@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D5BFFE491B46E3B100291DB0 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5BFFE481B46E3B100291DB0 /* main.cpp */; };
+		D51A45AA1B4D7D9F0072C9E7 /* wddump.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D51A45A91B4D7D9F0072C9E7 /* wddump.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -23,8 +23,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		D51A45A91B4D7D9F0072C9E7 /* wddump.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = wddump.cpp; sourceTree = SOURCE_ROOT; };
 		D5BFFE451B46E3B100291DB0 /* wddump */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = wddump; sourceTree = BUILT_PRODUCTS_DIR; };
-		D5BFFE481B46E3B100291DB0 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,7 +57,7 @@
 		D5BFFE471B46E3B100291DB0 /* wddump */ = {
 			isa = PBXGroup;
 			children = (
-				D5BFFE481B46E3B100291DB0 /* main.cpp */,
+				D51A45A91B4D7D9F0072C9E7 /* wddump.cpp */,
 			);
 			path = wddump;
 			sourceTree = "<group>";
@@ -118,7 +118,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D5BFFE491B46E3B100291DB0 /* main.cpp in Sources */,
+				D51A45AA1B4D7D9F0072C9E7 /* wddump.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -235,6 +235,7 @@
 				D5BFFE4E1B46E3B100291DB0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
