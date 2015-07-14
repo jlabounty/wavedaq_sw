@@ -108,12 +108,10 @@ int main()
             
             // decode waveform data
             pd = (unsigned char*)(ph+1);
-            for (i=0 ; i<512 ; ) {
-               data[i++] = pd[0] | ((pd[1] & 0x0F) << 8);
-               pd++;
-               data[i++] = (pd[0] >> 4) | ((unsigned short)pd[1] << 4);
-               pd++;
-               pd++;
+            for (i=0 ; i<512 ; i+=2) {
+               data[i]   = ((pd[1] & 0x0F) << 8) | pd[0];
+               data[i+1] = ((unsigned short)pd[2] << 4) | (pd[1] >> 4);
+               pd+=3;
             }
             
             // write data to file
