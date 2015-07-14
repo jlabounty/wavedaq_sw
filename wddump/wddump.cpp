@@ -20,14 +20,16 @@
 #include <assert.h>
 
 #define WD2_PORT 1850
+//#define WD2_PORT 2000
+
+#pragma pack(1)
 
 typedef struct {
    unsigned char  protocol_version;
    unsigned short board_id;
    unsigned short sampling_frequency;
    unsigned short number_of_samples;
-   unsigned char  channel_info_adc;
-   unsigned char  channel_info_channel;
+   unsigned char  adc_and_channel_info;
    unsigned short channel_segment_number;
    unsigned short data_sequence_number;
    unsigned short packet_sequence_number;
@@ -92,17 +94,25 @@ int main()
          n = (int)recvfrom(s, (char *)buffer, sizeof(buffer), 0, (struct sockaddr *)&rem_addr, (socklen_t *)&len);
          if (n > sizeof(WD2_FRAME_HEADER)) {
             ph = (WD2_FRAME_HEADER*)buffer;
-            printf("Received packet from : %s:%d\n", inet_ntoa(rem_addr.sin_addr), ntohs(rem_addr.sin_port));
-            printf("Protocol version     : %d\n", ph->protocol_version);
-            printf("Board ID             : %d\n", ph->board_id);
-            printf("Sampling frequency   : %d\n", ph->sampling_frequency);
+            printf("Received packet from   : %s:%d\n", inet_ntoa(rem_addr.sin_addr), ntohs(rem_addr.sin_port));
+            printf("Protocol version       : %d\n", ph->protocol_version);
+            printf("Board ID               : %d\n", 0xFFFF & ((ph->board_id<<8)|(ph->board_id>>8)));
+            printf("Sampling frequency     : %d\n", 0xFFFF & ((ph->sampling_frequency<<8)|(ph->sampling_frequency>>8)));
+            printf("Number of Samples      : %d\n", 0xFFFF & ((ph->number_of_samples<<8)|(ph->number_of_samples>>8)));
+            printf("ADC/Channel Number     : %d/%d\n", 0x0F & (ph->adc_and_channel_info >> 4),  0x0F & ph->adc_and_channel_info);
+            printf("Channel Segment Number : %d\n", 0xFFFF & ((ph->channel_segment_number<<8)|(ph->channel_segment_number>>8)));
+            printf("Data Sequence Number   : %d\n", 0xFFFF & ((ph->data_sequence_number<<8)|(ph->data_sequence_number>>8)));
+            printf("Packet Sequence Number : %d\n", 0xFFFF & ((ph->packet_sequence_number<<8)|(ph->packet_sequence_number>>8)));
+            printf("Reserved               : %d\n", 0xFFFF & ((ph->reserved<<8)|(ph->reserved>>8)));
+            printf("\n");
             
             // decode waveform data
-            for (i=0 ; i<512 / 2 ; ) {
-               pd = (unsigned char*)(ph+1);
+            pd = (unsigned char*)(ph+1);
+            for (i=0 ; i<512 ; ) {
                data[i++] = pd[0] | ((pd[1] & 0x0F) << 8);
                pd++;
                data[i++] = (pd[0] >> 4) | ((unsigned short)pd[1] << 4);
+               pd++;
                pd++;
             }
             
