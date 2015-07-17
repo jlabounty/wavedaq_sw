@@ -49,7 +49,8 @@ int main()
    unsigned short header_adc;
    unsigned short header_ch;
    socklen_t len;
-   FILE *f, *l;
+   FILE *f;
+   //FILE *l;
    
 #ifdef _MSC_VER
    {
@@ -156,12 +157,13 @@ int main()
             fprintf(f, "\n");
             fclose(f);
             // write log to file
+            /*
             l = fopen("log.txt", "a");
             assert(l);
             fprintf(l, "Frame %d | ADC/Channel %d/%d | Segment %d", ph->data_sequence_number, header_adc, header_ch, ph->channel_segment_number);
             fprintf(l, "\n");
             fclose(l);
-            
+            */
          } else
             printf("Received packet from %s:%d, %d bytes\n", inet_ntoa(rem_addr.sin_addr), ntohs(rem_addr.sin_port), n);
       }
