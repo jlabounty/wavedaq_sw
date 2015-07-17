@@ -45,9 +45,11 @@ int main()
    struct timeval timeout;
    WD2_FRAME_HEADER *ph;
    unsigned char *pd;
-   unsigned short data[512];
+   short data[512];
+   unsigned short header_adc;
+   unsigned short header_ch;
    socklen_t len;
-   FILE *f;
+   FILE *f, *l;
    
 #ifdef _MSC_VER
    {
@@ -75,6 +77,7 @@ int main()
 
    printf("Waiting for packets ...\n");
    
+   printf("Source IP:Port          Frame   ADC/Ch/Segment\n\r");
    do {
 
       FD_ZERO(&readfds);
@@ -94,33 +97,70 @@ int main()
          n = (int)recvfrom(s, (char *)buffer, sizeof(buffer), 0, (struct sockaddr *)&rem_addr, (socklen_t *)&len);
          if (n > sizeof(WD2_FRAME_HEADER)) {
             ph = (WD2_FRAME_HEADER*)buffer;
-            printf("Received packet from   : %s:%d\n", inet_ntoa(rem_addr.sin_addr), ntohs(rem_addr.sin_port));
-            printf("Protocol version       : %d\n", ph->protocol_version);
-            printf("Board ID               : %d\n", 0xFFFF & ((ph->board_id<<8)|(ph->board_id>>8)));
-            printf("Sampling frequency     : %d\n", 0xFFFF & ((ph->sampling_frequency<<8)|(ph->sampling_frequency>>8)));
-            printf("Number of Samples      : %d\n", 0xFFFF & ((ph->number_of_samples<<8)|(ph->number_of_samples>>8)));
-            printf("ADC/Channel Number     : %d/%d\n", 0x0F & (ph->adc_and_channel_info >> 4),  0x0F & ph->adc_and_channel_info);
-            printf("Channel Segment Number : %d\n", 0xFFFF & ((ph->channel_segment_number<<8)|(ph->channel_segment_number>>8)));
-            printf("Data Sequence Number   : %d\n", 0xFFFF & ((ph->data_sequence_number<<8)|(ph->data_sequence_number>>8)));
-            printf("Packet Sequence Number : %d\n", 0xFFFF & ((ph->packet_sequence_number<<8)|(ph->packet_sequence_number>>8)));
-            printf("Reserved               : %d\n", 0xFFFF & ((ph->reserved<<8)|(ph->reserved>>8)));
-            printf("\n");
+            // correct endianness of header data
+            ph->board_id               = 0xFFFF & ((ph->board_id<<8)|(ph->board_id>>8));
+            ph->sampling_frequency     = 0xFFFF & ((ph->sampling_frequency<<8)|(ph->sampling_frequency>>8)); 
+            ph->number_of_samples      = 0xFFFF & ((ph->number_of_samples<<8)|(ph->number_of_samples>>8));
+            header_adc                 = 0x0F   & (ph->adc_and_channel_info >> 4);
+            header_ch                  = 0x0F   & ph->adc_and_channel_info;
+            ph->channel_segment_number = 0xFFFF & ((ph->channel_segment_number<<8)|(ph->channel_segment_number>>8));
+            ph->data_sequence_number   = 0xFFFF & ((ph->data_sequence_number<<8)|(ph->data_sequence_number>>8));
+            ph->packet_sequence_number = 0xFFFF & ((ph->packet_sequence_number<<8)|(ph->packet_sequence_number>>8));
+            ph->reserved               = 0xFFFF & ((ph->reserved<<8)|(ph->reserved>>8));
+            //printf("Received packet from   : %s:%d\n", inet_ntoa(rem_addr.sin_addr), ntohs(rem_addr.sin_port));
+            //printf("xxx.xxx.xxx.xxx:xxxxx   xxxxx      x/x/x\n\r");
+            printf("%s:%5d   %5d      %d/%d/%d\n\r", inet_ntoa(rem_addr.sin_addr), ntohs(rem_addr.sin_port), ph->data_sequence_number, header_adc, header_ch, ph->channel_segment_number);
+            //printf("Protocol version       : %d\n", ph->protocol_version);
+            //printf("Board ID               : %d\n", ph->board_id);
+            //printf("Sampling frequency     : %d\n", ph->sampling_frequency);
+            //printf("Number of Samples      : %d\n", ph->number_of_samples);
+            //printf("ADC/Channel Number     : %d/%d\n", header_adc,  header_ch);
+            //printf("Channel Segment Number : %d\n", ph->channel_segment_number);
+            //printf("Data Sequence Number   : %d\n", ph->data_sequence_number);
+            //printf("Packet Sequence Number : %d\n", ph->packet_sequence_number);
+            //printf("Reserved               : %d\n", ph->reserved);
+            //printf("\n");
             
             // decode waveform data
             pd = (unsigned char*)(ph+1);
             for (i=0 ; i<512 ; i+=2) {
                data[i]   = ((pd[1] & 0x0F) << 8) | pd[0];
+               if(data[i] >= 0x0800) {
+                  // expand two's complement
+                  data[i] -= 0x1000;
+               }
                data[i+1] = ((unsigned short)pd[2] << 4) | (pd[1] >> 4);
+               if(data[i+1] >= 0x0800) {
+                  // expand two's complement
+                  data[i+1] -= 0x1000;
+               }
                pd+=3;
             }
             
             // write data to file
             f = fopen("dump.txt", "a");
             assert(f);
+            // header information
+            fprintf(f, "%d\n", ph->board_id);
+            fprintf(f, "%d\n", ph->sampling_frequency); 
+            fprintf(f, "%d\n", ph->number_of_samples);
+            fprintf(f, "%d\n", header_adc);
+            fprintf(f, "%d\n", header_ch);
+            fprintf(f, "%d\n", ph->channel_segment_number);
+            fprintf(f, "%d\n", ph->data_sequence_number);
+            fprintf(f, "%d\n", ph->packet_sequence_number);
+            fprintf(f, "%d\n", ph->reserved);
+            // data
             for (i=0 ; i<512 ; i++)
                fprintf(f, "%d\n", data[i]);
             fprintf(f, "\n");
             fclose(f);
+            // write log to file
+            l = fopen("log.txt", "a");
+            assert(l);
+            fprintf(l, "Frame %d | ADC/Channel %d/%d | Segment %d", ph->data_sequence_number, header_adc, header_ch, ph->channel_segment_number);
+            fprintf(l, "\n");
+            fclose(l);
             
          } else
             printf("Received packet from %s:%d, %d bytes\n", inet_ntoa(rem_addr.sin_addr), ntohs(rem_addr.sin_port), n);
