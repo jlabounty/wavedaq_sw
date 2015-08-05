@@ -1,0 +1,43 @@
+/*
+//  wds.css
+//  WaveDAQ CSS File
+//
+//  Created by Stefan Ritt on 5/8/15.
+*/
+
+body {
+   margin: 0px;
+   color: black;
+   background-color: white;
+   font-family: verdana,tahoma,sans-serif;
+}
+
+/* standard link colors and decorations */
+a:link { color:#0000FF; text-decoration:none }
+a:visited { color:#800080; text-decoration:none }
+a:hover { color:#0000FF; text-decoration:underline }
+a:active { color:#0000FF; text-decoration:underline }
+a:focus { color:#0000FF; text-decoration:underline }
+
+#scope {
+   float: left;
+   background-color: white;
+}
+
+.controls {
+   background-color: white;
+   text-align: center;
+   padding: 5px;
+}
+
+.buttons {
+   margin: auto;
+}
+
+button {
+   font-size: 2em;
+   padding: 5px;
+   width: 150px;
+   border-radius: 10px;
+   background-color: #E0E0E0;
+}
