@@ -24,20 +24,38 @@ a:focus { color:#0000FF; text-decoration:underline }
    background-color: white;
 }
 
-.controls {
-   background-color: white;
-   text-align: center;
+button {
+   font-size: 20px;
    padding: 5px;
+   border: 2px solid #C0C0C0;
+   border-radius: 10px;
+   background-color: #E0E0E0;
 }
 
-.buttons {
+.controls {
+   display: inline-block;
+   height: 500px;
+   background-color: white;
+   text-align: center;
+   padding: 3px;
+}
+
+.centered {
    margin: auto;
 }
 
-button {
-   font-size: 2em;
+.colorButton {
+   font-size: 25px;
+   width: 40px;
+   height: 40px;
+   border-radius: 5px;
+   padding: 0;
+}
+
+.startButton {
+   width: 87px;
+}
+
+#UScale {
    padding: 5px;
-   width: 150px;
-   border-radius: 10px;
-   background-color: #E0E0E0;
 }

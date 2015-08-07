@@ -32,6 +32,7 @@
 		D55471881B72477A002A92E4 /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = SOURCE_ROOT; };
 		D55471891B72498D002A92E4 /* wds.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = wds.css; sourceTree = SOURCE_ROOT; };
 		D554718A1B72498D002A92E4 /* wds.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = wds.js; sourceTree = SOURCE_ROOT; };
+		D5D7CE451B74EFB40037D843 /* controls.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = controls.js; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +67,7 @@
 			children = (
 				D55471891B72498D002A92E4 /* wds.css */,
 				D554718A1B72498D002A92E4 /* wds.js */,
+				D5D7CE451B74EFB40037D843 /* controls.js */,
 				D55471881B72477A002A92E4 /* index.html */,
 				D55471841B72439A002A92E4 /* mongoose.c */,
 				D55471851B72439A002A92E4 /* mongoose.h */,
