@@ -29,6 +29,8 @@ function Scope() { // constructor
    this.wfOffset = [];     // volts
    this.wfTOffset = 0;     // seconds
    this.wfTScale = 100E-9; // seconds per division
+   this.wfUO = [];
+   this.wfUS = [];
 }
 
 function init()
@@ -124,6 +126,8 @@ Scope.prototype.drawGrid = function(ctx)
    ctx.strokeRect(this.x1-2, this.y1-2, this.w+4, this.h+4);
    
    if (this.gridPath == null) {
+      this.calcScaleOffset();
+      
       var p = new Path2D();
       p.moveTo(this.x1, this.y1);
       p.lineTo(this.x1, this.y2);
@@ -202,14 +206,15 @@ Scope.prototype.drawGrid = function(ctx)
    ctx.stroke(this.gridPath);
 }
 
-Scope.prototype.TtoX = function(t)
+Scope.prototype.calcScaleOffset = function()
 {
-   return this.wfTOffset + t/this.wfTScale/10 * this.w + this.x1;
-}
-
-Scope.prototype.UtoY = function(c, u)
-{
-   return (this.y1+this.y2)/2 - (this.wfOffset[c]/2 + u/this.wfScale[c]/10)*this.h;
+   this.wfTO = this.wfTOffset + this.x1;
+   this.wfTS = 1/this.wfTScale/10 * this.w;
+   
+   for (c=0 ; c<16 ; c++) {
+      this.wfUO[c] = (this.y1+this.y2)/2 - this.wfOffset[c]/2*this.h;
+      this.wfUS[c] = -this.h/this.wfScale[c]/10;
+   }
 }
 
 Scope.prototype.drawWF = function(ctx)
@@ -219,10 +224,11 @@ Scope.prototype.drawWF = function(ctx)
 
    for (c=0 ; c<4 ; c++) {
       ctx.beginPath();
-      console.log(ctx.strokeStyle);
       for (i=0 ; i<1024 ; i++) {
-         var x = this.TtoX(this.wfT[c][i]);
-         var y = this.UtoY(c, this.wfU[c][i]);
+         //var x = this.TtoX(this.wfT[c][i]);
+         //var y = this.UtoY(c, this.wfU[c][i]);
+         var x = this.wfT[c][i] * this.wfTS + this.wfTO;
+         var y = this.wfU[c][i] * this.wfUS[c] + this.wfUO[c]
          if (i == 0)
             ctx.moveTo(x, y);
          else
