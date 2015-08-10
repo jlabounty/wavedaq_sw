@@ -39,5 +39,5 @@ $(C_OBJ): %.o: %.c
 	g++ $(CFLAGS) -c $<
 
 clean:
-	rm $(C_OBJ) $(CPP_OBJ) $(OUTNAME)
+	rm -f $(C_OBJ) $(CPP_OBJ) $(OUTNAME)
 
