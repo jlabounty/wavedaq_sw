@@ -9,6 +9,7 @@
 </head>
 <body onload="init();">
 <canvas id="scope">Your webbrowser does not support the WaveDAQ application</canvas>
+<!-- <div id="debug">Debug</div> -->
 <div class="controls" id="controls">
    <button class="startButton" type="button" id="btnStop" onClick="btnStop()">Stop</button>
    <button class="startButton" type="button" id="btnSingle" onClick="btnSingle()">Single</button><br />
@@ -54,7 +55,15 @@
             </button>
          </td>
          <td>
-            <canvas name="ctrlVSlider" width="40" height="110">|</canvas>
+            <canvas name="ctrlVSlider" width="40" height="112">|</canvas>
+         </td>
+         <td>
+         <button class="highButton" id="ofsZero" type="button" onClick="btnOfsZero()">
+            <canvas name="ctrlButtonZero">^</canvas>
+         </button><br />
+         <button class="highButton" id="ofsDistr" type="button" onClick="btnOfsDistr()">
+            <canvas name="ctrlButtonDistr">^</canvas>
+         </button>
          </td>
       </tr>
    </table>

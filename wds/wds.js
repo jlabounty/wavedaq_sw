@@ -58,8 +58,17 @@ function init()
       s.wfU[i] = [];
       s.wfScale[i] = 0.1;
       s.wfScaleIndex[i] = 6;
-      s.wfOffset[i] = -0.4 + i/20;
+      s.wfOffset[i] = 0.4 - i/20;
    }
+
+   // size to fit screen
+   s.resize();
+ 
+   // add resize event handler
+   window.addEventListener("resize", s.resize);
+
+   // preselect first channel
+   btnChn(0);
    
    var d = s.draw.bind(s);
    window.requestAnimationFrame(d);
@@ -119,15 +128,26 @@ Scope.prototype.calcFPS = function()
    this.t = setTimeout(c, 1000);
 }
 
-Scope.prototype.draw = function()
+Scope.prototype.resize = function()
 {
-   this.nFrames++;
    var canvas = document.getElementById("scope");
-   var ctx = canvas.getContext("2d");
+   if (canvas == undefined)
+      return;
    
    // resize canvas according to window size
-   canvas.width = window.innerWidth - CONTROLS_WIDTH;
-   canvas.height = window.innerHeight;
+   canvas.width = document.documentElement.clientWidth - CONTROLS_WIDTH;
+   canvas.height = document.documentElement.clientHeight;
+}
+
+Scope.prototype.draw = function()
+{
+   var canvas = document.getElementById("scope");
+   if (canvas == undefined)
+      return;
+   
+   this.nFrames++;
+
+   var ctx = canvas.getContext("2d");
    
    this.width = canvas.width;
    this.height = canvas.height;
@@ -159,7 +179,9 @@ Scope.prototype.drawFPS = function(ctx)
    ctx.fillStyle = 'white';
    ctx.strokeStyle = 'white';
    ctx.font = '14px sans-serif';
-   ctx.fillText(this.nFPS + " Acquisitions / sec.", 10, this.y2+20);
+   ctx.textAlign = "left";
+   ctx.textBaseline = "top"
+   ctx.fillText(this.nFPS + " Acquisitions / sec.", 10, this.y2+8);
 }
 
 Scope.prototype.drawGrid = function(ctx)
@@ -265,6 +287,25 @@ Scope.prototype.calcScaleOffset = function()
 
 Scope.prototype.drawWF = function(ctx)
 {
+   for (c=15 ; c>=0 ; c--) {
+      if (this.chOn[c]) {
+         var y = this.wfUO[c];
+         ctx.fillStyle = chnColors[c];
+         ctx.strokeStyle = "#E0E0E0";
+         ctx.beginPath();
+         ctx.arc(6, y, 6, 0, 2*Math.PI);
+         ctx.fill();
+         ctx.stroke();
+         ctx.strokeStyle = "#000000";
+         ctx.fillStyle = "#000000";
+         ctx.textAlign = "center";
+         ctx.textBaseline = "middle";
+         ctx.font = '10px sans-serif';
+         ctx.fillText(c, 6, y);
+      }
+   }
+   
+   ctx.save();
    ctx.rect(this.x1, this.y1, this.w, this.h);
    ctx.clip();
 
@@ -273,7 +314,7 @@ Scope.prototype.drawWF = function(ctx)
          ctx.beginPath();
          for (i=0 ; i<1024 ; i++) {
             var x = this.wfT[c][i] * this.wfTS + this.wfTO;
-            var y = this.wfU[c][i] * this.wfUS[c] + this.wfUO[c]
+            var y = this.wfU[c][i] * this.wfUS[c] + this.wfUO[c];
             if (i == 0)
                ctx.moveTo(x, y);
             else
@@ -283,6 +324,8 @@ Scope.prototype.drawWF = function(ctx)
          ctx.stroke();
       }
    }
+   
+   ctx.restore(); // remove clipping
 }
 
 /*---- UI event handler ----*/
@@ -318,6 +361,17 @@ function btnChn(c)
    else
       o.innerHTML = s.chOn[c] ? "Off" : "On";
    
+   var index = c;
+   if (c == -1) {
+      for (index=0 ; index<16 ; index++)
+         if (s.chOn[index])
+            break;
+      if (index == 16)
+         index = 0;
+   }
+
+   document.getElementById("UScale").innerHTML = scaleTable[s.wfScaleIndex[index]][1];
+   
    for (i=0 ; i<16 ; i++) {
       var cb = document.getElementById("ch"+i);
       if (i == c || c == -1)
@@ -347,15 +401,26 @@ function btnOn()
 
 function btnScale(inc)
 {
+   if (s.currentChn == -1) {
+      for (i=0 ; i<16 ; i++)
+         if (s.chOn[i])
+            break;
+      if (i == 16)
+         i = 0;
+   } else
+      i = s.currentChn;
+   
+   index = s.wfScaleIndex[i] + inc;
+   if (index < 0)
+      index = 0;
+   if (index == scaleTable.length)
+      index--;
+   
    for (i=0 ; i<16 ; i++) {
       if (s.currentChn != -1 && i != s.currentChn)
          continue;
-      s.wfScaleIndex[i] += inc;
-      if (s.wfScaleIndex[i] < 0)
-         s.wfScaleIndex[i] = 0;
-      if (s.wfScaleIndex[i] == scaleTable.length)
-         s.wfScaleIndex[i]--;
       
+      s.wfScaleIndex[i] = index;
       s.wfScale[i] = scaleTable[s.wfScaleIndex[i]][0];
       document.getElementById("UScale").innerHTML = scaleTable[s.wfScaleIndex[i]][1];
    }
@@ -371,3 +436,36 @@ function sldOffset(value)
    }
    s.calcScaleOffset();
 }
+
+function btnOfsZero()
+{
+   for (i=0 ; i<16 ; i++) {
+      if (s.chOn[i])
+         s.wfOffset[i] = 0;
+   }
+   s.calcScaleOffset();
+}
+
+function btnOfsDistr()
+{
+   // count active channels
+   var n = 0;
+   for (i=0 ; i<16 ; i++) {
+      if (s.chOn[i])
+         n++;
+   }
+
+   // calculate offset between channels
+   var d = 1/(n+1);
+   
+   // set offset
+   var o = 0.5-d;
+   for (i=0 ; i<16 ; i++) {
+      if (s.chOn[i]) {
+         s.wfOffset[i] = o;
+         o -= d;
+      }
+   }
+   s.calcScaleOffset();
+}
+

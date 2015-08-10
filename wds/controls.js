@@ -69,14 +69,62 @@ function controlsInit() {
       ctx.fillStyle = "#808080";
       ctx.fill();
    }
-   
+
+   // ctrlButtonZero
+   var cvs = document.getElementsByName("ctrlButtonZero");
+   for (i=0 ; i<cvs.length ; i++) {
+      cvs[i].width = 36;
+      cvs[i].height = 40;
+      var ctx = cvs[i].getContext("2d");
+      ctx.fillStyle = "#E0E0E0";
+      ctx.fillRect(0, 0, 36, 32);
+      ctx.fillStyle = "#808080";
+      ctx.beginPath();
+      ctx.moveTo(18, 20);
+      ctx.lineTo(31, 5);
+      ctx.lineTo(5, 5);
+      ctx.lineTo(18, 20);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(18, 20);
+      ctx.lineTo(31, 35);
+      ctx.lineTo(5, 35);
+      ctx.lineTo(18, 20);
+      ctx.fill();
+   }
+
+   // ctrlButtonDist
+   var cvs = document.getElementsByName("ctrlButtonDistr");
+   for (i=0 ; i<cvs.length ; i++) {
+      cvs[i].width = 36;
+      cvs[i].height = 40;
+      var ctx = cvs[i].getContext("2d");
+      ctx.fillStyle = "#E0E0E0";
+      ctx.fillRect(0, 0, 36, 32);
+      ctx.fillStyle = "#808080";
+      ctx.beginPath();
+      ctx.moveTo(18, 3);
+      ctx.lineTo(31, 18);
+      ctx.lineTo(5, 18);
+      ctx.lineTo(18, 3);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(18, 39);
+      ctx.lineTo(31, 24);
+      ctx.lineTo(5, 24);
+      ctx.lineTo(18, 39);
+      ctx.fill();
+   }
+
    // ctrlVSlider
    var sl = document.getElementsByName("ctrlVSlider");
    for (i=0 ; i<sl.length ; i++) {
       sl[i].position = 0.5;
-      sl[i].addEventListener("click", dummy);
+      sl[i].addEventListener("click", ctrlVSlider); // ctrlVSlider
       sl[i].addEventListener("mousemove", ctrlVSlider);
-      sl[i].addEventListener("touchmove", dummy);
+      sl[i].addEventListener("touchmove", ctrlVSlider);
       ctrlVSliderDraw(sl[i]);
    }
    
@@ -84,7 +132,21 @@ function controlsInit() {
 
 function dummy(e)
 {
-   console.log(e);
+   if (e.type == "touchmove" ) {
+      var d = document.getElementById("debug");
+      
+      var y = parseInt(e.changedTouches[e.changedTouches.length-1].clientY);
+      var ty = e.target.getBoundingClientRect().top;
+      d.innerHTML = "Touch: " + y + " Target: " + ty;
+   }
+
+   if (e.type == "click" ) {
+      var d = document.getElementById("debug");
+      
+      var y = e.clientY;
+      var ty = e.target.getBoundingClientRect().top;
+      d.innerHTML = "Click: " + y + " Target: " + ty;
+   }
 }
 
 function ctrlVSliderDraw(sl)
@@ -124,14 +186,21 @@ function ctrlVSliderDraw(sl)
 
 function ctrlVSlider(e)
 {
-   if (e.buttons == 1) {
-      e.target.position = 1- (e.offsetY-e.target.sliderOfs)/(e.target.height-2*e.target.sliderOfs);
+   e.preventDefault();
+   var y = undefined;
+   
+   if ((e.buttons == 1 && e.type == "mousemove") || e.type == "click")
+      y = e.offsetY;
+   if (e.type == "touchmove")
+      y = e.changedTouches[e.changedTouches.length-1].clientY - e.target.getBoundingClientRect().top;
+   
+   if (y != undefined) {
+      e.target.position = 1 - (y-e.target.sliderOfs)/(e.target.height-2*e.target.sliderOfs);
       if (e.target.position < 0)
          e.target.position = 0;
       if (e.target.position > 1)
          e.target.position = 1;
       ctrlVSliderDraw(e.target);
+      e.target.update(e.target.position);
    }
-   e.preventDefault();
-   e.target.update(e.target.position);
 }
