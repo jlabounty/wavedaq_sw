@@ -34,12 +34,6 @@ var scaleTable = [
 
 function init()
 {
-   // set initial colors for buttons
-   for (i=0 ; i<16 ; i++) {
-      var b = document.getElementById("ch"+i);
-      b.style.backgroundColor = chnColors[i];
-   }
-   
    // prevent mouse events to go up to the browser
    var c = document.getElementById("controls");
    c.addEventListener("click", function(e){e.preventDefault()});
@@ -53,29 +47,35 @@ function init()
    // create Scope object
    s = new Scope();
    for (i=0 ; i<16 ; i++) {
-      s.chOn[i] = true;
-      s.wfT[i] = [];
-      s.wfU[i] = [];
+      s.chOn[i] = false;
+      s.wf.T[i] = [];
+      s.wf.U[i] = [];
       s.wfScale[i] = 0.1;
       s.wfScaleIndex[i] = 6;
-      s.wfOffset[i] = 0.4 - i/20;
+      s.wfOffset[i] = 0;
    }
-
+   s.chOn[0] = true;
+   var b = document.getElementById("ch0");
+   b.style.backgroundColor = chnColors[0];
+   
    // size to fit screen
    s.resize();
  
    // add resize event handler
-   window.addEventListener("resize", s.resize);
+   var z = s.resize.bind(s);
+   window.addEventListener("resize", z);
 
    // preselect first channel
    btnChn(0);
    
-   var d = s.draw.bind(s);
-   window.requestAnimationFrame(d);
+   // draw empty scope
+   s.redraw();
    
+   // schedule first waveform read
    var r = s.readWF.bind(s);
-   window.setTimeout(r, 20);
+   window.setTimeout(r, 10);
    
+   // schedule FPS calculator
    var c = s.calcFPS.bind(s);
    s.t = setTimeout(c, 1000);
 }
@@ -90,8 +90,7 @@ function Scope() { // constructor
    this.bottomHeight = 25;
    this.gridPath = null;
    this.chOn = [];
-   this.wfT = [];
-   this.wfU = [];
+   this.wf = {T:[], U:[]};
    this.wfScale = [];      // volts per division
    this.wfScaleIndex = [];
    this.wfOffset = [];     // -0.5 .. +0.5
@@ -106,16 +105,63 @@ function Scope() { // constructor
 
 Scope.prototype.readWF = function()
 {
+   /* simulate local data
    for (c=0 ; c<16 ; c++) {
-      for (i=0 ; i<1024 ; i++) {
-         this.wfT[c][i] = i*1E-9;
-         this.wfU[c][i] = Math.sin(this.wfT[c][i] / 50 / 1E-9) / 4 + (Math.random()-0.5) / 30;
+      for (i=0 ; i<10 ; i++) {
+         this.wf.T[c][i] = i*1E-9;
+         this.wf.U[c][i] = Math.sin(this.wf.T[c][i] / 50 / 1E-9) / 4 + (Math.random()-0.5) / 30;
       }
    }
 
    if (this.running) {
       var r = this.readWF.bind(this);
       window.setTimeout(r, 20);
+   }
+   */
+   for (chn=0,c=0 ; c<16 ; c++)
+      if (this.chOn[c])
+         chn |= (1<<c);
+
+   req = new XMLHttpRequest();
+   req.onreadystatechange = this.receiveWF.bind(this);
+   req.open("GET", "wfb?chn=" + chn + "&r=" + Math.random(), true); // avoid cached results
+   req.responseType = "arraybuffer";
+   req.send();
+}
+
+Scope.prototype.receiveWF = function()
+{
+   if (req.readyState == 4 && req.status == 200) {
+      // this.wf = JSON.parse(req.responseText);
+      
+      var intArray = new Uint32Array(req.response);
+      var floatArray = new Float32Array(req.response);
+      
+      for (var i=0 ; i<intArray.length ; ) {
+         if (intArray[i] == 1) { // time array
+            i++;
+            var c = intArray[i++];
+            var n = intArray[i++];
+            for (var j=0 ; j<n ; j++)
+               this.wf.T[c][j] = floatArray[i++];
+         } else if (intArray[i] == 2) { // voltage array
+            i++;
+            var c = intArray[i++];
+            var n = intArray[i++];
+            for (var j=0 ; j<n ; j++)
+               this.wf.U[c][j] = floatArray[i++];
+         } else {
+            alert("WDS: Invalid binary data received form server");
+            break;
+         }
+      }
+      
+      if (this.running) {
+         var r = this.readWF.bind(this);
+         window.setTimeout(r, 10); // schedule next waveform read
+      }
+      
+      this.redraw();
    }
 }
 
@@ -137,6 +183,14 @@ Scope.prototype.resize = function()
    // resize canvas according to window size
    canvas.width = document.documentElement.clientWidth - CONTROLS_WIDTH;
    canvas.height = document.documentElement.clientHeight;
+   
+   this.redraw();
+}
+
+Scope.prototype.redraw = function()
+{
+   var d = s.draw.bind(s);
+   window.requestAnimationFrame(d);
 }
 
 Scope.prototype.draw = function()
@@ -169,9 +223,6 @@ Scope.prototype.draw = function()
    this.drawGrid(ctx);
    this.drawFPS(ctx);
    this.drawWF(ctx);
-   
-   var d = this.draw.bind(this);
-   window.requestAnimationFrame(d);
 }
 
 Scope.prototype.drawFPS = function(ctx)
@@ -293,7 +344,7 @@ Scope.prototype.drawWF = function(ctx)
          ctx.fillStyle = chnColors[c];
          ctx.strokeStyle = "#E0E0E0";
          ctx.beginPath();
-         ctx.arc(6, y, 6, 0, 2*Math.PI);
+         ctx.arc(8, y, 8, 0, 2*Math.PI);
          ctx.fill();
          ctx.stroke();
          ctx.strokeStyle = "#000000";
@@ -301,7 +352,7 @@ Scope.prototype.drawWF = function(ctx)
          ctx.textAlign = "center";
          ctx.textBaseline = "middle";
          ctx.font = '10px sans-serif';
-         ctx.fillText(c, 6, y);
+         ctx.fillText(c, 8, y);
       }
    }
    
@@ -313,8 +364,8 @@ Scope.prototype.drawWF = function(ctx)
       if (this.chOn[c]) {
          ctx.beginPath();
          for (i=0 ; i<1024 ; i++) {
-            var x = this.wfT[c][i] * this.wfTS + this.wfTO;
-            var y = this.wfU[c][i] * this.wfUS[c] + this.wfUO[c];
+            var x = this.wf.T[c][i] * this.wfTS + this.wfTO;
+            var y = this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c];
             if (i == 0)
                ctx.moveTo(x, y);
             else
@@ -340,7 +391,7 @@ function btnStop()
       s.running = true;
       e.innerHTML = "Stop";
       var r = s.readWF.bind(s);
-      window.setTimeout(r, 20);
+      window.setTimeout(r, 10);
    }
 }
 
@@ -348,7 +399,7 @@ function btnSingle()
 {
    if (!s.running) {
       var r = s.readWF.bind(s);
-      window.setTimeout(r, 20);
+      window.setTimeout(r, 10);
    }
 }
 
@@ -379,6 +430,8 @@ function btnChn(c)
       else
          cb.style.border = "2px solid #C0C0C0";
    }
+   
+   s.redraw();
 }
 
 function btnOn()
@@ -397,6 +450,7 @@ function btnOn()
       }
    }
    bt.innerHTML = bt.innerHTML == "On" ? "Off" : "On";
+   s.redraw();
 }
 
 function btnScale(inc)
@@ -425,6 +479,7 @@ function btnScale(inc)
       document.getElementById("UScale").innerHTML = scaleTable[s.wfScaleIndex[i]][1];
    }
    s.calcScaleOffset();
+   s.redraw();
 }
 
 function sldOffset(value)
@@ -435,6 +490,7 @@ function sldOffset(value)
       s.wfOffset[i] = value-0.5;
    }
    s.calcScaleOffset();
+   s.redraw();
 }
 
 function btnOfsZero()
@@ -444,6 +500,11 @@ function btnOfsZero()
          s.wfOffset[i] = 0;
    }
    s.calcScaleOffset();
+   s.redraw();
+   
+   var sl = document.getElementsByName("ctrlVSlider");
+   sl[0].position = 0.5;
+   ctrlVSliderDraw(sl[0]);
 }
 
 function btnOfsDistr()
@@ -467,5 +528,5 @@ function btnOfsDistr()
       }
    }
    s.calcScaleOffset();
+   s.redraw();
 }
-
