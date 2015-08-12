@@ -35,11 +35,14 @@ function roundedRect(ctx, x, y, w, h, r)
 function controlsInit() {
    
    // ctrlButtonUp
-   var cvs = document.getElementsByName("ctrlButtonUp");
-   for (i=0 ; i<cvs.length ; i++) {
-      cvs[i].width = 36;
-      cvs[i].height = 32;
-      var ctx = cvs[i].getContext("2d");
+   var b = document.getElementsByName("ctrlButtonUp");
+   for (i=0 ; i<b.length ; i++) {
+      var cvs =  document.createElement("canvas");
+      b[i].appendChild(cvs);
+
+      cvs.width = 36;
+      cvs.height = 32;
+      var ctx = cvs.getContext("2d");
       ctx.fillStyle = "#E0E0E0";
       ctx.fillRect(0, 0, 36, 32);
       ctx.beginPath();
@@ -53,11 +56,14 @@ function controlsInit() {
    }
    
    // ctrlButtonDown
-   var cvs = document.getElementsByName("ctrlButtonDown");
-   for (i=0 ; i<cvs.length ; i++) {
-      cvs[i].width = 36;
-      cvs[i].height = 32;
-      var ctx = cvs[i].getContext("2d");
+   var b = document.getElementsByName("ctrlButtonDown");
+   for (i=0 ; i<b.length ; i++) {
+      var cvs =  document.createElement("canvas");
+      b[i].appendChild(cvs);
+
+      cvs.width = 36;
+      cvs.height = 32;
+      var ctx = cvs.getContext("2d");
       ctx.fillStyle = "#E0E0E0";
       ctx.fillRect(0, 0, 36, 32);
       ctx.beginPath();
@@ -71,35 +77,41 @@ function controlsInit() {
    }
 
    // ctrlButtonZero
-   var cvs = document.getElementsByName("ctrlButtonZero");
-   for (i=0 ; i<cvs.length ; i++) {
-      cvs[i].width = 36;
-      cvs[i].height = 40;
-      var ctx = cvs[i].getContext("2d");
+   var b = document.getElementsByName("ctrlButtonZero");
+   for (i=0 ; i<b.length ; i++) {
+      var cvs =  document.createElement("canvas");
+      b[i].appendChild(cvs);
+      
+      cvs.width = 36;
+      cvs.height = 40;
+      var ctx = cvs.getContext("2d");
       ctx.fillStyle = "#E0E0E0";
       ctx.fillRect(0, 0, 36, 32);
       ctx.fillStyle = "#808080";
       ctx.beginPath();
-      ctx.moveTo(18, 20);
-      ctx.lineTo(31, 5);
-      ctx.lineTo(5, 5);
-      ctx.lineTo(18, 20);
+      ctx.moveTo(18, 22);
+      ctx.lineTo(31, 7);
+      ctx.lineTo(5, 7);
+      ctx.lineTo(18, 22);
       ctx.closePath();
       ctx.fill();
       ctx.beginPath();
-      ctx.moveTo(18, 20);
-      ctx.lineTo(31, 35);
-      ctx.lineTo(5, 35);
-      ctx.lineTo(18, 20);
+      ctx.moveTo(18, 22);
+      ctx.lineTo(31, 37);
+      ctx.lineTo(5, 37);
+      ctx.lineTo(18, 22);
       ctx.fill();
    }
 
    // ctrlButtonDist
-   var cvs = document.getElementsByName("ctrlButtonDistr");
-   for (i=0 ; i<cvs.length ; i++) {
-      cvs[i].width = 36;
-      cvs[i].height = 40;
-      var ctx = cvs[i].getContext("2d");
+   var b = document.getElementsByName("ctrlButtonDistr");
+   for (i=0 ; i<b.length ; i++) {
+      var cvs =  document.createElement("canvas");
+      b[i].appendChild(cvs);
+
+      cvs.width = 36;
+      cvs.height = 40;
+      var ctx = cvs.getContext("2d");
       ctx.fillStyle = "#E0E0E0";
       ctx.fillRect(0, 0, 36, 32);
       ctx.fillStyle = "#808080";
@@ -119,61 +131,46 @@ function controlsInit() {
    }
 
    // ctrlVSlider
-   var sl = document.getElementsByName("ctrlVSlider");
-   for (i=0 ; i<sl.length ; i++) {
-      sl[i].position = 0.5;
-      sl[i].addEventListener("click", ctrlVSlider); // ctrlVSlider
-      sl[i].addEventListener("mousemove", ctrlVSlider);
-      sl[i].addEventListener("touchmove", ctrlVSlider);
-      ctrlVSliderDraw(sl[i]);
+   var b = document.getElementsByName("ctrlVSlider");
+   for (i=0 ; i<b.length ; i++) {
+      var cvs =  document.createElement("canvas");
+      cvs.width = b[i].clientWidth;
+      cvs.height = b[i].clientHeight;
+      b[i].appendChild(cvs);
+      b[i].canvas = cvs;
+      
+      b[i].position = 0.5;
+      b[i].addEventListener("click", ctrlVSlider);
+      b[i].addEventListener("mousemove", ctrlVSlider);
+      b[i].addEventListener("touchmove", ctrlVSlider);
+      ctrlVSliderDraw(b[i]);
    }
    
 }
 
-function dummy(e)
+function ctrlVSliderDraw(b)
 {
-   if (e.type == "touchmove" ) {
-      var d = document.getElementById("debug");
-      
-      var y = parseInt(e.changedTouches[e.changedTouches.length-1].clientY);
-      var ty = e.target.getBoundingClientRect().top;
-      d.innerHTML = "Touch: " + y + " Target: " + ty;
-   }
-
-   if (e.type == "click" ) {
-      var d = document.getElementById("debug");
-      
-      var y = e.clientY;
-      var ty = e.target.getBoundingClientRect().top;
-      d.innerHTML = "Click: " + y + " Target: " + ty;
-   }
-}
-
-function ctrlVSliderDraw(sl)
-{
-   var w = sl.width;
-   var h = sl.height;
-   sl.sliderOfs = 20;
+   var w = b.clientWidth;
+   var h = b.clientHeight;
+   b.sliderOfs = 20;
    
-   var ctx = sl.getContext("2d");
+   var ctx = b.canvas.getContext("2d");
    ctx.fillStyle = "#E0E0E0";
-   ctx.strokeStyle = "#C0C0C0";
-   ctx.lineWidth = 2;
-   roundedRect(ctx, 0, 0, w, h, 5);
+   ctx.fillRect(0, 0, b.canvas.width, b.canvas.height);
    
-   var knob = sl.sliderOfs + (1-sl.position)*(h-2*sl.sliderOfs);
+   var knob = b.sliderOfs + (1-b.position)*(h-2*b.sliderOfs);
    
    ctx.strokeStyle = "#A0A0A0";
    ctx.lineWidth = 3;
    ctx.beginPath();
-   ctx.moveTo(w/2, sl.sliderOfs);
+   ctx.moveTo(w/2, b.sliderOfs);
    ctx.lineTo(w/2, knob);
    ctx.stroke();
    
    ctx.strokeStyle = "#00A0FF";
    ctx.beginPath();
    ctx.moveTo(w/2, knob);
-   ctx.lineTo(w/2, h-sl.sliderOfs);
+   ctx.lineTo(w/2, h-b.sliderOfs);
    ctx.stroke();
    
    ctx.fillStyle = "#E0E0E0";
@@ -188,19 +185,26 @@ function ctrlVSlider(e)
 {
    e.preventDefault();
    var y = undefined;
+   var b = e.target.parentNode;
+   
+   if (b.canvas == undefined) // we can get events from parent node
+      return;
    
    if ((e.buttons == 1 && e.type == "mousemove") || e.type == "click")
       y = e.offsetY;
    if (e.type == "touchmove")
-      y = e.changedTouches[e.changedTouches.length-1].clientY - e.target.getBoundingClientRect().top;
+      y = e.changedTouches[e.changedTouches.length-1].clientY - b.getBoundingClientRect().top;
    
    if (y != undefined) {
-      e.target.position = 1 - (y-e.target.sliderOfs)/(e.target.height-2*e.target.sliderOfs);
-      if (e.target.position < 0)
-         e.target.position = 0;
-      if (e.target.position > 1)
-         e.target.position = 1;
-      ctrlVSliderDraw(e.target);
-      e.target.update(e.target.position);
+      b.position = 1 - (y-b.sliderOfs)/(b.clientHeight-2*b.sliderOfs);
+      if (b.position < 0)
+         b.position = 0;
+      if (b.position > 1)
+         b.position = 1;
+      ctrlVSliderDraw(b);
+      var f = b.dataset.update;
+      if (f.indexOf("("))
+         f = f.substr(0, f.indexOf("("));
+      window[f](b.position);
    }
 }

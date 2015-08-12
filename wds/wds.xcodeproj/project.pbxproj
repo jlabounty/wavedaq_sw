@@ -24,6 +24,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		D529FE721B7B437F004E2D39 /* osc.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = osc.js; sourceTree = SOURCE_ROOT; };
 		D55471771B72428F002A92E4 /* wds */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = wds; sourceTree = BUILT_PRODUCTS_DIR; };
 		D55471811B7242DE002A92E4 /* wds.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = wds.cpp; sourceTree = SOURCE_ROOT; };
 		D55471821B7242DE002A92E4 /* wds.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = wds.h; sourceTree = SOURCE_ROOT; };
@@ -67,6 +68,7 @@
 			children = (
 				D55471891B72498D002A92E4 /* wds.css */,
 				D554718A1B72498D002A92E4 /* wds.js */,
+				D529FE721B7B437F004E2D39 /* osc.js */,
 				D5D7CE451B74EFB40037D843 /* controls.js */,
 				D55471881B72477A002A92E4 /* index.html */,
 				D55471841B72439A002A92E4 /* mongoose.c */,
