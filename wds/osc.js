@@ -13,19 +13,36 @@ function Oscilloscope(div) { // constructor
                      "#D0A060", "#A0C0D0", "#C04010", "#807060",
                      "#F0C000", "#2090A0", "#D040D0", "#90B000"];
    
-   this.scaleTable = [[ 0.001, "1 mV"   ],
-                      [ 0.002, "2 mV"   ],
-                      [ 0.005, "5 mV"   ],
-                      [ 0.01,  "10 mV"  ],
-                      [ 0.02,  "20 mV"  ],
-                      [ 0.05,  "50 mV"  ],
-                      [ 0.1,   "100 mV" ],
-                      [ 0.2,   "200 mV" ],
-                      [ 0.5,   "500 mV" ],
-                      [ 1,     "1 V"    ],
-                      [ 2,     "2 V"    ],
-                      [ 5,     "5 V"    ],
-                      [ 10,    "10 V"   ]];
+   this.UScaleTable = [[ 0.001, "1 mV"   ],
+                       [ 0.002, "2 mV"   ],
+                       [ 0.005, "5 mV"   ],
+                       [ 0.01,  "10 mV"  ],
+                       [ 0.02,  "20 mV"  ],
+                       [ 0.05,  "50 mV"  ],
+                       [ 0.1,   "100 mV" ],
+                       [ 0.2,   "200 mV" ],
+                       [ 0.5,   "500 mV" ],
+                       [ 1,     "1 V"    ],
+                       [ 2,     "2 V"    ],
+                       [ 5,     "5 V"    ],
+                       [ 10,    "10 V"   ]];
+
+   this.TScaleTable = [[ 1E-9,   "1 ns"   ],
+                       [ 2E-9,   "2 ns"   ],
+                       [ 5E-9,   "5 ns"   ],
+                       [ 10E-9,  "10 ns"  ],
+                       [ 20E-9,  "20 ns"  ],
+                       [ 50E-9,  "50 ns"  ],
+                       [ 100E-9, "100 ns" ],
+                       [ 200E-9, "200 ns" ],
+                       [ 500E-9, "500 ns" ],
+                       [ 1E-6,   "1 us"   ],
+                       [ 2E-6,   "2 us"   ],
+                       [ 5E-6,   "5 us"   ],
+                       [ 10E-6, "10 us"   ],
+                       [ 20E-6, "20 us"   ],
+                       [ 50E-6, "50 us"   ],
+                       [ 100E-6,"100 us"  ]];
 
    // create canvas inside div
    this.canvas = document.createElement("canvas");
@@ -54,7 +71,7 @@ function Oscilloscope(div) { // constructor
    this.wfTOffset = 0;     // seconds
    
    this.wfTScale = 100E-9; // seconds per division
-   this.wfTScaleIndex = [];
+   this.wfTScaleIndex = 6;
    
    this.wfUO = [];         // offset and scale optimized
    this.wfUS = [];
@@ -236,7 +253,7 @@ Oscilloscope.prototype.drawGrid = function(ctx)
 
 Oscilloscope.prototype.calcScaleOffset = function()
 {
-   this.wfTO = this.wfTOffset + this.x1;
+   this.wfTO = this.wfTOffset/this.wfTScale * this.w + this.x1;
    this.wfTS = 1/this.wfTScale/10 * this.w;
    
    for (c=0 ; c<16 ; c++) {

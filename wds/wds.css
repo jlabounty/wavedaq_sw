@@ -66,6 +66,13 @@ button {
    padding: 0;
 }
 
+.hSlider {
+   width: 174px;
+   height: 40px;
+   border-radius: 5px;
+   padding: 0;
+}
+
 .startButton {
    width: 87px;
 }

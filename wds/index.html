@@ -55,13 +55,31 @@
             </button>
          </td>
          <td>
-            <button name="ctrlVSlider" id="vofsSlider" class="vSlider" type="button" data-update="sldOffset()"></button>
+            <button name="ctrlVSlider" id="uofsSlider" class="vSlider" type="button" data-update="sldUOffset()"></button>
          </td>
          <td>
             <button name="ctrlButtonZero" class="highButton" id="ofsZero" type="button" onClick="btnOfsZero()">
             </button>
             <div style="height:10px;"></div>
-            <button name="ctrlButtonDistr" class="highButton" id="ofsDistr" type="button" onClick="btnOfsDistr()">
+            <button name="ctrlButtonDist" class="highButton" id="ofsDist" type="button" onClick="btnOfsDist()">
+            </button>
+         </td>
+      </tr>
+      <tr>
+         <td colspan=3>
+            <button name="ctrlHSlider" id="tofsSlider" class="hSlider" type="button" data-update="sldTOffset()"></button>
+         <td>
+      </tr>
+   </table>
+   <table width="100%">
+      <tr>
+         <td>
+            <button name="ctrlButtonLeft" id="scaleLeft" type="button" class="colorButton" onClick="btnTScale(-1)">
+            </button>
+         </td>
+         <td id="TScale">100 ns</td>
+         <td>
+            <button name="ctrlButtonRight" id="scaleRight" type="button" class="colorButton" onClick="btnTScale(1)">
             </button>
          </td>
       </tr>

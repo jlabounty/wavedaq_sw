@@ -20,11 +20,6 @@ function init()
    c.addEventListener("click", function(e){e.preventDefault()});
    c.addEventListener("mousemove", function(e){e.preventDefault()});
 
-   // initialize custom controls
-   controlsInit();
-   //var sl = document.getElementsByName("ctrlVSlider");
-   //sl[0].update = sldOffset;
-   
    // create Scope object
    OSC = new Oscilloscope(document.getElementById("scope"));
 
@@ -182,7 +177,7 @@ function btnChn(c)
       if (index == 16)
          index = 0;
    }
-   document.getElementById("UScale").innerHTML = OSC.scaleTable[OSC.wfScaleIndex[index]][1];
+   document.getElementById("UScale").innerHTML = OSC.UScaleTable[OSC.wfScaleIndex[index]][1];
 
    // set blue border of active channel buttons
    for (i=0 ; i<16 ; i++) {
@@ -231,10 +226,10 @@ function btnScale(inc)
    } else
       i = OSC.currentChn;
    
-   index = OSC.wfScaleIndex[i] + inc;
+   var index = OSC.wfScaleIndex[i] + inc;
    if (index < 0)
       index = 0;
-   if (index == OSC.scaleTable.length)
+   if (index == OSC.UScaleTable.length)
       index--;
    
    for (i=0 ; i<16 ; i++) {
@@ -242,14 +237,40 @@ function btnScale(inc)
          continue;
       
       OSC.wfScaleIndex[i] = index;
-      OSC.wfScale[i] = OSC.scaleTable[OSC.wfScaleIndex[i]][0];
-      document.getElementById("UScale").innerHTML = OSC.scaleTable[OSC.wfScaleIndex[i]][1];
+      OSC.wfScale[i] = OSC.UScaleTable[OSC.wfScaleIndex[i]][0];
+      document.getElementById("UScale").innerHTML = OSC.UScaleTable[OSC.wfScaleIndex[i]][1];
    }
    OSC.calcScaleOffset();
    OSC.redraw();
 }
 
-function sldOffset(value)
+function btnTScale(inc)
+// change horizontal scale, update label
+{
+   if (OSC.currentChn == -1) {
+      for (i=0 ; i<16 ; i++)
+         if (OSC.chOn[i])
+            break;
+      if (i == 16)
+         i = 0;
+   } else
+      i = OSC.currentChn;
+   
+   var index = OSC.wfTScaleIndex + inc;
+   if (index < 0)
+      index = 0;
+   if (index == OSC.TScaleTable.length)
+      index--;
+   
+   OSC.wfTScaleIndex = index;
+   OSC.wfTScale = OSC.TScaleTable[OSC.wfTScaleIndex][0];
+   document.getElementById("TScale").innerHTML = OSC.TScaleTable[OSC.wfTScaleIndex][1];
+
+   OSC.calcScaleOffset();
+   OSC.redraw();
+}
+
+function sldUOffset(value)
 {
    for (i=0 ; i<16 ; i++) {
       if (OSC.currentChn != -1 && i != OSC.currentChn)
@@ -271,10 +292,10 @@ function btnOfsZero()
    
    var sl = document.getElementsByName("ctrlVSlider");
    sl[0].position = 0.5;
-   ctrlVSliderDraw(sl[0]);
+   sl[0].draw();
 }
 
-function btnOfsDistr()
+function btnOfsDist()
 {
    // count active channels
    var n = 0;
@@ -297,3 +318,12 @@ function btnOfsDistr()
    OSC.calcScaleOffset();
    OSC.redraw();
 }
+
+function sldTOffset(value)
+{
+   OSC.wfTOffset = (value-0.5) * OSC.wfTScale;
+   OSC.calcScaleOffset();
+   OSC.redraw();
+}
+
+
