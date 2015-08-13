@@ -90,6 +90,10 @@ function Oscilloscope(div) { // constructor
    // schedule FPS calculator
    var f = this.calcFPS.bind(this);
    this.t = setTimeout(f, 1000);
+   
+   // measurements
+   this.lastMeasurement = 0;
+   this.sigma = [];
 }
 
 Oscilloscope.prototype.sendWaveforms = function(wf)
@@ -147,8 +151,9 @@ Oscilloscope.prototype.draw = function()
    this.previousHeight = this.height;
    
    this.drawGrid(ctx);
-   this.drawFPS(ctx);
    this.drawWF(ctx);
+   this.drawFPS(ctx);
+   this.drawMeasurements(ctx);
 }
 
 Oscilloscope.prototype.drawFPS = function(ctx)
@@ -157,8 +162,46 @@ Oscilloscope.prototype.drawFPS = function(ctx)
    ctx.strokeStyle = 'white';
    ctx.font = '14px sans-serif';
    ctx.textAlign = "left";
-   ctx.textBaseline = "top"
+   ctx.textBaseline = "top";
    ctx.fillText(this.nEPS + " EPS  " + this.nFPS + " FPS", 10, this.y2+8);
+}
+
+Oscilloscope.prototype.drawMeasurements = function(ctx)
+{
+   var d = new Date();
+   if (d.getTime() > this.lastMeasurement + 500) {
+      for (var c=0 ; c<16 ; c++) {
+         if (this.chOn[c]) {
+            var mean = 0;
+            var sigma = 0;
+            
+            for (i=0 ; i<1024 ; i++)
+               mean += this.wf.U[c][i];
+            mean /= 1024;
+            for (i=0 ; i<1024 ; i++)
+               sigma += (this.wf.U[c][i]-mean) * (this.wf.U[c][i]-mean);
+            
+            sigma = Math.sqrt(sigma/1024);
+            sigma = sigma * 1000; // mV
+            this.sigma[c] = sigma;
+         }
+      }
+      this.lastMeasurement = d.getTime();
+   }
+   
+   x = 130;
+   for (var c=0 ; c<16 ; c++) {
+      if (this.chOn[c] && this.sigma[c] != undefined) {
+         ctx.fillStyle = this.chnColors[c];
+         ctx.strokeStyle = this.chnColors[c];
+         ctx.font = '14px sans-serif';
+         ctx.textAlign = "left";
+         ctx.textBaseline = "top";
+         var t = this.sigma[c].toFixed(1) + " mV";
+         ctx.fillText(t, x, this.y2+8);
+         x += ctx.measureText(t).width + 10;
+      }
+   }
 }
 
 Oscilloscope.prototype.drawGrid = function(ctx)
