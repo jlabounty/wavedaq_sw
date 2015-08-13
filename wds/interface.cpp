@@ -86,7 +86,7 @@ double time_ms()
 
 int interface_read(int millisec, float waveform[16][1024])
 {
-   int i, status, waveform_channel;
+   int i, status, waveform_channel, current_frame;
    fd_set readfds;
    struct timeval timeout;
    WD2_FRAME_HEADER *ph;
@@ -103,6 +103,7 @@ int interface_read(int millisec, float waveform[16][1024])
       waveform[i][512] = nanf("");
    }
    
+   current_frame = -1;
    start_time = time_ms();
    
    do { // until all channels received
@@ -153,6 +154,13 @@ int interface_read(int millisec, float waveform[16][1024])
                    header_channel,
                    ph->channel_segment_number);
             */
+            
+            if (current_frame == -1)
+               current_frame = ph->data_sequence_number;
+            
+            // drop package if it does not belong to current frame
+            if (ph->data_sequence_number != current_frame)
+               continue;
             
             waveform_channel = header_adc*8+header_channel;
             assert(waveform_channel < 16);
