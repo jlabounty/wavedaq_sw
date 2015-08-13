@@ -86,7 +86,7 @@ function loadWF()
 function receiveWF()
 {
    if (req.readyState == 4 && req.status == 200) {
-      // this.wf = JSON.parse(req.responseText); // use htis for JSON encoded data
+      // this.wf = JSON.parse(req.responseText); // use this for JSON encoded data
       
       // create 16 empty waveforms
       var wf = {T:[], U:[]};
@@ -99,7 +99,10 @@ function receiveWF()
       var floatArray = new Float32Array(this.req.response);
       
       for (var i=0 ; i<intArray.length ; ) {
-         if (intArray[i] == 1) { // time array
+         if (intArray[i] == 0) {        // idle message
+            OSC.idle = true;
+            break;
+         } else if (intArray[i] == 1) { // time array
             i++;
             var c = intArray[i++];
             var n = intArray[i++];
@@ -107,6 +110,7 @@ function receiveWF()
                wf.T[c][j] = floatArray[i++];
          } else if (intArray[i] == 2) { // voltage array
             i++;
+            OSC.idle = false;
             var c = intArray[i++];
             var n = intArray[i++];
             for (var j=0 ; j<n ; j++)
@@ -121,7 +125,8 @@ function receiveWF()
          window.setTimeout(loadWF, 10); // schedule next waveform read
       
       // send waveforms to oscilloscope
-      OSC.sendWaveforms(wf);
+      if (!OSC.idle)
+         OSC.sendWaveforms(wf);
       
       // redraw oscilloscope to show new waveforms
       OSC.redraw();

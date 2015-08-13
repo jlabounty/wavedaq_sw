@@ -19,8 +19,7 @@
 #include <netdb.h>
 #include <assert.h>
 
-#define WD2_PORT 1850
-//#define WD2_PORT 2000
+#define WD2_PORT 2000
 
 #pragma pack(1)
 

@@ -50,6 +50,7 @@ function Oscilloscope(div) { // constructor
    
    this.running = true;
    this.currentChn = 0;
+   this.idle = true;
    
    this.nFrames = 0;
    this.nFPS = 0;
@@ -110,6 +111,7 @@ Oscilloscope.prototype.calcFPS = function()
    this.nEPS = this.nEvents;
    this.nEvents = 0;
    
+   // call again in one second
    var f = this.calcFPS.bind(this);
    this.t = setTimeout(f, 1000);
 }
@@ -292,6 +294,15 @@ Oscilloscope.prototype.drawGrid = function(ctx)
    ctx.strokeStyle = "rgb(146,136,110)";
    ctx.fillStyle = ctx.strokeStyle;
    ctx.stroke(this.gridPath);
+   
+   if (this.idle) {
+      ctx.strokeStyle = "#FFFFFF";
+      ctx.fillStyle = "#FFFFFF";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      ctx.font = '24px sans-serif';
+      ctx.fillText("Trig ?", this.x2-10, this.x1+10);
+   }
 }
 
 Oscilloscope.prototype.calcScaleOffset = function()

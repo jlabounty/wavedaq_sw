@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		D55471831B7242DE002A92E4 /* wds.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D55471811B7242DE002A92E4 /* wds.cpp */; };
 		D55471861B72439A002A92E4 /* mongoose.c in Sources */ = {isa = PBXBuildFile; fileRef = D55471841B72439A002A92E4 /* mongoose.c */; };
+		D57D5F201B7CB2EA00F6676E /* interface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D57D5F1F1B7CB2EA00F6676E /* interface.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -33,6 +34,7 @@
 		D55471881B72477A002A92E4 /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = SOURCE_ROOT; };
 		D55471891B72498D002A92E4 /* wds.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = wds.css; sourceTree = SOURCE_ROOT; };
 		D554718A1B72498D002A92E4 /* wds.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = wds.js; sourceTree = SOURCE_ROOT; };
+		D57D5F1F1B7CB2EA00F6676E /* interface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = interface.cpp; sourceTree = SOURCE_ROOT; };
 		D5D7CE451B74EFB40037D843 /* controls.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = controls.js; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -74,6 +76,7 @@
 				D55471841B72439A002A92E4 /* mongoose.c */,
 				D55471851B72439A002A92E4 /* mongoose.h */,
 				D55471811B7242DE002A92E4 /* wds.cpp */,
+				D57D5F1F1B7CB2EA00F6676E /* interface.cpp */,
 				D55471821B7242DE002A92E4 /* wds.h */,
 			);
 			path = wds;
@@ -137,6 +140,7 @@
 			files = (
 				D55471861B72439A002A92E4 /* mongoose.c in Sources */,
 				D55471831B7242DE002A92E4 /* wds.cpp in Sources */,
+				D57D5F201B7CB2EA00F6676E /* interface.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
