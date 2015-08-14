@@ -182,12 +182,12 @@ int interface_read(int millisec, float waveform[16][1024])
                
                if (ph->channel_segment_number == 0) {
                   // first segment
-                  waveform[waveform_channel][i]       = (float)data1 * (1 / 4096.0); // 2V range with 12 bits
-                  waveform[waveform_channel][i+1]     = (float)data2 * (1 / 4096.0);
+                  waveform[waveform_channel][i]       = (float)data1 * (0.63 / 4096.0); // 2V range with 12 bits
+                  waveform[waveform_channel][i+1]     = (float)data2 * (0.63 / 4096.0);
                } else {
                   // second segment
-                  waveform[waveform_channel][512+i]   = (float)data1 * (1 / 4096.0);
-                  waveform[waveform_channel][512+i+1] = (float)data2 * (1 / 4096.0);
+                  waveform[waveform_channel][512+i]   = (float)data1 * (0.63 / 4096.0);
+                  waveform[waveform_channel][512+i+1] = (float)data2 * (0.63 / 4096.0);
                }
             }
             

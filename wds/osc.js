@@ -86,7 +86,6 @@ function Oscilloscope(div) { // constructor
       this.wfScaleIndex[i] = 6;
       this.wfOffset[i] = 0;
    }
-   this.chOn[0] = true;
    
    // schedule FPS calculator
    var f = this.calcFPS.bind(this);

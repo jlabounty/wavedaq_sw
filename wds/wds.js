@@ -5,8 +5,6 @@
 //  Created by Stefan Ritt on 5/8/15.
 //
 
-const CONTROL_WIDTH = 190;
-
 var OSC; // global scope object
 
 function init()
@@ -24,8 +22,10 @@ function init()
    OSC = new Oscilloscope(document.getElementById("scope"));
 
    // size to fit screen
-   OSC.resize(document.documentElement.clientWidth - CONTROL_WIDTH,
+   var ctls = document.getElementById("controls");
+   OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth,
               document.documentElement.clientHeight);
+   ctls.style.marginLeft = (document.documentElement.clientWidth - ctls.offsetWidth) + "px";
  
    // add resize event handler
    window.addEventListener("resize", resize);
@@ -42,28 +42,27 @@ function init()
 
 function loadWF()
 {
-   /* outcomment to simulate local data
-
-   // create 16 empty waveforms
-   var wf = {T:[], U:[]};
-   for (var i=0 ; i<16 ; i++) {
-      wf.T[i] = [];
-      wf.U[i] = [];
-   }
-   for (c=0 ; c<16 ; c++) {
-      for (i=0 ; i<1024 ; i++) {
-         wf.T[c][i] = i*1E-9;
-         wf.U[c][i] = Math.sin(wf.T[c][i] / 50 / 1E-9) / 4 + (Math.random()-0.5) / 30;
+   if (false) { // set true to similate waveforms
+      // create 16 empty waveforms
+      var wf = {T:[], U:[]};
+      for (var i=0 ; i<16 ; i++) {
+         wf.T[i] = [];
+         wf.U[i] = [];
       }
+      for (c=0 ; c<16 ; c++) {
+         for (i=0 ; i<1024 ; i++) {
+            wf.T[c][i] = i*1E-9;
+            wf.U[c][i] = Math.sin(wf.T[c][i] / 50 / 1E-9) / 4 + (Math.random()-0.5) / 30;
+         }
+      }
+      
+      if (OSC.running)
+         window.setTimeout(loadWF, 10); // schedule next waveform read
+      
+      OSC.sendWaveforms(wf);
+      OSC.redraw();
+      return;
    }
-   
-   if (OSC.running)
-      window.setTimeout(loadWF, 10); // schedule next waveform read
-
-   OSC.sendWaveforms(wf);
-   OSC.redraw();
-   return;
-   */
    
    // build mask with active channels
    for (chn=0,c=0 ; c<16 ; c++)
@@ -138,8 +137,10 @@ function receiveWF()
 function resize()
 // called when screen got resized
 {
-   OSC.resize(document.documentElement.clientWidth - CONTROL_WIDTH,
+   var ctls = document.getElementById("controls");
+   OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth,
               document.documentElement.clientHeight);
+   ctls.style.marginLeft = (document.documentElement.clientWidth - ctls.offsetWidth) + "px";
 }
 
 function btnStop()
@@ -166,6 +167,13 @@ function btnSingle()
 function btnChn(c)
 // select channel "c" and set controls to reflect channel status (c == -1 means all channels)
 {
+   if (c != -1) {
+      if (OSC.currentChn == c)
+         OSC.chOn[c] = !OSC.chOn[c];
+      else
+         OSC.chOn[c] = true;
+   }
+   
    OSC.currentChn = c;
    var o = document.getElementById("chOn");
    if (c == -1)
@@ -193,6 +201,8 @@ function btnChn(c)
          cb.style.border = "2px solid #C0C0C0";
       if (OSC.chOn[i])
          cb.style.backgroundColor = OSC.chnColors[i];
+      else
+         cb.style.backgroundColor = "#E0E0E0";
    }
    
    OSC.redraw();
