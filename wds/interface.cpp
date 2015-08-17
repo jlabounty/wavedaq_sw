@@ -40,7 +40,7 @@ typedef struct {
 
 int interface_socket;
 
-int interface_init()
+int interface_init(GLOBALS *gl)
 {
    struct sockaddr_in addr;
 

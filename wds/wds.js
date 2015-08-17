@@ -77,7 +77,7 @@ function loadWF()
    // send AJAX request
    req = new XMLHttpRequest();
    req.onreadystatechange = this.receiveWF.bind(this);
-   req.open("GET", "wfb?chn=" + chn + "&r=" + Math.random(), true); // avoid cached results
+   req.open("GET", "wf?chn=" + chn + "&r=" + Math.random(), true); // avoid cached results
    req.responseType = "arraybuffer";
    req.send();
 }
@@ -103,6 +103,7 @@ function receiveWF()
             break;
          } else if (intArray[i] == 1) { // time array
             i++;
+            var f = intArray[i++];
             var c = intArray[i++];
             var n = intArray[i++];
             for (var j=0 ; j<n ; j++)
@@ -110,10 +111,12 @@ function receiveWF()
          } else if (intArray[i] == 2) { // voltage array
             i++;
             OSC.idle = false;
+            var f = intArray[i++];
             var c = intArray[i++];
             var n = intArray[i++];
             for (var j=0 ; j<n ; j++)
                wf.U[c][j] = floatArray[i++];
+            OSC.demo = (f == 0);
          } else {
             alert("WDS: Invalid binary data received form server");
             break;

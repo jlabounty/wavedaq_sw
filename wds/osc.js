@@ -51,6 +51,7 @@ function Oscilloscope(div) { // constructor
    this.running = true;
    this.currentChn = 0;
    this.idle = true;
+   this.demo = false;
    
    this.nFrames = 0;
    this.nFPS = 0;
@@ -294,13 +295,13 @@ Oscilloscope.prototype.drawGrid = function(ctx)
    ctx.fillStyle = ctx.strokeStyle;
    ctx.stroke(this.gridPath);
    
-   if (this.idle) {
+   if (this.idle || this.demo) {
       ctx.strokeStyle = "#FFFFFF";
       ctx.fillStyle = "#FFFFFF";
       ctx.textAlign = "right";
       ctx.textBaseline = "middle";
       ctx.font = '24px sans-serif';
-      ctx.fillText("Trig ?", this.x2-10, this.x1+10);
+      ctx.fillText(this.demo ? "DEMO" : "Trig ?", this.x2-10, this.x1+10);
    }
 }
 

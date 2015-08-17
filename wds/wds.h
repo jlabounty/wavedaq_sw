@@ -11,8 +11,14 @@
 #define SUCCESS 1
 #define FAILURE 0
 
+typedef struct {
+   int  demo_flag;
+   int  verbose_flag;
+   char **board_address;
+} GLOBALS;
+
 // interface functions
-int interface_init(void);
+int interface_init(GLOBALS *gl);
 int interface_read(int timeout, float wf[16][1024]);
 
 // linux and MAC specific things
