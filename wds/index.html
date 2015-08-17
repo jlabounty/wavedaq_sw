@@ -10,80 +10,64 @@
    <script src="wds.js" type="text/javascript"></script>
 </head>
 <body onload="init();">
+
 <div id="scope" class="scope"></div>
-<!-- <div id="debug">Debug</div> -->
+
 <div class="controls" id="controls">
-   <button class="startButton" type="button" id="btnStop" onClick="btnStop()">Stop</button>
-   <button class="startButton" type="button" id="btnSingle" onClick="btnSingle()">Single</button><br />
-   <table class="centered">
+
+   <button class="wideButton" type="button" id="btnStop" onClick="btnStop()">Stop</button>
+   <button class="wideButton" type="button" id="btnSingle" onClick="btnSingle()">Single</button>
+   
+   <div class="chnButtons">
+      <button class="squareButton" id="ch0" type="button" onClick="btnChn(0)">0</button>
+      <button class="squareButton" id="ch1" type="button" onClick="btnChn(1)">1</button>
+      <button class="squareButton" id="ch2" type="button" onClick="btnChn(2)">2</button>
+      <button class="squareButton" id="ch3" type="button" onClick="btnChn(3)">3</button><br />
+      <button class="squareButton" id="ch4" type="button" onClick="btnChn(4)">4</button>
+      <button class="squareButton" id="ch5" type="button" onClick="btnChn(5)">5</button>
+      <button class="squareButton" id="ch6" type="button" onClick="btnChn(6)">6</button>
+      <button class="squareButton" id="ch7" type="button" onClick="btnChn(7)">7</button><br />
+      <button class="squareButton" id="ch8" type="button" onClick="btnChn(8)">8</button>
+      <button class="squareButton" id="ch9" type="button" onClick="btnChn(9)">9</button>
+      <button class="squareButton" id="ch10" type="button" onClick="btnChn(10)">10</button>
+      <button class="squareButton" id="ch11" type="button" onClick="btnChn(11)">11</button><br />
+      <button class="squareButton" id="ch12" type="button" onClick="btnChn(12)">12</button>
+      <button class="squareButton" id="ch13" type="button" onClick="btnChn(13)">13</button>
+      <button class="squareButton" id="ch14" type="button" onClick="btnChn(14)">14</button>
+      <button class="squareButton" id="ch15" type="button" onClick="btnChn(15)">15</button>
+   </div>
+   
+   <button class="wideButton" id="chAll" type="button" onClick="btnChn(-1)">All</button>
+   <button class="wideButton" id="chOn" type="button" onClick="btnOn()">Off</button>
+
+   <div class="group">
+      <div class="upDown">
+         <button name="ctrlButtonUp" id="scaleUp" type="button" class="squareButtonCanvas" onClick="btnScale(1)"></button>
+         <div id="UScale">100 mV</div>
+         <button name="ctrlButtonDown" id="scaleDown" type="button" class="squareButtonCanvas" onClick="btnScale(-1)"></button>
+      </div><button name="ctrlVSlider" id="uofsSlider" class="vSlider" type="button" data-update="sldUOffset()"></button>
+
+      <div class="zeroDist">
+         <button name="ctrlButtonZero" class="highButton" id="ofsZero" type="button" onClick="btnOfsZero()"></button>
+         <div style="height:10px;"></div>
+         <button name="ctrlButtonDist" class="highButton" id="ofsDist" type="button" onClick="btnOfsDist()"></button>
+      </div>
+   </div>
+   
+   <button name="ctrlHSlider" id="tofsSlider" class="hSlider" type="button" data-update="sldTOffset()"></button>
+
+   <table class="timeScale">
       <tr>
-         <td><button class="colorButton" id="ch0" type="button" onClick="btnChn(0)">0</button></td>
-         <td><button class="colorButton" id="ch1" type="button" onClick="btnChn(1)">1</button></td>
-         <td><button class="colorButton" id="ch2" type="button" onClick="btnChn(2)">2</button></td>
-         <td><button class="colorButton" id="ch3" type="button" onClick="btnChn(3)">3</button></td>
-      </tr>
-      <tr>
-         <td><button class="colorButton" id="ch4" type="button" onClick="btnChn(4)">4</button></td>
-         <td><button class="colorButton" id="ch5" type="button" onClick="btnChn(5)">5</button></td>
-         <td><button class="colorButton" id="ch6" type="button" onClick="btnChn(6)">6</button></td>
-         <td><button class="colorButton" id="ch7" type="button" onClick="btnChn(7)">7</button></td>
-      </tr>
-      <tr>
-         <td><button class="colorButton" id="ch8" type="button" onClick="btnChn(8)">8</button></td>
-         <td><button class="colorButton" id="ch9" type="button" onClick="btnChn(9)">9</button></td>
-         <td><button class="colorButton" id="ch10" type="button" onClick="btnChn(10)">10</button></td>
-         <td><button class="colorButton" id="ch11" type="button" onClick="btnChn(11)">11</button></td>
-      </tr>
-      <tr>
-         <td><button class="colorButton" id="ch12" type="button" onClick="btnChn(12)">12</button></td>
-         <td><button class="colorButton" id="ch13" type="button" onClick="btnChn(13)">13</button></td>
-         <td><button class="colorButton" id="ch14" type="button" onClick="btnChn(14)">14</button></td>
-         <td><button class="colorButton" id="ch15" type="button" onClick="btnChn(15)">15</button></td>
-      </tr>
-      <tr>
-         <td colspan=2><button class="startButton" id="chAll" type="button" onClick="btnChn(-1)">All</button></td>
-         <td colspan=2><button class="startButton" id="chOn" type="button" onClick="btnOn()">Off</button></td>
-      </tr>
-   </table>
-   <table class="centered">
-      <tr>
-         <td>
-            <button name="ctrlButtonUp" id="scaleUp" type="button" class="colorButton" onClick="btnScale(1)">
-            </button><br />
-            <div id="UScale">100 mV</div>
-            <button name="ctrlButtonDown" id="scaleDown" type="button" class="colorButton" onClick="btnScale(-1)">
-            </button>
+         <td width="1%">
+            <button name="ctrlButtonLeft" id="scaleLeft" type="button" class="squareButtonCanvas" onClick="btnTScale(-1)"></button>
          </td>
-         <td>
-            <button name="ctrlVSlider" id="uofsSlider" class="vSlider" type="button" data-update="sldUOffset()"></button>
-         </td>
-         <td>
-            <button name="ctrlButtonZero" class="highButton" id="ofsZero" type="button" onClick="btnOfsZero()">
-            </button>
-            <div style="height:10px;"></div>
-            <button name="ctrlButtonDist" class="highButton" id="ofsDist" type="button" onClick="btnOfsDist()">
-            </button>
-         </td>
-      </tr>
-      <tr>
-         <td colspan=3>
-            <button name="ctrlHSlider" id="tofsSlider" class="hSlider" type="button" data-update="sldTOffset()"></button>
-         <td>
-      </tr>
-   </table>
-   <table width="100%">
-      <tr>
-         <td>
-            <button name="ctrlButtonLeft" id="scaleLeft" type="button" class="colorButton" onClick="btnTScale(-1)">
-            </button>
-         </td>
-         <td id="TScale">100 ns</td>
-         <td>
-            <button name="ctrlButtonRight" id="scaleRight" type="button" class="colorButton" onClick="btnTScale(1)">
-            </button>
+         <td id="TScale" style="vertical-align:middle">100 ns</td>
+         <td width="1%">
+            <button name="ctrlButtonRight" id="scaleRight" type="button" class="squareButtonCanvas" onClick="btnTScale(1)"></button>
          </td>
       </tr>
    </table>
+
 </div>
 
 </body>
