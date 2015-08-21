@@ -18,6 +18,9 @@ function init()
    c.addEventListener("click", function(e){e.preventDefault()});
    c.addEventListener("mousemove", function(e){e.preventDefault()});
 
+   // capture all key events
+   document.addEventListener("keypress", oscKeypress, false);
+   
    // create Scope object
    OSC = new Oscilloscope(document.getElementById("scope"));
 
@@ -141,9 +144,34 @@ function resize()
 // called when screen got resized
 {
    var ctls = document.getElementById("controls");
-   OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth,
-              document.documentElement.clientHeight);
-   ctls.style.marginLeft = (document.documentElement.clientWidth - ctls.offsetWidth) + "px";
+   if (ctls.hidden == true) {
+      OSC.resize(document.documentElement.clientWidth,
+                 document.documentElement.clientHeight);
+      ctls.style.marginLeft = (document.documentElement.clientWidth) + "px";
+   }  else {
+      OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth,
+                 document.documentElement.clientHeight);
+      ctls.style.marginLeft = (document.documentElement.clientWidth - ctls.offsetWidth) + "px";
+   }
+}
+
+function oscKeypress(e)
+{
+   var charCode = (typeof e.which == "number") ? e.which : e.keyCode;
+   
+   if (charCode == 's'.charCodeAt(0)) {
+      btnStop();
+   }
+
+   if (charCode == ']'.charCodeAt(0)) {
+      var ctls = document.getElementById("controls");
+      if (ctls.hidden == true)
+         ctls.hidden = false;
+      else
+         ctls.hidden = true;
+      resize();
+   }
+
 }
 
 function btnStop()
