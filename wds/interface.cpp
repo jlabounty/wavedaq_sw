@@ -16,13 +16,18 @@
 #include <sys/types.h>
 #include <sys/select.h>
 #include <sys/time.h>
+#include <sys/ioctl.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <net/if.h>
+#include <net/if_dl.h>
+#include <ifaddrs.h>
 #include <netdb.h>
 #include <assert.h>
 #include <errno.h>
 
-#define WD2_PORT 2000
+#define WD2_CMD_PORT   3000
+#define WD2_DATA_PORT  2000
 
 #pragma pack(1)
 
@@ -38,12 +43,189 @@ typedef struct {
    unsigned short reserved;
 } WD2_FRAME_HEADER;
 
-int interface_socket;
+/*-----------------------------------------------------------------------------------------*/
+
+size_t strlcpy(char *dst, const char *src, size_t size)
+{
+   char *d = dst;
+   const char *s = src;
+   size_t n = size;
+   
+   /* Copy as many bytes as will fit */
+   if (n != 0 && --n != 0) {
+      do {
+         if ((*d++ = *s++) == 0)
+            break;
+      } while (--n != 0);
+   }
+   
+   /* Not enough room in dst, add NUL and traverse rest of src */
+   if (n == 0) {
+      if (size != 0)
+         *d = '\0';             /* NUL-terminate dst */
+      while (*s++);
+   }
+   
+   return (s - src - 1);        /* count does not include NUL */
+}
+
+size_t strlcat(char *dst, const char *src, size_t size)
+{
+   char *d = dst;
+   const char *s = src;
+   size_t n = size;
+   size_t dlen;
+   
+   /* Find the end of dst and adjust bytes left but don't go past end */
+   while (n-- != 0 && *d != '\0')
+      d++;
+   dlen = d - dst;
+   n = size - dlen;
+   
+   if (n == 0)
+      return (dlen + strlen(s));
+   while (*s != '\0') {
+      if (n != 1) {
+         *d++ = *s;
+         n--;
+      }
+      s++;
+   }
+   *d = '\0';
+   
+   return (dlen + (s - src));   /* count does not include NUL */
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+void get_mac_addr(int socket, const char *interface, char *mac_addr)
+{
+   /*
+   #incdlude <linux/sockios.h>
+   struct ifreq ifinfo;
+   strcpy(ifinfo.ifr_name, "en0");
+   int result = ioctl(socket, SIOCGIFHWADDR, &ifinfo);
+    
+   if ((result == 0) && (ifinfo.ifr_hwaddr.sa_family == 1)) {
+      memcpy(mac, ifinfo.ifr_hwaddr.sa_data, IFHWADDRLEN);
+   */
+
+   struct ifaddrs *if_addr = NULL;
+
+   getifaddrs(&if_addr);
+   for ( ; if_addr != NULL ; if_addr = if_addr->ifa_next) {
+      if (strcmp(if_addr->ifa_name, interface) == 0) {
+         if (if_addr->ifa_addr != NULL && if_addr->ifa_addr->sa_family == AF_LINK) {
+            struct sockaddr_dl * sdl = (struct sockaddr_dl *)if_addr->ifa_addr;
+            unsigned char mac[6];
+            memcpy(mac, LLADDR(sdl), sdl->sdl_alen);
+            sprintf(mac_addr, "%02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+            return;
+         }
+      }
+   }
+}
+
+void get_ip_addr(int socket, const char *interface, char *ip_addr)
+{
+   struct ifaddrs *if_addr = NULL;
+   
+   getifaddrs(&if_addr);
+   for ( ; if_addr != NULL ; if_addr = if_addr->ifa_next) {
+      if (strcmp(if_addr->ifa_name, interface) == 0) {
+         if (if_addr->ifa_addr != NULL && if_addr->ifa_addr->sa_family == AF_INET) {
+            inet_ntop(AF_INET, &((struct sockaddr_in *)if_addr->ifa_addr)->sin_addr, ip_addr, INET_ADDRSTRLEN);
+            return;
+         }
+      }
+   }
+}
+
+
+/*-----------------------------------------------------------------------------------------*/
+
+int interface_send(GLOBALS *gl, int board, const char *str, char *result, int *size)
+{
+   size_t n, i;
+   fd_set readfds;
+   struct timeval timeout;
+   int    status;
+   int    millisec = 100;
+   struct sockaddr_in client_addr;
+   char   buffer[1600], prompt[80];
+
+   // send request
+   memcpy(&client_addr, gl->eth_addr+board, sizeof(client_addr));
+   
+   i = sendto(gl->cmd_socket[board],
+                  str,
+                  strlen(str),
+                  0,
+                  (struct sockaddr *)&client_addr,
+                  sizeof(client_addr));
+   assert(i = strlen(str));
+   
+   // retrieve reply
+   n = 0;
+   do {
+      memset(buffer, 0, sizeof(buffer));
+      
+      FD_ZERO(&readfds);
+      FD_SET(gl->cmd_socket[board], &readfds);
+      
+      timeout.tv_sec = millisec / 1000;
+      timeout.tv_usec = (millisec % 1000) * 1000;
+      
+      do {
+         status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
+      } while (status == -1);        /* dont return if an alarm signal was cought */
+      
+      if (!FD_ISSET(gl->cmd_socket[board], &readfds)) {
+         if (size != NULL)
+            *size = 0;
+         return 0;
+      }
+      
+      i = recv(gl->cmd_socket[board], buffer, sizeof(buffer), 0);
+      assert(i > 0);
+      
+      if (buffer[i] == 0) // don't count trailing zero
+         i--;
+      
+      if (result != NULL)
+         memcpy(result+n, buffer, i);
+      n += i;
+      
+      // check for prompt
+      strlcpy(prompt, gl->board_name[board], sizeof(prompt));
+      strlcat(prompt, " > ", sizeof(prompt));
+      
+      if (strcmp(buffer+strlen(buffer)-strlen(prompt), prompt) == 0)
+         break;
+      
+   } while (1);
+   
+   // chop off prompt
+   if (result != NULL)
+      result[strlen(result)-strlen(prompt)] = 0;
+   n -= strlen(prompt);
+          
+   if (size != NULL)
+      *size = (int)n;
+   
+   return SUCCESS;
+}
+
+/*-----------------------------------------------------------------------------------------*/
 
 int interface_init(GLOBALS *gl)
 {
-   struct sockaddr_in addr;
-
+   struct sockaddr_in server_addr;
+   struct sockaddr_in client_addr;
+   char addr_str[32], str[256], reply[10000];
+   struct hostent *phe;
+   int size;
+   
 #ifdef _MSC_VER
    {
    WSADATA WSAData;
@@ -54,26 +236,78 @@ int interface_init(GLOBALS *gl)
    }
 #endif
 
-   // create UDB socket
-   interface_socket = socket(AF_INET, SOCK_DGRAM, 0);
-   assert(interface_socket);
-   
-   // bind socket to port WD2_PORT
-   memset((char*)&addr, 0, sizeof(addr));
-   addr.sin_family = AF_INET;
-   addr.sin_port = htons(WD2_PORT);
-   addr.sin_addr.s_addr = htonl(INADDR_ANY);
-   if (bind(interface_socket, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
-      if (errno == EADDRINUSE)
-         printf("Another instance of this program is alredy listening at port %d\n", WD2_PORT);
-      else
-         perror("bind");
-      return FAILURE;
-   }
+   gl->cmd_socket = (int *)malloc(sizeof(int)*gl->n_boards);
+   gl->data_socket = (int *)malloc(sizeof(int)*gl->n_boards);
 
-   printf("WD2 Interface listening on port %d ...\n", WD2_PORT);
+   for (int i=0 ; i<gl->n_boards ; i++) {
+      
+      // create UDB socket for command interpreter
+      gl->cmd_socket[i] = socket(AF_INET, SOCK_DGRAM, 0);
+      assert(gl->cmd_socket[i]);
+      
+      // bind socket to any port
+      memset((char*)&server_addr, 0, sizeof(server_addr));
+      server_addr.sin_family = AF_INET;
+      server_addr.sin_port = htons(3000); // use any port
+      server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+      if (bind(gl->cmd_socket[i], (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+         perror("bind");
+         return FAILURE;
+      }
+
+      // find out which port we were bound
+      size = sizeof(server_addr);
+      getsockname(gl->cmd_socket[i], (struct sockaddr *) &server_addr, (socklen_t *)&size);
+      printf("Listening on command port %d\n", ntohs(server_addr.sin_port));
+
+      // create UDB socket to receive binary data
+      gl->data_socket[i] = socket(AF_INET, SOCK_DGRAM, 0);
+      assert(gl->data_socket[i]);
+      
+      // bind socket to port WD2_DATA_PORT
+      memset((char*)&server_addr, 0, sizeof(server_addr));
+      server_addr.sin_family = AF_INET;
+      server_addr.sin_port = htons(WD2_DATA_PORT);
+      server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+      if (bind(gl->data_socket[i], (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+         perror("bind");
+         return FAILURE;
+      }
+
+      // find out which port we were bound
+      size = sizeof(server_addr);
+      getsockname(gl->data_socket[i], (struct sockaddr *) &server_addr, (socklen_t *)&size);
+      printf("Listening on data port %d\n", ntohs(server_addr.sin_port));
+
+      // retrieve Ethernet address of board
+      phe = gethostbyname(gl->board_name[i]);
+      if (phe == NULL) {
+         printf("Cannot resolve host name \"%s\"\n", gl->board_name[i]);
+         return 0;
+      }
+      memcpy((char *)&client_addr.sin_addr, phe->h_addr, phe->h_length);
+      client_addr.sin_family = AF_INET;
+      client_addr.sin_port = htons(WD2_CMD_PORT);
+      size = sizeof(client_addr);
+      memcpy(gl->eth_addr, &client_addr, sizeof(client_addr));
+
+      // set MAC address in WD board
+      get_mac_addr(gl->cmd_socket[i], "en0", addr_str);
+      sprintf(str, "setenv ethaddrdst %s", addr_str);
+      size = sizeof(reply);
+      interface_send(gl, i, str, reply, &size);
+      
+      // set IP address in WD board
+      get_ip_addr(gl->cmd_socket[i], "en0", addr_str);
+      sprintf(str, "setenv ipaddrdst %s", addr_str);
+      size = sizeof(reply);
+      interface_send(gl, i, str, reply, &size);
+   }
+   
    return SUCCESS;
 }
+
+/*-----------------------------------------------------------------------------------------*/
 
 #define Sleep(x) usleep(x*1000)
 
@@ -84,7 +318,9 @@ double time_ms()
    return tv.tv_sec*1000 + tv.tv_usec/1000.0;
 }
 
-int interface_read(int millisec, float waveform[16][1024])
+/*-----------------------------------------------------------------------------------------*/
+
+int interface_read_waveform(GLOBALS *gl, int millisec, float waveform[16][1024])
 {
    int i, status, waveform_channel, current_frame;
    fd_set readfds;
@@ -109,7 +345,7 @@ int interface_read(int millisec, float waveform[16][1024])
    do { // until all channels received
       
       FD_ZERO(&readfds);
-      FD_SET(interface_socket, &readfds);
+      FD_SET(gl->data_socket[0], &readfds);
       
       timeout.tv_sec = millisec / 1000;
       timeout.tv_usec = (millisec % 1000) * 1000;
@@ -125,12 +361,12 @@ int interface_read(int millisec, float waveform[16][1024])
       if (time_ms() - start_time > 1000)
          return FAILURE;
       
-      if (FD_ISSET(interface_socket, &readfds)) {
+      if (FD_ISSET(gl->data_socket[0], &readfds)) {
          int len, n;
          
          // packet is available, so receive it
          len = sizeof(remote_addr);
-         n = (int)recvfrom(interface_socket, (char *)buffer, sizeof(buffer), 0,
+         n = (int)recvfrom(gl->data_socket[0], (char *)buffer, sizeof(buffer), 0,
                            (struct sockaddr *)&remote_addr, (socklen_t *)&len);
          if (n > sizeof(WD2_FRAME_HEADER)) {
             ph = (WD2_FRAME_HEADER *)buffer;
@@ -146,14 +382,14 @@ int interface_read(int millisec, float waveform[16][1024])
             ph->packet_sequence_number = SWAP_UINT16(ph->packet_sequence_number);
             ph->reserved               = SWAP_UINT16(ph->reserved);
             
-            /*
+            
             printf("From %s:%d, Frame %5d, ADC/Chn/Segment %d/%d/%d\n", inet_ntoa(remote_addr.sin_addr),
                    ntohs(remote_addr.sin_port),
                    ph->data_sequence_number,
                    header_adc,
                    header_channel,
                    ph->channel_segment_number);
-            */
+            
             
             if (current_frame == -1)
                current_frame = ph->data_sequence_number;

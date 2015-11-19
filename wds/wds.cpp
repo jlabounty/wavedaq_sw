@@ -39,7 +39,10 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
             }
          }
       } else {
-         status = interface_read(1000, wfU);
+
+         interface_send(gl, 0, "drsstart\n", NULL, NULL);
+         interface_send(gl, 0, "drstrig\n", NULL, NULL);
+         status = interface_read_waveform(gl, 1000, wfU);
       
          for (int c=0 ; c<16 ; c++) {
             for (int i=0 ; i<1024 ; i++) {
@@ -97,13 +100,16 @@ int main(int argc, char *argv[]) {
    GLOBALS gl;
    
    static struct option longopts[] = {
-      { "demo",        no_argument,     NULL, 'd' },
-      { "verbose",     no_argument,     NULL, 'v' },
+      { "demo",        no_argument,        NULL, 'd' },
+      { "verbose",     no_argument,        NULL, 'v' },
+      { "wd",          required_argument,  NULL, 'w' },
+      { 0, 0, 0, 0}
    };
    
    memset(&gl, 0, sizeof(gl));
+   gl.board_name = (char **)malloc(sizeof(char *) * (argc+1));
    
-   while ((ch = getopt_long(argc, argv, "dv", longopts, NULL)) != -1) {
+   while ((ch = getopt_long(argc, argv, "dvw:", longopts, NULL)) != -1) {
       switch (ch) {
          case 'd':
             gl.demo_flag = 1;
@@ -111,8 +117,12 @@ int main(int argc, char *argv[]) {
          case 'v':
             gl.verbose_flag = 1;
             break;
+         case 'w':
+            if (optarg)
+               gl.board_name[gl.n_boards++] = optarg;
+            break;
          default:
-            printf("usage: wsd [-dv] [<address> [<address> ...]]\n");
+            printf("usage: wsd [-dv] [-w <address> [-w <address> ...]]\n");
             printf(" -d --demo        Demo mode\n");
             printf(" -v --verbose     Print extra statistics\n");
             return 1;
@@ -121,13 +131,6 @@ int main(int argc, char *argv[]) {
    }
    argc -= optind;
    argv += optind;
-   
-   gl.board_address = (char **)malloc(sizeof(char *) * (argc+1));
-   
-   int i;
-   for (i=0 ; i<argc && argv[i][0] ; i++)
-      gl.board_address[i] = argv[i];
-   gl.board_address[i] = NULL;
    
    // initialize ethernet interface to WD board
    if (interface_init(&gl) != SUCCESS)
@@ -144,6 +147,16 @@ int main(int argc, char *argv[]) {
       printf("Starting in DEMO mode.\n");
    
    for (;;) {
+      /*
+      float wfU[16][1024];
+      int status;
+      
+      interface_send(&gl, 0, "drsstart\n", NULL, NULL);
+      interface_send(&gl, 0, "drstrig\n", NULL, NULL);
+      status = interface_read_waveform(&gl, 1000, wfU);
+
+      sleep(1000);
+      */
       mg_poll_server(server, 1000);   // Infinite loop, Ctrl-C to stop
    }
    

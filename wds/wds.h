@@ -14,12 +14,17 @@
 typedef struct {
    int  demo_flag;
    int  verbose_flag;
-   char **board_address;
+   int  n_boards;
+   char **board_name;
+   int  *cmd_socket;
+   int  *data_socket;
+   unsigned char eth_addr[16];
 } GLOBALS;
 
 // interface functions
 int interface_init(GLOBALS *gl);
-int interface_read(int timeout, float wf[16][1024]);
+int interface_read_waveform(GLOBALS *gl, int timeout, float wf[16][1024]);
+int interface_send(GLOBALS *gl, int board, const char *str, char *result, int *size);
 
 // linux and MAC specific things
 #if defined(__linux__) || defined(__APPLE__)
