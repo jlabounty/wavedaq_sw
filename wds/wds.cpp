@@ -40,8 +40,11 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
          }
       } else {
 
+         // issue single DRS software trigger
          interface_send(gl, 0, "drsstart\n", NULL, NULL);
          interface_send(gl, 0, "drstrig\n", NULL, NULL);
+         
+         // read waveforms
          status = interface_read_waveform(gl, 1000, wfU);
       
          for (int c=0 ; c<16 ; c++) {
@@ -147,16 +150,6 @@ int main(int argc, char *argv[]) {
       printf("Starting in DEMO mode.\n");
    
    for (;;) {
-      /*
-      float wfU[16][1024];
-      int status;
-      
-      interface_send(&gl, 0, "drsstart\n", NULL, NULL);
-      interface_send(&gl, 0, "drstrig\n", NULL, NULL);
-      status = interface_read_waveform(&gl, 1000, wfU);
-
-      sleep(1000);
-      */
       mg_poll_server(server, 1000);   // Infinite loop, Ctrl-C to stop
    }
    
