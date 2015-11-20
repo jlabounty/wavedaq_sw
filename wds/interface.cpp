@@ -24,6 +24,8 @@
 
 #ifdef __linux__
 #include <linux/sockios.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
 #endif
 #ifdef __APPLE__
 #include <net/if_dl.h>
