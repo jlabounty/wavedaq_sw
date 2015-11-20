@@ -39,13 +39,36 @@ function init()
    // draw empty scope
    OSC.redraw();
    
+   // fill wdSelector from list on server
+   loadBoardList();
+   
    // schedule first waveform load
    window.setTimeout(loadWF, 10);
 }
 
+function loadBoardList()
+{
+   // send AJAX request
+   req = new XMLHttpRequest();
+   req.onreadystatechange = function() {
+      if (req.readyState == 4 && req.status == 200) {
+         var obj = JSON.parse(req.responseText);
+         var sel = document.getElementById("wdSelect");
+         for (var i=0 ; i<obj.boards.length ; i++) {
+            var opt = document.createElement('option');
+            opt.innerHTML = obj.boards[i].name;
+            opt.value = obj.boards[i].name;
+            sel.appendChild(opt);
+         }
+      }
+   };
+   req.open("GET", "list" + "?r=" + Math.random(), true); // avoid cached results
+   req.send();
+}
+
 function loadWF()
 {
-   if (false) { // set true to similate waveforms
+   if (false) { // set true to simulate waveforms
       // create 16 empty waveforms
       var wf = {T:[], U:[]};
       for (var i=0 ; i<16 ; i++) {
@@ -106,6 +129,7 @@ function receiveWF()
             break;
          } else if (intArray[i] == 1) { // time array
             i++;
+            OSC.wd = intArray[i++];
             var f = intArray[i++];
             var c = intArray[i++];
             var n = intArray[i++];
@@ -114,12 +138,13 @@ function receiveWF()
          } else if (intArray[i] == 2) { // voltage array
             i++;
             OSC.idle = false;
+            OSC.wd = intArray[i++];
             var f = intArray[i++];
             var c = intArray[i++];
             var n = intArray[i++];
             for (var j=0 ; j<n ; j++)
                wf.U[c][j] = floatArray[i++];
-            OSC.demo = (f == 0);
+            OSC.demo = (OSC.wd == 0);
          } else {
             alert("WDS: Invalid binary data received form server");
             break;

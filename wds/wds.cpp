@@ -36,7 +36,7 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
             mg_printf_data(conn, ",");
          mg_printf_data(conn, "\n");
       }
-      
+
       mg_printf_data(conn, "   ]\n");
       mg_printf_data(conn, "}\n");
       return MG_TRUE;
@@ -75,6 +75,7 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
          }
       }
 
+      int wd = (gl->demo_flag) ? 0 : atoi(gl->board_name[0]+3);
       if (status == SUCCESS) {
          
          mg_get_var(conn, "chn", str, sizeof(str));
@@ -87,6 +88,7 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
             if (chn & (1 << c)) {
                t = 1; // time array
                mg_send_data(conn, &t, 4);
+               mg_send_data(conn, &wd, 4);
                mg_send_data(conn, &f, 4);
                mg_send_data(conn, &c, 4);
                mg_send_data(conn, &n, 4);
@@ -99,6 +101,7 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
             if (chn & (1 << c)) {
                t = 2; // voltage array
                mg_send_data(conn, &t, 4);
+               mg_send_data(conn, &wd, 4);
                mg_send_data(conn, &f, 4);
                mg_send_data(conn, &c, 4);
                mg_send_data(conn, &n, 4);
@@ -110,6 +113,7 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
          // just return idle message
          int t = 0;
          mg_send_data(conn, &t, 4);
+         mg_send_data(conn, &wd, 4);
       }
       
       return MG_TRUE;
@@ -170,7 +174,7 @@ int main(int argc, char *argv[]) {
    argc -= optind;
    argv += optind;
    
-   if (gl.n_boards == 0) {
+   if (gl.n_boards == 0 && !gl.demo_flag) {
       printf("You have to specify at least one WaveDREAM board via the -w option.\n");
       return 1;
    }

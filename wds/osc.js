@@ -65,6 +65,7 @@ function Oscilloscope(div) { // constructor
    
    this.chOn = [];         // on/off switch for channels
    this.wf = {T:[], U:[]}; // waveforms
+   this.wd = 0;            // WaveDREAM board
    
    this.wfScale = [];      // volts per division
    this.wfScaleIndex = [];
@@ -295,14 +296,21 @@ Oscilloscope.prototype.drawGrid = function(ctx)
    ctx.fillStyle = ctx.strokeStyle;
    ctx.stroke(this.gridPath);
    
-   if (this.idle || this.demo) {
-      ctx.strokeStyle = "#FFFFFF";
-      ctx.fillStyle = "#FFFFFF";
-      ctx.textAlign = "right";
-      ctx.textBaseline = "middle";
-      ctx.font = '24px sans-serif';
-      ctx.fillText(this.demo ? "DEMO" : "Trig ?", this.x2-10, this.x1+10);
-   }
+   ctx.strokeStyle = "#FFFFFF";
+   ctx.fillStyle = "#FFFFFF";
+   ctx.textAlign = "right";
+   ctx.textBaseline = "middle";
+   ctx.font = '24px sans-serif';
+
+   if (this.idle)
+      ctx.fillText("Trig ?", this.x2-10, this.x1+10);
+   else if (this.demo)
+      ctx.fillText("DEMO", this.x2-10, this.x1+10);
+   
+   /*
+   else
+      ctx.fillText(this.wd<10 ? "WD00"+this.wd : (this.wd<100 ? "WD0"+this.wd : "WD"+this.wd), this.x2-10, this.x1+10);
+    */
 }
 
 Oscilloscope.prototype.calcScaleOffset = function()

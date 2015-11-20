@@ -176,6 +176,7 @@ int interface_send(GLOBALS *gl, int board, const char *str, char *result, int *s
    assert(i = strlen(str));
    
    // retrieve reply
+   // TBD: retry a few times
    n = 0;
    do {
       memset(buffer, 0, sizeof(buffer));
@@ -252,45 +253,51 @@ int interface_init(GLOBALS *gl)
    for (int i=0 ; i<gl->n_boards ; i++) {
       
       // create UDB socket for command interpreter
-      gl->cmd_socket[i] = socket(AF_INET, SOCK_DGRAM, 0);
-      assert(gl->cmd_socket[i]);
+      if (i == 0) {
+         gl->cmd_socket[i] = socket(AF_INET, SOCK_DGRAM, 0);
+         assert(gl->cmd_socket[i]);
+         
+         // bind socket to any port
+         memset((char*)&server_addr, 0, sizeof(server_addr));
+         server_addr.sin_family = AF_INET;
+         server_addr.sin_port = htons(3000); // use any port
+         server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+         if (bind(gl->cmd_socket[i], (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+            perror("bind");
+            return FAILURE;
+         }
+         
+         // find out which port we were bound
+         size = sizeof(server_addr);
+         getsockname(gl->cmd_socket[i], (struct sockaddr *) &server_addr, (socklen_t *)&size);
+         if (gl->verbose_flag)
+            printf("Listening on command port %d\n", ntohs(server_addr.sin_port));
+      } else
+         gl->cmd_socket[i] = gl->cmd_socket[0]; // reuse socket
       
-      // bind socket to any port
-      memset((char*)&server_addr, 0, sizeof(server_addr));
-      server_addr.sin_family = AF_INET;
-      server_addr.sin_port = htons(3000); // use any port
-      server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-      if (bind(gl->cmd_socket[i], (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
-         perror("bind");
-         return FAILURE;
-      }
-
-      // find out which port we were bound
-      size = sizeof(server_addr);
-      getsockname(gl->cmd_socket[i], (struct sockaddr *) &server_addr, (socklen_t *)&size);
-      if (gl->verbose_flag)
-         printf("Listening on command port %d\n", ntohs(server_addr.sin_port));
-
       // create UDB socket to receive binary data
-      gl->data_socket[i] = socket(AF_INET, SOCK_DGRAM, 0);
-      assert(gl->data_socket[i]);
+      if (i == 0) {
+         gl->data_socket[i] = socket(AF_INET, SOCK_DGRAM, 0);
+         assert(gl->data_socket[i]);
+         
+         // bind socket to port WD2_DATA_PORT
+         memset((char*)&server_addr, 0, sizeof(server_addr));
+         server_addr.sin_family = AF_INET;
+         server_addr.sin_port = htons(WD2_DATA_PORT);
+         server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+         if (bind(gl->data_socket[i], (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+            perror("bind");
+            return FAILURE;
+         }
+         
+         // find out which port we were bound
+         size = sizeof(server_addr);
+         getsockname(gl->data_socket[i], (struct sockaddr *) &server_addr, (socklen_t *)&size);
+         if (gl->verbose_flag)
+            printf("Listening on data port %d\n", ntohs(server_addr.sin_port));
+      } else
+         gl->data_socket[i] = gl->data_socket[0]; // reuse socket
       
-      // bind socket to port WD2_DATA_PORT
-      memset((char*)&server_addr, 0, sizeof(server_addr));
-      server_addr.sin_family = AF_INET;
-      server_addr.sin_port = htons(WD2_DATA_PORT);
-      server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-      if (bind(gl->data_socket[i], (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
-         perror("bind");
-         return FAILURE;
-      }
-
-      // find out which port we were bound
-      size = sizeof(server_addr);
-      getsockname(gl->data_socket[i], (struct sockaddr *) &server_addr, (socklen_t *)&size);
-      if (gl->verbose_flag)
-         printf("Listening on data port %d\n", ntohs(server_addr.sin_port));
-
       // retrieve Ethernet address of board
       phe = gethostbyname(gl->board_name[i]);
       if (phe == NULL) {
@@ -309,7 +316,17 @@ int interface_init(GLOBALS *gl)
 #ifdef __APPLE__
       strcpy(interface, "en0");
 #endif
-      
+
+      // check if board is alive
+      size = sizeof(reply);
+      interface_send(gl, i, "info", reply, &size);
+      if (!size) {
+         printf("Board %s does not reply, aborting.\n", gl->board_name[i]);
+         return 0;
+      }
+      if (gl->verbose_flag)
+         printf("Board %s info:\n%s", gl->board_name[i], reply);
+
       // set destinantion port in WD board
       get_mac_addr(gl->cmd_socket[i], interface, addr_str);
       sprintf(str, "setenv dstport %d", WD2_DATA_PORT);
