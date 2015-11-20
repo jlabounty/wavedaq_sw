@@ -309,6 +309,15 @@ int interface_init(GLOBALS *gl)
 #ifdef __APPLE__
       strcpy(interface, "en0");
 #endif
+      
+      // set destinantion port in WD board
+      get_mac_addr(gl->cmd_socket[i], interface, addr_str);
+      sprintf(str, "setenv dstport %d", WD2_DATA_PORT);
+      size = sizeof(reply);
+      interface_send(gl, i, str, reply, &size);
+      if (gl->verbose_flag)
+         printf("Set dstport = %d at %s\n", WD2_DATA_PORT, gl->board_name[i]);
+
       // set MAC address in WD board
       get_mac_addr(gl->cmd_socket[i], interface, addr_str);
       sprintf(str, "setenv ethaddrdst %s", addr_str);

@@ -57,10 +57,14 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
          }
       } else {
 
-         // issue single DRS software trigger
-         interface_send(gl, 0, "drsstart\n", NULL, NULL);
-         interface_send(gl, 0, "drstrig\n", NULL, NULL);
-         
+         if (gl->adc_flag) {
+            // issue single ADC software trigger
+            interface_send(gl, 0, "adcget 1\n", NULL, NULL);
+         } else {
+            // issue single DRS software trigger
+            interface_send(gl, 0, "drsstart\n", NULL, NULL);
+            interface_send(gl, 0, "drstrig\n", NULL, NULL);
+         }
          // read waveforms
          status = interface_read_waveform(gl, 1000, wfU);
       
@@ -118,9 +122,12 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
 int main(int argc, char *argv[]) {
    int ch;
    GLOBALS gl;
+   char str[256];
    
    static struct option longopts[] = {
+      { "adc",         no_argument,        NULL, 'a' },
       { "demo",        no_argument,        NULL, 'd' },
+      { "port",        required_argument,  NULL, 'p' },
       { "verbose",     no_argument,        NULL, 'v' },
       { "wd",          required_argument,  NULL, 'w' },
       { 0, 0, 0, 0}
@@ -128,11 +135,19 @@ int main(int argc, char *argv[]) {
    
    memset(&gl, 0, sizeof(gl));
    gl.board_name = (char **)malloc(sizeof(char *) * (argc+1));
+   gl.http_port = 8080; // default port
    
-   while ((ch = getopt_long(argc, argv, "dvw:", longopts, NULL)) != -1) {
+   while ((ch = getopt_long(argc, argv, "adp:vw:", longopts, NULL)) != -1) {
       switch (ch) {
+         case 'a':
+            gl.adc_flag = 1;
+            break;
          case 'd':
             gl.demo_flag = 1;
+            break;
+         case 'p':
+            if (optarg)
+               gl.http_port = atoi(optarg);
             break;
          case 'v':
             gl.verbose_flag = 1;
@@ -142,7 +157,9 @@ int main(int argc, char *argv[]) {
                gl.board_name[gl.n_boards++] = optarg;
             break;
          default:
-            printf("usage: wsd [-dv] [-w <address> [-w <address> ...]]\n");
+            printf("usage: wsd [-adv] [-w <address> [-w <address> ...]]\n");
+            printf(" -a --adc         Read ADC instead DRS\n");
+            printf(" -p --port        HTTP server port\n");
             printf(" -d --demo        Demo mode\n");
             printf(" -w --wd          Internet address of WaveDREAM board\n");
             printf(" -v --verbose     Print extra statistics\n");
@@ -165,9 +182,10 @@ int main(int argc, char *argv[]) {
    // initialize web server
    struct mg_server *server = mg_create_server(&gl, wds_handler);
    mg_set_option(server, "document_root", ".");      // Serve current directory
-   mg_set_option(server, "listening_port", "8080");  // Open port 8080
+   sprintf(str, "%d", gl.http_port);
+   mg_set_option(server, "listening_port", str);     // Define listening port
    
-   printf("Starting HTTP server at port 8080...\n");
+   printf("Starting HTTP server at port %d...\n", gl.http_port);
    
    if (gl.demo_flag)
       printf("Starting in DEMO mode.\n");

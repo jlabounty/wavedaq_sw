@@ -14,6 +14,8 @@
 typedef struct {
    int  demo_flag;
    int  verbose_flag;
+   int  adc_flag;
+   int  http_port;
    int  n_boards;
    char **board_name;
    int  *cmd_socket;
