@@ -25,8 +25,25 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
    if (event == MG_AUTH)
       return MG_TRUE; // authorize all events
    
+   // list of boards
+   if (event == MG_REQUEST && !strcmp(conn->uri, "/list")) {
+      mg_printf_data(conn, "{\n");
+      mg_printf_data(conn, "   \"boards\": [\n");
+      
+      for (int i=0 ; i<gl->n_boards ; i++) {
+         mg_printf_data(conn, "      { \"name\": \"%s\" }", gl->board_name[i]);
+         if (i<gl->n_boards-1)
+            mg_printf_data(conn, ",");
+         mg_printf_data(conn, "\n");
+      }
+      
+      mg_printf_data(conn, "   ]\n");
+      mg_printf_data(conn, "}\n");
+      return MG_TRUE;
+   }
+   
    // binary encoded waveforms
-   if (event == MG_REQUEST && !strcmp(conn->uri, "/wf")) {
+   if (event == MG_REQUEST && strcmp(conn->uri, "/wf") == 0) {
       float wfT[16][1024], wfU[16][1024];
       int status;
       
