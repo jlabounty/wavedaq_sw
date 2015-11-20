@@ -127,6 +127,7 @@ int main(int argc, char *argv[]) {
          default:
             printf("usage: wsd [-dv] [-w <address> [-w <address> ...]]\n");
             printf(" -d --demo        Demo mode\n");
+            printf(" -w --wd          Internet address of WaveDREAM board\n");
             printf(" -v --verbose     Print extra statistics\n");
             return 1;
             break;
@@ -134,6 +135,11 @@ int main(int argc, char *argv[]) {
    }
    argc -= optind;
    argv += optind;
+   
+   if (gl.n_boards == 0) {
+      printf("You have to specify at least one WaveDREAM board via the -w option.\n");
+      return 1;
+   }
    
    // initialize ethernet interface to WD board
    if (interface_init(&gl) != SUCCESS)

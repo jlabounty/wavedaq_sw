@@ -258,7 +258,8 @@ int interface_init(GLOBALS *gl)
       // find out which port we were bound
       size = sizeof(server_addr);
       getsockname(gl->cmd_socket[i], (struct sockaddr *) &server_addr, (socklen_t *)&size);
-      printf("Listening on command port %d\n", ntohs(server_addr.sin_port));
+      if (gl->verbose_flag)
+         printf("Listening on command port %d\n", ntohs(server_addr.sin_port));
 
       // create UDB socket to receive binary data
       gl->data_socket[i] = socket(AF_INET, SOCK_DGRAM, 0);
@@ -277,7 +278,8 @@ int interface_init(GLOBALS *gl)
       // find out which port we were bound
       size = sizeof(server_addr);
       getsockname(gl->data_socket[i], (struct sockaddr *) &server_addr, (socklen_t *)&size);
-      printf("Listening on data port %d\n", ntohs(server_addr.sin_port));
+      if (gl->verbose_flag)
+         printf("Listening on data port %d\n", ntohs(server_addr.sin_port));
 
       // retrieve Ethernet address of board
       phe = gethostbyname(gl->board_name[i]);
@@ -296,12 +298,16 @@ int interface_init(GLOBALS *gl)
       sprintf(str, "setenv ethaddrdst %s", addr_str);
       size = sizeof(reply);
       interface_send(gl, i, str, reply, &size);
+      if (gl->verbose_flag)
+         printf("Set ethaddrdst = %s at %s\n", addr_str, gl->board_name[i]);
       
       // set IP address in WD board
       get_ip_addr(gl->cmd_socket[i], "en0", addr_str);
       sprintf(str, "setenv ipaddrdst %s", addr_str);
       size = sizeof(reply);
       interface_send(gl, i, str, reply, &size);
+      if (gl->verbose_flag)
+         printf("Set ipaddrdst = %s at %s\n", addr_str, gl->board_name[i]);
    }
    
    return SUCCESS;
@@ -382,14 +388,14 @@ int interface_read_waveform(GLOBALS *gl, int millisec, float waveform[16][1024])
             ph->packet_sequence_number = SWAP_UINT16(ph->packet_sequence_number);
             ph->reserved               = SWAP_UINT16(ph->reserved);
             
-            
+            /*
             printf("From %s:%d, Frame %5d, ADC/Chn/Segment %d/%d/%d\n", inet_ntoa(remote_addr.sin_addr),
                    ntohs(remote_addr.sin_port),
                    ph->data_sequence_number,
                    header_adc,
                    header_channel,
                    ph->channel_segment_number);
-            
+            */
             
             if (current_frame == -1)
                current_frame = ph->data_sequence_number;
