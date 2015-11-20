@@ -4,7 +4,7 @@
 #
 ###########################################################
 
-CFLAGS  = -O0
+CFLAGS  = -O0 -g
 
 # search main file
 GREP = grep -l "main(" *c *cpp

@@ -12,6 +12,12 @@
 
 #include "wds.h"
 
+#ifdef __linux__
+#include <linux/sockios.h>
+#endif
+#ifdef __APPLE__
+#include <net/if_dl.h>
+#endif
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/select.h>
@@ -20,7 +26,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <net/if.h>
-#include <net/if_dl.h>
 #include <ifaddrs.h>
 #include <netdb.h>
 #include <assert.h>
@@ -100,16 +105,20 @@ size_t strlcat(char *dst, const char *src, size_t size)
 
 void get_mac_addr(int socket, const char *interface, char *mac_addr)
 {
-   /*
-   #incdlude <linux/sockios.h>
+#ifdef __linux__
    struct ifreq ifinfo;
-   strcpy(ifinfo.ifr_name, "en0");
+   unsigned char mac[6];
+   strcpy(ifinfo.ifr_name, interface);
    int result = ioctl(socket, SIOCGIFHWADDR, &ifinfo);
     
    if ((result == 0) && (ifinfo.ifr_hwaddr.sa_family == 1)) {
       memcpy(mac, ifinfo.ifr_hwaddr.sa_data, IFHWADDRLEN);
-   */
+      sprintf(mac_addr, "%02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+      return;
+   }
+#endif
 
+#ifdef __APPLE__
    struct ifaddrs *if_addr = NULL;
 
    getifaddrs(&if_addr);
@@ -124,6 +133,7 @@ void get_mac_addr(int socket, const char *interface, char *mac_addr)
          }
       }
    }
+#endif
 }
 
 void get_ip_addr(int socket, const char *interface, char *ip_addr)
@@ -222,7 +232,7 @@ int interface_init(GLOBALS *gl)
 {
    struct sockaddr_in server_addr;
    struct sockaddr_in client_addr;
-   char addr_str[32], str[256], reply[10000];
+   char addr_str[32], str[256], reply[10000], interface[32];
    struct hostent *phe;
    int size;
    
@@ -293,8 +303,14 @@ int interface_init(GLOBALS *gl)
       size = sizeof(client_addr);
       memcpy(gl->eth_addr, &client_addr, sizeof(client_addr));
 
+#ifdef __linux__
+      strcpy(interface, "eth0");
+#endif
+#ifdef __APPLE__
+      strcpy(interface, "en0");
+#endif
       // set MAC address in WD board
-      get_mac_addr(gl->cmd_socket[i], "en0", addr_str);
+      get_mac_addr(gl->cmd_socket[i], interface, addr_str);
       sprintf(str, "setenv ethaddrdst %s", addr_str);
       size = sizeof(reply);
       interface_send(gl, i, str, reply, &size);
@@ -302,7 +318,7 @@ int interface_init(GLOBALS *gl)
          printf("Set ethaddrdst = %s at %s\n", addr_str, gl->board_name[i]);
       
       // set IP address in WD board
-      get_ip_addr(gl->cmd_socket[i], "en0", addr_str);
+      get_ip_addr(gl->cmd_socket[i], interface, addr_str);
       sprintf(str, "setenv ipaddrdst %s", addr_str);
       size = sizeof(reply);
       interface_send(gl, i, str, reply, &size);
@@ -450,4 +466,3 @@ int interface_read_waveform(GLOBALS *gl, int millisec, float waveform[16][1024])
    
    return FAILURE;
 }
-
