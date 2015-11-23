@@ -253,65 +253,65 @@ int interface_init(GLOBALS *gl)
    for (int i=0 ; i<gl->n_boards ; i++)
       gl->eth_addr[i] = (unsigned char *)malloc(sizeof(unsigned char)*16);
  
-   for (int i=0 ; i<gl->n_boards ; i++) {
+   for (int index=0 ; index<gl->n_boards ; index++) {
       
       // create UDB socket for command interpreter
-      if (i == 0) {
-         gl->cmd_socket[i] = socket(AF_INET, SOCK_DGRAM, 0);
-         assert(gl->cmd_socket[i]);
+      if (index == 0) {
+         gl->cmd_socket[index] = socket(AF_INET, SOCK_DGRAM, 0);
+         assert(gl->cmd_socket[index]);
          
          // bind socket to any port
          memset((char*)&server_addr, 0, sizeof(server_addr));
          server_addr.sin_family = AF_INET;
          server_addr.sin_port = htons(3000); // use any port
          server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-         if (bind(gl->cmd_socket[i], (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+         if (bind(gl->cmd_socket[index], (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
             perror("bind");
             return FAILURE;
          }
          
          // find out which port we were bound
          size = sizeof(server_addr);
-         getsockname(gl->cmd_socket[i], (struct sockaddr *) &server_addr, (socklen_t *)&size);
+         getsockname(gl->cmd_socket[index], (struct sockaddr *) &server_addr, (socklen_t *)&size);
          if (gl->verbose_flag)
             printf("Listening on command port %d\n", ntohs(server_addr.sin_port));
       } else
-         gl->cmd_socket[i] = gl->cmd_socket[0]; // reuse socket
+         gl->cmd_socket[index] = gl->cmd_socket[0]; // reuse socket
       
       // create UDB socket to receive binary data
-      if (i == 0) {
-         gl->data_socket[i] = socket(AF_INET, SOCK_DGRAM, 0);
-         assert(gl->data_socket[i]);
+      if (index == 0) {
+         gl->data_socket[index] = socket(AF_INET, SOCK_DGRAM, 0);
+         assert(gl->data_socket[index]);
          
          // bind socket to port WD2_DATA_PORT
          memset((char*)&server_addr, 0, sizeof(server_addr));
          server_addr.sin_family = AF_INET;
          server_addr.sin_port = htons(WD2_DATA_PORT);
          server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-         if (bind(gl->data_socket[i], (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+         if (bind(gl->data_socket[index], (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
             perror("bind");
             return FAILURE;
          }
          
          // find out which port we were bound
          size = sizeof(server_addr);
-         getsockname(gl->data_socket[i], (struct sockaddr *) &server_addr, (socklen_t *)&size);
+         getsockname(gl->data_socket[index], (struct sockaddr *) &server_addr, (socklen_t *)&size);
          if (gl->verbose_flag)
             printf("Listening on data port %d\n", ntohs(server_addr.sin_port));
       } else
-         gl->data_socket[i] = gl->data_socket[0]; // reuse socket
+         gl->data_socket[index] = gl->data_socket[0]; // reuse socket
       
       // retrieve Ethernet address of board
-      phe = gethostbyname(gl->board_name[i]);
+      phe = gethostbyname(gl->board_name[index]);
       if (phe == NULL) {
-         printf("Cannot resolve host name \"%s\"\n", gl->board_name[i]);
+         printf("Cannot resolve host name \"%s\"\n", gl->board_name[index]);
          return 0;
       }
       memcpy((char *)&client_addr.sin_addr, phe->h_addr, phe->h_length);
       client_addr.sin_family = AF_INET;
       client_addr.sin_port = htons(WD2_CMD_PORT);
       size = sizeof(client_addr);
-      memcpy(gl->eth_addr[i], &client_addr, sizeof(client_addr));
+      memcpy(gl->eth_addr[index], &client_addr, sizeof(client_addr));
 
 #ifdef __linux__
       strcpy(interface, "eth0");
@@ -322,9 +322,9 @@ int interface_init(GLOBALS *gl)
 
       // check if board is alive
       size = sizeof(reply);
-      interface_send(gl, i, "info", reply, &size);
+      interface_send(gl, index, "info", reply, &size);
       if (!size) {
-         printf("Board %s does not reply, aborting.\n", gl->board_name[i]);
+         printf("Board %s does not reply, aborting.\n", gl->board_name[index]);
          return 0;
       }
       if (gl->verbose_flag) {
@@ -333,33 +333,61 @@ int interface_init(GLOBALS *gl)
             char *p2 = strstr(p, "\r\n\r\n");
             if (p2 != NULL)
                *p2 = 0;
-            printf("Board %s info:\n%s", gl->board_name[i], p);
+            printf("Board %s info:\n%s", gl->board_name[index], p);
          }
       }
 
       // set destinantion port in WD board
-      get_mac_addr(gl->cmd_socket[i], interface, addr_str);
+      get_mac_addr(gl->cmd_socket[index], interface, addr_str);
       sprintf(str, "setenv dstport %d", WD2_DATA_PORT);
       size = sizeof(reply);
-      interface_send(gl, i, str, reply, &size);
+      interface_send(gl, index, str, reply, &size);
       if (gl->verbose_flag)
-         printf("Set dstport = %d at %s\n", WD2_DATA_PORT, gl->board_name[i]);
+         printf("Set dstport = %d at %s\n", WD2_DATA_PORT, gl->board_name[index]);
 
       // set MAC address in WD board
-      get_mac_addr(gl->cmd_socket[i], interface, addr_str);
+      get_mac_addr(gl->cmd_socket[index], interface, addr_str);
       sprintf(str, "setenv ethaddrdst %s", addr_str);
       size = sizeof(reply);
-      interface_send(gl, i, str, reply, &size);
+      interface_send(gl, index, str, reply, &size);
       if (gl->verbose_flag)
-         printf("Set ethaddrdst = %s at %s\n", addr_str, gl->board_name[i]);
+         printf("Set ethaddrdst = %s at %s\n", addr_str, gl->board_name[index]);
       
       // set IP address in WD board
-      get_ip_addr(gl->cmd_socket[i], interface, addr_str);
+      get_ip_addr(gl->cmd_socket[index], interface, addr_str);
       sprintf(str, "setenv ipaddrdst %s", addr_str);
       size = sizeof(reply);
-      interface_send(gl, i, str, reply, &size);
+      interface_send(gl, index, str, reply, &size);
       if (gl->verbose_flag)
-         printf("Set ipaddrdst = %s at %s\n", addr_str, gl->board_name[i]);
+         printf("Set ipaddrdst = %s at %s\n", addr_str, gl->board_name[index]);
+      
+      // set input configuration
+      if (gl->pzc) { // pole zero cancellation on (bit=0)
+         if (gl->gain == 0)
+            sprintf(str, "feset all 02");
+         else if (gl->gain == 1)
+            sprintf(str, "feset all 1a");
+         else if (gl->gain == 2)
+            sprintf(str, "feset all 3a");
+         size = sizeof(reply);
+         interface_send(gl, index, str, reply, &size);
+      } else { // pole zero cancellation off (bit=1)
+         if (gl->gain == 0)
+            sprintf(str, "feset all 82");
+         else if (gl->gain == 1)
+            sprintf(str, "feset all 9a");
+         else if (gl->gain == 2)
+            sprintf(str, "feset all ba");
+         size = sizeof(reply);
+         interface_send(gl, index, str, reply, &size);
+      }
+
+      sprintf(str, "setenv ipaddrdst %s", addr_str);
+      size = sizeof(reply);
+      interface_send(gl, index, str, reply, &size);
+      if (gl->verbose_flag)
+         printf("Set ipaddrdst = %s at %s\n", addr_str, gl->board_name[index]);
+      
    }
    
    return SUCCESS;

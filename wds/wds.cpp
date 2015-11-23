@@ -134,9 +134,11 @@ int main(int argc, char *argv[]) {
    static struct option longopts[] = {
       { "adc",         no_argument,        NULL, 'a' },
       { "demo",        no_argument,        NULL, 'd' },
+      { "gain",        required_argument,  NULL, 'g' },
       { "port",        required_argument,  NULL, 'p' },
       { "verbose",     no_argument,        NULL, 'v' },
       { "wd",          required_argument,  NULL, 'w' },
+      { "zero",        no_argument,        NULL, 'z' },
       { 0, 0, 0, 0}
    };
    
@@ -144,13 +146,17 @@ int main(int argc, char *argv[]) {
    gl.board_name = (char **)malloc(sizeof(char *) * (argc+1));
    gl.http_port = 8080; // default port
    
-   while ((ch = getopt_long(argc, argv, "adp:vw:", longopts, NULL)) != -1) {
+   while ((ch = getopt_long(argc, argv, "adg:p:vw:z", longopts, NULL)) != -1) {
       switch (ch) {
          case 'a':
             gl.adc_flag = 1;
             break;
          case 'd':
             gl.demo_flag = 1;
+            break;
+         case 'g':
+            if (optarg)
+               gl.gain = atoi(optarg);
             break;
          case 'p':
             if (optarg)
@@ -163,13 +169,18 @@ int main(int argc, char *argv[]) {
             if (optarg)
                gl.board_name[gl.n_boards++] = optarg;
             break;
+         case 'z':
+            gl.pzc = 1;
+            break;
          default:
             printf("usage: wsd [-adv] [-w <address> [-w <address> ...]]\n");
             printf(" -a --adc         Read ADC instead DRS\n");
+            printf(" -g --gain        Input gain (0=1, 2=10, 3=100)\n");
             printf(" -p --port        HTTP server port\n");
             printf(" -d --demo        Demo mode\n");
             printf(" -w --wd          Internet address of WaveDREAM board\n");
             printf(" -v --verbose     Print extra statistics\n");
+            printf(" -z --zero        Turn on pole-zero-canellation\n");
             return 1;
             break;
       }
