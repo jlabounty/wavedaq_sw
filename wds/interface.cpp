@@ -165,7 +165,7 @@ int interface_send(GLOBALS *gl, int board, const char *str, char *result, int *s
    char   buffer[1600], prompt[80];
 
    // send request
-   memcpy(&client_addr, gl->eth_addr+board, sizeof(client_addr));
+   memcpy(&client_addr, gl->eth_addr[board], sizeof(client_addr));
    
    i = sendto(gl->cmd_socket[board],
                   str,
@@ -249,7 +249,10 @@ int interface_init(GLOBALS *gl)
 
    gl->cmd_socket = (int *)malloc(sizeof(int)*gl->n_boards);
    gl->data_socket = (int *)malloc(sizeof(int)*gl->n_boards);
-
+   gl->eth_addr = (unsigned char **)malloc(sizeof(unsigned char *)*gl->n_boards);
+   for (int i=0 ; i<gl->n_boards ; i++)
+      gl->eth_addr[i] = (unsigned char *)malloc(sizeof(unsigned char)*16);
+ 
    for (int i=0 ; i<gl->n_boards ; i++) {
       
       // create UDB socket for command interpreter
@@ -308,7 +311,7 @@ int interface_init(GLOBALS *gl)
       client_addr.sin_family = AF_INET;
       client_addr.sin_port = htons(WD2_CMD_PORT);
       size = sizeof(client_addr);
-      memcpy(gl->eth_addr, &client_addr, sizeof(client_addr));
+      memcpy(gl->eth_addr[i], &client_addr, sizeof(client_addr));
 
 #ifdef __linux__
       strcpy(interface, "eth0");
@@ -324,8 +327,15 @@ int interface_init(GLOBALS *gl)
          printf("Board %s does not reply, aborting.\n", gl->board_name[i]);
          return 0;
       }
-      if (gl->verbose_flag)
-         printf("Board %s info:\n%s", gl->board_name[i], reply);
+      if (gl->verbose_flag) {
+         char *p = strstr(reply, "-- Version");
+         if (p != NULL) {
+            char *p2 = strstr(p, "\r\n\r\n");
+            if (p2 != NULL)
+               *p2 = 0;
+            printf("Board %s info:\n%s", gl->board_name[i], p);
+         }
+      }
 
       // set destinantion port in WD board
       get_mac_addr(gl->cmd_socket[i], interface, addr_str);
@@ -368,7 +378,7 @@ double time_ms()
 
 /*-----------------------------------------------------------------------------------------*/
 
-int interface_read_waveform(GLOBALS *gl, int millisec, float waveform[16][1024])
+int interface_read_waveform(GLOBALS *gl, int board, int millisec, float waveform[16][1024])
 {
    int i, status, waveform_channel, current_frame;
    fd_set readfds;
@@ -393,7 +403,7 @@ int interface_read_waveform(GLOBALS *gl, int millisec, float waveform[16][1024])
    do { // until all channels received
       
       FD_ZERO(&readfds);
-      FD_SET(gl->data_socket[0], &readfds);
+      FD_SET(gl->data_socket[board], &readfds);
       
       timeout.tv_sec = millisec / 1000;
       timeout.tv_usec = (millisec % 1000) * 1000;
@@ -412,12 +422,12 @@ int interface_read_waveform(GLOBALS *gl, int millisec, float waveform[16][1024])
          return FAILURE;
       }
       
-      if (FD_ISSET(gl->data_socket[0], &readfds)) {
+      if (FD_ISSET(gl->data_socket[board], &readfds)) {
          int len, n;
          
          // packet is available, so receive it
          len = sizeof(remote_addr);
-         n = (int)recvfrom(gl->data_socket[0], (char *)buffer, sizeof(buffer), 0,
+         n = (int)recvfrom(gl->data_socket[board], (char *)buffer, sizeof(buffer), 0,
                            (struct sockaddr *)&remote_addr, (socklen_t *)&len);
          if (n > sizeof(WD2_FRAME_HEADER)) {
             ph = (WD2_FRAME_HEADER *)buffer;

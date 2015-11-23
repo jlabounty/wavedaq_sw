@@ -57,16 +57,19 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
          }
       } else {
 
+         mg_get_var(conn, "b", str, sizeof(str));
+         int board = atoi(str);
+
          if (gl->adc_flag) {
             // issue single ADC software trigger
-            interface_send(gl, 0, "adcget 1\n", NULL, NULL);
+            interface_send(gl, board, "adcget 1\n", NULL, NULL);
          } else {
             // issue single DRS software trigger
-            interface_send(gl, 0, "drsstart\n", NULL, NULL);
-            interface_send(gl, 0, "drstrig\n", NULL, NULL);
+            interface_send(gl, board, "drsstart\n", NULL, NULL);
+            interface_send(gl, board, "drstrig\n", NULL, NULL);
          }
          // read waveforms
-         status = interface_read_waveform(gl, 1000, wfU);
+         status = interface_read_waveform(gl, board, 1000, wfU);
       
          for (int c=0 ; c<16 ; c++) {
             for (int i=0 ; i<1024 ; i++) {
@@ -78,7 +81,7 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
       int wd = (gl->demo_flag) ? 0 : atoi(gl->board_name[0]+3);
       if (status == SUCCESS) {
          
-         mg_get_var(conn, "chn", str, sizeof(str));
+         mg_get_var(conn, "c", str, sizeof(str));
          int chn = atoi(str);
          
          int t = 1;    // array type

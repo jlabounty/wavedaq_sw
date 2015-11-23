@@ -91,7 +91,7 @@ function loadWF()
    }
    
    // build mask with active channels
-   for (chn=0,c=0 ; c<16 ; c++)
+   for (var chn=0,c=0 ; c<16 ; c++)
       if (OSC.chOn[c])
          chn |= (1<<c);
    
@@ -100,10 +100,13 @@ function loadWF()
       return;
    }
    
+   // get active board
+   var board = document.getElementById("wdSelect").selectedIndex;
+   
    // send AJAX request
    req = new XMLHttpRequest();
    req.onreadystatechange = this.receiveWF.bind(this);
-   req.open("GET", "wf?chn=" + chn + "&r=" + Math.random(), true); // avoid cached results
+   req.open("GET", "wf?b=" + board + "&c=" + chn + "&r=" + Math.random(), true); // avoid cached results
    req.responseType = "arraybuffer";
    req.send();
 }
