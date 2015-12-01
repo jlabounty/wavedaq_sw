@@ -154,13 +154,12 @@ void get_ip_addr(int socket, const char *interface, char *ip_addr)
 
 /*-----------------------------------------------------------------------------------------*/
 
-int interface_send(GLOBALS *gl, int board, const char *str, char *result, int *size)
+int interface_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *result, int *size)
 {
    size_t n, i;
    fd_set readfds;
    struct timeval timeout;
    int    status;
-   int    millisec = 100;
    struct sockaddr_in client_addr;
    char   buffer[1600], prompt[80];
 
@@ -184,8 +183,8 @@ int interface_send(GLOBALS *gl, int board, const char *str, char *result, int *s
       FD_ZERO(&readfds);
       FD_SET(gl->cmd_socket[board], &readfds);
       
-      timeout.tv_sec = millisec / 1000;
-      timeout.tv_usec = (millisec % 1000) * 1000;
+      timeout.tv_sec = timeout_ms / 1000;
+      timeout.tv_usec = (timeout_ms % 1000) * 1000;
       
       do {
          status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
@@ -322,7 +321,7 @@ int interface_init(GLOBALS *gl)
 
       // check if board is alive
       size = sizeof(reply);
-      interface_send(gl, index, "info", reply, &size);
+      interface_send(gl, index, 5000, "info", reply, &size); // first access long timeout
       if (!size) {
          printf("Board %s does not reply, aborting.\n", gl->board_name[index]);
          return 0;
@@ -341,7 +340,7 @@ int interface_init(GLOBALS *gl)
       get_mac_addr(gl->cmd_socket[index], interface, addr_str);
       sprintf(str, "setenv dstport %d", WD2_DATA_PORT);
       size = sizeof(reply);
-      interface_send(gl, index, str, reply, &size);
+      interface_send(gl, index, 1000, str, reply, &size);
       if (gl->verbose_flag)
          printf("Set dstport = %d at %s\n", WD2_DATA_PORT, gl->board_name[index]);
 
@@ -349,7 +348,7 @@ int interface_init(GLOBALS *gl)
       get_mac_addr(gl->cmd_socket[index], interface, addr_str);
       sprintf(str, "setenv ethaddrdst %s", addr_str);
       size = sizeof(reply);
-      interface_send(gl, index, str, reply, &size);
+      interface_send(gl, index, 1000, str, reply, &size);
       if (gl->verbose_flag)
          printf("Set ethaddrdst = %s at %s\n", addr_str, gl->board_name[index]);
       
@@ -357,7 +356,7 @@ int interface_init(GLOBALS *gl)
       get_ip_addr(gl->cmd_socket[index], interface, addr_str);
       sprintf(str, "setenv ipaddrdst %s", addr_str);
       size = sizeof(reply);
-      interface_send(gl, index, str, reply, &size);
+      interface_send(gl, index, 1000, str, reply, &size);
       if (gl->verbose_flag)
          printf("Set ipaddrdst = %s at %s\n", addr_str, gl->board_name[index]);
       
@@ -370,7 +369,7 @@ int interface_init(GLOBALS *gl)
          else if (gl->gain == 2)
             sprintf(str, "feset all 3a");
          size = sizeof(reply);
-         interface_send(gl, index, str, reply, &size);
+         interface_send(gl, index, 1000, str, reply, &size);
       } else { // pole zero cancellation off (bit=1)
          if (gl->gain == 0)
             sprintf(str, "feset all 82");
@@ -379,12 +378,12 @@ int interface_init(GLOBALS *gl)
          else if (gl->gain == 2)
             sprintf(str, "feset all ba");
          size = sizeof(reply);
-         interface_send(gl, index, str, reply, &size);
+         interface_send(gl, index, 1000, str, reply, &size);
       }
 
       sprintf(str, "setenv ipaddrdst %s", addr_str);
       size = sizeof(reply);
-      interface_send(gl, index, str, reply, &size);
+      interface_send(gl, index, 1000, str, reply, &size);
       if (gl->verbose_flag)
          printf("Set ipaddrdst = %s at %s\n", addr_str, gl->board_name[index]);
       

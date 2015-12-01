@@ -28,7 +28,7 @@ typedef struct {
 // interface functions
 int interface_init(GLOBALS *gl);
 int interface_read_waveform(GLOBALS *gl, int board, int timeout, float wf[16][1024]);
-int interface_send(GLOBALS *gl, int board, const char *str, char *result, int *size);
+int interface_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *result, int *size);
 
 // linux and MAC specific things
 #if defined(__linux__) || defined(__APPLE__)
