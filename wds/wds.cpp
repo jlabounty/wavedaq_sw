@@ -59,6 +59,10 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
 
          mg_get_var(conn, "b", str, sizeof(str));
          int board = atoi(str);
+         
+         // avoid invalid board index
+         if (board < 0 || board >= gl->n_boards)
+            board = 0;
 
          if (gl->adc_flag) {
             // issue single ADC software trigger
