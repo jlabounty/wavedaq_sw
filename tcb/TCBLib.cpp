@@ -180,6 +180,13 @@ void TCB::GetTriggerCounters(int handle, u_int32_t *data) {
   }
 }
 //
+// write in data masks
+void TCB::SetDataMasks(int handle, u_int32_t *data) {
+  for(int imsk = 0; imsk<4; imsk++) {
+    WriteReg(handle,kaddrdmask[imsk],data+imsk);
+  }
+}
+//
 // read memory address
 void TCB::GetMemoryAddress(int handle, u_int32_t *data) {
   u_int32_t addr = RMEMADDR;

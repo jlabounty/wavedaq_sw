@@ -3,6 +3,10 @@
 #define RPRESCA1      0x11                      // prescaling1 
 #define RPRESCA2      0x12                      // prescaling2 
 #define RPRESCA3      0x13                      // prescaling3 
+#define RIDMASK0      0x14                      // mask indata(31:0)
+#define RIDMASK1      0x15                      // mask indata(63:32)
+#define RIDMASK2      0x16                      // mask indata(95:64)
+#define RIDMASK3      0x17                      // mask indata(127:96)
 #define RTOTTIME      0x20                      // total time 
 #define RLIVETIME     0x21                      // live time 
 #define REVECOU       0x22                      // event counter 
@@ -23,6 +27,7 @@ class TCB {
   u_int32_t kaddrpre[4] = {RPRESCA0,RPRESCA1,RPRESCA2,RPRESCA3};
   u_int32_t kaddrmem[4] = {RMEM0,RMEM1,RMEM2,RMEM3};
   u_int32_t kaddrcou[4] = {RTRGCOU0,RTRGCOU1,RTRGCOU2,RTRGCOU3};
+  u_int32_t kaddrdmask[4] = {RIDMASK0,RIDMASK1,RIDMASK2,RIDMASK3};
  public:
   // board info
   u_int32_t   fidcode;      // reg id
@@ -73,6 +78,8 @@ class TCB {
   void GetTriggerCounters(int,u_int32_t*);
   // read memory address
   void GetMemoryAddress(int,u_int32_t*);
+  // write in data masks
+  void SetDataMasks(int,u_int32_t*);
   // Constructor
   TCB(int slot) { 
     fslot = slot;

@@ -18,9 +18,9 @@ int main()
   u_int32_t data, scanfdata;
   u_int32_t trgtype, tpattern;
   u_int32_t wdata[128];
-  FILE *filin, *filout, *filpresca;
+  FILE *filin, *filout, *filpresca, *filmasks;
   u_int32_t rdata[32] = {0};
-  u_int32_t presca[4], counters[4];
+  u_int32_t presca[4], counters[4], masks[4];
   clock_t t_before, t_after;
   // open mscb connection
   handle = mscb_init("212.189.155.62", 0, "", 0);
@@ -38,7 +38,7 @@ int main()
    printf("[11]: Read TotalTime       \t \t  [12]: Read Live Time \n");
    printf("[13]: Read Event Counter   \t \t  [14]: Read trigger type\n");
    printf("[15]: Read Trigger Counters\t \t  [16]: Read memory address\n");
-   printf("[17]: Select Slot\n");
+   printf("[17]: Set in data masks    \t \t  [18]: Select Slot\n");
    do {
      printf("Give an option: ");
      scanf("%s",opline);
@@ -158,7 +158,15 @@ int main()
      printf("\n   Memory address = %d\n",data);
    }
    if(option == 17) {
-     printf(" opt = 17 : Set slot ... \n");
+     printf(" opt = 17 : Set precaling values (from indatamask.dat file) ... \n");
+     filmasks = fopen("indatamask.dat","read");
+     for(int imsk = 0; imsk<4; imsk++) {
+       fscanf(filmasks,"%x\n",masks+imsk);
+     }
+     TCBBoard.SetDataMasks(handle,masks);
+   }
+   if(option == 18) {
+     printf(" opt = 18 : Set slot ... \n");
      printf("Slot?\n");
      scanf("%d",&data);
      TCBBoard.fslot = data;
