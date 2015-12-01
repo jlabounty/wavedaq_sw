@@ -60,6 +60,7 @@ function loadBoardList()
             opt.value = obj.boards[i].name;
             sel.appendChild(opt);
          }
+         OSC.nWd = obj.boards.length;
       }
    };
    req.open("GET", "list" + "?r=" + Math.random(), true); // avoid cached results
@@ -68,6 +69,12 @@ function loadBoardList()
 
 function loadWF()
 {
+   // wait until list of boards has been loaded
+   if (OSC.nWd == 0) {
+      window.setTimeout(loadWF, 10);
+      return;
+   }
+   
    if (false) { // set true to simulate waveforms
       // create 16 empty waveforms
       var wf = {T:[], U:[]};

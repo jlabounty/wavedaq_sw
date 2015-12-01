@@ -66,6 +66,7 @@ function Oscilloscope(div) { // constructor
    this.chOn = [];         // on/off switch for channels
    this.wf = {T:[], U:[]}; // waveforms
    this.wd = 0;            // WaveDREAM board
+   this.nWd = 0;           // number of boards
    
    this.wfScale = [];      // volts per division
    this.wfScaleIndex = [];
