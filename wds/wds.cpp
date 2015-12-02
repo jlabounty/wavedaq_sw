@@ -66,11 +66,10 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
 
          if (gl->adc_flag) {
             // issue single ADC software trigger
-            interface_send(gl, board, 100, "adcget 1\n", NULL, NULL);
+            interface_send(gl, board, 100, "adcgeteth 1\n", NULL, NULL);
          } else {
             // issue single DRS software trigger
-            interface_send(gl, board, 100, "drsstart\n", NULL, NULL);
-            interface_send(gl, board, 100, "drstrig\n", NULL, NULL);
+            interface_send(gl, board, 100, "drsget\n", NULL, NULL);
          }
          // read waveforms
          status = interface_read_waveform(gl, board, 1000, wfU);
