@@ -252,6 +252,9 @@ int interface_init(GLOBALS *gl)
    for (int i=0 ; i<gl->n_boards ; i++)
       gl->eth_addr[i] = (unsigned char *)malloc(sizeof(unsigned char)*16);
  
+   if (gl->demo_flag)
+      return SUCCESS;
+   
    for (int index=0 ; index<gl->n_boards ; index++) {
       
       // create UDB socket for command interpreter

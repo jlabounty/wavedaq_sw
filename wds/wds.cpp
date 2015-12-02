@@ -196,6 +196,11 @@ int main(int argc, char *argv[]) {
       return 1;
    }
    
+   if (gl.demo_flag) {
+      gl.n_boards = 1;
+      gl.board_name[0] = (char *)"wd000";
+   }
+   
    // initialize ethernet interface to WD board
    if (interface_init(&gl) != SUCCESS)
       return FAILURE;

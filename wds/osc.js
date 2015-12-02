@@ -61,7 +61,6 @@ function Oscilloscope(div) { // constructor
    this.previousWidth = 0;
    this.previousHeight = 0;
    this.bottomHeight = 25;
-   this.gridPath = null;
    
    this.chOn = [];         // on/off switch for channels
    this.wf = {T:[], U:[]}; // waveforms
@@ -147,10 +146,6 @@ Oscilloscope.prototype.draw = function()
    this.y2 = this.wfHeight-4;
    this.w = this.x2-this.x1;
    this.h = this.y2-this.y1;
-   
-   if (this.width != this.previousWidth ||
-       this.height != this.previousHeight)
-      this.gridPath = null;
    this.previousWidth = this.width;
    this.previousHeight = this.height;
    
@@ -217,102 +212,83 @@ Oscilloscope.prototype.drawGrid = function(ctx)
    ctx.lineWidth = 4;
    ctx.strokeRect(this.x1-2, this.y1-2, this.w+4, this.h+4);
    
-   if (this.gridPath == null) {
-      this.calcScaleOffset();
+   this.calcScaleOffset();
+   
+   ctx.beginPath();
+   ctx.moveTo(this.x1, this.y1);
+   ctx.lineTo(this.x1, this.y2);
+   ctx.lineTo(this.x2, this.y2);
+   ctx.lineTo(this.x2, this.y1);
+   ctx.lineTo(this.x1, this.y1);
+   
+   ctx.moveTo(this.x1, this.y1+this.h/2);
+   ctx.lineTo(this.x2, this.y1+this.h/2);
+   ctx.moveTo(this.x1+this.w/2, this.y1);
+   ctx.lineTo(this.x1+this.w/2, this.y2);
+   
+   // horizontal lines
+   for (i=1 ; i<50 ; i++) {
+      var x = this.x1+i*this.w/50.0;
       
-      if (typeof Path2D == "undefined") {
-         var o = ctx;
-         o.beginPath();
+      for (j=1 ; j<10 ; j++)
+         ctx.rect(x, this.y1+j*this.h/10.0, 1, 1);
+      
+      ctx.moveTo(x, this.y1);
+      if (i % 5 == 0)
+         ctx.lineTo(x, this.y1+10);
+      else
+         ctx.lineTo(x, this.y1+6);
+      
+      var y = this.y1 + this.h/2;
+      if (i % 5 == 0) {
+         ctx.moveTo(x, y-5);
+         ctx.lineTo(x, y+5);
       } else {
-         var o = new Path2D();
+         ctx.moveTo(x, y-3);
+         ctx.lineTo(x, y+3);
       }
       
-      o.moveTo(this.x1, this.y1);
-      o.lineTo(this.x1, this.y2);
-      o.lineTo(this.x2, this.y2);
-      o.lineTo(this.x2, this.y1);
-      o.lineTo(this.x1, this.y1);
-      
-      o.moveTo(this.x1, this.y1+this.h/2);
-      o.lineTo(this.x2, this.y1+this.h/2);
-      o.moveTo(this.x1+this.w/2, this.y1);
-      o.lineTo(this.x1+this.w/2, this.y2);
-      
-      // horizontal lines
-      for (i=1 ; i<50 ; i++) {
-         var x = this.x1+i*this.w/50.0;
-         
-         for (j=1 ; j<10 ; j++)
-            o.rect(x, this.y1+j*this.h/10.0, 1, 1);
-         
-         o.moveTo(x, this.y1);
-         if (i % 5 == 0)
-            o.lineTo(x, this.y1+10);
-         else
-            o.lineTo(x, this.y1+6);
-         
-         var y = this.y1 + this.h/2;
-         if (i % 5 == 0) {
-            o.moveTo(x, y-5);
-            o.lineTo(x, y+5);
-         } else {
-            o.moveTo(x, y-3);
-            o.lineTo(x, y+3);
-         }
-         
-         o.moveTo(x, this.y2);
-         if (i % 5 == 0)
-            o.lineTo(x, this.y2-10);
-         else
-            o.lineTo(x, this.y2-6);
-      }
-      
-      // vertical lines
-      for (i=1 ; i<50 ; i++) {
-         var y = this.y1+i*this.h/50.0;
-         
-         for (j=1 ; j<10 ; j++)
-            o.rect(this.x1+j*this.w/10.0, y, 1, 1);
-         
-         o.moveTo(this.x1, y);
-         if (i % 5 == 0)
-            o.lineTo(this.x1+10, y);
-         else
-            o.lineTo(this.x1+6, y);
-         
-         var x = this.x1 + this.w/2;
-         if (i % 5 == 0) {
-            o.moveTo(x-5, y);
-            o.lineTo(x+5, y);
-         } else {
-            o.moveTo(x-3, y);
-            o.lineTo(x+3, y);
-         }
-         
-         o.moveTo(this.x2, y);
-         if (i % 5 == 0)
-            o.lineTo(this.x2-10, y);
-         else
-            o.lineTo(this.x2-6, y);
-      }
-      
-      if (typeof Path2D == "undefined") {
-         o.lineWidth = 1;
-         o.strokeStyle = "rgb(146,136,110)";
-         o.fillStyle = o.strokeStyle;
-         o.stroke();
-      } else {
-         this.gridPath = o;
-      }
+      ctx.moveTo(x, this.y2);
+      if (i % 5 == 0)
+         ctx.lineTo(x, this.y2-10);
+      else
+         ctx.lineTo(x, this.y2-6);
    }
    
-   if (this.gridPath != null) {
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = "rgb(146,136,110)";
-      ctx.fillStyle = ctx.strokeStyle;
-      ctx.stroke(this.gridPath);
+   // vertical lines
+   for (i=1 ; i<50 ; i++) {
+      var y = this.y1+i*this.h/50.0;
+      
+      for (j=1 ; j<10 ; j++)
+         ctx.rect(this.x1+j*this.w/10.0, y, 1, 1);
+      
+      ctx.moveTo(this.x1, y);
+      if (i % 5 == 0)
+         ctx.lineTo(this.x1+10, y);
+      else
+         ctx.lineTo(this.x1+6, y);
+      
+      var x = this.x1 + this.w/2;
+      if (i % 5 == 0) {
+         ctx.moveTo(x-5, y);
+         ctx.lineTo(x+5, y);
+      } else {
+         ctx.moveTo(x-3, y);
+         ctx.lineTo(x+3, y);
+      }
+      
+      ctx.moveTo(this.x2, y);
+      if (i % 5 == 0)
+         ctx.lineTo(this.x2-10, y);
+      else
+         ctx.lineTo(this.x2-6, y);
    }
    
+   ctx.lineWidth = 1;
+   ctx.strokeStyle = "rgb(146,136,110)";
+   ctx.fillStyle = ctx.strokeStyle;
+   ctx.stroke();
+
    ctx.strokeStyle = "#FFFFFF";
    ctx.fillStyle = "#FFFFFF";
    ctx.textAlign = "right";
