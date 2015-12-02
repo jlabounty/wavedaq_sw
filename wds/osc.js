@@ -220,45 +220,51 @@ Oscilloscope.prototype.drawGrid = function(ctx)
    if (this.gridPath == null) {
       this.calcScaleOffset();
       
-      var p = new Path2D();
-      p.moveTo(this.x1, this.y1);
-      p.lineTo(this.x1, this.y2);
-      p.lineTo(this.x2, this.y2);
-      p.lineTo(this.x2, this.y1);
-      p.lineTo(this.x1, this.y1);
+      if (typeof Path2D == "undefined") {
+         var o = ctx;
+         o.beginPath();
+      } else {
+         var o = new Path2D();
+      }
       
-      p.moveTo(this.x1, this.y1+this.h/2);
-      p.lineTo(this.x2, this.y1+this.h/2);
-      p.moveTo(this.x1+this.w/2, this.y1);
-      p.lineTo(this.x1+this.w/2, this.y2);
+      o.moveTo(this.x1, this.y1);
+      o.lineTo(this.x1, this.y2);
+      o.lineTo(this.x2, this.y2);
+      o.lineTo(this.x2, this.y1);
+      o.lineTo(this.x1, this.y1);
+      
+      o.moveTo(this.x1, this.y1+this.h/2);
+      o.lineTo(this.x2, this.y1+this.h/2);
+      o.moveTo(this.x1+this.w/2, this.y1);
+      o.lineTo(this.x1+this.w/2, this.y2);
       
       // horizontal lines
       for (i=1 ; i<50 ; i++) {
          var x = this.x1+i*this.w/50.0;
          
          for (j=1 ; j<10 ; j++)
-            p.rect(x, this.y1+j*this.h/10.0, 1, 1);
+            o.rect(x, this.y1+j*this.h/10.0, 1, 1);
          
-         p.moveTo(x, this.y1);
+         o.moveTo(x, this.y1);
          if (i % 5 == 0)
-            p.lineTo(x, this.y1+10);
+            o.lineTo(x, this.y1+10);
          else
-            p.lineTo(x, this.y1+6);
+            o.lineTo(x, this.y1+6);
          
          var y = this.y1 + this.h/2;
          if (i % 5 == 0) {
-            p.moveTo(x, y-5);
-            p.lineTo(x, y+5);
+            o.moveTo(x, y-5);
+            o.lineTo(x, y+5);
          } else {
-            p.moveTo(x, y-3);
-            p.lineTo(x, y+3);
+            o.moveTo(x, y-3);
+            o.lineTo(x, y+3);
          }
          
-         p.moveTo(x, this.y2);
+         o.moveTo(x, this.y2);
          if (i % 5 == 0)
-            p.lineTo(x, this.y2-10);
+            o.lineTo(x, this.y2-10);
          else
-            p.lineTo(x, this.y2-6);
+            o.lineTo(x, this.y2-6);
       }
       
       // vertical lines
@@ -266,36 +272,46 @@ Oscilloscope.prototype.drawGrid = function(ctx)
          var y = this.y1+i*this.h/50.0;
          
          for (j=1 ; j<10 ; j++)
-            p.rect(this.x1+j*this.w/10.0, y, 1, 1);
+            o.rect(this.x1+j*this.w/10.0, y, 1, 1);
          
-         p.moveTo(this.x1, y);
+         o.moveTo(this.x1, y);
          if (i % 5 == 0)
-            p.lineTo(this.x1+10, y);
+            o.lineTo(this.x1+10, y);
          else
-            p.lineTo(this.x1+6, y);
+            o.lineTo(this.x1+6, y);
          
          var x = this.x1 + this.w/2;
          if (i % 5 == 0) {
-            p.moveTo(x-5, y);
-            p.lineTo(x+5, y);
+            o.moveTo(x-5, y);
+            o.lineTo(x+5, y);
          } else {
-            p.moveTo(x-3, y);
-            p.lineTo(x+3, y);
+            o.moveTo(x-3, y);
+            o.lineTo(x+3, y);
          }
          
-         p.moveTo(this.x2, y);
+         o.moveTo(this.x2, y);
          if (i % 5 == 0)
-            p.lineTo(this.x2-10, y);
+            o.lineTo(this.x2-10, y);
          else
-            p.lineTo(this.x2-6, y);
+            o.lineTo(this.x2-6, y);
       }
-      this.gridPath = p;
+      
+      if (typeof Path2D == "undefined") {
+         o.lineWidth = 1;
+         o.strokeStyle = "rgb(146,136,110)";
+         o.fillStyle = o.strokeStyle;
+         o.stroke();
+      } else {
+         this.gridPath = o;
+      }
    }
    
-   ctx.lineWidth = 1;
-   ctx.strokeStyle = "rgb(146,136,110)";
-   ctx.fillStyle = ctx.strokeStyle;
-   ctx.stroke(this.gridPath);
+   if (this.gridPath != null) {
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "rgb(146,136,110)";
+      ctx.fillStyle = ctx.strokeStyle;
+      ctx.stroke(this.gridPath);
+   }
    
    ctx.strokeStyle = "#FFFFFF";
    ctx.fillStyle = "#FFFFFF";
