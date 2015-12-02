@@ -178,7 +178,7 @@ int main(int argc, char *argv[]) {
          default:
             printf("usage: wsd [-adv] [-w <address> [-w <address> ...]]\n");
             printf(" -a --adc         Read ADC instead DRS\n");
-            printf(" -g --gain        Input gain (0=1, 2=10, 3=100)\n");
+            printf(" -g --gain        Input gain (0=1, 1=10, 2=100)\n");
             printf(" -p --port        HTTP server port\n");
             printf(" -d --demo        Demo mode\n");
             printf(" -w --wd          Internet address of WaveDREAM board\n");
