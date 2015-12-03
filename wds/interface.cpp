@@ -165,10 +165,13 @@ int interface_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char
 
    // send request
    memcpy(&client_addr, gl->eth_addr[board], sizeof(client_addr));
+   strlcpy(buffer, str, sizeof(buffer));
+   if (buffer[strlen(buffer)-1] != '\n')
+      strlcat(buffer, "\n", sizeof(buffer));
    
    i = sendto(gl->cmd_socket[board],
-                  str,
-                  strlen(str),
+                  buffer,
+                  strlen(buffer),
                   0,
                   (struct sockaddr *)&client_addr,
                   sizeof(client_addr));
@@ -177,6 +180,9 @@ int interface_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char
    // retrieve reply
    // TBD: retry a few times
    n = 0;
+   if (result != NULL)
+      memset(result, 0, *size);
+   
    do {
       memset(buffer, 0, sizeof(buffer));
       
@@ -232,7 +238,7 @@ int interface_init(GLOBALS *gl)
 {
    struct sockaddr_in server_addr;
    struct sockaddr_in client_addr;
-   char addr_str[32], str[256], reply[10000], interface[32], *p;
+   char str[256], reply[10000], *p;
    struct hostent *phe;
    int size;
    
@@ -281,28 +287,9 @@ int interface_init(GLOBALS *gl)
          gl->cmd_socket[index] = gl->cmd_socket[0]; // reuse socket
       
       // create UDB socket to receive binary data
-      if (index == 0) {
-         gl->data_socket[index] = socket(AF_INET, SOCK_DGRAM, 0);
-         assert(gl->data_socket[index]);
+      gl->data_socket[index] = socket(AF_INET, SOCK_DGRAM, 0);
+      assert(gl->data_socket[index]);
          
-         // bind socket to port WD2_DATA_PORT
-         memset((char*)&server_addr, 0, sizeof(server_addr));
-         server_addr.sin_family = AF_INET;
-         server_addr.sin_port = htons(WD2_DATA_PORT);
-         server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-         if (bind(gl->data_socket[index], (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
-            perror("bind");
-            return FAILURE;
-         }
-         
-         // find out which port we were bound
-         size = sizeof(server_addr);
-         getsockname(gl->data_socket[index], (struct sockaddr *) &server_addr, (socklen_t *)&size);
-         if (gl->verbose_flag)
-            printf("Listening on data port %d\n", ntohs(server_addr.sin_port));
-      } else
-         gl->data_socket[index] = gl->data_socket[0]; // reuse socket
-      
       // retrieve Ethernet address of board
       phe = gethostbyname(gl->board_name[index]);
       if (phe == NULL) {
@@ -314,13 +301,6 @@ int interface_init(GLOBALS *gl)
       client_addr.sin_port = htons(WD2_CMD_PORT);
       size = sizeof(client_addr);
       memcpy(gl->eth_addr[index], &client_addr, sizeof(client_addr));
-
-#ifdef __linux__
-      strcpy(interface, "eth0");
-#endif
-#ifdef __APPLE__
-      strcpy(interface, "en0");
-#endif
 
       // check if board is alive
       size = sizeof(reply);
@@ -340,7 +320,6 @@ int interface_init(GLOBALS *gl)
       }
 
       // set destinantion port in WD board
-      get_mac_addr(gl->cmd_socket[index], interface, addr_str);
       sprintf(str, "setenv dstport %d", WD2_DATA_PORT);
       size = sizeof(reply);
       interface_send(gl, index, 1000, str, reply, &size);
