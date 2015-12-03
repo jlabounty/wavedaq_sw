@@ -263,33 +263,32 @@ int interface_init(GLOBALS *gl)
    
    for (int index=0 ; index<gl->n_boards ; index++) {
       
-      // create UDB socket for command interpreter
+      // create UDB socket for command interpreter on any port
       if (index == 0) {
          gl->cmd_socket[index] = socket(AF_INET, SOCK_DGRAM, 0);
          assert(gl->cmd_socket[index]);
-         
-         // bind socket to any port
-         memset((char*)&server_addr, 0, sizeof(server_addr));
-         server_addr.sin_family = AF_INET;
-         server_addr.sin_port = htons(3000); // use any port
-         server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-         if (bind(gl->cmd_socket[index], (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
-            perror("bind");
-            return FAILURE;
-         }
-         
-         // find out which port we were bound
-         size = sizeof(server_addr);
-         getsockname(gl->cmd_socket[index], (struct sockaddr *) &server_addr, (socklen_t *)&size);
-         if (gl->verbose_flag)
-            printf("Listening on command port %d\n", ntohs(server_addr.sin_port));
       } else
          gl->cmd_socket[index] = gl->cmd_socket[0]; // reuse socket
       
-      // create UDB socket to receive binary data
-      gl->data_socket[index] = socket(AF_INET, SOCK_DGRAM, 0);
-      assert(gl->data_socket[index]);
+      // create UDB socket to receive binary data on port WD2_DATA_PORT
+      if (index == 0) {
+         gl->data_socket[index] = socket(AF_INET, SOCK_DGRAM, 0);
+         assert(gl->data_socket[index]);
          
+         // bind socket to port WD2_DATA_PORT
+         memset((char*)&server_addr, 0, sizeof(server_addr));
+         server_addr.sin_family = AF_INET;
+         server_addr.sin_port = htons(WD2_DATA_PORT);
+         server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+         if (bind(gl->data_socket[index], (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+            perror("bind");
+            return FAILURE;
+         }
+         if (gl->verbose_flag)
+            printf("Listening on data port %d\n", WD2_DATA_PORT);
+      } else
+         gl->data_socket[index] = gl->data_socket[0]; // reuse socket
+
       // retrieve Ethernet address of board
       phe = gethostbyname(gl->board_name[index]);
       if (phe == NULL) {
