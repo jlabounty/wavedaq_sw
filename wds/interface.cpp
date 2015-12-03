@@ -232,7 +232,7 @@ int interface_init(GLOBALS *gl)
 {
    struct sockaddr_in server_addr;
    struct sockaddr_in client_addr;
-   char addr_str[32], str[256], reply[10000], interface[32];
+   char addr_str[32], str[256], reply[10000], interface[32], *p;
    struct hostent *phe;
    int size;
    
@@ -335,7 +335,7 @@ int interface_init(GLOBALS *gl)
             char *p2 = strstr(p, "\r\n\r\n");
             if (p2 != NULL)
                *p2 = 0;
-            printf("Board %s info:\n%s", gl->board_name[index], p);
+            printf("\n**** Board %s info: ****\n%s", gl->board_name[index], p);
          }
       }
 
@@ -345,23 +345,33 @@ int interface_init(GLOBALS *gl)
       size = sizeof(reply);
       interface_send(gl, index, 1000, str, reply, &size);
       if (gl->verbose_flag)
-         printf("Set dstport = %d at %s\n", WD2_DATA_PORT, gl->board_name[index]);
+         printf("Set dstport    = %d\n", WD2_DATA_PORT);
 
-      // set MAC address in WD board
-      get_mac_addr(gl->cmd_socket[index], interface, addr_str);
-      sprintf(str, "setenv ethaddrdst %s", addr_str);
+      // set MAC address and IP address of this computer in WD board
       size = sizeof(reply);
-      interface_send(gl, index, 1000, str, reply, &size);
-      if (gl->verbose_flag)
-         printf("Set ethaddrdst = %s at %s\n", addr_str, gl->board_name[index]);
+      interface_send(gl, index, 1000, "cfgdst", reply, &size);
       
-      // set IP address in WD board
-      get_ip_addr(gl->cmd_socket[index], interface, addr_str);
-      sprintf(str, "setenv ipaddrdst %s", addr_str);
       size = sizeof(reply);
-      interface_send(gl, index, 1000, str, reply, &size);
+      interface_send(gl, index, 1000, "printenv ethaddrdst", reply, &size);
+      if (strstr(reply, "dst=")) {
+         p = strstr(reply, "dst=")+4;
+         if (strchr(p, '\n'))
+            *strchr(p, '\n') = 0;
+      } else
+         p = reply;
       if (gl->verbose_flag)
-         printf("Set ipaddrdst = %s at %s\n", addr_str, gl->board_name[index]);
+         printf("Set ethaddrdst = %s\n", p);
+      
+      size = sizeof(reply);
+      interface_send(gl, index, 1000, "printenv ipaddrdst", reply, &size);
+      if (strstr(reply, "dst=")) {
+         p = strstr(reply, "dst=")+4;
+         if (strchr(p, '\n'))
+            *strchr(p, '\n') = 0;
+      } else
+         p = reply;
+      if (gl->verbose_flag)
+         printf("Set ipaddrdst  = %s\n", p);
       
       // set input configuration
       if (gl->pzc) { // pole zero cancellation on (bit=0)
@@ -384,6 +394,9 @@ int interface_init(GLOBALS *gl)
          interface_send(gl, index, 1000, str, reply, &size);
       }
    }
+   
+   if (gl->verbose_flag)
+      printf("\n");
    
    return SUCCESS;
 }
