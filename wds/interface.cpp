@@ -383,13 +383,6 @@ int interface_init(GLOBALS *gl)
          size = sizeof(reply);
          interface_send(gl, index, 1000, str, reply, &size);
       }
-
-      sprintf(str, "setenv ipaddrdst %s", addr_str);
-      size = sizeof(reply);
-      interface_send(gl, index, 1000, str, reply, &size);
-      if (gl->verbose_flag)
-         printf("Set ipaddrdst = %s at %s\n", addr_str, gl->board_name[index]);
-      
    }
    
    return SUCCESS;
