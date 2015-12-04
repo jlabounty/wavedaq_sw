@@ -15,6 +15,8 @@
 #include "wds.h"
 #include "mongoose.h"
 
+/*-----------------------------------------------------------------------------------------*/
+
 // This function will be called by mongoose on every new request
 static int wds_handler(struct mg_connection *conn, enum mg_event event)
 {
