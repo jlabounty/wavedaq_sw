@@ -103,57 +103,6 @@ size_t strlcat(char *dst, const char *src, size_t size)
 
 /*-----------------------------------------------------------------------------------------*/
 
-void get_mac_addr(int socket, const char *interface, char *mac_addr)
-{
-#ifdef __linux__
-   struct ifreq ifinfo;
-   unsigned char mac[6];
-   strcpy(ifinfo.ifr_name, interface);
-   int result = ioctl(socket, SIOCGIFHWADDR, &ifinfo);
-    
-   if ((result == 0) && (ifinfo.ifr_hwaddr.sa_family == 1)) {
-      memcpy(mac, ifinfo.ifr_hwaddr.sa_data, IFHWADDRLEN);
-      sprintf(mac_addr, "%02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-      return;
-   }
-#endif
-
-#ifdef __APPLE__
-   struct ifaddrs *if_addr = NULL;
-
-   getifaddrs(&if_addr);
-   for ( ; if_addr != NULL ; if_addr = if_addr->ifa_next) {
-      if (strcmp(if_addr->ifa_name, interface) == 0) {
-         if (if_addr->ifa_addr != NULL && if_addr->ifa_addr->sa_family == AF_LINK) {
-            struct sockaddr_dl * sdl = (struct sockaddr_dl *)if_addr->ifa_addr;
-            unsigned char mac[6];
-            memcpy(mac, LLADDR(sdl), sdl->sdl_alen);
-            sprintf(mac_addr, "%02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-            return;
-         }
-      }
-   }
-#endif
-}
-
-void get_ip_addr(int socket, const char *interface, char *ip_addr)
-{
-   struct ifaddrs *if_addr = NULL;
-   
-   getifaddrs(&if_addr);
-   for ( ; if_addr != NULL ; if_addr = if_addr->ifa_next) {
-      if (strcmp(if_addr->ifa_name, interface) == 0) {
-         if (if_addr->ifa_addr != NULL && if_addr->ifa_addr->sa_family == AF_INET) {
-            inet_ntop(AF_INET, &((struct sockaddr_in *)if_addr->ifa_addr)->sin_addr, ip_addr, INET_ADDRSTRLEN);
-            return;
-         }
-      }
-   }
-}
-
-
-/*-----------------------------------------------------------------------------------------*/
-
 int interface_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *result, int *size)
 {
    size_t n, i;
@@ -161,66 +110,80 @@ int interface_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char
    struct timeval timeout;
    int    status;
    struct sockaddr_in client_addr;
-   char   buffer[1600], prompt[80];
+   char   tx_buffer[1600], rx_buffer[1600], prompt[80];
 
-   // send request
    memcpy(&client_addr, gl->eth_addr[board], sizeof(client_addr));
-   strlcpy(buffer, str, sizeof(buffer));
-   if (buffer[strlen(buffer)-1] != '\n')
-      strlcat(buffer, "\n", sizeof(buffer));
-   
-   i = sendto(gl->cmd_socket[board],
-                  buffer,
-                  strlen(buffer),
-                  0,
-                  (struct sockaddr *)&client_addr,
-                  sizeof(client_addr));
-   assert(i = strlen(str));
-   
-   // retrieve reply
-   // TBD: retry a few times
-   n = 0;
+   strlcpy(tx_buffer, str, sizeof(tx_buffer));
+   if (tx_buffer[strlen(tx_buffer)-1] != '\n')
+      strlcat(tx_buffer, "\n", sizeof(tx_buffer));
+
    if (result != NULL)
       memset(result, 0, *size);
+   n = 0;
+
+   // assemble prompt
+   strlcpy(prompt, gl->board_name[board], sizeof(prompt));
+   strlcat(prompt, " > ", sizeof(prompt));
    
-   do {
-      memset(buffer, 0, sizeof(buffer));
+   // retry max five times
+   for (int retry=0 ; retry < 5 ; retry++) {
       
-      FD_ZERO(&readfds);
-      FD_SET(gl->cmd_socket[board], &readfds);
+      // send request
+      i = sendto(gl->cmd_socket[board],
+                 tx_buffer,
+                 strlen(tx_buffer),
+                 0,
+                 (struct sockaddr *)&client_addr,
+                 sizeof(client_addr));
+      assert(i = strlen(str));
       
-      timeout.tv_sec = timeout_ms / 1000;
-      timeout.tv_usec = (timeout_ms % 1000) * 1000;
-      
+      // retrieve reply until prompt is found
+      n = 0;
       do {
-         status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
-      } while (status == -1);        /* dont return if an alarm signal was cought */
-      
-      if (!FD_ISSET(gl->cmd_socket[board], &readfds)) {
-         if (size != NULL)
-            *size = 0;
-         return 0;
-      }
-      
-      i = recv(gl->cmd_socket[board], buffer, sizeof(buffer), 0);
-      assert(i > 0);
-      
-      if (buffer[i] == 0) // don't count trailing zero
-         i--;
-      
-      if (result != NULL)
-         memcpy(result+n, buffer, i);
-      n += i;
+         memset(rx_buffer, 0, sizeof(rx_buffer));
+         
+         FD_ZERO(&readfds);
+         FD_SET(gl->cmd_socket[board], &readfds);
+         
+         timeout.tv_sec = timeout_ms / 1000;
+         timeout.tv_usec = (timeout_ms % 1000) * 1000;
+         
+         do {
+            status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
+         } while (status == -1);        /* dont return if an alarm signal was cought */
+         
+         if (!FD_ISSET(gl->cmd_socket[board], &readfds))
+            break;
+         
+         i = recv(gl->cmd_socket[board], rx_buffer, sizeof(rx_buffer), 0);
+         assert(i > 0);
+         
+         if (rx_buffer[i] == 0) // don't count trailing zero
+            i--;
+         
+         if (result != NULL)
+            memcpy(result+n, rx_buffer, i);
+         n += i;
+         
+         // check for prompt
+         if (strcmp(rx_buffer+strlen(rx_buffer)-strlen(prompt), prompt) == 0)
+            break;
+         
+      } while (1);
       
       // check for prompt
-      strlcpy(prompt, gl->board_name[board], sizeof(prompt));
-      strlcat(prompt, " > ", sizeof(prompt));
-      
-      if (strcmp(buffer+strlen(buffer)-strlen(prompt), prompt) == 0)
+      if (strcmp(rx_buffer+strlen(rx_buffer)-strlen(prompt), prompt) == 0)
          break;
       
-   } while (1);
-   
+      printf("%s retry %d\n", gl->board_name[board], retry+1);
+   }
+
+   if (n == 0) {
+      if (size != NULL)
+         *size = 0;
+      return 0;
+   }
+
    // chop off prompt
    if (result != NULL)
       result[strlen(result)-strlen(prompt)] = 0;
@@ -281,7 +244,10 @@ int interface_init(GLOBALS *gl)
          server_addr.sin_port = htons(WD2_DATA_PORT);
          server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
          if (bind(gl->data_socket[index], (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
-            perror("bind");
+            if (errno == 1)
+               printf("wds server is already running\n");
+            else
+               perror("bind");
             return FAILURE;
          }
          if (gl->verbose_flag)
@@ -303,7 +269,7 @@ int interface_init(GLOBALS *gl)
 
       // check if board is alive
       size = sizeof(reply);
-      interface_send(gl, index, 5000, "info", reply, &size); // first access long timeout
+      interface_send(gl, index, 1000, "info", reply, &size); // first access long timeout
       if (!size) {
          printf("Board %s does not reply, aborting.\n", gl->board_name[index]);
          return 0;
@@ -321,35 +287,37 @@ int interface_init(GLOBALS *gl)
       // set destinantion port in WD board
       sprintf(str, "setenv dstport %d", WD2_DATA_PORT);
       size = sizeof(reply);
-      interface_send(gl, index, 1000, str, reply, &size);
+      interface_send(gl, index, 100, str, reply, &size);
       if (gl->verbose_flag)
          printf("Set dstport    = %d\n", WD2_DATA_PORT);
 
       // set MAC address and IP address of this computer in WD board
       size = sizeof(reply);
-      interface_send(gl, index, 1000, "cfgdst", reply, &size);
+      interface_send(gl, index, 100, "cfgdst", reply, &size);
       
-      size = sizeof(reply);
-      interface_send(gl, index, 1000, "printenv ethaddrdst", reply, &size);
-      if (strstr(reply, "dst=")) {
-         p = strstr(reply, "dst=")+4;
-         if (strchr(p, '\n'))
-            *strchr(p, '\n') = 0;
-      } else
-         p = reply;
-      if (gl->verbose_flag)
-         printf("Set ethaddrdst = %s\n", p);
-      
-      size = sizeof(reply);
-      interface_send(gl, index, 1000, "printenv ipaddrdst", reply, &size);
-      if (strstr(reply, "dst=")) {
-         p = strstr(reply, "dst=")+4;
-         if (strchr(p, '\n'))
-            *strchr(p, '\n') = 0;
-      } else
-         p = reply;
-      if (gl->verbose_flag)
-         printf("Set ipaddrdst  = %s\n", p);
+      if (gl->verbose_flag) {
+         size = sizeof(reply);
+         interface_send(gl, index, 100, "printenv -n ethaddrdst", reply, &size);
+         if (strstr(reply+2, "\r")) {
+            p = strstr(reply+2, "\r")+1;
+            if (strchr(p, '\n'))
+               *strchr(p, '\n') = 0;
+         } else
+            p = reply;
+         if (gl->verbose_flag)
+            printf("Set ethaddrdst = %s\n", p);
+         
+         size = sizeof(reply);
+         interface_send(gl, index, 100, "printenv -n ipaddrdst", reply, &size);
+         if (strstr(reply+2, "\r")) {
+            p = strstr(reply+2, "\r")+1;
+            if (strchr(p, '\n'))
+               *strchr(p, '\n') = 0;
+         } else
+            p = reply;
+         if (gl->verbose_flag)
+            printf("Set ipaddrdst  = %s\n", p);
+      }
       
       // set input configuration
       if (gl->pzc) { // pole zero cancellation on (bit=0)
@@ -360,7 +328,7 @@ int interface_init(GLOBALS *gl)
          else if (gl->gain == 2)
             sprintf(str, "feset all 3a");
          size = sizeof(reply);
-         interface_send(gl, index, 1000, str, reply, &size);
+         interface_send(gl, index, 100, str, reply, &size);
       } else { // pole zero cancellation off (bit=1)
          if (gl->gain == 0)
             sprintf(str, "feset all 82");
@@ -369,7 +337,7 @@ int interface_init(GLOBALS *gl)
          else if (gl->gain == 2)
             sprintf(str, "feset all ba");
          size = sizeof(reply);
-         interface_send(gl, index, 1000, str, reply, &size);
+         interface_send(gl, index, 100, str, reply, &size);
       }
    }
    

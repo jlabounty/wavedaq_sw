@@ -154,7 +154,7 @@ function receiveWF()
             var n = intArray[i++];
             for (var j=0 ; j<n ; j++)
                wf.U[c][j] = floatArray[i++];
-            OSC.demo = (OSC.wd == 0);
+            OSC.demo = (OSC.wd == 0xFF);
          } else {
             alert("WDS: Invalid binary data received form server");
             break;
@@ -212,7 +212,7 @@ function oscKeypress(e)
 function btnStop()
 // start/stop oscilloscope
 {
-   e = document.getElementById("btnStop");
+   var e = document.getElementById("btnStop");
    if (OSC.running) {
       OSC.running = false;
       e.innerHTML = "Start";
@@ -226,8 +226,13 @@ function btnStop()
 function btnSingle()
 // trigger single acquisition
 {
-   if (!OSC.running)
-      window.setTimeout(loadWF, 10);
+   if (OSC.running) {
+      var e = document.getElementById("btnStop");
+      OSC.running = false;
+      e.innerHTML = "Start";
+   }
+      
+   window.setTimeout(loadWF, 10);
 }
 
 function btnChn(c)

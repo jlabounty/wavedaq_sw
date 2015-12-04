@@ -10,6 +10,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <ctype.h>
 
 #include "wds.h"
 #include "mongoose.h"
@@ -81,7 +82,7 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
          }
       }
 
-      int wd = (gl->demo_flag) ? 0 : atoi(gl->board_name[0]+3);
+      int wd = (gl->demo_flag) ? 0xFF : atoi(gl->board_name[0]+3);
       if (status == SUCCESS) {
          
          mg_get_var(conn, "c", str, sizeof(str));
@@ -130,9 +131,9 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
 }
 
 int main(int argc, char *argv[]) {
-   int ch;
+   int ch, i, i1, i2;
    GLOBALS gl;
-   char str[256];
+   char str[256], *p;
    
    static struct option longopts[] = {
       { "adc",         no_argument,        NULL, 'a' },
@@ -146,8 +147,14 @@ int main(int argc, char *argv[]) {
    };
    
    memset(&gl, 0, sizeof(gl));
-   gl.board_name = (char **)malloc(sizeof(char *) * (argc+1));
+   gl.board_name = (char **)malloc(sizeof(char *) * 16);
+   for (i=0 ; i<16 ; i++)
+      gl.board_name[i] = (char *)malloc(32);
    gl.http_port = 8080; // default port
+   gl.gain = 2; // gain 100
+   gl.pzc = 1;
+   i1 = 0;
+   i2 = 15;
    
    while ((ch = getopt_long(argc, argv, "adg:p:vw:z", longopts, NULL)) != -1) {
       switch (ch) {
@@ -169,8 +176,25 @@ int main(int argc, char *argv[]) {
             gl.verbose_flag = 1;
             break;
          case 'w':
-            if (optarg)
-               gl.board_name[gl.n_boards++] = optarg;
+            if (optarg) {
+               if (isdigit(optarg[0])) {
+                  if (strchr(optarg, '-')) {
+                     i1 = atoi(optarg);
+                     p = strchr(optarg, '-') + 1;
+                     i2 = atoi(p);
+                     if (i1 >= 0 && i1 < 14 && i2>1 && i2<16) {
+                        for (i=i1 ; i<=i2; i++) {
+                           sprintf(gl.board_name[gl.n_boards++], "wd%03d", i);
+                        }
+                     } else {
+                        printf("invalid argument \"-w %s\"\n", optarg);
+                        return 1;
+                     }
+                  }  else
+                     sprintf(gl.board_name[gl.n_boards++], "wd%03d", atoi(optarg));
+               } else
+                  strlcpy(gl.board_name[gl.n_boards++], optarg, 32);
+            }
             break;
          case 'z':
             gl.pzc = 1;
@@ -198,7 +222,7 @@ int main(int argc, char *argv[]) {
    
    if (gl.demo_flag) {
       gl.n_boards = 1;
-      gl.board_name[0] = (char *)"wd000";
+      strlcpy(gl.board_name[0], "wd000", 32);
    }
    
    // initialize ethernet interface to WD board
