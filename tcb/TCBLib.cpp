@@ -4,6 +4,11 @@
 #include "mscb.h"
 #include "TCBLib.h"
 
+u_int32_t kaddrpre[4] = {RPRESCA0,RPRESCA1,RPRESCA2,RPRESCA3};
+u_int32_t kaddrmem[4] = {RMEM0,RMEM1,RMEM2,RMEM3};
+u_int32_t kaddrcou[4] = {RTRGCOU0,RTRGCOU1,RTRGCOU2,RTRGCOU3};
+u_int32_t kaddrdmask[4] = {RIDMASK0,RIDMASK1,RIDMASK2,RIDMASK3};
+
 //general write register function
 void TCB::WriteReg(int handle, u_int32_t addr, u_int32_t *data) {
   int status;
@@ -19,9 +24,9 @@ void TCB::WriteReg(int handle, u_int32_t addr, u_int32_t *data) {
 void TCB::ReadReg(int handle, u_int32_t addr, u_int32_t *data) {
   char dbuf[1024];
   *data = 0;
-    mscb_read_mem(handle, 0, fslot, addr&0xff, &dbuf, 4);
-    for (int i=0 ; i<4 ; i++)  
-      *data |= ((u_int32_t) dbuf[3-i]&0xff)<<(i*8); //"(i*8)" as a byte swap
+  mscb_read_mem(handle, 0, fslot, addr&0xff, &dbuf, 4);
+  for (int i=0 ; i<4 ; i++)  
+    *data |= ((u_int32_t) dbuf[3-i]&0xff)<<(i*8); //"(i*8)" as a byte swap
 }
 // prescaling values setting
 void TCB::SetPrescaling(int handle, u_int32_t *presca) {
@@ -82,6 +87,16 @@ void TCB::GoRun(int handle) {
   // now set the runmode
   data = (data&0xFFFFFFFC) | 0x1;
   WriteReg(handle,addr,&data);
+}
+//
+// activate the RUNMODE signal
+int TCB::IsRunning(int handle) {
+  u_int32_t addr = RRUN;
+  u_int32_t data; 
+  // first read the RRUN register to copy the current status
+  ReadReg(handle,addr,&data);
+  data &= 0x1;
+  return (data);
 }
 //
 // remove the internal BUSY signal
@@ -191,4 +206,12 @@ void TCB::SetDataMasks(int handle, u_int32_t *data) {
 void TCB::GetMemoryAddress(int handle, u_int32_t *data) {
   u_int32_t addr = RMEMADDR;
   ReadReg(handle,addr,data);
+}
+//
+// read time stamps
+void TCB::GetTimeStamps(int handle, u_int32_t *data) {
+  u_int32_t addr = TIMESTP0;
+  for(int itst = 0; itst<32; itst++) {
+    ReadReg(handle,addr+itst,data+itst);
+  }
 }

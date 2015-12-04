@@ -15,6 +15,7 @@
 #define RTRGCOU1      0x41                      // trigger counter1
 #define RTRGCOU2      0x42                      // trigger counter2
 #define RTRGCOU3      0x43                      // trigger counter3
+#define TIMESTP0      0x50                      // base address of time stamps (32 integers) 
 #define RTHRMULT      0x70                      // multiplicity threshold 
 #define RMEMADDR      0x7F                      // memory address
 #define RMEM0         0x80                      // memory 0 
@@ -23,11 +24,6 @@
 #define RMEM3         0xE0                      // memory 3 
 
 class TCB {
- private:
-  u_int32_t kaddrpre[4] = {RPRESCA0,RPRESCA1,RPRESCA2,RPRESCA3};
-  u_int32_t kaddrmem[4] = {RMEM0,RMEM1,RMEM2,RMEM3};
-  u_int32_t kaddrcou[4] = {RTRGCOU0,RTRGCOU1,RTRGCOU2,RTRGCOU3};
-  u_int32_t kaddrdmask[4] = {RIDMASK0,RIDMASK1,RIDMASK2,RIDMASK3};
  public:
   // board info
   u_int32_t   fidcode;      // reg id
@@ -54,6 +50,8 @@ class TCB {
   void ReadMemory(int,int,u_int32_t*);
   // set the runmode
   void GoRun(int);
+  // get the runmode status
+  int IsRunning(int);
   // remove the busy
   void RemoveBusy(int);
   // software sync
@@ -80,6 +78,8 @@ class TCB {
   void GetMemoryAddress(int,u_int32_t*);
   // write in data masks
   void SetDataMasks(int,u_int32_t*);
+  // read time stamps
+  void GetTimeStamps(int,u_int32_t *);
   // Constructor
   TCB(int slot) { 
     fslot = slot;
