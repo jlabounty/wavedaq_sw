@@ -199,7 +199,7 @@ int main(int argc, char *argv[]) {
             }
             break;
          case 'z':
-            gl.pzc = 1;
+            gl.pzc = 0;
             break;
          default:
             printf("usage: wsd [-adv] [-w <address> [-w <address> ...]]\n");
@@ -209,7 +209,7 @@ int main(int argc, char *argv[]) {
             printf(" -d --demo        Demo mode\n");
             printf(" -w --wd          Internet address of WaveDREAM board\n");
             printf(" -v --verbose     Print extra statistics\n");
-            printf(" -z --zero        Turn on pole-zero-canellation\n");
+            printf(" -z --zero        Turn off pole-zero-canellation (on by default)\n");
             return 1;
             break;
       }
