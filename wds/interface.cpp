@@ -38,14 +38,20 @@
 
 typedef struct {
    unsigned char  protocol_version;
+   unsigned char  board_version;
    unsigned short board_id;
+   unsigned char  crate_id;
+   unsigned char  slot_id;
+   unsigned char  adc_and_channel_info;
+   unsigned char  channel_segment_number;
+   unsigned short readout_sequence_number;
+   unsigned short hardware_sequence_number;
    unsigned short sampling_frequency;
    unsigned short number_of_samples;
-   unsigned char  adc_and_channel_info;
-   unsigned short channel_segment_number;
-   unsigned short data_sequence_number;
+   unsigned short drs0_trigger_cell;
+   unsigned short drs1_trigger_cell;
+   unsigned short trigger_type;
    unsigned short packet_sequence_number;
-   unsigned short reserved;
 } WD2_FRAME_HEADER;
 
 /*-----------------------------------------------------------------------------------------*/
@@ -415,29 +421,32 @@ int interface_read_waveform(GLOBALS *gl, int board, int millisec, float waveform
             ph = (WD2_FRAME_HEADER *)buffer;
             
             // correct endianness of header data
-            ph->board_id               = SWAP_UINT16(ph->board_id);
-            ph->sampling_frequency     = SWAP_UINT16(ph->sampling_frequency);
-            ph->number_of_samples      = SWAP_UINT16(ph->number_of_samples);
-            header_adc                 = (ph->adc_and_channel_info >> 4) & 0x0f;
-            header_channel             = (ph->adc_and_channel_info) & 0x0f;
-            ph->channel_segment_number = SWAP_UINT16(ph->channel_segment_number);
-            ph->data_sequence_number   = SWAP_UINT16(ph->data_sequence_number);
-            ph->packet_sequence_number = SWAP_UINT16(ph->packet_sequence_number);
-            ph->reserved               = SWAP_UINT16(ph->reserved);
-            
+            ph->board_id                 = SWAP_UINT16(ph->board_id);
+            header_adc                   = (ph->adc_and_channel_info >> 4) & 0x0f;
+            header_channel               = (ph->adc_and_channel_info) & 0x0f;
+            ph->readout_sequence_number  = SWAP_UINT16(ph->readout_sequence_number);
+            ph->hardware_sequence_number = SWAP_UINT16(ph->hardware_sequence_number);
+            ph->sampling_frequency       = SWAP_UINT16(ph->sampling_frequency);
+            ph->number_of_samples        = SWAP_UINT16(ph->number_of_samples);
+            ph->drs0_trigger_cell        = SWAP_UINT16(ph->drs0_trigger_cell);
+            ph->drs1_trigger_cell        = SWAP_UINT16(ph->drs1_trigger_cell);
+            ph->trigger_type             = SWAP_UINT16(ph->trigger_type);
+            ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
+           
             if (gl->verbose_flag)
-               printf("From %s:%d, Frame %5d, ADC/Chn/Segment %d/%d/%d\n", inet_ntoa(remote_addr.sin_addr),
+               printf("From %s:%d, Frame %5d, ADC/Chn/Segment %d/%d/%d\n",
+                      inet_ntoa(remote_addr.sin_addr),
                       ntohs(remote_addr.sin_port),
-                      ph->data_sequence_number,
+                      ph->readout_sequence_number,
                       header_adc,
                       header_channel,
                       ph->channel_segment_number);
             
             if (current_frame == -1)
-               current_frame = ph->data_sequence_number;
+               current_frame = ph->readout_sequence_number;
             
             // drop package if it does not belong to current frame
-            if (ph->data_sequence_number != current_frame)
+            if (ph->readout_sequence_number != current_frame)
                continue;
             
             waveform_channel = header_adc*8+header_channel;
