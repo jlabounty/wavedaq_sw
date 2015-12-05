@@ -141,7 +141,7 @@ int interface_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char
                  0,
                  (struct sockaddr *)&client_addr,
                  sizeof(client_addr));
-      assert(i = strlen(str));
+      assert(i == strlen(tx_buffer));
       
       // retrieve reply until prompt is found
       n = 0;
@@ -164,7 +164,7 @@ int interface_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char
          i = recv(gl->cmd_socket[board], rx_buffer, sizeof(rx_buffer), 0);
          assert(i > 0);
          
-         if (rx_buffer[i] == 0) // don't count trailing zero
+         if (rx_buffer[i-1] == 0) // don't count trailing zero
             i--;
          
          if (result != NULL)
@@ -187,7 +187,7 @@ int interface_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char
    if (n == 0) {
       if (size != NULL)
          *size = 0;
-      return 0;
+      return -1;
    }
 
    // chop off prompt
@@ -275,12 +275,19 @@ int interface_init(GLOBALS *gl)
 
       // check if board is alive
       size = sizeof(reply);
-      interface_send(gl, index, 1000, "info", reply, &size); // first access long timeout
-      if (!size) {
-         printf("Board %s does not reply, aborting.\n", gl->board_name[index]);
+      if (interface_send(gl, index, 1000, "", reply, &size) < 0) {
+         printf("Cannot connect to board \"%s\"\n", gl->board_name[index]);
          return 0;
       }
+
+      // print board info
       if (gl->verbose_flag) {
+         size = sizeof(reply);
+         interface_send(gl, index, 1000, "info", reply, &size); // first access long timeout
+         if (!size) {
+            printf("Board %s does not reply, aborting.\n", gl->board_name[index]);
+            return 0;
+         }
          char *p = strstr(reply, "-- Version");
          if (p != NULL) {
             char *p2 = strstr(p, "\r\n\r\n");
@@ -293,13 +300,13 @@ int interface_init(GLOBALS *gl)
       // set destinantion port in WD board
       sprintf(str, "setenv dstport %d", WD2_DATA_PORT);
       size = sizeof(reply);
-      interface_send(gl, index, 100, str, reply, &size);
+      assert(interface_send(gl, index, 100, str, reply, &size) > 0);
       if (gl->verbose_flag)
          printf("Set dstport    = %d\n", WD2_DATA_PORT);
 
       // set MAC address and IP address of this computer in WD board
       size = sizeof(reply);
-      interface_send(gl, index, 100, "cfgdst", reply, &size);
+      assert(interface_send(gl, index, 100, "cfgdst", reply, &size) > 0);
       
       if (gl->verbose_flag) {
          size = sizeof(reply);
@@ -334,7 +341,7 @@ int interface_init(GLOBALS *gl)
          else if (gl->gain == 2)
             sprintf(str, "feset all 3a");
          size = sizeof(reply);
-         interface_send(gl, index, 100, str, reply, &size);
+         assert(interface_send(gl, index, 100, str, reply, &size) > 0);
       } else { // pole zero cancellation off (bit=1)
          if (gl->gain == 0)
             sprintf(str, "feset all 82");
@@ -343,8 +350,37 @@ int interface_init(GLOBALS *gl)
          else if (gl->gain == 2)
             sprintf(str, "feset all ba");
          size = sizeof(reply);
-         interface_send(gl, index, 100, str, reply, &size);
+         assert(interface_send(gl, index, 100, str, reply, &size) > 0);
       }
+
+      // trun on comparator power
+      size = sizeof(reply);
+      assert(interface_send(gl, index, 100, "pwrcmp on", reply, &size) > 0);
+
+      // set comparator level
+      size = sizeof(reply);
+      sprintf(str, "dacset tlevel1 %d", 500);
+      assert(interface_send(gl, index, 100, str, reply, &size) > 0);
+      size = sizeof(reply);
+      sprintf(str, "dacset tlevel2 %d", 500);
+      assert(interface_send(gl, index, 100, str, reply, &size) > 0);
+      size = sizeof(reply);
+      sprintf(str, "dacset tlevel3 %d", 500);
+      assert(interface_send(gl, index, 100, str, reply, &size) > 0);
+      size = sizeof(reply);
+      sprintf(str, "dacset tlevel4 %d", 500);
+      assert(interface_send(gl, index, 100, str, reply, &size) > 0);
+      
+      // enable local trigger
+      size = sizeof(reply);
+      assert(interface_send(gl, index, 100, "regwr d4 FFFF0000", reply, &size) > 0);
+      size = sizeof(reply);
+      assert(interface_send(gl, index, 100, "regwr d8 000C0000", reply, &size) > 0);
+      
+      // set DRS readout mode to ROI
+      size = sizeof(reply);
+      assert(interface_send(gl, index, 100, "regwr 10 0D0C0020", reply, &size) > 0);
+      
    }
    
    if (gl->verbose_flag)
