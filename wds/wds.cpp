@@ -143,10 +143,12 @@ int main(int argc, char *argv[]) {
    
    static struct option longopts[] = {
       { "adc",         no_argument,        NULL, 'a' },
+      { "calibrate",   no_argument,        NULL, 'c' },
       { "demo",        no_argument,        NULL, 'd' },
       { "gain",        required_argument,  NULL, 'g' },
       { "port",        required_argument,  NULL, 'p' },
       { "tlevel",      required_argument,  NULL, 't' },
+      { "raw",         required_argument,  NULL, 'r' },
       { "verbose",     no_argument,        NULL, 'v' },
       { "wd",          required_argument,  NULL, 'w' },
       { "zero",        no_argument,        NULL, 'z' },
@@ -165,10 +167,13 @@ int main(int argc, char *argv[]) {
    i1 = 0;
    i2 = 15;
    
-   while ((ch = getopt_long(argc, argv, "adg:p:t:vw:z", longopts, NULL)) != -1) {
+   while ((ch = getopt_long(argc, argv, "acdg:p:t:rvw:z", longopts, NULL)) != -1) {
       switch (ch) {
          case 'a':
             gl.adc_flag = 1;
+            break;
+         case 'c':
+            gl.calibrate_flag = 1;
             break;
          case 'd':
             gl.demo_flag = 1;
@@ -180,6 +185,9 @@ int main(int argc, char *argv[]) {
          case 'p':
             if (optarg)
                gl.http_port = atoi(optarg);
+            break;
+         case 'r':
+            gl.raw_flag = 1;
             break;
          case 't':
             if (optarg)
@@ -219,6 +227,7 @@ int main(int argc, char *argv[]) {
             printf(" -g --gain        Input gain (0=1, 1=10, 2=100)\n");
             printf(" -t --tlevel      Trigger level in mV (0=auto)\n");
             printf(" -p --port        HTTP server port\n");
+            printf(" -r --raw         Show raw (uncalibrated) data\n");
             printf(" -w --wd          Internet address of WaveDREAM board\n");
             printf(" -v --verbose     Print extra statistics\n");
             printf(" -z --zero        Turn off pole-zero-canellation (on by default)\n");
@@ -242,6 +251,12 @@ int main(int argc, char *argv[]) {
    // initialize ethernet interface to WD board
    if (interface_init(&gl) != SUCCESS)
       return FAILURE;
+   
+   // do calibration
+   if (gl.calibrate_flag) {
+      interface_calibrate(&gl);
+      return 0;
+   }
    
    // initialize web server
    struct mg_server *server = mg_create_server(&gl, wds_handler);

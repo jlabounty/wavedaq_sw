@@ -9,6 +9,7 @@
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
+#include <fcntl.h>
 
 #include "wds.h"
 
@@ -226,6 +227,7 @@ int interface_init(GLOBALS *gl)
    gl->eth_addr = (unsigned char **)malloc(sizeof(unsigned char *)*gl->n_boards);
    for (int i=0 ; i<gl->n_boards ; i++)
       gl->eth_addr[i] = (unsigned char *)malloc(sizeof(unsigned char)*16);
+   gl->wf_offset = (float **)malloc(sizeof(float *) * gl->n_boards);
  
    if (gl->demo_flag)
       return SUCCESS;
@@ -388,6 +390,17 @@ int interface_init(GLOBALS *gl)
       // assert(interface_send(gl, index, 100, "regwr 10 0D0C0020", reply, &size) > 0);
       assert(interface_send(gl, index, 100, "regwr 10 0D0C0010", reply, &size) > 0);
       
+      
+      // load calibration for board from file (for now...)
+      char str[80];
+      sprintf(str, "%s.cal", gl->board_name[index]);
+      int fh = open(str, O_RDONLY, 0644);
+      if (fh > 0) {
+         gl->wf_offset[index] = (float *)malloc(sizeof(float)*16*1024);
+         assert(read(fh, gl->wf_offset[index], sizeof(float)*16*1024) == sizeof(float)*16*1024);
+      } else
+         gl->wf_offset[index] = NULL;
+      
    }
    
    if (gl->verbose_flag)
@@ -488,9 +501,22 @@ int interface_read_waveform(GLOBALS *gl, int board, int millisec, float waveform
             if (current_frame == -1)
                current_frame = ph->readout_sequence_number;
             
-            // drop package if it does not belong to current frame
-            if (ph->readout_sequence_number != current_frame)
+            // drop package if it belongs to older frame
+            if (ph->readout_sequence_number < current_frame) {
+               printf("Package dropped, package frame=%d, current frame=%d\n", ph->readout_sequence_number, current_frame);
                continue;
+            }
+            
+            // drop whole frame if package of next frame received
+            if (ph->readout_sequence_number > current_frame) {
+               printf("Frame dropped, package frame=%d, current frame=%d\n", ph->readout_sequence_number, current_frame);
+               // tag waveforms as invalid
+               for (i=0 ; i<16 ; i++) {
+                  waveform[i][0]   = nanf("");
+                  waveform[i][512] = nanf("");
+               }
+            }
+            
             
             waveform_channel = header_adc*8+header_channel;
             assert(waveform_channel < 16);
@@ -525,8 +551,16 @@ int interface_read_waveform(GLOBALS *gl, int board, int millisec, float waveform
             for (i=0 ; i<16 ; i++)
                if (isnan(waveform[i][0]) || isnan(waveform[i][512]))
                    break;
-            if (i == 16)
+            if (i == 16) {
+               // calibrate waveforms
+               if (gl->wf_offset[board] != NULL) {
+                  for (i=0 ; i<16 ; i++)
+                     for (int j=0 ; j<1024 ; j++)
+                        waveform[i][j] -= gl->wf_offset[board][i*1024+j];
+               }
+               
                return SUCCESS;
+            }
             
          } else {
             printf("Unexpected UDP packet received\n");
@@ -537,4 +571,61 @@ int interface_read_waveform(GLOBALS *gl, int board, int millisec, float waveform
    } while (1);
    
    return FAILURE;
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+
+int interface_calibrate(GLOBALS *gl)
+{
+   float wfU[16][1024], awf[16][1024];
+   int i, n, prog, old_prog;
+   
+   n = 500;
+
+   printf("Calibration boards\n");
+   
+   for (int board=0 ; board<gl->n_boards ; board++) {
+
+      printf("%s: [                                                 ]\r%s: [",
+             gl->board_name[board], gl->board_name[board]);
+      fflush(stdout);
+      
+      memset(awf, 0, sizeof(awf));
+      old_prog = 0;
+      
+      for (i=0 ; i<n ; i++) {
+         interface_send(gl, board, 100, "drsget\n", NULL, NULL);
+         assert(interface_read_waveform(gl, board, 1000, wfU) == SUCCESS);
+         
+         for (int ch=0 ; ch<16 ; ch++)
+            for (int bin=0 ; bin<1024 ; bin++)
+               awf[ch][bin] += wfU[ch][bin];
+         
+         /* update progress bar */
+         prog = (int)((double)(i)/(n)*50);
+         if (prog > old_prog) {
+            old_prog = prog;
+            printf("=");
+            fflush(stdout);
+         }
+      }
+
+      for (int ch=0 ; ch<16 ; ch++)
+         for (int bin=0 ; bin<1024 ; bin++)
+            awf[ch][bin] /= n;
+
+      printf("\n");
+      
+      // save calibration
+      char str[80];
+      sprintf(str, "%s.cal", gl->board_name[board]);
+      int fh = open(str, O_WRONLY | O_CREAT, 0644);
+      assert(fh > 0);
+
+      assert(write(fh, awf, sizeof(awf)) == sizeof(awf));
+      close(fh);
+   }
+
+   return SUCCESS;
 }

@@ -13,8 +13,10 @@
 
 typedef struct {
    int  demo_flag;
+   int  calibrate_flag;
    int  verbose_flag;
    int  adc_flag;
+   int  raw_flag;
    int  gain;
    int  pzc;
    int  http_port;
@@ -24,12 +26,14 @@ typedef struct {
    int  *data_socket;
    unsigned char **eth_addr;
    int  trigger_level;
+   float **wf_offset;
 } GLOBALS;
 
 // interface functions
 int interface_init(GLOBALS *gl);
 int interface_read_waveform(GLOBALS *gl, int board, int timeout, float wf[16][1024]);
 int interface_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *result, int *size);
+int interface_calibrate(GLOBALS *gl);
 
 size_t strlcpy(char *dst, const char *src, size_t size);
 size_t strlcat(char *dst, const char *src, size_t size);
