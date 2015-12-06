@@ -359,27 +359,34 @@ int interface_init(GLOBALS *gl)
 
       // set comparator level
       size = sizeof(reply);
-      sprintf(str, "dacset tlevel1 %d", 500);
+      sprintf(str, "dacset tlevel1 %d", gl->trigger_level);
       assert(interface_send(gl, index, 100, str, reply, &size) > 0);
       size = sizeof(reply);
-      sprintf(str, "dacset tlevel2 %d", 500);
+      sprintf(str, "dacset tlevel2 %d", gl->trigger_level);
       assert(interface_send(gl, index, 100, str, reply, &size) > 0);
       size = sizeof(reply);
-      sprintf(str, "dacset tlevel3 %d", 500);
+      sprintf(str, "dacset tlevel3 %d", gl->trigger_level);
       assert(interface_send(gl, index, 100, str, reply, &size) > 0);
       size = sizeof(reply);
-      sprintf(str, "dacset tlevel4 %d", 500);
+      sprintf(str, "dacset tlevel4 %d", gl->trigger_level);
       assert(interface_send(gl, index, 100, str, reply, &size) > 0);
       
       // enable local trigger
-      size = sizeof(reply);
-      assert(interface_send(gl, index, 100, "regwr d4 FFFF0000", reply, &size) > 0);
-      size = sizeof(reply);
-      assert(interface_send(gl, index, 100, "regwr d8 000C0000", reply, &size) > 0);
-      
+      if (gl->trigger_level != 0) {
+         size = sizeof(reply);
+         assert(interface_send(gl, index, 100, "regwr d4 FFFF0000", reply, &size) > 0);
+         size = sizeof(reply);
+         assert(interface_send(gl, index, 100, "regwr d8 00080000", reply, &size) > 0);
+      } else {
+         assert(interface_send(gl, index, 100, "regwr d4 00000000", reply, &size) > 0);
+         size = sizeof(reply);
+         assert(interface_send(gl, index, 100, "regwr d8 00000000", reply, &size) > 0);
+      }
+   
       // set DRS readout mode to ROI
       size = sizeof(reply);
-      assert(interface_send(gl, index, 100, "regwr 10 0D0C0020", reply, &size) > 0);
+      // assert(interface_send(gl, index, 100, "regwr 10 0D0C0020", reply, &size) > 0);
+      assert(interface_send(gl, index, 100, "regwr 10 0D0C0010", reply, &size) > 0);
       
    }
    

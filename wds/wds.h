@@ -23,6 +23,7 @@ typedef struct {
    int  *cmd_socket;
    int  *data_socket;
    unsigned char **eth_addr;
+   int  trigger_level;
 } GLOBALS;
 
 // interface functions
