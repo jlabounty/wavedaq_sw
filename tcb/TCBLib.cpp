@@ -89,13 +89,21 @@ void TCB::GoRun(int handle) {
   WriteReg(handle,addr,&data);
 }
 //
-// activate the RUNMODE signal
+// check the RUNMODE status
 int TCB::IsRunning(int handle) {
   u_int32_t addr = RRUN;
   u_int32_t data; 
-  // first read the RRUN register to copy the current status
   ReadReg(handle,addr,&data);
   data &= 0x1;
+  return (data);
+}
+//
+// check the BUSY status
+int TCB::IsBusy(int handle) {
+  u_int32_t addr = RRUN;
+  u_int32_t data; 
+  ReadReg(handle,addr,&data);
+  data &= 0x8;
   return (data);
 }
 //

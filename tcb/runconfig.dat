@@ -1,0 +1,8 @@
+trgenable f
+triggerbusmasks 7
+prescalingtrg0 ff
+prescalingtrg1 ff
+prescalingtrg2 ff
+prescalingtrg3 ff
+multiplicitythr 2
+channelmasks FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF

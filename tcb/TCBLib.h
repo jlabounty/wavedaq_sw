@@ -80,6 +80,8 @@ class TCB {
   void SetDataMasks(int,u_int32_t*);
   // read time stamps
   void GetTimeStamps(int,u_int32_t *);
+  // check if the system is busy
+  int IsBusy(int);
   // Constructor
   TCB(int slot) { 
     fslot = slot;
