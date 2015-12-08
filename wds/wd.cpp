@@ -1,5 +1,5 @@
 //
-//  interface.cpp
+//  wd
 //  WaveDAQ Ethernet Interface
 //
 //  Created by Stefan Ritt on 13/8/15.
@@ -110,7 +110,7 @@ size_t strlcat(char *dst, const char *src, size_t size)
 
 /*-----------------------------------------------------------------------------------------*/
 
-int interface_send(GLOBALS *gl, int b, int timeout_ms, const char *str, char *result, int *size)
+int wd_send(GLOBALS *gl, int b, int timeout_ms, const char *str, char *result, int *size)
 {
    size_t n, i;
    fd_set readfds;
@@ -208,7 +208,7 @@ int interface_send(GLOBALS *gl, int b, int timeout_ms, const char *str, char *re
 
 /*-----------------------------------------------------------------------------------------*/
 
-int interface_init(GLOBALS *gl)
+int wd_init(GLOBALS *gl)
 {
    struct sockaddr_in server_addr;
    struct sockaddr_in client_addr;
@@ -274,7 +274,7 @@ int interface_init(GLOBALS *gl)
 
       // check if board is alive
       size = sizeof(reply);
-      if (interface_send(gl, index, 1000, "", reply, &size) < 0) {
+      if (wd_send(gl, index, 1000, "", reply, &size) < 0) {
          printf("Cannot connect to board \"%s\"\n", gl->board[index].name);
          return 0;
       }
@@ -282,7 +282,7 @@ int interface_init(GLOBALS *gl)
       // print board info
       if (gl->verbose_flag) {
          size = sizeof(reply);
-         interface_send(gl, index, 1000, "info", reply, &size); // first access long timeout
+         wd_send(gl, index, 1000, "info", reply, &size); // first access long timeout
          if (!size) {
             printf("Board %s does not reply, aborting.\n", gl->board[index].name);
             return 0;
@@ -298,18 +298,16 @@ int interface_init(GLOBALS *gl)
 
       // set destinantion port in WD board
       sprintf(str, "setenv dstport %d", WD2_DATA_PORT);
-      size = sizeof(reply);
-      assert(interface_send(gl, index, 100, str, reply, &size) > 0);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       if (gl->verbose_flag)
          printf("Set dstport    = %d\n", WD2_DATA_PORT);
 
       // set MAC address and IP address of this computer in WD board
-      size = sizeof(reply);
-      assert(interface_send(gl, index, 100, "cfgdst", reply, &size) > 0);
+      assert(wd_send(gl, index, 100, "cfgdst", NULL, NULL) > 0);
       
       if (gl->verbose_flag) {
          size = sizeof(reply);
-         interface_send(gl, index, 100, "printenv -n ethaddrdst", reply, &size);
+         wd_send(gl, index, 100, "printenv -n ethaddrdst", reply, &size);
          if (strstr(reply+2, "\r")) {
             p = strstr(reply+2, "\r")+1;
             if (strchr(p, '\n'))
@@ -320,7 +318,7 @@ int interface_init(GLOBALS *gl)
             printf("Set ethaddrdst = %s\n", p);
          
          size = sizeof(reply);
-         interface_send(gl, index, 100, "printenv -n ipaddrdst", reply, &size);
+         wd_send(gl, index, 100, "printenv -n ipaddrdst", reply, &size);
          if (strstr(reply+2, "\r")) {
             p = strstr(reply+2, "\r")+1;
             if (strchr(p, '\n'))
@@ -339,8 +337,7 @@ int interface_init(GLOBALS *gl)
             sprintf(str, "feset all 1a");
          else if (gl->board[index].gain == 2)
             sprintf(str, "feset all 3a");
-         size = sizeof(reply);
-         assert(interface_send(gl, index, 100, str, reply, &size) > 0);
+         assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       } else { // pole zero cancellation off (bit=1)
          if (gl->board[index].gain == 0)
             sprintf(str, "feset all 82");
@@ -348,44 +345,34 @@ int interface_init(GLOBALS *gl)
             sprintf(str, "feset all 9a");
          else if (gl->board[index].gain == 2)
             sprintf(str, "feset all ba");
-         size = sizeof(reply);
-         assert(interface_send(gl, index, 100, str, reply, &size) > 0);
+         assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       }
 
       // trun on comparator power
-      size = sizeof(reply);
-      assert(interface_send(gl, index, 100, "pwrcmp on", reply, &size) > 0);
+      assert(wd_send(gl, index, 100, "pwrcmp on", NULL, NULL) > 0);
 
       // set comparator level
-      size = sizeof(reply);
       sprintf(str, "dacset tlevel1 %d", gl->board[index].trigger_level);
-      assert(interface_send(gl, index, 100, str, reply, &size) > 0);
-      size = sizeof(reply);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       sprintf(str, "dacset tlevel2 %d", gl->board[index].trigger_level);
-      assert(interface_send(gl, index, 100, str, reply, &size) > 0);
-      size = sizeof(reply);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       sprintf(str, "dacset tlevel3 %d", gl->board[index].trigger_level);
-      assert(interface_send(gl, index, 100, str, reply, &size) > 0);
-      size = sizeof(reply);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       sprintf(str, "dacset tlevel4 %d", gl->board[index].trigger_level);
-      assert(interface_send(gl, index, 100, str, reply, &size) > 0);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       
       // enable local trigger
       if (gl->board[index].trigger_level != 0) {
-         size = sizeof(reply);
-         assert(interface_send(gl, index, 100, "regwr d4 FFFF0000", reply, &size) > 0);
-         size = sizeof(reply);
-         assert(interface_send(gl, index, 100, "regwr d8 00080000", reply, &size) > 0);
+         assert(wd_send(gl, index, 100, "regwr d4 FFFF0000", NULL, NULL) > 0);
+         assert(wd_send(gl, index, 100, "regwr d8 00080000", NULL, NULL) > 0);
       } else {
-         assert(interface_send(gl, index, 100, "regwr d4 00000000", reply, &size) > 0);
-         size = sizeof(reply);
-         assert(interface_send(gl, index, 100, "regwr d8 00000000", reply, &size) > 0);
+         assert(wd_send(gl, index, 100, "regwr d4 00000000", NULL, NULL) > 0);
+         assert(wd_send(gl, index, 100, "regwr d8 00000000", NULL, NULL) > 0);
       }
    
       // set DRS readout mode to ROI
-      size = sizeof(reply);
-      // assert(interface_send(gl, index, 100, "regwr 10 0D0C0020", reply, &size) > 0);
-      assert(interface_send(gl, index, 100, "regwr 10 0D0C0010", reply, &size) > 0);
+      // assert(wd_send(gl, index, 100, "regwr 10 0D0C0020", NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, "regwr 10 0D0C0010", NULL, NULL) > 0);
       
       
       // load calibration for board from file (for now...)
@@ -417,7 +404,7 @@ double time_ms()
 
 /*-----------------------------------------------------------------------------------------*/
 
-int interface_read_waveform(GLOBALS *gl, int b, int millisec, float waveform[16][1024])
+int wd_read_waveform(GLOBALS *gl, int b, int millisec, float waveform[16][1024])
 {
    int i, status, waveform_channel, current_frame;
    fd_set readfds;
@@ -572,7 +559,7 @@ int interface_read_waveform(GLOBALS *gl, int b, int millisec, float waveform[16]
 /*-----------------------------------------------------------------------------------------*/
 
 
-int interface_calibrate(GLOBALS *gl)
+int wd_calibrate(GLOBALS *gl)
 {
    float wfU[16][1024], awf[16][1024];
    int i, n, prog, old_prog;
@@ -591,8 +578,8 @@ int interface_calibrate(GLOBALS *gl)
       old_prog = 0;
       
       for (i=0 ; i<n ; i++) {
-         interface_send(gl, board, 100, "drsget\n", NULL, NULL);
-         assert(interface_read_waveform(gl, board, 1000, wfU) == SUCCESS);
+         wd_send(gl, board, 100, "drsget\n", NULL, NULL);
+         assert(wd_read_waveform(gl, board, 1000, wfU) == SUCCESS);
          
          for (int ch=0 ; ch<16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)

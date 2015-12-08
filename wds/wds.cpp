@@ -69,17 +69,17 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
 
          if (gl->adc_flag) {
             // issue single ADC software trigger
-            interface_send(gl, b, 100, "adcgeteth 1\n", NULL, NULL);
+            wd_send(gl, b, 100, "adcgeteth 1\n", NULL, NULL);
          } else {
             if (gl->board[b].trigger_level == 0)
                // issue single DRS software trigger
-               interface_send(gl, b, 100, "drsget\n", NULL, NULL);
+               wd_send(gl, b, 100, "drsget\n", NULL, NULL);
             else
                // just start DRS and wait for trigger
-               interface_send(gl, b, 100, "drsstart\n", NULL, NULL);
+               wd_send(gl, b, 100, "drsstart\n", NULL, NULL);
          }
          // read waveforms
-         status = interface_read_waveform(gl, b, 1000, wfU);
+         status = wd_read_waveform(gl, b, 1000, wfU);
       
          for (int c=0 ; c<16 ; c++) {
             for (int i=0 ; i<1024 ; i++) {
@@ -254,12 +254,12 @@ int main(int argc, char *argv[]) {
    }
    
    // initialize ethernet interface to WD board
-   if (interface_init(&gl) != SUCCESS)
+   if (wd_init(&gl) != SUCCESS)
       return FAILURE;
    
    // do calibration
    if (gl.calibrate_flag) {
-      interface_calibrate(&gl);
+      wd_calibrate(&gl);
       return 0;
    }
    
