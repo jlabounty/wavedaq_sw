@@ -162,8 +162,8 @@ int main(int argc, char *argv[]) {
 
    for (i=0 ; i<16 ; i++) {
       gl.board[i].trigger_level = 0;
-   gl.board[i].gain = 0; // gain 1
-   gl.board[i].pzc = 0;
+      gl.board[i].gain = 0; // gain 1
+      gl.board[i].pzc = 0;  // PZC off
    }
    
    i1 = 0;
@@ -223,7 +223,7 @@ int main(int argc, char *argv[]) {
             break;
          case 'z':
             for (i=0 ; i<16 ; i++)
-               gl.board[i].pzc = 0;
+               gl.board[i].pzc = 1;
             break;
          default:
             printf("usage: wsd [-adv] [-w <address> [-w <address> ...]]\n");
@@ -235,7 +235,7 @@ int main(int argc, char *argv[]) {
             printf(" -r --raw         Show raw (uncalibrated) data\n");
             printf(" -w --wd          Internet address of WaveDREAM board\n");
             printf(" -v --verbose     Print extra statistics\n");
-            printf(" -z --zero        Turn off pole-zero-canellation (on by default)\n");
+            printf(" -z --zero        Turn on pole-zero-canellation\n");
             return 1;
             break;
       }

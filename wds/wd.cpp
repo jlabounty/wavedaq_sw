@@ -503,6 +503,13 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, float waveform[16][1024])
                }
             }
             
+            // drop package if it does not belong to current board
+            /*
+            if (ph->board_id != b) {
+               printf("Package dropped, package board=%d, current board=%d\n", ph->board_id, b);
+               continue;
+            }
+            */
             
             waveform_channel = header_adc*8+header_channel;
             assert(waveform_channel < 16);
