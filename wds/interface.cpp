@@ -9,6 +9,7 @@
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
+#include <fcntl.h>
 
 #include "wds.h"
 
@@ -38,14 +39,20 @@
 
 typedef struct {
    unsigned char  protocol_version;
+   unsigned char  board_version;
    unsigned short board_id;
+   unsigned char  crate_id;
+   unsigned char  slot_id;
+   unsigned char  adc_and_channel_info;
+   unsigned char  channel_segment_number;
+   unsigned short readout_sequence_number;
+   unsigned short hardware_sequence_number;
    unsigned short sampling_frequency;
    unsigned short number_of_samples;
-   unsigned char  adc_and_channel_info;
-   unsigned short channel_segment_number;
-   unsigned short data_sequence_number;
+   unsigned short drs0_trigger_cell;
+   unsigned short drs1_trigger_cell;
+   unsigned short trigger_type;
    unsigned short packet_sequence_number;
-   unsigned short reserved;
 } WD2_FRAME_HEADER;
 
 /*-----------------------------------------------------------------------------------------*/
@@ -135,7 +142,7 @@ int interface_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char
                  0,
                  (struct sockaddr *)&client_addr,
                  sizeof(client_addr));
-      assert(i = strlen(str));
+      assert(i == strlen(tx_buffer));
       
       // retrieve reply until prompt is found
       n = 0;
@@ -158,7 +165,7 @@ int interface_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char
          i = recv(gl->cmd_socket[board], rx_buffer, sizeof(rx_buffer), 0);
          assert(i > 0);
          
-         if (rx_buffer[i] == 0) // don't count trailing zero
+         if (rx_buffer[i-1] == 0) // don't count trailing zero
             i--;
          
          if (result != NULL)
@@ -181,7 +188,7 @@ int interface_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char
    if (n == 0) {
       if (size != NULL)
          *size = 0;
-      return 0;
+      return -1;
    }
 
    // chop off prompt
@@ -220,6 +227,7 @@ int interface_init(GLOBALS *gl)
    gl->eth_addr = (unsigned char **)malloc(sizeof(unsigned char *)*gl->n_boards);
    for (int i=0 ; i<gl->n_boards ; i++)
       gl->eth_addr[i] = (unsigned char *)malloc(sizeof(unsigned char)*16);
+   gl->wf_offset = (float **)malloc(sizeof(float *) * gl->n_boards);
  
    if (gl->demo_flag)
       return SUCCESS;
@@ -269,12 +277,19 @@ int interface_init(GLOBALS *gl)
 
       // check if board is alive
       size = sizeof(reply);
-      interface_send(gl, index, 1000, "info", reply, &size); // first access long timeout
-      if (!size) {
-         printf("Board %s does not reply, aborting.\n", gl->board_name[index]);
+      if (interface_send(gl, index, 1000, "", reply, &size) < 0) {
+         printf("Cannot connect to board \"%s\"\n", gl->board_name[index]);
          return 0;
       }
+
+      // print board info
       if (gl->verbose_flag) {
+         size = sizeof(reply);
+         interface_send(gl, index, 1000, "info", reply, &size); // first access long timeout
+         if (!size) {
+            printf("Board %s does not reply, aborting.\n", gl->board_name[index]);
+            return 0;
+         }
          char *p = strstr(reply, "-- Version");
          if (p != NULL) {
             char *p2 = strstr(p, "\r\n\r\n");
@@ -287,13 +302,13 @@ int interface_init(GLOBALS *gl)
       // set destinantion port in WD board
       sprintf(str, "setenv dstport %d", WD2_DATA_PORT);
       size = sizeof(reply);
-      interface_send(gl, index, 100, str, reply, &size);
+      assert(interface_send(gl, index, 100, str, reply, &size) > 0);
       if (gl->verbose_flag)
          printf("Set dstport    = %d\n", WD2_DATA_PORT);
 
       // set MAC address and IP address of this computer in WD board
       size = sizeof(reply);
-      interface_send(gl, index, 100, "cfgdst", reply, &size);
+      assert(interface_send(gl, index, 100, "cfgdst", reply, &size) > 0);
       
       if (gl->verbose_flag) {
          size = sizeof(reply);
@@ -328,7 +343,7 @@ int interface_init(GLOBALS *gl)
          else if (gl->gain == 2)
             sprintf(str, "feset all 3a");
          size = sizeof(reply);
-         interface_send(gl, index, 100, str, reply, &size);
+         assert(interface_send(gl, index, 100, str, reply, &size) > 0);
       } else { // pole zero cancellation off (bit=1)
          if (gl->gain == 0)
             sprintf(str, "feset all 82");
@@ -337,8 +352,55 @@ int interface_init(GLOBALS *gl)
          else if (gl->gain == 2)
             sprintf(str, "feset all ba");
          size = sizeof(reply);
-         interface_send(gl, index, 100, str, reply, &size);
+         assert(interface_send(gl, index, 100, str, reply, &size) > 0);
       }
+
+      // trun on comparator power
+      size = sizeof(reply);
+      assert(interface_send(gl, index, 100, "pwrcmp on", reply, &size) > 0);
+
+      // set comparator level
+      size = sizeof(reply);
+      sprintf(str, "dacset tlevel1 %d", gl->trigger_level);
+      assert(interface_send(gl, index, 100, str, reply, &size) > 0);
+      size = sizeof(reply);
+      sprintf(str, "dacset tlevel2 %d", gl->trigger_level);
+      assert(interface_send(gl, index, 100, str, reply, &size) > 0);
+      size = sizeof(reply);
+      sprintf(str, "dacset tlevel3 %d", gl->trigger_level);
+      assert(interface_send(gl, index, 100, str, reply, &size) > 0);
+      size = sizeof(reply);
+      sprintf(str, "dacset tlevel4 %d", gl->trigger_level);
+      assert(interface_send(gl, index, 100, str, reply, &size) > 0);
+      
+      // enable local trigger
+      if (gl->trigger_level != 0) {
+         size = sizeof(reply);
+         assert(interface_send(gl, index, 100, "regwr d4 FFFF0000", reply, &size) > 0);
+         size = sizeof(reply);
+         assert(interface_send(gl, index, 100, "regwr d8 00080000", reply, &size) > 0);
+      } else {
+         assert(interface_send(gl, index, 100, "regwr d4 00000000", reply, &size) > 0);
+         size = sizeof(reply);
+         assert(interface_send(gl, index, 100, "regwr d8 00000000", reply, &size) > 0);
+      }
+   
+      // set DRS readout mode to ROI
+      size = sizeof(reply);
+      // assert(interface_send(gl, index, 100, "regwr 10 0D0C0020", reply, &size) > 0);
+      assert(interface_send(gl, index, 100, "regwr 10 0D0C0010", reply, &size) > 0);
+      
+      
+      // load calibration for board from file (for now...)
+      char str[80];
+      sprintf(str, "%s.cal", gl->board_name[index]);
+      int fh = open(str, O_RDONLY, 0644);
+      if (fh > 0) {
+         gl->wf_offset[index] = (float *)malloc(sizeof(float)*16*1024);
+         assert(read(fh, gl->wf_offset[index], sizeof(float)*16*1024) == sizeof(float)*16*1024);
+      } else
+         gl->wf_offset[index] = NULL;
+      
    }
    
    if (gl->verbose_flag)
@@ -415,30 +477,46 @@ int interface_read_waveform(GLOBALS *gl, int board, int millisec, float waveform
             ph = (WD2_FRAME_HEADER *)buffer;
             
             // correct endianness of header data
-            ph->board_id               = SWAP_UINT16(ph->board_id);
-            ph->sampling_frequency     = SWAP_UINT16(ph->sampling_frequency);
-            ph->number_of_samples      = SWAP_UINT16(ph->number_of_samples);
-            header_adc                 = (ph->adc_and_channel_info >> 4) & 0x0f;
-            header_channel             = (ph->adc_and_channel_info) & 0x0f;
-            ph->channel_segment_number = SWAP_UINT16(ph->channel_segment_number);
-            ph->data_sequence_number   = SWAP_UINT16(ph->data_sequence_number);
-            ph->packet_sequence_number = SWAP_UINT16(ph->packet_sequence_number);
-            ph->reserved               = SWAP_UINT16(ph->reserved);
-            
+            ph->board_id                 = SWAP_UINT16(ph->board_id);
+            header_adc                   = (ph->adc_and_channel_info >> 4) & 0x0f;
+            header_channel               = (ph->adc_and_channel_info) & 0x0f;
+            ph->readout_sequence_number  = SWAP_UINT16(ph->readout_sequence_number);
+            ph->hardware_sequence_number = SWAP_UINT16(ph->hardware_sequence_number);
+            ph->sampling_frequency       = SWAP_UINT16(ph->sampling_frequency);
+            ph->number_of_samples        = SWAP_UINT16(ph->number_of_samples);
+            ph->drs0_trigger_cell        = SWAP_UINT16(ph->drs0_trigger_cell);
+            ph->drs1_trigger_cell        = SWAP_UINT16(ph->drs1_trigger_cell);
+            ph->trigger_type             = SWAP_UINT16(ph->trigger_type);
+            ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
+           
             if (gl->verbose_flag)
-               printf("From %s:%d, Frame %5d, ADC/Chn/Segment %d/%d/%d\n", inet_ntoa(remote_addr.sin_addr),
+               printf("From %s:%d, Frame %5d, ADC/Chn/Segment %d/%d/%d\n",
+                      inet_ntoa(remote_addr.sin_addr),
                       ntohs(remote_addr.sin_port),
-                      ph->data_sequence_number,
+                      ph->readout_sequence_number,
                       header_adc,
                       header_channel,
                       ph->channel_segment_number);
             
             if (current_frame == -1)
-               current_frame = ph->data_sequence_number;
+               current_frame = ph->readout_sequence_number;
             
-            // drop package if it does not belong to current frame
-            if (ph->data_sequence_number != current_frame)
+            // drop package if it belongs to older frame
+            if (ph->readout_sequence_number < current_frame) {
+               printf("Package dropped, package frame=%d, current frame=%d\n", ph->readout_sequence_number, current_frame);
                continue;
+            }
+            
+            // drop whole frame if package of next frame received
+            if (ph->readout_sequence_number > current_frame) {
+               printf("Frame dropped, package frame=%d, current frame=%d\n", ph->readout_sequence_number, current_frame);
+               // tag waveforms as invalid
+               for (i=0 ; i<16 ; i++) {
+                  waveform[i][0]   = nanf("");
+                  waveform[i][512] = nanf("");
+               }
+            }
+            
             
             waveform_channel = header_adc*8+header_channel;
             assert(waveform_channel < 16);
@@ -473,8 +551,16 @@ int interface_read_waveform(GLOBALS *gl, int board, int millisec, float waveform
             for (i=0 ; i<16 ; i++)
                if (isnan(waveform[i][0]) || isnan(waveform[i][512]))
                    break;
-            if (i == 16)
+            if (i == 16) {
+               // calibrate waveforms
+               if (gl->wf_offset[board] != NULL) {
+                  for (i=0 ; i<16 ; i++)
+                     for (int j=0 ; j<1024 ; j++)
+                        waveform[i][j] -= gl->wf_offset[board][i*1024+j];
+               }
+               
                return SUCCESS;
+            }
             
          } else {
             printf("Unexpected UDP packet received\n");
@@ -485,4 +571,61 @@ int interface_read_waveform(GLOBALS *gl, int board, int millisec, float waveform
    } while (1);
    
    return FAILURE;
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+
+int interface_calibrate(GLOBALS *gl)
+{
+   float wfU[16][1024], awf[16][1024];
+   int i, n, prog, old_prog;
+   
+   n = 500;
+
+   printf("Calibration boards\n");
+   
+   for (int board=0 ; board<gl->n_boards ; board++) {
+
+      printf("%s: [                                                 ]\r%s: [",
+             gl->board_name[board], gl->board_name[board]);
+      fflush(stdout);
+      
+      memset(awf, 0, sizeof(awf));
+      old_prog = 0;
+      
+      for (i=0 ; i<n ; i++) {
+         interface_send(gl, board, 100, "drsget\n", NULL, NULL);
+         assert(interface_read_waveform(gl, board, 1000, wfU) == SUCCESS);
+         
+         for (int ch=0 ; ch<16 ; ch++)
+            for (int bin=0 ; bin<1024 ; bin++)
+               awf[ch][bin] += wfU[ch][bin];
+         
+         /* update progress bar */
+         prog = (int)((double)(i)/(n)*50);
+         if (prog > old_prog) {
+            old_prog = prog;
+            printf("=");
+            fflush(stdout);
+         }
+      }
+
+      for (int ch=0 ; ch<16 ; ch++)
+         for (int bin=0 ; bin<1024 ; bin++)
+            awf[ch][bin] /= n;
+
+      printf("\n");
+      
+      // save calibration
+      char str[80];
+      sprintf(str, "%s.cal", gl->board_name[board]);
+      int fh = open(str, O_WRONLY | O_CREAT, 0644);
+      assert(fh > 0);
+
+      assert(write(fh, awf, sizeof(awf)) == sizeof(awf));
+      close(fh);
+   }
+
+   return SUCCESS;
 }

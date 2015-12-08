@@ -71,8 +71,12 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
             // issue single ADC software trigger
             interface_send(gl, board, 100, "adcgeteth 1\n", NULL, NULL);
          } else {
-            // issue single DRS software trigger
-            interface_send(gl, board, 100, "drsget\n", NULL, NULL);
+            if (gl->trigger_level == 0)
+               // issue single DRS software trigger
+               interface_send(gl, board, 100, "drsget\n", NULL, NULL);
+            else
+               // just start DRS and wait for trigger
+               interface_send(gl, board, 100, "drsstart\n", NULL, NULL);
          }
          // read waveforms
          status = interface_read_waveform(gl, board, 1000, wfU);
@@ -139,9 +143,12 @@ int main(int argc, char *argv[]) {
    
    static struct option longopts[] = {
       { "adc",         no_argument,        NULL, 'a' },
+      { "calibrate",   no_argument,        NULL, 'c' },
       { "demo",        no_argument,        NULL, 'd' },
       { "gain",        required_argument,  NULL, 'g' },
       { "port",        required_argument,  NULL, 'p' },
+      { "tlevel",      required_argument,  NULL, 't' },
+      { "raw",         required_argument,  NULL, 'r' },
       { "verbose",     no_argument,        NULL, 'v' },
       { "wd",          required_argument,  NULL, 'w' },
       { "zero",        no_argument,        NULL, 'z' },
@@ -153,15 +160,20 @@ int main(int argc, char *argv[]) {
    for (i=0 ; i<16 ; i++)
       gl.board_name[i] = (char *)malloc(32);
    gl.http_port = 8080; // default port
-   gl.gain = 2; // gain 100
-   gl.pzc = 1;
+   gl.gain = 0; // gain 1
+   gl.pzc = 0;
+   gl.trigger_level = 0;
+   
    i1 = 0;
    i2 = 15;
    
-   while ((ch = getopt_long(argc, argv, "adg:p:vw:z", longopts, NULL)) != -1) {
+   while ((ch = getopt_long(argc, argv, "acdg:p:t:rvw:z", longopts, NULL)) != -1) {
       switch (ch) {
          case 'a':
             gl.adc_flag = 1;
+            break;
+         case 'c':
+            gl.calibrate_flag = 1;
             break;
          case 'd':
             gl.demo_flag = 1;
@@ -173,6 +185,13 @@ int main(int argc, char *argv[]) {
          case 'p':
             if (optarg)
                gl.http_port = atoi(optarg);
+            break;
+         case 'r':
+            gl.raw_flag = 1;
+            break;
+         case 't':
+            if (optarg)
+               gl.trigger_level = atoi(optarg);
             break;
          case 'v':
             gl.verbose_flag = 1;
@@ -204,9 +223,11 @@ int main(int argc, char *argv[]) {
          default:
             printf("usage: wsd [-adv] [-w <address> [-w <address> ...]]\n");
             printf(" -a --adc         Read ADC instead DRS\n");
-            printf(" -g --gain        Input gain (0=1, 1=10, 2=100)\n");
-            printf(" -p --port        HTTP server port\n");
             printf(" -d --demo        Demo mode\n");
+            printf(" -g --gain        Input gain (0=1, 1=10, 2=100)\n");
+            printf(" -t --tlevel      Trigger level in mV (0=auto)\n");
+            printf(" -p --port        HTTP server port\n");
+            printf(" -r --raw         Show raw (uncalibrated) data\n");
             printf(" -w --wd          Internet address of WaveDREAM board\n");
             printf(" -v --verbose     Print extra statistics\n");
             printf(" -z --zero        Turn off pole-zero-canellation (on by default)\n");
@@ -230,6 +251,12 @@ int main(int argc, char *argv[]) {
    // initialize ethernet interface to WD board
    if (interface_init(&gl) != SUCCESS)
       return FAILURE;
+   
+   // do calibration
+   if (gl.calibrate_flag) {
+      interface_calibrate(&gl);
+      return 0;
+   }
    
    // initialize web server
    struct mg_server *server = mg_create_server(&gl, wds_handler);
