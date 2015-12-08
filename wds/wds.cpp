@@ -34,7 +34,7 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
       mg_printf_data(conn, "   \"boards\": [\n");
       
       for (int i=0 ; i<gl->n_boards ; i++) {
-         mg_printf_data(conn, "      { \"name\": \"%s\" }", gl->board_name[i]);
+         mg_printf_data(conn, "      { \"name\": \"%s\" }", gl->board[i].name);
          if (i<gl->n_boards-1)
             mg_printf_data(conn, ",");
          mg_printf_data(conn, "\n");
@@ -50,6 +50,13 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
       float wfT[16][1024], wfU[16][1024];
       int status;
       
+      mg_get_var(conn, "b", str, sizeof(str));
+      int b = atoi(str);
+      
+      // avoid invalid board index
+      if (b < 0 || b >= gl->n_boards)
+         b = 0;
+      
       if (gl->demo_flag) {
          status = SUCCESS;
          for (int c=0 ; c<16 ; c++) {
@@ -60,26 +67,19 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
          }
       } else {
 
-         mg_get_var(conn, "b", str, sizeof(str));
-         int board = atoi(str);
-         
-         // avoid invalid board index
-         if (board < 0 || board >= gl->n_boards)
-            board = 0;
-
          if (gl->adc_flag) {
             // issue single ADC software trigger
-            interface_send(gl, board, 100, "adcgeteth 1\n", NULL, NULL);
+            interface_send(gl, b, 100, "adcgeteth 1\n", NULL, NULL);
          } else {
-            if (gl->trigger_level == 0)
+            if (gl->board[b].trigger_level == 0)
                // issue single DRS software trigger
-               interface_send(gl, board, 100, "drsget\n", NULL, NULL);
+               interface_send(gl, b, 100, "drsget\n", NULL, NULL);
             else
                // just start DRS and wait for trigger
-               interface_send(gl, board, 100, "drsstart\n", NULL, NULL);
+               interface_send(gl, b, 100, "drsstart\n", NULL, NULL);
          }
          // read waveforms
-         status = interface_read_waveform(gl, board, 1000, wfU);
+         status = interface_read_waveform(gl, b, 1000, wfU);
       
          for (int c=0 ; c<16 ; c++) {
             for (int i=0 ; i<1024 ; i++) {
@@ -88,7 +88,9 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
          }
       }
 
-      int wd = (gl->demo_flag) ? 0xFF : atoi(gl->board_name[0]+3);
+      if (gl->demo_flag)
+         b = 0xFF; // signals demo data
+      
       if (status == SUCCESS) {
          
          mg_get_var(conn, "c", str, sizeof(str));
@@ -101,7 +103,7 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
             if (chn & (1 << c)) {
                t = 1; // time array
                mg_send_data(conn, &t, 4);
-               mg_send_data(conn, &wd, 4);
+               mg_send_data(conn, &b, 4);
                mg_send_data(conn, &f, 4);
                mg_send_data(conn, &c, 4);
                mg_send_data(conn, &n, 4);
@@ -114,7 +116,7 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
             if (chn & (1 << c)) {
                t = 2; // voltage array
                mg_send_data(conn, &t, 4);
-               mg_send_data(conn, &wd, 4);
+               mg_send_data(conn, &b, 4);
                mg_send_data(conn, &f, 4);
                mg_send_data(conn, &c, 4);
                mg_send_data(conn, &n, 4);
@@ -126,7 +128,7 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
          // just return idle message
          int t = 0;
          mg_send_data(conn, &t, 4);
-         mg_send_data(conn, &wd, 4);
+         mg_send_data(conn, &b, 4);
       }
       
       return MG_TRUE;
@@ -156,13 +158,13 @@ int main(int argc, char *argv[]) {
    };
    
    memset(&gl, 0, sizeof(gl));
-   gl.board_name = (char **)malloc(sizeof(char *) * 16);
-   for (i=0 ; i<16 ; i++)
-      gl.board_name[i] = (char *)malloc(32);
    gl.http_port = 8080; // default port
-   gl.gain = 0; // gain 1
-   gl.pzc = 0;
-   gl.trigger_level = 0;
+
+   for (i=0 ; i<16 ; i++) {
+      gl.board[i].trigger_level = 0;
+   gl.board[i].gain = 0; // gain 1
+   gl.board[i].pzc = 0;
+   }
    
    i1 = 0;
    i2 = 15;
@@ -180,7 +182,8 @@ int main(int argc, char *argv[]) {
             break;
          case 'g':
             if (optarg)
-               gl.gain = atoi(optarg);
+               for (i=0 ; i<16 ; i++)
+                  gl.board[i].gain = atoi(optarg);
             break;
          case 'p':
             if (optarg)
@@ -191,7 +194,8 @@ int main(int argc, char *argv[]) {
             break;
          case 't':
             if (optarg)
-               gl.trigger_level = atoi(optarg);
+               for (i=0 ; i<16 ; i++)
+                  gl.board[i].trigger_level = atoi(optarg);
             break;
          case 'v':
             gl.verbose_flag = 1;
@@ -205,20 +209,21 @@ int main(int argc, char *argv[]) {
                      i2 = atoi(p);
                      if (i1 >= 0 && i1 < 14 && i2>1 && i2<16) {
                         for (i=i1 ; i<=i2; i++) {
-                           sprintf(gl.board_name[gl.n_boards++], "wd%03d", i);
+                           sprintf(gl.board[gl.n_boards++].name, "wd%03d", i);
                         }
                      } else {
                         printf("invalid argument \"-w %s\"\n", optarg);
                         return 1;
                      }
                   }  else
-                     sprintf(gl.board_name[gl.n_boards++], "wd%03d", atoi(optarg));
+                     sprintf(gl.board[gl.n_boards++].name, "wd%03d", atoi(optarg));
                } else
-                  strlcpy(gl.board_name[gl.n_boards++], optarg, 32);
+                  strlcpy(gl.board[gl.n_boards++].name, optarg, 32);
             }
             break;
          case 'z':
-            gl.pzc = 0;
+            for (i=0 ; i<16 ; i++)
+               gl.board[i].pzc = 0;
             break;
          default:
             printf("usage: wsd [-adv] [-w <address> [-w <address> ...]]\n");
@@ -245,7 +250,7 @@ int main(int argc, char *argv[]) {
    
    if (gl.demo_flag) {
       gl.n_boards = 1;
-      strlcpy(gl.board_name[0], "wd000", 32);
+      strlcpy(gl.board[0].name, "wd000", 32);
    }
    
    // initialize ethernet interface to WD board

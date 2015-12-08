@@ -12,21 +12,26 @@
 #define FAILURE 0
 
 typedef struct {
+   int  serial_number;
+   char name[32];
+   int  cmd_socket;
+   int  data_socket;
+   unsigned char eth_addr[16];
+   int  trigger_level;
+   int  gain;
+   int  pzc;
+   float wf_offset[16][1024];
+} WDB;
+
+typedef struct {
    int  demo_flag;
    int  calibrate_flag;
    int  verbose_flag;
    int  adc_flag;
    int  raw_flag;
-   int  gain;
-   int  pzc;
    int  http_port;
    int  n_boards;
-   char **board_name;
-   int  *cmd_socket;
-   int  *data_socket;
-   unsigned char **eth_addr;
-   int  trigger_level;
-   float **wf_offset;
+   WDB  board[16];
 } GLOBALS;
 
 // interface functions

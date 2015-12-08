@@ -110,7 +110,7 @@ size_t strlcat(char *dst, const char *src, size_t size)
 
 /*-----------------------------------------------------------------------------------------*/
 
-int interface_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *result, int *size)
+int interface_send(GLOBALS *gl, int b, int timeout_ms, const char *str, char *result, int *size)
 {
    size_t n, i;
    fd_set readfds;
@@ -119,7 +119,7 @@ int interface_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char
    struct sockaddr_in client_addr;
    char   tx_buffer[1600], rx_buffer[1600], prompt[80];
 
-   memcpy(&client_addr, gl->eth_addr[board], sizeof(client_addr));
+   memcpy(&client_addr, gl->board[b].eth_addr, sizeof(client_addr));
    strlcpy(tx_buffer, str, sizeof(tx_buffer));
    if (tx_buffer[strlen(tx_buffer)-1] != '\n')
       strlcat(tx_buffer, "\n", sizeof(tx_buffer));
@@ -129,20 +129,24 @@ int interface_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char
    n = 0;
 
    // assemble prompt
-   strlcpy(prompt, gl->board_name[board], sizeof(prompt));
+   strlcpy(prompt, gl->board[b].name, sizeof(prompt));
    strlcat(prompt, " > ", sizeof(prompt));
    
    // retry max five times
    for (int retry=0 ; retry < 5 ; retry++) {
       
       // send request
-      i = sendto(gl->cmd_socket[board],
+      i = sendto(gl->board[b].cmd_socket,
                  tx_buffer,
                  strlen(tx_buffer),
                  0,
                  (struct sockaddr *)&client_addr,
                  sizeof(client_addr));
-      assert(i == strlen(tx_buffer));
+      
+      if (i != strlen(tx_buffer)) {
+         printf("%s send retry %d\n", gl->board[b].name, retry+1);
+         continue;
+      }
       
       // retrieve reply until prompt is found
       n = 0;
@@ -150,7 +154,7 @@ int interface_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char
          memset(rx_buffer, 0, sizeof(rx_buffer));
          
          FD_ZERO(&readfds);
-         FD_SET(gl->cmd_socket[board], &readfds);
+         FD_SET(gl->board[b].cmd_socket, &readfds);
          
          timeout.tv_sec = timeout_ms / 1000;
          timeout.tv_usec = (timeout_ms % 1000) * 1000;
@@ -159,10 +163,10 @@ int interface_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char
             status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
          } while (status == -1);        /* dont return if an alarm signal was cought */
          
-         if (!FD_ISSET(gl->cmd_socket[board], &readfds))
+         if (!FD_ISSET(gl->board[b].cmd_socket, &readfds))
             break;
          
-         i = recv(gl->cmd_socket[board], rx_buffer, sizeof(rx_buffer), 0);
+         i = recv(gl->board[b].cmd_socket, rx_buffer, sizeof(rx_buffer), 0);
          assert(i > 0);
          
          if (rx_buffer[i-1] == 0) // don't count trailing zero
@@ -182,7 +186,7 @@ int interface_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char
       if (strcmp(rx_buffer+strlen(rx_buffer)-strlen(prompt), prompt) == 0)
          break;
       
-      printf("%s retry %d\n", gl->board_name[board], retry+1);
+      printf("%s retry %d\n", gl->board[b].name, retry+1);
    }
 
    if (n == 0) {
@@ -222,13 +226,6 @@ int interface_init(GLOBALS *gl)
    }
 #endif
 
-   gl->cmd_socket = (int *)malloc(sizeof(int)*gl->n_boards);
-   gl->data_socket = (int *)malloc(sizeof(int)*gl->n_boards);
-   gl->eth_addr = (unsigned char **)malloc(sizeof(unsigned char *)*gl->n_boards);
-   for (int i=0 ; i<gl->n_boards ; i++)
-      gl->eth_addr[i] = (unsigned char *)malloc(sizeof(unsigned char)*16);
-   gl->wf_offset = (float **)malloc(sizeof(float *) * gl->n_boards);
- 
    if (gl->demo_flag)
       return SUCCESS;
    
@@ -236,22 +233,22 @@ int interface_init(GLOBALS *gl)
       
       // create UDB socket for command interpreter on any port
       if (index == 0) {
-         gl->cmd_socket[index] = socket(AF_INET, SOCK_DGRAM, 0);
-         assert(gl->cmd_socket[index]);
+         gl->board[index].cmd_socket = socket(AF_INET, SOCK_DGRAM, 0);
+         assert(gl->board[index].cmd_socket);
       } else
-         gl->cmd_socket[index] = gl->cmd_socket[0]; // reuse socket
+         gl->board[index].cmd_socket = gl->board[0].cmd_socket; // reuse socket
       
       // create UDB socket to receive binary data on port WD2_DATA_PORT
       if (index == 0) {
-         gl->data_socket[index] = socket(AF_INET, SOCK_DGRAM, 0);
-         assert(gl->data_socket[index]);
+         gl->board[index].data_socket = socket(AF_INET, SOCK_DGRAM, 0);
+         assert(gl->board[index].data_socket);
          
          // bind socket to port WD2_DATA_PORT
          memset((char*)&server_addr, 0, sizeof(server_addr));
          server_addr.sin_family = AF_INET;
          server_addr.sin_port = htons(WD2_DATA_PORT);
          server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-         if (bind(gl->data_socket[index], (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+         if (bind(gl->board[index].data_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
             if (errno == 1)
                printf("wds server is already running\n");
             else
@@ -261,24 +258,24 @@ int interface_init(GLOBALS *gl)
          if (gl->verbose_flag)
             printf("Listening on data port %d\n", WD2_DATA_PORT);
       } else
-         gl->data_socket[index] = gl->data_socket[0]; // reuse socket
+         gl->board[index].data_socket = gl->board[0].data_socket; // reuse socket
 
       // retrieve Ethernet address of board
-      phe = gethostbyname(gl->board_name[index]);
+      phe = gethostbyname(gl->board[index].name);
       if (phe == NULL) {
-         printf("Cannot resolve host name \"%s\"\n", gl->board_name[index]);
+         printf("Cannot resolve host name \"%s\"\n", gl->board[index].name);
          return 0;
       }
       memcpy((char *)&client_addr.sin_addr, phe->h_addr, phe->h_length);
       client_addr.sin_family = AF_INET;
       client_addr.sin_port = htons(WD2_CMD_PORT);
       size = sizeof(client_addr);
-      memcpy(gl->eth_addr[index], &client_addr, sizeof(client_addr));
+      memcpy(gl->board[index].eth_addr, &client_addr, sizeof(client_addr));
 
       // check if board is alive
       size = sizeof(reply);
       if (interface_send(gl, index, 1000, "", reply, &size) < 0) {
-         printf("Cannot connect to board \"%s\"\n", gl->board_name[index]);
+         printf("Cannot connect to board \"%s\"\n", gl->board[index].name);
          return 0;
       }
 
@@ -287,7 +284,7 @@ int interface_init(GLOBALS *gl)
          size = sizeof(reply);
          interface_send(gl, index, 1000, "info", reply, &size); // first access long timeout
          if (!size) {
-            printf("Board %s does not reply, aborting.\n", gl->board_name[index]);
+            printf("Board %s does not reply, aborting.\n", gl->board[index].name);
             return 0;
          }
          char *p = strstr(reply, "-- Version");
@@ -295,7 +292,7 @@ int interface_init(GLOBALS *gl)
             char *p2 = strstr(p, "\r\n\r\n");
             if (p2 != NULL)
                *p2 = 0;
-            printf("\n**** Board %s info: ****\n%s", gl->board_name[index], p);
+            printf("\n**** Board %s info: ****\n%s", gl->board[index].name, p);
          }
       }
 
@@ -335,21 +332,21 @@ int interface_init(GLOBALS *gl)
       }
       
       // set input configuration
-      if (gl->pzc) { // pole zero cancellation on (bit=0)
-         if (gl->gain == 0)
+      if (gl->board[index].pzc) { // pole zero cancellation on (bit=0)
+         if (gl->board[index].gain == 0)
             sprintf(str, "feset all 02");
-         else if (gl->gain == 1)
+         else if (gl->board[index].gain == 1)
             sprintf(str, "feset all 1a");
-         else if (gl->gain == 2)
+         else if (gl->board[index].gain == 2)
             sprintf(str, "feset all 3a");
          size = sizeof(reply);
          assert(interface_send(gl, index, 100, str, reply, &size) > 0);
       } else { // pole zero cancellation off (bit=1)
-         if (gl->gain == 0)
+         if (gl->board[index].gain == 0)
             sprintf(str, "feset all 82");
-         else if (gl->gain == 1)
+         else if (gl->board[index].gain == 1)
             sprintf(str, "feset all 9a");
-         else if (gl->gain == 2)
+         else if (gl->board[index].gain == 2)
             sprintf(str, "feset all ba");
          size = sizeof(reply);
          assert(interface_send(gl, index, 100, str, reply, &size) > 0);
@@ -361,20 +358,20 @@ int interface_init(GLOBALS *gl)
 
       // set comparator level
       size = sizeof(reply);
-      sprintf(str, "dacset tlevel1 %d", gl->trigger_level);
+      sprintf(str, "dacset tlevel1 %d", gl->board[index].trigger_level);
       assert(interface_send(gl, index, 100, str, reply, &size) > 0);
       size = sizeof(reply);
-      sprintf(str, "dacset tlevel2 %d", gl->trigger_level);
+      sprintf(str, "dacset tlevel2 %d", gl->board[index].trigger_level);
       assert(interface_send(gl, index, 100, str, reply, &size) > 0);
       size = sizeof(reply);
-      sprintf(str, "dacset tlevel3 %d", gl->trigger_level);
+      sprintf(str, "dacset tlevel3 %d", gl->board[index].trigger_level);
       assert(interface_send(gl, index, 100, str, reply, &size) > 0);
       size = sizeof(reply);
-      sprintf(str, "dacset tlevel4 %d", gl->trigger_level);
+      sprintf(str, "dacset tlevel4 %d", gl->board[index].trigger_level);
       assert(interface_send(gl, index, 100, str, reply, &size) > 0);
       
       // enable local trigger
-      if (gl->trigger_level != 0) {
+      if (gl->board[index].trigger_level != 0) {
          size = sizeof(reply);
          assert(interface_send(gl, index, 100, "regwr d4 FFFF0000", reply, &size) > 0);
          size = sizeof(reply);
@@ -393,14 +390,12 @@ int interface_init(GLOBALS *gl)
       
       // load calibration for board from file (for now...)
       char str[80];
-      sprintf(str, "%s.cal", gl->board_name[index]);
+      sprintf(str, "%s.cal", gl->board[index].name);
       int fh = open(str, O_RDONLY, 0644);
-      if (fh > 0) {
-         gl->wf_offset[index] = (float *)malloc(sizeof(float)*16*1024);
-         assert(read(fh, gl->wf_offset[index], sizeof(float)*16*1024) == sizeof(float)*16*1024);
-      } else
-         gl->wf_offset[index] = NULL;
-      
+      if (fh > 0)
+         assert(read(fh, gl->board[index].wf_offset, sizeof(float)*16*1024) == sizeof(float)*16*1024);
+      else
+         memset(gl->board[index].wf_offset, 0, sizeof(float)*16*1024);;
    }
    
    if (gl->verbose_flag)
@@ -422,7 +417,7 @@ double time_ms()
 
 /*-----------------------------------------------------------------------------------------*/
 
-int interface_read_waveform(GLOBALS *gl, int board, int millisec, float waveform[16][1024])
+int interface_read_waveform(GLOBALS *gl, int b, int millisec, float waveform[16][1024])
 {
    int i, status, waveform_channel, current_frame;
    fd_set readfds;
@@ -447,7 +442,7 @@ int interface_read_waveform(GLOBALS *gl, int board, int millisec, float waveform
    do { // until all channels received
       
       FD_ZERO(&readfds);
-      FD_SET(gl->data_socket[board], &readfds);
+      FD_SET(gl->board[b].data_socket, &readfds);
       
       timeout.tv_sec = millisec / 1000;
       timeout.tv_usec = (millisec % 1000) * 1000;
@@ -466,12 +461,12 @@ int interface_read_waveform(GLOBALS *gl, int board, int millisec, float waveform
          return FAILURE;
       }
       
-      if (FD_ISSET(gl->data_socket[board], &readfds)) {
+      if (FD_ISSET(gl->board[b].data_socket, &readfds)) {
          int len, n;
          
          // packet is available, so receive it
          len = sizeof(remote_addr);
-         n = (int)recvfrom(gl->data_socket[board], (char *)buffer, sizeof(buffer), 0,
+         n = (int)recvfrom(gl->board[b].data_socket, (char *)buffer, sizeof(buffer), 0,
                            (struct sockaddr *)&remote_addr, (socklen_t *)&len);
          if (n > sizeof(WD2_FRAME_HEADER)) {
             ph = (WD2_FRAME_HEADER *)buffer;
@@ -510,6 +505,10 @@ int interface_read_waveform(GLOBALS *gl, int board, int millisec, float waveform
             // drop whole frame if package of next frame received
             if (ph->readout_sequence_number > current_frame) {
                printf("Frame dropped, package frame=%d, current frame=%d\n", ph->readout_sequence_number, current_frame);
+
+               // switch to new frame
+               current_frame = ph->readout_sequence_number;
+               
                // tag waveforms as invalid
                for (i=0 ; i<16 ; i++) {
                   waveform[i][0]   = nanf("");
@@ -553,12 +552,9 @@ int interface_read_waveform(GLOBALS *gl, int board, int millisec, float waveform
                    break;
             if (i == 16) {
                // calibrate waveforms
-               if (gl->wf_offset[board] != NULL) {
-                  for (i=0 ; i<16 ; i++)
-                     for (int j=0 ; j<1024 ; j++)
-                        waveform[i][j] -= gl->wf_offset[board][i*1024+j];
-               }
-               
+               for (i=0 ; i<16 ; i++)
+                  for (int j=0 ; j<1024 ; j++)
+                     waveform[i][j] -= gl->board[b].wf_offset[i][j];
                return SUCCESS;
             }
             
@@ -588,7 +584,7 @@ int interface_calibrate(GLOBALS *gl)
    for (int board=0 ; board<gl->n_boards ; board++) {
 
       printf("%s: [                                                 ]\r%s: [",
-             gl->board_name[board], gl->board_name[board]);
+             gl->board[board].name, gl->board[board].name);
       fflush(stdout);
       
       memset(awf, 0, sizeof(awf));
@@ -619,7 +615,7 @@ int interface_calibrate(GLOBALS *gl)
       
       // save calibration
       char str[80];
-      sprintf(str, "%s.cal", gl->board_name[board]);
+      sprintf(str, "%s.cal", gl->board[board].name);
       int fh = open(str, O_WRONLY | O_CREAT, 0644);
       assert(fh > 0);
 
