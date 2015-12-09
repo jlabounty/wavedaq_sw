@@ -372,7 +372,7 @@ int wd_init(GLOBALS *gl)
    
       // set DRS readout mode to ROI
       // assert(wd_send(gl, index, 100, "regwr 10 0D0C0020", NULL, NULL) > 0);
-      assert(wd_send(gl, index, 100, "regwr 10 0D0C0010", NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, "regwr 10 0D0C0030", NULL, NULL) > 0);
       
       
       // load calibration for board from file (for now...)
