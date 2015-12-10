@@ -61,10 +61,10 @@ int tcb_poll_event() {
 //read event
 int tcb_read_event(){
   //read memories and address
-  TCBBoard.ReadMemory(handle, 0, memdata);
-  TCBBoard.ReadMemory(handle, 1, memdata+32);
-  TCBBoard.ReadMemory(handle, 2, memdata+64);
-  TCBBoard.ReadMemory(handle, 3, memdata+96);
+  TCBBoard.ReadMemoryBLT(handle, 0, memdata);
+  TCBBoard.ReadMemoryBLT(handle, 1, memdata+32);
+  TCBBoard.ReadMemoryBLT(handle, 2, memdata+64);
+  TCBBoard.ReadMemoryBLT(handle, 3, memdata+96);
   TCBBoard.GetMemoryAddress(handle,&memaddr);
   // counters and trg type
   TCBBoard.GetTriggerCounters(handle,trgcounters);

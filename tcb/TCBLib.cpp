@@ -28,6 +28,18 @@ void TCB::ReadReg(int handle, u_int32_t addr, u_int32_t *data) {
   for (int i=0 ; i<4 ; i++)  
     *data |= ((u_int32_t) dbuf[3-i]&0xff)<<(i*8); //"(i*8)" as a byte swap
 }
+//
+// general read register function
+void TCB::ReadBLT(int handle, u_int32_t addr, u_int32_t *data, int nword) {
+  char dbuf[1024];
+  mscb_read_mem(handle, 0, fslot, addr&0xff, &dbuf, nword*4); //4*nword: it is in number of bytes
+  for (int iword=0 ; iword<nword ; iword++)  {
+    data[iword] = 0;
+    for(int ibyte = 0; ibyte<4; ibyte++)
+      data[iword] |= ((u_int32_t) dbuf[(iword*4+3)-ibyte]&0xff)<<(ibyte*8); //"(i*8)" as a byte swap
+  }
+}
+//
 // prescaling values setting
 void TCB::SetPrescaling(int handle, u_int32_t *presca) {
   int status;
@@ -76,6 +88,15 @@ void TCB::ReadMemory(int handle, int which, u_int32_t *data) {
   for(int icell = 0; icell<32; icell++) {
     ReadReg(handle,addr+icell,data+icell);
   }
+}
+//
+// Read all the memories with bly 
+void TCB::ReadMemoryBLT(int handle, int which, u_int32_t *data) {
+  u_int32_t addr;
+  // set the address as a function of the addressed memory
+  addr = kaddrmem[which];
+  // now loop to write the 32 memory cells
+  ReadBLT(handle,addr,data,32);
 }
 //
 // activate the RUNMODE signal
@@ -198,9 +219,7 @@ void TCB::GetTriggerType(int handle, u_int32_t *type, u_int32_t *tpattern) {
 //
 // read total time
 void TCB::GetTriggerCounters(int handle, u_int32_t *data) {
-  for(int icou = 0; icou<4; icou++) {
-    ReadReg(handle,kaddrcou[icou],data+icou);
-  }
+    ReadBLT(handle,kaddrcou[0],data,4);
 }
 //
 // write in data masks
@@ -219,7 +238,5 @@ void TCB::GetMemoryAddress(int handle, u_int32_t *data) {
 // read time stamps
 void TCB::GetTimeStamps(int handle, u_int32_t *data) {
   u_int32_t addr = TIMESTP0;
-  for(int itst = 0; itst<32; itst++) {
-    ReadReg(handle,addr+itst,data+itst);
-  }
+  ReadBLT(handle,addr,data,32);
 }

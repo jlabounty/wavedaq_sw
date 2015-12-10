@@ -26,6 +26,7 @@ int main()
   u_int32_t wdata[128];
   FILE *filin, *filout, *filpresca, *filmasks, *filswmasks, *filrew;
   u_int32_t rdata[32] = {0}, tdata[32] = {0};
+  u_int32_t rdatablt[128] = {0};
   u_int32_t rmem[128], memAddress, memRewind;
   u_int32_t presca[4], counters[4], masks[4], swmasks[4]={0};
   int loopnumber=10;
@@ -125,17 +126,18 @@ int main()
     //
     if(option == 10) {
       printf(" opt = 10 : Read memories (to readram.dat file) ... \n");
-      t_before = clock();
+      //      for(int imem = 0; imem<4; imem++) {
+      //	TCBBoard.ReadMemory(handle,imem,rdata);
+      //      }
+      //
       filout = fopen("readram.dat","w");
-      for(int imem = 0; imem<4; imem++) {
-	TCBBoard.ReadMemory(handle,imem,rdata);
-	for(int icell = 0; icell<32; icell++) {
-	  fprintf(filout,"%08x\n",rdata[icell]);
-	}
+      for(int imem = 0; imem<4; imem++) 
+	TCBBoard.ReadMemoryBLT(handle,imem,rdatablt+imem*32);
+      for(int icell = 0; icell<128; icell++) {
+	fprintf(filout,"%08x\n",rdatablt[icell]);
       }
-      t_after = clock();
       fclose(filout);
-      printf ("It took me %lu clicks (%f seconds).\n",t_after-t_before,((float)(t_after-t_before))/CLOCKS_PER_SEC);
+      
     }
     if(option == 11) {
       printf(" opt = 1 : Get TotalTime ... \n");

@@ -38,6 +38,8 @@ class TCB {
   void WriteReg(int, u_int32_t, u_int32_t*);
   // general read register function
   void ReadReg(int, u_int32_t, u_int32_t*);
+  // general read block transfer function
+  void ReadBLT(int, u_int32_t, u_int32_t*,int);
   // prescaling values setting
   void SetPrescaling(int, u_int32_t*);
   // read prescaling values
@@ -48,6 +50,8 @@ class TCB {
   void WriteMemory(int,int,u_int32_t*);
   // read a memory
   void ReadMemory(int,int,u_int32_t*);
+  // read all memories
+  void ReadMemoryBLT(int,int,u_int32_t*);
   // set the runmode
   void GoRun(int);
   // get the runmode status
