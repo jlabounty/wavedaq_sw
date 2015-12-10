@@ -273,11 +273,13 @@ int wd_init(GLOBALS *gl)
       memcpy(gl->board[index].eth_addr, &client_addr, sizeof(client_addr));
 
       // check if board is alive
-      size = sizeof(reply);
-      if (wd_send(gl, index, 1000, "", reply, &size) < 0) {
+      if (wd_send(gl, index, 1000, "", NULL, NULL) < 0) {
          printf("Cannot connect to board \"%s\"\n", gl->board[index].name);
          return 0;
       }
+      
+      // set dbglevel none
+      assert(wd_send(gl, index, 100, "dbglvl none", NULL, NULL) > 0);
 
       // print board info
       if (gl->verbose_flag) {
@@ -300,7 +302,7 @@ int wd_init(GLOBALS *gl)
       sprintf(str, "setenv dstport %d", WD2_DATA_PORT);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       if (gl->verbose_flag)
-         printf("Set dstport    = %d\n", WD2_DATA_PORT);
+         printf("Set dstport       = %d\n", WD2_DATA_PORT);
 
       // set MAC address and IP address of this computer in WD board
       assert(wd_send(gl, index, 100, "cfgdst", NULL, NULL) > 0);
@@ -308,25 +310,17 @@ int wd_init(GLOBALS *gl)
       if (gl->verbose_flag) {
          size = sizeof(reply);
          wd_send(gl, index, 100, "printenv -n ethaddrdst", reply, &size);
-         if (strstr(reply+2, "\r")) {
-            p = strstr(reply+2, "\r")+1;
-            if (strchr(p, '\n'))
-               *strchr(p, '\n') = 0;
-         } else
-            p = reply;
+         if (strchr(reply, '\n'))
+            *strchr(reply, '\n') = 0;
          if (gl->verbose_flag)
-            printf("Set ethaddrdst = %s\n", p);
+            printf("Set ethaddrdst    = %s\n", reply);
          
          size = sizeof(reply);
          wd_send(gl, index, 100, "printenv -n ipaddrdst", reply, &size);
-         if (strstr(reply+2, "\r")) {
-            p = strstr(reply+2, "\r")+1;
-            if (strchr(p, '\n'))
-               *strchr(p, '\n') = 0;
-         } else
-            p = reply;
+         if (strchr(reply, '\n'))
+            *strchr(reply, '\n') = 0;
          if (gl->verbose_flag)
-            printf("Set ipaddrdst  = %s\n", p);
+            printf("Set ipaddrdst     = %s\n", reply);
       }
       
       // set input configuration
@@ -352,6 +346,8 @@ int wd_init(GLOBALS *gl)
       assert(wd_send(gl, index, 100, "pwrcmp on", NULL, NULL) > 0);
 
       // set comparator level
+      if (gl->verbose_flag)
+         printf("Set trigger level = %d mV\n", gl->board[index].trigger_level);
       sprintf(str, "dacset tlevel1 %d", gl->board[index].trigger_level);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       sprintf(str, "dacset tlevel2 %d", gl->board[index].trigger_level);
