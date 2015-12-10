@@ -542,9 +542,11 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, float waveform[16][1024])
                    break;
             if (i == 16) {
                // calibrate waveforms
-               for (i=0 ; i<16 ; i++)
-                  for (int j=0 ; j<1024 ; j++)
-                     waveform[i][j] -= gl->board[b].wf_offset[i][j];
+               if (!gl->adc_flag) {
+                  for (i=0 ; i<16 ; i++)
+                     for (int j=0 ; j<1024 ; j++)
+                        waveform[i][j] -= gl->board[b].wf_offset[i][j];
+               }
                return SUCCESS;
             }
             
