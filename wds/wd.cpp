@@ -359,8 +359,10 @@ int wd_init(GLOBALS *gl)
       
       // enable local trigger
       if (gl->board[index].trigger_level != 0) {
+         // trigger_cfg_or
          assert(wd_send(gl, index, 100, "regwr d4 FFFF0000", NULL, NULL) > 0);
-         assert(wd_send(gl, index, 100, "regwr d8 00080000", NULL, NULL) > 0);
+         // trigger_enable, trigger_falling_edge
+         assert(wd_send(gl, index, 100, "regwr d8 000C0000", NULL, NULL) > 0);
       } else {
          assert(wd_send(gl, index, 100, "regwr d4 00000000", NULL, NULL) > 0);
          assert(wd_send(gl, index, 100, "regwr d8 00000000", NULL, NULL) > 0);
@@ -368,7 +370,7 @@ int wd_init(GLOBALS *gl)
    
       // set DRS readout mode to ROI
       // assert(wd_send(gl, index, 100, "regwr 10 0D0C0020", NULL, NULL) > 0);
-      assert(wd_send(gl, index, 100, "regwr 10 0D0C0030", NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, "regwr 10 0D0D0030", NULL, NULL) > 0);
       
       
       // load calibration for board from file (for now...)
