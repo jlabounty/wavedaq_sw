@@ -360,7 +360,8 @@ int wd_init(GLOBALS *gl)
       // enable local trigger
       if (gl->board[index].trigger_level != 0) {
          // trigger_cfg_or
-         assert(wd_send(gl, index, 100, "regwr d4 FFFF0000", NULL, NULL) > 0);
+         sprintf(str, "regwr d4 %s", gl->board[index].trigger_mask);
+         assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
          // trigger_enable, trigger_falling_edge
          assert(wd_send(gl, index, 100, "regwr d8 000C0000", NULL, NULL) > 0);
       } else {

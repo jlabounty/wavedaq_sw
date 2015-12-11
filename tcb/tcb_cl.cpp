@@ -32,7 +32,7 @@ int main()
   int loopnumber=10;
   clock_t t_before, t_after;
   // open mscb connection
-  handle = mscb_init("212.189.155.62", 0, "", 0);
+  handle = mscb_init("mscb176", 0, "", 0);
   // create TCB Board
   TCB TCBBoard(17);
   TCBBoard.SetIDCode(handle);

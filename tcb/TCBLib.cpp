@@ -4,6 +4,8 @@
 #include "mscb.h"
 #include "TCBLib.h"
 
+#define MSCB_ADDR 20
+
 u_int32_t kaddrpre[5] = {RPRESCA0,RPRESCA1,RPRESCA2,RPRESCA3,RPRESCA4};
 u_int32_t kaddrmem[4] = {RMEM0,RMEM1,RMEM2,RMEM3};
 u_int32_t kaddrcou[5] = {RTRGCOU0,RTRGCOU1,RTRGCOU2,RTRGCOU3,RTRGCOU4};
@@ -14,7 +16,7 @@ void TCB::WriteReg(int handle, u_int32_t addr, u_int32_t *data) {
   int status;
   // before than writing we have to perform a byteswap
   u_int32_t wdata = ((*data&0xff)<<24) | ((*data&0xff00)<<8) | ((*data&0xff0000)>>8) | ((*data&0xff000000)>>24);
-  status = mscb_write_mem(handle, 0, fslot, addr&0xff, &wdata, sizeof(data));
+  status = mscb_write_mem(handle, MSCB_ADDR, fslot, addr&0xff, &wdata, sizeof(data));
   // print something only in case of error
   if (status != 1)
     printf("Error: status = %d\n", status);
@@ -24,7 +26,7 @@ void TCB::WriteReg(int handle, u_int32_t addr, u_int32_t *data) {
 void TCB::ReadReg(int handle, u_int32_t addr, u_int32_t *data) {
   char dbuf[1024];
   *data = 0;
-  mscb_read_mem(handle, 0, fslot, addr&0xff, &dbuf, 4);
+  mscb_read_mem(handle, MSCB_ADDR, fslot, addr&0xff, &dbuf, 4);
   for (int i=0 ; i<4 ; i++)  
     *data |= ((u_int32_t) dbuf[3-i]&0xff)<<(i*8); //"(i*8)" as a byte swap
 }
@@ -32,7 +34,7 @@ void TCB::ReadReg(int handle, u_int32_t addr, u_int32_t *data) {
 // general read register function
 void TCB::ReadBLT(int handle, u_int32_t addr, u_int32_t *data, int nword) {
   char dbuf[1024];
-  mscb_read_mem(handle, 0, fslot, addr&0xff, &dbuf, nword*4); //4*nword: it is in number of bytes
+  mscb_read_mem(handle, MSCB_ADDR, fslot, addr&0xff, &dbuf, nword*4); //4*nword: it is in number of bytes
   for (int iword=0 ; iword<nword ; iword++)  {
     data[iword] = 0;
     for(int ibyte = 0; ibyte<4; ibyte++)
