@@ -18,7 +18,9 @@ int tcb_init() {
   fscanf(infile,"%*s %x",presca+1);
   fscanf(infile,"%*s %x",presca+2);
   fscanf(infile,"%*s %x",presca+3);
+  fscanf(infile,"%*s %x",presca+4);
   fscanf(infile,"%*s %x",&multthr);
+  fscanf(infile,"%*s %x",&trgdly);
   fscanf(infile,"%*s %x %x %x %x",chamask, chamask+1, chamask+2, chamask+3);
   fclose(infile);
   // load RRUN register
@@ -30,6 +32,8 @@ int tcb_init() {
   TCBBoard.SetDataMasks(handle,chamask);
   // load multiplicity threshold
   TCBBoard.SetTHRMult(handle,&multthr);
+  // load trigger delay
+  TCBBoard.SetTRGDLY(handle,&trgdly);
   // give a SW Sync
   TCBBoard.SWSync(handle);
   // give a SW stop to go idle 

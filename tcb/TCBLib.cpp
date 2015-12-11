@@ -4,9 +4,9 @@
 #include "mscb.h"
 #include "TCBLib.h"
 
-u_int32_t kaddrpre[4] = {RPRESCA0,RPRESCA1,RPRESCA2,RPRESCA3};
+u_int32_t kaddrpre[5] = {RPRESCA0,RPRESCA1,RPRESCA2,RPRESCA3,RPRESCA4};
 u_int32_t kaddrmem[4] = {RMEM0,RMEM1,RMEM2,RMEM3};
-u_int32_t kaddrcou[4] = {RTRGCOU0,RTRGCOU1,RTRGCOU2,RTRGCOU3};
+u_int32_t kaddrcou[5] = {RTRGCOU0,RTRGCOU1,RTRGCOU2,RTRGCOU3,RTRGCOU4};
 u_int32_t kaddrdmask[4] = {RIDMASK0,RIDMASK1,RIDMASK2,RIDMASK3};
 
 //general write register function
@@ -45,7 +45,7 @@ void TCB::SetPrescaling(int handle, u_int32_t *presca) {
   int status;
   //load the prescaling values;
   // loop on prescaling values
-  for(int ireg=0; ireg<4; ireg++) {
+  for(int ireg=0; ireg<5; ireg++) {
     WriteReg(handle, kaddrpre[ireg],presca+ireg);
   }   
 } //end SetPrescaling
@@ -54,7 +54,7 @@ void TCB::SetPrescaling(int handle, u_int32_t *presca) {
 void TCB::GetPrescaling(int handle, u_int32_t *presca) {
   //load the prescaling values;
   //read loop on prescaling registers
-  for(int ireg = 0; ireg<4; ireg++) 
+  for(int ireg = 0; ireg<5; ireg++) 
     ReadReg(handle,kaddrpre[ireg],presca+ireg); 
 } //end GetPrescaling 
 //
@@ -168,10 +168,22 @@ void TCB::SetRRUN(int handle, u_int32_t *data) {
   WriteReg(handle,addr,data);
 }
 //
-// write the RRUN register
+// write the THRMult register
 void TCB::SetTHRMult(int handle, u_int32_t *data) {
   u_int32_t addr = RTHRMULT;
   WriteReg(handle,addr,data);
+}
+//
+// write the TRGDLY register
+void TCB::SetTRGDLY(int handle, u_int32_t *data) {
+  u_int32_t addr = RTRGDLY;
+  WriteReg(handle,addr,data);
+}
+//
+// read the TRGDLY register
+void TCB::GetTRGDLY(int handle, u_int32_t *data) {
+  u_int32_t addr = RTRGDLY;
+  ReadReg(handle,addr,data);
 }
 //
 // write the RRUN register
@@ -182,7 +194,7 @@ void TCB::GetRRUN(int handle, u_int32_t *data) {
   printf(" INBUSY status %x \n",(*data&0x2)>>1);
   printf(" FADCMODE status %x \n",(*data&0x4)>>2);
   printf(" EXBUSY status %x \n",(*data&0x8)>>3);
-  printf(" TRGENA status %x \n",(*data&0xf00)>>8);
+  printf(" TRGENA status %x \n",(*data&0x1f00)>>8);
   printf(" MASKBUSY status %x \n",(*data&0x2000)>>13);
   printf(" MASKSYNC status %x \n",(*data&0x4000)>>14);
   printf(" MASKTRG status %x \n",(*data&0x8000)>>15);
@@ -213,13 +225,13 @@ void TCB::GetTriggerType(int handle, u_int32_t *type, u_int32_t *tpattern) {
   u_int32_t data;
   ReadReg(handle,addr,&data);
   //extract trigger type
-  *type = data&0x3;
-  *tpattern = (data&0xf0000)>>16;
+  *type = data&0x7;
+  *tpattern = (data&0x1f0000)>>16;
 }
 //
 // read total time
 void TCB::GetTriggerCounters(int handle, u_int32_t *data) {
-    ReadBLT(handle,kaddrcou[0],data,4);
+    ReadBLT(handle,kaddrcou[0],data,5);
 }
 //
 // write in data masks
