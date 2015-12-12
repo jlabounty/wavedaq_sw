@@ -148,6 +148,7 @@ int main(int argc, char *argv[]) {
       { "calibrate",   no_argument,        NULL, 'c' },
       { "demo",        no_argument,        NULL, 'd' },
       { "gain",        required_argument,  NULL, 'g' },
+      { "mask",        required_argument,  NULL, 'm' },
       { "port",        required_argument,  NULL, 'p' },
       { "tlevel",      required_argument,  NULL, 't' },
       { "raw",         required_argument,  NULL, 'r' },
@@ -164,12 +165,13 @@ int main(int argc, char *argv[]) {
       gl.board[i].trigger_level = 0;
       gl.board[i].gain = 0; // gain 1
       gl.board[i].pzc = 0;  // PZC off
+      strcpy(gl.board[i].trigger_mask, "FFFF0000"); // or of all 16 channels
    }
    
    i1 = 0;
    i2 = 15;
    
-   while ((ch = getopt_long(argc, argv, "acdg:p:t:rvw:z", longopts, NULL)) != -1) {
+   while ((ch = getopt_long(argc, argv, "acdg:m:p:t:rvw:z", longopts, NULL)) != -1) {
       switch (ch) {
          case 'a':
             gl.adc_flag = 1;
@@ -184,6 +186,16 @@ int main(int argc, char *argv[]) {
             if (optarg)
                for (i=0 ; i<16 ; i++)
                   gl.board[i].gain = atoi(optarg);
+            break;
+         case 'm':
+            if (optarg) {
+               if (strlen(optarg) != 8) {
+                  printf("invalid trigger mask, please use xxxxyyyy\n");
+                  return 1;
+               }
+               for (i=0 ; i<16 ; i++)
+                  strlcpy(gl.board[i].trigger_mask, optarg, sizeof(gl.board[i].trigger_mask));
+            }
             break;
          case 'p':
             if (optarg)
@@ -231,6 +243,7 @@ int main(int argc, char *argv[]) {
             printf(" -d --demo        Demo mode\n");
             printf(" -g --gain        Input gain (0=1, 1=10, 2=100)\n");
             printf(" -t --tlevel      Trigger level in mV (0=auto)\n");
+            printf(" -m --mask        Trigger mask xxxxyyyy (xxxx=16 bit OR, yyyy=16bit AND)\n");
             printf(" -p --port        HTTP server port\n");
             printf(" -r --raw         Show raw (uncalibrated) data\n");
             printf(" -w --wd          Internet address of WaveDREAM board\n");

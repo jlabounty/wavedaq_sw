@@ -1,12 +1,13 @@
 #define RRUN          0x00                      // run control 
-#define RPRESCA0      0x10                      // prescaling0 
-#define RPRESCA1      0x11                      // prescaling1 
-#define RPRESCA2      0x12                      // prescaling2 
-#define RPRESCA3      0x13                      // prescaling3 
-#define RIDMASK0      0x14                      // mask indata(31:0)
-#define RIDMASK1      0x15                      // mask indata(63:32)
-#define RIDMASK2      0x16                      // mask indata(95:64)
-#define RIDMASK3      0x17                      // mask indata(127:96)
+#define RPRESCA0      0x10                      // prescaling0 - track-like
+#define RPRESCA1      0x11                      // prescaling1 - multiplicity
+#define RPRESCA2      0x12                      // prescaling2 - tile single
+#define RPRESCA3      0x13                      // prescaling3 - laser
+#define RPRESCA4      0x14                      // prescaling4 - pedestal 
+#define RIDMASK0      0x15                      // mask indata(31:0)
+#define RIDMASK1      0x16                      // mask indata(63:32)
+#define RIDMASK2      0x17                      // mask indata(95:64)
+#define RIDMASK3      0x18                      // mask indata(127:96)
 #define RTOTTIME      0x20                      // total time 
 #define RLIVETIME     0x21                      // live time 
 #define REVECOU       0x22                      // event counter 
@@ -15,8 +16,10 @@
 #define RTRGCOU1      0x41                      // trigger counter1
 #define RTRGCOU2      0x42                      // trigger counter2
 #define RTRGCOU3      0x43                      // trigger counter3
+#define RTRGCOU4      0x44                      // trigger counter4
 #define TIMESTP0      0x50                      // base address of time stamps (32 integers) 
 #define RTHRMULT      0x70                      // multiplicity threshold 
+#define RTRGDLY       0x71                      // trigger delay register
 #define RMEMADDR      0x7F                      // memory address
 #define RMEM0         0x80                      // memory 0 
 #define RMEM1         0xA0                      // memory 1 
@@ -64,8 +67,12 @@ class TCB {
   void SWStop(int);
   // set rrun register
   void SetRRUN(int,u_int32_t*);
-  // set rrun register
+  // set multiplicity register
   void SetTHRMult(int,u_int32_t*);
+  // set trigger delay
+  void SetTRGDLY(int,u_int32_t*);
+  // get trigger delay
+  void GetTRGDLY(int,u_int32_t*);
   // get rrun register
   void GetRRUN(int,u_int32_t*);
   // read total time 

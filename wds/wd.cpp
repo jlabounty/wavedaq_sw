@@ -359,15 +359,18 @@ int wd_init(GLOBALS *gl)
       
       // enable local trigger
       if (gl->board[index].trigger_level != 0) {
-         assert(wd_send(gl, index, 100, "regwr d4 FFFF0000", NULL, NULL) > 0);
-         assert(wd_send(gl, index, 100, "regwr d8 00080000", NULL, NULL) > 0);
+         // trigger_cfg_or
+         sprintf(str, "regwr d4 %s", gl->board[index].trigger_mask);
+         assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+         // trigger_enable, trigger_falling_edge
+         assert(wd_send(gl, index, 100, "regwr d8 000C0000", NULL, NULL) > 0);
       } else {
          assert(wd_send(gl, index, 100, "regwr d4 00000000", NULL, NULL) > 0);
          assert(wd_send(gl, index, 100, "regwr d8 00000000", NULL, NULL) > 0);
       }
    
       // set DRS readout mode to ROI
-      // assert(wd_send(gl, index, 100, "regwr 10 0D0D0020", NULL, NULL) > 0);
+      // assert(wd_send(gl, index, 100, "regwr 10 0D0C0020", NULL, NULL) > 0);
       assert(wd_send(gl, index, 100, "regwr 10 0D0D0030", NULL, NULL) > 0);
       
       

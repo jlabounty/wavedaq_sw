@@ -13,7 +13,7 @@
 // global variables to be copied
 TCB TCBBoard(17);
 int handle;
-u_int32_t memdata[128], memaddr, tdc[32], totaltime, livetime, hwevecou, trgtype, trgpattern, trgcounters[4];
+u_int32_t memdata[128], memaddr, tdc[32], totaltime, livetime, hwevecou, trgtype, trgpattern, trgcounters[5];
 u_int32_t fadcmode;
-u_int32_t trgena, trgbusmask, presca[4], multthr, chamask[4];
+u_int32_t trgena, trgbusmask, presca[5], multthr, chamask[4], trgdly;
 FILE *infile;

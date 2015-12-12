@@ -18,6 +18,7 @@ typedef struct {
    int  data_socket;
    unsigned char eth_addr[16];
    int  trigger_level;
+   char  trigger_mask[10];
    int  gain;
    int  pzc;
    float wf_offset[16][1024];

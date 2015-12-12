@@ -28,11 +28,11 @@ int main()
   u_int32_t rdata[32] = {0}, tdata[32] = {0};
   u_int32_t rdatablt[128] = {0};
   u_int32_t rmem[128], memAddress, memRewind;
-  u_int32_t presca[4], counters[4], masks[4], swmasks[4]={0};
+  u_int32_t presca[5], counters[5], masks[4], swmasks[4]={0};
   int loopnumber=10;
   clock_t t_before, t_after;
   // open mscb connection
-  handle = mscb_init("212.189.155.62", 0, "", 0);
+  handle = mscb_init("mscb176", 0, "", 0);
   // create TCB Board
   TCB TCBBoard(17);
   TCBBoard.SetIDCode(handle);
@@ -49,7 +49,8 @@ int main()
     printf("[15]: Read Trigger Counters\t \t  [16]: Read memory address\n");
     printf("[17]: Read Time Stamps     \t \t  [18]: Set in data masks\n");
     printf("[19]: Setup multiple run   \t \t  [20]: Run multiple\n");
-    printf("[21]: Select Slot          \t \t  [-1]: Exit\n");
+    printf("[21]: Select Slot          \t \t  [22]: Set trigger 3 delay\n");
+    printf("[-1]: Exit\n");
 
     do {
       printf("Give an option: ");
@@ -100,7 +101,7 @@ int main()
     if(option == 7) {
       printf(" opt = 7 : Set precaling values (from presca.dat file) ... \n");
       filpresca = fopen("presca.dat","read");
-      for(int irow = 0; irow<4; irow++) {
+      for(int irow = 0; irow<5; irow++) {
 	fscanf(filpresca,"%x\n",presca+irow);
       }
       TCBBoard.SetPrescaling(handle,presca);
@@ -162,7 +163,7 @@ int main()
     if(option == 15) {
       printf(" opt = 15 : Get Trigger Counters ... \n");
       TCBBoard.GetTriggerCounters(handle,counters);
-      for(int icou = 0; icou<4; icou++)
+      for(int icou = 0; icou<5; icou++)
 	printf("\n   Trigger Counter %d = %d\n",icou,counters[icou]);
     }
     if(option == 16) {
@@ -224,11 +225,19 @@ int main()
       printf("\n Run completed, %d events collected\n",loopnumber);
       fclose(filrew);
     }
+    //
     if(option == 21) {
       printf(" opt = 19 : Set slot ... \n");
       printf("Slot?\n");
       scanf("%d",&data);
       TCBBoard.fslot = data;
+    }
+    //
+    if(option == 22) {
+      printf(" opt = 22 : Set trigger delay ... \n");
+      printf("Trigger delay (in clk ticks (10ns))?\n");
+      scanf("%x",&data);
+      TCBBoard.SetTRGDLY(handle,&data);
     }
 
 
