@@ -32,7 +32,7 @@ int main()
   int loopnumber=10;
   clock_t t_before, t_after;
   // open mscb connection
-  handle = mscb_init("mscb176", 0, "", 0);
+  handle = mscb_init("mscb178", 0, "", 0);
   // create TCB Board
   TCB TCBBoard(17);
   TCBBoard.SetIDCode(handle);
@@ -102,7 +102,7 @@ int main()
       printf(" opt = 7 : Set precaling values (from presca.dat file) ... \n");
       filpresca = fopen("presca.dat","read");
       for(int irow = 0; irow<5; irow++) {
-	fscanf(filpresca,"%x\n",presca+irow);
+        fscanf(filpresca,"%x\n",presca+irow);
       }
       TCBBoard.SetPrescaling(handle,presca);
     }
@@ -118,24 +118,24 @@ int main()
       printf(" opt = 9 : Write memories (from writeram.dat file) ... \n");
       filin = fopen("writeram.dat","read");
       for(int irow = 0; irow<128; irow++) {
-	fscanf(filin,"%x\n",wdata+irow);
+        fscanf(filin,"%x\n",wdata+irow);
       }
       fclose(filin);
       for(int imem = 0; imem<4; imem++)
-	TCBBoard.WriteMemory(handle,imem,wdata+imem*32);
+        TCBBoard.WriteMemory(handle,imem,wdata+imem*32);
     }
     //
     if(option == 10) {
       printf(" opt = 10 : Read memories (to readram.dat file) ... \n");
       //      for(int imem = 0; imem<4; imem++) {
-      //	TCBBoard.ReadMemory(handle,imem,rdata);
+      //        TCBBoard.ReadMemory(handle,imem,rdata);
       //      }
       //
       filout = fopen("readram.dat","w");
       for(int imem = 0; imem<4; imem++) 
-	TCBBoard.ReadMemoryBLT(handle,imem,rdatablt+imem*32);
+        TCBBoard.ReadMemoryBLT(handle,imem,rdatablt+imem*32);
       for(int icell = 0; icell<128; icell++) {
-	fprintf(filout,"%08x\n",rdatablt[icell]);
+        fprintf(filout,"%08x\n",rdatablt[icell]);
       }
       fclose(filout);
       
@@ -164,7 +164,7 @@ int main()
       printf(" opt = 15 : Get Trigger Counters ... \n");
       TCBBoard.GetTriggerCounters(handle,counters);
       for(int icou = 0; icou<5; icou++)
-	printf("\n   Trigger Counter %d = %d\n",icou,counters[icou]);
+        printf("\n   Trigger Counter %d = %d\n",icou,counters[icou]);
     }
     if(option == 16) {
       printf(" opt = 16 : Get Memory address ... \n");
@@ -176,13 +176,13 @@ int main()
       TCBBoard.GetTimeStamps(handle,tdata);
       printf("\n   Time Stamps \n");
       for (int itst=0;itst<32;itst++)
-	printf(" discr [%03d:%03d]: 0x%08x\n",4*itst+3,4*itst,tdata[itst]);
+        printf(" discr [%03d:%03d]: 0x%08x\n",4*itst+3,4*itst,tdata[itst]);
     }
     if(option == 18) {
       printf(" opt = 18 : Set precaling values (from indatamask.dat file) ... \n");
       filmasks = fopen("indatamask.dat","read");
       for(int imsk = 0; imsk<4; imsk++) {
-	fscanf(filmasks,"%x\n",masks+imsk);
+        fscanf(filmasks,"%x\n",masks+imsk);
       }
       TCBBoard.SetDataMasks(handle,masks);
     }
@@ -192,7 +192,7 @@ int main()
         filswmasks = fopen("indatamask.dat","read");
         for(int imsk = 0; imsk<4; imsk++) {
             fscanf(filswmasks,"%x\n",swmasks+imsk);
-	}
+        }
         printf("How many times to run?\n");
         scanf("%d", &loopnumber);
     }
@@ -202,25 +202,25 @@ int main()
       u_int32_t time;
       filrew = fopen("output.dat", "write");
       for(int ieve=0; ieve<loopnumber;ieve++){
-	fprintf(filrew," %d ",ieve);
-	TCBBoard.RemoveBusy(handle);
-	TCBBoard.GoRun(handle);
-	while(TCBBoard.IsRunning(handle));
-	for (int imem=0;imem<4;imem++){
-	  TCBBoard.ReadMemory(handle, imem, rmem+(imem*32));
-	}
-	TCBBoard.GetTimeStamps(handle, tdata);
-	TCBBoard.GetMemoryAddress(handle, &memAddress);
-	
-	for (int icha=0;icha<128;icha++){
-	  if(swmasks[icha/32] & (0x1<<(icha%32))){
-	    MemoryRewind(icha, memAddress, rmem, &memRewind);
-	    time = (tdata[icha/4] >> ((icha%4)*8)) & 0xFF;
-	    fprintf(filrew, " %03d %08x %02x ",icha, memRewind, time);
-	   }	  
-	}
-	fprintf(filrew,"\n");
-	if (!(ieve%100)) printf(" Event %d\r",ieve);
+        fprintf(filrew," %d ",ieve);
+        TCBBoard.RemoveBusy(handle);
+        TCBBoard.GoRun(handle);
+        while(TCBBoard.IsRunning(handle));
+        for (int imem=0;imem<4;imem++){
+          TCBBoard.ReadMemory(handle, imem, rmem+(imem*32));
+        }
+        TCBBoard.GetTimeStamps(handle, tdata);
+        TCBBoard.GetMemoryAddress(handle, &memAddress);
+        
+        for (int icha=0;icha<128;icha++){
+          if(swmasks[icha/32] & (0x1<<(icha%32))){
+            MemoryRewind(icha, memAddress, rmem, &memRewind);
+            time = (tdata[icha/4] >> ((icha%4)*8)) & 0xFF;
+            fprintf(filrew, " %03d %08x %02x ",icha, memRewind, time);
+           }      
+        }
+        fprintf(filrew,"\n");
+        if (!(ieve%100)) printf(" Event %d\r",ieve);
       }
       printf("\n Run completed, %d events collected\n",loopnumber);
       fclose(filrew);

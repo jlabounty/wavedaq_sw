@@ -32,7 +32,7 @@ CPP_OBJ = $(CPP_FILES:%.c=%.o)
 all: $(OUTNAME)
 
 $(OUTNAME): $(C_OBJ) $(CPP_OBJ)
-	gcc $(C_OBJ) $(CPP_OBJ) -o $(OUTNAME) $(LIBS)
+	g++ $(C_OBJ) $(CPP_OBJ) -o $(OUTNAME) $(LIBS)
 
 $(CPP_OBJ): %.o: %.cpp 
 	g++ $(CFLAGS) -c $<
