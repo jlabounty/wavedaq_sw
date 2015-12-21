@@ -152,7 +152,8 @@ int main(int argc, char *argv[]) {
       { "offset",      required_argument,  NULL, 'o' },
       { "port",        required_argument,  NULL, 'p' },
       { "tlevel",      required_argument,  NULL, 't' },
-      { "raw",         required_argument,  NULL, 'r' },
+      { "raw",         no_argument,        NULL, 'r' },
+      { "speed",       required_argument,  NULL, 's' },
       { "verbose",     no_argument,        NULL, 'v' },
       { "wd",          required_argument,  NULL, 'w' },
       { "zero",        no_argument,        NULL, 'z' },
@@ -161,6 +162,7 @@ int main(int argc, char *argv[]) {
    
    memset(&gl, 0, sizeof(gl));
    gl.http_port = 8080; // default port
+   gl.sampling_speed = 2;
 
    for (i=0 ; i<16 ; i++) {
       gl.board[i].trigger_level = 0;
@@ -172,7 +174,7 @@ int main(int argc, char *argv[]) {
    i1 = 0;
    i2 = 15;
    
-   while ((ch = getopt_long(argc, argv, "acdg:m:o:p:t:rvw:z", longopts, NULL)) != -1) {
+   while ((ch = getopt_long(argc, argv, "acdg:m:o:p:t:rs:vw:z", longopts, NULL)) != -1) {
       switch (ch) {
          case 'a':
             gl.adc_flag = 1;
@@ -209,6 +211,10 @@ int main(int argc, char *argv[]) {
             break;
          case 'r':
             gl.raw_flag = 1;
+            break;
+         case 's':
+            if (optarg)
+               gl.sampling_speed = atoi(optarg);
             break;
          case 't':
             if (optarg)

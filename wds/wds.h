@@ -33,6 +33,7 @@ typedef struct {
    int  raw_flag;
    int  http_port;
    int  n_boards;
+   int  sampling_speed;
    WDB  board[16];
 } GLOBALS;
 

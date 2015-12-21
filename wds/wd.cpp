@@ -363,6 +363,19 @@ int wd_init(GLOBALS *gl)
       sprintf(str, "dacset offset %d", gl->board[index].offset);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       
+      // set sampling frequency
+      if (gl->verbose_flag)
+         printf("Set sampling frequency to %d GSPS", gl->sampling_speed);
+      if (gl->sampling_speed == 1)
+         assert(wd_send(gl, index, 100, "regwr 2c 0003c800", NULL, NULL) > 0);
+      else if (gl->sampling_speed == 2)
+         assert(wd_send(gl, index, 100, "regwr 2c 0003c800", NULL, NULL) > 0);
+      else if (gl->sampling_speed == 3)
+         assert(wd_send(gl, index, 100, "regwr 2c 00038500", NULL, NULL) > 0);
+      else if (gl->sampling_speed == 4)
+         assert(wd_send(gl, index, 100, "regwr 2c 00036400", NULL, NULL) > 0);
+      else if (gl->sampling_speed == 5)
+         assert(wd_send(gl, index, 100, "regwr 2c 00035000", NULL, NULL) > 0);
       
       // enable local trigger
       if (gl->board[index].trigger_level != 0) {
