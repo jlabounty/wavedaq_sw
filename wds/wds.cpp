@@ -149,6 +149,7 @@ int main(int argc, char *argv[]) {
       { "demo",        no_argument,        NULL, 'd' },
       { "gain",        required_argument,  NULL, 'g' },
       { "mask",        required_argument,  NULL, 'm' },
+      { "offset",      required_argument,  NULL, 'o' },
       { "port",        required_argument,  NULL, 'p' },
       { "tlevel",      required_argument,  NULL, 't' },
       { "raw",         required_argument,  NULL, 'r' },
@@ -171,7 +172,7 @@ int main(int argc, char *argv[]) {
    i1 = 0;
    i2 = 15;
    
-   while ((ch = getopt_long(argc, argv, "acdg:m:p:t:rvw:z", longopts, NULL)) != -1) {
+   while ((ch = getopt_long(argc, argv, "acdg:m:o:p:t:rvw:z", longopts, NULL)) != -1) {
       switch (ch) {
          case 'a':
             gl.adc_flag = 1;
@@ -196,6 +197,11 @@ int main(int argc, char *argv[]) {
                for (i=0 ; i<16 ; i++)
                   strlcpy(gl.board[i].trigger_mask, optarg, sizeof(gl.board[i].trigger_mask));
             }
+            break;
+         case 'o':
+            if (optarg)
+               for (i=0 ; i<16 ; i++)
+                  gl.board[i].offset = atoi(optarg);
             break;
          case 'p':
             if (optarg)

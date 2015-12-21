@@ -212,7 +212,7 @@ int wd_init(GLOBALS *gl)
 {
    struct sockaddr_in server_addr;
    struct sockaddr_in client_addr;
-   char str[256], reply[10000], *p;
+   char str[256], reply[10000];
    struct hostent *phe;
    int size;
    
@@ -356,6 +356,13 @@ int wd_init(GLOBALS *gl)
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       sprintf(str, "dacset tlevel4 %d", gl->board[index].trigger_level);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      
+      // set offset
+      if (gl->verbose_flag)
+         printf("Set offsetr level = %d mV\n", gl->board[index].offset);
+      sprintf(str, "dacset offset %d", gl->board[index].offset);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      
       
       // enable local trigger
       if (gl->board[index].trigger_level != 0) {

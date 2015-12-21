@@ -18,9 +18,10 @@ typedef struct {
    int  data_socket;
    unsigned char eth_addr[16];
    int  trigger_level;
-   char  trigger_mask[10];
+   char trigger_mask[10];
    int  gain;
    int  pzc;
+   int  offset;
    float wf_offset[16][1024];
 } WDB;
 
