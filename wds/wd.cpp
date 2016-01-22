@@ -423,13 +423,13 @@ double time_ms()
 
 /*-----------------------------------------------------------------------------------------*/
 
-int wd_read_waveform(GLOBALS *gl, int b, int millisec, float waveform[16][1024])
+int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float waveform[16][1024])
 {
    int i, status, waveform_channel, current_frame;
    fd_set readfds;
    struct timeval timeout;
-   WD2_FRAME_HEADER *ph;
    unsigned char *pd;
+   WD2_FRAME_HEADER *ph;
    short data1, data2;
    struct sockaddr_in remote_addr;
    unsigned char buffer[1800];
@@ -490,6 +490,18 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, float waveform[16][1024])
             ph->trigger_type             = SWAP_UINT16(ph->trigger_type);
             ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
            
+            // copy some data to event header
+            pe->board_id = ph->board_id;
+            pe->crate_id = ph->crate_id;
+            pe->slot_id = ph->slot_id;
+            pe->readout_sequence_number = 0; // not yet implemented
+            pe->hardware_sequence_number = 0; // not yet implemented
+            pe->sampling_frequency = ph->sampling_frequency;
+            pe->number_of_samples = 1024;
+            pe->drs0_trigger_cell = ph->drs0_trigger_cell;
+            pe->drs1_trigger_cell = ph->drs1_trigger_cell;
+            pe->trigger_type = 0; // not yet implemented
+            
             if (gl->verbose_flag)
                printf("From %s:%d, Frame %5d, ADC/Chn/Segment %d/%d/%d\n",
                       inet_ntoa(remote_addr.sin_addr),
@@ -591,6 +603,7 @@ int wd_calibrate(GLOBALS *gl)
 {
    float wfU[16][1024], awf[16][1024];
    int i, n, prog, old_prog;
+   WD2_EVENT eventHeader;
    
    n = 500;
 
@@ -607,7 +620,7 @@ int wd_calibrate(GLOBALS *gl)
       
       for (i=0 ; i<n ; i++) {
          wd_send(gl, board, 100, "drsget\n", NULL, NULL);
-         assert(wd_read_waveform(gl, board, 1000, wfU) == SUCCESS);
+         assert(wd_read_waveform(gl, board, 1000, &eventHeader, wfU) == SUCCESS);
          
          for (int ch=0 ; ch<16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)

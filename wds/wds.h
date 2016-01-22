@@ -37,9 +37,22 @@ typedef struct {
    WDB  board[16];
 } GLOBALS;
 
+typedef struct {
+   unsigned short board_id;
+   unsigned char  crate_id;
+   unsigned char  slot_id;
+   unsigned short readout_sequence_number;
+   unsigned short hardware_sequence_number;
+   unsigned short sampling_frequency;
+   unsigned short number_of_samples;
+   unsigned short drs0_trigger_cell;
+   unsigned short drs1_trigger_cell;
+   unsigned short trigger_type;
+} WD2_EVENT;
+
 // interface functions
 int wd_init(GLOBALS *gl);
-int wd_read_waveform(GLOBALS *gl, int board, int timeout, float wf[16][1024]);
+int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wf[16][1024]);
 int wd_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *result, int *size);
 int wd_calibrate(GLOBALS *gl);
 

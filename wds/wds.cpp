@@ -22,6 +22,7 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
 {
    char str[256];
    GLOBALS *gl;
+   WD2_EVENT eventHeader;
    
    gl = (GLOBALS *)conn->server_param;
    
@@ -79,7 +80,7 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
                wd_send(gl, b, 100, "drsstart\n", NULL, NULL);
          }
          // read waveforms
-         status = wd_read_waveform(gl, b, 1000, wfU);
+         status = wd_read_waveform(gl, b, 1000, &eventHeader, wfU);
       
          for (int c=0 ; c<16 ; c++) {
             for (int i=0 ; i<1024 ; i++) {
