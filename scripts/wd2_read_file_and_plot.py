@@ -21,8 +21,7 @@ i_header_ch     = 4
 i_ch_segment_nr = 5
 i_data_seq_nr   = 6
 i_packet_seq_nr = 7
-i_reserved      = 8
-data_offset     = 9
+data_offset     = 8
 
 #with open("../wddump/dump.txt") as dump_file:
 #  data = dump_file.readlines()
@@ -33,7 +32,7 @@ out_file.write(outline)
 outline = "Frame ADC Ch Noise[LSBs] Noise[mV]\n"
 out_file.write(outline)
 
-data = np.split(np.loadtxt("../wddump/dump.txt", dtype=np.int32), 32)
+data = np.split(np.loadtxt("./wddump/dump.txt", dtype=np.int32), 32)
 current_frame = data[0][i_data_seq_nr]
 
 ch_data_value = np.zeros((adcs, channels,frame_size), dtype=np.float32)
