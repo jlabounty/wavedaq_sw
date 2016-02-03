@@ -266,7 +266,7 @@ Controls.prototype.ctrlVSliderHandler = function(e)
 {
    e.preventDefault();
    var y = undefined;
-   var b = e.target.parentNode;
+   var b = e.currentTarget;
    
    if (b.canvas == undefined) // we can get events from parent node
       return;
@@ -329,7 +329,7 @@ Controls.prototype.ctrlHSliderHandler = function(e)
 {
    e.preventDefault();
    var x = undefined;
-   var b = e.target.parentNode;
+   var b = e.currentTarget;
    
    if (b.canvas == undefined) // we can get events from parent node
       return;
