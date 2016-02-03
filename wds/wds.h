@@ -28,12 +28,14 @@ typedef struct {
 typedef struct {
    int  demo_flag;
    int  calibrate_flag;
+   int  rotate_flag;
    int  verbose_flag;
    int  adc_flag;
    int  raw_flag;
    int  http_port;
    int  n_boards;
    int  sampling_speed;
+   int  do_calibration;
    WDB  board[16];
 } GLOBALS;
 

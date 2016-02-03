@@ -390,9 +390,7 @@ int wd_init(GLOBALS *gl)
       }
    
       // set DRS readout mode to ROI
-      // assert(wd_send(gl, index, 100, "regwr 10 0D0C0020", NULL, NULL) > 0);
       assert(wd_send(gl, index, 100, "regwr 10 0D0D0030", NULL, NULL) > 0);
-      
       
       // load calibration for board from file (for now...)
       char str[80];
@@ -435,6 +433,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
    unsigned char buffer[1800];
    int header_adc, header_channel;
    double start_time;
+   static float wf1[16][1024], wf2[16][1024];
 
    // tag waveforms as invalid
    for (i=0 ; i<16 ; i++) {
@@ -503,13 +502,15 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
             pe->trigger_type = 0; // not yet implemented
             
             if (gl->verbose_flag)
-               printf("From %s:%d, Frame %5d, ADC/Chn/Segment %d/%d/%d\n",
+               printf("From %s:%d, Frame %5d, ADC/Chn/Segment %d/%d/%d - %04d/%04d\n",
                       inet_ntoa(remote_addr.sin_addr),
                       ntohs(remote_addr.sin_port),
                       ph->readout_sequence_number,
                       header_adc,
                       header_channel,
-                      ph->channel_segment_number);
+                      ph->channel_segment_number,
+                      ph->drs0_trigger_cell,
+                      ph->drs1_trigger_cell);
             
             if (current_frame == -1)
                current_frame = ph->readout_sequence_number;
@@ -576,12 +577,38 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
                if (isnan(waveform[i][0]) || isnan(waveform[i][512]))
                    break;
             if (i == 16) {
+
+               for (i=0 ; i<16 ; i++)
+                  for (int j=0 ; j<1024 ; j++)
+                     wf2[i][j] = waveform[i][j];
+
+               // un-rotate waveforms
+               if (gl->rotate_flag) {
+                  for (i=0 ; i<8 ; i++)
+                     for (int j=0 ; j<1024 ; j++)
+                        waveform[i][j] = wf1[i][j];
+               } else {
+                  for (i=0 ; i<8 ; i++) {
+                     for (int j=0 ; j<1024 ; j++)
+                        waveform[i][(j+pe->drs0_trigger_cell) % 1024] = wf1[i][j];
+                  }
+                  for (i=8 ; i<16 ; i++) {
+                     for (int j=0 ; j<1024 ; j++)
+                        waveform[i][(j+pe->drs1_trigger_cell) % 1024] = wf1[i][j];
+                  }
+               }
+               
+               for (i=0 ; i<16 ; i++)
+                  for (int j=0 ; j<1024 ; j++)
+                     wf1[i][j] = wf2[i][j];
+              
                // calibrate waveforms
-               if (!gl->adc_flag) {
+               if (gl->calibrate_flag && !gl->adc_flag) {
                   for (i=0 ; i<16 ; i++)
                      for (int j=0 ; j<1024 ; j++)
                         waveform[i][j] -= gl->board[b].wf_offset[i][j];
                }
+
                return SUCCESS;
             }
             
