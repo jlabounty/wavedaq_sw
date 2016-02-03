@@ -12,6 +12,7 @@
 #include <fcntl.h>
 
 #include "wds.h"
+#include "averager.h"
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -603,10 +604,19 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
                      wf1[i][j] = wf2[i][j];
               
                // calibrate waveforms
-               if (gl->calibrate_flag && !gl->adc_flag) {
-                  for (i=0 ; i<16 ; i++)
-                     for (int j=0 ; j<1024 ; j++)
-                        waveform[i][j] -= gl->board[b].wf_offset[i][j];
+               if (!gl->raw_flag && !gl->adc_flag) {
+                  if (gl->rotate_flag) {
+                     for (i=0 ; i<8 ; i++)
+                        for (int j=0 ; j<1024 ; j++)
+                           waveform[i][j] -= gl->board[b].wf_offset[i][(j+pe->drs0_trigger_cell) % 1024];
+                     for (i=8 ; i<16 ; i++)
+                        for (int j=0 ; j<1024 ; j++)
+                           waveform[i][j] -= gl->board[b].wf_offset[i][(j+pe->drs1_trigger_cell) % 1024];
+                  } else {
+                     for (i=0 ; i<16 ; i++)
+                        for (int j=0 ; j<1024 ; j++)
+                           waveform[i][j] -= gl->board[b].wf_offset[i][j];
+                  }
                }
 
                return SUCCESS;
@@ -642,8 +652,12 @@ int wd_calibrate(GLOBALS *gl)
              gl->board[board].name, gl->board[board].name);
       fflush(stdout);
       
+      Averager *ave = new Averager(2, 8, 1024, n);
+      
       memset(awf, 0, sizeof(awf));
       old_prog = 0;
+      gl->rotate_flag = 0;
+      gl->raw_flag = 1;
       
       for (i=0 ; i<n ; i++) {
          wd_send(gl, board, 100, "drsget\n", NULL, NULL);
@@ -651,7 +665,7 @@ int wd_calibrate(GLOBALS *gl)
          
          for (int ch=0 ; ch<16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
-               awf[ch][bin] += wfU[ch][bin];
+               ave->Add(ch/8, ch%8, bin, wfU[ch][bin]);
          
          /* update progress bar */
          prog = (int)((double)(i)/(n)*50);
@@ -664,8 +678,8 @@ int wd_calibrate(GLOBALS *gl)
 
       for (int ch=0 ; ch<16 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
-            awf[ch][bin] /= n;
-
+            awf[ch][bin] = ave->RobustAverage(100, ch/8, ch%8, bin);
+      
       printf("\n");
       
       // save calibration

@@ -27,7 +27,6 @@ typedef struct {
 
 typedef struct {
    int  demo_flag;
-   int  calibrate_flag;
    int  rotate_flag;
    int  verbose_flag;
    int  adc_flag;

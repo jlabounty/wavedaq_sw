@@ -164,8 +164,8 @@ int main(int argc, char *argv[]) {
    memset(&gl, 0, sizeof(gl));
    gl.http_port = 8080; // default port
    gl.sampling_speed = 2;
-   gl.calibrate_flag = 1;
-   gl.rotate_flag = 0;
+   gl.raw_flag = 0;
+   gl.rotate_flag = 1;
 
    for (i=0 ; i<16 ; i++) {
       gl.board[i].trigger_level = 0;
@@ -255,6 +255,7 @@ int main(int argc, char *argv[]) {
          default:
             printf("usage: wsd [-adv] [-w <address> [-w <address> ...]]\n");
             printf(" -a --adc         Read ADC instead DRS\n");
+            printf(" -c --calibrate   Calibrate DRS chips\n");
             printf(" -d --demo        Demo mode\n");
             printf(" -g --gain        Input gain (0=1, 1=10, 2=100)\n");
             printf(" -t --tlevel      Trigger level in mV (0=auto)\n");
