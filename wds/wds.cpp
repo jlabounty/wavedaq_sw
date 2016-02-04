@@ -164,7 +164,8 @@ int main(int argc, char *argv[]) {
    memset(&gl, 0, sizeof(gl));
    gl.http_port = 8080; // default port
    gl.sampling_speed = 2;
-   gl.raw_flag = 0;
+   gl.ofs_calib1_flag = 1;
+   gl.ofs_calib2_flag = 1;
    gl.rotate_flag = 1;
 
    for (i=0 ; i<16 ; i++) {
@@ -213,7 +214,8 @@ int main(int argc, char *argv[]) {
                gl.http_port = atoi(optarg);
             break;
          case 'r':
-            gl.raw_flag = 1;
+            gl.ofs_calib1_flag = 0;
+            gl.ofs_calib2_flag = 0;
             break;
          case 's':
             if (optarg)
@@ -306,8 +308,8 @@ int main(int argc, char *argv[]) {
    for (;;) {
       mg_poll_server(server, 1000);   // Infinite loop, Ctrl-C to stop
    }
-   
+
    // mg_destroy_server(&server);
-   
+
    return 0;
 }

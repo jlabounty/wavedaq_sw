@@ -22,7 +22,8 @@ typedef struct {
    int  gain;
    int  pzc;
    int  offset;
-   float wf_offset[16][1024];
+   float wf_offset1[16][1024];
+   float wf_offset2[16][1024];
 } WDB;
 
 typedef struct {
@@ -30,7 +31,9 @@ typedef struct {
    int  rotate_flag;
    int  verbose_flag;
    int  adc_flag;
-   int  raw_flag;
+   int  ofs_calib1_flag;
+   int  ofs_calib2_flag;
+   int  tcalib_flag;
    int  http_port;
    int  n_boards;
    int  sampling_speed;

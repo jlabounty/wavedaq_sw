@@ -25,6 +25,8 @@ Averager::Averager(int nx, int ny, int nz, int dim)
    int size = sizeof(float)*nx*ny*nz * dim;
    fArray = (float *)malloc(size);
    assert(fArray);
+   fTmp = (float *)malloc(sizeof(float) * dim);
+   assert(fTmp);
    memset(fArray, 0, size);
    size = sizeof(float)*nx*ny*nz;
    fN = (unsigned short *)malloc(size);
@@ -116,15 +118,17 @@ double Averager::Median(int x, int y, int z)
    int nIndex = (x*fNy + y)*fNz + z;
    int aIndex = ((x*fNy + y)*fNz + z) * fDim;
    
-   qsort(&fArray[aIndex], fN[nIndex], sizeof(float), compar);
-   m = fArray[aIndex + fN[nIndex]/2];
+   memcpy(fTmp, &fArray[aIndex], fN[nIndex] * sizeof(float));
+   
+   qsort(fTmp, fN[nIndex], sizeof(float), compar);
+   m = fTmp[fN[nIndex]/2];
    
    return m;
 }
 
 /*----------------------------------------------------------------*/
 
-double Averager::RobustAverage(double range, int x, int y, int z)
+double Averager::RobustAverage(int x, int y, int z)
 {
    assert(x < fNx);
    assert(y < fNy);
@@ -132,30 +136,29 @@ double Averager::RobustAverage(double range, int x, int y, int z)
    
    double ra = 0;
    int n = 0;
-   double m = Median(x, y, z);
    
    int nIndex = (x*fNy + y)*fNz + z;
    int aIndex = ((x*fNy + y)*fNz + z) * fDim;
    
-   for (int i=0 ; i<fN[nIndex] ; i++) {
-      if (fArray[aIndex + i] > m - range && fArray[aIndex + i] < m + range) {
-         ra += fArray[aIndex + i];
-         n++;
-      }
+   // sort array
+   memcpy(fTmp, &fArray[aIndex], fN[nIndex] * sizeof(float));
+   qsort(fTmp, fN[nIndex], sizeof(float), compar);
+
+   // average over central 50% of all samples
+   for (int i=fN[nIndex]/4 ; i<fN[nIndex]/4*3 ; i++) {
+      ra += fTmp[i];
+      n++;
    }
    
    if (n > 0)
       ra /= n;
 
-   //if (y == 0 && z == 7 && fN[nIndex] > 10)
-   //   printf("%d %lf %lf %lf\n", fN[nIndex], a, m, ra);
-   
    return ra;
 }
 
 /*----------------------------------------------------------------*/
 
-int Averager::SaveNormalizedDistribution(const char *filename, int x, float range)
+int Averager::SaveNormalizedDistribution(const char *filename, int x)
 {
    assert(x < fNx);
    FILE *f = fopen(filename, "wt");
@@ -195,10 +198,8 @@ int Averager::SaveNormalizedDistribution(const char *filename, int x, float rang
             
             fprintf(f, "%6.4lf, %6.4lf, %6.4lf, %8.6lf, ", min, max, average, sigma);
             
-            if (min < -range || max > range) {
-               for (int i=0 ; i<n ; i++)
-                  fprintf(f, "%6.4lf,", fArray[aIndex + i] - m);
-            }
+            for (int i=0 ; i<n ; i++)
+               fprintf(f, "%6.4lf,", fArray[aIndex + i] - m);
             
             fprintf(f, "\n");
          }
@@ -207,4 +208,3 @@ int Averager::SaveNormalizedDistribution(const char *filename, int x, float rang
    fclose(f);
    return 1;
 }
-

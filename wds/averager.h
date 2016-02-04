@@ -7,7 +7,7 @@
 
 class Averager {
    int fNx, fNy, fNz, fDim;
-   float *fArray;
+   float *fArray, *fTmp;
    unsigned short *fN;
    
 public:
@@ -18,7 +18,8 @@ public:
    void Reset();
    double Average(int x, int y, int z);
    double Median(int x, int y, int z);
-   double RobustAverage(double range, int x, int y, int z);
-   int SaveNormalizedDistribution(const char *filename, int x, float range);
+   double RobustAverage(int x, int y, int z);
+   int SaveNormalizedDistribution(const char *filename, int x);
+   int Debug();
 
 };

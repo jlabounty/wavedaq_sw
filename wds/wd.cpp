@@ -397,10 +397,13 @@ int wd_init(GLOBALS *gl)
       char str[80];
       sprintf(str, "%s.cal", gl->board[index].name);
       int fh = open(str, O_RDONLY, 0644);
-      if (fh > 0)
-         assert(read(fh, gl->board[index].wf_offset, sizeof(float)*16*1024) == sizeof(float)*16*1024);
-      else
-         memset(gl->board[index].wf_offset, 0, sizeof(float)*16*1024);;
+      if (fh > 0) {
+         assert(read(fh, gl->board[index].wf_offset1, sizeof(float)*16*1024) == sizeof(float)*16*1024);
+         assert(read(fh, gl->board[index].wf_offset2, sizeof(float)*16*1024) == sizeof(float)*16*1024);
+      } else {
+         memset(gl->board[index].wf_offset1, 0, sizeof(float)*16*1024);;
+         memset(gl->board[index].wf_offset2, 0, sizeof(float)*16*1024);;
+      }
    }
    
    if (gl->verbose_flag)
@@ -494,7 +497,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
             pe->board_id = ph->board_id;
             pe->crate_id = ph->crate_id;
             pe->slot_id = ph->slot_id;
-            pe->readout_sequence_number = 0; // not yet implemented
+            pe->readout_sequence_number = ph->readout_sequence_number;
             pe->hardware_sequence_number = 0; // not yet implemented
             pe->sampling_frequency = ph->sampling_frequency;
             pe->number_of_samples = 1024;
@@ -604,18 +607,29 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
                      wf1[i][j] = wf2[i][j];
               
                // calibrate waveforms
-               if (!gl->raw_flag && !gl->adc_flag) {
-                  if (gl->rotate_flag) {
-                     for (i=0 ; i<8 ; i++)
-                        for (int j=0 ; j<1024 ; j++)
-                           waveform[i][j] -= gl->board[b].wf_offset[i][(j+pe->drs0_trigger_cell) % 1024];
-                     for (i=8 ; i<16 ; i++)
-                        for (int j=0 ; j<1024 ; j++)
-                           waveform[i][j] -= gl->board[b].wf_offset[i][(j+pe->drs1_trigger_cell) % 1024];
-                  } else {
+               if (!gl->adc_flag) { // don't calibrate in ADC mode
+                  
+                  // cell-by-cell offset calibration
+                  if (gl->ofs_calib1_flag) {
+                     if (gl->rotate_flag) {
+                        for (i=0 ; i<8 ; i++)
+                           for (int j=0 ; j<1024 ; j++)
+                              waveform[i][j] -= gl->board[b].wf_offset1[i][(j+pe->drs0_trigger_cell) % 1024];
+                        for (i=8 ; i<16 ; i++)
+                           for (int j=0 ; j<1024 ; j++)
+                              waveform[i][j] -= gl->board[b].wf_offset1[i][(j+pe->drs1_trigger_cell) % 1024];
+                     } else {
+                        for (i=0 ; i<16 ; i++)
+                           for (int j=0 ; j<1024 ; j++)
+                              waveform[i][j] -= gl->board[b].wf_offset1[i][j];
+                     }
+                  }
+                  
+                  // start-to-end offset calibration
+                  if (gl->ofs_calib2_flag) {
                      for (i=0 ; i<16 ; i++)
                         for (int j=0 ; j<1024 ; j++)
-                           waveform[i][j] -= gl->board[b].wf_offset[i][j];
+                           waveform[i][j] -= gl->board[b].wf_offset2[i][j];
                   }
                }
 
@@ -638,9 +652,10 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
 
 int wd_calibrate(GLOBALS *gl)
 {
-   float wfU[16][1024], awf[16][1024];
+   float wfU[16][1024], awf1[16][1024], awf2[16][1024];
    int i, n, prog, old_prog;
    WD2_EVENT eventHeader;
+   char str[80];
    
    n = 500;
 
@@ -652,12 +667,57 @@ int wd_calibrate(GLOBALS *gl)
              gl->board[board].name, gl->board[board].name);
       fflush(stdout);
       
-      Averager *ave = new Averager(2, 8, 1024, n);
-      
-      memset(awf, 0, sizeof(awf));
       old_prog = 0;
+
+      //---- Primary Calibration ----
+      
+      Averager *ave = new Averager(2, 8, 1024, n);
+      memset(awf1, 0, sizeof(awf1));
       gl->rotate_flag = 0;
-      gl->raw_flag = 1;
+      gl->ofs_calib1_flag = 0;
+      gl->ofs_calib2_flag = 0;
+      
+      for (i=0 ; i<n ; i++) {
+         wd_send(gl, board, 100, "drsget\n", NULL, NULL);
+         assert(wd_read_waveform(gl, board, 1000, &eventHeader, wfU) == SUCCESS);
+         
+         for (int ch=0 ; ch<16 ; ch++)
+            for (int bin=0 ; bin<1024 ; bin++)
+               ave->Add(ch/8, ch%8, bin, wfU[ch][bin]);
+
+         /* update progress bar */
+         prog = (int)((double)(i/2)/(n)*50);
+         if (prog > old_prog) {
+            old_prog = prog;
+            printf("=");
+            fflush(stdout);
+         }
+      }
+
+      for (int ch=0 ; ch<16 ; ch++)
+         for (int bin=0 ; bin<1024 ; bin++)
+            awf1[ch][bin] = ave->Median(ch/8, ch%8, bin);
+      
+      // ave->SaveNormalizedDistribution("wf.csv", 0);
+      
+      // save calibration
+      sprintf(str, "%s.cal", gl->board[board].name);
+      int fh = open(str, O_WRONLY | O_CREAT, 0644);
+      assert(fh > 0);
+      assert(write(fh, awf1, sizeof(awf1)) == sizeof(awf1));
+      
+      for (i=0 ; i<16 ; i++)
+         for (int j=0 ; j<1024 ; j++)
+            gl->board[board].wf_offset1[i][j] = awf1[i][j];
+      
+      //---- Secondary Calibration
+      
+      ave->Reset();
+      memset(awf2, 0, sizeof(awf2));
+      old_prog = 0;
+      gl->rotate_flag = 1; // now rotate waveforms
+      gl->ofs_calib1_flag = 1; // and do 1st calibration
+      gl->ofs_calib2_flag = 0;
       
       for (i=0 ; i<n ; i++) {
          wd_send(gl, board, 100, "drsget\n", NULL, NULL);
@@ -668,27 +728,23 @@ int wd_calibrate(GLOBALS *gl)
                ave->Add(ch/8, ch%8, bin, wfU[ch][bin]);
          
          /* update progress bar */
-         prog = (int)((double)(i)/(n)*50);
+         prog = (int)((double)(n/2+i/2)/(n)*50);
          if (prog > old_prog) {
             old_prog = prog;
             printf("=");
             fflush(stdout);
          }
       }
-
+      
       for (int ch=0 ; ch<16 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
-            awf[ch][bin] = ave->RobustAverage(100, ch/8, ch%8, bin);
+            awf2[ch][bin] = ave->Median(ch/8, ch%8, bin);
       
       printf("\n");
       
       // save calibration
-      char str[80];
-      sprintf(str, "%s.cal", gl->board[board].name);
-      int fh = open(str, O_WRONLY | O_CREAT, 0644);
-      assert(fh > 0);
-
-      assert(write(fh, awf, sizeof(awf)) == sizeof(awf));
+      assert(write(fh, awf2, sizeof(awf2)) == sizeof(awf2));
+      
       close(fh);
    }
 
