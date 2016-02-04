@@ -21,7 +21,7 @@ typedef struct {
    char trigger_mask[10];
    int  gain;
    int  pzc;
-   int  offset;
+   float offset;
    float wf_offset1[16][1024];
    float wf_offset2[16][1024];
 } WDB;

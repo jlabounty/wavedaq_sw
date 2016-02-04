@@ -360,8 +360,8 @@ int wd_init(GLOBALS *gl)
       
       // set offset
       if (gl->verbose_flag)
-         printf("Set offsetr level = %d mV\n", gl->board[index].offset);
-      sprintf(str, "dacset offset %d", gl->board[index].offset);
+         printf("Set offset level  = %g V\n", gl->board[index].offset);
+      sprintf(str, "dacset ofs %d", (int)(gl->board[index].offset*1000));
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       
       // set sampling frequency
@@ -722,6 +722,8 @@ int wd_calibrate(GLOBALS *gl)
       for (i=0 ; i<n ; i++) {
          wd_send(gl, board, 100, "drsget\n", NULL, NULL);
          assert(wd_read_waveform(gl, board, 1000, &eventHeader, wfU) == SUCCESS);
+         
+         Sleep(10);
          
          for (int ch=0 ; ch<16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
