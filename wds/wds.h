@@ -34,6 +34,7 @@ typedef struct {
    int  ofs_calib1_flag;
    int  ofs_calib2_flag;
    int  tcalib_flag;
+   int  remove_spikes;
    int  http_port;
    int  n_boards;
    int  sampling_speed;

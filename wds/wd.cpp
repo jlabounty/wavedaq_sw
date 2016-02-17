@@ -58,6 +58,10 @@ typedef struct {
 
 /*-----------------------------------------------------------------------------------------*/
 
+void remove_spikes(GLOBALS *gl, short trigger_cell, float wf[][1024]);
+
+/*-----------------------------------------------------------------------------------------*/
+
 size_t strlcpy(char *dst, const char *src, size_t size)
 {
    char *d = dst;
@@ -631,6 +635,12 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
                         for (int j=0 ; j<1024 ; j++)
                            waveform[i][j] -= gl->board[b].wf_offset2[i][j];
                   }
+                  
+                  // remove spikes
+                  if (gl->remove_spikes) {
+                     remove_spikes(gl, pe->drs0_trigger_cell, waveform);
+                     remove_spikes(gl, pe->drs1_trigger_cell, waveform+8);
+                  }
                }
 
                return SUCCESS;
@@ -648,7 +658,6 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
 }
 
 /*-----------------------------------------------------------------------------------------*/
-
 
 int wd_calibrate(GLOBALS *gl)
 {
@@ -751,4 +760,168 @@ int wd_calibrate(GLOBALS *gl)
    }
 
    return SUCCESS;
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+int histo[50];
+
+void remove_spikes(GLOBALS *gl, short trigger_cell, float wf[][1024])
+{
+/*
+   Remove a specific kind of spike on DRS4.
+   
+   This spike has some specific features, namely:
+     - Common on all the channels on a chip
+     - Constant heigh and width
+     - Two spikes per channel
+     - Symmetric to cell #0.
+   
+ 
+   This is not general purpose spike-removing function.
+*/
+ 
+   int i, j, k, l;
+   double hp, x, y;
+   int sp[8][10];
+   int rsp[10], rot_sp[10];
+   int n_sp[8], n_rsp;
+   int  nNeighbor, nSymmetric;
+   float cwf[16][1024];
+
+   /*
+   FILE *f = fopen("wf.csv", "wt");
+   fprintf(f, "tc=%d\n", trigger_cell);
+   fprintf(f, "i, CH0, CH1, CH2, CH3, CH4, CH5, CH6, CH7\n");
+   for (j=0 ; j<1024 ; j++) {
+      fprintf(f, "%d, ", j);
+      for (i=0 ; i<8 ; i++)
+         fprintf(f, "%0.3lf, ", wf[i][j]);
+      fprintf(f, "\n");
+   }
+   fclose(f);
+   */
+   
+   /* rotate waveform back relative to cell #0 */
+   if (gl->rotate_flag) {
+      for (i=0 ; i<8 ; i++)
+         for (j=0 ; j<1024 ; j++)
+            cwf[i][(j+trigger_cell) % 1024] = wf[i][j];
+   } else {
+      for (i=0 ; i<8 ; i++)
+         for (j=0 ; j<1024 ; j++)
+            cwf[i][j] = wf[i][j];
+   }
+
+   memset(sp, 0, sizeof(sp));
+   memset(n_sp, 0, sizeof(n_sp));
+   memset(rsp, 0, sizeof(rsp));
+   n_rsp = 0;
+   
+   /* find spikes with special high-pass filter, skip last values */
+   for (j=0 ; j<1020 ; j++) {
+      for (i=0 ; i<8 ; i++) {
+         hp = -cwf[i][j] + cwf[i][(j+1)%1024]+cwf[i][(j+2)%1024] - cwf[i][(j+3) % 1024];
+         if (hp > 0.010) {
+            if (n_sp[i] < 10) // record maximum of 10 spikes
+               sp[i][n_sp[i]++] = j;
+            else
+               return;        // too many spikes -> something wrong
+         }
+      }
+   }
+
+   /* find spikes at cell #0 and #1023 */
+   /*
+   for (i=0 ; i<8 ; i++) {
+      if (wf[i][0]+wf[i][1]-2*wf[i][2] > 0.020) {
+         if (n_sp[i] < 10)
+            sp[i][n_sp[i]++] = 0;
+      }
+      if (-2*wf[i][1021]+wf[i][1022]+wf[i][1023] > 0.020) {
+         if (n_sp[i] < 10)
+            sp[i][n_sp[i]++] = 1020;
+      }
+   }
+   */
+   
+   /* go through all spikes and look for symmetric spikes and neighbors */
+   for (i=0 ; i<8 ; i++) {
+      for (j=0 ; j<n_sp[i] ; j++) {
+         /* check if this spike has a symmetric partner in any channel */
+         for (k=nSymmetric=0 ; k<8 ; k++) {
+            for (l=0 ; l<n_sp[k] ; l++)
+               if (sp[i][j] == (1020-sp[k][l]+1024) % 1024) {
+                  nSymmetric++;
+                  break;
+               }
+         }
+         
+         /* check if this spike has same spike in any other channels */
+         for (k=nNeighbor=0 ; k<8 ; k++)
+            if (i != k) {
+               for (l=0 ; l<n_sp[k] ; l++)
+                  if (sp[i][j] == sp[k][l]) {
+                     nNeighbor++;
+                     break;
+                  }
+            }
+         
+         if (nSymmetric + nNeighbor >= 2) {
+            /* if at least two matching spikes, treat this as a real spike */
+            for (k=0 ; k<n_rsp ; k++)
+               if (rsp[k] == sp[i][j])
+                  break;
+            if (n_rsp < 10 && k == n_rsp)
+               rsp[n_rsp++] = sp[i][j];
+         }
+      }
+   }
+   
+   /* rotate spikes according to trigger cell */
+   if (gl->rotate_flag) {
+      for (i=0 ; i<n_rsp ; i++)
+         rot_sp[i] = (rsp[i] - trigger_cell + 1024) % 1024;
+   } else {
+      for (i=0 ; i<n_rsp ; i++)
+         rot_sp[i] = rsp[i];
+   }
+   
+   /* recognize spikes if at least one channel has it */
+   for (k=0 ; k<n_rsp ; k++) {
+      for (i=0 ; i<8 ; i++) {
+         
+         if (k < n_rsp-1 && rsp[k] == 0 && rsp[k+1] == 1020) {
+            /* remove double spike */
+            j = rot_sp[k] > rot_sp[k+1] ? rot_sp[k+1] : rot_sp[k];
+            x = wf[i][(j+1) % 1024];
+            y = wf[i][(j+6) % 1024];
+            if (fabs(x-y) < 0.015) {
+               wf[i][(j+2) % 1024] = x + 1*(y-x)/5;
+               wf[i][(j+3) % 1024] = x + 2*(y-x)/5;
+               wf[i][(j+4) % 1024] = x + 3*(y-x)/5;
+               wf[i][(j+5) % 1024] = x + 4*(y-x)/5;
+            } else {
+               wf[i][(j+2) % 1024] -= 0.0148f;
+               wf[i][(j+3) % 1024] -= 0.0148f;
+               wf[i][(j+4) % 1024] -= 0.0148f;
+               wf[i][(j+5) % 1024] -= 0.0148f;
+            }
+         } else {
+            /* remove single spike */
+            x = wf[i][rot_sp[k]];
+            y = wf[i][(rot_sp[k]+3) % 1024];
+            
+            if (fabs(x-y) < 0.010) {
+               wf[i][(rot_sp[k]+1) % 1024] = x + 1*(y-x)/3;
+               wf[i][(rot_sp[k]+2) % 1024] = x + 2*(y-x)/3;
+            } else {
+               wf[i][(rot_sp[k]+1) % 1024] -= 0.009f;
+               wf[i][(rot_sp[k]+2) % 1024] -= 0.009f;
+            }
+         }
+      }
+      if (k < n_rsp-1 && rsp[k] == 0 && rsp[k+1] == 1020)
+         k++; // skip second half of double spike
+   }
 }

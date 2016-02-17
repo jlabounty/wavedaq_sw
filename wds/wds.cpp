@@ -167,6 +167,7 @@ int main(int argc, char *argv[]) {
    gl.ofs_calib1_flag = 1;
    gl.ofs_calib2_flag = 1;
    gl.rotate_flag = 1;
+   gl.remove_spikes = 1;
 
    for (i=0 ; i<16 ; i++) {
       gl.board[i].trigger_level = 0;
