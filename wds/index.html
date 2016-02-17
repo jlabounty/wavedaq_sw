@@ -81,20 +81,29 @@
 <div id="config">
    
    <br />
-   <input type="checkbox" id="calib1">Apply Primary Calibration (Cell)<br />
-   <input type="checkbox" id="calib2">Apply Secondary Calibration (Readout)<br />
-   <input type="checkbox" id="spikes">Remove Spikes<br />
+   <table border="0">
+      <tr><td><input type="checkbox" id="calib1" name="ofs_calib1_flag" onClick="setGl(this)"></td><td>Apply Primary Calibration (Cell)</td></tr>
+      <tr><td><input type="checkbox" id="calib2"></td><td>Apply Secondary Calibration (Readout)</td></tr>
+      <tr><td><input type="checkbox" id="spikes"></td><td>Remove Spikes</td></tr>
+   </table>
       
 </div>
 
 <div id="about">
 
-   WaveDAQ Oscilloscope<br />
-   Stefan Ritt<br />
-   Paul Scherrer Institute<br />
-   <br />
-   <button class="wideButton" type="button" onClick="document.getElementById('about').style.display = 'none';">Close</button>
-
+   <div id="aboutTitle" class="titlebar">
+      About
+   </div>
+   
+   <div class="dialog">
+      <div style="font-size:16pt">WaveDAQ Oscilloscope</div>
+      <div id="build" style="font-size:12pt"></div>
+      <img style="position:absolute;right:30px;" src="favicon.png">
+      <div style="font-size:8pt">Stefan Ritt</div>
+      <div style="font-size:8pt">Paul Scherrer Institute</div>
+      <button class="wideButton" style="background-color:#F8F8F8" type="button" onClick="document.getElementById('about').style.display = 'none';">Close</button>
+   <div>
+      
 </div>
 
 </div> <!-- container -->

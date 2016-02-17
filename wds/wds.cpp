@@ -17,71 +17,77 @@
 
 /*-----------------------------------------------------------------------------------------*/
 
+static struct mg_serve_http_opts s_http_server_opts;
+
 // This function will be called by mongoose on every new request
-static int wds_handler(struct mg_connection *conn, enum mg_event event)
+static void wds_handler(struct mg_connection *conn, int event, void *ev_data)
 {
    char str[256];
    GLOBALS *gl;
    WD2_EVENT eventHeader;
    
-   gl = (GLOBALS *)conn->server_param;
+   struct http_message *hm = (struct http_message *)ev_data;
    
+   gl = (GLOBALS *)conn->mgr->user_data;
+   
+   /*
    if (event == MG_AUTH)
       return MG_TRUE; // authorize all events (for now...)
-   
-   // list of boards
-   if (event == MG_REQUEST && !strcmp(conn->uri, "/boards")) {
-      mg_printf_data(conn, "{\n");
-      mg_printf_data(conn, "   \"boards\": [\n");
-      
-      for (int i=0 ; i<gl->n_boards ; i++) {
-         mg_printf_data(conn, "      { \"name\": \"%s\" }", gl->board[i].name);
-         if (i<gl->n_boards-1)
-            mg_printf_data(conn, ",");
-         mg_printf_data(conn, "\n");
-      }
+   */
 
-      mg_printf_data(conn, "   ]\n");
-      mg_printf_data(conn, "}\n");
-      return MG_TRUE;
+   // if (event == MG_EV_HTTP_REQUEST)
+   printf("%d\n", event);
+
+   if (event == MG_EV_HTTP_REQUEST) {
+      mg_serve_http(conn, hm, s_http_server_opts);
    }
+   
+   return;
    
    // gloabls
-   if (event == MG_REQUEST && !strcmp(conn->uri, "/gl")) {
-      mg_printf_data(conn, "{\n");
-      mg_printf_data(conn, "   \"demo_flag\": \"%d\",\n",       gl->demo_flag);
-      mg_printf_data(conn, "   \"rotate_flag\": \"%d\",\n",     gl->rotate_flag);
-      mg_printf_data(conn, "   \"verbose_flag\": \"%d\",\n",    gl->verbose_flag);
-      mg_printf_data(conn, "   \"adc_flag\": \"%d\",\n",        gl->adc_flag);
-      mg_printf_data(conn, "   \"ofs_calib1_flag\": \"%d\",\n", gl->ofs_calib1_flag);
-      mg_printf_data(conn, "   \"ofs_calib2_flag\": \"%d\",\n", gl->ofs_calib2_flag);
-      mg_printf_data(conn, "   \"tcalib_flag\": \"%d\",\n",     gl->tcalib_flag);
-      mg_printf_data(conn, "   \"remove_spikes\": \"%d\",\n",   gl->remove_spikes);
-      mg_printf_data(conn, "   \"http_port\": \"%d\",\n",       gl->http_port);
-      mg_printf_data(conn, "   \"n_boards\": \"%d\",\n",        gl->n_boards);
-      mg_printf_data(conn, "   \"sampling_speed\": \"%d\",\n",  gl->sampling_speed);
+   if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/gl") == 0) {
+      mg_printf(conn, "{\n");
+      mg_printf(conn, "   \"demo_flag\": \"%d\",\n",       gl->demo_flag);
+      mg_printf(conn, "   \"rotate_flag\": \"%d\",\n",     gl->rotate_flag);
+      mg_printf(conn, "   \"verbose_flag\": \"%d\",\n",    gl->verbose_flag);
+      mg_printf(conn, "   \"adc_flag\": \"%d\",\n",        gl->adc_flag);
+      mg_printf(conn, "   \"ofs_calib1_flag\": \"%d\",\n", gl->ofs_calib1_flag);
+      mg_printf(conn, "   \"ofs_calib2_flag\": \"%d\",\n", gl->ofs_calib2_flag);
+      mg_printf(conn, "   \"tcalib_flag\": \"%d\",\n",     gl->tcalib_flag);
+      mg_printf(conn, "   \"remove_spikes\": \"%d\",\n",   gl->remove_spikes);
+      mg_printf(conn, "   \"http_port\": \"%d\",\n",       gl->http_port);
+      mg_printf(conn, "   \"n_boards\": \"%d\",\n",        gl->n_boards);
+      mg_printf(conn, "   \"sampling_speed\": \"%d\",\n",  gl->sampling_speed);
       
-      mg_printf_data(conn, "   \"boards\": [\n");
+      mg_printf(conn, "   \"boards\": [\n");
       
       for (int i=0 ; i<gl->n_boards ; i++) {
-         mg_printf_data(conn, "      { \"name\": \"%s\" }", gl->board[i].name);
+         mg_printf(conn, "      { \"name\": \"%s\" }", gl->board[i].name);
          if (i<gl->n_boards-1)
-            mg_printf_data(conn, ",");
-         mg_printf_data(conn, "\n");
+            mg_printf(conn, ",");
+         mg_printf(conn, "\n");
       }
       
-      mg_printf_data(conn, "   ]\n");
+      mg_printf(conn, "   ]\n");
       
-      mg_printf_data(conn, "}\n");
-      return MG_TRUE;
+      mg_printf(conn, "}\n");
+      return;
    }
    
+   // software build
+   if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/build") == 0) {
+      mg_printf(conn, "{\n");
+      mg_printf(conn, "   \"build\": \"%s\"\n", __DATE__);
+      mg_printf(conn, "}\n");
+      return;
+   }
+
    // binary encoded waveforms
-   if (event == MG_REQUEST && strcmp(conn->uri, "/wf") == 0) {
+   if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/wf") == 0) {
       float wfT[16][1024], wfU[16][1024];
       int status;
       
-      mg_get_var(conn, "b", str, sizeof(str));
+      mg_get_http_var(&hm->body, "b", str, sizeof(str));
       int b = atoi(str);
       
       // avoid invalid board index
@@ -124,7 +130,7 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
       
       if (status == SUCCESS) {
          
-         mg_get_var(conn, "c", str, sizeof(str));
+         mg_get_http_var(&hm->body, "c", str, sizeof(str));
          int chn = atoi(str);
          
          int t = 1;    // array type
@@ -133,39 +139,49 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
          for (int c=0 ; c<16 ; c++) {
             if (chn & (1 << c)) {
                t = 1; // time array
-               mg_send_data(conn, &t, 4);
-               mg_send_data(conn, &b, 4);
-               mg_send_data(conn, &f, 4);
-               mg_send_data(conn, &c, 4);
-               mg_send_data(conn, &n, 4);
-               mg_send_data(conn, wfT[c], sizeof(float)*n);
+               mg_send(conn, &t, 4);
+               mg_send(conn, &b, 4);
+               mg_send(conn, &f, 4);
+               mg_send(conn, &c, 4);
+               mg_send(conn, &n, 4);
+               mg_send(conn, wfT[c], sizeof(float)*n);
             }
          }
          
          for (int c=0 ; c<16 ; c++) {
             if (chn & (1 << c)) {
                t = 2; // voltage array
-               mg_send_data(conn, &t, 4);
-               mg_send_data(conn, &b, 4);
-               mg_send_data(conn, &f, 4);
-               mg_send_data(conn, &c, 4);
-               mg_send_data(conn, &n, 4);
-               mg_send_data(conn, wfU[c], sizeof(float)*n);
+               mg_send(conn, &t, 4);
+               mg_send(conn, &b, 4);
+               mg_send(conn, &f, 4);
+               mg_send(conn, &c, 4);
+               mg_send(conn, &n, 4);
+               mg_send(conn, wfU[c], sizeof(float)*n);
             }
          }
          
       } else {
          // just return idle message
          int t = 0;
-         mg_send_data(conn, &t, 4);
-         mg_send_data(conn, &b, 4);
+         mg_send(conn, &t, 4);
+         mg_send(conn, &b, 4);
       }
       
-      return MG_TRUE;
+      return;
    }
 
+   // globals PUT
+   /*
+   if (event == MG_RECV && strcmp(conn->uri, "/gl") == 0) {
+      return MG_TRUE;
+   }
+    */
    
-   return MG_FALSE;
+   // file serving
+   if (event == MG_EV_HTTP_REQUEST) {
+      mg_serve_http(conn, hm, s_http_server_opts);
+   }
+   
 }
 
 #define CMD_OFS_CALIB 1
@@ -330,10 +346,13 @@ int main(int argc, char *argv[]) {
    }
    
    // initialize web server
-   struct mg_server *server = mg_create_server(&gl, wds_handler);
-   mg_set_option(server, "document_root", ".");      // Serve current directory
+   struct mg_mgr mgr;
+   struct mg_connection *con;
+   
+   mg_mgr_init(&mgr, &gl);
    sprintf(str, "%d", gl.http_port);
-   mg_set_option(server, "listening_port", str);     // Define listening port
+   con = mg_bind(&mgr, str, wds_handler);
+   s_http_server_opts.document_root = ".";  // Serve current directory
    
    printf("Starting HTTP server at port %d...\n", gl.http_port);
    
@@ -341,7 +360,7 @@ int main(int argc, char *argv[]) {
       printf("Starting in DEMO mode.\n");
    
    for (;;) {
-      mg_poll_server(server, 1000);   // Infinite loop, Ctrl-C to stop
+      mg_mgr_poll(&mgr, 1000);   // Infinite loop, Ctrl-C to stop
    }
 
    // mg_destroy_server(&server);

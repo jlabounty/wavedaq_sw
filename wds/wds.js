@@ -44,6 +44,9 @@ function init()
    // load globals including board list from server
    loadGl();
    
+   // load build and put into about box
+   loadBuild();
+   
    // schedule first waveform load
    window.setTimeout(loadWF, 10);
 }
@@ -66,9 +69,35 @@ function loadGl()
          }
          OSC.nWd = OSC.GL.boards.length;
 
+         // populate config
+         document.getElementById("calib1").checked = (OSC.GL.ofs_calib1_flag == "1");
+         document.getElementById("calib2").checked = (OSC.GL.ofs_calib2_flag == "1");
+         document.getElementById("spikes").checked = (OSC.GL.remove_spikes == "1");
       }
    };
    req.open("GET", "gl?r=" + Math.random(), true); // avoid cached results
+   req.send();
+}
+
+function setGl(e)
+{
+   var req = new XMLHttpRequest();
+   req.open("PUT", "gl/" + e.name, true); // avoid cached results
+   req.send("abcd");
+}
+
+function loadBuild()
+{
+   // send AJAX request
+   var req = new XMLHttpRequest();
+   req.onreadystatechange = function() {
+      if (req.readyState == 4 && req.status == 200) {
+         build = JSON.parse(req.responseText);
+         var e = document.getElementById("build");
+         e.innerHTML = "Built "+build.build;
+      }
+   };
+   req.open("GET", "build?r=" + Math.random(), true); // avoid cached results
    req.send();
 }
 
@@ -195,6 +224,7 @@ function resize()
                  document.documentElement.clientHeight);
       ctls.style.left = (document.documentElement.clientWidth - ctls.offsetWidth - config.offsetWidth) + "px";
       config.style.left = (document.documentElement.clientWidth - config.offsetWidth) + "px";
+      config.style.height = document.documentElement.clientHeight + "px";
    }
 }
 
@@ -420,6 +450,16 @@ function sldTOffset(value)
    OSC.redraw();
 }
 
+function btnConfig()
+{
+   var e = document.getElementById("config");
+   if (e.style.display == "none" || e.style.display == "")
+      e.style.display = "block";
+   else
+      e.style.display = "none";
+   resize();
+}
+
 function btnAbout()
 {
    var e = document.getElementById("about");
@@ -427,36 +467,54 @@ function btnAbout()
    e.style.left = document.documentElement.clientWidth/2 - e.offsetWidth/2 + "px";
    e.style.top  = document.documentElement.clientHeight/2 - e.offsetHeight/2 + "px";
    
-   this.addEventListener("click", aboutDrag);
-   this.addEventListener("mousemove", aboutDrag);
-   this.addEventListener("touchmove", aboutDrag);
+   this.addEventListener("mousedown",  aboutDrag, true);
+   this.addEventListener("mousemove",  aboutDrag, true);
+   this.addEventListener("mouseup",    aboutDrag, true);
+   this.addEventListener("touchstart", aboutDrag, true);
+   this.addEventListener("touchmove",  aboutDrag, true);
 }
 
-var Ax, Ay;
+var Ax, Ay, Dx, Dy;
 
 function aboutDrag(e)
 {
-   e.preventDefault();
    var x = undefined;
    var dlg = document.getElementById("about");
 
-   if (e.type == "click") {
-      Ax = e.offsetX;
-      Ay = e.offsetY;
+   if (e.type == "mouseup") {
+      Ax = 0;
+      Ay = 0;
+   }
+
+   if (e.target == document.getElementById("aboutTitle") && e.type == "mousedown") {
+      Ax = e.clientX;
+      Ay = e.clientY;
       Dx = parseInt(dlg.style.left);
       Dy = parseInt(dlg.style.top);
    }
    
-   if ((e.buttons == 1 && e.type == "mousemove")) {
-      x = e.offsetX;
-      y = e.offsetY;
+   if (e.target == document.getElementById("aboutTitle") && e.type == "touchstart") {
+      e.preventDefault();
+      Ax = e.targetTouches[0].clientX;
+      Ay = e.targetTouches[0].clientY;
+      Dx = parseInt(dlg.style.left);
+      Dy = parseInt(dlg.style.top);
+   }
+
+   if (e.buttons == 1 && e.type == "mousemove" && Ax > 0 && Ay > 0) {
+      e.preventDefault();
+      x = e.clientX;
+      y = e.clientY;
       dlg.style.left = (Dx + (x - Ax)) + "px";
       dlg.style.top  = (Dy + (y - Ay)) + "px";
    }
    
-   /*
-   if (e.type == "touchmove")
-      x = e.changedTouches[e.changedTouches.length-1].clientX - b.getBoundingClientRect().left;
-   */
+
+   if (e.type == "touchmove" && Ax > 0 && Ay > 0) {
+      x = e.changedTouches[e.changedTouches.length-1].clientX;
+      y = e.changedTouches[e.changedTouches.length-1].clientY;
+      dlg.style.left = (Dx + (x - Ax)) + "px";
+      dlg.style.top  = (Dy + (y - Ay)) + "px";
+    }
 }
 
