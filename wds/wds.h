@@ -38,7 +38,6 @@ typedef struct {
    int  http_port;
    int  n_boards;
    int  sampling_speed;
-   int  do_calibration;
    WDB  board[16];
 } GLOBALS;
 

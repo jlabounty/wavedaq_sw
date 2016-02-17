@@ -27,10 +27,10 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
    gl = (GLOBALS *)conn->server_param;
    
    if (event == MG_AUTH)
-      return MG_TRUE; // authorize all events
+      return MG_TRUE; // authorize all events (for now...)
    
    // list of boards
-   if (event == MG_REQUEST && !strcmp(conn->uri, "/list")) {
+   if (event == MG_REQUEST && !strcmp(conn->uri, "/boards")) {
       mg_printf_data(conn, "{\n");
       mg_printf_data(conn, "   \"boards\": [\n");
       
@@ -42,6 +42,36 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
       }
 
       mg_printf_data(conn, "   ]\n");
+      mg_printf_data(conn, "}\n");
+      return MG_TRUE;
+   }
+   
+   // gloabls
+   if (event == MG_REQUEST && !strcmp(conn->uri, "/gl")) {
+      mg_printf_data(conn, "{\n");
+      mg_printf_data(conn, "   \"demo_flag\": \"%d\",\n",       gl->demo_flag);
+      mg_printf_data(conn, "   \"rotate_flag\": \"%d\",\n",     gl->rotate_flag);
+      mg_printf_data(conn, "   \"verbose_flag\": \"%d\",\n",    gl->verbose_flag);
+      mg_printf_data(conn, "   \"adc_flag\": \"%d\",\n",        gl->adc_flag);
+      mg_printf_data(conn, "   \"ofs_calib1_flag\": \"%d\",\n", gl->ofs_calib1_flag);
+      mg_printf_data(conn, "   \"ofs_calib2_flag\": \"%d\",\n", gl->ofs_calib2_flag);
+      mg_printf_data(conn, "   \"tcalib_flag\": \"%d\",\n",     gl->tcalib_flag);
+      mg_printf_data(conn, "   \"remove_spikes\": \"%d\",\n",   gl->remove_spikes);
+      mg_printf_data(conn, "   \"http_port\": \"%d\",\n",       gl->http_port);
+      mg_printf_data(conn, "   \"n_boards\": \"%d\",\n",        gl->n_boards);
+      mg_printf_data(conn, "   \"sampling_speed\": \"%d\",\n",  gl->sampling_speed);
+      
+      mg_printf_data(conn, "   \"boards\": [\n");
+      
+      for (int i=0 ; i<gl->n_boards ; i++) {
+         mg_printf_data(conn, "      { \"name\": \"%s\" }", gl->board[i].name);
+         if (i<gl->n_boards-1)
+            mg_printf_data(conn, ",");
+         mg_printf_data(conn, "\n");
+      }
+      
+      mg_printf_data(conn, "   ]\n");
+      
       mg_printf_data(conn, "}\n");
       return MG_TRUE;
    }
@@ -110,7 +140,6 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
                mg_send_data(conn, &n, 4);
                mg_send_data(conn, wfT[c], sizeof(float)*n);
             }
-            
          }
          
          for (int c=0 ; c<16 ; c++) {
@@ -139,8 +168,11 @@ static int wds_handler(struct mg_connection *conn, enum mg_event event)
    return MG_FALSE;
 }
 
+#define CMD_OFS_CALIB 1
+#define CMD_TIME_CALIB 2
+
 int main(int argc, char *argv[]) {
-   int ch, i, i1, i2;
+   int ch, i, i1, i2, cmd = 0;
    GLOBALS gl;
    char str[256], *p;
    
@@ -186,7 +218,7 @@ int main(int argc, char *argv[]) {
             gl.adc_flag = 1;
             break;
          case 'c':
-            gl.do_calibration = 1;
+            cmd = CMD_OFS_CALIB;
             break;
          case 'd':
             gl.demo_flag = 1;
@@ -292,7 +324,7 @@ int main(int argc, char *argv[]) {
       return FAILURE;
    
    // do calibration
-   if (gl.do_calibration) {
+   if (cmd == CMD_OFS_CALIB) {
       wd_calibrate(&gl);
       return 0;
    }

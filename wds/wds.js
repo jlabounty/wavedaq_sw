@@ -39,31 +39,34 @@ function init()
    // draw empty scope
    OSC.redraw();
    
-   // fill wdSelector from list on server
-   loadBoardList();
+   // load globals including board list from server
+   loadGl();
    
    // schedule first waveform load
    window.setTimeout(loadWF, 10);
 }
 
-function loadBoardList()
+function loadGl()
 {
    // send AJAX request
-   req = new XMLHttpRequest();
+   var req = new XMLHttpRequest();
    req.onreadystatechange = function() {
       if (req.readyState == 4 && req.status == 200) {
-         var obj = JSON.parse(req.responseText);
+         OSC.GL = JSON.parse(req.responseText);
+         
+         // populate board list
          var sel = document.getElementById("wdSelect");
-         for (var i=0 ; i<obj.boards.length ; i++) {
+         for (var i=0 ; i<OSC.GL.boards.length ; i++) {
             var opt = document.createElement('option');
-            opt.innerHTML = obj.boards[i].name;
-            opt.value = obj.boards[i].name;
+            opt.innerHTML = OSC.GL.boards[i].name;
+            opt.value = OSC.GL.boards[i].name;
             sel.appendChild(opt);
          }
-         OSC.nWd = obj.boards.length;
+         OSC.nWd = OSC.GL.boards.length;
+
       }
    };
-   req.open("GET", "list" + "?r=" + Math.random(), true); // avoid cached results
+   req.open("GET", "gl?r=" + Math.random(), true); // avoid cached results
    req.send();
 }
 
@@ -111,17 +114,17 @@ function loadWF()
    var board = document.getElementById("wdSelect").selectedIndex;
    
    // send AJAX request
-   req = new XMLHttpRequest();
-   req.onreadystatechange = this.receiveWF.bind(this);
-   req.open("GET", "wf?b=" + board + "&c=" + chn + "&r=" + Math.random(), true); // avoid cached results
-   req.responseType = "arraybuffer";
-   req.send();
+   OSC.req = new XMLHttpRequest();
+   OSC.req.onreadystatechange = receiveWF;
+   OSC.req.open("GET", "wf?b=" + board + "&c=" + chn + "&r=" + Math.random(), true); // avoid cached results
+   OSC.req.responseType = "arraybuffer";
+   OSC.req.send();
 }
 
 function receiveWF()
 {
-   if (req.readyState == 4 && req.status == 200) {
-      // this.wf = JSON.parse(req.responseText); // use this for JSON encoded data
+   if (OSC.req.readyState == 4 && OSC.req.status == 200) {
+      // this.wf = JSON.parse(OSC.req.responseText); // use this for JSON encoded data
       
       // create 16 empty waveforms
       var wf = {T:[], U:[]};
@@ -130,8 +133,8 @@ function receiveWF()
          wf.U[i] = [];
       }
       
-      var intArray = new Uint32Array(this.req.response);
-      var floatArray = new Float32Array(this.req.response);
+      var intArray = new Uint32Array(OSC.req.response);
+      var floatArray = new Float32Array(OSC.req.response);
       
       for (var i=0 ; i<intArray.length ; ) {
          if (intArray[i] == 0) {        // idle message
