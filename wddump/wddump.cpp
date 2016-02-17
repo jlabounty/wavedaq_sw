@@ -25,15 +25,25 @@
 
 typedef struct {
    unsigned char  protocol_version;
+   unsigned char  board_version;
    unsigned short board_id;
+   unsigned char  crate_id;
+   unsigned char  slot_id;
+   unsigned char  adc_and_channel_info;
+   unsigned char  channel_segment_number;
+   unsigned short readout_sequence_number;
+   unsigned short hardware_sequence_number;
    unsigned short sampling_frequency;
    unsigned short number_of_samples;
-   unsigned char  adc_and_channel_info;
-   unsigned short channel_segment_number;
-   unsigned short data_sequence_number;
+   unsigned short drs0_trigger_cell;
+   unsigned short drs1_trigger_cell;
+   unsigned short trigger_type;
    unsigned short packet_sequence_number;
-   unsigned short reserved;
 } WD2_FRAME_HEADER;
+
+/* Byte and Word swapping big endian <-> little endian */
+#define SWAP_UINT16(x) (((x) >> 8) | ((x) << 8))
+#define SWAP_UINT32(x) (((x) >> 24) | (((x) & 0x00FF0000) >> 8) | (((x) & 0x0000FF00) << 8) | ((x) << 24))
 
 int main()
 {
@@ -46,7 +56,7 @@ int main()
    unsigned char *pd;
    short data[512];
    unsigned short header_adc;
-   unsigned short header_ch;
+   unsigned short header_channel;
    socklen_t len;
    FILE *f;
    //FILE *l;
@@ -97,19 +107,24 @@ int main()
          n = (int)recvfrom(s, (char *)buffer, sizeof(buffer), 0, (struct sockaddr *)&rem_addr, (socklen_t *)&len);
          if (n > sizeof(WD2_FRAME_HEADER)) {
             ph = (WD2_FRAME_HEADER*)buffer;
+            
             // correct endianness of header data
-            ph->board_id               = 0xFFFF & ((ph->board_id<<8)|(ph->board_id>>8));
-            ph->sampling_frequency     = 0xFFFF & ((ph->sampling_frequency<<8)|(ph->sampling_frequency>>8)); 
-            ph->number_of_samples      = 0xFFFF & ((ph->number_of_samples<<8)|(ph->number_of_samples>>8));
-            header_adc                 = 0x0F   & (ph->adc_and_channel_info >> 4);
-            header_ch                  = 0x0F   & ph->adc_and_channel_info;
-            ph->channel_segment_number = 0xFFFF & ((ph->channel_segment_number<<8)|(ph->channel_segment_number>>8));
-            ph->data_sequence_number   = 0xFFFF & ((ph->data_sequence_number<<8)|(ph->data_sequence_number>>8));
-            ph->packet_sequence_number = 0xFFFF & ((ph->packet_sequence_number<<8)|(ph->packet_sequence_number>>8));
-            ph->reserved               = 0xFFFF & ((ph->reserved<<8)|(ph->reserved>>8));
+            ph->board_id                 = SWAP_UINT16(ph->board_id);
+            header_adc                   = (ph->adc_and_channel_info >> 4) & 0x0f;
+            header_channel               = (ph->adc_and_channel_info) & 0x0f;
+            ph->readout_sequence_number  = SWAP_UINT16(ph->readout_sequence_number);
+            ph->hardware_sequence_number = SWAP_UINT16(ph->hardware_sequence_number);
+            ph->sampling_frequency       = SWAP_UINT16(ph->sampling_frequency);
+            ph->number_of_samples        = SWAP_UINT16(ph->number_of_samples);
+            ph->drs0_trigger_cell        = SWAP_UINT16(ph->drs0_trigger_cell);
+            ph->drs1_trigger_cell        = SWAP_UINT16(ph->drs1_trigger_cell);
+            ph->trigger_type             = SWAP_UINT16(ph->trigger_type);
+            ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
+            
             //printf("Received packet from   : %s:%d\n", inet_ntoa(rem_addr.sin_addr), ntohs(rem_addr.sin_port));
             //printf("xxx.xxx.xxx.xxx:xxxxx   xxxxx      x/x/x\n\r");
-            printf("%s:%5d   %5d      %d/%d/%d\n\r", inet_ntoa(rem_addr.sin_addr), ntohs(rem_addr.sin_port), ph->data_sequence_number, header_adc, header_ch, ph->channel_segment_number);
+            printf("%s:%5d   %5d      %d/%d/%d\n\r", inet_ntoa(rem_addr.sin_addr), ntohs(rem_addr.sin_port),
+                   ph->readout_sequence_number, header_adc, header_channel, ph->channel_segment_number);
             //printf("Protocol version       : %d\n", ph->protocol_version);
             //printf("Board ID               : %d\n", ph->board_id);
             //printf("Sampling frequency     : %d\n", ph->sampling_frequency);
@@ -118,7 +133,6 @@ int main()
             //printf("Channel Segment Number : %d\n", ph->channel_segment_number);
             //printf("Data Sequence Number   : %d\n", ph->data_sequence_number);
             //printf("Packet Sequence Number : %d\n", ph->packet_sequence_number);
-            //printf("Reserved               : %d\n", ph->reserved);
             //printf("\n");
             
             // decode waveform data
@@ -145,11 +159,11 @@ int main()
             fprintf(f, "%d\n", ph->sampling_frequency); 
             fprintf(f, "%d\n", ph->number_of_samples);
             fprintf(f, "%d\n", header_adc);
-            fprintf(f, "%d\n", header_ch);
+            fprintf(f, "%d\n", header_channel);
             fprintf(f, "%d\n", ph->channel_segment_number);
-            fprintf(f, "%d\n", ph->data_sequence_number);
+            fprintf(f, "%d\n", ph->readout_sequence_number);
             fprintf(f, "%d\n", ph->packet_sequence_number);
-            fprintf(f, "%d\n", ph->reserved);
+
             // data
             for (i=0 ; i<512 ; i++)
                fprintf(f, "%d\n", data[i]);
