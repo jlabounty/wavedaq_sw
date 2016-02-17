@@ -49,10 +49,51 @@ a:hover { color:#0000FF; text-decoration:underline }
 a:active { color:#0000FF; text-decoration:underline }
 a:focus { color:#0000FF; text-decoration:underline }
 
-.scope {
-   float: left;
-   display: inline-block;
-   height: 0;
+#container {
+   position: relative;
+}
+
+#scope {
+   position: absolute;
+   top: 0px;
+   left: 0px;
+   width: 0px;
+   height: 0px;
+}
+
+#controls {
+   position: absolute;
+   top: 0px;
+   left: 0px;
+   max-width: 190px;
+   width: 190px;
+   background-color: white;
+   text-align: center;
+}
+
+#config {
+   border-left: 1px solid black;
+   position: absolute;
+   top: 0px;
+   left: 0px;
+   max-width: 360px;
+   width: 360px;
+   height: 5000px;
+   background-color: white;
+   text-align: left;
+}
+
+#about {
+   border: 1px solid black;
+   position: absolute;
+   top: 0px;
+   left: 0px;
+   max-width: 360px;
+   width: 360px;
+   background-color: white;
+   text-align: center;
+   padding: 10px;
+   display: none;
 }
 
 button {
@@ -62,15 +103,6 @@ button {
    border-radius: 10px;
    background-color: #E0E0E0;
    padding: 0;
-}
-
-.controls {
-   max-width: 190px;
-   width: 190px;
-   background-color: white;
-   text-align: center;
-   display: inline-block;
-   margin-left: 0;
 }
 
 .squareButton {

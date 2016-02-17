@@ -12,9 +12,11 @@
 </head>
 <body onload="init();">
 
-<div id="scope" class="scope"></div>
+<div id="container">
+   
+<div id="scope"></div>
 
-<div class="controls" id="controls">
+<div id="controls">
 
    <select id="wdSelect" class="wdSelect">
    </select><br />
@@ -71,7 +73,31 @@
       </tr>
    </table>
 
+   <button class="wideButton" id="btnConfig" type="button" onClick="btnConfig()">Config</button>
+   <button class="wideButton" id="btnAbout" type="button" onClick="btnAbout()">About</button>
+
 </div>
+
+<div id="config">
+   
+   <br />
+   <input type="checkbox" id="calib1">Apply Primary Calibration (Cell)<br />
+   <input type="checkbox" id="calib2">Apply Secondary Calibration (Readout)<br />
+   <input type="checkbox" id="spikes">Remove Spikes<br />
+      
+</div>
+
+<div id="about">
+
+   WaveDAQ Oscilloscope<br />
+   Stefan Ritt<br />
+   Paul Scherrer Institute<br />
+   <br />
+   <button class="wideButton" type="button" onClick="document.getElementById('about').style.display = 'none';">Close</button>
+
+</div>
+
+</div> <!-- container -->
 
 </body>
 </html>

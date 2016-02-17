@@ -26,9 +26,11 @@ function init()
 
    // size to fit screen
    var ctls = document.getElementById("controls");
-   OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth,
+   var config = document.getElementById("config");
+   OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth - config.offsetWidth,
               document.documentElement.clientHeight);
-   ctls.style.marginLeft = (document.documentElement.clientWidth - ctls.offsetWidth) + "px";
+   ctls.style.left = (document.documentElement.clientWidth - ctls.offsetWidth - config.offsetWidth) + "px";
+   config.style.left = (document.documentElement.clientWidth - config.offsetWidth) + "px";
  
    // add resize event handler
    window.addEventListener("resize", resize);
@@ -182,14 +184,17 @@ function resize()
 // called when screen got resized
 {
    var ctls = document.getElementById("controls");
+   var config = document.getElementById("config");
    if (ctls.hidden == true) {
       OSC.resize(document.documentElement.clientWidth,
                  document.documentElement.clientHeight);
-      ctls.style.marginLeft = (document.documentElement.clientWidth) + "px";
+      ctls.style.left = (document.documentElement.clientWidth) + "px";
+      config.style.left = (document.documentElement.clientWidth) + "px";
    }  else {
-      OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth,
+      OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth - config.offsetWidth,
                  document.documentElement.clientHeight);
-      ctls.style.marginLeft = (document.documentElement.clientWidth - ctls.offsetWidth) + "px";
+      ctls.style.left = (document.documentElement.clientWidth - ctls.offsetWidth - config.offsetWidth) + "px";
+      config.style.left = (document.documentElement.clientWidth - config.offsetWidth) + "px";
    }
 }
 
@@ -415,4 +420,43 @@ function sldTOffset(value)
    OSC.redraw();
 }
 
+function btnAbout()
+{
+   var e = document.getElementById("about");
+   e.style.display = "block";
+   e.style.left = document.documentElement.clientWidth/2 - e.offsetWidth/2 + "px";
+   e.style.top  = document.documentElement.clientHeight/2 - e.offsetHeight/2 + "px";
+   
+   this.addEventListener("click", aboutDrag);
+   this.addEventListener("mousemove", aboutDrag);
+   this.addEventListener("touchmove", aboutDrag);
+}
+
+var Ax, Ay;
+
+function aboutDrag(e)
+{
+   e.preventDefault();
+   var x = undefined;
+   var dlg = document.getElementById("about");
+
+   if (e.type == "click") {
+      Ax = e.offsetX;
+      Ay = e.offsetY;
+      Dx = parseInt(dlg.style.left);
+      Dy = parseInt(dlg.style.top);
+   }
+   
+   if ((e.buttons == 1 && e.type == "mousemove")) {
+      x = e.offsetX;
+      y = e.offsetY;
+      dlg.style.left = (Dx + (x - Ax)) + "px";
+      dlg.style.top  = (Dy + (y - Ay)) + "px";
+   }
+   
+   /*
+   if (e.type == "touchmove")
+      x = e.changedTouches[e.changedTouches.length-1].clientX - b.getBoundingClientRect().left;
+   */
+}
 
