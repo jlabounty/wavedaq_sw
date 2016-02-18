@@ -20,65 +20,57 @@
 static struct mg_serve_http_opts s_http_server_opts;
 
 // This function will be called by mongoose on every new request
-static void wds_handler(struct mg_connection *conn, int event, void *ev_data)
+static void wds_handler(struct mg_connection *nc, int event, void *p)
 {
    char str[256];
    GLOBALS *gl;
    WD2_EVENT eventHeader;
    
-   struct http_message *hm = (struct http_message *)ev_data;
+   struct http_message *hm = (struct http_message *)p;
    
-   gl = (GLOBALS *)conn->mgr->user_data;
-   
-   /*
-   if (event == MG_AUTH)
-      return MG_TRUE; // authorize all events (for now...)
-   */
-
-   // if (event == MG_EV_HTTP_REQUEST)
-   printf("%d\n", event);
-
-   if (event == MG_EV_HTTP_REQUEST) {
-      mg_serve_http(conn, hm, s_http_server_opts);
-   }
-   
-   return;
+   gl = (GLOBALS *)nc->mgr->user_data;
    
    // gloabls
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/gl") == 0) {
-      mg_printf(conn, "{\n");
-      mg_printf(conn, "   \"demo_flag\": \"%d\",\n",       gl->demo_flag);
-      mg_printf(conn, "   \"rotate_flag\": \"%d\",\n",     gl->rotate_flag);
-      mg_printf(conn, "   \"verbose_flag\": \"%d\",\n",    gl->verbose_flag);
-      mg_printf(conn, "   \"adc_flag\": \"%d\",\n",        gl->adc_flag);
-      mg_printf(conn, "   \"ofs_calib1_flag\": \"%d\",\n", gl->ofs_calib1_flag);
-      mg_printf(conn, "   \"ofs_calib2_flag\": \"%d\",\n", gl->ofs_calib2_flag);
-      mg_printf(conn, "   \"tcalib_flag\": \"%d\",\n",     gl->tcalib_flag);
-      mg_printf(conn, "   \"remove_spikes\": \"%d\",\n",   gl->remove_spikes);
-      mg_printf(conn, "   \"http_port\": \"%d\",\n",       gl->http_port);
-      mg_printf(conn, "   \"n_boards\": \"%d\",\n",        gl->n_boards);
-      mg_printf(conn, "   \"sampling_speed\": \"%d\",\n",  gl->sampling_speed);
+      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
       
-      mg_printf(conn, "   \"boards\": [\n");
+      mg_printf_http_chunk(nc, "{\n");
+      mg_printf_http_chunk(nc, "   \"demo_flag\": \"%d\",\n",       gl->demo_flag);
+      mg_printf_http_chunk(nc, "   \"rotate_flag\": \"%d\",\n",     gl->rotate_flag);
+      mg_printf_http_chunk(nc, "   \"verbose_flag\": \"%d\",\n",    gl->verbose_flag);
+      mg_printf_http_chunk(nc, "   \"adc_flag\": \"%d\",\n",        gl->adc_flag);
+      mg_printf_http_chunk(nc, "   \"ofs_calib1_flag\": \"%d\",\n", gl->ofs_calib1_flag);
+      mg_printf_http_chunk(nc, "   \"ofs_calib2_flag\": \"%d\",\n", gl->ofs_calib2_flag);
+      mg_printf_http_chunk(nc, "   \"tcalib_flag\": \"%d\",\n",     gl->tcalib_flag);
+      mg_printf_http_chunk(nc, "   \"remove_spikes\": \"%d\",\n",   gl->remove_spikes);
+      mg_printf_http_chunk(nc, "   \"http_port\": \"%d\",\n",       gl->http_port);
+      mg_printf_http_chunk(nc, "   \"n_boards\": \"%d\",\n",        gl->n_boards);
+      mg_printf_http_chunk(nc, "   \"sampling_speed\": \"%d\",\n",  gl->sampling_speed);
+      
+      mg_printf_http_chunk(nc, "   \"boards\": [\n");
       
       for (int i=0 ; i<gl->n_boards ; i++) {
-         mg_printf(conn, "      { \"name\": \"%s\" }", gl->board[i].name);
+         mg_printf_http_chunk(nc, "      { \"name\": \"%s\" }", gl->board[i].name);
          if (i<gl->n_boards-1)
-            mg_printf(conn, ",");
-         mg_printf(conn, "\n");
+            mg_printf_http_chunk(nc, ",");
+         mg_printf_http_chunk(nc, "\n");
       }
       
-      mg_printf(conn, "   ]\n");
+      mg_printf_http_chunk(nc, "   ]\n");
       
-      mg_printf(conn, "}\n");
+      mg_printf_http_chunk(nc, "}\n");
+      
+      mg_send_http_chunk(nc, "", 0); // end of response
       return;
    }
    
    // software build
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/build") == 0) {
-      mg_printf(conn, "{\n");
-      mg_printf(conn, "   \"build\": \"%s\"\n", __DATE__);
-      mg_printf(conn, "}\n");
+      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+      mg_printf_http_chunk(nc, "{\n");
+      mg_printf_http_chunk(nc, "   \"build\": \"%s\"\n", __DATE__);
+      mg_printf_http_chunk(nc, "}\n");
+      mg_send_http_chunk(nc, "", 0);
       return;
    }
 
@@ -87,7 +79,9 @@ static void wds_handler(struct mg_connection *conn, int event, void *ev_data)
       float wfT[16][1024], wfU[16][1024];
       int status;
       
-      mg_get_http_var(&hm->body, "b", str, sizeof(str));
+      mg_send_response_line(nc, 200, "Content-Type: application/octet-stream\r\nTransfer-Encoding: chunked\r\n");
+
+      mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
       int b = atoi(str);
       
       // avoid invalid board index
@@ -130,7 +124,7 @@ static void wds_handler(struct mg_connection *conn, int event, void *ev_data)
       
       if (status == SUCCESS) {
          
-         mg_get_http_var(&hm->body, "c", str, sizeof(str));
+         mg_get_http_var(&hm->query_string, "c", str, sizeof(str));
          int chn = atoi(str);
          
          int t = 1;    // array type
@@ -139,34 +133,36 @@ static void wds_handler(struct mg_connection *conn, int event, void *ev_data)
          for (int c=0 ; c<16 ; c++) {
             if (chn & (1 << c)) {
                t = 1; // time array
-               mg_send(conn, &t, 4);
-               mg_send(conn, &b, 4);
-               mg_send(conn, &f, 4);
-               mg_send(conn, &c, 4);
-               mg_send(conn, &n, 4);
-               mg_send(conn, wfT[c], sizeof(float)*n);
+               mg_send_http_chunk(nc, (const char *)&t, 4);
+               mg_send_http_chunk(nc, (const char *)&b, 4);
+               mg_send_http_chunk(nc, (const char *)&f, 4);
+               mg_send_http_chunk(nc, (const char *)&c, 4);
+               mg_send_http_chunk(nc, (const char *)&n, 4);
+               mg_send_http_chunk(nc, (const char *)wfT[c], sizeof(float)*n);
             }
          }
          
          for (int c=0 ; c<16 ; c++) {
             if (chn & (1 << c)) {
                t = 2; // voltage array
-               mg_send(conn, &t, 4);
-               mg_send(conn, &b, 4);
-               mg_send(conn, &f, 4);
-               mg_send(conn, &c, 4);
-               mg_send(conn, &n, 4);
-               mg_send(conn, wfU[c], sizeof(float)*n);
+               mg_send_http_chunk(nc, (const char *)&t, 4);
+               mg_send_http_chunk(nc, (const char *)&b, 4);
+               mg_send_http_chunk(nc, (const char *)&f, 4);
+               mg_send_http_chunk(nc, (const char *)&c, 4);
+               mg_send_http_chunk(nc, (const char *)&n, 4);
+               mg_send_http_chunk(nc, (const char *)wfU[c], sizeof(float)*n);
             }
          }
          
       } else {
          // just return idle message
          int t = 0;
-         mg_send(conn, &t, 4);
-         mg_send(conn, &b, 4);
+         mg_send_http_chunk(nc, (const char *)&t, 4);
+         mg_send_http_chunk(nc, (const char *)&b, 4);
       }
-      
+
+      mg_send_http_chunk(nc, "", 0);
+
       return;
    }
 
@@ -179,7 +175,7 @@ static void wds_handler(struct mg_connection *conn, int event, void *ev_data)
    
    // file serving
    if (event == MG_EV_HTTP_REQUEST) {
-      mg_serve_http(conn, hm, s_http_server_opts);
+      mg_serve_http(nc, hm, s_http_server_opts);
    }
    
 }
@@ -352,7 +348,10 @@ int main(int argc, char *argv[]) {
    mg_mgr_init(&mgr, &gl);
    sprintf(str, "%d", gl.http_port);
    con = mg_bind(&mgr, str, wds_handler);
+   mg_set_protocol_http_websocket(con);
    s_http_server_opts.document_root = ".";  // Serve current directory
+   s_http_server_opts.dav_document_root = ".";  // Allow access via WebDav
+   s_http_server_opts.enable_directory_listing = "yes";
    
    printf("Starting HTTP server at port %d...\n", gl.http_port);
    
@@ -363,7 +362,7 @@ int main(int argc, char *argv[]) {
       mg_mgr_poll(&mgr, 1000);   // Infinite loop, Ctrl-C to stop
    }
 
-   // mg_destroy_server(&server);
+   // mg_mgr_free(&mgr);
 
    return 0;
 }

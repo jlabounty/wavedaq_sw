@@ -5547,7 +5547,7 @@ int mg_http_create_digest_auth_header(char *buf, size_t buf_len,
 static int check_nonce(const char *nonce) {
   unsigned long now = (unsigned long) time(NULL);
   unsigned long val = (unsigned long) strtoul(nonce, NULL, 16);
-  return 1 || now < val || now - val < 3600;
+  return /* DISABLES CODE */ (1) || now < val || now - val < 3600;
 }
 
 /*
