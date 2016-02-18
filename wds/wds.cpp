@@ -12,8 +12,14 @@
 #include <getopt.h>
 #include <ctype.h>
 
+#include "averager.h"
 #include "wds.h"
 #include "mongoose.h"
+
+#define CMD_OFS_CALIB 1
+#define CMD_TIME_CALIB 2
+
+CALIB_PROGRESS ofs_prog;
 
 /*-----------------------------------------------------------------------------------------*/
 
@@ -29,6 +35,22 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
    struct http_message *hm = (struct http_message *)p;
    
    gl = (GLOBALS *)nc->mgr->user_data;
+   
+   if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->method, "PUT") == 0) {
+      if (mg_vcmp(&hm->uri, "/gl/ofs_calib1_flag") == 0)
+         gl->ofs_calib1_flag = atoi(hm->body.p);
+      else if (mg_vcmp(&hm->uri, "/gl/ofs_calib2_flag") == 0)
+         gl->ofs_calib2_flag = atoi(hm->body.p);
+      else if (mg_vcmp(&hm->uri, "/gl/remove_spikes") == 0)
+         gl->remove_spikes = atoi(hm->body.p);
+      else if (mg_vcmp(&hm->uri, "/gl/rotate_flag") == 0)
+         gl->rotate_flag = atoi(hm->body.p);
+
+      else if (mg_vcmp(&hm->uri, "/vcalib") == 0)
+         ofs_prog.state = CS_FIRST_BOARD;
+      
+      mg_printf(nc, "HTTP/1.1 204 No Content\r\n");
+   }
    
    // gloabls
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/gl") == 0) {
@@ -78,8 +100,23 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/wf") == 0) {
       float wfT[16][1024], wfU[16][1024];
       int status;
-      
+
       mg_send_response_line(nc, 200, "Content-Type: application/octet-stream\r\nTransfer-Encoding: chunked\r\n");
+
+      // return progress if in calibration mode
+      if (ofs_prog.state) {
+         int t = 10;    // array type
+         mg_send_http_chunk(nc, (const char *)&t, 4);
+         
+         float f = ofs_prog.i_board;
+         mg_send_http_chunk(nc, (const char *)&f, 4);
+         
+         f = ofs_prog.progress;
+         mg_send_http_chunk(nc, (const char *)&f, 4);
+         
+         mg_send_http_chunk(nc, "", 0);
+         return;
+      }
 
       mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
       int b = atoi(str);
@@ -171,7 +208,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
    if (event == MG_RECV && strcmp(conn->uri, "/gl") == 0) {
       return MG_TRUE;
    }
-    */
+   */
    
    // file serving
    if (event == MG_EV_HTTP_REQUEST) {
@@ -180,8 +217,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
    
 }
 
-#define CMD_OFS_CALIB 1
-#define CMD_TIME_CALIB 2
+/*-----------------------------------------------------------------------------------------*/
 
 int main(int argc, char *argv[]) {
    int ch, i, i1, i2, cmd = 0;
@@ -337,7 +373,36 @@ int main(int argc, char *argv[]) {
    
    // do calibration
    if (cmd == CMD_OFS_CALIB) {
-      wd_calibrate(&gl);
+      CALIB_PROGRESS prog;
+      
+      printf("Calibrating boards\n");
+      prog.state = CS_FIRST_BOARD;
+
+      do {
+         double old_prog;
+         int old_board;
+         
+         if (prog.state == CS_FIRST_BOARD || prog.state == CS_FIRST_SAMPLE) {
+            printf("%s: [                                                 ]\r%s: [",
+                   gl.board[prog.i_board].name, gl.board[prog.i_board].name);
+            fflush(stdout);
+            old_prog = 0;
+            old_board = 0;
+         }
+
+         wd_calibrate(&gl, &prog);
+         
+         if (prog.progress >= old_prog + 0.02) {
+            old_prog += 0.02;
+            printf("=");
+            fflush(stdout);
+         }
+         if (prog.state == CS_FIRST_SAMPLE)
+            printf("\r\n");
+         
+      } while (prog.state != CS_INACTIVE);
+      printf("\r\n");
+      
       return 0;
    }
    
@@ -350,7 +415,7 @@ int main(int argc, char *argv[]) {
    con = mg_bind(&mgr, str, wds_handler);
    mg_set_protocol_http_websocket(con);
    s_http_server_opts.document_root = ".";  // Serve current directory
-   s_http_server_opts.dav_document_root = ".";  // Allow access via WebDav
+   s_http_server_opts.dav_auth_file = "-";  // Allow access via WebDav
    s_http_server_opts.enable_directory_listing = "yes";
    
    printf("Starting HTTP server at port %d...\n", gl.http_port);
@@ -359,7 +424,17 @@ int main(int argc, char *argv[]) {
       printf("Starting in DEMO mode.\n");
    
    for (;;) {
-      mg_mgr_poll(&mgr, 1000);   // Infinite loop, Ctrl-C to stop
+
+      // do calibration if asked for
+      if (ofs_prog.state != CS_INACTIVE) {
+         wd_calibrate(&gl, &ofs_prog);
+         printf("%1.2lf\n", ofs_prog.progress);
+      
+         // Yield to server, not timeout
+         mg_mgr_poll(&mgr, 0);
+      } else
+         // Yield to server, 10ms timeout
+         mg_mgr_poll(&mgr, 10);
    }
 
    // mg_mgr_free(&mgr);

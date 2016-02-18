@@ -39,6 +39,7 @@ typedef struct {
    int  n_boards;
    int  sampling_speed;
    WDB  board[16];
+   int  cmd;
 } GLOBALS;
 
 typedef struct {
@@ -54,11 +55,31 @@ typedef struct {
    unsigned short trigger_type;
 } WD2_EVENT;
 
+typedef struct {
+   int      state;
+   double   progress;
+   int      n_board;
+   int      i_board;
+   int      n_iter1;
+   int      i_iter1;
+   int      n_iter2;
+   int      i_iter2;
+   int      index;
+   Averager *ave;
+   int      fh;
+} CALIB_PROGRESS;
+
+// calibration states
+#define CS_INACTIVE     0
+#define CS_FIRST_BOARD  1
+#define CS_FIRST_SAMPLE 2
+#define CS_RUNNING      3
+
 // interface functions
 int wd_init(GLOBALS *gl);
 int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wf[16][1024]);
 int wd_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *result, int *size);
-int wd_calibrate(GLOBALS *gl);
+int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *p);
 
 size_t strlcpy(char *dst, const char *src, size_t size);
 size_t strlcat(char *dst, const char *src, size_t size);

@@ -45,7 +45,7 @@
    <button class="wideButton" id="chAll" type="button" onClick="btnChn(-1)">All</button>
    <button class="wideButton" id="chOn" type="button" onClick="btnOn()">Off</button>
 
-   <div class="group">
+   <div class="groupBtn">
       <div class="upDown">
          <button name="ctrlButtonUp" id="scaleUp" type="button" class="squareButtonCanvas" onClick="btnScale(1)"></button>
          <div id="UScale">100 mV</div>
@@ -80,13 +80,31 @@
 
 <div id="config">
    
-   <br />
-   <table border="0">
-      <tr><td><input type="checkbox" id="calib1" name="ofs_calib1_flag" onClick="setGl(this)"></td><td>Apply Primary Calibration (Cell)</td></tr>
-      <tr><td><input type="checkbox" id="calib2"></td><td>Apply Secondary Calibration (Readout)</td></tr>
-      <tr><td><input type="checkbox" id="spikes"></td><td>Remove Spikes</td></tr>
-   </table>
+   <div class="groupTitle">Voltage Calibration</div>
+   <div class="group">
+      <table border="0">
+         <tr><td><input type="checkbox" id="calib1" name="ofs_calib1_flag" onClick="setGl(this)"></td>
+            <td>Apply Primary Calibration (Cell)</td></tr>
+         <tr><td><input type="checkbox" id="calib2" name="ofs_calib2_flag" onClick="setGl(this)"></td>
+            <td>Apply Secondary Calibration (Readout)</td></tr>
+         <tr><td><input type="checkbox" id="spikes" name="remove_spikes" onClick="setGl(this)"></td>
+            <td>Remove Spikes</td></tr>
+      </table>
+      <button class="executeButton" id="btnVCalib" type="button" onClick="btnVCalib()">Execute Voltage Calibration</button>
+      <div class="progressBar">
+         <div class="progressInd" id="progressIndVcalib"></div>
+      </div>
       
+   </div>
+
+   <div class="groupTitle">Timing Calibration</div>
+   <div class="group">
+      <table border="0">
+         <tr><td><input type="checkbox" id="rotate" name="rotate_flag" onClick="setGl(this)"></td>
+            <td>Rotate waveform relative to trigger</td></tr>
+      </table>
+   </div>
+
 </div>
 
 <div id="about">

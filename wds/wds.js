@@ -7,6 +7,9 @@
 
 var OSC; // global scope object
 
+var progressInd = 0;
+var progressOldBoard = 0;
+
 function init()
 {
    // prevent mouse events to go up to the browser
@@ -73,6 +76,7 @@ function loadGl()
          document.getElementById("calib1").checked = (OSC.GL.ofs_calib1_flag == "1");
          document.getElementById("calib2").checked = (OSC.GL.ofs_calib2_flag == "1");
          document.getElementById("spikes").checked = (OSC.GL.remove_spikes == "1");
+         document.getElementById("rotate").checked = (OSC.GL.rotate_flag == "1");
       }
    };
    req.open("GET", "gl?r=" + Math.random(), true); // avoid cached results
@@ -82,8 +86,17 @@ function loadGl()
 function setGl(e)
 {
    var req = new XMLHttpRequest();
-   req.open("PUT", "gl/" + e.name, true); // avoid cached results
-   req.send("abcd");
+   req.open("PUT", "gl/" + e.name, true);
+   req.send(e.checked ? "1" : "0");
+}
+
+function btnVCalib(e)
+{
+   progressOldBoard = document.getElementById("wdSelect").selectedIndex;
+
+   var req = new XMLHttpRequest();
+   req.open("PUT", "vcalib");
+   req.send();
 }
 
 function loadBuild()
@@ -179,6 +192,16 @@ function receiveWF()
             var n = intArray[i++];
             for (var j=0 ; j<n ; j++)
                wf.T[c][j] = floatArray[i++];
+            
+            // check for progress bar
+            if (progressInd > 0) {
+               progressInd = 0;
+               var e = document.getElementById("progressIndVcalib");
+               e.style.width = "0";
+               
+               document.getElementById("wdSelect").selectedIndex = progressOldBoard;
+            }
+               
          } else if (intArray[i] == 2) { // voltage array
             i++;
             OSC.idle = false;
@@ -189,6 +212,17 @@ function receiveWF()
             for (var j=0 ; j<n ; j++)
                wf.U[c][j] = floatArray[i++];
             OSC.demo = (OSC.wd == 0xFF);
+         } else if (intArray[i] == 10) { // progress data
+            var b = floatArray[1];
+            progressInd = floatArray[2];
+
+            var e = document.getElementById("progressIndVcalib");
+            e.style.width = (progressInd*280) + "px";
+            
+            document.getElementById("wdSelect").selectedIndex = b;
+
+            window.setTimeout(loadWF, 250);
+            return;
          } else {
             alert("WDS: Invalid binary data received form server");
             break;

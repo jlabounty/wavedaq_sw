@@ -11,8 +11,8 @@
 #include <stdlib.h>
 #include <fcntl.h>
 
-#include "wds.h"
 #include "averager.h"
+#include "wds.h"
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -659,104 +659,126 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
 
 /*-----------------------------------------------------------------------------------------*/
 
-int wd_calibrate(GLOBALS *gl)
+int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
 {
    float wfU[16][1024], awf1[16][1024], awf2[16][1024];
-   int i, n, prog, old_prog;
    WD2_EVENT eventHeader;
    char str[80];
    
-   n = 500;
+   if (pr->state == CS_FIRST_BOARD) {
+      pr->state   = CS_FIRST_SAMPLE;
+      pr->i_board = 0;
+   }
 
-   printf("Calibration boards\n");
+   if (pr->state == CS_FIRST_SAMPLE) {
+      pr->state   = CS_RUNNING;
+      pr->n_iter1 = 500;
+      pr->i_iter1 = 0;
+      pr->n_iter2 = 500;
+      pr->i_iter2 = 0;
+      pr->n_board = gl->n_boards;
+      pr->ave = NULL;
+   }
+
+   //---- Primary Calibration ----
    
-   for (int board=0 ; board<gl->n_boards ; board++) {
+   if (pr->i_iter1 < pr->n_iter1) {
 
-      printf("%s: [                                                 ]\r%s: [",
-             gl->board[board].name, gl->board[board].name);
-      fflush(stdout);
-      
-      old_prog = 0;
-
-      //---- Primary Calibration ----
-      
-      Averager *ave = new Averager(2, 8, 1024, n);
-      memset(awf1, 0, sizeof(awf1));
-      gl->rotate_flag = 0;
-      gl->ofs_calib1_flag = 0;
-      gl->ofs_calib2_flag = 0;
-      
-      for (i=0 ; i<n ; i++) {
-         wd_send(gl, board, 100, "drsget\n", NULL, NULL);
-         assert(wd_read_waveform(gl, board, 1000, &eventHeader, wfU) == SUCCESS);
-         
-         for (int ch=0 ; ch<16 ; ch++)
-            for (int bin=0 ; bin<1024 ; bin++)
-               ave->Add(ch/8, ch%8, bin, wfU[ch][bin]);
-
-         /* update progress bar */
-         prog = (int)((double)(i/2)/(n)*50);
-         if (prog > old_prog) {
-            old_prog = prog;
-            printf("=");
-            fflush(stdout);
-         }
+      // initialize data on first iteration
+      if (pr->i_iter1 == 0) {
+         gl->rotate_flag = 0;
+         gl->ofs_calib1_flag = 0;
+         gl->ofs_calib2_flag = 0;
+         pr->ave = new Averager(2, 8, 1024, pr->n_iter1);
+         memset(awf1, 0, sizeof(awf1));
       }
+
+      pr->i_iter1++;
+      
+      wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
+      assert(wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU) == SUCCESS);
+      
+      Sleep(10);
 
       for (int ch=0 ; ch<16 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
-            awf1[ch][bin] = ave->Median(ch/8, ch%8, bin);
+            pr->ave->Add(ch/8, ch%8, bin, wfU[ch][bin]);
       
-      // ave->SaveNormalizedDistribution("wf.csv", 0);
+      pr->progress = (double) pr->i_iter1 / pr->n_iter1 * 0.5;
       
-      // save calibration
-      sprintf(str, "%s.cal", gl->board[board].name);
-      int fh = open(str, O_WRONLY | O_CREAT, 0644);
-      assert(fh > 0);
-      assert(write(fh, awf1, sizeof(awf1)) == sizeof(awf1));
-      
-      for (i=0 ; i<16 ; i++)
-         for (int j=0 ; j<1024 ; j++)
-            gl->board[board].wf_offset1[i][j] = awf1[i][j];
-      
-      //---- Secondary Calibration
-      
-      ave->Reset();
-      memset(awf2, 0, sizeof(awf2));
-      old_prog = 0;
-      gl->rotate_flag = 1; // now rotate waveforms
-      gl->ofs_calib1_flag = 1; // and do 1st calibration
-      gl->ofs_calib2_flag = 0;
-      
-      for (i=0 ; i<n ; i++) {
-         wd_send(gl, board, 100, "drsget\n", NULL, NULL);
-         assert(wd_read_waveform(gl, board, 1000, &eventHeader, wfU) == SUCCESS);
-         
-         Sleep(10);
-         
+      // calibration finished
+      if (pr->i_iter1 == pr->n_iter1) {
          for (int ch=0 ; ch<16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
-               ave->Add(ch/8, ch%8, bin, wfU[ch][bin]);
+               awf1[ch][bin] = pr->ave->Median(ch/8, ch%8, bin);
          
-         /* update progress bar */
-         prog = (int)((double)(n/2+i/2)/(n)*50);
-         if (prog > old_prog) {
-            old_prog = prog;
-            printf("=");
-            fflush(stdout);
-         }
+         // ave->SaveNormalizedDistribution("wf.csv", 0);
+         
+         // save calibration
+         sprintf(str, "%s.cal", gl->board[pr->i_board].name);
+         pr->fh = open(str, O_WRONLY | O_CREAT, 0644);
+         assert(pr->fh > 0);
+         assert(write(pr->fh, awf1, sizeof(awf1)) == sizeof(awf1));
+         
+         for (int ch=0 ; ch<16 ; ch++)
+            for (int j=0 ; j<1024 ; j++)
+               gl->board[pr->i_board].wf_offset1[ch][j] = awf1[ch][j];
       }
+
+      return SUCCESS;
+   }
+   
+   //---- Secondary Calibration
+   
+   if (pr->i_iter2 < pr->n_iter2) {
+   
+      // initialize data on first iteration
+      if (pr->i_iter2 == 0) {
+         pr->ave->Reset();
+         memset(awf2, 0, sizeof(awf2));
+         gl->rotate_flag = 1; // now rotate waveforms
+         gl->ofs_calib1_flag = 1; // and do 1st calibration
+         gl->ofs_calib2_flag = 0;
+      }
+
+      pr->i_iter2++;
+      
+      wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
+      assert(wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU) == SUCCESS);
+      
+      Sleep(10);
       
       for (int ch=0 ; ch<16 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
-            awf2[ch][bin] = ave->Median(ch/8, ch%8, bin);
+            pr->ave->Add(ch/8, ch%8, bin, wfU[ch][bin]);
       
-      printf("\n");
+      pr->progress = (double)pr->i_iter2 / pr->n_iter2 * 0.5 + 0.5;
       
-      // save calibration
-      assert(write(fh, awf2, sizeof(awf2)) == sizeof(awf2));
-      
-      close(fh);
+      // calibration finished
+      if (pr->i_iter2 == pr->n_iter2) {
+         for (int ch=0 ; ch<16 ; ch++)
+            for (int bin=0 ; bin<1024 ; bin++)
+               awf2[ch][bin] = pr->ave->Median(ch/8, ch%8, bin);
+         
+         // save calibration
+         assert(write(pr->fh, awf2, sizeof(awf2)) == sizeof(awf2));
+         
+         close(pr->fh);
+
+         // switch to next board
+         pr->i_board++;
+         pr->state = CS_FIRST_SAMPLE;
+         pr->progress = 1;
+         delete pr->ave;
+         pr->ave = NULL;
+
+         if (pr->i_board == pr->n_board) {
+            pr->state = CS_INACTIVE;
+            gl->rotate_flag = 1;
+            gl->ofs_calib1_flag = 1;
+            gl->ofs_calib2_flag = 1;
+         }
+      }
    }
 
    return SUCCESS;
