@@ -27,13 +27,12 @@ function init()
    // create Scope object
    OSC = new Oscilloscope(document.getElementById("scope"));
 
-   // size to fit screen
-   var ctls = document.getElementById("controls");
+   // hid config panel
    var config = document.getElementById("config");
-   OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth - config.offsetWidth,
-              document.documentElement.clientHeight);
-   ctls.style.left = (document.documentElement.clientWidth - ctls.offsetWidth - config.offsetWidth) + "px";
-   config.style.left = (document.documentElement.clientWidth - config.offsetWidth) + "px";
+   config.t = 0;
+   config.slider = 0;
+   config.visible = false;
+   resize();
  
    // add resize event handler
    window.addEventListener("resize", resize);
@@ -251,13 +250,20 @@ function resize()
    if (ctls.hidden == true) {
       OSC.resize(document.documentElement.clientWidth,
                  document.documentElement.clientHeight);
+      
+      // move panels off-screen
       ctls.style.left = (document.documentElement.clientWidth) + "px";
       config.style.left = (document.documentElement.clientWidth) + "px";
    }  else {
-      OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth - config.offsetWidth,
+      // confif full visible (configSlider = 1), hidden (configSlider = 0)
+      OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth -
+                 config.offsetWidth * config.slider,
                  document.documentElement.clientHeight);
-      ctls.style.left = (document.documentElement.clientWidth - ctls.offsetWidth - config.offsetWidth) + "px";
-      config.style.left = (document.documentElement.clientWidth - config.offsetWidth) + "px";
+      ctls.style.left = (document.documentElement.clientWidth - ctls.offsetWidth -
+                         config.offsetWidth * config.slider) + "px";
+      config.style.left = (document.documentElement.clientWidth -
+                           config.offsetWidth * config.slider) + "px";
+      
       config.style.height = document.documentElement.clientHeight + "px";
    }
 }
@@ -486,12 +492,29 @@ function sldTOffset(value)
 
 function btnConfig()
 {
-   var e = document.getElementById("config");
-   if (e.style.display == "none" || e.style.display == "")
-      e.style.display = "block";
-   else
-      e.style.display = "none";
+   var config = document.getElementById("config");
+   config.visible = !config.visible;
+   config.t = 0;
+   window.setTimeout(configSlide, 20);
+}
+
+function configSlide()
+{
+   var config = document.getElementById("config");
+
+   config.t++;
+   
+   if (config.visible) {
+      config.slider = 1-(1-config.t/10)*(1-config.t/10);
+   } else {
+      config.slider = (1-config.t/10)*(1-config.t/10);
+   }
+
    resize();
+   console.log(config.slider);
+   
+   if (config.t < 10)
+      window.setTimeout(configSlide, 20);
 }
 
 function btnAbout()

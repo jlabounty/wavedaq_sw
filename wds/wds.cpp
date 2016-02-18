@@ -47,7 +47,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          gl->rotate_flag = atoi(hm->body.p);
 
       else if (mg_vcmp(&hm->uri, "/vcalib") == 0)
-         ofs_prog.state = CS_FIRST_BOARD;
+         if (!gl->demo_flag)
+            ofs_prog.state = CS_FIRST_BOARD;
       
       mg_printf(nc, "HTTP/1.1 204 No Content\r\n");
    }
