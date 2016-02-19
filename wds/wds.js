@@ -251,10 +251,17 @@ function resize()
       OSC.resize(document.documentElement.clientWidth,
                  document.documentElement.clientHeight);
       
-      // move panels off-screen
-      ctls.style.left = (document.documentElement.clientWidth) + "px";
-      config.style.left = (document.documentElement.clientWidth) + "px";
+      // hide panels
+      ctls.style.display = "none";
+      config.style.display = "none";
    }  else {
+      ctls.style.display = "block";
+      
+      if (config.slider > 0)
+         config.style.display = "block";
+      else
+         config.style.display = "none";
+      
       // confif full visible (configSlider = 1), hidden (configSlider = 0)
       OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth -
                  config.offsetWidth * config.slider,
@@ -263,7 +270,6 @@ function resize()
                          config.offsetWidth * config.slider) + "px";
       config.style.left = (document.documentElement.clientWidth -
                            config.offsetWidth * config.slider) + "px";
-      
       config.style.height = document.documentElement.clientHeight + "px";
    }
 }

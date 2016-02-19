@@ -196,7 +196,7 @@ Oscilloscope.prototype.drawMeasurements = function(ctx)
          ctx.font = '14px sans-serif';
          ctx.textAlign = "left";
          ctx.textBaseline = "top";
-         var t = this.sigma[c].toFixed(1) + " mV";
+         var t = this.sigma[c].toFixed(2) + " mV";
          ctx.fillText(t, x, this.y2+8);
          x += ctx.measureText(t).width + 10;
       }
