@@ -9,7 +9,6 @@
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
-#include <getopt.h>
 #include <ctype.h>
 
 #include "averager.h"
@@ -221,142 +220,127 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 /*-----------------------------------------------------------------------------------------*/
 
 int main(int argc, char *argv[]) {
-   int ch, i, i1, i2, cmd = 0;
+   int i, j, i1, i2, cmd = 0;
    GLOBALS gl;
    char str[256], *p;
    
-   static struct option longopts[] = {
-      { "adc",         no_argument,        NULL, 'a' },
-      { "calibrate",   no_argument,        NULL, 'c' },
-      { "demo",        no_argument,        NULL, 'd' },
-      { "gain",        required_argument,  NULL, 'g' },
-      { "mask",        required_argument,  NULL, 'm' },
-      { "offset",      required_argument,  NULL, 'o' },
-      { "port",        required_argument,  NULL, 'p' },
-      { "tlevel",      required_argument,  NULL, 't' },
-      { "raw",         no_argument,        NULL, 'r' },
-      { "speed",       required_argument,  NULL, 's' },
-      { "verbose",     no_argument,        NULL, 'v' },
-      { "wd",          required_argument,  NULL, 'w' },
-      { "zero",        no_argument,        NULL, 'z' },
-      { 0, 0, 0, 0}
-   };
-   
    memset(&gl, 0, sizeof(gl));
-   gl.http_port = 8080; // default port
-   gl.sampling_speed = 2;
+   gl.http_port       = 8080; // default port
+   gl.sampling_speed  = 2;
    gl.ofs_calib1_flag = 1;
    gl.ofs_calib2_flag = 1;
-   gl.rotate_flag = 1;
-   gl.remove_spikes = 1;
+   gl.rotate_flag     = 1;
+   gl.remove_spikes   = 1;
 
    for (i=0 ; i<16 ; i++) {
       gl.board[i].trigger_level = 0;
-      gl.board[i].gain = 0;      // gain 1
-      gl.board[i].offset = 1.25; // center offset
-      gl.board[i].pzc = 0;       // PZC off
+      gl.board[i].gain          = 0;       // gain 1
+      gl.board[i].offset        = 1.25;    // center offset
+      gl.board[i].pzc           = 0;       // PZC off
       strcpy(gl.board[i].trigger_mask, "FFFF0000"); // or of all 16 channels
    }
    
    i1 = 0;
    i2 = 15;
    
-   while ((ch = getopt_long(argc, argv, "acdg:m:o:p:t:rs:vw:z", longopts, NULL)) != -1) {
-      switch (ch) {
-         case 'a':
-            gl.adc_flag = 1;
-            break;
-         case 'c':
-            cmd = CMD_OFS_CALIB;
-            break;
-         case 'd':
-            gl.demo_flag = 1;
-            break;
-         case 'g':
-            if (optarg)
-               for (i=0 ; i<16 ; i++)
-                  gl.board[i].gain = atoi(optarg);
-            break;
-         case 'm':
-            if (optarg) {
-               if (strlen(optarg) != 8) {
-                  printf("invalid trigger mask, please use xxxxyyyy\n");
+   // parse command line parameters
+   for (i=1 ; i<argc ; i++) {
+      if (argv[i][0] == '-' && argv[i][1] == 'a')
+         gl.adc_flag = 1;
+      
+      else if (argv[i][0] == '-' && argv[i][1] == 'c')
+         cmd = CMD_OFS_CALIB;
+      
+      else if (argv[i][0] == '-' && argv[i][1] == 'd')
+         gl.demo_flag = 1;
+      
+      else if (argv[i][0] == '-' && argv[i][1] == 'g') {
+         for (j=0 ; j<16 ; j++)
+            gl.board[j].gain = atoi(argv[i+1]);
+         i++;
+      }
+      
+      else if (argv[i][0] == '-' && argv[i][1] == 'm') {
+         if (strlen(argv[i+1]) != 8) {
+            printf("invalid trigger mask, please use xxxxyyyy\n");
+            return 1;
+         }
+         for (j=0 ; j<16 ; j++)
+            strlcpy(gl.board[j].trigger_mask, argv[i+1], sizeof(gl.board[j].trigger_mask));
+         i++;
+      }
+      
+      else if (argv[i][0] == '-' && argv[i][1] == 'o') {
+         for (j=0 ; j<16 ; j++)
+            gl.board[j].offset = atoi(argv[i+1]);
+         i++;
+      }
+      
+      else if (argv[i][0] == '-' && argv[i][1] == 'd')
+         gl.http_port = atoi(argv[++i]);
+
+      else if (argv[i][0] == '-' && argv[i][1] == 'r') {
+         gl.ofs_calib1_flag = 0;
+         gl.ofs_calib2_flag = 0;
+      }
+      
+      else if (argv[i][0] == '-' && argv[i][1] == 's')
+         gl.sampling_speed = atoi(argv[++i]);
+      
+      else if (argv[i][0] == '-' && argv[i][1] == 't') {
+         for (j=0 ; j<16 ; j++)
+            gl.board[j].trigger_level = atoi(argv[i+1]);
+         i++;
+      }
+      
+      else if (argv[i][0] == '-' && argv[i][1] == 'v')
+         gl.verbose_flag = 1;
+
+      else if (argv[i][0] == '-' && argv[i][1] == 'w') {
+         
+         if (isdigit(argv[i+1][0])) {
+            if (strchr(argv[i+1], '-')) {
+               i1 = atoi(argv[i+1]);
+               p = strchr(argv[i+1], '-') + 1;
+               i2 = atoi(p);
+               if (i1 >= 0 && i1 < 14 && i2>1 && i2<16) {
+                  for (i=i1 ; i<=i2; i++) {
+                     sprintf(gl.board[gl.n_boards++].name, "wd%03d", i);
+                  }
+               } else {
+                  printf("invalid argument \"-w %s\"\n", argv[i+1]);
                   return 1;
                }
-               for (i=0 ; i<16 ; i++)
-                  strlcpy(gl.board[i].trigger_mask, optarg, sizeof(gl.board[i].trigger_mask));
-            }
-            break;
-         case 'o':
-            if (optarg)
-               for (i=0 ; i<16 ; i++)
-                  gl.board[i].offset = atof(optarg);
-            break;
-         case 'p':
-            if (optarg)
-               gl.http_port = atoi(optarg);
-            break;
-         case 'r':
-            gl.ofs_calib1_flag = 0;
-            gl.ofs_calib2_flag = 0;
-            break;
-         case 's':
-            if (optarg)
-               gl.sampling_speed = atoi(optarg);
-            break;
-         case 't':
-            if (optarg)
-               for (i=0 ; i<16 ; i++)
-                  gl.board[i].trigger_level = atoi(optarg);
-            break;
-         case 'v':
-            gl.verbose_flag = 1;
-            break;
-         case 'w':
-            if (optarg) {
-               if (isdigit(optarg[0])) {
-                  if (strchr(optarg, '-')) {
-                     i1 = atoi(optarg);
-                     p = strchr(optarg, '-') + 1;
-                     i2 = atoi(p);
-                     if (i1 >= 0 && i1 < 14 && i2>1 && i2<16) {
-                        for (i=i1 ; i<=i2; i++) {
-                           sprintf(gl.board[gl.n_boards++].name, "wd%03d", i);
-                        }
-                     } else {
-                        printf("invalid argument \"-w %s\"\n", optarg);
-                        return 1;
-                     }
-                  }  else
-                     sprintf(gl.board[gl.n_boards++].name, "wd%03d", atoi(optarg));
-               } else
-                  strlcpy(gl.board[gl.n_boards++].name, optarg, 32);
-            }
-            break;
-         case 'z':
-            for (i=0 ; i<16 ; i++)
-               gl.board[i].pzc = 1;
-            break;
-         default:
-            printf("usage: wsd [-adv] [-w <address> [-w <address> ...]]\n");
-            printf(" -a --adc         Read ADC instead DRS\n");
-            printf(" -c --calibrate   Calibrate DRS chips\n");
-            printf(" -d --demo        Demo mode\n");
-            printf(" -g --gain        Input gain (0=1, 1=10, 2=100)\n");
-            printf(" -t --tlevel      Trigger level in mV (0=auto)\n");
-            printf(" -m --mask        Trigger mask xxxxyyyy (xxxx=16 bit OR, yyyy=16bit AND)\n");
-            printf(" -o --offset      Set channel offset in V\n");
-            printf(" -p --port        HTTP server port\n");
-            printf(" -r --raw         Show raw (uncalibrated) data\n");
-            printf(" -w --wd          Internet address of WaveDREAM board\n");
-            printf(" -v --verbose     Print extra statistics\n");
-            printf(" -z --zero        Turn on pole-zero-canellation\n");
-            return 1;
-            break;
+            }  else
+            sprintf(gl.board[gl.n_boards++].name, "wd%03d", atoi(argv[i+1]));
+         } else
+            strlcpy(gl.board[gl.n_boards++].name, argv[i+1], 32);
+         i++;
+      }
+
+      else if (argv[i][0] == '-' && argv[i][1] == 'z') {
+         for (j=0 ; j<16 ; j++)
+            gl.board[j].pzc = 1;
+      }
+
+      else {
+         printf("usage: wsd [options] [-w <address> [-w <address> ...]]\n");
+         printf("valid options:\n");
+         printf(" -a               Read ADC instead DRS\n");
+         printf(" -c               Calibrate DRS chips\n");
+         printf(" -d               Demo mode\n");
+         printf(" -g 0/1/2         Input gain (0=1, 1=10, 2=100)\n");
+         printf(" -t <level>       Trigger level in mV (0=auto)\n");
+         printf(" -m <mask>        Trigger mask xxxxyyyy (xxxx=16 bit OR, yyyy=16bit AND)\n");
+         printf(" -o <offset>      Set channel offset in V\n");
+         printf(" -p <port>        HTTP server port\n");
+         printf(" -r               Show raw (uncalibrated) data\n");
+         printf(" -w <address>     Internet address of WaveDREAM board\n");
+         printf(" -v               Print extra statistics\n");
+         printf(" -z               Turn on pole-zero-canellation\n");
+         return 1;
       }
    }
-   argc -= optind;
-   argv += optind;
    
    if (gl.n_boards == 0 && !gl.demo_flag) {
       printf("You have to specify at least one WaveDREAM board via the -w option.\n");
