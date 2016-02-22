@@ -43,7 +43,11 @@ union { unsigned int i ; float f; } _nanf = { 0x7fc00000 };
 #endif
 
 #ifdef __APPLE__
-#include <net/if_dl.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <net/if.h>
+
+#define NANF nanf("")
 #endif
 
 #define WD2_CMD_PORT   3000
@@ -433,13 +437,12 @@ int wd_init(GLOBALS *gl)
 
 double time_ms()
 {
-#ifdef __linux__
+#ifdef _MSC_VER
+   return GetTickCount();
+#else
    struct timeval tv;
    gettimeofday(&tv, NULL);
    return tv.tv_sec*1000 + tv.tv_usec/1000.0;
-#endif
-#ifdef _MSC_VER
-   return GetTickCount();
 #endif
 }
 
