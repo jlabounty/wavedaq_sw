@@ -546,7 +546,9 @@ double cs_time() {
  * license, as set out in <http://cesanta.com/products.html>.
  */
 
+#ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS /* Disable deprecation warning in VS2005+ */
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>

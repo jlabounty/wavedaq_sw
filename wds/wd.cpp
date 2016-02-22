@@ -14,21 +14,34 @@
 #include "averager.h"
 #include "wds.h"
 
-#include <sys/socket.h>
 #include <sys/types.h>
-#include <sys/select.h>
-#include <sys/time.h>
-#include <arpa/inet.h>
-#include <ifaddrs.h>
-#include <netdb.h>
 #include <assert.h>
 #include <errno.h>
 
-#ifdef __linux__
-#include <linux/sockios.h>
-#include <sys/ioctl.h>
-#include <net/if.h>
+#ifdef _MSC_VER
+#include <windows.h>
+#include <io.h>
+#include <time.h>
+#include <float.h>
+
+union { unsigned int i ; float f; } _nanf = { 0x7fc00000 };
+#define NANF (_nanf.f)
 #endif
+
+#ifdef __linux__
+#include <sys/socket.h>
+#include <sys/select.h>
+#include <linux/sockios.h>
+#include <arpa/inet.h>
+#include <sys/ioctl.h>
+#include <sys/time.h>
+#include <net/if.h>
+#include <ifaddrs.h>
+#include <netdb.h>
+
+#define NANF nanf("")
+#endif
+
 #ifdef __APPLE__
 #include <net/if_dl.h>
 #endif
@@ -418,13 +431,16 @@ int wd_init(GLOBALS *gl)
 
 /*-----------------------------------------------------------------------------------------*/
 
-#define Sleep(x) usleep(x*1000)
-
 double time_ms()
 {
+#ifdef __linux__
    struct timeval tv;
    gettimeofday(&tv, NULL);
    return tv.tv_sec*1000 + tv.tv_usec/1000.0;
+#endif
+#ifdef _MSC_VER
+   return GetTickCount();
+#endif
 }
 
 /*-----------------------------------------------------------------------------------------*/
@@ -445,8 +461,8 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
 
    // tag waveforms as invalid
    for (i=0 ; i<16 ; i++) {
-      waveform[i][0]   = nanf("");
-      waveform[i][512] = nanf("");
+      waveform[i][0]   = NANF;
+      waveform[i][512] = NANF;
    }
    
    current_frame = -1;
@@ -538,8 +554,8 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
                
                // tag waveforms as invalid
                for (i=0 ; i<16 ; i++) {
-                  waveform[i][0]   = nanf("");
-                  waveform[i][512] = nanf("");
+                  waveform[i][0]   = NANF;
+                  waveform[i][512] = NANF;
                }
             }
             
@@ -571,12 +587,12 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
                
                if (ph->channel_segment_number == 0) {
                   // first segment
-                  waveform[waveform_channel][i]       = (float)data1 * (0.63 / 4096.0); // 2V range with 12 bits
-                  waveform[waveform_channel][i+1]     = (float)data2 * (0.63 / 4096.0);
+                  waveform[waveform_channel][i]       = (float)(data1 * (0.63 / 4096.0)); // 2V range with 12 bits
+                  waveform[waveform_channel][i+1]     = (float)(data2 * (0.63 / 4096.0));
                } else {
                   // second segment
-                  waveform[waveform_channel][512+i]   = (float)data1 * (0.63 / 4096.0);
-                  waveform[waveform_channel][512+i+1] = (float)data2 * (0.63 / 4096.0);
+                  waveform[waveform_channel][512+i]   = (float)(data1 * (0.63 / 4096.0));
+                  waveform[waveform_channel][512+i+1] = (float)(data2 * (0.63 / 4096.0));
                }
             }
             
@@ -698,7 +714,7 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
       wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
       assert(wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU) == SUCCESS);
       
-      Sleep(10);
+      sleep_ms(10);
 
       for (int ch=0 ; ch<16 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
@@ -710,7 +726,7 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
       if (pr->i_iter1 == pr->n_iter1) {
          for (int ch=0 ; ch<16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
-               awf1[ch][bin] = pr->ave->Median(ch/8, ch%8, bin);
+               awf1[ch][bin] = (float)pr->ave->Median(ch/8, ch%8, bin);
          
          // ave->SaveNormalizedDistribution("wf.csv", 0);
          
@@ -746,7 +762,7 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
       wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
       assert(wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU) == SUCCESS);
       
-      Sleep(10);
+      sleep_ms(10);
       
       for (int ch=0 ; ch<16 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
@@ -758,7 +774,7 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
       if (pr->i_iter2 == pr->n_iter2) {
          for (int ch=0 ; ch<16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
-               awf2[ch][bin] = pr->ave->Median(ch/8, ch%8, bin);
+               awf2[ch][bin] = (float)pr->ave->Median(ch/8, ch%8, bin);
          
          // save calibration
          assert(write(pr->fh, awf2, sizeof(awf2)) == sizeof(awf2));
@@ -919,10 +935,10 @@ void remove_spikes(GLOBALS *gl, short trigger_cell, float wf[][1024])
             x = wf[i][(j+1) % 1024];
             y = wf[i][(j+6) % 1024];
             if (fabs(x-y) < 0.015) {
-               wf[i][(j+2) % 1024] = x + 1*(y-x)/5;
-               wf[i][(j+3) % 1024] = x + 2*(y-x)/5;
-               wf[i][(j+4) % 1024] = x + 3*(y-x)/5;
-               wf[i][(j+5) % 1024] = x + 4*(y-x)/5;
+               wf[i][(j+2) % 1024] = (float)(x + 1*(y-x)/5);
+               wf[i][(j+3) % 1024] = (float)(x + 2*(y-x)/5);
+               wf[i][(j+4) % 1024] = (float)(x + 3*(y-x)/5);
+               wf[i][(j+5) % 1024] = (float)(x + 4*(y-x)/5);
             } else {
                wf[i][(j+2) % 1024] -= 0.0148f;
                wf[i][(j+3) % 1024] -= 0.0148f;
@@ -935,8 +951,8 @@ void remove_spikes(GLOBALS *gl, short trigger_cell, float wf[][1024])
             y = wf[i][(rot_sp[k]+3) % 1024];
             
             if (fabs(x-y) < 0.010) {
-               wf[i][(rot_sp[k]+1) % 1024] = x + 1*(y-x)/3;
-               wf[i][(rot_sp[k]+2) % 1024] = x + 2*(y-x)/3;
+               wf[i][(rot_sp[k]+1) % 1024] = (float)(x + 1*(y-x)/3);
+               wf[i][(rot_sp[k]+2) % 1024] = (float)(x + 2*(y-x)/3);
             } else {
                wf[i][(rot_sp[k]+1) % 1024] -= 0.009f;
                wf[i][(rot_sp[k]+2) % 1024] -= 0.009f;

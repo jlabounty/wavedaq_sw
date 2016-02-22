@@ -249,7 +249,7 @@ function resize()
    var config = document.getElementById("config");
    if (ctls.hidden == true) {
       OSC.resize(document.documentElement.clientWidth,
-                 document.documentElement.clientHeight);
+                 document.documentElement.clientHeight-3);
       
       // hide panels
       ctls.style.display = "none";
@@ -265,7 +265,7 @@ function resize()
       // confif full visible (configSlider = 1), hidden (configSlider = 0)
       OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth -
                  config.offsetWidth * config.slider,
-                 document.documentElement.clientHeight);
+                 document.documentElement.clientHeight-3);
       ctls.style.left = (document.documentElement.clientWidth - ctls.offsetWidth -
                          config.offsetWidth * config.slider) + "px";
       config.style.left = (document.documentElement.clientWidth -

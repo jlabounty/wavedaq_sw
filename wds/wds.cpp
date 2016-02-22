@@ -11,6 +11,11 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#ifdef _MSC_VER
+#else
+#include <getopt.h>
+#endif
+
 #include "averager.h"
 #include "wds.h"
 #include "mongoose.h"
@@ -108,10 +113,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          int t = 10;    // array type
          mg_send_http_chunk(nc, (const char *)&t, 4);
          
-         float f = ofs_prog.i_board;
+         float f = (float)ofs_prog.i_board;
          mg_send_http_chunk(nc, (const char *)&f, 4);
          
-         f = ofs_prog.progress;
+         f = (float)ofs_prog.progress;
          mg_send_http_chunk(nc, (const char *)&f, 4);
          
          mg_send_http_chunk(nc, "", 0);
@@ -129,8 +134,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          status = SUCCESS;
          for (int c=0 ; c<16 ; c++) {
             for (int i=0 ; i<1024 ; i++) {
-               wfT[c][i] = i*1E-9;
-               wfU[c][i] = (float)sin(wfT[c][i] / 50 / 1E-9) / 4 + ((float)random()/RAND_MAX-0.5) / 30;
+               wfT[c][i] = (float)(i*1E-9);
+               wfU[c][i] = (float)(sin(wfT[c][i] / 50 / 1E-9) / 4 + ((float)random()/RAND_MAX-0.5) / 30);
             }
          }
       } else {
@@ -151,7 +156,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       
          for (int c=0 ; c<16 ; c++) {
             for (int i=0 ; i<1024 ; i++) {
-               wfT[c][i] = i*1E-9;
+               wfT[c][i] = (float)(i*1E-9);
             }
          }
       }
@@ -219,7 +224,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
 /*-----------------------------------------------------------------------------------------*/
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) 
+{
    int i, j, i1, i2, cmd = 0;
    GLOBALS gl;
    char str[256], *p;
@@ -237,7 +243,7 @@ int main(int argc, char *argv[]) {
       gl.board[i].gain          = 0;       // gain 1
       gl.board[i].offset        = 1.25;    // center offset
       gl.board[i].pzc           = 0;       // PZC off
-      strcpy(gl.board[i].trigger_mask, "FFFF0000"); // or of all 16 channels
+      strlcpy(gl.board[i].trigger_mask, "FFFF0000", sizeof(gl.board[i].trigger_mask)); // or of all 16 channels
    }
    
    i1 = 0;
@@ -272,7 +278,7 @@ int main(int argc, char *argv[]) {
       
       else if (argv[i][0] == '-' && argv[i][1] == 'o') {
          for (j=0 ; j<16 ; j++)
-            gl.board[j].offset = atoi(argv[i+1]);
+            gl.board[j].offset = (float)atoi(argv[i+1]);
          i++;
       }
       

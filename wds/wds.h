@@ -87,13 +87,15 @@ size_t strlcat(char *dst, const char *src, size_t size);
 // linux and MAC specific things
 #if defined(__linux__) || defined(__APPLE__)
 #include <unistd.h>
-#define sleep(x) usleep(x*1000)
+#define sleep_ms(x) usleep(x*1000)
 #endif // __linux__ || __APLE__
 
 // Windows specific things
-#if defined(_WIN32)
-#include <windows.h>
-#define sleep(x) Sleep(x)
+#if defined(_MSC_VER)
+#pragma warning( disable: 4996)
+#define isnan(x) _isnan(x)
+#define sleep_ms(x) Sleep(x)
+typedef int socklen_t;
 #endif // _WIN32
 
 /* Byte and Word swapping big endian <-> little endian */
