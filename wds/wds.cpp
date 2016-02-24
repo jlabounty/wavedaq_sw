@@ -163,7 +163,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
          if (gl->adc_flag) {
             // issue single ADC software trigger
-            wd_send(gl, b, 100, "adcgeteth 1\n", NULL, NULL);
+            wd_send(gl, b, 100, "adcget\n", NULL, NULL);
          } else {
             if (gl->board[b].trigger_level == 0)
                // issue single DRS software trigger
