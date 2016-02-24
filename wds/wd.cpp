@@ -230,6 +230,34 @@ int wd_send(GLOBALS *gl, int b, int timeout_ms, const char *str, char *result, i
 
 /*-----------------------------------------------------------------------------------------*/
 
+void wd_setFE(GLOBALS *gl, int index)
+{
+   char str[256];
+   
+   if (gl->demo_flag)
+      return;
+   // set input configuration
+   if (gl->board[index].pzc) { // pole zero cancellation on (bit=0)
+      if (gl->board[index].gain == 0)
+         sprintf(str, "feset all 02");
+      else if (gl->board[index].gain == 1)
+         sprintf(str, "feset all 1a");
+      else if (gl->board[index].gain == 2)
+         sprintf(str, "feset all 3a");
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+   } else { // pole zero cancellation off (bit=1)
+      if (gl->board[index].gain == 0)
+         sprintf(str, "feset all 82");
+      else if (gl->board[index].gain == 1)
+         sprintf(str, "feset all 9a");
+      else if (gl->board[index].gain == 2)
+         sprintf(str, "feset all ba");
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+   }
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
 int wd_init(GLOBALS *gl)
 {
    struct sockaddr_in server_addr;
@@ -345,24 +373,7 @@ int wd_init(GLOBALS *gl)
             printf("Set ipaddrdst     = %s\n", reply);
       }
       
-      // set input configuration
-      if (gl->board[index].pzc) { // pole zero cancellation on (bit=0)
-         if (gl->board[index].gain == 0)
-            sprintf(str, "feset all 02");
-         else if (gl->board[index].gain == 1)
-            sprintf(str, "feset all 1a");
-         else if (gl->board[index].gain == 2)
-            sprintf(str, "feset all 3a");
-         assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-      } else { // pole zero cancellation off (bit=1)
-         if (gl->board[index].gain == 0)
-            sprintf(str, "feset all 82");
-         else if (gl->board[index].gain == 1)
-            sprintf(str, "feset all 9a");
-         else if (gl->board[index].gain == 2)
-            sprintf(str, "feset all ba");
-         assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-      }
+      wd_setFE(gl, index);
 
       // trun on comparator power
       assert(wd_send(gl, index, 100, "pwrcmp on", NULL, NULL) > 0);

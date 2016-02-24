@@ -41,7 +41,22 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
    gl = (GLOBALS *)nc->mgr->user_data;
    
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->method, "PUT") == 0) {
-      if (mg_vcmp(&hm->uri, "/gl/ofs_calib1_flag") == 0)
+      
+      if (mg_vcmp(&hm->uri, "/gl/pzc") == 0) {
+         for (int i=0 ; i<gl->n_boards ; i++) {
+            gl->board[i].pzc = atoi(hm->body.p);
+            wd_setFE(gl, i);
+         }
+      }
+      
+      else if (mg_vcmp(&hm->uri, "/gl/gain") == 0) {
+         for (int i=0 ; i<gl->n_boards ; i++) {
+            gl->board[i].gain = atoi(hm->body.p);
+            wd_setFE(gl, i);
+         }
+      }
+
+      else if (mg_vcmp(&hm->uri, "/gl/ofs_calib1_flag") == 0)
          gl->ofs_calib1_flag = atoi(hm->body.p);
       else if (mg_vcmp(&hm->uri, "/gl/ofs_calib2_flag") == 0)
          gl->ofs_calib2_flag = atoi(hm->body.p);
@@ -74,10 +89,16 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "   \"n_boards\": \"%d\",\n",        gl->n_boards);
       mg_printf_http_chunk(nc, "   \"sampling_speed\": \"%d\",\n",  gl->sampling_speed);
       
-      mg_printf_http_chunk(nc, "   \"boards\": [\n");
+      mg_printf_http_chunk(nc, "   \"board\": [\n");
       
       for (int i=0 ; i<gl->n_boards ; i++) {
-         mg_printf_http_chunk(nc, "      { \"name\": \"%s\" }", gl->board[i].name);
+         mg_printf_http_chunk(nc, "      {\n");
+         mg_printf_http_chunk(nc, "         \"name\": \"%s\" ,\n", gl->board[i].name);
+         mg_printf_http_chunk(nc, "         \"trigger_level\": \"%d\",\n", gl->board[i].trigger_level);
+         mg_printf_http_chunk(nc, "         \"trigger_mask\": \"%s\",\n", gl->board[i].trigger_mask);
+         mg_printf_http_chunk(nc, "         \"gain\": \"%d\",\n", gl->board[i].gain);
+         mg_printf_http_chunk(nc, "         \"pzc\": \"%d\"\n", gl->board[i].pzc);
+         mg_printf_http_chunk(nc, "      }\n");
          if (i<gl->n_boards-1)
             mg_printf_http_chunk(nc, ",");
          mg_printf_http_chunk(nc, "\n");

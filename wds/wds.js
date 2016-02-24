@@ -17,7 +17,7 @@ function init()
    c.addEventListener("click", function(e){e.preventDefault()});
    c.addEventListener("mousemove", function(e){e.preventDefault()});
 
-   var c = document.getElementById("scope");
+   c = document.getElementById("scope");
    c.addEventListener("click", function(e){e.preventDefault()});
    c.addEventListener("mousemove", function(e){e.preventDefault()});
 
@@ -63,15 +63,18 @@ function loadGl()
          
          // populate board list
          var sel = document.getElementById("wdSelect");
-         for (var i=0 ; i<OSC.GL.boards.length ; i++) {
+         for (var i=0 ; i<OSC.GL.board.length ; i++) {
             var opt = document.createElement('option');
-            opt.innerHTML = OSC.GL.boards[i].name;
-            opt.value = OSC.GL.boards[i].name;
+            opt.innerHTML = OSC.GL.board[i].name;
+            opt.value = OSC.GL.board[i].name;
             sel.appendChild(opt);
          }
-         OSC.nWd = OSC.GL.boards.length;
+         OSC.nWd = OSC.GL.board.length;
 
          // populate config
+         document.getElementById("pzc").checked = (OSC.GL.board[0].pzc == "1");
+         document.config.gain[parseInt(OSC.GL.board[0].gain)].checked = true;
+
          document.getElementById("calib1").checked = (OSC.GL.ofs_calib1_flag == "1");
          document.getElementById("calib2").checked = (OSC.GL.ofs_calib2_flag == "1");
          document.getElementById("spikes").checked = (OSC.GL.remove_spikes == "1");
@@ -85,8 +88,13 @@ function loadGl()
 function setGl(e)
 {
    var req = new XMLHttpRequest();
-   req.open("PUT", "gl/" + e.name, true);
-   req.send(e.checked ? "1" : "0");
+   if (e.type == "checkbox") {
+      req.open("PUT", "gl/" + e.name, true);
+      req.send(e.checked ? "1" : "0");
+   } else if (e.type == "radio") {
+      req.open("PUT", "gl/" + e.name, true);
+      req.send(e.value);
+   }
 }
 
 function btnVCalib(e)
@@ -179,7 +187,7 @@ function receiveWF()
       var intArray = new Uint32Array(OSC.req.response);
       var floatArray = new Float32Array(OSC.req.response);
       
-      for (var i=0 ; i<intArray.length ; ) {
+      for (i=0 ; i<intArray.length ; ) {
          if (intArray[i] == 0) {        // idle message
             OSC.idle = true;
             break;
@@ -205,17 +213,17 @@ function receiveWF()
             i++;
             OSC.idle = false;
             OSC.wd = intArray[i++];
-            var f = intArray[i++];
-            var c = intArray[i++];
-            var n = intArray[i++];
-            for (var j=0 ; j<n ; j++)
+            f = intArray[i++];
+            c = intArray[i++];
+            n = intArray[i++];
+            for (j=0 ; j<n ; j++)
                wf.U[c][j] = floatArray[i++];
             OSC.demo = (OSC.wd == 0xFF);
          } else if (intArray[i] == 10) { // progress data
             var b = floatArray[1];
             progressInd = floatArray[2];
 
-            var e = document.getElementById("progressIndVcalib");
+            e = document.getElementById("progressIndVcalib");
             e.style.width = (progressInd*280) + "px";
             
             document.getElementById("wdSelect").selectedIndex = b;
@@ -284,10 +292,7 @@ function oscKeypress(e)
 
    if (charCode == ']'.charCodeAt(0)) {
       var ctls = document.getElementById("controls");
-      if (ctls.hidden == true)
-         ctls.hidden = false;
-      else
-         ctls.hidden = true;
+      ctls.hidden = !ctls.hidden;
       resize();
    }
 
@@ -348,7 +353,7 @@ function btnChn(c)
    document.getElementById("UScale").innerHTML = OSC.UScaleTable[OSC.wfScaleIndex[index]][1];
 
    // set blue border of active channel buttons
-   for (i=0 ; i<16 ; i++) {
+   for (var i=0 ; i<16 ; i++) {
       var cb = document.getElementById("ch"+i);
       if (i == c || c == -1)
          cb.style.border = "3px solid blue";
@@ -366,7 +371,7 @@ function btnChn(c)
 function btnOn()
 // turn current channel(s) on and off
 {
-   for (i=0 ; i<16 ; i++) {
+   for (var i=0 ; i<16 ; i++) {
       if (OSC.currentChn != -1 && i != OSC.currentChn)
          continue;
       var cb = document.getElementById("ch"+i);
@@ -388,7 +393,7 @@ function btnScale(inc)
 // change vertical scale, update label
 {
    if (OSC.currentChn == -1) {
-      for (i=0 ; i<16 ; i++)
+      for (var i=0 ; i<16 ; i++)
          if (OSC.chOn[i])
             break;
       if (i == 16)
@@ -418,7 +423,7 @@ function btnTScale(inc)
 // change horizontal scale, update label
 {
    if (OSC.currentChn == -1) {
-      for (i=0 ; i<16 ; i++)
+      for (var i=0 ; i<16 ; i++)
          if (OSC.chOn[i])
             break;
       if (i == 16)
@@ -517,8 +522,7 @@ function configSlide()
    }
 
    resize();
-   console.log(config.slider);
-   
+
    if (config.t < 10)
       window.setTimeout(configSlide, 20);
 }

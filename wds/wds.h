@@ -77,6 +77,7 @@ typedef struct {
 
 // interface functions
 int wd_init(GLOBALS *gl);
+void wd_setFE(GLOBALS *gl, int index);
 int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wf[16][1024]);
 int wd_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *result, int *size);
 int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *p);
