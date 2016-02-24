@@ -79,6 +79,12 @@
 
    <div id="config">
       <form name="config">
+         <div class="groupTitle">Trigger</div>
+         <div class="group" style="position:relative;">
+               <button name="ctrlHSlider" id="trgSlider" class="hSlider" style="width:215px" type="button" data-update="sldTLevel()"></button>
+               <input style="position:absolute;top:10%;font-size:16px;text-align:center" type="text" id="inpTLevel" size="5" value="0">&nbsp;&nbsp;mV
+         </div>
+
          <div class="groupTitle">Analog Front-end</div>
          <div class="group">
             Gain:
@@ -88,7 +94,6 @@
             &nbsp;&nbsp;&nbsp;
             <input type="checkbox" id="pzc" name="pzc" onClick="setGl(this)">PZC
          </div>
-
 
          <div class="groupTitle">Voltage Calibration</div>
          <div class="group">

@@ -230,7 +230,7 @@ int wd_send(GLOBALS *gl, int b, int timeout_ms, const char *str, char *result, i
 
 /*-----------------------------------------------------------------------------------------*/
 
-void wd_setFE(GLOBALS *gl, int index)
+void wd_set_fe(GLOBALS *gl, int index)
 {
    char str[256];
    
@@ -254,6 +254,42 @@ void wd_setFE(GLOBALS *gl, int index)
          sprintf(str, "feset all ba");
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    }
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+void wd_set_trigger_level(GLOBALS *gl, int index)
+{
+   char str[256];
+
+   if (gl->demo_flag)
+      return;
+
+   if (gl->verbose_flag)
+      printf("Set trigger level = %d mV\n", (int)(gl->board[index].trigger_level*1000));
+   sprintf(str, "dacset tlevel1 %d", (int)(gl->board[index].trigger_level*1000));
+   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+   sprintf(str, "dacset tlevel2 %d", (int)(gl->board[index].trigger_level*1000));
+   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+   sprintf(str, "dacset tlevel3 %d", (int)(gl->board[index].trigger_level*1000));
+   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+   sprintf(str, "dacset tlevel4 %d", (int)(gl->board[index].trigger_level*1000));
+   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+void wd_set_offset(GLOBALS *gl, int index)
+{
+   char str[256];
+   
+   if (gl->demo_flag)
+      return;
+
+   if (gl->verbose_flag)
+      printf("Set offset level  = %g V\n", gl->board[index].offset);
+   sprintf(str, "dacset ofs %d", (int)(gl->board[index].offset*1000));
+   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
 }
 
 /*-----------------------------------------------------------------------------------------*/
@@ -373,28 +409,14 @@ int wd_init(GLOBALS *gl)
             printf("Set ipaddrdst     = %s\n", reply);
       }
       
-      wd_setFE(gl, index);
+      wd_set_fe(gl, index);
 
       // trun on comparator power
       assert(wd_send(gl, index, 100, "pwrcmp on", NULL, NULL) > 0);
 
-      // set comparator level
-      if (gl->verbose_flag)
-         printf("Set trigger level = %d mV\n", gl->board[index].trigger_level);
-      sprintf(str, "dacset tlevel1 %d", gl->board[index].trigger_level);
-      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-      sprintf(str, "dacset tlevel2 %d", gl->board[index].trigger_level);
-      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-      sprintf(str, "dacset tlevel3 %d", gl->board[index].trigger_level);
-      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-      sprintf(str, "dacset tlevel4 %d", gl->board[index].trigger_level);
-      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-      
-      // set offset
-      if (gl->verbose_flag)
-         printf("Set offset level  = %g V\n", gl->board[index].offset);
-      sprintf(str, "dacset ofs %d", (int)(gl->board[index].offset*1000));
-      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      wd_set_trigger_level(gl, index);
+
+      wd_set_offset(gl, index);
       
       // set sampling frequency
       if (gl->verbose_flag)

@@ -17,7 +17,7 @@ typedef struct {
    int  cmd_socket;
    int  data_socket;
    unsigned char eth_addr[16];
-   int  trigger_level;
+   float trigger_level;
    char trigger_mask[10];
    int  gain;
    int  pzc;
@@ -77,7 +77,10 @@ typedef struct {
 
 // interface functions
 int wd_init(GLOBALS *gl);
-void wd_setFE(GLOBALS *gl, int index);
+void wd_set_fe(GLOBALS *gl, int index);
+void wd_set_trigger_level(GLOBALS *gl, int index);
+void wd_set_offset(GLOBALS *gl, int index);
+
 int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wf[16][1024]);
 int wd_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *result, int *size);
 int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *p);

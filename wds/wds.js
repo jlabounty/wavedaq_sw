@@ -224,7 +224,7 @@ function receiveWF()
             progressInd = floatArray[2];
 
             e = document.getElementById("progressIndVcalib");
-            e.style.width = (progressInd*280) + "px";
+            e.style.width = (progressInd*270) + "px";
             
             document.getElementById("wdSelect").selectedIndex = b;
 
@@ -454,6 +454,16 @@ function sldUOffset(value)
    }
    OSC.calcScaleOffset();
    OSC.redraw();
+}
+
+function sldTLevel(value)
+{
+   var e = document.getElementById("inpTLevel");
+   e.value = Math.round(value * 1000 - 500);
+
+   var req = new XMLHttpRequest();
+   req.open("PUT", "gl/trigger_level", true);
+   req.send(Math.round(value * 1000 - 500)/1000);
 }
 
 function btnOfsZero()

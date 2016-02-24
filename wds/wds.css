@@ -21,22 +21,20 @@ dl, dt, dd, ol, ul, li,
 fieldset, form, label, legend,
 table, caption, tbody, tfoot, thead, tr, th, td,
 article, aside, canvas, details, embed,
-figure, figcaption, footer, header, hgroup,
+figure, figcaption, footer, header,
 menu, nav, output, ruby, section, summary,
 time, mark, audio, video {
    margin: 0;
    padding: 0;
    border: 0;
-   font-size: 100%;
    font: inherit;
    vertical-align: baseline;
-   margin: 0;
 }
 
 /*------------------------------*/
 
 body {
-   margin: 0px;
+   margin: 0;
    color: black;
    background-color: white;
    font-family: verdana,tahoma,sans-serif;
@@ -55,16 +53,16 @@ a:focus { color:#0000FF; text-decoration:underline }
 
 #scope {
    position: absolute;
-   top: 0px;
-   left: 0px;
-   width: 0px;
-   height: 0px;
+   top: 0;
+   left: 0;
+   width: 0;
+   height: 0;
 }
 
 #controls {
    position: absolute;
-   top: 0px;
-   left: 0px;
+   top: 0;
+   left: 0;
    max-width: 190px;
    width: 190px;
    background-color: white;
@@ -74,8 +72,8 @@ a:focus { color:#0000FF; text-decoration:underline }
 #config {
    border-left: 1px solid black;
    position: absolute;
-   top: 0px;
-   left: 0px;
+   top: 0;
+   left: 0;
    max-width: 300px;
    width: 300px;
    height: 5000px;
@@ -87,8 +85,8 @@ a:focus { color:#0000FF; text-decoration:underline }
    border: 1px solid black;
    border-radius: 6px;
    position: absolute;
-   top: 0px;
-   left: 0px;
+   top: 0;
+   left: 0;
    max-width: 360px;
    width: 360px;
    display: none;
@@ -96,7 +94,7 @@ a:focus { color:#0000FF; text-decoration:underline }
 
 button {
    font-size: 20px;
-   margin: 0px;
+   margin: 0;
    border: 2px solid #C0C0C0;
    border-radius: 10px;
    background-color: #E0E0E0;
@@ -104,7 +102,7 @@ button {
 }
 
 .groupBtn {
-   background-color: #F0F0F0;
+   background-color: white;
    border-radius: 6px;
 }
 
@@ -168,7 +166,7 @@ button {
 .progressBar {
    border: 1px solid #A0A0A0;
    border-radius: 10px;
-   width: 280px;
+   width: 270px;
    height: 10px;
    background-color: #E0E0E0;
    margin-left: 6px;
@@ -191,7 +189,7 @@ button {
 }
 
 .chnButtons {
-   font-size: 0px; /* removes space between buttons */
+   font-size: 0; /* removes space between buttons */
 }
 
 .group {
@@ -221,7 +219,7 @@ button {
    width: 40px;
    height: 118px;
    border-radius: 5px;
-   padding: 0px;
+   padding: 0;
 }
 
 .hSlider {
@@ -229,7 +227,7 @@ button {
    width: 174px;
    height: 40px;
    border-radius: 5px;
-   padding: 0px;
+   padding: 0;
 }
 
 .timeScale {

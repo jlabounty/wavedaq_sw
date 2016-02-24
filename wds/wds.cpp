@@ -32,7 +32,7 @@ static struct mg_serve_http_opts s_http_server_opts;
 // This function will be called by mongoose on every new request
 static void wds_handler(struct mg_connection *nc, int event, void *p)
 {
-   char str[256];
+   char str[256], value[256];
    GLOBALS *gl;
    WD2_EVENT eventHeader;
    
@@ -42,28 +42,48 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
    
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->method, "PUT") == 0) {
       
+      value[0] = 0;
+      if (hm->body.p) {
+         strlcpy(value, hm->body.p, sizeof(value));
+         value[hm->body.len] = 0;
+      }
+
       if (mg_vcmp(&hm->uri, "/gl/pzc") == 0) {
          for (int i=0 ; i<gl->n_boards ; i++) {
-            gl->board[i].pzc = atoi(hm->body.p);
-            wd_setFE(gl, i);
+            gl->board[i].pzc = atoi(value);
+            wd_set_fe(gl, i);
          }
       }
       
       else if (mg_vcmp(&hm->uri, "/gl/gain") == 0) {
          for (int i=0 ; i<gl->n_boards ; i++) {
-            gl->board[i].gain = atoi(hm->body.p);
-            wd_setFE(gl, i);
+            gl->board[i].gain = atoi(value);
+            wd_set_fe(gl, i);
+         }
+      }
+
+      else if (mg_vcmp(&hm->uri, "/gl/trigger_level") == 0) {
+         for (int i=0 ; i<gl->n_boards ; i++) {
+            gl->board[i].trigger_level = atof(value);
+            wd_set_trigger_level(gl, i);
+         }
+      }
+
+      else if (mg_vcmp(&hm->uri, "/gl/offset") == 0) {
+         for (int i=0 ; i<gl->n_boards ; i++) {
+            gl->board[i].offset = atof(value);
+            wd_set_offset(gl, i);
          }
       }
 
       else if (mg_vcmp(&hm->uri, "/gl/ofs_calib1_flag") == 0)
-         gl->ofs_calib1_flag = atoi(hm->body.p);
+         gl->ofs_calib1_flag = atoi(value);
       else if (mg_vcmp(&hm->uri, "/gl/ofs_calib2_flag") == 0)
-         gl->ofs_calib2_flag = atoi(hm->body.p);
+         gl->ofs_calib2_flag = atoi(value);
       else if (mg_vcmp(&hm->uri, "/gl/remove_spikes") == 0)
-         gl->remove_spikes = atoi(hm->body.p);
+         gl->remove_spikes = atoi(value);
       else if (mg_vcmp(&hm->uri, "/gl/rotate_flag") == 0)
-         gl->rotate_flag = atoi(hm->body.p);
+         gl->rotate_flag = atoi(value);
 
       else if (mg_vcmp(&hm->uri, "/vcalib") == 0)
          if (!gl->demo_flag)
@@ -94,10 +114,11 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       for (int i=0 ; i<gl->n_boards ; i++) {
          mg_printf_http_chunk(nc, "      {\n");
          mg_printf_http_chunk(nc, "         \"name\": \"%s\" ,\n", gl->board[i].name);
-         mg_printf_http_chunk(nc, "         \"trigger_level\": \"%d\",\n", gl->board[i].trigger_level);
+         mg_printf_http_chunk(nc, "         \"trigger_level\": \"%1.3lf\",\n", gl->board[i].trigger_level);
          mg_printf_http_chunk(nc, "         \"trigger_mask\": \"%s\",\n", gl->board[i].trigger_mask);
          mg_printf_http_chunk(nc, "         \"gain\": \"%d\",\n", gl->board[i].gain);
-         mg_printf_http_chunk(nc, "         \"pzc\": \"%d\"\n", gl->board[i].pzc);
+         mg_printf_http_chunk(nc, "         \"pzc\": \"%d\",\n", gl->board[i].pzc);
+         mg_printf_http_chunk(nc, "         \"offset\": \"%1.3lf\"\n", gl->board[i].offset);
          mg_printf_http_chunk(nc, "      }\n");
          if (i<gl->n_boards-1)
             mg_printf_http_chunk(nc, ",");
@@ -316,7 +337,7 @@ int main(int argc, char *argv[])
       
       else if (argv[i][0] == '-' && argv[i][1] == 't') {
          for (j=0 ; j<16 ; j++)
-            gl.board[j].trigger_level = atoi(argv[i+1]);
+            gl.board[j].trigger_level = atof(argv[i+1]);
          i++;
       }
       
@@ -357,7 +378,7 @@ int main(int argc, char *argv[])
          printf(" -c               Calibrate DRS chips\n");
          printf(" -d               Demo mode\n");
          printf(" -g 0/1/2         Input gain (0=1, 1=10, 2=100)\n");
-         printf(" -t <level>       Trigger level in mV (0=auto)\n");
+         printf(" -t <level>       Trigger level in V (0=auto)\n");
          printf(" -m <mask>        Trigger mask xxxxyyyy (xxxx=16 bit OR, yyyy=16bit AND)\n");
          printf(" -o <offset>      Set channel offset in V\n");
          printf(" -p <port>        HTTP server port\n");
