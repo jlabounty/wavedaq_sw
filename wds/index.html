@@ -78,11 +78,12 @@
    </div>
 
    <div id="config">
-      <form name="config">
+      <form name="config" onsubmit="return false;">
          <div class="groupTitle">Trigger</div>
          <div class="group" style="position:relative;">
                <button name="ctrlHSlider" id="trgSlider" class="hSlider" style="width:215px" type="button" data-update="sldTLevel()"></button>
-               <input style="position:absolute;top:10%;font-size:16px;text-align:center" type="text" id="inpTLevel" size="5" value="0">&nbsp;&nbsp;mV
+               <input style="position:absolute;top:10%;font-size:16px;text-align:center" name="trigger_level"
+                      type="text" id="inpTLevel" onkeypress="keyGl(this)" size="5" value="0">&nbsp;&nbsp;mV
          </div>
 
          <div class="groupTitle">Analog Front-end</div>

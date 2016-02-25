@@ -65,6 +65,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       else if (mg_vcmp(&hm->uri, "/gl/trigger_level") == 0) {
          for (int i=0 ; i<gl->n_boards ; i++) {
             gl->board[i].trigger_level = atof(value);
+            if (gl->board[i].trigger_level > 0.5)
+               gl->board[i].trigger_level = 0.5;
+            if (gl->board[i].trigger_level < -0.5)
+               gl->board[i].trigger_level = -0.5;
             wd_set_trigger_level(gl, i);
          }
       }
@@ -97,28 +101,28 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
       
       mg_printf_http_chunk(nc, "{\n");
-      mg_printf_http_chunk(nc, "   \"demo_flag\": \"%d\",\n",       gl->demo_flag);
-      mg_printf_http_chunk(nc, "   \"rotate_flag\": \"%d\",\n",     gl->rotate_flag);
-      mg_printf_http_chunk(nc, "   \"verbose_flag\": \"%d\",\n",    gl->verbose_flag);
-      mg_printf_http_chunk(nc, "   \"adc_flag\": \"%d\",\n",        gl->adc_flag);
-      mg_printf_http_chunk(nc, "   \"ofs_calib1_flag\": \"%d\",\n", gl->ofs_calib1_flag);
-      mg_printf_http_chunk(nc, "   \"ofs_calib2_flag\": \"%d\",\n", gl->ofs_calib2_flag);
-      mg_printf_http_chunk(nc, "   \"tcalib_flag\": \"%d\",\n",     gl->tcalib_flag);
-      mg_printf_http_chunk(nc, "   \"remove_spikes\": \"%d\",\n",   gl->remove_spikes);
-      mg_printf_http_chunk(nc, "   \"http_port\": \"%d\",\n",       gl->http_port);
-      mg_printf_http_chunk(nc, "   \"n_boards\": \"%d\",\n",        gl->n_boards);
-      mg_printf_http_chunk(nc, "   \"sampling_speed\": \"%d\",\n",  gl->sampling_speed);
+      mg_printf_http_chunk(nc, "   \"demo_flag\": %s,\n",       gl->demo_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"rotate_flag\": %s,\n",     gl->rotate_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"verbose_flag\": %s,\n",    gl->verbose_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"adc_flag\": %s,\n",        gl->adc_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"ofs_calib1_flag\": %s,\n", gl->ofs_calib1_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"ofs_calib2_flag\": %s,\n", gl->ofs_calib2_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"tcalib_flag\": %s,\n",     gl->tcalib_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"remove_spikes\": %s,\n",   gl->remove_spikes ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"http_port\": %d,\n",       gl->http_port);
+      mg_printf_http_chunk(nc, "   \"n_boards\": %d,\n",        gl->n_boards);
+      mg_printf_http_chunk(nc, "   \"sampling_speed\": %d,\n",  gl->sampling_speed);
       
       mg_printf_http_chunk(nc, "   \"board\": [\n");
       
       for (int i=0 ; i<gl->n_boards ; i++) {
          mg_printf_http_chunk(nc, "      {\n");
          mg_printf_http_chunk(nc, "         \"name\": \"%s\" ,\n", gl->board[i].name);
-         mg_printf_http_chunk(nc, "         \"trigger_level\": \"%1.3lf\",\n", gl->board[i].trigger_level);
-         mg_printf_http_chunk(nc, "         \"trigger_mask\": \"%s\",\n", gl->board[i].trigger_mask);
-         mg_printf_http_chunk(nc, "         \"gain\": \"%d\",\n", gl->board[i].gain);
-         mg_printf_http_chunk(nc, "         \"pzc\": \"%d\",\n", gl->board[i].pzc);
-         mg_printf_http_chunk(nc, "         \"offset\": \"%1.3lf\"\n", gl->board[i].offset);
+         mg_printf_http_chunk(nc, "         \"trigger_level\": %1.3lf,\n", gl->board[i].trigger_level);
+         mg_printf_http_chunk(nc, "         \"trigger_mask\": \"%s\",\n",  gl->board[i].trigger_mask);
+         mg_printf_http_chunk(nc, "         \"gain\": %d,\n",              gl->board[i].gain);
+         mg_printf_http_chunk(nc, "         \"pzc\": %s,\n",               gl->board[i].pzc ? "true" : "false");
+         mg_printf_http_chunk(nc, "         \"offset\": %1.3lf\n",         gl->board[i].offset);
          mg_printf_http_chunk(nc, "      }\n");
          if (i<gl->n_boards-1)
             mg_printf_http_chunk(nc, ",");
@@ -281,7 +285,7 @@ int main(int argc, char *argv[])
    gl.remove_spikes   = 1;
 
    for (i=0 ; i<16 ; i++) {
-      gl.board[i].trigger_level = 0;
+      gl.board[i].trigger_level = 0.123;
       gl.board[i].gain          = 0;       // gain 1
       gl.board[i].offset        = 1.25;    // center offset
       gl.board[i].pzc           = 0;       // PZC off

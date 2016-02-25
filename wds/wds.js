@@ -60,7 +60,7 @@ function loadGl()
    req.onreadystatechange = function() {
       if (req.readyState == 4 && req.status == 200) {
          OSC.GL = JSON.parse(req.responseText);
-         
+
          // populate board list
          var sel = document.getElementById("wdSelect");
          for (var i=0 ; i<OSC.GL.board.length ; i++) {
@@ -72,13 +72,16 @@ function loadGl()
          OSC.nWd = OSC.GL.board.length;
 
          // populate config
-         document.getElementById("pzc").checked = (OSC.GL.board[0].pzc == "1");
+         document.getElementById("trgSlider").set(OSC.GL.board[0].trigger_level+0.5);
+         document.getElementById("inpTLevel").value = Math.round(OSC.GL.board[0].trigger_level * 1000);
+
+         document.getElementById("pzc").checked = OSC.GL.board[0].pzc;
          document.config.gain[parseInt(OSC.GL.board[0].gain)].checked = true;
 
-         document.getElementById("calib1").checked = (OSC.GL.ofs_calib1_flag == "1");
-         document.getElementById("calib2").checked = (OSC.GL.ofs_calib2_flag == "1");
-         document.getElementById("spikes").checked = (OSC.GL.remove_spikes == "1");
-         document.getElementById("rotate").checked = (OSC.GL.rotate_flag == "1");
+         document.getElementById("calib1").checked = OSC.GL.ofs_calib1_flag;
+         document.getElementById("calib2").checked = OSC.GL.ofs_calib2_flag;
+         document.getElementById("spikes").checked = OSC.GL.remove_spikes;
+         document.getElementById("rotate").checked = OSC.GL.rotate_flag;
       }
    };
    req.open("GET", "gl?r=" + Math.random(), true); // avoid cached results
@@ -94,6 +97,23 @@ function setGl(e)
    } else if (e.type == "radio") {
       req.open("PUT", "gl/" + e.name, true);
       req.send(e.value);
+   } else if (e.type == "text") {
+      req.open("PUT", "gl/" + e.name, true);
+      if (e.name == "trigger_level") {
+         req.send(parseInt(e.value) / 1000);
+      } else
+         req.send(e.value);
+   }
+
+   loadGl();
+}
+
+function keyGl(e)
+{
+   var charCode = (typeof event.which == "number") ? event.which : event.keyCode;
+
+   if (charCode == 13) {
+      setGl(e);
    }
 }
 
@@ -286,7 +306,7 @@ function oscKeypress(e)
 {
    var charCode = (typeof e.which == "number") ? e.which : e.keyCode;
    
-   if (charCode == 's'.charCodeAt(0)) {
+   if (charCode == ' '.charCodeAt(0)) {
       btnStop();
    }
 
@@ -458,12 +478,10 @@ function sldUOffset(value)
 
 function sldTLevel(value)
 {
-   var e = document.getElementById("inpTLevel");
-   e.value = Math.round(value * 1000 - 500);
-
    var req = new XMLHttpRequest();
    req.open("PUT", "gl/trigger_level", true);
    req.send(Math.round(value * 1000 - 500)/1000);
+   loadGl();
 }
 
 function btnOfsZero()
