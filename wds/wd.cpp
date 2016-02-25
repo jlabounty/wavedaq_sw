@@ -11,25 +11,43 @@
 #include <stdlib.h>
 #include <fcntl.h>
 
+#include "averager.h"
 #include "wds.h"
 
-#include <sys/socket.h>
 #include <sys/types.h>
-#include <sys/select.h>
-#include <sys/time.h>
-#include <arpa/inet.h>
-#include <ifaddrs.h>
-#include <netdb.h>
 #include <assert.h>
 #include <errno.h>
 
-#ifdef __linux__
-#include <linux/sockios.h>
-#include <sys/ioctl.h>
-#include <net/if.h>
+#ifdef _MSC_VER
+#include <windows.h>
+#include <io.h>
+#include <time.h>
+#include <float.h>
+
+union { unsigned int i ; float f; } _nanf = { 0x7fc00000 };
+#define NANF (_nanf.f)
 #endif
+
+#ifdef __linux__
+#include <sys/socket.h>
+#include <sys/select.h>
+#include <linux/sockios.h>
+#include <arpa/inet.h>
+#include <sys/ioctl.h>
+#include <sys/time.h>
+#include <net/if.h>
+#include <ifaddrs.h>
+#include <netdb.h>
+
+#define NANF nanf("")
+#endif
+
 #ifdef __APPLE__
-#include <net/if_dl.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <net/if.h>
+
+#define NANF nanf("")
 #endif
 
 #define WD2_CMD_PORT   3000
@@ -54,6 +72,10 @@ typedef struct {
    unsigned short trigger_type;
    unsigned short packet_sequence_number;
 } WD2_FRAME_HEADER;
+
+/*-----------------------------------------------------------------------------------------*/
+
+void remove_spikes(GLOBALS *gl, short trigger_cell, float wf[][1024]);
 
 /*-----------------------------------------------------------------------------------------*/
 
@@ -208,6 +230,70 @@ int wd_send(GLOBALS *gl, int b, int timeout_ms, const char *str, char *result, i
 
 /*-----------------------------------------------------------------------------------------*/
 
+void wd_set_fe(GLOBALS *gl, int index)
+{
+   char str[256];
+   
+   if (gl->demo_flag)
+      return;
+   // set input configuration
+   if (gl->board[index].pzc) { // pole zero cancellation on (bit=0)
+      if (gl->board[index].gain == 0)
+         sprintf(str, "feset all 02");
+      else if (gl->board[index].gain == 1)
+         sprintf(str, "feset all 1a");
+      else if (gl->board[index].gain == 2)
+         sprintf(str, "feset all 3a");
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+   } else { // pole zero cancellation off (bit=1)
+      if (gl->board[index].gain == 0)
+         sprintf(str, "feset all 82");
+      else if (gl->board[index].gain == 1)
+         sprintf(str, "feset all 9a");
+      else if (gl->board[index].gain == 2)
+         sprintf(str, "feset all ba");
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+   }
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+void wd_set_trigger_level(GLOBALS *gl, int index)
+{
+   char str[256];
+
+   if (gl->demo_flag)
+      return;
+
+   if (gl->verbose_flag)
+      printf("Set trigger level = %d mV\n", (int)(gl->board[index].trigger_level*1000));
+   sprintf(str, "dacset tlevel1 %d", (int)(gl->board[index].trigger_level*1000));
+   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+   sprintf(str, "dacset tlevel2 %d", (int)(gl->board[index].trigger_level*1000));
+   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+   sprintf(str, "dacset tlevel3 %d", (int)(gl->board[index].trigger_level*1000));
+   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+   sprintf(str, "dacset tlevel4 %d", (int)(gl->board[index].trigger_level*1000));
+   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+void wd_set_offset(GLOBALS *gl, int index)
+{
+   char str[256];
+   
+   if (gl->demo_flag)
+      return;
+
+   if (gl->verbose_flag)
+      printf("Set offset level  = %g V\n", gl->board[index].offset);
+   sprintf(str, "dacset ofs %d", (int)(gl->board[index].offset*1000));
+   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
 int wd_init(GLOBALS *gl)
 {
    struct sockaddr_in server_addr;
@@ -323,45 +409,14 @@ int wd_init(GLOBALS *gl)
             printf("Set ipaddrdst     = %s\n", reply);
       }
       
-      // set input configuration
-      if (gl->board[index].pzc) { // pole zero cancellation on (bit=0)
-         if (gl->board[index].gain == 0)
-            sprintf(str, "feset all 02");
-         else if (gl->board[index].gain == 1)
-            sprintf(str, "feset all 1a");
-         else if (gl->board[index].gain == 2)
-            sprintf(str, "feset all 3a");
-         assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-      } else { // pole zero cancellation off (bit=1)
-         if (gl->board[index].gain == 0)
-            sprintf(str, "feset all 82");
-         else if (gl->board[index].gain == 1)
-            sprintf(str, "feset all 9a");
-         else if (gl->board[index].gain == 2)
-            sprintf(str, "feset all ba");
-         assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-      }
+      wd_set_fe(gl, index);
 
       // trun on comparator power
       assert(wd_send(gl, index, 100, "pwrcmp on", NULL, NULL) > 0);
 
-      // set comparator level
-      if (gl->verbose_flag)
-         printf("Set trigger level = %d mV\n", gl->board[index].trigger_level);
-      sprintf(str, "dacset tlevel1 %d", gl->board[index].trigger_level);
-      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-      sprintf(str, "dacset tlevel2 %d", gl->board[index].trigger_level);
-      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-      sprintf(str, "dacset tlevel3 %d", gl->board[index].trigger_level);
-      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-      sprintf(str, "dacset tlevel4 %d", gl->board[index].trigger_level);
-      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-      
-      // set offset
-      if (gl->verbose_flag)
-         printf("Set offsetr level = %d mV\n", gl->board[index].offset);
-      sprintf(str, "dacset offset %d", gl->board[index].offset);
-      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      wd_set_trigger_level(gl, index);
+
+      wd_set_offset(gl, index);
       
       // set sampling frequency
       if (gl->verbose_flag)
@@ -390,18 +445,19 @@ int wd_init(GLOBALS *gl)
       }
    
       // set DRS readout mode to ROI
-      // assert(wd_send(gl, index, 100, "regwr 10 0D0C0020", NULL, NULL) > 0);
       assert(wd_send(gl, index, 100, "regwr 10 0D0D0030", NULL, NULL) > 0);
-      
       
       // load calibration for board from file (for now...)
       char str[80];
       sprintf(str, "%s.cal", gl->board[index].name);
       int fh = open(str, O_RDONLY, 0644);
-      if (fh > 0)
-         assert(read(fh, gl->board[index].wf_offset, sizeof(float)*16*1024) == sizeof(float)*16*1024);
-      else
-         memset(gl->board[index].wf_offset, 0, sizeof(float)*16*1024);;
+      if (fh > 0) {
+         assert(read(fh, gl->board[index].wf_offset1, sizeof(float)*16*1024) == sizeof(float)*16*1024);
+         assert(read(fh, gl->board[index].wf_offset2, sizeof(float)*16*1024) == sizeof(float)*16*1024);
+      } else {
+         memset(gl->board[index].wf_offset1, 0, sizeof(float)*16*1024);;
+         memset(gl->board[index].wf_offset2, 0, sizeof(float)*16*1024);;
+      }
    }
    
    if (gl->verbose_flag)
@@ -412,34 +468,37 @@ int wd_init(GLOBALS *gl)
 
 /*-----------------------------------------------------------------------------------------*/
 
-#define Sleep(x) usleep(x*1000)
-
 double time_ms()
 {
+#ifdef _MSC_VER
+   return GetTickCount();
+#else
    struct timeval tv;
    gettimeofday(&tv, NULL);
    return tv.tv_sec*1000 + tv.tv_usec/1000.0;
+#endif
 }
 
 /*-----------------------------------------------------------------------------------------*/
 
-int wd_read_waveform(GLOBALS *gl, int b, int millisec, float waveform[16][1024])
+int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float waveform[16][1024])
 {
    int i, status, waveform_channel, current_frame;
    fd_set readfds;
    struct timeval timeout;
-   WD2_FRAME_HEADER *ph;
    unsigned char *pd;
+   WD2_FRAME_HEADER *ph;
    short data1, data2;
    struct sockaddr_in remote_addr;
    unsigned char buffer[1800];
    int header_adc, header_channel;
    double start_time;
+   static float wf1[16][1024], wf2[16][1024];
 
    // tag waveforms as invalid
    for (i=0 ; i<16 ; i++) {
-      waveform[i][0]   = nanf("");
-      waveform[i][512] = nanf("");
+      waveform[i][0]   = NANF;
+      waveform[i][512] = NANF;
    }
    
    current_frame = -1;
@@ -490,14 +549,28 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, float waveform[16][1024])
             ph->trigger_type             = SWAP_UINT16(ph->trigger_type);
             ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
            
+            // copy some data to event header
+            pe->board_id = ph->board_id;
+            pe->crate_id = ph->crate_id;
+            pe->slot_id = ph->slot_id;
+            pe->readout_sequence_number = ph->readout_sequence_number;
+            pe->hardware_sequence_number = 0; // not yet implemented
+            pe->sampling_frequency = ph->sampling_frequency;
+            pe->number_of_samples = 1024;
+            pe->drs0_trigger_cell = ph->drs0_trigger_cell;
+            pe->drs1_trigger_cell = ph->drs1_trigger_cell;
+            pe->trigger_type = 0; // not yet implemented
+            
             if (gl->verbose_flag)
-               printf("From %s:%d, Frame %5d, ADC/Chn/Segment %d/%d/%d\n",
+               printf("From %s:%d, Frame %5d, ADC/Chn/Segment %d/%d/%d - %04d/%04d\n",
                       inet_ntoa(remote_addr.sin_addr),
                       ntohs(remote_addr.sin_port),
                       ph->readout_sequence_number,
                       header_adc,
                       header_channel,
-                      ph->channel_segment_number);
+                      ph->channel_segment_number,
+                      ph->drs0_trigger_cell,
+                      ph->drs1_trigger_cell);
             
             if (current_frame == -1)
                current_frame = ph->readout_sequence_number;
@@ -517,8 +590,8 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, float waveform[16][1024])
                
                // tag waveforms as invalid
                for (i=0 ; i<16 ; i++) {
-                  waveform[i][0]   = nanf("");
-                  waveform[i][512] = nanf("");
+                  waveform[i][0]   = NANF;
+                  waveform[i][512] = NANF;
                }
             }
             
@@ -550,12 +623,12 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, float waveform[16][1024])
                
                if (ph->channel_segment_number == 0) {
                   // first segment
-                  waveform[waveform_channel][i]       = (float)data1 * (0.63 / 4096.0); // 2V range with 12 bits
-                  waveform[waveform_channel][i+1]     = (float)data2 * (0.63 / 4096.0);
+                  waveform[waveform_channel][i]       = (float)(data1 * (0.63 / 4096.0)); // 2V range with 12 bits
+                  waveform[waveform_channel][i+1]     = (float)(data2 * (0.63 / 4096.0));
                } else {
                   // second segment
-                  waveform[waveform_channel][512+i]   = (float)data1 * (0.63 / 4096.0);
-                  waveform[waveform_channel][512+i+1] = (float)data2 * (0.63 / 4096.0);
+                  waveform[waveform_channel][512+i]   = (float)(data1 * (0.63 / 4096.0));
+                  waveform[waveform_channel][512+i+1] = (float)(data2 * (0.63 / 4096.0));
                }
             }
             
@@ -564,12 +637,64 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, float waveform[16][1024])
                if (isnan(waveform[i][0]) || isnan(waveform[i][512]))
                    break;
             if (i == 16) {
-               // calibrate waveforms
-               if (!gl->adc_flag) {
-                  for (i=0 ; i<16 ; i++)
+
+               for (i=0 ; i<16 ; i++)
+                  for (int j=0 ; j<1024 ; j++)
+                     wf2[i][j] = waveform[i][j];
+
+               // un-rotate waveforms
+               if (gl->rotate_flag) {
+                  for (i=0 ; i<8 ; i++)
                      for (int j=0 ; j<1024 ; j++)
-                        waveform[i][j] -= gl->board[b].wf_offset[i][j];
+                        waveform[i][j] = wf1[i][j];
+               } else {
+                  for (i=0 ; i<8 ; i++) {
+                     for (int j=0 ; j<1024 ; j++)
+                        waveform[i][(j+pe->drs0_trigger_cell) % 1024] = wf1[i][j];
+                  }
+                  for (i=8 ; i<16 ; i++) {
+                     for (int j=0 ; j<1024 ; j++)
+                        waveform[i][(j+pe->drs1_trigger_cell) % 1024] = wf1[i][j];
+                  }
                }
+               
+               for (i=0 ; i<16 ; i++)
+                  for (int j=0 ; j<1024 ; j++)
+                     wf1[i][j] = wf2[i][j];
+              
+               // calibrate waveforms
+               if (!gl->adc_flag) { // don't calibrate in ADC mode
+                  
+                  // cell-by-cell offset calibration
+                  if (gl->ofs_calib1_flag) {
+                     if (gl->rotate_flag) {
+                        for (i=0 ; i<8 ; i++)
+                           for (int j=0 ; j<1024 ; j++)
+                              waveform[i][j] -= gl->board[b].wf_offset1[i][(j+pe->drs0_trigger_cell) % 1024];
+                        for (i=8 ; i<16 ; i++)
+                           for (int j=0 ; j<1024 ; j++)
+                              waveform[i][j] -= gl->board[b].wf_offset1[i][(j+pe->drs1_trigger_cell) % 1024];
+                     } else {
+                        for (i=0 ; i<16 ; i++)
+                           for (int j=0 ; j<1024 ; j++)
+                              waveform[i][j] -= gl->board[b].wf_offset1[i][j];
+                     }
+                  }
+                  
+                  // start-to-end offset calibration
+                  if (gl->ofs_calib2_flag) {
+                     for (i=0 ; i<16 ; i++)
+                        for (int j=0 ; j<1024 ; j++)
+                           waveform[i][j] -= gl->board[b].wf_offset2[i][j];
+                  }
+                  
+                  // remove spikes
+                  if (gl->remove_spikes) {
+                     remove_spikes(gl, pe->drs0_trigger_cell, waveform);
+                     remove_spikes(gl, pe->drs1_trigger_cell, waveform+8);
+                  }
+               }
+
                return SUCCESS;
             }
             
@@ -586,57 +711,291 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, float waveform[16][1024])
 
 /*-----------------------------------------------------------------------------------------*/
 
-
-int wd_calibrate(GLOBALS *gl)
+int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
 {
-   float wfU[16][1024], awf[16][1024];
-   int i, n, prog, old_prog;
+   float wfU[16][1024], awf1[16][1024], awf2[16][1024];
+   WD2_EVENT eventHeader;
+   char str[80];
    
-   n = 500;
+   if (pr->state == CS_FIRST_BOARD) {
+      pr->state   = CS_FIRST_SAMPLE;
+      pr->i_board = 0;
+   }
 
-   printf("Calibration boards\n");
+   if (pr->state == CS_FIRST_SAMPLE) {
+      pr->state   = CS_RUNNING;
+      pr->n_iter1 = 500;
+      pr->i_iter1 = 0;
+      pr->n_iter2 = 500;
+      pr->i_iter2 = 0;
+      pr->n_board = gl->n_boards;
+      pr->ave = NULL;
+   }
+
+   //---- Primary Calibration ----
    
-   for (int board=0 ; board<gl->n_boards ; board++) {
+   if (pr->i_iter1 < pr->n_iter1) {
 
-      printf("%s: [                                                 ]\r%s: [",
-             gl->board[board].name, gl->board[board].name);
-      fflush(stdout);
-      
-      memset(awf, 0, sizeof(awf));
-      old_prog = 0;
-      
-      for (i=0 ; i<n ; i++) {
-         wd_send(gl, board, 100, "drsget\n", NULL, NULL);
-         assert(wd_read_waveform(gl, board, 1000, wfU) == SUCCESS);
-         
-         for (int ch=0 ; ch<16 ; ch++)
-            for (int bin=0 ; bin<1024 ; bin++)
-               awf[ch][bin] += wfU[ch][bin];
-         
-         /* update progress bar */
-         prog = (int)((double)(i)/(n)*50);
-         if (prog > old_prog) {
-            old_prog = prog;
-            printf("=");
-            fflush(stdout);
-         }
+      // initialize data on first iteration
+      if (pr->i_iter1 == 0) {
+         gl->rotate_flag = 0;
+         gl->ofs_calib1_flag = 0;
+         gl->ofs_calib2_flag = 0;
+         pr->ave = new Averager(2, 8, 1024, pr->n_iter1);
+         memset(awf1, 0, sizeof(awf1));
       }
+
+      pr->i_iter1++;
+      
+      wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
+      assert(wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU) == SUCCESS);
+      
+      sleep_ms(10);
 
       for (int ch=0 ; ch<16 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
-            awf[ch][bin] /= n;
-
-      printf("\n");
+            pr->ave->Add(ch/8, ch%8, bin, wfU[ch][bin]);
       
-      // save calibration
-      char str[80];
-      sprintf(str, "%s.cal", gl->board[board].name);
-      int fh = open(str, O_WRONLY | O_CREAT, 0644);
-      assert(fh > 0);
+      pr->progress = (double) pr->i_iter1 / pr->n_iter1 * 0.5;
+      
+      // calibration finished
+      if (pr->i_iter1 == pr->n_iter1) {
+         for (int ch=0 ; ch<16 ; ch++)
+            for (int bin=0 ; bin<1024 ; bin++)
+               awf1[ch][bin] = (float)pr->ave->Median(ch/8, ch%8, bin);
+         
+         // ave->SaveNormalizedDistribution("wf.csv", 0);
+         
+         // save calibration
+         sprintf(str, "%s.cal", gl->board[pr->i_board].name);
+         pr->fh = open(str, O_WRONLY | O_CREAT, 0644);
+         assert(pr->fh > 0);
+         assert(write(pr->fh, awf1, sizeof(awf1)) == sizeof(awf1));
+         
+         for (int ch=0 ; ch<16 ; ch++)
+            for (int j=0 ; j<1024 ; j++)
+               gl->board[pr->i_board].wf_offset1[ch][j] = awf1[ch][j];
+      }
 
-      assert(write(fh, awf, sizeof(awf)) == sizeof(awf));
-      close(fh);
+      return SUCCESS;
+   }
+   
+   //---- Secondary Calibration
+   
+   if (pr->i_iter2 < pr->n_iter2) {
+   
+      // initialize data on first iteration
+      if (pr->i_iter2 == 0) {
+         pr->ave->Reset();
+         memset(awf2, 0, sizeof(awf2));
+         gl->rotate_flag = 1; // now rotate waveforms
+         gl->ofs_calib1_flag = 1; // and do 1st calibration
+         gl->ofs_calib2_flag = 0;
+      }
+
+      pr->i_iter2++;
+      
+      wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
+      assert(wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU) == SUCCESS);
+      
+      sleep_ms(10);
+      
+      for (int ch=0 ; ch<16 ; ch++)
+         for (int bin=0 ; bin<1024 ; bin++)
+            pr->ave->Add(ch/8, ch%8, bin, wfU[ch][bin]);
+      
+      pr->progress = (double)pr->i_iter2 / pr->n_iter2 * 0.5 + 0.5;
+      
+      // calibration finished
+      if (pr->i_iter2 == pr->n_iter2) {
+         for (int ch=0 ; ch<16 ; ch++)
+            for (int bin=0 ; bin<1024 ; bin++)
+               awf2[ch][bin] = (float)pr->ave->Median(ch/8, ch%8, bin);
+         
+         // save calibration
+         assert(write(pr->fh, awf2, sizeof(awf2)) == sizeof(awf2));
+         
+         close(pr->fh);
+
+         // switch to next board
+         pr->i_board++;
+         pr->state = CS_FIRST_SAMPLE;
+         pr->progress = 1;
+         delete pr->ave;
+         pr->ave = NULL;
+
+         if (pr->i_board == pr->n_board) {
+            pr->state = CS_INACTIVE;
+            gl->rotate_flag = 1;
+            gl->ofs_calib1_flag = 1;
+            gl->ofs_calib2_flag = 1;
+         }
+      }
    }
 
    return SUCCESS;
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+int histo[50];
+
+void remove_spikes(GLOBALS *gl, short trigger_cell, float wf[][1024])
+{
+/*
+   Remove a specific kind of spike on DRS4.
+   
+   This spike has some specific features, namely:
+     - Common on all the channels on a chip
+     - Constant heigh and width
+     - Two spikes per channel
+     - Symmetric to cell #0.
+   
+ 
+   This is not general purpose spike-removing function.
+*/
+ 
+   int i, j, k, l;
+   double hp, x, y;
+   int sp[8][10];
+   int rsp[10], rot_sp[10];
+   int n_sp[8], n_rsp;
+   int  nNeighbor, nSymmetric;
+   float cwf[16][1024];
+
+   /*
+   FILE *f = fopen("wf.csv", "wt");
+   fprintf(f, "tc=%d\n", trigger_cell);
+   fprintf(f, "i, CH0, CH1, CH2, CH3, CH4, CH5, CH6, CH7\n");
+   for (j=0 ; j<1024 ; j++) {
+      fprintf(f, "%d, ", j);
+      for (i=0 ; i<8 ; i++)
+         fprintf(f, "%0.3lf, ", wf[i][j]);
+      fprintf(f, "\n");
+   }
+   fclose(f);
+   */
+   
+   /* rotate waveform back relative to cell #0 */
+   if (gl->rotate_flag) {
+      for (i=0 ; i<8 ; i++)
+         for (j=0 ; j<1024 ; j++)
+            cwf[i][(j+trigger_cell) % 1024] = wf[i][j];
+   } else {
+      for (i=0 ; i<8 ; i++)
+         for (j=0 ; j<1024 ; j++)
+            cwf[i][j] = wf[i][j];
+   }
+
+   memset(sp, 0, sizeof(sp));
+   memset(n_sp, 0, sizeof(n_sp));
+   memset(rsp, 0, sizeof(rsp));
+   n_rsp = 0;
+   
+   /* find spikes with special high-pass filter, skip last values */
+   for (j=0 ; j<1020 ; j++) {
+      for (i=0 ; i<8 ; i++) {
+         hp = -cwf[i][j] + cwf[i][(j+1)%1024]+cwf[i][(j+2)%1024] - cwf[i][(j+3) % 1024];
+         if (hp > 0.010) {
+            if (n_sp[i] < 10) // record maximum of 10 spikes
+               sp[i][n_sp[i]++] = j;
+            else
+               return;        // too many spikes -> something wrong
+         }
+      }
+   }
+
+   /* find spikes at cell #0 and #1023 */
+   /*
+   for (i=0 ; i<8 ; i++) {
+      if (wf[i][0]+wf[i][1]-2*wf[i][2] > 0.020) {
+         if (n_sp[i] < 10)
+            sp[i][n_sp[i]++] = 0;
+      }
+      if (-2*wf[i][1021]+wf[i][1022]+wf[i][1023] > 0.020) {
+         if (n_sp[i] < 10)
+            sp[i][n_sp[i]++] = 1020;
+      }
+   }
+   */
+   
+   /* go through all spikes and look for symmetric spikes and neighbors */
+   for (i=0 ; i<8 ; i++) {
+      for (j=0 ; j<n_sp[i] ; j++) {
+         /* check if this spike has a symmetric partner in any channel */
+         for (k=nSymmetric=0 ; k<8 ; k++) {
+            for (l=0 ; l<n_sp[k] ; l++)
+               if (sp[i][j] == (1020-sp[k][l]+1024) % 1024) {
+                  nSymmetric++;
+                  break;
+               }
+         }
+         
+         /* check if this spike has same spike in any other channels */
+         for (k=nNeighbor=0 ; k<8 ; k++)
+            if (i != k) {
+               for (l=0 ; l<n_sp[k] ; l++)
+                  if (sp[i][j] == sp[k][l]) {
+                     nNeighbor++;
+                     break;
+                  }
+            }
+         
+         if (nSymmetric + nNeighbor >= 2) {
+            /* if at least two matching spikes, treat this as a real spike */
+            for (k=0 ; k<n_rsp ; k++)
+               if (rsp[k] == sp[i][j])
+                  break;
+            if (n_rsp < 10 && k == n_rsp)
+               rsp[n_rsp++] = sp[i][j];
+         }
+      }
+   }
+   
+   /* rotate spikes according to trigger cell */
+   if (gl->rotate_flag) {
+      for (i=0 ; i<n_rsp ; i++)
+         rot_sp[i] = (rsp[i] - trigger_cell + 1024) % 1024;
+   } else {
+      for (i=0 ; i<n_rsp ; i++)
+         rot_sp[i] = rsp[i];
+   }
+   
+   /* recognize spikes if at least one channel has it */
+   for (k=0 ; k<n_rsp ; k++) {
+      for (i=0 ; i<8 ; i++) {
+         
+         if (k < n_rsp-1 && rsp[k] == 0 && rsp[k+1] == 1020) {
+            /* remove double spike */
+            j = rot_sp[k] > rot_sp[k+1] ? rot_sp[k+1] : rot_sp[k];
+            x = wf[i][(j+1) % 1024];
+            y = wf[i][(j+6) % 1024];
+            if (fabs(x-y) < 0.015) {
+               wf[i][(j+2) % 1024] = (float)(x + 1*(y-x)/5);
+               wf[i][(j+3) % 1024] = (float)(x + 2*(y-x)/5);
+               wf[i][(j+4) % 1024] = (float)(x + 3*(y-x)/5);
+               wf[i][(j+5) % 1024] = (float)(x + 4*(y-x)/5);
+            } else {
+               wf[i][(j+2) % 1024] -= 0.0148f;
+               wf[i][(j+3) % 1024] -= 0.0148f;
+               wf[i][(j+4) % 1024] -= 0.0148f;
+               wf[i][(j+5) % 1024] -= 0.0148f;
+            }
+         } else {
+            /* remove single spike */
+            x = wf[i][rot_sp[k]];
+            y = wf[i][(rot_sp[k]+3) % 1024];
+            
+            if (fabs(x-y) < 0.010) {
+               wf[i][(rot_sp[k]+1) % 1024] = (float)(x + 1*(y-x)/3);
+               wf[i][(rot_sp[k]+2) % 1024] = (float)(x + 2*(y-x)/3);
+            } else {
+               wf[i][(rot_sp[k]+1) % 1024] -= 0.009f;
+               wf[i][(rot_sp[k]+2) % 1024] -= 0.009f;
+            }
+         }
+      }
+      if (k < n_rsp-1 && rsp[k] == 0 && rsp[k+1] == 1020)
+         k++; // skip second half of double spike
+   }
 }

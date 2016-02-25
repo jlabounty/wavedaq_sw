@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-US">
 <head>
+   <meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1">
    <title>WaveDAQ</title>
-   <link href="wds.css" rel="stylesheet" rel="stylesheet" type="text/css">
+   <link href="wds.css" rel="stylesheet" type="text/css">
    <link href="favicon.png" rel="shortcut icon" type="image/png" title="WaveDAQ Icon">
    <link href="iosicon.png" rel="apple-touch-icon" type="image/png" title="WaveDAQ Icon">
    <script src="controls.js" type="text/javascript"></script>
@@ -11,66 +12,134 @@
 </head>
 <body onload="init();">
 
-<div id="scope" class="scope"></div>
+<div id="container">
 
-<div class="controls" id="controls">
+   <div id="scope"></div>
 
-   <select id="wdSelect" class="wdSelect">
-   </select><br />
-   <button class="wideButton" type="button" id="btnStop" onClick="btnStop()">Stop</button>
-   <button class="wideButton" type="button" id="btnSingle" onClick="btnSingle()">Single</button>
-   
-   <div class="chnButtons">
-      <button class="squareButton" id="ch0" type="button" onClick="btnChn(0)">0</button>
-      <button class="squareButton" id="ch1" type="button" onClick="btnChn(1)">1</button>
-      <button class="squareButton" id="ch2" type="button" onClick="btnChn(2)">2</button>
-      <button class="squareButton" id="ch3" type="button" onClick="btnChn(3)">3</button><br />
-      <button class="squareButton" id="ch4" type="button" onClick="btnChn(4)">4</button>
-      <button class="squareButton" id="ch5" type="button" onClick="btnChn(5)">5</button>
-      <button class="squareButton" id="ch6" type="button" onClick="btnChn(6)">6</button>
-      <button class="squareButton" id="ch7" type="button" onClick="btnChn(7)">7</button><br />
-      <button class="squareButton" id="ch8" type="button" onClick="btnChn(8)">8</button>
-      <button class="squareButton" id="ch9" type="button" onClick="btnChn(9)">9</button>
-      <button class="squareButton" id="ch10" type="button" onClick="btnChn(10)">10</button>
-      <button class="squareButton" id="ch11" type="button" onClick="btnChn(11)">11</button><br />
-      <button class="squareButton" id="ch12" type="button" onClick="btnChn(12)">12</button>
-      <button class="squareButton" id="ch13" type="button" onClick="btnChn(13)">13</button>
-      <button class="squareButton" id="ch14" type="button" onClick="btnChn(14)">14</button>
-      <button class="squareButton" id="ch15" type="button" onClick="btnChn(15)">15</button>
-   </div>
-   
-   <button class="wideButton" id="chAll" type="button" onClick="btnChn(-1)">All</button>
-   <button class="wideButton" id="chOn" type="button" onClick="btnOn()">Off</button>
+   <div id="controls">
+      <select id="wdSelect" class="wdSelect">
+      </select><br />
+      <button class="wideButton" type="button" id="btnStop" onClick="btnStop()">Stop</button>
+      <button class="wideButton" type="button" id="btnSingle" onClick="btnSingle()">Single</button>
 
-   <div class="group">
-      <div class="upDown">
-         <button name="ctrlButtonUp" id="scaleUp" type="button" class="squareButtonCanvas" onClick="btnScale(1)"></button>
-         <div id="UScale">100 mV</div>
-         <button name="ctrlButtonDown" id="scaleDown" type="button" class="squareButtonCanvas" onClick="btnScale(-1)"></button>
-      </div><button name="ctrlVSlider" id="uofsSlider" class="vSlider" type="button" data-update="sldUOffset()"></button>
-
-      <div class="zeroDist">
-         <button name="ctrlButtonZero" class="highButton" id="ofsZero" type="button" onClick="btnOfsZero()"></button>
-         <div style="height:10px;"></div>
-         <button name="ctrlButtonDist" class="highButton" id="ofsDist" type="button" onClick="btnOfsDist()"></button>
+      <div class="chnButtons">
+         <button class="squareButton" id="ch0" type="button" onClick="btnChn(0)">0</button>
+         <button class="squareButton" id="ch1" type="button" onClick="btnChn(1)">1</button>
+         <button class="squareButton" id="ch2" type="button" onClick="btnChn(2)">2</button>
+         <button class="squareButton" id="ch3" type="button" onClick="btnChn(3)">3</button><br />
+         <button class="squareButton" id="ch4" type="button" onClick="btnChn(4)">4</button>
+         <button class="squareButton" id="ch5" type="button" onClick="btnChn(5)">5</button>
+         <button class="squareButton" id="ch6" type="button" onClick="btnChn(6)">6</button>
+         <button class="squareButton" id="ch7" type="button" onClick="btnChn(7)">7</button><br />
+         <button class="squareButton" id="ch8" type="button" onClick="btnChn(8)">8</button>
+         <button class="squareButton" id="ch9" type="button" onClick="btnChn(9)">9</button>
+         <button class="squareButton" id="ch10" type="button" onClick="btnChn(10)">10</button>
+         <button class="squareButton" id="ch11" type="button" onClick="btnChn(11)">11</button><br />
+         <button class="squareButton" id="ch12" type="button" onClick="btnChn(12)">12</button>
+         <button class="squareButton" id="ch13" type="button" onClick="btnChn(13)">13</button>
+         <button class="squareButton" id="ch14" type="button" onClick="btnChn(14)">14</button>
+         <button class="squareButton" id="ch15" type="button" onClick="btnChn(15)">15</button>
       </div>
+
+      <button class="wideButton" id="chAll" type="button" onClick="btnChn(-1)">All</button>
+      <button class="wideButton" id="chOn" type="button" onClick="btnOn()">Off</button>
+
+      <div class="groupBtn">
+         <div class="upDown">
+            <button name="ctrlButtonUp" id="scaleUp" type="button" class="squareButtonCanvas" onClick="btnScale(1)"></button>
+            <div id="UScale">100 mV</div>
+            <button name="ctrlButtonDown" id="scaleDown" type="button" class="squareButtonCanvas" onClick="btnScale(-1)"></button>
+         </div><button name="ctrlVSlider" id="uofsSlider" class="vSlider" type="button" data-update="sldUOffset()"></button>
+
+         <div class="zeroDist">
+            <button name="ctrlButtonZero" class="highButton" id="ofsZero" type="button" onClick="btnOfsZero()"></button>
+            <div style="height:10px;"></div>
+            <button name="ctrlButtonDist" class="highButton" id="ofsDist" type="button" onClick="btnOfsDist()"></button>
+         </div>
+      </div>
+
+      <button name="ctrlHSlider" id="tofsSlider" class="hSlider" type="button" data-update="sldTOffset()"></button>
+
+      <table class="timeScale">
+         <tr>
+            <td width="1%">
+               <button name="ctrlButtonLeft" id="scaleLeft" type="button" class="squareButtonCanvas" onClick="btnTScale(-1)"></button>
+            </td>
+            <td id="TScale" style="vertical-align:middle">100 ns</td>
+            <td width="1%">
+               <button name="ctrlButtonRight" id="scaleRight" type="button" class="squareButtonCanvas" onClick="btnTScale(1)"></button>
+            </td>
+         </tr>
+      </table>
+
+      <button class="wideButton" id="btnConfig" type="button" onClick="btnConfig()">Config</button>
+      <button class="wideButton" id="btnAbout" type="button" onClick="btnAbout()">About</button>
+
    </div>
-   
-   <button name="ctrlHSlider" id="tofsSlider" class="hSlider" type="button" data-update="sldTOffset()"></button>
 
-   <table class="timeScale">
-      <tr>
-         <td width="1%">
-            <button name="ctrlButtonLeft" id="scaleLeft" type="button" class="squareButtonCanvas" onClick="btnTScale(-1)"></button>
-         </td>
-         <td id="TScale" style="vertical-align:middle">100 ns</td>
-         <td width="1%">
-            <button name="ctrlButtonRight" id="scaleRight" type="button" class="squareButtonCanvas" onClick="btnTScale(1)"></button>
-         </td>
-      </tr>
-   </table>
+   <div id="config">
+      <form name="config">
+         <div class="groupTitle">Trigger</div>
+         <div class="group" style="position:relative;">
+               <button name="ctrlHSlider" id="trgSlider" class="hSlider" style="width:215px" type="button" data-update="sldTLevel()"></button>
+               <input style="position:absolute;top:10%;font-size:16px;text-align:center" type="text" id="inpTLevel" size="5" value="0">&nbsp;&nbsp;mV
+         </div>
 
-</div>
+         <div class="groupTitle">Analog Front-end</div>
+         <div class="group">
+            Gain:
+            <input type="radio" id="gain1" name="gain" value="0" onClick="setGl(this)">1
+            <input type="radio" id="gain10" name="gain" value="1" onClick="setGl(this)">10
+            <input type="radio" id="gain100" name="gain" value="2" onClick="setGl(this)">100
+            &nbsp;&nbsp;&nbsp;
+            <input type="checkbox" id="pzc" name="pzc" onClick="setGl(this)">PZC
+         </div>
+
+         <div class="groupTitle">Voltage Calibration</div>
+         <div class="group">
+            <table border="0">
+               <tr><td><input type="checkbox" id="calib1" name="ofs_calib1_flag" onClick="setGl(this)"></td>
+                  <td>Apply Primary Calibration (Cell)</td></tr>
+               <tr><td><input type="checkbox" id="calib2" name="ofs_calib2_flag" onClick="setGl(this)"></td>
+                  <td>Apply Secondary Calibration (Readout)</td></tr>
+               <tr><td><input type="checkbox" id="spikes" name="remove_spikes" onClick="setGl(this)"></td>
+                  <td>Remove Spikes</td></tr>
+            </table>
+            <button class="executeButton" id="btnVCalib" type="button" onClick="btnVCalib()">Execute Voltage Calibration</button>
+            <div class="progressBar">
+               <div class="progressInd" id="progressIndVcalib"></div>
+            </div>
+
+         </div>
+
+         <div class="groupTitle">Timing Calibration</div>
+         <div class="group">
+            <table border="0">
+               <tr><td><input type="checkbox" id="rotate" name="rotate_flag" onClick="setGl(this)"></td>
+                  <td>Rotate waveform relative to trigger</td></tr>
+            </table>
+         </div>
+      </form>
+   </div>
+
+   <div id="about">
+
+      <div id="aboutTitle" class="titlebar">
+         About
+      </div>
+
+      <div class="dialog">
+         <div style="font-size:16pt">WaveDAQ Oscilloscope</div>
+         <div id="build" style="font-size:12pt"></div>
+         <img style="position:absolute;right:30px;" src="favicon.png">
+         <div style="font-size:8pt">Stefan Ritt</div>
+         <div style="font-size:8pt">Paul Scherrer Institute</div>
+         <button class="wideButton" style="background-color:#F8F8F8" type="button" onClick="document.getElementById('about').style.display = 'none';">Close</button>
+      </div>
+
+   </div>
+
+</div> <!-- container -->
 
 </body>
 </html>

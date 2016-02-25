@@ -7,6 +7,9 @@
 
 var OSC; // global scope object
 
+var progressInd = 0;
+var progressOldBoard = 0;
+
 function init()
 {
    // prevent mouse events to go up to the browser
@@ -14,7 +17,7 @@ function init()
    c.addEventListener("click", function(e){e.preventDefault()});
    c.addEventListener("mousemove", function(e){e.preventDefault()});
 
-   var c = document.getElementById("scope");
+   c = document.getElementById("scope");
    c.addEventListener("click", function(e){e.preventDefault()});
    c.addEventListener("mousemove", function(e){e.preventDefault()});
 
@@ -24,11 +27,12 @@ function init()
    // create Scope object
    OSC = new Oscilloscope(document.getElementById("scope"));
 
-   // size to fit screen
-   var ctls = document.getElementById("controls");
-   OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth,
-              document.documentElement.clientHeight);
-   ctls.style.marginLeft = (document.documentElement.clientWidth - ctls.offsetWidth) + "px";
+   // hid config panel
+   var config = document.getElementById("config");
+   config.t = 0;
+   config.slider = 0;
+   config.visible = false;
+   resize();
  
    // add resize event handler
    window.addEventListener("resize", resize);
@@ -39,31 +43,81 @@ function init()
    // draw empty scope
    OSC.redraw();
    
-   // fill wdSelector from list on server
-   loadBoardList();
+   // load globals including board list from server
+   loadGl();
+   
+   // load build and put into about box
+   loadBuild();
    
    // schedule first waveform load
    window.setTimeout(loadWF, 10);
 }
 
-function loadBoardList()
+function loadGl()
 {
    // send AJAX request
-   req = new XMLHttpRequest();
+   var req = new XMLHttpRequest();
    req.onreadystatechange = function() {
       if (req.readyState == 4 && req.status == 200) {
-         var obj = JSON.parse(req.responseText);
+         OSC.GL = JSON.parse(req.responseText);
+         
+         // populate board list
          var sel = document.getElementById("wdSelect");
-         for (var i=0 ; i<obj.boards.length ; i++) {
+         for (var i=0 ; i<OSC.GL.board.length ; i++) {
             var opt = document.createElement('option');
-            opt.innerHTML = obj.boards[i].name;
-            opt.value = obj.boards[i].name;
+            opt.innerHTML = OSC.GL.board[i].name;
+            opt.value = OSC.GL.board[i].name;
             sel.appendChild(opt);
          }
-         OSC.nWd = obj.boards.length;
+         OSC.nWd = OSC.GL.board.length;
+
+         // populate config
+         document.getElementById("pzc").checked = (OSC.GL.board[0].pzc == "1");
+         document.config.gain[parseInt(OSC.GL.board[0].gain)].checked = true;
+
+         document.getElementById("calib1").checked = (OSC.GL.ofs_calib1_flag == "1");
+         document.getElementById("calib2").checked = (OSC.GL.ofs_calib2_flag == "1");
+         document.getElementById("spikes").checked = (OSC.GL.remove_spikes == "1");
+         document.getElementById("rotate").checked = (OSC.GL.rotate_flag == "1");
       }
    };
-   req.open("GET", "list" + "?r=" + Math.random(), true); // avoid cached results
+   req.open("GET", "gl?r=" + Math.random(), true); // avoid cached results
+   req.send();
+}
+
+function setGl(e)
+{
+   var req = new XMLHttpRequest();
+   if (e.type == "checkbox") {
+      req.open("PUT", "gl/" + e.name, true);
+      req.send(e.checked ? "1" : "0");
+   } else if (e.type == "radio") {
+      req.open("PUT", "gl/" + e.name, true);
+      req.send(e.value);
+   }
+}
+
+function btnVCalib(e)
+{
+   progressOldBoard = document.getElementById("wdSelect").selectedIndex;
+
+   var req = new XMLHttpRequest();
+   req.open("PUT", "vcalib");
+   req.send();
+}
+
+function loadBuild()
+{
+   // send AJAX request
+   var req = new XMLHttpRequest();
+   req.onreadystatechange = function() {
+      if (req.readyState == 4 && req.status == 200) {
+         build = JSON.parse(req.responseText);
+         var e = document.getElementById("build");
+         e.innerHTML = "Built "+build.build;
+      }
+   };
+   req.open("GET", "build?r=" + Math.random(), true); // avoid cached results
    req.send();
 }
 
@@ -111,17 +165,17 @@ function loadWF()
    var board = document.getElementById("wdSelect").selectedIndex;
    
    // send AJAX request
-   req = new XMLHttpRequest();
-   req.onreadystatechange = this.receiveWF.bind(this);
-   req.open("GET", "wf?b=" + board + "&c=" + chn + "&r=" + Math.random(), true); // avoid cached results
-   req.responseType = "arraybuffer";
-   req.send();
+   OSC.req = new XMLHttpRequest();
+   OSC.req.onreadystatechange = receiveWF;
+   OSC.req.open("GET", "wf?b=" + board + "&c=" + chn + "&r=" + Math.random(), true); // avoid cached results
+   OSC.req.responseType = "arraybuffer";
+   OSC.req.send();
 }
 
 function receiveWF()
 {
-   if (req.readyState == 4 && req.status == 200) {
-      // this.wf = JSON.parse(req.responseText); // use this for JSON encoded data
+   if (OSC.req.readyState == 4 && OSC.req.status == 200) {
+      // this.wf = JSON.parse(OSC.req.responseText); // use this for JSON encoded data
       
       // create 16 empty waveforms
       var wf = {T:[], U:[]};
@@ -130,10 +184,10 @@ function receiveWF()
          wf.U[i] = [];
       }
       
-      var intArray = new Uint32Array(this.req.response);
-      var floatArray = new Float32Array(this.req.response);
+      var intArray = new Uint32Array(OSC.req.response);
+      var floatArray = new Float32Array(OSC.req.response);
       
-      for (var i=0 ; i<intArray.length ; ) {
+      for (i=0 ; i<intArray.length ; ) {
          if (intArray[i] == 0) {        // idle message
             OSC.idle = true;
             break;
@@ -145,16 +199,37 @@ function receiveWF()
             var n = intArray[i++];
             for (var j=0 ; j<n ; j++)
                wf.T[c][j] = floatArray[i++];
+            
+            // check for progress bar
+            if (progressInd > 0) {
+               progressInd = 0;
+               var e = document.getElementById("progressIndVcalib");
+               e.style.width = "0";
+               
+               document.getElementById("wdSelect").selectedIndex = progressOldBoard;
+            }
+               
          } else if (intArray[i] == 2) { // voltage array
             i++;
             OSC.idle = false;
             OSC.wd = intArray[i++];
-            var f = intArray[i++];
-            var c = intArray[i++];
-            var n = intArray[i++];
-            for (var j=0 ; j<n ; j++)
+            f = intArray[i++];
+            c = intArray[i++];
+            n = intArray[i++];
+            for (j=0 ; j<n ; j++)
                wf.U[c][j] = floatArray[i++];
             OSC.demo = (OSC.wd == 0xFF);
+         } else if (intArray[i] == 10) { // progress data
+            var b = floatArray[1];
+            progressInd = floatArray[2];
+
+            e = document.getElementById("progressIndVcalib");
+            e.style.width = (progressInd*270) + "px";
+            
+            document.getElementById("wdSelect").selectedIndex = b;
+
+            window.setTimeout(loadWF, 250);
+            return;
          } else {
             alert("WDS: Invalid binary data received form server");
             break;
@@ -179,14 +254,31 @@ function resize()
 // called when screen got resized
 {
    var ctls = document.getElementById("controls");
+   var config = document.getElementById("config");
    if (ctls.hidden == true) {
       OSC.resize(document.documentElement.clientWidth,
-                 document.documentElement.clientHeight);
-      ctls.style.marginLeft = (document.documentElement.clientWidth) + "px";
+                 document.documentElement.clientHeight-3);
+      
+      // hide panels
+      ctls.style.display = "none";
+      config.style.display = "none";
    }  else {
-      OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth,
-                 document.documentElement.clientHeight);
-      ctls.style.marginLeft = (document.documentElement.clientWidth - ctls.offsetWidth) + "px";
+      ctls.style.display = "block";
+      
+      if (config.slider > 0)
+         config.style.display = "block";
+      else
+         config.style.display = "none";
+      
+      // confif full visible (configSlider = 1), hidden (configSlider = 0)
+      OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth -
+                 config.offsetWidth * config.slider,
+                 document.documentElement.clientHeight-3);
+      ctls.style.left = (document.documentElement.clientWidth - ctls.offsetWidth -
+                         config.offsetWidth * config.slider) + "px";
+      config.style.left = (document.documentElement.clientWidth -
+                           config.offsetWidth * config.slider) + "px";
+      config.style.height = document.documentElement.clientHeight + "px";
    }
 }
 
@@ -200,10 +292,7 @@ function oscKeypress(e)
 
    if (charCode == ']'.charCodeAt(0)) {
       var ctls = document.getElementById("controls");
-      if (ctls.hidden == true)
-         ctls.hidden = false;
-      else
-         ctls.hidden = true;
+      ctls.hidden = !ctls.hidden;
       resize();
    }
 
@@ -264,7 +353,7 @@ function btnChn(c)
    document.getElementById("UScale").innerHTML = OSC.UScaleTable[OSC.wfScaleIndex[index]][1];
 
    // set blue border of active channel buttons
-   for (i=0 ; i<16 ; i++) {
+   for (var i=0 ; i<16 ; i++) {
       var cb = document.getElementById("ch"+i);
       if (i == c || c == -1)
          cb.style.border = "3px solid blue";
@@ -282,7 +371,7 @@ function btnChn(c)
 function btnOn()
 // turn current channel(s) on and off
 {
-   for (i=0 ; i<16 ; i++) {
+   for (var i=0 ; i<16 ; i++) {
       if (OSC.currentChn != -1 && i != OSC.currentChn)
          continue;
       var cb = document.getElementById("ch"+i);
@@ -304,7 +393,7 @@ function btnScale(inc)
 // change vertical scale, update label
 {
    if (OSC.currentChn == -1) {
-      for (i=0 ; i<16 ; i++)
+      for (var i=0 ; i<16 ; i++)
          if (OSC.chOn[i])
             break;
       if (i == 16)
@@ -334,7 +423,7 @@ function btnTScale(inc)
 // change horizontal scale, update label
 {
    if (OSC.currentChn == -1) {
-      for (i=0 ; i<16 ; i++)
+      for (var i=0 ; i<16 ; i++)
          if (OSC.chOn[i])
             break;
       if (i == 16)
@@ -365,6 +454,16 @@ function sldUOffset(value)
    }
    OSC.calcScaleOffset();
    OSC.redraw();
+}
+
+function sldTLevel(value)
+{
+   var e = document.getElementById("inpTLevel");
+   e.value = Math.round(value * 1000 - 500);
+
+   var req = new XMLHttpRequest();
+   req.open("PUT", "gl/trigger_level", true);
+   req.send(Math.round(value * 1000 - 500)/1000);
 }
 
 function btnOfsZero()
@@ -412,4 +511,87 @@ function sldTOffset(value)
    OSC.redraw();
 }
 
+function btnConfig()
+{
+   var config = document.getElementById("config");
+   config.visible = !config.visible;
+   config.t = 0;
+   window.setTimeout(configSlide, 20);
+}
+
+function configSlide()
+{
+   var config = document.getElementById("config");
+
+   config.t++;
+   
+   if (config.visible) {
+      config.slider = 1-(1-config.t/10)*(1-config.t/10);
+   } else {
+      config.slider = (1-config.t/10)*(1-config.t/10);
+   }
+
+   resize();
+
+   if (config.t < 10)
+      window.setTimeout(configSlide, 20);
+}
+
+function btnAbout()
+{
+   var e = document.getElementById("about");
+   e.style.display = "block";
+   e.style.left = document.documentElement.clientWidth/2 - e.offsetWidth/2 + "px";
+   e.style.top  = document.documentElement.clientHeight/2 - e.offsetHeight/2 + "px";
+   
+   this.addEventListener("mousedown",  aboutDrag, true);
+   this.addEventListener("mousemove",  aboutDrag, true);
+   this.addEventListener("mouseup",    aboutDrag, true);
+   this.addEventListener("touchstart", aboutDrag, true);
+   this.addEventListener("touchmove",  aboutDrag, true);
+}
+
+var Ax, Ay, Dx, Dy;
+
+function aboutDrag(e)
+{
+   var x = undefined;
+   var dlg = document.getElementById("about");
+
+   if (e.type == "mouseup") {
+      Ax = 0;
+      Ay = 0;
+   }
+
+   if (e.target == document.getElementById("aboutTitle") && e.type == "mousedown") {
+      Ax = e.clientX;
+      Ay = e.clientY;
+      Dx = parseInt(dlg.style.left);
+      Dy = parseInt(dlg.style.top);
+   }
+   
+   if (e.target == document.getElementById("aboutTitle") && e.type == "touchstart") {
+      e.preventDefault();
+      Ax = e.targetTouches[0].clientX;
+      Ay = e.targetTouches[0].clientY;
+      Dx = parseInt(dlg.style.left);
+      Dy = parseInt(dlg.style.top);
+   }
+
+   if (e.buttons == 1 && e.type == "mousemove" && Ax > 0 && Ay > 0) {
+      e.preventDefault();
+      x = e.clientX;
+      y = e.clientY;
+      dlg.style.left = (Dx + (x - Ax)) + "px";
+      dlg.style.top  = (Dy + (y - Ay)) + "px";
+   }
+   
+
+   if (e.type == "touchmove" && Ax > 0 && Ay > 0) {
+      x = e.changedTouches[e.changedTouches.length-1].clientX;
+      y = e.changedTouches[e.changedTouches.length-1].clientY;
+      dlg.style.left = (Dx + (x - Ax)) + "px";
+      dlg.style.top  = (Dy + (y - Ay)) + "px";
+    }
+}
 

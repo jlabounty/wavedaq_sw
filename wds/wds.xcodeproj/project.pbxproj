@@ -10,6 +10,7 @@
 		D55471831B7242DE002A92E4 /* wds.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D55471811B7242DE002A92E4 /* wds.cpp */; };
 		D55471861B72439A002A92E4 /* mongoose.c in Sources */ = {isa = PBXBuildFile; fileRef = D55471841B72439A002A92E4 /* mongoose.c */; };
 		D57D5F201B7CB2EA00F6676E /* wd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D57D5F1F1B7CB2EA00F6676E /* wd.cpp */; };
+		D587E5161C6257D300C25CE4 /* averager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D587E5141C6257D300C25CE4 /* averager.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -35,6 +36,8 @@
 		D55471891B72498D002A92E4 /* wds.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = wds.css; sourceTree = SOURCE_ROOT; };
 		D554718A1B72498D002A92E4 /* wds.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = wds.js; sourceTree = SOURCE_ROOT; };
 		D57D5F1F1B7CB2EA00F6676E /* wd.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = wd.cpp; sourceTree = SOURCE_ROOT; };
+		D587E5141C6257D300C25CE4 /* averager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = averager.cpp; sourceTree = SOURCE_ROOT; };
+		D587E5151C6257D300C25CE4 /* averager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = averager.h; sourceTree = SOURCE_ROOT; };
 		D5D7CE451B74EFB40037D843 /* controls.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = controls.js; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -68,6 +71,8 @@
 		D55471791B72428F002A92E4 /* wds */ = {
 			isa = PBXGroup;
 			children = (
+				D587E5141C6257D300C25CE4 /* averager.cpp */,
+				D587E5151C6257D300C25CE4 /* averager.h */,
 				D55471891B72498D002A92E4 /* wds.css */,
 				D554718A1B72498D002A92E4 /* wds.js */,
 				D529FE721B7B437F004E2D39 /* osc.js */,
@@ -140,6 +145,7 @@
 			files = (
 				D55471861B72439A002A92E4 /* mongoose.c in Sources */,
 				D55471831B7242DE002A92E4 /* wds.cpp in Sources */,
+				D587E5161C6257D300C25CE4 /* averager.cpp in Sources */,
 				D57D5F201B7CB2EA00F6676E /* wd.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -228,6 +234,7 @@
 		D554717F1B72428F002A92E4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -235,6 +242,7 @@
 		D55471801B72428F002A92E4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

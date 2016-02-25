@@ -17,31 +17,73 @@ typedef struct {
    int  cmd_socket;
    int  data_socket;
    unsigned char eth_addr[16];
-   int  trigger_level;
+   float trigger_level;
    char trigger_mask[10];
    int  gain;
    int  pzc;
-   int  offset;
-   float wf_offset[16][1024];
+   float offset;
+   float wf_offset1[16][1024];
+   float wf_offset2[16][1024];
 } WDB;
 
 typedef struct {
    int  demo_flag;
-   int  calibrate_flag;
+   int  rotate_flag;
    int  verbose_flag;
    int  adc_flag;
-   int  raw_flag;
+   int  ofs_calib1_flag;
+   int  ofs_calib2_flag;
+   int  tcalib_flag;
+   int  remove_spikes;
    int  http_port;
    int  n_boards;
    int  sampling_speed;
    WDB  board[16];
+   int  cmd;
 } GLOBALS;
+
+typedef struct {
+   unsigned short board_id;
+   unsigned char  crate_id;
+   unsigned char  slot_id;
+   unsigned short readout_sequence_number;
+   unsigned short hardware_sequence_number;
+   unsigned short sampling_frequency;
+   unsigned short number_of_samples;
+   unsigned short drs0_trigger_cell;
+   unsigned short drs1_trigger_cell;
+   unsigned short trigger_type;
+} WD2_EVENT;
+
+typedef struct {
+   int      state;
+   double   progress;
+   int      n_board;
+   int      i_board;
+   int      n_iter1;
+   int      i_iter1;
+   int      n_iter2;
+   int      i_iter2;
+   int      index;
+   Averager *ave;
+   int      fh;
+} CALIB_PROGRESS;
+
+// calibration states
+#define CS_INACTIVE     0
+#define CS_FIRST_BOARD  1
+#define CS_FIRST_SAMPLE 2
+#define CS_RUNNING      3
 
 // interface functions
 int wd_init(GLOBALS *gl);
-int wd_read_waveform(GLOBALS *gl, int board, int timeout, float wf[16][1024]);
+void wd_set_fe(GLOBALS *gl, int index);
+void wd_set_trigger_level(GLOBALS *gl, int index);
+void wd_set_offset(GLOBALS *gl, int index);
+
+int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wf[16][1024]);
 int wd_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *result, int *size);
-int wd_calibrate(GLOBALS *gl);
+int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *p);
 
 size_t strlcpy(char *dst, const char *src, size_t size);
 size_t strlcat(char *dst, const char *src, size_t size);
@@ -49,13 +91,15 @@ size_t strlcat(char *dst, const char *src, size_t size);
 // linux and MAC specific things
 #if defined(__linux__) || defined(__APPLE__)
 #include <unistd.h>
-#define sleep(x) usleep(x*1000)
+#define sleep_ms(x) usleep(x*1000)
 #endif // __linux__ || __APLE__
 
 // Windows specific things
-#if defined(_WIN32)
-#include <windows.h>
-#define sleep(x) Sleep(x)
+#if defined(_MSC_VER)
+#pragma warning( disable: 4996)
+#define isnan(x) _isnan(x)
+#define sleep_ms(x) Sleep(x)
+typedef int socklen_t;
 #endif // _WIN32
 
 /* Byte and Word swapping big endian <-> little endian */
