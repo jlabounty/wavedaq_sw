@@ -39,6 +39,7 @@ typedef struct {
    int  http_port;
    int  n_boards;
    int  sampling_speed;
+   int  trigger_mode;
    WDB  board[16];
    int  cmd;
 } GLOBALS;
@@ -75,6 +76,10 @@ typedef struct {
 #define CS_FIRST_BOARD  1
 #define CS_FIRST_SAMPLE 2
 #define CS_RUNNING      3
+
+// trigger modes
+#define TM_NORMAL       0
+#define TM_AUTO         1
 
 // interface functions
 int wd_init(GLOBALS *gl);

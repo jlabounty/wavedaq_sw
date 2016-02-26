@@ -71,6 +71,11 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                gl->board[i].trigger_level = -0.5;
             wd_set_trigger_level(gl, i);
          }
+         printf("Set trigger level: %lf\n", atof(value));
+      }
+
+      else if (mg_vcmp(&hm->uri, "/gl/trigger_mode") == 0) {
+         gl->trigger_mode = atoi(value);
       }
 
       else if (mg_vcmp(&hm->uri, "/gl/offset") == 0) {
@@ -112,6 +117,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "   \"http_port\": %d,\n",       gl->http_port);
       mg_printf_http_chunk(nc, "   \"n_boards\": %d,\n",        gl->n_boards);
       mg_printf_http_chunk(nc, "   \"sampling_speed\": %d,\n",  gl->sampling_speed);
+      mg_printf_http_chunk(nc, "   \"trigger_mode\": %d,\n",    gl->trigger_mode);
       
       mg_printf_http_chunk(nc, "   \"board\": [\n");
       
@@ -190,7 +196,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             // issue single ADC software trigger
             wd_send(gl, b, 100, "adcget\n", NULL, NULL);
          } else {
-            if (gl->board[b].trigger_level == 0)
+            if (gl->trigger_mode == TM_AUTO)
                // issue single DRS software trigger
                wd_send(gl, b, 100, "drsget\n", NULL, NULL);
             else
@@ -283,6 +289,7 @@ int main(int argc, char *argv[])
    gl.ofs_calib2_flag = 1;
    gl.rotate_flag     = 1;
    gl.remove_spikes   = 1;
+   gl.trigger_mode    = TM_AUTO;
 
    for (i=0 ; i<16 ; i++) {
       gl.board[i].trigger_level = 0;

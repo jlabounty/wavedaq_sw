@@ -74,6 +74,7 @@ function loadGl()
          // populate config
          document.getElementById("trgSlider").set(OSC.GL.board[0].trigger_level+0.5);
          document.getElementById("inpTLevel").value = Math.round(OSC.GL.board[0].trigger_level * 1000);
+         document.config.trigger_mode[OSC.GL.trigger_mode].checked = true;
 
          document.getElementById("pzc").checked = OSC.GL.board[0].pzc;
          document.config.gain[parseInt(OSC.GL.board[0].gain)].checked = true;
@@ -91,6 +92,13 @@ function loadGl()
 function setGl(e)
 {
    var req = new XMLHttpRequest();
+
+   req.onreadystatechange = function () {
+      if (req.readyState == 4 && req.status == 204) {
+         loadGl();
+      }
+   }
+
    if (e.type == "checkbox") {
       req.open("PUT", "gl/" + e.name, true);
       req.send(e.checked ? "1" : "0");
@@ -105,15 +113,14 @@ function setGl(e)
          req.send(e.value);
    }
 
-   loadGl();
 }
 
-function keyGl(e)
+function keyGl(event, input)
 {
    var charCode = (typeof event.which == "number") ? event.which : event.keyCode;
 
    if (charCode == 13) {
-      setGl(e);
+      setGl(input);
    }
 }
 
@@ -481,7 +488,8 @@ function sldTLevel(value)
    var req = new XMLHttpRequest();
    req.open("PUT", "gl/trigger_level", true);
    req.send(Math.round(value * 1000 - 500)/1000);
-   loadGl();
+
+   document.getElementById("inpTLevel").value = Math.round(value * 1000 - 500);
 }
 
 function btnOfsZero()
