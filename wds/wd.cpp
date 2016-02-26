@@ -51,7 +51,6 @@ union { unsigned int i ; float f; } _nanf = { 0x7fc00000 };
 #endif
 
 #define WD2_CMD_PORT   3000
-#define WD2_DATA_PORT  2000
 
 #pragma pack(1)
 
@@ -324,25 +323,26 @@ int wd_init(GLOBALS *gl)
       } else
          gl->board[index].cmd_socket = gl->board[0].cmd_socket; // reuse socket
       
-      // create UDB socket to receive binary data on port WD2_DATA_PORT
+      // create UDB socket to receive binary data
       if (index == 0) {
          gl->board[index].data_socket = socket(AF_INET, SOCK_DGRAM, 0);
          assert(gl->board[index].data_socket);
          
-         // bind socket to port WD2_DATA_PORT
+         // bind socket to port chosen by OS
          memset((char*)&server_addr, 0, sizeof(server_addr));
          server_addr.sin_family = AF_INET;
-         server_addr.sin_port = htons(WD2_DATA_PORT);
+         server_addr.sin_port = htons(0); // let OS choose port
          server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
          if (bind(gl->board[index].data_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
-            if (errno == 1)
-               printf("wds server is already running\n");
-            else
-               perror("bind");
+            perror("bind");
             return FAILURE;
          }
+         size = sizeof(server_addr);
+         getsockname(gl->board[index].data_socket, (struct sockaddr *) &server_addr, (socklen_t *) &size);
+         gl->board[index].server_port = ntohs(server_addr.sin_port);
+
          if (gl->verbose_flag)
-            printf("Listening on data port %d\n", WD2_DATA_PORT);
+            printf("Listening on data port %d\n", gl->board[index].server_port);
       } else
          gl->board[index].data_socket = gl->board[0].data_socket; // reuse socket
 
@@ -385,10 +385,10 @@ int wd_init(GLOBALS *gl)
       }
 
       // set destinantion port in WD board
-      sprintf(str, "setenv dstport %d", WD2_DATA_PORT);
+      sprintf(str, "setenv dstport %d", gl->board[index].server_port);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       if (gl->verbose_flag)
-         printf("Set dstport       = %d\n", WD2_DATA_PORT);
+         printf("Set dstport       = %d\n", gl->board[index].server_port);
 
       // set MAC address and IP address of this computer in WD board
       assert(wd_send(gl, index, 100, "cfgdst", NULL, NULL) > 0);
@@ -422,7 +422,7 @@ int wd_init(GLOBALS *gl)
       if (gl->verbose_flag)
          printf("Set sampling frequency to %d GSPS", gl->sampling_speed);
       if (gl->sampling_speed == 1)
-         assert(wd_send(gl, index, 100, "regwr 2c 0003c800", NULL, NULL) > 0);
+         assert(wd_send(gl, index, 100, "regwr 2c 0003c800", NULL, NULL) > 0); // to be corrected!
       else if (gl->sampling_speed == 2)
          assert(wd_send(gl, index, 100, "regwr 2c 0003c800", NULL, NULL) > 0);
       else if (gl->sampling_speed == 3)

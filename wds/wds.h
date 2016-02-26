@@ -16,6 +16,7 @@ typedef struct {
    char name[32];
    int  cmd_socket;
    int  data_socket;
+   int  server_port;
    unsigned char eth_addr[16];
    float trigger_level;
    char trigger_mask[10];
