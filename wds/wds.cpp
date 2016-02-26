@@ -285,7 +285,7 @@ int main(int argc, char *argv[])
    gl.remove_spikes   = 1;
 
    for (i=0 ; i<16 ; i++) {
-      gl.board[i].trigger_level = 0.123;
+      gl.board[i].trigger_level = 0;
       gl.board[i].gain          = 0;       // gain 1
       gl.board[i].offset        = 1.25;    // center offset
       gl.board[i].pzc           = 0;       // PZC off
@@ -328,7 +328,7 @@ int main(int argc, char *argv[])
          i++;
       }
       
-      else if (argv[i][0] == '-' && argv[i][1] == 'd')
+      else if (argv[i][0] == '-' && argv[i][1] == 'p')
          gl.http_port = atoi(argv[++i]);
 
       else if (argv[i][0] == '-' && argv[i][1] == 'r') {
@@ -450,6 +450,10 @@ int main(int argc, char *argv[])
    mg_mgr_init(&mgr, &gl);
    sprintf(str, "%d", gl.http_port);
    con = mg_bind(&mgr, str, wds_handler);
+   if (con == NULL) {
+      printf("Cannot bind to port %d. Probably other server is already running.\n", gl.http_port);
+      return 0;
+   }
    mg_set_protocol_http_websocket(con);
    s_http_server_opts.document_root = ".";  // Serve current directory
    s_http_server_opts.dav_auth_file = "-";  // Allow access via WebDav
@@ -465,7 +469,6 @@ int main(int argc, char *argv[])
       // do calibration if asked for
       if (ofs_prog.state != CS_INACTIVE) {
          wd_calibrate(&gl, &ofs_prog);
-         printf("%1.2lf\n", ofs_prog.progress);
       
          // Yield to server, not timeout
          mg_mgr_poll(&mgr, 0);

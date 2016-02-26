@@ -117,7 +117,7 @@ function keyGl(e)
    }
 }
 
-function btnVCalib(e)
+function doVCalib()
 {
    progressOldBoard = document.getElementById("wdSelect").selectedIndex;
 
