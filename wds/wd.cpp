@@ -240,15 +240,15 @@ void wd_set_fe(GLOBALS *gl, int index)
       if (gl->board[index].gain == 0)
          sprintf(str, "feset all 02");
       else if (gl->board[index].gain == 1)
-         sprintf(str, "feset all 1a");
+         sprintf(str, "feset all 22");
       else if (gl->board[index].gain == 2)
-         sprintf(str, "feset all 3a");
+         sprintf(str, "feset all 6a");
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    } else { // pole zero cancellation off (bit=1)
       if (gl->board[index].gain == 0)
          sprintf(str, "feset all 82");
       else if (gl->board[index].gain == 1)
-         sprintf(str, "feset all 9a");
+         sprintf(str, "feset all 8a");
       else if (gl->board[index].gain == 2)
          sprintf(str, "feset all ba");
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
