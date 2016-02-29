@@ -265,15 +265,61 @@ void wd_set_trigger_level(GLOBALS *gl, int index)
       return;
 
    if (gl->verbose_flag)
-      printf("Set trigger level = %d mV\n", (int)(gl->board[index].trigger_level*1000));
-   sprintf(str, "dacset tlevel1 %d", (int)(gl->board[index].trigger_level*1000));
+      printf("Set trigger level = %d mV\n", (int)(gl->board[index].trigger_level*1000+1000));
+   sprintf(str, "dacset tlevel1 %d", (int)(gl->board[index].trigger_level*1000+1000));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   sprintf(str, "dacset tlevel2 %d", (int)(gl->board[index].trigger_level*1000));
+   sprintf(str, "dacset tlevel2 %d", (int)(gl->board[index].trigger_level*1000+1000));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   sprintf(str, "dacset tlevel3 %d", (int)(gl->board[index].trigger_level*1000));
+   sprintf(str, "dacset tlevel3 %d", (int)(gl->board[index].trigger_level*1000+1000));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   sprintf(str, "dacset tlevel4 %d", (int)(gl->board[index].trigger_level*1000));
+   sprintf(str, "dacset tlevel4 %d", (int)(gl->board[index].trigger_level*1000+1000));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+void wd_set_trigger_mode(GLOBALS *gl, int index)
+{
+   char str[256];
+   
+   if (gl->demo_flag)
+      return;
+   
+   // enable local trigger
+   if (gl->trigger_mode == TM_NORMAL) {
+      // trigger_cfg_or
+      sprintf(str, "regwr d4 %s", gl->board[index].trigger_mask);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+ 
+      // trigger_enable, trigger_falling_edge
+      assert(wd_send(gl, index, 100, "regwr d8 000C0000", NULL, NULL) > 0);
+   } else {
+      // disable all trigger
+      assert(wd_send(gl, index, 100, "regwr d4 00000000", NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, "regwr d8 00000000", NULL, NULL) > 0);
+   }
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+void wd_set_sampling_frequency(GLOBALS *gl, int index)
+{
+   if (gl->demo_flag)
+      return;
+   
+   // set sampling frequency
+   if (gl->verbose_flag)
+      printf("Set sampling frequency to %f GSPS", gl->sampling_frequency);
+   if (gl->sampling_frequency == 1)
+      assert(wd_send(gl, index, 100, "regwr 2c 0003c800", NULL, NULL) > 0); // to be corrected!
+   else if (gl->sampling_frequency == 2)
+      assert(wd_send(gl, index, 100, "regwr 2c 0003c800", NULL, NULL) > 0);
+   else if (gl->sampling_frequency == 3)
+      assert(wd_send(gl, index, 100, "regwr 2c 00038500", NULL, NULL) > 0);
+   else if (gl->sampling_frequency == 4)
+      assert(wd_send(gl, index, 100, "regwr 2c 00036400", NULL, NULL) > 0);
+   else if (gl->sampling_frequency == 5)
+      assert(wd_send(gl, index, 100, "regwr 2c 00035000", NULL, NULL) > 0);
 }
 
 /*-----------------------------------------------------------------------------------------*/
@@ -415,34 +461,9 @@ int wd_init(GLOBALS *gl)
       assert(wd_send(gl, index, 100, "pwrcmp on", NULL, NULL) > 0);
 
       wd_set_trigger_level(gl, index);
-
       wd_set_offset(gl, index);
-      
-      // set sampling frequency
-      if (gl->verbose_flag)
-         printf("Set sampling frequency to %d GSPS", gl->sampling_speed);
-      if (gl->sampling_speed == 1)
-         assert(wd_send(gl, index, 100, "regwr 2c 0003c800", NULL, NULL) > 0); // to be corrected!
-      else if (gl->sampling_speed == 2)
-         assert(wd_send(gl, index, 100, "regwr 2c 0003c800", NULL, NULL) > 0);
-      else if (gl->sampling_speed == 3)
-         assert(wd_send(gl, index, 100, "regwr 2c 00038500", NULL, NULL) > 0);
-      else if (gl->sampling_speed == 4)
-         assert(wd_send(gl, index, 100, "regwr 2c 00036400", NULL, NULL) > 0);
-      else if (gl->sampling_speed == 5)
-         assert(wd_send(gl, index, 100, "regwr 2c 00035000", NULL, NULL) > 0);
-      
-      // enable local trigger
-      if (gl->board[index].trigger_level != 0) {
-         // trigger_cfg_or
-         sprintf(str, "regwr d4 %s", gl->board[index].trigger_mask);
-         assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-         // trigger_enable, trigger_falling_edge
-         assert(wd_send(gl, index, 100, "regwr d8 000C0000", NULL, NULL) > 0);
-      } else {
-         assert(wd_send(gl, index, 100, "regwr d4 00000000", NULL, NULL) > 0);
-         assert(wd_send(gl, index, 100, "regwr d8 00000000", NULL, NULL) > 0);
-      }
+      wd_set_sampling_frequency(gl, index);
+      wd_set_trigger_mode(gl, index);
    
       // set DRS readout mode to ROI
       assert(wd_send(gl, index, 100, "regwr 10 0D0D0030", NULL, NULL) > 0);

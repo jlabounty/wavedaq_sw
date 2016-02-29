@@ -71,11 +71,12 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                gl->board[i].trigger_level = -0.5;
             wd_set_trigger_level(gl, i);
          }
-         printf("Set trigger level: %lf\n", atof(value));
       }
 
       else if (mg_vcmp(&hm->uri, "/gl/trigger_mode") == 0) {
          gl->trigger_mode = atoi(value);
+         for (int i=0 ; i<gl->n_boards ; i++)
+            wd_set_trigger_mode(gl, i);
       }
 
       else if (mg_vcmp(&hm->uri, "/gl/offset") == 0) {
@@ -106,18 +107,18 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
       
       mg_printf_http_chunk(nc, "{\n");
-      mg_printf_http_chunk(nc, "   \"demo_flag\": %s,\n",       gl->demo_flag ? "true" : "false");
-      mg_printf_http_chunk(nc, "   \"rotate_flag\": %s,\n",     gl->rotate_flag ? "true" : "false");
-      mg_printf_http_chunk(nc, "   \"verbose_flag\": %s,\n",    gl->verbose_flag ? "true" : "false");
-      mg_printf_http_chunk(nc, "   \"adc_flag\": %s,\n",        gl->adc_flag ? "true" : "false");
-      mg_printf_http_chunk(nc, "   \"ofs_calib1_flag\": %s,\n", gl->ofs_calib1_flag ? "true" : "false");
-      mg_printf_http_chunk(nc, "   \"ofs_calib2_flag\": %s,\n", gl->ofs_calib2_flag ? "true" : "false");
-      mg_printf_http_chunk(nc, "   \"tcalib_flag\": %s,\n",     gl->tcalib_flag ? "true" : "false");
-      mg_printf_http_chunk(nc, "   \"remove_spikes\": %s,\n",   gl->remove_spikes ? "true" : "false");
-      mg_printf_http_chunk(nc, "   \"http_port\": %d,\n",       gl->http_port);
-      mg_printf_http_chunk(nc, "   \"n_boards\": %d,\n",        gl->n_boards);
-      mg_printf_http_chunk(nc, "   \"sampling_speed\": %d,\n",  gl->sampling_speed);
-      mg_printf_http_chunk(nc, "   \"trigger_mode\": %d,\n",    gl->trigger_mode);
+      mg_printf_http_chunk(nc, "   \"demo_flag\": %s,\n",          gl->demo_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"rotate_flag\": %s,\n",        gl->rotate_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"verbose_flag\": %s,\n",       gl->verbose_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"adc_flag\": %s,\n",           gl->adc_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"ofs_calib1_flag\": %s,\n",    gl->ofs_calib1_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"ofs_calib2_flag\": %s,\n",    gl->ofs_calib2_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"tcalib_flag\": %s,\n",        gl->tcalib_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"remove_spikes\": %s,\n",      gl->remove_spikes ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"http_port\": %d,\n",          gl->http_port);
+      mg_printf_http_chunk(nc, "   \"n_boards\": %d,\n",           gl->n_boards);
+      mg_printf_http_chunk(nc, "   \"sampling_frequency\": %d,\n", gl->sampling_frequency);
+      mg_printf_http_chunk(nc, "   \"trigger_mode\": %d,\n",       gl->trigger_mode);
       
       mg_printf_http_chunk(nc, "   \"board\": [\n");
       
@@ -283,13 +284,13 @@ int main(int argc, char *argv[])
    char str[256], *p;
    
    memset(&gl, 0, sizeof(gl));
-   gl.http_port       = 8080; // default port
-   gl.sampling_speed  = 2;
-   gl.ofs_calib1_flag = 1;
-   gl.ofs_calib2_flag = 1;
-   gl.rotate_flag     = 1;
-   gl.remove_spikes   = 1;
-   gl.trigger_mode    = TM_AUTO;
+   gl.http_port          = 8080; // default port
+   gl.sampling_frequency = 2;
+   gl.ofs_calib1_flag    = 1;
+   gl.ofs_calib2_flag    = 1;
+   gl.rotate_flag        = 1;
+   gl.remove_spikes      = 1;
+   gl.trigger_mode       = TM_AUTO;
 
    for (i=0 ; i<16 ; i++) {
       gl.board[i].trigger_level = 0;
@@ -344,7 +345,7 @@ int main(int argc, char *argv[])
       }
       
       else if (argv[i][0] == '-' && argv[i][1] == 's')
-         gl.sampling_speed = atoi(argv[++i]);
+         gl.sampling_frequency = atoi(argv[++i]);
       
       else if (argv[i][0] == '-' && argv[i][1] == 't') {
          for (j=0 ; j<16 ; j++)
