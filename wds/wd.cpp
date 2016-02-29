@@ -335,6 +335,11 @@ void wd_set_offset(GLOBALS *gl, int index)
       printf("Set offset level  = %g V\n", gl->board[index].offset);
    sprintf(str, "dacset ofs %d", (int)(gl->board[index].offset*1000));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+   
+   if (gl->verbose_flag)
+      printf("Set ROFS = %g V\n", gl->board[index].offset);
+   sprintf(str, "dacset rofs %d", 1600);
+   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
 }
 
 /*-----------------------------------------------------------------------------------------*/
@@ -459,6 +464,9 @@ int wd_init(GLOBALS *gl)
 
       // trun on comparator power
       assert(wd_send(gl, index, 100, "pwrcmp on", NULL, NULL) > 0);
+
+      // set bias
+      assert(wd_send(gl, index, 100, "dacset bias 700", NULL, NULL) > 0);
 
       wd_set_trigger_level(gl, index);
       wd_set_offset(gl, index);
