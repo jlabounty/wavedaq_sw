@@ -282,13 +282,13 @@ function resize()
 {
    var ctls = document.getElementById("controls");
    var config = document.getElementById("config");
+
    if (ctls.hidden == true) {
-      OSC.resize(document.documentElement.clientWidth,
-                 document.documentElement.clientHeight-3);
-      
       // hide panels
       ctls.style.display = "none";
       config.style.display = "none";
+      OSC.resize(document.documentElement.clientWidth,
+                 document.documentElement.clientHeight);
    }  else {
       ctls.style.display = "block";
       
@@ -297,15 +297,20 @@ function resize()
       else
          config.style.display = "none";
       
-      // confif full visible (configSlider = 1), hidden (configSlider = 0)
       OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth -
                  config.offsetWidth * config.slider,
-                 document.documentElement.clientHeight-3);
+                 document.documentElement.clientHeight);
+
+      // config full visible (configSlider = 1), hidden (configSlider = 0)
       ctls.style.left = (document.documentElement.clientWidth - ctls.offsetWidth -
                          config.offsetWidth * config.slider) + "px";
       config.style.left = (document.documentElement.clientWidth -
                            config.offsetWidth * config.slider) + "px";
       config.style.height = document.documentElement.clientHeight + "px";
+
+      OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth -
+                 config.offsetWidth * config.slider,
+                 document.documentElement.clientHeight);
    }
 }
 

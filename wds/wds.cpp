@@ -64,7 +64,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
       else if (mg_vcmp(&hm->uri, "/gl/trigger_level") == 0) {
          for (int i=0 ; i<gl->n_boards ; i++) {
-            gl->board[i].trigger_level = atof(value);
+            gl->board[i].trigger_level = (float)atof(value);
             if (gl->board[i].trigger_level > 0.5)
                gl->board[i].trigger_level = 0.5;
             if (gl->board[i].trigger_level < -0.5)
@@ -80,7 +80,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
       else if (mg_vcmp(&hm->uri, "/gl/offset") == 0) {
          for (int i=0 ; i<gl->n_boards ; i++) {
-            gl->board[i].offset = atof(value);
+            gl->board[i].offset = (float)atof(value);
             wd_set_offset(gl, i);
          }
       }
@@ -348,7 +348,7 @@ int main(int argc, char *argv[])
       
       else if (argv[i][0] == '-' && argv[i][1] == 't') {
          for (j=0 ; j<16 ; j++)
-            gl.board[j].trigger_level = atof(argv[i+1]);
+            gl.board[j].trigger_level = (float)atof(argv[i+1]);
          i++;
       }
       
