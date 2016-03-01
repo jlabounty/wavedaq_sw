@@ -19,6 +19,10 @@
   <ItemGroup>
     <ClInclude Include="wds.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="index.html" />
+    <None Include="wds.js" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{105C12F1-5AFE-421A-ABDB-B3B2413EF751}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>

@@ -174,13 +174,14 @@ Oscilloscope.prototype.drawMeasurements = function(ctx)
             var mean = 0;
             var sigma = 0;
             
-            for (i=0 ; i<1024 ; i++)
+            // skip first two and last values
+            for (i=2 ; i<1022 ; i++)
                mean += this.wf.U[c][i];
-            mean /= 1024;
-            for (i=0 ; i<1024 ; i++)
+            mean /= 1020;
+            for (i=2 ; i<1022 ; i++)
                sigma += (this.wf.U[c][i]-mean) * (this.wf.U[c][i]-mean);
             
-            sigma = Math.sqrt(sigma/1024);
+            sigma = Math.sqrt(sigma/1020);
             sigma = sigma * 1000; // mV
             this.sigma[c] = sigma;
          }

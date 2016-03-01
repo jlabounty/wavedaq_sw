@@ -195,6 +195,7 @@ Controls.prototype.init = function() // scan DOM
       sl.addEventListener("touchmove", this.ctrlHSliderHandler.bind(this));
       sl.draw = this.ctrlHSliderDraw;
       sl.draw(sl);
+      sl.set = this.ctrlHSliderSet;
    }
 
 };
@@ -231,8 +232,8 @@ Controls.prototype.ctrlVSliderDraw = function(b)
 {
    if (b == undefined)
       b = this;
-   var w = b.clientWidth;
-   var h = b.clientHeight;
+   var w = b.canvas.width;
+   var h = b.canvas.height;
    b.sliderOfs = 20;
    
    var ctx = b.canvas.getContext("2d");
@@ -294,8 +295,8 @@ Controls.prototype.ctrlHSliderDraw = function(b)
 {
    if (b == undefined)
       b = this;
-   var w = b.clientWidth;
-   var h = b.clientHeight;
+   var w = b.canvas.width;
+   var h = b.canvas.height;
    b.sliderOfs = 20;
    
    var ctx = b.canvas.getContext("2d");
@@ -323,6 +324,12 @@ Controls.prototype.ctrlHSliderDraw = function(b)
    ctx.arc(knob, h/2, 10, 0, 2*Math.PI);
    ctx.stroke();
    ctx.fill();
+}
+
+Controls.prototype.ctrlHSliderSet = function(pos)
+{
+   this.position = pos;
+   this.draw();
 }
 
 Controls.prototype.ctrlHSliderHandler = function(e)

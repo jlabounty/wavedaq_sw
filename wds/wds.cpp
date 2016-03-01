@@ -64,14 +64,24 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
       else if (mg_vcmp(&hm->uri, "/gl/trigger_level") == 0) {
          for (int i=0 ; i<gl->n_boards ; i++) {
-            gl->board[i].trigger_level = atof(value);
+            gl->board[i].trigger_level = (float)atof(value);
+            if (gl->board[i].trigger_level > 0.5)
+               gl->board[i].trigger_level = 0.5;
+            if (gl->board[i].trigger_level < -0.5)
+               gl->board[i].trigger_level = -0.5;
             wd_set_trigger_level(gl, i);
          }
       }
 
+      else if (mg_vcmp(&hm->uri, "/gl/trigger_mode") == 0) {
+         gl->trigger_mode = atoi(value);
+         for (int i=0 ; i<gl->n_boards ; i++)
+            wd_set_trigger_mode(gl, i);
+      }
+
       else if (mg_vcmp(&hm->uri, "/gl/offset") == 0) {
          for (int i=0 ; i<gl->n_boards ; i++) {
-            gl->board[i].offset = atof(value);
+            gl->board[i].offset = (float)atof(value);
             wd_set_offset(gl, i);
          }
       }
@@ -97,28 +107,29 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
       
       mg_printf_http_chunk(nc, "{\n");
-      mg_printf_http_chunk(nc, "   \"demo_flag\": \"%d\",\n",       gl->demo_flag);
-      mg_printf_http_chunk(nc, "   \"rotate_flag\": \"%d\",\n",     gl->rotate_flag);
-      mg_printf_http_chunk(nc, "   \"verbose_flag\": \"%d\",\n",    gl->verbose_flag);
-      mg_printf_http_chunk(nc, "   \"adc_flag\": \"%d\",\n",        gl->adc_flag);
-      mg_printf_http_chunk(nc, "   \"ofs_calib1_flag\": \"%d\",\n", gl->ofs_calib1_flag);
-      mg_printf_http_chunk(nc, "   \"ofs_calib2_flag\": \"%d\",\n", gl->ofs_calib2_flag);
-      mg_printf_http_chunk(nc, "   \"tcalib_flag\": \"%d\",\n",     gl->tcalib_flag);
-      mg_printf_http_chunk(nc, "   \"remove_spikes\": \"%d\",\n",   gl->remove_spikes);
-      mg_printf_http_chunk(nc, "   \"http_port\": \"%d\",\n",       gl->http_port);
-      mg_printf_http_chunk(nc, "   \"n_boards\": \"%d\",\n",        gl->n_boards);
-      mg_printf_http_chunk(nc, "   \"sampling_speed\": \"%d\",\n",  gl->sampling_speed);
+      mg_printf_http_chunk(nc, "   \"demo_flag\": %s,\n",          gl->demo_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"rotate_flag\": %s,\n",        gl->rotate_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"verbose_flag\": %s,\n",       gl->verbose_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"adc_flag\": %s,\n",           gl->adc_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"ofs_calib1_flag\": %s,\n",    gl->ofs_calib1_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"ofs_calib2_flag\": %s,\n",    gl->ofs_calib2_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"tcalib_flag\": %s,\n",        gl->tcalib_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"remove_spikes\": %s,\n",      gl->remove_spikes ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"http_port\": %d,\n",          gl->http_port);
+      mg_printf_http_chunk(nc, "   \"n_boards\": %d,\n",           gl->n_boards);
+      mg_printf_http_chunk(nc, "   \"sampling_frequency\": %d,\n", gl->sampling_frequency);
+      mg_printf_http_chunk(nc, "   \"trigger_mode\": %d,\n",       gl->trigger_mode);
       
       mg_printf_http_chunk(nc, "   \"board\": [\n");
       
       for (int i=0 ; i<gl->n_boards ; i++) {
          mg_printf_http_chunk(nc, "      {\n");
          mg_printf_http_chunk(nc, "         \"name\": \"%s\" ,\n", gl->board[i].name);
-         mg_printf_http_chunk(nc, "         \"trigger_level\": \"%1.3lf\",\n", gl->board[i].trigger_level);
-         mg_printf_http_chunk(nc, "         \"trigger_mask\": \"%s\",\n", gl->board[i].trigger_mask);
-         mg_printf_http_chunk(nc, "         \"gain\": \"%d\",\n", gl->board[i].gain);
-         mg_printf_http_chunk(nc, "         \"pzc\": \"%d\",\n", gl->board[i].pzc);
-         mg_printf_http_chunk(nc, "         \"offset\": \"%1.3lf\"\n", gl->board[i].offset);
+         mg_printf_http_chunk(nc, "         \"trigger_level\": %1.3lf,\n", gl->board[i].trigger_level);
+         mg_printf_http_chunk(nc, "         \"trigger_mask\": \"%s\",\n",  gl->board[i].trigger_mask);
+         mg_printf_http_chunk(nc, "         \"gain\": %d,\n",              gl->board[i].gain);
+         mg_printf_http_chunk(nc, "         \"pzc\": %s,\n",               gl->board[i].pzc ? "true" : "false");
+         mg_printf_http_chunk(nc, "         \"offset\": %1.3lf\n",         gl->board[i].offset);
          mg_printf_http_chunk(nc, "      }\n");
          if (i<gl->n_boards-1)
             mg_printf_http_chunk(nc, ",");
@@ -186,7 +197,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             // issue single ADC software trigger
             wd_send(gl, b, 100, "adcget\n", NULL, NULL);
          } else {
-            if (gl->board[b].trigger_level == 0)
+            if (gl->trigger_mode == TM_AUTO)
                // issue single DRS software trigger
                wd_send(gl, b, 100, "drsget\n", NULL, NULL);
             else
@@ -273,12 +284,13 @@ int main(int argc, char *argv[])
    char str[256], *p;
    
    memset(&gl, 0, sizeof(gl));
-   gl.http_port       = 8080; // default port
-   gl.sampling_speed  = 2;
-   gl.ofs_calib1_flag = 1;
-   gl.ofs_calib2_flag = 1;
-   gl.rotate_flag     = 1;
-   gl.remove_spikes   = 1;
+   gl.http_port          = 8080; // default port
+   gl.sampling_frequency = 2;
+   gl.ofs_calib1_flag    = 1;
+   gl.ofs_calib2_flag    = 1;
+   gl.rotate_flag        = 1;
+   gl.remove_spikes      = 1;
+   gl.trigger_mode       = TM_AUTO;
 
    for (i=0 ; i<16 ; i++) {
       gl.board[i].trigger_level = 0;
@@ -324,7 +336,7 @@ int main(int argc, char *argv[])
          i++;
       }
       
-      else if (argv[i][0] == '-' && argv[i][1] == 'd')
+      else if (argv[i][0] == '-' && argv[i][1] == 'p')
          gl.http_port = atoi(argv[++i]);
 
       else if (argv[i][0] == '-' && argv[i][1] == 'r') {
@@ -333,11 +345,11 @@ int main(int argc, char *argv[])
       }
       
       else if (argv[i][0] == '-' && argv[i][1] == 's')
-         gl.sampling_speed = atoi(argv[++i]);
+         gl.sampling_frequency = atoi(argv[++i]);
       
       else if (argv[i][0] == '-' && argv[i][1] == 't') {
          for (j=0 ; j<16 ; j++)
-            gl.board[j].trigger_level = atof(argv[i+1]);
+            gl.board[j].trigger_level = (float)atof(argv[i+1]);
          i++;
       }
       
@@ -446,6 +458,10 @@ int main(int argc, char *argv[])
    mg_mgr_init(&mgr, &gl);
    sprintf(str, "%d", gl.http_port);
    con = mg_bind(&mgr, str, wds_handler);
+   if (con == NULL) {
+      printf("Cannot bind to port %d. Probably other server is already running.\n", gl.http_port);
+      return 0;
+   }
    mg_set_protocol_http_websocket(con);
    s_http_server_opts.document_root = ".";  // Serve current directory
    s_http_server_opts.dav_auth_file = "-";  // Allow access via WebDav
@@ -461,7 +477,6 @@ int main(int argc, char *argv[])
       // do calibration if asked for
       if (ofs_prog.state != CS_INACTIVE) {
          wd_calibrate(&gl, &ofs_prog);
-         printf("%1.2lf\n", ofs_prog.progress);
       
          // Yield to server, not timeout
          mg_mgr_poll(&mgr, 0);

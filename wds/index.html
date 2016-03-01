@@ -78,11 +78,23 @@
    </div>
 
    <div id="config">
-      <form name="config">
+      <form name="config" onsubmit="return false;">
          <div class="groupTitle">Trigger</div>
-         <div class="group" style="position:relative;">
-               <button name="ctrlHSlider" id="trgSlider" class="hSlider" style="width:215px" type="button" data-update="sldTLevel()"></button>
-               <input style="position:absolute;top:10%;font-size:16px;text-align:center" type="text" id="inpTLevel" size="5" value="0">&nbsp;&nbsp;mV
+         <div class="group">
+
+               <div style="display:table;margin-bottom:10px">
+               <button name="ctrlHSlider" id="trgSlider" class="hSlider" type="button" data-update="sldTLevel()"
+                       style="margin:0;margin-right:5px;width:190px;display:table-cell;vertical-align:middle;"></button>
+                  <input style="width:45px;font-size:16px;text-align:center;display:table-cell;vertical-align:middle;" name="trigger_level"
+                         type="text" id="inpTLevel" onkeypress="keyGl(event,this)" value="0">
+                  <span style="display:table-cell;vertical-align:middle">&nbsp;mV</span>
+               </div>
+               <div>
+                  Trigger type:&nbsp;&nbsp;
+                  <input type="radio" id="trModeNormal" name="trigger_mode" value="0" checked onClick="setGl(this)">normal
+                  <input type="radio" id="trModeAuto" name="trigger_mode" value="1" onClick="setGl(this)">auto
+
+               </div>
          </div>
 
          <div class="groupTitle">Analog Front-end</div>
@@ -105,7 +117,7 @@
                <tr><td><input type="checkbox" id="spikes" name="remove_spikes" onClick="setGl(this)"></td>
                   <td>Remove Spikes</td></tr>
             </table>
-            <button class="executeButton" id="btnVCalib" type="button" onClick="btnVCalib()">Execute Voltage Calibration</button>
+            <button class="executeButton" id="btnVCalib" type="button" onClick="doVCalib()">Execute Voltage Calibration</button>
             <div class="progressBar">
                <div class="progressInd" id="progressIndVcalib"></div>
             </div>

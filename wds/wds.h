@@ -16,6 +16,7 @@ typedef struct {
    char name[32];
    int  cmd_socket;
    int  data_socket;
+   int  server_port;
    unsigned char eth_addr[16];
    float trigger_level;
    char trigger_mask[10];
@@ -37,7 +38,8 @@ typedef struct {
    int  remove_spikes;
    int  http_port;
    int  n_boards;
-   int  sampling_speed;
+   float sampling_frequency;
+   int  trigger_mode;
    WDB  board[16];
    int  cmd;
 } GLOBALS;
@@ -75,10 +77,16 @@ typedef struct {
 #define CS_FIRST_SAMPLE 2
 #define CS_RUNNING      3
 
+// trigger modes
+#define TM_NORMAL       0
+#define TM_AUTO         1
+
 // interface functions
 int wd_init(GLOBALS *gl);
 void wd_set_fe(GLOBALS *gl, int index);
 void wd_set_trigger_level(GLOBALS *gl, int index);
+void wd_set_trigger_mode(GLOBALS *gl, int index);
+void ws_set_sampling_frequency(GLOBALS *gl, int index);
 void wd_set_offset(GLOBALS *gl, int index);
 
 int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wf[16][1024]);

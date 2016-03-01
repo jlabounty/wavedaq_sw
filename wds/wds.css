@@ -108,6 +108,7 @@ button {
 
 .groupTitle {
    font-size: 8pt;
+   font-weight: bold;
    margin-left: 20px;
    margin-top: 6px;
 }
@@ -216,16 +217,16 @@ button {
 }
 
 .vSlider {
-   width: 40px;
+   width: 30px;
    height: 118px;
    border-radius: 5px;
    padding: 0;
 }
 
 .hSlider {
-   margin: 3px;
+   /* margin: 3px; */
    width: 174px;
-   height: 40px;
+   height: 30px;
    border-radius: 5px;
    padding: 0;
 }

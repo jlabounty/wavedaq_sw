@@ -51,7 +51,6 @@ union { unsigned int i ; float f; } _nanf = { 0x7fc00000 };
 #endif
 
 #define WD2_CMD_PORT   3000
-#define WD2_DATA_PORT  2000
 
 #pragma pack(1)
 
@@ -241,15 +240,15 @@ void wd_set_fe(GLOBALS *gl, int index)
       if (gl->board[index].gain == 0)
          sprintf(str, "feset all 02");
       else if (gl->board[index].gain == 1)
-         sprintf(str, "feset all 1a");
+         sprintf(str, "feset all 22");
       else if (gl->board[index].gain == 2)
-         sprintf(str, "feset all 3a");
+         sprintf(str, "feset all 6a");
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    } else { // pole zero cancellation off (bit=1)
       if (gl->board[index].gain == 0)
          sprintf(str, "feset all 82");
       else if (gl->board[index].gain == 1)
-         sprintf(str, "feset all 9a");
+         sprintf(str, "feset all 8a");
       else if (gl->board[index].gain == 2)
          sprintf(str, "feset all ba");
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
@@ -266,15 +265,61 @@ void wd_set_trigger_level(GLOBALS *gl, int index)
       return;
 
    if (gl->verbose_flag)
-      printf("Set trigger level = %d mV\n", (int)(gl->board[index].trigger_level*1000));
-   sprintf(str, "dacset tlevel1 %d", (int)(gl->board[index].trigger_level*1000));
+      printf("Set trigger level = %d mV\n", (int)(gl->board[index].trigger_level*1000+1000));
+   sprintf(str, "dacset tlevel1 %d", (int)(gl->board[index].trigger_level*1000+1000));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   sprintf(str, "dacset tlevel2 %d", (int)(gl->board[index].trigger_level*1000));
+   sprintf(str, "dacset tlevel2 %d", (int)(gl->board[index].trigger_level*1000+1000));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   sprintf(str, "dacset tlevel3 %d", (int)(gl->board[index].trigger_level*1000));
+   sprintf(str, "dacset tlevel3 %d", (int)(gl->board[index].trigger_level*1000+1000));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   sprintf(str, "dacset tlevel4 %d", (int)(gl->board[index].trigger_level*1000));
+   sprintf(str, "dacset tlevel4 %d", (int)(gl->board[index].trigger_level*1000+1000));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+void wd_set_trigger_mode(GLOBALS *gl, int index)
+{
+   char str[256];
+   
+   if (gl->demo_flag)
+      return;
+   
+   // enable local trigger
+   if (gl->trigger_mode == TM_NORMAL) {
+      // trigger_cfg_or
+      sprintf(str, "regwr d4 %s", gl->board[index].trigger_mask);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+ 
+      // trigger_enable, trigger_falling_edge
+      assert(wd_send(gl, index, 100, "regwr d8 000C0000", NULL, NULL) > 0);
+   } else {
+      // disable all trigger
+      assert(wd_send(gl, index, 100, "regwr d4 00000000", NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, "regwr d8 00000000", NULL, NULL) > 0);
+   }
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+void wd_set_sampling_frequency(GLOBALS *gl, int index)
+{
+   if (gl->demo_flag)
+      return;
+   
+   // set sampling frequency
+   if (gl->verbose_flag)
+      printf("Set sampling frequency to %f GSPS", gl->sampling_frequency);
+   if (gl->sampling_frequency == 1)
+      assert(wd_send(gl, index, 100, "regwr 2c 0003c800", NULL, NULL) > 0); // to be corrected!
+   else if (gl->sampling_frequency == 2)
+      assert(wd_send(gl, index, 100, "regwr 2c 0003c800", NULL, NULL) > 0);
+   else if (gl->sampling_frequency == 3)
+      assert(wd_send(gl, index, 100, "regwr 2c 00038500", NULL, NULL) > 0);
+   else if (gl->sampling_frequency == 4)
+      assert(wd_send(gl, index, 100, "regwr 2c 00036400", NULL, NULL) > 0);
+   else if (gl->sampling_frequency == 5)
+      assert(wd_send(gl, index, 100, "regwr 2c 00035000", NULL, NULL) > 0);
 }
 
 /*-----------------------------------------------------------------------------------------*/
@@ -289,6 +334,11 @@ void wd_set_offset(GLOBALS *gl, int index)
    if (gl->verbose_flag)
       printf("Set offset level  = %g V\n", gl->board[index].offset);
    sprintf(str, "dacset ofs %d", (int)(gl->board[index].offset*1000));
+   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+   
+   if (gl->verbose_flag)
+      printf("Set ROFS = %g V\n", gl->board[index].offset);
+   sprintf(str, "dacset rofs %d", 1500);
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
 }
 
@@ -324,25 +374,26 @@ int wd_init(GLOBALS *gl)
       } else
          gl->board[index].cmd_socket = gl->board[0].cmd_socket; // reuse socket
       
-      // create UDB socket to receive binary data on port WD2_DATA_PORT
+      // create UDB socket to receive binary data
       if (index == 0) {
          gl->board[index].data_socket = socket(AF_INET, SOCK_DGRAM, 0);
          assert(gl->board[index].data_socket);
          
-         // bind socket to port WD2_DATA_PORT
+         // bind socket to port chosen by OS
          memset((char*)&server_addr, 0, sizeof(server_addr));
          server_addr.sin_family = AF_INET;
-         server_addr.sin_port = htons(WD2_DATA_PORT);
+         server_addr.sin_port = htons(0); // let OS choose port
          server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
          if (bind(gl->board[index].data_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
-            if (errno == 1)
-               printf("wds server is already running\n");
-            else
-               perror("bind");
+            perror("bind");
             return FAILURE;
          }
+         size = sizeof(server_addr);
+         getsockname(gl->board[index].data_socket, (struct sockaddr *) &server_addr, (socklen_t *) &size);
+         gl->board[index].server_port = ntohs(server_addr.sin_port);
+
          if (gl->verbose_flag)
-            printf("Listening on data port %d\n", WD2_DATA_PORT);
+            printf("Listening on data port %d\n", gl->board[index].server_port);
       } else
          gl->board[index].data_socket = gl->board[0].data_socket; // reuse socket
 
@@ -385,10 +436,10 @@ int wd_init(GLOBALS *gl)
       }
 
       // set destinantion port in WD board
-      sprintf(str, "setenv dstport %d", WD2_DATA_PORT);
+      sprintf(str, "setenv dstport %d", gl->board[index].server_port);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       if (gl->verbose_flag)
-         printf("Set dstport       = %d\n", WD2_DATA_PORT);
+         printf("Set dstport       = %d\n", gl->board[index].server_port);
 
       // set MAC address and IP address of this computer in WD board
       assert(wd_send(gl, index, 100, "cfgdst", NULL, NULL) > 0);
@@ -414,35 +465,13 @@ int wd_init(GLOBALS *gl)
       // trun on comparator power
       assert(wd_send(gl, index, 100, "pwrcmp on", NULL, NULL) > 0);
 
-      wd_set_trigger_level(gl, index);
+      // set bias
+      assert(wd_send(gl, index, 100, "dacset bias 700", NULL, NULL) > 0);
 
+      wd_set_trigger_level(gl, index);
       wd_set_offset(gl, index);
-      
-      // set sampling frequency
-      if (gl->verbose_flag)
-         printf("Set sampling frequency to %d GSPS", gl->sampling_speed);
-      if (gl->sampling_speed == 1)
-         assert(wd_send(gl, index, 100, "regwr 2c 0003c800", NULL, NULL) > 0);
-      else if (gl->sampling_speed == 2)
-         assert(wd_send(gl, index, 100, "regwr 2c 0003c800", NULL, NULL) > 0);
-      else if (gl->sampling_speed == 3)
-         assert(wd_send(gl, index, 100, "regwr 2c 00038500", NULL, NULL) > 0);
-      else if (gl->sampling_speed == 4)
-         assert(wd_send(gl, index, 100, "regwr 2c 00036400", NULL, NULL) > 0);
-      else if (gl->sampling_speed == 5)
-         assert(wd_send(gl, index, 100, "regwr 2c 00035000", NULL, NULL) > 0);
-      
-      // enable local trigger
-      if (gl->board[index].trigger_level != 0) {
-         // trigger_cfg_or
-         sprintf(str, "regwr d4 %s", gl->board[index].trigger_mask);
-         assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-         // trigger_enable, trigger_falling_edge
-         assert(wd_send(gl, index, 100, "regwr d8 000C0000", NULL, NULL) > 0);
-      } else {
-         assert(wd_send(gl, index, 100, "regwr d4 00000000", NULL, NULL) > 0);
-         assert(wd_send(gl, index, 100, "regwr d8 00000000", NULL, NULL) > 0);
-      }
+      wd_set_sampling_frequency(gl, index);
+      wd_set_trigger_mode(gl, index);
    
       // set DRS readout mode to ROI
       assert(wd_send(gl, index, 100, "regwr 10 0D0D0030", NULL, NULL) > 0);
@@ -623,12 +652,12 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
                
                if (ph->channel_segment_number == 0) {
                   // first segment
-                  waveform[waveform_channel][i]       = (float)(data1 * (0.63 / 4096.0)); // 2V range with 12 bits
-                  waveform[waveform_channel][i+1]     = (float)(data2 * (0.63 / 4096.0));
+                  waveform[waveform_channel][i]       = (float)(data1 * (1 / 4096.0)); // 1V DRS range with 12 bits
+                  waveform[waveform_channel][i+1]     = (float)(data2 * (1 / 4096.0));
                } else {
                   // second segment
-                  waveform[waveform_channel][512+i]   = (float)(data1 * (0.63 / 4096.0));
-                  waveform[waveform_channel][512+i+1] = (float)(data2 * (0.63 / 4096.0));
+                  waveform[waveform_channel][512+i]   = (float)(data1 * (1 / 4096.0));
+                  waveform[waveform_channel][512+i+1] = (float)(data2 * (1 / 4096.0));
                }
             }
             
