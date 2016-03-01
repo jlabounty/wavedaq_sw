@@ -78,7 +78,8 @@ function loadGl()
 
          document.getElementById("pzc").checked = OSC.GL.board[0].pzc;
          document.config.gain[parseInt(OSC.GL.board[0].gain)].checked = true;
-
+         document.getElementById("osctca_enable").checked = OSC.GL.osctca_enable;
+         
          document.getElementById("calib1").checked = OSC.GL.ofs_calib1_flag;
          document.getElementById("calib2").checked = OSC.GL.ofs_calib2_flag;
          document.getElementById("spikes").checked = OSC.GL.remove_spikes;
@@ -109,6 +110,8 @@ function setGl(e)
       req.open("PUT", "gl/" + e.name, true);
       if (e.name == "trigger_level") {
          req.send(parseInt(e.value) / 1000);
+      } else if (e.name == "sampling_frequency") {
+         req.send(parseInt(e.value));
       } else
          req.send(e.value);
    }

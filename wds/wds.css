@@ -101,6 +101,14 @@ button {
    padding: 0;
 }
 
+input[type=text] {
+   width:45px;
+   font-size:16px;
+   text-align:center;
+   display:table-cell;
+   vertical-align:middle;
+}
+
 .groupBtn {
    background-color: white;
    border-radius: 6px;

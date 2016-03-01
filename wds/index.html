@@ -65,7 +65,7 @@
             <td width="1%">
                <button name="ctrlButtonLeft" id="scaleLeft" type="button" class="squareButtonCanvas" onClick="btnTScale(-1)"></button>
             </td>
-            <td id="TScale" style="vertical-align:middle">100 ns</td>
+            <td id="TScale" style="vertical-align:middle">20 ns</td>
             <td width="1%">
                <button name="ctrlButtonRight" id="scaleRight" type="button" class="squareButtonCanvas" onClick="btnTScale(1)"></button>
             </td>
@@ -85,8 +85,7 @@
                <div style="display:table;margin-bottom:10px">
                <button name="ctrlHSlider" id="trgSlider" class="hSlider" type="button" data-update="sldTLevel()"
                        style="margin:0;margin-right:5px;width:190px;display:table-cell;vertical-align:middle;"></button>
-                  <input style="width:45px;font-size:16px;text-align:center;display:table-cell;vertical-align:middle;" name="trigger_level"
-                         type="text" id="inpTLevel" onkeypress="keyGl(event,this)" value="0">
+                  <input name="trigger_level" type="text" id="inpTLevel" onkeypress="keyGl(event,this)" value="0">
                   <span style="display:table-cell;vertical-align:middle">&nbsp;mV</span>
                </div>
                <div>
@@ -105,6 +104,16 @@
             <input type="radio" id="gain100" name="gain" value="2" onClick="setGl(this)">100
             &nbsp;&nbsp;&nbsp;
             <input type="checkbox" id="pzc" name="pzc" onClick="setGl(this)">PZC
+               
+            <div style="margin-top:5px">
+               <input type="checkbox" id="osctca_enable" name="osctca_enable" onClick="setGl(this)">Connect clock to all channels
+            </div>
+         </div>
+
+         <div class="groupTitle">Sampling Speed</div>
+         <div class="group">
+            <input type="text" id="sampling_frequency" name="sampling_frequency" value="5" onkeypress="keyGl(event,this)">&nbsp;GSPS
+            &nbsp;Actual:<span id="actual_frequency">5.120 GSPS</span>
          </div>
 
          <div class="groupTitle">Voltage Calibration</div>

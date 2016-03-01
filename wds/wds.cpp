@@ -79,6 +79,18 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             wd_set_trigger_mode(gl, i);
       }
 
+      else if (mg_vcmp(&hm->uri, "/gl/osctca_enable") == 0) {
+         gl->osctca_enable = atoi(value);
+         for (int i=0 ; i<gl->n_boards ; i++)
+            wd_set_osctca(gl, i);
+      }
+
+      else if (mg_vcmp(&hm->uri, "/gl/sampling_frequency") == 0) {
+         gl->sampling_frequency = atoi(value);
+         for (int i=0 ; i<gl->n_boards ; i++)
+            wd_set_sampling_frequency(gl, i);
+      }
+
       else if (mg_vcmp(&hm->uri, "/gl/offset") == 0) {
          for (int i=0 ; i<gl->n_boards ; i++) {
             gl->board[i].offset = (float)atof(value);
@@ -119,6 +131,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "   \"n_boards\": %d,\n",           gl->n_boards);
       mg_printf_http_chunk(nc, "   \"sampling_frequency\": %d,\n", gl->sampling_frequency);
       mg_printf_http_chunk(nc, "   \"trigger_mode\": %d,\n",       gl->trigger_mode);
+      mg_printf_http_chunk(nc, "   \"osctca_enable\": %s,\n",      gl->osctca_enable ? "true" : "false");
       
       mg_printf_http_chunk(nc, "   \"board\": [\n");
       
@@ -187,7 +200,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          status = SUCCESS;
          for (int c=0 ; c<16 ; c++) {
             for (int i=0 ; i<1024 ; i++) {
-               wfT[c][i] = (float)(i*1E-9);
+               wfT[c][i] = (float)(i*1E-9 / gl->sampling_frequency);
                wfU[c][i] = (float)(sin(wfT[c][i] / 50 / 1E-9) / 4 + ((float)random()/RAND_MAX-0.5) / 30);
             }
          }
@@ -209,7 +222,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       
          for (int c=0 ; c<16 ; c++) {
             for (int i=0 ; i<1024 ; i++) {
-               wfT[c][i] = (float)(i*1E-9);
+               wfT[c][i] = (float)(i*1E-9 / gl->sampling_frequency);
             }
          }
       }
@@ -285,12 +298,13 @@ int main(int argc, char *argv[])
    
    memset(&gl, 0, sizeof(gl));
    gl.http_port          = 8080; // default port
-   gl.sampling_frequency = 2;
+   gl.sampling_frequency = 5;
    gl.ofs_calib1_flag    = 1;
    gl.ofs_calib2_flag    = 1;
    gl.rotate_flag        = 1;
    gl.remove_spikes      = 1;
    gl.trigger_mode       = TM_AUTO;
+   gl.osctca_enable      = 0;
 
    for (i=0 ; i<16 ; i++) {
       gl.board[i].trigger_level = 0;
