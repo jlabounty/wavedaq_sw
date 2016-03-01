@@ -338,7 +338,7 @@ void wd_set_offset(GLOBALS *gl, int index)
    
    if (gl->verbose_flag)
       printf("Set ROFS = %g V\n", gl->board[index].offset);
-   sprintf(str, "dacset rofs %d", 1600);
+   sprintf(str, "dacset rofs %d", 1500);
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
 }
 
@@ -652,12 +652,12 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
                
                if (ph->channel_segment_number == 0) {
                   // first segment
-                  waveform[waveform_channel][i]       = (float)(data1 * (0.63 / 4096.0)); // 2V range with 12 bits
-                  waveform[waveform_channel][i+1]     = (float)(data2 * (0.63 / 4096.0));
+                  waveform[waveform_channel][i]       = (float)(data1 * (1 / 4096.0)); // 1V DRS range with 12 bits
+                  waveform[waveform_channel][i+1]     = (float)(data2 * (1 / 4096.0));
                } else {
                   // second segment
-                  waveform[waveform_channel][512+i]   = (float)(data1 * (0.63 / 4096.0));
-                  waveform[waveform_channel][512+i+1] = (float)(data2 * (0.63 / 4096.0));
+                  waveform[waveform_channel][512+i]   = (float)(data1 * (1 / 4096.0));
+                  waveform[waveform_channel][512+i+1] = (float)(data2 * (1 / 4096.0));
                }
             }
             
