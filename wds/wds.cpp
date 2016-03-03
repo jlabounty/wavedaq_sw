@@ -201,7 +201,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          for (int c=0 ; c<16 ; c++) {
             for (int i=0 ; i<1024 ; i++) {
                wfT[c][i] = (float)(i*1E-9 / gl->sampling_frequency);
-               wfU[c][i] = (float)(sin(wfT[c][i] / 50 / 1E-9) / 4 + ((float)random()/RAND_MAX-0.5) / 30);
+               wfU[c][i] = (float)(sin(wfT[c][i] / 50 / 1E-9 * gl->sampling_frequency) / 4 + ((float)random()/RAND_MAX-0.5) / 30);
             }
          }
       } else {
