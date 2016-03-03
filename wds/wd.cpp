@@ -547,7 +547,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
    unsigned char buffer[1800];
    int header_adc, header_channel;
    double start_time;
-   static float wf1[16][1024], wf2[16][1024];
+   static float wf1[16][1024];
 
    // tag waveforms as invalid
    for (i=0 ; i<16 ; i++) {
@@ -694,7 +694,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
 
                for (i=0 ; i<16 ; i++)
                   for (int j=0 ; j<1024 ; j++)
-                     wf2[i][j] = waveform[i][j];
+                     wf1[i][j] = waveform[i][j];
 
                // un-rotate waveforms
                if (gl->rotate_flag) {
@@ -712,10 +712,6 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
                   }
                }
                
-               for (i=0 ; i<16 ; i++)
-                  for (int j=0 ; j<1024 ; j++)
-                     wf1[i][j] = wf2[i][j];
-              
                // calibrate waveforms
                if (!gl->adc_flag) { // don't calibrate in ADC mode
                   
