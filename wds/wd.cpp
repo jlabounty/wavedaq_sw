@@ -944,9 +944,9 @@ void remove_spikes(GLOBALS *gl, short trigger_cell, float wf[][1024])
    
    /* find spikes with special high-pass filter, skip last values */
    for (j=0 ; j<1020 ; j++) {
-      for (i=0 ; i<8 ; i++) {
+      for (i=1 ; i<4 ; i++) { // TBD: temporary fix for bad channels 1,5,6,7
          hp = -cwf[i][j] + cwf[i][(j+1)%1024]+cwf[i][(j+2)%1024] - cwf[i][(j+3) % 1024];
-         if (hp > 0.010) {
+         if (hp > 0.020) {
             if (n_sp[i] < 10) // record maximum of 10 spikes
                sp[i][n_sp[i]++] = j;
             else
