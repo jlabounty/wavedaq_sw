@@ -232,27 +232,32 @@ int wd_send(GLOBALS *gl, int b, int timeout_ms, const char *str, char *result, i
 void wd_set_fe(GLOBALS *gl, int index)
 {
    char str[256];
+   int byte;
    
    if (gl->demo_flag)
       return;
    // set input configuration
    if (gl->board[index].pzc) { // pole zero cancellation on (bit=0)
       if (gl->board[index].gain == 0)
-         sprintf(str, "feset all 02");
+         byte = 0x02;
       else if (gl->board[index].gain == 1)
-         sprintf(str, "feset all 22");
+         byte = 0x22;
       else if (gl->board[index].gain == 2)
-         sprintf(str, "feset all 6a");
-      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+         byte = 0x62;
    } else { // pole zero cancellation off (bit=1)
       if (gl->board[index].gain == 0)
-         sprintf(str, "feset all 82");
+         byte = 0x82;
       else if (gl->board[index].gain == 1)
-         sprintf(str, "feset all 8a");
+         byte = 0x8a;
       else if (gl->board[index].gain == 2)
-         sprintf(str, "feset all ba");
-      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+         byte = 0xba;
    }
+   
+   if (gl->osctca_enable)
+      byte += 0x01;
+
+   sprintf(str, "feset all %02X", byte);
+   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
 }
 
 /*-----------------------------------------------------------------------------------------*/
@@ -302,6 +307,25 @@ void wd_set_trigger_mode(GLOBALS *gl, int index)
 
 /*-----------------------------------------------------------------------------------------*/
 
+void wd_set_osctca(GLOBALS *gl, int index)
+{
+   if (gl->demo_flag)
+      return;
+   
+   if (gl->osctca_enable) {
+      assert(wd_send(gl, index, 100, "calosc on", NULL, NULL) > 0);  // enable TCA_CTRL
+      assert(wd_send(gl, index, 100, "calbuf on", NULL, NULL) > 0);  // enbale BUFFER_CTRL
+   } else {
+      assert(wd_send(gl, index, 100, "calosc off", NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, "calbuf off", NULL, NULL) > 0);
+   }
+   
+   // set MUX to input or CAL+
+   wd_set_fe(gl, index);
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
 void wd_set_sampling_frequency(GLOBALS *gl, int index)
 {
    if (gl->demo_flag)
@@ -338,7 +362,7 @@ void wd_set_offset(GLOBALS *gl, int index)
    
    if (gl->verbose_flag)
       printf("Set ROFS = %g V\n", gl->board[index].offset);
-   sprintf(str, "dacset rofs %d", 1500);
+   sprintf(str, "dacset rofs %d", 1450);
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
 }
 
@@ -472,6 +496,7 @@ int wd_init(GLOBALS *gl)
       wd_set_offset(gl, index);
       wd_set_sampling_frequency(gl, index);
       wd_set_trigger_mode(gl, index);
+      wd_set_osctca(gl, index);
    
       // set DRS readout mode to ROI
       assert(wd_send(gl, index, 100, "regwr 10 0D0D0030", NULL, NULL) > 0);
@@ -522,7 +547,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
    unsigned char buffer[1800];
    int header_adc, header_channel;
    double start_time;
-   static float wf1[16][1024], wf2[16][1024];
+   static float wf1[16][1024];
 
    // tag waveforms as invalid
    for (i=0 ; i<16 ; i++) {
@@ -669,7 +694,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
 
                for (i=0 ; i<16 ; i++)
                   for (int j=0 ; j<1024 ; j++)
-                     wf2[i][j] = waveform[i][j];
+                     wf1[i][j] = waveform[i][j];
 
                // un-rotate waveforms
                if (gl->rotate_flag) {
@@ -687,10 +712,6 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
                   }
                }
                
-               for (i=0 ; i<16 ; i++)
-                  for (int j=0 ; j<1024 ; j++)
-                     wf1[i][j] = wf2[i][j];
-              
                // calibrate waveforms
                if (!gl->adc_flag) { // don't calibrate in ADC mode
                   
@@ -923,9 +944,9 @@ void remove_spikes(GLOBALS *gl, short trigger_cell, float wf[][1024])
    
    /* find spikes with special high-pass filter, skip last values */
    for (j=0 ; j<1020 ; j++) {
-      for (i=0 ; i<8 ; i++) {
+      for (i=1 ; i<4 ; i++) { // TBD: temporary fix for bad channels 1,5,6,7
          hp = -cwf[i][j] + cwf[i][(j+1)%1024]+cwf[i][(j+2)%1024] - cwf[i][(j+3) % 1024];
-         if (hp > 0.010) {
+         if (hp > 0.020) {
             if (n_sp[i] < 10) // record maximum of 10 spikes
                sp[i][n_sp[i]++] = j;
             else

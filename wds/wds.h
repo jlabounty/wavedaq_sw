@@ -40,6 +40,7 @@ typedef struct {
    int  n_boards;
    float sampling_frequency;
    int  trigger_mode;
+   int  osctca_enable;
    WDB  board[16];
    int  cmd;
 } GLOBALS;
@@ -86,8 +87,9 @@ int wd_init(GLOBALS *gl);
 void wd_set_fe(GLOBALS *gl, int index);
 void wd_set_trigger_level(GLOBALS *gl, int index);
 void wd_set_trigger_mode(GLOBALS *gl, int index);
-void ws_set_sampling_frequency(GLOBALS *gl, int index);
+void wd_set_sampling_frequency(GLOBALS *gl, int index);
 void wd_set_offset(GLOBALS *gl, int index);
+void wd_set_osctca(GLOBALS *gl, int index);
 
 int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wf[16][1024]);
 int wd_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *result, int *size);

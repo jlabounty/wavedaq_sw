@@ -28,7 +28,7 @@ time, mark, audio, video {
    padding: 0;
    border: 0;
    font: inherit;
-   vertical-align: baseline;
+   /* vertical-align: baseline; */
 }
 
 /*------------------------------*/
@@ -99,6 +99,29 @@ button {
    border-radius: 10px;
    background-color: #E0E0E0;
    padding: 0;
+}
+
+input[type=text] {
+   width:45px;
+   font-size:16px;
+   text-align:center;
+}
+
+.vMiddleBox {
+   display:table;
+}
+
+.vMiddleElement {
+   display:table-cell;
+   vertical-align:middle;
+}
+
+.hSpacer5 {
+   margin-right:5px;
+}
+
+.vSpacer5 {
+   margin-bottom:5px;
 }
 
 .groupBtn {
@@ -229,6 +252,7 @@ button {
    height: 30px;
    border-radius: 5px;
    padding: 0;
+   margin:0;
 }
 
 .timeScale {

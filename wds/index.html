@@ -65,7 +65,7 @@
             <td width="1%">
                <button name="ctrlButtonLeft" id="scaleLeft" type="button" class="squareButtonCanvas" onClick="btnTScale(-1)"></button>
             </td>
-            <td id="TScale" style="vertical-align:middle">100 ns</td>
+            <td id="TScale" style="vertical-align:middle">20 ns</td>
             <td width="1%">
                <button name="ctrlButtonRight" id="scaleRight" type="button" class="squareButtonCanvas" onClick="btnTScale(1)"></button>
             </td>
@@ -81,30 +81,46 @@
       <form name="config" onsubmit="return false;">
          <div class="groupTitle">Trigger</div>
          <div class="group">
-
-               <div style="display:table;margin-bottom:10px">
-               <button name="ctrlHSlider" id="trgSlider" class="hSlider" type="button" data-update="sldTLevel()"
-                       style="margin:0;margin-right:5px;width:190px;display:table-cell;vertical-align:middle;"></button>
-                  <input style="width:45px;font-size:16px;text-align:center;display:table-cell;vertical-align:middle;" name="trigger_level"
-                         type="text" id="inpTLevel" onkeypress="keyGl(event,this)" value="0">
-                  <span style="display:table-cell;vertical-align:middle">&nbsp;mV</span>
-               </div>
-               <div>
-                  Trigger type:&nbsp;&nbsp;
-                  <input type="radio" id="trModeNormal" name="trigger_mode" value="0" checked onClick="setGl(this)">normal
-                  <input type="radio" id="trModeAuto" name="trigger_mode" value="1" onClick="setGl(this)">auto
-
-               </div>
+            <div class="vMiddleBox vSpacer5">
+               <button name="ctrlHSlider" id="trgSlider" class="hSlider vMiddleElement" type="button" data-update="sldTLevel()" style="width:190px;"></button>
+               <span class="hSpacer5"></span>
+               <input name="trigger_level" class="vMiddleElement" type="text" id="inpTLevel" onkeypress="keyGl(event,this)" value="0">
+               <span class="vMiddleElement">&nbsp;mV</span>
+            </div>
+            <div>
+               Trigger type:&nbsp;&nbsp;
+               <input type="radio" id="trModeNormal" name="trigger_mode" value="0" checked onClick="setGl(this)">normal
+               <input type="radio" id="trModeAuto" name="trigger_mode" value="1" onClick="setGl(this)">auto
+            </div>
          </div>
 
          <div class="groupTitle">Analog Front-end</div>
          <div class="group">
-            Gain:
-            <input type="radio" id="gain1" name="gain" value="0" onClick="setGl(this)">1
-            <input type="radio" id="gain10" name="gain" value="1" onClick="setGl(this)">10
-            <input type="radio" id="gain100" name="gain" value="2" onClick="setGl(this)">100
-            &nbsp;&nbsp;&nbsp;
-            <input type="checkbox" id="pzc" name="pzc" onClick="setGl(this)">PZC
+            <div class="vSpacer5">
+               Gain:
+               <input type="radio" id="gain1" name="gain" value="0" onClick="setGl(this)">1
+               <input type="radio" id="gain10" name="gain" value="1" onClick="setGl(this)">10
+               <input type="radio" id="gain100" name="gain" value="2" onClick="setGl(this)">100
+               &nbsp;&nbsp;&nbsp;
+               <input type="checkbox" id="pzc" name="pzc" onClick="setGl(this)">PZC
+            </div>
+            <div class="vSpacer5">
+               <input type="checkbox" id="osctca_enable" name="osctca_enable" onClick="setGl(this)">Connect clock to all channels
+            </div>
+            <div class="vMiddleBox vSpacer5">
+               <div class="vMiddleElement">Ofs:&nbsp;</div>
+               <button name="ctrlHSlider" id="ofsSlider" class="hSlider vMiddleElement" type="button" data-update="sldOffset()" style="width:150px;"></button>
+               <span class="hSpacer5"></span>
+               <input name="offset" class="vMiddleElement" type="text" id="inpOffset" onkeypress="keyGl(event,this)" value="0">
+               <span class="vMiddleElement">&nbsp;mV</span>
+
+            </div>
+         </div>
+
+         <div class="groupTitle">Sampling Speed</div>
+         <div class="group">
+            <input type="text" id="sampling_frequency" name="sampling_frequency" value="5" onkeypress="keyGl(event,this)">&nbsp;GSPS
+            &nbsp;Actual:<span id="actual_frequency">5.120 GSPS</span>
          </div>
 
          <div class="groupTitle">Voltage Calibration</div>
