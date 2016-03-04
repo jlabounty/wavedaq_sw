@@ -357,12 +357,12 @@ void wd_set_offset(GLOBALS *gl, int index)
 
    if (gl->verbose_flag)
       printf("Set offset level  = %g V\n", gl->board[index].offset);
-   sprintf(str, "dacset ofs %d", (int)(gl->board[index].offset*1000));
+   sprintf(str, "dacset ofs %d", (int)(gl->board[index].offset*1000*2.5+1250)); // shift by 1.25V
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    
    if (gl->verbose_flag)
       printf("Set ROFS = %g V\n", gl->board[index].offset);
-   sprintf(str, "dacset rofs %d", 1450);
+   sprintf(str, "dacset rofs %d", 1525);
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
 }
 
