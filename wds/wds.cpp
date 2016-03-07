@@ -309,7 +309,7 @@ int main(int argc, char *argv[])
    for (i=0 ; i<16 ; i++) {
       gl.board[i].trigger_level = 0;
       gl.board[i].gain          = 0;       // gain 1
-      gl.board[i].offset        = 1.25;    // center offset
+      gl.board[i].offset        = 0;       // center offset
       gl.board[i].pzc           = 0;       // PZC off
       strlcpy(gl.board[i].trigger_mask, "FFFF0000", sizeof(gl.board[i].trigger_mask)); // or of all 16 channels
    }
@@ -406,7 +406,7 @@ int main(int argc, char *argv[])
          printf(" -g 0/1/2         Input gain (0=1, 1=10, 2=100)\n");
          printf(" -t <level>       Trigger level in V (0=auto)\n");
          printf(" -m <mask>        Trigger mask xxxxyyyy (xxxx=16 bit OR, yyyy=16bit AND)\n");
-         printf(" -o <offset>      Set channel offset in V\n");
+         printf(" -o <offset>      Set channel offset in V (0=+-0.5V)\n");
          printf(" -p <port>        HTTP server port\n");
          printf(" -r               Show raw (uncalibrated) data\n");
          printf(" -w <address>     Internet address of WaveDREAM board\n");
