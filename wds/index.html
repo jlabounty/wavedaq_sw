@@ -105,16 +105,27 @@
                <input type="checkbox" id="pzc" name="pzc" onClick="setGl(this)">PZC
             </div>
             <div class="vSpacer5">
-               <input type="checkbox" id="osctca_enable" name="osctca_enable" onClick="setGl(this)">Connect clock to all channels
+               <input type="checkbox" id="osctca_flag" name="osctca_flag" onClick="setGl(this)">Connect clock to all channels
             </div>
-            <div class="vMiddleBox vSpacer5">
-               <div class="vMiddleElement">Ofs:&nbsp;</div>
-               <button name="ctrlHSlider" id="ofsSlider" class="hSlider vMiddleElement" type="button" data-update="sldOffset()" style="width:150px;"></button>
-               <span class="hSpacer5"></span>
-               <input name="offset" class="vMiddleElement" type="text" id="inpOffset" onkeypress="keyGl(event,this)" value="0">
-               <span class="vMiddleElement">&nbsp;mV</span>
 
+            <div class="vMiddleBox vSpacer5">
+               <div class="vMiddleElement">Input range:&nbsp;</div>
+               <select id="rangeSelect" class="rangeSelect" onchange="setRange(this)">
+                  <option value="-0.45">-0.95 V ... +0.05 V</option>
+                  <option value="0">-0.5 V  ... +0.5 V</option>
+                  <option value="0.45">-0.05 V ... +0.95 V</option>
+               </select>
             </div>
+
+            <!--
+            <div class="vMiddleBox vSpacer5">
+               <div class="vMiddleElement">Range:&nbsp;</div>
+               <button name="ctrlHSlider" id="rangeSlider" class="hSlider vMiddleElement" type="button" data-update="sldRange()" style="width:150px;"></button>
+               <span class="hSpacer5"></span>
+               <input name="range" class="vMiddleElement" type="text" id="inpRange" onkeypress="keyGl(event,this)" value="0">
+               <span class="vMiddleElement">&nbsp;mV</span>
+            </div>
+            -->
          </div>
 
          <div class="groupTitle">Sampling Speed</div>

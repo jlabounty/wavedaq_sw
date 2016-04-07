@@ -78,10 +78,9 @@ function loadGl()
 
          document.getElementById("pzc").checked = OSC.GL.board[0].pzc;
          document.config.gain[parseInt(OSC.GL.board[0].gain)].checked = true;
-         document.getElementById("osctca_enable").checked = OSC.GL.osctca_enable;
+         document.getElementById("osctca_flag").checked = OSC.GL.osctca_flag;
 
-         document.getElementById("ofsSlider").set(OSC.GL.board[0].offset+0.5);
-         document.getElementById("inpOffset").value = Math.round(OSC.GL.board[0].offset * 1000);
+         document.getElementById("rangeSelect").value = OSC.GL.board[0].range;
 
          document.getElementById("calib1").checked = OSC.GL.ofs_calib1_flag;
          document.getElementById("calib2").checked = OSC.GL.ofs_calib2_flag;
@@ -113,7 +112,7 @@ function setGl(e)
       req.open("PUT", "gl/" + e.name, true);
       if (e.name == "trigger_level") {
          req.send(parseInt(e.value) / 1000);
-      } else if (e.name == "offset") {
+      } else if (e.name == "range") {
          req.send(parseInt(e.value));
       } else if (e.name == "sampling_frequency") {
          req.send(parseInt(e.value));
@@ -505,13 +504,21 @@ function sldTLevel(value)
    document.getElementById("inpTLevel").value = Math.round(value * 1000 - 500);
 }
 
-function sldOffset(value)
+function sldRange(value)
 {
    var req = new XMLHttpRequest();
-   req.open("PUT", "gl/offset", true);
+   req.open("PUT", "gl/range", true);
    req.send(Math.round(value * 1000 - 500)/1000);
 
-   document.getElementById("inpOffset").value = Math.round(value * 1000 - 500);
+   document.getElementById("inpRange").value = Math.round(value * 1000 - 500);
+}
+
+function setRange(s)
+{
+   var req = new XMLHttpRequest();
+   req.open("PUT", "gl/range", true);
+   req.send(parseFloat(s.value));
+   alert("Please execute voltage calibration after range change");
 }
 
 function btnOfsZero()

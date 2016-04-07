@@ -212,6 +212,12 @@ input[type=text] {
    width: 180px;
 }
 
+.rangeSelect {
+   margin: 5px;
+   background: white;
+   font-size: 12px;
+}
+
 .chnButtons {
    font-size: 0; /* removes space between buttons */
 }

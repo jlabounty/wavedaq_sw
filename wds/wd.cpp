@@ -253,7 +253,7 @@ void wd_set_fe(GLOBALS *gl, int index)
          byte = 0xba;
    }
    
-   if (gl->osctca_enable)
+   if (gl->osctca_flag)
       byte += 0x01;
 
    sprintf(str, "feset all %02X", byte);
@@ -269,7 +269,7 @@ void wd_set_trigger_level(GLOBALS *gl, int index)
    if (gl->demo_flag)
       return;
 
-   //if (gl->verbose_flag)
+   if (gl->verbose_flag)
       printf("Set trigger level = %d mV\n", (int)(gl->board[index].trigger_level*1000));
    sprintf(str, "dacset tlevel1 %d", (int)(gl->board[index].trigger_level*1000+900));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
@@ -312,7 +312,7 @@ void wd_set_osctca(GLOBALS *gl, int index)
    if (gl->demo_flag)
       return;
    
-   if (gl->osctca_enable) {
+   if (gl->osctca_flag) {
       assert(wd_send(gl, index, 100, "calosc on", NULL, NULL) > 0);  // enable TCA_CTRL
       assert(wd_send(gl, index, 100, "calbuf on", NULL, NULL) > 0);  // enbale BUFFER_CTRL
    } else {
@@ -348,7 +348,7 @@ void wd_set_sampling_frequency(GLOBALS *gl, int index)
 
 /*-----------------------------------------------------------------------------------------*/
 
-void wd_set_offset(GLOBALS *gl, int index)
+void wd_set_range(GLOBALS *gl, int index)
 {
    char str[256];
    
@@ -356,8 +356,8 @@ void wd_set_offset(GLOBALS *gl, int index)
       return;
 
    if (gl->verbose_flag)
-      printf("Set offset level  = %g V\n", gl->board[index].offset);
-   sprintf(str, "dacset ofs %d", (int)(gl->board[index].offset*1750+1270)); // shift by 1.27V
+      printf("Set range = %g V\n", gl->board[index].range);
+   sprintf(str, "dacset ofs %d", (int)(1270-gl->board[index].range*1700)); // shift by 1.27V
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    
    assert(wd_send(gl, index, 100, "dacset rofs 1550", NULL, NULL) > 0);
@@ -491,7 +491,7 @@ int wd_init(GLOBALS *gl)
       assert(wd_send(gl, index, 100, "dacset bias 700", NULL, NULL) > 0);
 
       wd_set_trigger_level(gl, index);
-      wd_set_offset(gl, index);
+      wd_set_range(gl, index);
       wd_set_sampling_frequency(gl, index);
       wd_set_trigger_mode(gl, index);
       wd_set_osctca(gl, index);
@@ -764,6 +764,13 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
    float wfU[16][1024], awf1[16][1024], awf2[16][1024];
    WD2_EVENT eventHeader;
    char str[80];
+   
+   /* turn off clock if it is on */
+   if (gl->osctca_flag) {
+      gl->osctca_flag = 0;
+      for (int i=0 ; i<gl->n_boards ; i++)
+         wd_set_osctca(gl, i);
+   }
    
    if (pr->state == CS_FIRST_BOARD) {
       pr->state   = CS_FIRST_SAMPLE;

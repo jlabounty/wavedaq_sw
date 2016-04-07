@@ -22,7 +22,7 @@ typedef struct {
    char trigger_mask[10];
    int  gain;
    int  pzc;
-   float offset;
+   float range;
    float wf_offset1[16][1024];
    float wf_offset2[16][1024];
 } WDB;
@@ -40,7 +40,7 @@ typedef struct {
    int  n_boards;
    float sampling_frequency;
    int  trigger_mode;
-   int  osctca_enable;
+   int  osctca_flag;
    WDB  board[16];
    int  cmd;
 } GLOBALS;
@@ -88,7 +88,7 @@ void wd_set_fe(GLOBALS *gl, int index);
 void wd_set_trigger_level(GLOBALS *gl, int index);
 void wd_set_trigger_mode(GLOBALS *gl, int index);
 void wd_set_sampling_frequency(GLOBALS *gl, int index);
-void wd_set_offset(GLOBALS *gl, int index);
+void wd_set_range(GLOBALS *gl, int index);
 void wd_set_osctca(GLOBALS *gl, int index);
 
 int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wf[16][1024]);

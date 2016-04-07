@@ -79,8 +79,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             wd_set_trigger_mode(gl, i);
       }
 
-      else if (mg_vcmp(&hm->uri, "/gl/osctca_enable") == 0) {
-         gl->osctca_enable = atoi(value);
+      else if (mg_vcmp(&hm->uri, "/gl/osctca_flag") == 0) {
+         gl->osctca_flag = atoi(value);
          for (int i=0 ; i<gl->n_boards ; i++)
             wd_set_osctca(gl, i);
       }
@@ -91,10 +91,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             wd_set_sampling_frequency(gl, i);
       }
 
-      else if (mg_vcmp(&hm->uri, "/gl/offset") == 0) {
+      else if (mg_vcmp(&hm->uri, "/gl/range") == 0) {
          for (int i=0 ; i<gl->n_boards ; i++) {
-            gl->board[i].offset = (float)atof(value);
-            wd_set_offset(gl, i);
+            gl->board[i].range = (float)atof(value);
+            wd_set_range(gl, i);
          }
       }
 
@@ -131,18 +131,18 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "   \"n_boards\": %d,\n",           gl->n_boards);
       mg_printf_http_chunk(nc, "   \"sampling_frequency\": %d,\n", gl->sampling_frequency);
       mg_printf_http_chunk(nc, "   \"trigger_mode\": %d,\n",       gl->trigger_mode);
-      mg_printf_http_chunk(nc, "   \"osctca_enable\": %s,\n",      gl->osctca_enable ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"osctca_flag\": %s,\n",        gl->osctca_flag ? "true" : "false");
       
       mg_printf_http_chunk(nc, "   \"board\": [\n");
       
       for (int i=0 ; i<gl->n_boards ; i++) {
          mg_printf_http_chunk(nc, "      {\n");
-         mg_printf_http_chunk(nc, "         \"name\": \"%s\" ,\n", gl->board[i].name);
+         mg_printf_http_chunk(nc, "         \"name\": \"%s\" ,\n",         gl->board[i].name);
          mg_printf_http_chunk(nc, "         \"trigger_level\": %1.3lf,\n", gl->board[i].trigger_level);
          mg_printf_http_chunk(nc, "         \"trigger_mask\": \"%s\",\n",  gl->board[i].trigger_mask);
          mg_printf_http_chunk(nc, "         \"gain\": %d,\n",              gl->board[i].gain);
          mg_printf_http_chunk(nc, "         \"pzc\": %s,\n",               gl->board[i].pzc ? "true" : "false");
-         mg_printf_http_chunk(nc, "         \"offset\": %1.3lf\n",         gl->board[i].offset);
+         mg_printf_http_chunk(nc, "         \"range\": %1.3lf\n",          gl->board[i].range);
          mg_printf_http_chunk(nc, "      }\n");
          if (i<gl->n_boards-1)
             mg_printf_http_chunk(nc, ",");
@@ -304,12 +304,12 @@ int main(int argc, char *argv[])
    gl.rotate_flag        = 1;
    gl.remove_spikes      = 1;
    gl.trigger_mode       = TM_AUTO;
-   gl.osctca_enable      = 0;
+   gl.osctca_flag        = 0;
 
    for (i=0 ; i<16 ; i++) {
       gl.board[i].trigger_level = 0;
       gl.board[i].gain          = 0;       // gain 1
-      gl.board[i].offset        = 0;       // center offset
+      gl.board[i].range         = 0;       // range +-0.5V
       gl.board[i].pzc           = 0;       // PZC off
       strlcpy(gl.board[i].trigger_mask, "FFFF0000", sizeof(gl.board[i].trigger_mask)); // or of all 16 channels
    }
@@ -328,6 +328,12 @@ int main(int argc, char *argv[])
       else if (argv[i][0] == '-' && argv[i][1] == 'd')
          gl.demo_flag = 1;
       
+      else if (argv[i][0] == '-' && argv[i][1] == 'f') {
+         for (j=0 ; j<16 ; j++)
+            gl.board[j].range = (float)atoi(argv[i+1]);
+         i++;
+      }
+      
       else if (argv[i][0] == '-' && argv[i][1] == 'g') {
          for (j=0 ; j<16 ; j++)
             gl.board[j].gain = atoi(argv[i+1]);
@@ -341,12 +347,6 @@ int main(int argc, char *argv[])
          }
          for (j=0 ; j<16 ; j++)
             strlcpy(gl.board[j].trigger_mask, argv[i+1], sizeof(gl.board[j].trigger_mask));
-         i++;
-      }
-      
-      else if (argv[i][0] == '-' && argv[i][1] == 'o') {
-         for (j=0 ; j<16 ; j++)
-            gl.board[j].offset = (float)atoi(argv[i+1]);
          i++;
       }
       
@@ -403,10 +403,10 @@ int main(int argc, char *argv[])
          printf(" -a               Read ADC instead DRS\n");
          printf(" -c               Calibrate DRS chips\n");
          printf(" -d               Demo mode\n");
+         printf(" -f <offset>      Set channel offset in V (0=+-0.5V)\n");
          printf(" -g 0/1/2         Input gain (0=1, 1=10, 2=100)\n");
          printf(" -t <level>       Trigger level in V (0=auto)\n");
          printf(" -m <mask>        Trigger mask xxxxyyyy (xxxx=16 bit OR, yyyy=16bit AND)\n");
-         printf(" -o <offset>      Set channel offset in V (0=+-0.5V)\n");
          printf(" -p <port>        HTTP server port\n");
          printf(" -r               Show raw (uncalibrated) data\n");
          printf(" -w <address>     Internet address of WaveDREAM board\n");
