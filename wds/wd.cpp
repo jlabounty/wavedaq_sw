@@ -269,15 +269,15 @@ void wd_set_trigger_level(GLOBALS *gl, int index)
    if (gl->demo_flag)
       return;
 
-   if (gl->verbose_flag)
-      printf("Set trigger level = %d mV\n", (int)(gl->board[index].trigger_level*1000+1000));
-   sprintf(str, "dacset tlevel1 %d", (int)(gl->board[index].trigger_level*1000+1000));
+   //if (gl->verbose_flag)
+      printf("Set trigger level = %d mV\n", (int)(gl->board[index].trigger_level*1000));
+   sprintf(str, "dacset tlevel1 %d", (int)(gl->board[index].trigger_level*1000+900));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   sprintf(str, "dacset tlevel2 %d", (int)(gl->board[index].trigger_level*1000+1000));
+   sprintf(str, "dacset tlevel2 %d", (int)(gl->board[index].trigger_level*1000+900));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   sprintf(str, "dacset tlevel3 %d", (int)(gl->board[index].trigger_level*1000+1000));
+   sprintf(str, "dacset tlevel3 %d", (int)(gl->board[index].trigger_level*1000+900));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   sprintf(str, "dacset tlevel4 %d", (int)(gl->board[index].trigger_level*1000+1000));
+   sprintf(str, "dacset tlevel4 %d", (int)(gl->board[index].trigger_level*1000+900));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
 }
 
@@ -357,11 +357,11 @@ void wd_set_offset(GLOBALS *gl, int index)
 
    if (gl->verbose_flag)
       printf("Set offset level  = %g V\n", gl->board[index].offset);
-   sprintf(str, "dacset ofs %d", (int)(gl->board[index].offset*1000+1250)); // shift by 1.25V
+   sprintf(str, "dacset ofs %d", (int)(gl->board[index].offset*1750+1270)); // shift by 1.27V
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    
-   assert(wd_send(gl, index, 100, "dacset rofs 1525", NULL, NULL) > 0);
-   assert(wd_send(gl, index, 100, "dacset caldc 925", NULL, NULL) > 0);
+   assert(wd_send(gl, index, 100, "dacset rofs 1550", NULL, NULL) > 0);
+   assert(wd_send(gl, index, 100, "dacset caldc 1280", NULL, NULL) > 0);
 }
 
 /*-----------------------------------------------------------------------------------------*/
