@@ -98,6 +98,13 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          }
       }
 
+      else if (mg_vcmp(&hm->uri, "/gl/dcv") == 0) {
+         gl->dcv = (float)atof(value);
+         gl->dcv_flag = (gl->dcv != 0);
+         for (int i=0 ; i<gl->n_boards ; i++)
+            wd_set_dcv(gl, i);
+      }
+
       else if (mg_vcmp(&hm->uri, "/gl/ofs_calib1_flag") == 0)
          gl->ofs_calib1_flag = atoi(value);
       else if (mg_vcmp(&hm->uri, "/gl/ofs_calib2_flag") == 0)
@@ -132,6 +139,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "   \"sampling_frequency\": %d,\n", gl->sampling_frequency);
       mg_printf_http_chunk(nc, "   \"trigger_mode\": %d,\n",       gl->trigger_mode);
       mg_printf_http_chunk(nc, "   \"osctca_flag\": %s,\n",        gl->osctca_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"dcv_flag\": %s,\n",           gl->dcv_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"dcv\": %1.3lf,\n",            gl->dcv);
       
       mg_printf_http_chunk(nc, "   \"board\": [\n");
       
@@ -305,6 +314,8 @@ int main(int argc, char *argv[])
    gl.remove_spikes      = 1;
    gl.trigger_mode       = TM_AUTO;
    gl.osctca_flag        = 0;
+   gl.dcv_flag           = 0;
+   gl.dcv                = 0;
 
    for (i=0 ; i<16 ; i++) {
       gl.board[i].trigger_level = 0;

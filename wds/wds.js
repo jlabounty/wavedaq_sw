@@ -82,6 +82,9 @@ function loadGl()
 
          document.getElementById("rangeSelect").value = OSC.GL.board[0].range;
 
+         document.getElementById("dcvSlider").set(OSC.GL.dcv/2+0.5);
+         document.getElementById("inpDcv").value = OSC.GL.dcv * 1000;
+
          document.getElementById("calib1").checked = OSC.GL.ofs_calib1_flag;
          document.getElementById("calib2").checked = OSC.GL.ofs_calib2_flag;
          document.getElementById("spikes").checked = OSC.GL.remove_spikes;
@@ -114,6 +117,8 @@ function setGl(e)
          req.send(parseInt(e.value) / 1000);
       } else if (e.name == "range") {
          req.send(parseInt(e.value));
+      } else if (e.name == "dcv") {
+         req.send(parseInt(e.value) / 1000);
       } else if (e.name == "sampling_frequency") {
          req.send(parseInt(e.value));
       } else
@@ -504,13 +509,13 @@ function sldTLevel(value)
    document.getElementById("inpTLevel").value = Math.round(value * 1000 - 500);
 }
 
-function sldRange(value)
+function sldDcv(value)
 {
    var req = new XMLHttpRequest();
-   req.open("PUT", "gl/range", true);
-   req.send(Math.round(value * 1000 - 500)/1000);
+   req.open("PUT", "gl/dcv", true);
+   req.send(Math.round(value * 2000 - 1000)/1000);
 
-   document.getElementById("inpRange").value = Math.round(value * 1000 - 500);
+   document.getElementById("inpDcv").value = Math.round(value * 2000 - 1000);
 }
 
 function setRange(s)

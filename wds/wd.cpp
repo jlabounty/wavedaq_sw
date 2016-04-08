@@ -254,7 +254,10 @@ void wd_set_fe(GLOBALS *gl, int index)
    }
    
    if (gl->osctca_flag)
-      byte += 0x01;
+      byte |= 0x01;
+
+   if (gl->dcv_flag)
+      byte |= 0x01;
 
    sprintf(str, "feset all %02X", byte);
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
@@ -362,6 +365,29 @@ void wd_set_range(GLOBALS *gl, int index)
    
    assert(wd_send(gl, index, 100, "dacset rofs 1550", NULL, NULL) > 0);
    assert(wd_send(gl, index, 100, "dacset caldc 1280", NULL, NULL) > 0);
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+void wd_set_dcv(GLOBALS *gl, int index)
+{
+   char str[256];
+   
+   if (gl->demo_flag)
+      return;
+   
+   if (gl->verbose_flag)
+      printf("Set DC voltage = %g V\n", gl->dcv);
+   sprintf(str, "dacset caldc %d", (int)(1280-gl->dcv*1000)); // shift by 1.28V
+   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+   
+
+   if (gl->dcv_flag)
+      assert(wd_send(gl, index, 100, "calbuf on", NULL, NULL) > 0);  // enable BUFFER_CTRL
+   else
+      assert(wd_send(gl, index, 100, "calbuf off", NULL, NULL) > 0);  // disable BUFFER_CTRL
+
+   wd_set_fe(gl, index); // turns multiplexer on/off
 }
 
 /*-----------------------------------------------------------------------------------------*/

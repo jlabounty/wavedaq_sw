@@ -12,37 +12,39 @@
 #define FAILURE 0
 
 typedef struct {
-   int  serial_number;
-   char name[32];
-   int  cmd_socket;
-   int  data_socket;
-   int  server_port;
+   int           serial_number;
+   char          name[32];
+   int           cmd_socket;
+   int           data_socket;
+   int           server_port;
    unsigned char eth_addr[16];
-   float trigger_level;
-   char trigger_mask[10];
-   int  gain;
-   int  pzc;
-   float range;
-   float wf_offset1[16][1024];
-   float wf_offset2[16][1024];
+   float         trigger_level;
+   char          trigger_mask[10];
+   int           gain;
+   int           pzc;
+   float         range;
+   float         wf_offset1[16][1024];
+   float         wf_offset2[16][1024];
 } WDB;
 
 typedef struct {
-   int  demo_flag;
-   int  rotate_flag;
-   int  verbose_flag;
-   int  adc_flag;
-   int  ofs_calib1_flag;
-   int  ofs_calib2_flag;
-   int  tcalib_flag;
-   int  remove_spikes;
-   int  http_port;
-   int  n_boards;
+   int   demo_flag;
+   int   rotate_flag;
+   int   verbose_flag;
+   int   adc_flag;
+   int   ofs_calib1_flag;
+   int   ofs_calib2_flag;
+   int   tcalib_flag;
+   int   remove_spikes;
+   int   http_port;
+   int   n_boards;
    float sampling_frequency;
-   int  trigger_mode;
-   int  osctca_flag;
-   WDB  board[16];
-   int  cmd;
+   int   trigger_mode;
+   int   osctca_flag;
+   int   dcv_flag;
+   float dcv;
+   WDB   board[16];
+   int   cmd;
 } GLOBALS;
 
 typedef struct {
@@ -90,6 +92,7 @@ void wd_set_trigger_mode(GLOBALS *gl, int index);
 void wd_set_sampling_frequency(GLOBALS *gl, int index);
 void wd_set_range(GLOBALS *gl, int index);
 void wd_set_osctca(GLOBALS *gl, int index);
+void wd_set_dcv(GLOBALS *gl, int index);
 
 int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wf[16][1024]);
 int wd_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *result, int *size);
