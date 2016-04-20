@@ -1,4 +1,5 @@
 #define RRUN          0x00                      // run control 
+#define RBUSDLY       0x01                      // trigger bus delay 
 #define RPRESCA0      0x10                      // prescaling0 - track-like
 #define RPRESCA1      0x11                      // prescaling1 - multiplicity
 #define RPRESCA2      0x12                      // prescaling2 - tile single
@@ -89,6 +90,10 @@ class TCB {
   void GetMemoryAddress(int,u_int32_t*);
   // write in data masks
   void SetDataMasks(int,u_int32_t*);
+  // write in trg bus delay register
+   void SetTRGBusDLY(int,u_int32_t*,u_int32_t*);
+  // write in trg bus delay register
+   void GetTRGBusDLY(int,u_int32_t*,u_int32_t*);
   // read time stamps
   void GetTimeStamps(int,u_int32_t *);
   // check if the system is busy

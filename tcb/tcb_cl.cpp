@@ -32,7 +32,7 @@ int main()
   int loopnumber=10;
   clock_t t_before, t_after;
   // open mscb connection
-  handle = mscb_init("mscb178", 0, "", 0);
+  handle = mscb_init("MSCB178", 65535, "", 0);
   // create TCB Board
   TCB TCBBoard(17);
   TCBBoard.SetIDCode(handle);
@@ -50,7 +50,7 @@ int main()
     printf("[17]: Read Time Stamps     \t \t  [18]: Set in data masks\n");
     printf("[19]: Setup multiple run   \t \t  [20]: Run multiple\n");
     printf("[21]: Select Slot          \t \t  [22]: Set trigger 3 delay\n");
-    printf("[-1]: Exit\n");
+    printf("[23]: Set trg bus delay    \t \t  [-1]: Exit\n");
 
     do {
       printf("Give an option: ");
@@ -95,7 +95,11 @@ int main()
     //
     if(option == 6) {
       printf(" opt = 6 : SW sync ... \n");
-      TCBBoard.SWSync(handle);
+      for(int i =0; i<10000; i++) {
+         data = i%32;
+         TCBBoard.SetTRGBusDLY(handle,&data,&data);
+         TCBBoard.SWSync(handle);
+      }
     }
     //
     if(option == 7) {
@@ -238,6 +242,15 @@ int main()
       printf("Trigger delay (in clk ticks (10ns))?\n");
       scanf("%x",&data);
       TCBBoard.SetTRGDLY(handle,&data);
+    }
+    if(option == 23) {
+      printf(" opt = 23 : Set trigger delay ... \n");
+      printf("Trigger bus delay (0-1f in taps of 80ps)?\n");
+      scanf("%x",&data);
+      u_int32_t data1;
+      TCBBoard.SetTRGBusDLY(handle,&data,&data);
+      TCBBoard.GetTRGBusDLY(handle,&data,&data1);
+      printf("I read back %x, %x\n",data,data1);
     }
 
 

@@ -1,10 +1,11 @@
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include "mscb.h"
 #include "TCBLib.h"
 
-#define MSCB_ADDR 20
+#define MSCB_ADDR 65535
 
 u_int32_t kaddrpre[5] = {RPRESCA0,RPRESCA1,RPRESCA2,RPRESCA3,RPRESCA4};
 u_int32_t kaddrmem[4] = {RMEM0,RMEM1,RMEM2,RMEM3};
@@ -51,6 +52,32 @@ void TCB::SetPrescaling(int handle, u_int32_t *presca) {
     WriteReg(handle, kaddrpre[ireg],presca+ireg);
   }   
 } //end SetPrescaling
+//
+// trg bus delay setting
+void TCB::SetTRGBusDLY(int handle, u_int32_t *syncdly, u_int32_t *trgdly) {
+  int status;
+  u_int32_t reset = 0x80000000;
+  u_int32_t value = (*syncdly) & 0x1f | ((*trgdly) & 0x1f)<<6;
+  u_int32_t valueload = ((*syncdly) & 0x1f) | 0x20 | (((*trgdly) & 0x1f)<<6) | 0x80;
+  // first reset the delay controller
+  WriteReg(handle, RBUSDLY,&reset);
+  // then load the value
+  WriteReg(handle, RBUSDLY,&value);
+  // then give a load pulse
+  WriteReg(handle, RBUSDLY,&valueload);
+  // then restore the delay
+  WriteReg(handle, RBUSDLY,&value);
+} //end trg bus delay setting
+//
+// trg bus delay readout
+void TCB::GetTRGBusDLY(int handle, u_int32_t *syncdly, u_int32_t *trgdly) {
+  int status;
+  u_int32_t dly;
+  // read trg bus dly reg
+  ReadReg(handle, RBUSDLY,&dly);
+  *syncdly = dly&0x1f;
+  *trgdly = dly&0x7c0;
+} //end trg bus delay setting
 //
 // read prescaling values
 void TCB::GetPrescaling(int handle, u_int32_t *presca) {
