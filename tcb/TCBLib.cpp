@@ -58,7 +58,7 @@ void TCB::SetTRGBusDLY(int handle, u_int32_t *syncdly, u_int32_t *trgdly) {
   int status;
   u_int32_t reset = 0x80000000;
   u_int32_t value = (*syncdly) & 0x1f | ((*trgdly) & 0x1f)<<6;
-  u_int32_t valueload = ((*syncdly) & 0x1f) | 0x20 | (((*trgdly) & 0x1f)<<6) | 0x80;
+  u_int32_t valueload = ((*syncdly) & 0x1f) | 0x20 | (((*trgdly) & 0x1f)<<6) | 0x800;
   // first reset the delay controller
   WriteReg(handle, RBUSDLY,&reset);
   // then load the value

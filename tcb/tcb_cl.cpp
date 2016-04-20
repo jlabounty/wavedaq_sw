@@ -97,7 +97,8 @@ int main()
       printf(" opt = 6 : SW sync ... \n");
       for(int i =0; i<10000; i++) {
          data = i%32;
-         TCBBoard.SetTRGBusDLY(handle,&data,&data);
+         u_int32_t data1 = (32 - data);
+         TCBBoard.SetTRGBusDLY(handle,&data,&data1);
          TCBBoard.SWSync(handle);
       }
     }
@@ -245,10 +246,12 @@ int main()
     }
     if(option == 23) {
       printf(" opt = 23 : Set trigger delay ... \n");
-      printf("Trigger bus delay (0-1f in taps of 80ps)?\n");
-      scanf("%x",&data);
       u_int32_t data1;
-      TCBBoard.SetTRGBusDLY(handle,&data,&data);
+      printf("Trigger bus delay: SYNC output (0-1f in taps of 80ps)?\n");
+      scanf("%x",&data);
+      printf("Trigger bus delay: TRG output (0-1f in taps of 80ps)?\n");
+      scanf("%x",&data1);
+      TCBBoard.SetTRGBusDLY(handle,&data,&data1);
       TCBBoard.GetTRGBusDLY(handle,&data,&data1);
       printf("I read back %x, %x\n",data,data1);
     }
