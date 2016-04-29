@@ -1438,14 +1438,14 @@ size_t mbuf_insert(struct mbuf *a, size_t off, const void *buf, size_t len) {
     }
     a->len += len;
   } else if ((p = (char *) MBUF_REALLOC(
-                  a->buf, (a->len + len) * MBUF_SIZE_MULTIPLIER)) != NULL) {
+                    a->buf, (size_t) ((a->len + len) * MBUF_SIZE_MULTIPLIER))) != NULL) {
     a->buf = p;
     memmove(a->buf + off + len, a->buf + off, a->len - off);
     if (buf != NULL) {
       memcpy(a->buf + off, buf, len);
     }
     a->len += len;
-    a->size = a->len * MBUF_SIZE_MULTIPLIER;
+    a->size = (size_t) (a->len * MBUF_SIZE_MULTIPLIER);
   } else {
     len = 0;
   }
@@ -2276,7 +2276,7 @@ MG_INTERNAL struct mg_connection *mg_create_connection(
     conn->sock = INVALID_SOCKET;
     conn->handler = callback;
     conn->mgr = mgr;
-    conn->last_io_time = mg_time();
+    conn->last_io_time = (time_t) mg_time();
     conn->flags = opts.flags & _MG_ALLOWED_CONNECT_FLAGS_MASK;
     conn->user_data = opts.user_data;
     /*
@@ -2575,7 +2575,7 @@ MG_INTERNAL size_t recv_avail_size(struct mg_connection *conn, size_t max) {
 }
 
 void mg_send(struct mg_connection *nc, const void *buf, int len) {
-  nc->last_io_time = mg_time();
+   nc->last_io_time = (time_t)mg_time();
   if (nc->flags & MG_F_UDP) {
     mg_if_udp_send(nc, buf, len);
   } else {
@@ -2606,7 +2606,7 @@ static void mg_recv_common(struct mg_connection *nc, void *buf, int len) {
     MG_FREE(buf);
     return;
   }
-  nc->last_io_time = mg_time();
+  nc->last_io_time = (time_t)mg_time();
   if (nc->recv_mbuf.len == 0) {
     /* Adopt buf as recv_mbuf's backing store. */
     mbuf_free(&nc->recv_mbuf);
@@ -3395,7 +3395,7 @@ void mg_mgr_handle_conn(struct mg_connection *nc, int fd_flags, double now) {
   }
 
   if (!(fd_flags & (_MG_F_FD_CAN_READ | _MG_F_FD_CAN_WRITE))) {
-    mg_if_poll(nc, now);
+     mg_if_poll(nc, (time_t)now);
   }
   mg_if_timer(nc, now);
 
@@ -3707,7 +3707,7 @@ time_t mg_mgr_poll(struct mg_mgr *mgr, int milli) {
     }
   }
 
-  return now;
+  return (time_t)now;
 }
 
 #endif
