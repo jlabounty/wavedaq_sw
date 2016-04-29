@@ -1732,14 +1732,12 @@ void cs_hmac_sha1(const unsigned char *key, size_t keylen,
 /* Amalgamated: #include "common/platform.h" */
 /* Amalgamated: #include "common/str_util.h" */
 
-#ifdef _MG_PROVIDE_STRNLEN
-size_t strnlen(const char *s, size_t maxlen) {
+size_t mg_strnlen(const char *s, size_t maxlen) {
   size_t l = 0;
   for (; l < maxlen && s[l] != '\0'; l++) {
   }
   return l;
 }
-#endif
 
 #define C_SNPRINTF_APPEND_CHAR(ch)       \
   do {                                   \
@@ -1868,7 +1866,7 @@ int c_vsnprintf(char *buf, size_t buf_size, const char *fmt, va_list ap) {
       if (ch == 's') {
         const char *s = va_arg(ap, const char *); /* Always fetch parameter */
         int j;
-        int pad = field_width - (precision >= 0 ? strnlen(s, precision) : 0);
+        int pad = field_width - (precision >= 0 ? mg_strnlen(s, precision) : 0);
         for (j = 0; j < pad; j++) {
           C_SNPRINTF_APPEND_CHAR(' ');
         }
