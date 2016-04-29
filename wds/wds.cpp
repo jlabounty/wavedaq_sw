@@ -388,7 +388,7 @@ int main(int argc, char *argv[])
                i1 = atoi(argv[i+1]);
                p = strchr(argv[i+1], '-') + 1;
                i2 = atoi(p);
-               if (i1 >= 0 && i1 < 14 && i2>1 && i2<16) {
+               if (i1 >= 0 && i1 < 14 && i2>0 && i2<16) {
                   for (i=i1 ; i<=i2; i++) {
                      sprintf(gl.board[gl.n_boards++].name, "wd%03d", i);
                   }
