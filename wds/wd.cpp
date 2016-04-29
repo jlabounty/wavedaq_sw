@@ -442,8 +442,10 @@ int wd_init(GLOBALS *gl)
 
          if (gl->verbose_flag)
             printf("Listening on data port %d\n", gl->board[index].server_port);
-      } else
+      } else {
          gl->board[index].data_socket = gl->board[0].data_socket; // reuse socket
+         gl->board[index].server_port = gl->board[0].server_port; // and port
+      }
 
       // retrieve Ethernet address of board
       phe = gethostbyname(gl->board[index].name);
