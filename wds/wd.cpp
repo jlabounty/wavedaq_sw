@@ -236,6 +236,10 @@ void wd_set_fe(GLOBALS *gl, int index)
    
    if (gl->demo_flag)
       return;
+   
+   if (gl->verbose_flag)
+      printf("Set gain %d, PZC %d\n", gl->board[index].gain, gl->board[index].pzc);
+
    // set input configuration
    if (gl->board[index].pzc) { // pole zero cancellation on (bit=0)
       if (gl->board[index].gain == 0)
@@ -274,6 +278,7 @@ void wd_set_trigger_level(GLOBALS *gl, int index)
 
    if (gl->verbose_flag)
       printf("Set trigger level = %d mV\n", (int)(gl->board[index].trigger_level*1000));
+   
    sprintf(str, "dacset tlevel1 %d", (int)(gl->board[index].trigger_level*1000+900));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    sprintf(str, "dacset tlevel2 %d", (int)(gl->board[index].trigger_level*1000+900));
@@ -293,6 +298,9 @@ void wd_set_trigger_mode(GLOBALS *gl, int index)
    if (gl->demo_flag)
       return;
    
+   if (gl->verbose_flag)
+      printf("Set trigger mode  %d\n", gl->trigger_mode);
+
    // enable local trigger
    if (gl->trigger_mode == TM_NORMAL) {
       // trigger_cfg_or
@@ -315,6 +323,9 @@ void wd_set_osctca(GLOBALS *gl, int index)
    if (gl->demo_flag)
       return;
    
+   if (gl->verbose_flag)
+      printf("Set TCA oscillator %d\n", gl->osctca_flag);
+
    if (gl->osctca_flag) {
       assert(wd_send(gl, index, 100, "calosc on", NULL, NULL) > 0);  // enable TCA_CTRL
       assert(wd_send(gl, index, 100, "calbuf on", NULL, NULL) > 0);  // enbale BUFFER_CTRL
@@ -337,6 +348,7 @@ void wd_set_sampling_frequency(GLOBALS *gl, int index)
    // set sampling frequency
    if (gl->verbose_flag)
       printf("Set sampling frequency to %f GSPS", gl->sampling_frequency);
+   
    if (gl->sampling_frequency == 1)
       assert(wd_send(gl, index, 100, "regwr 2c 0003c800", NULL, NULL) > 0); // to be corrected!
    else if (gl->sampling_frequency == 2)
@@ -360,6 +372,7 @@ void wd_set_range(GLOBALS *gl, int index)
 
    if (gl->verbose_flag)
       printf("Set range = %g V\n", gl->board[index].range);
+   
    sprintf(str, "dacset ofs %d", (int)(1270-gl->board[index].range*1700)); // shift by 1.27V
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    
@@ -378,6 +391,7 @@ void wd_set_dcv(GLOBALS *gl, int index)
    
    if (gl->verbose_flag)
       printf("Set DC voltage = %g V\n", gl->dcv);
+   
    sprintf(str, "dacset caldc %d", (int)(1280-gl->dcv*1000)); // shift by 1.28V
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    
@@ -641,6 +655,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
             pe->drs1_trigger_cell = ph->drs1_trigger_cell;
             pe->trigger_type = 0; // not yet implemented
             
+            /*
             if (gl->verbose_flag)
                printf("From %s:%d, Frame %5d, ADC/Chn/Segment %d/%d/%d - %04d/%04d\n",
                       inet_ntoa(remote_addr.sin_addr),
@@ -651,6 +666,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
                       ph->channel_segment_number,
                       ph->drs0_trigger_cell,
                       ph->drs1_trigger_cell);
+            */
             
             if (current_frame == -1)
                current_frame = ph->readout_sequence_number;
