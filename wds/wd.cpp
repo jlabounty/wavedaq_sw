@@ -245,16 +245,16 @@ void wd_set_fe(GLOBALS *gl, int index)
       if (gl->board[index].gain == 0)
          byte = 0x02;
       else if (gl->board[index].gain == 1)
-         byte = 0x22;
+         byte = 0x0a;
       else if (gl->board[index].gain == 2)
-         byte = 0x62;
+         byte = 0x2A;
    } else { // pole zero cancellation off (bit=1)
       if (gl->board[index].gain == 0)
          byte = 0x82;
       else if (gl->board[index].gain == 1)
          byte = 0x8a;
       else if (gl->board[index].gain == 2)
-         byte = 0xba;
+         byte = 0xaa;
    }
    
    if (gl->osctca_flag)
