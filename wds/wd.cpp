@@ -350,7 +350,7 @@ void wd_set_sampling_frequency(GLOBALS *gl, int index)
    
    // set sampling frequency
    if (gl->verbose_flag)
-      printf("Set sampling frequency to %f GSPS", gl->sampling_frequency);
+      printf("Set sampling frequency to %f GSPS\n", gl->sampling_frequency);
    
    if (gl->sampling_frequency == 1)
       assert(wd_send(gl, index, 100, "regwr 2c 0003c800", NULL, NULL) > 0); // to be corrected!
@@ -568,11 +568,33 @@ int wd_init(GLOBALS *gl)
       sprintf(str, "%s.cal", gl->board[index].name);
       int fh = open(str, O_RDONLY, 0644);
       if (fh > 0) {
-         assert(read(fh, gl->board[index].wf_offset1, sizeof(float)*16*1024) == sizeof(float)*16*1024);
-         assert(read(fh, gl->board[index].wf_offset2, sizeof(float)*16*1024) == sizeof(float)*16*1024);
+         CALIB_DATA calib_data;
+         assert(read(fh, &calib_data, sizeof(calib_data)) == sizeof(calib_data));
+         
+         assert(memcmp(calib_data.version_id, "CAL1", 4) == 0);
+
+         if (fabs(calib_data.sampling_frequency - gl->sampling_frequency) > 0.001) {
+            printf("Warning: Calibration data is for %3g GSPS, running now at %3g GSPS\n",
+                   calib_data.sampling_frequency, gl->sampling_frequency);
+         }
+
+         if (fabs(calib_data.temperature - gl->board[index].temperature) > 5) {
+            printf("Warning: Calibration data is for %3g deg. C, running now at %3g deg. C\n",
+                   calib_data.temperature, gl->board[index].temperature);
+         }
+
+         memcpy(gl->board[index].wf_offset1, calib_data.wf_offset1, sizeof(calib_data.wf_offset1));
+         memcpy(gl->board[index].wf_offset2, calib_data.wf_offset2, sizeof(calib_data.wf_offset2));
+         memcpy(gl->board[index].wf_gain1, calib_data.wf_gain1, sizeof(calib_data.wf_gain1));
+         memcpy(gl->board[index].wf_gain2, calib_data.wf_gain2, sizeof(calib_data.wf_gain2));
       } else {
          memset(gl->board[index].wf_offset1, 0, sizeof(float)*16*1024);;
          memset(gl->board[index].wf_offset2, 0, sizeof(float)*16*1024);;
+         for (int ch=0 ; ch < 16 ; ch++)
+            for (int bin=0 ; bin<1024 ; bin++) {
+               gl->board[index].wf_gain1[ch][bin] = 1;
+               gl->board[index].wf_gain2[ch][bin] = 1;
+            }
       }
    }
    
@@ -802,6 +824,17 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
                            waveform[i][j] -= gl->board[b].wf_offset2[i][j];
                   }
                   
+                  // gain calibration
+                  if (gl->gain_calib_flag) {
+                     for (i=0 ; i<16 ; i++)
+                        for (int j=0 ; j<1024 ; j++) {
+                           if (waveform[i][j] > 0)
+                              waveform[i][j] *= gl->board[b].wf_gain1[i][j];
+                           else
+                              waveform[i][j] *= gl->board[b].wf_gain2[i][j];
+                        }
+                  }
+
                   // remove spikes
                   if (gl->remove_spikes) {
                      remove_spikes(gl, pe->drs0_trigger_cell, waveform);
@@ -827,7 +860,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
 
 int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
 {
-   float wfU[16][1024], awf1[16][1024], awf2[16][1024];
+   float wfU[16][1024], awf1[16][1024], awf2[16][1024], awf3[16][1024], awf4[16][1024];
    WD2_EVENT eventHeader;
    char str[80];
    
@@ -844,11 +877,16 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
    }
 
    if (pr->state == CS_FIRST_SAMPLE) {
+      memset(awf1, 0, sizeof(awf1));
+      memset(awf2, 0, sizeof(awf2));
+      memset(awf3, 0, sizeof(awf3));
+      memset(awf4, 0, sizeof(awf4));
+      memset(pr, 0, sizeof(CALIB_PROGRESS));
       pr->state   = CS_RUNNING;
-      pr->n_iter1 = 500;
-      pr->i_iter1 = 0;
-      pr->n_iter2 = 500;
-      pr->i_iter2 = 0;
+      pr->n_iter1 = 200;
+      pr->n_iter2 = 200;
+      pr->n_iter3 = 200;
+      pr->n_iter4 = 200;
       pr->n_board = gl->n_boards;
       pr->ave = NULL;
    }
@@ -862,8 +900,8 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
          gl->rotate_flag = 0;
          gl->ofs_calib1_flag = 0;
          gl->ofs_calib2_flag = 0;
+         gl->gain_calib_flag = 0;
          pr->ave = new Averager(2, 8, 1024, pr->n_iter1);
-         memset(awf1, 0, sizeof(awf1));
       }
 
       pr->i_iter1++;
@@ -877,7 +915,8 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
          for (int bin=0 ; bin<1024 ; bin++)
             pr->ave->Add(ch/8, ch%8, bin, wfU[ch][bin]);
       
-      pr->progress = (double) pr->i_iter1 / pr->n_iter1 * 0.5;
+      pr->progress = (double)(pr->i_iter1 + pr->i_iter2 + pr->i_iter3 + pr->i_iter4) /
+                             (pr->n_iter1 + pr->n_iter2 + pr->n_iter3 + pr->n_iter4);
       
       // calibration finished
       if (pr->i_iter1 == pr->n_iter1) {
@@ -908,10 +947,10 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
       // initialize data on first iteration
       if (pr->i_iter2 == 0) {
          pr->ave->Reset();
-         memset(awf2, 0, sizeof(awf2));
          gl->rotate_flag = 1; // now rotate waveforms
          gl->ofs_calib1_flag = 1; // and do 1st calibration
          gl->ofs_calib2_flag = 0;
+         gl->gain_calib_flag = 0;
       }
 
       pr->i_iter2++;
@@ -925,7 +964,8 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
          for (int bin=0 ; bin<1024 ; bin++)
             pr->ave->Add(ch/8, ch%8, bin, wfU[ch][bin]);
       
-      pr->progress = (double)pr->i_iter2 / pr->n_iter2 * 0.5 + 0.5;
+      pr->progress = (double)(pr->i_iter1 + pr->i_iter2 + pr->i_iter3 + pr->i_iter4) /
+                             (pr->n_iter1 + pr->n_iter2 + pr->n_iter3 + pr->n_iter4);
       
       // calibration finished
       if (pr->i_iter2 == pr->n_iter2) {
@@ -935,16 +975,94 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
          
          // save calibration
          assert(write(pr->fh, awf2, sizeof(awf2)) == sizeof(awf2));
+      }
+      
+      return SUCCESS;
+   }
+   
+   //---- Positive Gain Calibration
+   
+   if (pr->i_iter3 < pr->n_iter3) {
+      
+      // initialize data on first iteration
+      if (pr->i_iter3 == 0) {
+         pr->ave->Reset();
+         gl->rotate_flag = 1;     // now rotate waveforms
+         gl->ofs_calib1_flag = 1; // and do 1st calibration
+         gl->ofs_calib2_flag = 1; // and do 2nd calibration
+      }
+      
+      pr->i_iter3++;
+      
+      wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
+      assert(wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU) == SUCCESS);
+      
+      sleep_ms(10);
+      
+      for (int ch=0 ; ch<16 ; ch++)
+         for (int bin=0 ; bin<1024 ; bin++)
+            pr->ave->Add(ch/8, ch%8, bin, wfU[ch][bin]);
+      
+      pr->progress = (double)(pr->i_iter1 + pr->i_iter2 + pr->i_iter3 + pr->i_iter4) /
+                             (pr->n_iter1 + pr->n_iter2 + pr->n_iter3 + pr->n_iter4);
+      
+      // calibration finished
+      if (pr->i_iter3 == pr->n_iter3) {
+         for (int ch=0 ; ch<16 ; ch++)
+            for (int bin=0 ; bin<1024 ; bin++)
+               awf3[ch][bin] = (float)pr->ave->Median(ch/8, ch%8, bin);
+         
+         // save calibration
+         assert(write(pr->fh, awf3, sizeof(awf3)) == sizeof(awf3));
+      }
+      
+      return SUCCESS;
+   }
+
+   //---- Negative Gain Calibration
+   
+   if (pr->i_iter4 < pr->n_iter4) {
+      
+      // initialize data on first iteration
+      if (pr->i_iter4 == 0) {
+         pr->ave->Reset();
+         gl->rotate_flag = 1;     // now rotate waveforms
+         gl->ofs_calib1_flag = 1; // and do 1st calibration
+         gl->ofs_calib2_flag = 1; // and do 2nd calibration
+      }
+      
+      pr->i_iter4++;
+      
+      wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
+      assert(wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU) == SUCCESS);
+      
+      sleep_ms(10);
+      
+      for (int ch=0 ; ch<16 ; ch++)
+         for (int bin=0 ; bin<1024 ; bin++)
+            pr->ave->Add(ch/8, ch%8, bin, wfU[ch][bin]);
+      
+      pr->progress = (double)(pr->i_iter1 + pr->i_iter2 + pr->i_iter3 + pr->i_iter4) /
+                             (pr->n_iter1 + pr->n_iter2 + pr->n_iter3 + pr->n_iter4);
+      
+      // calibration finished
+      if (pr->i_iter4 == pr->n_iter4) {
+         for (int ch=0 ; ch<16 ; ch++)
+            for (int bin=0 ; bin<1024 ; bin++)
+               awf3[ch][bin] = (float)pr->ave->Median(ch/8, ch%8, bin);
+         
+         // save calibration
+         assert(write(pr->fh, awf4, sizeof(awf4)) == sizeof(awf4));
          
          close(pr->fh);
-
+         
          // switch to next board
          pr->i_board++;
          pr->state = CS_FIRST_SAMPLE;
          pr->progress = 1;
          delete pr->ave;
          pr->ave = NULL;
-
+         
          if (pr->i_board == pr->n_board) {
             pr->state = CS_INACTIVE;
             gl->rotate_flag = 1;
@@ -952,6 +1070,8 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
             gl->ofs_calib2_flag = 1;
          }
       }
+      
+      return SUCCESS;
    }
 
    return SUCCESS;
@@ -1119,4 +1239,25 @@ void remove_spikes(GLOBALS *gl, short trigger_cell, float wf[][1024])
       if (k < n_rsp-1 && rsp[k] == 0 && rsp[k+1] == 1020)
          k++; // skip second half of double spike
    }
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+void wd_read_temp(GLOBALS *gl)
+{
+   static time_t last = 0;
+   time_t now;
+   
+   time(&now);
+   if (now > last + 5) {
+      for (int index=0 ; index<gl->n_boards ; index++) {
+         int size;
+         char str[80];
+         size = sizeof(str);
+         assert(wd_send(gl, index, 100, "temp", str, &size) > 0);
+         gl->board[index].temperature = atof(str+5);
+      }
+      last = now;
+   }
+      
 }
