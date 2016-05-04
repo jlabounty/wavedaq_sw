@@ -12,39 +12,45 @@
 #define FAILURE 0
 
 typedef struct {
-   int           serial_number;
-   char          name[32];
-   int           cmd_socket;
-   int           data_socket;
-   int           server_port;
-   unsigned char eth_addr[16];
-   float         trigger_level;
-   char          trigger_mask[10];
-   int           gain;
-   int           pzc;
-   float         range;
-   float         wf_offset1[16][1024];
-   float         wf_offset2[16][1024];
+   int            serial_number;
+   char           name[32];
+   int            cmd_socket;
+   int            data_socket;
+   int            server_port;
+   unsigned char  eth_addr[16];
+   float          trigger_level;
+   char           trigger_mask[10];
+   int            gain;
+   int            pzc;
+   float          range;
+   float          temperature;
+   unsigned int   scaler[16];
+
+   float          wf_offset1[16][1024];
+   float          wf_offset2[16][1024];
+   float          wf_gain1[16][1024];
+   float          wf_gain2[16][1024];
 } WDB;
 
 typedef struct {
-   int   demo_flag;
-   int   rotate_flag;
-   int   verbose_flag;
-   int   adc_flag;
-   int   ofs_calib1_flag;
-   int   ofs_calib2_flag;
-   int   tcalib_flag;
-   int   remove_spikes;
-   int   http_port;
-   int   n_boards;
-   float sampling_frequency;
-   int   trigger_mode;
-   int   osctca_flag;
-   int   dcv_flag;
-   float dcv;
-   WDB   board[16];
-   int   cmd;
+   int            demo_flag;
+   int            rotate_flag;
+   int            verbose_flag;
+   int            adc_flag;
+   int            ofs_calib1_flag;
+   int            ofs_calib2_flag;
+   int            gain_calib_flag;
+   int            tcalib_flag;
+   int            remove_spikes;
+   int            http_port;
+   int            n_boards;
+   float          sampling_frequency;
+   int            trigger_mode;
+   int            osctca_flag;
+   int            dcv_flag;
+   float          dcv;
+   WDB            board[16];
+   int            cmd;
 } GLOBALS;
 
 typedef struct {
@@ -61,18 +67,33 @@ typedef struct {
 } WD2_EVENT;
 
 typedef struct {
-   int      state;
-   double   progress;
-   int      n_board;
-   int      i_board;
-   int      n_iter1;
-   int      i_iter1;
-   int      n_iter2;
-   int      i_iter2;
-   int      index;
-   Averager *ave;
-   int      fh;
+   int            state;
+   double         progress;
+   int            n_board;
+   int            i_board;
+   int            n_iter1;
+   int            i_iter1;
+   int            n_iter2;
+   int            i_iter2;
+   int            n_iter3;
+   int            i_iter3;
+   int            n_iter4;
+   int            i_iter4;
+   int            index;
+   Averager       *ave;
+   int            fh;
 } CALIB_PROGRESS;
+
+typedef struct {
+   char           version_id[4];
+   unsigned int   crc;
+   float          sampling_frequency;
+   float          temperature;
+   float          wf_offset1[16][1024];
+   float          wf_offset2[16][1024];
+   float          wf_gain1[16][1024];
+   float          wf_gain2[16][1024];
+} CALIB_DATA;
 
 // calibration states
 #define CS_INACTIVE     0
@@ -97,6 +118,7 @@ void wd_set_dcv(GLOBALS *gl, int index);
 int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wf[16][1024]);
 int wd_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *result, int *size);
 int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *p);
+void wd_read_temp(GLOBALS *gl);
 
 size_t strlcpy(char *dst, const char *src, size_t size);
 size_t strlcat(char *dst, const char *src, size_t size);

@@ -109,6 +109,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          gl->ofs_calib1_flag = atoi(value);
       else if (mg_vcmp(&hm->uri, "/gl/ofs_calib2_flag") == 0)
          gl->ofs_calib2_flag = atoi(value);
+      else if (mg_vcmp(&hm->uri, "/gl/gain_calib_flag") == 0)
+         gl->gain_calib_flag = atoi(value);
       else if (mg_vcmp(&hm->uri, "/gl/remove_spikes") == 0)
          gl->remove_spikes = atoi(value);
       else if (mg_vcmp(&hm->uri, "/gl/rotate_flag") == 0)
@@ -123,6 +125,9 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
    
    // gloabls
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/gl") == 0) {
+      if (gl->verbose_flag)
+         printf("Load /gl\n");
+      
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
       
       mg_printf_http_chunk(nc, "{\n");
@@ -132,6 +137,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "   \"adc_flag\": %s,\n",           gl->adc_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"ofs_calib1_flag\": %s,\n",    gl->ofs_calib1_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"ofs_calib2_flag\": %s,\n",    gl->ofs_calib2_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"gain_calib_flag\": %s,\n",    gl->gain_calib_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"tcalib_flag\": %s,\n",        gl->tcalib_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"remove_spikes\": %s,\n",      gl->remove_spikes ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"http_port\": %d,\n",          gl->http_port);
@@ -151,7 +157,13 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "         \"trigger_mask\": \"%s\",\n",  gl->board[i].trigger_mask);
          mg_printf_http_chunk(nc, "         \"gain\": %d,\n",              gl->board[i].gain);
          mg_printf_http_chunk(nc, "         \"pzc\": %s,\n",               gl->board[i].pzc ? "true" : "false");
-         mg_printf_http_chunk(nc, "         \"range\": %1.3lf\n",          gl->board[i].range);
+         mg_printf_http_chunk(nc, "         \"range\": %1.3lf,\n",         gl->board[i].range);
+         mg_printf_http_chunk(nc, "         \"temperature\": %1.1lf,\n",   gl->board[i].temperature);
+         mg_printf_http_chunk(nc, "         \"scaler\": [\n");
+         int s;
+         for (s=0 ; s<15 ; s++)
+            mg_printf_http_chunk(nc, "            %d,\n", gl->board[i].scaler[s]);
+         mg_printf_http_chunk(nc, "            %d]\n", gl->board[i].scaler[s]);
          mg_printf_http_chunk(nc, "      }\n");
          if (i<gl->n_boards-1)
             mg_printf_http_chunk(nc, ",");
@@ -310,6 +322,7 @@ int main(int argc, char *argv[])
    gl.sampling_frequency = 5;
    gl.ofs_calib1_flag    = 1;
    gl.ofs_calib2_flag    = 1;
+   gl.gain_calib_flag    = 1;
    gl.rotate_flag        = 1;
    gl.remove_spikes      = 1;
    gl.trigger_mode       = TM_AUTO;
@@ -367,6 +380,7 @@ int main(int argc, char *argv[])
       else if (argv[i][0] == '-' && argv[i][1] == 'r') {
          gl.ofs_calib1_flag = 0;
          gl.ofs_calib2_flag = 0;
+         gl.gain_calib_flag = 0;
       }
       
       else if (argv[i][0] == '-' && argv[i][1] == 's')
@@ -508,6 +522,9 @@ int main(int argc, char *argv[])
       } else
          // Yield to server, 10ms timeout
          mg_mgr_poll(&mgr, 10);
+      
+      // read board temperatures periodically
+      wd_read_temp(&gl);
    }
 
    // mg_mgr_free(&mgr);

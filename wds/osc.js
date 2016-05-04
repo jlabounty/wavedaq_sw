@@ -96,6 +96,10 @@ function Oscilloscope(div) { // constructor
    // measurements
    this.lastMeasurement = 0;
    this.sigma = [];
+   
+   // board info
+   this.temperature = 12.34;
+   this.firmware = 1234;
 }
 
 Oscilloscope.prototype.sendWaveforms = function(wf)
@@ -152,6 +156,7 @@ Oscilloscope.prototype.draw = function()
    this.drawGrid(ctx);
    this.drawWF(ctx);
    this.drawFPS(ctx);
+   this.drawTemperature(ctx);
    this.drawMeasurements(ctx);
 }
 
@@ -163,6 +168,16 @@ Oscilloscope.prototype.drawFPS = function(ctx)
    ctx.textAlign = "left";
    ctx.textBaseline = "top";
    ctx.fillText(this.nEPS + " EPS  " + this.nFPS + " FPS", 10, this.y2+8);
+}
+
+Oscilloscope.prototype.drawTemperature = function(ctx)
+{
+   ctx.fillStyle = 'white';
+   ctx.strokeStyle = 'white';
+   ctx.font = '14px sans-serif';
+   ctx.textAlign = "left";
+   ctx.textBaseline = "top";
+   ctx.fillText("T=" + this.GL.board[0].temperature.toFixed(1) + " C", 130, this.y2+8);
 }
 
 Oscilloscope.prototype.drawMeasurements = function(ctx)
@@ -189,7 +204,7 @@ Oscilloscope.prototype.drawMeasurements = function(ctx)
       this.lastMeasurement = d.getTime();
    }
    
-   x = 130;
+   x = 220;
    for (var c=0 ; c<16 ; c++) {
       if (this.chOn[c] && this.sigma[c] != undefined) {
          ctx.fillStyle = this.chnColors[c];

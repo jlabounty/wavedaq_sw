@@ -51,6 +51,15 @@ function init()
    
    // schedule first waveform load
    window.setTimeout(loadWF, 10);
+   
+   // schedule loadGL()
+   window.setTimeout(updateGl, 5000);
+}
+
+function updateGl()
+{
+   loadGl();
+   window.setTimeout(updateGl, 5000);
 }
 
 function loadGl()
@@ -67,7 +76,10 @@ function loadGl()
             var opt = document.createElement('option');
             opt.innerHTML = OSC.GL.board[i].name;
             opt.value = OSC.GL.board[i].name;
-            sel.appendChild(opt);
+            if (sel.childNodes[i+1] == undefined)
+               sel.appendChild(opt);
+            else if (sel.childNodes[i+1] != opt)
+               sel.replaceChild(opt, sel.childNodes[i+1]); /// does not work!!!
          }
          OSC.nWd = OSC.GL.board.length;
 
@@ -87,6 +99,7 @@ function loadGl()
 
          document.getElementById("calib1").checked = OSC.GL.ofs_calib1_flag;
          document.getElementById("calib2").checked = OSC.GL.ofs_calib2_flag;
+         document.getElementById("calib3").checked = OSC.GL.gain_calib_flag;
          document.getElementById("spikes").checked = OSC.GL.remove_spikes;
          document.getElementById("rotate").checked = OSC.GL.rotate_flag;
       }
