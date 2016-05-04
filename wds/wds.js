@@ -523,7 +523,6 @@ function setRange(s)
    var req = new XMLHttpRequest();
    req.open("PUT", "gl/range", true);
    req.send(parseFloat(s.value));
-   alert("Please execute voltage calibration after range change");
 }
 
 function btnOfsZero()

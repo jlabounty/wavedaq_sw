@@ -265,6 +265,9 @@ void wd_set_fe(GLOBALS *gl, int index)
 
    sprintf(str, "feset all %02X", byte);
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+   
+   // adjust range offset which depends on gain
+   wd_set_range(gl, index);
 }
 
 /*-----------------------------------------------------------------------------------------*/
@@ -373,11 +376,24 @@ void wd_set_range(GLOBALS *gl, int index)
    if (gl->verbose_flag)
       printf("Set range = %g V\n", gl->board[index].range);
    
-   sprintf(str, "dacset ofs %d", (int)(1270-gl->board[index].range*1700)); // shift by 1.27V
+   if (fabs(gl->board[index].range) < 0.001) {
+      if (gl->board[index].gain == 2)
+         sprintf(str, "dacset ofs %d", 1270);
+      else
+         sprintf(str, "dacset ofs %d", 1300);
+   } else if (fabs(gl->board[index].range - (-0.45)) < 0.001) {
+      if (gl->board[index].gain == 2)
+         sprintf(str, "dacset ofs %d", 1640);
+      else
+         sprintf(str, "dacset ofs %d", 2000);
+   } else if (fabs(gl->board[index].range - 0.45) < 0.001) {
+      if (gl->board[index].gain == 2)
+         sprintf(str, "dacset ofs %d", 890);
+      else
+         sprintf(str, "dacset ofs %d", 580);
+   }
+
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   
-   assert(wd_send(gl, index, 100, "dacset rofs 1550", NULL, NULL) > 0);
-   assert(wd_send(gl, index, 100, "dacset caldc 1280", NULL, NULL) > 0);
 }
 
 /*-----------------------------------------------------------------------------------------*/
@@ -531,6 +547,12 @@ int wd_init(GLOBALS *gl)
 
       // set bias
       assert(wd_send(gl, index, 100, "dacset bias 700", NULL, NULL) > 0);
+
+      // set ROFS
+      assert(wd_send(gl, index, 100, "dacset rofs 1550", NULL, NULL) > 0);
+      
+      // set caldc to zero
+      assert(wd_send(gl, index, 100, "dacset caldc 1280", NULL, NULL) > 0);
 
       wd_set_trigger_level(gl, index);
       wd_set_range(gl, index);
