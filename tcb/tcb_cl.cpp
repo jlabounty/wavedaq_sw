@@ -29,10 +29,11 @@ int main()
   u_int32_t rdatablt[128] = {0};
   u_int32_t rmem[128], memAddress, memRewind;
   u_int32_t presca[5], counters[5], masks[4], swmasks[4]={0};
+  u_int32_t scalers[128], scalertime;
   int loopnumber=10;
   clock_t t_before, t_after;
   // open mscb connection
-  handle = mscb_init("MSCB178", 65535, "", 0);
+  handle = mscb_init("MSCB177", 65535, "", 0);
   // create TCB Board
   TCB TCBBoard(17);
   TCBBoard.SetIDCode(handle);
@@ -50,7 +51,8 @@ int main()
     printf("[17]: Read Time Stamps     \t \t  [18]: Set in data masks\n");
     printf("[19]: Setup multiple run   \t \t  [20]: Run multiple\n");
     printf("[21]: Select Slot          \t \t  [22]: Set trigger 3 delay\n");
-    printf("[23]: Set trg bus delay    \t \t  [-1]: Exit\n");
+    printf("[23]: Set trg bus delay    \t \t  [24]: Get Scalers\n");
+    printf("[-1]: Exit\n");
 
     do {
       printf("Give an option: ");
@@ -254,6 +256,14 @@ int main()
       TCBBoard.SetTRGBusDLY(handle,&data,&data1);
       TCBBoard.GetTRGBusDLY(handle,&data,&data1);
       printf("I read back %x, %x\n",data,data1);
+    }
+    if(option == 24) {
+      printf(" opt = 24 : Get Scalers ... \n");
+      TCBBoard.GetScalers(handle, scalers, &scalertime);
+      for (int i=0; i<128;i++){
+		printf("%3d:  %08x\n", i, scalers[i]);
+      }
+      printf("time: %08x\n", scalertime);
     }
 
 
