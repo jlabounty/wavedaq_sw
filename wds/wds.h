@@ -12,6 +12,17 @@
 #define FAILURE 0
 
 typedef struct {
+   char           version_id[4];
+   unsigned int   crc;
+   float          sampling_frequency;
+   float          temperature;
+   float          wf_offset1[16][1024];
+   float          wf_offset2[16][1024];
+   float          wf_gain1[16][1024];
+   float          wf_gain2[16][1024];
+} CALIB_DATA;
+
+typedef struct {
    int            serial_number;
    char           name[32];
    int            cmd_socket;
@@ -26,10 +37,7 @@ typedef struct {
    float          temperature;
    unsigned int   scaler[16];
 
-   float          wf_offset1[16][1024];
-   float          wf_offset2[16][1024];
-   float          wf_gain1[16][1024];
-   float          wf_gain2[16][1024];
+   CALIB_DATA     calib;
 } WDB;
 
 typedef struct {
@@ -82,18 +90,8 @@ typedef struct {
    int            index;
    Averager       *ave;
    int            fh;
+   float          prev_range;
 } CALIB_PROGRESS;
-
-typedef struct {
-   char           version_id[4];
-   unsigned int   crc;
-   float          sampling_frequency;
-   float          temperature;
-   float          wf_offset1[16][1024];
-   float          wf_offset2[16][1024];
-   float          wf_gain1[16][1024];
-   float          wf_gain2[16][1024];
-} CALIB_DATA;
 
 // calibration states
 #define CS_INACTIVE     0

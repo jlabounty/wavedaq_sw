@@ -568,32 +568,27 @@ int wd_init(GLOBALS *gl)
       sprintf(str, "%s.cal", gl->board[index].name);
       int fh = open(str, O_RDONLY, 0644);
       if (fh > 0) {
-         CALIB_DATA calib_data;
-         assert(read(fh, &calib_data, sizeof(calib_data)) == sizeof(calib_data));
+         assert(read(fh, &gl->board[index].calib, sizeof(CALIB_DATA)) == sizeof(CALIB_DATA));
          
-         assert(memcmp(calib_data.version_id, "CAL1", 4) == 0);
+         assert(memcmp(gl->board[index].calib.version_id, "CAL1", 4) == 0);
 
-         if (fabs(calib_data.sampling_frequency - gl->sampling_frequency) > 0.001) {
+         if (fabs(gl->board[index].calib.sampling_frequency - gl->sampling_frequency) > 0.001) {
             printf("Warning: Calibration data is for %3g GSPS, running now at %3g GSPS\n",
-                   calib_data.sampling_frequency, gl->sampling_frequency);
+                   gl->board[index].calib.sampling_frequency, gl->sampling_frequency);
          }
 
-         if (fabs(calib_data.temperature - gl->board[index].temperature) > 5) {
+         if (fabs(gl->board[index].calib.temperature - gl->board[index].temperature) > 5) {
             printf("Warning: Calibration data is for %3g deg. C, running now at %3g deg. C\n",
-                   calib_data.temperature, gl->board[index].temperature);
+                   gl->board[index].calib.temperature, gl->board[index].temperature);
          }
 
-         memcpy(gl->board[index].wf_offset1, calib_data.wf_offset1, sizeof(calib_data.wf_offset1));
-         memcpy(gl->board[index].wf_offset2, calib_data.wf_offset2, sizeof(calib_data.wf_offset2));
-         memcpy(gl->board[index].wf_gain1, calib_data.wf_gain1, sizeof(calib_data.wf_gain1));
-         memcpy(gl->board[index].wf_gain2, calib_data.wf_gain2, sizeof(calib_data.wf_gain2));
       } else {
-         memset(gl->board[index].wf_offset1, 0, sizeof(float)*16*1024);;
-         memset(gl->board[index].wf_offset2, 0, sizeof(float)*16*1024);;
+         memset(gl->board[index].calib.wf_offset1, 0, sizeof(float)*16*1024);;
+         memset(gl->board[index].calib.wf_offset2, 0, sizeof(float)*16*1024);;
          for (int ch=0 ; ch < 16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++) {
-               gl->board[index].wf_gain1[ch][bin] = 1;
-               gl->board[index].wf_gain2[ch][bin] = 1;
+               gl->board[index].calib.wf_gain1[ch][bin] = 1;
+               gl->board[index].calib.wf_gain2[ch][bin] = 1;
             }
       }
    }
@@ -806,34 +801,52 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
                      if (gl->rotate_flag) {
                         for (i=0 ; i<8 ; i++)
                            for (int j=0 ; j<1024 ; j++)
-                              waveform[i][j] -= gl->board[b].wf_offset1[i][(j+pe->drs0_trigger_cell) % 1024];
+                              waveform[i][j] -= gl->board[b].calib.wf_offset1[i][(j+pe->drs0_trigger_cell) % 1024];
                         for (i=8 ; i<16 ; i++)
                            for (int j=0 ; j<1024 ; j++)
-                              waveform[i][j] -= gl->board[b].wf_offset1[i][(j+pe->drs1_trigger_cell) % 1024];
+                              waveform[i][j] -= gl->board[b].calib.wf_offset1[i][(j+pe->drs1_trigger_cell) % 1024];
                      } else {
                         for (i=0 ; i<16 ; i++)
                            for (int j=0 ; j<1024 ; j++)
-                              waveform[i][j] -= gl->board[b].wf_offset1[i][j];
+                              waveform[i][j] -= gl->board[b].calib.wf_offset1[i][j];
                      }
-                  }
-                  
-                  // start-to-end offset calibration
-                  if (gl->ofs_calib2_flag) {
-                     for (i=0 ; i<16 ; i++)
-                        for (int j=0 ; j<1024 ; j++)
-                           waveform[i][j] -= gl->board[b].wf_offset2[i][j];
                   }
                   
                   // gain calibration
                   if (gl->gain_calib_flag) {
-                     for (i=0 ; i<16 ; i++)
-                        for (int j=0 ; j<1024 ; j++) {
-                           if (waveform[i][j] > 0)
-                              waveform[i][j] *= gl->board[b].wf_gain1[i][j];
-                           else
-                              waveform[i][j] *= gl->board[b].wf_gain2[i][j];
-                        }
+                     if (gl->rotate_flag) {
+                        for (i=0 ; i<8 ; i++)
+                           for (int j=0 ; j<1024 ; j++) {
+                              if (waveform[i][j] > 0)
+                                 waveform[i][j] /= gl->board[b].calib.wf_gain1[i][(j+pe->drs0_trigger_cell) % 1024];
+                              else
+                                 waveform[i][j] /= gl->board[b].calib.wf_gain2[i][(j+pe->drs0_trigger_cell) % 1024];
+                           }
+                        for (i=8 ; i<16 ; i++)
+                           for (int j=0 ; j<1024 ; j++) {
+                              if (waveform[i][j] > 0)
+                                 waveform[i][j] /= gl->board[b].calib.wf_gain1[i][(j+pe->drs1_trigger_cell) % 1024];
+                              else
+                                 waveform[i][j] /= gl->board[b].calib.wf_gain2[i][(j+pe->drs1_trigger_cell) % 1024];
+                           }
+                     } else {
+                        for (i=0 ; i<16 ; i++)
+                           for (int j=0 ; j<1024 ; j++) {
+                              if (waveform[i][j] > 0)
+                                 waveform[i][j] /= gl->board[b].calib.wf_gain1[i][j];
+                              else
+                                 waveform[i][j] /= gl->board[b].calib.wf_gain2[i][j];
+                           }
+                     }
                   }
+
+                  // start-to-end offset calibration
+                  if (gl->ofs_calib2_flag) {
+                     for (i=0 ; i<16 ; i++)
+                        for (int j=0 ; j<1024 ; j++)
+                           waveform[i][j] -= gl->board[b].calib.wf_offset2[i][j];
+                  }
+                  
 
                   // remove spikes
                   if (gl->remove_spikes) {
@@ -860,7 +873,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
 
 int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
 {
-   float wfU[16][1024], awf1[16][1024], awf2[16][1024], awf3[16][1024], awf4[16][1024];
+   float wfU[16][1024];
    WD2_EVENT eventHeader;
    char str[80];
    
@@ -872,23 +885,23 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
    }
    
    if (pr->state == CS_FIRST_BOARD) {
-      pr->state   = CS_FIRST_SAMPLE;
-      pr->i_board = 0;
-   }
-
-   if (pr->state == CS_FIRST_SAMPLE) {
-      memset(awf1, 0, sizeof(awf1));
-      memset(awf2, 0, sizeof(awf2));
-      memset(awf3, 0, sizeof(awf3));
-      memset(awf4, 0, sizeof(awf4));
       memset(pr, 0, sizeof(CALIB_PROGRESS));
-      pr->state   = CS_RUNNING;
+      pr->state   = CS_FIRST_SAMPLE;
       pr->n_iter1 = 200;
       pr->n_iter2 = 200;
       pr->n_iter3 = 200;
       pr->n_iter4 = 200;
       pr->n_board = gl->n_boards;
-      pr->ave = NULL;
+      pr->i_board = 0;
+   }
+
+   if (pr->state == CS_FIRST_SAMPLE) {
+      pr->progress = 0;
+      pr->i_iter1  = 0;
+      pr->i_iter2  = 0;
+      pr->i_iter3  = 0;
+      pr->i_iter4  = 0;
+      pr->state    = CS_RUNNING;
    }
 
    //---- Primary Calibration ----
@@ -901,6 +914,15 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
          gl->ofs_calib1_flag = 0;
          gl->ofs_calib2_flag = 0;
          gl->gain_calib_flag = 0;
+         gl->remove_spikes   = 0;
+         
+         pr->prev_range = gl->board[pr->i_board].range;
+         gl->board[pr->i_board].range = 0; // range -0.5 ... + 0.5V
+         wd_set_range(gl, pr->i_board);
+         gl->dcv = 0;
+         gl->dcv_flag = 1; // switch multiplexer
+         wd_set_dcv(gl, pr->i_board);
+         
          pr->ave = new Averager(2, 8, 1024, pr->n_iter1);
       }
 
@@ -922,19 +944,9 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
       if (pr->i_iter1 == pr->n_iter1) {
          for (int ch=0 ; ch<16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
-               awf1[ch][bin] = (float)pr->ave->Median(ch/8, ch%8, bin);
+               gl->board[pr->i_board].calib.wf_offset1[ch][bin] = (float)pr->ave->Median(ch/8, ch%8, bin);
          
          // ave->SaveNormalizedDistribution("wf.csv", 0);
-         
-         // save calibration
-         sprintf(str, "%s.cal", gl->board[pr->i_board].name);
-         pr->fh = open(str, O_WRONLY | O_CREAT, 0644);
-         assert(pr->fh > 0);
-         assert(write(pr->fh, awf1, sizeof(awf1)) == sizeof(awf1));
-         
-         for (int ch=0 ; ch<16 ; ch++)
-            for (int j=0 ; j<1024 ; j++)
-               gl->board[pr->i_board].wf_offset1[ch][j] = awf1[ch][j];
       }
 
       return SUCCESS;
@@ -947,8 +959,8 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
       // initialize data on first iteration
       if (pr->i_iter2 == 0) {
          pr->ave->Reset();
-         gl->rotate_flag = 1; // now rotate waveforms
-         gl->ofs_calib1_flag = 1; // and do 1st calibration
+         gl->rotate_flag     = 1; // rotate waveforms
+         gl->ofs_calib1_flag = 1; // do 1st calibration
          gl->ofs_calib2_flag = 0;
          gl->gain_calib_flag = 0;
       }
@@ -971,10 +983,7 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
       if (pr->i_iter2 == pr->n_iter2) {
          for (int ch=0 ; ch<16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
-               awf2[ch][bin] = (float)pr->ave->Median(ch/8, ch%8, bin);
-         
-         // save calibration
-         assert(write(pr->fh, awf2, sizeof(awf2)) == sizeof(awf2));
+               gl->board[pr->i_board].calib.wf_offset2[ch][bin] = (float)pr->ave->Median(ch/8, ch%8, bin);
       }
       
       return SUCCESS;
@@ -987,9 +996,14 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
       // initialize data on first iteration
       if (pr->i_iter3 == 0) {
          pr->ave->Reset();
-         gl->rotate_flag = 1;     // now rotate waveforms
-         gl->ofs_calib1_flag = 1; // and do 1st calibration
-         gl->ofs_calib2_flag = 1; // and do 2nd calibration
+         gl->rotate_flag     = 0;
+         gl->ofs_calib1_flag = 1; // do 1st calibration
+         gl->ofs_calib2_flag = 0;
+         gl->gain_calib_flag = 0;
+
+         gl->dcv             = 0.45;
+         gl->dcv_flag        = 1;
+         wd_set_dcv(gl, pr->i_board);
       }
       
       pr->i_iter3++;
@@ -1010,10 +1024,7 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
       if (pr->i_iter3 == pr->n_iter3) {
          for (int ch=0 ; ch<16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
-               awf3[ch][bin] = (float)pr->ave->Median(ch/8, ch%8, bin);
-         
-         // save calibration
-         assert(write(pr->fh, awf3, sizeof(awf3)) == sizeof(awf3));
+               gl->board[pr->i_board].calib.wf_gain1[ch][bin] = pr->ave->Median(ch/8, ch%8, bin) / 0.45;
       }
       
       return SUCCESS;
@@ -1026,9 +1037,14 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
       // initialize data on first iteration
       if (pr->i_iter4 == 0) {
          pr->ave->Reset();
-         gl->rotate_flag = 1;     // now rotate waveforms
-         gl->ofs_calib1_flag = 1; // and do 1st calibration
-         gl->ofs_calib2_flag = 1; // and do 2nd calibration
+         gl->rotate_flag     = 0;
+         gl->ofs_calib1_flag = 1; // do 1st calibration
+         gl->ofs_calib2_flag = 0;
+         gl->gain_calib_flag = 0;
+
+         gl->dcv             = -0.45;
+         gl->dcv_flag        = 1;
+         wd_set_dcv(gl, pr->i_board);
       }
       
       pr->i_iter4++;
@@ -1049,25 +1065,41 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
       if (pr->i_iter4 == pr->n_iter4) {
          for (int ch=0 ; ch<16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
-               awf3[ch][bin] = (float)pr->ave->Median(ch/8, ch%8, bin);
+               gl->board[pr->i_board].calib.wf_gain2[ch][bin] = pr->ave->Median(ch/8, ch%8, bin) / -0.45;
          
+         delete pr->ave;
+         pr->ave = NULL;
+
          // save calibration
-         assert(write(pr->fh, awf4, sizeof(awf4)) == sizeof(awf4));
+         memcpy(gl->board[pr->i_board].calib.version_id, "CAL1", 4);
+         gl->board[pr->i_board].calib.sampling_frequency = gl->sampling_frequency;
+         gl->board[pr->i_board].calib.temperature = gl->board[pr->i_board].temperature;
          
+         sprintf(str, "%s.cal", gl->board[pr->i_board].name);
+         pr->fh = open(str, O_WRONLY | O_CREAT, 0644);
+         assert(pr->fh > 0);
+         assert(write(pr->fh, &gl->board[pr->i_board].calib, sizeof(CALIB_DATA)) == sizeof(CALIB_DATA));
          close(pr->fh);
          
+         // reset board
+         gl->board[pr->i_board].range = pr->prev_range;
+         wd_set_range(gl, pr->i_board);
+         gl->dcv = 0;
+         gl->dcv_flag = 0;
+         wd_set_dcv(gl, pr->i_board);
+
          // switch to next board
          pr->i_board++;
          pr->state = CS_FIRST_SAMPLE;
          pr->progress = 1;
-         delete pr->ave;
-         pr->ave = NULL;
          
          if (pr->i_board == pr->n_board) {
             pr->state = CS_INACTIVE;
             gl->rotate_flag = 1;
             gl->ofs_calib1_flag = 1;
             gl->ofs_calib2_flag = 1;
+            gl->gain_calib_flag = 1;
+            gl->remove_spikes   = 1;
          }
       }
       

@@ -53,13 +53,13 @@ function init()
    window.setTimeout(loadWF, 10);
    
    // schedule loadGL()
-   window.setTimeout(updateGl, 5000);
+   window.setTimeout(updateGl, 10000);
 }
 
 function updateGl()
 {
    loadGl();
-   window.setTimeout(updateGl, 5000);
+   window.setTimeout(updateGl, 10000);
 }
 
 function loadGl()
