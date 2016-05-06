@@ -78,8 +78,8 @@ function loadGl()
             opt.value = OSC.GL.board[i].name;
             if (sel.childNodes[i+1] == undefined)
                sel.appendChild(opt);
-            else if (sel.childNodes[i+1] != opt)
-               sel.replaceChild(opt, sel.childNodes[i+1]); /// does not work!!!
+            else if (sel.childNodes[i+1].innerHTML != opt.innerHTML)
+               sel.replaceChild(opt, sel.childNodes[i+1]);
          }
          OSC.nWd = OSC.GL.board.length;
 

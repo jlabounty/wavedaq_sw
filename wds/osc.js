@@ -96,10 +96,6 @@ function Oscilloscope(div) { // constructor
    // measurements
    this.lastMeasurement = 0;
    this.sigma = [];
-   
-   // board info
-   this.temperature = 12.34;
-   this.firmware = 1234;
 }
 
 Oscilloscope.prototype.sendWaveforms = function(wf)
@@ -177,7 +173,13 @@ Oscilloscope.prototype.drawTemperature = function(ctx)
    ctx.font = '14px sans-serif';
    ctx.textAlign = "left";
    ctx.textBaseline = "top";
-   ctx.fillText("T=" + this.GL.board[0].temperature.toFixed(1) + " C", 130, this.y2+8);
+   
+   if (OSC.GL != undefined) {
+      var board = document.getElementById("wdSelect").selectedIndex;
+      var t = OSC.GL.board[board].temperature;
+      
+      ctx.fillText("T=" + t.toFixed(1) + " C", 130, this.y2+8);
+   }
 }
 
 Oscilloscope.prototype.drawMeasurements = function(ctx)
