@@ -98,9 +98,20 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          }
       }
 
+      else if (mg_vcmp(&hm->uri, "/gl/mux_flag") == 0) {
+         gl->mux_flag = atoi(value);
+         for (int i=0 ; i<gl->n_boards ; i++)
+            wd_set_fe(gl, i);
+      }
+
+      else if (mg_vcmp(&hm->uri, "/gl/dcv_flag") == 0) {
+         gl->dcv_flag = atoi(value);
+         for (int i=0 ; i<gl->n_boards ; i++)
+            wd_set_dcv_flag(gl, i);
+      }
+
       else if (mg_vcmp(&hm->uri, "/gl/dcv") == 0) {
          gl->dcv = (float)atof(value);
-         gl->dcv_flag = (gl->dcv != 0);
          for (int i=0 ; i<gl->n_boards ; i++)
             wd_set_dcv(gl, i);
       }
@@ -111,6 +122,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          gl->ofs_calib2_flag = atoi(value);
       else if (mg_vcmp(&hm->uri, "/gl/gain_calib_flag") == 0)
          gl->gain_calib_flag = atoi(value);
+      else if (mg_vcmp(&hm->uri, "/gl/range_calib_flag") == 0)
+         gl->range_calib_flag = atoi(value);
       else if (mg_vcmp(&hm->uri, "/gl/remove_spikes") == 0)
          gl->remove_spikes = atoi(value);
       else if (mg_vcmp(&hm->uri, "/gl/rotate_flag") == 0)
@@ -138,6 +151,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "   \"ofs_calib1_flag\": %s,\n",    gl->ofs_calib1_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"ofs_calib2_flag\": %s,\n",    gl->ofs_calib2_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"gain_calib_flag\": %s,\n",    gl->gain_calib_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"range_calib_flag\": %s,\n",   gl->range_calib_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"tcalib_flag\": %s,\n",        gl->tcalib_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"remove_spikes\": %s,\n",      gl->remove_spikes ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"http_port\": %d,\n",          gl->http_port);
@@ -145,6 +159,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "   \"sampling_frequency\": %d,\n", gl->sampling_frequency);
       mg_printf_http_chunk(nc, "   \"trigger_mode\": %d,\n",       gl->trigger_mode);
       mg_printf_http_chunk(nc, "   \"osctca_flag\": %s,\n",        gl->osctca_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"mux_flag\": %s,\n",           gl->mux_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"dcv_flag\": %s,\n",           gl->dcv_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"dcv\": %1.3lf,\n",            gl->dcv);
       
@@ -336,10 +351,12 @@ int main(int argc, char *argv[])
    gl.ofs_calib1_flag    = 1;
    gl.ofs_calib2_flag    = 1;
    gl.gain_calib_flag    = 1;
+   gl.range_calib_flag   = 1;
    gl.rotate_flag        = 1;
    gl.remove_spikes      = 1;
    gl.trigger_mode       = TM_AUTO;
    gl.osctca_flag        = 0;
+   gl.mux_flag           = 0;
    gl.dcv_flag           = 0;
    gl.dcv                = 0;
 
@@ -391,9 +408,10 @@ int main(int argc, char *argv[])
          gl.http_port = atoi(argv[++i]);
 
       else if (argv[i][0] == '-' && argv[i][1] == 'r') {
-         gl.ofs_calib1_flag = 0;
-         gl.ofs_calib2_flag = 0;
-         gl.gain_calib_flag = 0;
+         gl.ofs_calib1_flag  = 0;
+         gl.ofs_calib2_flag  = 0;
+         gl.gain_calib_flag  = 0;
+         gl.range_calib_flag = 0;
       }
       
       else if (argv[i][0] == '-' && argv[i][1] == 's')

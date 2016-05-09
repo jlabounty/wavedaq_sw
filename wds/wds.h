@@ -20,6 +20,9 @@ typedef struct {
    float          wf_offset2[16][1024];
    float          wf_gain1[16][1024];
    float          wf_gain2[16][1024];
+   float          offset_range0[16];
+   float          offset_range1[16];
+   float          offset_range2[16];
 } CALIB_DATA;
 
 typedef struct {
@@ -48,6 +51,7 @@ typedef struct {
    int            ofs_calib1_flag;
    int            ofs_calib2_flag;
    int            gain_calib_flag;
+   int            range_calib_flag;
    int            tcalib_flag;
    int            remove_spikes;
    int            http_port;
@@ -55,6 +59,7 @@ typedef struct {
    float          sampling_frequency;
    int            trigger_mode;
    int            osctca_flag;
+   int            mux_flag;
    int            dcv_flag;
    float          dcv;
    WDB            board[16];
@@ -111,6 +116,7 @@ void wd_set_trigger_mode(GLOBALS *gl, int index);
 void wd_set_sampling_frequency(GLOBALS *gl, int index);
 void wd_set_range(GLOBALS *gl, int index);
 void wd_set_osctca(GLOBALS *gl, int index);
+void wd_set_dcv_flag(GLOBALS *gl, int index);
 void wd_set_dcv(GLOBALS *gl, int index);
 
 int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wf[16][1024]);

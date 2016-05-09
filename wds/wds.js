@@ -58,7 +58,6 @@ function init()
 
 function wdSelect(s)
 {
-   alert(s.selectedIndex);
    OSC.board = s.selectedIndex;
 }
 
@@ -113,12 +112,16 @@ function loadGl()
 
          document.getElementById("rangeSelect").value = OSC.GL.board[0].range;
 
+         document.getElementById("mux_flag").checked  = OSC.GL.mux_flag;
+         document.getElementById("dcv_flag").checked  = OSC.GL.dcv_flag;
+         
          document.getElementById("dcvSlider").set(OSC.GL.dcv/2+0.5);
-         document.getElementById("inpDcv").value = OSC.GL.dcv * 1000;
+         document.getElementById("inpDcv").value   = OSC.GL.dcv * 1000;
 
          document.getElementById("calib1").checked = OSC.GL.ofs_calib1_flag;
          document.getElementById("calib2").checked = OSC.GL.ofs_calib2_flag;
          document.getElementById("calib3").checked = OSC.GL.gain_calib_flag;
+         document.getElementById("calib4").checked = OSC.GL.range_calib_flag;
          document.getElementById("spikes").checked = OSC.GL.remove_spikes;
          document.getElementById("rotate").checked = OSC.GL.rotate_flag;
       }

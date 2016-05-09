@@ -238,7 +238,7 @@ void wd_set_fe(GLOBALS *gl, int index)
       return;
    
    if (gl->verbose_flag)
-      printf("Set gain %d, PZC %d\n", gl->board[index].gain, gl->board[index].pzc);
+      printf("Set gain %d, PZC %d, mux %d\n", gl->board[index].gain, gl->board[index].pzc, gl->mux_flag);
 
    // set input configuration
    if (gl->board[index].pzc) { // pole zero cancellation on (bit=0)
@@ -257,10 +257,7 @@ void wd_set_fe(GLOBALS *gl, int index)
          byte = 0xaa;
    }
    
-   if (gl->osctca_flag)
-      byte |= 0x01;
-
-   if (gl->dcv_flag)
+   if (gl->mux_flag)
       byte |= 0x01;
 
    sprintf(str, "feset all %02X", byte);
@@ -331,14 +328,9 @@ void wd_set_osctca(GLOBALS *gl, int index)
 
    if (gl->osctca_flag) {
       assert(wd_send(gl, index, 100, "calosc on", NULL, NULL) > 0);  // enable TCA_CTRL
-      assert(wd_send(gl, index, 100, "calbuf on", NULL, NULL) > 0);  // enbale BUFFER_CTRL
    } else {
       assert(wd_send(gl, index, 100, "calosc off", NULL, NULL) > 0);
-      assert(wd_send(gl, index, 100, "calbuf off", NULL, NULL) > 0);
    }
-   
-   // set MUX to input or CAL+
-   wd_set_fe(gl, index);
 }
 
 /*-----------------------------------------------------------------------------------------*/
@@ -398,6 +390,22 @@ void wd_set_range(GLOBALS *gl, int index)
 
 /*-----------------------------------------------------------------------------------------*/
 
+void wd_set_dcv_flag(GLOBALS *gl, int index)
+{
+   if (gl->demo_flag)
+      return;
+   
+   if (gl->verbose_flag)
+      printf("Set DC power = %d\n", gl->dcv_flag);
+   
+   if (gl->dcv_flag)
+      assert(wd_send(gl, index, 100, "calbuf on", NULL, NULL) > 0);  // enable BUFFER_CTRL
+   else
+      assert(wd_send(gl, index, 100, "calbuf off", NULL, NULL) > 0);  // disable BUFFER_CTRL
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
 void wd_set_dcv(GLOBALS *gl, int index)
 {
    char str[256];
@@ -410,14 +418,6 @@ void wd_set_dcv(GLOBALS *gl, int index)
    
    sprintf(str, "dacset caldc %d", (int)(1280-gl->dcv*1000)); // shift by 1.28V
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   
-
-   if (gl->dcv_flag)
-      assert(wd_send(gl, index, 100, "calbuf on", NULL, NULL) > 0);  // enable BUFFER_CTRL
-   else
-      assert(wd_send(gl, index, 100, "calbuf off", NULL, NULL) > 0);  // disable BUFFER_CTRL
-
-   wd_set_fe(gl, index); // turns multiplexer on/off
 }
 
 /*-----------------------------------------------------------------------------------------*/
@@ -436,7 +436,7 @@ int wd_init(GLOBALS *gl)
    
    // Start windows sockets
    if (WSAStartup(MAKEWORD(1, 1), &WSAData) != 0)
-   return -1;
+   return FAILURE;
    }
 #endif
 
@@ -481,7 +481,7 @@ int wd_init(GLOBALS *gl)
       phe = gethostbyname(gl->board[index].name);
       if (phe == NULL) {
          printf("Cannot resolve host name \"%s\"\n", gl->board[index].name);
-         return 0;
+         return FAILURE;
       }
       memcpy((char *)&client_addr.sin_addr, phe->h_addr, phe->h_length);
       client_addr.sin_family = AF_INET;
@@ -492,7 +492,7 @@ int wd_init(GLOBALS *gl)
       // check if board is alive
       if (wd_send(gl, index, 1000, "", NULL, NULL) < 0) {
          printf("Cannot connect to board \"%s\"\n", gl->board[index].name);
-         return 0;
+         return FAILURE;
       }
       
       // set dbglevel none
@@ -504,7 +504,7 @@ int wd_init(GLOBALS *gl)
          wd_send(gl, index, 1000, "info", reply, &size); // first access long timeout
          if (!size) {
             printf("Board %s does not reply, aborting.\n", gl->board[index].name);
-            return 0;
+            return FAILURE;
          }
          char *p = strstr(reply, "-- Version");
          if (p != NULL) {
@@ -571,9 +571,16 @@ int wd_init(GLOBALS *gl)
       sprintf(str, "%s.cal", gl->board[index].name);
       int fh = open(str, O_RDONLY, 0644);
       if (fh > 0) {
-         assert(read(fh, &gl->board[index].calib, sizeof(CALIB_DATA)) == sizeof(CALIB_DATA));
+         size = read(fh, &gl->board[index].calib, sizeof(CALIB_DATA));
+         if (size != sizeof(CALIB_DATA)) {
+            printf("Invalid calibration file size of \"%s\". Aborting.\n", str);
+            return FAILURE;
+         }
          
-         assert(memcmp(gl->board[index].calib.version_id, "CAL1", 4) == 0);
+         if (memcmp(gl->board[index].calib.version_id, "CAL1", 4) != 0) {
+            printf("Invalid calibration file format in \"%s\". Aborting.\n", str);
+            return FAILURE;
+         }
 
          if (fabs(gl->board[index].calib.sampling_frequency - gl->sampling_frequency) > 0.001) {
             printf("Warning: Calibration data is for %3g GSPS, running now at %3g GSPS\n",
@@ -585,14 +592,25 @@ int wd_init(GLOBALS *gl)
                    gl->board[index].calib.temperature, gl->board[index].temperature);
          }
 
+         // ## please remove after testing!!!
+         for (int ch=0 ; ch < 16 ; ch++) {
+            gl->board[index].calib.offset_range0[ch] = 0.45;
+            gl->board[index].calib.offset_range1[ch] = 0;
+            gl->board[index].calib.offset_range2[ch] = -0.45;
+         }
+
       } else {
-         memset(gl->board[index].calib.wf_offset1, 0, sizeof(float)*16*1024);;
-         memset(gl->board[index].calib.wf_offset2, 0, sizeof(float)*16*1024);;
-         for (int ch=0 ; ch < 16 ; ch++)
+         memset(gl->board[index].calib.wf_offset1, 0, sizeof(float)*16*1024);
+         memset(gl->board[index].calib.wf_offset2, 0, sizeof(float)*16*1024);
+         for (int ch=0 ; ch < 16 ; ch++) {
             for (int bin=0 ; bin<1024 ; bin++) {
                gl->board[index].calib.wf_gain1[ch][bin] = 1;
                gl->board[index].calib.wf_gain2[ch][bin] = 1;
             }
+            gl->board[index].calib.offset_range0[ch] = 0.45;
+            gl->board[index].calib.offset_range1[ch] = 0;
+            gl->board[index].calib.offset_range2[ch] = -0.45;
+         }
       }
    }
    
@@ -850,6 +868,23 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
                            waveform[i][j] -= gl->board[b].calib.wf_offset2[i][j];
                   }
                   
+                  // range calibration
+                  if (gl->range_calib_flag) {
+                     float ofs;
+                     
+                     for (i=0 ; i<16 ; i++) {
+                        if (fabs(gl->board[b].range - (-0.45)) < 0.001)
+                           ofs = gl->board[b].calib.offset_range0[i];
+                        else if (fabs(gl->board[b].range) < 0.001)
+                           ofs = gl->board[b].calib.offset_range1[i];
+                        else if (fabs(gl->board[b].range - 0.45) < 0.001)
+                           ofs = gl->board[b].calib.offset_range2[i];
+                        else
+                           ofs = 0;
+                        for (int j=0 ; j<1024 ; j++)
+                           waveform[i][j] -= ofs;
+                     }
+                  }
 
                   // remove spikes
                   if (gl->remove_spikes) {
@@ -913,11 +948,12 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
 
       // initialize data on first iteration
       if (pr->i_iter1 == 0) {
-         gl->rotate_flag = 0;
-         gl->ofs_calib1_flag = 0;
-         gl->ofs_calib2_flag = 0;
-         gl->gain_calib_flag = 0;
-         gl->remove_spikes   = 0;
+         gl->rotate_flag      = 0;
+         gl->ofs_calib1_flag  = 0;
+         gl->ofs_calib2_flag  = 0;
+         gl->gain_calib_flag  = 0;
+         gl->range_calib_flag = 0;
+         gl->remove_spikes    = 0;
          
          pr->prev_range = gl->board[pr->i_board].range;
          gl->board[pr->i_board].range = 0; // range -0.5 ... + 0.5V
@@ -962,10 +998,11 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
       // initialize data on first iteration
       if (pr->i_iter2 == 0) {
          pr->ave->Reset();
-         gl->rotate_flag     = 1; // rotate waveforms
-         gl->ofs_calib1_flag = 1; // do 1st calibration
-         gl->ofs_calib2_flag = 0;
-         gl->gain_calib_flag = 0;
+         gl->rotate_flag      = 1; // rotate waveforms
+         gl->ofs_calib1_flag  = 1; // do 1st calibration
+         gl->ofs_calib2_flag  = 0;
+         gl->gain_calib_flag  = 0;
+         gl->range_calib_flag = 0;
       }
 
       pr->i_iter2++;
@@ -999,13 +1036,14 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
       // initialize data on first iteration
       if (pr->i_iter3 == 0) {
          pr->ave->Reset();
-         gl->rotate_flag     = 0;
-         gl->ofs_calib1_flag = 1; // do 1st calibration
-         gl->ofs_calib2_flag = 0;
-         gl->gain_calib_flag = 0;
+         gl->rotate_flag      = 0;
+         gl->ofs_calib1_flag  = 1; // do 1st calibration
+         gl->ofs_calib2_flag  = 0;
+         gl->gain_calib_flag  = 0;
+         gl->range_calib_flag = 0;
 
-         gl->dcv             = 0.45;
-         gl->dcv_flag        = 1;
+         gl->dcv              = 0.45;
+         gl->dcv_flag         = 1;
          wd_set_dcv(gl, pr->i_board);
       }
       
@@ -1040,13 +1078,14 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
       // initialize data on first iteration
       if (pr->i_iter4 == 0) {
          pr->ave->Reset();
-         gl->rotate_flag     = 0;
-         gl->ofs_calib1_flag = 1; // do 1st calibration
-         gl->ofs_calib2_flag = 0;
-         gl->gain_calib_flag = 0;
+         gl->rotate_flag      = 0;
+         gl->ofs_calib1_flag  = 1; // do 1st calibration
+         gl->ofs_calib2_flag  = 0;
+         gl->gain_calib_flag  = 0;
+         gl->range_calib_flag = 0;
 
-         gl->dcv             = -0.45;
-         gl->dcv_flag        = 1;
+         gl->dcv              = -0.45;
+         gl->dcv_flag         = 1;
          wd_set_dcv(gl, pr->i_board);
       }
       
@@ -1072,41 +1111,72 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
          
          delete pr->ave;
          pr->ave = NULL;
-
-         // save calibration
-         memcpy(gl->board[pr->i_board].calib.version_id, "CAL1", 4);
-         gl->board[pr->i_board].calib.sampling_frequency = gl->sampling_frequency;
-         gl->board[pr->i_board].calib.temperature = gl->board[pr->i_board].temperature;
-         
-         sprintf(str, "%s.cal", gl->board[pr->i_board].name);
-         pr->fh = open(str, O_WRONLY | O_CREAT, 0644);
-         assert(pr->fh > 0);
-         assert(write(pr->fh, &gl->board[pr->i_board].calib, sizeof(CALIB_DATA)) == sizeof(CALIB_DATA));
-         close(pr->fh);
-         
-         // reset board
-         gl->board[pr->i_board].range = pr->prev_range;
-         wd_set_range(gl, pr->i_board);
-         gl->dcv = 0;
-         gl->dcv_flag = 0;
-         wd_set_dcv(gl, pr->i_board);
-
-         // switch to next board
-         pr->i_board++;
-         pr->state = CS_FIRST_SAMPLE;
-         pr->progress = 1;
-         
-         if (pr->i_board == pr->n_board) {
-            pr->state = CS_INACTIVE;
-            gl->rotate_flag = 1;
-            gl->ofs_calib1_flag = 1;
-            gl->ofs_calib2_flag = 1;
-            gl->gain_calib_flag = 1;
-            gl->remove_spikes   = 1;
-         }
       }
       
       return SUCCESS;
+   }
+   
+   // reset board
+   gl->dcv = 0;
+   gl->dcv_flag = 0;
+   wd_set_dcv(gl, pr->i_board);
+
+   gl->rotate_flag      = 1;
+   gl->ofs_calib1_flag  = 1;
+   gl->ofs_calib2_flag  = 0;
+   gl->gain_calib_flag  = 0;
+   gl->range_calib_flag = 0;
+   gl->remove_spikes    = 0;
+
+   // measure offset without DCV at different ranges
+   assert(wd_send(gl, pr->i_board, 100, "calbuf off", NULL, NULL) > 0);    // disable BUFFER_CTRL
+   assert(wd_send(gl, pr->i_board, 100, "feset all 82", NULL, NULL) > 0);  // gain 1, PZC off, MUX off
+   
+   gl->board[pr->i_board].range = -0.45;
+   wd_set_range(gl, pr->i_board);
+   
+   for (int i=0 ; i<10 ; i++) {
+      wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
+      assert(wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU) == SUCCESS);
+   }
+   
+   for (int ch=0 ; ch<16 ; ch++) {
+      float sum = 0;
+      for (int i=6 ; i<1020 ; i++)
+         sum += wfU[ch][i];
+      gl->board[pr->i_board].calib.offset_range0[ch] = sum / 1016;
+   }
+   
+   // set everything back to normal values
+   gl->board[pr->i_board].range = pr->prev_range;
+   wd_set_range(gl, pr->i_board);
+   wd_set_dcv(gl, pr->i_board);
+
+   // save calibration
+   memcpy(gl->board[pr->i_board].calib.version_id, "CAL1", 4);
+   gl->board[pr->i_board].calib.sampling_frequency = gl->sampling_frequency;
+   gl->board[pr->i_board].calib.temperature = gl->board[pr->i_board].temperature;
+   
+   sprintf(str, "%s.cal", gl->board[pr->i_board].name);
+   pr->fh = open(str, O_WRONLY | O_CREAT, 0644);
+   assert(pr->fh > 0);
+   assert(write(pr->fh, &gl->board[pr->i_board].calib, sizeof(CALIB_DATA)) == sizeof(CALIB_DATA));
+   close(pr->fh);
+
+   
+   // switch to next board
+   pr->i_board++;
+   pr->state = CS_FIRST_SAMPLE;
+   pr->progress = 1;
+   
+   if (pr->i_board == pr->n_board) {
+      pr->state = CS_INACTIVE;
+      gl->rotate_flag = 1;
+      gl->ofs_calib1_flag  = 1;
+      gl->ofs_calib2_flag  = 1;
+      gl->gain_calib_flag  = 1;
+      gl->range_calib_flag = 1;
+      gl->remove_spikes    = 1;
    }
 
    return SUCCESS;

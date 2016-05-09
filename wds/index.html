@@ -105,7 +105,7 @@
                <input type="checkbox" id="pzc" name="pzc" onClick="setGl(this)">PZC
             </div>
             <div class="vSpacer5">
-               <input type="checkbox" id="osctca_flag" name="osctca_flag" onClick="setGl(this)">Connect clock to all channels
+               <input type="checkbox" id="osctca_flag" name="osctca_flag" onClick="setGl(this)">Enable calibration clock
             </div>
 
             <div class="vMiddleBox vSpacer5">
@@ -118,8 +118,15 @@
             </div>
 
             <div class="vMiddleBox vSpacer5">
+               <input type="checkbox" id="mux_flag" name="mux_flag" onClick="setGl(this)">Connect inputs to calib. source
+            </div>
+            <div class="vMiddleBox vSpacer5">
+               <input type="checkbox" id="dcv_flag" name="dcv_flag" onClick="setGl(this)">Power calib. source
+            </div>
+
+            <div class="vMiddleBox vSpacer5">
                <div class="vMiddleElement">DC:&nbsp;</div>
-               <button name="ctrlHSlider" id="dcvSlider" class="hSlider vMiddleElement" type="button" data-update="sldDcv()" style="width:150px;"></button>
+               <button name="ctrlHSlider" id="dcvSlider" class="hSlider vMiddleElement" type="button" data-update="sldDcv()" style="width:140px;"></button>
                <span class="hSpacer5"></span>
                <input name="dcv" class="vMiddleElement" type="text" id="inpDcv" onkeypress="keyGl(event,this)" value="0">
                <span class="vMiddleElement">&nbsp;mV</span>
@@ -141,6 +148,8 @@
                   <td>Apply Readout Calibration</td></tr>
                <tr><td><input type="checkbox" id="calib3" name="gain_calib_flag" onClick="setGl(this)"></td>
                   <td>Apply Gain Calibration</td></tr>
+               <tr><td><input type="checkbox" id="calib4" name="range_calib_flag" onClick="setGl(this)"></td>
+                  <td>Correct Range Offset</td></tr>
                <tr><td><input type="checkbox" id="spikes" name="remove_spikes" onClick="setGl(this)"></td>
                   <td>Remove Spikes</td></tr>
             </table>
