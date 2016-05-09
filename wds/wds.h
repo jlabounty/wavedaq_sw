@@ -116,7 +116,7 @@ void wd_set_dcv(GLOBALS *gl, int index);
 int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wf[16][1024]);
 int wd_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *result, int *size);
 int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *p);
-void wd_read_temp(GLOBALS *gl);
+void wd_read_temp(GLOBALS *gl, int index);
 
 size_t strlcpy(char *dst, const char *src, size_t size);
 size_t strlcat(char *dst, const char *src, size_t size);

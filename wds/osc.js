@@ -89,6 +89,9 @@ function Oscilloscope(div) { // constructor
       this.wfOffset[i] = 0;
    }
    
+   // current board
+   this.board = 0;
+   
    // schedule FPS calculator
    var f = this.calcFPS.bind(this);
    this.t = setTimeout(f, 1000);

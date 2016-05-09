@@ -178,6 +178,19 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       return;
    }
    
+   // temperature
+   if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/temp") == 0) {
+      mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
+      int b = atoi(str);
+
+      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+      mg_printf_http_chunk(nc, "{\n");
+      mg_printf_http_chunk(nc, "   \"temp\": \"%1.1lf\"\n", gl->board[b].temperature);
+      mg_printf_http_chunk(nc, "}\n");
+      mg_send_http_chunk(nc, "", 0);
+      return;
+   }
+
    // software build
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/build") == 0) {
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
@@ -524,7 +537,8 @@ int main(int argc, char *argv[])
          mg_mgr_poll(&mgr, 10);
       
       // read board temperatures periodically
-      wd_read_temp(&gl);
+      for (int i=0 ; i<gl.n_boards ; i++)
+         wd_read_temp(&gl, i);
    }
 
    // mg_mgr_free(&mgr);

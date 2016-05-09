@@ -52,14 +52,33 @@ function init()
    // schedule first waveform load
    window.setTimeout(loadWF, 10);
    
-   // schedule loadGL()
-   window.setTimeout(updateGl, 10000);
+   // schedule loadTemp()
+   window.setTimeout(loadTemp, 10000);
 }
 
-function updateGl()
+function wdSelect(s)
 {
-   loadGl();
-   window.setTimeout(updateGl, 10000);
+   alert(s.selectedIndex);
+   OSC.board = s.selectedIndex;
+}
+
+function loadTemp()
+{
+   // send AJAX request
+   var req = new XMLHttpRequest();
+   req.onreadystatechange = function() {
+      if (req.readyState == 4 && req.status == 200) {
+         t = JSON.parse(req.responseText);
+         
+         // get active board
+         OSC.GL.board[OSC.board].temperature = parseFloat(t.temp);
+      }
+   };
+   
+   req.open("GET", "temp?b=" + OSC.board + "&r=" + Math.random(), true); // avoid cached results
+   req.send();
+
+   window.setTimeout(loadTemp, 10000);
 }
 
 function loadGl()
@@ -151,7 +170,7 @@ function keyGl(event, input)
 
 function doVCalib()
 {
-   progressOldBoard = document.getElementById("wdSelect").selectedIndex;
+   progressOldBoard = OSC.board;
 
    var req = new XMLHttpRequest();
    req.open("PUT", "vcalib");
@@ -213,13 +232,10 @@ function loadWF()
       return;
    }
    
-   // get active board
-   var board = document.getElementById("wdSelect").selectedIndex;
-   
    // send AJAX request
    OSC.req = new XMLHttpRequest();
    OSC.req.onreadystatechange = receiveWF;
-   OSC.req.open("GET", "wf?b=" + board + "&c=" + chn + "&r=" + Math.random(), true); // avoid cached results
+   OSC.req.open("GET", "wf?b=" + OSC.board + "&c=" + chn + "&r=" + Math.random(), true); // avoid cached results
    OSC.req.responseType = "arraybuffer";
    OSC.req.send();
 }
@@ -259,6 +275,7 @@ function receiveWF()
                e.style.width = "0";
                
                document.getElementById("wdSelect").selectedIndex = progressOldBoard;
+               OSC.board = progressOldBoard;
             }
                
          } else if (intArray[i] == 2) { // voltage array

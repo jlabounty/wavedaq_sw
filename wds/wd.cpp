@@ -563,6 +563,9 @@ int wd_init(GLOBALS *gl)
       // set DRS readout mode to ROI
       assert(wd_send(gl, index, 100, "regwr 10 0D0D0030", NULL, NULL) > 0);
       
+      // read current temperature
+      wd_read_temp(gl, index);
+      
       // load calibration for board from file (for now...)
       char str[80];
       sprintf(str, "%s.cal", gl->board[index].name);
@@ -1275,21 +1278,20 @@ void remove_spikes(GLOBALS *gl, short trigger_cell, float wf[][1024])
 
 /*-----------------------------------------------------------------------------------------*/
 
-void wd_read_temp(GLOBALS *gl)
+void wd_read_temp(GLOBALS *gl, int index)
 {
-   static time_t last = 0;
+   static time_t last[16] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
    time_t now;
    
    time(&now);
-   if (now > last + 5) {
-      for (int index=0 ; index<gl->n_boards ; index++) {
+   if (now > last[index] + 10) {
          int size;
          char str[80];
          size = sizeof(str);
          assert(wd_send(gl, index, 100, "temp", str, &size) > 0);
          gl->board[index].temperature = atof(str+5);
-      }
-      last = now;
+
+      last[index] = now;
    }
       
 }
