@@ -561,7 +561,7 @@ int wd_init(GLOBALS *gl)
       wd_set_osctca(gl, index);
    
       // set DRS readout mode to ROI
-      assert(wd_send(gl, index, 100, "regwr 10 14140030", NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, "regwr 10 17170030", NULL, NULL) > 0);
       
       // read current temperature
       wd_read_temp(gl, index);
@@ -593,11 +593,13 @@ int wd_init(GLOBALS *gl)
          }
 
          // ## please remove after testing!!!
+         /*
          for (int ch=0 ; ch < 16 ; ch++) {
             gl->board[index].calib.offset_range0[ch] = 0.45;
             gl->board[index].calib.offset_range1[ch] = 0;
             gl->board[index].calib.offset_range2[ch] = -0.45;
          }
+          */
 
       } else {
          memset(gl->board[index].calib.wf_offset1, 0, sizeof(float)*16*1024);
@@ -1145,8 +1147,8 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
 
    gl->rotate_flag      = 1;
    gl->ofs_calib1_flag  = 1;
-   gl->ofs_calib2_flag  = 0;
-   gl->gain_calib_flag  = 0;
+   gl->ofs_calib2_flag  = 1;
+   gl->gain_calib_flag  = 1;
    gl->range_calib_flag = 0;
    gl->remove_spikes    = 0;
 
@@ -1162,32 +1164,34 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
       wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
       if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU) != SUCCESS)
          i--;
+      sleep_ms(10);
    }
    
    for (int ch=0 ; ch<16 ; ch++) {
       float sum = 0;
-      for (int i=6 ; i<1020 ; i++)
+      for (int i=10 ; i<1020 ; i++)
          sum += wfU[ch][i];
-      // gl->board[pr->i_board].calib.offset_range0[ch] = sum / 1016;
-      gl->board[pr->i_board].calib.offset_range0[ch] = 0.45;
+      gl->board[pr->i_board].calib.offset_range0[ch] = sum / 1010;
+      // gl->board[pr->i_board].calib.offset_range0[ch] = 0.45;
    }
    
    // Range 0
-   gl->board[pr->i_board].range = -0.45;
+   gl->board[pr->i_board].range = 0;
    wd_set_range(gl, pr->i_board);
    
    for (int i=0 ; i<10 ; i++) {
       wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
       if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU) != SUCCESS)
          i--;
+      sleep_ms(10);
    }
    
    for (int ch=0 ; ch<16 ; ch++) {
       float sum = 0;
-      for (int i=6 ; i<1020 ; i++)
+      for (int i=10 ; i<1020 ; i++)
          sum += wfU[ch][i];
-      // gl->board[pr->i_board].calib.offset_range0[ch] = sum / 1016;
-      gl->board[pr->i_board].calib.offset_range0[ch] = 0;
+      gl->board[pr->i_board].calib.offset_range1[ch] = sum / 1010;
+      // gl->board[pr->i_board].calib.offset_range1[ch] = 0;
    }
 
    // Range 0.45
@@ -1198,21 +1202,22 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
       wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
       if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU) != SUCCESS)
          i--;
+      sleep_ms(10);
    }
    
    for (int ch=0 ; ch<16 ; ch++) {
       float sum = 0;
-      for (int i=6 ; i<1020 ; i++)
+      for (int i=10 ; i<1020 ; i++)
          sum += wfU[ch][i];
-      // gl->board[pr->i_board].calib.offset_range0[ch] = sum / 1016;
-      gl->board[pr->i_board].calib.offset_range0[ch] = 0.45;
+      gl->board[pr->i_board].calib.offset_range2[ch] = sum / 1010;
+      // gl->board[pr->i_board].calib.offset_range2[ch] = 0.45;
    }
 
    // set everything back to normal values
    gl->board[pr->i_board].range = pr->prev_range;
-   gl->mux_flag         = 0;
-   gl->dcv_flag         = 0;
-   gl->dcv              = 0;
+   gl->mux_flag                 = 0;
+   gl->dcv_flag                 = 0;
+   gl->dcv                      = 0;
    wd_set_fe(gl, pr->i_board);
    wd_set_dcv(gl, pr->i_board);
    wd_set_dcv_flag(gl, pr->i_board);
