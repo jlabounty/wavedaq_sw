@@ -337,23 +337,24 @@ void wd_set_osctca(GLOBALS *gl, int index)
 
 void wd_set_sampling_frequency(GLOBALS *gl, int index)
 {
+   char str[80];
+   
    if (gl->demo_flag)
       return;
    
+   // 200 MHz LMK bus frequency
+   int divider = (int) (200.0 / gl->nominal_sampling_frequency * 2.048 / 2 + 0.5);
+   
+   // calculate real frequency
+   gl->actual_sampling_frequency = 200.0 / divider * 2.048 / 2;
+   
    // set sampling frequency
    if (gl->verbose_flag)
-      printf("Set sampling frequency to %f GSPS\n", gl->sampling_frequency);
+      printf("Set sampling frequency to %1.3lg GSPS (%1.4lg GSPS)\n", gl->nominal_sampling_frequency,
+             gl->actual_sampling_frequency);
    
-   if (gl->sampling_frequency == 1)
-      assert(wd_send(gl, index, 100, "regwr 2c 0003c800", NULL, NULL) > 0); // to be corrected!
-   else if (gl->sampling_frequency == 2)
-      assert(wd_send(gl, index, 100, "regwr 2c 0003c800", NULL, NULL) > 0);
-   else if (gl->sampling_frequency == 3)
-      assert(wd_send(gl, index, 100, "regwr 2c 00038500", NULL, NULL) > 0);
-   else if (gl->sampling_frequency == 4)
-      assert(wd_send(gl, index, 100, "regwr 2c 00036400", NULL, NULL) > 0);
-   else if (gl->sampling_frequency == 5)
-      assert(wd_send(gl, index, 100, "regwr 2c 00035000", NULL, NULL) > 0);
+   sprintf(str, "regwr 2c 0003%02X00", divider);
+   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
 }
 
 /*-----------------------------------------------------------------------------------------*/
@@ -563,6 +564,14 @@ int wd_init(GLOBALS *gl)
       // set DRS readout mode to ROI
       assert(wd_send(gl, index, 100, "regwr 10 17170030", NULL, NULL) > 0);
       
+      // set LMK registers to their defaults, see "LMK regs.xls"
+      assert(wd_send(gl, index, 100, "regwr 2c 00032800", NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, "regwr 30 00020101", NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, "regwr 34 00020102", NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, "regwr 58 029900AD", NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, "regwr 5c 0800140E", NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, "regwr 60 D800280F", NULL, NULL) > 0);
+      
       // read current temperature
       wd_read_temp(gl, index);
       
@@ -582,9 +591,9 @@ int wd_init(GLOBALS *gl)
             return FAILURE;
          }
 
-         if (fabs(gl->board[index].calib.sampling_frequency - gl->sampling_frequency) > 0.001) {
+         if (fabs(gl->board[index].calib.sampling_frequency - gl->actual_sampling_frequency) > 0.001) {
             printf("Warning: Calibration data is for %3g GSPS, running now at %3g GSPS\n",
-                   gl->board[index].calib.sampling_frequency, gl->sampling_frequency);
+                   gl->board[index].calib.sampling_frequency, gl->actual_sampling_frequency);
          }
 
          if (fabs(gl->board[index].calib.temperature - gl->board[index].temperature) > 5) {
@@ -1225,7 +1234,7 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *pr)
 
    // save calibration
    memcpy(gl->board[pr->i_board].calib.version_id, "CAL1", 4);
-   gl->board[pr->i_board].calib.sampling_frequency = gl->sampling_frequency;
+   gl->board[pr->i_board].calib.sampling_frequency = gl->actual_sampling_frequency;
    gl->board[pr->i_board].calib.temperature = gl->board[pr->i_board].temperature;
    
    sprintf(str, "%s.cal", gl->board[pr->i_board].name);

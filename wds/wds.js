@@ -27,6 +27,12 @@ function init()
    // create Scope object
    OSC = new Oscilloscope(document.getElementById("scope"));
 
+   // load globals including board list from server
+   loadGl();
+   
+   // load build and put into about box
+   loadBuild();
+   
    // hid config panel
    var config = document.getElementById("config");
    config.t = 0;
@@ -42,12 +48,6 @@ function init()
    
    // draw empty scope
    OSC.redraw();
-   
-   // load globals including board list from server
-   loadGl();
-   
-   // load build and put into about box
-   loadBuild();
    
    // schedule first waveform load
    window.setTimeout(loadWF, 10);
@@ -117,6 +117,8 @@ function loadGl()
          
          document.getElementById("dcvSlider").set(OSC.GL.dcv/2+0.5);
          document.getElementById("inpDcv").value   = OSC.GL.dcv * 1000;
+         
+         document.getElementById("actual_sampling_frequency").innerHTML = OSC.GL.actual_sampling_frequency+" GSPS";
 
          document.getElementById("calib1").checked = OSC.GL.ofs_calib1_flag;
          document.getElementById("calib2").checked = OSC.GL.ofs_calib2_flag;
@@ -154,8 +156,8 @@ function setGl(e)
          req.send(parseInt(e.value));
       } else if (e.name == "dcv") {
          req.send(parseInt(e.value) / 1000);
-      } else if (e.name == "sampling_frequency") {
-         req.send(parseInt(e.value));
+      } else if (e.name == "nominal_sampling_frequency") {
+         req.send(parseFloat(e.value));
       } else
          req.send(e.value);
    }

@@ -56,7 +56,8 @@ typedef struct {
    int            remove_spikes;
    int            http_port;
    int            n_boards;
-   float          sampling_frequency;
+   float          nominal_sampling_frequency;
+   float          actual_sampling_frequency;
    int            trigger_mode;
    int            osctca_flag;
    int            mux_flag;

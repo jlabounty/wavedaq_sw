@@ -85,8 +85,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             wd_set_osctca(gl, i);
       }
 
-      else if (mg_vcmp(&hm->uri, "/gl/sampling_frequency") == 0) {
-         gl->sampling_frequency = atoi(value);
+      else if (mg_vcmp(&hm->uri, "/gl/nominal_sampling_frequency") == 0) {
+         gl->nominal_sampling_frequency = atof(value);
          for (int i=0 ; i<gl->n_boards ; i++)
             wd_set_sampling_frequency(gl, i);
       }
@@ -156,7 +156,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "   \"remove_spikes\": %s,\n",      gl->remove_spikes ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"http_port\": %d,\n",          gl->http_port);
       mg_printf_http_chunk(nc, "   \"n_boards\": %d,\n",           gl->n_boards);
-      mg_printf_http_chunk(nc, "   \"sampling_frequency\": %d,\n", gl->sampling_frequency);
+      mg_printf_http_chunk(nc, "   \"nominal_sampling_frequency\": %1.3lf,\n", gl->nominal_sampling_frequency);
+      mg_printf_http_chunk(nc, "   \"actual_sampling_frequency\": %1.3lf,\n", gl->actual_sampling_frequency);
       mg_printf_http_chunk(nc, "   \"trigger_mode\": %d,\n",       gl->trigger_mode);
       mg_printf_http_chunk(nc, "   \"osctca_flag\": %s,\n",        gl->osctca_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"mux_flag\": %s,\n",           gl->mux_flag ? "true" : "false");
@@ -249,8 +250,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          status = SUCCESS;
          for (int c=0 ; c<16 ; c++) {
             for (int i=0 ; i<1024 ; i++) {
-               wfT[c][i] = (float)(i*1E-9 / gl->sampling_frequency);
-               wfU[c][i] = (float)(sin(wfT[c][i] / 50 / 1E-9 * gl->sampling_frequency) / 4 + ((float)random()/RAND_MAX-0.5) / 30);
+               wfT[c][i] = (float)(i*1E-9 / gl->actual_sampling_frequency);
+               wfU[c][i] = (float)(sin(wfT[c][i] / 50 / 1E-9 * gl->actual_sampling_frequency) / 4 + ((float)random()/RAND_MAX-0.5) / 30);
             }
          }
       } else {
@@ -271,7 +272,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       
          for (int c=0 ; c<16 ; c++) {
             for (int i=0 ; i<1024 ; i++) {
-               wfT[c][i] = (float)(i*1E-9 / gl->sampling_frequency);
+               wfT[c][i] = (float)(i*1E-9 / gl->actual_sampling_frequency);
             }
          }
       }
@@ -347,7 +348,7 @@ int main(int argc, char *argv[])
    
    memset(&gl, 0, sizeof(gl));
    gl.http_port          = 8080; // default port
-   gl.sampling_frequency = 5;
+   gl.nominal_sampling_frequency = 5;
    gl.ofs_calib1_flag    = 1;
    gl.ofs_calib2_flag    = 1;
    gl.gain_calib_flag    = 1;
@@ -415,7 +416,7 @@ int main(int argc, char *argv[])
       }
       
       else if (argv[i][0] == '-' && argv[i][1] == 's')
-         gl.sampling_frequency = atoi(argv[++i]);
+         gl.nominal_sampling_frequency = atoi(argv[++i]);
       
       else if (argv[i][0] == '-' && argv[i][1] == 't') {
          for (j=0 ; j<16 ; j++)

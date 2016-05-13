@@ -340,6 +340,9 @@ Oscilloscope.prototype.calcScaleOffset = function()
 
 Oscilloscope.prototype.drawWF = function(ctx)
 {
+   if (OSC.GL == undefined)
+      return;
+   
    for (c=15 ; c>=0 ; c--) {
       if (this.chOn[c]) {
          var y = this.wfUO[c];
@@ -362,9 +365,12 @@ Oscilloscope.prototype.drawWF = function(ctx)
    ctx.rect(this.x1, this.y1, this.w, this.h);
    ctx.clip();
    
+   var spacing = this.wfTS / (OSC.GL.nominal_sampling_frequency * 1E9);
+   
    for (c=0 ; c<16 ; c++) {
       if (this.chOn[c]) {
-         ctx.beginPath();
+         ctx.fillStyle = this.chnColors[c];
+         ctx.strokeStyle = this.chnColors[c];
          for (i=0 ; i<1024 ; i++) {
             var x = this.wf.T[c][i] * this.wfTS + this.wfTO;
             var y = this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c];
@@ -372,8 +378,9 @@ Oscilloscope.prototype.drawWF = function(ctx)
                ctx.moveTo(x, y);
             else
                ctx.lineTo(x, y);
+            if (spacing > 5)
+               ctx.fillRect(x-2, y-2, 5, 5);
          }
-         ctx.strokeStyle = this.chnColors[c];
          ctx.stroke();
       }
    }
