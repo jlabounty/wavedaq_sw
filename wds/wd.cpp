@@ -600,16 +600,6 @@ int wd_init(GLOBALS *gl)
             printf("Warning: Calibration data is for %3g deg. C, running now at %3g deg. C\n",
                    gl->board[index].calib.temperature, gl->board[index].temperature);
          }
-
-         // ## please remove after testing!!!
-         /*
-         for (int ch=0 ; ch < 16 ; ch++) {
-            gl->board[index].calib.offset_range0[ch] = 0.45;
-            gl->board[index].calib.offset_range1[ch] = 0;
-            gl->board[index].calib.offset_range2[ch] = -0.45;
-         }
-          */
-
       } else {
          memset(gl->board[index].calib.wf_offset1, 0, sizeof(float)*16*1024);
          memset(gl->board[index].calib.wf_offset2, 0, sizeof(float)*16*1024);

@@ -369,6 +369,7 @@ Oscilloscope.prototype.drawWF = function(ctx)
    
    for (c=0 ; c<16 ; c++) {
       if (this.chOn[c]) {
+         ctx.beginPath();
          ctx.fillStyle = this.chnColors[c];
          ctx.strokeStyle = this.chnColors[c];
          for (i=0 ; i<1024 ; i++) {
