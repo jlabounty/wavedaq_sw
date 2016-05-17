@@ -329,8 +329,8 @@ Oscilloscope.prototype.drawGrid = function(ctx)
 
 Oscilloscope.prototype.calcScaleOffset = function()
 {
-   this.wfTO = this.wfTOffset/this.wfTScale * this.w + this.x1;
-   this.wfTS = 1/this.wfTScale/10 * this.w;
+   this.wfTO = this.wfTOffset/(this.wfTScale*10) * this.w + this.x1;
+   this.wfTS = 1/(this.wfTScale*10) * this.w;
    
    for (c=0 ; c<16 ; c++) {
       this.wfUO[c] = (this.y1+this.y2)/2 - this.wfOffset[c]*this.h;

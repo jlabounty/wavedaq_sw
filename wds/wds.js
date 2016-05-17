@@ -520,6 +520,8 @@ function btnTScale(inc)
    OSC.wfTScale = OSC.TScaleTable[OSC.wfTScaleIndex][0];
    document.getElementById("TScale").innerHTML = OSC.TScaleTable[OSC.wfTScaleIndex][1];
 
+   document.getElementById("tofsSlider").set(0.5);
+   sldTOffset(0.5);
    OSC.calcScaleOffset();
    OSC.redraw();
 }
@@ -600,7 +602,9 @@ function btnOfsDist()
 
 function sldTOffset(value)
 {
-   OSC.wfTOffset = (value-0.5) * OSC.wfTScale;
+   var wfWidth = 1024 / OSC.GL.actual_sampling_frequency * 1E-9;
+   var scWidth = OSC.wfTScale * 10;
+   OSC.wfTOffset = 0.9 * scWidth - wfWidth + value*(wfWidth - 0.8 * scWidth);
    OSC.calcScaleOffset();
    OSC.redraw();
 }
