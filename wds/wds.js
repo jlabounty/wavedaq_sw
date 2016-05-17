@@ -126,6 +126,8 @@ function loadGl()
          document.getElementById("calib4").checked = OSC.GL.range_calib_flag;
          document.getElementById("spikes").checked = OSC.GL.remove_spikes;
          document.getElementById("rotate").checked = OSC.GL.rotate_flag;
+         
+         document.getElementById("tcalib").checked = OSC.GL.time_calib_flag;
       }
    };
    req.open("GET", "gl?r=" + Math.random(), true); // avoid cached results
@@ -179,6 +181,15 @@ function doVCalib()
 
    var req = new XMLHttpRequest();
    req.open("PUT", "vcalib");
+   req.send();
+}
+
+function doTCalib()
+{
+   progressOldBoard = OSC.board;
+   
+   var req = new XMLHttpRequest();
+   req.open("PUT", "tcalib");
    req.send();
 }
 
@@ -278,6 +289,8 @@ function receiveWF()
                progressInd = 0;
                var e = document.getElementById("progressIndVcalib");
                e.style.width = "0";
+               var e = document.getElementById("progressIndTcalib");
+               e.style.width = "0";
                
                document.getElementById("wdSelect").selectedIndex = progressOldBoard;
                OSC.board = progressOldBoard;
@@ -293,7 +306,7 @@ function receiveWF()
             for (j=0 ; j<n ; j++)
                wf.U[c][j] = floatArray[i++];
             OSC.demo = (OSC.wd == 0xFF);
-         } else if (intArray[i] == 10) { // progress data
+         } else if (intArray[i] == 10) { // vcalib progress data
             var b = floatArray[1];
             progressInd = floatArray[2];
 
@@ -302,6 +315,17 @@ function receiveWF()
             
             document.getElementById("wdSelect").selectedIndex = b;
 
+            window.setTimeout(loadWF, 250);
+            return;
+         } else if (intArray[i] == 11) { // tcalib progress data
+            var b = floatArray[1];
+            progressInd = floatArray[2];
+            
+            e = document.getElementById("progressIndTcalib");
+            e.style.width = (progressInd*270) + "px";
+            
+            document.getElementById("wdSelect").selectedIndex = b;
+            
             window.setTimeout(loadWF, 250);
             return;
          } else {

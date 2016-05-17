@@ -165,7 +165,13 @@
             <table border="0">
                <tr><td><input type="checkbox" id="rotate" name="rotate_flag" onClick="setGl(this)"></td>
                   <td>Rotate waveform relative to trigger</td></tr>
+               <tr><td><input type="checkbox" id="tcalib" name="time_calib_flag" onClick="setGl(this)"></td>
+                  <td>Apply timing calibration</td></tr>
             </table>
+            <button class="executeButton" id="btnTCalib" type="button" onClick="doTCalib()">Execute Time Calibration</button>
+            <div class="progressBar">
+               <div class="progressInd" id="progressIndTcalib"></div>
+            </div>
          </div>
       </form>
    </div>

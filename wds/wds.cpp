@@ -20,10 +20,11 @@
 #include "wds.h"
 #include "mongoose.h"
 
-#define CMD_OFS_CALIB 1
+#define CMD_VOLTAGE_CALIB 1
 #define CMD_TIME_CALIB 2
 
-CALIB_PROGRESS ofs_prog;
+VCALIB_PROGRESS vcalib_prog;
+TCALIB_PROGRESS tcalib_prog;
 
 /*-----------------------------------------------------------------------------------------*/
 
@@ -128,11 +129,19 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          gl->remove_spikes = atoi(value);
       else if (mg_vcmp(&hm->uri, "/gl/rotate_flag") == 0)
          gl->rotate_flag = atoi(value);
+      else if (mg_vcmp(&hm->uri, "/gl/time_calib_flag") == 0)
+      gl->time_calib_flag = atoi(value);
 
-      else if (mg_vcmp(&hm->uri, "/vcalib") == 0)
+      else if (mg_vcmp(&hm->uri, "/vcalib") == 0) {
          if (!gl->demo_flag)
-            ofs_prog.state = CS_FIRST_BOARD;
-      
+            vcalib_prog.state = CS_FIRST_BOARD;
+      }
+
+      else if (mg_vcmp(&hm->uri, "/tcalib") == 0) {
+         if (!gl->demo_flag)
+            tcalib_prog.state = CS_FIRST_BOARD;
+      }
+
       mg_printf(nc, "HTTP/1.1 204 No Content\r\n");
    }
    
@@ -152,7 +161,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "   \"ofs_calib2_flag\": %s,\n",    gl->ofs_calib2_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"gain_calib_flag\": %s,\n",    gl->gain_calib_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"range_calib_flag\": %s,\n",   gl->range_calib_flag ? "true" : "false");
-      mg_printf_http_chunk(nc, "   \"tcalib_flag\": %s,\n",        gl->tcalib_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"time_calib_flag\": %s,\n",    gl->time_calib_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"remove_spikes\": %s,\n",      gl->remove_spikes ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"http_port\": %d,\n",          gl->http_port);
       mg_printf_http_chunk(nc, "   \"n_boards\": %d,\n",           gl->n_boards);
@@ -225,14 +234,29 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_send_response_line(nc, 200, "Content-Type: application/octet-stream\r\nTransfer-Encoding: chunked\r\n");
 
       // return progress if in calibration mode
-      if (ofs_prog.state) {
+      if (vcalib_prog.state) {
          int t = 10;    // array type
          mg_send_http_chunk(nc, (const char *)&t, 4);
          
-         float f = (float)ofs_prog.i_board;
+         float f = (float)vcalib_prog.i_board;
          mg_send_http_chunk(nc, (const char *)&f, 4);
          
-         f = (float)ofs_prog.progress;
+         f = (float)vcalib_prog.progress;
+         mg_send_http_chunk(nc, (const char *)&f, 4);
+         
+         mg_send_http_chunk(nc, "", 0);
+         return;
+      }
+
+      // return progress if in calibration mode
+      if (tcalib_prog.state) {
+         int t = 11;    // array type
+         mg_send_http_chunk(nc, (const char *)&t, 4);
+         
+         float f = (float)tcalib_prog.i_board;
+         mg_send_http_chunk(nc, (const char *)&f, 4);
+         
+         f = (float)tcalib_prog.progress;
          mg_send_http_chunk(nc, (const char *)&f, 4);
          
          mg_send_http_chunk(nc, "", 0);
@@ -356,6 +380,7 @@ int main(int argc, char *argv[])
    gl.range_calib_flag           = 1;
    gl.rotate_flag                = 1;
    gl.remove_spikes              = 1;
+   gl.time_calib_flag            = 1;
    gl.trigger_mode               = TM_AUTO;
    gl.osctca_flag                = 0;
    gl.mux_flag                   = 0;
@@ -379,7 +404,7 @@ int main(int argc, char *argv[])
          gl.adc_flag = 1;
       
       else if (argv[i][0] == '-' && argv[i][1] == 'c')
-         cmd = CMD_OFS_CALIB;
+         cmd = CMD_VOLTAGE_CALIB;
       
       else if (argv[i][0] == '-' && argv[i][1] == 'd')
          gl.demo_flag = 1;
@@ -414,6 +439,7 @@ int main(int argc, char *argv[])
          gl.ofs_calib2_flag  = 0;
          gl.gain_calib_flag  = 0;
          gl.range_calib_flag = 0;
+         gl.time_calib_flag  = 0;
       }
       
       else if (argv[i][0] == '-' && argv[i][1] == 's')
@@ -489,8 +515,8 @@ int main(int argc, char *argv[])
       return FAILURE;
    
    // do calibration
-   if (cmd == CMD_OFS_CALIB) {
-      CALIB_PROGRESS prog;
+   if (cmd == CMD_VOLTAGE_CALIB) {
+      VCALIB_PROGRESS prog;
       
       printf("Calibrating boards\n");
       prog.state = CS_FIRST_BOARD;
@@ -507,7 +533,7 @@ int main(int argc, char *argv[])
             old_board = 0;
          }
 
-         wd_calibrate(&gl, &prog);
+         wd_calibrate_voltage(&gl, &prog);
          
          if (prog.progress >= old_prog + 0.02) {
             old_prog += 0.02;
@@ -547,10 +573,15 @@ int main(int argc, char *argv[])
    for (;;) {
 
       // do calibration if asked for
-      if (ofs_prog.state != CS_INACTIVE) {
-         wd_calibrate(&gl, &ofs_prog);
-      
-         // Yield to server, not timeout
+      if (vcalib_prog.state != CS_INACTIVE) {
+         wd_calibrate_voltage(&gl, &vcalib_prog);
+         
+         // Yield to server, no timeout
+         mg_mgr_poll(&mgr, 0);
+      } else if (tcalib_prog.state != CS_INACTIVE) {
+         wd_calibrate_time(&gl, &tcalib_prog);
+         
+         // Yield to server, no timeout
          mg_mgr_poll(&mgr, 0);
       } else
          // Yield to server, 10ms timeout
