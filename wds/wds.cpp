@@ -347,25 +347,26 @@ int main(int argc, char *argv[])
    char str[256], *p;
    
    memset(&gl, 0, sizeof(gl));
-   gl.http_port          = 8080; // default port
+   gl.http_port                  = 8080; // default port
    gl.nominal_sampling_frequency = 5;
-   gl.ofs_calib1_flag    = 1;
-   gl.ofs_calib2_flag    = 1;
-   gl.gain_calib_flag    = 1;
-   gl.range_calib_flag   = 1;
-   gl.rotate_flag        = 1;
-   gl.remove_spikes      = 1;
-   gl.trigger_mode       = TM_AUTO;
-   gl.osctca_flag        = 0;
-   gl.mux_flag           = 0;
-   gl.dcv_flag           = 0;
-   gl.dcv                = 0;
+   gl.actual_sampling_frequency  = 5;
+   gl.ofs_calib1_flag            = 1;
+   gl.ofs_calib2_flag            = 1;
+   gl.gain_calib_flag            = 1;
+   gl.range_calib_flag           = 1;
+   gl.rotate_flag                = 1;
+   gl.remove_spikes              = 1;
+   gl.trigger_mode               = TM_AUTO;
+   gl.osctca_flag                = 0;
+   gl.mux_flag                   = 0;
+   gl.dcv_flag                   = 0;
+   gl.dcv                        = 0;
 
    for (i=0 ; i<16 ; i++) {
-      gl.board[i].trigger_level = 0;
-      gl.board[i].gain          = 0;       // gain 1
-      gl.board[i].range         = 0;       // range +-0.5V
-      gl.board[i].pzc           = 0;       // PZC off
+      gl.board[i].trigger_level  = 0;
+      gl.board[i].gain           = 0;       // gain 1
+      gl.board[i].range          = 0;       // range +-0.5V
+      gl.board[i].pzc            = 0;       // PZC off
       strlcpy(gl.board[i].trigger_mask, "FFFF0000", sizeof(gl.board[i].trigger_mask)); // or of all 16 channels
    }
    

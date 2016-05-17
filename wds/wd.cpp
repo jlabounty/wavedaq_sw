@@ -339,8 +339,10 @@ void wd_set_sampling_frequency(GLOBALS *gl, int index)
 {
    char str[80];
    
-   if (gl->demo_flag)
+   if (gl->demo_flag) {
+      gl->actual_sampling_frequency = gl->nominal_sampling_frequency;
       return;
+   }
    
    // 200 MHz LMK bus frequency
    int divider = (int) (200.0 / gl->nominal_sampling_frequency * 2.048 / 2 + 0.5);
@@ -1422,6 +1424,11 @@ void wd_read_temp(GLOBALS *gl, int index)
    static time_t last[16] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
    time_t now;
    
+   if (gl->demo_flag) {
+      gl->board[index].temperature = 36.9;
+      return;
+   }
+
    time(&now);
    if (now > last[index] + 10) {
          int size;
