@@ -38,6 +38,7 @@ union { unsigned int i ; float f; } _nanf = { 0x7fc00000 };
 #include <net/if.h>
 #include <ifaddrs.h>
 #include <netdb.h>
+#include <time.h>
 
 #define NANF nanf("")
 #endif
