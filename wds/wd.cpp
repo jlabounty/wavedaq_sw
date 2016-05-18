@@ -1425,6 +1425,72 @@ void wd_read_temp(GLOBALS *gl, int index)
 
 /*-----------------------------------------------------------------------------------------*/
 
+void wd_analyze_period(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[16][1024])
+{
+   int tc;
+   
+   for (int ch=0 ; ch<16 ; ch++) {
+      if (ch < 8)
+         tc = pe->drs0_trigger_cell;
+      else
+         tc = pe->drs1_trigger_cell;
+      
+      // rising edges
+      for (int i1=tc+5; i1<tc+1024-5 ; i1++) {
+         if (wfU[ch][i1 % 1024] <= 0 && wfU[ch][(i1+1) % 1024] > 0) {
+            for (int i2=i1+1 ; i2<i1+1024 ; i2++) {
+               if (wfU[ch][i2 % 1024] <= 0 && wfU[ch][(i2+1) % 1024] > 0) {
+                  
+                  // first partial cell
+                  double tPeriod = gl->board[b].tcalib.dt[ch][i1%1024]*(1/(1-wfU[ch][i1%1024]/wfU[ch][(i1+1)%1024]));
+                  
+                  // full cells between i1 and i2
+                  if (i2 < i1)
+                     i2 += 1024;
+                  for (int j=i1+1 ; j<i2 ; j++)
+                     tPeriod += gl->board[b].tcalib.dt[ch][j%1024];
+                  
+                  // second partial cell
+                  tPeriod += gl->board[b].tcalib.dt[ch][i2 % 1024]*(1/(1-wfU[ch][(i2+1)%1024]/wfU[ch][i2%1024]));
+                  
+                  gl->board[b].tcalib.period[ch][i1%1024] = tPeriod;
+                  
+                  break;
+               }
+            }
+         }
+      }
+      
+      // falling edges
+      for (int i1=tc+5; i1<tc+1024-5 ; i1++) {
+         if (wfU[ch][i1 % 1024] >= 0 && wfU[ch][(i1+1) % 1024] < 0) {
+            for (int i2=i1+1 ; i2<i1+1024 ; i2++) {
+               if (wfU[ch][i2 % 1024] >= 0 && wfU[ch][(i2+1) % 1024] < 0) {
+                  
+                  // first partial cell
+                  double tPeriod = gl->board[b].tcalib.dt[ch][i1%1024]*(1/(1-wfU[ch][i1%1024]/wfU[ch][(i1+1)%1024]));
+                  
+                  // full cells between i1 and i2
+                  if (i2 < i1)
+                     i2 += 1024;
+                  for (int j=i1+1 ; j<i2 ; j++)
+                     tPeriod += gl->board[b].tcalib.dt[ch][j%1024];
+                  
+                  // second partial cell
+                  tPeriod += gl->board[b].tcalib.dt[ch][i2 % 1024]*(1/(1-wfU[ch][(i2+1)%1024]/wfU[ch][i2%1024]));
+                  
+                  gl->board[b].tcalib.period[ch][i1%1024] = tPeriod;
+                  
+                  break;
+               }
+            }
+         }
+      }
+   }
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
 int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
 {
    float wfU[16][1024];
@@ -1440,6 +1506,7 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       pr->n_board = gl->n_boards;
       pr->i_board = 0;
       gl->time_calib_flag  = 0;
+      gl->rotate_flag      = 0;
    }
    
    if (pr->state == CS_FIRST_SAMPLE) {
@@ -1450,8 +1517,10 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
 
       // initialize delta-t array with nominal values
       for (int ch=0 ; ch<16 ; ch++)
-         for (int bin=0 ; bin<1024 ; bin++)
+         for (int bin=0 ; bin<1024 ; bin++) {
             gl->board[pr->i_board].tcalib.dt[ch][bin] = 1/gl->actual_sampling_frequency*1E-9; // [s]
+            gl->board[pr->i_board].tcalib.period[ch][bin] = 10*1E-9; // 10 ns
+         }
 
       // switch to -0.5 ... + 0.5V range, timing oscillator on
       pr->prev_range = gl->board[pr->i_board].range;
@@ -1479,17 +1548,23 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU) != SUCCESS)
          return SUCCESS; // just skip this event
       
+      wd_analyze_period(gl, &eventHeader, pr->i_board, wfU);
+      
+      /*
       for (int ch=0 ; ch<16 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
             pr->ave->Add(ch/8, ch%8, bin, wfU[ch][bin]);
+      */
       
       pr->progress = (double)(pr->i_iter1 + pr->i_iter2) / (pr->n_iter1 + pr->n_iter2);
       
       // calibration finished
       if (pr->i_iter1 == pr->n_iter1) {
+         /*
          for (int ch=0 ; ch<16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
                gl->board[pr->i_board].tcalib.dt[ch][bin] = (float)pr->ave->Median(ch/8, ch%8, bin);
+          */
       }
       
       sleep_ms(10); // obtain 100 Hz rate

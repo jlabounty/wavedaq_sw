@@ -31,6 +31,7 @@ typedef struct {
    float          sampling_frequency;
    float          temperature;
    float          dt[16][1024];
+   float          period[16][1024];
 } TCALIB_DATA;
 
 typedef struct {

@@ -231,9 +231,15 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       float wfT[16][1024], wfU[16][1024];
       int status;
 
+      mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
+      int b = atoi(str);
+
+      mg_get_http_var(&hm->query_string, "c", str, sizeof(str));
+      int chn = atoi(str);
+
       mg_send_response_line(nc, 200, "Content-Type: application/octet-stream\r\nTransfer-Encoding: chunked\r\n");
 
-      // return progress if in calibration mode
+      // return progress if in voltage calibration mode
       if (vcalib_prog.state) {
          int t = 10;    // array type
          mg_send_http_chunk(nc, (const char *)&t, 4);
@@ -248,7 +254,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          return;
       }
 
-      // return progress if in calibration mode
+      // return progress and period in time calibration mode
       if (tcalib_prog.state) {
          int t = 11;    // array type
          mg_send_http_chunk(nc, (const char *)&t, 4);
@@ -259,13 +265,14 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          f = (float)tcalib_prog.progress;
          mg_send_http_chunk(nc, (const char *)&f, 4);
          
+         for (int c=0 ; c<16 ; c++)
+            if (chn & (1 << c))
+               mg_send_http_chunk(nc, (const char *)gl->board[tcalib_prog.i_board].tcalib.period[c], sizeof(float)*1024);
+
          mg_send_http_chunk(nc, "", 0);
          return;
       }
 
-      mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
-      int b = atoi(str);
-      
       // avoid invalid board index
       if (b < 0 || b >= gl->n_boards)
          b = 0;
@@ -305,10 +312,6 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          b = 0xFF; // signals demo data
       
       if (status == SUCCESS) {
-         
-         mg_get_http_var(&hm->query_string, "c", str, sizeof(str));
-         int chn = atoi(str);
-         
          int t = 1;    // array type
          int n = 1024; // number of elements
          int f = 0;    // frame number
