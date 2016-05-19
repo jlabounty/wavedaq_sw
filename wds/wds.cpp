@@ -86,6 +86,12 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             wd_set_osctca(gl, i);
       }
 
+      else if (mg_vcmp(&hm->uri, "/gl/clock_source") == 0) {
+         gl->clock_source = atoi(value);
+         for (int i=0 ; i<gl->n_boards ; i++)
+            wd_set_osctca(gl, i);
+      }
+
       else if (mg_vcmp(&hm->uri, "/gl/nominal_sampling_frequency") == 0) {
          gl->nominal_sampling_frequency = atof(value);
          for (int i=0 ; i<gl->n_boards ; i++)
@@ -169,6 +175,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "   \"actual_sampling_frequency\": %1.3lf,\n", gl->actual_sampling_frequency);
       mg_printf_http_chunk(nc, "   \"trigger_mode\": %d,\n",       gl->trigger_mode);
       mg_printf_http_chunk(nc, "   \"osctca_flag\": %s,\n",        gl->osctca_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"clock_source\": %d,\n",       gl->clock_source);
       mg_printf_http_chunk(nc, "   \"mux_flag\": %s,\n",           gl->mux_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"dcv_flag\": %s,\n",           gl->dcv_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"dcv\": %1.3lf,\n",            gl->dcv);
@@ -244,10 +251,9 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          int t = 10;    // array type
          mg_send_http_chunk(nc, (const char *)&t, 4);
          
-         float f = (float)vcalib_prog.i_board;
-         mg_send_http_chunk(nc, (const char *)&f, 4);
+         mg_send_http_chunk(nc, (const char *)&vcalib_prog.i_board, 4);
          
-         f = (float)vcalib_prog.progress;
+         float f = (float)vcalib_prog.progress;
          mg_send_http_chunk(nc, (const char *)&f, 4);
          
          mg_send_http_chunk(nc, "", 0);
@@ -266,8 +272,13 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_send_http_chunk(nc, (const char *)&f, 4);
          
          for (int c=0 ; c<16 ; c++)
-            if (chn & (1 << c))
-               mg_send_http_chunk(nc, (const char *)gl->board[tcalib_prog.i_board].tcalib.period[c], sizeof(float)*1024);
+            if (chn & (1 << c)) {
+               int n = 1024;
+               mg_send_http_chunk(nc, (const char *)&c, 4);
+               mg_send_http_chunk(nc, (const char *)&n, 4);
+
+               mg_send_http_chunk(nc, (const char *)gl->board[tcalib_prog.i_board].tcalib.period[c], sizeof(float)*n);
+            }
 
          mg_send_http_chunk(nc, "", 0);
          return;
@@ -386,6 +397,7 @@ int main(int argc, char *argv[])
    gl.time_calib_flag            = 1;
    gl.trigger_mode               = TM_AUTO;
    gl.osctca_flag                = 0;
+   gl.clock_source               = 0;
    gl.mux_flag                   = 0;
    gl.dcv_flag                   = 0;
    gl.dcv                        = 0;

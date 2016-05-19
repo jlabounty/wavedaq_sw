@@ -70,6 +70,7 @@ typedef struct {
    float          actual_sampling_frequency;
    int            trigger_mode;
    int            osctca_flag;
+   int            clock_source;
    int            mux_flag;
    int            dcv_flag;
    float          dcv;

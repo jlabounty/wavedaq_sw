@@ -262,7 +262,7 @@ function receiveWF()
       // this.wf = JSON.parse(OSC.req.responseText); // use this for JSON encoded data
       
       // create 16 empty waveforms
-      var wf = {T:[], U:[]};
+      var wf = {T:[], U:[], type: 1 };
       for (var i=0 ; i<16 ; i++) {
          wf.T[i] = [];
          wf.U[i] = [];
@@ -271,11 +271,13 @@ function receiveWF()
       var intArray = new Uint32Array(OSC.req.response);
       var floatArray = new Float32Array(OSC.req.response);
       
-      for (i=0 ; i<intArray.length ; ) {
-         if (intArray[i] == 0) {        // idle message
+      for (var i=0 ; i<intArray.length ; ) {
+         var responseType = intArray[i];
+
+         if (responseType == 0) {        // idle message
             OSC.idle = true;
             break;
-         } else if (intArray[i] == 1) { // time array
+         } else if (responseType == 1) { // time array
             i++;
             OSC.wd = intArray[i++];
             var f = intArray[i++];
@@ -296,51 +298,68 @@ function receiveWF()
                OSC.board = progressOldBoard;
             }
                
-         } else if (intArray[i] == 2) { // voltage array
+         } else if (responseType == 2) { // voltage array
             i++;
             OSC.idle = false;
             OSC.wd = intArray[i++];
-            f = intArray[i++];
-            c = intArray[i++];
-            n = intArray[i++];
-            for (j=0 ; j<n ; j++)
+            var f = intArray[i++];
+            var c = intArray[i++];
+            var n = intArray[i++];
+            for (var j=0 ; j<n ; j++)
                wf.U[c][j] = floatArray[i++];
             OSC.demo = (OSC.wd == 0xFF);
-         } else if (intArray[i] == 10) { // vcalib progress data
+            
+         } else if (responseType == 10) { // vcalib progress data
             var b = floatArray[1];
             progressInd = floatArray[2];
 
-            e = document.getElementById("progressIndVcalib");
+            var e = document.getElementById("progressIndVcalib");
             e.style.width = (progressInd*270) + "px";
             
             document.getElementById("wdSelect").selectedIndex = b;
 
             window.setTimeout(loadWF, 250);
             return;
-         } else if (intArray[i] == 11) { // tcalib progress data
-            var b = floatArray[1];
-            progressInd = floatArray[2];
             
-            e = document.getElementById("progressIndTcalib");
+         } else if (responseType == 11) { // tcalib progress data
+            i++;
+            OSC.wd = floatArray[i++];
+            wf.type = 2; // indicate delta-T array
+            
+            progressInd = floatArray[i++];
+            
+            var e = document.getElementById("progressIndTcalib");
             e.style.width = (progressInd*270) + "px";
             
             document.getElementById("wdSelect").selectedIndex = b;
             
-            window.setTimeout(loadWF, 250);
-            return;
+            while (i < intArray.length) {
+               var c = intArray[i++]
+               var n = intArray[i++];
+               for (var j=0 ; j<n ; j++)
+                  wf.T[c][j] = floatArray[i++];
+            }
+            
          } else {
             alert("WDS: Invalid binary data received form server");
             break;
          }
       }
-      
-      if (OSC.running)
-         window.setTimeout(loadWF, 10); // schedule next waveform read
-      
-      // send waveforms to oscilloscope
-      if (!OSC.idle)
+
+      if (responseType == 11) {
+         window.setTimeout(loadWF, 250);
          OSC.sendWaveforms(wf);
       
+      } else {
+         // schedule next waveform read
+         if (OSC.running)
+            window.setTimeout(loadWF, 10);
+
+         // send waveforms to oscilloscope
+         if (!OSC.idle)
+            OSC.sendWaveforms(wf);
+      }
+
       // redraw oscilloscope to show new waveforms
       OSC.redraw();
    }

@@ -336,6 +336,27 @@ void wd_set_osctca(GLOBALS *gl, int index)
 
 /*-----------------------------------------------------------------------------------------*/
 
+void wd_set_clocksource(GLOBALS *gl, int index)
+{
+   if (gl->demo_flag)
+      return;
+   
+   if (gl->verbose_flag) {
+      if (gl->clock_source == 1)
+         printf("Set clock source to external\n");
+      else
+         printf("Set clock source to internal\n");
+   }
+   
+   if (gl->clock_source == 1) {
+      assert(wd_send(gl, index, 100, "clkext on", NULL, NULL) > 0);
+   } else {
+      assert(wd_send(gl, index, 100, "clkext off", NULL, NULL) > 0);
+   }
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
 void wd_set_sampling_frequency(GLOBALS *gl, int index)
 {
    char str[80];
@@ -563,7 +584,8 @@ int wd_init(GLOBALS *gl)
       wd_set_sampling_frequency(gl, index);
       wd_set_trigger_mode(gl, index);
       wd_set_osctca(gl, index);
-   
+      wd_set_clocksource(gl, index);
+      
       // set DRS readout mode to ROI
       assert(wd_send(gl, index, 100, "regwr 10 17170030", NULL, NULL) > 0);
       
@@ -572,7 +594,7 @@ int wd_init(GLOBALS *gl)
       assert(wd_send(gl, index, 100, "regwr 30 00020101", NULL, NULL) > 0);
       assert(wd_send(gl, index, 100, "regwr 34 00020102", NULL, NULL) > 0);
       assert(wd_send(gl, index, 100, "regwr 58 029900AD", NULL, NULL) > 0);
-      assert(wd_send(gl, index, 100, "regwr 5c 0800140E", NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, "regwr 5c 0830140E", NULL, NULL) > 0);
       assert(wd_send(gl, index, 100, "regwr 60 D800280F", NULL, NULL) > 0);
       
       // read current temperature
@@ -1519,7 +1541,7 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       for (int ch=0 ; ch<16 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++) {
             gl->board[pr->i_board].tcalib.dt[ch][bin] = 1/gl->actual_sampling_frequency*1E-9; // [s]
-            gl->board[pr->i_board].tcalib.period[ch][bin] = 10*1E-9; // 10 ns
+            gl->board[pr->i_board].tcalib.period[ch][bin] = 0;
          }
 
       // switch to -0.5 ... + 0.5V range, timing oscillator on
