@@ -51,6 +51,10 @@ union { unsigned int i ; float f; } _nanf = { 0x7fc00000 };
 #define NANF nanf("")
 #endif
 
+#ifndef MAX
+#define MAX(x,y) ((x>y)?(x):(y))
+#endif
+
 #define WD2_CMD_PORT   3000
 
 #pragma pack(1)
@@ -1046,7 +1050,12 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
          wd_set_dcv(gl, pr->i_board);
          wd_set_dcv_flag(gl, pr->i_board);
          
-         pr->ave = new Averager(1, 16, 1024, pr->n_iter1);
+         int n = pr->n_iter1;
+         n = MAX(n, pr->n_iter2);
+         n = MAX(n, pr->n_iter3);
+         n = MAX(n, pr->n_iter4);
+         
+         pr->ave = new Averager(1, 16, 1024, n);
       }
 
       pr->i_iter1++;
@@ -1069,6 +1078,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
                gl->board[pr->i_board].vcalib.wf_offset1[ch][bin] = (float)pr->ave->Median(0, ch, bin);
          
          // ave->SaveNormalizedDistribution("wf.csv", 0);
+         pr->ave->Reset();
       }
 
       sleep_ms(10); // obtain 100 Hz rate
@@ -1107,6 +1117,8 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
          for (int ch=0 ; ch<16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
                gl->board[pr->i_board].vcalib.wf_offset2[ch][bin] = (float)pr->ave->Median(0, ch, bin);
+         
+         pr->ave->Reset();
       }
       
       sleep_ms(10); // obtain 100 Hz rate
@@ -1152,6 +1164,8 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
          for (int ch=0 ; ch<16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
                gl->board[pr->i_board].vcalib.wf_gain1[ch][bin] = pr->ave->Median(0, ch, bin) / 0.45;
+         
+         pr->ave->Reset();
       }
       
       sleep_ms(10); // obtain 100 Hz rate
@@ -1622,8 +1636,6 @@ void wd_calibrate_local(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[16][1024], 
          // average over all 1024 dU
          double sum = 0;
          double cellDV[1024];
-         if (ch == 0)
-         printf("%d\n", pr->i_iter1);
          
          for (int i=0 ; i<1024 ; i++) {
             cellDV[i] = pr->ave->RobustAverage(0, ch, i);
@@ -1642,6 +1654,98 @@ void wd_calibrate_local(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[16][1024], 
 }
 
 /*-----------------------------------------------------------------------------------------*/
+
+void wd_calibrate_global(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[16][1024], TCALIB_PROGRESS *pr)
+{
+   int tc;
+   float damping = 0.1;
+   
+   for (int ch=0 ; ch<16 ; ch++) {
+      if (ch < 8)
+         tc = pe->drs0_trigger_cell;
+      else
+         tc = pe->drs1_trigger_cell;
+      
+      // rising edges
+      for (int i1=tc+5; i1<tc+1024-5 ; i1++) {
+         if (wfU[ch][i1 % 1024] <= 0 && wfU[ch][(i1+1) % 1024] > 0) {
+            for (int i2=i1+1 ; i2<i1+1024 ; i2++) {
+               if (wfU[ch][i2 % 1024] <= 0 && wfU[ch][(i2+1) % 1024] > 0) {
+                  
+                  // first partial cell
+                  double tPeriod = gl->board[b].tcalib.dt[ch][i1%1024]*(1/(1-wfU[ch][i1%1024]/wfU[ch][(i1+1)%1024]));
+                  
+                  // full cells between i1 and i2
+                  if (i2 < i1)
+                     i2 += 1024;
+                  for (int j=i1+1 ; j<i2 ; j++)
+                     tPeriod += gl->board[b].tcalib.dt[ch][j%1024];
+                  
+                  // second partial cell
+                  tPeriod += gl->board[b].tcalib.dt[ch][i2 % 1024]*(1/(1-wfU[ch][(i2+1)%1024]/wfU[ch][i2%1024]));
+                  
+                  // calculate correction to nominal period of 10 ns as a fraction
+                  float corr = (10E-9) / tPeriod;
+                  
+                  // skip big corrections (probably noise)
+                  if (corr > 1.01 || corr < 0.99)
+                     continue;
+                  
+                  // apply damping factor
+                  corr = (corr - 1)*damping + 1;
+                  
+                  // distribute correction equally into bin inside the region
+                  for (int j=i1+1 ; j<i2 ; j++)
+                     gl->board[b].tcalib.dt[ch][j % 1024] *= corr;
+                  
+                  break;
+               }
+            }
+         }
+      }
+      
+      // falling edges
+      for (int i1=tc+5; i1<tc+1024-5 ; i1++) {
+         if (wfU[ch][i1 % 1024] >= 0 && wfU[ch][(i1+1) % 1024] < 0) {
+            for (int i2=i1+1 ; i2<i1+1024 ; i2++) {
+               if (wfU[ch][i2 % 1024] >= 0 && wfU[ch][(i2+1) % 1024] < 0) {
+                  
+                  // first partial cell
+                  double tPeriod = gl->board[b].tcalib.dt[ch][i1%1024]*(1/(1-wfU[ch][i1%1024]/wfU[ch][(i1+1)%1024]));
+                  
+                  // full cells between i1 and i2
+                  if (i2 < i1)
+                     i2 += 1024;
+                  for (int j=i1+1 ; j<i2 ; j++)
+                     tPeriod += gl->board[b].tcalib.dt[ch][j%1024];
+                  
+                  // second partial cell
+                  tPeriod += gl->board[b].tcalib.dt[ch][i2 % 1024]*(1/(1-wfU[ch][(i2+1)%1024]/wfU[ch][i2%1024]));
+                  
+                  // calculate correction to nominal period of 10 ns as a fraction
+                  float corr = (10E-9) / tPeriod;
+                  
+                  // skip big corrections (probably noise)
+                  if (corr > 1.01 || corr < 0.99)
+                     continue;
+                  
+                  // apply damping factor
+                  corr = (corr - 1)*damping + 1;
+                  
+                  // distribute correction equally into bin inside the region
+                  for (int j=i1+1 ; j<i2 ; j++)
+                     gl->board[b].tcalib.dt[ch][j % 1024] *= corr;
+                  
+                  break;
+               }
+            }
+         }
+      }
+   }
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
 
 int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
 {
@@ -1686,7 +1790,7 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       wd_set_dcv_flag(gl, pr->i_board);
       wd_set_osctca(gl, pr->i_board);
       
-      pr->ave = new Averager(1, 16, 1024, pr->n_iter1);
+      pr->ave = new Averager(1, 16, 1024, MAX(pr->n_iter1, pr->n_iter2));
    }
    
    //---- Local Calibration ----
@@ -1704,6 +1808,9 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       
       pr->progress = (double)(pr->i_iter1 + pr->i_iter2) / (pr->n_iter1 + pr->n_iter2);
       
+      if (pr->i_iter1 == pr->n_iter1)
+         pr->ave->Reset();
+      
       sleep_ms(10); // obtain 100 Hz rate
       return SUCCESS;
    }
@@ -1719,13 +1826,16 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
          return SUCCESS; // just skip this event
       
       wd_analyze_period(gl, &eventHeader, pr->i_board, wfU);
-      // wd_calibrate_global(gl, &eventHeader, pr->i_board, wfU, pr);
+      wd_calibrate_global(gl, &eventHeader, pr->i_board, wfU, pr);
       
       pr->progress = (double)(pr->i_iter1 + pr->i_iter2) / (pr->n_iter1 + pr->n_iter2);
       
       sleep_ms(10); // obtain 100 Hz rate
       return SUCCESS;
    }
+   
+   delete pr->ave;
+   pr->ave = NULL;
    
    // set everything back to normal values
    gl->board[pr->i_board].range = pr->prev_range;
