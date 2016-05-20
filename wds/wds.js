@@ -296,6 +296,8 @@ function receiveWF()
                
                document.getElementById("wdSelect").selectedIndex = progressOldBoard;
                OSC.board = progressOldBoard;
+               
+               window.setTimeout(loadGl, 10);
             }
                
          } else if (responseType == 2) { // voltage array

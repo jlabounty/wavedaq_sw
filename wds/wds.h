@@ -146,7 +146,7 @@ void wd_set_osctca(GLOBALS *gl, int index);
 void wd_set_dcv_flag(GLOBALS *gl, int index);
 void wd_set_dcv(GLOBALS *gl, int index);
 
-int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wf[16][1024]);
+int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wfU[16][1024], float wfT[16][1024]);
 int wd_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *result, int *size);
 int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *p);
 int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *p);

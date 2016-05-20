@@ -606,7 +606,7 @@ int wd_init(GLOBALS *gl)
       // set LED green
       assert(wd_send(gl, index, 100, "ledset g", NULL, NULL) > 0);
       
-      // load calibration for board from file (for now...)
+      // load voltage calibration for board from file (for now...)
       char str[80];
       sprintf(str, "%s.vcal", gl->board[index].name);
       int fh = open(str, O_RDONLY, 0644);
@@ -616,17 +616,14 @@ int wd_init(GLOBALS *gl)
             printf("Invalid calibration file size of \"%s\". Aborting.\n", str);
             return FAILURE;
          }
-         
          if (memcmp(gl->board[index].vcalib.version_id, "CAL1", 4) != 0) {
             printf("Invalid calibration file format in \"%s\". Aborting.\n", str);
             return FAILURE;
          }
-
          if (fabs(gl->board[index].vcalib.sampling_frequency - gl->actual_sampling_frequency) > 0.001) {
             printf("Warning: Calibration data is for %3g GSPS, running now at %3g GSPS\n",
                    gl->board[index].vcalib.sampling_frequency, gl->actual_sampling_frequency);
          }
-
          if (fabs(gl->board[index].vcalib.temperature - gl->board[index].temperature) > 5) {
             printf("Warning: Calibration data is for %3g deg. C, running now at %3g deg. C\n",
                    gl->board[index].vcalib.temperature, gl->board[index].temperature);
@@ -644,6 +641,34 @@ int wd_init(GLOBALS *gl)
             gl->board[index].vcalib.offset_range2[ch] = -0.45;
          }
       }
+
+      // load timing calibration for board from file (for now...)
+      sprintf(str, "%s.tcal", gl->board[index].name);
+      fh = open(str, O_RDONLY, 0644);
+      if (fh > 0) {
+         size = read(fh, &gl->board[index].tcalib, sizeof(TCALIB_DATA));
+         if (size != sizeof(TCALIB_DATA)) {
+            printf("Invalid calibration file size of \"%s\". Aborting.\n", str);
+            return FAILURE;
+         }
+         if (memcmp(gl->board[index].tcalib.version_id, "CAL1", 4) != 0) {
+            printf("Invalid calibration file format in \"%s\". Aborting.\n", str);
+            return FAILURE;
+         }
+         if (fabs(gl->board[index].tcalib.sampling_frequency - gl->actual_sampling_frequency) > 0.001) {
+            printf("Warning: Calibration data is for %3g GSPS, running now at %3g GSPS\n",
+                   gl->board[index].tcalib.sampling_frequency, gl->actual_sampling_frequency);
+         }
+         if (fabs(gl->board[index].tcalib.temperature - gl->board[index].temperature) > 5) {
+            printf("Warning: Calibration data is for %3g deg. C, running now at %3g deg. C\n",
+                   gl->board[index].tcalib.temperature, gl->board[index].temperature);
+         }
+      } else {
+         for (int ch=0 ; ch < 16 ; ch++)
+            for (int bin=0 ; bin<1024 ; bin++)
+               gl->board[index].tcalib.dt[ch][bin] = 1E-9 / gl->actual_sampling_frequency;
+      }
+      
    }
    
    if (gl->verbose_flag)
@@ -667,7 +692,7 @@ double time_ms()
 
 /*-----------------------------------------------------------------------------------------*/
 
-int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float waveform[16][1024])
+int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[16][1024], float wfT[16][1024])
 {
    int i, status, waveform_channel, current_frame;
    fd_set readfds;
@@ -683,8 +708,8 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
 
    // tag waveforms as invalid
    for (i=0 ; i<16 ; i++) {
-      waveform[i][0]   = NANF;
-      waveform[i][512] = NANF;
+      wfU[i][0]   = NANF;
+      wfU[i][512] = NANF;
    }
    
    current_frame = -1;
@@ -778,8 +803,8 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
                
                // tag waveforms as invalid
                for (i=0 ; i<16 ; i++) {
-                  waveform[i][0]   = NANF;
-                  waveform[i][512] = NANF;
+                  wfU[i][0]   = NANF;
+                  wfU[i][512] = NANF;
                }
             }
             
@@ -811,38 +836,35 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
                
                if (ph->channel_segment_number == 0) {
                   // first segment
-                  waveform[waveform_channel][i]       = (float)(data1 * (1 / 4096.0)); // 1V DRS range with 12 bits
-                  waveform[waveform_channel][i+1]     = (float)(data2 * (1 / 4096.0));
+                  wfU[waveform_channel][i]       = (float)(data1 * (1 / 4096.0)); // 1V DRS range with 12 bits
+                  wfU[waveform_channel][i+1]     = (float)(data2 * (1 / 4096.0));
                } else {
                   // second segment
-                  waveform[waveform_channel][512+i]   = (float)(data1 * (1 / 4096.0));
-                  waveform[waveform_channel][512+i+1] = (float)(data2 * (1 / 4096.0));
+                  wfU[waveform_channel][512+i]   = (float)(data1 * (1 / 4096.0));
+                  wfU[waveform_channel][512+i+1] = (float)(data2 * (1 / 4096.0));
                }
             }
             
             // test if all waveforms are received
             for (i=0 ; i<16 ; i++)
-               if (isnan(waveform[i][0]) || isnan(waveform[i][512]))
+               if (isnan(wfU[i][0]) || isnan(wfU[i][512]))
                    break;
             if (i == 16) {
 
                for (i=0 ; i<16 ; i++)
                   for (int j=0 ; j<1024 ; j++)
-                     wf1[i][j] = waveform[i][j];
+                     wf1[i][j] = wfU[i][j];
 
                // un-rotate waveforms
                if (gl->rotate_flag) {
-                  for (i=0 ; i<8 ; i++)
+                  for (i=0 ; i<16 ; i++)
                      for (int j=0 ; j<1024 ; j++)
-                        waveform[i][j] = wf1[i][j];
+                        wfU[i][j] = wf1[i][j];
                } else {
-                  for (i=0 ; i<8 ; i++) {
+                  for (i=0 ; i<16 ; i++) {
+                     int tc = i < 8 ? pe->drs0_trigger_cell : pe->drs1_trigger_cell;
                      for (int j=0 ; j<1024 ; j++)
-                        waveform[i][(j+pe->drs0_trigger_cell) % 1024] = wf1[i][j];
-                  }
-                  for (i=8 ; i<16 ; i++) {
-                     for (int j=0 ; j<1024 ; j++)
-                        waveform[i][(j+pe->drs1_trigger_cell) % 1024] = wf1[i][j];
+                        wfU[i][(j+tc) % 1024] = wf1[i][j];
                   }
                }
                
@@ -852,43 +874,37 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
                   // cell-by-cell offset calibration
                   if (gl->ofs_calib1_flag) {
                      if (gl->rotate_flag) {
-                        for (i=0 ; i<8 ; i++)
+                        for (i=0 ; i<16 ; i++) {
+                           int tc = i < 8 ? pe->drs0_trigger_cell : pe->drs1_trigger_cell;
                            for (int j=0 ; j<1024 ; j++)
-                              waveform[i][j] -= gl->board[b].vcalib.wf_offset1[i][(j+pe->drs0_trigger_cell) % 1024];
-                        for (i=8 ; i<16 ; i++)
-                           for (int j=0 ; j<1024 ; j++)
-                              waveform[i][j] -= gl->board[b].vcalib.wf_offset1[i][(j+pe->drs1_trigger_cell) % 1024];
+                              wfU[i][j] -= gl->board[b].vcalib.wf_offset1[i][(j+tc) % 1024];
+                        }
                      } else {
                         for (i=0 ; i<16 ; i++)
                            for (int j=0 ; j<1024 ; j++)
-                              waveform[i][j] -= gl->board[b].vcalib.wf_offset1[i][j];
+                              wfU[i][j] -= gl->board[b].vcalib.wf_offset1[i][j];
                      }
                   }
                   
                   // gain calibration
                   if (gl->gain_calib_flag) {
                      if (gl->rotate_flag) {
-                        for (i=0 ; i<8 ; i++)
+                        for (i=0 ; i<16 ; i++) {
+                           int tc = i < 8 ? pe->drs0_trigger_cell : pe->drs1_trigger_cell;
                            for (int j=0 ; j<1024 ; j++) {
-                              if (waveform[i][j] > 0)
-                                 waveform[i][j] /= gl->board[b].vcalib.wf_gain1[i][(j+pe->drs0_trigger_cell) % 1024];
+                              if (wfU[i][j] > 0)
+                                 wfU[i][j] /= gl->board[b].vcalib.wf_gain1[i][(j+tc) % 1024];
                               else
-                                 waveform[i][j] /= gl->board[b].vcalib.wf_gain2[i][(j+pe->drs0_trigger_cell) % 1024];
+                                 wfU[i][j] /= gl->board[b].vcalib.wf_gain2[i][(j+tc) % 1024];
                            }
-                        for (i=8 ; i<16 ; i++)
-                           for (int j=0 ; j<1024 ; j++) {
-                              if (waveform[i][j] > 0)
-                                 waveform[i][j] /= gl->board[b].vcalib.wf_gain1[i][(j+pe->drs1_trigger_cell) % 1024];
-                              else
-                                 waveform[i][j] /= gl->board[b].vcalib.wf_gain2[i][(j+pe->drs1_trigger_cell) % 1024];
-                           }
+                        }
                      } else {
                         for (i=0 ; i<16 ; i++)
                            for (int j=0 ; j<1024 ; j++) {
-                              if (waveform[i][j] > 0)
-                                 waveform[i][j] /= gl->board[b].vcalib.wf_gain1[i][j];
+                              if (wfU[i][j] > 0)
+                                 wfU[i][j] /= gl->board[b].vcalib.wf_gain1[i][j];
                               else
-                                 waveform[i][j] /= gl->board[b].vcalib.wf_gain2[i][j];
+                                 wfU[i][j] /= gl->board[b].vcalib.wf_gain2[i][j];
                            }
                      }
                   }
@@ -897,7 +913,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
                   if (gl->ofs_calib2_flag) {
                      for (i=0 ; i<16 ; i++)
                         for (int j=0 ; j<1024 ; j++)
-                           waveform[i][j] -= gl->board[b].vcalib.wf_offset2[i][j];
+                           wfU[i][j] -= gl->board[b].vcalib.wf_offset2[i][j];
                   }
                   
                   // range calibration
@@ -914,14 +930,47 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
                         else
                            ofs = 0;
                         for (int j=0 ; j<1024 ; j++)
-                           waveform[i][j] -= ofs;
+                           wfU[i][j] -= ofs;
                      }
                   }
 
                   // remove spikes
                   if (gl->remove_spikes) {
-                     remove_spikes(gl, pe->drs0_trigger_cell, waveform);
-                     remove_spikes(gl, pe->drs1_trigger_cell, waveform+8);
+                     remove_spikes(gl, pe->drs0_trigger_cell, wfU);
+                     remove_spikes(gl, pe->drs1_trigger_cell, wfU+8);
+                  }
+                  
+                  // calculate time
+                  if (gl->time_calib_flag) {
+                     // integrate time from delta-t values
+                     for (int ch=0 ; ch<16 ; ch++) {
+                        int tc = ch < 8 ? pe->drs0_trigger_cell : pe->drs1_trigger_cell;
+                        wfT[ch][0] = 0;
+                        for (int i=1 ; i<1024 ; i++)
+                           wfT[ch][i] = wfT[ch][i-1] + gl->board[b].tcalib.dt[ch][(i-1+tc)%1024];
+                     }
+                     // align cell#0 of all channels inside chip0
+                     float t1 = wfT[0][(1024-pe->drs0_trigger_cell) % 1024];
+                     for (int ch=1 ; ch<8 ; ch++) {
+                        float t2 = wfT[ch][(1024-pe->drs0_trigger_cell) % 1024];
+                        float dt = t1 - t2;
+                        for (int i=0 ; i<1024 ; i++)
+                           wfT[ch][i] += dt;
+                     }
+                     // align cell#0 of all channels inside chip1
+                     t1 = wfT[8][(1024-pe->drs1_trigger_cell) % 1024];
+                     for (int ch=9 ; ch<15 ; ch++) {
+                        float t2 = wfT[ch][(1024-pe->drs1_trigger_cell) % 1024];
+                        float dt = t1 - t2;
+                        for (int i=0 ; i<1024 ; i++)
+                           wfT[ch][i] += dt;
+                     }
+                     
+                  } else {
+                     // set nominal sampling interval
+                     for (i=0 ; i<16 ; i++)
+                        for (int j=0 ; j<1024 ; j++)
+                           wfT[i][j] = j * 1E-9/gl->actual_sampling_frequency;
                   }
                }
 
@@ -943,7 +992,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wave
 
 int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
 {
-   float wfU[16][1024];
+   float wfU[16][1024], wfT[16][1024];
    WD2_EVENT eventHeader;
    char str[80];
    
@@ -1003,7 +1052,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       pr->i_iter1++;
       
       wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
-      if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU) != SUCCESS)
+      if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS)
          return SUCCESS; // just skip this event
       
       for (int ch=0 ; ch<16 ; ch++)
@@ -1043,7 +1092,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       pr->i_iter2++;
       
       wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
-      if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU) != SUCCESS)
+      if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS)
          return SUCCESS; // just skip this event
 
       for (int ch=0 ; ch<16 ; ch++)
@@ -1088,7 +1137,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       pr->i_iter3++;
       
       wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
-      if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU) != SUCCESS)
+      if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS)
          return SUCCESS; // just skip this event
       
       for (int ch=0 ; ch<16 ; ch++)
@@ -1129,7 +1178,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       pr->i_iter4++;
       
       wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
-      if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU) != SUCCESS)
+      if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS)
          return SUCCESS; // just skip this event
       
       for (int ch=0 ; ch<16 ; ch++)
@@ -1175,7 +1224,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
    
    for (int i=0 ; i<10 ; i++) {
       wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
-      if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU) != SUCCESS)
+      if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS)
          i--;
       sleep_ms(10);
    }
@@ -1193,7 +1242,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
    
    for (int i=0 ; i<10 ; i++) {
       wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
-      if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU) != SUCCESS)
+      if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS)
          i--;
       sleep_ms(10);
    }
@@ -1211,7 +1260,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
    
    for (int i=0 ; i<10 ; i++) {
       wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
-      if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU) != SUCCESS)
+      if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS)
          i--;
       sleep_ms(10);
    }
@@ -1573,6 +1622,8 @@ void wd_calibrate_local(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[16][1024], 
          // average over all 1024 dU
          double sum = 0;
          double cellDV[1024];
+         if (ch == 0)
+         printf("%d\n", pr->i_iter1);
          
          for (int i=0 ; i<1024 ; i++) {
             cellDV[i] = pr->ave->RobustAverage(0, ch, i);
@@ -1594,18 +1645,17 @@ void wd_calibrate_local(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[16][1024], 
 
 int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
 {
-   float wfU[16][1024];
+   float wfU[16][1024], wfT[16][1024];
    WD2_EVENT eventHeader;
    char str[80];
-   int i;
    
    if (pr->state == CS_FIRST_BOARD) {
       memset(pr, 0, sizeof(VCALIB_PROGRESS));
-      pr->state   = CS_FIRST_SAMPLE;
-      pr->n_iter1 = 500;
-      pr->n_iter2 = 200;
-      pr->n_board = gl->n_boards;
-      pr->i_board = 0;
+      pr->state            = CS_FIRST_SAMPLE;
+      pr->n_iter1          = 400;
+      pr->n_iter2          = 400;
+      pr->n_board          = gl->n_boards;
+      pr->i_board          = 0;
       gl->time_calib_flag  = 0;
       gl->rotate_flag      = 0;
    }
@@ -1646,28 +1696,13 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       pr->i_iter1++;
       
       wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
-      if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU) != SUCCESS)
+      if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS)
          return SUCCESS; // just skip this event
       
       wd_analyze_period(gl, &eventHeader, pr->i_board, wfU);
       wd_calibrate_local(gl, &eventHeader, pr->i_board, wfU, pr);
       
-      /*
-      for (int ch=0 ; ch<16 ; ch++)
-         for (int bin=0 ; bin<1024 ; bin++)
-            pr->ave->Add(0, ch, bin, wfU[ch][bin]);
-      */
-      
       pr->progress = (double)(pr->i_iter1 + pr->i_iter2) / (pr->n_iter1 + pr->n_iter2);
-      
-      // calibration finished
-      if (pr->i_iter1 == pr->n_iter1) {
-         /*
-         for (int ch=0 ; ch<16 ; ch++)
-            for (int bin=0 ; bin<1024 ; bin++)
-               gl->board[pr->i_board].tcalib.dt[ch][bin] = (float)pr->ave->Median(0, ch, bin);
-          */
-      }
       
       sleep_ms(10); // obtain 100 Hz rate
       return SUCCESS;
@@ -1677,40 +1712,18 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
    
    if (pr->i_iter2 < pr->n_iter2) {
       
-      // initialize data on first iteration
-      if (pr->i_iter2 == 0) {
-         pr->ave->Reset();
-         gl->rotate_flag      = 1; // rotate waveforms
-         gl->ofs_calib1_flag  = 1; // do 1st calibration
-         gl->ofs_calib2_flag  = 0;
-         gl->gain_calib_flag  = 0;
-         gl->range_calib_flag = 0;
-      }
-      
       pr->i_iter2++;
       
-      for (i=0 ; i<10 ; i++) {
-         wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
-         if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU) == SUCCESS)
-            break;
-      }
-      assert(i < 10);
+      wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
+      if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS)
+         return SUCCESS; // just skip this event
       
-      sleep_ms(10);
-      
-      for (int ch=0 ; ch<16 ; ch++)
-         for (int bin=0 ; bin<1024 ; bin++)
-            pr->ave->Add(0, ch, bin, wfU[ch][bin]);
+      wd_analyze_period(gl, &eventHeader, pr->i_board, wfU);
+      // wd_calibrate_global(gl, &eventHeader, pr->i_board, wfU, pr);
       
       pr->progress = (double)(pr->i_iter1 + pr->i_iter2) / (pr->n_iter1 + pr->n_iter2);
       
-      // calibration finished
-      if (pr->i_iter2 == pr->n_iter2) {
-         for (int ch=0 ; ch<16 ; ch++)
-            for (int bin=0 ; bin<1024 ; bin++)
-               gl->board[pr->i_board].tcalib.dt[ch][bin] = (float)pr->ave->Median(0, ch, bin);
-      }
-      
+      sleep_ms(10); // obtain 100 Hz rate
       return SUCCESS;
    }
    
@@ -1743,13 +1756,14 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
    pr->progress = 1;
    
    if (pr->i_board == pr->n_board) {
-      pr->state = CS_INACTIVE;
-      gl->rotate_flag = 1;
+      pr->state            = CS_INACTIVE;
+      gl->rotate_flag      = 1;
       gl->ofs_calib1_flag  = 1;
       gl->ofs_calib2_flag  = 1;
       gl->gain_calib_flag  = 1;
       gl->range_calib_flag = 1;
       gl->remove_spikes    = 1;
+      gl->time_calib_flag  = 1;
    }
    
    return SUCCESS;

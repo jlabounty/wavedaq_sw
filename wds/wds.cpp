@@ -323,13 +323,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                wd_send(gl, b, 100, "drsstart\n", NULL, NULL);
          }
          // read waveforms
-         status = wd_read_waveform(gl, b, 1000, &eventHeader, wfU);
-      
-         for (int c=0 ; c<16 ; c++) {
-            for (int i=0 ; i<1024 ; i++) {
-               wfT[c][i] = (float)(i*1E-9 / gl->actual_sampling_frequency);
-            }
-         }
+         status = wd_read_waveform(gl, b, 1000, &eventHeader, wfU, wfT);
       }
 
       if (gl->demo_flag)
