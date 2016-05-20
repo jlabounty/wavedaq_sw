@@ -418,6 +418,26 @@ function oscKeypress(e)
       resize();
    }
 
+   if (charCode == 'c'.charCodeAt(0)) {
+      btnConfig();
+   }
+
+   if (charCode == 'a'.charCodeAt(0)) {
+      btnChn(-1);
+   }
+
+   if (charCode == 'o'.charCodeAt(0)) {
+      btnOn();
+   }
+
+   if (charCode == '^'.charCodeAt(0)) {
+      btnOfsDist();
+   }
+
+   if (charCode == 'v'.charCodeAt(0)) {
+      btnOfsZero();
+   }
+
 }
 
 function btnStop()

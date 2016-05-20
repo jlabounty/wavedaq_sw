@@ -82,8 +82,13 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
       else if (mg_vcmp(&hm->uri, "/gl/osctca_flag") == 0) {
          gl->osctca_flag = atoi(value);
-         for (int i=0 ; i<gl->n_boards ; i++)
+         gl->mux_flag = atoi(value);
+         gl->dcv_flag = atoi(value);
+         for (int i=0 ; i<gl->n_boards ; i++) {
             wd_set_osctca(gl, i);
+            wd_set_fe(gl, i);
+            wd_set_dcv_flag(gl, i);
+         }
       }
 
       else if (mg_vcmp(&hm->uri, "/gl/clock_source") == 0) {
@@ -121,6 +126,14 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          gl->dcv = (float)atof(value);
          for (int i=0 ; i<gl->n_boards ; i++)
             wd_set_dcv(gl, i);
+      }
+
+      else if (mg_vcmp(&hm->uri, "/gl/adc_flag") == 0) {
+         gl->adc_flag = atoi(value);
+         if (gl->adc_flag)
+            gl->actual_sampling_frequency = 0.080; // ADC 80 MHz
+         else
+            wd_set_sampling_frequency(gl, 0);
       }
 
       else if (mg_vcmp(&hm->uri, "/gl/ofs_calib1_flag") == 0)
@@ -401,6 +414,7 @@ int main(int argc, char *argv[])
    gl.mux_flag                   = 0;
    gl.dcv_flag                   = 0;
    gl.dcv                        = 0;
+   gl.adc_flag                   = 0;
 
    for (i=0 ; i<16 ; i++) {
       gl.board[i].trigger_level  = 0;

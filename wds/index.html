@@ -105,10 +105,9 @@
                <input type="checkbox" id="pzc" name="pzc" onClick="setGl(this)">PZC
             </div>
             <div class="vSpacer5">
-               Input:
-                  <input type="radio" id="osctca_flag" name="inputMux" selected onClick="inputMux(this)">DRS
-                  <input type="radio" id="osctca_flag" name="inputMux" onClick="inputMux(this)">ADC
-                  <input type="radio" id="osctca_flag" name="inputMux" onClick="inputMux(this)">CLK
+               Mode:
+                  <input type="radio" id="inputMode" name="adc_flag" checked="checked" value="0" onClick="setGl(this)">DRS
+                  <input type="radio" id="inputMode" name="adc_flag" value="1" onClick="setGl(this)">ADC
             </div>
 
             <div class="vMiddleBox vSpacer5">
@@ -120,6 +119,9 @@
                </select>
             </div>
 
+            <div class="vSpacer5">
+               <input type="checkbox" id="osctca_flag" name="osctca_flag" onClick="setGl(this)">Enable calibration clock
+            </div>
             <div class="vMiddleBox vSpacer5">
                <input type="checkbox" id="mux_flag" name="mux_flag" onClick="setGl(this)">Connect inputs to calib. source
             </div>
