@@ -349,9 +349,9 @@ void wd_set_clocksource(GLOBALS *gl, int index)
    }
    
    if (gl->clock_source == 1) {
-      assert(wd_send(gl, index, 100, "clkext on", NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, "regclr c 20000", NULL, NULL) > 0);
    } else {
-      assert(wd_send(gl, index, 100, "clkext off", NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, "regset c 20000", NULL, NULL) > 0);
    }
 }
 
@@ -520,6 +520,9 @@ int wd_init(GLOBALS *gl)
          return FAILURE;
       }
       
+      // set LED red
+      assert(wd_send(gl, index, 100, "ledset r", NULL, NULL) > 0);
+
       // set dbglevel none
       assert(wd_send(gl, index, 100, "dbglvl none", NULL, NULL) > 0);
 
@@ -579,13 +582,6 @@ int wd_init(GLOBALS *gl)
       // set caldc to zero
       assert(wd_send(gl, index, 100, "dacset caldc 1280", NULL, NULL) > 0);
 
-      wd_set_trigger_level(gl, index);
-      wd_set_range(gl, index);
-      wd_set_sampling_frequency(gl, index);
-      wd_set_trigger_mode(gl, index);
-      wd_set_osctca(gl, index);
-      wd_set_clocksource(gl, index);
-      
       // set DRS readout mode to ROI
       assert(wd_send(gl, index, 100, "regwr 10 17170030", NULL, NULL) > 0);
       
@@ -597,8 +593,18 @@ int wd_init(GLOBALS *gl)
       assert(wd_send(gl, index, 100, "regwr 5c 0830140E", NULL, NULL) > 0);
       assert(wd_send(gl, index, 100, "regwr 60 D800280F", NULL, NULL) > 0);
       
+      wd_set_trigger_level(gl, index);
+      wd_set_range(gl, index);
+      wd_set_trigger_mode(gl, index);
+      wd_set_osctca(gl, index);
+      wd_set_clocksource(gl, index);
+      wd_set_sampling_frequency(gl, index);
+      
       // read current temperature
       wd_read_temp(gl, index);
+      
+      // set LED green
+      assert(wd_send(gl, index, 100, "ledset g", NULL, NULL) > 0);
       
       // load calibration for board from file (for now...)
       char str[80];
@@ -991,7 +997,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
          wd_set_dcv(gl, pr->i_board);
          wd_set_dcv_flag(gl, pr->i_board);
          
-         pr->ave = new Averager(2, 8, 1024, pr->n_iter1);
+         pr->ave = new Averager(1, 16, 1024, pr->n_iter1);
       }
 
       pr->i_iter1++;
@@ -1002,7 +1008,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       
       for (int ch=0 ; ch<16 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
-            pr->ave->Add(ch/8, ch%8, bin, wfU[ch][bin]);
+            pr->ave->Add(0, ch, bin, wfU[ch][bin]);
       
       pr->progress = (double)(pr->i_iter1 + pr->i_iter2 + pr->i_iter3 + pr->i_iter4) /
                              (pr->n_iter1 + pr->n_iter2 + pr->n_iter3 + pr->n_iter4);
@@ -1011,7 +1017,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       if (pr->i_iter1 == pr->n_iter1) {
          for (int ch=0 ; ch<16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
-               gl->board[pr->i_board].vcalib.wf_offset1[ch][bin] = (float)pr->ave->Median(ch/8, ch%8, bin);
+               gl->board[pr->i_board].vcalib.wf_offset1[ch][bin] = (float)pr->ave->Median(0, ch, bin);
          
          // ave->SaveNormalizedDistribution("wf.csv", 0);
       }
@@ -1042,7 +1048,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
 
       for (int ch=0 ; ch<16 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
-            pr->ave->Add(ch/8, ch%8, bin, wfU[ch][bin]);
+            pr->ave->Add(0, ch, bin, wfU[ch][bin]);
       
       pr->progress = (double)(pr->i_iter1 + pr->i_iter2 + pr->i_iter3 + pr->i_iter4) /
                              (pr->n_iter1 + pr->n_iter2 + pr->n_iter3 + pr->n_iter4);
@@ -1051,7 +1057,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       if (pr->i_iter2 == pr->n_iter2) {
          for (int ch=0 ; ch<16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
-               gl->board[pr->i_board].vcalib.wf_offset2[ch][bin] = (float)pr->ave->Median(ch/8, ch%8, bin);
+               gl->board[pr->i_board].vcalib.wf_offset2[ch][bin] = (float)pr->ave->Median(0, ch, bin);
       }
       
       sleep_ms(10); // obtain 100 Hz rate
@@ -1087,7 +1093,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       
       for (int ch=0 ; ch<16 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
-            pr->ave->Add(ch/8, ch%8, bin, wfU[ch][bin]);
+            pr->ave->Add(0, ch, bin, wfU[ch][bin]);
       
       pr->progress = (double)(pr->i_iter1 + pr->i_iter2 + pr->i_iter3 + pr->i_iter4) /
                              (pr->n_iter1 + pr->n_iter2 + pr->n_iter3 + pr->n_iter4);
@@ -1096,7 +1102,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       if (pr->i_iter3 == pr->n_iter3) {
          for (int ch=0 ; ch<16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
-               gl->board[pr->i_board].vcalib.wf_gain1[ch][bin] = pr->ave->Median(ch/8, ch%8, bin) / 0.45;
+               gl->board[pr->i_board].vcalib.wf_gain1[ch][bin] = pr->ave->Median(0, ch, bin) / 0.45;
       }
       
       sleep_ms(10); // obtain 100 Hz rate
@@ -1128,7 +1134,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       
       for (int ch=0 ; ch<16 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
-            pr->ave->Add(ch/8, ch%8, bin, wfU[ch][bin]);
+            pr->ave->Add(0, ch, bin, wfU[ch][bin]);
       
       pr->progress = (double)(pr->i_iter1 + pr->i_iter2 + pr->i_iter3 + pr->i_iter4) /
                              (pr->n_iter1 + pr->n_iter2 + pr->n_iter3 + pr->n_iter4);
@@ -1137,7 +1143,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       if (pr->i_iter4 == pr->n_iter4) {
          for (int ch=0 ; ch<16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
-               gl->board[pr->i_board].vcalib.wf_gain2[ch][bin] = pr->ave->Median(ch/8, ch%8, bin) / -0.45;
+               gl->board[pr->i_board].vcalib.wf_gain2[ch][bin] = pr->ave->Median(0, ch, bin) / -0.45;
          
          delete pr->ave;
          pr->ave = NULL;
@@ -1513,6 +1519,79 @@ void wd_analyze_period(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[16][1024])
 
 /*-----------------------------------------------------------------------------------------*/
 
+void wd_calibrate_local(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[16][1024], TCALIB_PROGRESS *pr)
+{
+   int tc;
+   float dv, llim, ulim;
+   
+   if (gl->nominal_sampling_frequency >= 3) {
+      llim = -0.1;
+      ulim =  0.1;
+   } else {
+      llim = -0.3;
+      ulim =  0.3;
+   }
+   
+   for (int ch=0 ; ch<16 ; ch++) {
+      if (ch < 8)
+         tc = pe->drs0_trigger_cell;
+      else
+         tc = pe->drs1_trigger_cell;
+      
+      for (int i=tc+5; i<tc+1024-5 ; i++) {
+
+         // rising edges
+
+         // test slope between previous and next cell to allow for negative cell width
+         if (wfU[ch][(i+1024-1) % 1024] < wfU[ch][(i+2) % 1024] > 0 &&
+             wfU[ch][i % 1024] > llim &&
+             wfU[ch][(i+1) % 1024] < ulim) {
+            
+            // calculate delta_v
+            dv = wfU[ch][(i+1) % 1024] - wfU[ch][i % 1024];
+            
+            // average delta_v
+            pr->ave->Add(0, ch, i % 1024, dv);
+         }
+         
+         // falling edges
+         if (wfU[ch][(i+1024-1) % 1024] > wfU[ch][(i+2) % 1024] > 0 &&
+             wfU[ch][i % 1024] < ulim &&
+             wfU[ch][(i+1) % 1024] > llim) {
+            
+            // calculate delta_v
+            dv = wfU[ch][(i+1) % 1024] - wfU[ch][i % 1024];
+            
+            // average delta_v
+            pr->ave->Add(0, ch, i % 1024, -dv);
+         }
+         
+      }
+      
+      // calculate calibration every 100 events
+      if (pr->i_iter1 % 100 == 0) {
+         // average over all 1024 dU
+         double sum = 0;
+         double cellDV[1024];
+         
+         for (int i=0 ; i<1024 ; i++) {
+            cellDV[i] = pr->ave->RobustAverage(0, ch, i);
+            sum += cellDV[i];
+         }
+         
+         sum /= 1024;
+         double dtCell = 1.0/gl->actual_sampling_frequency*1E-9;
+         
+         // here comes the central calculation, dT = dV/average * dtCell
+         for (int i=0 ; i<1024 ; i++)
+            gl->board[b].tcalib.dt[ch][i] = cellDV[i] / sum * dtCell;
+      }
+
+   }
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
 int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
 {
    float wfU[16][1024];
@@ -1523,7 +1602,7 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
    if (pr->state == CS_FIRST_BOARD) {
       memset(pr, 0, sizeof(VCALIB_PROGRESS));
       pr->state   = CS_FIRST_SAMPLE;
-      pr->n_iter1 = 200;
+      pr->n_iter1 = 500;
       pr->n_iter2 = 200;
       pr->n_board = gl->n_boards;
       pr->i_board = 0;
@@ -1557,7 +1636,7 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       wd_set_dcv_flag(gl, pr->i_board);
       wd_set_osctca(gl, pr->i_board);
       
-      pr->ave = new Averager(2, 8, 1024, pr->n_iter1);
+      pr->ave = new Averager(1, 16, 1024, pr->n_iter1);
    }
    
    //---- Local Calibration ----
@@ -1571,11 +1650,12 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
          return SUCCESS; // just skip this event
       
       wd_analyze_period(gl, &eventHeader, pr->i_board, wfU);
+      wd_calibrate_local(gl, &eventHeader, pr->i_board, wfU, pr);
       
       /*
       for (int ch=0 ; ch<16 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
-            pr->ave->Add(ch/8, ch%8, bin, wfU[ch][bin]);
+            pr->ave->Add(0, ch, bin, wfU[ch][bin]);
       */
       
       pr->progress = (double)(pr->i_iter1 + pr->i_iter2) / (pr->n_iter1 + pr->n_iter2);
@@ -1585,7 +1665,7 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
          /*
          for (int ch=0 ; ch<16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
-               gl->board[pr->i_board].tcalib.dt[ch][bin] = (float)pr->ave->Median(ch/8, ch%8, bin);
+               gl->board[pr->i_board].tcalib.dt[ch][bin] = (float)pr->ave->Median(0, ch, bin);
           */
       }
       
@@ -1620,7 +1700,7 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       
       for (int ch=0 ; ch<16 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
-            pr->ave->Add(ch/8, ch%8, bin, wfU[ch][bin]);
+            pr->ave->Add(0, ch, bin, wfU[ch][bin]);
       
       pr->progress = (double)(pr->i_iter1 + pr->i_iter2) / (pr->n_iter1 + pr->n_iter2);
       
@@ -1628,7 +1708,7 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       if (pr->i_iter2 == pr->n_iter2) {
          for (int ch=0 ; ch<16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
-               gl->board[pr->i_board].tcalib.dt[ch][bin] = (float)pr->ave->Median(ch/8, ch%8, bin);
+               gl->board[pr->i_board].tcalib.dt[ch][bin] = (float)pr->ave->Median(0, ch, bin);
       }
       
       return SUCCESS;

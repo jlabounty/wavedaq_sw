@@ -370,10 +370,7 @@ Oscilloscope.prototype.drawWF = function(ctx)
    ctx.rect(this.x1, this.y1, this.w, this.h);
    ctx.clip();
    
-   if (OSC.GL.adc_flag)
-      var spacing = this.wfTS / (0.080 * 1E9);
-   else
-      var spacing = this.wfTS / (OSC.GL.nominal_sampling_frequency * 1E9);
+   var spacing = this.wfTS / (OSC.GL.actual_sampling_frequency * 1E9);
    
    for (c=0 ; c<16 ; c++) {
       if (this.chOn[c]) {
