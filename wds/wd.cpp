@@ -611,17 +611,18 @@ int wd_init(GLOBALS *gl)
       assert(wd_send(gl, index, 100, "ledset g", NULL, NULL) > 0);
       
       // load voltage calibration for board from file (for now...)
-      char str[80];
+      char str[80], dir[256];
+      getcwd(dir, sizeof(dir));
       sprintf(str, "%s.vcal", gl->board[index].name);
       int fh = open(str, O_RDONLY, 0644);
       if (fh > 0) {
          size = read(fh, &gl->board[index].vcalib, sizeof(VCALIB_DATA));
          if (size != sizeof(VCALIB_DATA)) {
-            printf("Invalid calibration file size of \"%s\". Aborting.\n", str);
+            printf("Invalid calibration file size of \"%s/%s\". Aborting.\n", dir, str);
             return FAILURE;
          }
          if (memcmp(gl->board[index].vcalib.version_id, "CAL1", 4) != 0) {
-            printf("Invalid calibration file format in \"%s\". Aborting.\n", str);
+            printf("Invalid calibration file format in \"%s/%s\". Aborting.\n", dir, str);
             return FAILURE;
          }
          if (fabs(gl->board[index].vcalib.sampling_frequency - gl->actual_sampling_frequency) > 0.001) {
@@ -640,9 +641,13 @@ int wd_init(GLOBALS *gl)
                gl->board[index].vcalib.wf_gain1[ch][bin] = 1;
                gl->board[index].vcalib.wf_gain2[ch][bin] = 1;
             }
-            gl->board[index].vcalib.offset_range0[ch] = 0.45;
-            gl->board[index].vcalib.offset_range1[ch] = 0;
-            gl->board[index].vcalib.offset_range2[ch] = -0.45;
+            gl->board[index].vcalib.drs_offset_range0[ch] = 0.45;
+            gl->board[index].vcalib.drs_offset_range1[ch] = 0;
+            gl->board[index].vcalib.drs_offset_range2[ch] = -0.45;
+
+            gl->board[index].vcalib.adc_offset_range0[ch] = 0;
+            gl->board[index].vcalib.adc_offset_range1[ch] = 0;
+            gl->board[index].vcalib.adc_offset_range2[ch] = 0;
          }
       }
 
@@ -873,8 +878,32 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                }
                
                // calibrate waveforms
-               if (!gl->adc_flag) { // don't calibrate in ADC mode
+               if (gl->adc_flag) { // calibrate ADC data
                   
+                  if (gl->range_calib_flag) {
+                     float ofs;
+                     
+                     for (i=0 ; i<16 ; i++) {
+                        if (fabs(gl->board[b].range - (-0.45)) < 0.001)
+                           ofs = gl->board[b].vcalib.adc_offset_range0[i];
+                        else if (fabs(gl->board[b].range) < 0.001)
+                           ofs = gl->board[b].vcalib.adc_offset_range1[i];
+                        else if (fabs(gl->board[b].range - 0.45) < 0.001)
+                           ofs = gl->board[b].vcalib.adc_offset_range2[i];
+                        else
+                           ofs = 0;
+                        for (int j=0 ; j<1024 ; j++)
+                           wfU[i][j] -= ofs;
+                     }
+                  }
+                  
+                  for (i=0 ; i<16 ; i++)
+                     for (int j=0 ; j<1024 ; j++)
+                        wfT[i][j] = j * 1E-9/gl->actual_sampling_frequency;
+                  
+                  
+               } else { // calibrate DRS data
+               
                   // cell-by-cell offset calibration
                   if (gl->ofs_calib1_flag) {
                      if (gl->rotate_flag) {
@@ -926,11 +955,11 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                      
                      for (i=0 ; i<16 ; i++) {
                         if (fabs(gl->board[b].range - (-0.45)) < 0.001)
-                           ofs = gl->board[b].vcalib.offset_range0[i];
+                           ofs = gl->board[b].vcalib.drs_offset_range0[i];
                         else if (fabs(gl->board[b].range) < 0.001)
-                           ofs = gl->board[b].vcalib.offset_range1[i];
+                           ofs = gl->board[b].vcalib.drs_offset_range1[i];
                         else if (fabs(gl->board[b].range - 0.45) < 0.001)
-                           ofs = gl->board[b].vcalib.offset_range2[i];
+                           ofs = gl->board[b].vcalib.drs_offset_range2[i];
                         else
                            ofs = 0;
                         for (int j=0 ; j<1024 ; j++)
@@ -1247,8 +1276,21 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
          sum += wfU[ch][i];
-      gl->board[pr->i_board].vcalib.offset_range0[ch] = sum / 1010;
+      gl->board[pr->i_board].vcalib.drs_offset_range0[ch] = sum / 1010;
    }
+   
+   gl->adc_flag = 1;
+   do {
+      wd_send(gl, pr->i_board, 100, "adcget\n", NULL, NULL);
+   } while (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS);
+   
+   for (int ch=0 ; ch<16 ; ch++) {
+      float sum = 0;
+      for (int i=10 ; i<1020 ; i++)
+         sum += wfU[ch][i];
+      gl->board[pr->i_board].vcalib.adc_offset_range0[ch] = sum / 1010;
+   }
+   gl->adc_flag = 0;
    
    // Range 0
    gl->board[pr->i_board].range = 0;
@@ -1265,8 +1307,21 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
          sum += wfU[ch][i];
-      gl->board[pr->i_board].vcalib.offset_range1[ch] = sum / 1010;
+      gl->board[pr->i_board].vcalib.drs_offset_range1[ch] = sum / 1010;
    }
+
+   gl->adc_flag = 1;
+   do {
+      wd_send(gl, pr->i_board, 100, "adcget\n", NULL, NULL);
+   } while (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS);
+   
+   for (int ch=0 ; ch<16 ; ch++) {
+      float sum = 0;
+      for (int i=10 ; i<1020 ; i++)
+         sum += wfU[ch][i];
+      gl->board[pr->i_board].vcalib.adc_offset_range1[ch] = sum / 1010;
+   }
+   gl->adc_flag = 0;
 
    // Range 0.45
    gl->board[pr->i_board].range = 0.45;
@@ -1283,8 +1338,21 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
          sum += wfU[ch][i];
-      gl->board[pr->i_board].vcalib.offset_range2[ch] = sum / 1010;
+      gl->board[pr->i_board].vcalib.drs_offset_range2[ch] = sum / 1010;
    }
+
+   gl->adc_flag = 1;
+   do {
+      wd_send(gl, pr->i_board, 100, "adcget\n", NULL, NULL);
+   } while (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS);
+   
+   for (int ch=0 ; ch<16 ; ch++) {
+      float sum = 0;
+      for (int i=10 ; i<1020 ; i++)
+         sum += wfU[ch][i];
+      gl->board[pr->i_board].vcalib.adc_offset_range2[ch] = sum / 1010;
+   }
+   gl->adc_flag = 0;
 
    // set everything back to normal values
    gl->board[pr->i_board].range = pr->prev_range;

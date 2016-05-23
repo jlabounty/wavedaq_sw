@@ -20,9 +20,12 @@ typedef struct {
    float          wf_offset2[16][1024];
    float          wf_gain1[16][1024];
    float          wf_gain2[16][1024];
-   float          offset_range0[16];
-   float          offset_range1[16];
-   float          offset_range2[16];
+   float          drs_offset_range0[16];
+   float          drs_offset_range1[16];
+   float          drs_offset_range2[16];
+   float          adc_offset_range0[16];
+   float          adc_offset_range1[16];
+   float          adc_offset_range2[16];
 } VCALIB_DATA;
 
 typedef struct {
