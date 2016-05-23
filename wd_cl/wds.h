@@ -1,0 +1,153 @@
+//
+//  wds.h
+//  WaveDAQ Server Application Header File
+//
+//  Created by Stefan Ritt on 5/8/15.
+//
+
+#ifndef __wds__wds__
+#define __wds__wds__
+
+#define SUCCESS 1
+#define FAILURE 0
+
+#include "averager.h"
+
+typedef struct {
+   char           version_id[4];
+   unsigned int   crc;
+   float          sampling_frequency;
+   float          temperature;
+   float          wf_offset1[16][1024];
+   float          wf_offset2[16][1024];
+   float          wf_gain1[16][1024];
+   float          wf_gain2[16][1024];
+   float          offset_range0[16];
+   float          offset_range1[16];
+   float          offset_range2[16];
+} CALIB_DATA;
+
+typedef struct {
+   int            serial_number;
+   char           name[32];
+   int            cmd_socket;
+   int            data_socket;
+   int            server_port;
+   unsigned char  eth_addr[16];
+   float          trigger_level;
+   char           trigger_mask[10];
+   int            gain;
+   int            pzc;
+   float          range;
+   float          temperature;
+   unsigned int   scaler[16];
+
+   CALIB_DATA     calib;
+} WDB;
+
+typedef struct {
+   int            demo_flag;
+   int            rotate_flag;
+   int            verbose_flag;
+   int            adc_flag;
+   int            ofs_calib1_flag;
+   int            ofs_calib2_flag;
+   int            gain_calib_flag;
+   int            range_calib_flag;
+   int            tcalib_flag;
+   int            remove_spikes;
+   int            http_port;
+   int            n_boards;
+   float          nominal_sampling_frequency;
+   float          actual_sampling_frequency;
+   int            trigger_mode;
+   int            osctca_flag;
+   int            mux_flag;
+   int            dcv_flag;
+   float          dcv;
+   WDB            board[16];
+   int            cmd;
+} GLOBALS;
+
+typedef struct {
+   unsigned short board_id;
+   unsigned char  crate_id;
+   unsigned char  slot_id;
+   unsigned short readout_sequence_number;
+   unsigned short hardware_sequence_number;
+   unsigned short sampling_frequency;
+   unsigned short number_of_samples;
+   unsigned short drs0_trigger_cell;
+   unsigned short drs1_trigger_cell;
+   unsigned short trigger_type;
+} WD2_EVENT;
+
+typedef struct {
+   int            state;
+   double         progress;
+   int            n_board;
+   int            i_board;
+   int            n_iter1;
+   int            i_iter1;
+   int            n_iter2;
+   int            i_iter2;
+   int            n_iter3;
+   int            i_iter3;
+   int            n_iter4;
+   int            i_iter4;
+   int            index;
+   Averager       *ave;
+   int            fh;
+   float          prev_range;
+} CALIB_PROGRESS;
+
+// calibration states
+#define CS_INACTIVE     0
+#define CS_FIRST_BOARD  1
+#define CS_FIRST_SAMPLE 2
+#define CS_RUNNING      3
+
+// trigger modes
+#define TM_NORMAL       0
+#define TM_AUTO         1
+
+// interface functions
+int wd_init(GLOBALS *gl);
+void wd_set_fe(GLOBALS *gl, int index);
+void wd_set_trigger_level(GLOBALS *gl, int index);
+void wd_set_trigger_mode(GLOBALS *gl, int index);
+void wd_set_sampling_frequency(GLOBALS *gl, int index);
+void wd_set_range(GLOBALS *gl, int index);
+void wd_set_osctca(GLOBALS *gl, int index);
+void wd_set_dcv_flag(GLOBALS *gl, int index);
+void wd_set_dcv(GLOBALS *gl, int index);
+
+int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wf[16][1024]);
+int wd_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *result, int *size);
+int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *p);
+void wd_read_temp(GLOBALS *gl, int index);
+void wd_write_reg(GLOBALS *, int , int , int);
+void wd_read_reg(GLOBALS *, int , int , unsigned int*, int len =1);
+
+size_t strlcpy(char *dst, const char *src, size_t size);
+size_t strlcat(char *dst, const char *src, size_t size);
+
+// linux and MAC specific things
+#if defined(__linux__) || defined(__APPLE__)
+#include <unistd.h>
+#define sleep_ms(x) usleep(x*1000)
+#endif // __linux__ || __APLE__
+
+// Windows specific things
+#if defined(_MSC_VER)
+#pragma warning( disable: 4996)
+#define isnan(x) _isnan(x)
+#define sleep_ms(x) Sleep(x)
+typedef int socklen_t;
+#endif // _WIN32
+
+/* Byte and Word swapping big endian <-> little endian */
+#define SWAP_UINT16(x) (((x) >> 8) | ((x) << 8))
+#define SWAP_UINT32(x) (((x) >> 24) | (((x) & 0x00FF0000) >> 8) | (((x) & 0x0000FF00) << 8) | ((x) << 24))
+
+#endif /* defined(__wds__wds__) */
