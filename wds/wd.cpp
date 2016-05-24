@@ -383,6 +383,10 @@ void wd_set_sampling_frequency(GLOBALS *gl, int index)
    
    sprintf(str, "regwr 2c 0003%02X00", divider);
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+   
+   // turn off time calibration if calibrated frequency is different
+   if (fabs(gl->actual_sampling_frequency - gl->board[index].tcalib.sampling_frequency) > 0.001)
+      gl->time_calib_flag = 0;
 }
 
 /*-----------------------------------------------------------------------------------------*/
@@ -602,10 +606,6 @@ int wd_init(GLOBALS *gl)
       wd_set_trigger_mode(gl, index);
       wd_set_osctca(gl, index);
       wd_set_clocksource(gl, index);
-      wd_set_sampling_frequency(gl, index);
-      
-      // read current temperature
-      wd_read_temp(gl, index);
       
       // set LED green
       assert(wd_send(gl, index, 100, "ledset g", NULL, NULL) > 0);
@@ -625,14 +625,22 @@ int wd_init(GLOBALS *gl)
             printf("Invalid calibration file format in \"%s/%s\". Aborting.\n", dir, str);
             return FAILURE;
          }
-         if (fabs(gl->board[index].vcalib.sampling_frequency - gl->actual_sampling_frequency) > 0.001) {
-            printf("Warning: Calibration data is for %3g GSPS, running now at %3g GSPS\n",
-                   gl->board[index].vcalib.sampling_frequency, gl->actual_sampling_frequency);
-         }
          if (fabs(gl->board[index].vcalib.temperature - gl->board[index].temperature) > 5) {
             printf("Warning: Calibration data is for %3g deg. C, running now at %3g deg. C\n",
                    gl->board[index].vcalib.temperature, gl->board[index].temperature);
          }
+         
+         // set sampling frequency from calibration data
+         if (gl->actual_sampling_frequency == 0) {
+            gl->actual_sampling_frequency = gl->board[index].vcalib.sampling_frequency;
+            gl->nominal_sampling_frequency = gl->actual_sampling_frequency;
+         } else {
+            if (fabs(gl->board[index].vcalib.sampling_frequency - gl->actual_sampling_frequency) > 0.001) {
+               printf("Warning: Calibration data is for %3g GSPS, running now at %3g GSPS\n",
+                      gl->board[index].vcalib.sampling_frequency, gl->actual_sampling_frequency);
+            }
+         }
+
       } else {
          memset(gl->board[index].vcalib.wf_offset1, 0, sizeof(float)*16*1024);
          memset(gl->board[index].vcalib.wf_offset2, 0, sizeof(float)*16*1024);
@@ -664,22 +672,35 @@ int wd_init(GLOBALS *gl)
             printf("Invalid calibration file format in \"%s\". Aborting.\n", str);
             return FAILURE;
          }
-         if (fabs(gl->board[index].tcalib.sampling_frequency - gl->actual_sampling_frequency) > 0.001) {
-            printf("Warning: Calibration data is for %3g GSPS, running now at %3g GSPS\n",
-                   gl->board[index].tcalib.sampling_frequency, gl->actual_sampling_frequency);
-         }
          if (fabs(gl->board[index].tcalib.temperature - gl->board[index].temperature) > 5) {
             printf("Warning: Calibration data is for %3g deg. C, running now at %3g deg. C\n",
                    gl->board[index].tcalib.temperature, gl->board[index].temperature);
+         }
+         
+         // set sampling frequency from calibration data
+         if (gl->actual_sampling_frequency == 0) {
+            gl->actual_sampling_frequency = gl->board[index].tcalib.sampling_frequency;
+            gl->nominal_sampling_frequency = gl->actual_sampling_frequency;
+         } else {
+            if (fabs(gl->board[index].vcalib.sampling_frequency - gl->actual_sampling_frequency) > 0.001) {
+               printf("Warning: Calibration data is for %3g GSPS, running now at %3g GSPS\n",
+                      gl->board[index].tcalib.sampling_frequency, gl->actual_sampling_frequency);
+            }
          }
       } else {
          for (int ch=0 ; ch < 16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
                gl->board[index].tcalib.dt[ch][bin] = 1E-9 / gl->actual_sampling_frequency;
       }
+
+      // set sampling frequency after time calibration has been loaded
+      wd_set_sampling_frequency(gl, index);
       
+      // read current board status (temperature + PLL lock)
+      wd_read_board_status(gl, index);
    }
    
+
    if (gl->verbose_flag)
       printf("\n");
    
@@ -1559,23 +1580,28 @@ void remove_spikes(GLOBALS *gl, short trigger_cell, float wf[][1024])
 
 /*-----------------------------------------------------------------------------------------*/
 
-void wd_read_temp(GLOBALS *gl, int index)
+void wd_read_board_status(GLOBALS *gl, int index)
 {
    static time_t last[16] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
    time_t now;
    
    if (gl->demo_flag) {
       gl->board[index].temperature = 36.9;
+      gl->board[index].pll_locked = 1;
       return;
    }
 
    time(&now);
    if (now > last[index] + 10) {
-         int size;
-         char str[80];
-         size = sizeof(str);
-         assert(wd_send(gl, index, 100, "temp", str, &size) > 0);
-         gl->board[index].temperature = atof(str+5);
+      int size;
+      char str[80];
+      size = sizeof(str);
+      assert(wd_send(gl, index, 100, "temp", str, &size) > 0);
+      gl->board[index].temperature = atof(str+5);
+      
+      size = sizeof(str);
+      assert(wd_send(gl, index, 100, "lmkgetlock", str, &size) > 0);
+      gl->board[index].pll_locked = str[8] == 'L';
 
       last[index] = now;
    }

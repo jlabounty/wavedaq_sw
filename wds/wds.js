@@ -52,8 +52,8 @@ function init()
    // schedule first waveform load
    window.setTimeout(loadWF, 10);
    
-   // schedule loadTemp()
-   window.setTimeout(loadTemp, 10000);
+   // schedule loadStatus()
+   window.setTimeout(loadStatus, 10000);
 }
 
 function wdSelect(s)
@@ -61,7 +61,7 @@ function wdSelect(s)
    OSC.board = s.selectedIndex;
 }
 
-function loadTemp()
+function loadStatus()
 {
    // send AJAX request
    var req = new XMLHttpRequest();
@@ -69,15 +69,15 @@ function loadTemp()
       if (req.readyState == 4 && req.status == 200) {
          t = JSON.parse(req.responseText);
          
-         // get active board
          OSC.GL.board[OSC.board].temperature = parseFloat(t.temp);
+         OSC.GL.board[OSC.board].pll_locked = t.pll_locked;
       }
    };
    
-   req.open("GET", "temp?b=" + OSC.board + "&r=" + Math.random(), true); // avoid cached results
+   req.open("GET", "status?b=" + OSC.board + "&r=" + Math.random(), true); // avoid cached results
    req.send();
 
-   window.setTimeout(loadTemp, 10000);
+   window.setTimeout(loadStatus, 10000);
 }
 
 function loadGl()
@@ -118,6 +118,7 @@ function loadGl()
          document.getElementById("dcvSlider").set(OSC.GL.dcv/2+0.5);
          document.getElementById("inpDcv").value   = OSC.GL.dcv * 1000;
          
+         document.getElementById("nominal_sampling_frequency").value = Math.round(OSC.GL.actual_sampling_frequency*10)/10;
          document.getElementById("actual_sampling_frequency").innerHTML = OSC.GL.actual_sampling_frequency+" GSPS";
 
          document.getElementById("calib1").checked = OSC.GL.ofs_calib1_flag;
@@ -677,9 +678,14 @@ function sldTOffset(value)
 {
    var wfWidth = 1024 / OSC.GL.actual_sampling_frequency * 1E-9;
    var scWidth = OSC.wfTScale * 10;
-   OSC.wfTOffset = 0.9 * scWidth - wfWidth + value*(wfWidth - 0.8 * scWidth);
+   if (wfWidth >= scWidth)
+      OSC.wfTOffset = 0.9 * scWidth - wfWidth - value*(0.8 * scWidth - wfWidth);
+   else
+      OSC.wfTOffset = 0.9 * scWidth - wfWidth - (1-value)*(0.8 * scWidth - wfWidth);
+   
    OSC.calcScaleOffset();
    OSC.redraw();
+   console.log(value + "  " + OSC.wfTOffset*1E9);
 }
 
 function btnConfig()

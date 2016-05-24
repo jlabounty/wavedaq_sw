@@ -50,6 +50,7 @@ typedef struct {
    int            pzc;
    float          range;
    float          temperature;
+   int            pll_locked;
    unsigned int   scaler[16];
 
    VCALIB_DATA    vcalib;
@@ -153,7 +154,7 @@ int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float w
 int wd_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *result, int *size);
 int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *p);
 int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *p);
-void wd_read_temp(GLOBALS *gl, int index);
+void wd_read_board_status(GLOBALS *gl, int index);
 
 size_t strlcpy(char *dst, const char *src, size_t size);
 size_t strlcat(char *dst, const char *src, size_t size);

@@ -161,6 +161,7 @@ Oscilloscope.prototype.draw = function()
       this.drawFPS(ctx);
       this.drawTemperature(ctx);
       this.drawMeasurements(ctx);
+      this.drawStatus(ctx);
    }
 }
 
@@ -225,6 +226,23 @@ Oscilloscope.prototype.drawMeasurements = function(ctx)
          var t = this.sigma[c].toFixed(2) + " mV";
          ctx.fillText(t, x, this.y2+8);
          x += ctx.measureText(t).width + 10;
+      }
+   }
+}
+
+Oscilloscope.prototype.drawStatus = function(ctx)
+{
+   if (OSC.GL != undefined) {
+      var board = document.getElementById("wdSelect").selectedIndex;
+      var locked = OSC.GL.board[board].pll_locked;
+      
+      if (locked == 0) {
+         ctx.fillStyle = 'red';
+         ctx.strokeStyle = 'red';
+         ctx.font = '48px sans-serif';
+         ctx.textAlign = "center";
+         ctx.textBaseline = "middle";
+         ctx.fillText("LMK PLL not locked!", (this.x1+this.x2)/2, (this.y1+this.y2)/2);
       }
    }
 }

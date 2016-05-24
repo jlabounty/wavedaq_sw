@@ -204,6 +204,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "         \"pzc\": %s,\n",               gl->board[i].pzc ? "true" : "false");
          mg_printf_http_chunk(nc, "         \"range\": %1.3lf,\n",         gl->board[i].range);
          mg_printf_http_chunk(nc, "         \"temperature\": %1.1lf,\n",   gl->board[i].temperature);
+         mg_printf_http_chunk(nc, "         \"pll_locked\": %s,\n",        gl->board[i].pll_locked ? "true" : "false");
          mg_printf_http_chunk(nc, "         \"scaler\": [\n");
          int s;
          for (s=0 ; s<15 ; s++)
@@ -224,13 +225,14 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
    }
    
    // temperature
-   if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/temp") == 0) {
+   if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/status") == 0) {
       mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
       int b = atoi(str);
 
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
       mg_printf_http_chunk(nc, "{\n");
-      mg_printf_http_chunk(nc, "   \"temp\": \"%1.1lf\"\n", gl->board[b].temperature);
+      mg_printf_http_chunk(nc, "   \"temp\": %1.1lf,\n",   gl->board[b].temperature);
+      mg_printf_http_chunk(nc, "   \"pll_locked\": %s\n",  gl->board[b].pll_locked ? "true" : "false");
       mg_printf_http_chunk(nc, "}\n");
       mg_send_http_chunk(nc, "", 0);
       return;
@@ -393,8 +395,8 @@ int main(int argc, char *argv[])
    
    memset(&gl, 0, sizeof(gl));
    gl.http_port                  = 8080; // default port
-   gl.nominal_sampling_frequency = 5;
-   gl.actual_sampling_frequency  = 5;
+   gl.nominal_sampling_frequency = 0;
+   gl.actual_sampling_frequency  = 0;
    gl.ofs_calib1_flag            = 1;
    gl.ofs_calib2_flag            = 1;
    gl.gain_calib_flag            = 1;
@@ -612,7 +614,7 @@ int main(int argc, char *argv[])
       
       // read board temperatures periodically
       for (int i=0 ; i<gl.n_boards ; i++)
-         wd_read_temp(&gl, i);
+         wd_read_board_status(&gl, i);
    }
 
    // mg_mgr_free(&mgr);

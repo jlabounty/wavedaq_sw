@@ -58,19 +58,19 @@
          </div>
       </div>
 
-      <button name="ctrlHSlider" id="tofsSlider" class="hSlider" type="button" data-update="sldTOffset()"></button>
-
       <table class="timeScale">
          <tr>
             <td width="1%">
-               <button name="ctrlButtonLeft" id="scaleLeft" type="button" class="squareButtonCanvas" onClick="btnTScale(-1)"></button>
+               <button name="ctrlButtonLeft" id="scaleLeft" type="button" class="squareButtonCanvas" onClick="btnTScale(1)"></button>
             </td>
             <td id="TScale" style="vertical-align:middle">20 ns</td>
             <td width="1%">
-               <button name="ctrlButtonRight" id="scaleRight" type="button" class="squareButtonCanvas" onClick="btnTScale(1)"></button>
+               <button name="ctrlButtonRight" id="scaleRight" type="button" class="squareButtonCanvas" onClick="btnTScale(-1)"></button>
             </td>
          </tr>
       </table>
+
+      <button name="ctrlHSlider" id="tofsSlider" class="hSlider" type="button" data-update="sldTOffset()"></button>
 
       <button class="wideButton" id="btnConfig" type="button" onClick="btnConfig()">Config</button>
       <button class="wideButton" id="btnAbout" type="button" onClick="btnAbout()">About</button>
