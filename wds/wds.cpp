@@ -425,26 +425,8 @@ int main(int argc, char *argv[])
    
    // parse command line parameters
    for (i=1 ; i<argc ; i++) {
-      if (argv[i][0] == '-' && argv[i][1] == 'a')
-         gl.adc_flag = 1;
-      
-      else if (argv[i][0] == '-' && argv[i][1] == 'c')
-         cmd = CMD_VOLTAGE_CALIB;
-      
-      else if (argv[i][0] == '-' && argv[i][1] == 'd')
+      if (argv[i][0] == '-' && argv[i][1] == 'd')
          gl.demo_flag = 1;
-      
-      else if (argv[i][0] == '-' && argv[i][1] == 'f') {
-         for (j=0 ; j<16 ; j++)
-            gl.board[j].range = (float)atoi(argv[i+1]);
-         i++;
-      }
-      
-      else if (argv[i][0] == '-' && argv[i][1] == 'g') {
-         for (j=0 ; j<16 ; j++)
-            gl.board[j].gain = atoi(argv[i+1]);
-         i++;
-      }
       
       else if (argv[i][0] == '-' && argv[i][1] == 'm') {
          if (strlen(argv[i+1]) != 8) {
@@ -459,23 +441,6 @@ int main(int argc, char *argv[])
       else if (argv[i][0] == '-' && argv[i][1] == 'p')
          gl.http_port = atoi(argv[++i]);
 
-      else if (argv[i][0] == '-' && argv[i][1] == 'r') {
-         gl.ofs_calib1_flag  = 0;
-         gl.ofs_calib2_flag  = 0;
-         gl.gain_calib_flag  = 0;
-         gl.range_calib_flag = 0;
-         gl.time_calib_flag  = 0;
-      }
-      
-      else if (argv[i][0] == '-' && argv[i][1] == 's')
-         gl.nominal_sampling_frequency = atoi(argv[++i]);
-      
-      else if (argv[i][0] == '-' && argv[i][1] == 't') {
-         for (j=0 ; j<16 ; j++)
-            gl.board[j].trigger_level = (float)atof(argv[i+1]);
-         i++;
-      }
-      
       else if (argv[i][0] == '-' && argv[i][1] == 'v')
          gl.verbose_flag = 1;
 
@@ -494,8 +459,14 @@ int main(int argc, char *argv[])
                   printf("invalid argument \"-w %s\"\n", argv[i+1]);
                   return 1;
                }
-            }  else
-            sprintf(gl.board[gl.n_boards++].name, "wd%03d", atoi(argv[i+1]));
+            } else if (argc > i+1 && isdigit(argv[i+1][0])) {
+               while (argc > i+1 && isdigit(argv[i+1][0])) {
+                  sprintf(gl.board[gl.n_boards++].name, "wd%03d", atoi(argv[i+1]));
+                  i++;
+               }
+               continue;
+            } else;
+               sprintf(gl.board[gl.n_boards++].name, "wd%03d", atoi(argv[i+1]));
          } else
             strlcpy(gl.board[gl.n_boards++].name, argv[i+1], 32);
          i++;
@@ -509,18 +480,11 @@ int main(int argc, char *argv[])
       else {
          printf("usage: wsd [options] [-w <address> [-w <address> ...]]\n");
          printf("valid options:\n");
-         printf(" -a               Read ADC instead DRS\n");
-         printf(" -c               Calibrate DRS chips\n");
-         printf(" -d               Demo mode\n");
-         printf(" -f <offset>      Set channel offset in V (0=+-0.5V)\n");
-         printf(" -g 0/1/2         Input gain (0=1, 1=10, 2=100)\n");
-         printf(" -t <level>       Trigger level in V (0=auto)\n");
-         printf(" -m <mask>        Trigger mask xxxxyyyy (xxxx=16 bit OR, yyyy=16bit AND)\n");
-         printf(" -p <port>        HTTP server port\n");
-         printf(" -r               Show raw (uncalibrated) data\n");
-         printf(" -w <address>     Internet address of WaveDREAM board\n");
-         printf(" -v               Print extra statistics\n");
-         printf(" -z               Turn on pole-zero-canellation\n");
+         printf(" -d                 Demo mode\n");
+         printf(" -m <mask>          Trigger mask xxxxyyyy (xxxx=16 bit OR, yyyy=16bit AND)\n");
+         printf(" -p <port>          HTTP server port\n");
+         printf(" -w <a1> [<a2> ...] Internet address(es) of WaveDREAM board(s)\n");
+         printf(" -v                 Print extra debugging information\n");
          return 1;
       }
    }

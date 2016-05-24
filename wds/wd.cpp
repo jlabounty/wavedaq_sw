@@ -606,7 +606,8 @@ int wd_init(GLOBALS *gl)
       wd_set_trigger_mode(gl, index);
       wd_set_osctca(gl, index);
       wd_set_clocksource(gl, index);
-      
+      wd_read_board_status(gl, index);
+
       // set LED green
       assert(wd_send(gl, index, 100, "ledset g", NULL, NULL) > 0);
       
@@ -618,16 +619,16 @@ int wd_init(GLOBALS *gl)
       if (fh > 0) {
          size = read(fh, &gl->board[index].vcalib, sizeof(VCALIB_DATA));
          if (size != sizeof(VCALIB_DATA)) {
-            printf("Invalid calibration file size of \"%s/%s\". Aborting.\n", dir, str);
+            printf("Invalid voltage calibration file size of \"%s/%s\". Aborting.\n", dir, str);
             return FAILURE;
          }
          if (memcmp(gl->board[index].vcalib.version_id, "CAL1", 4) != 0) {
-            printf("Invalid calibration file format in \"%s/%s\". Aborting.\n", dir, str);
+            printf("Invalid voltage calibration file format in \"%s/%s\". Aborting.\n", dir, str);
             return FAILURE;
          }
          if (fabs(gl->board[index].vcalib.temperature - gl->board[index].temperature) > 5) {
-            printf("Warning: Calibration data is for %3g deg. C, running now at %3g deg. C\n",
-                   gl->board[index].vcalib.temperature, gl->board[index].temperature);
+            printf("Warning: Voltage calibration data in \"%s/%s\" is for %3g deg. C, running now at %3g deg. C\n",
+                   dir, str, gl->board[index].vcalib.temperature, gl->board[index].temperature);
          }
          
          // set sampling frequency from calibration data
@@ -636,8 +637,8 @@ int wd_init(GLOBALS *gl)
             gl->nominal_sampling_frequency = gl->actual_sampling_frequency;
          } else {
             if (fabs(gl->board[index].vcalib.sampling_frequency - gl->actual_sampling_frequency) > 0.001) {
-               printf("Warning: Calibration data is for %3g GSPS, running now at %3g GSPS\n",
-                      gl->board[index].vcalib.sampling_frequency, gl->actual_sampling_frequency);
+               printf("Warning: Voltage calibration data in \"%s/%s\" is for %3g GSPS, running now at %3g GSPS\n",
+                      dir, str, gl->board[index].vcalib.sampling_frequency, gl->actual_sampling_frequency);
             }
          }
 
@@ -665,16 +666,16 @@ int wd_init(GLOBALS *gl)
       if (fh > 0) {
          size = read(fh, &gl->board[index].tcalib, sizeof(TCALIB_DATA));
          if (size != sizeof(TCALIB_DATA)) {
-            printf("Invalid calibration file size of \"%s\". Aborting.\n", str);
+            printf("Invalid time calibration file size of \"%s\". Aborting.\n", str);
             return FAILURE;
          }
          if (memcmp(gl->board[index].tcalib.version_id, "CAL1", 4) != 0) {
-            printf("Invalid calibration file format in \"%s\". Aborting.\n", str);
+            printf("Invalid time calibration file format in \"%s\". Aborting.\n", str);
             return FAILURE;
          }
          if (fabs(gl->board[index].tcalib.temperature - gl->board[index].temperature) > 5) {
-            printf("Warning: Calibration data is for %3g deg. C, running now at %3g deg. C\n",
-                   gl->board[index].tcalib.temperature, gl->board[index].temperature);
+            printf("Warning: Time calibration data in \"%s/%s\" is for %3g deg. C, running now at %3g deg. C\n",
+                   dir, str, gl->board[index].tcalib.temperature, gl->board[index].temperature);
          }
          
          // set sampling frequency from calibration data
@@ -683,8 +684,8 @@ int wd_init(GLOBALS *gl)
             gl->nominal_sampling_frequency = gl->actual_sampling_frequency;
          } else {
             if (fabs(gl->board[index].vcalib.sampling_frequency - gl->actual_sampling_frequency) > 0.001) {
-               printf("Warning: Calibration data is for %3g GSPS, running now at %3g GSPS\n",
-                      gl->board[index].tcalib.sampling_frequency, gl->actual_sampling_frequency);
+               printf("Warning: Time calibration data in \"%s/%s\" is for %3g GSPS, running now at %3g GSPS\n",
+                      dir, str, gl->board[index].tcalib.sampling_frequency, gl->actual_sampling_frequency);
             }
          }
       } else {
