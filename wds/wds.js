@@ -295,6 +295,10 @@ function receiveWF()
                e.style.width = "0";
                
                document.getElementById("wdSelect").selectedIndex = progressOldBoard;
+               document.getElementById("btnVCalib").innerHTML = "Execute Voltage Calibration";
+               document.getElementById("btnVCalib").disabled = false;
+               document.getElementById("btnTCalib").innerHTML = "Execute Time Calibration";
+               document.getElementById("btnTCalib").disabled = false;
                OSC.board = progressOldBoard;
                
                window.setTimeout(loadGl, 10);
@@ -312,13 +316,15 @@ function receiveWF()
             OSC.demo = (OSC.wd == 0xFF);
             
          } else if (responseType == 10) { // vcalib progress data
-            var b = floatArray[1];
+            var b = intArray[1];
             progressInd = floatArray[2];
 
             var e = document.getElementById("progressIndVcalib");
             e.style.width = (progressInd*270) + "px";
             
             document.getElementById("wdSelect").selectedIndex = b;
+            document.getElementById("btnVCalib").innerHTML = document.getElementById("wdSelect").value;
+            document.getElementById("btnVCalib").disabled = true;
 
             window.setTimeout(loadWF, 250);
             return;
@@ -333,7 +339,9 @@ function receiveWF()
             var e = document.getElementById("progressIndTcalib");
             e.style.width = (progressInd*270) + "px";
             
-            document.getElementById("wdSelect").selectedIndex = b;
+            document.getElementById("wdSelect").selectedIndex = OSC.wd;
+            document.getElementById("btnTCalib").innerHTML = document.getElementById("wdSelect").value;
+            document.getElementById("btnTCalib").disabled = true;
             
             while (i < intArray.length) {
                var c = intArray[i++]
