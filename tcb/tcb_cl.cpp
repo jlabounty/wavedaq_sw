@@ -33,7 +33,7 @@ int main()
   int loopnumber=10;
   clock_t t_before, t_after;
   // open mscb connection
-  handle = mscb_init("MSCB177", 65535, "", 0);
+  handle = mscb_init("MSCB176", 65535, "", 0);
   // create TCB Board
   TCB TCBBoard(17);
   TCBBoard.SetIDCode(handle);
@@ -97,12 +97,15 @@ int main()
     //
     if(option == 6) {
       printf(" opt = 6 : SW sync ... \n");
+      TCBBoard.SWSync(handle);
+      /* use this code for a delay scan
       for(int i =0; i<10000; i++) {
          data = i%32;
          u_int32_t data1 = (32 - data);
          TCBBoard.SetTRGBusDLY(handle,&data,&data1);
          TCBBoard.SWSync(handle);
       }
+      */
     }
     //
     if(option == 7) {
