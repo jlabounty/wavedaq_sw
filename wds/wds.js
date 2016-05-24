@@ -129,6 +129,7 @@ function loadGl()
          document.getElementById("rotate").checked = OSC.GL.rotate_flag;
          
          document.getElementById("tcalib").checked = OSC.GL.time_calib_flag;
+         document.getElementById("clksource").checked = OSC.GL.clock_source;
       }
    };
    req.open("GET", "gl?r=" + Math.random(), true); // avoid cached results

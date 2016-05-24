@@ -93,8 +93,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
       else if (mg_vcmp(&hm->uri, "/gl/clock_source") == 0) {
          gl->clock_source = atoi(value);
-         for (int i=0 ; i<gl->n_boards ; i++)
-            wd_set_osctca(gl, i);
+         for (int i=0 ; i<gl->n_boards ; i++) {
+            wd_set_clocksource(gl, i);
+            wd_read_board_status(gl, i); // check LMK PLL lock
+         }
       }
 
       else if (mg_vcmp(&hm->uri, "/gl/nominal_sampling_frequency") == 0) {
@@ -560,7 +562,8 @@ int main(int argc, char *argv[])
       printf("Starting in DEMO mode.\n");
    
    for (;;) {
-
+      time_t last = 0, now;
+      
       // do calibration if asked for
       if (vcalib_prog.state != CS_INACTIVE) {
          wd_calibrate_voltage(&gl, &vcalib_prog);
@@ -577,8 +580,11 @@ int main(int argc, char *argv[])
          mg_mgr_poll(&mgr, 10);
       
       // read board temperatures periodically
-      for (int i=0 ; i<gl.n_boards ; i++)
-         wd_read_board_status(&gl, i);
+      time(&now);
+      if (now > last + 10) {
+         for (int i=0 ; i<gl.n_boards ; i++)
+            wd_read_board_status(&gl, i);
+      }
    }
 
    // mg_mgr_free(&mgr);

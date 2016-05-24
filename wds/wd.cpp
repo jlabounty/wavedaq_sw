@@ -1586,30 +1586,22 @@ void remove_spikes(GLOBALS *gl, short trigger_cell, float wf[][1024])
 
 void wd_read_board_status(GLOBALS *gl, int index)
 {
-   static time_t last[16] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
-   time_t now;
-   
+   int size;
+   char str[80];
+
    if (gl->demo_flag) {
       gl->board[index].temperature = 36.9;
       gl->board[index].pll_locked = 1;
       return;
    }
 
-   time(&now);
-   if (now > last[index] + 10) {
-      int size;
-      char str[80];
-      size = sizeof(str);
-      assert(wd_send(gl, index, 100, "temp", str, &size) > 0);
-      gl->board[index].temperature = atof(str+5);
-      
-      size = sizeof(str);
-      assert(wd_send(gl, index, 100, "lmkgetlock", str, &size) > 0);
-      gl->board[index].pll_locked = str[8] == 'L';
-
-      last[index] = now;
-   }
-      
+   size = sizeof(str);
+   assert(wd_send(gl, index, 100, "temp", str, &size) > 0);
+   gl->board[index].temperature = atof(str+5);
+   
+   size = sizeof(str);
+   assert(wd_send(gl, index, 100, "lmkgetlock", str, &size) > 0);
+   gl->board[index].pll_locked = str[8] == 'L';
 }
 
 /*-----------------------------------------------------------------------------------------*/
