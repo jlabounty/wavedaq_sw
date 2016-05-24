@@ -452,8 +452,8 @@ int main(int argc, char *argv[])
                p = strchr(argv[i+1], '-') + 1;
                i2 = atoi(p);
                if (i1 >= 0 && i1 < 14 && i2>0 && i2<16) {
-                  for (i=i1 ; i<=i2; i++) {
-                     sprintf(gl.board[gl.n_boards++].name, "wd%03d", i);
+                  for (int j=i1 ; j<=i2; j++) {
+                     sprintf(gl.board[gl.n_boards++].name, "wd%03d", j);
                   }
                } else {
                   printf("invalid argument \"-w %s\"\n", argv[i+1]);
