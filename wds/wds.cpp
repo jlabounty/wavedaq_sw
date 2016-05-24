@@ -465,7 +465,7 @@ int main(int argc, char *argv[])
                   i++;
                }
                continue;
-            } else;
+            } else
                sprintf(gl.board[gl.n_boards++].name, "wd%03d", atoi(argv[i+1]));
          } else
             strlcpy(gl.board[gl.n_boards++].name, argv[i+1], 32);

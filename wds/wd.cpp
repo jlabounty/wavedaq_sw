@@ -694,6 +694,9 @@ int wd_init(GLOBALS *gl)
                gl->board[index].tcalib.dt[ch][bin] = 1E-9 / gl->actual_sampling_frequency;
       }
 
+      if (gl->nominal_sampling_frequency == 0)
+         gl->nominal_sampling_frequency = gl->actual_sampling_frequency = 5;
+
       // set sampling frequency after time calibration has been loaded
       wd_set_sampling_frequency(gl, index);
       
