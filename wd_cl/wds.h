@@ -13,6 +13,20 @@
 
 #include "averager.h"
 
+//trigger memory addresses
+#define RRUN (0xC7000000>>2)
+#define RCAL0 (0xC7000004>>2)
+#define RCAL1 (0xC7000008>>2)
+#define RCAL2 (0xC700000C>>2)
+#define RCAL3 (0xC7000010>>2)
+#define RTHR0 (0xC7000014>>2)
+#define RTHR1 (0xC7000018>>2)
+#define RTHR2 (0xC700001C>>2)
+#define RTHR3 (0xC7000020>>2)
+#define RMEMADDR (0xC7000024>>2)
+#define MEMIN (0xC7100000>>2)
+#define MEMOUT (0xC7200000>>2)
+
 typedef struct {
    char           version_id[4];
    unsigned int   crc;
@@ -128,6 +142,12 @@ int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *p);
 void wd_read_temp(GLOBALS *gl, int index);
 void wd_write_reg(GLOBALS *, int , int , int);
 void wd_read_reg(GLOBALS *, int , int , unsigned int*, int len =1);
+void wd_set_TRGCalib(GLOBALS *gl, int index, unsigned int channel, unsigned int data);
+void wd_set_TRGThr(GLOBALS *gl, int index, unsigned int thr, unsigned int val);
+void wd_TRGSetRUN(GLOBALS *gl, int index);
+void wd_TRGStopRUN(GLOBALS *gl, int index);
+
+
 
 size_t strlcpy(char *dst, const char *src, size_t size);
 size_t strlcat(char *dst, const char *src, size_t size);

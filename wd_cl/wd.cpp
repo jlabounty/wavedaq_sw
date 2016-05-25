@@ -152,8 +152,8 @@ int wd_send(GLOBALS *gl, int b, int timeout_ms, const char *str, char *result, i
    strlcpy(prompt, gl->board[b].name, sizeof(prompt));
    strlcat(prompt, " > ", sizeof(prompt));
    
-   // retry max five times
-   for (int retry=0 ; retry < 5 ; retry++) {
+   // retry max five times, col ca...
+   for (int retry=0 ; retry < 1000000 ; retry++) {
       
       // send request
       i = sendto(gl->board[b].cmd_socket,
@@ -1478,3 +1478,40 @@ void wd_read_reg(GLOBALS *gl, int index, int address, unsigned int* data, int le
     
 }
 
+void wd_set_TRGCalib(GLOBALS *gl, int index, unsigned int channel, unsigned int data){
+		unsigned int datain;
+		data &= 0xFF;
+		wd_read_reg(gl, index,RCAL0+(channel/4), &datain);
+		switch(channel %4){
+			case 0: datain &= 0xFFFFFF00;
+				datain |= data;
+				break;
+			case 1: datain &= 0xFFFF00FF;
+				datain |= data << 8;
+				break;
+			case 2: datain &= 0xFF00FFFF;
+				datain |= data << 16;
+				break;
+			case 3: datain &= 0x00FFFFFF;
+				datain |= data << 24;
+				break;
+		}
+		wd_write_reg(gl, index,RCAL0+(channel/4), datain);
+}
+
+
+void wd_set_TRGThr(GLOBALS *gl, int index, unsigned int thr, unsigned int val){
+	wd_write_reg(gl, index,RTHR0+(thr &0x3), val);
+}
+
+void wd_TRGSetRUN(GLOBALS *gl, int index){
+            unsigned int data;
+            wd_read_reg(gl, index,RRUN, &data);
+            wd_write_reg(gl, index, RRUN, data |0x00000001);	
+}
+
+void wd_TRGStopRUN(GLOBALS *gl, int index){
+            unsigned int data;
+            wd_read_reg(gl, index,RRUN, &data);
+            wd_write_reg(gl, index, RRUN, data &0xFFFFFFFE);
+}
