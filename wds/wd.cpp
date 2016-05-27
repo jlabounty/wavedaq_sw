@@ -385,8 +385,10 @@ void wd_set_sampling_frequency(GLOBALS *gl, int index)
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    
    // turn off time calibration if calibrated frequency is different
-   if (fabs(gl->actual_sampling_frequency - gl->board[index].tcalib.sampling_frequency) > 0.001)
-      gl->time_calib_flag = 0;
+   if (fabs(gl->actual_sampling_frequency - gl->board[index].tcalib.sampling_frequency) > 0.001) {
+      gl->time_calib1_flag = 0;
+      gl->time_calib2_flag = 0;
+   }
 }
 
 /*-----------------------------------------------------------------------------------------*/
@@ -998,8 +1000,8 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                      remove_spikes(gl, pe->drs1_trigger_cell, wfU+8);
                   }
                   
-                  // calculate time
-                  if (gl->time_calib_flag) {
+                  // calculate calibrated time for each bin
+                  if (gl->time_calib1_flag) {
                      // integrate time from delta-t values
                      for (int ch=0 ; ch<16 ; ch++) {
                         int tc = ch < 8 ? pe->drs0_trigger_cell : pe->drs1_trigger_cell;
@@ -1015,9 +1017,8 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                         for (int i=0 ; i<1024 ; i++)
                            wfT[ch][i] += dt;
                      }
-                     // align cell#0 of all channels inside chip1
-                     t1 = wfT[8][(1024-pe->drs1_trigger_cell) % 1024];
-                     for (int ch=9 ; ch<15 ; ch++) {
+                     // align cell#0 of all channels inside chip1 to chip0
+                     for (int ch=8 ; ch<15 ; ch++) {
                         float t2 = wfT[ch][(1024-pe->drs1_trigger_cell) % 1024];
                         float dt = t1 - t2;
                         for (int i=0 ; i<1024 ; i++)
@@ -1030,6 +1031,31 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                         for (int j=0 ; j<1024 ; j++)
                            wfT[i][j] = j * 1E-9/gl->actual_sampling_frequency;
                   }
+                  
+                  // apply time offsets
+                  if (gl->time_calib2_flag) {
+                     for (i=0 ; i<16 ; i++)
+                        for (int j=0 ; j<1024 ; j++)
+                           wfT[i][j] -= gl->board[b].tcalib.offset[i];
+                  }
+                  
+                  /*/######
+                  for (int i=20; i<1024-20 ; i++) {
+                     if (wfU[0][i] <= 0 && wfU[0][i+1] > 0) {
+                        double t0 = wfT[0][i] + (wfT[0][i+1]-wfT[0][i])*(1/(1-wfU[0][i]/wfU[0][i+1]));
+                        
+                        for (int j=i-10; j<i+10 ; j++) {
+                           if (wfU[8][j] <= 0 && wfU[8][j+1] > 0) {
+                              double t = wfT[8][j] + (wfT[8][j+1]-wfT[8][j])*(1/(1-wfU[8][j]/wfU[8][j+1]));
+                              double dt = t - t0;
+                              printf("%1.3lf\n", dt*1E9);
+                              break;
+                           }
+                        }
+                        break;
+                     }
+                  }
+                  //######*/
                }
 
                return SUCCESS;
@@ -1619,7 +1645,7 @@ void wd_analyze_period(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[16][1024])
       // rising edges
       for (int i1=tc+5; i1<tc+1024-5 ; i1++) {
          if (wfU[ch][i1 % 1024] <= 0 && wfU[ch][(i1+1) % 1024] > 0) {
-            for (int i2=i1+1 ; i2<i1+1024 ; i2++) {
+            for (int i2=i1+1 ; i2<i1+1024 && i2<tc+1024-3; i2++) {
                if (wfU[ch][i2 % 1024] <= 0 && wfU[ch][(i2+1) % 1024] > 0) {
                   
                   // first partial cell
@@ -1645,7 +1671,7 @@ void wd_analyze_period(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[16][1024])
       // falling edges
       for (int i1=tc+5; i1<tc+1024-5 ; i1++) {
          if (wfU[ch][i1 % 1024] >= 0 && wfU[ch][(i1+1) % 1024] < 0) {
-            for (int i2=i1+1 ; i2<i1+1024 ; i2++) {
+            for (int i2=i1+1 ; i2<i1+1024 && i2<tc+1024-3; i2++) {
                if (wfU[ch][i2 % 1024] >= 0 && wfU[ch][(i2+1) % 1024] < 0) {
                   
                   // first partial cell
@@ -1662,6 +1688,30 @@ void wd_analyze_period(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[16][1024])
                   
                   gl->board[b].tcalib.period[ch][i1%1024] = tPeriod;
                   
+                  break;
+               }
+            }
+         }
+      }
+   }
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+void wd_analyze_time_offset(GLOBALS *gl, float wfU[16][1024], float wfT[16][1024], TCALIB_PROGRESS *pr)
+{
+   
+   // find rising edge in channel #0
+   for (int i=20; i<1024-20 ; i++) {
+      if (wfU[0][i] <= 0 && wfU[0][i+1] > 0) {
+         double t0 = wfT[0][i] + (wfT[0][i+1]-wfT[0][i])*(1/(1-wfU[0][i]/wfU[0][i+1]));
+         
+         for (int ch=1 ; ch<16 ; ch++) {
+            for (int j=i-10; j<i+10 ; j++) {
+               if (wfU[ch][j] <= 0 && wfU[ch][j+1] > 0) {
+                  double t = wfT[ch][j] + (wfT[ch][j+1]-wfT[ch][j])*(1/(1-wfU[ch][j]/wfU[ch][j+1]));
+                  double dt = t - t0;
+                  pr->ave->Add(0, ch, 0, dt);
                   break;
                }
             }
@@ -1759,7 +1809,7 @@ void wd_calibrate_global(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[16][1024],
       // rising edges
       for (int i1=tc+5; i1<tc+1024-5 ; i1++) {
          if (wfU[ch][i1 % 1024] <= 0 && wfU[ch][(i1+1) % 1024] > 0) {
-            for (int i2=i1+1 ; i2<i1+1024 ; i2++) {
+            for (int i2=i1+1 ; i2<i1+1024 && i2<tc+1024-3; i2++) {
                if (wfU[ch][i2 % 1024] <= 0 && wfU[ch][(i2+1) % 1024] > 0) {
                   
                   // first partial cell
@@ -1774,6 +1824,9 @@ void wd_calibrate_global(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[16][1024],
                   // second partial cell
                   tPeriod += gl->board[b].tcalib.dt[ch][i2 % 1024]*(1/(1-wfU[ch][(i2+1)%1024]/wfU[ch][i2%1024]));
                   
+                  if (ch== 0)
+                     printf("%1.3lf\n", tPeriod*1E9);
+
                   // calculate correction to nominal period of 10 ns as a fraction
                   float corr = (10E-9) / tPeriod;
                   
@@ -1845,13 +1898,21 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
    
    if (pr->state == CS_FIRST_BOARD) {
       memset(pr, 0, sizeof(VCALIB_PROGRESS));
-      pr->state            = CS_FIRST_SAMPLE;
-      pr->n_iter1          = 400;
-      pr->n_iter2          = 400;
-      pr->n_board          = gl->n_boards;
-      pr->i_board          = 0;
-      gl->time_calib_flag  = 0;
-      gl->rotate_flag      = 0;
+      pr->state             = CS_FIRST_SAMPLE;
+      pr->n_iter1           = 400;
+      pr->n_iter2           = 400;
+      pr->n_iter3           = 100;
+      pr->n_board           = gl->n_boards;
+      pr->i_board           = 0;
+      
+      gl->rotate_flag       = 0;
+      gl->adc_flag          = 0;
+      gl->ofs_calib1_flag   = 1;
+      gl->ofs_calib2_flag   = 1;
+      gl->gain_calib_flag   = 1;
+      gl->range_calib_flag  = 1;
+      gl->time_calib1_flag  = 0;
+      gl->time_calib2_flag  = 0;
    }
    
    if (pr->state == CS_FIRST_SAMPLE) {
@@ -1896,7 +1957,7 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       wd_analyze_period(gl, &eventHeader, pr->i_board, wfU);
       wd_calibrate_local(gl, &eventHeader, pr->i_board, wfU, pr);
       
-      pr->progress = (double)(pr->i_iter1 + pr->i_iter2) / (pr->n_iter1 + pr->n_iter2);
+      pr->progress = (double)(pr->i_iter1 + pr->i_iter2 + pr->i_iter3) / (pr->n_iter1 + pr->n_iter2 + pr->n_iter3);
       
       if (pr->i_iter1 == pr->n_iter1)
          pr->ave->Reset();
@@ -1918,12 +1979,42 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       wd_analyze_period(gl, &eventHeader, pr->i_board, wfU);
       wd_calibrate_global(gl, &eventHeader, pr->i_board, wfU, pr);
       
-      pr->progress = (double)(pr->i_iter1 + pr->i_iter2) / (pr->n_iter1 + pr->n_iter2);
+      pr->progress = (double)(pr->i_iter1 + pr->i_iter2 + pr->i_iter3) / (pr->n_iter1 + pr->n_iter2 + pr->n_iter3);
+      
+      if (pr->i_iter2 == pr->n_iter2) {
+         pr->ave->Reset();
+         gl->time_calib1_flag  = 1;
+         gl->rotate_flag       = 1;
+      }
+
+      sleep_ms(10); // obtain 100 Hz rate
+      return SUCCESS;
+   }
+
+   //---- Offset Calibration
+   
+   if (pr->i_iter3 < pr->n_iter3) {
+      
+      pr->i_iter3++;
+      
+      wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
+      if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS)
+         return SUCCESS; // just skip this event
+      
+      wd_analyze_time_offset(gl, wfU, wfT, pr);
+      
+      pr->progress = (double)(pr->i_iter1 + pr->i_iter2 + pr->i_iter3) / (pr->n_iter1 + pr->n_iter2 + pr->n_iter3);
+      
+      if (pr->i_iter3 == pr->n_iter3) {
+         gl->board[pr->i_board].tcalib.offset[0] = 0; // by definition
+         for (int ch=1 ; ch<15 ; ch++)
+            gl->board[pr->i_board].tcalib.offset[ch] = pr->ave->RobustAverage(0, ch, 0);
+      }
       
       sleep_ms(10); // obtain 100 Hz rate
       return SUCCESS;
    }
-   
+
    delete pr->ave;
    pr->ave = NULL;
    
@@ -1956,14 +2047,15 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
    pr->progress = 1;
    
    if (pr->i_board == pr->n_board) {
-      pr->state            = CS_INACTIVE;
-      gl->rotate_flag      = 1;
-      gl->ofs_calib1_flag  = 1;
-      gl->ofs_calib2_flag  = 1;
-      gl->gain_calib_flag  = 1;
-      gl->range_calib_flag = 1;
-      gl->remove_spikes    = 1;
-      gl->time_calib_flag  = 1;
+      pr->state             = CS_INACTIVE;
+      gl->rotate_flag       = 1;
+      gl->ofs_calib1_flag   = 1;
+      gl->ofs_calib2_flag   = 1;
+      gl->gain_calib_flag   = 1;
+      gl->range_calib_flag  = 1;
+      gl->remove_spikes     = 1;
+      gl->time_calib1_flag  = 1;
+      gl->time_calib2_flag  = 1;
    }
    
    return SUCCESS;

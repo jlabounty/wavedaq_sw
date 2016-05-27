@@ -35,6 +35,7 @@ typedef struct {
    float          temperature;
    float          dt[16][1024];
    float          period[16][1024];
+   float          offset[16];
 } TCALIB_DATA;
 
 typedef struct {
@@ -66,7 +67,8 @@ typedef struct {
    int            ofs_calib2_flag;
    int            gain_calib_flag;
    int            range_calib_flag;
-   int            time_calib_flag;
+   int            time_calib1_flag;
+   int            time_calib2_flag;
    int            remove_spikes;
    int            http_port;
    int            n_boards;
@@ -123,6 +125,8 @@ typedef struct {
    int            i_iter1;
    int            n_iter2;
    int            i_iter2;
+   int            n_iter3;
+   int            i_iter3;
    int            index;
    Averager       *ave;
    int            fh;

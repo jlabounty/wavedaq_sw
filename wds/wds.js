@@ -128,7 +128,8 @@ function loadGl()
          document.getElementById("spikes").checked = OSC.GL.remove_spikes;
          document.getElementById("rotate").checked = OSC.GL.rotate_flag;
          
-         document.getElementById("tcalib").checked = OSC.GL.time_calib_flag;
+         document.getElementById("tcalib1").checked = OSC.GL.time_calib1_flag;
+         document.getElementById("tcalib2").checked = OSC.GL.time_calib2_flag;
          document.getElementById("clksource").checked = OSC.GL.clock_source;
       }
    };
