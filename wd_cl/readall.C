@@ -6,7 +6,8 @@
 void readall(){
 	FILE *in = fopen("data.dat", "r");
 	
-	TH1D *hWFM = new TH1D("hWFM", "waveform", 512, 0, 512);
+	TH1D *hWFMA = new TH1D("hWFMA", "waveform A", 512, 0, 512);
+	TH1D *hWFMB = new TH1D("hWFMB", "waveform B", 512, 0, 512);
 	TH1D *hInWFM[16];
        	for(int i=0; i<16;i++) hInWFM[i] = new TH1D(Form("hWFM%2d", i), Form("waveform %d", i), 512, 0, 512);
 	TH1D *hDISC0 = new TH1D("hDISC0", "disc0", 512, 0, 512);
@@ -14,44 +15,56 @@ void readall(){
 	TH1D *hDISC2 = new TH1D("hDISC2", "disc2", 512, 0, 512);
 	
 	unsigned int memaddr;	
-	fscanf(in, "%08x\n", &memaddr);
+	fscanf(in, "%x\n", &memaddr);
 
+	unsigned int memaddrB = memaddr >>16;
+	unsigned int memaddrA = memaddr & 0x1FF;
 	for(int i=0; i<512;i++){
 		unsigned long int datain;
 		fscanf(in, "%lx\n", &datain);
 		int d1= (datain >> 45) & 0x1;
 		int d2= (datain >> 46) & 0x1;
 		int d3= (datain >> 47) & 0x1;
-		int data = datain & 0xFFFFFFFF;
-		if(data>0x7FFFFFFF){
-			data -= 0xFFFFFFFE;
+		int dataA = datain & 0xFFFFFFFF;
+		int dataB = (datain>>32) & 0xFFFFFFFF;
+		if(dataA>0x7FFFFFFF){
+			dataA -= 0xFFFFFFFE;
 		}
-		hWFM->SetBinContent((i-memaddr)%512+1, ((data)));
-		hDISC0->SetBinContent((i-memaddr)%512+1, d1*20+150);
-		hDISC1->SetBinContent((i-memaddr)%512+1, d2*20+180);
-		hDISC2->SetBinContent((i-memaddr)%512+1, d3*20+210);
+		if(dataB>0x7FFFFFFF){
+			dataB -= 0xFFFFFFFE;
+		}
+		hWFMA->SetBinContent((i-memaddrA)%512+1, ((dataA)));
+		hWFMB->SetBinContent((i-memaddrB)%512+1, ((dataB)));
+		//hDISC0->SetBinContent((i-memaddr)%512+1, d1*20+150);
+		//hDISC1->SetBinContent((i-memaddr)%512+1, d2*20+180);
+		//hDISC2->SetBinContent((i-memaddr)%512+1, d3*20+210);
 		//printf("%04x %04x %d\n", datain, 0xFFF & (datain), (datain));
 	}
 	fclose(in);
 	printf("done output!\n");
 	
 	in = fopen("datamemin.dat", "r");
-	fscanf(in, "%08x\n", &memaddr);
+	fscanf(in, "%x\n", &memaddr);
+	memaddrB = (memaddr >>16) & 0x1FF;
+	memaddrA = memaddr & 0x1FF;
 	for(int i=0; i<8192;i++){
 		unsigned int datain;
 		fscanf(in, "%x\n", &datain);
-		datain &=0x3FFF;	
-		hInWFM[i/512]->SetBinContent((i%512-memaddr)%512+1, datain);
+		datain &=0x3FF;	
+		if ((i/512)<8) hInWFM[i/512]->SetBinContent((i%512-memaddrA)%512+1, datain);
+		else hInWFM[i/512]->SetBinContent((i%512-memaddrB)%512+1, datain);
 		if (i%512 == 0)printf("doing input %d!\n", i/512);
 	}
 	fclose(in);
 
 	new TCanvas();
-	hWFM->GetXaxis()->SetTitle("address (1bin = 12.5ns)");
-	hWFM->Draw();
-	hDISC0->Draw("SAME");
-	hDISC1->Draw("SAME");
-	hDISC2->Draw("SAME");
+	hWFMA->GetXaxis()->SetTitle("address (1bin = 12.5ns)");
+	hWFMA->Draw();
+	new TCanvas();
+	hWFMB->Draw();
+	//hDISC0->Draw("SAME");
+	//hDISC1->Draw("SAME");
+	//hDISC2->Draw("SAME");
 	TCanvas *c= new TCanvas();
 	c->Divide(2,2);
 	c->cd(1);

@@ -76,9 +76,10 @@ int main(int argc, char *argv[])
         printf("\n --- Options: \n");
         printf("[ 1]: Set Run reg          \t \t  [ 2]: Get Run Reg\n");
         printf("[ 3]: Set Runmode          \t \t  [ 4]: Unset Runmode\n");
-        printf("[ 5]: Dump input memory    \t \t  [ 6]: Dump output memory\n");
-        printf("[ 7]: Write input memory   \t \t  [ 8]: Set threshold\n");
-        printf("[ 9]: Set calibration      \t \t  [10]: Multiple Run\n");
+        printf("[ 5]: Read MemAddr    	   \t \t  [ 6]: SW Sync\n");
+        printf("[ 7]: Dump input memory    \t \t  [ 8]: Dump output memory\n");
+        printf("[ 9]: Write input memory   \t \t  [10]: Set threshold\n");
+        printf("[11]: Set calibration      \t \t  [12]: Multiple Run\n");
         printf("[-1]: Exit\n");
         
         do {
@@ -131,8 +132,18 @@ int main(int argc, char *argv[])
         if(option == 4) {
             wd_TRGStopRUN(&gl, 0);
         }
-        //
+	//
         if(option == 5) {
+	    unsigned int counters[2];
+            wd_read_memaddr(&gl, 0, counters);
+	    printf("counterA:%09x counterB:%09x\n", counters[0], counters[1]);
+	}
+	//
+        if(option == 6) {
+            wd_swsync(&gl, 0);
+	}
+        //
+        if(option == 7) {
             int channelID;
             printf("channel: ");
             scanf("%d", &channelID);
@@ -141,29 +152,38 @@ int main(int argc, char *argv[])
             unsigned int data[512];
             wd_read_reg(&gl, 0,MEMIN + 512*channelID, data, 512);
             FILE* out = fopen("data.dat", "w");
-	    fprintf(out, "%x\n", memaddr);
+	    fprintf(out, "%x\n", memaddr&0x1FF);
             for (int i=0; i<512; i++) {
                 fprintf(out, "%x\n", data[i]);
             }
             fclose(out);
         }
         //
-        if(option == 6) {
+        if(option == 8) {
+            int memID;
+            printf("memory: ");
+            scanf("%d", &memID);
             unsigned int memaddr;
             wd_read_reg(&gl, 0,RMEMADDR, &memaddr);
             unsigned int data[2048];
             wd_read_reg(&gl, 0,MEMOUT, data, 2048);
             FILE* out = fopen("data.dat", "w");
-	    fprintf(out, "%x\n", memaddr);
+	    if (memID==0)
+	    	fprintf(out, "%x\n", memaddr&0x1ff);
+	    else
+	    	fprintf(out, "%x\n", memaddr>>12);
+	
             for (int i=0; i<512; i++) {
-	        fprintf(out, "%08x", (data[i+1024]) | (data[i+1516]<<16));
-                fprintf(out, "%08x\n", data[i] | (data[i+512]<<16) );
+	    	if (memID==0)
+			fprintf(out, "%08x\n", data[i] | (data[i+512]<<16) );
+		else
+	        	fprintf(out, "%08x\n", (data[i+1024]) | (data[i+1516]<<16));
             }
             fclose(out);
             
         }
         //
-        if(option == 7) {
+        if(option == 9) {
             FILE* in = fopen("datain.dat", "r");
             for (int i=0; i<512*16; i++) {
 		unsigned int data;
@@ -173,7 +193,7 @@ int main(int argc, char *argv[])
             fclose(in);
         }
         //
-	if(option ==  8) {
+	if(option ==  10) {
 		unsigned int data;
 		unsigned int offset;
 		printf("Threshold (0-3): ");
@@ -183,7 +203,7 @@ int main(int argc, char *argv[])
 		wd_set_TRGThr(&gl, 0, offset, data);
 	}
         //
-	if(option ==  9) {
+	if(option ==  11) {
 		unsigned int data;
 		unsigned int channel;
 		printf("Input channel (0-15): ");
@@ -193,7 +213,7 @@ int main(int argc, char *argv[])
 		wd_set_TRGCalib(&gl, 0, channel, data);
 	}
 	//
-	if(option == 10) {
+	if(option == 12) {
 		int channel1, channel2;
 		printf("Input channel (0-15, -1 for all): ");
 		scanf("%d", &channel1);
@@ -218,7 +238,7 @@ int main(int argc, char *argv[])
             FILE* out = fopen("data.dat", "w");
 	    fprintf(out, "%x\n", memaddr);
             for (int i=0; i<512; i++) {
-	        fprintf(out, "%08x", (data[i+1024]) | (data[i+1516]<<16));
+	        fprintf(out, "%08x", (data[i+1024]) | (data[i+1536]<<16));
                 fprintf(out, "%08x\n", data[i] | (data[i+512]<<16) );
             }
             fclose(out);

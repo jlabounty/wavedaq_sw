@@ -152,7 +152,7 @@ int wd_send(GLOBALS *gl, int b, int timeout_ms, const char *str, char *result, i
    strlcpy(prompt, gl->board[b].name, sizeof(prompt));
    strlcat(prompt, " > ", sizeof(prompt));
    
-   // retry max five times, col ca...
+   // retry max five times
    for (int retry=0 ; retry < 1000000 ; retry++) {
       
       // send request
@@ -1514,4 +1514,16 @@ void wd_TRGStopRUN(GLOBALS *gl, int index){
             unsigned int data;
             wd_read_reg(gl, index,RRUN, &data);
             wd_write_reg(gl, index, RRUN, data &0xFFFFFFFE);
+}
+void wd_read_memaddr(GLOBALS *gl, int index, unsigned int* data){
+            unsigned int datain;
+            wd_read_reg(gl, index,RMEMADDR, &datain);
+	    data[0] = datain &0x1FF;
+	    data[1] = (datain >>12)&0x1FF;
+}
+void wd_swsync(GLOBALS *gl, int index){
+	    unsigned int data;
+            wd_read_reg(gl, index,RRUN, &data);
+            wd_write_reg(gl, index, RRUN, data | 0x00000008);	
+            wd_write_reg(gl, index, RRUN, data & 0xFFFFFFF7);	
 }

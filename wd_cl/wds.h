@@ -146,6 +146,8 @@ void wd_set_TRGCalib(GLOBALS *gl, int index, unsigned int channel, unsigned int 
 void wd_set_TRGThr(GLOBALS *gl, int index, unsigned int thr, unsigned int val);
 void wd_TRGSetRUN(GLOBALS *gl, int index);
 void wd_TRGStopRUN(GLOBALS *gl, int index);
+void wd_swsync(GLOBALS *gl, int index);
+void wd_read_memaddr(GLOBALS *gl, int index, unsigned int *data);
 
 
 
