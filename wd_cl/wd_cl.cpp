@@ -6,6 +6,7 @@
 //
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
@@ -22,9 +23,29 @@
 #define CMD_OFS_CALIB 1
 #define CMD_TIME_CALIB 2
 
+//comment the line below if you do not want to execute root macros
+#define RUNROOT
+
 CALIB_PROGRESS ofs_prog;
 
 /*-----------------------------------------------------------------------------------------*/
+void runRoot(int sel){
+#ifdef RUNROOT
+	FILE* pipe;
+        
+	if(sel==0) pipe = popen("root -l readdata.C+ >/dev/null 2>&1", "w");
+	else pipe = popen("root -l readall.C+ >/dev/null 2>&1", "w");
+	
+	printf("ROOT Running.... press enter to exit");
+        char a;
+	do {
+            scanf("%c",&a);
+        } while (a!='\n') ;
+	
+	fprintf(pipe, ".q\n");
+	pclose(pipe);
+#endif
+}
 
 int main(int argc, char *argv[]) 
 {
@@ -157,6 +178,7 @@ int main(int argc, char *argv[])
                 fprintf(out, "%x\n", data[i]);
             }
             fclose(out);
+	    runRoot(0);
         }
         //
         if(option == 8) {
@@ -181,6 +203,7 @@ int main(int argc, char *argv[])
             }
             fclose(out);
             
+	    runRoot(0);
         }
         //
         if(option == 9) {
@@ -250,6 +273,7 @@ int main(int argc, char *argv[])
             }
             fclose(out);
 		
+	    runRoot(1);
 	}
         /* end of the main loop on the options*/
     } while ( option >= 0);
