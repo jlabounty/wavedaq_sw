@@ -1824,9 +1824,6 @@ void wd_calibrate_global(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[16][1024],
                   // second partial cell
                   tPeriod += gl->board[b].tcalib.dt[ch][i2 % 1024]*(1/(1-wfU[ch][(i2+1)%1024]/wfU[ch][i2%1024]));
                   
-                  if (ch== 0)
-                     printf("%1.3lf\n", tPeriod*1E9);
-
                   // calculate correction to nominal period of 10 ns as a fraction
                   float corr = (10E-9) / tPeriod;
                   
