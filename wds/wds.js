@@ -130,6 +130,7 @@ function loadGl()
          
          document.getElementById("tcalib1").checked = OSC.GL.time_calib1_flag;
          document.getElementById("tcalib2").checked = OSC.GL.time_calib2_flag;
+         document.getElementById("tcalib3").checked = OSC.GL.time_calib3_flag;
          document.getElementById("clksource").checked = OSC.GL.clock_source;
       }
    };

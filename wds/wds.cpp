@@ -154,6 +154,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          gl->time_calib1_flag = atoi(value);
       else if (mg_vcmp(&hm->uri, "/gl/time_calib2_flag") == 0)
          gl->time_calib2_flag = atoi(value);
+      else if (mg_vcmp(&hm->uri, "/gl/time_calib3_flag") == 0)
+         gl->time_calib3_flag = atoi(value);
 
       else if (mg_vcmp(&hm->uri, "/vcalib") == 0) {
          if (!gl->demo_flag)
@@ -161,6 +163,18 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       }
 
       else if (mg_vcmp(&hm->uri, "/tcalib") == 0) {
+         if (!gl->demo_flag) {
+            mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
+            if (str[0]) {
+               int b = atoi(str);
+               tcalib_prog.state = CS_SINGLE_BOARD;
+               tcalib_prog.i_board = b;
+            } else
+               tcalib_prog.state = CS_FIRST_BOARD;
+         }
+      }
+
+      else if (mg_vcmp(&hm->uri, "/tcaliball") == 0) {
          if (!gl->demo_flag)
             tcalib_prog.state = CS_FIRST_BOARD;
       }
@@ -186,6 +200,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "   \"range_calib_flag\": %s,\n",   gl->range_calib_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"time_calib1_flag\": %s,\n",   gl->time_calib1_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"time_calib2_flag\": %s,\n",   gl->time_calib2_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"time_calib3_flag\": %s,\n",   gl->time_calib3_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"remove_spikes\": %s,\n",      gl->remove_spikes ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"http_port\": %d,\n",          gl->http_port);
       mg_printf_http_chunk(nc, "   \"n_boards\": %d,\n",           gl->n_boards);
@@ -410,6 +425,7 @@ int main(int argc, char *argv[])
    gl.remove_spikes              = 1;
    gl.time_calib1_flag           = 1;
    gl.time_calib2_flag           = 1;
+   gl.time_calib3_flag           = 0;
    gl.trigger_mode               = TM_AUTO;
    gl.osctca_flag                = 0;
    gl.clock_source               = 0;

@@ -616,7 +616,8 @@ int wd_init(GLOBALS *gl)
       // load voltage calibration for board from file (for now...)
       char str[80], dir[256];
       getcwd(dir, sizeof(dir));
-      sprintf(str, "%s.vcal", gl->board[index].name);
+      strcat(dir, "/calib");
+      sprintf(str, "%s/%s.vcal", dir, gl->board[index].name);
       int fh = open(str, O_RDONLY, 0644);
       if (fh > 0) {
          size = read(fh, &gl->board[index].vcalib, sizeof(VCALIB_DATA));
@@ -663,7 +664,7 @@ int wd_init(GLOBALS *gl)
       }
 
       // load timing calibration for board from file (for now...)
-      sprintf(str, "%s.tcal", gl->board[index].name);
+      sprintf(str, "%s/%s.tcal", dir, gl->board[index].name);
       fh = open(str, O_RDONLY, 0644);
       if (fh > 0) {
          size = read(fh, &gl->board[index].tcalib, sizeof(TCALIB_DATA));
@@ -1038,6 +1039,21 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                         for (int j=0 ; j<1024 ; j++)
                            wfT[i][j] -= gl->board[b].tcalib.offset[i];
                   }
+                  
+                  // apply horizontal trigger position correction
+                  if (gl->time_calib3_flag) {
+                     // find first crossing of the trigger level
+                     for (int i=4 ; i<1020 ; i++)
+                        if (wfU[0][i] <= 0 && wfU[0][i+1] > 0) {
+                           double t0 = wfT[0][i] + (wfT[0][i+1]-wfT[0][i])*(0-wfU[0][i])/(wfU[0][i+1]-wfU[0][i]);
+                     
+                           for (i=0 ; i<16 ; i++)
+                              for (int j=0 ; j<1024 ; j++)
+                                 wfT[i][j] -= t0;
+                           break;
+                        }
+                  }
+                  
                   
                   /*/######
                   for (int i=20; i<1024-20 ; i++) {
@@ -1420,7 +1436,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
    gl->board[pr->i_board].vcalib.sampling_frequency = gl->actual_sampling_frequency;
    gl->board[pr->i_board].vcalib.temperature = gl->board[pr->i_board].temperature;
    
-   sprintf(str, "%s.vcal", gl->board[pr->i_board].name);
+   sprintf(str, "calib/%s.vcal", gl->board[pr->i_board].name);
    pr->fh = open(str, O_WRONLY | O_CREAT, 0644);
    assert(pr->fh > 0);
    assert(write(pr->fh, &gl->board[pr->i_board].vcalib, sizeof(VCALIB_DATA)) == sizeof(VCALIB_DATA));
@@ -1893,15 +1909,15 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
    WD2_EVENT eventHeader;
    char str[80];
    
-   if (pr->state == CS_FIRST_BOARD) {
+   if (pr->state == CS_FIRST_BOARD || pr->state == CS_SINGLE_BOARD) {
       memset(pr, 0, sizeof(VCALIB_PROGRESS));
       pr->state             = CS_FIRST_SAMPLE;
       pr->n_iter1           = 400;
       pr->n_iter2           = 400;
       pr->n_iter3           = 100;
       pr->n_board           = gl->n_boards;
-      pr->i_board           = 0;
-      
+      if (pr->state == CS_FIRST_BOARD)
+         pr->i_board           = 0;
       gl->rotate_flag       = 0;
       gl->adc_flag          = 0;
       gl->ofs_calib1_flag   = 1;
@@ -1910,6 +1926,7 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       gl->range_calib_flag  = 1;
       gl->time_calib1_flag  = 0;
       gl->time_calib2_flag  = 0;
+      gl->time_calib3_flag  = 0;
    }
    
    if (pr->state == CS_FIRST_SAMPLE) {
@@ -2032,7 +2049,7 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
    gl->board[pr->i_board].tcalib.sampling_frequency = gl->actual_sampling_frequency;
    gl->board[pr->i_board].tcalib.temperature = gl->board[pr->i_board].temperature;
    
-   sprintf(str, "%s.tcal", gl->board[pr->i_board].name);
+   sprintf(str, "calib/%s.tcal", gl->board[pr->i_board].name);
    pr->fh = open(str, O_WRONLY | O_CREAT, 0644);
    assert(pr->fh > 0);
    assert(write(pr->fh, &gl->board[pr->i_board].tcalib, sizeof(TCALIB_DATA)) == sizeof(TCALIB_DATA));
@@ -2040,8 +2057,10 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
    
    // switch to next board
    pr->i_board++;
-   pr->state = CS_FIRST_SAMPLE;
-   pr->progress = 1;
+   pr->state             = CS_FIRST_SAMPLE;
+   pr->progress          = 1;
+   gl->time_calib1_flag  = 0;
+   gl->rotate_flag       = 0;
    
    if (pr->i_board == pr->n_board) {
       pr->state             = CS_INACTIVE;
