@@ -565,9 +565,8 @@ int main(int argc, char *argv[])
    if (gl.demo_flag)
       printf("Starting in DEMO mode.\n");
    
+   time_t last = 0, now;
    for (;;) {
-      time_t last = 0, now;
-      
       // do calibration if asked for
       if (vcalib_prog.state != CS_INACTIVE) {
          wd_calibrate_voltage(&gl, &vcalib_prog);
@@ -588,6 +587,7 @@ int main(int argc, char *argv[])
       if (now > last + 10) {
          for (int i=0 ; i<gl.n_boards ; i++)
             wd_read_board_status(&gl, i);
+         last = now;
       }
    }
 

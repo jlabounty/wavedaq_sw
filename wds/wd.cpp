@@ -892,7 +892,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                      wf1[i][j] = wfU[i][j];
 
                // un-rotate waveforms
-               if (gl->rotate_flag) {
+               if (gl->rotate_flag || gl->adc_flag) {
                   for (i=0 ; i<16 ; i++)
                      for (int j=0 ; j<1024 ; j++)
                         wfU[i][j] = wf1[i][j];
@@ -1613,7 +1613,7 @@ void remove_spikes(GLOBALS *gl, short trigger_cell, float wf[][1024])
 void wd_read_board_status(GLOBALS *gl, int index)
 {
    int size;
-   char str[80];
+   char str[10000];
 
    if (gl->demo_flag) {
       gl->board[index].temperature = 36.9;
@@ -1627,7 +1627,7 @@ void wd_read_board_status(GLOBALS *gl, int index)
    
    size = sizeof(str);
    assert(wd_send(gl, index, 100, "lmkgetlock", str, &size) > 0);
-   gl->board[index].pll_locked = str[8] == 'L';
+   gl->board[index].pll_locked = (str[8] == 'L');
 }
 
 /*-----------------------------------------------------------------------------------------*/
