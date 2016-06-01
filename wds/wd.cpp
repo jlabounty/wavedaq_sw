@@ -475,8 +475,10 @@ int wd_init(GLOBALS *gl)
    }
 #endif
 
-   if (gl->demo_flag)
+   if (gl->demo_flag) {
+      gl->nominal_sampling_frequency = gl->actual_sampling_frequency = 5;
       return SUCCESS;
+   }
    
    for (int index=0 ; index<gl->n_boards ; index++) {
       
