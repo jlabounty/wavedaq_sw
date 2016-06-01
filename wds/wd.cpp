@@ -644,6 +644,7 @@ int wd_init(GLOBALS *gl)
                       dir, str, gl->board[index].vcalib.sampling_frequency, gl->actual_sampling_frequency);
             }
          }
+         close(fh);
 
       } else {
          memset(gl->board[index].vcalib.wf_offset1, 0, sizeof(float)*16*1024);
@@ -691,6 +692,8 @@ int wd_init(GLOBALS *gl)
                       dir, str, gl->board[index].tcalib.sampling_frequency, gl->actual_sampling_frequency);
             }
          }
+         close(fh);
+         
       } else {
          for (int ch=0 ; ch < 16 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
