@@ -69,6 +69,7 @@ typedef struct {
    int            range_calib_flag;
    int            time_calib1_flag;
    int            time_calib2_flag;
+   int            time_calib3_flag;
    int            remove_spikes;
    int            http_port;
    int            n_boards;
@@ -135,9 +136,10 @@ typedef struct {
 
 // calibration states
 #define CS_INACTIVE     0
-#define CS_FIRST_BOARD  1
-#define CS_FIRST_SAMPLE 2
-#define CS_RUNNING      3
+#define CS_SINGLE_BOARD 1
+#define CS_FIRST_BOARD  2
+#define CS_FIRST_SAMPLE 3
+#define CS_RUNNING      4
 
 // trigger modes
 #define TM_NORMAL       0
