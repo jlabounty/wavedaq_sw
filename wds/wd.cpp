@@ -806,7 +806,6 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
             pe->drs1_trigger_cell = ph->drs1_trigger_cell;
             pe->trigger_type = 0; // not yet implemented
             
-            /*
             if (gl->verbose_flag)
                printf("From %s:%d, Frame %5d, ADC/Chn/Segment %d/%d/%d - %04d/%04d\n",
                       inet_ntoa(remote_addr.sin_addr),
@@ -817,7 +816,6 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                       ph->channel_segment_number,
                       ph->drs0_trigger_cell,
                       ph->drs1_trigger_cell);
-            */
             
             if (current_frame == -1)
                current_frame = ph->readout_sequence_number;
