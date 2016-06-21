@@ -1024,7 +1024,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                            wfT[ch][i] += dt;
                      }
                      // align cell#0 of all channels inside chip1 to chip0
-                     for (int ch=8 ; ch<15 ; ch++) {
+                     for (int ch=8 ; ch<16 ; ch++) {
                         float t2 = wfT[ch][(1024-pe->drs1_trigger_cell) % 1024];
                         float dt = t1 - t2;
                         for (int i=0 ; i<1024 ; i++)
@@ -2026,7 +2026,7 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       
       if (pr->i_iter3 == pr->n_iter3) {
          gl->board[pr->i_board].tcalib.offset[0] = 0; // by definition
-         for (int ch=1 ; ch<15 ; ch++)
+         for (int ch=1 ; ch<16 ; ch++)
             gl->board[pr->i_board].tcalib.offset[ch] = pr->ave->RobustAverage(0, ch, 0);
       }
       
