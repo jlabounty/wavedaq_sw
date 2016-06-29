@@ -13,6 +13,7 @@
 
 #include "averager.h"
 #include "wds.h"
+#include "register_map.h"
 
 #include <sys/types.h>
 #include <assert.h>
@@ -309,15 +310,18 @@ void wd_set_trigger_mode(GLOBALS *gl, int index)
    // enable local trigger
    if (gl->trigger_mode == TM_NORMAL) {
       // trigger_cfg_or
-      sprintf(str, "regwr d4 %s", gl->board[index].trigger_mask);
+      sprintf(str, "regwr %02x %s", REG_TRIGGER_CFG_A_OFFSET, gl->board[index].trigger_mask);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
  
       // trigger_enable, trigger_falling_edge
-      assert(wd_send(gl, index, 100, "regwr d8 000C0000", NULL, NULL) > 0);
+      sprintf(str, "regwr %02x 000C0000", REG_TRIGGER_CFG_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    } else {
       // disable all trigger
-      assert(wd_send(gl, index, 100, "regwr d4 00000000", NULL, NULL) > 0);
-      assert(wd_send(gl, index, 100, "regwr d8 00000000", NULL, NULL) > 0);
+      sprintf(str, "regwr %02x 00000000", REG_TRIGGER_CFG_A_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      sprintf(str, "regwr %02x 00000000", REG_TRIGGER_CFG_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    }
 }
 
@@ -381,7 +385,7 @@ void wd_set_sampling_frequency(GLOBALS *gl, int index)
       printf("Set sampling frequency to %1.3lg GSPS (%1.4lg GSPS)\n", gl->nominal_sampling_frequency,
              gl->actual_sampling_frequency);
    
-   sprintf(str, "regwr 2c 0003%02X00", divider);
+   sprintf(str, "regwr %02x 0003%02X00", REG_LMK_0_OFFSET, divider);
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    
    // turn off time calibration if calibrated frequency is different
@@ -595,15 +599,22 @@ int wd_init(GLOBALS *gl)
       assert(wd_send(gl, index, 100, "dacset caldc 1280", NULL, NULL) > 0);
 
       // set DRS readout mode to ROI
-      assert(wd_send(gl, index, 100, "regwr 10 17170030", NULL, NULL) > 0);
+      sprintf(str, "regwr %02x 17170030", REG_CONTROL_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       
       // set LMK registers to their defaults, see "LMK regs.xls"
-      assert(wd_send(gl, index, 100, "regwr 2c 00032800", NULL, NULL) > 0);
-      assert(wd_send(gl, index, 100, "regwr 30 00020101", NULL, NULL) > 0);
-      assert(wd_send(gl, index, 100, "regwr 34 00020102", NULL, NULL) > 0);
-      assert(wd_send(gl, index, 100, "regwr 58 029900AD", NULL, NULL) > 0);
-      assert(wd_send(gl, index, 100, "regwr 5c 0830140E", NULL, NULL) > 0);
-      assert(wd_send(gl, index, 100, "regwr 60 D800280F", NULL, NULL) > 0);
+      sprintf(str, "regwr %02x 00032800", REG_LMK_0_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      sprintf(str, "regwr %02x 00020101", REG_LMK_1_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      sprintf(str, "regwr %02x 00020102", REG_LMK_2_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      sprintf(str, "regwr %02x 029900AD", REG_LMK_13_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      sprintf(str, "regwr %02x 0830140E", REG_LMK_14_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      sprintf(str, "regwr %02x D800280F", REG_LMK_15_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       
       wd_set_trigger_level(gl, index);
       wd_set_range(gl, index);

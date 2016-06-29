@@ -39,6 +39,7 @@
 		D587E5141C6257D300C25CE4 /* averager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = averager.cpp; sourceTree = SOURCE_ROOT; };
 		D587E5151C6257D300C25CE4 /* averager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = averager.h; sourceTree = SOURCE_ROOT; };
 		D5D7CE451B74EFB40037D843 /* controls.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = controls.js; sourceTree = SOURCE_ROOT; };
+		D5E10D301D22CDF5009AA227 /* register_map.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = register_map.h; path = ../../../firmware/WD2/wd2_hardware_test/wd2_xsdk_workspace/wd2_app_cmd_interpreter/src/register_map.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +72,7 @@
 		D55471791B72428F002A92E4 /* wds */ = {
 			isa = PBXGroup;
 			children = (
+				D5E10D301D22CDF5009AA227 /* register_map.h */,
 				D587E5141C6257D300C25CE4 /* averager.cpp */,
 				D587E5151C6257D300C25CE4 /* averager.h */,
 				D55471891B72498D002A92E4 /* wds.css */,
@@ -235,6 +237,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
+				HEADER_SEARCH_PATHS = /wavedaq/firmware/WD2/wd2_hardware_test/wd2_xsdk_workspace/wd2_app_cmd_interpreter/src/;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -243,6 +246,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
+				HEADER_SEARCH_PATHS = /wavedaq/firmware/WD2/wd2_hardware_test/wd2_xsdk_workspace/wd2_app_cmd_interpreter/src/;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
