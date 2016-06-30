@@ -28,11 +28,11 @@ function init()
    OSC = new Oscilloscope(document.getElementById("scope"));
 
    // load globals including board list from server
-   loadGl();
+   loadGl(true);
    
    // load build and put into about box
    loadBuild();
-   
+
    // hid config panel
    var config = document.getElementById("config");
    config.t = 0;
@@ -80,7 +80,7 @@ function loadStatus()
    window.setTimeout(loadStatus, 10000);
 }
 
-function loadGl()
+function loadGl(init)
 {
    // send AJAX request
    var req = new XMLHttpRequest();
@@ -134,6 +134,17 @@ function loadGl()
          document.getElementById("tcalib2").checked = OSC.GL.time_calib2_flag;
          document.getElementById("tcalib3").checked = OSC.GL.time_calib3_flag;
          document.getElementById("clksource").checked = OSC.GL.clock_source;
+
+         if (init) {
+            // set scale according to sampling frequency
+            if (OSC.GL.actual_sampling_frequency < 2)
+               OSC.wfTScaleIndex = 6; // 100 ns
+            else if (OSC.GL.actual_sampling_frequency < 4)
+               OSC.wfTScaleIndex = 5; // 50 ns
+            else
+               OSC.wfTScaleIndex = 4; // 20 ns
+            setTScale();
+         }
       }
    };
    req.open("GET", "gl?r=" + Math.random(), true); // avoid cached results
@@ -596,6 +607,11 @@ function btnTScale(inc)
       index--;
    
    OSC.wfTScaleIndex = index;
+   setTScale();
+}
+
+function setTScale()
+{
    OSC.wfTScale = OSC.TScaleTable[OSC.wfTScaleIndex][0];
    document.getElementById("TScale").innerHTML = OSC.TScaleTable[OSC.wfTScaleIndex][1];
 

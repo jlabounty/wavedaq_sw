@@ -72,10 +72,10 @@ function Oscilloscope(div) { // constructor
    
    this.wfOffset = [];     // -0.5 .. +0.5
    this.wfTOffset = 0;     // seconds
-   
-   this.wfTScale = 20E-9;  // seconds per division
+
    this.wfTScaleIndex = 4;
-   
+   this.wfTScale = this.TScaleTable[this.wfTScaleIndex][0];
+
    this.wfUO = [];         // offset and scale optimized
    this.wfUS = [];
    
