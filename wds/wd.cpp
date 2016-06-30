@@ -312,7 +312,7 @@ void wd_set_trigger_mode(GLOBALS *gl, int index)
    if (gl->board[index].trigger_delay == 0)
       delay = 0x100;
    else {
-      delay = gl->board[index].trigger_delay / 450 * 255;
+      delay = (int)(gl->board[index].trigger_delay / 450 * 255);
       if (delay > 255)
          delay = 255;
       if (delay < 0)
