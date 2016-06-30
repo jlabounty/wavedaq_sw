@@ -87,6 +87,13 @@
                <input name="trigger_level" class="vMiddleElement" type="text" id="inpTLevel" onkeypress="keyGl(event,this)" value="0">
                <span class="vMiddleElement">&nbsp;mV</span>
             </div>
+            <div class="vMiddleBox vSpacer5">
+               <div class="vMiddleElement">Delay:&nbsp;</div>
+               <button name="ctrlHSlider" id="trgDelaySlider" class="hSlider vMiddleElement" type="button" data-update="sldTDelay()" style="width:130px;"></button>
+               <span class="hSpacer5"></span>
+               <input name="trigger_delay" class="vMiddleElement" type="text" id="inpTDelay" onkeypress="keyGl(event,this)" value="0">
+               <span class="vMiddleElement">&nbsp;ns</span>
+            </div>
             <div>
                Trigger type:&nbsp;&nbsp;
                <input type="radio" id="trModeNormal" name="trigger_mode" value="0" checked onClick="setGl(this)">normal

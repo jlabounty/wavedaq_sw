@@ -104,6 +104,8 @@ function loadGl()
          // populate config
          document.getElementById("trgSlider").set(OSC.GL.board[0].trigger_level+0.5);
          document.getElementById("inpTLevel").value = Math.round(OSC.GL.board[0].trigger_level * 1000);
+         document.getElementById("trgDelaySlider").set(1-OSC.GL.board[0].trigger_delay/450);
+         document.getElementById("inpTDelay").value = Math.round(OSC.GL.board[0].trigger_delay);
          document.config.trigger_mode[OSC.GL.trigger_mode].checked = true;
 
          document.getElementById("pzc").checked = OSC.GL.board[0].pzc;
@@ -621,6 +623,16 @@ function sldTLevel(value)
    req.send(Math.round(value * 1000 - 500)/1000);
 
    document.getElementById("inpTLevel").value = Math.round(value * 1000 - 500);
+}
+
+function sldTDelay(value)
+{
+   var del = 450-Math.round(value * 450);
+   var req = new XMLHttpRequest();
+   req.open("PUT", "gl/trigger_delay", true);
+   req.send(del);
+
+   document.getElementById("inpTDelay").value = del;
 }
 
 function sldDcv(value)

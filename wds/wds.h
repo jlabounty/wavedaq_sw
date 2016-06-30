@@ -46,6 +46,7 @@ typedef struct {
    int            server_port;
    unsigned char  eth_addr[16];
    float          trigger_level;
+   float          trigger_delay;
    char           trigger_mask[10];
    int            gain;
    int            pzc;

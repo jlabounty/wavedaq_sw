@@ -300,13 +300,24 @@ void wd_set_trigger_level(GLOBALS *gl, int index)
 void wd_set_trigger_mode(GLOBALS *gl, int index)
 {
    char str[256];
+   int delay;
    
    if (gl->demo_flag)
       return;
    
    if (gl->verbose_flag)
-      printf("Set trigger mode  %d\n", gl->trigger_mode);
+      printf("Set trigger mode %d, delay = %1.0lf\n", gl->trigger_mode, gl->board[index].trigger_delay);
 
+   if (gl->board[index].trigger_delay == 0)
+      delay = 0x100;
+   else {
+      delay = gl->board[index].trigger_delay / 450 * 255;
+      if (delay > 255)
+         delay = 255;
+      if (delay < 0)
+         delay = 0;
+   }
+   
    // enable local trigger
    if (gl->trigger_mode == TM_NORMAL) {
       // trigger_cfg_or
@@ -314,13 +325,14 @@ void wd_set_trigger_mode(GLOBALS *gl, int index)
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
  
       // trigger_enable, trigger_falling_edge
-      sprintf(str, "regwr %02x 000C0000", REG_TRIGGER_CFG_OFFSET);
+      sprintf(str, "regwr %02x 000C%04x", REG_TRIGGER_CFG_OFFSET, delay);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    } else {
       // disable all trigger
       sprintf(str, "regwr %02x 00000000", REG_TRIGGER_CFG_A_OFFSET);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-      sprintf(str, "regwr %02x 00000000", REG_TRIGGER_CFG_OFFSET);
+      
+      sprintf(str, "regwr %02x 0000%04x", REG_TRIGGER_CFG_OFFSET, delay);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    }
 }

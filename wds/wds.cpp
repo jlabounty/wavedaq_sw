@@ -74,6 +74,17 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          }
       }
 
+      else if (mg_vcmp(&hm->uri, "/gl/trigger_delay") == 0) {
+         for (int i=0 ; i<gl->n_boards ; i++) {
+            gl->board[i].trigger_delay = (float)atof(value);
+            if (gl->board[i].trigger_delay > 500)
+               gl->board[i].trigger_delay = 500;
+            if (gl->board[i].trigger_delay < 0)
+               gl->board[i].trigger_delay = 0;
+            wd_set_trigger_mode(gl, i);
+         }
+      }
+
       else if (mg_vcmp(&hm->uri, "/gl/trigger_mode") == 0) {
          gl->trigger_mode = atoi(value);
          for (int i=0 ; i<gl->n_boards ; i++)
@@ -219,6 +230,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      {\n");
          mg_printf_http_chunk(nc, "         \"name\": \"%s\" ,\n",         gl->board[i].name);
          mg_printf_http_chunk(nc, "         \"trigger_level\": %1.3lf,\n", gl->board[i].trigger_level);
+         mg_printf_http_chunk(nc, "         \"trigger_delay\": %1.0lf,\n", gl->board[i].trigger_delay);
          mg_printf_http_chunk(nc, "         \"trigger_mask\": \"%s\",\n",  gl->board[i].trigger_mask);
          mg_printf_http_chunk(nc, "         \"gain\": %d,\n",              gl->board[i].gain);
          mg_printf_http_chunk(nc, "         \"pzc\": %s,\n",               gl->board[i].pzc ? "true" : "false");
@@ -436,6 +448,7 @@ int main(int argc, char *argv[])
 
    for (i=0 ; i<16 ; i++) {
       gl.board[i].trigger_level  = 0;
+      gl.board[i].trigger_delay  = 0;
       gl.board[i].gain           = 0;       // gain 1
       gl.board[i].range          = 0;       // range +-0.5V
       gl.board[i].pzc            = 0;       // PZC off
