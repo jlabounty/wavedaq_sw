@@ -16,6 +16,7 @@
 #include "register_map.h"
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -48,7 +49,6 @@ union { unsigned int i ; float f; } _nanf = { 0x7fc00000 };
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <net/if.h>
-#include <sys/stat.h>
 
 #define NANF nanf("")
 #endif
