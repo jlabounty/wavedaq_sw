@@ -602,6 +602,14 @@ int wd_init(GLOBALS *gl)
       // trun on comparator power
       assert(wd_send(gl, index, 100, "pwrcmp on", NULL, NULL) > 0);
 
+      // enable all comparators
+      sprintf(str, "regwr %02x 0000FFFF", REG_TRIGGER_COMP_MASK_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      
+      // set simple trigger scheme
+      sprintf(str, "regwr %02x 00000000", REG_TRIGGER_SCHEME_SELECT_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+
       // set bias
       assert(wd_send(gl, index, 100, "dacset bias 700", NULL, NULL) > 0);
 
