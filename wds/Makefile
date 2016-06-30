@@ -21,6 +21,8 @@ CFLAGS  += -std=gnu++11 -x c++
 LIBS    = -framework IOKit -framework CoreFoundation -lobjc
 endif
 
+CFLAGS += -I../../firmware/WD2/wd2_hardware_test/wd2_xsdk_workspace/wd2_app_cmd_interpreter/src/
+
 # search *.c and *.cpp files
 C_FILES = $(wildcard *.c)
 CPP_FILES = $(wildcard *.cpp)
