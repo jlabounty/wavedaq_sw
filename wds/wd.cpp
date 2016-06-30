@@ -48,6 +48,7 @@ union { unsigned int i ; float f; } _nanf = { 0x7fc00000 };
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <net/if.h>
+#include <sys/stat.h>
 
 #define NANF nanf("")
 #endif
@@ -1464,6 +1465,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
    gl->board[pr->i_board].vcalib.sampling_frequency = gl->actual_sampling_frequency;
    gl->board[pr->i_board].vcalib.temperature = gl->board[pr->i_board].temperature;
    
+   mkdir("calib", 0755);
    sprintf(str, "calib/%s.vcal", gl->board[pr->i_board].name);
    pr->fh = open(str, O_WRONLY | O_CREAT, 0644);
    assert(pr->fh > 0);
