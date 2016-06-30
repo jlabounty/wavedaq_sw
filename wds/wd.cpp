@@ -286,13 +286,13 @@ void wd_set_trigger_level(GLOBALS *gl, int index)
    if (gl->verbose_flag)
       printf("Set trigger level = %d mV\n", (int)(gl->board[index].trigger_level*1000));
    
-   sprintf(str, "dacset tlevel1 %d", (int)(gl->board[index].trigger_level*1000+900));
+   sprintf(str, "dacset tlevel1 %d", (int)(gl->board[index].trigger_level*500+900));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   sprintf(str, "dacset tlevel2 %d", (int)(gl->board[index].trigger_level*1000+900));
+   sprintf(str, "dacset tlevel2 %d", (int)(gl->board[index].trigger_level*500+900));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   sprintf(str, "dacset tlevel3 %d", (int)(gl->board[index].trigger_level*1000+900));
+   sprintf(str, "dacset tlevel3 %d", (int)(gl->board[index].trigger_level*500+900));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   sprintf(str, "dacset tlevel4 %d", (int)(gl->board[index].trigger_level*1000+900));
+   sprintf(str, "dacset tlevel4 %d", (int)(gl->board[index].trigger_level*500+900));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
 }
 
