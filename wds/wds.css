@@ -67,6 +67,7 @@ a:focus { color:#0000FF; text-decoration:underline }
    width: 190px;
    background-color: white;
    text-align: center;
+   opacity: 0; // pre-hidden
 }
 
 #config {
@@ -79,6 +80,7 @@ a:focus { color:#0000FF; text-decoration:underline }
    height: 5000px;
    background-color: white;
    text-align: left;
+   opacity: 0; // pre-hidden
 }
 
 #about {
@@ -89,7 +91,7 @@ a:focus { color:#0000FF; text-decoration:underline }
    left: 0;
    max-width: 360px;
    width: 360px;
-   display: none;
+   display: none; // pre-hidden
 }
 
 button {

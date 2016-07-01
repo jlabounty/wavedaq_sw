@@ -270,6 +270,25 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       return;
    }
 
+   // scalers
+   if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/scalers") == 0) {
+      mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
+      int b = atoi(str);
+      
+      wd_read_scalers(gl, b);
+      
+      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+      mg_printf_http_chunk(nc, "{\n");
+      mg_printf_http_chunk(nc, "         \"scaler\": [\n");
+      int s;
+      for (s=0 ; s<15 ; s++)
+         mg_printf_http_chunk(nc, "            %d,\n", gl->board[b].scaler[s]);
+      mg_printf_http_chunk(nc, "            %d]\n", gl->board[b].scaler[s]);
+      mg_printf_http_chunk(nc, "}\n");
+      mg_send_http_chunk(nc, "", 0);
+      return;
+   }
+
    // software build
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/build") == 0) {
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");

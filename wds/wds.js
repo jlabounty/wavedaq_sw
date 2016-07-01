@@ -33,7 +33,7 @@ function init()
    // load build and put into about box
    loadBuild();
 
-   // hid config panel
+   // hide config panel
    var config = document.getElementById("config");
    config.t = 0;
    config.slider = 0;
@@ -54,6 +54,9 @@ function init()
    
    // schedule loadStatus()
    window.setTimeout(loadStatus, 10000);
+
+   // schedule loadScalers()
+   window.setTimeout(loadScalers, 1000);
 }
 
 function wdSelect(s)
@@ -78,6 +81,22 @@ function loadStatus()
    req.send();
 
    window.setTimeout(loadStatus, 10000);
+}
+
+function loadScalers()
+{
+   // send AJAX request
+   var req = new XMLHttpRequest();
+   req.onreadystatechange = function() {
+      if (req.readyState == 4 && req.status == 200) {
+         OSC.GL.board[OSC.board].scaler = JSON.parse(req.responseText).scaler;
+      }
+   };
+
+   req.open("GET", "scalers?b=" + OSC.board + "&r=" + Math.random(), true); // avoid cached results
+   req.send();
+
+   window.setTimeout(loadScalers, 1000);
 }
 
 function loadGl(init)
@@ -181,6 +200,12 @@ function setGl(e)
          req.send(e.value);
    }
 
+}
+
+function setDisp(e)
+{
+   if (e.name == "scaler")
+     OSC.disp.scaler = e.checked;
 }
 
 function keyGl(event, input)
@@ -408,11 +433,13 @@ function resize()
                  document.documentElement.clientHeight);
    }  else {
       ctls.style.display = "block";
+      ctls.style.opacity = 1; // make it visible again (pre-hidden in CSS)
       
       if (config.slider > 0)
          config.style.display = "block";
       else
          config.style.display = "none";
+      config.style.opacity = 1;
       
       OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth -
                  config.offsetWidth * config.slider,

@@ -1686,6 +1686,36 @@ void wd_read_board_status(GLOBALS *gl, int index)
 
 /*-----------------------------------------------------------------------------------------*/
 
+void wd_read_scalers(GLOBALS *gl, int index)
+{
+   int size;
+   char str[10000], cmd[100], *p;
+   
+   if (gl->demo_flag) {
+      for (int i=0 ; i<16 ; i++)
+         gl->board[index].scaler[i] = (float)random()/RAND_MAX*9999;
+      return;
+   }
+   
+   sprintf(cmd, "llrd c301%04x 34", REG_SCALER_1_LSB_OFFSET);
+   size = sizeof(str);
+   assert(wd_send(gl, index, 100, cmd, str, &size) > 0);
+   
+   p = str;
+   for (int i=0 ; i<18 ; i++) {
+      p = strchr(p, ' ');
+      if (p == NULL)
+         break;
+      gl->board[index].scaler[i] = strtol(p, NULL, 16);
+      p = strchr(p+1, ' ');
+      if (p == NULL)
+         break;
+      p++;  // skip MSB
+   }
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
 void wd_analyze_period(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[16][1024])
 {
    int tc;

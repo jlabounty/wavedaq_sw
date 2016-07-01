@@ -78,7 +78,11 @@ function Oscilloscope(div) { // constructor
 
    this.wfUO = [];         // offset and scale optimized
    this.wfUS = [];
-   
+
+   // display object
+   var disp = { scaler: false };
+   this.disp = disp;
+
    // default values
    for (var i=0 ; i<16 ; i++) {
       this.chOn[i] = false;
@@ -143,7 +147,10 @@ Oscilloscope.prototype.draw = function()
    this.height = this.canvas.height;
    this.wfWidth = this.width;
    this.wfHeight = this.height - this.bottomHeight;
-   this.x1 = 10+4; // leave space for marker
+   this.x1 = 11; // leave space for marker
+   if (this.disp.scaler) // leave space for scaler
+      this.x1 += 125;
+
    this.y1 = 4;    // leave space for frame
    this.x2 = this.wfWidth-4;
    this.y2 = this.wfHeight-4;
@@ -161,6 +168,7 @@ Oscilloscope.prototype.draw = function()
       this.drawFPS(ctx);
       this.drawTemperature(ctx);
       this.drawMeasurements(ctx);
+      this.drawScalers(ctx);
       this.drawStatus(ctx);
    }
 }
@@ -243,6 +251,41 @@ Oscilloscope.prototype.drawStatus = function(ctx)
          ctx.textAlign = "center";
          ctx.textBaseline = "middle";
          ctx.fillText("LMK PLL not locked!", (this.x1+this.x2)/2, (this.y1+this.y2)/2);
+      }
+   }
+}
+
+Oscilloscope.prototype.drawScalers = function(ctx)
+{
+   if (OSC.GL != undefined && OSC.disp.scaler) {
+      var board = document.getElementById("wdSelect").selectedIndex;
+      var scaler = OSC.GL.board[board].scaler;
+
+      for (var c=0 ; c<16 ; c++) {
+         ctx.fillStyle = this.chnColors[c];
+         ctx.strokeStyle = this.chnColors[c];
+         ctx.font = '14px sans-serif';
+         ctx.textBaseline = "top";
+
+         ctx.textAlign = "right";
+         ctx.fillText(c, 20, 4 + c * 20);
+
+         var s = scaler[c];
+         if (s < 1E3) {
+            ctx.fillText(s, 85, 4 + c * 20);
+            ctx.textAlign = "left";
+            ctx.fillText("Hz", 90, 4 + c * 20);
+         } else if (s < 1E6) {
+            s /= 1E3;
+            ctx.fillText(s.toFixed(3), 85, 4 + c * 20);
+            ctx.textAlign = "left";
+            ctx.fillText("kHz", 90, 4 + c * 20);
+         } else {
+            s /= 1E6;
+            ctx.fillText(s.toFixed(3), 85, 4 + c * 20);
+            ctx.textAlign = "left";
+            ctx.fillText("MHz", 90, 4 + c * 20);
+         }
       }
    }
 }
@@ -340,14 +383,12 @@ Oscilloscope.prototype.drawGrid = function(ctx)
    ctx.font = '24px sans-serif';
 
    if (this.idle)
-      ctx.fillText("Trig ?", this.x2-10, this.x1+10);
+      ctx.fillText("Trig ?", this.x2-10, this.y1+20);
    else if (this.demo)
-      ctx.fillText("DEMO", this.x2-10, this.x1+10);
-   
-   /*
-   else
-      ctx.fillText(this.wd<10 ? "WD00"+this.wd : (this.wd<100 ? "WD0"+this.wd : "WD"+this.wd), this.x2-10, this.x1+10);
-    */
+      ctx.fillText("DEMO", this.x2-10, this.y1+20);
+
+   ctx.beginPath(); // ?? needed to avoid problems later...
+   ctx.stroke();
 }
 
 Oscilloscope.prototype.calcScaleOffset = function()
@@ -365,29 +406,11 @@ Oscilloscope.prototype.drawWF = function(ctx)
 {
    if (OSC.GL == undefined)
       return;
-   
-   for (c=15 ; c>=0 ; c--) {
-      if (this.chOn[c]) {
-         var y = this.wfUO[c];
-         ctx.fillStyle = this.chnColors[c];
-         ctx.strokeStyle = "#E0E0E0";
-         ctx.beginPath();
-         ctx.arc(8, y, 8, 0, 2*Math.PI);
-         ctx.fill();
-         ctx.stroke();
-         ctx.strokeStyle = "#000000";
-         ctx.fillStyle = "#000000";
-         ctx.textAlign = "center";
-         ctx.textBaseline = "middle";
-         ctx.font = '10px sans-serif';
-         ctx.fillText(c, 8, y);
-      }
-   }
-   
+
    ctx.save();
    ctx.rect(this.x1, this.y1, this.w, this.h);
    ctx.clip();
-   
+
    var spacing = this.wfTS / (OSC.GL.actual_sampling_frequency * 1E9);
    
    for (c=0 ; c<16 ; c++) {
@@ -410,6 +433,24 @@ Oscilloscope.prototype.drawWF = function(ctx)
    }
    
    ctx.restore(); // remove clipping
+
+   for (c=15 ; c>=0 ; c--) {
+      if (this.chOn[c]) {
+         var y = this.wfUO[c];
+         ctx.fillStyle = this.chnColors[c];
+         ctx.strokeStyle = "#E0E0E0";
+         ctx.beginPath();
+         ctx.arc(this.x1-2, y, 8, 0, 2*Math.PI);
+         ctx.fill();
+         ctx.stroke();
+         ctx.strokeStyle = "#000000";
+         ctx.fillStyle = "#000000";
+         ctx.textAlign = "center";
+         ctx.textBaseline = "middle";
+         ctx.font = '10px sans-serif';
+         ctx.fillText(c, this.x1-2, y);
+      }
+   }
 }
 
 Oscilloscope.prototype.drawDT = function(ctx)

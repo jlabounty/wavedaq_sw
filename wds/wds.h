@@ -53,7 +53,7 @@ typedef struct {
    float          range;
    float          temperature;
    int            pll_locked;
-   unsigned int   scaler[16];
+   unsigned int   scaler[18];
 
    VCALIB_DATA    vcalib;
    TCALIB_DATA    tcalib;
@@ -163,6 +163,7 @@ int wd_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *resul
 int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *p);
 int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *p);
 void wd_read_board_status(GLOBALS *gl, int index);
+void wd_read_scalers(GLOBALS *gl, int index);
 
 size_t strlcpy(char *dst, const char *src, size_t size);
 size_t strlcat(char *dst, const char *src, size_t size);
