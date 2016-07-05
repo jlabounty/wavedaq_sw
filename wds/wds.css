@@ -110,11 +110,11 @@ input[type=text] {
 }
 
 .vMiddleBox {
-   display:table;
+   //display:table;
 }
 
 .vMiddleElement {
-   display:table-cell;
+   display: inline;
    vertical-align:middle;
 }
 
