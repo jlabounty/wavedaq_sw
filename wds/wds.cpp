@@ -12,6 +12,7 @@
 #include <ctype.h>
 
 #ifdef _MSC_VER
+#include <time.h>
 #else
 #include <getopt.h>
 #endif
@@ -111,7 +112,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       }
 
       else if (mg_vcmp(&hm->uri, "/gl/nominal_sampling_frequency") == 0) {
-         gl->nominal_sampling_frequency = atof(value);
+         gl->nominal_sampling_frequency = (float)(atof(value));
          for (int i=0 ; i<gl->n_boards ; i++)
             wd_set_sampling_frequency(gl, i);
       }
@@ -144,7 +145,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       else if (mg_vcmp(&hm->uri, "/gl/adc_flag") == 0) {
          gl->adc_flag = atoi(value);
          if (gl->adc_flag)
-            gl->actual_sampling_frequency = 0.080; // ADC 80 MHz
+            gl->actual_sampling_frequency = 0.080f; // ADC 80 MHz
          else
             wd_set_sampling_frequency(gl, 0);
       }
