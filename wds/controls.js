@@ -1,6 +1,6 @@
 //
 //  controls.js
-//  Custom Controsl
+//  Custom Controls
 //
 //  Created by Stefan Ritt on 5/8/15.
 //

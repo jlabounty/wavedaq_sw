@@ -103,12 +103,19 @@ function Oscilloscope(div) { // constructor
    // measurements
    this.lastMeasurement = 0;
    this.sigma = [];
+
+   // used for trigger lines
+   this.lastTriggerLevelChange = 0;
 }
 
 Oscilloscope.prototype.sendWaveforms = function(wf)
 {
    this.nEvents++;
    this.wf = wf;
+
+   // execute measurements
+   for (var i=0 ; i<this.measurement.length ; i++)
+      this.measurement[i].measure(wf.T[0], wf.U[0], wf.T[1], wf.U[1], true, undefined);
 }
 
 Oscilloscope.prototype.calcFPS = function()
@@ -201,6 +208,18 @@ Oscilloscope.prototype.drawTemperature = function(ctx)
 
 Oscilloscope.prototype.drawMeasurements = function(ctx)
 {
+   if (this.measurement.length > 0) {
+      ctx.fillStyle = 'white';
+      ctx.strokeStyle = 'white';
+      ctx.font = '14px monospace';
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+      ctx.fillText("                                Min       Max      Mean       Std         N", 15, 10);
+   }
+   for (var i=0 ; i<this.measurement.length ; i++)
+      this.measurement[i].draw(i, ctx);
+
+   /*
    var d = new Date();
    if (d.getTime() > this.lastMeasurement + 500) {
       for (var c=0 ; c<16 ; c++) {
@@ -236,6 +255,7 @@ Oscilloscope.prototype.drawMeasurements = function(ctx)
          x += ctx.measureText(t).width + 10;
       }
    }
+   */
 }
 
 Oscilloscope.prototype.drawStatus = function(ctx)
@@ -412,7 +432,8 @@ Oscilloscope.prototype.drawWF = function(ctx)
    ctx.clip();
 
    var spacing = this.wfTS / (OSC.GL.actual_sampling_frequency * 1E9);
-   
+
+   // Waveforms
    for (c=0 ; c<16 ; c++) {
       if (this.chOn[c]) {
          ctx.beginPath();
@@ -434,6 +455,7 @@ Oscilloscope.prototype.drawWF = function(ctx)
    
    ctx.restore(); // remove clipping
 
+   // Circular markers on left side
    for (c=15 ; c>=0 ; c--) {
       if (this.chOn[c]) {
          var y = this.wfUO[c];
@@ -451,6 +473,34 @@ Oscilloscope.prototype.drawWF = function(ctx)
          ctx.fillText(c, this.x1-2, y);
       }
    }
+
+   // Trigger levels
+   for (c=15 ; c>=0 ; c--) {
+      if (this.chOn[c]) {
+         ctx.fillStyle = this.chnColors[c];
+         ctx.strokeStyle = this.chnColors[c];
+
+         var y = (document.getElementById("inpTLevel").value / 1000) * this.wfUS[c] + this.wfUO[c];
+
+         ctx.beginPath();
+         ctx.moveTo(this.x2 - 2, y - 5);
+         ctx.lineTo(this.x2 - 2, y + 5);
+         ctx.lineTo(this.x2 - 10, y);
+         ctx.lineTo(this.x2 - 2, y - 5);
+         ctx.closePath();
+         ctx.fill();
+         ctx.stroke();
+
+         var d = new Date();
+         if (d.getTime() < this.lastTriggerLevelChange + 1000) {
+            ctx.beginPath();
+            ctx.moveTo(this.x2 - 10, y);
+            ctx.lineTo(this.x1, y);
+            ctx.stroke();
+         }
+      }
+   }
+
 }
 
 Oscilloscope.prototype.drawDT = function(ctx)

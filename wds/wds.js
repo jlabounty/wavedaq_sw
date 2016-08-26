@@ -27,6 +27,14 @@ function init()
    // create Scope object
    OSC = new Oscilloscope(document.getElementById("scope"));
 
+   /* test for measurements */
+   OSC.measurement = new Array(4);
+   OSC.measurement[0] = new Measurement(2, 0, 0);
+   OSC.measurement[1] = new Measurement(2, 0, 1);
+   OSC.measurement[2] = new Measurement(0, 0, 0);
+   OSC.measurement[3] = new Measurement(1, 0, 1);
+   /**/
+
    // load globals including board list from server
    loadGl(true);
    
@@ -666,6 +674,8 @@ function sldTLevel(value)
    req.send(Math.round(value * 1000 - 500)/1000);
 
    document.getElementById("inpTLevel").value = Math.round(value * 1000 - 500);
+   var d = new Date();
+   OSC.lastTriggerLevelChange = d.getTime();
 }
 
 function sldTDelay(value)
@@ -743,7 +753,6 @@ function sldTOffset(value)
    
    OSC.calcScaleOffset();
    OSC.redraw();
-   console.log(value + "  " + OSC.wfTOffset*1E9);
 }
 
 function btnConfig()
