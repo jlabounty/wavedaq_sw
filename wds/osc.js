@@ -5,6 +5,16 @@
 //  Created by Stefan Ritt on 12/8/15.
 //
 
+// extend 2d canvas object
+CanvasRenderingContext2D.prototype.drawLine = function(x1, y1, x2, y2)
+{
+   this.beginPath();
+   this.moveTo(x1, y1);
+   this.lineTo(x2, y2);
+   this.stroke();
+}
+
+
 function Oscilloscope(div) { // constructor
    
    // constants
@@ -113,9 +123,27 @@ Oscilloscope.prototype.sendWaveforms = function(wf)
    this.nEvents++;
    this.wf = wf;
 
+   // extract visible part of wavefom
+   var x1 = [];
+   var y1 = [];
+   var x2 = [];
+   var y2 = [];
+
+   for (var i=0 ; i<this.wf.T[0].length ; i++) {
+      var x = this.timeToX(this.wf.T[0][i]);
+      if (x >= OSC.x1) {
+         x1.push(this.wf.T[0][i]);
+         y1.push(this.wf.U[0][i]);
+         x2.push(this.wf.T[1][i]);
+         y2.push(this.wf.U[1][i]);
+      }
+      if (x > OSC.x2)
+         break;
+   }
+
    // execute measurements
    for (var i=0 ; i<this.measurement.length ; i++)
-      this.measurement[i].measure(wf.T[0], wf.U[0], wf.T[1], wf.U[1], true, undefined);
+      this.measurement[i].measure(x1, y1, x2, y2, true, undefined);
 }
 
 Oscilloscope.prototype.calcFPS = function()
@@ -172,15 +200,16 @@ Oscilloscope.prototype.draw = function()
       this.drawDT(ctx);
    } else {
       this.drawWF(ctx);
-      this.drawFPS(ctx);
-      this.drawTemperature(ctx);
       this.drawMeasurements(ctx);
-      this.drawScalers(ctx);
-      this.drawStatus(ctx);
+      this.printFPS(ctx);
+      this.printTemperature(ctx);
+      this.printScalers(ctx);
+      this.printMeasurements(ctx);
+      this.printStatus(ctx);
    }
 }
 
-Oscilloscope.prototype.drawFPS = function(ctx)
+Oscilloscope.prototype.printFPS = function(ctx)
 {
    ctx.fillStyle = 'white';
    ctx.strokeStyle = 'white';
@@ -190,7 +219,7 @@ Oscilloscope.prototype.drawFPS = function(ctx)
    ctx.fillText(this.nEPS + " EPS  " + this.nFPS + " FPS", 10, this.y2+8);
 }
 
-Oscilloscope.prototype.drawTemperature = function(ctx)
+Oscilloscope.prototype.printTemperature = function(ctx)
 {
    ctx.fillStyle = 'white';
    ctx.strokeStyle = 'white';
@@ -206,7 +235,7 @@ Oscilloscope.prototype.drawTemperature = function(ctx)
    }
 }
 
-Oscilloscope.prototype.drawMeasurements = function(ctx)
+Oscilloscope.prototype.printMeasurements = function(ctx)
 {
    if (this.measurement.length > 0) {
       ctx.fillStyle = 'white';
@@ -214,10 +243,10 @@ Oscilloscope.prototype.drawMeasurements = function(ctx)
       ctx.font = '14px monospace';
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
-      ctx.fillText("                                Min       Max      Mean       Std         N", 15, 10);
+      ctx.fillText("                                Min       Max      Mean       Std         N", OSC.x1+15, 10);
    }
    for (var i=0 ; i<this.measurement.length ; i++)
-      this.measurement[i].draw(i, ctx);
+      this.measurement[i].print(i, ctx);
 
    /*
    var d = new Date();
@@ -258,7 +287,31 @@ Oscilloscope.prototype.drawMeasurements = function(ctx)
    */
 }
 
-Oscilloscope.prototype.drawStatus = function(ctx)
+Oscilloscope.prototype.drawMeasurements = function(ctx)
+{
+   // extract visible part of wavefom
+   var x1 = [];
+   var y1 = [];
+   var x2 = [];
+   var y2 = [];
+
+   for (var i=0 ; i<this.wf.T[0].length ; i++) {
+      var x = this.timeToX(this.wf.T[0][i]);
+      if (x >= OSC.x1) {
+         x1.push(this.wf.T[0][i]);
+         y1.push(this.wf.U[0][i]);
+         x2.push(this.wf.T[1][i]);
+         y2.push(this.wf.U[1][i]);
+      }
+      if (x > OSC.x2)
+         break;
+   }
+
+   for (var i = 0; i < this.measurement.length; i++)
+      this.measurement[i].measure(x1, y1, x2, y2, false, ctx);
+}
+
+Oscilloscope.prototype.printStatus = function(ctx)
 {
    if (OSC.GL != undefined) {
       var board = document.getElementById("wdSelect").selectedIndex;
@@ -275,7 +328,7 @@ Oscilloscope.prototype.drawStatus = function(ctx)
    }
 }
 
-Oscilloscope.prototype.drawScalers = function(ctx)
+Oscilloscope.prototype.printScalers = function(ctx)
 {
    if (OSC.GL != undefined && OSC.disp.scaler) {
       var board = document.getElementById("wdSelect").selectedIndex;
@@ -420,6 +473,16 @@ Oscilloscope.prototype.calcScaleOffset = function()
       this.wfUO[c] = (this.y1+this.y2)/2 - this.wfOffset[c]*this.h;
       this.wfUS[c] = -this.h/this.wfScale[c]/10;
    }
+}
+
+Oscilloscope.prototype.timeToX = function(t)
+{
+   return t * this.wfTS + this.wfTO;
+}
+
+Oscilloscope.prototype.voltToY = function(v, c)
+{
+   return v * this.wfUS[c] + this.wfUO[c];
 }
 
 Oscilloscope.prototype.drawWF = function(ctx)

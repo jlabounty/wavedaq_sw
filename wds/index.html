@@ -47,26 +47,26 @@
 
       <div class="groupBtn">
          <div class="upDown">
-            <button name="ctrlButtonUp" id="scaleUp" type="button" class="squareButtonCanvas" onClick="btnScale(1)"></button>
+            <button name="ctrlButton" data-icon="up" id="scaleUp" type="button" class="squareButtonCanvas" onClick="btnScale(1)"></button>
             <div id="UScale">100 mV</div>
-            <button name="ctrlButtonDown" id="scaleDown" type="button" class="squareButtonCanvas" onClick="btnScale(-1)"></button>
+            <button name="ctrlButton" data-icon="down" id="scaleDown" type="button" class="squareButtonCanvas" onClick="btnScale(-1)"></button>
          </div><button name="ctrlVSlider" id="uofsSlider" class="vSlider" type="button" data-update="sldUOffset()"></button>
 
          <div class="zeroDist">
-            <button name="ctrlButtonZero" class="highButton" id="ofsZero" type="button" onClick="btnOfsZero()"></button>
+            <button name="ctrlButton" data-icon="vcoll" class="highButton" id="ofsZero" type="button" onClick="btnOfsZero()"></button>
             <div style="height:10px;"></div>
-            <button name="ctrlButtonDist" class="highButton" id="ofsDist" type="button" onClick="btnOfsDist()"></button>
+            <button name="ctrlButton" data-icon="vexp" class="highButton" id="ofsDist" type="button" onClick="btnOfsDist()"></button>
          </div>
       </div>
 
       <table class="timeScale">
          <tr>
             <td width="1%">
-               <button name="ctrlButtonLeft" id="scaleLeft" type="button" class="squareButtonCanvas" onClick="btnTScale(1)"></button>
+               <button name="ctrlButton" data-icon="left" id="scaleLeft" type="button" class="squareButtonCanvas" onClick="btnTScale(1)"></button>
             </td>
             <td id="TScale" style="vertical-align:middle">20 ns</td>
             <td width="1%">
-               <button name="ctrlButtonRight" id="scaleRight" type="button" class="squareButtonCanvas" onClick="btnTScale(-1)"></button>
+               <button name="ctrlButton" data-icon="right" id="scaleRight" type="button" class="squareButtonCanvas" onClick="btnTScale(-1)"></button>
             </td>
          </tr>
       </table>
@@ -74,7 +74,8 @@
       <button name="ctrlHSlider" id="tofsSlider" class="hSlider" type="button" data-update="sldTOffset()"></button>
 
       <button class="wideButton" id="btnConfig" type="button" onClick="btnConfig()">Config</button>
-      <button class="wideButton" id="btnAbout" type="button" onClick="btnAbout()">About</button>
+      <button class="wideButton" id="btnMeasure" type="button" onClick="dlgShow('dlgMeasure')">Measure</button>
+      <button class="wideButton" id="btnAbout" type="button" onClick="dlgShow('dlgAbout')">About</button>
 
    </div>
 
@@ -193,19 +194,28 @@
       </form>
    </div>
 
-   <div id="about">
+   <div id="dlgAbout" class="dlgFrame">
 
-      <div id="aboutTitle" class="titlebar">
-         About
-      </div>
+      <div class="dlgTitlebar">About</div>
 
-      <div class="dialog">
+      <div class="dlgPanel">
          <div style="font-size:16pt">WaveDAQ Oscilloscope</div>
          <div id="build" style="font-size:12pt"></div>
          <img style="position:absolute;right:30px;" src="favicon.png">
          <div style="font-size:8pt">Stefan Ritt</div>
          <div style="font-size:8pt">Paul Scherrer Institute</div>
-         <button class="wideButton" style="background-color:#F8F8F8" type="button" onClick="document.getElementById('about').style.display = 'none';">Close</button>
+         <button class="wideButton" style="background-color:#F8F8F8" type="button" onClick="dlgHide('dlgAbout')">Close</button>
+      </div>
+
+   </div>
+
+   <div id="dlgMeasure" class="dlgFrame">
+
+      <div class="dlgTitlebar">Measure</div>
+
+      <div class="dlgPanel">
+         <div>Test</div>
+         <button class="wideButton" style="background-color:#F8F8F8" type="button" onClick="dlgHide('dlgMeasure')">Close</button>
       </div>
 
    </div>

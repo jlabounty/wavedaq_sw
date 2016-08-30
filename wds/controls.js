@@ -5,6 +5,73 @@
 //  Created by Stefan Ritt on 5/8/15.
 //
 
+/*
+
+    Usage
+    =====
+
+    Dialogs
+    -------
+
+    <button type="button" onClick="dlgShow('dlgXXX')">XXX</button>
+
+
+    <div id="dlgXXX" class="dlgFrame">
+       <div class="dlgTitlebar">Title</div>
+       <div class="dlgPanel">
+          <div>Dialog Contents</div>
+          <button type="button" onClick="dlgHide('dlgXXX')">Close</button>
+       </div>
+    </div>
+
+
+
+    Sliders
+    -------
+
+    <button name="ctrlHSlider" type="button" data-update="xxx()"></button>
+
+    <button name="ctrlVSlider" type="button" data-update="xxx()"></button>
+
+
+
+    Icon buttons
+    ------------
+
+    <button name="ctrlButton" data-icon="<icon>" type="button"></button>
+
+    <icon> = up, down, left, right, vcoll, vexp, add, remove
+
+ */
+
+document.write("<style>" +
+    ".dlgFrame {" +
+    "   border: 1px solid black;" +
+    "   border-radius: 6px;" +
+    "   position: absolute;" +
+    "   top: 0;" +
+    "   left: 0;" +
+    "   max-width: 360px;" +
+    "   width: 360px;" +
+    "   display: none; // pre-hidden" +
+    "}" +
+    ".dlgTitlebar {" +
+    "   text-align: center;" +
+    "   background-color: #C0C0C0;" +
+    "   border-top-left-radius: 6px;" +
+    "   border-top-right-radius: 6px;" +
+    "   font-size: 10pt;" +
+    "   padding: 2px;" +
+    "}" +
+    ".dlgPanel {" +
+    "   background-color: #F0F0F0;" +
+    "   text-align: center;" +
+    "   padding: 5px;" +
+    "   border-bottom-left-radius: 6px;" +
+    "   border-bottom-right-radius: 6px;" +
+    "}" +
+    "</style>");
+
 (function(window) { // anonymous global function
    window.addEventListener("load", ctlInit, false);
 })(window);
@@ -22,145 +89,122 @@ function Controls() // constructor
 Controls.prototype.init = function() // scan DOM
 {
    // scan DOM for controls
-   this.ctrlButtonUp    = document.getElementsByName("ctrlButtonUp");
-   this.ctrlButtonDown  = document.getElementsByName("ctrlButtonDown");
-   this.ctrlButtonLeft  = document.getElementsByName("ctrlButtonLeft");
-   this.ctrlButtonRight = document.getElementsByName("ctrlButtonRight");
-   this.ctrlButtonZero  = document.getElementsByName("ctrlButtonZero");
-   this.ctrlButtonDist  = document.getElementsByName("ctrlButtonDist");
+   this.ctrlButton      = document.getElementsByName("ctrlButton");
    this.ctrlVSlider     = document.getElementsByName("ctrlVSlider");
    this.ctrlHSlider     = document.getElementsByName("ctrlHSlider");
 
-   // ctrlButtonUp
-   for (var i=0 ; i<this.ctrlButtonUp.length ; i++) {
-      var cvs =  document.createElement("canvas");
-      this.ctrlButtonUp[i].appendChild(cvs);
+   // ctrlButton
+   for (var i=0 ; i<this.ctrlButton.length ; i++) {
+      var cvs = document.createElement("canvas");
+      this.ctrlButton[i].appendChild(cvs);
 
-      cvs.width = 36;
-      cvs.height = 32;
-      var ctx = cvs.getContext("2d");
-      ctx.fillStyle = "#E0E0E0";
-      ctx.fillRect(0, 0, 36, 36);
-      ctx.beginPath();
-      ctx.moveTo(18, 7);
-      ctx.lineTo(31, 27);
-      ctx.lineTo(5, 27);
-      ctx.lineTo(18, 7);
-      ctx.closePath();
-      ctx.fillStyle = "#808080";
-      ctx.fill();
-   }
-   
-   // ctrlButtonDown
-   for (var i=0 ; i<this.ctrlButtonDown.length ; i++) {
-      var cvs =  document.createElement("canvas");
-      this.ctrlButtonDown[i].appendChild(cvs);
+      if (this.ctrlButton[i].dataset.icon == "up") {
+         cvs.width = 36;
+         cvs.height = 32;
+         var ctx = cvs.getContext("2d");
+         ctx.fillStyle = "#E0E0E0";
+         ctx.fillRect(0, 0, 36, 36);
+         ctx.beginPath();
+         ctx.moveTo(18, 7);
+         ctx.lineTo(31, 27);
+         ctx.lineTo(5, 27);
+         ctx.lineTo(18, 7);
+         ctx.closePath();
+         ctx.fillStyle = "#808080";
+         ctx.fill();
+      }
 
-      cvs.width = 36;
-      cvs.height = 32;
-      var ctx = cvs.getContext("2d");
-      ctx.fillStyle = "#E0E0E0";
-      ctx.fillRect(0, 0, 36, 32);
-      ctx.beginPath();
-      ctx.moveTo(18, 29);
-      ctx.lineTo(31, 9);
-      ctx.lineTo(5, 9);
-      ctx.lineTo(18, 29);
-      ctx.closePath();
-      ctx.fillStyle = "#808080";
-      ctx.fill();
-   }
+      if (this.ctrlButton[i].dataset.icon == "down") {
+         cvs.width = 36;
+         cvs.height = 32;
+         var ctx = cvs.getContext("2d");
+         ctx.fillStyle = "#E0E0E0";
+         ctx.fillRect(0, 0, 36, 32);
+         ctx.beginPath();
+         ctx.moveTo(18, 29);
+         ctx.lineTo(31, 9);
+         ctx.lineTo(5, 9);
+         ctx.lineTo(18, 29);
+         ctx.closePath();
+         ctx.fillStyle = "#808080";
+         ctx.fill();
+      }
 
-   // ctrlButtonLeft
-   for (var i=0 ; i<this.ctrlButtonLeft.length ; i++) {
-      var cvs =  document.createElement("canvas");
-      this.ctrlButtonLeft[i].appendChild(cvs);
-      
-      cvs.width = 36;
-      cvs.height = 32;
-      var ctx = cvs.getContext("2d");
-      ctx.fillStyle = "#E0E0E0";
-      ctx.fillRect(0, 0, 36, 32);
-      ctx.beginPath();
-      ctx.moveTo(7, 18);
-      ctx.lineTo(27, 31);
-      ctx.lineTo(27, 5);
-      ctx.lineTo(7, 18);
-      ctx.closePath();
-      ctx.fillStyle = "#808080";
-      ctx.fill();
-   }
-   
-   // ctrlButtonRight
-   for (var i=0 ; i<this.ctrlButtonRight.length ; i++) {
-      var cvs =  document.createElement("canvas");
-      this.ctrlButtonRight[i].appendChild(cvs);
-      
-      cvs.width = 36;
-      cvs.height = 32;
-      var ctx = cvs.getContext("2d");
-      ctx.fillStyle = "#E0E0E0";
-      ctx.fillRect(0, 0, 36, 32);
-      ctx.beginPath();
-      ctx.moveTo(29, 18);
-      ctx.lineTo(9, 31);
-      ctx.lineTo(9, 5);
-      ctx.lineTo(29, 18);
-      ctx.closePath();
-      ctx.fillStyle = "#808080";
-      ctx.fill();
-   }
-   
-   // ctrlButtonZero
-   for (var i=0 ; i<this.ctrlButtonZero.length ; i++) {
-      var cvs =  document.createElement("canvas");
-      this.ctrlButtonZero[i].appendChild(cvs);
-      
-      cvs.width = 36;
-      cvs.height = 40;
-      var ctx = cvs.getContext("2d");
-      ctx.fillStyle = "#E0E0E0";
-      ctx.fillRect(0, 0, 36, 32);
-      ctx.fillStyle = "#808080";
-      ctx.beginPath();
-      ctx.moveTo(18, 22);
-      ctx.lineTo(31, 7);
-      ctx.lineTo(5, 7);
-      ctx.lineTo(18, 22);
-      ctx.closePath();
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(18, 22);
-      ctx.lineTo(31, 37);
-      ctx.lineTo(5, 37);
-      ctx.lineTo(18, 22);
-      ctx.fill();
-   }
+      if (this.ctrlButton[i].dataset.icon == "left") {
+         cvs.width = 36;
+         cvs.height = 32;
+         var ctx = cvs.getContext("2d");
+         ctx.fillStyle = "#E0E0E0";
+         ctx.fillRect(0, 0, 36, 32);
+         ctx.beginPath();
+         ctx.moveTo(7, 18);
+         ctx.lineTo(27, 31);
+         ctx.lineTo(27, 5);
+         ctx.lineTo(7, 18);
+         ctx.closePath();
+         ctx.fillStyle = "#808080";
+         ctx.fill();
+      }
 
-   // ctrlButtonDist
-   for (var i=0 ; i<this.ctrlButtonDist.length ; i++) {
-      var cvs =  document.createElement("canvas");
-      this.ctrlButtonDist[i].appendChild(cvs);
+      if (this.ctrlButton[i].dataset.icon == "right") {
+         cvs.width = 36;
+         cvs.height = 32;
+         var ctx = cvs.getContext("2d");
+         ctx.fillStyle = "#E0E0E0";
+         ctx.fillRect(0, 0, 36, 32);
+         ctx.beginPath();
+         ctx.moveTo(29, 18);
+         ctx.lineTo(9, 31);
+         ctx.lineTo(9, 5);
+         ctx.lineTo(29, 18);
+         ctx.closePath();
+         ctx.fillStyle = "#808080";
+         ctx.fill();
+      }
 
-      cvs.width = 36;
-      cvs.height = 40;
-      var ctx = cvs.getContext("2d");
-      ctx.fillStyle = "#E0E0E0";
-      ctx.fillRect(0, 0, 36, 32);
-      ctx.fillStyle = "#808080";
-      ctx.beginPath();
-      ctx.moveTo(18, 3);
-      ctx.lineTo(31, 18);
-      ctx.lineTo(5, 18);
-      ctx.lineTo(18, 3);
-      ctx.closePath();
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(18, 39);
-      ctx.lineTo(31, 24);
-      ctx.lineTo(5, 24);
-      ctx.lineTo(18, 39);
-      ctx.fill();
+      if (this.ctrlButton[i].dataset.icon == "vcoll") {
+         cvs.width = 36;
+         cvs.height = 40;
+         var ctx = cvs.getContext("2d");
+         ctx.fillStyle = "#E0E0E0";
+         ctx.fillRect(0, 0, 36, 32);
+         ctx.fillStyle = "#808080";
+         ctx.beginPath();
+         ctx.moveTo(18, 22);
+         ctx.lineTo(31, 7);
+         ctx.lineTo(5, 7);
+         ctx.lineTo(18, 22);
+         ctx.closePath();
+         ctx.fill();
+         ctx.beginPath();
+         ctx.moveTo(18, 22);
+         ctx.lineTo(31, 37);
+         ctx.lineTo(5, 37);
+         ctx.lineTo(18, 22);
+         ctx.fill();
+      }
+
+      if (this.ctrlButton[i].dataset.icon == "vexp") {
+         cvs.width = 36;
+         cvs.height = 40;
+         var ctx = cvs.getContext("2d");
+         ctx.fillStyle = "#E0E0E0";
+         ctx.fillRect(0, 0, 36, 32);
+         ctx.fillStyle = "#808080";
+         ctx.beginPath();
+         ctx.moveTo(18, 3);
+         ctx.lineTo(31, 18);
+         ctx.lineTo(5, 18);
+         ctx.lineTo(18, 3);
+         ctx.closePath();
+         ctx.fill();
+         ctx.beginPath();
+         ctx.moveTo(18, 39);
+         ctx.lineTo(31, 24);
+         ctx.lineTo(5, 24);
+         ctx.lineTo(18, 39);
+         ctx.fill();
+      }
    }
 
    // ctrlVSlider
@@ -358,4 +402,74 @@ Controls.prototype.ctrlHSliderHandler = function(e)
          f = f.substr(0, f.indexOf("("));
       window[f](b.position);
    }
+}
+
+//-------------------------------------------------------------------------------------------------
+
+function dlgShow(dlg)
+{
+   var d = document.getElementById(dlg);
+
+   d.dlgAx = 0;
+   d.dlgAy = 0;
+   d.dlgDx = 0;
+   d.dlgDy = 0;
+
+   d.style.display = "block";
+   d.style.left = document.documentElement.clientWidth/2 - d.offsetWidth/2 + "px";
+   d.style.top  = document.documentElement.clientHeight/2 - d.offsetHeight/2 + "px";
+
+   d.dlgMouseDown = function(e) {
+      if ((e.target == this || e.target.parentNode == this) &&
+           e.target.className == "dlgTitlebar") {
+         this.Ax = e.clientX;
+         this.Ay = e.clientY;
+         this.Dx = parseInt(this.style.left);
+         this.Dy = parseInt(this.style.top);
+      }
+   }
+
+   d.dlgMouseMove = function(e) {
+      if (this.Ax > 0 && this.Ay > 0) {
+         e.preventDefault();
+         var x = e.clientX;
+         var y = e.clientY;
+         this.style.left = (this.Dx + (x - this.Ax)) + "px";
+         this.style.top = (this.Dy + (y - this.Ay)) + "px";
+      }
+   }
+
+   d.dlgMouseUp = function(e) {
+      this.Ax = 0;
+      this.Ay = 0;
+   }
+
+   d.dlgTouchStart = function(e) {
+      if (e.target == this || e.target.parentNode == this) {
+         e.preventDefault();
+         this.Ax = e.targetTouches[0].clientX;
+         this.Ay = e.targetTouches[0].clientY;
+         this.Dx = parseInt(this.style.left);
+         this.Dy = parseInt(this.style.top);
+      }
+   }
+
+   d.dlgTouchMove = function(e) {
+      var x = e.changedTouches[e.changedTouches.length - 1].clientX;
+      var y = e.changedTouches[e.changedTouches.length - 1].clientY;
+      this.style.left = (this.Dx + (x - this.Ax)) + "px";
+      this.style.top = (this.Dy + (y - this.Ay)) + "px";
+   }
+
+   window.addEventListener("mousedown",  d.dlgMouseDown.bind(d), true);
+   window.addEventListener("mousemove",  d.dlgMouseMove.bind(d), true);
+   window.addEventListener("mouseup",    d.dlgMouseUp.bind(d), true);
+   window.addEventListener("touchstart", d.dlgTouchStart.bind(d), true);
+   window.addEventListener("touchmove",  d.dlgTouchMove.bind(d), true);
+}
+
+function dlgHide(dlg)
+{
+   var d = document.getElementById(dlg);
+   d.style.display = "none";
 }

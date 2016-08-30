@@ -83,17 +83,6 @@ a:focus { color:#0000FF; text-decoration:underline }
    opacity: 0; // pre-hidden
 }
 
-#about {
-   border: 1px solid black;
-   border-radius: 6px;
-   position: absolute;
-   top: 0;
-   left: 0;
-   max-width: 360px;
-   width: 360px;
-   display: none; // pre-hidden
-}
-
 button {
    font-size: 20px;
    margin: 0;
@@ -136,23 +125,6 @@ input[type=text] {
    font-weight: bold;
    margin-left: 20px;
    margin-top: 6px;
-}
-
-.dialog {
-   background-color: #F0F0F0;
-   text-align: center;
-   padding: 5px;
-   border-bottom-left-radius: 6px;
-   border-bottom-right-radius: 6px;
-}
-
-.titlebar {
-   text-align: center;
-   background-color: #C0C0C0;
-   border-top-left-radius: 6px;
-   border-top-right-radius: 6px;
-   font-size: 10pt;
-   padding: 2px;
 }
 
 .squareButton {

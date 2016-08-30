@@ -28,11 +28,12 @@ function init()
    OSC = new Oscilloscope(document.getElementById("scope"));
 
    /* test for measurements */
-   OSC.measurement = new Array(4);
-   OSC.measurement[0] = new Measurement(2, 0, 0);
-   OSC.measurement[1] = new Measurement(2, 0, 1);
-   OSC.measurement[2] = new Measurement(0, 0, 0);
-   OSC.measurement[3] = new Measurement(1, 0, 1);
+   OSC.measurement = [];
+   OSC.measurement.push(new Measurement(6, 0, 0));
+   /*
+   OSC.measurement.push(new Measurement(1, 0, 0));
+   OSC.measurement.push(new Measurement(5, 0, 0));
+   OSC.measurement.push(new Measurement(6, 0, 0));
    /**/
 
    // load globals including board list from server
@@ -780,62 +781,3 @@ function configSlide()
    if (config.t < 10)
       window.setTimeout(configSlide, 20);
 }
-
-function btnAbout()
-{
-   var e = document.getElementById("about");
-   e.style.display = "block";
-   e.style.left = document.documentElement.clientWidth/2 - e.offsetWidth/2 + "px";
-   e.style.top  = document.documentElement.clientHeight/2 - e.offsetHeight/2 + "px";
-   
-   this.addEventListener("mousedown",  aboutDrag, true);
-   this.addEventListener("mousemove",  aboutDrag, true);
-   this.addEventListener("mouseup",    aboutDrag, true);
-   this.addEventListener("touchstart", aboutDrag, true);
-   this.addEventListener("touchmove",  aboutDrag, true);
-}
-
-var Ax, Ay, Dx, Dy;
-
-function aboutDrag(e)
-{
-   var x = undefined;
-   var dlg = document.getElementById("about");
-
-   if (e.type == "mouseup") {
-      Ax = 0;
-      Ay = 0;
-   }
-
-   if (e.target == document.getElementById("aboutTitle") && e.type == "mousedown") {
-      Ax = e.clientX;
-      Ay = e.clientY;
-      Dx = parseInt(dlg.style.left);
-      Dy = parseInt(dlg.style.top);
-   }
-   
-   if (e.target == document.getElementById("aboutTitle") && e.type == "touchstart") {
-      e.preventDefault();
-      Ax = e.targetTouches[0].clientX;
-      Ay = e.targetTouches[0].clientY;
-      Dx = parseInt(dlg.style.left);
-      Dy = parseInt(dlg.style.top);
-   }
-
-   if (e.buttons == 1 && e.type == "mousemove" && Ax > 0 && Ay > 0) {
-      e.preventDefault();
-      x = e.clientX;
-      y = e.clientY;
-      dlg.style.left = (Dx + (x - Ax)) + "px";
-      dlg.style.top  = (Dy + (y - Ay)) + "px";
-   }
-   
-
-   if (e.type == "touchmove" && Ax > 0 && Ay > 0) {
-      x = e.changedTouches[e.changedTouches.length-1].clientX;
-      y = e.changedTouches[e.changedTouches.length-1].clientY;
-      dlg.style.left = (Dx + (x - Ax)) + "px";
-      dlg.style.top  = (Dy + (y - Ay)) + "px";
-    }
-}
-
