@@ -186,6 +186,21 @@ input[type=text] {
    width: 180px;
 }
 
+.measSelect {
+   margin: 5px;
+   background: white;
+   font-size: 14px;
+}
+
+.plusButton {
+   padding-top: 0px;
+   padding-right: 6px;
+   padding-bottom: 3px;
+   padding-left: 6px;
+   background-color: #E0E0E0;
+   width: 32px;
+}
+
 .rangeSelect {
    margin: 5px;
    background: white;

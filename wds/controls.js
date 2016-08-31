@@ -51,8 +51,6 @@ document.write("<style>" +
     "   position: absolute;" +
     "   top: 0;" +
     "   left: 0;" +
-    "   max-width: 360px;" +
-    "   width: 360px;" +
     "   display: none; // pre-hidden" +
     "}" +
     ".dlgTitlebar {" +
@@ -160,6 +158,29 @@ Controls.prototype.init = function() // scan DOM
          ctx.closePath();
          ctx.fillStyle = "#808080";
          ctx.fill();
+      }
+
+      if (this.ctrlButton[i].dataset.icon == "plus") {
+         cvs.width = 36;
+         cvs.height = 36;
+         var ctx = cvs.getContext("2d");
+         ctx.fillStyle = "#E0E0E0";
+         ctx.fillRect(0, 0, 36, 36);
+         ctx.strokeStyle = "#808080";
+         ctx.lineWidth = 3;
+         ctx.drawLine(18, 7, 18, 29);
+         ctx.drawLine(7, 18, 29, 18);
+      }
+
+      if (this.ctrlButton[i].dataset.icon == "minus") {
+         cvs.width = 36;
+         cvs.height = 36;
+         var ctx = cvs.getContext("2d");
+         ctx.fillStyle = "#E0E0E0";
+         ctx.fillRect(0, 0, 36, 36);
+         ctx.strokeStyle = "#FF0000";
+         ctx.lineWidth = 3;
+         ctx.drawLine(7, 18, 29, 18);
       }
 
       if (this.ctrlButton[i].dataset.icon == "vcoll") {

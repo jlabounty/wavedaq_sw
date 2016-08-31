@@ -5,26 +5,26 @@
 //  Created by Stefan Ritt on 26/8/16.
 //
 
+var measList = [
+   { name:"Mean",      unit:"mV",  digits:1, f:measMean   },
+   { name:"Sigma",     unit:"mV",  digits:1, f:measSigma  },
+   { name:"Pk-Pk",     unit:"mV",  digits:1, f:measPkPk   },
+   { name:"VSlice",    unit:"mV",  digits:1 },
+   { name:"Charge",    unit:"pC",  digits:1 },
+
+   { name:"Freq",      unit:"MHz", digits:1, f:measFreq   },
+   { name:"Period",    unit:"ns",  digits:1, f:measPeriod },
+   { name:"Rise",      unit:"ns",  digits:1 },
+   { name:"Fall",      unit:"ns",  digits:1 },
+   { name:"Pos Width", unit:"ns",  digits:1 },
+   { name:"Neg Width", unit:"ns",  digits:1 },
+   { name:"Chn delay", unit:"ns",  digits:1 },
+   { name:"HSlice",    unit:"ns",  digits:3 },
+];
+
 function Measurement(index, board1, channel1, board2, channel2) // constructor
 {
-   this.list = [
-      { name:"Mean",      unit:"mV",  digits:1, f:this.MMean   },
-      { name:"Sigma",     unit:"mV",  digits:1, f:this.MSigma  },
-      { name:"Pk-Pk",     unit:"mV",  digits:1, f:this.MPkPk   },
-      { name:"VSlice",    unit:"mV",  digits:1 },
-      { name:"Charge",    unit:"pC",  digits:1 },
-
-      { name:"Freq",      unit:"MHz", digits:1, f:this.MFreq   },
-      { name:"Period",    unit:"ns",  digits:1, f:this.MPeriod },
-      { name:"Rise",      unit:"ns",  digits:1 },
-      { name:"Fall",      unit:"ns",  digits:1 },
-      { name:"Pos Width", unit:"ns",  digits:1 },
-      { name:"Neg Width", unit:"ns",  digits:1 },
-      { name:"Chn delay", unit:"ns",  digits:1 },
-      { name:"HSlice",    unit:"ns",  digits:3 },
-   ];
-
-   if (index >= this.list.length) {
+   if (index >= measList.length) {
       console.log("Measurement: invalid index");
       return;
    }
@@ -58,13 +58,13 @@ Measurement.prototype.setNStat = function(n)
 
 Measurement.prototype.getName = function()
 {
-   return this.list[this.index].name;
+   return measList[this.index].name;
 };
 
 Measurement.prototype.measure = function(x1, y1, x2, y2, update, ctx)
 {
    // execute measurement function in context of "this" object
-   this.value = this.list[this.index].f.call(this, x1, y1, x2, y2, ctx);
+   this.value = measList[this.index].f.call(this, x1, y1, x2, y2, ctx);
 
    // update statistics
    if (update && this.value != undefined) {
@@ -111,8 +111,8 @@ Measurement.prototype.getString = function()
 {
    if (this.value == undefined)
       return "      N/A";
-   var str = pad(this.value, 6, this.list[this.index].digits);
-   str += " "+this.list[this.index].unit;
+   var str = pad(this.value, 6, measList[this.index].digits);
+   str += " "+measList[this.index].unit;
    return str;
 };
 
@@ -123,7 +123,7 @@ Measurement.prototype.print = function(index, ctx)
    ctx.font = '14px sans-serif';
    ctx.textAlign = "left";
    ctx.textBaseline = "top";
-   ctx.fillText(this.list[this.index].name + " [CH" + this.channel1 + "]", OSC.x1+20, 35+index*20);
+   ctx.fillText(measList[this.index].name + " [CH" + this.channel1 + "]", OSC.x1+20, 35+index*20);
 
    ctx.font = "14px monospace";
    ctx.fillText(this.getString() +
@@ -141,12 +141,12 @@ Measurement.prototype.draw = function(ctx)
    ctx.strokeStyle = OSC.chnColors[this.channel1];
 
    // execute measurement function in context of "this" object
-   this.value = this.list[this.index].f.call(this, x1, y1, x2, y2, false, ctx);
+   this.value = measList[this.index].f.call(this, x1, y1, x2, y2, false, ctx);
 }
 
 //-------------------------------------------
 
-Measurement.prototype.MMean = function(x, y, x2, y1, ctx)
+function measMean(x, y, x2, y1, ctx)
 {
    var mean = 0;
    for (var i = 0; i < x.length; i++)
@@ -161,7 +161,7 @@ Measurement.prototype.MMean = function(x, y, x2, y1, ctx)
    return mean * 1000;
 };
 
-Measurement.prototype.MSigma = function(x, y, x2, y2, ctx)
+function measSigma(x, y, x2, y2, ctx)
 {
    var mean = 0;
    var rms  = 0;
@@ -197,7 +197,7 @@ Measurement.prototype.MSigma = function(x, y, x2, y2, ctx)
    return rms * 1000;
 };
 
-Measurement.prototype.MPkPk = function(x, y, x2, y2, ctx)
+function measPkPk(x, y, x2, y2, ctx)
 {
    var min_x, min_y, max_x, max_y;
 
@@ -255,7 +255,7 @@ Measurement.prototype.MPkPk = function(x, y, x2, y2, ctx)
 
 //-------------------------------------------
 
-Measurement.prototype.MFreq = function(x, y, x2, y2, ctx)
+function measFreq(x, y, x2, y2, ctx)
 {
    var p = this.MPeriod(x, y, x2, y2, ctx);
 
@@ -265,7 +265,7 @@ Measurement.prototype.MFreq = function(x, y, x2, y2, ctx)
    return undefined;
 }
 
-Measurement.prototype.MPeriod = function(x, y, x2, y2, ctx)
+function measPeriod(x, y, x2, y2, ctx)
 {
    var i;
 

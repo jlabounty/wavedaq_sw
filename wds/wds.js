@@ -781,3 +781,60 @@ function configSlide()
    if (config.t < 10)
       window.setTimeout(configSlide, 20);
 }
+
+function measRem()
+{
+   this.parentNode.parentNode.removeChild(this.parentNode);
+}
+
+function measAdd()
+{
+   var l = document.getElementById("measList");
+
+   var d = document.createElement("div");
+   l.insertBefore(d, l.childNodes[l.childNodes.length-2]);
+
+   var b = document.createElement("button");
+   b.type = "button";
+   b.className = "plusButton";
+   b.style.color = "red";
+   b.onclick = measRem;
+   b.innerHTML = "-";
+   d.appendChild(b);
+
+   var s = document.createElement("select");
+   s.className = "measSelect";
+   for (var i=0 ; i<10 ; i++) {
+      var o = document.createElement("option");
+      o.value = "WD00"+i;
+      o.innerHTML = "WD00"+i;
+      s.appendChild(o);
+   }
+   d.appendChild(s);
+
+   var s = document.createElement("select");
+   s.className = "measSelect";
+   for (var i=0 ; i<10 ; i++) {
+      var o = document.createElement("option");
+      o.value = "CH"+i;
+      o.innerHTML = "CH"+i;
+      s.appendChild(o);
+   }
+   d.appendChild(s);
+
+   var s = document.createElement("select");
+   s.className = "measSelect";
+   var o = document.createElement("option");
+   s.appendChild(o);
+   for (var i=0 ; i<10 ; i++) {
+      var o = document.createElement("option");
+      o.value = measList[i].name;
+      o.innerHTML = measList[i].name;
+      s.appendChild(o);
+   }
+   d.appendChild(s);
+
+   var s = document.createElement("span");
+   s.innerHTML = 'From:<input type="text" size="10">To:<input type="text" size="10">';
+   d.appendChild(s);
+}

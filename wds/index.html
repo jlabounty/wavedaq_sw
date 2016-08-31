@@ -213,9 +213,33 @@
 
       <div class="dlgTitlebar">Measure</div>
 
-      <div class="dlgPanel">
-         <div>Test</div>
-         <button class="wideButton" style="background-color:#F8F8F8" type="button" onClick="dlgHide('dlgMeasure')">Close</button>
+      <div class="dlgPanel" style="text-align: left;padding:10px">
+         <div class="vMiddleElement">
+            <div>
+               <input type="checkbox" id="dispHisto" onclick="">&nbsp;Display Histograms&nbsp;&nbsp;
+               Accumulate<select class="measSelect" onchange="">
+                  <option value="10">10</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                  <option value="500">500</option>
+                  <option value="1000" selected>1000</option>
+                  <option value="5000">5000</option>
+                  <option value="10000">10000</option>
+                  <option value="50000">50000</option>
+                  <option value="100000">100000</option>
+                  <option value="1000000">1000000</option>
+               </select>measurements
+            </div>
+            <div id="measList">
+               <!-- will be filled dynamically -->
+               <div id="measAdd">
+                  <button type="button" class="plusButton" onClick="measAdd()">+</button>
+               </div>
+            </div>
+         </div><br />
+         <div style="text-align:center">
+            <button class="wideButton" style="background-color:#F8F8F8" type="button" onClick="dlgHide('dlgMeasure')">Close</button>
+         </div>
       </div>
 
    </div>
