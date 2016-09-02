@@ -124,26 +124,28 @@ Oscilloscope.prototype.sendWaveforms = function(wf)
    this.wf = wf;
 
    // extract visible part of wavefom
-   var x1 = [];
-   var y1 = [];
-   var x2 = [];
-   var y2 = [];
+   var x = [];
+   var y = [];
 
-   for (var i=0 ; i<this.wf.T[0].length ; i++) {
-      var x = this.timeToX(this.wf.T[0][i]);
-      if (x >= OSC.x1) {
-         x1.push(this.wf.T[0][i]);
-         y1.push(this.wf.U[0][i]);
-         x2.push(this.wf.T[1][i]);
-         y2.push(this.wf.U[1][i]);
+   for (var c=0 ; c<16 ; c++) {
+      x[c] = [];
+      y[c] = [];
+      for (var i = 0; i < this.wf.T[0].length; i++) {
+         var x1 = this.timeToX(this.wf.T[0][i]);
+         if (x1 >= OSC.x1) {
+            x[c].push(this.wf.T[c][i]);
+            y[c].push(this.wf.U[c][i]);
+         }
+         if (x1 > OSC.x2)
+            break;
       }
-      if (x > OSC.x2)
-         break;
    }
 
    // execute measurements
-   for (var i=0 ; i<this.measurement.length ; i++)
-      this.measurement[i].measure(x1, y1, x2, y2, true, undefined);
+   for (i = 0; i < this.measList.childNodes.length; i++)
+      if (this.measList.childNodes[i].measurement)
+         this.measList.childNodes[i].measurement.measure(x, y, true, undefined);
+
 }
 
 Oscilloscope.prototype.calcFPS = function()
@@ -237,78 +239,49 @@ Oscilloscope.prototype.printTemperature = function(ctx)
 
 Oscilloscope.prototype.printMeasurements = function(ctx)
 {
-   if (this.measurement.length > 0) {
+   var n = 0;
+   for (var i=0 ; i<this.measList.childNodes.length ; i++)
+      if (this.measList.childNodes[i].nodeName == "DIV")
+         n++;
+
+   if (n > 1) {
       ctx.fillStyle = 'white';
       ctx.strokeStyle = 'white';
       ctx.font = '14px monospace';
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
-      ctx.fillText("                                Min       Max      Mean       Std         N", OSC.x1+15, 10);
-   }
-   for (var i=0 ; i<this.measurement.length ; i++)
-      this.measurement[i].print(i, ctx);
+      ctx.fillText("                                Min       Max      Mean       Std         N", OSC.x1 + 15, 10);
 
-   /*
-   var d = new Date();
-   if (d.getTime() > this.lastMeasurement + 500) {
-      for (var c=0 ; c<16 ; c++) {
-         if (this.chOn[c]) {
-            var mean = 0;
-            var sigma = 0;
-            
-            // skip first and last values
-            for (i=6 ; i<1022 ; i++)
-               mean += this.wf.U[c][i];
-            mean /= 1016;
-            for (i=6 ; i<1022 ; i++)
-               sigma += (this.wf.U[c][i]-mean) * (this.wf.U[c][i]-mean);
-            
-            sigma = Math.sqrt(sigma/1016);
-            sigma = sigma * 1000; // mV
-            this.sigma[c] = sigma;
-         }
-      }
-      this.lastMeasurement = d.getTime();
+      n = 0;
+      for (i = 0; i < this.measList.childNodes.length; i++)
+         if (this.measList.childNodes[i].measurement)
+            this.measList.childNodes[i].measurement.print(n++, ctx);
    }
-   
-   x = 220;
-   for (var c=0 ; c<16 ; c++) {
-      if (this.chOn[c] && this.sigma[c] != undefined) {
-         ctx.fillStyle = this.chnColors[c];
-         ctx.strokeStyle = this.chnColors[c];
-         ctx.font = '14px sans-serif';
-         ctx.textAlign = "left";
-         ctx.textBaseline = "top";
-         var t = this.sigma[c].toFixed(2) + " mV";
-         ctx.fillText(t, x, this.y2+8);
-         x += ctx.measureText(t).width + 10;
-      }
-   }
-   */
 }
 
 Oscilloscope.prototype.drawMeasurements = function(ctx)
 {
    // extract visible part of wavefom
-   var x1 = [];
-   var y1 = [];
-   var x2 = [];
-   var y2 = [];
+   var x = [];
+   var y = [];
 
-   for (var i=0 ; i<this.wf.T[0].length ; i++) {
-      var x = this.timeToX(this.wf.T[0][i]);
-      if (x >= OSC.x1) {
-         x1.push(this.wf.T[0][i]);
-         y1.push(this.wf.U[0][i]);
-         x2.push(this.wf.T[1][i]);
-         y2.push(this.wf.U[1][i]);
+   for (var c=0 ; c<16 ; c++) {
+      x[c] = [];
+      y[c] = [];
+      for (var i = 0; i < this.wf.T[0].length; i++) {
+         var x1 = this.timeToX(this.wf.T[0][i]);
+         if (x1 >= OSC.x1) {
+            x[c].push(this.wf.T[c][i]);
+            y[c].push(this.wf.U[c][i]);
+         }
+         if (x1 > OSC.x2)
+            break;
       }
-      if (x > OSC.x2)
-         break;
    }
 
-   for (var i = 0; i < this.measurement.length; i++)
-      this.measurement[i].measure(x1, y1, x2, y2, false, ctx);
+   for (i = 0; i < this.measList.childNodes.length; i++)
+      if (this.measList.childNodes[i].measurement)
+         this.measList.childNodes[i].measurement.measure(x, y, false, ctx);
 }
 
 Oscilloscope.prototype.printStatus = function(ctx)

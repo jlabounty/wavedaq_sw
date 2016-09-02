@@ -108,8 +108,8 @@
             </div>
             <div class="vSpacer5">
                Mode:
-                  <input type="radio" id="inputMode" name="adc_flag" checked="checked" value="0" onClick="setGl(this)">DRS
-                  <input type="radio" id="inputMode" name="adc_flag" value="1" onClick="setGl(this)">ADC
+                  <input type="radio" id="inputModeDRS" name="adc_flag" checked="checked" value="0" onClick="setGl(this)">DRS
+                  <input type="radio" id="inputModeADC" name="adc_flag" value="1" onClick="setGl(this)">ADC
             </div>
 
             <div class="vMiddleBox vSpacer5">
@@ -186,8 +186,11 @@
          <div class="groupTitle">Display</div>
          <div class="group">
             <table border="0">
-               <tr><td><input type="checkbox" id="scaler" name="scaler" onClick="setDisp(this)"></td>
-                  <td>Show hardware scalers</td></tr>
+               <tr>
+                  <td><input type="checkbox" id="scaler" title="Show hardware scalers" name="scaler"
+                             onClick="setDisp(this)"></td>
+                  <td>Show hardware scalers</td>
+               </tr>
             </table>
          </div>
 
@@ -234,6 +237,7 @@
                <!-- will be filled dynamically -->
                <div id="measAdd">
                   <button type="button" class="plusButton" onClick="measAdd()">+</button>
+                  <span id="addHint" style="color:green;font-style:italic">&nbsp;&larr;&nbsp;Click to create new measurement</span>
                </div>
             </div>
          </div><br />
