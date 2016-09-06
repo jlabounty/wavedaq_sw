@@ -32,10 +32,11 @@ var measList = [
       name: "VSlice",
       unit: "mV",
       digits: 1,
+      f: measVSlice,
       param: [
          {name: "WD", type: "WD", value: 0},
          {name: "CH", type: "CH", value: 0},
-         {name: "Time", type: "cursor", value: 123}
+         {name: "Time", type: "tcursor", value: 0}
       ]
    },
    {
@@ -45,9 +46,9 @@ var measList = [
       param: [
          {name: "WD", type: "WD", value: 0},
          {name: "CH", type: "CH", value: 0},
-         {name: "Time1", type: "cursor", value: ""},
-         {name: "Time2", type: "cursor", value: ""},
-         ]
+         {name: "Time1", type: "tcursor", value: ""},
+         {name: "Time2", type: "tcursor", value: ""}
+      ]
    },
    //------------------
    {
@@ -92,9 +93,14 @@ var measList = [
       name: "Chn delay",
       unit: "ns",
       digits: 1,
+      f: measChnDelay,
       param: [
-         {name: "WD1", type: "WD", value: 0}, {name: "CH1", type: "CH", value: 0},
-         {name: "WD2", type: "WD", value: 0}, {name: "CH2", type: "CH", value: 0}
+         {name: "WD1", type: "WD", value: 0},
+         {name: "CH1", type: "CH", value: 0},
+         {name: "Thr1", type: "ucursor", value: 0},
+         {name: "WD2", type: "WD", value: 0},
+         {name: "CH2", type: "CH", value: 0},
+         {name: "Thr2", type: "ucursor", value: 0}
       ]
    },
    {
@@ -102,20 +108,21 @@ var measList = [
       unit: "ns",
       digits: 3,
       param: [{name: "WD", type: "WD", value: 0}, {name: "CH", type: "CH", value: 0}]
-   },
+   }
 ];
 
 function Measurement() // constructor
 {
    this.index = undefined;
    this.value = undefined;
+   this.color = undefined;
    this.setNStat(1000);
 }
 
 Measurement.prototype.setFunc = function (name) {
 
    // find name in array
-   for (var i=0 ; i<measList.length ; i++) {
+   for (var i = 0; i < measList.length; i++) {
       if (measList[i].name == name)
          break;
    }
@@ -133,6 +140,10 @@ Measurement.prototype.resetStat = function () // reset statistics
 {
    this.nMeasured = 0;
    this.statIndex = 0;
+   this.min = undefined;
+   this.max = undefined;
+   this.mean = undefined;
+   this.std = undefined;
 };
 
 Measurement.prototype.setNStat = function (n) {
@@ -145,32 +156,24 @@ Measurement.prototype.setNStat = function (n) {
    this.resetStat();
 };
 
-Measurement.prototype.getName = function () {
-   return measList[this.index].name;
-};
-
-Measurement.prototype.measure = function (x, y, update, ctx) {
+Measurement.prototype.measure = function (x, y, i1, i2, update, ctx) {
    // execute measurement function in context of "this" object
-   this.value = measList[this.index].f.call(this, x, y, ctx);
+   this.value = measList[this.index].f.call(this, x, y, i1, i2, ctx);
 
    // update statistics
    if (update && this.value != undefined) {
       this.statArray[this.statIndex] = this.value;
       this.statIndex = (this.statIndex + 1) % this.nStat;
 
-      var na;
       if (this.nMeasured < this.nStat) {
          this.nMeasured++;
-         na = this.nMeasured;
-      } else {
-         na = this.nStat;
       }
 
       var vsum = 0;
       var vvsum = 0;
       this.min = this.max = this.value;
 
-      for (var i = 0; i < na; i++) {
+      for (var i = 0; i < this.nMeasured; i++) {
          vsum += this.statArray[i];
          vvsum += (this.statArray[i] * this.statArray[i]);
          if (this.statArray[i] < this.min)
@@ -198,6 +201,8 @@ Measurement.prototype.getString = function () {
       return "      N/A";
    var str = pad(this.value, 6, measList[this.index].digits);
    str += " " + measList[this.index].unit;
+   if (measList[this.index].unit.length == 2)
+      str += " ";
    return str;
 };
 
@@ -208,13 +213,15 @@ Measurement.prototype.print = function (index, ctx) {
    ctx.textAlign = "left";
    ctx.textBaseline = "top";
 
-   var name = measList[this.index].name + " ";
-   for (var i=0 ; i<this.param.length ; i++) {
+   var name = measList[this.index].name;
+   this.color = "white";
+   for (var i = 0; i < this.param.length; i++) {
       if (this.param[i].type == "WD")
-         name += "[WD"+this.param[i].value+"]";
+         name += "-WD" + this.param[i].value;
       if (this.param[i].type == "CH") {
-         name += "[CH" + this.param[i].value + "]";
-         ctx.fillStyle = OSC.chnColors[this.param[i].value];
+         name += "-CH" + this.param[i].value;
+         this.color = OSC.chnColors[this.param[i].value];
+         ctx.fillStyle = this.color;
       }
    }
 
@@ -227,61 +234,61 @@ Measurement.prototype.print = function (index, ctx) {
       pad(this.mean, 10, 3) +
       pad(this.std, 10, 3) +
       pad(this.nMeasured, 10, 0),
-      OSC.x1 + 150, 35 + index * 20);
+      OSC.x1 + 250, 35 + index * 20);
 };
 
-Measurement.prototype.draw = function (ctx) {
-   ctx.fillStyle = OSC.chnColors[this.channel1];
-   ctx.strokeStyle = OSC.chnColors[this.channel1];
+Measurement.prototype.draw = function (x, y, i1, i2, ctx) {
+   ctx.fillStyle = this.color;
+   ctx.strokeStyle = this.color;
 
    // execute measurement function in context of "this" object
-   this.value = measList[this.index].f.call(this, x1, y1, x2, y2, false, ctx);
-}
+   this.value = measList[this.index].f.call(this, x, y, i1, i2, ctx);
+};
 
 //-------------------------------------------
 
-function measMean(x, y, ctx) {
+function measMean(x, y, i1, i2, ctx) {
    var c = this.param[1].value;
    var mean = 0;
-   for (var i = 0; i < x[c].length; i++)
+   for (var i = i1; i < i2; i++)
       mean += y[c][i];
 
-   if (x[c].length > 0)
-      mean /= x[c].length;
+   if (i2 > i1)
+      mean /= (i2 - i1);
 
-   if (ctx != undefined)
-      ctx.drawLine(OSC.timeToX(x[c][0]), OSC.voltToY(mean, 0), OSC.timeToX(x[c][x[c].length - 1]), OSC.voltToY(mean, 0));
+   if (ctx != undefined && OSC.chOn[c])
+      ctx.drawLine(OSC.timeToX(x[c][i1]), OSC.voltToY(mean, c), OSC.timeToX(x[c][i2 - 1]), OSC.voltToY(mean, c));
 
    return mean * 1000;
-};
+}
 
-function measSigma(x, y, ctx) {
+function measSigma(x, y, i1, i2, ctx) {
    var c = this.param[1].value;
    var mean = 0;
    var rms = 0;
 
-   if (x[c].legnth <= 0)
-      return 0;
+   if (i1 == i2)
+      return;
 
-   for (var i = 0; i < x[c].length; i++)
-      mean += y[i];
-   mean /= x[c].length;
+   for (var i = i1; i < i2; i++)
+      mean += y[c][i];
+   mean /= (i2 - i1);
 
-   for (i = 0; i < x[c].length; i++)
+   for (i = i1; i < i2; i++)
       rms += (y[c][i] - mean) * (y[c][i] - mean);
-   rms = Math.sqrt(rms / x[c].length);
+   rms = Math.sqrt(rms / (i2 - i1));
 
-   if (ctx != undefined) {
-      var ym = OSC.voltToY(mean, 0);
+   if (ctx != undefined && OSC.chOn[c]) {
+      var ym = OSC.voltToY(mean, c);
       ctx.beginPath();
-      ctx.moveTo(OSC.timeToX(x[c][0]), ym);
+      ctx.moveTo(OSC.timeToX(x[c][i1]), ym);
 
-      for (i = 0; i < x.length; i++) {
-         ctx.lineTo(OSC.timeToX(x[c][i]), OSC.voltToY(y[c][i], 0));
+      for (i = i1; i < i2; i++) {
+         ctx.lineTo(OSC.timeToX(x[c][i]), OSC.voltToY(y[c][i], c));
       }
 
-      ctx.lineTo(OSC.timeToX(x[c][x[c].length - 1]), ym);
-      ctx.lineTo(OSC.timeToX(x[c][0]), ym);
+      ctx.lineTo(OSC.timeToX(x[c][i2 - 1]), ym);
+      ctx.lineTo(OSC.timeToX(x[c][i1]), ym);
 
       ctx.closePath();
       ctx.stroke();
@@ -289,15 +296,15 @@ function measSigma(x, y, ctx) {
    }
 
    return rms * 1000;
-};
+}
 
-function measPkPk(x, y, ctx) {
+function measPkPk(x, y, i1, i2, ctx) {
    var c = this.param[1].value;
    var min_x, min_y, max_x, max_y;
 
    min_x = max_x = x[c][0];
    min_y = max_y = y[c][0];
-   for (var i = 0; i < x[c].length; i++) {
+   for (var i = i1; i < i2; i++) {
       if (y[c][i] < min_y) {
          min_x = x[c][i];
          min_y = y[c][i];
@@ -311,8 +318,8 @@ function measPkPk(x, y, ctx) {
    if (ctx != undefined) {
       var x_min = OSC.timeToX(min_x);
       var x_max = OSC.timeToX(max_x);
-      var y_min = OSC.voltToY(min_y, 0);
-      var y_max = OSC.voltToY(max_y, 0);
+      var y_min = OSC.voltToY(min_y, c);
+      var y_max = OSC.voltToY(max_y, c);
 
       var x_center = (x_min + x_max) / 2;
 
@@ -344,49 +351,76 @@ function measPkPk(x, y, ctx) {
    }
 
    return (max_y - min_y) * 1000;
-};
+}
+
+function measVSlice(x, y, i1, i2, ctx) {
+   var c = this.param[1].value;
+
+   for (var i = 0; i < x[c].length - 1; i++)
+      if (x[c][i] <= this.param[2].value * 1E-9 &&
+         x[c][i + 1] > this.param[2].value * 1E-9)
+         break;
+
+   if (i == x[c].length - 1)
+      return;
+
+   if (x[c][i] == x[c][i + 1])
+      return;
+
+   var u = y[c][i] + (y[c][i + 1] - y[c][i]) * (this.param[2].value * 1E-9 - x[c][i]) / (x[c][i + 1] - x[c][i]);
+
+   if (ctx != undefined && OSC.chOn[c]) {
+      ctx.drawLine(OSC.timeToX(this.param[2].value * 1E-9), OSC.y1,
+         OSC.timeToX(this.param[2].value * 1E-9), OSC.y2);
+      ctx.drawLine(OSC.timeToX(this.param[2].value * 1E-9) - 10, OSC.voltToY(u, c),
+         OSC.timeToX(this.param[2].value * 1E-9) + 10, OSC.voltToY(u, c));
+   }
+
+   return u * 1000;
+}
 
 //-------------------------------------------
 
-function measFreq(x, y, ctx) {
-   var c = this.param[1].value;
-   var p = this.MPeriod(x, y, ctx);
+function measFreq(x, y, i1, i2, ctx) {
+   var p = measPeriod.call(this, x, y, i1, i2, ctx);
 
    if (p != undefined)
       return 1000 / p;
 
-   return undefined;
+   return;
 }
 
-function measPeriod(xa, ya, ctx) {
+function measPeriod(xa, ya, i1, i2, ctx) {
    var c = this.param[1].value;
    var x = xa[c];
-   var y = ya[c];
-   var i;
+   var y = [];
+   for (var i = 0; i < 1024; i++)
+      y[i] = ya[c][i];
 
-   if (x.length <= 0)
-      return 0;
+   if (i1 == i2)
+      return;
 
-   var miny = maxy = y[0];
+   var miny = y[0];
+   var maxy = y[0];
    var mean = 0;
-   for (i = 0; i < x.length; i++) {
+   for (i = i1; i < i2; i++) {
       if (y[i] > maxy)
          maxy = y[i];
       if (y[i] < miny)
          miny = y[i];
       mean += y[i];
    }
-   if (x.length < 5 || maxy - miny < 0.01)
-      return undefined;
+   if (i2 - i1 < 5 || maxy - miny < 0.01)
+      return;
 
-   mean = mean / x.length;
-   for (i = 0; i < x.length; i++)
+   mean = mean / (i2 - i1);
+   for (i = i1; i < i2; i++)
       y[i] -= mean;
 
    var xing = [];
 
    /* search and store zero crossings wiht noise rejection */
-   for (i = 5; i < x.length - 5; i++) {
+   for (i = i1 + 5; i < i2 - 5; i++) {
       if (y[i] > 0 && y[i + 3] > 0 && y[i - 1] <= 0 && y[i - 4] <= 0)
          xing.push(i);
       if (y[i] < 0 && y[i + 3] < 0 && y[i - 1] >= 0 && y[i - 4] >= 0)
@@ -395,47 +429,47 @@ function measPeriod(xa, ya, ctx) {
 
    /* search zero crossing close to center */
    var min = 1;
-   var mid = x[x.length / 2];
-   var i1;
+   var mid = x[(i2 + i1) / 2];
+   var ia;
    for (i = 0; i < xing.length; i++) {
       if (mid - x[xing[i]] < min && x[xing[i]] < mid) {
          min = mid - x[xing[i]];
-         i1 = i;
+         ia = i;
       }
    }
    /* no edge on left half found, take first on right */
-   if (i1 == undefined && xing.length > 0) {
-      i1 = 0;
+   if (ia == undefined && xing.length > 0) {
+      ia = 0;
    }
-   if (i1 == undefined)
-      return undefined;
+   if (ia == undefined)
+      return;
 
-   i = xing[i1];
+   i = xing[ia];
    var pos_edge = y[i] > 0;
 
    var t1 = (x[i - 1] * y[i] - x[i] * y[i - 1]) / (y[i] - y[i - 1]);
 
    /* search next zero crossing */
-   var i2;
-   for (i = i1 + 1; i < xing.length; i++) {
+   var ib;
+   for (i = ia + 1; i < xing.length; i++) {
       if (pos_edge && y[xing[i]] > 0) {
-         i2 = i;
+         ib = i;
          break;
       }
       if (!pos_edge && y[xing[i]] < 0) {
-         i2 = i;
+         ib = i;
          break;
       }
    }
 
-   if (i2 == undefined)
-      return undefined;
+   if (ib == undefined)
+      return;
 
-   i = xing[i2];
+   i = xing[ib];
    var t2 = (x[i - 1] * y[i] - x[i] * y[i - 1]) / (y[i] - y[i - 1]);
 
-   if (ctx != undefined) {
-      var ym = OSC.voltToY(mean, 0);
+   if (ctx != undefined && OSC.chOn[c]) {
+      var ym = OSC.voltToY(mean, c);
       var x1 = OSC.timeToX(t1);
       var x2 = OSC.timeToX(t2);
 
@@ -465,3 +499,53 @@ function measPeriod(xa, ya, ctx) {
    return (t2 - t1) * 1E9;
 }
 
+function measChnDelay(x, y, i1, i2, ctx) {
+   var w1   = this.param[0].value;
+   var c1   = this.param[1].value;
+   var thr1 = this.param[2].value / 1000;
+   var w2   = this.param[3].value;
+   var c2   = this.param[4].value;
+   var thr2 = this.param[5].value / 1000;
+
+   for (var i = i1; i < i2; i++)
+      if (y[c1][i] <= thr1 && y[c1][i + 1] > thr1)
+         break;
+
+   if (i == i2)
+      return;
+
+   if (x[c1][i + 1] == x[c1][i])
+      return;
+
+   var t1 = x[c1][i] + (thr1 - y[c1][i]) * (x[c1][i + 1] - x[c1][i]) / (y[c1][i + 1] - y[c1][i]);
+
+   for (i = i1; i < i2; i++)
+      if (y[c2][i] <= thr2 && y[c2][i + 1] > thr2)
+         break;
+
+   if (i == i2)
+      return;
+
+   if (x[c2][i + 1] == x[c2][i])
+      return;
+
+   var t2 = x[c2][i] + (thr2 - y[c2][i]) * (x[c2][i + 1] - x[c2][i]) / (y[c2][i + 1] - y[c2][i]);
+
+   if (ctx != undefined && OSC.chOn[c1] && OSC.chOn[c2]) {
+
+      var x1 = OSC.timeToX(t1);
+      var y1 = OSC.voltToY(thr1, c1);
+
+      var x2 = OSC.timeToX(t2);
+      var y2 = OSC.voltToY(thr2, c2);
+
+      ctx.drawLine(x1 - 10, y1, x1 + 10, y1);
+      ctx.drawLine(x1, y1, x1, (y1 + y2) / 2);
+      ctx.drawLine(x1, (y1 + y2) / 2, x2, (y1 + y2) / 2);
+      ctx.drawLine(x2, (y1 + y2) / 2, x2, y2);
+      ctx.drawLine(x2 - 10, y2, x2 + 10, y2);
+   }
+
+
+   return (t1 - t2) * 1E9;
+}

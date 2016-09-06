@@ -264,33 +264,6 @@ Controls.prototype.init = function () // scan DOM
 
 };
 
-Controls.prototype.roundedRect = function (ctx, x, y, w, h, r) {
-   // correct for line width
-   x += ctx.lineWidth / 2;
-   y += ctx.lineWidth / 2;
-   w -= ctx.lineWidth;
-   h -= ctx.lineWidth;
-
-   ctx.beginPath();
-
-   // draw top and top right corner
-   ctx.moveTo(x + r, y);
-   ctx.arcTo(x + w, y, x + w, y + r, r);
-
-   // draw right side and bottom right corner
-   ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
-
-   // draw bottom and bottom left corner
-   ctx.arcTo(x, y + h, x, y + h - r, r);
-
-   // draw left and top left corner
-   ctx.arcTo(x, y, x + r, y, r);
-
-   ctx.fill();
-   ctx.stroke();
-};
-
-
 Controls.prototype.ctrlVSliderDraw = function (b) {
    if (b == undefined)
       b = this;
@@ -430,7 +403,10 @@ function dlgShow(dlg) {
 
    d.style.display = "block";
    d.style.left = document.documentElement.clientWidth / 2 - d.offsetWidth / 2 + "px";
-   d.style.top = document.documentElement.clientHeight / 2 - d.offsetHeight / 2 + "px";
+   if (document.documentElement.clientHeight / 2 - d.offsetHeight / 2 < 0)
+      d.style.top = "0px";
+   else
+      d.style.top = document.documentElement.clientHeight / 2 - d.offsetHeight / 2 + "px";
 
    d.dlgMouseDown = function (e) {
       if ((e.target == this || e.target.parentNode == this) &&
@@ -452,7 +428,7 @@ function dlgShow(dlg) {
       }
    };
 
-   d.dlgMouseUp = function (e) {
+   d.dlgMouseUp = function () {
       this.Ax = 0;
       this.Ay = 0;
    };

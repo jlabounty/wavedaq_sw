@@ -204,7 +204,10 @@
       <div class="dlgPanel">
          <div style="font-size:16pt">WaveDAQ Oscilloscope</div>
          <div id="build" style="font-size:12pt"></div>
-         <img style="position:absolute;right:30px;" src="favicon.png">
+         <hr />
+         <div>Events per second: <span id="EPS">N/A</span></div>
+         <div>Frames per second: <span id="FPS">N/A</span></div>
+         <hr />
          <div style="font-size:8pt">Stefan Ritt</div>
          <div style="font-size:8pt">Paul Scherrer Institute</div>
          <button class="wideButton" style="background-color:#F8F8F8" type="button" onClick="dlgHide('dlgAbout')">Close</button>
@@ -218,9 +221,11 @@
 
       <div class="dlgPanel" style="text-align: left;padding:10px">
          <div class="vMiddleElement">
-            <div>
-               <input type="checkbox" id="dispHisto" onclick="">&nbsp;Display Histograms&nbsp;&nbsp;
-               Accumulate<select class="measSelect" onchange="">
+            <div style="text-align:center">
+               <input type="checkbox" id="dispHisto" onclick="dispHisto(this)">&nbsp;Display Histograms
+            </div>
+            <div style="text-align:center">
+               Accumulate<select class="measSelect" onchange="setNStat(this.value)">
                   <option value="10">10</option>
                   <option value="50">50</option>
                   <option value="100">100</option>
@@ -233,6 +238,10 @@
                   <option value="1000000">1000000</option>
                </select>measurements
             </div>
+            <div style="text-align:center">
+               <button style="background-color:#F8F8F8;margin:3px;padding:3px" type="button" onClick="clearStat()">Clear statistics</button>
+            </div>
+            <hr />
             <div id="measList">
                <!-- will be filled dynamically -->
                <div id="measAdd">

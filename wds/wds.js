@@ -183,7 +183,7 @@ function setGl(e) {
       if (req.readyState == 4 && req.status == 204) {
          loadGl();
       }
-   }
+   };
 
    if (e.type == "checkbox") {
       req.open("PUT", "gl/" + e.name, true);
@@ -241,7 +241,7 @@ function loadBuild() {
    var req = new XMLHttpRequest();
    req.onreadystatechange = function () {
       if (req.readyState == 4 && req.status == 200) {
-         build = JSON.parse(req.responseText);
+         var build = JSON.parse(req.responseText);
          var e = document.getElementById("build");
          e.innerHTML = "Built " + build.build;
       }
@@ -256,6 +256,8 @@ function loadWF() {
       window.setTimeout(loadWF, 10);
       return;
    }
+
+   var i, c, chn;
 
    if (false) { // set true to simulate waveforms
       // create 16 empty waveforms
@@ -278,9 +280,17 @@ function loadWF() {
    }
 
    // build mask with active channels
-   for (var chn = 0, c = 0; c < 16; c++)
+   for (chn = 0, c = 0; c < 16; c++)
       if (OSC.chOn[c])
          chn |= (1 << c);
+
+   for (i = 0; i < OSC.measList.childNodes.length; i++)
+      if (OSC.measList.childNodes[i].measurement) {
+         for (var p = 0; p < OSC.measList.childNodes[i].measurement.param.length; p++) {
+            if (OSC.measList.childNodes[i].measurement.param[p].type == "CH")
+               chn |= (1 << OSC.measList.childNodes[i].measurement.param[p].value);
+         }
+      }
 
    if (chn == 0 && OSC.running) {
       window.setTimeout(loadWF, 10); // schedule next waveform read
@@ -309,7 +319,7 @@ function receiveWF() {
       var intArray = new Uint32Array(OSC.req.response);
       var floatArray = new Float32Array(OSC.req.response);
 
-      for (var i = 0; i < intArray.length;) {
+      for (i = 0; i < intArray.length;) {
          var responseType = intArray[i];
 
          if (responseType == 0) {        // idle message
@@ -321,15 +331,24 @@ function receiveWF() {
             var f = intArray[i++];
             var c = intArray[i++];
             var n = intArray[i++];
-            for (var j = 0; j < n; j++)
-               wf.T[c][j] = floatArray[i++];
+            OSC.i1 = 0;
+            OSC.i2 = 1023;
+            for (var j = 0; j < n; j++) {
+               var t = floatArray[i++];
+               wf.T[c][j] = t;
+               var xt = OSC.timeToX(t);
+               if (OSC.i1 == 0 && xt >= OSC.x1)
+                  OSC.i1 = j;
+               if (xt <=  OSC.x2)
+                  OSC.i2 = j;
+            }
 
             // check for progress bar
             if (progressInd > 0) {
                progressInd = 0;
                var e = document.getElementById("progressIndVcalib");
                e.style.width = "0";
-               var e = document.getElementById("progressIndTcalib");
+               e = document.getElementById("progressIndTcalib");
                e.style.width = "0";
 
                document.getElementById("wdSelect").selectedIndex = progressOldBoard;
@@ -346,10 +365,10 @@ function receiveWF() {
             i++;
             OSC.idle = false;
             OSC.wd = intArray[i++];
-            var f = intArray[i++];
-            var c = intArray[i++];
-            var n = intArray[i++];
-            for (var j = 0; j < n; j++)
+            f = intArray[i++];
+            c = intArray[i++];
+            n = intArray[i++];
+            for (j = 0; j < n; j++)
                wf.U[c][j] = floatArray[i++];
             OSC.demo = (OSC.wd == 0xFF);
 
@@ -357,7 +376,7 @@ function receiveWF() {
             var b = intArray[1];
             progressInd = floatArray[2];
 
-            var e = document.getElementById("progressIndVcalib");
+            e = document.getElementById("progressIndVcalib");
             e.style.width = (progressInd * 270) + "px";
 
             document.getElementById("wdSelect").selectedIndex = b;
@@ -374,7 +393,7 @@ function receiveWF() {
 
             progressInd = floatArray[i++];
 
-            var e = document.getElementById("progressIndTcalib");
+            e = document.getElementById("progressIndTcalib");
             e.style.width = (progressInd * 270) + "px";
 
             document.getElementById("wdSelect").selectedIndex = OSC.wd;
@@ -382,9 +401,9 @@ function receiveWF() {
             document.getElementById("btnTCalib").disabled = true;
 
             while (i < intArray.length) {
-               var c = intArray[i++]
-               var n = intArray[i++];
-               for (var j = 0; j < n; j++)
+               c = intArray[i++];
+               n = intArray[i++];
+               for (j = 0; j < n; j++)
                   wf.T[c][j] = floatArray[i++];
             }
 
@@ -613,15 +632,6 @@ function btnScale(inc)
 function btnTScale(inc)
 // change horizontal scale, update label
 {
-   if (OSC.currentChn == -1) {
-      for (var i = 0; i < 16; i++)
-         if (OSC.chOn[i])
-            break;
-      if (i == 16)
-         i = 0;
-   } else
-      i = OSC.currentChn;
-
    var index = OSC.wfTScaleIndex + inc;
    if (index < 0)
       index = 0;
@@ -638,12 +648,13 @@ function setTScale() {
 
    document.getElementById("tofsSlider").set(0.5);
    sldTOffset(0.5);
+   clearStat();
    OSC.calcScaleOffset();
    OSC.redraw();
 }
 
 function sldUOffset(value) {
-   for (i = 0; i < 16; i++) {
+   for (var i = 0; i < 16; i++) {
       if (OSC.currentChn != -1 && i != OSC.currentChn)
          continue;
       OSC.wfOffset[i] = value - 0.5;
@@ -660,6 +671,7 @@ function sldTLevel(value) {
    document.getElementById("inpTLevel").value = Math.round(value * 1000 - 500);
    var d = new Date();
    OSC.lastTriggerLevelChange = d.getTime();
+   clearStat();
 }
 
 function sldTDelay(value) {
@@ -669,6 +681,7 @@ function sldTDelay(value) {
    req.send(del);
 
    document.getElementById("inpTDelay").value = del;
+   clearStat();
 }
 
 function sldDcv(value) {
@@ -729,6 +742,7 @@ function sldTOffset(value) {
    else
       OSC.wfTOffset = 0.9 * scWidth - wfWidth - (1 - value) * (0.8 * scWidth - wfWidth);
 
+   clearStat();
    OSC.calcScaleOffset();
    OSC.redraw();
 }
@@ -773,6 +787,9 @@ function measAdd() {
    var meas = document.createElement("div");
    l.insertBefore(meas, l.childNodes[l.childNodes.length - 2]);
 
+   if (l.childNodes.length > 6)
+      var prev = l.childNodes[l.childNodes.length - 4].measurement;
+
    // create measurement object and attach it to <div>
    meas.measurement = new Measurement();
 
@@ -795,14 +812,18 @@ function measAdd() {
       o = document.createElement("option");
       o.value = measList[i].name;
       o.innerHTML = measList[i].name;
+      if (prev) {
+         if (measList[i].name == prev.name)
+            o.selected = true;
+      }
       s.appendChild(o);
    }
    meas.appendChild(s);
 
-   measSelect(meas, s);
+   measSelect(meas, s, prev);
 }
 
-function measSelect(meas, sel) {
+function measSelect(meas, sel, prev) {
 
    // remove previous input fields
    for (var i = meas.childNodes.length - 1; i > 1; i--)
@@ -824,6 +845,10 @@ function measSelect(meas, sel) {
             var o = document.createElement("option");
             o.value = i;
             o.innerHTML = "WD00" + i;
+            if (prev) {
+               if (prev.param[pi].value == i)
+                  o.selected = true;
+            }
             input[pi].appendChild(o);
          }
          meas.appendChild(input[pi]);
@@ -838,6 +863,10 @@ function measSelect(meas, sel) {
             o = document.createElement("option");
             o.value = i;
             o.innerHTML = "CH" + i;
+            if (prev) {
+               if (prev.param[pi].value+1 == i)
+                  o.selected = true;
+            }
             input[pi].appendChild(o);
          }
          meas.appendChild(input[pi]);
@@ -871,3 +900,19 @@ function measParamChange(meas) {
    }
 }
 
+function setNStat(v) {
+   for (i = 0; i < OSC.measList.childNodes.length; i++)
+      if (OSC.measList.childNodes[i].measurement)
+         OSC.measList.childNodes[i].measurement.setNStat(v);
+}
+
+function clearStat() {
+   for (i = 0; i < OSC.measList.childNodes.length; i++)
+      if (OSC.measList.childNodes[i].measurement)
+         OSC.measList.childNodes[i].measurement.resetStat();
+}
+
+function dispHisto(c)
+{
+   OSC.disp.histo = c.checked;
+}
