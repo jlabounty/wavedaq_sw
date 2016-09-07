@@ -208,8 +208,14 @@ function setGl(e) {
 }
 
 function setDisp(e) {
-   if (e.name == "scaler")
+   if (e.name == "scaler") {
       OSC.disp.scaler = e.checked;
+      OSC.resizeCanvas();
+   }
+   if (e.name == "persist") {
+      OSC.disp.persistency = e.checked;
+      OSC.resizeCanvas();
+   }
 }
 
 function keyGl(event, input) {
@@ -575,6 +581,7 @@ function btnChn(c)
          cb.style.backgroundColor = "#E0E0E0";
    }
 
+   OSC.clearPersistency();
    OSC.redraw();
 }
 
@@ -596,6 +603,7 @@ function btnOn()
    }
    bt.innerHTML = bt.innerHTML == "On" ? "Off" : "On";
 
+   OSC.clearPersistency();
    OSC.redraw();
 }
 
@@ -625,6 +633,7 @@ function btnScale(inc)
       OSC.wfScale[i] = OSC.UScaleTable[OSC.wfScaleIndex[i]][0];
       document.getElementById("UScale").innerHTML = OSC.UScaleTable[OSC.wfScaleIndex[i]][1];
    }
+   OSC.clearPersistency();
    OSC.calcScaleOffset();
    OSC.redraw();
 }
@@ -660,6 +669,7 @@ function sldUOffset(value) {
       OSC.wfOffset[i] = value - 0.5;
    }
    OSC.calcScaleOffset();
+   OSC.clearPersistency();
    OSC.redraw();
 }
 
@@ -703,6 +713,7 @@ function btnOfsZero() {
       if (OSC.chOn[i])
          OSC.wfOffset[i] = 0;
    }
+   OSC.clearPersistency();
    OSC.calcScaleOffset();
    OSC.redraw();
 
@@ -730,6 +741,7 @@ function btnOfsDist() {
          o -= d;
       }
    }
+   OSC.clearPersistency();
    OSC.calcScaleOffset();
    OSC.redraw();
 }
@@ -743,6 +755,7 @@ function sldTOffset(value) {
       OSC.wfTOffset = 0.9 * scWidth - wfWidth - (1 - value) * (0.8 * scWidth - wfWidth);
 
    clearStat();
+   OSC.clearPersistency();
    OSC.calcScaleOffset();
    OSC.redraw();
 }
@@ -915,4 +928,5 @@ function clearStat() {
 function dispHisto(c)
 {
    OSC.disp.histo = c.checked;
+   OSC.resizeCanvas();
 }

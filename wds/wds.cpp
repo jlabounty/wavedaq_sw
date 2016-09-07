@@ -362,6 +362,20 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                wfT[c][i] = (float)(i*1E-9 / gl->actual_sampling_frequency);
                wfU[c][i] = (float)(sin((wfT[c][i]+c*1E-9)*gl->actual_sampling_frequency / 1E-9 / 50) / 4 + ((float)random()/RAND_MAX-0.5) / 300);
             }
+            // add spikes
+            for (int i=0 ; i<1024 ; i++) {
+               if ((float)random()/RAND_MAX < 0.00005) {
+                  float s = ((float)random()/RAND_MAX-0.5) / 5;
+                  int j = i-5;
+                  float f;
+                  for (f=0 ; f<1 ; f += 0.2,j++)
+                     if (j >= 0 && j< 1024)
+                        wfU[c][j] += s * f;
+                  for (f=1 ; f>0 ; f -= 0.2,j++)
+                     if (j >= 0 && j< 1024)
+                        wfU[c][j] += s * f;
+               }
+            }
          }
       } else {
 

@@ -93,6 +93,7 @@ function Oscilloscope(div) { // constructor
       histo: false,
       histoDivider: 0.5
    };
+   this.newImage = true;
 
    // default values
    for (var i = 0; i < 16; i++) {
@@ -158,7 +159,12 @@ Oscilloscope.prototype.calcFPS = function () {
 Oscilloscope.prototype.resize = function (width, height) {
    this.canvas.width = width;
    this.canvas.height = height > width ? width : height;
+   this.resizeCanvas();
    this.redraw();
+};
+
+Oscilloscope.prototype.clearPersistency = function () {
+   this.newImage = true;
 };
 
 Oscilloscope.prototype.redraw = function () {
@@ -189,6 +195,7 @@ Oscilloscope.prototype.mouseEvent = function (e) {
             this.disp.histoDivider = 0.1;
          if (this.disp.histoDivider > 0.9)
             this.disp.histoDivider = 0.9;
+         OSC.resizeCanvas();
       }
 
       if (e.type == "mouseup")
@@ -252,11 +259,7 @@ Oscilloscope.prototype.mouseEvent = function (e) {
    }
 };
 
-Oscilloscope.prototype.draw = function () {
-   this.nFrames++;
-
-   var ctx = this.canvas.getContext("2d");
-
+Oscilloscope.prototype.resizeCanvas = function () {
    this.width = this.canvas.width;
    this.height = this.canvas.height;
 
@@ -284,12 +287,36 @@ Oscilloscope.prototype.draw = function () {
    this.hiWidth = this.x2 - this.x1;
    this.hiHeight = this.hiy2 - this.hiy1;
 
-   this.drawGrid(ctx);
+   this.calcScaleOffset();
+   this.clearPersistency();
+};
 
+Oscilloscope.prototype.draw = function () {
+   this.nFrames++;
+
+   var ctx = this.canvas.getContext("2d");
+
+   // create new waveform image if canvas has been resized
+   if (this.newImage) {
+      this.newImage = false;
+      this.wfImg = ctx.createImageData(this.x2 - this.x1, this.y2 - this.y1);
+      for (var i = 0; i < this.wfImg.data.length; i += 4) {
+         this.wfImg.data[i] = 0;
+         this.wfImg.data[i + 1] = 0;
+         this.wfImg.data[i + 2] = 0;
+         this.wfImg.data[i + 3] = 255;
+      }
+      this.wfImgOccupied = new Uint8ClampedArray(this.wfImg.data.length / 4);
+   }
+
+   this.blackCanvas(ctx);
    if (this.wf.type == 2) {
       this.drawDT(ctx);
+      this.drawGrid(ctx);
    } else {
       this.drawWF(ctx);
+      this.drawGrid(ctx);
+      this.drawMarker(ctx);
       this.drawMeasurements(ctx);
       this.printFPS(ctx);
       this.printTemperature(ctx);
@@ -399,15 +426,15 @@ Oscilloscope.prototype.printScalers = function (ctx) {
    }
 };
 
-Oscilloscope.prototype.drawGrid = function (ctx) {
+Oscilloscope.prototype.blackCanvas = function (ctx) {
    ctx.fillStyle = "black";
    ctx.fillRect(0, 0, this.width, this.height);
+};
 
+Oscilloscope.prototype.drawGrid = function (ctx) {
    ctx.strokeStyle = "#808080";
    ctx.lineWidth = 2;
    ctx.strokeRect(this.x1 - 1, this.y1 - 1, this.w + 2, this.h + 2);
-
-   this.calcScaleOffset();
 
    ctx.beginPath();
    ctx.moveTo(this.x1, this.y1);
@@ -521,38 +548,124 @@ Oscilloscope.prototype.drawWF = function (ctx) {
    if (OSC.GL == undefined)
       return;
 
-   ctx.save();
-   ctx.rect(this.x1, this.y1, this.w, this.h);
-   ctx.clip();
-
-   var spacing = this.wfTS / (OSC.GL.actual_sampling_frequency * 1E9);
-
    // Waveforms
-   for (var c = 0; c < 16; c++) {
-      if (this.chOn[c]) {
-         ctx.beginPath();
-         ctx.fillStyle = this.chnColors[c];
-         ctx.strokeStyle = this.chnColors[c];
-         for (var i = 0; i < 1024; i++) {
-            var x = this.wf.T[c][i] * this.wfTS + this.wfTO;
-            var y = this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c];
-            if (i == 0)
-               ctx.moveTo(x, y);
-            else
-               ctx.lineTo(x, y);
-            if (spacing > 5)
-               ctx.fillRect(x - 2, y - 2, 5, 5);
+   if (!this.disp.persistency) {
+      ctx.save();
+      ctx.rect(this.x1, this.y1, this.w, this.h);
+      ctx.clip();
+      var spacing = this.wfTS / (OSC.GL.actual_sampling_frequency * 1E9);
+      for (var c = 0; c < 16; c++) {
+         if (this.chOn[c]) {
+            ctx.beginPath();
+            ctx.fillStyle = this.chnColors[c];
+            ctx.strokeStyle = this.chnColors[c];
+            for (var i = 0; i < 1024; i++) {
+               var x = this.wf.T[c][i] * this.wfTS + this.wfTO;
+               var y = this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c];
+               if (i == 0)
+                  ctx.moveTo(x, y);
+               else
+                  ctx.lineTo(x, y);
+               if (spacing > 5)
+                  ctx.fillRect(x - 2, y - 2, 5, 5);
+            }
+            ctx.stroke();
          }
-         ctx.stroke();
       }
+      ctx.restore(); // remove clipping
+
+   } else {
+
+      // reduce alpha
+      delta = 5;
+      for (i = 0; i < this.wfImgOccupied.length; i++) {
+         if (this.wfImgOccupied[i]) {
+            var i1 = i * 4;
+            if (this.wfImg.data[i1] > 0) {
+               if (this.wfImg.data[i1] >= delta)
+                  this.wfImg.data[i1] -= delta;
+               else
+                  this.wfImg.data[i1] = 0;
+            }
+            if (this.wfImg.data[i1 + 1] > 0) {
+               if (this.wfImg.data[i1 + 1] >= delta)
+                  this.wfImg.data[i1 + 1] -= delta;
+               else
+                  this.wfImg.data[i1 + 1] = 0;
+            }
+            if (this.wfImg.data[i1 + 2] > 0) {
+               if (this.wfImg.data[i1 + 2] >= delta)
+                  this.wfImg.data[i1 + 2] -= delta;
+               else
+                  this.wfImg.data[i1 + 2] = 0;
+            }
+            if (this.wfImg.data[i1] == 0 &&
+               this.wfImg.data[i1 + 1] == 0 &&
+               this.wfImg.data[i1 + 2] == 0)
+               this.wfImgOccupied[i] = 0;
+         }
+      }
+
+      for (c = 0; c < 16; c++) {
+         if (this.chOn[c]) {
+            var col = parseInt(this.chnColors[c].substr(1, 6), 16);
+            var r = (col >> 16) & 0xFF;
+            var g = (col >> 8) & 0xFF;
+            var b = col & 0xFF;
+            var x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+
+            for (i = 0; i < 1024; i++) {
+               x1 = Math.floor(this.wf.T[c][i] * this.wfTS + this.wfTO);
+               y1 = Math.floor(this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c]);
+
+               if (i == 0) {
+                  x = x1;
+                  y = y1;
+                  if (x >= this.x1 && x < this.x2 &&
+                     y >= this.y1 && y < this.y2) {
+                     x -= this.x1;
+                     y -= this.y1;
+                     var i2 = y * this.wfImg.width + x;
+                     i1 = i2 * 4;
+                     this.wfImg.data[i1] = r;
+                     this.wfImg.data[i1 + 1] = g;
+                     this.wfImg.data[i1 + 2] = b;
+                     this.wfImgOccupied[i2] = 1;
+                  }
+               } else {
+                  var dx = x1 - x2;
+                  var dy = y1 - y2;
+                  var n = Math.max(Math.abs(dx), Math.abs(dy));
+                  for (var j = 0; j < n; j++) {
+                     x = Math.floor(x2 + j * dx / n);
+                     y = Math.floor(y2 + j * dy / n);
+                     if (x >= this.x1 && x < this.x2 &&
+                        y >= this.y1 && y < this.y2) {
+                        x -= this.x1;
+                        y -= this.y1;
+                        i2 = y * this.wfImg.width + x;
+                        i1 = i2 * 4;
+                        this.wfImg.data[i1] = r;
+                        this.wfImg.data[i1 + 1] = g;
+                        this.wfImg.data[i1 + 2] = b;
+                        this.wfImgOccupied[i2] = 1;
+                     }
+                  }
+               }
+               x2 = x1;
+               y2 = y1;
+            }
+         }
+      }
+      ctx.putImageData(this.wfImg, this.x1, this.y1);
    }
+};
 
-   ctx.restore(); // remove clipping
-
+Oscilloscope.prototype.drawMarker = function (ctx) {
    // Circular markers on left side
-   for (c = 15; c >= 0; c--) {
+   for (var c = 15; c >= 0; c--) {
       if (this.chOn[c]) {
-         y = this.wfUO[c];
+         var y = this.wfUO[c];
          ctx.fillStyle = this.chnColors[c];
          ctx.strokeStyle = "#E0E0E0";
          ctx.beginPath();
