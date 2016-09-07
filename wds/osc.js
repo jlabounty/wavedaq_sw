@@ -122,8 +122,13 @@ function Oscilloscope(div) { // constructor
       axisMax: 0,
       dragLeftHandle: false,
       dragRightHande: false,
-      dragX: 0
+      dragX: 0,
+      button: []
    };
+
+   this.histo.button[0] = document.getElementById("measClear");
+   this.histo.button[1] = document.getElementById("measZoomOut");
+   this.histo.button[2] = document.getElementById("measZoomFit");
 
    // mouse event handlers
    window.addEventListener("mousedown", this.mouseEvent.bind(this), true);
@@ -237,25 +242,6 @@ Oscilloscope.prototype.mouseEvent = function (e) {
          e.type == "mousedown") {
          this.histo.dragRightHandle = true;
       }
-
-      // zoom out
-      if (e.clientX > this.x2 - 90 && e.clientX < this.x2 - 10 &&
-         e.clientY > this.hiy1 + 10 && e.clientY < this.hiy1 + 40 &&
-         e.type == "mousedown") {
-         this.histo.autoAxis = false;
-         var d = 0.5 * (this.histo.axisMax - this.histo.axisMin);
-         this.histo.axisMin -= d;
-         this.histo.axisMax += d;
-      }
-
-      // auto zoom
-      if (e.clientX > this.x2 - 90 && e.clientX < this.x2 - 10 &&
-         e.clientY > this.hiy1 + 60 && e.clientY < this.hiy1 + 80 &&
-         e.type == "mousedown") {
-
-         this.histo.autoAxis = true;
-      }
-
    }
 };
 
@@ -326,6 +312,9 @@ Oscilloscope.prototype.draw = function () {
 
       if (this.disp.histo)
          this.drawHisto(ctx);
+      else
+         for (i = 0; i < OSC.histo.button.length; i++)
+            OSC.histo.button[i].style.display = "none";
    }
 };
 
@@ -361,7 +350,7 @@ Oscilloscope.prototype.printMeasurements = function (ctx) {
       ctx.font = '14px monospace';
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
-      ctx.fillText("    Value        Min       Max      Mean       Std         N", OSC.x1 + 250, 10);
+      ctx.fillText("    Value        Min       Max      Mean       Std         N", OSC.x1 + 250, OSC.y1 + 10);
 
       n = 0;
       for (i = 0; i < this.measList.childNodes.length; i++)
@@ -791,6 +780,10 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
    for (var idx = 0; idx < this.measList.childNodes.length; idx++) {
       m = this.measList.childNodes[idx].measurement;
       if (m) {
+         var histoSum = 0;
+         var histoSum2 = 0;
+         var histoN = 0;
+
          nMeas++;
          var nBins = Math.floor(1.5 * Math.sqrt(m.nMeasured));
          if (nBins > 1000)
@@ -808,8 +801,12 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
                oflow++;
             else if (bin < 0)
                uflow++;
-            else
+            else {
                histo[bin]++;
+               histoSum += m.statArray[i];
+               histoSum2 += m.statArray[i] * m.statArray[i];
+               histoN++;
+            }
          }
 
          var hmax = histo[0];
@@ -864,6 +861,25 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
             ctx.fillRect(this.x2 - 3 * (oflowBin + 1), y, 3, this.hiy2 - y);
             oflowBin++;
          }
+
+         // print statistics
+         var mean = histoSum / histoN;
+         var std = Math.sqrt(histoSum2 / histoN - histoSum * histoSum / histoN / histoN);
+
+         ctx.font = "14px monospace";
+
+         if (nMeas == 1) {
+            ctx.save();
+            ctx.fillStyle = "white";
+            ctx.fillText("      Mean       Std         N     UFlow     OFlow", this.x1, this.hiy1 + 10);
+            ctx.restore();
+         }
+         ctx.fillText(pad(mean, 10, 3) +
+            pad(std, 10, 4) +
+            pad(histoN, 10, 0) +
+            pad(uflow, 10, 0) +
+            pad(oflow, 10, 0),
+            this.x1, this.hiy1 + 10 + nMeas * 20);
       }
    }
 
@@ -920,48 +936,20 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
       ctx.drawLine(this.x2 - 10, this.hiy1 + this.hiHeight / 2 - 10, this.x2 - 10, this.hiy1 + this.hiHeight / 2 + 10);
    }
 
-   // zoom out
-   ctx.beginPath();
-   ctx.moveTo(this.x2 - 75, this.hiy1 + 10);
-   ctx.lineTo(this.x2 - 25, this.hiy1 + 10);
-   ctx.arcTo(this.x2 - 10, this.hiy1 + 10, this.x2 - 10, this.hiy1 + 25, 15);
-   ctx.arcTo(this.x2 - 10, this.hiy1 + 40, this.x2 - 25, this.hiy1 + 40, 15);
-   ctx.lineTo(this.x2 - 75, this.hiy1 + 40);
-   ctx.arcTo(this.x2 - 90, this.hiy1 + 40, this.x2 - 90, this.hiy1 + 25, 15);
-   ctx.arcTo(this.x2 - 90, this.hiy1 + 10, this.x2 - 75, this.hiy1 + 10, 15);
-   ctx.closePath();
-   ctx.globalAlpha = 0.4;
-   ctx.stroke();
-   ctx.fill();
-   ctx.globalAlpha = 1;
-   ctx.strokeStyle = "#808080";
-   ctx.drawLine(this.x2 - 60, this.hiy1 + 25, this.x2 - 40, this.hiy1 + 25);
-
-   // auto zoom
-   if (!this.histo.autoAxis) {
-      ctx.beginPath();
-      ctx.moveTo(this.x2 - 75, this.hiy1 + 50);
-      ctx.lineTo(this.x2 - 25, this.hiy1 + 50);
-      ctx.arcTo(this.x2 - 10, this.hiy1 + 50, this.x2 - 10, this.hiy1 + 65, 15);
-      ctx.arcTo(this.x2 - 10, this.hiy1 + 80, this.x2 - 25, this.hiy1 + 80, 15);
-      ctx.lineTo(this.x2 - 75, this.hiy1 + 80);
-      ctx.arcTo(this.x2 - 90, this.hiy1 + 80, this.x2 - 90, this.hiy1 + 65, 15);
-      ctx.arcTo(this.x2 - 90, this.hiy1 + 50, this.x2 - 75, this.hiy1 + 50, 15);
-      ctx.closePath();
-      ctx.globalAlpha = 0.4;
-      ctx.stroke();
-      ctx.fill();
-      ctx.globalAlpha = 1;
-      ctx.strokeStyle = "#808080";
-
-      ctx.drawLine(this.x2 - 75, this.hiy1 + 65, this.x2 - 25, this.hiy1 + 65);
-      ctx.drawLine(this.x2 - 75, this.hiy1 + 65, this.x2 - 65, this.hiy1 + 60);
-      ctx.drawLine(this.x2 - 75, this.hiy1 + 65, this.x2 - 65, this.hiy1 + 70);
-      ctx.drawLine(this.x2 - 25, this.hiy1 + 65, this.x2 - 35, this.hiy1 + 60);
-      ctx.drawLine(this.x2 - 25, this.hiy1 + 65, this.x2 - 35, this.hiy1 + 70);
-   }
-
    ctx.restore();
+
+   // move buttons to right place
+   for (i = 0; i < this.histo.button.length; i++) {
+      if (this.histo.button[i].id == "measZoomFit") {
+         if (this.histo.autoAxis)
+            this.histo.button[i].style.display = "none";
+         else
+            this.histo.button[i].style.display = "block";
+      } else
+         this.histo.button[i].style.display = "block";
+      this.histo.button[i].style.left = (this.x2 - 70) + "px";
+      this.histo.button[i].style.top = (this.hiy1 + 10 + 30 * i) + "px";
+   }
 };
 
 const LN10 = 2.302585094;

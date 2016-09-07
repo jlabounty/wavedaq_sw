@@ -161,7 +161,7 @@ Measurement.prototype.measure = function (x, y, i1, i2, update, ctx) {
    this.value = measList[this.index].f.call(this, x, y, i1, i2, ctx);
 
    // update statistics
-   if (update && this.value != undefined) {
+   if (update && this.value != undefined && !isNaN(this.value) ) {
       this.statArray[this.statIndex] = this.value;
       this.statIndex = (this.statIndex + 1) % this.nStat;
 
@@ -214,27 +214,31 @@ Measurement.prototype.print = function (index, ctx) {
    ctx.textBaseline = "top";
 
    var name = measList[this.index].name;
-   this.color = "white";
+   var nCh = 0;
    for (var i = 0; i < this.param.length; i++) {
       if (this.param[i].type == "WD")
          name += "-WD" + this.param[i].value;
       if (this.param[i].type == "CH") {
+         nCh++;
          name += "-CH" + this.param[i].value;
-         this.color = OSC.chnColors[this.param[i].value];
+         if (nCh == 1)
+            this.color = OSC.chnColors[this.param[i].value];
+         else
+            this.color = "#E0E0E0";
          ctx.fillStyle = this.color;
       }
    }
 
-   ctx.fillText(name, OSC.x1 + 20, 35 + index * 20);
+   ctx.fillText(name, OSC.x1 + 20, OSC.y1 + 10 + (index + 1) * 20);
 
    ctx.font = "14px monospace";
    ctx.fillText(this.getString() +
       pad(this.min, 10, 3) +
       pad(this.max, 10, 3) +
       pad(this.mean, 10, 3) +
-      pad(this.std, 10, 3) +
+      pad(this.std, 10, 4) +
       pad(this.nMeasured, 10, 0),
-      OSC.x1 + 250, 35 + index * 20);
+      OSC.x1 + 250, OSC.y1 + 10 + (index + 1) * 20);
 };
 
 Measurement.prototype.draw = function (x, y, i1, i2, ctx) {
@@ -258,6 +262,9 @@ function measMean(x, y, i1, i2, ctx) {
 
    if (ctx != undefined && OSC.chOn[c])
       ctx.drawLine(OSC.timeToX(x[c][i1]), OSC.voltToY(mean, c), OSC.timeToX(x[c][i2 - 1]), OSC.voltToY(mean, c));
+
+   if (!(mean < 100 && mean > -100))
+      console.log(mean);
 
    return mean * 1000;
 }
@@ -429,7 +436,7 @@ function measPeriod(xa, ya, i1, i2, ctx) {
 
    /* search zero crossing close to center */
    var min = 1;
-   var mid = x[(i2 + i1) / 2];
+   var mid = x[Math.floor((i2 + i1) / 2)];
    var ia;
    for (i = 0; i < xing.length; i++) {
       if (mid - x[xing[i]] < min && x[xing[i]] < mid) {
@@ -500,11 +507,11 @@ function measPeriod(xa, ya, i1, i2, ctx) {
 }
 
 function measChnDelay(x, y, i1, i2, ctx) {
-   var w1   = this.param[0].value;
-   var c1   = this.param[1].value;
+   var w1 = this.param[0].value;
+   var c1 = this.param[1].value;
    var thr1 = this.param[2].value / 1000;
-   var w2   = this.param[3].value;
-   var c2   = this.param[4].value;
+   var w2 = this.param[3].value;
+   var c2 = this.param[4].value;
    var thr2 = this.param[5].value / 1000;
 
    for (var i = i1; i < i2; i++)

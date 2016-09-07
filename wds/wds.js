@@ -854,10 +854,10 @@ function measSelect(meas, sel, prev) {
          input[pi].onchange = function () {
             measParamChange(meas);
          };
-         for (i = 0; i < 2; i++) {
+         for (i = 0; i < OSC.GL.board.length; i++) {
             var o = document.createElement("option");
             o.value = i;
-            o.innerHTML = "WD00" + i;
+            o.innerHTML = OSC.GL.board[i].name;
             if (prev) {
                if (prev.param[pi].value == i)
                   o.selected = true;
@@ -911,6 +911,17 @@ function measParamChange(meas) {
          meas.measurement.resetStat();
       }
    }
+}
+
+function measZoomOut() {
+   OSC.histo.autoAxis = false;
+   var d = 0.5 * (OSC.histo.axisMax - OSC.histo.axisMin);
+   OSC.histo.axisMin -= d;
+   OSC.histo.axisMax += d;
+}
+
+function measZoomFit() {
+   OSC.histo.autoAxis = true;
 }
 
 function setNStat(v) {

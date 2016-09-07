@@ -153,6 +153,16 @@ input[type=text] {
    width: 83px;
 }
 
+.floatButton {
+   background-color:#F8F8F8;
+   margin: 3px;
+   position: absolute;
+   top: 100px;
+   left: 100px;
+   width: 50px;
+   display: none;
+}
+
 .executeButton {
    margin: auto;
    margin-top: 10px;
