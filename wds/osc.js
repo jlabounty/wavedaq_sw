@@ -363,7 +363,7 @@ Oscilloscope.prototype.printMeasurements = function (ctx) {
 Oscilloscope.prototype.drawMeasurements = function (ctx) {
    for (var i = 0; i < this.measList.childNodes.length; i++)
       if (this.measList.childNodes[i].measurement)
-         this.measList.childNodes[i].measurement.draw(this.wf.T, this.wf.U, this.i1, this.i2, ctx);
+         this.measList.childNodes[i].measurement.draw(ctx, this.wf.T, this.wf.U, this.i1, this.i2);
 };
 
 Oscilloscope.prototype.printStatus = function (ctx) {
