@@ -60,7 +60,8 @@ function Oscilloscope(div) { // constructor
    this.running = true;
    this.currentChn = 0;
    this.idle = true;
-   this.demo = false;
+   this.demoMode = demoMode;
+   this.remoteDemo = false;
 
    this.nFrames = 0;
    this.nFPS = 0;
@@ -91,7 +92,9 @@ function Oscilloscope(div) { // constructor
    this.disp = {
       scaler: false,
       histo: false,
-      histoDivider: 0.5
+      histoDivider: 0.5,
+      persistency: 0,
+      persDeltaInt: 0
    };
    this.newImage = true;
 
@@ -331,9 +334,7 @@ Oscilloscope.prototype.printTemperature = function (ctx) {
    ctx.textBaseline = "top";
 
    if (OSC.GL != undefined) {
-      var board = document.getElementById("wdSelect").selectedIndex;
-      var t = OSC.GL.board[board].temperature;
-
+      var t = OSC.GL.board[OSC.board].temperature;
       ctx.fillText("T = " + t.toFixed(1) + " C", this.x1 + 12, this.y2 - 24);
    }
 };
@@ -367,8 +368,7 @@ Oscilloscope.prototype.drawMeasurements = function (ctx) {
 
 Oscilloscope.prototype.printStatus = function (ctx) {
    if (OSC.GL != undefined) {
-      var board = document.getElementById("wdSelect").selectedIndex;
-      var locked = OSC.GL.board[board].pll_locked;
+      var locked = OSC.GL.board[OSC.board].pll_locked;
 
       if (locked == 0) {
          ctx.fillStyle = 'red';
@@ -383,8 +383,7 @@ Oscilloscope.prototype.printStatus = function (ctx) {
 
 Oscilloscope.prototype.printScalers = function (ctx) {
    if (OSC.GL != undefined && OSC.disp.scaler) {
-      var board = document.getElementById("wdSelect").selectedIndex;
-      var scaler = OSC.GL.board[board].scaler;
+      var scaler = OSC.GL.board[OSC.board].scaler;
 
       for (var c = 0; c < 16; c++) {
          ctx.fillStyle = this.chnColors[c];
@@ -506,10 +505,10 @@ Oscilloscope.prototype.drawGrid = function (ctx) {
    ctx.textBaseline = "middle";
    ctx.font = '24px sans-serif';
 
-   if (this.idle)
-      ctx.fillText("Trig ?", this.x2 - 10, this.y1 + 20);
-   else if (this.demo)
+   if (this.remoteDemo || this.demoMode)
       ctx.fillText("DEMO", this.x2 - 10, this.y1 + 20);
+   else if (this.idle)
+      ctx.fillText("Trig ?", this.x2 - 10, this.y1 + 20);
 
    ctx.beginPath(); // ?? needed to avoid problems later...
    ctx.stroke();
@@ -538,7 +537,7 @@ Oscilloscope.prototype.drawWF = function (ctx) {
       return;
 
    // Waveforms
-   if (!this.disp.persistency) {
+   if (this.disp.persistency == 0) {
       ctx.save();
       ctx.rect(this.x1, this.y1, this.w, this.h);
       ctx.clip();
@@ -566,34 +565,43 @@ Oscilloscope.prototype.drawWF = function (ctx) {
    } else {
 
       // reduce alpha
-      delta = 5;
-      for (i = 0; i < this.wfImgOccupied.length; i++) {
-         if (this.wfImgOccupied[i]) {
-            var i1 = i * 4;
-            if (this.wfImg.data[i1] > 0) {
-               if (this.wfImg.data[i1] >= delta)
-                  this.wfImg.data[i1] -= delta;
-               else
-                  this.wfImg.data[i1] = 0;
+      if (!isNaN(this.disp.persistency)) {
+         var delta = 200 / this.disp.persistency / OSC.nEPS;
+         this.disp.persDeltaInt += delta;
+         if (this.disp.persDeltaInt >= 1) {
+            delta = Math.floor(this.disp.persDeltaInt);
+            this.disp.persDeltaInt -= delta;
+
+            for (i = 0; i < this.wfImgOccupied.length; i++) {
+               if (this.wfImgOccupied[i]) {
+                  var i1 = i * 4;
+                  if (this.wfImg.data[i1] > 0) {
+                     if (this.wfImg.data[i1] >= delta)
+                        this.wfImg.data[i1] -= delta;
+                     else
+                        this.wfImg.data[i1] = 0;
+                  }
+                  if (this.wfImg.data[i1 + 1] > 0) {
+                     if (this.wfImg.data[i1 + 1] >= delta)
+                        this.wfImg.data[i1 + 1] -= delta;
+                     else
+                        this.wfImg.data[i1 + 1] = 0;
+                  }
+                  if (this.wfImg.data[i1 + 2] > 0) {
+                     if (this.wfImg.data[i1 + 2] >= delta)
+                        this.wfImg.data[i1 + 2] -= delta;
+                     else
+                        this.wfImg.data[i1 + 2] = 0;
+                  }
+                  if (this.wfImg.data[i1] == 0 &&
+                     this.wfImg.data[i1 + 1] == 0 &&
+                     this.wfImg.data[i1 + 2] == 0)
+                     this.wfImgOccupied[i] = 0;
+               }
             }
-            if (this.wfImg.data[i1 + 1] > 0) {
-               if (this.wfImg.data[i1 + 1] >= delta)
-                  this.wfImg.data[i1 + 1] -= delta;
-               else
-                  this.wfImg.data[i1 + 1] = 0;
-            }
-            if (this.wfImg.data[i1 + 2] > 0) {
-               if (this.wfImg.data[i1 + 2] >= delta)
-                  this.wfImg.data[i1 + 2] -= delta;
-               else
-                  this.wfImg.data[i1 + 2] = 0;
-            }
-            if (this.wfImg.data[i1] == 0 &&
-               this.wfImg.data[i1 + 1] == 0 &&
-               this.wfImg.data[i1 + 2] == 0)
-               this.wfImgOccupied[i] = 0;
          }
       }
+
 
       for (c = 0; c < 16; c++) {
          if (this.chOn[c]) {

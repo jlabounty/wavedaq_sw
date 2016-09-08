@@ -212,7 +212,7 @@ input[type=text] {
    border-radius: 15px;
 }
 
-.rangeSelect {
+.select {
    margin: 5px;
    background: white;
    font-size: 12px;

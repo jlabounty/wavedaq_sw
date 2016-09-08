@@ -134,7 +134,7 @@
 
             <div class="vMiddleBox vSpacer5">
                <div class="vMiddleElement">Input range:&nbsp;</div>
-               <select id="rangeSelect" class="rangeSelect" onchange="setRange(this)">
+               <select id="rangeSelect" class="select" onchange="setRange(this)">
                   <option value="-0.45">-0.95 V ... +0.05 V</option>
                   <option value="0">-0.5 V ... +0.5 V</option>
                   <option value="0.45">-0.05 V ... +0.95 V</option>
@@ -235,12 +235,21 @@
 
          <div class="groupTitle">Display</div>
          <div class="group">
+            <div class="vMiddleBox vSpacer5">
+               <div class="vMiddleElement">Waveform persistency:&nbsp;</div>
+               <select id="persSelect" class="select" onchange="setPers(this)">
+                  <option value="0">None</option>
+                  <option value="0.5">0.5 s</option>
+                  <option value="1">1 s</option>
+                  <option value="2">2 s</option>
+                  <option value="5">5 s</option>
+                  <option value="10">10 s</option>
+                  <option value="60">60 s</option>
+                  <option value="inf">Infnite</option>
+               </select>
+            </div>
+
             <table border="0">
-               <tr>
-                  <td><input type="checkbox" id="persist" title="Show persistency" name="persist"
-                             onClick="setDisp(this)"></td>
-                  <td>Waveform persistency</td>
-               </tr>
                <tr>
                   <td><input type="checkbox" id="scaler" title="Show hardware scalers" name="scaler"
                              onClick="setDisp(this)"></td>
