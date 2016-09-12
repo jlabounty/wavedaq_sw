@@ -515,7 +515,7 @@ int main(int argc, char *argv[])
 
       else if (argv[i][0] == '-' && argv[i][1] == 'w') {
          
-         if (isdigit(argv[i+1][0])) {
+         if (isdigit(argv[i+1][0]) && !strchr(argv[i+1], '.')) {
             if (strchr(argv[i+1], '-')) {
                i1 = atoi(argv[i+1]);
                p = strchr(argv[i+1], '-') + 1;
