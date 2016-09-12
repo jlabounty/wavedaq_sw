@@ -144,7 +144,8 @@ size_t strlcat(char *dst, const char *src, size_t size)
 
 int wd_send(GLOBALS *gl, int b, int timeout_ms, const char *str, char *result, int *size)
 {
-   size_t n, i;
+   size_t n;
+   int    i;
    fd_set readfds;
    struct timeval timeout;
    int    status;
@@ -161,8 +162,12 @@ int wd_send(GLOBALS *gl, int b, int timeout_ms, const char *str, char *result, i
    n = 0;
 
    // assemble prompt
-   strlcpy(prompt, gl->board[b].name, sizeof(prompt));
-   strlcat(prompt, " > ", sizeof(prompt));
+   if (strchr(gl->board[b].name, '.'))
+      strlcpy(prompt, " > ", sizeof(prompt));
+   else {
+      strlcpy(prompt, gl->board[b].name, sizeof(prompt));
+      strlcat(prompt, " > ", sizeof(prompt));
+   }
    
    // retry max five times
    for (int retry=0 ; retry < 5 ; retry++) {
