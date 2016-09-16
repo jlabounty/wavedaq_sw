@@ -46,8 +46,11 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       
       value[0] = 0;
       if (hm->body.p) {
-         strlcpy(value, hm->body.p, sizeof(value));
-         value[hm->body.len] = 0;
+         if (hm->body.len < sizeof(value)) {
+            strncpy(value, hm->body.p, hm->body.len);
+            value[hm->body.len] = 0;
+         } else
+            value[0] = 0;
       }
 
       if (mg_vcmp(&hm->uri, "/gl/pzc") == 0) {
