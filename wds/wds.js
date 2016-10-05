@@ -27,7 +27,13 @@ function init()
    // create Scope object
    OSC = new Oscilloscope(document.getElementById("scope"));
 
-   // hid config panel
+   // load globals including board list from server
+   loadGl(true);
+   
+   // load build and put into about box
+   loadBuild();
+
+   // hide config panel
    var config = document.getElementById("config");
    config.t = 0;
    config.slider = 0;
@@ -43,17 +49,57 @@ function init()
    // draw empty scope
    OSC.redraw();
    
-   // load globals including board list from server
-   loadGl();
-   
-   // load build and put into about box
-   loadBuild();
-   
    // schedule first waveform load
    window.setTimeout(loadWF, 10);
+   
+   // schedule loadStatus()
+   window.setTimeout(loadStatus, 10000);
+
+   // schedule loadScalers()
+   window.setTimeout(loadScalers, 1000);
 }
 
-function loadGl()
+function wdSelect(s)
+{
+   OSC.board = s.selectedIndex;
+}
+
+function loadStatus()
+{
+   // send AJAX request
+   var req = new XMLHttpRequest();
+   req.onreadystatechange = function() {
+      if (req.readyState == 4 && req.status == 200) {
+         t = JSON.parse(req.responseText);
+         
+         OSC.GL.board[OSC.board].temperature = parseFloat(t.temp);
+         OSC.GL.board[OSC.board].pll_locked = t.pll_locked;
+      }
+   };
+   
+   req.open("GET", "status?b=" + OSC.board + "&r=" + Math.random(), true); // avoid cached results
+   req.send();
+
+   window.setTimeout(loadStatus, 10000);
+}
+
+function loadScalers()
+{
+   // send AJAX request
+   var req = new XMLHttpRequest();
+   req.onreadystatechange = function() {
+      if (req.readyState == 4 && req.status == 200) {
+         OSC.GL.board[OSC.board].scaler = JSON.parse(req.responseText).scaler;
+      }
+   };
+
+   req.open("GET", "scalers?b=" + OSC.board + "&r=" + Math.random(), true); // avoid cached results
+   req.send();
+
+   window.setTimeout(loadScalers, 1000);
+}
+
+function loadGl(init)
 {
    // send AJAX request
    var req = new XMLHttpRequest();
@@ -67,13 +113,18 @@ function loadGl()
             var opt = document.createElement('option');
             opt.innerHTML = OSC.GL.board[i].name;
             opt.value = OSC.GL.board[i].name;
-            sel.appendChild(opt);
+            if (sel.childNodes[i+1] == undefined)
+               sel.appendChild(opt);
+            else if (sel.childNodes[i+1].innerHTML != opt.innerHTML)
+               sel.replaceChild(opt, sel.childNodes[i+1]);
          }
          OSC.nWd = OSC.GL.board.length;
 
          // populate config
          document.getElementById("trgSlider").set(OSC.GL.board[0].trigger_level+0.5);
          document.getElementById("inpTLevel").value = Math.round(OSC.GL.board[0].trigger_level * 1000);
+         document.getElementById("trgDelaySlider").set(1-OSC.GL.board[0].trigger_delay/450);
+         document.getElementById("inpTDelay").value = Math.round(OSC.GL.board[0].trigger_delay);
          document.config.trigger_mode[OSC.GL.trigger_mode].checked = true;
 
          document.getElementById("pzc").checked = OSC.GL.board[0].pzc;
@@ -82,13 +133,37 @@ function loadGl()
 
          document.getElementById("rangeSelect").value = OSC.GL.board[0].range;
 
+         document.getElementById("mux_flag").checked  = OSC.GL.mux_flag;
+         document.getElementById("dcv_flag").checked  = OSC.GL.dcv_flag;
+         
          document.getElementById("dcvSlider").set(OSC.GL.dcv/2+0.5);
-         document.getElementById("inpDcv").value = OSC.GL.dcv * 1000;
+         document.getElementById("inpDcv").value   = OSC.GL.dcv * 1000;
+         
+         document.getElementById("nominal_sampling_frequency").value = Math.round(OSC.GL.actual_sampling_frequency*10)/10;
+         document.getElementById("actual_sampling_frequency").innerHTML = OSC.GL.actual_sampling_frequency+" GSPS";
 
          document.getElementById("calib1").checked = OSC.GL.ofs_calib1_flag;
          document.getElementById("calib2").checked = OSC.GL.ofs_calib2_flag;
+         document.getElementById("calib3").checked = OSC.GL.gain_calib_flag;
+         document.getElementById("calib4").checked = OSC.GL.range_calib_flag;
          document.getElementById("spikes").checked = OSC.GL.remove_spikes;
          document.getElementById("rotate").checked = OSC.GL.rotate_flag;
+         
+         document.getElementById("tcalib1").checked = OSC.GL.time_calib1_flag;
+         document.getElementById("tcalib2").checked = OSC.GL.time_calib2_flag;
+         document.getElementById("tcalib3").checked = OSC.GL.time_calib3_flag;
+         document.getElementById("clksource").checked = OSC.GL.clock_source;
+
+         if (init) {
+            // set scale according to sampling frequency
+            if (OSC.GL.actual_sampling_frequency < 2)
+               OSC.wfTScaleIndex = 6; // 100 ns
+            else if (OSC.GL.actual_sampling_frequency < 4)
+               OSC.wfTScaleIndex = 5; // 50 ns
+            else
+               OSC.wfTScaleIndex = 4; // 20 ns
+            setTScale();
+         }
       }
    };
    req.open("GET", "gl?r=" + Math.random(), true); // avoid cached results
@@ -119,12 +194,18 @@ function setGl(e)
          req.send(parseInt(e.value));
       } else if (e.name == "dcv") {
          req.send(parseInt(e.value) / 1000);
-      } else if (e.name == "sampling_frequency") {
-         req.send(parseInt(e.value));
+      } else if (e.name == "nominal_sampling_frequency") {
+         req.send(parseFloat(e.value));
       } else
          req.send(e.value);
    }
 
+}
+
+function setDisp(e)
+{
+   if (e.name == "scaler")
+     OSC.disp.scaler = e.checked;
 }
 
 function keyGl(event, input)
@@ -138,10 +219,19 @@ function keyGl(event, input)
 
 function doVCalib()
 {
-   progressOldBoard = document.getElementById("wdSelect").selectedIndex;
+   progressOldBoard = OSC.board;
 
    var req = new XMLHttpRequest();
    req.open("PUT", "vcalib");
+   req.send();
+}
+
+function doTCalib()
+{
+   progressOldBoard = OSC.board;
+   
+   var req = new XMLHttpRequest();
+   req.open("PUT", "tcalib");
    req.send();
 }
 
@@ -200,13 +290,10 @@ function loadWF()
       return;
    }
    
-   // get active board
-   var board = document.getElementById("wdSelect").selectedIndex;
-   
    // send AJAX request
    OSC.req = new XMLHttpRequest();
    OSC.req.onreadystatechange = receiveWF;
-   OSC.req.open("GET", "wf?b=" + board + "&c=" + chn + "&r=" + Math.random(), true); // avoid cached results
+   OSC.req.open("GET", "wf?b=" + OSC.board + "&c=" + chn + "&r=" + Math.random(), true); // avoid cached results
    OSC.req.responseType = "arraybuffer";
    OSC.req.send();
 }
@@ -217,7 +304,7 @@ function receiveWF()
       // this.wf = JSON.parse(OSC.req.responseText); // use this for JSON encoded data
       
       // create 16 empty waveforms
-      var wf = {T:[], U:[]};
+      var wf = {T:[], U:[], type: 1 };
       for (var i=0 ; i<16 ; i++) {
          wf.T[i] = [];
          wf.U[i] = [];
@@ -226,11 +313,13 @@ function receiveWF()
       var intArray = new Uint32Array(OSC.req.response);
       var floatArray = new Float32Array(OSC.req.response);
       
-      for (i=0 ; i<intArray.length ; ) {
-         if (intArray[i] == 0) {        // idle message
+      for (var i=0 ; i<intArray.length ; ) {
+         var responseType = intArray[i];
+
+         if (responseType == 0) {        // idle message
             OSC.idle = true;
             break;
-         } else if (intArray[i] == 1) { // time array
+         } else if (responseType == 1) { // time array
             i++;
             OSC.wd = intArray[i++];
             var f = intArray[i++];
@@ -244,44 +333,85 @@ function receiveWF()
                progressInd = 0;
                var e = document.getElementById("progressIndVcalib");
                e.style.width = "0";
+               var e = document.getElementById("progressIndTcalib");
+               e.style.width = "0";
                
                document.getElementById("wdSelect").selectedIndex = progressOldBoard;
+               document.getElementById("btnVCalib").innerHTML = "Execute Voltage Calibration";
+               document.getElementById("btnVCalib").disabled = false;
+               document.getElementById("btnTCalib").innerHTML = "Execute Time Calibration";
+               document.getElementById("btnTCalib").disabled = false;
+               OSC.board = progressOldBoard;
+               
+               window.setTimeout(loadGl, 10);
             }
                
-         } else if (intArray[i] == 2) { // voltage array
+         } else if (responseType == 2) { // voltage array
             i++;
             OSC.idle = false;
             OSC.wd = intArray[i++];
-            f = intArray[i++];
-            c = intArray[i++];
-            n = intArray[i++];
-            for (j=0 ; j<n ; j++)
+            var f = intArray[i++];
+            var c = intArray[i++];
+            var n = intArray[i++];
+            for (var j=0 ; j<n ; j++)
                wf.U[c][j] = floatArray[i++];
             OSC.demo = (OSC.wd == 0xFF);
-         } else if (intArray[i] == 10) { // progress data
-            var b = floatArray[1];
+            
+         } else if (responseType == 10) { // vcalib progress data
+            var b = intArray[1];
             progressInd = floatArray[2];
 
-            e = document.getElementById("progressIndVcalib");
+            var e = document.getElementById("progressIndVcalib");
             e.style.width = (progressInd*270) + "px";
             
             document.getElementById("wdSelect").selectedIndex = b;
+            document.getElementById("btnVCalib").innerHTML = document.getElementById("wdSelect").value;
+            document.getElementById("btnVCalib").disabled = true;
 
             window.setTimeout(loadWF, 250);
             return;
+            
+         } else if (responseType == 11) { // tcalib progress data
+            i++;
+            OSC.wd = floatArray[i++];
+            wf.type = 2; // indicate delta-T array
+            
+            progressInd = floatArray[i++];
+            
+            var e = document.getElementById("progressIndTcalib");
+            e.style.width = (progressInd*270) + "px";
+            
+            document.getElementById("wdSelect").selectedIndex = OSC.wd;
+            document.getElementById("btnTCalib").innerHTML = document.getElementById("wdSelect").value;
+            document.getElementById("btnTCalib").disabled = true;
+            
+            while (i < intArray.length) {
+               var c = intArray[i++]
+               var n = intArray[i++];
+               for (var j=0 ; j<n ; j++)
+                  wf.T[c][j] = floatArray[i++];
+            }
+            
          } else {
             alert("WDS: Invalid binary data received form server");
             break;
          }
       }
-      
-      if (OSC.running)
-         window.setTimeout(loadWF, 10); // schedule next waveform read
-      
-      // send waveforms to oscilloscope
-      if (!OSC.idle)
+
+      if (responseType == 11) {
+         window.setTimeout(loadWF, 250);
          OSC.sendWaveforms(wf);
       
+      } else {
+         // schedule next waveform read
+         if (OSC.running)
+            window.setTimeout(loadWF, 10);
+
+         // send waveforms to oscilloscope
+         if (!OSC.idle)
+            OSC.sendWaveforms(wf);
+      }
+
       // redraw oscilloscope to show new waveforms
       OSC.redraw();
    }
@@ -303,11 +433,13 @@ function resize()
                  document.documentElement.clientHeight);
    }  else {
       ctls.style.display = "block";
+      ctls.style.opacity = 1; // make it visible again (pre-hidden in CSS)
       
       if (config.slider > 0)
          config.style.display = "block";
       else
          config.style.display = "none";
+      config.style.opacity = 1;
       
       OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth -
                  config.offsetWidth * config.slider,
@@ -338,6 +470,26 @@ function oscKeypress(e)
       var ctls = document.getElementById("controls");
       ctls.hidden = !ctls.hidden;
       resize();
+   }
+
+   if (charCode == 'c'.charCodeAt(0)) {
+      btnConfig();
+   }
+
+   if (charCode == 'a'.charCodeAt(0)) {
+      btnChn(-1);
+   }
+
+   if (charCode == 'o'.charCodeAt(0)) {
+      btnOn();
+   }
+
+   if (charCode == '^'.charCodeAt(0)) {
+      btnOfsDist();
+   }
+
+   if (charCode == 'v'.charCodeAt(0)) {
+      btnOfsZero();
    }
 
 }
@@ -482,9 +634,16 @@ function btnTScale(inc)
       index--;
    
    OSC.wfTScaleIndex = index;
+   setTScale();
+}
+
+function setTScale()
+{
    OSC.wfTScale = OSC.TScaleTable[OSC.wfTScaleIndex][0];
    document.getElementById("TScale").innerHTML = OSC.TScaleTable[OSC.wfTScaleIndex][1];
 
+   document.getElementById("tofsSlider").set(0.5);
+   sldTOffset(0.5);
    OSC.calcScaleOffset();
    OSC.redraw();
 }
@@ -509,6 +668,16 @@ function sldTLevel(value)
    document.getElementById("inpTLevel").value = Math.round(value * 1000 - 500);
 }
 
+function sldTDelay(value)
+{
+   var del = 450-Math.round(value * 450);
+   var req = new XMLHttpRequest();
+   req.open("PUT", "gl/trigger_delay", true);
+   req.send(del);
+
+   document.getElementById("inpTDelay").value = del;
+}
+
 function sldDcv(value)
 {
    var req = new XMLHttpRequest();
@@ -523,7 +692,6 @@ function setRange(s)
    var req = new XMLHttpRequest();
    req.open("PUT", "gl/range", true);
    req.send(parseFloat(s.value));
-   alert("Please execute voltage calibration after range change");
 }
 
 function btnOfsZero()
@@ -566,9 +734,16 @@ function btnOfsDist()
 
 function sldTOffset(value)
 {
-   OSC.wfTOffset = (value-0.5) * OSC.wfTScale;
+   var wfWidth = 1024 / OSC.GL.actual_sampling_frequency * 1E-9;
+   var scWidth = OSC.wfTScale * 10;
+   if (wfWidth >= scWidth)
+      OSC.wfTOffset = 0.9 * scWidth - wfWidth - value*(0.8 * scWidth - wfWidth);
+   else
+      OSC.wfTOffset = 0.9 * scWidth - wfWidth - (1-value)*(0.8 * scWidth - wfWidth);
+   
    OSC.calcScaleOffset();
    OSC.redraw();
+   console.log(value + "  " + OSC.wfTOffset*1E9);
 }
 
 function btnConfig()

@@ -12,39 +12,78 @@
 #define FAILURE 0
 
 typedef struct {
-   int           serial_number;
-   char          name[32];
-   int           cmd_socket;
-   int           data_socket;
-   int           server_port;
-   unsigned char eth_addr[16];
-   float         trigger_level;
-   char          trigger_mask[10];
-   int           gain;
-   int           pzc;
-   float         range;
-   float         wf_offset1[16][1024];
-   float         wf_offset2[16][1024];
+   char           version_id[4];
+   unsigned int   crc;
+   float          sampling_frequency;
+   float          temperature;
+   float          wf_offset1[16][1024];
+   float          wf_offset2[16][1024];
+   float          wf_gain1[16][1024];
+   float          wf_gain2[16][1024];
+   float          drs_offset_range0[16];
+   float          drs_offset_range1[16];
+   float          drs_offset_range2[16];
+   float          adc_offset_range0[16];
+   float          adc_offset_range1[16];
+   float          adc_offset_range2[16];
+} VCALIB_DATA;
+
+typedef struct {
+   char           version_id[4];
+   unsigned int   crc;
+   float          sampling_frequency;
+   float          temperature;
+   float          dt[16][1024];
+   float          period[16][1024];
+   float          offset[16];
+} TCALIB_DATA;
+
+typedef struct {
+   int            serial_number;
+   char           name[32];
+   int            cmd_socket;
+   int            data_socket;
+   int            server_port;
+   unsigned char  eth_addr[16];
+   float          trigger_level;
+   float          trigger_delay;
+   char           trigger_mask[10];
+   int            gain;
+   int            pzc;
+   float          range;
+   float          temperature;
+   int            pll_locked;
+   unsigned int   scaler[18];
+
+   VCALIB_DATA    vcalib;
+   TCALIB_DATA    tcalib;
 } WDB;
 
 typedef struct {
-   int   demo_flag;
-   int   rotate_flag;
-   int   verbose_flag;
-   int   adc_flag;
-   int   ofs_calib1_flag;
-   int   ofs_calib2_flag;
-   int   tcalib_flag;
-   int   remove_spikes;
-   int   http_port;
-   int   n_boards;
-   float sampling_frequency;
-   int   trigger_mode;
-   int   osctca_flag;
-   int   dcv_flag;
-   float dcv;
-   WDB   board[16];
-   int   cmd;
+   int            demo_flag;
+   int            rotate_flag;
+   int            verbose_flag;
+   int            adc_flag;
+   int            ofs_calib1_flag;
+   int            ofs_calib2_flag;
+   int            gain_calib_flag;
+   int            range_calib_flag;
+   int            time_calib1_flag;
+   int            time_calib2_flag;
+   int            time_calib3_flag;
+   int            remove_spikes;
+   int            http_port;
+   int            n_boards;
+   float          nominal_sampling_frequency;
+   float          actual_sampling_frequency;
+   int            trigger_mode;
+   int            osctca_flag;
+   int            clock_source;
+   int            mux_flag;
+   int            dcv_flag;
+   float          dcv;
+   WDB            board[16];
+   int            cmd;
 } GLOBALS;
 
 typedef struct {
@@ -61,24 +100,47 @@ typedef struct {
 } WD2_EVENT;
 
 typedef struct {
-   int      state;
-   double   progress;
-   int      n_board;
-   int      i_board;
-   int      n_iter1;
-   int      i_iter1;
-   int      n_iter2;
-   int      i_iter2;
-   int      index;
-   Averager *ave;
-   int      fh;
-} CALIB_PROGRESS;
+   int            state;
+   double         progress;
+   int            n_board;
+   int            i_board;
+   int            n_iter1;
+   int            i_iter1;
+   int            n_iter2;
+   int            i_iter2;
+   int            n_iter3;
+   int            i_iter3;
+   int            n_iter4;
+   int            i_iter4;
+   int            index;
+   Averager       *ave;
+   int            fh;
+   float          prev_range;
+} VCALIB_PROGRESS;
+
+typedef struct {
+   int            state;
+   double         progress;
+   int            n_board;
+   int            i_board;
+   int            n_iter1;
+   int            i_iter1;
+   int            n_iter2;
+   int            i_iter2;
+   int            n_iter3;
+   int            i_iter3;
+   int            index;
+   Averager       *ave;
+   int            fh;
+   float          prev_range;
+} TCALIB_PROGRESS;
 
 // calibration states
 #define CS_INACTIVE     0
-#define CS_FIRST_BOARD  1
-#define CS_FIRST_SAMPLE 2
-#define CS_RUNNING      3
+#define CS_SINGLE_BOARD 1
+#define CS_FIRST_BOARD  2
+#define CS_FIRST_SAMPLE 3
+#define CS_RUNNING      4
 
 // trigger modes
 #define TM_NORMAL       0
@@ -92,11 +154,16 @@ void wd_set_trigger_mode(GLOBALS *gl, int index);
 void wd_set_sampling_frequency(GLOBALS *gl, int index);
 void wd_set_range(GLOBALS *gl, int index);
 void wd_set_osctca(GLOBALS *gl, int index);
+void wd_set_clocksource(GLOBALS *gl, int index);
+void wd_set_dcv_flag(GLOBALS *gl, int index);
 void wd_set_dcv(GLOBALS *gl, int index);
 
-int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wf[16][1024]);
+int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wfU[16][1024], float wfT[16][1024]);
 int wd_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *result, int *size);
-int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *p);
+int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *p);
+int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *p);
+void wd_read_board_status(GLOBALS *gl, int index);
+void wd_read_scalers(GLOBALS *gl, int index);
 
 size_t strlcpy(char *dst, const char *src, size_t size);
 size_t strlcat(char *dst, const char *src, size_t size);

@@ -5,7 +5,7 @@
 #include "mscb.h"
 #include "TCBLib.h"
 
-#define MSCB_ADDR 65535
+#define MSCB_ADDR 20
 
 u_int32_t kaddrpre[5] = {RPRESCA0,RPRESCA1,RPRESCA2,RPRESCA3,RPRESCA4};
 u_int32_t kaddrmem[4] = {RMEM0,RMEM1,RMEM2,RMEM3};
@@ -27,7 +27,7 @@ void TCB::WriteReg(int handle, u_int32_t addr, u_int32_t *data) {
 void TCB::ReadReg(int handle, u_int32_t addr, u_int32_t *data) {
   char dbuf[1024];
   *data = 0;
-  mscb_read_mem(handle, MSCB_ADDR, fslot, addr&0xff, &dbuf, 4);
+  mscb_read_mem(handle, MSCB_ADDR, fslot, addr, &dbuf, 4);
   for (int i=0 ; i<4 ; i++)  
     *data |= ((u_int32_t) dbuf[3-i]&0xff)<<(i*8); //"(i*8)" as a byte swap
 }
@@ -35,7 +35,7 @@ void TCB::ReadReg(int handle, u_int32_t addr, u_int32_t *data) {
 // general read register function
 void TCB::ReadBLT(int handle, u_int32_t addr, u_int32_t *data, int nword) {
   char dbuf[1024];
-  mscb_read_mem(handle, MSCB_ADDR, fslot, addr&0xff, &dbuf, nword*4); //4*nword: it is in number of bytes
+  mscb_read_mem(handle, MSCB_ADDR, fslot, addr, &dbuf, nword*4); //4*nword: it is in number of bytes
   for (int iword=0 ; iword<nword ; iword++)  {
     data[iword] = 0;
     for(int ibyte = 0; ibyte<4; ibyte++)
@@ -57,7 +57,7 @@ void TCB::SetPrescaling(int handle, u_int32_t *presca) {
 void TCB::SetTRGBusDLY(int handle, u_int32_t *syncdly, u_int32_t *trgdly) {
   int status;
   u_int32_t reset = 0x80000000;
-  u_int32_t value = (*syncdly) & 0x1f | ((*trgdly) & 0x1f)<<6;
+  u_int32_t value = ((*syncdly) & 0x1f) | (((*trgdly) & 0x1f)<<6);
   u_int32_t valueload = ((*syncdly) & 0x1f) | 0x20 | (((*trgdly) & 0x1f)<<6) | 0x800;
   // first reset the delay controller
   WriteReg(handle, RBUSDLY,&reset);
@@ -280,4 +280,16 @@ void TCB::GetMemoryAddress(int handle, u_int32_t *data) {
 void TCB::GetTimeStamps(int handle, u_int32_t *data) {
   u_int32_t addr = TIMESTP0;
   ReadBLT(handle,addr,data,32);
+}
+//
+// read scalers
+void TCB::GetScalers(int handle, u_int32_t *scalers, u_int32_t *time) {
+  u_int32_t addr = SCALER;
+  ReadBLT(handle,addr,scalers,32);
+  ReadBLT(handle,addr,scalers+32,32);
+  ReadBLT(handle,addr,scalers+64,32);
+  ReadBLT(handle,addr,scalers+96,32);
+  
+  addr = SCALERTIME;
+  ReadReg(handle,addr, time); 
 }

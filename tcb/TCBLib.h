@@ -26,6 +26,8 @@
 #define RMEM1         0xA0                      // memory 1 
 #define RMEM2         0xC0                      // memory 2 
 #define RMEM3         0xE0                      // memory 3 
+#define SCALER	      0x200			// start of scalers (128 integers)
+#define SCALERTIME    0x280			// totaltime latched on scaler read
 
 class TCB {
  public:
@@ -98,6 +100,8 @@ class TCB {
   void GetTimeStamps(int,u_int32_t *);
   // check if the system is busy
   int IsBusy(int);
+  // get scalers
+  void GetScalers(int, u_int32_t *, u_int32_t *);
   // Constructor
   TCB(int slot) { 
     fslot = slot;

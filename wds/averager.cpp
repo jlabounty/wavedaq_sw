@@ -22,6 +22,7 @@ Averager::Averager(int nx, int ny, int nz, int dim)
    fNz = nz;
    fDim = dim;
    
+   assert(nx*ny*nz*dim);
    int size = sizeof(float)*nx*ny*nz * dim;
    fArray = (float *)malloc(size);
    assert(fArray);
