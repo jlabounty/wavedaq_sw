@@ -24,7 +24,7 @@
 #define CMD_TIME_CALIB 2
 
 //comment the line below if you do not want to execute root macros
-#define RUNROOT
+//#define RUNROOT
 
 CALIB_PROGRESS ofs_prog;
 
@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
             }
             fclose(out);
             
-	    runRoot(0);
+	    //	    runRoot(0);
         }
         //
         if(option == 9) {
@@ -273,7 +273,7 @@ int main(int argc, char *argv[])
             }
             fclose(out);
 		
-	    runRoot(1);
+	    //	    runRoot(1);
 	}
         /* end of the main loop on the options*/
     } while ( option >= 0);
