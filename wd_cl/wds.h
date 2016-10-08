@@ -36,10 +36,23 @@ typedef struct {
    float          wf_offset2[16][1024];
    float          wf_gain1[16][1024];
    float          wf_gain2[16][1024];
-   float          offset_range0[16];
-   float          offset_range1[16];
-   float          offset_range2[16];
-} CALIB_DATA;
+   float          drs_offset_range0[16];
+   float          drs_offset_range1[16];
+   float          drs_offset_range2[16];
+   float          adc_offset_range0[16];
+   float          adc_offset_range1[16];
+   float          adc_offset_range2[16];
+} VCALIB_DATA;
+
+typedef struct {
+   char           version_id[4];
+   unsigned int   crc;
+   float          sampling_frequency;
+   float          temperature;
+   float          dt[16][1024];
+   float          period[16][1024];
+   float          offset[16];
+} TCALIB_DATA;
 
 typedef struct {
    int            serial_number;
@@ -49,14 +62,17 @@ typedef struct {
    int            server_port;
    unsigned char  eth_addr[16];
    float          trigger_level;
+   float          trigger_delay;
    char           trigger_mask[10];
    int            gain;
    int            pzc;
    float          range;
    float          temperature;
-   unsigned int   scaler[16];
+   int            pll_locked;
+   unsigned int   scaler[18];
 
-   CALIB_DATA     calib;
+   VCALIB_DATA    vcalib;
+   TCALIB_DATA    tcalib;
 } WDB;
 
 typedef struct {
@@ -68,7 +84,9 @@ typedef struct {
    int            ofs_calib2_flag;
    int            gain_calib_flag;
    int            range_calib_flag;
-   int            tcalib_flag;
+   int            time_calib1_flag;
+   int            time_calib2_flag;
+   int            time_calib3_flag;
    int            remove_spikes;
    int            http_port;
    int            n_boards;
@@ -76,6 +94,7 @@ typedef struct {
    float          actual_sampling_frequency;
    int            trigger_mode;
    int            osctca_flag;
+   int            clock_source;
    int            mux_flag;
    int            dcv_flag;
    float          dcv;
@@ -113,13 +132,31 @@ typedef struct {
    Averager       *ave;
    int            fh;
    float          prev_range;
-} CALIB_PROGRESS;
+} VCALIB_PROGRESS;
+
+typedef struct {
+   int            state;
+   double         progress;
+   int            n_board;
+   int            i_board;
+   int            n_iter1;
+   int            i_iter1;
+   int            n_iter2;
+   int            i_iter2;
+   int            n_iter3;
+   int            i_iter3;
+   int            index;
+   Averager       *ave;
+   int            fh;
+   float          prev_range;
+} TCALIB_PROGRESS;
 
 // calibration states
 #define CS_INACTIVE     0
-#define CS_FIRST_BOARD  1
-#define CS_FIRST_SAMPLE 2
-#define CS_RUNNING      3
+#define CS_SINGLE_BOARD 1
+#define CS_FIRST_BOARD  2
+#define CS_FIRST_SAMPLE 3
+#define CS_RUNNING      4
 
 // trigger modes
 #define TM_NORMAL       0
@@ -133,13 +170,17 @@ void wd_set_trigger_mode(GLOBALS *gl, int index);
 void wd_set_sampling_frequency(GLOBALS *gl, int index);
 void wd_set_range(GLOBALS *gl, int index);
 void wd_set_osctca(GLOBALS *gl, int index);
+void wd_set_clocksource(GLOBALS *gl, int index);
 void wd_set_dcv_flag(GLOBALS *gl, int index);
 void wd_set_dcv(GLOBALS *gl, int index);
 
-int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wf[16][1024]);
+int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wfU[16][1024], float wfT[16][1024]);
 int wd_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *result, int *size);
-int wd_calibrate(GLOBALS *gl, CALIB_PROGRESS *p);
-void wd_read_temp(GLOBALS *gl, int index);
+int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *p);
+int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *p);
+void wd_read_board_status(GLOBALS *gl, int index);
+void wd_read_scalers(GLOBALS *gl, int index);
+
 void wd_write_reg(GLOBALS *, int , int , int);
 void wd_read_reg(GLOBALS *, int , int , unsigned int*, int len =1);
 void wd_set_TRGCalib(GLOBALS *gl, int index, unsigned int channel, unsigned int data);
@@ -148,8 +189,6 @@ void wd_TRGSetRUN(GLOBALS *gl, int index);
 void wd_TRGStopRUN(GLOBALS *gl, int index);
 void wd_swsync(GLOBALS *gl, int index);
 void wd_read_memaddr(GLOBALS *gl, int index, unsigned int *data);
-
-
 
 size_t strlcpy(char *dst, const char *src, size_t size);
 size_t strlcat(char *dst, const char *src, size_t size);

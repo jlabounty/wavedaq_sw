@@ -22,11 +22,11 @@ void readdata(string filename="data.dat"){
 		int d2= (datain >> 46) & 0x1;
 		int d3= (datain >> 47) & 0x1;
 		int data = datain & 0xFFFFFFFF;
-		printf("%08x ", data);
+		//		printf("%08x ", data);
 		if(data>0x7FFFFFFF){
 			data -= 0xFFFFFFFE;
 		}
-		printf("%08x\n", data);
+		//		printf("%08x\n", data);
 		hWFM->SetBinContent((i-memaddr)%512+1, ((data)));
 		hDISC0->SetBinContent((i-memaddr)%512+1, d1*20+150);
 		hDISC1->SetBinContent((i-memaddr)%512+1, d2*20+180);
@@ -35,8 +35,8 @@ void readdata(string filename="data.dat"){
 	}
 	hWFM->GetXaxis()->SetTitle("address (1bin = 12.5ns)");
 	hWFM->Draw();
-	hDISC0->Draw("SAME");
-	hDISC1->Draw("SAME");
-	hDISC2->Draw("SAME");
+	//	hDISC0->Draw("SAME");
+	//	hDISC1->Draw("SAME");
+	//	hDISC2->Draw("SAME");
 	fclose(in);
 }

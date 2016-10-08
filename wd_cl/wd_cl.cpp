@@ -20,13 +20,13 @@
 
 #include "wds.h"
 
-#define CMD_OFS_CALIB 1
-#define CMD_TIME_CALIB 2
+//#define CMD_OFS_CALIB 1
+//#define CMD_TIME_CALIB 2
 
 //comment the line below if you do not want to execute root macros
 //#define RUNROOT
 
-CALIB_PROGRESS ofs_prog;
+//CALIB_PROGRESS ofs_prog;
 
 /*-----------------------------------------------------------------------------------------*/
 void runRoot(int sel){
