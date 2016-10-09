@@ -190,16 +190,13 @@ int main(int argc, char *argv[])
             unsigned int data[2048];
             wd_read_reg(&gl, 0,MEMOUT, data, 2048);
             FILE* out = fopen("data.dat", "w");
-	    if (memID==0)
-	    	fprintf(out, "%x\n", memaddr&0x1ff);
-	    else
-	    	fprintf(out, "%x\n", memaddr>>12);
+	    fprintf(out, "%x\n", memaddr&0x1ff);
 	
             for (int i=0; i<512; i++) {
 	    	if (memID==0)
 			fprintf(out, "%08x\n", data[i] | (data[i+512]<<16) );
 		else
-	        	fprintf(out, "%08x\n", (data[i+1024]) | (data[i+1516]<<16));
+	        	fprintf(out, "%08x\n", (data[i+1024]) | (data[i+1536]<<16));
             }
             fclose(out);
             

@@ -26,6 +26,7 @@ void readdata(string filename="data.dat"){
 		if(data>0x7FFFFFFF){
 			data -= 0xFFFFFFFE;
 		}
+		//		data&=1;
 		//		printf("%08x\n", data);
 		hWFM->SetBinContent((i-memaddr)%512+1, ((data)));
 		hDISC0->SetBinContent((i-memaddr)%512+1, d1*20+150);
