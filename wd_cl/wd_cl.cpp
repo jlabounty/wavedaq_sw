@@ -225,12 +225,19 @@ int main(int argc, char *argv[])
         //
 	if(option ==  11) {
 		unsigned int data;
-		unsigned int channel;
-		printf("Input channel (0-15): ");
-		scanf("%d", &channel);
+		unsigned int from, to;
+		printf("From input channel (0-15): ");
+		scanf("%d", &from);
+		printf("To input channel (0-15): ");
+		scanf("%d", &to);
 		printf("Value (0-255): ");
 		scanf("%x", &data);
-		wd_set_TRGCalib(&gl, 0, channel, data);
+		if(to<from)
+		  printf("Please from > to!\n");
+		else {
+		  for(int icha = from; icha<to+1; icha++)
+		    wd_set_TRGCalib(&gl, 0, icha, data);
+		}
 	}
 	//
 	if(option == 12) {
