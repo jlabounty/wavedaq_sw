@@ -17,10 +17,11 @@ CanvasRenderingContext2D.prototype.drawLine = function (x1, y1, x2, y2) {
 function Oscilloscope(div) { // constructor
 
    // constants
-   this.chnColors = ["#FFFF00", "#B0B0FF", "#FFA0A0", "#A0FFA0",
-      "#FF9000", "#00AAFF", "#FF0020", "#00C030",
+   this.chnColors = [
+      "#FFFF00", "#B0B0FF", "#FFA0A0", "#A0FFA0",
+      "#FF9000", "#00AAFF", "#FF0020", "#00C030", "#E0E0E0",
       "#D0A060", "#A0C0D0", "#C04010", "#807060",
-      "#F0C000", "#2090A0", "#D040D0", "#90B000"];
+      "#F0C000", "#2090A0", "#D040D0", "#90B000", "#E0E0E0"];
 
    this.UScaleTable = [[0.001, "1 mV"],
       [0.002, "2 mV"],

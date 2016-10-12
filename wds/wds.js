@@ -351,7 +351,7 @@ function loadWF() {
       var wf = {T: [], U: []};
       OSC.i1 = 0;
       OSC.i2 = 1023;
-      for (c = 0; c < 16; c++) {
+      for (c = 0; c < 18; c++) {
          wf.T[c] = [];
          wf.U[c] = [];
          for (i = 0; i < 1024; i++) {
@@ -391,7 +391,7 @@ function loadWF() {
    }
 
    // build mask with active channels
-   for (chn = 0, c = 0; c < 16; c++)
+   for (chn = 0, c = 0; c < 18; c++)
       if (OSC.chOn[c])
          chn |= (1 << c);
 
@@ -420,9 +420,9 @@ function receiveWF() {
    if (OSC.req.readyState == 4 && OSC.req.status == 200) {
       // this.wf = JSON.parse(OSC.req.responseText); // use this for JSON encoded data
 
-      // create 16 empty waveforms
+      // create 18 empty waveforms
       var wf = {T: [], U: [], type: 1};
-      for (var i = 0; i < 16; i++) {
+      for (var i = 0; i < 18; i++) {
          wf.T[i] = [];
          wf.U[i] = [];
       }
@@ -482,6 +482,7 @@ function receiveWF() {
             for (j = 0; j < n; j++)
                wf.U[c][j] = floatArray[i++];
             OSC.remoteDemo = (OSC.wd == 0xFF);
+            console.log("Ch"+c);
 
          } else if (responseType == 10) { // vcalib progress data
             var b = intArray[1];
@@ -674,8 +675,10 @@ function btnChn(c)
    document.getElementById("UScale").innerHTML = OSC.UScaleTable[OSC.wfScaleIndex[index]][1];
 
    // set blue border of active channel buttons
-   for (var i = 0; i < 16; i++) {
+   for (var i = 0; i < 18; i++) {
       var cb = document.getElementById("ch" + i);
+      if (cb == undefined)
+         continue;
       if (i == c || c == -1)
          cb.style.border = "3px solid blue";
       else
