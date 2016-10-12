@@ -665,11 +665,11 @@ int wd_init(GLOBALS *gl)
       if (fh > 0) {
          size = read(fh, &gl->board[index].vcalib, sizeof(VCALIB_DATA));
          if (size != sizeof(VCALIB_DATA)) {
-            printf("Invalid voltage calibration file size of \"%s/%s\". Aborting.\n", dir, str);
+            printf("Invalid voltage calibration file size of %s. Aborting.\n", str);
             return FAILURE;
          }
          if (memcmp(gl->board[index].vcalib.version_id, "CAL1", 4) != 0) {
-            printf("Invalid voltage calibration file format in \"%s/%s\". Aborting.\n", dir, str);
+            printf("Invalid voltage calibration file format in %s. Aborting.\n", str);
             return FAILURE;
          }
          if (fabs(gl->board[index].vcalib.temperature - gl->board[index].temperature) > 5) {
