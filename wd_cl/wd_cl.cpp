@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
         printf("[ 7]: Dump input memory    \t \t  [ 8]: Dump output memory\n");
         printf("[ 9]: Write input memory   \t \t  [10]: Set threshold\n");
         printf("[11]: Set calibration      \t \t  [12]: Multiple Run\n");
-        printf("[-1]: Exit\n");
+        printf("[13]: write output memory  \t \t  [-1]: Exit\n");
         
         do {
             printf("Give an option: ");
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
         }
 	//
         if(option == 5) {
-	    unsigned int counters[2];
+	  unsigned int counters[2];
             wd_read_memaddr(&gl, 0, counters);
 	    printf("counterA:%09x counterB:%09x\n", counters[0], counters[1]);
 	}
@@ -279,6 +279,20 @@ int main(int argc, char *argv[])
 		
 	    //	    runRoot(1);
 	}
+	if(option == 13) {
+            for (int i=0; i<512; i++) {
+            	wd_write_reg(&gl, 0,MEMOUT + i, 0xA1A0);
+            }
+            for (int i=512; i<1024; i++) {
+            	wd_write_reg(&gl, 0,MEMOUT + i, 0xA3A2);
+            }
+            for (int i=1024; i<1536; i++) {
+            	wd_write_reg(&gl, 0,MEMOUT + i, 0xA5A4);
+            }
+            for (int i=1536; i<2048; i++) {
+            	wd_write_reg(&gl, 0,MEMOUT + i, 0xA7A6);
+            }
+        }
         /* end of the main loop on the options*/
     } while ( option >= 0);
     
