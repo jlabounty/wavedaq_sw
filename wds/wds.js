@@ -347,7 +347,7 @@ function loadWF() {
    var i, c, chn;
 
    if (OSC.demoMode) {
-      // create 16 empty waveforms
+      // create 18 empty waveforms
       var wf = {T: [], U: []};
       OSC.i1 = 0;
       OSC.i2 = 1023;
@@ -482,7 +482,6 @@ function receiveWF() {
             for (j = 0; j < n; j++)
                wf.U[c][j] = floatArray[i++];
             OSC.remoteDemo = (OSC.wd == 0xFF);
-            console.log("Ch"+c);
 
          } else if (responseType == 10) { // vcalib progress data
             var b = intArray[1];
@@ -666,10 +665,10 @@ function btnChn(c)
    // set scale according to first active channel
    var index = c;
    if (c == -1) {
-      for (index = 0; index < 16; index++)
+      for (index = 0; index < 18; index++)
          if (OSC.chOn[index])
             break;
-      if (index == 16)
+      if (index == 18)
          index = 0;
    }
    document.getElementById("UScale").innerHTML = OSC.UScaleTable[OSC.wfScaleIndex[index]][1];
@@ -679,7 +678,7 @@ function btnChn(c)
       var cb = document.getElementById("ch" + i);
       if (cb == undefined)
          continue;
-      if (i == c || c == -1)
+      if (i == c || (c == -1 && i < 16))
          cb.style.border = "3px solid blue";
       else
          cb.style.border = "2px solid #C0C0C0";
@@ -719,10 +718,10 @@ function btnScale(inc)
 // change vertical scale, update label
 {
    if (OSC.currentChn == -1) {
-      for (var i = 0; i < 16; i++)
+      for (var i = 0; i < 18; i++)
          if (OSC.chOn[i])
             break;
-      if (i == 16)
+      if (i == 18)
          i = 0;
    } else
       i = OSC.currentChn;
@@ -733,7 +732,7 @@ function btnScale(inc)
    if (index == OSC.UScaleTable.length)
       index--;
 
-   for (i = 0; i < 16; i++) {
+   for (i = 0; i < 18; i++) {
       if (OSC.currentChn != -1 && i != OSC.currentChn)
          continue;
 
@@ -771,7 +770,7 @@ function setTScale() {
 }
 
 function sldUOffset(value) {
-   for (var i = 0; i < 16; i++) {
+   for (var i = 0; i < 18; i++) {
       if (OSC.currentChn != -1 && i != OSC.currentChn)
          continue;
       OSC.wfOffset[i] = value - 0.5;
@@ -825,7 +824,7 @@ function setRange(s) {
 }
 
 function btnOfsZero() {
-   for (i = 0; i < 16; i++) {
+   for (i = 0; i < 18; i++) {
       if (OSC.chOn[i])
          OSC.wfOffset[i] = 0;
    }
@@ -841,7 +840,7 @@ function btnOfsZero() {
 function btnOfsDist() {
    // count active channels
    var n = 0;
-   for (i = 0; i < 16; i++) {
+   for (i = 0; i < 18; i++) {
       if (OSC.chOn[i])
          n++;
    }
@@ -851,7 +850,7 @@ function btnOfsDist() {
 
    // set offset
    var o = 0.5 - d;
-   for (i = 0; i < 16; i++) {
+   for (i = 0; i < 18; i++) {
       if (OSC.chOn[i]) {
          OSC.wfOffset[i] = o;
          o -= d;
@@ -988,7 +987,7 @@ function measSelect(meas, sel, prev) {
          input[pi].onchange = function () {
             measParamChange(meas);
          };
-         for (i = 0; i < 16; i++) {
+         for (i = 0; i < 18; i++) {
             o = document.createElement("option");
             o.value = i;
             o.innerHTML = "CH" + i;
