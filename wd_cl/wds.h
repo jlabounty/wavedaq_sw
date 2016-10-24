@@ -14,18 +14,18 @@
 #include "averager.h"
 
 //trigger memory addresses
-#define RRUN     (0x00400000>>2)
-#define RCAL0    (0x00400004>>2)
-#define RCAL1    (0x00400008>>2)
-#define RCAL2    (0x0040000C>>2)
-#define RCAL3    (0x00400010>>2)
-#define RTHR0    (0x00400014>>2)
-#define RTHR1    (0x00400018>>2)
-#define RTHR2    (0x0040001C>>2)
-#define RTHR3    (0x00400020>>2)
-#define RMEMADDR (0x00400024>>2)
-#define MEMIN    (0x00500000>>2)
-#define MEMOUT   (0x00600000>>2)
+#define RRUN     (0xC30000F8>>2)
+#define RCAL0    (0xC30000FC>>2)
+#define RCAL1    (0xC3000100>>2)
+#define RCAL2    (0xC3000104>>2)
+#define RCAL3    (0xC3000108>>2)
+#define RTHR0    (0xC300010C>>2)
+#define RTHR1    (0xC3000110>>2)
+#define RTHR2    (0xC3000114>>2)
+#define RTHR3    (0xC3000118>>2)
+#define RMEMADDR (0xC301002C>>2)
+#define MEMIN    (0x00400000>>2)
+#define MEMOUT   (0x00500000>>2)
 
 typedef struct {
    char           version_id[4];
