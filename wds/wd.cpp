@@ -669,7 +669,11 @@ int wd_init(GLOBALS *gl)
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       sprintf(str, "regwr %02x D800280F", REG_LMK_15_OFFSET);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-      
+
+      // switch channel 9 to TCB input
+      assert(wd_send(gl, index, 100, "calclk tca a", NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, "calclk tca b", NULL, NULL) > 0);
+
       wd_set_trigger_level(gl, index);
       wd_set_range(gl, index);
       wd_set_trigger_mode(gl, index);
@@ -1323,7 +1327,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       
       // calibration finished
       if (pr->i_iter3 == pr->n_iter3) {
-         for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
+         for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) // exclude clock channels
             for (int bin=0 ; bin<1024 ; bin++)
                gl->board[pr->i_board].vcalib.wf_gain1[ch][bin] = (float)(pr->ave->Median(0, ch, bin) / 0.45);
          
@@ -1366,7 +1370,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       
       // calibration finished
       if (pr->i_iter4 == pr->n_iter4) {
-         for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
+         for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) // exclude clock channels
             for (int bin=0 ; bin<1024 ; bin++)
                gl->board[pr->i_board].vcalib.wf_gain2[ch][bin] = (float)(pr->ave->Median(0, ch, bin) / -0.45);
          
