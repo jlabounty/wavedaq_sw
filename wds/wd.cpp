@@ -1047,7 +1047,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                   // gain calibration
                   if (gl->gain_calib_flag) {
                      if (gl->rotate_flag) {
-                        for (i=0 ; i<WD_N_CHANNELS ; i++) {
+                        for (i=0 ; i<WD_N_CHANNELS-2 ; i++) { // exclude clock channels
                            int tc = i < 8 || i == 16  ? pe->drs0_trigger_cell : pe->drs1_trigger_cell;
                            for (int j=0 ; j<1024 ; j++) {
                               if (wfU[i][j] > 0)
@@ -1057,7 +1057,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                            }
                         }
                      } else {
-                        for (i=0 ; i<WD_N_CHANNELS ; i++)
+                        for (i=0 ; i<WD_N_CHANNELS-2 ; i++)
                            for (int j=0 ; j<1024 ; j++) {
                               if (wfU[i][j] > 0)
                                  wfU[i][j] /= gl->board[b].vcalib.wf_gain1[i][j];
@@ -1078,7 +1078,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                   if (gl->range_calib_flag) {
                      float ofs;
                      
-                     for (i=0 ; i<WD_N_CHANNELS ; i++) {
+                     for (i=0 ; i<WD_N_CHANNELS-2 ; i++) { // exclude clock channels
                         if (fabs(gl->board[b].range - (-0.45)) < 0.001)
                            ofs = gl->board[b].vcalib.drs_offset_range0[i];
                         else if (fabs(gl->board[b].range) < 0.001)
@@ -1426,7 +1426,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       sleep_ms(10);
    }
    
-   for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
+   for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
          sum += wfU[ch][i];
@@ -1438,7 +1438,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       wd_send(gl, pr->i_board, 100, "adcget\n", NULL, NULL);
    } while (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS);
    
-   for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
+   for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
          sum += wfU[ch][i];
@@ -1457,7 +1457,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       sleep_ms(10);
    }
    
-   for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
+   for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
          sum += wfU[ch][i];
@@ -1469,7 +1469,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       wd_send(gl, pr->i_board, 100, "adcget\n", NULL, NULL);
    } while (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS);
    
-   for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
+   for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
          sum += wfU[ch][i];
@@ -1488,7 +1488,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       sleep_ms(10);
    }
    
-   for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
+   for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
          sum += wfU[ch][i];
@@ -1500,7 +1500,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       wd_send(gl, pr->i_board, 100, "adcget\n", NULL, NULL);
    } while (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS);
    
-   for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
+   for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
          sum += wfU[ch][i];
