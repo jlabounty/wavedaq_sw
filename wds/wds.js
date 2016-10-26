@@ -283,6 +283,8 @@ function setDisp(e) {
 }
 
 function setPers(s) {
+   OSC.clearPersistency();
+   OSC.redraw();
    OSC.disp.persistency = parseFloat(s.value);
 }
 
@@ -461,6 +463,8 @@ function receiveWF() {
                e.style.width = "0";
                e = document.getElementById("progressIndTcalib");
                e.style.width = "0";
+               
+               OSC.clearPersistency();
 
                document.getElementById("wdSelect").selectedIndex = progressOldBoard;
                document.getElementById("btnVCalib").innerHTML = "Execute Voltage Calibration";
