@@ -106,6 +106,12 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          }
       }
 
+      else if (mg_vcmp(&hm->uri, "/gl/read_channel9") == 0) {
+         gl->read_channel9 = atoi(value);
+         for (int i=0 ; i<gl->n_boards ; i++)
+            wd_set_channel9(gl, i);
+      }
+
       else if (mg_vcmp(&hm->uri, "/gl/clock_source") == 0) {
          gl->clock_source = atoi(value);
          for (int i=0 ; i<gl->n_boards ; i++) {
@@ -223,6 +229,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "   \"actual_sampling_frequency\": %1.3lf,\n", gl->actual_sampling_frequency);
       mg_printf_http_chunk(nc, "   \"trigger_mode\": %d,\n",       gl->trigger_mode);
       mg_printf_http_chunk(nc, "   \"osctca_flag\": %s,\n",        gl->osctca_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"read_channel9\": %s,\n",      gl->read_channel9 ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"clock_source\": %d,\n",       gl->clock_source);
       mg_printf_http_chunk(nc, "   \"mux_flag\": %s,\n",           gl->mux_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"dcv_flag\": %s,\n",           gl->dcv_flag ? "true" : "false");
@@ -477,6 +484,7 @@ int main(int argc, char *argv[])
    gl.time_calib3_flag           = 0;
    gl.trigger_mode               = TM_AUTO;
    gl.osctca_flag                = 0;
+   gl.read_channel9              = 1;
    gl.clock_source               = 0;
    gl.mux_flag                   = 0;
    gl.dcv_flag                   = 0;

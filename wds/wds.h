@@ -81,6 +81,7 @@ typedef struct {
    float          actual_sampling_frequency;
    int            trigger_mode;
    int            osctca_flag;
+   int            read_channel9;
    int            clock_source;
    int            mux_flag;
    int            dcv_flag;
@@ -157,6 +158,7 @@ void wd_set_trigger_mode(GLOBALS *gl, int index);
 void wd_set_sampling_frequency(GLOBALS *gl, int index);
 void wd_set_range(GLOBALS *gl, int index);
 void wd_set_osctca(GLOBALS *gl, int index);
+void wd_set_channel9(GLOBALS *gl, int index);
 void wd_set_clocksource(GLOBALS *gl, int index);
 void wd_set_dcv_flag(GLOBALS *gl, int index);
 void wd_set_dcv(GLOBALS *gl, int index);

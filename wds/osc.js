@@ -19,9 +19,10 @@ function Oscilloscope(div) { // constructor
    // constants
    this.chnColors = [
       "#FFFF00", "#B0B0FF", "#FFA0A0", "#A0FFA0",
-      "#FF9000", "#00AAFF", "#FF0020", "#00C030", "#E0E0E0",
+      "#FF9000", "#00AAFF", "#FF0020", "#00C030",
       "#D0A060", "#A0C0D0", "#C04010", "#807060",
-      "#F0C000", "#2090A0", "#D040D0", "#90B000", "#E0E0E0"];
+      "#F0C000", "#2090A0", "#D040D0", "#90B000",
+      "#FFFFFF", "#FFFFFF" ];
 
    this.UScaleTable = [[0.001, "1 mV"],
       [0.002, "2 mV"],
@@ -100,7 +101,7 @@ function Oscilloscope(div) { // constructor
    this.newImage = true;
 
    // default values
-   for (var i = 0; i < 16; i++) {
+   for (var i = 0; i < 18; i++) {
       this.chOn[i] = false;
       this.wf.T[i] = [];
       this.wf.U[i] = [];
@@ -519,7 +520,7 @@ Oscilloscope.prototype.calcScaleOffset = function () {
    this.wfTO = this.wfTOffset / (this.wfTScale * 10) * this.w + this.x1;
    this.wfTS = 1 / (this.wfTScale * 10) * this.w;
 
-   for (var c = 0; c < 16; c++) {
+   for (var c = 0; c < 18; c++) {
       this.wfUO[c] = (this.y1 + this.y2) / 2 - this.wfOffset[c] * this.h;
       this.wfUS[c] = -this.h / this.wfScale[c] / 10;
    }
@@ -543,7 +544,7 @@ Oscilloscope.prototype.drawWF = function (ctx) {
       ctx.rect(this.x1, this.y1, this.w, this.h);
       ctx.clip();
       var spacing = this.wfTS / (OSC.GL.actual_sampling_frequency * 1E9);
-      for (var c = 0; c < 16; c++) {
+      for (var c = 0; c < 18; c++) {
          if (this.chOn[c]) {
             ctx.beginPath();
             ctx.fillStyle = this.chnColors[c];
@@ -604,7 +605,7 @@ Oscilloscope.prototype.drawWF = function (ctx) {
       }
 
 
-      for (c = 0; c < 16; c++) {
+      for (c = 0; c < 18; c++) {
          if (this.chOn[c]) {
             var col = parseInt(this.chnColors[c].substr(1, 6), 16);
             var r = (col >> 16) & 0xFF;
@@ -661,7 +662,7 @@ Oscilloscope.prototype.drawWF = function (ctx) {
 
 Oscilloscope.prototype.drawMarker = function (ctx) {
    // Circular markers on left side
-   for (var c = 15; c >= 0; c--) {
+   for (var c = 17; c >= 0; c--) {
       if (this.chOn[c]) {
          var y = this.wfUO[c];
          ctx.fillStyle = this.chnColors[c];
@@ -734,7 +735,7 @@ Oscilloscope.prototype.drawDT = function (ctx) {
    ctx.rect(this.x1, this.y1, this.w, this.h);
    ctx.clip();
 
-   for (c = 0; c < 16; c++) {
+   for (c = 0; c < 18; c++) {
       if (this.chOn[c]) {
          ctx.beginPath();
          ctx.fillStyle = this.chnColors[c];
