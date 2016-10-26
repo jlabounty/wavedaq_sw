@@ -372,6 +372,8 @@ void wd_set_osctca(GLOBALS *gl, int index)
 
 void wd_set_clocksource(GLOBALS *gl, int index)
 {
+   char str[80];
+   
    if (gl->demo_flag)
       return;
    
@@ -383,9 +385,22 @@ void wd_set_clocksource(GLOBALS *gl, int index)
    }
    
    if (gl->clock_source == 1) {
+      // switch clock source
       assert(wd_send(gl, index, 100, "regclr c 20000", NULL, NULL) > 0);
+      
+      // enable LMK outputs 1 & 2 for channel 9
+      sprintf(str, "regwr %02x 00030101", REG_LMK_1_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      sprintf(str, "regwr %02x 00030102", REG_LMK_1_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+
    } else {
       assert(wd_send(gl, index, 100, "regset c 20000", NULL, NULL) > 0);
+
+      sprintf(str, "regwr %02x 00020101", REG_LMK_1_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      sprintf(str, "regwr %02x 00020102", REG_LMK_1_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    }
 }
 
@@ -674,9 +689,9 @@ int wd_init(GLOBALS *gl)
       sprintf(str, "regwr %02x D800280F", REG_LMK_15_OFFSET);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
 
-      // switch channel 9 to TCB input
-      assert(wd_send(gl, index, 100, "calclk tca a", NULL, NULL) > 0);
-      assert(wd_send(gl, index, 100, "calclk tca b", NULL, NULL) > 0);
+      // switch channel 9 to LMK input
+      assert(wd_send(gl, index, 100, "calclk lmk a", NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, "calclk lmk b", NULL, NULL) > 0);
 
       wd_set_trigger_level(gl, index);
       wd_set_range(gl, index);
