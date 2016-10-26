@@ -283,6 +283,19 @@ void wd_set_fe(GLOBALS *gl, int index)
    sprintf(str, "feset all %02X", byte);
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    
+   // set MUX of channel 9
+   if (gl->mux_flag) {
+      if (gl->verbose_flag)
+         printf("Set channel 9 input to LMK output\n");;
+      assert(wd_send(gl, index, 100, "calclk tca a", NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, "calclk tca b", NULL, NULL) > 0);
+   } else {
+      if (gl->verbose_flag)
+         printf("Set channel 9 input to TCA output\n");;
+      assert(wd_send(gl, index, 100, "calclk lmk a", NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, "calclk lmk b", NULL, NULL) > 0);
+   }
+   
    // adjust range offset which depends on gain
    wd_set_range(gl, index);
 }
@@ -393,7 +406,6 @@ void wd_set_clocksource(GLOBALS *gl, int index)
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       sprintf(str, "regwr %02x 00030102", REG_LMK_1_OFFSET);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-
    } else {
       assert(wd_send(gl, index, 100, "regset c 20000", NULL, NULL) > 0);
 
@@ -1885,10 +1897,7 @@ void wd_calibrate_local(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[WD_N_CHANNE
    }
    
    for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
-      if (ch < WD_N_CHANNELS/2)
-         tc = pe->drs0_trigger_cell;
-      else
-         tc = pe->drs1_trigger_cell;
+      tc = ch < 8 || ch == 16 ? pe->drs0_trigger_cell : pe->drs1_trigger_cell;
       
       for (int i=tc+5; i<tc+1024-5 ; i++) {
 
@@ -1950,10 +1959,7 @@ void wd_calibrate_global(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[WD_N_CHANN
    float damping = 0.1f;
    
    for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
-      if (ch < WD_N_CHANNELS/2)
-         tc = pe->drs0_trigger_cell;
-      else
-         tc = pe->drs1_trigger_cell;
+      tc = ch < 8 || ch == 16 ? pe->drs0_trigger_cell : pe->drs1_trigger_cell;
       
       // rising edges
       for (int i1=tc+5; i1<tc+1024-5 ; i1++) {
