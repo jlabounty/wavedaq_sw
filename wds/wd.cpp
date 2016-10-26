@@ -65,6 +65,8 @@ union { unsigned int i ; float f; } _nanf = { 0x7fc00000 };
 
 #pragma pack(1)
 
+#define UDP_PROTOCOL_VERSION 3
+
 typedef struct {
    unsigned char  protocol_version;
    unsigned char  board_version;
@@ -73,13 +75,15 @@ typedef struct {
    unsigned char  slot_id;
    unsigned char  adc_and_channel_info;
    unsigned char  channel_segment_number;
-   unsigned short readout_sequence_number;
-   unsigned short hardware_sequence_number;
+   unsigned int   event_number;
    unsigned short sampling_frequency;
    unsigned short number_of_samples;
+   unsigned short trigger_number;
    unsigned short drs0_trigger_cell;
    unsigned short drs1_trigger_cell;
    unsigned short trigger_type;
+   unsigned short temperature;
+   unsigned int   reserved;
    unsigned short packet_sequence_number;
 } WD2_FRAME_HEADER;
 
@@ -806,7 +810,8 @@ double time_ms()
 
 int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[WD_N_CHANNELS][1024], float wfT[WD_N_CHANNELS][1024])
 {
-   int i, status, waveform_channel, current_frame;
+   int i, status, waveform_channel;
+   unsigned int current_event_number;
    fd_set readfds;
    struct timeval timeout;
    unsigned char *pd;
@@ -824,7 +829,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
       wfU[i][512] = NANF;
    }
    
-   current_frame = -1;
+   current_event_number = -1;
    start_time = time_ms();
    
    do { // until all channels received
@@ -859,25 +864,37 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
          if (n > sizeof(WD2_FRAME_HEADER)) {
             ph = (WD2_FRAME_HEADER *)buffer;
             
+            // check protocol version
+            if (ph->protocol_version != UDP_PROTOCOL_VERSION) {
+               printf("Invalid protocol version %d, expected %d. Probably WD firmware update required.\n", ph->protocol_version, UDP_PROTOCOL_VERSION);
+               continue;
+            }
+            
             // correct endianness of header data
             ph->board_id                 = SWAP_UINT16(ph->board_id);
             header_adc                   = (ph->adc_and_channel_info >> 4) & 0x0f;
             header_channel               = (ph->adc_and_channel_info) & 0x0f;
-            ph->readout_sequence_number  = SWAP_UINT16(ph->readout_sequence_number);
-            ph->hardware_sequence_number = SWAP_UINT16(ph->hardware_sequence_number);
+            ph->event_number             = SWAP_UINT32(ph->event_number);
             ph->sampling_frequency       = SWAP_UINT16(ph->sampling_frequency);
             ph->number_of_samples        = SWAP_UINT16(ph->number_of_samples);
+            ph->trigger_number           = SWAP_UINT16(ph->trigger_number);
             ph->drs0_trigger_cell        = SWAP_UINT16(ph->drs0_trigger_cell);
             ph->drs1_trigger_cell        = SWAP_UINT16(ph->drs1_trigger_cell);
             ph->trigger_type             = SWAP_UINT16(ph->trigger_type);
+            ph->temperature              = SWAP_UINT16(ph->temperature);
             ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
            
+            // check packet length
+            if (n != sizeof(WD2_FRAME_HEADER) + ph->number_of_samples * 1.5) {
+               printf("Wrong UDP packet size %d, expected %d.\n", n, (int)sizeof(WD2_FRAME_HEADER) + (int)(ph->number_of_samples * 1.5));
+               continue;
+            }
+            
             // copy some data to event header
             pe->board_id = ph->board_id;
             pe->crate_id = ph->crate_id;
             pe->slot_id = ph->slot_id;
-            pe->readout_sequence_number = ph->readout_sequence_number;
-            pe->hardware_sequence_number = 0; // not yet implemented
+            pe->event_number = ph->event_number;
             pe->sampling_frequency = ph->sampling_frequency;
             pe->number_of_samples = 1024;
             pe->drs0_trigger_cell = ph->drs0_trigger_cell;
@@ -897,21 +914,21 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                       ph->drs1_trigger_cell);
             */
             
-            if (current_frame == -1)
-               current_frame = ph->readout_sequence_number;
+            if (current_event_number == -1)
+               current_event_number = ph->event_number;
             
             // drop package if it belongs to older frame
-            if (ph->readout_sequence_number < current_frame) {
-               printf("Package dropped, package frame=%d, current frame=%d\n", ph->readout_sequence_number, current_frame);
+            if (ph->event_number < current_event_number) {
+               printf("Package dropped, package event number=%d, current event number=%d\n", ph->event_number, current_event_number);
                continue;
             }
             
             // drop whole frame if package of next frame received
-            if (ph->readout_sequence_number > current_frame) {
-               printf("Frame dropped, package frame=%d, current frame=%d\n", ph->readout_sequence_number, current_frame);
+            if (ph->event_number > current_event_number) {
+               printf("Frame dropped, package frame=%d, current frame=%d\n", ph->event_number, current_event_number);
 
                // switch to new frame
-               current_frame = ph->readout_sequence_number;
+               current_event_number = ph->event_number;
                
                // tag waveforms as invalid
                for (i=0 ; i<WD_N_CHANNELS ; i++) {

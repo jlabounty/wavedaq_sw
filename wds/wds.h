@@ -94,8 +94,7 @@ typedef struct {
    unsigned short board_id;
    unsigned char  crate_id;
    unsigned char  slot_id;
-   unsigned short readout_sequence_number;
-   unsigned short hardware_sequence_number;
+   unsigned short event_number;
    unsigned short sampling_frequency;
    unsigned short number_of_samples;
    unsigned short drs0_trigger_cell;
