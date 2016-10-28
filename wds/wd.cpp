@@ -930,10 +930,10 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
             
             /*
             if (gl->verbose_flag)
-               printf("From %s:%d, Frame %5d, ADC/Chn/Segment %d/%d/%d - %04d/%04d\n",
+               printf("From %s:%d, Event %5d, ADC/Chn/Segment %d/%d/%d - %04d/%04d\n",
                       inet_ntoa(remote_addr.sin_addr),
                       ntohs(remote_addr.sin_port),
-                      ph->readout_sequence_number,
+                      ph->event_number,
                       header_adc,
                       header_channel,
                       ph->channel_segment_number,
@@ -1010,7 +1010,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                if (isnan(wfU[i][0]) || isnan(wfU[i][512]))
                    break;
             if ((gl->read_channel9 && i == WD_N_CHANNELS) ||
-                (!gl->read_channel9 && i == WD_N_CHANNELS-2)) {
+                ((!gl->read_channel9 || gl->adc_flag) && i == WD_N_CHANNELS-2)) {
 
                for (i=0 ; i<WD_N_CHANNELS ; i++)
                   for (int j=0 ; j<1024 ; j++)
