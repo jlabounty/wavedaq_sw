@@ -311,7 +311,7 @@ void wd_set_trigger_mode(GLOBALS *gl, int index)
       return;
    
    if (gl->verbose_flag)
-      printf("Set trigger mode %d, delay = %1.0lf\n", gl->trigger_mode, gl->board[index].trigger_delay);
+      printf("Set trigger mode %d, delay = %1.0lf, source= %s\n", gl->trigger_mode, gl->board[index].trigger_delay, (gl->board[index].trigger_source==TS_INTERNAL)?"internal":"external");
 
    if (gl->board[index].trigger_delay == 0)
       delay = 0x100;
@@ -325,13 +325,46 @@ void wd_set_trigger_mode(GLOBALS *gl, int index)
    
    // enable local trigger
    if (gl->trigger_mode == TM_NORMAL) {
-      // trigger_cfg_or
-      sprintf(str, "regwr %02x %s", REG_TRIGGER_CFG_A_OFFSET, gl->board[index].trigger_mask);
-      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
- 
-      // trigger_enable, trigger_falling_edge
-      sprintf(str, "regwr %02x 000C%04x", REG_TRIGGER_CFG_OFFSET, delay);
-      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      //set according to trigger source
+      if (gl->board[index].trigger_source == TS_INTERNAL){
+         // trigger_cfg_or
+         sprintf(str, "regwr %02x %s", REG_TRIGGER_CFG_A_OFFSET, gl->board[index].trigger_mask);
+         assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+  
+         // trigger_enable, trigger_falling_edge
+         sprintf(str, "regwr %02x 000C%04x", REG_TRIGGER_CFG_OFFSET, delay);
+         assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      } else {
+         // disable all internal triggers
+         sprintf(str, "regwr %02x 00000000", REG_TRIGGER_CFG_A_OFFSET);
+         assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+
+         // trigger_enable, trigger_falling_edge, trigger_ext_or
+         sprintf(str, "regwr %02x 000E%04x", REG_TRIGGER_CFG_OFFSET, delay);
+         assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+
+	 // reset output serdes
+         sprintf(str, "regset %08x 00000800", REG_CONTROL_OFFSET);
+         assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+
+	 //set trg calibration
+         sprintf(str, "regwr %02x 01010101", REG_MEG_TRIGGER_CFG1_OFFSET);
+         assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+         sprintf(str, "regwr %02x 01010101", REG_MEG_TRIGGER_CFG2_OFFSET);
+         assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+         sprintf(str, "regwr %02x 01010101", REG_MEG_TRIGGER_CFG3_OFFSET);
+         assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+         sprintf(str, "regwr %02x 01010101", REG_MEG_TRIGGER_CFG4_OFFSET);
+         assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+
+	 //set pedestal threshold
+         sprintf(str, "regwr %02x 000000020", REG_MEG_TRIGGER_CFG5_OFFSET);
+         assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+
+	 // set algorithm runmode (with FADCMODE)
+         sprintf(str, "regwr %02x 00000007", REG_MEG_TRIGGER_CFG0_OFFSET);
+         assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      }
    } else {
       // disable all trigger
       sprintf(str, "regwr %02x 00000000", REG_TRIGGER_CFG_A_OFFSET);
@@ -628,7 +661,7 @@ int wd_init(GLOBALS *gl)
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       
       // set LMK registers to their defaults, see "LMK regs.xls"
-      sprintf(str, "regwr %02x 00032800", REG_LMK_0_OFFSET);
+      /*sprintf(str, "regwr %02x 00032800", REG_LMK_0_OFFSET);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       sprintf(str, "regwr %02x 00020101", REG_LMK_1_OFFSET);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
@@ -640,7 +673,25 @@ int wd_init(GLOBALS *gl)
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       sprintf(str, "regwr %02x D800280F", REG_LMK_15_OFFSET);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-      
+      */
+      sprintf(str, "regwr %02x 00032800", REG_LMK_0_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      sprintf(str, "regwr %02x 00020101", REG_LMK_1_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      sprintf(str, "regwr %02x 00020102", REG_LMK_2_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      sprintf(str, "regwr %02x 10000908", REG_LMK_8_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      sprintf(str, "regwr %02x A0022A09", REG_LMK_9_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      sprintf(str, "regwr %02x 0082000B", REG_LMK_11_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      sprintf(str, "regwr %02x 0284C0AD", REG_LMK_13_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      sprintf(str, "regwr %02x 0800100E", REG_LMK_14_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      sprintf(str, "regwr %02x D800280F", REG_LMK_15_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       wd_set_trigger_level(gl, index);
       wd_set_range(gl, index);
       wd_set_trigger_mode(gl, index);

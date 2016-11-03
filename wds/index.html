@@ -92,6 +92,21 @@
                <input type="radio" id="trModeNormal" name="trigger_mode" value="0" checked onClick="setGl(this)">normal
                <input type="radio" id="trModeAuto" name="trigger_mode" value="1" onClick="setGl(this)">auto
             </div>
+            <div>
+               Trigger source:&nbsp;&nbsp;
+	       <table style="display:inline">
+                  <tr>
+                     <td>
+	                <input type="radio" id="trSourceInt" name="trigger_source" value="0" checked onClick="setGl(this)">internal
+                     </td>
+                  </tr>
+	          <tr>
+                     <td>
+                        <input type="radio" id="trSourceExt" name="trigger_source" value="1" onClick="setGl(this)">external
+                     </td>
+                  </tr>
+	       </table>
+            </div>
          </div>
 
          <div class="groupTitle">Analog Front-end</div>

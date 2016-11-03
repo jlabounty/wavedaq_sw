@@ -91,6 +91,13 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          for (int i=0 ; i<gl->n_boards ; i++)
             wd_set_trigger_mode(gl, i);
       }
+ 
+      else if (mg_vcmp(&hm->uri, "/gl/trigger_source") == 0) {
+         for (int i=0 ; i<gl->n_boards ; i++){
+            gl->board[i].trigger_source = (float)atoi(value);
+            wd_set_trigger_mode(gl, i);
+	 }
+      }
 
       else if (mg_vcmp(&hm->uri, "/gl/osctca_flag") == 0) {
          gl->osctca_flag = atoi(value);
@@ -233,6 +240,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "         \"trigger_level\": %1.3lf,\n", gl->board[i].trigger_level);
          mg_printf_http_chunk(nc, "         \"trigger_delay\": %1.0lf,\n", gl->board[i].trigger_delay);
          mg_printf_http_chunk(nc, "         \"trigger_mask\": \"%s\",\n",  gl->board[i].trigger_mask);
+         mg_printf_http_chunk(nc, "         \"trigger_source\": %d,\n",    gl->board[i].trigger_source);
          mg_printf_http_chunk(nc, "         \"gain\": %d,\n",              gl->board[i].gain);
          mg_printf_http_chunk(nc, "         \"pzc\": %s,\n",               gl->board[i].pzc ? "true" : "false");
          mg_printf_http_chunk(nc, "         \"range\": %1.3lf,\n",         gl->board[i].range);

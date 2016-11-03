@@ -48,6 +48,7 @@ typedef struct {
    float          trigger_level;
    float          trigger_delay;
    char           trigger_mask[10];
+   int            trigger_source;
    int            gain;
    int            pzc;
    float          range;
@@ -145,6 +146,10 @@ typedef struct {
 // trigger modes
 #define TM_NORMAL       0
 #define TM_AUTO         1
+
+// trigger sources
+#define TS_INTERNAL     0
+#define TS_EXTERNAL     1
 
 // interface functions
 int wd_init(GLOBALS *gl);
