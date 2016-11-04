@@ -126,6 +126,7 @@ function loadGl(init)
          document.getElementById("trgDelaySlider").set(1-OSC.GL.board[0].trigger_delay/450);
          document.getElementById("inpTDelay").value = Math.round(OSC.GL.board[0].trigger_delay);
          document.config.trigger_mode[OSC.GL.trigger_mode].checked = true;
+         document.config.trigger_source[OSC.GL.board[0].trigger_source].checked = true;
 
          document.getElementById("pzc").checked = OSC.GL.board[0].pzc;
          document.config.gain[parseInt(OSC.GL.board[0].gain)].checked = true;

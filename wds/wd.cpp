@@ -358,7 +358,7 @@ void wd_set_trigger_mode(GLOBALS *gl, int index)
          assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
 
 	 //set pedestal threshold
-         sprintf(str, "regwr %02x 000000020", REG_MEG_TRIGGER_CFG5_OFFSET);
+         sprintf(str, "regwr %02x 000000010", REG_MEG_TRIGGER_CFG5_OFFSET);
          assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
 
 	 // set algorithm runmode (with FADCMODE)

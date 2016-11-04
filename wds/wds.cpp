@@ -468,7 +468,7 @@ int main(int argc, char *argv[])
    gl.time_calib3_flag           = 0;
    gl.trigger_mode               = TM_AUTO;
    gl.osctca_flag                = 0;
-   gl.clock_source               = 0;
+   gl.clock_source               = 1;
    gl.mux_flag                   = 0;
    gl.dcv_flag                   = 0;
    gl.dcv                        = 0;
@@ -477,6 +477,7 @@ int main(int argc, char *argv[])
    for (i=0 ; i<16 ; i++) {
       gl.board[i].trigger_level  = 0;
       gl.board[i].trigger_delay  = 0;
+      gl.board[i].trigger_source = TS_INTERNAL;
       gl.board[i].gain           = 0;       // gain 1
       gl.board[i].range          = 0;       // range +-0.5V
       gl.board[i].pzc            = 0;       // PZC off
