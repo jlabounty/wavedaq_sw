@@ -65,6 +65,8 @@ union { unsigned int i ; float f; } _nanf = { 0x7fc00000 };
 
 #pragma pack(1)
 
+#define UDP_PROTOCOL_VERSION 3
+
 typedef struct {
    unsigned char  protocol_version;
    unsigned char  board_version;
@@ -73,13 +75,15 @@ typedef struct {
    unsigned char  slot_id;
    unsigned char  adc_and_channel_info;
    unsigned char  channel_segment_number;
-   unsigned short readout_sequence_number;
-   unsigned short hardware_sequence_number;
+   unsigned int   event_number;
    unsigned short sampling_frequency;
    unsigned short number_of_samples;
+   unsigned short trigger_number;
    unsigned short drs0_trigger_cell;
    unsigned short drs1_trigger_cell;
    unsigned short trigger_type;
+   unsigned short temperature;
+   unsigned int   reserved;
    unsigned short packet_sequence_number;
 } WD2_FRAME_HEADER;
 
@@ -144,7 +148,8 @@ size_t strlcat(char *dst, const char *src, size_t size)
 
 int wd_send(GLOBALS *gl, int b, int timeout_ms, const char *str, char *result, int *size)
 {
-   size_t n, i;
+   size_t n;
+   int    i;
    fd_set readfds;
    struct timeval timeout;
    int    status;
@@ -161,8 +166,12 @@ int wd_send(GLOBALS *gl, int b, int timeout_ms, const char *str, char *result, i
    n = 0;
 
    // assemble prompt
-   strlcpy(prompt, gl->board[b].name, sizeof(prompt));
-   strlcat(prompt, " > ", sizeof(prompt));
+   if (strchr(gl->board[b].name, '.'))
+      strlcpy(prompt, " > ", sizeof(prompt));
+   else {
+      strlcpy(prompt, gl->board[b].name, sizeof(prompt));
+      strlcat(prompt, " > ", sizeof(prompt));
+   }
    
    // retry max five times
    for (int retry=0 ; retry < 5 ; retry++) {
@@ -274,6 +283,19 @@ void wd_set_fe(GLOBALS *gl, int index)
    sprintf(str, "feset all %02X", byte);
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    
+   // set MUX of channel 9
+   if (gl->mux_flag) {
+      if (gl->verbose_flag)
+         printf("Set channel 9 input to LMK output\n");;
+      assert(wd_send(gl, index, 100, "calclk tca a", NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, "calclk tca b", NULL, NULL) > 0);
+   } else {
+      if (gl->verbose_flag)
+         printf("Set channel 9 input to TCA output\n");;
+      assert(wd_send(gl, index, 100, "calclk lmk a", NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, "calclk lmk b", NULL, NULL) > 0);
+   }
+   
    // adjust range offset which depends on gain
    wd_set_range(gl, index);
 }
@@ -290,13 +312,13 @@ void wd_set_trigger_level(GLOBALS *gl, int index)
    if (gl->verbose_flag)
       printf("Set trigger level = %d mV\n", (int)(gl->board[index].trigger_level*1000));
    
+   sprintf(str, "dacset tlevel0 %d", (int)(gl->board[index].trigger_level*500+900));
+   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    sprintf(str, "dacset tlevel1 %d", (int)(gl->board[index].trigger_level*500+900));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    sprintf(str, "dacset tlevel2 %d", (int)(gl->board[index].trigger_level*500+900));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    sprintf(str, "dacset tlevel3 %d", (int)(gl->board[index].trigger_level*500+900));
-   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   sprintf(str, "dacset tlevel4 %d", (int)(gl->board[index].trigger_level*500+900));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
 }
 
@@ -363,6 +385,8 @@ void wd_set_osctca(GLOBALS *gl, int index)
 
 void wd_set_clocksource(GLOBALS *gl, int index)
 {
+   char str[80];
+   
    if (gl->demo_flag)
       return;
    
@@ -374,10 +398,46 @@ void wd_set_clocksource(GLOBALS *gl, int index)
    }
    
    if (gl->clock_source == 1) {
+      // switch clock source
       assert(wd_send(gl, index, 100, "regclr c 20000", NULL, NULL) > 0);
+      
+      // enable LMK outputs 1 & 2 for channel 9
+      sprintf(str, "regwr %02x 00030101", REG_LMK_1_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      sprintf(str, "regwr %02x 00030102", REG_LMK_1_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    } else {
       assert(wd_send(gl, index, 100, "regset c 20000", NULL, NULL) > 0);
+
+      sprintf(str, "regwr %02x 00020101", REG_LMK_1_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      sprintf(str, "regwr %02x 00020102", REG_LMK_1_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    }
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+void wd_set_channel9(GLOBALS *gl, int index)
+{
+   char str[80];
+   
+   if (gl->demo_flag)
+      return;
+   
+   if (gl->verbose_flag) {
+      if (gl->read_channel9)
+         printf("Enable channel 9 readout\n");
+      else
+         printf("Disable channel 9 readout\n");
+   }
+   
+   if (gl->read_channel9)
+      sprintf(str, "regwr %02x 01FF01FF", REG_CHANNEL_TX_EN_OFFSET);
+   else
+      sprintf(str, "regwr %02x 00FF00FF", REG_CHANNEL_TX_EN_OFFSET);
+   
+   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
 }
 
 /*-----------------------------------------------------------------------------------------*/
@@ -624,9 +684,9 @@ int wd_init(GLOBALS *gl)
       assert(wd_send(gl, index, 100, "dacset caldc 1280", NULL, NULL) > 0);
 
       // set DRS readout mode to ROI
-      sprintf(str, "regwr %02x 17170030", REG_CONTROL_OFFSET);
+      sprintf(str, "regwr %02x 20200030", REG_CONTROL_OFFSET);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-      
+
       // set LMK registers to their defaults, see "LMK regs.xls"
       sprintf(str, "regwr %02x 00032800", REG_LMK_0_OFFSET);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
@@ -640,12 +700,17 @@ int wd_init(GLOBALS *gl)
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       sprintf(str, "regwr %02x D800280F", REG_LMK_15_OFFSET);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-      
+
+      // switch channel 9 to LMK input
+      assert(wd_send(gl, index, 100, "calclk lmk a", NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, "calclk lmk b", NULL, NULL) > 0);
+
       wd_set_trigger_level(gl, index);
       wd_set_range(gl, index);
       wd_set_trigger_mode(gl, index);
       wd_set_osctca(gl, index);
       wd_set_clocksource(gl, index);
+      wd_set_channel9(gl, index);
       wd_read_board_status(gl, index);
 
       // set LED green
@@ -660,11 +725,11 @@ int wd_init(GLOBALS *gl)
       if (fh > 0) {
          size = read(fh, &gl->board[index].vcalib, sizeof(VCALIB_DATA));
          if (size != sizeof(VCALIB_DATA)) {
-            printf("Invalid voltage calibration file size of \"%s/%s\". Aborting.\n", dir, str);
+            printf("Invalid voltage calibration file size of %s. Aborting.\n", str);
             return FAILURE;
          }
          if (memcmp(gl->board[index].vcalib.version_id, "CAL1", 4) != 0) {
-            printf("Invalid voltage calibration file format in \"%s/%s\". Aborting.\n", dir, str);
+            printf("Invalid voltage calibration file format in %s. Aborting.\n", str);
             return FAILURE;
          }
          if (fabs(gl->board[index].vcalib.temperature - gl->board[index].temperature) > 5) {
@@ -687,7 +752,7 @@ int wd_init(GLOBALS *gl)
       } else {
          memset(gl->board[index].vcalib.wf_offset1, 0, sizeof(float)*16*1024);
          memset(gl->board[index].vcalib.wf_offset2, 0, sizeof(float)*16*1024);
-         for (int ch=0 ; ch < 16 ; ch++) {
+         for (int ch=0 ; ch < WD_N_CHANNELS ; ch++) {
             for (int bin=0 ; bin<1024 ; bin++) {
                gl->board[index].vcalib.wf_gain1[ch][bin] = 1;
                gl->board[index].vcalib.wf_gain2[ch][bin] = 1;
@@ -733,7 +798,7 @@ int wd_init(GLOBALS *gl)
          close(fh);
          
       } else {
-         for (int ch=0 ; ch < 16 ; ch++)
+         for (int ch=0 ; ch < WD_N_CHANNELS ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
                gl->board[index].tcalib.dt[ch][bin] = (float)(1E-9 / gl->actual_sampling_frequency);
       }
@@ -770,9 +835,10 @@ double time_ms()
 
 /*-----------------------------------------------------------------------------------------*/
 
-int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[16][1024], float wfT[16][1024])
+int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[WD_N_CHANNELS][1024], float wfT[WD_N_CHANNELS][1024])
 {
-   int i, status, waveform_channel, current_frame;
+   int i, status, waveform_channel;
+   unsigned int current_event_number;
    fd_set readfds;
    struct timeval timeout;
    unsigned char *pd;
@@ -782,15 +848,15 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
    unsigned char buffer[1800];
    int header_adc, header_channel;
    double start_time;
-   static float wf1[16][1024];
+   static float wf1[WD_N_CHANNELS][1024];
 
    // tag waveforms as invalid
-   for (i=0 ; i<16 ; i++) {
+   for (i=0 ; i<WD_N_CHANNELS ; i++) {
       wfU[i][0]   = NANF;
       wfU[i][512] = NANF;
    }
    
-   current_frame = -1;
+   current_event_number = -1;
    start_time = time_ms();
    
    do { // until all channels received
@@ -825,25 +891,37 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
          if (n > sizeof(WD2_FRAME_HEADER)) {
             ph = (WD2_FRAME_HEADER *)buffer;
             
+            // check protocol version
+            if (ph->protocol_version != UDP_PROTOCOL_VERSION) {
+               printf("Invalid protocol version %d, expected %d. Probably WD firmware update required.\n", ph->protocol_version, UDP_PROTOCOL_VERSION);
+               continue;
+            }
+            
             // correct endianness of header data
             ph->board_id                 = SWAP_UINT16(ph->board_id);
             header_adc                   = (ph->adc_and_channel_info >> 4) & 0x0f;
             header_channel               = (ph->adc_and_channel_info) & 0x0f;
-            ph->readout_sequence_number  = SWAP_UINT16(ph->readout_sequence_number);
-            ph->hardware_sequence_number = SWAP_UINT16(ph->hardware_sequence_number);
+            ph->event_number             = SWAP_UINT32(ph->event_number);
             ph->sampling_frequency       = SWAP_UINT16(ph->sampling_frequency);
             ph->number_of_samples        = SWAP_UINT16(ph->number_of_samples);
+            ph->trigger_number           = SWAP_UINT16(ph->trigger_number);
             ph->drs0_trigger_cell        = SWAP_UINT16(ph->drs0_trigger_cell);
             ph->drs1_trigger_cell        = SWAP_UINT16(ph->drs1_trigger_cell);
             ph->trigger_type             = SWAP_UINT16(ph->trigger_type);
+            ph->temperature              = SWAP_UINT16(ph->temperature);
             ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
            
+            // check packet length
+            if (n != sizeof(WD2_FRAME_HEADER) + ph->number_of_samples * 1.5) {
+               printf("Wrong UDP packet size %d, expected %d.\n", n, (int)sizeof(WD2_FRAME_HEADER) + (int)(ph->number_of_samples * 1.5));
+               continue;
+            }
+            
             // copy some data to event header
             pe->board_id = ph->board_id;
             pe->crate_id = ph->crate_id;
             pe->slot_id = ph->slot_id;
-            pe->readout_sequence_number = ph->readout_sequence_number;
-            pe->hardware_sequence_number = 0; // not yet implemented
+            pe->event_number = ph->event_number;
             pe->sampling_frequency = ph->sampling_frequency;
             pe->number_of_samples = 1024;
             pe->drs0_trigger_cell = ph->drs0_trigger_cell;
@@ -852,10 +930,10 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
             
             /*
             if (gl->verbose_flag)
-               printf("From %s:%d, Frame %5d, ADC/Chn/Segment %d/%d/%d - %04d/%04d\n",
+               printf("From %s:%d, Event %5d, ADC/Chn/Segment %d/%d/%d - %04d/%04d\n",
                       inet_ntoa(remote_addr.sin_addr),
                       ntohs(remote_addr.sin_port),
-                      ph->readout_sequence_number,
+                      ph->event_number,
                       header_adc,
                       header_channel,
                       ph->channel_segment_number,
@@ -863,24 +941,24 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                       ph->drs1_trigger_cell);
             */
             
-            if (current_frame == -1)
-               current_frame = ph->readout_sequence_number;
+            if (current_event_number == -1)
+               current_event_number = ph->event_number;
             
             // drop package if it belongs to older frame
-            if (ph->readout_sequence_number < current_frame) {
-               printf("Package dropped, package frame=%d, current frame=%d\n", ph->readout_sequence_number, current_frame);
+            if (ph->event_number < current_event_number) {
+               printf("Package dropped, package event number=%d, current event number=%d\n", ph->event_number, current_event_number);
                continue;
             }
             
             // drop whole frame if package of next frame received
-            if (ph->readout_sequence_number > current_frame) {
-               printf("Frame dropped, package frame=%d, current frame=%d\n", ph->readout_sequence_number, current_frame);
+            if (ph->event_number > current_event_number) {
+               printf("Frame dropped, package frame=%d, current frame=%d\n", ph->event_number, current_event_number);
 
                // switch to new frame
-               current_frame = ph->readout_sequence_number;
+               current_event_number = ph->event_number;
                
                // tag waveforms as invalid
-               for (i=0 ; i<16 ; i++) {
+               for (i=0 ; i<WD_N_CHANNELS ; i++) {
                   wfU[i][0]   = NANF;
                   wfU[i][512] = NANF;
                }
@@ -894,8 +972,12 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
             }
             */
             
-            waveform_channel = header_adc*8+header_channel;
-            assert(waveform_channel < 16);
+            // map ADC and channel to WD channel (0..7, 8..15, 16+17)
+            if (header_channel == 8)
+               waveform_channel = 16 + header_adc;
+            else
+               waveform_channel = header_adc*8+header_channel;
+            assert(waveform_channel < WD_N_CHANNELS);
             
             // decode waveform data
             pd = (unsigned char*)(ph+1);
@@ -924,23 +1006,24 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
             }
             
             // test if all waveforms are received
-            for (i=0 ; i<16 ; i++)
+            for (i=0 ; i<WD_N_CHANNELS ; i++)
                if (isnan(wfU[i][0]) || isnan(wfU[i][512]))
                    break;
-            if (i == 16) {
+            if ((gl->read_channel9 && i == WD_N_CHANNELS) ||
+                ((!gl->read_channel9 || gl->adc_flag) && i == WD_N_CHANNELS-2)) {
 
-               for (i=0 ; i<16 ; i++)
+               for (i=0 ; i<WD_N_CHANNELS ; i++)
                   for (int j=0 ; j<1024 ; j++)
                      wf1[i][j] = wfU[i][j];
 
                // un-rotate waveforms
                if (gl->rotate_flag || gl->adc_flag) {
-                  for (i=0 ; i<16 ; i++)
+                  for (i=0 ; i<WD_N_CHANNELS ; i++)
                      for (int j=0 ; j<1024 ; j++)
                         wfU[i][j] = wf1[i][j];
                } else {
-                  for (i=0 ; i<16 ; i++) {
-                     int tc = i < 8 ? pe->drs0_trigger_cell : pe->drs1_trigger_cell;
+                  for (i=0 ; i<WD_N_CHANNELS ; i++) {
+                     int tc = i < 8 || i == 16 ? pe->drs0_trigger_cell : pe->drs1_trigger_cell;
                      for (int j=0 ; j<1024 ; j++)
                         wfU[i][(j+tc) % 1024] = wf1[i][j];
                   }
@@ -952,7 +1035,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                   if (gl->range_calib_flag) {
                      float ofs;
                      
-                     for (i=0 ; i<16 ; i++) {
+                     for (i=0 ; i<WD_N_CHANNELS ; i++) {
                         if (fabs(gl->board[b].range - (-0.45)) < 0.001)
                            ofs = gl->board[b].vcalib.adc_offset_range0[i];
                         else if (fabs(gl->board[b].range) < 0.001)
@@ -966,7 +1049,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                      }
                   }
                   
-                  for (i=0 ; i<16 ; i++)
+                  for (i=0 ; i<WD_N_CHANNELS ; i++)
                      for (int j=0 ; j<1024 ; j++)
                         wfT[i][j] = (float)(j * 1E-9/gl->actual_sampling_frequency);
                   
@@ -976,13 +1059,13 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                   // cell-by-cell offset calibration
                   if (gl->ofs_calib1_flag) {
                      if (gl->rotate_flag) {
-                        for (i=0 ; i<16 ; i++) {
-                           int tc = i < 8 ? pe->drs0_trigger_cell : pe->drs1_trigger_cell;
+                        for (i=0 ; i<WD_N_CHANNELS ; i++) {
+                           int tc = i < 8 || i == 16  ? pe->drs0_trigger_cell : pe->drs1_trigger_cell;
                            for (int j=0 ; j<1024 ; j++)
                               wfU[i][j] -= gl->board[b].vcalib.wf_offset1[i][(j+tc) % 1024];
                         }
                      } else {
-                        for (i=0 ; i<16 ; i++)
+                        for (i=0 ; i<WD_N_CHANNELS ; i++)
                            for (int j=0 ; j<1024 ; j++)
                               wfU[i][j] -= gl->board[b].vcalib.wf_offset1[i][j];
                      }
@@ -991,8 +1074,8 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                   // gain calibration
                   if (gl->gain_calib_flag) {
                      if (gl->rotate_flag) {
-                        for (i=0 ; i<16 ; i++) {
-                           int tc = i < 8 ? pe->drs0_trigger_cell : pe->drs1_trigger_cell;
+                        for (i=0 ; i<WD_N_CHANNELS-2 ; i++) { // exclude clock channels
+                           int tc = i < 8 || i == 16  ? pe->drs0_trigger_cell : pe->drs1_trigger_cell;
                            for (int j=0 ; j<1024 ; j++) {
                               if (wfU[i][j] > 0)
                                  wfU[i][j] /= gl->board[b].vcalib.wf_gain1[i][(j+tc) % 1024];
@@ -1001,7 +1084,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                            }
                         }
                      } else {
-                        for (i=0 ; i<16 ; i++)
+                        for (i=0 ; i<WD_N_CHANNELS-2 ; i++)
                            for (int j=0 ; j<1024 ; j++) {
                               if (wfU[i][j] > 0)
                                  wfU[i][j] /= gl->board[b].vcalib.wf_gain1[i][j];
@@ -1013,7 +1096,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
 
                   // start-to-end offset calibration
                   if (gl->ofs_calib2_flag) {
-                     for (i=0 ; i<16 ; i++)
+                     for (i=0 ; i<WD_N_CHANNELS ; i++)
                         for (int j=0 ; j<1024 ; j++)
                            wfU[i][j] -= gl->board[b].vcalib.wf_offset2[i][j];
                   }
@@ -1022,7 +1105,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                   if (gl->range_calib_flag) {
                      float ofs;
                      
-                     for (i=0 ; i<16 ; i++) {
+                     for (i=0 ; i<WD_N_CHANNELS-2 ; i++) { // exclude clock channels
                         if (fabs(gl->board[b].range - (-0.45)) < 0.001)
                            ofs = gl->board[b].vcalib.drs_offset_range0[i];
                         else if (fabs(gl->board[b].range) < 0.001)
@@ -1039,14 +1122,14 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                   // remove spikes
                   if (gl->remove_spikes) {
                      remove_spikes(gl, pe->drs0_trigger_cell, wfU);
-                     remove_spikes(gl, pe->drs1_trigger_cell, wfU+8);
+                     remove_spikes(gl, pe->drs1_trigger_cell, wfU+WD_N_CHANNELS/2);
                   }
                   
                   // calculate calibrated time for each bin
                   if (gl->time_calib1_flag) {
                      // integrate time from delta-t values
-                     for (int ch=0 ; ch<16 ; ch++) {
-                        int tc = ch < 8 ? pe->drs0_trigger_cell : pe->drs1_trigger_cell;
+                     for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
+                        int tc = ch < 8 || ch == 16 ? pe->drs0_trigger_cell : pe->drs1_trigger_cell;
                         wfT[ch][0] = 0;
                         for (int i=1 ; i<1024 ; i++)
                            wfT[ch][i] = wfT[ch][i-1] + gl->board[b].tcalib.dt[ch][(i-1+tc)%1024];
@@ -1059,6 +1142,11 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                         for (int i=0 ; i<1024 ; i++)
                            wfT[ch][i] += dt;
                      }
+                     float t2 = wfT[16][(1024-pe->drs0_trigger_cell) % 1024];
+                     float dt = t1 - t2;
+                     for (int i=0 ; i<1024 ; i++)
+                        wfT[16][i] += dt;
+                     
                      // align cell#0 of all channels inside chip1 to chip0
                      for (int ch=8 ; ch<16 ; ch++) {
                         float t2 = wfT[ch][(1024-pe->drs1_trigger_cell) % 1024];
@@ -1066,17 +1154,21 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                         for (int i=0 ; i<1024 ; i++)
                            wfT[ch][i] += dt;
                      }
+                     t2 = wfT[17][(1024-pe->drs1_trigger_cell) % 1024];
+                     dt = t1 - t2;
+                     for (int i=0 ; i<1024 ; i++)
+                        wfT[17][i] += dt;
                      
                   } else {
                      // set nominal sampling interval
-                     for (i=0 ; i<16 ; i++)
+                     for (i=0 ; i<WD_N_CHANNELS ; i++)
                         for (int j=0 ; j<1024 ; j++)
                            wfT[i][j] = (float)(j * 1E-9/gl->actual_sampling_frequency);
                   }
                   
                   // apply time offsets
                   if (gl->time_calib2_flag) {
-                     for (i=0 ; i<16 ; i++)
+                     for (i=0 ; i<WD_N_CHANNELS ; i++)
                         for (int j=0 ; j<1024 ; j++)
                            wfT[i][j] -= gl->board[b].tcalib.offset[i];
                   }
@@ -1088,31 +1180,12 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                         if (wfU[0][i] <= 0 && wfU[0][i+1] > 0) {
                            double t0 = wfT[0][i] + (wfT[0][i+1]-wfT[0][i])*(0-wfU[0][i])/(wfU[0][i+1]-wfU[0][i]);
                      
-                           for (i=0 ; i<16 ; i++)
+                           for (i=0 ; i<WD_N_CHANNELS ; i++)
                               for (int j=0 ; j<1024 ; j++)
                                  wfT[i][j] -= (float)t0;
                            break;
                         }
                   }
-                  
-                  
-                  /*/######
-                  for (int i=20; i<1024-20 ; i++) {
-                     if (wfU[0][i] <= 0 && wfU[0][i+1] > 0) {
-                        double t0 = wfT[0][i] + (wfT[0][i+1]-wfT[0][i])*(1/(1-wfU[0][i]/wfU[0][i+1]));
-                        
-                        for (int j=i-10; j<i+10 ; j++) {
-                           if (wfU[8][j] <= 0 && wfU[8][j+1] > 0) {
-                              double t = wfT[8][j] + (wfT[8][j+1]-wfT[8][j])*(1/(1-wfU[8][j]/wfU[8][j+1]));
-                              double dt = t - t0;
-                              printf("%1.3lf\n", dt*1E9);
-                              break;
-                           }
-                        }
-                        break;
-                     }
-                  }
-                  //######*/
                }
 
                return SUCCESS;
@@ -1133,7 +1206,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
 
 int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
 {
-   float wfU[16][1024], wfT[16][1024];
+   float wfU[WD_N_CHANNELS][1024], wfT[WD_N_CHANNELS][1024];
    WD2_EVENT eventHeader;
    char str[80];
    
@@ -1192,7 +1265,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
          n = MAX(n, pr->n_iter3);
          n = MAX(n, pr->n_iter4);
          
-         pr->ave = new Averager(1, 16, 1024, n);
+         pr->ave = new Averager(1, WD_N_CHANNELS, 1024, n);
       }
 
       pr->i_iter1++;
@@ -1201,7 +1274,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS)
          return SUCCESS; // just skip this event
       
-      for (int ch=0 ; ch<16 ; ch++)
+      for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
             pr->ave->Add(0, ch, bin, wfU[ch][bin]);
       
@@ -1210,7 +1283,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       
       // calibration finished
       if (pr->i_iter1 == pr->n_iter1) {
-         for (int ch=0 ; ch<16 ; ch++)
+         for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
                gl->board[pr->i_board].vcalib.wf_offset1[ch][bin] = (float)pr->ave->Median(0, ch, bin);
          
@@ -1242,7 +1315,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS)
          return SUCCESS; // just skip this event
 
-      for (int ch=0 ; ch<16 ; ch++)
+      for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
             pr->ave->Add(0, ch, bin, wfU[ch][bin]);
       
@@ -1251,7 +1324,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       
       // calibration finished
       if (pr->i_iter2 == pr->n_iter2) {
-         for (int ch=0 ; ch<16 ; ch++)
+         for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
                gl->board[pr->i_board].vcalib.wf_offset2[ch][bin] = (float)pr->ave->Median(0, ch, bin);
          
@@ -1289,7 +1362,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS)
          return SUCCESS; // just skip this event
       
-      for (int ch=0 ; ch<16 ; ch++)
+      for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
             pr->ave->Add(0, ch, bin, wfU[ch][bin]);
       
@@ -1298,7 +1371,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       
       // calibration finished
       if (pr->i_iter3 == pr->n_iter3) {
-         for (int ch=0 ; ch<16 ; ch++)
+         for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) // exclude clock channels
             for (int bin=0 ; bin<1024 ; bin++)
                gl->board[pr->i_board].vcalib.wf_gain1[ch][bin] = (float)(pr->ave->Median(0, ch, bin) / 0.45);
          
@@ -1332,7 +1405,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS)
          return SUCCESS; // just skip this event
       
-      for (int ch=0 ; ch<16 ; ch++)
+      for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
             pr->ave->Add(0, ch, bin, wfU[ch][bin]);
       
@@ -1341,7 +1414,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       
       // calibration finished
       if (pr->i_iter4 == pr->n_iter4) {
-         for (int ch=0 ; ch<16 ; ch++)
+         for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) // exclude clock channels
             for (int bin=0 ; bin<1024 ; bin++)
                gl->board[pr->i_board].vcalib.wf_gain2[ch][bin] = (float)(pr->ave->Median(0, ch, bin) / -0.45);
          
@@ -1380,7 +1453,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       sleep_ms(10);
    }
    
-   for (int ch=0 ; ch<16 ; ch++) {
+   for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
          sum += wfU[ch][i];
@@ -1392,7 +1465,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       wd_send(gl, pr->i_board, 100, "adcget\n", NULL, NULL);
    } while (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS);
    
-   for (int ch=0 ; ch<16 ; ch++) {
+   for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
          sum += wfU[ch][i];
@@ -1411,7 +1484,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       sleep_ms(10);
    }
    
-   for (int ch=0 ; ch<16 ; ch++) {
+   for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
          sum += wfU[ch][i];
@@ -1423,7 +1496,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       wd_send(gl, pr->i_board, 100, "adcget\n", NULL, NULL);
    } while (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS);
    
-   for (int ch=0 ; ch<16 ; ch++) {
+   for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
          sum += wfU[ch][i];
@@ -1442,7 +1515,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       sleep_ms(10);
    }
    
-   for (int ch=0 ; ch<16 ; ch++) {
+   for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
          sum += wfU[ch][i];
@@ -1454,7 +1527,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       wd_send(gl, pr->i_board, 100, "adcget\n", NULL, NULL);
    } while (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS);
    
-   for (int ch=0 ; ch<16 ; ch++) {
+   for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
          sum += wfU[ch][i];
@@ -1527,7 +1600,7 @@ void remove_spikes(GLOBALS *gl, short trigger_cell, float wf[][1024])
    int rsp[10], rot_sp[10];
    int n_sp[8], n_rsp;
    int  nNeighbor, nSymmetric;
-   float cwf[16][1024];
+   float cwf[WD_N_CHANNELS][1024];
 
    /*
    FILE *f = fopen("wf.csv", "wt");
@@ -1720,12 +1793,12 @@ void wd_read_scalers(GLOBALS *gl, int index)
 
 /*-----------------------------------------------------------------------------------------*/
 
-void wd_analyze_period(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[16][1024])
+void wd_analyze_period(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[WD_N_CHANNELS][1024])
 {
    int tc;
    
-   for (int ch=0 ; ch<16 ; ch++) {
-      if (ch < 8)
+   for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
+      if (ch < WD_N_CHANNELS/2)
          tc = pe->drs0_trigger_cell;
       else
          tc = pe->drs1_trigger_cell;
@@ -1786,7 +1859,7 @@ void wd_analyze_period(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[16][1024])
 
 /*-----------------------------------------------------------------------------------------*/
 
-void wd_analyze_time_offset(GLOBALS *gl, float wfU[16][1024], float wfT[16][1024], TCALIB_PROGRESS *pr)
+void wd_analyze_time_offset(GLOBALS *gl, float wfU[WD_N_CHANNELS][1024], float wfT[WD_N_CHANNELS][1024], TCALIB_PROGRESS *pr)
 {
    
    // find rising edge in channel #0
@@ -1794,7 +1867,7 @@ void wd_analyze_time_offset(GLOBALS *gl, float wfU[16][1024], float wfT[16][1024
       if (wfU[0][i] <= 0 && wfU[0][i+1] > 0) {
          double t0 = wfT[0][i] + (wfT[0][i+1]-wfT[0][i])*(1/(1-wfU[0][i]/wfU[0][i+1]));
          
-         for (int ch=1 ; ch<16 ; ch++) {
+         for (int ch=1 ; ch<WD_N_CHANNELS ; ch++) {
             for (int j=i-10; j<i+10 ; j++) {
                if (wfU[ch][j] <= 0 && wfU[ch][j+1] > 0) {
                   double t = wfT[ch][j] + (wfT[ch][j+1]-wfT[ch][j])*(1/(1-wfU[ch][j]/wfU[ch][j+1]));
@@ -1810,7 +1883,7 @@ void wd_analyze_time_offset(GLOBALS *gl, float wfU[16][1024], float wfT[16][1024
 
 /*-----------------------------------------------------------------------------------------*/
 
-void wd_calibrate_local(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[16][1024], TCALIB_PROGRESS *pr)
+void wd_calibrate_local(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[WD_N_CHANNELS][1024], TCALIB_PROGRESS *pr)
 {
    int tc;
    float dv, llim, ulim;
@@ -1823,11 +1896,8 @@ void wd_calibrate_local(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[16][1024], 
       ulim =  0.3f;
    }
    
-   for (int ch=0 ; ch<16 ; ch++) {
-      if (ch < 8)
-         tc = pe->drs0_trigger_cell;
-      else
-         tc = pe->drs1_trigger_cell;
+   for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
+      tc = ch < 8 || ch == 16 ? pe->drs0_trigger_cell : pe->drs1_trigger_cell;
       
       for (int i=tc+5; i<tc+1024-5 ; i++) {
 
@@ -1883,16 +1953,13 @@ void wd_calibrate_local(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[16][1024], 
 
 /*-----------------------------------------------------------------------------------------*/
 
-void wd_calibrate_global(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[16][1024], TCALIB_PROGRESS *pr)
+void wd_calibrate_global(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[WD_N_CHANNELS][1024], TCALIB_PROGRESS *pr)
 {
    int tc;
    float damping = 0.1f;
    
-   for (int ch=0 ; ch<16 ; ch++) {
-      if (ch < 8)
-         tc = pe->drs0_trigger_cell;
-      else
-         tc = pe->drs1_trigger_cell;
+   for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
+      tc = ch < 8 || ch == 16 ? pe->drs0_trigger_cell : pe->drs1_trigger_cell;
       
       // rising edges
       for (int i1=tc+5; i1<tc+1024-5 ; i1++) {
@@ -1977,7 +2044,7 @@ void wd_calibrate_global(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[16][1024],
 
 int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
 {
-   float wfU[16][1024], wfT[16][1024];
+   float wfU[WD_N_CHANNELS][1024], wfT[WD_N_CHANNELS][1024];
    WD2_EVENT eventHeader;
    char str[80];
    
@@ -2008,7 +2075,7 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       pr->state    = CS_RUNNING;
 
       // initialize delta-t array with nominal values
-      for (int ch=0 ; ch<16 ; ch++)
+      for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
          for (int bin=0 ; bin<1024 ; bin++) {
             gl->board[pr->i_board].tcalib.dt[ch][bin] = (float)(1/gl->actual_sampling_frequency*1E-9); // [s]
             gl->board[pr->i_board].tcalib.period[ch][bin] = 0;
@@ -2027,7 +2094,7 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       wd_set_dcv_flag(gl, pr->i_board);
       wd_set_osctca(gl, pr->i_board);
       
-      pr->ave = new Averager(1, 16, 1024, MAX(pr->n_iter1, pr->n_iter2));
+      pr->ave = new Averager(1, WD_N_CHANNELS, 1024, MAX(pr->n_iter1, pr->n_iter2));
    }
    
    //---- Local Calibration ----
@@ -2093,7 +2160,7 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       
       if (pr->i_iter3 == pr->n_iter3) {
          gl->board[pr->i_board].tcalib.offset[0] = 0; // by definition
-         for (int ch=1 ; ch<16 ; ch++)
+         for (int ch=1 ; ch<WD_N_CHANNELS ; ch++)
             gl->board[pr->i_board].tcalib.offset[ch] = (float)(pr->ave->RobustAverage(0, ch, 0));
       }
       

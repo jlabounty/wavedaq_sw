@@ -46,8 +46,11 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       
       value[0] = 0;
       if (hm->body.p) {
-         strlcpy(value, hm->body.p, sizeof(value));
-         value[hm->body.len] = 0;
+         if (hm->body.len < sizeof(value)) {
+            strncpy(value, hm->body.p, hm->body.len);
+            value[hm->body.len] = 0;
+         } else
+            value[0] = 0;
       }
 
       if (mg_vcmp(&hm->uri, "/gl/pzc") == 0) {
@@ -101,6 +104,12 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             wd_set_fe(gl, i);
             wd_set_dcv_flag(gl, i);
          }
+      }
+
+      else if (mg_vcmp(&hm->uri, "/gl/read_channel9") == 0) {
+         gl->read_channel9 = atoi(value);
+         for (int i=0 ; i<gl->n_boards ; i++)
+            wd_set_channel9(gl, i);
       }
 
       else if (mg_vcmp(&hm->uri, "/gl/clock_source") == 0) {
@@ -220,6 +229,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "   \"actual_sampling_frequency\": %1.3lf,\n", gl->actual_sampling_frequency);
       mg_printf_http_chunk(nc, "   \"trigger_mode\": %d,\n",       gl->trigger_mode);
       mg_printf_http_chunk(nc, "   \"osctca_flag\": %s,\n",        gl->osctca_flag ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"read_channel9\": %s,\n",      gl->read_channel9 ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"clock_source\": %d,\n",       gl->clock_source);
       mg_printf_http_chunk(nc, "   \"mux_flag\": %s,\n",           gl->mux_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"dcv_flag\": %s,\n",           gl->dcv_flag ? "true" : "false");
@@ -302,7 +312,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
    // binary encoded waveforms
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/wf") == 0) {
-      float wfT[16][1024], wfU[16][1024];
+      float wfT[WD_N_CHANNELS][1024], wfU[WD_N_CHANNELS][1024];
       int status;
 
       mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
@@ -338,7 +348,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          f = (float)tcalib_prog.progress;
          mg_send_http_chunk(nc, (const char *)&f, 4);
          
-         for (int c=0 ; c<16 ; c++)
+         for (int c=0 ; c<WD_N_CHANNELS ; c++)
             if (chn & (1 << c)) {
                int n = 1024;
                mg_send_http_chunk(nc, (const char *)&c, 4);
@@ -357,10 +367,24 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       
       if (gl->demo_flag) {
          status = SUCCESS;
-         for (int c=0 ; c<16 ; c++) {
+         for (int c=0 ; c<WD_N_CHANNELS ; c++) {
             for (int i=0 ; i<1024 ; i++) {
                wfT[c][i] = (float)(i*1E-9 / gl->actual_sampling_frequency);
-               wfU[c][i] = (float)(sin(wfT[c][i] / 50 / 1E-9 * gl->actual_sampling_frequency) / 4 + ((float)random()/RAND_MAX-0.5) / 30);
+               wfU[c][i] = (float)(sin((wfT[c][i]+c*1E-9)*gl->actual_sampling_frequency / 1E-9 / 50) / 4 + ((float)random()/RAND_MAX-0.5) / 300);
+            }
+            // add spikes
+            for (int i=0 ; i<1024 ; i++) {
+               if ((float)random()/RAND_MAX < 0.00005) {
+                  float s = ((float)random()/RAND_MAX-0.5) / 5;
+                  int j = i-5;
+                  float f;
+                  for (f=0 ; f<1 ; f += 0.2,j++)
+                     if (j >= 0 && j< 1024)
+                        wfU[c][j] += s * f;
+                  for (f=1 ; f>0 ; f -= 0.2,j++)
+                     if (j >= 0 && j< 1024)
+                        wfU[c][j] += s * f;
+               }
             }
          }
       } else {
@@ -387,7 +411,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          int t = 1;    // array type
          int n = 1024; // number of elements
          int f = 0;    // frame number
-         for (int c=0 ; c<16 ; c++) {
+         for (int c=0 ; c<WD_N_CHANNELS ; c++) {
             if (chn & (1 << c)) {
                t = 1; // time array
                mg_send_http_chunk(nc, (const char *)&t, 4);
@@ -399,7 +423,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             }
          }
          
-         for (int c=0 ; c<16 ; c++) {
+         for (int c=0 ; c<WD_N_CHANNELS ; c++) {
             if (chn & (1 << c)) {
                t = 2; // voltage array
                mg_send_http_chunk(nc, (const char *)&t, 4);
@@ -460,13 +484,14 @@ int main(int argc, char *argv[])
    gl.time_calib3_flag           = 0;
    gl.trigger_mode               = TM_AUTO;
    gl.osctca_flag                = 0;
+   gl.read_channel9              = 1;
    gl.clock_source               = 0;
    gl.mux_flag                   = 0;
    gl.dcv_flag                   = 0;
    gl.dcv                        = 0;
    gl.adc_flag                   = 0;
 
-   for (i=0 ; i<16 ; i++) {
+   for (i=0 ; i<WD_N_BOARDS ; i++) {
       gl.board[i].trigger_level  = 0;
       gl.board[i].trigger_delay  = 0;
       gl.board[i].gain           = 0;       // gain 1
@@ -488,7 +513,7 @@ int main(int argc, char *argv[])
             printf("invalid trigger mask, please use xxxxyyyy\n");
             return 1;
          }
-         for (j=0 ; j<16 ; j++)
+         for (j=0 ; j<WD_N_BOARDS ; j++)
             strlcpy(gl.board[j].trigger_mask, argv[i+1], sizeof(gl.board[j].trigger_mask));
          i++;
       }
@@ -501,7 +526,7 @@ int main(int argc, char *argv[])
 
       else if (argv[i][0] == '-' && argv[i][1] == 'w') {
          
-         if (isdigit(argv[i+1][0])) {
+         if (isdigit(argv[i+1][0]) && !strchr(argv[i+1], '.')) {
             if (strchr(argv[i+1], '-')) {
                i1 = atoi(argv[i+1]);
                p = strchr(argv[i+1], '-') + 1;
@@ -528,7 +553,7 @@ int main(int argc, char *argv[])
       }
 
       else if (argv[i][0] == '-' && argv[i][1] == 'z') {
-         for (j=0 ; j<16 ; j++)
+         for (j=0 ; j<WD_N_BOARDS ; j++)
             gl.board[j].pzc = 1;
       }
 

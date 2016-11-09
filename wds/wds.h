@@ -11,21 +11,24 @@
 #define SUCCESS 1
 #define FAILURE 0
 
+#define WD_N_CHANNELS 18 // 8+1 * 2
+#define WD_N_BOARDS   16 // 16 boards per crate
+
 typedef struct {
    char           version_id[4];
    unsigned int   crc;
    float          sampling_frequency;
    float          temperature;
-   float          wf_offset1[16][1024];
-   float          wf_offset2[16][1024];
-   float          wf_gain1[16][1024];
-   float          wf_gain2[16][1024];
-   float          drs_offset_range0[16];
-   float          drs_offset_range1[16];
-   float          drs_offset_range2[16];
-   float          adc_offset_range0[16];
-   float          adc_offset_range1[16];
-   float          adc_offset_range2[16];
+   float          wf_offset1[WD_N_CHANNELS][1024];
+   float          wf_offset2[WD_N_CHANNELS][1024];
+   float          wf_gain1[WD_N_CHANNELS][1024];
+   float          wf_gain2[WD_N_CHANNELS][1024];
+   float          drs_offset_range0[WD_N_CHANNELS];
+   float          drs_offset_range1[WD_N_CHANNELS];
+   float          drs_offset_range2[WD_N_CHANNELS];
+   float          adc_offset_range0[WD_N_CHANNELS];
+   float          adc_offset_range1[WD_N_CHANNELS];
+   float          adc_offset_range2[WD_N_CHANNELS];
 } VCALIB_DATA;
 
 typedef struct {
@@ -33,9 +36,9 @@ typedef struct {
    unsigned int   crc;
    float          sampling_frequency;
    float          temperature;
-   float          dt[16][1024];
-   float          period[16][1024];
-   float          offset[16];
+   float          dt[WD_N_CHANNELS][1024];
+   float          period[WD_N_CHANNELS][1024];
+   float          offset[WD_N_CHANNELS];
 } TCALIB_DATA;
 
 typedef struct {
@@ -78,11 +81,12 @@ typedef struct {
    float          actual_sampling_frequency;
    int            trigger_mode;
    int            osctca_flag;
+   int            read_channel9;
    int            clock_source;
    int            mux_flag;
    int            dcv_flag;
    float          dcv;
-   WDB            board[16];
+   WDB            board[WD_N_BOARDS];
    int            cmd;
 } GLOBALS;
 
@@ -90,8 +94,7 @@ typedef struct {
    unsigned short board_id;
    unsigned char  crate_id;
    unsigned char  slot_id;
-   unsigned short readout_sequence_number;
-   unsigned short hardware_sequence_number;
+   unsigned short event_number;
    unsigned short sampling_frequency;
    unsigned short number_of_samples;
    unsigned short drs0_trigger_cell;
@@ -154,11 +157,12 @@ void wd_set_trigger_mode(GLOBALS *gl, int index);
 void wd_set_sampling_frequency(GLOBALS *gl, int index);
 void wd_set_range(GLOBALS *gl, int index);
 void wd_set_osctca(GLOBALS *gl, int index);
+void wd_set_channel9(GLOBALS *gl, int index);
 void wd_set_clocksource(GLOBALS *gl, int index);
 void wd_set_dcv_flag(GLOBALS *gl, int index);
 void wd_set_dcv(GLOBALS *gl, int index);
 
-int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wfU[16][1024], float wfT[16][1024]);
+int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wfU[WD_N_CHANNELS][1024], float wfT[WD_N_CHANNELS][1024]);
 int wd_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *result, int *size);
 int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *p);
 int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *p);
