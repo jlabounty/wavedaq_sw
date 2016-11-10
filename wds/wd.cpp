@@ -688,7 +688,7 @@ int wd_init(GLOBALS *gl)
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       sprintf(str, "regwr %02x 0284C0AD", REG_LMK_13_OFFSET);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-      sprintf(str, "regwr %02x 0800100E", REG_LMK_14_OFFSET);
+      sprintf(str, "regwr %02x 0830100E", REG_LMK_14_OFFSET);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       sprintf(str, "regwr %02x D800280F", REG_LMK_15_OFFSET);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
