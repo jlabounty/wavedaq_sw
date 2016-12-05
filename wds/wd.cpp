@@ -484,21 +484,31 @@ void wd_set_range(GLOBALS *gl, int index)
    if (gl->verbose_flag)
       printf("Set range = %g V\n", gl->board[index].range);
    
-   if (fabs(gl->board[index].range) < 0.001) {
-      if (gl->board[index].gain == 2)
-         sprintf(str, "dacset ofs %d", 1270);
-      else
-         sprintf(str, "dacset ofs %d", 1300);
-   } else if (fabs(gl->board[index].range - (-0.45)) < 0.001) {
-      if (gl->board[index].gain == 2)
-         sprintf(str, "dacset ofs %d", 1640);
-      else
-         sprintf(str, "dacset ofs %d", 2000);
-   } else if (fabs(gl->board[index].range - 0.45) < 0.001) {
-      if (gl->board[index].gain == 2)
-         sprintf(str, "dacset ofs %d", 890);
-      else
-         sprintf(str, "dacset ofs %d", 580);
+   if (gl->board[index].revision == WD_REV_D) {
+      if (fabs(gl->board[index].range) < 0.001) {                  // -0.5 ... +0.5
+         if (gl->board[index].gain == 2)
+            sprintf(str, "dacset ofs %d", 1270);
+         else
+            sprintf(str, "dacset ofs %d", 1300);
+      } else if (fabs(gl->board[index].range - (-0.45)) < 0.001) { // -1 ... 0
+         if (gl->board[index].gain == 2)
+            sprintf(str, "dacset ofs %d", 1640);
+         else
+            sprintf(str, "dacset ofs %d", 2000);
+      } else if (fabs(gl->board[index].range - 0.45) < 0.001) {    // 0 ... +1
+         if (gl->board[index].gain == 2)
+            sprintf(str, "dacset ofs %d", 890);
+         else
+            sprintf(str, "dacset ofs %d", 580);
+      }
+   } else if (gl->board[index].revision == WD_REV_E) {
+      if (fabs(gl->board[index].range) < 0.001) {                  // -0.5 ... +0.5
+         sprintf(str, "dacset ofs %d", 297);
+      } else if (fabs(gl->board[index].range - (-0.45)) < 0.001) { // -1 ... 0
+         sprintf(str, "dacset ofs %d", 6);
+      } else if (fabs(gl->board[index].range - 0.45) < 0.001) {    // 0 ... +1
+         sprintf(str, "dacset ofs %d", 582);
+      }
    }
 
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
@@ -619,23 +629,26 @@ int wd_init(GLOBALS *gl)
       // set dbglevel none
       assert(wd_send(gl, index, 100, "dbglvl none", NULL, NULL) > 0);
 
-      // print board info
-      if (gl->verbose_flag) {
-         size = sizeof(reply);
-         wd_send(gl, index, 1000, "info", reply, &size); // first access long timeout
-         if (!size) {
-            printf("Board %s does not reply, aborting.\n", gl->board[index].name);
-            return FAILURE;
-         }
-         char *p = strstr(reply, "-- Version");
-         if (p != NULL) {
-            char *p2 = strstr(p, "\r\n\r\n");
-            if (p2 != NULL)
-               *p2 = 0;
+      // get board info
+      size = sizeof(reply);
+      wd_send(gl, index, 1000, "info", reply, &size); // first access long timeout
+      if (!size) {
+         printf("Board %s does not reply, aborting.\n", gl->board[index].name);
+         return FAILURE;
+      }
+      char *p = strstr(reply, "-- Version");
+      if (p != NULL) {
+         char *p2 = strstr(p, "\r\n\r\n");
+         if (p2 != NULL)
+            *p2 = 0;
+         if (gl->verbose_flag) {
             printf("\n**** Board %s info: ****\n%s", gl->board[index].name, p);
          }
       }
 
+      gl->board[index].type     = 2; // WD2
+      gl->board[index].revision = 4; // A:0, B:1, C:2, D:3, E:4
+      
       // set destinantion port in WD board
       sprintf(str, "setenv dstport %d", gl->board[index].server_port);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);

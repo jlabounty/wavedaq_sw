@@ -42,6 +42,8 @@ typedef struct {
 } TCALIB_DATA;
 
 typedef struct {
+   int            type;
+   int            revision;
    int            serial_number;
    char           name[32];
    int            cmd_socket;
@@ -62,6 +64,9 @@ typedef struct {
    VCALIB_DATA    vcalib;
    TCALIB_DATA    tcalib;
 } WDB;
+
+#define WD_REV_D  3
+#define WD_REV_E  4
 
 typedef struct {
    int            demo_flag;
