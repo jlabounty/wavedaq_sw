@@ -57,6 +57,7 @@ typedef struct {
    int            gain;
    int            pzc;
    float          range;
+   float          range_ofs;
    float          temperature;
    int            pll_locked;
    unsigned int   scaler[18];
@@ -91,7 +92,7 @@ typedef struct {
    int            clock_source;
    int            mux_flag;
    int            dcv_flag;
-   float          dcv;
+   float          dc_offset;
    WDB            board[WD_N_BOARDS];
    int            cmd;
 } GLOBALS;
@@ -171,6 +172,7 @@ void wd_set_channel9(GLOBALS *gl, int index);
 void wd_set_clocksource(GLOBALS *gl, int index);
 void wd_set_dcv_flag(GLOBALS *gl, int index);
 void wd_set_dcv(GLOBALS *gl, int index);
+void wd_set_dc_offset(GLOBALS *gl, int index);
 
 int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wfU[WD_N_CHANNELS][1024], float wfT[WD_N_CHANNELS][1024]);
 int wd_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *result, int *size);
