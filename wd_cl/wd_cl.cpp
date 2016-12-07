@@ -118,9 +118,12 @@ int main(int argc, char *argv[])
             printf("FADCMODE? ");
             scanf("%d", &scanfdata);
 	    data |= (scanfdata & 0x1)<<1;
-            printf("SPYMODE? ");
+            printf("TESTTXMODE? ");
             scanf("%d", &scanfdata);
 	    data |= (scanfdata & 0x1)<<2;
+            printf("ALGSEL (0=TC, 1=LXe)? ");
+            scanf("%d", &scanfdata);
+	    data |= (scanfdata & 0x1)<<5;
             wd_write_reg(&gl, 0, RRUN, data);
         }
 	//
@@ -138,9 +141,14 @@ int main(int argc, char *argv[])
 	    	printf("FADCMODE off\n");
 	    }
 	    if(data & 0x00000004) {
-	    	printf("SPYMODE on\n");
+	    	printf("TESTTXMODE on\n");
 	    } else {
-	    	printf("SPYMODE off\n");
+	    	printf("TESTTXMODE off\n");
+	    }
+	    if(data & 0x00000010) {
+	    	printf("ALGSEL LXe\n");
+	    } else {
+	    	printf("ALGSEL TC\n");
 	    }
 
 	    printf("RUNREG value: %08x\n", data);
