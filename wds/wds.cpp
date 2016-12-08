@@ -145,10 +145,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             wd_set_dcv_flag(gl, i);
       }
 
-      else if (mg_vcmp(&hm->uri, "/gl/dcv") == 0) {
-         gl->dcv = (float)atof(value);
+      else if (mg_vcmp(&hm->uri, "/gl/dc_offset") == 0) {
+         gl->dc_offset = (float)atof(value);
          for (int i=0 ; i<gl->n_boards ; i++)
-            wd_set_dcv(gl, i);
+            wd_set_dc_offset(gl, i);
       }
 
       else if (mg_vcmp(&hm->uri, "/gl/adc_flag") == 0) {
@@ -233,7 +233,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "   \"clock_source\": %d,\n",       gl->clock_source);
       mg_printf_http_chunk(nc, "   \"mux_flag\": %s,\n",           gl->mux_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"dcv_flag\": %s,\n",           gl->dcv_flag ? "true" : "false");
-      mg_printf_http_chunk(nc, "   \"dcv\": %1.3lf,\n",            gl->dcv);
+      mg_printf_http_chunk(nc, "   \"dc_offset\": %1.3lf,\n",      gl->dc_offset);
       
       mg_printf_http_chunk(nc, "   \"board\": [\n");
       
@@ -488,7 +488,7 @@ int main(int argc, char *argv[])
    gl.clock_source               = 0;
    gl.mux_flag                   = 0;
    gl.dcv_flag                   = 0;
-   gl.dcv                        = 0;
+   gl.dc_offset                  = 0;
    gl.adc_flag                   = 0;
 
    for (i=0 ; i<WD_N_BOARDS ; i++) {

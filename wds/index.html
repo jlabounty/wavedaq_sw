@@ -85,6 +85,7 @@
 
       <button class="wideButton" id="btnConfig" type="button" onClick="btnConfig()">Config</button>
       <button class="wideButton" id="btnMeasure" type="button" onClick="dlgShow('dlgMeasure')">Measure</button>
+      <button class="wideButton" id="btnChannels" type="button" onClick="btnChannels()">Channels</button>
       <button class="wideButton" id="btnAbout" type="button" onClick="dlgShow('dlgAbout')">About</button>
 
    </div>
@@ -169,9 +170,9 @@
 
             <div class="vMiddleBox vSpacer5">
                <div class="vMiddleElement">DC:&nbsp;</div>
-               <button name="ctrlHSlider" id="dcvSlider" class="hSlider vMiddleElement" type="button"
-                       data-update="sldDcv()" style="width:140px;"></button>
-               <span class="hSpacer5"></span><input name="dcv" class="vMiddleElement" type="text" id="inpDcv"
+               <button name="ctrlHSlider" id="dcOffsetSlider" class="hSlider vMiddleElement" type="button"
+                       data-update="sldDcOffset()" style="width:140px;"></button>
+               <span class="hSpacer5"></span><input name="dc_offset" class="vMiddleElement" type="text" id="inpDcOffset"
                                                     onkeypress="keyGl(event,this)" value="0"><span
                     class="vMiddleElement">&nbsp;mV</span>
             </div>
@@ -279,6 +280,18 @@
          </div>
 
       </form>
+   </div>
+
+   <div id="channels">
+      <table id="channelsTable">
+         <tr class="channelsTitle">
+            <th class="channelsTh">Chn</th>
+            <th class="channelsTh">Link</th>
+            <th class="channelsTh">Gain</th>
+            <th class="channelsTh">Trigger Level</th>
+         </tr>
+         <!-- channel rows will be created dynamically in init() -->
+      </table>
    </div>
 
    <div id="dlgAbout" class="dlgFrame">

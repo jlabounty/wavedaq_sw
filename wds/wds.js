@@ -51,6 +51,54 @@ function init() {
    config.t = 0;
    config.slider = 0;
    config.visible = false;
+
+   // fill channels panel
+   var chTable = document.getElementById("channelsTable");
+   for (var r=0 ; r<16 ; r++) {
+      var row = chTable.insertRow(-1);
+      row.className = "channelsRow";
+
+      var cell = row.insertCell(-1);
+      cell.className = "channelsTd";
+      cell.appendChild(document.createTextNode(r));
+      cell.style.backgroundColor = OSC.chnColors[r];
+
+      var cell = row.insertCell(-1);
+      cell.className = "channelsTd";
+      var cb = document.createElement('input');
+      cb.type = "checkbox";
+      cb.name = "Link channel";
+      cb.id = "channelLink"+r;
+      cb.checked = false;
+      cell.appendChild(cb);
+
+      var cell = row.insertCell(-1);
+      cell.className = "channelsTd";
+      var sel = document.createElement('select');
+      var gains = ["1", "2", "4", "8", "10", "20", "40", "80", "100"];
+      for (var i=0 ; i<gains.length ; i++) {
+         var op = document.createElement('option');
+         op.value = op.textContent = gains[i];
+         sel.appendChild(op);
+      }
+      cell.appendChild(sel);
+
+      var cell = row.insertCell(-1);
+      cell.className = "channelsTd";
+      var inp = document.createElement('input');
+      inp.type = "text";
+      inp.value = "0";
+      inp.id = "channelTL"+r;
+      cell.appendChild(inp);
+      cell.appendChild(document.createTextNode(" mV"));
+   }
+
+   // hide channels panel
+   var channels = document.getElementById("channels");
+   channels.t = 0;
+   channels.slider = 1; // ##
+   channels.visible = false;
+
    resize();
 
    // add resize event handler
@@ -153,8 +201,8 @@ function populateControls(init)
    document.getElementById("mux_flag").checked = OSC.GL.mux_flag;
    document.getElementById("dcv_flag").checked = OSC.GL.dcv_flag;
 
-   document.getElementById("dcvSlider").set(OSC.GL.dcv / 2 + 0.5);
-   document.getElementById("inpDcv").value = OSC.GL.dcv * 1000;
+   document.getElementById("dcOffsetSlider").set(OSC.GL.dc_offset / 2 + 0.5);
+   document.getElementById("inpDcOffset").value = OSC.GL.dc_offset * 1000;
 
    document.getElementById("nominal_sampling_frequency").value = Math.round(OSC.GL.actual_sampling_frequency * 10) / 10;
    document.getElementById("actual_sampling_frequency").innerHTML = OSC.GL.actual_sampling_frequency + " GSPS";
@@ -207,7 +255,7 @@ function loadGl(init) {
          "clock_source": 0,
          "mux_flag": false,
          "dcv_flag": false,
-         "dcv": 0.000,
+         "dc_offset": 0.000,
          "board": [
             {
                "name": "wd000",
@@ -265,7 +313,7 @@ function setGl(e) {
          req.send(parseInt(e.value) / 1000);
       } else if (e.name == "range") {
          req.send(parseInt(e.value));
-      } else if (e.name == "dcv") {
+      } else if (e.name == "dc_offset") {
          req.send(parseInt(e.value) / 1000);
       } else if (e.name == "nominal_sampling_frequency") {
          req.send(parseFloat(e.value));
@@ -554,6 +602,7 @@ function resize()
 {
    var ctls = document.getElementById("controls");
    var config = document.getElementById("config");
+   var channels = document.getElementById("channels");
 
    if (ctls.hidden == true) {
       // hide panels
@@ -571,19 +620,33 @@ function resize()
          config.style.display = "none";
       config.style.opacity = 1;
 
+      if (channels.slider > 0)
+         channels.style.display = "block";
+      else
+         channels.style.display = "none";
+      channels.style.opacity = 1;
+
       OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth -
-         config.offsetWidth * config.slider,
+         config.offsetWidth * config.slider -
+         channels.offsetWidth * channels.slider,
          document.documentElement.clientHeight);
 
       // config full visible (configSlider = 1), hidden (configSlider = 0)
       ctls.style.left = (document.documentElement.clientWidth - ctls.offsetWidth -
-         config.offsetWidth * config.slider) + "px";
+         config.offsetWidth * config.slider -
+         channels.offsetWidth * channels.slider) + "px";
+
+      channels.style.left = (document.documentElement.clientWidth -
+         config.offsetWidth * config.slider - channels.offsetWidth * channels.slider) + "px";
+      channels.style.height = document.documentElement.clientHeight + "px";
+
       config.style.left = (document.documentElement.clientWidth -
          config.offsetWidth * config.slider) + "px";
       config.style.height = document.documentElement.clientHeight + "px";
 
       OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth -
-         config.offsetWidth * config.slider,
+         config.offsetWidth * config.slider -
+         channels.offsetWidth * channels.slider,
          document.documentElement.clientHeight);
    }
 }
@@ -809,14 +872,14 @@ function sldTDelay(value) {
    clearStat();
 }
 
-function sldDcv(value) {
+function sldDcOffset(value) {
    if (OSC.demoMode)
       return;
    var req = new XMLHttpRequest();
-   req.open("PUT", "gl/dcv", true);
+   req.open("PUT", "gl/dc_offset", true);
    req.send(Math.round(value * 2000 - 1000) / 1000);
 
-   document.getElementById("inpDcv").value = Math.round(value * 2000 - 1000);
+   document.getElementById("inpDcOffset").value = Math.round(value * 2000 - 1000);
 }
 
 function setRange(s) {
@@ -886,6 +949,13 @@ function btnConfig() {
    window.setTimeout(configSlide, 20);
 }
 
+function btnChannels() {
+   var channels = document.getElementById("channels");
+   channels.visible = !channels.visible;
+   channels.t = 0;
+   window.setTimeout(channelsSlide, 20);
+}
+
 function configSlide() {
    var config = document.getElementById("config");
 
@@ -901,6 +971,23 @@ function configSlide() {
 
    if (config.t < 10)
       window.setTimeout(configSlide, 20);
+}
+
+function channelsSlide() {
+   var channels = document.getElementById("channels");
+
+   channels.t++;
+
+   if (channels.visible) {
+      channels.slider = 1 - (1 - channels.t / 10) * (1 - channels.t / 10);
+   } else {
+      channels.slider = (1 - channels.t / 10) * (1 - channels.t / 10);
+   }
+
+   resize();
+
+   if (channels.t < 10)
+      window.setTimeout(channelsSlide, 20);
 }
 
 function measRem() {

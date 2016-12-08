@@ -83,8 +83,50 @@ a:focus { color:#0000FF; text-decoration:underline }
    opacity: 0; // pre-hidden
 }
 
+#channels {
+   border-left: 1px solid black;
+   position: absolute;
+   top: 0;
+   left: 0;
+   max-width: 300px;
+   width: 300px;
+   height: 5000px;
+   background-color: white;
+   text-align: left;
+   opacity: 0; // pre-hidden
+}
+
+#channelsTable {
+   width: 100%;
+   text-align: center;
+   border-collapse: collapse;
+   border: none;
+   padding: 10px;
+}
+
+.channelsTitle {
+   background-color: #D0D0D0;
+   padding: 10px;
+}
+
+.channelsRow:nth-child(even) {
+   background-color: #F0F0F0;
+}
+
+.channelsRow:nth-child(odd) {
+   background-color: #FFFFFF;
+}
+
+.channelsTh {
+   padding: 4px;
+}
+
+.channelsTd {
+   padding: 4px;
+}
+
 button {
-   font-size: 20px;
+   font-size: 16px;
    margin: 0;
    border: 2px solid #C0C0C0;
    border-radius: 10px;

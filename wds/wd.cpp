@@ -379,6 +379,14 @@ void wd_set_osctca(GLOBALS *gl, int index)
    } else {
       assert(wd_send(gl, index, 100, "calosc off", NULL, NULL) > 0);
    }
+
+   if (gl->board[index].revision == WD_REV_E) {
+      if (gl->osctca_flag) {
+         assert(wd_send(gl, index, 100, "lmksetch 6 1 2 0 1", NULL, NULL) > 0);  // enable LMK channel 6
+      } else {
+         assert(wd_send(gl, index, 100, "lmksetch 6 1 2 0 0", NULL, NULL) > 0);
+      }
+   }
 }
 
 /*-----------------------------------------------------------------------------------------*/
@@ -485,6 +493,7 @@ void wd_set_range(GLOBALS *gl, int index)
       printf("Set range = %g V\n", gl->board[index].range);
    
    if (gl->board[index].revision == WD_REV_D) {
+      gl->board[index].range_ofs = 0;
       if (fabs(gl->board[index].range) < 0.001) {                  // -0.5 ... +0.5
          if (gl->board[index].gain == 2)
             sprintf(str, "dacset ofs %d", 1270);
@@ -503,12 +512,13 @@ void wd_set_range(GLOBALS *gl, int index)
       }
    } else if (gl->board[index].revision == WD_REV_E) {
       if (fabs(gl->board[index].range) < 0.001) {                  // -0.5 ... +0.5
-         sprintf(str, "dacset ofs %d", 297);
+         gl->board[index].range_ofs = 0.700;
       } else if (fabs(gl->board[index].range - (-0.45)) < 0.001) { // -1 ... 0
-         sprintf(str, "dacset ofs %d", 6);
+         gl->board[index].range_ofs = 1.230;
       } else if (fabs(gl->board[index].range - 0.45) < 0.001) {    // 0 ... +1
-         sprintf(str, "dacset ofs %d", 582);
+         gl->board[index].range_ofs = 0.140;
       }
+      sprintf(str, "dacset ofs %d", (int)(gl->board[index].range_ofs*1000));
    }
 
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
@@ -540,10 +550,34 @@ void wd_set_dcv(GLOBALS *gl, int index)
       return;
    
    if (gl->verbose_flag)
-      printf("Set DC voltage = %g V\n", gl->dcv);
+      printf("Set DC voltage = %g V\n", gl->dc_offset);
    
-   sprintf(str, "dacset caldc %d", (int)(1280-gl->dcv*1000)); // shift by 1.28V
+   sprintf(str, "dacset caldc %d", (int)(1280-gl->dc_offset*1000)); // shift by 1.28V
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+// general function working both for revisitn 2D and 2E
+void wd_set_dc_offset(GLOBALS *gl, int index)
+{
+   char str[256];
+   
+   if (gl->demo_flag)
+      return;
+
+   if (gl->board[index].revision == WD_REV_D) {
+      wd_set_dcv_flag(gl, index);
+      wd_set_dcv(gl, index);
+   }
+
+   if (gl->board[index].revision == WD_REV_E) {
+      if (gl->verbose_flag)
+         printf("Set offset voltage = %g V\n", gl->dc_offset);
+      
+      sprintf(str, "dacset ofs %d", (int)((gl->board[index].range_ofs+gl->dc_offset*0.6)*1000));
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+   }
 }
 
 /*-----------------------------------------------------------------------------------------*/
@@ -630,24 +664,33 @@ int wd_init(GLOBALS *gl)
       assert(wd_send(gl, index, 100, "dbglvl none", NULL, NULL) > 0);
 
       // get board info
-      size = sizeof(reply);
-      wd_send(gl, index, 1000, "info", reply, &size); // first access long timeout
-      if (!size) {
-         printf("Board %s does not reply, aborting.\n", gl->board[index].name);
-         return FAILURE;
-      }
-      char *p = strstr(reply, "-- Version");
-      if (p != NULL) {
-         char *p2 = strstr(p, "\r\n\r\n");
-         if (p2 != NULL)
-            *p2 = 0;
-         if (gl->verbose_flag) {
+      if (gl->verbose_flag) {
+         size = sizeof(reply);
+         wd_send(gl, index, 1000, "info", reply, &size); // first access long timeout
+         if (!size) {
+            printf("Board %s does not reply, aborting.\n", gl->board[index].name);
+            return FAILURE;
+         }
+         char *p = strstr(reply, "-- Version");
+         if (p != NULL) {
+            char *p2 = strstr(p, "\r\n\r\n");
+            if (p2 != NULL)
+               *p2 = 0;
             printf("\n**** Board %s info: ****\n%s", gl->board[index].name, p);
          }
       }
 
-      gl->board[index].type     = 2; // WD2
-      gl->board[index].revision = 4; // A:0, B:1, C:2, D:3, E:4
+      // get board type
+      size = sizeof(reply);
+      sprintf(str, "regrd stat %X", REG_HW_VERSION_OFFSET);
+      assert(wd_send(gl, index, 1000, str, reply, &size) > 0);
+      if (strlen(reply) == 25) {
+         unsigned int dw = strtol(reply+15, NULL, 16);
+         gl->board[index].type     = (dw >> 8) & 0xFF; // WD2
+         gl->board[index].revision = dw & 0xFF;        // A:0, B:1, C:2, D:3, E:4
+         gl->board[index].type     = 2; //## temporary fix until firmware is ready
+         gl->board[index].revision = 4;
+      }
       
       // set destinantion port in WD board
       sprintf(str, "setenv dstport %d", gl->board[index].server_port);
@@ -725,6 +768,8 @@ int wd_init(GLOBALS *gl)
       wd_set_clocksource(gl, index);
       wd_set_channel9(gl, index);
       wd_read_board_status(gl, index);
+      wd_set_dcv_flag(gl, index);
+      wd_set_dc_offset(gl, index);
 
       // set LED green
       assert(wd_send(gl, index, 100, "ledset g", NULL, NULL) > 0);
@@ -1268,10 +1313,10 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
          wd_set_range(gl, pr->i_board);
          gl->mux_flag         = 1;
          gl->dcv_flag         = 1;
-         gl->dcv              = 0;
+         gl->dc_offset        = 0;
          wd_set_fe(gl, pr->i_board);
-         wd_set_dcv(gl, pr->i_board);
          wd_set_dcv_flag(gl, pr->i_board);
+         wd_set_dc_offset(gl, pr->i_board);
          
          int n = pr->n_iter1;
          n = MAX(n, pr->n_iter2);
@@ -1363,10 +1408,10 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
 
          gl->mux_flag         = 1;
          gl->dcv_flag         = 1;
-         gl->dcv              = 0.45f;
+         gl->dc_offset        = 0.45f;
          wd_set_fe(gl, pr->i_board);
-         wd_set_dcv(gl, pr->i_board);
          wd_set_dcv_flag(gl, pr->i_board);
+         wd_set_dc_offset(gl, pr->i_board);
       }
       
       pr->i_iter3++;
@@ -1408,7 +1453,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
          gl->gain_calib_flag  = 0;
          gl->range_calib_flag = 0;
 
-         gl->dcv              = -0.45f;
+         gl->dc_offset        = -0.45f;
          wd_set_dcv(gl, pr->i_board);
       }
       
@@ -1440,9 +1485,9 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
    }
    
    // reset board
-   gl->dcv = 0;
+   gl->dc_offset = 0;
    gl->dcv_flag = 0;
-   wd_set_dcv(gl, pr->i_board);
+   wd_set_dc_offset(gl, pr->i_board);
 
    gl->rotate_flag      = 1;
    gl->ofs_calib1_flag  = 1;
@@ -1552,10 +1597,10 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
    gl->board[pr->i_board].range = pr->prev_range;
    gl->mux_flag                 = 0;
    gl->dcv_flag                 = 0;
-   gl->dcv                      = 0;
+   gl->dc_offset                = 0;
    wd_set_fe(gl, pr->i_board);
-   wd_set_dcv(gl, pr->i_board);
    wd_set_dcv_flag(gl, pr->i_board);
+   wd_set_dc_offset(gl, pr->i_board);
    wd_set_range(gl, pr->i_board);
 
    // save calibration
@@ -2100,11 +2145,11 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       wd_set_range(gl, pr->i_board);
       gl->mux_flag         = 1;
       gl->dcv_flag         = 1;
-      gl->dcv              = 0;
+      gl->dc_offset        = 0;
       gl->osctca_flag      = 1;
       wd_set_fe(gl, pr->i_board);
-      wd_set_dcv(gl, pr->i_board);
       wd_set_dcv_flag(gl, pr->i_board);
+      wd_set_dc_offset(gl, pr->i_board);
       wd_set_osctca(gl, pr->i_board);
       
       pr->ave = new Averager(1, WD_N_CHANNELS, 1024, MAX(pr->n_iter1, pr->n_iter2));
@@ -2188,11 +2233,11 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
    gl->board[pr->i_board].range = pr->prev_range;
    gl->mux_flag                 = 0;
    gl->dcv_flag                 = 0;
-   gl->dcv                      = 0;
+   gl->dc_offset                = 0;
    gl->osctca_flag              = 0;
    wd_set_fe(gl, pr->i_board);
-   wd_set_dcv(gl, pr->i_board);
    wd_set_dcv_flag(gl, pr->i_board);
+   wd_set_dc_offset(gl, pr->i_board);
    wd_set_range(gl, pr->i_board);
    wd_set_osctca(gl, pr->i_board);
    
