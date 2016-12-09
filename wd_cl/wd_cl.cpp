@@ -67,6 +67,7 @@ int main(int argc, char *argv[])
    gl.mux_flag           = 0;
    gl.dcv_flag           = 0;
    gl.dcv                = 0;
+   gl.clock_source       = 1;
 
    for (i=0 ; i<16 ; i++) {
       gl.board[i].trigger_level = 0;
@@ -90,7 +91,7 @@ int main(int argc, char *argv[])
    // initialize ethernet interface to WD board
    if (wd_init(&gl) != SUCCESS)
           return FAILURE;
-    
+
     int option;
     char opline[256];
     do {
@@ -114,7 +115,7 @@ int main(int argc, char *argv[])
             unsigned int data=0;
             int scanfdata;
             wd_read_reg(&gl, 0,RRUN, &data);
-	    data &= 0xFFFFFF9;
+	    data &= 0xFFFFFFE9;
             printf("FADCMODE? ");
             scanf("%d", &scanfdata);
 	    data |= (scanfdata & 0x1)<<1;
@@ -123,7 +124,7 @@ int main(int argc, char *argv[])
 	    data |= (scanfdata & 0x1)<<2;
             printf("ALGSEL (0=TC, 1=LXe)? ");
             scanf("%d", &scanfdata);
-	    data |= (scanfdata & 0x1)<<5;
+	    data |= (scanfdata & 0x1)<<4;
             wd_write_reg(&gl, 0, RRUN, data);
         }
 	//
