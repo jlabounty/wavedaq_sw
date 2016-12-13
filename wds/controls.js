@@ -239,6 +239,7 @@ Controls.prototype.init = function () // scan DOM
 
       sl.position = 0.5; // slider position 0...1
       sl.addEventListener("click", this.ctrlVSliderHandler.bind(this));
+      sl.addEventListener("contextmenu", this.ctrlVSliderHandler.bind(this));
       sl.addEventListener("mousemove", this.ctrlVSliderHandler.bind(this));
       sl.addEventListener("touchmove", this.ctrlVSliderHandler.bind(this));
       sl.draw = this.ctrlVSliderDraw;
@@ -256,6 +257,7 @@ Controls.prototype.init = function () // scan DOM
 
       sl.position = 0.5; // slider position 0...1
       sl.addEventListener("click", this.ctrlHSliderHandler.bind(this));
+      sl.addEventListener("contextmenu", this.ctrlHSliderHandler.bind(this));
       sl.addEventListener("mousemove", this.ctrlHSliderHandler.bind(this));
       sl.addEventListener("touchmove", this.ctrlHSliderHandler.bind(this));
       sl.draw = this.ctrlHSliderDraw;
@@ -312,17 +314,26 @@ Controls.prototype.ctrlVSliderHandler = function (e) {
    if (e.type == "touchmove")
       y = e.changedTouches[e.changedTouches.length - 1].clientY - b.getBoundingClientRect().top;
 
-   if (y != undefined) {
-      b.position = 1 - (y - b.sliderOfs) / (b.clientHeight - 2 * b.sliderOfs);
-      if (b.position < 0)
-         b.position = 0;
-      if (b.position > 1)
-         b.position = 1;
+   if (e.type == "contextmenu") {
+      b.position = 0.5;
       this.ctrlVSliderDraw(b);
       var f = b.dataset.update;
       if (f.indexOf("("))
          f = f.substr(0, f.indexOf("("));
       window[f](b.position);
+   } else {
+      if (y != undefined) {
+         b.position = 1 - (y - b.sliderOfs) / (b.clientHeight - 2 * b.sliderOfs);
+         if (b.position < 0)
+            b.position = 0;
+         if (b.position > 1)
+            b.position = 1;
+         this.ctrlVSliderDraw(b);
+         var f = b.dataset.update;
+         if (f.indexOf("("))
+            f = f.substr(0, f.indexOf("("));
+         window[f](b.position);
+      }
    }
 };
 
@@ -378,17 +389,26 @@ Controls.prototype.ctrlHSliderHandler = function (e) {
    if (e.type == "touchmove")
       x = e.changedTouches[e.changedTouches.length - 1].clientX - b.getBoundingClientRect().left;
 
-   if (x != undefined) {
-      b.position = (x - b.sliderOfs) / (b.clientWidth - 2 * b.sliderOfs);
-      if (b.position < 0)
-         b.position = 0;
-      if (b.position > 1)
-         b.position = 1;
+   if (e.type == "contextmenu") {
+      b.position = 0.5;
       this.ctrlHSliderDraw(b);
       var f = b.dataset.update;
       if (f.indexOf("("))
          f = f.substr(0, f.indexOf("("));
       window[f](b.position);
+   } else {
+      if (x != undefined) {
+         b.position = (x - b.sliderOfs) / (b.clientWidth - 2 * b.sliderOfs);
+         if (b.position < 0)
+            b.position = 0;
+         if (b.position > 1)
+            b.position = 1;
+         this.ctrlHSliderDraw(b);
+         var f = b.dataset.update;
+         if (f.indexOf("("))
+            f = f.substr(0, f.indexOf("("));
+         window[f](b.position);
+      }
    }
 };
 
