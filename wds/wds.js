@@ -75,10 +75,15 @@ function init() {
       var cell = row.insertCell(-1);
       cell.className = "channelsTd";
       var sel = document.createElement('select');
-      var gains = ["1", "2", "4", "8", "10", "20", "40", "80", "100"];
+      sel.name = "gain/"+r;
+      sel.setAttribute("onchange", "setGl(this)");
+      //sel.addEventListener("change", setGl(sel));
+      var gains = ["0.5", "1", "2.5", "5", "10", "25", "50", "100"];
       for (var i=0 ; i<gains.length ; i++) {
          var op = document.createElement('option');
          op.value = op.textContent = gains[i];
+         if (gains[i] == "1")
+            op.selected = true;
          sel.appendChild(op);
       }
       cell.appendChild(sel);
@@ -301,7 +306,12 @@ function setGl(e) {
       }
    };
 
-   if (e.type == "checkbox") {
+   if (e.type == "select-one") {
+      if (e.selectedIndex != -1) {
+         req.open("PUT", "gl/" + e.name, true);
+         req.send(e.selectedOptions[0].value);
+      }
+   } else if (e.type == "checkbox") {
       req.open("PUT", "gl/" + e.name, true);
       req.send(e.checked ? "1" : "0");
    } else if (e.type == "radio") {

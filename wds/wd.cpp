@@ -249,38 +249,64 @@ int wd_send(GLOBALS *gl, int b, int timeout_ms, const char *str, char *result, i
 
 /*-----------------------------------------------------------------------------------------*/
 
-void wd_set_fe(GLOBALS *gl, int index)
+void wd_set_fe(GLOBALS *gl, int index, int channel)
 {
    char str[256];
-   int byte;
+   int byte = 0;
    
    if (gl->demo_flag)
       return;
    
    if (gl->verbose_flag)
-      printf("Set gain %d, PZC %d, mux %d\n", gl->board[index].gain, gl->board[index].pzc, gl->mux_flag);
+      printf("Set gain channel %d to %g, PZC %d, mux %d\n", channel, gl->board[index].gain[channel], gl->board[index].pzc[channel], gl->mux_flag);
 
-   // set input configuration
-   if (gl->board[index].pzc) { // pole zero cancellation on (bit=0)
-      if (gl->board[index].gain == 0)
+   if (gl->board[index].revision == WD_REV_D) {
+      // set input configuration
+      if (gl->board[index].gain[channel] == 1)
          byte = 0x02;
-      else if (gl->board[index].gain == 1)
+      else if (gl->board[index].gain[channel] == 10)
          byte = 0x0a;
-      else if (gl->board[index].gain == 2)
+      else if (gl->board[index].gain[channel] == 100)
          byte = 0x2A;
-   } else { // pole zero cancellation off (bit=1)
-      if (gl->board[index].gain == 0)
-         byte = 0x82;
-      else if (gl->board[index].gain == 1)
-         byte = 0x8a;
-      else if (gl->board[index].gain == 2)
-         byte = 0xaa;
+      else
+         byte = 0x02;
+      
+      if (!gl->board[index].pzc[channel]) // pole zero cancellation off (bit=1)
+         byte |= 0x80;
+      
+      if (gl->mux_flag)
+         byte |= 0x01;
    }
    
-   if (gl->mux_flag)
-      byte |= 0x01;
+   if (gl->board[index].revision == WD_REV_E) {
+      // set input configuration according to FE_bits_2E.xlsx
+      if (gl->board[index].gain[channel] == 0.5)
+         byte = 0x06;
+      else if (gl->board[index].gain[channel] == 1)
+         byte = 0x02;
+      else if (gl->board[index].gain[channel] == 2.5)
+         byte = 0x1A;
+      else if (gl->board[index].gain[channel] == 5)
+         byte = 0x16;
+      else if (gl->board[index].gain[channel] == 10)
+         byte = 0x12;
+      else if (gl->board[index].gain[channel] == 25)
+         byte = 0x5A;
+      else if (gl->board[index].gain[channel] == 50)
+         byte = 0x56;
+      else if (gl->board[index].gain[channel] == 100)
+         byte = 0x52;
+      else
+         byte = 0x02;
+      
+      if (!gl->board[index].pzc[channel]) // pole zero cancellation off (bit=1)
+         byte |= 0x100;
+      
+      if (gl->mux_flag)
+         byte |= 0x01;
+   }
 
-   sprintf(str, "feset all %02X", byte);
+   sprintf(str, "feset %d %02X", channel, byte);
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    
    // set MUX of channel 9
@@ -575,7 +601,7 @@ void wd_set_dc_offset(GLOBALS *gl, int index)
       if (gl->verbose_flag)
          printf("Set offset voltage = %g V\n", gl->dc_offset);
       
-      sprintf(str, "dacset ofs %d", (int)((gl->board[index].range_ofs+gl->dc_offset*0.6)*1000));
+      sprintf(str, "dacset ofs %d", (int)((gl->board[index].range_ofs+gl->dc_offset*1.09)*1000));
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    }
 }
@@ -1129,6 +1155,13 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                      }
                   }
                   
+                  // start-to-end offset calibration
+                  if (gl->ofs_calib2_flag) {
+                     for (i=0 ; i<WD_N_CHANNELS ; i++)
+                        for (int j=0 ; j<1024 ; j++)
+                           wfU[i][j] -= gl->board[b].vcalib.wf_offset2[i][j];
+                  }
+                  
                   // gain calibration
                   if (gl->gain_calib_flag) {
                      if (gl->rotate_flag) {
@@ -1152,13 +1185,6 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                      }
                   }
 
-                  // start-to-end offset calibration
-                  if (gl->ofs_calib2_flag) {
-                     for (i=0 ; i<WD_N_CHANNELS ; i++)
-                        for (int j=0 ; j<1024 ; j++)
-                           wfU[i][j] -= gl->board[b].vcalib.wf_offset2[i][j];
-                  }
-                  
                   // range calibration
                   if (gl->range_calib_flag) {
                      float ofs;
@@ -1454,7 +1480,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
          gl->range_calib_flag = 0;
 
          gl->dc_offset        = -0.45f;
-         wd_set_dcv(gl, pr->i_board);
+         wd_set_dc_offset(gl, pr->i_board);
       }
       
       pr->i_iter4++;
@@ -1498,7 +1524,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
 
    // measure offset without DCV at different ranges
    assert(wd_send(gl, pr->i_board, 100, "calbuf off", NULL, NULL) > 0);    // disable BUFFER_CTRL
-   assert(wd_send(gl, pr->i_board, 100, "feset all 82", NULL, NULL) > 0);  // gain 1, PZC off, MUX off
+   assert(wd_send(gl, pr->i_board, 100, "feset all 102", NULL, NULL) > 0);  // gain 1, PZC off, MUX off
 
    // Range -0.45
    gl->board[pr->i_board].range = -0.45f;

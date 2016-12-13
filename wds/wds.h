@@ -50,12 +50,12 @@ typedef struct {
    int            data_socket;
    int            server_port;
    unsigned char  eth_addr[16];
-   float          trigger_level;
+   float          trigger_level[WD_N_CHANNELS];
    float          trigger_delay;
    char           trigger_mask[10];
    int            trigger_source;
-   int            gain;
-   int            pzc;
+   float          gain[WD_N_CHANNELS];
+   int            pzc[WD_N_CHANNELS];
    float          range;
    float          range_ofs;
    float          temperature;
