@@ -75,9 +75,9 @@ function init() {
       var cell = row.insertCell(-1);
       cell.className = "channelsTd";
       var sel = document.createElement('select');
-      sel.name = "gain/"+r;
-      sel.setAttribute("onchange", "setGl(this)");
-      //sel.addEventListener("change", setGl(sel));
+      sel.id = "gain"+r;
+      sel.name = "gain";
+      sel.setAttribute("onchange", "setGl(this,"+r+")");
       var gains = ["0.5", "1", "2.5", "5", "10", "25", "50", "100"];
       for (var i=0 ; i<gains.length ; i++) {
          var op = document.createElement('option');
@@ -87,6 +87,16 @@ function init() {
          sel.appendChild(op);
       }
       cell.appendChild(sel);
+
+      var cell = row.insertCell(-1);
+      cell.className = "channelsTd";
+      var cb = document.createElement('input');
+      cb.type = "checkbox";
+      cb.name = "pzc";
+      cb.id = "pzc"+r;
+      cb.checked = false;
+      cb.setAttribute("onclick", "setGl(this,"+r+")");
+      cell.appendChild(cb);
 
       var cell = row.insertCell(-1);
       cell.className = "channelsTd";
@@ -191,14 +201,14 @@ function populateControls(init)
    OSC.nWd = OSC.GL.board.length;
 
    // populate config
-   document.getElementById("trgSlider").set(OSC.GL.board[0].trigger_level + 0.5);
-   document.getElementById("inpTLevel").value = Math.round(OSC.GL.board[0].trigger_level * 1000);
+   document.getElementById("trgSlider").set(OSC.GL.board[0].trigger_level[0] + 0.5);
+   document.getElementById("inpTLevel").value = Math.round(OSC.GL.board[0].trigger_level[0] * 1000);
    document.getElementById("trgDelaySlider").set(1 - OSC.GL.board[0].trigger_delay / 450);
    document.getElementById("inpTDelay").value = Math.round(OSC.GL.board[0].trigger_delay);
    document.config.trigger_mode[OSC.GL.trigger_mode].checked = true;
 
-   document.getElementById("pzc").checked = OSC.GL.board[0].pzc;
-   document.config.gain[parseInt(OSC.GL.board[0].gain)].checked = true;
+   document.getElementById("pzc").checked = OSC.GL.board[0].pzc[0];
+   document.getElementById("gain").value = OSC.GL.board[0].gain[0];
    document.getElementById("osctca_flag").checked = OSC.GL.osctca_flag;
 
    document.getElementById("rangeSelect").value = OSC.GL.board[0].range;
@@ -264,11 +274,12 @@ function loadGl(init) {
          "board": [
             {
                "name": "wd000",
-               "trigger_level": 0.000,
                "trigger_delay": 0,
                "trigger_mask": "FFFF0000",
-               "gain": 0,
-               "pzc": false,
+               "trigger_level": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+               "gain": [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+               "pzc": [false,false,false,false,false,false,false,false,
+                       false,false,false,false,false,false,false,false],
                "range": 0.000,
                "temperature": 36.9,
                "pll_locked": true,
@@ -294,7 +305,7 @@ function loadGl(init) {
    req.send();
 }
 
-function setGl(e) {
+function setGl(e, channel) {
    if (OSC.demoMode)
       return;
 
@@ -306,19 +317,33 @@ function setGl(e) {
       }
    };
 
+   if (e.name == "gain" && channel == undefined) {
+      for (var i=0 ; i<16 ; i++)
+         document.getElementById("gain"+i).value = e.value;
+   }
+
+   if (e.name == "pzc" && channel == undefined) {
+      for (var i=0 ; i<16 ; i++)
+         document.getElementById("pzc"+i).checked = e.checked;
+   }
+
+   var uri = "gl/" + OSC.board + "/"+ e.name;
+   if (channel != undefined)
+      uri += "/" + channel;
+
    if (e.type == "select-one") {
       if (e.selectedIndex != -1) {
-         req.open("PUT", "gl/" + e.name, true);
+         req.open("PUT", uri, true);
          req.send(e.selectedOptions[0].value);
       }
    } else if (e.type == "checkbox") {
-      req.open("PUT", "gl/" + e.name, true);
+      req.open("PUT", uri, true);
       req.send(e.checked ? "1" : "0");
    } else if (e.type == "radio") {
-      req.open("PUT", "gl/" + e.name, true);
+      req.open("PUT", uri, true);
       req.send(e.value);
    } else if (e.type == "text") {
-      req.open("PUT", "gl/" + e.name, true);
+      req.open("PUT", uri, true);
       if (e.name == "trigger_level") {
          req.send(parseInt(e.value) / 1000);
       } else if (e.name == "range") {
@@ -861,7 +886,7 @@ function sldTLevel(value) {
    if (OSC.demoMode)
       return;
    var req = new XMLHttpRequest();
-   req.open("PUT", "gl/trigger_level", true);
+   req.open("PUT", "gl/"+OSC.board+"/trigger_level", true);
    req.send(Math.round(value * 1000 - 500) / 1000);
 
    document.getElementById("inpTLevel").value = Math.round(value * 1000 - 500);
@@ -875,7 +900,7 @@ function sldTDelay(value) {
       return;
    var del = 450 - Math.round(value * 450);
    var req = new XMLHttpRequest();
-   req.open("PUT", "gl/trigger_delay", true);
+   req.open("PUT", "gl/"+OSC.board+"/trigger_delay", true);
    req.send(del);
 
    document.getElementById("inpTDelay").value = del;
@@ -886,7 +911,7 @@ function sldDcOffset(value) {
    if (OSC.demoMode)
       return;
    var req = new XMLHttpRequest();
-   req.open("PUT", "gl/dc_offset", true);
+   req.open("PUT", "gl/"+OSC.board+"/dc_offset", true);
    req.send(Math.round(value * 2000 - 1000) / 1000);
 
    document.getElementById("inpDcOffset").value = Math.round(value * 2000 - 1000);
@@ -896,7 +921,7 @@ function setRange(s) {
    if (OSC.demoMode)
       return;
    var req = new XMLHttpRequest();
-   req.open("PUT", "gl/range", true);
+   req.open("PUT", "gl/"+OSC.board+"/range", true);
    req.send(parseFloat(s.value));
 }
 

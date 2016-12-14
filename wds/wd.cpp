@@ -257,6 +257,13 @@ void wd_set_fe(GLOBALS *gl, int index, int channel)
    if (gl->demo_flag)
       return;
    
+   // channel == -1 means all channels
+   if (channel == -1) {
+      for (channel=0 ; channel<WD_N_CHANNELS ; channel++)
+         wd_set_fe(gl, index, channel);
+      return;
+   }
+   
    if (gl->verbose_flag)
       printf("Set gain channel %d to %g, PZC %d, mux %d\n", channel, gl->board[index].gain[channel], gl->board[index].pzc[channel], gl->mux_flag);
 
@@ -328,23 +335,29 @@ void wd_set_fe(GLOBALS *gl, int index, int channel)
 
 /*-----------------------------------------------------------------------------------------*/
 
-void wd_set_trigger_level(GLOBALS *gl, int index)
+void wd_set_trigger_level(GLOBALS *gl, int index, int channel)
 {
    char str[256];
 
    if (gl->demo_flag)
       return;
 
-   if (gl->verbose_flag)
-      printf("Set trigger level = %d mV\n", (int)(gl->board[index].trigger_level*1000));
+   if (channel == -1) {
+      for (channel=0 ; channel<WD_N_CHANNELS ; channel++)
+         wd_set_trigger_level(gl, index, channel);
+      return;
+   }
    
-   sprintf(str, "dacset tlevel0 %d", (int)(gl->board[index].trigger_level*500+900));
+   if (gl->verbose_flag)
+      printf("Set trigger level channel %d = %d mV\n", channel, (int)(gl->board[index].trigger_level[channel]*1000));
+   
+   sprintf(str, "dacset tlevel0 %d", (int)(gl->board[index].trigger_level[channel]*500+900));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   sprintf(str, "dacset tlevel1 %d", (int)(gl->board[index].trigger_level*500+900));
+   sprintf(str, "dacset tlevel1 %d", (int)(gl->board[index].trigger_level[channel]*500+900));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   sprintf(str, "dacset tlevel2 %d", (int)(gl->board[index].trigger_level*500+900));
+   sprintf(str, "dacset tlevel2 %d", (int)(gl->board[index].trigger_level[channel]*500+900));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   sprintf(str, "dacset tlevel3 %d", (int)(gl->board[index].trigger_level*500+900));
+   sprintf(str, "dacset tlevel3 %d", (int)(gl->board[index].trigger_level[channel]*500+900));
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
 }
 
@@ -521,17 +534,17 @@ void wd_set_range(GLOBALS *gl, int index)
    if (gl->board[index].revision == WD_REV_D) {
       gl->board[index].range_ofs = 0;
       if (fabs(gl->board[index].range) < 0.001) {                  // -0.5 ... +0.5
-         if (gl->board[index].gain == 2)
+         if (gl->board[index].gain[0] == 2)
             sprintf(str, "dacset ofs %d", 1270);
          else
             sprintf(str, "dacset ofs %d", 1300);
       } else if (fabs(gl->board[index].range - (-0.45)) < 0.001) { // -1 ... 0
-         if (gl->board[index].gain == 2)
+         if (gl->board[index].gain[0] == 2)
             sprintf(str, "dacset ofs %d", 1640);
          else
             sprintf(str, "dacset ofs %d", 2000);
       } else if (fabs(gl->board[index].range - 0.45) < 0.001) {    // 0 ... +1
-         if (gl->board[index].gain == 2)
+         if (gl->board[index].gain[0] == 2)
             sprintf(str, "dacset ofs %d", 890);
          else
             sprintf(str, "dacset ofs %d", 580);
@@ -743,7 +756,7 @@ int wd_init(GLOBALS *gl)
             printf("Set ipaddrdst     = %s\n", reply);
       }
       
-      wd_set_fe(gl, index);
+      wd_set_fe(gl, index, -1);
 
       // trun on comparator power
       assert(wd_send(gl, index, 100, "pwrcmp on", NULL, NULL) > 0);
@@ -787,7 +800,8 @@ int wd_init(GLOBALS *gl)
       assert(wd_send(gl, index, 100, "calclk lmk a", NULL, NULL) > 0);
       assert(wd_send(gl, index, 100, "calclk lmk b", NULL, NULL) > 0);
 
-      wd_set_trigger_level(gl, index);
+      for (int channel=0 ; channel<WD_N_CHANNELS ; channel++)
+         wd_set_trigger_level(gl, index, channel);
       wd_set_range(gl, index);
       wd_set_trigger_mode(gl, index);
       wd_set_osctca(gl, index);
@@ -1340,7 +1354,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
          gl->mux_flag         = 1;
          gl->dcv_flag         = 1;
          gl->dc_offset        = 0;
-         wd_set_fe(gl, pr->i_board);
+         wd_set_fe(gl, pr->i_board, -1);
          wd_set_dcv_flag(gl, pr->i_board);
          wd_set_dc_offset(gl, pr->i_board);
          
@@ -1435,7 +1449,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
          gl->mux_flag         = 1;
          gl->dcv_flag         = 1;
          gl->dc_offset        = 0.45f;
-         wd_set_fe(gl, pr->i_board);
+         wd_set_fe(gl, pr->i_board, -1);
          wd_set_dcv_flag(gl, pr->i_board);
          wd_set_dc_offset(gl, pr->i_board);
       }
@@ -1624,7 +1638,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
    gl->mux_flag                 = 0;
    gl->dcv_flag                 = 0;
    gl->dc_offset                = 0;
-   wd_set_fe(gl, pr->i_board);
+   wd_set_fe(gl, pr->i_board, -1);
    wd_set_dcv_flag(gl, pr->i_board);
    wd_set_dc_offset(gl, pr->i_board);
    wd_set_range(gl, pr->i_board);
@@ -2173,7 +2187,7 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       gl->dcv_flag         = 1;
       gl->dc_offset        = 0;
       gl->osctca_flag      = 1;
-      wd_set_fe(gl, pr->i_board);
+      wd_set_fe(gl, pr->i_board, -1);
       wd_set_dcv_flag(gl, pr->i_board);
       wd_set_dc_offset(gl, pr->i_board);
       wd_set_osctca(gl, pr->i_board);
@@ -2261,7 +2275,7 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
    gl->dcv_flag                 = 0;
    gl->dc_offset                = 0;
    gl->osctca_flag              = 0;
-   wd_set_fe(gl, pr->i_board);
+   wd_set_fe(gl, pr->i_board, -1);
    wd_set_dcv_flag(gl, pr->i_board);
    wd_set_dc_offset(gl, pr->i_board);
    wd_set_range(gl, pr->i_board);

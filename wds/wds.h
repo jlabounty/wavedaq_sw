@@ -11,8 +11,9 @@
 #define SUCCESS 1
 #define FAILURE 0
 
-#define WD_N_CHANNELS 18 // 8+1 * 2
-#define WD_N_BOARDS   16 // 16 boards per crate
+#define WD_N_INPUT_CHN 16
+#define WD_N_CHANNELS  18 // 8+1 * 2
+#define WD_N_BOARDS    16 // 16 boards per crate
 
 typedef struct {
    char           version_id[4];
@@ -50,12 +51,13 @@ typedef struct {
    int            data_socket;
    int            server_port;
    unsigned char  eth_addr[16];
-   float          trigger_level[WD_N_CHANNELS];
    float          trigger_delay;
    char           trigger_mask[10];
    int            trigger_source;
-   float          gain[WD_N_CHANNELS];
-   int            pzc[WD_N_CHANNELS];
+   float          trigger_level[WD_N_INPUT_CHN];
+   float          gain[WD_N_INPUT_CHN];
+   int            pzc[WD_N_INPUT_CHN];
+   float          pzc_tau;
    float          range;
    float          range_ofs;
    float          temperature;
@@ -162,8 +164,8 @@ typedef struct {
 
 // interface functions
 int wd_init(GLOBALS *gl);
-void wd_set_fe(GLOBALS *gl, int index);
-void wd_set_trigger_level(GLOBALS *gl, int index);
+void wd_set_fe(GLOBALS *gl, int index, int channel);
+void wd_set_trigger_level(GLOBALS *gl, int index, int channel);
 void wd_set_trigger_mode(GLOBALS *gl, int index);
 void wd_set_sampling_frequency(GLOBALS *gl, int index);
 void wd_set_range(GLOBALS *gl, int index);

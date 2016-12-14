@@ -126,9 +126,16 @@
          <div class="group">
             <div class="vSpacer5">
                Gain:
-               <input type="radio" id="gain1" name="gain" value="0" onClick="setGl(this)">1
-               <input type="radio" id="gain10" name="gain" value="1" onClick="setGl(this)">10
-               <input type="radio" id="gain100" name="gain" value="2" onClick="setGl(this)">100
+               <select id="gain" name="gain" class="select" onchange="setGl(this)">
+                  <option value="0.5">0.5</option>
+                  <option selected value="1">1</option>
+                  <option value="2.5">2.5</option>
+                  <option value="5">5</option>
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+               </select>
                &nbsp;&nbsp;&nbsp;
                <input type="checkbox" id="pzc" name="pzc" onClick="setGl(this)">PZC
             </div>
@@ -278,6 +285,7 @@
             <th class="channelsTh">Chn</th>
             <th class="channelsTh">Link</th>
             <th class="channelsTh">Gain</th>
+            <th class="channelsTh">PZC</th>
             <th class="channelsTh">Trigger Level</th>
          </tr>
          <!-- channel rows will be created dynamically in init() -->

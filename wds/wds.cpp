@@ -34,9 +34,10 @@ static struct mg_serve_http_opts s_http_server_opts;
 // This function will be called by mongoose on every new request
 static void wds_handler(struct mg_connection *nc, int event, void *p)
 {
-   char str[256], value[256], uri[256];
+   char str[256], uri[256], cmd[256], item[256], value[256];
    GLOBALS *gl;
    WD2_EVENT eventHeader;
+   int board, channel;
    
    struct http_message *hm = (struct http_message *)p;
    
@@ -45,8 +46,30 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->method, "PUT") == 0) {
       
       uri[0] = 0;
-      if (hm->uri.p)
+      cmd[0] = 0;
+      item[0] = 0;
+      board = -1;
+      channel = -1;
+      if (hm->uri.p) {
          strlcpy(uri, hm->uri.p, sizeof(uri));
+         char *p = strtok(uri, "/ ");
+         if (p) {
+            strlcpy(cmd, p, sizeof(item));
+            p = strtok(NULL, "/ ");
+            if (p) {
+               board = atoi(p);
+               p = strtok(NULL, "/ ");
+               if (p) {
+                  strlcpy(item, p, sizeof(item));
+                  p = strtok(NULL, "/ ");
+                  if (p) {
+                     if (isdigit(*p))
+                        channel = atoi(p);
+                  }
+               }
+            }
+         }
+      }
       
       value[0] = 0;
       if (hm->body.p) {
@@ -57,38 +80,54 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             value[0] = 0;
       }
 
-      if (strcmp(uri, "/gl/pzc") == 0) {
-         for (int i=0 ; i<gl->n_boards ; i++) {
-            gl->board[i].pzc = atoi(value);
-            wd_set_fe(gl, i);
+      if (strcmp(item, "pzc") == 0) {
+         if (channel == -1) {
+            for (int i=0 ; i<gl->n_boards ; i++) {
+               for (int j=0 ; j<WD_N_INPUT_CHN ; j++) {
+                  gl->board[i].pzc[j] = atoi(value);
+                  wd_set_fe(gl, i, j);
+               }
+            }
+         } else {
+            gl->board[board].pzc[channel] = atoi(value);
+            wd_set_fe(gl, board, channel);
          }
       }
       
-      else if (strncmp(uri, "/gl/gain", 8) == 0) {
-         if (strlen(hm->uri.p) == 8) {
+      else if (strcmp(item, "gain") == 0) {
+         if (channel == -1) {
             for (int i=0 ; i<gl->n_boards ; i++) {
-               gl->board[i].gain = atof(value);
-               wd_set_fe(gl, i);
+               for (int j=0 ; j<WD_N_INPUT_CHN ; j++)
+                  gl->board[i].gain[j] = atof(value);
+               wd_set_fe(gl, board, -1);
             }
          } else {
-            int i = atoi(uri+9);
-            gl->board[i].gain = atof(value);
-            wd_set_fe(gl, i);
+            gl->board[board].gain[channel] = atof(value);
+            wd_set_fe(gl, board, channel);
          }
       }
 
-      else if (strcmp(uri, "/gl/trigger_level") == 0) {
+      else if (strcmp(item, "trigger_level") == 0) {
          for (int i=0 ; i<gl->n_boards ; i++) {
-            gl->board[i].trigger_level = (float)atof(value);
-            if (gl->board[i].trigger_level > 0.5)
-               gl->board[i].trigger_level = 0.5;
-            if (gl->board[i].trigger_level < -0.5)
-               gl->board[i].trigger_level = -0.5;
-            wd_set_trigger_level(gl, i);
+            float tl = (float)atof(value);
+            if (tl > 0.5)
+               tl = 0.5;
+            if (tl < -0.5)
+               tl = -0.5;
+            
+            if (channel == -1) {
+               for (int j=0 ; j<WD_N_INPUT_CHN ; j++) {
+                  gl->board[i].trigger_level[j] = tl;
+                  wd_set_trigger_level(gl, board, j);
+               }
+            } else {
+               gl->board[board].trigger_level[channel] = tl;
+               wd_set_trigger_level(gl, board, channel);
+            }
          }
       }
 
-      else if (strcmp(uri, "/gl/trigger_delay") == 0) {
+      else if (strcmp(item, "trigger_delay") == 0) {
          for (int i=0 ; i<gl->n_boards ; i++) {
             gl->board[i].trigger_delay = (float)atof(value);
             if (gl->board[i].trigger_delay > 500)
@@ -99,30 +138,31 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          }
       }
 
-      else if (strcmp(uri, "/gl/trigger_mode") == 0) {
+      else if (strcmp(item, "trigger_mode") == 0) {
          gl->trigger_mode = atoi(value);
          for (int i=0 ; i<gl->n_boards ; i++)
             wd_set_trigger_mode(gl, i);
       }
 
-      else if (strcmp(uri, "/gl/osctca_flag") == 0) {
+      else if (strcmp(item, "osctca_flag") == 0) {
          gl->osctca_flag = atoi(value);
          gl->mux_flag = atoi(value);
          gl->dcv_flag = atoi(value);
          for (int i=0 ; i<gl->n_boards ; i++) {
             wd_set_osctca(gl, i);
-            wd_set_fe(gl, i);
+            for (channel=0 ; channel<WD_N_INPUT_CHN ; channel++)
+               wd_set_fe(gl, i, channel);
             wd_set_dcv_flag(gl, i);
          }
       }
 
-      else if (strcmp(uri, "/gl/read_channel9") == 0) {
+      else if (strcmp(item, "read_channel9") == 0) {
          gl->read_channel9 = atoi(value);
          for (int i=0 ; i<gl->n_boards ; i++)
             wd_set_channel9(gl, i);
       }
 
-      else if (strcmp(uri, "/gl/clock_source") == 0) {
+      else if (strcmp(item, "clock_source") == 0) {
          gl->clock_source = atoi(value);
          for (int i=0 ; i<gl->n_boards ; i++) {
             wd_set_clocksource(gl, i);
@@ -130,38 +170,38 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          }
       }
 
-      else if (strcmp(uri, "/gl/nominal_sampling_frequency") == 0) {
+      else if (strcmp(item, "nominal_sampling_frequency") == 0) {
          gl->nominal_sampling_frequency = (float)(atof(value));
          for (int i=0 ; i<gl->n_boards ; i++)
             wd_set_sampling_frequency(gl, i);
       }
 
-      else if (strcmp(uri, "/gl/range") == 0) {
+      else if (strcmp(item, "range") == 0) {
          for (int i=0 ; i<gl->n_boards ; i++) {
             gl->board[i].range = (float)atof(value);
             wd_set_range(gl, i);
          }
       }
 
-      else if (strcmp(uri, "/gl/mux_flag") == 0) {
+      else if (strcmp(item, "mux_flag") == 0) {
          gl->mux_flag = atoi(value);
          for (int i=0 ; i<gl->n_boards ; i++)
-            wd_set_fe(gl, i);
+            wd_set_fe(gl, board, i);
       }
 
-      else if (strcmp(uri, "/gl/dcv_flag") == 0) {
+      else if (strcmp(item, "dcv_flag") == 0) {
          gl->dcv_flag = atoi(value);
          for (int i=0 ; i<gl->n_boards ; i++)
             wd_set_dcv_flag(gl, i);
       }
 
-      else if (strcmp(uri, "/gl/dc_offset") == 0) {
+      else if (strcmp(item, "dc_offset") == 0) {
          gl->dc_offset = (float)atof(value);
          for (int i=0 ; i<gl->n_boards ; i++)
             wd_set_dc_offset(gl, i);
       }
 
-      else if (strcmp(uri, "/gl/adc_flag") == 0) {
+      else if (strcmp(item, "adc_flag") == 0) {
          gl->adc_flag = atoi(value);
          if (gl->adc_flag)
             gl->actual_sampling_frequency = 0.080f; // ADC 80 MHz
@@ -169,31 +209,31 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             wd_set_sampling_frequency(gl, 0);
       }
 
-      else if (strcmp(uri, "/gl/ofs_calib1_flag") == 0)
+      else if (strcmp(item, "ofs_calib1_flag") == 0)
          gl->ofs_calib1_flag = atoi(value);
-      else if (strcmp(uri, "/gl/ofs_calib2_flag") == 0)
+      else if (strcmp(item, "ofs_calib2_flag") == 0)
          gl->ofs_calib2_flag = atoi(value);
-      else if (strcmp(uri, "/gl/gain_calib_flag") == 0)
+      else if (strcmp(item, "gain_calib_flag") == 0)
          gl->gain_calib_flag = atoi(value);
-      else if (strcmp(uri, "/gl/range_calib_flag") == 0)
+      else if (strcmp(item, "range_calib_flag") == 0)
          gl->range_calib_flag = atoi(value);
-      else if (strcmp(uri, "/gl/remove_spikes") == 0)
+      else if (strcmp(item, "remove_spikes") == 0)
          gl->remove_spikes = atoi(value);
-      else if (strcmp(uri, "/gl/rotate_flag") == 0)
+      else if (strcmp(item, "rotate_flag") == 0)
          gl->rotate_flag = atoi(value);
-      else if (strcmp(uri, "/gl/time_calib1_flag") == 0)
+      else if (strcmp(item, "time_calib1_flag") == 0)
          gl->time_calib1_flag = atoi(value);
-      else if (strcmp(uri, "/gl/time_calib2_flag") == 0)
+      else if (strcmp(item, "time_calib2_flag") == 0)
          gl->time_calib2_flag = atoi(value);
-      else if (strcmp(uri, "/gl/time_calib3_flag") == 0)
+      else if (strcmp(item, "time_calib3_flag") == 0)
          gl->time_calib3_flag = atoi(value);
 
-      else if (strcmp(uri, "/vcalib") == 0) {
+      else if (strcmp(cmd, "vcalib") == 0) {
          if (!gl->demo_flag)
             vcalib_prog.state = CS_FIRST_BOARD;
       }
 
-      else if (strcmp(uri, "/tcalib") == 0) {
+      else if (strcmp(cmd, "tcalib") == 0) {
          if (!gl->demo_flag) {
             mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
             if (str[0]) {
@@ -205,7 +245,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          }
       }
 
-      else if (strcmp(uri, "/tcaliball") == 0) {
+      else if (strcmp(cmd, "tcaliball") == 0) {
          if (!gl->demo_flag)
             tcalib_prog.state = CS_FIRST_BOARD;
       }
@@ -250,11 +290,28 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       for (int i=0 ; i<gl->n_boards ; i++) {
          mg_printf_http_chunk(nc, "      {\n");
          mg_printf_http_chunk(nc, "         \"name\": \"%s\" ,\n",         gl->board[i].name);
-         mg_printf_http_chunk(nc, "         \"trigger_level\": %1.3lf,\n", gl->board[i].trigger_level);
          mg_printf_http_chunk(nc, "         \"trigger_delay\": %1.0lf,\n", gl->board[i].trigger_delay);
          mg_printf_http_chunk(nc, "         \"trigger_mask\": \"%s\",\n",  gl->board[i].trigger_mask);
-         mg_printf_http_chunk(nc, "         \"gain\": %g,\n",              gl->board[i].gain);
-         mg_printf_http_chunk(nc, "         \"pzc\": %s,\n",               gl->board[i].pzc ? "true" : "false");
+         
+         mg_printf_http_chunk(nc, "         \"trigger_level\": [\n");
+         for (int j=0 ; j<WD_N_INPUT_CHN ; j++)
+            mg_printf_http_chunk(nc, "            %1.3lf%c\n",     gl->board[i].trigger_level[j],
+                                 j<WD_N_INPUT_CHN-1?',':' ');
+         mg_printf_http_chunk(nc, "         ],\n");
+
+         mg_printf_http_chunk(nc, "         \"gain\": [\n");
+         for (int j=0 ; j<WD_N_INPUT_CHN ; j++)
+            mg_printf_http_chunk(nc, "            %1.3lf%c\n",     gl->board[i].gain[j],
+                                 j<WD_N_INPUT_CHN-1?',':' ');
+         mg_printf_http_chunk(nc, "         ],\n");
+
+         mg_printf_http_chunk(nc, "         \"pzc\": [\n");
+         for (int j=0 ; j<WD_N_INPUT_CHN ; j++)
+            mg_printf_http_chunk(nc, "            %s%c\n",         gl->board[i].pzc[j] ? "true" : "false",
+                                 j<WD_N_INPUT_CHN-1?',':' ');
+         mg_printf_http_chunk(nc, "         ],\n");
+
+         mg_printf_http_chunk(nc, "         \"pzc_tau\": %1.3lf,\n",       gl->board[i].pzc_tau);
          mg_printf_http_chunk(nc, "         \"range\": %1.3lf,\n",         gl->board[i].range);
          mg_printf_http_chunk(nc, "         \"temperature\": %1.1lf,\n",   gl->board[i].temperature);
          mg_printf_http_chunk(nc, "         \"pll_locked\": %s,\n",        gl->board[i].pll_locked ? "true" : "false");
@@ -263,7 +320,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          for (s=0 ; s<15 ; s++)
             mg_printf_http_chunk(nc, "            %d,\n", gl->board[i].scaler[s]);
          mg_printf_http_chunk(nc, "            %d]\n", gl->board[i].scaler[s]);
-         mg_printf_http_chunk(nc, "      }\n");
+         mg_printf_http_chunk(nc, "      }");
          if (i<gl->n_boards-1)
             mg_printf_http_chunk(nc, ",");
          mg_printf_http_chunk(nc, "\n");
@@ -502,12 +559,17 @@ int main(int argc, char *argv[])
    gl.adc_flag                   = 0;
 
    for (i=0 ; i<WD_N_BOARDS ; i++) {
-      gl.board[i].trigger_level  = 0;
       gl.board[i].trigger_delay  = 0;
-      gl.board[i].gain           = 1;       // gain 1
       gl.board[i].range          = 0;       // range +-0.5V
-      gl.board[i].pzc            = 0;       // PZC off
+      gl.board[i].pzc_tau        = 0;
+
       strlcpy(gl.board[i].trigger_mask, "FFFF0000", sizeof(gl.board[i].trigger_mask)); // or of all 16 channels
+      
+      for (j=0 ; j<WD_N_INPUT_CHN ; j++) {
+         gl.board[i].trigger_level[j] = 0;
+         gl.board[i].gain[j]          = 1;       // gain 1
+         gl.board[i].pzc[j]           = 0;       // PZC off
+      }
    }
    
    i1 = 0;
@@ -564,7 +626,8 @@ int main(int argc, char *argv[])
 
       else if (argv[i][0] == '-' && argv[i][1] == 'z') {
          for (j=0 ; j<WD_N_BOARDS ; j++)
-            gl.board[j].pzc = 1;
+            for (int k=0 ; k<WD_N_INPUT_CHN ; k++)
+               gl.board[j].pzc[k] = 1;
       }
 
       else {
