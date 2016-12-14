@@ -118,12 +118,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             if (channel == -1) {
                for (int j=0 ; j<WD_N_INPUT_CHN ; j++) {
                   gl->board[i].trigger_level[j] = tl;
-                  wd_set_trigger_level(gl, board, j);
                }
-            } else {
+            } else
                gl->board[board].trigger_level[channel] = tl;
-               wd_set_trigger_level(gl, board, channel);
-            }
+            wd_set_trigger_level(gl, board, channel);
          }
       }
 

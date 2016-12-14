@@ -65,15 +65,6 @@ function init() {
 
       var cell = row.insertCell(-1);
       cell.className = "channelsTd";
-      var cb = document.createElement('input');
-      cb.type = "checkbox";
-      cb.name = "Link channel";
-      cb.id = "channelLink"+r;
-      cb.checked = false;
-      cell.appendChild(cb);
-
-      var cell = row.insertCell(-1);
-      cell.className = "channelsTd";
       var sel = document.createElement('select');
       sel.id = "gain"+r;
       sel.name = "gain";
@@ -103,7 +94,9 @@ function init() {
       var inp = document.createElement('input');
       inp.type = "text";
       inp.value = "0";
-      inp.id = "channelTL"+r;
+      inp.name = "trigger_level";
+      inp.id = "trigger_level"+r;
+      cb.setAttribute("onchange", "setGl(this,"+r+")");
       cell.appendChild(inp);
       cell.appendChild(document.createTextNode(" mV"));
    }
@@ -316,6 +309,11 @@ function setGl(e, channel) {
          loadGl();
       }
    };
+
+   if (e.name == "trigger_level" && channel == undefined) {
+      for (var i=0 ; i<16 ; i++)
+         document.getElementById("trigger_level"+i).value = e.value;
+   }
 
    if (e.name == "gain" && channel == undefined) {
       for (var i=0 ; i<16 ; i++)

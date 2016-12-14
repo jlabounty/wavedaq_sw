@@ -342,23 +342,35 @@ void wd_set_trigger_level(GLOBALS *gl, int index, int channel)
    if (gl->demo_flag)
       return;
 
-   if (channel == -1) {
-      for (channel=0 ; channel<WD_N_CHANNELS ; channel++)
-         wd_set_trigger_level(gl, index, channel);
-      return;
+   if (gl->verbose_flag) {
+      if (channel != -1)
+         printf("Set trigger level channel %d = %d mV\n", channel, (int)(gl->board[index].trigger_level[channel]*1000));
+      else
+         printf("Set trigger level all channels = %d mV\n", (int)(gl->board[index].trigger_level[channel]*1000));
    }
    
-   if (gl->verbose_flag)
-      printf("Set trigger level channel %d = %d mV\n", channel, (int)(gl->board[index].trigger_level[channel]*1000));
+   if (gl->board[index].revision == WD_REV_D) {
+      sprintf(str, "dacset tlevel0 %d", (int)(gl->board[index].trigger_level[channel]*500+900));
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      sprintf(str, "dacset tlevel1 %d", (int)(gl->board[index].trigger_level[channel]*500+900));
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      sprintf(str, "dacset tlevel2 %d", (int)(gl->board[index].trigger_level[channel]*500+900));
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      sprintf(str, "dacset tlevel3 %d", (int)(gl->board[index].trigger_level[channel]*500+900));
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+   }
    
-   sprintf(str, "dacset tlevel0 %d", (int)(gl->board[index].trigger_level[channel]*500+900));
-   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   sprintf(str, "dacset tlevel1 %d", (int)(gl->board[index].trigger_level[channel]*500+900));
-   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   sprintf(str, "dacset tlevel2 %d", (int)(gl->board[index].trigger_level[channel]*500+900));
-   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   sprintf(str, "dacset tlevel3 %d", (int)(gl->board[index].trigger_level[channel]*500+900));
-   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+   if (gl->board[index].revision == WD_REV_E) {
+      if (channel == -1) {
+         for (int i=0 ; i<WD_N_INPUT_CHN ; i++)
+            wd_set_trigger_level(gl, index, i);
+         return;
+      }
+      if (channel != -1) {
+         sprintf(str, "dacset tlevel%d %d", channel, (int)(gl->board[index].trigger_level[channel]*500+900));
+         assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      }
+   }
 }
 
 /*-----------------------------------------------------------------------------------------*/
@@ -800,7 +812,7 @@ int wd_init(GLOBALS *gl)
       assert(wd_send(gl, index, 100, "calclk lmk a", NULL, NULL) > 0);
       assert(wd_send(gl, index, 100, "calclk lmk b", NULL, NULL) > 0);
 
-      for (int channel=0 ; channel<WD_N_CHANNELS ; channel++)
+      for (int channel=0 ; channel<WD_N_INPUT_CHN ; channel++)
          wd_set_trigger_level(gl, index, channel);
       wd_set_range(gl, index);
       wd_set_trigger_mode(gl, index);
