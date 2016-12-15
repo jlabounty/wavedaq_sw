@@ -96,7 +96,7 @@ function init() {
       inp.value = "0";
       inp.name = "trigger_level";
       inp.id = "trigger_level"+r;
-      cb.setAttribute("onchange", "setGl(this,"+r+")");
+      inp.setAttribute("onkeypress", "keyGl(event, this,"+r+")");
       cell.appendChild(inp);
       cell.appendChild(document.createTextNode(" mV"));
    }
@@ -104,7 +104,7 @@ function init() {
    // hide channels panel
    var channels = document.getElementById("channels");
    channels.t = 0;
-   channels.slider = 1; // ##
+   channels.slider = 0;
    channels.visible = false;
 
    resize();
@@ -369,11 +369,11 @@ function setPers(s) {
    OSC.disp.persistency = parseFloat(s.value);
 }
 
-function keyGl(event, input) {
+function keyGl(event, input, channel) {
    var charCode = (typeof event.which == "number") ? event.which : event.keyCode;
 
    if (charCode == 13) {
-      setGl(input);
+      setGl(input, channel);
    }
 }
 
@@ -880,14 +880,28 @@ function sldUOffset(value) {
    OSC.redraw();
 }
 
+var tLevelLast = -1;
+
 function sldTLevel(value) {
    if (OSC.demoMode)
       return;
+
+   value = Math.round((value - 0.5)*1000)/1000; // convert to V
+
+   if (value == tLevelLast) // only send if changed
+      return;
+   
+   tLevelLast = value;
    var req = new XMLHttpRequest();
    req.open("PUT", "gl/"+OSC.board+"/trigger_level", true);
-   req.send(Math.round(value * 1000 - 500) / 1000);
+   req.send(value);
 
-   document.getElementById("inpTLevel").value = Math.round(value * 1000 - 500);
+   document.getElementById("inpTLevel").value = value * 1000;
+   for (var i=0 ; i<16 ; i++) {
+      OSC.GL.board[OSC.board].trigger_level[i] = value;
+      document.getElementById("trigger_level"+i).value = value * 1000;
+   }
+   
    var d = new Date();
    OSC.lastTriggerLevelChange = d.getTime();
    clearStat();

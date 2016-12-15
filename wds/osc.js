@@ -283,6 +283,11 @@ Oscilloscope.prototype.resizeCanvas = function () {
 };
 
 Oscilloscope.prototype.draw = function () {
+   
+   // wait until globals are loaded
+   if (OSC.GL == undefined)
+      return;
+   
    this.nFrames++;
 
    var ctx = this.canvas.getContext("2d");
@@ -686,7 +691,7 @@ Oscilloscope.prototype.drawMarker = function (ctx) {
          ctx.fillStyle = this.chnColors[c];
          ctx.strokeStyle = this.chnColors[c];
 
-         y = (document.getElementById("inpTLevel").value / 1000) * this.wfUS[c] + this.wfUO[c];
+         y = (OSC.GL.board[OSC.board].trigger_level[c]) * this.wfUS[c] + this.wfUO[c];
 
          ctx.beginPath();
          ctx.moveTo(this.x2 - 2, y - 5);
