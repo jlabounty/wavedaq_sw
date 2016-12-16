@@ -905,6 +905,7 @@ function sldTLevel(value) {
    var d = new Date();
    OSC.lastTriggerLevelChange = d.getTime();
    clearStat();
+   OSC.redraw();
 }
 
 function sldTDelay(value) {

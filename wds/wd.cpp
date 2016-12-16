@@ -382,7 +382,9 @@ void wd_set_trigger_mode(GLOBALS *gl, int index)
       return;
    
    if (gl->verbose_flag)
-      printf("Set trigger mode %d, delay = %1.0lf\n", gl->trigger_mode, gl->board[index].trigger_delay);
+      printf("Set trigger mode %d, delay = %1.0lf, source = %s\n", gl->trigger_mode,
+             gl->board[index].trigger_delay,
+             gl->trigger_source == WD_TS_INTERNAL ? "internal" : "external");
 
    if (gl->board[index].trigger_delay == 0)
       delay = 0x100;
@@ -395,7 +397,7 @@ void wd_set_trigger_mode(GLOBALS *gl, int index)
    }
    
    // enable local trigger
-   if (gl->trigger_mode == TM_NORMAL) {
+   if (gl->trigger_mode == WD_TM_NORMAL) {
       // trigger_cfg_or
       sprintf(str, "regwr %02x %s", REG_TRIGGER_CFG_A_OFFSET, gl->board[index].trigger_mask);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
@@ -1325,9 +1327,9 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
          wd_set_osctca(gl, i);
    }
    
-   if (pr->state == CS_FIRST_BOARD) {
+   if (pr->state == WD_CS_FIRST_BOARD) {
       memset(pr, 0, sizeof(VCALIB_PROGRESS));
-      pr->state   = CS_FIRST_SAMPLE;
+      pr->state   = WD_CS_FIRST_SAMPLE;
       pr->n_iter1 = 200;
       pr->n_iter2 = 200;
       pr->n_iter3 = 200;
@@ -1336,13 +1338,13 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
       pr->i_board = 0;
    }
 
-   if (pr->state == CS_FIRST_SAMPLE) {
+   if (pr->state == WD_CS_FIRST_SAMPLE) {
       pr->progress = 0;
       pr->i_iter1  = 0;
       pr->i_iter2  = 0;
       pr->i_iter3  = 0;
       pr->i_iter4  = 0;
-      pr->state    = CS_RUNNING;
+      pr->state    = WD_CS_RUNNING;
    }
 
    //---- Primary Calibration ----
@@ -1667,11 +1669,11 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
 
    // switch to next board
    pr->i_board++;
-   pr->state = CS_FIRST_SAMPLE;
+   pr->state = WD_CS_FIRST_SAMPLE;
    pr->progress = 1;
    
    if (pr->i_board == pr->n_board) {
-      pr->state = CS_INACTIVE;
+      pr->state = WD_CS_INACTIVE;
       gl->rotate_flag = 1;
       gl->ofs_calib1_flag  = 1;
       gl->ofs_calib2_flag  = 1;
@@ -2156,14 +2158,14 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
    WD2_EVENT eventHeader;
    char str[80];
    
-   if (pr->state == CS_FIRST_BOARD || pr->state == CS_SINGLE_BOARD) {
+   if (pr->state == WD_CS_FIRST_BOARD || pr->state == WD_CS_SINGLE_BOARD) {
       memset(pr, 0, sizeof(VCALIB_PROGRESS));
-      pr->state             = CS_FIRST_SAMPLE;
+      pr->state             = WD_CS_FIRST_SAMPLE;
       pr->n_iter1           = 400;
       pr->n_iter2           = 400;
       pr->n_iter3           = 100;
       pr->n_board           = gl->n_boards;
-      if (pr->state == CS_FIRST_BOARD)
+      if (pr->state == WD_CS_FIRST_BOARD)
          pr->i_board           = 0;
       gl->rotate_flag       = 0;
       gl->adc_flag          = 0;
@@ -2176,11 +2178,11 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       gl->time_calib3_flag  = 0;
    }
    
-   if (pr->state == CS_FIRST_SAMPLE) {
+   if (pr->state == WD_CS_FIRST_SAMPLE) {
       pr->progress = 0;
       pr->i_iter1  = 0;
       pr->i_iter2  = 0;
-      pr->state    = CS_RUNNING;
+      pr->state    = WD_CS_RUNNING;
 
       // initialize delta-t array with nominal values
       for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
@@ -2304,13 +2306,13 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
    
    // switch to next board
    pr->i_board++;
-   pr->state             = CS_FIRST_SAMPLE;
+   pr->state             = WD_CS_FIRST_SAMPLE;
    pr->progress          = 1;
    gl->time_calib1_flag  = 0;
    gl->rotate_flag       = 0;
    
    if (pr->i_board == pr->n_board) {
-      pr->state             = CS_INACTIVE;
+      pr->state             = WD_CS_INACTIVE;
       gl->rotate_flag       = 1;
       gl->ofs_calib1_flag   = 1;
       gl->ofs_calib2_flag   = 1;

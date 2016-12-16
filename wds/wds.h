@@ -53,7 +53,6 @@ typedef struct {
    unsigned char  eth_addr[16];
    float          trigger_delay;
    char           trigger_mask[10];
-   int            trigger_source;
    float          trigger_level[WD_N_INPUT_CHN];
    float          gain[WD_N_INPUT_CHN];
    int            pzc[WD_N_INPUT_CHN];
@@ -89,6 +88,7 @@ typedef struct {
    float          nominal_sampling_frequency;
    float          actual_sampling_frequency;
    int            trigger_mode;
+   int            trigger_source;
    int            osctca_flag;
    int            read_channel9;
    int            clock_source;
@@ -148,19 +148,19 @@ typedef struct {
 } TCALIB_PROGRESS;
 
 // calibration states
-#define CS_INACTIVE     0
-#define CS_SINGLE_BOARD 1
-#define CS_FIRST_BOARD  2
-#define CS_FIRST_SAMPLE 3
-#define CS_RUNNING      4
+#define WD_CS_INACTIVE     0
+#define WD_CS_SINGLE_BOARD 1
+#define WD_CS_FIRST_BOARD  2
+#define WD_CS_FIRST_SAMPLE 3
+#define WD_CS_RUNNING      4
 
 // trigger modes
-#define TM_NORMAL       0
-#define TM_AUTO         1
+#define WD_TM_NORMAL       0
+#define WD_TM_AUTO         1
 
 // trigger sources
-#define TS_INTERNAL     0
-#define TS_EXTERNAL     1
+#define WD_TS_INTERNAL     0
+#define WD_TS_EXTERNAL     1
 
 // interface functions
 int wd_init(GLOBALS *gl);

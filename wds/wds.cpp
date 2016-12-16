@@ -142,6 +142,13 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             wd_set_trigger_mode(gl, i);
       }
 
+      else if (strcmp(item, "trigger_source") == 0) {
+         gl->trigger_source = (float)atof(value);
+         for (int i=0 ; i<gl->n_boards ; i++) {
+            wd_set_trigger_mode(gl, i);
+         }
+      }
+
       else if (strcmp(item, "osctca_flag") == 0) {
          gl->osctca_flag = atoi(value);
          gl->mux_flag = atoi(value);
@@ -228,7 +235,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
       else if (strcmp(cmd, "vcalib") == 0) {
          if (!gl->demo_flag)
-            vcalib_prog.state = CS_FIRST_BOARD;
+            vcalib_prog.state = WD_CS_FIRST_BOARD;
       }
 
       else if (strcmp(cmd, "tcalib") == 0) {
@@ -236,16 +243,16 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
             if (str[0]) {
                int b = atoi(str);
-               tcalib_prog.state = CS_SINGLE_BOARD;
+               tcalib_prog.state = WD_CS_SINGLE_BOARD;
                tcalib_prog.i_board = b;
             } else
-               tcalib_prog.state = CS_FIRST_BOARD;
+               tcalib_prog.state = WD_CS_FIRST_BOARD;
          }
       }
 
       else if (strcmp(cmd, "tcaliball") == 0) {
          if (!gl->demo_flag)
-            tcalib_prog.state = CS_FIRST_BOARD;
+            tcalib_prog.state = WD_CS_FIRST_BOARD;
       }
 
       mg_printf(nc, "HTTP/1.1 204 No Content\r\n");
@@ -276,6 +283,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "   \"nominal_sampling_frequency\": %1.3lf,\n", gl->nominal_sampling_frequency);
       mg_printf_http_chunk(nc, "   \"actual_sampling_frequency\": %1.3lf,\n", gl->actual_sampling_frequency);
       mg_printf_http_chunk(nc, "   \"trigger_mode\": %d,\n",       gl->trigger_mode);
+      mg_printf_http_chunk(nc, "   \"trigger_source\": %d,\n",     gl->trigger_source);
       mg_printf_http_chunk(nc, "   \"osctca_flag\": %s,\n",        gl->osctca_flag ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"read_channel9\": %s,\n",      gl->read_channel9 ? "true" : "false");
       mg_printf_http_chunk(nc, "   \"clock_source\": %d,\n",       gl->clock_source);
@@ -458,7 +466,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             // issue single ADC software trigger
             wd_send(gl, b, 100, "adcget\n", NULL, NULL);
          } else {
-            if (gl->trigger_mode == TM_AUTO)
+            if (gl->trigger_mode == WD_TM_AUTO)
                // issue single DRS software trigger
                wd_send(gl, b, 100, "drsget\n", NULL, NULL);
             else
@@ -547,7 +555,8 @@ int main(int argc, char *argv[])
    gl.time_calib1_flag           = 1;
    gl.time_calib2_flag           = 1;
    gl.time_calib3_flag           = 0;
-   gl.trigger_mode               = TM_AUTO;
+   gl.trigger_mode               = WD_TM_AUTO;
+   gl.trigger_source             = WD_TS_INTERNAL;
    gl.osctca_flag                = 0;
    gl.read_channel9              = 1;
    gl.clock_source               = 0;
@@ -659,13 +668,13 @@ int main(int argc, char *argv[])
       VCALIB_PROGRESS prog;
       
       printf("Calibrating boards\n");
-      prog.state = CS_FIRST_BOARD;
+      prog.state = WD_CS_FIRST_BOARD;
 
       do {
          double old_prog;
          int old_board;
          
-         if (prog.state == CS_FIRST_BOARD || prog.state == CS_FIRST_SAMPLE) {
+         if (prog.state == WD_CS_FIRST_BOARD || prog.state == WD_CS_FIRST_SAMPLE) {
             printf("%s: [                                                 ]\r%s: [",
                    gl.board[prog.i_board].name, gl.board[prog.i_board].name);
             fflush(stdout);
@@ -680,10 +689,10 @@ int main(int argc, char *argv[])
             printf("=");
             fflush(stdout);
          }
-         if (prog.state == CS_FIRST_SAMPLE)
+         if (prog.state == WD_CS_FIRST_SAMPLE)
             printf("\r\n");
          
-      } while (prog.state != CS_INACTIVE);
+      } while (prog.state != WD_CS_INACTIVE);
       printf("\r\n");
       
       return 0;
@@ -713,12 +722,12 @@ int main(int argc, char *argv[])
    time_t last = 0, now;
    for (;;) {
       // do calibration if asked for
-      if (vcalib_prog.state != CS_INACTIVE) {
+      if (vcalib_prog.state != WD_CS_INACTIVE) {
          wd_calibrate_voltage(&gl, &vcalib_prog);
          
          // Yield to server, no timeout
          mg_mgr_poll(&mgr, 0);
-      } else if (tcalib_prog.state != CS_INACTIVE) {
+      } else if (tcalib_prog.state != WD_CS_INACTIVE) {
          wd_calibrate_time(&gl, &tcalib_prog);
          
          // Yield to server, no timeout
