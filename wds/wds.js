@@ -687,6 +687,10 @@ function resize()
 function oscKeypress(e) {
    var charCode = (typeof e.which == "number") ? e.which : e.keyCode;
 
+   // check if for some dialog box etc.
+   if (e.target != document.body)
+      return;
+   
    if (charCode == ' '.charCodeAt(0)) {
       btnStop();
    }
@@ -1003,6 +1007,52 @@ function btnChannels() {
    channels.t = 0;
    window.setTimeout(channelsSlide, 20);
 }
+
+function btnSave() {
+   dlgShow('dlgSave');
+   document.getElementById('filename').focus();
+}
+
+function btnStart() {
+   var e = document.getElementById('btnSave');
+   e.innerHTML = "Stop";
+   e.style.border = "3px solid blue";
+
+   var req = new XMLHttpRequest();
+   var param = document.getElementById("filename").value;
+   param += "\n";
+   param += document.getElementById("fileformat").selectedOptions[0].value;
+   param += "\n";
+   param += document.getElementById("nevents").value;
+   req.open("PUT", "save", true);
+   req.send(param);
+   dlgHide('dlgSave');
+}
+
+/*
+   } else {
+      e.innerHTML = "Save";
+      e.style.border = "2px solid #C0C0C0";
+      req.send(0);
+      //download data file
+      var link = document.createElement("a");
+      if("download" in link){
+         document.body.appendChild(link);
+         link.download = "data.dat";
+         link.href= "data.dat";
+         link.click();
+         document.body.removeChild(link);
+         window.URL.revokeObjectURL("data.dat");
+      } else {
+         //do not support download attribute
+         window.open("data.dat");
+      }
+      delete link;
+   }
+
+   dlgHide("dlgSave");
+}
+*/
 
 function configSlide() {
    var config = document.getElementById("config");

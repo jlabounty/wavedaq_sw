@@ -65,7 +65,7 @@ document.write("<style>" +
    ".dlgPanel {" +
    "   background-color: #F0F0F0;" +
    "   text-align: center;" +
-   "   padding: 5px;" +
+   "   padding: 10px;" +
    "   border-bottom-left-radius: 6px;" +
    "   border-bottom-right-radius: 6px;" +
    "}" +
