@@ -816,8 +816,8 @@ int wd_init(GLOBALS *gl)
       // set caldc to zero
       assert(wd_send(gl, index, 100, "dacset caldc 1280", NULL, NULL) > 0);
 
-      // set DRS readout mode to ROI
-      sprintf(str, "regwr %02x 20200030", REG_CONTROL_OFFSET);
+      // set DRS readout mode to ROI and ADC ISERDES delay
+      sprintf(str, "regwr %02x 1F1F0030", REG_CONTROL_OFFSET);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
 
       // set LMK registers to their defaults, see "LMK regs.xls"
