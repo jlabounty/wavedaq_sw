@@ -56,7 +56,7 @@ typedef struct {
    float          trigger_level[WD_N_INPUT_CHN];
    float          gain[WD_N_INPUT_CHN];
    int            pzc[WD_N_INPUT_CHN];
-   float          pzc_tau;
+   int            pzc_level;
    float          range;
    float          range_ofs;
    float          temperature;
@@ -167,6 +167,7 @@ int wd_init(GLOBALS *gl);
 void wd_set_fe(GLOBALS *gl, int index, int channel);
 void wd_set_trigger_level(GLOBALS *gl, int index, int channel);
 void wd_set_trigger_mode(GLOBALS *gl, int index);
+void wd_set_pzc_level(GLOBALS *gl, int index);
 void wd_set_sampling_frequency(GLOBALS *gl, int index);
 void wd_set_range(GLOBALS *gl, int index);
 void wd_set_osctca(GLOBALS *gl, int index);

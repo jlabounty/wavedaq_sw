@@ -335,6 +335,32 @@ void wd_set_fe(GLOBALS *gl, int index, int channel)
 
 /*-----------------------------------------------------------------------------------------*/
 
+void wd_set_pzc_level(GLOBALS *gl, int index)
+{
+   char str[256];
+   int  l;
+   
+   int level[] = {0, 500, 1000, 1500, 1800, 2000, 2500};
+   if (gl->demo_flag)
+      return;
+   
+   l = gl->board[index].pzc_level;
+   if (l < 1)
+      l = 1;
+   if (l > sizeof(level)/sizeof(int))
+      l = sizeof(level)/sizeof(int);
+   
+   if (gl->verbose_flag)
+      printf("Set PZC level = %d\n", l);
+   
+   if (gl->board[index].revision == WD_REV_E) {
+      sprintf(str, "dacset pzclevel %d", level[l-1]);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+   }
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
 void wd_set_trigger_level(GLOBALS *gl, int index, int channel)
 {
    char str[256];

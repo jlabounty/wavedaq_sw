@@ -94,6 +94,13 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          }
       }
       
+      if (strcmp(item, "pzc_level") == 0) {
+         for (int i=0 ; i<gl->n_boards ; i++) {
+            gl->board[i].pzc_level = atoi(value);
+            wd_set_pzc_level(gl, i);
+         }
+      }
+
       else if (strcmp(item, "gain") == 0) {
          if (channel == -1) {
             for (int i=0 ; i<gl->n_boards ; i++) {
@@ -317,7 +324,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                                  j<WD_N_INPUT_CHN-1?',':' ');
          mg_printf_http_chunk(nc, "         ],\n");
 
-         mg_printf_http_chunk(nc, "         \"pzc_tau\": %1.3lf,\n",       gl->board[i].pzc_tau);
+         mg_printf_http_chunk(nc, "         \"pzc_level\": %d,\n",         gl->board[i].pzc_level);
          mg_printf_http_chunk(nc, "         \"range\": %1.3lf,\n",         gl->board[i].range);
          mg_printf_http_chunk(nc, "         \"temperature\": %1.1lf,\n",   gl->board[i].temperature);
          mg_printf_http_chunk(nc, "         \"pll_locked\": %s,\n",        gl->board[i].pll_locked ? "true" : "false");
@@ -568,7 +575,7 @@ int main(int argc, char *argv[])
    for (i=0 ; i<WD_N_BOARDS ; i++) {
       gl.board[i].trigger_delay  = 0;
       gl.board[i].range          = 0;       // range +-0.5V
-      gl.board[i].pzc_tau        = 0;
+      gl.board[i].pzc_level      = 1;
 
       strlcpy(gl.board[i].trigger_mask, "FFFF0000", sizeof(gl.board[i].trigger_mask)); // or of all 16 channels
       
