@@ -191,7 +191,7 @@ Oscilloscope.prototype.mouseEvent = function (e) {
       else if ((e.button & 2) > 0) e.which = 3; // Right
    }
 
-   if (this.disp.histo) {
+   if (this.disp.histo && e.target == this.canvas) {
 
       // division bar
       if (Math.abs(e.clientY - this.hiy1) < 10 &&

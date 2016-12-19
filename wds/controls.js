@@ -432,10 +432,23 @@ function dlgShow(dlg) {
    d.dlgMouseDown = function (e) {
       if ((e.target == this || e.target.parentNode == this) &&
          e.target.className == "dlgTitlebar") {
+         e.preventDefault();
          this.Ax = e.clientX;
          this.Ay = e.clientY;
          this.Dx = parseInt(this.style.left);
          this.Dy = parseInt(this.style.top);
+
+      }
+
+      var p = e.target;
+      while (p != undefined && p != this && p != document.body)
+         p = p.parentElement;
+
+      if (p == this) {
+         var dlgs = document.getElementsByClassName("dlgFrame");
+         for (var i=0 ; i<dlgs.length ; i++)
+            dlgs[i].style.zIndex = 10;
+         d.style.zIndex = 11;
       }
    };
 
