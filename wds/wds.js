@@ -625,6 +625,18 @@ function receiveWF() {
 
       // redraw oscilloscope to show new waveforms
       OSC.redraw();
+
+      // if logging file is complete, load it
+      if (OSC.logFlag && OSC.nLogged == OSC.nRequested) {
+         OSC.logFlag = false;
+
+         var e = document.getElementById('btnSave');
+         e.innerHTML = "Start";
+         e.style.border = "2px solid #C0C0C0";
+
+         // trigger loading of file
+         window.location.href = OSC.logfile;
+      }
    }
 }
 
@@ -1018,16 +1030,33 @@ function btnStart() {
    e.innerHTML = "Stop";
    e.style.border = "3px solid blue";
 
+   if (document.getElementById("filename").value == "") {
+      dlgAlert("Warning", "Please enter a valid file name");
+      return;
+   }
+
+   var e = document.getElementById("nevents").value;
+   if (isNaN(parseInt(e)) || parseInt(e) < 1 || parseInt(e) > 1E6) {
+      dlgAlert("Warning", "Please enter a valid number of events");
+      return;
+   }
+
+   OSC.logfile = document.getElementById("filename").value;
+   OSC.nRequested = parseInt(e);
+   OSC.logFlag = true;
+   OSC.nLogged = 0;
+
    var req = new XMLHttpRequest();
-   var param = document.getElementById("filename").value;
+   var param = OSC.filename;
    param += "\n";
    param += document.getElementById("fileformat").selectedOptions[0].value;
    param += "\n";
    param += document.getElementById("saveboards").selectedOptions[0].value;
    param += "\n";
-   param += document.getElementById("nevents").value;
+   param += e;
    req.open("PUT", "save", true);
    req.send(param);
+
    dlgHide('dlgSave');
 }
 

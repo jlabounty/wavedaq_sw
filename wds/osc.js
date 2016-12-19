@@ -65,6 +65,11 @@ function Oscilloscope(div) { // constructor
    this.demoMode = demoMode;
    this.remoteDemo = false;
 
+   this.logFlag = false;
+   this.logfile = "";
+   this.nLogged = 0;
+   this.nRequested = 0;
+
    this.nFrames = 0;
    this.nFPS = 0;
    this.nEvents = 0;
@@ -348,15 +353,17 @@ Oscilloscope.prototype.printTemperature = function (ctx) {
 };
 
 Oscilloscope.prototype.printLogged = function (ctx) {
-   ctx.fillStyle = 'white';
-   ctx.strokeStyle = 'white';
-   ctx.font = '14px sans-serif';
-   ctx.textAlign = "left";
-   ctx.textBaseline = "top";
+   if (OSC.logFlag) {
+      ctx.fillStyle = 'white';
+      ctx.strokeStyle = 'white';
+      ctx.font = '14px sans-serif';
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
 
-   if (OSC.nLogged != undefined && OSC.nLogged > 0) {
-      var t = OSC.nLogged + " events logged";
-      ctx.fillText(t, this.x2 - ctx.measureText(t).width-10, this.y2 - 24);
+      if (OSC.nLogged != undefined && OSC.nLogged > 0) {
+         var t = OSC.nLogged + " events logged";
+         ctx.fillText(t, this.x2 - ctx.measureText(t).width - 10, this.y2 - 24);
+      }
    }
 };
 
