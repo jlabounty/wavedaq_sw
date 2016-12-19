@@ -522,7 +522,7 @@ function receiveWF() {
          } else if (responseType == 1) { // time array
             i++;
             OSC.wd = intArray[i++];
-            var f = intArray[i++];
+            OSC.nLogged = intArray[i++];
             var c = intArray[i++];
             var n = intArray[i++];
             OSC.i1 = 0;
@@ -561,7 +561,7 @@ function receiveWF() {
             i++;
             OSC.idle = false;
             OSC.wd = intArray[i++];
-            f = intArray[i++];
+            OSC.nLogged = intArray[i++];
             c = intArray[i++];
             n = intArray[i++];
             for (j = 0; j < n; j++)
@@ -1023,36 +1023,13 @@ function btnStart() {
    param += "\n";
    param += document.getElementById("fileformat").selectedOptions[0].value;
    param += "\n";
+   param += document.getElementById("saveboards").selectedOptions[0].value;
+   param += "\n";
    param += document.getElementById("nevents").value;
    req.open("PUT", "save", true);
    req.send(param);
    dlgHide('dlgSave');
 }
-
-/*
-   } else {
-      e.innerHTML = "Save";
-      e.style.border = "2px solid #C0C0C0";
-      req.send(0);
-      //download data file
-      var link = document.createElement("a");
-      if("download" in link){
-         document.body.appendChild(link);
-         link.download = "data.dat";
-         link.href= "data.dat";
-         link.click();
-         document.body.removeChild(link);
-         window.URL.revokeObjectURL("data.dat");
-      } else {
-         //do not support download attribute
-         window.open("data.dat");
-      }
-      delete link;
-   }
-
-   dlgHide("dlgSave");
-}
-*/
 
 function configSlide() {
    var config = document.getElementById("config");

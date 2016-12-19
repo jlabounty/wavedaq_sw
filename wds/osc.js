@@ -316,6 +316,7 @@ Oscilloscope.prototype.draw = function () {
       this.drawMeasurements(ctx);
       this.printFPS(ctx);
       this.printTemperature(ctx);
+      this.printLogged(ctx);
       this.printScalers(ctx);
       this.printMeasurements(ctx);
       this.printStatus(ctx);
@@ -343,6 +344,19 @@ Oscilloscope.prototype.printTemperature = function (ctx) {
    if (OSC.GL != undefined) {
       var t = OSC.GL.board[OSC.board].temperature;
       ctx.fillText("T = " + t.toFixed(1) + " C", this.x1 + 12, this.y2 - 24);
+   }
+};
+
+Oscilloscope.prototype.printLogged = function (ctx) {
+   ctx.fillStyle = 'white';
+   ctx.strokeStyle = 'white';
+   ctx.font = '14px sans-serif';
+   ctx.textAlign = "left";
+   ctx.textBaseline = "top";
+
+   if (OSC.nLogged != undefined && OSC.nLogged > 0) {
+      var t = OSC.nLogged + " events logged";
+      ctx.fillText(t, this.x2 - ctx.measureText(t).width-10, this.y2 - 24);
    }
 };
 

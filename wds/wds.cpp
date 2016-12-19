@@ -262,6 +262,26 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             tcalib_prog.state = WD_CS_FIRST_BOARD;
       }
 
+      else if (strcmp(cmd, "save") == 0) {
+         char *p = strtok(value, "\n");
+         if (p) {
+            strlcpy(gl->li.filename, p, sizeof(gl->li.filename));
+            p = strtok(NULL, "\n");
+            if (p) {
+               gl->li.format = p[0] == 'x' ? LI_FORMAT_XML : LI_FORMAT_BIN;
+               p = strtok(NULL, "\n");
+               if (p) {
+                  gl->li.board = p[0] == 'a' ? -1 : 0;
+                  p = strtok(NULL, "\n");
+                  if (p) {
+                     gl->li.nRequest = atoi(p);
+                     gl->li.nLogged = 0;
+                  }
+               }
+            }
+         }
+      }
+
       mg_printf(nc, "HTTP/1.1 204 No Content\r\n");
    }
    
@@ -484,19 +504,22 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          status = wd_read_waveform(gl, b, 1000, &eventHeader, wfU, wfT);
       }
 
+      // save waveforms
+      wd_save_waveform(gl, b, chn, &eventHeader, wfU, wfT);
+
       if (gl->demo_flag)
          b = 0xFF; // signals demo data
       
       if (status == SUCCESS) {
-         int t = 1;    // array type
-         int n = 1024; // number of elements
-         int f = 0;    // frame number
+         int t = 1;                 // array type
+         int n = 1024;              // number of elements
+         int l = gl->li.nLogged;    // number of logged events
          for (int c=0 ; c<WD_N_CHANNELS ; c++) {
             if (chn & (1 << c)) {
                t = 1; // time array
                mg_send_http_chunk(nc, (const char *)&t, 4);
                mg_send_http_chunk(nc, (const char *)&b, 4);
-               mg_send_http_chunk(nc, (const char *)&f, 4);
+               mg_send_http_chunk(nc, (const char *)&l, 4);
                mg_send_http_chunk(nc, (const char *)&c, 4);
                mg_send_http_chunk(nc, (const char *)&n, 4);
                mg_send_http_chunk(nc, (const char *)wfT[c], sizeof(float)*n);
@@ -508,7 +531,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                t = 2; // voltage array
                mg_send_http_chunk(nc, (const char *)&t, 4);
                mg_send_http_chunk(nc, (const char *)&b, 4);
-               mg_send_http_chunk(nc, (const char *)&f, 4);
+               mg_send_http_chunk(nc, (const char *)&l, 4);
                mg_send_http_chunk(nc, (const char *)&c, 4);
                mg_send_http_chunk(nc, (const char *)&n, 4);
                mg_send_http_chunk(nc, (const char *)wfU[c], sizeof(float)*n);
