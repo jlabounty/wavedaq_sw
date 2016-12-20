@@ -4,7 +4,7 @@
 // PLEASE CHECK THE MSCB HANDLE DEFINITION
 int tcb_init() {
   // open mscb connection CHECK MSCB NODE
-  handle = mscb_init("MSCBXXX", 0, "", 0);
+  handle = mscb_init((char *)"MSCBXXX", 0, "", 0);
   // create TCB Board
   TCBBoard.fslot = 17;
   // check the board ID

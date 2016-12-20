@@ -27,7 +27,7 @@ C_OBJ = $(C_FILES:%.c=%.o)
 
 # search *.c and *.cpp files
 CPP_FILES = $(wildcard *.cpp)
-CPP_OBJ = $(CPP_FILES:%.c=%.o)
+CPP_OBJ = $(CPP_FILES:%.cpp=%.o)
 
 all: $(OUTNAME)
 
