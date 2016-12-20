@@ -82,6 +82,7 @@ typedef struct {
 
 typedef struct {
    int            fh;
+   MXML_WRITER    *xml;
    char           filename[256];
    int            format; // LI_FORMAT_xxx
    int            board;

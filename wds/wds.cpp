@@ -18,6 +18,7 @@
 #endif
 
 #include "averager.h"
+#include "mxml.h"
 #include "wds.h"
 #include "mongoose.h"
 
@@ -267,8 +268,14 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          if (p && strcmp(p, "stop") == 0) {
             // close file on premature stop
             gl->li.nRequest = gl->li.nLogged;
-            close(gl->li.fh);
-            gl->li.fh = 0;
+            if (gl->li.fh) {
+               close(gl->li.fh);
+               gl->li.fh = 0;
+            }
+            if (gl->li.xml) {
+               mxml_close_file(gl->li.xml);
+               gl->li.xml = NULL;
+            }
          }
          else if (p) {
             strlcpy(gl->li.filename, p, sizeof(gl->li.filename));

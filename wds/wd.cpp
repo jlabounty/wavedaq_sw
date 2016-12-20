@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 
+#include "mxml.h"
 #include "averager.h"
 #include "wds.h"
 #include "register_map.h"
@@ -1389,17 +1390,65 @@ int wd_save_waveform(GLOBALS *gl, int b, int chn, WD2_EVENT *pe, float wfU[WD_N_
    
    // open file on new request
    if (gl->li.nRequest && gl->li.nLogged == 0) {
-       if (gl->li.fh > 0)
-       close(gl->li.fh);
-       
-       gl->li.fh = open(gl->li.filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0644);
-       assert(gl->li.fh > 0);
+
+      if (gl->li.format == LI_FORMAT_BIN) {
+         if (gl->li.fh > 0)
+            close(gl->li.fh);
+         
+         gl->li.fh = open(gl->li.filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0644);
+         assert(gl->li.fh > 0);
+      }
+      
+      if (gl->li.format == LI_FORMAT_XML) {
+         if (gl->li.xml)
+            mxml_close_file(gl->li.xml);
+         
+         gl->li.xml = mxml_open_file(gl->li.filename);
+         assert(gl->li.xml);
+      }
    }
-       
-   if (gl->li.fh == 0)
+   
+   if (gl->li.fh == 0 && gl->li.xml == NULL)
       return SUCCESS;
    
+   TIMESTAMP ts;
+   GetTimeStamp(ts);
+
    if (gl->li.format == LI_FORMAT_XML) {
+      char str[256];
+      mxml_start_element(gl->li.xml, "Event");
+      sprintf(str, "%d", gl->li.nLogged+1);
+      mxml_write_element(gl->li.xml, "Serial", str);
+      sprintf(str, "%4d/%02d/%02d %02d:%02d:%02d.%03d", ts.Year, ts.Month,
+              ts.Day, ts.Hour, ts.Minute, ts.Second, ts.Milliseconds);
+      mxml_write_element(gl->li.xml, "Time", str);
+      mxml_write_element(gl->li.xml, "HUnit", "ns");
+      mxml_write_element(gl->li.xml, "VUnit", "mV");
+      
+      for (int b=0 ; b<gl->n_boards ; b++) {
+         sprintf(str, "Board_%d", gl->board[b].serial_number);
+         mxml_start_element(gl->li.xml, str);
+         for (int i=0 ; i<WD_N_CHANNELS ; i++) {
+            if (1/*##*/) {
+               sprintf(str, "CHN%d", i);
+               mxml_start_element(gl->li.xml, str);
+               sprintf(str, "%d", i < WD_N_CHANNELS/2 ? pe->drs0_trigger_cell : pe->drs1_trigger_cell);
+               mxml_write_element(gl->li.xml, "Trigger_Cell", str);
+               sprintf(str, "%u", gl->board[b].scaler[i]);
+               mxml_write_element(gl->li.xml, "Scaler", str);
+               mxml_start_element(gl->li.xml, "Waveform");
+               strcpy(str, "\n");
+               for (int j=0 ; j<1024 ; j++) {
+                  sprintf(str, "%1.3f,%1.1f", wfT[i][j]*1E9, wfU[i][j]*1E3);
+                  mxml_write_element(gl->li.xml, "Data", str);
+               }
+               mxml_end_element(gl->li.xml); // CHNx
+               mxml_end_element(gl->li.xml); // CHNx
+            }
+         }
+         mxml_end_element(gl->li.xml); //Board
+      }
+      mxml_end_element(gl->li.xml); // Event
    }
    
    if (gl->li.format == LI_FORMAT_BIN) {
@@ -1433,9 +1482,6 @@ int wd_save_waveform(GLOBALS *gl, int b, int chn, WD2_EVENT *pe, float wfU[WD_N_
             }
          }
       }
-      
-      TIMESTAMP ts;
-      GetTimeStamp(ts);
       
       memcpy(p, "EHDR", 4);
       p += 4;

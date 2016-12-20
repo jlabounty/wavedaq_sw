@@ -631,11 +631,11 @@ function receiveWF() {
          OSC.logFlag = false;
 
          var e = document.getElementById('btnSave');
-         e.innerHTML = "Start";
+         e.innerHTML = "Save";
          e.style.border = "2px solid #C0C0C0";
 
          // trigger loading of file
-         window.location.href = OSC.logfile;
+         downloadFile(OSC.logfile);
       }
    }
 }
@@ -1027,7 +1027,7 @@ function btnSave() {
 
       req.onreadystatechange = function () {
          if (req.readyState == 4 && req.status == 204) {
-            window.location.href = OSC.logfile;
+            downloadFile(OSC.logfile);
          }
       };
 
@@ -1035,7 +1035,7 @@ function btnSave() {
       req.send("stop");
 
       OSC.logFlag = false;
-      e.innerHTML = "Start";
+      e.innerHTML = "Save";
       e.style.border = "2px solid #C0C0C0";
 
    } else {
@@ -1079,6 +1079,20 @@ function btnStart() {
    dlgHide('dlgSave');
 }
 
+function downloadFile(filename) {
+   var link = document.createElement("a");
+   if ("download" in link) {
+      document.body.appendChild(link);
+      link.download = filename;
+      link.href = filename;
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(filename);
+   } else {
+      // no support for download attribute
+      window.open(filename);
+   }
+}
 function configSlide() {
    var config = document.getElementById("config");
 
