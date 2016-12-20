@@ -1400,7 +1400,6 @@ int wd_save_waveform(GLOBALS *gl, int b, int chn, WD2_EVENT *pe, float wfU[WD_N_
       return SUCCESS;
    
    if (gl->li.format == LI_FORMAT_XML) {
-      
    }
    
    if (gl->li.format == LI_FORMAT_BIN) {
@@ -1503,7 +1502,7 @@ int wd_save_waveform(GLOBALS *gl, int b, int chn, WD2_EVENT *pe, float wfU[WD_N_
    
    gl->li.nLogged++;
    
-   if (gl->li.nLogged == gl->li.nRequest) {
+   if (gl->li.nLogged == gl->li.nRequest && gl->li.fh) {
       close(gl->li.fh);
       gl->li.fh = 0;
    }

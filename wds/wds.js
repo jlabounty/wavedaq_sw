@@ -1021,14 +1021,33 @@ function btnChannels() {
 }
 
 function btnSave() {
-   dlgShow('dlgSave');
-   document.getElementById('filename').focus();
+   var e = document.getElementById('btnSave');
+   if (e.innerHTML == "Stop") {
+      var req = new XMLHttpRequest();
+
+      req.onreadystatechange = function () {
+         if (req.readyState == 4 && req.status == 204) {
+            window.location.href = OSC.logfile;
+         }
+      };
+
+      req.open("PUT", "save", true);
+      req.send("stop");
+
+      OSC.logFlag = false;
+      e.innerHTML = "Start";
+      e.style.border = "2px solid #C0C0C0";
+
+   } else {
+      dlgShow('dlgSave');
+      document.getElementById('filename').focus();
+   }
 }
 
 function btnStart() {
    var e = document.getElementById('btnSave');
    e.innerHTML = "Stop";
-   e.style.border = "3px solid blue";
+   e.style.border = "3px solid #00A0FF";
 
    if (document.getElementById("filename").value == "") {
       dlgAlert("Warning", "Please enter a valid file name");
@@ -1047,7 +1066,7 @@ function btnStart() {
    OSC.nLogged = 0;
 
    var req = new XMLHttpRequest();
-   var param = OSC.filename;
+   var param = OSC.logfile;
    param += "\n";
    param += document.getElementById("fileformat").selectedOptions[0].value;
    param += "\n";

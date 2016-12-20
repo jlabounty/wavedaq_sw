@@ -264,7 +264,13 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
       else if (strcmp(cmd, "save") == 0) {
          char *p = strtok(value, "\n");
-         if (p) {
+         if (p && strcmp(p, "stop") == 0) {
+            // close file on premature stop
+            gl->li.nRequest = gl->li.nLogged;
+            close(gl->li.fh);
+            gl->li.fh = 0;
+         }
+         else if (p) {
             strlcpy(gl->li.filename, p, sizeof(gl->li.filename));
             p = strtok(NULL, "\n");
             if (p) {
