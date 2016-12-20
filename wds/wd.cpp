@@ -146,6 +146,43 @@ size_t strlcat(char *dst, const char *src, size_t size)
 
 /*-----------------------------------------------------------------------------------------*/
 
+void GetTimeStamp(TIMESTAMP &ts)
+{
+#ifdef _MSC_VER
+   SYSTEMTIME t;
+   static unsigned int ofs = 0;
+   
+   GetLocalTime(&t);
+   if (ofs == 0)
+      ofs = timeGetTime() - t.wMilliseconds;
+   ts.Year         = t.wYear;
+   ts.Month        = t.wMonth;
+   ts.Day          = t.wDay;
+   ts.Hour         = t.wHour;
+   ts.Minute       = t.wMinute;
+   ts.Second       = t.wSecond;
+   ts.Milliseconds = (timeGetTime() - ofs) % 1000;
+#else
+   struct timeval t;
+   struct tm *lt;
+   time_t now;
+   
+   gettimeofday(&t, NULL);
+   time(&now);
+   lt = localtime(&now);
+   
+   ts.Year         = lt->tm_year+1900;
+   ts.Month        = lt->tm_mon+1;
+   ts.Day          = lt->tm_mday;
+   ts.Hour         = lt->tm_hour;
+   ts.Minute       = lt->tm_min;
+   ts.Second       = lt->tm_sec;
+   ts.Milliseconds = t.tv_usec/1000;
+#endif /* OS_UNIX */
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
 int wd_send(GLOBALS *gl, int b, int timeout_ms, const char *str, char *result, int *size)
 {
    size_t n;
@@ -1336,6 +1373,141 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
    } while (1);
    
    return FAILURE;
+}
+
+
+/*-----------------------------------------------------------------------------------------*/
+
+int wd_save_waveform(GLOBALS *gl, int b, int chn, WD2_EVENT *pe, float wfU[WD_N_CHANNELS][1024], float wfT[WD_N_CHANNELS][1024])
+{
+   static unsigned char *buffer = NULL;
+   unsigned char *p;
+   
+   int buffer_size = 8 + 4 + (1024*4+12)*18 + (1024*2+12)*18;
+   if (!buffer)
+      buffer = (unsigned char *)malloc(buffer_size);
+   
+   // open file on new request
+   if (gl->li.nRequest && gl->li.nLogged == 0) {
+       if (gl->li.fh > 0)
+       close(gl->li.fh);
+       
+       gl->li.fh = open(gl->li.filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0644);
+       assert(gl->li.fh > 0);
+   }
+       
+   if (gl->li.fh == 0)
+      return SUCCESS;
+   
+   if (gl->li.format == LI_FORMAT_XML) {
+   }
+   
+   if (gl->li.format == LI_FORMAT_BIN) {
+      p = buffer;
+      
+      if (gl->li.nLogged == 0) {
+         memcpy(p, "DRS8", 4); // File identifier and version
+         p += 4;
+         
+         // time calibration header
+         memcpy(p, "TIME", 4);
+         p += 4;
+         
+         for (int b=0 ; b<gl->n_boards ; b++) {
+            // store board serial number
+            sprintf((char *)p, "B#");
+            p += 2;
+            *(unsigned short *)p = gl->board[b].serial_number;
+            p += sizeof(unsigned short);
+            
+            for (int i=0 ; i<WD_N_CHANNELS ; i++) {
+               if (chn && (1 << i)){
+                  sprintf((char *)p, "C%03d", i);
+                  p += 4;
+                  for (int j=0 ; j<1024 ; j++) {
+                     // save binary time as 32-bit float value
+                     *(float *)p = gl->board[b].tcalib.dt[i][j];
+                     p += sizeof(float);
+                  }
+               }
+            }
+         }
+      }
+      
+      TIMESTAMP ts;
+      GetTimeStamp(ts);
+      
+      memcpy(p, "EHDR", 4);
+      p += 4;
+      *(int *)p = gl->li.nLogged;
+      p += sizeof(int);
+      *(unsigned short *)p = ts.Year;
+      p += sizeof(unsigned short);
+      *(unsigned short *)p = ts.Month;
+      p += sizeof(unsigned short);
+      *(unsigned short *)p = ts.Day;
+      p += sizeof(unsigned short);
+      *(unsigned short *)p = ts.Hour;
+      p += sizeof(unsigned short);
+      *(unsigned short *)p = ts.Minute;
+      p += sizeof(unsigned short);
+      *(unsigned short *)p = ts.Second;
+      p += sizeof(unsigned short);
+      *(unsigned short *)p = ts.Milliseconds;
+      p += sizeof(unsigned short);
+      *(unsigned short *)p = (unsigned short)(gl->board[0].range * 1000); // range
+      p += sizeof(unsigned short);
+      
+      for (int b=0 ; b<gl->n_boards ; b++) {
+         
+         // store board serial number
+         sprintf((char *)p, "B#");
+         p += 2;
+         *(unsigned short *)p = gl->board[b].serial_number;
+         p += sizeof(unsigned short);
+         
+         
+         for (int i=0 ; i<WD_N_CHANNELS ; i++) {
+            if (chn && (1 << i)) {
+               // store trigger cell
+               sprintf((char *)p, "T#");
+               p += 2;
+               *(unsigned short *)p = i < WD_N_CHANNELS/2 ? pe->drs0_trigger_cell : pe->drs1_trigger_cell;
+               p += sizeof(unsigned short);
+
+               sprintf((char *)p, "C%03d", i+1);
+               p += 4;
+               
+               unsigned int s = gl->board[b].scaler[i];
+               memcpy(p, &s, sizeof(int));
+               p += sizeof(int);
+               
+               for (int j=0 ; j<1024 ; j++) {
+                  // save binary date as 16-bit value:
+                  // 0 = -0.5V,  65535 = +0.5V    for range 0
+                  // 0 = -0.05V, 65535 = +0.95V   for range 0.45
+                  unsigned short d = (unsigned short)((wfU[i][j]/1000.0 - gl->board[b].range + 0.5) * 65535);
+                  *(unsigned short *)p = d;
+                  p += sizeof(unsigned short);
+               }
+            }
+         }
+      }
+      
+      int size = p - buffer;
+      int n = write(gl->li.fh, buffer, size);
+      assert(n == size);
+      assert(size < buffer_size);
+   }
+   
+   gl->li.nLogged++;
+   
+   if (gl->li.nLogged == gl->li.nRequest && gl->li.fh) {
+      close(gl->li.fh);
+      gl->li.fh = 0;
+   }
+
+   return SUCCESS;
 }
 
 /*-----------------------------------------------------------------------------------------*/

@@ -65,6 +65,11 @@ function Oscilloscope(div) { // constructor
    this.demoMode = demoMode;
    this.remoteDemo = false;
 
+   this.logFlag = false;
+   this.logfile = "";
+   this.nLogged = 0;
+   this.nRequested = 0;
+
    this.nFrames = 0;
    this.nFPS = 0;
    this.nEvents = 0;
@@ -191,7 +196,7 @@ Oscilloscope.prototype.mouseEvent = function (e) {
       else if ((e.button & 2) > 0) e.which = 3; // Right
    }
 
-   if (this.disp.histo) {
+   if (this.disp.histo && e.target == this.canvas) {
 
       // division bar
       if (Math.abs(e.clientY - this.hiy1) < 10 &&
@@ -316,6 +321,7 @@ Oscilloscope.prototype.draw = function () {
       this.drawMeasurements(ctx);
       this.printFPS(ctx);
       this.printTemperature(ctx);
+      this.printLogged(ctx);
       this.printScalers(ctx);
       this.printMeasurements(ctx);
       this.printStatus(ctx);
@@ -343,6 +349,21 @@ Oscilloscope.prototype.printTemperature = function (ctx) {
    if (OSC.GL != undefined) {
       var t = OSC.GL.board[OSC.board].temperature;
       ctx.fillText("T = " + t.toFixed(1) + " C", this.x1 + 12, this.y2 - 24);
+   }
+};
+
+Oscilloscope.prototype.printLogged = function (ctx) {
+   if (OSC.logFlag) {
+      ctx.fillStyle = 'white';
+      ctx.strokeStyle = 'white';
+      ctx.font = '14px sans-serif';
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+
+      if (OSC.nLogged != undefined && OSC.nLogged > 0) {
+         var t = OSC.nLogged + "/" + OSC.nRequested + " events logged";
+         ctx.fillText(t, this.x2 - ctx.measureText(t).width - 10, this.y2 - 24);
+      }
    }
 };
 

@@ -522,7 +522,7 @@ function receiveWF() {
          } else if (responseType == 1) { // time array
             i++;
             OSC.wd = intArray[i++];
-            var f = intArray[i++];
+            OSC.nLogged = intArray[i++];
             var c = intArray[i++];
             var n = intArray[i++];
             OSC.i1 = 0;
@@ -561,7 +561,7 @@ function receiveWF() {
             i++;
             OSC.idle = false;
             OSC.wd = intArray[i++];
-            f = intArray[i++];
+            OSC.nLogged = intArray[i++];
             c = intArray[i++];
             n = intArray[i++];
             for (j = 0; j < n; j++)
@@ -625,6 +625,18 @@ function receiveWF() {
 
       // redraw oscilloscope to show new waveforms
       OSC.redraw();
+
+      // if logging file is complete, load it
+      if (OSC.logFlag && OSC.nLogged == OSC.nRequested) {
+         OSC.logFlag = false;
+
+         var e = document.getElementById('btnSave');
+         e.innerHTML = "Start";
+         e.style.border = "2px solid #C0C0C0";
+
+         // trigger loading of file
+         window.location.href = OSC.logfile;
+      }
    }
 }
 
@@ -687,6 +699,10 @@ function resize()
 function oscKeypress(e) {
    var charCode = (typeof e.which == "number") ? e.which : e.keyCode;
 
+   // check if for some dialog box etc.
+   if (e.target != document.body)
+      return;
+   
    if (charCode == ' '.charCodeAt(0)) {
       btnStop();
    }
@@ -1002,6 +1018,65 @@ function btnChannels() {
    channels.visible = !channels.visible;
    channels.t = 0;
    window.setTimeout(channelsSlide, 20);
+}
+
+function btnSave() {
+   var e = document.getElementById('btnSave');
+   if (e.innerHTML == "Stop") {
+      var req = new XMLHttpRequest();
+
+      req.onreadystatechange = function () {
+         if (req.readyState == 4 && req.status == 204) {
+            window.location.href = OSC.logfile;
+         }
+      };
+
+      req.open("PUT", "save", true);
+      req.send("stop");
+
+      OSC.logFlag = false;
+      e.innerHTML = "Start";
+      e.style.border = "2px solid #C0C0C0";
+
+   } else {
+      dlgShow('dlgSave');
+      document.getElementById('filename').focus();
+   }
+}
+
+function btnStart() {
+   var e = document.getElementById('btnSave');
+   e.innerHTML = "Stop";
+   e.style.border = "3px solid #00A0FF";
+
+   if (document.getElementById("filename").value == "") {
+      dlgAlert("Warning", "Please enter a valid file name");
+      return;
+   }
+
+   var e = document.getElementById("nevents").value;
+   if (isNaN(parseInt(e)) || parseInt(e) < 1 || parseInt(e) > 1E6) {
+      dlgAlert("Warning", "Please enter a valid number of events");
+      return;
+   }
+
+   OSC.logfile = document.getElementById("filename").value;
+   OSC.nRequested = parseInt(e);
+   OSC.logFlag = true;
+   OSC.nLogged = 0;
+
+   var req = new XMLHttpRequest();
+   var param = OSC.logfile;
+   param += "\n";
+   param += document.getElementById("fileformat").selectedOptions[0].value;
+   param += "\n";
+   param += document.getElementById("saveboards").selectedOptions[0].value;
+   param += "\n";
+   param += e;
+   req.open("PUT", "save", true);
+   req.send(param);
+
+   dlgHide('dlgSave');
 }
 
 function configSlide() {

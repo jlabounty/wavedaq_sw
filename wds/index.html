@@ -86,6 +86,7 @@
       <button class="wideButton" id="btnConfig" type="button" onClick="btnConfig()">Config</button>
       <button class="wideButton" id="btnMeasure" type="button" onClick="dlgShow('dlgMeasure')">Measure</button>
       <button class="wideButton" id="btnChannels" type="button" onClick="btnChannels()">Channels</button>
+      <button class="wideButton" id="btnSave" type="button" onClick="btnSave()">Save</button>
       <button class="wideButton" id="btnAbout" type="button" onClick="dlgShow('dlgAbout')">About</button>
 
    </div>
@@ -301,6 +302,7 @@
       </table>
    </div>
 
+   <!-- about dialog -->
    <div id="dlgAbout" class="dlgFrame">
 
       <div class="dlgTitlebar">About</div>
@@ -320,11 +322,13 @@
 
    </div>
 
+
+   <!-- measure dialog -->
    <div id="dlgMeasure" class="dlgFrame">
 
       <div class="dlgTitlebar">Measure</div>
 
-      <div class="dlgPanel" style="text-align: left;padding:10px">
+      <div class="dlgPanel" style="text-align: left">
          <div class="vMiddleElement">
             <div style="text-align:center">
                <input type="checkbox" id="dispHisto" onclick="dispHisto(this)">&nbsp;Display Histograms
@@ -365,6 +369,51 @@
          </div>
       </div>
 
+   </div>
+   
+   <!-- save events dialog -->
+   <div id="dlgSave" class="dlgFrame">
+      
+      <div class="dlgTitlebar">Save waveforms</div>
+      
+      <div class="dlgPanel">
+         <table style="padding: 10px;border-spacing: 10px">
+            <tr>
+               <td style="text-align: right">Filename:</td>
+               <td><input type="text" name="filename" id="filename" style="width: 150px;text-align: left"></td>
+            </tr>
+            <tr>
+               <td style="text-align: right">Format:</td>
+               <td style="text-align: left">
+                  <select id="fileformat">
+                     <option selected value="bin">binary</option>
+                     <option value="xml">xml</option>
+                  </select>
+               </td>
+            </tr>
+            <tr>
+               <td style="text-align: right">Boards:</td>
+               <td style="text-align: left">
+                  <select id="saveboards">
+                     <option selected value="cur">Current board only</option>
+                     <option value="all">All boards</option>
+                  </select>
+               </td>
+            </tr>
+            <tr>
+               <td style="text-align: right">Number of events:</td>
+               <td style="text-align: left">
+                  <input type="text" id="nevents" style="width: 150px;text-align: left">
+               </td>
+            </tr>
+         </table>
+         <br />
+         <div style="text-align:center">
+           <button id="btnSaveDialog" class="wideButton" type="button" onClick="btnStart();">Start</button>
+           <button class="wideButton" type="button" onClick="dlgHide('dlgSave')">Cancel</button>
+         </div>
+      </div>
+      
    </div>
 
    <!-- extra buttons -->

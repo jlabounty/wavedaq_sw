@@ -16,6 +16,16 @@
 #define WD_N_BOARDS    16 // 16 boards per crate
 
 typedef struct {
+   unsigned short Year;
+   unsigned short Month;
+   unsigned short Day;
+   unsigned short Hour;
+   unsigned short Minute;
+   unsigned short Second;
+   unsigned short Milliseconds;
+} TIMESTAMP;
+
+typedef struct {
    char           version_id[4];
    unsigned int   crc;
    float          sampling_frequency;
@@ -67,6 +77,18 @@ typedef struct {
    TCALIB_DATA    tcalib;
 } WDB;
 
+#define LI_FORMAT_BIN  1
+#define LI_FORMAT_XML  2
+
+typedef struct {
+   int            fh;
+   char           filename[256];
+   int            format; // LI_FORMAT_xxx
+   int            board;
+   int            nRequest;
+   int            nLogged;
+} LOGINFO;
+
 #define WD_REV_D  3
 #define WD_REV_E  4
 
@@ -96,7 +118,7 @@ typedef struct {
    int            dcv_flag;
    float          dc_offset;
    WDB            board[WD_N_BOARDS];
-   int            cmd;
+   LOGINFO        li;
 } GLOBALS;
 
 typedef struct {
@@ -162,6 +184,10 @@ typedef struct {
 #define WD_TS_INTERNAL     0
 #define WD_TS_EXTERNAL     1
 
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
 // interface functions
 int wd_init(GLOBALS *gl);
 void wd_set_fe(GLOBALS *gl, int index, int channel);
@@ -178,6 +204,7 @@ void wd_set_dcv(GLOBALS *gl, int index);
 void wd_set_dc_offset(GLOBALS *gl, int index);
 
 int wd_read_waveform(GLOBALS *gl, int board, int timeout, WD2_EVENT *pe, float wfU[WD_N_CHANNELS][1024], float wfT[WD_N_CHANNELS][1024]);
+int wd_save_waveform(GLOBALS *gl, int b, int chn, WD2_EVENT *pe, float wfU[WD_N_CHANNELS][1024], float wfT[WD_N_CHANNELS][1024]);
 int wd_send(GLOBALS *gl, int board, int timeout_ms, const char *str, char *result, int *size);
 int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *p);
 int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *p);
