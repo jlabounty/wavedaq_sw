@@ -67,7 +67,7 @@ a:focus { color:#0000FF; text-decoration:underline }
    width: 190px;
    background-color: white;
    text-align: center;
-   opacity: 0; // pre-hidden
+   opacity: 0; /* pre-hidden */
 }
 
 #config {
@@ -80,7 +80,7 @@ a:focus { color:#0000FF; text-decoration:underline }
    height: 5000px;
    background-color: white;
    text-align: left;
-   opacity: 0; // pre-hidden
+   opacity: 0; /* pre-hidden */
 }
 
 #channels {
@@ -93,8 +93,8 @@ a:focus { color:#0000FF; text-decoration:underline }
    height: 5000px;
    background-color: white;
    text-align: left;
-   z-index: -1; // slide under config pane
-   opacity: 0; // pre-hidden
+   z-index: -1; /* slide under config pane */
+   opacity: 0;  /* pre-hidden */
 }
 
 #channelsTable {
@@ -142,7 +142,7 @@ input[type=text] {
 }
 
 .vMiddleBox {
-   //display:table;
+   display:table;
 }
 
 .vMiddleElement {

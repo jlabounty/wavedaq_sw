@@ -360,10 +360,8 @@ Oscilloscope.prototype.printLogged = function (ctx) {
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
 
-      if (OSC.nLogged != undefined && OSC.nLogged > 0) {
-         var t = OSC.nLogged + "/" + OSC.nRequested + " events logged";
-         ctx.fillText(t, this.x2 - ctx.measureText(t).width - 10, this.y2 - 24);
-      }
+      var t = OSC.nLogged + "/" + OSC.nRequested + " events logged";
+      ctx.fillText(t, this.x2 - ctx.measureText(t).width - 10, this.y2 - 24);
    }
 };
 

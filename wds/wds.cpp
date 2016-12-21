@@ -563,13 +563,6 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       return;
    }
 
-   // globals PUT
-   /*
-   if (event == MG_RECV && strcmp(conn->uri, "/gl") == 0) {
-      return MG_TRUE;
-   }
-   */
-   
    // file serving
    if (event == MG_EV_HTTP_REQUEST) {
       mg_serve_http(nc, hm, s_http_server_opts);

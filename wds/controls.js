@@ -52,7 +52,7 @@ document.write("<style>" +
    "   top: 0;" +
    "   left: 0;" +
    "   z-index: 10;" +
-   "   display: none; // pre-hidden" +
+   "   display: none; /* pre-hidden */" +
    "}" +
    ".dlgTitlebar {" +
    "   text-align: center;" +

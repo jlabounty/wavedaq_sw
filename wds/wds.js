@@ -1045,6 +1045,14 @@ function btnSave() {
 }
 
 function btnStart() {
+   // check for download attribute
+   var link = document.createElement("a");
+   var filename = document.getElementById("filename").value;
+   if (!("download" in link)) {
+      alert("Downloading of files in not supported in your browser. Please use Firefox or Chrome.");
+      return;
+   }
+
    var e = document.getElementById('btnSave');
    e.innerHTML = "Stop";
    e.style.border = "3px solid #00A0FF";
@@ -1060,12 +1068,18 @@ function btnStart() {
       return;
    }
 
-   OSC.logfile = document.getElementById("filename").value;
+   OSC.logfile = filename;
    OSC.nRequested = parseInt(e);
-   OSC.logFlag = true;
    OSC.nLogged = 0;
 
    var req = new XMLHttpRequest();
+   req.onreadystatechange = function () {
+      if (req.readyState == 4 && req.status == 204) {
+         OSC.logFlag = true;
+      }
+   };
+
+
    var param = OSC.logfile;
    param += "\n";
    param += document.getElementById("fileformat").selectedOptions[0].value;
@@ -1081,18 +1095,14 @@ function btnStart() {
 
 function downloadFile(filename) {
    var link = document.createElement("a");
-   if ("download" in link) {
-      document.body.appendChild(link);
-      link.download = filename;
-      link.href = filename;
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(filename);
-   } else {
-      // no support for download attribute
-      window.open(filename);
-   }
+   document.body.appendChild(link);
+   link.download = filename;
+   link.href = filename;
+   link.click();
+   document.body.removeChild(link);
+   window.URL.revokeObjectURL(filename);
 }
+
 function configSlide() {
    var config = document.getElementById("config");
 
