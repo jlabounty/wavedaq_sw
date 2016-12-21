@@ -152,7 +152,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       }
 
       else if (strcmp(item, "trigger_source") == 0) {
-         gl->trigger_source = (float)atof(value);
+         gl->trigger_source = (int)atof(value);
          for (int i=0 ; i<gl->n_boards ; i++) {
             wd_set_trigger_mode(gl, i);
          }
