@@ -19,6 +19,7 @@
 
 #include "averager.h"
 #include "mxml.h"
+#include "strlcpy.h"
 #include "wds.h"
 #include "mongoose.h"
 

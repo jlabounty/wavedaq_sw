@@ -12,6 +12,7 @@
 #include <fcntl.h>
 
 #include "mxml.h"
+#include "strlcpy.h"
 #include "averager.h"
 #include "wds.h"
 #include "register_map.h"
