@@ -1459,27 +1459,28 @@ int wd_save_waveform(GLOBALS *gl, int b, int chn, WD2_EVENT *pe, float wfU[WD_N_
          *(unsigned short *)p = gl->board[b].serial_number;
          p += sizeof(unsigned short);
          
-         
          for (int i=0 ; i<WD_N_CHANNELS ; i++) {
             if (chn && (1 << i)) {
-               // store trigger cell
+               // channel header
+               sprintf((char *)p, "C%03d", i);
+               p += 4;
+
+               // write scaler
+               unsigned int s = gl->board[b].scaler[i];
+               memcpy(p, &s, sizeof(int));
+               p += sizeof(int);
+
+               // write trigger cell
                sprintf((char *)p, "T#");
                p += 2;
                *(unsigned short *)p = i < WD_N_CHANNELS/2 ? pe->drs0_trigger_cell : pe->drs1_trigger_cell;
                p += sizeof(unsigned short);
 
-               sprintf((char *)p, "C%03d", i+1);
-               p += 4;
-               
-               unsigned int s = gl->board[b].scaler[i];
-               memcpy(p, &s, sizeof(int));
-               p += sizeof(int);
-               
                for (int j=0 ; j<1024 ; j++) {
                   // save binary date as 16-bit value:
                   // 0 = -0.5V,  65535 = +0.5V    for range 0
                   // 0 = -0.05V, 65535 = +0.95V   for range 0.45
-                  unsigned short d = (unsigned short)((wfU[i][j]/1000.0 - gl->board[b].range + 0.5) * 65535);
+                  unsigned short d = (unsigned short)((wfU[i][j] - gl->board[b].range + 0.5) * 65535);
                   *(unsigned short *)p = d;
                   p += sizeof(unsigned short);
                }
@@ -1493,12 +1494,12 @@ int wd_save_waveform(GLOBALS *gl, int b, int chn, WD2_EVENT *pe, float wfU[WD_N_
       assert(size < buffer_size);
    }
    
-   gl->li.nLogged++;
-   
    if (gl->li.nLogged == gl->li.nRequest && gl->li.fh) {
       close(gl->li.fh);
       gl->li.fh = 0;
    }
+
+   gl->li.nLogged++;
 
    return SUCCESS;
 }
