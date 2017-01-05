@@ -431,6 +431,8 @@ void wd_set_trigger_mode(GLOBALS *gl, int index)
 
 void wd_set_osctca(GLOBALS *gl, int index)
 {
+   char str[80];
+   
    if (gl->demo_flag)
       return;
    
@@ -445,7 +447,28 @@ void wd_set_osctca(GLOBALS *gl, int index)
 
    if (gl->board[index].revision == WD_REV_E) {
       if (gl->osctca_flag) {
-         assert(wd_send(gl, index, 100, "lmksetch 6 1 2 0 1", NULL, NULL) > 0);  // enable LMK channel 6
+         if (gl->osctca_delay != 0) {
+            if (gl->osctca_delay > 0) {
+               // delay channel 6
+               sprintf(str, "lmksetch 6 3 2 %d 1", gl->osctca_delay);
+               assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+               
+               sprintf(str, "lmksetch 0 1 %d 0 1", gl->lmk_divider);
+               assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+            } else {
+               // delay channel 0
+               sprintf(str, "lmksetch 6 1 2 0 1");
+               assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+               
+               sprintf(str, "lmksetch 0 3 %d %d 1", gl->lmk_divider, -gl->osctca_delay);
+               assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+            }
+         } else {
+            sprintf(str, "lmksetch 6 1 2 0 1");
+            assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+            sprintf(str, "lmksetch 0 1 %d 0 1", gl->lmk_divider);
+            assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+         }
       } else {
          assert(wd_send(gl, index, 100, "lmksetch 6 1 2 0 0", NULL, NULL) > 0);
       }
@@ -523,17 +546,17 @@ void wd_set_sampling_frequency(GLOBALS *gl, int index)
    }
    
    // 200 MHz LMK bus frequency
-   int divider = (int) (200.0 / gl->nominal_sampling_frequency * 2.048 / 2 + 0.5);
+   gl->lmk_divider = (int) (200.0 / gl->nominal_sampling_frequency * 2.048 + 0.5);
    
    // calculate real frequency
-   gl->actual_sampling_frequency = (float)(200.0 / divider * 2.048 / 2);
+   gl->actual_sampling_frequency = (float)(200.0 / gl->lmk_divider * 2.048);
    
    // set sampling frequency
    if (gl->verbose_flag)
       printf("Set sampling frequency to %1.3lg GSPS (%1.4lg GSPS)\n", gl->nominal_sampling_frequency,
              gl->actual_sampling_frequency);
    
-   sprintf(str, "regwr %02x 0003%02X00", REG_LMK_0_OFFSET, divider);
+   sprintf(str, "lmksetch 0 1 %d 0 1", gl->lmk_divider);
    assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    
    // turn off time calibration if calibrated frequency is different
@@ -2192,8 +2215,8 @@ void wd_calibrate_local(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[WD_N_CHANNE
    float dv, llim, ulim;
    
    if (gl->nominal_sampling_frequency >= 3) {
-      llim = -0.1f;
-      ulim =  0.1f;
+      llim = -0.15f;
+      ulim =  0.15f;
    } else {
       llim = -0.3f;
       ulim =  0.3f;
@@ -2229,7 +2252,6 @@ void wd_calibrate_local(GLOBALS *gl, WD2_EVENT *pe, int b, float wfU[WD_N_CHANNE
             // average delta_v
             pr->ave->Add(0, ch, i % 1024, -dv);
          }
-         
       }
       
       // calculate calibration every 100 events
@@ -2354,9 +2376,10 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
    if (pr->state == WD_CS_FIRST_BOARD || pr->state == WD_CS_SINGLE_BOARD) {
       memset(pr, 0, sizeof(VCALIB_PROGRESS));
       pr->state             = WD_CS_FIRST_SAMPLE;
-      pr->n_iter1           = 400;
-      pr->n_iter2           = 400;
+      pr->n_iter1           = 500;
+      pr->n_iter2           = 500;
       pr->n_iter3           = 100;
+      pr->phase             = 0;
       pr->n_board           = gl->n_boards;
       if (pr->state == WD_CS_FIRST_BOARD)
          pr->i_board           = 0;
@@ -2392,6 +2415,7 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       gl->dcv_flag         = 1;
       gl->dc_offset        = 0;
       gl->osctca_flag      = 1;
+      gl->osctca_delay     = -2250;
       wd_set_fe(gl, pr->i_board, -1);
       wd_set_dcv_flag(gl, pr->i_board);
       wd_set_dc_offset(gl, pr->i_board);
@@ -2406,6 +2430,13 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       
       pr->i_iter1++;
       
+      // switch phase of LMK clock
+      if (pr->i_iter1 > pr->n_iter1/20 * (1+pr->phase)) {
+         pr->phase++;
+         gl->osctca_delay = (pr->phase-10)*2250/10;
+         wd_set_osctca(gl, pr->i_board);
+      }
+      
       wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
       if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS)
          return SUCCESS; // just skip this event
@@ -2415,8 +2446,13 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       
       pr->progress = (double)(pr->i_iter1 + pr->i_iter2 + pr->i_iter3) / (pr->n_iter1 + pr->n_iter2 + pr->n_iter3);
       
-      if (pr->i_iter1 == pr->n_iter1)
+      if (pr->i_iter1 == pr->n_iter1) {
          pr->ave->Reset();
+         
+         pr->phase = 0;
+         gl->osctca_delay = -2250;
+         wd_set_osctca(gl, pr->i_board);
+      }
       
       sleep_ms(10); // obtain 100 Hz rate
       return SUCCESS;
@@ -2428,6 +2464,13 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       
       pr->i_iter2++;
       
+      // switch phase of LMK clock
+      if (pr->i_iter2 > pr->n_iter2/20 * (1+pr->phase)) {
+         pr->phase++;
+         gl->osctca_delay = (pr->phase-10)*2250/10;
+         wd_set_osctca(gl, pr->i_board);
+      }
+
       wd_send(gl, pr->i_board, 100, "drsget\n", NULL, NULL);
       if (wd_read_waveform(gl, pr->i_board, 1000, &eventHeader, wfU, wfT) != SUCCESS)
          return SUCCESS; // just skip this event
@@ -2441,6 +2484,8 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
          pr->ave->Reset();
          gl->time_calib1_flag  = 1;
          gl->rotate_flag       = 1;
+         gl->osctca_delay = 0;
+         wd_set_osctca(gl, pr->i_board);
       }
 
       sleep_ms(10); // obtain 100 Hz rate
@@ -2480,6 +2525,7 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
    gl->dcv_flag                 = 0;
    gl->dc_offset                = 0;
    gl->osctca_flag              = 0;
+   gl->osctca_delay             = 0;
    wd_set_fe(gl, pr->i_board, -1);
    wd_set_dcv_flag(gl, pr->i_board);
    wd_set_dc_offset(gl, pr->i_board);

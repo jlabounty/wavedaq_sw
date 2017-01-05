@@ -595,6 +595,7 @@ int main(int argc, char *argv[])
    gl.trigger_mode               = WD_TM_AUTO;
    gl.trigger_source             = WD_TS_INTERNAL;
    gl.osctca_flag                = 0;
+   gl.osctca_delay               = 0;
    gl.read_channel9              = 1;
    gl.clock_source               = 0;
    gl.mux_flag                   = 0;

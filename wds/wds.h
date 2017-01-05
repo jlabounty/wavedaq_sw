@@ -110,9 +110,11 @@ typedef struct {
    int            n_boards;
    float          nominal_sampling_frequency;
    float          actual_sampling_frequency;
+   int            lmk_divider;
    int            trigger_mode;
    int            trigger_source;
    int            osctca_flag;
+   int            osctca_delay;
    int            read_channel9;
    int            clock_source;
    int            mux_flag;
@@ -164,6 +166,7 @@ typedef struct {
    int            i_iter2;
    int            n_iter3;
    int            i_iter3;
+   int            phase;
    int            index;
    Averager       *ave;
    int            fh;
