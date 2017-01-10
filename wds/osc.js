@@ -731,6 +731,36 @@ Oscilloscope.prototype.drawMarker = function (ctx) {
       }
    }
 
+   // Trigger merker
+   ctx.fillStyle = 'white';
+   ctx.strokeStyle = 'white';
+
+   var t = 1024 / OSC.GL.actual_sampling_frequency * 1E-9;
+   t -= (30 + OSC.GL.board[OSC.board].trigger_delay) * 1E-9;
+   var xt = this.timeToX(t);
+
+   ctx.beginPath();
+   ctx.moveTo(xt - 4, this.y1 + 2);
+   ctx.lineTo(xt - 4, this.y1 + 9);
+   ctx.lineTo(xt,     this.y1 + 13);
+   ctx.lineTo(xt + 4, this.y1 + 9);
+   ctx.lineTo(xt + 4, this.y1 + 2);
+   ctx.lineTo(xt - 4, this.y1 + 2)
+   ctx.closePath();
+   ctx.fill();
+   ctx.stroke();
+
+   ctx.beginPath();
+   ctx.fillStyle = 'black';
+   ctx.strokeStyle = 'black';
+   ctx.moveTo(xt - 3, this.y1 + 4);
+   ctx.lineTo(xt + 3, this.y1 + 4);
+   ctx.stroke();
+
+   ctx.beginPath();
+   ctx.moveTo(xt, this.y1 + 4);
+   ctx.lineTo(xt, this.y1 + 12);
+   ctx.stroke();
 };
 
 Oscilloscope.prototype.drawDT = function (ctx) {

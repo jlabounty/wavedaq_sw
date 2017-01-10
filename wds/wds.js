@@ -932,6 +932,7 @@ function sldTDelay(value) {
    req.open("PUT", "gl/"+OSC.board+"/trigger_delay", true);
    req.send(del);
 
+   OSC.GL.board[OSC.board].trigger_delay = del;
    document.getElementById("inpTDelay").value = del;
    clearStat();
 }

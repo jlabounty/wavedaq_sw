@@ -1321,15 +1321,20 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
                   // apply horizontal trigger position correction
                   if (gl->time_calib3_flag) {
                      // find first crossing of the trigger level
-                     for (int i=4 ; i<1020 ; i++)
-                        if (wfU[0][i] <= 0 && wfU[0][i+1] > 0) {
-                           double t0 = wfT[0][i] + (wfT[0][i+1]-wfT[0][i])*(0-wfU[0][i])/(wfU[0][i+1]-wfU[0][i]);
-                     
-                           for (i=0 ; i<WD_N_CHANNELS ; i++)
-                              for (int j=0 ; j<1024 ; j++)
-                                 wfT[i][j] -= (float)t0;
-                           break;
+                     for (int i=4 ; i<1020 ; i++) {
+                        for (int c=0 ; c<16 ; c++) {
+                           double tl =gl->board[b].trigger_level[c];
+                           if (wfU[c][i] > tl && wfU[c][i+1] <= tl) {
+                              double t0 = wfT[c][i] + (wfT[c][i+1]-wfT[c][i])*(tl-wfU[c][i])/(wfU[c][i+1]-wfU[c][i]);
+                              t0 -= 1024*1E-9/gl->actual_sampling_frequency - 30E-9 - gl->board[b].trigger_delay * 1E-9;
+                              for (i=0 ; i<WD_N_CHANNELS ; i++)
+                                 for (int j=0 ; j<1024 ; j++)
+                                    wfT[i][j] -= (float)t0;
+                              i = 1020;
+                              c = 16;
+                           }
                         }
+                     }
                   }
                }
 
