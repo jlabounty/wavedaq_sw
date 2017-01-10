@@ -2083,7 +2083,7 @@ void wd_read_board_status(GLOBALS *gl, int index)
    gl->board[index].temperature = (float)atof(str+5);
    
    size = sizeof(str);
-   assert(wd_send(gl, index, 100, "lmkgetlock", str, &size) > 0);
+   assert(wd_send(gl, index, 100, "lmklock", str, &size) > 0);
    gl->board[index].pll_locked = (str[8] == 'L');
 }
 
