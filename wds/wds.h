@@ -63,6 +63,7 @@ typedef struct {
    unsigned char  eth_addr[16];
    float          trigger_delay;
    char           trigger_mask[10];
+   int            trigger_edge;
    float          trigger_level[WD_N_INPUT_CHN];
    float          gain[WD_N_INPUT_CHN];
    int            pzc[WD_N_INPUT_CHN];

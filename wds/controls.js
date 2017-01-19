@@ -226,6 +226,53 @@ Controls.prototype.init = function () // scan DOM
          ctx.lineTo(18, 39);
          ctx.fill();
       }
+
+      if (this.ctrlButton[i].dataset.icon == "edgeup") {
+         cvs.width = 36;
+         cvs.height = 36;
+         ctx = cvs.getContext("2d");
+         ctx.fillStyle = "#E0E0E0";
+         ctx.fillRect(0, 0, 36, 36);
+         ctx.strokeStyle = "#808080";
+         ctx.fillStyle = "#808080";
+         ctx.lineWidth = 2;
+         ctx.beginPath();
+         ctx.moveTo(3, 31);
+         ctx.lineTo(13, 31);
+         ctx.lineTo(23, 5);
+         ctx.lineTo(33, 5);
+         ctx.stroke();
+         ctx.beginPath();
+         ctx.moveTo(20, 12);
+         ctx.lineTo(22, 26);
+         ctx.lineTo(10, 22);
+         ctx.closePath();
+         ctx.fill();
+      }
+
+      if (this.ctrlButton[i].dataset.icon == "edgedown") {
+         cvs.width = 36;
+         cvs.height = 36;
+         ctx = cvs.getContext("2d");
+         ctx.fillStyle = "#E0E0E0";
+         ctx.fillRect(0, 0, 36, 36);
+         ctx.strokeStyle = "#808080";
+         ctx.fillStyle = "#808080";
+         ctx.lineWidth = 2;
+         ctx.beginPath();
+         ctx.moveTo(3, 5);
+         ctx.lineTo(13, 5);
+         ctx.lineTo(23, 31);
+         ctx.lineTo(33, 31);
+         ctx.stroke();
+         ctx.beginPath();
+         ctx.moveTo(20, 24);
+         ctx.lineTo(22, 10);
+         ctx.lineTo(10, 14);
+         ctx.closePath();
+         ctx.fill();
+      }
+
    }
 
    // ctrlVSlider

@@ -145,6 +145,13 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          }
       }
 
+      else if (strcmp(item, "trigger_edge") == 0) {
+         for (int i=0 ; i<gl->n_boards ; i++) {
+            gl->board[i].trigger_edge = atoi(value);
+            wd_set_trigger_mode(gl, i);
+         }
+      }
+
       else if (strcmp(item, "trigger_mode") == 0) {
          gl->trigger_mode = atoi(value);
          for (int i=0 ; i<gl->n_boards ; i++)
@@ -339,6 +346,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "         \"name\": \"%s\" ,\n",         gl->board[i].name);
          mg_printf_http_chunk(nc, "         \"trigger_delay\": %1.0lf,\n", gl->board[i].trigger_delay);
          mg_printf_http_chunk(nc, "         \"trigger_mask\": \"%s\",\n",  gl->board[i].trigger_mask);
+         mg_printf_http_chunk(nc, "         \"trigger_edge\": \"%d\",\n",  gl->board[i].trigger_edge);
          
          mg_printf_http_chunk(nc, "         \"trigger_level\": [\n");
          for (int j=0 ; j<WD_N_INPUT_CHN ; j++)
@@ -605,6 +613,7 @@ int main(int argc, char *argv[])
 
    for (i=0 ; i<WD_N_BOARDS ; i++) {
       gl.board[i].trigger_delay  = 0;
+      gl.board[i].trigger_edge   = 0;       // low to high transition
       gl.board[i].range          = 0;       // range +-0.5V
       gl.board[i].pzc_level      = 1;
 

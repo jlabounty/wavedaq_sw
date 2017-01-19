@@ -389,6 +389,7 @@ void wd_set_trigger_mode(GLOBALS *gl, int index)
 {
    char str[256];
    int delay;
+   unsigned int reg;
    
    if (gl->demo_flag)
       return;
@@ -415,7 +416,14 @@ void wd_set_trigger_mode(GLOBALS *gl, int index)
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
  
       // trigger_enable, trigger_falling_edge
-      sprintf(str, "regwr %02x 000C%04x", REG_TRIGGER_CFG_OFFSET, delay);
+      reg = BIT_TRIGGER_ENABLE;
+      
+      if (gl->board[index].trigger_edge)
+         reg |= BIT_TRIGGER_FALLING_EDGE;
+      
+      reg |= delay;
+      
+      sprintf(str, "regwr %02x %08x", REG_TRIGGER_CFG_OFFSET, reg);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    } else {
       // disable all trigger

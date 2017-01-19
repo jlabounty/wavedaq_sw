@@ -937,6 +937,25 @@ function sldTDelay(value) {
    clearStat();
 }
 
+function btnTedge(value) {
+   if (OSC.demoMode)
+      return;
+   var req = new XMLHttpRequest();
+   req.open("PUT", "gl/"+OSC.board+"/trigger_edge", true);
+   req.send(value);
+
+   OSC.GL.board[OSC.board].trigger_edge = value;
+
+   var e = document.getElementById('trgEdge');
+   if (value == 0) {
+      e.dataset.icon = "edgedown";
+      e.onclick = function() { btnTedge(1); };
+   } else {
+      e.dataset.icon = "edgeup";
+      e.onclick = function() { btnTedge(0); };
+   }
+}
+
 function sldDcOffset(value) {
    if (OSC.demoMode)
       return;
