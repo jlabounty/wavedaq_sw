@@ -410,30 +410,28 @@ void wd_set_trigger_mode(GLOBALS *gl, int index)
          delay = 0;
    }
    
-   // enable local trigger
-   if (gl->trigger_mode == WD_TM_NORMAL) {
-      // trigger_cfg_or
+   // set trigger_cfg_or mask
+   if (gl->trigger_source == WD_TS_INTERNAL)
       sprintf(str, "regwr %02x %s", REG_TRIGGER_CFG_A_OFFSET, gl->board[index].trigger_mask);
-      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
- 
-      // trigger_enable, trigger_falling_edge
-      reg = BIT_TRIGGER_ENABLE;
-      
-      if (gl->board[index].trigger_edge)
-         reg |= BIT_TRIGGER_FALLING_EDGE;
-      
-      reg |= delay;
-      
-      sprintf(str, "regwr %02x %08x", REG_TRIGGER_CFG_OFFSET, reg);
-      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   } else {
-      // disable all trigger
+   else
       sprintf(str, "regwr %02x 00000000", REG_TRIGGER_CFG_A_OFFSET);
-      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-      
-      sprintf(str, "regwr %02x 0000%04x", REG_TRIGGER_CFG_OFFSET, delay);
-      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   }
+   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+   
+   // trigger_enable
+   reg = BIT_TRIGGER_ENABLE;
+
+   // enable external trigger source
+   if (gl->trigger_source == WD_TS_EXTERNAL)
+      reg |= BIT_TRIGGER_CFG_EXT_OR;
+   
+   // trigger edge rising / falling
+   if (gl->board[index].trigger_edge)
+      reg |= BIT_TRIGGER_FALLING_EDGE;
+   
+   reg |= delay;
+   
+   sprintf(str, "regwr %02x %08x", REG_TRIGGER_CFG_OFFSET, reg);
+   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
 }
 
 /*-----------------------------------------------------------------------------------------*/
