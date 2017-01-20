@@ -946,13 +946,12 @@ function btnTedge(value) {
 
    OSC.GL.board[OSC.board].trigger_edge = value;
 
-   var e = document.getElementById('trgEdge');
    if (value == 0) {
-      e.dataset.icon = "edgedown";
-      e.onclick = function() { btnTedge(1); };
+      document.getElementById('trgEdgeUp').style.display = "inline";
+      document.getElementById('trgEdgeDown').style.display = "none";
    } else {
-      e.dataset.icon = "edgeup";
-      e.onclick = function() { btnTedge(0); };
+      document.getElementById('trgEdgeUp').style.display = "none";
+      document.getElementById('trgEdgeDown').style.display = "inline";
    }
 }
 

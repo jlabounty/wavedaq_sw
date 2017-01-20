@@ -395,9 +395,10 @@ void wd_set_trigger_mode(GLOBALS *gl, int index)
       return;
    
    if (gl->verbose_flag)
-      printf("Set trigger mode %d, delay = %1.0lf, source = %s\n", gl->trigger_mode,
+      printf("Set trigger mode %d, delay = %1.0lf, source = %s, edge = %s\n", gl->trigger_mode,
              gl->board[index].trigger_delay,
-             gl->trigger_source == WD_TS_INTERNAL ? "internal" : "external");
+             gl->trigger_source == WD_TS_INTERNAL ? "internal" : "external",
+             gl->board[index].trigger_edge ? "falling" : "rising");
 
    if (gl->board[index].trigger_delay == 0)
       delay = 0x100;
