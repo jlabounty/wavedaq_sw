@@ -411,14 +411,19 @@ Oscilloscope.prototype.printScalers = function (ctx) {
    if (OSC.GL != undefined && OSC.disp.scaler) {
       var scaler = OSC.GL.board[OSC.board].scaler;
 
-      for (var c = 0; c < 16; c++) {
+      for (var c = 0; c < 18; c++) {
          ctx.fillStyle = this.chnColors[c];
          ctx.strokeStyle = this.chnColors[c];
          ctx.font = '14px sans-serif';
          ctx.textBaseline = "top";
 
          ctx.textAlign = "right";
-         ctx.fillText(c.toString(), 20, 4 + c * 20);
+         if (c == 16)
+            ctx.fillText("T", 20, 4 + c * 20);
+         else if (c == 17)
+            ctx.fillText("E", 20, 4 + c * 20);
+         else
+            ctx.fillText(c.toString(), 20, 4 + c * 20);
 
          var s = scaler[c];
          if (s < 1E3) {

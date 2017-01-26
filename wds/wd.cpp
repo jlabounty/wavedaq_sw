@@ -410,28 +410,36 @@ void wd_set_trigger_mode(GLOBALS *gl, int index)
          delay = 0;
    }
    
-   // set trigger_cfg_or mask
-   if (gl->trigger_source == WD_TS_INTERNAL)
-      sprintf(str, "regwr %02x %s", REG_TRIGGER_CFG_A_OFFSET, gl->board[index].trigger_mask);
-   else
+   if (gl->trigger_mode == WD_TM_SOFTWARE) {
       sprintf(str, "regwr %02x 00000000", REG_TRIGGER_CFG_A_OFFSET);
-   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
-   
-   // trigger_enable
-   reg = BIT_TRIGGER_ENABLE;
-
-   // enable external trigger source
-   if (gl->trigger_source == WD_TS_EXTERNAL)
-      reg |= BIT_TRIGGER_CFG_EXT_OR;
-   
-   // trigger edge rising / falling
-   if (gl->board[index].trigger_edge)
-      reg |= BIT_TRIGGER_FALLING_EDGE;
-   
-   reg |= delay;
-   
-   sprintf(str, "regwr %02x %08x", REG_TRIGGER_CFG_OFFSET, reg);
-   assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      
+      sprintf(str, "regwr %02x 00000000", REG_TRIGGER_CFG_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+   } else {
+      // set trigger_cfg_or mask
+      if (gl->trigger_source == WD_TS_INTERNAL)
+         sprintf(str, "regwr %02x %s", REG_TRIGGER_CFG_A_OFFSET, gl->board[index].trigger_mask);
+      else
+         sprintf(str, "regwr %02x 00000000", REG_TRIGGER_CFG_A_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      
+      // trigger_enable
+      reg = BIT_TRIGGER_ENABLE;
+      
+      // enable external trigger source
+      if (gl->trigger_source == WD_TS_EXTERNAL)
+         reg |= BIT_TRIGGER_CFG_EXT_OR;
+      
+      // trigger edge rising / falling
+      if (gl->board[index].trigger_edge)
+         reg |= BIT_TRIGGER_FALLING_EDGE;
+      
+      reg |= delay;
+      
+      sprintf(str, "regwr %02x %08x", REG_TRIGGER_CFG_OFFSET, reg);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+   }
 }
 
 /*-----------------------------------------------------------------------------------------*/
@@ -1547,15 +1555,12 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
    float wfU[WD_N_CHANNELS][1024], wfT[WD_N_CHANNELS][1024];
    WD2_EVENT eventHeader;
    char str[80];
-   
-   /* turn off clock if it is on */
-   if (gl->osctca_flag) {
-      gl->osctca_flag = 0;
-      for (int i=0 ; i<gl->n_boards ; i++)
-         wd_set_osctca(gl, i);
-   }
+   static GLOBALS old_gl;
    
    if (pr->state == WD_CS_FIRST_BOARD) {
+      // save current globals
+      memcpy(&old_gl, gl, sizeof(GLOBALS));
+
       memset(pr, 0, sizeof(VCALIB_PROGRESS));
       pr->state   = WD_CS_FIRST_SAMPLE;
       pr->n_iter1 = 200;
@@ -1581,6 +1586,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
 
       // initialize data on first iteration
       if (pr->i_iter1 == 0) {
+         gl->osctca_flag      = 0;
          gl->rotate_flag      = 0;
          gl->ofs_calib1_flag  = 0;
          gl->ofs_calib2_flag  = 0;
@@ -1588,15 +1594,17 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
          gl->range_calib_flag = 0;
          gl->remove_spikes    = 0;
          
-         pr->prev_range = gl->board[pr->i_board].range;
          gl->board[pr->i_board].range = 0; // range -0.5 ... + 0.5V
          wd_set_range(gl, pr->i_board);
          gl->mux_flag         = 1;
          gl->dcv_flag         = 1;
          gl->dc_offset        = 0;
+         gl->trigger_mode     = WD_TM_SOFTWARE;
+         wd_set_osctca(gl, pr->i_board);
          wd_set_fe(gl, pr->i_board, -1);
          wd_set_dcv_flag(gl, pr->i_board);
          wd_set_dc_offset(gl, pr->i_board);
+         wd_set_trigger_mode(gl, pr->i_board);
          
          int n = pr->n_iter1;
          n = MAX(n, pr->n_iter2);
@@ -1874,19 +1882,16 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
    gl->adc_flag = 0;
 
    // set everything back to normal values
-   gl->board[pr->i_board].range = pr->prev_range;
    gl->mux_flag                 = 0;
    gl->dcv_flag                 = 0;
    gl->dc_offset                = 0;
-   wd_set_fe(gl, pr->i_board, -1);
-   wd_set_dcv_flag(gl, pr->i_board);
-   wd_set_dc_offset(gl, pr->i_board);
-   wd_set_range(gl, pr->i_board);
 
    // save calibration
    memcpy(gl->board[pr->i_board].vcalib.version_id, "CAL1", 4);
    gl->board[pr->i_board].vcalib.sampling_frequency = gl->actual_sampling_frequency;
    gl->board[pr->i_board].vcalib.temperature = gl->board[pr->i_board].temperature;
+   
+   memcpy(&old_gl.board[pr->i_board].vcalib, &gl->board[pr->i_board].vcalib, sizeof(VCALIB_DATA));
    
    mkdir("calib", 0755);
    sprintf(str, "calib/%s.vcal", gl->board[pr->i_board].name);
@@ -1902,12 +1907,15 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
    
    if (pr->i_board == pr->n_board) {
       pr->state = WD_CS_INACTIVE;
-      gl->rotate_flag = 1;
-      gl->ofs_calib1_flag  = 1;
-      gl->ofs_calib2_flag  = 1;
-      gl->gain_calib_flag  = 1;
-      gl->range_calib_flag = 1;
-      gl->remove_spikes    = 1;
+      
+      memcpy(gl, &old_gl, sizeof(GLOBALS));
+      for (int i=0 ; i<gl->n_boards ; i++) {
+         wd_set_trigger_mode(gl, i);
+         wd_set_range(gl, i);
+         wd_set_fe(gl, i, -1);
+         wd_set_dcv_flag(gl, i);
+         wd_set_dc_offset(gl, i);
+      }
    }
 
    return SUCCESS;
@@ -2112,7 +2120,7 @@ void wd_read_scalers(GLOBALS *gl, int index)
       return;
    }
    
-   sprintf(cmd, "llrd c301%04x 34", REG_SCALER_1_LSB_OFFSET);
+   sprintf(cmd, "llrd c301%04x 34", REG_SCALER_0_LSB_OFFSET);
    size = sizeof(str);
    assert(wd_send(gl, index, 100, cmd, str, &size) > 0);
    

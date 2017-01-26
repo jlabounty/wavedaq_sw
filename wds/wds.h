@@ -153,7 +153,6 @@ typedef struct {
    int            index;
    Averager       *ave;
    int            fh;
-   float          prev_range;
 } VCALIB_PROGRESS;
 
 typedef struct {
@@ -184,6 +183,7 @@ typedef struct {
 // trigger modes
 #define WD_TM_NORMAL       0
 #define WD_TM_AUTO         1
+#define WD_TM_SOFTWARE     2
 
 // trigger sources
 #define WD_TS_INTERNAL     0
