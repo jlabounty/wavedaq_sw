@@ -512,7 +512,7 @@ void wd_set_clocksource(GLOBALS *gl, int index)
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       
       // configures LMK PLL loop for 80 MHz input frequency
-      sprintf(str, "regclr %x D800320F", REG_LMK_15_OFFSET);
+      sprintf(str, "regwr %x D800320F", REG_LMK_15_OFFSET);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       
       // enable LMK outputs 1 & 2 for channel 9
@@ -526,7 +526,7 @@ void wd_set_clocksource(GLOBALS *gl, int index)
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
 
       // configures LMK PLL loop for 100 MHz input frequency
-      sprintf(str, "regclr %x D800280F", REG_LMK_15_OFFSET);
+      sprintf(str, "regwr %x D800280F", REG_LMK_15_OFFSET);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
 
       // disable LMK outputs 1 & 2 for channel 9
