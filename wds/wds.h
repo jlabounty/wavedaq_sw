@@ -170,7 +170,6 @@ typedef struct {
    int            index;
    Averager       *ave;
    int            fh;
-   float          prev_range;
 } TCALIB_PROGRESS;
 
 // calibration states

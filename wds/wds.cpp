@@ -169,11 +169,21 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          gl->osctca_flag = atoi(value);
          gl->mux_flag = atoi(value);
          gl->dcv_flag = atoi(value);
+         
          for (int i=0 ; i<gl->n_boards ; i++) {
             wd_set_osctca(gl, i);
             for (channel=0 ; channel<WD_N_INPUT_CHN ; channel++)
                wd_set_fe(gl, i, channel);
             wd_set_dcv_flag(gl, i);
+            
+            //*** temporary fix for bad clock waveform due to trigger overload ***
+            if (atoi(value)) {
+               gl->trigger_mode = WD_TM_SOFTWARE;
+               wd_set_trigger_mode(gl, i);
+            } else {
+               gl->trigger_mode = WD_TM_AUTO;
+               wd_set_trigger_mode(gl, i);
+            }
          }
       }
 
@@ -515,7 +525,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             // issue single ADC software trigger
             wd_send(gl, b, 100, "adcget\n", NULL, NULL);
          } else {
-            if (gl->trigger_mode == WD_TM_AUTO)
+            if (gl->trigger_mode == WD_TM_AUTO || gl->trigger_mode == WD_TM_SOFTWARE)
                // issue single DRS software trigger
                wd_send(gl, b, 100, "drsget\n", NULL, NULL);
             else

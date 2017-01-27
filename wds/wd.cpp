@@ -401,7 +401,7 @@ void wd_set_trigger_mode(GLOBALS *gl, int index)
              gl->board[index].trigger_edge ? "falling" : "rising");
 
    if (gl->board[index].trigger_delay == 0)
-      delay = 0x100;
+      delay = 0x100; // set delay bypass
    else {
       delay = (int)(gl->board[index].trigger_delay / 450 * 255);
       if (delay > 255)
@@ -1881,11 +1881,6 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
    }
    gl->adc_flag = 0;
 
-   // set everything back to normal values
-   gl->mux_flag                 = 0;
-   gl->dcv_flag                 = 0;
-   gl->dc_offset                = 0;
-
    // save calibration
    memcpy(gl->board[pr->i_board].vcalib.version_id, "CAL1", 4);
    gl->board[pr->i_board].vcalib.sampling_frequency = gl->actual_sampling_frequency;
@@ -1908,6 +1903,7 @@ int wd_calibrate_voltage(GLOBALS *gl, VCALIB_PROGRESS *pr)
    if (pr->i_board == pr->n_board) {
       pr->state = WD_CS_INACTIVE;
       
+      // switch everything back to previous values
       memcpy(gl, &old_gl, sizeof(GLOBALS));
       for (int i=0 ; i<gl->n_boards ; i++) {
          wd_set_trigger_mode(gl, i);
@@ -2392,8 +2388,12 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
    float wfU[WD_N_CHANNELS][1024], wfT[WD_N_CHANNELS][1024];
    WD2_EVENT eventHeader;
    char str[80];
-   
+   static GLOBALS old_gl;
+
    if (pr->state == WD_CS_FIRST_BOARD || pr->state == WD_CS_SINGLE_BOARD) {
+      // save current globals
+      memcpy(&old_gl, gl, sizeof(GLOBALS));
+      
       memset(pr, 0, sizeof(VCALIB_PROGRESS));
       pr->state             = WD_CS_FIRST_SAMPLE;
       pr->n_iter1           = 500;
@@ -2428,7 +2428,6 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
          }
 
       // switch to -0.5 ... + 0.5V range, timing oscillator on
-      pr->prev_range = gl->board[pr->i_board].range;
       gl->board[pr->i_board].range = 0; // range -0.5 ... + 0.5V
       wd_set_range(gl, pr->i_board);
       gl->mux_flag         = 1;
@@ -2436,10 +2435,12 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       gl->dc_offset        = 0;
       gl->osctca_flag      = 1;
       gl->osctca_delay     = -2250;
+      gl->trigger_mode     = WD_TM_SOFTWARE;
       wd_set_fe(gl, pr->i_board, -1);
       wd_set_dcv_flag(gl, pr->i_board);
       wd_set_dc_offset(gl, pr->i_board);
       wd_set_osctca(gl, pr->i_board);
+      wd_set_trigger_mode(gl, pr->i_board);
       
       pr->ave = new Averager(1, WD_N_CHANNELS, 1024, MAX(pr->n_iter1, pr->n_iter2));
    }
@@ -2539,24 +2540,14 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
    delete pr->ave;
    pr->ave = NULL;
    
-   // set everything back to normal values
-   gl->board[pr->i_board].range = pr->prev_range;
-   gl->mux_flag                 = 0;
-   gl->dcv_flag                 = 0;
-   gl->dc_offset                = 0;
-   gl->osctca_flag              = 0;
-   gl->osctca_delay             = 0;
-   wd_set_fe(gl, pr->i_board, -1);
-   wd_set_dcv_flag(gl, pr->i_board);
-   wd_set_dc_offset(gl, pr->i_board);
-   wd_set_range(gl, pr->i_board);
-   wd_set_osctca(gl, pr->i_board);
-   
    // save calibration
    memcpy(gl->board[pr->i_board].tcalib.version_id, "CAL1", 4);
    gl->board[pr->i_board].tcalib.sampling_frequency = gl->actual_sampling_frequency;
    gl->board[pr->i_board].tcalib.temperature = gl->board[pr->i_board].temperature;
    
+   memcpy(&old_gl.board[pr->i_board].tcalib, &gl->board[pr->i_board].tcalib, sizeof(TCALIB_DATA));
+   
+   mkdir("calib", 0755);
    sprintf(str, "calib/%s.tcal", gl->board[pr->i_board].name);
    pr->fh = open(str, O_WRONLY | O_CREAT, 0644);
    assert(pr->fh > 0);
@@ -2572,14 +2563,17 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
    
    if (pr->i_board == pr->n_board) {
       pr->state             = WD_CS_INACTIVE;
-      gl->rotate_flag       = 1;
-      gl->ofs_calib1_flag   = 1;
-      gl->ofs_calib2_flag   = 1;
-      gl->gain_calib_flag   = 1;
-      gl->range_calib_flag  = 1;
-      gl->remove_spikes     = 1;
-      gl->time_calib1_flag  = 1;
-      gl->time_calib2_flag  = 1;
+      
+      // switch everything back to previous values
+      memcpy(gl, &old_gl, sizeof(GLOBALS));
+      for (int i=0 ; i<gl->n_boards ; i++) {
+         wd_set_fe(gl, pr->i_board, -1);
+         wd_set_dcv_flag(gl, pr->i_board);
+         wd_set_dc_offset(gl, pr->i_board);
+         wd_set_range(gl, pr->i_board);
+         wd_set_osctca(gl, pr->i_board);
+         wd_set_trigger_mode(gl, pr->i_board);
+      }
    }
    
    return SUCCESS;

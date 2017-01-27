@@ -198,7 +198,12 @@ function populateControls(init)
    document.getElementById("inpTLevel").value = Math.round(OSC.GL.board[0].trigger_level[0] * 1000);
    document.getElementById("trgDelaySlider").set(1 - OSC.GL.board[0].trigger_delay / 450);
    document.getElementById("inpTDelay").value = Math.round(OSC.GL.board[0].trigger_delay);
-   document.config.trigger_mode[OSC.GL.trigger_mode].checked = true;
+   
+   if (OSC.GL.trigger_mode == 2) {
+      document.config.trigger_mode[0].checked = false;
+      document.config.trigger_mode[1].checked = false;
+   } else
+      document.config.trigger_mode[OSC.GL.trigger_mode].checked = true;
 
    document.getElementById("pzc").checked = OSC.GL.board[0].pzc[0];
    document.getElementById("gain").value = OSC.GL.board[0].gain[0];
