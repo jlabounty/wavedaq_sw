@@ -325,6 +325,10 @@ function setGl(e, channel) {
          document.getElementById("pzc"+i).checked = e.checked;
    }
 
+   if (e.name == "clock_source" && e.checked == true) {
+      dlgMessage("Warning", "No external clock present");
+   }
+   
    var uri = "gl/" + OSC.board + "/"+ e.name;
    if (channel != undefined)
       uri += "/" + channel;
@@ -1072,23 +1076,23 @@ function btnStart() {
       return;
    }
 
-   var e = document.getElementById('btnSave');
-   e.innerHTML = "Stop";
-   e.style.border = "3px solid #00A0FF";
-
    if (document.getElementById("filename").value == "") {
-      dlgAlert("Warning", "Please enter a valid file name");
+      dlgMessage("Warning", "Please enter a valid file name");
       return;
    }
 
-   var e = document.getElementById("nevents").value;
-   if (isNaN(parseInt(e)) || parseInt(e) < 1 || parseInt(e) > 1E6) {
-      dlgAlert("Warning", "Please enter a valid number of events");
+   var ne = document.getElementById("nevents").value;
+   if (isNaN(parseInt(ne)) || parseInt(ne) < 1 || parseInt(ne) > 1E6) {
+      dlgMessage("Warning", "Please enter a valid number of events");
       return;
    }
+
+   var b = document.getElementById('btnSave');
+   b.innerHTML = "Stop";
+   b.style.border = "3px solid #00A0FF";
 
    OSC.logfile = filename;
-   OSC.nRequested = parseInt(e);
+   OSC.nRequested = parseInt(ne);
    OSC.nLogged = 0;
 
    var req = new XMLHttpRequest();
@@ -1098,14 +1102,13 @@ function btnStart() {
       }
    };
 
-
    var param = OSC.logfile;
    param += "\n";
    param += document.getElementById("fileformat").selectedOptions[0].value;
    param += "\n";
    param += document.getElementById("saveboards").selectedOptions[0].value;
    param += "\n";
-   param += e;
+   param += ne;
    req.open("PUT", "save", true);
    req.send(param);
 

@@ -372,7 +372,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "         \"pll_locked\": %s,\n",        gl->board[i].pll_locked ? "true" : "false");
          mg_printf_http_chunk(nc, "         \"scaler\": [\n");
          int s;
-         for (s=0 ; s<15 ; s++)
+         for (s=0 ; s<17 ; s++)
             mg_printf_http_chunk(nc, "            %d,\n", gl->board[i].scaler[s]);
          mg_printf_http_chunk(nc, "            %d]\n", gl->board[i].scaler[s]);
          mg_printf_http_chunk(nc, "      }");

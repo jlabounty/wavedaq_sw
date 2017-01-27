@@ -543,25 +543,28 @@ function dlgHide(dlg) {
    d.style.display = "none";
 }
 
-function dlgAlert(title, string) {
-   var d = document.getElementById("dlgAlert");
+function dlgMessage(title, string) {
+   var d = document.getElementById("dlgMessage");
    if (d == undefined) {
       d =  document.createElement("div");
-      d.id = "dlgAlert";
+      d.id = "dlgMessage";
       d.className = "dlgFrame";
       d.style.zIndex = 11;
 
-      d.innerHTML = "<div class=\"dlgTitlebar\">"+title+"</div>"+
+      d.innerHTML = "<div class=\"dlgTitlebar\" id=\"dlgMessageTitle\">"+title+"</div>"+
       
-      "<div class=\"dlgPanel\" style=\"padding: 30px;\">"+string+
+      "<div class=\"dlgPanel\" style=\"padding: 30px;\">"+
+      "<div id=\"dlgMessageString\">"+string+"</div>"+
       "<br /><br /><button class=\"wideButton\" style=\"background-color:#F8F8F8\" type=\"button\" "+
-      " onClick=\"dlgHide('dlgAlert')\">Close</button>"+
+      " onClick=\"dlgHide('dlgMessage')\">Close</button>"+
       "</div>";
 
       document.body.appendChild(d);
-      dlgShow("dlgAlert");
+      dlgShow("dlgMessage");
    } else {
-      dlgShow("dlgAlert");
-      document.getElementById("dlgAlert").style.zIndex = 11;
+      document.getElementById("dlgMessageTitle").innerHTML = title;
+      document.getElementById("dlgMessageString").innerHTML = string;
+      dlgShow("dlgMessage");
+      document.getElementById("dlgMessage").style.zIndex = 11;
    }
 }
