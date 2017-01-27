@@ -507,8 +507,13 @@ void wd_set_clocksource(GLOBALS *gl, int index)
    }
    
    if (gl->clock_source == 1) {
-      // switch clock source
-      assert(wd_send(gl, index, 100, "regclr c 20000", NULL, NULL) > 0);
+      // switch clock source to backplane clock
+      sprintf(str, "regclr %x 20000", REG_CLK_CALIB_CTRL_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+      
+      // configures LMK PLL loop for 80 MHz input frequency
+      sprintf(str, "regclr %x D800320F", REG_LMK_15_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       
       // enable LMK outputs 1 & 2 for channel 9
       sprintf(str, "regwr %02x 00030101", REG_LMK_1_OFFSET);
@@ -516,8 +521,14 @@ void wd_set_clocksource(GLOBALS *gl, int index)
       sprintf(str, "regwr %02x 00030102", REG_LMK_1_OFFSET);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
    } else {
+      // switch clock source to internal clock
       assert(wd_send(gl, index, 100, "regset c 20000", NULL, NULL) > 0);
 
+      // configures LMK PLL loop for 100 MHz input frequency
+      sprintf(str, "regclr %x D800280F", REG_LMK_15_OFFSET);
+      assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
+
+      // disable LMK outputs 1 & 2 for channel 9
       sprintf(str, "regwr %02x 00020101", REG_LMK_1_OFFSET);
       assert(wd_send(gl, index, 100, str, NULL, NULL) > 0);
       sprintf(str, "regwr %02x 00020102", REG_LMK_1_OFFSET);
