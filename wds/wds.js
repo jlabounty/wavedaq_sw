@@ -1288,6 +1288,16 @@ function measParamChange(meas) {
    }
 }
 
+function measZoomIn() {
+   OSC.histo.autoAxis = false;
+   
+   var x = OSC.histo.xMax;
+   var d = 0.25 * (OSC.histo.axisMax - OSC.histo.axisMin);
+
+   OSC.histo.axisMin = x - d;
+   OSC.histo.axisMax = x + d;
+}
+
 function measZoomOut() {
    OSC.histo.autoAxis = false;
    var d = 0.5 * (OSC.histo.axisMax - OSC.histo.axisMin);

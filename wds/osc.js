@@ -130,6 +130,7 @@ function Oscilloscope(div) { // constructor
       autoAxis: true,
       axisMin: 0,
       axisMax: 0,
+      xMax: 0,
       dragLeftHandle: false,
       dragRightHande: false,
       dragX: 0,
@@ -137,8 +138,9 @@ function Oscilloscope(div) { // constructor
    };
 
    this.histo.button[0] = document.getElementById("measClear");
-   this.histo.button[1] = document.getElementById("measZoomOut");
-   this.histo.button[2] = document.getElementById("measZoomFit");
+   this.histo.button[1] = document.getElementById("measZoomIn");
+   this.histo.button[2] = document.getElementById("measZoomOut");
+   this.histo.button[3] = document.getElementById("measZoomFit");
 
    // mouse event handlers
    window.addEventListener("mousedown", this.mouseEvent.bind(this), true);
@@ -846,6 +848,7 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
    var histo = [];
    var uflowBin = 0;
    var oflowBin = 0;
+   this.histo.xMax = 0;
    for (var idx = 0; idx < this.measList.childNodes.length; idx++) {
       m = this.measList.childNodes[idx].measurement;
       if (m) {
@@ -880,8 +883,10 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
 
          var hmax = histo[0];
          for (i = 0; i < nBins; i++)
-            if (histo[i] > hmax)
+            if (histo[i] > hmax) {
                hmax = histo[i];
+               this.histo.xMax = i/nBins * (this.histo.axisMax - this.histo.axisMin) + this.histo.axisMin;
+            }
 
          // draw histo
          ctx.strokeStyle = m.color;

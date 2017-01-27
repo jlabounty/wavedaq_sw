@@ -44,6 +44,7 @@
 		D5D3311B1E0952F400F72196 /* strlcpy.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = strlcpy.c; sourceTree = SOURCE_ROOT; };
 		D5D7CE451B74EFB40037D843 /* controls.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = controls.js; sourceTree = SOURCE_ROOT; };
 		D5E10D301D22CDF5009AA227 /* register_map.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = register_map.h; path = ../../../firmware/WD2/wd2_hardware_test/wd2_xsdk_workspace/wd2_app_cmd_interpreter/src/register_map.h; sourceTree = "<group>"; };
+		D5EE12301E3B6BF0007FA7E6 /* measurement.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = measurement.js; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,6 +77,7 @@
 		D55471791B72428F002A92E4 /* wds */ = {
 			isa = PBXGroup;
 			children = (
+				D5EE12301E3B6BF0007FA7E6 /* measurement.js */,
 				D5D3311A1E0952F400F72196 /* mxml.c */,
 				D5D3311B1E0952F400F72196 /* strlcpy.c */,
 				D5E10D301D22CDF5009AA227 /* register_map.h */,
