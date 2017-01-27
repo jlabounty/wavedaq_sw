@@ -2567,12 +2567,12 @@ int wd_calibrate_time(GLOBALS *gl, TCALIB_PROGRESS *pr)
       // switch everything back to previous values
       memcpy(gl, &old_gl, sizeof(GLOBALS));
       for (int i=0 ; i<gl->n_boards ; i++) {
-         wd_set_fe(gl, pr->i_board, -1);
-         wd_set_dcv_flag(gl, pr->i_board);
-         wd_set_dc_offset(gl, pr->i_board);
-         wd_set_range(gl, pr->i_board);
-         wd_set_osctca(gl, pr->i_board);
-         wd_set_trigger_mode(gl, pr->i_board);
+         wd_set_fe(gl, i, -1);
+         wd_set_dcv_flag(gl, i);
+         wd_set_dc_offset(gl, i);
+         wd_set_range(gl, i);
+         wd_set_osctca(gl, i);
+         wd_set_trigger_mode(gl, i);
       }
    }
    
