@@ -331,7 +331,8 @@ function setGl(e, channel) {
    }
 
    if (e.name == "clock_source" && e.checked == true) {
-      dlgMessage("Warning", "No external clock present");
+      if (OSC.GL.board[OSC.board].scaler[17] < 79E6)
+         dlgMessage("Warning", "No external clock present");
    }
    
    var uri = "gl/" + OSC.board + "/"+ e.name;
