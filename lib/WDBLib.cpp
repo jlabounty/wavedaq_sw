@@ -5,18 +5,17 @@
 //  Created by Stefan Ritt on 13/8/15.
 //
 
-#if 0
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <stdarg.h>
+#include <exception>
+#include <stdexcept>
 
-#include "midas.h"
-#include "experim.h"
-#include "WD.h"
-#include "register_map.h"
+#include "WDBLib.h"
+// #include "register_map.h"
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -27,9 +26,6 @@
 #include <netdb.h>
 #include <assert.h>
 #include <errno.h>
-
-#include <exception>
-#include <stdexcept>
 
 #ifdef __linux__
 #include <linux/sockios.h>
@@ -69,6 +65,14 @@ int WDB::fServerPort = 0;
 
 /*-----------------------------------------------------------------------------------------*/
 
+void WDB::Connect()
+{
+   throw std::runtime_error(std::string("Cannot connect to board ")+fName);
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+#if 0
 int WDB::SendReceive(const char *str, char *result, int *size, int timeout_ms)
 {
    size_t n, i;

@@ -26,9 +26,18 @@ int main(int argc, const char * argv[])
    vector<WDB*> wdb;
 
    for (auto &s: wdbName) {
-      wdb.push_back(new WDB(s));
+      WDB *w = new WDB(s);
+      wdb.push_back(w);
+      
+      cout << "Connect to " << w->getName() << " ..." << std::flush;
+      try {
+         w->Connect();
+      } catch (std::runtime_error &e) {
+         cout << endl;
+         cout << e.what() << ", aborting." << endl;
+         return -1;
+      }
    }
 
-   cout << wdb[0]->getName() << endl;
    return 0;
 }

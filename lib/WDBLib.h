@@ -44,10 +44,11 @@ typedef struct {
 
 class WDB {
    string fName;
-   
-public:
+
    static int fDataSocket;
    static int fServerPort;
+
+public:
    
    // constructor
    WDB(string name) {
@@ -58,7 +59,7 @@ public:
    string getName() { return fName; }
    
    // interface functions
-
+   void Connect();
 };
 
 // linux and MAC specific things
