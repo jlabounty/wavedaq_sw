@@ -4,16 +4,21 @@
 //
 //  Created by Stefan Ritt on 31 Jan 2017
 //
+//  Naming convention: mXxx for member variables
+//                     gXxx for global (static) variables
+//                     kXxx for constants
+//
+//
 
 #ifndef __wdblib_h__
 #define __wdblib_h__
 
 #include <string>
 
-using namespace std;
-
 #define SUCCESS 1
 #define FAILURE 0
+
+/*----------------------------------------------------------*/
 
 typedef struct {
    char           version_id[4];
@@ -32,6 +37,17 @@ typedef struct {
    float          adc_offset_range2[16];
 } VCALIB_DATA;
 
+class vcalib {
+   VCALIB_DATA    fCalib;
+   
+public:
+   vcalib();
+   void save();
+   void load();
+};
+
+/*----------------------------------------------------------*/
+
 typedef struct {
    char           version_id[4];
    unsigned int   crc;
@@ -42,25 +58,45 @@ typedef struct {
    float          offset[16];
 } TCALIB_DATA;
 
-class WDB {
-   string fName;
+class tcalib {
+   TCALIB_DATA    fCalib;
+   
+public:
+   tcalib();
+   void save();
+   void load();
+};
 
-   static int fDataSocket;
-   static int fServerPort;
+/*----------------------------------------------------------*/
+
+class WDB {
+   std::string      mName;
+   unsigned char    mEthAddr[16];
+
+   int              mSerialNumber;
+   
+   static int       gServerPort;
+   static int       gDataSocket;
+   static int       gCmdSocket;
+
+   void             SendReceive(std::string str, std::string result, int timeout_ms = 100);
+   void             Send(std::string str, int timeout_ms = 100);
 
 public:
    
    // constructor
-   WDB(string name) {
-      fName = name;
+   WDB(std::string name) {
+      mName = name;
    }
 
    // setter & getter
-   string getName() { return fName; }
+   std::string getName() { return mName; }
    
    // interface functions
    void Connect();
 };
+
+/*----------------------------------------------------------*/
 
 // linux and MAC specific things
 #if defined(__linux__) || defined(__APPLE__)

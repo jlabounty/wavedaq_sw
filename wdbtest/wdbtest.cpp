@@ -12,29 +12,28 @@
 
 #include "WDBLib.h"
 
-using namespace std;
-
 /*-- Globals -------------------------------------------------------*/
 
-vector<string> wdbName = { "wd027" };
+std::vector<std::string> wdbName = { "wd027" };
 
 /*------------------------------------------------------------------*/
 
 
 int main(int argc, const char * argv[])
 {
-   vector<WDB*> wdb;
+   std::vector<WDB*> wdb;
 
    for (auto &s: wdbName) {
       WDB *w = new WDB(s);
       wdb.push_back(w);
       
-      cout << "Connect to " << w->getName() << " ..." << std::flush;
+      std::cout << "Connect to " << w->getName() << " ..." << std::flush;
       try {
          w->Connect();
       } catch (std::runtime_error &e) {
-         cout << endl;
-         cout << e.what() << ", aborting." << endl;
+         std::cout << std::endl;
+         std::cout << e.what() << std::endl;
+         std::cout << "Aborting." << std::endl;
          return -1;
       }
    }

@@ -5,6 +5,19 @@
 //  Created by Stefan Ritt on 13/8/15.
 //
 
+#include <string>
+#include <iostream>
+
+#include <sys/socket.h>
+#include <sys/select.h>
+#include <sys/time.h>
+#include <arpa/inet.h>
+#include <ifaddrs.h>
+#include <netdb.h>
+#include <assert.h>
+#include <errno.h>
+
+/*
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -13,19 +26,8 @@
 #include <stdarg.h>
 #include <exception>
 #include <stdexcept>
-
-#include "WDBLib.h"
-// #include "register_map.h"
-
-#include <sys/socket.h>
 #include <sys/types.h>
-#include <sys/select.h>
-#include <sys/time.h>
-#include <arpa/inet.h>
-#include <ifaddrs.h>
-#include <netdb.h>
-#include <assert.h>
-#include <errno.h>
+*/
 
 #ifdef __linux__
 #include <linux/sockios.h>
@@ -37,6 +39,9 @@
 #include <net/if_dl.h>
 #include <pthread.h>
 #endif
+
+#include "WDBLib.h"
+// #include "register_map.h"
 
 #define WD2_CMD_PORT   3000
 
@@ -60,14 +65,240 @@ typedef struct {
    unsigned short packet_sequence_number;
 } WD2_FRAME_HEADER;
 
-int WDB::fDataSocket = 0;
-int WDB::fServerPort = 0;
+int WDB::gDataSocket = 0;
+int WDB::gServerPort = 0;
+int WDB::gCmdSocket  = 0;
+
+/*-----------------------------------------------------------------------------------------*/
+
+void WDB::Send(std::string str, int timeout_ms)
+{
+   std::string result;
+   SendReceive(str, result, timeout_ms);
+}
+
+void WDB::SendReceive(std::string str, std::string result, int timeout_ms)
+{
+   size_t i;
+   fd_set readfds;
+   struct timeval timeout;
+   int    status, ms;
+   struct sockaddr_in client_addr;
+   char   rx_buffer[1600];
+   std::string prompt;
+   
+   memcpy(&client_addr, mEthAddr, sizeof(client_addr));
+   
+   if (str.back() != '\n')
+      str += '\n';
+   
+   result.clear();
+   
+   // assemble prompt
+   prompt = mName + " > ";
+   
+   // retry max five times
+   for (int retry=0 ; retry < 5 ; retry++) {
+      
+      // send request
+      i = sendto(gCmdSocket,
+                 str.c_str(),
+                 str.size(),
+                 0,
+                 (struct sockaddr *)&client_addr,
+                 sizeof(client_addr));
+      
+      if (i != str.size()) {
+         std::cout << mName << " send retry " << retry+1;
+         continue;
+      }
+      
+      // retrieve reply until prompt is found
+      do {
+         memset(rx_buffer, 0, sizeof(rx_buffer));
+         
+         FD_ZERO(&readfds);
+         FD_SET(gCmdSocket, &readfds);
+         
+         ms = timeout_ms;
+         if (retry == 0) // first trial times out faster
+            ms = 100;
+         
+         timeout.tv_sec = ms / 1000;
+         timeout.tv_usec = (ms % 1000) * 1000;
+         
+         do {
+            status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
+         } while (status == -1);        /* dont return if an alarm signal was cought */
+         
+         if (!FD_ISSET(gCmdSocket, &readfds))
+            break;
+         
+         i = recv(gCmdSocket, rx_buffer, sizeof(rx_buffer), 0);
+         assert(i > 0);
+         
+         if (rx_buffer[i-1] == 0) // don't count trailing zero
+            i--;
+         
+         result += rx_buffer;
+         
+         // check for prompt
+         if (result.substr(result.size()-prompt.size()) == prompt)
+            break;
+         
+      } while (1);
+      
+      // check for prompt
+      if (result.substr(result.size()-prompt.size()) == prompt)
+         break;
+      
+      std::cout << mName << " retry " << retry+1;
+   }
+   
+   if (result.size() == 0) {
+      throw std::runtime_error(std::string("Error sending \"")+str+"\" to "+mName+".");
+      return;
+   }
+   
+   // chop off prompt
+   if (result.size() >= prompt.size())
+      result = result.substr(0, result.size()-prompt.size());
+}
 
 /*-----------------------------------------------------------------------------------------*/
 
 void WDB::Connect()
 {
-   throw std::runtime_error(std::string("Cannot connect to board ")+fName);
+   struct sockaddr_in server_addr;
+   struct sockaddr_in client_addr;
+   struct hostent *phe;
+   int size;
+   
+#ifdef _MSC_VER
+   {
+   WSADATA WSAData;
+   
+   // Start windows sockets
+   if (WSAStartup(MAKEWORD(1, 1), &WSAData) != 0)
+      return -1;
+   }
+#endif
+   
+   // create UDB socket for command interpreter on any port
+   if (gCmdSocket == 0)
+      gCmdSocket = socket(AF_INET, SOCK_DGRAM, 0);
+   assert(gCmdSocket);
+   
+   // create UDB socket to receive binary data on port WD2_DATA_PORT
+   if (gDataSocket == 0) {
+      gDataSocket = socket(AF_INET, SOCK_DGRAM, 0);
+      assert(gDataSocket);
+      
+      // bind socket to port chosen by OS
+      memset((char*)&server_addr, 0, sizeof(server_addr));
+      server_addr.sin_family = AF_INET;
+      server_addr.sin_port = htons(0); // let OS choose port
+      server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+      if (::bind(gDataSocket, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+         perror("bind");
+         throw std::runtime_error(std::string("Cannot bind socket"));
+      }
+      size = sizeof(server_addr);
+      getsockname(gDataSocket, (struct sockaddr *) &server_addr, (socklen_t *) &size);
+      gServerPort = ntohs(server_addr.sin_port);
+      
+      std::cout << "Listening on data port " << gServerPort << "." << std::endl;
+   }
+   
+   // retrieve Ethernet address of board
+   phe = gethostbyname(mName.c_str());
+   if (phe == NULL)
+      throw std::runtime_error(std::string("Cannot resolve host name ")+mName+".");
+   
+   memcpy((char *)&client_addr.sin_addr, phe->h_addr, phe->h_length);
+   client_addr.sin_family = AF_INET;
+   client_addr.sin_port = htons(WD2_CMD_PORT);
+   size = sizeof(client_addr);
+   memcpy(mEthAddr, &client_addr, sizeof(client_addr));
+   
+   // check if board is alive
+   try {
+      WDB::Send("", 500);
+   } catch (...) {
+      throw std::runtime_error(std::string("Cannot connect to board ")+mName+".");
+   }
+   
+   // derive serial number from network name (for now...)
+   mSerialNumber = atoi(mName.c_str()+2);
+   
+   // set dbglevel none
+   Send("dbglvl none");
+   
+   // set destinantion port in WD board
+   Send(std::string("setenv dstport ")+std::to_string(gServerPort));
+   
+   // set MAC address and IP address of this computer in WD board
+   Send("cfgdst");
+   
+   /*
+   SetGain(ts->wdb[iwd].gain);
+   SetPZC(ts->wdb[iwd].pzc);
+   SetTriggerLevel(&ts->wdb[iwd].trigger_level[0]);
+   SetClockSource(1);
+   SetSamplingFrequency(ts->wdb[iwd].sampling_frequency);
+   
+   // Now some trigger setup: comparator mask and patterns
+   SetMasks(ts, iwd);
+   SetPatterns(ts, iwd);
+   
+   ConfigureBoard(iwd);
+   
+   // load voltage calibration for board from file (for now...)
+   sprintf(str, "/home/meg/meg2/online/frontends/wd_fe/calib/%s.vcal", fName);
+   int fh = open(str, O_RDONLY, 0644);
+   if (fh < 0)
+      throw std::runtime_error(std::string("Cannot find voltage calibration file \"")+str+"\""".");
+   
+   size = read(fh, &fVCalib, sizeof(VCALIB_DATA));
+   if (size != sizeof(VCALIB_DATA)) {
+      close(fh);
+      throw std::runtime_error(std::string("Invalid voltage calibration file size of \"")+str+"\""".");
+   }
+   
+   if (memcmp(fVCalib.version_id, "CAL1", 4) != 0) {
+      close(fh);
+      throw std::runtime_error(std::string("Invalid voltage calibration file format in \"")+str+"\""".");
+   }
+   
+   // set sampling frequency from calibration data
+   if (fabs(fVCalib.sampling_frequency - fSamplingFrequency) > 0.01) {
+      char err[1000];
+      sprintf(err, "Warning: Voltage calibration data in \"%s/%s\" is for %3g GSPS, running now at %3g GSPS\n",
+              dir, str, fVCalib.sampling_frequency, fSamplingFrequency);
+      close(fh);
+      throw std::runtime_error(std::string(err));
+   }
+   close(fh);
+   
+   // load timing calibration for board from file (for now...)
+   sprintf(str, "/home/meg/meg2/online/frontends/wd_fe/calib/%s.tcal", fName);
+   fh = open(str, O_RDONLY, 0644);
+   if (fh < 0)
+      throw std::runtime_error(std::string("Cannot find time calibration file \"")+str+"\""".");
+   
+   size = read(fh, &fTCalib, sizeof(TCALIB_DATA));
+   if (size != sizeof(TCALIB_DATA)) {
+      close(fh);
+      throw std::runtime_error(std::string("Invalid time calibration file size of \"")+str+"\""".");
+   }
+   
+   if (memcmp(fTCalib.version_id, "CAL1", 4) != 0) {
+      close(fh);
+      throw std::runtime_error(std::string("Invalid time calibration file format in \"")+str+"\""+".");
+   }
+   
+   close(fh);
+    */
 }
 
 /*-----------------------------------------------------------------------------------------*/
