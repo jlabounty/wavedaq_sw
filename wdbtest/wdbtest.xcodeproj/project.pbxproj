@@ -26,6 +26,7 @@
 /* Begin PBXFileReference section */
 		D51CB2901E40E14900D2DC06 /* wdbtest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = wdbtest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D553D50E1E40E8D200AE1F52 /* WDBLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WDBLib.h; path = /wavedaq/software/lib/WDBLib.h; sourceTree = "<group>"; };
+		D58BAE791E432921003BFDD0 /* register_map.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = register_map.h; path = /wavedaq/firmware/WD2/wd2_hardware_test/wd2_xsdk_workspace/wd2_app_cmd_interpreter/src/register_map.h; sourceTree = "<group>"; };
 		D5AF68551E40E1E900E1BC39 /* WDBLib.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WDBLib.cpp; path = /wavedaq/software/lib/WDBLib.cpp; sourceTree = "<group>"; };
 		D5AF68571E40E23500E1BC39 /* wdbtest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = wdbtest.cpp; path = /wavedaq/software/wdbtest/wdbtest.cpp; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -60,6 +61,7 @@
 		D51CB2921E40E14900D2DC06 /* wdbtest */ = {
 			isa = PBXGroup;
 			children = (
+				D58BAE791E432921003BFDD0 /* register_map.h */,
 				D553D50E1E40E8D200AE1F52 /* WDBLib.h */,
 				D5AF68571E40E23500E1BC39 /* wdbtest.cpp */,
 				D5AF68551E40E1E900E1BC39 /* WDBLib.cpp */,
@@ -222,7 +224,10 @@
 		D51CB2981E40E14900D2DC06 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				HEADER_SEARCH_PATHS = /wavedaq/software/lib/;
+				HEADER_SEARCH_PATHS = (
+					/wavedaq/software/lib/,
+					/wavedaq/firmware/WD2/wd2_hardware_test/wd2_xsdk_workspace/wd2_app_cmd_interpreter/src/,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -230,7 +235,10 @@
 		D51CB2991E40E14900D2DC06 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				HEADER_SEARCH_PATHS = /wavedaq/software/lib/;
+				HEADER_SEARCH_PATHS = (
+					/wavedaq/software/lib/,
+					/wavedaq/firmware/WD2/wd2_hardware_test/wd2_xsdk_workspace/wd2_app_cmd_interpreter/src/,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

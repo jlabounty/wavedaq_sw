@@ -15,30 +15,29 @@
 
 #include <string>
 
-#define SUCCESS 1
-#define FAILURE 0
+#include "register_map.h"
 
-/*----------------------------------------------------------*/
+//--------------------------------------------------------------------
 
 typedef struct {
-   char           version_id[4];
-   unsigned int   crc;
-   float          sampling_frequency;
-   float          temperature;
-   float          wf_offset1[16][1024];
-   float          wf_offset2[16][1024];
-   float          wf_gain1[16][1024];
-   float          wf_gain2[16][1024];
-   float          drs_offset_range0[16];
-   float          drs_offset_range1[16];
-   float          drs_offset_range2[16];
-   float          adc_offset_range0[16];
-   float          adc_offset_range1[16];
-   float          adc_offset_range2[16];
+   char             version_id[4];
+   unsigned int     crc;
+   float            sampling_frequency;
+   float            temperature;
+   float            wf_offset1[16][1024];
+   float            wf_offset2[16][1024];
+   float            wf_gain1[16][1024];
+   float            wf_gain2[16][1024];
+   float            drs_offset_range0[16];
+   float            drs_offset_range1[16];
+   float            drs_offset_range2[16];
+   float            adc_offset_range0[16];
+   float            adc_offset_range1[16];
+   float            adc_offset_range2[16];
 } VCALIB_DATA;
 
 class vcalib {
-   VCALIB_DATA    fCalib;
+   VCALIB_DATA      fCalib;
    
 public:
    vcalib();
@@ -46,20 +45,20 @@ public:
    void load();
 };
 
-/*----------------------------------------------------------*/
+//--------------------------------------------------------------------
 
 typedef struct {
-   char           version_id[4];
-   unsigned int   crc;
-   float          sampling_frequency;
-   float          temperature;
-   float          dt[16][1024];
-   float          period[16][1024];
-   float          offset[16];
+   char             version_id[4];
+   unsigned int     crc;
+   float            sampling_frequency;
+   float            temperature;
+   float            dt[16][1024];
+   float            period[16][1024];
+   float            offset[16];
 } TCALIB_DATA;
 
 class tcalib {
-   TCALIB_DATA    fCalib;
+   TCALIB_DATA      fCalib;
    
 public:
    tcalib();
@@ -67,19 +66,19 @@ public:
    void load();
 };
 
-/*----------------------------------------------------------*/
+//--------------------------------------------------------------------
 
 class WDB {
    std::string      mName;
    unsigned char    mEthAddr[16];
 
-   int              mSerialNumber;
+   unsigned int     reg[REG_CRC32_REG_BANK_OFFSET/4];
    
    static int       gServerPort;
    static int       gDataSocket;
    static int       gCmdSocket;
 
-   void             SendReceive(std::string str, std::string result, int timeout_ms = 100);
+   std::string      SendReceive(std::string str, int timeout_ms = 100);
    void             Send(std::string str, int timeout_ms = 100);
 
 public:
@@ -94,9 +93,37 @@ public:
    
    // interface functions
    void Connect();
+   void ReceiveRegisters();
+   
+   unsigned int GetSerialNumber();
+   unsigned int GetSlotId();
+   unsigned int GetCrateId();
+   unsigned int GetProtocolVersion();
+   unsigned int GetBufferCtrl();
+   unsigned int GetTcaCtrl();
+   unsigned int GetClkDivAdcDrs();
+   unsigned int GetClkSelDaq();
+   unsigned int GetClkSelExt();
+   unsigned int GetExtClkFreq();
+   unsigned int GetLocalClkFreq();
+   unsigned int GetDacRofs();
+   unsigned int GetDacOfs();
+   unsigned int GetDacCalDc();
+   unsigned int GetDacPulseAmp();
+   unsigned int GetDacPczLevel();
+   float GetDacTlevel(int chn);
+   
+   void SetRegMask(unsigned int ofs, unsigned int mask, unsigned int v);
+   void SetDacRofs(unsigned int v);
+   void SetDacOfs(unsigned int v);
+   void SetDacCalDc(unsigned int v);
+   void SetDacPulseAmp(unsigned int v);
+   void SetDacPczLevel(unsigned int v);
+   void SetDacTlevel(int chn, float v);
+
 };
 
-/*----------------------------------------------------------*/
+//--------------------------------------------------------------------
 
 // linux and MAC specific things
 #if defined(__linux__) || defined(__APPLE__)

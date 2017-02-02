@@ -41,7 +41,7 @@
 #endif
 
 #include "WDBLib.h"
-// #include "register_map.h"
+#include "register_map.h"
 
 #define WD2_CMD_PORT   3000
 
@@ -69,15 +69,17 @@ int WDB::gDataSocket = 0;
 int WDB::gServerPort = 0;
 int WDB::gCmdSocket  = 0;
 
-/*-----------------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------
 
 void WDB::Send(std::string str, int timeout_ms)
 {
    std::string result;
-   SendReceive(str, result, timeout_ms);
+   result = SendReceive(str, timeout_ms);
 }
 
-void WDB::SendReceive(std::string str, std::string result, int timeout_ms)
+//--------------------------------------------------------------------
+
+std::string WDB::SendReceive(std::string str, int timeout_ms)
 {
    size_t i;
    fd_set readfds;
@@ -85,7 +87,7 @@ void WDB::SendReceive(std::string str, std::string result, int timeout_ms)
    int    status, ms;
    struct sockaddr_in client_addr;
    char   rx_buffer[1600];
-   std::string prompt;
+   std::string prompt, result;
    
    memcpy(&client_addr, mEthAddr, sizeof(client_addr));
    
@@ -157,22 +159,23 @@ void WDB::SendReceive(std::string str, std::string result, int timeout_ms)
    
    if (result.size() == 0) {
       throw std::runtime_error(std::string("Error sending \"")+str+"\" to "+mName+".");
-      return;
+      return result;
    }
    
    // chop off prompt
    if (result.size() >= prompt.size())
       result = result.substr(0, result.size()-prompt.size());
+   
+   return result;
 }
 
-/*-----------------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------
 
 void WDB::Connect()
 {
    struct sockaddr_in server_addr;
    struct sockaddr_in client_addr;
    struct hostent *phe;
-   int size;
    
 #ifdef _MSC_VER
    {
@@ -203,7 +206,7 @@ void WDB::Connect()
          perror("bind");
          throw std::runtime_error(std::string("Cannot bind socket"));
       }
-      size = sizeof(server_addr);
+      auto size = sizeof(server_addr);
       getsockname(gDataSocket, (struct sockaddr *) &server_addr, (socklen_t *) &size);
       gServerPort = ntohs(server_addr.sin_port);
       
@@ -218,7 +221,6 @@ void WDB::Connect()
    memcpy((char *)&client_addr.sin_addr, phe->h_addr, phe->h_length);
    client_addr.sin_family = AF_INET;
    client_addr.sin_port = htons(WD2_CMD_PORT);
-   size = sizeof(client_addr);
    memcpy(mEthAddr, &client_addr, sizeof(client_addr));
    
    // check if board is alive
@@ -228,9 +230,6 @@ void WDB::Connect()
       throw std::runtime_error(std::string("Cannot connect to board ")+mName+".");
    }
    
-   // derive serial number from network name (for now...)
-   mSerialNumber = atoi(mName.c_str()+2);
-   
    // set dbglevel none
    Send("dbglvl none");
    
@@ -239,7 +238,214 @@ void WDB::Connect()
    
    // set MAC address and IP address of this computer in WD board
    Send("cfgdst");
+}
+
+//--------------------------------------------------------------------
+
+#include <sstream>
+
+void WDB::ReceiveRegisters()
+{
+   std::string result;
+   for (int i=0 ; i<REG_CRC32_REG_BANK_OFFSET ; i+=4) {
+      std::ostringstream req;
+      req << "regrd ctrl " << std::hex << i;
+      
+      result = SendReceive(req.str());
+      
+      this->reg[i/4] = (unsigned int)std::stoul(result.substr(13), nullptr, 16);
+   }
+}
+
+//--------------------------------------------------------------------
+
+unsigned int bitExtract(unsigned int reg, unsigned int mask)
+{
+   reg = reg & mask; // clear bits not in mask
    
+   // find LSB which is non-zero
+   for (int i=0 ; i<32 ; i++)
+      if (mask & (1<<i)) {
+         // shift bits right
+         reg >>= i;
+         break;
+      }
+   
+   return reg;
+}
+
+void bitReplace(unsigned int &reg, unsigned int mask, unsigned int value)
+{
+   reg = reg & (~mask); // clear bits frommask
+   
+   // find LSB which is non-zero
+   for (int i=0 ; i<32 ; i++)
+      if (mask & (1<<i)) {
+         // shift bits left and OR it to register
+         value <<= i;
+         value &= mask;
+         reg |= value;
+         break;
+      }
+}
+
+//--------------------------------------------------------------------
+
+unsigned int WDB::GetSerialNumber()
+{
+   return bitExtract(reg[REG_SERIAL_NUMBER_OFFSET/4], BIT_SERIAL_NUMBER);
+}
+
+unsigned int WDB::GetCrateId()
+{
+   return bitExtract(reg[REG_BOARD_LOCATION_OFFSET/4], BIT_CRATE_ID);
+}
+
+unsigned int WDB::GetSlotId()
+{
+   return bitExtract(reg[REG_BOARD_LOCATION_OFFSET/4], BIT_SLOT_ID);
+}
+
+unsigned int WDB::GetProtocolVersion()
+{
+   return bitExtract(reg[REG_PROTOCOL_VERSION_OFFSET/4], BIT_PROTOCOL_VERSION);
+}
+
+unsigned int WDB::GetBufferCtrl()
+{
+   return bitExtract(reg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_BUFFER_CTRL);
+}
+
+unsigned int WDB::GetTcaCtrl()
+{
+   return bitExtract(reg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_TCA_CTRL);
+}
+
+unsigned int WDB::GetClkDivAdcDrs()
+{
+   return bitExtract(reg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_CLK_DIV_ADC_DRS);
+}
+
+unsigned int WDB::GetClkSelDaq()
+{
+   return bitExtract(reg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_CLK_SEL_DAQ);
+}
+
+unsigned int WDB::GetClkSelExt()
+{
+   return bitExtract(reg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_CLK_SEL_EXT);
+}
+
+unsigned int WDB::GetExtClkFreq()
+{
+   return bitExtract(reg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_LOCAL_CLK_FREQ);
+}
+
+unsigned int WDB::GetLocalClkFreq()
+{
+   return bitExtract(reg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_LOCAL_CLK_FREQ);
+}
+
+
+unsigned int WDB::GetDacRofs()
+{
+   return bitExtract(reg[REG_DAC0_A_B_OFFSET/4], BIT_DAC0_CH_A);
+}
+
+unsigned int WDB::GetDacOfs()
+{
+   return bitExtract(reg[REG_DAC0_A_B_OFFSET/4], BIT_DAC0_CH_B);
+}
+
+unsigned int WDB::GetDacCalDc()
+{
+   return bitExtract(reg[REG_DAC0_C_D_OFFSET/4], BIT_DAC0_CH_C);
+}
+
+unsigned int WDB::GetDacPulseAmp()
+{
+   return bitExtract(reg[REG_DAC0_C_D_OFFSET/4], BIT_DAC0_CH_D);
+}
+
+unsigned int WDB::GetDacPczLevel()
+{
+   return bitExtract(reg[REG_DAC0_E_F_OFFSET/4], BIT_DAC0_CH_E);
+}
+
+float WDB::GetDacTlevel(int chn)
+{
+   unsigned int v;
+   
+   assert(chn < 16);
+   if (chn % 2 == 0)
+      v = bitExtract(reg[REG_DAC1_A_B_OFFSET/4+(chn/2)], BIT_DAC1_CH_A);
+   else
+      v = bitExtract(reg[REG_DAC1_A_B_OFFSET/4+(chn/2)], BIT_DAC1_CH_B);
+   
+   // convert to Volts taking WDB comparator offset into account
+   return ((v / 4095.0 * 2500) - 900) / 500.0;
+}
+
+//--------------------------------------------------------------------
+
+void WDB::SetRegMask(unsigned int ofs, unsigned int mask, unsigned int v)
+{
+   unsigned int r = this->reg[ofs/4];
+   
+   bitReplace(r, mask, v);
+   
+   std::ostringstream req;
+   req << "regwr " << std::hex << ofs << " " << r;
+   
+   std::cout << req.str();
+   
+   Send(req.str());
+   
+   this->reg[ofs/4] = r;
+}
+
+void WDB::SetDacRofs(unsigned int v)
+{
+   SetRegMask(REG_DAC0_A_B_OFFSET, BIT_DAC0_CH_A, v);
+}
+
+void WDB::SetDacOfs(unsigned int v)
+{
+   SetRegMask(REG_DAC0_A_B_OFFSET, BIT_DAC0_CH_B, v);
+}
+
+void WDB::SetDacCalDc(unsigned int v)
+{
+   SetRegMask(REG_DAC0_C_D_OFFSET, BIT_DAC0_CH_C, v);
+}
+
+void WDB::SetDacPulseAmp(unsigned int v)
+{
+   SetRegMask(REG_DAC0_C_D_OFFSET, BIT_DAC0_CH_D, v);
+}
+
+void WDB::SetDacPczLevel(unsigned int v)
+{
+   SetRegMask(REG_DAC0_E_F_OFFSET, BIT_DAC0_CH_E, v);
+}
+
+void WDB::SetDacTlevel(int chn, float v)
+{
+   // convert to mV taking WDB comparator offset into account
+   v = v*500 + 900;
+   
+   // convert from mV to DAC bits
+   auto d = (unsigned int)(v / 2500.0 * 4095 + 0.5);
+   
+   assert(chn < 16);
+   if (chn % 2 == 0)
+      SetRegMask(REG_DAC1_A_B_OFFSET+(chn/2)*4, BIT_DAC1_CH_A, d);
+   else
+      SetRegMask(REG_DAC1_A_B_OFFSET+(chn/2)*4, BIT_DAC1_CH_B, d);
+}
+
+//--------------------------------------------------------------------
+
    /*
    SetGain(ts->wdb[iwd].gain);
    SetPZC(ts->wdb[iwd].pzc);
@@ -299,7 +505,6 @@ void WDB::Connect()
    
    close(fh);
     */
-}
 
 /*-----------------------------------------------------------------------------------------*/
 
