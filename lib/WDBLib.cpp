@@ -7,6 +7,8 @@
 
 #include <string>
 #include <iostream>
+#include <iomanip>
+#include <vector>
 
 #include <sys/socket.h>
 #include <sys/select.h>
@@ -244,16 +246,29 @@ void WDB::Connect()
 
 #include <sstream>
 
-void WDB::ReceiveRegisters()
+void WDB::ReceiveControlRegisters()
 {
    std::string result;
-   for (int i=0 ; i<REG_CRC32_REG_BANK_OFFSET ; i+=4) {
+   for (int i=0 ; i<=REG_CRC32_REG_BANK_OFFSET ; i+=4) {
       std::ostringstream req;
       req << "regrd ctrl " << std::hex << i;
       
       result = SendReceive(req.str());
       
-      this->reg[i/4] = (unsigned int)std::stoul(result.substr(13), nullptr, 16);
+      this->creg[i/4] = (unsigned int)std::stoul(result.substr(13), nullptr, 16);
+   }
+}
+
+void WDB::ReceiveStatusRegisters()
+{
+   std::string result;
+   for (int i=0 ; i<=REG_ADC_01_CLK_MOD_FLAG_OFFSET ; i+=4) {
+      std::ostringstream req;
+      req << "regrd stat " << std::hex << i;
+      
+      result = SendReceive(req.str());
+      
+      this->sreg[i/4] = (unsigned int)std::stoul(result.substr(13), nullptr, 16);
    }
 }
 
@@ -293,83 +308,83 @@ void bitReplace(unsigned int &reg, unsigned int mask, unsigned int value)
 
 unsigned int WDB::GetSerialNumber()
 {
-   return bitExtract(reg[REG_SERIAL_NUMBER_OFFSET/4], BIT_SERIAL_NUMBER);
+   return bitExtract(creg[REG_SERIAL_NUMBER_OFFSET/4], BIT_SERIAL_NUMBER);
 }
 
 unsigned int WDB::GetCrateId()
 {
-   return bitExtract(reg[REG_BOARD_LOCATION_OFFSET/4], BIT_CRATE_ID);
+   return bitExtract(creg[REG_BOARD_LOCATION_OFFSET/4], BIT_CRATE_ID);
 }
 
 unsigned int WDB::GetSlotId()
 {
-   return bitExtract(reg[REG_BOARD_LOCATION_OFFSET/4], BIT_SLOT_ID);
+   return bitExtract(creg[REG_BOARD_LOCATION_OFFSET/4], BIT_SLOT_ID);
 }
 
 unsigned int WDB::GetProtocolVersion()
 {
-   return bitExtract(reg[REG_PROTOCOL_VERSION_OFFSET/4], BIT_PROTOCOL_VERSION);
+   return bitExtract(creg[REG_PROTOCOL_VERSION_OFFSET/4], BIT_PROTOCOL_VERSION);
 }
 
 unsigned int WDB::GetBufferCtrl()
 {
-   return bitExtract(reg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_BUFFER_CTRL);
+   return bitExtract(creg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_BUFFER_CTRL);
 }
 
 unsigned int WDB::GetTcaCtrl()
 {
-   return bitExtract(reg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_TCA_CTRL);
+   return bitExtract(creg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_TCA_CTRL);
 }
 
 unsigned int WDB::GetClkDivAdcDrs()
 {
-   return bitExtract(reg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_CLK_DIV_ADC_DRS);
+   return bitExtract(creg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_CLK_DIV_ADC_DRS);
 }
 
 unsigned int WDB::GetClkSelDaq()
 {
-   return bitExtract(reg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_CLK_SEL_DAQ);
+   return bitExtract(creg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_CLK_SEL_DAQ);
 }
 
 unsigned int WDB::GetClkSelExt()
 {
-   return bitExtract(reg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_CLK_SEL_EXT);
+   return bitExtract(creg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_CLK_SEL_EXT);
 }
 
 unsigned int WDB::GetExtClkFreq()
 {
-   return bitExtract(reg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_LOCAL_CLK_FREQ);
+   return bitExtract(creg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_LOCAL_CLK_FREQ);
 }
 
 unsigned int WDB::GetLocalClkFreq()
 {
-   return bitExtract(reg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_LOCAL_CLK_FREQ);
+   return bitExtract(creg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_LOCAL_CLK_FREQ);
 }
 
 
 unsigned int WDB::GetDacRofs()
 {
-   return bitExtract(reg[REG_DAC0_A_B_OFFSET/4], BIT_DAC0_CH_A);
+   return bitExtract(creg[REG_DAC0_A_B_OFFSET/4], BIT_DAC0_CH_A);
 }
 
 unsigned int WDB::GetDacOfs()
 {
-   return bitExtract(reg[REG_DAC0_A_B_OFFSET/4], BIT_DAC0_CH_B);
+   return bitExtract(creg[REG_DAC0_A_B_OFFSET/4], BIT_DAC0_CH_B);
 }
 
 unsigned int WDB::GetDacCalDc()
 {
-   return bitExtract(reg[REG_DAC0_C_D_OFFSET/4], BIT_DAC0_CH_C);
+   return bitExtract(creg[REG_DAC0_C_D_OFFSET/4], BIT_DAC0_CH_C);
 }
 
 unsigned int WDB::GetDacPulseAmp()
 {
-   return bitExtract(reg[REG_DAC0_C_D_OFFSET/4], BIT_DAC0_CH_D);
+   return bitExtract(creg[REG_DAC0_C_D_OFFSET/4], BIT_DAC0_CH_D);
 }
 
 unsigned int WDB::GetDacPczLevel()
 {
-   return bitExtract(reg[REG_DAC0_E_F_OFFSET/4], BIT_DAC0_CH_E);
+   return bitExtract(creg[REG_DAC0_E_F_OFFSET/4], BIT_DAC0_CH_E);
 }
 
 float WDB::GetDacTlevel(int chn)
@@ -378,19 +393,169 @@ float WDB::GetDacTlevel(int chn)
    
    assert(chn < 16);
    if (chn % 2 == 0)
-      v = bitExtract(reg[REG_DAC1_A_B_OFFSET/4+(chn/2)], BIT_DAC1_CH_A);
+      v = bitExtract(creg[REG_DAC1_A_B_OFFSET/4+(chn/2)], BIT_DAC1_CH_A);
    else
-      v = bitExtract(reg[REG_DAC1_A_B_OFFSET/4+(chn/2)], BIT_DAC1_CH_B);
+      v = bitExtract(creg[REG_DAC1_A_B_OFFSET/4+(chn/2)], BIT_DAC1_CH_B);
    
    // convert to Volts taking WDB comparator offset into account
    return ((v / 4095.0 * 2500) - 900) / 500.0;
+}
+
+unsigned int WDB::GetFrontend(int chn)
+{
+   assert(chn < 16);
+
+   unsigned int m;
+   if (chn % 2 == 0)
+      m = BIT_FE0_ACDC | BIT_FE0_COMP2 | BIT_FE0_OP2  | BIT_FE0_COMP1 | BIT_FE0_OP1 |
+          BIT_FE0_ATT1 | BIT_FE0_ATT0  | BIT_FE0_CAL1 | BIT_FE0_CAL0;
+   else
+      m = BIT_FE1_ACDC | BIT_FE1_COMP2 | BIT_FE1_OP2  | BIT_FE1_COMP1 | BIT_FE1_OP1 |
+          BIT_FE1_ATT1 | BIT_FE1_ATT0  | BIT_FE1_CAL1 | BIT_FE1_CAL0;
+
+   return bitExtract(creg[REG_FRONTEND_0_1_OFFSET/4+(chn/2)], m);
+}
+
+unsigned int WDB::GetLmk(int r)
+{
+   assert(r < 16);
+   return creg[REG_LMK_0_OFFSET/4+r];
+}
+
+unsigned int WDB::GetTriggerOutPulseLength()
+{
+   return bitExtract(creg[REG_TRIGGER_CFG_OFFSET/4], BIT_TRIGGER_OUT_PULSE_LENGTH);
+}
+
+unsigned int WDB::GetTriggerEnable()
+{
+   return bitExtract(creg[REG_TRIGGER_CFG_OFFSET/4], BIT_TRIGGER_ENABLE);
+}
+
+unsigned int WDB::GetTriggerFallingEdge()
+{
+   return bitExtract(creg[REG_TRIGGER_CFG_OFFSET/4], BIT_TRIGGER_FALLING_EDGE);
+}
+
+unsigned int WDB::GetTriggerCfgExtOr()
+{
+   return bitExtract(creg[REG_TRIGGER_CFG_OFFSET/4], BIT_TRIGGER_CFG_EXT_OR);
+}
+
+unsigned int WDB::GetTriggerCfgExtAnd()
+{
+   return bitExtract(creg[REG_TRIGGER_CFG_OFFSET/4], BIT_TRIGGER_CFG_EXT_AND);
+}
+
+unsigned int WDB::GetTriggerDelayEnable()
+{
+   return bitExtract(creg[REG_TRIGGER_CFG_OFFSET/4], BIT_TRIGGER_DELAY_ENABLE);
+}
+
+unsigned int WDB::GetTriggerDelay()
+{
+   return bitExtract(creg[REG_TRIGGER_CFG_OFFSET/4], BIT_TRIGGER_DELAY);
+}
+
+unsigned int WDB::GetTriggerCompMask()
+{
+   return bitExtract(creg[REG_TRIGGER_COMP_MASK_OFFSET/4], BIT_TRIGGER_COMP_MASK);
+}
+
+unsigned int WDB::GetTriggerCfgOr()
+{
+   return bitExtract(creg[REG_TRIGGER_CFG_A_OFFSET/4], BIT_TRIGGER_CFG_OR);
+}
+
+unsigned int WDB::GetTriggerCfgAnd()
+{
+   return bitExtract(creg[REG_TRIGGER_CFG_A_OFFSET/4], BIT_TRIGGER_CFG_AND);
+}
+
+unsigned int WDB::GetTriggerLocalScheme()
+{
+   return bitExtract(creg[REG_TRIGGER_SCHEME_SELECT_OFFSET/4], BIT_PATTERN_TRIGGER_SELECT);
+}
+
+unsigned int WDB::GetTriggerBackplaneScheme(int chn)
+{
+   assert(chn < 8);
+
+   unsigned int mask;
+   mask = BIT_BACKPLANE_TRIGGER7 << (chn * 2);
+   
+   return bitExtract(creg[REG_TRIGGER_SCHEME_SELECT_OFFSET/4], mask);
+}
+
+unsigned int WDB::GetTriggerPatternEnLocal()
+{
+   return bitExtract(creg[REG_TRIGGER_PATTERN_EN_LOCAL_OFFSET/4], BIT_TRIGGER_PATTERN_EN_LOCAL);
+}
+
+unsigned int WDB::GetTriggerPatternEnBackplane(int chn)
+{
+   assert(chn < 8);
+   return bitExtract(creg[REG_TRIGGER_PATTERN_EN_BPL0_OFFSET/4+chn], BIT_TRIGGER_PATTERN_EN_BPL0);
+}
+
+unsigned int WDB::GetTriggerPattern(int i)
+{
+   assert(i < 32);
+   return bitExtract(creg[REG_TRIGGER_PATTERN0_OFFSET/4+i], BIT_TRIGGER_PATTERN0);
+}
+
+unsigned int WDB::GetCrc32RegBank()
+{
+   return bitExtract(creg[REG_CRC32_REG_BANK_OFFSET/4], BIT_CRC32_REG_BANK);
+}
+
+//--------------------------------------------------------------------
+
+std::string WDB::GetFwBuild()
+{
+   std::ostringstream s;
+   std::vector<std::string> monthName = {"Jan", "Feb", "Mar", "Apr", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+   
+   s << "Compatibility Level: ";
+   s << bitExtract(sreg[REG_FW_BUILD_TIME_OFFSET/4], BIT_FW_COMPAT_LEVEL) << std::endl;
+   s << "FW GIT Revision:     ";
+   s << "0x" << std::hex << std::uppercase << bitExtract(sreg[REG_GIT_HASH_TAG_OFFSET/4], BIT_GIT_HASH_TAG) << std::endl;
+
+   s << "FW Build:            ";
+   s << std::dec << std::setw(2) << std::setfill('0');
+   s << monthName[bitExtract(sreg[REG_FW_BUILD_DATE_OFFSET/4], BIT_FW_BUILD_MONTH)-1] << ' ';
+   s << bitExtract(sreg[REG_FW_BUILD_DATE_OFFSET/4], BIT_FW_BUILD_DAY) << ' ';
+   s << bitExtract(sreg[REG_FW_BUILD_DATE_OFFSET/4], BIT_FW_BUILD_YEAR) << "  ";
+   
+   s << bitExtract(sreg[REG_FW_BUILD_TIME_OFFSET/4], BIT_FW_BUILD_HOUR) << ':';
+   s << bitExtract(sreg[REG_FW_BUILD_TIME_OFFSET/4], BIT_FW_BUILD_MINUTE) << ':';
+   s << bitExtract(sreg[REG_FW_BUILD_TIME_OFFSET/4], BIT_FW_BUILD_SECOND) << std::endl;
+   
+   return s.str();
+}
+
+std::string WDB::GetHwVersion()
+{
+   std::ostringstream s;
+   
+   assert(bitExtract(sreg[REG_HW_VERSION_OFFSET/4], BIT_BOARD_MAGIC) == 0xAC);
+   
+   s << "Board Type:          ";
+   s << "WaveDREAM" << bitExtract(sreg[REG_HW_VERSION_OFFSET/4], BIT_BOARD_TYPE) << std::endl;
+   s << "Board Revision:      ";
+   s << (char)('A'+bitExtract(sreg[REG_HW_VERSION_OFFSET/4], BIT_BOARD_REVISION)) << std::endl;
+   s << "Board Variant:       ";
+   s << std::showbase << std::setw(2) << std::hex << bitExtract(sreg[REG_HW_VERSION_OFFSET/4], BIT_BOARD_VARIANT);
+   s << std::endl;
+
+   return s.str();
 }
 
 //--------------------------------------------------------------------
 
 void WDB::SetRegMask(unsigned int ofs, unsigned int mask, unsigned int v)
 {
-   unsigned int r = this->reg[ofs/4];
+   unsigned int r = this->creg[ofs/4];
    
    bitReplace(r, mask, v);
    
@@ -401,7 +566,7 @@ void WDB::SetRegMask(unsigned int ofs, unsigned int mask, unsigned int v)
    
    Send(req.str());
    
-   this->reg[ofs/4] = r;
+   this->creg[ofs/4] = r;
 }
 
 void WDB::SetDacRofs(unsigned int v)
@@ -442,6 +607,108 @@ void WDB::SetDacTlevel(int chn, float v)
       SetRegMask(REG_DAC1_A_B_OFFSET+(chn/2)*4, BIT_DAC1_CH_A, d);
    else
       SetRegMask(REG_DAC1_A_B_OFFSET+(chn/2)*4, BIT_DAC1_CH_B, d);
+}
+
+void WDB::SetFrontend(int chn, unsigned int v)
+{
+   assert(chn < 16);
+   unsigned int m;
+   if (chn % 2 == 0)
+      m = BIT_FE0_ACDC | BIT_FE0_COMP2 | BIT_FE0_OP2  | BIT_FE0_COMP1 | BIT_FE0_OP1 |
+          BIT_FE0_ATT1 | BIT_FE0_ATT0  | BIT_FE0_CAL1 | BIT_FE0_CAL0;
+   else
+      m = BIT_FE1_ACDC | BIT_FE1_COMP2 | BIT_FE1_OP2  | BIT_FE1_COMP1 | BIT_FE1_OP1 |
+          BIT_FE1_ATT1 | BIT_FE1_ATT0  | BIT_FE1_CAL1 | BIT_FE1_CAL0;
+
+   SetRegMask(REG_FRONTEND_0_1_OFFSET+(chn/2)*4, m, v);
+}
+
+void WDB::SetLmk(int r, unsigned int v)
+{
+   assert(r < 16);
+   SetRegMask(REG_LMK_0_OFFSET+r*4, 0xFFFFFFFF, v);
+}
+
+void WDB::SetTriggerOutPulseLength(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_CFG_OFFSET, BIT_TRIGGER_OUT_PULSE_LENGTH, v);
+}
+
+void WDB::SetTriggerEnable(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_CFG_OFFSET, BIT_TRIGGER_ENABLE, v);
+}
+
+void WDB::SetTriggerFallingEdge(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_CFG_OFFSET, BIT_TRIGGER_FALLING_EDGE, v);
+}
+
+void WDB::SetTriggerCfgExtOr(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_CFG_OFFSET, BIT_TRIGGER_CFG_EXT_OR, v);
+}
+
+void WDB::SetTriggerCfgExtAnd(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_CFG_OFFSET, BIT_TRIGGER_CFG_EXT_AND, v);
+}
+
+void WDB::SetTriggerDelayEnable(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_CFG_OFFSET, BIT_TRIGGER_DELAY_ENABLE, v);
+}
+
+void WDB::SetTriggerDelay(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_CFG_OFFSET, BIT_TRIGGER_DELAY, v);
+}
+
+void WDB::SetTriggerCompMask(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_COMP_MASK_OFFSET, BIT_TRIGGER_COMP_MASK, v);
+}
+
+void WDB::SetTriggerCfgOr(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_CFG_A_OFFSET, BIT_TRIGGER_CFG_OR, v);
+}
+
+void WDB::SetTriggerCfgAnd(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_CFG_A_OFFSET, BIT_TRIGGER_CFG_AND, v);
+}
+
+void WDB::SetTriggerLocalScheme(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_SCHEME_SELECT_OFFSET, BIT_PATTERN_TRIGGER_SELECT, v);
+}
+
+void WDB::SetTriggerBackplaneScheme(int chn, unsigned int v)
+{
+   assert(chn < 8);
+   
+   unsigned int mask;
+   mask = BIT_BACKPLANE_TRIGGER7 << (chn * 2);
+
+   SetRegMask(REG_TRIGGER_SCHEME_SELECT_OFFSET, mask, v);
+}
+
+void WDB::SetTriggerPatternEnLocal(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_PATTERN_EN_LOCAL_OFFSET, BIT_TRIGGER_PATTERN_EN_LOCAL, v);
+}
+
+void WDB::SetTriggerPatternEnBackplane(int chn, unsigned int v)
+{
+   assert(chn < 8);
+   SetRegMask(REG_TRIGGER_PATTERN_EN_BPL0_OFFSET+chn, BIT_TRIGGER_PATTERN_EN_BPL0, v);
+}
+
+void WDB::SetTriggerPattern(int i, unsigned int v)
+{
+   assert(i < 32);
+   SetRegMask(REG_TRIGGER_PATTERN0_OFFSET+i, BIT_TRIGGER_PATTERN0, v);
 }
 
 //--------------------------------------------------------------------

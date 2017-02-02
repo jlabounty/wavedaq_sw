@@ -72,7 +72,8 @@ class WDB {
    std::string      mName;
    unsigned char    mEthAddr[16];
 
-   unsigned int     reg[REG_CRC32_REG_BANK_OFFSET/4];
+   unsigned int     creg[REG_CRC32_REG_BANK_OFFSET/4+1];
+   unsigned int     sreg[REG_ADC_01_CLK_MOD_FLAG_OFFSET/4+1];
    
    static int       gServerPort;
    static int       gDataSocket;
@@ -93,7 +94,8 @@ public:
    
    // interface functions
    void Connect();
-   void ReceiveRegisters();
+   void ReceiveControlRegisters();
+   void ReceiveStatusRegisters();
    
    unsigned int GetSerialNumber();
    unsigned int GetSlotId();
@@ -112,6 +114,26 @@ public:
    unsigned int GetDacPulseAmp();
    unsigned int GetDacPczLevel();
    float GetDacTlevel(int chn);
+   unsigned int GetFrontend(int chn);
+   unsigned int GetLmk(int r);
+   unsigned int GetTriggerOutPulseLength();
+   unsigned int GetTriggerEnable();
+   unsigned int GetTriggerFallingEdge();
+   unsigned int GetTriggerCfgExtOr();
+   unsigned int GetTriggerCfgExtAnd();
+   unsigned int GetTriggerDelayEnable();
+   unsigned int GetTriggerDelay();
+   unsigned int GetTriggerCompMask();
+   unsigned int GetTriggerCfgOr();
+   unsigned int GetTriggerCfgAnd();
+   unsigned int GetTriggerLocalScheme();
+   unsigned int GetTriggerBackplaneScheme(int chn);
+   unsigned int GetTriggerPatternEnLocal();
+   unsigned int GetTriggerPatternEnBackplane(int chn);
+   unsigned int GetTriggerPattern(int chn);
+   unsigned int GetCrc32RegBank();
+   std::string GetFwBuild();
+   std::string GetHwVersion();
    
    void SetRegMask(unsigned int ofs, unsigned int mask, unsigned int v);
    void SetDacRofs(unsigned int v);
@@ -120,7 +142,23 @@ public:
    void SetDacPulseAmp(unsigned int v);
    void SetDacPczLevel(unsigned int v);
    void SetDacTlevel(int chn, float v);
-
+   void SetFrontend(int chn, unsigned int v);
+   void SetLmk(int r, unsigned int v);
+   void SetTriggerOutPulseLength(unsigned int v);
+   void SetTriggerEnable(unsigned int v);
+   void SetTriggerFallingEdge(unsigned int v);
+   void SetTriggerCfgExtOr(unsigned int v);
+   void SetTriggerCfgExtAnd(unsigned int v);
+   void SetTriggerDelayEnable(unsigned int v);
+   void SetTriggerDelay(unsigned int v);
+   void SetTriggerCompMask(unsigned int v);
+   void SetTriggerCfgOr(unsigned int v);
+   void SetTriggerCfgAnd(unsigned int v);
+   void SetTriggerLocalScheme(unsigned int v);
+   void SetTriggerBackplaneScheme(int chn, unsigned int v);
+   void SetTriggerPatternEnLocal(unsigned int v);
+   void SetTriggerPatternEnBackplane(int chn, unsigned int v);
+   void SetTriggerPattern(int chn, unsigned int v);
 };
 
 //--------------------------------------------------------------------

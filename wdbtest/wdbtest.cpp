@@ -30,7 +30,8 @@ int main(int argc, const char * argv[])
       std::cout << "Connect to " << w->getName() << " ..." << std::flush;
       try {
          w->Connect();
-         w->ReceiveRegisters();
+         w->ReceiveControlRegisters();
+         w->ReceiveStatusRegisters();
       } catch (std::runtime_error &e) {
          std::cout << std::endl;
          std::cout << e.what() << std::endl;
@@ -39,10 +40,8 @@ int main(int argc, const char * argv[])
       }
    }
 
-   auto v = wdb[0]->GetDacTlevel(0);
-   v = 0.1;
-   wdb[0]->SetDacTlevel(0, v);
-   v = wdb[0]->GetDacTlevel(0);
+   std::cout << wdb[0]->GetFwBuild() << std::endl;
+   std::cout << wdb[0]->GetHwVersion() << std::endl;
    
    return 0;
 }
