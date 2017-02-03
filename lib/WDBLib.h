@@ -96,6 +96,7 @@ public:
    void Connect();
    void ReceiveControlRegisters();
    void ReceiveStatusRegisters();
+   void ReceiveStatusRegister(int ofs);
    
    unsigned int GetSerialNumber();
    unsigned int GetSlotId();
@@ -132,8 +133,20 @@ public:
    unsigned int GetTriggerPatternEnBackplane(int chn);
    unsigned int GetTriggerPattern(int chn);
    unsigned int GetCrc32RegBank();
+   
    std::string GetFwBuild();
    std::string GetHwVersion();
+   unsigned int GetDrsSampleFreq();
+   unsigned int GetAdcSampleFreq();
+   float GetTemperature();
+   unsigned int GetPlllck();
+   unsigned int GetSerdesPlllck();
+   unsigned int IsSerialBusy();
+   unsigned int IsRunning();
+   unsigned int GetTriggerBus();
+   unsigned int GetTriggerType();
+   unsigned int GetTriggerNumber();
+   void GetScalers(std::vector<unsigned long> &s);
    
    void SetRegMask(unsigned int ofs, unsigned int mask, unsigned int v);
    void SetDacRofs(unsigned int v);

@@ -6,6 +6,7 @@
 //
 
 #include <string>
+#include <sstream>
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -153,13 +154,15 @@ std::string WDB::SendReceive(std::string str, int timeout_ms)
       } while (1);
       
       // check for prompt
-      if (result.substr(result.size()-prompt.size()) == prompt)
+      if (result.size() >= prompt.size() && result.substr(result.size()-prompt.size()) == prompt)
          break;
       
-      std::cout << mName << " retry " << retry+1;
+      std::cout << mName << " retry " << retry+1 << std::endl;
    }
    
    if (result.size() == 0) {
+      if (str.back() == '\n')
+        str = str.substr(0, str.size()-1);
       throw std::runtime_error(std::string("Error sending \"")+str+"\" to "+mName+".");
       return result;
    }
@@ -244,8 +247,6 @@ void WDB::Connect()
 
 //--------------------------------------------------------------------
 
-#include <sstream>
-
 void WDB::ReceiveControlRegisters()
 {
    std::string result;
@@ -262,14 +263,27 @@ void WDB::ReceiveControlRegisters()
 void WDB::ReceiveStatusRegisters()
 {
    std::string result;
-   for (int i=0 ; i<=REG_ADC_01_CLK_MOD_FLAG_OFFSET ; i+=4) {
-      std::ostringstream req;
-      req << "regrd stat " << std::hex << i;
-      
-      result = SendReceive(req.str());
-      
-      this->sreg[i/4] = (unsigned int)std::stoul(result.substr(13), nullptr, 16);
+   std::ostringstream req;
+   req << "llrd c3010000 " << REG_ADC_01_CLK_MOD_FLAG_OFFSET/4+1;
+   
+   result = SendReceive(req.str());
+   std::stringstream ss(result);
+   std::string line;
+   
+   for (auto i=0 ; i<REG_ADC_01_CLK_MOD_FLAG_OFFSET/4 ; i++) {
+      std::getline(ss, line, '\r');
+      this->sreg[i/4+i] = (unsigned int)std::stoul(line.substr(14), nullptr, 16);
    }
+}
+
+void WDB::ReceiveStatusRegister(int ofs)
+{
+   std::string result;
+   std::ostringstream req;
+   req << "regrd stat " << std::hex << ofs;
+      
+   result = SendReceive(req.str());
+   this->sreg[ofs/4] = (unsigned int)std::stoul(result.substr(13), nullptr, 16);
 }
 
 //--------------------------------------------------------------------
@@ -549,6 +563,104 @@ std::string WDB::GetHwVersion()
    s << std::endl;
 
    return s.str();
+}
+
+unsigned int WDB::GetDrsSampleFreq()
+{
+   return bitExtract(sreg[REG_DRS_SAMPLE_FREQ_OFFSET/4], BIT_DRS_SAMPLE_FREQ);
+}
+
+unsigned int WDB::GetAdcSampleFreq()
+{
+   return bitExtract(sreg[REG_ADC_SAMPLE_FREQ_OFFSET/4], BIT_ADC_SAMPLE_FREQ);
+}
+
+float WDB::GetTemperature()
+{
+   ReceiveStatusRegister(REG_STATUS_OFFSET);
+   return bitExtract(sreg[REG_STATUS_OFFSET/4], BIT_TEMPERATURE) * 0.0625;
+}
+
+unsigned int WDB::GetPlllck()
+{
+   ReceiveStatusRegister(REG_STATUS_OFFSET);
+   auto mask = BIT_SYS_DCM_LOCK | BIT_DRS_PLLLCK_0 | BIT_DRS_PLLLCK_1 | BIT_LMK_PLLLCK;
+   return bitExtract(sreg[REG_STATUS_OFFSET/4], mask);
+}
+
+unsigned int WDB::GetSerdesPlllck()
+{
+   ReceiveStatusRegister(REG_STATUS_OFFSET);
+   auto mask = BIT_OSERDES_PLLLCK_DCB | BIT_OSERDES_PLLLCK_TCB | BIT_ISERDES_PLLLCK_0 | BIT_ISERDES_PLLLCK_1;
+   return bitExtract(sreg[REG_STATUS_OFFSET/4], mask);
+}
+
+unsigned int WDB::IsSerialBusy()
+{
+   ReceiveStatusRegister(REG_STATUS_OFFSET);
+   return bitExtract(sreg[REG_STATUS_OFFSET/4], BIT_SERIAL_BUSY);
+}
+
+unsigned int WDB::IsRunning()
+{
+   ReceiveStatusRegister(REG_STATUS_OFFSET);
+   return bitExtract(sreg[REG_STATUS_OFFSET/4], BIT_RUNNING);
+}
+
+unsigned int WDB::GetTriggerBus()
+{
+   ReceiveStatusRegister(REG_TRIGGER_BUS_OFFSET);
+   return bitExtract(sreg[REG_TRIGGER_BUS_OFFSET/4], BIT_TRIGGER_BUS);
+}
+
+unsigned int WDB::GetTriggerType()
+{
+   ReceiveStatusRegister(REG_TRIGGER_INFO_OFFSET);
+   return bitExtract(sreg[REG_TRIGGER_INFO_OFFSET/4], BIT_TRIGGER_TYPE);
+}
+
+unsigned int WDB::GetTriggerNumber()
+{
+   ReceiveStatusRegister(REG_TRIGGER_INFO_OFFSET);
+   return bitExtract(sreg[REG_TRIGGER_INFO_OFFSET/4], BIT_TRIGGER_NUMBER);
+}
+
+void WDB::GetScalers(std::vector<unsigned long> &scaler)
+{
+   std::string result;
+   std::ostringstream req;
+   req << "llrd c30100" << std::hex << REG_SCALER_0_LSB_OFFSET << " 34";
+   
+   result = SendReceive(req.str());
+   std::stringstream ss(result);
+   std::string line;
+   
+   for (auto i=0 ; i<34 ; i++) {
+      std::getline(ss, line, '\r');
+      this->sreg[REG_SCALER_0_LSB_OFFSET/4+i] = (unsigned int)std::stoul(line.substr(14), nullptr, 16);
+   }
+
+   // channels 0-15 are 64 bit counters
+   for (auto i=0 ; i<16 ; i++) {
+      unsigned long v = this->sreg[REG_SCALER_0_LSB_OFFSET/4+i*2] |
+                        ((unsigned long)this->sreg[REG_SCALER_0_LSB_OFFSET/4+i*2+1] << 32);
+      
+      if (scaler.size() < i+1)
+         scaler.push_back(v);
+      else
+         scaler[i] = v;
+   }
+   
+   // channels 16 and 17 are 32 bit counters
+   for (auto i=16 ; i<18 ; i++) {
+      unsigned long v = this->sreg[REG_SCALER_TRIGGER_OFFSET/4+i];
+      
+      if (scaler.size() < i+1)
+         scaler.push_back(v);
+      else
+         scaler[i] = v;
+   }
+
 }
 
 //--------------------------------------------------------------------
