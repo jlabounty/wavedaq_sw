@@ -81,6 +81,9 @@ int main(int argc, char *argv[])
          printf("TESTTXMODE?\n");
          scanf("%x",&scanfdata);
          data |= scanfdata<<5;
+         printf("DBGSERDES?\n");
+         scanf("%x",&scanfdata);
+         data |= scanfdata<<8;
          printf("ENABLE_TRGBUS?\n");
          scanf("%x",&scanfdata);
          data |= scanfdata<<4;
@@ -297,16 +300,24 @@ int main(int argc, char *argv[])
          printf(" opt 23 = SERDES Scan ... \n");
 
          u_int32_t icha;
-         u_int32_t pattern;
-         u_int32_t rdata;
-         u_int32_t addr;
+         u_int32_t patternup, patterndown;
+         u_int32_t rdatadown, rdataup;
+         u_int32_t addrdown, addrup;
          u_int32_t dly[5];
          printf("which channel? (16-19 for FC0-3)\n");
          scanf("%d",&icha);
-         printf("which pattern?\n");
-         scanf("%08X",&pattern);
-         addr = MEMBASEADDR + 1024*2*(icha%16);
-         printf("address:%08X\n", addr);
+         printf("which pattern (0 for default)?\n");
+         scanf("%08X",&patterndown);
+         if(patterndown==0){
+            patterndown = 0xDEADBEEF;
+            patternup = 0xDEADBEEF;
+         } else {
+            printf("pattern up part?\n");
+            scanf("%08X",&patternup);
+         }
+         addrdown = MEMBASEADDR + 1024*2*(icha%16);
+         addrup = MEMBASEADDR + 1024*2*(icha%16)+1024;
+         printf("address:%08X\n", addrdown);
          for(int iDly=0; iDly<32; iDly++){
             dly[icha/4] = (iDly & 0x1F) << (icha%4)*8;
             //for(int i=0; i<4; i++)printf("%08X ", dly[i]);
@@ -316,9 +327,10 @@ int main(int argc, char *argv[])
             for(int iBit=0; iBit<8; iBit++){
                TCBBoard.SerdesBitslip(icha);
                // now read the word back to check the tx
-               TCBBoard.ReadReg(addr,&rdata);
-               if(rdata==pattern) printf("dly:%03X bit:%3d %08X\n", iDly, iBit, rdata);
-               //printf("dly:%03X bit:%3d %08X\n", iDly, iBit, rdata);
+               TCBBoard.ReadReg(addrdown,&rdatadown);
+               TCBBoard.ReadReg(addrup,&rdataup);
+               if(rdataup==patternup && rdatadown==patterndown) printf("dly:%03X bit:%3d %08X%08X\n", iDly, iBit, rdataup, rdatadown);
+               //printf("dly:%03X bit:%3d %08X%08X\n", iDly, iBit, rdataup, rdatadown);
             }
          }
       }

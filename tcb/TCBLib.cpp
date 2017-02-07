@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <midas.h>
 #include "mscb.h"
 #include "TCBLib.h"
 
@@ -444,7 +445,6 @@ void TCB::GetRRUN(u_int32_t *data)
    printf(" TESTTXMODE status %x \n",(*data&0x20)>>5);
    printf(" EXBUSY status %x \n",(*data&0x8)>>3);
    printf(" ENABLE TRGBUS status %x \n",(*data&0x10)>>4);
-   printf(" SERIALIZE TRGBUS status %x \n",(*data&0x100)>>8);
    printf(" MASKBUSY status %x \n",(*data&0x2000)>>13);
    printf(" MASKSYNC status %x \n",(*data&0x4000)>>14);
    printf(" MASKTRG status %x \n",(*data&0x8000)>>15);
