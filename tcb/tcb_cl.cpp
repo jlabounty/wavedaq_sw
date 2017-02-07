@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "mscb.h"
-//#include <midas.h>
-//#include <mcstd.h>
 #include "TCBLib.h"
 #include <ctime>
 #include <errno.h>
