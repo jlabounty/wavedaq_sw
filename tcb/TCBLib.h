@@ -1,113 +1,175 @@
-#define RRUN          0x00                      // run control 
-#define RBUSDLY       0x01                      // trigger bus delay 
-#define RPRESCA0      0x10                      // prescaling0 - track-like
-#define RPRESCA1      0x11                      // prescaling1 - multiplicity
-#define RPRESCA2      0x12                      // prescaling2 - tile single
-#define RPRESCA3      0x13                      // prescaling3 - laser
-#define RPRESCA4      0x14                      // prescaling4 - pedestal 
-#define RIDMASK0      0x15                      // mask indata(31:0)
-#define RIDMASK1      0x16                      // mask indata(63:32)
-#define RIDMASK2      0x17                      // mask indata(95:64)
-#define RIDMASK3      0x18                      // mask indata(127:96)
-#define RTOTTIME      0x20                      // total time 
-#define RLIVETIME     0x21                      // live time 
-#define REVECOU       0x22                      // event counter 
-#define RTRITYPE      0x23                      // trigger type 
-#define RTRGCOU0      0x40                      // trigger counter0 
-#define RTRGCOU1      0x41                      // trigger counter1
-#define RTRGCOU2      0x42                      // trigger counter2
-#define RTRGCOU3      0x43                      // trigger counter3
-#define RTRGCOU4      0x44                      // trigger counter4
-#define TIMESTP0      0x50                      // base address of time stamps (32 integers) 
-#define RTHRMULT      0x70                      // multiplicity threshold 
-#define RTRGDLY       0x71                      // trigger delay register
-#define RMEMADDR      0x7F                      // memory address
-#define RMEM0         0x80                      // memory 0 
-#define RMEM1         0xA0                      // memory 1 
-#define RMEM2         0xC0                      // memory 2 
-#define RMEM3         0xE0                      // memory 3 
-#define SCALER	      0x200			// start of scalers (128 integers)
-#define SCALERTIME    0x280			// totaltime latched on scaler read
+//
+//  TCBLib.h
+//  Trigger Concentrator Board Library Header File
+//
+//  Created by Luca Galli on 12/12/2015
+//
+
+#define RRUN          0x00                      // run control
+#define RBUSDLY       0x01                      // trigger bus delay
+#define RENA          0x02                      // trigger enable bits
+#define RALGSEL       0x03                      // algorith select on TCB1/2_0
+#define RWDDLY0       0x10                      // wdb serdes delay values
+#define RWDDLY1       0x11                      // wdb serdes delay values
+#define RWDDLY2       0x12                      // wdb serdes delay values
+#define RWDDLY3       0x13                      // wdb serdes delay values
+#define RFCDLY        0x14                      // frontpanel serdes delay values
+#define RBSLIP        0x15                      // bitslip and reset for input serdes
+#define RSERDESMSK    0x16                      // mask for input serdes
+#define RPRESCA0      0x100                     // prescaling value- trigger 0: waveform sum value
+#define RPRESCA1      0x101                     // prescaling value- trigger 1: tc or
+#define RPRESCA2      0x102                     // prescaling value- trigger 2: laser
+#define RPRESCA3      0x103                     // prescaling value- trigger 3: diode
+#define RPRESCA4      0x104                     // prescaling value- trigger 4: pedestal
+#define RTOTTIME      0x200                     // total time
+#define RLIVETIME     0x201                     // live time
+#define REVECOU       0x202                     // event counter
+#define RTRITYPE      0x203                     // trigger type
+#define RSYSEVECOU    0x204                     // system (trgbus) event counter
+#define RSYSTRITYPE   0x205                     // system (trgbus) trigger type
+#define RTRGCOU0      0x400                     // trigger counter0
+#define RTRGCOU1      0x401                     // trigger counter1
+#define RTRGCOU2      0x402                     // trigger counter2
+#define RTRGCOU3      0x403                     // trigger counter3
+#define RTRGCOU4      0x404                     // trigger counter4
+#define RPARAM        0x600                     // start of parameter space
+#define RMEMADDR      0x0FFFF                   // counter stop position
+#define MEMBASEADDR   0x10000                   //base address for memories
+// define the number of trigger algorithms
+#define NTRG 5
+
+///////////////////////////////////////////////////////////
+// LIBRARY ASSOCIATED TO TCB_X_0
+#define MEMNUM             34
+#define MEMDIM             1024
+///////////////////////////////////////////////////////////
+
+
+typedef struct {
+    unsigned short     trgindly;
+    unsigned short     syncindly;
+    unsigned short     sprindly;
+    unsigned short     trgoutdly;
+    unsigned short     syncoutdly;
+    unsigned short     sproutdly;
+    unsigned short     algsel;
+    bool      triggerenable[32];
+    unsigned int       serdesmask;
+    unsigned int       prescaling[32];
+} TCB_SETTINGS;
+
 
 class TCB {
- public:
-  // board info
-  u_int32_t   fidcode;      // reg id
-  u_int32_t   fslot;      // slot
+private:
+   void           SetBitslip(int *bitslip);
+   int            InitType1(TCB_SETTINGS *ts);
+   int            InitType2(TCB_SETTINGS *ts);
+   int            InitType3(TCB_SETTINGS *ts);
 
-  // getters
-  u_int32_t      GetIDCode() { return fidcode; }
-  u_int32_t      GeSlot() { return fslot; }
-  // board configuration
-  //
-  //general write register function
-  void WriteReg(int, u_int32_t, u_int32_t*);
-  // general read register function
-  void ReadReg(int, u_int32_t, u_int32_t*);
-  // general read block transfer function
-  void ReadBLT(int, u_int32_t, u_int32_t*,int);
-  // prescaling values setting
-  void SetPrescaling(int, u_int32_t*);
-  // read prescaling values
-  void GetPrescaling(int, u_int32_t*);
-  // set the IDCode
-  void SetIDCode(int);
-  // write a memory
-  void WriteMemory(int,int,u_int32_t*);
-  // read a memory
-  void ReadMemory(int,int,u_int32_t*);
-  // read all memories
-  void ReadMemoryBLT(int,int,u_int32_t*);
-  // set the runmode
-  void GoRun(int);
-  // get the runmode status
-  int IsRunning(int);
-  // remove the busy
-  void RemoveBusy(int);
-  // software sync
-  void SWSync(int);
-  // software stop
-  void SWStop(int);
-  // set rrun register
-  void SetRRUN(int,u_int32_t*);
-  // set multiplicity register
-  void SetTHRMult(int,u_int32_t*);
-  // set trigger delay
-  void SetTRGDLY(int,u_int32_t*);
-  // get trigger delay
-  void GetTRGDLY(int,u_int32_t*);
-  // get rrun register
-  void GetRRUN(int,u_int32_t*);
-  // read total time 
-  void GetTotalTime(int,u_int32_t*);
-  // read live time 
-  void GetLiveTime(int,u_int32_t*);
-  // read event counter
-  void GetEventCounter(int,u_int32_t*);
-  // read trigger type and pattern
-  void GetTriggerType(int,u_int32_t*,u_int32_t*);
-  // read trigger counters
-  void GetTriggerCounters(int,u_int32_t*);
-  // read memory address
-  void GetMemoryAddress(int,u_int32_t*);
-  // write in data masks
-  void SetDataMasks(int,u_int32_t*);
-  // write in trg bus delay register
-   void SetTRGBusDLY(int,u_int32_t*,u_int32_t*);
-  // write in trg bus delay register
-   void GetTRGBusDLY(int,u_int32_t*,u_int32_t*);
-  // read time stamps
-  void GetTimeStamps(int,u_int32_t *);
-  // check if the system is busy
-  int IsBusy(int);
-  // get scalers
-  void GetScalers(int, u_int32_t *, u_int32_t *);
-  // Constructor
-  TCB(int slot) { 
-    fslot = slot;
-    fidcode = 0xff;
-  }
+public:
+   // board info
+   u_int32_t      fidcode;           // reg id
+   u_int32_t      fslot;             // slot
+   char           fmscb_device[256]; // MSCBxxx node name
+   int            fmscb_addr;        // MSCB address of CMB
+   int            fh;                // MSCB handle
+   
+   // getters
+   u_int32_t      GetIDCode() { return fidcode; }
+   u_int32_t      GetSlot() { return fslot; }
+   
+   // Constructor
+   TCB(const char *mscb_device, int mscb_addr, int slot) {
+      strlcpy(fmscb_device, mscb_device, sizeof(fmscb_device));
+      fmscb_addr = mscb_addr;
+      fslot = slot;
+      fidcode = 0xffff;
+   }
 
+   int InitBoard(TCB_SETTINGS *ts, int iType);
+   
+   //general write register function
+   void WriteReg(u_int32_t, u_int32_t*);
+   //general write block transfert function
+   void WriteBLT(u_int32_t, u_int32_t*,int);
+   // general read register function
+   void ReadReg(u_int32_t, u_int32_t*);
+   // general read block transfer function
+   void ReadBLT(u_int32_t, u_int32_t*,int);
+   // prescaling values setting
+   void SetPrescaling(u_int32_t*);
+   // read prescaling values
+   void GetPrescaling(u_int32_t*);
+   // set the IDCode
+   void SetIDCode();
+   // write a memory
+   void WriteMemory(int,u_int32_t*);
+   // write a memory
+   void WriteMemoryBLT(int,u_int32_t*);
+   // read a memory
+   void ReadMemory(int,u_int32_t*);
+   // read all memories
+   void ReadMemoryBLT(int,u_int32_t*);
+   // set the runmode
+   void GoRun();
+   // get the runmode status
+   int IsRunning();
+   // remove the busy
+   void RemoveBusy();
+   // software sync
+   void SWSync();
+   // software stop
+   void SWStop();
+   // set rrun register
+   void SetRRUN(u_int32_t*);
+   // set rena register
+   void SetRENA(u_int32_t*);
+   // set ralgsel register
+   void SetRALGSEL(u_int32_t*);
+   // get rrun register
+   void GetRRUN(u_int32_t*);
+   // get rena register
+   void GetRENA(u_int32_t*);
+   // get ralgsel register
+   void GetRALGSEL(u_int32_t*);
+   // read total time
+   void GetTotalTime(u_int32_t*);
+   // read live time
+   void GetLiveTime(u_int32_t*);
+   // read event counter
+   void GetEventCounter(u_int32_t*);
+   // read trigger type and pattern
+   void GetTriggerType(u_int32_t*,u_int32_t*);
+   // read system event counter
+   void GetSystemEventCounter(u_int32_t*);
+   // read system trigger type
+   bool GetSystemTriggerType(u_int32_t*);
+   // read trigger counters
+   void GetTriggerCounters(u_int32_t*);
+   // read memory address
+   void GetMemoryAddress(u_int32_t*);
+   // check if the system is busy
+   int IsBusy();
+   // write in trg bus Odelay register
+   void SetTRGBusODLY(u_int32_t*,u_int32_t*,u_int32_t*);
+   // write in trg bus Idelay register
+   void SetTRGBusIDLY(u_int32_t*,u_int32_t*,u_int32_t*);
+   // write in trg bus I/O delay register
+   void GetTRGBusDLY(u_int32_t*,u_int32_t*,u_int32_t*,u_int32_t*,u_int32_t*,u_int32_t*);
+   // write serdes memory
+   void WriteSERDESMem(int,int,u_int32_t*);
+   // read serdes memory
+   void ReadSERDESMem(int,int,u_int32_t*);
+   // Serdes delay values setting
+   void SetSerdesDelay(u_int32_t*);
+   // read serdes delay values
+   void GetSerdesDelay(u_int32_t*);
+   // read serdes delay values
+   void SerdesReset();
+   // Serdes delay values setting
+   void SetSerdesMask(u_int32_t*);
+   // read serdes delay values
+   void SerdesBitslip(u_int32_t);
+   // set generic trigger parameter (with base offset 0x600)
+   void SetParameter(u_int32_t, u_int32_t*);
 };
-
-

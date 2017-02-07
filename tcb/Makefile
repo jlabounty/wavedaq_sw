@@ -1,44 +1,62 @@
-###########################################################
+#####################################################################
 #
-#  General purpose Makefile for Linux and Darwin, SR 2015
+#  Name:         Makefile
+#  Created by:   Stefan Ritt
 #
-###########################################################
+#  Contents:     Makefile for MEG II WaveDREAM frontend
+#
+#####################################################################
 
-CFLAGS  = -O0 -DOS_LINUX
+# directories
+MSCB_DIR      = ../../../mscb
 
-# search main file
-GREP = grep -l "main(" *cpp
-MAIN = $(shell $(GREP))
-OUTNAME = $(basename $(MAIN))
-
-# OS specific flags and libs
-ifeq ($(shell uname),Linux)
-LIBS    = -pthread
-endif
+# compiler, flags and libs
+CC            = cc
+CPP           = g++
+FLAGS         = -g -DOS_LINUX -Wall
 
 ifeq ($(shell uname),Darwin)
-CFLAGS  += -DOS_DARWIN
-LIBS    = -framework IOKit -framework CoreFoundation -lobjc
+FLAGS         += -DOS_DARWIN -DHAVE_STRLCPY
+LIBS          =  -framework IOKit -framework CoreFoundation
+else
+FLAGS         += 
+LIBS          =  -lrt -lbsd
 endif
 
-# search *.c and *.cpp files
-C_FILES = $(wildcard *.c)
-C_OBJ = $(C_FILES:%.c=%.o)
+FLAGS         += -I$(MSCB_DIR)/include 
+LIBS          += -lm -lutil -lpthread
 
-# search *.c and *.cpp files
-CPP_FILES = $(wildcard *.cpp)
-CPP_OBJ = $(CPP_FILES:%.cpp=%.o)
+# system objects
+MSCB_OBJ      = mscb.o mscbrpc.o
+
+#-------------------------------------------------------------------
+# Drivers needed by the frontend program
+#                 
+DRV_OBJ       = TCBLib.o 
+OBJECTS       = $(MSCB_OBJ) $(DRV_OBJ) 
+OUTNAME       = tcb_cl
 
 all: $(OUTNAME)
 
-$(OUTNAME): $(C_OBJ) $(CPP_OBJ)
-	g++ $(C_OBJ) $(CPP_OBJ) -o $(OUTNAME) $(LIBS)
+$(OUTNAME): $(OBJECTS)
+	$(CPP) $(FLAGS) $(OBJECTS) -o $(OUTNAME) $(LIBS)
 
-$(CPP_OBJ): %.o: %.cpp 
-	g++ $(CFLAGS) -c $<
+$(DRV_OBJ): %.o: %.cpp
+	$(CPP) $(FLAGS) -MMD -MP -MF $(@:.o=.d) -MT $@ -c $<
 
-$(C_OBJ): %.o: %.c
-	gcc $(CFLAGS) -c $<
+$(MSCB_OBJ): %.o: $(MSCB_DIR)/src/%.c
+	$(CC) $(FLAGS) -MMD -MP -MF $(@:.o=.d) -MT $@ -c $<
+
+tcb_cl: tcb_cl.o TCBLib.o $(MXML_OBJ) $(MSCB_OBJ) 
+	$(CPP)  $(FLAGS) $(MXML_OBJ) $(MSCB_OBJ) TCBLib.o tcb_cl.o  -o tcb_cl $(LIBS)
+
+tcb_cl.o: tcb_cl.cpp
+	$(CPP) $(FLAGS) -MMD -MP -MF $(@:.o=.d) -MT $@ -c $<
+
 
 clean:
-	rm $(C_OBJ) $(OUTNAME)
+	rm -f *.o *.d *~ \#* $(OUTNAME)
+
+ifneq ($(MAKECMDGOALS), clean)
+-include *.d
+endif

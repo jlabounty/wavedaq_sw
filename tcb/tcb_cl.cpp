@@ -1,285 +1,380 @@
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "mscb.h"
+//#include <midas.h>
+//#include <mcstd.h>
 #include "TCBLib.h"
 #include <ctime>
 #include <errno.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <stdlib.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
+
 void MemoryRewind(int ich, u_int32_t last, u_int32_t *mem, u_int32_t *outmem) {
-  *outmem = 0;
-  for(int i=0;i<32;i++)
-    *outmem |= ((mem[(ich/32)*32+i]>>(ich%32))&0x1)<<((32-i+last)%32);  
+   *outmem = 0;
+   for(int i=0;i<32;i++)
+      *outmem |= ((mem[(ich/32)*32+i]>>(ich%32))&0x1)<<((32-i+last)%32);  
 }
 
-int main()
+const char *cmb_name = "mscb178";
+
+int main(int argc, char *argv[])
 {
-  int handle,option;
-  char opline[256];
-  u_int32_t data, scanfdata;
-  u_int32_t trgtype, tpattern;
-  u_int32_t wdata[128];
-  FILE *filin, *filout, *filpresca, *filmasks, *filswmasks, *filrew;
-  u_int32_t rdata[32] = {0}, tdata[32] = {0};
-  u_int32_t rdatablt[128] = {0};
-  u_int32_t rmem[128], memAddress, memRewind;
-  u_int32_t presca[5], counters[5], masks[4], swmasks[4]={0};
-  u_int32_t scalers[128], scalertime;
-  int loopnumber=10;
-  clock_t t_before, t_after;
-  // open mscb connection
-  handle = mscb_init((char *)"MSCB176", 65535, "", 0);
-  // create TCB Board
-  TCB TCBBoard(17);
-  TCBBoard.SetIDCode(handle);
-  /* main loop on the options */
-  do {
-    printf("\n --- Options: \n");
-    printf("[ 1]: Set RRUN reg         \t \t  [ 2]: Get RRUN reg\n");
-    printf("[ 3]: Activate runmode     \t \t  [ 4]: Remove the busy\n");
-    printf("[ 5]: Give a SW stop       \t \t  [ 6]: Give a SW sync \n");
-    printf("[ 7]: Set prescaling       \t \t  [ 8]: Set multiplicity thr \n");
-    printf("[ 9]: Write RAMs           \t \t  [10]: Read RAMs \n");
-    printf("[11]: Read TotalTime       \t \t  [12]: Read Live Time \n");
-    printf("[13]: Read Event Counter   \t \t  [14]: Read trigger type\n");
-    printf("[15]: Read Trigger Counters\t \t  [16]: Read memory address\n");
-    printf("[17]: Read Time Stamps     \t \t  [18]: Set in data masks\n");
-    printf("[19]: Setup multiple run   \t \t  [20]: Run multiple\n");
-    printf("[21]: Select Slot          \t \t  [22]: Set trigger 3 delay\n");
-    printf("[23]: Set trg bus delay    \t \t  [24]: Get Scalers\n");
-    printf("[-1]: Exit\n");
+   int handle,option;
+   char opline[256];
+   u_int32_t data, scanfdata;
+   u_int32_t trgtype, tpattern;
+   FILE *filin, *filout, *filpresca, *filsdly;
+   u_int32_t presca[5], counters[5], sdly[5];
+   //  clock_t t_before, t_after;
+   if(argc != 3) {
+      printf("Please indicate the mscb connection ID and node...\n");
+      return 0;
+   }
 
-    do {
-      printf("Give an option: ");
-      scanf("%s",opline);
-      option = strtod(opline,NULL);
-    } while ( option == 0 ) ;
-    //
-    if(option == 1) {
-      printf(" opt = 1 : Set RRUN ... \n");
-      printf("FADCMODE?\n");
-      scanf("%x",&scanfdata);
-      data = scanfdata<<2;
-      printf("TRGENA?\n");
-      scanf("%x",&scanfdata);
-      data |= scanfdata<<8;
-      printf("MASKS?\n");
-      scanf("%x",&scanfdata);
-      data |= scanfdata<<13;
-      TCBBoard.SetRRUN(handle,&data);
-    }
-    //
-    if(option == 2) {
-      printf(" opt = 2 : Get RRUN ... \n");
-      TCBBoard.GetRRUN(handle,&data);
-      printf("RRUN reg content = %08x",data);
-    }
-    //
-    if(option == 3) {
-      printf(" opt = 3 : Activate runmode ... \n");
-      TCBBoard.GoRun(handle);
-    }
-    //
-    if(option == 4) {
-      printf(" opt = 4 : Remove busy ... \n");
-      TCBBoard.RemoveBusy(handle);
-    }
-    //
-    if(option == 5) {
-      printf(" opt = 5 : SW stop ... \n");
-      TCBBoard.SWStop(handle);
-    }
-    //
-    if(option == 6) {
-      printf(" opt = 6 : SW sync ... \n");
-      TCBBoard.SWSync(handle);
-      /* use this code for a delay scan
-      for(int i =0; i<10000; i++) {
-         data = i%32;
-         u_int32_t data1 = (32 - data);
-         TCBBoard.SetTRGBusDLY(handle,&data,&data1);
-         TCBBoard.SWSync(handle);
-      }
-      */
-    }
-    //
-    if(option == 7) {
-      printf(" opt = 7 : Set precaling values (from presca.dat file) ... \n");
-      filpresca = fopen("presca.dat","read");
-      for(int irow = 0; irow<5; irow++) {
-        fscanf(filpresca,"%x\n",presca+irow);
-      }
-      TCBBoard.SetPrescaling(handle,presca);
-    }
-    //
-    if(option == 8) {
-      printf(" opt = 8 : Set multiplicity ... \n");
-      printf("Multiplicity thr?\n");
-      scanf("%x",&data);
-      TCBBoard.SetTHRMult(handle,&data);
-    }
-    //
-    if(option == 9) {
-      printf(" opt = 9 : Write memories (from writeram.dat file) ... \n");
-      filin = fopen("writeram.dat","read");
-      for(int irow = 0; irow<128; irow++) {
-        fscanf(filin,"%x\n",wdata+irow);
-      }
-      fclose(filin);
-      for(int imem = 0; imem<4; imem++)
-        TCBBoard.WriteMemory(handle,imem,wdata+imem*32);
-    }
-    //
-    if(option == 10) {
-      printf(" opt = 10 : Read memories (to readram.dat file) ... \n");
-      //      for(int imem = 0; imem<4; imem++) {
-      //        TCBBoard.ReadMemory(handle,imem,rdata);
-      //      }
+   printf("interfacing with TCB_X_0 at %s:%s slot 17....\n", argv[1], argv[2]);
+
+   // open mscb connection
+   //  handle = mscb_init("MSCB177", 0, "", 0);
+   handle = mscb_init(argv[1], 0, "", 0);
+   // create TCB Board
+
+   TCB TCBBoard(argv[1],atoi(argv[2]),17);
+   //  TCBBoard.fh = mscb_init(TCBBoard.fmscb_device, 0, "", 0);
+   TCBBoard.fh = mscb_init(TCBBoard.fmscb_device, 0, "", 0);
+   TCBBoard.SetIDCode();
+
+   /* main loop on the options */
+   do {
+      printf("\n --- Options: \n");
+      printf("[ 1]: Set RRUN and RENA    \t \t  [ 2]: Get RRUN and RENA reg\n");
+      printf("[ 3]: Activate runmode     \t \t  [ 4]: Remove the busy\n");
+      printf("[ 5]: Give a SW stop       \t \t  [ 6]: Give a SW sync \n");
+      printf("[ 7]: Set prescaling       \t \t  [ 8]: Board setup\n");
+      printf("[ 9]: Read TotalTime       \t \t  [10]: Read Live Time \n");
+      printf("[11]: Read Event Counter   \t \t  [12]: Read trigger type\n");
+      printf("[13]: Read Trigger Counters\t \t  [14]: Read memory address\n");
+      printf("[15]: Select Slot          \t \t  [16]: Set trg bus delay\n");
+      printf("[17]: Write SERDES mem     \t \t  [18]: Read SERDES mem\n");
+      printf("[19]: Write SERDES Delay   \t \t  [20]: Read SERDES Delay\n");
+      printf("[21]: SERDES reset         \t \t  [22]: SERDES bitslip\n");
+      printf("[23]: SERDES Scan          \t \t  [24]: SERDES default values\n");
+      printf("[25]: Write SERDES Mask    \t \t  [26]: Set Parameter\n");
+      printf("[-1]: Exit\n");
+
+      do {
+         printf("Give an option: ");
+         scanf("%s",opline);
+         option = strtod(opline,NULL);
+      } while ( option == 0 ) ;
       //
-      filout = fopen("readram.dat","w");
-      for(int imem = 0; imem<4; imem++) 
-        TCBBoard.ReadMemoryBLT(handle,imem,rdatablt+imem*32);
-      for(int icell = 0; icell<128; icell++) {
-        fprintf(filout,"%08x\n",rdatablt[icell]);
+      if(option == 1) {
+         printf(" opt = 1 : Set RRUN ... \n");
+         printf("FADCMODE?\n");
+         scanf("%x",&scanfdata);
+         data = scanfdata<<2;
+         printf("TESTTXMODE?\n");
+         scanf("%x",&scanfdata);
+         data |= scanfdata<<5;
+         printf("ENABLE_TRGBUS?\n");
+         scanf("%x",&scanfdata);
+         data |= scanfdata<<4;
+         printf("MASKS?\n");
+         scanf("%x",&scanfdata);
+         data |= scanfdata<<13; 
+         TCBBoard.SetRRUN(&data);
+         printf("TRGENA?(hex)\n");
+         scanf("%x",&scanfdata);
+         data = scanfdata;
+         TCBBoard.SetRENA(&data);
+         printf("ALGSEL?(hex)\n");
+         scanf("%x",&scanfdata);
+         data = scanfdata;
+         TCBBoard.SetRALGSEL(&data);
       }
-      fclose(filout);
-      
-    }
-    if(option == 11) {
-      printf(" opt = 1 : Get TotalTime ... \n");
-      TCBBoard.GetTotalTime(handle,&data);
-      printf("\n   Total Time = %f sec\n",(float)data/1e6);
-    }
-    if(option == 12) {
-      printf(" opt = 12 : Get LiveTime ... \n");
-      TCBBoard.GetLiveTime(handle,&data);
-      printf("\n   Live Time = %d\n ",data);
-    }
-    if(option == 13) {
-      printf(" opt = 13 : Get Event Counter ... \n");
-      TCBBoard.GetEventCounter(handle,&data);
-      printf("\n   Event Counter = %d\n",data);
-    }
-    if(option == 14) {
-      printf(" opt = 14 : Get trigger type ... \n");
-      TCBBoard.GetTriggerType(handle,&trgtype,&tpattern);
-      printf("\n   trigger type = %d, trigger pattern = 0x%x\n",trgtype,tpattern);
-    }
-    if(option == 15) {
-      printf(" opt = 15 : Get Trigger Counters ... \n");
-      TCBBoard.GetTriggerCounters(handle,counters);
-      for(int icou = 0; icou<5; icou++)
-        printf("\n   Trigger Counter %d = %d\n",icou,counters[icou]);
-    }
-    if(option == 16) {
-      printf(" opt = 16 : Get Memory address ... \n");
-      TCBBoard.GetMemoryAddress(handle,&data);
-      printf("\n   Memory address = %d\n",data);
-    }
-    if(option == 17) {
-      printf(" opt = 17 : Get Time Stamps ... \n");
-      TCBBoard.GetTimeStamps(handle,tdata);
-      printf("\n   Time Stamps \n");
-      for (int itst=0;itst<32;itst++)
-        printf(" discr [%03d:%03d]: 0x%08x\n",4*itst+3,4*itst,tdata[itst]);
-    }
-    if(option == 18) {
-      printf(" opt = 18 : Set precaling values (from indatamask.dat file) ... \n");
-      filmasks = fopen("indatamask.dat","read");
-      for(int imsk = 0; imsk<4; imsk++) {
-        fscanf(filmasks,"%x\n",masks+imsk);
+      //
+      if(option == 2) {
+         printf(" opt = 2 : Get RRUN ... \n");
+         TCBBoard.GetRENA(&data);
+         TCBBoard.GetRRUN(&data);
+         printf("RRUN reg content = %08x",data);
       }
-      TCBBoard.SetDataMasks(handle,masks);
-    }
-    if(option==19){
-        printf(" opt = 19 : Multiple run setup ....\n");
-        printf("loading software masks from indatamask.dat file....\n");
-        filswmasks = fopen("indatamask.dat","read");
-        for(int imsk = 0; imsk<4; imsk++) {
-            fscanf(filswmasks,"%x\n",swmasks+imsk);
-        }
-        printf("How many times to run?\n");
-        scanf("%d", &loopnumber);
-    }
-
-    if(option==20){
-      printf(" opt = 20 : Execute run\n");
-      u_int32_t time;
-      filrew = fopen("output.dat", "write");
-      for(int ieve=0; ieve<loopnumber;ieve++){
-        fprintf(filrew," %d ",ieve);
-        TCBBoard.RemoveBusy(handle);
-        TCBBoard.GoRun(handle);
-        while(TCBBoard.IsRunning(handle));
-        for (int imem=0;imem<4;imem++){
-          TCBBoard.ReadMemory(handle, imem, rmem+(imem*32));
-        }
-        TCBBoard.GetTimeStamps(handle, tdata);
-        TCBBoard.GetMemoryAddress(handle, &memAddress);
-        
-        for (int icha=0;icha<128;icha++){
-          if(swmasks[icha/32] & (0x1<<(icha%32))){
-            MemoryRewind(icha, memAddress, rmem, &memRewind);
-            time = (tdata[icha/4] >> ((icha%4)*8)) & 0xFF;
-            fprintf(filrew, " %03d %08x %02x ",icha, memRewind, time);
-           }      
-        }
-        fprintf(filrew,"\n");
-        if (!(ieve%100)) printf(" Event %d\r",ieve);
+      //
+      if(option == 3) {
+         printf(" opt = 3 : Activate runmode ... \n");
+         TCBBoard.GoRun();
       }
-      printf("\n Run completed, %d events collected\n",loopnumber);
-      fclose(filrew);
-    }
-    //
-    if(option == 21) {
-      printf(" opt = 19 : Set slot ... \n");
-      printf("Slot?\n");
-      scanf("%d",&data);
-      TCBBoard.fslot = data;
-    }
-    //
-    if(option == 22) {
-      printf(" opt = 22 : Set trigger delay ... \n");
-      printf("Trigger delay (in clk ticks (10ns))?\n");
-      scanf("%x",&data);
-      TCBBoard.SetTRGDLY(handle,&data);
-    }
-    if(option == 23) {
-      printf(" opt = 23 : Set trigger delay ... \n");
-      u_int32_t data1;
-      printf("Trigger bus delay: SYNC output (0-1f in taps of 80ps)?\n");
-      scanf("%x",&data);
-      printf("Trigger bus delay: TRG output (0-1f in taps of 80ps)?\n");
-      scanf("%x",&data1);
-      TCBBoard.SetTRGBusDLY(handle,&data,&data1);
-      TCBBoard.GetTRGBusDLY(handle,&data,&data1);
-      printf("I read back %x, %x\n",data,data1);
-    }
-    if(option == 24) {
-      printf(" opt = 24 : Get Scalers ... \n");
-      TCBBoard.GetScalers(handle, scalers, &scalertime);
-      for (int i=0; i<128;i++){
-		printf("%3d:  %08x\n", i, scalers[i]);
+      //
+      if(option == 4) {
+         printf(" opt = 4 : Remove busy ... \n");
+         TCBBoard.RemoveBusy();
       }
-      printf("time: %08x\n", scalertime);
-    }
+      //
+      if(option == 5) {
+         printf(" opt = 5 : SW stop ... \n");
+         TCBBoard.SWStop();
+      }
+      //
+      if(option == 6) {
+         printf(" opt = 6 : SW sync ... \n");
+         TCBBoard.SWSync();
+      }
+      //
+      if(option == 7) {
+         printf(" opt = 7 : Set precaling values (from presca.dat file) ... \n");
+         filpresca = fopen("presca.dat","read");
+         for(int irow = 0; irow<NTRG; irow++) {
+            fscanf(filpresca,"%x\n",presca+irow);
+         }
+         TCBBoard.SetPrescaling(presca);
+      }
+      //
+      if(option == 8) {
+         printf(" opt = 8 : configuring board ... \n");
+         TCB_SETTINGS t;
+
+         //temporarly hardcoded
+         t.trgindly = 0;
+         t.syncindly = 0;
+         t.sprindly = 0;
+         t.trgoutdly = 0;
+         t.syncoutdly = 0;
+         t.sproutdly = 0;
+         for(int iTRG =0; iTRG<32; iTRG++){
+            t.triggerenable[iTRG] = 0;
+            t.prescaling[iTRG] = 1;
+         }
+         t.serdesmask = 0x000FFFFF;
+         t.algsel = 0;
+
+         TCBBoard.InitBoard(&t, (TCBBoard.GetIDCode()>>12));
+      }
+      if(option ==  9) {
+         printf(" opt = 9 : Get TotalTime ... \n");
+         TCBBoard.GetTotalTime(&data);
+         printf("\n   Total Time = %f sec\n",(float)data/1e6);
+      }
+      if(option == 10) {
+         printf(" opt = 10 : Get LiveTime ... \n");
+         TCBBoard.GetLiveTime(&data);
+         printf("\n   Live Time = %f sec\n",(float)data/1e6);
+      }
+      if(option == 11) {
+         printf(" opt = 11 : Get Event Counter ... \n");
+         TCBBoard.GetEventCounter(&data);
+         printf("\n   Event Counter = %d\n",data);
+         TCBBoard.GetSystemEventCounter(&data);
+         printf("   System Event Counter = %d\n",data);
+      }
+      if(option == 12) {
+         printf(" opt = 12 : Get trigger type ... \n");
+         TCBBoard.GetTriggerType(&trgtype,&tpattern);
+         printf("\n   trigger type = %d, trigger pattern = 0x%x\n",trgtype,tpattern);
+         if (TCBBoard.GetSystemTriggerType(&trgtype)){
+            printf("\n   system trigger type = %d\n",trgtype);
+         } else {
+            printf("\n   TRANSMISSION ERROR! reading = %d\n",trgtype);
+         }
+      }
+      if(option == 13) {
+         printf(" opt = 13 : Get Trigger Counters ... \n");
+         TCBBoard.GetTriggerCounters(counters);
+         for(int icou = 0; icou<NTRG; icou++)
+            printf("\n   Trigger Counter %d = %d\n",icou,counters[icou]);
+      }
+      if(option == 14) {
+         printf(" opt = 14 : Get Memory address ... \n");
+         TCBBoard.GetMemoryAddress(&data);
+         printf("\n   Memory address = %d\n",data);
+      }
+      //
+      if(option == 15) {
+         printf(" opt = 15 : Set slot ... \n");
+         printf("Slot?\n");
+         scanf("%d",&data);
+         TCBBoard.fslot = data;
+         TCBBoard.SetIDCode();
+      }
+      if(option == 16) {
+         printf(" opt = 16 : Set trigger delay ... \n");
+         u_int32_t data1,data2,data3,data4,data5;
+         if((TCBBoard.GetIDCode()>>12)==0x3){
+            //this is a Master
+            printf("Trigger bus delay: SYNC output (0-1f in taps of 80ps)?(hex)\n");
+            scanf("%x",&data);
+            printf("Trigger bus delay: TRG output (0-1f in taps of 80ps)?(hex)\n");
+            scanf("%x",&data1);
+            printf("Trigger bus delay: SPARE output (0-1f in taps of 80ps)?(hex)\n");
+            scanf("%x",&data2);
+            TCBBoard.SetTRGBusODLY(&data,&data1,&data2);
+         }
+         printf("Trigger bus delay: SYNC input (0-1f in taps of 80ps)?(hex)\n");
+         scanf("%x",&data);
+         printf("Trigger bus delay: TRG input (0-1f in taps of 80ps)?(hex)\n");
+         scanf("%x",&data1);
+         printf("Trigger bus delay: SPARE input (0-1f in taps of 80ps)?(hex)\n");
+         scanf("%x",&data2);
+         TCBBoard.SetTRGBusIDLY(&data,&data1,&data2);
+         TCBBoard.GetTRGBusDLY(&data,&data1,&data2,&data3,&data4,&data5);
+         printf("I read back ODelay Sync = %x, ODelay Trg = %x, ODelay Spare = %x\n",data,data1,data2);
+         printf("            IDelay Sync = %x, IDelay Trg = %x, IDelay Spare = %x\n",data3,data4,data5);
+      }
+      if(option == 17) {
+         printf(" opt 17 = Write SERDES memory ... \n");
+         int ichannel, imem, ifil;
+         u_int32_t wdata[MEMDIM];
+         printf(" serdes channel number? \n");
+         scanf("%d",&ichannel);
+         printf(" which memory? (0 = LSB, 1 = MSB) \n");
+         scanf("%d",&imem);
+         printf(" which file? (0 or 1) \n");
+         scanf("%d",&ifil);
+         if(ifil == 0)
+            filin = fopen("writeserdesram.dat","read");
+         else
+            filin = fopen("writeserdesram2.dat","read");
+         for(int irow = 0; irow<MEMDIM; irow++) {
+            fscanf(filin,"%x\n",wdata+irow);
+         }
+         fclose(filin);
+         TCBBoard.WriteSERDESMem(ichannel,imem,wdata);
+      }
+      if(option == 18) {
+         printf(" opt 18 = Dump SERDES memory ... \n");
+         int ichannel, imem;
+         u_int32_t rdata[MEMDIM];
+         printf(" serdes channel number? \n");
+         scanf("%d",&ichannel);
+         printf(" which memory? (0 = LSB, 1 = MSB) \n");
+         scanf("%d",&imem);
+         TCBBoard.ReadSERDESMem(ichannel,imem,rdata);
+         filout = fopen("readserdesram.dat","write");
+         for(int irow = 0; irow<MEMDIM; irow++) {
+            fprintf(filout,"%08x\n",rdata[irow]);
+         }
+         fclose(filout);
+      }
+      if(option == 19) {
+         printf(" opt 19 = Write SERDES delay ... \n");
+         filsdly = fopen("serdesdly.dat","read");
+         for(int irow = 0; irow<5; irow++) {
+            fscanf(filsdly,"%x\n",sdly+irow);
+         }
+         TCBBoard.SetSerdesDelay(sdly);
+      }
+      if(option == 20) {
+         printf(" opt 20 = Read SERDES delay ... \n");
+
+         TCBBoard.GetSerdesDelay(sdly);
+         for(int irow = 0; irow<5; irow++) {
+            printf("dly%d: %x\n",irow, sdly[irow]);
+         }
+      }
+      if(option == 21) {
+         printf(" opt 21 = SERDES reset ... \n");
+         TCBBoard.SerdesReset();
+      }
+      if(option == 22) {
+         printf(" opt 22 = SERDES bitslip ... \n");
+
+         u_int32_t icha;
+         u_int32_t rdata;
+         u_int32_t addr;
+         printf("which channel?\n");
+         scanf("%d",&icha);
+         addr = MEMBASEADDR + 1024*2*icha;
+         TCBBoard.SerdesBitslip(icha);
+         // now read the word back to check the tx
+         TCBBoard.ReadReg(addr,&rdata);
+         printf("%08X\n", rdata);
+      }
+      if(option == 23) {
+         printf(" opt 23 = SERDES Scan ... \n");
+
+         u_int32_t icha;
+         u_int32_t pattern;
+         u_int32_t rdata;
+         u_int32_t addr;
+         u_int32_t dly[5];
+         printf("which channel? (16-19 for FC0-3)\n");
+         scanf("%d",&icha);
+         printf("which pattern?\n");
+         scanf("%08X",&pattern);
+         addr = MEMBASEADDR + 1024*2*(icha%16);
+         printf("address:%08X\n", addr);
+         for(int iDly=0; iDly<32; iDly++){
+            dly[icha/4] = (iDly & 0x1F) << (icha%4)*8;
+            //for(int i=0; i<4; i++)printf("%08X ", dly[i]);
+            //printf("\n");
+            TCBBoard.SetSerdesDelay(dly);
+            TCBBoard.SerdesReset();
+            for(int iBit=0; iBit<8; iBit++){
+               TCBBoard.SerdesBitslip(icha);
+               // now read the word back to check the tx
+               TCBBoard.ReadReg(addr,&rdata);
+               if(rdata==pattern) printf("dly:%03X bit:%3d %08X\n", iDly, iBit, rdata);
+               //printf("dly:%03X bit:%3d %08X\n", iDly, iBit, rdata);
+            }
+         }
+      }
+      if(option == 24) {
+         printf(" opt 24 = Write SERDES default value ... \n");
+         if((TCBBoard.GetIDCode()>>12)==0x3){
+            filsdly = fopen("serdesmasterdly.dat","read");
+         } else {
+            filsdly = fopen("serdesdly.dat","read");
+         }
+         for(int irow = 0; irow<5; irow++) {
+            fscanf(filsdly,"%x\n",sdly+irow);
+         }
+         int bitslip[20];
+         for(int irow = 0; irow<20; irow++) {
+            fscanf(filsdly,"%d\n",bitslip+irow);
+         }
+         TCBBoard.SerdesReset();
+         TCBBoard.SetSerdesDelay(sdly);
+         int flag=1;
+         while(flag){
+            flag=0;
+            for(int i=0; i<20; i++){
+               if(bitslip[i]!=0){
+                  flag=1;
+                  TCBBoard.SerdesBitslip(i);
+                  bitslip[i]--;
+               }
+            }
+         }
+      }
+      if(option == 25) {
+         printf(" opt = 25 : Set trigger mask ... \n");
+         printf("Serdes Mask?(hex) ");
+         scanf("%x",&data);
+         TCBBoard.SetSerdesMask(&data);
+      }
+      if(option == 26) {
+         u_int32_t offset;
+         printf(" opt = 26 : Set Parameter ... \n");
+         printf("Parameter offset? ");
+         scanf("%d",&offset);
+         printf("Value?(hex) ");
+         scanf("%x",&data);
+         TCBBoard.SetParameter(offset, &data);
+      }
+      /* end of the main loop on the options*/
+   } while ( option >= 0);
 
 
-    /* end of the main loop on the options*/
-  } while ( option >= 0);
-  
+   /* normal exit: close the VME crate */
+   printf(" exiting ... \n");
 
-  /* normal exit: close the VME crate */
-  printf(" exiting ... \n");
-
-  //
-  // close mscb connection
-  mscb_exit(handle);
-  return 0;
+   //
+   // close mscb connection
+   mscb_exit(TCBBoard.fh);
+   return 0;
 }
 
