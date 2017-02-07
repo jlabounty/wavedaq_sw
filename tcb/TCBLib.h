@@ -44,6 +44,7 @@
 #define MEMDIM             1024
 ///////////////////////////////////////////////////////////
 
+#include "strlcpy.h"
 
 typedef struct {
     unsigned short     trgindly;

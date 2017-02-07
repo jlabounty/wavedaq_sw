@@ -27,7 +27,7 @@ FLAGS         += -I$(MSCB_DIR)/include
 LIBS          += -lm -lutil -lpthread
 
 # system objects
-MSCB_OBJ      = mscb.o mscbrpc.o
+MSCB_OBJ      = mscb.o mscbrpc.o strlcpy.o
 
 #-------------------------------------------------------------------
 # Drivers needed by the frontend program
