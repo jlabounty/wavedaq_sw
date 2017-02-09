@@ -101,9 +101,10 @@ int main(int argc, char *argv[])
       //
       if(option == 2) {
          printf(" opt = 2 : Get RRUN ... \n");
-         TCBBoard.GetRENA(&data);
          TCBBoard.GetRRUN(&data);
-         printf("RRUN reg content = %08x",data);
+         printf("RRUN reg content = %08x\n",data);
+         TCBBoard.GetRENA(&data);
+         TCBBoard.GetRALGSEL(&data);
       }
       //
       if(option == 3) {
