@@ -11,9 +11,7 @@
 #include "mscb.h"
 #include "TCBLib.h"
 
-u_int32_t kaddrpre[NTRG]   = { RPRESCA0, RPRESCA1, RPRESCA2, RPRESCA3, RPRESCA4};
 u_int32_t kaddrsdly[5]   = {RWDDLY0, RWDDLY1, RWDDLY2, RWDDLY3, RFCDLY};
-u_int32_t kaddrcou[NTRG]   = { RTRGCOU0, RTRGCOU1, RTRGCOU2, RTRGCOU3, RTRGCOU4};
 
 void TCB::SetBitslip(int *bitslip){
    int nonzero=1;
@@ -46,8 +44,8 @@ int TCB::InitType1(TCB_SETTINGS *ts){
    SetRALGSEL(&ralgsel);
 
    // serdes setup
-   u_int32_t sdly[5]={0x14FFFF12,0x0B0E0816,0x19070A0D,0x11141514,0x08080808};
-   int bitslip[20]={0,3,3,3,3,2,2,2,2,2,2,3,3,3,3,3,1,1,1,1};
+   u_int32_t sdly[5]={0x14FFFF05,0x0B0E0816,0x19070A0D,0x11141514,0x08080808};
+   int bitslip[20]={4,3,3,3,3,2,2,2,2,2,2,3,3,3,3,3,1,1,1,1};
    SerdesReset();
    SetSerdesDelay(sdly);
    SetBitslip(bitslip);
@@ -78,8 +76,8 @@ int TCB::InitType2(TCB_SETTINGS *ts){
    SetRALGSEL(&ralgsel);
 
    // serdes setup
-   u_int32_t sdly[5]={0x140F110F,0x0B0E0816,0x19070A0D,0x11141514,0x08080808};
-   int bitslip[20]={3,3,3,3,3,2,2,2,2,2,2,3,3,3,3,3,1,1,1,1};
+   u_int32_t sdly[5]={0x140F110F,0x0B0E0816,0x19070A0D,0x11141514,0x16161616};
+   int bitslip[20]={3,3,3,3,3,2,2,2,2,2,2,3,3,3,3,3,2,2,2,2};
    SerdesReset();
    SetSerdesDelay(sdly);
    SetBitslip(bitslip);
@@ -103,16 +101,23 @@ int TCB::InitType3(TCB_SETTINGS *ts){
    u_int32_t testtxmode = 0;
    u_int32_t trgbusmask = 0x7;
 
+   // set the number of available trigger 
+   SetNTRG();
    // load RRUN register
    u_int32_t rrundata = (enable_trgbus<<4) | (fadcmode<<2) | (trgbusmask<<13) | (testtxmode <<5);
    SetRRUN(&rrundata);
+   // read the number of trigger available
+   
    // load RENA register
    u_int32_t trgenable = 0;
-   for (int itrg=0; itrg<32; itrg++){
-       trgenable |= ts->triggerenable[itrg]<<itrg;
+   int nword = fntrg/32 + 1;
+   for(int iword = 0; iword <nword; iword++){
+     for (int itrg=0; itrg<32; itrg++){
+       trgenable |= ts->triggerenable[itrg+iword*32]<<itrg;
+     }
+     SetRENA(&trgenable,iword);
    }
-   SetRENA(&trgenable);
-
+   
    // serdes setup
    u_int32_t sdly[5]={0x16121211,0x100A0716,0x18080910,0x14151717,0xFFFFFFFF};
    int bitslip[20]={0,0,0,0,0,7,7,7,7,7,7,0,0,0,0,0,0,0,0,0};
@@ -231,17 +236,18 @@ void TCB::WriteBLT(u_int32_t addr, u_int32_t *data, int nword)
 // prescaling values setting
 void TCB::SetPrescaling(u_int32_t *presca)
 {
-   if ((fidcode>>12)!=3) printf("setting prescaling on TCB %4x!!!!!\n", fidcode);
-   for (int ireg=0; ireg<NTRG; ireg++)
-      WriteReg(kaddrpre[ireg],presca+ireg);
+  if ((fidcode>>12)!=3) {printf("setting prescaling on TCB %4x!!!!! skipped\n", fidcode); return;}
+   for (int ireg=0; ireg<fntrg; ireg++)
+      WriteReg(RPRESCA+ireg,presca+ireg);
 }
 
 // read prescaling values
 void TCB::GetPrescaling(u_int32_t *presca)
 {
    //read loop on prescaling registers
-   for (int ireg = 0; ireg<NTRG; ireg++)
-      ReadReg(kaddrpre[ireg],presca+ireg);
+  if ((fidcode>>12)!=3) { printf("setting prescaling on TCB %4x!!!!! skipped\n", fidcode); return;}
+   for (int ireg = 0; ireg<fntrg; ireg++)
+      ReadReg(RPRESCA+ireg,presca+ireg);
 }
 
 //Set IDCode by accessing to rrun register
@@ -255,6 +261,19 @@ void TCB::SetIDCode()
 
    //the IDCode is obtained by parsing the data
    fidcode = ((data&0xffff0000)>>16);
+}
+
+//Set NTRG by accessing to rntrg register
+void TCB::SetNTRG()
+{
+   u_int32_t data;
+   u_int32_t addr = RNTRG;
+   
+   // read the RRUN register and take the content
+   ReadReg(addr, &data);
+
+   //the IDCode is obtained by parsing the data
+   fntrg = data;
 }
 
 // Write a memory
@@ -421,9 +440,9 @@ void TCB::SetRRUN(u_int32_t *data)
    WriteReg(addr,data);
 }
 // write the RENA register
-void TCB::SetRENA(u_int32_t *data)
+void TCB::SetRENA(u_int32_t *data, int iword)
 {
-   u_int32_t addr = RENA;
+   u_int32_t addr = RENA + iword;
    WriteReg(addr,data);
 }
 // write the RALGSEL register
@@ -450,11 +469,11 @@ void TCB::GetRRUN(u_int32_t *data)
    printf(" IDCODE status %x \n",(*data&0xffff0000)>>16);
 }
 // read the RENA register
-void TCB::GetRENA(u_int32_t *data)
+void TCB::GetRENA(u_int32_t *data, int iword)
 {
-  u_int32_t addr = RENA;
+  u_int32_t addr = RENA + iword;
   ReadReg(addr,data);
-  printf(" TRGENA status %x \n",*data);
+  printf(" TRGENA status %x, bit [%d:%d]\n",*data,(iword+1)*32-1,iword*32);
 }
 
 // read the RALGSEL register
@@ -487,14 +506,16 @@ void TCB::GetEventCounter(u_int32_t *data)
 }
 
 // read trigger type
-void TCB::GetTriggerType(u_int32_t *type, u_int32_t *tpattern)
+void TCB::GetTriggerType(u_int32_t *data)
 {
    u_int32_t addr = RTRITYPE;
-   u_int32_t data;
-   ReadReg(addr,&data);
-   //extract trigger type
-   *type = data&0xff;
-   *tpattern = (data&0x1ff000)>>16;
+   ReadReg(addr,data);
+}
+// read trigger type
+void TCB::GetTriggerPattern(u_int32_t *data, int iword)
+{
+   u_int32_t addr = RTRIPATT;
+   ReadReg(addr+iword,data);
 }
 
 // read system event counter
@@ -511,7 +532,7 @@ bool TCB::GetSystemTriggerType(u_int32_t *type)
    u_int32_t data;
    ReadReg(addr,&data);
    //extract trigger type
-   *type = data&0xff;
+   *type = data&0xffff;
 
    printf("%08x\n", data);
    if(data&0x80000000) return false;
@@ -520,7 +541,7 @@ bool TCB::GetSystemTriggerType(u_int32_t *type)
 // read trigger counters
 void TCB::GetTriggerCounters(u_int32_t *data)
 {
-   ReadBLT(kaddrcou[0],data,NTRG);
+   ReadBLT(RTRGCOU,data,fntrg);
 }
 
 // read memory address
@@ -625,4 +646,9 @@ void TCB::SetSerdesMask(u_int32_t *data)
 void TCB::SetParameter(u_int32_t offset, u_int32_t *data)
 {
    WriteReg(RPARAM + offset, data);
+}
+// get FW compilation date
+void TCB::GetCompilDate(u_int32_t *data)
+{
+  ReadReg(USR_ACCESS,data);
 }

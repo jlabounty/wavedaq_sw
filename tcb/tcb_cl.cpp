@@ -46,6 +46,7 @@ int main(int argc, char *argv[])
    //  TCBBoard.fh = mscb_init(TCBBoard.fmscb_device, 0, "", 0);
    TCBBoard.fh = mscb_init(TCBBoard.fmscb_device, 0, "", 0);
    TCBBoard.SetIDCode();
+   TCBBoard.SetNTRG();
 
    /* main loop on the options */
    do {
@@ -89,22 +90,39 @@ int main(int argc, char *argv[])
          scanf("%x",&scanfdata);
          data |= scanfdata<<13; 
          TCBBoard.SetRRUN(&data);
-         printf("TRGENA?(hex)\n");
-         scanf("%x",&scanfdata);
-         data = scanfdata;
-         TCBBoard.SetRENA(&data);
-         printf("ALGSEL?(hex)\n");
-         scanf("%x",&scanfdata);
-         data = scanfdata;
-         TCBBoard.SetRALGSEL(&data);
+	 if(((TCBBoard.fidcode&0xf000)>>12)==3) {
+	   int nword = (TCBBoard.fntrg-1)/32 + 1;
+	   for(int iword = 0; iword <nword; iword++){
+	     printf("TRGENA?(hex, bit [%d:%d])\n",(iword+1)*32-1,iword*32);
+	     scanf("%x",&scanfdata);
+	     data = scanfdata;
+	     TCBBoard.SetRENA(&data,iword);
+	   }
+	 }
+	 if(((TCBBoard.fidcode&0xf000)>>12)!=3) {
+	   printf("ALGSEL?(hex)\n");
+	   scanf("%x",&scanfdata);
+	   data = scanfdata;
+	   TCBBoard.SetRALGSEL(&data);
+	 }
       }
       //
       if(option == 2) {
          printf(" opt = 2 : Get RRUN ... \n");
+         printf(" FW compilation date: ");
+	 TCBBoard.GetCompilDate(&data);
+	 printf("%d/%d/20%d %d:%d:%d\n",(data&0xF8000000)>>27,(data&0x7800000)>>23,(data&0x7e0000)>>17,(data&0x1F000)>>12,(data&0xFC0)>>6,(data&0x3F));
          TCBBoard.GetRRUN(&data);
-         printf("RRUN reg content = %08x\n",data);
-         TCBBoard.GetRENA(&data);
-         TCBBoard.GetRALGSEL(&data);
+         printf(" RRUN reg content = %08x\n",data);
+	 if(((TCBBoard.fidcode&0xf000)>>12)==3) {
+	   int nword = (TCBBoard.fntrg-1)/32 + 1;
+	   for(int iword = 0; iword <nword; iword++){
+	     TCBBoard.GetRENA(&data,iword);
+	   }
+	 }
+	 if(((TCBBoard.fidcode&0xf000)>>12)!=3) {
+	   TCBBoard.GetRALGSEL(&data);
+	 }
       }
       //
       if(option == 3) {
@@ -130,7 +148,7 @@ int main(int argc, char *argv[])
       if(option == 7) {
          printf(" opt = 7 : Set precaling values (from presca.dat file) ... \n");
          filpresca = fopen("presca.dat","read");
-         for(int irow = 0; irow<NTRG; irow++) {
+         for(int irow = 0; irow<TCBBoard.fntrg; irow++) {
             fscanf(filpresca,"%x\n",presca+irow);
          }
          TCBBoard.SetPrescaling(presca);
@@ -175,18 +193,23 @@ int main(int argc, char *argv[])
       }
       if(option == 12) {
          printf(" opt = 12 : Get trigger type ... \n");
-         TCBBoard.GetTriggerType(&trgtype,&tpattern);
-         printf("\n   trigger type = %d, trigger pattern = 0x%x\n",trgtype,tpattern);
+         TCBBoard.GetTriggerType(&trgtype);
+         printf("trigger type = %d ",trgtype);
          if (TCBBoard.GetSystemTriggerType(&trgtype)){
             printf("\n   system trigger type = %d\n",trgtype);
          } else {
             printf("\n   TRANSMISSION ERROR! reading = %d\n",trgtype);
          }
+	 int nword = (TCBBoard.fntrg-1)/32;
+	 for(int iword = 0; iword<nword; iword++) {
+	   TCBBoard.GetTriggerPattern(&tpattern,iword);
+	   printf("trigger trgpattern = %d bit [%d:%d] \n",tpattern,(iword+1)*32-1,iword*32);
+	 }
       }
       if(option == 13) {
          printf(" opt = 13 : Get Trigger Counters ... \n");
          TCBBoard.GetTriggerCounters(counters);
-         for(int icou = 0; icou<NTRG; icou++)
+         for(int icou = 0; icou<TCBBoard.fntrg; icou++)
             printf("\n   Trigger Counter %d = %d\n",icou,counters[icou]);
       }
       if(option == 14) {
