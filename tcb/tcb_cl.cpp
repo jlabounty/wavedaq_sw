@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
    u_int32_t data, scanfdata;
    u_int32_t trgtype, tpattern;
    FILE *filin, *filout, *filpresca, *filsdly;
-   u_int32_t presca[5], counters[5], sdly[5];
+   u_int32_t presca[128], counters[128], sdly[5];
    //  clock_t t_before, t_after;
    if(argc != 3) {
       printf("Please indicate the mscb connection ID and node...\n");
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
       printf("[21]: SERDES reset         \t \t  [22]: SERDES bitslip\n");
       printf("[23]: SERDES Scan          \t \t  [24]: SERDES default values\n");
       printf("[25]: Write SERDES Mask    \t \t  [26]: Set Parameter\n");
-      printf("[-1]: Exit\n");
+      printf("[27]: Force a trigger      \t \t  [-1]: Exit\n");
 
       do {
          printf("Give an option: ");
@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
          t.trgoutdly = 0;
          t.syncoutdly = 0;
          t.sproutdly = 0;
-         for(int iTRG =0; iTRG<32; iTRG++){
+         for(int iTRG =0; iTRG<TCBBoard.fntrg; iTRG++){
             t.triggerenable[iTRG] = 0;
             t.prescaling[iTRG] = 1;
          }
@@ -193,18 +193,20 @@ int main(int argc, char *argv[])
       }
       if(option == 12) {
          printf(" opt = 12 : Get trigger type ... \n");
-         TCBBoard.GetTriggerType(&trgtype);
-         printf("trigger type = %d ",trgtype);
-         if (TCBBoard.GetSystemTriggerType(&trgtype)){
-            printf("\n   system trigger type = %d\n",trgtype);
-         } else {
-            printf("\n   TRANSMISSION ERROR! reading = %d\n",trgtype);
+         if((TCBBoard.fidcode >>12)==3){
+            TCBBoard.GetTriggerType(&trgtype);
+            printf("trigger type = %d\n",trgtype);
+            int nword = (TCBBoard.fntrg-1)/32+1;
+            for(int iword = 0; iword<nword; iword++) {
+               TCBBoard.GetTriggerPattern(&tpattern,iword);
+               printf("trigger trgpattern = %08x bit [%d:%d] \n",tpattern,(iword+1)*32-1,iword*32);
+            }
          }
-	 int nword = (TCBBoard.fntrg-1)/32;
-	 for(int iword = 0; iword<nword; iword++) {
-	   TCBBoard.GetTriggerPattern(&tpattern,iword);
-	   printf("trigger trgpattern = %d bit [%d:%d] \n",tpattern,(iword+1)*32-1,iword*32);
-	 }
+         if (TCBBoard.GetSystemTriggerType(&trgtype)){
+            printf("system trigger type = %d\n",trgtype);
+         } else {
+            printf("TRANSMISSION ERROR! reading = %d\n",trgtype);
+         }
       }
       if(option == 13) {
          printf(" opt = 13 : Get Trigger Counters ... \n");
@@ -398,6 +400,13 @@ int main(int argc, char *argv[])
          printf("Value?(hex) ");
          scanf("%x",&data);
          TCBBoard.SetParameter(offset, &data);
+      }
+     if(option == 27) {
+         int trgid;
+         printf(" opt = 27 : Force a trigger ... \n");
+         printf("Trigger Id? from 0 to %d \n",TCBBoard.fntrg-1);
+         scanf("%d",&trgid);
+         TCBBoard.ForceTrigger(trgid);
       }
       /* end of the main loop on the options*/
    } while ( option >= 0);

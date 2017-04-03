@@ -19,6 +19,7 @@
 #define RSERDESMSK    0x16                      // mask for input serdes
 #define RENA          0x20                      // trigger enable (first address)
 #define RTRIPATT      0x30                      // trigger pattern (first address)
+#define RTRGFORCE     0x40                      // force a trigger (first address)
 #define RPRESCA       0x100                     // prescaling value first address
 #define RTOTTIME      0x200                     // total time
 #define RLIVETIME     0x201                     // live time
@@ -47,9 +48,9 @@ typedef struct {
     unsigned short     syncoutdly;
     unsigned short     sproutdly;
     unsigned short     algsel;
-    bool               triggerenable[32];
+    bool               triggerenable[128];
     unsigned int       serdesmask;
-    unsigned int       prescaling[32];
+    unsigned int       prescaling[128];
 } TCB_SETTINGS;
 
 
@@ -78,7 +79,7 @@ public:
       fmscb_addr = mscb_addr;
       fslot = slot;
       fidcode = 0xffff;
-      fntrg = 0xffff;
+      fntrg = 0x0;
 
    }
 
@@ -174,4 +175,6 @@ public:
    void SetParameter(u_int32_t, u_int32_t*);
    // get FW compilation date
    void GetCompilDate(u_int32_t*);
+   // force the trigger passed by the function call
+   void ForceTrigger(int);
 };
