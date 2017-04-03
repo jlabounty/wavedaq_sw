@@ -534,14 +534,15 @@ bool TCB::GetSystemTriggerType(u_int32_t *type)
    //extract trigger type
    *type = data&0xffff;
 
-   printf("%08x\n", data);
    if(data&0x80000000) return false;
    else return true;
 }
 // read trigger counters
 void TCB::GetTriggerCounters(u_int32_t *data)
 {
-   ReadBLT(RTRGCOU,data,fntrg);
+    int ncycle = (fntrg-1)/32 + 1;
+    for(int icycle = 0; icycle<ncycle; icycle++)
+      ReadBLT(RTRGCOU+icycle*32,data+icycle*32,32);
 }
 
 // read memory address
@@ -651,4 +652,12 @@ void TCB::SetParameter(u_int32_t offset, u_int32_t *data)
 void TCB::GetCompilDate(u_int32_t *data)
 {
   ReadReg(USR_ACCESS,data);
+}
+// serdes mask values setting
+void TCB::ForceTrigger(int trg)
+{
+  u_int32_t data;
+  int iword = trg/32;
+  data = 1<<trg%32;
+   WriteReg(RTRGFORCE+iword,&data);
 }
