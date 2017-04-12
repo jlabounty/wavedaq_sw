@@ -1,0 +1,1575 @@
+//
+//  wd
+//  WaveDAQ Ethernet Interface
+//
+//  Created by Stefan Ritt on 13/8/15.
+//
+
+#include <string>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+#include <vector>
+
+#include <sys/socket.h>
+#include <sys/select.h>
+#include <sys/time.h>
+#include <arpa/inet.h>
+#include <ifaddrs.h>
+#include <netdb.h>
+#include <assert.h>
+#include <errno.h>
+
+/*
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <stdarg.h>
+#include <exception>
+#include <stdexcept>
+#include <sys/types.h>
+*/
+
+#ifdef __linux__
+#include <linux/sockios.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
+#include <pthread.h>
+#endif
+#ifdef __APPLE__
+#include <net/if_dl.h>
+#include <pthread.h>
+#endif
+
+#include "WDBLib.h"
+#include "register_map.h"
+
+#define WD2_CMD_PORT   3000
+
+#pragma pack(1)
+
+typedef struct {
+   unsigned char  protocol_version;
+   unsigned char  board_version;
+   unsigned short board_id;
+   unsigned char  crate_id;
+   unsigned char  slot_id;
+   unsigned char  adc_and_channel_info;
+   unsigned char  channel_segment_number;
+   unsigned short readout_sequence_number;
+   unsigned short hardware_sequence_number;
+   unsigned short sampling_frequency;
+   unsigned short number_of_samples;
+   unsigned short drs0_trigger_cell;
+   unsigned short drs1_trigger_cell;
+   unsigned short trigger_type;
+   unsigned short packet_sequence_number;
+} WD2_FRAME_HEADER;
+
+int WDB::gDataSocket = 0;
+int WDB::gServerPort = 0;
+int WDB::gCmdSocket  = 0;
+
+//--------------------------------------------------------------------
+
+void WDB::Send(std::string str, int timeout_ms)
+{
+   std::string result;
+   result = SendReceive(str, timeout_ms);
+}
+
+//--------------------------------------------------------------------
+
+std::string WDB::SendReceive(std::string str, int timeout_ms)
+{
+   size_t i;
+   fd_set readfds;
+   struct timeval timeout;
+   int    status, ms;
+   struct sockaddr_in client_addr;
+   char   rx_buffer[1600];
+   std::string prompt, result;
+   
+   memcpy(&client_addr, mEthAddr, sizeof(client_addr));
+   
+   if (str.back() != '\n')
+      str += '\n';
+   
+   result.clear();
+   
+   // assemble prompt
+   prompt = mName + " > ";
+   
+   // retry max five times
+   for (int retry=0 ; retry < 5 ; retry++) {
+      
+      // send request
+      i = sendto(gCmdSocket,
+                 str.c_str(),
+                 str.size(),
+                 0,
+                 (struct sockaddr *)&client_addr,
+                 sizeof(client_addr));
+      
+      if (i != str.size()) {
+         std::cout << mName << " send retry " << retry+1;
+         continue;
+      }
+      
+      // retrieve reply until prompt is found
+      do {
+         memset(rx_buffer, 0, sizeof(rx_buffer));
+         
+         FD_ZERO(&readfds);
+         FD_SET(gCmdSocket, &readfds);
+         
+         ms = timeout_ms;
+         if (retry == 0) // first trial times out faster
+            ms = 100;
+         
+         timeout.tv_sec = ms / 1000;
+         timeout.tv_usec = (ms % 1000) * 1000;
+         
+         do {
+            status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
+         } while (status == -1);        /* dont return if an alarm signal was cought */
+         
+         if (!FD_ISSET(gCmdSocket, &readfds))
+            break;
+         
+         i = recv(gCmdSocket, rx_buffer, sizeof(rx_buffer), 0);
+         assert(i > 0);
+         
+         if (rx_buffer[i-1] == 0) // don't count trailing zero
+            i--;
+         
+         result += rx_buffer;
+         
+         // check for prompt
+         if (result.substr(result.size()-prompt.size()) == prompt)
+            break;
+         
+      } while (1);
+      
+      // check for prompt
+      if (result.size() >= prompt.size() && result.substr(result.size()-prompt.size()) == prompt)
+         break;
+      
+      std::cout << mName << " retry " << retry+1 << std::endl;
+   }
+   
+   if (result.size() == 0) {
+      if (str.back() == '\n')
+        str = str.substr(0, str.size()-1);
+      throw std::runtime_error(std::string("Error sending \"")+str+"\" to "+mName+".");
+      return result;
+   }
+   
+   // chop off prompt
+   if (result.size() >= prompt.size())
+      result = result.substr(0, result.size()-prompt.size());
+   
+   return result;
+}
+
+//--------------------------------------------------------------------
+
+void WDB::Connect()
+{
+   struct sockaddr_in server_addr;
+   struct sockaddr_in client_addr;
+   struct hostent *phe;
+   
+#ifdef _MSC_VER
+   {
+   WSADATA WSAData;
+   
+   // Start windows sockets
+   if (WSAStartup(MAKEWORD(1, 1), &WSAData) != 0)
+      return -1;
+   }
+#endif
+   
+   // create UDB socket for command interpreter on any port
+   if (gCmdSocket == 0)
+      gCmdSocket = socket(AF_INET, SOCK_DGRAM, 0);
+   assert(gCmdSocket);
+   
+   // create UDB socket to receive binary data on port WD2_DATA_PORT
+   if (gDataSocket == 0) {
+      gDataSocket = socket(AF_INET, SOCK_DGRAM, 0);
+      assert(gDataSocket);
+      
+      // bind socket to port chosen by OS
+      memset((char*)&server_addr, 0, sizeof(server_addr));
+      server_addr.sin_family = AF_INET;
+      server_addr.sin_port = htons(0); // let OS choose port
+      server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+      if (::bind(gDataSocket, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+         perror("bind");
+         throw std::runtime_error(std::string("Cannot bind socket"));
+      }
+      auto size = sizeof(server_addr);
+      getsockname(gDataSocket, (struct sockaddr *) &server_addr, (socklen_t *) &size);
+      gServerPort = ntohs(server_addr.sin_port);
+      
+      std::cout << "Listening on data port " << gServerPort << "." << std::endl;
+   }
+   
+   // retrieve Ethernet address of board
+   phe = gethostbyname(mName.c_str());
+   if (phe == NULL)
+      throw std::runtime_error(std::string("Cannot resolve host name ")+mName+".");
+   
+   memcpy((char *)&client_addr.sin_addr, phe->h_addr, phe->h_length);
+   client_addr.sin_family = AF_INET;
+   client_addr.sin_port = htons(WD2_CMD_PORT);
+   memcpy(mEthAddr, &client_addr, sizeof(client_addr));
+   
+   // check if board is alive
+   try {
+      WDB::Send("", 500);
+   } catch (...) {
+      throw std::runtime_error(std::string("Cannot connect to board ")+mName+".");
+   }
+   
+   // set dbglevel none
+   Send("dbglvl none");
+   
+   // set destinantion port in WD board
+   Send(std::string("setenv dstport ")+std::to_string(gServerPort));
+   
+   // set MAC address and IP address of this computer in WD board
+   Send("cfgdst");
+}
+
+//--------------------------------------------------------------------
+
+void WDB::ReceiveControlRegisters()
+{
+   std::string result;
+   for (int i=0 ; i<=REG_CRC32_REG_BANK_OFFSET ; i+=4) {
+      std::ostringstream req;
+      req << "regrd ctrl " << std::hex << i;
+      
+      result = SendReceive(req.str());
+      
+      this->creg[i/4] = (unsigned int)std::stoul(result.substr(13), nullptr, 16);
+   }
+}
+
+void WDB::ReceiveStatusRegisters()
+{
+   std::string result;
+   std::ostringstream req;
+   req << "llrd c3010000 " << REG_ADC_01_CLK_MOD_FLAG_OFFSET/4+1;
+   
+   result = SendReceive(req.str());
+   std::stringstream ss(result);
+   std::string line;
+   
+   for (auto i=0 ; i<REG_ADC_01_CLK_MOD_FLAG_OFFSET/4 ; i++) {
+      std::getline(ss, line, '\r');
+      this->sreg[i/4+i] = (unsigned int)std::stoul(line.substr(14), nullptr, 16);
+   }
+}
+
+void WDB::ReceiveStatusRegister(int ofs)
+{
+   std::string result;
+   std::ostringstream req;
+   req << "regrd stat " << std::hex << ofs;
+      
+   result = SendReceive(req.str());
+   this->sreg[ofs/4] = (unsigned int)std::stoul(result.substr(13), nullptr, 16);
+}
+
+//--------------------------------------------------------------------
+
+unsigned int bitExtract(unsigned int reg, unsigned int mask)
+{
+   reg = reg & mask; // clear bits not in mask
+   
+   // find LSB which is non-zero
+   for (int i=0 ; i<32 ; i++)
+      if (mask & (1<<i)) {
+         // shift bits right
+         reg >>= i;
+         break;
+      }
+   
+   return reg;
+}
+
+void bitReplace(unsigned int &reg, unsigned int mask, unsigned int value)
+{
+   reg = reg & (~mask); // clear bits frommask
+   
+   // find LSB which is non-zero
+   for (int i=0 ; i<32 ; i++)
+      if (mask & (1<<i)) {
+         // shift bits left and OR it to register
+         value <<= i;
+         value &= mask;
+         reg |= value;
+         break;
+      }
+}
+
+//--------------------------------------------------------------------
+
+unsigned int WDB::GetSerialNumber()
+{
+   return bitExtract(creg[REG_SERIAL_NUMBER_OFFSET/4], BIT_SERIAL_NUMBER);
+}
+
+unsigned int WDB::GetCrateId()
+{
+   return bitExtract(creg[REG_BOARD_LOCATION_OFFSET/4], BIT_CRATE_ID);
+}
+
+unsigned int WDB::GetSlotId()
+{
+   return bitExtract(creg[REG_BOARD_LOCATION_OFFSET/4], BIT_SLOT_ID);
+}
+
+unsigned int WDB::GetProtocolVersion()
+{
+   return bitExtract(creg[REG_PROTOCOL_VERSION_OFFSET/4], BIT_PROTOCOL_VERSION);
+}
+
+unsigned int WDB::GetBufferCtrl()
+{
+   return bitExtract(creg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_BUFFER_CTRL);
+}
+
+unsigned int WDB::GetTcaCtrl()
+{
+   return bitExtract(creg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_TCA_CTRL);
+}
+
+unsigned int WDB::GetClkDivAdcDrs()
+{
+   return bitExtract(creg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_CLK_DIV_ADC_DRS);
+}
+
+unsigned int WDB::GetClkSelDaq()
+{
+   return bitExtract(creg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_CLK_SEL_DAQ);
+}
+
+unsigned int WDB::GetClkSelExt()
+{
+   return bitExtract(creg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_CLK_SEL_EXT);
+}
+
+unsigned int WDB::GetExtClkFreq()
+{
+   return bitExtract(creg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_LOCAL_CLK_FREQ);
+}
+
+unsigned int WDB::GetLocalClkFreq()
+{
+   return bitExtract(creg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_LOCAL_CLK_FREQ);
+}
+
+
+unsigned int WDB::GetDacRofs()
+{
+   return bitExtract(creg[REG_DAC0_A_B_OFFSET/4], BIT_DAC0_CH_A);
+}
+
+unsigned int WDB::GetDacOfs()
+{
+   return bitExtract(creg[REG_DAC0_A_B_OFFSET/4], BIT_DAC0_CH_B);
+}
+
+unsigned int WDB::GetDacCalDc()
+{
+   return bitExtract(creg[REG_DAC0_C_D_OFFSET/4], BIT_DAC0_CH_C);
+}
+
+unsigned int WDB::GetDacPulseAmp()
+{
+   return bitExtract(creg[REG_DAC0_C_D_OFFSET/4], BIT_DAC0_CH_D);
+}
+
+unsigned int WDB::GetDacPczLevel()
+{
+   return bitExtract(creg[REG_DAC0_E_F_OFFSET/4], BIT_DAC0_CH_E);
+}
+
+float WDB::GetDacTlevel(int chn)
+{
+   unsigned int v;
+   
+   assert(chn < 16);
+   if (chn % 2 == 0)
+      v = bitExtract(creg[REG_DAC1_A_B_OFFSET/4+(chn/2)], BIT_DAC1_CH_A);
+   else
+      v = bitExtract(creg[REG_DAC1_A_B_OFFSET/4+(chn/2)], BIT_DAC1_CH_B);
+   
+   // convert to Volts taking WDB comparator offset into account
+   return ((v / 4095.0 * 2500) - 900) / 500.0;
+}
+
+unsigned int WDB::GetFrontend(int chn)
+{
+   assert(chn < 16);
+
+   unsigned int m;
+   if (chn % 2 == 0)
+      m = BIT_FE0_ACDC | BIT_FE0_COMP2 | BIT_FE0_OP2  | BIT_FE0_COMP1 | BIT_FE0_OP1 |
+          BIT_FE0_ATT1 | BIT_FE0_ATT0  | BIT_FE0_CAL1 | BIT_FE0_CAL0;
+   else
+      m = BIT_FE1_ACDC | BIT_FE1_COMP2 | BIT_FE1_OP2  | BIT_FE1_COMP1 | BIT_FE1_OP1 |
+          BIT_FE1_ATT1 | BIT_FE1_ATT0  | BIT_FE1_CAL1 | BIT_FE1_CAL0;
+
+   return bitExtract(creg[REG_FRONTEND_0_1_OFFSET/4+(chn/2)], m);
+}
+
+unsigned int WDB::GetLmk(int r)
+{
+   assert(r < 16);
+   return creg[REG_LMK_0_OFFSET/4+r];
+}
+
+unsigned int WDB::GetTriggerOutPulseLength()
+{
+   return bitExtract(creg[REG_TRIGGER_CFG_OFFSET/4], BIT_TRIGGER_OUT_PULSE_LENGTH);
+}
+
+unsigned int WDB::GetTriggerEnable()
+{
+   return bitExtract(creg[REG_TRIGGER_CFG_OFFSET/4], BIT_TRIGGER_ENABLE);
+}
+
+unsigned int WDB::GetTriggerFallingEdge()
+{
+   return bitExtract(creg[REG_TRIGGER_CFG_OFFSET/4], BIT_TRIGGER_FALLING_EDGE);
+}
+
+unsigned int WDB::GetTriggerCfgExtOr()
+{
+   return bitExtract(creg[REG_TRIGGER_CFG_OFFSET/4], BIT_TRIGGER_CFG_EXT_OR);
+}
+
+unsigned int WDB::GetTriggerCfgExtAnd()
+{
+   return bitExtract(creg[REG_TRIGGER_CFG_OFFSET/4], BIT_TRIGGER_CFG_EXT_AND);
+}
+
+unsigned int WDB::GetTriggerDelayEnable()
+{
+   return bitExtract(creg[REG_TRIGGER_CFG_OFFSET/4], BIT_TRIGGER_DELAY_ENABLE);
+}
+
+unsigned int WDB::GetTriggerDelay()
+{
+   return bitExtract(creg[REG_TRIGGER_CFG_OFFSET/4], BIT_TRIGGER_DELAY);
+}
+
+unsigned int WDB::GetTriggerCompMask()
+{
+   return bitExtract(creg[REG_TRIGGER_COMP_MASK_OFFSET/4], BIT_TRIGGER_COMP_MASK);
+}
+
+unsigned int WDB::GetTriggerCfgOr()
+{
+   return bitExtract(creg[REG_TRIGGER_CFG_A_OFFSET/4], BIT_TRIGGER_CFG_OR);
+}
+
+unsigned int WDB::GetTriggerCfgAnd()
+{
+   return bitExtract(creg[REG_TRIGGER_CFG_A_OFFSET/4], BIT_TRIGGER_CFG_AND);
+}
+
+unsigned int WDB::GetTriggerLocalScheme()
+{
+   return bitExtract(creg[REG_TRIGGER_SCHEME_SELECT_OFFSET/4], BIT_PATTERN_TRIGGER_SELECT);
+}
+
+unsigned int WDB::GetTriggerBackplaneScheme(int chn)
+{
+   assert(chn < 8);
+
+   unsigned int mask;
+   mask = BIT_BACKPLANE_TRIGGER7 << (chn * 2);
+   
+   return bitExtract(creg[REG_TRIGGER_SCHEME_SELECT_OFFSET/4], mask);
+}
+
+unsigned int WDB::GetTriggerPatternEnLocal()
+{
+   return bitExtract(creg[REG_TRIGGER_PATTERN_EN_LOCAL_OFFSET/4], BIT_TRIGGER_PATTERN_EN_LOCAL);
+}
+
+unsigned int WDB::GetTriggerPatternEnBackplane(int chn)
+{
+   assert(chn < 8);
+   return bitExtract(creg[REG_TRIGGER_PATTERN_EN_BPL0_OFFSET/4+chn], BIT_TRIGGER_PATTERN_EN_BPL0);
+}
+
+unsigned int WDB::GetTriggerPattern(int i)
+{
+   assert(i < 32);
+   return bitExtract(creg[REG_TRIGGER_PATTERN0_OFFSET/4+i], BIT_TRIGGER_PATTERN0);
+}
+
+unsigned int WDB::GetCrc32RegBank()
+{
+   return bitExtract(creg[REG_CRC32_REG_BANK_OFFSET/4], BIT_CRC32_REG_BANK);
+}
+
+//--------------------------------------------------------------------
+
+std::string WDB::GetFwBuild()
+{
+   std::ostringstream s;
+   std::vector<std::string> monthName = {"Jan", "Feb", "Mar", "Apr", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+   
+   s << "Compatibility Level: ";
+   s << bitExtract(sreg[REG_FW_BUILD_TIME_OFFSET/4], BIT_FW_COMPAT_LEVEL) << std::endl;
+   s << "FW GIT Revision:     ";
+   s << "0x" << std::hex << std::uppercase << bitExtract(sreg[REG_GIT_HASH_TAG_OFFSET/4], BIT_GIT_HASH_TAG) << std::endl;
+
+   s << "FW Build:            ";
+   s << std::dec << std::setw(2) << std::setfill('0');
+   s << monthName[bitExtract(sreg[REG_FW_BUILD_DATE_OFFSET/4], BIT_FW_BUILD_MONTH)-1] << ' ';
+   s << bitExtract(sreg[REG_FW_BUILD_DATE_OFFSET/4], BIT_FW_BUILD_DAY) << ' ';
+   s << bitExtract(sreg[REG_FW_BUILD_DATE_OFFSET/4], BIT_FW_BUILD_YEAR) << "  ";
+   
+   s << bitExtract(sreg[REG_FW_BUILD_TIME_OFFSET/4], BIT_FW_BUILD_HOUR) << ':';
+   s << bitExtract(sreg[REG_FW_BUILD_TIME_OFFSET/4], BIT_FW_BUILD_MINUTE) << ':';
+   s << bitExtract(sreg[REG_FW_BUILD_TIME_OFFSET/4], BIT_FW_BUILD_SECOND) << std::endl;
+   
+   return s.str();
+}
+
+std::string WDB::GetHwVersion()
+{
+   std::ostringstream s;
+   
+   assert(bitExtract(sreg[REG_HW_VERSION_OFFSET/4], BIT_BOARD_MAGIC) == 0xAC);
+   
+   s << "Board Type:          ";
+   s << "WaveDREAM" << bitExtract(sreg[REG_HW_VERSION_OFFSET/4], BIT_BOARD_TYPE) << std::endl;
+   s << "Board Revision:      ";
+   s << (char)('A'+bitExtract(sreg[REG_HW_VERSION_OFFSET/4], BIT_BOARD_REVISION)) << std::endl;
+   s << "Board Variant:       ";
+   s << std::showbase << std::setw(2) << std::hex << bitExtract(sreg[REG_HW_VERSION_OFFSET/4], BIT_BOARD_VARIANT);
+   s << std::endl;
+
+   return s.str();
+}
+
+unsigned int WDB::GetDrsSampleFreq()
+{
+   return bitExtract(sreg[REG_DRS_SAMPLE_FREQ_OFFSET/4], BIT_DRS_SAMPLE_FREQ);
+}
+
+unsigned int WDB::GetAdcSampleFreq()
+{
+   return bitExtract(sreg[REG_ADC_SAMPLE_FREQ_OFFSET/4], BIT_ADC_SAMPLE_FREQ);
+}
+
+float WDB::GetTemperature()
+{
+   ReceiveStatusRegister(REG_STATUS_OFFSET);
+   return bitExtract(sreg[REG_STATUS_OFFSET/4], BIT_TEMPERATURE) * 0.0625;
+}
+
+unsigned int WDB::GetPlllck()
+{
+   ReceiveStatusRegister(REG_STATUS_OFFSET);
+   auto mask = BIT_SYS_DCM_LOCK | BIT_DRS_PLLLCK_0 | BIT_DRS_PLLLCK_1 | BIT_LMK_PLLLCK;
+   return bitExtract(sreg[REG_STATUS_OFFSET/4], mask);
+}
+
+unsigned int WDB::GetSerdesPlllck()
+{
+   ReceiveStatusRegister(REG_STATUS_OFFSET);
+   auto mask = BIT_OSERDES_PLLLCK_DCB | BIT_OSERDES_PLLLCK_TCB | BIT_ISERDES_PLLLCK_0 | BIT_ISERDES_PLLLCK_1;
+   return bitExtract(sreg[REG_STATUS_OFFSET/4], mask);
+}
+
+unsigned int WDB::IsSerialBusy()
+{
+   ReceiveStatusRegister(REG_STATUS_OFFSET);
+   return bitExtract(sreg[REG_STATUS_OFFSET/4], BIT_SERIAL_BUSY);
+}
+
+unsigned int WDB::IsRunning()
+{
+   ReceiveStatusRegister(REG_STATUS_OFFSET);
+   return bitExtract(sreg[REG_STATUS_OFFSET/4], BIT_RUNNING);
+}
+
+unsigned int WDB::GetTriggerBus()
+{
+   ReceiveStatusRegister(REG_TRIGGER_BUS_OFFSET);
+   return bitExtract(sreg[REG_TRIGGER_BUS_OFFSET/4], BIT_TRIGGER_BUS);
+}
+
+unsigned int WDB::GetTriggerType()
+{
+   ReceiveStatusRegister(REG_TRIGGER_INFO_OFFSET);
+   return bitExtract(sreg[REG_TRIGGER_INFO_OFFSET/4], BIT_TRIGGER_TYPE);
+}
+
+unsigned int WDB::GetTriggerNumber()
+{
+   ReceiveStatusRegister(REG_TRIGGER_INFO_OFFSET);
+   return bitExtract(sreg[REG_TRIGGER_INFO_OFFSET/4], BIT_TRIGGER_NUMBER);
+}
+
+void WDB::GetScalers(std::vector<unsigned long> &scaler)
+{
+   std::string result;
+   std::ostringstream req;
+   req << "llrd c30100" << std::hex << REG_SCALER_0_LSB_OFFSET << " 34";
+   
+   result = SendReceive(req.str());
+   std::stringstream ss(result);
+   std::string line;
+   
+   for (auto i=0 ; i<34 ; i++) {
+      std::getline(ss, line, '\r');
+      this->sreg[REG_SCALER_0_LSB_OFFSET/4+i] = (unsigned int)std::stoul(line.substr(14), nullptr, 16);
+   }
+
+   // channels 0-15 are 64 bit counters
+   for (auto i=0 ; i<16 ; i++) {
+      unsigned long v = this->sreg[REG_SCALER_0_LSB_OFFSET/4+i*2] |
+                        ((unsigned long)this->sreg[REG_SCALER_0_LSB_OFFSET/4+i*2+1] << 32);
+      
+      if (scaler.size() < i+1)
+         scaler.push_back(v);
+      else
+         scaler[i] = v;
+   }
+   
+   // channels 16 and 17 are 32 bit counters
+   for (auto i=16 ; i<18 ; i++) {
+      unsigned long v = this->sreg[REG_SCALER_TRIGGER_OFFSET/4+i];
+      
+      if (scaler.size() < i+1)
+         scaler.push_back(v);
+      else
+         scaler[i] = v;
+   }
+
+}
+
+//--------------------------------------------------------------------
+
+void WDB::SetRegMask(unsigned int ofs, unsigned int mask, unsigned int v)
+{
+   unsigned int r = this->creg[ofs/4];
+   
+   bitReplace(r, mask, v);
+   
+   std::ostringstream req;
+   req << "regwr " << std::hex << ofs << " " << r;
+   
+   std::cout << req.str();
+   
+   Send(req.str());
+   
+   this->creg[ofs/4] = r;
+}
+
+void WDB::SetDacRofs(unsigned int v)
+{
+   SetRegMask(REG_DAC0_A_B_OFFSET, BIT_DAC0_CH_A, v);
+}
+
+void WDB::SetDacOfs(unsigned int v)
+{
+   SetRegMask(REG_DAC0_A_B_OFFSET, BIT_DAC0_CH_B, v);
+}
+
+void WDB::SetDacCalDc(unsigned int v)
+{
+   SetRegMask(REG_DAC0_C_D_OFFSET, BIT_DAC0_CH_C, v);
+}
+
+void WDB::SetDacPulseAmp(unsigned int v)
+{
+   SetRegMask(REG_DAC0_C_D_OFFSET, BIT_DAC0_CH_D, v);
+}
+
+void WDB::SetDacPczLevel(unsigned int v)
+{
+   SetRegMask(REG_DAC0_E_F_OFFSET, BIT_DAC0_CH_E, v);
+}
+
+void WDB::SetDacTlevel(int chn, float v)
+{
+   // convert to mV taking WDB comparator offset into account
+   v = v*500 + 900;
+   
+   // convert from mV to DAC bits
+   auto d = (unsigned int)(v / 2500.0 * 4095 + 0.5);
+   
+   assert(chn < 16);
+   if (chn % 2 == 0)
+      SetRegMask(REG_DAC1_A_B_OFFSET+(chn/2)*4, BIT_DAC1_CH_A, d);
+   else
+      SetRegMask(REG_DAC1_A_B_OFFSET+(chn/2)*4, BIT_DAC1_CH_B, d);
+}
+
+void WDB::SetFrontend(int chn, unsigned int v)
+{
+   assert(chn < 16);
+   unsigned int m;
+   if (chn % 2 == 0)
+      m = BIT_FE0_ACDC | BIT_FE0_COMP2 | BIT_FE0_OP2  | BIT_FE0_COMP1 | BIT_FE0_OP1 |
+          BIT_FE0_ATT1 | BIT_FE0_ATT0  | BIT_FE0_CAL1 | BIT_FE0_CAL0;
+   else
+      m = BIT_FE1_ACDC | BIT_FE1_COMP2 | BIT_FE1_OP2  | BIT_FE1_COMP1 | BIT_FE1_OP1 |
+          BIT_FE1_ATT1 | BIT_FE1_ATT0  | BIT_FE1_CAL1 | BIT_FE1_CAL0;
+
+   SetRegMask(REG_FRONTEND_0_1_OFFSET+(chn/2)*4, m, v);
+}
+
+void WDB::SetLmk(int r, unsigned int v)
+{
+   assert(r < 16);
+   SetRegMask(REG_LMK_0_OFFSET+r*4, 0xFFFFFFFF, v);
+}
+
+void WDB::SetTriggerOutPulseLength(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_CFG_OFFSET, BIT_TRIGGER_OUT_PULSE_LENGTH, v);
+}
+
+void WDB::SetTriggerEnable(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_CFG_OFFSET, BIT_TRIGGER_ENABLE, v);
+}
+
+void WDB::SetTriggerFallingEdge(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_CFG_OFFSET, BIT_TRIGGER_FALLING_EDGE, v);
+}
+
+void WDB::SetTriggerCfgExtOr(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_CFG_OFFSET, BIT_TRIGGER_CFG_EXT_OR, v);
+}
+
+void WDB::SetTriggerCfgExtAnd(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_CFG_OFFSET, BIT_TRIGGER_CFG_EXT_AND, v);
+}
+
+void WDB::SetTriggerDelayEnable(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_CFG_OFFSET, BIT_TRIGGER_DELAY_ENABLE, v);
+}
+
+void WDB::SetTriggerDelay(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_CFG_OFFSET, BIT_TRIGGER_DELAY, v);
+}
+
+void WDB::SetTriggerCompMask(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_COMP_MASK_OFFSET, BIT_TRIGGER_COMP_MASK, v);
+}
+
+void WDB::SetTriggerCfgOr(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_CFG_A_OFFSET, BIT_TRIGGER_CFG_OR, v);
+}
+
+void WDB::SetTriggerCfgAnd(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_CFG_A_OFFSET, BIT_TRIGGER_CFG_AND, v);
+}
+
+void WDB::SetTriggerLocalScheme(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_SCHEME_SELECT_OFFSET, BIT_PATTERN_TRIGGER_SELECT, v);
+}
+
+void WDB::SetTriggerBackplaneScheme(int chn, unsigned int v)
+{
+   assert(chn < 8);
+   
+   unsigned int mask;
+   mask = BIT_BACKPLANE_TRIGGER7 << (chn * 2);
+
+   SetRegMask(REG_TRIGGER_SCHEME_SELECT_OFFSET, mask, v);
+}
+
+void WDB::SetTriggerPatternEnLocal(unsigned int v)
+{
+   SetRegMask(REG_TRIGGER_PATTERN_EN_LOCAL_OFFSET, BIT_TRIGGER_PATTERN_EN_LOCAL, v);
+}
+
+void WDB::SetTriggerPatternEnBackplane(int chn, unsigned int v)
+{
+   assert(chn < 8);
+   SetRegMask(REG_TRIGGER_PATTERN_EN_BPL0_OFFSET+chn, BIT_TRIGGER_PATTERN_EN_BPL0, v);
+}
+
+void WDB::SetTriggerPattern(int i, unsigned int v)
+{
+   assert(i < 32);
+   SetRegMask(REG_TRIGGER_PATTERN0_OFFSET+i, BIT_TRIGGER_PATTERN0, v);
+}
+
+//--------------------------------------------------------------------
+
+   /*
+   SetGain(ts->wdb[iwd].gain);
+   SetPZC(ts->wdb[iwd].pzc);
+   SetTriggerLevel(&ts->wdb[iwd].trigger_level[0]);
+   SetClockSource(1);
+   SetSamplingFrequency(ts->wdb[iwd].sampling_frequency);
+   
+   // Now some trigger setup: comparator mask and patterns
+   SetMasks(ts, iwd);
+   SetPatterns(ts, iwd);
+   
+   ConfigureBoard(iwd);
+   
+   // load voltage calibration for board from file (for now...)
+   sprintf(str, "/home/meg/meg2/online/frontends/wd_fe/calib/%s.vcal", fName);
+   int fh = open(str, O_RDONLY, 0644);
+   if (fh < 0)
+      throw std::runtime_error(std::string("Cannot find voltage calibration file \"")+str+"\""".");
+   
+   size = read(fh, &fVCalib, sizeof(VCALIB_DATA));
+   if (size != sizeof(VCALIB_DATA)) {
+      close(fh);
+      throw std::runtime_error(std::string("Invalid voltage calibration file size of \"")+str+"\""".");
+   }
+   
+   if (memcmp(fVCalib.version_id, "CAL1", 4) != 0) {
+      close(fh);
+      throw std::runtime_error(std::string("Invalid voltage calibration file format in \"")+str+"\""".");
+   }
+   
+   // set sampling frequency from calibration data
+   if (fabs(fVCalib.sampling_frequency - fSamplingFrequency) > 0.01) {
+      char err[1000];
+      sprintf(err, "Warning: Voltage calibration data in \"%s/%s\" is for %3g GSPS, running now at %3g GSPS\n",
+              dir, str, fVCalib.sampling_frequency, fSamplingFrequency);
+      close(fh);
+      throw std::runtime_error(std::string(err));
+   }
+   close(fh);
+   
+   // load timing calibration for board from file (for now...)
+   sprintf(str, "/home/meg/meg2/online/frontends/wd_fe/calib/%s.tcal", fName);
+   fh = open(str, O_RDONLY, 0644);
+   if (fh < 0)
+      throw std::runtime_error(std::string("Cannot find time calibration file \"")+str+"\""".");
+   
+   size = read(fh, &fTCalib, sizeof(TCALIB_DATA));
+   if (size != sizeof(TCALIB_DATA)) {
+      close(fh);
+      throw std::runtime_error(std::string("Invalid time calibration file size of \"")+str+"\""".");
+   }
+   
+   if (memcmp(fTCalib.version_id, "CAL1", 4) != 0) {
+      close(fh);
+      throw std::runtime_error(std::string("Invalid time calibration file format in \"")+str+"\""+".");
+   }
+   
+   close(fh);
+    */
+
+/*-----------------------------------------------------------------------------------------*/
+
+#if 0
+int WDB::SendReceive(const char *str, char *result, int *size, int timeout_ms)
+{
+   size_t n, i;
+   fd_set readfds;
+   struct timeval timeout;
+   int    status, ms;
+   struct sockaddr_in client_addr;
+   char   tx_buffer[1600], rx_buffer[1600], prompt[80];
+
+   memcpy(&client_addr, fEthAddr, sizeof(client_addr));
+   strlcpy(tx_buffer, str, sizeof(tx_buffer));
+   if (tx_buffer[strlen(tx_buffer)-1] != '\n')
+      strlcat(tx_buffer, "\n", sizeof(tx_buffer));
+
+   if (result != NULL)
+      memset(result, 0, *size);
+   n = 0;
+
+   // assemble prompt
+   strlcpy(prompt, fName, sizeof(prompt));
+   strlcat(prompt, " > ", sizeof(prompt));
+   
+   // retry max five times
+   for (int retry=0 ; retry < 5 ; retry++) {
+      
+      // send request
+      i = sendto(fCmdSocket,
+                 tx_buffer,
+                 strlen(tx_buffer),
+                 0,
+                 (struct sockaddr *)&client_addr,
+                 sizeof(client_addr));
+      
+      if (i != strlen(tx_buffer)) {
+         printf("%s send retry %d\n", fName, retry+1);
+         continue;
+      }
+      
+      // retrieve reply until prompt is found
+      n = 0;
+      do {
+         memset(rx_buffer, 0, sizeof(rx_buffer));
+         
+         FD_ZERO(&readfds);
+         FD_SET(fCmdSocket, &readfds);
+         
+         ms = timeout_ms;
+         if (retry == 0) // first trial times out faster
+            ms = 100;
+         
+         timeout.tv_sec = ms / 1000;
+         timeout.tv_usec = (ms % 1000) * 1000;
+         
+         do {
+            status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
+         } while (status == -1);        /* dont return if an alarm signal was cought */
+         
+         if (!FD_ISSET(fCmdSocket, &readfds))
+            break;
+         
+         i = recv(fCmdSocket, rx_buffer, sizeof(rx_buffer), 0);
+         assert(i > 0);
+         
+         if (rx_buffer[i-1] == 0) // don't count trailing zero
+            i--;
+         
+         if (result != NULL)
+            memcpy(result+n, rx_buffer, i);
+         n += i;
+         
+         // check for prompt
+         if (strcmp(rx_buffer+strlen(rx_buffer)-strlen(prompt), prompt) == 0)
+            break;
+         
+      } while (1);
+      
+      // check for prompt
+      if (strcmp(rx_buffer+strlen(rx_buffer)-strlen(prompt), prompt) == 0)
+         break;
+      
+      printf("%s retry %d\n", fName, retry+1);
+   }
+
+   if (n == 0) {
+      if (size != NULL)
+         *size = 0;
+      throw std::runtime_error(std::string("Error sending \"")+str+"\" to "+fName);
+      return -1;
+   }
+
+   // chop off prompt
+   if (result != NULL)
+      result[strlen(result)-strlen(prompt)] = 0;
+   n -= strlen(prompt);
+          
+   if (size != NULL)
+      *size = (int)n;
+   
+   return SUCCESS;
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+int WDB::Send(const char *format, ...)
+{
+   char str[1000];
+   
+   va_list argptr;
+   va_start(argptr, format);
+   vsprintf(str, format, argptr);
+   va_end(argptr);
+   
+   return WDB::SendReceive(str);
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+int WDB::Init(TRIGGER_SETTINGS *ts, int iwd)
+{
+   struct sockaddr_in server_addr;
+   struct sockaddr_in client_addr;
+   char str[256], dir[256];
+   struct hostent *phe;
+   int size;
+   
+#ifdef _MSC_VER
+   {
+   WSADATA WSAData;
+   
+   // Start windows sockets
+   if (WSAStartup(MAKEWORD(1, 1), &WSAData) != 0)
+   return -1;
+   }
+#endif
+
+   // create UDB socket for command interpreter on any port
+   fCmdSocket = socket(AF_INET, SOCK_DGRAM, 0);
+   assert(fCmdSocket);
+   
+   // create UDB socket to receive binary data on port WD2_DATA_PORT
+   if (fDataSocket == 0) {
+      fDataSocket = socket(AF_INET, SOCK_DGRAM, 0);
+      assert(fDataSocket);
+      
+      // bind socket to port chosen by OS
+      memset((char*)&server_addr, 0, sizeof(server_addr));
+      server_addr.sin_family = AF_INET;
+      server_addr.sin_port = htons(0); // let OS choose port
+      server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+      if (bind(fDataSocket, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+         perror("bind");
+         throw std::runtime_error(std::string("Cannot bind socket"));
+      }
+      size = sizeof(server_addr);
+      getsockname(fDataSocket, (struct sockaddr *) &server_addr, (socklen_t *) &size);
+      fServerPort = ntohs(server_addr.sin_port);
+      
+      printf("Listening on data port %d\n", fServerPort);
+   }
+   
+   // retrieve Ethernet address of board
+   phe = gethostbyname(fName);
+   if (phe == NULL)
+      throw std::runtime_error(std::string("Cannot resolve host name ")+fName);
+
+   memcpy((char *)&client_addr.sin_addr, phe->h_addr, phe->h_length);
+   client_addr.sin_family = AF_INET;
+   client_addr.sin_port = htons(WD2_CMD_PORT);
+   size = sizeof(client_addr);
+   memcpy(fEthAddr, &client_addr, sizeof(client_addr));
+   
+   // check if board is alive
+   try {
+      SendReceive("", NULL, NULL, 500);
+   } catch (...) {
+      throw std::runtime_error(std::string("Cannot connect to board ")+fName);
+   }
+   
+   // derive serial number from network name (for now...)
+   fSerialNumber = atoi(fName+2);
+   
+   // set dbglevel none
+   Send("dbglvl none");
+   
+   // set destinantion port in WD board
+   sprintf(str, "setenv dstport %d", fServerPort);
+   Send(str);
+   
+   // set MAC address and IP address of this computer in WD board
+   Send("cfgdst");
+   
+   SetGain(ts->wdb[iwd].gain);
+   SetPZC(ts->wdb[iwd].pzc);
+   SetTriggerLevel(&ts->wdb[iwd].trigger_level[0]);
+   SetClockSource(1);
+   SetSamplingFrequency(ts->wdb[iwd].sampling_frequency);
+  
+   // Now some trigger setup: comparator mask and patterns
+   SetMasks(ts, iwd);
+   SetPatterns(ts, iwd);
+
+   ConfigureBoard(iwd);
+   
+   // load voltage calibration for board from file (for now...)
+   sprintf(str, "/home/meg/meg2/online/frontends/wd_fe/calib/%s.vcal", fName);
+   int fh = open(str, O_RDONLY, 0644);
+   if (fh < 0)
+      throw std::runtime_error(std::string("Cannot find voltage calibration file \"")+str+"\"");
+
+   size = read(fh, &fVCalib, sizeof(VCALIB_DATA));
+   if (size != sizeof(VCALIB_DATA)) {
+      close(fh);
+      throw std::runtime_error(std::string("Invalid voltage calibration file size of \"")+str+"\"");
+   }
+
+   if (memcmp(fVCalib.version_id, "CAL1", 4) != 0) {
+      close(fh);
+      throw std::runtime_error(std::string("Invalid voltage calibration file format in \"")+str+"\"");
+   }
+   
+   // set sampling frequency from calibration data
+   if (fabs(fVCalib.sampling_frequency - fSamplingFrequency) > 0.01) {
+      char err[1000];
+      sprintf(err, "Warning: Voltage calibration data in \"%s/%s\" is for %3g GSPS, running now at %3g GSPS\n",
+              dir, str, fVCalib.sampling_frequency, fSamplingFrequency);
+      close(fh);
+      throw std::runtime_error(std::string(err));
+   }
+   close(fh);
+   
+   // load timing calibration for board from file (for now...)
+   sprintf(str, "/home/meg/meg2/online/frontends/wd_fe/calib/%s.tcal", fName);
+   fh = open(str, O_RDONLY, 0644);
+   if (fh < 0)
+      throw std::runtime_error(std::string("Cannot find time calibration file \"")+str+"\"");
+
+   size = read(fh, &fTCalib, sizeof(TCALIB_DATA));
+   if (size != sizeof(TCALIB_DATA)) {
+      close(fh);
+      throw std::runtime_error(std::string("Invalid time calibration file size of \"")+str+"\"");
+   }
+   
+   if (memcmp(fTCalib.version_id, "CAL1", 4) != 0) {
+      close(fh);
+      throw std::runtime_error(std::string("Invalid time calibration file format in \"")+str+"\"");
+   }
+   
+   close(fh);
+   
+   return SUCCESS;
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+void WDB::SetTriggerLevel(int *tl)
+{
+   fTriggerLevel[0] = tl[0];
+   fTriggerLevel[1] = tl[1];
+   fTriggerLevel[2] = tl[2];
+   fTriggerLevel[3] = tl[3];
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+void WDB::ConfigureBoard(int iwd)
+{
+   char str[80];
+   int byte;
+   
+   // set LED red
+   Send("ledset r");
+
+   // set dbglevel none
+   Send("dbglvl none");
+   
+   // set input configuration
+   byte = 0;
+   if (fPZC) { // pole zero cancellation on (bit=0)
+      if (fGain == 0)
+         byte = 0x02;
+      else if (fGain == 1)
+         byte = 0x0a;
+      else if (fGain == 2)
+         byte = 0x2a;
+   } else { // pole zero cancellation off (bit=1)
+      if (fGain == 0)
+         byte = 0x82;
+      else if (fGain == 1)
+         byte = 0x8a;
+      else if (fGain == 2)
+         byte = 0xaa;
+   }
+   
+   sprintf(str, "feset all %02X", byte);
+   Send(str);
+   
+   // trun on comparator power
+   Send("pwrcmp on");
+
+   // set comparator level
+   Send("dacset tlevel1 %d", fTriggerLevel[0]/2+900);
+   Send("dacset tlevel2 %d", fTriggerLevel[1]/2+900);
+   Send("dacset tlevel3 %d", fTriggerLevel[2]/2+900);
+   Send("dacset tlevel4 %d", fTriggerLevel[3]/2+900);
+
+   // set range to -0.95V ... +0.05V
+   if (fGain == 2)
+      Send("dacset ofs 1640");
+   else
+      Send("dacset ofs 2000");
+   
+   // set DACs
+   Send("dacset bias 700");
+   Send("dacset rofs 1550");
+   Send("dacset caldc 1280");
+
+   // disable local trigger
+   Send("regwr %02x 00000000", REG_TRIGGER_CFG_A_OFFSET);
+   
+   // trigger_enable, trigger_falling_edge, enable external trigger
+   // set the trigger delay to be 0x3F and the signal shaping 4 (80MHz clk cycles)
+   Send("regwr %02x 040E0034", REG_TRIGGER_CFG_OFFSET);
+   
+   // set DRS readout mode to ROI and drs_active
+   Send("regwr %02x 17170030", REG_CONTROL_OFFSET);
+   
+   // set clock source
+   if (fClockSource == 1)
+      Send("regclr %02x 20000", REG_CLK_CALIB_CTRL_OFFSET);
+   else
+      Send("regset %02x 20000", REG_CLK_CALIB_CTRL_OFFSET);
+   
+   // set inter-packet delay
+   Send("regwr %02x FF00", REG_COM_CONTROL_OFFSET);
+   
+   // set LMK registers to their defaults, see "LMK regs.xls"
+   Send("regwr %02x 00032800", REG_LMK_0_OFFSET);
+   Send("regwr %02x 00020101", REG_LMK_1_OFFSET);
+   Send("regwr %02x 00020102", REG_LMK_2_OFFSET);
+   Send("regwr %02x 029900AD", REG_LMK_13_OFFSET);
+   Send("regwr %02x 0830140E", REG_LMK_14_OFFSET);
+   Send("regwr %02x D800280F", REG_LMK_15_OFFSET);
+
+   // set LMK register to current sampling frequency
+   int divider = (int) (200.0 / fSamplingFrequency * 2.048 / 2 + 0.5);
+   Send("regwr %02x 0003%02X00", REG_LMK_0_OFFSET, divider);
+
+   // initialize FSM and frame counter
+   Send("drsreinit");
+   
+   // set LED red
+   Send("ledset g");
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+int WDB::StartDRS()
+{
+   return Send("drsstart");
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+#define Sleep(x) usleep(x*1000)
+
+double time_ms()
+{
+   struct timeval tv;
+   gettimeofday(&tv, NULL);
+   return tv.tv_sec*1000 + tv.tv_usec/1000.0;
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+namespace {
+  // waveform buffer for one event
+  float wf[16][16][1024];
+  float waveform[16][16][1024];
+  int   triggerCell[16][2];
+  float wft[16][16][1024];
+  float wftime[16][16][1024];
+  int   new_event = 0;
+  int   _nWdb;
+}
+
+void *wdb_collector(void *param);
+
+/*-----------------------------------------------------------------------------------------*/
+
+int wdb_start_collector(WDB *wdb[], int nWdb)
+{
+   INT status;
+   pthread_t thread_id;
+
+   _nWdb = nWdb;
+   status = pthread_create(&thread_id, NULL, wdb_collector, (void *)wdb);
+   return status;
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+int wdb_read_waveform(float *pwf, int *ptc, float *pwft)
+{
+   double start_time;
+   
+   start_time = time_ms();
+   while (!new_event) {
+      sleep(10);
+      
+      // time-out after one second
+      if (time_ms() - start_time > 1000)
+         return 0;
+   }
+   
+   memcpy(pwf, waveform, sizeof(float)*_nWdb*16*1024);
+   memcpy(ptc, triggerCell, sizeof(int)*_nWdb*2);
+   memcpy(pwft, wftime, sizeof(float)*_nWdb*16*1024);
+   
+   new_event = 0;
+   return 1;
+}
+
+/*-----------------------------------------------------------------------------------------*/
+
+void *wdb_collector(void *param)
+{
+   int i, b, c, s, status, current_frame, np;
+   fd_set readfds;
+   struct timeval timeout;
+   struct sockaddr_in remote_addr;
+   WD2_FRAME_HEADER *ph;
+   unsigned char *pd;
+   short data1, data2;
+   unsigned char buffer[1800];
+   int header_adc, header_channel, waveform_channel, board;
+
+   WDB **wdb = (WDB **)param;
+   s = wdb[0]->fDataSocket;
+   current_frame = -1;
+   np = 0;
+   for (int b=0 ; b<_nWdb ; b++)
+      for (int c=0 ; c<16 ; c++) {
+         wf[b][c][0]   = nanf("");
+         wf[b][c][512] = nanf("");
+      }
+
+   while (1) {
+
+      FD_ZERO(&readfds);
+      FD_SET(s, &readfds);
+      
+      timeout.tv_sec = 1;
+      timeout.tv_usec = 0;
+      
+      do {
+         status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
+      } while (status == -1 && errno == EINTR);  // don't return if an alarm signal was caught
+      
+      if (status == -1)
+         perror("select");
+      
+      if (FD_ISSET(s, &readfds)) {
+         int len, n;
+         
+         // packet is available, so receive it
+         len = sizeof(remote_addr);
+         n = (int)recvfrom(s, (char *)buffer, sizeof(buffer), 0,
+                           (struct sockaddr *)&remote_addr, (socklen_t *)&len);
+         if (n > (int)sizeof(WD2_FRAME_HEADER)) {
+            ph = (WD2_FRAME_HEADER *)buffer;
+            np++;
+            
+            // correct endianness of header data
+            ph->board_id                 = SWAP_UINT16(ph->board_id);
+            header_adc                   = (ph->adc_and_channel_info >> 4) & 0x0f;
+            header_channel               = (ph->adc_and_channel_info) & 0x0f;
+            ph->readout_sequence_number  = SWAP_UINT16(ph->readout_sequence_number);
+            ph->hardware_sequence_number = SWAP_UINT16(ph->hardware_sequence_number);
+            ph->sampling_frequency       = SWAP_UINT16(ph->sampling_frequency);
+            ph->number_of_samples        = SWAP_UINT16(ph->number_of_samples);
+            ph->drs0_trigger_cell        = SWAP_UINT16(ph->drs0_trigger_cell);
+            ph->drs1_trigger_cell        = SWAP_UINT16(ph->drs1_trigger_cell);
+            ph->trigger_type             = SWAP_UINT16(ph->trigger_type);
+            ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
+
+            /*
+            printf("%5d, From %s, Board %2d, Frame %5d, ADC/Chn/Segment %d/%d/%d\n",
+                   np,
+                   inet_ntoa(remote_addr.sin_addr),
+                   ph->board_id,
+                   ph->readout_sequence_number,
+                   header_adc,
+                   header_channel,
+                   ph->channel_segment_number);
+            */
+            
+            if (current_frame == -1)
+               current_frame = ph->readout_sequence_number;
+            
+            // drop package if it belongs to older frame
+            if (ph->readout_sequence_number < current_frame) {
+               printf("Package dropped, package frame=%d, current frame=%d, board id = %d\n", ph->readout_sequence_number, current_frame, ph->board_id);
+               continue;
+            }
+            
+            // drop whole frame if package of next frame received
+            if (ph->readout_sequence_number > current_frame) {
+               printf("Frame dropped, package frame=%d, current frame=%d\n", ph->readout_sequence_number, current_frame);
+               
+               // switch to new frame
+               current_frame = ph->readout_sequence_number;
+               
+               // tag waveforms as invalid
+               for (int b=0 ; b<_nWdb ; b++)
+                  for (int c=0 ; c<16 ; c++) {
+                     wf[b][c][0]   = nanf("");
+                     wf[b][c][512] = nanf("");
+                  }
+
+               np = 1;
+            }
+            
+            waveform_channel = header_adc*8+header_channel;
+            assert(waveform_channel < 16);
+            
+            // ensure board id is in our receive list
+            for (i=0 ; i<_nWdb ; i++)
+               if (ph->board_id == wdb[i]->fSerialNumber)
+                  break;
+            assert(i < _nWdb);
+            board = i;
+            
+            // copy trigger cell
+            if (waveform_channel < 8)
+               triggerCell[board][0] = ph->drs0_trigger_cell;
+            else
+               triggerCell[board][1] = ph->drs1_trigger_cell;
+            
+            // decode waveform data
+            pd = (unsigned char*)(ph+1);
+            for (i=0 ; i<512 ; i+=2) {
+               data1   = ((pd[1] & 0x0F) << 8) | pd[0];
+               if(data1 >= 0x0800) {
+                  // expand two's complement
+                  data1 -= 0x1000;
+               }
+               data2 = ((unsigned short)pd[2] << 4) | (pd[1] >> 4);
+               if(data2 >= 0x0800) {
+                  // expand two's complement
+                  data2 -= 0x1000;
+               }
+               pd+=3;
+               
+               if (ph->channel_segment_number == 0) {
+                  // first segment
+                  wf[board][waveform_channel][i]       = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
+                  wf[board][waveform_channel][i+1]     = (float)data2 * (1 / 4096.0);
+               } else {
+                  // second segment
+                  wf[board][waveform_channel][512+i]   = (float)data1 * (1 / 4096.0);
+                  wf[board][waveform_channel][512+i+1] = (float)data2 * (1 / 4096.0);
+               }
+            }
+         }
+      }
+      
+      // check if we got all fragments
+      for (b=i=0 ; b<_nWdb ; b++)
+         for (c=0 ; c<16 ; c++)
+            if (!isnan(wf[b][c][0]) && !isnan(wf[b][c][512]))
+               i++;
+      if (i == _nWdb*16) {
+
+         // cell-by-cell offset calibration
+         for (b=0 ; b<_nWdb ; b++) {
+            for (c=0 ; c<16 ; c++) {
+               int tc = c<8 ? triggerCell[b][0] : triggerCell[b][1];
+               for (i=0 ; i<1024 ; i++)
+                  wf[b][c][i] -= wdb[b]->fVCalib.wf_offset1[c][(i+tc)%1024];
+            }
+         }
+
+         // gain calibration
+         for (b=0 ; b<_nWdb ; b++) {
+            for (c=0 ; c<16 ; c++) {
+               int tc = c<8 ? triggerCell[b][0] : triggerCell[b][1];
+               for (int i=0 ; i<1024 ; i++) {
+                  if (wf[b][c][i] > 0)
+                     wf[b][c][i] /= wdb[b]->fVCalib.wf_gain1[c][(i+tc) % 1024];
+                  else
+                     wf[b][c][i] /= wdb[b]->fVCalib.wf_gain2[c][(i+tc) % 1024];
+               }
+            }
+         }
+
+         // start-to-end offset calibration
+         for (b=0 ; b<_nWdb ; b++) {
+            for (c=0 ; c<16 ; c++)
+               for (i=0 ; i<1024 ; i++)
+                  wf[b][c][i] -= wdb[b]->fVCalib.wf_offset2[c][i];
+         }
+         
+         // range calibration
+         for (b=0 ; b<_nWdb ; b++)
+            for (c=0 ; c<16 ; c++)
+               for (int i=0 ; i<1024 ; i++)
+                  wf[b][c][i] -= wdb[b]->fVCalib.drs_offset_range0[c]; // -0.95 ... 0.05 V
+
+         // calculate calibrated time for each bin
+
+         // integrate time from delta-t values
+         for (b=0 ; b<_nWdb ; b++) {
+            for (c=0 ; c<16 ; c++) {
+               int tc = c<8 ? triggerCell[b][0] : triggerCell[b][1];
+               wft[b][c][0] = 0;
+               for (int i=1 ; i<1024 ; i++)
+                  wft[b][c][i] = wft[b][c][i-1] + wdb[b]->fTCalib.dt[c][(i-1+tc)%1024];
+            }
+            // align cell#0 of all channels inside chip0
+            float t1 = wft[b][0][(1024-triggerCell[b][0]) % 1024];
+            for (c=1 ; c<8 ; c++) {
+               float t2 = wft[b][c][(1024-triggerCell[b][0]) % 1024];
+               float dt = t1 - t2;
+               for (int i=0 ; i<1024 ; i++)
+                  wft[b][c][i] += dt;
+            }
+            // align cell#0 of all channels inside chip1 to chip0
+            for (c=8 ; c<16 ; c++) {
+               float t2 = wft[b][c][(1024-triggerCell[b][1]) % 1024];
+               float dt = t1 - t2;
+               for (int i=0 ; i<1024 ; i++)
+                  wft[b][c][i] += dt;
+            }
+         }
+         
+         // copy waveform to buffer and signal new event
+         memcpy(waveform, wf, sizeof(waveform));
+         memcpy(wftime, wft, sizeof(wftime));
+         new_event = 1;
+         current_frame = -1;
+         np = 0;
+
+         // tag waveforms as invalid
+         for (int b=0 ; b<_nWdb ; b++)
+            for (int c=0 ; c<16 ; c++) {
+               wf[b][c][0]   = nanf("");
+               wf[b][c][512] = nanf("");
+            }
+
+      }
+   }
+}
+
+// this funtion sets a link from WD to TCB to be AND/OR/Pattern
+// this is written on the word type
+// 0 = AND
+// 1 = OR
+// 2 = PATTERN
+// 3 = UNUSED
+void WDB::SetTCBLink(int ltype, int port)
+{
+   //first reset the bits
+   Send("regclr %x %x", REG_TRIGGER_SCHEME_SELECT_OFFSET, (3<<14)>>(port*2));
+   // then set them
+   Send("regset %x %x", REG_TRIGGER_SCHEME_SELECT_OFFSET, (ltype<<14)>>(port*2));
+}
+
+//THIS FUNCTION SET THE PATTERNS TO A WDB TAKEN FROM ODB (ONE SET FOR THE WHOLE SYSTEM SO FAR)
+void WDB::SetPatterns(TRIGGER_SETTINGS *ts,int iwd)
+{
+   // first load the pattern enable
+   for(int ipatten = 0; ipatten<8; ipatten++)
+      Send("regwr %x %x", 4*ipatten+REG_TRIGGER_PATTERN_EN_BPL0_OFFSET, ts->wdb[iwd].pattern_enable[ipatten]);
+   // then load the patterns itself
+   for(int ipatt = 0; ipatt<32; ipatt++)
+      Send("regwr %x %x", 4*ipatt+REG_TRIGGER_PATTERN0_OFFSET, ts->wdb[iwd].pattern[ipatt]);
+}
+
+// SET THE MASKS FROM ODB (ONE MASK SETTING PER BOARD PER CHANNEL)
+void WDB::SetMasks(TRIGGER_SETTINGS *ts, int iwd)
+{
+   Send("regwr %x %x", REG_TRIGGER_COMP_MASK_OFFSET, ts->wdb[iwd].masks);
+}
+
+#endif // 0
