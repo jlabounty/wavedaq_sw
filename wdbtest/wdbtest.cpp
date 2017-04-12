@@ -14,7 +14,7 @@
 
 /*-- Globals -------------------------------------------------------*/
 
-std::vector<std::string> wdbName = { "wd027" };
+std::vector<std::string> wdbName = { "wd094" };
 
 /*------------------------------------------------------------------*/
 
@@ -41,9 +41,11 @@ int main(int argc, const char * argv[])
    }
 
    try {
-   std::cout << wdb[0]->GetFwBuild() << std::endl;
-   std::cout << wdb[0]->GetHwVersion() << std::endl;
-   
+      std::cout << wdb[0]->GetFwBuild() << std::endl;
+      std::cout << wdb[0]->GetHwVersion() << std::endl;
+      std::cout << "Protocol version:    " << wdb[0]->GetProtocolVersion() << std::endl;
+      std::cout << "Serial number:       " << wdb[0]->GetSerialNumber() << std::endl;
+      
       std::vector<unsigned long> s;
       do {
          wdb[0]->GetScalers(s);

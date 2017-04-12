@@ -15,7 +15,7 @@
 
 #include <string>
 
-#include "register_map.h"
+#include "register_map_wd2.h"
 
 //--------------------------------------------------------------------
 
@@ -72,8 +72,8 @@ class WDB {
    std::string      mName;
    unsigned char    mEthAddr[16];
 
-   unsigned int     creg[REG_CRC32_REG_BANK_OFFSET/4+1];
-   unsigned int     sreg[REG_ADC_01_CLK_MOD_FLAG_OFFSET/4+1];
+   unsigned int     creg[WD2_REG_CRC32_REG_BANK_OFS/4+1];
+   unsigned int     sreg[WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4+1];
    
    static int       gServerPort;
    static int       gDataSocket;
@@ -98,10 +98,13 @@ public:
    void ReceiveStatusRegisters();
    void ReceiveStatusRegister(int ofs);
    
+   std::string GetFwBuild();
+   std::string GetHwVersion();
+   unsigned int GetProtocolVersion();
+
    unsigned int GetSerialNumber();
    unsigned int GetSlotId();
    unsigned int GetCrateId();
-   unsigned int GetProtocolVersion();
    unsigned int GetBufferCtrl();
    unsigned int GetTcaCtrl();
    unsigned int GetClkDivAdcDrs();
@@ -134,8 +137,6 @@ public:
    unsigned int GetTriggerPattern(int chn);
    unsigned int GetCrc32RegBank();
    
-   std::string GetFwBuild();
-   std::string GetHwVersion();
    unsigned int GetDrsSampleFreq();
    unsigned int GetAdcSampleFreq();
    float GetTemperature();

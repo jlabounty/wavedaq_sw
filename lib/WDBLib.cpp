@@ -44,7 +44,7 @@
 #endif
 
 #include "WDBLib.h"
-#include "register_map.h"
+#include "register_map_wd2.h"
 
 #define WD2_CMD_PORT   3000
 
@@ -250,11 +250,13 @@ void WDB::Connect()
 void WDB::ReceiveControlRegisters()
 {
    std::string result;
-   for (int i=0 ; i<=REG_CRC32_REG_BANK_OFFSET ; i+=4) {
+   for (int i=0 ; i<=WD2_REG_CRC32_REG_BANK_OFS ; i+=4) {
       std::ostringstream req;
       req << "regrd ctrl " << std::hex << i;
       
-      result = SendReceive(req.str());
+      do {
+         result = SendReceive(req.str());
+      } while (result.size() == 0);
       
       this->creg[i/4] = (unsigned int)std::stoul(result.substr(13), nullptr, 16);
    }
@@ -264,15 +266,15 @@ void WDB::ReceiveStatusRegisters()
 {
    std::string result;
    std::ostringstream req;
-   req << "llrd c3010000 " << REG_ADC_01_CLK_MOD_FLAG_OFFSET/4+1;
+   req << "llrd c3010000 " << WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4+1;
    
    result = SendReceive(req.str());
    std::stringstream ss(result);
    std::string line;
    
-   for (auto i=0 ; i<REG_ADC_01_CLK_MOD_FLAG_OFFSET/4 ; i++) {
+   for (auto i=0 ; i<WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4 ; i++) {
       std::getline(ss, line, '\r');
-      this->sreg[i/4+i] = (unsigned int)std::stoul(line.substr(14), nullptr, 16);
+      this->sreg[i] = (unsigned int)std::stoul(line.substr(14), nullptr, 16);
    }
 }
 
@@ -288,19 +290,9 @@ void WDB::ReceiveStatusRegister(int ofs)
 
 //--------------------------------------------------------------------
 
-unsigned int bitExtract(unsigned int reg, unsigned int mask)
+unsigned int bitExtract(unsigned int reg[], unsigned int rofs, unsigned int mask, unsigned int ofs)
 {
-   reg = reg & mask; // clear bits not in mask
-   
-   // find LSB which is non-zero
-   for (int i=0 ; i<32 ; i++)
-      if (mask & (1<<i)) {
-         // shift bits right
-         reg >>= i;
-         break;
-      }
-   
-   return reg;
+   return (reg[rofs/4] & mask) >> ofs;
 }
 
 void bitReplace(unsigned int &reg, unsigned int mask, unsigned int value)
@@ -318,87 +310,174 @@ void bitReplace(unsigned int &reg, unsigned int mask, unsigned int value)
       }
 }
 
-//--------------------------------------------------------------------
+//-- Status registers ------------------------------------------------
 
-unsigned int WDB::GetSerialNumber()
+std::string WDB::GetFwBuild()
 {
-   return bitExtract(creg[REG_SERIAL_NUMBER_OFFSET/4], BIT_SERIAL_NUMBER);
+   std::ostringstream s;
+   std::vector<std::string> monthName = {"Jan", "Feb", "Mar", "Apr", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+   
+   s << "Compatibility Level: ";
+   s << bitExtract(sreg, WD2_REG_REG_LAYOUT_VER_OFS, WD2_BIT_FW_COMPAT_LEVEL_MASK, WD2_BIT_FW_COMPAT_LEVEL_OFS) << std::endl;
+   s << "FW GIT Revision:     ";
+   s << "0x" << std::hex << std::uppercase << bitExtract(sreg, WD2_REG_GIT_HASH_TAG_OFS, WD2_BIT_GIT_HASH_TAG_MASK, WD2_BIT_GIT_HASH_TAG_OFS) << std::endl;
+   
+   s << "FW Build:            ";
+   s << std::dec << std::setw(2) << std::setfill('0');
+   s << monthName[bitExtract(sreg, WD2_REG_FW_BUILD_DATE_OFS, WD2_BIT_FW_BUILD_MONTH_MASK, WD2_BIT_FW_BUILD_MONTH_OFS)-1] << ' ';
+   s << bitExtract(sreg, WD2_REG_FW_BUILD_DATE_OFS, WD2_BIT_FW_BUILD_DAY_MASK, WD2_BIT_FW_BUILD_DAY_OFS) << ' ';
+   s << bitExtract(sreg, WD2_REG_FW_BUILD_DATE_OFS, WD2_BIT_FW_BUILD_YEAR_MASK, WD2_BIT_FW_BUILD_YEAR_OFS) << "  ";
+   
+   s << std::setfill('0') << std::setw(2) << bitExtract(sreg, WD2_REG_FW_BUILD_TIME_OFS, WD2_BIT_FW_BUILD_HOUR_MASK, WD2_BIT_FW_BUILD_HOUR_OFS) << ':';
+   s << std::setfill('0') << std::setw(2) << bitExtract(sreg, WD2_REG_FW_BUILD_TIME_OFS, WD2_BIT_FW_BUILD_MINUTE_MASK, WD2_BIT_FW_BUILD_MINUTE_OFS) << ':';
+   s << std::setfill('0') << std::setw(2) << bitExtract(sreg, WD2_REG_FW_BUILD_TIME_OFS, WD2_BIT_FW_BUILD_SECOND_MASK, WD2_BIT_FW_BUILD_SECOND_OFS) << std::endl;
+   
+   return s.str();
 }
 
-unsigned int WDB::GetCrateId()
+std::string WDB::GetHwVersion()
 {
-   return bitExtract(creg[REG_BOARD_LOCATION_OFFSET/4], BIT_CRATE_ID);
-}
-
-unsigned int WDB::GetSlotId()
-{
-   return bitExtract(creg[REG_BOARD_LOCATION_OFFSET/4], BIT_SLOT_ID);
+   std::ostringstream s;
+   
+   assert(bitExtract(sreg, WD2_REG_HW_VER_OFS, WD2_BIT_BOARD_MAGIC_MASK, WD2_BIT_BOARD_MAGIC_OFS) == 0xAC);
+   
+   s << "Board Type:          ";
+   s << "WaveDREAM" << bitExtract(sreg, WD2_REG_HW_VER_OFS, WD2_BIT_BOARD_TYPE_MASK, WD2_BIT_BOARD_TYPE_OFS) << std::endl;
+   s << "Board Revision:      ";
+   s << (char)('A'+bitExtract(sreg, WD2_REG_HW_VER_OFS, WD2_BIT_BOARD_REVISION_MASK, WD2_BIT_BOARD_REVISION_OFS)) << std::endl;
+   s << "Board Variant:       ";
+   s << std::showbase << std::internal << std::setfill('0') << std::hex << std::setw(4) << bitExtract(sreg, WD2_REG_HW_VER_OFS, WD2_BIT_BOARD_VARIANT_MASK, WD2_BIT_BOARD_VARIANT_OFS);
+   s << std::endl;
+   
+   return s.str();
 }
 
 unsigned int WDB::GetProtocolVersion()
 {
-   return bitExtract(creg[REG_PROTOCOL_VERSION_OFFSET/4], BIT_PROTOCOL_VERSION);
+   return bitExtract(sreg, WD2_REG_PROT_VER_OFS, WD2_BIT_PROTOCOL_VERSION_MASK, WD2_BIT_PROTOCOL_VERSION_OFS);
+}
+
+unsigned int WDB::GetSerialNumber()
+{
+   return bitExtract(sreg, WD2_REG_SN_OFS, WD2_BIT_SERIAL_NUMBER_MASK, WD2_BIT_SERIAL_NUMBER_OFS);
+}
+
+void WDB::GetScalers(std::vector<unsigned long> &scaler)
+{
+   std::string result;
+   std::ostringstream req;
+   req << "llrd c30100" << std::hex << WD2_REG_SCALER_0_LSB_OFS << " 34";
+   
+   result = SendReceive(req.str());
+   std::stringstream ss(result);
+   std::string line;
+   
+   for (auto i=0 ; i<34 ; i++) {
+      std::getline(ss, line, '\r');
+      this->sreg[WD2_REG_SCALER_0_LSB_OFS/4+i] = (unsigned int)std::stoul(line.substr(14), nullptr, 16);
+   }
+   
+   // channels 0-15 are 64 bit counters
+   for (auto i=0 ; i<16 ; i++) {
+      unsigned long v = this->sreg[WD2_REG_SCALER_0_LSB_OFS/4+i*2] |
+      ((unsigned long)this->sreg[WD2_REG_SCALER_0_LSB_OFS/4+i*2+1] << 32);
+      
+      if (scaler.size() < i+1)
+         scaler.push_back(v);
+      else
+         scaler[i] = v;
+   }
+   
+   // channels 16 and 17 are 32 bit counters
+   for (auto i=16 ; i<18 ; i++) {
+      unsigned long v = this->sreg[WD2_REG_SCALER_TRG_OFS/4+i];
+      
+      if (scaler.size() < i+1)
+         scaler.push_back(v);
+      else
+         scaler[i] = v;
+   }
+   
+}
+
+//-- Control registers -----------------------------------------------
+
+unsigned int WDB::GetCrateId()
+{
+   return bitExtract(creg, WD2_REG_WDB_LOC_OFS, WD2_BIT_CRATE_ID_MASK, WD2_BIT_CRATE_ID_OFS);
+}
+
+unsigned int WDB::GetSlotId()
+{
+   return bitExtract(creg, WD2_REG_WDB_LOC_OFS, WD2_BIT_SLOT_ID_MASK, WD2_BIT_SLOT_ID_OFS);
+}
+
+#if 0
+
+unsigned int WDB::GetProtocolVersion()
+{
+   return bitExtract(creg[WD2_REG_PROTOCOL_VERSION_OFS/4], BIT_PROTOCOL_VERSION);
 }
 
 unsigned int WDB::GetBufferCtrl()
 {
-   return bitExtract(creg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_BUFFER_CTRL);
+   return bitExtract(creg[WD2_REG_CLK_CALIB_CTRL_OFS/4], BIT_BUFFER_CTRL);
 }
 
 unsigned int WDB::GetTcaCtrl()
 {
-   return bitExtract(creg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_TCA_CTRL);
+   return bitExtract(creg[WD2_REG_CLK_CALIB_CTRL_OFS/4], BIT_TCA_CTRL);
 }
 
 unsigned int WDB::GetClkDivAdcDrs()
 {
-   return bitExtract(creg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_CLK_DIV_ADC_DRS);
+   return bitExtract(creg[WD2_REG_CLK_CALIB_CTRL_OFS/4], BIT_CLK_DIV_ADC_DRS);
 }
 
 unsigned int WDB::GetClkSelDaq()
 {
-   return bitExtract(creg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_CLK_SEL_DAQ);
+   return bitExtract(creg[WD2_REG_CLK_CALIB_CTRL_OFS/4], BIT_CLK_SEL_DAQ);
 }
 
 unsigned int WDB::GetClkSelExt()
 {
-   return bitExtract(creg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_CLK_SEL_EXT);
+   return bitExtract(creg[WD2_REG_CLK_CALIB_CTRL_OFS/4], BIT_CLK_SEL_EXT);
 }
 
 unsigned int WDB::GetExtClkFreq()
 {
-   return bitExtract(creg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_LOCAL_CLK_FREQ);
+   return bitExtract(creg[WD2_REG_CLK_CALIB_CTRL_OFS/4], BIT_LOCAL_CLK_FREQ);
 }
 
 unsigned int WDB::GetLocalClkFreq()
 {
-   return bitExtract(creg[REG_CLK_CALIB_CTRL_OFFSET/4], BIT_LOCAL_CLK_FREQ);
+   return bitExtract(creg[WD2_REG_CLK_CALIB_CTRL_OFS/4], BIT_LOCAL_CLK_FREQ);
 }
 
 
 unsigned int WDB::GetDacRofs()
 {
-   return bitExtract(creg[REG_DAC0_A_B_OFFSET/4], BIT_DAC0_CH_A);
+   return bitExtract(creg[WD2_REG_DAC0_A_B_OFS/4], BIT_DAC0_CH_A);
 }
 
 unsigned int WDB::GetDacOfs()
 {
-   return bitExtract(creg[REG_DAC0_A_B_OFFSET/4], BIT_DAC0_CH_B);
+   return bitExtract(creg[WD2_REG_DAC0_A_B_OFS/4], BIT_DAC0_CH_B);
 }
 
 unsigned int WDB::GetDacCalDc()
 {
-   return bitExtract(creg[REG_DAC0_C_D_OFFSET/4], BIT_DAC0_CH_C);
+   return bitExtract(creg[WD2_REG_DAC0_C_D_OFS/4], BIT_DAC0_CH_C);
 }
 
 unsigned int WDB::GetDacPulseAmp()
 {
-   return bitExtract(creg[REG_DAC0_C_D_OFFSET/4], BIT_DAC0_CH_D);
+   return bitExtract(creg[WD2_REG_DAC0_C_D_OFS/4], BIT_DAC0_CH_D);
 }
 
 unsigned int WDB::GetDacPczLevel()
 {
-   return bitExtract(creg[REG_DAC0_E_F_OFFSET/4], BIT_DAC0_CH_E);
+   return bitExtract(creg[WD2_REG_DAC0_E_F_OFS/4], BIT_DAC0_CH_E);
 }
 
 float WDB::GetDacTlevel(int chn)
@@ -407,9 +486,9 @@ float WDB::GetDacTlevel(int chn)
    
    assert(chn < 16);
    if (chn % 2 == 0)
-      v = bitExtract(creg[REG_DAC1_A_B_OFFSET/4+(chn/2)], BIT_DAC1_CH_A);
+      v = bitExtract(creg[WD2_REG_DAC1_A_B_OFS/4+(chn/2)], BIT_DAC1_CH_A);
    else
-      v = bitExtract(creg[REG_DAC1_A_B_OFFSET/4+(chn/2)], BIT_DAC1_CH_B);
+      v = bitExtract(creg[WD2_REG_DAC1_A_B_OFS/4+(chn/2)], BIT_DAC1_CH_B);
    
    // convert to Volts taking WDB comparator offset into account
    return ((v / 4095.0 * 2500) - 900) / 500.0;
@@ -427,68 +506,68 @@ unsigned int WDB::GetFrontend(int chn)
       m = BIT_FE1_ACDC | BIT_FE1_COMP2 | BIT_FE1_OP2  | BIT_FE1_COMP1 | BIT_FE1_OP1 |
           BIT_FE1_ATT1 | BIT_FE1_ATT0  | BIT_FE1_CAL1 | BIT_FE1_CAL0;
 
-   return bitExtract(creg[REG_FRONTEND_0_1_OFFSET/4+(chn/2)], m);
+   return bitExtract(creg[WD2_REG_FRONTEND_0_1_OFS/4+(chn/2)], m);
 }
 
 unsigned int WDB::GetLmk(int r)
 {
    assert(r < 16);
-   return creg[REG_LMK_0_OFFSET/4+r];
+   return creg[WD2_REG_LMK_0_OFS/4+r];
 }
 
 unsigned int WDB::GetTriggerOutPulseLength()
 {
-   return bitExtract(creg[REG_TRIGGER_CFG_OFFSET/4], BIT_TRIGGER_OUT_PULSE_LENGTH);
+   return bitExtract(creg[WD2_REG_TRIGGER_CFG_OFS/4], BIT_TRIGGER_OUT_PULSE_LENGTH);
 }
 
 unsigned int WDB::GetTriggerEnable()
 {
-   return bitExtract(creg[REG_TRIGGER_CFG_OFFSET/4], BIT_TRIGGER_ENABLE);
+   return bitExtract(creg[WD2_REG_TRIGGER_CFG_OFS/4], BIT_TRIGGER_ENABLE);
 }
 
 unsigned int WDB::GetTriggerFallingEdge()
 {
-   return bitExtract(creg[REG_TRIGGER_CFG_OFFSET/4], BIT_TRIGGER_FALLING_EDGE);
+   return bitExtract(creg[WD2_REG_TRIGGER_CFG_OFS/4], BIT_TRIGGER_FALLING_EDGE);
 }
 
 unsigned int WDB::GetTriggerCfgExtOr()
 {
-   return bitExtract(creg[REG_TRIGGER_CFG_OFFSET/4], BIT_TRIGGER_CFG_EXT_OR);
+   return bitExtract(creg[WD2_REG_TRIGGER_CFG_OFS/4], BIT_TRIGGER_CFG_EXT_OR);
 }
 
 unsigned int WDB::GetTriggerCfgExtAnd()
 {
-   return bitExtract(creg[REG_TRIGGER_CFG_OFFSET/4], BIT_TRIGGER_CFG_EXT_AND);
+   return bitExtract(creg[WD2_REG_TRIGGER_CFG_OFS/4], BIT_TRIGGER_CFG_EXT_AND);
 }
 
 unsigned int WDB::GetTriggerDelayEnable()
 {
-   return bitExtract(creg[REG_TRIGGER_CFG_OFFSET/4], BIT_TRIGGER_DELAY_ENABLE);
+   return bitExtract(creg[WD2_REG_TRIGGER_CFG_OFS/4], BIT_TRIGGER_DELAY_ENABLE);
 }
 
 unsigned int WDB::GetTriggerDelay()
 {
-   return bitExtract(creg[REG_TRIGGER_CFG_OFFSET/4], BIT_TRIGGER_DELAY);
+   return bitExtract(creg[WD2_REG_TRIGGER_CFG_OFS/4], BIT_TRIGGER_DELAY);
 }
 
 unsigned int WDB::GetTriggerCompMask()
 {
-   return bitExtract(creg[REG_TRIGGER_COMP_MASK_OFFSET/4], BIT_TRIGGER_COMP_MASK);
+   return bitExtract(creg[WD2_REG_TRIGGER_COMP_MASK_OFS/4], BIT_TRIGGER_COMP_MASK);
 }
 
 unsigned int WDB::GetTriggerCfgOr()
 {
-   return bitExtract(creg[REG_TRIGGER_CFG_A_OFFSET/4], BIT_TRIGGER_CFG_OR);
+   return bitExtract(creg[WD2_REG_TRIGGER_CFG_A_OFS/4], BIT_TRIGGER_CFG_OR);
 }
 
 unsigned int WDB::GetTriggerCfgAnd()
 {
-   return bitExtract(creg[REG_TRIGGER_CFG_A_OFFSET/4], BIT_TRIGGER_CFG_AND);
+   return bitExtract(creg[WD2_REG_TRIGGER_CFG_A_OFS/4], BIT_TRIGGER_CFG_AND);
 }
 
 unsigned int WDB::GetTriggerLocalScheme()
 {
-   return bitExtract(creg[REG_TRIGGER_SCHEME_SELECT_OFFSET/4], BIT_PATTERN_TRIGGER_SELECT);
+   return bitExtract(creg[WD2_REG_TRIGGER_SCHEME_SELECT_OFS/4], BIT_PATTERN_TRIGGER_SELECT);
 }
 
 unsigned int WDB::GetTriggerBackplaneScheme(int chn)
@@ -498,169 +577,95 @@ unsigned int WDB::GetTriggerBackplaneScheme(int chn)
    unsigned int mask;
    mask = BIT_BACKPLANE_TRIGGER7 << (chn * 2);
    
-   return bitExtract(creg[REG_TRIGGER_SCHEME_SELECT_OFFSET/4], mask);
+   return bitExtract(creg[WD2_REG_TRIGGER_SCHEME_SELECT_OFS/4], mask);
 }
 
 unsigned int WDB::GetTriggerPatternEnLocal()
 {
-   return bitExtract(creg[REG_TRIGGER_PATTERN_EN_LOCAL_OFFSET/4], BIT_TRIGGER_PATTERN_EN_LOCAL);
+   return bitExtract(creg[WD2_REG_TRIGGER_PATTERN_EN_LOCAL_OFS/4], BIT_TRIGGER_PATTERN_EN_LOCAL);
 }
 
 unsigned int WDB::GetTriggerPatternEnBackplane(int chn)
 {
    assert(chn < 8);
-   return bitExtract(creg[REG_TRIGGER_PATTERN_EN_BPL0_OFFSET/4+chn], BIT_TRIGGER_PATTERN_EN_BPL0);
+   return bitExtract(creg[WD2_REG_TRIGGER_PATTERN_EN_BPL0_OFS/4+chn], BIT_TRIGGER_PATTERN_EN_BPL0);
 }
 
 unsigned int WDB::GetTriggerPattern(int i)
 {
    assert(i < 32);
-   return bitExtract(creg[REG_TRIGGER_PATTERN0_OFFSET/4+i], BIT_TRIGGER_PATTERN0);
+   return bitExtract(creg[WD2_REG_TRIGGER_PATTERN0_OFS/4+i], BIT_TRIGGER_PATTERN0);
 }
 
 unsigned int WDB::GetCrc32RegBank()
 {
-   return bitExtract(creg[REG_CRC32_REG_BANK_OFFSET/4], BIT_CRC32_REG_BANK);
+   return bitExtract(creg[WD2_REG_CRC32_WD2_REG_BANK_OFS/4], BIT_CRC32_WD2_REG_BANK);
 }
+
+#endif // 0
 
 //--------------------------------------------------------------------
 
-std::string WDB::GetFwBuild()
-{
-   std::ostringstream s;
-   std::vector<std::string> monthName = {"Jan", "Feb", "Mar", "Apr", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-   
-   s << "Compatibility Level: ";
-   s << bitExtract(sreg[REG_FW_BUILD_TIME_OFFSET/4], BIT_FW_COMPAT_LEVEL) << std::endl;
-   s << "FW GIT Revision:     ";
-   s << "0x" << std::hex << std::uppercase << bitExtract(sreg[REG_GIT_HASH_TAG_OFFSET/4], BIT_GIT_HASH_TAG) << std::endl;
-
-   s << "FW Build:            ";
-   s << std::dec << std::setw(2) << std::setfill('0');
-   s << monthName[bitExtract(sreg[REG_FW_BUILD_DATE_OFFSET/4], BIT_FW_BUILD_MONTH)-1] << ' ';
-   s << bitExtract(sreg[REG_FW_BUILD_DATE_OFFSET/4], BIT_FW_BUILD_DAY) << ' ';
-   s << bitExtract(sreg[REG_FW_BUILD_DATE_OFFSET/4], BIT_FW_BUILD_YEAR) << "  ";
-   
-   s << bitExtract(sreg[REG_FW_BUILD_TIME_OFFSET/4], BIT_FW_BUILD_HOUR) << ':';
-   s << bitExtract(sreg[REG_FW_BUILD_TIME_OFFSET/4], BIT_FW_BUILD_MINUTE) << ':';
-   s << bitExtract(sreg[REG_FW_BUILD_TIME_OFFSET/4], BIT_FW_BUILD_SECOND) << std::endl;
-   
-   return s.str();
-}
-
-std::string WDB::GetHwVersion()
-{
-   std::ostringstream s;
-   
-   assert(bitExtract(sreg[REG_HW_VERSION_OFFSET/4], BIT_BOARD_MAGIC) == 0xAC);
-   
-   s << "Board Type:          ";
-   s << "WaveDREAM" << bitExtract(sreg[REG_HW_VERSION_OFFSET/4], BIT_BOARD_TYPE) << std::endl;
-   s << "Board Revision:      ";
-   s << (char)('A'+bitExtract(sreg[REG_HW_VERSION_OFFSET/4], BIT_BOARD_REVISION)) << std::endl;
-   s << "Board Variant:       ";
-   s << std::showbase << std::setw(2) << std::hex << bitExtract(sreg[REG_HW_VERSION_OFFSET/4], BIT_BOARD_VARIANT);
-   s << std::endl;
-
-   return s.str();
-}
+#if 0
 
 unsigned int WDB::GetDrsSampleFreq()
 {
-   return bitExtract(sreg[REG_DRS_SAMPLE_FREQ_OFFSET/4], BIT_DRS_SAMPLE_FREQ);
+   return bitExtract(sreg[WD2_REG_DRS_SAMPLE_FREQ_OFS/4], BIT_DRS_SAMPLE_FREQ);
 }
 
 unsigned int WDB::GetAdcSampleFreq()
 {
-   return bitExtract(sreg[REG_ADC_SAMPLE_FREQ_OFFSET/4], BIT_ADC_SAMPLE_FREQ);
+   return bitExtract(sreg[WD2_REG_ADC_SAMPLE_FREQ_OFS/4], BIT_ADC_SAMPLE_FREQ);
 }
 
 float WDB::GetTemperature()
 {
-   ReceiveStatusRegister(REG_STATUS_OFFSET);
-   return bitExtract(sreg[REG_STATUS_OFFSET/4], BIT_TEMPERATURE) * 0.0625;
+   ReceiveStatusRegister(WD2_REG_STATUS_OFS);
+   return bitExtract(sreg[WD2_REG_STATUS_OFS/4], BIT_TEMPERATURE) * 0.0625;
 }
 
 unsigned int WDB::GetPlllck()
 {
-   ReceiveStatusRegister(REG_STATUS_OFFSET);
+   ReceiveStatusRegister(WD2_REG_STATUS_OFS);
    auto mask = BIT_SYS_DCM_LOCK | BIT_DRS_PLLLCK_0 | BIT_DRS_PLLLCK_1 | BIT_LMK_PLLLCK;
-   return bitExtract(sreg[REG_STATUS_OFFSET/4], mask);
+   return bitExtract(sreg[WD2_REG_STATUS_OFS/4], mask);
 }
 
 unsigned int WDB::GetSerdesPlllck()
 {
-   ReceiveStatusRegister(REG_STATUS_OFFSET);
+   ReceiveStatusRegister(WD2_REG_STATUS_OFS);
    auto mask = BIT_OSERDES_PLLLCK_DCB | BIT_OSERDES_PLLLCK_TCB | BIT_ISERDES_PLLLCK_0 | BIT_ISERDES_PLLLCK_1;
-   return bitExtract(sreg[REG_STATUS_OFFSET/4], mask);
+   return bitExtract(sreg[WD2_REG_STATUS_OFS/4], mask);
 }
 
 unsigned int WDB::IsSerialBusy()
 {
-   ReceiveStatusRegister(REG_STATUS_OFFSET);
-   return bitExtract(sreg[REG_STATUS_OFFSET/4], BIT_SERIAL_BUSY);
+   ReceiveStatusRegister(WD2_REG_STATUS_OFS);
+   return bitExtract(sreg[WD2_REG_STATUS_OFS/4], BIT_SERIAL_BUSY);
 }
 
 unsigned int WDB::IsRunning()
 {
-   ReceiveStatusRegister(REG_STATUS_OFFSET);
-   return bitExtract(sreg[REG_STATUS_OFFSET/4], BIT_RUNNING);
+   ReceiveStatusRegister(WD2_REG_STATUS_OFS);
+   return bitExtract(sreg[WD2_REG_STATUS_OFS/4], BIT_RUNNING);
 }
 
 unsigned int WDB::GetTriggerBus()
 {
-   ReceiveStatusRegister(REG_TRIGGER_BUS_OFFSET);
-   return bitExtract(sreg[REG_TRIGGER_BUS_OFFSET/4], BIT_TRIGGER_BUS);
+   ReceiveStatusRegister(WD2_REG_TRIGGER_BUS_OFS);
+   return bitExtract(sreg[WD2_REG_TRIGGER_BUS_OFS/4], BIT_TRIGGER_BUS);
 }
 
 unsigned int WDB::GetTriggerType()
 {
-   ReceiveStatusRegister(REG_TRIGGER_INFO_OFFSET);
-   return bitExtract(sreg[REG_TRIGGER_INFO_OFFSET/4], BIT_TRIGGER_TYPE);
+   ReceiveStatusRegister(WD2_REG_TRIGGER_INFO_OFS);
+   return bitExtract(sreg[WD2_REG_TRIGGER_INFO_OFS/4], BIT_TRIGGER_TYPE);
 }
 
 unsigned int WDB::GetTriggerNumber()
 {
-   ReceiveStatusRegister(REG_TRIGGER_INFO_OFFSET);
-   return bitExtract(sreg[REG_TRIGGER_INFO_OFFSET/4], BIT_TRIGGER_NUMBER);
-}
-
-void WDB::GetScalers(std::vector<unsigned long> &scaler)
-{
-   std::string result;
-   std::ostringstream req;
-   req << "llrd c30100" << std::hex << REG_SCALER_0_LSB_OFFSET << " 34";
-   
-   result = SendReceive(req.str());
-   std::stringstream ss(result);
-   std::string line;
-   
-   for (auto i=0 ; i<34 ; i++) {
-      std::getline(ss, line, '\r');
-      this->sreg[REG_SCALER_0_LSB_OFFSET/4+i] = (unsigned int)std::stoul(line.substr(14), nullptr, 16);
-   }
-
-   // channels 0-15 are 64 bit counters
-   for (auto i=0 ; i<16 ; i++) {
-      unsigned long v = this->sreg[REG_SCALER_0_LSB_OFFSET/4+i*2] |
-                        ((unsigned long)this->sreg[REG_SCALER_0_LSB_OFFSET/4+i*2+1] << 32);
-      
-      if (scaler.size() < i+1)
-         scaler.push_back(v);
-      else
-         scaler[i] = v;
-   }
-   
-   // channels 16 and 17 are 32 bit counters
-   for (auto i=16 ; i<18 ; i++) {
-      unsigned long v = this->sreg[REG_SCALER_TRIGGER_OFFSET/4+i];
-      
-      if (scaler.size() < i+1)
-         scaler.push_back(v);
-      else
-         scaler[i] = v;
-   }
-
+   ReceiveStatusRegister(WD2_REG_TRIGGER_INFO_OFS);
+   return bitExtract(sreg[WD2_REG_TRIGGER_INFO_OFS/4], BIT_TRIGGER_NUMBER);
 }
 
 //--------------------------------------------------------------------
@@ -683,27 +688,27 @@ void WDB::SetRegMask(unsigned int ofs, unsigned int mask, unsigned int v)
 
 void WDB::SetDacRofs(unsigned int v)
 {
-   SetRegMask(REG_DAC0_A_B_OFFSET, BIT_DAC0_CH_A, v);
+   SetRegMask(WD2_REG_DAC0_A_B_OFS, BIT_DAC0_CH_A, v);
 }
 
 void WDB::SetDacOfs(unsigned int v)
 {
-   SetRegMask(REG_DAC0_A_B_OFFSET, BIT_DAC0_CH_B, v);
+   SetRegMask(WD2_REG_DAC0_A_B_OFS, BIT_DAC0_CH_B, v);
 }
 
 void WDB::SetDacCalDc(unsigned int v)
 {
-   SetRegMask(REG_DAC0_C_D_OFFSET, BIT_DAC0_CH_C, v);
+   SetRegMask(WD2_REG_DAC0_C_D_OFS, BIT_DAC0_CH_C, v);
 }
 
 void WDB::SetDacPulseAmp(unsigned int v)
 {
-   SetRegMask(REG_DAC0_C_D_OFFSET, BIT_DAC0_CH_D, v);
+   SetRegMask(WD2_REG_DAC0_C_D_OFS, BIT_DAC0_CH_D, v);
 }
 
 void WDB::SetDacPczLevel(unsigned int v)
 {
-   SetRegMask(REG_DAC0_E_F_OFFSET, BIT_DAC0_CH_E, v);
+   SetRegMask(WD2_REG_DAC0_E_F_OFS, BIT_DAC0_CH_E, v);
 }
 
 void WDB::SetDacTlevel(int chn, float v)
@@ -716,9 +721,9 @@ void WDB::SetDacTlevel(int chn, float v)
    
    assert(chn < 16);
    if (chn % 2 == 0)
-      SetRegMask(REG_DAC1_A_B_OFFSET+(chn/2)*4, BIT_DAC1_CH_A, d);
+      SetRegMask(WD2_REG_DAC1_A_B_OFS+(chn/2)*4, BIT_DAC1_CH_A, d);
    else
-      SetRegMask(REG_DAC1_A_B_OFFSET+(chn/2)*4, BIT_DAC1_CH_B, d);
+      SetRegMask(WD2_REG_DAC1_A_B_OFS+(chn/2)*4, BIT_DAC1_CH_B, d);
 }
 
 void WDB::SetFrontend(int chn, unsigned int v)
@@ -732,68 +737,68 @@ void WDB::SetFrontend(int chn, unsigned int v)
       m = BIT_FE1_ACDC | BIT_FE1_COMP2 | BIT_FE1_OP2  | BIT_FE1_COMP1 | BIT_FE1_OP1 |
           BIT_FE1_ATT1 | BIT_FE1_ATT0  | BIT_FE1_CAL1 | BIT_FE1_CAL0;
 
-   SetRegMask(REG_FRONTEND_0_1_OFFSET+(chn/2)*4, m, v);
+   SetRegMask(WD2_REG_FRONTEND_0_1_OFS+(chn/2)*4, m, v);
 }
 
 void WDB::SetLmk(int r, unsigned int v)
 {
    assert(r < 16);
-   SetRegMask(REG_LMK_0_OFFSET+r*4, 0xFFFFFFFF, v);
+   SetRegMask(WD2_REG_LMK_0_OFS+r*4, 0xFFFFFFFF, v);
 }
 
 void WDB::SetTriggerOutPulseLength(unsigned int v)
 {
-   SetRegMask(REG_TRIGGER_CFG_OFFSET, BIT_TRIGGER_OUT_PULSE_LENGTH, v);
+   SetRegMask(WD2_REG_TRIGGER_CFG_OFS, BIT_TRIGGER_OUT_PULSE_LENGTH, v);
 }
 
 void WDB::SetTriggerEnable(unsigned int v)
 {
-   SetRegMask(REG_TRIGGER_CFG_OFFSET, BIT_TRIGGER_ENABLE, v);
+   SetRegMask(WD2_REG_TRIGGER_CFG_OFS, BIT_TRIGGER_ENABLE, v);
 }
 
 void WDB::SetTriggerFallingEdge(unsigned int v)
 {
-   SetRegMask(REG_TRIGGER_CFG_OFFSET, BIT_TRIGGER_FALLING_EDGE, v);
+   SetRegMask(WD2_REG_TRIGGER_CFG_OFS, BIT_TRIGGER_FALLING_EDGE, v);
 }
 
 void WDB::SetTriggerCfgExtOr(unsigned int v)
 {
-   SetRegMask(REG_TRIGGER_CFG_OFFSET, BIT_TRIGGER_CFG_EXT_OR, v);
+   SetRegMask(WD2_REG_TRIGGER_CFG_OFS, BIT_TRIGGER_CFG_EXT_OR, v);
 }
 
 void WDB::SetTriggerCfgExtAnd(unsigned int v)
 {
-   SetRegMask(REG_TRIGGER_CFG_OFFSET, BIT_TRIGGER_CFG_EXT_AND, v);
+   SetRegMask(WD2_REG_TRIGGER_CFG_OFS, BIT_TRIGGER_CFG_EXT_AND, v);
 }
 
 void WDB::SetTriggerDelayEnable(unsigned int v)
 {
-   SetRegMask(REG_TRIGGER_CFG_OFFSET, BIT_TRIGGER_DELAY_ENABLE, v);
+   SetRegMask(WD2_REG_TRIGGER_CFG_OFS, BIT_TRIGGER_DELAY_ENABLE, v);
 }
 
 void WDB::SetTriggerDelay(unsigned int v)
 {
-   SetRegMask(REG_TRIGGER_CFG_OFFSET, BIT_TRIGGER_DELAY, v);
+   SetRegMask(WD2_REG_TRIGGER_CFG_OFS, BIT_TRIGGER_DELAY, v);
 }
 
 void WDB::SetTriggerCompMask(unsigned int v)
 {
-   SetRegMask(REG_TRIGGER_COMP_MASK_OFFSET, BIT_TRIGGER_COMP_MASK, v);
+   SetRegMask(WD2_REG_TRIGGER_COMP_MASK_OFS, BIT_TRIGGER_COMP_MASK, v);
 }
 
 void WDB::SetTriggerCfgOr(unsigned int v)
 {
-   SetRegMask(REG_TRIGGER_CFG_A_OFFSET, BIT_TRIGGER_CFG_OR, v);
+   SetRegMask(WD2_REG_TRIGGER_CFG_A_OFS, BIT_TRIGGER_CFG_OR, v);
 }
 
 void WDB::SetTriggerCfgAnd(unsigned int v)
 {
-   SetRegMask(REG_TRIGGER_CFG_A_OFFSET, BIT_TRIGGER_CFG_AND, v);
+   SetRegMask(WD2_REG_TRIGGER_CFG_A_OFS, BIT_TRIGGER_CFG_AND, v);
 }
 
 void WDB::SetTriggerLocalScheme(unsigned int v)
 {
-   SetRegMask(REG_TRIGGER_SCHEME_SELECT_OFFSET, BIT_PATTERN_TRIGGER_SELECT, v);
+   SetRegMask(WD2_REG_TRIGGER_SCHEME_SELECT_OFS, BIT_PATTERN_TRIGGER_SELECT, v);
 }
 
 void WDB::SetTriggerBackplaneScheme(int chn, unsigned int v)
@@ -803,25 +808,27 @@ void WDB::SetTriggerBackplaneScheme(int chn, unsigned int v)
    unsigned int mask;
    mask = BIT_BACKPLANE_TRIGGER7 << (chn * 2);
 
-   SetRegMask(REG_TRIGGER_SCHEME_SELECT_OFFSET, mask, v);
+   SetRegMask(WD2_REG_TRIGGER_SCHEME_SELECT_OFS, mask, v);
 }
 
 void WDB::SetTriggerPatternEnLocal(unsigned int v)
 {
-   SetRegMask(REG_TRIGGER_PATTERN_EN_LOCAL_OFFSET, BIT_TRIGGER_PATTERN_EN_LOCAL, v);
+   SetRegMask(WD2_REG_TRIGGER_PATTERN_EN_LOCAL_OFS, BIT_TRIGGER_PATTERN_EN_LOCAL, v);
 }
 
 void WDB::SetTriggerPatternEnBackplane(int chn, unsigned int v)
 {
    assert(chn < 8);
-   SetRegMask(REG_TRIGGER_PATTERN_EN_BPL0_OFFSET+chn, BIT_TRIGGER_PATTERN_EN_BPL0, v);
+   SetRegMask(WD2_REG_TRIGGER_PATTERN_EN_BPL0_OFS+chn, BIT_TRIGGER_PATTERN_EN_BPL0, v);
 }
 
 void WDB::SetTriggerPattern(int i, unsigned int v)
 {
    assert(i < 32);
-   SetRegMask(REG_TRIGGER_PATTERN0_OFFSET+i, BIT_TRIGGER_PATTERN0, v);
+   SetRegMask(WD2_REG_TRIGGER_PATTERN0_OFS+i, BIT_TRIGGER_PATTERN0, v);
 }
+
+#endif // 0
 
 //--------------------------------------------------------------------
 
@@ -1205,35 +1212,35 @@ void WDB::ConfigureBoard(int iwd)
    Send("dacset caldc 1280");
 
    // disable local trigger
-   Send("regwr %02x 00000000", REG_TRIGGER_CFG_A_OFFSET);
+   Send("regwr %02x 00000000", WD2_REG_TRIGGER_CFG_A_OFS);
    
    // trigger_enable, trigger_falling_edge, enable external trigger
    // set the trigger delay to be 0x3F and the signal shaping 4 (80MHz clk cycles)
-   Send("regwr %02x 040E0034", REG_TRIGGER_CFG_OFFSET);
+   Send("regwr %02x 040E0034", WD2_REG_TRIGGER_CFG_OFS);
    
    // set DRS readout mode to ROI and drs_active
-   Send("regwr %02x 17170030", REG_CONTROL_OFFSET);
+   Send("regwr %02x 17170030", WD2_REG_CONTROL_OFS);
    
    // set clock source
    if (fClockSource == 1)
-      Send("regclr %02x 20000", REG_CLK_CALIB_CTRL_OFFSET);
+      Send("regclr %02x 20000", WD2_REG_CLK_CALIB_CTRL_OFS);
    else
-      Send("regset %02x 20000", REG_CLK_CALIB_CTRL_OFFSET);
+      Send("regset %02x 20000", WD2_REG_CLK_CALIB_CTRL_OFS);
    
    // set inter-packet delay
-   Send("regwr %02x FF00", REG_COM_CONTROL_OFFSET);
+   Send("regwr %02x FF00", WD2_REG_COM_CONTROL_OFS);
    
    // set LMK registers to their defaults, see "LMK regs.xls"
-   Send("regwr %02x 00032800", REG_LMK_0_OFFSET);
-   Send("regwr %02x 00020101", REG_LMK_1_OFFSET);
-   Send("regwr %02x 00020102", REG_LMK_2_OFFSET);
-   Send("regwr %02x 029900AD", REG_LMK_13_OFFSET);
-   Send("regwr %02x 0830140E", REG_LMK_14_OFFSET);
-   Send("regwr %02x D800280F", REG_LMK_15_OFFSET);
+   Send("regwr %02x 00032800", WD2_REG_LMK_0_OFS);
+   Send("regwr %02x 00020101", WD2_REG_LMK_1_OFS);
+   Send("regwr %02x 00020102", WD2_REG_LMK_2_OFS);
+   Send("regwr %02x 029900AD", WD2_REG_LMK_13_OFS);
+   Send("regwr %02x 0830140E", WD2_REG_LMK_14_OFS);
+   Send("regwr %02x D800280F", WD2_REG_LMK_15_OFS);
 
    // set LMK register to current sampling frequency
    int divider = (int) (200.0 / fSamplingFrequency * 2.048 / 2 + 0.5);
-   Send("regwr %02x 0003%02X00", REG_LMK_0_OFFSET, divider);
+   Send("regwr %02x 0003%02X00", WD2_REG_LMK_0_OFS, divider);
 
    // initialize FSM and frame counter
    Send("drsreinit");
@@ -1466,7 +1473,7 @@ void *wdb_collector(void *param)
             for (c=0 ; c<16 ; c++) {
                int tc = c<8 ? triggerCell[b][0] : triggerCell[b][1];
                for (i=0 ; i<1024 ; i++)
-                  wf[b][c][i] -= wdb[b]->fVCalib.wf_offset1[c][(i+tc)%1024];
+                  wf[b][c][i] -= wdb[b]->fVCalib.wf_OFS1[c][(i+tc)%1024];
             }
          }
 
@@ -1487,14 +1494,14 @@ void *wdb_collector(void *param)
          for (b=0 ; b<_nWdb ; b++) {
             for (c=0 ; c<16 ; c++)
                for (i=0 ; i<1024 ; i++)
-                  wf[b][c][i] -= wdb[b]->fVCalib.wf_offset2[c][i];
+                  wf[b][c][i] -= wdb[b]->fVCalib.wf_OFS2[c][i];
          }
          
          // range calibration
          for (b=0 ; b<_nWdb ; b++)
             for (c=0 ; c<16 ; c++)
                for (int i=0 ; i<1024 ; i++)
-                  wf[b][c][i] -= wdb[b]->fVCalib.drs_offset_range0[c]; // -0.95 ... 0.05 V
+                  wf[b][c][i] -= wdb[b]->fVCalib.drs_OFS_range0[c]; // -0.95 ... 0.05 V
 
          // calculate calibrated time for each bin
 
@@ -1550,9 +1557,9 @@ void *wdb_collector(void *param)
 void WDB::SetTCBLink(int ltype, int port)
 {
    //first reset the bits
-   Send("regclr %x %x", REG_TRIGGER_SCHEME_SELECT_OFFSET, (3<<14)>>(port*2));
+   Send("regclr %x %x", WD2_REG_TRIGGER_SCHEME_SELECT_OFS, (3<<14)>>(port*2));
    // then set them
-   Send("regset %x %x", REG_TRIGGER_SCHEME_SELECT_OFFSET, (ltype<<14)>>(port*2));
+   Send("regset %x %x", WD2_REG_TRIGGER_SCHEME_SELECT_OFS, (ltype<<14)>>(port*2));
 }
 
 //THIS FUNCTION SET THE PATTERNS TO A WDB TAKEN FROM ODB (ONE SET FOR THE WHOLE SYSTEM SO FAR)
@@ -1560,16 +1567,16 @@ void WDB::SetPatterns(TRIGGER_SETTINGS *ts,int iwd)
 {
    // first load the pattern enable
    for(int ipatten = 0; ipatten<8; ipatten++)
-      Send("regwr %x %x", 4*ipatten+REG_TRIGGER_PATTERN_EN_BPL0_OFFSET, ts->wdb[iwd].pattern_enable[ipatten]);
+      Send("regwr %x %x", 4*ipatten+WD2_REG_TRIGGER_PATTERN_EN_BPL0_OFS, ts->wdb[iwd].pattern_enable[ipatten]);
    // then load the patterns itself
    for(int ipatt = 0; ipatt<32; ipatt++)
-      Send("regwr %x %x", 4*ipatt+REG_TRIGGER_PATTERN0_OFFSET, ts->wdb[iwd].pattern[ipatt]);
+      Send("regwr %x %x", 4*ipatt+WD2_REG_TRIGGER_PATTERN0_OFS, ts->wdb[iwd].pattern[ipatt]);
 }
 
 // SET THE MASKS FROM ODB (ONE MASK SETTING PER BOARD PER CHANNEL)
 void WDB::SetMasks(TRIGGER_SETTINGS *ts, int iwd)
 {
-   Send("regwr %x %x", REG_TRIGGER_COMP_MASK_OFFSET, ts->wdb[iwd].masks);
+   Send("regwr %x %x", WD2_REG_TRIGGER_COMP_MASK_OFS, ts->wdb[iwd].masks);
 }
 
 #endif // 0
