@@ -46,6 +46,7 @@ int main(int argc, const char * argv[])
       std::cout << "Protocol version:    " << wdb[0]->GetProtocolVersion() << std::endl;
       std::cout << "Serial number:       " << wdb[0]->GetSerialNumber() << std::endl;
       
+      
       std::vector<unsigned long> s;
       do {
          wdb[0]->GetScalers(s);
