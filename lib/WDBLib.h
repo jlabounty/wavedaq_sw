@@ -240,6 +240,8 @@ public:
    // ADC configuration intentionally skipped ...
    
    unsigned int GetTriggerPulseLength();
+   void SetTriggerShaperEnable(bool v);
+   bool IsTriggerShaperEnable();
    void SetTriggerPulseLength(unsigned int v);
    bool IsTriggerEnable();
    void SetTriggerEnable(bool v);
@@ -249,8 +251,8 @@ public:
    void SetTriggerExternalOr(bool v);
    bool IsTriggerExternalAnd();
    void SetTriggerExternalAnd(bool v);
-   bool IsTriggerDelayBypassEnable();
-   void SetTriggerDelayBypassEnable(bool v);
+   bool IsTriggerDelayEnable();
+   void SetTriggerDelayEnable(bool v);
    unsigned int GetTriggerDelay();
    void SetTriggerDelay(unsigned int v);
    unsigned int GetTriggerComparatorMask();

@@ -10,6 +10,7 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <cmath>
 
 #include <sys/socket.h>
 #include <sys/select.h>
@@ -126,9 +127,10 @@ std::string WDB::SendReceive(std::string str, int timeout_ms)
          FD_SET(gCmdSocket, &readfds);
          
          ms = timeout_ms;
+         /*
          if (retry == 0) // first trial times out faster
             ms = 100;
-         
+         */
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
          
@@ -265,15 +267,16 @@ void bitReplace(unsigned int &reg, unsigned int mask, unsigned int ofs, unsigned
 void WDB::ReceiveControlRegisters()
 {
    std::string result;
-   for (int i=0 ; i<=WD2_REG_CRC32_REG_BANK_OFS ; i+=4) {
-      std::ostringstream req;
-      req << "regrd ctrl " << std::hex << i;
-      
-      do {
-         result = SendReceive(req.str());
-      } while (result.size() == 0);
-      
-      this->creg[i/4] = (unsigned int)std::stoul(result.substr(13), nullptr, 16);
+   std::ostringstream req;
+   req << "llrd c3000000 " << WD2_REG_CRC32_REG_BANK_OFS/4+1;
+   
+   result = SendReceive(req.str());
+   std::stringstream ss(result);
+   std::string line;
+   
+   for (auto i=0 ; i<WD2_REG_CRC32_REG_BANK_OFS/4 ; i++) {
+      std::getline(ss, line, '\r');
+      this->creg[i] = (unsigned int)std::stoul(line.substr(14), nullptr, 16);
    }
 }
 
@@ -297,7 +300,7 @@ void WDB::ReceiveStatusRegister(int ofs)
 {
    std::string result;
    std::ostringstream req;
-   req << "regrd stat " << std::hex << ofs;
+   req << "llrd c301" << std::internal << std::setfill('0') << std::hex << std::setw(4) << ofs << " 1";
       
    result = SendReceive(req.str());
    this->sreg[ofs/4] = (unsigned int)std::stoul(result.substr(13), nullptr, 16);
@@ -374,7 +377,9 @@ float WDB::GetTemperature()
 // temperature in deg. C
 {
    ReceiveStatusRegister(WD2_REG_STATUS_OFS);
-   return bitExtract(sreg, WD2_REG_STATUS_OFS, WD2_BIT_TEMPERATURE_MASK, WD2_BIT_TEMPERATURE_OFS) * 0.0625;
+   float temp = bitExtract(sreg, WD2_REG_STATUS_OFS, WD2_BIT_TEMPERATURE_MASK, WD2_BIT_TEMPERATURE_OFS) * 0.0625;
+   temp = std::roundf(temp * 10 + 0.5) / 10.0f;
+   return temp;
 }
 
 bool WDB::IsFlashSelect()
@@ -404,12 +409,12 @@ bool WDB::IsWDBBusy()
 
 bool WDB::IsHvBoardPlugged()
 {
-   return bitExtract(sreg, WD2_REG_STATUS_OFS, WD2_BIT_HV_BOARD_UNPLUGGED_MASK, WD2_BIT_HV_BOARD_UNPLUGGED_OFS) == 0;
+   return bitExtract(sreg, WD2_REG_STATUS_OFS, WD2_BIT_HV_BOARD_PLUGGED_MASK, WD2_BIT_HV_BOARD_PLUGGED_OFS) == 1;
 }
 
 bool WDB::IsBackplanePlugged()
 {
-   return bitExtract(sreg, WD2_REG_STATUS_OFS, WD2_BIT_BACKPLANE_UNPLUGGED_MASK, WD2_BIT_BACKPLANE_UNPLUGGED_OFS) == 0;
+   return bitExtract(sreg, WD2_REG_STATUS_OFS, WD2_BIT_BACKPLANE_PLUGGED_MASK, WD2_BIT_BACKPLANE_PLUGGED_OFS) == 1;
 }
 
 unsigned int WDB::GetExtPllLck()
@@ -605,7 +610,7 @@ void WDB::SetCompPowerEnable(bool value)
 }
 
 unsigned int WDB::GetReadoutSrcSel()
-// 0 = DRS readout / 1 = ADC readout
+// 0x1 = DRS readout / 0x2 = ADC readout / 0x4 = TDC readout
 {
    return bitExtract(creg, WD2_REG_WDB_LOC_OFS, WD2_BIT_READOUT_SRC_SEL_MASK, WD2_BIT_READOUT_SRC_SEL_OFS);
 }
@@ -1179,6 +1184,16 @@ void WDB::SetLMK(int reg, unsigned int v)
    SetRegMask(WD2_REG_LMK_0_OFS+reg*4, 0xFFFFFFFF, 0, v);
 }
 
+bool WDB::IsTriggerShaperEnable()
+{
+   return bitExtract(creg, WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_SHAPER_ENABLE_MASK, WD2_BIT_TRIGGER_SHAPER_ENABLE_OFS);
+}
+
+void WDB::SetTriggerShaperEnable(bool v)
+{
+   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_SHAPER_ENABLE_MASK, WD2_BIT_TRIGGER_SHAPER_ENABLE_OFS, 1);
+}
+
 unsigned int WDB::GetTriggerPulseLength()
 {
    return bitExtract(creg, WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_OUT_PULSE_LENGTH_MASK, WD2_BIT_TRIGGER_OUT_PULSE_LENGTH_OFS);
@@ -1229,14 +1244,14 @@ void WDB::SetTriggerExternalAnd(bool v)
    SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_CFG_EXT_AND_MASK, WD2_BIT_TRIGGER_CFG_EXT_AND_OFS, 1);
 }
 
-bool WDB::IsTriggerDelayBypassEnable()
+bool WDB::IsTriggerDelayEnable()
 {
-   return bitExtract(creg, WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_DELAY_BYPASS_MASK, WD2_BIT_TRIGGER_DELAY_BYPASS_OFS);
+   return bitExtract(creg, WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_DELAY_ENABLE_MASK, WD2_BIT_TRIGGER_DELAY_ENABLE_OFS);
 }
 
-void WDB::SetTriggerDelayBypassEnable(bool v)
+void WDB::SetTriggerDelayEnable(bool v)
 {
-   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_DELAY_BYPASS_MASK, WD2_BIT_TRIGGER_DELAY_BYPASS_OFS, 1);
+   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_DELAY_ENABLE_MASK, WD2_BIT_TRIGGER_DELAY_ENABLE_OFS, 1);
 }
 
 unsigned int WDB::GetTriggerDelay()

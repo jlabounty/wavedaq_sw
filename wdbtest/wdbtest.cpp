@@ -52,6 +52,8 @@ int main(int argc, const char * argv[])
          wdb[0]->GetScalers(s);
          std::cout << "S: " << s[0] << std::endl;
          
+         std::cout << "T: " << wdb[0]->GetTemperature() << std::endl;
+         
          sleep(1000);
       } while (1);
       
