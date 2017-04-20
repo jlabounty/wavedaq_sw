@@ -21,18 +21,6 @@
 #include <assert.h>
 #include <errno.h>
 
-/*
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <stdarg.h>
-#include <exception>
-#include <stdexcept>
-#include <sys/types.h>
-*/
-
 #ifdef __linux__
 #include <linux/sockios.h>
 #include <sys/ioctl.h>
@@ -47,7 +35,10 @@
 #include "WDBLib.h"
 #include "register_map_wd2.h"
 
-#define WD2_CMD_PORT   3000
+#define WD2_CMD_PORT          3000
+
+#define WD2_MEM_OFS_CONTROL   0xc3000000
+#define WD2_MEM_OFS_STATUS    0xc3010000
 
 #pragma pack(1)
 
@@ -105,6 +96,23 @@ std::string WDB::SendReceive(std::string str, int timeout_ms)
    
    // retry max five times
    for (int retry=0 ; retry < 5 ; retry++) {
+
+      // clear input queue
+      do {
+         FD_ZERO(&readfds);
+         FD_SET(gCmdSocket, &readfds);
+         
+         timeout.tv_sec = 0;
+         timeout.tv_usec = 0;
+         do {
+            status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
+         } while (status == -1); // don't return on interrupt
+         
+         if (!FD_ISSET(gCmdSocket, &readfds))
+            break;
+         
+         i = recv(gCmdSocket, rx_buffer, sizeof(rx_buffer), 0);
+      } while (true);
       
       // send request
       i = sendto(gCmdSocket,
@@ -127,10 +135,6 @@ std::string WDB::SendReceive(std::string str, int timeout_ms)
          FD_SET(gCmdSocket, &readfds);
          
          ms = timeout_ms;
-         /*
-         if (retry == 0) // first trial times out faster
-            ms = 100;
-         */
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
          
@@ -160,6 +164,7 @@ std::string WDB::SendReceive(std::string str, int timeout_ms)
          break;
       
       std::cout << mName << " retry " << retry+1 << std::endl;
+      result.clear();
    }
    
    if (result.size() == 0) {
@@ -217,7 +222,7 @@ void WDB::Connect()
       getsockname(gDataSocket, (struct sockaddr *) &server_addr, (socklen_t *) &size);
       gServerPort = ntohs(server_addr.sin_port);
       
-      std::cout << "Listening on data port " << gServerPort << "." << std::endl;
+      std::cout << std::endl << "Listening on data port " << gServerPort << "." << std::endl;
    }
    
    // retrieve Ethernet address of board
@@ -268,15 +273,17 @@ void WDB::ReceiveControlRegisters()
 {
    std::string result;
    std::ostringstream req;
-   req << "llrd c3000000 " << WD2_REG_CRC32_REG_BANK_OFS/4+1;
+   req << "llrd " << std::hex << WD2_MEM_OFS_CONTROL << " " << std::dec << WD2_REG_CRC32_REG_BANK_OFS/4+1;
    
-   result = SendReceive(req.str());
+   result = SendReceive(req.str(), 500);
    std::stringstream ss(result);
    std::string line;
    
    for (auto i=0 ; i<WD2_REG_CRC32_REG_BANK_OFS/4 ; i++) {
       std::getline(ss, line, '\r');
-      this->creg[i] = (unsigned int)std::stoul(line.substr(14), nullptr, 16);
+      auto adr = (unsigned int)std::stoul(line.substr(3), nullptr, 16);
+      if (adr > 0 && adr < WD2_REG_CRC32_REG_BANK_OFS/4)
+         this->creg[adr] = (unsigned int)std::stoul(line.substr(14), nullptr, 16);
    }
 }
 
@@ -284,9 +291,9 @@ void WDB::ReceiveStatusRegisters()
 {
    std::string result;
    std::ostringstream req;
-   req << "llrd c3010000 " << WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4+1;
+   req << "llrd " << std::hex << WD2_MEM_OFS_STATUS << " " << std::dec << WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4+1;
    
-   result = SendReceive(req.str());
+   result = SendReceive(req.str(), 500);
    std::stringstream ss(result);
    std::string line;
    
@@ -300,7 +307,8 @@ void WDB::ReceiveStatusRegister(int ofs)
 {
    std::string result;
    std::ostringstream req;
-   req << "llrd c301" << std::internal << std::setfill('0') << std::hex << std::setw(4) << ofs << " 1";
+   auto adr = WD2_MEM_OFS_STATUS + ofs;
+   req << "llrd " << std::hex << adr << " 1";
       
    result = SendReceive(req.str());
    this->sreg[ofs/4] = (unsigned int)std::stoul(result.substr(13), nullptr, 16);
@@ -488,15 +496,18 @@ void WDB::GetScalers(std::vector<unsigned long> &scaler)
 {
    std::string result;
    std::ostringstream req;
-   req << "llrd c30100" << std::hex << WD2_REG_SCALER_0_LSB_OFS << " 34";
+   auto adr = WD2_MEM_OFS_STATUS + WD2_REG_SCALER_0_LSB_OFS;
+   req << "llrd " << std::hex << adr << " 34";
    
-   result = SendReceive(req.str());
+   result = SendReceive(req.str(), 500); // increased timeout
    std::stringstream ss(result);
    std::string line;
    
    for (auto i=0 ; i<34 ; i++) {
       std::getline(ss, line, '\r');
-      this->sreg[WD2_REG_SCALER_0_LSB_OFS/4+i] = (unsigned int)std::stoul(line.substr(14), nullptr, 16);
+      auto adr = ((unsigned int)std::stoul(line.substr(7), nullptr, 16)) / 4;
+      if (adr >= WD2_REG_SCALER_0_LSB_OFS/4 && adr < WD2_REG_SCALER_EXT_CLK_OFS/4)
+         this->sreg[adr] = (unsigned int)std::stoul(line.substr(14), nullptr, 16);
    }
    
    // channels 0-15 are 64 bit counters
