@@ -728,7 +728,7 @@ int main(int argc, char *argv[])
       prog.state = WD_CS_FIRST_BOARD;
 
       do {
-         double old_prog;
+         double old_prog = 0;
          int old_board;
          
          if (prog.state == WD_CS_FIRST_BOARD || prog.state == WD_CS_FIRST_SAMPLE) {
