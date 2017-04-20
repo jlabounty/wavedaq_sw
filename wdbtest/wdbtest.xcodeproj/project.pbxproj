@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D572D49E1EA8FE38006BB27C /* mongoose.c in Sources */ = {isa = PBXBuildFile; fileRef = D572D49D1EA8FE38006BB27C /* mongoose.c */; };
 		D5AF68561E40E1E900E1BC39 /* WDBLib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5AF68551E40E1E900E1BC39 /* WDBLib.cpp */; };
 		D5AF68581E40E23500E1BC39 /* wdbtest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5AF68571E40E23500E1BC39 /* wdbtest.cpp */; };
 /* End PBXBuildFile section */
@@ -27,6 +28,7 @@
 		D51CB2901E40E14900D2DC06 /* wdbtest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = wdbtest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D54359AB1E9E597100912A50 /* register_map_wd2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = register_map_wd2.h; path = /wavedaq/firmware/WD2/wd2_hardware_test/wd2_xsdk_workspace/wd2_app_cmd_interpreter/src/register_map_wd2.h; sourceTree = "<group>"; };
 		D553D50E1E40E8D200AE1F52 /* WDBLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WDBLib.h; path = /wavedaq/software/lib/WDBLib.h; sourceTree = "<group>"; };
+		D572D49D1EA8FE38006BB27C /* mongoose.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mongoose.c; path = /wavedaq/software/wdbtest/mongoose.c; sourceTree = "<group>"; };
 		D5AF68551E40E1E900E1BC39 /* WDBLib.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WDBLib.cpp; path = /wavedaq/software/lib/WDBLib.cpp; sourceTree = "<group>"; };
 		D5AF68571E40E23500E1BC39 /* wdbtest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = wdbtest.cpp; path = /wavedaq/software/wdbtest/wdbtest.cpp; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -61,6 +63,7 @@
 		D51CB2921E40E14900D2DC06 /* wdbtest */ = {
 			isa = PBXGroup;
 			children = (
+				D572D49D1EA8FE38006BB27C /* mongoose.c */,
 				D54359AB1E9E597100912A50 /* register_map_wd2.h */,
 				D553D50E1E40E8D200AE1F52 /* WDBLib.h */,
 				D5AF68571E40E23500E1BC39 /* wdbtest.cpp */,
@@ -127,6 +130,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D5AF68561E40E1E900E1BC39 /* WDBLib.cpp in Sources */,
+				D572D49E1EA8FE38006BB27C /* mongoose.c in Sources */,
 				D5AF68581E40E23500E1BC39 /* wdbtest.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -224,6 +228,7 @@
 		D51CB2981E40E14900D2DC06 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				HEADER_SEARCH_PATHS = (
 					/wavedaq/software/lib/,
 					/wavedaq/firmware/WD2/wd2_hardware_test/wd2_xsdk_workspace/wd2_app_cmd_interpreter/src/,
@@ -235,6 +240,7 @@
 		D51CB2991E40E14900D2DC06 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				HEADER_SEARCH_PATHS = (
 					/wavedaq/software/lib/,
 					/wavedaq/firmware/WD2/wd2_hardware_test/wd2_xsdk_workspace/wd2_app_cmd_interpreter/src/,

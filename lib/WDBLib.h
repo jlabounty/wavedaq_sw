@@ -110,7 +110,7 @@ public:
    std::string GetHwVersion();
    unsigned int GetProtocolVersion();
    unsigned int GetSerialNumber();
-   float GetTemperature();
+   float GetTemperature(bool refresh = true);
    bool IsFlashSelect();
    bool IsBoardSelect();
    bool IsSerialBusy();

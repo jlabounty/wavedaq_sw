@@ -392,10 +392,14 @@ unsigned int WDB::GetSerialNumber()
    return bitExtract(sreg, WD2_REG_SN_OFS, WD2_BIT_SERIAL_NUMBER_MASK, WD2_BIT_SERIAL_NUMBER_OFS);
 }
 
-float WDB::GetTemperature()
+float WDB::GetTemperature(bool refresh)
 // temperature in deg. C
 {
-   ReceiveStatusRegister(WD2_REG_STATUS_OFS);
+   if (mDemoMode)
+      return 37.5;
+   
+   if (refresh)
+      ReceiveStatusRegister(WD2_REG_STATUS_OFS);
    float temp = bitExtract(sreg, WD2_REG_STATUS_OFS, WD2_BIT_TEMPERATURE_MASK, WD2_BIT_TEMPERATURE_OFS) * 0.0625;
    temp = std::roundf(temp * 10 + 0.5) / 10.0f;
    return temp;

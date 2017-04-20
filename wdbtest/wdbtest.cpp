@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "WDBLib.h"
+#include "mongoose.h"
 
 /*-- Globals -------------------------------------------------------*/
 
@@ -24,6 +25,56 @@ typedef struct {
    bool verbose;
    std::vector<WDB*> wdb;
 } GLOBALS;
+
+/*------------------------------------------------------------------*/
+
+static struct mg_serve_http_opts s_http_server_opts;
+
+// This function will be called by mongoose on every new request
+static void wds_handler(struct mg_connection *nc, int event, void *p)
+{
+   struct http_message *hm = (struct http_message *)p;
+   
+   GLOBALS *gl = (GLOBALS *)nc->mgr->user_data;
+
+   if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->method, "PUT") == 0) {
+   }
+   
+   // gloabls
+   if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/gl") == 0) {
+      if (gl->verbose)
+         std::cout<< "Load /gl" << std::endl;
+      
+      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+      
+      mg_printf_http_chunk(nc, "{\n");
+      mg_printf_http_chunk(nc, "   \"demo_flag\": %s,\n",          gl->demoMode ? "true" : "false");
+      
+      mg_printf_http_chunk(nc, "   \"board\": [\n");
+      
+      for (auto &b: gl->wdb) {
+         mg_printf_http_chunk(nc, "      {\n");
+         mg_printf_http_chunk(nc, "         \"name\": \"%s\"\n",         b->getName().c_str());
+         mg_printf_http_chunk(nc, "      }");
+         if (b != gl->wdb.back())
+            mg_printf_http_chunk(nc, ",");
+         mg_printf_http_chunk(nc, "\n");
+      }
+      
+      mg_printf_http_chunk(nc, "   ]\n");
+
+      mg_printf_http_chunk(nc, "}\n");
+
+      mg_send_http_chunk(nc, "", 0); // end of response
+      return;
+   }
+   
+   // file serving
+   if (event == MG_EV_HTTP_REQUEST) {
+      mg_serve_http(nc, hm, s_http_server_opts);
+   }
+
+}
 
 /*------------------------------------------------------------------*/
 
@@ -44,6 +95,9 @@ void showUsage(std::string name)
 int main(int argc, const char * argv[])
 {
    GLOBALS gl;
+   
+   // default values
+   gl.serverPort = 8080;
    
    // parse command line parameters
    if (argc < 2) {
@@ -117,7 +171,7 @@ int main(int argc, const char * argv[])
    }
    
    for (auto &b: gl.wdb) {
-      std::cout << "Connect to " << b->getName() << " ..." << std::flush;
+      std::cout << "Connect to " << b->getName() << " ... " << std::flush;
       try {
          if (!gl.demoMode) {
             b->SetDebug(gl.verbose);
@@ -133,8 +187,10 @@ int main(int argc, const char * argv[])
          std::cout << "Aborting." << std::endl;
          return 1;
       }
+      std::cout << " OK" << std::endl;
    }
 
+   /*
    try {
       std::vector<unsigned long> s;
       do {
@@ -152,6 +208,60 @@ int main(int argc, const char * argv[])
       std::cout << "Aborting." << std::endl;
       return 1;
    }
+   */
+   
+   // initialize web server
+   struct mg_mgr mgr;
+   struct mg_connection *con;
+   
+   mg_mgr_init(&mgr, &gl);
+   con = mg_bind(&mgr, std::to_string(gl.serverPort).c_str(), wds_handler);
+   if (con == NULL) {
+      std::cerr << "Cannot bind to port " << gl.serverPort << ". Probably other server is already running." << std::endl;
+      return 1;
+   }
+   mg_set_protocol_http_websocket(con);
+   s_http_server_opts.document_root = ".";  // Serve current directory
+   s_http_server_opts.dav_auth_file = "-";  // Allow access via WebDav
+   s_http_server_opts.enable_directory_listing = "yes";
+   
+   std::cout << "Starting HTTP server at port " << gl.serverPort << std::endl;
+   
+   if (gl.demoMode)
+      std::cout << "Starting in DEMO mode." << std::endl;
+   
+   time_t last = 0, now;
+   for (;;) {
+      /*
+      // do calibration if asked for
+      if (vcalib_prog.state != WD_CS_INACTIVE) {
+         wd_calibrate_voltage(&gl, &vcalib_prog);
+         
+         // Yield to server, no timeout
+         mg_mgr_poll(&mgr, 0);
+      } else if (tcalib_prog.state != WD_CS_INACTIVE) {
+         wd_calibrate_time(&gl, &tcalib_prog);
+         
+         // Yield to server, no timeout
+         mg_mgr_poll(&mgr, 0);
+      } else
+         // Yield to server, 10ms timeout
+         mg_mgr_poll(&mgr, 10);
+      */
+
+      // Yield to server, 10ms timeout
+      mg_mgr_poll(&mgr, 10);
+
+      // read board temperatures periodically
+      time(&now);
+      if (now > last + 10) {
+         for (auto &b: gl.wdb)
+            b->GetTemperature(true);
+         last = now;
+      }
+   }
+   
+   // mg_mgr_free(&mgr);
    
    return 0;
 }
