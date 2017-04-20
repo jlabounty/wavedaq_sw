@@ -71,6 +71,8 @@ public:
 class WDB {
    std::string      mName;
    unsigned char    mEthAddr[16];
+   bool             mDebug;
+   bool             mDemoMode;
 
    unsigned int     creg[WD2_REG_CRC32_REG_BANK_OFS/4+1];
    unsigned int     sreg[WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4+1];
@@ -85,19 +87,23 @@ class WDB {
 public:
    
    // constructor
-   WDB(std::string name) {
+   WDB(std::string name, bool debug = false) {
       mName = name;
+      mDebug = debug;
+      mDemoMode = (name == "demo");
    }
 
    // setter & getter
    std::string getName() { return mName; }
    
    // interface functions
+   void SetDebug(bool debug) { mDebug = debug; }
    void Connect();
    void ReceiveControlRegisters();
    void ReceiveStatusRegisters();
    void ReceiveStatusRegister(int ofs);
    void SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v);
+   void PrintVersion();
 
    // status registers
    std::string GetFwBuild();

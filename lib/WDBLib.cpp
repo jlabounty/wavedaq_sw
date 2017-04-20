@@ -123,7 +123,8 @@ std::string WDB::SendReceive(std::string str, int timeout_ms)
                  sizeof(client_addr));
       
       if (i != str.size()) {
-         std::cout << mName << " send retry " << retry+1;
+         if (this->mDebug)
+            std::cout << mName << " send retry " << retry+1 << std::endl;
          continue;
       }
       
@@ -163,7 +164,8 @@ std::string WDB::SendReceive(std::string str, int timeout_ms)
       if (result.size() >= prompt.size() && result.substr(result.size()-prompt.size()) == prompt)
          break;
       
-      std::cout << mName << " retry " << retry+1 << std::endl;
+      if (this->mDebug)
+         std::cout << mName << " retry " << retry+1 << std::endl;
       result.clear();
    }
    
@@ -222,7 +224,8 @@ void WDB::Connect()
       getsockname(gDataSocket, (struct sockaddr *) &server_addr, (socklen_t *) &size);
       gServerPort = ntohs(server_addr.sin_port);
       
-      std::cout << std::endl << "Listening on data port " << gServerPort << "." << std::endl;
+      if (this->mDebug)
+         std::cout << std::endl << "Listening on data port " << gServerPort << "." << std::endl;
    }
    
    // retrieve Ethernet address of board
@@ -329,6 +332,14 @@ void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, uns
 }
 
 //-- Status registers ------------------------------------------------
+
+void WDB::PrintVersion()
+{
+   std::cout << GetFwBuild() << std::endl;
+   std::cout << GetHwVersion() << std::endl;
+   std::cout << "Protocol version:    " << GetProtocolVersion() << std::endl;
+   std::cout << "Serial number:       " << GetSerialNumber() << std::endl;
+}
 
 std::string WDB::GetFwBuild()
 {
@@ -1431,128 +1442,11 @@ unsigned int WDB::GetCrc32RegBank()
    }
    
    close(fh);
+
     */
-
 /*-----------------------------------------------------------------------------------------*/
 
-#if 0
-int WDB::SendReceive(const char *str, char *result, int *size, int timeout_ms)
-{
-   size_t n, i;
-   fd_set readfds;
-   struct timeval timeout;
-   int    status, ms;
-   struct sockaddr_in client_addr;
-   char   tx_buffer[1600], rx_buffer[1600], prompt[80];
-
-   memcpy(&client_addr, fEthAddr, sizeof(client_addr));
-   strlcpy(tx_buffer, str, sizeof(tx_buffer));
-   if (tx_buffer[strlen(tx_buffer)-1] != '\n')
-      strlcat(tx_buffer, "\n", sizeof(tx_buffer));
-
-   if (result != NULL)
-      memset(result, 0, *size);
-   n = 0;
-
-   // assemble prompt
-   strlcpy(prompt, fName, sizeof(prompt));
-   strlcat(prompt, " > ", sizeof(prompt));
-   
-   // retry max five times
-   for (int retry=0 ; retry < 5 ; retry++) {
-      
-      // send request
-      i = sendto(fCmdSocket,
-                 tx_buffer,
-                 strlen(tx_buffer),
-                 0,
-                 (struct sockaddr *)&client_addr,
-                 sizeof(client_addr));
-      
-      if (i != strlen(tx_buffer)) {
-         printf("%s send retry %d\n", fName, retry+1);
-         continue;
-      }
-      
-      // retrieve reply until prompt is found
-      n = 0;
-      do {
-         memset(rx_buffer, 0, sizeof(rx_buffer));
-         
-         FD_ZERO(&readfds);
-         FD_SET(fCmdSocket, &readfds);
-         
-         ms = timeout_ms;
-         if (retry == 0) // first trial times out faster
-            ms = 100;
-         
-         timeout.tv_sec = ms / 1000;
-         timeout.tv_usec = (ms % 1000) * 1000;
-         
-         do {
-            status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
-         } while (status == -1);        /* dont return if an alarm signal was cought */
-         
-         if (!FD_ISSET(fCmdSocket, &readfds))
-            break;
-         
-         i = recv(fCmdSocket, rx_buffer, sizeof(rx_buffer), 0);
-         assert(i > 0);
-         
-         if (rx_buffer[i-1] == 0) // don't count trailing zero
-            i--;
-         
-         if (result != NULL)
-            memcpy(result+n, rx_buffer, i);
-         n += i;
-         
-         // check for prompt
-         if (strcmp(rx_buffer+strlen(rx_buffer)-strlen(prompt), prompt) == 0)
-            break;
-         
-      } while (1);
-      
-      // check for prompt
-      if (strcmp(rx_buffer+strlen(rx_buffer)-strlen(prompt), prompt) == 0)
-         break;
-      
-      printf("%s retry %d\n", fName, retry+1);
-   }
-
-   if (n == 0) {
-      if (size != NULL)
-         *size = 0;
-      throw std::runtime_error(std::string("Error sending \"")+str+"\" to "+fName);
-      return -1;
-   }
-
-   // chop off prompt
-   if (result != NULL)
-      result[strlen(result)-strlen(prompt)] = 0;
-   n -= strlen(prompt);
-          
-   if (size != NULL)
-      *size = (int)n;
-   
-   return SUCCESS;
-}
-
-/*-----------------------------------------------------------------------------------------*/
-
-int WDB::Send(const char *format, ...)
-{
-   char str[1000];
-   
-   va_list argptr;
-   va_start(argptr, format);
-   vsprintf(str, format, argptr);
-   va_end(argptr);
-   
-   return WDB::SendReceive(str);
-}
-
-/*-----------------------------------------------------------------------------------------*/
-
+/*
 int WDB::Init(TRIGGER_SETTINGS *ts, int iwd)
 {
    struct sockaddr_in server_addr;
@@ -1593,7 +1487,8 @@ int WDB::Init(TRIGGER_SETTINGS *ts, int iwd)
       getsockname(fDataSocket, (struct sockaddr *) &server_addr, (socklen_t *) &size);
       fServerPort = ntohs(server_addr.sin_port);
       
-      printf("Listening on data port %d\n", fServerPort);
+      if (this.mDebug)
+         std::cout << "Listening on data port " << fServerPort << std::endl;
    }
    
    // retrieve Ethernet address of board
@@ -1688,7 +1583,6 @@ int WDB::Init(TRIGGER_SETTINGS *ts, int iwd)
    return SUCCESS;
 }
 
-/*-----------------------------------------------------------------------------------------*/
 
 void WDB::SetTriggerLevel(int *tl)
 {
@@ -1698,7 +1592,6 @@ void WDB::SetTriggerLevel(int *tl)
    fTriggerLevel[3] = tl[3];
 }
 
-/*-----------------------------------------------------------------------------------------*/
 
 void WDB::ConfigureBoard(int iwd)
 {
@@ -1790,14 +1683,12 @@ void WDB::ConfigureBoard(int iwd)
    Send("ledset g");
 }
 
-/*-----------------------------------------------------------------------------------------*/
 
 int WDB::StartDRS()
 {
    return Send("drsstart");
 }
 
-/*-----------------------------------------------------------------------------------------*/
 
 #define Sleep(x) usleep(x*1000)
 
@@ -1808,7 +1699,6 @@ double time_ms()
    return tv.tv_sec*1000 + tv.tv_usec/1000.0;
 }
 
-/*-----------------------------------------------------------------------------------------*/
 
 namespace {
   // waveform buffer for one event
@@ -1823,7 +1713,6 @@ namespace {
 
 void *wdb_collector(void *param);
 
-/*-----------------------------------------------------------------------------------------*/
 
 int wdb_start_collector(WDB *wdb[], int nWdb)
 {
@@ -1834,8 +1723,6 @@ int wdb_start_collector(WDB *wdb[], int nWdb)
    status = pthread_create(&thread_id, NULL, wdb_collector, (void *)wdb);
    return status;
 }
-
-/*-----------------------------------------------------------------------------------------*/
 
 int wdb_read_waveform(float *pwf, int *ptc, float *pwft)
 {
@@ -1857,8 +1744,6 @@ int wdb_read_waveform(float *pwf, int *ptc, float *pwft)
    new_event = 0;
    return 1;
 }
-
-/*-----------------------------------------------------------------------------------------*/
 
 void *wdb_collector(void *param)
 {
@@ -1921,7 +1806,6 @@ void *wdb_collector(void *param)
             ph->trigger_type             = SWAP_UINT16(ph->trigger_type);
             ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
 
-            /*
             printf("%5d, From %s, Board %2d, Frame %5d, ADC/Chn/Segment %d/%d/%d\n",
                    np,
                    inet_ntoa(remote_addr.sin_addr),
@@ -1930,7 +1814,6 @@ void *wdb_collector(void *param)
                    header_adc,
                    header_channel,
                    ph->channel_segment_number);
-            */
             
             if (current_frame == -1)
                current_frame = ph->readout_sequence_number;
@@ -2120,4 +2003,4 @@ void WDB::SetMasks(TRIGGER_SETTINGS *ts, int iwd)
    Send("regwr %x %x", WD2_REG_TRIGGER_COMP_MASK_OFS, ts->wdb[iwd].masks);
 }
 
-#endif // 0
+*/
