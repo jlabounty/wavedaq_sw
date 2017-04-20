@@ -67,7 +67,7 @@ union { unsigned int i ; float f; } _nanf = { 0x7fc00000 };
 
 #pragma pack(1)
 
-#define UDP_PROTOCOL_VERSION 3
+#define UDP_PROTOCOL_VERSION 4
 
 typedef struct {
    unsigned char  protocol_version;
@@ -79,7 +79,7 @@ typedef struct {
    unsigned char  channel_segment_number;
    unsigned int   event_number;
    unsigned short sampling_frequency;
-   unsigned short number_of_samples;
+   unsigned short payload_length;
    unsigned short trigger_number;
    unsigned short drs0_trigger_cell;
    unsigned short drs1_trigger_cell;
@@ -1075,7 +1075,7 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
             header_channel               = (ph->adc_and_channel_info) & 0x0f;
             ph->event_number             = SWAP_UINT32(ph->event_number);
             ph->sampling_frequency       = SWAP_UINT16(ph->sampling_frequency);
-            ph->number_of_samples        = SWAP_UINT16(ph->number_of_samples);
+            ph->payload_length        = SWAP_UINT16(ph->payload_length);
             ph->trigger_number           = SWAP_UINT16(ph->trigger_number);
             ph->drs0_trigger_cell        = SWAP_UINT16(ph->drs0_trigger_cell);
             ph->drs1_trigger_cell        = SWAP_UINT16(ph->drs1_trigger_cell);
@@ -1084,8 +1084,8 @@ int wd_read_waveform(GLOBALS *gl, int b, int millisec, WD2_EVENT *pe, float wfU[
             ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
            
             // check packet length
-            if (n != sizeof(WD2_FRAME_HEADER) + ph->number_of_samples * 1.5) {
-               printf("Wrong UDP packet size %d, expected %d.\n", n, (int)sizeof(WD2_FRAME_HEADER) + (int)(ph->number_of_samples * 1.5));
+            if (n != sizeof(WD2_FRAME_HEADER) + ph->payload_length) {
+               printf("Wrong UDP packet size %d Bytes, expected %d Bytes.\n", n, (int)sizeof(WD2_FRAME_HEADER) + (int)(ph->payload_length));
                continue;
             }
             
