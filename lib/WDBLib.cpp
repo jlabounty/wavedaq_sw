@@ -274,6 +274,12 @@ void bitReplace(unsigned int &reg, unsigned int mask, unsigned int ofs, unsigned
 
 void WDB::ReceiveControlRegisters()
 {
+   if (mDemoMode) {
+      for (auto i=0 ; i<WD2_REG_CRC32_REG_BANK_OFS/4 ; i++)
+         this->creg[i] = 0;
+      return;
+   }
+
    std::string result;
    std::ostringstream req;
    req << "llrd " << std::hex << WD2_MEM_OFS_CONTROL << " " << std::dec << WD2_REG_CRC32_REG_BANK_OFS/4+1;
@@ -292,6 +298,11 @@ void WDB::ReceiveControlRegisters()
 
 void WDB::ReceiveStatusRegisters()
 {
+   if (mDemoMode) {
+      for (auto i=0 ; i<WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4 ; i++)
+         this->sreg[i] = 0;
+      return;
+   }
    std::string result;
    std::ostringstream req;
    req << "llrd " << std::hex << WD2_MEM_OFS_STATUS << " " << std::dec << WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4+1;
@@ -308,6 +319,10 @@ void WDB::ReceiveStatusRegisters()
 
 void WDB::ReceiveStatusRegister(int ofs)
 {
+   if (mDemoMode) {
+      this->sreg[ofs/4] = 0;
+      return;
+   }
    std::string result;
    std::ostringstream req;
    auto adr = WD2_MEM_OFS_STATUS + ofs;
@@ -319,6 +334,9 @@ void WDB::ReceiveStatusRegister(int ofs)
 
 void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v)
 {
+   if (mDemoMode)
+      return;
+   
    unsigned int r = this->creg[rofs/4];
    
    bitReplace(r, mask, ofs, v);
@@ -669,7 +687,7 @@ void WDB::SetDRSWaveContinous(bool value)
 }
 
 void WDB::TrgDRSConfigure()
-// tirggers a DRS chip register configuration
+// triggers a DRS chip register configuration
 {
    SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_DRS_CONFIGURE_MASK, WD2_BIT_DRS_CONFIGURE_OFS, 1);
 }
@@ -742,7 +760,7 @@ void WDB::SetTimingCalibBufferEnable(bool value)
 }
 
 bool WDB::IsTimingCalibSignalEnable()
-// enable (power) buffers driving the timing calibration signal to the frontend MUX
+// switch on/off the 100 MHz calibration signal for the DRS chips
 {
    return bitExtract(creg, WD2_REG_WDB_LOC_OFS, WD2_BIT_TIMING_CALIB_SIGNAL_EN_MASK, WD2_BIT_TIMING_CALIB_SIGNAL_EN_OFS) == 1;
 }
@@ -849,7 +867,7 @@ void WDB::SetDataDestination(unsigned int value)
 }
 
 unsigned int WDB::GetDCBSerdesTrain()
-// enable training pattero for DCB serdes connection
+// enable training pattern for DCB serdes connection
 {
    return bitExtract(creg, WD2_REG_COM_CTRL_OFS, WD2_BIT_DCB_SERDES_TRAIN_MASK, WD2_BIT_DCB_SERDES_TRAIN_OFS);
 }
@@ -860,7 +878,7 @@ void WDB::SetDCBSerdesTrain(unsigned int value)
 }
 
 unsigned int WDB::GetTCBSerdesTrain()
-// enable training pattero for TCB serdes connection
+// enable training pattern for TCB serdes connection
 {
    return bitExtract(creg, WD2_REG_COM_CTRL_OFS, WD2_BIT_TCB_SERDES_TRAIN_MASK, WD2_BIT_TCB_SERDES_TRAIN_OFS);
 }
@@ -1065,23 +1083,23 @@ void WDB::SetDacTlevel(int chn, float v)
       SetRegMask(WD2_REG_DAC1_A_B_OFS+(chn/2)*4, WD2_BIT_DAC1_CH_B_MASK, WD2_BIT_DAC1_CH_B_OFS, d);
 }
 
-unsigned int WDB::GetFEPZC(int chn)
+bool WDB::IsFEPZC(int chn)
 // pole-zero canellation
 {
    assert(chn < 16);
    auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
    auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_PZC_EN_MASK : WD2_BIT_FE1_PZC_EN_MASK;
    auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_PZC_EN_OFS  : WD2_BIT_FE1_PZC_EN_OFS;
-   return bitExtract(creg, rofs, mask, ofs);
+   return bitExtract(creg, rofs, mask, ofs) > 0;
 }
 
-void WDB::SetFEPZC(int chn, unsigned int v)
+void WDB::SetFEPZC(int chn, bool v)
 {
    assert(chn < 16);
    auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
    auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_PZC_EN_MASK : WD2_BIT_FE1_PZC_EN_MASK;
    auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_PZC_EN_OFS  : WD2_BIT_FE1_PZC_EN_OFS;
-   SetRegMask(rofs, mask, ofs, v);
+   SetRegMask(rofs, mask, ofs, v ? 1 : 0);
 }
 
 unsigned int WDB::GetFEAmp2Comp(int chn)
@@ -1177,6 +1195,18 @@ void WDB::SetFEAttenuation(int chn, unsigned int v)
    auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_ATTENUATION_MASK : WD2_BIT_FE1_ATTENUATION_MASK;
    auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_ATTENUATION_OFS  : WD2_BIT_FE1_ATTENUATION_OFS;
    SetRegMask(rofs, mask, ofs, v);
+}
+
+float WDB::GetFEGain(int chn)
+{
+   // TDB
+   return mFEGain;
+}
+
+void WDB::SetFEGain(int chn, float g)
+{
+   // TDB
+   mFEGain = g;
 }
 
 unsigned int WDB::GetFEMux(int chn)

@@ -68,6 +68,36 @@ public:
 
 //--------------------------------------------------------------------
 
+// waveform processor (waveform decoding, calibration, saving, ...
+class WP {
+   bool             mDebug;
+   bool             mDemoMode;
+  
+   bool             mRotateWaveform;
+   bool             mOfsCalib1;
+   bool             mOfsCalib2;
+   bool             mGainCalib;
+   bool             mTimeCalib1;
+   bool             mTimeCalib2;
+   bool             mTimeCalib3;
+   bool             mRemoveSpikes;
+   
+public:
+   
+   // constructor
+   WP(bool debug = false, bool demo = false) {
+      mDebug = debug;
+      mDemoMode = demo;
+   }
+   
+   // setter & getter
+   bool IsDemoMode() { return mDemoMode; }
+   
+};
+
+//--------------------------------------------------------------------
+
+// WaveDREAM board class. Interface functions to all WDB registers
 class WDB {
    std::string      mName;
    unsigned char    mEthAddr[16];
@@ -83,6 +113,8 @@ class WDB {
 
    std::string      SendReceive(std::string str, int timeout_ms = 100);
    void             Send(std::string str, int timeout_ms = 100);
+   
+   float            mFEGain;
 
 public:
    
@@ -225,8 +257,8 @@ public:
    float GetDacTlevel(int chn);
    void SetDacTlevel(int chn, float v);
 
-   unsigned int GetFEPZC(int chn);
-   void SetFEPZC(int chn, unsigned int v);
+   bool IsFEPZC(int chn);
+   void SetFEPZC(int chn, bool v);
    unsigned int GetFEAmp2Comp(int chn);
    void SetFEAmp2Comp(int chn, unsigned int v);
    unsigned int GetFEAmp2Enable(int chn);
@@ -239,6 +271,9 @@ public:
    void SetFEAttenuation(int chn, unsigned int v);
    unsigned int GetFEMux(int chn);
    void SetFEMux(int chn, unsigned int v);
+
+   float GetFEGain(int chn);
+   void SetFEGain(int chn, float v);
 
    unsigned int GetLMK(int reg);
    void SetLMK(int reg, unsigned int v);
