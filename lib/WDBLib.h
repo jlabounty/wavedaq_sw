@@ -70,7 +70,10 @@ public:
 
 // waveform processor (waveform decoding, calibration, saving, ...
 class WP {
-   bool             mDebug;
+   static int       gDataSocket;
+   static int       gServerPort;
+
+   bool             mVerbose;
    bool             mDemoMode;
   
    bool             mRotateWaveform;
@@ -85,13 +88,11 @@ class WP {
 public:
    
    // constructor
-   WP(bool debug = false, bool demo = false) {
-      mDebug = debug;
-      mDemoMode = demo;
-   }
+   WP(bool verbose = false, bool demo = false);
    
    // setter & getter
    bool IsDemoMode() { return mDemoMode; }
+   int GetServerPort() { return gServerPort; }
    
 };
 
@@ -101,14 +102,12 @@ public:
 class WDB {
    std::string      mName;
    unsigned char    mEthAddr[16];
-   bool             mDebug;
+   bool             mVerbose;
    bool             mDemoMode;
 
    unsigned int     creg[WD2_REG_CRC32_REG_BANK_OFS/4+1];
    unsigned int     sreg[WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4+1];
    
-   static int       gServerPort;
-   static int       gDataSocket;
    static int       gCmdSocket;
 
    std::string      SendReceive(std::string str, int timeout_ms = 100);
@@ -119,9 +118,9 @@ class WDB {
 public:
    
    // constructor
-   WDB(std::string name, bool debug = false) {
+   WDB(std::string name, bool verbose = false) {
       mName = name;
-      mDebug = debug;
+      mVerbose = verbose;
       mDemoMode = (name == "demo");
    }
 
@@ -129,8 +128,8 @@ public:
    std::string getName() { return mName; }
    
    // interface functions
-   void SetDebug(bool debug) { mDebug = debug; }
-   void Connect();
+   void SetVerbose(bool verbose) { mVerbose = verbose; }
+   void Connect(int port);
    void ReceiveControlRegisters();
    void ReceiveStatusRegisters();
    void ReceiveStatusRegister(int ofs);

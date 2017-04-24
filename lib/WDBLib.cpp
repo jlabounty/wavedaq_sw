@@ -37,7 +37,8 @@
 
 #define WD2_CMD_PORT          3000
 
-#define WD2_MEM_OFS_REG       0xc3000000
+#define WD2_MEM_OFS_CTRL_REG  0x00000000
+#define WD2_MEM_OFS_STAT_REG  0x00001000
 
 #pragma pack(1)
 
@@ -59,9 +60,9 @@ typedef struct {
    unsigned short packet_sequence_number;
 } WD2_FRAME_HEADER;
 
-int WDB::gDataSocket = 0;
-int WDB::gServerPort = 0;
-int WDB::gCmdSocket  = 0;
+int WP::gDataSocket = 0;
+int WP::gServerPort = 0;
+int WDB::gCmdSocket = 0;
 
 //--------------------------------------------------------------------
 
@@ -122,7 +123,7 @@ std::string WDB::SendReceive(std::string str, int timeout_ms)
                  sizeof(client_addr));
       
       if (i != str.size()) {
-         if (this->mDebug)
+         if (this->mVerbose)
             std::cout << mName << " send retry " << retry+1 << std::endl;
          continue;
       }
@@ -163,7 +164,7 @@ std::string WDB::SendReceive(std::string str, int timeout_ms)
       if (result.size() >= prompt.size() && result.substr(result.size()-prompt.size()) == prompt)
          break;
       
-      if (this->mDebug)
+      if (this->mVerbose)
          std::cout << mName << " retry " << retry+1 << std::endl;
       result.clear();
    }
@@ -184,9 +185,8 @@ std::string WDB::SendReceive(std::string str, int timeout_ms)
 
 //--------------------------------------------------------------------
 
-void WDB::Connect()
+void WDB::Connect(int port)
 {
-   struct sockaddr_in server_addr;
    struct sockaddr_in client_addr;
    struct hostent *phe;
    
@@ -204,28 +204,6 @@ void WDB::Connect()
    if (gCmdSocket == 0)
       gCmdSocket = socket(AF_INET, SOCK_DGRAM, 0);
    assert(gCmdSocket);
-   
-   // create UDB socket to receive binary data on port WD2_DATA_PORT
-   if (gDataSocket == 0) {
-      gDataSocket = socket(AF_INET, SOCK_DGRAM, 0);
-      assert(gDataSocket);
-      
-      // bind socket to port chosen by OS
-      memset((char*)&server_addr, 0, sizeof(server_addr));
-      server_addr.sin_family = AF_INET;
-      server_addr.sin_port = htons(0); // let OS choose port
-      server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-      if (::bind(gDataSocket, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
-         perror("bind");
-         throw std::runtime_error(std::string("Cannot bind socket"));
-      }
-      auto size = sizeof(server_addr);
-      getsockname(gDataSocket, (struct sockaddr *) &server_addr, (socklen_t *) &size);
-      gServerPort = ntohs(server_addr.sin_port);
-      
-      if (this->mDebug)
-         std::cout << std::endl << "Listening on data port " << gServerPort << "." << std::endl;
-   }
    
    // retrieve Ethernet address of board
    phe = gethostbyname(mName.c_str());
@@ -248,17 +226,18 @@ void WDB::Connect()
    Send("dbglvl none");
    
    // set destinantion port in WD board
-   Send(std::string("setenv dstport ")+std::to_string(gServerPort));
+   Send(std::string("setenv dstport ")+std::to_string(port));
    
    // set MAC address and IP address of this computer in WD board
    Send("cfgdst");
+
 }
 
 //--------------------------------------------------------------------
 
 unsigned int bitExtract(unsigned int reg[], unsigned int rofs, unsigned int mask, unsigned int ofs)
 {
-   return (reg[rofs/4] & mask) >> ofs;
+   return (reg[(rofs & 0x0FFF)/4] & mask) >> ofs;
 }
 
 void bitReplace(unsigned int &reg, unsigned int mask, unsigned int ofs, unsigned int value)
@@ -281,7 +260,7 @@ void WDB::ReceiveControlRegisters()
 
    std::string result;
    std::ostringstream req;
-   req << "llrd 0x" << std::hex << WD2_MEM_OFS_REG << " " << std::dec << WD2_REG_CRC32_REG_BANK_OFS/4+1;
+   req << "rr 0x" << std::hex << WD2_MEM_OFS_CTRL_REG << " " << std::dec << WD2_REG_CRC32_REG_BANK_OFS/4+1;
    
    result = SendReceive(req.str(), 500);
    std::stringstream ss(result);
@@ -289,9 +268,9 @@ void WDB::ReceiveControlRegisters()
    
    for (auto i=0 ; i<WD2_REG_CRC32_REG_BANK_OFS/4 ; i++) {
       std::getline(ss, line, '\r');
-      auto adr = (unsigned int)std::stoul(line.substr(3), nullptr, 16) - WD2_MEM_OFS_REG;
+      auto adr = (unsigned int)std::stoul(line.substr(3), nullptr, 16) - WD2_MEM_OFS_CTRL_REG;
       if (adr <= WD2_REG_CRC32_REG_BANK_OFS)
-         this->creg[adr/4] = (unsigned int)std::stoul(line.substr(14), nullptr, 16);
+         this->creg[adr/4] = (unsigned int)std::stoul(line.substr(10), nullptr, 16);
    }
 }
 
@@ -304,7 +283,7 @@ void WDB::ReceiveStatusRegisters()
    }
    std::string result;
    std::ostringstream req;
-   req << "llrd 0x" << std::hex << WD2_MEM_OFS_REG << " " << std::dec << WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4+1;
+   req << "rr 0x" << std::hex << WD2_MEM_OFS_STAT_REG << " " << std::dec << WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4+1;
    
    result = SendReceive(req.str(), 500);
    std::stringstream ss(result);
@@ -312,20 +291,24 @@ void WDB::ReceiveStatusRegisters()
    
    for (auto i=0 ; i<WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4 ; i++) {
       std::getline(ss, line, '\r');
-      this->sreg[i] = (unsigned int)std::stoul(line.substr(14), nullptr, 16);
+      auto adr = (unsigned int)std::stoul(line.substr(3), nullptr, 16) - WD2_MEM_OFS_STAT_REG;
+      if (adr <= WD2_REG_ADC_01_CLK_MOD_FLAG_OFS)
+         this->sreg[adr/4] = (unsigned int)std::stoul(line.substr(10), nullptr, 16);
    }
 }
 
 void WDB::ReceiveStatusRegister(int ofs)
 {
+   ofs = (ofs & 0x0FFF);
+   
    if (mDemoMode) {
       this->sreg[ofs/4] = 0;
       return;
    }
    std::string result;
    std::ostringstream req;
-   auto adr = WD2_MEM_OFS_REG + ofs;
-   req << "llrd 0x" << std::hex << adr << " 1";
+   auto adr = WD2_MEM_OFS_STAT_REG + ofs;
+   req << "rr 0x" << std::hex << adr << " 1";
       
    result = SendReceive(req.str());
    this->sreg[ofs/4] = (unsigned int)std::stoul(result.substr(13), nullptr, 16);
@@ -336,12 +319,14 @@ void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, uns
    if (mDemoMode)
       return;
    
+   rofs = (rofs & 0x0FFF);
+   
    unsigned int r = this->creg[rofs/4];
    
    bitReplace(r, mask, ofs, v);
    
    std::ostringstream req;
-   req << "llwr 0x" << std::hex << WD2_MEM_OFS_REG+rofs << " " << r;
+   req << "wr 0x" << std::hex << WD2_MEM_OFS_CTRL_REG+rofs << " " << r;
    
    Send(req.str());
    
@@ -528,8 +513,8 @@ void WDB::GetScalers(std::vector<unsigned long> &scaler)
 {
    std::string result;
    std::ostringstream req;
-   auto adr = WD2_MEM_OFS_REG + WD2_REG_SCALER_0_LSB_OFS;
-   req << "llrd " << std::hex << adr << " 34";
+   auto adr = WD2_MEM_OFS_STAT_REG + WD2_REG_SCALER_0_LSB_OFS;
+   req << "rr 0x" << std::hex << adr << " 34";
    
    result = SendReceive(req.str(), 500); // increased timeout
    std::stringstream ss(result);
@@ -1416,6 +1401,42 @@ unsigned int WDB::GetCrc32RegBank()
 }
 
 //--------------------------------------------------------------------
+
+WP::WP(bool verbose, bool demo)
+{
+   struct sockaddr_in server_addr;
+
+   mVerbose = verbose;
+   mDemoMode = demo;
+   
+   // create UDB socket to receive binary data from WDB
+   if (gDataSocket == 0) {
+      gDataSocket = socket(AF_INET, SOCK_DGRAM, 0);
+      assert(gDataSocket);
+      
+      // bind socket to port chosen by OS
+      memset((char*)&server_addr, 0, sizeof(server_addr));
+      server_addr.sin_family = AF_INET;
+      server_addr.sin_port = htons(0); // let OS choose port
+      server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+      if (::bind(gDataSocket, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+         perror("bind");
+         throw std::runtime_error(std::string("Cannot bind socket"));
+      }
+      auto size = sizeof(server_addr);
+      getsockname(gDataSocket, (struct sockaddr *) &server_addr, (socklen_t *) &size);
+      gServerPort = ntohs(server_addr.sin_port);
+      
+      if (this->mVerbose)
+         std::cout << std::endl << "Listening on data port " << gServerPort << "." << std::endl;
+   }
+}
+
+//--------------------------------------------------------------------
+
+
+//--------------------------------------------------------------------
+
 
    /*
    SetGain(ts->wdb[iwd].gain);

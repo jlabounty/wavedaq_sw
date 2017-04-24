@@ -234,7 +234,7 @@ void showUsage(std::string name)
    std::cerr << "  -d              Demo mode" << std::endl;
    std::cerr << "  -p              HTTP server port" << std::endl;
    std::cerr << "  -w <address>    Internet address(es) of WaveDREAM board(s)" << std::endl;
-   std::cerr << "  -v              Print extra debugging information (verbose)" << std::endl;
+   std::cerr << "  -v              Print extra information (verbose)" << std::endl;
 }
 
 int main(int argc, const char * argv[])
@@ -316,16 +316,17 @@ int main(int argc, const char * argv[])
    }
    
    // instantiate waveform processor
-   gl.wp = new WP(gl.demoMode, gl.demoMode);
+   gl.wp = new WP(gl.verbose, gl.demoMode);
    
+   // connect to all WDB and retrieve registers
    for (auto &b: gl.wdb) {
       std::cout << "Connect to " << b->getName() << " ... " << std::flush;
       try {
          if (!gl.demoMode) {
-            b->SetDebug(gl.verbose);
-            b->Connect();
-            b->ReceiveControlRegisters();
+            b->SetVerbose(gl.verbose);
+            b->Connect(gl.wp->GetServerPort());
             b->ReceiveStatusRegisters();
+            b->ReceiveControlRegisters();
             if (gl.verbose)
                b->PrintVersion();
          }
