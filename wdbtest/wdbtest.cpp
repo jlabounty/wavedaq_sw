@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <string>
 #include <vector>
+#include <thread>
 
 #include "WDBLib.h"
 #include "mongoose.h"
@@ -339,6 +340,10 @@ int main(int argc, const char * argv[])
       std::cout << " OK" << std::endl;
    }
 
+   // set active WDB
+   for (auto &b: gl.wdb)
+      gl.wp->AddActiveWDB(b->GetSerialNumber());
+   
    /*
    try {
       std::vector<unsigned long> s;

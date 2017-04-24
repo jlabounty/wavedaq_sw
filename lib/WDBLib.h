@@ -13,9 +13,12 @@
 #ifndef __wdblib_h__
 #define __wdblib_h__
 
-#include <string>
-
 #include "register_map_wd2.h"
+
+#include <thread>
+#include <set>
+
+#define WD_N_CHANNELS 18
 
 //--------------------------------------------------------------------
 
@@ -68,6 +71,30 @@ public:
 
 //--------------------------------------------------------------------
 
+
+class WDWF {
+   unsigned short   mBoardID;
+   bool             mWfValid[2];
+   unsigned int     mChannelMask;
+
+   
+   float            wf[WD_N_CHANNELS][1024];
+   int              mTriggerCell[2];
+ 
+public:
+   WDWF(int boardID) {
+      mBoardID = boardID;
+      mWfValid[0] = false;
+      mWfValid[1] = false;
+      mChannelMask = 0xFFFF;
+   } ;
+   
+   unsigned char    GetBoardID() { return mBoardID; }
+   void             SetWfValid(int segment, bool v) { mWfValid[segment] = v; }
+   void             SetTriggerCell(int drs, int cell) { mTriggerCell[drs] = cell; }
+   bool             IsValid() { return false; }
+};
+
 // waveform processor (waveform decoding, calibration, saving, ...
 class WP {
    static int       gDataSocket;
@@ -85,6 +112,14 @@ class WP {
    bool             mTimeCalib3;
    bool             mRemoveSpikes;
    
+   std::thread      mThreadCollector;
+   void Collector();
+   std::thread CollectorThread() {
+      return std::thread([=] { Collector(); });
+   };
+   
+   std::set<WDWF *> mActiveWDB;
+   
 public:
    
    // constructor
@@ -93,6 +128,9 @@ public:
    // setter & getter
    bool IsDemoMode() { return mDemoMode; }
    int GetServerPort() { return gServerPort; }
+   
+   void AddActiveWDB(int boardID);
+   void RemoveActiveWDB(int boardID);
    
 };
 

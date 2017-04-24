@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <vector>
 #include <cmath>
+#include <thread>
 
 #include <sys/socket.h>
 #include <sys/select.h>
@@ -36,6 +37,8 @@
 #include "register_map_wd2.h"
 
 #define WD2_CMD_PORT          3000
+
+#define UDP_PROTOCOL_VERSION  4
 
 #define WD2_MEM_OFS_CTRL_REG  0x00000000
 #define WD2_MEM_OFS_STAT_REG  0x00001000
@@ -1402,12 +1405,23 @@ unsigned int WDB::GetCrc32RegBank()
 
 //--------------------------------------------------------------------
 
+void *wdb_collector(void *param);
+
 WP::WP(bool verbose, bool demo)
 {
    struct sockaddr_in server_addr;
 
    mVerbose = verbose;
    mDemoMode = demo;
+   
+   mRotateWaveform = true;
+   mOfsCalib1 = false;
+   mOfsCalib2 = false;
+   mGainCalib = false;
+   mTimeCalib1 = false;
+   mTimeCalib2 = false;
+   mTimeCalib3 = false;
+   mRemoveSpikes = false;
    
    // create UDB socket to receive binary data from WDB
    if (gDataSocket == 0) {
@@ -1430,10 +1444,288 @@ WP::WP(bool verbose, bool demo)
       if (this->mVerbose)
          std::cout << std::endl << "Listening on data port " << gServerPort << "." << std::endl;
    }
+
+   // start waveform collector thread
+   mThreadCollector = this->CollectorThread();
 }
 
 //--------------------------------------------------------------------
 
+void WP::AddActiveWDB(int boardID)
+{
+   WDWF *w = new WDWF(boardID);
+   
+   mActiveWDB.insert(w);
+}
+
+void WP::RemoveActiveWDB(int boardID)
+{
+   for (auto w = mActiveWDB.begin() ; w != mActiveWDB.end() ; w++) {
+      if ((*w)->GetBoardID() == boardID) {
+         mActiveWDB.erase(*w);
+         delete *w;
+      }
+   }
+}
+
+//--------------------------------------------------------------------
+
+
+void WP::Collector()
+{
+   int currentEvent = -1;
+   
+   if (mVerbose)
+      std::cout << std::endl << "Started waveform collector." << std::endl;
+
+   do {
+      for (auto w = mActiveWDB.begin() ; w != mActiveWDB.end() ; w++) {
+         (*w)->SetWfValid(0, false);
+         (*w)->SetWfValid(1, false);
+      }
+      
+      do { // until all packets from one event have been received
+         
+         fd_set readfds;
+         struct timeval timeout;
+         int status, nPacket = -1;
+
+         FD_ZERO(&readfds);
+         FD_SET(gDataSocket, &readfds);
+         
+         timeout.tv_sec = 1;
+         timeout.tv_usec = 0;
+         
+         do {
+            status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
+         } while (status == -1 && errno == EINTR);  // don't return if an alarm signal was caught
+         
+         if (status == -1)
+            perror("select");
+         
+         if (FD_ISSET(gDataSocket, &readfds)) {
+            // packet is available, so receive it
+            struct sockaddr_in remote_addr;
+            unsigned char buffer[1800];
+
+            int len = sizeof(remote_addr);
+            int n = (int)recvfrom(gDataSocket, (char *)buffer, sizeof(buffer), 0,
+                              (struct sockaddr *)&remote_addr, (socklen_t *)&len);
+            if (n > (int)sizeof(WD2_FRAME_HEADER)) {
+               WD2_FRAME_HEADER *ph = (WD2_FRAME_HEADER *)buffer;
+
+               // check protocol version
+               if (ph->protocol_version != UDP_PROTOCOL_VERSION) {
+                  std::cerr << "Invalid protocol version " << ph->protocol_version << ", expected " << UDP_PROTOCOL_VERSION << ". Probably WD firmware update required." << std::endl;
+                  continue;
+               }
+               
+               nPacket++;
+               
+               // correct endianness of header data
+               ph->board_id                 = SWAP_UINT16(ph->board_id);
+               int header_adc               = (ph->adc_and_channel_info >> 4) & 0x0f;
+               int header_channel           = (ph->adc_and_channel_info) & 0x0f;
+               ph->readout_sequence_number  = SWAP_UINT16(ph->readout_sequence_number);
+               ph->hardware_sequence_number = SWAP_UINT16(ph->hardware_sequence_number);
+               ph->sampling_frequency       = SWAP_UINT16(ph->sampling_frequency);
+               ph->number_of_samples        = SWAP_UINT16(ph->number_of_samples);
+               ph->drs0_trigger_cell        = SWAP_UINT16(ph->drs0_trigger_cell);
+               ph->drs1_trigger_cell        = SWAP_UINT16(ph->drs1_trigger_cell);
+               ph->trigger_type             = SWAP_UINT16(ph->trigger_type);
+               ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
+               
+               if (mVerbose)
+                  printf("#%d, From %s:%d, Event %5d, ADC/Chn/Segment %d/%d/%d - %04d/%04d\n",
+                         nPacket,
+                         inet_ntoa(remote_addr.sin_addr),
+                         ntohs(remote_addr.sin_port),
+                         ph->readout_sequence_number,
+                         header_adc,
+                         header_channel,
+                         ph->channel_segment_number,
+                         ph->drs0_trigger_cell,
+                         ph->drs1_trigger_cell);
+               
+               if (currentEvent == -1)
+                  currentEvent = ph->readout_sequence_number;
+               
+               // drop package if it belongs to older event
+               if (ph->readout_sequence_number < currentEvent) {
+                  printf("Package dropped, package frame=%d, current event=%d, board id = %d\n", ph->readout_sequence_number, currentEvent, ph->board_id);
+                  continue;
+               }
+               
+               // drop whole event if package of next event has been received
+               if (ph->readout_sequence_number > currentEvent) {
+                  printf("Frame dropped, package frame=%d, current event=%d\n", ph->readout_sequence_number, currentEvent);
+                  
+                  // switch to new frame
+                  currentEvent = ph->readout_sequence_number;
+                  nPacket = -1;
+                  
+                  // tag waveforms as invalid
+                  for (auto w = mActiveWDB.begin() ; w != mActiveWDB.end() ; w++) {
+                     (*w)->SetWfValid(0, false);
+                     (*w)->SetWfValid(1, false);
+                  }
+               }
+               
+               // map ADC and channel to WD channel (0..7, 8..15, 16+17)
+               int wfChannel;
+               if (header_channel == 8)
+                  wfChannel = 16 + header_adc;
+               else
+                  wfChannel = header_adc*8+header_channel;
+               assert(wfChannel < WD_N_CHANNELS);
+               
+               // find waveform data belonging to this board
+               WDWF *wf = nullptr;
+               for (auto it = mActiveWDB.begin() ; it != mActiveWDB.end() ; it++)
+                  if ((*it)->GetBoardID() == ph->board_id) {
+                     wf = *it;
+                     break;
+                  }
+               assert(wf);
+               
+               wf->SetTriggerCell(0, ph->drs0_trigger_cell);
+               
+               // decode waveform data
+//               pd = (unsigned char*)(ph+1);
+//               for (i=0 ; i<512 ; i+=2) {
+//                  data1   = ((pd[1] & 0x0F) << 8) | pd[0];
+//                  if(data1 >= 0x0800) {
+//                     // expand two's complement
+//                     data1 -= 0x1000;
+//                  }
+//                  data2 = ((unsigned short)pd[2] << 4) | (pd[1] >> 4);
+//                  if(data2 >= 0x0800) {
+//                     // expand two's complement
+//                     data2 -= 0x1000;
+//                  }
+//                  pd+=3;
+//                  
+//                  if (ph->channel_segment_number == 0) {
+//                     // first segment
+//                     wf[board][waveform_channel][i]       = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
+//                     wf[board][waveform_channel][i+1]     = (float)data2 * (1 / 4096.0);
+//                  } else {
+//                     // second segment
+//                     wf[board][waveform_channel][512+i]   = (float)data1 * (1 / 4096.0);
+//                     wf[board][waveform_channel][512+i+1] = (float)data2 * (1 / 4096.0);
+//                  }
+//               }
+            }
+         }
+         
+/*
+         // check if we got all fragments
+         for (b=i=0 ; b<_nWdb ; b++)
+            for (c=0 ; c<16 ; c++)
+               if (!isnan(wf[b][c][0]) && !isnan(wf[b][c][512]))
+                  i++;
+         if (i == _nWdb*16) {
+            
+            // cell-by-cell offset calibration
+            for (b=0 ; b<_nWdb ; b++) {
+               for (c=0 ; c<16 ; c++) {
+                  int tc = c<8 ? triggerCell[b][0] : triggerCell[b][1];
+                  for (i=0 ; i<1024 ; i++)
+                     wf[b][c][i] -= wdb[b]->fVCalib.wf_OFS1[c][(i+tc)%1024];
+               }
+            }
+            
+            // gain calibration
+            for (b=0 ; b<_nWdb ; b++) {
+               for (c=0 ; c<16 ; c++) {
+                  int tc = c<8 ? triggerCell[b][0] : triggerCell[b][1];
+                  for (int i=0 ; i<1024 ; i++) {
+                     if (wf[b][c][i] > 0)
+                        wf[b][c][i] /= wdb[b]->fVCalib.wf_gain1[c][(i+tc) % 1024];
+                     else
+                        wf[b][c][i] /= wdb[b]->fVCalib.wf_gain2[c][(i+tc) % 1024];
+                  }
+               }
+            }
+            
+            // start-to-end offset calibration
+            for (b=0 ; b<_nWdb ; b++) {
+               for (c=0 ; c<16 ; c++)
+                  for (i=0 ; i<1024 ; i++)
+                     wf[b][c][i] -= wdb[b]->fVCalib.wf_OFS2[c][i];
+            }
+            
+            // range calibration
+            for (b=0 ; b<_nWdb ; b++)
+               for (c=0 ; c<16 ; c++)
+                  for (int i=0 ; i<1024 ; i++)
+                     wf[b][c][i] -= wdb[b]->fVCalib.drs_OFS_range0[c]; // -0.95 ... 0.05 V
+            
+            // calculate calibrated time for each bin
+            
+            // integrate time from delta-t values
+            for (b=0 ; b<_nWdb ; b++) {
+               for (c=0 ; c<16 ; c++) {
+                  int tc = c<8 ? triggerCell[b][0] : triggerCell[b][1];
+                  wft[b][c][0] = 0;
+                  for (int i=1 ; i<1024 ; i++)
+                     wft[b][c][i] = wft[b][c][i-1] + wdb[b]->fTCalib.dt[c][(i-1+tc)%1024];
+               }
+               // align cell#0 of all channels inside chip0
+               float t1 = wft[b][0][(1024-triggerCell[b][0]) % 1024];
+               for (c=1 ; c<8 ; c++) {
+                  float t2 = wft[b][c][(1024-triggerCell[b][0]) % 1024];
+                  float dt = t1 - t2;
+                  for (int i=0 ; i<1024 ; i++)
+                     wft[b][c][i] += dt;
+               }
+               // align cell#0 of all channels inside chip1 to chip0
+               for (c=8 ; c<16 ; c++) {
+                  float t2 = wft[b][c][(1024-triggerCell[b][1]) % 1024];
+                  float dt = t1 - t2;
+                  for (int i=0 ; i<1024 ; i++)
+                     wft[b][c][i] += dt;
+               }
+            }
+            
+            // copy waveform to buffer and signal new event
+            memcpy(waveform, wf, sizeof(waveform));
+            memcpy(wftime, wft, sizeof(wftime));
+            new_event = 1;
+            current_frame = -1;
+            np = 0;
+            
+            // tag waveforms as invalid
+            for (int b=0 ; b<_nWdb ; b++)
+               for (int c=0 ; c<16 ; c++) {
+                  wf[b][c][0]   = nanf("");
+                  wf[b][c][512] = nanf("");
+               }
+            
+         }
+      }
+*/
+         // check that all waveforms have been received
+         auto it = mActiveWDB.begin();
+         for ( ; it != mActiveWDB.end() ; it++)
+            if (!(*it)->IsValid())
+               break;
+         if (it == mActiveWDB.end())
+            break;
+         
+
+      } while (1);
+      
+      
+      // send full event into ring buffer
+      // TBD
+      std::cout << "." << std::flush;
+      
+      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+      
+   } while (1);
+   
+}
 
 //--------------------------------------------------------------------
 
@@ -1765,19 +2057,6 @@ namespace {
   int   _nWdb;
 }
 
-void *wdb_collector(void *param);
-
-
-int wdb_start_collector(WDB *wdb[], int nWdb)
-{
-   INT status;
-   pthread_t thread_id;
-
-   _nWdb = nWdb;
-   status = pthread_create(&thread_id, NULL, wdb_collector, (void *)wdb);
-   return status;
-}
-
 int wdb_read_waveform(float *pwf, int *ptc, float *pwft)
 {
    double start_time;
@@ -1799,262 +2078,5 @@ int wdb_read_waveform(float *pwf, int *ptc, float *pwft)
    return 1;
 }
 
-void *wdb_collector(void *param)
-{
-   int i, b, c, s, status, current_frame, np;
-   fd_set readfds;
-   struct timeval timeout;
-   struct sockaddr_in remote_addr;
-   WD2_FRAME_HEADER *ph;
-   unsigned char *pd;
-   short data1, data2;
-   unsigned char buffer[1800];
-   int header_adc, header_channel, waveform_channel, board;
-
-   WDB **wdb = (WDB **)param;
-   s = wdb[0]->fDataSocket;
-   current_frame = -1;
-   np = 0;
-   for (int b=0 ; b<_nWdb ; b++)
-      for (int c=0 ; c<16 ; c++) {
-         wf[b][c][0]   = nanf("");
-         wf[b][c][512] = nanf("");
-      }
-
-   while (1) {
-
-      FD_ZERO(&readfds);
-      FD_SET(s, &readfds);
-      
-      timeout.tv_sec = 1;
-      timeout.tv_usec = 0;
-      
-      do {
-         status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
-      } while (status == -1 && errno == EINTR);  // don't return if an alarm signal was caught
-      
-      if (status == -1)
-         perror("select");
-      
-      if (FD_ISSET(s, &readfds)) {
-         int len, n;
-         
-         // packet is available, so receive it
-         len = sizeof(remote_addr);
-         n = (int)recvfrom(s, (char *)buffer, sizeof(buffer), 0,
-                           (struct sockaddr *)&remote_addr, (socklen_t *)&len);
-         if (n > (int)sizeof(WD2_FRAME_HEADER)) {
-            ph = (WD2_FRAME_HEADER *)buffer;
-            np++;
-            
-            // correct endianness of header data
-            ph->board_id                 = SWAP_UINT16(ph->board_id);
-            header_adc                   = (ph->adc_and_channel_info >> 4) & 0x0f;
-            header_channel               = (ph->adc_and_channel_info) & 0x0f;
-            ph->readout_sequence_number  = SWAP_UINT16(ph->readout_sequence_number);
-            ph->hardware_sequence_number = SWAP_UINT16(ph->hardware_sequence_number);
-            ph->sampling_frequency       = SWAP_UINT16(ph->sampling_frequency);
-            ph->number_of_samples        = SWAP_UINT16(ph->number_of_samples);
-            ph->drs0_trigger_cell        = SWAP_UINT16(ph->drs0_trigger_cell);
-            ph->drs1_trigger_cell        = SWAP_UINT16(ph->drs1_trigger_cell);
-            ph->trigger_type             = SWAP_UINT16(ph->trigger_type);
-            ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
-
-            printf("%5d, From %s, Board %2d, Frame %5d, ADC/Chn/Segment %d/%d/%d\n",
-                   np,
-                   inet_ntoa(remote_addr.sin_addr),
-                   ph->board_id,
-                   ph->readout_sequence_number,
-                   header_adc,
-                   header_channel,
-                   ph->channel_segment_number);
-            
-            if (current_frame == -1)
-               current_frame = ph->readout_sequence_number;
-            
-            // drop package if it belongs to older frame
-            if (ph->readout_sequence_number < current_frame) {
-               printf("Package dropped, package frame=%d, current frame=%d, board id = %d\n", ph->readout_sequence_number, current_frame, ph->board_id);
-               continue;
-            }
-            
-            // drop whole frame if package of next frame received
-            if (ph->readout_sequence_number > current_frame) {
-               printf("Frame dropped, package frame=%d, current frame=%d\n", ph->readout_sequence_number, current_frame);
-               
-               // switch to new frame
-               current_frame = ph->readout_sequence_number;
-               
-               // tag waveforms as invalid
-               for (int b=0 ; b<_nWdb ; b++)
-                  for (int c=0 ; c<16 ; c++) {
-                     wf[b][c][0]   = nanf("");
-                     wf[b][c][512] = nanf("");
-                  }
-
-               np = 1;
-            }
-            
-            waveform_channel = header_adc*8+header_channel;
-            assert(waveform_channel < 16);
-            
-            // ensure board id is in our receive list
-            for (i=0 ; i<_nWdb ; i++)
-               if (ph->board_id == wdb[i]->fSerialNumber)
-                  break;
-            assert(i < _nWdb);
-            board = i;
-            
-            // copy trigger cell
-            if (waveform_channel < 8)
-               triggerCell[board][0] = ph->drs0_trigger_cell;
-            else
-               triggerCell[board][1] = ph->drs1_trigger_cell;
-            
-            // decode waveform data
-            pd = (unsigned char*)(ph+1);
-            for (i=0 ; i<512 ; i+=2) {
-               data1   = ((pd[1] & 0x0F) << 8) | pd[0];
-               if(data1 >= 0x0800) {
-                  // expand two's complement
-                  data1 -= 0x1000;
-               }
-               data2 = ((unsigned short)pd[2] << 4) | (pd[1] >> 4);
-               if(data2 >= 0x0800) {
-                  // expand two's complement
-                  data2 -= 0x1000;
-               }
-               pd+=3;
-               
-               if (ph->channel_segment_number == 0) {
-                  // first segment
-                  wf[board][waveform_channel][i]       = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
-                  wf[board][waveform_channel][i+1]     = (float)data2 * (1 / 4096.0);
-               } else {
-                  // second segment
-                  wf[board][waveform_channel][512+i]   = (float)data1 * (1 / 4096.0);
-                  wf[board][waveform_channel][512+i+1] = (float)data2 * (1 / 4096.0);
-               }
-            }
-         }
-      }
-      
-      // check if we got all fragments
-      for (b=i=0 ; b<_nWdb ; b++)
-         for (c=0 ; c<16 ; c++)
-            if (!isnan(wf[b][c][0]) && !isnan(wf[b][c][512]))
-               i++;
-      if (i == _nWdb*16) {
-
-         // cell-by-cell offset calibration
-         for (b=0 ; b<_nWdb ; b++) {
-            for (c=0 ; c<16 ; c++) {
-               int tc = c<8 ? triggerCell[b][0] : triggerCell[b][1];
-               for (i=0 ; i<1024 ; i++)
-                  wf[b][c][i] -= wdb[b]->fVCalib.wf_OFS1[c][(i+tc)%1024];
-            }
-         }
-
-         // gain calibration
-         for (b=0 ; b<_nWdb ; b++) {
-            for (c=0 ; c<16 ; c++) {
-               int tc = c<8 ? triggerCell[b][0] : triggerCell[b][1];
-               for (int i=0 ; i<1024 ; i++) {
-                  if (wf[b][c][i] > 0)
-                     wf[b][c][i] /= wdb[b]->fVCalib.wf_gain1[c][(i+tc) % 1024];
-                  else
-                     wf[b][c][i] /= wdb[b]->fVCalib.wf_gain2[c][(i+tc) % 1024];
-               }
-            }
-         }
-
-         // start-to-end offset calibration
-         for (b=0 ; b<_nWdb ; b++) {
-            for (c=0 ; c<16 ; c++)
-               for (i=0 ; i<1024 ; i++)
-                  wf[b][c][i] -= wdb[b]->fVCalib.wf_OFS2[c][i];
-         }
-         
-         // range calibration
-         for (b=0 ; b<_nWdb ; b++)
-            for (c=0 ; c<16 ; c++)
-               for (int i=0 ; i<1024 ; i++)
-                  wf[b][c][i] -= wdb[b]->fVCalib.drs_OFS_range0[c]; // -0.95 ... 0.05 V
-
-         // calculate calibrated time for each bin
-
-         // integrate time from delta-t values
-         for (b=0 ; b<_nWdb ; b++) {
-            for (c=0 ; c<16 ; c++) {
-               int tc = c<8 ? triggerCell[b][0] : triggerCell[b][1];
-               wft[b][c][0] = 0;
-               for (int i=1 ; i<1024 ; i++)
-                  wft[b][c][i] = wft[b][c][i-1] + wdb[b]->fTCalib.dt[c][(i-1+tc)%1024];
-            }
-            // align cell#0 of all channels inside chip0
-            float t1 = wft[b][0][(1024-triggerCell[b][0]) % 1024];
-            for (c=1 ; c<8 ; c++) {
-               float t2 = wft[b][c][(1024-triggerCell[b][0]) % 1024];
-               float dt = t1 - t2;
-               for (int i=0 ; i<1024 ; i++)
-                  wft[b][c][i] += dt;
-            }
-            // align cell#0 of all channels inside chip1 to chip0
-            for (c=8 ; c<16 ; c++) {
-               float t2 = wft[b][c][(1024-triggerCell[b][1]) % 1024];
-               float dt = t1 - t2;
-               for (int i=0 ; i<1024 ; i++)
-                  wft[b][c][i] += dt;
-            }
-         }
-         
-         // copy waveform to buffer and signal new event
-         memcpy(waveform, wf, sizeof(waveform));
-         memcpy(wftime, wft, sizeof(wftime));
-         new_event = 1;
-         current_frame = -1;
-         np = 0;
-
-         // tag waveforms as invalid
-         for (int b=0 ; b<_nWdb ; b++)
-            for (int c=0 ; c<16 ; c++) {
-               wf[b][c][0]   = nanf("");
-               wf[b][c][512] = nanf("");
-            }
-
-      }
-   }
-}
-
-// this funtion sets a link from WD to TCB to be AND/OR/Pattern
-// this is written on the word type
-// 0 = AND
-// 1 = OR
-// 2 = PATTERN
-// 3 = UNUSED
-void WDB::SetTCBLink(int ltype, int port)
-{
-   //first reset the bits
-   Send("regclr %x %x", WD2_REG_TRIGGER_SCHEME_SELECT_OFS, (3<<14)>>(port*2));
-   // then set them
-   Send("regset %x %x", WD2_REG_TRIGGER_SCHEME_SELECT_OFS, (ltype<<14)>>(port*2));
-}
-
-//THIS FUNCTION SET THE PATTERNS TO A WDB TAKEN FROM ODB (ONE SET FOR THE WHOLE SYSTEM SO FAR)
-void WDB::SetPatterns(TRIGGER_SETTINGS *ts,int iwd)
-{
-   // first load the pattern enable
-   for(int ipatten = 0; ipatten<8; ipatten++)
-      Send("regwr %x %x", 4*ipatten+WD2_REG_TRIGGER_PATTERN_EN_BPL0_OFS, ts->wdb[iwd].pattern_enable[ipatten]);
-   // then load the patterns itself
-   for(int ipatt = 0; ipatt<32; ipatt++)
-      Send("regwr %x %x", 4*ipatt+WD2_REG_TRIGGER_PATTERN0_OFS, ts->wdb[iwd].pattern[ipatt]);
-}
-
-// SET THE MASKS FROM ODB (ONE MASK SETTING PER BOARD PER CHANNEL)
-void WDB::SetMasks(TRIGGER_SETTINGS *ts, int iwd)
-{
-   Send("regwr %x %x", WD2_REG_TRIGGER_COMP_MASK_OFS, ts->wdb[iwd].masks);
-}
 
 */
