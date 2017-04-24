@@ -37,8 +37,7 @@
 
 #define WD2_CMD_PORT          3000
 
-#define WD2_MEM_OFS_CONTROL   0xc3000000
-#define WD2_MEM_OFS_STATUS    0xc3010000
+#define WD2_MEM_OFS_REG       0xc3000000
 
 #pragma pack(1)
 
@@ -282,7 +281,7 @@ void WDB::ReceiveControlRegisters()
 
    std::string result;
    std::ostringstream req;
-   req << "llrd " << std::hex << WD2_MEM_OFS_CONTROL << " " << std::dec << WD2_REG_CRC32_REG_BANK_OFS/4+1;
+   req << "llrd 0x" << std::hex << WD2_MEM_OFS_REG << " " << std::dec << WD2_REG_CRC32_REG_BANK_OFS/4+1;
    
    result = SendReceive(req.str(), 500);
    std::stringstream ss(result);
@@ -290,9 +289,9 @@ void WDB::ReceiveControlRegisters()
    
    for (auto i=0 ; i<WD2_REG_CRC32_REG_BANK_OFS/4 ; i++) {
       std::getline(ss, line, '\r');
-      auto adr = (unsigned int)std::stoul(line.substr(3), nullptr, 16);
-      if (adr > 0 && adr < WD2_REG_CRC32_REG_BANK_OFS/4)
-         this->creg[adr] = (unsigned int)std::stoul(line.substr(14), nullptr, 16);
+      auto adr = (unsigned int)std::stoul(line.substr(3), nullptr, 16) - WD2_MEM_OFS_REG;
+      if (adr <= WD2_REG_CRC32_REG_BANK_OFS)
+         this->creg[adr/4] = (unsigned int)std::stoul(line.substr(14), nullptr, 16);
    }
 }
 
@@ -305,7 +304,7 @@ void WDB::ReceiveStatusRegisters()
    }
    std::string result;
    std::ostringstream req;
-   req << "llrd " << std::hex << WD2_MEM_OFS_STATUS << " " << std::dec << WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4+1;
+   req << "llrd 0x" << std::hex << WD2_MEM_OFS_REG << " " << std::dec << WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4+1;
    
    result = SendReceive(req.str(), 500);
    std::stringstream ss(result);
@@ -325,8 +324,8 @@ void WDB::ReceiveStatusRegister(int ofs)
    }
    std::string result;
    std::ostringstream req;
-   auto adr = WD2_MEM_OFS_STATUS + ofs;
-   req << "llrd " << std::hex << adr << " 1";
+   auto adr = WD2_MEM_OFS_REG + ofs;
+   req << "llrd 0x" << std::hex << adr << " 1";
       
    result = SendReceive(req.str());
    this->sreg[ofs/4] = (unsigned int)std::stoul(result.substr(13), nullptr, 16);
@@ -342,7 +341,7 @@ void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, uns
    bitReplace(r, mask, ofs, v);
    
    std::ostringstream req;
-   req << "regwr " << std::hex << rofs << " " << r;
+   req << "llwr 0x" << std::hex << WD2_MEM_OFS_REG+rofs << " " << r;
    
    Send(req.str());
    
@@ -529,7 +528,7 @@ void WDB::GetScalers(std::vector<unsigned long> &scaler)
 {
    std::string result;
    std::ostringstream req;
-   auto adr = WD2_MEM_OFS_STATUS + WD2_REG_SCALER_0_LSB_OFS;
+   auto adr = WD2_MEM_OFS_REG + WD2_REG_SCALER_0_LSB_OFS;
    req << "llrd " << std::hex << adr << " 34";
    
    result = SendReceive(req.str(), 500); // increased timeout
@@ -1060,9 +1059,9 @@ float WDB::GetDacTlevel(int chn)
    
    assert(chn < 16);
    if (chn % 2 == 0)
-      v = bitExtract(creg, WD2_REG_DAC1_A_B_OFS/4+(chn/2), WD2_BIT_DAC1_CH_A_MASK, WD2_BIT_DAC1_CH_A_OFS);
+      v = bitExtract(creg, WD2_REG_DAC1_A_B_OFS+(chn/2), WD2_BIT_DAC1_CH_A_MASK, WD2_BIT_DAC1_CH_A_OFS);
    else
-      v = bitExtract(creg, WD2_REG_DAC1_A_B_OFS/4+(chn/2), WD2_BIT_DAC1_CH_B_MASK, WD2_BIT_DAC1_CH_B_OFS);
+      v = bitExtract(creg, WD2_REG_DAC1_A_B_OFS+(chn/2), WD2_BIT_DAC1_CH_B_MASK, WD2_BIT_DAC1_CH_B_OFS);
    
    // convert to Volts taking WDB comparator offset into account
    return ((v / 4095.0 * 2500) - 900) / 500.0;

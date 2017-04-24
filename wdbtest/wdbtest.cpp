@@ -94,7 +94,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       
       for (int b = b1 ; b<b2 ; b++) {
          mg_printf_http_chunk(nc, "    {\n");
-         mg_printf_http_chunk(nc, "      \"temperature\": %1.1lf,\n",           gl->wdb[b]->GetTemperature(false));
+         mg_printf_http_chunk(nc, "      \"temperature\": %1.1lf,\n",            gl->wdb[b]->GetTemperature(false));
          mg_printf_http_chunk(nc, "      \"sysBusy\": %s,\n",                    gl->wdb[b]->IsSysBusy() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"wdbBusy\": %s,\n",                    gl->wdb[b]->IsSysBusy() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"hvBoardPlugged\": %s,\n",             gl->wdb[b]->IsHvBoardPlugged() ? "true" : "false");
@@ -152,7 +152,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"triggerExternalOr\": %s,\n",          gl->wdb[b]->IsTriggerExternalOr() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"triggerExternalAnd\": %s,\n",         gl->wdb[b]->IsTriggerExternalAnd() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"triggerDelayEnable\": %s,\n",         gl->wdb[b]->IsTriggerDelayEnable() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"triggerDelay\": %s,\n",               gl->wdb[b]->GetTriggerDelay());
+         mg_printf_http_chunk(nc, "      \"triggerDelay\": %d,\n",               gl->wdb[b]->GetTriggerDelay());
          mg_printf_http_chunk(nc, "      \"triggerComparatorMask\": %d,\n",      gl->wdb[b]->GetTriggerComparatorMask());
          mg_printf_http_chunk(nc, "      \"triggerCfgOr\": %d,\n",               gl->wdb[b]->GetTriggerCfgOr());
          mg_printf_http_chunk(nc, "      \"triggerCfgAnd\": %d,\n",              gl->wdb[b]->GetTriggerCfgAnd());
