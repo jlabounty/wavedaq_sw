@@ -240,7 +240,7 @@ void showUsage(std::string name)
 
 int main(int argc, const char * argv[])
 {
-   GLOBALS gl;
+   GLOBALS gl = {};
    
    // default values
    gl.serverPort = 8080;
@@ -343,8 +343,12 @@ int main(int argc, const char * argv[])
    // set active WDB
    for (auto &b: gl.wdb)
       gl.wp->AddActiveWDB(b->GetSerialNumber());
+
+   // request single event
+   for (auto &b: gl.wdb)
+      b->RequestDRSEvent();
    
-   /*
+   /**/
    try {
       std::vector<unsigned long> s;
       do {
@@ -362,7 +366,7 @@ int main(int argc, const char * argv[])
       std::cout << "Aborting." << std::endl;
       return 1;
    }
-   */
+   /**/
    
    // initialize web server
    struct mg_mgr mgr;
@@ -385,37 +389,46 @@ int main(int argc, const char * argv[])
       std::cout << "Starting in DEMO mode." << std::endl;
    
    time_t last = 0, now;
-   for (;;) {
-      /*
-      // do calibration if asked for
-      if (vcalib_prog.state != WD_CS_INACTIVE) {
-         wd_calibrate_voltage(&gl, &vcalib_prog);
+   
+   try {
+      while (true) {
+         /*
+          // do calibration if asked for
+          if (vcalib_prog.state != WD_CS_INACTIVE) {
+          wd_calibrate_voltage(&gl, &vcalib_prog);
+          
+          // Yield to server, no timeout
+          mg_mgr_poll(&mgr, 0);
+          } else if (tcalib_prog.state != WD_CS_INACTIVE) {
+          wd_calibrate_time(&gl, &tcalib_prog);
+          
+          // Yield to server, no timeout
+          mg_mgr_poll(&mgr, 0);
+          } else
+          // Yield to server, 10ms timeout
+          mg_mgr_poll(&mgr, 10);
+          */
          
-         // Yield to server, no timeout
-         mg_mgr_poll(&mgr, 0);
-      } else if (tcalib_prog.state != WD_CS_INACTIVE) {
-         wd_calibrate_time(&gl, &tcalib_prog);
-         
-         // Yield to server, no timeout
-         mg_mgr_poll(&mgr, 0);
-      } else
          // Yield to server, 10ms timeout
          mg_mgr_poll(&mgr, 10);
-      */
-
-      // Yield to server, 10ms timeout
-      mg_mgr_poll(&mgr, 10);
-
-      // read board temperatures periodically
-      time(&now);
-      if (now > last + 10) {
-         for (auto &b: gl.wdb)
-            b->GetTemperature(true);
-         last = now;
+         
+         // read board temperatures periodically
+         time(&now);
+         if (now > last + 10) {
+            for (auto &b: gl.wdb)
+               b->GetTemperature(true);
+            last = now;
+         }
       }
+   } catch  (std::runtime_error &e) {
+      std::cout << std::endl;
+      std::cout << e.what() << std::endl;
+      std::cout << "Aborting." << std::endl;
+      
+      mg_mgr_free(&mgr);
+      
+      return 1;
    }
-   
-   // mg_mgr_free(&mgr);
    
    return 0;
 }

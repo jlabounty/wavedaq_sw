@@ -74,25 +74,33 @@ public:
 
 class WDWF {
    unsigned short   mBoardID;
-   bool             mWfValid[2];
+   bool             mWfValid[WD_N_CHANNELS][2];
    unsigned int     mChannelMask;
 
-   
    float            wf[WD_N_CHANNELS][1024];
+   
+   unsigned short   mCrateId;
+   unsigned short   mSlotId;
+   
    int              mTriggerCell[2];
+   int              mWFType; // 0 = DRS, 1 = ADC
+   unsigned short   mSamplingFrequency;
  
 public:
    WDWF(int boardID) {
       mBoardID = boardID;
-      mWfValid[0] = false;
-      mWfValid[1] = false;
+      for (int i=0 ; i<WD_N_CHANNELS ; i++) {
+         mWfValid[i][0] = false;
+         mWfValid[i][1] = false;
+      }
       mChannelMask = 0xFFFF;
    } ;
    
    unsigned char    GetBoardID() { return mBoardID; }
-   void             SetWfValid(int segment, bool v) { mWfValid[segment] = v; }
+   float *          GetWFArray(int channel) { return wf[channel]; }
    void             SetTriggerCell(int drs, int cell) { mTriggerCell[drs] = cell; }
-   bool             IsValid() { return false; }
+   void             SetWfValid(int channel, int segment, bool v) { mWfValid[channel][segment] = v; }
+   bool             IsWfValid();
 };
 
 // waveform processor (waveform decoding, calibration, saving, ...
@@ -112,6 +120,9 @@ class WP {
    bool             mTimeCalib3;
    bool             mRemoveSpikes;
    
+   int              mPacketsReceived;
+   int              mCurrentEvent;
+   
    std::thread      mThreadCollector;
    void Collector();
    std::thread CollectorThread() {
@@ -119,6 +130,10 @@ class WP {
    };
    
    std::set<WDWF *> mActiveWDB;
+   
+   void             InvalidateAllWf();
+   void             ReceiveWfPacket();
+   bool             AllPacketsReceived();
    
 public:
    
@@ -350,6 +365,11 @@ public:
    unsigned int GetTriggerPattern(int chn);
    void SetTriggerPattern(int chn, unsigned int v);
    unsigned int GetCrc32RegBank();
+   
+   // high-level methods
+   void RequestDRSEvent();
+   void RequestADCEvent();
+   void RequestTDCEvent();
 };
 
 //--------------------------------------------------------------------

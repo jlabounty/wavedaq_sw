@@ -40,9 +40,6 @@
 
 #define UDP_PROTOCOL_VERSION  4
 
-#define WD2_MEM_OFS_CTRL_REG  0x00000000
-#define WD2_MEM_OFS_STAT_REG  0x00001000
-
 #pragma pack(1)
 
 typedef struct {
@@ -52,7 +49,7 @@ typedef struct {
    unsigned char  crate_id;
    unsigned char  slot_id;
    unsigned char  adc_and_channel_info;
-   unsigned char  channel_segment_number;
+   unsigned char  segment_and_package_type;
    unsigned short readout_sequence_number;
    unsigned short hardware_sequence_number;
    unsigned short sampling_frequency;
@@ -263,7 +260,7 @@ void WDB::ReceiveControlRegisters()
 
    std::string result;
    std::ostringstream req;
-   req << "rr 0x" << std::hex << WD2_MEM_OFS_CTRL_REG << " " << std::dec << WD2_REG_CRC32_REG_BANK_OFS/4+1;
+   req << "rr 0x" << std::hex << WD2_REG_WDB_LOC_OFS << " " << std::dec << WD2_REG_CRC32_REG_BANK_OFS/4+1;
    
    result = SendReceive(req.str(), 500);
    std::stringstream ss(result);
@@ -271,7 +268,7 @@ void WDB::ReceiveControlRegisters()
    
    for (auto i=0 ; i<WD2_REG_CRC32_REG_BANK_OFS/4 ; i++) {
       std::getline(ss, line, '\r');
-      auto adr = (unsigned int)std::stoul(line.substr(3), nullptr, 16) - WD2_MEM_OFS_CTRL_REG;
+      auto adr = (unsigned int)std::stoul(line.substr(3), nullptr, 16) - WD2_REG_WDB_LOC_OFS;
       if (adr <= WD2_REG_CRC32_REG_BANK_OFS)
          this->creg[adr/4] = (unsigned int)std::stoul(line.substr(10), nullptr, 16);
    }
@@ -286,7 +283,7 @@ void WDB::ReceiveStatusRegisters()
    }
    std::string result;
    std::ostringstream req;
-   req << "rr 0x" << std::hex << WD2_MEM_OFS_STAT_REG << " " << std::dec << WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4+1;
+   req << "rr 0x" << std::hex << WD2_REG_HW_VER_OFS << " " << std::dec << WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4+1;
    
    result = SendReceive(req.str(), 500);
    std::stringstream ss(result);
@@ -294,46 +291,47 @@ void WDB::ReceiveStatusRegisters()
    
    for (auto i=0 ; i<WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4 ; i++) {
       std::getline(ss, line, '\r');
-      auto adr = (unsigned int)std::stoul(line.substr(3), nullptr, 16) - WD2_MEM_OFS_STAT_REG;
-      if (adr <= WD2_REG_ADC_01_CLK_MOD_FLAG_OFS)
-         this->sreg[adr/4] = (unsigned int)std::stoul(line.substr(10), nullptr, 16);
+      auto adr = (unsigned int)std::stoul(line.substr(3), nullptr, 16);
+      if (adr <= WD2_REG_ADC_01_CLK_MOD_FLAG_OFS) {
+         auto index = (adr - WD2_REG_HW_VER_OFS)/4;
+         this->sreg[index] = (unsigned int)std::stoul(line.substr(10), nullptr, 16);
+      }
    }
 }
 
-void WDB::ReceiveStatusRegister(int ofs)
+void WDB::ReceiveStatusRegister(int rofs)
 {
-   ofs = (ofs & 0x0FFF);
+   int index = (rofs & 0xFFFF)/4;
    
    if (mDemoMode) {
-      this->sreg[ofs/4] = 0;
+      this->sreg[index] = 0;
       return;
    }
    std::string result;
    std::ostringstream req;
-   auto adr = WD2_MEM_OFS_STAT_REG + ofs;
-   req << "rr 0x" << std::hex << adr << " 1";
+   req << "rr 0x" << std::hex << rofs << " 1";
       
    result = SendReceive(req.str());
-   this->sreg[ofs/4] = (unsigned int)std::stoul(result.substr(13), nullptr, 16);
+   this->sreg[index] = (unsigned int)std::stoul(result.substr(13), nullptr, 16);
 }
 
 void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v)
 {
    if (mDemoMode)
       return;
-   
-   rofs = (rofs & 0x0FFF);
-   
-   unsigned int r = this->creg[rofs/4];
+
+   int index = (rofs & 0xFFFF)/4;
+
+   unsigned int r = this->creg[index];
    
    bitReplace(r, mask, ofs, v);
    
    std::ostringstream req;
-   req << "wr 0x" << std::hex << WD2_MEM_OFS_CTRL_REG+rofs << " " << r;
+   req << "wr 0x" << std::hex << rofs << " " << r;
    
    Send(req.str());
    
-   this->creg[rofs/4] = r;
+   this->creg[index] = r;
 }
 
 //-- Status registers ------------------------------------------------
@@ -516,8 +514,7 @@ void WDB::GetScalers(std::vector<unsigned long> &scaler)
 {
    std::string result;
    std::ostringstream req;
-   auto adr = WD2_MEM_OFS_STAT_REG + WD2_REG_SCALER_0_LSB_OFS;
-   req << "rr 0x" << std::hex << adr << " 34";
+   req << "rr 0x" << std::hex << WD2_REG_SCALER_0_LSB_OFS << " 34";
    
    result = SendReceive(req.str(), 500); // increased timeout
    std::stringstream ss(result);
@@ -525,7 +522,7 @@ void WDB::GetScalers(std::vector<unsigned long> &scaler)
    
    for (auto i=0 ; i<34 ; i++) {
       std::getline(ss, line, '\r');
-      auto adr = ((unsigned int)std::stoul(line.substr(7), nullptr, 16)) / 4;
+      auto adr = ((unsigned int)std::stoul(line.substr(3), nullptr, 16)) / 4;
       if (adr >= WD2_REG_SCALER_0_LSB_OFS/4 && adr < WD2_REG_SCALER_EXT_CLK_OFS/4)
          this->sreg[adr] = (unsigned int)std::stoul(line.substr(14), nullptr, 16);
    }
@@ -1405,6 +1402,48 @@ unsigned int WDB::GetCrc32RegBank()
 
 //--------------------------------------------------------------------
 
+void WDB::RequestDRSEvent()
+{
+   SendReceive("drsget");
+   
+//   SetReadoutSrcSel(0); // select DRS as readout source
+//   
+//   SetDAQSingle(true);  // start DRS domino wave
+//   SetDAQSingle(false);
+//   
+//   TrgDAQSoft();
+}
+
+void WDB::RequestADCEvent()
+{
+   // SendReceive("adcget");
+
+   SetReadoutSrcSel(1); // select ADC as readout source
+   
+   SetDAQSingle(true);  // start DAQ
+   SetDAQSingle(false);
+   
+   TrgDAQSoft();
+}
+
+void WDB::RequestTDCEvent()
+{
+   SendReceive("tdcget"); // not yet implemented !
+}
+
+//--------------------------------------------------------------------
+
+bool WDWF::IsWfValid()
+{
+   for (int i=0 ; i<WD_N_CHANNELS ; i++)
+      if (mChannelMask & (1 << i))
+         if (!mWfValid[i][0] || !mWfValid[i][1])
+            return false;
+   return true;
+}
+
+//--------------------------------------------------------------------
+
 void *wdb_collector(void *param);
 
 WP::WP(bool verbose, bool demo)
@@ -1470,251 +1509,203 @@ void WP::RemoveActiveWDB(int boardID)
 
 //--------------------------------------------------------------------
 
+void WP::InvalidateAllWf()
+{
+   for (auto w = mActiveWDB.begin() ; w != mActiveWDB.end() ; w++) {
+      for (int i=0 ; i<WD_N_CHANNELS ; i++) {
+         (*w)->SetWfValid(i, 0, false);
+         (*w)->SetWfValid(i, 1, false);
+      }
+   }
+   
+   mPacketsReceived = 0;
+}
+
+//--------------------------------------------------------------------
+
+bool WP::AllPacketsReceived()
+{
+   auto it = mActiveWDB.begin();
+   while (it != mActiveWDB.end()) {
+      if (!(*it)->IsWfValid())
+         break;
+      it++;
+   }
+   if (it == mActiveWDB.end())
+      return true;
+   return false;
+}
+
+//--------------------------------------------------------------------
+
+void WP::ReceiveWfPacket()
+{
+   fd_set readfds;
+   struct timeval timeout;
+   int status;
+   
+   FD_ZERO(&readfds);
+   FD_SET(gDataSocket, &readfds);
+   
+   timeout.tv_sec = 1;
+   timeout.tv_usec = 0;
+   
+   do {
+      status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
+   } while (status == -1 && errno == EINTR);  // don't return if an alarm signal was caught
+   
+   if (status == -1)
+      perror("select");
+   
+   if (FD_ISSET(gDataSocket, &readfds)) {
+      // packet is available, so receive it
+      struct sockaddr_in remote_addr;
+      unsigned char buffer[1800];
+      
+      int len = sizeof(remote_addr);
+      int n = (int)recvfrom(gDataSocket, (char *)buffer, sizeof(buffer), 0,
+                            (struct sockaddr *)&remote_addr, (socklen_t *)&len);
+      if (n > (int)sizeof(WD2_FRAME_HEADER)) {
+         WD2_FRAME_HEADER *ph = (WD2_FRAME_HEADER *)buffer;
+         
+         // check protocol version
+         if (ph->protocol_version != UDP_PROTOCOL_VERSION) {
+            std::cerr << "Invalid protocol version " << ph->protocol_version << ", expected " << UDP_PROTOCOL_VERSION << ". Probably WD firmware update required." << std::endl;
+            return;
+         }
+         
+         mPacketsReceived++;
+         
+         // correct endianness of header data
+         ph->board_id                 = SWAP_UINT16(ph->board_id);
+         int header_adc               = (ph->adc_and_channel_info >> 4) & 0x0f;
+         int header_channel           = (ph->adc_and_channel_info) & 0x0f;
+         int channel_segment          = (ph->segment_and_package_type >> 4) & 0x0f;
+         int package_type             = (ph->segment_and_package_type) & 0x0f;
+         ph->readout_sequence_number  = SWAP_UINT16(ph->readout_sequence_number);
+         ph->hardware_sequence_number = SWAP_UINT16(ph->hardware_sequence_number);
+         ph->sampling_frequency       = SWAP_UINT16(ph->sampling_frequency);
+         ph->number_of_samples        = SWAP_UINT16(ph->number_of_samples);
+         ph->drs0_trigger_cell        = SWAP_UINT16(ph->drs0_trigger_cell);
+         ph->drs1_trigger_cell        = SWAP_UINT16(ph->drs1_trigger_cell);
+         ph->trigger_type             = SWAP_UINT16(ph->trigger_type);
+         ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
+         
+         if (mVerbose)
+            printf("#%02d from %s:%d, event=%5d type=%d ADC/Chn/Segment=%d/%d/%d Tcell=%04d/%04d\n",
+                   mPacketsReceived-1,
+                   inet_ntoa(remote_addr.sin_addr),
+                   ntohs(remote_addr.sin_port),
+                   ph->readout_sequence_number,
+                   package_type,
+                   header_adc,
+                   header_channel,
+                   channel_segment,
+                   ph->drs0_trigger_cell,
+                   ph->drs1_trigger_cell);
+         
+         if (mCurrentEvent == -1)
+            mCurrentEvent = ph->readout_sequence_number;
+         
+         // drop package (for now...) if it is not event data
+         if (package_type != 0) {
+            std::cerr << "Package dropped, package type=" << package_type << ", "
+            << "board id = " << ph->board_id << std::endl;
+            return;
+         }
+         
+         // drop package if it belongs to older event
+         if (ph->readout_sequence_number < mCurrentEvent) {
+            std::cerr << "Package dropped, package event=" << ph->readout_sequence_number << ", "
+                      << "current event=" << mCurrentEvent << ", "
+                      << "board id = " << ph->board_id << std::endl;
+            return;
+         }
+         
+         // drop whole event if package of next event has been received
+         if (ph->readout_sequence_number > mCurrentEvent) {
+            std::cerr << "Event dropped, package event=" << ph->readout_sequence_number << ", "
+            << "current event=" << mCurrentEvent << ", "
+            << "board id = " << ph->board_id << std::endl;
+            
+            // switch to new frame
+            mCurrentEvent = ph->readout_sequence_number;
+            InvalidateAllWf();
+         }
+         
+         // map ADC and channel to WD channel (0..7, 8..15, 16+17)
+         int wfChannel;
+         if (header_channel == 8)
+            wfChannel = 16 + header_adc;
+         else
+            wfChannel = header_adc*8+header_channel;
+         assert(wfChannel < WD_N_CHANNELS);
+         
+         // find waveform data belonging to this board
+         WDWF *wf = nullptr;
+         for (auto it = mActiveWDB.begin() ; it != mActiveWDB.end() ; it++)
+            if ((*it)->GetBoardID() == ph->board_id) {
+               wf = *it;
+               break;
+            }
+         assert(wf);
+         
+         wf->SetTriggerCell(0, ph->drs0_trigger_cell);
+         wf->SetWfValid(wfChannel, channel_segment, true);
+         
+         // decode waveform data
+         auto pd = (unsigned char*)(ph+1);
+         for (int i=0 ; i<512 ; i+=2) {
+            short data1   = ((pd[1] & 0x0F) << 8) | pd[0];
+            if(data1 >= 0x0800) {
+               // expand two's complement
+               data1 -= 0x1000;
+            }
+            short data2 = ((unsigned short)pd[2] << 4) | (pd[1] >> 4);
+            if(data2 >= 0x0800) {
+               // expand two's complement
+               data2 -= 0x1000;
+            }
+            pd+=3;
+            
+            if (channel_segment == 0) {
+               // first segment
+               wf->GetWFArray(wfChannel)[i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
+               wf->GetWFArray(wfChannel)[i+1]       = (float)data2 * (1 / 4096.0);
+            } else {
+               // second segment
+               wf->GetWFArray(wfChannel)[512+i]     = (float)data1 * (1 / 4096.0);
+               wf->GetWFArray(wfChannel)[512+i+1]   = (float)data2 * (1 / 4096.0);
+            }
+         }
+      }
+   }
+
+}
+
+//--------------------------------------------------------------------
+
 
 void WP::Collector()
 {
-   int currentEvent = -1;
+   mCurrentEvent = -1;
    
    if (mVerbose)
       std::cout << std::endl << "Started waveform collector." << std::endl;
 
    do {
-      for (auto w = mActiveWDB.begin() ; w != mActiveWDB.end() ; w++) {
-         (*w)->SetWfValid(0, false);
-         (*w)->SetWfValid(1, false);
-      }
+
+      InvalidateAllWf();
       
-      do { // until all packets from one event have been received
+      do {
          
-         fd_set readfds;
-         struct timeval timeout;
-         int status, nPacket = -1;
+         ReceiveWfPacket();
 
-         FD_ZERO(&readfds);
-         FD_SET(gDataSocket, &readfds);
-         
-         timeout.tv_sec = 1;
-         timeout.tv_usec = 0;
-         
-         do {
-            status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
-         } while (status == -1 && errno == EINTR);  // don't return if an alarm signal was caught
-         
-         if (status == -1)
-            perror("select");
-         
-         if (FD_ISSET(gDataSocket, &readfds)) {
-            // packet is available, so receive it
-            struct sockaddr_in remote_addr;
-            unsigned char buffer[1800];
-
-            int len = sizeof(remote_addr);
-            int n = (int)recvfrom(gDataSocket, (char *)buffer, sizeof(buffer), 0,
-                              (struct sockaddr *)&remote_addr, (socklen_t *)&len);
-            if (n > (int)sizeof(WD2_FRAME_HEADER)) {
-               WD2_FRAME_HEADER *ph = (WD2_FRAME_HEADER *)buffer;
-
-               // check protocol version
-               if (ph->protocol_version != UDP_PROTOCOL_VERSION) {
-                  std::cerr << "Invalid protocol version " << ph->protocol_version << ", expected " << UDP_PROTOCOL_VERSION << ". Probably WD firmware update required." << std::endl;
-                  continue;
-               }
-               
-               nPacket++;
-               
-               // correct endianness of header data
-               ph->board_id                 = SWAP_UINT16(ph->board_id);
-               int header_adc               = (ph->adc_and_channel_info >> 4) & 0x0f;
-               int header_channel           = (ph->adc_and_channel_info) & 0x0f;
-               ph->readout_sequence_number  = SWAP_UINT16(ph->readout_sequence_number);
-               ph->hardware_sequence_number = SWAP_UINT16(ph->hardware_sequence_number);
-               ph->sampling_frequency       = SWAP_UINT16(ph->sampling_frequency);
-               ph->number_of_samples        = SWAP_UINT16(ph->number_of_samples);
-               ph->drs0_trigger_cell        = SWAP_UINT16(ph->drs0_trigger_cell);
-               ph->drs1_trigger_cell        = SWAP_UINT16(ph->drs1_trigger_cell);
-               ph->trigger_type             = SWAP_UINT16(ph->trigger_type);
-               ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
-               
-               if (mVerbose)
-                  printf("#%d, From %s:%d, Event %5d, ADC/Chn/Segment %d/%d/%d - %04d/%04d\n",
-                         nPacket,
-                         inet_ntoa(remote_addr.sin_addr),
-                         ntohs(remote_addr.sin_port),
-                         ph->readout_sequence_number,
-                         header_adc,
-                         header_channel,
-                         ph->channel_segment_number,
-                         ph->drs0_trigger_cell,
-                         ph->drs1_trigger_cell);
-               
-               if (currentEvent == -1)
-                  currentEvent = ph->readout_sequence_number;
-               
-               // drop package if it belongs to older event
-               if (ph->readout_sequence_number < currentEvent) {
-                  printf("Package dropped, package frame=%d, current event=%d, board id = %d\n", ph->readout_sequence_number, currentEvent, ph->board_id);
-                  continue;
-               }
-               
-               // drop whole event if package of next event has been received
-               if (ph->readout_sequence_number > currentEvent) {
-                  printf("Frame dropped, package frame=%d, current event=%d\n", ph->readout_sequence_number, currentEvent);
-                  
-                  // switch to new frame
-                  currentEvent = ph->readout_sequence_number;
-                  nPacket = -1;
-                  
-                  // tag waveforms as invalid
-                  for (auto w = mActiveWDB.begin() ; w != mActiveWDB.end() ; w++) {
-                     (*w)->SetWfValid(0, false);
-                     (*w)->SetWfValid(1, false);
-                  }
-               }
-               
-               // map ADC and channel to WD channel (0..7, 8..15, 16+17)
-               int wfChannel;
-               if (header_channel == 8)
-                  wfChannel = 16 + header_adc;
-               else
-                  wfChannel = header_adc*8+header_channel;
-               assert(wfChannel < WD_N_CHANNELS);
-               
-               // find waveform data belonging to this board
-               WDWF *wf = nullptr;
-               for (auto it = mActiveWDB.begin() ; it != mActiveWDB.end() ; it++)
-                  if ((*it)->GetBoardID() == ph->board_id) {
-                     wf = *it;
-                     break;
-                  }
-               assert(wf);
-               
-               wf->SetTriggerCell(0, ph->drs0_trigger_cell);
-               
-               // decode waveform data
-//               pd = (unsigned char*)(ph+1);
-//               for (i=0 ; i<512 ; i+=2) {
-//                  data1   = ((pd[1] & 0x0F) << 8) | pd[0];
-//                  if(data1 >= 0x0800) {
-//                     // expand two's complement
-//                     data1 -= 0x1000;
-//                  }
-//                  data2 = ((unsigned short)pd[2] << 4) | (pd[1] >> 4);
-//                  if(data2 >= 0x0800) {
-//                     // expand two's complement
-//                     data2 -= 0x1000;
-//                  }
-//                  pd+=3;
-//                  
-//                  if (ph->channel_segment_number == 0) {
-//                     // first segment
-//                     wf[board][waveform_channel][i]       = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
-//                     wf[board][waveform_channel][i+1]     = (float)data2 * (1 / 4096.0);
-//                  } else {
-//                     // second segment
-//                     wf[board][waveform_channel][512+i]   = (float)data1 * (1 / 4096.0);
-//                     wf[board][waveform_channel][512+i+1] = (float)data2 * (1 / 4096.0);
-//                  }
-//               }
-            }
-         }
-         
-/*
-         // check if we got all fragments
-         for (b=i=0 ; b<_nWdb ; b++)
-            for (c=0 ; c<16 ; c++)
-               if (!isnan(wf[b][c][0]) && !isnan(wf[b][c][512]))
-                  i++;
-         if (i == _nWdb*16) {
-            
-            // cell-by-cell offset calibration
-            for (b=0 ; b<_nWdb ; b++) {
-               for (c=0 ; c<16 ; c++) {
-                  int tc = c<8 ? triggerCell[b][0] : triggerCell[b][1];
-                  for (i=0 ; i<1024 ; i++)
-                     wf[b][c][i] -= wdb[b]->fVCalib.wf_OFS1[c][(i+tc)%1024];
-               }
-            }
-            
-            // gain calibration
-            for (b=0 ; b<_nWdb ; b++) {
-               for (c=0 ; c<16 ; c++) {
-                  int tc = c<8 ? triggerCell[b][0] : triggerCell[b][1];
-                  for (int i=0 ; i<1024 ; i++) {
-                     if (wf[b][c][i] > 0)
-                        wf[b][c][i] /= wdb[b]->fVCalib.wf_gain1[c][(i+tc) % 1024];
-                     else
-                        wf[b][c][i] /= wdb[b]->fVCalib.wf_gain2[c][(i+tc) % 1024];
-                  }
-               }
-            }
-            
-            // start-to-end offset calibration
-            for (b=0 ; b<_nWdb ; b++) {
-               for (c=0 ; c<16 ; c++)
-                  for (i=0 ; i<1024 ; i++)
-                     wf[b][c][i] -= wdb[b]->fVCalib.wf_OFS2[c][i];
-            }
-            
-            // range calibration
-            for (b=0 ; b<_nWdb ; b++)
-               for (c=0 ; c<16 ; c++)
-                  for (int i=0 ; i<1024 ; i++)
-                     wf[b][c][i] -= wdb[b]->fVCalib.drs_OFS_range0[c]; // -0.95 ... 0.05 V
-            
-            // calculate calibrated time for each bin
-            
-            // integrate time from delta-t values
-            for (b=0 ; b<_nWdb ; b++) {
-               for (c=0 ; c<16 ; c++) {
-                  int tc = c<8 ? triggerCell[b][0] : triggerCell[b][1];
-                  wft[b][c][0] = 0;
-                  for (int i=1 ; i<1024 ; i++)
-                     wft[b][c][i] = wft[b][c][i-1] + wdb[b]->fTCalib.dt[c][(i-1+tc)%1024];
-               }
-               // align cell#0 of all channels inside chip0
-               float t1 = wft[b][0][(1024-triggerCell[b][0]) % 1024];
-               for (c=1 ; c<8 ; c++) {
-                  float t2 = wft[b][c][(1024-triggerCell[b][0]) % 1024];
-                  float dt = t1 - t2;
-                  for (int i=0 ; i<1024 ; i++)
-                     wft[b][c][i] += dt;
-               }
-               // align cell#0 of all channels inside chip1 to chip0
-               for (c=8 ; c<16 ; c++) {
-                  float t2 = wft[b][c][(1024-triggerCell[b][1]) % 1024];
-                  float dt = t1 - t2;
-                  for (int i=0 ; i<1024 ; i++)
-                     wft[b][c][i] += dt;
-               }
-            }
-            
-            // copy waveform to buffer and signal new event
-            memcpy(waveform, wf, sizeof(waveform));
-            memcpy(wftime, wft, sizeof(wftime));
-            new_event = 1;
-            current_frame = -1;
-            np = 0;
-            
-            // tag waveforms as invalid
-            for (int b=0 ; b<_nWdb ; b++)
-               for (int c=0 ; c<16 ; c++) {
-                  wf[b][c][0]   = nanf("");
-                  wf[b][c][512] = nanf("");
-               }
-            
-         }
-      }
-*/
-         // check that all waveforms have been received
-         auto it = mActiveWDB.begin();
-         for ( ; it != mActiveWDB.end() ; it++)
-            if (!(*it)->IsValid())
-               break;
-         if (it == mActiveWDB.end())
-            break;
-         
-
-      } while (1);
+      } while (!AllPacketsReceived());
+      
+      
+      // do various calibrations
+      // RoateWaveforms();
       
       
       // send full event into ring buffer
