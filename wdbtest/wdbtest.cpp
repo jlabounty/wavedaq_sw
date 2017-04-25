@@ -419,6 +419,15 @@ int main(int argc, const char * argv[])
                b->GetTemperature(true);
             last = now;
          }
+         
+         if (gl.wp->IsNewEvent()) {
+            auto es = gl.wp->GetEvent();
+            WDEvent *e = gl.wp->GetEvent()[0];
+            
+            std::cout << e;
+         }
+         
+         
       }
    } catch  (std::runtime_error &e) {
       std::cout << std::endl;

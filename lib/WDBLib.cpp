@@ -42,26 +42,6 @@
 
 #pragma pack(1)
 
-typedef struct {
-   unsigned char  protocol_version;
-   unsigned char  board_version;
-   unsigned short board_id;
-   unsigned char  crate_id;
-   unsigned char  slot_id;
-   unsigned char  adc_and_channel_info;
-   unsigned char  segment_and_package_type;
-   unsigned int   event_number;
-   unsigned short sampling_frequency;
-   unsigned short payload_length;
-   unsigned short trigger_number;
-   unsigned short drs0_trigger_cell;
-   unsigned short drs1_trigger_cell;
-   unsigned short trigger_type;
-   unsigned short temperature;
-   unsigned int   reserved;
-   unsigned short packet_sequence_number;
-} WD2_FRAME_HEADER;
-
 int WP::gDataSocket = 0;
 int WP::gServerPort = 0;
 int WDB::gCmdSocket = 0;
@@ -303,7 +283,7 @@ void WDB::ReceiveStatusRegisters()
 
 void WDB::ReceiveStatusRegister(int rofs)
 {
-   int index = (rofs & 0xFFFF)/4;
+   int index = (rofs & 0x0FFF)/4;
    
    if (mDemoMode) {
       this->sreg[index] = 0;
@@ -322,14 +302,14 @@ void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, uns
    if (mDemoMode)
       return;
 
-   int index = (rofs & 0xFFFF)/4;
+   int index = (rofs & 0x0FFF)/4;
 
    unsigned int r = this->creg[index];
    
    bitReplace(r, mask, ofs, v);
    
    std::ostringstream req;
-   req << "wr 0x" << std::hex << rofs << " " << r;
+   req << "rw 0x" << std::hex << rofs << " 0x" << r;
    
    Send(req.str());
    
@@ -1412,14 +1392,14 @@ unsigned int WDB::GetCrc32RegBank()
 
 void WDB::RequestDRSEvent()
 {
-   SendReceive("drsget");
+   //  SendReceive("drsget");
    
-//   SetReadoutSrcSel(0); // select DRS as readout source
-//   
-//   SetDAQSingle(true);  // start DRS domino wave
-//   SetDAQSingle(false);
-//   
-//   TrgDAQSoft();
+   SetReadoutSrcSel(0); // select DRS as readout source
+   
+   SetDAQSingle(true);  // start DRS domino wave
+   SetDAQSingle(false);
+   
+   TrgDAQSoft();
 }
 
 void WDB::RequestADCEvent()
@@ -1441,13 +1421,27 @@ void WDB::RequestTDCEvent()
 
 //--------------------------------------------------------------------
 
-bool WDWF::IsWfValid()
+bool WDEvent::IsWfValid()
 {
    for (int i=0 ; i<WD_N_CHANNELS ; i++)
       if (mChannelMask & (1 << i))
          if (!mWfValid[i][0] || !mWfValid[i][1])
             return false;
    return true;
+}
+
+void WDEvent::SetEventHeaderInfo(WD2_FRAME_HEADER *ph)
+{
+   mCrateId = ph->crate_id;
+   mSlotId  = ph->slot_id;
+   mEventNumber = ph->event_number;
+   mSamplingFrequency = ph->sampling_frequency;
+   mTriggerNumber = ph->trigger_number;
+   mTriggerCell[0] = ph->drs0_trigger_cell;
+   mTriggerCell[1] = ph->drs1_trigger_cell;
+   mTriggerType = ph->trigger_type;
+   mTemperature = std::round(ph->temperature*0.0625 * 10 + 0.5) / 10.0f;
+   mWFTypeADC = mSamplingFrequency <= 100;
 }
 
 //--------------------------------------------------------------------
@@ -1500,16 +1494,23 @@ WP::WP(bool verbose, bool demo)
 
 void WP::AddActiveWDB(int boardID)
 {
-   WDWF *w = new WDWF(boardID);
-   
-   mActiveWDB.insert(w);
+   WDEvent *w1 = new WDEvent(boardID);
+   mEvent.push_back(w1);
+   WDEvent *w2 = new WDEvent(boardID);
+   mFullEvent.push_back(w2);
 }
 
 void WP::RemoveActiveWDB(int boardID)
 {
-   for (auto w = mActiveWDB.begin() ; w != mActiveWDB.end() ; w++) {
+   for (auto w = mEvent.begin() ; w != mEvent.end() ; w++) {
       if ((*w)->GetBoardID() == boardID) {
-         mActiveWDB.erase(*w);
+         mEvent.erase(w);
+         delete *w;
+      }
+   }
+   for (auto w = mFullEvent.begin() ; w != mFullEvent.end() ; w++) {
+      if ((*w)->GetBoardID() == boardID) {
+         mFullEvent.erase(w);
          delete *w;
       }
    }
@@ -1519,7 +1520,7 @@ void WP::RemoveActiveWDB(int boardID)
 
 void WP::InvalidateAllWf()
 {
-   for (auto w = mActiveWDB.begin() ; w != mActiveWDB.end() ; w++) {
+   for (auto w = mEvent.begin() ; w != mEvent.end() ; w++) {
       for (int i=0 ; i<WD_N_CHANNELS ; i++) {
          (*w)->SetWfValid(i, 0, false);
          (*w)->SetWfValid(i, 1, false);
@@ -1533,13 +1534,13 @@ void WP::InvalidateAllWf()
 
 bool WP::AllPacketsReceived()
 {
-   auto it = mActiveWDB.begin();
-   while (it != mActiveWDB.end()) {
+   auto it = mEvent.begin();
+   while (it != mEvent.end()) {
       if (!(*it)->IsWfValid())
          break;
       it++;
    }
-   if (it == mActiveWDB.end())
+   if (it == mEvent.end())
       return true;
    return false;
 }
@@ -1601,7 +1602,7 @@ void WP::ReceiveWfPacket()
          ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
          
          if (mVerbose)
-            printf("#%02d from %s:%d, event=%5d type=%d ADC/Chn/Segment=%d/%d/%d Tcell=%04d/%04d\n",
+            printf("#%02d from %s:%d, event=%5d type=%d ADC/Chn/Segment=%d/%d/%d Tcell=%04d/%04d T=%1.1lf\n",
                    mPacketsReceived-1,
                    inet_ntoa(remote_addr.sin_addr),
                    ntohs(remote_addr.sin_port),
@@ -1611,7 +1612,8 @@ void WP::ReceiveWfPacket()
                    header_channel,
                    channel_segment,
                    ph->drs0_trigger_cell,
-                   ph->drs1_trigger_cell);
+                   ph->drs1_trigger_cell,
+                   ph->temperature*0.0625);
          
          if (mCurrentEvent == -1)
             mCurrentEvent = ph->event_number;
@@ -1651,16 +1653,16 @@ void WP::ReceiveWfPacket()
          assert(wfChannel < WD_N_CHANNELS);
          
          // find waveform data belonging to this board
-         WDWF *wf = nullptr;
-         for (auto it = mActiveWDB.begin() ; it != mActiveWDB.end() ; it++)
+         WDEvent *ev = nullptr;
+         for (auto it = mEvent.begin() ; it != mEvent.end() ; it++)
             if ((*it)->GetBoardID() == ph->board_id) {
-               wf = *it;
+               ev = *it;
                break;
             }
-         assert(wf);
+         assert(ev);
          
-         wf->SetTriggerCell(0, ph->drs0_trigger_cell);
-         wf->SetWfValid(wfChannel, channel_segment, true);
+         ev->SetWfValid(wfChannel, channel_segment, true);
+         ev->SetEventHeaderInfo(ph);
          
          // decode waveform data
          auto pd = (unsigned char*)(ph+1);
@@ -1679,12 +1681,12 @@ void WP::ReceiveWfPacket()
             
             if (channel_segment == 0) {
                // first segment
-               wf->GetWFArray(wfChannel)[i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
-               wf->GetWFArray(wfChannel)[i+1]       = (float)data2 * (1 / 4096.0);
+               ev->GetWfArray(wfChannel)[i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
+               ev->GetWfArray(wfChannel)[i+1]       = (float)data2 * (1 / 4096.0);
             } else {
                // second segment
-               wf->GetWFArray(wfChannel)[512+i]     = (float)data1 * (1 / 4096.0);
-               wf->GetWFArray(wfChannel)[512+i+1]   = (float)data2 * (1 / 4096.0);
+               ev->GetWfArray(wfChannel)[512+i]     = (float)data1 * (1 / 4096.0);
+               ev->GetWfArray(wfChannel)[512+i+1]   = (float)data2 * (1 / 4096.0);
             }
          }
       }
@@ -1694,6 +1696,125 @@ void WP::ReceiveWfPacket()
 
 //--------------------------------------------------------------------
 
+void WP::RotateWaveforms()
+{
+   for (auto it = mEvent.begin() ; it != mEvent.end() ; it++) {
+      auto ev = (*it);
+      if (ev->IsWFTypeADC())
+         continue;
+      
+      float wf[WD_N_CHANNELS][1024];
+      
+      for (int i=0 ; i<WD_N_CHANNELS ; i++)
+         for (int j=0 ; j<1024 ; j++)
+            wf[i][j] = ev->GetWfArray(i)[j];
+      
+      // un-rotate waveforms
+      if (mRotateWaveform) {
+         for (int i=0 ; i<WD_N_CHANNELS ; i++)
+            for (int j=0 ; j<1024 ; j++)
+               ev->GetWfArray(i)[j] = ev->GetWfArray(i)[j];
+      } else {
+         for (int i=0 ; i<WD_N_CHANNELS ; i++) {
+            int tc = i < 8 || i == 16 ? ev->GetTriggerCell(0) : ev->GetTriggerCell(1);
+            for (int j=0 ; j<1024 ; j++)
+               ev->GetWfArray(i)[(j+tc) % 1024] = wf[i][j];
+         }
+      }
+   }
+}
+
+//--------------------------------------------------------------------
+
+void WP::CalibrateWaveforms()
+{
+   for (auto it = mEvent.begin() ; it != mEvent.end() ; it++) {
+      auto ev = (*it);
+      
+      
+      if (ev->IsWFTypeADC()) { //---------- calibrate ADC data ----------
+         
+         if (mRangeCalib) {
+            // TBD
+         }
+         
+         // just set nominal time bins from ADC sampling rate
+         for (int i=0 ; i<WD_N_CHANNELS ; i++)
+            for (int j=0 ; j<1024 ; j++)
+               ev->GetWfTArray(i)[j] = (float)(j * 1E-6/ev->GetSamplingFrequency());
+
+      } else {  //---------- calibrate DRS data ----------
+
+         float wf[WD_N_CHANNELS][1024];
+         
+         for (int i=0 ; i<WD_N_CHANNELS ; i++)
+            for (int j=0 ; j<1024 ; j++)
+               wf[i][j] = ev->GetWfArray(i)[j];
+         
+         // un-rotate waveforms
+         if (mRotateWaveform) {
+            for (int i=0 ; i<WD_N_CHANNELS ; i++)
+               for (int j=0 ; j<1024 ; j++)
+                  ev->GetWfArray(i)[j] = ev->GetWfArray(i)[j];
+         } else {
+            for (int i=0 ; i<WD_N_CHANNELS ; i++) {
+               int tc = i < 8 || i == 16 ? ev->GetTriggerCell(0) : ev->GetTriggerCell(1);
+               for (int j=0 ; j<1024 ; j++)
+                  ev->GetWfArray(i)[(j+tc) % 1024] = wf[i][j];
+            }
+         }
+         
+         // cell-by-cell offset calibration
+         if (mOfsCalib1) {
+            // TBD
+         };
+         
+         // start-to-end offset calibration
+         if (mOfsCalib2) {
+            // TBD
+         };
+         
+         // gain calibration
+         if (mGainCalib) {
+            // TBD
+         };
+         
+         // gain calibration
+         if (mRangeCalib) {
+            // TBD
+         };
+
+         // remove spikes
+         if (mRemoveSpikes) {
+            // TBD
+         };
+
+         // calculate calibrated time for each event
+         if (mTimeCalib1) {
+            // TBD
+         } else {
+            // set nominal sampling intervals
+            for (int i=0 ; i<WD_N_CHANNELS ; i++)
+               for (int j=0 ; j<1024 ; j++)
+                  ev->GetWfTArray(i)[j] = (float)(j * 1E-6/ev->GetSamplingFrequency());
+         }
+         
+         // apply time offsets (different PCB path traces)
+         if (mTimeCalib2) {
+            // TBD
+         }
+
+         // apply horizontal trigger position correction
+         if (mTimeCalib3) {
+            // TBD
+         }
+
+         
+      }
+   }
+}
+
+//--------------------------------------------------------------------
 
 void WP::Collector()
 {
@@ -1714,14 +1835,17 @@ void WP::Collector()
       
       
       // do various calibrations
-      // RoateWaveforms();
+      RotateWaveforms();
+      CalibrateWaveforms();
       
+      // copy full event
+      auto es = mEvent.begin();
+      auto ed = mFullEvent.begin();
       
-      // send full event into ring buffer
-      // TBD
-      std::cout << "." << std::flush;
-      
-      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+      while (es != mEvent.end())
+         **(ed++) = **(es++);
+
+      mNewEvent = true;
       
    } while (1);
    

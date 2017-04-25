@@ -23,6 +23,28 @@
 //--------------------------------------------------------------------
 
 typedef struct {
+   unsigned char  protocol_version;
+   unsigned char  board_version;
+   unsigned short board_id;
+   unsigned char  crate_id;
+   unsigned char  slot_id;
+   unsigned char  adc_and_channel_info;
+   unsigned char  segment_and_package_type;
+   unsigned int   event_number;
+   unsigned short sampling_frequency;
+   unsigned short payload_length;
+   unsigned short trigger_number;
+   unsigned short drs0_trigger_cell;
+   unsigned short drs1_trigger_cell;
+   unsigned short trigger_type;
+   unsigned short temperature;
+   unsigned int   reserved;
+   unsigned short packet_sequence_number;
+} WD2_FRAME_HEADER;
+
+//--------------------------------------------------------------------
+
+typedef struct {
    char             version_id[4];
    unsigned int     crc;
    float            sampling_frequency;
@@ -72,22 +94,27 @@ public:
 //--------------------------------------------------------------------
 
 
-class WDWF {
+class WDEvent {
    unsigned short   mBoardID;
    bool             mWfValid[WD_N_CHANNELS][2];
    unsigned int     mChannelMask;
 
-   float            wf[WD_N_CHANNELS][1024];
+   float            mWf[WD_N_CHANNELS][1024];
+   float            mWfT[WD_N_CHANNELS][1024];
    
    unsigned short   mCrateId;
    unsigned short   mSlotId;
-   
-   int              mTriggerCell[2];
-   int              mWFType; // 0 = DRS, 1 = ADC
+   unsigned int     mEventNumber;
    unsigned short   mSamplingFrequency;
+   unsigned short   mTriggerNumber;
+   int              mTriggerCell[2];
+   unsigned short   mTriggerType;
+   float            mTemperature;
+   
+   bool             mWFTypeADC;
  
 public:
-   WDWF(int boardID) {
+   WDEvent(int boardID) {
       mBoardID = boardID;
       for (int i=0 ; i<WD_N_CHANNELS ; i++) {
          mWfValid[i][0] = false;
@@ -97,10 +124,15 @@ public:
    } ;
    
    unsigned char    GetBoardID() { return mBoardID; }
-   float *          GetWFArray(int channel) { return wf[channel]; }
-   void             SetTriggerCell(int drs, int cell) { mTriggerCell[drs] = cell; }
+   float *          GetWfArray(int channel) { return mWf[channel]; }
+   float *          GetWfTArray(int channel) { return mWfT[channel]; }
    void             SetWfValid(int channel, int segment, bool v) { mWfValid[channel][segment] = v; }
    bool             IsWfValid();
+   void             SetEventHeaderInfo(WD2_FRAME_HEADER *);
+   void             SetTriggerCell(int chip, int c) { mTriggerCell[chip] = c; }
+   int              GetTriggerCell(int chip) { return mTriggerCell[chip]; }
+   unsigned short   GetSamplingFrequency() { return mSamplingFrequency; }
+   bool             IsWFTypeADC() { return mWFTypeADC; }
 };
 
 // waveform processor (waveform decoding, calibration, saving, ...
@@ -115,6 +147,7 @@ class WP {
    bool             mOfsCalib1;
    bool             mOfsCalib2;
    bool             mGainCalib;
+   bool             mRangeCalib;
    bool             mTimeCalib1;
    bool             mTimeCalib2;
    bool             mTimeCalib3;
@@ -129,11 +162,15 @@ class WP {
       return std::thread([=] { Collector(); });
    };
    
-   std::set<WDWF *> mActiveWDB;
+   std::vector<WDEvent *> mEvent;
+   std::vector<WDEvent *> mFullEvent;
+   bool             mNewEvent;
    
    void             InvalidateAllWf();
    void             ReceiveWfPacket();
    bool             AllPacketsReceived();
+   void             RotateWaveforms();
+   void             CalibrateWaveforms();
    
 public:
    
@@ -143,6 +180,9 @@ public:
    // setter & getter
    bool IsDemoMode() { return mDemoMode; }
    int GetServerPort() { return gServerPort; }
+   bool IsNewEvent() { return mNewEvent; }
+   std::vector<WDEvent *> GetEvent() { return mFullEvent; }
+   void ClearNewEvent() { mNewEvent = false; }
    
    void AddActiveWDB(int boardID);
    void RemoveActiveWDB(int boardID);
