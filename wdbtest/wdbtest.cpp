@@ -348,7 +348,7 @@ int main(int argc, const char * argv[])
    for (auto &b: gl.wdb)
       b->RequestDRSEvent();
    
-   /**/
+   /*
    try {
       std::vector<unsigned long> s;
       do {
@@ -366,7 +366,7 @@ int main(int argc, const char * argv[])
       std::cout << "Aborting." << std::endl;
       return 1;
    }
-   /**/
+   */
    
    // initialize web server
    struct mg_mgr mgr;

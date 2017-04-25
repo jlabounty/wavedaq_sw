@@ -50,13 +50,15 @@ typedef struct {
    unsigned char  slot_id;
    unsigned char  adc_and_channel_info;
    unsigned char  segment_and_package_type;
-   unsigned short readout_sequence_number;
-   unsigned short hardware_sequence_number;
+   unsigned int   event_number;
    unsigned short sampling_frequency;
-   unsigned short number_of_samples;
+   unsigned short payload_length;
+   unsigned short trigger_number;
    unsigned short drs0_trigger_cell;
    unsigned short drs1_trigger_cell;
    unsigned short trigger_type;
+   unsigned short temperature;
+   unsigned int   reserved;
    unsigned short packet_sequence_number;
 } WD2_FRAME_HEADER;
 
@@ -373,6 +375,12 @@ std::string WDB::GetHwVersion()
    
    assert(bitExtract(sreg, WD2_REG_HW_VER_OFS, WD2_BIT_BOARD_MAGIC_MASK, WD2_BIT_BOARD_MAGIC_OFS) == 0xAC);
    
+   s << "Board Vendor:        ";
+   if (bitExtract(sreg, WD2_REG_HW_VER_OFS, WD2_BIT_VENDOR_ID_MASK, WD2_BIT_VENDOR_ID_OFS) == 0x01)
+      s << "PSI";
+   else
+      s << "unknown";
+   s << std::endl;
    s << "Board Type:          ";
    s << "WaveDREAM" << bitExtract(sreg, WD2_REG_HW_VER_OFS, WD2_BIT_BOARD_TYPE_MASK, WD2_BIT_BOARD_TYPE_OFS) << std::endl;
    s << "Board Revision:      ";
@@ -1582,13 +1590,14 @@ void WP::ReceiveWfPacket()
          int header_channel           = (ph->adc_and_channel_info) & 0x0f;
          int channel_segment          = (ph->segment_and_package_type >> 4) & 0x0f;
          int package_type             = (ph->segment_and_package_type) & 0x0f;
-         ph->readout_sequence_number  = SWAP_UINT16(ph->readout_sequence_number);
-         ph->hardware_sequence_number = SWAP_UINT16(ph->hardware_sequence_number);
+         ph->event_number             = SWAP_UINT32(ph->event_number);
          ph->sampling_frequency       = SWAP_UINT16(ph->sampling_frequency);
-         ph->number_of_samples        = SWAP_UINT16(ph->number_of_samples);
+         ph->payload_length           = SWAP_UINT16(ph->payload_length);
+         ph->trigger_number           = SWAP_UINT16(ph->trigger_number);
          ph->drs0_trigger_cell        = SWAP_UINT16(ph->drs0_trigger_cell);
          ph->drs1_trigger_cell        = SWAP_UINT16(ph->drs1_trigger_cell);
          ph->trigger_type             = SWAP_UINT16(ph->trigger_type);
+         ph->temperature              = SWAP_UINT16(ph->temperature);
          ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
          
          if (mVerbose)
@@ -1596,7 +1605,7 @@ void WP::ReceiveWfPacket()
                    mPacketsReceived-1,
                    inet_ntoa(remote_addr.sin_addr),
                    ntohs(remote_addr.sin_port),
-                   ph->readout_sequence_number,
+                   ph->event_number,
                    package_type,
                    header_adc,
                    header_channel,
@@ -1605,7 +1614,7 @@ void WP::ReceiveWfPacket()
                    ph->drs1_trigger_cell);
          
          if (mCurrentEvent == -1)
-            mCurrentEvent = ph->readout_sequence_number;
+            mCurrentEvent = ph->event_number;
          
          // drop package (for now...) if it is not event data
          if (package_type != 0) {
@@ -1615,21 +1624,21 @@ void WP::ReceiveWfPacket()
          }
          
          // drop package if it belongs to older event
-         if (ph->readout_sequence_number < mCurrentEvent) {
-            std::cerr << "Package dropped, package event=" << ph->readout_sequence_number << ", "
+         if (ph->event_number < mCurrentEvent) {
+            std::cerr << "Package dropped, package event=" << ph->event_number << ", "
                       << "current event=" << mCurrentEvent << ", "
                       << "board id = " << ph->board_id << std::endl;
             return;
          }
          
          // drop whole event if package of next event has been received
-         if (ph->readout_sequence_number > mCurrentEvent) {
-            std::cerr << "Event dropped, package event=" << ph->readout_sequence_number << ", "
+         if (ph->event_number > mCurrentEvent) {
+            std::cerr << "Event dropped, package event=" << ph->event_number << ", "
             << "current event=" << mCurrentEvent << ", "
             << "board id = " << ph->board_id << std::endl;
             
             // switch to new frame
-            mCurrentEvent = ph->readout_sequence_number;
+            mCurrentEvent = ph->event_number;
             InvalidateAllWf();
          }
          
