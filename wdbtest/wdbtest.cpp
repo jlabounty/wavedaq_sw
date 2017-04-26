@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include <thread>
+#include <random>
 
 #include "WDBLib.h"
 #include "mongoose.h"
@@ -51,20 +52,21 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
       
       mg_printf_http_chunk(nc, "{\n");
-      mg_printf_http_chunk(nc, "   \"demo_flag\": %s,\n",          gl->demoMode ? "true" : "false");
-      
-      mg_printf_http_chunk(nc, "   \"board\": [\n");
-      
-      for (auto &b: gl->wdb) {
-         mg_printf_http_chunk(nc, "      {\n");
-         mg_printf_http_chunk(nc, "         \"name\": \"%s\"\n",         b->getName().c_str());
-         mg_printf_http_chunk(nc, "      }");
-         if (b != gl->wdb.back())
-            mg_printf_http_chunk(nc, ",");
-         mg_printf_http_chunk(nc, "\n");
-      }
-      
-      mg_printf_http_chunk(nc, "   ]\n");
+      mg_printf_http_chunk(nc, "   \"gl\": {\n");
+      mg_printf_http_chunk(nc, "      \"demo_flag\": %s,\n",                     gl->demoMode ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"nWdb\": %d\n",                           gl->wdb.size());
+      mg_printf_http_chunk(nc, "   },\n");
+      mg_printf_http_chunk(nc, "   \"wp\": {\n");
+      mg_printf_http_chunk(nc, "      \"rotateWaveform\": %s,\n",                gl->wp->IsRotateWaveform() ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"ofsCalib1\": %s,\n",                     gl->wp->IsOfsCalib1() ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"ofsCalib2\": %s,\n",                     gl->wp->IsOfsCalib2() ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"gainCalib\": %s,\n",                     gl->wp->IsGainCalib() ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"rangeCalib\": %s,\n",                    gl->wp->IsRangeCalib() ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"timeCalib1\": %s,\n",                    gl->wp->IsTimeCalib1() ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"timeCalib2\": %s,\n",                    gl->wp->IsTimeCalib2() ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"timeCalib3\": %s,\n",                    gl->wp->IsTimeCalib3() ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"removeSpikes\": %s\n",                  gl->wp->IsRemoveSpikes() ? "true" : "false");
+      mg_printf_http_chunk(nc, "   }\n");
       mg_printf_http_chunk(nc, "}\n");
       mg_send_http_chunk(nc, "", 0); // end of response
       return;
@@ -91,74 +93,82 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
       mg_printf_http_chunk(nc, "{\n");
-      mg_printf_http_chunk(nc, "  \"board\": [\n");
+      mg_printf_http_chunk(nc, "  \"wdb\": [\n");
       
       for (int b = b1 ; b<b2 ; b++) {
+         auto w = gl->wdb[b];
          mg_printf_http_chunk(nc, "    {\n");
-         mg_printf_http_chunk(nc, "      \"temperature\": %1.1lf,\n",            gl->wdb[b]->GetTemperature(false));
-         mg_printf_http_chunk(nc, "      \"sysBusy\": %s,\n",                    gl->wdb[b]->IsSysBusy() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"wdbBusy\": %s,\n",                    gl->wdb[b]->IsSysBusy() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"hvBoardPlugged\": %s,\n",             gl->wdb[b]->IsHvBoardPlugged() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"hvBackplanePlugged\": %s,\n",         gl->wdb[b]->IsBackplanePlugged() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"extPllLck\": %s,\n",                  gl->wdb[b]->IsExtPllLck() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"intPllLck\": %s,\n",                  gl->wdb[b]->IsIntPllLck() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"drsSampleFreq\": %d,\n",              gl->wdb[b]->GetDrsSampleFreq());
-         mg_printf_http_chunk(nc, "      \"adcSampleFreq\": %d,\n",              gl->wdb[b]->GetAdcSampleFreq());
-         mg_printf_http_chunk(nc, "      \"compChannelStatus\": %d,\n",          gl->wdb[b]->GetCompChannelStatus());
-         mg_printf_http_chunk(nc, "      \"lastEventNumber\": %d,\n",            gl->wdb[b]->GetLastEventNumber());
-         mg_printf_http_chunk(nc, "      \"triggerBusParityErrorCount\": %d,\n", gl->wdb[b]->GetLastEventNumber());
-         mg_printf_http_chunk(nc, "      \"triggerBusType\": %d,\n",             gl->wdb[b]->GetTriggerBusType());
-         mg_printf_http_chunk(nc, "      \"triggerBusNumber\": %d,\n",           gl->wdb[b]->GetTriggerBusNumber());
-         mg_printf_http_chunk(nc, "      \"crateId\": %d,\n",                    gl->wdb[b]->GetCrateId());
-         mg_printf_http_chunk(nc, "      \"slotId\": %d,\n",                     gl->wdb[b]->GetSlotId());
-         mg_printf_http_chunk(nc, "      \"readoutSrcSel\": %d,\n",              gl->wdb[b]->GetReadoutSrcSel());
-         mg_printf_http_chunk(nc, "      \"daqNormal\": %s,\n",                  gl->wdb[b]->IsDAQNormal() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"daqSingle\": %s,\n",                  gl->wdb[b]->IsDAQSingle() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"drs0TimingRefSel\": %d,\n",           gl->wdb[b]->GetDRS0TimingRefSel());
-         mg_printf_http_chunk(nc, "      \"drs1TimingRefSel\": %d,\n",           gl->wdb[b]->GetDRS1TimingRefSel());
-         mg_printf_http_chunk(nc, "      \"timingCalibBufferEnable\": %s,\n",    gl->wdb[b]->IsTimingCalibBufferEnable() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"timingCalibSignalEnable\": %s,\n",    gl->wdb[b]->IsTimingCalibSignalEnable() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"daqClkSrcSel\": %d,\n",               gl->wdb[b]->GetDAQClkSrcSel());
-         mg_printf_http_chunk(nc, "      \"extClkInSel\": %d,\n",                gl->wdb[b]->GetExtClkInSel());
-         mg_printf_http_chunk(nc, "      \"extClkFreq\": %d,\n",                 gl->wdb[b]->GetExtClkFreq());
-         mg_printf_http_chunk(nc, "      \"localClkFreq\": %d,\n",               gl->wdb[b]->GetLocalClkFreq());
-         mg_printf_http_chunk(nc, "      \"drs0ChnTxEnable\": %d,\n",            gl->wdb[b]->GetDRS0ChnTxEnable());
-         mg_printf_http_chunk(nc, "      \"drs1ChnTxEnable\": %d,\n",            gl->wdb[b]->GetDRS1ChnTxEnable());
-         mg_printf_http_chunk(nc, "      \"dacPZCLevel\": %d,\n",                gl->wdb[b]->GetDacPZCLevel());
+         mg_printf_http_chunk(nc, "      \"name\": \"%s\",\n",                   w->GetName().c_str());
+         mg_printf_http_chunk(nc, "      \"temperature\": %1.1lf,\n",            w->GetTemperature(false));
+         mg_printf_http_chunk(nc, "      \"sysBusy\": %s,\n",                    w->IsSysBusy() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"wdbBusy\": %s,\n",                    w->IsSysBusy() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"hvBoardPlugged\": %s,\n",             w->IsHvBoardPlugged() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"hvBackplanePlugged\": %s,\n",         w->IsBackplanePlugged() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"extPllLck\": %s,\n",                  w->IsExtPllLck() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"intPllLck\": %s,\n",                  w->IsIntPllLck() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"drsSampleFreq\": %d,\n",              w->GetDrsSampleFreq());
+         mg_printf_http_chunk(nc, "      \"adcSampleFreq\": %d,\n",              w->GetAdcSampleFreq());
+         mg_printf_http_chunk(nc, "      \"compChannelStatus\": %d,\n",          w->GetCompChannelStatus());
+         mg_printf_http_chunk(nc, "      \"lastEventNumber\": %d,\n",            w->GetLastEventNumber());
+         mg_printf_http_chunk(nc, "      \"triggerBusParityErrorCount\": %d,\n", w->GetLastEventNumber());
+         mg_printf_http_chunk(nc, "      \"triggerBusType\": %d,\n",             w->GetTriggerBusType());
+         mg_printf_http_chunk(nc, "      \"triggerBusNumber\": %d,\n",           w->GetTriggerBusNumber());
+         mg_printf_http_chunk(nc, "      \"crateId\": %d,\n",                    w->GetCrateId());
+         mg_printf_http_chunk(nc, "      \"slotId\": %d,\n",                     w->GetSlotId());
+         mg_printf_http_chunk(nc, "      \"readoutSrcSel\": %d,\n",              w->GetReadoutSrcSel());
+         mg_printf_http_chunk(nc, "      \"daqNormal\": %s,\n",                  w->IsDAQNormal() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"daqSingle\": %s,\n",                  w->IsDAQSingle() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"drs0TimingRefSel\": %d,\n",           w->GetDRS0TimingRefSel());
+         mg_printf_http_chunk(nc, "      \"drs1TimingRefSel\": %d,\n",           w->GetDRS1TimingRefSel());
+         mg_printf_http_chunk(nc, "      \"timingCalibBufferEnable\": %s,\n",    w->IsTimingCalibBufferEnable() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"timingCalibSignalEnable\": %s,\n",    w->IsTimingCalibSignalEnable() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"daqClkSrcSel\": %d,\n",               w->GetDAQClkSrcSel());
+         mg_printf_http_chunk(nc, "      \"extClkInSel\": %d,\n",                w->GetExtClkInSel());
+         mg_printf_http_chunk(nc, "      \"extClkFreq\": %d,\n",                 w->GetExtClkFreq());
+         mg_printf_http_chunk(nc, "      \"localClkFreq\": %d,\n",               w->GetLocalClkFreq());
+         mg_printf_http_chunk(nc, "      \"drs0ChnTxEnable\": %d,\n",            w->GetDRS0ChnTxEnable());
+         mg_printf_http_chunk(nc, "      \"drs1ChnTxEnable\": %d,\n",            w->GetDRS1ChnTxEnable());
+         
+         mg_printf_http_chunk(nc, "      \"dacOfs\": %d,\n",                     w->GetDacOfs());
+         mg_printf_http_chunk(nc, "      \"dacCalDc\": %d,\n",                   w->GetDacCalDc());
+         mg_printf_http_chunk(nc, "      \"dacPZCLevel\": %d,\n",                w->GetDacPZCLevel());
 
          mg_printf_http_chunk(nc, "      \"dacTlevel\": [\n");
          for (int i=0 ; i<14 ; i++)
-            mg_printf_http_chunk(nc, "        %d,\n",                            gl->wdb[b]->GetDacTlevel(i));
-         mg_printf_http_chunk(nc, "        %d ],\n",                             gl->wdb[b]->GetDacTlevel(15));
+            mg_printf_http_chunk(nc, "        %d,\n",                            w->GetDacTlevel(i));
+         mg_printf_http_chunk(nc, "        %d ],\n",                             w->GetDacTlevel(15));
 
          mg_printf_http_chunk(nc, "      \"fePZC\": [\n");
          for (int i=0 ; i<14 ; i++)
-            mg_printf_http_chunk(nc, "        %s,\n",                            gl->wdb[b]->IsFEPZC(i) ? "true" : "false");
-         mg_printf_http_chunk(nc, "        %s ],\n",                             gl->wdb[b]->IsFEPZC(15) ? "true" : "false");
+            mg_printf_http_chunk(nc, "        %s,\n",                            w->IsFEPZC(i) ? "true" : "false");
+         mg_printf_http_chunk(nc, "        %s ],\n",                             w->IsFEPZC(15) ? "true" : "false");
 
          mg_printf_http_chunk(nc, "      \"feGain\": [\n");
          for (int i=0 ; i<14 ; i++)
-            mg_printf_http_chunk(nc, "        %1g,\n",                           gl->wdb[b]->GetFEGain(i));
-         mg_printf_http_chunk(nc, "        %1g ],\n",                            gl->wdb[b]->GetFEGain(15));
+            mg_printf_http_chunk(nc, "        %1g,\n",                           w->GetFEGain(i));
+         mg_printf_http_chunk(nc, "        %1g ],\n",                            w->GetFEGain(15));
 
          mg_printf_http_chunk(nc, "      \"feMux\": [\n");
          for (int i=0 ; i<14 ; i++)
-            mg_printf_http_chunk(nc, "        %1g,\n",                           gl->wdb[b]->GetFEMux(i));
-         mg_printf_http_chunk(nc, "        %1g ],\n",                            gl->wdb[b]->GetFEMux(15));
+            mg_printf_http_chunk(nc, "        %1g,\n",                           w->GetFEMux(i));
+         mg_printf_http_chunk(nc, "        %1g ],\n",                            w->GetFEMux(15));
 
-         mg_printf_http_chunk(nc, "      \"triggerShaperEnable\": %s,\n",        gl->wdb[b]->IsTriggerShaperEnable() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"triggerPulseLength\": %d,\n",         gl->wdb[b]->GetTriggerPulseLength());
-         mg_printf_http_chunk(nc, "      \"triggerEnable\": %s,\n",              gl->wdb[b]->IsTriggerEnable() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"triggerFallingEdge\": %s,\n",         gl->wdb[b]->IsTriggerFallingEdge() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"triggerExternalOr\": %s,\n",          gl->wdb[b]->IsTriggerExternalOr() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"triggerExternalAnd\": %s,\n",         gl->wdb[b]->IsTriggerExternalAnd() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"triggerDelayEnable\": %s,\n",         gl->wdb[b]->IsTriggerDelayEnable() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"triggerDelay\": %d,\n",               gl->wdb[b]->GetTriggerDelay());
-         mg_printf_http_chunk(nc, "      \"triggerComparatorMask\": %d,\n",      gl->wdb[b]->GetTriggerComparatorMask());
-         mg_printf_http_chunk(nc, "      \"triggerCfgOr\": %d,\n",               gl->wdb[b]->GetTriggerCfgOr());
-         mg_printf_http_chunk(nc, "      \"triggerCfgAnd\": %d,\n",              gl->wdb[b]->GetTriggerCfgAnd());
+         mg_printf_http_chunk(nc, "      \"triggerShaperEnable\": %s,\n",        w->IsTriggerShaperEnable() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"triggerPulseLength\": %d,\n",         w->GetTriggerPulseLength());
+         mg_printf_http_chunk(nc, "      \"triggerEnable\": %s,\n",              w->IsTriggerEnable() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"triggerFallingEdge\": %s,\n",         w->IsTriggerFallingEdge() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"triggerExternalOr\": %s,\n",          w->IsTriggerExternalOr() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"triggerExternalAnd\": %s,\n",         w->IsTriggerExternalAnd() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"triggerDelayEnable\": %s,\n",         w->IsTriggerDelayEnable() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"triggerDelay\": %d,\n",               w->GetTriggerDelay());
+         mg_printf_http_chunk(nc, "      \"triggerComparatorMask\": %d,\n",      w->GetTriggerComparatorMask());
+         mg_printf_http_chunk(nc, "      \"triggerCfgOr\": %d,\n",               w->GetTriggerCfgOr());
+         mg_printf_http_chunk(nc, "      \"triggerCfgAnd\": %d\n",               w->GetTriggerCfgAnd());
 
-         mg_printf_http_chunk(nc, "    }\n");
+         if (b == b2-1)
+            mg_printf_http_chunk(nc, "    }\n");
+         else
+            mg_printf_http_chunk(nc, "    },\n");
       }
       
       mg_printf_http_chunk(nc, "  ]\n");
@@ -190,7 +200,14 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       int b = atoi(str);
       
       std::vector<unsigned long> scaler;
-      gl->wdb[b]->GetScalers(scaler);
+      if (gl->demoMode) {
+         std::default_random_engine generator;
+         std::poisson_distribution<int> dist(1000);
+         
+         for (auto i=0 ; i<34 ; i++)
+            scaler.push_back(dist(generator));
+      } else
+         gl->wdb[b]->GetScalers(scaler);
       
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
       mg_printf_http_chunk(nc, "{\n");
@@ -212,6 +229,146 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "   \"build\": \"%s\"\n", __DATE__);
       mg_printf_http_chunk(nc, "}\n");
       mg_send_http_chunk(nc, "", 0);
+      return;
+   }
+
+   // binary encoded waveforms
+   if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/wf") == 0) {
+      float wfT[WD_N_CHANNELS][1024], wfU[WD_N_CHANNELS][1024];
+      bool bWfAvailable = false;
+      
+      mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
+      int b = atoi(str);
+      
+      mg_get_http_var(&hm->query_string, "c", str, sizeof(str));
+      int chn = atoi(str);
+      
+      mg_send_response_line(nc, 200, "Content-Type: application/octet-stream\r\nTransfer-Encoding: chunked\r\n");
+      
+      // return progress if in voltage calibration mode
+//      if (vcalib_prog.state) {
+//         int t = 10;    // array type
+//         mg_send_http_chunk(nc, (const char *)&t, 4);
+//         
+//         mg_send_http_chunk(nc, (const char *)&vcalib_prog.i_board, 4);
+//         
+//         float f = (float)vcalib_prog.progress;
+//         mg_send_http_chunk(nc, (const char *)&f, 4);
+//         
+//         mg_send_http_chunk(nc, "", 0);
+//         return;
+//      }
+      
+      // return progress and period in time calibration mode
+//      if (tcalib_prog.state) {
+//         int t = 11;    // array type
+//         mg_send_http_chunk(nc, (const char *)&t, 4);
+//         
+//         float f = (float)tcalib_prog.i_board;
+//         mg_send_http_chunk(nc, (const char *)&f, 4);
+//         
+//         f = (float)tcalib_prog.progress;
+//         mg_send_http_chunk(nc, (const char *)&f, 4);
+//         
+//         for (int c=0 ; c<WD_N_CHANNELS ; c++)
+//            if (chn & (1 << c)) {
+//               int n = 1024;
+//               mg_send_http_chunk(nc, (const char *)&c, 4);
+//               mg_send_http_chunk(nc, (const char *)&n, 4);
+//               
+//               mg_send_http_chunk(nc, (const char *)gl->board[tcalib_prog.i_board].tcalib.period[c], sizeof(float)*n);
+//            }
+//         
+//         mg_send_http_chunk(nc, "", 0);
+//         return;
+//      }
+      
+      // avoid invalid board index
+      if (b < 0 || b >= gl->wdb.size())
+         b = 0;
+      
+      if (gl->demoMode) {
+         bWfAvailable = true;
+         for (int c=0 ; c<WD_N_CHANNELS ; c++) {
+            for (int i=0 ; i<1024 ; i++) {
+               wfT[c][i] = (float)(i*1E-9 / gl->wdb[b]->GetDrsSampleFreq());
+               wfU[c][i] = (float)(sin((wfT[c][i]+c*1E-9)*gl->wdb[b]->GetDrsSampleFreq() / 1E-9 / 50) / 4 + ((float)random()/RAND_MAX-0.5) / 300);
+            }
+            // add spikes
+            for (int i=0 ; i<1024 ; i++) {
+               if ((float)random()/RAND_MAX < 0.00005) {
+                  float s = ((float)random()/RAND_MAX-0.5) / 5;
+                  int j = i-5;
+                  float f;
+                  for (f=0 ; f<1 ; f += 0.2,j++)
+                     if (j >= 0 && j< 1024)
+                        wfU[c][j] += s * f;
+                  for (f=1 ; f>0 ; f -= 0.2,j++)
+                     if (j >= 0 && j< 1024)
+                        wfU[c][j] += s * f;
+               }
+            }
+         }
+      } else {
+         
+//         if (gl->adc_flag) {
+//            // issue single ADC software trigger
+//            wd_send(gl, b, 100, "adcget\n", NULL, NULL);
+//         } else {
+//            if (gl->trigger_mode == WD_TM_AUTO || gl->trigger_mode == WD_TM_SOFTWARE)
+//               // issue single DRS software trigger
+//               wd_send(gl, b, 100, "drsget\n", NULL, NULL);
+//            else
+//               // just start DRS and wait for trigger
+//               wd_send(gl, b, 100, "drsstart\n", NULL, NULL);
+//         }
+//         // read waveforms
+//         status = wd_read_waveform(gl, b, 1000, &eventHeader, wfU, wfT);
+      }
+      
+      // save waveforms
+      // wd_save_waveform(gl, b, chn, &eventHeader, wfU, wfT);
+      
+      if (gl->demoMode)
+         b = 0xFF; // signals demo data
+      
+      if (bWfAvailable) {
+         int t = 1;                 // array type
+         int n = 1024;              // number of elements
+         int l = 0; // gl->li.nLogged;    // number of logged events
+         for (int c=0 ; c<WD_N_CHANNELS ; c++) {
+            if (chn & (1 << c)) {
+               t = 1; // time array
+               mg_send_http_chunk(nc, (const char *)&t, 4);
+               mg_send_http_chunk(nc, (const char *)&b, 4);
+               mg_send_http_chunk(nc, (const char *)&l, 4);
+               mg_send_http_chunk(nc, (const char *)&c, 4);
+               mg_send_http_chunk(nc, (const char *)&n, 4);
+               mg_send_http_chunk(nc, (const char *)wfT[c], sizeof(float)*n);
+            }
+         }
+         
+         for (int c=0 ; c<WD_N_CHANNELS ; c++) {
+            if (chn & (1 << c)) {
+               t = 2; // voltage array
+               mg_send_http_chunk(nc, (const char *)&t, 4);
+               mg_send_http_chunk(nc, (const char *)&b, 4);
+               mg_send_http_chunk(nc, (const char *)&l, 4);
+               mg_send_http_chunk(nc, (const char *)&c, 4);
+               mg_send_http_chunk(nc, (const char *)&n, 4);
+               mg_send_http_chunk(nc, (const char *)wfU[c], sizeof(float)*n);
+            }
+         }
+         
+      } else {
+         // just return idle message
+         int t = 0;
+         mg_send_http_chunk(nc, (const char *)&t, 4);
+         mg_send_http_chunk(nc, (const char *)&b, 4);
+      }
+      
+      mg_send_http_chunk(nc, "", 0);
+      
       return;
    }
 
@@ -321,7 +478,7 @@ int main(int argc, const char * argv[])
    
    // connect to all WDB and retrieve registers
    for (auto &b: gl.wdb) {
-      std::cout << "Connect to " << b->getName() << " ... " << std::flush;
+      std::cout << "Connect to " << b->GetName() << " ... " << std::flush;
       try {
          if (!gl.demoMode) {
             b->SetVerbose(gl.verbose);

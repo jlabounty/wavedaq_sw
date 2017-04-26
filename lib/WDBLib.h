@@ -162,9 +162,9 @@ class WP {
       return std::thread([=] { Collector(); });
    };
    
+   bool             mNewEvent;
    std::vector<WDEvent *> mEvent;
    std::vector<WDEvent *> mFullEvent;
-   bool             mNewEvent;
    
    void             InvalidateAllWf();
    void             ReceiveWfPacket();
@@ -178,11 +178,32 @@ public:
    WP(bool verbose = false, bool demo = false);
    
    // setter & getter
-   bool IsDemoMode() { return mDemoMode; }
+   int GetDataSocket() { return gDataSocket; }
    int GetServerPort() { return gServerPort; }
+   bool IsVerbose() { return mVerbose; }
+   bool IsDemoMode() { return mDemoMode; }
+   bool IsRotateWaveform() { return mRotateWaveform;}
+   bool IsOfsCalib1() { return mOfsCalib1;}
+   bool IsOfsCalib2() { return mOfsCalib2;}
+   bool IsGainCalib() { return mGainCalib;}
+   bool IsRangeCalib() { return mRangeCalib;}
+   bool IsTimeCalib1() { return mTimeCalib1;}
+   bool IsTimeCalib2() { return mTimeCalib2;}
+   bool IsTimeCalib3() { return mTimeCalib3;}
+   bool IsRemoveSpikes() { return mRemoveSpikes; }
    bool IsNewEvent() { return mNewEvent; }
    std::vector<WDEvent *> GetEvent() { return mFullEvent; }
    void ClearNewEvent() { mNewEvent = false; }
+
+   void SetRotateWaveform(bool f) { mRotateWaveform = f; }
+   void SetOfsCalib1(bool f) { mOfsCalib1 = f; }
+   void SetOfsCalib2(bool f) { mOfsCalib2 = f; }
+   void SetGainCalib(bool f) { mGainCalib = f; }
+   void SetRangeCalib(bool f) { mRangeCalib = f; }
+   void SetTimeCalib1(bool f) { mTimeCalib1 = f; }
+   void SetTimeCalib2(bool f) { mTimeCalib2 = f; }
+   void SetTimeCalib3(bool f) { mTimeCalib3 = f; }
+   void SetRemoveSpikes(bool f) { mRemoveSpikes = f; }
    
    void AddActiveWDB(int boardID);
    void RemoveActiveWDB(int boardID);
@@ -218,7 +239,7 @@ public:
    }
 
    // setter & getter
-   std::string getName() { return mName; }
+   std::string GetName() { return mName; }
    
    // interface functions
    void SetVerbose(bool verbose) { mVerbose = verbose; }

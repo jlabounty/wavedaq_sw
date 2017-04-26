@@ -63,7 +63,7 @@ function init() {
       cell.appendChild(document.createTextNode(r));
       cell.style.backgroundColor = OSC.chnColors[r];
 
-      var cell = row.insertCell(-1);
+      cell = row.insertCell(-1);
       cell.className = "channelsTd";
       var sel = document.createElement('select');
       sel.id = "gain"+r;
@@ -79,7 +79,7 @@ function init() {
       }
       cell.appendChild(sel);
 
-      var cell = row.insertCell(-1);
+      cell = row.insertCell(-1);
       cell.className = "channelsTd";
       var cb = document.createElement('input');
       cb.type = "checkbox";
@@ -89,7 +89,7 @@ function init() {
       cb.setAttribute("onclick", "setGl(this,"+r+")");
       cell.appendChild(cb);
 
-      var cell = row.insertCell(-1);
+      cell = row.insertCell(-1);
       cell.className = "channelsTd";
       var inp = document.createElement('input');
       inp.type = "text";
@@ -129,13 +129,13 @@ function init() {
 }
 
 function wdSelect(s) {
-   OSC.board = s.selectedIndex;
+   OSC.curBoard = s.selectedIndex;
 }
 
 function loadStatus() {
    if (OSC.demoMode) {
-      OSC.GL.board[OSC.board].temperature = 37.8;
-      OSC.GL.board[OSC.board].pll_locked = true;
+      OSC.wdb[OSC.curBoard].temperature = 37.8;
+      OSC.wdb[OSC.curBoard].pll_locked = true;
       return;
    }
 
@@ -145,12 +145,12 @@ function loadStatus() {
       if (req.readyState == 4 && req.status == 200) {
          var t = JSON.parse(req.responseText);
 
-         OSC.GL.board[OSC.board].temperature = parseFloat(t.temp);
-         OSC.GL.board[OSC.board].pll_locked = t.pll_locked;
+         OSC.wdb[OSC.curBoard].temperature = parseFloat(t.temp);
+         OSC.wdb[OSC.curBoard].pll_locked = t.pll_locked;
       }
    };
 
-   req.open("GET", "status?b=" + OSC.board + "&r=" + Math.random(), true); // avoid cached results
+   req.open("GET", "status?b=" + OSC.curBoard + "&r=" + Math.random(), true); // avoid cached results
    req.send();
 
    window.setTimeout(loadStatus, 10000);
@@ -159,7 +159,7 @@ function loadStatus() {
 function loadScalers() {
    if (OSC.demoMode) {
       for (var i = 0; i < 16; i++)
-         OSC.GL.board[OSC.board].scaler[i] = Math.floor(Math.random() * 9999);
+         OSC.wdb[OSC.curBoard].scaler[i] = Math.floor(Math.random() * 9999);
       window.setTimeout(loadScalers, 1000);
       return;
    }
@@ -168,11 +168,11 @@ function loadScalers() {
    var req = new XMLHttpRequest();
    req.onreadystatechange = function () {
       if (req.readyState == 4 && req.status == 200) {
-         OSC.GL.board[OSC.board].scaler = JSON.parse(req.responseText).scaler;
+         OSC.wdb[OSC.curBoard].scaler = JSON.parse(req.responseText).scaler;
       }
    };
 
-   req.open("GET", "scalers?b=" + OSC.board + "&r=" + Math.random(), true); // avoid cached results
+   req.open("GET", "scalers?b=" + OSC.curBoard + "&r=" + Math.random(), true); // avoid cached results
    req.send();
 
    window.setTimeout(loadScalers, 1000);
@@ -182,61 +182,62 @@ function populateControls(init)
 {
    // populate board list
    var sel = document.getElementById("wdSelect");
-   for (var i = 0; i < OSC.GL.board.length; i++) {
+   for (var i = 0; i < OSC.gl.nWdb; i++) {
       var opt = document.createElement('option');
-      opt.innerHTML = OSC.GL.board[i].name;
-      opt.value = OSC.GL.board[i].name;
+      opt.innerHTML = OSC.wdb[i].name;
+      opt.value = OSC.wdb[i].name;
       if (sel.childNodes[i + 1] == undefined)
          sel.appendChild(opt);
       else if (sel.childNodes[i + 1].innerHTML != opt.innerHTML)
          sel.replaceChild(opt, sel.childNodes[i + 1]);
    }
-   OSC.nWd = OSC.GL.board.length;
+   OSC.nWdb = OSC.gl.nWdb;
 
    // populate config
-   document.getElementById("trgSlider").set(OSC.GL.board[0].trigger_level[0] + 0.5);
-   document.getElementById("inpTLevel").value = Math.round(OSC.GL.board[0].trigger_level[0] * 1000);
-   document.getElementById("trgDelaySlider").set(1 - OSC.GL.board[0].trigger_delay / 450);
-   document.getElementById("inpTDelay").value = Math.round(OSC.GL.board[0].trigger_delay);
+   document.getElementById("trgSlider").set(OSC.wdb[0].dacTlevel[0] + 0.5);
+   document.getElementById("inpTLevel").value = Math.round(OSC.wdb[0].dacTlevel[0] * 1000);
+   document.getElementById("trgDelaySlider").set(1 - OSC.wdb[0].triggerDelay / 450);
+   document.getElementById("inpTDelay").value = Math.round(OSC.wdb[0].triggerDelay);
    
-   if (OSC.GL.trigger_mode == 2) {
+   if (OSC.wdb[0].triggerEnable) {
       document.config.trigger_mode[0].checked = false;
       document.config.trigger_mode[1].checked = false;
    } else
-      document.config.trigger_mode[OSC.GL.trigger_mode].checked = true;
+      document.config.trigger_mode[0].checked = true; //##
 
-   document.getElementById("pzc").checked = OSC.GL.board[0].pzc[0];
-   document.getElementById("gain").value = OSC.GL.board[0].gain[0];
-   document.getElementById("osctca_flag").checked = OSC.GL.osctca_flag;
+   document.getElementById("pzc").checked = OSC.wdb[0].fePZC[0];
+   document.getElementById("gain").value = OSC.wdb[0].feGain[0];
+   document.getElementById("osctca_flag").checked = OSC.wdb[0].timingCalibSignalEnable;
 
-   document.getElementById("rangeSelect").value = OSC.GL.board[0].range;
+   document.getElementById("rangeSelect").value = 0; // ##
 
-   document.getElementById("mux_flag").checked = OSC.GL.mux_flag;
-   document.getElementById("dcv_flag").checked = OSC.GL.dcv_flag;
+   document.getElementById("mux_flag").checked = OSC.wdb[0].feMux[0];
+   document.getElementById("dcv_flag").checked = OSC.wdb[0].timingCalibBufferEnable;
 
-   document.getElementById("dcOffsetSlider").set(OSC.GL.dc_offset / 2 + 0.5);
-   document.getElementById("inpDcOffset").value = OSC.GL.dc_offset * 1000;
+   document.getElementById("dcOffsetSlider").set(OSC.wdb[0].dacCalDC / 2 + 0.5);
+   document.getElementById("inpDcOffset").value = OSC.wdb[0].dacCalDC * 1000;
 
-   document.getElementById("nominal_sampling_frequency").value = Math.round(OSC.GL.actual_sampling_frequency * 10) / 10;
-   document.getElementById("actual_sampling_frequency").innerHTML = OSC.GL.actual_sampling_frequency + " GSPS";
+   document.getElementById("nominal_sampling_frequency").value = Math.round(OSC.wdb[0].drsSampleFreq/1000 * 10) / 10;
+   document.getElementById("actual_sampling_frequency").innerHTML = OSC.wdb[0].drsSampleFreq/1000 + " GSPS";
 
-   document.getElementById("calib1").checked = OSC.GL.ofs_calib1_flag;
-   document.getElementById("calib2").checked = OSC.GL.ofs_calib2_flag;
-   document.getElementById("calib3").checked = OSC.GL.gain_calib_flag;
-   document.getElementById("calib4").checked = OSC.GL.range_calib_flag;
-   document.getElementById("spikes").checked = OSC.GL.remove_spikes;
-   document.getElementById("rotate").checked = OSC.GL.rotate_flag;
+   document.getElementById("calib1").checked = OSC.wp.ofsCalib1;
+   document.getElementById("calib2").checked = OSC.wp.ofsCalib2;
+   document.getElementById("calib3").checked = OSC.wp.gainCalib;
+   document.getElementById("calib4").checked = OSC.wp.rangeCalib;
+   document.getElementById("spikes").checked = OSC.wp.removeSpikes;
+   document.getElementById("rotate").checked = OSC.wp.rotateFlag;
 
-   document.getElementById("tcalib1").checked = OSC.GL.time_calib1_flag;
-   document.getElementById("tcalib2").checked = OSC.GL.time_calib2_flag;
-   document.getElementById("tcalib3").checked = OSC.GL.time_calib3_flag;
-   document.getElementById("clksource").checked = OSC.GL.clock_source;
+   document.getElementById("tcalib1").checked = OSC.wp.time_calib1_flag;
+   document.getElementById("tcalib2").checked = OSC.wp.time_calib2_flag;
+   document.getElementById("tcalib3").checked = OSC.wp.time_calib3_flag;
+
+   document.getElementById("clksource").checked = (OSC.wdb[0].daqClkSrcSel == 0);
 
    if (init) {
       // set scale according to sampling frequency
-      if (OSC.GL.actual_sampling_frequency < 2)
+      if (OSC.wdb[0].drsSampleFreq < 2000)
          OSC.wfTScaleIndex = 6; // 100 ns
-      else if (OSC.GL.actual_sampling_frequency < 4)
+      else if (OSC.wdb[0].drsSampleFreq < 4000)
          OSC.wfTScaleIndex = 5; // 50 ns
       else
          OSC.wfTScaleIndex = 4; // 20 ns
@@ -245,61 +246,32 @@ function populateControls(init)
 }
 
 function loadGl(init) {
-   if (OSC.demoMode) {
-      OSC.GL = {
-         "demo_flag": true,
-         "rotate_flag": true,
-         "verbose_flag": false,
-         "adc_flag": false,
-         "ofs_calib1_flag": true,
-         "ofs_calib2_flag": true,
-         "gain_calib_flag": true,
-         "range_calib_flag": true,
-         "time_calib1_flag": true,
-         "time_calib2_flag": true,
-         "time_calib3_flag": false,
-         "remove_spikes": true,
-         "http_port": 8080,
-         "n_boards": 1,
-         "nominal_sampling_frequency": 5.000,
-         "actual_sampling_frequency": 5.000,
-         "trigger_mode": 1,
-         "osctca_flag": false,
-         "clock_source": 0,
-         "mux_flag": false,
-         "dcv_flag": false,
-         "dc_offset": 0.000,
-         "board": [
-            {
-               "name": "wd000",
-               "trigger_delay": 0,
-               "trigger_mask": "FFFF0000",
-               "trigger_level": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-               "gain": [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-               "pzc": [false,false,false,false,false,false,false,false,
-                       false,false,false,false,false,false,false,false],
-               "range": 0.000,
-               "temperature": 36.9,
-               "pll_locked": true,
-               "scaler": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-            }
-         ]
-      };
-
-      populateControls(init);
-      return;
-   }
-
    // send AJAX request
    var req = new XMLHttpRequest();
    req.onreadystatechange = function () {
       if (req.readyState == 4 && req.status == 200) {
-         OSC.GL = JSON.parse(req.responseText);
-         populateControls(init);
+         var o = JSON.parse(req.responseText);
+         OSC.gl = o.gl;
+         OSC.wp = o.wp;
+         loadWdb(-1, init); // daisy-chain for loading all WDBs
       }
    };
 
    req.open("GET", "gl?r=" + Math.random(), true); // avoid cached results
+   req.send();
+}
+
+function loadWdb(b, init) {
+   // send AJAX request
+   var req = new XMLHttpRequest();
+   req.onreadystatechange = function () {
+      if (req.readyState == 4 && req.status == 200) {
+         OSC.wdb = JSON.parse(req.responseText).wdb;
+         populateControls(init);
+      }
+   };
+
+   req.open("GET", "wdb?b=" + b + "&r=" + Math.random(), true); // avoid cached results
    req.send();
 }
 
@@ -331,11 +303,11 @@ function setGl(e, channel) {
    }
 
    if (e.name == "clock_source" && e.checked == true) {
-      if (OSC.GL.board[OSC.board].scaler[17] < 79E6)
+      if (OSC.wdb[OSC.curBoard].scaler[17] < 79E6)
          dlgMessage("Warning", "No external clock present");
    }
    
-   var uri = "gl/" + OSC.board + "/"+ e.name;
+   var uri = "gl/" + OSC.curBoard + "/"+ e.name;
    if (channel != undefined)
       uri += "/" + channel;
 
@@ -392,7 +364,7 @@ function doVCalib() {
       alert("Not available in demo mode");
       return;
    }
-   progressOldBoard = OSC.board;
+   progressOldBoard = OSC.curBoard;
 
    var req = new XMLHttpRequest();
    req.open("PUT", "vcalib");
@@ -404,7 +376,7 @@ function doTCalib() {
       alert("Not available in demo mode");
       return;
    }
-   progressOldBoard = OSC.board;
+   progressOldBoard = OSC.curBoard;
 
    var req = new XMLHttpRequest();
    req.open("PUT", "tcalib");
@@ -448,9 +420,9 @@ function loadWF() {
          wf.T[c] = [];
          wf.U[c] = [];
          for (i = 0; i < 1024; i++) {
-            var t = i * 1E-9 / OSC.GL.actual_sampling_frequency;
+            var t = i * 1E-9 / OSC.wdb[0].drsSampleFreq;
             wf.T[c][i] = t;
-            wf.U[c][i] = Math.sin((wf.T[c][i] + c * 1E-9) * OSC.GL.actual_sampling_frequency /
+            wf.U[c][i] = Math.sin((wf.T[c][i] + c * 1E-9) * OSC.wdb[0].drsSampleFreq /
                   1E-9 / 50) / 4 + (Math.random() - 0.5) / 300;
 
             var xt = OSC.timeToX(t);
@@ -504,7 +476,7 @@ function loadWF() {
    // send AJAX request
    OSC.req = new XMLHttpRequest();
    OSC.req.onreadystatechange = receiveWF;
-   OSC.req.open("GET", "wf?b=" + OSC.board + "&c=" + chn + "&r=" + Math.random(), true); // avoid cached results
+   OSC.req.open("GET", "wf?b=" + OSC.curBoard + "&c=" + chn + "&r=" + Math.random(), true); // avoid cached results
    OSC.req.responseType = "arraybuffer";
    OSC.req.send();
 }
@@ -562,7 +534,7 @@ function receiveWF() {
                document.getElementById("btnVCalib").disabled = false;
                document.getElementById("btnTCalib").innerHTML = "Execute Time Calibration";
                document.getElementById("btnTCalib").disabled = false;
-               OSC.board = progressOldBoard;
+               OSC.curBoard = progressOldBoard;
 
                window.setTimeout(loadGl, 10);
             }
@@ -919,12 +891,12 @@ function sldTLevel(value) {
    
    tLevelLast = value;
    var req = new XMLHttpRequest();
-   req.open("PUT", "gl/"+OSC.board+"/trigger_level", true);
+   req.open("PUT", "gl/"+OSC.curBoard+"/trigger_level", true);
    req.send(value);
 
    document.getElementById("inpTLevel").value = value * 1000;
    for (var i=0 ; i<16 ; i++) {
-      OSC.GL.board[OSC.board].trigger_level[i] = value;
+      OSC.wdb[OSC.curBoard].trigger_level[i] = value;
       document.getElementById("trigger_level"+i).value = value * 1000;
    }
    
@@ -939,10 +911,10 @@ function sldTDelay(value) {
       return;
    var del = 450 - Math.round(value * 450);
    var req = new XMLHttpRequest();
-   req.open("PUT", "gl/"+OSC.board+"/trigger_delay", true);
+   req.open("PUT", "gl/"+OSC.curBoard+"/trigger_delay", true);
    req.send(del);
 
-   OSC.GL.board[OSC.board].trigger_delay = del;
+   OSC.wdb[OSC.curBoard].trigger_delay = del;
    document.getElementById("inpTDelay").value = del;
    clearStat();
 }
@@ -951,10 +923,10 @@ function btnTedge(value) {
    if (OSC.demoMode)
       return;
    var req = new XMLHttpRequest();
-   req.open("PUT", "gl/"+OSC.board+"/trigger_edge", true);
+   req.open("PUT", "gl/"+OSC.curBoard+"/trigger_edge", true);
    req.send(value);
 
-   OSC.GL.board[OSC.board].trigger_edge = value;
+   OSC.wdb[OSC.curBoard].trigger_edge = value;
 
    if (value == 0) {
       document.getElementById('trgEdgeUp').style.display = "inline";
@@ -969,7 +941,7 @@ function sldDcOffset(value) {
    if (OSC.demoMode)
       return;
    var req = new XMLHttpRequest();
-   req.open("PUT", "gl/"+OSC.board+"/dc_offset", true);
+   req.open("PUT", "gl/"+OSC.curBoard+"/dc_offset", true);
    req.send(Math.round(value * 2000 - 1000) / 1000);
 
    document.getElementById("inpDcOffset").value = Math.round(value * 2000 - 1000);
@@ -979,7 +951,7 @@ function setRange(s) {
    if (OSC.demoMode)
       return;
    var req = new XMLHttpRequest();
-   req.open("PUT", "gl/"+OSC.board+"/range", true);
+   req.open("PUT", "gl/"+OSC.curBoard+"/range", true);
    req.send(parseFloat(s.value));
 }
 
@@ -1022,7 +994,7 @@ function btnOfsDist() {
 }
 
 function sldTOffset(value) {
-   var wfWidth = 1024 / OSC.GL.actual_sampling_frequency * 1E-9;
+   var wfWidth = 1024 / OSC.wdb[OSC.curBoard].drsSampleFreq * 1E-12;
    var scWidth = OSC.wfTScale * 10;
    if (wfWidth >= scWidth)
       OSC.wfTOffset = 0.9 * scWidth - wfWidth - value * (0.8 * scWidth - wfWidth);
