@@ -1026,7 +1026,7 @@ function btnOfsDist() {
 }
 
 function sldTOffset(value) {
-   var wfWidth = 1024 / OSC.wdb[OSC.curBoard].drsSampleFreq * 1E-12;
+   var wfWidth = 1024 / OSC.wdb[OSC.curBoard].drsSampleFreq * 1E-6;
    var scWidth = OSC.wfTScale * 10;
    if (wfWidth >= scWidth)
       OSC.wfTOffset = 0.9 * scWidth - wfWidth - value * (0.8 * scWidth - wfWidth);
