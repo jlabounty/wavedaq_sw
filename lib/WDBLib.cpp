@@ -36,27 +36,33 @@
 #include "WDBLib.h"
 #include "register_map_wd2.h"
 
-#define WD2_CMD_PORT          3000
+#define WD2_USE_UDP_BIN
 
-#define UDP_PROTOCOL_VERSION  4
+#define WD2_CMD_PORT_BIN          4000
+#define WD2_CMD_PORT_ASCII        3000
+
+#define WD2_UDP_PROTOCOL_VERSION  4
 
 #pragma pack(1)
 
-int WP::gDataSocket = 0;
-int WP::gServerPort = 0;
-int WDB::gCmdSocket = 0;
+int WP::gDataSocket   = 0;
+int WP::gServerPort   = 0;
+int WDB::gASCIISocket = 0;
+int WDB::gBinSocket   = 0;
+
+unsigned short WDB::udpSequenceNumber = 0; // sequence number to identify related send/acknowledge packets
 
 //--------------------------------------------------------------------
 
-void WDB::Send(std::string str, int timeout_ms)
+void WDB::SendUDP(std::string str, int timeout_ms)
 {
    std::string result;
-   result = SendReceive(str, timeout_ms);
+   result = SendReceiveUDP(str, timeout_ms);
 }
 
 //--------------------------------------------------------------------
 
-std::string WDB::SendReceive(std::string str, int timeout_ms)
+std::string WDB::SendReceiveUDP(std::string str, int timeout_ms)
 {
    size_t i;
    fd_set readfds;
@@ -66,7 +72,7 @@ std::string WDB::SendReceive(std::string str, int timeout_ms)
    char   rx_buffer[1600];
    std::string prompt, result;
    
-   memcpy(&client_addr, mEthAddr, sizeof(client_addr));
+   memcpy(&client_addr, mEthAddrAscii, sizeof(client_addr));
    
    if (str.back() != '\n')
       str += '\n';
@@ -82,7 +88,7 @@ std::string WDB::SendReceive(std::string str, int timeout_ms)
       // clear input queue
       do {
          FD_ZERO(&readfds);
-         FD_SET(gCmdSocket, &readfds);
+         FD_SET(gASCIISocket, &readfds);
          
          timeout.tv_sec = 0;
          timeout.tv_usec = 0;
@@ -90,14 +96,14 @@ std::string WDB::SendReceive(std::string str, int timeout_ms)
             status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
          } while (status == -1); // don't return on interrupt
          
-         if (!FD_ISSET(gCmdSocket, &readfds))
+         if (!FD_ISSET(gASCIISocket, &readfds))
             break;
          
-         i = recv(gCmdSocket, rx_buffer, sizeof(rx_buffer), 0);
+         i = recv(gASCIISocket, rx_buffer, sizeof(rx_buffer), 0);
       } while (true);
       
       // send request
-      i = sendto(gCmdSocket,
+      i = sendto(gASCIISocket,
                  str.c_str(),
                  str.size(),
                  0,
@@ -115,7 +121,7 @@ std::string WDB::SendReceive(std::string str, int timeout_ms)
          memset(rx_buffer, 0, sizeof(rx_buffer));
          
          FD_ZERO(&readfds);
-         FD_SET(gCmdSocket, &readfds);
+         FD_SET(gASCIISocket, &readfds);
          
          ms = timeout_ms;
          timeout.tv_sec = ms / 1000;
@@ -125,10 +131,10 @@ std::string WDB::SendReceive(std::string str, int timeout_ms)
             status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
          } while (status == -1);        /* dont return if an alarm signal was cought */
          
-         if (!FD_ISSET(gCmdSocket, &readfds))
+         if (!FD_ISSET(gASCIISocket, &readfds))
             break;
          
-         i = recv(gCmdSocket, rx_buffer, sizeof(rx_buffer), 0);
+         i = recv(gASCIISocket, rx_buffer, sizeof(rx_buffer), 0);
          assert(i > 0);
          
          if (rx_buffer[i-1] == 0) // don't count trailing zero
@@ -167,6 +173,235 @@ std::string WDB::SendReceive(std::string str, int timeout_ms)
 
 //--------------------------------------------------------------------
 
+void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data, int timeout_ms)
+{
+   static unsigned short udpSeq = 0; // sequence number to identify related send/acknowledge packets
+   size_t i;
+   fd_set readfds;
+   struct timeval timeout;
+   int    status, ms;
+   struct sockaddr_in client_addr;
+   bool   bSuccess = false;
+   
+   udpSequenceNumber++;
+   std::memcpy(&client_addr, mEthAddrBin, sizeof(client_addr));
+   
+   std::vector<unsigned char> writeBuf(8);
+   std::vector<unsigned char> readBuf(1600);
+   
+   writeBuf[0] = 0x14; // Write32 command
+   writeBuf[1] = 0;
+   writeBuf[2] = udpSequenceNumber >> 8;
+   writeBuf[3] = udpSequenceNumber & 0xFF;
+   
+   writeBuf[4] = (ofs >> 24) & 0xFF;
+   writeBuf[5] = (ofs >> 16) & 0xFF;
+   writeBuf[6] = (ofs >>  8) & 0xFF;
+   writeBuf[7] = (ofs >>  0) & 0xFF;
+   
+   for (auto &d: data) {
+      writeBuf.push_back((d >> 24) & 0xFF);
+      writeBuf.push_back((d >> 16) & 0xFF);
+      writeBuf.push_back((d >>  8) & 0xFF);
+      writeBuf.push_back((d >>  0) & 0xFF);
+   }
+   
+   // retry max five times
+   for (int retry=0 ; retry < 5 ; retry++) {
+      
+      // clear input queue
+      do {
+         FD_ZERO(&readfds);
+         FD_SET(gBinSocket, &readfds);
+         
+         timeout.tv_sec = 0;
+         timeout.tv_usec = 0;
+         do {
+            status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
+         } while (status == -1); // don't return on interrupt
+         
+         if (!FD_ISSET(gBinSocket, &readfds))
+            break;
+         
+         i = recv(gBinSocket, &readBuf[0], readBuf.size(), 0);
+      } while (true);
+      
+      // send request
+      i = sendto(gBinSocket,
+                 &writeBuf[0],
+                 writeBuf.size(),
+                 0,
+                 (struct sockaddr *)&client_addr,
+                 sizeof(client_addr));
+      
+      if (i != writeBuf.size()) {
+         if (this->mVerbose)
+            std::cout << mName << " send retry " << retry+1 << std::endl;
+         continue;
+      }
+      
+      // retrieve reply until acknowledge is found
+      do {
+         std::fill(readBuf.begin(), readBuf.end(), 0);
+         
+         FD_ZERO(&readfds);
+         FD_SET(gBinSocket, &readfds);
+         
+         ms = timeout_ms;
+         timeout.tv_sec = ms / 1000;
+         timeout.tv_usec = (ms % 1000) * 1000;
+         
+         do {
+            status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
+         } while (status == -1);        /* dont return if an alarm signal was cought */
+         
+         if (!FD_ISSET(gBinSocket, &readfds))
+            break;
+         
+         i = recv(gBinSocket, &readBuf[0], readBuf.size(), 0);
+         assert(i > 0);
+         
+         // check for acknowledge
+         bSuccess = readBuf[0] == 0x14 &&
+                    readBuf[1] == 0x01 &&
+                    readBuf[2] == ((udpSeq >> 8) & 0xFF) && readBuf[3] == (udpSeq & 0xFF);
+         if (bSuccess)
+            return;
+         
+      } while (1);
+      
+      
+      if (this->mVerbose)
+         std::cout << mName << " retry " << retry+1 << std::endl;
+   }
+   
+   if (!bSuccess) {
+      throw std::runtime_error(std::string("Error writing binary UDP data to "+mName+"."));
+      return;
+   }
+}
+
+//--------------------------------------------------------------------
+
+std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int len, int timeout_ms)
+{
+   size_t i;
+   fd_set readfds;
+   struct timeval timeout;
+   int    status, ms;
+   struct sockaddr_in client_addr;
+   bool   bSuccess = false;
+   std::vector<unsigned int> result;
+   
+   udpSequenceNumber++;
+   std::memcpy(&client_addr, mEthAddrBin, sizeof(client_addr));
+   
+   std::vector<unsigned char> writeBuf(12);
+   std::vector<unsigned char> readBuf(1600);
+   
+   writeBuf[ 0] = 0x24; // Read32 command
+   writeBuf[ 1] = 0;
+   writeBuf[ 2] = udpSequenceNumber >> 8;
+   writeBuf[ 3] = udpSequenceNumber & 0xFF;
+   
+   writeBuf[ 4] = (ofs >> 24) & 0xFF;
+   writeBuf[ 5] = (ofs >> 16) & 0xFF;
+   writeBuf[ 6] = (ofs >>  8) & 0xFF;
+   writeBuf[ 7] = (ofs >>  0) & 0xFF;
+
+   writeBuf[ 8] = (len >> 24) & 0xFF;
+   writeBuf[ 9] = (len >> 16) & 0xFF;
+   writeBuf[10] = (len >>  8) & 0xFF;
+   writeBuf[11] = (len >>  0) & 0xFF;
+
+   // retry max five times
+   for (int retry=0 ; retry < 5 ; retry++) {
+      
+      // clear input queue
+      do {
+         FD_ZERO(&readfds);
+         FD_SET(gBinSocket, &readfds);
+         
+         timeout.tv_sec = 0;
+         timeout.tv_usec = 0;
+         do {
+            status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
+         } while (status == -1); // don't return on interrupt
+         
+         if (!FD_ISSET(gBinSocket, &readfds))
+            break;
+         
+         i = recv(gBinSocket, &readBuf[0], readBuf.size(), 0);
+      } while (true);
+      
+      // send request
+      i = sendto(gBinSocket,
+                 &writeBuf[0],
+                 writeBuf.size(),
+                 0,
+                 (struct sockaddr *)&client_addr,
+                 sizeof(client_addr));
+      
+      if (i != writeBuf.size()) {
+         if (this->mVerbose)
+            std::cout << mName << " send retry " << retry+1 << std::endl;
+         continue;
+      }
+      
+      // retrieve reply until acknowledge is found
+      do {
+         std::fill(readBuf.begin(), readBuf.end(), 0);
+         
+         FD_ZERO(&readfds);
+         FD_SET(gBinSocket, &readfds);
+         
+         ms = timeout_ms;
+         timeout.tv_sec = ms / 1000;
+         timeout.tv_usec = (ms % 1000) * 1000;
+         
+         do {
+            status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
+         } while (status == -1);        /* dont return if an alarm signal was cought */
+         
+         if (!FD_ISSET(gBinSocket, &readfds))
+            break;
+         
+         i = recv(gBinSocket, &readBuf[0], readBuf.size(), 0);
+         assert(i > 0);
+         
+         // check for acknowledge
+         bSuccess = readBuf[0] == 0x14 &&
+         readBuf[1] == 0x01 &&
+         readBuf[2] == ((udpSequenceNumber >> 8) & 0xFF) && readBuf[3] == (udpSequenceNumber & 0xFF);
+         
+         // check for data length (limited to one UDP frame at the moment)
+         bSuccess = bSuccess && (i == len + 4);
+
+         if (bSuccess) {
+            // copy data
+            for (int i=0 ; i<len ; i++)
+               result.push_back(readBuf[i*4+4] << 24 |
+                                readBuf[i*4+5] << 16 |
+                                readBuf[i*4+6] <<  8 |
+                                readBuf[i*4+7]);
+            return result;
+         }
+
+      } while (1);
+      
+      
+      if (this->mVerbose)
+         std::cout << mName << " retry " << retry+1 << std::endl;
+   }
+   
+   if (!bSuccess)
+      throw std::runtime_error(std::string("Error reading binary UDP data from "+mName+"."));
+   
+   return result;
+}
+
+//--------------------------------------------------------------------
+
 void WDB::Connect(int port)
 {
    struct sockaddr_in client_addr;
@@ -182,11 +417,16 @@ void WDB::Connect(int port)
    }
 #endif
    
-   // create UDB socket for command interpreter on any port
-   if (gCmdSocket == 0)
-      gCmdSocket = socket(AF_INET, SOCK_DGRAM, 0);
-   assert(gCmdSocket);
-   
+   // create UDB socket for ASCII command interpreter
+   if (gASCIISocket == 0)
+      gASCIISocket = socket(AF_INET, SOCK_DGRAM, 0);
+   assert(gASCIISocket);
+
+   // create UDB socket for binary commands
+   if (gBinSocket == 0)
+      gBinSocket = socket(AF_INET, SOCK_DGRAM, 0);
+   assert(gBinSocket);
+
    // retrieve Ethernet address of board
    phe = gethostbyname(mName.c_str());
    if (phe == NULL)
@@ -194,25 +434,30 @@ void WDB::Connect(int port)
    
    memcpy((char *)&client_addr.sin_addr, phe->h_addr, phe->h_length);
    client_addr.sin_family = AF_INET;
-   client_addr.sin_port = htons(WD2_CMD_PORT);
-   memcpy(mEthAddr, &client_addr, sizeof(client_addr));
-   
+   client_addr.sin_port = htons(WD2_CMD_PORT_ASCII);
+   memcpy(mEthAddrAscii, &client_addr, sizeof(client_addr));
+
+   client_addr.sin_port = htons(WD2_CMD_PORT_BIN);
+   memcpy(mEthAddrBin, &client_addr, sizeof(client_addr));
+
    // check if board is alive
    try {
-      WDB::Send("", 500);
+      WDB::SendUDP("", 500);
    } catch (...) {
       throw std::runtime_error(std::string("Cannot connect to board ")+mName+".");
    }
    
    // set dbglevel none
-   Send("dbglvl none");
+   SendUDP("dbglvl none");
    
    // set destinantion port in WD board
-   Send(std::string("setenv dstport ")+std::to_string(port));
+   SendUDP(std::string("setenv dstport ")+std::to_string(port));
    
    // set MAC address and IP address of this computer in WD board
-   Send("cfgdst");
+   SendUDP("cfgdst");
 
+   std::vector<unsigned int> data { 0x12345678 };
+   WriteUDP(0xC3000000 + WD2_REG_WDB_LOC_OFS, data);
 }
 
 //--------------------------------------------------------------------
@@ -234,40 +479,56 @@ void bitReplace(unsigned int &reg, unsigned int mask, unsigned int ofs, unsigned
 
 void WDB::ReceiveControlRegisters()
 {
+   unsigned int nReg = (WD2_REG_CRC32_REG_BANK_OFS - WD2_REG_WDB_LOC_OFS)/4 + 1;
+
    if (mDemoMode) {
-      for (auto i=0 ; i<WD2_REG_CRC32_REG_BANK_OFS/4 ; i++)
+      for (auto i=0 ; i<nReg ; i++)
          this->creg[i] = 0;
       return;
    }
 
+#ifdef WD2_USE_UDP_BIN
+   std::vector<unsigned int> result = ReadUDP(WD2_REG_WDB_LOC_OFS, nReg);
+   for (auto i=0 ; i<nReg ; i++)
+      this->creg[i] = result[i];
+#else
    std::string result;
    std::ostringstream req;
-   req << "rr 0x" << std::hex << WD2_REG_WDB_LOC_OFS << " " << std::dec << WD2_REG_CRC32_REG_BANK_OFS/4+1;
+   req << "rr 0x" << std::hex << WD2_REG_WDB_LOC_OFS << " " << std::dec << nReg;
    
-   result = SendReceive(req.str(), 500);
+   result = SendReceiveUDP(req.str(), 500);
    std::stringstream ss(result);
    std::string line;
    
-   for (auto i=0 ; i<WD2_REG_CRC32_REG_BANK_OFS/4 ; i++) {
+   for (auto i=0 ; i<nReg ; i++) {
       std::getline(ss, line, '\r');
       auto adr = (unsigned int)std::stoul(line.substr(3), nullptr, 16) - WD2_REG_WDB_LOC_OFS;
       if (adr <= WD2_REG_CRC32_REG_BANK_OFS)
          this->creg[adr/4] = (unsigned int)std::stoul(line.substr(10), nullptr, 16);
    }
+#endif
 }
 
 void WDB::ReceiveStatusRegisters()
 {
+   unsigned int nReg = (WD2_REG_ADC_01_CLK_MOD_FLAG_OFS - WD2_REG_HW_VER_OFS)/4 + 1;
+
    if (mDemoMode) {
-      for (auto i=0 ; i<WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4 ; i++)
+      for (auto i=0 ; i<nReg ; i++)
          this->sreg[i] = 0;
       return;
    }
+   
+#ifdef WD2_USE_UDP_BIN
+   std::vector<unsigned int> result = ReadUDP(WD2_REG_HW_VER_OFS, nReg);
+   for (auto i=0 ; i<nReg ; i++)
+      this->sreg[i] = result[i];
+#else
    std::string result;
    std::ostringstream req;
    req << "rr 0x" << std::hex << WD2_REG_HW_VER_OFS << " " << std::dec << WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4+1;
    
-   result = SendReceive(req.str(), 500);
+   result = SendReceiveUDP(req.str(), 500);
    std::stringstream ss(result);
    std::string line;
    
@@ -279,6 +540,7 @@ void WDB::ReceiveStatusRegisters()
          this->sreg[index] = (unsigned int)std::stoul(line.substr(10), nullptr, 16);
       }
    }
+#endif
 }
 
 void WDB::ReceiveStatusRegister(int rofs)
@@ -289,12 +551,18 @@ void WDB::ReceiveStatusRegister(int rofs)
       this->sreg[index] = 0;
       return;
    }
+
+#ifdef WD2_USE_UDP_BIN
+   std::vector<unsigned int> result = ReadUDP(rofs, 1);
+   this->sreg[index] = result[0];
+#else
    std::string result;
    std::ostringstream req;
    req << "rr 0x" << std::hex << rofs << " 1";
       
-   result = SendReceive(req.str());
+   result = SendReceiveUDP(req.str());
    this->sreg[index] = (unsigned int)std::stoul(result.substr(13), nullptr, 16);
+#endif
 }
 
 void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v)
@@ -308,10 +576,14 @@ void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, uns
    
    bitReplace(r, mask, ofs, v);
    
+#ifdef WD2_USE_UDP_BIN
+   WriteUDP(rofs, std::vector<unsigned int> { r });
+#else
    std::ostringstream req;
    req << "rw 0x" << std::hex << rofs << " 0x" << r;
    
-   Send(req.str());
+   SendUDP(req.str());
+#endif
    
    this->creg[index] = r;
 }
@@ -516,7 +788,7 @@ void WDB::GetScalers(std::vector<unsigned long> &scaler)
    std::ostringstream req;
    req << "rr 0x" << std::hex << WD2_REG_SCALER_0_LSB_OFS << " 34";
    
-   result = SendReceive(req.str(), 500); // increased timeout
+   result = SendReceiveUDP(req.str(), 500); // increased timeout
    std::stringstream ss(result);
    std::string line;
    
@@ -1428,7 +1700,7 @@ void WDB::RequestADCEvent()
 
 void WDB::RequestTDCEvent()
 {
-   SendReceive("tdcget"); // not yet implemented !
+   SendReceiveUDP("tdcget"); // not yet implemented !
 }
 
 //--------------------------------------------------------------------
@@ -1590,8 +1862,8 @@ void WP::ReceiveWfPacket()
          WD2_FRAME_HEADER *ph = (WD2_FRAME_HEADER *)buffer;
          
          // check protocol version
-         if (ph->protocol_version != UDP_PROTOCOL_VERSION) {
-            std::cerr << "Invalid protocol version " << ph->protocol_version << ", expected " << UDP_PROTOCOL_VERSION << ". Probably WD firmware update required." << std::endl;
+         if (ph->protocol_version != WD2_UDP_PROTOCOL_VERSION) {
+            std::cerr << "Invalid protocol version " << ph->protocol_version << ", expected " << WD2_UDP_PROTOCOL_VERSION << ". Probably WD firmware update required." << std::endl;
             return;
          }
          

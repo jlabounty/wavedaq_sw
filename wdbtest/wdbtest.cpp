@@ -580,9 +580,8 @@ int main(int argc, const char * argv[])
          
          if (gl.wp->IsNewEvent()) {
             auto es = gl.wp->GetEvent();
-            WDEvent *e = gl.wp->GetEvent()[0];
-            
-            std::cout << e;
+            //WDEvent *e = gl.wp->GetEvent()[0];
+            gl.wp->ClearNewEvent();
          }
          
          

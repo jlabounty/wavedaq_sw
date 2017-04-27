@@ -215,18 +215,24 @@ public:
 // WaveDREAM board class. Interface functions to all WDB registers
 class WDB {
    std::string      mName;
-   unsigned char    mEthAddr[16];
+   unsigned char    mEthAddrAscii[16];
+   unsigned char    mEthAddrBin[16];
    bool             mVerbose;
    bool             mDemoMode;
 
    unsigned int     creg[WD2_REG_CRC32_REG_BANK_OFS/4+1];
    unsigned int     sreg[WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4+1];
    
-   static int       gCmdSocket;
+   static int       gASCIISocket;
+   static int       gBinSocket;
+   static unsigned short udpSequenceNumber;
 
-   std::string      SendReceive(std::string str, int timeout_ms = 100);
-   void             Send(std::string str, int timeout_ms = 100);
-   
+   std::string      SendReceiveUDP(std::string str, int timeout_ms = 100);
+   void             SendUDP(std::string str, int timeout_ms = 100);
+
+   void             WriteUDP(unsigned int ofs, std::vector<unsigned int> data, int timeout_ms = 100);
+   std::vector<unsigned int> ReadUDP(unsigned int ofs, unsigned int len, int timeout_ms = 100);
+
    float            mFEGain;
 
 public:
