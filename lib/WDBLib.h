@@ -191,7 +191,7 @@ public:
    bool IsTimeCalib2() { return mTimeCalib2;}
    bool IsTimeCalib3() { return mTimeCalib3;}
    bool IsRemoveSpikes() { return mRemoveSpikes; }
-   bool IsNewEvent() { return mNewEvent; }
+   bool IsNewEvent(int timeout);
    std::vector<WDEvent *> GetEvent() { return mFullEvent; }
    void ClearNewEvent() { mNewEvent = false; }
 
@@ -243,6 +243,11 @@ public:
       mVerbose = verbose;
       mDemoMode = (name == "demo");
    }
+
+   // constants
+   const int        cReadoutSrcDRS = 0x01;
+   const int        cReadoutSrcADC = 0x02;
+   const int        cReadoutSrcTDC = 0x04;
 
    // setter & getter
    std::string GetName() { return mName; }
@@ -311,6 +316,7 @@ public:
    void SetDAQNormal(bool value);
    bool IsDAQSingle();
    void SetDAQSingle(bool value);
+   void StartDAQSingle();
    unsigned int GetDRS0TimingRefSel();
    void SetDRS0TimingRefSel(unsigned int value);
    unsigned int GetDRS1TimingRefSel();

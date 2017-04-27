@@ -21,12 +21,17 @@
 
 std::vector<std::string> wdbName = { "wd094" };
 
+const int cTriggerModeNormal    = 1;
+const int cTriggerModeAuto      = 2;
+const int cTriggerModeSoftware  = 3;
+
 typedef struct {
    bool demoMode;
    int  serverPort;
    bool verbose;
    std::vector<WDB*> wdb;
    WP*  wp;
+   int  triggerMode;
 } GLOBALS;
 
 /*------------------------------------------------------------------*/
@@ -288,6 +293,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       if (b < 0 || b >= gl->wdb.size())
          b = 0;
       
+      WDEvent *event;
+
       if (gl->demoMode) {
          bWfAvailable = true;
          for (int c=0 ; c<WD_N_CHANNELS ; c++) {
@@ -312,19 +319,23 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          }
       } else {
          
-//         if (gl->adc_flag) {
-//            // issue single ADC software trigger
-//            wd_send(gl, b, 100, "adcget\n", NULL, NULL);
-//         } else {
-//            if (gl->trigger_mode == WD_TM_AUTO || gl->trigger_mode == WD_TM_SOFTWARE)
-//               // issue single DRS software trigger
-//               wd_send(gl, b, 100, "drsget\n", NULL, NULL);
-//            else
-//               // just start DRS and wait for trigger
-//               wd_send(gl, b, 100, "drsstart\n", NULL, NULL);
-//         }
-//         // read waveforms
-//         status = wd_read_waveform(gl, b, 1000, &eventHeader, wfU, wfT);
+         // request single event
+         for (auto &b: gl->wdb) {
+            if (b->GetReadoutSrcSel() == b->cReadoutSrcDRS) {
+               if (gl->triggerMode == cTriggerModeAuto || gl->triggerMode == cTriggerModeSoftware)
+                  b->RequestDRSEvent();
+               else if (gl->triggerMode == cTriggerModeNormal)
+                  b->StartDAQSingle();
+            } else if (b->GetReadoutSrcSel() == b->cReadoutSrcADC)
+               b->RequestADCEvent();
+         }
+         
+         // read waveforms
+         if (gl->wp->IsNewEvent(100)) {
+            auto es = gl->wp->GetEvent();
+            event = gl->wp->GetEvent()[0];
+            gl->wp->ClearNewEvent();
+         }
       }
       
       // save waveforms
@@ -498,34 +509,10 @@ int main(int argc, const char * argv[])
       std::cout << " OK" << std::endl;
    }
 
-   // set active WDB
+   // tell waveform processor which WDB are active
    for (auto &b: gl.wdb)
       gl.wp->AddActiveWDB(b->GetSerialNumber());
 
-   // request single event
-   for (auto &b: gl.wdb)
-      b->RequestDRSEvent();
-   
-   /*
-   try {
-      std::vector<unsigned long> s;
-      do {
-         gl.wdb[0]->GetScalers(s);
-         std::cout << "S: " << s[0] << std::endl;
-         
-         std::cout << "T: " << gl.wdb[0]->GetTemperature() << std::endl;
-         
-         sleep(1000);
-      } while (1);
-      
-   } catch  (std::runtime_error &e) {
-      std::cout << std::endl;
-      std::cout << e.what() << std::endl;
-      std::cout << "Aborting." << std::endl;
-      return 1;
-   }
-   */
-   
    // initialize web server
    struct mg_mgr mgr;
    struct mg_connection *con;
@@ -577,13 +564,7 @@ int main(int argc, const char * argv[])
                b->GetTemperature(true);
             last = now;
          }
-         
-         if (gl.wp->IsNewEvent()) {
-            auto es = gl.wp->GetEvent();
-            //WDEvent *e = gl.wp->GetEvent()[0];
-            gl.wp->ClearNewEvent();
-         }
-         
+        
          
       }
    } catch  (std::runtime_error &e) {

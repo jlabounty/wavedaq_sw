@@ -36,7 +36,7 @@
 #include "WDBLib.h"
 #include "register_map_wd2.h"
 
-#define WD2_USE_UDP_BIN
+#undef WD2_USE_UDP_BIN
 
 #define WD2_CMD_PORT_BIN          4000
 #define WD2_CMD_PORT_ASCII        3000
@@ -910,7 +910,7 @@ void WDB::SetCompPowerEnable(bool value)
 }
 
 unsigned int WDB::GetReadoutSrcSel()
-// 0x1 = DRS readout / 0x2 = ADC readout / 0x4 = TDC readout
+// cReadoutSrcDrs / cReadoutSrcAdc / cReadoutSrcTdc
 {
    return bitExtract(creg, WD2_REG_WDB_LOC_OFS, WD2_BIT_READOUT_SRC_SEL_MASK, WD2_BIT_READOUT_SRC_SEL_OFS);
 }
@@ -980,6 +980,11 @@ bool WDB::IsDAQSingle()
 void WDB::SetDAQSingle(bool value)
 {
    SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_DAQ_SINGLE_MASK, WD2_BIT_DAQ_SINGLE_OFS, value ? 1 : 0);
+}
+
+void WDB::StartDAQSingle()
+{
+   SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_DAQ_SINGLE_MASK, WD2_BIT_DAQ_SINGLE_OFS, 1);
 }
 
 unsigned int WDB::GetDRS0TimingRefSel()
@@ -2133,6 +2138,11 @@ void WP::Collector()
       
    } while (1);
    
+}
+
+bool WP::IsNewEvent(int timeout)
+{
+   return mNewEvent;
 }
 
 //--------------------------------------------------------------------
