@@ -119,13 +119,24 @@ function init() {
    OSC.redraw();
 
    // schedule first waveform load
-   window.setTimeout(loadWF, 10);
+   OSC.timer.loadWF = window.setTimeout(loadWF, 10);
 
    // schedule loadStatus()
-   window.setTimeout(loadStatus, 10000);
+   OSC.timer.loadStatus = window.setTimeout(loadStatus, 10000);
 
    // schedule loadScalers()
-   window.setTimeout(loadScalers, 1000);
+   OSC.timer.loadScalers = window.setTimeout(loadScalers, 1000);
+}
+
+function clearTimers() {
+   if (OSC.timer.loadGl != undefined)
+      clearTimeout(OSC.timer.loadGl);
+   if (OSC.timer.loadStatus != undefined)
+      clearTimeout(OSC.timer.loadStatus);
+   if (OSC.timer.loadScalers != undefined)
+      clearTimeout(OSC.timer.loadScalers);
+   if (OSC.timer.loadWF != undefined)
+      clearTimeout(OSC.timer.loadWF);
 }
 
 function wdSelect(s) {
@@ -135,7 +146,7 @@ function wdSelect(s) {
 function loadStatus() {
    if (OSC.demoMode) {
       OSC.wdb[OSC.curBoard].temperature = 37.8;
-      OSC.wdb[OSC.curBoard].pll_locked = true;
+      OSC.wdb[OSC.curBoard].pllLck = true;
       return;
    }
 
@@ -145,15 +156,19 @@ function loadStatus() {
       if (req.readyState == 4 && req.status == 200) {
          var t = JSON.parse(req.responseText);
 
-         OSC.wdb[OSC.curBoard].temperature = parseFloat(t.temp);
-         OSC.wdb[OSC.curBoard].pll_locked = t.pll_locked;
+         OSC.wdb[OSC.curBoard].temperature = parseFloat(t.temperature);
+         OSC.wdb[OSC.curBoard].pllLck = t.pllLck;
+         OSC.redraw();
+      } else if (req.readyState == 4 && req.status == 0) {
+         alert("Connection to server broken.\nPlease reload page.");
+         clearTimers();
       }
    };
 
    req.open("GET", "status?b=" + OSC.curBoard + "&r=" + Math.random(), true); // avoid cached results
    req.send();
 
-   window.setTimeout(loadStatus, 10000);
+   OSC.timer.loadStatus = window.setTimeout(loadStatus, 10000);
 }
 
 function loadScalers() {
@@ -169,13 +184,17 @@ function loadScalers() {
    req.onreadystatechange = function () {
       if (req.readyState == 4 && req.status == 200) {
          OSC.wdb[OSC.curBoard].scaler = JSON.parse(req.responseText).scaler;
+         OSC.redraw();
+      } else if (req.readyState == 4 && req.status == 0) {
+         alert("Connection to server broken.\nPlease reload page.");
+         clearTimers();
       }
    };
 
    req.open("GET", "scalers?b=" + OSC.curBoard + "&r=" + Math.random(), true); // avoid cached results
    req.send();
 
-   window.setTimeout(loadScalers, 1000);
+   OSC.timer.loadScalers = window.setTimeout(loadScalers, 1000);
 }
 
 function populateControls(init)
@@ -254,6 +273,9 @@ function loadGl(init) {
          OSC.gl = o.gl;
          OSC.wp = o.wp;
          loadWdb(-1, init); // daisy-chain for loading all WDBs
+      } else if (req.readyState == 4 && req.status == 0) {
+         alert("Connection to server broken.\nPlease reload page.");
+         clearTimers();
       }
    };
 
@@ -268,6 +290,9 @@ function loadWdb(b, init) {
       if (req.readyState == 4 && req.status == 200) {
          OSC.wdb = JSON.parse(req.responseText).wdb;
          populateControls(init);
+      } else if (req.readyState == 4 && req.status == 0) {
+         alert("Connection to server broken.\nPlease reload page.");
+         clearTimers();
       }
    };
 
@@ -342,6 +367,7 @@ function setDisp(e) {
    if (e.name == "scaler") {
       OSC.disp.scaler = e.checked;
       OSC.resizeCanvas();
+      OSC.redraw();
    }
 }
 
@@ -396,6 +422,9 @@ function loadBuild() {
          var build = JSON.parse(req.responseText);
          var e = document.getElementById("build");
          e.innerHTML = "Built " + build.build;
+      } else if (req.readyState == 4 && req.status == 0) {
+         alert("Connection to server broken.\nPlease reload page.");
+         clearTimers();
       }
    };
    req.open("GET", "build?r=" + Math.random(), true); // avoid cached results
@@ -404,8 +433,8 @@ function loadBuild() {
 
 function loadWF() {
    // wait until list of boards has been loaded
-   if (OSC.nWd == 0) {
-      window.setTimeout(loadWF, 10);
+   if (OSC.wdb == undefined) {
+      OSC.timer.loadWF = window.setTimeout(loadWF, 10);
       return;
    }
 
@@ -448,7 +477,7 @@ function loadWF() {
 
       OSC.idle = false;
       if (OSC.running)
-         window.setTimeout(loadWF, 10); // schedule next waveform read
+         OSC.timer.loadWF = window.setTimeout(loadWF, 10); // schedule next waveform read
 
       OSC.sendWaveforms(wf);
       OSC.redraw();
@@ -469,7 +498,7 @@ function loadWF() {
       }
 
    if (chn == 0 && OSC.running) {
-      window.setTimeout(loadWF, 10); // schedule next waveform read
+      OSC.timer.loadWF = window.setTimeout(loadWF, 10); // schedule next waveform read
       return;
    }
 
@@ -536,7 +565,7 @@ function receiveWF() {
                document.getElementById("btnTCalib").disabled = false;
                OSC.curBoard = progressOldBoard;
 
-               window.setTimeout(loadGl, 10);
+               OSC.timer.loadGl = window.setTimeout(loadGl, 10);
             }
 
          } else if (responseType == 2) { // voltage array
@@ -561,7 +590,7 @@ function receiveWF() {
             document.getElementById("btnVCalib").innerHTML = document.getElementById("wdSelect").value;
             document.getElementById("btnVCalib").disabled = true;
 
-            window.setTimeout(loadWF, 250);
+            OSC.timer.loadWF = window.setTimeout(loadWF, 250);
             return;
 
          } else if (responseType == 11) { // tcalib progress data
@@ -592,13 +621,13 @@ function receiveWF() {
       }
 
       if (responseType == 11) {
-         window.setTimeout(loadWF, 250);
+         OSC.timer.loadWF = window.setTimeout(loadWF, 250);
          OSC.sendWaveforms(wf);
 
       } else {
          // schedule next waveform read
          if (OSC.running)
-            window.setTimeout(loadWF, 10);
+            OSC.timer.loadWF = window.setTimeout(loadWF, 10);
 
          // send waveforms to oscilloscope
          if (!OSC.idle)
@@ -619,6 +648,9 @@ function receiveWF() {
          // trigger loading of file
          downloadFile(OSC.logfile);
       }
+   } else if (OSC.req.readyState == 4 && OSC.req.status == 0) {
+      alert("Connection to server broken.\nPlease reload page.");
+      clearTimers();
    }
 }
 
@@ -727,7 +759,7 @@ function btnStop()
    } else {
       OSC.running = true;
       e.innerHTML = "Stop";
-      window.setTimeout(loadWF, 10);
+      OSC.timer.loadWF = window.setTimeout(loadWF, 10);
    }
 }
 
@@ -740,7 +772,7 @@ function btnSingle()
       e.innerHTML = "Start";
    }
 
-   window.setTimeout(loadWF, 10);
+   OSC.timer.loadWF = window.setTimeout(loadWF, 10);
 }
 
 function btnChn(c)

@@ -442,6 +442,9 @@ unsigned int WDB::GetExtPllLck()
 
 bool WDB::IsExtPllLck()
 {
+   if (mDemoMode)
+      return true;
+
    auto mask = WD2_BIT_DRS_PLL_LOCK_0_MASK |
                WD2_BIT_DRS_PLL_LOCK_1_MASK |
                WD2_BIT_LMK_PLL_LOCK_MASK;
@@ -466,6 +469,9 @@ unsigned int WDB::GetIntPllLck()
 
 bool WDB::IsIntPllLck()
 {
+   if (mDemoMode)
+      return true;
+
    auto mask = WD2_BIT_SYS_DCM_LOCK_MASK |
                WD2_BIT_DAQ_PLL_LOCK_MASK |
                WD2_BIT_OSERDES_PLL_LOCK_DCB_MASK |
@@ -481,12 +487,18 @@ bool WDB::IsIntPllLck()
 unsigned int WDB::GetDrsSampleFreq()
 // sampling frequency in MHz
 {
+   if (mDemoMode)
+      return 5120;
+   
    return bitExtract(sreg, WD2_REG_DRS_SAMPLE_FREQ_OFS, WD2_BIT_DRS_SAMPLE_FREQ_MASK, WD2_BIT_DRS_SAMPLE_FREQ_OFS);
 }
 
 unsigned int WDB::GetAdcSampleFreq()
 // sampling frequency in MHz
 {
+   if (mDemoMode)
+      return 80;
+
    return bitExtract(sreg, WD2_REG_ADC_SAMPLE_FREQ_OFS, WD2_BIT_ADC_SAMPLE_FREQ_MASK, WD2_BIT_ADC_SAMPLE_FREQ_OFS);
 }
 

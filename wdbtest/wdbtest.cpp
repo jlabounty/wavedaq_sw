@@ -38,6 +38,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 {
    struct http_message *hm = (struct http_message *)p;
    char str[256];
+   static std::default_random_engine randomGenerator;
    
    GLOBALS *gl = (GLOBALS *)nc->mgr->user_data;
 
@@ -53,7 +54,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       
       mg_printf_http_chunk(nc, "{\n");
       mg_printf_http_chunk(nc, "   \"gl\": {\n");
-      mg_printf_http_chunk(nc, "      \"demo_flag\": %s,\n",                     gl->demoMode ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"demoMode\": %s,\n",                      gl->demoMode ? "true" : "false");
       mg_printf_http_chunk(nc, "      \"nWdb\": %d\n",                           gl->wdb.size());
       mg_printf_http_chunk(nc, "   },\n");
       mg_printf_http_chunk(nc, "   \"wp\": {\n");
@@ -65,7 +66,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "      \"timeCalib1\": %s,\n",                    gl->wp->IsTimeCalib1() ? "true" : "false");
       mg_printf_http_chunk(nc, "      \"timeCalib2\": %s,\n",                    gl->wp->IsTimeCalib2() ? "true" : "false");
       mg_printf_http_chunk(nc, "      \"timeCalib3\": %s,\n",                    gl->wp->IsTimeCalib3() ? "true" : "false");
-      mg_printf_http_chunk(nc, "      \"removeSpikes\": %s\n",                  gl->wp->IsRemoveSpikes() ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"removeSpikes\": %s\n",                   gl->wp->IsRemoveSpikes() ? "true" : "false");
       mg_printf_http_chunk(nc, "   }\n");
       mg_printf_http_chunk(nc, "}\n");
       mg_send_http_chunk(nc, "", 0); // end of response
@@ -134,22 +135,22 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"dacPZCLevel\": %d,\n",                w->GetDacPZCLevel());
 
          mg_printf_http_chunk(nc, "      \"dacTlevel\": [\n");
-         for (int i=0 ; i<14 ; i++)
+         for (int i=0 ; i<15 ; i++)
             mg_printf_http_chunk(nc, "        %d,\n",                            w->GetDacTlevel(i));
          mg_printf_http_chunk(nc, "        %d ],\n",                             w->GetDacTlevel(15));
 
          mg_printf_http_chunk(nc, "      \"fePZC\": [\n");
-         for (int i=0 ; i<14 ; i++)
+         for (int i=0 ; i<15 ; i++)
             mg_printf_http_chunk(nc, "        %s,\n",                            w->IsFEPZC(i) ? "true" : "false");
          mg_printf_http_chunk(nc, "        %s ],\n",                             w->IsFEPZC(15) ? "true" : "false");
 
          mg_printf_http_chunk(nc, "      \"feGain\": [\n");
-         for (int i=0 ; i<14 ; i++)
+         for (int i=0 ; i<15 ; i++)
             mg_printf_http_chunk(nc, "        %1g,\n",                           w->GetFEGain(i));
          mg_printf_http_chunk(nc, "        %1g ],\n",                            w->GetFEGain(15));
 
          mg_printf_http_chunk(nc, "      \"feMux\": [\n");
-         for (int i=0 ; i<14 ; i++)
+         for (int i=0 ; i<15 ; i++)
             mg_printf_http_chunk(nc, "        %1g,\n",                           w->GetFEMux(i));
          mg_printf_http_chunk(nc, "        %1g ],\n",                            w->GetFEMux(15));
 
@@ -185,8 +186,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
       mg_printf_http_chunk(nc, "{\n");
-      mg_printf_http_chunk(nc, "   \"temp\": %1.1lf,\n",   gl->wdb[b]->GetTemperature(false));
-      mg_printf_http_chunk(nc, "   \"pll_locked\": %s\n",  gl->wdb[b]->IsExtPllLck() && gl->wdb[b]->IsIntPllLck() ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"temperature\": %1.1lf,\n",   gl->wdb[b]->GetTemperature(false));
+      mg_printf_http_chunk(nc, "   \"pllLck\": %s\n",             gl->wdb[b]->IsExtPllLck() && gl->wdb[b]->IsIntPllLck() ? "true" : "false");
       mg_printf_http_chunk(nc, "}\n");
       mg_send_http_chunk(nc, "", 0);
       return;
@@ -201,22 +202,22 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       
       std::vector<unsigned long> scaler;
       if (gl->demoMode) {
-         std::default_random_engine generator;
          std::poisson_distribution<int> dist(1000);
          
          for (auto i=0 ; i<34 ; i++)
-            scaler.push_back(dist(generator));
+            scaler.push_back(dist(randomGenerator));
       } else
          gl->wdb[b]->GetScalers(scaler);
       
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
       mg_printf_http_chunk(nc, "{\n");
       mg_printf_http_chunk(nc, "         \"scaler\": [\n");
-      for (auto &s: scaler)
-         if (s != scaler.back())
+      for (auto &s: scaler) {
+         if (&s != &scaler.back())
             mg_printf_http_chunk(nc, "            %d,\n", s);
          else
             mg_printf_http_chunk(nc, "            %d]\n", s);
+      }
       mg_printf_http_chunk(nc, "}\n");
       mg_send_http_chunk(nc, "", 0);
       return;
@@ -291,8 +292,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          bWfAvailable = true;
          for (int c=0 ; c<WD_N_CHANNELS ; c++) {
             for (int i=0 ; i<1024 ; i++) {
-               wfT[c][i] = (float)(i*1E-9 / gl->wdb[b]->GetDrsSampleFreq());
-               wfU[c][i] = (float)(sin((wfT[c][i]+c*1E-9)*gl->wdb[b]->GetDrsSampleFreq() / 1E-9 / 50) / 4 + ((float)random()/RAND_MAX-0.5) / 300);
+               wfT[c][i] = (float)(i*1E-6 / gl->wdb[b]->GetDrsSampleFreq());
+               wfU[c][i] = (float)(sin((wfT[c][i]+c*1E-9)*gl->wdb[b]->GetDrsSampleFreq() / 1E-6 / 50) / 4 + ((float)random()/RAND_MAX-0.5) / 300);
             }
             // add spikes
             for (int i=0 ; i<1024 ; i++) {
