@@ -115,8 +115,8 @@
                <tr>
                   <td>
                      Type:&nbsp;&nbsp;
-                     <input type="radio" id="trModeNormal" name="trigger_mode" value="0" checked onClick="setGl(this)">normal
-                     <input type="radio" id="trModeAuto" name="trigger_mode" value="1" onClick="setGl(this)">auto
+                     <input type="radio" id="trModeNormal" name="trigger_mode" value="0" checked onClick="setParam(this)">normal
+                     <input type="radio" id="trModeAuto" name="trigger_mode" value="1" onClick="setParam(this)">auto
                   </td>
                   <td rowspan = 2>
                      &nbsp;&nbsp;
@@ -129,8 +129,8 @@
                <tr>
                   <td>
                      Source:&nbsp;&nbsp;
-                     <input type="radio" id="trSourceInt" name="trigger_source" value="0" checked onClick="setGl(this)">int
-                     <input type="radio" id="trSourceExt" name="trigger_source" value="1" onClick="setGl(this)">ext
+                     <input type="radio" id="trSourceInt" name="trigger_source" value="0" checked onClick="setParam(this)">int
+                     <input type="radio" id="trSourceExt" name="trigger_source" value="1" onClick="setParam(this)">ext
                   </td>
                </tr>
             </table>
@@ -140,7 +140,7 @@
          <div class="group">
             <div class="vSpacer5">
                <label for="gain">Gain:</label>
-               <select id="gain" name="gain" class="select" onchange="setGl(this)">
+               <select id="gain" name="gain" class="select" onchange="setParam(this)">
                   <option value="0.5">0.5</option>
                   <option selected value="1">1</option>
                   <option value="2.5">2.5</option>
@@ -151,8 +151,8 @@
                   <option value="100">100</option>
                </select>
                &nbsp;&nbsp;&nbsp;
-               <input type="checkbox" id="pzc" name="pzc" onClick="setGl(this)">PZC
-               <select id="pzc_level" name="pzc_level" class="select" onchange="setGl(this)">
+               <input type="checkbox" id="pzc" name="pzc" onClick="setParam(this)">PZC
+               <select id="pzc_level" name="pzc_level" class="select" onchange="setParam(this)">
                   <option value="1">1</option>
                   <option value="2">2</option>
                   <option value="3">3</option>
@@ -165,8 +165,8 @@
             </div>
             <div class="vSpacer5">
                Mode:
-               <input type="radio" id="inputModeDRS" name="adc_flag" checked="checked" value="0" onClick="setGl(this)">DRS
-               <input type="radio" id="inputModeADC" name="adc_flag" value="1" onClick="setGl(this)">ADC
+               <input type="radio" id="inputModeDRS" name="adc_flag" checked="checked" value="0" onClick="setParam(this)">DRS
+               <input type="radio" id="inputModeADC" name="adc_flag" value="1" onClick="setParam(this)">ADC
             </div>
 
             <div class="vMiddleBox vSpacer5">
@@ -179,14 +179,14 @@
             </div>
 
             <div class="vSpacer5">
-               <input type="checkbox" id="osctca_flag" name="osctca_flag" onClick="setGl(this)">Enable calibration clock
+               <input type="checkbox" id="osctca_flag" name="osctca_flag" onClick="setParam(this)">Enable calibration clock
             </div>
             <div class="vMiddleBox vSpacer5">
-               <input type="checkbox" id="mux_flag" name="mux_flag" onClick="setGl(this)">Connect inputs to calib.
+               <input type="checkbox" id="mux_flag" name="mux_flag" onClick="setParam(this)">Connect inputs to calib.
                source
             </div>
             <div class="vMiddleBox vSpacer5">
-               <input type="checkbox" id="dcv_flag" name="dcv_flag" onClick="setGl(this)">Power calib. source
+               <input type="checkbox" id="dcv_flag" name="dcv_flag" onClick="setParam(this)">Power calib. source
             </div>
 
             <div class="vMiddleBox vSpacer5">
@@ -210,23 +210,23 @@
          <div class="group">
             <table border="0">
                <tr>
-                  <td><input type="checkbox" id="calib1" name="ofs_calib1_flag" onClick="setGl(this)"></td>
+                  <td><input type="checkbox" id="calib1" name="ofs_calib1_flag" onClick="setParam(this)"></td>
                   <td>Apply Cell Calibration</td>
                </tr>
                <tr>
-                  <td><input type="checkbox" id="calib2" name="ofs_calib2_flag" onClick="setGl(this)"></td>
+                  <td><input type="checkbox" id="calib2" name="ofs_calib2_flag" onClick="setParam(this)"></td>
                   <td>Apply Readout Calibration</td>
                </tr>
                <tr>
-                  <td><input type="checkbox" id="calib3" name="gain_calib_flag" onClick="setGl(this)"></td>
+                  <td><input type="checkbox" id="calib3" name="gain_calib_flag" onClick="setParam(this)"></td>
                   <td>Apply Gain Calibration</td>
                </tr>
                <tr>
-                  <td><input type="checkbox" id="calib4" name="range_calib_flag" onClick="setGl(this)"></td>
+                  <td><input type="checkbox" id="calib4" name="range_calib_flag" onClick="setParam(this)"></td>
                   <td>Correct Range Offset</td>
                </tr>
                <tr>
-                  <td><input type="checkbox" id="spikes" name="remove_spikes" onClick="setGl(this)"></td>
+                  <td><input type="checkbox" id="spikes" name="remove_spikes" onClick="setParam(this)"></td>
                   <td>Remove Spikes</td>
                </tr>
             </table>
@@ -243,23 +243,23 @@
          <div class="group">
             <table border="0">
                <tr>
-                  <td><input type="checkbox" id="rotate" name="rotate_flag" onClick="setGl(this)"></td>
+                  <td><input type="checkbox" id="rotate" name="rotateWaveform" onClick="setParam(this)"></td>
                   <td>Rotate waveform relative to trigger</td>
                </tr>
                <tr>
-                  <td><input type="checkbox" id="tcalib1" name="time_calib1_flag" onClick="setGl(this)"></td>
+                  <td><input type="checkbox" id="tcalib1" name="time_calib1_flag" onClick="setParam(this)"></td>
                   <td>Apply timing calibration</td>
                </tr>
                <tr>
-                  <td><input type="checkbox" id="tcalib2" name="time_calib2_flag" onClick="setGl(this)"></td>
+                  <td><input type="checkbox" id="tcalib2" name="time_calib2_flag" onClick="setParam(this)"></td>
                   <td>Apply timing offset correction</td>
                </tr>
                <tr>
-                  <td><input type="checkbox" id="tcalib3" name="time_calib3_flag" onClick="setGl(this)"></td>
+                  <td><input type="checkbox" id="tcalib3" name="time_calib3_flag" onClick="setParam(this)"></td>
                   <td>Correct horizontal trigger position</td>
                </tr>
                <tr>
-                  <td><input type="checkbox" id="clksource" name="clock_source" onClick="setGl(this)"></td>
+                  <td><input type="checkbox" id="clksource" name="clock_source" onClick="setParam(this)"></td>
                   <td>Use external reference clock</td>
                </tr>
             </table>

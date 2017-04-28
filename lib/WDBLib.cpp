@@ -1879,6 +1879,7 @@ void WP::ReceiveWfPacket()
          ph->temperature              = SWAP_UINT16(ph->temperature);
          ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
          
+         /*
          if (mVerbose)
             printf("#%02d from %s:%d, event=%5d type=%d ADC/Chn/Segment=%d/%d/%d Tcell=%04d/%04d T=%1.1lf\n",
                    mPacketsReceived-1,
@@ -1892,6 +1893,7 @@ void WP::ReceiveWfPacket()
                    ph->drs0_trigger_cell,
                    ph->drs1_trigger_cell,
                    ph->temperature*0.0625);
+         */
          
          if (mCurrentEvent == -1)
             mCurrentEvent = ph->event_number;
@@ -2086,7 +2088,7 @@ void WP::CalibrateWaveforms()
             // set nominal sampling intervals
             for (int i=0 ; i<WD_N_CHANNELS ; i++)
                for (int j=0 ; j<1024 ; j++)
-                  ev->mWfU[i][j] = (float)(j * 1E-6/ev->mSamplingFrequency);
+                  ev->mWfT[i][j] = (float)(j * 1E-6/ev->mSamplingFrequency);
          }
          
          // apply time offsets (different PCB path traces)

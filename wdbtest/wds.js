@@ -68,7 +68,7 @@ function init() {
       var sel = document.createElement('select');
       sel.id = "gain"+r;
       sel.name = "gain";
-      sel.setAttribute("onchange", "setGl(this,"+r+")");
+      sel.setAttribute("onchange", "setParam(this,"+r+")");
       var gains = ["0.5", "1", "2.5", "5", "10", "25", "50", "100"];
       for (var i=0 ; i<gains.length ; i++) {
          var op = document.createElement('option');
@@ -86,7 +86,7 @@ function init() {
       cb.name = "pzc";
       cb.id = "pzc"+r;
       cb.checked = false;
-      cb.setAttribute("onclick", "setGl(this,"+r+")");
+      cb.setAttribute("onclick", "setParam(this,"+r+")");
       cell.appendChild(cb);
 
       cell = row.insertCell(-1);
@@ -315,7 +315,7 @@ function loadWdb(b, init) {
    req.send();
 }
 
-function setGl(e, channel) {
+function setParam(e, channel) {
    if (OSC.demoMode)
       return;
 
@@ -347,7 +347,7 @@ function setGl(e, channel) {
          dlgMessage("Warning", "No external clock present");
    }
    
-   var uri = "gl/" + OSC.curBoard + "/"+ e.name;
+   var uri = "param/" + OSC.curBoard + "/"+ e.name;
    if (channel != undefined)
       uri += "/" + channel;
 
@@ -396,7 +396,7 @@ function keyGl(event, input, channel) {
    var charCode = (typeof event.which == "number") ? event.which : event.keyCode;
 
    if (charCode == 13) {
-      setGl(input, channel);
+      setParam(input, channel);
    }
 }
 

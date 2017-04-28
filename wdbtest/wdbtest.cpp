@@ -36,6 +36,29 @@ typedef struct {
 
 /*------------------------------------------------------------------*/
 
+std::vector<std::string> split(const std::string&input , char separator)
+{
+   std::vector<std::string> output;
+   
+   std::istringstream stream(input);
+   std::string s;
+   while (getline(stream, s, separator)) {
+      // trim leading spaces
+      size_t startpos = s.find_first_not_of(" \t\r\n");
+      if (startpos != std::string::npos)
+         s = s.substr(startpos);
+      // trim trailing spaces
+      size_t endpos = s.find_last_not_of(" \t\r\n");
+      if (endpos != std::string::npos)
+         s = s.substr(0, endpos+1);
+      output.push_back(s);
+   }
+   
+   return output;
+}
+
+/*------------------------------------------------------------------*/
+
 static struct mg_serve_http_opts s_http_server_opts;
 
 // This function will be called by mongoose on every new request
@@ -48,6 +71,29 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
    GLOBALS *gl = (GLOBALS *)nc->mgr->user_data;
 
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->method, "PUT") == 0) {
+      std::string uri, value, item;
+      std::vector<std::string> args;
+      int iBoard = -1, iChannel = -1;
+      
+      // get parameters from URI
+      if (hm->uri.p) {
+         uri = split(std::string(hm->uri.p), ' ')[0];
+         args = split(uri, '/');
+         if (args.size() > 3) {
+            iBoard = std::stoi(args[2]);
+            item = args[3];
+         }
+         if (args.size() > 4)
+            iChannel = std::stoi(args[4]);
+      }
+      if (hm->body.p)
+         value = std::string(hm->body.p, hm->body.len);
+      
+      if (item == "rotateWaveform") {
+         gl->wp->SetRotateWaveform(value == "1");
+      }
+
+      mg_printf(nc, "HTTP/1.1 204 No Content\r\n");
    }
    
    // gloabls
