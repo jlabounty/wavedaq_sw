@@ -16,7 +16,7 @@
 #include "register_map_wd2.h"
 
 #include <thread>
-#include <set>
+#include <queue>
 
 #define WD_N_CHANNELS 18
 
@@ -93,15 +93,10 @@ public:
 
 //--------------------------------------------------------------------
 
-
 class WDEvent {
-   unsigned short   mBoardID;
-   bool             mWfValid[WD_N_CHANNELS][2];
-   unsigned int     mChannelMask;
-
-   float            mWf[WD_N_CHANNELS][1024];
-   float            mWfT[WD_N_CHANNELS][1024];
+public:
    
+   unsigned short   mBoardId;
    unsigned short   mCrateId;
    unsigned short   mSlotId;
    unsigned int     mEventNumber;
@@ -110,12 +105,72 @@ class WDEvent {
    int              mTriggerCell[2];
    unsigned short   mTriggerType;
    float            mTemperature;
-   
    bool             mWFTypeADC;
+   
+   float            mWfU[WD_N_CHANNELS][1024];
+   float            mWfT[WD_N_CHANNELS][1024];
+   
+   WDEvent(int boardId) { mBoardId = boardId; };
+
+   void             SetEventHeaderInfo(WD2_FRAME_HEADER *);
+};
+
+//--------------------------------------------------------------------
+
+template <class T> class tqueue {
+   std::mutex mutex;
+   std::condition_variable full, empty;
+   std::queue<T> queue;
+   
+   int mSize;
+   
+public:
+   tqueue(int size) { mSize = size; };
+   ~tqueue() {};
+   
+   void push(T e) {
+      std::unique_lock<std::mutex> lock(mutex);
+      while (queue.size() > mSize) {
+         //std::cout << "producer waiting" << std::endl;
+         full.wait(lock);
+      }
+      queue.push(e);
+      empty.notify_one();
+      lock.unlock();
+   }
+   T pop(int timeout = 0) {
+      auto start = std::chrono::system_clock::now();
+      std::unique_lock<std::mutex> lock(mutex);
+      while (queue.empty()) {
+         //std::cout << "consumer waiting" << std::endl;
+         if (timeout == 0)
+            empty.wait(lock); // this is twice faster on MacOS
+         else
+            empty.wait_for(lock, std::chrono::milliseconds(timeout));
+         if (std::chrono::system_clock::now() > start + std::chrono::milliseconds(timeout))
+            break;
+      }
+      if (queue.empty())
+         return nullptr;
+      T e = queue.front();
+      queue.pop();
+      full.notify_one();
+      lock.unlock();
+      return e;
+   }
+   size_t size() { return queue.size(); }
+};
+
+//--------------------------------------------------------------------
+
+class WDEventRequest {
+   unsigned short   mBoardId;
+   bool             mWfValid[WD_N_CHANNELS][2];
+   unsigned int     mChannelMask;
  
 public:
-   WDEvent(int boardID) {
-      mBoardID = boardID;
+   WDEventRequest(int boardId) {
+      mBoardId = boardId;
       for (int i=0 ; i<WD_N_CHANNELS ; i++) {
          mWfValid[i][0] = false;
          mWfValid[i][1] = false;
@@ -123,17 +178,12 @@ public:
       mChannelMask = 0xFFFF;
    } ;
    
-   unsigned char    GetBoardID() { return mBoardID; }
-   float *          GetWfArray(int channel) { return mWf[channel]; }
-   float *          GetWfTArray(int channel) { return mWfT[channel]; }
+   int              GetBoardId() { return mBoardId; }
    void             SetWfValid(int channel, int segment, bool v) { mWfValid[channel][segment] = v; }
    bool             IsWfValid();
-   void             SetEventHeaderInfo(WD2_FRAME_HEADER *);
-   void             SetTriggerCell(int chip, int c) { mTriggerCell[chip] = c; }
-   int              GetTriggerCell(int chip) { return mTriggerCell[chip]; }
-   unsigned short   GetSamplingFrequency() { return mSamplingFrequency; }
-   bool             IsWFTypeADC() { return mWFTypeADC; }
 };
+
+//--------------------------------------------------------------------
 
 // waveform processor (waveform decoding, calibration, saving, ...
 class WP {
@@ -163,8 +213,10 @@ class WP {
    };
    
    bool             mNewEvent;
+   std::vector<WDEventRequest *> mEventRequest;
    std::vector<WDEvent *> mEvent;
-   std::vector<WDEvent *> mFullEvent;
+   
+   tqueue<std::vector<WDEvent *> *> *mTqueue;
    
    void             InvalidateAllWf();
    void             ReceiveWfPacket();
@@ -191,9 +243,7 @@ public:
    bool IsTimeCalib2() { return mTimeCalib2;}
    bool IsTimeCalib3() { return mTimeCalib3;}
    bool IsRemoveSpikes() { return mRemoveSpikes; }
-   bool IsNewEvent(int timeout);
-   std::vector<WDEvent *> GetEvent() { return mFullEvent; }
-   void ClearNewEvent() { mNewEvent = false; }
+   std::vector<WDEvent *>* GetEvent(int timeout) { return mTqueue->pop(timeout); }
 
    void SetRotateWaveform(bool f) { mRotateWaveform = f; }
    void SetOfsCalib1(bool f) { mOfsCalib1 = f; }
@@ -205,8 +255,8 @@ public:
    void SetTimeCalib3(bool f) { mTimeCalib3 = f; }
    void SetRemoveSpikes(bool f) { mRemoveSpikes = f; }
    
-   void AddActiveWDB(int boardID);
-   void RemoveActiveWDB(int boardID);
+   void AddEventRequest(int boardID);
+   void RemoveEventRequest(int boardID);
    
 };
 

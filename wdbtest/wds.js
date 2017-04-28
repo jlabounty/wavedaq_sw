@@ -128,7 +128,12 @@ function init() {
    OSC.timer.loadScalers = window.setTimeout(loadScalers, 1000);
 }
 
-function clearTimers() {
+function connectionBroken() {
+   if (OSC.connected) {
+      alert("Connection to server broken.\nPlease reload page.");
+      OSC.connected = false;
+   }
+
    if (OSC.timer.loadGl != undefined)
       clearTimeout(OSC.timer.loadGl);
    if (OSC.timer.loadStatus != undefined)
@@ -160,15 +165,18 @@ function loadStatus() {
          OSC.wdb[OSC.curBoard].pllLck = t.pllLck;
          OSC.redraw();
       } else if (req.readyState == 4 && req.status == 0) {
-         alert("Connection to server broken.\nPlease reload page.");
-         clearTimers();
+         connectionBroken();
       }
    };
 
    req.open("GET", "status?b=" + OSC.curBoard + "&r=" + Math.random(), true); // avoid cached results
-   req.send();
 
-   OSC.timer.loadStatus = window.setTimeout(loadStatus, 10000);
+   try {
+      req.send();
+      OSC.timer.loadStatus = window.setTimeout(loadStatus, 10000);
+   } catch (e) {
+      connectionBroken();
+   }
 }
 
 function loadScalers() {
@@ -186,15 +194,18 @@ function loadScalers() {
          OSC.wdb[OSC.curBoard].scaler = JSON.parse(req.responseText).scaler;
          OSC.redraw();
       } else if (req.readyState == 4 && req.status == 0) {
-         alert("Connection to server broken.\nPlease reload page.");
-         clearTimers();
+         connectionBroken();
       }
    };
 
    req.open("GET", "scalers?b=" + OSC.curBoard + "&r=" + Math.random(), true); // avoid cached results
-   req.send();
 
-   OSC.timer.loadScalers = window.setTimeout(loadScalers, 1000);
+   try {
+      req.send();
+      OSC.timer.loadScalers = window.setTimeout(loadScalers, 1000);
+   } catch (e) {
+      connectionBroken();
+   }
 }
 
 function populateControls(init)
@@ -274,13 +285,17 @@ function loadGl(init) {
          OSC.wp = o.wp;
          loadWdb(-1, init); // daisy-chain for loading all WDBs
       } else if (req.readyState == 4 && req.status == 0) {
-         alert("Connection to server broken.\nPlease reload page.");
-         clearTimers();
+         connectionBroken();
       }
    };
 
    req.open("GET", "gl?r=" + Math.random(), true); // avoid cached results
-   req.send();
+
+   try {
+      req.send();
+   } catch (e) {
+      connectionBroken();
+   }
 }
 
 function loadWdb(b, init) {
@@ -290,9 +305,9 @@ function loadWdb(b, init) {
       if (req.readyState == 4 && req.status == 200) {
          OSC.wdb = JSON.parse(req.responseText).wdb;
          populateControls(init);
+         OSC.connected = true;
       } else if (req.readyState == 4 && req.status == 0) {
-         alert("Connection to server broken.\nPlease reload page.");
-         clearTimers();
+         connectionBroken();
       }
    };
 
@@ -423,17 +438,21 @@ function loadBuild() {
          var e = document.getElementById("build");
          e.innerHTML = "Built " + build.build;
       } else if (req.readyState == 4 && req.status == 0) {
-         alert("Connection to server broken.\nPlease reload page.");
-         clearTimers();
+         connectionBroken();
       }
    };
    req.open("GET", "build?r=" + Math.random(), true); // avoid cached results
-   req.send();
+
+   try {
+      req.send();
+   } catch (e) {
+      connectionBroken();
+   }
 }
 
 function loadWF() {
    // wait until list of boards has been loaded
-   if (OSC.wdb == undefined) {
+   if (!OSC.connected) {
       OSC.timer.loadWF = window.setTimeout(loadWF, 10);
       return;
    }
@@ -507,7 +526,12 @@ function loadWF() {
    OSC.req.onreadystatechange = receiveWF;
    OSC.req.open("GET", "wf?b=" + OSC.curBoard + "&c=" + chn + "&r=" + Math.random(), true); // avoid cached results
    OSC.req.responseType = "arraybuffer";
-   OSC.req.send();
+
+   try {
+      OSC.req.send();
+   } catch (e) {
+      connectionBroken();
+   }
 }
 
 function receiveWF() {
@@ -649,8 +673,7 @@ function receiveWF() {
          downloadFile(OSC.logfile);
       }
    } else if (OSC.req.readyState == 4 && OSC.req.status == 0) {
-      alert("Connection to server broken.\nPlease reload page.");
-      clearTimers();
+      connectionBroken();
    }
 }
 

@@ -456,8 +456,10 @@ void WDB::Connect(int port)
    // set MAC address and IP address of this computer in WD board
    SendUDP("cfgdst");
 
+   /* test binary UDP protocol
    std::vector<unsigned int> data { 0x12345678 };
    WriteUDP(0xC3000000 + WD2_REG_WDB_LOC_OFS, data);
+    */
 }
 
 //--------------------------------------------------------------------
@@ -479,64 +481,61 @@ void bitReplace(unsigned int &reg, unsigned int mask, unsigned int ofs, unsigned
 
 void WDB::ReceiveControlRegisters()
 {
-   unsigned int nReg = (WD2_REG_CRC32_REG_BANK_OFS - WD2_REG_WDB_LOC_OFS)/4 + 1;
-
    if (mDemoMode) {
-      for (auto i=0 ; i<nReg ; i++)
+      for (auto i=0 ; i<REG_NR_OF_CTRL_REGS ; i++)
          this->creg[i] = 0;
       return;
    }
 
 #ifdef WD2_USE_UDP_BIN
    std::vector<unsigned int> result = ReadUDP(WD2_REG_WDB_LOC_OFS, nReg);
-   for (auto i=0 ; i<nReg ; i++)
+   for (auto i=0 ; i<REG_NR_OF_CTRL_REGS ; i++)
       this->creg[i] = result[i];
 #else
    std::string result;
    std::ostringstream req;
-   req << "rr 0x" << std::hex << WD2_REG_WDB_LOC_OFS << " " << std::dec << nReg;
+   req << "rr 0x" << std::hex << WD2_REG_WDB_LOC_OFS << " " << std::dec << REG_NR_OF_CTRL_REGS;
    
    result = SendReceiveUDP(req.str(), 500);
    std::stringstream ss(result);
    std::string line;
    
-   for (auto i=0 ; i<nReg ; i++) {
+   for (auto i=0 ; i<REG_NR_OF_CTRL_REGS ; i++) {
       std::getline(ss, line, '\r');
-      auto adr = (unsigned int)std::stoul(line.substr(3), nullptr, 16) - WD2_REG_WDB_LOC_OFS;
-      if (adr <= WD2_REG_CRC32_REG_BANK_OFS)
-         this->creg[adr/4] = (unsigned int)std::stoul(line.substr(10), nullptr, 16);
+      auto adr = (unsigned int)std::stoul(line.substr(3), nullptr, 16);
+      auto index = (adr - WD2_REG_WDB_LOC_OFS) / 4;
+      if (index < REG_NR_OF_CTRL_REGS)
+         this->creg[index] = (unsigned int)std::stoul(line.substr(10), nullptr, 16);
    }
 #endif
 }
 
 void WDB::ReceiveStatusRegisters()
 {
-   unsigned int nReg = (WD2_REG_ADC_01_CLK_MOD_FLAG_OFS - WD2_REG_HW_VER_OFS)/4 + 1;
-
    if (mDemoMode) {
-      for (auto i=0 ; i<nReg ; i++)
+      for (auto i=0 ; i<REG_NR_OF_STAT_REGS ; i++)
          this->sreg[i] = 0;
       return;
    }
    
 #ifdef WD2_USE_UDP_BIN
    std::vector<unsigned int> result = ReadUDP(WD2_REG_HW_VER_OFS, nReg);
-   for (auto i=0 ; i<nReg ; i++)
+   for (auto i=0 ; i<REG_NR_OF_STAT_REGS ; i++)
       this->sreg[i] = result[i];
 #else
    std::string result;
    std::ostringstream req;
-   req << "rr 0x" << std::hex << WD2_REG_HW_VER_OFS << " " << std::dec << WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4+1;
+   req << "rr 0x" << std::hex << WD2_REG_HW_VER_OFS << " " << std::dec << REG_NR_OF_STAT_REGS;
    
    result = SendReceiveUDP(req.str(), 500);
    std::stringstream ss(result);
    std::string line;
    
-   for (auto i=0 ; i<WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4 ; i++) {
+   for (auto i=0 ; i<REG_NR_OF_STAT_REGS ; i++) {
       std::getline(ss, line, '\r');
       auto adr = (unsigned int)std::stoul(line.substr(3), nullptr, 16);
-      if (adr <= WD2_REG_ADC_01_CLK_MOD_FLAG_OFS) {
-         auto index = (adr - WD2_REG_HW_VER_OFS)/4;
+      auto index = (adr - WD2_REG_HW_VER_OFS) / 4;
+      if (index < REG_NR_OF_STAT_REGS) {
          this->sreg[index] = (unsigned int)std::stoul(line.substr(10), nullptr, 16);
       }
    }
@@ -729,14 +728,15 @@ unsigned int WDB::GetIntPllLck()
 // internal PLLs (FPGA DAQ, ISERDES, OSERDES)
 {
    ReceiveStatusRegister(WD2_REG_PLL_LOCK_OFS);
-   auto mask = WD2_BIT_SYS_DCM_LOCK_MASK |
+   auto mask =
+   WD2_BIT_SYS_DCM_LOCK_MASK |
    WD2_BIT_DAQ_PLL_LOCK_MASK |
    WD2_BIT_OSERDES_PLL_LOCK_DCB_MASK |
    WD2_BIT_OSERDES_PLL_LOCK_TCB_MASK |
    WD2_BIT_ISERDES_PLL_LOCK_0_MASK |
    WD2_BIT_ISERDES_PLL_LOCK_1_MASK;
    
-   return bitExtract(sreg, WD2_REG_PLL_LOCK_OFS, mask, WD2_BIT_LMK_PLL_LOCK_OFS);
+   return bitExtract(sreg, WD2_REG_PLL_LOCK_OFS, mask, WD2_BIT_ISERDES_PLL_LOCK_1_OFS);
 }
 
 bool WDB::IsIntPllLck()
@@ -744,15 +744,15 @@ bool WDB::IsIntPllLck()
    if (mDemoMode)
       return true;
 
-   auto mask = WD2_BIT_SYS_DCM_LOCK_MASK |
-               WD2_BIT_DAQ_PLL_LOCK_MASK |
-               WD2_BIT_OSERDES_PLL_LOCK_DCB_MASK |
-               WD2_BIT_OSERDES_PLL_LOCK_TCB_MASK |
-               WD2_BIT_ISERDES_PLL_LOCK_0_MASK |
-               WD2_BIT_ISERDES_PLL_LOCK_1_MASK;
+   auto mask =
+   WD2_BIT_SYS_DCM_LOCK_MASK |
+   WD2_BIT_DAQ_PLL_LOCK_MASK |
+   WD2_BIT_OSERDES_PLL_LOCK_DCB_MASK |
+   WD2_BIT_OSERDES_PLL_LOCK_TCB_MASK |
+   WD2_BIT_ISERDES_PLL_LOCK_0_MASK |
+   WD2_BIT_ISERDES_PLL_LOCK_1_MASK;
    mask >>= WD2_BIT_ISERDES_PLL_LOCK_1_OFS;
-   
-   return (GetExtPllLck() == mask);
+   return (GetIntPllLck() == mask);
 }
 
 
@@ -792,11 +792,16 @@ void WDB::GetScalers(std::vector<unsigned long> &scaler)
    std::stringstream ss(result);
    std::string line;
    
+   try {
    for (auto i=0 ; i<34 ; i++) {
       std::getline(ss, line, '\r');
       auto adr = ((unsigned int)std::stoul(line.substr(3), nullptr, 16)) / 4;
       if (adr >= WD2_REG_SCALER_0_LSB_OFS/4 && adr < WD2_REG_SCALER_EXT_CLK_OFS/4)
          this->sreg[adr] = (unsigned int)std::stoul(line.substr(14), nullptr, 16);
+   }
+   } catch(...) {
+      if (mVerbose)
+         std::cerr << "Received invalid scalers." << std::endl;
    }
    
    // channels 0-15 are 64 bit counters
@@ -912,7 +917,7 @@ void WDB::SetCompPowerEnable(bool value)
 unsigned int WDB::GetReadoutSrcSel()
 // cReadoutSrcDrs / cReadoutSrcAdc / cReadoutSrcTdc
 {
-   return bitExtract(creg, WD2_REG_WDB_LOC_OFS, WD2_BIT_READOUT_SRC_SEL_MASK, WD2_BIT_READOUT_SRC_SEL_OFS);
+   return bitExtract(creg, WD2_REG_CTRL_OFS, WD2_BIT_READOUT_SRC_SEL_MASK, WD2_BIT_READOUT_SRC_SEL_OFS);
 }
 
 void WDB::SetReadoutSrcSel(unsigned int value)
@@ -1710,17 +1715,9 @@ void WDB::RequestTDCEvent()
 
 //--------------------------------------------------------------------
 
-bool WDEvent::IsWfValid()
-{
-   for (int i=0 ; i<WD_N_CHANNELS ; i++)
-      if (mChannelMask & (1 << i))
-         if (!mWfValid[i][0] || !mWfValid[i][1])
-            return false;
-   return true;
-}
-
 void WDEvent::SetEventHeaderInfo(WD2_FRAME_HEADER *ph)
 {
+   mBoardId = ph->board_id;
    mCrateId = ph->crate_id;
    mSlotId  = ph->slot_id;
    mEventNumber = ph->event_number;
@@ -1731,6 +1728,17 @@ void WDEvent::SetEventHeaderInfo(WD2_FRAME_HEADER *ph)
    mTriggerType = ph->trigger_type;
    mTemperature = std::round(ph->temperature*0.0625 * 10 + 0.5) / 10.0f;
    mWFTypeADC = mSamplingFrequency <= 100;
+}
+
+//--------------------------------------------------------------------
+
+bool WDEventRequest::IsWfValid()
+{
+   for (int i=0 ; i<WD_N_CHANNELS ; i++)
+      if (mChannelMask & (1 << i))
+         if (!mWfValid[i][0] || !mWfValid[i][1])
+            return false;
+   return true;
 }
 
 //--------------------------------------------------------------------
@@ -1752,6 +1760,8 @@ WP::WP(bool verbose, bool demo)
    mTimeCalib2 = false;
    mTimeCalib3 = false;
    mRemoveSpikes = false;
+   
+   mTqueue = new tqueue<std::vector<WDEvent *>*>(100);
    
    // create UDB socket to receive binary data from WDB
    if (gDataSocket == 0) {
@@ -1781,26 +1791,26 @@ WP::WP(bool verbose, bool demo)
 
 //--------------------------------------------------------------------
 
-void WP::AddActiveWDB(int boardID)
+void WP::AddEventRequest(int boardID)
 {
-   WDEvent *w1 = new WDEvent(boardID);
-   mEvent.push_back(w1);
-   WDEvent *w2 = new WDEvent(boardID);
-   mFullEvent.push_back(w2);
+   WDEventRequest *r = new WDEventRequest(boardID);
+   mEventRequest.push_back(r);
+   WDEvent *e = new WDEvent(boardID);
+   mEvent.push_back(e);
 }
 
-void WP::RemoveActiveWDB(int boardID)
+void WP::RemoveEventRequest(int boardID)
 {
-   for (auto w = mEvent.begin() ; w != mEvent.end() ; w++) {
-      if ((*w)->GetBoardID() == boardID) {
-         mEvent.erase(w);
-         delete *w;
+   for (auto r = mEventRequest.begin() ; r != mEventRequest.end() ; r++) {
+      if ((*r)->GetBoardId() == boardID) {
+         mEventRequest.erase(r);
+         delete *r;
       }
    }
-   for (auto w = mFullEvent.begin() ; w != mFullEvent.end() ; w++) {
-      if ((*w)->GetBoardID() == boardID) {
-         mFullEvent.erase(w);
-         delete *w;
+   for (auto e = mEvent.begin() ; e != mEvent.end() ; e++) {
+      if ((*e)->mBoardId == boardID) {
+         mEvent.erase(e);
+         delete *e;
       }
    }
 }
@@ -1809,7 +1819,7 @@ void WP::RemoveActiveWDB(int boardID)
 
 void WP::InvalidateAllWf()
 {
-   for (auto w = mEvent.begin() ; w != mEvent.end() ; w++) {
+   for (auto w = mEventRequest.begin() ; w != mEventRequest.end() ; w++) {
       for (int i=0 ; i<WD_N_CHANNELS ; i++) {
          (*w)->SetWfValid(i, 0, false);
          (*w)->SetWfValid(i, 1, false);
@@ -1823,13 +1833,13 @@ void WP::InvalidateAllWf()
 
 bool WP::AllPacketsReceived()
 {
-   auto it = mEvent.begin();
-   while (it != mEvent.end()) {
+   auto it = mEventRequest.begin();
+   while (it != mEventRequest.end()) {
       if (!(*it)->IsWfValid())
          break;
       it++;
    }
-   if (it == mEvent.end())
+   if (it == mEventRequest.end())
       return true;
    return false;
 }
@@ -1942,16 +1952,28 @@ void WP::ReceiveWfPacket()
          assert(wfChannel < WD_N_CHANNELS);
          
          // find waveform data belonging to this board
-         WDEvent *ev = nullptr;
-         for (auto it = mEvent.begin() ; it != mEvent.end() ; it++)
-            if ((*it)->GetBoardID() == ph->board_id) {
-               ev = *it;
+         WDEventRequest *er = nullptr;
+         for (auto r: mEventRequest)
+            if (r->GetBoardId() == ph->board_id) {
+               er = r;
                break;
             }
-         assert(ev);
+         if (!er) {
+            // received packet for board without event request
+            return;
+         }
          
-         ev->SetWfValid(wfChannel, channel_segment, true);
-         ev->SetEventHeaderInfo(ph);
+         er->SetWfValid(wfChannel, channel_segment, true);
+         WDEvent *event = nullptr;
+         for (auto e: mEvent) {
+            if (e->mBoardId == ph->board_id) {
+               event = e;
+               break;
+            }
+         }
+         assert(event);
+         
+         event->SetEventHeaderInfo(ph);
          
          // decode waveform data
          auto pd = (unsigned char*)(ph+1);
@@ -1970,12 +1992,12 @@ void WP::ReceiveWfPacket()
             
             if (channel_segment == 0) {
                // first segment
-               ev->GetWfArray(wfChannel)[i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
-               ev->GetWfArray(wfChannel)[i+1]       = (float)data2 * (1 / 4096.0);
+               event->mWfU[wfChannel][i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
+               event->mWfU[wfChannel][i+1]       = (float)data2 * (1 / 4096.0);
             } else {
                // second segment
-               ev->GetWfArray(wfChannel)[512+i]     = (float)data1 * (1 / 4096.0);
-               ev->GetWfArray(wfChannel)[512+i+1]   = (float)data2 * (1 / 4096.0);
+               event->mWfU[wfChannel][512+i]     = (float)data1 * (1 / 4096.0);
+               event->mWfU[wfChannel][512+i+1]   = (float)data2 * (1 / 4096.0);
             }
          }
       }
@@ -1989,25 +2011,25 @@ void WP::RotateWaveforms()
 {
    for (auto it = mEvent.begin() ; it != mEvent.end() ; it++) {
       auto ev = (*it);
-      if (ev->IsWFTypeADC())
+      if (ev->mWFTypeADC)
          continue;
       
       float wf[WD_N_CHANNELS][1024];
       
       for (int i=0 ; i<WD_N_CHANNELS ; i++)
          for (int j=0 ; j<1024 ; j++)
-            wf[i][j] = ev->GetWfArray(i)[j];
+            wf[i][j] = ev->mWfU[i][j];
       
       // un-rotate waveforms
       if (mRotateWaveform) {
          for (int i=0 ; i<WD_N_CHANNELS ; i++)
             for (int j=0 ; j<1024 ; j++)
-               ev->GetWfArray(i)[j] = ev->GetWfArray(i)[j];
+               ev->mWfU[i][j] = ev->mWfU[i][j];
       } else {
          for (int i=0 ; i<WD_N_CHANNELS ; i++) {
-            int tc = i < 8 || i == 16 ? ev->GetTriggerCell(0) : ev->GetTriggerCell(1);
+            int tc = i < 8 || i == 16 ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
             for (int j=0 ; j<1024 ; j++)
-               ev->GetWfArray(i)[(j+tc) % 1024] = wf[i][j];
+               ev->mWfU[i][(j+tc) % 1024] = wf[i][j];
          }
       }
    }
@@ -2021,7 +2043,7 @@ void WP::CalibrateWaveforms()
       auto ev = (*it);
       
       
-      if (ev->IsWFTypeADC()) { //---------- calibrate ADC data ----------
+      if (ev->mWFTypeADC) { //---------- calibrate ADC data ----------
          
          if (mRangeCalib) {
             // TBD
@@ -2030,7 +2052,7 @@ void WP::CalibrateWaveforms()
          // just set nominal time bins from ADC sampling rate
          for (int i=0 ; i<WD_N_CHANNELS ; i++)
             for (int j=0 ; j<1024 ; j++)
-               ev->GetWfTArray(i)[j] = (float)(j * 1E-6/ev->GetSamplingFrequency());
+               ev->mWfU[i][j] = (float)(j * 1E-6/ev->mSamplingFrequency);
 
       } else {  //---------- calibrate DRS data ----------
 
@@ -2038,18 +2060,18 @@ void WP::CalibrateWaveforms()
          
          for (int i=0 ; i<WD_N_CHANNELS ; i++)
             for (int j=0 ; j<1024 ; j++)
-               wf[i][j] = ev->GetWfArray(i)[j];
+               wf[i][j] = ev->mWfU[i][j];
          
          // un-rotate waveforms
          if (mRotateWaveform) {
             for (int i=0 ; i<WD_N_CHANNELS ; i++)
                for (int j=0 ; j<1024 ; j++)
-                  ev->GetWfArray(i)[j] = ev->GetWfArray(i)[j];
+                  ev->mWfU[i][j] = ev->mWfU[i][j];
          } else {
             for (int i=0 ; i<WD_N_CHANNELS ; i++) {
-               int tc = i < 8 || i == 16 ? ev->GetTriggerCell(0) : ev->GetTriggerCell(1);
+               int tc = i < 8 || i == 16 ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
                for (int j=0 ; j<1024 ; j++)
-                  ev->GetWfArray(i)[(j+tc) % 1024] = wf[i][j];
+                  ev->mWfU[i][(j+tc) % 1024] = wf[i][j];
             }
          }
          
@@ -2085,7 +2107,7 @@ void WP::CalibrateWaveforms()
             // set nominal sampling intervals
             for (int i=0 ; i<WD_N_CHANNELS ; i++)
                for (int j=0 ; j<1024 ; j++)
-                  ev->GetWfTArray(i)[j] = (float)(j * 1E-6/ev->GetSamplingFrequency());
+                  ev->mWfU[i][j] = (float)(j * 1E-6/ev->mSamplingFrequency);
          }
          
          // apply time offsets (different PCB path traces)
@@ -2127,22 +2149,20 @@ void WP::Collector()
       RotateWaveforms();
       CalibrateWaveforms();
       
-      // copy full event
+      // copy full event to queue
       auto es = mEvent.begin();
-      auto ed = mFullEvent.begin();
+      std::vector<WDEvent *> *ev = new std::vector<WDEvent *>;
       
-      while (es != mEvent.end())
-         **(ed++) = **(es++);
+      while (es != mEvent.end()) {
+         WDEvent *e = new WDEvent((*es)->mBoardId);
+         *e = **(es++);
+         ev->push_back(e);
+      }
 
-      mNewEvent = true;
+      mTqueue->push(ev);
       
    } while (1);
    
-}
-
-bool WP::IsNewEvent(int timeout)
-{
-   return mNewEvent;
 }
 
 //--------------------------------------------------------------------

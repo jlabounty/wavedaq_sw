@@ -240,8 +240,6 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
    // binary encoded waveforms
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/wf") == 0) {
-      float wfT[WD_N_CHANNELS][1024], wfU[WD_N_CHANNELS][1024];
-      bool bWfAvailable = false;
       
       mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
       int b = atoi(str);
@@ -293,14 +291,14 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       if (b < 0 || b >= gl->wdb.size())
          b = 0;
       
-      WDEvent *event;
+      WDEvent *event = nullptr;
 
       if (gl->demoMode) {
-         bWfAvailable = true;
+         event = new WDEvent(b);
          for (int c=0 ; c<WD_N_CHANNELS ; c++) {
             for (int i=0 ; i<1024 ; i++) {
-               wfT[c][i] = (float)(i*1E-6 / gl->wdb[b]->GetDrsSampleFreq());
-               wfU[c][i] = (float)(sin((wfT[c][i]+c*1E-9)*gl->wdb[b]->GetDrsSampleFreq() / 1E-6 / 50) / 4 + ((float)random()/RAND_MAX-0.5) / 300);
+               event->mWfT[c][i] = (float)(i*1E-6 / gl->wdb[b]->GetDrsSampleFreq());
+               event->mWfU[c][i] = (float)(sin((event->mWfT[c][i]+c*1E-9)*gl->wdb[b]->GetDrsSampleFreq() / 1E-6 / 50) / 4 + ((float)random()/RAND_MAX-0.5) / 300);
             }
             // add spikes
             for (int i=0 ; i<1024 ; i++) {
@@ -310,10 +308,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                   float f;
                   for (f=0 ; f<1 ; f += 0.2,j++)
                      if (j >= 0 && j< 1024)
-                        wfU[c][j] += s * f;
+                        event->mWfU[c][j] += s * f;
                   for (f=1 ; f>0 ; f -= 0.2,j++)
                      if (j >= 0 && j< 1024)
-                        wfU[c][j] += s * f;
+                        event->mWfU[c][j] += s * f;
                }
             }
          }
@@ -321,7 +319,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          
          // request single event
          for (auto &b: gl->wdb) {
-            if (b->GetReadoutSrcSel() == b->cReadoutSrcDRS) {
+            if (b->GetReadoutSrcSel() == 0 /*TBD: b->cReadoutSrcDRS*/) {
                if (gl->triggerMode == cTriggerModeAuto || gl->triggerMode == cTriggerModeSoftware)
                   b->RequestDRSEvent();
                else if (gl->triggerMode == cTriggerModeNormal)
@@ -331,10 +329,11 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          }
          
          // read waveforms
-         if (gl->wp->IsNewEvent(100)) {
-            auto es = gl->wp->GetEvent();
-            event = gl->wp->GetEvent()[0];
-            gl->wp->ClearNewEvent();
+         auto eVector = gl->wp->GetEvent(100);
+         if (eVector) {
+            if (eVector->size() > 0)
+               event = (*eVector)[0];
+            delete eVector;
          }
       }
       
@@ -344,7 +343,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       if (gl->demoMode)
          b = 0xFF; // signals demo data
       
-      if (bWfAvailable) {
+      if (event) {
          int t = 1;                 // array type
          int n = 1024;              // number of elements
          int l = 0; // gl->li.nLogged;    // number of logged events
@@ -356,7 +355,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                mg_send_http_chunk(nc, (const char *)&l, 4);
                mg_send_http_chunk(nc, (const char *)&c, 4);
                mg_send_http_chunk(nc, (const char *)&n, 4);
-               mg_send_http_chunk(nc, (const char *)wfT[c], sizeof(float)*n);
+               mg_send_http_chunk(nc, (const char *)event->mWfT[c], sizeof(float)*n);
             }
          }
          
@@ -368,7 +367,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                mg_send_http_chunk(nc, (const char *)&l, 4);
                mg_send_http_chunk(nc, (const char *)&c, 4);
                mg_send_http_chunk(nc, (const char *)&n, 4);
-               mg_send_http_chunk(nc, (const char *)wfU[c], sizeof(float)*n);
+               mg_send_http_chunk(nc, (const char *)event->mWfU[c], sizeof(float)*n);
             }
          }
          
@@ -380,6 +379,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       }
       
       mg_send_http_chunk(nc, "", 0);
+      
+      delete event;
       
       return;
    }
@@ -413,6 +414,7 @@ int main(int argc, const char * argv[])
    
    // default values
    gl.serverPort = 8080;
+   gl.triggerMode = cTriggerModeAuto;
    
    // parse command line parameters
    if (argc < 2) {
@@ -499,6 +501,9 @@ int main(int argc, const char * argv[])
             b->ReceiveControlRegisters();
             if (gl.verbose)
                b->PrintVersion();
+
+            // fix wrong default registers
+            b->SetDRSWaveContinous(true);
          }
       } catch (std::runtime_error &e) {
          std::cout << std::endl;
@@ -511,7 +516,7 @@ int main(int argc, const char * argv[])
 
    // tell waveform processor which WDB are active
    for (auto &b: gl.wdb)
-      gl.wp->AddActiveWDB(b->GetSerialNumber());
+      gl.wp->AddEventRequest(b->GetSerialNumber());
 
    // initialize web server
    struct mg_mgr mgr;

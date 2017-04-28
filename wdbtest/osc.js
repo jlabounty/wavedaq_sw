@@ -63,6 +63,7 @@ function Oscilloscope(div) { // constructor
    this.currentChn = 0;
    this.idle = true;
    this.demoMode = demoMode;
+   this.connected = false;
 
    this.logFlag = false;
    this.logfile = "";
@@ -294,7 +295,7 @@ Oscilloscope.prototype.resizeCanvas = function () {
 Oscilloscope.prototype.draw = function () {
    
    // wait until globals are loaded
-   if (OSC.wdb == undefined)
+   if (!OSC.connected)
       return;
    
    this.nFrames++;
@@ -568,7 +569,7 @@ Oscilloscope.prototype.voltToY = function (v, c) {
 };
 
 Oscilloscope.prototype.drawWF = function (ctx) {
-   if (OSC.wdb == undefined)
+   if (!OSC.connected)
       return;
 
    // Waveforms
@@ -773,7 +774,7 @@ Oscilloscope.prototype.drawMarker = function (ctx) {
 };
 
 Oscilloscope.prototype.drawDT = function (ctx) {
-   if (OSC.wdb == undefined)
+   if (!OSC.connected)
       return;
 
    for (var c = 15; c >= 0; c--) {
@@ -818,7 +819,7 @@ Oscilloscope.prototype.drawDT = function (ctx) {
 };
 
 Oscilloscope.prototype.drawHisto = function (ctx) {
-   if (OSC.wdb == undefined)
+   if (!OSC.connected)
       return;
 
    // draw overall frame
