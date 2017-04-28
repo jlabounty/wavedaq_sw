@@ -36,7 +36,7 @@
 #include "WDBLib.h"
 #include "register_map_wd2.h"
 
-#undef WD2_USE_UDP_BIN
+#define WD2_USE_UDP_BIN
 
 #define WD2_CMD_PORT_BIN          4000
 #define WD2_CMD_PORT_ASCII        3000
@@ -175,7 +175,6 @@ std::string WDB::SendReceiveUDP(std::string str, int timeout_ms)
 
 void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data, int timeout_ms)
 {
-   static unsigned short udpSeq = 0; // sequence number to identify related send/acknowledge packets
    size_t i;
    fd_set readfds;
    struct timeval timeout;
@@ -264,7 +263,8 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data, int timeout
          // check for acknowledge
          bSuccess = readBuf[0] == 0x14 &&
                     readBuf[1] == 0x01 &&
-                    readBuf[2] == ((udpSeq >> 8) & 0xFF) && readBuf[3] == (udpSeq & 0xFF);
+                    readBuf[2] == ((udpSequenceNumber >> 8) & 0xFF) &&
+                    readBuf[3] == (udpSequenceNumber & 0xFF);
          if (bSuccess)
             return;
          
@@ -283,7 +283,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data, int timeout
 
 //--------------------------------------------------------------------
 
-std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int len, int timeout_ms)
+std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg, int timeout_ms)
 {
    size_t i;
    fd_set readfds;
@@ -294,6 +294,7 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int len, int t
    std::vector<unsigned int> result;
    
    udpSequenceNumber++;
+   auto len = nReg * sizeof(unsigned int);
    std::memcpy(&client_addr, mEthAddrBin, sizeof(client_addr));
    
    std::vector<unsigned char> writeBuf(12);
@@ -370,9 +371,10 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int len, int t
          assert(i > 0);
          
          // check for acknowledge
-         bSuccess = readBuf[0] == 0x14 &&
-         readBuf[1] == 0x01 &&
-         readBuf[2] == ((udpSequenceNumber >> 8) & 0xFF) && readBuf[3] == (udpSequenceNumber & 0xFF);
+         bSuccess = readBuf[0] == 0x24 &&
+                    readBuf[1] == 0x01 &&
+                    readBuf[2] == ((udpSequenceNumber >> 8) & 0xFF) &&
+                    readBuf[3] == (udpSequenceNumber & 0xFF);
          
          // check for data length (limited to one UDP frame at the moment)
          bSuccess = bSuccess && (i == len + 4);
@@ -455,11 +457,6 @@ void WDB::Connect(int port)
    
    // set MAC address and IP address of this computer in WD board
    SendUDP("cfgdst");
-
-   /* test binary UDP protocol
-   std::vector<unsigned int> data { 0x12345678 };
-   WriteUDP(0xC3000000 + WD2_REG_WDB_LOC_OFS, data);
-    */
 }
 
 //--------------------------------------------------------------------
@@ -479,64 +476,64 @@ void bitReplace(unsigned int &reg, unsigned int mask, unsigned int ofs, unsigned
 
 //--------------------------------------------------------------------
 
-void WDB::ReceiveControlRegisters()
+void WDB::ReceiveControlRegisters(unsigned int index, unsigned int nReg)
 {
    if (mDemoMode) {
-      for (auto i=0 ; i<REG_NR_OF_CTRL_REGS ; i++)
+      for (auto i=index ; i<index+nReg ; i++)
          this->creg[i] = 0;
       return;
    }
 
 #ifdef WD2_USE_UDP_BIN
-   std::vector<unsigned int> result = ReadUDP(WD2_REG_WDB_LOC_OFS, nReg);
-   for (auto i=0 ; i<REG_NR_OF_CTRL_REGS ; i++)
-      this->creg[i] = result[i];
+   std::vector<unsigned int> result = ReadUDP(WD2_REG_WDB_LOC_OFS+index*4, nReg);
+   for (auto i=0 ; i<nReg ; i++)
+      this->creg[index+i] = result[i];
 #else
    std::string result;
    std::ostringstream req;
-   req << "rr 0x" << std::hex << WD2_REG_WDB_LOC_OFS << " " << std::dec << REG_NR_OF_CTRL_REGS;
+   req << "rr 0x" << std::hex << WD2_REG_WDB_LOC_OFS+index*4 << " " << std::dec << nReg;
    
    result = SendReceiveUDP(req.str(), 500);
    std::stringstream ss(result);
    std::string line;
    
-   for (auto i=0 ; i<REG_NR_OF_CTRL_REGS ; i++) {
+   for (auto i=index ; i<index+nReg ; i++) {
       std::getline(ss, line, '\r');
       auto adr = (unsigned int)std::stoul(line.substr(3), nullptr, 16);
-      auto index = (adr - WD2_REG_WDB_LOC_OFS) / 4;
-      if (index < REG_NR_OF_CTRL_REGS)
-         this->creg[index] = (unsigned int)std::stoul(line.substr(10), nullptr, 16);
+      auto idx = (adr - WD2_REG_WDB_LOC_OFS) / 4;
+      if (idx < REG_NR_OF_CTRL_REGS)
+         this->creg[idx] = (unsigned int)std::stoul(line.substr(10), nullptr, 16);
    }
 #endif
 }
 
-void WDB::ReceiveStatusRegisters()
+void WDB::ReceiveStatusRegisters(unsigned int index, unsigned int nReg)
 {
    if (mDemoMode) {
-      for (auto i=0 ; i<REG_NR_OF_STAT_REGS ; i++)
+      for (auto i=index ; i<index+nReg ; i++)
          this->sreg[i] = 0;
       return;
    }
    
 #ifdef WD2_USE_UDP_BIN
-   std::vector<unsigned int> result = ReadUDP(WD2_REG_HW_VER_OFS, nReg);
-   for (auto i=0 ; i<REG_NR_OF_STAT_REGS ; i++)
-      this->sreg[i] = result[i];
+   std::vector<unsigned int> result = ReadUDP(WD2_REG_HW_VER_OFS+index*4, nReg);
+   for (auto i=0 ; i<nReg ; i++)
+      this->sreg[index+i] = result[i];
 #else
    std::string result;
    std::ostringstream req;
-   req << "rr 0x" << std::hex << WD2_REG_HW_VER_OFS << " " << std::dec << REG_NR_OF_STAT_REGS;
+   req << "rr 0x" << std::hex << WD2_REG_HW_VER_OFS+index*4 << " " << std::dec << nReg;
    
    result = SendReceiveUDP(req.str(), 500);
    std::stringstream ss(result);
    std::string line;
    
-   for (auto i=0 ; i<REG_NR_OF_STAT_REGS ; i++) {
+   for (auto i=index ; i<index+nReg ; i++) {
       std::getline(ss, line, '\r');
       auto adr = (unsigned int)std::stoul(line.substr(3), nullptr, 16);
-      auto index = (adr - WD2_REG_HW_VER_OFS) / 4;
-      if (index < REG_NR_OF_STAT_REGS) {
-         this->sreg[index] = (unsigned int)std::stoul(line.substr(10), nullptr, 16);
+      auto idx = (adr - WD2_REG_HW_VER_OFS) / 4;
+      if (idx < REG_NR_OF_STAT_REGS) {
+         this->sreg[idx] = (unsigned int)std::stoul(line.substr(10), nullptr, 16);
       }
    }
 #endif
@@ -784,26 +781,8 @@ unsigned int WDB::GetAdcInfo()
 
 void WDB::GetScalers(std::vector<unsigned long> &scaler)
 {
-   std::string result;
-   std::ostringstream req;
-   req << "rr 0x" << std::hex << WD2_REG_SCALER_0_LSB_OFS << " 34";
-   
-   result = SendReceiveUDP(req.str(), 500); // increased timeout
-   std::stringstream ss(result);
-   std::string line;
-   
-   try {
-   for (auto i=0 ; i<34 ; i++) {
-      std::getline(ss, line, '\r');
-      auto adr = ((unsigned int)std::stoul(line.substr(3), nullptr, 16)) / 4;
-      if (adr >= WD2_REG_SCALER_0_LSB_OFS/4 && adr < WD2_REG_SCALER_EXT_CLK_OFS/4)
-         this->sreg[adr] = (unsigned int)std::stoul(line.substr(14), nullptr, 16);
-   }
-   } catch(...) {
-      if (mVerbose)
-         std::cerr << "Received invalid scalers." << std::endl;
-   }
-   
+   ReceiveStatusRegisters((WD2_REG_SCALER_0_LSB_OFS-WD2_REG_HW_VER_OFS)/4, 34);
+
    // channels 0-15 are 64 bit counters
    for (auto i=0 ; i<16 ; i++) {
       unsigned long v = this->sreg[WD2_REG_SCALER_0_LSB_OFS/4+i*2] |

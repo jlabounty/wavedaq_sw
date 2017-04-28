@@ -305,8 +305,8 @@ public:
    // interface functions
    void SetVerbose(bool verbose) { mVerbose = verbose; }
    void Connect(int port);
-   void ReceiveControlRegisters();
-   void ReceiveStatusRegisters();
+   void ReceiveControlRegisters(unsigned int index=0, unsigned int nReg=REG_NR_OF_CTRL_REGS);
+   void ReceiveStatusRegisters(unsigned int index=0, unsigned int nReg=REG_NR_OF_STAT_REGS);
    void ReceiveStatusRegister(int ofs);
    void SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v);
    void PrintVersion();
