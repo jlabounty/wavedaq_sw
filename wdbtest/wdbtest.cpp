@@ -93,6 +93,24 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          gl->wp->SetRotateWaveform(value == "1");
       }
 
+      else if (item == "timeCalib1") {
+         gl->wp->SetTimeCalib1(value == "1");
+      }
+
+      else if (item == "timeCalib2") {
+         gl->wp->SetTimeCalib2(value == "1");
+      }
+
+      else if (item == "timeCalib3") {
+         gl->wp->SetTimeCalib3(value == "1");
+      }
+
+      else if (item == "daqClkSrcSel") {
+         std::cout << "Set: " << value << std::endl;
+         gl->wdb[iBoard]->SetDaqClkSrcSel(std::stoi(value));
+      }
+
+      
       mg_printf(nc, "HTTP/1.1 204 No Content\r\n");
    }
    
@@ -169,17 +187,18 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"slotId\": %d,\n",                     w->GetSlotId());
          mg_printf_http_chunk(nc, "      \"readoutSrcSel\": %d,\n",              w->GetReadoutSrcSel());
          mg_printf_http_chunk(nc, "      \"daqNormal\": %s,\n",                  w->IsDAQNormal() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"daqSingle\": %s,\n",                  w->IsDAQSingle() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"drs0TimingRefSel\": %d,\n",           w->GetDRS0TimingRefSel());
-         mg_printf_http_chunk(nc, "      \"drs1TimingRefSel\": %d,\n",           w->GetDRS1TimingRefSel());
+         mg_printf_http_chunk(nc, "      \"daqSingle\": %s,\n",                  w->IsDaqSingle() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"drs0TimingRefSel\": %d,\n",           w->GetDrs0TimingRefSel());
+         mg_printf_http_chunk(nc, "      \"drs1TimingRefSel\": %d,\n",           w->GetDrs1TimingRefSel());
          mg_printf_http_chunk(nc, "      \"timingCalibBufferEnable\": %s,\n",    w->IsTimingCalibBufferEnable() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"timingCalibSignalEnable\": %s,\n",    w->IsTimingCalibSignalEnable() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"daqClkSrcSel\": %d,\n",               w->GetDAQClkSrcSel());
+         mg_printf_http_chunk(nc, "      \"daqClkSrcSel\": %d,\n",               w->GetDaqClkSrcSel());
+         std::cout << "Return: " << w->GetDaqClkSrcSel() << std::endl;
          mg_printf_http_chunk(nc, "      \"extClkInSel\": %d,\n",                w->GetExtClkInSel());
          mg_printf_http_chunk(nc, "      \"extClkFreq\": %d,\n",                 w->GetExtClkFreq());
          mg_printf_http_chunk(nc, "      \"localClkFreq\": %d,\n",               w->GetLocalClkFreq());
-         mg_printf_http_chunk(nc, "      \"drs0ChnTxEnable\": %d,\n",            w->GetDRS0ChnTxEnable());
-         mg_printf_http_chunk(nc, "      \"drs1ChnTxEnable\": %d,\n",            w->GetDRS1ChnTxEnable());
+         mg_printf_http_chunk(nc, "      \"drs0ChnTxEnable\": %d,\n",            w->GetDrs0ChnTxEnable());
+         mg_printf_http_chunk(nc, "      \"drs1ChnTxEnable\": %d,\n",            w->GetDrs1ChnTxEnable());
          
          mg_printf_http_chunk(nc, "      \"dacOfs\": %d,\n",                     w->GetDacOfs());
          mg_printf_http_chunk(nc, "      \"dacCalDc\": %d,\n",                   w->GetDacCalDc());
@@ -192,18 +211,18 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
          mg_printf_http_chunk(nc, "      \"fePZC\": [\n");
          for (int i=0 ; i<15 ; i++)
-            mg_printf_http_chunk(nc, "        %s,\n",                            w->IsFEPZC(i) ? "true" : "false");
-         mg_printf_http_chunk(nc, "        %s ],\n",                             w->IsFEPZC(15) ? "true" : "false");
+            mg_printf_http_chunk(nc, "        %s,\n",                            w->IsFePzc(i) ? "true" : "false");
+         mg_printf_http_chunk(nc, "        %s ],\n",                             w->IsFePzc(15) ? "true" : "false");
 
          mg_printf_http_chunk(nc, "      \"feGain\": [\n");
          for (int i=0 ; i<15 ; i++)
-            mg_printf_http_chunk(nc, "        %1g,\n",                           w->GetFEGain(i));
-         mg_printf_http_chunk(nc, "        %1g ],\n",                            w->GetFEGain(15));
+            mg_printf_http_chunk(nc, "        %1g,\n",                           w->GetFeGain(i));
+         mg_printf_http_chunk(nc, "        %1g ],\n",                            w->GetFeGain(15));
 
          mg_printf_http_chunk(nc, "      \"feMux\": [\n");
          for (int i=0 ; i<15 ; i++)
-            mg_printf_http_chunk(nc, "        %1g,\n",                           w->GetFEMux(i));
-         mg_printf_http_chunk(nc, "        %1g ],\n",                            w->GetFEMux(15));
+            mg_printf_http_chunk(nc, "        %1g,\n",                           w->GetFeMux(i));
+         mg_printf_http_chunk(nc, "        %1g ],\n",                            w->GetFeMux(15));
 
          mg_printf_http_chunk(nc, "      \"triggerShaperEnable\": %s,\n",        w->IsTriggerShaperEnable() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"triggerPulseLength\": %d,\n",         w->GetTriggerPulseLength());
@@ -367,11 +386,11 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          for (auto &b: gl->wdb) {
             if (b->GetReadoutSrcSel() == 0 /*TBD: b->cReadoutSrcDRS*/) {
                if (gl->triggerMode == cTriggerModeAuto || gl->triggerMode == cTriggerModeSoftware)
-                  b->RequestDRSEvent();
+                  b->RequestDrsEvent();
                else if (gl->triggerMode == cTriggerModeNormal)
-                  b->StartDAQSingle();
+                  b->StartDaqSingle();
             } else if (b->GetReadoutSrcSel() == b->cReadoutSrcADC)
-               b->RequestADCEvent();
+               b->RequestAdcEvent();
          }
          
          // read waveforms

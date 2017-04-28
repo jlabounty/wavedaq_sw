@@ -255,13 +255,13 @@ function populateControls(init)
    document.getElementById("calib3").checked = OSC.wp.gainCalib;
    document.getElementById("calib4").checked = OSC.wp.rangeCalib;
    document.getElementById("spikes").checked = OSC.wp.removeSpikes;
-   document.getElementById("rotate").checked = OSC.wp.rotateFlag;
+   document.getElementById("rotate").checked = OSC.wp.rotateWaveform;
 
-   document.getElementById("tcalib1").checked = OSC.wp.time_calib1_flag;
-   document.getElementById("tcalib2").checked = OSC.wp.time_calib2_flag;
-   document.getElementById("tcalib3").checked = OSC.wp.time_calib3_flag;
+   document.getElementById("tcalib1").checked = OSC.wp.timeCalib1;
+   document.getElementById("tcalib2").checked = OSC.wp.timeCalib2;
+   document.getElementById("tcalib3").checked = OSC.wp.timeCalib3;
 
-   document.getElementById("clksource").checked = (OSC.wdb[0].daqClkSrcSel == 0);
+   document.getElementById("clksource").checked = (OSC.wdb[0].daqClkSrcSel == 1);
 
    if (init) {
       // set scale according to sampling frequency

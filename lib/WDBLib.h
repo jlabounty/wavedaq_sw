@@ -347,8 +347,8 @@ public:
    void SetSlotId(unsigned int value);
    unsigned int GetValidDelayADC();
    void SetValidDelayADC(unsigned int value);
-   unsigned int GetDAQDataPhase();
-   void SetDAQDataPhase(unsigned int value);
+   unsigned int GetDaqDataPhase();
+   void SetDaqDataPhase(unsigned int value);
    bool IsCompPowerEnable();
    void SetCompPowerEnable(bool value);
    unsigned int GetReadoutSrcSel();
@@ -363,59 +363,59 @@ public:
    void TrgDAQReinit();
    bool IsDAQNormal();
    
-   void SetDAQNormal(bool value);
-   bool IsDAQSingle();
-   void SetDAQSingle(bool value);
-   void StartDAQSingle();
-   unsigned int GetDRS0TimingRefSel();
-   void SetDRS0TimingRefSel(unsigned int value);
-   unsigned int GetDRS1TimingRefSel();
-   void SetDRS1TimingRefSel(unsigned int value);
+   void SetDaqNormal(bool value);
+   bool IsDaqSingle();
+   void SetDaqSingle(bool value);
+   void StartDaqSingle();
+   unsigned int GetDrs0TimingRefSel();
+   void SetDrs0TimingRefSel(unsigned int value);
+   unsigned int GetDrs1TimingRefSel();
+   void SetDrs1TimingRefSel(unsigned int value);
    bool IsTimingCalibBufferEnable();
    void SetTimingCalibBufferEnable(bool value);
    bool IsTimingCalibSignalEnable();
    void SetTimingCalibSignalEnable(bool value);
-   unsigned int GetDAQClkSrcSel();
-   void SetDAQClkSrcSel(unsigned int value);
+   unsigned int GetDaqClkSrcSel();
+   void SetDaqClkSrcSel(unsigned int value);
    unsigned int GetExtClkInSel();
    void SetExtClkInSel(unsigned int value);
    unsigned int GetExtClkFreq();
    unsigned int GetLocalClkFreq();
-   unsigned int GetDRS1ChnTxEnable();
-   void SetDRS1ChnTxEnable(unsigned int value);
-   unsigned int GetDRS0ChnTxEnable();
-   void SetDRS0ChnTxEnable(unsigned int value);
-   unsigned int GetDRSControl();
-   void SetDRSControl(unsigned int value);
+   unsigned int GetDrs1ChnTxEnable();
+   void SetDrs1ChnTxEnable(unsigned int value);
+   unsigned int GetDrs0ChnTxEnable();
+   void SetDrs0ChnTxEnable(unsigned int value);
+   unsigned int GetDrsControl();
+   void SetDrsControl(unsigned int value);
    unsigned int GetDataDestination();
    void SetDataDestination(unsigned int value);
    unsigned int GetDCBSerdesTrain();
    void SetDCBSerdesTrain(unsigned int value);
-   unsigned int GetTCBSerdesTrain();
-   void SetTCBSerdesTrain(unsigned int value);
+   unsigned int GetTcbSerdesTrain();
+   void SetTcbSerdesTrain(unsigned int value);
    unsigned int GetInterPacketDelay();
    void SetInterPacketDelay(unsigned int value);
    
-   void ResetDAQPLL();
-   void ResetDCBOserdesPLL();
-   void ResetDCBOserdesIF();
-   void ResetTCBOserdesPLL();
-   void ResetTCBOserdesIF();
+   void ResetDaqPll();
+   void ResetDcbOserdesPll();
+   void ResetDcbOserdesIf();
+   void ResetTcbOserdesPll();
+   void ResetTcbOserdesIf();
    void ResetScaler();
    void ResetTriggerParityErrorCounter();
-   void LMKSyncLocal();
-   void ResetADCIF();
+   void LmkSyncLocal();
+   void ResetAdcIf();
    void ResetPackager();
    void ResetEventCounter();
-   void ResetDRSControlFSM();
-   void ReconfigureFPGA();
+   void ResetDrsControlFsm();
+   void ReconfigureFpga();
    
-   void ApplyDRSSettings();
-   void ApplyDACSettings();
+   void ApplyDrsSettings();
+   void ApplyDacSettings();
    void ApplyFrontendSettings();
    void ApplyControlSettings();
-   void ApplyADCSettings();
-   void ApplyLMKSettings();
+   void ApplyAdcSettings();
+   void ApplyLmkSettings();
 
    unsigned int GetDacRofs();
    void SetDacRofs(unsigned int v);
@@ -432,26 +432,26 @@ public:
    float GetDacTlevel(int chn);
    void SetDacTlevel(int chn, float v);
 
-   bool IsFEPZC(int chn);
-   void SetFEPZC(int chn, bool v);
-   unsigned int GetFEAmp2Comp(int chn);
-   void SetFEAmp2Comp(int chn, unsigned int v);
-   unsigned int GetFEAmp2Enable(int chn);
-   void SetFEAmp2Enable(int chn, unsigned int v);
-   unsigned int GetFEAmp1Comp(int chn);
-   void SetFEAmp1Comp(int chn, unsigned int v);
-   unsigned int GetFEAmp1Enable(int chn);
-   void SetFEAmp1Enable(int chn, unsigned int v);
-   unsigned int GetFEAttenuation(int chn);
-   void SetFEAttenuation(int chn, unsigned int v);
-   unsigned int GetFEMux(int chn);
-   void SetFEMux(int chn, unsigned int v);
+   bool IsFePzc(int chn);
+   void SetFePzc(int chn, bool v);
+   unsigned int GetFeAmp2Comp(int chn);
+   void SetFeAmp2Comp(int chn, unsigned int v);
+   unsigned int GetFeAmp2Enable(int chn);
+   void SetFeAmp2Enable(int chn, unsigned int v);
+   unsigned int GetFeAmp1Comp(int chn);
+   void SetFeAmp1Comp(int chn, unsigned int v);
+   unsigned int GetFeAmp1Enable(int chn);
+   void SetFeAmp1Enable(int chn, unsigned int v);
+   unsigned int GetFeAttenuation(int chn);
+   void SetFeAttenuation(int chn, unsigned int v);
+   unsigned int GetFeMux(int chn);
+   void SetFeMux(int chn, unsigned int v);
 
-   float GetFEGain(int chn);
-   void SetFEGain(int chn, float v);
+   float GetFeGain(int chn);
+   void SetFeGain(int chn, float v);
 
-   unsigned int GetLMK(int reg);
-   void SetLMK(int reg, unsigned int v);
+   unsigned int GetLmk(int reg);
+   void SetLmk(int reg, unsigned int v);
 
    // ADC configuration intentionally skipped ...
    
@@ -490,9 +490,9 @@ public:
    unsigned int GetCrc32RegBank();
    
    // high-level methods
-   void RequestDRSEvent();
-   void RequestADCEvent();
-   void RequestTDCEvent();
+   void RequestDrsEvent();
+   void RequestAdcEvent();
+   void RequestTdcEvent();
 };
 
 //--------------------------------------------------------------------

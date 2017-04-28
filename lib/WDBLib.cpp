@@ -563,23 +563,22 @@ void WDB::ReceiveStatusRegister(int rofs)
 
 void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v)
 {
-   if (mDemoMode)
-      return;
-
    int index = (rofs & 0x0FFF)/4;
 
    unsigned int r = this->creg[index];
    
    bitReplace(r, mask, ofs, v);
    
+   if (!mDemoMode) {
 #ifdef WD2_USE_UDP_BIN
-   WriteUDP(rofs, std::vector<unsigned int> { r });
+      WriteUDP(rofs, std::vector<unsigned int> { r });
 #else
-   std::ostringstream req;
-   req << "rw 0x" << std::hex << rofs << " 0x" << r;
+      std::ostringstream req;
+      req << "rw 0x" << std::hex << rofs << " 0x" << r;
    
-   SendUDP(req.str());
+      SendUDP(req.str());
 #endif
+   }
    
    this->creg[index] = r;
 }
@@ -871,13 +870,13 @@ void WDB::SetValidDelayADC(unsigned int value)
    SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_VALID_DELAY_ADC_MASK, WD2_BIT_VALID_DELAY_ADC_OFS, value);
 }
 
-unsigned int WDB::GetDAQDataPhase()
+unsigned int WDB::GetDaqDataPhase()
 // phase step setting of the PLL generating the common DAQ clock
 {
    return bitExtract(creg, WD2_REG_WDB_LOC_OFS, WD2_BIT_DAQ_DATA_PHASE_MASK, WD2_BIT_DAQ_DATA_PHASE_OFS);
 }
 
-void WDB::SetDAQDataPhase(unsigned int value)
+void WDB::SetDaqDataPhase(unsigned int value)
 {
    SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_DAQ_DATA_PHASE_MASK, WD2_BIT_DAQ_DATA_PHASE_OFS, value);
 }
@@ -950,45 +949,48 @@ bool WDB::IsDAQNormal()
    return bitExtract(creg, WD2_REG_WDB_LOC_OFS, WD2_BIT_DAQ_NORMAL_MASK, WD2_BIT_DAQ_NORMAL_OFS) == 1;
 }
 
-void WDB::SetDAQNormal(bool value)
+void WDB::SetDaqNormal
+
+
+(bool value)
 {
    SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_DAQ_NORMAL_MASK, WD2_BIT_DAQ_NORMAL_OFS, value ? 1 : 0);
 }
 
-bool WDB::IsDAQSingle()
+bool WDB::IsDaqSingle()
 // "single" acquisition mode like on an oscilloscope
 {
    return bitExtract(creg, WD2_REG_WDB_LOC_OFS, WD2_BIT_DAQ_SINGLE_MASK, WD2_BIT_DAQ_SINGLE_OFS) == 1;
 }
 
-void WDB::SetDAQSingle(bool value)
+void WDB::SetDaqSingle(bool value)
 {
    SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_DAQ_SINGLE_MASK, WD2_BIT_DAQ_SINGLE_OFS, value ? 1 : 0);
 }
 
-void WDB::StartDAQSingle()
+void WDB::StartDaqSingle()
 {
    SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_DAQ_SINGLE_MASK, WD2_BIT_DAQ_SINGLE_OFS, 1);
 }
 
-unsigned int WDB::GetDRS0TimingRefSel()
+unsigned int WDB::GetDrs0TimingRefSel()
 // 0 = oscillator / 1 = LMK
 {
    return bitExtract(creg, WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_DRS_0_TIMING_REF_SEL_MASK, WD2_BIT_DRS_0_TIMING_REF_SEL_OFS);
 }
 
-void WDB::SetDRS0TimingRefSel(unsigned int value)
+void WDB::SetDrs0TimingRefSel(unsigned int value)
 {
    SetRegMask(WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_DRS_0_TIMING_REF_SEL_MASK, WD2_BIT_DRS_0_TIMING_REF_SEL_OFS, value);
 }
 
-unsigned int WDB::GetDRS1TimingRefSel()
+unsigned int WDB::GetDrs1TimingRefSel()
 // 0 = oscillator / 1 = LMK
 {
    return bitExtract(creg, WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_DRS_1_TIMING_REF_SEL_MASK, WD2_BIT_DRS_1_TIMING_REF_SEL_OFS);
 }
 
-void WDB::SetDRS1TimingRefSel(unsigned int value)
+void WDB::SetDrs1TimingRefSel(unsigned int value)
 {
    SetRegMask(WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_DRS_1_TIMING_REF_SEL_MASK, WD2_BIT_DRS_1_TIMING_REF_SEL_OFS, value);
 }
@@ -1015,13 +1017,13 @@ void WDB::SetTimingCalibSignalEnable(bool value)
    SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_TIMING_CALIB_SIGNAL_EN_MASK, WD2_BIT_TIMING_CALIB_SIGNAL_EN_OFS, value ? 1 : 0);
 }
 
-unsigned int WDB::GetDAQClkSrcSel()
+unsigned int WDB::GetDaqClkSrcSel()
 // 0 = crate clock / 1 = on-board oscillator
 {
    return bitExtract(creg, WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_DAQ_CLK_SRC_SEL_MASK, WD2_BIT_DAQ_CLK_SRC_SEL_OFS);
 }
 
-void WDB::SetDAQClkSrcSel(unsigned int value)
+void WDB::SetDaqClkSrcSel(unsigned int value)
 {
    SetRegMask(WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_DAQ_CLK_SRC_SEL_MASK, WD2_BIT_DAQ_CLK_SRC_SEL_OFS, value);
 }
@@ -1049,29 +1051,29 @@ unsigned int WDB::GetLocalClkFreq()
    return bitExtract(creg, WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_LOCAL_CLK_FREQ_MASK, WD2_BIT_LOCAL_CLK_FREQ_OFS);
 }
 
-unsigned int WDB::GetDRS1ChnTxEnable()
+unsigned int WDB::GetDrs1ChnTxEnable()
 // channel transmission enable of DRS1 [CH8:CH0], CH8:clock channel
 {
    return bitExtract(creg, WD2_REG_CH_TX_EN_OFS, WD2_BIT_DRS_1_CH_TX_EN_MASK, WD2_BIT_DRS_1_CH_TX_EN_OFS);
 }
 
-void WDB::SetDRS1ChnTxEnable(unsigned int value)
+void WDB::SetDrs1ChnTxEnable(unsigned int value)
 {
    SetRegMask(WD2_REG_CH_TX_EN_OFS, WD2_BIT_DRS_1_CH_TX_EN_MASK, WD2_BIT_DRS_1_CH_TX_EN_OFS, value);
 }
 
-unsigned int WDB::GetDRS0ChnTxEnable()
+unsigned int WDB::GetDrs0ChnTxEnable()
 // channel transmission enable of DRS0 [CH8:CH0], CH8:clock channel
 {
    return bitExtract(creg, WD2_REG_CH_TX_EN_OFS, WD2_BIT_DRS_0_CH_TX_EN_MASK, WD2_BIT_DRS_0_CH_TX_EN_OFS);
 }
 
-void WDB::SetDRS0ChnTxEnable(unsigned int value)
+void WDB::SetDrs0ChnTxEnable(unsigned int value)
 {
    SetRegMask(WD2_REG_CH_TX_EN_OFS, WD2_BIT_DRS_0_CH_TX_EN_MASK, WD2_BIT_DRS_0_CH_TX_EN_OFS, value);
 }
 
-unsigned int WDB::GetDRSControl()
+unsigned int WDB::GetDrsControl()
 /* bits
     18:  drs_wsrloop
     17:  drs_pllen
@@ -1089,7 +1091,7 @@ unsigned int WDB::GetDRSControl()
    return bitExtract(creg, WD2_REG_DRS_CTRL_OFS, mask, WD2_BIT_DRS_WCR_OFS);
 }
 
-void WDB::SetDRSControl(unsigned int value)
+void WDB::SetDrsControl(unsigned int value)
 {
    auto mask = WD2_BIT_DRS_WSRLOOP_MASK |
    WD2_BIT_DRS_PLLEN_MASK |
@@ -1122,13 +1124,13 @@ void WDB::SetDCBSerdesTrain(unsigned int value)
    SetRegMask(WD2_REG_COM_CTRL_OFS, WD2_BIT_DCB_SERDES_TRAIN_MASK, WD2_BIT_DCB_SERDES_TRAIN_OFS, value);
 }
 
-unsigned int WDB::GetTCBSerdesTrain()
+unsigned int WDB::GetTcbSerdesTrain()
 // enable training pattern for TCB serdes connection
 {
    return bitExtract(creg, WD2_REG_COM_CTRL_OFS, WD2_BIT_TCB_SERDES_TRAIN_MASK, WD2_BIT_TCB_SERDES_TRAIN_OFS);
 }
 
-void WDB::SetTCBSerdesTrain(unsigned int value)
+void WDB::SetTcbSerdesTrain(unsigned int value)
 {
    SetRegMask(WD2_REG_COM_CTRL_OFS, WD2_BIT_TCB_SERDES_TRAIN_MASK, WD2_BIT_TCB_SERDES_TRAIN_OFS, value);
 }
@@ -1144,27 +1146,28 @@ void WDB::SetInterPacketDelay(unsigned int value)
    SetRegMask(WD2_REG_COM_CTRL_OFS, WD2_BIT_INTER_PKG_DELAY_MASK, WD2_BIT_INTER_PKG_DELAY_OFS, value);
 }
 
-void WDB::ResetDAQPLL()
+void WDB::ResetDaqPll
+()
 {
    SetRegMask(WD2_REG_RST_OFS, WD2_BIT_DAQ_PLL_RST_MASK, WD2_BIT_DAQ_PLL_RST_OFS, 1);
 }
 
-void WDB::ResetDCBOserdesPLL()
+void WDB::ResetDcbOserdesPll()
 {
    SetRegMask(WD2_REG_RST_OFS, WD2_BIT_DCB_OSERDES_PLL_RST_MASK, WD2_BIT_DCB_OSERDES_PLL_RST_OFS, 1);
 }
 
-void WDB::ResetDCBOserdesIF()
+void WDB::ResetDcbOserdesIf()
 {
    SetRegMask(WD2_REG_RST_OFS, WD2_BIT_DCB_OSERDES_IF_RST_MASK, WD2_BIT_DCB_OSERDES_IF_RST_OFS, 1);
 }
 
-void WDB::ResetTCBOserdesPLL()
+void WDB::ResetTcbOserdesPll()
 {
    SetRegMask(WD2_REG_RST_OFS, WD2_BIT_TCB_OSERDES_IF_RST_MASK, WD2_BIT_TCB_OSERDES_IF_RST_OFS, 1);
 }
 
-void WDB::ResetTCBOserdesIF()
+void WDB::ResetTcbOserdesIf()
 {
    SetRegMask(WD2_REG_RST_OFS, WD2_BIT_TCB_OSERDES_IF_RST_MASK, WD2_BIT_TCB_OSERDES_IF_RST_OFS, 1);
 }
@@ -1179,12 +1182,12 @@ void WDB::ResetTriggerParityErrorCounter()
    SetRegMask(WD2_REG_RST_OFS, WD2_BIT_TRB_PARITY_ERROR_COUNT_RST_MASK, WD2_BIT_TRB_PARITY_ERROR_COUNT_RST_OFS, 1);
 }
 
-void WDB::LMKSyncLocal()
+void WDB::LmkSyncLocal()
 {
    SetRegMask(WD2_REG_RST_OFS, WD2_BIT_LMK_SYNC_LOCAL_MASK, WD2_BIT_LMK_SYNC_LOCAL_OFS, 1);
 }
 
-void WDB::ResetADCIF()
+void WDB::ResetAdcIf()
 {
    SetRegMask(WD2_REG_RST_OFS, WD2_BIT_ADC_IF_RST_MASK, WD2_BIT_ADC_IF_RST_OFS, 1);
 }
@@ -1199,22 +1202,22 @@ void WDB::ResetEventCounter()
    SetRegMask(WD2_REG_RST_OFS, WD2_BIT_EVENT_COUNTER_RST_MASK, WD2_BIT_EVENT_COUNTER_RST_OFS, 1);
 }
 
-void WDB::ResetDRSControlFSM()
+void WDB::ResetDrsControlFsm()
 {
    SetRegMask(WD2_REG_RST_OFS, WD2_BIT_DRS_CTRL_FSM_RST_MASK, WD2_BIT_DRS_CTRL_FSM_RST_OFS, 1);
 }
 
-void WDB::ReconfigureFPGA()
+void WDB::ReconfigureFpga()
 {
    SetRegMask(WD2_REG_RST_OFS, WD2_BIT_RECONFIGURE_FPGA_MASK, WD2_BIT_RECONFIGURE_FPGA_OFS, 1);
 }
 
-void WDB::ApplyDRSSettings()
+void WDB::ApplyDrsSettings()
 {
    SetRegMask(WD2_REG_APLY_CFG_OFS, WD2_BIT_APPLY_SETTINGS_DRS_MASK, WD2_BIT_APPLY_SETTINGS_DRS_OFS, 1);
 }
 
-void WDB::ApplyDACSettings()
+void WDB::ApplyDacSettings()
 {
    SetRegMask(WD2_REG_APLY_CFG_OFS, WD2_BIT_APPLY_SETTINGS_DAC_MASK, WD2_BIT_APPLY_SETTINGS_DAC_OFS, 1);
 }
@@ -1229,12 +1232,12 @@ void WDB::ApplyControlSettings()
    SetRegMask(WD2_REG_APLY_CFG_OFS, WD2_BIT_APPLY_SETTINGS_CTRL_MASK, WD2_BIT_APPLY_SETTINGS_CTRL_OFS, 1);
 }
 
-void WDB::ApplyADCSettings()
+void WDB::ApplyAdcSettings()
 {
    SetRegMask(WD2_REG_APLY_CFG_OFS, WD2_BIT_APPLY_SETTINGS_ADC_MASK, WD2_BIT_APPLY_SETTINGS_ADC_OFS, 1);
 }
 
-void WDB::ApplyLMKSettings()
+void WDB::ApplyLmkSettings()
 {
    SetRegMask(WD2_REG_APLY_CFG_OFS, WD2_BIT_APPLY_SETTINGS_LMK_MASK, WD2_BIT_APPLY_SETTINGS_LMK_OFS, 1);
 }
@@ -1328,7 +1331,7 @@ void WDB::SetDacTlevel(int chn, float v)
       SetRegMask(WD2_REG_DAC1_A_B_OFS+(chn/2)*4, WD2_BIT_DAC1_CH_B_MASK, WD2_BIT_DAC1_CH_B_OFS, d);
 }
 
-bool WDB::IsFEPZC(int chn)
+bool WDB::IsFePzc(int chn)
 // pole-zero canellation
 {
    assert(chn < 16);
@@ -1338,7 +1341,7 @@ bool WDB::IsFEPZC(int chn)
    return bitExtract(creg, rofs, mask, ofs) > 0;
 }
 
-void WDB::SetFEPZC(int chn, bool v)
+void WDB::SetFePzc(int chn, bool v)
 {
    assert(chn < 16);
    auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
@@ -1347,7 +1350,7 @@ void WDB::SetFEPZC(int chn, bool v)
    SetRegMask(rofs, mask, ofs, v ? 1 : 0);
 }
 
-unsigned int WDB::GetFEAmp2Comp(int chn)
+unsigned int WDB::GetFeAmp2Comp(int chn)
 // amplifier 2 compensation enable
 {
    assert(chn < 16);
@@ -1357,7 +1360,7 @@ unsigned int WDB::GetFEAmp2Comp(int chn)
    return bitExtract(creg, rofs, mask, ofs);
 }
 
-void WDB::SetFEAmp2Comp(int chn, unsigned int v)
+void WDB::SetFeAmp2Comp(int chn, unsigned int v)
 {
    assert(chn < 16);
    auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
@@ -1366,7 +1369,7 @@ void WDB::SetFEAmp2Comp(int chn, unsigned int v)
    SetRegMask(rofs, mask, ofs, v);
 }
 
-unsigned int WDB::GetFEAmp2Enable(int chn)
+unsigned int WDB::GetFeAmp2Enable(int chn)
 // amplifier 2 enable (gain 10)
 {
    assert(chn < 16);
@@ -1376,7 +1379,7 @@ unsigned int WDB::GetFEAmp2Enable(int chn)
    return bitExtract(creg, rofs, mask, ofs);
 }
 
-void WDB::SetFEAmp2Enable(int chn, unsigned int v)
+void WDB::SetFeAmp2Enable(int chn, unsigned int v)
 {
    assert(chn < 16);
    auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
@@ -1385,7 +1388,7 @@ void WDB::SetFEAmp2Enable(int chn, unsigned int v)
    SetRegMask(rofs, mask, ofs, v);
 }
 
-unsigned int WDB::GetFEAmp1Comp(int chn)
+unsigned int WDB::GetFeAmp1Comp(int chn)
 // amplifier 1 compensation enable
 {
    assert(chn < 16);
@@ -1395,7 +1398,7 @@ unsigned int WDB::GetFEAmp1Comp(int chn)
    return bitExtract(creg, rofs, mask, ofs);
 }
 
-void WDB::SetFEAmp1Comp(int chn, unsigned int v)
+void WDB::SetFeAmp1Comp(int chn, unsigned int v)
 {
    assert(chn < 16);
    auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
@@ -1404,7 +1407,7 @@ void WDB::SetFEAmp1Comp(int chn, unsigned int v)
    SetRegMask(rofs, mask, ofs, v);
 }
 
-unsigned int WDB::GetFEAmp1Enable(int chn)
+unsigned int WDB::GetFeAmp1Enable(int chn)
 // amplifier 1 enable (gain 10)
 {
    assert(chn < 16);
@@ -1414,7 +1417,7 @@ unsigned int WDB::GetFEAmp1Enable(int chn)
    return bitExtract(creg, rofs, mask, ofs);
 }
 
-void WDB::SetFEAmp1Enable(int chn, unsigned int v)
+void WDB::SetFeAmp1Enable(int chn, unsigned int v)
 {
    assert(chn < 16);
    auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
@@ -1423,7 +1426,7 @@ void WDB::SetFEAmp1Enable(int chn, unsigned int v)
    SetRegMask(rofs, mask, ofs, v);
 }
 
-unsigned int WDB::GetFEAttenuation(int chn)
+unsigned int WDB::GetFeAttenuation(int chn)
 // attenuation: 0 = 0dB / 1 = 6dB / 2 = 12dB / 8 = 18dB
 {
    assert(chn < 16);
@@ -1433,7 +1436,7 @@ unsigned int WDB::GetFEAttenuation(int chn)
    return bitExtract(creg, rofs, mask, ofs);
 }
 
-void WDB::SetFEAttenuation(int chn, unsigned int v)
+void WDB::SetFeAttenuation(int chn, unsigned int v)
 {
    assert(chn < 16);
    auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
@@ -1442,19 +1445,19 @@ void WDB::SetFEAttenuation(int chn, unsigned int v)
    SetRegMask(rofs, mask, ofs, v);
 }
 
-float WDB::GetFEGain(int chn)
+float WDB::GetFeGain(int chn)
 {
    // TDB
    return mFEGain;
 }
 
-void WDB::SetFEGain(int chn, float g)
+void WDB::SetFeGain(int chn, float g)
 {
    // TDB
    mFEGain = g;
 }
 
-unsigned int WDB::GetFEMux(int chn)
+unsigned int WDB::GetFeMux(int chn)
 // multiplexer: 0 = next channel / 1 = previous channel / 2 = input / 3 = cal source
 {
    assert(chn < 16);
@@ -1464,7 +1467,7 @@ unsigned int WDB::GetFEMux(int chn)
    return bitExtract(creg, rofs, mask, ofs);
 }
 
-void WDB::SetFEMux(int chn, unsigned int v)
+void WDB::SetFeMux(int chn, unsigned int v)
 {
    assert(chn < 16);
    auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
@@ -1473,13 +1476,13 @@ void WDB::SetFEMux(int chn, unsigned int v)
    SetRegMask(rofs, mask, ofs, v);
 }
 
-unsigned int WDB::GetLMK(int reg)
+unsigned int WDB::GetLmk(int reg)
 {
    assert(reg < 16);
    return creg[WD2_REG_LMK_0_OFS/4+reg];
 }
 
-void WDB::SetLMK(int reg, unsigned int v)
+void WDB::SetLmk(int reg, unsigned int v)
 {
    assert(reg < 16);
    SetRegMask(WD2_REG_LMK_0_OFS+reg*4, 0xFFFFFFFF, 0, v);
@@ -1663,31 +1666,31 @@ unsigned int WDB::GetCrc32RegBank()
 
 //--------------------------------------------------------------------
 
-void WDB::RequestDRSEvent()
+void WDB::RequestDrsEvent()
 {
    //  SendReceive("drsget");
    
    SetReadoutSrcSel(0); // select DRS as readout source
    
-   SetDAQSingle(true);  // start DRS domino wave
-   SetDAQSingle(false);
+   SetDaqSingle(true);  // start DRS domino wave
+   SetDaqSingle(false);
    
    TrgDAQSoft();
 }
 
-void WDB::RequestADCEvent()
+void WDB::RequestAdcEvent()
 {
    // SendReceive("adcget");
 
    SetReadoutSrcSel(1); // select ADC as readout source
    
-   SetDAQSingle(true);  // start DAQ
-   SetDAQSingle(false);
+   SetDaqSingle(true);  // start DAQ
+   SetDaqSingle(false);
    
    TrgDAQSoft();
 }
 
-void WDB::RequestTDCEvent()
+void WDB::RequestTdcEvent()
 {
    SendReceiveUDP("tdcget"); // not yet implemented !
 }

@@ -247,20 +247,20 @@
                   <td>Rotate waveform relative to trigger</td>
                </tr>
                <tr>
-                  <td><input type="checkbox" id="tcalib1" name="time_calib1_flag" onClick="setParam(this)"></td>
+                  <td><input type="checkbox" id="tcalib1" name="timeCalib1" onClick="setParam(this)"></td>
                   <td>Apply timing calibration</td>
                </tr>
                <tr>
-                  <td><input type="checkbox" id="tcalib2" name="time_calib2_flag" onClick="setParam(this)"></td>
+                  <td><input type="checkbox" id="tcalib2" name="timeCalib2" onClick="setParam(this)"></td>
                   <td>Apply timing offset correction</td>
                </tr>
                <tr>
-                  <td><input type="checkbox" id="tcalib3" name="time_calib3_flag" onClick="setParam(this)"></td>
+                  <td><input type="checkbox" id="tcalib3" name="timeCalib3" onClick="setParam(this)"></td>
                   <td>Correct horizontal trigger position</td>
                </tr>
                <tr>
-                  <td><input type="checkbox" id="clksource" name="clock_source" onClick="setParam(this)"></td>
-                  <td>Use external reference clock</td>
+                  <td><input type="checkbox" id="clksource" name="daqClkSrcSel" onClick="setParam(this)"></td>
+                  <td>Use internal reference clock</td>
                </tr>
             </table>
             <button class="executeButton" id="btnTCalib" type="button" onClick="doTCalib()">Execute Time Calibration
