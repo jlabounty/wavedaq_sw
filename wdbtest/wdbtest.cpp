@@ -106,11 +106,28 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       }
 
       else if (item == "daqClkSrcSel") {
-         std::cout << "Set: " << value << std::endl;
+         assert(iBoard != -1);
          gl->wdb[iBoard]->SetDaqClkSrcSel(std::stoi(value));
       }
 
-      
+      else if (item == "triggerLevel") {
+         assert(iBoard != -1);
+         gl->wdb[iBoard]->SetDacTlevel(iChannel, std::stof(value));
+      }
+
+      else if (item == "triggerDelay") {
+         gl->wdb[iBoard]->SetTriggerDelayNs(std::stoi(value));
+      }
+
+      else if (item == "triggerFallingEdge") {
+         gl->wdb[iBoard]->SetTriggerFallingEdge(std::stoi(value));
+      }
+
+      else if (item == "readoutSrc") {
+         gl->wdb[iBoard]->SetReadoutSrcSel(std::stoi(value));
+         std::cout << "readoutSrcSel: " << value << std::endl;
+      }
+
       mg_printf(nc, "HTTP/1.1 204 No Content\r\n");
    }
    
@@ -193,7 +210,6 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"timingCalibBufferEnable\": %s,\n",    w->IsTimingCalibBufferEnable() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"timingCalibSignalEnable\": %s,\n",    w->IsTimingCalibSignalEnable() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"daqClkSrcSel\": %d,\n",               w->GetDaqClkSrcSel());
-         std::cout << "Return: " << w->GetDaqClkSrcSel() << std::endl;
          mg_printf_http_chunk(nc, "      \"extClkInSel\": %d,\n",                w->GetExtClkInSel());
          mg_printf_http_chunk(nc, "      \"extClkFreq\": %d,\n",                 w->GetExtClkFreq());
          mg_printf_http_chunk(nc, "      \"localClkFreq\": %d,\n",               w->GetLocalClkFreq());
@@ -206,8 +222,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
          mg_printf_http_chunk(nc, "      \"dacTlevel\": [\n");
          for (int i=0 ; i<15 ; i++)
-            mg_printf_http_chunk(nc, "        %d,\n",                            w->GetDacTlevel(i));
-         mg_printf_http_chunk(nc, "        %d ],\n",                             w->GetDacTlevel(15));
+            mg_printf_http_chunk(nc, "        %f,\n",                            w->GetDacTlevel(i));
+         mg_printf_http_chunk(nc, "        %f ],\n",                             w->GetDacTlevel(15));
 
          mg_printf_http_chunk(nc, "      \"fePZC\": [\n");
          for (int i=0 ; i<15 ; i++)
@@ -231,7 +247,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"triggerExternalOr\": %s,\n",          w->IsTriggerExternalOr() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"triggerExternalAnd\": %s,\n",         w->IsTriggerExternalAnd() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"triggerDelayEnable\": %s,\n",         w->IsTriggerDelayEnable() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"triggerDelay\": %d,\n",               w->GetTriggerDelay());
+         mg_printf_http_chunk(nc, "      \"triggerDelay\": %d,\n",               w->GetTriggerDelayNs());
          mg_printf_http_chunk(nc, "      \"triggerComparatorMask\": %d,\n",      w->GetTriggerComparatorMask());
          mg_printf_http_chunk(nc, "      \"triggerCfgOr\": %d,\n",               w->GetTriggerCfgOr());
          mg_printf_http_chunk(nc, "      \"triggerCfgAnd\": %d\n",               w->GetTriggerCfgAnd());
@@ -257,7 +273,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
       mg_printf_http_chunk(nc, "{\n");
       mg_printf_http_chunk(nc, "   \"temperature\": %1.1lf,\n",   gl->wdb[b]->GetTemperature(false));
-      mg_printf_http_chunk(nc, "   \"pllLck\": %s\n",             gl->wdb[b]->IsExtPllLck() && gl->wdb[b]->IsIntPllLck() ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"pllLck\": %s\n",             gl->wdb[b]->IsExtPllLck(false) && gl->wdb[b]->IsIntPllLck(false) ? "true" : "false");
       mg_printf_http_chunk(nc, "}\n");
       mg_send_http_chunk(nc, "", 0);
       return;
@@ -384,13 +400,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          
          // request single event
          for (auto &b: gl->wdb) {
-            if (b->GetReadoutSrcSel() == 0 /*TBD: b->cReadoutSrcDRS*/) {
-               if (gl->triggerMode == cTriggerModeAuto || gl->triggerMode == cTriggerModeSoftware)
-                  b->RequestDrsEvent();
-               else if (gl->triggerMode == cTriggerModeNormal)
-                  b->StartDaqSingle();
-            } else if (b->GetReadoutSrcSel() == b->cReadoutSrcADC)
-               b->RequestAdcEvent();
+            if (gl->triggerMode == cTriggerModeAuto || gl->triggerMode == cTriggerModeSoftware)
+               b->RequestEvent();
+            else if (gl->triggerMode == cTriggerModeNormal)
+               b->StartDaqSingle();
          }
          
          // read waveforms
@@ -630,8 +643,9 @@ int main(int argc, const char * argv[])
          // read board temperatures periodically
          time(&now);
          if (now > last + 10) {
-            for (auto &b: gl.wdb)
+            for (auto &b: gl.wdb) {
                b->GetTemperature(true);
+            }
             last = now;
          }
         

@@ -280,8 +280,8 @@ class WDB {
    std::string      SendReceiveUDP(std::string str, int timeout_ms = 100);
    void             SendUDP(std::string str, int timeout_ms = 100);
 
-   void             WriteUDP(unsigned int ofs, std::vector<unsigned int> data, int timeout_ms = 100);
-   std::vector<unsigned int> ReadUDP(unsigned int ofs, unsigned int len, int timeout_ms = 100);
+   void             WriteUDP(unsigned int ofs, std::vector<unsigned int> data, int timeout_ms = 250);
+   std::vector<unsigned int> ReadUDP(unsigned int ofs, unsigned int len, int timeout_ms = 250);
 
    float            mFEGain;
 
@@ -295,21 +295,21 @@ public:
    }
 
    // constants
-   const int        cReadoutSrcDRS = 0x01;
-   const int        cReadoutSrcADC = 0x02;
-   const int        cReadoutSrcTDC = 0x04;
+   const int        cReadoutSrcDrs = 0x01;
+   const int        cReadoutSrcAdc = 0x02;
+   const int        cReadoutSrcTdc = 0x04;
 
-   // setter & getter
-   std::string GetName() { return mName; }
-   
    // interface functions
    void SetVerbose(bool verbose) { mVerbose = verbose; }
    void Connect(int port);
    void ReceiveControlRegisters(unsigned int index=0, unsigned int nReg=REG_NR_OF_CTRL_REGS);
    void ReceiveStatusRegisters(unsigned int index=0, unsigned int nReg=REG_NR_OF_STAT_REGS);
    void ReceiveStatusRegister(int ofs);
-   void SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v);
+   void SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v, bool send=true);
    void PrintVersion();
+
+   // setter & getter ----------
+   std::string GetName() { return mName; }
 
    // status registers
    std::string GetFwBuild();
@@ -324,10 +324,10 @@ public:
    bool IsWDBBusy();
    bool IsHvBoardPlugged();
    bool IsBackplanePlugged();
-   unsigned int GetExtPllLck();
-   bool IsExtPllLck();
-   unsigned int GetIntPllLck();
-   bool IsIntPllLck();
+   unsigned int GetExtPllLck(bool refresh = true);
+   bool IsExtPllLck(bool refresh = true);
+   unsigned int GetIntPllLck(bool refresh = true);
+   bool IsIntPllLck(bool refresh = true);
    unsigned int GetDrsSampleFreq();
    unsigned int GetAdcSampleFreq();
    unsigned int GetAdcInfo();
@@ -489,10 +489,11 @@ public:
    void SetTriggerPattern(int chn, unsigned int v);
    unsigned int GetCrc32RegBank();
    
-   // high-level methods
-   void RequestDrsEvent();
-   void RequestAdcEvent();
-   void RequestTdcEvent();
+   // hihg level methods ----------
+   unsigned int GetTriggerDelayNs();
+   void SetTriggerDelayNs(unsigned int ns);
+   
+   void RequestEvent();
 };
 
 //--------------------------------------------------------------------

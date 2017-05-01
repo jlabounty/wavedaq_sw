@@ -561,7 +561,7 @@ void WDB::ReceiveStatusRegister(int rofs)
 #endif
 }
 
-void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v)
+void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v, bool send)
 {
    int index = (rofs & 0x0FFF)/4;
 
@@ -569,7 +569,7 @@ void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, uns
    
    bitReplace(r, mask, ofs, v);
    
-   if (!mDemoMode) {
+   if (!mDemoMode && send) {
 #ifdef WD2_USE_UDP_BIN
       WriteUDP(rofs, std::vector<unsigned int> { r });
 #else
@@ -698,16 +698,17 @@ bool WDB::IsBackplanePlugged()
    return bitExtract(sreg, WD2_REG_STATUS_OFS, WD2_BIT_BACKPLANE_PLUGGED_MASK, WD2_BIT_BACKPLANE_PLUGGED_OFS) == 1;
 }
 
-unsigned int WDB::GetExtPllLck()
+unsigned int WDB::GetExtPllLck(bool refresh)
 // external PLLs (DRS, LMK)
 {
-   ReceiveStatusRegister(WD2_REG_PLL_LOCK_OFS);
+   if (refresh)
+      ReceiveStatusRegister(WD2_REG_PLL_LOCK_OFS);
    return bitExtract(sreg, WD2_REG_PLL_LOCK_OFS, WD2_BIT_DRS_PLL_LOCK_0_MASK |
                      WD2_BIT_DRS_PLL_LOCK_1_MASK | WD2_BIT_LMK_PLL_LOCK_MASK,
                      WD2_BIT_LMK_PLL_LOCK_OFS);
 }
 
-bool WDB::IsExtPllLck()
+bool WDB::IsExtPllLck(bool refresh)
 {
    if (mDemoMode)
       return true;
@@ -717,13 +718,14 @@ bool WDB::IsExtPllLck()
                WD2_BIT_LMK_PLL_LOCK_MASK;
    mask >>= WD2_BIT_LMK_PLL_LOCK_OFS;
    
-   return (GetExtPllLck() == mask);
+   return (GetExtPllLck(refresh) == mask);
 }
 
-unsigned int WDB::GetIntPllLck()
+unsigned int WDB::GetIntPllLck(bool refresh)
 // internal PLLs (FPGA DAQ, ISERDES, OSERDES)
 {
-   ReceiveStatusRegister(WD2_REG_PLL_LOCK_OFS);
+   if (refresh)
+      ReceiveStatusRegister(WD2_REG_PLL_LOCK_OFS);
    auto mask =
    WD2_BIT_SYS_DCM_LOCK_MASK |
    WD2_BIT_DAQ_PLL_LOCK_MASK |
@@ -735,7 +737,7 @@ unsigned int WDB::GetIntPllLck()
    return bitExtract(sreg, WD2_REG_PLL_LOCK_OFS, mask, WD2_BIT_ISERDES_PLL_LOCK_1_OFS);
 }
 
-bool WDB::IsIntPllLck()
+bool WDB::IsIntPllLck(bool refresh)
 {
    if (mDemoMode)
       return true;
@@ -748,7 +750,7 @@ bool WDB::IsIntPllLck()
    WD2_BIT_ISERDES_PLL_LOCK_0_MASK |
    WD2_BIT_ISERDES_PLL_LOCK_1_MASK;
    mask >>= WD2_BIT_ISERDES_PLL_LOCK_1_OFS;
-   return (GetIntPllLck() == mask);
+   return (GetIntPllLck(refresh) == mask);
 }
 
 
@@ -895,12 +897,18 @@ void WDB::SetCompPowerEnable(bool value)
 unsigned int WDB::GetReadoutSrcSel()
 // cReadoutSrcDrs / cReadoutSrcAdc / cReadoutSrcTdc
 {
-   return bitExtract(creg, WD2_REG_CTRL_OFS, WD2_BIT_READOUT_SRC_SEL_MASK, WD2_BIT_READOUT_SRC_SEL_OFS);
+   auto v = bitExtract(creg, WD2_REG_CTRL_OFS, WD2_BIT_READOUT_SRC_SEL_MASK, WD2_BIT_READOUT_SRC_SEL_OFS);
+   // temporary fix: use 0/1 until selection is implemented in FPGA
+   if (v)
+      return 0x02;
+   return 0x01;
 }
 
 void WDB::SetReadoutSrcSel(unsigned int value)
 {
-   SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_READOUT_SRC_SEL_MASK, WD2_BIT_READOUT_SRC_SEL_OFS, value);
+   // temporary fix: use 0/1 until selection is implemented in FPGA
+   unsigned int v = (value == 0x02);
+   SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_READOUT_SRC_SEL_MASK, WD2_BIT_READOUT_SRC_SEL_OFS, v);
 }
 
 unsigned int WDB::GetDRSReadoutMode()
@@ -1325,10 +1333,33 @@ void WDB::SetDacTlevel(int chn, float v)
    auto d = (unsigned int)(v / 2500.0 * 4095 + 0.5);
    
    assert(chn < 16);
-   if (chn % 2 == 0)
-      SetRegMask(WD2_REG_DAC1_A_B_OFS+(chn/2)*4, WD2_BIT_DAC1_CH_A_MASK, WD2_BIT_DAC1_CH_A_OFS, d);
-   else
-      SetRegMask(WD2_REG_DAC1_A_B_OFS+(chn/2)*4, WD2_BIT_DAC1_CH_B_MASK, WD2_BIT_DAC1_CH_B_OFS, d);
+   if (chn == -1) {
+      std::vector<unsigned int> regs;
+      for (chn=0 ; chn<16 ; chn++) {
+         if (chn % 2 == 0)
+            SetRegMask(WD2_REG_DAC1_A_B_OFS+(chn/2)*4, WD2_BIT_DAC1_CH_A_MASK, WD2_BIT_DAC1_CH_A_OFS, d, false);
+         else
+            SetRegMask(WD2_REG_DAC1_A_B_OFS+(chn/2)*4, WD2_BIT_DAC1_CH_B_MASK, WD2_BIT_DAC1_CH_B_OFS, d, false);
+      }
+      for (chn=0 ; chn<8 ; chn++)
+         regs.push_back(creg[(WD2_REG_DAC1_A_B_OFS-WD2_REG_WDB_LOC_OFS)/4+chn]);
+#ifdef WD2_USE_UDP_BIN
+      WriteUDP(WD2_REG_DAC1_A_B_OFS, regs);
+#else
+      for (chn=0 ; chn<8 ; chn++) {
+         std::ostringstream req;
+         req << "rw 0x" << std::hex << WD2_REG_DAC1_A_B_OFS+(chn/2)*4 << " 0x" << creg[(WD2_REG_DAC1_A_B_OFS-WD2_REG_WDB_LOC_OFS)/4+chn];
+         
+         SendUDP(req.str());
+      }
+#endif
+
+   } else {
+      if (chn % 2 == 0)
+         SetRegMask(WD2_REG_DAC1_A_B_OFS+(chn/2)*4, WD2_BIT_DAC1_CH_A_MASK, WD2_BIT_DAC1_CH_A_OFS, d);
+      else
+         SetRegMask(WD2_REG_DAC1_A_B_OFS+(chn/2)*4, WD2_BIT_DAC1_CH_B_MASK, WD2_BIT_DAC1_CH_B_OFS, d);
+   }
 }
 
 bool WDB::IsFePzc(int chn)
@@ -1495,7 +1526,7 @@ bool WDB::IsTriggerShaperEnable()
 
 void WDB::SetTriggerShaperEnable(bool v)
 {
-   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_SHAPER_ENABLE_MASK, WD2_BIT_TRIGGER_SHAPER_ENABLE_OFS, 1);
+   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_SHAPER_ENABLE_MASK, WD2_BIT_TRIGGER_SHAPER_ENABLE_OFS, v);
 }
 
 unsigned int WDB::GetTriggerPulseLength()
@@ -1505,7 +1536,7 @@ unsigned int WDB::GetTriggerPulseLength()
 
 void WDB::SetTriggerPulseLength(unsigned int v)
 {
-   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_OUT_PULSE_LENGTH_MASK, WD2_BIT_TRIGGER_OUT_PULSE_LENGTH_OFS, 1);
+   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_OUT_PULSE_LENGTH_MASK, WD2_BIT_TRIGGER_OUT_PULSE_LENGTH_OFS, v);
 }
 
 bool WDB::IsTriggerEnable()
@@ -1515,7 +1546,7 @@ bool WDB::IsTriggerEnable()
 
 void WDB::SetTriggerEnable(bool v)
 {
-   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_ENABLE_MASK, WD2_BIT_TRIGGER_ENABLE_OFS, 1);
+   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_ENABLE_MASK, WD2_BIT_TRIGGER_ENABLE_OFS, v);
 }
 
 bool WDB::IsTriggerFallingEdge()
@@ -1525,7 +1556,7 @@ bool WDB::IsTriggerFallingEdge()
 
 void WDB::SetTriggerFallingEdge(bool v)
 {
-   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_FALLING_EDGE_MASK, WD2_BIT_TRIGGER_FALLING_EDGE_OFS, 1);
+   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_FALLING_EDGE_MASK, WD2_BIT_TRIGGER_FALLING_EDGE_OFS, v);
 }
 
 bool WDB::IsTriggerExternalOr()
@@ -1535,7 +1566,7 @@ bool WDB::IsTriggerExternalOr()
 
 void WDB::SetTriggerExternalOr(bool v)
 {
-   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_CFG_EXT_OR_MASK, WD2_BIT_TRIGGER_CFG_EXT_OR_OFS, 1);
+   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_CFG_EXT_OR_MASK, WD2_BIT_TRIGGER_CFG_EXT_OR_OFS, v);
 }
 
 bool WDB::IsTriggerExternalAnd()
@@ -1545,7 +1576,7 @@ bool WDB::IsTriggerExternalAnd()
 
 void WDB::SetTriggerExternalAnd(bool v)
 {
-   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_CFG_EXT_AND_MASK, WD2_BIT_TRIGGER_CFG_EXT_AND_OFS, 1);
+   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_CFG_EXT_AND_MASK, WD2_BIT_TRIGGER_CFG_EXT_AND_OFS, v);
 }
 
 bool WDB::IsTriggerDelayEnable()
@@ -1555,7 +1586,7 @@ bool WDB::IsTriggerDelayEnable()
 
 void WDB::SetTriggerDelayEnable(bool v)
 {
-   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_DELAY_ENABLE_MASK, WD2_BIT_TRIGGER_DELAY_ENABLE_OFS, 1);
+   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_DELAY_ENABLE_MASK, WD2_BIT_TRIGGER_DELAY_ENABLE_OFS, v);
 }
 
 unsigned int WDB::GetTriggerDelay()
@@ -1565,7 +1596,7 @@ unsigned int WDB::GetTriggerDelay()
 
 void WDB::SetTriggerDelay(unsigned int v)
 {
-   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_DELAY_MASK, WD2_BIT_TRIGGER_DELAY_OFS, 1);
+   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_DELAY_MASK, WD2_BIT_TRIGGER_DELAY_OFS, v);
 }
 
 unsigned int WDB::GetTriggerComparatorMask()
@@ -1575,7 +1606,7 @@ unsigned int WDB::GetTriggerComparatorMask()
 
 void WDB::SetTriggerComparatorMask(unsigned int v)
 {
-   SetRegMask(WD2_REG_TRG_COMP_MASK_OFS, WD2_BIT_TRIGGER_COMP_MASK_MASK, WD2_BIT_TRIGGER_COMP_MASK_OFS, 1);
+   SetRegMask(WD2_REG_TRG_COMP_MASK_OFS, WD2_BIT_TRIGGER_COMP_MASK_MASK, WD2_BIT_TRIGGER_COMP_MASK_OFS, v);
 }
 
 unsigned int WDB::GetTriggerCfgOr()
@@ -1585,7 +1616,7 @@ unsigned int WDB::GetTriggerCfgOr()
 
 void WDB::SetTriggerCfgOr(unsigned int v)
 {
-   SetRegMask(WD2_REG_TRG_CH_CMB_OFS, WD2_BIT_TRIGGER_CFG_OR_MASK, WD2_BIT_TRIGGER_CFG_OR_OFS, 1);
+   SetRegMask(WD2_REG_TRG_CH_CMB_OFS, WD2_BIT_TRIGGER_CFG_OR_MASK, WD2_BIT_TRIGGER_CFG_OR_OFS, v);
 }
 
 unsigned int WDB::GetTriggerCfgAnd()
@@ -1595,7 +1626,7 @@ unsigned int WDB::GetTriggerCfgAnd()
 
 void WDB::SetTriggerCfgAnd(unsigned int v)
 {
-   SetRegMask(WD2_REG_TRG_CH_CMB_OFS, WD2_BIT_TRIGGER_CFG_AND_MASK, WD2_BIT_TRIGGER_CFG_AND_OFS, 1);
+   SetRegMask(WD2_REG_TRG_CH_CMB_OFS, WD2_BIT_TRIGGER_CFG_AND_MASK, WD2_BIT_TRIGGER_CFG_AND_OFS, v);
 }
 
 unsigned int WDB::GetTriggerLocalScheme()
@@ -1606,7 +1637,7 @@ unsigned int WDB::GetTriggerLocalScheme()
 
 void WDB::SetTriggerLocalScheme(unsigned int v)
 {
-   SetRegMask(WD2_REG_TRG_SCH_SEL_OFS, WD2_BIT_PATTERN_TRIGGER_SELECT_MASK, WD2_BIT_PATTERN_TRIGGER_SELECT_OFS, 1);
+   SetRegMask(WD2_REG_TRG_SCH_SEL_OFS, WD2_BIT_PATTERN_TRIGGER_SELECT_MASK, WD2_BIT_PATTERN_TRIGGER_SELECT_OFS, v);
 }
 
 unsigned int WDB::GetTriggerBackplaneScheme(int chn)
@@ -1666,33 +1697,38 @@ unsigned int WDB::GetCrc32RegBank()
 
 //--------------------------------------------------------------------
 
-void WDB::RequestDrsEvent()
+unsigned int WDB::GetTriggerDelayNs()
 {
-   //  SendReceive("drsget");
+   auto v = GetTriggerDelay();
    
-   SetReadoutSrcSel(0); // select DRS as readout source
+   v = (unsigned int)(v / 255.0 * 450 + 0.5);
+   return v;
+}
+
+void WDB::SetTriggerDelayNs(unsigned int ns)
+{
+   SetTriggerDelayEnable(ns > 0);
+   
+   unsigned int v = (unsigned int)(ns / 450.0 * 255 + 0.5);
+   if (v > 255)
+      v = 255;
+   SetTriggerDelay(v);
+}
+
+//--------------------------------------------------------------------
+
+
+void WDB::RequestEvent()
+{
+   //if (GetReadoutSrcSel() == WDB::cReadoutSrcDrs)
+   //   SendReceive("drsget");
+   //else
+   //   SendReceive("adcget");
    
    SetDaqSingle(true);  // start DRS domino wave
    SetDaqSingle(false);
    
    TrgDAQSoft();
-}
-
-void WDB::RequestAdcEvent()
-{
-   // SendReceive("adcget");
-
-   SetReadoutSrcSel(1); // select ADC as readout source
-   
-   SetDaqSingle(true);  // start DAQ
-   SetDaqSingle(false);
-   
-   TrgDAQSoft();
-}
-
-void WDB::RequestTdcEvent()
-{
-   SendReceiveUDP("tdcget"); // not yet implemented !
 }
 
 //--------------------------------------------------------------------
@@ -1809,6 +1845,7 @@ void WP::InvalidateAllWf()
    }
    
    mPacketsReceived = 0;
+   mCurrentEvent = -1;
 }
 
 //--------------------------------------------------------------------

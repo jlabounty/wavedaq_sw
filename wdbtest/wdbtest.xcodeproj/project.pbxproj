@@ -31,6 +31,9 @@
 		D572D49D1EA8FE38006BB27C /* mongoose.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mongoose.c; path = /wavedaq/software/wdbtest/mongoose.c; sourceTree = "<group>"; };
 		D5AF68551E40E1E900E1BC39 /* WDBLib.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WDBLib.cpp; path = /wavedaq/software/lib/WDBLib.cpp; sourceTree = "<group>"; };
 		D5AF68571E40E23500E1BC39 /* wdbtest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = wdbtest.cpp; path = /wavedaq/software/wdbtest/wdbtest.cpp; sourceTree = SOURCE_ROOT; };
+		D5EEA84C1EB71145007635F7 /* wds.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = wds.js; sourceTree = "<group>"; };
+		D5EEA84D1EB7114F007635F7 /* osc.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = osc.js; sourceTree = "<group>"; };
+		D5EEA84E1EB71158007635F7 /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,6 +50,7 @@
 		D51CB2871E40E14900D2DC06 = {
 			isa = PBXGroup;
 			children = (
+				D5EEA84B1EB71130007635F7 /* html */,
 				D51CB2921E40E14900D2DC06 /* wdbtest */,
 				D51CB2911E40E14900D2DC06 /* Products */,
 			);
@@ -70,6 +74,16 @@
 				D5AF68551E40E1E900E1BC39 /* WDBLib.cpp */,
 			);
 			path = wdbtest;
+			sourceTree = "<group>";
+		};
+		D5EEA84B1EB71130007635F7 /* html */ = {
+			isa = PBXGroup;
+			children = (
+				D5EEA84E1EB71158007635F7 /* index.html */,
+				D5EEA84D1EB7114F007635F7 /* osc.js */,
+				D5EEA84C1EB71145007635F7 /* wds.js */,
+			);
+			name = html;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

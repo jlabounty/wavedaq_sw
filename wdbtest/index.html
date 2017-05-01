@@ -98,17 +98,17 @@
             <div class="vMiddleBox vSpacer5">
                <button name="ctrlHSlider" id="trgSlider" class="hSlider vMiddleElement" type="button"
                        data-update="sldTLevel()" style="width:180px;"></button>
-               <span class="hSpacer5 vMiddleElement"></span><input name="trigger_level" class="vMiddleElement"
-                                                                   type="text" id="inpTLevel"
-                                                                   onkeypress="keyGl(event,this)" value="0"><span
+               <span class="hSpacer5 vMiddleElement"></span><input name="triggerLevel" class="vMiddleElement"
+                                                                   type="text" id="inpTlevel"
+                                                                   onkeypress="keyParam(event,this)" value="0"><span
                     class="vMiddleElement">&nbsp;mV</span>
             </div>
             <div class="vMiddleBox vSpacer5">
                <div class="vMiddleElement">Delay:&nbsp;</div>
                <button name="ctrlHSlider" id="trgDelaySlider" class="hSlider vMiddleElement" type="button"
                        data-update="sldTDelay()" style="width:130px;"></button>
-               <span class="hSpacer5"></span><input name="trigger_delay" class="vMiddleElement" type="text"
-                                                    id="inpTDelay" onkeypress="keyGl(event,this)" value="0"><span
+               <span class="hSpacer5"></span><input name="triggerDelay" class="vMiddleElement" type="text"
+                                                    id="inpTDelay" onkeypress="keyParam(event,this)" value="0"><span
                     class="vMiddleElement">&nbsp;ns</span>
             </div>
             <table>
@@ -165,8 +165,8 @@
             </div>
             <div class="vSpacer5">
                Mode:
-               <input type="radio" id="inputModeDRS" name="adc_flag" checked="checked" value="0" onClick="setParam(this)">DRS
-               <input type="radio" id="inputModeADC" name="adc_flag" value="1" onClick="setParam(this)">ADC
+               <input type="radio" id="inputReadoutSrcDRS" name="readoutSrc" checked="checked" value="1" onClick="setParam(this)">DRS
+               <input type="radio" id="inputReadoutSrcADC" name="readoutSrc" value="2" onClick="setParam(this)">ADC
             </div>
 
             <div class="vMiddleBox vSpacer5">
@@ -194,7 +194,7 @@
                <button name="ctrlHSlider" id="dcOffsetSlider" class="hSlider vMiddleElement" type="button"
                        data-update="sldDcOffset()" style="width:140px;"></button>
                <span class="hSpacer5"></span><input name="dc_offset" class="vMiddleElement" type="text" id="inpDcOffset"
-                                                    onkeypress="keyGl(event,this)" value="0"><span
+                                                    onkeypress="keyParam(event,this)" value="0"><span
                     class="vMiddleElement">&nbsp;mV</span>
             </div>
          </div>
@@ -202,7 +202,7 @@
          <div class="groupTitle">Sampling Speed</div>
          <div class="group">
             <input type="text" id="nominal_sampling_frequency" name="nominal_sampling_frequency" value="5"
-                   onkeypress="keyGl(event,this)">&nbsp;GSPS
+                   onkeypress="keyParam(event,this)">&nbsp;GSPS
             &nbsp;Actual:&nbsp;<span id="actual_sampling_frequency">N/A</span>
          </div>
 

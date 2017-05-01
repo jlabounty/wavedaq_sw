@@ -94,9 +94,9 @@ function init() {
       var inp = document.createElement('input');
       inp.type = "text";
       inp.value = "0";
-      inp.name = "trigger_level";
-      inp.id = "trigger_level"+r;
-      inp.setAttribute("onkeypress", "keyGl(event, this,"+r+")");
+      inp.name = "triggerLevel";
+      inp.id = "triggerLevel"+r;
+      inp.setAttribute("onkeypress", "keyParam(event, this,"+r+")");
       cell.appendChild(inp);
       cell.appendChild(document.createTextNode(" mV"));
    }
@@ -122,10 +122,10 @@ function init() {
    OSC.timer.loadWF = window.setTimeout(loadWF, 10);
 
    // schedule loadStatus()
-   OSC.timer.loadStatus = window.setTimeout(loadStatus, 10000);
+   //## OSC.timer.loadStatus = window.setTimeout(loadStatus, 10000);
 
    // schedule loadScalers()
-   OSC.timer.loadScalers = window.setTimeout(loadScalers, 1000);
+   //## OSC.timer.loadScalers = window.setTimeout(loadScalers, 1000);
 }
 
 function connectionBroken() {
@@ -225,7 +225,7 @@ function populateControls(init)
 
    // populate config
    document.getElementById("trgSlider").set(OSC.wdb[0].dacTlevel[0] + 0.5);
-   document.getElementById("inpTLevel").value = Math.round(OSC.wdb[0].dacTlevel[0] * 1000);
+   document.getElementById("inpTlevel").value = Math.round(OSC.wdb[0].dacTlevel[0] * 1000);
    document.getElementById("trgDelaySlider").set(1 - OSC.wdb[0].triggerDelay / 450);
    document.getElementById("inpTDelay").value = Math.round(OSC.wdb[0].triggerDelay);
    
@@ -234,9 +234,21 @@ function populateControls(init)
       document.config.trigger_mode[1].checked = false;
    } else
       document.config.trigger_mode[0].checked = true; //##
+   
+   if (OSC.wdb[0].triggerFallingEdge) {
+      document.getElementById('trgEdgeUp').style.display = "none";
+      document.getElementById('trgEdgeDown').style.display = "inline";
+   } else {
+      document.getElementById('trgEdgeUp').style.display = "inline";
+      document.getElementById('trgEdgeDown').style.display = "none";
+   }
 
    document.getElementById("pzc").checked = OSC.wdb[0].fePZC[0];
    document.getElementById("gain").value = OSC.wdb[0].feGain[0];
+   
+   document.getElementById("inputReadoutSrcDRS").checked = (OSC.wdb[0].readoutSrcSel == 1);
+   document.getElementById("inputReadoutSrcADC").checked = (OSC.wdb[0].readoutSrcSel == 2);
+   
    document.getElementById("osctca_flag").checked = OSC.wdb[0].timingCalibSignalEnable;
 
    document.getElementById("rangeSelect").value = 0; // ##
@@ -321,15 +333,15 @@ function setParam(e, channel) {
 
    var req = new XMLHttpRequest();
 
-   req.onreadystatechange = function () {
+   req.onreadystatechange = function (e) {
       if (req.readyState == 4 && req.status == 204) {
-         loadGl();
+         // success
       }
    };
 
-   if (e.name == "trigger_level" && channel == undefined) {
+   if (e.name == "triggerLevel" && channel == undefined) {
       for (var i=0 ; i<16 ; i++)
-         document.getElementById("trigger_level"+i).value = e.value;
+         document.getElementById("triggerLevel"+i).value = e.value;
    }
 
    if (e.name == "gain" && channel == undefined) {
@@ -364,7 +376,7 @@ function setParam(e, channel) {
       req.send(e.value);
    } else if (e.type == "text") {
       req.open("PUT", uri, true);
-      if (e.name == "trigger_level") {
+      if (e.name == "triggerLevel") {
          req.send(parseInt(e.value) / 1000);
       } else if (e.name == "range") {
          req.send(parseInt(e.value));
@@ -375,7 +387,6 @@ function setParam(e, channel) {
       } else
          req.send(e.value);
    }
-
 }
 
 function setDisp(e) {
@@ -392,10 +403,26 @@ function setPers(s) {
    OSC.disp.persistency = parseFloat(s.value);
 }
 
-function keyGl(event, input, channel) {
+function keyParam(event, input, channel) {
    var charCode = (typeof event.which == "number") ? event.which : event.keyCode;
 
    if (charCode == 13) {
+      if (input.id == "inpTlevel") {
+         if (input.value < -500)
+            input.value = -500;
+         if (input.value > 500)
+            input.value = 500;
+         document.getElementById("trgSlider").set(input.value/1000 + 0.5);
+      }
+      
+      if (input.id == "inpTDelay") {
+         if (input.value < 0)
+            input.value = 0;
+         if (input.value > 450)
+            input.value = 450;
+         document.getElementById("trgDelaySlider").set(1 - input.value/450);
+      }
+      
       setParam(input, channel);
    }
 }
@@ -946,13 +973,13 @@ function sldTLevel(value) {
    
    tLevelLast = value;
    var req = new XMLHttpRequest();
-   req.open("PUT", "gl/"+OSC.curBoard+"/trigger_level", true);
+   req.open("PUT", "gl/"+OSC.curBoard+"/triggerLevel", true);
    req.send(value);
 
-   document.getElementById("inpTLevel").value = value * 1000;
+   document.getElementById("inpTlevel").value = value * 1000;
    for (var i=0 ; i<16 ; i++) {
-      OSC.wdb[OSC.curBoard].trigger_level[i] = value;
-      document.getElementById("trigger_level"+i).value = value * 1000;
+      OSC.wdb[OSC.curBoard].dacTlevel[i] = value;
+      document.getElementById("triggerLevel"+i).value = value * 1000;
    }
    
    var d = new Date();
@@ -966,10 +993,10 @@ function sldTDelay(value) {
       return;
    var del = 450 - Math.round(value * 450);
    var req = new XMLHttpRequest();
-   req.open("PUT", "gl/"+OSC.curBoard+"/trigger_delay", true);
+   req.open("PUT", "gl/"+OSC.curBoard+"/triggerDelay", true);
    req.send(del);
 
-   OSC.wdb[OSC.curBoard].trigger_delay = del;
+   OSC.wdb[OSC.curBoard].triggerDelay = del;
    document.getElementById("inpTDelay").value = del;
    clearStat();
 }
@@ -978,17 +1005,17 @@ function btnTedge(value) {
    if (OSC.demoMode)
       return;
    var req = new XMLHttpRequest();
-   req.open("PUT", "gl/"+OSC.curBoard+"/trigger_edge", true);
+   req.open("PUT", "gl/"+OSC.curBoard+"/triggerFallingEdge", true);
    req.send(value);
 
-   OSC.wdb[OSC.curBoard].trigger_edge = value;
+   OSC.wdb[OSC.curBoard].triggerFallingEdge = (value == 1);
 
-   if (value == 0) {
-      document.getElementById('trgEdgeUp').style.display = "inline";
-      document.getElementById('trgEdgeDown').style.display = "none";
-   } else {
+   if (value == 1) {
       document.getElementById('trgEdgeUp').style.display = "none";
       document.getElementById('trgEdgeDown').style.display = "inline";
+   } else {
+      document.getElementById('trgEdgeUp').style.display = "inline";
+      document.getElementById('trgEdgeDown').style.display = "none";
    }
 }
 
