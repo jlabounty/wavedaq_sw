@@ -210,7 +210,7 @@ class WP {
    
    std::thread      mThreadCollector;
    void Collector();
-   std::thread CollectorThread() {
+   std::thread SpawnCollectorThread() {
       return std::thread([=] { Collector(); });
    };
    
