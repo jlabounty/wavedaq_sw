@@ -44,8 +44,6 @@
 
 #define WD2_UDP_PROTOCOL_VERSION  4
 
-#pragma pack(1)
-
 int WP::gDataSocket   = 0;
 int WP::gServerPort   = 0;
 int WDB::gASCIISocket = 0;

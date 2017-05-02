@@ -24,6 +24,8 @@
 
 //--------------------------------------------------------------------
 
+#pragma pack(1)
+
 typedef struct {
    unsigned char  protocol_version;
    unsigned char  board_version;
