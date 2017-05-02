@@ -11,7 +11,7 @@ ifeq ($(shell uname),Darwin)
 CFLAGS  += -std=gnu++11 -x c++
 LIBS    = -framework IOKit -framework CoreFoundation -lobjc
 else
-CFLAGS  += -std=c++11
+CFLAGS  += -std=c++0x
 LIBS    = -lpthread
 endif
 

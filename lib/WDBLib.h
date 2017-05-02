@@ -297,9 +297,9 @@ public:
    }
 
    // constants
-   const int        cReadoutSrcDrs = 0x01;
-   const int        cReadoutSrcAdc = 0x02;
-   const int        cReadoutSrcTdc = 0x04;
+   static const int cReadoutSrcDrs = 0x01;
+   static const int cReadoutSrcAdc = 0x02;
+   static const int cReadoutSrcTdc = 0x04;
 
    // interface functions
    void SetVerbose(bool verbose) { mVerbose = verbose; }
