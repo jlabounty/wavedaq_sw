@@ -116,16 +116,34 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       }
 
       else if (item == "triggerDelay") {
+         assert(iBoard != -1);
          gl->wdb[iBoard]->SetTriggerDelayNs(std::stoi(value));
       }
 
       else if (item == "triggerFallingEdge") {
+         assert(iBoard != -1);
          gl->wdb[iBoard]->SetTriggerFallingEdge(std::stoi(value));
       }
 
       else if (item == "readoutSrc") {
+         assert(iBoard != -1);
          gl->wdb[iBoard]->SetReadoutSrcSel(std::stoi(value));
          std::cout << "readoutSrcSel: " << value << std::endl;
+      }
+
+      else if (item == "calibBufferEnable") {
+         assert(iBoard != -1);
+         gl->wdb[iBoard]->SetCalibBufferEnable(std::stoi(value));
+      }
+
+      else if (item == "timingCalibSignalEnable") {
+         assert(iBoard != -1);
+         gl->wdb[iBoard]->SetTimingCalibSignalEnable(std::stoi(value));
+      }
+
+      else if (item == "feMux") {
+         assert(iBoard != -1);
+         gl->wdb[iBoard]->SetFeMux(iChannel, std::stoi(value) ? 0x03 : 0x02);
       }
 
       mg_printf(nc, "HTTP/1.1 204 No Content\r\n");
@@ -207,7 +225,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"daqSingle\": %s,\n",                  w->IsDaqSingle() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"drs0TimingRefSel\": %d,\n",           w->GetDrs0TimingRefSel());
          mg_printf_http_chunk(nc, "      \"drs1TimingRefSel\": %d,\n",           w->GetDrs1TimingRefSel());
-         mg_printf_http_chunk(nc, "      \"timingCalibBufferEnable\": %s,\n",    w->IsTimingCalibBufferEnable() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"calibBufferEnable\": %s,\n",          w->IsCalibBufferEnable() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"timingCalibSignalEnable\": %s,\n",    w->IsTimingCalibSignalEnable() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"daqClkSrcSel\": %d,\n",               w->GetDaqClkSrcSel());
          mg_printf_http_chunk(nc, "      \"extClkInSel\": %d,\n",                w->GetExtClkInSel());

@@ -875,7 +875,7 @@ void WDB::SetValidDelayADC(unsigned int value)
 unsigned int WDB::GetDaqDataPhase()
 // phase step setting of the PLL generating the common DAQ clock
 {
-   return bitExtract(creg, WD2_REG_WDB_LOC_OFS, WD2_BIT_DAQ_DATA_PHASE_MASK, WD2_BIT_DAQ_DATA_PHASE_OFS);
+   return bitExtract(creg, WD2_REG_CTRL_OFS, WD2_BIT_DAQ_DATA_PHASE_MASK, WD2_BIT_DAQ_DATA_PHASE_OFS);
 }
 
 void WDB::SetDaqDataPhase(unsigned int value)
@@ -886,7 +886,7 @@ void WDB::SetDaqDataPhase(unsigned int value)
 bool WDB::IsCompPowerEnable()
 // comperator power enable
 {
-   return bitExtract(creg, WD2_REG_WDB_LOC_OFS, WD2_BIT_COMP_POWER_EN_MASK, WD2_BIT_COMP_POWER_EN_OFS) == 1;
+   return bitExtract(creg, WD2_REG_CTRL_OFS, WD2_BIT_COMP_POWER_EN_MASK, WD2_BIT_COMP_POWER_EN_OFS) == 1;
 }
 
 void WDB::SetCompPowerEnable(bool value)
@@ -914,7 +914,7 @@ void WDB::SetReadoutSrcSel(unsigned int value)
 unsigned int WDB::GetDRSReadoutMode()
 // 0 = start from first sampling cell / 1 = start from stop cell
 {
-   return bitExtract(creg, WD2_REG_WDB_LOC_OFS, WD2_BIT_DRS_READOUT_MODE_MASK, WD2_BIT_DRS_READOUT_MODE_OFS);
+   return bitExtract(creg, WD2_REG_CTRL_OFS, WD2_BIT_DRS_READOUT_MODE_MASK, WD2_BIT_DRS_READOUT_MODE_OFS);
 }
 
 void WDB::SetDRSReadoutMode(unsigned int value)
@@ -925,7 +925,7 @@ void WDB::SetDRSReadoutMode(unsigned int value)
 bool WDB::IsDRSWaveContinous()
 // run domino wave continously even during readout
 {
-   return bitExtract(creg, WD2_REG_WDB_LOC_OFS, WD2_BIT_DRS_WAVE_CONTINUOUS_MASK, WD2_BIT_DRS_WAVE_CONTINUOUS_OFS) == 1;
+   return bitExtract(creg, WD2_REG_CTRL_OFS, WD2_BIT_DRS_WAVE_CONTINUOUS_MASK, WD2_BIT_DRS_WAVE_CONTINUOUS_OFS) == 1;
 }
 
 void WDB::SetDRSWaveContinous(bool value)
@@ -954,7 +954,7 @@ void WDB::TrgDAQReinit()
 bool WDB::IsDAQNormal()
 // "normal" acquisition mode like on an oscilloscope
 {
-   return bitExtract(creg, WD2_REG_WDB_LOC_OFS, WD2_BIT_DAQ_NORMAL_MASK, WD2_BIT_DAQ_NORMAL_OFS) == 1;
+   return bitExtract(creg, WD2_REG_CTRL_OFS, WD2_BIT_DAQ_NORMAL_MASK, WD2_BIT_DAQ_NORMAL_OFS) == 1;
 }
 
 void WDB::SetDaqNormal
@@ -968,7 +968,7 @@ void WDB::SetDaqNormal
 bool WDB::IsDaqSingle()
 // "single" acquisition mode like on an oscilloscope
 {
-   return bitExtract(creg, WD2_REG_WDB_LOC_OFS, WD2_BIT_DAQ_SINGLE_MASK, WD2_BIT_DAQ_SINGLE_OFS) == 1;
+   return bitExtract(creg, WD2_REG_CTRL_OFS, WD2_BIT_DAQ_SINGLE_MASK, WD2_BIT_DAQ_SINGLE_OFS) == 1;
 }
 
 void WDB::SetDaqSingle(bool value)
@@ -1003,26 +1003,26 @@ void WDB::SetDrs1TimingRefSel(unsigned int value)
    SetRegMask(WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_DRS_1_TIMING_REF_SEL_MASK, WD2_BIT_DRS_1_TIMING_REF_SEL_OFS, value);
 }
 
-bool WDB::IsTimingCalibBufferEnable()
+bool WDB::IsCalibBufferEnable()
 // enable (power) buffers driving the timing calibration signal to the frontend MUX
 {
-   return bitExtract(creg, WD2_REG_WDB_LOC_OFS, WD2_BIT_TIMING_CALIB_BUFFER_EN_MASK, WD2_BIT_TIMING_CALIB_BUFFER_EN_OFS) == 1;
+   return bitExtract(creg, WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_TIMING_CALIB_BUFFER_EN_MASK, WD2_BIT_TIMING_CALIB_BUFFER_EN_OFS) == 1;
 }
 
-void WDB::SetTimingCalibBufferEnable(bool value)
+void WDB::SetCalibBufferEnable(bool value)
 {
-   SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_TIMING_CALIB_BUFFER_EN_MASK, WD2_BIT_TIMING_CALIB_BUFFER_EN_OFS, value ? 1 : 0);
+   SetRegMask(WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_TIMING_CALIB_BUFFER_EN_MASK, WD2_BIT_TIMING_CALIB_BUFFER_EN_OFS, value ? 1 : 0);
 }
 
 bool WDB::IsTimingCalibSignalEnable()
 // switch on/off the 100 MHz calibration signal for the DRS chips
 {
-   return bitExtract(creg, WD2_REG_WDB_LOC_OFS, WD2_BIT_TIMING_CALIB_SIGNAL_EN_MASK, WD2_BIT_TIMING_CALIB_SIGNAL_EN_OFS) == 1;
+   return bitExtract(creg, WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_TIMING_CALIB_SIGNAL_EN_MASK, WD2_BIT_TIMING_CALIB_SIGNAL_EN_OFS) == 1;
 }
 
 void WDB::SetTimingCalibSignalEnable(bool value)
 {
-   SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_TIMING_CALIB_SIGNAL_EN_MASK, WD2_BIT_TIMING_CALIB_SIGNAL_EN_OFS, value ? 1 : 0);
+   SetRegMask(WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_TIMING_CALIB_SIGNAL_EN_MASK, WD2_BIT_TIMING_CALIB_SIGNAL_EN_OFS, value ? 1 : 0);
 }
 
 unsigned int WDB::GetDaqClkSrcSel()
@@ -1501,10 +1501,32 @@ unsigned int WDB::GetFeMux(int chn)
 void WDB::SetFeMux(int chn, unsigned int v)
 {
    assert(chn < 16);
-   auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
-   auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_MUX_MASK : WD2_BIT_FE1_MUX_MASK;
-   auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_MUX_OFS  : WD2_BIT_FE1_MUX_OFS;
-   SetRegMask(rofs, mask, ofs, v);
+   if (chn == -1) {
+      std::vector<unsigned int> regs;
+      for (chn=0 ; chn<16 ; chn++) {
+         auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
+         auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_MUX_MASK : WD2_BIT_FE1_MUX_MASK;
+         auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_MUX_OFS  : WD2_BIT_FE1_MUX_OFS;
+         SetRegMask(rofs, mask, ofs, v);
+      }
+      for (chn=0 ; chn<8 ; chn++)
+         regs.push_back(creg[(WD2_REG_FE_CFG_0_1_OFS-WD2_REG_WDB_LOC_OFS)/4+chn]);
+#ifdef WD2_USE_UDP_BIN
+      WriteUDP(WD2_REG_FE_CFG_0_1_OFS, regs);
+#else
+      for (chn=0 ; chn<8 ; chn++) {
+         std::ostringstream req;
+         req << "rw 0x" << std::hex << WD2_REG_FE_CFG_0_1_OFS+(chn/2)*4 << " 0x" << creg[(WD2_REG_FE_CFG_0_1_OFS-WD2_REG_WDB_LOC_OFS)/4+chn];
+         
+         SendUDP(req.str());
+      }
+#endif
+   } else {
+      auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
+      auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_MUX_MASK : WD2_BIT_FE1_MUX_MASK;
+      auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_MUX_OFS  : WD2_BIT_FE1_MUX_OFS;
+      SetRegMask(rofs, mask, ofs, v);
+   }
 }
 
 unsigned int WDB::GetLmk(int reg)
@@ -1933,7 +1955,7 @@ void WP::ReceiveWfPacket()
                    ph->drs0_trigger_cell,
                    ph->drs1_trigger_cell,
                    ph->temperature*0.0625);
-         */
+         /*/
          
          if (mCurrentEvent == -1)
             mCurrentEvent = ph->event_number;

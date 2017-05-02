@@ -371,8 +371,8 @@ public:
    void SetDrs0TimingRefSel(unsigned int value);
    unsigned int GetDrs1TimingRefSel();
    void SetDrs1TimingRefSel(unsigned int value);
-   bool IsTimingCalibBufferEnable();
-   void SetTimingCalibBufferEnable(bool value);
+   bool IsCalibBufferEnable();
+   void SetCalibBufferEnable(bool value);
    bool IsTimingCalibSignalEnable();
    void SetTimingCalibSignalEnable(bool value);
    unsigned int GetDaqClkSrcSel();

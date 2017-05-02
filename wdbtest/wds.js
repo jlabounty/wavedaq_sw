@@ -249,12 +249,12 @@ function populateControls(init)
    document.getElementById("inputReadoutSrcDRS").checked = (OSC.wdb[0].readoutSrcSel == 1);
    document.getElementById("inputReadoutSrcADC").checked = (OSC.wdb[0].readoutSrcSel == 2);
    
-   document.getElementById("osctca_flag").checked = OSC.wdb[0].timingCalibSignalEnable;
+   document.getElementById("timingCalibSignalEnable").checked = OSC.wdb[0].timingCalibSignalEnable;
 
    document.getElementById("rangeSelect").value = 0; // ##
 
-   document.getElementById("mux_flag").checked = OSC.wdb[0].feMux[0];
-   document.getElementById("dcv_flag").checked = OSC.wdb[0].timingCalibBufferEnable;
+   document.getElementById("feMux").checked = OSC.wdb[0].feMux[0];
+   document.getElementById("calibBufferEnable").checked = OSC.wdb[0].calibBufferEnable;
 
    document.getElementById("dcOffsetSlider").set(OSC.wdb[0].dacCalDC / 2 + 0.5);
    document.getElementById("inpDcOffset").value = OSC.wdb[0].dacCalDC * 1000;
