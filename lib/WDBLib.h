@@ -24,7 +24,7 @@
 
 //--------------------------------------------------------------------
 
-#pragma pack(1)
+#pragma pack(1) // byte-level alignement for frame header
 
 typedef struct {
    unsigned char  protocol_version;
@@ -45,6 +45,8 @@ typedef struct {
    unsigned int   reserved;
    unsigned short packet_sequence_number;
 } WD2_FRAME_HEADER;
+
+#pragma pack() // reset alignment to default value
 
 //--------------------------------------------------------------------
 
