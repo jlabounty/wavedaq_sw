@@ -12,6 +12,7 @@
 #include <vector>
 #include <cmath>
 #include <thread>
+#include <cstring>
 
 #include <sys/socket.h>
 #include <sys/select.h>
@@ -72,7 +73,7 @@ std::string WDB::SendReceiveUDP(std::string str, int timeout_ms)
    char   rx_buffer[1600];
    std::string prompt, result;
    
-   memcpy(&client_addr, mEthAddrAscii, sizeof(client_addr));
+   std::memcpy(&client_addr, mEthAddrAscii, sizeof(client_addr));
    
    if (str.back() != '\n')
       str += '\n';
@@ -118,7 +119,7 @@ std::string WDB::SendReceiveUDP(std::string str, int timeout_ms)
       
       // retrieve reply until prompt is found
       do {
-         memset(rx_buffer, 0, sizeof(rx_buffer));
+         std::memset(rx_buffer, 0, sizeof(rx_buffer));
          
          FD_ZERO(&readfds);
          FD_SET(gASCIISocket, &readfds);
@@ -434,13 +435,13 @@ void WDB::Connect(int port)
    if (phe == NULL)
       throw std::runtime_error(std::string("Cannot resolve host name ")+mName+".");
    
-   memcpy((char *)&client_addr.sin_addr, phe->h_addr, phe->h_length);
+   std::memcpy((char *)&client_addr.sin_addr, phe->h_addr, phe->h_length);
    client_addr.sin_family = AF_INET;
    client_addr.sin_port = htons(WD2_CMD_PORT_ASCII);
-   memcpy(mEthAddrAscii, &client_addr, sizeof(client_addr));
+   std::memcpy(mEthAddrAscii, &client_addr, sizeof(client_addr));
 
    client_addr.sin_port = htons(WD2_CMD_PORT_BIN);
-   memcpy(mEthAddrBin, &client_addr, sizeof(client_addr));
+   std::memcpy(mEthAddrBin, &client_addr, sizeof(client_addr));
 
    // check if board is alive
    try {
@@ -1809,7 +1810,7 @@ WP::WP(bool verbose, bool demo)
       assert(gDataSocket);
       
       // bind socket to port chosen by OS
-      memset((char*)&server_addr, 0, sizeof(server_addr));
+      std::memset((char*)&server_addr, 0, sizeof(server_addr));
       server_addr.sin_family = AF_INET;
       server_addr.sin_port = htons(0); // let OS choose port
       server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
