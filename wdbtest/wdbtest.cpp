@@ -112,7 +112,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
       else if (item == "triggerLevel") {
          assert(iBoard != -1);
-         gl->wdb[iBoard]->SetDacTlevel(iChannel, std::stof(value));
+         gl->wdb[iBoard]->SetDacTlevelV(iChannel, std::stof(value));
       }
 
       else if (item == "triggerDelay") {
@@ -234,14 +234,14 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"drs0ChnTxEnable\": %d,\n",            w->GetDrs0ChnTxEnable());
          mg_printf_http_chunk(nc, "      \"drs1ChnTxEnable\": %d,\n",            w->GetDrs1ChnTxEnable());
          
-         mg_printf_http_chunk(nc, "      \"dacOfs\": %d,\n",                     w->GetDacOfs());
-         mg_printf_http_chunk(nc, "      \"dacCalDc\": %d,\n",                   w->GetDacCalDc());
-         mg_printf_http_chunk(nc, "      \"dacPZCLevel\": %d,\n",                w->GetDacPZCLevel());
+         mg_printf_http_chunk(nc, "      \"dacOfs\": %f,\n",                     w->GetDacOfsV());
+         mg_printf_http_chunk(nc, "      \"dacCalDc\": %f,\n",                   w->GetDacCalDcV());
+         mg_printf_http_chunk(nc, "      \"dacPZCLevel\": %f,\n",                w->GetDacPZCLevelV());
 
          mg_printf_http_chunk(nc, "      \"dacTlevel\": [\n");
          for (int i=0 ; i<15 ; i++)
-            mg_printf_http_chunk(nc, "        %f,\n",                            w->GetDacTlevel(i));
-         mg_printf_http_chunk(nc, "        %f ],\n",                             w->GetDacTlevel(15));
+            mg_printf_http_chunk(nc, "        %f,\n",                            w->GetDacTlevelV(i));
+         mg_printf_http_chunk(nc, "        %f ],\n",                             w->GetDacTlevelV(15));
 
          mg_printf_http_chunk(nc, "      \"fePZC\": [\n");
          for (int i=0 ; i<15 ; i++)
@@ -602,7 +602,7 @@ int main(int argc, const char * argv[])
             b->SetDRSWaveContinous(true);
             b->SetDRSReadoutMode(true);
             b->SetCompPowerEnable(true);
-            b->SetDacTlevel(-1, 0);
+            b->SetDacTlevelV(-1, 0);
          }
       } catch (std::runtime_error &e) {
          std::cout << std::endl;

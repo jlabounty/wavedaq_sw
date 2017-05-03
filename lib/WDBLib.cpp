@@ -1249,67 +1249,79 @@ void WDB::ApplyLmkSettings()
    SetRegMask(WD2_REG_APLY_CFG_OFS, WD2_BIT_APPLY_SETTINGS_LMK_MASK, WD2_BIT_APPLY_SETTINGS_LMK_OFS, 1);
 }
 
-unsigned int WDB::GetDacRofs()
+float WDB::GetDacRofsV()
 {
-   return bitExtract(creg, WD2_REG_DAC0_A_B_OFS, WD2_BIT_DAC0_CH_A_MASK, WD2_BIT_DAC0_CH_A_OFS);
+   auto d = bitExtract(creg, WD2_REG_DAC0_A_B_OFS, WD2_BIT_DAC0_CH_A_MASK, WD2_BIT_DAC0_CH_A_OFS);
+   return d / 65535 * 2.5;
 }
 
-void WDB::SetDacRofs(unsigned int v)
+void WDB::SetDacRofsV(float v)
 {
-   SetRegMask(WD2_REG_DAC0_A_B_OFS, WD2_BIT_DAC0_CH_A_MASK, WD2_BIT_DAC0_CH_A_OFS, 1);
+   auto d = (unsigned int)(v / 2500.0 * 65535 + 0.5);
+   SetRegMask(WD2_REG_DAC0_A_B_OFS, WD2_BIT_DAC0_CH_A_MASK, WD2_BIT_DAC0_CH_A_OFS, d);
 }
 
-unsigned int WDB::GetDacOfs()
+float WDB::GetDacOfsV()
 {
-   return bitExtract(creg, WD2_REG_DAC0_A_B_OFS, WD2_BIT_DAC0_CH_B_MASK, WD2_BIT_DAC0_CH_B_OFS);
+   auto d = bitExtract(creg, WD2_REG_DAC0_A_B_OFS, WD2_BIT_DAC0_CH_B_MASK, WD2_BIT_DAC0_CH_B_OFS);
+   return d / 65535 * 2.5;
 }
 
-void WDB::SetDacOfs(unsigned int v)
+void WDB::SetDacOfsV(float v)
 {
-   SetRegMask(WD2_REG_DAC0_A_B_OFS, WD2_BIT_DAC0_CH_B_MASK, WD2_BIT_DAC0_CH_B_OFS, 1);
+   auto d = (unsigned int)(v / 2500.0 * 65535 + 0.5);
+   SetRegMask(WD2_REG_DAC0_A_B_OFS, WD2_BIT_DAC0_CH_B_MASK, WD2_BIT_DAC0_CH_B_OFS, d);
 }
 
-unsigned int WDB::GetDacCalDc()
+float WDB::GetDacCalDcV()
 {
-   return bitExtract(creg, WD2_REG_DAC0_C_D_OFS, WD2_BIT_DAC0_CH_C_MASK, WD2_BIT_DAC0_CH_C_MASK);
+   auto d = bitExtract(creg, WD2_REG_DAC0_C_D_OFS, WD2_BIT_DAC0_CH_C_MASK, WD2_BIT_DAC0_CH_C_MASK);
+   return d / 65535 * 2.5;
 }
 
-void WDB::SetDacCalDc(unsigned int v)
+void WDB::SetDacCalDcV(float v)
 {
-   SetRegMask(WD2_REG_DAC0_C_D_OFS, WD2_BIT_DAC0_CH_C_MASK, WD2_BIT_DAC0_CH_C_OFS, 1);
+   auto d = (unsigned int)(v / 2500.0 * 65535 + 0.5);
+   SetRegMask(WD2_REG_DAC0_C_D_OFS, WD2_BIT_DAC0_CH_C_MASK, WD2_BIT_DAC0_CH_C_OFS, d);
 }
 
-unsigned int WDB::GetDacPulseAmp()
+float WDB::GetDacPulseAmpV()
 {
-   return bitExtract(creg, WD2_REG_DAC0_C_D_OFS, WD2_BIT_DAC0_CH_D_MASK, WD2_BIT_DAC0_CH_D_OFS);
+   auto d = bitExtract(creg, WD2_REG_DAC0_C_D_OFS, WD2_BIT_DAC0_CH_D_MASK, WD2_BIT_DAC0_CH_D_OFS);
+   return d / 65535 * 2.5;
 }
 
-void WDB::SetDacPulseAmp(unsigned int v)
+void WDB::SetDacPulseAmpV(float v)
 {
-   SetRegMask(WD2_REG_DAC0_C_D_OFS, WD2_BIT_DAC0_CH_D_MASK, WD2_BIT_DAC0_CH_D_OFS, 1);
+   auto d = (unsigned int)(v / 2500.0 * 65535 + 0.5);
+   SetRegMask(WD2_REG_DAC0_C_D_OFS, WD2_BIT_DAC0_CH_D_MASK, WD2_BIT_DAC0_CH_D_OFS, d);
 }
 
-unsigned int WDB::GetDacPZCLevel()
+float WDB::GetDacPZCLevelV()
 {
-   return bitExtract(creg, WD2_REG_DAC0_E_F_OFS, WD2_BIT_DAC0_CH_E_MASK, WD2_BIT_DAC0_CH_E_OFS);
+   auto d = bitExtract(creg, WD2_REG_DAC0_E_F_OFS, WD2_BIT_DAC0_CH_E_MASK, WD2_BIT_DAC0_CH_E_OFS);
+   return d / 65535 * 2.5;
 }
 
-void WDB::SetDacPZCLevel(unsigned int v)
+void WDB::SetDacPZCLevelV(float v)
 {
-   SetRegMask(WD2_REG_DAC0_E_F_OFS, WD2_BIT_DAC0_CH_E_MASK, WD2_BIT_DAC0_CH_E_OFS, 1);
+   auto d = (unsigned int)(v / 2500.0 * 65535 + 0.5);
+   SetRegMask(WD2_REG_DAC0_E_F_OFS, WD2_BIT_DAC0_CH_E_MASK, WD2_BIT_DAC0_CH_E_OFS, d);
 }
 
-unsigned int WDB::GetDacBias()
+float WDB::GetDacBiasV()
 {
-   return bitExtract(creg, WD2_REG_DAC0_G_H_OFS, WD2_BIT_DAC0_CH_H_MASK, WD2_BIT_DAC0_CH_H_OFS);
+   auto d = bitExtract(creg, WD2_REG_DAC0_G_H_OFS, WD2_BIT_DAC0_CH_H_MASK, WD2_BIT_DAC0_CH_H_OFS);
+   return d / 65535 * 2.5;
 }
 
-void WDB::SetDacBias(unsigned int v)
+void WDB::SetDacBiasV(float v)
 {
-   SetRegMask(WD2_REG_DAC0_G_H_OFS, WD2_BIT_DAC0_CH_H_MASK, WD2_BIT_DAC0_CH_H_OFS, 1);
+   auto d = (unsigned int)(v / 2500.0 * 65535 + 0.5);
+   SetRegMask(WD2_REG_DAC0_G_H_OFS, WD2_BIT_DAC0_CH_H_MASK, WD2_BIT_DAC0_CH_H_OFS, d);
 }
 
-float WDB::GetDacTlevel(int chn)
+float WDB::GetDacTlevelV(int chn)
 {
    unsigned int v;
    
@@ -1320,16 +1332,16 @@ float WDB::GetDacTlevel(int chn)
       v = bitExtract(creg, WD2_REG_DAC1_A_B_OFS+(chn/2), WD2_BIT_DAC1_CH_B_MASK, WD2_BIT_DAC1_CH_B_OFS);
    
    // convert to Volts taking WDB comparator offset into account
-   return ((v / 4095.0 * 2500) - 900) / 500.0;
+   return ((v / 65535.0 * 2500) - 900) / 500.0;
 }
 
-void WDB::SetDacTlevel(int chn, float v)
+void WDB::SetDacTlevelV(int chn, float v)
 {
    // convert to mV taking WDB comparator offset into account
    v = v*500 + 900;
    
    // convert from mV to DAC bits
-   auto d = (unsigned int)(v / 2500.0 * 4095 + 0.5);
+   auto d = (unsigned int)(v / 2500.0 * 65535 + 0.5);
    
    assert(chn < 16);
    if (chn == -1) {

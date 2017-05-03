@@ -423,20 +423,20 @@ public:
    void ApplyAdcSettings();
    void ApplyLmkSettings();
 
-   unsigned int GetDacRofs();
-   void SetDacRofs(unsigned int v);
-   unsigned int GetDacOfs();
-   void SetDacOfs(unsigned int v);
-   unsigned int GetDacCalDc();
-   void SetDacCalDc(unsigned int v);
-   unsigned int GetDacPulseAmp();
-   void SetDacPulseAmp(unsigned int v);
-   unsigned int GetDacPZCLevel();
-   void SetDacPZCLevel(unsigned int v);
-   unsigned int GetDacBias();
-   void SetDacBias(unsigned int v);
-   float GetDacTlevel(int chn);
-   void SetDacTlevel(int chn, float v);
+   float GetDacRofsV();
+   void SetDacRofsV(float v);
+   float GetDacOfsV();
+   void SetDacOfsV(float v);
+   float GetDacCalDcV();
+   void SetDacCalDcV(float v);
+   float GetDacPulseAmpV();
+   void SetDacPulseAmpV(float v);
+   float GetDacPZCLevelV();
+   void SetDacPZCLevelV(float v);
+   float GetDacBiasV();
+   void SetDacBiasV(float v);
+   float GetDacTlevelV(int chn);
+   void SetDacTlevelV(int chn, float v);
 
    bool IsFePzc(int chn);
    void SetFePzc(int chn, bool v);
