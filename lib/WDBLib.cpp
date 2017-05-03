@@ -762,6 +762,24 @@ unsigned int WDB::GetDrsSampleFreq()
    return bitExtract(sreg, WD2_REG_DRS_SAMPLE_FREQ_OFS, WD2_BIT_DRS_SAMPLE_FREQ_MASK, WD2_BIT_DRS_SAMPLE_FREQ_OFS);
 }
 
+void WDB::SetDrsSampleFreq(unsigned int f)
+// sampling frequency in MHz
+{
+   if (mDemoMode) {
+      int index = (WD2_REG_DRS_SAMPLE_FREQ_OFS & 0x0FFF)/4;
+      unsigned int r = this->creg[index];
+      bitReplace(r, WD2_BIT_DRS_SAMPLE_FREQ_MASK, WD2_BIT_DRS_SAMPLE_FREQ_OFS, f);
+      this->sreg[index] = r;
+      return;
+   }
+   
+   // 200 MHz LMK bus frequency
+   auto divider = (int) (200.0 / f * 2048 + 0.5);
+   
+   SetRegMask(WD2_REG_LMK_0_OFS, WD2_BIT_LMK0_CLKOUT0_DIV_MASK, WD2_BIT_LMK0_CLKOUT0_DIV_OFS, divider);
+   ApplyLmkSettings();
+}
+
 unsigned int WDB::GetAdcSampleFreq()
 // sampling frequency in MHz
 {
@@ -1021,7 +1039,18 @@ bool WDB::IsTimingCalibSignalEnable()
 
 void WDB::SetTimingCalibSignalEnable(bool value)
 {
+   // switch TCA_CTRL
    SetRegMask(WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_TIMING_CALIB_SIGNAL_EN_MASK, WD2_BIT_TIMING_CALIB_SIGNAL_EN_OFS, value ? 1 : 0);
+   
+   // switch LMK output #6
+   
+   // enable divider
+   SetRegMask(WD2_REG_LMK_6_OFS, WD2_BIT_LMK6_CLKOUT6_MUX_MASK, WD2_BIT_LMK6_CLKOUT6_MUX_OFS, 1);
+   // divide 200 MHz by 2x1 = 100 MHz
+   SetRegMask(WD2_REG_LMK_6_OFS, WD2_BIT_LMK6_CLKOUT6_DIV_MASK, WD2_BIT_LMK6_CLKOUT6_DIV_OFS, 1);
+   // enbable/disable output
+   SetRegMask(WD2_REG_LMK_6_OFS, WD2_BIT_LMK6_CLKOUT6_EN_MASK, WD2_BIT_LMK6_CLKOUT6_EN_OFS, value);
+   ApplyLmkSettings();
 }
 
 unsigned int WDB::GetDaqClkSrcSel()

@@ -146,6 +146,11 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          gl->wdb[iBoard]->SetFeMux(iChannel, std::stoi(value) ? 0x03 : 0x02);
       }
 
+      else if (item == "drsSampleFreq") {
+         assert(iBoard != -1);
+         gl->wdb[iBoard]->SetDrsSampleFreq(std::stoi(value));
+      }
+      
       mg_printf(nc, "HTTP/1.1 204 No Content\r\n");
    }
    
@@ -255,8 +260,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
          mg_printf_http_chunk(nc, "      \"feMux\": [\n");
          for (int i=0 ; i<15 ; i++)
-            mg_printf_http_chunk(nc, "        %1g,\n",                           w->GetFeMux(i));
-         mg_printf_http_chunk(nc, "        %1g ],\n",                            w->GetFeMux(15));
+            mg_printf_http_chunk(nc, "        %d,\n",                            w->GetFeMux(i));
+         mg_printf_http_chunk(nc, "        %d ],\n",                             w->GetFeMux(15));
 
          mg_printf_http_chunk(nc, "      \"triggerShaperEnable\": %s,\n",        w->IsTriggerShaperEnable() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"triggerPulseLength\": %d,\n",         w->GetTriggerPulseLength());
@@ -504,9 +509,27 @@ void showUsage(std::string name)
    std::cerr << "  -v              Print extra information (verbose)" << std::endl;
 }
 
+#include <execinfo.h>
+
+void handler(int sig) {
+   void *array[10];
+   size_t size;
+   
+   // get void*'s for all entries on the stack
+   size = backtrace(array, 10);
+   
+   // print out all the frames to stderr
+   fprintf(stderr, "Error: signal %d:\n", sig);
+   backtrace_symbols_fd(array, size, STDERR_FILENO);
+   exit(1);
+}
+
 int main(int argc, const char * argv[])
 {
    GLOBALS gl = {};
+   
+   // install handle to show stack trace on segment violation
+   signal(SIGSEGV, handler);
    
    // default values
    gl.serverPort = 8080;

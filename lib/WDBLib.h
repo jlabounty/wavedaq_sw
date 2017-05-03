@@ -335,6 +335,7 @@ public:
    unsigned int GetIntPllLck(bool refresh = true);
    bool IsIntPllLck(bool refresh = true);
    unsigned int GetDrsSampleFreq();
+   void SetDrsSampleFreq(unsigned int f);
    unsigned int GetAdcSampleFreq();
    unsigned int GetAdcInfo();
    

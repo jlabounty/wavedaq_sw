@@ -179,14 +179,15 @@
             </div>
 
             <div class="vSpacer5">
-               <input type="checkbox" id="timingCalibSignalEnable" name="timingCalibSignalEnable" onClick="setParam(this)">Enable calibration clock
+               <input type="checkbox" id="timingCalibSignalEnable" name="timingCalibSignalEnable" onClick="setCalibClock(this)">Enable calibration clock
             </div>
             <div class="vMiddleBox vSpacer5">
-               <input type="checkbox" id="feMux" name="feMux" onClick="setParam(this)">Connect inputs to calib.
-               source
+               <input type="checkbox" id="feMux" name="feMux" onClick="setParam(this)">
+                  Connect inputs to calib. source
             </div>
             <div class="vMiddleBox vSpacer5">
-               <input type="checkbox" id="calibBufferEnable" name="calibBufferEnable" onClick="setParam(this)">Power calib. source
+               <input type="checkbox" id="calibBufferEnable" name="calibBufferEnable" onClick="setParam(this)">
+                  Power calib. source
             </div>
 
             <div class="vMiddleBox vSpacer5">
@@ -201,9 +202,9 @@
 
          <div class="groupTitle">Sampling Speed</div>
          <div class="group">
-            <input type="text" id="nominal_sampling_frequency" name="nominal_sampling_frequency" value="5"
+            <input type="text" id="drsSampleFreq" name="drsSampleFreq" value="5"
                    onkeypress="keyParam(event,this)">&nbsp;GSPS
-            &nbsp;Actual:&nbsp;<span id="actual_sampling_frequency">N/A</span>
+            &nbsp;Actual:&nbsp;<span id="drsActualSampleFreq">N/A</span>
          </div>
 
          <div class="groupTitle">Voltage Calibration</div>

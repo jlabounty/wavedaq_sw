@@ -253,14 +253,14 @@ function populateControls(init)
 
    document.getElementById("rangeSelect").value = 0; // ##
 
-   document.getElementById("feMux").checked = OSC.wdb[0].feMux[0];
+   document.getElementById("feMux").checked = (OSC.wdb[0].feMux[0] == 3);
    document.getElementById("calibBufferEnable").checked = OSC.wdb[0].calibBufferEnable;
 
    document.getElementById("dcOffsetSlider").set(OSC.wdb[0].dacCalDC / 2 + 0.5);
    document.getElementById("inpDcOffset").value = OSC.wdb[0].dacCalDC * 1000;
 
-   document.getElementById("nominal_sampling_frequency").value = Math.round(OSC.wdb[0].drsSampleFreq/1000 * 10) / 10;
-   document.getElementById("actual_sampling_frequency").innerHTML = OSC.wdb[0].drsSampleFreq/1000 + " GSPS";
+   document.getElementById("drsSampleFreq").value = Math.round(OSC.wdb[0].drsSampleFreq/1000 * 10) / 10;
+   document.getElementById("drsActualSampleFreq").innerHTML = OSC.wdb[0].drsSampleFreq/1000 + " GSPS";
 
    document.getElementById("calib1").checked = OSC.wp.ofsCalib1;
    document.getElementById("calib2").checked = OSC.wp.ofsCalib2;
@@ -327,6 +327,20 @@ function loadWdb(b, init) {
    req.send();
 }
 
+function setCalibClock(e) {
+   setParam(e);
+   var c = document.getElementById("feMux");
+   c.checked = e.checked;
+   setParam(c);
+   c = document.getElementById("calibBufferEnable");
+   c.checked = e.checked;
+   setParam(c);
+}
+
+function setDrsSamplFreq(e) {
+   setParam(e);
+}
+
 function setParam(e, channel) {
    if (OSC.demoMode)
       return;
@@ -382,8 +396,8 @@ function setParam(e, channel) {
          req.send(parseInt(e.value));
       } else if (e.name == "dc_offset") {
          req.send(parseInt(e.value) / 1000);
-      } else if (e.name == "nominal_sampling_frequency") {
-         req.send(parseFloat(e.value));
+      } else if (e.name == "drsSampleFreq") {
+         req.send(parseFloat(e.value) * 1000);
       } else
          req.send(e.value);
    }
@@ -423,6 +437,12 @@ function keyParam(event, input, channel) {
          document.getElementById("trgDelaySlider").set(1 - input.value/450);
       }
       
+      if (input.id == "drsSampleFreq") {
+         var divider = Math.round(200.0 / input.value * 2.048);
+         OSC.wdb[0].drsSampleFreq = Math.round(200 / divider * 2048);
+         document.getElementById("drsActualSampleFreq").innerHTML = OSC.wdb[0].drsSampleFreq/1000 + " GSPS";
+      }
+
       setParam(input, channel);
    }
 }

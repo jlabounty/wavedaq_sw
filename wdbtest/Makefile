@@ -17,10 +17,12 @@ endif
 
 CFLAGS += -I../lib -I../../firmware/WD2/wd2_hardware_test/wd2_xsdk_workspace/wd2_app_cmd_interpreter/src/
 
+LDFLAGS = -g
+
 all: wdbtest
 
 wdbtest: wdbtest.o WDBLib.o mongoose.o
-	$(CC) wdbtest.o WDBLib.o mongoose.o -o wdbtest $(LIBS)
+	$(CC) $(LDFLAGS) wdbtest.o WDBLib.o mongoose.o -o wdbtest $(LIBS)
 
 WDBLib.o: ../lib/WDBLib.cpp ../lib/WDBLib.h
 	$(CC) $(CFLAGS) -c $<
