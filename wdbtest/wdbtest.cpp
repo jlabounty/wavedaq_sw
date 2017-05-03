@@ -602,6 +602,7 @@ int main(int argc, const char * argv[])
             b->SetDRSWaveContinous(true);
             b->SetDRSReadoutMode(true);
             b->SetCompPowerEnable(true);
+            b->SetDacTlevel(-1, 0);
          }
       } catch (std::runtime_error &e) {
          std::cout << std::endl;
