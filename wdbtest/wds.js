@@ -229,18 +229,20 @@ function populateControls(init)
    document.getElementById("sldTriggerDelay").set(1 - OSC.wdb[0].triggerDelay / 450);
    document.getElementById("inpTriggerDelay").value = Math.round(OSC.wdb[0].triggerDelay);
    
-   if (OSC.wdb[0].triggerEnable) {
-      document.config.trigger_mode[0].checked = false;
-      document.config.trigger_mode[1].checked = false;
-   } else
-      document.config.trigger_mode[0].checked = true; //##
+   if (OSC.gl.triggerMode == 1) {
+      document.getElementById("rbTriggerModeNormal").checked = true;
+      document.getElementById("rbTriggerModeAuto").checked = false;
+   } else if (OSC.gl.triggerMode == 2) {
+      document.getElementById("rbTriggerModeNormal").checked = false;
+      document.getElementById("rbTriggerModeAuto").checked = true;
+   }
    
    if (OSC.wdb[0].triggerFallingEdge) {
-      document.getElementById('trgEdgeUp').style.display = "none";
-      document.getElementById('trgEdgeDown').style.display = "inline";
+      document.getElementById("trgEdgeUp").style.display = "none";
+      document.getElementById("trgEdgeDown").style.display = "inline";
    } else {
-      document.getElementById('trgEdgeUp').style.display = "inline";
-      document.getElementById('trgEdgeDown').style.display = "none";
+      document.getElementById("trgEdgeUp").style.display = "inline";
+      document.getElementById("trgEdgeDown").style.display = "none";
    }
 
    document.getElementById("pzc").checked = OSC.wdb[0].fePZC[0];

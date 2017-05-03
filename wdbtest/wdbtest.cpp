@@ -23,7 +23,6 @@ std::vector<std::string> wdbName = { "wd094" };
 
 const int cTriggerModeNormal    = 1;
 const int cTriggerModeAuto      = 2;
-const int cTriggerModeSoftware  = 3;
 
 typedef struct {
    bool demoMode;
@@ -110,7 +109,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          gl->wdb[iBoard]->SetDaqClkSrcSel(std::stoi(value));
       }
 
-      else if (item == "triggerLevel") {
+      else if (item == "dacTriggerLevel") {
          assert(iBoard != -1);
          gl->wdb[iBoard]->SetDacTriggerLevelV(iChannel, std::stof(value));
       }
@@ -123,6 +122,27 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       else if (item == "triggerFallingEdge") {
          assert(iBoard != -1);
          gl->wdb[iBoard]->SetTriggerFallingEdge(std::stoi(value));
+      }
+
+      else if (item == "triggerMode") {
+         gl->triggerMode = std::stoi(value);
+      }
+
+      else if (item == "triggerSource") {
+         assert(iBoard != -1);
+         if (value == "0") {
+            // internal trigger
+            gl->wdb[iBoard]->SetTriggerEnable(true);
+            gl->wdb[iBoard]->SetTriggerCfgOr(0xFFFF);
+            gl->wdb[iBoard]->SetTriggerExternalOr(false);
+            gl->wdb[iBoard]->SetTriggerExternalAnd(false);
+         } else {
+            // external trigger
+            gl->wdb[iBoard]->SetTriggerEnable(true);
+            gl->wdb[iBoard]->SetTriggerCfgOr(0);
+            gl->wdb[iBoard]->SetTriggerExternalOr(true);
+            gl->wdb[iBoard]->SetTriggerExternalAnd(false);
+         }
       }
 
       else if (item == "readoutSrc") {
@@ -169,6 +189,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "{\n");
       mg_printf_http_chunk(nc, "   \"gl\": {\n");
       mg_printf_http_chunk(nc, "      \"demoMode\": %s,\n",                      gl->demoMode ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"triggerMode\": %d,\n",                   gl->triggerMode);
       mg_printf_http_chunk(nc, "      \"nWdb\": %d\n",                           gl->wdb.size());
       mg_printf_http_chunk(nc, "   },\n");
       mg_printf_http_chunk(nc, "   \"wp\": {\n");
@@ -428,14 +449,14 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          
          // request single event
          for (auto &b: gl->wdb) {
-            if (gl->triggerMode == cTriggerModeAuto || gl->triggerMode == cTriggerModeSoftware)
+            if (gl->triggerMode == cTriggerModeAuto)
                b->RequestEvent();
             else if (gl->triggerMode == cTriggerModeNormal)
                b->StartDaqSingle();
          }
          
          // read waveforms
-         auto eVector = gl->wp->GetEvent(100);
+         auto eVector = gl->wp->GetEvent(1000);
          if (eVector) {
             if (eVector->size() > 0)
                event = (*eVector)[0];
@@ -632,6 +653,11 @@ int main(int argc, const char * argv[])
             b->SetCompPowerEnable(true);
             b->SetDacTriggerLevelV(-1, 0);
             b->SetDacCalDcV(0);
+            
+            b->SetTriggerEnable(true);
+            b->SetTriggerCfgOr(0xFFFF);
+            b->SetTriggerExternalOr(false);
+            b->SetTriggerExternalAnd(false);
          }
       } catch (std::runtime_error &e) {
          std::cout << std::endl;
