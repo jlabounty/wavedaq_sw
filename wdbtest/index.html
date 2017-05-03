@@ -20,7 +20,7 @@
    <div id="controls">
       <select id="wdSelect" class="wdSelect" onchange="wdSelect(this)">
       </select><br/>
-      <button class="wideButton" type="button" id="btnStop" onClick="btnStop()">Stop</button>
+      <button class="wideButton" type="button" id="btnStop" style="background-color:#A0FFA0" onClick="btnStop()">Stop</button>
       <button class="wideButton" type="button" id="btnSingle" onClick="btnSingle()">Single</button>
 
       <div class="chnButtons">
@@ -96,20 +96,24 @@
          <div class="groupTitle">Trigger</div>
          <div class="group">
             <div class="vMiddleBox vSpacer5">
-               <button name="ctrlHSlider" id="trgSlider" class="hSlider vMiddleElement" type="button"
-                       data-update="sldTLevel()" style="width:180px;"></button>
-               <span class="hSpacer5 vMiddleElement"></span><input name="triggerLevel" class="vMiddleElement"
-                                                                   type="text" id="inpTlevel"
-                                                                   onkeypress="keyParam(event,this)" value="0"><span
-                    class="vMiddleElement">&nbsp;mV</span>
+               <button name="ctrlHSlider" id="sldDacTriggerLevel" class="hSlider vMiddleElement" type="button"
+                       data-update="sldDacTriggerLevel()" style="width:180px;"></button>
+               <span class="hSpacer5 vMiddleElement"></span>
+                  <input name="dacTriggerLevel" class="vMiddleElement"
+                         type="text" id="inpDacTriggerLevel"
+                         onkeypress="keyParam(event,this)" value="0"><span
+                         class="vMiddleElement">&nbsp;mV
+               </span>
             </div>
             <div class="vMiddleBox vSpacer5">
                <div class="vMiddleElement">Delay:&nbsp;</div>
-               <button name="ctrlHSlider" id="trgDelaySlider" class="hSlider vMiddleElement" type="button"
-                       data-update="sldTDelay()" style="width:130px;"></button>
-               <span class="hSpacer5"></span><input name="triggerDelay" class="vMiddleElement" type="text"
-                                                    id="inpTDelay" onkeypress="keyParam(event,this)" value="0"><span
-                    class="vMiddleElement">&nbsp;ns</span>
+               <button name="ctrlHSlider" id="sldTriggerDelay" class="hSlider vMiddleElement" type="button"
+                       data-update="sldTriggerDelay()" style="width:130px;"></button>
+               <span class="hSpacer5"></span>
+               <input name="triggerDelay" class="vMiddleElement" type="text"
+                     id="inpTriggerDelay" onkeypress="keyParam(event,this)" value="0"><span
+                     class="vMiddleElement">&nbsp;ns
+               </span>
             </div>
             <table>
                <tr>
@@ -179,7 +183,8 @@
             </div>
 
             <div class="vSpacer5">
-               <input type="checkbox" id="timingCalibSignalEnable" name="timingCalibSignalEnable" onClick="setCalibClock(this)">Enable calibration clock
+               <input type="checkbox" id="timingCalibSignalEnable" name="timingCalibSignalEnable" onClick="setCalibClock(this)">
+                  Enable calibration clock
             </div>
             <div class="vMiddleBox vSpacer5">
                <input type="checkbox" id="feMux" name="feMux" onClick="setParam(this)">
@@ -192,11 +197,11 @@
 
             <div class="vMiddleBox vSpacer5">
                <div class="vMiddleElement">DC:&nbsp;</div>
-               <button name="ctrlHSlider" id="dcOffsetSlider" class="hSlider vMiddleElement" type="button"
-                       data-update="sldDcOffset()" style="width:140px;"></button>
-               <span class="hSpacer5"></span><input name="dc_offset" class="vMiddleElement" type="text" id="inpDcOffset"
-                                                    onkeypress="keyParam(event,this)" value="0"><span
-                    class="vMiddleElement">&nbsp;mV</span>
+               <button name="ctrlHSlider" id="sldDacCalDc" class="hSlider vMiddleElement" type="button"
+                       data-update="sldDacCalDc()" style="width:140px;"></button>
+               <span class="hSpacer5"></span><input name="dacCalDc" class="vMiddleElement" type="text" id="inpDacCalDc"
+                       onkeypress="keyParam(event,this)" value="0"><span
+                       class="vMiddleElement">&nbsp;mV</span>
             </div>
          </div>
 

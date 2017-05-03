@@ -720,7 +720,7 @@ Oscilloscope.prototype.drawMarker = function (ctx) {
          ctx.fillStyle = this.chnColors[c];
          ctx.strokeStyle = this.chnColors[c];
 
-         y = (OSC.wdb[OSC.curBoard].dacTlevel[c]) * this.wfUS[c] + this.wfUO[c];
+         y = (OSC.wdb[OSC.curBoard].dacTriggerLevel[c]) * this.wfUS[c] + this.wfUO[c];
 
          ctx.beginPath();
          ctx.moveTo(this.x2 - 2, y - 5);

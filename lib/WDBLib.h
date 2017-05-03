@@ -436,8 +436,8 @@ public:
    void SetDacPZCLevelV(float v);
    float GetDacBiasV();
    void SetDacBiasV(float v);
-   float GetDacTlevelV(int chn);
-   void SetDacTlevelV(int chn, float v);
+   float GetDacTriggerLevelV(int chn);
+   void SetDacTriggerLevelV(int chn, float v);
 
    bool IsFePzc(int chn);
    void SetFePzc(int chn, bool v);
