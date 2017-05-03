@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
          printf(" opt = 2 : Get RRUN ... \n");
          printf(" FW compilation date: ");
 	 TCBBoard.GetCompilDate(&data);
-	 printf("%d/%d/20%d %d:%d:%d\n",(data&0xF8000000)>>27,(data&0x7800000)>>23,(data&0x7e0000)>>17,(data&0x1F000)>>12,(data&0xFC0)>>6,(data&0x3F));
+	 printf("%02d/%02d/20%02d %02d:%02d:%02d\n",(data&0xF8000000)>>27,(data&0x7800000)>>23,(data&0x7e0000)>>17,(data&0x1F000)>>12,(data&0xFC0)>>6,(data&0x3F));
          TCBBoard.GetRRUN(&data);
          printf(" RRUN reg content = %08x\n",data);
 	 if(((TCBBoard.fidcode&0xf000)>>12)==3) {
