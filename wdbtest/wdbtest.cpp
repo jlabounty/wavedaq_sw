@@ -600,6 +600,8 @@ int main(int argc, const char * argv[])
 
             // fix wrong default registers
             b->SetDRSWaveContinous(true);
+            b->SetDRSReadoutMode(true);
+            b->SetCompPowerEnable(true);
          }
       } catch (std::runtime_error &e) {
          std::cout << std::endl;

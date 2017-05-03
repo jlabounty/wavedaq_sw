@@ -365,7 +365,7 @@ public:
    void SetDRSWaveContinous(bool value);
    
    void TrgDRSConfigure();
-   void TrgDAQSoft();
+   void TrgDAQSoft(bool value);
    void TrgDAQReinit();
    bool IsDAQNormal();
    

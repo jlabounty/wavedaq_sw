@@ -125,12 +125,12 @@ function init() {
    //## OSC.timer.loadStatus = window.setTimeout(loadStatus, 10000);
 
    // schedule loadScalers()
-   //## OSC.timer.loadScalers = window.setTimeout(loadScalers, 1000);
+   OSC.timer.loadScalers = window.setTimeout(loadScalers, 1000);
 }
 
 function connectionBroken() {
    if (OSC.connected) {
-      alert("Connection to server broken.\nPlease reload page.");
+      dlgMessage("Error", "Connection to server broken.\nPlease reload page.", true);
       OSC.connected = false;
    }
 
@@ -1137,13 +1137,13 @@ function btnStart() {
    }
 
    if (document.getElementById("filename").value == "") {
-      dlgMessage("Warning", "Please enter a valid file name");
+      dlgMessage("Warning", "Please enter a valid file name", true);
       return;
    }
 
    var ne = document.getElementById("nevents").value;
    if (isNaN(parseInt(ne)) || parseInt(ne) < 1 || parseInt(ne) > 1E6) {
-      dlgMessage("Warning", "Please enter a valid number of events");
+      dlgMessage("Warning", "Please enter a valid number of events", true);
       return;
    }
 

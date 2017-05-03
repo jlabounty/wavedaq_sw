@@ -938,10 +938,10 @@ void WDB::TrgDRSConfigure()
    SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_DRS_CONFIGURE_MASK, WD2_BIT_DRS_CONFIGURE_OFS, 1);
 }
 
-void WDB::TrgDAQSoft()
+void WDB::TrgDAQSoft(bool value)
 // software trigger of a DRS readout
 {
-   SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_DAQ_SOFT_TRIGGER_MASK, WD2_BIT_DAQ_SOFT_TRIGGER_OFS, 1);
+   SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_DAQ_SOFT_TRIGGER_MASK, WD2_BIT_DAQ_SOFT_TRIGGER_OFS, value);
 }
 
 void WDB::TrgDAQReinit()
@@ -1749,7 +1749,8 @@ void WDB::RequestEvent()
    SetDaqSingle(true);  // start DRS domino wave
    SetDaqSingle(false);
    
-   TrgDAQSoft();
+   TrgDAQSoft(true);
+   TrgDAQSoft(false);
 }
 
 //--------------------------------------------------------------------

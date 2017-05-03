@@ -25,6 +25,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		D51B00171EB9C95B003DF0C8 /* controls.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = controls.js; sourceTree = "<group>"; };
+		D51B00181EB9CB92003DF0C8 /* wds.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = wds.css; sourceTree = "<group>"; };
 		D51CB2901E40E14900D2DC06 /* wdbtest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = wdbtest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D54359AB1E9E597100912A50 /* register_map_wd2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = register_map_wd2.h; path = /wavedaq/firmware/WD2/wd2_hardware_test/wd2_xsdk_workspace/wd2_app_cmd_interpreter/src/register_map_wd2.h; sourceTree = "<group>"; };
 		D553D50E1E40E8D200AE1F52 /* WDBLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WDBLib.h; path = /wavedaq/software/lib/WDBLib.h; sourceTree = "<group>"; };
@@ -79,6 +81,8 @@
 		D5EEA84B1EB71130007635F7 /* html */ = {
 			isa = PBXGroup;
 			children = (
+				D51B00181EB9CB92003DF0C8 /* wds.css */,
+				D51B00171EB9C95B003DF0C8 /* controls.js */,
 				D5EEA84E1EB71158007635F7 /* index.html */,
 				D5EEA84D1EB7114F007635F7 /* osc.js */,
 				D5EEA84C1EB71145007635F7 /* wds.js */,
