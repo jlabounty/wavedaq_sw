@@ -1336,6 +1336,8 @@ void WDB::SetDacPulseAmpV(float v)
    SetRegMask(WD2_REG_DAC0_C_D_OFS, WD2_BIT_DAC0_CH_D_MASK, WD2_BIT_DAC0_CH_D_OFS, d);
 }
 
+std::vector<float> pzcLevel = { 0, 0.5, 1, 1.5, 1.8, 2, 2.5 };
+
 float WDB::GetDacPZCLevelV()
 {
    auto d = bitExtract(creg, WD2_REG_DAC0_E_F_OFS, WD2_BIT_DAC0_CH_E_MASK, WD2_BIT_DAC0_CH_E_OFS);
@@ -1346,6 +1348,23 @@ void WDB::SetDacPZCLevelV(float v)
 {
    auto d = (unsigned int)(v / 2.5 * 65535 + 0.5);
    SetRegMask(WD2_REG_DAC0_E_F_OFS, WD2_BIT_DAC0_CH_E_MASK, WD2_BIT_DAC0_CH_E_OFS, d);
+}
+
+int WDB::GetDacPZCLevelN()
+{
+   int i;
+   auto v = GetDacPZCLevelV();
+   for (i=0 ; i<pzcLevel.size() ; i++)
+      if (pzcLevel[i] == v)
+        break;
+   return i+1;
+}
+
+void WDB::SetDacPZCLevelN(int i)
+{
+   i--;
+   assert(i >= 0 && i < pzcLevel.size());
+   SetDacPZCLevelV(pzcLevel[i]);
 }
 
 float WDB::GetDacBiasV()
@@ -1424,6 +1443,11 @@ bool WDB::IsFePzc(int chn)
 
 void WDB::SetFePzc(int chn, bool v)
 {
+   if (chn == -1) {
+      for (int i=0 ; i<16 ; i++)
+         SetFePzc(i, v);
+      return;
+   }
    assert(chn < 16);
    auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
    auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_PZC_EN_MASK : WD2_BIT_FE1_PZC_EN_MASK;
@@ -1526,16 +1550,85 @@ void WDB::SetFeAttenuation(int chn, unsigned int v)
    SetRegMask(rofs, mask, ofs, v);
 }
 
+// input configuration according to FE_bits_2E.xlsx
+struct {
+   float gain;
+   int   att0;
+   int   att1;
+   int   en1;
+   int   comp1;
+   int   en2;
+   int   comp2;
+} gain_table[] = {
+   { 0.5, 1, 0, 0, 0, 0, 0},
+   {   1, 0, 0, 0, 0, 0, 0},
+   { 2.5, 0, 1, 1, 0, 0, 0},
+   {   5, 1, 0, 1, 0, 0, 0},
+   {  10, 0, 0, 1, 0, 0, 0},
+   {  25, 0, 1, 1, 0, 1, 0},
+   {  50, 1, 0, 1, 0, 1, 0},
+   { 100, 0, 0, 1, 0, 1, 0},
+   
+};
+
 float WDB::GetFeGain(int chn)
 {
-   // TDB
-   return mFEGain;
+   auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
+   auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_ATTENUATION_MASK : WD2_BIT_FE1_ATTENUATION_MASK;
+   auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_ATTENUATION_OFS  : WD2_BIT_FE1_ATTENUATION_OFS;
+   int att = bitExtract(creg, rofs, mask, ofs);
+   mask = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER1_EN_MASK : WD2_BIT_FE1_AMPLIFIER1_EN_MASK;
+   ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER1_EN_OFS  : WD2_BIT_FE1_AMPLIFIER1_EN_OFS;
+   int en1 = bitExtract(creg, rofs, mask, ofs);
+   mask = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER2_EN_MASK : WD2_BIT_FE1_AMPLIFIER2_EN_MASK;
+   ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER2_EN_OFS  : WD2_BIT_FE1_AMPLIFIER2_EN_OFS;
+   int en2 = bitExtract(creg, rofs, mask, ofs);
+   
+   for (int i=0 ; i<8 ; i++)
+      if (((gain_table[i].att0 | (gain_table[i].att1 << 1)) == att) &&
+          gain_table[i].en1 == en1 &&
+          gain_table[i].en2 == en2)
+         return gain_table[i].gain;
+
+   return 1;
 }
 
-void WDB::SetFeGain(int chn, float g)
+void WDB::SetFeGain(int chn, float gain)
 {
-   // TDB
-   mFEGain = g;
+   if (chn == -1) {
+      for (int i=0 ; i<16 ; i++)
+         SetFeGain(i, gain);
+      return;
+   }
+   
+   int i;
+   for (i=0 ; i<8 ; i++)
+      if (gain_table[i].gain == gain)
+         break;
+   
+   if (i < 8) {
+      auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
+      
+      auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_ATTENUATION_MASK : WD2_BIT_FE1_ATTENUATION_MASK;
+      auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_ATTENUATION_OFS  : WD2_BIT_FE1_ATTENUATION_OFS;
+      SetRegMask(rofs, mask, ofs, gain_table[i].att0 | (gain_table[i].att1 << 1), false);
+      
+      mask = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER1_EN_MASK : WD2_BIT_FE1_AMPLIFIER1_EN_MASK;
+      ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER1_EN_OFS  : WD2_BIT_FE1_AMPLIFIER1_EN_OFS;
+      SetRegMask(rofs, mask, ofs, gain_table[i].en1, false);
+      
+      mask = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER1_COMP_EN_MASK : WD2_BIT_FE1_AMPLIFIER1_COMP_EN_MASK;
+      ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER1_COMP_EN_OFS  : WD2_BIT_FE1_AMPLIFIER1_COMP_EN_OFS;
+      SetRegMask(rofs, mask, ofs, gain_table[i].comp1, false);
+      
+      mask = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER2_EN_MASK : WD2_BIT_FE1_AMPLIFIER2_EN_MASK;
+      ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER2_EN_OFS  : WD2_BIT_FE1_AMPLIFIER2_EN_OFS;
+      SetRegMask(rofs, mask, ofs, gain_table[i].en2, false);
+      
+      mask = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER2_COMP_EN_MASK : WD2_BIT_FE1_AMPLIFIER2_COMP_EN_MASK;
+      ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER2_COMP_EN_OFS  : WD2_BIT_FE1_AMPLIFIER2_COMP_EN_OFS;
+      SetRegMask(rofs, mask, ofs, gain_table[i].comp2, true); // send register
+   }
 }
 
 unsigned int WDB::GetFeMux(int chn)
@@ -1788,7 +1881,6 @@ void WDB::SetTriggerDelayNs(unsigned int ns)
 }
 
 //--------------------------------------------------------------------
-
 
 void WDB::RequestEvent()
 {

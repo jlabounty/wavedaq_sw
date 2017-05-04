@@ -434,6 +434,8 @@ public:
    void SetDacPulseAmpV(float v);
    float GetDacPZCLevelV();
    void SetDacPZCLevelV(float v);
+   int GetDacPZCLevelN();
+   void SetDacPZCLevelN(int n);
    float GetDacBiasV();
    void SetDacBiasV(float v);
    float GetDacTriggerLevelV(int chn);
@@ -499,6 +501,9 @@ public:
    // hihg level methods ----------
    unsigned int GetTriggerDelayNs();
    void SetTriggerDelayNs(unsigned int ns);
+   
+   void SetRange(float r);
+   float GetRange();
    
    void RequestEvent();
 };

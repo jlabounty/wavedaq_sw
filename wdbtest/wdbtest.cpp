@@ -145,10 +145,29 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          }
       }
 
+      else if (item == "gain") {
+         assert(iBoard != -1);
+         gl->wdb[iBoard]->SetFeGain(iChannel, std::stof(value));
+      }
+
+      else if (item == "pzc") {
+         assert(iBoard != -1);
+         gl->wdb[iBoard]->SetFePzc(iChannel, std::stoi(value));
+      }
+
+      else if (item == "pzcLevel") {
+         assert(iBoard != -1);
+         gl->wdb[iBoard]->SetDacPZCLevelN(std::stoi(value));
+      }
+
+      else if (item == "range") {
+         assert(iBoard != -1);
+         std::cout << value << std::endl;
+      }
+
       else if (item == "readoutSrc") {
          assert(iBoard != -1);
          gl->wdb[iBoard]->SetReadoutSrcSel(std::stoi(value));
-         std::cout << "readoutSrcSel: " << value << std::endl;
       }
 
       else if (item == "calibBufferEnable") {
@@ -456,7 +475,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          }
          
          // read waveforms
-         auto eVector = gl->wp->GetEvent(1000);
+         auto eVector = gl->wp->GetEvent(300);
          if (eVector) {
             if (eVector->size() > 0)
                event = (*eVector)[0];
@@ -651,13 +670,13 @@ int main(int argc, const char * argv[])
             b->SetDRSWaveContinous(true);
             b->SetDRSReadoutMode(true);
             b->SetCompPowerEnable(true);
-            b->SetDacTriggerLevelV(-1, 0);
-            b->SetDacCalDcV(0);
+            //b->SetDacTriggerLevelV(-1, 0);
+            //b->SetDacCalDcV(0);
             
-            b->SetTriggerEnable(true);
-            b->SetTriggerCfgOr(0xFFFF);
-            b->SetTriggerExternalOr(false);
-            b->SetTriggerExternalAnd(false);
+            //b->SetTriggerEnable(true);
+            //b->SetTriggerCfgOr(0xFFFF);
+            //b->SetTriggerExternalOr(false);
+            //b->SetTriggerExternalAnd(false);
          }
       } catch (std::runtime_error &e) {
          std::cout << std::endl;

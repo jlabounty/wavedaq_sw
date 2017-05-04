@@ -85,7 +85,7 @@
 
       <button class="wideButton" id="btnConfig" type="button" onClick="btnConfig()">Config</button>
       <button class="wideButton" id="btnMeasure" type="button" onClick="dlgShow('dlgMeasure')">Measure</button>
-      <button class="wideButton" id="btnChannels" type="button" onClick="btnChannels()">Channels</button>
+      <button class="wideButton" id="btnChannels" type="button" onClick="dlgShow('dlgChannels')">Channels</button>
       <button class="wideButton" id="btnSave" type="button" onClick="btnSave()">Save</button>
       <button class="wideButton" id="btnAbout" type="button" onClick="dlgShow('dlgAbout')">About</button>
 
@@ -133,8 +133,8 @@
                <tr>
                   <td>
                      Source:&nbsp;&nbsp;
-                     <input type="radio" id="trSourceInt" name="triggerSource" value="0" checked onClick="setParam(this)">int
-                     <input type="radio" id="trSourceExt" name="triggerSource" value="1" onClick="setParam(this)">ext
+                     <input type="radio" id="rbTriggerSourceInt" name="triggerSource" value="0" checked onClick="setParam(this)">int
+                     <input type="radio" id="rbTriggerSourceExt" name="triggerSource" value="1" onClick="setParam(this)">ext
                   </td>
                </tr>
             </table>
@@ -143,8 +143,8 @@
          <div class="groupTitle">Analog Front-end</div>
          <div class="group">
             <div class="vSpacer5">
-               <label for="gain">Gain:</label>
-               <select id="gain" name="gain" class="select" onchange="setParam(this)">
+               <label for="selGain">Gain:</label>
+               <select id="selGain" name="gain" class="select" onchange="setParam(this)">
                   <option value="0.5">0.5</option>
                   <option selected value="1">1</option>
                   <option value="2.5">2.5</option>
@@ -155,8 +155,8 @@
                   <option value="100">100</option>
                </select>
                &nbsp;&nbsp;&nbsp;
-               <input type="checkbox" id="pzc" name="pzc" onClick="setParam(this)">PZC
-               <select id="pzc_level" name="pzc_level" class="select" onchange="setParam(this)">
+               <input type="checkbox" id="cbPzc" name="pzc" onClick="setParam(this)">PZC
+               <select id="selPzcLevel" name="pzcLevel" class="select" onchange="setParam(this)">
                   <option value="1">1</option>
                   <option value="2">2</option>
                   <option value="3">3</option>
@@ -175,7 +175,7 @@
 
             <div class="vMiddleBox vSpacer5">
                <div class="vMiddleElement">Input range:&nbsp;</div>
-               <select id="rangeSelect" class="select" onchange="setRange(this)">
+               <select id="selRange" class="select" onchange="setRange(this)">
                   <option value="-0.45">-0.95 V ... +0.05 V</option>
                   <option value="0">-0.5 V ... +0.5 V</option>
                   <option value="0.45">-0.05 V ... +0.95 V</option>
@@ -309,16 +309,26 @@
       </form>
    </div>
 
-   <div id="channels">
-      <table id="channelsTable">
-         <tr class="channelsTitle">
-            <th class="channelsTh">Chn</th>
-            <th class="channelsTh">Gain</th>
-            <th class="channelsTh">PZC</th>
-            <th class="channelsTh">Trigger Level</th>
-         </tr>
-         <!-- channel rows will be created dynamically in init() -->
-      </table>
+   <!-- channels dialog -->
+   <div id="dlgChannels" class="dlgFrame">
+
+      <div class="dlgTitlebar">Channel Configuration</div>
+
+      <div class="dlgPanel">
+         <div id="channels">
+            <table id="channelsTable">
+               <tr class="channelsTitle">
+                  <th class="channelsTh">Chn</th>
+                  <th class="channelsTh">Gain</th>
+                  <th class="channelsTh">PZC</th>
+                  <th class="channelsTh">Trigger Level</th>
+               </tr>
+               <!-- channel rows will be created dynamically in init() -->
+            </table>
+         </div>
+         <button class="wideButton" style="background-color:#F8F8F8" type="button" onClick="dlgHide('dlgChannels')">Close
+         </button>
+      </div>
    </div>
 
    <!-- about dialog -->

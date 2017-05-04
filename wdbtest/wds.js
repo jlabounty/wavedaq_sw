@@ -66,7 +66,7 @@ function init() {
       cell = row.insertCell(-1);
       cell.className = "channelsTd";
       var sel = document.createElement('select');
-      sel.id = "gain"+r;
+      sel.id = "selGain"+r;
       sel.name = "gain";
       sel.setAttribute("onchange", "setParam(this,"+r+")");
       var gains = ["0.5", "1", "2.5", "5", "10", "25", "50", "100"];
@@ -84,7 +84,7 @@ function init() {
       var cb = document.createElement('input');
       cb.type = "checkbox";
       cb.name = "pzc";
-      cb.id = "pzc"+r;
+      cb.id = "cbPzc"+r;
       cb.checked = false;
       cb.setAttribute("onclick", "setParam(this,"+r+")");
       cell.appendChild(cb);
@@ -100,12 +100,6 @@ function init() {
       cell.appendChild(inp);
       cell.appendChild(document.createTextNode(" mV"));
    }
-
-   // hide channels panel
-   var channels = document.getElementById("channels");
-   channels.t = 0;
-   channels.slider = 0;
-   channels.visible = false;
 
    resize();
 
@@ -187,24 +181,28 @@ function loadScalers() {
       return;
    }
 
-   // send AJAX request
-   var req = new XMLHttpRequest();
-   req.onreadystatechange = function () {
-      if (req.readyState == 4 && req.status == 200) {
-         OSC.wdb[OSC.curBoard].scaler = JSON.parse(req.responseText).scaler;
-         OSC.redraw();
-      } else if (req.readyState == 4 && req.status == 0) {
+   if (OSC.disp.scaler) {
+      // send AJAX request
+      var req = new XMLHttpRequest();
+      req.onreadystatechange = function () {
+         if (req.readyState == 4 && req.status == 200) {
+            OSC.wdb[OSC.curBoard].scaler = JSON.parse(req.responseText).scaler;
+            OSC.redraw();
+         } else if (req.readyState == 4 && req.status == 0) {
+            connectionBroken();
+         }
+      };
+      
+      req.open("GET", "scalers?b=" + OSC.curBoard + "&r=" + Math.random(), true); // avoid cached results
+      
+      try {
+         req.send();
+         OSC.timer.loadScalers = window.setTimeout(loadScalers, 1000);
+      } catch (e) {
          connectionBroken();
       }
-   };
-
-   req.open("GET", "scalers?b=" + OSC.curBoard + "&r=" + Math.random(), true); // avoid cached results
-
-   try {
-      req.send();
+   } else {
       OSC.timer.loadScalers = window.setTimeout(loadScalers, 1000);
-   } catch (e) {
-      connectionBroken();
    }
 }
 
@@ -237,6 +235,14 @@ function populateControls(init)
       document.getElementById("rbTriggerModeAuto").checked = true;
    }
    
+   if (OSC.wdb[0].triggerExternalOr) {
+      document.getElementById("rbTriggerSourceInt").checked = false;
+      document.getElementById("rbTriggerSourceExt").checked = true;
+   } else {
+      document.getElementById("rbTriggerSourceInt").checked = true;
+      document.getElementById("rbTriggerSourceExt").checked = false;
+   }
+   
    if (OSC.wdb[0].triggerFallingEdge) {
       document.getElementById("trgEdgeUp").style.display = "none";
       document.getElementById("trgEdgeDown").style.display = "inline";
@@ -245,15 +251,19 @@ function populateControls(init)
       document.getElementById("trgEdgeDown").style.display = "none";
    }
 
-   document.getElementById("pzc").checked = OSC.wdb[0].fePZC[0];
-   document.getElementById("gain").value = OSC.wdb[0].feGain[0];
+   document.getElementById("cbPzc").checked = OSC.wdb[0].fePZC[0];
+   document.getElementById("selGain").value = OSC.wdb[0].feGain[0];
+   //for (var i=0 ; i< 16 ; i++) {
+   //   document.getElementById("selGain"+i).value = OSC.wdb[0].feGain[i];
+   //   document.getElementById("cbPzc"+i).checked = OSC.wdb[0].fePZC[i];
+   //}
    
    document.getElementById("inputReadoutSrcDRS").checked = (OSC.wdb[0].readoutSrcSel == 1);
    document.getElementById("inputReadoutSrcADC").checked = (OSC.wdb[0].readoutSrcSel == 2);
    
    document.getElementById("timingCalibSignalEnable").checked = OSC.wdb[0].timingCalibSignalEnable;
 
-   document.getElementById("rangeSelect").value = 0; // ##
+   document.getElementById("selRange").value = 0; // ##
 
    document.getElementById("feMux").checked = (OSC.wdb[0].feMux[0] == 3);
    document.getElementById("calibBufferEnable").checked = OSC.wdb[0].calibBufferEnable;
@@ -362,12 +372,12 @@ function setParam(e, channel) {
 
    if (e.name == "gain" && channel == undefined) {
       for (var i=0 ; i<16 ; i++)
-         document.getElementById("gain"+i).value = e.value;
+         document.getElementById("selGain"+i).value = e.value;
    }
 
    if (e.name == "pzc" && channel == undefined) {
       for (var i=0 ; i<16 ; i++)
-         document.getElementById("pzc"+i).checked = e.checked;
+         document.getElementById("cbPzc"+i).checked = e.checked;
    }
 
    if (e.name == "clock_source" && e.checked == true) {
@@ -741,7 +751,6 @@ function resize()
 {
    var ctls = document.getElementById("controls");
    var config = document.getElementById("config");
-   var channels = document.getElementById("channels");
 
    if (ctls.hidden == true) {
       // hide panels
@@ -759,33 +768,20 @@ function resize()
          config.style.display = "none";
       config.style.opacity = 1;
 
-      if (channels.slider > 0)
-         channels.style.display = "block";
-      else
-         channels.style.display = "none";
-      channels.style.opacity = 1;
-
       OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth -
          config.offsetWidth * config.slider -
-         channels.offsetWidth * channels.slider,
          document.documentElement.clientHeight);
 
       // config full visible (configSlider = 1), hidden (configSlider = 0)
       ctls.style.left = (document.documentElement.clientWidth - ctls.offsetWidth -
-         config.offsetWidth * config.slider -
-         channels.offsetWidth * channels.slider) + "px";
-
-      channels.style.left = (document.documentElement.clientWidth -
-         config.offsetWidth * config.slider - channels.offsetWidth * channels.slider) + "px";
-      channels.style.height = document.documentElement.clientHeight + "px";
+         config.offsetWidth * config.slider + "px");
 
       config.style.left = (document.documentElement.clientWidth -
          config.offsetWidth * config.slider) + "px";
       config.style.height = document.documentElement.clientHeight + "px";
 
       OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth -
-         config.offsetWidth * config.slider -
-         channels.offsetWidth * channels.slider,
+         config.offsetWidth * config.slider,
          document.documentElement.clientHeight);
    }
 }
@@ -1128,13 +1124,6 @@ function btnConfig() {
    window.setTimeout(configSlide, 20);
 }
 
-function btnChannels() {
-   var channels = document.getElementById("channels");
-   channels.visible = !channels.visible;
-   channels.t = 0;
-   window.setTimeout(channelsSlide, 20);
-}
-
 function btnSave() {
    var e = document.getElementById('btnSave');
    if (e.innerHTML == "Stop") {
@@ -1232,23 +1221,6 @@ function configSlide() {
 
    if (config.t < 10)
       window.setTimeout(configSlide, 20);
-}
-
-function channelsSlide() {
-   var channels = document.getElementById("channels");
-
-   channels.t++;
-
-   if (channels.visible) {
-      channels.slider = 1 - (1 - channels.t / 10) * (1 - channels.t / 10);
-   } else {
-      channels.slider = (1 - channels.t / 10) * (1 - channels.t / 10);
-   }
-
-   resize();
-
-   if (channels.t < 10)
-      window.setTimeout(channelsSlide, 20);
 }
 
 function measRem() {

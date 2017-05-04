@@ -481,11 +481,11 @@ function dlgShow(dlg, modal) {
    d.modal = (modal != undefined);
 
    d.style.display = "block";
-   d.style.left = document.documentElement.clientWidth / 2 - d.offsetWidth / 2 + "px";
+   d.style.left = Math.round(document.documentElement.clientWidth / 2 - d.offsetWidth / 2) + "px";
    if (document.documentElement.clientHeight / 2 - d.offsetHeight / 2 < 0)
       d.style.top = "0px";
    else
-      d.style.top = document.documentElement.clientHeight / 2 - d.offsetHeight / 2 + "px";
+      d.style.top = Math.round(document.documentElement.clientHeight / 2 - d.offsetHeight / 2) + "px";
 
    if (d.modal) {
       var b = document.getElementById("dlgBlackout");
