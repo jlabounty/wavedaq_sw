@@ -694,7 +694,7 @@ int main(int argc, const char * argv[])
 
    // tell waveform processor which WDB are active
    for (auto &b: gl.wdb)
-      gl.wp->AddEventRequest(b->GetSerialNumber(), 0x1FFFF);
+      gl.wp->AddEventRequest(b->GetSerialNumber(), 0x3FFFF);
 
    // initialize web server
    struct mg_mgr mgr;
