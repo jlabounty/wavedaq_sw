@@ -1024,12 +1024,12 @@ void WDB::SetDrs1TimingRefSel(unsigned int value)
 bool WDB::IsCalibBufferEnable()
 // enable (power) buffers driving the timing calibration signal to the frontend MUX
 {
-   return bitExtract(creg, WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_TIMING_CALIB_BUFFER_EN_MASK, WD2_BIT_TIMING_CALIB_BUFFER_EN_OFS) == 1;
+   return bitExtract(creg, WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_CALIB_BUFFER_EN_MASK, WD2_BIT_CALIB_BUFFER_EN_OFS) == 1;
 }
 
 void WDB::SetCalibBufferEnable(bool value)
 {
-   SetRegMask(WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_TIMING_CALIB_BUFFER_EN_MASK, WD2_BIT_TIMING_CALIB_BUFFER_EN_OFS, value ? 1 : 0);
+   SetRegMask(WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_CALIB_BUFFER_EN_MASK, WD2_BIT_CALIB_BUFFER_EN_OFS, value ? 1 : 0);
 }
 
 bool WDB::IsTimingCalibSignalEnable()
