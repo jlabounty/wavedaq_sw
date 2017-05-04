@@ -413,7 +413,7 @@ Oscilloscope.prototype.printStatus = function (ctx) {
 };
 
 Oscilloscope.prototype.printScalers = function (ctx) {
-   if (OSC.wdb != undefined && OSC.disp.scaler) {
+   if (OSC.wdb != undefined && OSC.disp.scaler && OSC.wdb[OSC.curBoard].scaler) {
       var scaler = OSC.wdb[OSC.curBoard].scaler;
 
       for (var c = 0; c < 18; c++) {

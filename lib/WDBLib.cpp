@@ -1983,12 +1983,21 @@ WP::WP(bool verbose, bool demo)
 
 //--------------------------------------------------------------------
 
-void WP::AddEventRequest(int boardID)
+void WP::AddEventRequest(int boardID, unsigned int channelMask)
 {
-   WDEventRequest *r = new WDEventRequest(boardID);
+   WDEventRequest *r = new WDEventRequest(boardID, channelMask);
    mEventRequest.push_back(r);
    WDEvent *e = new WDEvent(boardID);
    mEvent.push_back(e);
+}
+
+void WP::SetEventRequestMask(int boardID, unsigned int channelMask)
+{
+   for (auto r = mEventRequest.begin() ; r != mEventRequest.end() ; r++) {
+      if ((*r)->GetBoardId() == boardID) {
+         (*r)->SetMask(channelMask);
+      }
+   }
 }
 
 void WP::RemoveEventRequest(int boardID)

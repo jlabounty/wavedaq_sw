@@ -671,6 +671,10 @@ int main(int argc, const char * argv[])
             b->SetDRSWaveContinous(true);
             b->SetDRSReadoutMode(true);
             b->SetCompPowerEnable(true);
+            
+            b->SetDrs0ChnTxEnable(0x1FF);
+            b->SetDrs1ChnTxEnable(0x1FF);
+            
             //b->SetDacTriggerLevelV(-1, 0);
             //b->SetDacCalDcV(0);
             
@@ -690,7 +694,7 @@ int main(int argc, const char * argv[])
 
    // tell waveform processor which WDB are active
    for (auto &b: gl.wdb)
-      gl.wp->AddEventRequest(b->GetSerialNumber());
+      gl.wp->AddEventRequest(b->GetSerialNumber(), 0x1FFFF);
 
    // initialize web server
    struct mg_mgr mgr;

@@ -175,17 +175,18 @@ class WDEventRequest {
    unsigned int     mChannelMask;
  
 public:
-   WDEventRequest(int boardId) {
+   WDEventRequest(int boardId, unsigned int mask = 0xFFFF) {
       mBoardId = boardId;
       for (int i=0 ; i<WD_N_CHANNELS ; i++) {
          mWfValid[i][0] = false;
          mWfValid[i][1] = false;
       }
-      mChannelMask = 0xFFFF;
+      mChannelMask = mask;
    } ;
    
    int              GetBoardId() { return mBoardId; }
    void             SetWfValid(int channel, int segment, bool v) { mWfValid[channel][segment] = v; }
+   void             SetMask(unsigned int mask) { mChannelMask = mask; }
    bool             IsWfValid();
 };
 
@@ -261,7 +262,8 @@ public:
    void SetTimeCalib3(bool f) { mTimeCalib3 = f; }
    void SetRemoveSpikes(bool f) { mRemoveSpikes = f; }
    
-   void AddEventRequest(int boardID);
+   void AddEventRequest(int boardID, unsigned int channelMask = 0xFFFF);
+   void SetEventRequestMask(int boardID, unsigned int channelMask);
    void RemoveEventRequest(int boardID);
    
 };
