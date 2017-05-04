@@ -668,20 +668,9 @@ int main(int argc, const char * argv[])
                b->PrintVersion();
 
             // fix wrong default registers
-            b->SetDRSWaveContinous(true);
-            b->SetDRSReadoutMode(true);
             b->SetCompPowerEnable(true);
-            
             b->SetDrs0ChnTxEnable(0x1FF);
             b->SetDrs1ChnTxEnable(0x1FF);
-            
-            //b->SetDacTriggerLevelV(-1, 0);
-            //b->SetDacCalDcV(0);
-            
-            //b->SetTriggerEnable(true);
-            //b->SetTriggerCfgOr(0xFFFF);
-            //b->SetTriggerExternalOr(false);
-            //b->SetTriggerExternalAnd(false);
          }
       } catch (std::runtime_error &e) {
          std::cout << std::endl;

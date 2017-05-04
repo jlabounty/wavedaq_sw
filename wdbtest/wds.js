@@ -406,7 +406,7 @@ function setParam(e, channel) {
 
    if (e.name == "dacTriggerLevel" && channel == undefined) {
       for (var i=0 ; i<16 ; i++)
-         document.getElementById("dacTriggerLevel"+i).value = e.value;
+         document.getElementById("inpDacTriggerLevel"+i).value = e.value;
    }
 
    if (e.name == "gain" && channel == undefined) {
