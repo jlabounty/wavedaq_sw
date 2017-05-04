@@ -2148,25 +2148,6 @@ void WP::CalibrateWaveforms()
 
       } else {  //---------- calibrate DRS data ----------
 
-         float wf[WD_N_CHANNELS][1024];
-         
-         for (int i=0 ; i<WD_N_CHANNELS ; i++)
-            for (int j=0 ; j<1024 ; j++)
-               wf[i][j] = ev->mWfU[i][j];
-         
-         // un-rotate waveforms
-         if (mRotateWaveform) {
-            for (int i=0 ; i<WD_N_CHANNELS ; i++)
-               for (int j=0 ; j<1024 ; j++)
-                  ev->mWfU[i][j] = ev->mWfU[i][j];
-         } else {
-            for (int i=0 ; i<WD_N_CHANNELS ; i++) {
-               int tc = i < 8 || i == 16 ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
-               for (int j=0 ; j<1024 ; j++)
-                  ev->mWfU[i][(j+tc) % 1024] = wf[i][j];
-            }
-         }
-         
          // cell-by-cell offset calibration
          if (mOfsCalib1) {
             // TBD
