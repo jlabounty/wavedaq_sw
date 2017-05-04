@@ -84,7 +84,6 @@ a:focus { color:#0000FF; text-decoration:underline }
 }
 
 #channels {
-   width: 300px;
    background-color: white;
    text-align: left;
 }
@@ -94,7 +93,7 @@ a:focus { color:#0000FF; text-decoration:underline }
    text-align: center;
    border-collapse: collapse;
    border: none;
-   padding: 10px;
+   padding: 0px;
 }
 
 .channelsTitle {
@@ -103,7 +102,7 @@ a:focus { color:#0000FF; text-decoration:underline }
 }
 
 .channelsRow:nth-child(even) {
-   background-color: #F0F0F0;
+   background-color: #E0E0E0;
 }
 
 .channelsRow:nth-child(odd) {

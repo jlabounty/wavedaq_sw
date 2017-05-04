@@ -162,7 +162,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
       else if (item == "range") {
          assert(iBoard != -1);
-         std::cout << value << std::endl;
+         gl->wdb[iBoard]->SetRange(std::stof(value));
       }
 
       else if (item == "readoutSrc") {
@@ -239,7 +239,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             b1 = 0;
             b2 = gl->wdb.size();
          } else {
-            b1 = b2 = b;
+            b1 = b;
+            b2 = b + 1;
          }
       } else {
          b1 = 0;
@@ -284,14 +285,14 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"drs0ChnTxEnable\": %d,\n",            w->GetDrs0ChnTxEnable());
          mg_printf_http_chunk(nc, "      \"drs1ChnTxEnable\": %d,\n",            w->GetDrs1ChnTxEnable());
          
-         mg_printf_http_chunk(nc, "      \"dacOfs\": %f,\n",                     w->GetDacOfsV());
-         mg_printf_http_chunk(nc, "      \"dacCalDc\": %f,\n",                   w->GetDacCalDcV());
-         mg_printf_http_chunk(nc, "      \"dacPZCLevel\": %f,\n",                w->GetDacPZCLevelV());
+         mg_printf_http_chunk(nc, "      \"dacOfs\": %1.3f,\n",                     w->GetDacOfsV());
+         mg_printf_http_chunk(nc, "      \"dacCalDc\": %1.3f,\n",                   w->GetDacCalDcV());
+         mg_printf_http_chunk(nc, "      \"dacPZCLevel\": %1.3f,\n",                w->GetDacPZCLevelV());
 
          mg_printf_http_chunk(nc, "      \"dacTriggerLevel\": [\n");
          for (int i=0 ; i<15 ; i++)
-            mg_printf_http_chunk(nc, "        %f,\n",                            w->GetDacTriggerLevelV(i));
-         mg_printf_http_chunk(nc, "        %f ],\n",                             w->GetDacTriggerLevelV(15));
+            mg_printf_http_chunk(nc, "        %1.3f,\n",                            w->GetDacTriggerLevelV(i));
+         mg_printf_http_chunk(nc, "        %1.3f ],\n",                             w->GetDacTriggerLevelV(15));
 
          mg_printf_http_chunk(nc, "      \"fePZC\": [\n");
          for (int i=0 ; i<15 ; i++)

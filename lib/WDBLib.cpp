@@ -1306,15 +1306,13 @@ void WDB::SetDacOfsV(float v)
 float WDB::GetDacCalDcV()
 {
    auto v = GetDacOfsV();
-   // shift by 1.18 V
-   v = v - 1.18;
+   v = v - 0.68;
    return v;
 }
 
 void WDB::SetDacCalDcV(float v)
 {
-   // shift by 1.18 V
-   v = v + 1.18;
+   v = v + 0.68;
    if (v < 0)
       v = 0;
    if (v > 2.5)
@@ -1322,6 +1320,18 @@ void WDB::SetDacCalDcV(float v)
 
    // shift OFS voltage since CAL_DC is AC coupled
    SetDacOfsV(v);
+}
+
+float WDB::GetRange()
+{
+   float r = -GetDacCalDcV();
+   r = (int)(r * 100) / 100.0;
+   return r;
+}
+
+void WDB::SetRange(float r)
+{
+   SetDacCalDcV(-r);
 }
 
 float WDB::GetDacPulseAmpV()
@@ -1381,16 +1391,17 @@ void WDB::SetDacBiasV(float v)
 
 float WDB::GetDacTriggerLevelV(int chn)
 {
-   unsigned int v;
+   unsigned int d;
    
    assert(chn < 16);
    if (chn % 2 == 0)
-      v = bitExtract(creg, WD2_REG_DAC1_A_B_OFS+(chn/2), WD2_BIT_DAC1_CH_A_MASK, WD2_BIT_DAC1_CH_A_OFS);
+      d = bitExtract(creg, WD2_REG_DAC1_A_B_OFS+(chn/2)*4, WD2_BIT_DAC1_CH_A_MASK, WD2_BIT_DAC1_CH_A_OFS);
    else
-      v = bitExtract(creg, WD2_REG_DAC1_A_B_OFS+(chn/2), WD2_BIT_DAC1_CH_B_MASK, WD2_BIT_DAC1_CH_B_OFS);
+      d = bitExtract(creg, WD2_REG_DAC1_A_B_OFS+(chn/2)*4, WD2_BIT_DAC1_CH_B_MASK, WD2_BIT_DAC1_CH_B_OFS);
    
    // convert to Volts taking WDB comparator offset into account
-   return ((v / 65535.0 * 2500) - 900) / 500.0;
+   float v = ((d / 65535.0 * 2500) - 900) / 500.0;
+   return (int)(v * 1000 + 0.5) / 1000.0;
 }
 
 void WDB::SetDacTriggerLevelV(int chn, float v)

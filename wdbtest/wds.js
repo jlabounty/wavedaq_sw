@@ -95,10 +95,38 @@ function init() {
       inp.type = "text";
       inp.value = "0";
       inp.name = "dacTriggerLevel";
-      inp.id = "dacTriggerLevel"+r;
+      inp.id = "inpDacTriggerLevel"+r;
+      inp.style.width = "60px";
       inp.setAttribute("onkeypress", "keyParam(event, this,"+r+")");
+      inp.setAttribute("onblur", "validateParam(this,"+r+")");
+      inp.setAttribute("tabindex", 100+r);
       cell.appendChild(inp);
       cell.appendChild(document.createTextNode(" mV"));
+      
+      cell = row.insertCell(-1);
+      cell.className = "channelsTd";
+      var inp = document.createElement('input');
+      inp.type = "text";
+      inp.value = "N/A";
+      inp.name = "hvDemand";
+      inp.id = "inpHvDemand"+r;
+      inp.style.width = "60px";
+      inp.setAttribute("onkeypress", "keyParam(event, this,"+r+")");
+      inp.setAttribute("onblur", "validateParam(this,"+r+")");
+      inp.setAttribute("tabindex", 116+r);
+      cell.appendChild(inp);
+      cell.appendChild(document.createTextNode(" V"));
+
+      cell = row.insertCell(-1);
+      cell.className = "channelsTd";
+      var inp = document.createElement('input');
+      inp.type = "text";
+      inp.value = "N/A";
+      inp.name = "hvCurrent";
+      inp.id = "inpHvCurrent"+r;
+      inp.disabled = true;
+      cell.appendChild(inp);
+      cell.appendChild(document.createTextNode(" uA"));
    }
 
    resize();
@@ -253,17 +281,22 @@ function populateControls(init)
 
    document.getElementById("cbPzc").checked = OSC.wdb[0].fePZC[0];
    document.getElementById("selGain").value = OSC.wdb[0].feGain[0];
-   //for (var i=0 ; i< 16 ; i++) {
-   //   document.getElementById("selGain"+i).value = OSC.wdb[0].feGain[i];
-   //   document.getElementById("cbPzc"+i).checked = OSC.wdb[0].fePZC[i];
-   //}
+   for (var i=0 ; i< 16 ; i++) {
+      document.getElementById("selGain"+i).value = OSC.wdb[0].feGain[i];
+      document.getElementById("cbPzc"+i).checked = OSC.wdb[0].fePZC[i];
+   }
    
    document.getElementById("inputReadoutSrcDRS").checked = (OSC.wdb[0].readoutSrcSel == 1);
    document.getElementById("inputReadoutSrcADC").checked = (OSC.wdb[0].readoutSrcSel == 2);
    
    document.getElementById("timingCalibSignalEnable").checked = OSC.wdb[0].timingCalibSignalEnable;
 
-   document.getElementById("selRange").value = 0; // ##
+   if (OSC.wdb[0].dacCalDc > 0.4)
+      document.getElementById("selRange").value = -0.45;
+   else if (OSC.wdb[0].dacCalDc < -0.4)
+      document.getElementById("selRange").value = 0.45;
+   else
+      document.getElementById("selRange").value = 0;
 
    document.getElementById("feMux").checked = (OSC.wdb[0].feMux[0] == 3);
    document.getElementById("calibBufferEnable").checked = OSC.wdb[0].calibBufferEnable;
@@ -287,6 +320,12 @@ function populateControls(init)
 
    document.getElementById("clksource").checked = (OSC.wdb[0].daqClkSrcSel == 1);
 
+   // channels dialog box
+   for (var i=0 ; i<16 ; i++) {
+      document.getElementById("inpDacTriggerLevel"+i).value = Math.round(OSC.wdb[0].dacTriggerLevel[i] * 1000);
+      document.getElementById("cbPzc"+i).checked = OSC.wdb[0].fePZC;
+   }
+   
    if (init) {
       // set scale according to sampling frequency
       if (OSC.wdb[0].drsSampleFreq < 2000)
@@ -431,40 +470,47 @@ function setPers(s) {
 
 function keyParam(event, input, channel) {
    var charCode = (typeof event.which == "number") ? event.which : event.keyCode;
-
+   
    if (charCode == 13) {
-      if (input.id == "inpDacTriggerLevel") {
-         if (input.value < -500)
-            input.value = -500;
-         if (input.value > 500)
-            input.value = 500;
-         document.getElementById("sldDacTriggerLevel").set(input.value/1000 + 0.5);
-      }
-      
-      if (input.id == "inpTriggerDelay") {
-         if (input.value < 0)
-            input.value = 0;
-         if (input.value > 450)
-            input.value = 450;
-         document.getElementById("sldTriggerDelay").set(1 - input.value/450);
-      }
-      
-      if (input.id == "drsSampleFreq") {
-         var divider = Math.round(200.0 / input.value * 2.048);
-         OSC.wdb[0].drsSampleFreq = Math.round(200 / divider * 2048);
-         document.getElementById("drsActualSampleFreq").innerHTML = OSC.wdb[0].drsSampleFreq/1000 + " GSPS";
-      }
-
-      if (input.id == "inpDacCalDc") {
-         if (input.value < -1000)
-            input.value = -1000;
-         if (input.value > 1000)
-            input.value = 1000;
-         document.getElementById("sldDacCalDc").set(input.value/2000 + 0.5);
-      }
-
-      setParam(input, channel);
+      validateParam(input, channel);
+      input.focus();
+      input.setSelectionRange(0, input.value.length);
    }
+}
+
+function validateParam(input, channel) {
+   if (input.id.substring(0, 18) == "inpDacTriggerLevel") {
+      if (input.value < -500)
+         input.value = -500;
+      if (input.value > 500)
+         input.value = 500;
+      if (input.id == "inpDacTriggerLevel")
+         document.getElementById("sldDacTriggerLevel").set(input.value/1000 + 0.5);
+   }
+   
+   if (input.id == "inpTriggerDelay") {
+      if (input.value < 0)
+         input.value = 0;
+      if (input.value > 450)
+         input.value = 450;
+      document.getElementById("sldTriggerDelay").set(1 - input.value/450);
+   }
+   
+   if (input.id == "drsSampleFreq") {
+      var divider = Math.round(200.0 / input.value * 2.048);
+      OSC.wdb[0].drsSampleFreq = Math.round(200 / divider * 2048);
+      document.getElementById("drsActualSampleFreq").innerHTML = OSC.wdb[0].drsSampleFreq/1000 + " GSPS";
+   }
+
+   if (input.id == "inpDacCalDc") {
+      if (input.value < -1000)
+         input.value = -1000;
+      if (input.value > 1000)
+         input.value = 1000;
+      document.getElementById("sldDacCalDc").set(input.value/2000 + 0.5);
+   }
+
+   setParam(input, channel);
 }
 
 function doVCalib() {
@@ -1007,7 +1053,7 @@ function sldDacTriggerLevel(value) {
    document.getElementById("inpDacTriggerLevel").value = value * 1000;
    for (var i=0 ; i<16 ; i++) {
       OSC.wdb[OSC.curBoard].dacTriggerLevel[i] = value;
-      document.getElementById("dacTriggerLevel"+i).value = value * 1000;
+      document.getElementById("inpDacTriggerLevel"+i).value = value * 1000;
    }
    
    var d = new Date();
@@ -1061,6 +1107,15 @@ function setRange(s) {
    if (OSC.demoMode)
       return;
    var req = new XMLHttpRequest();
+   req.onreadystatechange = function () {
+      if (req.readyState == 4 && req.status == 204) {
+         // read back DC offset which gets shifted by range change
+         loadWdb(OSC.curBoard);
+      } else if (req.readyState == 4 && req.status == 0) {
+         connectionBroken();
+      }
+   };
+
    req.open("PUT", "gl/"+OSC.curBoard+"/range", true);
    req.send(parseFloat(s.value));
 }
