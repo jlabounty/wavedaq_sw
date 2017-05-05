@@ -168,6 +168,12 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       else if (item == "readoutSrc") {
          assert(iBoard != -1);
          gl->wdb[iBoard]->SetReadoutSrcSel(std::stoi(value));
+         
+         if (std::stoi(value) == 1) {
+            gl->wp->SetEventRequestMask(gl->wdb[iBoard]->GetSerialNumber(), 0x3FFFF);
+         } else {
+            gl->wp->SetEventRequestMask(gl->wdb[iBoard]->GetSerialNumber(), 0xFFFF);
+         }
       }
 
       else if (item == "calibBufferEnable") {
@@ -682,8 +688,12 @@ int main(int argc, const char * argv[])
    }
 
    // tell waveform processor which WDB are active
-   for (auto &b: gl.wdb)
-      gl.wp->AddEventRequest(b->GetSerialNumber(), 0x3FFFF);
+   for (auto &b: gl.wdb) {
+      if (b->GetReadoutSrcSel() == 1)
+         gl.wp->AddEventRequest(b->GetSerialNumber(), 0x3FFFF); // 18 DRS channels
+      else
+         gl.wp->AddEventRequest(b->GetSerialNumber(),  0xFFFF); // 16 ADC channels
+   }
 
    // initialize web server
    struct mg_mgr mgr;

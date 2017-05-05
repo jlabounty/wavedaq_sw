@@ -2265,7 +2265,12 @@ void WP::CalibrateWaveforms()
          // just set nominal time bins from ADC sampling rate
          for (int i=0 ; i<WD_N_CHANNELS ; i++)
             for (int j=0 ; j<1024 ; j++)
-               ev->mWfU[i][j] = (float)(j * 1E-6/ev->mSamplingFrequency);
+               ev->mWfT[i][j] = (float)(j * 1E-6/ev->mSamplingFrequency);
+
+         // shift ADC values
+         for (int i=0 ; i<WD_N_CHANNELS ; i++)
+            for (int j=0 ; j<1024 ; j++)
+               ev->mWfU[i][j] += 0.35;
 
       } else {  //---------- calibrate DRS data ----------
 
