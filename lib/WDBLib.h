@@ -566,6 +566,8 @@ public:
    unsigned int GetTriggerPattern(int chn);
    void SetTriggerPattern(int chn, unsigned int v);
    unsigned int GetCrc32RegBank();
+   void SetAdvTrgCfg(int i, unsigned int v);
+   unsigned int GetAdvTrgCfg(int i);
    
    // hihg level methods ----------
    unsigned int GetTriggerDelayNs();

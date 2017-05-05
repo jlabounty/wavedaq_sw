@@ -1876,6 +1876,19 @@ void WDB::SetTriggerPattern(int i, unsigned int v)
    SetRegMask(WD2_REG_TRG_PTRN0_OFS+i*4, WD2_BIT_TRG_PTRN0_MASK, WD2_BIT_TRG_PTRN0_OFS, v);
 }
 
+unsigned int WDB::GetAdvTrgCfg(int i)
+{
+   assert(i < 30);
+   return bitExtract(creg, WD2_REG_ADV_TRG_CFG0_OFS+i*4, WD2_BIT_ADV_TRG_CFG_0_MASK, WD2_BIT_ADV_TRG_CFG_0_OFS);
+}
+
+void WDB::SetAdvTrgCfg(int i, unsigned int v)
+{
+   assert(i < 30);
+   SetRegMask(WD2_REG_ADV_TRG_CFG0_OFS+i*4, WD2_BIT_ADV_TRG_CFG_0_MASK, WD2_BIT_ADV_TRG_CFG_0_OFS, v);
+}
+
+
 unsigned int WDB::GetCrc32RegBank()
 {
    return bitExtract(creg, WD2_REG_CRC32_REG_BANK_OFS, WD2_BIT_CRC32_REG_BANK_MASK, WD2_BIT_CRC32_REG_BANK_OFS);
