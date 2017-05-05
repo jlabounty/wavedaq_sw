@@ -181,6 +181,9 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data, int timeout
    struct sockaddr_in client_addr;
    bool   bSuccess = false;
    
+   if (mDemoMode)
+      return;
+
    udpSequenceNumber++;
    std::memcpy(&client_addr, mEthAddrBin, sizeof(client_addr));
    
@@ -1305,6 +1308,9 @@ void WDB::SetDacOfsV(float v)
 
 float WDB::GetDacCalDcV()
 {
+   if (mDemoMode)
+      return 0;
+
    auto v = GetDacOfsV();
    v = v - 0.68;
    return v;
@@ -1392,6 +1398,9 @@ void WDB::SetDacBiasV(float v)
 float WDB::GetDacTriggerLevelV(int chn)
 {
    unsigned int d;
+   
+   if (mDemoMode)
+      return 0;
    
    assert(chn < 16);
    if (chn % 2 == 0)

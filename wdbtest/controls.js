@@ -56,12 +56,16 @@ document.write("<style>" +
    "   display: none; /* pre-hidden */" +
    "}" +
    ".dlgTitlebar {" +
+   "   user-select: none;" +
    "   text-align: center;" +
    "   background-color: #C0C0C0;" +
    "   border-top-left-radius: 6px;" +
    "   border-top-right-radius: 6px;" +
    "   font-size: 10pt;" +
    "   padding: 2px;" +
+   "}" +
+   ".dlgTitlebar:hover {" +
+   "   cursor: pointer;" +
    "}" +
    ".dlgPanel {" +
    "   background-color: #F0F0F0;" +
@@ -532,11 +536,20 @@ function dlgShow(dlg, modal) {
          e.preventDefault();
          var x = e.clientX;
          var y = e.clientY;
-         this.style.left = (this.Dx + (x - this.Ax)) + "px";
-         this.style.top = (this.Dy + (y - this.Ay)) + "px";
+         // stop dragging if leaving window
+         if (x < 0 || y < 0 ||
+             x > document.documentElement.clientWidth ||
+             y > document.documentElement.clientHeight ||
+             (this.Dy + (y - this.Ay)) < 0) {
+            this.Ax = 0;
+            this.Ay = 0;
+         } else {
+            this.style.left = (this.Dx + (x - this.Ax)) + "px";
+            this.style.top = (this.Dy + (y - this.Ay)) + "px";
+         }
       }
    };
-
+   
    d.dlgMouseUp = function () {
       this.Ax = 0;
       this.Ay = 0;
