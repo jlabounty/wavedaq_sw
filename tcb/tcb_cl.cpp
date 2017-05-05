@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
          printf(" opt = 2 : Get RRUN ... \n");
          printf(" FW compilation date: ");
 	 TCBBoard.GetCompilDate(&data);
-	 printf("%d/%d/20%d %d:%d:%d\n",(data&0xF8000000)>>27,(data&0x7800000)>>23,(data&0x7e0000)>>17,(data&0x1F000)>>12,(data&0xFC0)>>6,(data&0x3F));
+	 printf("%02d/%02d/20%02d %02d:%02d:%02d\n",(data&0xF8000000)>>27,(data&0x7800000)>>23,(data&0x7e0000)>>17,(data&0x1F000)>>12,(data&0xFC0)>>6,(data&0x3F));
          TCBBoard.GetRRUN(&data);
          printf(" RRUN reg content = %08x\n",data);
 	 if(((TCBBoard.fidcode&0xf000)>>12)==3) {
@@ -328,7 +328,7 @@ int main(int argc, char *argv[])
          u_int32_t rdatadown, rdataup;
          u_int32_t addrdown, addrup;
          u_int32_t dly[5];
-         printf("which channel? (16-19 for FC0-3)\n");
+         printf("which channel? (16-19 for FC0-3, 100 all)\n");
          scanf("%d",&icha);
          printf("which pattern (0 for default)?\n");
          scanf("%08X",&patterndown);
@@ -339,27 +339,71 @@ int main(int argc, char *argv[])
             printf("pattern up part?\n");
             scanf("%08X",&patternup);
          }
-         addrdown = MEMBASEADDR + 1024*2*(icha%16);
-         addrup = MEMBASEADDR + 1024*2*(icha%16)+1024;
-         printf("address:%08X\n", addrdown);
-         for(int iDly=0; iDly<32; iDly++){
-            dly[icha/4] = (iDly & 0x1F) << (icha%4)*8;
-            //for(int i=0; i<4; i++)printf("%08X ", dly[i]);
-            //printf("\n");
-            TCBBoard.SetSerdesDelay(dly);
-            TCBBoard.SerdesReset();
-            for(int iBit=0; iBit<8; iBit++){
-               TCBBoard.SerdesBitslip(icha);
-               // now read the word back to check the tx
-               TCBBoard.ReadReg(addrdown,&rdatadown);
-               TCBBoard.ReadReg(addrup,&rdataup);
-               if(rdataup==patternup && rdatadown==patterndown) printf("dly:%03X bit:%3d %08X%08X\n", iDly, iBit, rdataup, rdatadown);
-               //printf("dly:%03X bit:%3d %08X%08X\n", iDly, iBit, rdataup, rdatadown);
+         if(icha==100){   
+            float result[16][32][8];
+            addrdown = MEMBASEADDR;
+            addrup = MEMBASEADDR + 1024;
+            for(int iDly=0; iDly<32; iDly++){
+               for(int iWord=0; iWord<5; iWord++) dly[iWord] =0;
+               for(int iSerdes=0; iSerdes<18; iSerdes++) dly[iSerdes/4] |= (iDly & 0x1F) << (iSerdes%4)*8;
+               TCBBoard.SetSerdesDelay(dly);
+               TCBBoard.SerdesReset();
+               for(int iBit=0; iBit<8; iBit++){
+                  //Next Bitslip
+                  for(int iSerdes=0; iSerdes<18; iSerdes++) TCBBoard.SerdesBitslip(iSerdes);
+                  if(iBit <1 || iBit >5) {
+                     for(int iSerdes=0; iSerdes<16; iSerdes++) result[iSerdes][iDly][iBit] = -1;
+                     continue;
+                  }
+                  // now read the word back to check the tx
+                  int counters[16] ={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                  for (int iIter=0; iIter<250; iIter++){
+                     for(int iSerdes=0; iSerdes<16; iSerdes++){
+                        TCBBoard.ReadReg(addrdown+1024*2*(iSerdes%16),&rdatadown);
+                        TCBBoard.ReadReg(addrup+1024*2*(iSerdes%16),&rdataup);
+                        if(rdataup==patternup && rdatadown==patterndown) counters[iSerdes]++;
+                     }
+                  }
+                  //printf("%2x %2X ", iDly, iBit);
+                  //for(int iSerdes=0; iSerdes<16; iSerdes++) printf("%.5f ", counters[iSerdes]/10.);
+                  //printf("\n");
+                  printf("*");
+                  fflush(stdout);
+                  for(int iSerdes=0; iSerdes<16; iSerdes++) result[iSerdes][iDly][iBit] = counters[iSerdes]/250.;
+               }
+            }
+
+            printf("\nDl Bt    0       1       2       3       4       5       6       7       8       9      10       11      12      13      14      15\n");
+            printf("-------------------------------------------------------------------------------------------------------------------------------------\n");
+            for(int a=0; a<8; a++) for(int b=0; b<32; b++) {
+               printf("%2x %2X ", b, a);
+               for(int iSerdes=0; iSerdes<16; iSerdes++) printf("%.5f ", result[iSerdes][b][a]);
+               printf("\n");
+            }
+
+         } else {
+            addrdown = MEMBASEADDR + 1024*2*(icha%16);
+            addrup = MEMBASEADDR + 1024*2*(icha%16)+1024;
+            printf("address:%08X\n", addrdown);
+            for(int iDly=0; iDly<32; iDly++){
+               dly[icha/4] = (iDly & 0x1F) << (icha%4)*8;
+               //for(int i=0; i<4; i++)printf("%08X ", dly[i]);
+               //printf("\n");
+               TCBBoard.SetSerdesDelay(dly);
+               TCBBoard.SerdesReset();
+               for(int iBit=0; iBit<8; iBit++){
+                  TCBBoard.SerdesBitslip(icha);
+                  // now read the word back to check the tx
+                  TCBBoard.ReadReg(addrdown,&rdatadown);
+                  TCBBoard.ReadReg(addrup,&rdataup);
+                  if(rdataup==patternup && rdatadown==patterndown) printf("dly:%03X bit:%3d %08X%08X\n", iDly, iBit, rdataup, rdatadown);
+                  //printf("dly:%03X bit:%3d %08X%08X\n", iDly, iBit, rdataup, rdatadown);
+               }
             }
          }
       }
       if(option == 24) {
-         printf(" opt 24 = Write SERDES default value ... \n");
+         printf(" opt 24 = write serdes default value ... \n");
          if((TCBBoard.GetIDCode()>>12)==0x3){
             filsdly = fopen("serdesmasterdly.dat","read");
          } else {
