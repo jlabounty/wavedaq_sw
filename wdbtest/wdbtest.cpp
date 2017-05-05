@@ -16,6 +16,7 @@
 
 #include "WDBLib.h"
 #include "mongoose.h"
+#include "averager.h"
 
 /*-- Globals -------------------------------------------------------*/
 
@@ -201,6 +202,12 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          gl->wdb[iBoard]->SetDacCalDcV(std::stof(value));
       }
 
+      //---------- commands ----------
+      else if (item == "vcalib") {
+         if (!gl->demoMode)
+            gl->wp->StartCalibrationVoltage(false);
+      }
+      
       mg_printf(nc, "HTTP/1.1 204 No Content\r\n");
    }
    
@@ -406,30 +413,31 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_send_response_line(nc, 200, "Content-Type: application/octet-stream\r\nTransfer-Encoding: chunked\r\n");
       
       // return progress if in voltage calibration mode
-//      if (vcalib_prog.state) {
-//         int t = 10;    // array type
-//         mg_send_http_chunk(nc, (const char *)&t, 4);
-//         
-//         mg_send_http_chunk(nc, (const char *)&vcalib_prog.i_board, 4);
-//         
-//         float f = (float)vcalib_prog.progress;
-//         mg_send_http_chunk(nc, (const char *)&f, 4);
-//         
-//         mg_send_http_chunk(nc, "", 0);
-//         return;
-//      }
+      if (gl->wp->IsVcalibActive()) {
+         int t = 10;    // array type
+         mg_send_http_chunk(nc, (const char *)&t, 4);
+         
+         int b = gl->wp->GetVcalibBoard();
+         mg_send_http_chunk(nc, (const char *)&b, 4);
+         
+         float f = gl->wp->GetVcalibProgress();
+         mg_send_http_chunk(nc, (const char *)&f, 4);
+         
+         mg_send_http_chunk(nc, "", 0);
+         return;
+      }
       
       // return progress and period in time calibration mode
-//      if (tcalib_prog.state) {
-//         int t = 11;    // array type
-//         mg_send_http_chunk(nc, (const char *)&t, 4);
-//         
-//         float f = (float)tcalib_prog.i_board;
-//         mg_send_http_chunk(nc, (const char *)&f, 4);
-//         
-//         f = (float)tcalib_prog.progress;
-//         mg_send_http_chunk(nc, (const char *)&f, 4);
-//         
+      if (gl->wp->IsTcalibActive()) {
+         int t = 11;    // array type
+         mg_send_http_chunk(nc, (const char *)&t, 4);
+         
+         int b = gl->wp->GetTcalibBoard();
+         mg_send_http_chunk(nc, (const char *)&b, 4);
+         
+         float f = gl->wp->GetVcalibProgress();
+         mg_send_http_chunk(nc, (const char *)&f, 4);
+         
 //         for (int c=0 ; c<WD_N_CHANNELS ; c++)
 //            if (chn & (1 << c)) {
 //               int n = 1024;
@@ -438,10 +446,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 //               
 //               mg_send_http_chunk(nc, (const char *)gl->board[tcalib_prog.i_board].tcalib.period[c], sizeof(float)*n);
 //            }
-//         
-//         mg_send_http_chunk(nc, "", 0);
-//         return;
-//      }
+         
+         mg_send_http_chunk(nc, "", 0);
+         return;
+      }
       
       // avoid invalid board index
       if (b < 0 || b >= gl->wdb.size())
@@ -659,7 +667,7 @@ int main(int argc, const char * argv[])
    }
    
    // instantiate waveform processor
-   gl.wp = new WP(gl.verbose, gl.demoMode);
+   gl.wp = new WP(gl.wdb, gl.verbose, gl.demoMode);
    
    // connect to all WDB and retrieve registers
    for (auto &b: gl.wdb) {
@@ -719,25 +727,23 @@ int main(int argc, const char * argv[])
    
    try {
       while (true) {
-         /*
-          // do calibration if asked for
-          if (vcalib_prog.state != WD_CS_INACTIVE) {
-          wd_calibrate_voltage(&gl, &vcalib_prog);
-          
-          // Yield to server, no timeout
-          mg_mgr_poll(&mgr, 0);
-          } else if (tcalib_prog.state != WD_CS_INACTIVE) {
-          wd_calibrate_time(&gl, &tcalib_prog);
-          
-          // Yield to server, no timeout
-          mg_mgr_poll(&mgr, 0);
-          } else
-          // Yield to server, 10ms timeout
-          mg_mgr_poll(&mgr, 10);
-          */
          
-         // Yield to server, 10ms timeout
-         mg_mgr_poll(&mgr, 10);
+         // do calibration if asked for
+         if (gl.wp->IsVcalibActive()) {
+            gl.wp->DoCalibrationVoltageStep();
+            
+            // Yield to server, no timeout
+            mg_mgr_poll(&mgr, 0);
+         
+         } else if (gl.wp->IsTcalibActive()) {
+            gl.wp->DoCalibrationTimeStep();
+            
+            // Yield to server, no timeout
+            mg_mgr_poll(&mgr, 0);
+         
+         } else
+            // Yield to server, 10ms timeout
+            mg_mgr_poll(&mgr, 10);
          
          // read board temperatures periodically
          time(&now);

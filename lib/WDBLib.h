@@ -19,6 +19,7 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include "averager.h"
 
 #define WD_N_CHANNELS 18
 
@@ -68,12 +69,11 @@ typedef struct {
 } VCALIB_DATA;
 
 class vcalib {
-   VCALIB_DATA      fCalib;
-   
 public:
-   vcalib();
-   void save();
-   void load();
+   VCALIB_DATA      mCalib;
+   vcalib() {};
+   void save() {};
+   void load() {};
 };
 
 //--------------------------------------------------------------------
@@ -89,13 +89,49 @@ typedef struct {
 } TCALIB_DATA;
 
 class tcalib {
-   TCALIB_DATA      fCalib;
-   
 public:
-   tcalib();
-   void save();
-   void load();
+   TCALIB_DATA      fCalib;
+   tcalib() {};
+   void save() {};
+   void load() {};
 };
+
+//--------------------------------------------------------------------
+
+typedef struct {
+   int            state;
+   double         progress;
+   int            nBoard;
+   int            iBoard;
+   int            nIter1;
+   int            iIter1;
+   int            nIter2;
+   int            iIter2;
+   int            nIter3;
+   int            iIter3;
+   int            nIter4;
+   int            iIter4;
+   int            index;
+   Averager       *ave;
+   int            fh;
+} VCALIB_PROGRESS;
+
+typedef struct {
+   int            state;
+   double         progress;
+   int            nBoard;
+   int            iBoard;
+   int            nIter1;
+   int            iIter1;
+   int            nIter2;
+   int            iIter2;
+   int            nIter3;
+   int            iIter3;
+   int            phase;
+   int            index;
+   Averager       *ave;
+   int            fh;
+} TCALIB_PROGRESS;
 
 //--------------------------------------------------------------------
 
@@ -192,49 +228,65 @@ public:
 
 //--------------------------------------------------------------------
 
+class WDB;
+
 // waveform processor (waveform decoding, calibration, saving, ...
 class WP {
-   static int       gDataSocket;
-   static int       gServerPort;
+   // calibration states
+   static const int  cCsInactive    = 0;
+   static const int  cCsSingleBoard = 1;
+   static const int  cCsFirstBoard  = 2;
+   static const int  cCsFirstSample = 3;
+   static const int  cCsRunning     = 4;
+   
+   static int        gDataSocket;
+   static int        gServerPort;
 
-   bool             mVerbose;
-   bool             mDemoMode;
+   bool              mVerbose;
+   bool              mDemoMode;
   
-   bool             mRotateWaveform;
-   bool             mOfsCalib1;
-   bool             mOfsCalib2;
-   bool             mGainCalib;
-   bool             mRangeCalib;
-   bool             mTimeCalib1;
-   bool             mTimeCalib2;
-   bool             mTimeCalib3;
-   bool             mRemoveSpikes;
+   std::vector<WDB*> mWdb;
+
+   bool              mRotateWaveform;
+   bool              mOfsCalib1;
+   bool              mOfsCalib2;
+   bool              mGainCalib;
+   bool              mRangeCalib;
+   bool              mTimeCalib1;
+   bool              mTimeCalib2;
+   bool              mTimeCalib3;
+   bool              mRemoveSpikes;
    
-   int              mPacketsReceived;
-   int              mCurrentEvent;
+   int               mPacketsReceived;
+   int               mCurrentEvent;
    
-   std::thread      mThreadCollector;
+   std::thread       mThreadCollector;
    void Collector();
    std::thread SpawnCollectorThread() {
       return std::thread([=] { Collector(); });
    };
    
-   bool             mNewEvent;
+   bool              mNewEvent;
    std::vector<WDEventRequest *> mEventRequest;
    std::vector<WDEvent *> mEvent;
    
    tqueue<std::vector<WDEvent *> *> *mTqueue;
    
-   void             InvalidateAllWf();
-   void             ReceiveWfPacket();
-   bool             AllPacketsReceived();
-   void             RotateWaveforms();
-   void             CalibrateWaveforms();
+   void              InvalidateAllWf();
+   void              ReceiveWfPacket();
+   bool              AllPacketsReceived();
+   void              RotateWaveforms();
+   void              CalibrateWaveforms();
+   
+   vcalib            mVCalib;
+   tcalib            mTCalib;
+   VCALIB_PROGRESS   vCalibProg;
+   TCALIB_PROGRESS   tCalibProg;
    
 public:
    
    // constructor
-   WP(bool verbose = false, bool demo = false);
+   WP(std::vector<WDB*> w, bool verbose = false, bool demo = false);
    
    // setter & getter
    int GetDataSocket() { return gDataSocket; }
@@ -262,10 +314,25 @@ public:
    void SetTimeCalib3(bool f) { mTimeCalib3 = f; }
    void SetRemoveSpikes(bool f) { mRemoveSpikes = f; }
    
+   bool IsVcalibActive() { return vCalibProg.state != cCsInactive; }
+   bool IsTcalibActive() { return tCalibProg.state != cCsInactive; }
+   
+   int  GetVcalibBoard() { return vCalibProg.iBoard; }
+   float GetVcalibProgress() { return vCalibProg.progress; }
+
+   int  GetTcalibBoard() { return tCalibProg.iBoard; }
+   float GetTcalibProgress() { return tCalibProg.progress; }
+
+   // functions
    void AddEventRequest(int boardID, unsigned int channelMask = 0xFFFF);
    void SetEventRequestMask(int boardID, unsigned int channelMask);
    void RemoveEventRequest(int boardID);
+   WDEvent* ReadSingleEvent(WDB *b, int timeout);
    
+   void StartCalibrationVoltage(bool bAll) { vCalibProg.nBoard = bAll ? mWdb.size() : 1; vCalibProg.state = cCsFirstBoard; }
+   void StartCalibrationTime(bool bAll) { tCalibProg.nBoard = bAll ? mWdb.size() : 1; tCalibProg.state = cCsFirstBoard; };
+   void DoCalibrationVoltageStep();
+   void DoCalibrationTimeStep();
 };
 
 //--------------------------------------------------------------------
@@ -515,17 +582,18 @@ public:
 // linux and MAC specific things
 #if defined(__linux__) || defined(__APPLE__)
 #include <unistd.h>
-#define sleep(x) usleep(x*1000)
 #endif // __linux__ || __APLE__
 
 // Windows specific things
 #if defined(_WIN32)
 #include <windows.h>
-#define sleep(x) Sleep(x)
 #endif // _WIN32
 
 /* Byte and Word swapping big endian <-> little endian */
 #define SWAP_UINT16(x) (((x) >> 8) | ((x) << 8))
 #define SWAP_UINT32(x) (((x) >> 24) | (((x) & 0x00FF0000) >> 8) | (((x) & 0x0000FF00) << 8) | ((x) << 24))
+
+#define sleep_ms(x) std::this_thread::sleep_for(std::chrono::milliseconds(x))
+
 
 #endif /* defined(__wdblib_h__) */

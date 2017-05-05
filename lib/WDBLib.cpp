@@ -13,6 +13,7 @@
 #include <cmath>
 #include <thread>
 #include <cstring>
+#include <algorithm>
 
 #include <sys/socket.h>
 #include <sys/select.h>
@@ -1946,12 +1947,13 @@ bool WDEventRequest::IsWfValid()
 
 //--------------------------------------------------------------------
 
-WP::WP(bool verbose, bool demo)
+WP::WP(std::vector<WDB *> w, bool verbose, bool demo)
 {
    struct sockaddr_in server_addr;
 
    mVerbose = verbose;
    mDemoMode = demo;
+   mWdb = w;
    
    mRotateWaveform = true;
    mOfsCalib1 = false;
@@ -2023,6 +2025,23 @@ void WP::RemoveEventRequest(int boardID)
          delete *e;
       }
    }
+}
+
+//--------------------------------------------------------------------
+
+WDEvent* WP::ReadSingleEvent(WDB *b, int timeout)
+{
+   b->RequestEvent();
+   
+   WDEvent *event = nullptr;
+   auto eVector = GetEvent(timeout);
+   if (eVector) {
+      if (eVector->size() > 0)
+         event = (*eVector)[0];
+      delete eVector;
+   }
+   
+   return event; // ### must be deleted ???
 }
 
 //--------------------------------------------------------------------
@@ -2365,3 +2384,359 @@ void WP::Collector()
 }
 
 //--------------------------------------------------------------------
+
+void WP::DoCalibrationVoltageStep()
+{
+   if (vCalibProg.state == cCsFirstBoard) {
+      // save current board settings
+      // ## TBD
+      
+      memset(&vCalibProg, 0, sizeof(VCALIB_PROGRESS));
+      vCalibProg.state   = cCsFirstSample;
+      vCalibProg.nIter1 = 200;
+      vCalibProg.nIter2 = 200;
+      vCalibProg.nIter3 = 200;
+      vCalibProg.nIter4 = 200;
+      vCalibProg.iBoard = 0;
+   }
+   
+   if (vCalibProg.state == cCsFirstSample) {
+      vCalibProg.progress = 0;
+      vCalibProg.iIter1  = 0;
+      vCalibProg.iIter2  = 0;
+      vCalibProg.iIter3  = 0;
+      vCalibProg.iIter4  = 0;
+      vCalibProg.state    = cCsRunning;
+   }
+   
+   //---- Primary Calibration ----
+   
+   WDB *b = mWdb[vCalibProg.iBoard];
+   
+   if (vCalibProg.iIter1 < vCalibProg.nIter1) {
+      
+      // initialize data on first iteration
+      if (vCalibProg.iIter1 == 0) {
+         // turn off all calibration
+         mRotateWaveform      = false;
+         mOfsCalib1           = false;
+         mOfsCalib2           = false;
+         mGainCalib           = false;
+         mRangeCalib          = false;
+         mRemoveSpikes        = false;
+         
+         // turn off calibration clock
+         b->SetTimingCalibSignalEnable(false);
+         
+         // range -0.5 ... + 0.5V
+         b->SetRange(0);
+         
+         // set gain 1
+         b->SetFeGain(-1, 1);
+
+         int n = vCalibProg.nIter1;
+         n = std::max(n, vCalibProg.nIter2);
+         n = std::max(n, vCalibProg.nIter3);
+         n = std::max(n, vCalibProg.nIter4);
+         
+         vCalibProg.ave = new Averager(1, WD_N_CHANNELS, 1024, n);
+      }
+      
+      vCalibProg.iIter1++;
+      
+      // get one event from board
+      WDEvent *event = ReadSingleEvent(b, 1000);
+      if (!event)
+         return; // just skip this event
+      
+      for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
+         for (int bin=0 ; bin<1024 ; bin++)
+            vCalibProg.ave->Add(0, ch, bin, event->mWfU[ch][bin]);
+      delete event;
+      
+      vCalibProg.progress = (double)(vCalibProg.iIter1 + vCalibProg.iIter2 + vCalibProg.iIter3 + vCalibProg.iIter4) /
+      (vCalibProg.nIter1 + vCalibProg.nIter2 + vCalibProg.nIter3 + vCalibProg.nIter4);
+      
+      // calibration finished
+      if (vCalibProg.iIter1 == vCalibProg.nIter1) {
+         for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
+            for (int bin=0 ; bin<1024 ; bin++)
+               mVCalib.mCalib.wf_offset1[ch][bin] = (float)vCalibProg.ave->Median(0, ch, bin);
+         
+         // ave->SaveNormalizedDistribution("wf.csv", 0);
+         vCalibProg.ave->Reset();
+      }
+      
+      sleep_ms(10); // obtain 100 Hz rate
+      return;
+   }
+   
+   //---- Secondary Calibration
+   
+   if (vCalibProg.iIter2 < vCalibProg.nIter2) {
+      
+      // initialize data on first iteration
+      if (vCalibProg.iIter2 == 0) {
+         vCalibProg.ave->Reset();
+         mRotateWaveform      = true;  // rotate waveforms
+         mOfsCalib1           = true;  // do 1st calibration
+      }
+      
+      vCalibProg.iIter2++;
+      
+      // get one event from board
+      WDEvent *event = ReadSingleEvent(b, 1000);
+      if (!event)
+         return;
+      
+      for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
+         for (int bin=0 ; bin<1024 ; bin++)
+            vCalibProg.ave->Add(0, ch, bin, event->mWfU[ch][bin]);
+      delete event;
+      
+      vCalibProg.progress = (double)(vCalibProg.iIter1 + vCalibProg.iIter2 + vCalibProg.iIter3 + vCalibProg.iIter4) /
+      (vCalibProg.nIter1 + vCalibProg.nIter2 + vCalibProg.nIter3 + vCalibProg.nIter4);
+      
+      // calibration finished
+      if (vCalibProg.iIter2 == vCalibProg.nIter2) {
+         for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
+            for (int bin=0 ; bin<1024 ; bin++)
+               mVCalib.mCalib.wf_offset2[ch][bin] = (float)vCalibProg.ave->Median(0, ch, bin);
+         
+         vCalibProg.ave->Reset();
+      }
+      
+      sleep_ms(10); // obtain 100 Hz rate
+      return;
+   }
+   
+   //---- Positive Gain Calibration
+   
+   if (vCalibProg.iIter3 < vCalibProg.nIter3) {
+      
+      // initialize data on first iteration
+      if (vCalibProg.iIter3 == 0) {
+         vCalibProg.ave->Reset();
+         mRotateWaveform      = true;  // rotate waveforms
+         mOfsCalib1           = true;  // do 1st calibration
+         mOfsCalib2           = true;  // do 2nd calibration
+
+         b->SetRange(0.45);
+      }
+      
+      vCalibProg.iIter3++;
+      
+      // get one event from board
+      WDEvent *event = ReadSingleEvent(b, 1000);
+      if (!event)
+         return;
+      
+      for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
+         for (int bin=0 ; bin<1024 ; bin++)
+            vCalibProg.ave->Add(0, ch, bin, event->mWfU[ch][bin]);
+      delete event;
+      
+      
+      vCalibProg.progress = (double)(vCalibProg.iIter1 + vCalibProg.iIter2 + vCalibProg.iIter3 + vCalibProg.iIter4) /
+      (vCalibProg.nIter1 + vCalibProg.nIter2 + vCalibProg.nIter3 + vCalibProg.nIter4);
+      
+      // calibration finished
+      if (vCalibProg.iIter3 == vCalibProg.nIter3) {
+         for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) // exclude clock channels
+            for (int bin=0 ; bin<1024 ; bin++)
+               mVCalib.mCalib.wf_gain1[ch][bin] = (float)(vCalibProg.ave->Median(0, ch, bin) / 0.45);
+         
+         vCalibProg.ave->Reset();
+      }
+      
+      sleep_ms(10); // obtain 100 Hz rate
+      return;
+   }
+   
+   //---- Negative Gain Calibration
+   
+   if (vCalibProg.iIter4 < vCalibProg.nIter4) {
+      
+      // initialize data on first iteration
+      if (vCalibProg.iIter4 == 0) {
+         vCalibProg.ave->Reset();
+         b->SetRange(0.45);
+      }
+      
+      vCalibProg.iIter4++;
+      
+      // get one event from board
+      WDEvent *event = ReadSingleEvent(b, 1000);
+      if (!event)
+         return;
+      
+      for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
+         for (int bin=0 ; bin<1024 ; bin++)
+            vCalibProg.ave->Add(0, ch, bin, event->mWfU[ch][bin]);
+      delete event;
+      
+      vCalibProg.progress = (double)(vCalibProg.iIter1 + vCalibProg.iIter2 + vCalibProg.iIter3 + vCalibProg.iIter4) /
+      (vCalibProg.nIter1 + vCalibProg.nIter2 + vCalibProg.nIter3 + vCalibProg.nIter4);
+      
+      // calibration finished
+      if (vCalibProg.iIter4 == vCalibProg.nIter4) {
+         for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) // exclude clock channels
+            for (int bin=0 ; bin<1024 ; bin++)
+               mVCalib.mCalib.wf_gain2[ch][bin] = (float)(vCalibProg.ave->Median(0, ch, bin) / -0.45);
+         
+         delete vCalibProg.ave;
+         vCalibProg.ave = NULL;
+      }
+      
+      sleep_ms(10); // obtain 100 Hz rate
+      return;
+   }
+   
+   mRotateWaveform = true;
+   mOfsCalib1      = true;
+   mOfsCalib2      = true;
+   mGainCalib      = true;
+   mRangeCalib     = false;
+   mRemoveSpikes   = false;
+
+   // measure offset at different ranges
+   
+   // Range -0.45
+   b->SetRange(0);
+
+   WDEvent *event;
+   for (int i=0 ; i<10 ; i++) {
+      event = ReadSingleEvent(b, 1000);
+      delete event;
+      sleep_ms(10);
+   }
+   event = ReadSingleEvent(b, 1000);
+   
+   for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
+      float sum = 0;
+      for (int i=10 ; i<1020 ; i++)
+         sum += event->mWfU[ch][i];
+      mVCalib.mCalib.drs_offset_range0[ch] = sum / 1010;
+   }
+   delete event;
+   
+   /*
+   gl->adc_flag = 1;
+   do {
+      wd_send(gl, vCalibProg.iBoard, 100, "adcget\n", NULL, NULL);
+   } while (wd_read_waveform(gl, vCalibProg.iBoard, 1000, &eventHeader, wfU, wfT) != SUCCESS);
+   
+   for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
+      float sum = 0;
+      for (int i=10 ; i<1020 ; i++)
+         sum += wfU[ch][i];
+      gl->board[vCalibProg.iBoard].vcalib.adc_offset_range0[ch] = sum / 1010;
+   }
+   gl->adc_flag = 0;
+   */
+   
+   // Range 0
+   b->SetRange(0);
+   
+   event = nullptr;
+   for (int i=0 ; i<10 ; i++) {
+      event = ReadSingleEvent(b, 1000);
+      delete event;
+      sleep_ms(10);
+   }
+   event = ReadSingleEvent(b, 1000);
+   
+   for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
+      float sum = 0;
+      for (int i=10 ; i<1020 ; i++)
+         sum += event->mWfU[ch][i];
+      mVCalib.mCalib.drs_offset_range1[ch] = sum / 1010;
+   }
+   delete event;
+   
+   /*
+   gl->adc_flag = 1;
+   do {
+      wd_send(gl, vCalibProg.iBoard, 100, "adcget\n", NULL, NULL);
+   } while (wd_read_waveform(gl, vCalibProg.iBoard, 1000, &eventHeader, wfU, wfT) != SUCCESS);
+   
+   for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
+      float sum = 0;
+      for (int i=10 ; i<1020 ; i++)
+         sum += wfU[ch][i];
+      gl->board[vCalibProg.iBoard].vcalib.adc_offset_range1[ch] = sum / 1010;
+   }
+   gl->adc_flag = 0;
+   */
+   
+   // Range 0.45
+   b->SetRange(0);
+   
+   event = nullptr;
+   for (int i=0 ; i<10 ; i++) {
+      event = ReadSingleEvent(b, 1000);
+      delete event;
+      sleep_ms(10);
+   }
+   event = ReadSingleEvent(b, 1000);
+   
+   for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
+      float sum = 0;
+      for (int i=10 ; i<1020 ; i++)
+         sum += event->mWfU[ch][i];
+      mVCalib.mCalib.drs_offset_range2[ch] = sum / 1010;
+   }
+   delete event;
+   
+   /*
+   gl->adc_flag = 1;
+   do {
+      wd_send(gl, vCalibProg.iBoard, 100, "adcget\n", NULL, NULL);
+   } while (wd_read_waveform(gl, vCalibProg.iBoard, 1000, &eventHeader, wfU, wfT) != SUCCESS);
+   
+   for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
+      float sum = 0;
+      for (int i=10 ; i<1020 ; i++)
+         sum += wfU[ch][i];
+      gl->board[vCalibProg.iBoard].vcalib.adc_offset_range2[ch] = sum / 1010;
+   }
+   gl->adc_flag = 0;
+   */
+   
+   // save calibration
+   
+   /*
+   memcpy(gl->board[vCalibProg.iBoard].vcalib.version_id, "CAL1", 4);
+   gl->board[vCalibProg.iBoard].vcalib.sampling_frequency = gl->actual_sampling_frequency;
+   gl->board[vCalibProg.iBoard].vcalib.temperature = gl->board[vCalibProg.iBoard].temperature;
+   
+   memcpy(&old_gl.board[vCalibProg.iBoard].vcalib, &gl->board[vCalibProg.iBoard].vcalib, sizeof(VCALIB_DATA));
+   
+   mkdir("calib", 0755);
+   sprintf(str, "calib/%s.vcal", gl->board[vCalibProg.iBoard].name);
+   vCalibProg.fh = open(str, O_WRONLY | O_CREAT, 0644);
+   assert(vCalibProg.fh > 0);
+   assert(write(vCalibProg.fh, &gl->board[vCalibProg.iBoard].vcalib, sizeof(VCALIB_DATA)) == sizeof(VCALIB_DATA));
+   close(vCalibProg.fh);
+   */
+   
+   // switch to next board
+   vCalibProg.iBoard++;
+   vCalibProg.state = cCsFirstSample;
+   vCalibProg.progress = 1;
+   
+   if (vCalibProg.iBoard == vCalibProg.nBoard) {
+      vCalibProg.state = cCsInactive;
+      
+      // switch everything back to previous values
+      //### TBD
+   }
+   
+   return;
+}
+
+//--------------------------------------------------------------------
+
+void WP::DoCalibrationTimeStep()
+{
+}
