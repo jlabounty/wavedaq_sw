@@ -818,7 +818,7 @@ void WDB::GetScalers(std::vector<unsigned long> &scaler)
    
    // channels 16 and 17 are 32 bit counters
    for (auto i=16 ; i<18 ; i++) {
-      unsigned long v = this->sreg[WD2_REG_SCALER_TRG_OFS/4+i];
+      unsigned long v = this->sreg[WD2_REG_SCALER_TRG_OFS/4+(i-16)];
       
       if (scaler.size() < i+1)
          scaler.push_back(v);
