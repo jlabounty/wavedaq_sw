@@ -32,9 +32,6 @@ CPP_OBJ = $(CPP_FILES:%.cpp=%.o)
 LIB_FILES = $(wildcard ../lib/*.cpp)
 LIB_OBJ = $(notdir $(LIB_FILES:%.cpp=%.o))
 
-$(info $(LIB_FILES))
-$(info $(LIB_OBJ))
-
 all: $(OUTNAME)
 
 $(OUTNAME): $(C_OBJ) $(CPP_OBJ) $(LIB_OBJ)
