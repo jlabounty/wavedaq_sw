@@ -63,7 +63,7 @@ function Oscilloscope(div) { // constructor
    this.currentChn = 0;
    this.idle = true;
    this.demoMode = demoMode;
-   this.remoteDemo = false;
+   this.connected = false;
 
    this.logFlag = false;
    this.logfile = "";
@@ -116,7 +116,7 @@ function Oscilloscope(div) { // constructor
    }
 
    // current board
-   this.board = 0;
+   this.curBoard = 0;
 
    // schedule FPS calculator
    var f = this.calcFPS.bind(this);
@@ -148,6 +148,9 @@ function Oscilloscope(div) { // constructor
    window.addEventListener("mouseup", this.mouseEvent.bind(this), true);
    window.addEventListener("touchstart", this.mouseEvent.bind(this), true);
    window.addEventListener("touchmove", this.mouseEvent.bind(this), true);
+
+   // timers
+   this.timer = {};
 }
 
 Oscilloscope.prototype.sendWaveforms = function (wf) {
@@ -292,7 +295,7 @@ Oscilloscope.prototype.resizeCanvas = function () {
 Oscilloscope.prototype.draw = function () {
    
    // wait until globals are loaded
-   if (OSC.GL == undefined)
+   if (!OSC.connected)
       return;
    
    this.nFrames++;
@@ -348,8 +351,8 @@ Oscilloscope.prototype.printTemperature = function (ctx) {
    ctx.textAlign = "left";
    ctx.textBaseline = "top";
 
-   if (OSC.GL != undefined) {
-      var t = OSC.GL.board[OSC.board].temperature;
+   if (OSC.wdb != undefined) {
+      var t = OSC.wdb[OSC.curBoard].temperature;
       ctx.fillText("T = " + t.toFixed(1) + " C", this.x1 + 12, this.y2 - 24);
    }
 };
@@ -395,8 +398,8 @@ Oscilloscope.prototype.drawMeasurements = function (ctx) {
 };
 
 Oscilloscope.prototype.printStatus = function (ctx) {
-   if (OSC.GL != undefined) {
-      var locked = OSC.GL.board[OSC.board].pll_locked;
+   if (OSC.wdb != undefined) {
+      var locked = OSC.wdb[OSC.curBoard].pllLck;
 
       if (locked == 0) {
          ctx.fillStyle = 'red';
@@ -410,8 +413,8 @@ Oscilloscope.prototype.printStatus = function (ctx) {
 };
 
 Oscilloscope.prototype.printScalers = function (ctx) {
-   if (OSC.GL != undefined && OSC.disp.scaler) {
-      var scaler = OSC.GL.board[OSC.board].scaler;
+   if (OSC.wdb != undefined && OSC.disp.scaler && OSC.wdb[OSC.curBoard].scaler) {
+      var scaler = OSC.wdb[OSC.curBoard].scaler;
 
       for (var c = 0; c < 18; c++) {
          ctx.fillStyle = this.chnColors[c];
@@ -538,7 +541,7 @@ Oscilloscope.prototype.drawGrid = function (ctx) {
    ctx.textBaseline = "middle";
    ctx.font = '24px sans-serif';
 
-   if (this.remoteDemo || this.demoMode)
+   if (this.gl.demoMode || this.demoMode)
       ctx.fillText("DEMO", this.x2 - 10, this.y1 + 20);
    else if (this.idle)
       ctx.fillText("Trig ?", this.x2 - 10, this.y1 + 20);
@@ -566,7 +569,7 @@ Oscilloscope.prototype.voltToY = function (v, c) {
 };
 
 Oscilloscope.prototype.drawWF = function (ctx) {
-   if (OSC.GL == undefined)
+   if (!OSC.connected)
       return;
 
    // Waveforms
@@ -574,7 +577,7 @@ Oscilloscope.prototype.drawWF = function (ctx) {
       ctx.save();
       ctx.rect(this.x1, this.y1, this.w, this.h);
       ctx.clip();
-      var spacing = this.wfTS / (OSC.GL.actual_sampling_frequency * 1E9);
+      var spacing = this.wfTS / (OSC.wdb[OSC.curBoard].drsSampleFreq * 1E6);
       for (var c = 0; c < 18; c++) {
          if (this.chOn[c]) {
             ctx.beginPath();
@@ -717,7 +720,7 @@ Oscilloscope.prototype.drawMarker = function (ctx) {
          ctx.fillStyle = this.chnColors[c];
          ctx.strokeStyle = this.chnColors[c];
 
-         y = (OSC.GL.board[OSC.board].trigger_level[c]) * this.wfUS[c] + this.wfUO[c];
+         y = (OSC.wdb[OSC.curBoard].dacTriggerLevel[c]) * this.wfUS[c] + this.wfUO[c];
 
          ctx.beginPath();
          ctx.moveTo(this.x2 - 2, y - 5);
@@ -742,8 +745,8 @@ Oscilloscope.prototype.drawMarker = function (ctx) {
    ctx.fillStyle = 'white';
    ctx.strokeStyle = 'white';
 
-   var t = 1024 / OSC.GL.actual_sampling_frequency * 1E-9;
-   t -= (30 + OSC.GL.board[OSC.board].trigger_delay) * 1E-9;
+   var t = 1024 / OSC.wdb[OSC.curBoard].drsSampleFreq * 1E-6;
+   t -= (30 + OSC.wdb[OSC.curBoard].triggerDelay) * 1E-9;
    var xt = this.timeToX(t);
 
    ctx.beginPath();
@@ -771,7 +774,7 @@ Oscilloscope.prototype.drawMarker = function (ctx) {
 };
 
 Oscilloscope.prototype.drawDT = function (ctx) {
-   if (OSC.GL == undefined)
+   if (!OSC.connected)
       return;
 
    for (var c = 15; c >= 0; c--) {
@@ -816,7 +819,7 @@ Oscilloscope.prototype.drawDT = function (ctx) {
 };
 
 Oscilloscope.prototype.drawHisto = function (ctx) {
-   if (OSC.GL == undefined)
+   if (!OSC.connected)
       return;
 
    // draw overall frame

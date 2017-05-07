@@ -20,7 +20,7 @@
    <div id="controls">
       <select id="wdSelect" class="wdSelect" onchange="wdSelect(this)">
       </select><br/>
-      <button class="wideButton" type="button" id="btnStop" onClick="btnStop()">Stop</button>
+      <button class="wideButton" type="button" id="btnStop" style="background-color:#A0FFA0" onClick="btnStop()">Stop</button>
       <button class="wideButton" type="button" id="btnSingle" onClick="btnSingle()">Single</button>
 
       <div class="chnButtons">
@@ -85,7 +85,7 @@
 
       <button class="wideButton" id="btnConfig" type="button" onClick="btnConfig()">Config</button>
       <button class="wideButton" id="btnMeasure" type="button" onClick="dlgShow('dlgMeasure')">Measure</button>
-      <button class="wideButton" id="btnChannels" type="button" onClick="btnChannels()">Channels</button>
+      <button class="wideButton" id="btnChannels" type="button" onClick="dlgShow('dlgChannels')">Channels</button>
       <button class="wideButton" id="btnSave" type="button" onClick="btnSave()">Save</button>
       <button class="wideButton" id="btnAbout" type="button" onClick="dlgShow('dlgAbout')">About</button>
 
@@ -96,27 +96,33 @@
          <div class="groupTitle">Trigger</div>
          <div class="group">
             <div class="vMiddleBox vSpacer5">
-               <button name="ctrlHSlider" id="trgSlider" class="hSlider vMiddleElement" type="button"
-                       data-update="sldTLevel()" style="width:180px;"></button>
-               <span class="hSpacer5 vMiddleElement"></span><input name="trigger_level" class="vMiddleElement"
-                                                                   type="text" id="inpTLevel"
-                                                                   onkeypress="keyGl(event,this)" value="0"><span
-                    class="vMiddleElement">&nbsp;mV</span>
+               <button name="ctrlHSlider" id="sldDacTriggerLevel" class="hSlider vMiddleElement" type="button"
+                       data-update="sldDacTriggerLevel()" style="width:180px;"></button>
+               <span class="hSpacer5 vMiddleElement"></span>
+                  <input name="dacTriggerLevel" class="vMiddleElement"
+                         type="text" id="inpDacTriggerLevel"
+                         onkeypress="keyParam(event,this)"
+                         onblur="validateParam(this)"
+                         value="0"><span
+                         class="vMiddleElement">&nbsp;mV
+               </span>
             </div>
             <div class="vMiddleBox vSpacer5">
                <div class="vMiddleElement">Delay:&nbsp;</div>
-               <button name="ctrlHSlider" id="trgDelaySlider" class="hSlider vMiddleElement" type="button"
-                       data-update="sldTDelay()" style="width:130px;"></button>
-               <span class="hSpacer5"></span><input name="trigger_delay" class="vMiddleElement" type="text"
-                                                    id="inpTDelay" onkeypress="keyGl(event,this)" value="0"><span
-                    class="vMiddleElement">&nbsp;ns</span>
+               <button name="ctrlHSlider" id="sldTriggerDelay" class="hSlider vMiddleElement" type="button"
+                       data-update="sldTriggerDelay()" style="width:130px;"></button>
+               <span class="hSpacer5"></span>
+               <input name="triggerDelay" class="vMiddleElement" type="text"
+                     id="inpTriggerDelay" onkeypress="keyParam(event,this)" value="0"><span
+                     class="vMiddleElement">&nbsp;ns
+               </span>
             </div>
             <table>
                <tr>
                   <td>
                      Type:&nbsp;&nbsp;
-                     <input type="radio" id="trModeNormal" name="trigger_mode" value="0" checked onClick="setGl(this)">normal
-                     <input type="radio" id="trModeAuto" name="trigger_mode" value="1" onClick="setGl(this)">auto
+                     <input type="radio" id="rbTriggerModeNormal" name="triggerMode" value="1" checked onClick="setParam(this)">normal
+                     <input type="radio" id="rbTriggerModeAuto" name="triggerMode" value="2" onClick="setParam(this)">auto
                   </td>
                   <td rowspan = 2>
                      &nbsp;&nbsp;
@@ -129,8 +135,8 @@
                <tr>
                   <td>
                      Source:&nbsp;&nbsp;
-                     <input type="radio" id="trSourceInt" name="trigger_source" value="0" checked onClick="setGl(this)">int
-                     <input type="radio" id="trSourceExt" name="trigger_source" value="1" onClick="setGl(this)">ext
+                     <input type="radio" id="rbTriggerSourceInt" name="triggerSource" value="0" checked onClick="setParam(this)">int
+                     <input type="radio" id="rbTriggerSourceExt" name="triggerSource" value="1" onClick="setParam(this)">ext
                   </td>
                </tr>
             </table>
@@ -139,8 +145,8 @@
          <div class="groupTitle">Analog Front-end</div>
          <div class="group">
             <div class="vSpacer5">
-               <label for="gain">Gain:</label>
-               <select id="gain" name="gain" class="select" onchange="setGl(this)">
+               <label for="selGain">Gain:</label>
+               <select id="selGain" name="gain" class="select" onchange="setParam(this)">
                   <option value="0.5">0.5</option>
                   <option selected value="1">1</option>
                   <option value="2.5">2.5</option>
@@ -151,8 +157,8 @@
                   <option value="100">100</option>
                </select>
                &nbsp;&nbsp;&nbsp;
-               <input type="checkbox" id="pzc" name="pzc" onClick="setGl(this)">PZC
-               <select id="pzc_level" name="pzc_level" class="select" onchange="setGl(this)">
+               <input type="checkbox" id="cbPzc" name="pzc" onClick="setParam(this)">PZC
+               <select id="selPzcLevel" name="pzcLevel" class="select" onchange="setParam(this)">
                   <option value="1">1</option>
                   <option value="2">2</option>
                   <option value="3">3</option>
@@ -165,13 +171,13 @@
             </div>
             <div class="vSpacer5">
                Mode:
-               <input type="radio" id="inputModeDRS" name="adc_flag" checked="checked" value="0" onClick="setGl(this)">DRS
-               <input type="radio" id="inputModeADC" name="adc_flag" value="1" onClick="setGl(this)">ADC
+               <input type="radio" id="inputReadoutSrcDRS" name="readoutSrc" checked="checked" value="1" onClick="setParam(this)">DRS
+               <input type="radio" id="inputReadoutSrcADC" name="readoutSrc" value="2" onClick="setParam(this)">ADC
             </div>
 
             <div class="vMiddleBox vSpacer5">
                <div class="vMiddleElement">Input range:&nbsp;</div>
-               <select id="rangeSelect" class="select" onchange="setRange(this)">
+               <select id="selRange" class="select" onchange="setRange(this)">
                   <option value="-0.45">-0.95 V ... +0.05 V</option>
                   <option value="0">-0.5 V ... +0.5 V</option>
                   <option value="0.45">-0.05 V ... +0.95 V</option>
@@ -179,54 +185,56 @@
             </div>
 
             <div class="vSpacer5">
-               <input type="checkbox" id="osctca_flag" name="osctca_flag" onClick="setGl(this)">Enable calibration clock
+               <input type="checkbox" id="timingCalibSignalEnable" name="timingCalibSignalEnable" onClick="setCalibClock(this)">
+                  Enable calibration clock
             </div>
             <div class="vMiddleBox vSpacer5">
-               <input type="checkbox" id="mux_flag" name="mux_flag" onClick="setGl(this)">Connect inputs to calib.
-               source
+               <input type="checkbox" id="feMux" name="feMux" onClick="setParam(this)">
+                  Connect inputs to calib. source
             </div>
             <div class="vMiddleBox vSpacer5">
-               <input type="checkbox" id="dcv_flag" name="dcv_flag" onClick="setGl(this)">Power calib. source
+               <input type="checkbox" id="calibBufferEnable" name="calibBufferEnable" onClick="setParam(this)">
+                  Power calib. source
             </div>
 
             <div class="vMiddleBox vSpacer5">
                <div class="vMiddleElement">DC:&nbsp;</div>
-               <button name="ctrlHSlider" id="dcOffsetSlider" class="hSlider vMiddleElement" type="button"
-                       data-update="sldDcOffset()" style="width:140px;"></button>
-               <span class="hSpacer5"></span><input name="dc_offset" class="vMiddleElement" type="text" id="inpDcOffset"
-                                                    onkeypress="keyGl(event,this)" value="0"><span
-                    class="vMiddleElement">&nbsp;mV</span>
+               <button name="ctrlHSlider" id="sldDacCalDc" class="hSlider vMiddleElement" type="button"
+                       data-update="sldDacCalDc()" style="width:140px;"></button>
+               <span class="hSpacer5"></span><input name="dacCalDc" class="vMiddleElement" type="text" id="inpDacCalDc"
+                       onkeypress="keyParam(event,this)" value="0"><span
+                       class="vMiddleElement">&nbsp;mV</span>
             </div>
          </div>
 
          <div class="groupTitle">Sampling Speed</div>
          <div class="group">
-            <input type="text" id="nominal_sampling_frequency" name="nominal_sampling_frequency" value="5"
-                   onkeypress="keyGl(event,this)">&nbsp;GSPS
-            &nbsp;Actual:&nbsp;<span id="actual_sampling_frequency">N/A</span>
+            <input type="text" id="drsSampleFreq" name="drsSampleFreq" value="5"
+                   onkeypress="keyParam(event,this)">&nbsp;GSPS
+            &nbsp;Actual:&nbsp;<span id="drsActualSampleFreq">N/A</span>
          </div>
 
          <div class="groupTitle">Voltage Calibration</div>
          <div class="group">
             <table border="0">
                <tr>
-                  <td><input type="checkbox" id="calib1" name="ofs_calib1_flag" onClick="setGl(this)"></td>
+                  <td><input type="checkbox" id="calib1" name="ofs_calib1_flag" onClick="setParam(this)"></td>
                   <td>Apply Cell Calibration</td>
                </tr>
                <tr>
-                  <td><input type="checkbox" id="calib2" name="ofs_calib2_flag" onClick="setGl(this)"></td>
+                  <td><input type="checkbox" id="calib2" name="ofs_calib2_flag" onClick="setParam(this)"></td>
                   <td>Apply Readout Calibration</td>
                </tr>
                <tr>
-                  <td><input type="checkbox" id="calib3" name="gain_calib_flag" onClick="setGl(this)"></td>
+                  <td><input type="checkbox" id="calib3" name="gain_calib_flag" onClick="setParam(this)"></td>
                   <td>Apply Gain Calibration</td>
                </tr>
                <tr>
-                  <td><input type="checkbox" id="calib4" name="range_calib_flag" onClick="setGl(this)"></td>
+                  <td><input type="checkbox" id="calib4" name="range_calib_flag" onClick="setParam(this)"></td>
                   <td>Correct Range Offset</td>
                </tr>
                <tr>
-                  <td><input type="checkbox" id="spikes" name="remove_spikes" onClick="setGl(this)"></td>
+                  <td><input type="checkbox" id="spikes" name="remove_spikes" onClick="setParam(this)"></td>
                   <td>Remove Spikes</td>
                </tr>
             </table>
@@ -243,24 +251,24 @@
          <div class="group">
             <table border="0">
                <tr>
-                  <td><input type="checkbox" id="rotate" name="rotate_flag" onClick="setGl(this)"></td>
+                  <td><input type="checkbox" id="rotate" name="rotateWaveform" onClick="setParam(this)"></td>
                   <td>Rotate waveform relative to trigger</td>
                </tr>
                <tr>
-                  <td><input type="checkbox" id="tcalib1" name="time_calib1_flag" onClick="setGl(this)"></td>
+                  <td><input type="checkbox" id="tcalib1" name="timeCalib1" onClick="setParam(this)"></td>
                   <td>Apply timing calibration</td>
                </tr>
                <tr>
-                  <td><input type="checkbox" id="tcalib2" name="time_calib2_flag" onClick="setGl(this)"></td>
+                  <td><input type="checkbox" id="tcalib2" name="timeCalib2" onClick="setParam(this)"></td>
                   <td>Apply timing offset correction</td>
                </tr>
                <tr>
-                  <td><input type="checkbox" id="tcalib3" name="time_calib3_flag" onClick="setGl(this)"></td>
+                  <td><input type="checkbox" id="tcalib3" name="timeCalib3" onClick="setParam(this)"></td>
                   <td>Correct horizontal trigger position</td>
                </tr>
                <tr>
-                  <td><input type="checkbox" id="clksource" name="clock_source" onClick="setGl(this)"></td>
-                  <td>Use external reference clock</td>
+                  <td><input type="checkbox" id="clksource" name="daqClkSrcSel" onClick="setParam(this)"></td>
+                  <td>Use internal reference clock</td>
                </tr>
             </table>
             <button class="executeButton" id="btnTCalib" type="button" onClick="doTCalib()">Execute Time Calibration
@@ -303,16 +311,28 @@
       </form>
    </div>
 
-   <div id="channels">
-      <table id="channelsTable">
-         <tr class="channelsTitle">
-            <th class="channelsTh">Chn</th>
-            <th class="channelsTh">Gain</th>
-            <th class="channelsTh">PZC</th>
-            <th class="channelsTh">Trigger Level</th>
-         </tr>
-         <!-- channel rows will be created dynamically in init() -->
-      </table>
+   <!-- channels dialog -->
+   <div id="dlgChannels" class="dlgFrame">
+
+      <div class="dlgTitlebar">Channel Configuration</div>
+
+      <div class="dlgPanel" style="padding:0">
+         <div id="channels">
+            <table id="channelsTable">
+               <tr class="channelsTitle">
+                  <th class="channelsTh">Chn</th>
+                  <th class="channelsTh">Gain</th>
+                  <th class="channelsTh">PZC</th>
+                  <th class="channelsTh">Trigger Level</th>
+                  <th class="channelsTh">HV</th>
+                  <th class="channelsTh">Current</th>
+               </tr>
+               <!-- channel rows will be created dynamically in init() -->
+            </table>
+         </div>
+         <button class="wideButton" style="background-color:#F8F8F8" type="button" onClick="dlgHide('dlgChannels')">Close
+         </button>
+      </div>
    </div>
 
    <!-- about dialog -->

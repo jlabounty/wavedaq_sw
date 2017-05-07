@@ -47,6 +47,7 @@
 document.write("<style>" +
    ".dlgFrame {" +
    "   border: 1px solid black;" +
+   "   box-shadow: 6px 6px 10px 4px rgba(0,0,0,0.2);" +
    "   border-radius: 6px;" +
    "   position: absolute;" +
    "   top: 0;" +
@@ -55,6 +56,7 @@ document.write("<style>" +
    "   display: none; /* pre-hidden */" +
    "}" +
    ".dlgTitlebar {" +
+   "   user-select: none;" +
    "   text-align: center;" +
    "   background-color: #C0C0C0;" +
    "   border-top-left-radius: 6px;" +
@@ -62,12 +64,24 @@ document.write("<style>" +
    "   font-size: 10pt;" +
    "   padding: 2px;" +
    "}" +
+   ".dlgTitlebar:hover {" +
+   "   cursor: pointer;" +
+   "}" +
    ".dlgPanel {" +
    "   background-color: #F0F0F0;" +
    "   text-align: center;" +
    "   padding: 10px;" +
    "   border-bottom-left-radius: 6px;" +
    "   border-bottom-right-radius: 6px;" +
+   "}" +
+   ".dlgBlackout {" +
+   "   background: rgba(0,0,0,.5);" +
+   "   position: fixed;" +
+   "   top: 0;" +
+   "   left: 0;" +
+   "   bottom: 0;" +
+   "   right: 0;" +
+   "   z-index: 20;" +
    "}" +
    "</style>");
 
@@ -461,21 +475,35 @@ Controls.prototype.ctrlHSliderHandler = function (e) {
 
 //-------------------------------------------------------------------------------------------------
 
-function dlgShow(dlg) {
+function dlgShow(dlg, modal) {
    var d = document.getElementById(dlg);
 
    d.dlgAx = 0;
    d.dlgAy = 0;
    d.dlgDx = 0;
    d.dlgDy = 0;
+   d.modal = (modal != undefined);
 
    d.style.display = "block";
-   d.style.left = document.documentElement.clientWidth / 2 - d.offsetWidth / 2 + "px";
+   d.style.left = Math.round(document.documentElement.clientWidth / 2 - d.offsetWidth / 2) + "px";
    if (document.documentElement.clientHeight / 2 - d.offsetHeight / 2 < 0)
       d.style.top = "0px";
    else
-      d.style.top = document.documentElement.clientHeight / 2 - d.offsetHeight / 2 + "px";
+      d.style.top = Math.round(document.documentElement.clientHeight / 2 - d.offsetHeight / 2) + "px";
 
+   if (d.modal) {
+      var b = document.getElementById("dlgBlackout");
+      if (b == undefined) {
+         b =  document.createElement("div");
+         b.id = "dlgBlackout";
+         b.className = "dlgBlackout";
+         document.body.appendChild(b);
+      }
+      
+      b.style.display = "block";
+      d.style.zIndex = 21; // on top of dlgBlackout (20)
+   }
+   
    d.dlgMouseDown = function (e) {
       if ((e.target == this || e.target.parentNode == this) &&
          e.target.className == "dlgTitlebar") {
@@ -484,18 +512,22 @@ function dlgShow(dlg) {
          this.Ay = e.clientY;
          this.Dx = parseInt(this.style.left);
          this.Dy = parseInt(this.style.top);
-
       }
 
-      var p = e.target;
-      while (p != undefined && p != this && p != document.body)
-         p = p.parentElement;
-
-      if (p == this) {
-         var dlgs = document.getElementsByClassName("dlgFrame");
-         for (var i=0 ; i<dlgs.length ; i++)
-            dlgs[i].style.zIndex = 10;
-         d.style.zIndex = 11;
+      if (d.modal) {
+         // catch all mouse events
+         e.preventDefault();
+      } else {
+         var p = e.target;
+         while (p != undefined && p != this && p != document.body)
+            p = p.parentElement;
+         
+         if (p == this) {
+            var dlgs = document.getElementsByClassName("dlgFrame");
+            for (var i=0 ; i<dlgs.length ; i++)
+               dlgs[i].style.zIndex = 10;
+            d.style.zIndex = 11;
+         }
       }
    };
 
@@ -504,11 +536,20 @@ function dlgShow(dlg) {
          e.preventDefault();
          var x = e.clientX;
          var y = e.clientY;
-         this.style.left = (this.Dx + (x - this.Ax)) + "px";
-         this.style.top = (this.Dy + (y - this.Ay)) + "px";
+         // stop dragging if leaving window
+         if (x < 0 || y < 0 ||
+             x > document.documentElement.clientWidth ||
+             y > document.documentElement.clientHeight ||
+             (this.Dy + (y - this.Ay)) < 0) {
+            this.Ax = 0;
+            this.Ay = 0;
+         } else {
+            this.style.left = (this.Dx + (x - this.Ax)) + "px";
+            this.style.top = (this.Dy + (y - this.Ay)) + "px";
+         }
       }
    };
-
+   
    d.dlgMouseUp = function () {
       this.Ax = 0;
       this.Ay = 0;
@@ -539,17 +580,20 @@ function dlgShow(dlg) {
 }
 
 function dlgHide(dlg) {
+   var d = document.getElementById("dlgBlackout");
+   if (d != undefined)
+      d.style.display = "none";
    var d = document.getElementById(dlg);
    d.style.display = "none";
 }
 
-function dlgMessage(title, string) {
+function dlgMessage(title, string, modal) {
    var d = document.getElementById("dlgMessage");
    if (d == undefined) {
       d =  document.createElement("div");
       d.id = "dlgMessage";
       d.className = "dlgFrame";
-      d.style.zIndex = 11;
+      d.style.zIndex = 20;
 
       d.innerHTML = "<div class=\"dlgTitlebar\" id=\"dlgMessageTitle\">"+title+"</div>"+
       
@@ -560,11 +604,11 @@ function dlgMessage(title, string) {
       "</div>";
 
       document.body.appendChild(d);
-      dlgShow("dlgMessage");
+      dlgShow("dlgMessage", modal);
    } else {
       document.getElementById("dlgMessageTitle").innerHTML = title;
       document.getElementById("dlgMessageString").innerHTML = string;
-      dlgShow("dlgMessage");
-      document.getElementById("dlgMessage").style.zIndex = 11;
+      dlgShow("dlgMessage", modal);
+      document.getElementById("dlgMessage").style.zIndex = 20;
    }
 }

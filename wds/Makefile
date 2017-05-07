@@ -21,7 +21,7 @@ CFLAGS  += -std=gnu++11 -x c++
 LIBS    = -framework IOKit -framework CoreFoundation -lobjc
 endif
 
-CFLAGS += -I../../firmware/WD2/wd2_hardware_test/wd2_xsdk_workspace/wd2_app_cmd_interpreter/src/
+CFLAGS += -I../lib -I../../firmware/WD2/wd2_hardware_test/wd2_xsdk_workspace/wd2_app_cmd_interpreter/src/
 
 # search *.c and *.cpp files
 C_FILES = $(wildcard *.c)
@@ -29,17 +29,26 @@ CPP_FILES = $(wildcard *.cpp)
 C_OBJ = $(C_FILES:%.c=%.o)
 CPP_OBJ = $(CPP_FILES:%.cpp=%.o)
 
+LIB_FILES = $(wildcard ../lib/*.cpp)
+LIB_OBJ = $(notdir $(LIB_FILES:%.cpp=%.o))
+
+$(info $(LIB_FILES))
+$(info $(LIB_OBJ))
+
 all: $(OUTNAME)
 
-$(OUTNAME): $(C_OBJ) $(CPP_OBJ)
-	g++ $(C_OBJ) $(CPP_OBJ) -o $(OUTNAME) $(LIBS)
+$(OUTNAME): $(C_OBJ) $(CPP_OBJ) $(LIB_OBJ)
+	g++ $(C_OBJ) $(CPP_OBJ) $(LIB_OBJ) -o $(OUTNAME) $(LIBS)
 
 $(CPP_OBJ): %.o: %.cpp
+	g++ $(CFLAGS) -c $<
+
+$(LIB_OBJ): %.o: ../lib/%.cpp
 	g++ $(CFLAGS) -c $<
 
 $(C_OBJ): %.o: %.c
 	g++ $(CFLAGS) -c $<
 
 clean:
-	rm -f $(C_OBJ) $(CPP_OBJ) $(OUTNAME)
+	rm -f $(C_OBJ) $(CPP_OBJ) $(LIB_OBJ) $(OUTNAME)
 
