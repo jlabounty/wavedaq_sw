@@ -23,6 +23,8 @@
 #include <netdb.h>
 #include <assert.h>
 #include <errno.h>
+#include <time.h>
+#include <fcntl.h>
 
 #ifdef __linux__
 #include <linux/sockios.h>
@@ -2287,7 +2289,6 @@ void WP::CalibrateWaveforms()
    for (auto it = mEvent.begin() ; it != mEvent.end() ; it++) {
       auto ev = (*it);
       
-      
       if (ev->mWFTypeADC) { //---------- calibrate ADC data ----------
          
          if (mRangeCalib) {
@@ -2358,6 +2359,218 @@ void WP::CalibrateWaveforms()
 
 //--------------------------------------------------------------------
 
+typedef struct {
+   unsigned short Year;
+   unsigned short Month;
+   unsigned short Day;
+   unsigned short Hour;
+   unsigned short Minute;
+   unsigned short Second;
+   unsigned short Milliseconds;
+} TIMESTAMP;
+
+void GetTimeStamp(TIMESTAMP &ts)
+{
+#ifdef _MSC_VER
+   SYSTEMTIME t;
+   static unsigned int ofs = 0;
+   
+   GetLocalTime(&t);
+   if (ofs == 0)
+      ofs = timeGetTime() - t.wMilliseconds;
+   ts.Year         = t.wYear;
+   ts.Month        = t.wMonth;
+   ts.Day          = t.wDay;
+   ts.Hour         = t.wHour;
+   ts.Minute       = t.wMinute;
+   ts.Second       = t.wSecond;
+   ts.Milliseconds = (timeGetTime() - ofs) % 1000;
+#else
+   struct timeval t;
+   struct tm *lt;
+   time_t now;
+   
+   gettimeofday(&t, NULL);
+   time(&now);
+   lt = localtime(&now);
+   
+   ts.Year         = lt->tm_year+1900;
+   ts.Month        = lt->tm_mon+1;
+   ts.Day          = lt->tm_mday;
+   ts.Hour         = lt->tm_hour;
+   ts.Minute       = lt->tm_min;
+   ts.Second       = lt->tm_sec;
+   ts.Milliseconds = t.tv_usec/1000;
+#endif /* OS_UNIX */
+}
+
+//--------------------------------------------------------------------
+
+void WP::LogWaveforms()
+{
+   static unsigned char *buffer = NULL;
+   unsigned char *p;
+   int chn = 0xFFFF; //## channel mask to log
+   
+   int buffer_size = 8 + 4 + (1024*4+12)*18 + (1024*2+12)*18;
+   if (!buffer)
+      buffer = (unsigned char *)malloc(buffer_size);
+   
+   if (li.fh == 0 && li.xml == NULL)
+      return;
+   
+   TIMESTAMP ts;
+   GetTimeStamp(ts);
+   
+   if (li.format == cLiFormatXML) {
+      char str[256];
+      mxml_start_element(li.xml, "Event");
+      sprintf(str, "%d", li.nLogged+1);
+      mxml_write_element(li.xml, "Serial", str);
+      sprintf(str, "%4d/%02d/%02d %02d:%02d:%02d.%03d", ts.Year, ts.Month,
+              ts.Day, ts.Hour, ts.Minute, ts.Second, ts.Milliseconds);
+      mxml_write_element(li.xml, "Time", str);
+      mxml_write_element(li.xml, "HUnit", "ns");
+      mxml_write_element(li.xml, "VUnit", "mV");
+      
+      for (auto it = mEvent.begin() ; it != mEvent.end() ; it++) {
+         auto ev = (*it);
+
+         sprintf(str, "Board_%d", ev->mBoardId);
+         mxml_start_element(li.xml, str);
+         for (int i=0 ; i<WD_N_CHANNELS ; i++) {
+            if (1/*## TBD*/) {
+               sprintf(str, "CHN%d", i);
+               mxml_start_element(li.xml, str);
+               sprintf(str, "%d", i < 8 || i == 16 ? ev->mTriggerCell[0] : ev->mTriggerCell[1]);
+               mxml_write_element(li.xml, "Trigger_Cell", str);
+               sprintf(str, "%u", 0); // ### TBD board[b].scaler[i]);
+               mxml_write_element(li.xml, "Scaler", str);
+               mxml_start_element(li.xml, "Waveform");
+               strcpy(str, "\n");
+               for (int j=0 ; j<1024 ; j++) {
+                  sprintf(str, "%1.3f,%1.1f", ev->mWfT[i][j]*1E9, ev->mWfU[i][j]*1E3);
+                  mxml_write_element(li.xml, "Data", str);
+               }
+               mxml_end_element(li.xml); // CHNx
+               mxml_end_element(li.xml); // CHNx
+            }
+         }
+         mxml_end_element(li.xml); //Board
+      }
+      mxml_end_element(li.xml); // Event
+   }
+   
+   if (li.format == cLiFormatBinary) {
+      p = buffer;
+      
+      if (li.nLogged == 0) {
+         memcpy(p, "DRS8", 4); // File identifier and version
+         p += 4;
+         
+         // time calibration header
+         memcpy(p, "TIME", 4);
+         p += 4;
+         
+         for (auto it = mEvent.begin() ; it != mEvent.end() ; it++) {
+            auto ev = (*it);
+
+            // store board serial number
+            sprintf((char *)p, "B#");
+            p += 2;
+            *(unsigned short *)p = ev->mBoardId;
+            p += sizeof(unsigned short);
+            
+            for (int i=0 ; i<WD_N_CHANNELS ; i++) {
+               if (chn && (1 << i)) {
+                  
+                  sprintf((char *)p, "C%03d", i);
+                  p += 4;
+                  for (int j=0 ; j<1024 ; j++) {
+                     // save binary time as 32-bit float value
+                     *(float *)p = 0; //## gl->board[b].tcalib.dt[i][j];
+                     p += sizeof(float);
+                  }
+               }
+            }
+         }
+      }
+      
+      memcpy(p, "EHDR", 4);
+      p += 4;
+      *(int *)p = li.nLogged;
+      p += sizeof(int);
+      *(unsigned short *)p = ts.Year;
+      p += sizeof(unsigned short);
+      *(unsigned short *)p = ts.Month;
+      p += sizeof(unsigned short);
+      *(unsigned short *)p = ts.Day;
+      p += sizeof(unsigned short);
+      *(unsigned short *)p = ts.Hour;
+      p += sizeof(unsigned short);
+      *(unsigned short *)p = ts.Minute;
+      p += sizeof(unsigned short);
+      *(unsigned short *)p = ts.Second;
+      p += sizeof(unsigned short);
+      *(unsigned short *)p = ts.Milliseconds;
+      p += sizeof(unsigned short);
+      *(unsigned short *)p = (unsigned short)(0); // range
+      p += sizeof(unsigned short);
+      
+      for (auto it = mEvent.begin() ; it != mEvent.end() ; it++) {
+         auto ev = (*it);
+         
+         // store board serial number
+         sprintf((char *)p, "B#");
+         p += 2;
+         *(unsigned short *)p = ev->mBoardId;
+         p += sizeof(unsigned short);
+         
+         for (int i=0 ; i<WD_N_CHANNELS ; i++) {
+            if (chn && (1 << i)) {
+               // channel header
+               sprintf((char *)p, "C%03d", i);
+               p += 4;
+               
+               // write scaler
+               unsigned int s = 0; //## gl->board[b].scaler[i];
+               memcpy(p, &s, sizeof(int));
+               p += sizeof(int);
+               
+               // write trigger cell
+               sprintf((char *)p, "T#");
+               p += 2;
+               *(unsigned short *)p = i < 8 || i == 16 ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
+               p += sizeof(unsigned short);
+               
+               for (int j=0 ; j<1024 ; j++) {
+                  // save binary date as 16-bit value:
+                  // 0 = -0.5V,  65535 = +0.5V    for range 0
+                  // 0 = -0.05V, 65535 = +0.95V   for range 0.45
+                  unsigned short d = (unsigned short)((ev->mWfU[i][j] - 0 /*##gl->board[b].range + 0.5*/) * 65535);
+                  *(unsigned short *)p = d;
+                  p += sizeof(unsigned short);
+               }
+            }
+         }
+      }
+      
+      int size = p - buffer;
+      int n = write(li.fh, buffer, size);
+      assert(n == size);
+      assert(size < buffer_size);
+   }
+   
+   if (li.nLogged == li.nRequest && li.fh) {
+      close(li.fh);
+      li.fh = 0;
+   }
+   
+   li.nLogged++;
+}
+
+//--------------------------------------------------------------------
+
 void WP::Collector()
 {
    mCurrentEvent = -1;
@@ -2379,6 +2592,7 @@ void WP::Collector()
       // do various calibrations
       RotateWaveforms();
       CalibrateWaveforms();
+      LogWaveforms();
       
       // copy full event to queue
       auto es = mEvent.begin();
@@ -2752,4 +2966,46 @@ void WP::DoCalibrationVoltageStep()
 
 void WP::DoCalibrationTimeStep()
 {
+}
+
+//--------------------------------------------------------------------
+
+void WP::StartLogging(std::string fileName, int format, bool all, int nEvents)
+{
+   li.fileName = fileName;
+   li.format  = format;
+   li.nRequest = nEvents;
+   li.bAll  = all;
+   li.nLogged = 0;
+   
+   if (li.format == cLiFormatBinary) {
+      if (li.fh > 0)
+         close(li.fh);
+      
+      li.fh = open(li.fileName.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0644);
+      assert(li.fh > 0);
+   }
+   
+   if (li.format == cLiFormatXML) {
+      if (li.xml)
+         mxml_close_file(li.xml);
+      
+      li.xml = mxml_open_file(li.fileName.c_str());
+      assert(li.xml);
+   }
+}
+
+//--------------------------------------------------------------------
+
+void WP::StopLogging()
+{
+   li.nRequest = li.nLogged;
+   if (li.fh) {
+      close(li.fh);
+      li.fh = 0;
+   }
+   if (li.xml) {
+      mxml_close_file(li.xml);
+      li.nLogged = 0;
+   }
 }

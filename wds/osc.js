@@ -365,7 +365,7 @@ Oscilloscope.prototype.printLogged = function (ctx) {
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
 
-      var t = OSC.nLogged + "/" + OSC.nRequested + " events logged";
+      var t = OSC.nLogged + "/" + OSC.nRequested + " events logged to " + OSC.logfile;
       ctx.fillText(t, this.x2 - ctx.measureText(t).width - 10, this.y2 - 24);
    }
 };

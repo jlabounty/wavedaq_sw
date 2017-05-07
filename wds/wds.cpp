@@ -24,6 +24,9 @@ std::vector<std::string> wdbName = { "wd094" };
 const int cTriggerModeNormal    = 1;
 const int cTriggerModeAuto      = 2;
 
+#define LI_FORMAT_BIN  1
+#define LI_FORMAT_XML  2
+
 typedef struct {
    bool demoMode;
    int  serverPort;
@@ -209,6 +212,18 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             gl->wp->StartCalibrationVoltage(false);
       }
       
+      else if (item == "save") {
+         if (value == "stop")
+            gl->wp->StopLogging();
+         else if (item != "") {
+            auto args = split(value, '\n');
+            gl->wp->StartLogging(args[0],
+                                 args[1] == "bin" ? WP::cLiFormatBinary : WP::cLiFormatXML,
+                                 args[2] == "all",
+                                 std::stoi(args[3]));
+         }
+      }
+
       mg_printf(nc, "HTTP/1.1 204 No Content\r\n");
    }
    
@@ -506,9 +521,9 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          b = 0xFF; // signals demo data
       
       if (event) {
-         int t = 1;                 // array type
-         int n = 1024;              // number of elements
-         int l = 0; // gl->li.nLogged;    // number of logged events
+         int t = 1;                    // array type
+         int n = 1024;                 // number of elements
+         int l = gl->wp->GetNLogged(); // number of logged events
          for (int c=0 ; c<WD_N_CHANNELS ; c++) {
             if (chn & (1 << c)) {
                t = 1; // time array

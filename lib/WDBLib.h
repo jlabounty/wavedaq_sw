@@ -20,6 +20,7 @@
 #include <mutex>
 #include <condition_variable>
 #include "averager.h"
+#include "mxml.h"
 
 #define WD_N_CHANNELS 18
 
@@ -277,14 +278,28 @@ class WP {
    bool              AllPacketsReceived();
    void              RotateWaveforms();
    void              CalibrateWaveforms();
+   //   void              LogWaveforms();
    
    vcalib            mVCalib;
    tcalib            mTCalib;
    VCALIB_PROGRESS   vCalibProg;
    TCALIB_PROGRESS   tCalibProg;
    
-public:
+   struct {
+      std::string    fileName;
+      int            fh;
+      MXML_WRITER    *xml;
+      int            format; // cLiFormatBinary / cLiFormatXML
+      bool           bAll;
+      int            board;
+      int            nRequest;
+      int            nLogged;
+   } li;
    
+public:
+   static const int  cLiFormatBinary = 1;
+   static const int  cLiFormatXML    = 2;
+
    // constructor
    WP(std::vector<WDB*> w, bool verbose = false, bool demo = false);
    
@@ -333,6 +348,11 @@ public:
    void StartCalibrationTime(bool bAll) { tCalibProg.nBoard = bAll ? mWdb.size() : 1; tCalibProg.state = cCsFirstBoard; };
    void DoCalibrationVoltageStep();
    void DoCalibrationTimeStep();
+   
+   void StartLogging(std::string fileName, int format, bool bAll, int nEvents);
+   void StopLogging();
+   unsigned int GetNLogged() { return li.nLogged; }
+   void LogWaveforms();
 };
 
 //--------------------------------------------------------------------
@@ -584,6 +604,7 @@ public:
 // linux and MAC specific things
 #if defined(__linux__) || defined(__APPLE__)
 #include <unistd.h>
+#define O_BINARY 0
 #endif // __linux__ || __APLE__
 
 // Windows specific things
