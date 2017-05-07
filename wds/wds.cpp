@@ -78,6 +78,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       if (hm->uri.p) {
          uri = split(std::string(hm->uri.p), ' ')[0];
          args = split(uri, '/');
+         if (args.size() > 1)
+            item = args[1];
          if (args.size() > 3) {
             iBoard = std::stoi(args[2]);
             item = args[3];
