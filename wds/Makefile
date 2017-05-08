@@ -38,10 +38,10 @@ all: $(OUTNAME)
 $(OUTNAME): $(C_OBJ) $(CPP_OBJ) $(LIB_OBJ)
 	g++ $(C_OBJ) $(CPP_OBJ) $(LIB_OBJ) -o $(OUTNAME) $(LIBS)
 
-$(CPP_OBJ): %.o: %.cpp
+$(CPP_OBJ): %.o: %.cpp %.h
 	g++ $(CFLAGS) -c $<
 
-$(LIB_OBJ): %.o: ../lib/%.cpp
+$(LIB_OBJ): %.o: ../lib/%.cpp %.h
 	g++ $(CFLAGS) -c $<
 
 $(C_OBJ): %.o: %.c
