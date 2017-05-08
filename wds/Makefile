@@ -41,7 +41,7 @@ $(OUTNAME): $(C_OBJ) $(CPP_OBJ) $(LIB_OBJ)
 $(CPP_OBJ): %.o: %.cpp %.h
 	g++ $(CFLAGS) -c $<
 
-$(LIB_OBJ): %.o: ../lib/%.cpp %.h
+$(LIB_OBJ): %.o: ../lib/%.cpp ../lib/%.h
 	g++ $(CFLAGS) -c $<
 
 $(C_OBJ): %.o: %.c
