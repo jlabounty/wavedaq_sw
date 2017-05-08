@@ -234,11 +234,11 @@ class WDB;
 // waveform processor (waveform decoding, calibration, saving, ...
 class WP {
    // calibration states
-   static const int  cCsInactive    = 0;
-   static const int  cCsSingleBoard = 1;
-   static const int  cCsFirstBoard  = 2;
-   static const int  cCsFirstSample = 3;
-   static const int  cCsRunning     = 4;
+   enum { cCsInactive = 0,
+      cCsSingleBoard = 1,
+      cCsFirstBoard  = 2,
+      cCsFirstSample = 3,
+      cCsRunning     = 4 };
    
    static int        gDataSocket;
    static int        gServerPort;
@@ -297,8 +297,7 @@ class WP {
    } li;
    
 public:
-   static const int  cLiFormatBinary = 1;
-   static const int  cLiFormatXML    = 2;
+   enum { cLiFormatBinary = 1, cLiFormatXML = 2};
 
    // constructor
    WP(std::vector<WDB*> w, bool verbose = false, bool demo = false);
