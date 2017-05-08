@@ -13,7 +13,7 @@ OUTNAME = $(basename $(MAIN))
 
 # OS specific flags and libs
 ifeq ($(shell uname),Linux)
-CFLAGS  += -std=gnu++11
+CFLAGS  += -std=c++0x
 LIBS    = -pthread
 endif
 
