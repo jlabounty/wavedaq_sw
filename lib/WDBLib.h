@@ -605,18 +605,17 @@ public:
 #if defined(__linux__) || defined(__APPLE__)
 #include <unistd.h>
 #define O_BINARY 0
+#define sleep_ms(x) usleep(x*1000)
 #endif // __linux__ || __APLE__
 
 // Windows specific things
 #if defined(_WIN32)
 #include <windows.h>
+#define sleep_ms(x) Sleep(x)
 #endif // _WIN32
 
 /* Byte and Word swapping big endian <-> little endian */
 #define SWAP_UINT16(x) (((x) >> 8) | ((x) << 8))
 #define SWAP_UINT32(x) (((x) >> 24) | (((x) & 0x00FF0000) >> 8) | (((x) & 0x0000FF00) << 8) | ((x) << 24))
-
-#define sleep_ms(x) std::this_thread::sleep_for(std::chrono::milliseconds(x))
-
 
 #endif /* defined(__wdblib_h__) */
