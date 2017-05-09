@@ -97,6 +97,26 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          gl->wp->SetRotateWaveform(value == "1");
       }
 
+      else if (item == "ofsCalib1") {
+         gl->wp->SetOfsCalib1(value == "1");
+      }
+
+      else if (item == "ofsCalib2") {
+         gl->wp->SetOfsCalib2(value == "1");
+      }
+
+      else if (item == "gainCalib") {
+         gl->wp->SetGainCalib(value == "1");
+      }
+
+      else if (item == "rangeCalib") {
+         gl->wp->SetRangeCalib(value == "1");
+      }
+
+      else if (item == "removeSpikes") {
+         gl->wp->SetRemoveSpikes(value == "1");
+      }
+
       else if (item == "timeCalib1") {
          gl->wp->SetTimeCalib1(value == "1");
       }
@@ -701,6 +721,9 @@ int main(int argc, const char * argv[])
             b->SetCompPowerEnable(true);
             b->SetDrs0ChnTxEnable(0x1FF);
             b->SetDrs1ChnTxEnable(0x1FF);
+            
+            // load calibration data for board
+            gl.wp->LoadCalibration(b);
          }
       } catch (std::runtime_error &e) {
          std::cout << std::endl;

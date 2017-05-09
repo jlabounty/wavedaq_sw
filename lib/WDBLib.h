@@ -24,6 +24,8 @@
 
 #define WD_N_CHANNELS 18
 
+class WDB;
+
 //--------------------------------------------------------------------
 
 #pragma pack(1) // byte-level alignement for frame header
@@ -73,8 +75,8 @@ class vcalib {
 public:
    VCALIB_DATA      mCalib;
    vcalib() {};
-   void save() {};
-   void load() {};
+   void save(WDB *b, std::string filename);
+   void load(WDB *b, std::string filename);
 };
 
 //--------------------------------------------------------------------
@@ -112,7 +114,6 @@ typedef struct {
    int            iIter3;
    int            nIter4;
    int            iIter4;
-   int            index;
    Averager       *ave;
    int            fh;
 } VCALIB_PROGRESS;
@@ -229,16 +230,14 @@ public:
 
 //--------------------------------------------------------------------
 
-class WDB;
-
 // waveform processor (waveform decoding, calibration, saving, ...
 class WP {
    // calibration states
    enum { cCsInactive = 0,
-      cCsSingleBoard = 1,
-      cCsFirstBoard  = 2,
-      cCsFirstSample = 3,
-      cCsRunning     = 4 };
+      cCsSingleBoard  = 1,
+      cCsFirstBoard   = 2,
+      cCsFirstSample  = 3,
+      cCsRunning      = 4 };
    
    static int        gDataSocket;
    static int        gServerPort;
@@ -278,6 +277,7 @@ class WP {
    bool              AllPacketsReceived();
    void              RotateWaveforms();
    void              CalibrateWaveforms();
+   void              RemoveSpikes(int tc, float wf[][1024]);
    //   void              LogWaveforms();
    
    vcalib            mVCalib;
@@ -347,6 +347,8 @@ public:
    void StartCalibrationTime(bool bAll) { tCalibProg.nBoard = bAll ? mWdb.size() : 1; tCalibProg.state = cCsFirstBoard; };
    void DoCalibrationVoltageStep();
    void DoCalibrationTimeStep();
+   void SaveCalibration(WDB *b);
+   void LoadCalibration(WDB *b);
    
    void StartLogging(std::string fileName, int format, bool bAll, int nEvents);
    void StopLogging();
@@ -386,6 +388,7 @@ public:
       mName = name;
       mVerbose = verbose;
       mDemoMode = (name == "demo");
+      mFEGain = 0;
    }
 
    // constants

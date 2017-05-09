@@ -18,6 +18,7 @@
 #include <sys/socket.h>
 #include <sys/select.h>
 #include <sys/time.h>
+#include <sys/stat.h>
 #include <arpa/inet.h>
 #include <ifaddrs.h>
 #include <netdb.h>
@@ -1607,13 +1608,15 @@ float WDB::GetFeGain(int chn)
    ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER2_EN_OFS  : WD2_BIT_FE1_AMPLIFIER2_EN_OFS;
    int en2 = bitExtract(creg, rofs, mask, ofs);
    
+   mFEGain = 1;
    for (int i=0 ; i<8 ; i++)
       if (((gain_table[i].att0 | (gain_table[i].att1 << 1)) == att) &&
           gain_table[i].en1 == en1 &&
-          gain_table[i].en2 == en2)
-         return gain_table[i].gain;
+          gain_table[i].en2 == en2) {
+         mFEGain = gain_table[i].gain;
+      }
 
-   return 1;
+   return mFEGain;
 }
 
 void WDB::SetFeGain(int chn, float gain)
@@ -2284,10 +2287,155 @@ void WP::RotateWaveforms()
 
 //--------------------------------------------------------------------
 
+void WP::RemoveSpikes(int trigger_cell, float wf[][1024])
+{
+   /*
+    Remove a specific kind of spike on DRS4.
+    
+    This spike has some specific features, namely:
+    - Common on all the channels on a chip
+    - Constant heigh and width
+    - Two spikes per channel
+    - Symmetric to cell #0.
+    
+    
+    Please note that this is not a general purpose spike-remal function.
+    */
+   
+   int i, j, k, l;
+   double hp, x, y;
+   int sp[8][10];
+   int rsp[10], rot_sp[10];
+   int n_sp[8], n_rsp;
+   int  nNeighbor, nSymmetric;
+   float cwf[WD_N_CHANNELS][1024];
+   
+  
+   /* rotate waveform back relative to cell #0 */
+   if (mRotateWaveform) {
+      for (i=0 ; i<8 ; i++)
+         for (j=0 ; j<1024 ; j++)
+            cwf[i][(j+trigger_cell) % 1024] = wf[i][j];
+   } else {
+      for (i=0 ; i<8 ; i++)
+         for (j=0 ; j<1024 ; j++)
+            cwf[i][j] = wf[i][j];
+   }
+   
+   memset(sp, 0, sizeof(sp));
+   memset(n_sp, 0, sizeof(n_sp));
+   memset(rsp, 0, sizeof(rsp));
+   n_rsp = 0;
+   
+   /* find spikes with special high-pass filter, skip last values */
+   for (j=0 ; j<1020 ; j++) {
+      for (i=1 ; i<4 ; i++) { // TBD: temporary fix for bad channels 1,5,6,7
+         hp = -cwf[i][j] + cwf[i][(j+1)%1024]+cwf[i][(j+2)%1024] - cwf[i][(j+3) % 1024];
+         if (hp > 0.020) {
+            if (n_sp[i] < 10) // record maximum of 10 spikes
+               sp[i][n_sp[i]++] = j;
+            else
+               return;        // too many spikes -> something wrong
+         }
+      }
+   }
+   
+   /* go through all spikes and look for symmetric spikes and neighbors */
+   for (i=0 ; i<8 ; i++) {
+      for (j=0 ; j<n_sp[i] ; j++) {
+         /* check if this spike has a symmetric partner in any channel */
+         for (k=nSymmetric=0 ; k<8 ; k++) {
+            for (l=0 ; l<n_sp[k] ; l++)
+               if (sp[i][j] == (1020-sp[k][l]+1024) % 1024) {
+                  nSymmetric++;
+                  break;
+               }
+         }
+         
+         /* check if this spike has same spike in any other channels */
+         for (k=nNeighbor=0 ; k<8 ; k++)
+            if (i != k) {
+               for (l=0 ; l<n_sp[k] ; l++)
+                  if (sp[i][j] == sp[k][l]) {
+                     nNeighbor++;
+                     break;
+                  }
+            }
+         
+         if (nSymmetric + nNeighbor >= 2) {
+            /* if at least two matching spikes, treat this as a real spike */
+            for (k=0 ; k<n_rsp ; k++)
+               if (rsp[k] == sp[i][j])
+                  break;
+            if (n_rsp < 10 && k == n_rsp)
+               rsp[n_rsp++] = sp[i][j];
+         }
+      }
+   }
+   
+   /* rotate spikes according to trigger cell */
+   if (mRotateWaveform) {
+      for (i=0 ; i<n_rsp ; i++)
+         rot_sp[i] = (rsp[i] - trigger_cell + 1024) % 1024;
+   } else {
+      for (i=0 ; i<n_rsp ; i++)
+         rot_sp[i] = rsp[i];
+   }
+   
+   /* recognize spikes if at least one channel has it */
+   for (k=0 ; k<n_rsp ; k++) {
+      for (i=0 ; i<8 ; i++) {
+         
+         if (k < n_rsp-1 && rsp[k] == 0 && rsp[k+1] == 1020) {
+            /* remove double spike */
+            j = rot_sp[k] > rot_sp[k+1] ? rot_sp[k+1] : rot_sp[k];
+            x = wf[i][(j+1) % 1024];
+            y = wf[i][(j+6) % 1024];
+            if (fabs(x-y) < 0.015) {
+               wf[i][(j+2) % 1024] = (float)(x + 1*(y-x)/5);
+               wf[i][(j+3) % 1024] = (float)(x + 2*(y-x)/5);
+               wf[i][(j+4) % 1024] = (float)(x + 3*(y-x)/5);
+               wf[i][(j+5) % 1024] = (float)(x + 4*(y-x)/5);
+            } else {
+               wf[i][(j+2) % 1024] -= 0.0148f;
+               wf[i][(j+3) % 1024] -= 0.0148f;
+               wf[i][(j+4) % 1024] -= 0.0148f;
+               wf[i][(j+5) % 1024] -= 0.0148f;
+            }
+         } else {
+            /* remove single spike */
+            x = wf[i][rot_sp[k]];
+            y = wf[i][(rot_sp[k]+3) % 1024];
+            
+            if (fabs(x-y) < 0.010) {
+               wf[i][(rot_sp[k]+1) % 1024] = (float)(x + 1*(y-x)/3);
+               wf[i][(rot_sp[k]+2) % 1024] = (float)(x + 2*(y-x)/3);
+            } else {
+               wf[i][(rot_sp[k]+1) % 1024] -= 0.009f;
+               wf[i][(rot_sp[k]+2) % 1024] -= 0.009f;
+            }
+         }
+      }
+      if (k < n_rsp-1 && rsp[k] == 0 && rsp[k+1] == 1020)
+         k++; // skip second half of double spike
+   }
+}
+
+//--------------------------------------------------------------------
+
 void WP::CalibrateWaveforms()
 {
    for (auto it = mEvent.begin() ; it != mEvent.end() ; it++) {
       auto ev = (*it);
+      
+      // search board belonging to this event
+      WDB* wdb = nullptr;
+      for (auto b: mWdb)
+         if (b->GetSerialNumber() == ev->mBoardId) {
+            wdb = b;
+            break;
+         }
+      assert(wdb);
       
       if (ev->mWFTypeADC) { //---------- calibrate ADC data ----------
          
@@ -2309,27 +2457,71 @@ void WP::CalibrateWaveforms()
 
          // cell-by-cell offset calibration
          if (mOfsCalib1) {
-            // TBD
+            if (mRotateWaveform) {
+               for (int i=0 ; i<WD_N_CHANNELS ; i++) {
+                  int tc = i < 8 || i == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
+                  for (int j=0 ; j<1024 ; j++)
+                     ev->mWfU[i][j] -= mVCalib.mCalib.wf_offset1[i][(j+tc) % 1024];
+               }
+            } else {
+               for (int i=0 ; i<WD_N_CHANNELS ; i++)
+                  for (int j=0 ; j<1024 ; j++)
+                     ev->mWfU[i][j] -= mVCalib.mCalib.wf_offset1[i][j];
+            }
          };
          
          // start-to-end offset calibration
          if (mOfsCalib2) {
-            // TBD
+            for (int i=0 ; i<WD_N_CHANNELS ; i++)
+               for (int j=0 ; j<1024 ; j++)
+                  ev->mWfU[i][j] -= mVCalib.mCalib.wf_offset2[i][j];
          };
          
          // gain calibration
          if (mGainCalib) {
-            // TBD
+            if (mRotateWaveform) {
+               for (int i=0 ; i<WD_N_CHANNELS-2 ; i++) { // exclude clock channels
+                  int tc = i < 8 || i == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
+                  for (int j=0 ; j<1024 ; j++) {
+                     if (ev->mWfU[i][j] > 0)
+                        ev->mWfU[i][j] /= mVCalib.mCalib.wf_gain1[i][(j+tc) % 1024];
+                     else
+                        ev->mWfU[i][j] /= mVCalib.mCalib.wf_gain2[i][(j+tc) % 1024];
+                  }
+               }
+            } else {
+               for (int i=0 ; i<WD_N_CHANNELS-2 ; i++)
+                  for (int j=0 ; j<1024 ; j++) {
+                     if (ev->mWfU[i][j] > 0)
+                        ev->mWfU[i][j] /= mVCalib.mCalib.wf_gain1[i][j];
+                     else
+                        ev->mWfU[i][j] /= mVCalib.mCalib.wf_gain2[i][j];
+                  }
+            }
          };
          
-         // gain calibration
+         // range calibration
          if (mRangeCalib) {
-            // TBD
+            float ofs;
+            
+            for (int i=0 ; i<WD_N_CHANNELS-2 ; i++) { // exclude clock channels
+               if (fabs(wdb->GetRange() - (-0.45)) < 0.001)
+                  ofs = mVCalib.mCalib.drs_offset_range0[i];
+               else if (fabs(wdb->GetRange()) < 0.001)
+                  ofs = mVCalib.mCalib.drs_offset_range1[i];
+               else if (fabs(wdb->GetRange() - 0.45) < 0.001)
+                  ofs = mVCalib.mCalib.drs_offset_range2[i];
+               else
+                  ofs = 0;
+               for (int j=0 ; j<1024 ; j++)
+                  ev->mWfU[i][j] -= ofs;
+            }
          };
 
          // remove spikes
          if (mRemoveSpikes) {
-            // TBD
+            RemoveSpikes(ev->mTriggerCell[0], ev->mWfU);
+            RemoveSpikes(ev->mTriggerCell[0], ev->mWfU+WD_N_CHANNELS/2);
          };
 
          // calculate calibrated time for each event
@@ -2618,21 +2810,25 @@ void WP::DoCalibrationVoltageStep()
       // save current board settings
       // ## TBD
       
-      memset(&vCalibProg, 0, sizeof(VCALIB_PROGRESS));
-      vCalibProg.state   = cCsFirstSample;
-      vCalibProg.nIter1 = 200;
-      vCalibProg.nIter2 = 200;
-      vCalibProg.nIter3 = 200;
-      vCalibProg.nIter4 = 200;
-      vCalibProg.iBoard = 0;
+      vCalibProg.state    = cCsFirstSample;
+      vCalibProg.progress = 0;
+      vCalibProg.nIter1   = 200;
+      vCalibProg.nIter2   = 200;
+      vCalibProg.nIter3   = 200;
+      vCalibProg.nIter4   = 200;
+      vCalibProg.iBoard   = 0;
+      vCalibProg.iIter1   = 0;
+      vCalibProg.iIter2   = 0;
+      vCalibProg.iIter3   = 0;
+      vCalibProg.iIter4   = 0;
    }
    
    if (vCalibProg.state == cCsFirstSample) {
       vCalibProg.progress = 0;
-      vCalibProg.iIter1  = 0;
-      vCalibProg.iIter2  = 0;
-      vCalibProg.iIter3  = 0;
-      vCalibProg.iIter4  = 0;
+      vCalibProg.iIter1   = 0;
+      vCalibProg.iIter2   = 0;
+      vCalibProg.iIter3   = 0;
+      vCalibProg.iIter4   = 0;
       vCalibProg.state    = cCsRunning;
    }
    
@@ -2931,6 +3127,7 @@ void WP::DoCalibrationVoltageStep()
    */
    
    // save calibration
+   SaveCalibration(b);
    
    /*
    memcpy(gl->board[vCalibProg.iBoard].vcalib.version_id, "CAL1", 4);
@@ -2939,7 +3136,6 @@ void WP::DoCalibrationVoltageStep()
    
    memcpy(&old_gl.board[vCalibProg.iBoard].vcalib, &gl->board[vCalibProg.iBoard].vcalib, sizeof(VCALIB_DATA));
    
-   mkdir("calib", 0755);
    sprintf(str, "calib/%s.vcal", gl->board[vCalibProg.iBoard].name);
    vCalibProg.fh = open(str, O_WRONLY | O_CREAT, 0644);
    assert(vCalibProg.fh > 0);
@@ -2963,6 +3159,22 @@ void WP::DoCalibrationVoltageStep()
 }
 
 //--------------------------------------------------------------------
+
+void WP::SaveCalibration(WDB *b)
+{
+   mkdir("calib", 0755);
+   mVCalib.save(b, "calib/"+b->GetName()+".vcal");
+}
+
+//--------------------------------------------------------------------
+
+void WP::LoadCalibration(WDB *b)
+{
+   mVCalib.load(b, "calib/"+b->GetName()+".vcal");
+}
+
+//--------------------------------------------------------------------
+
 
 void WP::DoCalibrationTimeStep()
 {
@@ -3007,5 +3219,68 @@ void WP::StopLogging()
    if (li.xml) {
       mxml_close_file(li.xml);
       li.nLogged = 0;
+   }
+}
+
+//--------------------------------------------------------------------
+
+void vcalib::save(WDB *b, std::string filename)
+{
+   std::memcpy(mCalib.version_id, "CAL1", 4);
+   mCalib.sampling_frequency = b->GetDrsSampleFreq() * 1000;
+   mCalib.temperature = b->GetTemperature();
+   
+   int fh = open(filename.c_str(), O_WRONLY | O_CREAT, 0644);
+   assert(fh > 0);
+   assert(write(fh, &mCalib, sizeof(VCALIB_DATA)) == sizeof(VCALIB_DATA));
+   close(fh);
+}
+
+void vcalib::load(WDB *b, std::string filename)
+{
+   int fh = open(filename.c_str(), O_RDONLY, 0644);
+   if (fh > 0) {
+      int size = read(fh, &mCalib, sizeof(VCALIB_DATA));
+      close(fh);
+
+      if (size != sizeof(VCALIB_DATA)) {
+         std::cerr << "Invalid voltage calibration file size in " << filename << ". Aborting." << std::endl;
+         return;
+      }
+      
+      if (memcmp(mCalib.version_id, "CAL1", 4) != 0) {
+         std::cerr << "Invalid voltage calibration file format in " << filename << ". Aborting." << std::endl;
+         return;
+      }
+      
+      if (fabs(mCalib.sampling_frequency - b->GetDrsSampleFreq()) > 0.001) {
+         std::cerr << "Warning: Voltage calibration data in " << filename << " is for "
+         << std::cerr.precision(3) << mCalib.sampling_frequency
+         << " GSPS, running now at "
+         << b->GetDrsSampleFreq()/1000 << " GSPS"  << std::endl;
+      }
+
+      if (fabs(mCalib.temperature - b->GetTemperature()) > 5) {
+         std::cerr << "Warning: Voltage calibration data in " << filename << " is for "
+         << std::cout.precision(3) << mCalib.temperature
+         << " deg. C, running now at " << b->GetTemperature() << " deg. C" << std::endl;
+      }
+      
+   } else {
+      memset(mCalib.wf_offset1, 0, sizeof(float)*16*1024);
+      memset(mCalib.wf_offset2, 0, sizeof(float)*16*1024);
+      for (int ch=0 ; ch < WD_N_CHANNELS ; ch++) {
+         for (int bin=0 ; bin<1024 ; bin++) {
+            mCalib.wf_gain1[ch][bin] = 1;
+            mCalib.wf_gain2[ch][bin] = 1;
+         }
+         mCalib.drs_offset_range0[ch] = 0.45f;
+         mCalib.drs_offset_range1[ch] = 0;
+         mCalib.drs_offset_range2[ch] = -0.45f;
+         
+         mCalib.adc_offset_range0[ch] = 0;
+         mCalib.adc_offset_range1[ch] = 0;
+         mCalib.adc_offset_range2[ch] = 0;
+      }
    }
 }
