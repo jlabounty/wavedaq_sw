@@ -723,7 +723,15 @@ int main(int argc, const char * argv[])
             b->SetDrs1ChnTxEnable(0x1FF);
             
             // load calibration data for board
-            gl.wp->LoadCalibration(b);
+            b->LoadCalibration();
+            if (b->mVCalib.IsValid()) {
+               gl.wp->SetOfsCalib1(true);
+               gl.wp->SetOfsCalib2(true);
+               gl.wp->SetGainCalib(true);
+               gl.wp->SetRangeCalib(true);
+               gl.wp->SetRemoveSpikes(true);
+            }
+                
          }
       } catch (std::runtime_error &e) {
          std::cout << std::endl;

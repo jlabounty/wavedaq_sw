@@ -1608,15 +1608,14 @@ float WDB::GetFeGain(int chn)
    ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER2_EN_OFS  : WD2_BIT_FE1_AMPLIFIER2_EN_OFS;
    int en2 = bitExtract(creg, rofs, mask, ofs);
    
-   mFEGain = 1;
    for (int i=0 ; i<8 ; i++)
       if (((gain_table[i].att0 | (gain_table[i].att1 << 1)) == att) &&
           gain_table[i].en1 == en1 &&
           gain_table[i].en2 == en2) {
-         mFEGain = gain_table[i].gain;
+         return gain_table[i].gain;
       }
 
-   return mFEGain;
+   return 0;
 }
 
 void WDB::SetFeGain(int chn, float gain)
@@ -1936,6 +1935,21 @@ void WDB::RequestEvent()
 }
 
 //--------------------------------------------------------------------
+
+void WDB::SaveCalibration()
+{
+   mkdir("calib", 0755);
+   mVCalib.save(this, "calib/"+mName+".vcal");
+}
+
+//--------------------------------------------------------------------
+
+void WDB::LoadCalibration()
+{
+   mVCalib.load(this, "calib/"+mName+".vcal");
+}
+
+//====================================================================
 
 void WDEvent::SetEventHeaderInfo(WD2_FRAME_HEADER *ph)
 {
@@ -2461,12 +2475,12 @@ void WP::CalibrateWaveforms()
                for (int i=0 ; i<WD_N_CHANNELS ; i++) {
                   int tc = i < 8 || i == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
                   for (int j=0 ; j<1024 ; j++)
-                     ev->mWfU[i][j] -= mVCalib.mCalib.wf_offset1[i][(j+tc) % 1024];
+                     ev->mWfU[i][j] -= wdb->mVCalib.mCalib.wf_offset1[i][(j+tc) % 1024];
                }
             } else {
                for (int i=0 ; i<WD_N_CHANNELS ; i++)
                   for (int j=0 ; j<1024 ; j++)
-                     ev->mWfU[i][j] -= mVCalib.mCalib.wf_offset1[i][j];
+                     ev->mWfU[i][j] -= wdb->mVCalib.mCalib.wf_offset1[i][j];
             }
          };
          
@@ -2474,7 +2488,7 @@ void WP::CalibrateWaveforms()
          if (mOfsCalib2) {
             for (int i=0 ; i<WD_N_CHANNELS ; i++)
                for (int j=0 ; j<1024 ; j++)
-                  ev->mWfU[i][j] -= mVCalib.mCalib.wf_offset2[i][j];
+                  ev->mWfU[i][j] -= wdb->mVCalib.mCalib.wf_offset2[i][j];
          };
          
          // gain calibration
@@ -2484,18 +2498,18 @@ void WP::CalibrateWaveforms()
                   int tc = i < 8 || i == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
                   for (int j=0 ; j<1024 ; j++) {
                      if (ev->mWfU[i][j] > 0)
-                        ev->mWfU[i][j] /= mVCalib.mCalib.wf_gain1[i][(j+tc) % 1024];
+                        ev->mWfU[i][j] /= wdb->mVCalib.mCalib.wf_gain1[i][(j+tc) % 1024];
                      else
-                        ev->mWfU[i][j] /= mVCalib.mCalib.wf_gain2[i][(j+tc) % 1024];
+                        ev->mWfU[i][j] /= wdb->mVCalib.mCalib.wf_gain2[i][(j+tc) % 1024];
                   }
                }
             } else {
                for (int i=0 ; i<WD_N_CHANNELS-2 ; i++)
                   for (int j=0 ; j<1024 ; j++) {
                      if (ev->mWfU[i][j] > 0)
-                        ev->mWfU[i][j] /= mVCalib.mCalib.wf_gain1[i][j];
+                        ev->mWfU[i][j] /= wdb->mVCalib.mCalib.wf_gain1[i][j];
                      else
-                        ev->mWfU[i][j] /= mVCalib.mCalib.wf_gain2[i][j];
+                        ev->mWfU[i][j] /= wdb->mVCalib.mCalib.wf_gain2[i][j];
                   }
             }
          };
@@ -2506,11 +2520,11 @@ void WP::CalibrateWaveforms()
             
             for (int i=0 ; i<WD_N_CHANNELS-2 ; i++) { // exclude clock channels
                if (fabs(wdb->GetRange() - (-0.45)) < 0.001)
-                  ofs = mVCalib.mCalib.drs_offset_range0[i];
+                  ofs = wdb->mVCalib.mCalib.drs_offset_range0[i];
                else if (fabs(wdb->GetRange()) < 0.001)
-                  ofs = mVCalib.mCalib.drs_offset_range1[i];
+                  ofs = wdb->mVCalib.mCalib.drs_offset_range1[i];
                else if (fabs(wdb->GetRange() - 0.45) < 0.001)
-                  ofs = mVCalib.mCalib.drs_offset_range2[i];
+                  ofs = wdb->mVCalib.mCalib.drs_offset_range2[i];
                else
                   ofs = 0;
                for (int j=0 ; j<1024 ; j++)
@@ -2857,6 +2871,9 @@ void WP::DoCalibrationVoltageStep()
          // set gain 1
          b->SetFeGain(-1, 1);
 
+         // set offset zero
+         b->SetDacCalDcV(0);
+
          int n = vCalibProg.nIter1;
          n = std::max(n, vCalibProg.nIter2);
          n = std::max(n, vCalibProg.nIter3);
@@ -2884,7 +2901,7 @@ void WP::DoCalibrationVoltageStep()
       if (vCalibProg.iIter1 == vCalibProg.nIter1) {
          for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
-               mVCalib.mCalib.wf_offset1[ch][bin] = (float)vCalibProg.ave->Median(0, ch, bin);
+               b->mVCalib.mCalib.wf_offset1[ch][bin] = (float)vCalibProg.ave->Median(0, ch, bin);
          
          // ave->SaveNormalizedDistribution("wf.csv", 0);
          vCalibProg.ave->Reset();
@@ -2924,7 +2941,7 @@ void WP::DoCalibrationVoltageStep()
       if (vCalibProg.iIter2 == vCalibProg.nIter2) {
          for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
-               mVCalib.mCalib.wf_offset2[ch][bin] = (float)vCalibProg.ave->Median(0, ch, bin);
+               b->mVCalib.mCalib.wf_offset2[ch][bin] = (float)vCalibProg.ave->Median(0, ch, bin);
          
          vCalibProg.ave->Reset();
       }
@@ -2944,7 +2961,7 @@ void WP::DoCalibrationVoltageStep()
          mOfsCalib1           = true;  // do 1st calibration
          mOfsCalib2           = true;  // do 2nd calibration
 
-         b->SetRange(0.45);
+         b->SetDacCalDcV(0.45);
       }
       
       vCalibProg.iIter3++;
@@ -2967,7 +2984,7 @@ void WP::DoCalibrationVoltageStep()
       if (vCalibProg.iIter3 == vCalibProg.nIter3) {
          for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) // exclude clock channels
             for (int bin=0 ; bin<1024 ; bin++)
-               mVCalib.mCalib.wf_gain1[ch][bin] = (float)(vCalibProg.ave->Median(0, ch, bin) / 0.45);
+               b->mVCalib.mCalib.wf_gain1[ch][bin] = (float)(vCalibProg.ave->Median(0, ch, bin) / 0.45);
          
          vCalibProg.ave->Reset();
       }
@@ -2983,7 +3000,8 @@ void WP::DoCalibrationVoltageStep()
       // initialize data on first iteration
       if (vCalibProg.iIter4 == 0) {
          vCalibProg.ave->Reset();
-         b->SetRange(0.45);
+         
+         b->SetDacCalDcV(-0.45);
       }
       
       vCalibProg.iIter4++;
@@ -3005,7 +3023,7 @@ void WP::DoCalibrationVoltageStep()
       if (vCalibProg.iIter4 == vCalibProg.nIter4) {
          for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) // exclude clock channels
             for (int bin=0 ; bin<1024 ; bin++)
-               mVCalib.mCalib.wf_gain2[ch][bin] = (float)(vCalibProg.ave->Median(0, ch, bin) / -0.45);
+               b->mVCalib.mCalib.wf_gain2[ch][bin] = (float)(vCalibProg.ave->Median(0, ch, bin) / -0.45);
          
          delete vCalibProg.ave;
          vCalibProg.ave = NULL;
@@ -3039,7 +3057,7 @@ void WP::DoCalibrationVoltageStep()
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
          sum += event->mWfU[ch][i];
-      mVCalib.mCalib.drs_offset_range0[ch] = sum / 1010;
+      b->mVCalib.mCalib.drs_offset_range0[ch] = sum / 1010;
    }
    delete event;
    
@@ -3073,7 +3091,7 @@ void WP::DoCalibrationVoltageStep()
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
          sum += event->mWfU[ch][i];
-      mVCalib.mCalib.drs_offset_range1[ch] = sum / 1010;
+      b->mVCalib.mCalib.drs_offset_range1[ch] = sum / 1010;
    }
    delete event;
    
@@ -3107,7 +3125,7 @@ void WP::DoCalibrationVoltageStep()
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
          sum += event->mWfU[ch][i];
-      mVCalib.mCalib.drs_offset_range2[ch] = sum / 1010;
+      b->mVCalib.mCalib.drs_offset_range2[ch] = sum / 1010;
    }
    delete event;
    
@@ -3127,10 +3145,10 @@ void WP::DoCalibrationVoltageStep()
    */
    
    // save calibration
-   SaveCalibration(b);
+   b->SaveCalibration();
    
    /*
-   memcpy(gl->board[vCalibProg.iBoard].vcalib.version_id, "CAL1", 4);
+   memcpy(gl->board[vCalibProg.iBoard].vcalib.version_id, "CAL2", 4);
    gl->board[vCalibProg.iBoard].vcalib.sampling_frequency = gl->actual_sampling_frequency;
    gl->board[vCalibProg.iBoard].vcalib.temperature = gl->board[vCalibProg.iBoard].temperature;
    
@@ -3156,21 +3174,6 @@ void WP::DoCalibrationVoltageStep()
    }
    
    return;
-}
-
-//--------------------------------------------------------------------
-
-void WP::SaveCalibration(WDB *b)
-{
-   mkdir("calib", 0755);
-   mVCalib.save(b, "calib/"+b->GetName()+".vcal");
-}
-
-//--------------------------------------------------------------------
-
-void WP::LoadCalibration(WDB *b)
-{
-   mVCalib.load(b, "calib/"+b->GetName()+".vcal");
 }
 
 //--------------------------------------------------------------------
@@ -3224,10 +3227,30 @@ void WP::StopLogging()
 
 //--------------------------------------------------------------------
 
-void vcalib::save(WDB *b, std::string filename)
+VCALIB::VCALIB()
 {
-   std::memcpy(mCalib.version_id, "CAL1", 4);
-   mCalib.sampling_frequency = b->GetDrsSampleFreq() * 1000;
+   bValid = false; // not yet loaded
+   memset(mCalib.wf_offset1, 0, sizeof(float)*16*1024);
+   memset(mCalib.wf_offset2, 0, sizeof(float)*16*1024);
+   for (int ch=0 ; ch < WD_N_CHANNELS ; ch++) {
+      for (int bin=0 ; bin<1024 ; bin++) {
+         mCalib.wf_gain1[ch][bin] = 1;
+         mCalib.wf_gain2[ch][bin] = 1;
+      }
+      mCalib.drs_offset_range0[ch] = 0.45f;
+      mCalib.drs_offset_range1[ch] = 0;
+      mCalib.drs_offset_range2[ch] = -0.45f;
+      
+      mCalib.adc_offset_range0[ch] = 0;
+      mCalib.adc_offset_range1[ch] = 0;
+      mCalib.adc_offset_range2[ch] = 0;
+   }
+}
+
+void VCALIB::save(WDB *b, std::string filename)
+{
+   std::memcpy(mCalib.version_id, "CAL2", 4);
+   mCalib.sampling_frequency = b->GetDrsSampleFreq();
    mCalib.temperature = b->GetTemperature();
    
    int fh = open(filename.c_str(), O_WRONLY | O_CREAT, 0644);
@@ -3236,7 +3259,7 @@ void vcalib::save(WDB *b, std::string filename)
    close(fh);
 }
 
-void vcalib::load(WDB *b, std::string filename)
+void VCALIB::load(WDB *b, std::string filename)
 {
    int fh = open(filename.c_str(), O_RDONLY, 0644);
    if (fh > 0) {
@@ -3248,16 +3271,16 @@ void vcalib::load(WDB *b, std::string filename)
          return;
       }
       
-      if (memcmp(mCalib.version_id, "CAL1", 4) != 0) {
+      if (memcmp(mCalib.version_id, "CAL2", 4) != 0) {
          std::cerr << "Invalid voltage calibration file format in " << filename << ". Aborting." << std::endl;
          return;
       }
       
-      if (fabs(mCalib.sampling_frequency - b->GetDrsSampleFreq()) > 0.001) {
+      if (fabs((float)mCalib.sampling_frequency - b->GetDrsSampleFreq()) > 1) {
          std::cerr << "Warning: Voltage calibration data in " << filename << " is for "
-         << std::cerr.precision(3) << mCalib.sampling_frequency
+         << mCalib.sampling_frequency/1000.0
          << " GSPS, running now at "
-         << b->GetDrsSampleFreq()/1000 << " GSPS"  << std::endl;
+         << b->GetDrsSampleFreq()/1000.0 << " GSPS"  << std::endl;
       }
 
       if (fabs(mCalib.temperature - b->GetTemperature()) > 5) {
@@ -3265,22 +3288,13 @@ void vcalib::load(WDB *b, std::string filename)
          << std::cout.precision(3) << mCalib.temperature
          << " deg. C, running now at " << b->GetTemperature() << " deg. C" << std::endl;
       }
-      
-   } else {
-      memset(mCalib.wf_offset1, 0, sizeof(float)*16*1024);
-      memset(mCalib.wf_offset2, 0, sizeof(float)*16*1024);
-      for (int ch=0 ; ch < WD_N_CHANNELS ; ch++) {
-         for (int bin=0 ; bin<1024 ; bin++) {
-            mCalib.wf_gain1[ch][bin] = 1;
-            mCalib.wf_gain2[ch][bin] = 1;
-         }
-         mCalib.drs_offset_range0[ch] = 0.45f;
-         mCalib.drs_offset_range1[ch] = 0;
-         mCalib.drs_offset_range2[ch] = -0.45f;
-         
-         mCalib.adc_offset_range0[ch] = 0;
-         mCalib.adc_offset_range1[ch] = 0;
-         mCalib.adc_offset_range2[ch] = 0;
-      }
+      bValid = true;
    }
+}
+
+//--------------------------------------------------------------------
+
+TCALIB::TCALIB()
+{
+   
 }

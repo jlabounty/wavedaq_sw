@@ -115,7 +115,9 @@ function init() {
       inp.setAttribute("onblur", "validateParam(this,"+r+")");
       inp.setAttribute("tabindex", 116+r);
       cell.appendChild(inp);
-      cell.appendChild(document.createTextNode(" V"));
+      var e = document.createElement("span");
+      e.innerHTML = "&nbsp;V&nbsp;";
+      cell.appendChild(e);
 
       cell = row.insertCell(-1);
       cell.className = "channelsTd";
@@ -238,7 +240,7 @@ function populateControls(init)
 {
    // populate board list
    var sel = document.getElementById("wdSelect");
-   for (var i = 0; i < OSC.gl.nWdb; i++) {
+   for (var i = 0; i < OSC.wdb.length; i++) {
       var opt = document.createElement('option');
       opt.innerHTML = OSC.wdb[i].name;
       opt.value = OSC.wdb[i].name;
@@ -247,7 +249,6 @@ function populateControls(init)
       else if (sel.childNodes[i + 1].innerHTML != opt.innerHTML)
          sel.replaceChild(opt, sel.childNodes[i + 1]);
    }
-   OSC.nWdb = OSC.gl.nWdb;
 
    // populate config
    document.getElementById("sldDacTriggerLevel").set(OSC.wdb[0].dacTriggerLevel[0] + 0.5);
@@ -1348,10 +1349,10 @@ function measSelect(meas, sel, prev) {
          input[pi].onchange = function () {
             measParamChange(meas);
          };
-         for (i = 0; i < OSC.GL.board.length; i++) {
+         for (i = 0; i < OSC.wdb.length; i++) {
             var o = document.createElement("option");
             o.value = i;
-            o.innerHTML = OSC.GL.board[i].name;
+            o.innerHTML = OSC.wdb[i].name;
             if (prev) {
                if (prev.param[pi].value == i)
                   o.selected = true;

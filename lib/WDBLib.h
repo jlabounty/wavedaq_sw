@@ -57,7 +57,7 @@ typedef struct {
 typedef struct {
    char             version_id[4];
    unsigned int     crc;
-   float            sampling_frequency;
+   unsigned short   sampling_frequency;
    float            temperature;
    float            wf_offset1[16][1024];
    float            wf_offset2[16][1024];
@@ -71,10 +71,13 @@ typedef struct {
    float            adc_offset_range2[16];
 } VCALIB_DATA;
 
-class vcalib {
+class VCALIB {
+   bool             bValid;
+
 public:
    VCALIB_DATA      mCalib;
-   vcalib() {};
+   VCALIB();
+   bool IsValid() { return bValid; }
    void save(WDB *b, std::string filename);
    void load(WDB *b, std::string filename);
 };
@@ -91,10 +94,13 @@ typedef struct {
    float            offset[16];
 } TCALIB_DATA;
 
-class tcalib {
+class TCALIB {
+   bool             bValid;
+
 public:
    TCALIB_DATA      fCalib;
-   tcalib() {};
+   TCALIB();
+   bool IsValid() { return bValid; }
    void save() {};
    void load() {};
 };
@@ -280,8 +286,6 @@ class WP {
    void              RemoveSpikes(int tc, float wf[][1024]);
    //   void              LogWaveforms();
    
-   vcalib            mVCalib;
-   tcalib            mTCalib;
    VCALIB_PROGRESS   vCalibProg;
    TCALIB_PROGRESS   tCalibProg;
    
@@ -347,8 +351,6 @@ public:
    void StartCalibrationTime(bool bAll) { tCalibProg.nBoard = bAll ? mWdb.size() : 1; tCalibProg.state = cCsFirstBoard; };
    void DoCalibrationVoltageStep();
    void DoCalibrationTimeStep();
-   void SaveCalibration(WDB *b);
-   void LoadCalibration(WDB *b);
    
    void StartLogging(std::string fileName, int format, bool bAll, int nEvents);
    void StopLogging();
@@ -379,8 +381,6 @@ class WDB {
    void             WriteUDP(unsigned int ofs, std::vector<unsigned int> data, int timeout_ms = 250);
    std::vector<unsigned int> ReadUDP(unsigned int ofs, unsigned int len, int timeout_ms = 250);
 
-   float            mFEGain;
-
 public:
    
    // constructor
@@ -388,7 +388,6 @@ public:
       mName = name;
       mVerbose = verbose;
       mDemoMode = (name == "demo");
-      mFEGain = 0;
    }
 
    // constants
@@ -396,6 +395,10 @@ public:
    static const int cReadoutSrcAdc = 0x02;
    static const int cReadoutSrcTdc = 0x04;
 
+   // calibrations
+   VCALIB           mVCalib;
+   TCALIB           mTCalib;
+   
    // interface functions
    void SetVerbose(bool verbose) { mVerbose = verbose; }
    void Connect(int port);
@@ -407,7 +410,7 @@ public:
 
    // setter & getter ----------
    std::string GetName() { return mName; }
-
+   
    // status registers
    std::string GetFwBuild();
    std::string GetHwVersion();
@@ -599,6 +602,9 @@ public:
    float GetRange();
    
    void RequestEvent();
+   
+   void SaveCalibration();
+   void LoadCalibration();
 };
 
 //--------------------------------------------------------------------
