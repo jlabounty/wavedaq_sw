@@ -2612,7 +2612,7 @@ void GetTimeStamp(TIMESTAMP &ts)
 
 //--------------------------------------------------------------------
 
-void WP::LogWaveforms()
+void WP::SaveWaveforms()
 {
    static unsigned char *buffer = NULL;
    unsigned char *p;
@@ -2767,12 +2767,17 @@ void WP::LogWaveforms()
       assert(size < buffer_size);
    }
    
+   li.nLogged++;
+
    if (li.nLogged == li.nRequest && li.fh) {
       close(li.fh);
       li.fh = 0;
    }
-   
-   li.nLogged++;
+
+   if (li.nLogged == li.nRequest && li.xml) {
+      mxml_close_file(li.xml);
+      li.xml = NULL;
+   }
 }
 
 //--------------------------------------------------------------------
@@ -2798,7 +2803,7 @@ void WP::Collector()
       // do various calibrations
       RotateWaveforms();
       CalibrateWaveforms();
-      LogWaveforms();
+      SaveWaveforms();
       
       // copy full event to queue
       auto es = mEvent.begin();
@@ -2865,7 +2870,7 @@ void WP::DoCalibrationVoltageStep()
          // turn off calibration clock
          b->SetCalibBufferEnable(false);
          b->SetTimingCalibSignalEnable(false);
-         b->SetFeMux(-1, 2);
+         b->SetFeMux(-1, WDB::cFeMuxInput);
          
          // range -0.5 ... + 0.5V
          b->SetRange(0);
@@ -3191,7 +3196,7 @@ void WP::DoCalibrationTimeStep()
 
 //--------------------------------------------------------------------
 
-void WP::StartLogging(std::string fileName, int format, bool all, int nEvents)
+void WP::StartWaveformSaving(std::string fileName, int format, bool all, int nEvents)
 {
    li.fileName = fileName;
    li.format  = format;
@@ -3227,8 +3232,9 @@ void WP::StopLogging()
    }
    if (li.xml) {
       mxml_close_file(li.xml);
-      li.nLogged = 0;
+      li.xml = NULL;
    }
+   li.nLogged = 0;
 }
 
 //--------------------------------------------------------------------

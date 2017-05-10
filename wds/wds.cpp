@@ -213,7 +213,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
       else if (item == "feMux") {
          assert(iBoard != -1);
-         gl->wdb[iBoard]->SetFeMux(iChannel, std::stoi(value) ? 0x03 : 0x02);
+         gl->wdb[iBoard]->SetFeMux(iChannel, std::stoi(value) ? WDB::cFeMuxCalSource : WDB::cFeMuxInput);
       }
 
       else if (item == "drsSampleFreq") {
@@ -237,10 +237,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             gl->wp->StopLogging();
          else if (item != "") {
             auto args = split(value, '\n');
-            gl->wp->StartLogging(args[0],
-                                 args[1] == "bin" ? WP::cLiFormatBinary : WP::cLiFormatXML,
-                                 args[2] == "all",
-                                 std::stoi(args[3]));
+            gl->wp->StartWaveformSaving(args[0],
+                                        args[1] == "bin" ? WP::cLiFormatBinary : WP::cLiFormatXML,
+                                        args[2] == "all",
+                                        std::stoi(args[3]));
          }
       }
 

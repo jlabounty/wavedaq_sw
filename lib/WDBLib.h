@@ -354,10 +354,10 @@ public:
    void DoCalibrationVoltageStep();
    void DoCalibrationTimeStep();
    
-   void StartLogging(std::string fileName, int format, bool bAll, int nEvents);
+   void StartWaveformSaving(std::string fileName, int format, bool bAll, int nEvents);
    void StopLogging();
    unsigned int GetNLogged() { return li.nLogged; }
-   void LogWaveforms();
+   void SaveWaveforms();
 };
 
 //--------------------------------------------------------------------
@@ -393,10 +393,15 @@ public:
    }
 
    // constants
-   static const int cReadoutSrcDrs = 0x01;
-   static const int cReadoutSrcAdc = 0x02;
-   static const int cReadoutSrcTdc = 0x04;
-
+   enum { cReadoutSrcDrs = 0x01,
+      cReadoutSrcAdc = 0x02,
+      cReadoutSrcTdc = 0x04 };
+   
+   enum { cFeMuxNextChannel = 0,
+      cFeMuxPreviousChannel = 1,
+      cFeMuxInput           = 2,
+      cFeMuxCalSource       = 3 };
+   
    // calibrations
    VCALIB           mVCalib;
    TCALIB           mTCalib;
