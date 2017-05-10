@@ -518,11 +518,24 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       } else {
          
          // request single event
-         for (auto &b: gl->wdb) {
+         if (b == -1) {
+            // all boards
+            gl->wp->SetRequestedBoards(-1);
+
+            for (auto &b: gl->wdb) {
+               if (gl->triggerMode == cTriggerModeAuto)
+                  b->RequestEvent();
+               else if (gl->triggerMode == cTriggerModeNormal)
+                  b->StartDaqSingle();
+            }
+         } else {
+            // only current board
+            gl->wp->SetRequestedBoards(b);
+            
             if (gl->triggerMode == cTriggerModeAuto)
-               b->RequestEvent();
+               gl->wdb[b]->RequestEvent();
             else if (gl->triggerMode == cTriggerModeNormal)
-               b->StartDaqSingle();
+               gl->wdb[b]->StartDaqSingle();
          }
          
          // read waveforms
@@ -533,9 +546,6 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             delete eVector;
          }
       }
-      
-      // save waveforms
-      // wd_save_waveform(gl, b, chn, &eventHeader, wfU, wfT);
       
       if (gl->demoMode)
          b = 0xFF; // signals demo data
@@ -702,16 +712,13 @@ int main(int argc, const char * argv[])
       return 1;
    }
    
-   // instantiate waveform processor
-   gl.wp = new WP(gl.wdb, gl.verbose, gl.demoMode);
-   
    // connect to all WDB and retrieve registers
    for (auto &b: gl.wdb) {
       std::cout << "Connect to " << b->GetName() << " ... " << std::flush;
       try {
          if (!gl.demoMode) {
             b->SetVerbose(gl.verbose);
-            b->Connect(gl.wp->GetServerPort());
+            b->Connect();
             b->ReceiveStatusRegisters();
             b->ReceiveControlRegisters();
             if (gl.verbose)
@@ -724,14 +731,6 @@ int main(int argc, const char * argv[])
             
             // load calibration data for board
             b->LoadCalibration();
-            if (b->mVCalib.IsValid()) {
-               gl.wp->SetOfsCalib1(true);
-               gl.wp->SetOfsCalib2(true);
-               gl.wp->SetGainCalib(true);
-               gl.wp->SetRangeCalib(true);
-               gl.wp->SetRemoveSpikes(true);
-            }
-                
          }
       } catch (std::runtime_error &e) {
          std::cout << std::endl;
@@ -739,17 +738,23 @@ int main(int argc, const char * argv[])
          std::cout << "Aborting." << std::endl;
          return 1;
       }
-      std::cout << " OK" << std::endl;
+      std::cout << "OK" << std::endl;
    }
 
-   // tell waveform processor which WDB are active
-   for (auto &b: gl.wdb) {
-      if (b->GetReadoutSrcSel() == 1)
-         gl.wp->AddEventRequest(b->GetSerialNumber(), 0x3FFFF); // 18 DRS channels
-      else
-         gl.wp->AddEventRequest(b->GetSerialNumber(),  0xFFFF); // 16 ADC channels
+   // instantiate waveform processor
+   gl.wp = new WP(gl.wdb, gl.verbose, gl.demoMode);
+   if (gl.wdb[0]->mVCalib.IsValid()) {
+      gl.wp->SetOfsCalib1(true);
+      gl.wp->SetOfsCalib2(true);
+      gl.wp->SetGainCalib(true);
+      gl.wp->SetRangeCalib(true);
+      gl.wp->SetRemoveSpikes(true);
    }
 
+   // set destination port after WP has been initialized
+   for (auto &b: gl.wdb)
+      b->SetDestinationPort(gl.wp->GetServerPort());
+   
    // initialize web server
    struct mg_mgr mgr;
    struct mg_connection *con;

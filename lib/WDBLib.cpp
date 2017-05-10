@@ -410,7 +410,7 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg, int 
 
 //--------------------------------------------------------------------
 
-void WDB::Connect(int port)
+void WDB::Connect()
 {
    struct sockaddr_in client_addr;
    struct hostent *phe;
@@ -457,7 +457,10 @@ void WDB::Connect(int port)
    
    // set dbglevel none
    SendUDP("dbglvl none");
-   
+}
+
+void WDB::SetDestinationPort(int port)
+{
    // set destinantion port in WD board
    SendUDP(std::string("setenv dstport ")+std::to_string(port));
    
@@ -1999,9 +2002,9 @@ WP::WP(std::vector<WDB *> w, bool verbose, bool demo)
    mTqueue = new tqueue<std::vector<WDEvent *>*>(100);
    
    // create UDB socket to receive binary data from WDB
-   if (gDataSocket == 0) {
-      gDataSocket = socket(AF_INET, SOCK_DGRAM, 0);
-      assert(gDataSocket);
+   if (WP::gDataSocket == 0) {
+      WP::gDataSocket = socket(AF_INET, SOCK_DGRAM, 0);
+      assert(WP::gDataSocket);
       
       // bind socket to port chosen by OS
       std::memset((char*)&server_addr, 0, sizeof(server_addr));
@@ -2013,49 +2016,42 @@ WP::WP(std::vector<WDB *> w, bool verbose, bool demo)
          throw std::runtime_error(std::string("Cannot bind socket"));
       }
       auto size = sizeof(server_addr);
-      getsockname(gDataSocket, (struct sockaddr *) &server_addr, (socklen_t *) &size);
-      gServerPort = ntohs(server_addr.sin_port);
+      getsockname(WP::gDataSocket, (struct sockaddr *) &server_addr, (socklen_t *) &size);
+      WP::gServerPort = ntohs(server_addr.sin_port);
       
       if (this->mVerbose)
-         std::cout << std::endl << "Listening on data port " << gServerPort << "." << std::endl;
+         std::cout << std::endl << "Listening on data port " << WP::gServerPort << "." << std::endl;
    }
 
+   // allocated event requests and (empty) events
+   for (int i=0 ; i<mWdb.size() ; i++) {
+      mEventRequest.push_back(new WDEventRequest(mWdb[i]->GetSerialNumber()));
+      mEvent.push_back(new WDEvent(mWdb[i]->GetSerialNumber()));
+   }
+   
    // start waveform collector thread
    mThreadCollector = this->SpawnCollectorThread();
+   
+   memset(&vCalibProg, 0, sizeof(vCalibProg));
+   memset(&tCalibProg, 0, sizeof(tCalibProg));
 }
 
 //--------------------------------------------------------------------
 
-void WP::AddEventRequest(int boardID, unsigned int channelMask)
+void WP::SetEventRequestMask(int b, unsigned int mask)
 {
-   WDEventRequest *r = new WDEventRequest(boardID, channelMask);
-   mEventRequest.push_back(r);
-   WDEvent *e = new WDEvent(boardID);
-   mEvent.push_back(e);
+   mEventRequest[b]->SetMask(mask);
 }
 
-void WP::SetEventRequestMask(int boardID, unsigned int channelMask)
+void WP::SetRequestedBoards(int b)
 {
-   for (auto r = mEventRequest.begin() ; r != mEventRequest.end() ; r++) {
-      if ((*r)->GetBoardId() == boardID) {
-         (*r)->SetMask(channelMask);
-      }
-   }
-}
-
-void WP::RemoveEventRequest(int boardID)
-{
-   for (auto r = mEventRequest.begin() ; r != mEventRequest.end() ; r++) {
-      if ((*r)->GetBoardId() == boardID) {
-         mEventRequest.erase(r);
-         delete *r;
-      }
-   }
-   for (auto e = mEvent.begin() ; e != mEvent.end() ; e++) {
-      if ((*e)->mBoardId == boardID) {
-         mEvent.erase(e);
-         delete *e;
-      }
+   if (b == -1) {
+      for (auto &r: mEventRequest)
+         r->SetRequested(true);
+   } else {
+      for (auto &r: mEventRequest)
+         r->SetRequested(false);
+      mEventRequest[b]->SetRequested(true);
    }
 }
 
@@ -2097,7 +2093,7 @@ bool WP::AllPacketsReceived()
 {
    auto it = mEventRequest.begin();
    while (it != mEventRequest.end()) {
-      if (!(*it)->IsWfValid())
+      if ((*it)->IsRequested()  && !(*it)->IsWfValid())
          break;
       it++;
    }
@@ -2115,7 +2111,7 @@ void WP::ReceiveWfPacket()
    int status;
    
    FD_ZERO(&readfds);
-   FD_SET(gDataSocket, &readfds);
+   FD_SET(WP::gDataSocket, &readfds);
    
    timeout.tv_sec = 1;
    timeout.tv_usec = 0;
@@ -2127,13 +2123,13 @@ void WP::ReceiveWfPacket()
    if (status == -1)
       perror("select");
    
-   if (FD_ISSET(gDataSocket, &readfds)) {
+   if (FD_ISSET(WP::gDataSocket, &readfds)) {
       // packet is available, so receive it
       struct sockaddr_in remote_addr;
       unsigned char buffer[1800];
       
       int len = sizeof(remote_addr);
-      int n = (int)recvfrom(gDataSocket, (char *)buffer, sizeof(buffer), 0,
+      int n = (int)recvfrom(WP::gDataSocket, (char *)buffer, sizeof(buffer), 0,
                             (struct sockaddr *)&remote_addr, (socklen_t *)&len);
       if (n > (int)sizeof(WD2_FRAME_HEADER)) {
          WD2_FRAME_HEADER *ph = (WD2_FRAME_HEADER *)buffer;
@@ -2162,7 +2158,7 @@ void WP::ReceiveWfPacket()
          ph->temperature              = SWAP_UINT16(ph->temperature);
          ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
          
-         /*
+#if 0
          if (mVerbose)
             printf("#%02d from %s:%d, event=%5d type=%d ADC/Chn/Segment=%d/%d/%d Tcell=%04d/%04d T=%1.1lf\n",
                    mPacketsReceived-1,
@@ -2176,7 +2172,7 @@ void WP::ReceiveWfPacket()
                    ph->drs0_trigger_cell,
                    ph->drs1_trigger_cell,
                    ph->temperature*0.0625);
-         /*/
+#endif
          
          if (mCurrentEvent == -1)
             mCurrentEvent = ph->event_number;

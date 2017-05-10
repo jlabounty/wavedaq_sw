@@ -215,12 +215,14 @@ public:
 
 class WDEventRequest {
    unsigned short   mBoardId;
+   bool             mBoardRequested;
    bool             mWfValid[WD_N_CHANNELS][2];
    unsigned int     mChannelMask;
  
 public:
    WDEventRequest(int boardId, unsigned int mask = 0xFFFF) {
       mBoardId = boardId;
+      mBoardRequested = true;
       for (int i=0 ; i<WD_N_CHANNELS ; i++) {
          mWfValid[i][0] = false;
          mWfValid[i][1] = false;
@@ -229,6 +231,8 @@ public:
    } ;
    
    int              GetBoardId() { return mBoardId; }
+   void             SetRequested(bool flag) { mBoardRequested = flag; }
+   bool             IsRequested() { return mBoardRequested; }
    void             SetWfValid(int channel, int segment, bool v) { mWfValid[channel][segment] = v; }
    void             SetMask(unsigned int mask) { mChannelMask = mask; }
    bool             IsWfValid();
@@ -344,9 +348,8 @@ public:
    float GetTcalibProgress() { return tCalibProg.progress; }
 
    // functions
-   void AddEventRequest(int boardID, unsigned int channelMask = 0xFFFF);
-   void SetEventRequestMask(int boardID, unsigned int channelMask);
-   void RemoveEventRequest(int boardID);
+   void SetRequestedBoards(int b);
+   void SetEventRequestMask(int b, unsigned int mask);
    WDEvent* ReadSingleEvent(WDB *b, int timeout);
    
    void StartCalibrationVoltage(bool bAll) { vCalibProg.nBoard = bAll ? mWdb.size() : 1; vCalibProg.state = cCsFirstBoard; }
@@ -408,7 +411,8 @@ public:
    
    // interface functions
    void SetVerbose(bool verbose) { mVerbose = verbose; }
-   void Connect(int port);
+   void Connect();
+   void SetDestinationPort(int port);
    void ReceiveControlRegisters(unsigned int index=0, unsigned int nReg=REG_NR_OF_CTRL_REGS);
    void ReceiveStatusRegisters(unsigned int index=0, unsigned int nReg=REG_NR_OF_STAT_REGS);
    void ReceiveStatusRegister(int ofs);
