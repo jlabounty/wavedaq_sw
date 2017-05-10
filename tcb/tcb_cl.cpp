@@ -450,14 +450,14 @@ int main(int argc, char *argv[])
       }
      if(option == 27) {
        u_int32_t valdo, valup;
-         printf(" opt = 27 : Set control words ... \n");
-         printf("Control word [31:0]? (hex)\n");
-         scanf("%d",&valdo);
-         printf("Control word [31:0]? (hex)\n");
-         scanf("%d",&valup);
-         TCBBoard.SetCheckWord(valdo,valup);
-	 TCBBoard.GetCheckWord();
-      }
+       printf(" opt = 27 : Set control words ... \n");
+       printf("Control word [31:0]? (hex)\n");
+       scanf("%x",&valdo);
+       printf("Control word [63:32]? (hex)\n");
+       scanf("%x",&valup);
+       TCBBoard.SetCheckWord(valdo,valup);
+       TCBBoard.GetCheckWord();
+     }
      if(option == 28) {
          printf(" opt = 28 : Get Check Status ... \n");
          TCBBoard.GetCheckStatus();
