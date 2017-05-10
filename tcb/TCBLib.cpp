@@ -36,9 +36,10 @@ int TCB::InitType1(TCB_SETTINGS *ts){
    u_int32_t enable_trgbus = 1;
    u_int32_t testtxmode = 0;
    u_int32_t trgbusmask = 0x7;
+   u_int32_t dbgserdes = 0;
 
    // load RRUN register
-   u_int32_t rrundata = (enable_trgbus<<4) | (fadcmode<<2) | (trgbusmask<<13) | (testtxmode <<5);
+   u_int32_t rrundata = (dbgserdes<<8) | (enable_trgbus<<4) | (fadcmode<<2) | (trgbusmask<<13) | (testtxmode <<5);
    SetRRUN(&rrundata);
    u_int32_t ralgsel = (ts->algsel);
    SetRALGSEL(&ralgsel);
@@ -68,9 +69,10 @@ int TCB::InitType2(TCB_SETTINGS *ts){
    u_int32_t enable_trgbus = 1;
    u_int32_t testtxmode = 0;
    u_int32_t trgbusmask = 0x7;
+   u_int32_t dbgserdes = 0;
 
    // load RRUN register
-   u_int32_t rrundata = (enable_trgbus<<4) | (fadcmode<<2) | (trgbusmask<<13) | (testtxmode <<5);
+   u_int32_t rrundata = (dbgserdes<<8) | (enable_trgbus<<4) | (fadcmode<<2) | (trgbusmask<<13) | (testtxmode <<5);
    SetRRUN(&rrundata);
    u_int32_t ralgsel = (ts->algsel);
    SetRALGSEL(&ralgsel);
@@ -119,7 +121,7 @@ int TCB::InitType3(TCB_SETTINGS *ts){
    }
    
    // serdes setup
-   u_int32_t sdly[5]={0x16121211,0x100A0716,0x18080910,0x14151717,0xFFFFFFFF};
+   u_int32_t sdly[5]={0x16121211,0x100A0716,0x14080910,0x14151717,0xFFFFFFFF};
    int bitslip[20]={0,0,0,0,0,7,7,7,7,7,7,0,0,0,0,0,0,0,0,0};
    SerdesReset();
    SetSerdesDelay(sdly);
@@ -461,6 +463,8 @@ void TCB::GetRRUN(u_int32_t *data)
    printf(" INBUSY status %x \n",(*data&0x2)>>1);
    printf(" FADCMODE status %x \n",(*data&0x4)>>2);
    printf(" TESTTXMODE status %x \n",(*data&0x20)>>5);
+   if( (fidcode>>12)==2 | (fidcode>>12)==1 ) 
+     printf(" DBGSERDES status %x \n",(*data&0x100)>>5);
    printf(" EXBUSY status %x \n",(*data&0x8)>>3);
    printf(" ENABLE TRGBUS status %x \n",(*data&0x10)>>4);
    printf(" MASKBUSY status %x \n",(*data&0x2000)>>13);
@@ -660,4 +664,30 @@ void TCB::ForceTrigger(int trg)
   int iword = trg/32;
   data = 1<<trg%32;
    WriteReg(RTRGFORCE+iword,&data);
+}
+// set the transmission check word
+void TCB::SetCheckWord(u_int32_t valuedo,u_int32_t valueup) 
+{
+  // first write [31:0]
+  WriteReg(RCHKWORDDO,&valuedo);
+  // then write [63:32]
+  WriteReg(RCHKWORDUP,&valueup);
+}
+// get the transmission check word
+void TCB::GetCheckWord() {
+  u_int32_t data;
+  // first read [31:0]
+  ReadReg(RCHKWORDDO,&data);
+  printf("Check word [31:0] = %08X\n",data);
+  // then read [63:32]
+  ReadReg(RCHKWORDUP,&data);
+  printf("Check word [63:32] = %08X\n",data);
+
+}
+// read the transmission check status
+void TCB::GetCheckStatus() {
+  u_int32_t data;
+  // first read [31:0]
+  ReadReg(RCHKSTATUS,&data);
+  printf("Transmission Status = %08X\n",data);
 }

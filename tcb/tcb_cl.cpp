@@ -64,7 +64,8 @@ int main(int argc, char *argv[])
       printf("[21]: SERDES reset         \t \t  [22]: SERDES bitslip\n");
       printf("[23]: SERDES Scan          \t \t  [24]: SERDES default values\n");
       printf("[25]: Write SERDES Mask    \t \t  [26]: Set Parameter\n");
-      printf("[27]: Force a trigger      \t \t  [-1]: Exit\n");
+      printf("[27]: Set check words      \t \t  [28]: Check transmission\n");
+      printf("[29]: Force a trigger      \t \t  [-1]: Exit\n");
 
       do {
          printf("Give an option: ");
@@ -80,9 +81,11 @@ int main(int argc, char *argv[])
          printf("TESTTXMODE?\n");
          scanf("%x",&scanfdata);
          data |= scanfdata<<5;
-         printf("DBGSERDES?\n");
-         scanf("%x",&scanfdata);
-         data |= scanfdata<<8;
+	 if(((TCBBoard.fidcode&0xf000)>>12)==2 || ((TCBBoard.fidcode&0xf000)>>12)==1) {
+	   printf("DBGSERDES?\n");
+	   scanf("%x",&scanfdata);
+	   data |= scanfdata<<8;
+	 }
          printf("ENABLE_TRGBUS?\n");
          scanf("%x",&scanfdata);
          data |= scanfdata<<4;
@@ -446,8 +449,22 @@ int main(int argc, char *argv[])
          TCBBoard.SetParameter(offset, &data);
       }
      if(option == 27) {
+       u_int32_t valdo, valup;
+         printf(" opt = 27 : Set control words ... \n");
+         printf("Control word [31:0]? (hex)\n");
+         scanf("%d",&valdo);
+         printf("Control word [31:0]? (hex)\n");
+         scanf("%d",&valup);
+         TCBBoard.SetCheckWord(valdo,valup);
+	 TCBBoard.GetCheckWord();
+      }
+     if(option == 28) {
+         printf(" opt = 28 : Get Check Status ... \n");
+         TCBBoard.GetCheckStatus();
+      }
+     if(option == 29) {
          int trgid;
-         printf(" opt = 27 : Force a trigger ... \n");
+         printf(" opt = 29 : Force a trigger ... \n");
          printf("Trigger Id? from 0 to %d \n",TCBBoard.fntrg-1);
          scanf("%d",&trgid);
          TCBBoard.ForceTrigger(trgid);

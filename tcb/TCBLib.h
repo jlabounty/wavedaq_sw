@@ -17,6 +17,9 @@
 #define RFCDLY        0x14                      // frontpanel serdes delay values
 #define RBSLIP        0x15                      // bitslip and reset for input serdes
 #define RSERDESMSK    0x16                      // mask for input serdes
+#define RCHKWORDDO    0x17                      // transmission check word [31:0]
+#define RCHKWORDUP    0x18                      // transmission check word [63:0]
+#define RCHKSTATUS    0x19                      // transmission check status
 #define RENA          0x20                      // trigger enable (first address)
 #define RTRIPATT      0x30                      // trigger pattern (first address)
 #define RTRGFORCE     0x40                      // force a trigger (first address)
@@ -177,4 +180,10 @@ public:
    void GetCompilDate(u_int32_t*);
    // force the trigger passed by the function call
    void ForceTrigger(int);
+   // set the transmission check word
+   void SetCheckWord(u_int32_t,u_int32_t);
+   // get the transmission check word
+   void GetCheckWord();
+   // read the transmission check status
+   void GetCheckStatus();
 };
