@@ -2821,9 +2821,6 @@ void WP::Collector()
 void WP::DoCalibrationVoltageStep()
 {
    if (vCalibProg.state == cCsFirstBoard) {
-      // save current board settings
-      // ## TBD
-      
       vCalibProg.state    = cCsFirstSample;
       vCalibProg.progress = 0;
       vCalibProg.nIter1   = 200;
@@ -2854,6 +2851,9 @@ void WP::DoCalibrationVoltageStep()
       
       // initialize data on first iteration
       if (vCalibProg.iIter1 == 0) {
+         // save current board settings
+         mOldRange = b->GetRange();
+         
          // turn off all calibration
          mRotateWaveform      = false;
          mOfsCalib1           = false;
@@ -2863,7 +2863,9 @@ void WP::DoCalibrationVoltageStep()
          mRemoveSpikes        = false;
          
          // turn off calibration clock
+         b->SetCalibBufferEnable(false);
          b->SetTimingCalibSignalEnable(false);
+         b->SetFeMux(-1, 2);
          
          // range -0.5 ... + 0.5V
          b->SetRange(0);
@@ -3043,7 +3045,8 @@ void WP::DoCalibrationVoltageStep()
    // measure offset at different ranges
    
    // Range -0.45
-   b->SetRange(0);
+   b->SetDacCalDcV(0);
+   b->SetRange(-0.45);
 
    WDEvent *event;
    for (int i=0 ; i<10 ; i++) {
@@ -3111,7 +3114,7 @@ void WP::DoCalibrationVoltageStep()
    */
    
    // Range 0.45
-   b->SetRange(0);
+   b->SetRange(0.45);
    
    event = nullptr;
    for (int i=0 ; i<10 ; i++) {
@@ -3166,11 +3169,14 @@ void WP::DoCalibrationVoltageStep()
    vCalibProg.state = cCsFirstSample;
    vCalibProg.progress = 1;
    
+   // switch back board
+   b->SetRange(mOldRange);
+   
    if (vCalibProg.iBoard == vCalibProg.nBoard) {
       vCalibProg.state = cCsInactive;
       
-      // switch everything back to previous values
-      //### TBD
+      mRangeCalib     = true;
+      mRemoveSpikes   = true;
    }
    
    return;

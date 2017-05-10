@@ -300,6 +300,8 @@ class WP {
       int            nLogged;
    } li;
    
+   float             mOldRange;
+   
 public:
    enum { cLiFormatBinary = 1, cLiFormatXML = 2};
 
