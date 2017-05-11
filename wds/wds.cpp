@@ -806,7 +806,9 @@ int main(int argc, const char * argv[])
          std::cout << "Aborting." << std::endl;
          return 1;
       }
-      std::cout << "OK" << std::endl << std::endl << std::endl;
+      std::cout << "OK" << std::endl;
+      if (gl.verbose)
+         std::cout << std::endl << std::endl;
    }
 
    // instantiate waveform processor
