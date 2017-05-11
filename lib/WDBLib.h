@@ -235,6 +235,7 @@ public:
    bool             IsRequested() { return mBoardRequested; }
    void             SetWfValid(int channel, int segment, bool v) { mWfValid[channel][segment] = v; }
    void             SetMask(unsigned int mask) { mChannelMask = mask; }
+   unsigned int     GetMask() { return mChannelMask; }
    bool             IsWfValid();
 };
 
@@ -353,6 +354,7 @@ public:
    void RequestAllBoards();
    void RequestBoard(WDB* b);
    void SetEventRequestMasks();
+   unsigned int GetEventRequestMask(int board_id);
    
    WDEvent* ReadSingleEvent(WDB* b, int timeout);
    
@@ -448,7 +450,7 @@ public:
    unsigned int GetAdcSampleFreq();
    unsigned int GetAdcInfo();
    
-   void GetScalers(std::vector<unsigned long> &s);
+   void GetScalers(std::vector<unsigned long> &s, bool refresh = true);
 
    unsigned int GetCompChannelStatus();
    unsigned int GetLastEventNumber();

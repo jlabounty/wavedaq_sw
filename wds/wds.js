@@ -927,6 +927,19 @@ function enableDRSChannels()
       if (OSC.chOn[i])
          mask |= (1 << i);
 
+   OSC.wdb[OSC.curBoard].drs0ChnTxEnable = 0;
+   OSC.wdb[OSC.curBoard].drs1ChnTxEnable = 0;
+   for (var i=0 ; i<8 ; i++)
+      if (OSC.chOn[i])
+         OSC.wdb[OSC.curBoard].drs0ChnTxEnable |= (1 << i);
+   for (var i=0 ; i<8 ; i++)
+      if (OSC.chOn[i+8])
+         OSC.wdb[OSC.curBoard].drs1ChnTxEnable |= (1 << i);
+   if (OSC.chOn[16])
+      OSC.wdb[OSC.curBoard].drs0ChnTxEnable |= 0x100;
+   if (OSC.chOn[17])
+      OSC.wdb[OSC.curBoard].drs1ChnTxEnable |= 0x100;
+
    var req = new XMLHttpRequest();
    req.open("PUT", "gl/"+OSC.curBoard+"/enableChannel", true);
    req.send(mask);

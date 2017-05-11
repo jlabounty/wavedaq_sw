@@ -811,9 +811,10 @@ unsigned int WDB::GetAdcInfo()
    return bitExtract(sreg, WD2_REG_ADC_INFO_OFS, mask, WD2_BIT_ADC_1_SPEED_OFS);
 }
 
-void WDB::GetScalers(std::vector<unsigned long> &scaler)
+void WDB::GetScalers(std::vector<unsigned long> &scaler, bool refresh)
 {
-   ReceiveStatusRegisters((WD2_REG_SCALER_0_LSB_OFS-WD2_REG_HW_VER_OFS)/4, 34);
+   if (refresh)
+      ReceiveStatusRegisters((WD2_REG_SCALER_0_LSB_OFS-WD2_REG_HW_VER_OFS)/4, 34);
 
    // channels 0-15 are 64 bit counters
    for (auto i=0 ; i<16 ; i++) {
@@ -2001,6 +2002,9 @@ WP::WP(std::vector<WDB *> w, bool verbose, bool demo)
    
    mTqueue = new tqueue<std::vector<WDEvent *>*>(100);
    
+   li.fh = 0;
+   li.xml = NULL;
+   
    // create UDB socket to receive binary data from WDB
    if (!mDemoMode && WP::gDataSocket == 0) {
       WP::gDataSocket = socket(AF_INET, SOCK_DGRAM, 0);
@@ -2023,11 +2027,9 @@ WP::WP(std::vector<WDB *> w, bool verbose, bool demo)
          std::cout << std::endl << "Listening on data port " << WP::gServerPort << "." << std::endl;
    }
 
-   // allocated event requests and (empty) events
-   for (int i=0 ; i<mWdb.size() ; i++) {
+   // allocated event requests for all WDB
+   for (int i=0 ; i<mWdb.size() ; i++)
       mEventRequest.push_back(new WDEventRequest(mWdb[i]->GetSerialNumber()));
-      mEvent.push_back(new WDEvent(mWdb[i]->GetSerialNumber()));
-   }
    
    // start waveform collector thread
    mThreadCollector = this->SpawnCollectorThread();
@@ -2054,6 +2056,14 @@ void WP::SetEventRequestMasks()
    }
 }
 
+unsigned int WP::GetEventRequestMask(int board_id)
+{
+   for (auto &r: mEventRequest)
+      if (r->GetBoardId() == board_id)
+         return r->GetMask();
+   return 0;
+}
+
 void WP::RequestBoard(WDB *b)
 {
    for (auto &r: mEventRequest) {
@@ -2061,6 +2071,13 @@ void WP::RequestBoard(WDB *b)
    }
    
    SetEventRequestMasks();
+
+   for (auto &e: mEvent)
+      delete e;
+   mEvent.clear();
+   
+   // allocate event buffer
+   mEvent.push_back(new WDEvent(b->GetSerialNumber()));
 }
 
 void WP::RequestAllBoards()
@@ -2069,6 +2086,13 @@ void WP::RequestAllBoards()
       r->SetRequested(true);
 
    SetEventRequestMasks();
+
+   for (auto &e: mEvent)
+      delete e;
+   
+   // allocate event buffer
+   for (auto &b: mWdb)
+      mEvent.push_back(new WDEvent(b->GetSerialNumber()));
 }
 
 //--------------------------------------------------------------------
@@ -2629,7 +2653,6 @@ void WP::SaveWaveforms()
 {
    static unsigned char *buffer = NULL;
    unsigned char *p;
-   int chn = 0xFFFF; //## channel mask to log
    
    int buffer_size = 8 + 4 + (1024*4+12)*18 + (1024*2+12)*18;
    if (!buffer)
@@ -2654,17 +2677,28 @@ void WP::SaveWaveforms()
       
       for (auto it = mEvent.begin() ; it != mEvent.end() ; it++) {
          auto ev = (*it);
-
+         int mask = GetEventRequestMask(ev->mBoardId);
+         
          sprintf(str, "Board_%d", ev->mBoardId);
          mxml_start_element(li.xml, str);
          for (int i=0 ; i<WD_N_CHANNELS ; i++) {
-            if (1/*## TBD*/) {
+            if (mask & (1 << i)) {
                sprintf(str, "CHN%d", i);
                mxml_start_element(li.xml, str);
                sprintf(str, "%d", i < 8 || i == 16 ? ev->mTriggerCell[0] : ev->mTriggerCell[1]);
                mxml_write_element(li.xml, "Trigger_Cell", str);
-               sprintf(str, "%u", 0); // ### TBD board[b].scaler[i]);
+               
+               unsigned int s = 0;
+               for (auto &b: mWdb)
+                  if (b->GetSerialNumber() == ev->mBoardId) {
+                     std::vector<unsigned long>sc;
+                     b->GetScalers(sc, false);
+                     s = sc[i];
+                     break;
+                  }
+               sprintf(str, "%u", s);
                mxml_write_element(li.xml, "Scaler", str);
+
                mxml_start_element(li.xml, "Waveform");
                strcpy(str, "\n");
                for (int j=0 ; j<1024 ; j++) {
@@ -2693,7 +2727,8 @@ void WP::SaveWaveforms()
          
          for (auto it = mEvent.begin() ; it != mEvent.end() ; it++) {
             auto ev = (*it);
-
+            int mask = GetEventRequestMask(ev->mBoardId);
+            
             // store board serial number
             sprintf((char *)p, "B#");
             p += 2;
@@ -2701,7 +2736,7 @@ void WP::SaveWaveforms()
             p += sizeof(unsigned short);
             
             for (int i=0 ; i<WD_N_CHANNELS ; i++) {
-               if (chn && (1 << i)) {
+               if (mask & (1 << i)) {
                   
                   sprintf((char *)p, "C%03d", i);
                   p += 4;
@@ -2738,6 +2773,7 @@ void WP::SaveWaveforms()
       
       for (auto it = mEvent.begin() ; it != mEvent.end() ; it++) {
          auto ev = (*it);
+         int mask = GetEventRequestMask(ev->mBoardId);
          
          // store board serial number
          sprintf((char *)p, "B#");
@@ -2746,13 +2782,20 @@ void WP::SaveWaveforms()
          p += sizeof(unsigned short);
          
          for (int i=0 ; i<WD_N_CHANNELS ; i++) {
-            if (chn && (1 << i)) {
+            if (mask & (1 << i)) {
                // channel header
                sprintf((char *)p, "C%03d", i);
                p += 4;
                
                // write scaler
-               unsigned int s = 0; //## gl->board[b].scaler[i];
+               unsigned int s = 0;
+               for (auto &b: mWdb)
+                  if (b->GetSerialNumber() == ev->mBoardId) {
+                     std::vector<unsigned long>sc;
+                     b->GetScalers(sc, false);
+                     s = sc[i];
+                     break;
+                  }
                memcpy(p, &s, sizeof(int));
                p += sizeof(int);
                
