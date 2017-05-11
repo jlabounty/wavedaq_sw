@@ -296,7 +296,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       //---------- commands ----------
       else if (item == "vcalib") {
          if (!gl->demoMode)
-            gl->wp->StartCalibrationVoltage(false);
+            gl->wp->StartCalibrationVoltage(true);
       }
       
       else if (item == "save") {
