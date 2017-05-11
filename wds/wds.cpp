@@ -93,40 +93,62 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       if (hm->body.p)
          value = std::string(hm->body.p, hm->body.len);
       
-      if (item == "rotateWaveform") {
-         gl->wp->SetRotateWaveform(value == "1");
+      if (gl->verbose)
+         std::cout << "Received item " << item
+         << ", value " << value
+         << ", board " << iBoard
+         << ", channel " << iChannel
+         << " from browser"
+         << std::endl;
+      
+      if (item == "enableChannel") {
+         // bits0-15 normal DRS channels bit16: clock0, bit17: clock1
+         auto mask = std::stoi(value);
+         auto mask0 = (mask & 0xFF);
+         auto mask1 = (mask & 0xFF00) >> 8;
+         if (mask & 0x10000)
+            mask0 |= 0x100;
+         if (mask & 0x20000)
+            mask1 |= 0x100;
+         assert(iBoard != -1);
+         gl->wdb[iBoard]->SetDrs0ChnTxEnable(mask0);
+         gl->wdb[iBoard]->SetDrs1ChnTxEnable(mask1);
+      }
+
+      else if (item == "rotateWaveform") {
+         gl->wp->SetRotateWaveform(value == "true");
       }
 
       else if (item == "ofsCalib1") {
-         gl->wp->SetOfsCalib1(value == "1");
+         gl->wp->SetOfsCalib1(value == "true");
       }
 
       else if (item == "ofsCalib2") {
-         gl->wp->SetOfsCalib2(value == "1");
+         gl->wp->SetOfsCalib2(value == "true");
       }
 
       else if (item == "gainCalib") {
-         gl->wp->SetGainCalib(value == "1");
+         gl->wp->SetGainCalib(value == "true");
       }
 
       else if (item == "rangeCalib") {
-         gl->wp->SetRangeCalib(value == "1");
+         gl->wp->SetRangeCalib(value == "true");
       }
 
       else if (item == "removeSpikes") {
-         gl->wp->SetRemoveSpikes(value == "1");
+         gl->wp->SetRemoveSpikes(value == "true");
       }
 
       else if (item == "timeCalib1") {
-         gl->wp->SetTimeCalib1(value == "1");
+         gl->wp->SetTimeCalib1(value == "true");
       }
 
       else if (item == "timeCalib2") {
-         gl->wp->SetTimeCalib2(value == "1");
+         gl->wp->SetTimeCalib2(value == "true");
       }
 
       else if (item == "timeCalib3") {
-         gl->wp->SetTimeCalib3(value == "1");
+         gl->wp->SetTimeCalib3(value == "true");
       }
 
       else if (item == "daqClkSrcSel") {
@@ -146,7 +168,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
       else if (item == "triggerFallingEdge") {
          assert(iBoard != -1);
-         gl->wdb[iBoard]->SetTriggerFallingEdge(std::stoi(value));
+         gl->wdb[iBoard]->SetTriggerFallingEdge(value == "true");
       }
 
       else if (item == "triggerMode") {
@@ -170,19 +192,19 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          }
       }
 
-      else if (item == "gain") {
+      else if (item == "feGain") {
          assert(iBoard != -1);
          gl->wdb[iBoard]->SetFeGain(iChannel, std::stof(value));
       }
 
-      else if (item == "pzc") {
+      else if (item == "fePzc") {
          assert(iBoard != -1);
-         gl->wdb[iBoard]->SetFePzc(iChannel, std::stoi(value));
+         gl->wdb[iBoard]->SetFePzc(iChannel, value == "true");
       }
 
-      else if (item == "pzcLevel") {
+      else if (item == "dacPzcLevel") {
          assert(iBoard != -1);
-         gl->wdb[iBoard]->SetDacPZCLevelN(std::stoi(value));
+         gl->wdb[iBoard]->SetDacPzcLevelN(std::stoi(value));
       }
 
       else if (item == "range") {
@@ -190,30 +212,24 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          gl->wdb[iBoard]->SetRange(std::stof(value));
       }
 
-      else if (item == "readoutSrc") {
+      else if (item == "readoutSrcSel") {
          assert(iBoard != -1);
          gl->wdb[iBoard]->SetReadoutSrcSel(std::stoi(value));
-         
-         if (std::stoi(value) == 1) {
-            gl->wp->SetEventRequestMask(gl->wdb[iBoard]->GetSerialNumber(), 0x3FFFF);
-         } else {
-            gl->wp->SetEventRequestMask(gl->wdb[iBoard]->GetSerialNumber(), 0xFFFF);
-         }
       }
 
       else if (item == "calibBufferEnable") {
          assert(iBoard != -1);
-         gl->wdb[iBoard]->SetCalibBufferEnable(std::stoi(value));
+         gl->wdb[iBoard]->SetCalibBufferEnable(value == "true");
       }
 
       else if (item == "timingCalibSignalEnable") {
          assert(iBoard != -1);
-         gl->wdb[iBoard]->SetTimingCalibSignalEnable(std::stoi(value));
+         gl->wdb[iBoard]->SetTimingCalibSignalEnable(value == "true");
       }
 
       else if (item == "feMux") {
          assert(iBoard != -1);
-         gl->wdb[iBoard]->SetFeMux(iChannel, std::stoi(value) ? WDB::cFeMuxCalSource : WDB::cFeMuxInput);
+         gl->wdb[iBoard]->SetFeMux(iChannel, value == "true" ? WDB::cFeMuxCalSource : WDB::cFeMuxInput);
       }
 
       else if (item == "drsSampleFreq") {
@@ -244,6 +260,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          }
       }
 
+      else {
+         assert(0);
+      }
+      
       mg_printf(nc, "HTTP/1.1 204 No Content\r\n");
    }
    
@@ -336,14 +356,14 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          
          mg_printf_http_chunk(nc, "      \"dacOfs\": %1.3f,\n",                  w->GetDacOfsV());
          mg_printf_http_chunk(nc, "      \"dacCalDc\": %1.3f,\n",                w->GetDacCalDcV());
-         mg_printf_http_chunk(nc, "      \"dacPZCLevel\": %1.3f,\n",             w->GetDacPZCLevelV());
+         mg_printf_http_chunk(nc, "      \"dacPzcLevel\": %d,\n",                w->GetDacPzcLevelN());
 
          mg_printf_http_chunk(nc, "      \"dacTriggerLevel\": [\n");
          for (int i=0 ; i<15 ; i++)
             mg_printf_http_chunk(nc, "        %1.3f,\n",                         w->GetDacTriggerLevelV(i));
          mg_printf_http_chunk(nc, "        %1.3f ],\n",                          w->GetDacTriggerLevelV(15));
 
-         mg_printf_http_chunk(nc, "      \"fePZC\": [\n");
+         mg_printf_http_chunk(nc, "      \"fePzc\": [\n");
          for (int i=0 ; i<15 ; i++)
             mg_printf_http_chunk(nc, "        %s,\n",                            w->IsFePzc(i) ? "true" : "false");
          mg_printf_http_chunk(nc, "        %s ],\n",                             w->IsFePzc(15) ? "true" : "false");
@@ -520,7 +540,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          // request single event
          if (b == -1) {
             // all boards
-            gl->wp->SetRequestedBoards(-1);
+            gl->wp->RequestAllBoards();
 
             for (auto &b: gl->wdb) {
                if (gl->triggerMode == cTriggerModeAuto)
@@ -530,8 +550,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             }
          } else {
             // only current board
-            gl->wp->SetRequestedBoards(b);
-            
+            gl->wp->RequestBoard(gl->wdb[b]);
+
             if (gl->triggerMode == cTriggerModeAuto)
                gl->wdb[b]->RequestEvent();
             else if (gl->triggerMode == cTriggerModeNormal)
@@ -724,11 +744,6 @@ int main(int argc, const char * argv[])
             if (gl.verbose)
                b->PrintVersion();
 
-            // fix wrong default registers
-            b->SetCompPowerEnable(true);
-            b->SetDrs0ChnTxEnable(0x1FF);
-            b->SetDrs1ChnTxEnable(0x1FF);
-            
             // load calibration data for board
             b->LoadCalibration();
          }

@@ -461,6 +461,9 @@ void WDB::Connect()
 
 void WDB::SetDestinationPort(int port)
 {
+   if (mDemoMode)
+      return;
+   
    // set destinantion port in WD board
    SendUDP(std::string("setenv dstport ")+std::to_string(port));
    
@@ -985,10 +988,7 @@ bool WDB::IsDAQNormal()
    return bitExtract(creg, WD2_REG_CTRL_OFS, WD2_BIT_DAQ_NORMAL_MASK, WD2_BIT_DAQ_NORMAL_OFS) == 1;
 }
 
-void WDB::SetDaqNormal
-
-
-(bool value)
+void WDB::SetDaqNormal(bool value)
 {
    SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_DAQ_NORMAL_MASK, WD2_BIT_DAQ_NORMAL_OFS, value ? 1 : 0);
 }
@@ -1361,33 +1361,33 @@ void WDB::SetDacPulseAmpV(float v)
 
 std::vector<float> pzcLevel = { 0, 0.5, 1, 1.5, 1.8, 2, 2.5 };
 
-float WDB::GetDacPZCLevelV()
+float WDB::GetDacPzcLevelV()
 {
    auto d = bitExtract(creg, WD2_REG_DAC0_E_F_OFS, WD2_BIT_DAC0_CH_E_MASK, WD2_BIT_DAC0_CH_E_OFS);
    return d / 65535.0 * 2.5;
 }
 
-void WDB::SetDacPZCLevelV(float v)
+void WDB::SetDacPzcLevelV(float v)
 {
    auto d = (unsigned int)(v / 2.5 * 65535 + 0.5);
    SetRegMask(WD2_REG_DAC0_E_F_OFS, WD2_BIT_DAC0_CH_E_MASK, WD2_BIT_DAC0_CH_E_OFS, d);
 }
 
-int WDB::GetDacPZCLevelN()
+int WDB::GetDacPzcLevelN()
 {
    int i;
-   auto v = GetDacPZCLevelV();
+   auto v = GetDacPzcLevelV();
    for (i=0 ; i<pzcLevel.size() ; i++)
       if (pzcLevel[i] == v)
         break;
    return i+1;
 }
 
-void WDB::SetDacPZCLevelN(int i)
+void WDB::SetDacPzcLevelN(int i)
 {
    i--;
    assert(i >= 0 && i < pzcLevel.size());
-   SetDacPZCLevelV(pzcLevel[i]);
+   SetDacPzcLevelV(pzcLevel[i]);
 }
 
 float WDB::GetDacBiasV()
@@ -2002,7 +2002,7 @@ WP::WP(std::vector<WDB *> w, bool verbose, bool demo)
    mTqueue = new tqueue<std::vector<WDEvent *>*>(100);
    
    // create UDB socket to receive binary data from WDB
-   if (WP::gDataSocket == 0) {
+   if (!mDemoMode && WP::gDataSocket == 0) {
       WP::gDataSocket = socket(AF_INET, SOCK_DGRAM, 0);
       assert(WP::gDataSocket);
       
@@ -2038,27 +2038,44 @@ WP::WP(std::vector<WDB *> w, bool verbose, bool demo)
 
 //--------------------------------------------------------------------
 
-void WP::SetEventRequestMask(int b, unsigned int mask)
+void WP::SetEventRequestMasks()
 {
-   mEventRequest[b]->SetMask(mask);
+   // set request mask from tx enable
+   int i=0;
+   for (auto &b: mWdb) {
+      auto mask = (b->GetDrs0ChnTxEnable() & 0xFF);
+      mask |= (b->GetDrs1ChnTxEnable() & 0xFF) << 8;
+      if (b->GetDrs0ChnTxEnable() & 0x100)
+         mask |= 0x10000;
+      if (b->GetDrs1ChnTxEnable() & 0x100)
+         mask |= 0x20000;
+
+      mEventRequest[i++]->SetMask(mask);
+   }
 }
 
-void WP::SetRequestedBoards(int b)
+void WP::RequestBoard(WDB *b)
 {
-   if (b == -1) {
-      for (auto &r: mEventRequest)
-         r->SetRequested(true);
-   } else {
-      for (auto &r: mEventRequest)
-         r->SetRequested(false);
-      mEventRequest[b]->SetRequested(true);
+   for (auto &r: mEventRequest) {
+      r->SetRequested(r->GetBoardId() == b->GetSerialNumber());
    }
+   
+   SetEventRequestMasks();
+}
+
+void WP::RequestAllBoards()
+{
+   for (auto &r: mEventRequest)
+      r->SetRequested(true);
+
+   SetEventRequestMasks();
 }
 
 //--------------------------------------------------------------------
 
 WDEvent* WP::ReadSingleEvent(WDB *b, int timeout)
 {
+   RequestBoard(b);
    b->RequestEvent();
    
    WDEvent *event = nullptr;
@@ -2854,6 +2871,8 @@ void WP::DoCalibrationVoltageStep()
       if (vCalibProg.iIter1 == 0) {
          // save current board settings
          mOldRange = b->GetRange();
+         mOldMask0 = b->GetDrs0ChnTxEnable();
+         mOldMask1 = b->GetDrs1ChnTxEnable();
          
          // turn off all calibration
          mRotateWaveform      = false;
@@ -2868,6 +2887,10 @@ void WP::DoCalibrationVoltageStep()
          b->SetTimingCalibSignalEnable(false);
          b->SetFeMux(-1, WDB::cFeMuxInput);
          
+         // enable all channels
+         b->SetDrs0ChnTxEnable(0x1FF);
+         b->SetDrs1ChnTxEnable(0x1FF);
+
          // range -0.5 ... + 0.5V
          b->SetRange(0);
          
@@ -3170,8 +3193,10 @@ void WP::DoCalibrationVoltageStep()
    vCalibProg.state = cCsFirstSample;
    vCalibProg.progress = 1;
    
-   // switch back board
+   // switch back old board settings
    b->SetRange(mOldRange);
+   b->SetDrs0ChnTxEnable(mOldMask0);
+   b->SetDrs1ChnTxEnable(mOldMask1);
    
    if (vCalibProg.iBoard == vCalibProg.nBoard) {
       vCalibProg.state = cCsInactive;
@@ -3293,8 +3318,9 @@ void VCALIB::load(WDB *b, std::string filename)
 
       if (fabs(mCalib.temperature - b->GetTemperature()) > 5) {
          std::cerr << "Warning: Voltage calibration data in " << filename << " is for "
-         << std::cout.precision(3) << mCalib.temperature
-         << " deg. C, running now at " << b->GetTemperature() << " deg. C" << std::endl;
+         << mCalib.temperature
+         << " deg. C, running now at "
+         << b->GetTemperature() << " deg. C" << std::endl;
       }
       bValid = true;
    }

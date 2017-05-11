@@ -305,6 +305,8 @@ class WP {
    } li;
    
    float             mOldRange;
+   int               mOldMask0;
+   int               mOldMask1;
    
 public:
    enum { cLiFormatBinary = 1, cLiFormatXML = 2};
@@ -348,9 +350,11 @@ public:
    float GetTcalibProgress() { return tCalibProg.progress; }
 
    // functions
-   void SetRequestedBoards(int b);
-   void SetEventRequestMask(int b, unsigned int mask);
-   WDEvent* ReadSingleEvent(WDB *b, int timeout);
+   void RequestAllBoards();
+   void RequestBoard(WDB* b);
+   void SetEventRequestMasks();
+   
+   WDEvent* ReadSingleEvent(WDB* b, int timeout);
    
    void StartCalibrationVoltage(bool bAll) { vCalibProg.nBoard = bAll ? mWdb.size() : 1; vCalibProg.state = cCsFirstBoard; }
    void StartCalibrationTime(bool bAll) { tCalibProg.nBoard = bAll ? mWdb.size() : 1; tCalibProg.state = cCsFirstBoard; };
@@ -537,10 +541,10 @@ public:
    void SetDacCalDcV(float v);
    float GetDacPulseAmpV();
    void SetDacPulseAmpV(float v);
-   float GetDacPZCLevelV();
-   void SetDacPZCLevelV(float v);
-   int GetDacPZCLevelN();
-   void SetDacPZCLevelN(int n);
+   float GetDacPzcLevelV();
+   void SetDacPzcLevelV(float v);
+   int GetDacPzcLevelN();
+   void SetDacPzcLevelN(int n);
    float GetDacBiasV();
    void SetDacBiasV(float v);
    float GetDacTriggerLevelV(int chn);

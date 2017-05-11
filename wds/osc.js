@@ -76,6 +76,7 @@ function Oscilloscope(div) { // constructor
    this.nEPS = 0;
 
    this.chOn = [];         // on/off switch for channels
+   this.chOnSelected = []  // channel button selected
    this.wf = {T: [], U: []}; // waveforms
    this.wd = 0;            // WaveDREAM board
    this.nWd = 0;           // number of boards
@@ -108,6 +109,7 @@ function Oscilloscope(div) { // constructor
    // default values
    for (var i = 0; i < 18; i++) {
       this.chOn[i] = false;
+      this.chOnSelected[i] = false;
       this.wf.T[i] = [];
       this.wf.U[i] = [];
       this.wfScale[i] = 0.1;
@@ -338,6 +340,27 @@ Oscilloscope.prototype.draw = function () {
             OSC.histo.button[i].style.display = "none";
    }
 };
+
+Oscilloscope.prototype.drawChnButtons = function () {
+   // set blue border of active channel buttons
+   for (var i = 0; i < 18; i++) {
+      var cb = document.getElementById("ch" + i);
+      if (cb == undefined)
+         continue;
+      if (this.chOnSelected[i])
+         cb.style.border = "3px solid blue";
+      else
+         cb.style.border = "2px solid #C0C0C0";
+      if (this.chOn[i])
+         cb.style.backgroundColor = this.chnColors[i];
+      else {
+         if (i < 16)
+            cb.style.backgroundColor = "#E0E0E0";
+         else
+            cb.style.backgroundColor = "#C0C0C0";
+      }
+   }
+}
 
 Oscilloscope.prototype.printFPS = function () {
    document.getElementById("EPS").innerHTML = this.nEPS;

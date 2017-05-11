@@ -45,7 +45,7 @@
          <button class="squareButton" id="ch15" type="button" onClick="btnChn(15)">15</button>
       </div>
 
-      <button class="wideButton" id="chAll" type="button" onClick="btnChn(-1)">All</button>
+      <button class="wideButton" id="chAll" type="button" onClick="btnChnAll()">All</button>
       <button class="wideButton" id="chOn" type="button" onClick="btnOn()">Off</button>
 
       <div class="groupBtn">
@@ -146,7 +146,7 @@
          <div class="group">
             <div class="vSpacer5">
                <label for="selGain">Gain:</label>
-               <select id="selGain" name="gain" class="select" onchange="setParam(this)">
+               <select id="selGain" name="feGain" class="select" onchange="setParam(this)">
                   <option value="0.5">0.5</option>
                   <option selected value="1">1</option>
                   <option value="2.5">2.5</option>
@@ -157,8 +157,8 @@
                   <option value="100">100</option>
                </select>
                &nbsp;&nbsp;&nbsp;
-               <input type="checkbox" id="cbPzc" name="pzc" onClick="setParam(this)">PZC
-               <select id="selPzcLevel" name="pzcLevel" class="select" onchange="setParam(this)">
+               <input type="checkbox" id="cbPzc" name="fePzc" onClick="setParam(this)">PZC
+               <select id="selPzcLevel" name="dacPzcLevel" class="select" onchange="setParam(this)">
                   <option value="1">1</option>
                   <option value="2">2</option>
                   <option value="3">3</option>
@@ -171,8 +171,8 @@
             </div>
             <div class="vSpacer5">
                Mode:
-               <input type="radio" id="inputReadoutSrcDRS" name="readoutSrc" checked="checked" value="1" onClick="setParam(this)">DRS
-               <input type="radio" id="inputReadoutSrcADC" name="readoutSrc" value="2" onClick="setParam(this)">ADC
+               <input type="radio" id="inputReadoutSrcDRS" name="readoutSrcSel" checked="checked" value="1" onClick="setParam(this)">DRS
+               <input type="radio" id="inputReadoutSrcADC" name="readoutSrcSel" value="2" onClick="setParam(this)">ADC
             </div>
 
             <div class="vMiddleBox vSpacer5">
