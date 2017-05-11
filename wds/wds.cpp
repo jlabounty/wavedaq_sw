@@ -792,8 +792,10 @@ int main(int argc, const char * argv[])
             b->Connect();
             b->ReceiveStatusRegisters();
             b->ReceiveControlRegisters();
-            if (gl.verbose)
+            if (gl.verbose) {
+               std::cout << std::endl << "========== Board Info ==========" << std::endl;
                b->PrintVersion();
+            }
 
             // load calibration data for board
             b->LoadCalibration();
@@ -804,7 +806,7 @@ int main(int argc, const char * argv[])
          std::cout << "Aborting." << std::endl;
          return 1;
       }
-      std::cout << "OK" << std::endl;
+      std::cout << "OK" << std::endl << std::endl << std::endl;
    }
 
    // instantiate waveform processor
