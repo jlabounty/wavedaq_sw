@@ -67,7 +67,7 @@ function init() {
       cell.className = "channelsTd";
       var sel = document.createElement('select');
       sel.id = "selGain"+r;
-      sel.name = "gain";
+      sel.name = "feGain";
       sel.setAttribute("onchange", "setParam(this,"+r+")");
       var gains = ["0.5", "1", "2.5", "5", "10", "25", "50", "100"];
       for (var i=0 ; i<gains.length ; i++) {
@@ -83,7 +83,7 @@ function init() {
       cell.className = "channelsTd";
       var cb = document.createElement('input');
       cb.type = "checkbox";
-      cb.name = "pzc";
+      cb.name = "fePzc";
       cb.id = "cbPzc"+r;
       cb.checked = false;
       cb.setAttribute("onclick", "setParam(this,"+r+")");
@@ -294,11 +294,6 @@ function populateControls(init)
 
    document.getElementById("cbPzc").checked = OSC.wdb[OSC.curBoard].fePzc[0];
    document.getElementById("selGain").value = OSC.wdb[OSC.curBoard].feGain[0];
-   for (var i=0 ; i< 16 ; i++) {
-      document.getElementById("selGain"+i).value = OSC.wdb[OSC.curBoard].feGain[i];
-      document.getElementById("cbPzc"+i).checked = OSC.wdb[OSC.curBoard].fePzc[i];
-   }
-
    document.getElementById("selPzcLevel").value = OSC.wdb[OSC.curBoard].dacPzcLevel;
 
    document.getElementById("inputReadoutSrcDRS").checked = (OSC.wdb[OSC.curBoard].readoutSrcSel == 1);
@@ -338,7 +333,8 @@ function populateControls(init)
    // channels dialog box
    for (var i=0 ; i<16 ; i++) {
       document.getElementById("inpDacTriggerLevel"+i).value = Math.round(OSC.wdb[OSC.curBoard].dacTriggerLevel[i] * 1000);
-      document.getElementById("cbPzc"+i).checked = OSC.wdb[OSC.curBoard].fePzc;
+      document.getElementById("selGain"+i).value = OSC.wdb[OSC.curBoard].feGain[i];
+      document.getElementById("cbPzc"+i).checked = OSC.wdb[OSC.curBoard].fePzc[i];
    }
    
    if (init) {
@@ -416,9 +412,15 @@ function setParam(e, channel) {
 
    var req = new XMLHttpRequest();
 
-   req.onreadystatechange = function (e) {
+   req.onreadystatechange = function () {
       if (req.readyState == 4 && req.status == 204) {
          // success
+         if (e.name == "range") {
+            // read back DC offset which gets shifted by range change
+            loadWdb(-1);
+         }
+      } else if (req.readyState == 4 && req.status == 0) {
+         connectionBroken();
       }
    };
 
@@ -442,7 +444,12 @@ function setParam(e, channel) {
          dlgMessage("Warning", "No external clock present");
    }
    
-   var uri = "param/" + OSC.curBoard + "/"+ e.name;
+   var uri = "param/";
+   if (OSC.applyAll)
+      uri += "ALL";
+   else
+      uri += OSC.curBoard + "";
+   uri += "/"+e.name;
    var value = "";
    if (channel != undefined)
       uri += "/" + channel;
@@ -466,13 +473,33 @@ function setParam(e, channel) {
    req.open("PUT", uri, true);
    req.send(value);
 
-   console.log("Set "+e.name+" to "+value);
-
    // set variable locally
    if (OSC.wp[e.name] != undefined)
       OSC.wp[e.name] = value;
-   else if (OSC.wdb[OSC.curBoard][e.name] != undefined)
-      OSC.wdb[OSC.curBoard][e.name] = value;
+   else if (OSC.wdb[OSC.curBoard][e.name] != undefined) {
+      if (OSC.applyAll) {
+         for (var i = 0; i < OSC.wdb.length; i++) {
+            if (OSC.wdb[i][e.name] instanceof Array) {
+               if (channel == undefined) {
+                  for (var j = 0; j < OSC.wdb[i][e.name].length; j++)
+                     OSC.wdb[i][e.name][j] = value;
+               } else
+                  OSC.wdb[i][e.name][channel] = value;
+            } else
+               OSC.wdb[i][e.name] = value;
+         }
+      } else {
+         if (OSC.wdb[OSC.curBoard][e.name] instanceof Array) {
+            // gain, pzc, femux, trigger level arrays
+            if (channel == undefined) {
+               for (var i = 0; i < OSC.wdb[OSC.curBoard][e.name].length; i++)
+                  OSC.wdb[OSC.curBoard][e.name][i] = value;
+            } else
+               OSC.wdb[OSC.curBoard][e.name][channel] = value;
+         } else
+            OSC.wdb[OSC.curBoard][e.name] = value;
+      }
+   }
 }
 
 function setDisp(e) {
@@ -941,7 +968,16 @@ function enableDRSChannels()
       OSC.wdb[OSC.curBoard].drs1ChnTxEnable |= 0x100;
 
    var req = new XMLHttpRequest();
-   req.open("PUT", "gl/"+OSC.curBoard+"/enableChannel", true);
+
+   if (OSC.applyAll) {
+      for (var i=0 ; i<OSC.wdb.length ; i++) {
+         OSC.wdb[i].drs0ChnTxEnable = OSC.wdb[OSC.curBoard].drs0ChnTxEnable;
+         OSC.wdb[i].drs1ChnTxEnable = OSC.wdb[OSC.curBoard].drs1ChnTxEnable;
+      }
+      req.open("PUT", "gl/ALL/enableChannel", true);
+   } else {
+      req.open("PUT", "gl/" + OSC.curBoard + "/enableChannel", true);
+   }
    req.send(mask);
 }
 
@@ -1096,16 +1132,10 @@ function sldDacTriggerLevel(value) {
       return;
    
    tLevelLast = value;
-   var req = new XMLHttpRequest();
-   req.open("PUT", "gl/"+OSC.curBoard+"/dacTriggerLevel", true);
-   req.send(value);
 
    document.getElementById("inpDacTriggerLevel").value = value * 1000;
-   for (var i=0 ; i<16 ; i++) {
-      OSC.wdb[OSC.curBoard].dacTriggerLevel[i] = value;
-      document.getElementById("inpDacTriggerLevel"+i).value = value * 1000;
-   }
-   
+   setParam(document.getElementById("inpDacTriggerLevel"));
+
    var d = new Date();
    OSC.lastTriggerLevelChange = d.getTime();
    clearStat();
@@ -1116,23 +1146,21 @@ function sldTriggerDelay(value) {
    if (OSC.demoMode)
       return;
    var del = 450 - Math.round(value * 450);
-   var req = new XMLHttpRequest();
-   req.open("PUT", "gl/"+OSC.curBoard+"/triggerDelay", true);
-   req.send(del);
 
    OSC.wdb[OSC.curBoard].triggerDelay = del;
    document.getElementById("inpTriggerDelay").value = del;
+   setParam(document.getElementById("inpTriggerDelay"));
    clearStat();
 }
 
 function btnTedge(value) {
    if (OSC.demoMode)
       return;
-   var req = new XMLHttpRequest();
-   req.open("PUT", "gl/"+OSC.curBoard+"/triggerFallingEdge", true);
-   req.send(value);
 
-   OSC.wdb[OSC.curBoard].triggerFallingEdge = (value == 1);
+   var e = {};
+   e.name = "triggerFallingEdge";
+   e.value = (value == 1);
+   setParam(e);
 
    if (value == 1) {
       document.getElementById('trgEdgeUp').style.display = "none";
@@ -1146,28 +1174,19 @@ function btnTedge(value) {
 function sldDacCalDc(value) {
    if (OSC.demoMode)
       return;
-   var req = new XMLHttpRequest();
-   req.open("PUT", "gl/"+OSC.curBoard+"/dacCalDc", true);
-   req.send(Math.round(value * 2000 - 1000) / 1000);
 
    document.getElementById("inpDacCalDc").value = Math.round(value * 2000 - 1000);
+   setParam(document.getElementById("inpDacCalDc"));
 }
 
 function setRange(s) {
    if (OSC.demoMode)
       return;
-   var req = new XMLHttpRequest();
-   req.onreadystatechange = function () {
-      if (req.readyState == 4 && req.status == 204) {
-         // read back DC offset which gets shifted by range change
-         loadWdb(OSC.curBoard);
-      } else if (req.readyState == 4 && req.status == 0) {
-         connectionBroken();
-      }
-   };
 
-   req.open("PUT", "gl/"+OSC.curBoard+"/range", true);
-   req.send(parseFloat(s.value));
+   var e = {};
+   e.name = "range";
+   e.value = parseFloat(s.value);
+   setParam(e);
 }
 
 function btnOfsZero() {

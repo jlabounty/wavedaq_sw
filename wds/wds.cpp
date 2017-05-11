@@ -84,7 +84,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          if (args.size() > 1)
             item = args[1];
          if (args.size() > 3) {
-            iBoard = std::stoi(args[2]);
+            if (args[2] == "ALL")
+               iBoard = -1;
+            else
+               iBoard = std::stoi(args[2]);
             item = args[3];
          }
          if (args.size() > 4)
@@ -110,9 +113,15 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             mask0 |= 0x100;
          if (mask & 0x20000)
             mask1 |= 0x100;
-         assert(iBoard != -1);
-         gl->wdb[iBoard]->SetDrs0ChnTxEnable(mask0);
-         gl->wdb[iBoard]->SetDrs1ChnTxEnable(mask1);
+         if (iBoard == -1)
+            for (auto &b: gl->wdb) {
+               b->SetDrs0ChnTxEnable(mask0);
+               b->SetDrs1ChnTxEnable(mask1);
+            }
+         else {
+            gl->wdb[iBoard]->SetDrs0ChnTxEnable(mask0);
+            gl->wdb[iBoard]->SetDrs1ChnTxEnable(mask1);
+         }
       }
 
       else if (item == "rotateWaveform") {
@@ -152,23 +161,35 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       }
 
       else if (item == "daqClkSrcSel") {
-         assert(iBoard != -1);
-         gl->wdb[iBoard]->SetDaqClkSrcSel(std::stoi(value));
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetDaqClkSrcSel(std::stoi(value));
+         else
+            gl->wdb[iBoard]->SetDaqClkSrcSel(std::stoi(value));
       }
 
       else if (item == "dacTriggerLevel") {
-         assert(iBoard != -1);
-         gl->wdb[iBoard]->SetDacTriggerLevelV(iChannel, std::stof(value));
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetDacTriggerLevelV(iChannel, std::stof(value));
+         else
+            gl->wdb[iBoard]->SetDacTriggerLevelV(iChannel, std::stof(value));
       }
 
       else if (item == "triggerDelay") {
-         assert(iBoard != -1);
-         gl->wdb[iBoard]->SetTriggerDelayNs(std::stoi(value));
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetTriggerDelayNs(std::stoi(value));
+         else
+            gl->wdb[iBoard]->SetTriggerDelayNs(std::stoi(value));
       }
 
       else if (item == "triggerFallingEdge") {
-         assert(iBoard != -1);
-         gl->wdb[iBoard]->SetTriggerFallingEdge(value == "true");
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetTriggerFallingEdge(value == "true");
+         else
+            gl->wdb[iBoard]->SetTriggerFallingEdge(value == "true");
       }
 
       else if (item == "triggerMode") {
@@ -176,30 +197,39 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       }
 
       else if (item == "triggerSource") {
-         assert(iBoard != -1);
-         if (value == "0") {
-            // internal trigger
-            gl->wdb[iBoard]->SetTriggerEnable(true);
-            gl->wdb[iBoard]->SetTriggerCfgOr(0xFFFF);
-            gl->wdb[iBoard]->SetTriggerExternalOr(false);
-            gl->wdb[iBoard]->SetTriggerExternalAnd(false);
-         } else {
-            // external trigger
-            gl->wdb[iBoard]->SetTriggerEnable(true);
-            gl->wdb[iBoard]->SetTriggerCfgOr(0);
-            gl->wdb[iBoard]->SetTriggerExternalOr(true);
-            gl->wdb[iBoard]->SetTriggerExternalAnd(false);
+         for (int i=0 ; i<gl->wdb.size() ; i++) {
+            if (iChannel == -1 || i == iChannel) {
+               if (value == "0") {
+                  // internal trigger
+                  gl->wdb[i]->SetTriggerEnable(true);
+                  gl->wdb[i]->SetTriggerCfgOr(0xFFFF);
+                  gl->wdb[i]->SetTriggerExternalOr(false);
+                  gl->wdb[i]->SetTriggerExternalAnd(false);
+               } else {
+                  // external trigger
+                  gl->wdb[i]->SetTriggerEnable(true);
+                  gl->wdb[i]->SetTriggerCfgOr(0);
+                  gl->wdb[i]->SetTriggerExternalOr(true);
+                  gl->wdb[i]->SetTriggerExternalAnd(false);
+               }
+            }
          }
       }
 
       else if (item == "feGain") {
-         assert(iBoard != -1);
-         gl->wdb[iBoard]->SetFeGain(iChannel, std::stof(value));
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetFeGain(iChannel, std::stof(value));
+         else
+            gl->wdb[iBoard]->SetFeGain(iChannel, std::stof(value));
       }
 
       else if (item == "fePzc") {
-         assert(iBoard != -1);
-         gl->wdb[iBoard]->SetFePzc(iChannel, value == "true");
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetFePzc(iChannel, value == "true");
+         else
+            gl->wdb[iBoard]->SetFePzc(iChannel, value == "true");
       }
 
       else if (item == "dacPzcLevel") {
@@ -208,38 +238,59 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       }
 
       else if (item == "range") {
-         assert(iBoard != -1);
-         gl->wdb[iBoard]->SetRange(std::stof(value));
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetRange(std::stof(value));
+         else
+            gl->wdb[iBoard]->SetRange(std::stof(value));
       }
 
       else if (item == "readoutSrcSel") {
-         assert(iBoard != -1);
-         gl->wdb[iBoard]->SetReadoutSrcSel(std::stoi(value));
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetReadoutSrcSel(std::stoi(value));
+         else
+            gl->wdb[iBoard]->SetReadoutSrcSel(std::stoi(value));
       }
 
       else if (item == "calibBufferEnable") {
-         assert(iBoard != -1);
-         gl->wdb[iBoard]->SetCalibBufferEnable(value == "true");
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetCalibBufferEnable(value == "true");
+         else
+            gl->wdb[iBoard]->SetCalibBufferEnable(value == "true");
       }
 
       else if (item == "timingCalibSignalEnable") {
-         assert(iBoard != -1);
-         gl->wdb[iBoard]->SetTimingCalibSignalEnable(value == "true");
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetTimingCalibSignalEnable(value == "true");
+         else
+            gl->wdb[iBoard]->SetTimingCalibSignalEnable(value == "true");
       }
 
       else if (item == "feMux") {
-         assert(iBoard != -1);
-         gl->wdb[iBoard]->SetFeMux(iChannel, value == "true" ? WDB::cFeMuxCalSource : WDB::cFeMuxInput);
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetFeMux(iChannel, value == "true" ? WDB::cFeMuxCalSource : WDB::cFeMuxInput);
+         else
+            gl->wdb[iBoard]->SetFeMux(iChannel, value == "true" ? WDB::cFeMuxCalSource : WDB::cFeMuxInput);
       }
 
       else if (item == "drsSampleFreq") {
-         assert(iBoard != -1);
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetDrsSampleFreq(std::stoi(value));
+         else
          gl->wdb[iBoard]->SetDrsSampleFreq(std::stoi(value));
       }
 
       else if (item == "dacCalDc") {
-         assert(iBoard != -1);
-         gl->wdb[iBoard]->SetDacCalDcV(std::stof(value));
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetDacCalDcV(std::stof(value));
+         else
+            gl->wdb[iBoard]->SetDacCalDcV(std::stof(value));
       }
 
       //---------- commands ----------

@@ -59,6 +59,7 @@ function Oscilloscope(div) { // constructor
    this.canvas = document.createElement("canvas");
    div.appendChild(this.canvas);
 
+   this.applyAll = false;
    this.running = true;
    this.currentChn = 0;
    this.idle = true;
