@@ -310,9 +310,11 @@
                </tr>
             </table>
 
-            Clock channels:
-            <button class="squareButton" id="ch16" type="button" onClick="btnChn(16)">16</button>
-            <button class="squareButton" id="ch17" type="button" onClick="btnChn(17)">17</button>
+            <div style="user-select: none">
+               Clock channels:
+               <button class="squareButton" id="ch16" type="button" onClick="btnChn(event, 16)" onContextmenu="btnChn(event, 16)">16</button>
+               <button class="squareButton" id="ch17" type="button" onClick="btnChn(event, 17)" onContextmenu="btnChn(event, 17)">17</button>
+            </div>
 
          </div>
 
