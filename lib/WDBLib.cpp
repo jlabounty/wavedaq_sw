@@ -2888,7 +2888,6 @@ void WP::DoCalibrationVoltageStep()
       vCalibProg.nIter2   = 200;
       vCalibProg.nIter3   = 200;
       vCalibProg.nIter4   = 200;
-      vCalibProg.iBoard   = 0;
       vCalibProg.iIter1   = 0;
       vCalibProg.iIter2   = 0;
       vCalibProg.iIter3   = 0;

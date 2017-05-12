@@ -358,7 +358,10 @@ public:
    
    WDEvent* ReadSingleEvent(WDB* b, int timeout);
    
-   void StartCalibrationVoltage(bool bAll) { vCalibProg.nBoard = bAll ? mWdb.size() : 1; vCalibProg.state = cCsFirstBoard; }
+   void StartCalibrationVoltage(int b) {
+      vCalibProg.nBoard = (b == -1) ? mWdb.size() : b+1;
+      vCalibProg.iBoard = (b == -1) ? 0 : b;
+      vCalibProg.state = cCsFirstBoard; }
    void StartCalibrationTime(bool bAll) { tCalibProg.nBoard = bAll ? mWdb.size() : 1; tCalibProg.state = cCsFirstBoard; };
    void DoCalibrationVoltageStep();
    void DoCalibrationTimeStep();

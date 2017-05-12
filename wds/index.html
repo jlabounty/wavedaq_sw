@@ -246,7 +246,7 @@
                   <td>Remove Spikes</td>
                </tr>
             </table>
-            <button class="executeButton" id="btnVCalib" type="button" onClick="doVCalib()">Execute Voltage
+            <button class="executeButton" id="btnVCalib" type="button" onClick="dlgShow('dlgCalib')">Execute Voltage
                Calibration
             </button>
             <div class="progressBar">
@@ -455,6 +455,26 @@
          </div>
       </div>
       
+   </div>
+
+   <!-- calibrate single/all boards dialog -->
+   <div id="dlgCalib" class="dlgFrame">
+   
+   <div class="dlgTitlebar">Please select which boards to calibrate</div>
+   
+   <div class="dlgPanel">
+      <div>
+         <button style="width:200px;padding:6px" type="button" onClick="doVCalib(false)">Calibrate current board</button>
+         <br /><br />
+         <button style="width:200px;padding:6px" type="button" onClick="doVCalib(true)">Calibrate all boards</button>
+         <br />
+      </div>
+      <hr />
+      <div style="text-align:center">
+         <button class="wideButton" type="button" onClick="dlgHide('dlgCalib')">Cancel</button>
+      </div>
+   </div>
+   
    </div>
 
    <!-- extra buttons -->

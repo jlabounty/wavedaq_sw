@@ -77,20 +77,19 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       std::vector<std::string> args;
       int iBoard = -1, iChannel = -1;
       
-      // get parameters from URI
+      // get parameters from URI in the format /<item>/<board>/<channel>
       if (hm->uri.p) {
          uri = split(std::string(hm->uri.p), ' ')[0];
          args = split(uri, '/');
          if (args.size() > 1)
             item = args[1];
-         if (args.size() > 3) {
+         if (args.size() > 2) {
             if (args[2] == "ALL")
                iBoard = -1;
             else
                iBoard = std::stoi(args[2]);
-            item = args[3];
          }
-         if (args.size() > 4)
+         if (args.size() > 3)
             iChannel = std::stoi(args[4]);
       }
       if (hm->body.p)
@@ -299,7 +298,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       //---------- commands ----------
       else if (item == "vcalib") {
          if (!gl->demoMode)
-            gl->wp->StartCalibrationVoltage(true);
+            gl->wp->StartCalibrationVoltage(iBoard);
       }
 
       else if (item == "tcalib") {

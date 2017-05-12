@@ -444,16 +444,15 @@ function setParam(e, channel) {
          dlgMessage("Warning", "No external clock present");
    }
    
-   var uri = "param/";
+   var uri = e.name+"/";
    if (OSC.applyAll)
       uri += "ALL";
    else
       uri += OSC.curBoard + "";
-   uri += "/"+e.name;
-   var value = "";
    if (channel != undefined)
       uri += "/" + channel;
 
+   var value = "";
    if (e.type == "select-one") {
       if (e.selectedIndex != -1) {
          value = e.selectedOptions[0].value;
@@ -561,7 +560,8 @@ function validateParam(input, channel) {
    setParam(input, channel);
 }
 
-function doVCalib() {
+function doVCalib(all) {
+   dlgHide("dlgCalib");
    if (OSC.demoMode) {
       alert("Not available in demo mode");
       return;
@@ -569,7 +569,10 @@ function doVCalib() {
    progressOldBoard = OSC.curBoard;
 
    var req = new XMLHttpRequest();
-   req.open("PUT", "vcalib");
+   if (all)
+      req.open("PUT", "vcalib/ALL");
+   else
+      req.open("PUT", "vcalib/"+OSC.curBoard);
    req.send();
 }
 

@@ -61,8 +61,8 @@ document.write("<style>" +
    "   background-color: #C0C0C0;" +
    "   border-top-left-radius: 6px;" +
    "   border-top-right-radius: 6px;" +
-   "   font-size: 10pt;" +
-   "   padding: 2px;" +
+   "   font-size: 12pt;" +
+   "   padding: 5px;" +
    "}" +
    ".dlgTitlebar:hover {" +
    "   cursor: pointer;" +
