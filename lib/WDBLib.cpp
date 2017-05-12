@@ -2280,15 +2280,10 @@ void WP::ReceiveWfPacket()
          auto pd = (unsigned char*)(ph+1);
          for (int i=0 ; i<512 ; i+=2) {
             short data1   = ((pd[1] & 0x0F) << 8) | pd[0];
-            if(data1 >= 0x0800) {
-               // expand two's complement
-               data1 -= 0x1000;
-            }
             short data2 = ((unsigned short)pd[2] << 4) | (pd[1] >> 4);
-            if(data2 >= 0x0800) {
-               // expand two's complement
-               data2 -= 0x1000;
-            }
+            // subtract binary offset
+            data1 -= 0x800;
+            data2 -= 0x800;
             pd+=3;
             
             if (channel_segment == 0) {
