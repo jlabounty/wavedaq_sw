@@ -459,6 +459,16 @@ void TCB::GetRRUN(u_int32_t *data)
 {
    u_int32_t addr = RRUN;
    ReadReg(addr,data);
+   if((*data&0xF000000)>>24==0xF) {
+     printf("\n*********************************************************************************************************************\n");
+     printf("** Board configured to drive the trigger bus to the fron panel connector, check the cable to the Ancillary Master! **\n");
+     printf("*********************************************************************************************************************\n\n");
+   }   
+   else if((*data&0xF000000)>>24==0xB) {
+     printf("\n****************************************************************\n");
+     printf("** Board configured to drive the trigger bus to the backplane **\n");
+     printf("****************************************************************\n\n");
+   }
    printf(" RUNMODE status %x \n",*data&0x1);
    printf(" FADCMODE status %x \n",(*data&0x4)>>2);
    printf(" TESTTXMODE status %x \n",(*data&0x20)>>5);

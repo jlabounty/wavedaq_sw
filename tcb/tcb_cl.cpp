@@ -74,40 +74,42 @@ int main(int argc, char *argv[])
       } while ( option == 0 ) ;
       //
       if(option == 1) {
-         printf(" opt = 1 : Set RRUN ... \n");
-         printf("FADCMODE?\n");
-         scanf("%x",&scanfdata);
-         data = scanfdata<<2;
-         printf("TESTTXMODE?\n");
-         scanf("%x",&scanfdata);
-         data |= scanfdata<<5;
-	 if(((TCBBoard.fidcode&0xf000)>>12)==2 || ((TCBBoard.fidcode&0xf000)>>12)==1) {
-	   printf("DBGSERDES?\n");
-	   scanf("%x",&scanfdata);
-	   data |= scanfdata<<8;
-	 }
-         printf("ENABLE_TRGBUS?\n");
-         scanf("%x",&scanfdata);
-         data |= scanfdata<<4;
-         printf("MASKS?\n");
-         scanf("%x",&scanfdata);
-         data |= scanfdata<<13; 
-         TCBBoard.SetRRUN(&data);
-	 if(((TCBBoard.fidcode&0xf000)>>12)==3) {
-	   int nword = (TCBBoard.fntrg-1)/32 + 1;
-	   for(int iword = 0; iword <nword; iword++){
-	     printf("TRGENA?(hex, bit [%d:%d])\n",(iword+1)*32-1,iword*32);
-	     scanf("%x",&scanfdata);
-	     data = scanfdata;
-	     TCBBoard.SetRENA(&data,iword);
-	   }
-	 }
-	 if(((TCBBoard.fidcode&0xf000)>>12)!=3) {
-	   printf("ALGSEL?(hex)\n");
-	   scanf("%x",&scanfdata);
-	   data = scanfdata;
-	   TCBBoard.SetRALGSEL(&data);
-	 }
+	printf(" opt = 1 : Set RRUN ... \n");
+	printf("\nFADCMODE?\n if 0 input RAMs are not written by SERDES data\n if 1 the opposite\n"); 
+	scanf("%x",&scanfdata);
+	data = scanfdata<<2;
+	printf("\nTESTTXMODE?\n if 0 output RAMs are not written by processed data\n if 1 the opposite\n"); 
+	scanf("%x",&scanfdata);
+	data |= scanfdata<<5;
+	if(((TCBBoard.fidcode&0xf000)>>12)==2 || ((TCBBoard.fidcode&0xf000)>>12)==1) {
+	  printf("\nDBGSERDES?\n if 1 0xDEADBEEF is set on any SERDES transmission\n");
+	  scanf("%x",&scanfdata);
+	  data |= scanfdata<<8;
+	}
+	if( !( (TCBBoard.fidcode&0xf000)>>12==3 && (TCBBoard.fidcode&0xf00)>>8==0xB ) ) {
+	  printf("\nENABLE_TRGBUS?\n If 0 then the TRGBus from backplane is not used but internal signals \n if 1 then the backplane signals are used\n");
+	  scanf("%x",&scanfdata);
+	}
+	data |= scanfdata<<4;
+	printf("\nMASKS? (hex) \n bit 0 is the EXBUSY \n bit 1 for the SYNC\n bit 2 for the TRG\n");
+	scanf("%x",&scanfdata);
+	data |= scanfdata<<13; 
+	TCBBoard.SetRRUN(&data);
+	if(((TCBBoard.fidcode&0xf000)>>12)==3) {
+	  int nword = (TCBBoard.fntrg-1)/32 + 1;
+	  for(int iword = 0; iword <nword; iword++){
+	    printf("\nTRGENA?(hex, bit [%d:%d])\n",(iword+1)*32-1,iword*32);
+	    scanf("%x",&scanfdata);
+	    data = scanfdata;
+	    TCBBoard.SetRENA(&data,iword);
+	  }
+	}
+	if(((TCBBoard.fidcode&0xf000)>>12)!=3) {
+	  printf("\nALGSEL?(hex)\n each bit is associated with a trigger ID as in the trigger map \n");
+	  scanf("%x",&scanfdata);
+	  data = scanfdata;
+	  TCBBoard.SetRALGSEL(&data);
+	}
       }
       //
       if(option == 2) {
