@@ -143,7 +143,7 @@ function init() {
    OSC.timer.loadWF = window.setTimeout(loadWF, 10);
 
    // schedule loadStatus()
-   //## OSC.timer.loadStatus = window.setTimeout(loadStatus, 10000);
+   OSC.timer.loadStatus = window.setTimeout(loadStatus, 10000);
 
    // schedule loadScalers()
    OSC.timer.loadScalers = window.setTimeout(loadScalers, 1000);

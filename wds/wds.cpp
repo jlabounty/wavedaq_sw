@@ -461,11 +461,12 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
    
    // temperature & PLL lock status
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/status") == 0) {
-      if (gl->verbose)
-         std::cout<< "Sending /status to browser" << std::endl;
       mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
       int b = atoi(str);
-      
+
+      if (gl->verbose)
+         std::cout<< "Sending /status board " << b << " to browser" << std::endl;
+
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
       mg_printf_http_chunk(nc, "{\n");
       mg_printf_http_chunk(nc, "   \"temperature\": %1.1lf,\n",   gl->wdb[b]->GetTemperature(false));
@@ -477,11 +478,12 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
    // scalers
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/scalers") == 0) {
-      if (gl->verbose)
-         std::cout<< "Sending /scalers to browser" << std::endl;
       mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
       int b = atoi(str);
       
+      if (gl->verbose)
+         std::cout<< "Sending /scalers board " << b << " to browser" << std::endl;
+
       std::vector<unsigned long> scaler;
       if (gl->demoMode) {
          std::poisson_distribution<int> dist(1000);
