@@ -617,7 +617,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          }
          
          // read waveforms
-         auto eVector = gl->wp->GetEvent(300);
+         auto eVector = gl->wp->GetEvent(500);
          if (eVector) {
             if (eVector->size() > 0)
                event = (*eVector)[0];

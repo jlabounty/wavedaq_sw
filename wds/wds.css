@@ -254,6 +254,7 @@ input[type=text] {
 
 .chnButtons {
    font-size: 0; /* removes space between buttons */
+   user-select: none; /* for Ctrl-Click */
 }
 
 .group {

@@ -328,7 +328,9 @@ function populateControls(init)
    document.getElementById("tcalib2").checked = OSC.wp.timeCalib2;
    document.getElementById("tcalib3").checked = OSC.wp.timeCalib3;
 
-   document.getElementById("clksource").checked = (OSC.wdb[OSC.curBoard].daqClkSrcSel == 1);
+   // document.getElementById("clksource").checked = (OSC.wdb[OSC.curBoard].daqClkSrcSel == 1);
+   document.getElementById("clksource").checked = true;
+   document.getElementById("clksource").disabled = true;
 
    // channels dialog box
    for (var i=0 ; i<16 ; i++) {
@@ -978,9 +980,9 @@ function enableDRSChannels()
          OSC.wdb[i].drs0ChnTxEnable = OSC.wdb[OSC.curBoard].drs0ChnTxEnable;
          OSC.wdb[i].drs1ChnTxEnable = OSC.wdb[OSC.curBoard].drs1ChnTxEnable;
       }
-      req.open("PUT", "gl/ALL/enableChannel", true);
+      req.open("PUT", "/enableChannel/ALL", true);
    } else {
-      req.open("PUT", "gl/" + OSC.curBoard + "/enableChannel", true);
+      req.open("PUT", "/enableChannel/" + OSC.curBoard, true);
    }
    req.send(mask);
 }
@@ -1005,13 +1007,31 @@ function btnChnAll()
    OSC.drawChnButtons();
 }
 
-function btnChn(c)
+function btnChn(event, c)
 // select channel "c" and set controls to reflect channel status (c == -1 means all channels)
 {
+   event.preventDefault(); // suppress context menu for Ctrl-click
+   
    // unselect all channels
-   for (var i=0 ; i<18 ; i++)
-      OSC.chOnSelected[i] = false;
+   if (!event.ctrlKey && !event.shiftKey)
+      for (var i=0 ; i<18 ; i++)
+         OSC.chOnSelected[i] = false;
 
+   if (event.shiftKey) {
+      // find last selected channel
+      var last;
+      for (last=15 ; last>=0 ; last--)
+         if (OSC.chOnSelected[last])
+            break;
+      // select all channels betweeen last and current
+      if (c > last)
+         for (var i=last ; i<=c ; i++)
+            OSC.chOnSelected[i] = true;
+      if (c < last)
+         for (var i=last ; i>=c ; i--)
+            OSC.chOnSelected[i] = true;
+   }
+   
    // select current channel
    OSC.chOnSelected[c] = true;
    if (OSC.currentChn == c)
@@ -1077,7 +1097,7 @@ function btnScale(inc)
       index--;
 
    for (i = 0; i < 18; i++) {
-      if (OSC.currentChn != -1 && i != OSC.currentChn)
+      if (!OSC.chOnSelected[i])
          continue;
 
       OSC.wfScaleIndex[i] = index;
@@ -1115,7 +1135,7 @@ function setTScale() {
 
 function sldUOffset(value) {
    for (var i = 0; i < 18; i++) {
-      if (OSC.currentChn != -1 && i != OSC.currentChn)
+      if (!OSC.chOnSelected[i])
          continue;
       OSC.wfOffset[i] = value - 0.5;
    }
