@@ -30,7 +30,7 @@ const int cTriggerModeAuto      = 2;
 typedef struct {
    bool demoMode;
    int  serverPort;
-   bool verbose;
+   int  verbose;
    std::vector<WDB*> wdb;
    WP*  wp;
    int  triggerMode;
@@ -692,7 +692,8 @@ void showUsage(std::string name)
    std::cerr << "  -d              Demo mode" << std::endl;
    std::cerr << "  -p              HTTP server port (default is 8080)" << std::endl;
    std::cerr << "  -w <address>    Internet address(es) of WaveDREAM board(s)" << std::endl;
-   std::cerr << "  -v              Print extra information (verbose)" << std::endl;
+   std::cerr << "  -v 1            Print extra information (verbose)" << std::endl;
+   std::cerr << "  -v 2            Print in addition each received waveform packet header" << std::endl;
 }
 
 #include <execinfo.h>
@@ -719,6 +720,7 @@ int main(int argc, const char * argv[])
    
    // default values
    gl.serverPort = 8080;
+   gl.verbose = 0;
    gl.triggerMode = cTriggerModeAuto;
    
    // parse command line parameters
@@ -738,8 +740,11 @@ int main(int argc, const char * argv[])
       else if (arg == "-p")
          gl.serverPort = std::stoi(argv[++i]);
       
-      else if (arg == "-v")
-         gl.verbose = true;
+      else if (arg == "-v") {
+         gl.verbose = 1;
+         if (i < argc-1 && isdigit(argv[i+1][0]))
+            gl.verbose = std::stoi(argv[++i]);
+      }
       
       else if (arg == "-w") {
          

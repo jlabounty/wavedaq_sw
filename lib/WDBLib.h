@@ -253,7 +253,7 @@ class WP {
    static int        gDataSocket;
    static int        gServerPort;
 
-   bool              mVerbose;
+   int               mVerbose;
    bool              mDemoMode;
   
    std::vector<WDB*> mWdb;
@@ -313,7 +313,7 @@ public:
    enum { cLiFormatBinary = 1, cLiFormatXML = 2};
 
    // constructor
-   WP(std::vector<WDB*> w, bool verbose = false, bool demo = false);
+   WP(std::vector<WDB*> w, int verbose = 0, bool demo = false);
    
    // setter & getter
    int GetDataSocket() { return gDataSocket; }
@@ -379,7 +379,7 @@ class WDB {
    std::string      mName;
    unsigned char    mEthAddrAscii[16];
    unsigned char    mEthAddrBin[16];
-   bool             mVerbose;
+   int              mVerbose;
    bool             mDemoMode;
 
    unsigned int     creg[WD2_REG_CRC32_REG_BANK_OFS/4+1];
@@ -398,7 +398,7 @@ class WDB {
 public:
    
    // constructor
-   WDB(std::string name, bool verbose = false) {
+   WDB(std::string name, int verbose = 0) {
       mName = name;
       mVerbose = verbose;
       mDemoMode = (name == "demo");
@@ -419,7 +419,7 @@ public:
    TCALIB           mTCalib;
    
    // interface functions
-   void SetVerbose(bool verbose) { mVerbose = verbose; }
+   void SetVerbose(int verbose) { mVerbose = verbose; }
    void Connect();
    void SetDestinationPort(int port);
    void ReceiveControlRegisters(unsigned int index=0, unsigned int nReg=REG_NR_OF_CTRL_REGS);

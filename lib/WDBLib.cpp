@@ -1983,7 +1983,7 @@ bool WDEventRequest::IsWfValid()
 
 //--------------------------------------------------------------------
 
-WP::WP(std::vector<WDB *> w, bool verbose, bool demo)
+WP::WP(std::vector<WDB *> w, int verbose, bool demo)
 {
    struct sockaddr_in server_addr;
 
@@ -2199,8 +2199,7 @@ void WP::ReceiveWfPacket()
          ph->temperature              = SWAP_UINT16(ph->temperature);
          ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
          
-#if 0
-         if (mVerbose)
+         if (mVerbose > 1)
             printf("#%02d from %s:%d, event=%5d type=%d ADC/Chn/Segment=%d/%d/%d Tcell=%04d/%04d T=%1.1lf\n",
                    mPacketsReceived-1,
                    inet_ntoa(remote_addr.sin_addr),
@@ -2213,7 +2212,6 @@ void WP::ReceiveWfPacket()
                    ph->drs0_trigger_cell,
                    ph->drs1_trigger_cell,
                    ph->temperature*0.0625);
-#endif
          
          if (mCurrentEvent == -1)
             mCurrentEvent = ph->event_number;
