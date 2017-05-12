@@ -165,7 +165,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             for (auto &b: gl->wdb)
                b->SetDaqClkSrcSel(std::stoi(value));
          else
-            gl->wdb[iBoard]->SetDaqClkSrcSel(std::stoi(value));
+            gl->wdb[iBoard]->SetDaqClkSrcSel(value == "true");
       }
 
       else if (item == "dacTriggerLevel") {
@@ -293,12 +293,20 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             gl->wdb[iBoard]->SetDacCalDcV(std::stof(value));
       }
 
+      else if (item == "hvDemand") {
+      }
+
       //---------- commands ----------
       else if (item == "vcalib") {
          if (!gl->demoMode)
             gl->wp->StartCalibrationVoltage(true);
       }
-      
+
+      else if (item == "tcalib") {
+         if (!gl->demoMode)
+            gl->wp->StartCalibrationTime(true);
+      }
+
       else if (item == "save") {
          if (value == "stop")
             gl->wp->StopLogging();
@@ -678,10 +686,10 @@ void showUsage(std::string name)
       name = name.substr(name.rfind("/")+1); // strip path
       
    std::cerr << "usage: " << name << " [options] [-w <address> [-w <address> ...]]" << std::endl;
-   std::cerr << "valud options:" << std::endl;
+   std::cerr << "valid options:" << std::endl;
    std::cerr << "  -h              Show this help" << std::endl;
    std::cerr << "  -d              Demo mode" << std::endl;
-   std::cerr << "  -p              HTTP server port" << std::endl;
+   std::cerr << "  -p              HTTP server port (default is 8080)" << std::endl;
    std::cerr << "  -w <address>    Internet address(es) of WaveDREAM board(s)" << std::endl;
    std::cerr << "  -v              Print extra information (verbose)" << std::endl;
 }

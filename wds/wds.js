@@ -942,6 +942,7 @@ function btnSingle()
       var e = document.getElementById("btnStop");
       OSC.running = false;
       e.innerHTML = "Start";
+      e.style.backgroundColor = "#FFA0A0";
    }
 
    OSC.timer.loadWF = window.setTimeout(loadWF, 10);
