@@ -2272,7 +2272,10 @@ void WP::ReceiveWfPacket()
                break;
             }
          }
-         assert(event);
+         if (!event) {
+            std::cerr << "Received unexpected packet from board #" << ph->board_id << ". Aborting." << std::endl;
+            abort();
+         }
          
          event->SetEventHeaderInfo(ph);
          
