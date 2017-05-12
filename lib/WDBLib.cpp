@@ -2258,7 +2258,7 @@ void WP::ReceiveWfPacket()
                break;
             }
          if (!er) {
-            // received packet for board without event request
+            std::cerr << "Received unexpected packet from board #" << ph->board_id << ". Aborting." << std::endl;
             return;
          }
          
@@ -2272,7 +2272,7 @@ void WP::ReceiveWfPacket()
          }
          if (!event) {
             std::cerr << "Received unexpected packet from board #" << ph->board_id << ". Aborting." << std::endl;
-            abort();
+            return;
          }
          
          event->SetEventHeaderInfo(ph);
