@@ -362,7 +362,10 @@ public:
       vCalibProg.nBoard = (b == -1) ? mWdb.size() : b+1;
       vCalibProg.iBoard = (b == -1) ? 0 : b;
       vCalibProg.state = cCsFirstBoard; }
-   void StartCalibrationTime(bool bAll) { tCalibProg.nBoard = bAll ? mWdb.size() : 1; tCalibProg.state = cCsFirstBoard; };
+   void StartCalibrationTime(int b) {
+      tCalibProg.nBoard = (b == -1) ? mWdb.size() : b+1;
+      tCalibProg.iBoard = (b == -1) ? 0 : b;
+      tCalibProg.state = cCsFirstBoard; };
    void DoCalibrationVoltageStep();
    void DoCalibrationTimeStep();
    
