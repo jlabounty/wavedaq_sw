@@ -814,6 +814,11 @@ int main(int argc, const char * argv[])
             // load calibration data for board
             b->LoadVoltageCalibration();
             b->LoadTimeCalibration();
+            
+         } else {
+            // turnall channels on in demo mode
+            b->SetDrs0ChnTxEnable(0xFFFF);
+            b->SetDrs1ChnTxEnable(0xFFFF);
          }
       } catch (std::runtime_error &e) {
          std::cout << std::endl;
@@ -825,7 +830,7 @@ int main(int argc, const char * argv[])
       if (gl.verbose)
          std::cout << std::endl << std::endl;
    }
-
+   
    // instantiate waveform processor
    gl.wp = new WP(gl.wdb, gl.verbose, gl.demoMode);
    if (gl.wdb[0]->mVCalib.IsValid()) {
