@@ -76,16 +76,16 @@
 		D55471791B72428F002A92E4 /* wds */ = {
 			isa = PBXGroup;
 			children = (
-				D5A75A7F1EBF467800280601 /* mxml.h */,
-				D5A75A7D1EBF466300280601 /* mxml.c */,
-				D55471881B72477A002A92E4 /* index.html */,
+				D5D7CE451B74EFB40037D843 /* controls.js */,
 				D55471891B72498D002A92E4 /* wds.css */,
 				D554718A1B72498D002A92E4 /* wds.js */,
 				D529FE721B7B437F004E2D39 /* osc.js */,
+				D5A75A7F1EBF467800280601 /* mxml.h */,
+				D5A75A7D1EBF466300280601 /* mxml.c */,
+				D55471881B72477A002A92E4 /* index.html */,
 				D56DDED41EBF3BF100A71E18 /* averager.cpp */,
 				D56DDED51EBF3BF100A71E18 /* averager.h */,
 				D5EE12301E3B6BF0007FA7E6 /* measurement.js */,
-				D5D7CE451B74EFB40037D843 /* controls.js */,
 				D55471841B72439A002A92E4 /* mongoose.c */,
 				D55471851B72439A002A92E4 /* mongoose.h */,
 				D56DDED11EBF3BDE00A71E18 /* WDBLib.cpp */,

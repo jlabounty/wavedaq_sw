@@ -62,7 +62,7 @@ document.write("<style>" +
    "   border-top-left-radius: 6px;" +
    "   border-top-right-radius: 6px;" +
    "   font-size: 12pt;" +
-   "   padding: 5px;" +
+   "   padding: 10px;" +
    "}" +
    ".dlgTitlebar:hover {" +
    "   cursor: pointer;" +
@@ -476,7 +476,11 @@ Controls.prototype.ctrlHSliderHandler = function (e) {
 //-------------------------------------------------------------------------------------------------
 
 function dlgShow(dlg, modal) {
-   var d = document.getElementById(dlg);
+   var d;
+   if (typeof dlg == "string")
+      d = document.getElementById(dlg);
+   else
+      d = dlg;
 
    d.dlgAx = 0;
    d.dlgAy = 0;
@@ -587,28 +591,38 @@ function dlgHide(dlg) {
    d.style.display = "none";
 }
 
-function dlgMessage(title, string, modal) {
-   var d = document.getElementById("dlgMessage");
-   if (d == undefined) {
-      d =  document.createElement("div");
-      d.id = "dlgMessage";
-      d.className = "dlgFrame";
-      d.style.zIndex = 20;
-
-      d.innerHTML = "<div class=\"dlgTitlebar\" id=\"dlgMessageTitle\">"+title+"</div>"+
-      
-      "<div class=\"dlgPanel\" style=\"padding: 30px;\">"+
-      "<div id=\"dlgMessageString\">"+string+"</div>"+
-      "<br /><br /><button class=\"wideButton\" style=\"background-color:#F8F8F8\" type=\"button\" "+
-      " onClick=\"dlgHide('dlgMessage')\">Close</button>"+
-      "</div>";
-
-      document.body.appendChild(d);
-      dlgShow("dlgMessage", modal);
-   } else {
-      document.getElementById("dlgMessageTitle").innerHTML = title;
-      document.getElementById("dlgMessageString").innerHTML = string;
-      dlgShow("dlgMessage", modal);
-      document.getElementById("dlgMessage").style.zIndex = 20;
+function dlgMessageDestroy(b)
+{
+   var dlg = b.parentElement.parentElement;
+   if (dlg.modal) {
+      var d = document.getElementById("dlgBlackout");
+      if (d != undefined)
+         d.style.display = "none";
    }
+   document.body.removeChild(dlg);
+}
+
+function dlgMessage(title, string, modal, error)
+{
+   d =  document.createElement("div");
+   //d.id = "dlgMessage";
+   d.className = "dlgFrame";
+   d.style.zIndex = modal? 21 : 20;
+
+   d.innerHTML = "<div class=\"dlgTitlebar\" id=\"dlgMessageTitle\">"+title+"</div>"+
+   "<div class=\"dlgPanel\" style=\"padding: 30px;\">"+
+   "<div id=\"dlgMessageString\">"+string+"</div>"+
+   "<br /><br /><button class=\"wideButton\" style=\"background-color:#F8F8F8\" type=\"button\" "+
+   " onClick=\"dlgMessageDestroy(this)\">Close</button>"+
+   "</div>";
+
+   document.body.appendChild(d);
+
+   if (error != undefined) {
+      var t = document.getElementById("dlgMessageTitle");
+      t.style.backgroundColor = "#9E2A2A";
+      t.style.color = "white";
+   }
+         
+   dlgShow(d, modal);
 }

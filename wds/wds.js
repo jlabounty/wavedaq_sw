@@ -151,7 +151,7 @@ function init() {
 
 function connectionBroken() {
    if (OSC.connected) {
-      dlgMessage("Error", "Connection to server broken.\nPlease reload page.", true);
+      dlgMessage("Error", "Connection to server broken.\nPlease reload page.", true, true);
       OSC.connected = false;
    }
 
@@ -443,7 +443,7 @@ function setParam(e, channel) {
 
    if (e.name == "clkSource" && e.checked == true) {
       if (OSC.wdb[OSC.curBoard].scaler[17] < 79E6)
-         dlgMessage("Warning", "No external clock present");
+         dlgMessage("Error", "No external clock present", true);
    }
    
    var uri = e.name+"/";
@@ -563,7 +563,7 @@ function validateParam(input, channel) {
 }
 
 function doVCalib(all) {
-   dlgHide("dlgCalib");
+   dlgHide("dlgVCalib");
    if (OSC.demoMode) {
       alert("Not available in demo mode");
       return;
@@ -578,7 +578,8 @@ function doVCalib(all) {
    req.send();
 }
 
-function doTCalib() {
+function doTCalib(all) {
+   dlgHide("dlgTCalib");
    if (OSC.demoMode) {
       alert("Not available in demo mode");
       return;
@@ -586,7 +587,10 @@ function doTCalib() {
    progressOldBoard = OSC.curBoard;
 
    var req = new XMLHttpRequest();
-   req.open("PUT", "tcalib");
+   if (all)
+      req.open("PUT", "tcalib/ALL");
+   else
+      req.open("PUT", "tcalib/"+OSC.curBoard);
    req.send();
 }
 
@@ -1305,13 +1309,13 @@ function btnStart() {
    }
 
    if (document.getElementById("filename").value == "") {
-      dlgMessage("Warning", "Please enter a valid file name", true);
+      dlgMessage("Error", "Please enter a valid file name", true, true);
       return;
    }
 
    var ne = document.getElementById("nevents").value;
    if (isNaN(parseInt(ne)) || parseInt(ne) < 1 || parseInt(ne) > 1E6) {
-      dlgMessage("Warning", "Please enter a valid number of events", true);
+      dlgMessage("Error", "Please enter a valid number of events", true, true);
       return;
    }
 
@@ -1341,6 +1345,22 @@ function btnStart() {
    req.send(param);
 
    dlgHide('dlgSave');
+}
+
+function btnVcalib()
+{
+   if (OSC.wdb.length > 1)
+      dlgShow('dlgVCalib');
+   else
+      doVCalib(false);
+}
+
+function btnTcalib()
+{
+   if (OSC.wdb.length > 1)
+      dlgShow('dlgTCalib');
+   else
+      doVCalib(false);
 }
 
 function downloadFile(filename) {
