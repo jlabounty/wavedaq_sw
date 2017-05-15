@@ -1015,7 +1015,8 @@ function btnChn(event, c)
    // unselect all channels
    if (!event.ctrlKey && !event.shiftKey)
       for (var i=0 ; i<18 ; i++)
-         OSC.chOnSelected[i] = false;
+         if (i != c)
+            OSC.chOnSelected[i] = false;
 
    if (event.shiftKey) {
       // find last selected channel
@@ -1025,20 +1026,21 @@ function btnChn(event, c)
             break;
       // select all channels betweeen last and current
       if (c > last)
-         for (var i=last ; i<=c ; i++)
+         for (var i=last ; i<c ; i++)
             OSC.chOnSelected[i] = true;
       if (c < last)
-         for (var i=last ; i>=c ; i--)
+         for (var i=last ; i>c ; i--)
             OSC.chOnSelected[i] = true;
    }
    
+   // if channel already selected, toggle it
+   if (OSC.chOnSelected[c])
+      OSC.chOn[c] = !OSC.chOn[c];  // if current channel clicked, toggle it
+   else
+      OSC.chOn[c] = true;          // if other channel clicked, enable it
+   
    // select current channel
    OSC.chOnSelected[c] = true;
-   if (OSC.currentChn == c)
-      OSC.chOn[c] = !OSC.chOn[c]; // if current channel clicked, toggle it
-   else
-      OSC.chOn[c] = true;         // if other channel clicked, enable it
-   OSC.currentChn = c;
 
    if (c < 16) {
       var o = document.getElementById("chOn");
@@ -1081,14 +1083,11 @@ function btnOn()
 function btnScale(inc)
 // change vertical scale, update label
 {
-   if (OSC.currentChn == -1) {
-      for (var i = 0; i < 18; i++)
-         if (OSC.chOn[i])
-            break;
-      if (i == 18)
-         i = 0;
-   } else
-      i = OSC.currentChn;
+   for (var i = 0; i < 18; i++)
+      if (OSC.chOnSelected[i])
+         break;
+   if (i == 18)
+      i = 0;
 
    var index = OSC.wfScaleIndex[i] + inc;
    if (index < 0)
