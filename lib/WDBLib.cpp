@@ -1995,6 +1995,7 @@ WP::WP(std::vector<WDB *> w, int verbose, bool demo)
    mOfsCalib1 = false;
    mOfsCalib2 = false;
    mGainCalib = false;
+   mRangeCalib = false;
    mTimeCalib1 = false;
    mTimeCalib2 = false;
    mTimeCalib3 = false;
