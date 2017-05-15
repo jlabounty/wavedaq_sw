@@ -303,7 +303,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
       else if (item == "tcalib") {
          if (!gl->demoMode)
-            gl->wp->StartCalibrationTime(true);
+            gl->wp->StartCalibrationTime(iBoard);
       }
 
       else if (item == "save") {
@@ -554,14 +554,14 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          float f = gl->wp->GetVcalibProgress();
          mg_send_http_chunk(nc, (const char *)&f, 4);
          
-//         for (int c=0 ; c<WD_N_CHANNELS ; c++)
-//            if (chn & (1 << c)) {
-//               int n = 1024;
-//               mg_send_http_chunk(nc, (const char *)&c, 4);
-//               mg_send_http_chunk(nc, (const char *)&n, 4);
-//               
-//               mg_send_http_chunk(nc, (const char *)gl->board[tcalib_prog.i_board].tcalib.period[c], sizeof(float)*n);
-//            }
+         for (int c=0 ; c<WD_N_CHANNELS ; c++)
+            if (chn & (1 << c)) {
+               int n = 1024;
+               mg_send_http_chunk(nc, (const char *)&c, 4);
+               mg_send_http_chunk(nc, (const char *)&n, 4);
+               
+               mg_send_http_chunk(nc, (const char *)gl->wdb[b]->mTCalib.mCalib.period[c], sizeof(float)*n);
+            }
          
          mg_send_http_chunk(nc, "", 0);
          return;
@@ -812,7 +812,8 @@ int main(int argc, const char * argv[])
             }
 
             // load calibration data for board
-            b->LoadCalibration();
+            b->LoadVoltageCalibration();
+            b->LoadTimeCalibration();
          }
       } catch (std::runtime_error &e) {
          std::cout << std::endl;

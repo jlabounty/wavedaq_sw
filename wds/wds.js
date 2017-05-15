@@ -1360,7 +1360,7 @@ function btnTcalib()
    if (OSC.wdb.length > 1)
       dlgShow('dlgTCalib');
    else
-      doVCalib(false);
+      doTCalib(false);
 }
 
 function downloadFile(filename) {

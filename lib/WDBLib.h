@@ -89,16 +89,16 @@ typedef struct {
    unsigned int     crc;
    float            sampling_frequency;
    float            temperature;
-   float            dt[16][1024];
-   float            period[16][1024];
-   float            offset[16];
+   float            dt[18][1024];
+   float            period[18][1024];
+   float            offset[18];
 } TCALIB_DATA;
 
 class TCALIB {
    bool             bValid;
 
 public:
-   TCALIB_DATA      fCalib;
+   TCALIB_DATA      mCalib;
    TCALIB();
    bool IsValid() { return bValid; }
    void save() {};
@@ -108,6 +108,7 @@ public:
 //--------------------------------------------------------------------
 
 typedef struct {
+   int            mode;
    int            state;
    double         progress;
    int            nBoard;
@@ -121,25 +122,8 @@ typedef struct {
    int            nIter4;
    int            iIter4;
    Averager       *ave;
-   int            fh;
-} VCALIB_PROGRESS;
-
-typedef struct {
-   int            state;
-   double         progress;
-   int            nBoard;
-   int            iBoard;
-   int            nIter1;
-   int            iIter1;
-   int            nIter2;
-   int            iIter2;
-   int            nIter3;
-   int            iIter3;
    int            phase;
-   int            index;
-   Averager       *ave;
-   int            fh;
-} TCALIB_PROGRESS;
+} CALIB_PROGRESS;
 
 //--------------------------------------------------------------------
 
@@ -249,7 +233,11 @@ class WP {
       cCsFirstBoard   = 2,
       cCsFirstSample  = 3,
       cCsRunning      = 4 };
-   
+
+   enum { cCmNone     = 0,
+      cCmVoltage      = 1,
+      cCmTime         = 2 };
+
    static int        gDataSocket;
    static int        gServerPort;
 
@@ -291,8 +279,7 @@ class WP {
    void              RemoveSpikes(int tc, float wf[][1024]);
    //   void              LogWaveforms();
    
-   VCALIB_PROGRESS   vCalibProg;
-   TCALIB_PROGRESS   tCalibProg;
+   CALIB_PROGRESS    calibProg;
    
    struct {
       std::string    fileName;
@@ -308,6 +295,11 @@ class WP {
    float             mOldRange;
    int               mOldMask0;
    int               mOldMask1;
+   
+   void              AnalyzePeriod(WDEvent *, WDB *);
+   void              AnalyzeTimeOffset(WDEvent *, WDB *);
+   void              CalibrateLocal(WDEvent *, WDB *);
+   void              CalibrateGlobal(WDEvent *, WDB *);
    
 public:
    enum { cLiFormatBinary = 1, cLiFormatXML = 2};
@@ -341,14 +333,14 @@ public:
    void SetTimeCalib3(bool f) { mTimeCalib3 = f; }
    void SetRemoveSpikes(bool f) { mRemoveSpikes = f; }
    
-   bool IsVcalibActive() { return vCalibProg.state != cCsInactive; }
-   bool IsTcalibActive() { return tCalibProg.state != cCsInactive; }
+   bool IsVcalibActive() { return calibProg.mode == cCmVoltage; }
+   bool IsTcalibActive() { return calibProg.mode == cCmTime; }
    
-   int  GetVcalibBoard() { return vCalibProg.iBoard; }
-   float GetVcalibProgress() { return vCalibProg.progress; }
+   int  GetVcalibBoard() { return calibProg.iBoard; }
+   float GetVcalibProgress() { return calibProg.progress; }
 
-   int  GetTcalibBoard() { return tCalibProg.iBoard; }
-   float GetTcalibProgress() { return tCalibProg.progress; }
+   int  GetTcalibBoard() { return calibProg.iBoard; }
+   float GetTcalibProgress() { return calibProg.progress; }
 
    // functions
    void RequestAllBoards();
@@ -359,13 +351,15 @@ public:
    WDEvent* ReadSingleEvent(WDB* b, int timeout);
    
    void StartCalibrationVoltage(int b) {
-      vCalibProg.nBoard = (b == -1) ? mWdb.size() : b+1;
-      vCalibProg.iBoard = (b == -1) ? 0 : b;
-      vCalibProg.state = cCsFirstBoard; }
+      calibProg.mode = cCmVoltage;
+      calibProg.nBoard = (b == -1) ? mWdb.size() : b+1;
+      calibProg.iBoard = (b == -1) ? 0 : b;
+      calibProg.state = cCsFirstBoard; }
    void StartCalibrationTime(int b) {
-      tCalibProg.nBoard = (b == -1) ? mWdb.size() : b+1;
-      tCalibProg.iBoard = (b == -1) ? 0 : b;
-      tCalibProg.state = cCsFirstBoard; };
+      calibProg.mode = cCmTime;
+      calibProg.nBoard = (b == -1) ? mWdb.size() : b+1;
+      calibProg.iBoard = (b == -1) ? 0 : b;
+      calibProg.state = cCsFirstBoard; };
    void DoCalibrationVoltageStep();
    void DoCalibrationTimeStep();
    
@@ -499,6 +493,8 @@ public:
    void SetCalibBufferEnable(bool value);
    bool IsTimingCalibSignalEnable();
    void SetTimingCalibSignalEnable(bool value);
+   void SetTimingCalibSignalDelay(int value);
+   int GetTimingCalibSignalDelay();
    unsigned int GetDaqClkSrcSel();
    void SetDaqClkSrcSel(unsigned int value);
    unsigned int GetExtClkInSel();
@@ -626,8 +622,10 @@ public:
    
    void RequestEvent();
    
-   void SaveCalibration();
-   void LoadCalibration();
+   void SaveVoltageCalibration();
+   void LoadVoltageCalibration();
+   void SaveTimeCalibration();
+   void LoadTimeCalibration();
 };
 
 //--------------------------------------------------------------------
