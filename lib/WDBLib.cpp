@@ -1071,14 +1071,24 @@ void WDB::SetTimingCalibSignalEnable(bool value)
 void WDB::SetTimingCalibSignalDelay(int value)
 {
    // set delay of LMK output #6
-   assert(value > -16 && value < 16);
+   assert(value >= -16 && value <= 16);
    if (value >= 0) {
       SetRegMask(WD2_REG_LMK_0_OFS, WD2_BIT_LMK0_CLKOUT0_DLY_MASK, WD2_BIT_LMK0_CLKOUT0_DLY_OFS, 0);
       // delay channel 6
-      SetRegMask(WD2_REG_LMK_6_OFS, WD2_BIT_LMK6_CLKOUT6_DLY_MASK, WD2_BIT_LMK6_CLKOUT6_DLY_OFS, value);
+      if (value == 16)
+         SetRegMask(WD2_REG_LMK_6_OFS, WD2_BIT_LMK6_CLKOUT6_MUX_MASK, WD2_BIT_LMK6_CLKOUT6_MUX_OFS, 1);
+      else {
+         SetRegMask(WD2_REG_LMK_6_OFS, WD2_BIT_LMK6_CLKOUT6_MUX_MASK, WD2_BIT_LMK6_CLKOUT6_MUX_OFS, 3);
+         SetRegMask(WD2_REG_LMK_6_OFS, WD2_BIT_LMK6_CLKOUT6_DLY_MASK, WD2_BIT_LMK6_CLKOUT6_DLY_OFS, value);
+      }
    } else {
       // delay channel 0
-      SetRegMask(WD2_REG_LMK_0_OFS, WD2_BIT_LMK0_CLKOUT0_DLY_MASK, WD2_BIT_LMK0_CLKOUT0_DLY_OFS, value);
+      if (value == -16)
+         SetRegMask(WD2_REG_LMK_0_OFS, WD2_BIT_LMK0_CLKOUT0_MUX_MASK, WD2_BIT_LMK0_CLKOUT0_MUX_OFS, 1);
+      else {
+         SetRegMask(WD2_REG_LMK_0_OFS, WD2_BIT_LMK0_CLKOUT0_MUX_MASK, WD2_BIT_LMK0_CLKOUT0_MUX_OFS, 3);
+         SetRegMask(WD2_REG_LMK_0_OFS, WD2_BIT_LMK0_CLKOUT0_DLY_MASK, WD2_BIT_LMK0_CLKOUT0_DLY_OFS, -value);
+      }
       SetRegMask(WD2_REG_LMK_6_OFS, WD2_BIT_LMK6_CLKOUT6_DLY_MASK, WD2_BIT_LMK6_CLKOUT6_DLY_OFS, 0);
    }
    
@@ -3616,6 +3626,9 @@ void WP::DoCalibrationTimeStep()
       b->SetDrs0ChnTxEnable(0x1FF);
       b->SetDrs1ChnTxEnable(0x1FF);
 
+      calibProg.phase = 0;
+      b->SetTimingCalibSignalDelay(calibProg.phase);
+
       calibProg.ave = new Averager(1, WD_N_CHANNELS, 1024, std::max(calibProg.nIter1, calibProg.nIter2));
    }
    
@@ -3626,9 +3639,12 @@ void WP::DoCalibrationTimeStep()
       calibProg.iIter1++;
       
       // switch phase of LMK clock
-      if (calibProg.iIter1 >= calibProg.nIter1/30 * (1+calibProg.phase)) {
+      if (calibProg.iIter1 % 10 == 0) {
          calibProg.phase++;
-         b->SetTimingCalibSignalDelay(calibProg.phase-15);
+         if (calibProg.phase == 17)
+            calibProg.phase = -16;
+         b->SetTimingCalibSignalDelay(calibProg.phase);
+         std::cout << "Phase: " << calibProg.phase << std::endl;
       }
       
       // get one event from board
@@ -3647,7 +3663,7 @@ void WP::DoCalibrationTimeStep()
       if (calibProg.iIter1 == calibProg.nIter1) {
          calibProg.ave->Reset();
          calibProg.phase = 0;
-         b->SetTimingCalibSignalDelay(calibProg.phase-15);
+         b->SetTimingCalibSignalDelay(calibProg.phase);
       }
       
       sleep_ms(10); // obtain 100 Hz rate
@@ -3661,9 +3677,11 @@ void WP::DoCalibrationTimeStep()
       calibProg.iIter2++;
       
       // switch phase of LMK clock
-      if (calibProg.iIter2 >= calibProg.nIter2/30 * (1+calibProg.phase)) {
+      if (calibProg.iIter1 % 10 == 0) {
          calibProg.phase++;
-         b->SetTimingCalibSignalDelay(calibProg.phase-15);
+         if (calibProg.phase == 17)
+            calibProg.phase = -16;
+         b->SetTimingCalibSignalDelay(calibProg.phase);
       }
       
       // get one event from board
@@ -3682,7 +3700,7 @@ void WP::DoCalibrationTimeStep()
       if (calibProg.iIter2 == calibProg.nIter2) {
          calibProg.ave->Reset();
          calibProg.phase = 0;
-         b->SetTimingCalibSignalDelay(0);
+         b->SetTimingCalibSignalDelay(calibProg.phase);
          mRotateWaveform       = true;
          mTimeCalib1           = true;
       }
