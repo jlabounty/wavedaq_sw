@@ -817,7 +817,7 @@ int main(int argc, const char * argv[])
             b->LoadTimeCalibration();
             
          } else {
-            // turnall channels on in demo mode
+            // turn all channels on in demo mode
             b->SetDrs0ChnTxEnable(0xFFFF);
             b->SetDrs1ChnTxEnable(0xFFFF);
          }
@@ -851,6 +851,10 @@ int main(int argc, const char * argv[])
    for (auto &b: gl.wdb)
       b->SetDestinationPort(gl.wp->GetServerPort());
    
+   // switch boards to normal mode to send events
+   for (auto &b: gl.wdb)
+      b->SetDaqNormal(false); // 'true' does not work yet
+
    // initialize web server
    struct mg_mgr mgr;
    struct mg_connection *con;

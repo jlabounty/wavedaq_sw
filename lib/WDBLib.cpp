@@ -2103,9 +2103,9 @@ void WP::SetEventRequestMasks()
    for (auto &b: mWdb) {
       auto mask = (b->GetDrs0ChnTxEnable() & 0xFF);
       mask |= (b->GetDrs1ChnTxEnable() & 0xFF) << 8;
-      if (b->GetDrs0ChnTxEnable() & 0x100)
+      if (b->GetDrs0ChnTxEnable() & 0x100 && b->GetReadoutSrcSel() == WDB::cReadoutSrcDrs)
          mask |= 0x10000;
-      if (b->GetDrs1ChnTxEnable() & 0x100)
+      if (b->GetDrs1ChnTxEnable() & 0x100 && b->GetReadoutSrcSel() == WDB::cReadoutSrcDrs)
          mask |= 0x20000;
 
       mEventRequest[i++]->SetMask(mask);
@@ -2322,7 +2322,7 @@ void WP::ReceiveWfPacket()
                break;
             }
          if (!er) {
-            std::cerr << "Received unexpected packet from board #" << ph->board_id << ". Aborting." << std::endl;
+            std::cerr << "Received unexpected packet from board #" << ph->board_id << std::endl;
             return;
          }
          
@@ -2335,7 +2335,7 @@ void WP::ReceiveWfPacket()
             }
          }
          if (!event) {
-            std::cerr << "Received unexpected packet from board #" << ph->board_id << ". Aborting." << std::endl;
+            std::cerr << "Received unexpected packet from board #" << ph->board_id << std::endl;
             return;
          }
          
@@ -2551,7 +2551,20 @@ void WP::CalibrateWaveforms()
       if (ev->mWFTypeADC) { //---------- calibrate ADC data ----------
          
          if (mRangeCalib) {
-            // TBD
+            float ofs;
+            
+            for (int i=0 ; i<WD_N_CHANNELS-2 ; i++) { // exclude clock channels
+               if (fabs(wdb->GetRange() - (-0.45)) < 0.001)
+                  ofs = wdb->mVCalib.mCalib.adc_offset_range0[i];
+               else if (fabs(wdb->GetRange()) < 0.001)
+                  ofs = wdb->mVCalib.mCalib.adc_offset_range1[i];
+               else if (fabs(wdb->GetRange() - 0.45) < 0.001)
+                  ofs = wdb->mVCalib.mCalib.adc_offset_range2[i];
+               else
+                  ofs = 0;
+               for (int j=0 ; j<1024 ; j++)
+                  ev->mWfU[i][j] -= ofs;
+            }
          }
          
          // just set nominal time bins from ADC sampling rate
@@ -3037,9 +3050,12 @@ void WP::DoCalibrationVoltageStep()
       calibProg.state    = cCsRunning;
 
       // save current board settings
+      mOldReadoutSrc = b->GetReadoutSrcSel();
       mOldRange = b->GetRange();
       mOldMask0 = b->GetDrs0ChnTxEnable();
       mOldMask1 = b->GetDrs1ChnTxEnable();
+      mOldCalibBuffer = b->IsCalibBufferEnable();
+      mOldCalibSignal = b->IsTimingCalibSignalEnable();
       
       // turn off all calibration
       mRotateWaveform      = false;
@@ -3057,6 +3073,7 @@ void WP::DoCalibrationVoltageStep()
       b->SetFeMux(-1, WDB::cFeMuxInput);
       
       // enable all channels
+      b->SetReadoutSrcSel(WDB::cReadoutSrcDrs);
       b->SetDrs0ChnTxEnable(0x1FF);
       b->SetDrs1ChnTxEnable(0x1FF);
       
@@ -3246,6 +3263,8 @@ void WP::DoCalibrationVoltageStep()
    b->SetDacCalDcV(0);
    b->SetRange(-0.45);
 
+   // DRS events
+   b->SetReadoutSrcSel(WDB::cReadoutSrcDrs);
    WDEvent *event;
    for (int i=0 ; i<10 ; i++) {
       event = ReadSingleEvent(b, 1000);
@@ -3262,24 +3281,28 @@ void WP::DoCalibrationVoltageStep()
    }
    delete event;
    
-   /*
-   gl->adc_flag = 1;
-   do {
-      wd_send(gl, calibProg.iBoard, 100, "adcget\n", NULL, NULL);
-   } while (wd_read_waveform(gl, calibProg.iBoard, 1000, &eventHeader, wfU, wfT) != SUCCESS);
+   // ADC events
+   b->SetReadoutSrcSel(WDB::cReadoutSrcAdc);
+   for (int i=0 ; i<10 ; i++) {
+      event = ReadSingleEvent(b, 1000);
+      delete event;
+      sleep_ms(10);
+   }
+   event = ReadSingleEvent(b, 1000);
    
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
-         sum += wfU[ch][i];
-      gl->board[calibProg.iBoard].vcalib.adc_offset_range0[ch] = sum / 1010;
+         sum += event->mWfU[ch][i];
+      b->mVCalib.mCalib.adc_offset_range0[ch] = sum / 1010;
    }
-   gl->adc_flag = 0;
-   */
+   delete event;
    
    // Range 0
    b->SetRange(0);
    
+   // DRS events
+   b->SetReadoutSrcSel(WDB::cReadoutSrcDrs);
    event = nullptr;
    for (int i=0 ; i<10 ; i++) {
       event = ReadSingleEvent(b, 1000);
@@ -3296,24 +3319,28 @@ void WP::DoCalibrationVoltageStep()
    }
    delete event;
    
-   /*
-   gl->adc_flag = 1;
-   do {
-      wd_send(gl, calibProg.iBoard, 100, "adcget\n", NULL, NULL);
-   } while (wd_read_waveform(gl, calibProg.iBoard, 1000, &eventHeader, wfU, wfT) != SUCCESS);
+   // ADC events
+   b->SetReadoutSrcSel(WDB::cReadoutSrcAdc);
+   for (int i=0 ; i<10 ; i++) {
+      event = ReadSingleEvent(b, 1000);
+      delete event;
+      sleep_ms(10);
+   }
+   event = ReadSingleEvent(b, 1000);
    
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
-         sum += wfU[ch][i];
-      gl->board[calibProg.iBoard].vcalib.adc_offset_range1[ch] = sum / 1010;
+         sum += event->mWfU[ch][i];
+      b->mVCalib.mCalib.adc_offset_range1[ch] = sum / 1010;
    }
-   gl->adc_flag = 0;
-   */
+   delete event;
    
    // Range 0.45
    b->SetRange(0.45);
    
+   // DRS events
+   b->SetReadoutSrcSel(WDB::cReadoutSrcDrs);
    event = nullptr;
    for (int i=0 ; i<10 ; i++) {
       event = ReadSingleEvent(b, 1000);
@@ -3330,20 +3357,22 @@ void WP::DoCalibrationVoltageStep()
    }
    delete event;
    
-   /*
-   gl->adc_flag = 1;
-   do {
-      wd_send(gl, calibProg.iBoard, 100, "adcget\n", NULL, NULL);
-   } while (wd_read_waveform(gl, calibProg.iBoard, 1000, &eventHeader, wfU, wfT) != SUCCESS);
+   // ADC events
+   b->SetReadoutSrcSel(WDB::cReadoutSrcAdc);
+   for (int i=0 ; i<10 ; i++) {
+      event = ReadSingleEvent(b, 1000);
+      delete event;
+      sleep_ms(10);
+   }
+   event = ReadSingleEvent(b, 1000);
    
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
-         sum += wfU[ch][i];
-      gl->board[calibProg.iBoard].vcalib.adc_offset_range2[ch] = sum / 1010;
+         sum += event->mWfU[ch][i];
+      b->mVCalib.mCalib.adc_offset_range2[ch] = sum / 1010;
    }
-   gl->adc_flag = 0;
-   */
+   delete event;
    
    delete calibProg.ave;
    calibProg.ave = NULL;
@@ -3353,14 +3382,17 @@ void WP::DoCalibrationVoltageStep()
    
    // switch to next board
    calibProg.iBoard++;
-   calibProg.state = cCsFirstSample;
+   calibProg.state    = cCsFirstSample;
    calibProg.progress = 1;
    
-   // switch back old board settings
+   // switch back to old board settings
+   b->SetReadoutSrcSel(mOldReadoutSrc);
    b->SetRange(mOldRange);
    b->SetDrs0ChnTxEnable(mOldMask0);
    b->SetDrs1ChnTxEnable(mOldMask1);
-   b->SetCalibBufferEnable(false);
+   b->SetCalibBufferEnable(mOldCalibBuffer);
+   b->SetTimingCalibSignalEnable(mOldCalibSignal);
+   b->SetFeMux(-1, mOldFeMux);
    
    if (calibProg.iBoard == calibProg.nBoard) {
       calibProg.state = cCsInactive;
@@ -3654,6 +3686,9 @@ void WP::DoCalibrationTimeStep()
       mOldRange = b->GetRange();
       mOldMask0 = b->GetDrs0ChnTxEnable();
       mOldMask1 = b->GetDrs1ChnTxEnable();
+      mOldCalibBuffer = b->IsCalibBufferEnable();
+      mOldCalibSignal = b->IsTimingCalibSignalEnable();
+      mOldFeMux = b->GetFeMux(0);
 
       mRotateWaveform       = false;
       mTimeCalib1           = false;
@@ -3800,25 +3835,24 @@ void WP::DoCalibrationTimeStep()
    
    // switch to next board
    calibProg.iBoard++;
-   calibProg.state             = cCsFirstSample;
-   calibProg.progress          = 1;
+   calibProg.state    = cCsFirstSample;
+   calibProg.progress = 1;
    
-   // switch back old board settings
+   // switch back to old board settings
    b->SetRange(mOldRange);
    b->SetDrs0ChnTxEnable(mOldMask0);
    b->SetDrs1ChnTxEnable(mOldMask1);
-
-   b->SetCalibBufferEnable(false);
-   b->SetTimingCalibSignalEnable(false);
-   b->SetFeMux(-1, WDB::cFeMuxInput);
+   b->SetCalibBufferEnable(mOldCalibBuffer);
+   b->SetTimingCalibSignalEnable(mOldCalibSignal);
+   b->SetFeMux(-1, mOldFeMux);
 
    if (calibProg.iBoard == calibProg.nBoard) {
-      calibProg.state          = cCsInactive;
+      calibProg.state = cCsInactive;
       calibProg.mode  = cCmNone;
       
-      mTimeCalib1              = true;
-      mTimeCalib2              = true;
-      mTimeCalib3              = true;
+      mTimeCalib1     = true;
+      mTimeCalib2     = true;
+      mTimeCalib3     = true;
    }
 }
 
