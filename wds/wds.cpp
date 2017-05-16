@@ -841,6 +841,11 @@ int main(int argc, const char * argv[])
       gl.wp->SetRangeCalib(true);
       gl.wp->SetRemoveSpikes(true);
    }
+   if (gl.wdb[0]->mTCalib.IsValid()) {
+      gl.wp->SetTimeCalib1(true);
+      gl.wp->SetTimeCalib2(true);
+      gl.wp->SetTimeCalib3(true);
+   }
 
    // set destination port after WP has been initialized
    for (auto &b: gl.wdb)
@@ -888,11 +893,13 @@ int main(int argc, const char * argv[])
             // Yield to server, 10ms timeout
             mg_mgr_poll(&mgr, 10);
          
-         // read board temperatures periodically
+         // read board temperatures and lock status periodically
          time(&now);
          if (now > last + 10) {
             for (auto &b: gl.wdb) {
                b->GetTemperature(true);
+               b->IsExtPllLck(true);
+               b->IsIntPllLck(true);
             }
             last = now;
          }

@@ -1987,9 +1987,10 @@ void WDB::SaveVoltageCalibration()
 
 //--------------------------------------------------------------------
 
-void WDB::LoadVoltageCalibration()
+bool WDB::LoadVoltageCalibration()
 {
    mVCalib.load(this, "calib/"+mName+".vcal");
+   return mVCalib.IsValid();
 }
 
 //--------------------------------------------------------------------
@@ -1997,14 +1998,15 @@ void WDB::LoadVoltageCalibration()
 void WDB::SaveTimeCalibration()
 {
    mkdir("calib", 0755);
-   mVCalib.save(this, "calib/"+mName+".tcal");
+   mTCalib.save(this, "calib/"+mName+".tcal");
 }
 
 //--------------------------------------------------------------------
 
-void WDB::LoadTimeCalibration()
+bool WDB::LoadTimeCalibration()
 {
-   mVCalib.load(this, "calib/"+mName+".tcal");
+   mTCalib.load(this, "calib/"+mName+".tcal");
+   return mTCalib.IsValid();
 }
 
 //====================================================================
@@ -2630,31 +2632,35 @@ void WP::CalibrateWaveforms()
             // integrate time from delta-t values
             for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
                int tc = ch < 8 || ch == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
+               if (!mRotateWaveform)
+                  tc = 0;
                ev->mWfT[ch][0] = 0;
                for (int i=1 ; i<1024 ; i++)
                   ev->mWfT[ch][i] = ev->mWfT[ch][i-1] + wdb->mTCalib.mCalib.dt[ch][(i-1+tc)%1024];
             }
             // align cell#0 of all channels inside chip0
-            float t1 = ev->mWfT[0][(1024-ev->mTriggerCell[0]) % 1024];
+            int tc = mRotateWaveform ? ev->mTriggerCell[0] : 0;
+            float t1 = ev->mWfT[0][(1024-tc) % 1024];
             for (int ch=1 ; ch<8 ; ch++) {
-               float t2 = ev->mWfT[ch][(1024-ev->mTriggerCell[0]) % 1024];
+               float t2 = ev->mWfT[ch][(1024-tc) % 1024];
                float dt = t1 - t2;
                for (int i=0 ; i<1024 ; i++)
                   ev->mWfT[ch][i] += dt;
             }
-            float t2 = ev->mWfT[16][(1024-ev->mTriggerCell[0]) % 1024];
+            float t2 = ev->mWfT[16][(1024-tc) % 1024];
             float dt = t1 - t2;
             for (int i=0 ; i<1024 ; i++)
                ev->mWfT[16][i] += dt;
             
             // align cell#0 of all channels inside chip1 to chip0
+            tc = mRotateWaveform ? ev->mTriggerCell[1] : 0;
             for (int ch=8 ; ch<16 ; ch++) {
-               float t2 = ev->mWfT[ch][(1024-ev->mTriggerCell[1]) % 1024];
+               float t2 = ev->mWfT[ch][(1024-tc) % 1024];
                float dt = t1 - t2;
                for (int i=0 ; i<1024 ; i++)
                   ev->mWfT[ch][i] += dt;
             }
-            t2 = ev->mWfT[17][(1024-ev->mTriggerCell[1]) % 1024];
+            t2 = ev->mWfT[17][(1024-tc) % 1024];
             dt = t1 - t2;
             for (int i=0 ; i<1024 ; i++)
                ev->mWfT[17][i] += dt;
@@ -2668,7 +2674,9 @@ void WP::CalibrateWaveforms()
          
          // apply time offsets (different PCB path traces)
          if (mTimeCalib2) {
-            // TBD
+            for (int i=0 ; i<WD_N_CHANNELS ; i++)
+               for (int j=0 ; j<1024 ; j++)
+                  ev->mWfT[i][j] -= wdb->mTCalib.mCalib.offset[i];
          }
 
          // apply horizontal trigger position correction
@@ -3292,6 +3300,9 @@ void WP::DoCalibrationVoltageStep()
    gl->adc_flag = 0;
    */
    
+   delete calibProg.ave;
+   calibProg.ave = NULL;
+
    // save calibration
    b->SaveVoltageCalibration();
    
@@ -3385,12 +3396,12 @@ void WP::AnalyzeTimeOffset(WDEvent *event, WDB *b)
    // find rising edge in channel #0
    for (int i=20; i<1024-20 ; i++) {
       if (event->mWfU[0][i] <= 0 && event->mWfU[0][i+1] > 0) {
-         double t0 = event->mWfT[0][i] + (event->mWfT[0][i+1]-event->mWfT[0][i])*(1/(1-event->mWfU[0][i]/event->mWfU[0][i+1]));
+         double t0 = event->mWfT[0][i] + (event->mWfT[0][i+1]-event->mWfT[0][i]) * (event->mWfU[0][i]/(event->mWfU[0][i]-event->mWfU[0][i+1]));
          
          for (int ch=1 ; ch<WD_N_CHANNELS ; ch++) {
             for (int j=i-10; j<i+10 ; j++) {
                if (event->mWfU[ch][j] <= 0 && event->mWfU[ch][j+1] > 0) {
-                  double t = event->mWfT[ch][j] + (event->mWfT[ch][j+1]-event->mWfT[ch][j])*(1/(1-event->mWfU[ch][j]/event->mWfU[ch][j+1]));
+                  double t = event->mWfT[ch][j] + (event->mWfT[ch][j+1]-event->mWfT[ch][j])*(event->mWfU[ch][j]/(event->mWfU[ch][j]-event->mWfU[ch][j+1]));
                   double dt = t - t0;
                   calibProg.ave->Add(0, ch, 0, (float)dt);
                   break;
@@ -3644,7 +3655,6 @@ void WP::DoCalibrationTimeStep()
          if (calibProg.phase == 17)
             calibProg.phase = -16;
          b->SetTimingCalibSignalDelay(calibProg.phase);
-         std::cout << "Phase: " << calibProg.phase << std::endl;
       }
       
       // get one event from board
@@ -3881,5 +3891,53 @@ void VCALIB::load(WDB *b, std::string filename)
 
 TCALIB::TCALIB()
 {
+   bValid = false; // not yet loaded
+   memset(&mCalib, 0, sizeof(mCalib));
+}
+
+void TCALIB::save(WDB *b, std::string filename)
+{
+   std::memcpy(mCalib.version_id, "CAL2", 4);
+   mCalib.sampling_frequency = b->GetDrsSampleFreq();
+   mCalib.temperature = b->GetTemperature();
    
+   int fh = open(filename.c_str(), O_WRONLY | O_CREAT, 0644);
+   assert(fh > 0);
+   assert(write(fh, &mCalib, sizeof(TCALIB_DATA)) == sizeof(TCALIB_DATA));
+   close(fh);
+}
+
+void TCALIB::load(WDB *b, std::string filename)
+{
+   int fh = open(filename.c_str(), O_RDONLY, 0644);
+   if (fh > 0) {
+      int size = read(fh, &mCalib, sizeof(TCALIB_DATA));
+      close(fh);
+      
+      if (size != sizeof(TCALIB_DATA)) {
+         std::cerr << "Invalid time calibration file size in " << filename << ". Aborting." << std::endl;
+         return;
+      }
+      
+      if (memcmp(mCalib.version_id, "CAL2", 4) != 0) {
+         std::cerr << "Invalid time calibration file format in " << filename << ". Aborting." << std::endl;
+         return;
+      }
+      
+      if (fabs((float)mCalib.sampling_frequency - b->GetDrsSampleFreq()) > 1) {
+         std::cerr << "Error: Time calibration data in " << filename << " is for "
+         << mCalib.sampling_frequency/1000.0
+         << " GSPS, running now at "
+         << b->GetDrsSampleFreq()/1000.0 << " GSPS"  << std::endl;
+         return;
+      }
+      
+      if (fabs(mCalib.temperature - b->GetTemperature()) > 5) {
+         std::cerr << "Warning: Time calibration data in " << filename << " is for "
+         << mCalib.temperature
+         << " deg. C, running now at "
+         << b->GetTemperature() << " deg. C" << std::endl;
+      }
+      bValid = true;
+   }
 }

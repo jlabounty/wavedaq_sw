@@ -101,8 +101,8 @@ public:
    TCALIB_DATA      mCalib;
    TCALIB();
    bool IsValid() { return bValid; }
-   void save() {};
-   void load() {};
+   void save(WDB *b, std::string filename);
+   void load(WDB *b, std::string filename);
 };
 
 //--------------------------------------------------------------------
@@ -623,9 +623,9 @@ public:
    void RequestEvent();
    
    void SaveVoltageCalibration();
-   void LoadVoltageCalibration();
+   bool LoadVoltageCalibration();
    void SaveTimeCalibration();
-   void LoadTimeCalibration();
+   bool LoadTimeCalibration();
 };
 
 //--------------------------------------------------------------------
