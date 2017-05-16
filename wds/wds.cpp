@@ -577,8 +577,9 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          event = new WDEvent(b);
          for (int c=0 ; c<WD_N_CHANNELS ; c++) {
             for (int i=0 ; i<1024 ; i++) {
-               event->mWfT[c][i] = (float)(i*1E-6 / gl->wdb[b]->GetDrsSampleFreq());
-               event->mWfU[c][i] = (float)(sin((event->mWfT[c][i]+c*1E-9)*gl->wdb[b]->GetDrsSampleFreq() / 1E-6 / 50) / 4 + ((float)random()/RAND_MAX-0.5) / 300);
+               float t = i*1E-6 / gl->wdb[b]->GetDrsSampleFreq();
+               event->mWfT[c][i] = t;
+               event->mWfU[c][i] = (float)(sin(M_PI*2 * 100E6 * t + c/8.0)/2 + ((float)random()/RAND_MAX-0.5) / 300);
             }
             // add spikes
             for (int i=0 ; i<1024 ; i++) {
