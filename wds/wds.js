@@ -1176,7 +1176,10 @@ function sldTriggerDelay(value) {
 
    OSC.wdb[OSC.curBoard].triggerDelay = del;
    document.getElementById("inpTriggerDelay").value = del;
-   setParam(document.getElementById("inpTriggerDelay"));
+   var e = {};
+   e.name = "triggerDelay";
+   e.value = del;
+   setParam(e);
    clearStat();
 }
 

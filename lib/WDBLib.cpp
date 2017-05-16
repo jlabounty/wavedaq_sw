@@ -2681,7 +2681,37 @@ void WP::CalibrateWaveforms()
 
          // apply horizontal trigger position correction
          if (mTimeCalib3) {
-            // TBD
+            bool bFound = false;
+            for (int i=4 ; i<1020 ; i++) {
+               for (int c=0 ; c<16 ; c++) {
+                  double tl = wdb->GetDacTriggerLevelV(c);
+                  if (wdb->IsTriggerFallingEdge()) {
+                     // falling edge
+                     if (ev->mWfU[c][i] > tl && ev->mWfU[c][i+1] <= tl) {
+                        double t0 = ev->mWfT[c][i] + (ev->mWfT[c][i+1]-ev->mWfT[c][i])*(tl-ev->mWfU[c][i])/(ev->mWfU[c][i+1]-ev->mWfU[c][i]);
+                        t0 -= 1024*1E-6/wdb->GetDrsSampleFreq() - 30E-9 - wdb->GetTriggerDelayNs() * 1E-9;
+                        for (i=0 ; i<WD_N_CHANNELS ; i++)
+                           for (int j=0 ; j<1024 ; j++)
+                              ev->mWfT[i][j] -= (float)t0;
+                        bFound = true;
+                        break;
+                     }
+                  } else {
+                     // rising edge
+                     if (ev->mWfU[c][i] < tl && ev->mWfU[c][i+1] >= tl) {
+                        double t0 = ev->mWfT[c][i] + (ev->mWfT[c][i+1]-ev->mWfT[c][i])*(tl-ev->mWfU[c][i])/(ev->mWfU[c][i+1]-ev->mWfU[c][i]);
+                        t0 -= 1024*1E-6/wdb->GetDrsSampleFreq() - 30E-9 - wdb->GetTriggerDelayNs() * 1E-9;
+                        for (i=0 ; i<WD_N_CHANNELS ; i++)
+                           for (int j=0 ; j<1024 ; j++)
+                              ev->mWfT[i][j] -= (float)t0;
+                        bFound = true;
+                        break;
+                     }
+                  }
+               }
+               if (bFound)
+                  break;
+            }
          }
 
          

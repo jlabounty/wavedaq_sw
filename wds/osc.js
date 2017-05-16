@@ -610,12 +610,14 @@ Oscilloscope.prototype.drawWF = function (ctx) {
             for (var i = 0; i < 1024; i++) {
                var x = this.wf.T[c][i] * this.wfTS + this.wfTO;
                var y = this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c];
-               if (i == 0)
-                  ctx.moveTo(x, y);
-               else
-                  ctx.lineTo(x, y);
-               if (spacing > 5)
-                  ctx.fillRect(x - 2, y - 2, 5, 5);
+               if (x > -100 && x < this.w + 100) {
+                  if (i == 0)
+                     ctx.moveTo(x, y);
+                  else
+                     ctx.lineTo(x, y);
+                  if (spacing > 5)
+                     ctx.fillRect(x - 2, y - 2, 5, 5);
+               }
             }
             ctx.stroke();
          }
@@ -765,7 +767,7 @@ Oscilloscope.prototype.drawMarker = function (ctx) {
       }
    }
 
-   // Trigger merker
+   // Trigger marker
    ctx.fillStyle = 'white';
    ctx.strokeStyle = 'white';
 
@@ -833,7 +835,7 @@ Oscilloscope.prototype.drawDT = function (ctx) {
             y = (10 - this.wf.T[c][i] * 1E9) * this.h / 10 + this.wfUO[c];
 
             if (this.wf.T[c][i] * 1E9 != 0)
-               ctx.fillRect(x, y, 1, 1);
+               ctx.fillRect(x, y, 3, 3);
          }
          ctx.stroke();
       }
