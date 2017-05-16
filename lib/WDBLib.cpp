@@ -2120,6 +2120,14 @@ unsigned int WP::GetEventRequestMask(int board_id)
    return 0;
 }
 
+WDB* WP::GetBoard(int board_id)
+{
+   for (auto &b: mWdb)
+      if (b->GetSerialNumber() == board_id)
+         return b;
+   return 0;
+}
+
 void WP::RequestBoard(WDB *b)
 {
    for (auto &r: mEventRequest) {
@@ -2166,7 +2174,7 @@ WDEvent* WP::ReadSingleEvent(WDB *b, int timeout)
       delete eVector;
    }
    
-   return event; // ### must be deleted ???
+   return event;
 }
 
 //--------------------------------------------------------------------
@@ -2852,7 +2860,9 @@ void WP::SaveWaveforms()
          for (auto it = mEvent.begin() ; it != mEvent.end() ; it++) {
             auto ev = (*it);
             int mask = GetEventRequestMask(ev->mBoardId);
-            
+            WDB *wdb = GetBoard(ev->mBoardId);
+            assert(wdb);
+
             // store board serial number
             sprintf((char *)p, "B#");
             p += 2;
@@ -2866,7 +2876,7 @@ void WP::SaveWaveforms()
                   p += 4;
                   for (int j=0 ; j<1024 ; j++) {
                      // save binary time as 32-bit float value
-                     *(float *)p = 0; //## gl->board[b].tcalib.dt[i][j];
+                     *(float *)p = wdb->mTCalib.mCalib.dt[i][j];
                      p += sizeof(float);
                   }
                }
@@ -2912,15 +2922,13 @@ void WP::SaveWaveforms()
                p += 4;
                
                // write scaler
-               unsigned int s = 0;
-               for (auto &b: mWdb)
-                  if (b->GetSerialNumber() == ev->mBoardId) {
-                     std::vector<unsigned long>sc;
-                     b->GetScalers(sc, false);
-                     s = sc[i];
-                     break;
-                  }
-               memcpy(p, &s, sizeof(int));
+               WDB *wdb = GetBoard(ev->mBoardId);
+               assert(wdb);
+               
+               std::vector<unsigned long>sc;
+               wdb->GetScalers(sc, false);
+               unsigned int s = sc[i];
+               memcpy(p, &s, sizeof(unsigned int));
                p += sizeof(int);
                
                // write trigger cell
@@ -2933,7 +2941,7 @@ void WP::SaveWaveforms()
                   // save binary date as 16-bit value:
                   // 0 = -0.5V,  65535 = +0.5V    for range 0
                   // 0 = -0.05V, 65535 = +0.95V   for range 0.45
-                  unsigned short d = (unsigned short)((ev->mWfU[i][j] - 0 /*##gl->board[b].range + 0.5*/) * 65535);
+                  unsigned short d = (unsigned short)((ev->mWfU[i][j] - wdb->GetRange() + 0.5) * 65535);
                   *(unsigned short *)p = d;
                   p += sizeof(unsigned short);
                }
@@ -3041,8 +3049,10 @@ void WP::DoCalibrationVoltageStep()
       mRangeCalib          = false;
       mRemoveSpikes        = false;
       
+      // turn on power for calibration input (needed for clock channels)
+      b->SetCalibBufferEnable(true);
+
       // turn off calibration clock
-      b->SetCalibBufferEnable(false);
       b->SetTimingCalibSignalEnable(false);
       b->SetFeMux(-1, WDB::cFeMuxInput);
       
@@ -3161,7 +3171,7 @@ void WP::DoCalibrationVoltageStep()
       if (!event)
          return;
       
-      for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
+      for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
             calibProg.ave->Add(0, ch, bin, event->mWfU[ch][bin]);
       delete event;
@@ -3201,7 +3211,7 @@ void WP::DoCalibrationVoltageStep()
       if (!event)
          return;
       
-      for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
+      for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
             calibProg.ave->Add(0, ch, bin, event->mWfU[ch][bin]);
       delete event;
@@ -3350,6 +3360,7 @@ void WP::DoCalibrationVoltageStep()
    b->SetRange(mOldRange);
    b->SetDrs0ChnTxEnable(mOldMask0);
    b->SetDrs1ChnTxEnable(mOldMask1);
+   b->SetCalibBufferEnable(false);
    
    if (calibProg.iBoard == calibProg.nBoard) {
       calibProg.state = cCsInactive;
@@ -3429,12 +3440,12 @@ void WP::AnalyzeTimeOffset(WDEvent *event, WDB *b)
 {
    
    // find rising edge in channel #0
-   for (int i=20; i<1024-20 ; i++) {
+   for (int i=30; i<1024-30 ; i++) {
       if (event->mWfU[0][i] <= 0 && event->mWfU[0][i+1] > 0) {
          double t0 = event->mWfT[0][i] + (event->mWfT[0][i+1]-event->mWfT[0][i]) * (event->mWfU[0][i]/(event->mWfU[0][i]-event->mWfU[0][i+1]));
          
          for (int ch=1 ; ch<WD_N_CHANNELS ; ch++) {
-            for (int j=i-10; j<i+10 ; j++) {
+            for (int j=i-20; j<i+20 ; j++) {
                if (event->mWfU[ch][j] <= 0 && event->mWfU[ch][j+1] > 0) {
                   double t = event->mWfT[ch][j] + (event->mWfT[ch][j+1]-event->mWfT[ch][j])*(event->mWfU[ch][j]/(event->mWfU[ch][j]-event->mWfU[ch][j+1]));
                   double dt = t - t0;

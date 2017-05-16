@@ -59,10 +59,10 @@ typedef struct {
    unsigned int     crc;
    unsigned short   sampling_frequency;
    float            temperature;
-   float            wf_offset1[16][1024];
-   float            wf_offset2[16][1024];
-   float            wf_gain1[16][1024];
-   float            wf_gain2[16][1024];
+   float            wf_offset1[18][1024];
+   float            wf_offset2[18][1024];
+   float            wf_gain1[18][1024];
+   float            wf_gain2[18][1024];
    float            drs_offset_range0[16];
    float            drs_offset_range1[16];
    float            drs_offset_range2[16];
@@ -346,6 +346,7 @@ public:
    void RequestAllBoards();
    void RequestBoard(WDB* b);
    void SetEventRequestMasks();
+   WDB* GetBoard(int board_id);
    unsigned int GetEventRequestMask(int board_id);
    
    WDEvent* ReadSingleEvent(WDB* b, int timeout);
