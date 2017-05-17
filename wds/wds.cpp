@@ -607,7 +607,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                if (gl->triggerMode == cTriggerModeAuto)
                   b->RequestEvent();
                else if (gl->triggerMode == cTriggerModeNormal)
-                  b->StartDaqSingle();
+                  ; //## b->StartDaqSingle();
             }
          } else {
             // only current board
@@ -616,11 +616,11 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             if (gl->triggerMode == cTriggerModeAuto)
                gl->wdb[b]->RequestEvent();
             else if (gl->triggerMode == cTriggerModeNormal)
-               gl->wdb[b]->StartDaqSingle();
+               ; //## gl->wdb[b]->StartDaqSingle();
          }
          
          // read waveforms
-         auto eVector = gl->wp->GetEvent(500);
+         auto eVector = gl->wp->GetEvent(1000);
          if (eVector) {
             if (eVector->size() > 0)
                event = (*eVector)[0];
@@ -852,8 +852,10 @@ int main(int argc, const char * argv[])
       b->SetDestinationPort(gl.wp->GetServerPort());
    
    // switch boards to normal mode to send events
-   for (auto &b: gl.wdb)
-      b->SetDaqNormal(false); // 'true' does not work yet
+   for (auto &b: gl.wdb) {
+      b->SetDaqNormal(true);
+      b->SetInterPacketDelay(0x1000);
+   }
 
    // initialize web server
    struct mg_mgr mgr;
