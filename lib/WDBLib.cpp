@@ -3050,12 +3050,14 @@ void WP::DoCalibrationVoltageStep()
       calibProg.state    = cCsRunning;
 
       // save current board settings
-      mOldReadoutSrc = b->GetReadoutSrcSel();
       mOldRange = b->GetRange();
       mOldMask0 = b->GetDrs0ChnTxEnable();
       mOldMask1 = b->GetDrs1ChnTxEnable();
+      
+      mOldReadoutSrc  = b->GetReadoutSrcSel();
+      mOldCalibClock  = b->IsTimingCalibSignalEnable();
+      mOldFeMux       = b->GetFeMux(0);
       mOldCalibBuffer = b->IsCalibBufferEnable();
-      mOldCalibSignal = b->IsTimingCalibSignalEnable();
       
       // turn off all calibration
       mRotateWaveform      = false;
@@ -3070,7 +3072,9 @@ void WP::DoCalibrationVoltageStep()
 
       // turn off calibration clock
       b->SetTimingCalibSignalEnable(false);
-      b->SetFeMux(-1, WDB::cFeMuxInput);
+      
+      // switch multiplexer to calibration source
+      b->SetFeMux(-1, WDB::cFeMuxCalSource);
       
       // enable all channels
       b->SetReadoutSrcSel(WDB::cReadoutSrcDrs);
@@ -3386,13 +3390,14 @@ void WP::DoCalibrationVoltageStep()
    calibProg.progress = 1;
    
    // switch back to old board settings
-   b->SetReadoutSrcSel(mOldReadoutSrc);
    b->SetRange(mOldRange);
    b->SetDrs0ChnTxEnable(mOldMask0);
    b->SetDrs1ChnTxEnable(mOldMask1);
-   b->SetCalibBufferEnable(mOldCalibBuffer);
-   b->SetTimingCalibSignalEnable(mOldCalibSignal);
+   
+   b->SetReadoutSrcSel(mOldReadoutSrc);
+   b->SetTimingCalibSignalEnable(mOldCalibClock);
    b->SetFeMux(-1, mOldFeMux);
+   b->SetCalibBufferEnable(mOldCalibBuffer);
    
    if (calibProg.iBoard == calibProg.nBoard) {
       calibProg.state = cCsInactive;
@@ -3686,9 +3691,11 @@ void WP::DoCalibrationTimeStep()
       mOldRange = b->GetRange();
       mOldMask0 = b->GetDrs0ChnTxEnable();
       mOldMask1 = b->GetDrs1ChnTxEnable();
+      
+      mOldReadoutSrc  = b->GetReadoutSrcSel();
+      mOldCalibClock  = b->IsTimingCalibSignalEnable();
+      mOldFeMux       = b->GetFeMux(0);
       mOldCalibBuffer = b->IsCalibBufferEnable();
-      mOldCalibSignal = b->IsTimingCalibSignalEnable();
-      mOldFeMux = b->GetFeMux(0);
 
       mRotateWaveform       = false;
       mTimeCalib1           = false;
@@ -3842,9 +3849,11 @@ void WP::DoCalibrationTimeStep()
    b->SetRange(mOldRange);
    b->SetDrs0ChnTxEnable(mOldMask0);
    b->SetDrs1ChnTxEnable(mOldMask1);
-   b->SetCalibBufferEnable(mOldCalibBuffer);
-   b->SetTimingCalibSignalEnable(mOldCalibSignal);
+   
+   b->SetReadoutSrcSel(mOldReadoutSrc);
+   b->SetTimingCalibSignalEnable(mOldCalibClock);
    b->SetFeMux(-1, mOldFeMux);
+   b->SetCalibBufferEnable(mOldCalibBuffer);
 
    if (calibProg.iBoard == calibProg.nBoard) {
       calibProg.state = cCsInactive;

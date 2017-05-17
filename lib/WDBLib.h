@@ -292,13 +292,14 @@ class WP {
       int            nLogged;
    } li;
    
-   int               mOldReadoutSrc;
    float             mOldRange;
    int               mOldMask0;
    int               mOldMask1;
-   bool              mOldCalibBuffer;
-   bool              mOldCalibSignal;
+
+   int               mOldReadoutSrc;
+   bool              mOldCalibClock;
    int               mOldFeMux;
+   bool              mOldCalibBuffer;
    
    void              AnalyzePeriod(WDEvent *, WDB *);
    void              AnalyzeTimeOffset(WDEvent *, WDB *);
