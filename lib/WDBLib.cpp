@@ -2057,7 +2057,7 @@ WP::WP(std::vector<WDB *> w, int verbose, bool demo)
    mTimeCalib3 = false;
    mRemoveSpikes = false;
    
-   mTqueue = new tqueue<std::vector<WDEvent *>*>(100);
+   mTqueue = new tqueue<std::vector<WDEvent *>*>(2);
    
    li.fh = 0;
    li.xml = NULL;
