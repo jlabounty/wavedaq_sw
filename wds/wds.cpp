@@ -90,7 +90,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                iBoard = std::stoi(args[2]);
          }
          if (args.size() > 3)
-            iChannel = std::stoi(args[4]);
+            iChannel = std::stoi(args[3]);
       }
       if (hm->body.p)
          value = std::string(hm->body.p, hm->body.len);

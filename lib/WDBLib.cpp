@@ -2322,7 +2322,8 @@ void WP::ReceiveWfPacket()
                break;
             }
          if (!er) {
-            std::cerr << "Received unexpected packet from board #" << ph->board_id << std::endl;
+            if (mVerbose)
+               std::cerr << "Received unexpected packet from board #" << ph->board_id << std::endl;
             return;
          }
          
