@@ -571,15 +571,16 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       if (b < 0 || b >= gl->wdb.size())
          b = 0;
       
-      WDEvent *event = nullptr;
-
+      WDEvent event(gl->wdb[b]->GetSerialNumber());
+      bool bNewEvent = false;
+      
       if (gl->demoMode) {
-         event = new WDEvent(b);
+         bNewEvent = true;
          for (int c=0 ; c<WD_N_CHANNELS ; c++) {
             for (int i=0 ; i<1024 ; i++) {
                float t = i*1E-6 / gl->wdb[b]->GetDrsSampleFreq();
-               event->mWfT[c][i] = t;
-               event->mWfU[c][i] = (float)(sin(M_PI*2 * 100E6 * t + c/8.0)/2 + ((float)random()/RAND_MAX-0.5) / 300);
+               event.mWfT[c][i] = t;
+               event.mWfU[c][i] = (float)(sin(M_PI*2 * 100E6 * t + c/8.0)/2 + ((float)random()/RAND_MAX-0.5) / 300);
             }
             // add spikes
             for (int i=0 ; i<1024 ; i++) {
@@ -589,10 +590,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                   float f;
                   for (f=0 ; f<1 ; f += 0.2,j++)
                      if (j >= 0 && j< 1024)
-                        event->mWfU[c][j] += s * f;
+                        event.mWfU[c][j] += s * f;
                   for (f=1 ; f>0 ; f -= 0.2,j++)
                      if (j >= 0 && j< 1024)
-                        event->mWfU[c][j] += s * f;
+                        event.mWfU[c][j] += s * f;
                }
             }
          }
@@ -620,18 +621,13 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          }
          
          // read waveforms
-         auto eVector = gl->wp->GetEvent(1000);
-         if (eVector) {
-            if (eVector->size() > 0)
-               event = (*eVector)[0];
-            delete eVector;
-         }
+         bNewEvent = gl->wp->GetLastEvent(gl->wdb[b], 1000, event);
       }
       
       if (gl->demoMode)
          b = 0xFF; // signals demo data
       
-      if (event) {
+      if (bNewEvent) {
          int t = 1;                    // array type
          int n = 1024;                 // number of elements
          int l = gl->wp->GetNLogged(); // number of logged events
@@ -643,7 +639,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                mg_send_http_chunk(nc, (const char *)&l, 4);
                mg_send_http_chunk(nc, (const char *)&c, 4);
                mg_send_http_chunk(nc, (const char *)&n, 4);
-               mg_send_http_chunk(nc, (const char *)event->mWfT[c], sizeof(float)*n);
+               mg_send_http_chunk(nc, (const char *)event.mWfT[c], sizeof(float)*n);
             }
          }
          
@@ -655,7 +651,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                mg_send_http_chunk(nc, (const char *)&l, 4);
                mg_send_http_chunk(nc, (const char *)&c, 4);
                mg_send_http_chunk(nc, (const char *)&n, 4);
-               mg_send_http_chunk(nc, (const char *)event->mWfU[c], sizeof(float)*n);
+               mg_send_http_chunk(nc, (const char *)event.mWfU[c], sizeof(float)*n);
             }
          }
          
@@ -667,8 +663,6 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       }
       
       mg_send_http_chunk(nc, "", 0);
-      
-      delete event;
       
       return;
    }

@@ -2057,8 +2057,6 @@ WP::WP(std::vector<WDB *> w, int verbose, bool demo)
    mTimeCalib3 = false;
    mRemoveSpikes = false;
    
-   mTqueue = new tqueue<std::vector<WDEvent *>*>(2);
-   
    li.fh = 0;
    li.xml = NULL;
    
@@ -2084,9 +2082,15 @@ WP::WP(std::vector<WDB *> w, int verbose, bool demo)
          std::cout << std::endl << "Listening on data port " << WP::gServerPort << "." << std::endl;
    }
 
-   // allocated event requests for all WDB
+   // allocated event buffer and requests for all WDB
    for (int i=0 ; i<mWdb.size() ; i++)
       mEventRequest.push_back(new WDEventRequest(mWdb[i]->GetSerialNumber()));
+   for (int i=0 ; i<mWdb.size() ; i++)
+      mEvent.push_back(new WDEvent(mWdb[i]->GetSerialNumber()));
+   for (int i=0 ; i<mWdb.size() ; i++)
+      mEventLast.push_back(new WDEvent(mWdb[i]->GetSerialNumber()));
+   
+   mEventEmpty = true;
    
    // start waveform collector thread
    mThreadCollector = this->SpawnCollectorThread();
@@ -2135,13 +2139,6 @@ void WP::RequestBoard(WDB *b)
    }
    
    SetEventRequestMasks();
-
-   for (auto &e: mEvent)
-      delete e;
-   mEvent.clear();
-   
-   // allocate event buffer
-   mEvent.push_back(new WDEvent(b->GetSerialNumber()));
 }
 
 void WP::RequestAllBoards()
@@ -2161,20 +2158,34 @@ void WP::RequestAllBoards()
 
 //--------------------------------------------------------------------
 
-WDEvent* WP::ReadSingleEvent(WDB *b, int timeout)
+bool WP::RequestEvent(WDB *b, int timeout, WDEvent &event)
 {
    RequestBoard(b);
    b->RequestEvent();
    
-   WDEvent *event = nullptr;
-   auto eVector = GetEvent(timeout);
-   if (eVector) {
-      if (eVector->size() > 0)
-         event = (*eVector)[0];
-      delete eVector;
+   return GetLastEvent(b, timeout, event);
+}
+
+//--------------------------------------------------------------------
+
+bool WP::GetLastEvent(WDB *b, int timeout, WDEvent& event)
+{
+   // wait for new event with timeout
+   {
+      std::unique_lock<std::mutex> lock(mEventMutex);
+      if (!(mEventCV.wait_for(lock, std::chrono::milliseconds(timeout), [this](){return mEventNew;})))
+         return false;
    }
    
-   return event;
+   {
+      std::lock_guard<std::mutex> lock(mEventAccessMutex);
+
+      for (auto e: mEventLast)
+         if (e->mBoardId == b->GetSerialNumber())
+            event = *e;
+      mEventNew = false;
+      return true;
+   }
 }
 
 //--------------------------------------------------------------------
@@ -3007,17 +3018,21 @@ void WP::Collector()
       CalibrateWaveforms();
       SaveWaveforms();
       
-      // copy full event to queue
-      auto es = mEvent.begin();
-      std::vector<WDEvent *> *ev = new std::vector<WDEvent *>;
+      {
+         std::lock_guard<std::mutex> lock(mEventAccessMutex);
+   
+         if (!mEventNew) {
+            // copy last event
+            auto es = mEvent.begin();
+            auto ed = mEventLast.begin();
       
-      while (es != mEvent.end()) {
-         WDEvent *e = new WDEvent((*es)->mBoardId);
-         *e = **(es++);
-         ev->push_back(e);
+            while (es != mEvent.end())
+               **(ed++) = **(es++);
+      
+            mEventNew = true;
+         }
       }
-
-      mTqueue->push(ev);
+      mEventCV.notify_one();
       
    } while (1);
    
@@ -3107,14 +3122,13 @@ void WP::DoCalibrationVoltageStep()
       calibProg.iIter1++;
       
       // get one event from board
-      WDEvent *event = ReadSingleEvent(b, 1000);
-      if (!event)
+      WDEvent event(b->GetSerialNumber());
+      if (!RequestEvent(b, 1000, event))
          return; // just skip this event
       
       for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
-            calibProg.ave->Add(0, ch, bin, event->mWfU[ch][bin]);
-      delete event;
+            calibProg.ave->Add(0, ch, bin, event.mWfU[ch][bin]);
       
       calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3 + calibProg.iIter4) /
       (calibProg.nIter1 + calibProg.nIter2 + calibProg.nIter3 + calibProg.nIter4);
@@ -3147,14 +3161,13 @@ void WP::DoCalibrationVoltageStep()
       calibProg.iIter2++;
       
       // get one event from board
-      WDEvent *event = ReadSingleEvent(b, 1000);
-      if (!event)
-         return;
+      WDEvent event(b->GetSerialNumber());
+      if (!RequestEvent(b, 1000, event))
+         return; // just skip this event
       
       for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
-            calibProg.ave->Add(0, ch, bin, event->mWfU[ch][bin]);
-      delete event;
+            calibProg.ave->Add(0, ch, bin, event.mWfU[ch][bin]);
       
       calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3 + calibProg.iIter4) /
       (calibProg.nIter1 + calibProg.nIter2 + calibProg.nIter3 + calibProg.nIter4);
@@ -3189,15 +3202,13 @@ void WP::DoCalibrationVoltageStep()
       calibProg.iIter3++;
       
       // get one event from board
-      WDEvent *event = ReadSingleEvent(b, 1000);
-      if (!event)
-         return;
+      WDEvent event(b->GetSerialNumber());
+      if (!RequestEvent(b, 1000, event))
+         return; // just skip this event
       
       for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
-            calibProg.ave->Add(0, ch, bin, event->mWfU[ch][bin]);
-      delete event;
-      
+            calibProg.ave->Add(0, ch, bin, event.mWfU[ch][bin]);
       
       calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3 + calibProg.iIter4) /
       (calibProg.nIter1 + calibProg.nIter2 + calibProg.nIter3 + calibProg.nIter4);
@@ -3229,14 +3240,13 @@ void WP::DoCalibrationVoltageStep()
       calibProg.iIter4++;
       
       // get one event from board
-      WDEvent *event = ReadSingleEvent(b, 1000);
-      if (!event)
-         return;
+      WDEvent event(b->GetSerialNumber());
+      if (!RequestEvent(b, 1000, event))
+         return; // just skip this event
       
       for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
-            calibProg.ave->Add(0, ch, bin, event->mWfU[ch][bin]);
-      delete event;
+            calibProg.ave->Add(0, ch, bin, event.mWfU[ch][bin]);
       
       calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3 + calibProg.iIter4) /
       (calibProg.nIter1 + calibProg.nIter2 + calibProg.nIter3 + calibProg.nIter4);
@@ -3270,114 +3280,100 @@ void WP::DoCalibrationVoltageStep()
 
    // DRS events
    b->SetReadoutSrcSel(WDB::cReadoutSrcDrs);
-   WDEvent *event;
+   WDEvent event(b->GetSerialNumber());
    for (int i=0 ; i<10 ; i++) {
-      event = ReadSingleEvent(b, 1000);
-      delete event;
+      RequestEvent(b, 1000, event);
       sleep_ms(10);
    }
-   event = ReadSingleEvent(b, 1000);
+   while (!RequestEvent(b, 1000, event));
    
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
-         sum += event->mWfU[ch][i];
+         sum += event.mWfU[ch][i];
       b->mVCalib.mCalib.drs_offset_range0[ch] = sum / 1010;
    }
-   delete event;
    
    // ADC events
    b->SetReadoutSrcSel(WDB::cReadoutSrcAdc);
    for (int i=0 ; i<10 ; i++) {
-      event = ReadSingleEvent(b, 1000);
-      delete event;
+      RequestEvent(b, 1000, event);
       sleep_ms(10);
    }
-   event = ReadSingleEvent(b, 1000);
+   while (!RequestEvent(b, 1000, event));
    
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
-         sum += event->mWfU[ch][i];
+         sum += event.mWfU[ch][i];
       b->mVCalib.mCalib.adc_offset_range0[ch] = sum / 1010;
    }
-   delete event;
    
    // Range 0
    b->SetRange(0);
    
    // DRS events
    b->SetReadoutSrcSel(WDB::cReadoutSrcDrs);
-   event = nullptr;
    for (int i=0 ; i<10 ; i++) {
-      event = ReadSingleEvent(b, 1000);
-      delete event;
+      RequestEvent(b, 1000, event);
       sleep_ms(10);
    }
-   event = ReadSingleEvent(b, 1000);
+   while (!RequestEvent(b, 1000, event));
    
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
-         sum += event->mWfU[ch][i];
+         sum += event.mWfU[ch][i];
       b->mVCalib.mCalib.drs_offset_range1[ch] = sum / 1010;
    }
-   delete event;
    
    // ADC events
    b->SetReadoutSrcSel(WDB::cReadoutSrcAdc);
    for (int i=0 ; i<10 ; i++) {
-      event = ReadSingleEvent(b, 1000);
-      delete event;
+      RequestEvent(b, 1000, event);
       sleep_ms(10);
    }
-   event = ReadSingleEvent(b, 1000);
+   while (!RequestEvent(b, 1000, event));
    
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
-         sum += event->mWfU[ch][i];
+         sum += event.mWfU[ch][i];
       b->mVCalib.mCalib.adc_offset_range1[ch] = sum / 1010;
    }
-   delete event;
    
    // Range 0.45
    b->SetRange(0.45);
    
    // DRS events
    b->SetReadoutSrcSel(WDB::cReadoutSrcDrs);
-   event = nullptr;
    for (int i=0 ; i<10 ; i++) {
-      event = ReadSingleEvent(b, 1000);
-      delete event;
+      RequestEvent(b, 1000, event);
       sleep_ms(10);
    }
-   event = ReadSingleEvent(b, 1000);
+   while (!RequestEvent(b, 1000, event));
    
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
-         sum += event->mWfU[ch][i];
+         sum += event.mWfU[ch][i];
       b->mVCalib.mCalib.drs_offset_range2[ch] = sum / 1010;
    }
-   delete event;
    
    // ADC events
    b->SetReadoutSrcSel(WDB::cReadoutSrcAdc);
    for (int i=0 ; i<10 ; i++) {
-      event = ReadSingleEvent(b, 1000);
-      delete event;
+      RequestEvent(b, 1000, event);
       sleep_ms(10);
    }
-   event = ReadSingleEvent(b, 1000);
+   while (!RequestEvent(b, 1000, event));
    
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
-         sum += event->mWfU[ch][i];
+         sum += event.mWfU[ch][i];
       b->mVCalib.mCalib.adc_offset_range2[ch] = sum / 1010;
    }
-   delete event;
    
    delete calibProg.ave;
    calibProg.ave = NULL;
@@ -3747,14 +3743,12 @@ void WP::DoCalibrationTimeStep()
       }
       
       // get one event from board
-      WDEvent *event = ReadSingleEvent(b, 1000);
-      if (!event)
+      WDEvent event(b->GetSerialNumber());
+      if (!RequestEvent(b, 1000, event))
          return; // just skip this event
       
-      AnalyzePeriod(event, b);
-      CalibrateLocal(event, b);
-
-      delete event;
+      AnalyzePeriod(&event, b);
+      CalibrateLocal(&event, b);
 
       calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3) /
          (calibProg.nIter1 + calibProg.nIter2 + calibProg.nIter3);
@@ -3784,14 +3778,12 @@ void WP::DoCalibrationTimeStep()
       }
       
       // get one event from board
-      WDEvent *event = ReadSingleEvent(b, 1000);
-      if (!event)
+      WDEvent event(b->GetSerialNumber());
+      if (!RequestEvent(b, 1000, event))
          return; // just skip this event
       
-      AnalyzePeriod(event, b);
-      CalibrateGlobal(event, b);
-      
-      delete event;
+      AnalyzePeriod(&event, b);
+      CalibrateGlobal(&event, b);
       
       calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3) /
       (calibProg.nIter1 + calibProg.nIter2 + calibProg.nIter3);
@@ -3815,13 +3807,11 @@ void WP::DoCalibrationTimeStep()
       calibProg.iIter3++;
       
       // get one event from board
-      WDEvent *event = ReadSingleEvent(b, 1000);
-      if (!event)
+      WDEvent event(b->GetSerialNumber());
+      if (!RequestEvent(b, 1000, event))
          return; // just skip this event
       
-      AnalyzeTimeOffset(event, b);
-      
-      delete event;
+      AnalyzeTimeOffset(&event, b);
       
       calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3) /
       (calibProg.nIter1 + calibProg.nIter2 + calibProg.nIter3);

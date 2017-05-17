@@ -157,20 +157,23 @@ template <class T> class tqueue {
    std::queue<T> queue;
    
    int mSize;
+   bool mWait;
    
 public:
-   tqueue(int size) { mSize = size; };
+   tqueue(int size, bool wait=true) { mSize = size; mWait = wait; };
    ~tqueue() {};
    
    void push(T e) {
       std::unique_lock<std::mutex> lock(mutex);
-      while (queue.size() > mSize) {
+      if (!mWait && queue.size() >= mSize) {
+         return;
+      }
+      while (queue.size() >= mSize) {
          //std::cout << "producer waiting" << std::endl;
          full.wait(lock);
       }
       queue.push(e);
       empty.notify_one();
-      lock.unlock();
    }
    T pop(int timeout = 0) {
       auto start = std::chrono::system_clock::now();
@@ -265,12 +268,16 @@ class WP {
       return std::thread([=] { Collector(); });
    };
    
-   bool              mNewEvent;
    std::vector<WDEventRequest *> mEventRequest;
    std::vector<WDEvent *> mEvent;
-   
-   tqueue<std::vector<WDEvent *> *> *mTqueue;
-   
+   std::vector<WDEvent *> mEventLast;
+
+   std::mutex        mEventMutex;
+   std::mutex        mEventAccessMutex;
+   std::condition_variable mEventCV;
+   bool              mEventNew;
+   bool              mEventEmpty;
+
    void              InvalidateAllWf();
    void              ReceiveWfPacket();
    bool              AllPacketsReceived();
@@ -326,8 +333,7 @@ public:
    bool IsTimeCalib2() { return mTimeCalib2;}
    bool IsTimeCalib3() { return mTimeCalib3;}
    bool IsRemoveSpikes() { return mRemoveSpikes; }
-   std::vector<WDEvent *>* GetEvent(int timeout) { return mTqueue->pop(timeout); }
-
+   
    void SetRotateWaveform(bool f) { mRotateWaveform = f; }
    void SetOfsCalib1(bool f) { mOfsCalib1 = f; }
    void SetOfsCalib2(bool f) { mOfsCalib2 = f; }
@@ -354,7 +360,8 @@ public:
    WDB* GetBoard(int board_id);
    unsigned int GetEventRequestMask(int board_id);
    
-   WDEvent* ReadSingleEvent(WDB* b, int timeout);
+   bool GetLastEvent(WDB* b, int timeout, WDEvent& event);
+   bool RequestEvent(WDB* b, int timeout, WDEvent& event);
    
    void StartCalibrationVoltage(int b) {
       calibProg.mode = cCmVoltage;
