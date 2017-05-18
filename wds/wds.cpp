@@ -278,10 +278,14 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
       else if (item == "drsSampleFreq") {
          if (iBoard == -1)
-            for (auto &b: gl->wdb)
+            for (auto &b: gl->wdb) {
                b->SetDrsSampleFreq(std::stoi(value));
-         else
-         gl->wdb[iBoard]->SetDrsSampleFreq(std::stoi(value));
+               b->ReceiveStatusRegister(WD2_REG_DRS_SAMPLE_FREQ_OFS);
+            }
+         else {
+            gl->wdb[iBoard]->SetDrsSampleFreq(std::stoi(value));
+            gl->wdb[iBoard]->ReceiveStatusRegister(WD2_REG_DRS_SAMPLE_FREQ_OFS);
+         }
       }
 
       else if (item == "dacCalDc") {

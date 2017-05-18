@@ -547,6 +547,7 @@ function validateParam(input, channel) {
    
    if (input.id == "drsSampleFreq") {
       var divider = Math.round(200.0 / input.value * 2.048);
+      divider = 2*Math.floor(divider/2);
       OSC.wdb[OSC.curBoard].drsSampleFreq = Math.round(200 / divider * 2048);
       document.getElementById("drsActualSampleFreq").innerHTML = OSC.wdb[OSC.curBoard].drsSampleFreq/1000 + " GSPS";
    }
