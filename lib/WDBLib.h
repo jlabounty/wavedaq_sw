@@ -77,7 +77,9 @@ class VCALIB {
 public:
    VCALIB_DATA      mCalib;
    VCALIB();
+   void SetValid(bool f) { bValid = f; }
    bool IsValid() { return bValid; }
+   int  GetSamplingFrequency() { return mCalib.sampling_frequency; }
    void save(WDB *b, std::string filename);
    void load(WDB *b, std::string filename);
 };
@@ -100,7 +102,9 @@ class TCALIB {
 public:
    TCALIB_DATA      mCalib;
    TCALIB();
+   void SetValid(bool f) { bValid = f; }
    bool IsValid() { return bValid; }
+   int  GetSamplingFrequency() { return mCalib.sampling_frequency; }
    void save(WDB *b, std::string filename);
    void load(WDB *b, std::string filename);
 };
@@ -143,6 +147,9 @@ public:
    
    float            mWfU[WD_N_CHANNELS][1024];
    float            mWfT[WD_N_CHANNELS][1024];
+   
+   bool             mVCalibrated;
+   bool             mTCalibrated;
    
    WDEvent(int boardId) { mBoardId = boardId; };
 
@@ -635,10 +642,10 @@ public:
    
    void RequestEvent();
    
-   void SaveVoltageCalibration();
-   bool LoadVoltageCalibration();
-   void SaveTimeCalibration();
-   bool LoadTimeCalibration();
+   void SaveVoltageCalibration(int freq);
+   bool LoadVoltageCalibration(int freq);
+   void SaveTimeCalibration(int freq);
+   bool LoadTimeCalibration(int freq);
 };
 
 //--------------------------------------------------------------------

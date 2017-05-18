@@ -34,6 +34,7 @@ typedef struct {
    std::vector<WDB*> wdb;
    WP*  wp;
    int  triggerMode;
+   int  triggerSelfArm;
 } GLOBALS;
 
 /*------------------------------------------------------------------*/
@@ -280,11 +281,13 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          if (iBoard == -1)
             for (auto &b: gl->wdb) {
                b->SetDrsSampleFreq(std::stoi(value));
-               b->ReceiveStatusRegister(WD2_REG_DRS_SAMPLE_FREQ_OFS);
+               b->LoadVoltageCalibration(b->GetDrsSampleFreq());
+               b->LoadTimeCalibration(b->GetDrsSampleFreq());
             }
          else {
             gl->wdb[iBoard]->SetDrsSampleFreq(std::stoi(value));
-            gl->wdb[iBoard]->ReceiveStatusRegister(WD2_REG_DRS_SAMPLE_FREQ_OFS);
+            gl->wdb[iBoard]->LoadVoltageCalibration(gl->wdb[iBoard]->GetDrsSampleFreq());
+            gl->wdb[iBoard]->LoadTimeCalibration(gl->wdb[iBoard]->GetDrsSampleFreq());
          }
       }
 
@@ -580,6 +583,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       
       if (gl->demoMode) {
          bNewEvent = true;
+         event.mVCalibrated = true;
+         event.mTCalibrated = true;
          for (int c=0 ; c<WD_N_CHANNELS ; c++) {
             for (int i=0 ; i<1024 ; i++) {
                float t = i*1E-6 / gl->wdb[b]->GetDrsSampleFreq();
@@ -620,8 +625,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
             if (gl->triggerMode == cTriggerModeAuto)
                gl->wdb[b]->RequestEvent();
-            else if (gl->triggerMode == cTriggerModeNormal)
-               ; //## gl->wdb[b]->StartDaqSingle();
+            else if (gl->triggerMode == cTriggerModeNormal) {
+               if (!gl->triggerSelfArm)
+                  gl->wdb[b]->StartDaqSingle();
+            }
          }
          
          // read waveforms
@@ -634,12 +641,15 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       if (bNewEvent) {
          int t = 1;                    // array type
          int n = 1024;                 // number of elements
+         int vc = event.mVCalibrated;  // voltage calibrated
+         int tc = event.mTCalibrated;  // time calibrated
          int l = gl->wp->GetNLogged(); // number of logged events
          for (int c=0 ; c<WD_N_CHANNELS ; c++) {
             if (chn & (1 << c)) {
                t = 1; // time array
                mg_send_http_chunk(nc, (const char *)&t, 4);
                mg_send_http_chunk(nc, (const char *)&b, 4);
+               mg_send_http_chunk(nc, (const char *)&tc, 4);
                mg_send_http_chunk(nc, (const char *)&l, 4);
                mg_send_http_chunk(nc, (const char *)&c, 4);
                mg_send_http_chunk(nc, (const char *)&n, 4);
@@ -652,6 +662,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                t = 2; // voltage array
                mg_send_http_chunk(nc, (const char *)&t, 4);
                mg_send_http_chunk(nc, (const char *)&b, 4);
+               mg_send_http_chunk(nc, (const char *)&vc, 4);
                mg_send_http_chunk(nc, (const char *)&l, 4);
                mg_send_http_chunk(nc, (const char *)&c, 4);
                mg_send_http_chunk(nc, (const char *)&n, 4);
@@ -690,6 +701,7 @@ void showUsage(std::string name)
    std::cerr << "  -h              Show this help" << std::endl;
    std::cerr << "  -d              Demo mode" << std::endl;
    std::cerr << "  -p              HTTP server port (default is 8080)" << std::endl;
+   std::cerr << "  -s              Run WDB in self-arm mode (use with caution!)" << std::endl;
    std::cerr << "  -w <address>    Internet address(es) of WaveDREAM board(s)" << std::endl;
    std::cerr << "  -v 1            Print extra information (verbose)" << std::endl;
    std::cerr << "  -v 2            Print in addition each received waveform packet header" << std::endl;
@@ -721,6 +733,7 @@ int main(int argc, const char * argv[])
    gl.serverPort = 8080;
    gl.verbose = 0;
    gl.triggerMode = cTriggerModeAuto;
+   gl.triggerSelfArm = false;
    
    // parse command line parameters
    if (argc < 2) {
@@ -739,6 +752,9 @@ int main(int argc, const char * argv[])
       else if (arg == "-p")
          gl.serverPort = std::stoi(argv[++i]);
       
+      else if (arg == "-s")
+         gl.triggerSelfArm = true;
+
       else if (arg == "-v") {
          gl.verbose = 1;
          if (i < argc-1 && isdigit(argv[i+1][0]))
@@ -811,8 +827,8 @@ int main(int argc, const char * argv[])
             }
 
             // load calibration data for board
-            b->LoadVoltageCalibration();
-            b->LoadTimeCalibration();
+            b->LoadVoltageCalibration(b->GetDrsSampleFreq());
+            b->LoadTimeCalibration(b->GetDrsSampleFreq());
             
          } else {
             // turn all channels on in demo mode
@@ -850,9 +866,15 @@ int main(int argc, const char * argv[])
       b->SetDestinationPort(gl.wp->GetServerPort());
    
    // switch boards to normal mode to send events
-   for (auto &b: gl.wdb) {
-      b->SetDaqNormal(true);
-      b->SetInterPacketDelay(0x1000);
+   if (gl.triggerSelfArm) {
+      for (auto &b: gl.wdb) {
+         b->SetDaqNormal(true);
+         b->SetInterPacketDelay(0x1000);
+      }
+   } else {
+      for (auto &b: gl.wdb) {
+         b->SetDaqNormal(false);
+      }
    }
 
    // initialize web server

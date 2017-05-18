@@ -728,6 +728,7 @@ function receiveWF() {
          } else if (responseType == 1) { // time array
             i++;
             OSC.wd = intArray[i++];
+            OSC.tCalibrated = intArray[i++];
             OSC.nLogged = intArray[i++];
             var c = intArray[i++];
             var n = intArray[i++];
@@ -767,6 +768,7 @@ function receiveWF() {
             i++;
             OSC.idle = false;
             OSC.wd = intArray[i++];
+            OSC.vCalibrated = intArray[i++];
             OSC.nLogged = intArray[i++];
             c = intArray[i++];
             n = intArray[i++];

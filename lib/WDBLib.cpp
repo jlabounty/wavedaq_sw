@@ -792,6 +792,9 @@ void WDB::SetDrsSampleFreq(unsigned int f)
    
    SetRegMask(WD2_REG_LMK_0_OFS, WD2_BIT_LMK0_CLKOUT0_DIV_MASK, WD2_BIT_LMK0_CLKOUT0_DIV_OFS, divider);
    ApplyLmkSettings();
+   
+   // read back new sampling frquency in status register
+   ReceiveStatusRegister(WD2_REG_DRS_SAMPLE_FREQ_OFS);
 }
 
 unsigned int WDB::GetAdcSampleFreq()
@@ -1979,33 +1982,45 @@ void WDB::RequestEvent()
 
 //--------------------------------------------------------------------
 
-void WDB::SaveVoltageCalibration()
+void WDB::SaveVoltageCalibration(int freq)
 {
    mkdir("calib", 0755);
-   mVCalib.save(this, "calib/"+mName+".vcal");
+   mVCalib.save(this, "calib/"+mName+"-"+std::to_string(freq)+".vcal");
 }
 
 //--------------------------------------------------------------------
 
-bool WDB::LoadVoltageCalibration()
+bool WDB::LoadVoltageCalibration(int freq)
 {
-   mVCalib.load(this, "calib/"+mName+".vcal");
+   if (mVerbose)
+      std::cout << "Loading voltage calibration for "+mName+" for " << freq/1000.0 << " GSPS ... ";
+   
+   mVCalib.load(this, "calib/"+mName+"-"+std::to_string(freq)+".vcal");
+   
+   if (mVerbose)
+      std::cout << (mVCalib.IsValid() ? "ok" : "failure") << std::endl;
    return mVCalib.IsValid();
 }
 
 //--------------------------------------------------------------------
 
-void WDB::SaveTimeCalibration()
+void WDB::SaveTimeCalibration(int freq)
 {
    mkdir("calib", 0755);
-   mTCalib.save(this, "calib/"+mName+".tcal");
+   mTCalib.save(this, "calib/"+mName+"-"+std::to_string(freq)+".tcal");
 }
 
 //--------------------------------------------------------------------
 
-bool WDB::LoadTimeCalibration()
+bool WDB::LoadTimeCalibration(int freq)
 {
-   mTCalib.load(this, "calib/"+mName+".tcal");
+   if (mVerbose)
+      std::cout << "Loading time calibration for "+mName+" for " << freq/1000.0 << " GSPS ... ";
+   
+   mTCalib.load(this, "calib/"+mName+"-"+std::to_string(freq)+".tcal");
+
+   if (mVerbose)
+      std::cout << (mVCalib.IsValid() ? "ok" : "failure") << std::endl;
    return mTCalib.IsValid();
 }
 
@@ -2352,7 +2367,9 @@ void WP::ReceiveWfPacket()
          }
          
          event->SetEventHeaderInfo(ph);
-         
+         event->mVCalibrated = false;
+         event->mTCalibrated = false;
+
          // decode waveform data
          auto pd = (unsigned char*)(ph+1);
          for (int i=0 ; i<512 ; i+=2) {
@@ -2562,9 +2579,12 @@ void WP::CalibrateWaveforms()
       
       if (ev->mWFTypeADC) { //---------- calibrate ADC data ----------
          
+         ev->mTCalibrated = true;
+         
          if (mRangeCalib) {
             float ofs;
             
+            ev->mVCalibrated = true;
             for (int i=0 ; i<WD_N_CHANNELS-2 ; i++) { // exclude clock channels
                if (fabs(wdb->GetRange() - (-0.45)) < 0.001)
                   ofs = wdb->mVCalib.mCalib.adc_offset_range0[i];
@@ -2591,8 +2611,13 @@ void WP::CalibrateWaveforms()
 
       } else {  //---------- calibrate DRS data ----------
 
+         bool bValid = (ev->mSamplingFrequency == wdb->mVCalib.GetSamplingFrequency() &&
+                        wdb->mVCalib.IsValid());
+
          // cell-by-cell offset calibration
-         if (mOfsCalib1) {
+         if (mOfsCalib1 && bValid) {
+            ev->mVCalibrated = true;
+
             if (mRotateWaveform) {
                for (int i=0 ; i<WD_N_CHANNELS ; i++) {
                   int tc = i < 8 || i == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
@@ -2607,14 +2632,14 @@ void WP::CalibrateWaveforms()
          };
          
          // start-to-end offset calibration
-         if (mOfsCalib2) {
+         if (mOfsCalib2 && bValid) {
             for (int i=0 ; i<WD_N_CHANNELS ; i++)
                for (int j=0 ; j<1024 ; j++)
                   ev->mWfU[i][j] -= wdb->mVCalib.mCalib.wf_offset2[i][j];
          };
          
          // gain calibration
-         if (mGainCalib) {
+         if (mGainCalib && bValid) {
             if (mRotateWaveform) {
                for (int i=0 ; i<WD_N_CHANNELS-2 ; i++) { // exclude clock channels
                   int tc = i < 8 || i == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
@@ -2637,7 +2662,7 @@ void WP::CalibrateWaveforms()
          };
          
          // range calibration
-         if (mRangeCalib) {
+         if (mRangeCalib && bValid) {
             float ofs;
             
             for (int i=0 ; i<WD_N_CHANNELS-2 ; i++) { // exclude clock channels
@@ -2661,7 +2686,11 @@ void WP::CalibrateWaveforms()
          };
 
          // calculate calibrated time for each event
-         if (mTimeCalib1) {
+         bValid = (ev->mSamplingFrequency == wdb->mTCalib.GetSamplingFrequency() &&
+                   wdb->mTCalib.IsValid());
+         if (mTimeCalib1 && bValid) {
+            ev->mTCalibrated = true;
+ 
             // integrate time from delta-t values
             for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
                int tc = ch < 8 || ch == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
@@ -2706,14 +2735,14 @@ void WP::CalibrateWaveforms()
          }
          
          // apply time offsets (different PCB path traces)
-         if (mTimeCalib2) {
+         if (mTimeCalib2 && bValid) {
             for (int i=0 ; i<WD_N_CHANNELS ; i++)
                for (int j=0 ; j<1024 ; j++)
                   ev->mWfT[i][j] -= wdb->mTCalib.mCalib.offset[i];
          }
 
          // apply horizontal trigger position correction
-         if (mTimeCalib3) {
+         if (mTimeCalib3 && bValid) {
             bool bFound = false;
             for (int i=4 ; i<1020 ; i++) {
                for (int c=0 ; c<16 ; c++) {
@@ -2751,8 +2780,6 @@ void WP::CalibrateWaveforms()
                   break;
             }
          }
-
-         
       }
    }
 }
@@ -3075,6 +3102,8 @@ void WP::DoCalibrationVoltageStep()
       mOldFeMux       = b->GetFeMux(0);
       mOldCalibBuffer = b->IsCalibBufferEnable();
       
+      b->mVCalib.mCalib.sampling_frequency = b->GetDrsSampleFreq();
+      
       // turn off all calibration
       mRotateWaveform      = false;
       mOfsCalib1           = false;
@@ -3156,6 +3185,7 @@ void WP::DoCalibrationVoltageStep()
          calibProg.ave->Reset();
          mRotateWaveform      = true;  // rotate waveforms
          mOfsCalib1           = true;  // do 1st calibration
+         b->mVCalib.SetValid(true);
       }
       
       calibProg.iIter2++;
@@ -3379,7 +3409,7 @@ void WP::DoCalibrationVoltageStep()
    calibProg.ave = NULL;
 
    // save calibration
-   b->SaveVoltageCalibration();
+   b->SaveVoltageCalibration(b->GetDrsSampleFreq());
    
    // switch to next board
    calibProg.iBoard++;
@@ -3694,6 +3724,8 @@ void WP::DoCalibrationTimeStep()
       mOldFeMux       = b->GetFeMux(0);
       mOldCalibBuffer = b->IsCalibBufferEnable();
 
+      b->mTCalib.mCalib.sampling_frequency = b->GetDrsSampleFreq();
+
       mRotateWaveform       = false;
       mTimeCalib1           = false;
       
@@ -3794,6 +3826,7 @@ void WP::DoCalibrationTimeStep()
          b->SetTimingCalibSignalDelay(calibProg.phase);
          mRotateWaveform       = true;
          mTimeCalib1           = true;
+         b->mTCalib.SetValid(true);
       }
 
       sleep_ms(10); // obtain 100 Hz rate
@@ -3829,7 +3862,7 @@ void WP::DoCalibrationTimeStep()
    delete calibProg.ave;
    calibProg.ave = NULL;
    
-   b->SaveTimeCalibration();
+   b->SaveTimeCalibration(b->GetDrsSampleFreq());
    
    // switch to next board
    calibProg.iBoard++;
@@ -3935,6 +3968,7 @@ void VCALIB::save(WDB *b, std::string filename)
 
 void VCALIB::load(WDB *b, std::string filename)
 {
+   bValid = false;
    int fh = open(filename.c_str(), O_RDONLY, 0644);
    if (fh > 0) {
       int size = read(fh, &mCalib, sizeof(VCALIB_DATA));
@@ -3989,6 +4023,7 @@ void TCALIB::save(WDB *b, std::string filename)
 
 void TCALIB::load(WDB *b, std::string filename)
 {
+   bValid = false;
    int fh = open(filename.c_str(), O_RDONLY, 0644);
    if (fh > 0) {
       int size = read(fh, &mCalib, sizeof(TCALIB_DATA));

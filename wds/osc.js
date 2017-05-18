@@ -70,6 +70,9 @@ function Oscilloscope(div) { // constructor
    this.logfile = "";
    this.nLogged = 0;
    this.nRequested = 0;
+   
+   this.vCalibrated = true;
+   this.tCalibrated = true;
 
    this.nFrames = 0;
    this.nFPS = 0;
@@ -433,6 +436,31 @@ Oscilloscope.prototype.printStatus = function (ctx) {
          ctx.textBaseline = "middle";
          ctx.fillText("LMK PLL not locked!", (this.x1 + this.x2) / 2, (this.y1 + this.y2) / 2);
       }
+      
+      if (!OSC.vCalibrated) {
+         ctx.fillStyle = 'red';
+         ctx.strokeStyle = 'red';
+         ctx.font = '18px sans-serif';
+         ctx.textAlign = "left";
+         ctx.textBaseline = "top";
+         var t = "Voltage calibrated";
+         ctx.fillText(t, this.x1 + 12, this.y2 - 55);
+         ctx.drawLine(this.x1+10, this.y2-57, this.x1+14+ctx.measureText(t).width, this.y2-46+14);
+         ctx.drawLine(this.x1+10, this.y2-46+14, this.x1+14+ctx.measureText(t).width, this.y2-57);
+      }
+      
+      if (!OSC.tCalibrated) {
+         ctx.fillStyle = 'red';
+         ctx.strokeStyle = 'red';
+         ctx.font = '18px sans-serif';
+         ctx.textAlign = "left";
+         ctx.textBaseline = "top";
+         var t = "Time calibrated";
+         ctx.fillText(t, this.x1 + 12, this.y2 - 85);
+         ctx.drawLine(this.x1+10, this.y2-87, this.x1+14+ctx.measureText(t).width, this.y2-76+14);
+         ctx.drawLine(this.x1+10, this.y2-76+14, this.x1+14+ctx.measureText(t).width, this.y2-87);
+      }
+
    }
 };
 
