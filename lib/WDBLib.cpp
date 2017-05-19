@@ -2222,6 +2222,8 @@ void WP::InvalidateAllWf()
    
    mPacketsReceived = 0;
    mCurrentEvent = -1;
+   mCurrentDrs0TriggerCell = -1;
+   mCurrentDrs1TriggerCell = -1;
 }
 
 //--------------------------------------------------------------------
@@ -2311,6 +2313,10 @@ void WP::ReceiveWfPacket()
          
          if (mCurrentEvent == -1)
             mCurrentEvent = ph->event_number;
+         if (mCurrentDrs0TriggerCell == -1)
+            mCurrentDrs0TriggerCell = ph->drs0_trigger_cell;
+         if (mCurrentDrs1TriggerCell == -1)
+            mCurrentDrs1TriggerCell = ph->drs1_trigger_cell;
          
          // drop package (for now...) if it is not event data
          if (package_type != 0) {
@@ -2325,6 +2331,13 @@ void WP::ReceiveWfPacket()
                       << "current event=" << mCurrentEvent << ", "
                       << "board id = " << ph->board_id << std::endl;
             return;
+         }
+         
+         // print warning if inconsistent trigger cells are found
+         if (ph->event_number == mCurrentEvent &&
+             (ph->drs0_trigger_cell != mCurrentDrs0TriggerCell ||
+              ph->drs0_trigger_cell != mCurrentDrs0TriggerCell)) {
+                std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
          }
          
          // drop whole event if package of next event has been received
