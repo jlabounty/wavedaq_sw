@@ -872,6 +872,12 @@ unsigned int WDB::GetTriggerBusNumber()
    return bitExtract(sreg, WD2_REG_TRB_INFO_OFS, WD2_BIT_TRB_NUMBER_MASK, WD2_BIT_TRB_NUMBER_OFS);
 }
 
+unsigned int WDB::GetAdvTriggerStatus(int r)
+{
+   assert(r >= 0 && r < 10);
+   return bitExtract(sreg, WD2_REG_ADV_TRG_STAT0_OFS+r*4, WD2_BIT_ADV_TRG_CFG_0_MASK, WD2_BIT_ADV_TRG_CFG_0_OFS);
+}
+
 //-- Control registers -----------------------------------------------
 
 unsigned int WDB::GetCrateId()

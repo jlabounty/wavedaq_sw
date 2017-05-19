@@ -477,6 +477,8 @@ public:
    unsigned int GetTriggerBusParityErrorCount();
    unsigned int GetTriggerBusType();
    unsigned int GetTriggerBusNumber();
+   
+   unsigned int GetAdvTriggerStatus(int r);
 
    // control registers
    unsigned int GetCrateId();
