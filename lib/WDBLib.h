@@ -268,8 +268,8 @@ class WP {
    
    int               mPacketsReceived;
    int               mCurrentEvent;
-   int               mCurrentDrs0TriggerCell;
-   int               mCurrentDrs1TriggerCell;
+   unsigned int      mCurrentDrs0TriggerCell;
+   unsigned int      mCurrentDrs1TriggerCell;
    
    std::thread       mThreadCollector;
    void Collector();

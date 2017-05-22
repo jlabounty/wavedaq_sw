@@ -387,7 +387,7 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg, int 
 
          if (bSuccess) {
             // copy data
-            for (int i=0 ; i<len ; i++)
+            for (unsigned int i=0 ; i<len ; i++)
                result.push_back(readBuf[i*4+4] << 24 |
                                 readBuf[i*4+5] << 16 |
                                 readBuf[i*4+6] <<  8 |
@@ -498,7 +498,7 @@ void WDB::ReceiveControlRegisters(unsigned int index, unsigned int nReg)
 
 #ifdef WD2_USE_UDP_BIN
    std::vector<unsigned int> result = ReadUDP(WD2_REG_WDB_LOC_OFS+index*4, nReg);
-   for (auto i=0 ; i<nReg ; i++)
+   for (unsigned int i=0 ; i<nReg ; i++)
       this->creg[index+i] = result[i];
 #else
    std::string result;
@@ -529,7 +529,7 @@ void WDB::ReceiveStatusRegisters(unsigned int index, unsigned int nReg)
    
 #ifdef WD2_USE_UDP_BIN
    std::vector<unsigned int> result = ReadUDP(WD2_REG_HW_VER_OFS+index*4, nReg);
-   for (auto i=0 ; i<nReg ; i++)
+   for (unsigned int i=0 ; i<nReg ; i++)
       this->sreg[index+i] = result[i];
 #else
    std::string result;
@@ -540,7 +540,7 @@ void WDB::ReceiveStatusRegisters(unsigned int index, unsigned int nReg)
    std::stringstream ss(result);
    std::string line;
    
-   for (auto i=index ; i<index+nReg ; i++) {
+   for (unsigned int i=index ; i<index+nReg ; i++) {
       std::getline(ss, line, '\r');
       auto adr = (unsigned int)std::stoul(line.substr(3), nullptr, 16);
       auto idx = (adr - WD2_REG_HW_VER_OFS) / 4;
@@ -725,9 +725,9 @@ bool WDB::IsExtPllLck(bool refresh)
    if (mDemoMode)
       return true;
 
-   auto mask = WD2_BIT_DRS_PLL_LOCK_0_MASK |
-               WD2_BIT_DRS_PLL_LOCK_1_MASK |
-               WD2_BIT_LMK_PLL_LOCK_MASK;
+   unsigned int mask = WD2_BIT_DRS_PLL_LOCK_0_MASK |
+                       WD2_BIT_DRS_PLL_LOCK_1_MASK |
+                       WD2_BIT_LMK_PLL_LOCK_MASK;
    mask >>= WD2_BIT_LMK_PLL_LOCK_OFS;
    
    return (GetExtPllLck(refresh) == mask);
@@ -754,7 +754,7 @@ bool WDB::IsIntPllLck(bool refresh)
    if (mDemoMode)
       return true;
 
-   auto mask =
+   unsigned int mask =
    WD2_BIT_SYS_DCM_LOCK_MASK |
    WD2_BIT_DAQ_PLL_LOCK_MASK |
    WD2_BIT_OSERDES_PLL_LOCK_DCB_MASK |
@@ -820,7 +820,7 @@ void WDB::GetScalers(std::vector<unsigned long> &scaler, bool refresh)
       ReceiveStatusRegisters((WD2_REG_SCALER_0_LSB_OFS-WD2_REG_HW_VER_OFS)/4, 34);
 
    // channels 0-15 are 64 bit counters
-   for (auto i=0 ; i<16 ; i++) {
+   for (unsigned int i=0 ; i<16 ; i++) {
       unsigned long v = this->sreg[WD2_REG_SCALER_0_LSB_OFS/4+i*2] |
       ((unsigned long)this->sreg[WD2_REG_SCALER_0_LSB_OFS/4+i*2+1] << 32);
       
@@ -831,7 +831,7 @@ void WDB::GetScalers(std::vector<unsigned long> &scaler, bool refresh)
    }
    
    // channels 16 and 17 are 32 bit counters
-   for (auto i=16 ; i<18 ; i++) {
+   for (unsigned int i=16 ; i<18 ; i++) {
       unsigned long v = this->sreg[WD2_REG_SCALER_TRG_OFS/4+(i-16)];
       
       if (scaler.size() < i+1)
@@ -1424,18 +1424,18 @@ void WDB::SetDacPzcLevelV(float v)
 
 int WDB::GetDacPzcLevelN()
 {
-   int i;
+   unsigned int i;
    auto v = GetDacPzcLevelV();
    for (i=0 ; i<pzcLevel.size() ; i++)
       if (pzcLevel[i] == v)
         break;
-   return i+1;
+   return (int)i+1;
 }
 
 void WDB::SetDacPzcLevelN(int i)
 {
    i--;
-   assert(i >= 0 && i < pzcLevel.size());
+   assert(i >= 0 && i < (int)pzcLevel.size());
    SetDacPzcLevelV(pzcLevel[i]);
 }
 
@@ -2104,11 +2104,11 @@ WP::WP(std::vector<WDB *> w, int verbose, bool demo)
    }
 
    // allocated event buffer and requests for all WDB
-   for (int i=0 ; i<mWdb.size() ; i++)
+   for (unsigned int i=0 ; i<mWdb.size() ; i++)
       mEventRequest.push_back(new WDEventRequest(mWdb[i]->GetSerialNumber()));
-   for (int i=0 ; i<mWdb.size() ; i++)
+   for (unsigned int i=0 ; i<mWdb.size() ; i++)
       mEvent.push_back(new WDEvent(mWdb[i]->GetSerialNumber()));
-   for (int i=0 ; i<mWdb.size() ; i++)
+   for (unsigned int i=0 ; i<mWdb.size() ; i++)
       mEventLast.push_back(new WDEvent(mWdb[i]->GetSerialNumber()));
    
    mEventEmpty = true;
@@ -2148,7 +2148,7 @@ unsigned int WP::GetEventRequestMask(int board_id)
 WDB* WP::GetBoard(int board_id)
 {
    for (auto &b: mWdb)
-      if (b->GetSerialNumber() == board_id)
+      if ((int)b->GetSerialNumber() == board_id)
          return b;
    return 0;
 }
@@ -2156,7 +2156,7 @@ WDB* WP::GetBoard(int board_id)
 void WP::RequestBoard(WDB *b)
 {
    for (auto &r: mEventRequest) {
-      r->SetRequested(r->GetBoardId() == b->GetSerialNumber());
+      r->SetRequested(r->GetBoardId() == (int)b->GetSerialNumber());
    }
    
    SetEventRequestMasks();
@@ -2348,7 +2348,7 @@ void WP::ReceiveWfPacket()
          }
          
          // drop package if it belongs to older event
-         if (ph->event_number < mCurrentEvent) {
+         if (ph->event_number < (unsigned int)mCurrentEvent) {
             std::cerr << "Package dropped, package event=" << ph->event_number << ", "
                       << "current event=" << mCurrentEvent << ", "
                       << "board id = " << ph->board_id << std::endl;
@@ -2356,14 +2356,14 @@ void WP::ReceiveWfPacket()
          }
          
          // print warning if inconsistent trigger cells are found
-         if (ph->event_number == mCurrentEvent &&
+         if (ph->event_number == (unsigned int)mCurrentEvent &&
              (ph->drs0_trigger_cell != mCurrentDrs0TriggerCell ||
               ph->drs0_trigger_cell != mCurrentDrs0TriggerCell)) {
                 std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
          }
          
          // drop whole event if package of next event has been received
-         if (ph->event_number > mCurrentEvent) {
+         if (ph->event_number > (unsigned int)mCurrentEvent) {
             std::cerr << "Event dropped, package event=" << ph->event_number << ", "
             << "current event=" << mCurrentEvent << ", "
             << "board id = " << ph->board_id << std::endl;
