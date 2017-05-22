@@ -2211,6 +2211,28 @@ bool WP::GetLastEvent(WDB *b, int timeout, WDEvent& event)
 
 //--------------------------------------------------------------------
 
+bool WP::GetLastEvent(int timeout, std::vector<WDEvent *> event)
+{
+   // wait for new event with timeout
+   {
+   std::unique_lock<std::mutex> lock(mEventMutex);
+   if (!(mEventCV.wait_for(lock, std::chrono::milliseconds(timeout), [this](){return mEventNew;})))
+      return false;
+   }
+   
+   {
+   std::lock_guard<std::mutex> lock(mEventAccessMutex);
+   
+   std::vector<WDEvent*>::iterator ed = event.begin();
+   for (auto es: mEventLast)
+         **(ed++) = *es;
+   mEventNew = false;
+   return true;
+   }
+}
+
+//--------------------------------------------------------------------
+
 void WP::InvalidateAllWf()
 {
    for (auto w = mEventRequest.begin() ; w != mEventRequest.end() ; w++) {

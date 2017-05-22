@@ -352,6 +352,10 @@ public:
    void SetTimeCalib2(bool f) { mTimeCalib2 = f; }
    void SetTimeCalib3(bool f) { mTimeCalib3 = f; }
    void SetRemoveSpikes(bool f) { mRemoveSpikes = f; }
+   void SetAllCalib(bool f) {
+      mOfsCalib1 = f; mOfsCalib2 = f; mGainCalib = f; mRangeCalib = f;
+      mTimeCalib1 = f; mTimeCalib2 = f; mTimeCalib3 = f;
+   }
    
    bool IsVcalibActive() { return calibProg.mode == cCmVoltage; }
    bool IsTcalibActive() { return calibProg.mode == cCmTime; }
@@ -370,6 +374,7 @@ public:
    unsigned int GetEventRequestMask(int board_id);
    
    bool GetLastEvent(WDB* b, int timeout, WDEvent& event);
+   bool GetLastEvent(int timeout, std::vector<WDEvent *> event);
    bool RequestEvent(WDB* b, int timeout, WDEvent& event);
    
    void StartCalibrationVoltage(int b) {
@@ -424,15 +429,19 @@ public:
    }
 
    // constants
-   enum { cReadoutSrcDrs = 0x01,
-      cReadoutSrcAdc = 0x02,
-      cReadoutSrcTdc = 0x04 };
+   enum { cReadoutSrcDrs       = 0x01,
+      cReadoutSrcAdc           = 0x02,
+      cReadoutSrcTdc           = 0x04 };
    
-   enum { cFeMuxNextChannel = 0,
-      cFeMuxPreviousChannel = 1,
-      cFeMuxInput           = 2,
-      cFeMuxCalSource       = 3 };
-   
+   enum { cFeMuxNextChannel    = 0,
+      cFeMuxPreviousChannel    = 1,
+      cFeMuxInput              = 2,
+      cFeMuxCalSource          = 3 };
+
+   enum { cTriggerSchemeSimple = 0,
+      cTriggerSchemeOr         = 1,
+      cTriggerSchemePattern    = 2};
+
    // calibrations
    VCALIB           mVCalib;
    TCALIB           mTCalib;
