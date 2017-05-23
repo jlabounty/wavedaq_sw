@@ -21,7 +21,7 @@
 
 #define WD2_PORT 2000
 
-#pragma pack(1)
+#pragma pack(1) // byte-level alignement for frame header
 
 typedef struct {
    unsigned char  protocol_version;
@@ -30,14 +30,16 @@ typedef struct {
    unsigned char  crate_id;
    unsigned char  slot_id;
    unsigned char  adc_and_channel_info;
-   unsigned char  channel_segment_number;
-   unsigned short readout_sequence_number;
-   unsigned short hardware_sequence_number;
+   unsigned char  segment_and_package_type;
+   unsigned int   event_number;
    unsigned short sampling_frequency;
-   unsigned short number_of_samples;
+   unsigned short payload_length;
+   unsigned short trigger_number;
    unsigned short drs0_trigger_cell;
    unsigned short drs1_trigger_cell;
    unsigned short trigger_type;
+   unsigned short temperature;
+   unsigned int   reserved;
    unsigned short packet_sequence_number;
 } WD2_FRAME_HEADER;
 
@@ -47,7 +49,7 @@ typedef struct {
 
 int main()
 {
-   int s, i, n, status;
+   int s, i, n, status, n_packet;
    unsigned char buffer[1800];
    fd_set readfds;
    struct sockaddr_in addr, rem_addr;
@@ -55,11 +57,7 @@ int main()
    WD2_FRAME_HEADER *ph;
    unsigned char *pd;
    short data[512];
-   unsigned short header_adc;
-   unsigned short header_channel;
    socklen_t len;
-   FILE *f;
-   //FILE *l;
    
 #ifdef _MSC_VER
    {
@@ -86,6 +84,7 @@ int main()
    }
 
    printf("Waiting for packets ...\n");
+   n_packet = 0;
    
    printf("Source IP:Port          Frame   ADC/Ch/Segment\n\r");
    do {
@@ -107,36 +106,41 @@ int main()
          n = (int)recvfrom(s, (char *)buffer, sizeof(buffer), 0, (struct sockaddr *)&rem_addr, (socklen_t *)&len);
          if (n > sizeof(WD2_FRAME_HEADER)) {
             ph = (WD2_FRAME_HEADER*)buffer;
+            pd = (unsigned char*)(ph+1);
             
             // correct endianness of header data
             ph->board_id                 = SWAP_UINT16(ph->board_id);
-            header_adc                   = (ph->adc_and_channel_info >> 4) & 0x0f;
-            header_channel               = (ph->adc_and_channel_info) & 0x0f;
-            ph->readout_sequence_number  = SWAP_UINT16(ph->readout_sequence_number);
-            ph->hardware_sequence_number = SWAP_UINT16(ph->hardware_sequence_number);
+            int header_adc               = (ph->adc_and_channel_info >> 4) & 0x0f;
+            int header_channel           = (ph->adc_and_channel_info) & 0x0f;
+            int channel_segment          = (ph->segment_and_package_type >> 4) & 0x0f;
+            int package_type             = (ph->segment_and_package_type) & 0x0f;
+            ph->event_number             = SWAP_UINT32(ph->event_number);
             ph->sampling_frequency       = SWAP_UINT16(ph->sampling_frequency);
-            ph->number_of_samples        = SWAP_UINT16(ph->number_of_samples);
+            ph->payload_length           = SWAP_UINT16(ph->payload_length);
+            ph->trigger_number           = SWAP_UINT16(ph->trigger_number);
             ph->drs0_trigger_cell        = SWAP_UINT16(ph->drs0_trigger_cell);
             ph->drs1_trigger_cell        = SWAP_UINT16(ph->drs1_trigger_cell);
             ph->trigger_type             = SWAP_UINT16(ph->trigger_type);
+            ph->temperature              = SWAP_UINT16(ph->temperature);
             ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
             
-            //printf("Received packet from   : %s:%d\n", inet_ntoa(rem_addr.sin_addr), ntohs(rem_addr.sin_port));
-            //printf("xxx.xxx.xxx.xxx:xxxxx   xxxxx      x/x/x\n\r");
-            printf("%s:%5d   %5d      %d/%d/%d\n\r", inet_ntoa(rem_addr.sin_addr), ntohs(rem_addr.sin_port),
-                   ph->readout_sequence_number, header_adc, header_channel, ph->channel_segment_number);
-            //printf("Protocol version       : %d\n", ph->protocol_version);
-            //printf("Board ID               : %d\n", ph->board_id);
-            //printf("Sampling frequency     : %d\n", ph->sampling_frequency);
-            //printf("Number of Samples      : %d\n", ph->number_of_samples);
-            //printf("ADC/Channel Number     : %d/%d\n", header_adc,  header_ch);
-            //printf("Channel Segment Number : %d\n", ph->channel_segment_number);
-            //printf("Data Sequence Number   : %d\n", ph->data_sequence_number);
-            //printf("Packet Sequence Number : %d\n", ph->packet_sequence_number);
-            //printf("\n");
+            unsigned int d               = SWAP_UINT32(*((unsigned int *)pd));
+            
+            printf("#%06d from %s:%d, event=%5d type=%d ADC/Chn/Segment=%d/%d/%d Tcell=%04d/%04d T=%1.1lf d=%d\n",
+                   n_packet++,
+                   inet_ntoa(rem_addr.sin_addr),
+                   ntohs(rem_addr.sin_port),
+                   ph->event_number,
+                   package_type,
+                   header_adc,
+                   header_channel,
+                   channel_segment,
+                   ph->drs0_trigger_cell,
+                   ph->drs1_trigger_cell,
+                   ph->temperature*0.0625,
+                   d);
             
             // decode waveform data
-            pd = (unsigned char*)(ph+1);
             for (i=0 ; i<512 ; i+=2) {
                data[i]   = ((pd[1] & 0x0F) << 8) | pd[0];
                if(data[i] >= 0x0800) {
@@ -150,33 +154,6 @@ int main()
                }
                pd+=3;
             }
-            
-            // write data to file
-            f = fopen("dump.txt", "a");
-            assert(f);
-            // header information
-            fprintf(f, "%d\n", ph->board_id);
-            fprintf(f, "%d\n", ph->sampling_frequency); 
-            fprintf(f, "%d\n", ph->number_of_samples);
-            fprintf(f, "%d\n", header_adc);
-            fprintf(f, "%d\n", header_channel);
-            fprintf(f, "%d\n", ph->channel_segment_number);
-            fprintf(f, "%d\n", ph->readout_sequence_number);
-            fprintf(f, "%d\n", ph->packet_sequence_number);
-
-            // data
-            for (i=0 ; i<512 ; i++)
-               fprintf(f, "%d\n", data[i]);
-            fprintf(f, "\n");
-            fclose(f);
-            // write log to file
-            /*
-            l = fopen("log.txt", "a");
-            assert(l);
-            fprintf(l, "Frame %d | ADC/Channel %d/%d | Segment %d", ph->data_sequence_number, header_adc, header_ch, ph->channel_segment_number);
-            fprintf(l, "\n");
-            fclose(l);
-            */
          } else
             printf("Received packet from %s:%d, %d bytes\n", inet_ntoa(rem_addr.sin_addr), ntohs(rem_addr.sin_port), n);
       }
