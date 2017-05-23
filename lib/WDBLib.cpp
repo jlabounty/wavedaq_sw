@@ -2364,13 +2364,17 @@ void WP::ReceiveWfPacket()
          
          // drop whole event if package of next event has been received
          if (ph->event_number > (unsigned int)mCurrentEvent) {
-            std::cerr << "Event dropped, package event=" << ph->event_number << ", "
-            << "current event=" << mCurrentEvent << ", "
-            << "board id = " << ph->board_id << std::endl;
+            if (mVerbose)
+               std::cerr << "Event dropped, package event=" << ph->event_number << ", "
+               << "current event=" << mCurrentEvent << ", "
+               << "board id = " << ph->board_id << std::endl;
             
             // switch to new frame
-            mCurrentEvent = ph->event_number;
             InvalidateAllWf();
+            mCurrentEvent = ph->event_number;
+            mCurrentDrs0TriggerCell = ph->drs0_trigger_cell;
+            mCurrentDrs1TriggerCell = ph->drs1_trigger_cell;
+            mPacketsReceived = 1;
          }
          
          // map ADC and channel to WD channel (0..7, 8..15, 16+17)
