@@ -3549,17 +3549,20 @@ void WP::AnalyzeTimeOffset(WDEvent *event, WDB *b)
 {
    
    // find rising edge in channel #0
-   for (int i=30; i<1024-30 ; i++) {
+   for (int i=10; i<1024-10 ; i++) {
       if (event->mWfU[0][i] <= 0 && event->mWfU[0][i+1] > 0) {
          double t0 = event->mWfT[0][i] + (event->mWfT[0][i+1]-event->mWfT[0][i]) * (event->mWfU[0][i]/(event->mWfU[0][i]-event->mWfU[0][i+1]));
          
          for (int ch=1 ; ch<WD_N_CHANNELS ; ch++) {
-            for (int j=i-20; j<i+20 ; j++) {
+            for (int j=10; j<1024-10 ; j++) {
                if (event->mWfU[ch][j] <= 0 && event->mWfU[ch][j+1] > 0) {
                   double t = event->mWfT[ch][j] + (event->mWfT[ch][j+1]-event->mWfT[ch][j])*(event->mWfU[ch][j]/(event->mWfU[ch][j]-event->mWfU[ch][j+1]));
                   double dt = t - t0;
-                  calibProg.ave->Add(0, ch, 0, (float)dt);
-                  break;
+                  if (ch > 15)
+                     dt -= 2E-9; // timing channels have a 2 ns offset
+                  if (fabs(dt) < 1E-9) {
+                     calibProg.ave->Add(0, ch, 0, (float)dt);
+                  }
                }
             }
          }
