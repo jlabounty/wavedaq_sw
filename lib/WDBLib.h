@@ -528,6 +528,8 @@ public:
    void SetTimingCalibSignalEnable(bool value);
    void SetTimingCalibSignalDelay(int value);
    int GetTimingCalibSignalDelay();
+   int GetTimingReferenceSignal();
+   void SetTimingReferenceSignal(int value);
    unsigned int GetDaqClkSrcSel();
    void SetDaqClkSrcSel(unsigned int value);
    unsigned int GetExtClkInSel();

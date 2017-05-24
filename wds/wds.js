@@ -317,6 +317,12 @@ function populateControls(init)
    document.getElementById("drsSampleFreq").value = Math.round(OSC.wdb[OSC.curBoard].drsSampleFreq/1000 * 10) / 10;
    document.getElementById("drsActualSampleFreq").innerHTML = OSC.wdb[OSC.curBoard].drsSampleFreq/1000 + " GSPS";
 
+   var s = document.getElementById("timingReferenceSignalSelect");
+   if (OSC.wdb[OSC.curBoard].drs0TimingRefSel > 0)
+      s.selectedIndex = 2;
+   else if (OSC.wdb[OSC.curBoard].timingCalibSignalEnable)
+      s.selectedIndex = 1;
+   
    document.getElementById("calib1").checked = OSC.wp.ofsCalib1;
    document.getElementById("calib2").checked = OSC.wp.ofsCalib2;
    document.getElementById("calib3").checked = OSC.wp.gainCalib;
@@ -402,6 +408,20 @@ function setCalibClock(e) {
    c = document.getElementById("calibBufferEnable");
    c.checked = e.checked;
    setParam(c);
+   c = document.getElementById("timingReferenceSignalSelect");
+   c.selectedIndex = e.checked ? 1 : 0;
+}
+
+function setReferenceSignal(e) {
+   setParam(e);
+   if (e.selectedIndex == 1) {
+      var c = document.getElementById("calibBufferEnable");
+      c.checked = true;
+      setParam(c);
+      var c = document.getElementById("timingCalibSignalEnable");
+      c.checked = true;
+      setParam(c);
+   }
 }
 
 function setDrsSamplFreq(e) {

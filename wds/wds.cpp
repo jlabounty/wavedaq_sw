@@ -269,6 +269,14 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             gl->wdb[iBoard]->SetTimingCalibSignalEnable(value == "true");
       }
 
+      else if (item == "timingReferenceSignal") {
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetTimingReferenceSignal(std::stoi(value));
+         else
+            gl->wdb[iBoard]->SetTimingReferenceSignal(std::stoi(value));
+      }
+
       else if (item == "feMux") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)

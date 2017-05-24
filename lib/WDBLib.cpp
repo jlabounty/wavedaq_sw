@@ -793,6 +793,8 @@ void WDB::SetDrsSampleFreq(unsigned int f)
    SetRegMask(WD2_REG_LMK_0_OFS, WD2_BIT_LMK0_CLKOUT0_DIV_MASK, WD2_BIT_LMK0_CLKOUT0_DIV_OFS, divider);
    ApplyLmkSettings();
    
+   LmkSyncLocal();
+   
    // read back new sampling frquency in status register
    ReceiveStatusRegister(WD2_REG_DRS_SAMPLE_FREQ_OFS);
 }
@@ -1119,6 +1121,68 @@ unsigned int WDB::GetDaqClkSrcSel()
    return bitExtract(creg, WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_DAQ_CLK_SRC_SEL_MASK, WD2_BIT_DAQ_CLK_SRC_SEL_OFS);
 }
 
+int WDB::GetTimingReferenceSignal()
+{
+   if (GetDrs0TimingRefSel()) {
+      if (bitExtract(creg, WD2_REG_LMK_1_OFS, WD2_BIT_LMK1_CLKOUT1_EN_MASK, WD2_BIT_LMK1_CLKOUT1_EN_OFS))
+         return 2;
+   } else {
+      if (IsTimingCalibSignalEnable())
+         return 1;
+   }
+   return 0;
+}
+
+void WDB::SetTimingReferenceSignal(int value)
+{
+   if (value == 0) { // turn reference signal off
+      
+      // select LMK outputs
+      SetDrs0TimingRefSel(1);
+      SetDrs1TimingRefSel(1);
+      
+      // disable LMK outputs #1 and #2
+      SetRegMask(WD2_REG_LMK_1_OFS, WD2_BIT_LMK1_CLKOUT1_EN_MASK, WD2_BIT_LMK1_CLKOUT1_EN_OFS, 0);
+      SetRegMask(WD2_REG_LMK_2_OFS, WD2_BIT_LMK2_CLKOUT2_EN_MASK, WD2_BIT_LMK2_CLKOUT2_EN_OFS, 0);
+      
+      ApplyLmkSettings();
+      
+   } else if (value == 1) { // seclect sine wave generator
+      
+      // turn on sine wave generator
+      SetTimingCalibSignalEnable(true);
+      
+      // select sine wave
+      SetDrs0TimingRefSel(0);
+      SetDrs1TimingRefSel(0);
+      
+      // disable LMK outputs #1 and #2
+      SetRegMask(WD2_REG_LMK_1_OFS, WD2_BIT_LMK1_CLKOUT1_EN_MASK, WD2_BIT_LMK1_CLKOUT1_EN_OFS, 0);
+      SetRegMask(WD2_REG_LMK_2_OFS, WD2_BIT_LMK2_CLKOUT2_EN_MASK, WD2_BIT_LMK2_CLKOUT2_EN_OFS, 0);
+      
+      ApplyLmkSettings();
+      
+   } else { // select square wave
+      
+      // select LMK outputs #1 and #2
+      SetDrs0TimingRefSel(1);
+      SetDrs1TimingRefSel(1);
+      
+      // turn on LMK outputs #1 and #2
+      SetRegMask(WD2_REG_LMK_1_OFS, WD2_BIT_LMK1_CLKOUT1_MUX_MASK, WD2_BIT_LMK1_CLKOUT1_MUX_OFS, 1);
+      SetRegMask(WD2_REG_LMK_1_OFS, WD2_BIT_LMK1_CLKOUT1_DIV_MASK, WD2_BIT_LMK1_CLKOUT1_DIV_OFS, 1);
+      SetRegMask(WD2_REG_LMK_1_OFS, WD2_BIT_LMK1_CLKOUT1_EN_MASK,  WD2_BIT_LMK1_CLKOUT1_EN_OFS, 1);
+      
+      SetRegMask(WD2_REG_LMK_2_OFS, WD2_BIT_LMK2_CLKOUT2_MUX_MASK, WD2_BIT_LMK2_CLKOUT2_MUX_OFS, 1);
+      SetRegMask(WD2_REG_LMK_2_OFS, WD2_BIT_LMK2_CLKOUT2_DIV_MASK, WD2_BIT_LMK2_CLKOUT2_DIV_OFS, 1);
+      SetRegMask(WD2_REG_LMK_2_OFS, WD2_BIT_LMK2_CLKOUT2_EN_MASK,  WD2_BIT_LMK2_CLKOUT2_EN_OFS, 1);
+      
+      ApplyLmkSettings();
+      
+      LmkSyncLocal();
+   }
+}
+
 void WDB::SetDaqClkSrcSel(unsigned int value)
 {
    SetRegMask(WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_DAQ_CLK_SRC_SEL_MASK, WD2_BIT_DAQ_CLK_SRC_SEL_OFS, value);
@@ -1281,6 +1345,7 @@ void WDB::ResetTriggerParityErrorCounter()
 void WDB::LmkSyncLocal()
 {
    SetRegMask(WD2_REG_RST_OFS, WD2_BIT_LMK_SYNC_LOCAL_MASK, WD2_BIT_LMK_SYNC_LOCAL_OFS, 1);
+   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_LMK_SYNC_LOCAL_MASK, WD2_BIT_LMK_SYNC_LOCAL_OFS, 0);
 }
 
 void WDB::ResetAdcIf()
