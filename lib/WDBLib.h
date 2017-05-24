@@ -342,7 +342,7 @@ public:
    bool IsTimeCalib2() { return mTimeCalib2;}
    bool IsTimeCalib3() { return mTimeCalib3;}
    bool IsRemoveSpikes() { return mRemoveSpikes; }
-   
+
    void SetRotateWaveform(bool f) { mRotateWaveform = f; }
    void SetOfsCalib1(bool f) { mOfsCalib1 = f; }
    void SetOfsCalib2(bool f) { mOfsCalib2 = f; }
@@ -405,9 +405,10 @@ class WDB {
    unsigned char    mEthAddrBin[16];
    int              mVerbose;
    bool             mDemoMode;
+   bool             mSendBlocked;
 
-   unsigned int     creg[WD2_REG_CRC32_REG_BANK_OFS/4+1];
-   unsigned int     sreg[WD2_REG_ADC_01_CLK_MOD_FLAG_OFS/4+1];
+   unsigned int     creg[REG_NR_OF_CTRL_REGS];
+   unsigned int     sreg[REG_NR_OF_STAT_REGS];
    
    static int       gASCIISocket;
    static int       gBinSocket;
@@ -426,6 +427,7 @@ public:
       mName = name;
       mVerbose = verbose;
       mDemoMode = (name == "demo");
+      mSendBlocked = false;
    }
 
    // constants
@@ -442,6 +444,10 @@ public:
       cTriggerSchemeOr         = 1,
       cTriggerSchemePattern    = 2};
 
+   enum { cTimingReferenceOff  = 0,
+      cTimingReferenceSine     = 1,
+      ctimingReferenceSquare   = 2};
+   
    // calibrations
    VCALIB           mVCalib;
    TCALIB           mTCalib;
@@ -454,7 +460,9 @@ public:
    void ReceiveStatusRegisters(unsigned int index=0, unsigned int nReg=REG_NR_OF_STAT_REGS);
    void ReceiveStatusRegister(int ofs);
    void SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v, bool send=true);
+   void SendControlRegisters();
    void PrintVersion();
+   void SetSendBlocked(bool f) { mSendBlocked = f; }
 
    // setter & getter ----------
    std::string GetName() { return mName; }

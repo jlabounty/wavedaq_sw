@@ -581,7 +581,7 @@ void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, uns
    
    bitReplace(r, mask, ofs, v);
    
-   if (!mDemoMode && send) {
+   if (!mDemoMode && send && !mSendBlocked) {
 #ifdef WD2_USE_UDP_BIN
       WriteUDP(rofs, std::vector<unsigned int> { r });
 #else
@@ -593,6 +593,14 @@ void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, uns
    }
    
    this->creg[index] = r;
+}
+
+void WDB::SendControlRegisters()
+{
+   std::vector<unsigned int> v;
+   for (int i=0 ; i<REG_NR_OF_CTRL_REGS ; i++)
+      v.push_back(this->creg[i]);
+   WriteUDP(0, v);
 }
 
 //-- Status registers ------------------------------------------------
@@ -949,6 +957,8 @@ unsigned int WDB::GetReadoutSrcSel()
 
 void WDB::SetReadoutSrcSel(unsigned int value)
 {
+   // cReadoutSrcDrs or cReadoutSrcAdc or cReadoutSrcTdc
+
    // temporary fix: use 0/1 until selection is implemented in FPGA
    unsigned int v = (value == 0x02);
    SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_READOUT_SRC_SEL_MASK, WD2_BIT_READOUT_SRC_SEL_OFS, v);
@@ -1135,7 +1145,7 @@ int WDB::GetTimingReferenceSignal()
 
 void WDB::SetTimingReferenceSignal(int value)
 {
-   if (value == 0) { // turn reference signal off
+   if (value == cTimingReferenceOff) { // turn reference signal off
       
       // select LMK outputs
       SetDrs0TimingRefSel(1);
