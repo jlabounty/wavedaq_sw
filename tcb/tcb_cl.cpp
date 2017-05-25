@@ -327,6 +327,7 @@ int main(int argc, char *argv[])
       if(option == 23) {
          printf(" opt 23 = SERDES Scan ... \n");
 
+	 FILE *fout = fopen("tres.dat","w");
          u_int32_t icha;
          u_int32_t patternup, patterndown;
          u_int32_t dly[5];
@@ -378,13 +379,18 @@ int main(int argc, char *argv[])
 	   printf("-------------------------------------------------------------------------------------------------------------------------------------\n");
 	   for(int a=0; a<8; a++) for(int b=0; b<32; b++) {
 	       printf("%2x %2X ", b, a);
-	       for(int iSerdes=0; iSerdes<16; iSerdes++)
+	       fprintf(fout,"%d %d ", b, a);
+	       for(int iSerdes=0; iSerdes<16; iSerdes++) {
 		 if(tres[iSerdes][b][a] > 0)
 		   printf("%.5f ", tres[iSerdes][b][a]);
 		 else 
 		   printf("\e[1;34m%.5f \e[0m", tres[iSerdes][b][a]);  
+		 fprintf(fout,"%lf ", tres[iSerdes][b][a]);
+	       }
 	       printf("\n");
+	       fprintf(fout,"\n");
 	     }
+	   fclose(fout);
 	 }
 	 else {
 	   for(int iDly=0; iDly<32; iDly++){
