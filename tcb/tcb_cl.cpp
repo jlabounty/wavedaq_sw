@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 
    /* main loop on the options */
    do {
-      printf("\n --- Options: \n");
+      printf("\n  --- Options: \n");
       printf("[ 1]: Set RRUN and RENA    \t \t  [ 2]: Get RRUN and RENA reg\n");
       printf("[ 3]: Activate runmode     \t \t  [ 4]: Remove the busy\n");
       printf("[ 5]: Give a SW stop       \t \t  [ 6]: Give a SW sync \n");
@@ -332,17 +332,19 @@ int main(int argc, char *argv[])
          u_int32_t dly[5];
 	 u_int32_t ccounters[17];
 	 int howlong;
+	 double tres[16][32][8]; //format: channel delay bitslip
 	 printf("which channel? (16-19 for FC0-3, 100 all)\n");
          scanf("%d",&icha);
 	 printf("How many usec each point? \n");
          scanf("%d",&howlong);
 	 patterndown = 0xDEADBEEF;
 	 patternup = 0xDEADBEEF;
-         if(icha==100){   //all channels together
+         if(icha==100) {   //all channels together
 	   for(int iDly=0; iDly<32; iDly++){
+	     printf("Testing Delay %02X\n",iDly);
 	     for(icha = 0; icha<16; icha++){
 	       // scan on any possible IDelay 
-	       dly[icha/4] = (iDly & 0x1F) << (icha%4)*8;
+	       dly[icha/4] = (iDly & 0x1F)<<24 | (iDly & 0x1F)<<16 | (iDly & 0x1F)<<8 | (iDly & 0x1F);
 	       TCBBoard.SetSerdesDelay(dly);
 	       TCBBoard.SerdesReset(); //also resets the bitslip
 	     }
@@ -367,21 +369,26 @@ int main(int argc, char *argv[])
 	       for(icha = 0; icha<16; icha++){
 		 if( ccounters[icha] == 0) 
 		   printf(" serdes %d iDly %02X, bitslip %d, number of tests %d \n", icha, iDly, iBit, ccounters[16]);
+		 tres[icha][iDly][iBit] = (double) ccounters[icha]/ccounters[16];
 	       }
 	     }
-	   }
+	   }	   
+	   
+	   printf("\nDl Bt    0       1       2       3       4       5       6       7       8       9      10       11      12      13      14      15\n");
+	   printf("-------------------------------------------------------------------------------------------------------------------------------------\n");
+	   for(int a=0; a<8; a++) for(int b=0; b<32; b++) {
+	       printf("%2x %2X ", b, a);
+	       for(int iSerdes=0; iSerdes<16; iSerdes++)
+		 if(tres[iSerdes][b][a] > 0)
+		   printf("%.5f ", tres[iSerdes][b][a]);
+		 else 
+		   printf("\e[1;34m%.5f \e[0m", tres[iSerdes][b][a]);  
+	       printf("\n");
+	     }
 	 }
-
-   //            printf("\nDl Bt    0       1       2       3       4       5       6       7       8       9      10       11      12      13      14      15\n");
-   //            printf("-------------------------------------------------------------------------------------------------------------------------------------\n");
-   //            for(int a=0; a<8; a++) for(int b=0; b<32; b++) {
-   //               printf("%2x %2X ", b, a);
-	       //               for(int iSerdes=0; iSerdes<16; iSerdes++) printf("%.5f ", result[iSerdes][b][a]);
-   //               printf("\n");
-   //	      }	    
 	 else {
-	   u_int32_t ccounters[17];
 	   for(int iDly=0; iDly<32; iDly++){
+	     printf("Testing Delay %02X\n",iDly);
 	     // scan on any possible IDelay 
 	     dly[icha/4] = (iDly & 0x1F) << (icha%4)*8;
 	     TCBBoard.SetSerdesDelay(dly);
@@ -404,6 +411,7 @@ int main(int argc, char *argv[])
 	       // print the result only if good
 	       if( ccounters[icha] == 0) 
 		 printf(" serdes %d iDly %02X, bitslip %d, number of tests %d \n", icha, iDly, iBit, ccounters[16]);
+	       tres[icha][iDly][iBit] = (double) ccounters[icha]/ccounters[16];
 	     }
 	   }
 	 }

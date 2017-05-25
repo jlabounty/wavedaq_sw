@@ -725,8 +725,8 @@ void TCB::ResetTransmissionCheck()
 // read check counters
 void TCB::GetCheckCounters(u_int32_t *rdata) {
   // first read the counters
-  for(int icou = 0; icou<16; icou++)
-    ReadReg(RCHKCOU+icou,rdata+icou);
+  //  for(int icou = 0; icou<16; icou++)
+    ReadBLT(RCHKCOU,rdata,16);
   //then the normalisation counter
   ReadReg(RCHKTIM,rdata+16);
 }
