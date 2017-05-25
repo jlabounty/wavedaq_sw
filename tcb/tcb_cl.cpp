@@ -64,7 +64,8 @@ int main(int argc, char *argv[])
       printf("[23]: SERDES Scan          \t \t  [24]: SERDES default values\n");
       printf("[25]: Write SERDES Mask    \t \t  [26]: Set Parameter\n");
       printf("[27]: Set check words      \t \t  [28]: Check transmission\n");
-      printf("[29]: Force a trigger      \t \t  [-1]: Exit\n");
+      printf("[29]: Force a trigger      \t \t  [30]: Reset and enable serdes check\n");
+      printf("[-1]: Exit\n");
 
       do {
          printf("Give an option: ");
@@ -360,7 +361,7 @@ int main(int argc, char *argv[])
 	       TCBBoard.ResetTransmissionCheck();
 	       // enable Transmission check
 	       TCBBoard.SetEnableTransmissionCheck(1);
-	       // wait 1usec
+	       // wait
 	       usleep(howlong);
 	       // disable transmission check
 	       TCBBoard.SetEnableTransmissionCheck(0);
@@ -408,7 +409,7 @@ int main(int argc, char *argv[])
 	       TCBBoard.ResetTransmissionCheck();
 	       // enable Transmission check
 	       TCBBoard.SetEnableTransmissionCheck(1);
-	       // wait 1usec
+	       // wait 
 	       usleep(howlong);
 	       // disable transmission check
 	       TCBBoard.SetEnableTransmissionCheck(0);
@@ -485,6 +486,15 @@ int main(int argc, char *argv[])
 	printf("Trigger Id? from 0 to %d \n",TCBBoard.fntrg-1);
 	scanf("%d",&trgid);
 	TCBBoard.ForceTrigger(trgid);
+      }
+      if(option == 30) {
+	printf(" opt = 30 : Reset and enable serdes check ... \n");
+        // disable transmission check
+        TCBBoard.SetEnableTransmissionCheck(0);
+        // reset transmission check
+        TCBBoard.ResetTransmissionCheck();
+        // enable Transmission check
+        TCBBoard.SetEnableTransmissionCheck(1);
       }
       /* end of the main loop on the options*/
    } while ( option >= 0);
