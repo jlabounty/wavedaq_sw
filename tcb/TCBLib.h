@@ -23,6 +23,8 @@
 #define RENA          0x20                      // trigger enable (first address)
 #define RTRIPATT      0x30                      // trigger pattern (first address)
 #define RTRGFORCE     0x40                      // force a trigger (first address)
+#define RCHKCOU       0x50                      // serdes counter check (first address)
+#define RCHKTIM       0x60                      // serdes cycles counter for normalisation
 #define RPRESCA       0x100                     // prescaling value first address
 #define RTOTTIME      0x200                     // total time
 #define RLIVETIME     0x201                     // live time
@@ -186,4 +188,10 @@ public:
    void GetCheckWord();
    // read the transmission check status
    void GetCheckStatus();
+   // enable/disable transmission check
+   void SetEnableTransmissionCheck(u_int32_t);
+   // reset transmission check
+   void ResetTransmissionCheck();
+   // read check counters
+   void GetCheckCounters(u_int32_t *);
 };

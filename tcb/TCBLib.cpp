@@ -78,8 +78,8 @@ int TCB::InitType2(TCB_SETTINGS *ts){
    SetRALGSEL(&ralgsel);
 
    // serdes setup
-   u_int32_t sdly[5]={0x140F110F,0x0B0E0816,0x19070A0D,0x11141514,0x16161616};
-   int bitslip[20]={3,3,3,3,3,2,2,2,2,2,2,3,3,3,3,3,2,2,2,2};
+   u_int32_t sdly[5]={0x140F110F,0x0B0E0816,0x19070A0D,0x11141514,0x07070707};
+   int bitslip[20]={3,3,3,3,3,2,2,2,2,2,2,3,3,3,3,3,1,1,1,1};
    SerdesReset();
    SetSerdesDelay(sdly);
    SetBitslip(bitslip);
@@ -701,3 +701,34 @@ void TCB::GetCheckStatus() {
   ReadReg(RCHKSTATUS,&data);
   printf("Transmission Status = %08X\n",data);
 }
+// enable/disable transmission check
+void TCB::SetEnableTransmissionCheck(u_int32_t enable) 
+{
+  u_int32_t wdata = 0;
+  // if enable == 1 then enabled
+  wdata |= enable<<31;
+  // write corresponding bit
+  WriteReg(RCHKSTATUS,&wdata);
+}
+// reset transmission check
+void TCB::ResetTransmissionCheck() 
+{
+  u_int32_t wdata = 0;
+  // if enable == 1 then enabled
+  wdata |= 1<<30;
+  // first reset
+  WriteReg(RCHKSTATUS,&wdata);
+  wdata = 0;
+  // then release the reset
+  WriteReg(RCHKSTATUS,&wdata);
+}
+// read check counters
+void TCB::GetCheckCounters(u_int32_t *rdata) {
+  // first read the counters
+  for(int icou = 0; icou<16; icou++)
+    ReadReg(RCHKCOU+icou,rdata+icou);
+  //then the normalisation counter
+  ReadReg(RCHKTIM,rdata+16);
+}
+
+
