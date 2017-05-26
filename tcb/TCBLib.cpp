@@ -45,8 +45,12 @@ int TCB::InitType1(TCB_SETTINGS *ts){
    SetRALGSEL(&ralgsel);
 
    // serdes setup
-   u_int32_t sdly[5]={0x0D0B0A09,0x1b051511,0x1515191a,0x0C0D1313,0x08080808};
-   int bitslip[20]={4,4,4,4,4,4,3,4,4,4,4,4,4,4,4,4,1,1,1,1};
+   //crate 181
+   //u_int32_t sdly[5]={0x0F0B0D0C,0x0B020613,0x1704080C,0x0B121310,0x08080808};
+   //int bitslip[20]={4,4,4,4,4,3,3,3,3,3,3,4,4,4,4,4,1,1,1,1};
+   //crate 186
+   u_int32_t sdly[5]={0x0F0D0F0A,0x07050511,0x1017080B,0x0B0E0F14,0x08080808};
+   int bitslip[20]={4,4,4,4,4,3,3,3,3,3,4,4,4,4,4,4,1,1,1,1};
    SerdesReset();
    SetSerdesDelay(sdly);
    SetBitslip(bitslip);

@@ -61,7 +61,6 @@ typedef struct {
 
 class TCB {
 private:
-   void           SetBitslip(int *bitslip);
    int            InitType1(TCB_SETTINGS *ts);
    int            InitType2(TCB_SETTINGS *ts);
    int            InitType3(TCB_SETTINGS *ts);
@@ -174,8 +173,10 @@ public:
    void SerdesReset();
    // Serdes delay values setting
    void SetSerdesMask(u_int32_t*);
-   // read serdes delay values
+   // give a bitslip to a given serdes
    void SerdesBitslip(u_int32_t);
+   // set bitslip according to an input array
+   void SetBitslip(int *bitslip);
    // set generic trigger parameter (with base address 0x600)
    void SetParameter(u_int32_t, u_int32_t*);
    // get FW compilation date
