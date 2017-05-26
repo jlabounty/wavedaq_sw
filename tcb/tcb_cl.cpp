@@ -475,6 +475,12 @@ int main(int argc, char *argv[])
         scanf("%x",&valup);
         TCBBoard.SetCheckWord(valdo,valup);
         TCBBoard.GetCheckWord();
+        printf("Control word mask [31:0]? (hex)\n");
+        scanf("%x",&valdo);
+        printf("Control word mask [63:32]? (hex)\n");
+        scanf("%x",&valup);
+        TCBBoard.SetCheckWordMask(valdo,valup);
+        TCBBoard.GetCheckWordMask();
       }
       if(option == 28) {
         printf(" opt = 28 : Get Check Status ... \n");

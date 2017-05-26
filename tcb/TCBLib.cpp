@@ -734,5 +734,22 @@ void TCB::GetCheckCounters(u_int32_t *rdata) {
   //then the normalisation counter
   ReadReg(RCHKTIM,rdata+16);
 }
-
+// set the transmission check word mask
+void TCB::SetCheckWordMask(u_int32_t valuedo,u_int32_t valueup) 
+{
+  // first write [31:0]
+  WriteReg(RCHKMASKDO,&valuedo);
+  // then write [63:32]
+  WriteReg(RCHKMASKUP,&valueup);
+}
+// get the transmission check word mask
+void TCB::GetCheckWordMask() {
+  u_int32_t data;
+  // first read [31:0]
+  ReadReg(RCHKMASKDO,&data);
+  printf("Check word Mask [31:0] = %08X\n",data);
+  // then read [63:32]
+  ReadReg(RCHKMASKUP,&data);
+  printf("Check word Mask [63:32] = %08X\n",data);
+}
 

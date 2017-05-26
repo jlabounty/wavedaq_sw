@@ -20,6 +20,8 @@
 #define RCHKWORDDO    0x17                      // transmission check word [31:0]
 #define RCHKWORDUP    0x18                      // transmission check word [63:0]
 #define RCHKSTATUS    0x19                      // transmission check status
+#define RCHKMASKDO    0x1A                      // transmission check word mask [31:0]
+#define RCHKMASKUP    0x1B                      // transmission check word mask [63:0]
 #define RENA          0x20                      // trigger enable (first address)
 #define RTRIPATT      0x30                      // trigger pattern (first address)
 #define RTRGFORCE     0x40                      // force a trigger (first address)
@@ -195,4 +197,8 @@ public:
    void ResetTransmissionCheck();
    // read check counters
    void GetCheckCounters(u_int32_t *);
+   // set the transmission check word mask
+   void SetCheckWordMask(u_int32_t,u_int32_t);
+   // get the transmission check word
+   void GetCheckWordMask();
 };
