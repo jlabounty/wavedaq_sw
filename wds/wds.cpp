@@ -566,7 +566,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          int b = gl->wp->GetTcalibBoard();
          mg_send_http_chunk(nc, (const char *)&b, 4);
          
-         float f = gl->wp->GetVcalibProgress();
+         float f = gl->wp->GetTcalibProgress();
          mg_send_http_chunk(nc, (const char *)&f, 4);
          
          for (int c=0 ; c<WD_N_CHANNELS ; c++)

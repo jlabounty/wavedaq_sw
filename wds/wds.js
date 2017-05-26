@@ -811,16 +811,16 @@ function receiveWF() {
             return;
 
          } else if (responseType == 11) { // tcalib progress data
-            i++;
-            OSC.wd = floatArray[i++];
-            wf.type = 2; // indicate delta-T array
+            var b = intArray[1];
+            progressInd = floatArray[2];
+            i += 3;
 
-            progressInd = floatArray[i++];
+            wf.type = 2; // indicate delta-T array
 
             e = document.getElementById("progressIndTcalib");
             e.style.width = (progressInd * 270) + "px";
 
-            document.getElementById("wdSelect").selectedIndex = OSC.wd;
+            document.getElementById("wdSelect").selectedIndex = b;
             document.getElementById("btnTCalib").innerHTML = document.getElementById("wdSelect").value;
             document.getElementById("btnTCalib").disabled = true;
 
