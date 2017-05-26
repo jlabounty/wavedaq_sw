@@ -463,6 +463,7 @@ void TCB::GetRRUN(u_int32_t *data)
 {
    u_int32_t addr = RRUN;
    ReadReg(addr,data);
+#ifdef DEBUG
    if((*data&0xF000000)>>24==0xF) {
      printf("\n*********************************************************************************************************************\n");
      printf("** Board configured to drive the trigger bus to the fron panel connector, check the cable to the Ancillary Master! **\n");
@@ -485,6 +486,7 @@ void TCB::GetRRUN(u_int32_t *data)
    printf(" MASKSYNC status %x \n",(*data&0x4000)>>14);
    printf(" MASKTRG status %x \n",(*data&0x8000)>>15);
    printf(" IDCODE status %x \n",(*data&0xffff0000)>>16);
+   #endif
 }
 // read the RENA register
 void TCB::GetRENA(u_int32_t *data, int iword)
