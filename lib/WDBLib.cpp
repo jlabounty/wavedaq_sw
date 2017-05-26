@@ -1157,7 +1157,7 @@ void WDB::SetTimingReferenceSignal(int value)
       
       ApplyLmkSettings();
       
-   } else if (value == 1) { // seclect sine wave generator
+   } else if (value == cTimingReferenceSine) { // seclect sine wave generator
       
       // turn on sine wave generator
       SetTimingCalibSignalEnable(true);
@@ -1172,7 +1172,7 @@ void WDB::SetTimingReferenceSignal(int value)
       
       ApplyLmkSettings();
       
-   } else { // select square wave
+   } else if (value == ctimingReferenceSquare){ // select square wave
       
       // select LMK outputs #1 and #2
       SetDrs0TimingRefSel(1);
