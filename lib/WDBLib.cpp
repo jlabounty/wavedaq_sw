@@ -1509,7 +1509,6 @@ int WDB::GetDacPzcLevelN()
 
 void WDB::SetDacPzcLevelN(int i)
 {
-   i--;
    assert(i >= 0 && i < (int)pzcLevel.size());
    SetDacPzcLevelV(pzcLevel[i]);
 }
