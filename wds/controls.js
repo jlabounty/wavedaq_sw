@@ -605,14 +605,13 @@ function dlgMessageDestroy(b)
 function dlgMessage(title, string, modal, error)
 {
    d =  document.createElement("div");
-   //d.id = "dlgMessage";
    d.className = "dlgFrame";
    d.style.zIndex = modal? 21 : 20;
 
    d.innerHTML = "<div class=\"dlgTitlebar\" id=\"dlgMessageTitle\">"+title+"</div>"+
    "<div class=\"dlgPanel\" style=\"padding: 30px;\">"+
    "<div id=\"dlgMessageString\">"+string+"</div>"+
-   "<br /><br /><button class=\"wideButton\" style=\"background-color:#F8F8F8\" type=\"button\" "+
+   "<br /><br /><button class=\"wideButton\" id=\"dlgMessageButton\" style=\"background-color:#F8F8F8\" type=\"button\" "+
    " onClick=\"dlgMessageDestroy(this)\">Close</button>"+
    "</div>";
 
@@ -625,4 +624,5 @@ function dlgMessage(title, string, modal, error)
    }
          
    dlgShow(d, modal);
+   return d;
 }

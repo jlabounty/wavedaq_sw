@@ -147,12 +147,20 @@ function init() {
 
    // schedule loadScalers()
    OSC.timer.loadScalers = window.setTimeout(loadScalers, 1000);
+
+   // load spinning wheel image
+   OSC.spinningWheel = new Image();
+   OSC.spinningWheel.src = "spinning-wheel.gif";
 }
 
 function connectionBroken() {
    if (OSC.connected) {
-      dlgMessage("Error", "Connection to server broken.\nPlease reload page.", true, true);
+      OSC.dlgReconnect = dlgMessage("Error", "Connection to server broken.<br>Trying to reconnect ..."+
+         "<br /><br /><br /><img src=\"spinning-wheel.gif\">", true, true);
+      var b = document.getElementById("dlgMessageButton");
+      b.innerHTML = "Cancel";
       OSC.connected = false;
+      OSC.timer.reconnect = window.setTimeout(reconnect, 1000);
    }
 
    if (OSC.timer.loadGl != undefined)
@@ -163,6 +171,23 @@ function connectionBroken() {
       clearTimeout(OSC.timer.loadScalers);
    if (OSC.timer.loadWF != undefined)
       clearTimeout(OSC.timer.loadWF);
+}
+
+function reconnect() {
+   if (OSC.dlgReconnect.parentElement == undefined)
+      return;
+   var req = new XMLHttpRequest();
+   req.onreadystatechange = function () {
+      if (req.readyState == 4 && req.status == 200) {
+         // reload page
+         location.reload();
+      } else if (req.readyState == 4) {
+         OSC.timer.reconnect = window.setTimeout(reconnect, 1000);
+      }
+   };
+
+   req.open("GET", "build", true);
+   req.send();
 }
 
 function wdSelect(s) {
