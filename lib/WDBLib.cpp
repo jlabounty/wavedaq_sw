@@ -600,7 +600,7 @@ void WDB::SendControlRegisters()
    std::vector<unsigned int> v;
    for (int i=0 ; i<REG_NR_OF_CTRL_REGS ; i++)
       v.push_back(this->creg[i]);
-   WriteUDP(0, v);
+   WriteUDP(WD2_REG_WDB_LOC_OFS, v);
 }
 
 //-- Status registers ------------------------------------------------
