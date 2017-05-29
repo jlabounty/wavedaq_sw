@@ -2386,17 +2386,17 @@ void WP::ReceiveWfPacket()
          ph->temperature              = SWAP_UINT16(ph->temperature);
          ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
 
-         char str[32];
-         sprintf(str, "%s:%d", inet_ntoa(remote_addr.sin_addr),
-                 ntohs(remote_addr.sin_port));
-         while (strlen(str)< 20)
-            strlcat(str, " ", sizeof(str));
+         std::string str(inet_ntoa(remote_addr.sin_addr));
+         str += ":";
+         str += std::to_string(ntohs(remote_addr.sin_port));
+         while (str.size() < 20)
+            str += " ";
 
          if (mVerbose > 1)
             printf("#%03d from WD%03d (%s), event=%5d type=%d ADC/Chn/Segment=%d/%d/%d Tcell=%04d/%04d T=%1.1lf\n",
                    mPacketsReceived-1,
                    ph->board_id,
-                   str,
+                   str.c_str(),
                    ph->event_number,
                    package_type,
                    header_adc,
