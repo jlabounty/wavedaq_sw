@@ -3175,9 +3175,6 @@ void WP::Collector()
             auto es = mEvent.begin();
             auto ed = mEventLast.begin();
       
-            std::cout << "Size mEvent: " << mEvent.size() << std::endl;
-            std::cout << "Size mLastEvent: " << mEventLast.size() << std::endl;
-
             while (es != mEvent.end())
                **(ed++) = **(es++);
       
