@@ -234,7 +234,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
       else if (item == "dacPzcLevel") {
          assert(iBoard != -1);
-         gl->wdb[iBoard]->SetDacPzcLevelN(std::stoi(value));
+         gl->wdb[iBoard]->SetDacPzcLevelN(std::stoi(value)-1);
       }
 
       else if (item == "range") {
