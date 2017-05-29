@@ -212,6 +212,8 @@ class WDEventRequest {
    bool             mBoardRequested;
    bool             mWfValid[WD_N_CHANNELS][2];
    unsigned int     mChannelMask;
+   int              mDrs0TriggerCell;
+   int              mDrs1TriggerCell;
  
 public:
    WDEventRequest(int boardId, unsigned int mask = 0xFFFF) {
@@ -228,6 +230,10 @@ public:
    void             SetRequested(bool flag) { mBoardRequested = flag; }
    bool             IsRequested() { return mBoardRequested; }
    void             SetWfValid(int channel, int segment, bool v) { mWfValid[channel][segment] = v; }
+   void             SetDrs0TriggerCell(unsigned int c) { mDrs0TriggerCell = c; }
+   void             SetDrs1TriggerCell(unsigned int c) { mDrs1TriggerCell = c; }
+   int              GetDrs0TriggerCell() { return mDrs0TriggerCell; }
+   int              GetDrs1TriggerCell() { return mDrs1TriggerCell; }
    void             SetMask(unsigned int mask) { mChannelMask = mask; }
    unsigned int     GetMask() { return mChannelMask; }
    bool             IsWfValid();
@@ -268,8 +274,6 @@ class WP {
    
    int               mPacketsReceived;
    int               mCurrentEvent;
-   int               mCurrentDrs0TriggerCell;
-   int               mCurrentDrs1TriggerCell;
    
    std::thread       mThreadCollector;
    void Collector();

@@ -2242,13 +2242,6 @@ void WP::RequestAllBoards()
       r->SetRequested(true);
 
    SetEventRequestMasks();
-
-   for (auto &e: mEvent)
-      delete e;
-   
-   // allocate event buffer
-   for (auto &b: mWdb)
-      mEvent.push_back(new WDEvent(b->GetSerialNumber()));
 }
 
 //--------------------------------------------------------------------
@@ -2309,17 +2302,17 @@ bool WP::GetLastEvent(int timeout, std::vector<WDEvent *> event)
 
 void WP::InvalidateAllWf()
 {
-   for (auto w = mEventRequest.begin() ; w != mEventRequest.end() ; w++) {
+   for (auto &er: mEventRequest) {
       for (int i=0 ; i<WD_N_CHANNELS ; i++) {
-         (*w)->SetWfValid(i, 0, false);
-         (*w)->SetWfValid(i, 1, false);
+         er->SetWfValid(i, 0, false);
+         er->SetWfValid(i, 1, false);
+         er->SetDrs0TriggerCell(-1);
+         er->SetDrs1TriggerCell(-1);
       }
    }
    
    mPacketsReceived = 0;
    mCurrentEvent = -1;
-   mCurrentDrs0TriggerCell = -1;
-   mCurrentDrs1TriggerCell = -1;
 }
 
 //--------------------------------------------------------------------
@@ -2392,12 +2385,18 @@ void WP::ReceiveWfPacket()
          ph->trigger_type             = SWAP_UINT16(ph->trigger_type);
          ph->temperature              = SWAP_UINT16(ph->temperature);
          ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
-         
+
+         char str[32];
+         sprintf(str, "%s:%d", inet_ntoa(remote_addr.sin_addr),
+                 ntohs(remote_addr.sin_port));
+         while (strlen(str)< 20)
+            strlcat(str, " ", sizeof(str));
+
          if (mVerbose > 1)
-            printf("#%02d from %s:%d, event=%5d type=%d ADC/Chn/Segment=%d/%d/%d Tcell=%04d/%04d T=%1.1lf\n",
+            printf("#%03d from WD%03d (%s), event=%5d type=%d ADC/Chn/Segment=%d/%d/%d Tcell=%04d/%04d T=%1.1lf\n",
                    mPacketsReceived-1,
-                   inet_ntoa(remote_addr.sin_addr),
-                   ntohs(remote_addr.sin_port),
+                   ph->board_id,
+                   str,
                    ph->event_number,
                    package_type,
                    header_adc,
@@ -2407,12 +2406,6 @@ void WP::ReceiveWfPacket()
                    ph->drs1_trigger_cell,
                    ph->temperature*0.0625);
          
-         if (mCurrentEvent == -1)
-            mCurrentEvent = ph->event_number;
-         if (mCurrentDrs0TriggerCell == -1)
-            mCurrentDrs0TriggerCell = ph->drs0_trigger_cell;
-         if (mCurrentDrs1TriggerCell == -1)
-            mCurrentDrs1TriggerCell = ph->drs1_trigger_cell;
          
          // drop package (for now...) if it is not event data
          if (package_type != 0) {
@@ -2421,18 +2414,38 @@ void WP::ReceiveWfPacket()
             return;
          }
          
-         // drop package if it belongs to older event
-         if (ph->event_number < (unsigned int)mCurrentEvent) {
-            std::cerr << "Package dropped, package event=" << ph->event_number << ", "
-                      << "current event=" << mCurrentEvent << ", "
-                      << "board id = " << ph->board_id << std::endl;
+         // find event request belonging to this board
+         WDEventRequest *er = nullptr;
+         for (auto r: mEventRequest)
+            if (r->GetBoardId() == ph->board_id) {
+               er = r;
+               break;
+            }
+         if (!er) {
+            if (mVerbose)
+               std::cerr << "Received unexpected packet from board #" << ph->board_id << std::endl;
             return;
          }
          
+         if (mCurrentEvent == -1)
+            mCurrentEvent = ph->event_number;
+         if (er->GetDrs0TriggerCell() == -1)
+            er->SetDrs0TriggerCell(ph->drs0_trigger_cell);
+         if (er->GetDrs1TriggerCell() == -1)
+            er->SetDrs1TriggerCell(ph->drs1_trigger_cell);
+         
+         // drop package if it belongs to older event
+         if (ph->event_number < (unsigned int)mCurrentEvent) {
+            std::cerr << "Package dropped, package event=" << ph->event_number << ", "
+            << "current event=" << mCurrentEvent << ", "
+            << "board id = " << ph->board_id << std::endl;
+            return;
+         }
+
          // print warning if inconsistent trigger cells are found
          if (ph->event_number == (unsigned int)mCurrentEvent &&
-             (ph->drs0_trigger_cell != mCurrentDrs0TriggerCell ||
-              ph->drs0_trigger_cell != mCurrentDrs0TriggerCell)) {
+             (ph->drs0_trigger_cell != er->GetDrs0TriggerCell() ||
+              ph->drs1_trigger_cell != er->GetDrs1TriggerCell())) {
                 std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
          }
          
@@ -2446,8 +2459,8 @@ void WP::ReceiveWfPacket()
             // switch to new frame
             InvalidateAllWf();
             mCurrentEvent = ph->event_number;
-            mCurrentDrs0TriggerCell = ph->drs0_trigger_cell;
-            mCurrentDrs1TriggerCell = ph->drs1_trigger_cell;
+            er->SetDrs0TriggerCell(ph->drs0_trigger_cell);
+            er->SetDrs1TriggerCell(ph->drs1_trigger_cell);
             mPacketsReceived = 1;
          }
          
@@ -2459,20 +2472,10 @@ void WP::ReceiveWfPacket()
             wfChannel = header_adc*8+header_channel;
          assert(wfChannel < WD_N_CHANNELS);
          
-         // find waveform data belonging to this board
-         WDEventRequest *er = nullptr;
-         for (auto r: mEventRequest)
-            if (r->GetBoardId() == ph->board_id) {
-               er = r;
-               break;
-            }
-         if (!er) {
-            if (mVerbose)
-               std::cerr << "Received unexpected packet from board #" << ph->board_id << std::endl;
-            return;
-         }
-         
+         // mark valid package received
          er->SetWfValid(wfChannel, channel_segment, true);
+         
+         // find event belonging to this baord
          WDEvent *event = nullptr;
          for (auto e: mEvent) {
             if (e->mBoardId == ph->board_id) {
@@ -3172,6 +3175,9 @@ void WP::Collector()
             auto es = mEvent.begin();
             auto ed = mEventLast.begin();
       
+            std::cout << "Size mEvent: " << mEvent.size() << std::endl;
+            std::cout << "Size mLastEvent: " << mEventLast.size() << std::endl;
+
             while (es != mEvent.end())
                **(ed++) = **(es++);
       
