@@ -434,7 +434,7 @@ public:
       mSendBlocked = false;
    }
 
-   const int cRequiredCompatibilityLevel = 1;
+   const unsigned int cRequiredCompatibilityLevel = 1;
    
    // constants
    enum { cReadoutSrcDrs       = 0x01,
