@@ -2350,6 +2350,7 @@ void WP::ReceiveWfPacket()
    fd_set readfds;
    struct timeval timeout;
    int status;
+   static std::chrono::time_point<std::chrono::high_resolution_clock> start;
    
    FD_ZERO(&readfds);
    FD_SET(WP::gDataSocket, &readfds);
@@ -2405,8 +2406,14 @@ void WP::ReceiveWfPacket()
          while (str.size() < 20)
             str += " ";
 
+         if (mCurrentEvent == -1)
+            start = std::chrono::high_resolution_clock::now();
+         auto elapsed = std::chrono::high_resolution_clock::now() - start;
+         unsigned int us = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+         
          if (mVerbose > 1)
-            printf("#%03d from WD%03d (%s), event=%5d type=%d ADC/Chn/Segment=%d/%d/%d Tcell=%04d/%04d T=%1.1lf\n",
+            printf("%06dus #%04d from WD%03d (%s), E=%5d T=%d A/C/S=%d/%d/%d TC=%04d/%04d T=%1.1lf\n",
+                   us,
                    mPacketsReceived-1,
                    ph->board_id,
                    str.c_str(),
@@ -2475,6 +2482,7 @@ void WP::ReceiveWfPacket()
             er->SetDrs0TriggerCell(ph->drs0_trigger_cell);
             er->SetDrs1TriggerCell(ph->drs1_trigger_cell);
             mPacketsReceived = 1;
+            start = std::chrono::high_resolution_clock::now();
          }
          
          // map ADC and channel to WD channel (0..7, 8..15, 16+17)
