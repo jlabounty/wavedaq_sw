@@ -457,6 +457,17 @@ void WDB::Connect()
    
    // set dbglevel none
    SendUDP("dbglvl none");
+   
+   // check firmware revision
+   ReceiveStatusRegister(WD2_REG_FW_BUILD_TIME_OFS);
+   if (GetCompatibilityLevel() < cRequiredCompatibilityLevel) {
+      std::string str("Board ");
+      str += mName + " has old firmware, please upgrade (Compat.Level "+
+      std::to_string(GetCompatibilityLevel())+", expected "+
+      std::to_string(cRequiredCompatibilityLevel)+").";
+      throw std::runtime_error(str);
+   }
+
 }
 
 void WDB::SetDestinationPort(int port)
@@ -464,11 +475,8 @@ void WDB::SetDestinationPort(int port)
    if (mDemoMode)
       return;
    
-   // set destinantion port in WD board
-   SendUDP(std::string("setenv dstport ")+std::to_string(port));
-   
-   // set MAC address and IP address of this computer in WD board
-   SendUDP("cfgdst");
+   // set destinantion port in WD board, MAC and IP is used automaticlly form UDP packet
+   SendUDP(std::string("cfgdst ")+std::to_string(port));
 }
 
 //--------------------------------------------------------------------
@@ -619,7 +627,7 @@ std::string WDB::GetFwBuild()
    std::vector<std::string> monthName = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
    
    s << "Compatibility Level: ";
-   s << bitExtract(sreg, WD2_REG_REG_LAYOUT_VER_OFS, WD2_BIT_FW_COMPAT_LEVEL_MASK, WD2_BIT_FW_COMPAT_LEVEL_OFS) << std::endl;
+   s << GetCompatibilityLevel() << std::endl;
    s << "FW GIT Revision:     ";
    s << "0x" << std::hex << std::uppercase << bitExtract(sreg, WD2_REG_GIT_HASH_TAG_OFS, WD2_BIT_GIT_HASH_TAG_MASK, WD2_BIT_GIT_HASH_TAG_OFS) << std::endl;
    
@@ -657,6 +665,11 @@ std::string WDB::GetHwVersion()
    s << std::endl;
    
    return s.str();
+}
+
+unsigned int WDB::GetCompatibilityLevel()
+{
+   return bitExtract(sreg, WD2_REG_FW_BUILD_TIME_OFS, WD2_BIT_FW_COMPAT_LEVEL_MASK, WD2_BIT_FW_COMPAT_LEVEL_OFS);
 }
 
 unsigned int WDB::GetProtocolVersion()

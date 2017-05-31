@@ -434,6 +434,8 @@ public:
       mSendBlocked = false;
    }
 
+   const int cRequiredCompatibilityLevel = 1;
+   
    // constants
    enum { cReadoutSrcDrs       = 0x01,
       cReadoutSrcAdc           = 0x02,
@@ -474,6 +476,7 @@ public:
    // status registers
    std::string GetFwBuild();
    std::string GetHwVersion();
+   unsigned int GetCompatibilityLevel();
    unsigned int GetProtocolVersion();
    unsigned int GetSerialNumber();
    float GetTemperature(bool refresh = true);
