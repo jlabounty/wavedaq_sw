@@ -153,15 +153,12 @@ int TCB::InitBoard(TCB_SETTINGS *ts, int iType)
         
    if ((fidcode>>12)==1){
    //TCB_1
-     fnserdes = 16;
      return InitType1(ts);
    }else if((fidcode>>12)==2) {
    //TCB_2
-     fnserdes = 4;
      return InitType2(ts); 
    } else if((fidcode>>12)==3){
    //TCB_3
-     fnserdes = 16;
      return InitType3(ts);
    } else{
       //unknow TCB
@@ -253,6 +250,9 @@ void TCB::SetIDCode()
 
    //the IDCode is obtained by parsing the data
    fidcode = ((data&0xffff0000)>>16);
+   if((fidcode>>12)==1) fnserdes = 16;
+   else if((fidcode>>12)==2) fnserdes = 4;
+   else if((fidcode>>12)==3) fnserdes = 16;
 }
 
 //Set NTRG by accessing to rntrg register
@@ -463,7 +463,7 @@ void TCB::GetRRUN(u_int32_t *data)
    printf(" FADCMODE status %x \n",(*data&0x4)>>2);
    printf(" TESTTXMODE status %x \n",(*data&0x20)>>5);
    if( (fidcode>>12)==2 || (fidcode>>12)==1 ) 
-     printf(" DBGSERDES status %x \n",(*data&0x100)>>5);
+     printf(" DBGSERDES status %x \n",(*data&0x100)>>9);
    printf(" INBUSY status %x \n",(*data&0x2)>>1);
    printf(" EXBUSY status %x \n",(*data&0x8)>>3);
    printf(" ENABLE TRGBUS status %x \n",(*data&0x10)>>4);
@@ -708,21 +708,72 @@ void TCB::ConfigureSingleSerdes(int serdes, int link, short dly, int bitslip){
    addr = RSERDESBSLP + linkid/32;
    data = 1 << (linkid%32);
    //u_int32_t memval;
-   //u_int32_t memaddr = MEMBASEADDR + serdes*2*MEMDIM + MEMDIM*(link%32);
+   //u_int32_t memaddr = MEMBASEADDR + serdes*2*MEMDIM + MEMDIM*(link/4);
    for (int i=0; i<bitslip; i++) {
       WriteReg(addr, &data);
+      //printf("(%3x) %08x \n", addr, data);
       //ReadReg(memaddr, &memval);
-      //if ((memval & 0xFF) == 0xEF) printf("current word(dly=%d bitsl=%d): %08x\n", dly, i, memval); //TODO: remove
+      //      printf("current word(dly=%d bitsl=%d): %08x\n", dly, i, memval); //TODO: remove
+   }
+}
+//configure a all serdes link
+void TCB::ConfigureAllSerdes(short dly, int bitslip){
+   //reset
+   u_int32_t conf[32]={0};
+   for(int ilink=0; ilink<8*fnserdes; ilink++){
+      conf[ilink/4] |= 0x80 << (ilink%4)*8;
+   }
+   WriteBLT(RSERDESCONF, conf, fnserdes*8/4);
+
+   //write config and enable
+   for(int i=0; i<2*fnserdes; i++){
+      conf[i] = 0;
+   }
+   for(int ilink=0; ilink<8*fnserdes; ilink++){
+      conf[ilink/4] |= (0x20|(dly &0x1F)) << (ilink%4)*8;
+   }
+   WriteBLT(RSERDESCONF, conf, fnserdes*8/4);
+
+   //load delay
+   u_int32_t loadval;
+   ReadReg(RSERDESTX, &loadval);
+   loadval |= 0x80000000;
+   WriteReg(RSERDESTX, &loadval);
+   loadval &= 0x7FFFFFFF;
+   WriteReg(RSERDESTX, &loadval);
+
+   //bitslip
+   u_int32_t data[4];
+   for(int i=0; i<4; i++) data[i]=0xFFFFFFFF;
+   //u_int32_t memval;
+   //u_int32_t memaddr = MEMBASEADDR + serdes*2*MEMDIM + MEMDIM*(link/4);
+   for (int i=0; i<bitslip; i++) {
+      WriteBLT(RSERDESBSLP, data, 4);
+      //WriteBLT(RSERDESBSLP, data, fnserdes/32 + (fnserdes%32!=0)?1:0);
+      //printf("(%3x) %08x \n", addr, data);
+      //ReadReg(memaddr, &memval);
+      //printf("current word(dly=%d bitsl=%d): %08x\n", dly, i, memval); //TODO: remove
    }
 }
 //check errors on serdes
+void TCB::ResetTransmitter(){
+   u_int32_t val;
+   ReadReg(RSERDESTX, &val);
+   val |= 0x000000FF;
+   WriteReg(RSERDESTX, &val);
+   val &= 0xFFFFFF00;
+   WriteReg(RSERDESTX, &val);
+}
+//check errors on serdes
 void TCB::GetSerdesError(u_int32_t* data){
-   ReadBLT(RSERDESCHECK, data, ceil(fnserdes/32.));
+   ReadBLT(RSERDESCHECK, data, ceil(fnserdes/4.));
 }
 //check error count on serdes
 void TCB::GetSerdesErrorCount(u_int32_t* data){
-   ReadBLT(RSERDESCOU, data, fnserdes*8);
-   ReadBLT(RSERDESCOU+fnserdes*4, data+fnserdes*4, fnserdes*4);
+   ReadBLT(RSERDESCOU, data, fnserdes*2);
+   ReadBLT(RSERDESCOU+fnserdes*2, data+fnserdes*2, fnserdes*2);
+   ReadBLT(RSERDESCOU+fnserdes*4, data+fnserdes*4, fnserdes*2);
+   ReadBLT(RSERDESCOU+fnserdes*6, data+fnserdes*6, fnserdes*2);
 
    ReadReg(RSERDESTIME, data + fnserdes*8);
 }

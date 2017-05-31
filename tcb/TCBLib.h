@@ -180,6 +180,10 @@ public:
    void GetCheckWord();
    //configure a single serdes link
    void ConfigureSingleSerdes(int, int, short, int);
+   //configure a all serdes link
+   void ConfigureAllSerdes(short, int);
+   //reset transmitter
+   void ResetTransmitter();
    //check an error on a given serdes link
    void GetSerdesError(u_int32_t*);
    //return the number of errors in the transmission test

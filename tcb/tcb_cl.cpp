@@ -60,9 +60,10 @@ int main(int argc, char *argv[])
       printf("[15]: Select Slot          \t \t  [16]: Set trg bus delay\n");
       printf("[17]: Write SERDES mem     \t \t  [18]: Read SERDES mem\n");
       printf("[19]: Configure Serdes     \t \t  [20]: Serdes Scan\n");
-      printf("[21]: Load serdes from file\t \t  [22]: Write SERDES Mask\n");
-      printf("[23]: Set Parameter        \t \t  [24]: Serdes check word\n");
-      printf("[25]: Read serdes status   \t \t  [26]: Force a trigger\n");
+      printf("[21]: Load serdes from file\t \t  [22]: Start Serdes test\n");
+      printf("[23]: Write SERDES Mask    \t \t  [24]: Set Parameter\n");
+      printf("[25]: Serdes check word    \t \t  [26]: Read serdes status\n");
+      printf("[27]: Force a trigger      \t \t  [28]: Reset Transmitter\n");
       printf("[-1]: Exit\n");
 
       do {
@@ -311,18 +312,19 @@ int main(int argc, char *argv[])
          printf("How many usec each point? \n");
          scanf("%d",&howlong);
          FILE *fout = fopen("tres.dat","w");
+         fprintf(fout,"%s %d\n", TCBBoard.fmscb_device, TCBBoard.fnserdes);
 
          TCBBoard.SetCheckWord(0xdeadbeef, 0xdeadbeef);
 
          for(int idly =0; idly<32; idly++){
             for(int ibit=0; ibit<8; ibit++){
-               TCBBoard.StartSerdesCheck();
                //configure everything
-               for(int iserdes=0; iserdes < TCBBoard.fnserdes; iserdes++){
+               /*for(int iserdes=0; iserdes < TCBBoard.fnserdes; iserdes++){
                   for(int ilink=0; ilink<8; ilink++){
                      TCBBoard.ConfigureSingleSerdes(iserdes, ilink, idly, ibit);
                   }
-               }
+               }*/
+              TCBBoard.ConfigureAllSerdes(idly, ibit);
 
                TCBBoard.StartSerdesCheck();
 
@@ -332,13 +334,14 @@ int main(int argc, char *argv[])
                TCBBoard.GetSerdesErrorCount(ccounters);
                fprintf(fout,"%d %d ", idly, ibit);
                for(int icounter=0; icounter<TCBBoard.fnserdes*8; icounter++){
-                  //printf("id (%3d) = %08x\n", icounter, ccounters[icounter]);
+		 //printf("id (%3d) = %08x\n", icounter, ccounters[icounter]);
                   //if(ccounters[icounter]==0) printf("channel %d ok with dly %d and bitslip %d\n", icounter, idly, ibit);
                   errors[icounter][ibit][idly] = ccounters[icounter]*1./ccounters[TCBBoard.fnserdes*8];
                   fprintf(fout,"%le ", ccounters[icounter]*1./ccounters[TCBBoard.fnserdes*8]);
                }
                fprintf(fout,"\n");
-               printf("bit %d dly %d\n", ibit, idly);
+               printf(" ******************* dly %d/31 ************\r", idly);
+               fflush(stdin);
             }
          }
 
@@ -346,7 +349,7 @@ int main(int argc, char *argv[])
 
          fout = fopen("serdesconfig.dat","w");
          //search eyes
-         const float thr = 1e-6;
+         const float thr = 1e-20;
          for(int icounter=0; icounter<TCBBoard.fnserdes*8; icounter++){
             float bestCenter=-1;
             int bestWidth=-1;
@@ -394,23 +397,27 @@ int main(int argc, char *argv[])
          fclose(fin);
       }
       if(option == 22) {
-        printf(" opt = 22 : Set trigger mask ... \n");
+        printf(" opt = 22 : Start Serdes check ... \n");
+        TCBBoard.StartSerdesCheck();
+      }
+      if(option == 23) {
+        printf(" opt = 23 : Set trigger mask ... \n");
         printf("Serdes Mask?(hex) ");
         scanf("%x",&data);
         TCBBoard.SetSerdesMask(&data);
       }
-      if(option == 23) {
+      if(option == 24) {
         u_int32_t offset;
-        printf(" opt = 23 : Set Parameter ... \n");
+        printf(" opt = 24 : Set Parameter ... \n");
         printf("Parameter offset? ");
         scanf("%d",&offset);
         printf("Value?(hex) ");
         scanf("%x",&data);
         TCBBoard.SetParameter(offset, &data);
       }
-      if(option == 24) {
+      if(option == 25) {
         u_int32_t valdo, valup;
-        printf(" opt = 24 : Set control words ... \n");
+        printf(" opt = 25 : Set control words ... \n");
         printf("Control word [31:0]? (hex)\n");
         scanf("%x",&valdo);
         printf("Control word [63:32]? (hex)\n");
@@ -424,16 +431,25 @@ int main(int argc, char *argv[])
         TCBBoard.SetCheckWordMask(valdo,valup);
         TCBBoard.GetCheckWordMask();*/
       }
-      if(option == 25) {
-        printf(" opt = 28 : Get Check Status ... \n");
-        //TCBBoard.GetCheckStatus();
-      }
       if(option == 26) {
+         printf(" opt = 26 : Get Check Status ... \n");
+         //TCBBoard.GetCheckStatus();
+         u_int32_t data[4];
+         TCBBoard.GetSerdesError(data);
+         for (int i=0; i<4; i++){
+            printf("Link[%3d:%3d]= %08x\n", (i+1)*32, i*32, data[i]);
+         }
+      }
+      if(option == 27) {
         int trgid;
-        printf(" opt = 29 : Force a trigger ... \n");
+        printf(" opt = 27 : Force a trigger ... \n");
         printf("Trigger Id? from 0 to %d \n",TCBBoard.fntrg-1);
         scanf("%d",&trgid);
         TCBBoard.ForceTrigger(trgid);
+      }
+      if(option == 28) {
+        printf(" opt = 28 : Reset transmitter ... \n");
+        TCBBoard.ResetTransmitter();
       }
       /* end of the main loop on the options*/
    } while ( option >= 0);
