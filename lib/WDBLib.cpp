@@ -126,7 +126,10 @@ std::string WDB::SendReceiveUDP(std::string str, int timeout_ms)
          FD_ZERO(&readfds);
          FD_SET(gASCIISocket, &readfds);
          
-         ms = timeout_ms;
+         if (retry == 0) // reduce timeout on first retry (ARP problem)
+            ms = 100;
+         else
+            ms = timeout_ms;
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
          
