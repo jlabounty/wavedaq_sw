@@ -194,4 +194,8 @@ public:
    void StartSerdesCheck();
    //stop serdes check
    void StopSerdesCheck();
+   //calibrate serdes
+   void CalibrateSerdes();
+   //calibrate serdes
+   void SetDbgserdes(bool);
 };

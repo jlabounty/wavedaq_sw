@@ -11,6 +11,7 @@
 #include "mscb.h"
 #include "TCBLib.h"
 #include "math.h"
+#include <unistd.h>
 
 int TCB::InitType1(TCB_SETTINGS *ts){
    if (fverbose)
@@ -815,4 +816,74 @@ void TCB::StopSerdesCheck(){
    //remove counter enable
    enablevalue &= 0xDFFFFFFF;
    WriteReg(RSERDESTX, &enablevalue);
+}
+//calibrate serdes
+void TCB::CalibrateSerdes(){
+         float errors[128][8][32];
+         u_int32_t ccounters[129];
+
+         SetCheckWord(0xdeadbeef, 0xdeadbeef);
+
+         for(int idly =0; idly<32; idly++){
+            for(int ibit=0; ibit<8; ibit++){
+               //configure everything
+               ConfigureAllSerdes(idly, ibit);
+
+               StartSerdesCheck();
+
+               usleep(1000);
+
+               StopSerdesCheck();
+               GetSerdesErrorCount(ccounters);
+               for(int icounter=0; icounter<fnserdes*8; icounter++){
+                  errors[icounter][ibit][idly] = ccounters[icounter]*1./ccounters[fnserdes*8];
+               }
+            }
+         }
+
+         //search eyes
+         const float thr = 1e-20;
+         for(int icounter=0; icounter<fnserdes*8; icounter++){
+            float bestCenter=-1;
+            int bestWidth=-1;
+            int bestBitslip=-1;
+            for(int ibit=0; ibit<8; ibit++){
+               int state=0;
+               int start =-1;
+               int stop =-1;
+               for(int idly=0; idly<32 && state!=2; idly++){
+                  if(errors[icounter][ibit][idly]<thr && state==0){
+                     state=1;
+                     start=idly;
+                     stop=idly;
+                  }
+                  if (errors[icounter][ibit][idly]<thr && state == 1){
+                     stop=idly;
+                  } else if(errors[icounter][ibit][idly] >= thr && state == 1){
+                     state=2;
+                  }
+               }
+
+               int width= stop-start;
+               if(width > bestWidth){
+                  bestWidth = width;
+                  bestCenter = (stop+start)/2;
+                  bestBitslip = ibit;
+               }
+            }
+
+            if(bestWidth > 0) ConfigureSingleSerdes(icounter/8, icounter%8, (int)(bestCenter), bestBitslip);
+         }
+
+}
+//Set/unset DBGSERDES
+void TCB::SetDbgserdes(bool enable){
+   u_int32_t data;
+   ReadReg(RRUN, &data);
+   if(enable){
+        data |= 0x00000100;
+   } else {
+        data &= 0xFFFFFEFF;
+   }
+   WriteReg(RRUN, &data);
 }
