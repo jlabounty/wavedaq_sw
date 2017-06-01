@@ -4096,6 +4096,8 @@ VCALIB::VCALIB()
          mCalib.wf_gain1[ch][bin] = 1;
          mCalib.wf_gain2[ch][bin] = 1;
       }
+   }
+   for (int ch=0 ; ch < WD_N_CHANNELS-2 ; ch++) {
       mCalib.drs_offset_range0[ch] = 0.45f;
       mCalib.drs_offset_range1[ch] = 0;
       mCalib.drs_offset_range2[ch] = -0.45f;
