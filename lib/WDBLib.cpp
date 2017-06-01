@@ -2385,8 +2385,6 @@ void WP::ReceiveWfPacket()
             return;
          }
          
-         mPacketsReceived++;
-         
          // correct endianness of header data
          ph->board_id                 = SWAP_UINT16(ph->board_id);
          int header_adc               = (ph->adc_and_channel_info >> 4) & 0x0f;
@@ -2403,6 +2401,9 @@ void WP::ReceiveWfPacket()
          ph->temperature              = SWAP_UINT16(ph->temperature);
          ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
 
+         mPacketsReceived++;
+         mWDEvents = ph->event_number; // derive number of sent WD events from header
+         
          std::string str(inet_ntoa(remote_addr.sin_addr));
          str += ":";
          str += std::to_string(ntohs(remote_addr.sin_port));
@@ -3185,6 +3186,8 @@ void WP::Collector()
 
       } while (!AllPacketsReceived());
       
+      // update statistics
+      mWDReceivedEvents++;
       
       // do various calibrations
       RotateWaveforms();
