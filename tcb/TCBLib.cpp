@@ -10,24 +10,7 @@
 #include <stdlib.h>
 #include "mscb.h"
 #include "TCBLib.h"
-
-u_int32_t kaddrsdly[5]   = {RWDDLY0, RWDDLY1, RWDDLY2, RWDDLY3, RFCDLY};
-
-void TCB::SetBitslip(int *bitslip){
-   int nonzero=1;
-   while(nonzero){
-      nonzero=0;
-      u_int32_t bitreg=0;
-      for(int iserdes=0; iserdes<20;iserdes++){
-         if(bitslip[iserdes]!=0){
-            nonzero=1;
-            bitreg |= 1 << (iserdes);
-            bitslip[iserdes]--;
-         }
-      }
-      WriteReg(RBSLIP, &bitreg);
-   }   
-}
+#include "math.h"
 
 int TCB::InitType1(TCB_SETTINGS *ts){
    if (fverbose)
@@ -50,14 +33,14 @@ int TCB::InitType1(TCB_SETTINGS *ts){
    //u_int32_t sdly[5]={0x0F0B0D0C,0x0B020613,0x1704080C,0x0B121310,0x08080808};
    //int bitslip[20]={4,4,4,4,4,3,3,3,3,3,3,4,4,4,4,4,1,1,1,1};
    //crate 186
-   u_int32_t sdly[5]={0x0F0D0F0A,0x07050511,0x1017080B,0x0B0E0F14,0x08080808};
+   /*u_int32_t sdly[5]={0x0F0D0F0A,0x07050511,0x1017080B,0x0B0E0F14,0x08080808};
    int bitslip[20]={4,4,4,4,4,3,3,3,3,3,4,4,4,4,4,4,1,1,1,1};
    SerdesReset();
    SetSerdesDelay(sdly);
    SetBitslip(bitslip);
    u_int32_t serdesmaskreg = ts->serdesmask;
    SetSerdesMask(&serdesmaskreg);
-
+   */
    //Input TRGBUS
    SetTRGBusIDLY((u_int32_t*) &ts->syncindly, (u_int32_t*) &ts->trgindly, (u_int32_t*) &ts->sprindly);
 
@@ -84,14 +67,14 @@ int TCB::InitType2(TCB_SETTINGS *ts){
    SetRALGSEL(&ralgsel);
 
    // serdes setup
-   u_int32_t sdly[5]={0x140F110F,0x0B0E0816,0x19070A0D,0x11141514,0x07070707};
+   /*u_int32_t sdly[5]={0x140F110F,0x0B0E0816,0x19070A0D,0x11141514,0x07070707};
    int bitslip[20]={3,3,3,3,3,2,2,2,2,2,2,3,3,3,3,3,1,1,1,1};
    SerdesReset();
    SetSerdesDelay(sdly);
    SetBitslip(bitslip);
    u_int32_t serdesmaskreg = ts->serdesmask;
    SetSerdesMask(&serdesmaskreg);
-
+*/
    //Input TRGBUS
    SetTRGBusIDLY((u_int32_t*) &ts->syncindly, (u_int32_t*) &ts->trgindly, (u_int32_t*) &ts->sprindly);
 
@@ -128,14 +111,14 @@ int TCB::InitType3(TCB_SETTINGS *ts){
    }
    
    // serdes setup
-   u_int32_t sdly[5]={0x16121211,0x100A0716,0x14080910,0x14151717,0xFFFFFFFF};
+/*   u_int32_t sdly[5]={0x16121211,0x100A0716,0x14080910,0x14151717,0xFFFFFFFF};
    int bitslip[20]={0,0,0,0,0,7,7,7,7,7,7,0,0,0,0,0,0,0,0,0};
    SerdesReset();
    SetSerdesDelay(sdly);
    SetBitslip(bitslip);
    u_int32_t serdesmaskreg = ts->serdesmask;
    SetSerdesMask(&serdesmaskreg);
-
+*/
    //set serdes delay
    SetTRGBusIDLY((u_int32_t*) &ts->syncindly, (u_int32_t*) &ts->trgindly, (u_int32_t*) &ts->sprindly);
    SetTRGBusODLY((u_int32_t*) &ts->syncoutdly, (u_int32_t*) &ts->trgoutdly, (u_int32_t*) &ts->sproutdly);
@@ -276,6 +259,9 @@ void TCB::SetIDCode()
 
    //the IDCode is obtained by parsing the data
    fidcode = ((data&0xffff0000)>>16);
+   if((fidcode>>12)==1) fnserdes = 16;
+   else if((fidcode>>12)==2) fnserdes = 4;
+   else if((fidcode>>12)==3) fnserdes = 16;
 }
 
 //Set NTRG by accessing to rntrg register
@@ -487,7 +473,7 @@ void TCB::GetRRUN(u_int32_t *data)
    printf(" FADCMODE status %x \n",(*data&0x4)>>2);
    printf(" TESTTXMODE status %x \n",(*data&0x20)>>5);
    if( (fidcode>>12)==2 || (fidcode>>12)==1 ) 
-     printf(" DBGSERDES status %x \n",(*data&0x100)>>5);
+     printf(" DBGSERDES status %x \n",(*data&0x100)>>9);
    printf(" INBUSY status %x \n",(*data&0x2)>>1);
    printf(" EXBUSY status %x \n",(*data&0x8)>>3);
    printf(" ENABLE TRGBUS status %x \n",(*data&0x10)>>4);
@@ -646,33 +632,6 @@ void TCB::WriteSERDESMem(int iserdes, int imem, u_int32_t *data){
 void TCB::ReadSERDESMem(int iserdes, int imem, u_int32_t *data){
   ReadMemoryBLT(2*iserdes+imem, data);
 }
-// serdes delay values setting
-void TCB::SetSerdesDelay(u_int32_t *data)
-{
-   for (int ireg=0; ireg<5; ireg++)
-      WriteReg(kaddrsdly[ireg],data+ireg);
-}
-
-// read serdes delay values
-void TCB::GetSerdesDelay(u_int32_t *data)
-{
-   //read loop on prescaling registers
-   for (int ireg = 0; ireg<5; ireg++)
-      ReadReg(kaddrsdly[ireg],data+ireg);
-}// reset all serdes 
-void TCB::SerdesReset()
-{
-   // write 0x80000000 on RBLIP 
-  u_int32_t wdata = 0x80000000;
-  WriteReg(RBSLIP,&wdata);
-}
-// give a bitslip 
-void TCB::SerdesBitslip(u_int32_t icha)
-{
-  u_int32_t wdata;
-  wdata = 1<<icha;
-  WriteReg(RBSLIP,&wdata);
-}
 // serdes mask values setting
 void TCB::SetSerdesMask(u_int32_t *data)
 {
@@ -700,56 +659,160 @@ void TCB::ForceTrigger(int trg)
 void TCB::SetCheckWord(u_int32_t valuedo,u_int32_t valueup) 
 {
   // first write [31:0]
-  WriteReg(RCHKWORDDO,&valuedo);
+  WriteReg(RSERDESVAL0,&valuedo);
   // then write [63:32]
-  WriteReg(RCHKWORDUP,&valueup);
+  WriteReg(RSERDESVAL1,&valueup);
 }
 // get the transmission check word
 void TCB::GetCheckWord() {
   u_int32_t data;
   // first read [31:0]
-  ReadReg(RCHKWORDDO,&data);
+  ReadReg(RSERDESVAL0,&data);
   printf("Check word [31:0] = %08X\n",data);
   // then read [63:32]
-  ReadReg(RCHKWORDUP,&data);
+  ReadReg(RSERDESVAL1,&data);
   printf("Check word [63:32] = %08X\n",data);
 
 }
-// read the transmission check status
-void TCB::GetCheckStatus() {
-  u_int32_t data;
-  // first read [31:0]
-  ReadReg(RCHKSTATUS,&data);
-  printf("Transmission Status = %08X\n",data);
-}
-// enable/disable transmission check
-void TCB::SetEnableTransmissionCheck(u_int32_t enable) 
-{
-  u_int32_t wdata = 0;
-  // if enable == 1 then enabled
-  wdata |= enable<<31;
-  // write corresponding bit
-  WriteReg(RCHKSTATUS,&wdata);
-}
-// reset transmission check
-void TCB::ResetTransmissionCheck() 
-{
-  u_int32_t wdata = 0;
-  // if enable == 1 then enabled
-  wdata |= 1<<30;
-  // first reset
-  WriteReg(RCHKSTATUS,&wdata);
-  wdata = 0;
-  // then release the reset
-  WriteReg(RCHKSTATUS,&wdata);
-}
-// read check counters
-void TCB::GetCheckCounters(u_int32_t *rdata) {
-  // first read the counters
-  //  for(int icou = 0; icou<16; icou++)
-    ReadBLT(RCHKCOU,rdata,16);
-  //then the normalisation counter
-  ReadReg(RCHKTIM,rdata+16);
-}
 
+//configure a single serdes link
+void TCB::ConfigureSingleSerdes(int serdes, int link, short dly, int bitslip){
+   //evaluate serdes id number
+   int linkid = 8*serdes+link;
+   //correct configuration offset
+   int addr = RSERDESCONF + linkid/4;
+   u_int32_t data;
 
+   //read back current config
+   ReadReg(addr, &data);
+
+   //reset reset
+   data |= 0x80<< (linkid%4)*8;
+   //printf("reset: %08x\n", data); //TODO: remove
+   WriteReg(addr, &data);
+
+   //reset serdes and write delay
+   switch(linkid%4){
+      case 0:
+         data &= 0xFFFFFF00;
+         break;
+      case 1:
+         data &= 0xFFFF00FF;
+         break;
+      case 2:
+         data &= 0xFF00FFFF;
+         break;
+      case 3:
+         data &= 0x00FFFFFF;
+         break;
+      default:
+         break;
+   }
+   data |= ((0x20|(dly &0x1F)) << (linkid%4)*8);
+
+   //printf("load config: %08x\n", data); //TODO: remove
+   WriteReg(addr, &data);
+
+   //load delay
+   u_int32_t loadval;
+   ReadReg(RSERDESTX, &loadval);
+   loadval |= 0x80000000;
+   WriteReg(RSERDESTX, &loadval);
+   loadval &= 0x7FFFFFFF;
+   WriteReg(RSERDESTX, &loadval);
+
+   //bitslip
+   addr = RSERDESBSLP + linkid/32;
+   data = 1 << (linkid%32);
+   //u_int32_t memval;
+   //u_int32_t memaddr = MEMBASEADDR + serdes*2*MEMDIM + MEMDIM*(link/4);
+   for (int i=0; i<bitslip; i++) {
+      WriteReg(addr, &data);
+      //printf("(%3x) %08x \n", addr, data);
+      //ReadReg(memaddr, &memval);
+      //      printf("current word(dly=%d bitsl=%d): %08x\n", dly, i, memval); //TODO: remove
+   }
+}
+//configure a all serdes link
+void TCB::ConfigureAllSerdes(short dly, int bitslip){
+   //reset
+   u_int32_t conf[32]={0};
+   for(int ilink=0; ilink<8*fnserdes; ilink++){
+      conf[ilink/4] |= 0x80 << (ilink%4)*8;
+   }
+   WriteBLT(RSERDESCONF, conf, fnserdes*8/4);
+
+   //write config and enable
+   for(int i=0; i<2*fnserdes; i++){
+      conf[i] = 0;
+   }
+   for(int ilink=0; ilink<8*fnserdes; ilink++){
+      conf[ilink/4] |= (0x20|(dly &0x1F)) << (ilink%4)*8;
+   }
+   WriteBLT(RSERDESCONF, conf, fnserdes*8/4);
+
+   //load delay
+   u_int32_t loadval;
+   ReadReg(RSERDESTX, &loadval);
+   loadval |= 0x80000000;
+   WriteReg(RSERDESTX, &loadval);
+   loadval &= 0x7FFFFFFF;
+   WriteReg(RSERDESTX, &loadval);
+
+   //bitslip
+   u_int32_t data[4];
+   for(int i=0; i<4; i++) data[i]=0xFFFFFFFF;
+   //u_int32_t memval;
+   //u_int32_t memaddr = MEMBASEADDR + serdes*2*MEMDIM + MEMDIM*(link/4);
+   for (int i=0; i<bitslip; i++) {
+      WriteBLT(RSERDESBSLP, data, 4);
+      //WriteBLT(RSERDESBSLP, data, fnserdes/32 + (fnserdes%32!=0)?1:0);
+      //printf("(%3x) %08x \n", addr, data);
+      //ReadReg(memaddr, &memval);
+      //printf("current word(dly=%d bitsl=%d): %08x\n", dly, i, memval); //TODO: remove
+   }
+}
+//check errors on serdes
+void TCB::ResetTransmitter(){
+   u_int32_t val;
+   ReadReg(RSERDESTX, &val);
+   val |= 0x000000FF;
+   WriteReg(RSERDESTX, &val);
+   val &= 0xFFFFFF00;
+   WriteReg(RSERDESTX, &val);
+}
+//check errors on serdes
+void TCB::GetSerdesError(u_int32_t* data){
+   ReadBLT(RSERDESCHECK, data, ceil(fnserdes/4.));
+}
+//check error count on serdes
+void TCB::GetSerdesErrorCount(u_int32_t* data){
+   ReadBLT(RSERDESCOU, data, fnserdes*2);
+   ReadBLT(RSERDESCOU+fnserdes*2, data+fnserdes*2, fnserdes*2);
+   ReadBLT(RSERDESCOU+fnserdes*4, data+fnserdes*4, fnserdes*2);
+   ReadBLT(RSERDESCOU+fnserdes*6, data+fnserdes*6, fnserdes*2);
+
+   ReadReg(RSERDESTIME, data + fnserdes*8);
+}
+//start a serdes check
+void TCB::StartSerdesCheck(){
+   u_int32_t enablevalue;
+   ReadReg(RSERDESTX, &enablevalue);
+
+   //reset
+   enablevalue |= 0x40000000;
+   WriteReg(RSERDESTX, &enablevalue);
+
+   //enable
+   enablevalue &= 0xBFFFFFFF;
+   enablevalue |= 0x20000000;
+   WriteReg(RSERDESTX, &enablevalue);
+}
+//stop a serdes check
+void TCB::StopSerdesCheck(){
+   u_int32_t enablevalue;
+   ReadReg(RSERDESTX, &enablevalue);
+   //remove counter enable
+   enablevalue &= 0xDFFFFFFF;
+   WriteReg(RSERDESTX, &enablevalue);
+}
