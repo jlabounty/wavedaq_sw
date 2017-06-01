@@ -30,7 +30,8 @@ void TCB::SetBitslip(int *bitslip){
 }
 
 int TCB::InitType1(TCB_SETTINGS *ts){
-   printf("configuring TCB_1_X\n");
+   if (fverbose)
+      printf("configuring TCB_1_X\n");
    
    u_int32_t fadcmode = 1;
    u_int32_t enable_trgbus = 1;
@@ -67,7 +68,8 @@ int TCB::InitType1(TCB_SETTINGS *ts){
 }
 
 int TCB::InitType2(TCB_SETTINGS *ts){
-   printf("configuring TCB_2_X\n");
+   if (fverbose)
+      printf("configuring TCB_2_X\n");
    
    u_int32_t fadcmode = 1;
    u_int32_t enable_trgbus = 1;
@@ -100,7 +102,8 @@ int TCB::InitType2(TCB_SETTINGS *ts){
 }
 
 int TCB::InitType3(TCB_SETTINGS *ts){
-   printf("configuring TCB_3_X\n");
+   if (fverbose)
+      printf("configuring TCB_3_X\n");
 
    u_int32_t fadcmode = 1;
    u_int32_t enable_trgbus = 1;
@@ -242,7 +245,10 @@ void TCB::WriteBLT(u_int32_t addr, u_int32_t *data, int nword)
 // prescaling values setting
 void TCB::SetPrescaling(u_int32_t *presca)
 {
-  if ((fidcode>>12)!=3) {printf("setting prescaling on TCB %4x!!!!! skipped\n", fidcode); return;}
+  if ((fidcode>>12)!=3) {
+     printf("setting prescaling on TCB %4x!!!!! skipped\n", fidcode);
+     return;
+  }
    for (int ireg=0; ireg<fntrg; ireg++)
       WriteReg(RPRESCA+ireg,presca+ireg);
 }
@@ -251,7 +257,10 @@ void TCB::SetPrescaling(u_int32_t *presca)
 void TCB::GetPrescaling(u_int32_t *presca)
 {
    //read loop on prescaling registers
-  if ((fidcode>>12)!=3) { printf("setting prescaling on TCB %4x!!!!! skipped\n", fidcode); return;}
+  if ((fidcode>>12)!=3) {
+     printf("setting prescaling on TCB %4x!!!!! skipped\n", fidcode);
+     return;
+  }
    for (int ireg = 0; ireg<fntrg; ireg++)
       ReadReg(RPRESCA+ireg,presca+ireg);
 }
@@ -574,7 +583,11 @@ void TCB::GetMemoryAddress(u_int32_t *data)
 
 // trg bus delay setting
 void TCB::SetTRGBusODLY(u_int32_t *syncdly, u_int32_t *trgdly, u_int32_t *sprdly) {
-   if ((fidcode>>12)!=3) printf("setting TRGBus on TCB %4x!!!!!\n", fidcode);
+   
+   if (fverbose)
+      if ((fidcode>>12)!=3)
+         printf("setting TRGBus on TCB %4x!!!!!\n", fidcode);
+   
    //   u_int32_t reset = 0x80000000;
    u_int32_t value;
    ReadReg(RBUSDLY, &value);
@@ -593,7 +606,9 @@ void TCB::SetTRGBusODLY(u_int32_t *syncdly, u_int32_t *trgdly, u_int32_t *sprdly
 
 // trg bus delay setting
 void TCB::SetTRGBusIDLY(u_int32_t *syncdly, u_int32_t *trgdly, u_int32_t *sprdly) {
-   if ((fidcode>>12)!=3) printf("setting TRGBus on TCB %4x!!!!!\n", fidcode);
+   if (fverbose)
+      if ((fidcode>>12)!=3)
+         printf("setting TRGBus on TCB %4x!!!!!\n", fidcode);
    //   u_int32_t reset = 0x80000000;
    u_int32_t value;
    ReadReg(RBUSDLY, &value);

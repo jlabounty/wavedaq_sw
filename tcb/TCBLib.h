@@ -72,19 +72,20 @@ public:
    char           fmscb_device[256]; // MSCBxxx node name
    int            fmscb_addr;        // MSCB address of CMB
    int            fh;                // MSCB handle
-   int            fntrg;              // number of available trigger
+   int            fntrg;             // number of available trigger
+   int            fverbose;          // verbosity level
    // getters
    u_int32_t      GetIDCode() { return fidcode; }
    u_int32_t      GetSlot() { return fslot; }
    
    // Constructor
-   TCB(const char *mscb_device, int mscb_addr, int slot) {
+   TCB(const char *mscb_device, int mscb_addr, int slot, int verbose = 0) {
       strlcpy(fmscb_device, mscb_device, sizeof(fmscb_device));
       fmscb_addr = mscb_addr;
       fslot = slot;
       fidcode = 0xffff;
       fntrg = 0x0;
-
+      fverbose = verbose;
    }
 
    int InitBoard(TCB_SETTINGS *ts, int iType);
