@@ -10,16 +10,8 @@
 #define RNTRG         0x02                      // trigger enable bits
 #define RALGSEL       0x03                      // algorithm select on TCB1/2_0
 #define USR_ACCESS    0x0F                      // FW compilaiton date
-#define RWDDLY0       0x10                      // wdb serdes delay values
-#define RWDDLY1       0x11                      // wdb serdes delay values
-#define RWDDLY2       0x12                      // wdb serdes delay values
-#define RWDDLY3       0x13                      // wdb serdes delay values
 #define RFCDLY        0x14                      // frontpanel serdes delay values
-#define RBSLIP        0x15                      // bitslip and reset for input serdes
 #define RSERDESMSK    0x16                      // mask for input serdes
-#define RCHKWORDDO    0x17                      // transmission check word [31:0]
-#define RCHKWORDUP    0x18                      // transmission check word [63:0]
-#define RCHKSTATUS    0x19                      // transmission check status
 #define RENA          0x20                      // trigger enable (first address)
 #define RTRIPATT      0x30                      // trigger pattern (first address)
 #define RTRGFORCE     0x40                      // force a trigger (first address)
@@ -32,6 +24,14 @@
 #define RTRITYPE      0x203                     // trigger type
 #define RSYSEVECOU    0x204                     // system (trgbus) event counter
 #define RSYSTRITYPE   0x205                     // system (trgbus) trigger type
+#define RSERDESCONF   0x300                     // serdes configuration, reset and check enable (first address)
+#define RSERDESBSLP   0x320                     // individual bitslip for each channel (first address)
+#define RSERDESCHECK  0x324                     // serdes status (first address)
+#define RSERDESVAL0   0x328                     // serdes value to be checked (lower part)
+#define RSERDESVAL1   0x329                     // serdes value to be checked (upper part)
+#define RSERDESCOU    0x330                     // serdes error counter (first address)
+#define RSERDESTIME   0x3B0                     // serdes test time
+#define RSERDESTX     0x3C0                     // tx serdes configuration and delay load
 #define RTRGCOU       0x400                     // trigger counter (first address)
 #define RPARAM        0x600                     // start of parameter space
 #define RMEMADDR      0x0FFFF                   // counter stop position
@@ -74,6 +74,7 @@ public:
    int            fh;                // MSCB handle
    int            fntrg;             // number of available trigger
    int            fverbose;          // verbosity level
+   int            fnserdes;          // number of available trigger
    // getters
    u_int32_t      GetIDCode() { return fidcode; }
    u_int32_t      GetSlot() { return fslot; }
@@ -86,6 +87,7 @@ public:
       fidcode = 0xffff;
       fntrg = 0x0;
       fverbose = verbose;
+      fnserdes= 0;
    }
 
    int InitBoard(TCB_SETTINGS *ts, int iType);
@@ -167,17 +169,7 @@ public:
    // read serdes memory
    void ReadSERDESMem(int,int,u_int32_t*);
    // Serdes delay values setting
-   void SetSerdesDelay(u_int32_t*);
-   // read serdes delay values
-   void GetSerdesDelay(u_int32_t*);
-   // read serdes delay values
-   void SerdesReset();
-   // Serdes delay values setting
    void SetSerdesMask(u_int32_t*);
-   // give a bitslip to a given serdes
-   void SerdesBitslip(u_int32_t);
-   // set bitslip according to an input array
-   void SetBitslip(int *bitslip);
    // set generic trigger parameter (with base address 0x600)
    void SetParameter(u_int32_t, u_int32_t*);
    // get FW compilation date
@@ -186,14 +178,24 @@ public:
    void ForceTrigger(int);
    // set the transmission check word
    void SetCheckWord(u_int32_t,u_int32_t);
-   // get the transmission check word
+   //get the transmission check word
    void GetCheckWord();
-   // read the transmission check status
-   void GetCheckStatus();
-   // enable/disable transmission check
-   void SetEnableTransmissionCheck(u_int32_t);
-   // reset transmission check
-   void ResetTransmissionCheck();
-   // read check counters
-   void GetCheckCounters(u_int32_t *);
+   //configure a single serdes link
+   void ConfigureSingleSerdes(int, int, short, int);
+   //configure a all serdes link
+   void ConfigureAllSerdes(short, int);
+   //reset transmitter
+   void ResetTransmitter();
+   //check an error on a given serdes link
+   void GetSerdesError(u_int32_t*);
+   //return the number of errors in the transmission test
+   void GetSerdesErrorCount(u_int32_t*);
+   //start serdes check
+   void StartSerdesCheck();
+   //stop serdes check
+   void StopSerdesCheck();
+   //calibrate serdes
+   void CalibrateSerdes();
+   //calibrate serdes
+   void SetDbgserdes(bool);
 };

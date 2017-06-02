@@ -26,8 +26,8 @@ int main(int argc, char *argv[])
    char opline[256];
    u_int32_t data, scanfdata;
    u_int32_t trgtype, tpattern;
-   FILE *filin, *filout, *filpresca, *filsdly;
-   u_int32_t presca[128], counters[128], sdly[5];
+   FILE *filin, *filout, *filpresca;
+   u_int32_t presca[128], counters[128];
    //  clock_t t_before, t_after;
    if(argc != 3) {
       printf("Please indicate the mscb connection ID and node...\n");
@@ -59,12 +59,11 @@ int main(int argc, char *argv[])
       printf("[13]: Read Trigger Counters\t \t  [14]: Read memory address\n");
       printf("[15]: Select Slot          \t \t  [16]: Set trg bus delay\n");
       printf("[17]: Write SERDES mem     \t \t  [18]: Read SERDES mem\n");
-      printf("[19]: Write SERDES Delay   \t \t  [20]: Read SERDES Delay\n");
-      printf("[21]: SERDES reset         \t \t  [22]: SERDES bitslip\n");
-      printf("[23]: SERDES Scan          \t \t  [24]: SERDES default values\n");
-      printf("[25]: Write SERDES Mask    \t \t  [26]: Set Parameter\n");
-      printf("[27]: Set check words      \t \t  [28]: Check transmission\n");
-      printf("[29]: Force a trigger      \t \t  [30]: Reset and enable serdes check\n");
+      printf("[19]: Configure Serdes     \t \t  [20]: Serdes Scan\n");
+      printf("[21]: Load serdes from file\t \t  [22]: Start Serdes test\n");
+      printf("[23]: Write SERDES Mask    \t \t  [24]: Set Parameter\n");
+      printf("[25]: Serdes check word    \t \t  [26]: Read serdes status\n");
+      printf("[27]: Force a trigger      \t \t  [28]: Reset Transmitter\n");
       printf("[-1]: Exit\n");
 
       do {
@@ -293,208 +292,164 @@ int main(int argc, char *argv[])
       }
       if(option == 19) {
          printf(" opt 19 = Write SERDES delay ... \n");
-         filsdly = fopen("serdesdly.dat","read");
-         for(int irow = 0; irow<5; irow++) {
-            fscanf(filsdly,"%x\n",sdly+irow);
-         }
-         TCBBoard.SetSerdesDelay(sdly);
+         int serdes, link, dly, bitsl;
+         printf("serdes id?\n");
+         scanf("%d", &serdes);
+         printf("serdes link?\n");
+         scanf("%d", &link);
+         printf("serdes dly?\n");
+         scanf("%d", &dly);
+         printf("serdes bitslip?\n");
+         scanf("%d", &bitsl);
+         TCBBoard.ConfigureSingleSerdes(serdes, link, dly, bitsl);
       }
       if(option == 20) {
-         printf(" opt 20 = Read SERDES delay ... \n");
+         printf(" opt 20 = SERDES Scan ... \n");
 
-         TCBBoard.GetSerdesDelay(sdly);
-         for(int irow = 0; irow<5; irow++) {
-            printf("dly%d: %x\n",irow, sdly[irow]);
-         }
-      }
-      if(option == 21) {
-         printf(" opt 21 = SERDES reset ... \n");
-         TCBBoard.SerdesReset();
-      }
-      if(option == 22) {
-         printf(" opt 22 = SERDES bitslip ... \n");
-
-         u_int32_t icha;
-         u_int32_t rdata;
-         u_int32_t addr;
-         printf("which channel?\n");
-         scanf("%d",&icha);
-         addr = MEMBASEADDR + 1024*2*icha;
-         TCBBoard.SerdesBitslip(icha);
-         // now read the word back to check the tx
-         TCBBoard.ReadReg(addr,&rdata);
-         printf("%08X\n", rdata);
-      }
-      if(option == 23) {
-         printf(" opt 23 = SERDES Scan ... \n");
-
-         FILE *fout = fopen("tres.dat","w");
-         u_int32_t icha;
-         u_int32_t patternup, patterndown;
-         u_int32_t dly[5];
-         u_int32_t ccounters[17];
          int howlong;
-         double tres[16][32][8]; //format: channel delay bitslip
-         printf("which channel? (16-19 for FC0-3, 100 all)\n");
-         scanf("%d",&icha);
+         float errors[128][8][32];
+         u_int32_t ccounters[129];
          printf("How many usec each point? \n");
          scanf("%d",&howlong);
-         patterndown = 0xDEADBEEF;
-         patternup = 0xDEADBEEF;
-         if(icha==100) {   //all channels together
-           for(int iDly=0; iDly<32; iDly++){
-             printf("Testing Delay %02X\n",iDly);
-             for(icha = 0; icha<16; icha++){
-               // scan on any possible IDelay 
-               dly[icha/4] = (iDly & 0x1F)<<24 | (iDly & 0x1F)<<16 | (iDly & 0x1F)<<8 | (iDly & 0x1F);
-               TCBBoard.SetSerdesDelay(dly);
-               TCBBoard.SerdesReset(); //also resets the bitslip
-             }
-             for(int iBit=0; iBit<8; iBit++){
-               for(icha = 0; icha<16; icha++){
-                 // scan on any possible bitslip
-                 TCBBoard.SerdesBitslip(icha);
-               }
-               // disable transmission check
-               TCBBoard.SetEnableTransmissionCheck(0);
-               // reset transmission check
-               TCBBoard.ResetTransmissionCheck();
-               // enable Transmission check
-               TCBBoard.SetEnableTransmissionCheck(1);
-               // wait
+         FILE *fout = fopen("tres.dat","w");
+         fprintf(fout,"%s %d\n", TCBBoard.fmscb_device, TCBBoard.fnserdes);
+
+         TCBBoard.SetCheckWord(0xdeadbeef, 0xdeadbeef);
+
+         for(int idly =0; idly<32; idly++){
+            for(int ibit=0; ibit<8; ibit++){
+               //configure everything
+               /*for(int iserdes=0; iserdes < TCBBoard.fnserdes; iserdes++){
+                  for(int ilink=0; ilink<8; ilink++){
+                     TCBBoard.ConfigureSingleSerdes(iserdes, ilink, idly, ibit);
+                  }
+               }*/
+              TCBBoard.ConfigureAllSerdes(idly, ibit);
+
+               TCBBoard.StartSerdesCheck();
+
                usleep(howlong);
-               // disable transmission check
-               TCBBoard.SetEnableTransmissionCheck(0);
-               // read the counters
-               TCBBoard.GetCheckCounters(ccounters);
-               // print the result only if good
-               for(icha = 0; icha<16; icha++){
-                 if( ccounters[icha] == 0) 
-                   printf(" serdes %d iDly %02X, bitslip %d, number of tests %d \n", icha, iDly, iBit, ccounters[16]);
-                 tres[icha][iDly][iBit] = (double) ccounters[icha]/ccounters[16];
+
+               TCBBoard.StopSerdesCheck();
+               TCBBoard.GetSerdesErrorCount(ccounters);
+               fprintf(fout,"%d %d ", idly, ibit);
+               for(int icounter=0; icounter<TCBBoard.fnserdes*8; icounter++){
+                 //printf("id (%3d) = %08x\n", icounter, ccounters[icounter]);
+                  //if(ccounters[icounter]==0) printf("channel %d ok with dly %d and bitslip %d\n", icounter, idly, ibit);
+                  errors[icounter][ibit][idly] = ccounters[icounter]*1./ccounters[TCBBoard.fnserdes*8];
+                  fprintf(fout,"%le ", ccounters[icounter]*1./ccounters[TCBBoard.fnserdes*8]);
                }
-             }
-           }       
-           
-           printf("\nDl Bt    0       1       2       3       4       5       6       7       8       9      10       11      12      13      14      15\n");
-           printf("-------------------------------------------------------------------------------------------------------------------------------------\n");
-           for(int a=0; a<8; a++) for(int b=0; b<32; b++) {
-               printf("%2x %2X ", b, a);
-               fprintf(fout,"%d %d ", b, a);
-               for(int iSerdes=0; iSerdes<16; iSerdes++) {
-                 if(tres[iSerdes][b][a] > 0)
-                   printf("%.5f ", tres[iSerdes][b][a]);
-                 else 
-                   printf("\e[1;34m%.5f \e[0m", tres[iSerdes][b][a]);  
-                 fprintf(fout,"%le ", tres[iSerdes][b][a]);
-               }
-               printf("\n");
                fprintf(fout,"\n");
-             }
-           fclose(fout);
-         }
-         else {
-           for(int iDly=0; iDly<32; iDly++){
-             printf("Testing Delay %02X\n",iDly);
-             // scan on any possible IDelay 
-             dly[icha/4] = (iDly & 0x1F) << (icha%4)*8;
-             TCBBoard.SetSerdesDelay(dly);
-             TCBBoard.SerdesReset(); //also resets the bitslip
-             for(int iBit=0; iBit<8; iBit++){
-               // scan on any possible bitslip
-               TCBBoard.SerdesBitslip(icha);
-               // disable transmission check
-               TCBBoard.SetEnableTransmissionCheck(0);
-               // reset transmission check
-               TCBBoard.ResetTransmissionCheck();
-               // enable Transmission check
-               TCBBoard.SetEnableTransmissionCheck(1);
-               // wait 
-               usleep(howlong);
-               // disable transmission check
-               TCBBoard.SetEnableTransmissionCheck(0);
-               // read the counters
-               TCBBoard.GetCheckCounters(ccounters);
-               // print the result only if good
-               if( ccounters[icha] == 0) 
-                 printf(" serdes %d iDly %02X, bitslip %d, number of tests %d \n", icha, iDly, iBit, ccounters[16]);
-               tres[icha][iDly][iBit] = (double) ccounters[icha]/ccounters[16];
-             }
-           }
-         }
-      }
-      if(option == 24) {
-        printf(" opt 24 = write serdes default value ... \n");
-        if((TCBBoard.GetIDCode()>>12)==0x3){
-          filsdly = fopen("serdesmasterdly.dat","read");
-        } else {
-          filsdly = fopen("serdesdly.dat","read");
-        }
-        for(int irow = 0; irow<5; irow++) {
-          fscanf(filsdly,"%x\n",sdly+irow);
-        }
-        int bitslip[20];
-        for(int irow = 0; irow<20; irow++) {
-          fscanf(filsdly,"%d\n",bitslip+irow);
-        }
-        TCBBoard.SerdesReset();
-        TCBBoard.SetSerdesDelay(sdly);
-        int flag=1;
-        while(flag){
-          flag=0;
-          for(int i=0; i<20; i++){
-            if(bitslip[i]!=0){
-              flag=1;
-              TCBBoard.SerdesBitslip(i);
-              bitslip[i]--;
+               printf(" ******************* dly %d/31 ************\r", idly);
+               fflush(stdin);
             }
-          }
-        }
+         }
+
+         fclose(fout);
+
+         fout = fopen("serdesconfig.dat","w");
+         //search eyes
+         const float thr = 1e-20;
+         for(int icounter=0; icounter<TCBBoard.fnserdes*8; icounter++){
+            float bestCenter=-1;
+            int bestWidth=-1;
+            int bestBitslip=-1;
+            for(int ibit=0; ibit<8; ibit++){
+               int state=0;
+               int start =-1;
+               int stop =-1;
+               for(int idly=0; idly<32 && state!=2; idly++){
+                  if(errors[icounter][ibit][idly]<thr && state==0){
+                     state=1;
+                     start=idly;
+                     stop=idly;
+                  }
+                  if (errors[icounter][ibit][idly]<thr && state == 1){
+                     stop=idly;
+                  } else if(errors[icounter][ibit][idly] >= thr && state == 1){
+                     state=2;
+                  }
+               }
+
+               int width= stop-start;
+               if(width > bestWidth){
+                  bestWidth = width;
+                  bestCenter = (stop+start)/2;
+                  bestBitslip = ibit;
+               }
+            }
+
+            printf("channel %d: dly %f, bit %d width %d\n", icounter, bestCenter, bestBitslip, bestWidth);
+            fprintf(fout, "%d %d\n", (int)bestCenter, bestBitslip);
+            if(bestWidth > 0) TCBBoard.ConfigureSingleSerdes(icounter/8, icounter%8, (int)(bestCenter), bestBitslip);
+         }
+         fclose(fout);
+
       }
-      if(option == 25) {
-        printf(" opt = 25 : Set trigger mask ... \n");
+      if(option == 21) {
+         printf(" opt 21 = load serdes value from file ... \n");
+         FILE *fin = fopen("serdesconfig.dat","r");
+         for(int iLink=0; iLink<TCBBoard.fnserdes*8; iLink++){
+            int dly, bit;
+            fscanf(fin, "%d %d\n", &dly, &bit);
+            TCBBoard.ConfigureSingleSerdes(iLink/8, iLink%8,  dly, bit);
+         }
+         fclose(fin);
+      }
+      if(option == 22) {
+        printf(" opt = 22 : Start Serdes check ... \n");
+        TCBBoard.StartSerdesCheck();
+      }
+      if(option == 23) {
+        printf(" opt = 23 : Set trigger mask ... \n");
         printf("Serdes Mask?(hex) ");
         scanf("%x",&data);
         TCBBoard.SetSerdesMask(&data);
       }
-      if(option == 26) {
+      if(option == 24) {
         u_int32_t offset;
-        printf(" opt = 26 : Set Parameter ... \n");
+        printf(" opt = 24 : Set Parameter ... \n");
         printf("Parameter offset? ");
         scanf("%d",&offset);
         printf("Value?(hex) ");
         scanf("%x",&data);
         TCBBoard.SetParameter(offset, &data);
       }
-      if(option == 27) {
+      if(option == 25) {
         u_int32_t valdo, valup;
-        printf(" opt = 27 : Set control words ... \n");
+        printf(" opt = 25 : Set control words ... \n");
         printf("Control word [31:0]? (hex)\n");
         scanf("%x",&valdo);
         printf("Control word [63:32]? (hex)\n");
         scanf("%x",&valup);
         TCBBoard.SetCheckWord(valdo,valup);
         TCBBoard.GetCheckWord();
+        /*printf("Control word mask [31:0]? (hex)\n");
+        scanf("%x",&valdo);
+        printf("Control word mask [63:32]? (hex)\n");
+        scanf("%x",&valup);
+        TCBBoard.SetCheckWordMask(valdo,valup);
+        TCBBoard.GetCheckWordMask();*/
       }
-      if(option == 28) {
-        printf(" opt = 28 : Get Check Status ... \n");
-        TCBBoard.GetCheckStatus();
+      if(option == 26) {
+         printf(" opt = 26 : Get Check Status ... \n");
+         //TCBBoard.GetCheckStatus();
+         u_int32_t data[4];
+         TCBBoard.GetSerdesError(data);
+         for (int i=0; i<4; i++){
+            printf("Link[%3d:%3d]= %08x\n", (i+1)*32, i*32, data[i]);
+         }
       }
-      if(option == 29) {
+      if(option == 27) {
         int trgid;
-        printf(" opt = 29 : Force a trigger ... \n");
+        printf(" opt = 27 : Force a trigger ... \n");
         printf("Trigger Id? from 0 to %d \n",TCBBoard.fntrg-1);
         scanf("%d",&trgid);
         TCBBoard.ForceTrigger(trgid);
       }
-      if(option == 30) {
-        printf(" opt = 30 : Reset and enable serdes check ... \n");
-        // disable transmission check
-        TCBBoard.SetEnableTransmissionCheck(0);
-        // reset transmission check
-        TCBBoard.ResetTransmissionCheck();
-        // enable Transmission check
-        TCBBoard.SetEnableTransmissionCheck(1);
+      if(option == 28) {
+        printf(" opt = 28 : Reset transmitter ... \n");
+        TCBBoard.ResetTransmitter();
       }
       /* end of the main loop on the options*/
    } while ( option >= 0);
