@@ -838,9 +838,11 @@ void WDB::SetLmkInputFreq(unsigned int f)
    if (f == 100) {       // R = 20, N = 40
       SetRegMask(WD2_REG_LMK_14_OFS, WD2_BIT_LMK14_PLL_R_MASK, WD2_BIT_LMK14_PLL_R_OFS, 20);
       SetRegMask(WD2_REG_LMK_15_OFS, WD2_BIT_LMK15_PLL_N_MASK, WD2_BIT_LMK15_PLL_N_OFS, 40);
+      SetRegMask(WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_EXT_CLK_FREQ_MASK, WD2_BIT_EXT_CLK_FREQ_OFS, 0x64);
    } else if (f == 80) { // R = 12, N = 40
       SetRegMask(WD2_REG_LMK_14_OFS, WD2_BIT_LMK14_PLL_R_MASK, WD2_BIT_LMK14_PLL_R_OFS, 12);
       SetRegMask(WD2_REG_LMK_15_OFS, WD2_BIT_LMK15_PLL_N_MASK, WD2_BIT_LMK15_PLL_N_OFS, 40);
+      SetRegMask(WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_EXT_CLK_FREQ_MASK, WD2_BIT_EXT_CLK_FREQ_OFS, 0x50);
    } else {
       throw std::runtime_error(std::string("Unsupported LMK03000 input frequency"));
    }
@@ -1374,6 +1376,7 @@ void WDB::ResetDcbOserdesIf()
 void WDB::ResetTcbOserdesPll()
 {
    SetRegMask(WD2_REG_RST_OFS, WD2_BIT_TCB_OSERDES_IF_RST_MASK, WD2_BIT_TCB_OSERDES_IF_RST_OFS, 1);
+   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_TCB_OSERDES_IF_RST_MASK, WD2_BIT_TCB_OSERDES_IF_RST_OFS, 0);
 }
 
 void WDB::ResetTcbOserdesIf()

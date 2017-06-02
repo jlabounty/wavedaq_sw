@@ -46,6 +46,7 @@ int main(int argc, char *argv[])
    TCBBoard.fh = mscb_init(TCBBoard.fmscb_device, 0, "", 0);
    TCBBoard.SetIDCode();
    TCBBoard.SetNTRG();
+   TCBBoard.fverbose=1;
 
    /* main loop on the options */
    do {
@@ -64,6 +65,7 @@ int main(int argc, char *argv[])
       printf("[23]: Write SERDES Mask    \t \t  [24]: Set Parameter\n");
       printf("[25]: Serdes check word    \t \t  [26]: Read serdes status\n");
       printf("[27]: Force a trigger      \t \t  [28]: Reset Transmitter\n");
+      printf("[29]: Automatic Serdes cal \t \t  \n");
       printf("[-1]: Exit\n");
 
       do {
@@ -450,6 +452,10 @@ int main(int argc, char *argv[])
       if(option == 28) {
         printf(" opt = 28 : Reset transmitter ... \n");
         TCBBoard.ResetTransmitter();
+      }
+      if(option == 29) {
+        printf(" opt = 29 : Automatic serdes scan ... \n");
+        TCBBoard.CalibrateSerdes();
       }
       /* end of the main loop on the options*/
    } while ( option >= 0);

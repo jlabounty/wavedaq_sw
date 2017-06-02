@@ -459,30 +459,30 @@ void TCB::GetRRUN(u_int32_t *data)
 {
    u_int32_t addr = RRUN;
    ReadReg(addr,data);
-#ifdef DEBUG
-   if((*data&0xF000000)>>24==0xF) {
-     printf("\n*********************************************************************************************************************\n");
-     printf("** Board configured to drive the trigger bus to the fron panel connector, check the cable to the Ancillary Master! **\n");
-     printf("*********************************************************************************************************************\n\n");
-   }   
-   else if((*data&0xF000000)>>24==0xB) {
-     printf("\n****************************************************************\n");
-     printf("** Board configured to drive the trigger bus to the backplane **\n");
-     printf("****************************************************************\n\n");
+   if(fverbose){
+      if((*data&0xF000000)>>24==0xF) {
+         printf("\n*********************************************************************************************************************\n");
+         printf("** Board configured to drive the trigger bus to the fron panel connector, check the cable to the Ancillary Master! **\n");
+         printf("*********************************************************************************************************************\n\n");
+      }   
+      else if((*data&0xF000000)>>24==0xB) {
+         printf("\n****************************************************************\n");
+         printf("** Board configured to drive the trigger bus to the backplane **\n");
+         printf("****************************************************************\n\n");
+      }
+      printf(" RUNMODE status %x \n",*data&0x1);
+      printf(" FADCMODE status %x \n",(*data&0x4)>>2);
+      printf(" TESTTXMODE status %x \n",(*data&0x20)>>5);
+      if( (fidcode>>12)==2 || (fidcode>>12)==1 ) 
+         printf(" DBGSERDES status %x \n",(*data&0x100)>>9);
+      printf(" INBUSY status %x \n",(*data&0x2)>>1);
+      printf(" EXBUSY status %x \n",(*data&0x8)>>3);
+      printf(" ENABLE TRGBUS status %x \n",(*data&0x10)>>4);
+      printf(" MASKBUSY status %x \n",(*data&0x2000)>>13);
+      printf(" MASKSYNC status %x \n",(*data&0x4000)>>14);
+      printf(" MASKTRG status %x \n",(*data&0x8000)>>15);
+      printf(" IDCODE status %x \n",(*data&0xffff0000)>>16);
    }
-   printf(" RUNMODE status %x \n",*data&0x1);
-   printf(" FADCMODE status %x \n",(*data&0x4)>>2);
-   printf(" TESTTXMODE status %x \n",(*data&0x20)>>5);
-   if( (fidcode>>12)==2 || (fidcode>>12)==1 ) 
-     printf(" DBGSERDES status %x \n",(*data&0x100)>>9);
-   printf(" INBUSY status %x \n",(*data&0x2)>>1);
-   printf(" EXBUSY status %x \n",(*data&0x8)>>3);
-   printf(" ENABLE TRGBUS status %x \n",(*data&0x10)>>4);
-   printf(" MASKBUSY status %x \n",(*data&0x2000)>>13);
-   printf(" MASKSYNC status %x \n",(*data&0x4000)>>14);
-   printf(" MASKTRG status %x \n",(*data&0x8000)>>15);
-   printf(" IDCODE status %x \n",(*data&0xffff0000)>>16);
-   #endif
 }
 // read the RENA register
 void TCB::GetRENA(u_int32_t *data, int iword)
@@ -872,7 +872,11 @@ void TCB::CalibrateSerdes(){
                }
             }
 
-            if(bestWidth > 0) ConfigureSingleSerdes(icounter/8, icounter%8, (int)(bestCenter), bestBitslip);
+            if(bestWidth > 0){
+               if(fverbose) printf("Setting Serdes %2d Link %1d at delay %2d bitslip %d (width %3d)\n", icounter/8, icounter%8, (int)(bestCenter), bestBitslip, bestWidth);
+               ConfigureSingleSerdes(icounter/8, icounter%8, (int)(bestCenter), bestBitslip);
+            }
+            else if(fverbose) printf("could not find eye for serdes %d, link%d\n", icounter/8, icounter%8);
          }
 
 }
