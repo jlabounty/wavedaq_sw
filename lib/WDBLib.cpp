@@ -823,6 +823,29 @@ void WDB::SetDrsSampleFreq(unsigned int f)
    ReceiveStatusRegister(WD2_REG_DRS_SAMPLE_FREQ_OFS);
 }
 
+unsigned int WDB::GetLmkInputFreq()
+{
+   auto r = bitExtract(creg, WD2_REG_LMK_14_OFS, WD2_BIT_LMK14_PLL_R_MASK, WD2_BIT_LMK14_PLL_R_OFS);
+   if (r == 12)
+      return 80;
+   if (r == 20)
+      return 100;
+   return 0;
+}
+
+void WDB::SetLmkInputFreq(unsigned int f)
+{
+   if (f == 100) {       // R = 20, N = 40
+      SetRegMask(WD2_REG_LMK_14_OFS, WD2_BIT_LMK14_PLL_R_MASK, WD2_BIT_LMK14_PLL_R_OFS, 20);
+      SetRegMask(WD2_REG_LMK_15_OFS, WD2_BIT_LMK15_PLL_N_MASK, WD2_BIT_LMK15_PLL_N_OFS, 40);
+   } else if (f == 80) { // R = 12, N = 40
+      SetRegMask(WD2_REG_LMK_14_OFS, WD2_BIT_LMK14_PLL_R_MASK, WD2_BIT_LMK14_PLL_R_OFS, 12);
+      SetRegMask(WD2_REG_LMK_15_OFS, WD2_BIT_LMK15_PLL_N_MASK, WD2_BIT_LMK15_PLL_N_OFS, 40);
+   } else {
+      throw std::runtime_error(std::string("Unsupported LMK03000 input frequency"));
+   }
+}
+
 unsigned int WDB::GetAdcSampleFreq()
 // sampling frequency in MHz
 {

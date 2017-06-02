@@ -500,6 +500,8 @@ public:
    bool IsIntPllLck(bool refresh = true);
    unsigned int GetDrsSampleFreq();
    void SetDrsSampleFreq(unsigned int f);
+   unsigned int GetLmkInputFreq();
+   void SetLmkInputFreq(unsigned int f);
    unsigned int GetAdcSampleFreq();
    unsigned int GetAdcInfo();
    
