@@ -3008,14 +3008,19 @@ void GetTimeStamp(TIMESTAMP &ts)
 void WP::SaveWaveforms()
 {
    static unsigned char *buffer = NULL;
+   int buffer_size;
    unsigned char *p;
-   
-   int buffer_size = 8 + 4 + (1024*4+12)*18 + (1024*2+12)*18;
-   if (!buffer)
-      buffer = (unsigned char *)malloc(buffer_size);
    
    if (li.fh == 0 && li.xml == NULL)
       return;
+
+   int n = mEvent.size();
+   buffer_size = 8 + n*(4+18*(4+1024*4)); // time array
+   buffer_size += 8+16+n*(4+18*(12+1024*2));  // voltage array
+   if (!buffer) {
+      buffer = (unsigned char *)malloc(buffer_size);
+      assert(buffer);
+   }
    
    TIMESTAMP ts;
    GetTimeStamp(ts);
@@ -3081,11 +3086,14 @@ void WP::SaveWaveforms()
          memcpy(p, "TIME", 4);
          p += 4;
          
-         for (auto it = mEvent.begin() ; it != mEvent.end() ; it++) {
-            auto ev = (*it);
+         for (auto b=0 ; b<mEvent.size() ; b++) {
+            auto ev = mEvent[b];
             int mask = GetEventRequestMask(ev->mBoardId);
             WDB *wdb = GetBoard(ev->mBoardId);
             assert(wdb);
+            
+            if (!li.bAll && b != li.board)
+               continue;
 
             // store board serial number
             sprintf((char *)p, "B#");
@@ -3129,10 +3137,13 @@ void WP::SaveWaveforms()
       *(unsigned short *)p = (unsigned short)(0); // range
       p += sizeof(unsigned short);
       
-      for (auto it = mEvent.begin() ; it != mEvent.end() ; it++) {
-         auto ev = (*it);
+      for (auto b = 0 ; b<mEvent.size() ; b++) {
+         auto ev = mEvent[b];
          int mask = GetEventRequestMask(ev->mBoardId);
          
+         if (!li.bAll && b != li.board)
+            continue;
+
          // store board serial number
          sprintf((char *)p, "B#");
          p += 2;
@@ -3176,7 +3187,7 @@ void WP::SaveWaveforms()
       int size = p - buffer;
       int n = write(li.fh, buffer, size);
       assert(n == size);
-      assert(size < buffer_size);
+      assert(size <= buffer_size);
    }
    
    li.nLogged++;
@@ -4068,13 +4079,14 @@ void WP::DoCalibrationTimeStep()
 
 //--------------------------------------------------------------------
 
-void WP::StartWaveformSaving(std::string fileName, int format, bool all, int nEvents)
+void WP::StartWaveformSaving(std::string fileName, int format, bool all, int board, int nEvents)
 {
    li.fileName = fileName;
-   li.format  = format;
+   li.format   = format;
    li.nRequest = nEvents;
-   li.bAll  = all;
-   li.nLogged = 0;
+   li.bAll     = all;
+   li.board    = board;
+   li.nLogged  = 0;
    
    if (li.format == cLiFormatBinary) {
       if (li.fh > 0)

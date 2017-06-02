@@ -488,7 +488,7 @@ function setParam(e, channel) {
 
    if (e.name == "clkSource" && e.checked == true) {
       if (OSC.wdb[OSC.curBoard].scaler[17] < 79E6)
-         dlgMessage("Error", "No external clock present", true);
+         dlgMessage("Error", "No external clock present", true, true);
    }
    
    var uri = e.name+"/";
@@ -1370,6 +1370,11 @@ function btnStart() {
       return;
    }
 
+   if (document.getElementById("saveboards").selectedOptions[0].value == "all") {
+      dlgMessage("Error", "Saving all boards only works with a global crate trigger", true, true);
+      return;
+   }
+   
    var b = document.getElementById('btnSave');
    b.innerHTML = "Stop";
    b.style.border = "3px solid #00A0FF";
@@ -1389,7 +1394,7 @@ function btnStart() {
    param += "\n";
    param += document.getElementById("fileformat").selectedOptions[0].value;
    param += "\n";
-   param += document.getElementById("saveboards").selectedOptions[0].value;
+   param += document.getElementById("saveboards").selectedOptions[0].value == "all" ? "all" : OSC.curBoard;
    param += "\n";
    param += ne;
    req.open("PUT", "save", true);

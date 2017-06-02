@@ -397,7 +397,7 @@ public:
    void DoCalibrationVoltageStep();
    void DoCalibrationTimeStep();
    
-   void StartWaveformSaving(std::string fileName, int format, bool bAll, int nEvents);
+   void StartWaveformSaving(std::string fileName, int format, bool bAll, int board, int nEvents);
    void StopLogging();
    unsigned int GetNLogged() { return li.nLogged; }
    void SaveWaveforms();
