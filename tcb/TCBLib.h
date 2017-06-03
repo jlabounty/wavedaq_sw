@@ -53,9 +53,7 @@ typedef struct {
     unsigned short     syncoutdly;
     unsigned short     sproutdly;
     unsigned short     algsel;
-    bool               triggerenable[128];
     unsigned int       serdesmask;
-    unsigned int       prescaling[128];
 } TCB_SETTINGS;
 
 
@@ -130,6 +128,8 @@ public:
    void SetRRUN(u_int32_t*);
    // set rena register
    void SetRENA(u_int32_t*,int);
+   // set rena register
+   void SetTriggerEnable(bool *);
    // set ralgsel register
    void SetRALGSEL(u_int32_t*);
    // get rrun register

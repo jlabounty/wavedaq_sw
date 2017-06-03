@@ -102,14 +102,14 @@ int TCB::InitType3(TCB_SETTINGS *ts){
    // read the number of trigger available
    
    // load RENA register
-   u_int32_t trgenable = 0;
+   /*u_int32_t trgenable = 0;
    int nword = fntrg/32 + 1;
    for(int iword = 0; iword <nword; iword++){
      for (int itrg=0; itrg<32; itrg++){
        trgenable |= ts->triggerenable[itrg+iword*32]<<itrg;
      }
      SetRENA(&trgenable,iword);
-   }
+   }*/
    
    // serdes setup
 /*   u_int32_t sdly[5]={0x16121211,0x100A0716,0x14080910,0x14151717,0xFFFFFFFF};
@@ -125,7 +125,7 @@ int TCB::InitType3(TCB_SETTINGS *ts){
    SetTRGBusODLY((u_int32_t*) &ts->syncoutdly, (u_int32_t*) &ts->trgoutdly, (u_int32_t*) &ts->sproutdly);
    
    //set prescaling
-   SetPrescaling((u_int32_t*)ts->prescaling);
+   //SetPrescaling((u_int32_t*)ts->prescaling);
   
    //remove the busy
    RemoveBusy();
@@ -446,6 +446,21 @@ void TCB::SetRENA(u_int32_t *data, int iword)
 {
    u_int32_t addr = RENA + iword;
    WriteReg(addr,data);
+}
+// write the RENA according to bool array
+void TCB::SetTriggerEnable(bool *triggerenable)
+{
+   int nword = fntrg/32 + (((fntrg%32) !=0)?1:0);
+   printf("fntrg=%d\n", fntrg);
+   for(int iword = 0; iword <nword; iword++){
+     u_int32_t trgenable = 0;
+     for (int itrg=0; itrg<32; itrg++){
+       if(triggerenable[itrg+iword*32])
+          trgenable |= 1<<itrg;
+     }
+     SetRENA(&trgenable,iword);
+     printf("setting trgena %d/%d to %08x\n", iword, nword, trgenable);
+   }
 }
 // write the RALGSEL register
 void TCB::SetRALGSEL(u_int32_t *data)
