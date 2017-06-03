@@ -451,7 +451,6 @@ void TCB::SetRENA(u_int32_t *data, int iword)
 void TCB::SetTriggerEnable(bool *triggerenable)
 {
    int nword = fntrg/32 + (((fntrg%32) !=0)?1:0);
-   printf("fntrg=%d\n", fntrg);
    for(int iword = 0; iword <nword; iword++){
      u_int32_t trgenable = 0;
      for (int itrg=0; itrg<32; itrg++){
@@ -459,7 +458,7 @@ void TCB::SetTriggerEnable(bool *triggerenable)
           trgenable |= 1<<itrg;
      }
      SetRENA(&trgenable,iword);
-     printf("setting trgena %d/%d to %08x\n", iword, nword, trgenable);
+     if(fverbose) printf("setting trgena %d/%d to %08x\n", iword, nword, trgenable);
    }
 }
 // write the RALGSEL register

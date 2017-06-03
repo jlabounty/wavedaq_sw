@@ -171,10 +171,10 @@ int main(int argc, char *argv[])
          t.trgoutdly = 0;
          t.syncoutdly = 0;
          t.sproutdly = 0;
-         for(int iTRG =0; iTRG<TCBBoard.fntrg; iTRG++){
+         /*for(int iTRG =0; iTRG<TCBBoard.fntrg; iTRG++){
             t.triggerenable[iTRG] = 0;
             t.prescaling[iTRG] = 1;
-         }
+         }*/
          t.serdesmask = 0x000FFFFF;
          t.algsel = 0;
 
