@@ -39,9 +39,10 @@ int TCB::InitType1(TCB_SETTINGS *ts){
    SerdesReset();
    SetSerdesDelay(sdly);
    SetBitslip(bitslip);
+   */
    u_int32_t serdesmaskreg = ts->serdesmask;
    SetSerdesMask(&serdesmaskreg);
-   */
+
    //Input TRGBUS
    SetTRGBusIDLY((u_int32_t*) &ts->syncindly, (u_int32_t*) &ts->trgindly, (u_int32_t*) &ts->sprindly);
 
@@ -73,9 +74,10 @@ int TCB::InitType2(TCB_SETTINGS *ts){
    SerdesReset();
    SetSerdesDelay(sdly);
    SetBitslip(bitslip);
+*/
    u_int32_t serdesmaskreg = ts->serdesmask;
    SetSerdesMask(&serdesmaskreg);
-*/
+
    //Input TRGBUS
    SetTRGBusIDLY((u_int32_t*) &ts->syncindly, (u_int32_t*) &ts->trgindly, (u_int32_t*) &ts->sprindly);
 
@@ -117,9 +119,10 @@ int TCB::InitType3(TCB_SETTINGS *ts){
    SerdesReset();
    SetSerdesDelay(sdly);
    SetBitslip(bitslip);
+*/
    u_int32_t serdesmaskreg = ts->serdesmask;
    SetSerdesMask(&serdesmaskreg);
-*/
+
    //set serdes delay
    SetTRGBusIDLY((u_int32_t*) &ts->syncindly, (u_int32_t*) &ts->trgindly, (u_int32_t*) &ts->sprindly);
    SetTRGBusODLY((u_int32_t*) &ts->syncoutdly, (u_int32_t*) &ts->trgoutdly, (u_int32_t*) &ts->sproutdly);
