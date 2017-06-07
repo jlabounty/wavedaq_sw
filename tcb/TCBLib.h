@@ -17,6 +17,7 @@
 #define RTRGFORCE     0x40                      // force a trigger (first address)
 #define RCHKCOU       0x50                      // serdes counter check (first address)
 #define RCHKTIM       0x60                      // serdes cycles counter for normalisation
+#define RCMD          0xFF                      // daq state machine control
 #define RPRESCA       0x100                     // prescaling value first address
 #define RTOTTIME      0x200                     // total time
 #define RLIVETIME     0x201                     // live time

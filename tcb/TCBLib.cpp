@@ -359,15 +359,13 @@ void TCB::ReadMemoryBLT(int which, u_int32_t *data)
    }
 }
 
-// activate the RUNMODE signal
+// activate the RUNMODE signal (by removing interal busy)
 void TCB::GoRun()
 {
-   u_int32_t addr = RRUN;
+   u_int32_t addr = RCMD;
    u_int32_t data;
-   // first read the RRUN register to copy the current status
-   ReadReg(addr,&data);
    // now set the runmode
-   data = (data&0xFFFFFFFC) | 0x1;
+   data = 0x1;
    WriteReg(addr,&data);
 }
 
@@ -393,48 +391,31 @@ int TCB::IsBusy()
    return (data);
 }
 
-// remove the internal BUSY signal
+// remove the internal BUSY signal: identical to GORUN with runmode state machine
 void TCB::RemoveBusy()
 {
-   u_int32_t addr = RRUN;
+  u_int32_t addr = RCMD;
    u_int32_t data;
-   // remove the busy until it is not read back
-   do {
-      // first read the RRUN register to copy the current status
-      ReadReg(addr,&data);
-      // now remove the busy
-      data = (data&0xFFFFFFFC) | 0x2;
-      // now set the busy
-      WriteReg(addr,&data);
-      ReadReg(addr,&data);
-   } while(TCB::IsBusy()==1);
+   // now set the runmode
+   data = 0x1;
+   WriteReg(addr,&data);
 }
 
 // activate the internal Sync signal
 void TCB::SWSync()
 {
-   u_int32_t addr = RRUN;
+   u_int32_t addr = RCMD;
    u_int32_t data;
-   
-   // first read the RRUN register to copy the current status
-   ReadReg(addr,&data);
-   
-   // now sync
-   data = (data&0xFFFFFFFC) | 0x80;
+   data = 0x4;
    WriteReg(addr,&data);
 }
 
 // activate the internal stop signal
 void TCB::SWStop()
 {
-   u_int32_t addr = RRUN;
+   u_int32_t addr = RCMD;
    u_int32_t data;
-
-   // first read the RRUN register to copy the current status
-   ReadReg(addr,&data);
-   
-   // now go to stop
-   data = (data&0xFFFFFFFC) | 0x40;
+   data = 0x2;
    WriteReg(addr,&data);
 }
 
