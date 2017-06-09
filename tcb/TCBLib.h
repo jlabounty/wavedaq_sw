@@ -183,8 +183,10 @@ public:
    void GetCheckWord();
    //configure a single serdes link
    void ConfigureSingleSerdes(int, int, short, int);
-   //configure a all serdes link
+   //configure all serdes link
    void ConfigureAllSerdes(short, int);
+   //configure all serdes delays and bits at once
+   void SetAllSerdes(u_int32_t *, int *);
    //reset transmitter
    void ResetTransmitter();
    //check an error on a given serdes link
@@ -196,7 +198,7 @@ public:
    //stop serdes check
    void StopSerdesCheck();
    //calibrate serdes
-   void CalibrateSerdes();
+   void CalibrateSerdes(u_int32_t *dlyout=0, int *bitout=0);
    //calibrate serdes
    void SetDbgserdes(bool);
 };

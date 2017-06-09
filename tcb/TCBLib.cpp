@@ -771,6 +771,44 @@ void TCB::ConfigureAllSerdes(short dly, int bitslip){
       //printf("current word(dly=%d bitsl=%d): %08x\n", dly, i, memval); //TODO: remove
    }
 }
+//configure a all serdes link
+void TCB::SetAllSerdes(u_int32_t *dlys, int *bits){
+   u_int32_t conf[32]={0};
+
+   for(int ilink=0; ilink<8*fnserdes; ilink++){
+      conf[ilink/4] |= 0x80 << (ilink%4)*8;
+   }
+   WriteBLT(RSERDESCONF, conf, fnserdes*8/4);
+
+   for(int i=0; i<32; i++)conf[i]=0;
+   for(int ilink=0; ilink<2*fnserdes; ilink++){
+      conf[ilink] |= (0x20202020|dlys[ilink]);
+   }
+   WriteBLT(RSERDESCONF, conf, fnserdes*8/4);
+
+   //load delay
+   u_int32_t loadval;
+   ReadReg(RSERDESTX, &loadval);
+   loadval |= 0x80000000;
+   WriteReg(RSERDESTX, &loadval);
+   loadval &= 0x7FFFFFFF;
+   WriteReg(RSERDESTX, &loadval);
+
+   u_int32_t data[4];
+   bool morebits = true;
+   while(morebits){
+      morebits = false;
+      for(int i=0; i<4; i++) data[i] = 0;
+      for(int ilink=0; ilink<8*fnserdes; ilink++){
+         if(bits[ilink]>0){
+            bits[ilink]--;
+            data[ilink/32] |= 1 << (ilink%32);
+            morebits = true;
+         }
+      }
+      WriteBLT(RSERDESBSLP, data, 4);
+   }
+}
 //check errors on serdes
 void TCB::ResetTransmitter(){
    u_int32_t val;
@@ -816,7 +854,7 @@ void TCB::StopSerdesCheck(){
    WriteReg(RSERDESTX, &enablevalue);
 }
 //calibrate serdes
-void TCB::CalibrateSerdes(){
+void TCB::CalibrateSerdes(u_int32_t *dlyout, int *bitout){
          float errors[128][8][32];
          u_int32_t ccounters[129];
 
@@ -829,7 +867,7 @@ void TCB::CalibrateSerdes(){
 
                StartSerdesCheck();
 
-               usleep(1000);
+               usleep(100);
 
                StopSerdesCheck();
                GetSerdesErrorCount(ccounters);
@@ -841,6 +879,8 @@ void TCB::CalibrateSerdes(){
 
          //search eyes
          const float thr = 1e-20;
+         u_int32_t dly[32] = {0};
+         int bit[128];
          for(int icounter=0; icounter<fnserdes*8; icounter++){
             float bestCenter=-1;
             int bestWidth=-1;
@@ -872,10 +912,19 @@ void TCB::CalibrateSerdes(){
 
             if(bestWidth > 0){
                if(fverbose) printf("Setting Serdes %2d Link %1d at delay %2d bitslip %d (width %3d)\n", icounter/8, icounter%8, (int)(bestCenter), bestBitslip, bestWidth);
-               ConfigureSingleSerdes(icounter/8, icounter%8, (int)(bestCenter), bestBitslip);
+               bit[icounter] = bestBitslip;
+               dly[icounter/4] |= (((int)(bestCenter))&0x1F)<<(icounter%4)*8;
+               //ConfigureSingleSerdes(icounter/8, icounter%8, (int)(bestCenter), bestBitslip);
             }
             else if(fverbose) printf("could not find eye for serdes %d, link%d\n", icounter/8, icounter%8);
          }
+
+         if(dlyout!=0 && bitout!=0){
+            memcpy(dlyout, dly, sizeof(u_int32_t)*32);
+            memcpy(bitout, bit, sizeof(int)*128);
+         }
+
+         SetAllSerdes(dly, bit);
 
 }
 //Set/unset DBGSERDES
