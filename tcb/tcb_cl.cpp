@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
       printf("[23]: Write SERDES Mask    \t \t  [24]: Set Parameter\n");
       printf("[25]: Serdes check word    \t \t  [26]: Read serdes status\n");
       printf("[27]: Force a trigger      \t \t  [28]: Reset Transmitter\n");
-      printf("[29]: Automatic Serdes cal \t \t  \n");
+      printf("[29]: Automatic Serdes cal \t \t  [30]: Dump Data \n");
       printf("[-1]: Exit\n");
 
       do {
@@ -456,6 +456,24 @@ int main(int argc, char *argv[])
       if(option == 29) {
         printf(" opt = 29 : Automatic serdes scan ... \n");
         TCBBoard.CalibrateSerdes();
+      }
+      if(option == 30) {
+        printf(" opt = 30 : Dump Data ... \n");
+        int ichannel;
+        u_int32_t rdataA[MEMDIM];
+        u_int32_t rdataB[MEMDIM];
+        u_int32_t address;
+        printf(" serdes channel number (0-15 input, 16 output)? \n");
+        scanf("%d",&ichannel);
+        TCBBoard.ReadSERDESMem(ichannel,0,rdataA);
+        TCBBoard.ReadSERDESMem(ichannel,1,rdataB);
+        TCBBoard.GetMemoryAddress(&address);
+        filout = fopen("dataout.dat","write");
+        fprintf(filout,"%04x %d %d %d\n", TCBBoard.fidcode, ichannel, address, MEMDIM);
+        for(int irow = 0; irow<MEMDIM; irow++) {
+           fprintf(filout,"%08x %08x\n",rdataB[irow], rdataA[irow]);
+        }
+        fclose(filout);
       }
       /* end of the main loop on the options*/
    } while ( option >= 0);
