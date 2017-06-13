@@ -494,9 +494,8 @@ public:
    bool IsWDBBusy();
    bool IsHvBoardPlugged();
    bool IsBackplanePlugged();
-   unsigned int GetExtPllLck(bool refresh = true);
+   unsigned int GetPllLck(bool refresh = true);
    bool IsExtPllLck(bool refresh = true);
-   unsigned int GetIntPllLck(bool refresh = true);
    bool IsIntPllLck(bool refresh = true);
    unsigned int GetDrsSampleFreq();
    void SetDrsSampleFreq(unsigned int f);

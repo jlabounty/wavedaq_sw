@@ -734,14 +734,23 @@ bool WDB::IsBackplanePlugged()
    return bitExtract(sreg, WD2_REG_STATUS_OFS, WD2_BIT_BACKPLANE_PLUGGED_MASK, WD2_BIT_BACKPLANE_PLUGGED_OFS) == 1;
 }
 
-unsigned int WDB::GetExtPllLck(bool refresh)
-// external PLLs (DRS, LMK)
+unsigned int WDB::GetPllLck(bool refresh)
+// all PLLs (DRS, LMK, FPGA DAQ, ISERDES, OSERDES)
 {
    if (refresh)
       ReceiveStatusRegister(WD2_REG_PLL_LOCK_OFS);
-   return bitExtract(sreg, WD2_REG_PLL_LOCK_OFS, WD2_BIT_DRS_PLL_LOCK_0_MASK |
-                     WD2_BIT_DRS_PLL_LOCK_1_MASK | WD2_BIT_LMK_PLL_LOCK_MASK,
-                     WD2_BIT_LMK_PLL_LOCK_OFS);
+   auto mask =
+   WD2_BIT_SYS_DCM_LOCK_MASK         |
+   WD2_BIT_DAQ_PLL_LOCK_MASK         |
+   WD2_BIT_OSERDES_PLL_LOCK_DCB_MASK |
+   WD2_BIT_OSERDES_PLL_LOCK_TCB_MASK |
+   WD2_BIT_ISERDES_PLL_LOCK_0_MASK   |
+   WD2_BIT_ISERDES_PLL_LOCK_1_MASK   |
+   WD2_BIT_DRS_PLL_LOCK_0_MASK       |
+   WD2_BIT_DRS_PLL_LOCK_1_MASK       |
+   WD2_BIT_LMK_PLL_LOCK_MASK;
+
+   return bitExtract(sreg, WD2_REG_PLL_LOCK_OFS, mask, WD2_BIT_LMK_PLL_LOCK_OFS);
 }
 
 bool WDB::IsExtPllLck(bool refresh)
@@ -754,23 +763,7 @@ bool WDB::IsExtPllLck(bool refresh)
                        WD2_BIT_LMK_PLL_LOCK_MASK;
    mask >>= WD2_BIT_LMK_PLL_LOCK_OFS;
    
-   return (GetExtPllLck(refresh) == mask);
-}
-
-unsigned int WDB::GetIntPllLck(bool refresh)
-// internal PLLs (FPGA DAQ, ISERDES, OSERDES)
-{
-   if (refresh)
-      ReceiveStatusRegister(WD2_REG_PLL_LOCK_OFS);
-   auto mask =
-   WD2_BIT_SYS_DCM_LOCK_MASK |
-   WD2_BIT_DAQ_PLL_LOCK_MASK |
-   WD2_BIT_OSERDES_PLL_LOCK_DCB_MASK |
-   WD2_BIT_OSERDES_PLL_LOCK_TCB_MASK |
-   WD2_BIT_ISERDES_PLL_LOCK_0_MASK |
-   WD2_BIT_ISERDES_PLL_LOCK_1_MASK;
-   
-   return bitExtract(sreg, WD2_REG_PLL_LOCK_OFS, mask, WD2_BIT_ISERDES_PLL_LOCK_1_OFS);
+   return (GetPllLck(refresh) == mask);
 }
 
 bool WDB::IsIntPllLck(bool refresh)
@@ -786,7 +779,7 @@ bool WDB::IsIntPllLck(bool refresh)
    WD2_BIT_ISERDES_PLL_LOCK_0_MASK |
    WD2_BIT_ISERDES_PLL_LOCK_1_MASK;
    mask >>= WD2_BIT_ISERDES_PLL_LOCK_1_OFS;
-   return (GetIntPllLck(refresh) == mask);
+   return (GetPllLck(refresh) == mask);
 }
 
 
