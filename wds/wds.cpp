@@ -944,8 +944,6 @@ int main(int argc, const char * argv[])
       std::cout << e.what() << std::endl;
       std::cout << "Aborting." << std::endl;
       
-      mg_mgr_free(&mgr);
-      
       return 1;
    }
    
