@@ -198,7 +198,7 @@ function wdSelect(s) {
 function loadStatus() {
    if (OSC.demoMode) {
       OSC.wdb[OSC.curBoard].temperature = 37.8;
-      OSC.wdb[OSC.curBoard].pllLck = true;
+      OSC.wdb[OSC.curBoard].pllLck = 0x1FF;
       return;
    }
 

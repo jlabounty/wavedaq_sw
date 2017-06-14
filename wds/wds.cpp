@@ -403,8 +403,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"wdbBusy\": %s,\n",                    w->IsSysBusy() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"hvBoardPlugged\": %s,\n",             w->IsHvBoardPlugged() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"hvBackplanePlugged\": %s,\n",         w->IsBackplanePlugged() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"extPllLck\": %s,\n",                  w->IsExtPllLck() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"intPllLck\": %s,\n",                  w->IsIntPllLck() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"pllLck\": %d,\n",                     w->GetPllLck());
          mg_printf_http_chunk(nc, "      \"drsSampleFreq\": %d,\n",              w->GetDrsSampleFreq());
          mg_printf_http_chunk(nc, "      \"adcSampleFreq\": %d,\n",              w->GetAdcSampleFreq());
          mg_printf_http_chunk(nc, "      \"compChannelStatus\": %d,\n",          w->GetCompChannelStatus());
@@ -486,7 +485,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
       mg_printf_http_chunk(nc, "{\n");
       mg_printf_http_chunk(nc, "   \"temperature\": %1.1lf,\n",   gl->wdb[b]->GetTemperature(false));
-      mg_printf_http_chunk(nc, "   \"pllLck\": %s\n",             gl->wdb[b]->IsExtPllLck(false) && gl->wdb[b]->IsIntPllLck(false) ? "true" : "false");
+      mg_printf_http_chunk(nc, "   \"pllLck\": %d\n",             gl->wdb[b]->GetPllLck(false));
       mg_printf_http_chunk(nc, "}\n");
       mg_send_http_chunk(nc, "", 0);
       return;
@@ -933,8 +932,7 @@ int main(int argc, const char * argv[])
          if (now > last + 10) {
             for (auto &b: gl.wdb) {
                b->GetTemperature(true);
-               b->IsExtPllLck(true);
-               b->IsIntPllLck(true);
+               b->GetPllLck(true);
             }
             last = now;
          }

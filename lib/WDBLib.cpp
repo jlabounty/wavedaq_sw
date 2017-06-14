@@ -763,7 +763,7 @@ bool WDB::IsExtPllLck(bool refresh)
                        WD2_BIT_LMK_PLL_LOCK_MASK;
    mask >>= WD2_BIT_LMK_PLL_LOCK_OFS;
    
-   return (GetPllLck(refresh) == mask);
+   return (((GetPllLck(refresh) >> WD2_BIT_LMK_PLL_LOCK_OFS) & mask) == mask);
 }
 
 bool WDB::IsIntPllLck(bool refresh)
@@ -779,7 +779,8 @@ bool WDB::IsIntPllLck(bool refresh)
    WD2_BIT_ISERDES_PLL_LOCK_0_MASK |
    WD2_BIT_ISERDES_PLL_LOCK_1_MASK;
    mask >>= WD2_BIT_ISERDES_PLL_LOCK_1_OFS;
-   return (GetPllLck(refresh) == mask);
+   
+   return (((GetPllLck(refresh) >> WD2_BIT_ISERDES_PLL_LOCK_1_OFS) & mask) == mask);
 }
 
 

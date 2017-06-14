@@ -426,15 +426,13 @@ Oscilloscope.prototype.drawMeasurements = function (ctx) {
 
 Oscilloscope.prototype.printStatus = function (ctx) {
    if (OSC.wdb != undefined) {
-      var locked = OSC.wdb[OSC.curBoard].pllLck;
-
-      if (locked == 0) {
+      if (OSC.wdb[OSC.curBoard].pllLck != 0x1FF) {
          ctx.fillStyle = 'red';
          ctx.strokeStyle = 'red';
          ctx.font = '48px sans-serif';
          ctx.textAlign = "center";
          ctx.textBaseline = "middle";
-         ctx.fillText("LMK PLL not locked!", (this.x1 + this.x2) / 2, (this.y1 + this.y2) / 2);
+         ctx.fillText("PLL not locked! (m=0x"+OSC.wdb[OSC.curBoard].pllLck.toString(16)+")", (this.x1 + this.x2) / 2, (this.y1 + this.y2) / 2);
       }
       
       if (!OSC.vCalibrated) {
