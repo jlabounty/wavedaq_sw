@@ -1,9 +1,10 @@
 /********************************************************************\
 
-  Name:         wd_fe.cpp
-  Created by:   Stefan Ritt
+  Name:         serdestest.cpp
+  Created by:   Luca Galli
 
-  Contents:     Frontend program for MEG II WaveDREAM readout
+  Contents:     Measure the serial link eye width between a WD board
+                and a TC board. 
 
 \********************************************************************/
 
@@ -26,17 +27,15 @@
 #include <vector>
 #include <map>
 
-
 // WD board
 WDB * wdb;
 // TCB board
 TCB* tcb;
 
-/*-- Frontend Init -------------------------------------------------*/
 int main(int argc, char** argv)
 {
-   //check arguments
-   if(argc!=3){
+   // check arguments
+   if (argc != 3) {
      printf("please use %s wdXXX mscbYYY\n", argv[0]);
      return 1;
    }   
@@ -52,7 +51,6 @@ int main(int argc, char** argv)
    wdb->ReceiveControlRegisters();
    
    wdb->SetSendBlocked(true); // update all control register together
-   
    
    // Set backplane clock source 80 MHz
    wdb->SetExtClkInSel(0);
