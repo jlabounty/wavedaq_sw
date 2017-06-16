@@ -938,3 +938,44 @@ void TCB::SetDbgserdes(bool enable){
    }
    WriteReg(RRUN, &data);
 }
+//Do a serdes Check according to serdesmask
+int TCB::CheckSerdes(){
+   u_int32_t data;
+   ReadReg(RSERDESMSK, &data);
+
+   //build masks
+   u_int32_t errormask[4] = { 0 };
+   for(int i=0; i<16; i++){
+      int mask = 1<<i;
+      if( data & mask ){
+        //channel enable
+        errormask[i/4] |= 0xFF << 8*(i%4);
+      }
+   }
+
+   SetCheckWord(0xdeadbeef, 0xdeadbeef);
+
+   StartSerdesCheck();
+
+   usleep(1000000);
+
+   StopSerdesCheck();
+
+   u_int32_t serdesstatus[4];
+   GetSerdesError(serdesstatus);
+
+   int ret = 1;
+
+   for(int i=0; i<4; i++){
+      if(serdesstatus[i] & errormask[i]){
+         ret = 0;
+      }
+   }
+
+   if(fverbose){
+      if(!ret) printf("serdes tx check failed. Got status: %08x %08x %08x %08x\n", serdesstatus[0] & errormask[0], serdesstatus[1] & errormask[1], serdesstatus[2] & errormask[2], serdesstatus[3] & errormask[3]);
+      else printf("serdes tx check succeeded\n");
+   }
+
+   return ret;
+}

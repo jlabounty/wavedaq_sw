@@ -201,4 +201,6 @@ public:
    void CalibrateSerdes(u_int32_t *dlyout=0, int *bitout=0);
    //calibrate serdes
    void SetDbgserdes(bool);
+   //do a serdes check
+   int CheckSerdes();
 };
