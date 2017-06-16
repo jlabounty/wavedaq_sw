@@ -1,12 +1,3 @@
-/********************************************************************\
-
-  Name:         wd_fe.cpp
-  Created by:   Stefan Ritt
-
-  Contents:     Frontend program for MEG II WaveDREAM readout
-
-\********************************************************************/
-
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
