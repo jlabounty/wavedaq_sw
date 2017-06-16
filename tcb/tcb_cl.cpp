@@ -18,8 +18,6 @@ void MemoryRewind(int ich, u_int32_t last, u_int32_t *mem, u_int32_t *outmem) {
       *outmem |= ((mem[(ich/32)*32+i]>>(ich%32))&0x1)<<((32-i+last)%32);  
 }
 
-const char *cmb_name = "mscb178";
-
 int main(int argc, char *argv[])
 {
    int handle,option;
@@ -37,7 +35,6 @@ int main(int argc, char *argv[])
    printf("interfacing with TCB_X_0 at %s:%s slot 17....\n", argv[1], argv[2]);
 
    // open mscb connection
-   //  handle = mscb_init("MSCB177", 0, "", 0);
    handle = mscb_init(argv[1], 0, "", 0);
    // create TCB Board
 
