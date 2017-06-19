@@ -858,7 +858,7 @@ void TCB::CalibrateSerdes(u_int32_t *dlyout, int *bitout){
          float errors[128][8][32];
          u_int32_t ccounters[129];
 
-         SetCheckWord(0xdeadbeef, 0xdeadbeef);
+         //SetCheckWord(0xdeadbeef, 0xdeadbeef);
 
          for(int idly =0; idly<32; idly++){
             for(int ibit=0; ibit<8; ibit++){
@@ -953,7 +953,7 @@ int TCB::CheckSerdes(){
       }
    }
 
-   SetCheckWord(0xdeadbeef, 0xdeadbeef);
+   //SetCheckWord(0xdeadbeef, 0xdeadbeef);
 
    StartSerdesCheck();
 

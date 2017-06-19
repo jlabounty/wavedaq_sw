@@ -27,6 +27,9 @@
 #include <vector>
 #include <map>
 
+#define TESTVALUE0 0xA5A5A5A5
+#define TESTVALUE1 0xA5A5A5A5
+
 // WD board
 WDB * wdb;
 // TCB board
@@ -63,6 +66,8 @@ int main(int argc, char** argv)
    
    // Set training pattern
    wdb->SetAdvTrgCfg(0, 0x00000030);
+   wdb->SetAdvTrgCfg(9, TESTVALUE0);
+   wdb->SetAdvTrgCfg(10, TESTVALUE1);
    
    // now send all changed registers in one packet
    wdb->SetSendBlocked(false);
@@ -84,10 +89,11 @@ int main(int argc, char** argv)
    //perform scan
    u_int32_t dly[32];
    int bit[128];
-   std::cout<<tcb->fverbose<<std::endl;
+   tcb->SetCheckWord(TESTVALUE0, TESTVALUE1);
+   std::cout << "TEST in progress, please wait...." << std::endl;
    tcb->CalibrateSerdes(dly, bit);
 
-   std::cout << "OK" << std::endl;
+   std::cout << "DONE" << std::endl;
 
    return 0;
 }
