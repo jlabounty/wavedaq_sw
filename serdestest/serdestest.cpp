@@ -48,6 +48,10 @@ int main(int argc, char** argv)
    tcb = new TCB(argv[2], 20, 17,1);
    tcb->fh = mscb_init(argv[2], 0, "", 0);
    tcb->SetIDCode();
+   if(tcb->fnserdes!=16) {
+      printf("Problem in communication with TCB....\n");
+      return 1;
+   }
    tcb->fverbose = 1;
 
    wdb->Connect();
