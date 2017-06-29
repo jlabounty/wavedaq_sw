@@ -624,6 +624,11 @@ void WDB::PrintVersion()
    std::cout << "Serial number:       " << GetSerialNumber() << std::endl;
 }
 
+unsigned int bcd2dec(unsigned int bcd)
+{
+   return ((bcd & 0xF000) >> 12) * 1000 + ((bcd & 0x0F00) >> 8) * 100 + ((bcd & 0x00F0) >> 4) * 10 + (bcd & 0xF);
+}
+
 std::string WDB::GetFwBuild()
 {
    std::ostringstream s;
@@ -636,13 +641,13 @@ std::string WDB::GetFwBuild()
    
    s << "FW Build:            ";
    s << std::dec << std::setw(2) << std::setfill('0');
-   s << monthName[bitExtract(sreg, WD2_REG_FW_BUILD_DATE_OFS, WD2_BIT_FW_BUILD_MONTH_MASK, WD2_BIT_FW_BUILD_MONTH_OFS)-1] << ' ';
-   s << bitExtract(sreg, WD2_REG_FW_BUILD_DATE_OFS, WD2_BIT_FW_BUILD_DAY_MASK, WD2_BIT_FW_BUILD_DAY_OFS) << ' ';
-   s << bitExtract(sreg, WD2_REG_FW_BUILD_DATE_OFS, WD2_BIT_FW_BUILD_YEAR_MASK, WD2_BIT_FW_BUILD_YEAR_OFS) << "  ";
+   s << monthName[bcd2dec(bitExtract(sreg, WD2_REG_FW_BUILD_DATE_OFS, WD2_BIT_FW_BUILD_MONTH_MASK, WD2_BIT_FW_BUILD_MONTH_OFS))-1] << ' ';
+   s << bcd2dec(bitExtract(sreg, WD2_REG_FW_BUILD_DATE_OFS, WD2_BIT_FW_BUILD_DAY_MASK, WD2_BIT_FW_BUILD_DAY_OFS)) << ' ';
+   s << bcd2dec(bitExtract(sreg, WD2_REG_FW_BUILD_DATE_OFS, WD2_BIT_FW_BUILD_YEAR_MASK, WD2_BIT_FW_BUILD_YEAR_OFS)) << "  ";
    
-   s << std::setfill('0') << std::setw(2) << bitExtract(sreg, WD2_REG_FW_BUILD_TIME_OFS, WD2_BIT_FW_BUILD_HOUR_MASK, WD2_BIT_FW_BUILD_HOUR_OFS) << ':';
-   s << std::setfill('0') << std::setw(2) << bitExtract(sreg, WD2_REG_FW_BUILD_TIME_OFS, WD2_BIT_FW_BUILD_MINUTE_MASK, WD2_BIT_FW_BUILD_MINUTE_OFS) << ':';
-   s << std::setfill('0') << std::setw(2) << bitExtract(sreg, WD2_REG_FW_BUILD_TIME_OFS, WD2_BIT_FW_BUILD_SECOND_MASK, WD2_BIT_FW_BUILD_SECOND_OFS) << std::endl;
+   s << std::setfill('0') << std::setw(2) << bcd2dec(bitExtract(sreg, WD2_REG_FW_BUILD_TIME_OFS, WD2_BIT_FW_BUILD_HOUR_MASK, WD2_BIT_FW_BUILD_HOUR_OFS)) << ':';
+   s << std::setfill('0') << std::setw(2) << bcd2dec(bitExtract(sreg, WD2_REG_FW_BUILD_TIME_OFS, WD2_BIT_FW_BUILD_MINUTE_MASK, WD2_BIT_FW_BUILD_MINUTE_OFS)) << ':';
+   s << std::setfill('0') << std::setw(2) << bcd2dec(bitExtract(sreg, WD2_REG_FW_BUILD_TIME_OFS, WD2_BIT_FW_BUILD_SECOND_MASK, WD2_BIT_FW_BUILD_SECOND_OFS)) << std::endl;
    
    return s.str();
 }
@@ -1123,7 +1128,8 @@ void WDB::SetTimingCalibSignalEnable(bool value)
    SetRegMask(WD2_REG_LMK_6_OFS, WD2_BIT_LMK6_CLKOUT6_DIV_MASK, WD2_BIT_LMK6_CLKOUT6_DIV_OFS, 1);
    // enbable/disable output
    SetRegMask(WD2_REG_LMK_6_OFS, WD2_BIT_LMK6_CLKOUT6_EN_MASK, WD2_BIT_LMK6_CLKOUT6_EN_OFS, value);
-   ApplyLmkSettings();
+   
+   // no ApplyLmkSettings() needed for firmware > June 29, 2017
 }
 
 void WDB::SetTimingCalibSignalDelay(int value)
@@ -1150,7 +1156,7 @@ void WDB::SetTimingCalibSignalDelay(int value)
       SetRegMask(WD2_REG_LMK_6_OFS, WD2_BIT_LMK6_CLKOUT6_DLY_MASK, WD2_BIT_LMK6_CLKOUT6_DLY_OFS, 0);
    }
    
-   ApplyLmkSettings();
+   // no ApplyLmkSettings() needed for firmware > June 29, 2017
 }
 
 int WDB::GetTimingCalibSignalDelay()
@@ -1192,7 +1198,7 @@ void WDB::SetTimingReferenceSignal(int value)
       SetRegMask(WD2_REG_LMK_1_OFS, WD2_BIT_LMK1_CLKOUT1_EN_MASK, WD2_BIT_LMK1_CLKOUT1_EN_OFS, 0);
       SetRegMask(WD2_REG_LMK_2_OFS, WD2_BIT_LMK2_CLKOUT2_EN_MASK, WD2_BIT_LMK2_CLKOUT2_EN_OFS, 0);
       
-      ApplyLmkSettings();
+      // no ApplyLmkSettings() needed for firmware > June 29, 2017
       
    } else if (value == cTimingReferenceSine) { // seclect sine wave generator
       
@@ -1207,7 +1213,7 @@ void WDB::SetTimingReferenceSignal(int value)
       SetRegMask(WD2_REG_LMK_1_OFS, WD2_BIT_LMK1_CLKOUT1_EN_MASK, WD2_BIT_LMK1_CLKOUT1_EN_OFS, 0);
       SetRegMask(WD2_REG_LMK_2_OFS, WD2_BIT_LMK2_CLKOUT2_EN_MASK, WD2_BIT_LMK2_CLKOUT2_EN_OFS, 0);
       
-      ApplyLmkSettings();
+      // no ApplyLmkSettings() needed for firmware > June 29, 2017
       
    } else if (value == ctimingReferenceSquare){ // select square wave
       
@@ -1224,7 +1230,7 @@ void WDB::SetTimingReferenceSignal(int value)
       SetRegMask(WD2_REG_LMK_2_OFS, WD2_BIT_LMK2_CLKOUT2_DIV_MASK, WD2_BIT_LMK2_CLKOUT2_DIV_OFS, 1);
       SetRegMask(WD2_REG_LMK_2_OFS, WD2_BIT_LMK2_CLKOUT2_EN_MASK,  WD2_BIT_LMK2_CLKOUT2_EN_OFS, 1);
       
-      ApplyLmkSettings();
+      // no ApplyLmkSettings() needed for firmware > June 29, 2017
       
       LmkSyncLocal();
    }
