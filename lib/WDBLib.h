@@ -684,6 +684,8 @@ public:
    bool LoadVoltageCalibration(int freq);
    void SaveTimeCalibration(int freq);
    bool LoadTimeCalibration(int freq);
+   
+   void SpecialTest();
 };
 
 //--------------------------------------------------------------------

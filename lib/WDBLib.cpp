@@ -2963,6 +2963,26 @@ void WP::CalibrateWaveforms()
 
 //--------------------------------------------------------------------
 
+// special test function to debug a firmware problem. Experts use only!
+void WDB::SpecialTest()
+{
+   while (true) {
+      SetRegMask(WD2_REG_LMK_0_OFS, WD2_BIT_LMK0_CLKOUT0_DLY_MASK, WD2_BIT_LMK0_CLKOUT0_DLY_OFS, 0);
+      // sleep_ms(10);
+      
+      std::cout << "Trigger event" << std::endl;
+      SetDaqSingle(true);  // start DRS domino wave
+      SetDaqSingle(false);
+      
+      TrgDAQSoft(true);
+      TrgDAQSoft(false);
+      
+      sleep_ms(1000);
+   }
+}
+
+//--------------------------------------------------------------------
+
 typedef struct {
    unsigned short Year;
    unsigned short Month;
@@ -3965,6 +3985,7 @@ void WP::DoCalibrationTimeStep()
          if (calibProg.phase == 17)
             calibProg.phase = -16;
          b->SetTimingCalibSignalDelay(calibProg.phase);
+         sleep_ms(10);
       }
       
       // get one event from board
@@ -3982,6 +4003,7 @@ void WP::DoCalibrationTimeStep()
          calibProg.ave->Reset();
          calibProg.phase = 0;
          b->SetTimingCalibSignalDelay(calibProg.phase);
+         sleep_ms(10);
       }
       
       sleep_ms(10); // obtain 100 Hz rate
@@ -4000,6 +4022,7 @@ void WP::DoCalibrationTimeStep()
          if (calibProg.phase == 17)
             calibProg.phase = -16;
          b->SetTimingCalibSignalDelay(calibProg.phase);
+         sleep_ms(10);
       }
       
       // get one event from board
@@ -4017,6 +4040,7 @@ void WP::DoCalibrationTimeStep()
          calibProg.ave->Reset();
          calibProg.phase = 0;
          b->SetTimingCalibSignalDelay(calibProg.phase);
+         sleep_ms(10);
          mRotateWaveform       = true;
          mTimeCalib1           = true;
          b->mTCalib.SetValid(true);

@@ -35,6 +35,7 @@ typedef struct {
    WP*  wp;
    int  triggerMode;
    int  triggerSelfArm;
+   bool specialTest;
 } GLOBALS;
 
 /*------------------------------------------------------------------*/
@@ -768,7 +769,10 @@ int main(int argc, const char * argv[])
          if (i < argc-1 && isdigit(argv[i+1][0]))
             gl.verbose = std::stoi(argv[++i]);
       }
-      
+
+      else if (arg == "-t")
+         gl.specialTest = true;
+
       else if (arg == "-w") {
          
          if (i+1 == argc) {
@@ -885,6 +889,11 @@ int main(int argc, const char * argv[])
       }
    }
 
+   if (gl.specialTest) {
+      std::cout << "Performing special test. Abort with Ctrl-C." << std::endl;
+      gl.wdb[0]->SpecialTest();
+   }
+   
    // initialize web server
    struct mg_mgr mgr;
    struct mg_connection *con;
