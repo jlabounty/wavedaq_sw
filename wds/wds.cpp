@@ -558,37 +558,31 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
       mg_printf_http_chunk(nc, "{\n");
-      mg_printf_http_chunk(nc, "         \"target\": [\n");
+      mg_printf_http_chunk(nc, "  \"target\": [\n");
       for (auto &s: target) {
          if (&s != &target.back())
             mg_printf_http_chunk(nc, "            %g,\n", s);
          else
-            mg_printf_http_chunk(nc, "            %g]\n", s);
+            mg_printf_http_chunk(nc, "            %g],\n", s);
       }
-      mg_printf_http_chunk(nc, "}\n");
 
-      mg_printf_http_chunk(nc, "{\n");
-      mg_printf_http_chunk(nc, "         \"current\": [\n");
+      mg_printf_http_chunk(nc, "  \"current\": [\n");
       for (auto &s: current) {
          if (&s != &current.back())
             mg_printf_http_chunk(nc, "            %g,\n", s);
          else
-            mg_printf_http_chunk(nc, "            %g]\n", s);
+            mg_printf_http_chunk(nc, "            %g],\n", s);
       }
-      mg_printf_http_chunk(nc, "}\n");
-
-      mg_printf_http_chunk(nc, "{\n");
-      mg_printf_http_chunk(nc, "         \"temperature\": [\n");
+      mg_printf_http_chunk(nc, "  \"temperature\": [\n");
       for (auto &s: temp) {
          if (&s != &temp.back())
             mg_printf_http_chunk(nc, "            %g,\n", s);
          else
-            mg_printf_http_chunk(nc, "            %g]\n", s);
+            mg_printf_http_chunk(nc, "            %g],\n", s);
       }
-      mg_printf_http_chunk(nc, "}\n");
-
-      mg_printf_http_chunk(nc, "{\n  \"base voltage\": %f\n}\n", base);
+      mg_printf_http_chunk(nc, "  \"baseVoltage\": %g\n\n", base);
       
+      mg_printf_http_chunk(nc, "}\n");
       mg_send_http_chunk(nc, "", 0);
       return;
    }

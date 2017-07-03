@@ -108,9 +108,9 @@ function init() {
       var inp = document.createElement('input');
       inp.type = "text";
       inp.value = "N/A";
-      inp.name = "hvDemand";
-      inp.id = "inpHvDemand"+r;
-      inp.style.width = "60px";
+      inp.name = "hvTarget";
+      inp.id = "inpHvTarget"+r;
+      inp.style.width = "80px";
       inp.setAttribute("onkeypress", "keyParam(event, this,"+r+")");
       inp.setAttribute("onblur", "validateParam(this,"+r+")");
       inp.setAttribute("tabindex", 116+r);
@@ -126,6 +126,7 @@ function init() {
       inp.value = "N/A";
       inp.name = "hvCurrent";
       inp.id = "inpHvCurrent"+r;
+      inp.style.width = "80px";
       inp.disabled = true;
       cell.appendChild(inp);
       cell.appendChild(document.createTextNode(" uA"));
@@ -148,6 +149,9 @@ function init() {
    // schedule loadScalers()
    OSC.timer.loadScalers = window.setTimeout(loadScalers, 1000);
 
+   // schedule loadHv()
+   OSC.timer.loadHv = window.setTimeout(loadHv, 1000);
+
    // load spinning wheel image
    OSC.spinningWheel = new Image();
    OSC.spinningWheel.src = "spinning-wheel.gif";
@@ -169,6 +173,8 @@ function connectionBroken() {
       clearTimeout(OSC.timer.loadStatus);
    if (OSC.timer.loadScalers != undefined)
       clearTimeout(OSC.timer.loadScalers);
+   if (OSC.timer.loadHv != undefined)
+      clearTimeout(OSC.timer.loadHv);
    if (OSC.timer.loadWF != undefined)
       clearTimeout(OSC.timer.loadWF);
 }
@@ -256,6 +262,50 @@ function loadScalers() {
       }
    } else {
       OSC.timer.loadScalers = window.setTimeout(loadScalers, 1000);
+   }
+}
+
+function loadHv() {
+   if (OSC.demoMode) {
+      for (var i = 0; i < 16; i++) {
+         OSC.wdb[OSC.curBoard].hv.target[i] = 0;
+         OSC.wdb[OSC.curBoard].hv.current[i] = 0;
+      }
+      for (var i = 0; i < 4; i++)
+         OSC.wdb[OSC.curBoard].hv.temperature[i] = 0;
+      OSC.wdb[OSC.curBoard].hv.baseVoltage = 0;
+      return;
+   }
+   
+   var e = document.getElementById("dlgChannels");
+   if (e.style.display == "block") { // if dialog visible
+      // send AJAX request
+      var req = new XMLHttpRequest();
+      req.onreadystatechange = function () {
+         if (req.readyState == 4 && req.status == 200) {
+            OSC.wdb[OSC.curBoard].hv = JSON.parse(req.responseText);
+            for (i = 0 ; i<16 ; i++) {
+               var e = document.getElementById("inpHvTarget"+i);
+               if (e != document.activeElement)
+                  e.value = OSC.wdb[OSC.curBoard].hv.target[i];
+               var e = document.getElementById("inpHvCurrent"+i);
+               e.value = OSC.wdb[OSC.curBoard].hv.current[i];
+            }
+         } else if (req.readyState == 4 && req.status == 0) {
+            connectionBroken();
+         }
+      };
+      
+      req.open("GET", "hv?b=" + OSC.curBoard + "&r=" + Math.random(), true); // avoid cached results
+      
+      try {
+         req.send();
+         OSC.timer.loadHv = window.setTimeout(loadHv, 1000);
+      } catch (e) {
+         connectionBroken();
+      }
+   } else {
+      OSC.timer.loadHv = window.setTimeout(loadHv, 1000);
    }
 }
 
@@ -605,6 +655,13 @@ function validateParam(input, channel) {
       document.getElementById("sldDacCalDc").set(input.value/2000 + 0.5);
    }
 
+   if (input.id.substr(0, 11) == "inpHvTarget") {
+      if (input.value < 0)
+         input.value = 0;
+      if (input.value > 210)
+         input.value = 210;
+   }
+   
    setParam(input, channel);
 }
 
