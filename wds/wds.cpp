@@ -308,7 +308,12 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             gl->wdb[iBoard]->SetDacCalDcV(std::stof(value));
       }
 
-      else if (item == "hvDemand") {
+      else if (item == "hvTarget") {
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetHVTarget(iChannel, std::stof(value));
+         else
+            gl->wdb[iBoard]->SetHVTarget(iChannel, std::stof(value));
       }
 
       //---------- commands ----------
@@ -523,6 +528,71 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       return;
    }
 
+   // hv & 1-wire temperatures
+   if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/hv") == 0) {
+      mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
+      int b = atoi(str);
+      
+      if (gl->verbose)
+         std::cout<< "Sending /hv board " << b << " to browser" << std::endl;
+      
+      std::vector<float> target;
+      std::vector<float> current;
+      std::vector<float> temp;
+      float base;
+      if (gl->demoMode) {
+         for (auto i=0 ; i<16 ; i++) {
+            target.push_back(0);
+            current.push_back(0);
+         }
+         for (auto i=0 ; i<4 ; i++) {
+            temp.push_back(20.0);
+         }
+         base = 0;
+      } else {
+         gl->wdb[b]->GetHVTarget(target);
+         gl->wdb[b]->GetHVCurrents(current);
+         gl->wdb[b]->Get1wireTemperatures(temp);
+         gl->wdb[b]->GetHVBaseVoltage(base);
+      }
+      
+      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+      mg_printf_http_chunk(nc, "{\n");
+      mg_printf_http_chunk(nc, "         \"target\": [\n");
+      for (auto &s: target) {
+         if (&s != &target.back())
+            mg_printf_http_chunk(nc, "            %g,\n", s);
+         else
+            mg_printf_http_chunk(nc, "            %g]\n", s);
+      }
+      mg_printf_http_chunk(nc, "}\n");
+
+      mg_printf_http_chunk(nc, "{\n");
+      mg_printf_http_chunk(nc, "         \"current\": [\n");
+      for (auto &s: current) {
+         if (&s != &current.back())
+            mg_printf_http_chunk(nc, "            %g,\n", s);
+         else
+            mg_printf_http_chunk(nc, "            %g]\n", s);
+      }
+      mg_printf_http_chunk(nc, "}\n");
+
+      mg_printf_http_chunk(nc, "{\n");
+      mg_printf_http_chunk(nc, "         \"temperature\": [\n");
+      for (auto &s: temp) {
+         if (&s != &temp.back())
+            mg_printf_http_chunk(nc, "            %g,\n", s);
+         else
+            mg_printf_http_chunk(nc, "            %g]\n", s);
+      }
+      mg_printf_http_chunk(nc, "}\n");
+
+      mg_printf_http_chunk(nc, "{\n  \"base voltage\": %f\n}\n", base);
+      
+      mg_send_http_chunk(nc, "", 0);
+      return;
+   }
+   
    // software build
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/build") == 0) {
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");

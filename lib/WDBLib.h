@@ -505,6 +505,9 @@ public:
    unsigned int GetAdcInfo();
    
    void GetScalers(std::vector<unsigned long> &s, bool refresh = true);
+   void GetHVCurrents(std::vector<float> &c, bool refresh = true);
+   void GetHVBaseVoltage(float &voltage, bool refresh = true);
+   void Get1wireTemperatures(std::vector<float> &c, bool refresh = true);
 
    unsigned int GetCompChannelStatus();
    unsigned int GetLastEventNumber();
@@ -630,6 +633,9 @@ public:
    float GetFeGain(int chn);
    void SetFeGain(int chn, float v);
 
+   void GetHVTarget(std::vector<float> &hv);
+   void SetHVTarget(int chn, float v);
+   
    unsigned int GetLmk(int reg);
    void SetLmk(int reg, unsigned int v);
 

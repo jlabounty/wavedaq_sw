@@ -894,6 +894,32 @@ void WDB::GetScalers(std::vector<unsigned long> &scaler, bool refresh)
    
 }
 
+void WDB::GetHVCurrents(std::vector<float> &current, bool refresh)
+{
+   if (refresh)
+      ReceiveStatusRegisters((WD2_REG_HV_I_MEAS_0_OFS-WD2_REG_HW_VER_OFS)/4, 21);
+   
+   for (unsigned int i=0 ; i<16 ; i++)
+      current.push_back((float) *((float *)(&this->sreg[(WD2_REG_HV_I_MEAS_0_OFS-WD2_REG_HW_VER_OFS)/4+i])));
+}
+
+void WDB::GetHVBaseVoltage(float &voltage, bool refresh)
+{
+   if (refresh)
+      ReceiveStatusRegisters((WD2_REG_HV_U_BASE_MEAS_OFS-WD2_REG_HW_VER_OFS)/4, 1);
+   
+   voltage = (float) *((float *)(&this->sreg[(WD2_REG_HV_U_BASE_MEAS_OFS-WD2_REG_HW_VER_OFS)/4]));
+}
+
+void WDB::Get1wireTemperatures(std::vector<float> &temp, bool refresh)
+{
+   if (refresh)
+      ReceiveStatusRegisters((WD2_REG_HV_TEMP_0_OFS-WD2_REG_HW_VER_OFS)/4, 4);
+   
+   for (unsigned int i=0 ; i<4 ; i++)
+      temp.push_back((float) *((float *)(&this->sreg[(WD2_REG_HV_TEMP_0_OFS-WD2_REG_HW_VER_OFS)/4+i])));
+}
+
 unsigned int WDB::GetCompChannelStatus()
 // comparator status for 16 channels (1 = above threshold)
 {
@@ -1865,6 +1891,19 @@ void WDB::SetFeMux(int chn, unsigned int v)
       auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_MUX_OFS  : WD2_BIT_FE1_MUX_OFS;
       SetRegMask(rofs, mask, ofs, v);
    }
+}
+
+void WDB::SetHVTarget(int chn, float v)
+{
+   assert(chn < 16);
+   SetRegMask(WD2_REG_HV_U_TARGET_0_OFS+chn*4, 0xFFFFFFFF, 0, *((unsigned int *)&v));
+}
+
+void WDB::GetHVTarget(std::vector<float> &hv)
+{
+   ReceiveControlRegisters((WD2_REG_HV_U_TARGET_0_OFS-WD2_REG_WDB_LOC_OFS)/4, 16);
+   for (unsigned int i=0 ; i<16 ; i++)
+      hv.push_back(*(float *)&this->creg[(WD2_REG_HV_U_TARGET_0_OFS-WD2_REG_WDB_LOC_OFS)/4+i]);
 }
 
 unsigned int WDB::GetLmk(int reg)
