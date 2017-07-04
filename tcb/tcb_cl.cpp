@@ -313,16 +313,9 @@ int main(int argc, char *argv[])
          FILE *fout = fopen("tres.dat","w");
          fprintf(fout,"%s %d\n", TCBBoard.fmscb_device, TCBBoard.fnserdes);
 
-         TCBBoard.SetCheckWord(0xdeadbeef, 0xdeadbeef);
 
          for(int idly =0; idly<32; idly++){
             for(int ibit=0; ibit<8; ibit++){
-               //configure everything
-               /*for(int iserdes=0; iserdes < TCBBoard.fnserdes; iserdes++){
-                  for(int ilink=0; ilink<8; ilink++){
-                     TCBBoard.ConfigureSingleSerdes(iserdes, ilink, idly, ibit);
-                  }
-               }*/
               TCBBoard.ConfigureAllSerdes(idly, ibit);
 
                TCBBoard.StartSerdesCheck();
@@ -333,8 +326,6 @@ int main(int argc, char *argv[])
                TCBBoard.GetSerdesErrorCount(ccounters);
                fprintf(fout,"%d %d ", idly, ibit);
                for(int icounter=0; icounter<TCBBoard.fnserdes*8; icounter++){
-                 //printf("id (%3d) = %08x\n", icounter, ccounters[icounter]);
-                  //if(ccounters[icounter]==0) printf("channel %d ok with dly %d and bitslip %d\n", icounter, idly, ibit);
                   errors[icounter][ibit][idly] = ccounters[icounter]*1./ccounters[TCBBoard.fnserdes*8];
                   fprintf(fout,"%le ", ccounters[icounter]*1./ccounters[TCBBoard.fnserdes*8]);
                }
