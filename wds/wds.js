@@ -265,6 +265,36 @@ function loadScalers() {
    }
 }
 
+function showDlgChannels() {
+   var req = new XMLHttpRequest();
+   req.onreadystatechange = function () {
+      if (req.readyState == 4 && req.status == 200) {
+         OSC.wdb[OSC.curBoard].hv = JSON.parse(req.responseText);
+         for (i = 0 ; i<16 ; i++) {
+            var e = document.getElementById("inpHvTarget"+i);
+            if (e != document.activeElement)
+               e.value = OSC.wdb[OSC.curBoard].hv.target[i];
+            var e = document.getElementById("inpHvCurrent"+i);
+            e.value = OSC.wdb[OSC.curBoard].hv.current[i];
+         }
+
+         // show dialog after HVs have been loaded
+         dlgShow('dlgChannels');
+
+      } else if (req.readyState == 4 && req.status == 0) {
+         connectionBroken();
+      }
+   };
+   
+   req.open("GET", "hv?b=" + OSC.curBoard + "&r=" + Math.random(), true); // avoid cached results
+   
+   try {
+      req.send();
+   } catch (e) {
+      connectionBroken();
+   }
+}
+
 function loadHv() {
    if (OSC.demoMode) {
       for (var i = 0; i < 16; i++) {
