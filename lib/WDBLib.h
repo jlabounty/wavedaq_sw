@@ -459,7 +459,7 @@ public:
 
    enum { cTimingReferenceOff  = 0,
       cTimingReferenceSine     = 1,
-      ctimingReferenceSquare   = 2};
+      cTimingReferenceSquare   = 2};
    
    // calibrations
    VCALIB           mVCalib;
