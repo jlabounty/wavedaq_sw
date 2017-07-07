@@ -1250,7 +1250,7 @@ void WDB::SetTimingReferenceSignal(int value)
       
       // no ApplyLmkSettings() needed for firmware > June 29, 2017
       
-   } else if (value == ctimingReferenceSquare){ // select square wave
+   } else if (value == cTimingReferenceSquare){ // select square wave
       
       // turn off sine wave generator
       SetTimingCalibSignalEnable(false);
