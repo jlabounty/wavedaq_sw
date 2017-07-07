@@ -1216,6 +1216,12 @@ void WDB::SetTimingReferenceSignal(int value)
 {
    if (value == cTimingReferenceOff) { // turn reference signal off
       
+      // turn off sine wave generator
+      SetTimingCalibSignalEnable(false);
+      
+      // turn off calibration buffer
+      SetCalibBufferEnable(false);
+
       // select LMK outputs
       SetDrs0TimingRefSel(1);
       SetDrs1TimingRefSel(1);
@@ -1231,6 +1237,9 @@ void WDB::SetTimingReferenceSignal(int value)
       // turn on sine wave generator
       SetTimingCalibSignalEnable(true);
       
+      // turn on calibration buffer
+      SetCalibBufferEnable(true);
+
       // select sine wave
       SetDrs0TimingRefSel(0);
       SetDrs1TimingRefSel(0);
@@ -1242,6 +1251,12 @@ void WDB::SetTimingReferenceSignal(int value)
       // no ApplyLmkSettings() needed for firmware > June 29, 2017
       
    } else if (value == ctimingReferenceSquare){ // select square wave
+      
+      // turn off sine wave generator
+      SetTimingCalibSignalEnable(false);
+      
+      // turn off calibration buffer
+      SetCalibBufferEnable(false);
       
       // select LMK outputs #1 and #2
       SetDrs0TimingRefSel(1);
