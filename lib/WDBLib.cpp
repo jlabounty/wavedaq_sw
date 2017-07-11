@@ -82,9 +82,6 @@ std::string WDB::SendReceiveUDP(std::string str, int timeout_ms)
    
    result.clear();
    
-   // assemble prompt
-   prompt = mName + " > ";
-   
    // retry max five times
    for (int retry=0 ; retry < 5 ; retry++) {
 
@@ -147,6 +144,10 @@ std::string WDB::SendReceiveUDP(std::string str, int timeout_ms)
             i--;
          
          result += rx_buffer;
+         
+         // on th first contact, read back prompt
+         if (mPrompt == "")
+            mPrompt = result.substr(0, result.size()-1);
          
          // check for prompt
          if (result.substr(result.size()-prompt.size()) == prompt)

@@ -412,6 +412,7 @@ public:
 // WaveDREAM board class. Interface functions to all WDB registers
 class WDB {
    std::string      mName;
+   std::string      mPrompt;
    unsigned char    mEthAddrAscii[16];
    unsigned char    mEthAddrBin[16];
    int              mVerbose;
@@ -436,6 +437,7 @@ public:
    // constructor
    WDB(std::string name, int verbose = 0) {
       mName = name;
+      mPrompt = "";
       mVerbose = verbose;
       mDemoMode = (name == "demo");
       mSendBlocked = false;
