@@ -73,7 +73,7 @@ std::string WDB::SendReceiveUDP(std::string str, int timeout_ms)
    int    status, ms;
    struct sockaddr_in client_addr;
    char   rx_buffer[1600];
-   std::string prompt, result;
+   std::string result;
    
    std::memcpy(&client_addr, mEthAddrAscii, sizeof(client_addr));
    
@@ -147,16 +147,16 @@ std::string WDB::SendReceiveUDP(std::string str, int timeout_ms)
          
          // on th first contact, read back prompt
          if (mPrompt == "")
-            mPrompt = result.substr(0, result.size()-1);
+            mPrompt = result;
          
          // check for prompt
-         if (result.substr(result.size()-prompt.size()) == prompt)
+         if (result.substr(result.size()-mPrompt.size()) == mPrompt)
             break;
          
       } while (1);
       
       // check for prompt
-      if (result.size() >= prompt.size() && result.substr(result.size()-prompt.size()) == prompt)
+      if (mPrompt.size() > 0 && result.size() >= mPrompt.size() && result.substr(result.size()-mPrompt.size()) == mPrompt)
          break;
       
       if (this->mVerbose)
@@ -172,8 +172,8 @@ std::string WDB::SendReceiveUDP(std::string str, int timeout_ms)
    }
    
    // chop off prompt
-   if (result.size() >= prompt.size())
-      result = result.substr(0, result.size()-prompt.size());
+   if (result.size() >= mPrompt.size())
+      result = result.substr(0, result.size()-mPrompt.size());
    
    return result;
 }
