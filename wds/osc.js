@@ -654,7 +654,11 @@ Oscilloscope.prototype.drawWF = function (ctx) {
 
       // reduce alpha
       if (!isNaN(this.disp.persistency)) {
-         var delta = 200 / this.disp.persistency / OSC.nEPS;
+         var delta;
+         if (OSC.nEPS == 0)
+            delta = 200 / this.disp.persistency;
+         else
+            delta = 200 / this.disp.persistency / OSC.nEPS;
          this.disp.persDeltaInt += delta;
          if (this.disp.persDeltaInt >= 1) {
             delta = Math.floor(this.disp.persDeltaInt);
