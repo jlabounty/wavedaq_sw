@@ -38,7 +38,7 @@ all: $(OUTNAME)
 $(OUTNAME): $(C_OBJ) $(CPP_OBJ) $(LIB_OBJ)
 	g++ $(C_OBJ) $(CPP_OBJ) $(LIB_OBJ) -o $(OUTNAME) $(LIBS)
 
-$(CPP_OBJ): %.o: %.cpp %.h
+$(CPP_OBJ): %.o: %.cpp %.h ../lib/WDBLib.h
 	g++ $(CFLAGS) -c $<
 
 $(LIB_OBJ): %.o: ../lib/%.cpp ../lib/%.h
