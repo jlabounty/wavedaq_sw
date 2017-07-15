@@ -743,6 +743,9 @@ bool WDB::IsBackplanePlugged()
 unsigned int WDB::GetPllLck(bool refresh)
 // all PLLs (DRS, LMK, FPGA DAQ, ISERDES, OSERDES)
 {
+   if (mDemoMode)
+      return 0x1FF;
+
    if (refresh)
       ReceiveStatusRegister(WD2_REG_PLL_LOCK_OFS);
    auto mask =
