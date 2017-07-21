@@ -10,13 +10,10 @@
 #define RNTRG         0x02                      // trigger enable bits
 #define RALGSEL       0x03                      // algorithm select on TCB1/2_0
 #define USR_ACCESS    0x0F                      // FW compilaiton date
-#define RFCDLY        0x14                      // frontpanel serdes delay values
 #define RSERDESMSK    0x16                      // mask for input serdes
 #define RENA          0x20                      // trigger enable (first address)
 #define RTRIPATT      0x30                      // trigger pattern (first address)
 #define RTRGFORCE     0x40                      // force a trigger (first address)
-#define RCHKCOU       0x50                      // serdes counter check (first address)
-#define RCHKTIM       0x60                      // serdes cycles counter for normalisation
 #define RCMD          0xFF                      // daq state machine control
 #define RPRESCA       0x100                     // prescaling value first address
 #define RTOTTIME      0x200                     // total time
@@ -37,11 +34,17 @@
 #define RPARAM        0x600                     // start of parameter space
 #define RMEMADDR      0x0FFFF                   // counter stop position
 #define MEMBASEADDR   0x10000                   //base address for memories
+#define PACKAGERBASE  0x01000000                //base address for packager memories
+#define RARBITER      0x01001000                //Bus Arbiter register and packager controller
+#define BUFFERBASE    0x02000000                //Buffer base address
 
 ///////////////////////////////////////////////////////////
 // LIBRARY ASSOCIATED TO TCB_X_0
 #define MEMNUM             34
-#define MEMDIM             1024
+#define MEMDIM             128
+#define BUFFERSIZE         8192
+#define BUFFERNUM          4
+#define PACKAGERSIZE       1024
 ///////////////////////////////////////////////////////////
 
 #include "strlcpy.h"
@@ -57,6 +60,7 @@ typedef struct {
     unsigned int       serdesmask;
 } TCB_SETTINGS;
 
+enum PACKETIZER_COMMAND {STOP, COPY, BLOCK_COPY, DIRECT_WRITE};
 
 class TCB {
 private:
@@ -203,4 +207,28 @@ public:
    void SetDbgserdes(bool);
    //do a serdes check
    int CheckSerdes();
+   //Assign Bus to Packetizer
+   void SetPacketizerBus(bool);
+   //Set Packetizer enable
+   void SetPacketizerEnable(bool);
+   //Set Packetizer autostart
+   void SetPacketizerAutostart(bool);
+   //issue a software start to packetizer
+   void StartPacketizer();
+   //force stop packetizer
+   void AbortPacketizer();
+   //write Command to packetizer memories
+   void SetPacketizerCommandAt(int offset, PACKETIZER_COMMAND cmd, u_int32_t arg0, u_int32_t arg1, u_int32_t opt=0);
+   //read current Buffer content
+   void ReadBuffer(u_int32_t* ptr, int size = (BUFFERSIZE-1));
+   //increment Buffer pointer
+   void IncrementBufferPointer();
+   //reset Buffer busy logic
+   void ResetBufferLogic();
+   //get current SPI Buffer pointer;
+   int GetSPIBufferPointer();
+   //get current Packetizer bus pointer;
+   int GetPacketizerBufferPointer();
+   //get current buffer memory state
+   u_int32_t GetBufferState();
 };

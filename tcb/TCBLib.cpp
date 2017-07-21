@@ -979,3 +979,148 @@ int TCB::CheckSerdes(){
 
    return ret;
 }
+
+//Assign local bus to Packetizer
+void TCB::SetPacketizerBus(bool state){
+   u_int32_t data;
+   ReadReg(RARBITER, &data);
+
+   if(state){
+      data |= 0x00000001;
+      WriteReg(RARBITER, &data);
+   } else {
+      data &= 0xFFFFFFFE;
+      WriteReg(RARBITER, &data);
+   }
+}
+
+//Enable Packetizer
+void TCB::SetPacketizerEnable(bool state){
+   u_int32_t data;
+   ReadReg(RARBITER, &data);
+
+   if(state){
+      data |= 0x00000002;
+      WriteReg(RARBITER, &data);
+   } else {
+      data &= 0xFFFFFFFD;
+      WriteReg(RARBITER, &data);
+   }
+}
+
+//Enable Packetizer
+void TCB::SetPacketizerAutostart(bool state){
+   u_int32_t data;
+   ReadReg(RARBITER, &data);
+
+   if(state){
+      data |= 0x00000010;
+      WriteReg(RARBITER, &data);
+   } else {
+      data &= 0xFFFFFFEF;
+      WriteReg(RARBITER, &data);
+   }
+}
+
+//Software Start for packetizer
+void TCB::StartPacketizer(){
+   u_int32_t data;
+   ReadReg(RARBITER, &data);
+   data |= 0x00000004;
+   WriteReg(RARBITER, &data);
+   data &= 0xFFFFFFF3;
+   WriteReg(RARBITER, &data);
+}
+
+//force stop for packetizer
+void TCB::AbortPacketizer(){
+   u_int32_t data;
+   ReadReg(RARBITER, &data);
+   data |= 0x00000008;
+   WriteReg(RARBITER, &data);
+   data &= 0xFFFFFFF7;
+   WriteReg(RARBITER, &data);
+}
+
+//Set Packetizer command
+void TCB::SetPacketizerCommandAt(int offset, PACKETIZER_COMMAND cmd, u_int32_t arg0, u_int32_t arg1, u_int32_t opt){
+   if(offset > PACKAGERSIZE) return;
+
+   u_int32_t data;
+
+   switch(cmd){
+      case STOP:
+         data = 0;
+         WriteReg(PACKAGERBASE+offset, &data);
+        break;
+      case COPY:
+         data = 0x10000000;
+         WriteReg(PACKAGERBASE+offset, &data);
+         WriteReg(PACKAGERBASE+offset+PACKAGERSIZE, &arg0);
+         WriteReg(PACKAGERBASE+offset+2*PACKAGERSIZE, &arg1);
+        break;
+      case BLOCK_COPY:
+         data = 0x20000000;
+         data |= opt & 0xFFFF;
+         WriteReg(PACKAGERBASE+offset, &data);
+         WriteReg(PACKAGERBASE+offset+PACKAGERSIZE, &arg0);
+         WriteReg(PACKAGERBASE+offset+2*PACKAGERSIZE, &arg1);
+        break;
+      case DIRECT_WRITE:
+         data = 0x30000000;
+         WriteReg(PACKAGERBASE+offset, &data);
+         WriteReg(PACKAGERBASE+offset+PACKAGERSIZE, &arg0);
+         WriteReg(PACKAGERBASE+offset+2*PACKAGERSIZE, &arg1);
+        break; 
+   }
+}
+
+//Read current buffer
+void TCB::ReadBuffer(u_int32_t* ptr, int size){
+   int read = 0;
+   const int BLTSIZE = 32;
+   while (read < size){
+      if((size-read) > BLTSIZE){
+         ReadBLT(BUFFERBASE+read, ptr, BLTSIZE);
+         ptr += BLTSIZE;
+         read += BLTSIZE;
+      } else {
+         ReadBLT(BUFFERBASE+read, ptr, (size-read));
+         ptr += (size-read);
+         read = size;
+      }
+   }
+}
+
+//Increment buffer pointer
+void TCB::IncrementBufferPointer(){
+   u_int32_t data = 0x00000001;
+   WriteReg(BUFFERBASE+BUFFERSIZE, &data);
+}
+
+//Reset buffer logic
+void TCB::ResetBufferLogic(){
+   u_int32_t data = 0x00000002;
+   WriteReg(BUFFERBASE+BUFFERSIZE, &data);
+}
+
+//Return current SPI buffer pointer
+int TCB::GetSPIBufferPointer(){
+   u_int32_t data;
+   ReadReg(BUFFERBASE+BUFFERSIZE, &data);
+   return data & 0xFF;
+}
+
+//Return current Packager buffer pointer
+int TCB::GetPacketizerBufferPointer(){
+   u_int32_t data;
+   ReadReg(BUFFERBASE+BUFFERSIZE, &data);
+   return (data >> 8) & 0xFF;
+}
+
+//Return current buffer busy state (bitmask)
+u_int32_t TCB::GetBufferState(){
+   u_int32_t data;
+   ReadReg(BUFFERBASE+BUFFERSIZE, &data);
+   return data >> 16;
+}
