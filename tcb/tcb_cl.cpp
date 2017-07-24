@@ -63,6 +63,7 @@ int main(int argc, char *argv[])
       printf("[25]: Serdes check word    \t \t  [26]: Read serdes status\n");
       printf("[27]: Force a trigger      \t \t  [28]: Reset Transmitter\n");
       printf("[29]: Automatic Serdes cal \t \t  [30]: Dump Data \n");
+      printf("[31]: Packetizer Commands  \t \t  [32]: Buffer Commands\n");
       printf("[-1]: Exit\n");
 
       do {
@@ -462,6 +463,83 @@ int main(int argc, char *argv[])
            fprintf(filout,"%08x %08x\n",rdataB[irow], rdataA[irow]);
         }
         fclose(filout);
+      }
+      if(option == 31) {
+        printf(" opt = 31 : Packetizer Commands \n");
+        printf("\n  --- Options: \n");
+        printf("[ 1]: Enable Packetizer    \t \t  [ 2]: Start Packetizer     \n");
+        printf("[ 3]: Set Autostart        \t \t  [ 4]: Assign bus \n");  
+        printf("[ 5]: Abort Packetizer     \t \t  [ 6]: Set Packetizer Command\n");
+        int sel;
+        do {
+          printf("Give an option: ");
+          scanf("%s",opline);
+          sel = strtod(opline,NULL);
+        } while ( sel == 0 ) ;
+        switch(sel){
+          case 1: 
+            printf("enable [0/1]? ");
+            int ans;
+            scanf("%d", &ans);
+            TCBBoard.SetPacketizerEnable(ans == 1);
+            break;
+          case 2: TCBBoard.StartPacketizer(); break;
+          case 3:
+            printf("enable [0/1]? ");
+            scanf("%d", &ans);
+            TCBBoard.SetPacketizerAutostart(ans == 1);
+            break;
+          case 4: 
+            printf("assign bus to packetizer [0/1]? ");
+            scanf("%d", &ans);
+            TCBBoard.SetPacketizerBus(ans == 1);
+            break;
+          case 5: TCBBoard.AbortPacketizer(); break;
+          case 6: 
+            int offset, cmd;
+            u_int32_t arg0, arg1, opt;
+            printf("offset (0-1024) ");
+            scanf("%d", &offset);
+            printf("command name (0-stop, 1-copy, 2-block_copy, 3-write) ");
+            scanf("%d", &cmd);
+            printf("argument 0, \"source\" (hex) ");
+            scanf("%x", &arg0);
+            printf("argument 1, \"destination\" (hex) ");
+            scanf("%x", &arg1);
+            printf("option (hex) ");
+            scanf("%x", &opt);
+            TCBBoard.SetPacketizerCommandAt(offset, (PACKETIZER_COMMAND)cmd, arg0, arg1, opt);
+            break;
+          default: break;
+        }
+      }
+      if(option == 32) {
+        printf(" opt = 32 : Buffer Commands \n");
+        printf("[ 1]: Read Buffer    \t \t  [ 2]: Increment Pointer\n");
+        printf("[ 3]: Reset Logic    \t \t  [ 4]: Get State\n");
+        int sel;
+        do {
+          printf("Give an option: ");
+          scanf("%s",opline);
+          sel = strtod(opline,NULL);
+        } while ( sel == 0 ) ;
+        switch(sel){
+          case 1: 
+            u_int32_t buf[BUFFERSIZE];
+            TCBBoard.ReadBuffer(buf);
+            for(int i=0; i<BUFFERSIZE; i++) printf("%08x\n", buf[i]);
+            break; 
+          case 2:
+            TCBBoard.IncrementBufferPointer();
+            break;
+          case 3:
+            TCBBoard.ResetBufferLogic();
+            break;
+          case 4:
+            printf ("SPI pointer: %d, Packetizer pointer %d, Memory State %x", TCBBoard.GetSPIBufferPointer(), TCBBoard.GetPacketizerBufferPointer(), TCBBoard.GetBufferState());
+            break;
+          default: break;
+        }
       }
       /* end of the main loop on the options*/
    } while ( option >= 0);
