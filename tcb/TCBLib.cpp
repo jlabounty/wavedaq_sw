@@ -147,6 +147,9 @@ int TCB::InitBoard(TCB_SETTINGS *ts, int iType)
    if (fh < 0) //there is not MSCB connection
       return 0;
 
+   //make sure bus is assegned to SPI
+   SetPacketizerBus(false);
+
    // check the board ID
    SetIDCode();
    if((fidcode == 0xffff) || (fidcode == 0x0000)) 
