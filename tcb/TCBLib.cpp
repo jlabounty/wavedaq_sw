@@ -149,6 +149,8 @@ int TCB::InitBoard(TCB_SETTINGS *ts, int iType)
 
    //make sure bus is assegned to SPI
    SetPacketizerBus(false);
+   AbortPacketizer();
+   ResetBufferLogic();
 
    // check the board ID
    SetIDCode();
@@ -1079,16 +1081,16 @@ void TCB::SetPacketizerCommandAt(int offset, PACKETIZER_COMMAND cmd, u_int32_t a
 }
 
 //Read current buffer
-void TCB::ReadBuffer(u_int32_t* ptr, int size){
+void TCB::ReadBuffer(u_int32_t* ptr, int size, int offset){
    int read = 0;
    const int BLTSIZE = 32;
    while (read < size){
       if((size-read) > BLTSIZE){
-         ReadBLT(BUFFERBASE+read, ptr, BLTSIZE);
+         ReadBLT(BUFFERBASE+read+offset, ptr, BLTSIZE);
          ptr += BLTSIZE;
          read += BLTSIZE;
       } else {
-         ReadBLT(BUFFERBASE+read, ptr, (size-read));
+         ReadBLT(BUFFERBASE+read+offset, ptr, (size-read));
          ptr += (size-read);
          read = size;
       }

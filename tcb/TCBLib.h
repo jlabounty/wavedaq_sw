@@ -220,7 +220,7 @@ public:
    //write Command to packetizer memories
    void SetPacketizerCommandAt(int offset, PACKETIZER_COMMAND cmd, u_int32_t arg0, u_int32_t arg1, u_int32_t opt=0);
    //read current Buffer content
-   void ReadBuffer(u_int32_t* ptr, int size = (BUFFERSIZE-1));
+   void ReadBuffer(u_int32_t* ptr, int size = (BUFFERSIZE-1), int offset = 0);
    //increment Buffer pointer
    void IncrementBufferPointer();
    //reset Buffer busy logic
