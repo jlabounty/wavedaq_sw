@@ -2172,13 +2172,14 @@ void WDB::SaveVoltageCalibration(int freq)
 
 //--------------------------------------------------------------------
 
-bool WDB::LoadVoltageCalibration(int freq)
+bool WDB::LoadVoltageCalibration(int freq, std::string path)
 {
    if (mVerbose)
       std::cout << "Loading voltage calibration for "+mName+" for " << freq/1000.0 << " GSPS ... ";
    
-   mVCalib.load(this, "calib/"+mName+"-"+std::to_string(freq)+".vcal");
-   
+   mVCalib.load(this, path+"calib/"+mName+"-"+std::to_string(freq)+".vcal");
+   if (mVerbose)
+      std::cout << path+"calib/"+mName+"-"+std::to_string(freq)+".vcal "; 
    if (mVerbose)
       std::cout << (mVCalib.IsValid() ? "ok" : "failure") << std::endl;
    return mVCalib.IsValid();
@@ -2194,12 +2195,13 @@ void WDB::SaveTimeCalibration(int freq)
 
 //--------------------------------------------------------------------
 
-bool WDB::LoadTimeCalibration(int freq)
+bool WDB::LoadTimeCalibration(int freq, std::string path)
 {
    if (mVerbose)
       std::cout << "Loading time calibration for "+mName+" for " << freq/1000.0 << " GSPS ... ";
    
-   mTCalib.load(this, "calib/"+mName+"-"+std::to_string(freq)+".tcal");
+   mTCalib.load(this, path+"calib/"+mName+"-"+std::to_string(freq)+".tcal");
+      std::cout << path+"calib/"+mName+"-"+std::to_string(freq)+".tcal "; 
 
    if (mVerbose)
       std::cout << (mVCalib.IsValid() ? "ok" : "failure") << std::endl;

@@ -689,9 +689,9 @@ public:
    void RequestEvent();
    
    void SaveVoltageCalibration(int freq);
-   bool LoadVoltageCalibration(int freq);
+   bool LoadVoltageCalibration(int freq, std::string path="");
    void SaveTimeCalibration(int freq);
-   bool LoadTimeCalibration(int freq);
+   bool LoadTimeCalibration(int freq, std::string path="");
    
    void SpecialTest();
 };
