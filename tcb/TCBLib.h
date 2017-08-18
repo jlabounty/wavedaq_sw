@@ -34,6 +34,7 @@
 #define RPARAM        0x600                     // start of parameter space
 #define RMEMADDR      0x0FFFF                   // counter stop position
 #define MEMBASEADDR   0x10000                   //base address for memories
+#define GENTMEMBASE   0x12000                   //base address for trigger generation memories (two memories with size = GENTDIM)
 #define PACKAGERBASE  0x01000000                //base address for packager memories
 #define RARBITER      0x01001000                //Bus Arbiter register and packager controller
 #define BUFFERBASE    0x02000000                //Buffer base address
@@ -42,6 +43,7 @@
 // LIBRARY ASSOCIATED TO TCB_X_0
 #define MEMNUM             34
 #define MEMDIM             128
+#define GENTDIM            32
 #define BUFFERSIZE         8192
 #define BUFFERNUM          4
 #define PACKAGERSIZE       1024
