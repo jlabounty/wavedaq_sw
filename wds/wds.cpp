@@ -205,7 +205,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                   gl->wdb[i]->SetTriggerEnable(true);
                   gl->wdb[i]->SetTriggerCfgOr(0);
                   gl->wdb[i]->SetTriggerCfgAnd(0);
-                  gl->wdb[i]->SetTriggerLocalScheme(3);
+                  gl->wdb[i]->SetTriggerLocalScheme(2);
                   gl->wdb[i]->SetTriggerExternalOr(false);
                   gl->wdb[i]->SetTriggerExternalAnd(false);
                } else {
