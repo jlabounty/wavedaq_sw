@@ -54,7 +54,7 @@ function init() {
 
    // fill channels panel
    var chTable = document.getElementById("channelsTable");
-   for (var r=0 ; r<16 ; r++) {
+   for (var r = 0; r < 16; r++) {
       var row = chTable.insertRow(-1);
       row.className = "channelsRow";
 
@@ -66,11 +66,11 @@ function init() {
       cell = row.insertCell(-1);
       cell.className = "channelsTd";
       var sel = document.createElement('select');
-      sel.id = "selGain"+r;
+      sel.id = "selGain" + r;
       sel.name = "feGain";
-      sel.setAttribute("onchange", "setParam(this,"+r+")");
+      sel.setAttribute("onchange", "setParam(this," + r + ")");
       var gains = ["0.5", "1", "2.5", "5", "10", "25", "50", "100"];
-      for (var i=0 ; i<gains.length ; i++) {
+      for (var i = 0; i < gains.length; i++) {
          var op = document.createElement('option');
          op.value = op.textContent = gains[i];
          if (gains[i] == "1")
@@ -84,9 +84,9 @@ function init() {
       var cb = document.createElement('input');
       cb.type = "checkbox";
       cb.name = "fePzc";
-      cb.id = "cbPzc"+r;
+      cb.id = "cbPzc" + r;
       cb.checked = false;
-      cb.setAttribute("onclick", "setParam(this,"+r+")");
+      cb.setAttribute("onclick", "setParam(this," + r + ")");
       cell.appendChild(cb);
 
       cell = row.insertCell(-1);
@@ -95,25 +95,25 @@ function init() {
       inp.type = "text";
       inp.value = "0";
       inp.name = "dacTriggerLevel";
-      inp.id = "inpDacTriggerLevel"+r;
+      inp.id = "inpDacTriggerLevel" + r;
       inp.style.width = "60px";
-      inp.setAttribute("onkeypress", "keyParam(event, this,"+r+")");
-      inp.setAttribute("onblur", "validateParam(this,"+r+")");
-      inp.setAttribute("tabindex", 100+r);
+      inp.setAttribute("onkeypress", "keyParam(event, this," + r + ")");
+      inp.setAttribute("onblur", "validateParam(this," + r + ")");
+      inp.setAttribute("tabindex", 100 + r);
       cell.appendChild(inp);
       cell.appendChild(document.createTextNode(" mV"));
-      
+
       cell = row.insertCell(-1);
       cell.className = "channelsTd";
       var inp = document.createElement('input');
       inp.type = "text";
       inp.value = "N/A";
       inp.name = "hvTarget";
-      inp.id = "inpHvTarget"+r;
+      inp.id = "inpHvTarget" + r;
       inp.style.width = "80px";
-      inp.setAttribute("onkeypress", "keyParam(event, this,"+r+")");
-      inp.setAttribute("onblur", "validateParam(this,"+r+")");
-      inp.setAttribute("tabindex", 116+r);
+      inp.setAttribute("onkeypress", "keyParam(event, this," + r + ")");
+      inp.setAttribute("onblur", "validateParam(this," + r + ")");
+      inp.setAttribute("tabindex", 116 + r);
       cell.appendChild(inp);
       var e = document.createElement("span");
       e.innerHTML = "&nbsp;V&nbsp;";
@@ -125,7 +125,7 @@ function init() {
       inp.type = "text";
       inp.value = "N/A";
       inp.name = "hvCurrent";
-      inp.id = "inpHvCurrent"+r;
+      inp.id = "inpHvCurrent" + r;
       inp.style.width = "80px";
       inp.disabled = true;
       cell.appendChild(inp);
@@ -159,7 +159,7 @@ function init() {
 
 function connectionBroken() {
    if (OSC.connected) {
-      OSC.dlgReconnect = dlgMessage("Error", "Connection to server broken.<br>Trying to reconnect ..."+
+      OSC.dlgReconnect = dlgMessage("Error", "Connection to server broken.<br>Trying to reconnect ..." +
          "<br /><br /><br /><img src=\"spinning-wheel.gif\">", true, true);
       var b = document.getElementById("dlgMessageButton");
       b.innerHTML = "Cancel";
@@ -251,9 +251,9 @@ function loadScalers() {
             connectionBroken();
          }
       };
-      
+
       req.open("GET", "scalers?b=" + OSC.curBoard + "&r=" + Math.random(), true); // avoid cached results
-      
+
       try {
          req.send();
          OSC.timer.loadScalers = window.setTimeout(loadScalers, 1000);
@@ -270,11 +270,11 @@ function showDlgChannels() {
    req.onreadystatechange = function () {
       if (req.readyState == 4 && req.status == 200) {
          OSC.wdb[OSC.curBoard].hv = JSON.parse(req.responseText);
-         for (i = 0 ; i<16 ; i++) {
-            var e = document.getElementById("inpHvTarget"+i);
+         for (i = 0; i < 16; i++) {
+            var e = document.getElementById("inpHvTarget" + i);
             if (e != document.activeElement)
                e.value = OSC.wdb[OSC.curBoard].hv.target[i];
-            var e = document.getElementById("inpHvCurrent"+i);
+            var e = document.getElementById("inpHvCurrent" + i);
             e.value = OSC.wdb[OSC.curBoard].hv.current[i];
          }
 
@@ -285,9 +285,9 @@ function showDlgChannels() {
          connectionBroken();
       }
    };
-   
+
    req.open("GET", "hv?b=" + OSC.curBoard + "&r=" + Math.random(), true); // avoid cached results
-   
+
    try {
       req.send();
    } catch (e) {
@@ -306,7 +306,7 @@ function loadHv() {
       OSC.wdb[OSC.curBoard].hv.baseVoltage = 0;
       return;
    }
-   
+
    var e = document.getElementById("dlgChannels");
    if (e.style.display == "block") { // if dialog visible
       // send AJAX request
@@ -314,20 +314,20 @@ function loadHv() {
       req.onreadystatechange = function () {
          if (req.readyState == 4 && req.status == 200) {
             OSC.wdb[OSC.curBoard].hv = JSON.parse(req.responseText);
-            for (i = 0 ; i<16 ; i++) {
-               var e = document.getElementById("inpHvTarget"+i);
+            for (i = 0; i < 16; i++) {
+               var e = document.getElementById("inpHvTarget" + i);
                if (e != document.activeElement)
                   e.value = OSC.wdb[OSC.curBoard].hv.target[i];
-               var e = document.getElementById("inpHvCurrent"+i);
+               var e = document.getElementById("inpHvCurrent" + i);
                e.value = OSC.wdb[OSC.curBoard].hv.current[i];
             }
          } else if (req.readyState == 4 && req.status == 0) {
             connectionBroken();
          }
       };
-      
+
       req.open("GET", "hv?b=" + OSC.curBoard + "&r=" + Math.random(), true); // avoid cached results
-      
+
       try {
          req.send();
          OSC.timer.loadHv = window.setTimeout(loadHv, 1000);
@@ -339,8 +339,7 @@ function loadHv() {
    }
 }
 
-function populateAllControls(init)
-{
+function populateAllControls(init) {
    // populate board list
    var sel = document.getElementById("wdSelect");
    for (var i = 0; i < OSC.wdb.length; i++) {
@@ -356,13 +355,12 @@ function populateAllControls(init)
    populateControls(init);
 }
 
-function populateControls(init)
-{
+function populateControls(init) {
    // populate channel buttons
-   for (var i=0 ; i<8 ; i++)
+   for (var i = 0; i < 8; i++)
       OSC.chOn[i] = (OSC.wdb[OSC.curBoard].drs0ChnTxEnable & (1 << i)) > 0;
-   for (var i=0 ; i<8 ; i++)
-      OSC.chOn[i+8] = (OSC.wdb[OSC.curBoard].drs1ChnTxEnable & (1 << i)) > 0;
+   for (var i = 0; i < 8; i++)
+      OSC.chOn[i + 8] = (OSC.wdb[OSC.curBoard].drs1ChnTxEnable & (1 << i)) > 0;
    OSC.chOn[16] = (OSC.wdb[OSC.curBoard].drs0ChnTxEnable & 0x100) > 0;
    OSC.chOn[17] = (OSC.wdb[OSC.curBoard].drs1ChnTxEnable & 0x100) > 0;
    OSC.drawChnButtons();
@@ -372,7 +370,7 @@ function populateControls(init)
    document.getElementById("inpDacTriggerLevel").value = Math.round(OSC.wdb[OSC.curBoard].dacTriggerLevel[0] * 1000);
    document.getElementById("sldTriggerDelay").set(1 - OSC.wdb[OSC.curBoard].triggerDelay / 450);
    document.getElementById("inpTriggerDelay").value = Math.round(OSC.wdb[OSC.curBoard].triggerDelay);
-   
+
    if (OSC.gl.triggerMode == 1) {
       document.getElementById("rbTriggerModeNormal").checked = true;
       document.getElementById("rbTriggerModeAuto").checked = false;
@@ -380,7 +378,7 @@ function populateControls(init)
       document.getElementById("rbTriggerModeNormal").checked = false;
       document.getElementById("rbTriggerModeAuto").checked = true;
    }
-   
+
    if (OSC.wdb[OSC.curBoard].triggerExternalOr) {
       document.getElementById("rbTriggerSourceInt").checked = false;
       document.getElementById("rbTriggerSourceExt").checked = true;
@@ -388,7 +386,7 @@ function populateControls(init)
       document.getElementById("rbTriggerSourceInt").checked = true;
       document.getElementById("rbTriggerSourceExt").checked = false;
    }
-   
+
    if (OSC.wdb[OSC.curBoard].triggerFallingEdge) {
       document.getElementById("trgEdgeUp").style.display = "none";
       document.getElementById("trgEdgeDown").style.display = "inline";
@@ -403,7 +401,7 @@ function populateControls(init)
 
    document.getElementById("inputReadoutSrcDRS").checked = (OSC.wdb[OSC.curBoard].readoutSrcSel == 1);
    document.getElementById("inputReadoutSrcADC").checked = (OSC.wdb[OSC.curBoard].readoutSrcSel == 2);
-   
+
    document.getElementById("timingCalibSignalEnable").checked = OSC.wdb[OSC.curBoard].timingCalibSignalEnable;
 
    if (OSC.wdb[OSC.curBoard].dacCalDc > 0.4)
@@ -419,15 +417,15 @@ function populateControls(init)
    document.getElementById("sldDacCalDc").set(OSC.wdb[OSC.curBoard].dacCalDc / 2 + 0.5);
    document.getElementById("inpDacCalDc").value = Math.round(OSC.wdb[OSC.curBoard].dacCalDc * 1000);
 
-   document.getElementById("drsSampleFreq").value = Math.round(OSC.wdb[OSC.curBoard].drsSampleFreq/1000 * 10) / 10;
-   document.getElementById("drsActualSampleFreq").innerHTML = OSC.wdb[OSC.curBoard].drsSampleFreq/1000 + " GSPS";
+   document.getElementById("drsSampleFreq").value = Math.round(OSC.wdb[OSC.curBoard].drsSampleFreq / 1000 * 10) / 10;
+   document.getElementById("drsActualSampleFreq").innerHTML = OSC.wdb[OSC.curBoard].drsSampleFreq / 1000 + " GSPS";
 
    var s = document.getElementById("timingReferenceSignalSelect");
    if (OSC.wdb[OSC.curBoard].drs0TimingRefSel > 0)
       s.selectedIndex = 2;
    else if (OSC.wdb[OSC.curBoard].timingCalibSignalEnable)
       s.selectedIndex = 1;
-   
+
    document.getElementById("calib1").checked = OSC.wp.ofsCalib1;
    document.getElementById("calib2").checked = OSC.wp.ofsCalib2;
    document.getElementById("calib3").checked = OSC.wp.gainCalib;
@@ -444,12 +442,42 @@ function populateControls(init)
    document.getElementById("clksource").disabled = true;
 
    // channels dialog box
-   for (var i=0 ; i<16 ; i++) {
-      document.getElementById("inpDacTriggerLevel"+i).value = Math.round(OSC.wdb[OSC.curBoard].dacTriggerLevel[i] * 1000);
-      document.getElementById("selGain"+i).value = OSC.wdb[OSC.curBoard].feGain[i];
-      document.getElementById("cbPzc"+i).checked = OSC.wdb[OSC.curBoard].fePzc[i];
+   for (i = 0; i < 16; i++) {
+      document.getElementById("inpDacTriggerLevel" + i).value = Math.round(OSC.wdb[OSC.curBoard].dacTriggerLevel[i] * 1000);
+      document.getElementById("selGain" + i).value = OSC.wdb[OSC.curBoard].feGain[i];
+      document.getElementById("cbPzc" + i).checked = OSC.wdb[OSC.curBoard].fePzc[i];
    }
-   
+
+   // trigger pattern dialog box
+   for (i = 0; i < 16; i++) {
+      var p = document.getElementById('P' + i);
+      p.enabled = (OSC.wdb[OSC.curBoard].triggerPatternEnLocal & (1 << i)) > 0;
+      if (p.enabled) {
+         p.style.backgroundColor = 'darkgreen';
+         p.style.color = 'white';
+      } else {
+         p.style.backgroundColor = '#DDDDDD';
+         p.style.color = 'black';
+      }
+
+      for (var j = 0; j < 16; j++) {
+         var c = document.getElementById('C' + (i < 10 ? '0' + i : i) + (j < 10 ? '0' + j : j));
+
+         c.mode = 0;
+         if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << j)) > 0)
+            c.mode = 1;
+         if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << (j+16))) > 0)
+            c.mode = 2;
+         if (c.mode == 0)
+            c.innerHTML = '';
+         if (c.mode == 1)
+            c.innerHTML = '&#11044;';
+         if (c.mode == 2)
+            c.innerHTML = '&#9587';
+      }
+   }
+
+
    if (init) {
       // set scale according to sampling frequency
       if (OSC.wdb[OSC.curBoard].drsSampleFreq < 2000)
@@ -552,26 +580,26 @@ function setParam(e, channel) {
    };
 
    if (e.name == "dacTriggerLevel" && channel == undefined) {
-      for (var i=0 ; i<16 ; i++)
-         document.getElementById("inpDacTriggerLevel"+i).value = e.value;
+      for (var i = 0; i < 16; i++)
+         document.getElementById("inpDacTriggerLevel" + i).value = e.value;
    }
 
    if (e.name == "feGain" && channel == undefined) {
-      for (var i=0 ; i<16 ; i++)
-         document.getElementById("selGain"+i).value = e.value;
+      for (var i = 0; i < 16; i++)
+         document.getElementById("selGain" + i).value = e.value;
    }
 
    if (e.name == "fePzc" && channel == undefined) {
-      for (var i=0 ; i<16 ; i++)
-         document.getElementById("cbPzc"+i).checked = e.checked;
+      for (var i = 0; i < 16; i++)
+         document.getElementById("cbPzc" + i).checked = e.checked;
    }
 
    if (e.name == "clkSource" && e.checked == true) {
       if (OSC.wdb[OSC.curBoard].scaler[17] < 79E6)
          dlgMessage("Error", "No external clock present", true, true);
    }
-   
-   var uri = e.name+"/";
+
+   var uri = e.name + "/";
    if (OSC.applyAll)
       uri += "ALL";
    else
@@ -644,7 +672,7 @@ function setPers(s) {
 
 function keyParam(event, input, channel) {
    var charCode = (typeof event.which == "number") ? event.which : event.keyCode;
-   
+
    if (charCode == 13) {
       validateParam(input, channel);
       input.focus();
@@ -659,22 +687,22 @@ function validateParam(input, channel) {
       if (input.value > 500)
          input.value = 500;
       if (input.id == "inpDacTriggerLevel")
-         document.getElementById("sldDacTriggerLevel").set(input.value/1000 + 0.5);
+         document.getElementById("sldDacTriggerLevel").set(input.value / 1000 + 0.5);
    }
-   
+
    if (input.id == "inpTriggerDelay") {
       if (input.value < 0)
          input.value = 0;
       if (input.value > 450)
          input.value = 450;
-      document.getElementById("sldTriggerDelay").set(1 - input.value/450);
+      document.getElementById("sldTriggerDelay").set(1 - input.value / 450);
    }
-   
+
    if (input.id == "drsSampleFreq") {
       var divider = Math.round(200.0 / input.value * 2.048);
-      divider = 2*Math.floor(divider/2);
+      divider = 2 * Math.floor(divider / 2);
       OSC.wdb[OSC.curBoard].drsSampleFreq = Math.round(200 / divider * 2048);
-      document.getElementById("drsActualSampleFreq").innerHTML = OSC.wdb[OSC.curBoard].drsSampleFreq/1000 + " GSPS";
+      document.getElementById("drsActualSampleFreq").innerHTML = OSC.wdb[OSC.curBoard].drsSampleFreq / 1000 + " GSPS";
    }
 
    if (input.id == "inpDacCalDc") {
@@ -682,7 +710,7 @@ function validateParam(input, channel) {
          input.value = -1000;
       if (input.value > 1000)
          input.value = 1000;
-      document.getElementById("sldDacCalDc").set(input.value/2000 + 0.5);
+      document.getElementById("sldDacCalDc").set(input.value / 2000 + 0.5);
    }
 
    if (input.id.substr(0, 11) == "inpHvTarget") {
@@ -691,7 +719,7 @@ function validateParam(input, channel) {
       if (input.value > 210)
          input.value = 210;
    }
-   
+
    setParam(input, channel);
 }
 
@@ -707,7 +735,7 @@ function doVCalib(all) {
    if (all)
       req.open("PUT", "vcalib/ALL");
    else
-      req.open("PUT", "vcalib/"+OSC.curBoard);
+      req.open("PUT", "vcalib/" + OSC.curBoard);
    req.send();
 }
 
@@ -723,7 +751,7 @@ function doTCalib(all) {
    if (all)
       req.open("PUT", "tcalib/ALL");
    else
-      req.open("PUT", "tcalib/"+OSC.curBoard);
+      req.open("PUT", "tcalib/" + OSC.curBoard);
    req.send();
 }
 
@@ -883,7 +911,7 @@ function receiveWF() {
                e.style.width = "0";
                e = document.getElementById("progressIndTcalib");
                e.style.width = "0";
-               
+
                OSC.clearPersistency();
 
                document.getElementById("wdSelect").selectedIndex = progressOldBoard;
@@ -1012,7 +1040,7 @@ function resize()
 
       // config full visible (configSlider = 1), hidden (configSlider = 0)
       ctls.style.left = (document.documentElement.clientWidth - ctls.offsetWidth -
-         config.offsetWidth * config.slider + "px");
+      config.offsetWidth * config.slider + "px");
 
       config.style.left = (document.documentElement.clientWidth -
          config.offsetWidth * config.slider) + "px";
@@ -1030,7 +1058,7 @@ function oscKeypress(e) {
    // check if for some dialog box etc.
    if (e.target != document.body)
       return;
-   
+
    if (charCode == ' '.charCodeAt(0)) {
       btnStop();
    }
@@ -1092,20 +1120,19 @@ function btnSingle()
    OSC.timer.loadWF = window.setTimeout(loadWF, 10);
 }
 
-function enableDRSChannels()
-{
+function enableDRSChannels() {
    var mask = 0;
-   for (var i=0 ; i<18 ; i++)
+   for (var i = 0; i < 18; i++)
       if (OSC.chOn[i])
          mask |= (1 << i);
 
    OSC.wdb[OSC.curBoard].drs0ChnTxEnable = 0;
    OSC.wdb[OSC.curBoard].drs1ChnTxEnable = 0;
-   for (var i=0 ; i<8 ; i++)
+   for (var i = 0; i < 8; i++)
       if (OSC.chOn[i])
          OSC.wdb[OSC.curBoard].drs0ChnTxEnable |= (1 << i);
-   for (var i=0 ; i<8 ; i++)
-      if (OSC.chOn[i+8])
+   for (var i = 0; i < 8; i++)
+      if (OSC.chOn[i + 8])
          OSC.wdb[OSC.curBoard].drs1ChnTxEnable |= (1 << i);
    if (OSC.chOn[16])
       OSC.wdb[OSC.curBoard].drs0ChnTxEnable |= 0x100;
@@ -1115,7 +1142,7 @@ function enableDRSChannels()
    var req = new XMLHttpRequest();
 
    if (OSC.applyAll) {
-      for (var i=0 ; i<OSC.wdb.length ; i++) {
+      for (var i = 0; i < OSC.wdb.length; i++) {
          OSC.wdb[i].drs0ChnTxEnable = OSC.wdb[OSC.curBoard].drs0ChnTxEnable;
          OSC.wdb[i].drs1ChnTxEnable = OSC.wdb[OSC.curBoard].drs1ChnTxEnable;
       }
@@ -1126,8 +1153,7 @@ function enableDRSChannels()
    req.send(mask);
 }
 
-function btnChnAll()
-{
+function btnChnAll() {
    var i;
 
    for (i = 0; i < 16; i++)
@@ -1150,34 +1176,34 @@ function btnChn(event, c)
 // select channel "c" and set controls to reflect channel status (c == -1 means all channels)
 {
    event.preventDefault(); // suppress context menu for Ctrl-click
-   
+
    // unselect all channels
    if (!event.ctrlKey && !event.shiftKey)
-      for (var i=0 ; i<18 ; i++)
+      for (var i = 0; i < 18; i++)
          if (i != c)
             OSC.chOnSelected[i] = false;
 
    if (event.shiftKey) {
       // find last selected channel
       var last;
-      for (last=15 ; last>=0 ; last--)
+      for (last = 15; last >= 0; last--)
          if (OSC.chOnSelected[last])
             break;
       // select all channels betweeen last and current
       if (c > last)
-         for (var i=last ; i<c ; i++)
+         for (var i = last; i < c; i++)
             OSC.chOnSelected[i] = true;
       if (c < last)
-         for (var i=last ; i>c ; i--)
+         for (var i = last; i > c; i--)
             OSC.chOnSelected[i] = true;
    }
-   
+
    // if channel already selected, toggle it
    if (OSC.chOnSelected[c])
       OSC.chOn[c] = !OSC.chOn[c];  // if current channel clicked, toggle it
    else
       OSC.chOn[c] = true;          // if other channel clicked, enable it
-   
+
    // select current channel
    OSC.chOnSelected[c] = true;
 
@@ -1288,11 +1314,11 @@ function sldDacTriggerLevel(value) {
    if (OSC.demoMode)
       return;
 
-   value = Math.round((value - 0.5)*1000)/1000; // convert to V
+   value = Math.round((value - 0.5) * 1000) / 1000; // convert to V
 
    if (value == tLevelLast) // only send if changed
       return;
-   
+
    tLevelLast = value;
 
    document.getElementById("inpDacTriggerLevel").value = value * 1000;
@@ -1461,7 +1487,7 @@ function btnStart() {
       dlgMessage("Error", "Saving all boards only works with a global crate trigger", true, true);
       return;
    }
-   
+
    var b = document.getElementById('btnSave');
    b.innerHTML = "Stop";
    b.style.border = "3px solid #00A0FF";
@@ -1490,16 +1516,14 @@ function btnStart() {
    dlgHide('dlgSave');
 }
 
-function btnVcalib()
-{
+function btnVcalib() {
    if (OSC.wdb.length > 1)
       dlgShow('dlgVCalib');
    else
       doVCalib(false);
 }
 
-function btnTcalib()
-{
+function btnTcalib() {
    if (OSC.wdb.length > 1)
       dlgShow('dlgTCalib');
    else
@@ -1664,7 +1688,7 @@ function measParamChange(meas) {
 
 function measZoomIn() {
    OSC.histo.autoAxis = false;
-   
+
    var x = OSC.histo.xMax;
    var d = 0.25 * (OSC.histo.axisMax - OSC.histo.axisMin);
 
@@ -1704,8 +1728,8 @@ function triggerSendPattern() {
    var e = {};
    e.name = "triggerPatternEnLocal";
    e.value = 0;
-   for (var i=0 ; i<16 ; i++) {
-      if (document.getElementById('P'+i).enabled)
+   for (var i = 0; i < 16; i++) {
+      if (document.getElementById('P' + i).enabled)
          e.value += (1 << i);
    }
 
@@ -1716,11 +1740,11 @@ function triggerSendCell(p) {
    var e = {};
    e.name = "triggerPattern";
    e.value = 0;
-   for (var i=0 ; i<16 ; i++) {
-      if (document.getElementById('C' + (i<10 ? '0' + i : i) + (p<10 ? '0' + p : p)).mode == 1)
+   for (var i = 0; i < 16; i++) {
+      if (document.getElementById('C' + (i < 10 ? '0' + i : i) + (p < 10 ? '0' + p : p)).mode == 1)
          e.value += (1 << i);
-      if (document.getElementById('C' + (i<10 ? '0' + i : i) + (p<10 ? '0' + p : p)).mode == 2)
-         e.value += (1 << (i+16));
+      if (document.getElementById('C' + (i < 10 ? '0' + i : i) + (p < 10 ? '0' + p : p)).mode == 2)
+         e.value += (1 << (i + 16));
    }
 
    setParam(e, p);
@@ -1762,7 +1786,7 @@ function triggerClearAll() {
 
    for (i = 0; i < 16; i++)
       for (var j = 0; j < 16; j++) {
-         var c = document.getElementById('C' + (i<10 ? '0' + i : i) + (j<10 ? '0' + j : j));
+         var c = document.getElementById('C' + (i < 10 ? '0' + i : i) + (j < 10 ? '0' + j : j));
          c.mode = 0;
          c.innerHTML = '';
       }
@@ -1782,7 +1806,7 @@ function triggerOrAll() {
 
    for (i = 0; i < 16; i++)
       for (var j = 0; j < 16; j++) {
-         var c = document.getElementById('C' + (i<10 ? '0' + i : i) + (j<10 ? '0' + j : j));
+         var c = document.getElementById('C' + (i < 10 ? '0' + i : i) + (j < 10 ? '0' + j : j));
          if (i == j) {
             c.mode = 1;
             c.innerHTML = '&#11044;';
