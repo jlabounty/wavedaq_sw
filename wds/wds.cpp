@@ -203,18 +203,38 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                if (value == "0") {
                   // internal trigger
                   gl->wdb[i]->SetTriggerEnable(true);
-                  gl->wdb[i]->SetTriggerCfgOr(0xFFFF);
+                  gl->wdb[i]->SetTriggerCfgOr(0);
+                  gl->wdb[i]->SetTriggerCfgAnd(0);
+                  gl->wdb[i]->SetTriggerLocalScheme(3);
                   gl->wdb[i]->SetTriggerExternalOr(false);
                   gl->wdb[i]->SetTriggerExternalAnd(false);
                } else {
                   // external trigger
                   gl->wdb[i]->SetTriggerEnable(true);
                   gl->wdb[i]->SetTriggerCfgOr(0);
+                  gl->wdb[i]->SetTriggerCfgAnd(0);
+                  gl->wdb[i]->SetTriggerLocalScheme(0);
                   gl->wdb[i]->SetTriggerExternalOr(true);
                   gl->wdb[i]->SetTriggerExternalAnd(false);
                }
             }
          }
+      }
+
+      else if (item == "triggerPatternEnLocal") {
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetTriggerPatternEnLocal(std::stoi(value));
+         else
+            gl->wdb[iBoard]->SetTriggerPatternEnLocal(std::stoi(value));
+      }
+
+      else if (item == "triggerPattern") {
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetTriggerPattern(iChannel, std::stoi(value));
+         else
+            gl->wdb[iBoard]->SetTriggerPattern(iChannel, std::stoi(value));
       }
 
       else if (item == "feGain") {
@@ -467,7 +487,14 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"triggerDelay\": %d,\n",               w->GetTriggerDelayNs());
          mg_printf_http_chunk(nc, "      \"triggerComparatorMask\": %d,\n",      w->GetTriggerComparatorMask());
          mg_printf_http_chunk(nc, "      \"triggerCfgOr\": %d,\n",               w->GetTriggerCfgOr());
-         mg_printf_http_chunk(nc, "      \"triggerCfgAnd\": %d\n",               w->GetTriggerCfgAnd());
+         mg_printf_http_chunk(nc, "      \"triggerCfgAnd\": %d,\n",              w->GetTriggerCfgAnd());
+         mg_printf_http_chunk(nc, "      \"triggerLocalScheme\": %d,\n",         w->GetTriggerLocalScheme());
+         mg_printf_http_chunk(nc, "      \"triggerPatternEnLocal\": %d,\n",      w->GetTriggerPatternEnLocal());
+
+         mg_printf_http_chunk(nc, "      \"triggerPattern\": [\n");
+         for (int i=0 ; i<15 ; i++)
+            mg_printf_http_chunk(nc, "        %d,\n",                            w->GetTriggerPattern(i));
+         mg_printf_http_chunk(nc, "        %d ]\n",                             w->GetTriggerPattern(15));
 
          if (b == b2-1)
             mg_printf_http_chunk(nc, "    }\n");

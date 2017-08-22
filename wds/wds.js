@@ -1699,3 +1699,101 @@ function dispHisto(c) {
    OSC.disp.histo = c.checked;
    OSC.resizeCanvas();
 }
+
+function triggerSendPattern() {
+   var e = {};
+   e.name = "triggerPatternEnLocal";
+   e.value = 0;
+   for (var i=0 ; i<16 ; i++) {
+      if (document.getElementById('P'+i).enabled)
+         e.value += (1 << i);
+   }
+
+   setParam(e);
+}
+
+function triggerSendCell(p) {
+   var e = {};
+   e.name = "triggerPattern";
+   e.value = 0;
+   for (var i=0 ; i<16 ; i++) {
+      if (document.getElementById('C' + (i<10 ? '0' + i : i) + (p<10 ? '0' + p : p)).mode == 1)
+         e.value += (1 << i);
+      if (document.getElementById('C' + (i<10 ? '0' + i : i) + (p<10 ? '0' + p : p)).mode == 2)
+         e.value += (1 << (i+16));
+   }
+
+   setParam(e, p);
+}
+
+function triggerClickPattern() {
+   this.enabled = !this.enabled;
+   if (this.enabled) {
+      this.style.backgroundColor = 'darkgreen';
+      this.style.color = 'white';
+   } else {
+      this.style.backgroundColor = '#DDDDDD';
+      this.style.color = 'black';
+   }
+
+   triggerSendPattern();
+}
+
+function triggerClickCell() {
+   console.log(this.pa + ' - ' + this.ch + ' = ' + this.mode);
+   this.mode = (this.mode + 1) % 3;
+   if (this.mode == 0)
+      this.innerHTML = '';
+   if (this.mode == 1)
+      this.innerHTML = '&#11044;';
+   if (this.mode == 2)
+      this.innerHTML = '&#9587';
+
+   triggerSendCell(this.pa);
+}
+
+function triggerClearAll() {
+   for (var i = 0; i < 16; i++) {
+      var p = document.getElementById('P' + i);
+      p.enabled = false;
+      p.style.backgroundColor = '#DDDDDD';
+      p.style.color = 'black';
+   }
+
+   for (i = 0; i < 16; i++)
+      for (var j = 0; j < 16; j++) {
+         var c = document.getElementById('C' + (i<10 ? '0' + i : i) + (j<10 ? '0' + j : j));
+         c.mode = 0;
+         c.innerHTML = '';
+      }
+
+   triggerSendPattern();
+   for (i = 0; i < 16; i++)
+      triggerSendCell(i);
+}
+
+function triggerOrAll() {
+   for (var i = 0; i < 16; i++) {
+      var p = document.getElementById('P' + i);
+      p.enabled = true;
+      p.style.backgroundColor = 'darkgreen';
+      p.style.color = 'white';
+   }
+
+   for (i = 0; i < 16; i++)
+      for (var j = 0; j < 16; j++) {
+         var c = document.getElementById('C' + (i<10 ? '0' + i : i) + (j<10 ? '0' + j : j));
+         if (i == j) {
+            c.mode = 1;
+            c.innerHTML = '&#11044;';
+         } else {
+            c.mode = 0;
+            c.innerHTML = '';
+         }
+      }
+
+   triggerSendPattern();
+   for (i = 0; i < 16; i++)
+      triggerSendCell(i);
+}
+

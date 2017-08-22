@@ -299,3 +299,31 @@ input[type=text] {
 .timeScale {
    margin: 3px;
 }
+
+.tableTrigger {
+   border-collapse: collapse;
+}
+
+.tableTrigger td {
+   border: 1px solid #808080;
+   padding: 2px;
+}
+
+.tableTriggerHeader {
+   cursor: pointer;
+   user-select: none;
+}
+
+.tableTriggerCell {
+   cursor: pointer;
+   user-select: none;
+   height: 26px;
+}
+
+.tableTrigger tr:nth-child(odd) {
+   background-color: #DDDDDD;
+}
+
+.tableTrigger tr:nth-child(event) {
+   background-color: #EEEEEE;
+}
