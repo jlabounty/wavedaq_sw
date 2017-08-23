@@ -477,6 +477,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             mg_printf_http_chunk(nc, "        %d,\n",                            w->GetFeMux(i));
          mg_printf_http_chunk(nc, "        %d ],\n",                             w->GetFeMux(15));
 
+         mg_printf_http_chunk(nc, "      \"triggerSource\": %d,\n",              w->GetTriggerLocalScheme() == 2 ? 0 : 1);
+
          mg_printf_http_chunk(nc, "      \"triggerShaperEnable\": %s,\n",        w->IsTriggerShaperEnable() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"triggerPulseLength\": %d,\n",         w->GetTriggerPulseLength());
          mg_printf_http_chunk(nc, "      \"triggerEnable\": %s,\n",              w->IsTriggerEnable() ? "true" : "false");

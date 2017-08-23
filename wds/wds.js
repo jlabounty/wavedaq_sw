@@ -379,12 +379,12 @@ function populateControls(init) {
       document.getElementById("rbTriggerModeAuto").checked = true;
    }
 
-   if (OSC.wdb[OSC.curBoard].triggerExternalOr) {
-      document.getElementById("rbTriggerSourceInt").checked = false;
-      document.getElementById("rbTriggerSourceExt").checked = true;
-   } else {
+   if (OSC.wdb[OSC.curBoard].triggerSource == 0) {
       document.getElementById("rbTriggerSourceInt").checked = true;
       document.getElementById("rbTriggerSourceExt").checked = false;
+   } else if (OSC.gl.triggerMode == 2) {
+      document.getElementById("rbTriggerSourceInt").checked = false;
+      document.getElementById("rbTriggerSourceExt").checked = true;
    }
 
    if (OSC.wdb[OSC.curBoard].triggerFallingEdge) {
@@ -1731,6 +1731,11 @@ function triggerSendPattern() {
    for (var i = 0; i < 16; i++) {
       if (document.getElementById('P' + i).enabled)
          e.value += (1 << i);
+   }
+
+   // if trigger is set to external, set it to internal
+   if (OSC.wdb[OSC.curBoard].triggerSource == 0) {
+
    }
 
    setParam(e);
