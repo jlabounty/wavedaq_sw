@@ -464,10 +464,19 @@ function populateControls(init) {
          var c = document.getElementById('C' + (i < 10 ? '0' + i : i) + (j < 10 ? '0' + j : j));
 
          c.mode = 0;
-         if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << j)) > 0)
-            c.mode = 1;
-         if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << (j+16))) > 0)
-            c.mode = 2;
+
+         // invert pattern for negative trigger
+         if (OSC.wdb[OSC.curBoard].triggerFallingEdge) {
+            if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << (j+16))) > 0)
+               c.mode = 1;
+            if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << j)) > 0)
+               c.mode = 2;
+         } else {
+            if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << j)) > 0)
+               c.mode = 1;
+            if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << (j+16))) > 0)
+               c.mode = 2;
+         }
          if (c.mode == 0)
             c.innerHTML = '';
          if (c.mode == 1)
@@ -1746,10 +1755,17 @@ function triggerSendCell(p) {
    e.name = "triggerPattern";
    e.value = 0;
    for (var i = 0; i < 16; i++) {
-      if (document.getElementById('C' + (i < 10 ? '0' + i : i) + (p < 10 ? '0' + p : p)).mode == 1)
-         e.value += (1 << i);
-      if (document.getElementById('C' + (i < 10 ? '0' + i : i) + (p < 10 ? '0' + p : p)).mode == 2)
-         e.value += (1 << (i + 16));
+      if (OSC.wdb[OSC.curBoard].triggerFallingEdge) {
+         if (document.getElementById('C' + (i < 10 ? '0' + i : i) + (p < 10 ? '0' + p : p)).mode == 1)
+            e.value += (1 << (i + 16));
+         if (document.getElementById('C' + (i < 10 ? '0' + i : i) + (p < 10 ? '0' + p : p)).mode == 2)
+            e.value += (1 << i);
+      } else {
+         if (document.getElementById('C' + (i < 10 ? '0' + i : i) + (p < 10 ? '0' + p : p)).mode == 1)
+            e.value += (1 << i);
+         if (document.getElementById('C' + (i < 10 ? '0' + i : i) + (p < 10 ? '0' + p : p)).mode == 2)
+            e.value += (1 << (i + 16));
+      }
    }
 
    setParam(e, p);
