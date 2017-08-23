@@ -36,6 +36,7 @@ typedef struct {
    int  triggerMode;
    int  triggerSelfArm;
    bool specialTest;
+   bool updatePeriodic;
 } GLOBALS;
 
 /*------------------------------------------------------------------*/
@@ -378,6 +379,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "   \"gl\": {\n");
       mg_printf_http_chunk(nc, "      \"demoMode\": %s,\n",                      gl->demoMode ? "true" : "false");
       mg_printf_http_chunk(nc, "      \"triggerMode\": %d,\n",                   gl->triggerMode);
+      mg_printf_http_chunk(nc, "      \"updatePeriodic\": %d,\n",                gl->updatePeriodic);
       mg_printf_http_chunk(nc, "      \"nWdb\": %d\n",                           gl->wdb.size());
       mg_printf_http_chunk(nc, "   },\n");
       mg_printf_http_chunk(nc, "   \"wp\": {\n");
@@ -804,6 +806,7 @@ void showUsage(std::string name)
    std::cerr << "  -d              Demo mode" << std::endl;
    std::cerr << "  -p              HTTP server port (default is 8080)" << std::endl;
    std::cerr << "  -s              Run WDB in self-arm mode (use with caution!)" << std::endl;
+   std::cerr << "  -u              Retrieve WDB registers once per second to capture changes by other control programs" << std::endl;
    std::cerr << "  -w <address>    Internet address(es) of WaveDREAM board(s)" << std::endl;
    std::cerr << "  -v 1            Print extra information (verbose)" << std::endl;
    std::cerr << "  -v 2            Print in addition each received waveform packet header" << std::endl;
@@ -836,6 +839,7 @@ int main(int argc, const char * argv[])
    gl.verbose = 0;
    gl.triggerMode = cTriggerModeAuto;
    gl.triggerSelfArm = false;
+   gl.updatePeriodic = false;
    
    // parse command line parameters
    if (argc < 2) {
@@ -857,6 +861,9 @@ int main(int argc, const char * argv[])
       else if (arg == "-s")
          gl.triggerSelfArm = true;
 
+      else if (arg == "-u")
+         gl.updatePeriodic = true;
+      
       else if (arg == "-v") {
          gl.verbose = 1;
          if (i < argc-1 && isdigit(argv[i+1][0]))
@@ -1031,14 +1038,26 @@ int main(int argc, const char * argv[])
          
          // read board temperatures and lock status periodically
          time(&now);
-         if (now > last + 10) {
-            for (auto &b: gl.wdb) {
-               b->GetTemperature(true);
-               b->GetPllLck(true);
+
+         if (gl.updatePeriodic) {
+            // update every second all registers
+            if (now > last) {
+               for (auto &b: gl.wdb) {
+                  b->ReceiveStatusRegisters();
+                  b->ReceiveControlRegisters();
+               }
+               last = now;
             }
-            last = now;
+         } else {
+            // update every 10 seconds to read temperature
+            if (now > last + 10) {
+               for (auto &b: gl.wdb) {
+                  b->GetTemperature(true);
+                  b->GetPllLck(true);
+               }
+               last = now;
+            }
          }
-        
          
       }
    } catch  (std::runtime_error &e) {

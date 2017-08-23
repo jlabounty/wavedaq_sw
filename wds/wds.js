@@ -152,10 +152,20 @@ function init() {
    // schedule loadHv()
    OSC.timer.loadHv = window.setTimeout(loadHv, 1000);
 
+   // schedule loadWdb()
+   OSC.timer.loadWdb = window.setTimeout(loadWdb, 1000);
+
    // load spinning wheel image
    OSC.spinningWheel = new Image();
    OSC.spinningWheel.src = "spinning-wheel.gif";
 }
+
+function loadWdb() {
+   readWdb(OSC.curBoard).then(function(result) {
+      OSC.timer.loadWdb = window.setTimeout(loadWdb, 1000);
+   }).catch();
+}
+
 
 function connectionBroken() {
    if (OSC.connected) {
@@ -175,6 +185,8 @@ function connectionBroken() {
       clearTimeout(OSC.timer.loadScalers);
    if (OSC.timer.loadHv != undefined)
       clearTimeout(OSC.timer.loadHv);
+   if (OSC.timer.loadWdb != undefined)
+      clearTimeout(OSC.timer.loadWdb);
    if (OSC.timer.loadWF != undefined)
       clearTimeout(OSC.timer.loadWF);
 }
@@ -507,7 +519,7 @@ function loadGl(init) {
          var o = JSON.parse(req.responseText);
          OSC.gl = o.gl;
          OSC.wp = o.wp;
-         loadWdb(-1, init); // daisy-chain for loading all WDBs
+         readWdb(-1, init); // daisy-chain for loading all WDBs
       } else if (req.readyState == 4 && req.status == 0) {
          connectionBroken();
       }
@@ -522,24 +534,30 @@ function loadGl(init) {
    }
 }
 
-function loadWdb(b, init) {
-   // send AJAX request
-   var req = new XMLHttpRequest();
-   req.onreadystatechange = function () {
-      if (req.readyState == 4 && req.status == 200) {
-         if (b == -1)
-            OSC.wdb = JSON.parse(req.responseText).wdb;
-         else
-            OSC.wdb[b] = JSON.parse(req.responseText).wdb[0];
-         populateAllControls(init);
-         OSC.connected = true;
-      } else if (req.readyState == 4 && req.status == 0) {
-         connectionBroken();
-      }
-   };
+function readWdb(b, init) {
 
-   req.open("GET", "wdb?b=" + b + "&r=" + Math.random(), true); // avoid cached results
-   req.send();
+   return new Promise(function(resolve, reject) {
+      // send AJAX request
+      var req = new XMLHttpRequest();
+      req.onreadystatechange = function () {
+         if (req.readyState == 4 && req.status == 200) {
+            if (b == -1)
+               OSC.wdb = JSON.parse(req.responseText).wdb;
+            else
+               OSC.wdb[b] = JSON.parse(req.responseText).wdb[0];
+            populateAllControls(init);
+            OSC.connected = true;
+            resolve(req);
+
+         } else if (req.readyState == 4 && req.status == 0) {
+            connectionBroken();
+            reject(req);
+         }
+      };
+
+      req.open("GET", "wdb?b=" + b + "&r=" + Math.random(), true); // avoid cached results
+      req.send();
+   });
 }
 
 function setCalibClock(e) {
@@ -581,7 +599,7 @@ function setParam(e, channel) {
          // success
          if (e.name == "range") {
             // read back DC offset which gets shifted by range change
-            loadWdb(-1);
+            readWdb(-1);
          }
       } else if (req.readyState == 4 && req.status == 0) {
          connectionBroken();
