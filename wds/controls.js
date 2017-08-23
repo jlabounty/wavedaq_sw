@@ -494,7 +494,13 @@ function dlgShow(dlg, modal) {
       d.style.top = "0px";
    else
       d.style.top = Math.round(document.documentElement.clientHeight / 2 - d.offsetHeight / 2) + "px";
-   d.style.zIndex = 11; // on top of all other dialogs
+
+
+   // put dialog on top of all other dialogs
+   var dlgs = document.getElementsByClassName("dlgFrame");
+   for (var i=0 ; i<dlgs.length ; i++)
+      dlgs[i].style.zIndex = 10;
+   d.style.zIndex = 11;
 
    if (d.modal) {
       var b = document.getElementById("dlgBlackout");
