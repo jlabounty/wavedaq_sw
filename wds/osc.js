@@ -101,6 +101,9 @@ function Oscilloscope(div) { // constructor
    this.i1 = 0;
    this.i2 = 0;
 
+   this.timeCursor =  { input: undefined, drag: false, time: 0, x: 0 };
+   this.voltCursor =  { input: undefined, drag: false, volt: 0, y: 0 };
+
    // display object
    this.disp = {
       scaler: false,
@@ -265,7 +268,31 @@ Oscilloscope.prototype.mouseEvent = function (e) {
          this.histo.dragRightHandle = true;
       }
    }
+
+   if (this.timeCursor.input != undefined && e.target == this.canvas) {
+
+      if (e.clientX > this.x1 && e.clientX < this.x2 &&
+          e.clientY > this.y1 && e.clientY < this.y2 &&
+          e.type == "mousedown")
+         this.timeCursor.drag = true;
+
+      if (e.type == "mouseup") {
+         this.timeCursor.drag = false;
+      }
+
+      if (e.type == "mousemove" && this.timeCursor.drag) {
+         this.timeCursor.dragX = e.clientX;
+         var t = (this.XToTime(e.clientX) / 1E-9).toFixed(1);
+         this.timeCursor.x = e.clientX;
+         this.timeCursor.time = t;
+         this.timeCursor.input.value = t;
+      }
+   }
 };
+
+Oscilloscope.prototype.setTimeCursor = function(i) {
+   this.timeCursor.input = i;
+}
 
 Oscilloscope.prototype.resizeCanvas = function () {
    this.width = this.canvas.width;
@@ -331,6 +358,7 @@ Oscilloscope.prototype.draw = function () {
       this.drawGrid(ctx);
       this.drawMarker(ctx);
       this.drawMeasurements(ctx);
+      this.drawCursors(ctx);
       this.printFPS(ctx);
       this.printTemperature(ctx);
       this.printLogged(ctx);
@@ -423,6 +451,15 @@ Oscilloscope.prototype.drawMeasurements = function (ctx) {
    for (var i = 0; i < this.measList.childNodes.length; i++)
       if (this.measList.childNodes[i].measurement)
          this.measList.childNodes[i].measurement.draw(ctx, this.wf.T, this.wf.U, this.i1, this.i2);
+};
+
+Oscilloscope.prototype.drawCursors = function (ctx) {
+   if (this.timeCursor.input) {
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = 2;
+      ctx.drawLine(this.timeCursor.x, this.y1, this.timeCursor.x, this.y2);
+      ctx.lineWidth = 1;
+   }
 };
 
 Oscilloscope.prototype.printStatus = function (ctx) {
@@ -613,6 +650,10 @@ Oscilloscope.prototype.calcScaleOffset = function () {
 
 Oscilloscope.prototype.timeToX = function (t) {
    return t * this.wfTS + this.wfTO;
+};
+
+Oscilloscope.prototype.XToTime = function (x) {
+   return (x - this.wfTO) / this.wfTS;
 };
 
 Oscilloscope.prototype.voltToY = function (v, c) {

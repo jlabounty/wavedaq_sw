@@ -1692,6 +1692,11 @@ function measSelect(meas, sel, prev) {
          input[pi].onchange = function () {
             measParamChange(meas);
          };
+         input[pi].addEventListener('focus', function(e) {
+            OSC.timeCursor.input = this;
+            OSC.timeCursor.time = this.value;
+         }, false);
+
          var text = document.createElement("span");
          text.innerHTML = "&nbsp;" + meas.measurement.param[pi].name + ":&nbsp;";
          meas.appendChild(text);
