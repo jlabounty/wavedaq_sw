@@ -467,22 +467,22 @@ function populateControls(init) {
 
          // invert pattern for negative trigger
          if (OSC.wdb[OSC.curBoard].triggerFallingEdge) {
-            if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << (j+16))) > 0)
+            if ((OSC.wdb[OSC.curBoard].triggerPattern[j] & (1 << (i+16))) > 0)
                c.mode = 1;
-            if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << j)) > 0)
+            if ((OSC.wdb[OSC.curBoard].triggerPattern[j] & (1 << i)) > 0)
                c.mode = 2;
          } else {
-            if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << j)) > 0)
+            if ((OSC.wdb[OSC.curBoard].triggerPattern[j] & (1 << i)) > 0)
                c.mode = 1;
-            if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << (j+16))) > 0)
+            if ((OSC.wdb[OSC.curBoard].triggerPattern[j] & (1 << (i+16))) > 0)
                c.mode = 2;
          }
          if (c.mode == 0)
             c.innerHTML = '';
          if (c.mode == 1)
-            c.innerHTML = '&#11044;';
+            c.innerHTML = '&bull;';
          if (c.mode == 2)
-            c.innerHTML = '&#9587';
+            c.innerHTML = '&times';
       }
    }
 
@@ -1790,9 +1790,9 @@ function triggerClickCell() {
    if (this.mode == 0)
       this.innerHTML = '';
    if (this.mode == 1)
-      this.innerHTML = '&#11044;';
+      this.innerHTML = '&bull;';
    if (this.mode == 2)
-      this.innerHTML = '&#9587';
+      this.innerHTML = '&times;';
 
    triggerSendCell(this.pa);
 }
@@ -1830,7 +1830,7 @@ function triggerOrAll() {
          var c = document.getElementById('C' + (i < 10 ? '0' + i : i) + (j < 10 ? '0' + j : j));
          if (i == j) {
             c.mode = 1;
-            c.innerHTML = '&#11044;';
+            c.innerHTML = '&bull;';
          } else {
             c.mode = 0;
             c.innerHTML = '';

@@ -317,7 +317,8 @@ input[type=text] {
 .tableTriggerCell {
    cursor: pointer;
    user-select: none;
-   height: 26px;
+   height: 30px;
+   font-size: 1.5em;
 }
 
 .tableTrigger tr:nth-child(odd) {
