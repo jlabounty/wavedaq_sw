@@ -161,9 +161,15 @@ function init() {
 }
 
 function loadWdb() {
-   readWdb(OSC.curBoard).then(function(result) {
+   var now = new Date()/1000;
+
+   if (now > OSC.lastParamSet + 2) {
+      readWdb(OSC.curBoard).then(function (result) {
+         OSC.timer.loadWdb = window.setTimeout(loadWdb, 1000);
+      }).catch();
+   } else {
       OSC.timer.loadWdb = window.setTimeout(loadWdb, 1000);
-   }).catch();
+   }
 }
 
 
@@ -378,11 +384,15 @@ function populateControls(init) {
    OSC.drawChnButtons();
 
    // populate config
-   document.getElementById("sldDacTriggerLevel").set(OSC.wdb[OSC.curBoard].dacTriggerLevel[0] + 0.5);
-   document.getElementById("inpDacTriggerLevel").value = Math.round(OSC.wdb[OSC.curBoard].dacTriggerLevel[0] * 1000);
-   document.getElementById("sldTriggerDelay").set(1 - OSC.wdb[OSC.curBoard].triggerDelay / 450);
-   document.getElementById("inpTriggerDelay").value = Math.round(OSC.wdb[OSC.curBoard].triggerDelay);
+   if (document.getElementById("inpDacTriggerLevel") != document.activeElement) {
+      document.getElementById("sldDacTriggerLevel").set(OSC.wdb[OSC.curBoard].dacTriggerLevel[0] + 0.5);
+      document.getElementById("inpDacTriggerLevel").value = Math.round(OSC.wdb[OSC.curBoard].dacTriggerLevel[0] * 1000);
+   }
 
+   if (document.getElementById("inpTriggerDelay") != document.activeElement) {
+      document.getElementById("sldTriggerDelay").set(1 - OSC.wdb[OSC.curBoard].triggerDelay / 450);
+      document.getElementById("inpTriggerDelay").value = Math.round(OSC.wdb[OSC.curBoard].triggerDelay);
+   }
    if (OSC.gl.triggerMode == 1) {
       document.getElementById("rbTriggerModeNormal").checked = true;
       document.getElementById("rbTriggerModeAuto").checked = false;
@@ -426,12 +436,15 @@ function populateControls(init) {
    document.getElementById("feMux").checked = (OSC.wdb[OSC.curBoard].feMux[0] == 3);
    document.getElementById("calibBufferEnable").checked = OSC.wdb[OSC.curBoard].calibBufferEnable;
 
-   document.getElementById("sldDacCalDc").set(OSC.wdb[OSC.curBoard].dacCalDc / 2 + 0.5);
-   document.getElementById("inpDacCalDc").value = Math.round(OSC.wdb[OSC.curBoard].dacCalDc * 1000);
+   if (document.getElementById("inpDacCalDc") != document.activeElement) {
+      document.getElementById("sldDacCalDc").set(OSC.wdb[OSC.curBoard].dacCalDc / 2 + 0.5);
+      document.getElementById("inpDacCalDc").value = Math.round(OSC.wdb[OSC.curBoard].dacCalDc * 1000);
+   }
 
-   document.getElementById("drsSampleFreq").value = Math.round(OSC.wdb[OSC.curBoard].drsSampleFreq / 1000 * 10) / 10;
-   document.getElementById("drsActualSampleFreq").innerHTML = OSC.wdb[OSC.curBoard].drsSampleFreq / 1000 + " GSPS";
-
+   if (document.getElementById("drsSampleFreq") != document.activeElement) {
+      document.getElementById("drsSampleFreq").value = Math.round(OSC.wdb[OSC.curBoard].drsSampleFreq / 1000 * 10) / 10;
+      document.getElementById("drsActualSampleFreq").innerHTML = OSC.wdb[OSC.curBoard].drsSampleFreq / 1000 + " GSPS";
+   }
    var s = document.getElementById("timingReferenceSignalSelect");
    if (OSC.wdb[OSC.curBoard].drs0TimingRefSel > 0)
       s.selectedIndex = 2;
@@ -455,7 +468,9 @@ function populateControls(init) {
 
    // channels dialog box
    for (i = 0; i < 16; i++) {
-      document.getElementById("inpDacTriggerLevel" + i).value = Math.round(OSC.wdb[OSC.curBoard].dacTriggerLevel[i] * 1000);
+      if (document.getElementById("inpDacTriggerLevel" + i) != document.activeElement)
+         document.getElementById("inpDacTriggerLevel" + i).value = Math.round(OSC.wdb[OSC.curBoard].dacTriggerLevel[i] * 1000);
+
       document.getElementById("selGain" + i).value = OSC.wdb[OSC.curBoard].feGain[i];
       document.getElementById("cbPzc" + i).checked = OSC.wdb[OSC.curBoard].fePzc[i];
    }
@@ -591,6 +606,10 @@ function setDrsSamplFreq(e) {
 function setParam(e, channel) {
    if (OSC.demoMode)
       return;
+
+   // suppress automatic updates for few seconds, otherwise a pending update
+   // could overwrite the current dialog box setting
+   OSC.lastParamSet = new Date() / 1000;
 
    var req = new XMLHttpRequest();
 
@@ -1808,7 +1827,6 @@ function triggerClickPattern() {
 }
 
 function triggerClickCell() {
-   console.log(this.pa + ' - ' + this.ch + ' = ' + this.mode);
    this.mode = (this.mode + 1) % 3;
    if (this.mode == 0)
       this.innerHTML = '';

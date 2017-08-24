@@ -135,6 +135,9 @@ function Oscilloscope(div) { // constructor
    // used for trigger lines
    this.lastTriggerLevelChange = 0;
 
+   // used to suppress updates after a parameter change
+   this.lastParamSet = new Date() / 1000;
+
    // histogram settings
    this.histo = {
       autoAxis: true,
