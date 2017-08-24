@@ -596,10 +596,6 @@ void TCB::SetTRGBusODLY(u_int32_t *syncdly, u_int32_t *trgdly, u_int32_t *sprdly
 
 // trg bus delay setting
 void TCB::SetTRGBusIDLY(u_int32_t *syncdly, u_int32_t *trgdly, u_int32_t *sprdly) {
-   if (fverbose)
-      if ((fidcode>>12)!=3)
-         printf("setting TRGBus on TCB %4x!!!!!\n", fidcode);
-   //   u_int32_t reset = 0x80000000;
    u_int32_t value;
    ReadReg(RBUSDLY, &value);
    value &=0xFFFF0000;
@@ -997,6 +993,15 @@ void TCB::SetPacketizerBus(bool state){
       data &= 0xFFFFFFFE;
       WriteReg(RARBITER, &data);
    }
+}
+
+//Check local bus association 
+bool TCB::GetPacketizerBus(){
+   u_int32_t data;
+   ReadReg(RARBITER, &data);
+   // if state is 1 the bus is used by the packetizer
+   return( (data & 0x1) == 1 );
+
 }
 
 //Enable Packetizer

@@ -211,6 +211,8 @@ public:
    int CheckSerdes();
    //Assign Bus to Packetizer
    void SetPacketizerBus(bool);
+   //Check local bus association
+   bool GetPacketizerBus();
    //Set Packetizer enable
    void SetPacketizerEnable(bool);
    //Set Packetizer autostart
