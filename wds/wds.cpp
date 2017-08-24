@@ -978,12 +978,9 @@ int main(int argc, const char * argv[])
       b->SetDestinationPort(gl.wp->GetServerPort());
    
    // switch boards to normal mode to send events
-   if (gl.triggerSelfArm) {
-      for (auto &b: gl.wdb) {
-         b->SetDaqNormal(true);
-         b->SetInterPacketDelay(0x1000);
-      }
-   } else {
+   if (gl.triggerSelfArm)
+      gl.triggerMode = cTriggerModeNormal;
+   else {
       for (auto &b: gl.wdb) {
          b->SetDaqNormal(false);
       }
