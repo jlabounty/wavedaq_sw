@@ -1082,6 +1082,20 @@ void TCB::SetPacketizerCommandAt(int offset, PACKETIZER_COMMAND cmd, u_int32_t a
          WriteReg(PACKAGERBASE+offset+PACKAGERSIZE, &arg0);
          WriteReg(PACKAGERBASE+offset+2*PACKAGERSIZE, &arg1);
         break; 
+      case JUMP:
+         data = 0x40000000;
+         data |= opt & 0xFFFF;
+         WriteReg(PACKAGERBASE+offset, &data);
+         WriteReg(PACKAGERBASE+offset+PACKAGERSIZE, &arg0);
+         WriteReg(PACKAGERBASE+offset+2*PACKAGERSIZE, &arg1);
+        break; 
+      case JUMP_IF:
+         data = 0x50000000;
+         data |= opt & 0xFFFF;
+         WriteReg(PACKAGERBASE+offset, &data);
+         WriteReg(PACKAGERBASE+offset+PACKAGERSIZE, &arg0);
+         WriteReg(PACKAGERBASE+offset+2*PACKAGERSIZE, &arg1);
+        break; 
    }
 }
 

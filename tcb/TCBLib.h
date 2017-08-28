@@ -62,7 +62,7 @@ typedef struct {
     unsigned int       serdesmask;
 } TCB_SETTINGS;
 
-enum PACKETIZER_COMMAND {STOP, COPY, BLOCK_COPY, DIRECT_WRITE};
+enum PACKETIZER_COMMAND {STOP, COPY, BLOCK_COPY, DIRECT_WRITE, JUMP, JUMP_IF};
 
 class TCB {
 private:

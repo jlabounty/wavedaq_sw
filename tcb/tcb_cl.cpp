@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
         printf("\nFADCMODE?\n if 0 input RAMs are not written by SERDES data\n if 1 the opposite\n"); 
         scanf("%x",&scanfdata);
         data = scanfdata<<2;
-        printf("\nTESTTXMODE?\n if 0 output RAMs are not written by processed data\n if 1 the opposite\n"); 
+        printf("\nTESTTXMODE?\n if 1 output RAMs are not written by processed data\n if 0 the opposite\n"); 
         scanf("%x",&scanfdata);
         data |= scanfdata<<5;
         if(((TCBBoard.fidcode&0xf000)>>12)==2 || ((TCBBoard.fidcode&0xf000)>>12)==1) {
@@ -201,7 +201,8 @@ int main(int argc, char *argv[])
          printf(" opt = 12 : Get trigger type ... \n");
          if((TCBBoard.fidcode >>12)==3){
             TCBBoard.GetTriggerType(&trgtype);
-            printf("trigger type = %d\n",trgtype);
+            printf("trigger type = %d\n",trgtype&0xFF);
+            printf("readout enable = 0x%02x\n",trgtype>>26);
             int nword = (TCBBoard.fntrg-1)/32+1;
             for(int iword = 0; iword<nword; iword++) {
                TCBBoard.GetTriggerPattern(&tpattern,iword);
@@ -502,7 +503,7 @@ int main(int argc, char *argv[])
             u_int32_t arg0, arg1, opt;
             printf("offset (0-1024) ");
             scanf("%d", &offset);
-            printf("command name (0-stop, 1-copy, 2-block_copy, 3-write) ");
+            printf("command name (0-stop, 1-copy, 2-block_copy, 3-write, 4-jump, 5-jumpIf) ");
             scanf("%d", &cmd);
             printf("argument 0, \"source\" (hex) ");
             scanf("%x", &arg0);
