@@ -602,7 +602,7 @@ void cs_log_printf(const char *fmt, ...);
 #define _CS_TIME_H_
 
 /* Sub-second granularity time(). */
-double cs_time();
+double cs_time(void);
 
 #endif /* _CS_TIME_H_ */
 /*
@@ -1406,7 +1406,7 @@ double mg_set_timer(struct mg_connection *c, double timestamp);
 /*
  * A sub-second precision version of time().
  */
-double mg_time();
+double mg_time(void);
 
 #ifdef __cplusplus
 }

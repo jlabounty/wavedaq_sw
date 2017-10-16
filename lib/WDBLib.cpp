@@ -813,8 +813,7 @@ void WDB::SetDrsSampleFreq(unsigned int f)
       return;
    }
    
-   // 200 MHz LMK bus frequency
-   auto divider = (int) (200.0 / f * 2048 + 0.5);
+   auto divider = (int) (240.0 / f * 2048 + 0.5);
    divider /= 2; // LMK multiplies divider by 2
    
    SetRegMask(WD2_REG_LMK_0_OFS, WD2_BIT_LMK0_CLKOUT0_DIV_MASK, WD2_BIT_LMK0_CLKOUT0_DIV_OFS, divider);
@@ -838,14 +837,16 @@ unsigned int WDB::GetLmkInputFreq()
 
 void WDB::SetLmkInputFreq(unsigned int f)
 {
-   if (f == 100) {       // R = 20, N = 40
+   if (f == 100) {       // R = 20, N = 48, VCO DIV = 5
       SetRegMask(WD2_REG_LMK_14_OFS, WD2_BIT_LMK14_PLL_R_MASK, WD2_BIT_LMK14_PLL_R_OFS, 20);
-      SetRegMask(WD2_REG_LMK_15_OFS, WD2_BIT_LMK15_PLL_N_MASK, WD2_BIT_LMK15_PLL_N_OFS, 40);
+      SetRegMask(WD2_REG_LMK_15_OFS, WD2_BIT_LMK15_PLL_N_MASK, WD2_BIT_LMK15_PLL_N_OFS, 48);
+      SetRegMask(WD2_REG_LMK_15_OFS, WD2_BIT_LMK15_VCO_DIV_MASK, WD2_BIT_LMK15_VCO_DIV_OFS, 5);
       SetRegMask(WD2_REG_LMK_13_OFS, WD2_BIT_LMK13_OSCIN_FREQ_MASK, WD2_BIT_LMK13_OSCIN_FREQ_OFS, 100);
       SetRegMask(WD2_REG_CLK_CTRL_OFS, WD2_BIT_EXT_CLK_FREQ_MASK, WD2_BIT_EXT_CLK_FREQ_OFS, 100);
-   } else if (f == 80) { // R = 20, N = 50
+   } else if (f == 80) { // R = 20, N = 60, VCO DIV = 5
       SetRegMask(WD2_REG_LMK_14_OFS, WD2_BIT_LMK14_PLL_R_MASK, WD2_BIT_LMK14_PLL_R_OFS, 20);
-      SetRegMask(WD2_REG_LMK_15_OFS, WD2_BIT_LMK15_PLL_N_MASK, WD2_BIT_LMK15_PLL_N_OFS, 50);
+      SetRegMask(WD2_REG_LMK_15_OFS, WD2_BIT_LMK15_PLL_N_MASK, WD2_BIT_LMK15_PLL_N_OFS, 60);
+      SetRegMask(WD2_REG_LMK_15_OFS, WD2_BIT_LMK15_VCO_DIV_MASK, WD2_BIT_LMK15_VCO_DIV_OFS, 5);
       SetRegMask(WD2_REG_LMK_13_OFS, WD2_BIT_LMK13_OSCIN_FREQ_MASK, WD2_BIT_LMK13_OSCIN_FREQ_OFS, 80);
       SetRegMask(WD2_REG_CLK_CTRL_OFS, WD2_BIT_EXT_CLK_FREQ_MASK, WD2_BIT_EXT_CLK_FREQ_OFS, 80);
    } else {

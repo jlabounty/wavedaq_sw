@@ -942,6 +942,9 @@ int main(int argc, const char * argv[])
             b->LoadVoltageCalibration(b->GetDrsSampleFreq());
             b->LoadTimeCalibration(b->GetDrsSampleFreq());
             
+            // ### temporary code until fixed in uB firmware
+            b->SetLmkInputFreq(100);
+            
          } else {
             // turn all channels on in demo mode
             b->SetDrs0ChnTxEnable(0xFFFF);
