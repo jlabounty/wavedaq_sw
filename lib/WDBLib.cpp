@@ -842,12 +842,12 @@ void WDB::SetLmkInputFreq(unsigned int f)
       SetRegMask(WD2_REG_LMK_14_OFS, WD2_BIT_LMK14_PLL_R_MASK, WD2_BIT_LMK14_PLL_R_OFS, 20);
       SetRegMask(WD2_REG_LMK_15_OFS, WD2_BIT_LMK15_PLL_N_MASK, WD2_BIT_LMK15_PLL_N_OFS, 40);
       SetRegMask(WD2_REG_LMK_13_OFS, WD2_BIT_LMK13_OSCIN_FREQ_MASK, WD2_BIT_LMK13_OSCIN_FREQ_OFS, 100);
-      SetRegMask(WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_EXT_CLK_FREQ_MASK, WD2_BIT_EXT_CLK_FREQ_OFS, 100);
+      SetRegMask(WD2_REG_CLK_CTRL_OFS, WD2_BIT_EXT_CLK_FREQ_MASK, WD2_BIT_EXT_CLK_FREQ_OFS, 100);
    } else if (f == 80) { // R = 20, N = 50
       SetRegMask(WD2_REG_LMK_14_OFS, WD2_BIT_LMK14_PLL_R_MASK, WD2_BIT_LMK14_PLL_R_OFS, 20);
       SetRegMask(WD2_REG_LMK_15_OFS, WD2_BIT_LMK15_PLL_N_MASK, WD2_BIT_LMK15_PLL_N_OFS, 50);
       SetRegMask(WD2_REG_LMK_13_OFS, WD2_BIT_LMK13_OSCIN_FREQ_MASK, WD2_BIT_LMK13_OSCIN_FREQ_OFS, 80);
-      SetRegMask(WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_EXT_CLK_FREQ_MASK, WD2_BIT_EXT_CLK_FREQ_OFS, 80);
+      SetRegMask(WD2_REG_CLK_CTRL_OFS, WD2_BIT_EXT_CLK_FREQ_MASK, WD2_BIT_EXT_CLK_FREQ_OFS, 80);
    } else {
       throw std::runtime_error(std::string("Unsupported LMK03000 input frequency"));
    }
@@ -1106,46 +1106,46 @@ void WDB::StartDaqSingle()
 unsigned int WDB::GetDrs0TimingRefSel()
 // 0 = oscillator / 1 = LMK
 {
-   return bitExtract(creg, WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_DRS_0_TIMING_REF_SEL_MASK, WD2_BIT_DRS_0_TIMING_REF_SEL_OFS);
+   return bitExtract(creg, WD2_REG_CAL_CTRL_OFS, WD2_BIT_DRS_0_TIMING_REF_SEL_MASK, WD2_BIT_DRS_0_TIMING_REF_SEL_OFS);
 }
 
 void WDB::SetDrs0TimingRefSel(unsigned int value)
 {
-   SetRegMask(WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_DRS_0_TIMING_REF_SEL_MASK, WD2_BIT_DRS_0_TIMING_REF_SEL_OFS, value);
+   SetRegMask(WD2_REG_CAL_CTRL_OFS, WD2_BIT_DRS_0_TIMING_REF_SEL_MASK, WD2_BIT_DRS_0_TIMING_REF_SEL_OFS, value);
 }
 
 unsigned int WDB::GetDrs1TimingRefSel()
 // 0 = oscillator / 1 = LMK
 {
-   return bitExtract(creg, WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_DRS_1_TIMING_REF_SEL_MASK, WD2_BIT_DRS_1_TIMING_REF_SEL_OFS);
+   return bitExtract(creg, WD2_REG_CAL_CTRL_OFS, WD2_BIT_DRS_1_TIMING_REF_SEL_MASK, WD2_BIT_DRS_1_TIMING_REF_SEL_OFS);
 }
 
 void WDB::SetDrs1TimingRefSel(unsigned int value)
 {
-   SetRegMask(WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_DRS_1_TIMING_REF_SEL_MASK, WD2_BIT_DRS_1_TIMING_REF_SEL_OFS, value);
+   SetRegMask(WD2_REG_CAL_CTRL_OFS, WD2_BIT_DRS_1_TIMING_REF_SEL_MASK, WD2_BIT_DRS_1_TIMING_REF_SEL_OFS, value);
 }
 
 bool WDB::IsCalibBufferEnable()
 // enable (power) buffers driving the timing calibration signal to the frontend MUX
 {
-   return bitExtract(creg, WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_CALIB_BUFFER_EN_MASK, WD2_BIT_CALIB_BUFFER_EN_OFS) == 1;
+   return bitExtract(creg, WD2_REG_CAL_CTRL_OFS, WD2_BIT_CALIB_BUFFER_EN_MASK, WD2_BIT_CALIB_BUFFER_EN_OFS) == 1;
 }
 
 void WDB::SetCalibBufferEnable(bool value)
 {
-   SetRegMask(WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_CALIB_BUFFER_EN_MASK, WD2_BIT_CALIB_BUFFER_EN_OFS, value ? 1 : 0);
+   SetRegMask(WD2_REG_CAL_CTRL_OFS, WD2_BIT_CALIB_BUFFER_EN_MASK, WD2_BIT_CALIB_BUFFER_EN_OFS, value ? 1 : 0);
 }
 
 bool WDB::IsTimingCalibSignalEnable()
 // switch on/off the 100 MHz calibration signal for the DRS chips
 {
-   return bitExtract(creg, WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_TIMING_CALIB_SIGNAL_EN_MASK, WD2_BIT_TIMING_CALIB_SIGNAL_EN_OFS) == 1;
+   return bitExtract(creg, WD2_REG_CAL_CTRL_OFS, WD2_BIT_TIMING_CALIB_SIGNAL_EN_MASK, WD2_BIT_TIMING_CALIB_SIGNAL_EN_OFS) == 1;
 }
 
 void WDB::SetTimingCalibSignalEnable(bool value)
 {
    // switch TCA_CTRL
-   SetRegMask(WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_TIMING_CALIB_SIGNAL_EN_MASK, WD2_BIT_TIMING_CALIB_SIGNAL_EN_OFS, value ? 1 : 0);
+   SetRegMask(WD2_REG_CAL_CTRL_OFS, WD2_BIT_TIMING_CALIB_SIGNAL_EN_MASK, WD2_BIT_TIMING_CALIB_SIGNAL_EN_OFS, value ? 1 : 0);
 
    // enable delay on LMK output #0
    SetRegMask(WD2_REG_LMK_0_OFS, WD2_BIT_LMK0_CLKOUT0_MUX_MASK, WD2_BIT_LMK0_CLKOUT0_MUX_OFS, 3);
@@ -1201,7 +1201,7 @@ int WDB::GetTimingCalibSignalDelay()
 unsigned int WDB::GetDaqClkSrcSel()
 // 0 = crate clock / 1 = on-board oscillator
 {
-   return bitExtract(creg, WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_DAQ_CLK_SRC_SEL_MASK, WD2_BIT_DAQ_CLK_SRC_SEL_OFS);
+   return bitExtract(creg, WD2_REG_CLK_CTRL_OFS, WD2_BIT_DAQ_CLK_SRC_SEL_MASK, WD2_BIT_DAQ_CLK_SRC_SEL_OFS);
 }
 
 int WDB::GetTimingReferenceSignal()
@@ -1283,30 +1283,30 @@ void WDB::SetTimingReferenceSignal(int value)
 
 void WDB::SetDaqClkSrcSel(unsigned int value)
 {
-   SetRegMask(WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_DAQ_CLK_SRC_SEL_MASK, WD2_BIT_DAQ_CLK_SRC_SEL_OFS, value);
+   SetRegMask(WD2_REG_CLK_CTRL_OFS, WD2_BIT_DAQ_CLK_SRC_SEL_MASK, WD2_BIT_DAQ_CLK_SRC_SEL_OFS, value);
 }
 
 unsigned int WDB::GetExtClkInSel()
 // 0 = crate clock / 1 = MCX connector input
 {
-   return bitExtract(creg, WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_EXT_CLK_IN_SEL_MASK, WD2_BIT_EXT_CLK_IN_SEL_OFS);
+   return bitExtract(creg, WD2_REG_CLK_CTRL_OFS, WD2_BIT_EXT_CLK_IN_SEL_MASK, WD2_BIT_EXT_CLK_IN_SEL_OFS);
 }
 
 void WDB::SetExtClkInSel(unsigned int value)
 {
-   SetRegMask(WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_EXT_CLK_IN_SEL_MASK, WD2_BIT_EXT_CLK_IN_SEL_OFS, value);
+   SetRegMask(WD2_REG_CLK_CTRL_OFS, WD2_BIT_EXT_CLK_IN_SEL_MASK, WD2_BIT_EXT_CLK_IN_SEL_OFS, value);
 }
 
 unsigned int WDB::GetExtClkFreq()
 // external clock frequency in MHz
 {
-   return bitExtract(creg, WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_EXT_CLK_FREQ_MASK, WD2_BIT_EXT_CLK_FREQ_OFS);
+   return bitExtract(creg, WD2_REG_CLK_CTRL_OFS, WD2_BIT_EXT_CLK_FREQ_MASK, WD2_BIT_EXT_CLK_FREQ_OFS);
 }
 
 unsigned int WDB::GetLocalClkFreq()
 // on-board clock frequency in MHz
 {
-   return bitExtract(creg, WD2_REG_CLK_CAL_CTRL_OFS, WD2_BIT_LOCAL_CLK_FREQ_MASK, WD2_BIT_LOCAL_CLK_FREQ_OFS);
+   return bitExtract(creg, WD2_REG_CLK_CTRL_OFS, WD2_BIT_LOCAL_CLK_FREQ_MASK, WD2_BIT_LOCAL_CLK_FREQ_OFS);
 }
 
 unsigned int WDB::GetDrs1ChnTxEnable()
