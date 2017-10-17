@@ -463,6 +463,18 @@ public:
       cTimingReferenceSine     = 1,
       cTimingReferenceSquare   = 2};
    
+   enum { cDbgUart             = 0x0,
+      cDbgTrigger              = 0x1,
+      cDbgSoftTrigger          = 0x2,
+      cDbgExtTrigger           = 0x3,
+      cDbgSyncDirect           = 0x4,
+      cDbgSyncSampled          = 0x5,
+      cDbgBusyLocal            = 0x6,
+      cDbgBusyBackplane        = 0x7,
+      cDbgLMKInputClk          = 0x8,
+      cDbgADCClk               = 0x9,
+      cDbgDataClk              = 0xA};
+
    // calibrations
    VCALIB           mVCalib;
    TCALIB           mTCalib;
@@ -677,6 +689,7 @@ public:
    void SetTriggerPattern(int chn, unsigned int v);
    unsigned int GetCrc32RegBank();
    void SetAdvTrgCfg(int i, unsigned int v);
+   void SetDbgSig(int rx, int tx);
    unsigned int GetAdvTrgCfg(int i);
    
    // hihg level methods ----------

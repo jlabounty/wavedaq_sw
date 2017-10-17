@@ -2125,6 +2125,14 @@ void WDB::SetAdvTrgCfg(int i, unsigned int v)
    SetRegMask(WD2_REG_ADV_TRG_CFG0_OFS+i*4, WD2_BIT_ADV_TRG_CFG_0_MASK, WD2_BIT_ADV_TRG_CFG_0_OFS, v);
 }
 
+void WDB::SetDbgSig(int rx, int tx)
+{
+   // send one of cDbgXXX signals to RX and TX ports on HV board
+   assert(rx >= cDbgUart && rx <= cDbgDataClk);
+   assert(tx >= cDbgUart && tx <= cDbgDataClk);
+   SetRegMask(WD2_REG_DBG_SIG_SEL_OFS, WD2_BIT_MCX_RX_SIG_SEL_MASK, WD2_BIT_MCX_RX_SIG_SEL_OFS, rx);
+   SetRegMask(WD2_REG_DBG_SIG_SEL_OFS, WD2_BIT_MCX_TX_SIG_SEL_MASK, WD2_BIT_MCX_TX_SIG_SEL_OFS, tx);
+}
 
 unsigned int WDB::GetCrc32RegBank()
 {

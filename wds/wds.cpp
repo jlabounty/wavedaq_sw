@@ -37,6 +37,8 @@ typedef struct {
    int  triggerSelfArm;
    bool specialTest;
    bool updatePeriodic;
+   int  dbgRx;
+   int  dbgTx;
 } GLOBALS;
 
 /*------------------------------------------------------------------*/
@@ -804,6 +806,7 @@ void showUsage(std::string name)
    std::cerr << "valid options:" << std::endl;
    std::cerr << "  -h              Show this help" << std::endl;
    std::cerr << "  -d              Demo mode" << std::endl;
+   std::cerr << "  -g rx tx        Debug output at RX/TX ports" << std::endl;
    std::cerr << "  -p              HTTP server port (default is 8080)" << std::endl;
    std::cerr << "  -s              Run WDB in self-arm mode (use with caution!)" << std::endl;
    std::cerr << "  -u              Retrieve WDB registers once per second to capture changes by other control programs" << std::endl;
@@ -840,6 +843,7 @@ int main(int argc, const char * argv[])
    gl.triggerMode = cTriggerModeAuto;
    gl.triggerSelfArm = false;
    gl.updatePeriodic = false;
+   gl.dbgRx = gl.dbgTx = 0;
    
    // parse command line parameters
    if (argc < 2) {
@@ -857,7 +861,12 @@ int main(int argc, const char * argv[])
       
       else if (arg == "-p")
          gl.serverPort = std::stoi(argv[++i]);
-      
+
+      else if (arg == "-g") {
+         gl.dbgRx = std::stoi(argv[++i]);
+         gl.dbgTx = std::stoi(argv[++i]);
+      }
+
       else if (arg == "-s")
          gl.triggerSelfArm = true;
 
@@ -944,6 +953,10 @@ int main(int argc, const char * argv[])
             
             // ### temporary code until fixed in uB firmware
             b->SetLmkInputFreq(100);
+            
+            // debug output
+            if (gl.dbgRx > 0 || gl.dbgTx > 0)
+               b->SetDbgSig(gl.dbgRx, gl.dbgTx);
             
          } else {
             // turn all channels on in demo mode
