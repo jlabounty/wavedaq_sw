@@ -1138,7 +1138,7 @@ void WDB::SetCalibBufferEnable(bool value)
 }
 
 bool WDB::IsTimingCalibSignalEnable()
-// switch on/off the 100 MHz calibration signal for the DRS chips
+// switch on/off the 120 MHz calibration signal for the DRS chips
 {
    return bitExtract(creg, WD2_REG_CAL_CTRL_OFS, WD2_BIT_TIMING_CALIB_SIGNAL_EN_MASK, WD2_BIT_TIMING_CALIB_SIGNAL_EN_OFS) == 1;
 }
@@ -1155,11 +1155,12 @@ void WDB::SetTimingCalibSignalEnable(bool value)
    
    // enable divider and delay
    SetRegMask(WD2_REG_LMK_6_OFS, WD2_BIT_LMK6_CLKOUT6_MUX_MASK, WD2_BIT_LMK6_CLKOUT6_MUX_OFS, 3);
-   // divide 200 MHz by 2x1 = 100 MHz
+   // divide 240 MHz by 2x1 = 120 MHz
    SetRegMask(WD2_REG_LMK_6_OFS, WD2_BIT_LMK6_CLKOUT6_DIV_MASK, WD2_BIT_LMK6_CLKOUT6_DIV_OFS, 1);
    // enbable/disable output
    SetRegMask(WD2_REG_LMK_6_OFS, WD2_BIT_LMK6_CLKOUT6_EN_MASK, WD2_BIT_LMK6_CLKOUT6_EN_OFS, value);
    
+   ApplyLmkSettings();
    // no ApplyLmkSettings() needed for firmware > June 29, 2017
 }
 
@@ -1234,7 +1235,8 @@ void WDB::SetTimingReferenceSignal(int value)
       // disable LMK outputs #1 and #2
       SetRegMask(WD2_REG_LMK_1_OFS, WD2_BIT_LMK1_CLKOUT1_EN_MASK, WD2_BIT_LMK1_CLKOUT1_EN_OFS, 0);
       SetRegMask(WD2_REG_LMK_2_OFS, WD2_BIT_LMK2_CLKOUT2_EN_MASK, WD2_BIT_LMK2_CLKOUT2_EN_OFS, 0);
-      
+
+      ApplyLmkSettings();
       // no ApplyLmkSettings() needed for firmware > June 29, 2017
       
    } else if (value == cTimingReferenceSine) { // seclect sine wave generator
@@ -1253,6 +1255,7 @@ void WDB::SetTimingReferenceSignal(int value)
       SetRegMask(WD2_REG_LMK_1_OFS, WD2_BIT_LMK1_CLKOUT1_EN_MASK, WD2_BIT_LMK1_CLKOUT1_EN_OFS, 0);
       SetRegMask(WD2_REG_LMK_2_OFS, WD2_BIT_LMK2_CLKOUT2_EN_MASK, WD2_BIT_LMK2_CLKOUT2_EN_OFS, 0);
       
+      ApplyLmkSettings();
       // no ApplyLmkSettings() needed for firmware > June 29, 2017
       
    } else if (value == cTimingReferenceSquare){ // select square wave
@@ -1276,6 +1279,7 @@ void WDB::SetTimingReferenceSignal(int value)
       SetRegMask(WD2_REG_LMK_2_OFS, WD2_BIT_LMK2_CLKOUT2_DIV_MASK, WD2_BIT_LMK2_CLKOUT2_DIV_OFS, 1);
       SetRegMask(WD2_REG_LMK_2_OFS, WD2_BIT_LMK2_CLKOUT2_EN_MASK,  WD2_BIT_LMK2_CLKOUT2_EN_OFS, 1);
       
+      ApplyLmkSettings();
       // no ApplyLmkSettings() needed for firmware > June 29, 2017
       
       LmkSyncLocal();
@@ -3839,8 +3843,8 @@ void WP::CalibrateLocal(WDEvent *event, WDB *b)
          }
       }
       
-      // calculate calibration every 100 events
-      if (calibProg.iIter1 % 100 == 0) {
+      // calculate calibration every 165 (5 events * 33 phases) events
+      if (calibProg.iIter1 % 165 == 0) {
          // average over all 1024 dU
          double sum = 0;
          double cellDV[1024];
@@ -3865,7 +3869,8 @@ void WP::CalibrateLocal(WDEvent *event, WDB *b)
 
 void WP::CalibrateGlobal(WDEvent *event, WDB *b)
 {
-   float damping = 0.1f;
+   double damping = 0.1f;
+   double nominalPeriod = 1 / 120E6; // Period of 120 MHz clock
    
    for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
       int tc = ch < 8 || ch == 16 ? event->mTriggerCell[0] : event->mTriggerCell[1];
@@ -3873,7 +3878,7 @@ void WP::CalibrateGlobal(WDEvent *event, WDB *b)
       // rising edges
       for (int i1=tc+5; i1<tc+1024-5 ; i1++) {
          if (event->mWfU[ch][i1 % 1024] <= 0 && event->mWfU[ch][(i1+1) % 1024] > 0) {
-            for (int i2=i1+1 ; i2<i1+1024 && i2<tc+1024-3; i2++) {
+            for (int i2=i1+1 ; i2<i1+1024 && i2<tc+1024-5; i2++) {
                if (event->mWfU[ch][i2 % 1024] <= 0 && event->mWfU[ch][(i2+1) % 1024] > 0) {
                   
                   // first partial cell
@@ -3889,7 +3894,7 @@ void WP::CalibrateGlobal(WDEvent *event, WDB *b)
                   tPeriod += b->mTCalib.mCalib.dt[ch][i2 % 1024]*(1/(1-event->mWfU[ch][(i2+1)%1024]/event->mWfU[ch][i2%1024]));
                   
                   // calculate correction to nominal period of 10 ns as a fraction
-                  float corr = (float)((10E-9) / tPeriod);
+                  float corr = (float)(nominalPeriod / tPeriod);
                   
                   // skip big corrections (probably noise)
                   if (corr > 1.01 || corr < 0.99)
@@ -3911,7 +3916,7 @@ void WP::CalibrateGlobal(WDEvent *event, WDB *b)
       // falling edges
       for (int i1=tc+5; i1<tc+1024-5 ; i1++) {
          if (event->mWfU[ch][i1 % 1024] >= 0 && event->mWfU[ch][(i1+1) % 1024] < 0) {
-            for (int i2=i1+1 ; i2<i1+1024 ; i2++) {
+            for (int i2=i1+1 ; i2<i1+1024 && i2<tc+1024-5; i2++) {
                if (event->mWfU[ch][i2 % 1024] >= 0 && event->mWfU[ch][(i2+1) % 1024] < 0) {
                   
                   // first partial cell
@@ -3927,7 +3932,7 @@ void WP::CalibrateGlobal(WDEvent *event, WDB *b)
                   tPeriod += b->mTCalib.mCalib.dt[ch][i2 % 1024]*(1/(1-event->mWfU[ch][(i2+1)%1024]/event->mWfU[ch][i2%1024]));
                   
                   // calculate correction to nominal period of 10 ns as a fraction
-                  float corr = (float)((10E-9) / tPeriod);
+                  float corr = (float)(nominalPeriod / tPeriod);
                   
                   // skip big corrections (probably noise)
                   if (corr > 1.01 || corr < 0.99)
@@ -3956,8 +3961,8 @@ void WP::DoCalibrationTimeStep()
    if (calibProg.state == cCsFirstBoard) {
       
       calibProg.state       = cCsFirstSample;
-      calibProg.nIter1      = 510; // multiple of 30!
-      calibProg.nIter2      = 510;
+      calibProg.nIter1      = 495;
+      calibProg.nIter2      = 300;
       calibProg.nIter3      = 100;
       calibProg.nIter4      = 0;
       calibProg.phase       = 0;
@@ -4038,7 +4043,7 @@ void WP::DoCalibrationTimeStep()
       calibProg.iIter1++;
       
       // switch phase of LMK clock
-      if (calibProg.iIter1 % 10 == 0) {
+      if (calibProg.iIter1 % 5 == 0) {
          calibProg.phase++;
          if (calibProg.phase == 17)
             calibProg.phase = -16;
