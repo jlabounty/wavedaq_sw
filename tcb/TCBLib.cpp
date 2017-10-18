@@ -477,7 +477,7 @@ void TCB::GetRRUN(u_int32_t *data)
       printf(" FADCMODE status %x \n",(*data&0x4)>>2);
       printf(" TESTTXMODE status %x \n",(*data&0x20)>>5);
       if( (fidcode>>12)==2 || (fidcode>>12)==1 ) 
-         printf(" DBGSERDES status %x \n",(*data&0x100)>>9);
+         printf(" DBGSERDES status %x \n",(*data&0x100)>>8);
       printf(" INBUSY status %x \n",(*data&0x2)>>1);
       printf(" EXBUSY status %x \n",(*data&0x8)>>3);
       printf(" ENABLE TRGBUS status %x \n",(*data&0x10)>>4);
