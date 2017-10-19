@@ -9,6 +9,7 @@
 #define RBUSDLY       0x01                      // trigger bus delay
 #define RNTRG         0x02                      // trigger enable bits
 #define RALGSEL       0x03                      // algorithm select on TCB1/2_0
+#define RPLLRES       0x04                      // Reset PLLs
 #define USR_ACCESS    0x0F                      // FW compilaiton date
 #define RSERDESMSK    0x16                      // mask for input serdes
 #define RENA          0x20                      // trigger enable (first address)
@@ -235,4 +236,6 @@ public:
    int GetPacketizerBufferPointer();
    //get current buffer memory state
    u_int32_t GetBufferState();
+   //reset PLLs
+   void ResetPLLs();
 };

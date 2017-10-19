@@ -859,6 +859,9 @@ void TCB::CalibrateSerdes(u_int32_t *dlyout, int *bitout){
          float errors[128][8][32];
          u_int32_t ccounters[129];
 
+
+	 //reset PLLs
+  	 ResetPLLs();
          //SetCheckWord(0xdeadbeef, 0xdeadbeef);
 
          for(int idly =0; idly<32; idly++){
@@ -941,6 +944,10 @@ void TCB::SetDbgserdes(bool enable){
 }
 //Do a serdes Check according to serdesmask
 int TCB::CheckSerdes(){
+
+   //reset PLLs
+   ResetPLLs();
+
    u_int32_t data;
    ReadReg(RSERDESMSK, &data);
 
@@ -1147,4 +1154,10 @@ u_int32_t TCB::GetBufferState(){
    u_int32_t data;
    ReadReg(BUFFERBASE+BUFFERSIZE, &data);
    return data >> 16;
+}
+
+//Reset PLLs
+void TCB::ResetPLLs(){
+   u_int32_t data = 0x00000001;
+   WriteReg(RPLLRES, &data);
 }
