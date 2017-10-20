@@ -466,9 +466,16 @@ void WDB::Connect()
    ReceiveStatusRegister(WD2_REG_FW_BUILD_TIME_OFS);
    if (GetCompatibilityLevel() < cRequiredCompatibilityLevel) {
       std::string str("Board ");
-      str += mName + " has old firmware, please upgrade (Compat.Level "+
-      std::to_string(GetCompatibilityLevel())+", expected "+
-      std::to_string(cRequiredCompatibilityLevel)+").";
+      str += mName + " has incompatible firmware, please upgrade (Board compatibility level: "+
+      std::to_string(GetCompatibilityLevel())+", Software compatibility level: "+
+      std::to_string(cRequiredCompatibilityLevel)+")";
+      throw std::runtime_error(str);
+   }
+   if (cRequiredCompatibilityLevel < GetCompatibilityLevel()) {
+      std::string str("Board ");
+      str += mName + " has newer incompatible firmware, please update WD library (Board compatibility level: "+
+      std::to_string(GetCompatibilityLevel())+", Software compatibility level: "+
+      std::to_string(cRequiredCompatibilityLevel)+")";
       throw std::runtime_error(str);
    }
 
