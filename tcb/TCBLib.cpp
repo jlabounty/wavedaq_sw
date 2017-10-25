@@ -1161,3 +1161,14 @@ void TCB::ResetPLLs(){
    u_int32_t data = 0x00000001;
    WriteReg(RPLLRES, &data);
 }
+
+//Read the PLL unlock counter PLLs
+void TCB::GetPLLUnlockCou(u_int32_t *data){
+   ReadReg(RPLLRES, data);
+}
+
+//Reset PLLs
+void TCB::ResetPLLUnlockCou(){
+   u_int32_t data = 0x00000002;
+   WriteReg(RPLLRES, &data);
+}

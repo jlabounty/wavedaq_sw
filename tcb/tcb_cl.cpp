@@ -64,7 +64,8 @@ int main(int argc, char *argv[])
       printf("[27]: Force a trigger      \t \t  [28]: Reset Transmitter\n");
       printf("[29]: Automatic Serdes cal \t \t  [30]: Dump Data \n");
       printf("[31]: Packetizer Commands  \t \t  [32]: Buffer Commands\n");
-      printf("[-1]: Exit\n");
+      printf("[33]: Reset PLL            \t \t  [34]: Reset PLL unlock cou\n");
+      printf("[35] Read PLL Unlock cou   \t \t  [-1]: Exit\n");
 
       do {
          printf("Give an option: ");
@@ -544,6 +545,24 @@ int main(int argc, char *argv[])
           default: break;
         }
       }
+      //reset PLL
+      if(option == 33) {
+        printf(" opt = 22 : PLL reset ... \n");
+        TCBBoard.ResetPLLs();
+      }
+      // reset PLL unlock counter
+      if(option == 34) {
+        printf(" opt = 34 : Reset PLL unlock counter ... \n");
+        TCBBoard.ResetPLLUnlockCou();
+      }
+      // get PLL unlock counter
+      if(option == 35) {
+	u_int32_t *rpcou;
+        printf(" opt = 35 : read PLL unlock counter ... \n");
+        TCBBoard.GetPLLUnlockCou(rpcou);
+	printf(" PLL unlock counter value: %d\n", rpcou);
+      }
+
       /* end of the main loop on the options*/
    } while ( option >= 0);
    

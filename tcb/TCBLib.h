@@ -238,4 +238,8 @@ public:
    u_int32_t GetBufferState();
    //reset PLLs
    void ResetPLLs();
+   //read the PLL unlock counter PLLs
+   void GetPLLUnlockCou(u_int32_t *data);
+   //reset the PLL unlock counter PLLs
+   void ResetPLLUnlockCou();
 };
