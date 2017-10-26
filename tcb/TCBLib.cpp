@@ -860,8 +860,6 @@ void TCB::CalibrateSerdes(u_int32_t *dlyout, int *bitout){
          u_int32_t ccounters[129];
 
 
-	 //reset PLLs
-  	 ResetPLLs();
          //SetCheckWord(0xdeadbeef, 0xdeadbeef);
 
          for(int idly =0; idly<32; idly++){
@@ -945,8 +943,6 @@ void TCB::SetDbgserdes(bool enable){
 //Do a serdes Check according to serdesmask
 int TCB::CheckSerdes(){
 
-   //reset PLLs
-   ResetPLLs();
 
    u_int32_t data;
    ReadReg(RSERDESMSK, &data);
