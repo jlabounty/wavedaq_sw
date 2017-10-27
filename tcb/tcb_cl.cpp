@@ -547,7 +547,7 @@ int main(int argc, char *argv[])
       }
       //reset PLL
       if(option == 33) {
-        printf(" opt = 22 : PLL reset ... \n");
+        printf(" opt = 33 : PLL reset ... \n");
         TCBBoard.ResetPLLs();
       }
       // reset PLL unlock counter
