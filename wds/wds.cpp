@@ -958,6 +958,13 @@ int main(int argc, const char * argv[])
             if (gl.dbgRx > 0 || gl.dbgTx > 0)
                b->SetDbgSig(gl.dbgRx, gl.dbgTx);
             
+            // check PLL locked status
+            if (!b->IsExtPllLck(false) || !b->IsIntPllLck(false)) {
+               std::ostringstream str;
+               str << "PLL not locked on board " << b->GetName() << ". Mask = 0x" << std::hex << b->GetPllLck(false);
+               throw std::runtime_error(str.str());
+            }
+            
          } else {
             // turn all channels on in demo mode
             b->SetDrs0ChnTxEnable(0xFFFF);
