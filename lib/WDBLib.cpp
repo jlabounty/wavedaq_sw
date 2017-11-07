@@ -8,6 +8,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <vector>
 #include <cmath>
@@ -2270,11 +2271,12 @@ bool WDEventRequest::IsWfValid()
 
 //--------------------------------------------------------------------
 
-WP::WP(std::vector<WDB *> w, int verbose, bool demo)
+WP::WP(std::vector<WDB *> w, int verbose, std::string logfile, bool demo)
 {
    struct sockaddr_in server_addr;
 
    mVerbose = verbose;
+   mLogfile = logfile;
    mDemoMode = demo;
    mWdb = w;
    
@@ -2287,6 +2289,8 @@ WP::WP(std::vector<WDB *> w, int verbose, bool demo)
    mTimeCalib2 = false;
    mTimeCalib3 = false;
    mRemoveSpikes = false;
+   
+   mWDReceivedEvents = 0;
    
    li.fh = 0;
    li.xml = NULL;
@@ -2535,8 +2539,12 @@ void WP::ReceiveWfPacket()
          auto elapsed = std::chrono::high_resolution_clock::now() - start;
          unsigned int us = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
          
-         if (mVerbose > 1)
-            printf("%06dus #%04d from WD%03d (%s), E=%5d T=%d A/C/S=%d/%d/%d TC=%04d/%04d T=%1.1lf\n",
+         if (mLogfile != "") {
+            std::ofstream f;
+            char line[256];
+            f.open(mLogfile, std::ios_base::app);
+            
+            sprintf(line, "%06dus #%04d from WD%03d (%s), EN=%5d PT=%d A/C/S=%d/%d/%d TC=%04d/%04d T=%1.1lf\n",
                    us,
                    mPacketsReceived-1,
                    ph->board_id,
@@ -2549,7 +2557,9 @@ void WP::ReceiveWfPacket()
                    ph->drs0_trigger_cell,
                    ph->drs1_trigger_cell,
                    ph->temperature*0.0625);
-         
+            
+            f << line;
+         }
          
          // drop package (for now...) if it is not event data
          if (package_type != 0) {
@@ -2568,6 +2578,11 @@ void WP::ReceiveWfPacket()
          if (!er) {
             if (mVerbose)
                std::cerr << "Received unexpected packet from board #" << ph->board_id << std::endl;
+            if (mLogfile != "") {
+               std::ofstream f;
+               f.open(mLogfile, std::ios_base::app);
+               f << "Received unexpected packet from board #" << ph->board_id << std::endl;
+            }
             return;
          }
          
@@ -2583,6 +2598,14 @@ void WP::ReceiveWfPacket()
             std::cerr << "Package dropped, package event=" << ph->event_number << ", "
             << "current event=" << mCurrentEvent << ", "
             << "board id = " << ph->board_id << std::endl;
+            
+            if (mLogfile != "") {
+               std::ofstream f;
+               f.open(mLogfile, std::ios_base::app);
+               f << "Package dropped, package event=" << ph->event_number << ", "
+               << "current event=" << mCurrentEvent << ", "
+               << "board id = " << ph->board_id << std::endl;
+            }
             return;
          }
 
@@ -2600,6 +2623,14 @@ void WP::ReceiveWfPacket()
                << "current event=" << mCurrentEvent << ", "
                << "board id = " << ph->board_id << std::endl;
             
+            if (mLogfile != "") {
+               std::ofstream f;
+               f.open(mLogfile, std::ios_base::app);
+               f << "Event dropped, package event=" << ph->event_number << ", "
+               << "current event=" << mCurrentEvent << ", "
+               << "board id = " << ph->board_id << std::endl;
+            }
+
             // switch to new frame
             InvalidateAllWf();
             mCurrentEvent = ph->event_number;
@@ -3339,6 +3370,14 @@ void WP::Collector()
 
       } while (!AllPacketsReceived());
       
+      if (mLogfile != "") {
+         auto it = mEvent.begin();
+         auto ev = (*it);
+         std::ofstream f;
+         f.open(mLogfile, std::ios_base::app);
+         f << "All packets of event " << ev->mEventNumber << " received." << std::endl;
+      }
+
       // update statistics
       mWDReceivedEvents++;
       

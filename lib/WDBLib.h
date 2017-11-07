@@ -258,6 +258,7 @@ class WP {
    static int        gServerPort;
 
    int               mVerbose;
+   std::string       mLogfile;
    bool              mDemoMode;
   
    std::vector<WDB*> mWdb;
@@ -333,7 +334,7 @@ public:
    enum { cLiFormatBinary = 1, cLiFormatXML = 2};
 
    // constructor
-   WP(std::vector<WDB*> w, int verbose = 0, bool demo = false);
+   WP(std::vector<WDB*> w, int verbose = 0, std::string logfile = "", bool demo = false);
    
    // setter & getter
    int GetDataSocket() { return gDataSocket; }
@@ -416,6 +417,7 @@ class WDB {
    unsigned char    mEthAddrAscii[16];
    unsigned char    mEthAddrBin[16];
    int              mVerbose;
+   std::string      mLogfile;
    bool             mDemoMode;
    bool             mSendBlocked;
 
@@ -439,6 +441,7 @@ public:
       mName = name;
       mPrompt = "";
       mVerbose = verbose;
+      mLogfile = "";
       mDemoMode = (name == "demo");
       mSendBlocked = false;
    }
@@ -481,6 +484,7 @@ public:
    
    // interface functions
    void SetVerbose(int verbose) { mVerbose = verbose; }
+   void SetLogFile(std::string logfile) { mLogfile = logfile; }
    void Connect();
    void SetDestinationPort(int port);
    void ReceiveControlRegisters(unsigned int index=0, unsigned int nReg=REG_NR_OF_CTRL_REGS);

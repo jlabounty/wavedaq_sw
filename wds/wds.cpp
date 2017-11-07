@@ -31,6 +31,7 @@ typedef struct {
    bool demoMode;
    int  serverPort;
    int  verbose;
+   std::string logFileName;
    bool reset;
    std::vector<WDB*> wdb;
    WP*  wp;
@@ -808,6 +809,7 @@ void showUsage(std::string name)
    std::cerr << "  -h              Show this help" << std::endl;
    std::cerr << "  -d              Demo mode" << std::endl;
    std::cerr << "  -g rx tx        Debug output at RX/TX ports" << std::endl;
+   std::cerr << "  -l <logfile>    Log file for debugging" << std::endl;
    std::cerr << "  -p              HTTP server port (default is 8080)" << std::endl;
    std::cerr << "  -r              Reset all PLLs" << std::endl;
    std::cerr << "  -s              Run WDB in self-arm mode (use with caution!)" << std::endl;
@@ -842,6 +844,7 @@ int main(int argc, const char * argv[])
    // default values
    gl.serverPort = 8080;
    gl.verbose = 0;
+   gl.logFileName = "";
    gl.reset = false;
    gl.triggerMode = cTriggerModeAuto;
    gl.triggerSelfArm = false;
@@ -869,6 +872,9 @@ int main(int argc, const char * argv[])
          gl.dbgRx = std::stoi(argv[++i]);
          gl.dbgTx = std::stoi(argv[++i]);
       }
+
+      else if (arg == "-l")
+         gl.logFileName = std::string(argv[++i]);
 
       else if (arg == "-r")
          gl.reset = true;
@@ -945,6 +951,7 @@ int main(int argc, const char * argv[])
       try {
          if (!gl.demoMode) {
             b->SetVerbose(gl.verbose);
+            b->SetLogFile(gl.logFileName);
             b->Connect();
             b->ReceiveStatusRegisters();
             b->ReceiveControlRegisters();
@@ -965,8 +972,16 @@ int main(int argc, const char * argv[])
                b->SetDbgSig(gl.dbgRx, gl.dbgTx);
             
             // reset PLLs
-            if (gl.reset)
+            if (gl.reset) {
                b->ResetAllPll();
+               auto f = b->GetDrsSampleFreq();
+               if (f > 5120)
+                  f = 5120;
+               if (f < 700)
+                  f = 700;
+               b->SetDrsSampleFreq(f);
+               b->GetPllLck(true);
+            }
             
             // check PLL locked status
             if (!b->IsExtPllLck(false) || !b->IsIntPllLck(false)) {
@@ -991,8 +1006,12 @@ int main(int argc, const char * argv[])
          std::cout << std::endl << std::endl;
    }
    
+   if (gl.reset) {
+      std::cout << "All PLLs reset" << std::endl;
+      return 0;
+   }
    // instantiate waveform processor
-   gl.wp = new WP(gl.wdb, gl.verbose, gl.demoMode);
+   gl.wp = new WP(gl.wdb, gl.verbose, gl.logFileName, gl.demoMode);
    if (gl.wdb[0]->mVCalib.IsValid()) {
       gl.wp->SetOfsCalib1(true);
       gl.wp->SetOfsCalib2(true);
