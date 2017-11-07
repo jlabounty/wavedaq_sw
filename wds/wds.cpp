@@ -31,6 +31,7 @@ typedef struct {
    bool demoMode;
    int  serverPort;
    int  verbose;
+   bool reset;
    std::vector<WDB*> wdb;
    WP*  wp;
    int  triggerMode;
@@ -808,11 +809,12 @@ void showUsage(std::string name)
    std::cerr << "  -d              Demo mode" << std::endl;
    std::cerr << "  -g rx tx        Debug output at RX/TX ports" << std::endl;
    std::cerr << "  -p              HTTP server port (default is 8080)" << std::endl;
+   std::cerr << "  -r              Reset all PLLs" << std::endl;
    std::cerr << "  -s              Run WDB in self-arm mode (use with caution!)" << std::endl;
    std::cerr << "  -u              Retrieve WDB registers once per second to capture changes by other control programs" << std::endl;
    std::cerr << "  -w <address>    Internet address(es) of WaveDREAM board(s)" << std::endl;
    std::cerr << "  -v 1            Print extra information (verbose)" << std::endl;
-   std::cerr << "  -v 2            Print in addition each received waveform packet header" << std::endl;
+   std::cerr << "  -v 2            Print each received waveform packet header" << std::endl;
 }
 
 #include <execinfo.h>
@@ -840,6 +842,7 @@ int main(int argc, const char * argv[])
    // default values
    gl.serverPort = 8080;
    gl.verbose = 0;
+   gl.reset = false;
    gl.triggerMode = cTriggerModeAuto;
    gl.triggerSelfArm = false;
    gl.updatePeriodic = false;
@@ -866,6 +869,9 @@ int main(int argc, const char * argv[])
          gl.dbgRx = std::stoi(argv[++i]);
          gl.dbgTx = std::stoi(argv[++i]);
       }
+
+      else if (arg == "-r")
+         gl.reset = true;
 
       else if (arg == "-s")
          gl.triggerSelfArm = true;
@@ -957,6 +963,10 @@ int main(int argc, const char * argv[])
             // debug output
             if (gl.dbgRx > 0 || gl.dbgTx > 0)
                b->SetDbgSig(gl.dbgRx, gl.dbgTx);
+            
+            // reset PLLs
+            if (gl.reset)
+               b->ResetAllPll();
             
             // check PLL locked status
             if (!b->IsExtPllLck(false) || !b->IsIntPllLck(false)) {

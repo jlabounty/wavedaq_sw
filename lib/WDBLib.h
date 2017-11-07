@@ -596,6 +596,7 @@ public:
    void ResetDcbOserdesIf();
    void ResetTcbOserdesPll();
    void ResetTcbOserdesIf();
+   void ResetAllPll();
    void ResetScaler();
    void ResetTriggerParityErrorCounter();
    void LmkSyncLocal();
