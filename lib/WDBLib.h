@@ -403,7 +403,7 @@ public:
    unsigned int GetNLogged() { return li.nLogged; }
    void SaveWaveforms();
    
-   void ResetStatistics() { mWDEvents = mWDReceivedEvents = 0; }
+   void ResetStatistics() { mWDEvents = mWDReceivedEvents = 0; mCurrentEvent = -1; }
    int GetWDEvents() { return mWDEvents; }
    int GetWDReceivedEvents() { return mWDReceivedEvents; }
 };
