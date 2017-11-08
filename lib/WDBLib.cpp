@@ -58,6 +58,18 @@ unsigned short WDB::udpSequenceNumber = 0; // sequence number to identify relate
 
 //--------------------------------------------------------------------
 
+// convert one data type into other, replaces *((float *)(&int))
+
+template<typename T, typename U>
+T access_as(U* p)
+{
+   T d;
+   memcpy(&d, p, sizeof(d));
+   return d;
+}
+
+//--------------------------------------------------------------------
+
 void WDB::SendUDP(std::string str, int timeout_ms)
 {
    std::string result;
@@ -916,7 +928,7 @@ void WDB::GetHVCurrents(std::vector<float> &current, bool refresh)
       ReceiveStatusRegisters((WD2_REG_HV_I_MEAS_0_OFS-WD2_REG_HW_VER_OFS)/4, 21);
    
    for (unsigned int i=0 ; i<16 ; i++)
-      current.push_back((float) *((float *)(&this->sreg[(WD2_REG_HV_I_MEAS_0_OFS-WD2_REG_HW_VER_OFS)/4+i])));
+      current.push_back(access_as<float>(&this->sreg[(WD2_REG_HV_I_MEAS_0_OFS-WD2_REG_HW_VER_OFS)/4+i]));
 }
 
 void WDB::GetHVBaseVoltage(float &voltage, bool refresh)
@@ -924,7 +936,7 @@ void WDB::GetHVBaseVoltage(float &voltage, bool refresh)
    if (refresh)
       ReceiveStatusRegisters((WD2_REG_HV_U_BASE_MEAS_OFS-WD2_REG_HW_VER_OFS)/4, 1);
    
-   voltage = (float) *((float *)(&this->sreg[(WD2_REG_HV_U_BASE_MEAS_OFS-WD2_REG_HW_VER_OFS)/4]));
+   voltage = access_as<float>(&this->sreg[(WD2_REG_HV_U_BASE_MEAS_OFS-WD2_REG_HW_VER_OFS)/4]);
 }
 
 void WDB::Get1wireTemperatures(std::vector<float> &temp, bool refresh)
@@ -933,7 +945,7 @@ void WDB::Get1wireTemperatures(std::vector<float> &temp, bool refresh)
       ReceiveStatusRegisters((WD2_REG_HV_TEMP_0_OFS-WD2_REG_HW_VER_OFS)/4, 4);
    
    for (unsigned int i=0 ; i<4 ; i++)
-      temp.push_back((float) *((float *)(&this->sreg[(WD2_REG_HV_TEMP_0_OFS-WD2_REG_HW_VER_OFS)/4+i])));
+      temp.push_back(access_as<float>(&this->sreg[(WD2_REG_HV_TEMP_0_OFS-WD2_REG_HW_VER_OFS)/4+i]));
 }
 
 unsigned int WDB::GetCompChannelStatus()
@@ -1954,14 +1966,17 @@ void WDB::SetFeMux(int chn, unsigned int v)
 void WDB::SetHVTarget(int chn, float v)
 {
    assert(chn < 16);
-   SetRegMask(WD2_REG_HV_U_TARGET_0_OFS+chn*4, 0xFFFFFFFF, 0, *((unsigned int *)&v));
+   SetRegMask(WD2_REG_HV_U_TARGET_0_OFS+chn*4, 0xFFFFFFFF, 0, access_as<unsigned int>(&v));
 }
 
 void WDB::GetHVTarget(std::vector<float> &hv)
 {
    ReceiveControlRegisters((WD2_REG_HV_U_TARGET_0_OFS-WD2_REG_WDB_LOC_OFS)/4, 16);
-   for (unsigned int i=0 ; i<16 ; i++)
-      hv.push_back(*(float *)&this->creg[(WD2_REG_HV_U_TARGET_0_OFS-WD2_REG_WDB_LOC_OFS)/4+i]);
+   for (unsigned int i=0 ; i<16 ; i++) {
+      float f;
+      memcpy(&f, &this->creg[(WD2_REG_HV_U_TARGET_0_OFS-WD2_REG_WDB_LOC_OFS)/4+i], sizeof(float));
+      hv.push_back(f);
+   }
 }
 
 unsigned int WDB::GetLmk(int reg)
@@ -3245,13 +3260,13 @@ void WP::SaveWaveforms()
          memcpy(p, "TIME", 4);
          p += 4;
          
-         for (auto b=0 ; b<mEvent.size() ; b++) {
+         for (size_t b=0 ; b<mEvent.size() ; b++) {
             auto ev = mEvent[b];
             int mask = GetEventRequestMask(ev->mBoardId);
             WDB *wdb = GetBoard(ev->mBoardId);
             assert(wdb);
             
-            if (!li.bAll && b != li.board)
+            if (!li.bAll && b != (size_t)li.board)
                continue;
 
             // store board serial number
@@ -3296,11 +3311,11 @@ void WP::SaveWaveforms()
       *(unsigned short *)p = (unsigned short)(0); // range
       p += sizeof(unsigned short);
       
-      for (auto b = 0 ; b<mEvent.size() ; b++) {
+      for (size_t b = 0 ; b<mEvent.size() ; b++) {
          auto ev = mEvent[b];
          int mask = GetEventRequestMask(ev->mBoardId);
          
-         if (!li.bAll && b != li.board)
+         if (!li.bAll && b != (size_t)li.board)
             continue;
 
          // store board serial number
