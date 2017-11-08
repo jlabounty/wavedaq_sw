@@ -980,6 +980,7 @@ int main(int argc, const char * argv[])
                if (f < 700)
                   f = 700;
                b->SetDrsSampleFreq(f);
+               sleep_ms(10);
                b->GetPllLck(true);
             }
             

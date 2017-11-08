@@ -250,6 +250,10 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data, int timeout
          continue;
       }
       
+      // don't wait for reply for reset FPGA command
+      if (timeout_ms < 0)
+         return;
+      
       // retrieve reply until acknowledge is found
       do {
          std::fill(readBuf.begin(), readBuf.end(), 0);
@@ -593,7 +597,7 @@ void WDB::ReceiveStatusRegister(int rofs)
 #endif
 }
 
-void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v, bool send)
+void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v, bool send, int timeout_ms)
 {
    int index = (rofs & 0x0FFF)/4;
 
@@ -603,7 +607,7 @@ void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, uns
    
    if (!mDemoMode && send && !mSendBlocked) {
 #ifdef WD2_USE_UDP_BIN
-      WriteUDP(rofs, std::vector<unsigned int> { r });
+      WriteUDP(rofs, std::vector<unsigned int> { r }, timeout_ms);
 #else
       std::ostringstream req;
       req << "rw 0x" << std::hex << rofs << " 0x" << r;
@@ -1462,11 +1466,13 @@ void WDB::ResetAllPll()
 void WDB::ResetScaler()
 {
    SetRegMask(WD2_REG_RST_OFS, WD2_BIT_SCALER_RST_MASK, WD2_BIT_SCALER_RST_OFS, 1);
+   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_SCALER_RST_MASK, WD2_BIT_SCALER_RST_OFS, 0);
 }
 
 void WDB::ResetTriggerParityErrorCounter()
 {
    SetRegMask(WD2_REG_RST_OFS, WD2_BIT_TRB_PARITY_ERROR_COUNT_RST_MASK, WD2_BIT_TRB_PARITY_ERROR_COUNT_RST_OFS, 1);
+   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_TRB_PARITY_ERROR_COUNT_RST_MASK, WD2_BIT_TRB_PARITY_ERROR_COUNT_RST_OFS, 0);
 }
 
 void WDB::LmkSyncLocal()
@@ -1478,26 +1484,31 @@ void WDB::LmkSyncLocal()
 void WDB::ResetAdcIf()
 {
    SetRegMask(WD2_REG_RST_OFS, WD2_BIT_ADC_IF_RST_MASK, WD2_BIT_ADC_IF_RST_OFS, 1);
+   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_ADC_IF_RST_MASK, WD2_BIT_ADC_IF_RST_OFS, 0);
 }
 
 void WDB::ResetPackager()
 {
    SetRegMask(WD2_REG_RST_OFS, WD2_BIT_WD_PKGR_RST_MASK, WD2_BIT_WD_PKGR_RST_OFS, 1);
+   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_WD_PKGR_RST_MASK, WD2_BIT_WD_PKGR_RST_OFS, 0);
 }
 
 void WDB::ResetEventCounter()
 {
    SetRegMask(WD2_REG_RST_OFS, WD2_BIT_EVENT_COUNTER_RST_MASK, WD2_BIT_EVENT_COUNTER_RST_OFS, 1);
+   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_EVENT_COUNTER_RST_MASK, WD2_BIT_EVENT_COUNTER_RST_OFS, 0);
 }
 
 void WDB::ResetDrsControlFsm()
 {
    SetRegMask(WD2_REG_RST_OFS, WD2_BIT_DRS_CTRL_FSM_RST_MASK, WD2_BIT_DRS_CTRL_FSM_RST_OFS, 1);
+   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_DRS_CTRL_FSM_RST_MASK, WD2_BIT_DRS_CTRL_FSM_RST_OFS, 0);
 }
 
 void WDB::ReconfigureFpga()
 {
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_RECONFIGURE_FPGA_MASK, WD2_BIT_RECONFIGURE_FPGA_OFS, 1);
+   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_RECONFIGURE_FPGA_MASK, WD2_BIT_RECONFIGURE_FPGA_OFS, 1, true, -1);
+   sleep_ms(1000);
 }
 
 void WDB::ApplyDrsSettings()

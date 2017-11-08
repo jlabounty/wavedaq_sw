@@ -490,7 +490,7 @@ public:
    void ReceiveControlRegisters(unsigned int index=0, unsigned int nReg=REG_NR_OF_CTRL_REGS);
    void ReceiveStatusRegisters(unsigned int index=0, unsigned int nReg=REG_NR_OF_STAT_REGS);
    void ReceiveStatusRegister(int ofs);
-   void SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v, bool send=true);
+   void SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v, bool send=true, int timeout_ms = 250);
    void SendControlRegisters();
    void PrintVersion();
    void SetSendBlocked(bool f) { mSendBlocked = f; }
