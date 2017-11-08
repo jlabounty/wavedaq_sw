@@ -2449,8 +2449,16 @@ bool WP::GetLastEvent(int timeout, std::vector<WDEvent *> event)
    // wait for new event with timeout
    {
    std::unique_lock<std::mutex> lock(mEventMutex);
-   if (!(mEventCV.wait_for(lock, std::chrono::milliseconds(timeout), [this](){return mEventNew;})))
+   if (!(mEventCV.wait_for(lock, std::chrono::milliseconds(timeout), [this](){return mEventNew;}))) {
+      
+      if (mLogfile != "") {
+         std::ofstream f;
+         f.open(mLogfile, std::ios_base::app);
+         f << "Timeout receiving event after " << timeout << "000us." << std::endl;
+      }
+                 
       return false;
+   }
    }
    
    {
