@@ -2634,22 +2634,6 @@ int WP::ReceiveWfPacket()
    if (er->GetDrs1TriggerCell() == -1)
       er->SetDrs1TriggerCell(ph->drs1_trigger_cell);
    
-   // drop package if it belongs to older event
-   if (ph->event_number < (unsigned int)mCurrentEvent) {
-      std::cerr << "Package dropped, package event=" << ph->event_number << ", "
-      << "current event=" << mCurrentEvent << ", "
-      << "board id = " << ph->board_id << std::endl;
-      
-      if (mLogfile != "") {
-         std::ofstream f;
-         f.open(mLogfile, std::ios_base::app);
-         f << "Package dropped, package event=" << ph->event_number << ", "
-         << "current event=" << mCurrentEvent << ", "
-         << "board id = " << ph->board_id << std::endl;
-      }
-      return 0;
-   }
-   
    // print warning if inconsistent trigger cells are found
    if (ph->event_number == (unsigned int)mCurrentEvent &&
        (ph->drs0_trigger_cell != er->GetDrs0TriggerCell() ||
@@ -2657,8 +2641,8 @@ int WP::ReceiveWfPacket()
           std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
        }
    
-   // drop whole event if package of next event has been received
-   if (ph->event_number > (unsigned int)mCurrentEvent) {
+   // drop whole event if package of different event has been received
+   if (ph->event_number != (unsigned int)mCurrentEvent) {
       if (mVerbose)
          std::cerr << "Event dropped, package event=" << ph->event_number << ", "
          << "current event=" << mCurrentEvent << ", "
@@ -2672,7 +2656,7 @@ int WP::ReceiveWfPacket()
          << "board id = " << ph->board_id << std::endl;
       }
       
-      // switch to new frame
+      // switch to new event
       InvalidateAllWf();
       mCurrentEvent = ph->event_number;
       er->SetDrs0TriggerCell(ph->drs0_trigger_cell);
