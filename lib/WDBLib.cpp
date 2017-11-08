@@ -2506,7 +2506,7 @@ bool WP::AllPacketsReceived()
 
 //--------------------------------------------------------------------
 
-void WP::ReceiveWfPacket()
+int WP::ReceiveWfPacket()
 {
    fd_set readfds;
    struct timeval timeout;
@@ -2526,205 +2526,211 @@ void WP::ReceiveWfPacket()
    if (status == -1)
       perror("select");
    
-   if (FD_ISSET(WP::gDataSocket, &readfds)) {
-      // packet is available, so receive it
-      struct sockaddr_in remote_addr;
-      unsigned char buffer[1800];
+   if (!FD_ISSET(WP::gDataSocket, &readfds)) {
+      return 0;
+   }
+   
+   // packet is available, so receive it
+   struct sockaddr_in remote_addr;
+   unsigned char buffer[1800];
+   
+   int len = sizeof(remote_addr);
+   int n = (int)recvfrom(WP::gDataSocket, (char *)buffer, sizeof(buffer), 0,
+                         (struct sockaddr *)&remote_addr, (socklen_t *)&len);
+   
+   // return if invalid header
+   if (n < (int)sizeof(WD2_FRAME_HEADER))
+      return 0;
+   
+   WD2_FRAME_HEADER *ph = (WD2_FRAME_HEADER *)buffer;
+   
+   // check protocol version
+   if (ph->protocol_version != WD2_UDP_PROTOCOL_VERSION) {
+      std::cerr << "Invalid protocol version " << ph->protocol_version << ", expected " << WD2_UDP_PROTOCOL_VERSION << ". Probably WD firmware update required." << std::endl;
+      return 0;
+   }
+   
+   // correct endianness of header data
+   ph->board_id                 = SWAP_UINT16(ph->board_id);
+   int header_adc               = (ph->adc_and_channel_info >> 4) & 0x0f;
+   int header_channel           = (ph->adc_and_channel_info) & 0x0f;
+   int channel_segment          = (ph->segment_and_package_type >> 4) & 0x0f;
+   int package_type             = (ph->segment_and_package_type) & 0x0f;
+   ph->event_number             = SWAP_UINT32(ph->event_number);
+   ph->sampling_frequency       = SWAP_UINT16(ph->sampling_frequency);
+   ph->payload_length           = SWAP_UINT16(ph->payload_length);
+   ph->trigger_number           = SWAP_UINT16(ph->trigger_number);
+   ph->drs0_trigger_cell        = SWAP_UINT16(ph->drs0_trigger_cell);
+   ph->drs1_trigger_cell        = SWAP_UINT16(ph->drs1_trigger_cell);
+   ph->trigger_type             = SWAP_UINT16(ph->trigger_type);
+   ph->temperature              = SWAP_UINT16(ph->temperature);
+   ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
+   
+   mPacketsReceived++;
+   mWDEvents = ph->event_number; // derive number of sent WD events from header
+   
+   std::string str(inet_ntoa(remote_addr.sin_addr));
+   str += ":";
+   str += std::to_string(ntohs(remote_addr.sin_port));
+   while (str.size() < 20)
+      str += " ";
+   
+   if (mCurrentEvent == -1)
+      start = std::chrono::high_resolution_clock::now();
+   auto elapsed = std::chrono::high_resolution_clock::now() - start;
+   unsigned int us = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+   
+   if (mLogfile != "") {
+      std::ofstream f;
+      char line[256];
+      f.open(mLogfile, std::ios_base::app);
       
-      int len = sizeof(remote_addr);
-      int n = (int)recvfrom(WP::gDataSocket, (char *)buffer, sizeof(buffer), 0,
-                            (struct sockaddr *)&remote_addr, (socklen_t *)&len);
-      if (n > (int)sizeof(WD2_FRAME_HEADER)) {
-         WD2_FRAME_HEADER *ph = (WD2_FRAME_HEADER *)buffer;
-         
-         // check protocol version
-         if (ph->protocol_version != WD2_UDP_PROTOCOL_VERSION) {
-            std::cerr << "Invalid protocol version " << ph->protocol_version << ", expected " << WD2_UDP_PROTOCOL_VERSION << ". Probably WD firmware update required." << std::endl;
-            return;
-         }
-         
-         // correct endianness of header data
-         ph->board_id                 = SWAP_UINT16(ph->board_id);
-         int header_adc               = (ph->adc_and_channel_info >> 4) & 0x0f;
-         int header_channel           = (ph->adc_and_channel_info) & 0x0f;
-         int channel_segment          = (ph->segment_and_package_type >> 4) & 0x0f;
-         int package_type             = (ph->segment_and_package_type) & 0x0f;
-         ph->event_number             = SWAP_UINT32(ph->event_number);
-         ph->sampling_frequency       = SWAP_UINT16(ph->sampling_frequency);
-         ph->payload_length           = SWAP_UINT16(ph->payload_length);
-         ph->trigger_number           = SWAP_UINT16(ph->trigger_number);
-         ph->drs0_trigger_cell        = SWAP_UINT16(ph->drs0_trigger_cell);
-         ph->drs1_trigger_cell        = SWAP_UINT16(ph->drs1_trigger_cell);
-         ph->trigger_type             = SWAP_UINT16(ph->trigger_type);
-         ph->temperature              = SWAP_UINT16(ph->temperature);
-         ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
-
-         mPacketsReceived++;
-         mWDEvents = ph->event_number; // derive number of sent WD events from header
-         
-         std::string str(inet_ntoa(remote_addr.sin_addr));
-         str += ":";
-         str += std::to_string(ntohs(remote_addr.sin_port));
-         while (str.size() < 20)
-            str += " ";
-
-         if (mCurrentEvent == -1)
-            start = std::chrono::high_resolution_clock::now();
-         auto elapsed = std::chrono::high_resolution_clock::now() - start;
-         unsigned int us = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
-         
-         if (mLogfile != "") {
-            std::ofstream f;
-            char line[256];
-            f.open(mLogfile, std::ios_base::app);
-            
-            sprintf(line, "%06dus #%04d from WD%03d (%s), EN=%5d PT=%d A/C/S=%d/%d/%d TC=%04d/%04d T=%1.1lf\n",
-                   us,
-                   mPacketsReceived-1,
-                   ph->board_id,
-                   str.c_str(),
-                   ph->event_number,
-                   package_type,
-                   header_adc,
-                   header_channel,
-                   channel_segment,
-                   ph->drs0_trigger_cell,
-                   ph->drs1_trigger_cell,
-                   ph->temperature*0.0625);
-            
-            f << line;
-         }
-         
-         // drop package (for now...) if it is not event data
-         if (package_type != 0) {
-            std::cerr << "Package dropped, package type=" << package_type << ", "
-            << "board id = " << ph->board_id << std::endl;
-            return;
-         }
-         
-         // find event request belonging to this board
-         WDEventRequest *er = nullptr;
-         for (auto r: mEventRequest)
-            if (r->GetBoardId() == ph->board_id) {
-               er = r;
-               break;
-            }
-         if (!er) {
-            if (mVerbose)
-               std::cerr << "Received unexpected packet from board #" << ph->board_id << std::endl;
-            if (mLogfile != "") {
-               std::ofstream f;
-               f.open(mLogfile, std::ios_base::app);
-               f << "Received unexpected packet from board #" << ph->board_id << std::endl;
-            }
-            return;
-         }
-         
-         if (mCurrentEvent == -1)
-            mCurrentEvent = ph->event_number;
-         if (er->GetDrs0TriggerCell() == -1)
-            er->SetDrs0TriggerCell(ph->drs0_trigger_cell);
-         if (er->GetDrs1TriggerCell() == -1)
-            er->SetDrs1TriggerCell(ph->drs1_trigger_cell);
-         
-         // drop package if it belongs to older event
-         if (ph->event_number < (unsigned int)mCurrentEvent) {
-            std::cerr << "Package dropped, package event=" << ph->event_number << ", "
-            << "current event=" << mCurrentEvent << ", "
-            << "board id = " << ph->board_id << std::endl;
-            
-            if (mLogfile != "") {
-               std::ofstream f;
-               f.open(mLogfile, std::ios_base::app);
-               f << "Package dropped, package event=" << ph->event_number << ", "
-               << "current event=" << mCurrentEvent << ", "
-               << "board id = " << ph->board_id << std::endl;
-            }
-            return;
-         }
-
-         // print warning if inconsistent trigger cells are found
-         if (ph->event_number == (unsigned int)mCurrentEvent &&
-             (ph->drs0_trigger_cell != er->GetDrs0TriggerCell() ||
-              ph->drs1_trigger_cell != er->GetDrs1TriggerCell())) {
-                std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
-         }
-         
-         // drop whole event if package of next event has been received
-         if (ph->event_number > (unsigned int)mCurrentEvent) {
-            if (mVerbose)
-               std::cerr << "Event dropped, package event=" << ph->event_number << ", "
-               << "current event=" << mCurrentEvent << ", "
-               << "board id = " << ph->board_id << std::endl;
-            
-            if (mLogfile != "") {
-               std::ofstream f;
-               f.open(mLogfile, std::ios_base::app);
-               f << "Event dropped, package event=" << ph->event_number << ", "
-               << "current event=" << mCurrentEvent << ", "
-               << "board id = " << ph->board_id << std::endl;
-            }
-
-            // switch to new frame
-            InvalidateAllWf();
-            mCurrentEvent = ph->event_number;
-            er->SetDrs0TriggerCell(ph->drs0_trigger_cell);
-            er->SetDrs1TriggerCell(ph->drs1_trigger_cell);
-            mPacketsReceived = 1;
-            start = std::chrono::high_resolution_clock::now();
-         }
-         
-         // map ADC and channel to WD channel (0..7, 8..15, 16+17)
-         int wfChannel;
-         if (header_channel == 8)
-            wfChannel = 16 + header_adc;
-         else
-            wfChannel = header_adc*8+header_channel;
-         assert(wfChannel < WD_N_CHANNELS);
-         
-         // mark valid package received
-         er->SetWfValid(wfChannel, channel_segment, true);
-         
-         // find event belonging to this baord
-         WDEvent *event = nullptr;
-         for (auto e: mEvent) {
-            if (e->mBoardId == ph->board_id) {
-               event = e;
-               break;
-            }
-         }
-         if (!event) {
-            std::cerr << "Received unexpected packet from board #" << ph->board_id << std::endl;
-            return;
-         }
-         
-         event->SetEventHeaderInfo(ph);
-         event->mVCalibrated = false;
-         event->mTCalibrated = false;
-
-         // decode waveform data
-         auto pd = (unsigned char*)(ph+1);
-         for (int i=0 ; i<512 ; i+=2) {
-            short data1   = ((pd[1] & 0x0F) << 8) | pd[0];
-            short data2 = ((unsigned short)pd[2] << 4) | (pd[1] >> 4);
-            // subtract binary offset
-            data1 -= 0x800;
-            data2 -= 0x800;
-            pd+=3;
-            
-            if (channel_segment == 0) {
-               // first segment
-               event->mWfU[wfChannel][i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
-               event->mWfU[wfChannel][i+1]       = (float)data2 * (1 / 4096.0);
-            } else {
-               // second segment
-               event->mWfU[wfChannel][512+i]     = (float)data1 * (1 / 4096.0);
-               event->mWfU[wfChannel][512+i+1]   = (float)data2 * (1 / 4096.0);
-            }
-         }
+      sprintf(line, "%06dus #%04d from WD%03d (%s), EN=%5d PT=%d A/C/S=%d/%d/%d TC=%04d/%04d T=%1.1lf\n",
+              us,
+              mPacketsReceived-1,
+              ph->board_id,
+              str.c_str(),
+              ph->event_number,
+              package_type,
+              header_adc,
+              header_channel,
+              channel_segment,
+              ph->drs0_trigger_cell,
+              ph->drs1_trigger_cell,
+              ph->temperature*0.0625);
+      
+      f << line;
+   }
+   
+   // drop package (for now...) if it is not event data
+   if (package_type != 0) {
+      std::cerr << "Package dropped, package type=" << package_type << ", "
+      << "board id = " << ph->board_id << std::endl;
+      return 0;
+   }
+   
+   // find event request belonging to this board
+   WDEventRequest *er = nullptr;
+   for (auto r: mEventRequest)
+      if (r->GetBoardId() == ph->board_id) {
+         er = r;
+         break;
+      }
+   if (!er) {
+      if (mVerbose)
+         std::cerr << "Received unexpected packet from board #" << ph->board_id << std::endl;
+      if (mLogfile != "") {
+         std::ofstream f;
+         f.open(mLogfile, std::ios_base::app);
+         f << "Received unexpected packet from board #" << ph->board_id << std::endl;
+      }
+      return 0;
+   }
+   
+   if (mCurrentEvent == -1)
+      mCurrentEvent = ph->event_number;
+   if (er->GetDrs0TriggerCell() == -1)
+      er->SetDrs0TriggerCell(ph->drs0_trigger_cell);
+   if (er->GetDrs1TriggerCell() == -1)
+      er->SetDrs1TriggerCell(ph->drs1_trigger_cell);
+   
+   // drop package if it belongs to older event
+   if (ph->event_number < (unsigned int)mCurrentEvent) {
+      std::cerr << "Package dropped, package event=" << ph->event_number << ", "
+      << "current event=" << mCurrentEvent << ", "
+      << "board id = " << ph->board_id << std::endl;
+      
+      if (mLogfile != "") {
+         std::ofstream f;
+         f.open(mLogfile, std::ios_base::app);
+         f << "Package dropped, package event=" << ph->event_number << ", "
+         << "current event=" << mCurrentEvent << ", "
+         << "board id = " << ph->board_id << std::endl;
+      }
+      return 0;
+   }
+   
+   // print warning if inconsistent trigger cells are found
+   if (ph->event_number == (unsigned int)mCurrentEvent &&
+       (ph->drs0_trigger_cell != er->GetDrs0TriggerCell() ||
+        ph->drs1_trigger_cell != er->GetDrs1TriggerCell())) {
+          std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
+       }
+   
+   // drop whole event if package of next event has been received
+   if (ph->event_number > (unsigned int)mCurrentEvent) {
+      if (mVerbose)
+         std::cerr << "Event dropped, package event=" << ph->event_number << ", "
+         << "current event=" << mCurrentEvent << ", "
+         << "board id = " << ph->board_id << std::endl;
+      
+      if (mLogfile != "") {
+         std::ofstream f;
+         f.open(mLogfile, std::ios_base::app);
+         f << "Event dropped, package event=" << ph->event_number << ", "
+         << "current event=" << mCurrentEvent << ", "
+         << "board id = " << ph->board_id << std::endl;
+      }
+      
+      // switch to new frame
+      InvalidateAllWf();
+      mCurrentEvent = ph->event_number;
+      er->SetDrs0TriggerCell(ph->drs0_trigger_cell);
+      er->SetDrs1TriggerCell(ph->drs1_trigger_cell);
+      mPacketsReceived = 1;
+      start = std::chrono::high_resolution_clock::now();
+   }
+   
+   // map ADC and channel to WD channel (0..7, 8..15, 16+17)
+   int wfChannel;
+   if (header_channel == 8)
+      wfChannel = 16 + header_adc;
+   else
+      wfChannel = header_adc*8+header_channel;
+   assert(wfChannel < WD_N_CHANNELS);
+   
+   // mark valid package received
+   er->SetWfValid(wfChannel, channel_segment, true);
+   
+   // find event belonging to this baord
+   WDEvent *event = nullptr;
+   for (auto e: mEvent) {
+      if (e->mBoardId == ph->board_id) {
+         event = e;
+         break;
+      }
+   }
+   if (!event) {
+      std::cerr << "Received unexpected packet from board #" << ph->board_id << std::endl;
+      return 0;
+   }
+   
+   event->SetEventHeaderInfo(ph);
+   event->mVCalibrated = false;
+   event->mTCalibrated = false;
+   
+   // decode waveform data
+   auto pd = (unsigned char*)(ph+1);
+   for (int i=0 ; i<512 ; i+=2) {
+      short data1   = ((pd[1] & 0x0F) << 8) | pd[0];
+      short data2 = ((unsigned short)pd[2] << 4) | (pd[1] >> 4);
+      // subtract binary offset
+      data1 -= 0x800;
+      data2 -= 0x800;
+      pd+=3;
+      
+      if (channel_segment == 0) {
+         // first segment
+         event->mWfU[wfChannel][i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
+         event->mWfU[wfChannel][i+1]       = (float)data2 * (1 / 4096.0);
+      } else {
+         // second segment
+         event->mWfU[wfChannel][512+i]     = (float)data1 * (1 / 4096.0);
+         event->mWfU[wfChannel][512+i+1]   = (float)data2 * (1 / 4096.0);
       }
    }
 
+   return 1;
 }
 
 //--------------------------------------------------------------------
@@ -3389,6 +3395,7 @@ void WP::SaveWaveforms()
 
 void WP::Collector()
 {
+   int status;
    mCurrentEvent = -1;
    
    if (mVerbose)
@@ -3400,16 +3407,19 @@ void WP::Collector()
       
       do {
          
-         ReceiveWfPacket();
+         status = ReceiveWfPacket();
 
-      } while (!AllPacketsReceived());
+      } while (status == 1 && !AllPacketsReceived());
       
       if (mLogfile != "") {
          auto it = mEvent.begin();
          auto ev = (*it);
          std::ofstream f;
          f.open(mLogfile, std::ios_base::app);
-         f << "All packets of event " << ev->mEventNumber << " received." << std::endl;
+         if (status == 1)
+            f << "All packets of event " << ev->mEventNumber << " received." << std::endl;
+         else
+            f << "Abort receiving of event " << ev->mEventNumber << std::endl;
       }
 
       // update statistics

@@ -293,7 +293,7 @@ class WP {
    bool              mEventEmpty;
 
    void              InvalidateAllWf();
-   void              ReceiveWfPacket();
+   int               ReceiveWfPacket();
    bool              AllPacketsReceived();
    void              RotateWaveforms();
    void              CalibrateWaveforms();
@@ -403,7 +403,7 @@ public:
    unsigned int GetNLogged() { return li.nLogged; }
    void SaveWaveforms();
    
-   void ResetStatistics() { mWDEvents = mWDReceivedEvents = 0; mCurrentEvent = -1; }
+   void ResetStatistics() { mWDEvents = mWDReceivedEvents = 0; }
    int GetWDEvents() { return mWDEvents; }
    int GetWDReceivedEvents() { return mWDReceivedEvents; }
 };
