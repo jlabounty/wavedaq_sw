@@ -2641,19 +2641,36 @@ int WP::ReceiveWfPacket()
           std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
        }
    
-   // drop whole event if package of different event has been received
-   if (ph->event_number != (unsigned int)mCurrentEvent) {
-      if (mVerbose)
-         std::cerr << "Event dropped, package event=" << ph->event_number << ", "
-         << "current event=" << mCurrentEvent << ", "
-         << "board id = " << ph->board_id << std::endl;
+   // drop package if it belongs to previous event
+   if (ph->event_number == (unsigned int)mCurrentEvent-1) {
+      std::cerr << "Package of previous event dropped, package event=" << ph->event_number << ", "
+      << "current event=" << mCurrentEvent << ", "
+      << "board id=" << ph->board_id << std::endl;
       
       if (mLogfile != "") {
          std::ofstream f;
          f.open(mLogfile, std::ios_base::app);
-         f << "Event dropped, package event=" << ph->event_number << ", "
+         f << "Package of previous event dropped, package event=" << ph->event_number << ", "
          << "current event=" << mCurrentEvent << ", "
-         << "board id = " << ph->board_id << std::endl;
+         << "board id=" << ph->board_id << std::endl;
+      }
+      return 0;
+   }
+
+   // Drop whole event if package of different event has been received. This could
+   // be a new event or event #1 if the WDB has been reset.
+   if (ph->event_number != (unsigned int)mCurrentEvent) {
+      if (mVerbose)
+         std::cerr << "Partially received event dropped, package event=" << ph->event_number << ", "
+         << "current event=" << mCurrentEvent << ", "
+         << "board id=" << ph->board_id << std::endl;
+      
+      if (mLogfile != "") {
+         std::ofstream f;
+         f.open(mLogfile, std::ios_base::app);
+         f << "Partially received event dropped, package event=" << ph->event_number << ", "
+         << "current event=" << mCurrentEvent << ", "
+         << "board id=" << ph->board_id << std::endl;
       }
       
       // switch to new event
