@@ -964,9 +964,6 @@ int main(int argc, const char * argv[])
             b->LoadVoltageCalibration(b->GetDrsSampleFreq());
             b->LoadTimeCalibration(b->GetDrsSampleFreq());
             
-            // ### temporary code until fixed in uB firmware
-            b->SetLmkInputFreq(100);
-            
             // debug output
             if (gl.dbgRx > 0 || gl.dbgTx > 0)
                b->SetDbgSig(gl.dbgRx, gl.dbgTx);
