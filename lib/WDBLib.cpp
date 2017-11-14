@@ -635,18 +635,14 @@ void WDB::SendControlRegisters()
 {
    // first half until HV
    std::vector<unsigned int> v;
-   for (int i=0 ; i<(WD2_REG_HV_U_TARGET_0_OFS-WD2_REG_WDB_LOC_OFS)/4 ; i++) {
-      printf("R: %d, O: %04X\n", i, WD2_REG_WDB_LOC_OFS+i*4);
+   for (int i=0 ; i<(WD2_REG_HV_U_TARGET_0_OFS-WD2_REG_WDB_LOC_OFS)/4 ; i++)
       v.push_back(this->creg[i]);
-   }
    WriteUDP(WD2_REG_WDB_LOC_OFS, v);
 
    // second half after HV
    v.clear();
-   for (int i=(WD2_REG_LMK_0_OFS-WD2_REG_WDB_LOC_OFS)/4 ; i<REG_NR_OF_CTRL_REGS ; i++) {
-      printf("R: %d, O: %04X\n", i, WD2_REG_LMK_0_OFS+(i-(WD2_REG_LMK_0_OFS-WD2_REG_WDB_LOC_OFS)/4)*4);
+   for (int i=(WD2_REG_LMK_0_OFS-WD2_REG_WDB_LOC_OFS)/4 ; i<REG_NR_OF_CTRL_REGS ; i++)
       v.push_back(this->creg[i]);
-   }
    WriteUDP(WD2_REG_LMK_0_OFS, v);
 }
 
