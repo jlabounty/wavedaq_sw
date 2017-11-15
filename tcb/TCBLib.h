@@ -32,6 +32,7 @@
 #define RSERDESTIME   0x3B0                     // serdes test time
 #define RSERDESTX     0x3C0                     // tx serdes configuration and delay load
 #define RTRGCOU       0x400                     // trigger counter (first address)
+#define RTRGDLY       0x500                     // trigger delay (first address)
 #define RPARAM        0x600                     // start of parameter space
 #define RMEMADDR      0x0FFFF                   // counter stop position
 #define MEMBASEADDR   0x10000                   //base address for memories
@@ -48,6 +49,7 @@
 #define BUFFERSIZE         8192
 #define BUFFERNUM          4
 #define PACKAGERSIZE       1024
+#define BLTSIZE            32
 ///////////////////////////////////////////////////////////
 
 #include "strlcpy.h"
@@ -242,4 +244,8 @@ public:
    void GetPLLUnlockCou(u_int32_t *data);
    //reset the PLL unlock counter PLLs
    void ResetPLLUnlockCou();
+   //Set trigger delay
+   void SetTRGDLY(u_int32_t *);
+   //Get trigger delay
+   void GetTRGDLY(u_int32_t *);
 };
