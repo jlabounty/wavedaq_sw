@@ -2359,6 +2359,9 @@ WP::WP(std::vector<WDB *> w, int verbose, std::string logfile, bool demo)
       mEventLast.push_back(new WDEvent(mWdb[i]->GetSerialNumber()));
    
    mEventEmpty = true;
+
+   //set appropriately the new event flag at startup
+   mEventNew = false;
    
    // start waveform collector thread
    mThreadCollector = this->SpawnCollectorThread();
@@ -3430,19 +3433,25 @@ void WP::Collector()
             f << "Abort receiving of event " << ev->mEventNumber << std::endl;
       }
 
-      // update statistics
-      mWDReceivedEvents++;
+      // if all packets have been received process the event
+      if(status == 1){
+
+         //debug stuff
+         if (mVerbose)
+            std::cout << "Fully received WD event." << std::endl;
+
+         // update statistics
+         mWDReceivedEvents++;
       
-      // do various calibrations
-      RotateWaveforms();
-      CalibrateWaveforms();
-      SaveWaveforms();
+         // do various calibrations
+         RotateWaveforms();
+         CalibrateWaveforms();
+         SaveWaveforms();
       
-      {
-         std::lock_guard<std::mutex> lock(mEventAccessMutex);
+         {
+            std::lock_guard<std::mutex> lock(mEventAccessMutex);
    
-         if (!mEventNew) {
-            // copy last event
+            // always overwrite last event
             auto es = mEvent.begin();
             auto ed = mEventLast.begin();
       
@@ -3451,9 +3460,8 @@ void WP::Collector()
       
             mEventNew = true;
          }
+         mEventCV.notify_one();
       }
-      mEventCV.notify_one();
-      
    } while (1);
    
 }
