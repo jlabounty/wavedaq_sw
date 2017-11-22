@@ -157,7 +157,7 @@ function init() {
 
    // load spinning wheel image
    OSC.spinningWheel = new Image();
-   OSC.spinningWheel.src = "spinning-wheel.gif";
+   OSC.spinningWheel.src = "spinning-wheel-wds.gif";
 }
 
 function loadWdb() {
