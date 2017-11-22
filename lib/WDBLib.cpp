@@ -2358,9 +2358,8 @@ WP::WP(std::vector<WDB *> w, int verbose, std::string logfile, bool demo)
    for (unsigned int i=0 ; i<mWdb.size() ; i++)
       mEventLast.push_back(new WDEvent(mWdb[i]->GetSerialNumber()));
    
+   // initialize event flags
    mEventEmpty = true;
-
-   //set appropriately the new event flag at startup
    mEventNew = false;
    
    // start waveform collector thread
@@ -2584,19 +2583,16 @@ int WP::ReceiveWfPacket()
    while (str.size() < 20)
       str += " ";
    
-   if (mCurrentEvent == -1){
+   if (mCurrentEvent == -1)
       mEventStartTime = std::chrono::high_resolution_clock::now();
-   }
-   auto elapsed = std::chrono::high_resolution_clock::now() - mEventStartTime;
-   unsigned int us = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
-   
+
    if (mLogfile != "") {
       std::ofstream f;
       char line[256];
       f.open(mLogfile, std::ios_base::app);
       
       sprintf(line, "%06dus #%04d from WD%03d (%s), EN=%5d PT=%d A/C/S=%d/%d/%d TC=%04d/%04d T=%1.1lf\n",
-              us,
+              usSince(mEventStartTime),
               mPacketsReceived-1,
               ph->board_id,
               str.c_str(),
@@ -2741,11 +2737,10 @@ int WP::ReceiveWfPacket()
          event->mWfU[wfChannel][512+i+1]   = (float)data2 * (1 / 4096.0);
       }
    }
-   if(mVerbose>=3){
-      elapsed = std::chrono::high_resolution_clock::now() - mEventStartTime;
-      us = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+   
+   if (mVerbose >= 3){
       printf("%06dus #%04d from WD%03d (%s), EN=%5d PT=%d A/C/S=%d/%d/%d TC=%04d/%04d T=%1.1lf\n",
-              us,
+              usSince(mEventStartTime),
               mPacketsReceived-1,
               ph->board_id,
               str.c_str(),
@@ -2759,7 +2754,7 @@ int WP::ReceiveWfPacket()
               ph->temperature*0.0625);
    }
 
-   return 1;
+   return SUCCESS;
 }
 
 //--------------------------------------------------------------------
@@ -3422,6 +3417,14 @@ void WP::SaveWaveforms()
 
 //--------------------------------------------------------------------
 
+unsigned int WP::usSince(std::chrono::time_point<std::chrono::high_resolution_clock> start)
+{
+   auto elapsed = std::chrono::high_resolution_clock::now() - start;
+   return std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+}
+
+//--------------------------------------------------------------------
+
 void WP::Collector()
 {
    int status;
@@ -3437,28 +3440,28 @@ void WP::Collector()
       do {
          
          status = ReceiveWfPacket();
+         if (status != SUCCESS)
+            break; // abort loop if timeout or wrong packet etc.
 
-      } while (status == 1 && !AllPacketsReceived());
+      } while (!AllPacketsReceived());
       
       if (mLogfile != "") {
          auto it = mEvent.begin();
          auto ev = (*it);
          std::ofstream f;
          f.open(mLogfile, std::ios_base::app);
-         if (status == 1)
+         if (status == SUCCESS)
             f << "All packets of event " << ev->mEventNumber << " received." << std::endl;
          else
             f << "Abort receiving of event " << ev->mEventNumber << std::endl;
       }
 
       // if all packets have been received process the event
-      if(status == 1){
+      if (status == SUCCESS) {
 
-         //debug stuff
-         auto elapsed = std::chrono::high_resolution_clock::now() - mEventStartTime;
-         unsigned int us = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+         // debug output
          if (mVerbose >= 2)
-            std::cout << "Fully received WD event. (time = "<< us << "us)" << std::endl;
+            std::cout << "Fully received WD event. (time = "<< usSince(mEventStartTime) << "us)" << std::endl;
 
          // update statistics
          mWDReceivedEvents++;
@@ -3467,12 +3470,12 @@ void WP::Collector()
          RotateWaveforms();
          CalibrateWaveforms();
          SaveWaveforms();
-         //debug stuff
-         elapsed = std::chrono::high_resolution_clock::now() - mEventStartTime;
-         us = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+         
+         // debug output
          if (mVerbose >= 2)
-            std::cout << "Fully calibrated WD event. (time = "<< us << "us)" << std::endl;
-      
+            std::cout << "Fully calibrated WD event. (time = "<< usSince(mEventStartTime) << "us)" << std::endl;
+
+         // copy event to buffer
          {
             std::lock_guard<std::mutex> lock(mEventAccessMutex);
    
@@ -3486,11 +3489,12 @@ void WP::Collector()
             mEventNew = true;
          }
          mEventCV.notify_one();
-         //debug stuff
-         elapsed = std::chrono::high_resolution_clock::now() - mEventStartTime;
-         us = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+         
+         
+         // debug output
          if (mVerbose >= 2)
-            std::cout << "Ready to be read WD event. (time = "<< us << "us)" << std::endl;
+            std::cout << "Ready to be read WD event. (time = "<< usSince(mEventStartTime) << "us)" << std::endl;
+         
       } else {
          {
             std::lock_guard<std::mutex> lock(mEventAccessMutex);

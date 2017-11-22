@@ -23,6 +23,7 @@
 #include "mxml.h"
 
 #define WD_N_CHANNELS 18
+#define SUCCESS        1
 
 class WDB;
 
@@ -292,6 +293,7 @@ class WP {
    bool              mEventNew;
    bool              mEventEmpty;
 
+   unsigned int      usSince(std::chrono::time_point<std::chrono::high_resolution_clock> start);
    void              InvalidateAllWf();
    int               ReceiveWfPacket();
    bool              AllPacketsReceived();
