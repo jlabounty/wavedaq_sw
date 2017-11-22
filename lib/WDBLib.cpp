@@ -2521,7 +2521,6 @@ int WP::ReceiveWfPacket()
    fd_set readfds;
    struct timeval timeout;
    int status;
-   static std::chrono::time_point<std::chrono::high_resolution_clock> start;
    
    FD_ZERO(&readfds);
    FD_SET(WP::gDataSocket, &readfds);
@@ -2585,9 +2584,10 @@ int WP::ReceiveWfPacket()
    while (str.size() < 20)
       str += " ";
    
-   if (mCurrentEvent == -1)
-      start = std::chrono::high_resolution_clock::now();
-   auto elapsed = std::chrono::high_resolution_clock::now() - start;
+   if (mCurrentEvent == -1){
+      mEventStartTime = std::chrono::high_resolution_clock::now();
+   }
+   auto elapsed = std::chrono::high_resolution_clock::now() - mEventStartTime;
    unsigned int us = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
    
    if (mLogfile != "") {
@@ -2689,7 +2689,8 @@ int WP::ReceiveWfPacket()
       er->SetDrs0TriggerCell(ph->drs0_trigger_cell);
       er->SetDrs1TriggerCell(ph->drs1_trigger_cell);
       mPacketsReceived = 1;
-      start = std::chrono::high_resolution_clock::now();
+
+      mEventStartTime = std::chrono::high_resolution_clock::now();
    }
    
    // map ADC and channel to WD channel (0..7, 8..15, 16+17)
@@ -2739,6 +2740,23 @@ int WP::ReceiveWfPacket()
          event->mWfU[wfChannel][512+i]     = (float)data1 * (1 / 4096.0);
          event->mWfU[wfChannel][512+i+1]   = (float)data2 * (1 / 4096.0);
       }
+   }
+   if(mVerbose>=3){
+      elapsed = std::chrono::high_resolution_clock::now() - mEventStartTime;
+      us = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+      printf("%06dus #%04d from WD%03d (%s), EN=%5d PT=%d A/C/S=%d/%d/%d TC=%04d/%04d T=%1.1lf\n",
+              us,
+              mPacketsReceived-1,
+              ph->board_id,
+              str.c_str(),
+              ph->event_number,
+              package_type,
+              header_adc,
+              header_channel,
+              channel_segment,
+              ph->drs0_trigger_cell,
+              ph->drs1_trigger_cell,
+              ph->temperature*0.0625);
    }
 
    return 1;
@@ -3437,8 +3455,10 @@ void WP::Collector()
       if(status == 1){
 
          //debug stuff
-         if (mVerbose)
-            std::cout << "Fully received WD event." << std::endl;
+         auto elapsed = std::chrono::high_resolution_clock::now() - mEventStartTime;
+         unsigned int us = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+         if (mVerbose >= 2)
+            std::cout << "Fully received WD event. (time = "<< us << "us)" << std::endl;
 
          // update statistics
          mWDReceivedEvents++;
@@ -3447,6 +3467,11 @@ void WP::Collector()
          RotateWaveforms();
          CalibrateWaveforms();
          SaveWaveforms();
+         //debug stuff
+         elapsed = std::chrono::high_resolution_clock::now() - mEventStartTime;
+         us = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+         if (mVerbose >= 2)
+            std::cout << "Fully calibrated WD event. (time = "<< us << "us)" << std::endl;
       
          {
             std::lock_guard<std::mutex> lock(mEventAccessMutex);
@@ -3461,6 +3486,16 @@ void WP::Collector()
             mEventNew = true;
          }
          mEventCV.notify_one();
+         //debug stuff
+         elapsed = std::chrono::high_resolution_clock::now() - mEventStartTime;
+         us = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+         if (mVerbose >= 2)
+            std::cout << "Ready to be read WD event. (time = "<< us << "us)" << std::endl;
+      } else {
+         {
+            std::lock_guard<std::mutex> lock(mEventAccessMutex);
+            mEventNew = false;
+         }
       }
    } while (1);
    

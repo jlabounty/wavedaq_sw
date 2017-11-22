@@ -45,7 +45,7 @@ int main(int argc, char** argv)
      return 1;
    }   
 
-   wdb = new WDB(argv[1], 1);
+   wdb = new WDB(argv[1], 3);
    // open mscb connection
    tcb = new TCB(argv[2], 20, 17, 1);
    tcb->fh = mscb_init(argv[2], 0, "", 0);
@@ -54,6 +54,8 @@ int main(int argc, char** argv)
       printf("Problem in communication with TCB....\n");
       return 1;
    }
+   tcb->SetNTRG();
+
    tcb->fverbose = 1;
 
    wdb->Connect();
@@ -62,7 +64,7 @@ int main(int argc, char** argv)
    wdb->ReceiveControlRegisters();
    wdb->SetSendBlocked(true); // update all control register together
    //wdb->SetInterPacketDelay(0x40000);
-   wdb->SetInterPacketDelay(0x400);
+   wdb->SetInterPacketDelay(0x40000);
    wdb->SetDrs0ChnTxEnable(0x1FF);
    wdb->SetDrs1ChnTxEnable(0x1FF);
    wdb->SetReadoutSrcSel(WDB::cReadoutSrcDrs);
@@ -75,6 +77,7 @@ int main(int argc, char** argv)
    wdb->SetTriggerExternalOr(true);
    wdb->SetTriggerCfgOr(0);
    wdb->SetTriggerCfgAnd(0);
+   wdb->SetTriggerLocalScheme(WDB::cTriggerSchemeSimple);
    wdb->SetExtClkInSel(0);
    wdb->SetDaqClkSrcSel(0);
    wdb->SetLmkInputFreq(80);
@@ -86,8 +89,8 @@ int main(int argc, char** argv)
    wdb->SendControlRegisters();
    wdb->ResetDrsControlFsm();
    wdb->ResetAllPll();
-   wdb->LoadVoltageCalibration(wdb->GetDrsSampleFreq(), "calib/");
-   wdb->LoadTimeCalibration(wdb->GetDrsSampleFreq(), "calib/");
+   wdb->LoadVoltageCalibration(wdb->GetDrsSampleFreq(), "./");
+   wdb->LoadTimeCalibration(wdb->GetDrsSampleFreq(), "./");
    wdb->SetDaqNormal(true);
    // read all status registers
    wdb->ReceiveStatusRegisters();
@@ -98,7 +101,7 @@ int main(int argc, char** argv)
    //CONFIGURE WP
    std::vector<WDB*> wdbvec;
    wdbvec.push_back(wdb);
-   wp = new WP(wdbvec, 1, "");
+   wp = new WP(wdbvec, 3, "");
    wp->SetAllCalib(true);
    wp->RequestAllBoards();
    wdb->SetDestinationPort(wp->GetServerPort());
@@ -108,7 +111,8 @@ int main(int argc, char** argv)
    //Configure TCB
    u_int32_t rrun_config = 0x0000C014;  //masktrg, masksync, fadcmode, enable trg_bus
    tcb->SetRRUN(&rrun_config);
-   bool tr_en[64] = {0};
+   bool tr_en[64];
+   for (int i=0; i<64; i++) tr_en[i]=false;
    tcb->SetTriggerEnable(tr_en);
 
    //Begin of run
@@ -138,7 +142,7 @@ int main(int argc, char** argv)
      tcb->GetTriggerType(&trgtype);
      printf("Trigger type: %d\n", trgtype&0x3F);
 
-     //READ WDB 
+     //READ WDB
      bool ret = wp->GetLastEvent(100, wde);
      printf("got WD event, return val=%d\n", ret);
      printf("WD event number %d\n", wde[0]->mTriggerNumber);

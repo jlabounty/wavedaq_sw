@@ -299,6 +299,7 @@ class WP {
    void              CalibrateWaveforms();
    void              RemoveSpikes(int tc, float wf[][1024]);
    //   void              LogWaveforms();
+   std::chrono::time_point<std::chrono::high_resolution_clock> mEventStartTime;
    
    CALIB_PROGRESS    calibProg;
    
