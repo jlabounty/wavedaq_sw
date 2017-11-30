@@ -64,7 +64,7 @@ int main(int argc, char** argv)
    wdb->ReceiveControlRegisters();
    wdb->SetSendBlocked(true); // update all control register together
    //wdb->SetInterPacketDelay(0x40000);
-   wdb->SetInterPacketDelay(0x40000);
+   wdb->SetInterPacketDelay(0x80000);
    wdb->SetDrs0ChnTxEnable(0x1FF);
    wdb->SetDrs1ChnTxEnable(0x1FF);
    wdb->SetReadoutSrcSel(WDB::cReadoutSrcDrs);
@@ -141,6 +141,9 @@ int main(int argc, char** argv)
      u_int32_t trgtype;
      tcb->GetTriggerType(&trgtype);
      printf("Trigger type: %d\n", trgtype&0x3F);
+
+     //delay
+     //usleep(100000);
 
      //READ WDB
      bool ret = wp->GetLastEvent(100, wde);
