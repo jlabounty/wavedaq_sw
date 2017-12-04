@@ -3451,17 +3451,15 @@ void WP::Collector()
          std::ofstream f;
          f.open(mLogfile, std::ios_base::app);
          if (status == SUCCESS)
-            f << "All packets of event " << ev->mEventNumber << " received." << std::endl;
+            f << std::setfill('0') << std::setw(6) << usSince(mEventStartTime) <<
+            "us All packets of event " << ev->mEventNumber << " received" << std::endl;
          else
-            f << "Abort receiving of event " << ev->mEventNumber << std::endl;
+            f << std::setfill('0') << std::setw(6) << usSince(mEventStartTime) <<
+            "us Abort receiving of event" << std::endl;
       }
 
       // if all packets have been received process the event
       if (status == SUCCESS) {
-
-         // debug output
-         if (mVerbose >= 2)
-            std::cout << "Fully received WD event. (time = "<< usSince(mEventStartTime) << "us)" << std::endl;
 
          // update statistics
          mWDReceivedEvents++;
@@ -3472,8 +3470,13 @@ void WP::Collector()
          SaveWaveforms();
          
          // debug output
-         if (mVerbose >= 2)
-            std::cout << "Fully calibrated WD event. (time = "<< usSince(mEventStartTime) << "us)" << std::endl;
+         if (mLogfile != "") {
+            std::ofstream f;
+            f.open(mLogfile, std::ios_base::app);
+            f << std::setfill('0') << std::setw(6) << usSince(mEventStartTime) <<
+            "us Fully calibrated WD event" << std::endl;
+            f << "===============================================================================================" << std::endl;
+         }
 
          // copy event to buffer
          {
