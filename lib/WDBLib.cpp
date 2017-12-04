@@ -2759,7 +2759,7 @@ int WP::ReceiveWfPacket()
 
 //--------------------------------------------------------------------
 
-void WP::RotateWaveforms()
+void WP::UnrotateWaveforms()
 {
    for (auto it = mEvent.begin() ; it != mEvent.end() ; it++) {
       auto ev = (*it);
@@ -2773,16 +2773,10 @@ void WP::RotateWaveforms()
             wf[i][j] = ev->mWfU[i][j];
       
       // un-rotate waveforms
-      if (mRotateWaveform) {
-         for (int i=0 ; i<WD_N_CHANNELS ; i++)
-            for (int j=0 ; j<1024 ; j++)
-               ev->mWfU[i][j] = ev->mWfU[i][j];
-      } else {
-         for (int i=0 ; i<WD_N_CHANNELS ; i++) {
-            int tc = i < 8 || i == 16 ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
-            for (int j=0 ; j<1024 ; j++)
-               ev->mWfU[i][(j+tc) % 1024] = wf[i][j];
-         }
+      for (int i=0 ; i<WD_N_CHANNELS ; i++) {
+         int tc = i < 8 || i == 16 ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
+         for (int j=0 ; j<1024 ; j++)
+            ev->mWfU[i][(j+tc) % 1024] = wf[i][j];
       }
    }
 }
@@ -3465,9 +3459,13 @@ void WP::Collector()
          mWDReceivedEvents++;
       
          // do various calibrations
-         RotateWaveforms();
+         if (!mRotateWaveform)
+           UnrotateWaveforms();
+         
          CalibrateWaveforms();
-         SaveWaveforms();
+         
+         if (li.fh != 0 || li.xml != NULL)
+            SaveWaveforms();
          
          // debug output
          if (mLogfile != "") {

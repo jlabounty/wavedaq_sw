@@ -297,7 +297,7 @@ class WP {
    void              InvalidateAllWf();
    int               ReceiveWfPacket();
    bool              AllPacketsReceived();
-   void              RotateWaveforms();
+   void              UnrotateWaveforms();
    void              CalibrateWaveforms();
    void              RemoveSpikes(int tc, float wf[][1024]);
    //   void              LogWaveforms();
