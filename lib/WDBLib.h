@@ -267,6 +267,7 @@ class WP {
    std::map<int, WDB*> mWdbMap;
 
    bool              mRotateWaveform;
+   bool              mCalibrateWaveform;
    bool              mOfsCalib1;
    bool              mOfsCalib2;
    bool              mGainCalib;
@@ -300,7 +301,6 @@ class WP {
    int               ReceiveWfPacket();
    bool              AllPacketsReceived();
    void              UnrotateWaveforms();
-   void              CalibrateWaveforms(std::vector<WDEvent *> event);
    void              RemoveSpikes(int tc, float wf[][1024]);
    std::chrono::time_point<std::chrono::high_resolution_clock> mEventStartTime;
    
@@ -346,6 +346,7 @@ public:
    bool IsVerbose() { return mVerbose; }
    bool IsDemoMode() { return mDemoMode; }
    bool IsRotateWaveform() { return mRotateWaveform;}
+   bool IsCalibrateWaveform() { return mCalibrateWaveform;}
    bool IsOfsCalib1() { return mOfsCalib1;}
    bool IsOfsCalib2() { return mOfsCalib2;}
    bool IsGainCalib() { return mGainCalib;}
@@ -356,6 +357,7 @@ public:
    bool IsRemoveSpikes() { return mRemoveSpikes; }
 
    void SetRotateWaveform(bool f) { mRotateWaveform = f; }
+   void SetCalibrateWaveform(bool f) { mCalibrateWaveform = f; }
    void SetOfsCalib1(bool f) { mOfsCalib1 = f; }
    void SetOfsCalib2(bool f) { mOfsCalib2 = f; }
    void SetGainCalib(bool f) { mGainCalib = f; }
@@ -389,6 +391,9 @@ public:
    bool GetLastEvent(int timeout, std::vector<WDEvent *> event);
    bool RequestEvent(WDB* b, int timeout, WDEvent& event);
    
+   void CalibrateWaveforms(WDEvent* event);
+   void CalibrateWaveforms(std::vector<WDEvent *> event);
+
    void StartCalibrationVoltage(int b) {
       calibProg.mode = cCmVoltage;
       calibProg.nBoard = (b == -1) ? mWdb.size() : b+1;

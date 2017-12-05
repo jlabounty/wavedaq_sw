@@ -2318,6 +2318,7 @@ WP::WP(std::vector<WDB *> w, int verbose, std::string logfile, bool demo)
       mWdbMap[b->GetSerialNumber()] = b;
    
    mRotateWaveform = true;
+   mCalibrateWaveform = true;
    mOfsCalib1 = false;
    mOfsCalib2 = false;
    mGainCalib = false;
@@ -2472,13 +2473,13 @@ bool WP::GetLastEvent(int timeout, std::vector<WDEvent *> event)
    }
    
    {
-   std::lock_guard<std::mutex> lock(mEventAccessMutex);
-   
-   std::vector<WDEvent*>::iterator ed = event.begin();
-   for (auto es: mEventLast)
+      std::lock_guard<std::mutex> lock(mEventAccessMutex);
+      
+      std::vector<WDEvent*>::iterator ed = event.begin();
+      for (auto es: mEventLast)
          **(ed++) = *es;
-   mEventNew = false;
-   return true;
+      mEventNew = false;
+      return true;
    }
 }
 
@@ -2923,215 +2924,222 @@ void WP::RemoveSpikes(int trigger_cell, float wf[][1024])
 void WP::CalibrateWaveforms(std::vector<WDEvent *> event)
 {
    for (auto it = event.begin() ; it != event.end() ; it++) {
-      auto ev = (*it);
+      WDEvent *ev = (*it);
+      CalibrateWaveforms(ev);
+   }
+
+}
+
+//--------------------------------------------------------------------
+
+void WP::CalibrateWaveforms(WDEvent* ev)
+{
+   // search board belonging to this event
+   WDB* wdb = WP::GetBoard(ev->mBoardId);
+   
+   if (ev->mWFTypeADC) { //---------- calibrate ADC data ----------
       
-      // search board belonging to this event
-      WDB* wdb = WP::GetBoard(ev->mBoardId);
+      ev->mTCalibrated = true;
       
-      if (ev->mWFTypeADC) { //---------- calibrate ADC data ----------
+      if (mRangeCalib) {
+         float ofs;
          
+         ev->mVCalibrated = true;
+         for (int i=0 ; i<WD_N_CHANNELS-2 ; i++) { // exclude clock channels
+            if (fabs(wdb->GetRange() - (-0.45)) < 0.001)
+               ofs = wdb->mVCalib.mCalib.adc_offset_range0[i];
+            else if (fabs(wdb->GetRange()) < 0.001)
+               ofs = wdb->mVCalib.mCalib.adc_offset_range1[i];
+            else if (fabs(wdb->GetRange() - 0.45) < 0.001)
+               ofs = wdb->mVCalib.mCalib.adc_offset_range2[i];
+            else
+               ofs = 0;
+            for (int j=0 ; j<1024 ; j++)
+               ev->mWfU[i][j] -= ofs;
+         }
+      }
+      
+      // just set nominal time bins from ADC sampling rate
+      for (int i=0 ; i<WD_N_CHANNELS ; i++)
+         for (int j=0 ; j<1024 ; j++)
+            ev->mWfT[i][j] = (float)(j * 1E-6/ev->mSamplingFrequency);
+      
+      // shift ADC values
+      for (int i=0 ; i<WD_N_CHANNELS ; i++)
+         for (int j=0 ; j<1024 ; j++)
+            ev->mWfU[i][j] += 0.35;
+      
+   } else {  //---------- calibrate DRS data ----------
+      
+      bool bValid = (ev->mSamplingFrequency == wdb->mVCalib.GetSamplingFrequency() &&
+                     wdb->mVCalib.IsValid());
+      
+      // cell-by-cell offset calibration
+      if (mOfsCalib1 && bValid) {
+         ev->mVCalibrated = true;
+         
+         if (mRotateWaveform) {
+            for (int i=0 ; i<WD_N_CHANNELS ; i++) {
+               int tc = i < 8 || i == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
+               for (int j=0 ; j<1024 ; j++)
+                  ev->mWfU[i][j] -= wdb->mVCalib.mCalib.wf_offset1[i][(j+tc) % 1024];
+            }
+         } else {
+            for (int i=0 ; i<WD_N_CHANNELS ; i++)
+               for (int j=0 ; j<1024 ; j++)
+                  ev->mWfU[i][j] -= wdb->mVCalib.mCalib.wf_offset1[i][j];
+         }
+      };
+      
+      // start-to-end offset calibration
+      if (mOfsCalib2 && bValid) {
+         for (int i=0 ; i<WD_N_CHANNELS ; i++)
+            for (int j=0 ; j<1024 ; j++)
+               ev->mWfU[i][j] -= wdb->mVCalib.mCalib.wf_offset2[i][j];
+      };
+      
+      // gain calibration
+      if (mGainCalib && bValid) {
+         if (mRotateWaveform) {
+            for (int i=0 ; i<WD_N_CHANNELS-2 ; i++) { // exclude clock channels
+               int tc = i < 8 || i == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
+               for (int j=0 ; j<1024 ; j++) {
+                  if (ev->mWfU[i][j] > 0)
+                     ev->mWfU[i][j] /= wdb->mVCalib.mCalib.wf_gain1[i][(j+tc) % 1024];
+                  else
+                     ev->mWfU[i][j] /= wdb->mVCalib.mCalib.wf_gain2[i][(j+tc) % 1024];
+               }
+            }
+         } else {
+            for (int i=0 ; i<WD_N_CHANNELS-2 ; i++)
+               for (int j=0 ; j<1024 ; j++) {
+                  if (ev->mWfU[i][j] > 0)
+                     ev->mWfU[i][j] /= wdb->mVCalib.mCalib.wf_gain1[i][j];
+                  else
+                     ev->mWfU[i][j] /= wdb->mVCalib.mCalib.wf_gain2[i][j];
+               }
+         }
+      };
+      
+      // range calibration
+      if (mRangeCalib && bValid) {
+         float ofs;
+         
+         for (int i=0 ; i<WD_N_CHANNELS-2 ; i++) { // exclude clock channels
+            if (fabs(wdb->GetRange() - (-0.45)) < 0.001)
+               ofs = wdb->mVCalib.mCalib.drs_offset_range0[i];
+            else if (fabs(wdb->GetRange()) < 0.001)
+               ofs = wdb->mVCalib.mCalib.drs_offset_range1[i];
+            else if (fabs(wdb->GetRange() - 0.45) < 0.001)
+               ofs = wdb->mVCalib.mCalib.drs_offset_range2[i];
+            else
+               ofs = 0;
+            for (int j=0 ; j<1024 ; j++)
+               ev->mWfU[i][j] -= ofs;
+         }
+      };
+      
+      // remove spikes
+      if (mRemoveSpikes) {
+         RemoveSpikes(ev->mTriggerCell[0], ev->mWfU);
+         RemoveSpikes(ev->mTriggerCell[0], ev->mWfU+WD_N_CHANNELS/2);
+      };
+      
+      // calculate calibrated time for each event
+      bValid = (ev->mSamplingFrequency == wdb->mTCalib.GetSamplingFrequency() &&
+                wdb->mTCalib.IsValid());
+      if (mTimeCalib1 && bValid) {
          ev->mTCalibrated = true;
          
-         if (mRangeCalib) {
-            float ofs;
-            
-            ev->mVCalibrated = true;
-            for (int i=0 ; i<WD_N_CHANNELS-2 ; i++) { // exclude clock channels
-               if (fabs(wdb->GetRange() - (-0.45)) < 0.001)
-                  ofs = wdb->mVCalib.mCalib.adc_offset_range0[i];
-               else if (fabs(wdb->GetRange()) < 0.001)
-                  ofs = wdb->mVCalib.mCalib.adc_offset_range1[i];
-               else if (fabs(wdb->GetRange() - 0.45) < 0.001)
-                  ofs = wdb->mVCalib.mCalib.adc_offset_range2[i];
-               else
-                  ofs = 0;
-               for (int j=0 ; j<1024 ; j++)
-                  ev->mWfU[i][j] -= ofs;
-            }
+         // integrate time from delta-t values
+         for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
+            int tc = ch < 8 || ch == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
+            if (!mRotateWaveform)
+               tc = 0;
+            ev->mWfT[ch][0] = 0;
+            for (int i=1 ; i<1024 ; i++)
+               ev->mWfT[ch][i] = ev->mWfT[ch][i-1] + wdb->mTCalib.mCalib.dt[ch][(i-1+tc)%1024];
          }
+         // align cell#0 of all channels inside chip0
+         int tc = mRotateWaveform ? ev->mTriggerCell[0] : 0;
+         float t1 = ev->mWfT[0][(1024-tc) % 1024];
+         for (int ch=1 ; ch<8 ; ch++) {
+            float t2 = ev->mWfT[ch][(1024-tc) % 1024];
+            float dt = t1 - t2;
+            for (int i=0 ; i<1024 ; i++)
+               ev->mWfT[ch][i] += dt;
+         }
+         float t2 = ev->mWfT[16][(1024-tc) % 1024];
+         float dt = t1 - t2;
+         for (int i=0 ; i<1024 ; i++)
+            ev->mWfT[16][i] += dt;
          
-         // just set nominal time bins from ADC sampling rate
+         // align cell#0 of all channels inside chip1 to chip0
+         tc = mRotateWaveform ? ev->mTriggerCell[1] : 0;
+         for (int ch=8 ; ch<16 ; ch++) {
+            float t2 = ev->mWfT[ch][(1024-tc) % 1024];
+            float dt = t1 - t2;
+            for (int i=0 ; i<1024 ; i++)
+               ev->mWfT[ch][i] += dt;
+         }
+         t2 = ev->mWfT[17][(1024-tc) % 1024];
+         dt = t1 - t2;
+         for (int i=0 ; i<1024 ; i++)
+            ev->mWfT[17][i] += dt;
+         
+      } else {
+         // set nominal sampling intervals
          for (int i=0 ; i<WD_N_CHANNELS ; i++)
             for (int j=0 ; j<1024 ; j++)
                ev->mWfT[i][j] = (float)(j * 1E-6/ev->mSamplingFrequency);
-
-         // shift ADC values
+      }
+      
+      // apply time offsets (different PCB path traces)
+      if (mTimeCalib2 && bValid) {
          for (int i=0 ; i<WD_N_CHANNELS ; i++)
             for (int j=0 ; j<1024 ; j++)
-               ev->mWfU[i][j] += 0.35;
-
-      } else {  //---------- calibrate DRS data ----------
-
-         bool bValid = (ev->mSamplingFrequency == wdb->mVCalib.GetSamplingFrequency() &&
-                        wdb->mVCalib.IsValid());
-
-         // cell-by-cell offset calibration
-         if (mOfsCalib1 && bValid) {
-            ev->mVCalibrated = true;
-
-            if (mRotateWaveform) {
-               for (int i=0 ; i<WD_N_CHANNELS ; i++) {
-                  int tc = i < 8 || i == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
-                  for (int j=0 ; j<1024 ; j++)
-                     ev->mWfU[i][j] -= wdb->mVCalib.mCalib.wf_offset1[i][(j+tc) % 1024];
-               }
-            } else {
-               for (int i=0 ; i<WD_N_CHANNELS ; i++)
-                  for (int j=0 ; j<1024 ; j++)
-                     ev->mWfU[i][j] -= wdb->mVCalib.mCalib.wf_offset1[i][j];
-            }
-         };
-         
-         // start-to-end offset calibration
-         if (mOfsCalib2 && bValid) {
-            for (int i=0 ; i<WD_N_CHANNELS ; i++)
-               for (int j=0 ; j<1024 ; j++)
-                  ev->mWfU[i][j] -= wdb->mVCalib.mCalib.wf_offset2[i][j];
-         };
-         
-         // gain calibration
-         if (mGainCalib && bValid) {
-            if (mRotateWaveform) {
-               for (int i=0 ; i<WD_N_CHANNELS-2 ; i++) { // exclude clock channels
-                  int tc = i < 8 || i == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
-                  for (int j=0 ; j<1024 ; j++) {
-                     if (ev->mWfU[i][j] > 0)
-                        ev->mWfU[i][j] /= wdb->mVCalib.mCalib.wf_gain1[i][(j+tc) % 1024];
-                     else
-                        ev->mWfU[i][j] /= wdb->mVCalib.mCalib.wf_gain2[i][(j+tc) % 1024];
-                  }
-               }
-            } else {
-               for (int i=0 ; i<WD_N_CHANNELS-2 ; i++)
-                  for (int j=0 ; j<1024 ; j++) {
-                     if (ev->mWfU[i][j] > 0)
-                        ev->mWfU[i][j] /= wdb->mVCalib.mCalib.wf_gain1[i][j];
-                     else
-                        ev->mWfU[i][j] /= wdb->mVCalib.mCalib.wf_gain2[i][j];
-                  }
-            }
-         };
-         
-         // range calibration
-         if (mRangeCalib && bValid) {
-            float ofs;
-            
-            for (int i=0 ; i<WD_N_CHANNELS-2 ; i++) { // exclude clock channels
-               if (fabs(wdb->GetRange() - (-0.45)) < 0.001)
-                  ofs = wdb->mVCalib.mCalib.drs_offset_range0[i];
-               else if (fabs(wdb->GetRange()) < 0.001)
-                  ofs = wdb->mVCalib.mCalib.drs_offset_range1[i];
-               else if (fabs(wdb->GetRange() - 0.45) < 0.001)
-                  ofs = wdb->mVCalib.mCalib.drs_offset_range2[i];
-               else
-                  ofs = 0;
-               for (int j=0 ; j<1024 ; j++)
-                  ev->mWfU[i][j] -= ofs;
-            }
-         };
-
-         // remove spikes
-         if (mRemoveSpikes) {
-            RemoveSpikes(ev->mTriggerCell[0], ev->mWfU);
-            RemoveSpikes(ev->mTriggerCell[0], ev->mWfU+WD_N_CHANNELS/2);
-         };
-
-         // calculate calibrated time for each event
-         bValid = (ev->mSamplingFrequency == wdb->mTCalib.GetSamplingFrequency() &&
-                   wdb->mTCalib.IsValid());
-         if (mTimeCalib1 && bValid) {
-            ev->mTCalibrated = true;
- 
-            // integrate time from delta-t values
-            for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
-               int tc = ch < 8 || ch == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
-               if (!mRotateWaveform)
-                  tc = 0;
-               ev->mWfT[ch][0] = 0;
-               for (int i=1 ; i<1024 ; i++)
-                  ev->mWfT[ch][i] = ev->mWfT[ch][i-1] + wdb->mTCalib.mCalib.dt[ch][(i-1+tc)%1024];
-            }
-            // align cell#0 of all channels inside chip0
-            int tc = mRotateWaveform ? ev->mTriggerCell[0] : 0;
-            float t1 = ev->mWfT[0][(1024-tc) % 1024];
-            for (int ch=1 ; ch<8 ; ch++) {
-               float t2 = ev->mWfT[ch][(1024-tc) % 1024];
-               float dt = t1 - t2;
-               for (int i=0 ; i<1024 ; i++)
-                  ev->mWfT[ch][i] += dt;
-            }
-            float t2 = ev->mWfT[16][(1024-tc) % 1024];
-            float dt = t1 - t2;
-            for (int i=0 ; i<1024 ; i++)
-               ev->mWfT[16][i] += dt;
-            
-            // align cell#0 of all channels inside chip1 to chip0
-            tc = mRotateWaveform ? ev->mTriggerCell[1] : 0;
-            for (int ch=8 ; ch<16 ; ch++) {
-               float t2 = ev->mWfT[ch][(1024-tc) % 1024];
-               float dt = t1 - t2;
-               for (int i=0 ; i<1024 ; i++)
-                  ev->mWfT[ch][i] += dt;
-            }
-            t2 = ev->mWfT[17][(1024-tc) % 1024];
-            dt = t1 - t2;
-            for (int i=0 ; i<1024 ; i++)
-               ev->mWfT[17][i] += dt;
-            
-         } else {
-            // set nominal sampling intervals
-            for (int i=0 ; i<WD_N_CHANNELS ; i++)
-               for (int j=0 ; j<1024 ; j++)
-                  ev->mWfT[i][j] = (float)(j * 1E-6/ev->mSamplingFrequency);
-         }
-         
-         // apply time offsets (different PCB path traces)
-         if (mTimeCalib2 && bValid) {
-            for (int i=0 ; i<WD_N_CHANNELS ; i++)
-               for (int j=0 ; j<1024 ; j++)
-                  ev->mWfT[i][j] -= wdb->mTCalib.mCalib.offset[i];
-         }
-
-         // apply horizontal trigger position correction
-         if (mTimeCalib3 && bValid) {
-            bool bFound = false;
-            double dt_min = 1;
-            for (int i=4 ; i<1020 ; i++) {
-               for (int c=0 ; c<16 ; c++) {
-                  if ((GetEventRequestMask(ev->mBoardId) & (1 << c)) == 0)
-                     continue;
-                  
-                  double tl = wdb->GetDacTriggerLevelV(c);
-                  if (wdb->IsTriggerFallingEdge()) {
-                     if ((GetEventRequestMask(ev->mBoardId) & (1 << c)) > 0) {
-                        // falling edge
-                        if (ev->mWfU[c][i] > tl && ev->mWfU[c][i+1] <= tl) {
-                           double t0 = ev->mWfT[c][i] +
-                             (ev->mWfT[c][i+1]-ev->mWfT[c][i])*(tl-ev->mWfU[c][i])/(ev->mWfU[c][i+1]-ev->mWfU[c][i]);
-                           double dt = t0 - (1024*1E-6/wdb->GetDrsSampleFreq() - 30E-9 - wdb->GetTriggerDelayNs() * 1E-9);
-                           if (fabs(dt) < fabs(dt_min))
-                              dt_min = dt;
-                           bFound = true;
-                        }
-                     }
-                  } else {
-                     // rising edge
-                     if (ev->mWfU[c][i] < tl && ev->mWfU[c][i+1] >= tl) {
+               ev->mWfT[i][j] -= wdb->mTCalib.mCalib.offset[i];
+      }
+      
+      // apply horizontal trigger position correction
+      if (mTimeCalib3 && bValid) {
+         bool bFound = false;
+         double dt_min = 1;
+         for (int i=4 ; i<1020 ; i++) {
+            for (int c=0 ; c<16 ; c++) {
+               if ((GetEventRequestMask(ev->mBoardId) & (1 << c)) == 0)
+                  continue;
+               
+               double tl = wdb->GetDacTriggerLevelV(c);
+               if (wdb->IsTriggerFallingEdge()) {
+                  if ((GetEventRequestMask(ev->mBoardId) & (1 << c)) > 0) {
+                     // falling edge
+                     if (ev->mWfU[c][i] > tl && ev->mWfU[c][i+1] <= tl) {
                         double t0 = ev->mWfT[c][i] +
-                          (ev->mWfT[c][i+1]-ev->mWfT[c][i])*(tl-ev->mWfU[c][i])/(ev->mWfU[c][i+1]-ev->mWfU[c][i]);
+                        (ev->mWfT[c][i+1]-ev->mWfT[c][i])*(tl-ev->mWfU[c][i])/(ev->mWfU[c][i+1]-ev->mWfU[c][i]);
                         double dt = t0 - (1024*1E-6/wdb->GetDrsSampleFreq() - 30E-9 - wdb->GetTriggerDelayNs() * 1E-9);
                         if (fabs(dt) < fabs(dt_min))
                            dt_min = dt;
                         bFound = true;
                      }
                   }
+               } else {
+                  // rising edge
+                  if (ev->mWfU[c][i] < tl && ev->mWfU[c][i+1] >= tl) {
+                     double t0 = ev->mWfT[c][i] +
+                     (ev->mWfT[c][i+1]-ev->mWfT[c][i])*(tl-ev->mWfU[c][i])/(ev->mWfU[c][i+1]-ev->mWfU[c][i]);
+                     double dt = t0 - (1024*1E-6/wdb->GetDrsSampleFreq() - 30E-9 - wdb->GetTriggerDelayNs() * 1E-9);
+                     if (fabs(dt) < fabs(dt_min))
+                        dt_min = dt;
+                     bFound = true;
+                  }
                }
             }
-            if (bFound) {
-               for (int i=0 ; i<WD_N_CHANNELS ; i++)
-                  for (int j=0 ; j<1024 ; j++)
-                     ev->mWfT[i][j] -= (float)dt_min;
-            }
+         }
+         if (bFound) {
+            for (int i=0 ; i<WD_N_CHANNELS ; i++)
+               for (int j=0 ; j<1024 ; j++)
+                  ev->mWfT[i][j] -= (float)dt_min;
          }
       }
    }
@@ -3455,9 +3463,10 @@ void WP::Collector()
       
          // do various calibrations
          if (!mRotateWaveform)
-           UnrotateWaveforms();
+            UnrotateWaveforms();
          
-         CalibrateWaveforms(mEvent);
+         if (mCalibrateWaveform)
+            CalibrateWaveforms(mEvent);
          
          if (li.fh != 0 || li.xml != NULL)
             SaveWaveforms();
