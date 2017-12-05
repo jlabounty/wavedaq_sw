@@ -19,6 +19,7 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include <map>
 #include "averager.h"
 #include "mxml.h"
 
@@ -263,6 +264,7 @@ class WP {
    bool              mDemoMode;
   
    std::vector<WDB*> mWdb;
+   std::map<int, WDB*> mWdbMap;
 
    bool              mRotateWaveform;
    bool              mOfsCalib1;
@@ -298,9 +300,8 @@ class WP {
    int               ReceiveWfPacket();
    bool              AllPacketsReceived();
    void              UnrotateWaveforms();
-   void              CalibrateWaveforms();
+   void              CalibrateWaveforms(std::vector<WDEvent *> event);
    void              RemoveSpikes(int tc, float wf[][1024]);
-   //   void              LogWaveforms();
    std::chrono::time_point<std::chrono::high_resolution_clock> mEventStartTime;
    
    CALIB_PROGRESS    calibProg;

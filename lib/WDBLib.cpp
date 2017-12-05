@@ -2313,6 +2313,10 @@ WP::WP(std::vector<WDB *> w, int verbose, std::string logfile, bool demo)
    mDemoMode = demo;
    mWdb = w;
    
+   // build mapping WDB id -> wdb
+   for (auto &b: mWdb)
+      mWdbMap[b->GetSerialNumber()] = b;
+   
    mRotateWaveform = true;
    mOfsCalib1 = false;
    mOfsCalib2 = false;
@@ -2396,10 +2400,7 @@ unsigned int WP::GetEventRequestMask(int board_id)
 
 WDB* WP::GetBoard(int board_id)
 {
-   for (auto &b: mWdb)
-      if ((int)b->GetSerialNumber() == board_id)
-         return b;
-   return 0;
+   return mWdbMap.at(board_id);
 }
 
 void WP::RequestBoard(WDB *b)
@@ -2919,19 +2920,13 @@ void WP::RemoveSpikes(int trigger_cell, float wf[][1024])
 
 //--------------------------------------------------------------------
 
-void WP::CalibrateWaveforms()
+void WP::CalibrateWaveforms(std::vector<WDEvent *> event)
 {
-   for (auto it = mEvent.begin() ; it != mEvent.end() ; it++) {
+   for (auto it = event.begin() ; it != event.end() ; it++) {
       auto ev = (*it);
       
       // search board belonging to this event
-      WDB* wdb = nullptr;
-      for (auto b: mWdb)
-         if (b->GetSerialNumber() == ev->mBoardId) {
-            wdb = b;
-            break;
-         }
-      assert(wdb);
+      WDB* wdb = WP::GetBoard(ev->mBoardId);
       
       if (ev->mWFTypeADC) { //---------- calibrate ADC data ----------
          
@@ -3462,7 +3457,7 @@ void WP::Collector()
          if (!mRotateWaveform)
            UnrotateWaveforms();
          
-         CalibrateWaveforms();
+         CalibrateWaveforms(mEvent);
          
          if (li.fh != 0 || li.xml != NULL)
             SaveWaveforms();
