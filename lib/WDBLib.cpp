@@ -2523,6 +2523,10 @@ int WP::ReceiveWfPacket()
    struct timeval timeout;
    int status;
    
+   // start event timer for debugging
+   if (mCurrentEvent == -1)
+      mEventStartTime = std::chrono::high_resolution_clock::now();
+   
    FD_ZERO(&readfds);
    FD_SET(WP::gDataSocket, &readfds);
    
@@ -2585,9 +2589,6 @@ int WP::ReceiveWfPacket()
    while (str.size() < 20)
       str += " ";
    
-   if (mCurrentEvent == -1)
-      mEventStartTime = std::chrono::high_resolution_clock::now();
-
    if (mLogfile != "") {
       std::ofstream f;
       char line[256];
