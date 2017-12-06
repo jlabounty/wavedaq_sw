@@ -2580,9 +2580,6 @@ int WP::ReceiveWfPacket()
    ph->temperature              = SWAP_UINT16(ph->temperature);
    ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
    
-   if (ph->event_number % 100 == 0 && header_channel == 7)
-      return SUCCESS;
-
    mPacketsReceived++;
    
    if (mLogfile != "") {

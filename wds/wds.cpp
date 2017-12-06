@@ -740,7 +740,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          }
          
          // read waveforms
-         bNewEvent = gl->wp->GetLastEvent(gl->wdb[b], 1000, event);
+         bNewEvent = gl->wp->GetLastEvent(gl->wdb[b], 100, event);
       }
       
       if (gl->demoMode)
