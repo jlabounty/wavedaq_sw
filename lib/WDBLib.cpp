@@ -2580,25 +2580,21 @@ int WP::ReceiveWfPacket()
    ph->temperature              = SWAP_UINT16(ph->temperature);
    ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
    
+   if (ph->event_number % 100 == 0 && header_channel == 7)
+      return SUCCESS;
+
    mPacketsReceived++;
-   mWDEvents = ph->event_number; // derive number of sent WD events from header
-   
-   std::string str(inet_ntoa(remote_addr.sin_addr));
-   str += ":";
-   str += std::to_string(ntohs(remote_addr.sin_port));
-   while (str.size() < 20)
-      str += " ";
    
    if (mLogfile != "") {
       std::ofstream f;
       char line[256];
       f.open(mLogfile, std::ios_base::app);
       
-      sprintf(line, "%06dus #%04d from WD%03d (%s), EN=%5d PT=%d A/C/S=%d/%d/%d TC=%04d/%04d T=%1.1lf\n",
+      sprintf(line, "%06dus #%04d from WD%03d, SZ=%3d EN=%5d PT=%d A/C/S=%d/%d/%d TC=%04d/%04d T=%1.1lf\n",
               usSince(mEventStartTime),
               mPacketsReceived-1,
               ph->board_id,
-              str.c_str(),
+              n,
               ph->event_number,
               package_type,
               header_adc,
@@ -2609,12 +2605,21 @@ int WP::ReceiveWfPacket()
               ph->temperature*0.0625);
       
       f << line;
+      
+      if (mVerbose >= 3)
+         std::cout << line << std::endl;
    }
    
    // drop package (for now...) if it is not event data
    if (package_type != 0) {
       std::cerr << "Package dropped, package type=" << package_type << ", "
       << "board id = " << ph->board_id << std::endl;
+      if (mLogfile != "") {
+         std::ofstream f;
+         f.open(mLogfile, std::ios_base::app);
+         f << "Package dropped, package type=" << package_type << ", "
+         << "board id = " << ph->board_id << std::endl;
+      }
       return 0;
    }
    
@@ -2682,6 +2687,10 @@ int WP::ReceiveWfPacket()
          << "board id=" << ph->board_id << std::endl;
       }
       
+      // count dropped packets
+      if (ph->event_number > mLastEventNumber)
+         mWDDroppedEvents = (ph->event_number - mLastEventNumber);
+      
       // switch to new event
       InvalidateAllWf();
       mCurrentEvent = ph->event_number;
@@ -2716,10 +2725,12 @@ int WP::ReceiveWfPacket()
       return 0;
    }
    
-   event->SetEventHeaderInfo(ph);
+   if (mPacketsReceived == 1)
+      event->SetEventHeaderInfo(ph);
    event->mVCalibrated = false;
    event->mTCalibrated = false;
-   
+   mLastEventNumber = ph->event_number;
+
    // decode waveform data
    auto pd = (unsigned char*)(ph+1);
    for (int i=0 ; i<512 ; i+=2) {
@@ -2741,22 +2752,6 @@ int WP::ReceiveWfPacket()
       }
    }
    
-   if (mVerbose >= 3){
-      printf("%06dus #%04d from WD%03d (%s), EN=%5d PT=%d A/C/S=%d/%d/%d TC=%04d/%04d T=%1.1lf\n",
-              usSince(mEventStartTime),
-              mPacketsReceived-1,
-              ph->board_id,
-              str.c_str(),
-              ph->event_number,
-              package_type,
-              header_adc,
-              header_channel,
-              channel_segment,
-              ph->drs0_trigger_cell,
-              ph->drs1_trigger_cell,
-              ph->temperature*0.0625);
-   }
-
    return SUCCESS;
 }
 

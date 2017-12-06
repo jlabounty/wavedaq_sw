@@ -331,9 +331,10 @@ class WP {
    void              CalibrateLocal(WDEvent *, WDB *);
    void              CalibrateGlobal(WDEvent *, WDB *);
    
-   unsigned int      mWDEvents;
    unsigned int      mWDReceivedEvents;
-   
+   unsigned int      mWDDroppedEvents;
+   unsigned int      mLastEventNumber;
+
 public:
    enum { cLiFormatBinary = 1, cLiFormatXML = 2};
 
@@ -412,9 +413,9 @@ public:
    unsigned int GetNLogged() { return li.nLogged; }
    void SaveWaveforms();
    
-   void ResetStatistics() { mWDEvents = mWDReceivedEvents = 0; }
-   int GetWDEvents() { return mWDEvents; }
+   void ResetStatistics() { mLastEventNumber = mWDReceivedEvents = mWDDroppedEvents = 0; }
    int GetWDReceivedEvents() { return mWDReceivedEvents; }
+   int GetWDDroppedEvents() { return mWDDroppedEvents; }
 };
 
 //--------------------------------------------------------------------
