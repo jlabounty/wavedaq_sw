@@ -2722,8 +2722,7 @@ int WP::ReceiveWfPacket()
       return 0;
    }
    
-   if (mPacketsReceived == 1)
-      event->SetEventHeaderInfo(ph);
+   event->SetEventHeaderInfo(ph);
    event->mVCalibrated = false;
    event->mTCalibrated = false;
    mLastEventNumber = ph->event_number;
