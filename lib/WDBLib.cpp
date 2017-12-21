@@ -2530,7 +2530,7 @@ int WP::ReceiveWfPacket()
    FD_ZERO(&readfds);
    FD_SET(WP::gDataSocket, &readfds);
    
-   timeout.tv_sec = 1;
+   timeout.tv_sec = 5;
    timeout.tv_usec = 0;
    
    do {
