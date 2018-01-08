@@ -952,11 +952,22 @@ int TCB::CheckSerdes(){
 
    //build masks
    u_int32_t errormask[4] = { 0 };
-   for(int i=0; i<16; i++){
-      int mask = 1<<i;
-      if( data & mask ){
-        //channel enable
-        errormask[i/4] |= 0xFF << 8*(i%4);
+   if((fidcode>>12)==2){
+      //TCB2 different serdes mask
+      for(int i=0; i<4; i++){
+         int mask = 1<<(i+16);
+         if( data & mask ){
+            //channel enable
+            errormask[i/4] |= 0xFF << 8*(i%4);
+         }
+      }
+   } else {
+      for(int i=0; i<16; i++){
+         int mask = 1<<i;
+         if( data & mask ){
+            //channel enable
+            errormask[i/4] |= 0xFF << 8*(i%4);
+         }
       }
    }
 
