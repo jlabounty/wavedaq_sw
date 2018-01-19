@@ -19,10 +19,12 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include <map>
 #include "averager.h"
 #include "mxml.h"
 
 #define WD_N_CHANNELS 18
+#define SUCCESS        1
 
 class WDB;
 
@@ -258,11 +260,14 @@ class WP {
    static int        gServerPort;
 
    int               mVerbose;
+   std::string       mLogfile;
    bool              mDemoMode;
   
    std::vector<WDB*> mWdb;
+   std::map<int, WDB*> mWdbMap;
 
    bool              mRotateWaveform;
+   bool              mCalibrateWaveform;
    bool              mOfsCalib1;
    bool              mOfsCalib2;
    bool              mGainCalib;
@@ -291,13 +296,13 @@ class WP {
    bool              mEventNew;
    bool              mEventEmpty;
 
+   unsigned int      usSince(std::chrono::time_point<std::chrono::high_resolution_clock> start);
    void              InvalidateAllWf();
-   void              ReceiveWfPacket();
+   int               ReceiveWfPacket();
    bool              AllPacketsReceived();
-   void              RotateWaveforms();
-   void              CalibrateWaveforms();
+   void              UnrotateWaveforms();
    void              RemoveSpikes(int tc, float wf[][1024]);
-   //   void              LogWaveforms();
+   std::chrono::time_point<std::chrono::high_resolution_clock> mEventStartTime;
    
    CALIB_PROGRESS    calibProg;
    
@@ -326,14 +331,15 @@ class WP {
    void              CalibrateLocal(WDEvent *, WDB *);
    void              CalibrateGlobal(WDEvent *, WDB *);
    
-   unsigned int      mWDEvents;
    unsigned int      mWDReceivedEvents;
-   
+   unsigned int      mWDDroppedEvents;
+   unsigned int      mLastEventNumber;
+
 public:
    enum { cLiFormatBinary = 1, cLiFormatXML = 2};
 
    // constructor
-   WP(std::vector<WDB*> w, int verbose = 0, bool demo = false);
+   WP(std::vector<WDB*> w, int verbose = 0, std::string logfile = "", bool demo = false);
    
    // setter & getter
    int GetDataSocket() { return gDataSocket; }
@@ -341,6 +347,7 @@ public:
    bool IsVerbose() { return mVerbose; }
    bool IsDemoMode() { return mDemoMode; }
    bool IsRotateWaveform() { return mRotateWaveform;}
+   bool IsCalibrateWaveform() { return mCalibrateWaveform;}
    bool IsOfsCalib1() { return mOfsCalib1;}
    bool IsOfsCalib2() { return mOfsCalib2;}
    bool IsGainCalib() { return mGainCalib;}
@@ -351,6 +358,7 @@ public:
    bool IsRemoveSpikes() { return mRemoveSpikes; }
 
    void SetRotateWaveform(bool f) { mRotateWaveform = f; }
+   void SetCalibrateWaveform(bool f) { mCalibrateWaveform = f; }
    void SetOfsCalib1(bool f) { mOfsCalib1 = f; }
    void SetOfsCalib2(bool f) { mOfsCalib2 = f; }
    void SetGainCalib(bool f) { mGainCalib = f; }
@@ -384,6 +392,9 @@ public:
    bool GetLastEvent(int timeout, std::vector<WDEvent *> event);
    bool RequestEvent(WDB* b, int timeout, WDEvent& event);
    
+   void CalibrateWaveforms(WDEvent* event);
+   void CalibrateWaveforms(std::vector<WDEvent *> event);
+
    void StartCalibrationVoltage(int b) {
       calibProg.mode = cCmVoltage;
       calibProg.nBoard = (b == -1) ? mWdb.size() : b+1;
@@ -402,9 +413,9 @@ public:
    unsigned int GetNLogged() { return li.nLogged; }
    void SaveWaveforms();
    
-   void ResetStatistics() { mWDEvents = mWDReceivedEvents = 0; }
-   int GetWDEvents() { return mWDEvents; }
+   void ResetStatistics() { mLastEventNumber = mWDReceivedEvents = mWDDroppedEvents = 0; }
    int GetWDReceivedEvents() { return mWDReceivedEvents; }
+   int GetWDDroppedEvents() { return mWDDroppedEvents; }
 };
 
 //--------------------------------------------------------------------
@@ -416,6 +427,7 @@ class WDB {
    unsigned char    mEthAddrAscii[16];
    unsigned char    mEthAddrBin[16];
    int              mVerbose;
+   std::string      mLogfile;
    bool             mDemoMode;
    bool             mSendBlocked;
 
@@ -439,6 +451,7 @@ public:
       mName = name;
       mPrompt = "";
       mVerbose = verbose;
+      mLogfile = "";
       mDemoMode = (name == "demo");
       mSendBlocked = false;
    }
@@ -481,12 +494,13 @@ public:
    
    // interface functions
    void SetVerbose(int verbose) { mVerbose = verbose; }
+   void SetLogFile(std::string logfile) { mLogfile = logfile; }
    void Connect();
    void SetDestinationPort(int port);
    void ReceiveControlRegisters(unsigned int index=0, unsigned int nReg=REG_NR_OF_CTRL_REGS);
    void ReceiveStatusRegisters(unsigned int index=0, unsigned int nReg=REG_NR_OF_STAT_REGS);
    void ReceiveStatusRegister(int ofs);
-   void SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v, bool send=true);
+   void SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v, bool send=true, int timeout_ms = 250);
    void SendControlRegisters();
    void PrintVersion();
    void SetSendBlocked(bool f) { mSendBlocked = f; }
@@ -596,6 +610,7 @@ public:
    void ResetDcbOserdesIf();
    void ResetTcbOserdesPll();
    void ResetTcbOserdesIf();
+   void ResetAllPll();
    void ResetScaler();
    void ResetTriggerParityErrorCounter();
    void LmkSyncLocal();

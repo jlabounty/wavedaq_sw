@@ -24,8 +24,8 @@ int main(int argc, char *argv[])
    char opline[256];
    u_int32_t data, scanfdata;
    u_int32_t trgtype, tpattern;
-   FILE *filin, *filout, *filpresca;
-   u_int32_t presca[128], counters[128];
+   FILE *filin, *filout, *filpresca, *filtrgdly;
+   u_int32_t presca[128], counters[128], trgdly[128];
    //  clock_t t_before, t_after;
    if(argc != 3) {
       printf("Please indicate the mscb connection ID and node...\n");
@@ -65,7 +65,8 @@ int main(int argc, char *argv[])
       printf("[29]: Automatic Serdes cal \t \t  [30]: Dump Data \n");
       printf("[31]: Packetizer Commands  \t \t  [32]: Buffer Commands\n");
       printf("[33]: Reset PLL            \t \t  [34]: Reset PLL unlock cou\n");
-      printf("[35]: Read Unlock counter  \t \t  [-1]: Exit\n");
+      printf("[35]: Read Unlock counter  \t \t  [36]: Get prescaling\n");             printf("[37]: Set trigger delay    \t \t  [38]: Get trigger delay\n");
+      printf("[-1]: Exit\n");
 
       do {
          printf("Give an option: ");
@@ -562,6 +563,26 @@ int main(int argc, char *argv[])
         TCBBoard.GetPLLUnlockCou(rpcou);
 	printf(" PLL unlock counter value: %d\n", *rpcou);
       }
+      //
+      if(option == 36) {
+	printf(" opt = 36 : Get precaling values (from presca.dat file) ... \n");
+	TCBBoard.GetPrescaling(presca);
+	for(int irow = 0; irow<TCBBoard.fntrg; irow++) printf("%x\n", presca[irow]);
+      }
+      //
+      if(option == 37) {
+	printf(" opt = 37 : Set trigger delay values (from trgdly.dat file) ... \n");
+	filtrgdly = fopen("trgdly.dat", "read");
+	for(int irow = 0; irow<TCBBoard.fntrg; irow++) fscanf(filtrgdly,"%x\n",trgdly+irow);
+	TCBBoard.SetTRGDLY(trgdly);
+      }
+      //
+      if(option == 38) {
+	printf(" opt = 38 : Get trigger delay values (from trgdly.dat file) ... \n");
+	TCBBoard.GetTRGDLY(trgdly);
+	for(int irow = 0; irow<TCBBoard.fntrg; irow++) printf("%x\n", trgdly[irow]);
+      }
+      
 
       /* end of the main loop on the options*/
    } while ( option >= 0);

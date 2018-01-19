@@ -157,7 +157,7 @@ function init() {
 
    // load spinning wheel image
    OSC.spinningWheel = new Image();
-   OSC.spinningWheel.src = "spinning-wheel.gif";
+   OSC.spinningWheel.src = "spinning-wheel-wds.gif";
 }
 
 function loadWdb() {
@@ -176,7 +176,7 @@ function loadWdb() {
 function connectionBroken() {
    if (OSC.connected) {
       OSC.dlgReconnect = dlgMessage("Error", "Connection to server broken.<br>Trying to reconnect ..." +
-         "<br /><br /><br /><img src=\"spinning-wheel.gif\">", true, true);
+         "<br /><br /><br /><img src=\"spinning-wheel-wds.gif\">", true, true);
       var b = document.getElementById("dlgMessageButton");
       b.innerHTML = "Cancel";
       OSC.connected = false;

@@ -237,24 +237,29 @@ void TCB::WriteBLT(u_int32_t addr, u_int32_t *data, int nword)
 // prescaling values setting
 void TCB::SetPrescaling(u_int32_t *presca)
 {
+  int NBLT = (fntrg-1)/BLTSIZE + 1;
+  int addr = RPRESCA;
   if ((fidcode>>12)!=3) {
      printf("setting prescaling on TCB %4x!!!!! skipped\n", fidcode);
      return;
+  }   // now loop to write prescaling values
+  for (int iblt = 0; iblt<NBLT; iblt++) {
+    WriteBLT(addr+(iblt*BLTSIZE),presca+(iblt*BLTSIZE), BLTSIZE);
   }
-   for (int ireg=0; ireg<fntrg; ireg++)
-      WriteReg(RPRESCA+ireg,presca+ireg);
 }
-
 // read prescaling values
 void TCB::GetPrescaling(u_int32_t *presca)
 {
    //read loop on prescaling registers
+  int NBLT = (fntrg-1)/BLTSIZE+1;
+  int addr = RPRESCA;
   if ((fidcode>>12)!=3) {
-     printf("setting prescaling on TCB %4x!!!!! skipped\n", fidcode);
+     printf("getting prescaling on TCB %4x!!!!! skipped\n", fidcode);
      return;
+  }   // now loop to read prescaling values
+  for (int iblt = 0; iblt<NBLT; iblt++) {
+    ReadBLT(addr+(iblt*BLTSIZE),presca+(iblt*BLTSIZE), BLTSIZE);
   }
-   for (int ireg = 0; ireg<fntrg; ireg++)
-      ReadReg(RPRESCA+ireg,presca+ireg);
 }
 
 //Set IDCode by accessing to rrun register
@@ -316,7 +321,6 @@ void TCB::WriteMemoryBLT(int which, u_int32_t *data)
    addr = MEMBASEADDR + which*MEMDIM;
 
    //calculate number of BLT (each is 64 words)
-   int BLTSIZE = 32;
    int NBLT = MEMDIM/BLTSIZE;
 
    // now loop to write the memory cells
@@ -355,7 +359,6 @@ void TCB::ReadMemoryBLT(int which, u_int32_t *data)
    addr = MEMBASEADDR + which*MEMDIM;
 
    //calculate number of BLT (each is 64 words)
-   int BLTSIZE = 32;
    int NBLT = MEMDIM/BLTSIZE;
 
    // now loop to write the memory cells
@@ -559,9 +562,9 @@ bool TCB::GetSystemTriggerType(u_int32_t *type)
 // read trigger counters
 void TCB::GetTriggerCounters(u_int32_t *data)
 {
-    int ncycle = (fntrg-1)/32 + 1;
+    int ncycle = (fntrg-1)/BLTSIZE + 1;
     for(int icycle = 0; icycle<ncycle; icycle++)
-      ReadBLT(RTRGCOU+icycle*32,data+icycle*32,32);
+      ReadBLT(RTRGCOU+icycle*BLTSIZE,data+icycle*BLTSIZE,BLTSIZE);
 }
 
 // read memory address
@@ -949,11 +952,22 @@ int TCB::CheckSerdes(){
 
    //build masks
    u_int32_t errormask[4] = { 0 };
-   for(int i=0; i<16; i++){
-      int mask = 1<<i;
-      if( data & mask ){
-        //channel enable
-        errormask[i/4] |= 0xFF << 8*(i%4);
+   if((fidcode>>12)==2){
+      //TCB2 different serdes mask
+      for(int i=0; i<4; i++){
+         int mask = 1<<(i+16);
+         if( data & mask ){
+            //channel enable
+            errormask[i/4] |= 0xFF << 8*(i%4);
+         }
+      }
+   } else {
+      for(int i=0; i<16; i++){
+         int mask = 1<<i;
+         if( data & mask ){
+            //channel enable
+            errormask[i/4] |= 0xFF << 8*(i%4);
+         }
       }
    }
 
@@ -1105,7 +1119,6 @@ void TCB::SetPacketizerCommandAt(int offset, PACKETIZER_COMMAND cmd, u_int32_t a
 //Read current buffer
 void TCB::ReadBuffer(u_int32_t* ptr, int size, int offset){
    int read = 0;
-   const int BLTSIZE = 32;
    while (read < size){
       if((size-read) > BLTSIZE){
          ReadBLT(BUFFERBASE+read+offset, ptr, BLTSIZE);
@@ -1167,4 +1180,28 @@ void TCB::GetPLLUnlockCou(u_int32_t *data){
 void TCB::ResetPLLUnlockCou(){
    u_int32_t data = 0x00000002;
    WriteReg(RPLLRES, &data);
+}
+// set trigger delay
+void TCB::SetTRGDLY(u_int32_t *dly){
+  int NBLT = (fntrg-1)/BLTSIZE+1;
+  int addr = RTRGDLY;
+  if ((fidcode>>12)!=3) {
+     printf("setting trigger delays on TCB %4x!!!!! skipped\n", fidcode);
+     return;
+  }   // now loop to write trigger delay values
+  for (int iblt = 0; iblt<NBLT; iblt++) {
+    WriteBLT(addr+(iblt*BLTSIZE),dly+(iblt*BLTSIZE), BLTSIZE);
+  }
+}
+// get trigger delay
+void TCB::GetTRGDLY(u_int32_t *dly){
+  int NBLT = (fntrg-1)/BLTSIZE+1;
+  int addr = RTRGDLY;
+  if ((fidcode>>12)!=3) {
+     printf("getting trigger delays on TCB %4x!!!!! skipped\n", fidcode);
+     return;
+  }   // now loop to read trigger delay values
+  for (int iblt = 0; iblt<NBLT; iblt++) {
+    ReadBLT(addr+(iblt*BLTSIZE),dly+(iblt*BLTSIZE), BLTSIZE);
+  }
 }
