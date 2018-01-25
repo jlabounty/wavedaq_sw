@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  25.01.2018 12:42:15
+// Created :  25.01.2018 16:39:38
 //
 
 
@@ -1137,161 +1137,161 @@ public:
    unsigned int GetLmk0Reset() { return BitExtractControl(WD2_LMK0_RESET_REG, WD2_LMK0_RESET_MASK, WD2_LMK0_RESET_OFS); };
    void         SetLmk0Reset(unsigned int value) { SetRegMask(WD2_LMK0_RESET_REG, WD2_LMK0_RESET_MASK, WD2_LMK0_RESET_OFS, value); };
 
-   // 0x00060000: LMK0_CLKOUT0_MUX - Channel 0 Clock Output Multiplexer (see datasheet)
-   unsigned int GetLmk0Clkout0Mux() { return BitExtractControl(WD2_LMK0_CLKOUT0_MUX_REG, WD2_LMK0_CLKOUT0_MUX_MASK, WD2_LMK0_CLKOUT0_MUX_OFS); };
-   void         SetLmk0Clkout0Mux(unsigned int value) { SetRegMask(WD2_LMK0_CLKOUT0_MUX_REG, WD2_LMK0_CLKOUT0_MUX_MASK, WD2_LMK0_CLKOUT0_MUX_OFS, value); };
+   // 0x00060000: LMK0_CLKOUT_MUX - Channel 0 Clock Output Multiplexer (see datasheet)
+   unsigned int GetLmk0ClkoutMux() { return BitExtractControl(WD2_LMK0_CLKOUT_MUX_REG, WD2_LMK0_CLKOUT_MUX_MASK, WD2_LMK0_CLKOUT_MUX_OFS); };
+   void         SetLmk0ClkoutMux(unsigned int value) { SetRegMask(WD2_LMK0_CLKOUT_MUX_REG, WD2_LMK0_CLKOUT_MUX_MASK, WD2_LMK0_CLKOUT_MUX_OFS, value); };
 
-   // 0x00010000: LMK0_CLKOUT0_EN - Channel 0 Clock Output Enable (0 = Disabled, 1 = Enabled)
-   unsigned int GetLmk0Clkout0En() { return BitExtractControl(WD2_LMK0_CLKOUT0_EN_REG, WD2_LMK0_CLKOUT0_EN_MASK, WD2_LMK0_CLKOUT0_EN_OFS); };
-   void         SetLmk0Clkout0En(unsigned int value) { SetRegMask(WD2_LMK0_CLKOUT0_EN_REG, WD2_LMK0_CLKOUT0_EN_MASK, WD2_LMK0_CLKOUT0_EN_OFS, value); };
+   // 0x00010000: LMK0_CLKOUT_EN - Channel 0 Clock Output Enable (0 = Disabled, 1 = Enabled)
+   unsigned int GetLmk0ClkoutEn() { return BitExtractControl(WD2_LMK0_CLKOUT_EN_REG, WD2_LMK0_CLKOUT_EN_MASK, WD2_LMK0_CLKOUT_EN_OFS); };
+   void         SetLmk0ClkoutEn(unsigned int value) { SetRegMask(WD2_LMK0_CLKOUT_EN_REG, WD2_LMK0_CLKOUT_EN_MASK, WD2_LMK0_CLKOUT_EN_OFS, value); };
 
-   // 0x0000FF00: LMK0_CLKOUT0_DIV - Channel 0 Clock Output Divider (value x 2) (1..255)
-   unsigned int GetLmk0Clkout0Div() { return BitExtractControl(WD2_LMK0_CLKOUT0_DIV_REG, WD2_LMK0_CLKOUT0_DIV_MASK, WD2_LMK0_CLKOUT0_DIV_OFS); };
-   void         SetLmk0Clkout0Div(unsigned int value) { SetRegMask(WD2_LMK0_CLKOUT0_DIV_REG, WD2_LMK0_CLKOUT0_DIV_MASK, WD2_LMK0_CLKOUT0_DIV_OFS, value); };
+   // 0x0000FF00: LMK0_CLKOUT_DIV - Channel 0 Clock Output Divider (value x 2) (1..255)
+   unsigned int GetLmk0ClkoutDiv() { return BitExtractControl(WD2_LMK0_CLKOUT_DIV_REG, WD2_LMK0_CLKOUT_DIV_MASK, WD2_LMK0_CLKOUT_DIV_OFS); };
+   void         SetLmk0ClkoutDiv(unsigned int value) { SetRegMask(WD2_LMK0_CLKOUT_DIV_REG, WD2_LMK0_CLKOUT_DIV_MASK, WD2_LMK0_CLKOUT_DIV_OFS, value); };
 
-   // 0x000000F0: LMK0_CLKOUT0_DLY - Channel 0 Clock Output Delay (value x 150ps)
-   unsigned int GetLmk0Clkout0Dly() { return BitExtractControl(WD2_LMK0_CLKOUT0_DLY_REG, WD2_LMK0_CLKOUT0_DLY_MASK, WD2_LMK0_CLKOUT0_DLY_OFS); };
-   void         SetLmk0Clkout0Dly(unsigned int value) { SetRegMask(WD2_LMK0_CLKOUT0_DLY_REG, WD2_LMK0_CLKOUT0_DLY_MASK, WD2_LMK0_CLKOUT0_DLY_OFS, value); };
+   // 0x000000F0: LMK0_CLKOUT_DLY - Channel 0 Clock Output Delay (value x 150ps)
+   unsigned int GetLmk0ClkoutDly() { return BitExtractControl(WD2_LMK0_CLKOUT_DLY_REG, WD2_LMK0_CLKOUT_DLY_MASK, WD2_LMK0_CLKOUT_DLY_OFS); };
+   void         SetLmk0ClkoutDly(unsigned int value) { SetRegMask(WD2_LMK0_CLKOUT_DLY_REG, WD2_LMK0_CLKOUT_DLY_MASK, WD2_LMK0_CLKOUT_DLY_OFS, value); };
 
 
 
    ////// ------ Control Register 56 [0x10E0]: LMK_1 - LMK Register 1 (Default: 0x00020101) ------ //////
 
-   // 0x00060000: LMK1_CLKOUT1_MUX - Channel 1 Clock Output Multiplexer (see datasheet)
-   unsigned int GetLmk1Clkout1Mux() { return BitExtractControl(WD2_LMK1_CLKOUT1_MUX_REG, WD2_LMK1_CLKOUT1_MUX_MASK, WD2_LMK1_CLKOUT1_MUX_OFS); };
-   void         SetLmk1Clkout1Mux(unsigned int value) { SetRegMask(WD2_LMK1_CLKOUT1_MUX_REG, WD2_LMK1_CLKOUT1_MUX_MASK, WD2_LMK1_CLKOUT1_MUX_OFS, value); };
+   // 0x00060000: LMK1_CLKOUT_MUX - Channel 1 Clock Output Multiplexer (see datasheet)
+   unsigned int GetLmk1ClkoutMux() { return BitExtractControl(WD2_LMK1_CLKOUT_MUX_REG, WD2_LMK1_CLKOUT_MUX_MASK, WD2_LMK1_CLKOUT_MUX_OFS); };
+   void         SetLmk1ClkoutMux(unsigned int value) { SetRegMask(WD2_LMK1_CLKOUT_MUX_REG, WD2_LMK1_CLKOUT_MUX_MASK, WD2_LMK1_CLKOUT_MUX_OFS, value); };
 
-   // 0x00010000: LMK1_CLKOUT1_EN - Channel 1 Clock Output Enable (0 = Disabled, 1 = Enabled)
-   unsigned int GetLmk1Clkout1En() { return BitExtractControl(WD2_LMK1_CLKOUT1_EN_REG, WD2_LMK1_CLKOUT1_EN_MASK, WD2_LMK1_CLKOUT1_EN_OFS); };
-   void         SetLmk1Clkout1En(unsigned int value) { SetRegMask(WD2_LMK1_CLKOUT1_EN_REG, WD2_LMK1_CLKOUT1_EN_MASK, WD2_LMK1_CLKOUT1_EN_OFS, value); };
+   // 0x00010000: LMK1_CLKOUT_EN - Channel 1 Clock Output Enable (0 = Disabled, 1 = Enabled)
+   unsigned int GetLmk1ClkoutEn() { return BitExtractControl(WD2_LMK1_CLKOUT_EN_REG, WD2_LMK1_CLKOUT_EN_MASK, WD2_LMK1_CLKOUT_EN_OFS); };
+   void         SetLmk1ClkoutEn(unsigned int value) { SetRegMask(WD2_LMK1_CLKOUT_EN_REG, WD2_LMK1_CLKOUT_EN_MASK, WD2_LMK1_CLKOUT_EN_OFS, value); };
 
-   // 0x0000FF00: LMK1_CLKOUT1_DIV - Channel 1 Clock Output Divider (value x 2) (1..255)
-   unsigned int GetLmk1Clkout1Div() { return BitExtractControl(WD2_LMK1_CLKOUT1_DIV_REG, WD2_LMK1_CLKOUT1_DIV_MASK, WD2_LMK1_CLKOUT1_DIV_OFS); };
-   void         SetLmk1Clkout1Div(unsigned int value) { SetRegMask(WD2_LMK1_CLKOUT1_DIV_REG, WD2_LMK1_CLKOUT1_DIV_MASK, WD2_LMK1_CLKOUT1_DIV_OFS, value); };
+   // 0x0000FF00: LMK1_CLKOUT_DIV - Channel 1 Clock Output Divider (value x 2) (1..255)
+   unsigned int GetLmk1ClkoutDiv() { return BitExtractControl(WD2_LMK1_CLKOUT_DIV_REG, WD2_LMK1_CLKOUT_DIV_MASK, WD2_LMK1_CLKOUT_DIV_OFS); };
+   void         SetLmk1ClkoutDiv(unsigned int value) { SetRegMask(WD2_LMK1_CLKOUT_DIV_REG, WD2_LMK1_CLKOUT_DIV_MASK, WD2_LMK1_CLKOUT_DIV_OFS, value); };
 
-   // 0x000000F0: LMK1_CLKOUT1_DLY - Channel 1 Clock Output Delay (value x 150ps)
-   unsigned int GetLmk1Clkout1Dly() { return BitExtractControl(WD2_LMK1_CLKOUT1_DLY_REG, WD2_LMK1_CLKOUT1_DLY_MASK, WD2_LMK1_CLKOUT1_DLY_OFS); };
-   void         SetLmk1Clkout1Dly(unsigned int value) { SetRegMask(WD2_LMK1_CLKOUT1_DLY_REG, WD2_LMK1_CLKOUT1_DLY_MASK, WD2_LMK1_CLKOUT1_DLY_OFS, value); };
+   // 0x000000F0: LMK1_CLKOUT_DLY - Channel 1 Clock Output Delay (value x 150ps)
+   unsigned int GetLmk1ClkoutDly() { return BitExtractControl(WD2_LMK1_CLKOUT_DLY_REG, WD2_LMK1_CLKOUT_DLY_MASK, WD2_LMK1_CLKOUT_DLY_OFS); };
+   void         SetLmk1ClkoutDly(unsigned int value) { SetRegMask(WD2_LMK1_CLKOUT_DLY_REG, WD2_LMK1_CLKOUT_DLY_MASK, WD2_LMK1_CLKOUT_DLY_OFS, value); };
 
 
 
    ////// ------ Control Register 57 [0x10E4]: LMK_2 - LMK Register 2 (Default: 0x00020102) ------ //////
 
-   // 0x00060000: LMK2_CLKOUT2_MUX - Channel 2 Clock Output Multiplexer (see datasheet)
-   unsigned int GetLmk2Clkout2Mux() { return BitExtractControl(WD2_LMK2_CLKOUT2_MUX_REG, WD2_LMK2_CLKOUT2_MUX_MASK, WD2_LMK2_CLKOUT2_MUX_OFS); };
-   void         SetLmk2Clkout2Mux(unsigned int value) { SetRegMask(WD2_LMK2_CLKOUT2_MUX_REG, WD2_LMK2_CLKOUT2_MUX_MASK, WD2_LMK2_CLKOUT2_MUX_OFS, value); };
+   // 0x00060000: LMK2_CLKOUT_MUX - Channel 2 Clock Output Multiplexer (see datasheet)
+   unsigned int GetLmk2ClkoutMux() { return BitExtractControl(WD2_LMK2_CLKOUT_MUX_REG, WD2_LMK2_CLKOUT_MUX_MASK, WD2_LMK2_CLKOUT_MUX_OFS); };
+   void         SetLmk2ClkoutMux(unsigned int value) { SetRegMask(WD2_LMK2_CLKOUT_MUX_REG, WD2_LMK2_CLKOUT_MUX_MASK, WD2_LMK2_CLKOUT_MUX_OFS, value); };
 
-   // 0x00010000: LMK2_CLKOUT2_EN - Channel 2 Clock Output Enable (0 = Disabled, 1 = Enabled)
-   unsigned int GetLmk2Clkout2En() { return BitExtractControl(WD2_LMK2_CLKOUT2_EN_REG, WD2_LMK2_CLKOUT2_EN_MASK, WD2_LMK2_CLKOUT2_EN_OFS); };
-   void         SetLmk2Clkout2En(unsigned int value) { SetRegMask(WD2_LMK2_CLKOUT2_EN_REG, WD2_LMK2_CLKOUT2_EN_MASK, WD2_LMK2_CLKOUT2_EN_OFS, value); };
+   // 0x00010000: LMK2_CLKOUT_EN - Channel 2 Clock Output Enable (0 = Disabled, 1 = Enabled)
+   unsigned int GetLmk2ClkoutEn() { return BitExtractControl(WD2_LMK2_CLKOUT_EN_REG, WD2_LMK2_CLKOUT_EN_MASK, WD2_LMK2_CLKOUT_EN_OFS); };
+   void         SetLmk2ClkoutEn(unsigned int value) { SetRegMask(WD2_LMK2_CLKOUT_EN_REG, WD2_LMK2_CLKOUT_EN_MASK, WD2_LMK2_CLKOUT_EN_OFS, value); };
 
-   // 0x0000FF00: LMK2_CLKOUT2_DIV - Channel 2 Clock Output Divider (value x 2) (1..255)
-   unsigned int GetLmk2Clkout2Div() { return BitExtractControl(WD2_LMK2_CLKOUT2_DIV_REG, WD2_LMK2_CLKOUT2_DIV_MASK, WD2_LMK2_CLKOUT2_DIV_OFS); };
-   void         SetLmk2Clkout2Div(unsigned int value) { SetRegMask(WD2_LMK2_CLKOUT2_DIV_REG, WD2_LMK2_CLKOUT2_DIV_MASK, WD2_LMK2_CLKOUT2_DIV_OFS, value); };
+   // 0x0000FF00: LMK2_CLKOUT_DIV - Channel 2 Clock Output Divider (value x 2) (1..255)
+   unsigned int GetLmk2ClkoutDiv() { return BitExtractControl(WD2_LMK2_CLKOUT_DIV_REG, WD2_LMK2_CLKOUT_DIV_MASK, WD2_LMK2_CLKOUT_DIV_OFS); };
+   void         SetLmk2ClkoutDiv(unsigned int value) { SetRegMask(WD2_LMK2_CLKOUT_DIV_REG, WD2_LMK2_CLKOUT_DIV_MASK, WD2_LMK2_CLKOUT_DIV_OFS, value); };
 
-   // 0x000000F0: LMK2_CLKOUT2_DLY - Channel 2 Clock Output Delay (value x 150ps)
-   unsigned int GetLmk2Clkout2Dly() { return BitExtractControl(WD2_LMK2_CLKOUT2_DLY_REG, WD2_LMK2_CLKOUT2_DLY_MASK, WD2_LMK2_CLKOUT2_DLY_OFS); };
-   void         SetLmk2Clkout2Dly(unsigned int value) { SetRegMask(WD2_LMK2_CLKOUT2_DLY_REG, WD2_LMK2_CLKOUT2_DLY_MASK, WD2_LMK2_CLKOUT2_DLY_OFS, value); };
+   // 0x000000F0: LMK2_CLKOUT_DLY - Channel 2 Clock Output Delay (value x 150ps)
+   unsigned int GetLmk2ClkoutDly() { return BitExtractControl(WD2_LMK2_CLKOUT_DLY_REG, WD2_LMK2_CLKOUT_DLY_MASK, WD2_LMK2_CLKOUT_DLY_OFS); };
+   void         SetLmk2ClkoutDly(unsigned int value) { SetRegMask(WD2_LMK2_CLKOUT_DLY_REG, WD2_LMK2_CLKOUT_DLY_MASK, WD2_LMK2_CLKOUT_DLY_OFS, value); };
 
 
 
    ////// ------ Control Register 58 [0x10E8]: LMK_3 - LMK Register 3 (Default: 0x00000103) ------ //////
 
-   // 0x00060000: LMK3_CLKOUT3_MUX - Channel 3 Clock Output Multiplexer (see datasheet)
-   unsigned int GetLmk3Clkout3Mux() { return BitExtractControl(WD2_LMK3_CLKOUT3_MUX_REG, WD2_LMK3_CLKOUT3_MUX_MASK, WD2_LMK3_CLKOUT3_MUX_OFS); };
-   void         SetLmk3Clkout3Mux(unsigned int value) { SetRegMask(WD2_LMK3_CLKOUT3_MUX_REG, WD2_LMK3_CLKOUT3_MUX_MASK, WD2_LMK3_CLKOUT3_MUX_OFS, value); };
+   // 0x00060000: LMK3_CLKOUT_MUX - Channel 3 Clock Output Multiplexer (see datasheet)
+   unsigned int GetLmk3ClkoutMux() { return BitExtractControl(WD2_LMK3_CLKOUT_MUX_REG, WD2_LMK3_CLKOUT_MUX_MASK, WD2_LMK3_CLKOUT_MUX_OFS); };
+   void         SetLmk3ClkoutMux(unsigned int value) { SetRegMask(WD2_LMK3_CLKOUT_MUX_REG, WD2_LMK3_CLKOUT_MUX_MASK, WD2_LMK3_CLKOUT_MUX_OFS, value); };
 
-   // 0x00010000: LMK3_CLKOUT3_EN - Channel 3 Clock Output Enable (0 = Disabled, 1 = Enabled)
-   unsigned int GetLmk3Clkout3En() { return BitExtractControl(WD2_LMK3_CLKOUT3_EN_REG, WD2_LMK3_CLKOUT3_EN_MASK, WD2_LMK3_CLKOUT3_EN_OFS); };
-   void         SetLmk3Clkout3En(unsigned int value) { SetRegMask(WD2_LMK3_CLKOUT3_EN_REG, WD2_LMK3_CLKOUT3_EN_MASK, WD2_LMK3_CLKOUT3_EN_OFS, value); };
+   // 0x00010000: LMK3_CLKOUT_EN - Channel 3 Clock Output Enable (0 = Disabled, 1 = Enabled)
+   unsigned int GetLmk3ClkoutEn() { return BitExtractControl(WD2_LMK3_CLKOUT_EN_REG, WD2_LMK3_CLKOUT_EN_MASK, WD2_LMK3_CLKOUT_EN_OFS); };
+   void         SetLmk3ClkoutEn(unsigned int value) { SetRegMask(WD2_LMK3_CLKOUT_EN_REG, WD2_LMK3_CLKOUT_EN_MASK, WD2_LMK3_CLKOUT_EN_OFS, value); };
 
-   // 0x0000FF00: LMK3_CLKOUT3_DIV - Channel 3 Clock Output Divider (value x 2) (1..255)
-   unsigned int GetLmk3Clkout3Div() { return BitExtractControl(WD2_LMK3_CLKOUT3_DIV_REG, WD2_LMK3_CLKOUT3_DIV_MASK, WD2_LMK3_CLKOUT3_DIV_OFS); };
-   void         SetLmk3Clkout3Div(unsigned int value) { SetRegMask(WD2_LMK3_CLKOUT3_DIV_REG, WD2_LMK3_CLKOUT3_DIV_MASK, WD2_LMK3_CLKOUT3_DIV_OFS, value); };
+   // 0x0000FF00: LMK3_CLKOUT_DIV - Channel 3 Clock Output Divider (value x 2) (1..255)
+   unsigned int GetLmk3ClkoutDiv() { return BitExtractControl(WD2_LMK3_CLKOUT_DIV_REG, WD2_LMK3_CLKOUT_DIV_MASK, WD2_LMK3_CLKOUT_DIV_OFS); };
+   void         SetLmk3ClkoutDiv(unsigned int value) { SetRegMask(WD2_LMK3_CLKOUT_DIV_REG, WD2_LMK3_CLKOUT_DIV_MASK, WD2_LMK3_CLKOUT_DIV_OFS, value); };
 
-   // 0x000000F0: LMK3_CLKOUT3_DLY - Channel 3 Clock Output Delay (value x 150ps)
-   unsigned int GetLmk3Clkout3Dly() { return BitExtractControl(WD2_LMK3_CLKOUT3_DLY_REG, WD2_LMK3_CLKOUT3_DLY_MASK, WD2_LMK3_CLKOUT3_DLY_OFS); };
-   void         SetLmk3Clkout3Dly(unsigned int value) { SetRegMask(WD2_LMK3_CLKOUT3_DLY_REG, WD2_LMK3_CLKOUT3_DLY_MASK, WD2_LMK3_CLKOUT3_DLY_OFS, value); };
+   // 0x000000F0: LMK3_CLKOUT_DLY - Channel 3 Clock Output Delay (value x 150ps)
+   unsigned int GetLmk3ClkoutDly() { return BitExtractControl(WD2_LMK3_CLKOUT_DLY_REG, WD2_LMK3_CLKOUT_DLY_MASK, WD2_LMK3_CLKOUT_DLY_OFS); };
+   void         SetLmk3ClkoutDly(unsigned int value) { SetRegMask(WD2_LMK3_CLKOUT_DLY_REG, WD2_LMK3_CLKOUT_DLY_MASK, WD2_LMK3_CLKOUT_DLY_OFS, value); };
 
 
 
    ////// ------ Control Register 59 [0x10EC]: LMK_4 - LMK Register 4 (Default: 0x00020104) ------ //////
 
-   // 0x00060000: LMK4_CLKOUT4_MUX - Channel 4 Clock Output Multiplexer (see datasheet)
-   unsigned int GetLmk4Clkout4Mux() { return BitExtractControl(WD2_LMK4_CLKOUT4_MUX_REG, WD2_LMK4_CLKOUT4_MUX_MASK, WD2_LMK4_CLKOUT4_MUX_OFS); };
-   void         SetLmk4Clkout4Mux(unsigned int value) { SetRegMask(WD2_LMK4_CLKOUT4_MUX_REG, WD2_LMK4_CLKOUT4_MUX_MASK, WD2_LMK4_CLKOUT4_MUX_OFS, value); };
+   // 0x00060000: LMK4_CLKOUT_MUX - Channel 4 Clock Output Multiplexer (see datasheet)
+   unsigned int GetLmk4ClkoutMux() { return BitExtractControl(WD2_LMK4_CLKOUT_MUX_REG, WD2_LMK4_CLKOUT_MUX_MASK, WD2_LMK4_CLKOUT_MUX_OFS); };
+   void         SetLmk4ClkoutMux(unsigned int value) { SetRegMask(WD2_LMK4_CLKOUT_MUX_REG, WD2_LMK4_CLKOUT_MUX_MASK, WD2_LMK4_CLKOUT_MUX_OFS, value); };
 
-   // 0x00010000: LMK4_CLKOUT4_EN - Channel 4 Clock Output Enable (0 = Disabled, 1 = Enabled)
-   unsigned int GetLmk4Clkout4En() { return BitExtractControl(WD2_LMK4_CLKOUT4_EN_REG, WD2_LMK4_CLKOUT4_EN_MASK, WD2_LMK4_CLKOUT4_EN_OFS); };
-   void         SetLmk4Clkout4En(unsigned int value) { SetRegMask(WD2_LMK4_CLKOUT4_EN_REG, WD2_LMK4_CLKOUT4_EN_MASK, WD2_LMK4_CLKOUT4_EN_OFS, value); };
+   // 0x00010000: LMK4_CLKOUT_EN - Channel 4 Clock Output Enable (0 = Disabled, 1 = Enabled)
+   unsigned int GetLmk4ClkoutEn() { return BitExtractControl(WD2_LMK4_CLKOUT_EN_REG, WD2_LMK4_CLKOUT_EN_MASK, WD2_LMK4_CLKOUT_EN_OFS); };
+   void         SetLmk4ClkoutEn(unsigned int value) { SetRegMask(WD2_LMK4_CLKOUT_EN_REG, WD2_LMK4_CLKOUT_EN_MASK, WD2_LMK4_CLKOUT_EN_OFS, value); };
 
-   // 0x0000FF00: LMK4_CLKOUT4_DIV - Channel 4 Clock Output Divider (value x 2) (1..255)
-   unsigned int GetLmk4Clkout4Div() { return BitExtractControl(WD2_LMK4_CLKOUT4_DIV_REG, WD2_LMK4_CLKOUT4_DIV_MASK, WD2_LMK4_CLKOUT4_DIV_OFS); };
-   void         SetLmk4Clkout4Div(unsigned int value) { SetRegMask(WD2_LMK4_CLKOUT4_DIV_REG, WD2_LMK4_CLKOUT4_DIV_MASK, WD2_LMK4_CLKOUT4_DIV_OFS, value); };
+   // 0x0000FF00: LMK4_CLKOUT_DIV - Channel 4 Clock Output Divider (value x 2) (1..255)
+   unsigned int GetLmk4ClkoutDiv() { return BitExtractControl(WD2_LMK4_CLKOUT_DIV_REG, WD2_LMK4_CLKOUT_DIV_MASK, WD2_LMK4_CLKOUT_DIV_OFS); };
+   void         SetLmk4ClkoutDiv(unsigned int value) { SetRegMask(WD2_LMK4_CLKOUT_DIV_REG, WD2_LMK4_CLKOUT_DIV_MASK, WD2_LMK4_CLKOUT_DIV_OFS, value); };
 
-   // 0x000000F0: LMK4_CLKOUT4_DLY - Channel 4 Clock Output Delay (value x 150ps)
-   unsigned int GetLmk4Clkout4Dly() { return BitExtractControl(WD2_LMK4_CLKOUT4_DLY_REG, WD2_LMK4_CLKOUT4_DLY_MASK, WD2_LMK4_CLKOUT4_DLY_OFS); };
-   void         SetLmk4Clkout4Dly(unsigned int value) { SetRegMask(WD2_LMK4_CLKOUT4_DLY_REG, WD2_LMK4_CLKOUT4_DLY_MASK, WD2_LMK4_CLKOUT4_DLY_OFS, value); };
+   // 0x000000F0: LMK4_CLKOUT_DLY - Channel 4 Clock Output Delay (value x 150ps)
+   unsigned int GetLmk4ClkoutDly() { return BitExtractControl(WD2_LMK4_CLKOUT_DLY_REG, WD2_LMK4_CLKOUT_DLY_MASK, WD2_LMK4_CLKOUT_DLY_OFS); };
+   void         SetLmk4ClkoutDly(unsigned int value) { SetRegMask(WD2_LMK4_CLKOUT_DLY_REG, WD2_LMK4_CLKOUT_DLY_MASK, WD2_LMK4_CLKOUT_DLY_OFS, value); };
 
 
 
    ////// ------ Control Register 60 [0x10F0]: LMK_5 - LMK Register 5 (Default: 0x00020105) ------ //////
 
-   // 0x00060000: LMK5_CLKOUT5_MUX - Channel 5 Clock Output Multiplexer (see datasheet)
-   unsigned int GetLmk5Clkout5Mux() { return BitExtractControl(WD2_LMK5_CLKOUT5_MUX_REG, WD2_LMK5_CLKOUT5_MUX_MASK, WD2_LMK5_CLKOUT5_MUX_OFS); };
-   void         SetLmk5Clkout5Mux(unsigned int value) { SetRegMask(WD2_LMK5_CLKOUT5_MUX_REG, WD2_LMK5_CLKOUT5_MUX_MASK, WD2_LMK5_CLKOUT5_MUX_OFS, value); };
+   // 0x00060000: LMK5_CLKOUT_MUX - Channel 5 Clock Output Multiplexer (see datasheet)
+   unsigned int GetLmk5ClkoutMux() { return BitExtractControl(WD2_LMK5_CLKOUT_MUX_REG, WD2_LMK5_CLKOUT_MUX_MASK, WD2_LMK5_CLKOUT_MUX_OFS); };
+   void         SetLmk5ClkoutMux(unsigned int value) { SetRegMask(WD2_LMK5_CLKOUT_MUX_REG, WD2_LMK5_CLKOUT_MUX_MASK, WD2_LMK5_CLKOUT_MUX_OFS, value); };
 
-   // 0x00010000: LMK5_CLKOUT5_EN - Channel 5 Clock Output Enable (0 = Disabled, 1 = Enabled)
-   unsigned int GetLmk5Clkout5En() { return BitExtractControl(WD2_LMK5_CLKOUT5_EN_REG, WD2_LMK5_CLKOUT5_EN_MASK, WD2_LMK5_CLKOUT5_EN_OFS); };
-   void         SetLmk5Clkout5En(unsigned int value) { SetRegMask(WD2_LMK5_CLKOUT5_EN_REG, WD2_LMK5_CLKOUT5_EN_MASK, WD2_LMK5_CLKOUT5_EN_OFS, value); };
+   // 0x00010000: LMK5_CLKOUT_EN - Channel 5 Clock Output Enable (0 = Disabled, 1 = Enabled)
+   unsigned int GetLmk5ClkoutEn() { return BitExtractControl(WD2_LMK5_CLKOUT_EN_REG, WD2_LMK5_CLKOUT_EN_MASK, WD2_LMK5_CLKOUT_EN_OFS); };
+   void         SetLmk5ClkoutEn(unsigned int value) { SetRegMask(WD2_LMK5_CLKOUT_EN_REG, WD2_LMK5_CLKOUT_EN_MASK, WD2_LMK5_CLKOUT_EN_OFS, value); };
 
-   // 0x0000FF00: LMK5_CLKOUT5_DIV - Channel 5 Clock Output Divider (value x 2) (1..255)
-   unsigned int GetLmk5Clkout5Div() { return BitExtractControl(WD2_LMK5_CLKOUT5_DIV_REG, WD2_LMK5_CLKOUT5_DIV_MASK, WD2_LMK5_CLKOUT5_DIV_OFS); };
-   void         SetLmk5Clkout5Div(unsigned int value) { SetRegMask(WD2_LMK5_CLKOUT5_DIV_REG, WD2_LMK5_CLKOUT5_DIV_MASK, WD2_LMK5_CLKOUT5_DIV_OFS, value); };
+   // 0x0000FF00: LMK5_CLKOUT_DIV - Channel 5 Clock Output Divider (value x 2) (1..255)
+   unsigned int GetLmk5ClkoutDiv() { return BitExtractControl(WD2_LMK5_CLKOUT_DIV_REG, WD2_LMK5_CLKOUT_DIV_MASK, WD2_LMK5_CLKOUT_DIV_OFS); };
+   void         SetLmk5ClkoutDiv(unsigned int value) { SetRegMask(WD2_LMK5_CLKOUT_DIV_REG, WD2_LMK5_CLKOUT_DIV_MASK, WD2_LMK5_CLKOUT_DIV_OFS, value); };
 
-   // 0x000000F0: LMK5_CLKOUT5_DLY - Channel 5 Clock Output Delay (value x 150ps)
-   unsigned int GetLmk5Clkout5Dly() { return BitExtractControl(WD2_LMK5_CLKOUT5_DLY_REG, WD2_LMK5_CLKOUT5_DLY_MASK, WD2_LMK5_CLKOUT5_DLY_OFS); };
-   void         SetLmk5Clkout5Dly(unsigned int value) { SetRegMask(WD2_LMK5_CLKOUT5_DLY_REG, WD2_LMK5_CLKOUT5_DLY_MASK, WD2_LMK5_CLKOUT5_DLY_OFS, value); };
+   // 0x000000F0: LMK5_CLKOUT_DLY - Channel 5 Clock Output Delay (value x 150ps)
+   unsigned int GetLmk5ClkoutDly() { return BitExtractControl(WD2_LMK5_CLKOUT_DLY_REG, WD2_LMK5_CLKOUT_DLY_MASK, WD2_LMK5_CLKOUT_DLY_OFS); };
+   void         SetLmk5ClkoutDly(unsigned int value) { SetRegMask(WD2_LMK5_CLKOUT_DLY_REG, WD2_LMK5_CLKOUT_DLY_MASK, WD2_LMK5_CLKOUT_DLY_OFS, value); };
 
 
 
    ////// ------ Control Register 61 [0x10F4]: LMK_6 - LMK Register 6 (Default: 0x00000106) ------ //////
 
-   // 0x00060000: LMK6_CLKOUT6_MUX - Channel 6 Clock Output Multiplexer (see datasheet)
-   unsigned int GetLmk6Clkout6Mux() { return BitExtractControl(WD2_LMK6_CLKOUT6_MUX_REG, WD2_LMK6_CLKOUT6_MUX_MASK, WD2_LMK6_CLKOUT6_MUX_OFS); };
-   void         SetLmk6Clkout6Mux(unsigned int value) { SetRegMask(WD2_LMK6_CLKOUT6_MUX_REG, WD2_LMK6_CLKOUT6_MUX_MASK, WD2_LMK6_CLKOUT6_MUX_OFS, value); };
+   // 0x00060000: LMK6_CLKOUT_MUX - Channel 6 Clock Output Multiplexer (see datasheet)
+   unsigned int GetLmk6ClkoutMux() { return BitExtractControl(WD2_LMK6_CLKOUT_MUX_REG, WD2_LMK6_CLKOUT_MUX_MASK, WD2_LMK6_CLKOUT_MUX_OFS); };
+   void         SetLmk6ClkoutMux(unsigned int value) { SetRegMask(WD2_LMK6_CLKOUT_MUX_REG, WD2_LMK6_CLKOUT_MUX_MASK, WD2_LMK6_CLKOUT_MUX_OFS, value); };
 
-   // 0x00010000: LMK6_CLKOUT6_EN - Channel 6 Clock Output Enable (0 = Disabled, 1 = Enabled)
-   unsigned int GetLmk6Clkout6En() { return BitExtractControl(WD2_LMK6_CLKOUT6_EN_REG, WD2_LMK6_CLKOUT6_EN_MASK, WD2_LMK6_CLKOUT6_EN_OFS); };
-   void         SetLmk6Clkout6En(unsigned int value) { SetRegMask(WD2_LMK6_CLKOUT6_EN_REG, WD2_LMK6_CLKOUT6_EN_MASK, WD2_LMK6_CLKOUT6_EN_OFS, value); };
+   // 0x00010000: LMK6_CLKOUT_EN - Channel 6 Clock Output Enable (0 = Disabled, 1 = Enabled)
+   unsigned int GetLmk6ClkoutEn() { return BitExtractControl(WD2_LMK6_CLKOUT_EN_REG, WD2_LMK6_CLKOUT_EN_MASK, WD2_LMK6_CLKOUT_EN_OFS); };
+   void         SetLmk6ClkoutEn(unsigned int value) { SetRegMask(WD2_LMK6_CLKOUT_EN_REG, WD2_LMK6_CLKOUT_EN_MASK, WD2_LMK6_CLKOUT_EN_OFS, value); };
 
-   // 0x0000FF00: LMK6_CLKOUT6_DIV - Channel 6 Clock Output Divider (value x 2) (1..255)
-   unsigned int GetLmk6Clkout6Div() { return BitExtractControl(WD2_LMK6_CLKOUT6_DIV_REG, WD2_LMK6_CLKOUT6_DIV_MASK, WD2_LMK6_CLKOUT6_DIV_OFS); };
-   void         SetLmk6Clkout6Div(unsigned int value) { SetRegMask(WD2_LMK6_CLKOUT6_DIV_REG, WD2_LMK6_CLKOUT6_DIV_MASK, WD2_LMK6_CLKOUT6_DIV_OFS, value); };
+   // 0x0000FF00: LMK6_CLKOUT_DIV - Channel 6 Clock Output Divider (value x 2) (1..255)
+   unsigned int GetLmk6ClkoutDiv() { return BitExtractControl(WD2_LMK6_CLKOUT_DIV_REG, WD2_LMK6_CLKOUT_DIV_MASK, WD2_LMK6_CLKOUT_DIV_OFS); };
+   void         SetLmk6ClkoutDiv(unsigned int value) { SetRegMask(WD2_LMK6_CLKOUT_DIV_REG, WD2_LMK6_CLKOUT_DIV_MASK, WD2_LMK6_CLKOUT_DIV_OFS, value); };
 
-   // 0x000000F0: LMK6_CLKOUT6_DLY - Channel 6 Clock Output Delay (value x 150ps)
-   unsigned int GetLmk6Clkout6Dly() { return BitExtractControl(WD2_LMK6_CLKOUT6_DLY_REG, WD2_LMK6_CLKOUT6_DLY_MASK, WD2_LMK6_CLKOUT6_DLY_OFS); };
-   void         SetLmk6Clkout6Dly(unsigned int value) { SetRegMask(WD2_LMK6_CLKOUT6_DLY_REG, WD2_LMK6_CLKOUT6_DLY_MASK, WD2_LMK6_CLKOUT6_DLY_OFS, value); };
+   // 0x000000F0: LMK6_CLKOUT_DLY - Channel 6 Clock Output Delay (value x 150ps)
+   unsigned int GetLmk6ClkoutDly() { return BitExtractControl(WD2_LMK6_CLKOUT_DLY_REG, WD2_LMK6_CLKOUT_DLY_MASK, WD2_LMK6_CLKOUT_DLY_OFS); };
+   void         SetLmk6ClkoutDly(unsigned int value) { SetRegMask(WD2_LMK6_CLKOUT_DLY_REG, WD2_LMK6_CLKOUT_DLY_MASK, WD2_LMK6_CLKOUT_DLY_OFS, value); };
 
 
 
    ////// ------ Control Register 62 [0x10F8]: LMK_7 - LMK Register 7 (Default: 0x00026407) ------ //////
 
-   // 0x00060000: LMK7_CLKOUT7_MUX - Channel 7 Clock Output Multiplexer (see datasheet)
-   unsigned int GetLmk7Clkout7Mux() { return BitExtractControl(WD2_LMK7_CLKOUT7_MUX_REG, WD2_LMK7_CLKOUT7_MUX_MASK, WD2_LMK7_CLKOUT7_MUX_OFS); };
-   void         SetLmk7Clkout7Mux(unsigned int value) { SetRegMask(WD2_LMK7_CLKOUT7_MUX_REG, WD2_LMK7_CLKOUT7_MUX_MASK, WD2_LMK7_CLKOUT7_MUX_OFS, value); };
+   // 0x00060000: LMK7_CLKOUT_MUX - Channel 7 Clock Output Multiplexer (see datasheet)
+   unsigned int GetLmk7ClkoutMux() { return BitExtractControl(WD2_LMK7_CLKOUT_MUX_REG, WD2_LMK7_CLKOUT_MUX_MASK, WD2_LMK7_CLKOUT_MUX_OFS); };
+   void         SetLmk7ClkoutMux(unsigned int value) { SetRegMask(WD2_LMK7_CLKOUT_MUX_REG, WD2_LMK7_CLKOUT_MUX_MASK, WD2_LMK7_CLKOUT_MUX_OFS, value); };
 
-   // 0x00010000: LMK7_CLKOUT7_EN - Channel 7 Clock Output Enable (0 = Disabled, 1 = Enabled)
-   unsigned int GetLmk7Clkout7En() { return BitExtractControl(WD2_LMK7_CLKOUT7_EN_REG, WD2_LMK7_CLKOUT7_EN_MASK, WD2_LMK7_CLKOUT7_EN_OFS); };
-   void         SetLmk7Clkout7En(unsigned int value) { SetRegMask(WD2_LMK7_CLKOUT7_EN_REG, WD2_LMK7_CLKOUT7_EN_MASK, WD2_LMK7_CLKOUT7_EN_OFS, value); };
+   // 0x00010000: LMK7_CLKOUT_EN - Channel 7 Clock Output Enable (0 = Disabled, 1 = Enabled)
+   unsigned int GetLmk7ClkoutEn() { return BitExtractControl(WD2_LMK7_CLKOUT_EN_REG, WD2_LMK7_CLKOUT_EN_MASK, WD2_LMK7_CLKOUT_EN_OFS); };
+   void         SetLmk7ClkoutEn(unsigned int value) { SetRegMask(WD2_LMK7_CLKOUT_EN_REG, WD2_LMK7_CLKOUT_EN_MASK, WD2_LMK7_CLKOUT_EN_OFS, value); };
 
-   // 0x0000FF00: LMK7_CLKOUT7_DIV - Channel 7 Clock Output Divider (value x 2) (1..255)
-   unsigned int GetLmk7Clkout7Div() { return BitExtractControl(WD2_LMK7_CLKOUT7_DIV_REG, WD2_LMK7_CLKOUT7_DIV_MASK, WD2_LMK7_CLKOUT7_DIV_OFS); };
-   void         SetLmk7Clkout7Div(unsigned int value) { SetRegMask(WD2_LMK7_CLKOUT7_DIV_REG, WD2_LMK7_CLKOUT7_DIV_MASK, WD2_LMK7_CLKOUT7_DIV_OFS, value); };
+   // 0x0000FF00: LMK7_CLKOUT_DIV - Channel 7 Clock Output Divider (value x 2) (1..255)
+   unsigned int GetLmk7ClkoutDiv() { return BitExtractControl(WD2_LMK7_CLKOUT_DIV_REG, WD2_LMK7_CLKOUT_DIV_MASK, WD2_LMK7_CLKOUT_DIV_OFS); };
+   void         SetLmk7ClkoutDiv(unsigned int value) { SetRegMask(WD2_LMK7_CLKOUT_DIV_REG, WD2_LMK7_CLKOUT_DIV_MASK, WD2_LMK7_CLKOUT_DIV_OFS, value); };
 
-   // 0x000000F0: LMK7_CLKOUT7_DLY - Channel 7 Clock Output Delay (value x 150ps)
-   unsigned int GetLmk7Clkout7Dly() { return BitExtractControl(WD2_LMK7_CLKOUT7_DLY_REG, WD2_LMK7_CLKOUT7_DLY_MASK, WD2_LMK7_CLKOUT7_DLY_OFS); };
-   void         SetLmk7Clkout7Dly(unsigned int value) { SetRegMask(WD2_LMK7_CLKOUT7_DLY_REG, WD2_LMK7_CLKOUT7_DLY_MASK, WD2_LMK7_CLKOUT7_DLY_OFS, value); };
+   // 0x000000F0: LMK7_CLKOUT_DLY - Channel 7 Clock Output Delay (value x 150ps)
+   unsigned int GetLmk7ClkoutDly() { return BitExtractControl(WD2_LMK7_CLKOUT_DLY_REG, WD2_LMK7_CLKOUT_DLY_MASK, WD2_LMK7_CLKOUT_DLY_OFS); };
+   void         SetLmk7ClkoutDly(unsigned int value) { SetRegMask(WD2_LMK7_CLKOUT_DLY_REG, WD2_LMK7_CLKOUT_DLY_MASK, WD2_LMK7_CLKOUT_DLY_OFS, value); };
 
 
 
