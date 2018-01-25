@@ -776,6 +776,39 @@ void TCB::ConfigureAllSerdes(short dly, int bitslip){
    }
 }
 //configure a all serdes link
+void TCB::ConfigureAllDCBSerdes(short dly, int bitslip){
+   //reset
+   u_int32_t conf[1]={0};
+   for(int ilink=0; ilink<2; ilink++){
+      conf[ilink/4] |= 0x80 << (ilink%4)*8;
+   }
+   WriteBLT(0x3D0, conf, 1);
+
+   //write config and enable
+   for(int i=0; i<1; i++){
+      conf[i] = 0;
+   }
+   for(int ilink=0; ilink<2; ilink++){
+      conf[ilink/4] |= (0x20|(dly &0x1F)) << (ilink%4)*8;
+   }
+   WriteBLT(0x3D0, conf, 1);
+
+   //load delay
+   u_int32_t loadval;
+   ReadReg(RSERDESTX, &loadval);
+   loadval |= 0x80000000;
+   WriteReg(RSERDESTX, &loadval);
+   loadval &= 0x7FFFFFFF;
+   WriteReg(RSERDESTX, &loadval);
+
+   //bitslip
+   u_int32_t data[1];
+   for(int i=0; i<1; i++) data[i]=0x00000003;
+   for (int i=0; i<bitslip; i++) {
+      WriteBLT(0x3D1, data, 1);
+   }
+}
+//configure a all serdes link
 void TCB::SetAllSerdes(u_int32_t *dlys, int *bits){
    u_int32_t conf[32]={0};
 
@@ -813,6 +846,44 @@ void TCB::SetAllSerdes(u_int32_t *dlys, int *bits){
       WriteBLT(RSERDESBSLP, data, 4);
    }
 }
+//configure a all serdes link
+void TCB::SetAllDCBSerdes(u_int32_t *dlys, int *bits){
+   u_int32_t conf[1]={0};
+
+   for(int ilink=0; ilink<2; ilink++){
+      conf[ilink/4] |= 0x80 << (ilink%4)*8;
+   }
+   WriteBLT(0x3D0, conf, 1);
+
+   for(int i=0; i<1; i++)conf[i]=0;
+   for(int ilink=0; ilink<2; ilink++){
+      conf[ilink] |= (0x20202020|dlys[ilink]);
+   }
+   WriteBLT(0x3D0, conf, 1);
+
+   //load delay
+   u_int32_t loadval;
+   ReadReg(RSERDESTX, &loadval);
+   loadval |= 0x80000000;
+   WriteReg(RSERDESTX, &loadval);
+   loadval &= 0x7FFFFFFF;
+   WriteReg(RSERDESTX, &loadval);
+
+   u_int32_t data[1];
+   bool morebits = true;
+   while(morebits){
+      morebits = false;
+      for(int i=0; i<1; i++) data[i] = 0;
+      for(int ilink=0; ilink<2; ilink++){
+         if(bits[ilink]>0){
+            bits[ilink]--;
+            data[ilink/32] |= 1 << (ilink%32);
+            morebits = true;
+         }
+      }
+      WriteBLT(0x3D1, data, 1);
+   }
+}
 //check errors on serdes
 void TCB::ResetTransmitter(){
    u_int32_t val;
@@ -834,6 +905,11 @@ void TCB::GetSerdesErrorCount(u_int32_t* data){
    ReadBLT(RSERDESCOU+fnserdes*6, data+fnserdes*6, fnserdes*2);
 
    ReadReg(RSERDESTIME, data + fnserdes*8);
+}
+//check errors on serdes
+void TCB::GetDCBSerdesErrorCount(u_int32_t* data){
+   ReadBLT(0x3D3, data, 2);
+   ReadReg(0x3B0, data+2);
 }
 //start a serdes check
 void TCB::StartSerdesCheck(){
@@ -930,6 +1006,81 @@ void TCB::CalibrateSerdes(u_int32_t *dlyout, int *bitout){
          }
 
          SetAllSerdes(dly, bit);
+
+}
+//calibrate serdes
+void TCB::CalibrateDCBSerdes(u_int32_t *dlyout, int *bitout){
+         float errors[2][8][32];
+         u_int32_t ccounters[3];
+
+
+         //SetCheckWord(0xdeadbeef, 0xdeadbeef);
+
+         for(int idly =0; idly<32; idly++){
+            for(int ibit=0; ibit<8; ibit++){
+               //configure everything
+               ConfigureAllDCBSerdes(idly, ibit);
+
+               StartSerdesCheck();
+
+               usleep(100);
+
+               StopSerdesCheck();
+               GetDCBSerdesErrorCount(ccounters);
+               for(int icounter=0; icounter<2; icounter++){
+                  errors[icounter][ibit][idly] = ccounters[icounter]*1./ccounters[2];
+               }
+            }
+         }
+
+         //search eyes
+         const float thr = 1e-20;
+         u_int32_t dly[1] = {0};
+         int bit[2];
+         for(int icounter=0; icounter<2; icounter++){
+            float bestCenter=-1;
+            int bestWidth=-1;
+            int bestBitslip=-1;
+            for(int ibit=0; ibit<8; ibit++){
+               int state=0;
+               int start =-1;
+               int stop =-1;
+               for(int idly=0; idly<32 && state!=2; idly++){
+                  if(errors[icounter][ibit][idly]<thr && state==0){
+                     state=1;
+                     start=idly;
+                     stop=idly;
+                  }
+                  if (errors[icounter][ibit][idly]<thr && state == 1){
+                     stop=idly;
+                  } else if(errors[icounter][ibit][idly] >= thr && state == 1){
+                     state=2;
+                  }
+               }
+
+               int width= stop-start;
+               if(width > bestWidth){
+                  bestWidth = width;
+                  bestCenter = (stop+start)/2;
+                  bestBitslip = ibit;
+               }
+            }
+
+            if(bestWidth > 0){
+               if(fverbose) printf("Setting Serdes %2d Link %1d at delay %2d bitslip %d (width %3d)\n", icounter/8, icounter%8, (int)(bestCenter), bestBitslip, bestWidth);
+               bit[icounter] = bestBitslip;
+               dly[icounter/4] |= (((int)(bestCenter))&0x1F)<<(icounter%4)*8;
+               //ConfigureSingleSerdes(icounter/8, icounter%8, (int)(bestCenter), bestBitslip);
+            }
+            else if(fverbose) printf("could not find eye for serdes %d, link%d\n", icounter/8, icounter%8);
+         }
+
+         if(dlyout!=0 && bitout!=0){
+            memcpy(dlyout, dly, sizeof(u_int32_t)*1);
+            memcpy(bitout, bit, sizeof(int)*2);
+         }
+
+         SetAllDCBSerdes(dly, bit);
 
 }
 //Set/unset DBGSERDES

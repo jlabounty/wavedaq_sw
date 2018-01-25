@@ -194,20 +194,28 @@ public:
    void ConfigureSingleSerdes(int, int, short, int);
    //configure all serdes link
    void ConfigureAllSerdes(short, int);
+   //configure all serdes link
+   void ConfigureAllDCBSerdes(short, int);
    //configure all serdes delays and bits at once
    void SetAllSerdes(u_int32_t *, int *);
+   //configure all serdes delays and bits at once
+   void SetAllDCBSerdes(u_int32_t *, int *);
    //reset transmitter
    void ResetTransmitter();
    //check an error on a given serdes link
    void GetSerdesError(u_int32_t*);
    //return the number of errors in the transmission test
    void GetSerdesErrorCount(u_int32_t*);
+   //return the number of errors in the transmission test
+   void GetDCBSerdesErrorCount(u_int32_t*);
    //start serdes check
    void StartSerdesCheck();
    //stop serdes check
    void StopSerdesCheck();
    //calibrate serdes
    void CalibrateSerdes(u_int32_t *dlyout=0, int *bitout=0);
+   //calibrate serdes
+   void CalibrateDCBSerdes(u_int32_t *dlyout=0, int *bitout=0);
    //calibrate serdes
    void SetDbgserdes(bool);
    //do a serdes check
