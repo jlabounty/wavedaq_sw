@@ -2418,17 +2418,17 @@ public:
    void         SetMcxTxSigSel(unsigned int value) { SetRegMask(WD2_MCX_TX_SIG_SEL_REG, WD2_MCX_TX_SIG_SEL_MASK, WD2_MCX_TX_SIG_SEL_OFS, value); };
 
    // 0x0000000F: MCX_RX_SIG_SEL - Select for RX connector:
-0x0 = UART (communication to MicroBlaze)
-0x1 = Trigger (internal hardware trigger signal to DRS control FSM)
-0x2 = Soft Trigger (trigger signal from MicroBlaze)
-0x3 = External Trigger (OR connection of external trigger from MCX and Backplane)
-0x4 = Sync Signal from Backplane (direct, active high)
-0x5 = Sync Signal from Backplane (sampled, output to LMK, active low)
-0x6 = Busy Local (active high)
-0x7 = Busy from Backplane (active high)
-0x8 = LMK Reference Clock (LMK input clock)
-0x9 = ADC Sampling Clock
-0xA = Divided Data Clock (phase shifted)
+   // 0x0 = UART (communication to MicroBlaze)
+   // 0x1 = Trigger (internal hardware trigger signal to DRS control FSM)
+   // 0x2 = Soft Trigger (trigger signal from MicroBlaze)
+   // 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane)
+   // 0x4 = Sync Signal from Backplane (direct, active high)
+   // 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low)
+   // 0x6 = Busy Local (active high)
+   // 0x7 = Busy from Backplane (active high)
+   // 0x8 = LMK Reference Clock (LMK input clock)
+   // 0x9 = ADC Sampling Clock
+   // 0xA = Divided Data Clock (phase shifted)
    unsigned int GetMcxRxSigSel() { return BitExtractControl(WD2_MCX_RX_SIG_SEL_REG, WD2_MCX_RX_SIG_SEL_MASK, WD2_MCX_RX_SIG_SEL_OFS); };
    void         SetMcxRxSigSel(unsigned int value) { SetRegMask(WD2_MCX_RX_SIG_SEL_REG, WD2_MCX_RX_SIG_SEL_MASK, WD2_MCX_RX_SIG_SEL_OFS, value); };
 
