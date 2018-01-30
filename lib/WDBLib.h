@@ -440,6 +440,7 @@ class WDB: public WDBREG {
    bool             mDemoMode;
    bool             mSendBlocked;
    int              mSendTimeoutMs;
+   int              mReceiveTimeoutMs;
 
    unsigned int     creg[REG_NR_OF_CTRL_REGS];
    unsigned int     sreg[REG_NR_OF_STAT_REGS];
@@ -449,19 +450,27 @@ class WDB: public WDBREG {
    static unsigned short udpSequenceNumber;
 
    void             BlockSend(bool flag) { mSendBlocked = flag; }
-   std::string      SendReceiveUDP(std::string str, int timeout_ms = 100);
-   void             SendUDP(std::string str, int timeout_ms = 100);
+   int              GetSendTimeoutMs() { return mSendTimeoutMs; };
+   void             SetSendTimeoutMs(int to) { mSendTimeoutMs = to; };
+   int              GetReceiveTimeoutMs() { return mReceiveTimeoutMs; };
+   void             SetReceiveTimeoutMs(int to) { mReceiveTimeoutMs = to; };
+   
+   std::string      SendReceiveUDP(std::string str);
+   void             SendUDP(std::string str);
 
-   void             WriteUDP(unsigned int ofs, std::vector<unsigned int> data, int timeout_ms = 250);
-   std::vector<unsigned int> ReadUDP(unsigned int ofs, unsigned int len, int timeout_ms = 250);
+   void             WriteUDP(unsigned int ofs, std::vector<unsigned int> data);
+   std::vector<unsigned int> ReadUDP(unsigned int ofs, unsigned int len);
 
 public:
    
    // constructor
    WDB(std::string name, int verbose = 0);
 
-   const unsigned int cRequiredCompatibilityLevel = 1;
-   
+   const unsigned int cRequiredRegLayoutCompatLevel = 4;
+   const unsigned int cRequiredFwCompatLevel = 2;
+   const int cDefaultSendTimeoutMs = 100;
+   const int cDefaultReceiveTimeoutMs = 100;
+
    // constants
    enum { cReadoutSrcDrs       = 0x01,
       cReadoutSrcAdc           = 0x02,

@@ -58,10 +58,6 @@ int WDB::gBinSocket   = 0;
 
 unsigned short WDB::udpSequenceNumber = 0; // sequence number to identify related send/acknowledge packets
 
-// should late go into register_map_wd2.h
-#define WD2_REG_CTRL_START 0x1000
-#define WD2_REG_STAT_START 0x0000
-
 //--------------------------------------------------------------------
 
 // convert one data type into other, replaces *((float *)(&int))
@@ -85,6 +81,8 @@ WDB::WDB(std::string name, int verbose)
    mLogfile = "";
    mDemoMode = (name == "demo");
    mSendBlocked = false;
+   mSendTimeoutMs = cDefaultSendTimeoutMs;
+   mReceiveTimeoutMs = cDefaultReceiveTimeoutMs;
    
    if (mDemoMode) {
       // set some meaningful values in demo mode to make wds happy
@@ -95,15 +93,15 @@ WDB::WDB(std::string name, int verbose)
 
 //--------------------------------------------------------------------
 
-void WDB::SendUDP(std::string str, int timeout_ms)
+void WDB::SendUDP(std::string str)
 {
    std::string result;
-   result = SendReceiveUDP(str, timeout_ms);
+   result = SendReceiveUDP(str);
 }
 
 //--------------------------------------------------------------------
 
-std::string WDB::SendReceiveUDP(std::string str, int timeout_ms)
+std::string WDB::SendReceiveUDP(std::string str)
 {
    size_t i;
    fd_set readfds;
@@ -164,7 +162,7 @@ std::string WDB::SendReceiveUDP(std::string str, int timeout_ms)
          if (retry == 0) // reduce timeout on first retry (ARP problem)
             ms = 100;
          else
-            ms = timeout_ms;
+            ms = mReceiveTimeoutMs;
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
          
@@ -218,7 +216,7 @@ std::string WDB::SendReceiveUDP(std::string str, int timeout_ms)
 
 //--------------------------------------------------------------------
 
-void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data, int timeout_ms)
+void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data)
 {
    size_t i;
    fd_set readfds;
@@ -288,7 +286,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data, int timeout
       }
       
       // don't wait for reply for reset FPGA command
-      if (timeout_ms < 0)
+      if (mSendTimeoutMs < 0)
          return;
       
       // retrieve reply until acknowledge is found
@@ -298,7 +296,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data, int timeout
          FD_ZERO(&readfds);
          FD_SET(gBinSocket, &readfds);
          
-         ms = timeout_ms;
+         ms = mSendTimeoutMs;
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
          
@@ -335,7 +333,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data, int timeout
 
 //--------------------------------------------------------------------
 
-std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg, int timeout_ms)
+std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg)
 {
    size_t i;
    fd_set readfds;
@@ -408,7 +406,7 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg, int 
          FD_ZERO(&readfds);
          FD_SET(gBinSocket, &readfds);
          
-         ms = timeout_ms;
+         ms = mReceiveTimeoutMs;
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
          
@@ -433,7 +431,7 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg, int 
 
          if (bSuccess) {
             // copy data
-            for (unsigned int i=0 ; i<len ; i++)
+            for (unsigned int i=0 ; i<len/4 ; i++)
                result.push_back(readBuf[i*4+4] << 24 |
                                 readBuf[i*4+5] << 16 |
                                 readBuf[i*4+6] <<  8 |
@@ -496,7 +494,9 @@ void WDB::Connect()
 
    // check if board is alive
    try {
-      WDB::SendUDP("", 500);
+      WDB::SetSendTimeoutMs(500); // increased timeout for first access
+      WDB::SendUDP("");
+      WDB::SetSendTimeoutMs(cDefaultSendTimeoutMs);
    } catch (...) {
       throw std::runtime_error(std::string("Cannot connect to board ")+mName+".");
    }
@@ -504,26 +504,38 @@ void WDB::Connect()
    // set dbglevel none
    SendUDP("dbglvl none");
    
-   // check firmware revision
+   // check firmware compatibility level
    ReceiveStatusRegister(WD2_FW_COMPAT_LEVEL_REG);
-   if (GetFwCompatLevel() < cRequiredCompatibilityLevel) {
+   ReceiveStatusRegister(WD2_REG_LAYOUT_COMP_LEVEL_REG);
+   if (GetFwCompatLevel() < cRequiredFwCompatLevel) {
       std::string str("Board ");
       str += mName + " has incompatible firmware, please upgrade (Board compatibility level: "+
       std::to_string(GetFwCompatLevel())+", Software compatibility level: "+
-      std::to_string(cRequiredCompatibilityLevel)+")";
+      std::to_string(cRequiredFwCompatLevel)+")";
       throw std::runtime_error(str);
    }
-   if (cRequiredCompatibilityLevel < GetFwCompatLevel()) {
+   if (cRequiredFwCompatLevel < GetFwCompatLevel()) {
       std::string str("Board ");
-      str += mName + " has newer incompatible firmware, please update WD library (Board compatibility level: "+
+      str += mName + " has newer incompatible firmware, please update WD library (Firmware compatibility level: "+
       std::to_string(GetFwCompatLevel())+", Software compatibility level: "+
-      std::to_string(cRequiredCompatibilityLevel)+")";
+      std::to_string(cRequiredFwCompatLevel)+")";
       throw std::runtime_error(str);
    }
-
-   ReceiveStatusRegisters();
-   unsigned int m = GetBoardMagic();
-   std::cout << m << std::endl;
+   // check register layout compatibility level
+   if (GetRegLayoutCompLevel() < cRequiredRegLayoutCompatLevel) {
+      std::string str("Board ");
+      str += mName + " has incompatible register layout, please upgrade (Board compatibility level: "+
+      std::to_string(GetRegLayoutCompLevel())+", Software compatibility level: "+
+      std::to_string(cRequiredRegLayoutCompatLevel)+")";
+      throw std::runtime_error(str);
+   }
+   if (cRequiredRegLayoutCompatLevel < GetRegLayoutCompLevel()) {
+      std::string str("Board ");
+      str += mName + " has newer register layout, please update WD library (Board compatibility level: "+
+      std::to_string(GetRegLayoutCompLevel())+", Software compatibility level: "+
+      std::to_string(cRequiredRegLayoutCompatLevel)+")";
+      throw std::runtime_error(str);
+   }
 }
 
 //--------------------------------------------------------------------
@@ -563,18 +575,19 @@ void WDB::ReceiveControlRegisters(unsigned int index, unsigned int nReg)
 {
    if (mDemoMode) {
       for (auto i=index ; i<index+nReg ; i++)
-         this->creg[i] = 0;
+         this->creg[i] = ctrl_reg_default[i];
       return;
    }
 
 #ifdef WD2_USE_UDP_BIN
    std::vector<unsigned int> result = ReadUDP(WD2_REG_WDB_LOC+index*4, nReg);
+   assert(result.size() == nReg);
    for (unsigned int i=0 ; i<nReg ; i++)
      this->creg[index+i] = result[i];
 #else
    std::string result;
    std::ostringstream req;
-   req << "rr 0x" << std::hex << WD2_REG_CTRL_START+index*4 << " " << std::dec << nReg;
+   req << "rr 0x" << std::hex << WD2_CTRL_REG_BASE_OFS+index*4 << " " << std::dec << nReg;
    
    result = SendReceiveUDP(req.str(), 500);
    std::stringstream ss(result);
@@ -599,13 +612,14 @@ void WDB::ReceiveStatusRegisters(unsigned int index, unsigned int nReg)
    }
    
 #ifdef WD2_USE_UDP_BIN
-   std::vector<unsigned int> result = ReadUDP(WD2_REG_STAT_START+index*4, nReg);
+   std::vector<unsigned int> result = ReadUDP(WD2_STAT_REG_BASE_OFS+index*4, nReg);
+   assert(result.size() == nReg);
    for (unsigned int i=0 ; i<nReg ; i++)
-     this->sreg[index+i] = result[i];
+      this->sreg[index+i] = result[i];
 #else
    std::string result;
    std::ostringstream req;
-   req << "rr 0x" << std::hex << WD2_REG_HW_VER_OFS+index*4 << " " << std::dec << nReg;
+   req << "rr 0x" << std::hex << WD2_STAT_REG_BASE_OFS+index*4 << " " << std::dec << nReg;
    
    result = SendReceiveUDP(req.str(), 500);
    std::stringstream ss(result);
@@ -614,7 +628,7 @@ void WDB::ReceiveStatusRegisters(unsigned int index, unsigned int nReg)
    for (unsigned int i=index ; i<index+nReg ; i++) {
       std::getline(ss, line, '\r');
       auto adr = (unsigned int)std::stoul(line.substr(3), nullptr, 16);
-      auto idx = (adr - WD2_REG_HW_VER_OFS) / 4;
+      auto idx = (adr - WD2_STAT_REG_BASE_OFS) / 4;
       if (idx < REG_NR_OF_STAT_REGS) {
          this->sreg[idx] = (unsigned int)std::stoul(line.substr(10), nullptr, 16);
       }
@@ -654,7 +668,7 @@ void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, uns
    
    if (!mDemoMode && !mSendBlocked) {
 #ifdef WD2_USE_UDP_BIN
-      WriteUDP(rofs, std::vector<unsigned int> { r }, mSendTimeoutMs);
+      WriteUDP(rofs, std::vector<unsigned int> { r });
 #else
       std::ostringstream req;
       req << "rw 0x" << std::hex << rofs << " 0x" << r;
@@ -670,13 +684,13 @@ void WDB::SendControlRegisters()
 {
    // first half until HV
    std::vector<unsigned int> v;
-   for (int i=0 ; i<(WD2_HV_U_TARGET_0_REG-WD2_REG_CTRL_START)/4 ; i++)
+   for (int i=0 ; i<(WD2_HV_U_TARGET_0_REG-WD2_CTRL_REG_BASE_OFS)/4 ; i++)
      v.push_back(this->creg[i]);
-   WriteUDP(WD2_REG_CTRL_START, v);
+   WriteUDP(WD2_CTRL_REG_BASE_OFS, v);
 
    // second half after HV
    v.clear();
-   for (int i=(WD2_REG_LMK_0-WD2_REG_CTRL_START)/4 ; i<REG_NR_OF_CTRL_REGS ; i++)
+   for (int i=(WD2_REG_LMK_0-WD2_CTRL_REG_BASE_OFS)/4 ; i<REG_NR_OF_CTRL_REGS ; i++)
      v.push_back(this->creg[i]);
    WriteUDP(WD2_REG_LMK_0, v);
 }
@@ -701,10 +715,12 @@ std::string WDB::GetFwBuild()
    std::ostringstream s;
    std::vector<std::string> monthName = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
    
-   s << "Compatibility Level: ";
+   s << "FW. Compat. Level:   ";
+   s << GetFwCompatLevel() << std::endl;
+   s << "Reg. Compat. Level:  ";
    s << GetRegLayoutCompLevel() << std::endl;
    s << "FW GIT Revision:     ";
-   s << "0x" << std::hex << std::uppercase << GetGitHashTag();
+   s << "0x" << std::hex << std::uppercase << GetGitHashTag() << std::endl;
    
    s << "FW Build:            ";
    s << std::dec << std::setw(2) << std::setfill('0');
@@ -754,7 +770,6 @@ float WDB::GetTemperatureDegree(bool refresh)
    temp = std::roundf(temp * 10 + 0.5) / 10.0f;
    return temp;
 }
-
 
 unsigned int WDB::GetPllLock(bool refresh)
 // all PLLs (DRS, LMK, FPGA DAQ, ISERDES, OSERDES)
@@ -3728,7 +3743,7 @@ void VCALIB::save(WDB *b, std::string filename)
 {
    std::memcpy(mCalib.version_id, "CAL2", 4);
    mCalib.sampling_frequency = b->GetDrsSampleFreq();
-   mCalib.temperature = b->GetTemperature();
+   mCalib.temperature = b->GetTemperatureDegree();
    
    int fh = open(filename.c_str(), O_WRONLY | O_CREAT, 0644);
    assert(fh > 0);
@@ -3761,11 +3776,11 @@ void VCALIB::load(WDB *b, std::string filename)
          << b->GetDrsSampleFreq()/1000.0 << " GSPS"  << std::endl;
       }
 
-      if (fabs(mCalib.temperature - b->GetTemperature()) > 5) {
+      if (fabs(mCalib.temperature - b->GetTemperatureDegree()) > 5) {
          std::cerr << "Warning: Voltage calibration data in " << filename << " is for "
          << mCalib.temperature
          << " deg. C, running now at "
-         << b->GetTemperature() << " deg. C" << std::endl;
+         << b->GetTemperatureDegree() << " deg. C" << std::endl;
       }
       bValid = true;
    }
@@ -3783,7 +3798,7 @@ void TCALIB::save(WDB *b, std::string filename)
 {
    std::memcpy(mCalib.version_id, "CAL2", 4);
    mCalib.sampling_frequency = b->GetDrsSampleFreq();
-   mCalib.temperature = b->GetTemperature();
+   mCalib.temperature = b->GetTemperatureDegree();
    
    int fh = open(filename.c_str(), O_WRONLY | O_CREAT, 0644);
    assert(fh > 0);
@@ -3817,11 +3832,11 @@ void TCALIB::load(WDB *b, std::string filename)
          return;
       }
       
-      if (fabs(mCalib.temperature - b->GetTemperature()) > 5) {
+      if (fabs(mCalib.temperature - b->GetTemperatureDegree()) > 5) {
          std::cerr << "Warning: Time calibration data in " << filename << " is for "
          << mCalib.temperature
          << " deg. C, running now at "
-         << b->GetTemperature() << " deg. C" << std::endl;
+         << b->GetTemperatureDegree() << " deg. C" << std::endl;
       }
       bValid = true;
    }
