@@ -49,7 +49,7 @@
 #define WD2_CMD_PORT_BIN          4000
 #define WD2_CMD_PORT_ASCII        3000
 
-#define WD2_UDP_PROTOCOL_VERSION  4
+#define WD2_UDP_PROTOCOL_VERSION  5
 
 int WP::gDataSocket   = 0;
 int WP::gServerPort   = 0;
@@ -1913,7 +1913,7 @@ int WP::ReceiveWfPacket()
    
    // check protocol version
    if (ph->protocol_version != WD2_UDP_PROTOCOL_VERSION) {
-      std::cerr << "Invalid protocol version " << ph->protocol_version << ", expected " << WD2_UDP_PROTOCOL_VERSION << ". Probably WD firmware update required." << std::endl;
+      std::cerr << "Invalid protocol version " << (int)ph->protocol_version << ", expected " << WD2_UDP_PROTOCOL_VERSION << ". Probably WD firmware update required." << std::endl;
       return 0;
    }
    
