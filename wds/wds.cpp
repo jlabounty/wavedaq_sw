@@ -450,8 +450,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"extClkInSel\": %d,\n",                w->GetExtClkInSel());
          mg_printf_http_chunk(nc, "      \"extClkFreq\": %d,\n",                 w->GetExtClkFreq());
          mg_printf_http_chunk(nc, "      \"localClkFreq\": %d,\n",               w->GetLocalClkFreq());
-         mg_printf_http_chunk(nc, "      \"drsDrsChnTxEnable\": %d,\n",          w->GetDrsChTxEn());
-         mg_printf_http_chunk(nc, "      \"drsAdcChnTxEnable\": %d,\n",          w->GetAdcChTxEn());
+         mg_printf_http_chunk(nc, "      \"drsDrsChnTxEn\": %d,\n",              w->GetDrsChTxEn());
+         mg_printf_http_chunk(nc, "      \"drsAdcChnTxEn\": %d,\n",              w->GetAdcChTxEn());
          
          mg_printf_http_chunk(nc, "      \"dacOfs\": %1.3f,\n",                  w->GetDacOfsV());
          mg_printf_http_chunk(nc, "      \"dacCalDc\": %1.3f,\n",                w->GetDacCalDcV());

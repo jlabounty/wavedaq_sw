@@ -375,12 +375,8 @@ function populateAllControls(init) {
 
 function populateControls(init) {
    // populate channel buttons
-   for (var i = 0; i < 8; i++)
-      OSC.chOn[i] = (OSC.wdb[OSC.curBoard].drs0ChnTxEnable & (1 << i)) > 0;
-   for (var i = 0; i < 8; i++)
-      OSC.chOn[i + 8] = (OSC.wdb[OSC.curBoard].drs1ChnTxEnable & (1 << i)) > 0;
-   OSC.chOn[16] = (OSC.wdb[OSC.curBoard].drs0ChnTxEnable & 0x100) > 0;
-   OSC.chOn[17] = (OSC.wdb[OSC.curBoard].drs1ChnTxEnable & 0x100) > 0;
+   for (var i = 0; i < 18; i++)
+      OSC.chOn[i] = (OSC.wdb[OSC.curBoard].drsDrsChnTxEn & (1 << i)) > 0;
    OSC.drawChnButtons();
 
    // populate config
@@ -1172,26 +1168,16 @@ function enableDRSChannels() {
       if (OSC.chOn[i])
          mask |= (1 << i);
 
-   OSC.wdb[OSC.curBoard].drs0ChnTxEnable = 0;
-   OSC.wdb[OSC.curBoard].drs1ChnTxEnable = 0;
-   for (var i = 0; i < 8; i++)
+   OSC.wdb[OSC.curBoard].drsDrsChnTxEn = 0;
+   for (var i = 0; i < 18; i++)
       if (OSC.chOn[i])
-         OSC.wdb[OSC.curBoard].drs0ChnTxEnable |= (1 << i);
-   for (var i = 0; i < 8; i++)
-      if (OSC.chOn[i + 8])
-         OSC.wdb[OSC.curBoard].drs1ChnTxEnable |= (1 << i);
-   if (OSC.chOn[16])
-      OSC.wdb[OSC.curBoard].drs0ChnTxEnable |= 0x100;
-   if (OSC.chOn[17])
-      OSC.wdb[OSC.curBoard].drs1ChnTxEnable |= 0x100;
+         OSC.wdb[OSC.curBoard].drsDrsChnTxEn |= (1 << i);
 
    var req = new XMLHttpRequest();
 
    if (OSC.applyAll) {
-      for (var i = 0; i < OSC.wdb.length; i++) {
-         OSC.wdb[i].drs0ChnTxEnable = OSC.wdb[OSC.curBoard].drs0ChnTxEnable;
-         OSC.wdb[i].drs1ChnTxEnable = OSC.wdb[OSC.curBoard].drs1ChnTxEnable;
-      }
+      for (var i = 0; i < OSC.wdb.length; i++)
+         OSC.wdb[i].drsDrsChnTxEn = OSC.wdb[OSC.curBoard].drsDrsChnTxEn;
       req.open("PUT", "/enableChannel/ALL", true);
    } else {
       req.open("PUT", "/enableChannel/" + OSC.curBoard, true);
