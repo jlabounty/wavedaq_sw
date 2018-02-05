@@ -1918,9 +1918,8 @@ int WP::ReceiveWfPacket()
    }
    
    // correct endianness of header data
-   ph->board_id                       = SWAP_UINT16(ph->board_id);
-   int header_adc                     = (ph->channel_info >> 7) & 0x1;
-   int header_channel                 = (ph->channel_info) & 0x1f;
+   int channel_adc                    = (ph->channel_info >> 7) & 0x1;
+   int channel_number                 = (ph->channel_info) & 0x1f;
    int channel_segment                = (ph->data_offset > 0);
    ph->tx_enable                      = SWAP_UINT32(ph->tx_enable);
    ph->zero_suppression_mask          = SWAP_UINT16(ph->zero_suppression_mask);
@@ -1938,20 +1937,27 @@ int WP::ReceiveWfPacket()
 
    mPacketsReceived++;
    
-   if (mLogfile != "") {
+   ph->board_id = 99; // ##
+   
+   assert(ph->payload_length % 3 == 0);
+   assert(ph->data_offset % 3 == 0);
+   int numberBins = (int) ph->payload_length / 1.5;
+   int firstBin = ph->data_offset / 1.5;
+   
+   if (mLogfile != "" || mVerbose >= 3) {
       std::ofstream f;
       char line[256];
       f.open(mLogfile, std::ios_base::app);
       
-      sprintf(line, "%06dus #%04d from WD%03d, SZ=%3d EN=%5d DT=%d A/C/S=%d/%d/%d TC=%04d T=%1.1lf\n",
+      sprintf(line, "%06dus #%04d from WD%03d, NB=%4d EN=%5d DT=%d A/C/S=%d/%02d/%d TC=%04d T=%1.1lf\n",
               usSince(mEventStartTime),
               mPacketsReceived-1,
               ph->board_id,
-              n,
+              numberBins,
               ph->event_number,
               ph->data_type,
-              header_adc,
-              header_channel,
+              channel_adc,
+              channel_number,
               channel_segment,
               ph->drs_trigger_cell,
               ph->temperature*0.0625);
@@ -1959,7 +1965,7 @@ int WP::ReceiveWfPacket()
       f << line;
       
       if (mVerbose >= 3)
-         std::cout << line << std::endl;
+         std::cout << line;
    }
    
    // drop package (for now...) if it is not DRS or ADC data
@@ -2055,16 +2061,10 @@ int WP::ReceiveWfPacket()
       mEventStartTime = std::chrono::high_resolution_clock::now();
    }
    
-   // map ADC and channel to WD channel (0..7, 8..15, 16+17)
-   int wfChannel;
-   if (header_channel == 8)
-      wfChannel = 16 + header_adc;
-   else
-      wfChannel = header_adc*8+header_channel;
-   assert(wfChannel < WD_N_CHANNELS);
+   assert(channel_number < WD_N_CHANNELS);
    
    // mark valid package received
-   er->SetWfValid(wfChannel, channel_segment, true);
+   er->SetWfValid(channel_number, channel_segment, true);
    
    // find event belonging to this baord
    WDEvent *event = nullptr;
@@ -2086,7 +2086,7 @@ int WP::ReceiveWfPacket()
 
    // decode waveform data
    auto pd = (unsigned char*)(ph+1);
-   for (int i=0 ; i<512 ; i+=2) {
+   for (int i=0 ; i<numberBins ; i+=2) {
       short data1   = ((pd[1] & 0x0F) << 8) | pd[0];
       short data2 = ((unsigned short)pd[2] << 4) | (pd[1] >> 4);
       // subtract binary offset
@@ -2096,12 +2096,12 @@ int WP::ReceiveWfPacket()
       
       if (channel_segment == 0) {
          // first segment
-         event->mWfU[wfChannel][i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
-         event->mWfU[wfChannel][i+1]       = (float)data2 * (1 / 4096.0);
+         event->mWfU[channel_number][firstBin+i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
+         event->mWfU[channel_number][firstBin+i+1]       = (float)data2 * (1 / 4096.0);
       } else {
          // second segment
-         event->mWfU[wfChannel][512+i]     = (float)data1 * (1 / 4096.0);
-         event->mWfU[wfChannel][512+i+1]   = (float)data2 * (1 / 4096.0);
+         event->mWfU[channel_number][firstBin+512+i]     = (float)data1 * (1 / 4096.0);
+         event->mWfU[channel_number][firstBin+512+i+1]   = (float)data2 * (1 / 4096.0);
       }
    }
    
