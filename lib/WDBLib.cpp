@@ -1234,6 +1234,20 @@ void WDB::SetDacBiasV(float v)
    SetDac0ChH(d);
 }
 
+void WDB::SetTriggerFallingEdge(unsigned int value)
+{
+   // store in reserved bit
+   SetRegMask(WD2_TRIGGER_FALLING_EDGE_REG, 0x80000000, 31, value);
+   
+   // falling edge is done via inverted pattern, so have real edge always rising
+   WDBREG::SetTriggerFallingEdge(0);
+}
+
+unsigned int WDB::GetTriggerFallingEdge()
+{
+   return BitExtractControl(WD2_TRIGGER_FALLING_EDGE_REG, 0x80000000, 31);;
+}
+
 float WDB::GetDacTriggerLevelV(int chn)
 {
    unsigned int d;

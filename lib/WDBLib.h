@@ -619,6 +619,9 @@ public:
    bool LoadVoltageCalibration(int freq, std::string path="");
    void SaveTimeCalibration(int freq);
    bool LoadTimeCalibration(int freq, std::string path="");
+   
+   unsigned int GetTriggerFallingEdge();
+   void SetTriggerFallingEdge(unsigned int value);
 };
 
 //--------------------------------------------------------------------
