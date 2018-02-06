@@ -1918,6 +1918,7 @@ int WP::ReceiveWfPacket()
    }
    
    // correct endianness of header data
+   ph->board_id                       = SWAP_UINT16(ph->board_id);
    int channel_adc                    = (ph->channel_info >> 7) & 0x1;
    int channel_number                 = (ph->channel_info) & 0x1f;
    int channel_segment                = (ph->data_offset > 0);
@@ -1936,8 +1937,6 @@ int WP::ReceiveWfPacket()
    ph->frontend_settings              = SWAP_UINT16(ph->frontend_settings);
 
    mPacketsReceived++;
-   
-   ph->board_id = 99; // ##
    
    assert(ph->payload_length % 3 == 0);
    assert(ph->data_offset % 3 == 0);
@@ -2087,6 +2086,7 @@ int WP::ReceiveWfPacket()
    // decode waveform data
    auto pd = (unsigned char*)(ph+1);
    for (int i=0 ; i<numberBins ; i+=2) {
+      // decode two bins
       short data1   = ((pd[1] & 0x0F) << 8) | pd[0];
       short data2 = ((unsigned short)pd[2] << 4) | (pd[1] >> 4);
       // subtract binary offset
@@ -2094,15 +2094,8 @@ int WP::ReceiveWfPacket()
       data2 -= 0x800;
       pd+=3;
       
-      if (channel_segment == 0) {
-         // first segment
-         event->mWfU[channel_number][firstBin+i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
-         event->mWfU[channel_number][firstBin+i+1]       = (float)data2 * (1 / 4096.0);
-      } else {
-         // second segment
-         event->mWfU[channel_number][firstBin+512+i]     = (float)data1 * (1 / 4096.0);
-         event->mWfU[channel_number][firstBin+512+i+1]   = (float)data2 * (1 / 4096.0);
-      }
+      event->mWfU[channel_number][firstBin+i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
+      event->mWfU[channel_number][firstBin+i+1]       = (float)data2 * (1 / 4096.0);
    }
    
    return SUCCESS;
