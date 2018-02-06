@@ -143,15 +143,6 @@ function init() {
    // schedule first waveform load
    OSC.timer.loadWF = window.setTimeout(loadWF, 10);
 
-   // schedule loadStatus()
-   OSC.timer.loadStatus = window.setTimeout(loadStatus, 10000);
-
-   // schedule loadScalers()
-   OSC.timer.loadScalers = window.setTimeout(loadScalers, 1000);
-
-   // schedule loadHv()
-   OSC.timer.loadHv = window.setTimeout(loadHv, 1000);
-
    // schedule loadWdb()
    OSC.timer.loadWdb = window.setTimeout(loadWdb, 1000);
 
@@ -185,12 +176,6 @@ function connectionBroken() {
 
    if (OSC.timer.loadGl != undefined)
       clearTimeout(OSC.timer.loadGl);
-   if (OSC.timer.loadStatus != undefined)
-      clearTimeout(OSC.timer.loadStatus);
-   if (OSC.timer.loadScalers != undefined)
-      clearTimeout(OSC.timer.loadScalers);
-   if (OSC.timer.loadHv != undefined)
-      clearTimeout(OSC.timer.loadHv);
    if (OSC.timer.loadWdb != undefined)
       clearTimeout(OSC.timer.loadWdb);
    if (OSC.timer.loadWF != undefined)
@@ -219,100 +204,6 @@ function wdSelect(s) {
    populateControls(false);
 }
 
-function loadStatus() {
-   if (OSC.demoMode) {
-      OSC.wdb[OSC.curBoard].temperature = 37.8;
-      OSC.wdb[OSC.curBoard].pllLck = 0x1FF;
-      return;
-   }
-
-   // send AJAX request
-   var req = new XMLHttpRequest();
-   req.onreadystatechange = function () {
-      if (req.readyState == 4 && req.status == 200) {
-         var t = JSON.parse(req.responseText);
-
-         OSC.wdb[OSC.curBoard].temperature = parseFloat(t.temperature);
-         OSC.wdb[OSC.curBoard].pllLck = t.pllLck;
-         OSC.redraw();
-      } else if (req.readyState == 4 && req.status == 0) {
-         connectionBroken();
-      }
-   };
-
-   req.open("GET", "status?b=" + OSC.curBoard + "&r=" + Math.random(), true); // avoid cached results
-
-   try {
-      req.send();
-      OSC.timer.loadStatus = window.setTimeout(loadStatus, 10000);
-   } catch (e) {
-      connectionBroken();
-   }
-}
-
-function loadScalers() {
-   if (OSC.demoMode) {
-      for (var i = 0; i < 16; i++)
-         OSC.wdb[OSC.curBoard].scaler[i] = Math.floor(Math.random() * 9999);
-      window.setTimeout(loadScalers, 1000);
-      return;
-   }
-
-   if (OSC.disp.scaler) {
-      // send AJAX request
-      var req = new XMLHttpRequest();
-      req.onreadystatechange = function () {
-         if (req.readyState == 4 && req.status == 200) {
-            OSC.wdb[OSC.curBoard].scaler = JSON.parse(req.responseText).scaler;
-            OSC.redraw();
-         } else if (req.readyState == 4 && req.status == 0) {
-            connectionBroken();
-         }
-      };
-
-      req.open("GET", "scalers?b=" + OSC.curBoard + "&r=" + Math.random(), true); // avoid cached results
-
-      try {
-         req.send();
-         OSC.timer.loadScalers = window.setTimeout(loadScalers, 1000);
-      } catch (e) {
-         connectionBroken();
-      }
-   } else {
-      OSC.timer.loadScalers = window.setTimeout(loadScalers, 1000);
-   }
-}
-
-function showDlgChannels() {
-   var req = new XMLHttpRequest();
-   req.onreadystatechange = function () {
-      if (req.readyState == 4 && req.status == 200) {
-         OSC.wdb[OSC.curBoard].hv = JSON.parse(req.responseText);
-         for (i = 0; i < 16; i++) {
-            var e = document.getElementById("inpHvTarget" + i);
-            if (e != document.activeElement)
-               e.value = OSC.wdb[OSC.curBoard].hv.target[i];
-            var e = document.getElementById("inpHvCurrent" + i);
-            e.value = OSC.wdb[OSC.curBoard].hv.current[i];
-         }
-
-         // show dialog after HVs have been loaded
-         dlgShow('dlgChannels');
-
-      } else if (req.readyState == 4 && req.status == 0) {
-         connectionBroken();
-      }
-   };
-
-   req.open("GET", "hv?b=" + OSC.curBoard + "&r=" + Math.random(), true); // avoid cached results
-
-   try {
-      req.send();
-   } catch (e) {
-      connectionBroken();
-   }
-}
-
 function loadHv() {
    if (OSC.demoMode) {
       for (var i = 0; i < 16; i++) {
@@ -323,37 +214,6 @@ function loadHv() {
          OSC.wdb[OSC.curBoard].hv.temperature[i] = 0;
       OSC.wdb[OSC.curBoard].hv.baseVoltage = 0;
       return;
-   }
-
-   var e = document.getElementById("dlgChannels");
-   if (e.style.display == "block") { // if dialog visible
-      // send AJAX request
-      var req = new XMLHttpRequest();
-      req.onreadystatechange = function () {
-         if (req.readyState == 4 && req.status == 200) {
-            OSC.wdb[OSC.curBoard].hv = JSON.parse(req.responseText);
-            for (i = 0; i < 16; i++) {
-               var e = document.getElementById("inpHvTarget" + i);
-               if (e != document.activeElement)
-                  e.value = OSC.wdb[OSC.curBoard].hv.target[i];
-               var e = document.getElementById("inpHvCurrent" + i);
-               e.value = OSC.wdb[OSC.curBoard].hv.current[i];
-            }
-         } else if (req.readyState == 4 && req.status == 0) {
-            connectionBroken();
-         }
-      };
-
-      req.open("GET", "hv?b=" + OSC.curBoard + "&r=" + Math.random(), true); // avoid cached results
-
-      try {
-         req.send();
-         OSC.timer.loadHv = window.setTimeout(loadHv, 1000);
-      } catch (e) {
-         connectionBroken();
-      }
-   } else {
-      OSC.timer.loadHv = window.setTimeout(loadHv, 1000);
    }
 }
 
@@ -462,13 +322,18 @@ function populateControls(init) {
    document.getElementById("clksource").checked = true;
    document.getElementById("clksource").disabled = true;
 
-   // channels dialog box
+   // channels dialog box with FE gain and HV
    for (i = 0; i < 16; i++) {
       if (document.getElementById("inpDacTriggerLevel" + i) != document.activeElement)
          document.getElementById("inpDacTriggerLevel" + i).value = Math.round(OSC.wdb[OSC.curBoard].dacTriggerLevel[i] * 1000);
 
       document.getElementById("selGain" + i).value = OSC.wdb[OSC.curBoard].feGain[i];
       document.getElementById("cbPzc" + i).checked = OSC.wdb[OSC.curBoard].fePzc[i];
+
+      var e = document.getElementById("inpHvTarget" + i);
+      if (e != document.activeElement)
+         e.value = OSC.wdb[OSC.curBoard].hv.target[i];
+      document.getElementById("inpHvCurrent" + i).value = OSC.wdb[OSC.curBoard].hv.current[i];
    }
 
    // trigger pattern dialog box

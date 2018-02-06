@@ -43,6 +43,8 @@ typedef struct {
    int  dbgTx;
 } GLOBALS;
 
+unsigned int demoDrsSampleFreq = 5120000;
+
 /*------------------------------------------------------------------*/
 
 std::vector<std::string> split(const std::string&input , char separator)
@@ -317,6 +319,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             gl->wdb[iBoard]->LoadVoltageCalibration(gl->wdb[iBoard]->GetDrsSampleFreq());
             gl->wdb[iBoard]->LoadTimeCalibration(gl->wdb[iBoard]->GetDrsSampleFreq());
          }
+         demoDrsSampleFreq = std::stoi(value);
       }
 
       else if (item == "dacCalDc") {
@@ -422,6 +425,38 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       
       for (int b = b1 ; b<b2 ; b++) {
          auto w = gl->wdb[b];
+
+         // simulate gaussian distributed scalers in demo mode
+         std::vector<unsigned long> scaler;
+         if (gl->demoMode) {
+            std::poisson_distribution<int> dist(1000);
+            
+            for (auto i=0 ; i<34 ; i++)
+               scaler.push_back(dist(randomGenerator));
+         } else
+            w->GetScalers(scaler, false);
+         
+         // obtain HVs
+         std::vector<float> hv_target;
+         std::vector<float> hv_current;
+         std::vector<float> hv_temp;
+         float hv_base;
+         if (gl->demoMode) {
+            for (auto i=0 ; i<16 ; i++) {
+               hv_target.push_back(0);
+               hv_current.push_back(0);
+            }
+            for (auto i=0 ; i<4 ; i++) {
+               hv_temp.push_back(20.0);
+            }
+            hv_base = 0;
+         } else {
+            w->GetHVTarget(hv_target);
+            w->GetHVCurrents(hv_current);
+            w->Get1wireTemperatures(hv_temp);
+            w->GetHVBaseVoltage(hv_base);
+         }
+         
          mg_printf_http_chunk(nc, "    {\n");
          mg_printf_http_chunk(nc, "      \"name\": \"%s\",\n",                   w->GetName().c_str());
          mg_printf_http_chunk(nc, "      \"temperature\": %1.1lf,\n",            w->GetTemperatureDegree(false));
@@ -429,7 +464,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"wdbBusy\": %s,\n",                    w->GetWdbBusy() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"hvBoardPlugged\": %s,\n",             w->GetHvBoardPlugged() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"hvBackplanePlugged\": %s,\n",         w->GetBackplanePlugged() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"pllLck\": %d,\n",                     w->GetPllLock());
+         mg_printf_http_chunk(nc, "      \"pllLck\": %d,\n",                     w->GetPllLock(false));
          mg_printf_http_chunk(nc, "      \"drsSampleFreq\": %d,\n",              w->GetDrsSampleFreq());
          mg_printf_http_chunk(nc, "      \"adcSampleFreq\": %d,\n",              w->GetAdcSampleFreq());
          mg_printf_http_chunk(nc, "      \"compChannelStatus\": %d,\n",          w->GetCompChStat());
@@ -496,7 +531,42 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"triggerPattern\": [\n");
          for (int i=0 ; i<18 ; i++)
             mg_printf_http_chunk(nc, "        %d,\n",                            w->GetTrgPtrn(i));
-         mg_printf_http_chunk(nc, "        %d ]\n",                             w->GetTrgPtrn(15));
+         mg_printf_http_chunk(nc, "        %d ],\n",                             w->GetTrgPtrn(15));
+
+         mg_printf_http_chunk(nc, "      \"scaler\": [\n");
+         for (auto &s: scaler) {
+            if (&s != &scaler.back())
+               mg_printf_http_chunk(nc, "        %d,\n", s);
+            else
+               mg_printf_http_chunk(nc, "        %d],\n", s);
+         }
+         
+         mg_printf_http_chunk(nc, "      \"hv\": {\n");
+
+         mg_printf_http_chunk(nc, "        \"target\": [\n");
+         for (auto &s: hv_target) {
+            if (&s != &hv_target.back())
+               mg_printf_http_chunk(nc, "            %g,\n", s);
+            else
+               mg_printf_http_chunk(nc, "            %g],\n", s);
+         }
+         mg_printf_http_chunk(nc, "        \"current\": [\n");
+         for (auto &s: hv_current) {
+            if (&s != &hv_current.back())
+               mg_printf_http_chunk(nc, "            %g,\n", s);
+            else
+               mg_printf_http_chunk(nc, "            %g],\n", s);
+         }
+         mg_printf_http_chunk(nc, "        \"temperature\": [\n");
+         for (auto &s: hv_temp) {
+            if (&s != &hv_temp.back())
+               mg_printf_http_chunk(nc, "            %g,\n", s);
+            else
+               mg_printf_http_chunk(nc, "            %g],\n", s);
+         }
+         mg_printf_http_chunk(nc, "        \"baseVoltage\": %g\n\n", hv_base);
+
+         mg_printf_http_chunk(nc, "      }\n");
 
          if (b == b2-1)
             mg_printf_http_chunk(nc, "    }\n");
@@ -507,113 +577,6 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "  ]\n");
       mg_printf_http_chunk(nc, "}\n");
       mg_send_http_chunk(nc, "", 0);
-   }
-   
-   // temperature & PLL lock status
-   if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/status") == 0) {
-      mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
-      int b = atoi(str);
-
-      if (gl->verbose)
-         std::cout<< "Sending /status board " << b << " to browser" << std::endl;
-
-      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
-      mg_printf_http_chunk(nc, "{\n");
-      mg_printf_http_chunk(nc, "   \"temperature\": %1.1lf,\n",   gl->wdb[b]->GetTemperatureDegree(false));
-      mg_printf_http_chunk(nc, "   \"pllLck\": %d\n",             gl->wdb[b]->GetPllLock(false));
-      mg_printf_http_chunk(nc, "}\n");
-      mg_send_http_chunk(nc, "", 0);
-      return;
-   }
-
-   // scalers
-   if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/scalers") == 0) {
-      mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
-      int b = atoi(str);
-      
-      if (gl->verbose)
-         std::cout<< "Sending /scalers board " << b << " to browser" << std::endl;
-
-      std::vector<unsigned long> scaler;
-      if (gl->demoMode) {
-         std::poisson_distribution<int> dist(1000);
-         
-         for (auto i=0 ; i<34 ; i++)
-            scaler.push_back(dist(randomGenerator));
-      } else
-         gl->wdb[b]->GetScalers(scaler);
-      
-      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
-      mg_printf_http_chunk(nc, "{\n");
-      mg_printf_http_chunk(nc, "         \"scaler\": [\n");
-      for (auto &s: scaler) {
-         if (&s != &scaler.back())
-            mg_printf_http_chunk(nc, "            %d,\n", s);
-         else
-            mg_printf_http_chunk(nc, "            %d]\n", s);
-      }
-      mg_printf_http_chunk(nc, "}\n");
-      mg_send_http_chunk(nc, "", 0);
-      return;
-   }
-
-   // hv & 1-wire temperatures
-   if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/hv") == 0) {
-      mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
-      int b = atoi(str);
-      
-      if (gl->verbose)
-         std::cout<< "Sending /hv board " << b << " to browser" << std::endl;
-      
-      std::vector<float> target;
-      std::vector<float> current;
-      std::vector<float> temp;
-      float base;
-      if (gl->demoMode) {
-         for (auto i=0 ; i<16 ; i++) {
-            target.push_back(0);
-            current.push_back(0);
-         }
-         for (auto i=0 ; i<4 ; i++) {
-            temp.push_back(20.0);
-         }
-         base = 0;
-      } else {
-         gl->wdb[b]->GetHVTarget(target);
-         gl->wdb[b]->GetHVCurrents(current);
-         gl->wdb[b]->Get1wireTemperatures(temp);
-         gl->wdb[b]->GetHVBaseVoltage(base);
-      }
-      
-      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
-      mg_printf_http_chunk(nc, "{\n");
-      mg_printf_http_chunk(nc, "  \"target\": [\n");
-      for (auto &s: target) {
-         if (&s != &target.back())
-            mg_printf_http_chunk(nc, "            %g,\n", s);
-         else
-            mg_printf_http_chunk(nc, "            %g],\n", s);
-      }
-
-      mg_printf_http_chunk(nc, "  \"current\": [\n");
-      for (auto &s: current) {
-         if (&s != &current.back())
-            mg_printf_http_chunk(nc, "            %g,\n", s);
-         else
-            mg_printf_http_chunk(nc, "            %g],\n", s);
-      }
-      mg_printf_http_chunk(nc, "  \"temperature\": [\n");
-      for (auto &s: temp) {
-         if (&s != &temp.back())
-            mg_printf_http_chunk(nc, "            %g,\n", s);
-         else
-            mg_printf_http_chunk(nc, "            %g],\n", s);
-      }
-      mg_printf_http_chunk(nc, "  \"baseVoltage\": %g\n\n", base);
-      
-      mg_printf_http_chunk(nc, "}\n");
-      mg_send_http_chunk(nc, "", 0);
-      return;
    }
    
    // software build
@@ -689,7 +652,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          event.mTCalibrated = true;
          for (int c=0 ; c<WD_N_CHANNELS ; c++) {
             for (int i=0 ; i<1024 ; i++) {
-               float t = i*1E-6 / gl->wdb[b]->GetDrsSampleFreq();
+               float t = i*1E-6 / demoDrsSampleFreq;
                event.mWfT[c][i] = t;
                event.mWfU[c][i] = (float)(sin(M_PI*2 * 100E6 * t + c/8.0)/2 + ((float)random()/RAND_MAX-0.5) / 300);
             }
@@ -1079,26 +1042,17 @@ int main(int argc, const char * argv[])
          // read board temperatures and lock status periodically
          time(&now);
 
-         if (gl.updatePeriodic) {
-            // update every second all registers
-            if (now > last) {
-               for (auto &b: gl.wdb) {
-                  b->ReceiveStatusRegisters();
+         if (now > last) {
+            // update every second all status registers
+            for (auto &b: gl.wdb)
+               b->ReceiveStatusRegisters();
+            // update all control registers if requested
+            if (gl.updatePeriodic) {
+               for (auto &b: gl.wdb)
                   b->ReceiveControlRegisters();
-               }
-               last = now;
             }
-         } else {
-            // update every 10 seconds to read temperature
-            if (now > last + 10) {
-               for (auto &b: gl.wdb) {
-                  b->GetTemperatureDegree(true);
-                  b->GetPllLock(true);
-               }
-               last = now;
-            }
+            last = now;
          }
-         
       }
    } catch  (std::runtime_error &e) {
       std::cout << std::endl;
