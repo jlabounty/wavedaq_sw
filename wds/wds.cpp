@@ -43,7 +43,7 @@ typedef struct {
    int  dbgTx;
 } GLOBALS;
 
-unsigned int demoDrsSampleFreq = 5120000;
+unsigned int demoDrsSampleFreq = 5016;
 
 /*------------------------------------------------------------------*/
 
@@ -465,7 +465,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"hvBoardPlugged\": %s,\n",             w->GetHvBoardPlugged() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"hvBackplanePlugged\": %s,\n",         w->GetBackplanePlugged() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"pllLck\": %d,\n",                     w->GetPllLock(false));
-         mg_printf_http_chunk(nc, "      \"drsSampleFreq\": %d,\n",              w->GetDrsSampleFreq());
+         mg_printf_http_chunk(nc, "      \"drsSampleFreq\": %d,\n",              gl->demoMode ? demoDrsSampleFreq : w->GetDrsSampleFreq());
          mg_printf_http_chunk(nc, "      \"adcSampleFreq\": %d,\n",              w->GetAdcSampleFreq());
          mg_printf_http_chunk(nc, "      \"compChannelStatus\": %d,\n",          w->GetCompChStat());
          mg_printf_http_chunk(nc, "      \"lastEventNumber\": %d,\n",            w->GetEventNumber());
