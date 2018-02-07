@@ -249,10 +249,10 @@ function populateControls(init) {
       document.getElementById("sldTriggerDelay").set(1 - OSC.wdb[OSC.curBoard].triggerDelay / 450);
       document.getElementById("inpTriggerDelay").value = Math.round(OSC.wdb[OSC.curBoard].triggerDelay);
    }
-   if (OSC.gl.triggerMode == 1) {
+   if (OSC.wdb[OSC.curBoard].triggerMode == 1) {
       document.getElementById("rbTriggerModeNormal").checked = true;
       document.getElementById("rbTriggerModeAuto").checked = false;
-   } else if (OSC.gl.triggerMode == 2) {
+   } else if (OSC.wdb[OSC.curBoard].triggerMode == 2) {
       document.getElementById("rbTriggerModeNormal").checked = false;
       document.getElementById("rbTriggerModeAuto").checked = true;
    }
@@ -260,7 +260,7 @@ function populateControls(init) {
    if (OSC.wdb[OSC.curBoard].triggerSource == 0) {
       document.getElementById("rbTriggerSourceInt").checked = true;
       document.getElementById("rbTriggerSourceExt").checked = false;
-   } else if (OSC.gl.triggerMode == 2) {
+   } else if (OSC.wdb[OSC.curBoard].triggerSource == 1) {
       document.getElementById("rbTriggerSourceInt").checked = false;
       document.getElementById("rbTriggerSourceExt").checked = true;
    }
@@ -337,8 +337,8 @@ function populateControls(init) {
    }
 
    // trigger pattern dialog box
-   for (i = 0; i < 16; i++) {
-      var p = document.getElementById('P' + i);
+   for (i = 0; i < 18; i++) {
+      var p = document.getElementById(i<10 ? 'P0'+i : 'P'+i);
       p.enabled = (OSC.wdb[OSC.curBoard].triggerPatternEnLocal & (1 << i)) > 0;
       if (p.enabled) {
          p.style.backgroundColor = 'darkgreen';
@@ -349,20 +349,20 @@ function populateControls(init) {
       }
 
       for (var j = 0; j < 16; j++) {
-         var c = document.getElementById('C' + (i < 10 ? '0' + i : i) + (j < 10 ? '0' + j : j));
+         var c = document.getElementById('C' + (j < 10 ? '0' + j : j) + (i < 10 ? '0' + i : i));
 
          c.mode = 0;
 
          // invert pattern for negative trigger
          if (OSC.wdb[OSC.curBoard].triggerFallingEdge) {
-            if ((OSC.wdb[OSC.curBoard].triggerPattern[j] & (1 << (i+16))) > 0)
+            if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << (j+16))) > 0)
                c.mode = 1;
-            if ((OSC.wdb[OSC.curBoard].triggerPattern[j] & (1 << i)) > 0)
+            if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << j)) > 0)
                c.mode = 2;
          } else {
-            if ((OSC.wdb[OSC.curBoard].triggerPattern[j] & (1 << i)) > 0)
+            if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << j)) > 0)
                c.mode = 1;
-            if ((OSC.wdb[OSC.curBoard].triggerPattern[j] & (1 << (i+16))) > 0)
+            if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << (j+16))) > 0)
                c.mode = 2;
          }
          if (c.mode == 0)
@@ -1250,6 +1250,9 @@ function btnTedge(value) {
    e.value = (value == 1);
    setParam(e);
 
+   for (var i=0 ; i<18 ; i++)
+      triggerSendCell(i);
+
    if (value == 1) {
       document.getElementById('trgEdgeUp').style.display = "none";
       document.getElementById('trgEdgeDown').style.display = "inline";
@@ -1630,14 +1633,9 @@ function triggerSendPattern() {
    var e = {};
    e.name = "triggerPatternEnLocal";
    e.value = 0;
-   for (var i = 0; i < 16; i++) {
-      if (document.getElementById('P' + i).enabled)
+   for (var i = 0; i < 18; i++) {
+      if (document.getElementById(i<10? 'P0'+i : 'P'+i).enabled)
          e.value += (1 << i);
-   }
-
-   // if trigger is set to external, set it to internal
-   if (OSC.wdb[OSC.curBoard].triggerSource == 0) {
-
    }
 
    setParam(e);
@@ -1678,6 +1676,13 @@ function triggerClickPattern() {
 }
 
 function triggerClickCell() {
+   // enable pattern for this cell
+   var p = document.getElementById('P' + this.id.substr(3));
+   p.enabled = true;
+   p.style.backgroundColor = 'darkgreen';
+   p.style.color = 'white';
+
+   // switch OR-AND-NULL
    this.mode = (this.mode + 1) % 3;
    if (this.mode == 0)
       this.innerHTML = '';
@@ -1686,41 +1691,54 @@ function triggerClickCell() {
    if (this.mode == 2)
       this.innerHTML = '&times;';
 
+   triggerSendPattern();
    triggerSendCell(this.pa);
 }
 
 function triggerClearAll() {
    for (var i = 0; i < 16; i++) {
-      var p = document.getElementById('P' + i);
+      var p = document.getElementById(i<10?'P0'+i:'P'+i);
+      p.enabled = false;
+      p.style.backgroundColor = '#DDDDDD';
+      p.style.color = 'black';
+   }
+   for (var i = 16; i < 18; i++) {
+      var p = document.getElementById(i<10?'P0'+i:'P'+i);
       p.enabled = false;
       p.style.backgroundColor = '#DDDDDD';
       p.style.color = 'black';
    }
 
    for (i = 0; i < 16; i++)
-      for (var j = 0; j < 16; j++) {
+      for (var j = 0; j < 18; j++) {
          var c = document.getElementById('C' + (i < 10 ? '0' + i : i) + (j < 10 ? '0' + j : j));
          c.mode = 0;
          c.innerHTML = '';
       }
 
    triggerSendPattern();
-   for (i = 0; i < 16; i++)
+   for (i = 0; i < 18; i++)
       triggerSendCell(i);
 }
 
 function triggerOrAll() {
    for (var i = 0; i < 16; i++) {
-      var p = document.getElementById('P' + i);
+      var p = document.getElementById(i<10?'P0'+i:'P'+i);
       p.enabled = true;
       p.style.backgroundColor = 'darkgreen';
       p.style.color = 'white';
    }
+   for (var i = 16; i < 18; i++) {
+      var p = document.getElementById(i<10?'P0'+i:'P'+i);
+      p.enabled = false;
+      p.style.backgroundColor = '#DDDDDD';
+      p.style.color = 'black';
+   }
 
    for (i = 0; i < 16; i++)
-      for (var j = 0; j < 16; j++) {
+      for (var j = 0; j < 18; j++) {
          var c = document.getElementById('C' + (i < 10 ? '0' + i : i) + (j < 10 ? '0' + j : j));
-         if (i == j) {
+         if (i == j && j<16) {
             c.mode = 1;
             c.innerHTML = '&bull;';
          } else {
@@ -1730,7 +1748,7 @@ function triggerOrAll() {
       }
 
    triggerSendPattern();
-   for (i = 0; i < 16; i++)
+   for (i = 0; i < 18; i++)
       triggerSendCell(i);
 }
 

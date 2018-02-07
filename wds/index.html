@@ -585,10 +585,10 @@
 
             var cell = row.insertCell(-1);
             cell.appendChild(document.createTextNode('Pattern:'));
-            for (var i = 0; i < 16; i++) {
+            for (var i = 0; i < 18; i++) {
                cell = row.insertCell(-1);
                cell.appendChild(document.createTextNode(i < 10 ? 'P0' + i : 'P' + i));
-               cell.id = 'P' + i;
+               cell.id = 'P' + (i<10 ? '0' + i : i);
                cell.enabled = false;
                cell.className = 'tableTriggerHeader';
                cell.addEventListener('click', triggerClickPattern.bind(cell));
@@ -600,7 +600,7 @@
                cell.appendChild(document.createTextNode('CH' + i));
                cell.style.backgroundColor = ChannelColors[i];
 
-               for (var j = 0; j < 16; j++) {
+               for (var j = 0; j < 18; j++) {
                   cell = row.insertCell(-1);
                   cell.appendChild(document.createTextNode(''));
                   cell.id = 'C' + (i<10 ? '0' + i : i) + (j<10 ? '0' + j : j);
@@ -622,8 +622,12 @@
    <div id="dlgTriggerHelp" class="dlgFrame">
       <div class="dlgTitlebar">Trigger Help
       </div>
-      <div class="dlgPanel" id="panelTrigger" style="text-align: left; line-height: 2em;">
-            <div>&bull;&nbsp;To activate or de-activate a trigger pattern, click on the PXX table header</div>
+      <div class="dlgPanel" id="panelTrigger" style="text-align: left; line-height: 2em; max-width: 950px;">
+         Each WaveDREAM board has 18 trigger patterns which are represented as columns in
+         the Trigger Patterns dialog. Each row represents one channel CH0 to CH15.
+         All 18 patterns are OR-ed to form the trigger. Each pattern can contain certain
+         channels in coincidence (&quot;&bull;&quot;) or in anti-coincidence (&quot;&times;&quot;).<br /><br />
+            <div>&bull;&nbsp;To activate or de-activate a trigger pattern, click on the PXX box at the table header</div>
             <div>&bull;&nbsp;To add a channel in coincidence to that pattern (AND), click once inside a cell.
                The symbol &quot;&bull;&quot; appears.</div>
             <div>&bull;&nbsp;To add a channel in anti-coincidence to that pattern (VETO), click again inside a cell.

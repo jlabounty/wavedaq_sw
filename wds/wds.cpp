@@ -212,7 +212,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                   gl->wdb[i]->SetTriggerEnable(true);
                   gl->wdb[i]->SetTriggerCfgOr(0);
                   gl->wdb[i]->SetTriggerCfgAnd(0);
-                  gl->wdb[i]->SetPatternTriggerSelect(2);
+                  gl->wdb[i]->SetPatternTriggerSelect(0);
                   gl->wdb[i]->SetTriggerCfgExtOr(true);
                   gl->wdb[i]->SetTriggerCfgExtAnd(false);
                }
@@ -383,7 +383,6 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "{\n");
       mg_printf_http_chunk(nc, "   \"gl\": {\n");
       mg_printf_http_chunk(nc, "      \"demoMode\": %s,\n",                      gl->demoMode ? "true" : "false");
-      mg_printf_http_chunk(nc, "      \"triggerMode\": %d,\n",                   gl->triggerMode);
       mg_printf_http_chunk(nc, "      \"updatePeriodic\": %d,\n",                gl->updatePeriodic);
       mg_printf_http_chunk(nc, "      \"nWdb\": %d\n",                           gl->wdb.size());
       mg_printf_http_chunk(nc, "   },\n");
@@ -517,8 +516,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             mg_printf_http_chunk(nc, "        %d,\n",                            w->GetFeMux(i));
          mg_printf_http_chunk(nc, "        %d ],\n",                             w->GetFeMux(15));
 
+         mg_printf_http_chunk(nc, "      \"triggerMode\": %d,\n",                gl->triggerMode);
          mg_printf_http_chunk(nc, "      \"triggerSource\": %d,\n",              w->GetPatternTriggerSelect() == 2 ? 0 : 1);
-
          mg_printf_http_chunk(nc, "      \"triggerShaperEnable\": %s,\n",        w->GetTriggerShaperEnable() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"triggerPulseLength\": %d,\n",         w->GetTriggerOutPulseLength());
          mg_printf_http_chunk(nc, "      \"triggerEnable\": %s,\n",              w->GetTriggerEnable() ? "true" : "false");
