@@ -1651,16 +1651,18 @@ bool WDB::LoadTimeCalibration(int freq, std::string path)
 
 void WDEvent::SetEventHeaderInfo(WD2_FRAME_HEADER *ph)
 {
+   int channel = ph->channel_info & 0x1F;
    mBoardId = ph->board_id;
    mCrateId = ph->crate_id;
    mSlotId  = ph->slot_id;
    mEventNumber = ph->event_number;
    mSamplingFrequency = ph->sampling_frequency;
    mTriggerNumber = ph->trigger_information[0] | (ph->trigger_information[1] << 8); // ## to be changed
-   if (ph->channel_info < 8 || ph->channel_info == 16)
-      mTriggerCell[0] = ph->drs_trigger_cell;
+   mTriggerCell[channel] = ph->drs_trigger_cell;
+   if (channel < 8 || channel == 16)
+      mTriggerCellDrs0 = ph->drs_trigger_cell;
    else
-      mTriggerCell[1] = ph->drs_trigger_cell;
+      mTriggerCellDrs1 = ph->drs_trigger_cell;
    mTriggerType = ph->trigger_information[2] | (ph->trigger_information[3] << 8);   // ## to be changed
    mTemperature = std::round(ph->temperature*0.0625 * 10 + 0.5) / 10.0f;
    mWFTypeADC = mSamplingFrequency <= 100;
@@ -1858,8 +1860,7 @@ void WP::InvalidateAllWf()
       for (int i=0 ; i<WD_N_CHANNELS ; i++) {
          er->SetWfValid(i, 0, false);
          er->SetWfValid(i, 1, false);
-         er->SetDrs0TriggerCell(-1);
-         er->SetDrs1TriggerCell(-1);
+         er->SetDrsTriggerCell(i, -1);
       }
    }
    
@@ -2014,18 +2015,20 @@ int WP::ReceiveWfPacket()
    
    if (mCurrentEvent == -1)
       mCurrentEvent = ph->event_number;
-   if (er->GetDrs0TriggerCell() == -1 && (ph->channel_info >> 7) == 0)
-      er->SetDrs0TriggerCell(ph->drs_trigger_cell);
-   if (er->GetDrs1TriggerCell() == -1 && (ph->channel_info >> 7) == 1)
-      er->SetDrs1TriggerCell(ph->drs_trigger_cell);
+   if (er->GetDrsTriggerCell(channel_number) == -1)
+      er->SetDrsTriggerCell(channel_number, ph->drs_trigger_cell);
    
    // print warning if inconsistent trigger cells are found
-   if (ph->event_number == (unsigned int)mCurrentEvent &&
-       (((ph->channel_info >> 7) == 0 && ph->drs_trigger_cell != er->GetDrs0TriggerCell()) ||
-        ((ph->channel_info >> 7) == 1 && ph->drs_trigger_cell != er->GetDrs1TriggerCell()))) {
-          std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
-       }
-   
+   if (channel_number < 8 || channel_number == 16) {
+      for (int i=0 ; i<8 ; i++)
+         if (er->GetDrsTriggerCell(i) != -1 && er->GetDrsTriggerCell(i) != ph->drs_trigger_cell)
+            std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
+   } else {
+      for (int i=8 ; i<16 ; i++)
+         if (er->GetDrsTriggerCell(i) != -1 && er->GetDrsTriggerCell(i) != ph->drs_trigger_cell)
+            std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
+   }
+
    // drop package if it belongs to previous event
    if (ph->event_number == (unsigned int)mCurrentEvent-1) {
       std::cerr << "Package of previous event dropped, package event=" << ph->event_number << ", "
@@ -2065,11 +2068,8 @@ int WP::ReceiveWfPacket()
       // switch to new event
       InvalidateAllWf();
       mCurrentEvent = ph->event_number;
-      if ((ph->channel_info >> 7) == 0)
-         er->SetDrs0TriggerCell(ph->drs_trigger_cell);
-      else
-         er->SetDrs1TriggerCell(ph->drs_trigger_cell);
       mPacketsReceived = 1;
+      er->SetDrsTriggerCell(channel_number, ph->drs_trigger_cell);
 
       mEventStartTime = std::chrono::high_resolution_clock::now();
    }
@@ -2132,7 +2132,7 @@ void WP::UnrotateWaveforms()
       
       // un-rotate waveforms
       for (int i=0 ; i<WD_N_CHANNELS ; i++) {
-         int tc = i < 8 || i == 16 ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
+         int tc = ev->mTriggerCell[i];
          for (int j=0 ; j<1024 ; j++)
             ev->mWfU[i][(j+tc) % 1024] = wf[i][j];
       }
@@ -2336,7 +2336,7 @@ void WP::CalibrateWaveforms(WDEvent* ev)
          
          if (mRotateWaveform) {
             for (int i=0 ; i<WD_N_CHANNELS ; i++) {
-               int tc = i < 8 || i == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
+               int tc = ev->mTriggerCell[i];
                for (int j=0 ; j<1024 ; j++)
                   ev->mWfU[i][j] -= wdb->mVCalib.mCalib.wf_offset1[i][(j+tc) % 1024];
             }
@@ -2358,7 +2358,7 @@ void WP::CalibrateWaveforms(WDEvent* ev)
       if (mGainCalib && bValid) {
          if (mRotateWaveform) {
             for (int i=0 ; i<WD_N_CHANNELS-2 ; i++) { // exclude clock channels
-               int tc = i < 8 || i == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
+               int tc = ev->mTriggerCell[i];
                for (int j=0 ; j<1024 ; j++) {
                   if (ev->mWfU[i][j] > 0)
                      ev->mWfU[i][j] /= wdb->mVCalib.mCalib.wf_gain1[i][(j+tc) % 1024];
@@ -2397,8 +2397,8 @@ void WP::CalibrateWaveforms(WDEvent* ev)
       
       // remove spikes
       if (mRemoveSpikes) {
-         RemoveSpikes(ev->mTriggerCell[0], ev->mWfU);
-         RemoveSpikes(ev->mTriggerCell[0], ev->mWfU+WD_N_CHANNELS/2);
+         RemoveSpikes(ev->mTriggerCellDrs0, ev->mWfU);
+         RemoveSpikes(ev->mTriggerCellDrs1, ev->mWfU+WD_N_CHANNELS/2);
       };
       
       // calculate calibrated time for each event
@@ -2409,7 +2409,7 @@ void WP::CalibrateWaveforms(WDEvent* ev)
          
          // integrate time from delta-t values
          for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
-            int tc = ch < 8 || ch == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
+            int tc = ev->mTriggerCell[ch];
             if (!mRotateWaveform)
                tc = 0;
             ev->mWfT[ch][0] = 0;
@@ -2417,7 +2417,7 @@ void WP::CalibrateWaveforms(WDEvent* ev)
                ev->mWfT[ch][i] = ev->mWfT[ch][i-1] + wdb->mTCalib.mCalib.dt[ch][(i-1+tc)%1024];
          }
          // align cell#0 of all channels inside chip0
-         int tc = mRotateWaveform ? ev->mTriggerCell[0] : 0;
+         int tc = mRotateWaveform ? ev->mTriggerCellDrs0 : 0;
          float t1 = ev->mWfT[0][(1024-tc) % 1024];
          for (int ch=1 ; ch<8 ; ch++) {
             float t2 = ev->mWfT[ch][(1024-tc) % 1024];
@@ -2431,7 +2431,7 @@ void WP::CalibrateWaveforms(WDEvent* ev)
             ev->mWfT[16][i] += dt;
          
          // align cell#0 of all channels inside chip1 to chip0
-         tc = mRotateWaveform ? ev->mTriggerCell[1] : 0;
+         tc = mRotateWaveform ? ev->mTriggerCellDrs1 : 0;
          for (int ch=8 ; ch<16 ; ch++) {
             float t2 = ev->mWfT[ch][(1024-tc) % 1024];
             float dt = t1 - t2;
@@ -2591,7 +2591,7 @@ void WP::SaveWaveforms()
             if (mask & (1 << i)) {
                sprintf(str, "CHN%d", i);
                mxml_start_element(li.xml, str);
-               sprintf(str, "%d", i < 8 || i == 16 ? ev->mTriggerCell[0] : ev->mTriggerCell[1]);
+               sprintf(str, "%d", ev->mTriggerCell[i]);
                mxml_write_element(li.xml, "Trigger_Cell", str);
                
                unsigned int s = 0;
@@ -2714,7 +2714,7 @@ void WP::SaveWaveforms()
                // write trigger cell
                sprintf((char *)p, "T#");
                p += 2;
-               *(unsigned short *)p = i < 8 || i == 16 ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
+               *(unsigned short *)p = ev->mTriggerCell[i];
                p += sizeof(unsigned short);
                
                for (int j=0 ; j<1024 ; j++) {
@@ -2902,7 +2902,7 @@ void WP::DoCalibrationVoltageStep()
       b->SetFeMux(-1, WDB::cFeMuxCalSource);
       
       // enable all DRSchannels
-      b->SetDrsChTxEn(0x3FF);
+      b->SetDrsChTxEn(0x3FFFF);
       b->SetAdcChTxEn(0);
       
       // range -0.5 ... + 0.5V
@@ -2947,7 +2947,7 @@ void WP::DoCalibrationVoltageStep()
             for (int bin=0 ; bin<1024 ; bin++)
                b->mVCalib.mCalib.wf_offset1[ch][bin] = (float)calibProg.ave->Median(0, ch, bin);
          
-         // ave->SaveNormalizedDistribution("wf.csv", 0);
+         // calibProg.ave->SaveNormalizedDistribution("wf.csv", 0);
          calibProg.ave->Reset();
       }
       
@@ -3088,7 +3088,7 @@ void WP::DoCalibrationVoltageStep()
    b->SetRange(-0.45);
 
    // DRS events
-   b->SetDrsChTxEn(0x3FF);
+   b->SetDrsChTxEn(0x3FFFF);
    b->SetAdcChTxEn(0);
    WDEvent event(b->GetSerialNumber());
    for (int i=0 ; i<10 ; i++) {
@@ -3106,7 +3106,7 @@ void WP::DoCalibrationVoltageStep()
    
    // ADC events
    b->SetDrsChTxEn(0);
-   b->SetAdcChTxEn(0xFF);
+   b->SetAdcChTxEn(0xFFFF);
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
       sleep_ms(10);
@@ -3124,7 +3124,7 @@ void WP::DoCalibrationVoltageStep()
    b->SetRange(0);
    
    // DRS events
-   b->SetDrsChTxEn(0x3FF);
+   b->SetDrsChTxEn(0x3FFFF);
    b->SetAdcChTxEn(0);
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
@@ -3141,7 +3141,7 @@ void WP::DoCalibrationVoltageStep()
    
    // ADC events
    b->SetDrsChTxEn(0);
-   b->SetAdcChTxEn(0xFF);
+   b->SetAdcChTxEn(0xFFFF);
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
       sleep_ms(10);
@@ -3159,7 +3159,7 @@ void WP::DoCalibrationVoltageStep()
    b->SetRange(0.45);
    
    // DRS events
-   b->SetDrsChTxEn(0x3FF);
+   b->SetDrsChTxEn(0x3FFFF);
    b->SetAdcChTxEn(0);
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
@@ -3176,7 +3176,7 @@ void WP::DoCalibrationVoltageStep()
    
    // ADC events
    b->SetDrsChTxEn(0);
-   b->SetAdcChTxEn(0xFF);
+   b->SetAdcChTxEn(0xFFFF);
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
       sleep_ms(10);
@@ -3226,7 +3226,7 @@ void WP::DoCalibrationVoltageStep()
 void WP::AnalyzePeriod(WDEvent *event, WDB *b)
 {
    for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
-      int tc = ch < 8 || ch == 16 ? event->mTriggerCell[0] : event->mTriggerCell[1];
+      int tc = event->mTriggerCell[ch];
       
       // rising edges
       for (int i1=tc+5; i1<tc+1024-5 ; i1++) {
@@ -3324,7 +3324,7 @@ void WP::CalibrateLocal(WDEvent *event, WDB *b)
    }
    
    for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
-      int tc = ch < 8 || ch == 16 ? event->mTriggerCell[0] : event->mTriggerCell[1];
+      int tc = event->mTriggerCell[ch];
       
       for (int i=tc+5; i<tc+1024-5 ; i++) {
          
@@ -3385,7 +3385,7 @@ void WP::CalibrateGlobal(WDEvent *event, WDB *b)
    double nominalPeriod = 1 / 120E6; // Period of 120 MHz clock
    
    for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
-      int tc = ch < 8 || ch == 16 ? event->mTriggerCell[0] : event->mTriggerCell[1];
+      int tc = event->mTriggerCell[ch];
       
       // rising edges
       for (int i1=tc+5; i1<tc+1024-5 ; i1++) {
@@ -3538,7 +3538,7 @@ void WP::DoCalibrationTimeStep()
       b->SetFeMux(-1, WDB::cFeMuxCalSource);
       
       // enable all channels
-      b->SetDrsChTxEn(0x3FF);
+      b->SetDrsChTxEn(0x3FFFF);
 
       calibProg.phase = 0;
       b->SetTimingCalibSignalDelay(calibProg.phase);

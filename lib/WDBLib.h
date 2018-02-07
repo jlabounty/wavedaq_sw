@@ -151,7 +151,9 @@ public:
    unsigned int     mEventNumber;
    unsigned short   mSamplingFrequency;
    unsigned short   mTriggerNumber;
-   int              mTriggerCell[2];
+   int              mTriggerCell[WD_N_CHANNELS];
+   int              mTriggerCellDrs0;
+   int              mTriggerCellDrs1;
    unsigned short   mTriggerType;
    float            mTemperature;
    bool             mWFTypeADC;
@@ -223,8 +225,7 @@ class WDEventRequest {
    bool             mBoardRequested;
    bool             mWfValid[WD_N_CHANNELS][2];
    unsigned int     mChannelMask;
-   int              mDrs0TriggerCell;
-   int              mDrs1TriggerCell;
+   int              mDrsTriggerCell[WD_N_CHANNELS];
  
 public:
    WDEventRequest(int boardId, unsigned int mask = 0xFFFF) {
@@ -233,6 +234,7 @@ public:
       for (int i=0 ; i<WD_N_CHANNELS ; i++) {
          mWfValid[i][0] = false;
          mWfValid[i][1] = false;
+         mDrsTriggerCell[i] = -1;
       }
       mChannelMask = mask;
    } ;
@@ -241,10 +243,8 @@ public:
    void             SetRequested(bool flag) { mBoardRequested = flag; }
    bool             IsRequested() { return mBoardRequested; }
    void             SetWfValid(int channel, int segment, bool v) { mWfValid[channel][segment] = v; }
-   void             SetDrs0TriggerCell(unsigned int c) { mDrs0TriggerCell = c; }
-   void             SetDrs1TriggerCell(unsigned int c) { mDrs1TriggerCell = c; }
-   int              GetDrs0TriggerCell() { return mDrs0TriggerCell; }
-   int              GetDrs1TriggerCell() { return mDrs1TriggerCell; }
+   void             SetDrsTriggerCell(int ch, unsigned int c) { mDrsTriggerCell[ch] = c; }
+   int              GetDrsTriggerCell(int ch) { return mDrsTriggerCell[ch]; }
    void             SetMask(unsigned int mask) { mChannelMask = mask; }
    unsigned int     GetMask() { return mChannelMask; }
    bool             IsWfValid();
