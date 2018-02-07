@@ -222,10 +222,14 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
       else if (item == "triggerPatternEnLocal") {
          if (iBoard == -1)
-            for (auto &b: gl->wdb)
-               b->SetPatternTriggerSelect(std::stoi(value));
-         else
-            gl->wdb[iBoard]->SetPatternTriggerSelect(std::stoi(value));
+            for (auto &b: gl->wdb) {
+               b->SetPatternTriggerSelect(2); // select pattern trigger
+               b->SetTrgPtrnEnLocal(std::stoi(value));
+            }
+         else {
+            gl->wdb[iBoard]->SetPatternTriggerSelect(2);
+            gl->wdb[iBoard]->SetTrgPtrnEnLocal(std::stoi(value));
+         }
       }
 
       else if (item == "triggerPattern") {
@@ -530,9 +534,9 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"triggerPatternEnLocal\": %d,\n",      w->GetTrgPtrnEnLocal());
 
          mg_printf_http_chunk(nc, "      \"triggerPattern\": [\n");
-         for (int i=0 ; i<18 ; i++)
+         for (int i=0 ; i<17 ; i++)
             mg_printf_http_chunk(nc, "        %d,\n",                            w->GetTrgPtrn(i));
-         mg_printf_http_chunk(nc, "        %d ],\n",                             w->GetTrgPtrn(15));
+         mg_printf_http_chunk(nc, "        %d ],\n",                             w->GetTrgPtrn(17));
 
          mg_printf_http_chunk(nc, "      \"scaler\": [\n");
          for (auto &s: scaler) {

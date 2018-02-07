@@ -1562,12 +1562,12 @@ void WDB::SetLmk(int reg, unsigned int v)
 unsigned int WDB::GetTrgPtrn(int i)
 {
    assert(i >= 0 && i < 18);
-   return BitExtractControl(WD2_TRG_PTRN0_REG+i/4, WD2_TRG_PTRN0_MASK, WD2_TRG_PTRN0_OFS);
+   return BitExtractControl(WD2_TRG_PTRN0_REG+i*4, WD2_TRG_PTRN0_MASK, WD2_TRG_PTRN0_OFS);
 };
 
 void WDB::SetTrgPtrn(int i, unsigned int value)
 {
-   SetRegMask(WD2_TRG_PTRN0_REG+i/4, WD2_TRG_PTRN0_MASK, WD2_TRG_PTRN0_OFS, value);
+   SetRegMask(WD2_TRG_PTRN0_REG+i*4, WD2_TRG_PTRN0_MASK, WD2_TRG_PTRN0_OFS, value);
 };
 
 unsigned int WDB::GetTriggerDelayNs()
