@@ -6,6 +6,7 @@
    <link href="wds.css" rel="stylesheet" type="text/css">
    <link href="favicon.png" rel="shortcut icon" type="image/png" title="WaveDAQ Icon">
    <link href="iosicon.png" rel="apple-touch-icon" type="image/png" title="WaveDAQ Icon">
+   <script src="fft.js" type="text/javascript"></script>
    <script src="controls.js" type="text/javascript"></script>
    <script src="osc.js" type="text/javascript"></script>
    <script src="wds.js" type="text/javascript"></script>
@@ -310,6 +311,16 @@
                   </select>
                </div>
 
+            </div>
+         </div>
+
+         <div class="groupTitle">Extra Channels</div>
+         <div class="group">
+            <div style="user-select: none">
+               <button class="squareButton" id="ch18" type="button" onClick="btnChn(event, 18)"
+                       onContextmenu="btnChn(event, 18)">&Sigma;</button>
+               <button class="squareButton" id="ch19" type="button" onClick="btnChn(event, 19)"
+                       onContextmenu="btnChn(event, 19)" style="width: 50px">FFT</button>
             </div>
          </div>
 
@@ -618,11 +629,11 @@
       </div>
    </div>
 
-   <!-- trigger pattern dialog -->
+   <!-- trigger pattern help dialog -->
    <div id="dlgTriggerHelp" class="dlgFrame">
       <div class="dlgTitlebar">Trigger Help
       </div>
-      <div class="dlgPanel" id="panelTrigger" style="text-align: left; line-height: 2em; max-width: 950px;">
+      <div class="dlgPanel" id="panelTriggerHelp" style="text-align: left; line-height: 2em; max-width: 950px;">
          Each WaveDREAM board has 18 trigger patterns which are represented as columns in
          the Trigger Patterns dialog. Each row represents one channel CH0 to CH15.
          All 18 patterns are OR-ed to form the trigger. Each pattern can contain certain
@@ -637,7 +648,8 @@
             <button class="wideButton" type="button" onClick="dlgHide('dlgTriggerHelp')">Close</button>
          </div>
       </div>
-   </div> <!-- container -->
+   </div>
+</div> <!-- container -->
 
 </body>
 </html>

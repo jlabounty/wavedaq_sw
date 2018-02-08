@@ -15,17 +15,18 @@ CanvasRenderingContext2D.prototype.drawLine = function (x1, y1, x2, y2) {
 
 var ChannelColors = [
    "#FFFF00", "#B0B0FF", "#FFA0A0", "#A0FFA0",
-   "#FF9000", "#00AAFF", "#FF0020", "#00C030",
+   "#FF9000", "#00AAFF", "#FF00A0", "#00C030",
    "#D0A060", "#A0C0D0", "#C04010", "#807060",
    "#F0C000", "#2090A0", "#D040D0", "#90B000",
-   "#FFFFFF", "#FFFFFF" ];
+   "#FFFFFF", "#FFFFFF", "#FF0000", "#FF0000" ];
 
 function Oscilloscope(div) { // constructor
 
    // constants
    this.chnColors = ChannelColors;
 
-   this.UScaleTable = [[0.001, "1 mV"],
+   this.UScaleTable =
+      [[0.001, "1 mV"],
       [0.002, "2 mV"],
       [0.005, "5 mV"],
       [0.01, "10 mV"],
@@ -39,7 +40,8 @@ function Oscilloscope(div) { // constructor
       [5, "5 V"],
       [10, "10 V"]];
 
-   this.TScaleTable = [[1E-9, "1 ns"],
+   this.TScaleTable =
+      [[1E-9, "1 ns"],
       [2E-9, "2 ns"],
       [5E-9, "5 ns"],
       [10E-9, "10 ns"],
@@ -115,7 +117,7 @@ function Oscilloscope(div) { // constructor
    this.newImage = true;
 
    // default values
-   for (var i = 0; i < 18; i++) {
+   for (var i = 0; i < 20; i++) {
       this.chOn[i] = false;
       this.chOnSelected[i] = false;
       this.wf.T[i] = [];
@@ -354,11 +356,11 @@ Oscilloscope.prototype.draw = function () {
 
    this.blackCanvas(ctx);
    if (this.wf.type == 2) {
+      this.drawGrid(ctx);
       this.drawDT(ctx);
-      this.drawGrid(ctx);
    } else {
-      this.drawWF(ctx);
       this.drawGrid(ctx);
+      this.drawWF(ctx);
       this.drawMarker(ctx);
       this.drawMeasurements(ctx);
       this.drawCursors(ctx);
@@ -379,7 +381,7 @@ Oscilloscope.prototype.draw = function () {
 
 Oscilloscope.prototype.drawChnButtons = function () {
    // set blue border of active channel buttons
-   for (var i = 0; i < 18; i++) {
+   for (var i = 0; i < 20; i++) {
       var cb = document.getElementById("ch" + i);
       if (cb == undefined)
          continue;
@@ -393,7 +395,7 @@ Oscilloscope.prototype.drawChnButtons = function () {
          if (i < 16)
             cb.style.backgroundColor = "#E0E0E0";
          else
-            cb.style.backgroundColor = "#C0C0C0";
+            cb.style.backgroundColor = "#A0A0A0";
       }
    }
 }
@@ -645,7 +647,7 @@ Oscilloscope.prototype.calcScaleOffset = function () {
    this.wfTO = this.wfTOffset / (this.wfTScale * 10) * this.w + this.x1;
    this.wfTS = 1 / (this.wfTScale * 10) * this.w;
 
-   for (var c = 0; c < 18; c++) {
+   for (var c = 0; c < 20; c++) {
       this.wfUO[c] = (this.y1 + this.y2) / 2 - this.wfOffset[c] * this.h;
       this.wfUS[c] = -this.h / this.wfScale[c] / 10;
    }
@@ -673,7 +675,7 @@ Oscilloscope.prototype.drawWF = function (ctx) {
       ctx.rect(this.x1, this.y1, this.w, this.h);
       ctx.clip();
       var spacing = this.wfTS / (OSC.wdb[OSC.curBoard].drsSampleFreq * 1E6);
-      for (var c = 0; c < 18; c++) {
+      for (var c = 0; c < 20; c++) {
          if (this.chOn[c]) {
             ctx.beginPath();
             ctx.fillStyle = this.chnColors[c];
@@ -740,7 +742,7 @@ Oscilloscope.prototype.drawWF = function (ctx) {
       }
 
 
-      for (c = 0; c < 18; c++) {
+      for (c = 0; c < 20; c++) {
          if (this.chOn[c]) {
             var col = parseInt(this.chnColors[c].substr(1, 6), 16);
             var r = (col >> 16) & 0xFF;
@@ -797,11 +799,11 @@ Oscilloscope.prototype.drawWF = function (ctx) {
 
 Oscilloscope.prototype.drawMarker = function (ctx) {
    // Circular markers on left side
-   for (var c = 17; c >= 0; c--) {
+   for (var c = 18; c >= 0; c--) {
       if (this.chOn[c]) {
          var y = this.wfUO[c];
          ctx.fillStyle = this.chnColors[c];
-         ctx.strokeStyle = "#E0E0E0";
+         ctx.strokeStyle = this.chnColors[c];
          ctx.beginPath();
          ctx.arc(this.x1 - 2, y, 8, 0, 2 * Math.PI);
          ctx.fill();
@@ -811,7 +813,10 @@ Oscilloscope.prototype.drawMarker = function (ctx) {
          ctx.textAlign = "center";
          ctx.textBaseline = "middle";
          ctx.font = '10px sans-serif';
-         ctx.fillText(c.toString(), this.x1 - 2, y);
+         if (c == 18)
+            ctx.fillText("\u03A3", this.x1 - 2, y);
+         else
+            ctx.fillText(c.toString(), this.x1 - 2, y);
       }
    }
 

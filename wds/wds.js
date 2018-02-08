@@ -776,9 +776,9 @@ function receiveWF() {
    if (OSC.req.readyState == 4 && OSC.req.status == 200) {
       // this.wf = JSON.parse(OSC.req.responseText); // use this for JSON encoded data
 
-      // create 18 empty waveforms
+      // create 16+2+2 empty waveforms
       var wf = {T: [], U: [], type: 1};
-      for (var i = 0; i < 18; i++) {
+      for (var i = 0; i < 20; i++) {
          wf.T[i] = [];
          wf.U[i] = [];
       }
@@ -884,6 +884,9 @@ function receiveWF() {
          }
       }
 
+      // calculate sum and FFT waveforms
+      calcMathWF(wf);
+
       if (responseType == 11) {
          OSC.timer.loadWF = window.setTimeout(loadWF, 250);
          OSC.sendWaveforms(wf);
@@ -914,6 +917,33 @@ function receiveWF() {
       }
    } else if (OSC.req.readyState == 4 && OSC.req.status == 0) {
       connectionBroken();
+   }
+}
+
+function calcMathWF(wf)
+{
+   // add sum waveform
+   for (i = 0; i < 1024; i++) {
+      var t = i * 1E-6 / OSC.wdb[OSC.curBoard].drsSampleFreq;
+      wf.T[18][i] = t;
+
+      wf.U[18][i] = 0;
+      for (var j=0 ; j<16 ; j++)
+         if (OSC.chOn[j])
+            wf.U[18][i] += wf.U[j][i];
+   }
+
+   var w = new Float32Array(1024);
+   for (var i = 0; i < 1024; i++) {
+      w[i] = Math.sin(880 * Math.PI * 2 * (i / 44000));
+   }
+   spectrum = fft(w);
+
+   // add FFT waveform
+   for (i = 0; i < 1024; i++) {
+      var t = i * 1E-6 / OSC.wdb[OSC.curBoard].drsSampleFreq;
+      wf.T[19][i] = t;
+      wf.U[19][i] = w[i]/1000;
    }
 }
 
@@ -1057,7 +1087,7 @@ function btnChnAll() {
       OSC.chOnSelected[i] = true;
 
    // set scale according to first active channel
-   for (i = 0; i < 18; i++)
+   for (i = 0; i < 19; i++)
       if (OSC.chOn[i])
          break;
    if (i == 18)
@@ -1076,7 +1106,7 @@ function btnChn(event, c)
 
    // unselect all channels
    if (!event.ctrlKey && !event.shiftKey)
-      for (var i = 0; i < 18; i++)
+      for (var i = 0; i < 20; i++)
          if (i != c)
             OSC.chOnSelected[i] = false;
 
@@ -1145,10 +1175,10 @@ function btnOn()
 function btnScale(inc)
 // change vertical scale, update label
 {
-   for (var i = 0; i < 18; i++)
+   for (var i = 0; i < 19; i++)
       if (OSC.chOnSelected[i])
          break;
-   if (i == 18)
+   if (i == 19)
       i = 0;
 
    var index = OSC.wfScaleIndex[i] + inc;
@@ -1157,7 +1187,7 @@ function btnScale(inc)
    if (index == OSC.UScaleTable.length)
       index--;
 
-   for (i = 0; i < 18; i++) {
+   for (i = 0; i < 19; i++) {
       if (!OSC.chOnSelected[i])
          continue;
 
@@ -1195,7 +1225,7 @@ function setTScale() {
 }
 
 function sldUOffset(value) {
-   for (var i = 0; i < 18; i++) {
+   for (var i = 0; i < 19; i++) {
       if (!OSC.chOnSelected[i])
          continue;
       OSC.wfOffset[i] = value - 0.5;
@@ -1281,7 +1311,7 @@ function setRange(s) {
 }
 
 function btnOfsZero() {
-   for (i = 0; i < 18; i++) {
+   for (i = 0; i < 19; i++) {
       if (OSC.chOn[i])
          OSC.wfOffset[i] = 0;
    }
@@ -1297,7 +1327,7 @@ function btnOfsZero() {
 function btnOfsDist() {
    // count active channels
    var n = 0;
-   for (i = 0; i < 18; i++) {
+   for (i = 0; i < 19; i++) {
       if (OSC.chOn[i])
          n++;
    }
@@ -1307,7 +1337,7 @@ function btnOfsDist() {
 
    // set offset
    var o = 0.5 - d;
-   for (i = 0; i < 18; i++) {
+   for (i = 0; i < 19; i++) {
       if (OSC.chOn[i]) {
          OSC.wfOffset[i] = o;
          o -= d;
@@ -1545,10 +1575,13 @@ function measSelect(meas, sel, prev) {
          input[pi].onchange = function () {
             measParamChange(meas);
          };
-         for (i = 0; i < 18; i++) {
+         for (i = 0; i < 19; i++) {
             o = document.createElement("option");
             o.value = i;
-            o.innerHTML = "CH" + i;
+            if (i == 18)
+               o.innerHTML = "SUM";
+            else
+               o.innerHTML = "CH" + i;
             if (prev) {
                if (prev.param[pi].value + 1 == i)
                   o.selected = true;
