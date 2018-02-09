@@ -276,6 +276,7 @@ void TCB::SetIDCode()
    if((fidcode>>12)==1) fnserdes = 16;
    else if((fidcode>>12)==2) fnserdes = 4;
    else if((fidcode>>12)==3) fnserdes = 16;
+   printf("board %d serdes %d\n", fidcode, fnserdes);
 }
 
 //Set NTRG by accessing to rntrg register
@@ -782,7 +783,7 @@ void TCB::ConfigureAllDCBSerdes(short dly, int bitslip){
    for(int ilink=0; ilink<2; ilink++){
       conf[ilink/4] |= 0x80 << (ilink%4)*8;
    }
-   WriteBLT(0x3D0, conf, 1);
+   WriteBLT(RDCBSERDESCONF, conf, 1);
 
    //write config and enable
    for(int i=0; i<1; i++){
@@ -791,7 +792,7 @@ void TCB::ConfigureAllDCBSerdes(short dly, int bitslip){
    for(int ilink=0; ilink<2; ilink++){
       conf[ilink/4] |= (0x20|(dly &0x1F)) << (ilink%4)*8;
    }
-   WriteBLT(0x3D0, conf, 1);
+   WriteBLT(RDCBSERDESCONF, conf, 1);
 
    //load delay
    u_int32_t loadval;
@@ -805,7 +806,7 @@ void TCB::ConfigureAllDCBSerdes(short dly, int bitslip){
    u_int32_t data[1];
    for(int i=0; i<1; i++) data[i]=0x00000003;
    for (int i=0; i<bitslip; i++) {
-      WriteBLT(0x3D1, data, 1);
+      WriteBLT(RDCBSERDESBSLP, data, 1);
    }
 }
 //configure a all serdes link
@@ -853,13 +854,13 @@ void TCB::SetAllDCBSerdes(u_int32_t *dlys, int *bits){
    for(int ilink=0; ilink<2; ilink++){
       conf[ilink/4] |= 0x80 << (ilink%4)*8;
    }
-   WriteBLT(0x3D0, conf, 1);
+   WriteBLT(RDCBSERDESCONF, conf, 1);
 
    for(int i=0; i<1; i++)conf[i]=0;
    for(int ilink=0; ilink<2; ilink++){
       conf[ilink] |= (0x20202020|dlys[ilink]);
    }
-   WriteBLT(0x3D0, conf, 1);
+   WriteBLT(RDCBSERDESCONF, conf, 1);
 
    //load delay
    u_int32_t loadval;
@@ -881,7 +882,7 @@ void TCB::SetAllDCBSerdes(u_int32_t *dlys, int *bits){
             morebits = true;
          }
       }
-      WriteBLT(0x3D1, data, 1);
+      WriteBLT(RDCBSERDESBSLP, data, 1);
    }
 }
 //check errors on serdes
@@ -908,8 +909,8 @@ void TCB::GetSerdesErrorCount(u_int32_t* data){
 }
 //check errors on serdes
 void TCB::GetDCBSerdesErrorCount(u_int32_t* data){
-   ReadBLT(0x3D3, data, 2);
-   ReadReg(0x3B0, data+2);
+   ReadBLT(RDCBSERDESCOU, data, 2);
+   ReadReg(RSERDESTIME, data+2);
 }
 //start a serdes check
 void TCB::StartSerdesCheck(){
