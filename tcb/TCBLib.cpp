@@ -276,7 +276,6 @@ void TCB::SetIDCode()
    if((fidcode>>12)==1) fnserdes = 16;
    else if((fidcode>>12)==2) fnserdes = 4;
    else if((fidcode>>12)==3) fnserdes = 16;
-   printf("board %d serdes %d\n", fidcode, fnserdes);
 }
 
 //Set NTRG by accessing to rntrg register
