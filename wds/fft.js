@@ -27,7 +27,7 @@ function fft(wreal) {
    var wimag = new Array(wreal.length).fill(0);
    transform(wreal, wimag);
    for (var i=0 ; i<wreal.length ; i++)
-      wreal[i] = Math.sqrt(wreal[i]*wreal[i]+wimag[i]+wimag[i]);
+      wreal[i] = Math.sqrt(wreal[i]*wreal[i]+wimag[i]*wimag[i]);
 }
 
 

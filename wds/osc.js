@@ -675,7 +675,7 @@ Oscilloscope.prototype.drawWF = function (ctx) {
       ctx.rect(this.x1, this.y1, this.w, this.h);
       ctx.clip();
       var spacing = this.wfTS / (OSC.wdb[OSC.curBoard].drsSampleFreq * 1E6);
-      for (var c = 0; c < 20; c++) {
+      for (var c = 0; c < 19; c++) {
          if (this.chOn[c]) {
             ctx.beginPath();
             ctx.fillStyle = this.chnColors[c];
@@ -795,6 +795,44 @@ Oscilloscope.prototype.drawWF = function (ctx) {
       }
       ctx.putImageData(this.wfImg, this.x1, this.y1);
    }
+
+   // draw FFT
+   if (this.chOn[19]) {
+
+      var f = [];
+      for (i = 0; i < 512; i++) {
+         f[i] = Math.log(this.wf.U[19][i]);
+      }
+
+      var min = -6;
+      var max = 6;
+
+      ctx.beginPath();
+      ctx.fillStyle = this.chnColors[19];
+      ctx.strokeStyle = this.chnColors[19];
+      for (i = 0; i < 512; i++) {
+         var x = i/512.0 * (this.x2 - this.x1) + this.x1;
+         var y = this.y2 - (f[i] - min) / (max - min) * (this.y2-this.y1);
+         if (i == 0)
+            ctx.moveTo(x, y);
+         else
+            ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      for (i=1 ; i<10 ; i++) {
+         var freqMax = OSC.wdb[OSC.curBoard].drsSampleFreq / 2;
+         var f = i/10.0*freqMax;
+
+         ctx.fillStyle = this.chnColors[19];
+         ctx.strokeStyle = this.chnColors[19];
+         ctx.font = '14px sans-serif';
+         ctx.textAlign = "center";
+         ctx.textBaseline = "top";
+         ctx.fillText(f.toFixed(0) + " MHz", i/10.0*(this.x2-this.x1)+this.x1, this.y2 - 24);
+      }
+   }
+
 };
 
 Oscilloscope.prototype.drawMarker = function (ctx) {

@@ -221,9 +221,9 @@
             </div>
             <div class="vSpacer5">
                Mode:
-               <input type="radio" id="inputReadoutSrcDRS" name="readoutSrcSel" checked="checked" value="1"
+               <input type="radio" id="inputReadoutSrcDRS" name="readoutSrcSel" disabled="1" checked="checked" value="1"
                       onClick="setParam(this)">DRS
-               <input type="radio" id="inputReadoutSrcADC" name="readoutSrcSel" value="2" onClick="setParam(this)">ADC
+               <input type="radio" id="inputReadoutSrcADC" name="readoutSrcSel" disabled="1" value="2" onClick="setParam(this)">ADC
             </div>
 
             <div class="vMiddleBox vSpacer5">
@@ -317,10 +317,33 @@
          <div class="groupTitle">Extra Channels</div>
          <div class="group">
             <div style="user-select: none">
-               <button class="squareButton" id="ch18" type="button" onClick="btnChn(event, 18)"
-                       onContextmenu="btnChn(event, 18)">&Sigma;</button>
-               <button class="squareButton" id="ch19" type="button" onClick="btnChn(event, 19)"
-                       onContextmenu="btnChn(event, 19)" style="width: 50px">FFT</button>
+               <div class="vMiddleBox vSpacer5">
+                  <button class="squareButton" id="ch18" type="button" onClick="btnChn(event, 18)"
+                          onContextmenu="btnChn(event, 18)">&Sigma;</button>
+                  <button class="squareButton" id="ch19" type="button" onClick="btnChn(event, 19)"
+                          onContextmenu="btnChn(event, 19)" style="width: 50px">FFT</button>
+                  <select id="chnFft" class="select" name="chnFft">
+                     <option value="0">CH0</option>
+                     <option value="1">CH1</option>
+                     <option value="2">CH2</option>
+                     <option value="3">CH3</option>
+                     <option value="4">CH4</option>
+                     <option value="5">CH5</option>
+                     <option value="6">CH6</option>
+                     <option value="7">CH7</option>
+                     <option value="8">CH8</option>
+                     <option value="9">CH9</option>
+                     <option value="10">CH10</option>
+                     <option value="11">CH11</option>
+                     <option value="12">CH12</option>
+                     <option value="13">CH13</option>
+                     <option value="14">CH14</option>
+                     <option value="15">CH15</option>
+                     <option value="16">CH16</option>
+                     <option value="17">CH17</option>
+                     <option value="18">SUM</option>
+                  </select>
+               </div>
             </div>
          </div>
 
