@@ -1107,7 +1107,7 @@ int TCB::CheckSerdes(){
       //TCB2 different serdes mask
       for(int i=0; i<4; i++){
          int mask = 1<<(i+16);
-         if( data & mask ){
+         if( !(data & mask) ){
             //channel enable
             errormask[i/4] |= 0xFF << 8*(i%4);
          }
@@ -1115,7 +1115,7 @@ int TCB::CheckSerdes(){
    } else {
       for(int i=0; i<16; i++){
          int mask = 1<<i;
-         if( data & mask ){
+         if( !(data & mask) ){
             //channel enable
             errormask[i/4] |= 0xFF << 8*(i%4);
          }
