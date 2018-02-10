@@ -1356,3 +1356,30 @@ void TCB::GetTRGDLY(u_int32_t *dly){
     ReadBLT(addr+(iblt*BLTSIZE),dly+(iblt*BLTSIZE), BLTSIZE);
   }
 }
+//Start AutoCalibration of Serdes
+void TCB::AutoCalibrateSerdes(){
+   u_int32_t val = 0x80000000;
+   WriteReg(RDCBSERDESBSLP, &val);
+}
+//Read Current Serdes Configuration
+void TCB::ReadCurrentSerdes(u_int32_t *dlyout, int *bitout){
+   u_int32_t serdesconf[2*16];
+
+   ReadBLT(RSERDESSTATUS, serdesconf, fnserdes*2);
+
+   for(int iConf=0; iConf< fnserdes*2; iConf++){
+      dlyout[iConf] = serdesconf[iConf] & 0x1F1F1F1F;
+      bitout[iConf*4] = (serdesconf[iConf] >> 5) & 0x7;
+      bitout[iConf*4+1] = (serdesconf[iConf] >> (5+8)) & 0x7;
+      bitout[iConf*4+2] = (serdesconf[iConf] >> (5+16)) & 0x7;
+      bitout[iConf*4+3] = (serdesconf[iConf] >> (5+24)) & 0x7;
+   }
+}
+//Get AutoLock Fail
+void TCB::GetAutoCalibrateFail(u_int32_t* ret){
+   ReadReg(RSERDESFAIL, ret);
+}
+//Get AutoLock Busy
+void TCB::GetAutoCalibrateBusy(u_int32_t* ret){
+   ReadReg(RSERDESBUSY, ret);
+}

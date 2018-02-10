@@ -269,4 +269,12 @@ public:
    void SetTRGDLY(u_int32_t *);
    //Get trigger delay
    void GetTRGDLY(u_int32_t *);
+   //Start AutoLock
+   void AutoCalibrateSerdes();
+   //Read Current Serdes
+   void ReadCurrentSerdes(u_int32_t *dlyout, int *bitout);
+   //Get AutoLock Fail
+   void GetAutoCalibrateFail(u_int32_t* ret);
+   //Get AutoLock Fail
+   void GetAutoCalibrateBusy(u_int32_t* ret);
 };
