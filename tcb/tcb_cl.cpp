@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
       printf("[ 9]: Read TotalTime       \t \t  [10]: Read Live Time \n");
       printf("[11]: Read Event Counter   \t \t  [12]: Read trigger type\n");
       printf("[13]: Read Trigger Counters\t \t  [14]: Read memory address\n");
-      printf("[15]: Select Slot          \t \t  [16]: Set trg bus delay\n");
+      printf("[15]: Select Board          \t \t  [16]: Set trg bus delay\n");
       printf("[17]: Write SERDES mem     \t \t  [18]: Read SERDES mem\n");
       printf("[19]: Configure Serdes     \t \t  [20]: Serdes Scan\n");
       printf("[21]: Load serdes from file\t \t  [22]: Start Serdes test\n");
