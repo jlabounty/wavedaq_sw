@@ -65,7 +65,8 @@ int main(int argc, char *argv[])
       printf("[29]: Automatic Serdes cal \t \t  [30]: Dump Data \n");
       printf("[31]: Packetizer Commands  \t \t  [32]: Buffer Commands\n");
       printf("[33]: Reset PLL            \t \t  [34]: Reset PLL unlock cou\n");
-      printf("[35]: Read Unlock counter  \t \t  [36]: Get prescaling\n");             printf("[37]: Set trigger delay    \t \t  [38]: Get trigger delay\n");
+      printf("[35]: Read Unlock counter  \t \t  [36]: Get prescaling\n");
+      printf("[37]: Set trigger delay    \t \t  [38]: Get trigger delay\n");
       printf("[-1]: Exit\n");
 
       do {
@@ -230,11 +231,20 @@ int main(int argc, char *argv[])
       }
       //
       if(option == 15) {
-         printf(" opt = 15 : Set slot ... \n");
-         printf("Slot?\n");
-         scanf("%d",&data);
-         TCBBoard.fslot = data;
-         TCBBoard.SetIDCode();
+	int crate,slot;
+	char cratestring[256];
+	printf(" opt = 15 : goto board, give crate number and slot ... \n");
+	printf("Crate number?\n");
+	scanf("%d",&crate);
+	sprintf(cratestring,"mscb%d",crate);
+	printf("Slot?\n");
+	scanf("%d",&slot);
+	//close current mscb connection and create a new one
+	mscb_exit(TCBBoard.fh);
+	handle = mscb_init(cratestring, 0, "", 0);
+	strlcpy(TCBBoard.fmscb_device, cratestring, sizeof(TCBBoard.fmscb_device));
+	TCBBoard.fslot = slot;
+	TCBBoard.SetIDCode();
       }
       if(option == 16) {
          printf(" opt = 16 : Set trigger delay ... \n");
