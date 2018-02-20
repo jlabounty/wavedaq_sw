@@ -28,6 +28,7 @@
 #include <map>
 
 #define TESTVALUE0 0xA5A5A5A5
+//#define TESTVALUE0 0xDEADBEEF
 #define TESTVALUE1 0xA5A5A5A5
 
 // WD board

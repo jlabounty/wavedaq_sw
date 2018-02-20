@@ -782,7 +782,7 @@ void TCB::ConfigureAllDCBSerdes(short dly, int bitslip){
    for(int ilink=0; ilink<2; ilink++){
       conf[ilink/4] |= 0x80 << (ilink%4)*8;
    }
-   WriteBLT(0x3D0, conf, 1);
+   WriteBLT(RDCBSERDESCONF, conf, 1);
 
    //write config and enable
    for(int i=0; i<1; i++){
@@ -791,7 +791,7 @@ void TCB::ConfigureAllDCBSerdes(short dly, int bitslip){
    for(int ilink=0; ilink<2; ilink++){
       conf[ilink/4] |= (0x20|(dly &0x1F)) << (ilink%4)*8;
    }
-   WriteBLT(0x3D0, conf, 1);
+   WriteBLT(RDCBSERDESCONF, conf, 1);
 
    //load delay
    u_int32_t loadval;
@@ -805,7 +805,7 @@ void TCB::ConfigureAllDCBSerdes(short dly, int bitslip){
    u_int32_t data[1];
    for(int i=0; i<1; i++) data[i]=0x00000003;
    for (int i=0; i<bitslip; i++) {
-      WriteBLT(0x3D1, data, 1);
+      WriteBLT(RDCBSERDESBSLP, data, 1);
    }
 }
 //configure a all serdes link
@@ -853,13 +853,13 @@ void TCB::SetAllDCBSerdes(u_int32_t *dlys, int *bits){
    for(int ilink=0; ilink<2; ilink++){
       conf[ilink/4] |= 0x80 << (ilink%4)*8;
    }
-   WriteBLT(0x3D0, conf, 1);
+   WriteBLT(RDCBSERDESCONF, conf, 1);
 
    for(int i=0; i<1; i++)conf[i]=0;
    for(int ilink=0; ilink<2; ilink++){
       conf[ilink] |= (0x20202020|dlys[ilink]);
    }
-   WriteBLT(0x3D0, conf, 1);
+   WriteBLT(RDCBSERDESCONF, conf, 1);
 
    //load delay
    u_int32_t loadval;
@@ -881,7 +881,7 @@ void TCB::SetAllDCBSerdes(u_int32_t *dlys, int *bits){
             morebits = true;
          }
       }
-      WriteBLT(0x3D1, data, 1);
+      WriteBLT(RDCBSERDESBSLP, data, 1);
    }
 }
 //check errors on serdes
@@ -908,8 +908,8 @@ void TCB::GetSerdesErrorCount(u_int32_t* data){
 }
 //check errors on serdes
 void TCB::GetDCBSerdesErrorCount(u_int32_t* data){
-   ReadBLT(0x3D3, data, 2);
-   ReadReg(0x3B0, data+2);
+   ReadBLT(RDCBSERDESCOU, data, 2);
+   ReadReg(RSERDESTIME, data+2);
 }
 //start a serdes check
 void TCB::StartSerdesCheck(){
@@ -1107,7 +1107,7 @@ int TCB::CheckSerdes(){
       //TCB2 different serdes mask
       for(int i=0; i<4; i++){
          int mask = 1<<(i+16);
-         if( data & mask ){
+         if( !(data & mask) ){
             //channel enable
             errormask[i/4] |= 0xFF << 8*(i%4);
          }
@@ -1115,7 +1115,7 @@ int TCB::CheckSerdes(){
    } else {
       for(int i=0; i<16; i++){
          int mask = 1<<i;
-         if( data & mask ){
+         if( !(data & mask) ){
             //channel enable
             errormask[i/4] |= 0xFF << 8*(i%4);
          }
@@ -1355,4 +1355,31 @@ void TCB::GetTRGDLY(u_int32_t *dly){
   for (int iblt = 0; iblt<NBLT; iblt++) {
     ReadBLT(addr+(iblt*BLTSIZE),dly+(iblt*BLTSIZE), BLTSIZE);
   }
+}
+//Start AutoCalibration of Serdes
+void TCB::AutoCalibrateSerdes(){
+   u_int32_t val = 0x80000000;
+   WriteReg(RDCBSERDESBSLP, &val);
+}
+//Read Current Serdes Configuration
+void TCB::ReadCurrentSerdes(u_int32_t *dlyout, int *bitout){
+   u_int32_t serdesconf[2*16];
+
+   ReadBLT(RSERDESSTATUS, serdesconf, fnserdes*2);
+
+   for(int iConf=0; iConf< fnserdes*2; iConf++){
+      dlyout[iConf] = serdesconf[iConf] & 0x1F1F1F1F;
+      bitout[iConf*4] = (serdesconf[iConf] >> 5) & 0x7;
+      bitout[iConf*4+1] = (serdesconf[iConf] >> (5+8)) & 0x7;
+      bitout[iConf*4+2] = (serdesconf[iConf] >> (5+16)) & 0x7;
+      bitout[iConf*4+3] = (serdesconf[iConf] >> (5+24)) & 0x7;
+   }
+}
+//Get AutoLock Fail
+void TCB::GetAutoCalibrateFail(u_int32_t* ret){
+   ReadReg(RSERDESFAIL, ret);
+}
+//Get AutoLock Busy
+void TCB::GetAutoCalibrateBusy(u_int32_t* ret){
+   ReadReg(RSERDESBUSY, ret);
 }

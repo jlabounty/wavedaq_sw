@@ -67,6 +67,8 @@ int main(int argc, char *argv[])
       printf("[33]: Reset PLL            \t \t  [34]: Reset PLL unlock cou\n");
       printf("[35]: Read Unlock counter  \t \t  [36]: Get prescaling\n");
       printf("[37]: Set trigger delay    \t \t  [38]: Get trigger delay\n");
+      printf("[39]: LockSerdes FSM Start \t \t  [40]: Get current serdes values\n");
+      printf("[41]: LockSerdes Status    \t \t  [42]:                          \n");
       printf("[-1]: Exit\n");
 
       do {
@@ -116,8 +118,8 @@ int main(int argc, char *argv[])
       //
       if(option == 2) {
          printf(" opt = 2 : Get RRUN ... \n");
-      	 if(TCBBoard.GetPacketizerBus()) 
-	   printf("WARNING: the local bus is used by the packetizer, some regs are not accessible!\n");
+         if(TCBBoard.GetPacketizerBus()) 
+           printf("WARNING: the local bus is used by the packetizer, some regs are not accessible!\n");
          printf(" FW compilation date: ");
          TCBBoard.GetCompilDate(&data);
          printf("%02d/%02d/20%02d %02d:%02d:%02d\n",(data&0xF8000000)>>27,(data&0x7800000)>>23,(data&0x7e0000)>>17,(data&0x1F000)>>12,(data&0xFC0)>>6,(data&0x3F));
@@ -568,29 +570,52 @@ int main(int argc, char *argv[])
       }
       // get PLL unlock counter
       if(option == 35) {
-	u_int32_t *rpcou = 0;
+        u_int32_t *rpcou = 0;
         printf(" opt = 35 : read PLL unlock counter ... \n");
         TCBBoard.GetPLLUnlockCou(rpcou);
-	printf(" PLL unlock counter value: %d\n", *rpcou);
+        printf(" PLL unlock counter value: %d\n", *rpcou);
       }
       //
       if(option == 36) {
-	printf(" opt = 36 : Get precaling values (from presca.dat file) ... \n");
-	TCBBoard.GetPrescaling(presca);
-	for(int irow = 0; irow<TCBBoard.fntrg; irow++) printf("%x\n", presca[irow]);
+        printf(" opt = 36 : Get precaling values (from presca.dat file) ... \n");
+        TCBBoard.GetPrescaling(presca);
+        for(int irow = 0; irow<TCBBoard.fntrg; irow++) printf("%x\n", presca[irow]);
       }
       //
       if(option == 37) {
-	printf(" opt = 37 : Set trigger delay values (from trgdly.dat file) ... \n");
-	filtrgdly = fopen("trgdly.dat", "read");
-	for(int irow = 0; irow<TCBBoard.fntrg; irow++) fscanf(filtrgdly,"%x\n",trgdly+irow);
-	TCBBoard.SetTRGDLY(trgdly);
+        printf(" opt = 37 : Set trigger delay values (from trgdly.dat file) ... \n");
+        filtrgdly = fopen("trgdly.dat", "read");
+        for(int irow = 0; irow<TCBBoard.fntrg; irow++) fscanf(filtrgdly,"%x\n",trgdly+irow);
+        TCBBoard.SetTRGDLY(trgdly);
       }
       //
       if(option == 38) {
-	printf(" opt = 38 : Get trigger delay values (from trgdly.dat file) ... \n");
-	TCBBoard.GetTRGDLY(trgdly);
-	for(int irow = 0; irow<TCBBoard.fntrg; irow++) printf("%x\n", trgdly[irow]);
+        printf(" opt = 38 : Get trigger delay values (from trgdly.dat file) ... \n");
+        TCBBoard.GetTRGDLY(trgdly);
+        for(int irow = 0; irow<TCBBoard.fntrg; irow++) printf("%x\n", trgdly[irow]);
+      }
+      //
+      if(option == 39) {
+        printf(" opt = 39 : start automatic calibration ... \n");
+        TCBBoard.AutoCalibrateSerdes();
+      }
+      //
+      if(option == 40) {
+        printf(" opt = 40 : Current serdes status ... \n");
+        u_int32_t dly[2*16];
+        int bit[8*16];
+        TCBBoard.ReadCurrentSerdes(dly, bit);
+        for(int i=0; i<TCBBoard.fnserdes*8; i++)
+           printf("serdes %d link %d: dly %x bitslip %d\n", i/8, i%8, (dly[i/4]>>((i%4)*8))&0x1f, bit[i]);
+      }
+      //
+      if(option == 41) {
+        printf(" opt = 41 : Current serdes autolock status ... \n");
+        u_int32_t state;
+        TCBBoard.GetAutoCalibrateFail(&state);
+        printf("fail: %x\n", state);
+        TCBBoard.GetAutoCalibrateBusy(&state);
+        printf("busy: %x\n", state);
       }
       
 
