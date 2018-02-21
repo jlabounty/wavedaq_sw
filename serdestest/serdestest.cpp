@@ -79,6 +79,12 @@ int main(int argc, char** argv)
       wdb->LmkSyncLocal();
       wdb->ReceiveStatusRegister(WD2_REG_DRS_SAMPLE_FREQ_OFS);
 
+      // Reset DRS FSM
+      wdb->ResetDrsControlFsm();
+
+      // Reset PLLs
+      wdb->ResetAllPll();
+
       // read all status registers
       wdb->ReceiveStatusRegisters();
 
