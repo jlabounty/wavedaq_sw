@@ -231,6 +231,8 @@ public:
    void CalibrateDCBSerdes(u_int32_t *dlyout=0, int *bitout=0);
    //calibrate serdes
    void SetDbgserdes(bool);
+   //set variable pattern
+   void SetSerdesPattern(bool);
    //do a serdes check
    int CheckSerdes();
    //Assign Bus to Packetizer

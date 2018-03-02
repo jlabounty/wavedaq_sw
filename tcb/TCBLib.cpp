@@ -1094,6 +1094,17 @@ void TCB::SetDbgserdes(bool enable){
    }
    WriteReg(RRUN, &data);
 }
+//Set/unset Serdes Pattern
+void TCB::SetSerdesPattern(bool enable){
+   u_int32_t data;
+   ReadReg(RRUN, &data);
+   if(enable){
+        data |= 0x00000200;
+   } else {
+        data &= 0xFFFFFDFF;
+   }
+   WriteReg(RRUN, &data);
+}
 //Do a serdes Check according to serdesmask
 int TCB::CheckSerdes(){
 
