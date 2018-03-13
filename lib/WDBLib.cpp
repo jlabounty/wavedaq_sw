@@ -1,6 +1,7 @@
 //
-//  wd
-//  WaveDAQ Ethernet Interface
+//  WDBLib.cpp
+//
+//  WaveDAQ Interface Library
 //
 //  Created by Stefan Ritt on 13/8/15.
 //
@@ -41,13 +42,14 @@
 
 #include "WDBLib.h"
 #include "register_map_wd2.h"
+#include "WDBReg.h"
 
 #define WD2_USE_UDP_BIN
 
 #define WD2_CMD_PORT_BIN          4000
 #define WD2_CMD_PORT_ASCII        3000
 
-#define WD2_UDP_PROTOCOL_VERSION  4
+#define WD2_UDP_PROTOCOL_VERSION  5
 
 int WP::gDataSocket   = 0;
 int WP::gServerPort   = 0;
@@ -68,17 +70,38 @@ T access_as(U* p)
    return d;
 }
 
+
 //--------------------------------------------------------------------
 
-void WDB::SendUDP(std::string str, int timeout_ms)
+WDB::WDB(std::string name, int verbose)
 {
-   std::string result;
-   result = SendReceiveUDP(str, timeout_ms);
+   mName = name;
+   mPrompt = "";
+   mVerbose = verbose;
+   mLogfile = "";
+   mDemoMode = (name == "demo");
+   mSendBlocked = false;
+   mSendTimeoutMs = cDefaultSendTimeoutMs;
+   mReceiveTimeoutMs = cDefaultReceiveTimeoutMs;
+   
+   if (mDemoMode) {
+      // set some meaningful values in demo mode to make wds happy
+      this->sreg[(WD2_DRS_SAMPLE_FREQ_REG & 0x0FFF)/4] = 5120;
+      this->sreg[(WD2_ADC_SAMPLE_FREQ_REG & 0x0FFF)/4] = 80;
+   }
 }
 
 //--------------------------------------------------------------------
 
-std::string WDB::SendReceiveUDP(std::string str, int timeout_ms)
+void WDB::SendUDP(std::string str)
+{
+   std::string result;
+   result = SendReceiveUDP(str);
+}
+
+//--------------------------------------------------------------------
+
+std::string WDB::SendReceiveUDP(std::string str)
 {
    size_t i;
    fd_set readfds;
@@ -139,7 +162,7 @@ std::string WDB::SendReceiveUDP(std::string str, int timeout_ms)
          if (retry == 0) // reduce timeout on first retry (ARP problem)
             ms = 100;
          else
-            ms = timeout_ms;
+            ms = mReceiveTimeoutMs;
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
          
@@ -193,7 +216,7 @@ std::string WDB::SendReceiveUDP(std::string str, int timeout_ms)
 
 //--------------------------------------------------------------------
 
-void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data, int timeout_ms)
+void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data)
 {
    size_t i;
    fd_set readfds;
@@ -263,7 +286,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data, int timeout
       }
       
       // don't wait for reply for reset FPGA command
-      if (timeout_ms < 0)
+      if (mSendTimeoutMs < 0)
          return;
       
       // retrieve reply until acknowledge is found
@@ -273,7 +296,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data, int timeout
          FD_ZERO(&readfds);
          FD_SET(gBinSocket, &readfds);
          
-         ms = timeout_ms;
+         ms = mSendTimeoutMs;
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
          
@@ -310,7 +333,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data, int timeout
 
 //--------------------------------------------------------------------
 
-std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg, int timeout_ms)
+std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg)
 {
    size_t i;
    fd_set readfds;
@@ -383,7 +406,7 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg, int 
          FD_ZERO(&readfds);
          FD_SET(gBinSocket, &readfds);
          
-         ms = timeout_ms;
+         ms = mReceiveTimeoutMs;
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
          
@@ -408,7 +431,7 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg, int 
 
          if (bSuccess) {
             // copy data
-            for (unsigned int i=0 ; i<len ; i++)
+            for (unsigned int i=0 ; i<len/4 ; i++)
                result.push_back(readBuf[i*4+4] << 24 |
                                 readBuf[i*4+5] << 16 |
                                 readBuf[i*4+6] <<  8 |
@@ -471,7 +494,9 @@ void WDB::Connect()
 
    // check if board is alive
    try {
-      WDB::SendUDP("", 500);
+      WDB::SetSendTimeoutMs(500); // increased timeout for first access
+      WDB::SendUDP("");
+      WDB::SetSendTimeoutMs(cDefaultSendTimeoutMs);
    } catch (...) {
       throw std::runtime_error(std::string("Cannot connect to board ")+mName+".");
    }
@@ -479,24 +504,41 @@ void WDB::Connect()
    // set dbglevel none
    SendUDP("dbglvl none");
    
-   // check firmware revision
-   ReceiveStatusRegister(WD2_REG_FW_BUILD_TIME_OFS);
-   if (GetCompatibilityLevel() < cRequiredCompatibilityLevel) {
+   // check firmware compatibility level
+   ReceiveStatusRegister(WD2_FW_COMPAT_LEVEL_REG);
+   ReceiveStatusRegister(WD2_REG_LAYOUT_COMP_LEVEL_REG);
+   if (GetFwCompatLevel() < cRequiredFwCompatLevel) {
       std::string str("Board ");
       str += mName + " has incompatible firmware, please upgrade (Board compatibility level: "+
-      std::to_string(GetCompatibilityLevel())+", Software compatibility level: "+
-      std::to_string(cRequiredCompatibilityLevel)+")";
+      std::to_string(GetFwCompatLevel())+", Software compatibility level: "+
+      std::to_string(cRequiredFwCompatLevel)+")";
       throw std::runtime_error(str);
    }
-   if (cRequiredCompatibilityLevel < GetCompatibilityLevel()) {
+   if (cRequiredFwCompatLevel < GetFwCompatLevel()) {
       std::string str("Board ");
-      str += mName + " has newer incompatible firmware, please update WD library (Board compatibility level: "+
-      std::to_string(GetCompatibilityLevel())+", Software compatibility level: "+
-      std::to_string(cRequiredCompatibilityLevel)+")";
+      str += mName + " has newer incompatible firmware, please update WD library (Firmware compatibility level: "+
+      std::to_string(GetFwCompatLevel())+", Software compatibility level: "+
+      std::to_string(cRequiredFwCompatLevel)+")";
       throw std::runtime_error(str);
    }
-
+   // check register layout compatibility level
+   if (GetRegLayoutCompLevel() < cRequiredRegLayoutCompatLevel) {
+      std::string str("Board ");
+      str += mName + " has incompatible register layout, please upgrade (Board compatibility level: "+
+      std::to_string(GetRegLayoutCompLevel())+", Software compatibility level: "+
+      std::to_string(cRequiredRegLayoutCompatLevel)+")";
+      throw std::runtime_error(str);
+   }
+   if (cRequiredRegLayoutCompatLevel < GetRegLayoutCompLevel()) {
+      std::string str("Board ");
+      str += mName + " has newer register layout, please update WD library (Board compatibility level: "+
+      std::to_string(GetRegLayoutCompLevel())+", Software compatibility level: "+
+      std::to_string(cRequiredRegLayoutCompatLevel)+")";
+      throw std::runtime_error(str);
+   }
 }
+
+//--------------------------------------------------------------------
 
 void WDB::SetDestinationPort(int port)
 {
@@ -509,9 +551,14 @@ void WDB::SetDestinationPort(int port)
 
 //--------------------------------------------------------------------
 
-unsigned int bitExtract(unsigned int reg[], unsigned int rofs, unsigned int mask, unsigned int ofs)
+unsigned int WDB::BitExtractStatus(unsigned int rofs, unsigned int mask, unsigned int ofs)
 {
-   return (reg[(rofs & 0x0FFF)/4] & mask) >> ofs;
+   return (sreg[(rofs & 0x0FFF)/4] & mask) >> ofs;
+}
+
+unsigned int WDB::BitExtractControl(unsigned int rofs, unsigned int mask, unsigned int ofs)
+{
+   return (creg[(rofs & 0x0FFF)/4] & mask) >> ofs;
 }
 
 void bitReplace(unsigned int &reg, unsigned int mask, unsigned int ofs, unsigned int value)
@@ -528,18 +575,19 @@ void WDB::ReceiveControlRegisters(unsigned int index, unsigned int nReg)
 {
    if (mDemoMode) {
       for (auto i=index ; i<index+nReg ; i++)
-         this->creg[i] = 0;
+         this->creg[i] = ctrl_reg_default[i];
       return;
    }
 
 #ifdef WD2_USE_UDP_BIN
-   std::vector<unsigned int> result = ReadUDP(WD2_REG_WDB_LOC_OFS+index*4, nReg);
+   std::vector<unsigned int> result = ReadUDP(WD2_REG_WDB_LOC+index*4, nReg);
+   assert(result.size() == nReg);
    for (unsigned int i=0 ; i<nReg ; i++)
-      this->creg[index+i] = result[i];
+     this->creg[index+i] = result[i];
 #else
    std::string result;
    std::ostringstream req;
-   req << "rr 0x" << std::hex << WD2_REG_WDB_LOC_OFS+index*4 << " " << std::dec << nReg;
+   req << "rr 0x" << std::hex << WD2_CTRL_REG_BASE_OFS+index*4 << " " << std::dec << nReg;
    
    result = SendReceiveUDP(req.str(), 500);
    std::stringstream ss(result);
@@ -564,13 +612,14 @@ void WDB::ReceiveStatusRegisters(unsigned int index, unsigned int nReg)
    }
    
 #ifdef WD2_USE_UDP_BIN
-   std::vector<unsigned int> result = ReadUDP(WD2_REG_HW_VER_OFS+index*4, nReg);
+   std::vector<unsigned int> result = ReadUDP(WD2_STAT_REG_BASE_OFS+index*4, nReg);
+   assert(result.size() == nReg);
    for (unsigned int i=0 ; i<nReg ; i++)
       this->sreg[index+i] = result[i];
 #else
    std::string result;
    std::ostringstream req;
-   req << "rr 0x" << std::hex << WD2_REG_HW_VER_OFS+index*4 << " " << std::dec << nReg;
+   req << "rr 0x" << std::hex << WD2_STAT_REG_BASE_OFS+index*4 << " " << std::dec << nReg;
    
    result = SendReceiveUDP(req.str(), 500);
    std::stringstream ss(result);
@@ -579,7 +628,7 @@ void WDB::ReceiveStatusRegisters(unsigned int index, unsigned int nReg)
    for (unsigned int i=index ; i<index+nReg ; i++) {
       std::getline(ss, line, '\r');
       auto adr = (unsigned int)std::stoul(line.substr(3), nullptr, 16);
-      auto idx = (adr - WD2_REG_HW_VER_OFS) / 4;
+      auto idx = (adr - WD2_STAT_REG_BASE_OFS) / 4;
       if (idx < REG_NR_OF_STAT_REGS) {
          this->sreg[idx] = (unsigned int)std::stoul(line.substr(10), nullptr, 16);
       }
@@ -609,7 +658,7 @@ void WDB::ReceiveStatusRegister(int rofs)
 #endif
 }
 
-void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v, bool send, int timeout_ms)
+void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v)
 {
    int index = (rofs & 0x0FFF)/4;
 
@@ -617,9 +666,9 @@ void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, uns
    
    bitReplace(r, mask, ofs, v);
    
-   if (!mDemoMode && send && !mSendBlocked) {
+   if (!mDemoMode && !mSendBlocked) {
 #ifdef WD2_USE_UDP_BIN
-      WriteUDP(rofs, std::vector<unsigned int> { r }, timeout_ms);
+      WriteUDP(rofs, std::vector<unsigned int> { r });
 #else
       std::ostringstream req;
       req << "rw 0x" << std::hex << rofs << " 0x" << r;
@@ -635,15 +684,15 @@ void WDB::SendControlRegisters()
 {
    // first half until HV
    std::vector<unsigned int> v;
-   for (int i=0 ; i<(WD2_REG_HV_U_TARGET_0_OFS-WD2_REG_WDB_LOC_OFS)/4 ; i++)
-      v.push_back(this->creg[i]);
-   WriteUDP(WD2_REG_WDB_LOC_OFS, v);
+   for (int i=0 ; i<(WD2_HV_U_TARGET_0_REG-WD2_CTRL_REG_BASE_OFS)/4 ; i++)
+     v.push_back(this->creg[i]);
+   WriteUDP(WD2_CTRL_REG_BASE_OFS, v);
 
    // second half after HV
    v.clear();
-   for (int i=(WD2_REG_LMK_0_OFS-WD2_REG_WDB_LOC_OFS)/4 ; i<REG_NR_OF_CTRL_REGS ; i++)
-      v.push_back(this->creg[i]);
-   WriteUDP(WD2_REG_LMK_0_OFS, v);
+   for (int i=(WD2_REG_LMK_0-WD2_CTRL_REG_BASE_OFS)/4 ; i<REG_NR_OF_CTRL_REGS ; i++)
+     v.push_back(this->creg[i]);
+   WriteUDP(WD2_REG_LMK_0, v);
 }
 
 //-- Status registers ------------------------------------------------
@@ -666,20 +715,22 @@ std::string WDB::GetFwBuild()
    std::ostringstream s;
    std::vector<std::string> monthName = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
    
-   s << "Compatibility Level: ";
-   s << GetCompatibilityLevel() << std::endl;
+   s << "FW. Compat. Level:   ";
+   s << GetFwCompatLevel() << std::endl;
+   s << "Reg. Compat. Level:  ";
+   s << GetRegLayoutCompLevel() << std::endl;
    s << "FW GIT Revision:     ";
-   s << "0x" << std::hex << std::uppercase << bitExtract(sreg, WD2_REG_GIT_HASH_TAG_OFS, WD2_BIT_GIT_HASH_TAG_MASK, WD2_BIT_GIT_HASH_TAG_OFS) << std::endl;
+   s << "0x" << std::hex << std::uppercase << GetGitHashTag() << std::endl;
    
    s << "FW Build:            ";
    s << std::dec << std::setw(2) << std::setfill('0');
-   s << monthName[bcd2dec(bitExtract(sreg, WD2_REG_FW_BUILD_DATE_OFS, WD2_BIT_FW_BUILD_MONTH_MASK, WD2_BIT_FW_BUILD_MONTH_OFS))-1] << ' ';
-   s << bcd2dec(bitExtract(sreg, WD2_REG_FW_BUILD_DATE_OFS, WD2_BIT_FW_BUILD_DAY_MASK, WD2_BIT_FW_BUILD_DAY_OFS)) << ' ';
-   s << bcd2dec(bitExtract(sreg, WD2_REG_FW_BUILD_DATE_OFS, WD2_BIT_FW_BUILD_YEAR_MASK, WD2_BIT_FW_BUILD_YEAR_OFS)) << "  ";
+   s << monthName[bcd2dec(GetFwBuildMonth())-1] << ' ';
+   s << bcd2dec(GetFwBuildDay()) << ' ';
+   s << bcd2dec(GetFwBuildYear()) << "  ";
    
-   s << std::setfill('0') << std::setw(2) << bcd2dec(bitExtract(sreg, WD2_REG_FW_BUILD_TIME_OFS, WD2_BIT_FW_BUILD_HOUR_MASK, WD2_BIT_FW_BUILD_HOUR_OFS)) << ':';
-   s << std::setfill('0') << std::setw(2) << bcd2dec(bitExtract(sreg, WD2_REG_FW_BUILD_TIME_OFS, WD2_BIT_FW_BUILD_MINUTE_MASK, WD2_BIT_FW_BUILD_MINUTE_OFS)) << ':';
-   s << std::setfill('0') << std::setw(2) << bcd2dec(bitExtract(sreg, WD2_REG_FW_BUILD_TIME_OFS, WD2_BIT_FW_BUILD_SECOND_MASK, WD2_BIT_FW_BUILD_SECOND_OFS)) << std::endl;
+   s << std::setfill('0') << std::setw(2) << bcd2dec(GetFwBuildHour()) << ':';
+   s << std::setfill('0') << std::setw(2) << bcd2dec(GetFwBuildMinute()) << ':';
+   s << std::setfill('0') << std::setw(2) << bcd2dec(GetFwBuildSecond()) << std::endl;
    
    return s.str();
 }
@@ -688,157 +739,67 @@ std::string WDB::GetHwVersion()
 {
    std::ostringstream s;
    
-   assert(bitExtract(sreg, WD2_REG_HW_VER_OFS, WD2_BIT_BOARD_MAGIC_MASK, WD2_BIT_BOARD_MAGIC_OFS) == 0xAC);
+   assert(GetBoardMagic() == 0xAC);
    
    s << "Board Vendor:        ";
-   if (bitExtract(sreg, WD2_REG_HW_VER_OFS, WD2_BIT_VENDOR_ID_MASK, WD2_BIT_VENDOR_ID_OFS) == 0x01)
+   if (GetVendorId() == 0x01)
       s << "PSI";
    else
       s << "unknown";
    s << std::endl;
    s << "Board Type:          ";
-   s << "WaveDREAM" << bitExtract(sreg, WD2_REG_HW_VER_OFS, WD2_BIT_BOARD_TYPE_MASK, WD2_BIT_BOARD_TYPE_OFS) << std::endl;
+   s << "WaveDREAM" << GetBoardType() << std::endl;
    s << "Board Revision:      ";
-   s << (char)('A'+bitExtract(sreg, WD2_REG_HW_VER_OFS, WD2_BIT_BOARD_REVISION_MASK, WD2_BIT_BOARD_REVISION_OFS)) << std::endl;
+   s << (char)('A'+GetBoardRevision()) << std::endl;
    s << "Board Variant:       ";
-   s << std::showbase << std::internal << std::setfill('0') << std::hex << std::setw(4) << bitExtract(sreg, WD2_REG_HW_VER_OFS, WD2_BIT_BOARD_VARIANT_MASK, WD2_BIT_BOARD_VARIANT_OFS);
+   s << std::showbase << std::internal << std::setfill('0') << std::hex << std::setw(4) << GetBoardVariant();
    s << std::endl;
    
    return s.str();
 }
 
-unsigned int WDB::GetCompatibilityLevel()
-{
-   return bitExtract(sreg, WD2_REG_FW_BUILD_TIME_OFS, WD2_BIT_FW_COMPAT_LEVEL_MASK, WD2_BIT_FW_COMPAT_LEVEL_OFS);
-}
-
-unsigned int WDB::GetProtocolVersion()
-// currently 4
-{
-   return bitExtract(sreg, WD2_REG_PROT_VER_OFS, WD2_BIT_PROTOCOL_VERSION_MASK, WD2_BIT_PROTOCOL_VERSION_OFS);
-}
-
-unsigned int WDB::GetSerialNumber()
-{
-   return bitExtract(sreg, WD2_REG_SN_OFS, WD2_BIT_SERIAL_NUMBER_MASK, WD2_BIT_SERIAL_NUMBER_OFS);
-}
-
-float WDB::GetTemperature(bool refresh)
+float WDB::GetTemperatureDegree(bool refresh)
 // temperature in deg. C
 {
    if (mDemoMode)
       return 37.5;
    
    if (refresh)
-      ReceiveStatusRegister(WD2_REG_STATUS_OFS);
-   float temp = bitExtract(sreg, WD2_REG_STATUS_OFS, WD2_BIT_TEMPERATURE_MASK, WD2_BIT_TEMPERATURE_OFS) * 0.0625;
+      ReceiveStatusRegister(WD2_TEMPERATURE_REG);
+   float temp = GetTemperature() * 0.0625;
    temp = std::roundf(temp * 10 + 0.5) / 10.0f;
    return temp;
 }
 
-bool WDB::IsFlashSelect()
-{
-   return bitExtract(sreg, WD2_REG_STATUS_OFS, WD2_BIT_FLASH_SEL_MASK, WD2_BIT_FLASH_SEL_OFS) == 0;
-}
-
-bool WDB::IsBoardSelect()
-{
-   return bitExtract(sreg, WD2_REG_STATUS_OFS, WD2_BIT_BOARD_SEL_MASK, WD2_BIT_BOARD_SEL_OFS) == 0;
-}
-
-bool WDB::IsSerialBusy()
-{
-   return bitExtract(sreg, WD2_REG_STATUS_OFS, WD2_BIT_SERIAL_BUSY_MASK, WD2_BIT_SERIAL_BUSY_OFS) == 0;
-}
-
-bool WDB::IsSysBusy()
-{
-   return bitExtract(sreg, WD2_REG_STATUS_OFS, WD2_BIT_SYS_BUSY_MASK, WD2_BIT_SYS_BUSY_OFS) == 0;
-}
-
-bool WDB::IsWDBBusy()
-{
-   return bitExtract(sreg, WD2_REG_STATUS_OFS, WD2_BIT_WDB_BUSY_MASK, WD2_BIT_WDB_BUSY_OFS) == 0;
-}
-
-bool WDB::IsHvBoardPlugged()
-{
-   return bitExtract(sreg, WD2_REG_STATUS_OFS, WD2_BIT_HV_BOARD_PLUGGED_MASK, WD2_BIT_HV_BOARD_PLUGGED_OFS) == 1;
-}
-
-bool WDB::IsBackplanePlugged()
-{
-   return bitExtract(sreg, WD2_REG_STATUS_OFS, WD2_BIT_BACKPLANE_PLUGGED_MASK, WD2_BIT_BACKPLANE_PLUGGED_OFS) == 1;
-}
-
-unsigned int WDB::GetPllLck(bool refresh)
+unsigned int WDB::GetPllLock(bool refresh)
 // all PLLs (DRS, LMK, FPGA DAQ, ISERDES, OSERDES)
 {
    if (mDemoMode)
       return 0x1FF;
 
    if (refresh)
-      ReceiveStatusRegister(WD2_REG_PLL_LOCK_OFS);
-   auto mask =
-   WD2_BIT_SYS_DCM_LOCK_MASK         |
-   WD2_BIT_DAQ_PLL_LOCK_MASK         |
-   WD2_BIT_OSERDES_PLL_LOCK_DCB_MASK |
-   WD2_BIT_OSERDES_PLL_LOCK_TCB_MASK |
-   WD2_BIT_ISERDES_PLL_LOCK_0_MASK   |
-   WD2_BIT_ISERDES_PLL_LOCK_1_MASK   |
-   WD2_BIT_DRS_PLL_LOCK_0_MASK       |
-   WD2_BIT_DRS_PLL_LOCK_1_MASK       |
-   WD2_BIT_LMK_PLL_LOCK_MASK;
-
-   return bitExtract(sreg, WD2_REG_PLL_LOCK_OFS, mask, WD2_BIT_LMK_PLL_LOCK_OFS);
-}
-
-bool WDB::IsExtPllLck(bool refresh)
-{
-   if (mDemoMode)
-      return true;
-
-   unsigned int mask = WD2_BIT_DRS_PLL_LOCK_0_MASK |
-                       WD2_BIT_DRS_PLL_LOCK_1_MASK |
-                       WD2_BIT_LMK_PLL_LOCK_MASK;
-   mask >>= WD2_BIT_LMK_PLL_LOCK_OFS;
-   
-   return (((GetPllLck(refresh) >> WD2_BIT_LMK_PLL_LOCK_OFS) & mask) == mask);
-}
-
-bool WDB::IsIntPllLck(bool refresh)
-{
-   if (mDemoMode)
-      return true;
-
+      ReceiveStatusRegister(WD2_SYS_DCM_LOCK_REG);
    unsigned int mask =
-   WD2_BIT_SYS_DCM_LOCK_MASK |
-   WD2_BIT_DAQ_PLL_LOCK_MASK |
-   WD2_BIT_OSERDES_PLL_LOCK_DCB_MASK |
-   WD2_BIT_OSERDES_PLL_LOCK_TCB_MASK |
-   WD2_BIT_ISERDES_PLL_LOCK_0_MASK |
-   WD2_BIT_ISERDES_PLL_LOCK_1_MASK;
-   mask >>= WD2_BIT_ISERDES_PLL_LOCK_1_OFS;
+      GetSysDcmLock()        << WD2_SYS_DCM_LOCK_OFS         |
+      GetDaqPllLock()        << WD2_DAQ_PLL_LOCK_OFS         |
+      GetOserdesPllLockDcb() << WD2_OSERDES_PLL_LOCK_DCB_OFS |
+      GetOserdesPllLockTcb() << WD2_OSERDES_PLL_LOCK_TCB_OFS |
+      GetIserdesPllLock0()   << WD2_ISERDES_PLL_LOCK_0_OFS   |
+      GetIserdesPllLock1()   << WD2_ISERDES_PLL_LOCK_1_OFS   |
+      GetDrsPllLock0()       << WD2_DRS_PLL_LOCK_0_OFS       |
+      GetDrsPllLock1()       << WD2_DRS_PLL_LOCK_1_OFS       |
+      GetLmkPllLock()        << WD2_LMK_PLL_LOCK_OFS;
    
-   return (((GetPllLck(refresh) >> WD2_BIT_ISERDES_PLL_LOCK_1_OFS) & mask) == mask);
-}
-
-unsigned int WDB::GetDrsSampleFreq()
-// sampling frequency in MHz
-{
-   if (mDemoMode)
-      return 5120;
-   
-   return bitExtract(sreg, WD2_REG_DRS_SAMPLE_FREQ_OFS, WD2_BIT_DRS_SAMPLE_FREQ_MASK, WD2_BIT_DRS_SAMPLE_FREQ_OFS);
+   return mask;
 }
 
 void WDB::SetDrsSampleFreq(unsigned int f)
 // sampling frequency in MHz
 {
    if (mDemoMode) {
-      int index = (WD2_REG_DRS_SAMPLE_FREQ_OFS & 0x0FFF)/4;
+      int index = (WD2_DRS_SAMPLE_FREQ_REG & 0x0FFF)/4;
       unsigned int r = this->creg[index];
-      bitReplace(r, WD2_BIT_DRS_SAMPLE_FREQ_MASK, WD2_BIT_DRS_SAMPLE_FREQ_OFS, f);
+      bitReplace(r, WD2_DRS_SAMPLE_FREQ_MASK, WD2_DRS_SAMPLE_FREQ_OFS, f);
       this->sreg[index] = r;
       return;
    }
@@ -846,80 +807,39 @@ void WDB::SetDrsSampleFreq(unsigned int f)
    auto divider = (int) (240.0 / f * 2048 + 0.5);
    divider /= 2; // LMK multiplies divider by 2
    
-   SetRegMask(WD2_REG_LMK_0_OFS, WD2_BIT_LMK0_CLKOUT0_DIV_MASK, WD2_BIT_LMK0_CLKOUT0_DIV_OFS, divider);
-   ApplyLmkSettings();
+   SetLmk0ClkoutDiv(divider);
+   SetApplySettingsLmk(1);
    
    LmkSyncLocal();
    
    // read back new sampling frquency in status register
-   ReceiveStatusRegister(WD2_REG_DRS_SAMPLE_FREQ_OFS);
-}
-
-unsigned int WDB::GetLmkInputFreq()
-{
-   auto r = bitExtract(creg, WD2_REG_LMK_14_OFS, WD2_BIT_LMK14_PLL_R_MASK, WD2_BIT_LMK14_PLL_R_OFS);
-   if (r == 12)
-      return 80;
-   if (r == 20)
-      return 100;
-   return 0;
-}
-
-void WDB::SetLmkInputFreq(unsigned int f)
-{
-   if (f == 100) {       // R = 20, N = 48, VCO DIV = 5
-      SetRegMask(WD2_REG_LMK_14_OFS, WD2_BIT_LMK14_PLL_R_MASK, WD2_BIT_LMK14_PLL_R_OFS, 20);
-      SetRegMask(WD2_REG_LMK_15_OFS, WD2_BIT_LMK15_PLL_N_MASK, WD2_BIT_LMK15_PLL_N_OFS, 48);
-      SetRegMask(WD2_REG_LMK_15_OFS, WD2_BIT_LMK15_VCO_DIV_MASK, WD2_BIT_LMK15_VCO_DIV_OFS, 5);
-      SetRegMask(WD2_REG_LMK_13_OFS, WD2_BIT_LMK13_OSCIN_FREQ_MASK, WD2_BIT_LMK13_OSCIN_FREQ_OFS, 100);
-      SetRegMask(WD2_REG_CLK_CTRL_OFS, WD2_BIT_EXT_CLK_FREQ_MASK, WD2_BIT_EXT_CLK_FREQ_OFS, 100);
-   } else if (f == 80) { // R = 20, N = 60, VCO DIV = 5
-      SetRegMask(WD2_REG_LMK_14_OFS, WD2_BIT_LMK14_PLL_R_MASK, WD2_BIT_LMK14_PLL_R_OFS, 20);
-      SetRegMask(WD2_REG_LMK_15_OFS, WD2_BIT_LMK15_PLL_N_MASK, WD2_BIT_LMK15_PLL_N_OFS, 60);
-      SetRegMask(WD2_REG_LMK_15_OFS, WD2_BIT_LMK15_VCO_DIV_MASK, WD2_BIT_LMK15_VCO_DIV_OFS, 5);
-      SetRegMask(WD2_REG_LMK_13_OFS, WD2_BIT_LMK13_OSCIN_FREQ_MASK, WD2_BIT_LMK13_OSCIN_FREQ_OFS, 80);
-      SetRegMask(WD2_REG_CLK_CTRL_OFS, WD2_BIT_EXT_CLK_FREQ_MASK, WD2_BIT_EXT_CLK_FREQ_OFS, 80);
-   } else {
-      throw std::runtime_error(std::string("Unsupported LMK03000 input frequency"));
-   }
-}
-
-unsigned int WDB::GetAdcSampleFreq()
-// sampling frequency in MHz
-{
-   if (mDemoMode)
-      return 80;
-
-   return bitExtract(sreg, WD2_REG_ADC_SAMPLE_FREQ_OFS, WD2_BIT_ADC_SAMPLE_FREQ_MASK, WD2_BIT_ADC_SAMPLE_FREQ_OFS);
-}
-
-unsigned int WDB::GetAdcInfo()
-// chip ID (0x93 for AD9637), speed grade (0=40MS, 1=80MS)
-{
-   auto mask = WD2_BIT_ADC_0_CHIP_ID_MASK | WD2_BIT_ADC_0_SPEED_MASK |
-               WD2_BIT_ADC_1_CHIP_ID_MASK | WD2_BIT_ADC_1_SPEED_MASK;
-   return bitExtract(sreg, WD2_REG_ADC_INFO_OFS, mask, WD2_BIT_ADC_1_SPEED_OFS);
+   ReceiveStatusRegister(WD2_DRS_SAMPLE_FREQ_REG);
 }
 
 void WDB::GetScalers(std::vector<unsigned long> &scaler, bool refresh)
 {
+   int scalerWidth[] = {
+      64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, // 0:15
+      64, // trigger
+      32, // external clock
+      32, // event transmission rate
+      64, // time
+   };
    if (refresh)
-      ReceiveStatusRegisters((WD2_REG_SCALER_0_LSB_OFS-WD2_REG_HW_VER_OFS)/4, 34);
+      ReceiveStatusRegisters((WD2_SCALER_0_LSB_REG & 0x0FFF)/4, 34);
 
    // channels 0-15 are 64 bit counters
+   int adr = 0;
+   unsigned long v;
    for (unsigned int i=0 ; i<16 ; i++) {
-      unsigned long v = this->sreg[WD2_REG_SCALER_0_LSB_OFS/4+i*2] |
-      ((unsigned long)this->sreg[WD2_REG_SCALER_0_LSB_OFS/4+i*2+1] << 32);
-      
-      if (scaler.size() < i+1)
-         scaler.push_back(v);
-      else
-         scaler[i] = v;
-   }
-   
-   // channels 16 and 17 are 32 bit counters
-   for (unsigned int i=16 ; i<18 ; i++) {
-      unsigned long v = this->sreg[WD2_REG_SCALER_TRG_OFS/4+(i-16)];
+      if (scalerWidth[i] == 64) {
+         v = this->sreg[WD2_SCALER_0_LSB_REG/4+adr] |
+            ((unsigned long)this->sreg[WD2_SCALER_0_LSB_REG/4+adr+1] << 32);
+         adr += 2;
+      } else {
+         v = this->sreg[WD2_SCALER_0_LSB_REG/4+adr];
+         adr += 1;
+      }
       
       if (scaler.size() < i+1)
          scaler.push_back(v);
@@ -932,266 +852,73 @@ void WDB::GetScalers(std::vector<unsigned long> &scaler, bool refresh)
 void WDB::GetHVCurrents(std::vector<float> &current, bool refresh)
 {
    if (refresh)
-      ReceiveStatusRegisters((WD2_REG_HV_I_MEAS_0_OFS-WD2_REG_HW_VER_OFS)/4, 21);
+      ReceiveStatusRegisters((WD2_HV_I_MEAS_0_REG & 0x0FFF)/4, 21);
    
    for (unsigned int i=0 ; i<16 ; i++)
-      current.push_back(access_as<float>(&this->sreg[(WD2_REG_HV_I_MEAS_0_OFS-WD2_REG_HW_VER_OFS)/4+i]));
+      current.push_back(access_as<float>(&this->sreg[(WD2_HV_I_MEAS_0_REG & 0x0FFF)/4+i]));
 }
 
 void WDB::GetHVBaseVoltage(float &voltage, bool refresh)
 {
    if (refresh)
-      ReceiveStatusRegisters((WD2_REG_HV_U_BASE_MEAS_OFS-WD2_REG_HW_VER_OFS)/4, 1);
+      ReceiveStatusRegisters((WD2_HV_U_BASE_MEAS_REG & 0x0FFFF)/4, 1);
    
-   voltage = access_as<float>(&this->sreg[(WD2_REG_HV_U_BASE_MEAS_OFS-WD2_REG_HW_VER_OFS)/4]);
+   voltage = access_as<float>(&this->sreg[(WD2_HV_U_BASE_MEAS_REG & 0x0FFFF)/4]);
 }
 
 void WDB::Get1wireTemperatures(std::vector<float> &temp, bool refresh)
 {
    if (refresh)
-      ReceiveStatusRegisters((WD2_REG_HV_TEMP_0_OFS-WD2_REG_HW_VER_OFS)/4, 4);
+      ReceiveStatusRegisters((WD2_HV_TEMP_0_REG & 0x0FFF)/4, 4);
    
    for (unsigned int i=0 ; i<4 ; i++)
-      temp.push_back(access_as<float>(&this->sreg[(WD2_REG_HV_TEMP_0_OFS-WD2_REG_HW_VER_OFS)/4+i]));
+      temp.push_back(access_as<float>(&this->sreg[(WD2_HV_TEMP_0_REG & 0x0FFF)/4+i]));
 }
 
-unsigned int WDB::GetCompChannelStatus()
-// comparator status for 16 channels (1 = above threshold)
-{
-   return bitExtract(sreg, WD2_REG_COMP_CH_STAT_OFS, WD2_BIT_COMP_CH_STAT_MASK, WD2_BIT_COMP_CH_STAT_OFS);
-}
-
-unsigned int WDB::GetLastEventNumber()
-// number of last event sent
-{
-   return bitExtract(sreg, WD2_REG_EVENT_NR_OFS, WD2_BIT_EVENT_NUMBER_MASK, WD2_BIT_EVENT_NUMBER_OFS);
-}
-
-unsigned int WDB::GetTriggerBusParityErrorCount()
-// error counter for trigger bus parity errors
-{
-   return bitExtract(sreg, WD2_REG_TRB_PARITY_ERR_OFS, WD2_BIT_TRB_PARITY_ERROR_COUNT_MASK, WD2_BIT_TRB_PARITY_ERROR_COUNT_OFS);
-}
-
-unsigned int WDB::GetTriggerBusType()
-// trigger type broadcasted via trigger bus
-{
-   return bitExtract(sreg, WD2_REG_TRB_INFO_OFS, WD2_BIT_TRB_TYPE_MASK, WD2_BIT_TRB_TYPE_OFS);
-}
-
-unsigned int WDB::GetTriggerBusNumber()
-// event number LSB broadcasted via trigger bus
-{
-   return bitExtract(sreg, WD2_REG_TRB_INFO_OFS, WD2_BIT_TRB_NUMBER_MASK, WD2_BIT_TRB_NUMBER_OFS);
-}
-
-unsigned int WDB::GetAdvTriggerStatus(int r)
-{
-   assert(r >= 0 && r < 10);
-   return bitExtract(sreg, WD2_REG_ADV_TRG_STAT0_OFS+r*4, WD2_BIT_ADV_TRG_CFG_0_MASK, WD2_BIT_ADV_TRG_CFG_0_OFS);
-}
 
 //-- Control registers -----------------------------------------------
 
-unsigned int WDB::GetCrateId()
-// id of crate (0-255)
+void WDB::SetLmkInputFreq(unsigned int f)
 {
-   return bitExtract(creg, WD2_REG_WDB_LOC_OFS, WD2_BIT_CRATE_ID_MASK, WD2_BIT_CRATE_ID_OFS);
+   if (f == 100) {       // R = 20, N = 48, VCO DIV = 5
+      SetLmk14PllR(20);
+      SetLmk15PllN(48);
+      SetLmk15VcoDiv(5);
+      SetLmk13OscinFreq(100);
+      SetExtClkFreq(100);
+   } else if (f == 80) { // R = 20, N = 60, VCO DIV = 5
+      SetLmk14PllR(20);
+      SetLmk15PllN(60);
+      SetLmk15VcoDiv(5);
+      SetLmk13OscinFreq(80);
+      SetExtClkFreq(80);
+   } else {
+      throw std::runtime_error(std::string("Unsupported LMK03000 input frequency"));
+   }
+   SetApplySettingsLmk(1);
 }
 
-void WDB::SetCrateId(unsigned int value)
+unsigned int WDB::GetLmkInputFreq()
 {
-   SetRegMask(WD2_REG_WDB_LOC_OFS, WD2_BIT_CRATE_ID_MASK, WD2_BIT_CRATE_ID_OFS, value);
-}
-
-unsigned int WDB::GetSlotId()
-// WaveDAQ crate slot number (0-15)
-{
-   return bitExtract(creg, WD2_REG_WDB_LOC_OFS, WD2_BIT_SLOT_ID_MASK, WD2_BIT_SLOT_ID_OFS);
-}
-
-void WDB::SetSlotId(unsigned int value)
-{
-   SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_SLOT_ID_MASK, WD2_BIT_SLOT_ID_OFS, value);
-}
-
-unsigned int WDB::GetValidDelayADC()
-// delay of data valid at the ISERDES of the ADCs
-{
-   return bitExtract(creg, WD2_REG_WDB_LOC_OFS, WD2_BIT_VALID_DELAY_ADC_MASK, WD2_BIT_VALID_DELAY_ADC_OFS);
-}
-
-void WDB::SetValidDelayADC(unsigned int value)
-{
-   SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_VALID_DELAY_ADC_MASK, WD2_BIT_VALID_DELAY_ADC_OFS, value);
-}
-
-unsigned int WDB::GetDaqDataPhase()
-// phase step setting of the PLL generating the common DAQ clock
-{
-   return bitExtract(creg, WD2_REG_CTRL_OFS, WD2_BIT_DAQ_DATA_PHASE_MASK, WD2_BIT_DAQ_DATA_PHASE_OFS);
-}
-
-void WDB::SetDaqDataPhase(unsigned int value)
-{
-   SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_DAQ_DATA_PHASE_MASK, WD2_BIT_DAQ_DATA_PHASE_OFS, value);
-}
-
-bool WDB::IsCompPowerEnable()
-// comperator power enable
-{
-   return bitExtract(creg, WD2_REG_CTRL_OFS, WD2_BIT_COMP_POWER_EN_MASK, WD2_BIT_COMP_POWER_EN_OFS) == 1;
-}
-
-void WDB::SetCompPowerEnable(bool value)
-{
-   SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_COMP_POWER_EN_MASK, WD2_BIT_COMP_POWER_EN_OFS, value ? 1 : 0);
-}
-
-unsigned int WDB::GetReadoutSrcSel()
-// cReadoutSrcDrs / cReadoutSrcAdc / cReadoutSrcTdc
-{
-   auto v = bitExtract(creg, WD2_REG_CTRL_OFS, WD2_BIT_READOUT_SRC_SEL_MASK, WD2_BIT_READOUT_SRC_SEL_OFS);
-   // temporary fix: use 0/1 until selection is implemented in FPGA
-   if (v)
-      return 0x02;
-   return 0x01;
-}
-
-void WDB::SetReadoutSrcSel(unsigned int value)
-{
-   // cReadoutSrcDrs or cReadoutSrcAdc or cReadoutSrcTdc
-
-   // temporary fix: use 0/1 until selection is implemented in FPGA
-   unsigned int v = (value == 0x02);
-   SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_READOUT_SRC_SEL_MASK, WD2_BIT_READOUT_SRC_SEL_OFS, v);
-}
-
-unsigned int WDB::GetDRSReadoutMode()
-// 0 = start from first sampling cell / 1 = start from stop cell
-{
-   return bitExtract(creg, WD2_REG_CTRL_OFS, WD2_BIT_DRS_READOUT_MODE_MASK, WD2_BIT_DRS_READOUT_MODE_OFS);
-}
-
-void WDB::SetDRSReadoutMode(unsigned int value)
-{
-   SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_DRS_READOUT_MODE_MASK, WD2_BIT_DRS_READOUT_MODE_OFS, value);
-}
-
-bool WDB::IsDRSWaveContinous()
-// run domino wave continously even during readout
-{
-   return bitExtract(creg, WD2_REG_CTRL_OFS, WD2_BIT_DRS_WAVE_CONTINUOUS_MASK, WD2_BIT_DRS_WAVE_CONTINUOUS_OFS) == 1;
-}
-
-void WDB::SetDRSWaveContinous(bool value)
-{
-   SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_DRS_WAVE_CONTINUOUS_MASK, WD2_BIT_DRS_WAVE_CONTINUOUS_OFS, value ? 1 : 0);
-}
-
-void WDB::TrgDRSConfigure()
-// triggers a DRS chip register configuration
-{
-   SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_DRS_CONFIGURE_MASK, WD2_BIT_DRS_CONFIGURE_OFS, 1);
-}
-
-void WDB::TrgDAQSoft(bool value)
-// software trigger of a DRS readout
-{
-   SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_DAQ_SOFT_TRIGGER_MASK, WD2_BIT_DAQ_SOFT_TRIGGER_OFS, value);
-}
-
-void WDB::TrgDAQReinit()
-// stop & reset the DRS readout state machine
-{
-   SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_DAQ_REINIT_MASK, WD2_BIT_DAQ_REINIT_OFS, 1);
-}
-
-bool WDB::IsDAQNormal()
-// "normal" acquisition mode like on an oscilloscope
-{
-   return bitExtract(creg, WD2_REG_CTRL_OFS, WD2_BIT_DAQ_NORMAL_MASK, WD2_BIT_DAQ_NORMAL_OFS) == 1;
-}
-
-void WDB::SetDaqNormal(bool value)
-{
-   SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_DAQ_NORMAL_MASK, WD2_BIT_DAQ_NORMAL_OFS, value ? 1 : 0);
-}
-
-bool WDB::IsDaqSingle()
-// "single" acquisition mode like on an oscilloscope
-{
-   return bitExtract(creg, WD2_REG_CTRL_OFS, WD2_BIT_DAQ_SINGLE_MASK, WD2_BIT_DAQ_SINGLE_OFS) == 1;
-}
-
-void WDB::SetDaqSingle(bool value)
-{
-   SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_DAQ_SINGLE_MASK, WD2_BIT_DAQ_SINGLE_OFS, value ? 1 : 0);
-}
-
-void WDB::StartDaqSingle()
-{
-   SetRegMask(WD2_REG_CTRL_OFS, WD2_BIT_DAQ_SINGLE_MASK, WD2_BIT_DAQ_SINGLE_OFS, 1);
-}
-
-unsigned int WDB::GetDrs0TimingRefSel()
-// 0 = oscillator / 1 = LMK
-{
-   return bitExtract(creg, WD2_REG_CAL_CTRL_OFS, WD2_BIT_DRS_0_TIMING_REF_SEL_MASK, WD2_BIT_DRS_0_TIMING_REF_SEL_OFS);
-}
-
-void WDB::SetDrs0TimingRefSel(unsigned int value)
-{
-   SetRegMask(WD2_REG_CAL_CTRL_OFS, WD2_BIT_DRS_0_TIMING_REF_SEL_MASK, WD2_BIT_DRS_0_TIMING_REF_SEL_OFS, value);
-}
-
-unsigned int WDB::GetDrs1TimingRefSel()
-// 0 = oscillator / 1 = LMK
-{
-   return bitExtract(creg, WD2_REG_CAL_CTRL_OFS, WD2_BIT_DRS_1_TIMING_REF_SEL_MASK, WD2_BIT_DRS_1_TIMING_REF_SEL_OFS);
-}
-
-void WDB::SetDrs1TimingRefSel(unsigned int value)
-{
-   SetRegMask(WD2_REG_CAL_CTRL_OFS, WD2_BIT_DRS_1_TIMING_REF_SEL_MASK, WD2_BIT_DRS_1_TIMING_REF_SEL_OFS, value);
-}
-
-bool WDB::IsCalibBufferEnable()
-// enable (power) buffers driving the timing calibration signal to the frontend MUX
-{
-   return bitExtract(creg, WD2_REG_CAL_CTRL_OFS, WD2_BIT_CALIB_BUFFER_EN_MASK, WD2_BIT_CALIB_BUFFER_EN_OFS) == 1;
-}
-
-void WDB::SetCalibBufferEnable(bool value)
-{
-   SetRegMask(WD2_REG_CAL_CTRL_OFS, WD2_BIT_CALIB_BUFFER_EN_MASK, WD2_BIT_CALIB_BUFFER_EN_OFS, value ? 1 : 0);
-}
-
-bool WDB::IsTimingCalibSignalEnable()
-// switch on/off the 120 MHz calibration signal for the DRS chips
-{
-   return bitExtract(creg, WD2_REG_CAL_CTRL_OFS, WD2_BIT_TIMING_CALIB_SIGNAL_EN_MASK, WD2_BIT_TIMING_CALIB_SIGNAL_EN_OFS) == 1;
+   return GetExtClkFreq();
 }
 
 void WDB::SetTimingCalibSignalEnable(bool value)
 {
    // switch TCA_CTRL
-   SetRegMask(WD2_REG_CAL_CTRL_OFS, WD2_BIT_TIMING_CALIB_SIGNAL_EN_MASK, WD2_BIT_TIMING_CALIB_SIGNAL_EN_OFS, value ? 1 : 0);
+   SetTimingCalibSignalEn(value);
 
    // enable delay on LMK output #0
-   SetRegMask(WD2_REG_LMK_0_OFS, WD2_BIT_LMK0_CLKOUT0_MUX_MASK, WD2_BIT_LMK0_CLKOUT0_MUX_OFS, 3);
+   SetLmk0ClkoutMux(3);
    
    // switch LMK output #6
    
    // enable divider and delay
-   SetRegMask(WD2_REG_LMK_6_OFS, WD2_BIT_LMK6_CLKOUT6_MUX_MASK, WD2_BIT_LMK6_CLKOUT6_MUX_OFS, 3);
+   SetLmk6ClkoutMux(3);
    // divide 240 MHz by 2x1 = 120 MHz
-   SetRegMask(WD2_REG_LMK_6_OFS, WD2_BIT_LMK6_CLKOUT6_DIV_MASK, WD2_BIT_LMK6_CLKOUT6_DIV_OFS, 1);
+   SetLmk6ClkoutDiv(1);
    // enbable/disable output
-   SetRegMask(WD2_REG_LMK_6_OFS, WD2_BIT_LMK6_CLKOUT6_EN_MASK, WD2_BIT_LMK6_CLKOUT6_EN_OFS, value);
-   
-   ApplyLmkSettings();
-   // no ApplyLmkSettings() needed for firmware > June 29, 2017
+   SetLmk6ClkoutEn(value);
 }
 
 void WDB::SetTimingCalibSignalDelay(int value)
@@ -1199,50 +926,42 @@ void WDB::SetTimingCalibSignalDelay(int value)
    // set delay of LMK output #6
    assert(value >= -16 && value <= 16);
    if (value >= 0) {
-      SetRegMask(WD2_REG_LMK_0_OFS, WD2_BIT_LMK0_CLKOUT0_DLY_MASK, WD2_BIT_LMK0_CLKOUT0_DLY_OFS, 0);
+      SetLmk0ClkoutDly(0);
       // delay channel 6
       if (value == 16)
-         SetRegMask(WD2_REG_LMK_6_OFS, WD2_BIT_LMK6_CLKOUT6_MUX_MASK, WD2_BIT_LMK6_CLKOUT6_MUX_OFS, 1);
+         SetLmk6ClkoutMux(1);
       else {
-         SetRegMask(WD2_REG_LMK_6_OFS, WD2_BIT_LMK6_CLKOUT6_MUX_MASK, WD2_BIT_LMK6_CLKOUT6_MUX_OFS, 3);
-         SetRegMask(WD2_REG_LMK_6_OFS, WD2_BIT_LMK6_CLKOUT6_DLY_MASK, WD2_BIT_LMK6_CLKOUT6_DLY_OFS, value);
+         SetLmk6ClkoutMux(3);
+         SetLmk6ClkoutDly(value);
       }
    } else {
       // delay channel 0
       if (value == -16)
-         SetRegMask(WD2_REG_LMK_0_OFS, WD2_BIT_LMK0_CLKOUT0_MUX_MASK, WD2_BIT_LMK0_CLKOUT0_MUX_OFS, 1);
+         SetLmk0ClkoutMux(1);
       else {
-         SetRegMask(WD2_REG_LMK_0_OFS, WD2_BIT_LMK0_CLKOUT0_MUX_MASK, WD2_BIT_LMK0_CLKOUT0_MUX_OFS, 3);
-         SetRegMask(WD2_REG_LMK_0_OFS, WD2_BIT_LMK0_CLKOUT0_DLY_MASK, WD2_BIT_LMK0_CLKOUT0_DLY_OFS, -value);
+         SetLmk0ClkoutMux(3);
+         SetLmk0ClkoutDly(-value);
       }
-      SetRegMask(WD2_REG_LMK_6_OFS, WD2_BIT_LMK6_CLKOUT6_DLY_MASK, WD2_BIT_LMK6_CLKOUT6_DLY_OFS, 0);
+      SetLmk6ClkoutDly(0);
    }
-   
-   // no ApplyLmkSettings() needed for firmware > June 29, 2017
 }
 
 int WDB::GetTimingCalibSignalDelay()
 {
-   int v1 = bitExtract(creg, WD2_REG_LMK_0_OFS, WD2_BIT_LMK0_CLKOUT0_DLY_MASK, WD2_BIT_LMK0_CLKOUT0_DLY_OFS);
-   int v2 = bitExtract(creg, WD2_REG_LMK_6_OFS, WD2_BIT_LMK6_CLKOUT6_DLY_MASK, WD2_BIT_LMK6_CLKOUT6_DLY_OFS);
+   int v1 = GetLmk0ClkoutDly();
+   int v2 = GetLmk6ClkoutDly();
    if (v2 > 0)
       return -v2;
    return v1;
 }
 
-unsigned int WDB::GetDaqClkSrcSel()
-// 0 = crate clock / 1 = on-board oscillator
-{
-   return bitExtract(creg, WD2_REG_CLK_CTRL_OFS, WD2_BIT_DAQ_CLK_SRC_SEL_MASK, WD2_BIT_DAQ_CLK_SRC_SEL_OFS);
-}
-
 int WDB::GetTimingReferenceSignal()
 {
    if (GetDrs0TimingRefSel()) {
-      if (bitExtract(creg, WD2_REG_LMK_1_OFS, WD2_BIT_LMK1_CLKOUT1_EN_MASK, WD2_BIT_LMK1_CLKOUT1_EN_OFS))
+      if (GetLmk1ClkoutEn())
          return 2;
    } else {
-      if (IsTimingCalibSignalEnable())
+      if (GetTimingCalibSignalEn())
          return 1;
    }
    return 0;
@@ -1256,332 +975,175 @@ void WDB::SetTimingReferenceSignal(int value)
       SetTimingCalibSignalEnable(false);
       
       // turn off calibration buffer
-      SetCalibBufferEnable(false);
+      SetCalibBufferEn(false);
 
       // select LMK outputs
       SetDrs0TimingRefSel(1);
       SetDrs1TimingRefSel(1);
       
       // disable LMK outputs #1 and #2
-      SetRegMask(WD2_REG_LMK_1_OFS, WD2_BIT_LMK1_CLKOUT1_EN_MASK, WD2_BIT_LMK1_CLKOUT1_EN_OFS, 0);
-      SetRegMask(WD2_REG_LMK_2_OFS, WD2_BIT_LMK2_CLKOUT2_EN_MASK, WD2_BIT_LMK2_CLKOUT2_EN_OFS, 0);
+      SetLmk1ClkoutEn(0);
+      SetLmk2ClkoutEn(0);
 
-      ApplyLmkSettings();
-      // no ApplyLmkSettings() needed for firmware > June 29, 2017
-      
    } else if (value == cTimingReferenceSine) { // seclect sine wave generator
       
       // turn on sine wave generator
       SetTimingCalibSignalEnable(true);
       
       // turn on calibration buffer
-      SetCalibBufferEnable(true);
+      SetCalibBufferEn(true);
 
       // select sine wave
       SetDrs0TimingRefSel(0);
       SetDrs1TimingRefSel(0);
       
       // disable LMK outputs #1 and #2
-      SetRegMask(WD2_REG_LMK_1_OFS, WD2_BIT_LMK1_CLKOUT1_EN_MASK, WD2_BIT_LMK1_CLKOUT1_EN_OFS, 0);
-      SetRegMask(WD2_REG_LMK_2_OFS, WD2_BIT_LMK2_CLKOUT2_EN_MASK, WD2_BIT_LMK2_CLKOUT2_EN_OFS, 0);
-      
-      ApplyLmkSettings();
-      // no ApplyLmkSettings() needed for firmware > June 29, 2017
-      
+      SetLmk1ClkoutEn(0);
+      SetLmk2ClkoutEn(0);
+
    } else if (value == cTimingReferenceSquare){ // select square wave
       
       // turn off sine wave generator
       SetTimingCalibSignalEnable(false);
       
       // turn off calibration buffer
-      SetCalibBufferEnable(false);
+      SetCalibBufferEn(false);
       
       // select LMK outputs #1 and #2
       SetDrs0TimingRefSel(1);
       SetDrs1TimingRefSel(1);
       
       // turn on LMK outputs #1 and #2
-      SetRegMask(WD2_REG_LMK_1_OFS, WD2_BIT_LMK1_CLKOUT1_MUX_MASK, WD2_BIT_LMK1_CLKOUT1_MUX_OFS, 1);
-      SetRegMask(WD2_REG_LMK_1_OFS, WD2_BIT_LMK1_CLKOUT1_DIV_MASK, WD2_BIT_LMK1_CLKOUT1_DIV_OFS, 1);
-      SetRegMask(WD2_REG_LMK_1_OFS, WD2_BIT_LMK1_CLKOUT1_EN_MASK,  WD2_BIT_LMK1_CLKOUT1_EN_OFS, 1);
+      SetLmk1ClkoutMux(1);
+      SetLmk1ClkoutDiv(1);
+      SetLmk1ClkoutEn(1);
       
-      SetRegMask(WD2_REG_LMK_2_OFS, WD2_BIT_LMK2_CLKOUT2_MUX_MASK, WD2_BIT_LMK2_CLKOUT2_MUX_OFS, 1);
-      SetRegMask(WD2_REG_LMK_2_OFS, WD2_BIT_LMK2_CLKOUT2_DIV_MASK, WD2_BIT_LMK2_CLKOUT2_DIV_OFS, 1);
-      SetRegMask(WD2_REG_LMK_2_OFS, WD2_BIT_LMK2_CLKOUT2_EN_MASK,  WD2_BIT_LMK2_CLKOUT2_EN_OFS, 1);
-      
-      ApplyLmkSettings();
-      // no ApplyLmkSettings() needed for firmware > June 29, 2017
-      
+      SetLmk2ClkoutMux(1);
+      SetLmk2ClkoutDiv(1);
+      SetLmk2ClkoutEn(1);
+
       LmkSyncLocal();
    }
 }
 
-void WDB::SetDaqClkSrcSel(unsigned int value)
-{
-   SetRegMask(WD2_REG_CLK_CTRL_OFS, WD2_BIT_DAQ_CLK_SRC_SEL_MASK, WD2_BIT_DAQ_CLK_SRC_SEL_OFS, value);
-}
-
-unsigned int WDB::GetExtClkInSel()
-// 0 = crate clock / 1 = MCX connector input
-{
-   return bitExtract(creg, WD2_REG_CLK_CTRL_OFS, WD2_BIT_EXT_CLK_IN_SEL_MASK, WD2_BIT_EXT_CLK_IN_SEL_OFS);
-}
-
-void WDB::SetExtClkInSel(unsigned int value)
-{
-   SetRegMask(WD2_REG_CLK_CTRL_OFS, WD2_BIT_EXT_CLK_IN_SEL_MASK, WD2_BIT_EXT_CLK_IN_SEL_OFS, value);
-}
-
-unsigned int WDB::GetExtClkFreq()
-// external clock frequency in MHz
-{
-   return bitExtract(creg, WD2_REG_CLK_CTRL_OFS, WD2_BIT_EXT_CLK_FREQ_MASK, WD2_BIT_EXT_CLK_FREQ_OFS);
-}
-
-unsigned int WDB::GetLocalClkFreq()
-// on-board clock frequency in MHz
-{
-   return bitExtract(creg, WD2_REG_CLK_CTRL_OFS, WD2_BIT_LOCAL_CLK_FREQ_MASK, WD2_BIT_LOCAL_CLK_FREQ_OFS);
-}
-
-unsigned int WDB::GetDrs1ChnTxEnable()
-// channel transmission enable of DRS1 [CH8:CH0], CH8:clock channel
-{
-   return bitExtract(creg, WD2_REG_CH_TX_EN_OFS, WD2_BIT_DRS_1_CH_TX_EN_MASK, WD2_BIT_DRS_1_CH_TX_EN_OFS);
-}
-
-void WDB::SetDrs1ChnTxEnable(unsigned int value)
-{
-   SetRegMask(WD2_REG_CH_TX_EN_OFS, WD2_BIT_DRS_1_CH_TX_EN_MASK, WD2_BIT_DRS_1_CH_TX_EN_OFS, value);
-}
-
-unsigned int WDB::GetDrs0ChnTxEnable()
-// channel transmission enable of DRS0 [CH8:CH0], CH8:clock channel
-{
-   return bitExtract(creg, WD2_REG_CH_TX_EN_OFS, WD2_BIT_DRS_0_CH_TX_EN_MASK, WD2_BIT_DRS_0_CH_TX_EN_OFS);
-}
-
-void WDB::SetDrs0ChnTxEnable(unsigned int value)
-{
-   SetRegMask(WD2_REG_CH_TX_EN_OFS, WD2_BIT_DRS_0_CH_TX_EN_MASK, WD2_BIT_DRS_0_CH_TX_EN_OFS, value);
-}
-
-unsigned int WDB::GetDrsControl()
-/* bits
-    18:  drs_wsrloop
-    17:  drs_pllen
-    16:  drs_dmode
-    15:8 drs_wsr
-     7:0 drs_wcr
-*/
-{
-   auto mask = WD2_BIT_DRS_WSRLOOP_MASK |
-               WD2_BIT_DRS_PLLEN_MASK |
-               WD2_BIT_DRS_DMODE_MASK |
-               WD2_BIT_DRS_WSR_MASK |
-               WD2_BIT_DRS_WCR_MASK;
-   
-   return bitExtract(creg, WD2_REG_DRS_CTRL_OFS, mask, WD2_BIT_DRS_WCR_OFS);
-}
-
-void WDB::SetDrsControl(unsigned int value)
-{
-   auto mask = WD2_BIT_DRS_WSRLOOP_MASK |
-   WD2_BIT_DRS_PLLEN_MASK |
-   WD2_BIT_DRS_DMODE_MASK |
-   WD2_BIT_DRS_WSR_MASK |
-   WD2_BIT_DRS_WCR_MASK;
-
-   SetRegMask(WD2_REG_DRS_CTRL_OFS, mask, WD2_BIT_DRS_WCR_OFS, value);
-}
-
-unsigned int WDB::GetDataDestination()
-// 0 = Ethernet / 1 = oserdes to backplane
-{
-   return bitExtract(creg, WD2_REG_COM_CTRL_OFS, WD2_BIT_DATA_DESTINATION_MASK, WD2_BIT_DATA_DESTINATION_OFS);
-}
-
-void WDB::SetDataDestination(unsigned int value)
-{
-   SetRegMask(WD2_REG_COM_CTRL_OFS, WD2_BIT_DATA_DESTINATION_MASK, WD2_BIT_DATA_DESTINATION_OFS, value);
-}
-
-unsigned int WDB::GetDCBSerdesTrain()
-// enable training pattern for DCB serdes connection
-{
-   return bitExtract(creg, WD2_REG_COM_CTRL_OFS, WD2_BIT_DCB_SERDES_TRAIN_MASK, WD2_BIT_DCB_SERDES_TRAIN_OFS);
-}
-
-void WDB::SetDCBSerdesTrain(unsigned int value)
-{
-   SetRegMask(WD2_REG_COM_CTRL_OFS, WD2_BIT_DCB_SERDES_TRAIN_MASK, WD2_BIT_DCB_SERDES_TRAIN_OFS, value);
-}
-
-unsigned int WDB::GetTcbSerdesTrain()
-// enable training pattern for TCB serdes connection
-{
-   return bitExtract(creg, WD2_REG_COM_CTRL_OFS, WD2_BIT_TCB_SERDES_TRAIN_MASK, WD2_BIT_TCB_SERDES_TRAIN_OFS);
-}
-
-void WDB::SetTcbSerdesTrain(unsigned int value)
-{
-   SetRegMask(WD2_REG_COM_CTRL_OFS, WD2_BIT_TCB_SERDES_TRAIN_MASK, WD2_BIT_TCB_SERDES_TRAIN_OFS, value);
-}
-
-unsigned int WDB::GetInterPacketDelay()
-// delay between transmission of two UDP packages (in ticks?)
-{
-   return bitExtract(creg, WD2_REG_COM_CTRL_OFS, WD2_BIT_INTER_PKG_DELAY_MASK, WD2_BIT_INTER_PKG_DELAY_OFS);
-}
-
-void WDB::SetInterPacketDelay(unsigned int value)
-{
-   SetRegMask(WD2_REG_COM_CTRL_OFS, WD2_BIT_INTER_PKG_DELAY_MASK, WD2_BIT_INTER_PKG_DELAY_OFS, value);
-}
-
 void WDB::ResetDaqPll()
 {
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_DAQ_PLL_RST_MASK, WD2_BIT_DAQ_PLL_RST_OFS, 1);
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_DAQ_PLL_RST_MASK, WD2_BIT_DAQ_PLL_RST_OFS, 0);
+   SetDaqPllRst(1);
+   SetDaqPllRst(0);
 }
 
 void WDB::ResetDcbOserdesPll()
 {
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_DCB_OSERDES_PLL_RST_MASK, WD2_BIT_DCB_OSERDES_PLL_RST_OFS, 1);
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_DCB_OSERDES_PLL_RST_MASK, WD2_BIT_DCB_OSERDES_PLL_RST_OFS, 0);
+   SetDcbOserdesPllRst(1);
+   SetDcbOserdesPllRst(0);
 }
 
 void WDB::ResetTcbOserdesPll()
 {
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_TCB_OSERDES_PLL_RST_MASK, WD2_BIT_TCB_OSERDES_PLL_RST_OFS, 1);
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_TCB_OSERDES_PLL_RST_MASK, WD2_BIT_TCB_OSERDES_PLL_RST_OFS, 0);
+   SetTcbOserdesPllRst(1);
+   SetTcbOserdesPllRst(0);
 }
-
 
 void WDB::ResetDcbOserdesIf()
 {
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_DCB_OSERDES_IF_RST_MASK, WD2_BIT_DCB_OSERDES_IF_RST_OFS, 1);
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_DCB_OSERDES_IF_RST_MASK, WD2_BIT_DCB_OSERDES_IF_RST_OFS, 0);
+   SetDcbOserdesIfRst(1);
+   SetDcbOserdesIfRst(0);
 }
 
 void WDB::ResetTcbOserdesIf()
 {
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_TCB_OSERDES_IF_RST_MASK, WD2_BIT_TCB_OSERDES_IF_RST_OFS, 1);
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_TCB_OSERDES_IF_RST_MASK, WD2_BIT_TCB_OSERDES_IF_RST_OFS, 0);
+   SetTcbOserdesIfRst(1);
+   SetTcbOserdesIfRst(0);
 }
 
 void WDB::ResetAllPll()
 {
-   auto mask = WD2_BIT_DAQ_PLL_RST_MASK |
-   WD2_BIT_DCB_OSERDES_PLL_RST_MASK |
-   WD2_BIT_TCB_OSERDES_PLL_RST_MASK |
-   WD2_BIT_DCB_OSERDES_IF_RST_MASK |
-   WD2_BIT_TCB_OSERDES_IF_RST_MASK;
-
-   SetRegMask(WD2_REG_RST_OFS, mask, WD2_BIT_TCB_OSERDES_IF_RST_OFS, 0x1F);
-   SetRegMask(WD2_REG_RST_OFS, mask, WD2_BIT_TCB_OSERDES_IF_RST_OFS, 0x00);
+   SetSendBlocked(true); // TBD: test this!
+   ResetDaqPll();
+   ResetDcbOserdesPll();
+   ResetTcbOserdesPll();
+   ResetDcbOserdesIf();
+   SetSendBlocked(false);
+   ResetTcbOserdesIf();
 }
 
 void WDB::ResetScaler()
 {
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_SCALER_RST_MASK, WD2_BIT_SCALER_RST_OFS, 1);
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_SCALER_RST_MASK, WD2_BIT_SCALER_RST_OFS, 0);
+   SetScalerRst(1);
+   SetScalerRst(0);
 }
 
 void WDB::ResetTriggerParityErrorCounter()
 {
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_TRB_PARITY_ERROR_COUNT_RST_MASK, WD2_BIT_TRB_PARITY_ERROR_COUNT_RST_OFS, 1);
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_TRB_PARITY_ERROR_COUNT_RST_MASK, WD2_BIT_TRB_PARITY_ERROR_COUNT_RST_OFS, 0);
+   SetTrbParityErrorCountRst(1);
+   SetTrbParityErrorCountRst(0);
 }
 
 void WDB::LmkSyncLocal()
 {
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_LMK_SYNC_LOCAL_MASK, WD2_BIT_LMK_SYNC_LOCAL_OFS, 1);
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_LMK_SYNC_LOCAL_MASK, WD2_BIT_LMK_SYNC_LOCAL_OFS, 0);
+   SetLmkSyncLocal(1);
+   SetLmkSyncLocal(0);
 }
 
 void WDB::ResetAdcIf()
 {
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_ADC_IF_RST_MASK, WD2_BIT_ADC_IF_RST_OFS, 1);
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_ADC_IF_RST_MASK, WD2_BIT_ADC_IF_RST_OFS, 0);
+   SetAdcIfRst(1);
+   SetAdcIfRst(0);
+}
+
+void WDB::ResetDataLinkIf()
+{
+   SetDataLinkIfRst(1);
+   SetDataLinkIfRst(0);
 }
 
 void WDB::ResetPackager()
 {
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_WD_PKGR_RST_MASK, WD2_BIT_WD_PKGR_RST_OFS, 1);
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_WD_PKGR_RST_MASK, WD2_BIT_WD_PKGR_RST_OFS, 0);
+   SetWdPkgrRst(1);
+   SetWdPkgrRst(0);
 }
 
 void WDB::ResetEventCounter()
 {
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_EVENT_COUNTER_RST_MASK, WD2_BIT_EVENT_COUNTER_RST_OFS, 1);
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_EVENT_COUNTER_RST_MASK, WD2_BIT_EVENT_COUNTER_RST_OFS, 0);
+   SetEventCounterRst(1);
+   SetEventCounterRst(0);
 }
 
 void WDB::ResetDrsControlFsm()
 {
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_DRS_CTRL_FSM_RST_MASK, WD2_BIT_DRS_CTRL_FSM_RST_OFS, 1);
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_DRS_CTRL_FSM_RST_MASK, WD2_BIT_DRS_CTRL_FSM_RST_OFS, 0);
+   SetDrsCtrlFsmRst(1);
+   SetDrsCtrlFsmRst(0);
 }
 
 void WDB::ReconfigureFpga()
 {
-   SetRegMask(WD2_REG_RST_OFS, WD2_BIT_RECONFIGURE_FPGA_MASK, WD2_BIT_RECONFIGURE_FPGA_OFS, 1, true, -1);
+   mSendTimeoutMs = -1;
+   SetReconfigureFpga(1);
    sleep_ms(1000);
-}
-
-void WDB::ApplyDrsSettings()
-{
-   SetRegMask(WD2_REG_APLY_CFG_OFS, WD2_BIT_APPLY_SETTINGS_DRS_MASK, WD2_BIT_APPLY_SETTINGS_DRS_OFS, 1);
-}
-
-void WDB::ApplyDacSettings()
-{
-   SetRegMask(WD2_REG_APLY_CFG_OFS, WD2_BIT_APPLY_SETTINGS_DAC_MASK, WD2_BIT_APPLY_SETTINGS_DAC_OFS, 1);
-}
-
-void WDB::ApplyFrontendSettings()
-{
-   SetRegMask(WD2_REG_APLY_CFG_OFS, WD2_BIT_APPLY_SETTINGS_DRS_MASK, WD2_BIT_APPLY_SETTINGS_DRS_OFS, 1);
-}
-
-void WDB::ApplyControlSettings()
-{
-   SetRegMask(WD2_REG_APLY_CFG_OFS, WD2_BIT_APPLY_SETTINGS_CTRL_MASK, WD2_BIT_APPLY_SETTINGS_CTRL_OFS, 1);
-}
-
-void WDB::ApplyAdcSettings()
-{
-   SetRegMask(WD2_REG_APLY_CFG_OFS, WD2_BIT_APPLY_SETTINGS_ADC_MASK, WD2_BIT_APPLY_SETTINGS_ADC_OFS, 1);
-}
-
-void WDB::ApplyLmkSettings()
-{
-   SetRegMask(WD2_REG_APLY_CFG_OFS, WD2_BIT_APPLY_SETTINGS_LMK_MASK, WD2_BIT_APPLY_SETTINGS_LMK_OFS, 1);
 }
 
 float WDB::GetDacRofsV()
 {
-   auto d = bitExtract(creg, WD2_REG_DAC0_A_B_OFS, WD2_BIT_DAC0_CH_A_MASK, WD2_BIT_DAC0_CH_A_OFS);
+   auto d = GetDac0ChA();
    return d / 65535.0 * 2.5;
 }
 
 void WDB::SetDacRofsV(float v)
 {
    auto d = (unsigned int)(v / 2.5 * 65535 + 0.5);
-   SetRegMask(WD2_REG_DAC0_A_B_OFS, WD2_BIT_DAC0_CH_A_MASK, WD2_BIT_DAC0_CH_A_OFS, d);
+   SetDac0ChA(d);
 }
 
 float WDB::GetDacOfsV()
 {
-   auto d = bitExtract(creg, WD2_REG_DAC0_A_B_OFS, WD2_BIT_DAC0_CH_B_MASK, WD2_BIT_DAC0_CH_B_OFS);
+   auto d = GetDac0ChB();
    return d / 65535.0 * 2.5;
 }
 
 void WDB::SetDacOfsV(float v)
 {
    auto d = (unsigned int)(v / 2.5 * 65535 + 0.5);
-   SetRegMask(WD2_REG_DAC0_A_B_OFS, WD2_BIT_DAC0_CH_B_MASK, WD2_BIT_DAC0_CH_B_OFS, d);
+   SetDac0ChB(d);
 }
 
 float WDB::GetDacCalDcV()
@@ -1620,28 +1182,28 @@ void WDB::SetRange(float r)
 
 float WDB::GetDacPulseAmpV()
 {
-   auto d = bitExtract(creg, WD2_REG_DAC0_C_D_OFS, WD2_BIT_DAC0_CH_D_MASK, WD2_BIT_DAC0_CH_D_OFS);
+   auto d = GetDac0ChD();
    return d / 65535.0 * 2.5;
 }
 
 void WDB::SetDacPulseAmpV(float v)
 {
    auto d = (unsigned int)(v / 2.5 * 65535 + 0.5);
-   SetRegMask(WD2_REG_DAC0_C_D_OFS, WD2_BIT_DAC0_CH_D_MASK, WD2_BIT_DAC0_CH_D_OFS, d);
+   SetDac0ChD(d);
 }
 
 std::vector<float> pzcLevel = { 0, 0.5, 1, 1.5, 1.8, 2, 2.5 };
 
 float WDB::GetDacPzcLevelV()
 {
-   auto d = bitExtract(creg, WD2_REG_DAC0_E_F_OFS, WD2_BIT_DAC0_CH_E_MASK, WD2_BIT_DAC0_CH_E_OFS);
+   auto d = GetDac0ChE();
    return d / 65535.0 * 2.5;
 }
 
 void WDB::SetDacPzcLevelV(float v)
 {
    auto d = (unsigned int)(v / 2.5 * 65535 + 0.5);
-   SetRegMask(WD2_REG_DAC0_E_F_OFS, WD2_BIT_DAC0_CH_E_MASK, WD2_BIT_DAC0_CH_E_OFS, d);
+   SetDac0ChE(d);
 }
 
 int WDB::GetDacPzcLevelN()
@@ -1662,14 +1224,28 @@ void WDB::SetDacPzcLevelN(int i)
 
 float WDB::GetDacBiasV()
 {
-   auto d = bitExtract(creg, WD2_REG_DAC0_G_H_OFS, WD2_BIT_DAC0_CH_H_MASK, WD2_BIT_DAC0_CH_H_OFS);
+   auto d = GetDac0ChH();
    return d / 65535.0 * 2.5;
 }
 
 void WDB::SetDacBiasV(float v)
 {
    auto d = (unsigned int)(v / 2.5 * 65535 + 0.5);
-   SetRegMask(WD2_REG_DAC0_G_H_OFS, WD2_BIT_DAC0_CH_H_MASK, WD2_BIT_DAC0_CH_H_OFS, d);
+   SetDac0ChH(d);
+}
+
+void WDB::SetTriggerFallingEdge(unsigned int value)
+{
+   // store in reserved bit
+   SetRegMask(WD2_TRIGGER_FALLING_EDGE_REG, 0x80000000, 31, value);
+   
+   // falling edge is done via inverted pattern, so have real edge always rising
+   WDBREG::SetTriggerFallingEdge(0);
+}
+
+unsigned int WDB::GetTriggerFallingEdge()
+{
+   return BitExtractControl(WD2_TRIGGER_FALLING_EDGE_REG, 0x80000000, 31);;
 }
 
 float WDB::GetDacTriggerLevelV(int chn)
@@ -1681,9 +1257,9 @@ float WDB::GetDacTriggerLevelV(int chn)
    
    assert(chn < 16);
    if (chn % 2 == 0)
-      d = bitExtract(creg, WD2_REG_DAC1_A_B_OFS+(chn/2)*4, WD2_BIT_DAC1_CH_A_MASK, WD2_BIT_DAC1_CH_A_OFS);
+      d = BitExtractControl(WD2_DAC1_CH_A_REG+(chn/2)*4, WD2_DAC1_CH_A_MASK, WD2_DAC1_CH_A_OFS);
    else
-      d = bitExtract(creg, WD2_REG_DAC1_A_B_OFS+(chn/2)*4, WD2_BIT_DAC1_CH_B_MASK, WD2_BIT_DAC1_CH_B_OFS);
+      d = BitExtractControl(WD2_DAC1_CH_A_REG+(chn/2)*4, WD2_DAC1_CH_B_MASK, WD2_DAC1_CH_B_OFS);
    
    // convert to Volts taking WDB comparator offset into account
    float v = ((d / 65535.0 * 2500) - 900) / 500.0;
@@ -1701,20 +1277,22 @@ void WDB::SetDacTriggerLevelV(int chn, float v)
    assert(chn < 16);
    if (chn == -1) {
       std::vector<unsigned int> regs;
+      BlockSend(true);
       for (chn=0 ; chn<16 ; chn++) {
          if (chn % 2 == 0)
-            SetRegMask(WD2_REG_DAC1_A_B_OFS+(chn/2)*4, WD2_BIT_DAC1_CH_A_MASK, WD2_BIT_DAC1_CH_A_OFS, d, false);
+            SetRegMask(WD2_DAC1_CH_A_REG+(chn/2)*4, WD2_DAC1_CH_A_MASK, WD2_DAC1_CH_A_OFS, d);
          else
-            SetRegMask(WD2_REG_DAC1_A_B_OFS+(chn/2)*4, WD2_BIT_DAC1_CH_B_MASK, WD2_BIT_DAC1_CH_B_OFS, d, false);
+            SetRegMask(WD2_DAC1_CH_A_REG+(chn/2)*4, WD2_DAC1_CH_B_MASK, WD2_DAC1_CH_B_OFS, d);
       }
+      BlockSend(false);
       for (chn=0 ; chn<8 ; chn++)
-         regs.push_back(creg[(WD2_REG_DAC1_A_B_OFS-WD2_REG_WDB_LOC_OFS)/4+chn]);
+         regs.push_back(creg[(WD2_DAC1_CH_A_REG & 0x0FFF)/4+chn]);
 #ifdef WD2_USE_UDP_BIN
-      WriteUDP(WD2_REG_DAC1_A_B_OFS, regs);
+      WriteUDP(WD2_DAC1_CH_A_REG, regs);
 #else
       for (chn=0 ; chn<8 ; chn++) {
          std::ostringstream req;
-         req << "rw 0x" << std::hex << WD2_REG_DAC1_A_B_OFS+(chn/2)*4 << " 0x" << creg[(WD2_REG_DAC1_A_B_OFS-WD2_REG_WDB_LOC_OFS)/4+chn];
+         req << "rw 0x" << std::hex << WD2_DAC1_CH_A_REG+(chn/2)*4 << " 0x" << creg[(WD2_DAC1_CH_A_REG & 0x0FFF)/4+chn];
          
          SendUDP(req.str());
       }
@@ -1722,20 +1300,20 @@ void WDB::SetDacTriggerLevelV(int chn, float v)
 
    } else {
       if (chn % 2 == 0)
-         SetRegMask(WD2_REG_DAC1_A_B_OFS+(chn/2)*4, WD2_BIT_DAC1_CH_A_MASK, WD2_BIT_DAC1_CH_A_OFS, d);
+         SetRegMask(WD2_DAC1_CH_A_REG+(chn/2)*4, WD2_DAC1_CH_A_MASK, WD2_DAC1_CH_A_OFS, d);
       else
-         SetRegMask(WD2_REG_DAC1_A_B_OFS+(chn/2)*4, WD2_BIT_DAC1_CH_B_MASK, WD2_BIT_DAC1_CH_B_OFS, d);
+         SetRegMask(WD2_DAC1_CH_A_REG+(chn/2)*4, WD2_DAC1_CH_B_MASK, WD2_DAC1_CH_B_OFS, d);
    }
 }
 
-bool WDB::IsFePzc(int chn)
+bool WDB::GetFePzc(int chn)
 // pole-zero canellation
 {
    assert(chn < 16);
-   auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
-   auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_PZC_EN_MASK : WD2_BIT_FE1_PZC_EN_MASK;
-   auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_PZC_EN_OFS  : WD2_BIT_FE1_PZC_EN_OFS;
-   return bitExtract(creg, rofs, mask, ofs) > 0;
+   auto rofs = WD2_FE0_PZC_EN_REG + (chn/2)*4;
+   auto mask = (chn % 2 == 0) ? WD2_FE0_PZC_EN_MASK : WD2_FE1_PZC_EN_MASK;
+   auto ofs  = (chn % 2 == 0) ? WD2_FE0_PZC_EN_OFS  : WD2_FE1_PZC_EN_OFS;
+   return BitExtractControl(rofs, mask, ofs) > 0;
 }
 
 void WDB::SetFePzc(int chn, bool v)
@@ -1746,9 +1324,9 @@ void WDB::SetFePzc(int chn, bool v)
       return;
    }
    assert(chn < 16);
-   auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
-   auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_PZC_EN_MASK : WD2_BIT_FE1_PZC_EN_MASK;
-   auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_PZC_EN_OFS  : WD2_BIT_FE1_PZC_EN_OFS;
+   auto rofs = WD2_FE0_PZC_EN_REG + (chn/2)*4;
+   auto mask = (chn % 2 == 0) ? WD2_FE0_PZC_EN_MASK : WD2_FE1_PZC_EN_MASK;
+   auto ofs  = (chn % 2 == 0) ? WD2_FE0_PZC_EN_OFS  : WD2_FE1_PZC_EN_OFS;
    SetRegMask(rofs, mask, ofs, v ? 1 : 0);
 }
 
@@ -1756,18 +1334,18 @@ unsigned int WDB::GetFeAmp2Comp(int chn)
 // amplifier 2 compensation enable
 {
    assert(chn < 16);
-   auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
-   auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER2_COMP_EN_MASK : WD2_BIT_FE1_AMPLIFIER2_COMP_EN_MASK;
-   auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER2_COMP_EN_OFS  : WD2_BIT_FE1_AMPLIFIER2_COMP_EN_OFS;
-   return bitExtract(creg, rofs, mask, ofs);
+   auto rofs = WD2_FE0_AMPLIFIER2_COMP_EN_REG + (chn/2)*4;
+   auto mask = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER2_COMP_EN_MASK : WD2_FE1_AMPLIFIER2_COMP_EN_MASK;
+   auto ofs  = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER2_COMP_EN_OFS  : WD2_FE1_AMPLIFIER2_COMP_EN_OFS;
+   return BitExtractControl(rofs, mask, ofs);
 }
 
 void WDB::SetFeAmp2Comp(int chn, unsigned int v)
 {
    assert(chn < 16);
-   auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
-   auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER2_COMP_EN_MASK : WD2_BIT_FE1_AMPLIFIER2_COMP_EN_MASK;
-   auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER2_COMP_EN_OFS  : WD2_BIT_FE1_AMPLIFIER2_COMP_EN_OFS;
+   auto rofs = WD2_FE0_AMPLIFIER2_COMP_EN_REG + (chn/2)*4;
+   auto mask = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER2_COMP_EN_MASK : WD2_FE1_AMPLIFIER2_COMP_EN_MASK;
+   auto ofs  = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER2_COMP_EN_OFS  : WD2_FE1_AMPLIFIER2_COMP_EN_OFS;
    SetRegMask(rofs, mask, ofs, v);
 }
 
@@ -1775,18 +1353,18 @@ unsigned int WDB::GetFeAmp2Enable(int chn)
 // amplifier 2 enable (gain 10)
 {
    assert(chn < 16);
-   auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
-   auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER2_EN_MASK : WD2_BIT_FE1_AMPLIFIER2_EN_MASK;
-   auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER2_EN_OFS  : WD2_BIT_FE1_AMPLIFIER2_EN_OFS;
-   return bitExtract(creg, rofs, mask, ofs);
+   auto rofs = WD2_FE0_AMPLIFIER2_EN_REG + (chn/2)*4;
+   auto mask = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER2_EN_MASK : WD2_FE1_AMPLIFIER2_EN_MASK;
+   auto ofs  = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER2_EN_OFS  : WD2_FE1_AMPLIFIER2_EN_OFS;
+   return BitExtractControl(rofs, mask, ofs);
 }
 
 void WDB::SetFeAmp2Enable(int chn, unsigned int v)
 {
    assert(chn < 16);
-   auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
-   auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER2_EN_MASK : WD2_BIT_FE1_AMPLIFIER2_EN_MASK;
-   auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER2_EN_OFS  : WD2_BIT_FE1_AMPLIFIER2_EN_OFS;
+   auto rofs = WD2_FE0_AMPLIFIER2_EN_REG + (chn/2)*4;
+   auto mask = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER2_EN_MASK : WD2_FE1_AMPLIFIER2_EN_MASK;
+   auto ofs  = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER2_EN_OFS  : WD2_FE1_AMPLIFIER2_EN_OFS;
    SetRegMask(rofs, mask, ofs, v);
 }
 
@@ -1794,18 +1372,18 @@ unsigned int WDB::GetFeAmp1Comp(int chn)
 // amplifier 1 compensation enable
 {
    assert(chn < 16);
-   auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
-   auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER1_COMP_EN_MASK : WD2_BIT_FE1_AMPLIFIER1_COMP_EN_MASK;
-   auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER1_COMP_EN_OFS  : WD2_BIT_FE1_AMPLIFIER1_COMP_EN_OFS;
-   return bitExtract(creg, rofs, mask, ofs);
+   auto rofs = WD2_FE0_AMPLIFIER1_COMP_EN_REG + (chn/2)*4;
+   auto mask = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER1_COMP_EN_MASK : WD2_FE1_AMPLIFIER1_COMP_EN_MASK;
+   auto ofs  = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER1_COMP_EN_OFS  : WD2_FE1_AMPLIFIER1_COMP_EN_OFS;
+   return BitExtractControl(rofs, mask, ofs);
 }
 
 void WDB::SetFeAmp1Comp(int chn, unsigned int v)
 {
    assert(chn < 16);
-   auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
-   auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER1_COMP_EN_MASK : WD2_BIT_FE1_AMPLIFIER1_COMP_EN_MASK;
-   auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER1_COMP_EN_OFS  : WD2_BIT_FE1_AMPLIFIER1_COMP_EN_OFS;
+   auto rofs = WD2_FE0_AMPLIFIER1_COMP_EN_REG + (chn/2)*4;
+   auto mask = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER1_COMP_EN_MASK : WD2_FE1_AMPLIFIER1_COMP_EN_MASK;
+   auto ofs  = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER1_COMP_EN_OFS  : WD2_FE1_AMPLIFIER1_COMP_EN_OFS;
    SetRegMask(rofs, mask, ofs, v);
 }
 
@@ -1813,18 +1391,18 @@ unsigned int WDB::GetFeAmp1Enable(int chn)
 // amplifier 1 enable (gain 10)
 {
    assert(chn < 16);
-   auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
-   auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER1_EN_MASK : WD2_BIT_FE1_AMPLIFIER1_EN_MASK;
-   auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER1_EN_OFS  : WD2_BIT_FE1_AMPLIFIER1_EN_OFS;
-   return bitExtract(creg, rofs, mask, ofs);
+   auto rofs = WD2_FE0_AMPLIFIER1_EN_REG + (chn/2)*4;
+   auto mask = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER1_EN_MASK : WD2_FE1_AMPLIFIER1_EN_MASK;
+   auto ofs  = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER1_EN_OFS  : WD2_FE1_AMPLIFIER1_EN_OFS;
+   return BitExtractControl(rofs, mask, ofs);
 }
 
 void WDB::SetFeAmp1Enable(int chn, unsigned int v)
 {
    assert(chn < 16);
-   auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
-   auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER1_EN_MASK : WD2_BIT_FE1_AMPLIFIER1_EN_MASK;
-   auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER1_EN_OFS  : WD2_BIT_FE1_AMPLIFIER1_EN_OFS;
+   auto rofs = WD2_FE0_AMPLIFIER1_EN_REG + (chn/2)*4;
+   auto mask = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER1_EN_MASK : WD2_FE1_AMPLIFIER1_EN_MASK;
+   auto ofs  = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER1_EN_OFS  : WD2_FE1_AMPLIFIER1_EN_OFS;
    SetRegMask(rofs, mask, ofs, v);
 }
 
@@ -1832,18 +1410,18 @@ unsigned int WDB::GetFeAttenuation(int chn)
 // attenuation: 0 = 0dB / 1 = 6dB / 2 = 12dB / 8 = 18dB
 {
    assert(chn < 16);
-   auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
-   auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_ATTENUATION_MASK : WD2_BIT_FE1_ATTENUATION_MASK;
-   auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_ATTENUATION_OFS  : WD2_BIT_FE1_ATTENUATION_OFS;
-   return bitExtract(creg, rofs, mask, ofs);
+   auto rofs = WD2_FE0_ATTENUATION_REG + (chn/2)*4;
+   auto mask = (chn % 2 == 0) ? WD2_FE0_ATTENUATION_MASK : WD2_FE1_ATTENUATION_MASK;
+   auto ofs  = (chn % 2 == 0) ? WD2_FE0_ATTENUATION_OFS  : WD2_FE1_ATTENUATION_OFS;
+   return BitExtractControl(rofs, mask, ofs);
 }
 
 void WDB::SetFeAttenuation(int chn, unsigned int v)
 {
    assert(chn < 16);
-   auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
-   auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_ATTENUATION_MASK : WD2_BIT_FE1_ATTENUATION_MASK;
-   auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_ATTENUATION_OFS  : WD2_BIT_FE1_ATTENUATION_OFS;
+   auto rofs = WD2_FE0_ATTENUATION_REG + (chn/2)*4;
+   auto mask = (chn % 2 == 0) ? WD2_FE0_ATTENUATION_MASK : WD2_FE1_ATTENUATION_MASK;
+   auto ofs  = (chn % 2 == 0) ? WD2_FE0_ATTENUATION_OFS  : WD2_FE1_ATTENUATION_OFS;
    SetRegMask(rofs, mask, ofs, v);
 }
 
@@ -1870,16 +1448,9 @@ struct {
 
 float WDB::GetFeGain(int chn)
 {
-   auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
-   auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_ATTENUATION_MASK : WD2_BIT_FE1_ATTENUATION_MASK;
-   auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_ATTENUATION_OFS  : WD2_BIT_FE1_ATTENUATION_OFS;
-   int att = bitExtract(creg, rofs, mask, ofs);
-   mask = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER1_EN_MASK : WD2_BIT_FE1_AMPLIFIER1_EN_MASK;
-   ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER1_EN_OFS  : WD2_BIT_FE1_AMPLIFIER1_EN_OFS;
-   int en1 = bitExtract(creg, rofs, mask, ofs);
-   mask = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER2_EN_MASK : WD2_BIT_FE1_AMPLIFIER2_EN_MASK;
-   ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER2_EN_OFS  : WD2_BIT_FE1_AMPLIFIER2_EN_OFS;
-   int en2 = bitExtract(creg, rofs, mask, ofs);
+   int att = GetFeAttenuation(chn);
+   int en1 = GetFeAmp1Enable(chn);
+   int en2 = GetFeAmp2Enable(chn);
    
    for (int i=0 ; i<8 ; i++)
       if (((gain_table[i].att0 | (gain_table[i].att1 << 1)) == att) &&
@@ -1905,27 +1476,15 @@ void WDB::SetFeGain(int chn, float gain)
          break;
    
    if (i < 8) {
-      auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
-      
-      auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_ATTENUATION_MASK : WD2_BIT_FE1_ATTENUATION_MASK;
-      auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_ATTENUATION_OFS  : WD2_BIT_FE1_ATTENUATION_OFS;
-      SetRegMask(rofs, mask, ofs, gain_table[i].att0 | (gain_table[i].att1 << 1), false);
-      
-      mask = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER1_EN_MASK : WD2_BIT_FE1_AMPLIFIER1_EN_MASK;
-      ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER1_EN_OFS  : WD2_BIT_FE1_AMPLIFIER1_EN_OFS;
-      SetRegMask(rofs, mask, ofs, gain_table[i].en1, false);
-      
-      mask = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER1_COMP_EN_MASK : WD2_BIT_FE1_AMPLIFIER1_COMP_EN_MASK;
-      ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER1_COMP_EN_OFS  : WD2_BIT_FE1_AMPLIFIER1_COMP_EN_OFS;
-      SetRegMask(rofs, mask, ofs, gain_table[i].comp1, false);
-      
-      mask = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER2_EN_MASK : WD2_BIT_FE1_AMPLIFIER2_EN_MASK;
-      ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER2_EN_OFS  : WD2_BIT_FE1_AMPLIFIER2_EN_OFS;
-      SetRegMask(rofs, mask, ofs, gain_table[i].en2, false);
-      
-      mask = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER2_COMP_EN_MASK : WD2_BIT_FE1_AMPLIFIER2_COMP_EN_MASK;
-      ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_AMPLIFIER2_COMP_EN_OFS  : WD2_BIT_FE1_AMPLIFIER2_COMP_EN_OFS;
-      SetRegMask(rofs, mask, ofs, gain_table[i].comp2, true); // send register
+      BlockSend(true);
+
+      SetFeAttenuation(chn, gain_table[i].att0 | (gain_table[i].att1 << 1));
+      SetFeAmp1Enable(chn, gain_table[i].en1);
+      SetFeAmp1Comp(chn, gain_table[i].comp1);
+      SetFeAmp2Enable(chn, gain_table[i].en2);
+
+      BlockSend(false); // now send register
+      SetFeAmp1Comp(chn, gain_table[i].comp2);
    }
 }
 
@@ -1933,10 +1492,10 @@ unsigned int WDB::GetFeMux(int chn)
 // multiplexer: 0 = next channel / 1 = previous channel / 2 = input / 3 = cal source
 {
    assert(chn < 16);
-   auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
-   auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_MUX_MASK : WD2_BIT_FE1_MUX_MASK;
-   auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_MUX_OFS  : WD2_BIT_FE1_MUX_OFS;
-   return bitExtract(creg, rofs, mask, ofs);
+   auto rofs = WD2_FE0_MUX_REG + (chn/2)*4;
+   auto mask = (chn % 2 == 0) ? WD2_FE0_MUX_MASK : WD2_FE1_MUX_MASK;
+   auto ofs  = (chn % 2 == 0) ? WD2_FE0_MUX_OFS  : WD2_FE1_MUX_OFS;
+   return BitExtractControl(rofs, mask, ofs);
 }
 
 void WDB::SetFeMux(int chn, unsigned int v)
@@ -1945,27 +1504,27 @@ void WDB::SetFeMux(int chn, unsigned int v)
    if (chn == -1) {
       std::vector<unsigned int> regs;
       for (chn=0 ; chn<16 ; chn++) {
-         auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
-         auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_MUX_MASK : WD2_BIT_FE1_MUX_MASK;
-         auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_MUX_OFS  : WD2_BIT_FE1_MUX_OFS;
+         auto rofs = WD2_FE0_MUX_REG + (chn/2)*4;
+         auto mask = (chn % 2 == 0) ? WD2_FE0_MUX_MASK : WD2_FE1_MUX_MASK;
+         auto ofs  = (chn % 2 == 0) ? WD2_FE0_MUX_OFS  : WD2_FE1_MUX_OFS;
          SetRegMask(rofs, mask, ofs, v);
       }
       for (chn=0 ; chn<8 ; chn++)
-         regs.push_back(creg[(WD2_REG_FE_CFG_0_1_OFS-WD2_REG_WDB_LOC_OFS)/4+chn]);
+         regs.push_back(creg[(WD2_FE0_MUX_REG & 0x0FFF)/4+chn]);
 #ifdef WD2_USE_UDP_BIN
-      WriteUDP(WD2_REG_FE_CFG_0_1_OFS, regs);
+      WriteUDP(WD2_FE0_MUX_REG, regs);
 #else
       for (chn=0 ; chn<8 ; chn++) {
          std::ostringstream req;
-         req << "rw 0x" << std::hex << WD2_REG_FE_CFG_0_1_OFS+(chn/2)*4 << " 0x" << creg[(WD2_REG_FE_CFG_0_1_OFS-WD2_REG_WDB_LOC_OFS)/4+chn];
+         req << "rw 0x" << std::hex << WD2_FE0_MUX_REG+(chn/2)*4 << " 0x" << creg[(WD2_FE0_MUX_REG & 0x0FFF)/4+chn];
          
          SendUDP(req.str());
       }
 #endif
    } else {
-      auto rofs = WD2_REG_FE_CFG_0_1_OFS + (chn/2)*4;
-      auto mask = (chn % 2 == 0) ? WD2_BIT_FE0_MUX_MASK : WD2_BIT_FE1_MUX_MASK;
-      auto ofs  = (chn % 2 == 0) ? WD2_BIT_FE0_MUX_OFS  : WD2_BIT_FE1_MUX_OFS;
+      auto rofs = WD2_FE0_MUX_REG + (chn/2)*4;
+      auto mask = (chn % 2 == 0) ? WD2_FE0_MUX_MASK : WD2_FE1_MUX_MASK;
+      auto ofs  = (chn % 2 == 0) ? WD2_FE0_MUX_OFS  : WD2_FE1_MUX_OFS;
       SetRegMask(rofs, mask, ofs, v);
    }
 }
@@ -1973,15 +1532,15 @@ void WDB::SetFeMux(int chn, unsigned int v)
 void WDB::SetHVTarget(int chn, float v)
 {
    assert(chn < 16);
-   SetRegMask(WD2_REG_HV_U_TARGET_0_OFS+chn*4, 0xFFFFFFFF, 0, access_as<unsigned int>(&v));
+   SetRegMask(WD2_HV_U_TARGET_0_REG+chn*4, WD2_HV_U_TARGET_0_MASK, WD2_HV_U_TARGET_0_OFS, access_as<unsigned int>(&v));
 }
 
 void WDB::GetHVTarget(std::vector<float> &hv)
 {
-   ReceiveControlRegisters((WD2_REG_HV_U_TARGET_0_OFS-WD2_REG_WDB_LOC_OFS)/4, 16);
+   ReceiveControlRegisters((WD2_HV_U_TARGET_0_REG & 0x0FFF)/4, 16);
    for (unsigned int i=0 ; i<16 ; i++) {
       float f;
-      memcpy(&f, &this->creg[(WD2_REG_HV_U_TARGET_0_OFS-WD2_REG_WDB_LOC_OFS)/4+i], sizeof(float));
+      memcpy(&f, &this->creg[(WD2_HV_U_TARGET_0_REG & 0x0FFF)/4+i], sizeof(float));
       hv.push_back(f);
    }
 }
@@ -1989,213 +1548,27 @@ void WDB::GetHVTarget(std::vector<float> &hv)
 unsigned int WDB::GetLmk(int reg)
 {
    assert(reg < 16);
-   return creg[WD2_REG_LMK_0_OFS/4+reg];
+   return creg[WD2_LMK0_RESET_REG/4+reg];
 }
 
 void WDB::SetLmk(int reg, unsigned int v)
 {
    assert(reg < 16);
-   SetRegMask(WD2_REG_LMK_0_OFS+reg*4, 0xFFFFFFFF, 0, v);
-}
-
-bool WDB::IsTriggerShaperEnable()
-{
-   return bitExtract(creg, WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_SHAPER_ENABLE_MASK, WD2_BIT_TRIGGER_SHAPER_ENABLE_OFS);
-}
-
-void WDB::SetTriggerShaperEnable(bool v)
-{
-   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_SHAPER_ENABLE_MASK, WD2_BIT_TRIGGER_SHAPER_ENABLE_OFS, v);
-}
-
-unsigned int WDB::GetTriggerPulseLength()
-{
-   return bitExtract(creg, WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_OUT_PULSE_LENGTH_MASK, WD2_BIT_TRIGGER_OUT_PULSE_LENGTH_OFS);
-}
-
-void WDB::SetTriggerPulseLength(unsigned int v)
-{
-   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_OUT_PULSE_LENGTH_MASK, WD2_BIT_TRIGGER_OUT_PULSE_LENGTH_OFS, v);
-}
-
-bool WDB::IsTriggerEnable()
-{
-   return bitExtract(creg, WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_ENABLE_MASK, WD2_BIT_TRIGGER_ENABLE_OFS);
-}
-
-void WDB::SetTriggerEnable(bool v)
-{
-   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_ENABLE_MASK, WD2_BIT_TRIGGER_ENABLE_OFS, v);
-}
-
-bool WDB::IsTriggerFallingEdge()
-{
-   return bitExtract(creg, WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_FALLING_EDGE_MASK, WD2_BIT_TRIGGER_FALLING_EDGE_OFS);
-}
-
-void WDB::SetTriggerFallingEdge(bool v)
-{
-   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_FALLING_EDGE_MASK, WD2_BIT_TRIGGER_FALLING_EDGE_OFS, v);
-}
-
-bool WDB::IsTriggerExternalOr()
-{
-   return bitExtract(creg, WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_CFG_EXT_OR_MASK, WD2_BIT_TRIGGER_CFG_EXT_OR_OFS);
-}
-
-void WDB::SetTriggerExternalOr(bool v)
-{
-   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_CFG_EXT_OR_MASK, WD2_BIT_TRIGGER_CFG_EXT_OR_OFS, v);
-}
-
-bool WDB::IsTriggerExternalAnd()
-{
-   return bitExtract(creg, WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_CFG_EXT_AND_MASK, WD2_BIT_TRIGGER_CFG_EXT_AND_OFS);
-}
-
-void WDB::SetTriggerExternalAnd(bool v)
-{
-   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_CFG_EXT_AND_MASK, WD2_BIT_TRIGGER_CFG_EXT_AND_OFS, v);
-}
-
-bool WDB::IsTriggerDelayEnable()
-{
-   return bitExtract(creg, WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_DELAY_ENABLE_MASK, WD2_BIT_TRIGGER_DELAY_ENABLE_OFS);
-}
-
-void WDB::SetTriggerDelayEnable(bool v)
-{
-   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_DELAY_ENABLE_MASK, WD2_BIT_TRIGGER_DELAY_ENABLE_OFS, v);
-}
-
-unsigned int WDB::GetTriggerDelay()
-{
-   return bitExtract(creg, WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_DELAY_MASK, WD2_BIT_TRIGGER_DELAY_OFS);
-}
-
-void WDB::SetTriggerDelay(unsigned int v)
-{
-   SetRegMask(WD2_REG_TRG_CFG_OFS, WD2_BIT_TRIGGER_DELAY_MASK, WD2_BIT_TRIGGER_DELAY_OFS, v);
-}
-
-unsigned int WDB::GetTriggerComparatorMask()
-{
-   return bitExtract(creg, WD2_REG_TRG_COMP_MASK_OFS, WD2_BIT_TRIGGER_COMP_MASK_MASK, WD2_BIT_TRIGGER_COMP_MASK_OFS);
-}
-
-void WDB::SetTriggerComparatorMask(unsigned int v)
-{
-   SetRegMask(WD2_REG_TRG_COMP_MASK_OFS, WD2_BIT_TRIGGER_COMP_MASK_MASK, WD2_BIT_TRIGGER_COMP_MASK_OFS, v);
-}
-
-unsigned int WDB::GetTriggerCfgOr()
-{
-   return bitExtract(creg, WD2_REG_TRG_CH_CMB_OFS, WD2_BIT_TRIGGER_CFG_OR_MASK, WD2_BIT_TRIGGER_CFG_OR_OFS);
-}
-
-void WDB::SetTriggerCfgOr(unsigned int v)
-{
-   SetRegMask(WD2_REG_TRG_CH_CMB_OFS, WD2_BIT_TRIGGER_CFG_OR_MASK, WD2_BIT_TRIGGER_CFG_OR_OFS, v);
-}
-
-unsigned int WDB::GetTriggerCfgAnd()
-{
-   return bitExtract(creg, WD2_REG_TRG_CH_CMB_OFS, WD2_BIT_TRIGGER_CFG_AND_MASK, WD2_BIT_TRIGGER_CFG_AND_OFS);
-}
-
-void WDB::SetTriggerCfgAnd(unsigned int v)
-{
-   SetRegMask(WD2_REG_TRG_CH_CMB_OFS, WD2_BIT_TRIGGER_CFG_AND_MASK, WD2_BIT_TRIGGER_CFG_AND_OFS, v);
-}
-
-unsigned int WDB::GetTriggerLocalScheme()
-// 0 = simple trigger / 2 = pattern trigger
-{
-   return bitExtract(creg, WD2_REG_TRG_SCH_SEL_OFS, WD2_BIT_PATTERN_TRIGGER_SELECT_MASK, WD2_BIT_PATTERN_TRIGGER_SELECT_OFS);
-}
-
-void WDB::SetTriggerLocalScheme(unsigned int v)
-{
-   SetRegMask(WD2_REG_TRG_SCH_SEL_OFS, WD2_BIT_PATTERN_TRIGGER_SELECT_MASK, WD2_BIT_PATTERN_TRIGGER_SELECT_OFS, v);
-}
-
-unsigned int WDB::GetTriggerBackplaneScheme(int chn)
-{
-   assert(chn < 8);
-   auto mask = WD2_BIT_BACKPLANE_TRIGGER0_MASK >> (chn * 2);
-   return bitExtract(creg, WD2_REG_TRG_SCH_SEL_OFS, mask, WD2_BIT_BACKPLANE_TRIGGER0_OFS - chn * 2);
-}
-
-void WDB::SetTriggerBackplaneScheme(int chn, unsigned int v)
-{
-   assert(chn < 8);
-   auto mask = WD2_BIT_BACKPLANE_TRIGGER0_MASK >> (chn * 2);
-   SetRegMask(WD2_REG_TRG_SCH_SEL_OFS, mask, WD2_BIT_BACKPLANE_TRIGGER0_OFS - chn * 2, v);
-}
-
-unsigned int WDB::GetTriggerPatternEnLocal()
-// a 1 enables the corresponding trigger pattern for the local trigger
-{
-   return bitExtract(creg, WD2_REG_TRG_PTRN_EN_LOCAL_OFS, WD2_BIT_TRG_PTRN_EN_LOCAL_MASK, WD2_BIT_TRG_PTRN_EN_LOCAL_OFS);
-}
-
-void WDB::SetTriggerPatternEnLocal(unsigned int v)
-{
-   SetRegMask(WD2_REG_TRG_PTRN_EN_LOCAL_OFS, WD2_BIT_TRG_PTRN_EN_LOCAL_MASK, WD2_BIT_TRG_PTRN_EN_LOCAL_OFS, v);
-}
-
-unsigned int WDB::GetTriggerPatternEnBackplane(int chn)
-// a 1 enables the corresponding trigger pattern for the local trigger
-{
-   assert(chn < 8);
-   return bitExtract(creg, WD2_REG_TRG_PTRN_EN_BPL0_OFS+chn*4, WD2_BIT_TRG_PTRN_EN_BPL0_MASK, WD2_BIT_TRG_PTRN_EN_BPL0_OFS);
-}
-
-void WDB::SetTriggerPatternEnBackplane(int chn, unsigned int v)
-{
-   assert(chn < 8);
-   SetRegMask(WD2_REG_TRG_PTRN_EN_BPL0_OFS+chn*4, WD2_BIT_TRG_PTRN_EN_BPL0_MASK, WD2_BIT_TRG_PTRN_EN_BPL0_OFS, v);
-}
-
-unsigned int WDB::GetTriggerPattern(int i)
-{
-   assert(i < 32);
-   return bitExtract(creg, WD2_REG_TRG_PTRN0_OFS+i*4, WD2_BIT_TRG_PTRN0_MASK, WD2_BIT_TRG_PTRN0_OFS);
-}
-
-void WDB::SetTriggerPattern(int i, unsigned int v)
-{
-   assert(i < 32);
-   SetRegMask(WD2_REG_TRG_PTRN0_OFS+i*4, WD2_BIT_TRG_PTRN0_MASK, WD2_BIT_TRG_PTRN0_OFS, v);
-}
-
-unsigned int WDB::GetAdvTrgCfg(int i)
-{
-   assert(i < 30);
-   return bitExtract(creg, WD2_REG_ADV_TRG_CFG0_OFS+i*4, WD2_BIT_ADV_TRG_CFG_0_MASK, WD2_BIT_ADV_TRG_CFG_0_OFS);
-}
-
-void WDB::SetAdvTrgCfg(int i, unsigned int v)
-{
-   assert(i < 30);
-   SetRegMask(WD2_REG_ADV_TRG_CFG0_OFS+i*4, WD2_BIT_ADV_TRG_CFG_0_MASK, WD2_BIT_ADV_TRG_CFG_0_OFS, v);
-}
-
-void WDB::SetDbgSig(int rx, int tx)
-{
-   // send one of cDbgXXX signals to RX and TX ports on HV board
-   assert(rx >= cDbgUart && rx <= cDbgDataClk);
-   assert(tx >= cDbgUart && tx <= cDbgDataClk);
-   SetRegMask(WD2_REG_DBG_SIG_SEL_OFS, WD2_BIT_MCX_RX_SIG_SEL_MASK, WD2_BIT_MCX_RX_SIG_SEL_OFS, rx);
-   SetRegMask(WD2_REG_DBG_SIG_SEL_OFS, WD2_BIT_MCX_TX_SIG_SEL_MASK, WD2_BIT_MCX_TX_SIG_SEL_OFS, tx);
-}
-
-unsigned int WDB::GetCrc32RegBank()
-{
-   return bitExtract(creg, WD2_REG_CRC32_REG_BANK_OFS, WD2_BIT_CRC32_REG_BANK_MASK, WD2_BIT_CRC32_REG_BANK_OFS);
+   SetRegMask(WD2_LMK0_RESET_REG+reg*4, 0xFFFFFFFF, 0, v);
 }
 
 //--------------------------------------------------------------------
+
+unsigned int WDB::GetTrgPtrn(int i)
+{
+   assert(i >= 0 && i < 18);
+   return BitExtractControl(WD2_TRG_PTRN0_REG+i*4, WD2_TRG_PTRN0_MASK, WD2_TRG_PTRN0_OFS);
+};
+
+void WDB::SetTrgPtrn(int i, unsigned int value)
+{
+   SetRegMask(WD2_TRG_PTRN0_REG+i*4, WD2_TRG_PTRN0_MASK, WD2_TRG_PTRN0_OFS, value);
+};
 
 unsigned int WDB::GetTriggerDelayNs()
 {
@@ -2227,8 +1600,8 @@ void WDB::RequestEvent()
    SetDaqSingle(true);  // start DRS domino wave
    SetDaqSingle(false);
    
-   TrgDAQSoft(true);
-   TrgDAQSoft(false);
+   SetDaqSoftTrigger(true);
+   SetDaqSoftTrigger(false);
 }
 
 //--------------------------------------------------------------------
@@ -2278,15 +1651,19 @@ bool WDB::LoadTimeCalibration(int freq, std::string path)
 
 void WDEvent::SetEventHeaderInfo(WD2_FRAME_HEADER *ph)
 {
+   int channel = ph->channel_info & 0x1F;
    mBoardId = ph->board_id;
    mCrateId = ph->crate_id;
    mSlotId  = ph->slot_id;
    mEventNumber = ph->event_number;
    mSamplingFrequency = ph->sampling_frequency;
-   mTriggerNumber = ph->trigger_number;
-   mTriggerCell[0] = ph->drs0_trigger_cell;
-   mTriggerCell[1] = ph->drs1_trigger_cell;
-   mTriggerType = ph->trigger_type;
+   mTriggerNumber = ph->trigger_information[0] | (ph->trigger_information[1] << 8); // ## to be changed
+   mTriggerCell[channel] = ph->drs_trigger_cell;
+   if (channel < 8 || channel == 16)
+      mTriggerCellDrs0 = ph->drs_trigger_cell;
+   else
+      mTriggerCellDrs1 = ph->drs_trigger_cell;
+   mTriggerType = ph->trigger_information[2] | (ph->trigger_information[3] << 8);   // ## to be changed
    mTemperature = std::round(ph->temperature*0.0625 * 10 + 0.5) / 10.0f;
    mWFTypeADC = mSamplingFrequency <= 100;
 }
@@ -2379,16 +1756,8 @@ void WP::SetEventRequestMasks()
 {
    // set request mask from tx enable
    int i=0;
-   for (auto &b: mWdb) {
-      auto mask = (b->GetDrs0ChnTxEnable() & 0xFF);
-      mask |= (b->GetDrs1ChnTxEnable() & 0xFF) << 8;
-      if (b->GetDrs0ChnTxEnable() & 0x100 && b->GetReadoutSrcSel() == WDB::cReadoutSrcDrs)
-         mask |= 0x10000;
-      if (b->GetDrs1ChnTxEnable() & 0x100 && b->GetReadoutSrcSel() == WDB::cReadoutSrcDrs)
-         mask |= 0x20000;
-
-      mEventRequest[i++]->SetMask(mask);
-   }
+   for (auto &b: mWdb)
+      mEventRequest[i++]->SetMask(b->GetDrsChTxEn());
 }
 
 unsigned int WP::GetEventRequestMask(int board_id)
@@ -2491,8 +1860,7 @@ void WP::InvalidateAllWf()
       for (int i=0 ; i<WD_N_CHANNELS ; i++) {
          er->SetWfValid(i, 0, false);
          er->SetWfValid(i, 1, false);
-         er->SetDrs0TriggerCell(-1);
-         er->SetDrs1TriggerCell(-1);
+         er->SetDrsTriggerCell(i, -1);
       }
    }
    
@@ -2560,61 +1928,68 @@ int WP::ReceiveWfPacket()
    
    // check protocol version
    if (ph->protocol_version != WD2_UDP_PROTOCOL_VERSION) {
-      std::cerr << "Invalid protocol version " << ph->protocol_version << ", expected " << WD2_UDP_PROTOCOL_VERSION << ". Probably WD firmware update required." << std::endl;
+      std::cerr << "Invalid protocol version " << (int)ph->protocol_version << ", expected " << WD2_UDP_PROTOCOL_VERSION << ". Probably WD firmware update required." << std::endl;
       return 0;
    }
    
    // correct endianness of header data
-   ph->board_id                 = SWAP_UINT16(ph->board_id);
-   int header_adc               = (ph->adc_and_channel_info >> 4) & 0x0f;
-   int header_channel           = (ph->adc_and_channel_info) & 0x0f;
-   int channel_segment          = (ph->segment_and_package_type >> 4) & 0x0f;
-   int package_type             = (ph->segment_and_package_type) & 0x0f;
-   ph->event_number             = SWAP_UINT32(ph->event_number);
-   ph->sampling_frequency       = SWAP_UINT16(ph->sampling_frequency);
-   ph->payload_length           = SWAP_UINT16(ph->payload_length);
-   ph->trigger_number           = SWAP_UINT16(ph->trigger_number);
-   ph->drs0_trigger_cell        = SWAP_UINT16(ph->drs0_trigger_cell);
-   ph->drs1_trigger_cell        = SWAP_UINT16(ph->drs1_trigger_cell);
-   ph->trigger_type             = SWAP_UINT16(ph->trigger_type);
-   ph->temperature              = SWAP_UINT16(ph->temperature);
-   ph->packet_sequence_number   = SWAP_UINT16(ph->packet_sequence_number);
-   
+   ph->board_id                       = SWAP_UINT16(ph->board_id);
+   int channel_adc                    = (ph->channel_info >> 7) & 0x1;
+   int channel_number                 = (ph->channel_info) & 0x1f;
+   int channel_segment                = (ph->data_offset > 0);
+   ph->tx_enable                      = SWAP_UINT32(ph->tx_enable);
+   ph->zero_suppression_mask          = SWAP_UINT16(ph->zero_suppression_mask);
+   ph->flags                          = SWAP_UINT16(ph->flags);
+   ph->samples_per_event_per_channel  = SWAP_UINT16(ph->samples_per_event_per_channel);
+   ph->payload_length                 = SWAP_UINT16(ph->payload_length);
+   ph->data_offset                    = SWAP_UINT16(ph->data_offset);
+   ph->event_number                   = SWAP_UINT32(ph->event_number);
+   ph->drs_trigger_cell               = SWAP_UINT16(ph->drs_trigger_cell);
+   ph->sampling_frequency             = SWAP_UINT32(ph->sampling_frequency);
+   ph->temperature                    = SWAP_UINT16(ph->temperature);
+   ph->dac_ofs                        = SWAP_UINT16(ph->dac_ofs);
+   ph->dac_rofs                       = SWAP_UINT16(ph->dac_rofs);
+   ph->frontend_settings              = SWAP_UINT16(ph->frontend_settings);
+
    mPacketsReceived++;
    
-   if (mLogfile != "") {
+   assert(ph->payload_length % 3 == 0);
+   assert(ph->data_offset % 3 == 0);
+   int numberBins = (int) ph->payload_length / 1.5;
+   int firstBin = ph->data_offset / 1.5;
+   
+   if (mLogfile != "" || mVerbose >= 3) {
       std::ofstream f;
       char line[256];
       f.open(mLogfile, std::ios_base::app);
       
-      sprintf(line, "%06dus #%04d from WD%03d, SZ=%3d EN=%5d PT=%d A/C/S=%d/%d/%d TC=%04d/%04d T=%1.1lf\n",
+      sprintf(line, "%06dus #%04d from WD%03d, NB=%4d EN=%5d DT=%d A/C/S=%d/%02d/%d TC=%04d T=%1.1lf\n",
               usSince(mEventStartTime),
               mPacketsReceived-1,
               ph->board_id,
-              n,
+              numberBins,
               ph->event_number,
-              package_type,
-              header_adc,
-              header_channel,
+              ph->data_type,
+              channel_adc,
+              channel_number,
               channel_segment,
-              ph->drs0_trigger_cell,
-              ph->drs1_trigger_cell,
+              ph->drs_trigger_cell,
               ph->temperature*0.0625);
       
       f << line;
       
       if (mVerbose >= 3)
-         std::cout << line << std::endl;
+         std::cout << line;
    }
    
-   // drop package (for now...) if it is not event data
-   if (package_type != 0) {
-      std::cerr << "Package dropped, package type=" << package_type << ", "
+   // drop package (for now...) if it is not DRS or ADC data
+   if (ph->data_type != 0 && ph->data_type != 1) {
+      std::cerr << "Package dropped, data type=" << ph->data_type << ", "
       << "board id = " << ph->board_id << std::endl;
       if (mLogfile != "") {
          std::ofstream f;
          f.open(mLogfile, std::ios_base::app);
-         f << "Package dropped, package type=" << package_type << ", "
+         f << "Package dropped, data type=" << ph->data_type << ", "
          << "board id = " << ph->board_id << std::endl;
       }
       return 0;
@@ -2640,18 +2015,20 @@ int WP::ReceiveWfPacket()
    
    if (mCurrentEvent == -1)
       mCurrentEvent = ph->event_number;
-   if (er->GetDrs0TriggerCell() == -1)
-      er->SetDrs0TriggerCell(ph->drs0_trigger_cell);
-   if (er->GetDrs1TriggerCell() == -1)
-      er->SetDrs1TriggerCell(ph->drs1_trigger_cell);
+   if (er->GetDrsTriggerCell(channel_number) == -1)
+      er->SetDrsTriggerCell(channel_number, ph->drs_trigger_cell);
    
    // print warning if inconsistent trigger cells are found
-   if (ph->event_number == (unsigned int)mCurrentEvent &&
-       (ph->drs0_trigger_cell != er->GetDrs0TriggerCell() ||
-        ph->drs1_trigger_cell != er->GetDrs1TriggerCell())) {
-          std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
-       }
-   
+   if (channel_number < 8 || channel_number == 16) {
+      for (int i=0 ; i<8 ; i++)
+         if (er->GetDrsTriggerCell(i) != -1 && er->GetDrsTriggerCell(i) != ph->drs_trigger_cell)
+            std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
+   } else {
+      for (int i=8 ; i<16 ; i++)
+         if (er->GetDrsTriggerCell(i) != -1 && er->GetDrsTriggerCell(i) != ph->drs_trigger_cell)
+            std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
+   }
+
    // drop package if it belongs to previous event
    if (ph->event_number == (unsigned int)mCurrentEvent-1) {
       std::cerr << "Package of previous event dropped, package event=" << ph->event_number << ", "
@@ -2691,23 +2068,16 @@ int WP::ReceiveWfPacket()
       // switch to new event
       InvalidateAllWf();
       mCurrentEvent = ph->event_number;
-      er->SetDrs0TriggerCell(ph->drs0_trigger_cell);
-      er->SetDrs1TriggerCell(ph->drs1_trigger_cell);
       mPacketsReceived = 1;
+      er->SetDrsTriggerCell(channel_number, ph->drs_trigger_cell);
 
       mEventStartTime = std::chrono::high_resolution_clock::now();
    }
    
-   // map ADC and channel to WD channel (0..7, 8..15, 16+17)
-   int wfChannel;
-   if (header_channel == 8)
-      wfChannel = 16 + header_adc;
-   else
-      wfChannel = header_adc*8+header_channel;
-   assert(wfChannel < WD_N_CHANNELS);
+   assert(channel_number < WD_N_CHANNELS);
    
    // mark valid package received
-   er->SetWfValid(wfChannel, channel_segment, true);
+   er->SetWfValid(channel_number, channel_segment, true);
    
    // find event belonging to this baord
    WDEvent *event = nullptr;
@@ -2729,7 +2099,8 @@ int WP::ReceiveWfPacket()
 
    // decode waveform data
    auto pd = (unsigned char*)(ph+1);
-   for (int i=0 ; i<512 ; i+=2) {
+   for (int i=0 ; i<numberBins ; i+=2) {
+      // decode two bins
       short data1   = ((pd[1] & 0x0F) << 8) | pd[0];
       short data2 = ((unsigned short)pd[2] << 4) | (pd[1] >> 4);
       // subtract binary offset
@@ -2737,15 +2108,8 @@ int WP::ReceiveWfPacket()
       data2 -= 0x800;
       pd+=3;
       
-      if (channel_segment == 0) {
-         // first segment
-         event->mWfU[wfChannel][i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
-         event->mWfU[wfChannel][i+1]       = (float)data2 * (1 / 4096.0);
-      } else {
-         // second segment
-         event->mWfU[wfChannel][512+i]     = (float)data1 * (1 / 4096.0);
-         event->mWfU[wfChannel][512+i+1]   = (float)data2 * (1 / 4096.0);
-      }
+      event->mWfU[channel_number][firstBin+i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
+      event->mWfU[channel_number][firstBin+i+1]       = (float)data2 * (1 / 4096.0);
    }
    
    return SUCCESS;
@@ -2768,7 +2132,7 @@ void WP::UnrotateWaveforms()
       
       // un-rotate waveforms
       for (int i=0 ; i<WD_N_CHANNELS ; i++) {
-         int tc = i < 8 || i == 16 ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
+         int tc = ev->mTriggerCell[i];
          for (int j=0 ; j<1024 ; j++)
             ev->mWfU[i][(j+tc) % 1024] = wf[i][j];
       }
@@ -2972,7 +2336,7 @@ void WP::CalibrateWaveforms(WDEvent* ev)
          
          if (mRotateWaveform) {
             for (int i=0 ; i<WD_N_CHANNELS ; i++) {
-               int tc = i < 8 || i == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
+               int tc = ev->mTriggerCell[i];
                for (int j=0 ; j<1024 ; j++)
                   ev->mWfU[i][j] -= wdb->mVCalib.mCalib.wf_offset1[i][(j+tc) % 1024];
             }
@@ -2994,7 +2358,7 @@ void WP::CalibrateWaveforms(WDEvent* ev)
       if (mGainCalib && bValid) {
          if (mRotateWaveform) {
             for (int i=0 ; i<WD_N_CHANNELS-2 ; i++) { // exclude clock channels
-               int tc = i < 8 || i == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
+               int tc = ev->mTriggerCell[i];
                for (int j=0 ; j<1024 ; j++) {
                   if (ev->mWfU[i][j] > 0)
                      ev->mWfU[i][j] /= wdb->mVCalib.mCalib.wf_gain1[i][(j+tc) % 1024];
@@ -3033,8 +2397,8 @@ void WP::CalibrateWaveforms(WDEvent* ev)
       
       // remove spikes
       if (mRemoveSpikes) {
-         RemoveSpikes(ev->mTriggerCell[0], ev->mWfU);
-         RemoveSpikes(ev->mTriggerCell[0], ev->mWfU+WD_N_CHANNELS/2);
+         RemoveSpikes(ev->mTriggerCellDrs0, ev->mWfU);
+         RemoveSpikes(ev->mTriggerCellDrs1, ev->mWfU+WD_N_CHANNELS/2);
       };
       
       // calculate calibrated time for each event
@@ -3045,7 +2409,7 @@ void WP::CalibrateWaveforms(WDEvent* ev)
          
          // integrate time from delta-t values
          for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
-            int tc = ch < 8 || ch == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
+            int tc = ev->mTriggerCell[ch];
             if (!mRotateWaveform)
                tc = 0;
             ev->mWfT[ch][0] = 0;
@@ -3053,7 +2417,7 @@ void WP::CalibrateWaveforms(WDEvent* ev)
                ev->mWfT[ch][i] = ev->mWfT[ch][i-1] + wdb->mTCalib.mCalib.dt[ch][(i-1+tc)%1024];
          }
          // align cell#0 of all channels inside chip0
-         int tc = mRotateWaveform ? ev->mTriggerCell[0] : 0;
+         int tc = mRotateWaveform ? ev->mTriggerCellDrs0 : 0;
          float t1 = ev->mWfT[0][(1024-tc) % 1024];
          for (int ch=1 ; ch<8 ; ch++) {
             float t2 = ev->mWfT[ch][(1024-tc) % 1024];
@@ -3067,7 +2431,7 @@ void WP::CalibrateWaveforms(WDEvent* ev)
             ev->mWfT[16][i] += dt;
          
          // align cell#0 of all channels inside chip1 to chip0
-         tc = mRotateWaveform ? ev->mTriggerCell[1] : 0;
+         tc = mRotateWaveform ? ev->mTriggerCellDrs1 : 0;
          for (int ch=8 ; ch<16 ; ch++) {
             float t2 = ev->mWfT[ch][(1024-tc) % 1024];
             float dt = t1 - t2;
@@ -3103,7 +2467,7 @@ void WP::CalibrateWaveforms(WDEvent* ev)
                   continue;
                
                double tl = wdb->GetDacTriggerLevelV(c);
-               if (wdb->IsTriggerFallingEdge()) {
+               if (wdb->GetTriggerFallingEdge()) {
                   if ((GetEventRequestMask(ev->mBoardId) & (1 << c)) > 0) {
                      // falling edge
                      if (ev->mWfU[c][i] > tl && ev->mWfU[c][i+1] <= tl) {
@@ -3134,26 +2498,6 @@ void WP::CalibrateWaveforms(WDEvent* ev)
                   ev->mWfT[i][j] -= (float)dt_min;
          }
       }
-   }
-}
-
-//--------------------------------------------------------------------
-
-// special test function to debug a firmware problem. Experts use only!
-void WDB::SpecialTest()
-{
-   while (true) {
-      SetRegMask(WD2_REG_LMK_0_OFS, WD2_BIT_LMK0_CLKOUT0_DLY_MASK, WD2_BIT_LMK0_CLKOUT0_DLY_OFS, 0);
-      // sleep_ms(10);
-      
-      std::cout << "Trigger event" << std::endl;
-      SetDaqSingle(true);  // start DRS domino wave
-      SetDaqSingle(false);
-      
-      TrgDAQSoft(true);
-      TrgDAQSoft(false);
-      
-      sleep_ms(1000);
    }
 }
 
@@ -3247,7 +2591,7 @@ void WP::SaveWaveforms()
             if (mask & (1 << i)) {
                sprintf(str, "CHN%d", i);
                mxml_start_element(li.xml, str);
-               sprintf(str, "%d", i < 8 || i == 16 ? ev->mTriggerCell[0] : ev->mTriggerCell[1]);
+               sprintf(str, "%d", ev->mTriggerCell[i]);
                mxml_write_element(li.xml, "Trigger_Cell", str);
                
                unsigned int s = 0;
@@ -3370,7 +2714,7 @@ void WP::SaveWaveforms()
                // write trigger cell
                sprintf((char *)p, "T#");
                p += 2;
-               *(unsigned short *)p = i < 8 || i == 16 ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
+               *(unsigned short *)p = ev->mTriggerCell[i];
                p += sizeof(unsigned short);
                
                for (int j=0 ; j<1024 ; j++) {
@@ -3531,13 +2875,12 @@ void WP::DoCalibrationVoltageStep()
 
       // save current board settings
       mOldRange = b->GetRange();
-      mOldMask0 = b->GetDrs0ChnTxEnable();
-      mOldMask1 = b->GetDrs1ChnTxEnable();
-      
-      mOldReadoutSrc  = b->GetReadoutSrcSel();
-      mOldCalibClock  = b->IsTimingCalibSignalEnable();
+      mOldMaskDrs = b->GetDrsChTxEn();
+      mOldMaskAdc = b->GetAdcChTxEn();
+
+      mOldCalibClock  = b->GetTimingCalibSignalEn();
       mOldFeMux       = b->GetFeMux(0);
-      mOldCalibBuffer = b->IsCalibBufferEnable();
+      mOldCalibBuffer = b->GetCalibBufferEn();
       
       b->mVCalib.mCalib.sampling_frequency = b->GetDrsSampleFreq();
       
@@ -3550,7 +2893,7 @@ void WP::DoCalibrationVoltageStep()
       mRemoveSpikes        = false;
       
       // turn on power for calibration input (needed for clock channels)
-      b->SetCalibBufferEnable(true);
+      b->SetCalibBufferEn(true);
 
       // turn off calibration clock
       b->SetTimingCalibSignalEnable(false);
@@ -3558,10 +2901,9 @@ void WP::DoCalibrationVoltageStep()
       // switch multiplexer to calibration source
       b->SetFeMux(-1, WDB::cFeMuxCalSource);
       
-      // enable all channels
-      b->SetReadoutSrcSel(WDB::cReadoutSrcDrs);
-      b->SetDrs0ChnTxEnable(0x1FF);
-      b->SetDrs1ChnTxEnable(0x1FF);
+      // enable all DRSchannels
+      b->SetDrsChTxEn(0x3FFFF);
+      b->SetAdcChTxEn(0);
       
       // range -0.5 ... + 0.5V
       b->SetRange(0);
@@ -3605,7 +2947,7 @@ void WP::DoCalibrationVoltageStep()
             for (int bin=0 ; bin<1024 ; bin++)
                b->mVCalib.mCalib.wf_offset1[ch][bin] = (float)calibProg.ave->Median(0, ch, bin);
          
-         // ave->SaveNormalizedDistribution("wf.csv", 0);
+         // calibProg.ave->SaveNormalizedDistribution("wf.csv", 0);
          calibProg.ave->Reset();
       }
       
@@ -3746,7 +3088,8 @@ void WP::DoCalibrationVoltageStep()
    b->SetRange(-0.45);
 
    // DRS events
-   b->SetReadoutSrcSel(WDB::cReadoutSrcDrs);
+   b->SetDrsChTxEn(0x3FFFF);
+   b->SetAdcChTxEn(0);
    WDEvent event(b->GetSerialNumber());
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
@@ -3762,7 +3105,8 @@ void WP::DoCalibrationVoltageStep()
    }
    
    // ADC events
-   b->SetReadoutSrcSel(WDB::cReadoutSrcAdc);
+   b->SetDrsChTxEn(0);
+   b->SetAdcChTxEn(0xFFFF);
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
       sleep_ms(10);
@@ -3780,7 +3124,8 @@ void WP::DoCalibrationVoltageStep()
    b->SetRange(0);
    
    // DRS events
-   b->SetReadoutSrcSel(WDB::cReadoutSrcDrs);
+   b->SetDrsChTxEn(0x3FFFF);
+   b->SetAdcChTxEn(0);
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
       sleep_ms(10);
@@ -3795,7 +3140,8 @@ void WP::DoCalibrationVoltageStep()
    }
    
    // ADC events
-   b->SetReadoutSrcSel(WDB::cReadoutSrcAdc);
+   b->SetDrsChTxEn(0);
+   b->SetAdcChTxEn(0xFFFF);
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
       sleep_ms(10);
@@ -3813,7 +3159,8 @@ void WP::DoCalibrationVoltageStep()
    b->SetRange(0.45);
    
    // DRS events
-   b->SetReadoutSrcSel(WDB::cReadoutSrcDrs);
+   b->SetDrsChTxEn(0x3FFFF);
+   b->SetAdcChTxEn(0);
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
       sleep_ms(10);
@@ -3828,7 +3175,8 @@ void WP::DoCalibrationVoltageStep()
    }
    
    // ADC events
-   b->SetReadoutSrcSel(WDB::cReadoutSrcAdc);
+   b->SetDrsChTxEn(0);
+   b->SetAdcChTxEn(0xFFFF);
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
       sleep_ms(10);
@@ -3855,13 +3203,12 @@ void WP::DoCalibrationVoltageStep()
    
    // switch back to old board settings
    b->SetRange(mOldRange);
-   b->SetDrs0ChnTxEnable(mOldMask0);
-   b->SetDrs1ChnTxEnable(mOldMask1);
-   
-   b->SetReadoutSrcSel(mOldReadoutSrc);
+   b->SetDrsChTxEn(mOldMaskDrs);
+   b->SetAdcChTxEn(mOldMaskAdc);
+
    b->SetTimingCalibSignalEnable(mOldCalibClock);
    b->SetFeMux(-1, mOldFeMux);
-   b->SetCalibBufferEnable(mOldCalibBuffer);
+   b->SetCalibBufferEn(mOldCalibBuffer);
    
    if (calibProg.iBoard == calibProg.nBoard) {
       calibProg.state = cCsInactive;
@@ -3879,7 +3226,7 @@ void WP::DoCalibrationVoltageStep()
 void WP::AnalyzePeriod(WDEvent *event, WDB *b)
 {
    for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
-      int tc = ch < 8 || ch == 16 ? event->mTriggerCell[0] : event->mTriggerCell[1];
+      int tc = event->mTriggerCell[ch];
       
       // rising edges
       for (int i1=tc+5; i1<tc+1024-5 ; i1++) {
@@ -3977,7 +3324,7 @@ void WP::CalibrateLocal(WDEvent *event, WDB *b)
    }
    
    for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
-      int tc = ch < 8 || ch == 16 ? event->mTriggerCell[0] : event->mTriggerCell[1];
+      int tc = event->mTriggerCell[ch];
       
       for (int i=tc+5; i<tc+1024-5 ; i++) {
          
@@ -4038,7 +3385,7 @@ void WP::CalibrateGlobal(WDEvent *event, WDB *b)
    double nominalPeriod = 1 / 120E6; // Period of 120 MHz clock
    
    for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
-      int tc = ch < 8 || ch == 16 ? event->mTriggerCell[0] : event->mTriggerCell[1];
+      int tc = event->mTriggerCell[ch];
       
       // rising edges
       for (int i1=tc+5; i1<tc+1024-5 ; i1++) {
@@ -4156,14 +3503,13 @@ void WP::DoCalibrationTimeStep()
       calibProg.state       = cCsRunning;
       
       // save current board settings
-      mOldRange = b->GetRange();
-      mOldMask0 = b->GetDrs0ChnTxEnable();
-      mOldMask1 = b->GetDrs1ChnTxEnable();
+      mOldRange   = b->GetRange();
+      mOldMaskDrs = b->GetDrsChTxEn();
+      mOldMaskAdc = b->GetAdcChTxEn();
       
-      mOldReadoutSrc  = b->GetReadoutSrcSel();
-      mOldCalibClock  = b->IsTimingCalibSignalEnable();
+      mOldCalibClock  = b->GetTimingCalibSignalEn();
       mOldFeMux       = b->GetFeMux(0);
-      mOldCalibBuffer = b->IsCalibBufferEnable();
+      mOldCalibBuffer = b->GetCalibBufferEn();
 
       b->mTCalib.mCalib.sampling_frequency = b->GetDrsSampleFreq();
 
@@ -4187,13 +3533,12 @@ void WP::DoCalibrationTimeStep()
       b->SetDacCalDcV(0);
 
       // turn on calibration clock
-      b->SetCalibBufferEnable(true);
+      b->SetCalibBufferEn(true);
       b->SetTimingCalibSignalEnable(true);
       b->SetFeMux(-1, WDB::cFeMuxCalSource);
       
       // enable all channels
-      b->SetDrs0ChnTxEnable(0x1FF);
-      b->SetDrs1ChnTxEnable(0x1FF);
+      b->SetDrsChTxEn(0x3FFFF);
 
       calibProg.phase = 0;
       b->SetTimingCalibSignalDelay(calibProg.phase);
@@ -4316,13 +3661,12 @@ void WP::DoCalibrationTimeStep()
    
    // switch back to old board settings
    b->SetRange(mOldRange);
-   b->SetDrs0ChnTxEnable(mOldMask0);
-   b->SetDrs1ChnTxEnable(mOldMask1);
-   
-   b->SetReadoutSrcSel(mOldReadoutSrc);
+   b->SetDrsChTxEn(mOldMaskDrs);
+   b->SetAdcChTxEn(mOldMaskAdc);
+
    b->SetTimingCalibSignalEnable(mOldCalibClock);
    b->SetFeMux(-1, mOldFeMux);
-   b->SetCalibBufferEnable(mOldCalibBuffer);
+   b->SetCalibBufferEn(mOldCalibBuffer);
 
    if (calibProg.iBoard == calibProg.nBoard) {
       calibProg.state = cCsInactive;
@@ -4406,7 +3750,7 @@ void VCALIB::save(WDB *b, std::string filename)
 {
    std::memcpy(mCalib.version_id, "CAL2", 4);
    mCalib.sampling_frequency = b->GetDrsSampleFreq();
-   mCalib.temperature = b->GetTemperature();
+   mCalib.temperature = b->GetTemperatureDegree();
    
    int fh = open(filename.c_str(), O_WRONLY | O_CREAT, 0644);
    assert(fh > 0);
@@ -4439,11 +3783,11 @@ void VCALIB::load(WDB *b, std::string filename)
          << b->GetDrsSampleFreq()/1000.0 << " GSPS"  << std::endl;
       }
 
-      if (fabs(mCalib.temperature - b->GetTemperature()) > 5) {
+      if (fabs(mCalib.temperature - b->GetTemperatureDegree()) > 5) {
          std::cerr << "Warning: Voltage calibration data in " << filename << " is for "
          << mCalib.temperature
          << " deg. C, running now at "
-         << b->GetTemperature() << " deg. C" << std::endl;
+         << b->GetTemperatureDegree() << " deg. C" << std::endl;
       }
       bValid = true;
    }
@@ -4461,7 +3805,7 @@ void TCALIB::save(WDB *b, std::string filename)
 {
    std::memcpy(mCalib.version_id, "CAL2", 4);
    mCalib.sampling_frequency = b->GetDrsSampleFreq();
-   mCalib.temperature = b->GetTemperature();
+   mCalib.temperature = b->GetTemperatureDegree();
    
    int fh = open(filename.c_str(), O_WRONLY | O_CREAT, 0644);
    assert(fh > 0);
@@ -4495,11 +3839,11 @@ void TCALIB::load(WDB *b, std::string filename)
          return;
       }
       
-      if (fabs(mCalib.temperature - b->GetTemperature()) > 5) {
+      if (fabs(mCalib.temperature - b->GetTemperatureDegree()) > 5) {
          std::cerr << "Warning: Time calibration data in " << filename << " is for "
          << mCalib.temperature
          << " deg. C, running now at "
-         << b->GetTemperature() << " deg. C" << std::endl;
+         << b->GetTemperatureDegree() << " deg. C" << std::endl;
       }
       bValid = true;
    }

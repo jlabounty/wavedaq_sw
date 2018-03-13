@@ -143,15 +143,6 @@ function init() {
    // schedule first waveform load
    OSC.timer.loadWF = window.setTimeout(loadWF, 10);
 
-   // schedule loadStatus()
-   OSC.timer.loadStatus = window.setTimeout(loadStatus, 10000);
-
-   // schedule loadScalers()
-   OSC.timer.loadScalers = window.setTimeout(loadScalers, 1000);
-
-   // schedule loadHv()
-   OSC.timer.loadHv = window.setTimeout(loadHv, 1000);
-
    // schedule loadWdb()
    OSC.timer.loadWdb = window.setTimeout(loadWdb, 1000);
 
@@ -185,12 +176,6 @@ function connectionBroken() {
 
    if (OSC.timer.loadGl != undefined)
       clearTimeout(OSC.timer.loadGl);
-   if (OSC.timer.loadStatus != undefined)
-      clearTimeout(OSC.timer.loadStatus);
-   if (OSC.timer.loadScalers != undefined)
-      clearTimeout(OSC.timer.loadScalers);
-   if (OSC.timer.loadHv != undefined)
-      clearTimeout(OSC.timer.loadHv);
    if (OSC.timer.loadWdb != undefined)
       clearTimeout(OSC.timer.loadWdb);
    if (OSC.timer.loadWF != undefined)
@@ -219,100 +204,6 @@ function wdSelect(s) {
    populateControls(false);
 }
 
-function loadStatus() {
-   if (OSC.demoMode) {
-      OSC.wdb[OSC.curBoard].temperature = 37.8;
-      OSC.wdb[OSC.curBoard].pllLck = 0x1FF;
-      return;
-   }
-
-   // send AJAX request
-   var req = new XMLHttpRequest();
-   req.onreadystatechange = function () {
-      if (req.readyState == 4 && req.status == 200) {
-         var t = JSON.parse(req.responseText);
-
-         OSC.wdb[OSC.curBoard].temperature = parseFloat(t.temperature);
-         OSC.wdb[OSC.curBoard].pllLck = t.pllLck;
-         OSC.redraw();
-      } else if (req.readyState == 4 && req.status == 0) {
-         connectionBroken();
-      }
-   };
-
-   req.open("GET", "status?b=" + OSC.curBoard + "&r=" + Math.random(), true); // avoid cached results
-
-   try {
-      req.send();
-      OSC.timer.loadStatus = window.setTimeout(loadStatus, 10000);
-   } catch (e) {
-      connectionBroken();
-   }
-}
-
-function loadScalers() {
-   if (OSC.demoMode) {
-      for (var i = 0; i < 16; i++)
-         OSC.wdb[OSC.curBoard].scaler[i] = Math.floor(Math.random() * 9999);
-      window.setTimeout(loadScalers, 1000);
-      return;
-   }
-
-   if (OSC.disp.scaler) {
-      // send AJAX request
-      var req = new XMLHttpRequest();
-      req.onreadystatechange = function () {
-         if (req.readyState == 4 && req.status == 200) {
-            OSC.wdb[OSC.curBoard].scaler = JSON.parse(req.responseText).scaler;
-            OSC.redraw();
-         } else if (req.readyState == 4 && req.status == 0) {
-            connectionBroken();
-         }
-      };
-
-      req.open("GET", "scalers?b=" + OSC.curBoard + "&r=" + Math.random(), true); // avoid cached results
-
-      try {
-         req.send();
-         OSC.timer.loadScalers = window.setTimeout(loadScalers, 1000);
-      } catch (e) {
-         connectionBroken();
-      }
-   } else {
-      OSC.timer.loadScalers = window.setTimeout(loadScalers, 1000);
-   }
-}
-
-function showDlgChannels() {
-   var req = new XMLHttpRequest();
-   req.onreadystatechange = function () {
-      if (req.readyState == 4 && req.status == 200) {
-         OSC.wdb[OSC.curBoard].hv = JSON.parse(req.responseText);
-         for (i = 0; i < 16; i++) {
-            var e = document.getElementById("inpHvTarget" + i);
-            if (e != document.activeElement)
-               e.value = OSC.wdb[OSC.curBoard].hv.target[i];
-            var e = document.getElementById("inpHvCurrent" + i);
-            e.value = OSC.wdb[OSC.curBoard].hv.current[i];
-         }
-
-         // show dialog after HVs have been loaded
-         dlgShow('dlgChannels');
-
-      } else if (req.readyState == 4 && req.status == 0) {
-         connectionBroken();
-      }
-   };
-
-   req.open("GET", "hv?b=" + OSC.curBoard + "&r=" + Math.random(), true); // avoid cached results
-
-   try {
-      req.send();
-   } catch (e) {
-      connectionBroken();
-   }
-}
-
 function loadHv() {
    if (OSC.demoMode) {
       for (var i = 0; i < 16; i++) {
@@ -323,37 +214,6 @@ function loadHv() {
          OSC.wdb[OSC.curBoard].hv.temperature[i] = 0;
       OSC.wdb[OSC.curBoard].hv.baseVoltage = 0;
       return;
-   }
-
-   var e = document.getElementById("dlgChannels");
-   if (e.style.display == "block") { // if dialog visible
-      // send AJAX request
-      var req = new XMLHttpRequest();
-      req.onreadystatechange = function () {
-         if (req.readyState == 4 && req.status == 200) {
-            OSC.wdb[OSC.curBoard].hv = JSON.parse(req.responseText);
-            for (i = 0; i < 16; i++) {
-               var e = document.getElementById("inpHvTarget" + i);
-               if (e != document.activeElement)
-                  e.value = OSC.wdb[OSC.curBoard].hv.target[i];
-               var e = document.getElementById("inpHvCurrent" + i);
-               e.value = OSC.wdb[OSC.curBoard].hv.current[i];
-            }
-         } else if (req.readyState == 4 && req.status == 0) {
-            connectionBroken();
-         }
-      };
-
-      req.open("GET", "hv?b=" + OSC.curBoard + "&r=" + Math.random(), true); // avoid cached results
-
-      try {
-         req.send();
-         OSC.timer.loadHv = window.setTimeout(loadHv, 1000);
-      } catch (e) {
-         connectionBroken();
-      }
-   } else {
-      OSC.timer.loadHv = window.setTimeout(loadHv, 1000);
    }
 }
 
@@ -375,12 +235,8 @@ function populateAllControls(init) {
 
 function populateControls(init) {
    // populate channel buttons
-   for (var i = 0; i < 8; i++)
-      OSC.chOn[i] = (OSC.wdb[OSC.curBoard].drs0ChnTxEnable & (1 << i)) > 0;
-   for (var i = 0; i < 8; i++)
-      OSC.chOn[i + 8] = (OSC.wdb[OSC.curBoard].drs1ChnTxEnable & (1 << i)) > 0;
-   OSC.chOn[16] = (OSC.wdb[OSC.curBoard].drs0ChnTxEnable & 0x100) > 0;
-   OSC.chOn[17] = (OSC.wdb[OSC.curBoard].drs1ChnTxEnable & 0x100) > 0;
+   for (var i = 0; i < 18; i++)
+      OSC.chOn[i] = (OSC.wdb[OSC.curBoard].drsDrsChnTxEn & (1 << i)) > 0;
    OSC.drawChnButtons();
 
    // populate config
@@ -393,10 +249,10 @@ function populateControls(init) {
       document.getElementById("sldTriggerDelay").set(1 - OSC.wdb[OSC.curBoard].triggerDelay / 450);
       document.getElementById("inpTriggerDelay").value = Math.round(OSC.wdb[OSC.curBoard].triggerDelay);
    }
-   if (OSC.gl.triggerMode == 1) {
+   if (OSC.wdb[OSC.curBoard].triggerMode == 1) {
       document.getElementById("rbTriggerModeNormal").checked = true;
       document.getElementById("rbTriggerModeAuto").checked = false;
-   } else if (OSC.gl.triggerMode == 2) {
+   } else if (OSC.wdb[OSC.curBoard].triggerMode == 2) {
       document.getElementById("rbTriggerModeNormal").checked = false;
       document.getElementById("rbTriggerModeAuto").checked = true;
    }
@@ -404,7 +260,7 @@ function populateControls(init) {
    if (OSC.wdb[OSC.curBoard].triggerSource == 0) {
       document.getElementById("rbTriggerSourceInt").checked = true;
       document.getElementById("rbTriggerSourceExt").checked = false;
-   } else if (OSC.gl.triggerMode == 2) {
+   } else if (OSC.wdb[OSC.curBoard].triggerSource == 1) {
       document.getElementById("rbTriggerSourceInt").checked = false;
       document.getElementById("rbTriggerSourceExt").checked = true;
    }
@@ -466,18 +322,23 @@ function populateControls(init) {
    document.getElementById("clksource").checked = true;
    document.getElementById("clksource").disabled = true;
 
-   // channels dialog box
+   // channels dialog box with FE gain and HV
    for (i = 0; i < 16; i++) {
       if (document.getElementById("inpDacTriggerLevel" + i) != document.activeElement)
          document.getElementById("inpDacTriggerLevel" + i).value = Math.round(OSC.wdb[OSC.curBoard].dacTriggerLevel[i] * 1000);
 
       document.getElementById("selGain" + i).value = OSC.wdb[OSC.curBoard].feGain[i];
       document.getElementById("cbPzc" + i).checked = OSC.wdb[OSC.curBoard].fePzc[i];
+
+      var e = document.getElementById("inpHvTarget" + i);
+      if (e != document.activeElement)
+         e.value = OSC.wdb[OSC.curBoard].hv.target[i];
+      document.getElementById("inpHvCurrent" + i).value = OSC.wdb[OSC.curBoard].hv.current[i];
    }
 
    // trigger pattern dialog box
-   for (i = 0; i < 16; i++) {
-      var p = document.getElementById('P' + i);
+   for (i = 0; i < 18; i++) {
+      var p = document.getElementById(i<10 ? 'P0'+i : 'P'+i);
       p.enabled = (OSC.wdb[OSC.curBoard].triggerPatternEnLocal & (1 << i)) > 0;
       if (p.enabled) {
          p.style.backgroundColor = 'darkgreen';
@@ -488,20 +349,20 @@ function populateControls(init) {
       }
 
       for (var j = 0; j < 16; j++) {
-         var c = document.getElementById('C' + (i < 10 ? '0' + i : i) + (j < 10 ? '0' + j : j));
+         var c = document.getElementById('C' + (j < 10 ? '0' + j : j) + (i < 10 ? '0' + i : i));
 
          c.mode = 0;
 
          // invert pattern for negative trigger
          if (OSC.wdb[OSC.curBoard].triggerFallingEdge) {
-            if ((OSC.wdb[OSC.curBoard].triggerPattern[j] & (1 << (i+16))) > 0)
+            if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << (j+16))) > 0)
                c.mode = 1;
-            if ((OSC.wdb[OSC.curBoard].triggerPattern[j] & (1 << i)) > 0)
+            if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << j)) > 0)
                c.mode = 2;
          } else {
-            if ((OSC.wdb[OSC.curBoard].triggerPattern[j] & (1 << i)) > 0)
+            if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << j)) > 0)
                c.mode = 1;
-            if ((OSC.wdb[OSC.curBoard].triggerPattern[j] & (1 << (i+16))) > 0)
+            if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << (j+16))) > 0)
                c.mode = 2;
          }
          if (c.mode == 0)
@@ -915,9 +776,9 @@ function receiveWF() {
    if (OSC.req.readyState == 4 && OSC.req.status == 200) {
       // this.wf = JSON.parse(OSC.req.responseText); // use this for JSON encoded data
 
-      // create 18 empty waveforms
+      // create 16+2+2 empty waveforms
       var wf = {T: [], U: [], type: 1};
-      for (var i = 0; i < 18; i++) {
+      for (var i = 0; i < 20; i++) {
          wf.T[i] = [];
          wf.U[i] = [];
       }
@@ -1023,6 +884,9 @@ function receiveWF() {
          }
       }
 
+      // calculate sum and FFT waveforms
+      calcMathWF(wf);
+
       if (responseType == 11) {
          OSC.timer.loadWF = window.setTimeout(loadWF, 250);
          OSC.sendWaveforms(wf);
@@ -1054,6 +918,57 @@ function receiveWF() {
    } else if (OSC.req.readyState == 4 && OSC.req.status == 0) {
       connectionBroken();
    }
+}
+
+function calcMathWF(wf)
+{
+   // add sum waveform
+   for (var i = 0; i < 1024; i++) {
+      wf.U[18][i] = 0;
+      for (var j=0 ; j<16 ; j++)
+         if (OSC.chOn[j]) {
+            wf.T[18][i] = wf.T[j][i];
+            wf.U[18][i] += wf.U[j][i];
+         }
+   }
+
+   // add FFT waveform
+   var w = [];
+   var t = [];
+   var e = document.getElementById('chnFft');
+   var c = e.options[e.selectedIndex].value;
+
+
+   for (i=1; i < 1024; i++)
+      w[i] = wf.U[c][i];
+
+   /*
+   // resample channel
+
+   for (var i = 0; i < 1024; i++)
+      t[i] = i * 1E-6 /OSC.wdb[OSC.curBoard].drsSampleFreq;
+
+   w[0] = wf.U[c][0];
+   for (i=1; i < 1024; i++) {
+      w[i] = wf.U[c][i];
+   }
+
+   console.log("----------");
+   for (i=0 ; i<10 ; i++)
+      console.log((wf.T[0][i]*1E9).toFixed(3)+" "+wf.U[0][i].toFixed(3));
+
+   console.log("");
+   for (i=0 ; i<10 ; i++)
+      console.log((t[i]*1E9).toFixed(3)+" "+w[i].toFixed(3));
+   */
+
+
+   w[0] = w[1]; // fix for spike
+
+   fft(w);
+
+   for (i = 0; i < 512; i++)
+      wf.U[19][i] = w[i];
 }
 
 /*---- UI event handler ----*/
@@ -1172,26 +1087,16 @@ function enableDRSChannels() {
       if (OSC.chOn[i])
          mask |= (1 << i);
 
-   OSC.wdb[OSC.curBoard].drs0ChnTxEnable = 0;
-   OSC.wdb[OSC.curBoard].drs1ChnTxEnable = 0;
-   for (var i = 0; i < 8; i++)
+   OSC.wdb[OSC.curBoard].drsDrsChnTxEn = 0;
+   for (var i = 0; i < 18; i++)
       if (OSC.chOn[i])
-         OSC.wdb[OSC.curBoard].drs0ChnTxEnable |= (1 << i);
-   for (var i = 0; i < 8; i++)
-      if (OSC.chOn[i + 8])
-         OSC.wdb[OSC.curBoard].drs1ChnTxEnable |= (1 << i);
-   if (OSC.chOn[16])
-      OSC.wdb[OSC.curBoard].drs0ChnTxEnable |= 0x100;
-   if (OSC.chOn[17])
-      OSC.wdb[OSC.curBoard].drs1ChnTxEnable |= 0x100;
+         OSC.wdb[OSC.curBoard].drsDrsChnTxEn |= (1 << i);
 
    var req = new XMLHttpRequest();
 
    if (OSC.applyAll) {
-      for (var i = 0; i < OSC.wdb.length; i++) {
-         OSC.wdb[i].drs0ChnTxEnable = OSC.wdb[OSC.curBoard].drs0ChnTxEnable;
-         OSC.wdb[i].drs1ChnTxEnable = OSC.wdb[OSC.curBoard].drs1ChnTxEnable;
-      }
+      for (var i = 0; i < OSC.wdb.length; i++)
+         OSC.wdb[i].drsDrsChnTxEn = OSC.wdb[OSC.curBoard].drsDrsChnTxEn;
       req.open("PUT", "/enableChannel/ALL", true);
    } else {
       req.open("PUT", "/enableChannel/" + OSC.curBoard, true);
@@ -1206,7 +1111,7 @@ function btnChnAll() {
       OSC.chOnSelected[i] = true;
 
    // set scale according to first active channel
-   for (i = 0; i < 18; i++)
+   for (i = 0; i < 19; i++)
       if (OSC.chOn[i])
          break;
    if (i == 18)
@@ -1225,7 +1130,7 @@ function btnChn(event, c)
 
    // unselect all channels
    if (!event.ctrlKey && !event.shiftKey)
-      for (var i = 0; i < 18; i++)
+      for (var i = 0; i < 20; i++)
          if (i != c)
             OSC.chOnSelected[i] = false;
 
@@ -1294,10 +1199,10 @@ function btnOn()
 function btnScale(inc)
 // change vertical scale, update label
 {
-   for (var i = 0; i < 18; i++)
+   for (var i = 0; i < 19; i++)
       if (OSC.chOnSelected[i])
          break;
-   if (i == 18)
+   if (i == 19)
       i = 0;
 
    var index = OSC.wfScaleIndex[i] + inc;
@@ -1306,7 +1211,7 @@ function btnScale(inc)
    if (index == OSC.UScaleTable.length)
       index--;
 
-   for (i = 0; i < 18; i++) {
+   for (i = 0; i < 19; i++) {
       if (!OSC.chOnSelected[i])
          continue;
 
@@ -1344,7 +1249,7 @@ function setTScale() {
 }
 
 function sldUOffset(value) {
-   for (var i = 0; i < 18; i++) {
+   for (var i = 0; i < 19; i++) {
       if (!OSC.chOnSelected[i])
          continue;
       OSC.wfOffset[i] = value - 0.5;
@@ -1399,6 +1304,9 @@ function btnTedge(value) {
    e.value = (value == 1);
    setParam(e);
 
+   for (var i=0 ; i<18 ; i++)
+      triggerSendCell(i);
+
    if (value == 1) {
       document.getElementById('trgEdgeUp').style.display = "none";
       document.getElementById('trgEdgeDown').style.display = "inline";
@@ -1427,7 +1335,7 @@ function setRange(s) {
 }
 
 function btnOfsZero() {
-   for (i = 0; i < 18; i++) {
+   for (i = 0; i < 19; i++) {
       if (OSC.chOn[i])
          OSC.wfOffset[i] = 0;
    }
@@ -1443,7 +1351,7 @@ function btnOfsZero() {
 function btnOfsDist() {
    // count active channels
    var n = 0;
-   for (i = 0; i < 18; i++) {
+   for (i = 0; i < 19; i++) {
       if (OSC.chOn[i])
          n++;
    }
@@ -1453,7 +1361,7 @@ function btnOfsDist() {
 
    // set offset
    var o = 0.5 - d;
-   for (i = 0; i < 18; i++) {
+   for (i = 0; i < 19; i++) {
       if (OSC.chOn[i]) {
          OSC.wfOffset[i] = o;
          o -= d;
@@ -1691,10 +1599,13 @@ function measSelect(meas, sel, prev) {
          input[pi].onchange = function () {
             measParamChange(meas);
          };
-         for (i = 0; i < 18; i++) {
+         for (i = 0; i < 19; i++) {
             o = document.createElement("option");
             o.value = i;
-            o.innerHTML = "CH" + i;
+            if (i == 18)
+               o.innerHTML = "SUM";
+            else
+               o.innerHTML = "CH" + i;
             if (prev) {
                if (prev.param[pi].value + 1 == i)
                   o.selected = true;
@@ -1779,14 +1690,9 @@ function triggerSendPattern() {
    var e = {};
    e.name = "triggerPatternEnLocal";
    e.value = 0;
-   for (var i = 0; i < 16; i++) {
-      if (document.getElementById('P' + i).enabled)
+   for (var i = 0; i < 18; i++) {
+      if (document.getElementById(i<10? 'P0'+i : 'P'+i).enabled)
          e.value += (1 << i);
-   }
-
-   // if trigger is set to external, set it to internal
-   if (OSC.wdb[OSC.curBoard].triggerSource == 0) {
-
    }
 
    setParam(e);
@@ -1827,6 +1733,13 @@ function triggerClickPattern() {
 }
 
 function triggerClickCell() {
+   // enable pattern for this cell
+   var p = document.getElementById('P' + this.id.substr(3));
+   p.enabled = true;
+   p.style.backgroundColor = 'darkgreen';
+   p.style.color = 'white';
+
+   // switch OR-AND-NULL
    this.mode = (this.mode + 1) % 3;
    if (this.mode == 0)
       this.innerHTML = '';
@@ -1835,41 +1748,54 @@ function triggerClickCell() {
    if (this.mode == 2)
       this.innerHTML = '&times;';
 
+   triggerSendPattern();
    triggerSendCell(this.pa);
 }
 
 function triggerClearAll() {
    for (var i = 0; i < 16; i++) {
-      var p = document.getElementById('P' + i);
+      var p = document.getElementById(i<10?'P0'+i:'P'+i);
+      p.enabled = false;
+      p.style.backgroundColor = '#DDDDDD';
+      p.style.color = 'black';
+   }
+   for (var i = 16; i < 18; i++) {
+      var p = document.getElementById(i<10?'P0'+i:'P'+i);
       p.enabled = false;
       p.style.backgroundColor = '#DDDDDD';
       p.style.color = 'black';
    }
 
    for (i = 0; i < 16; i++)
-      for (var j = 0; j < 16; j++) {
+      for (var j = 0; j < 18; j++) {
          var c = document.getElementById('C' + (i < 10 ? '0' + i : i) + (j < 10 ? '0' + j : j));
          c.mode = 0;
          c.innerHTML = '';
       }
 
    triggerSendPattern();
-   for (i = 0; i < 16; i++)
+   for (i = 0; i < 18; i++)
       triggerSendCell(i);
 }
 
 function triggerOrAll() {
    for (var i = 0; i < 16; i++) {
-      var p = document.getElementById('P' + i);
+      var p = document.getElementById(i<10?'P0'+i:'P'+i);
       p.enabled = true;
       p.style.backgroundColor = 'darkgreen';
       p.style.color = 'white';
    }
+   for (var i = 16; i < 18; i++) {
+      var p = document.getElementById(i<10?'P0'+i:'P'+i);
+      p.enabled = false;
+      p.style.backgroundColor = '#DDDDDD';
+      p.style.color = 'black';
+   }
 
    for (i = 0; i < 16; i++)
-      for (var j = 0; j < 16; j++) {
+      for (var j = 0; j < 18; j++) {
          var c = document.getElementById('C' + (i < 10 ? '0' + i : i) + (j < 10 ? '0' + j : j));
-         if (i == j) {
+         if (i == j && j<16) {
             c.mode = 1;
             c.innerHTML = '&bull;';
          } else {
@@ -1879,7 +1805,7 @@ function triggerOrAll() {
       }
 
    triggerSendPattern();
-   for (i = 0; i < 16; i++)
+   for (i = 0; i < 18; i++)
       triggerSendCell(i);
 }
 

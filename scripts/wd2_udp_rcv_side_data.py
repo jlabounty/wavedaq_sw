@@ -2,6 +2,7 @@
 import sys
 import os
 import socket
+import ctypes 
 import numpy as np
 
 UDP_IP = "" #"129.129.188.323"
@@ -80,3 +81,55 @@ for i in np.arange(32,data_size):
   out_file.write(outline)
 
 out_file.close()
+
+#-----------------------------------------------
+# Header
+#-----------------------------------------------
+
+class header_struct(ctypes.BigEndianStructure):  # ctypes.Structure / ctypes.LittleEndianStructure
+  _pack_   = 1  # alignment to 1 byte only, must be defined before __fields__
+  _fields_ = [
+               ('protocol_version'         , ctypes.c_uint8),      # 1 byte  Protocol_Version                   
+               ('board_revision'           , ctypes.c_uint8),      # 1 byte  Board_Revision               
+               ('board_id'                 , ctypes.c_uint16),     # 2 byte  Board_ID                                   
+               ('crate_id'                 , ctypes.c_uint8),      # 1 byte  Crate_ID                   
+               ('slot_id'                  , ctypes.c_uint8),      # 1 byte  Slot_ID                  
+               ('adc'                      , ctypes.c_uint8, 1),   # 1 bit   ADC 
+               ('channel'                  , ctypes.c_uint8, 7),   # 7 bit   Channel
+               ('data_type'                , ctypes.c_uint8, 8),   # 4 bit   package type
+               ('tx_enable'                , ctypes.c_uint32),     # 4 byte  TX_Enable
+               ('reserved_flag0'           , ctypes.c_uint8, 6),   # 6 bit   reserved
+               ('trig_info_perr_flag'      , ctypes.c_uint8, 1),   # 1 bit   Trigger_Info_Parity_Error_Flag
+               ('trig_info_new_flag'       , ctypes.c_uint8, 1),   # 1 bit   Trigger_Info_New_Flag
+               ('reserved_flag1'           , ctypes.c_uint8, 2),   # 2 bit   reserved
+               ('start_of_type_flag'       , ctypes.c_uint8, 1),   # 1 bit   Start_of_Type_Flag
+               ('end_of_type_flag'         , ctypes.c_uint8, 1),   # 1 bit   End_of_Type_Flag
+               ('reserved_flag2'           , ctypes.c_uint8, 2),   # 2 bit   reserved
+               ('daq_pll_lock_flag'        , ctypes.c_uint8, 1),   # 1 bit   DAQ_PLL_Lock_Flag
+               ('drs_pll_lock_flag'        , ctypes.c_uint8, 1),   # 1 bit   DRS_PLL_Lock_Flag
+               ('trigger_source'           , ctypes.c_uint8),      # 1 byte  Trigger_Source
+               ('bits_per_sample'          , ctypes.c_uint8),      # 1 byte  Bits_per_Sample
+               ('samples_per_event_per_ch' , ctypes.c_uint16),     # 2 byte  Samples_per_Event_per_Channel
+               ('payload_length'           , ctypes.c_uint16),     # 2 byte  Payload_Length in ...
+               ('data_offset'              , ctypes.c_uint16),     # 2 byte  Data_Offset in ...
+               ('trigger_info2'            , ctypes.c_uint16),     # 2 byte  Trigger_Info (MSBs, Trigger_Type)
+               ('trigger_info1'            , ctypes.c_uint16),     # 2 byte  Trigger_Info (Reserved)
+               ('trigger_info0'            , ctypes.c_uint16),     # 2 byte  Trigger_Info (LSBs, Trigger_Number)
+               ('event_number'             , ctypes.c_uint32),     # 4 byte  Event_Number             
+               ('time_stamp'               , ctypes.c_uint64),     # 8 byte  Time_Stamp
+               ('sampling_frequency'       , ctypes.c_uint32),     # 4 byte  Sampling_Frequency
+               ('drs_trigger_cell'         , ctypes.c_uint16),     # 2 byte  DRS_Trigger_Cell                              
+               ('temperature'              , ctypes.c_uint16),     # 2 byte  Temperature                                  
+               ('dac_ofs'                  , ctypes.c_uint16),     # 2 byte  DAC_OFS DAC channel
+               ('dac_rofs'                 , ctypes.c_uint16),     # 2 byte  DAC_ROFS DAC channel
+               ('frontend_settings'        , ctypes.c_uint16),     # 2 byte  Frontend_Settings
+               ('reserved2'                , ctypes.c_uint16),     # 2 byte  Reserved                               
+               ('reserved1'                , ctypes.c_uint32),     # 4 byte  Reserved
+               ('reserved0'                , ctypes.c_uint32),     # 4 byte  Reserved
+             ]
+
+  def info(self):
+    for a in self._fields_:
+      print ("%-25s : %8d"%(a[0], self.__getattribute__(a[0])))
+
+#-----------------------------------------------

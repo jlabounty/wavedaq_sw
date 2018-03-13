@@ -14,6 +14,7 @@
 #define __wdblib_h__
 
 #include "register_map_wd2.h"
+#include "WDBReg.h"
 
 #include <thread>
 #include <queue>
@@ -34,22 +35,30 @@ class WDB;
 
 typedef struct {
    unsigned char  protocol_version;
-   unsigned char  board_version;
+   unsigned char  board_revision;
    unsigned short board_id;
    unsigned char  crate_id;
    unsigned char  slot_id;
-   unsigned char  adc_and_channel_info;
-   unsigned char  segment_and_package_type;
-   unsigned int   event_number;
-   unsigned short sampling_frequency;
+   unsigned char  channel_info;
+   unsigned char  data_type;
+   unsigned int   tx_enable;
+   unsigned short zero_suppression_mask;
+   unsigned short flags;
+   unsigned char  trigger_source;
+   unsigned char  bits_per_sample;
+   unsigned short samples_per_event_per_channel;
    unsigned short payload_length;
-   unsigned short trigger_number;
-   unsigned short drs0_trigger_cell;
-   unsigned short drs1_trigger_cell;
-   unsigned short trigger_type;
+   unsigned short data_offset;
+   unsigned char  time_stamp[8];
+   unsigned int   event_number;
+   unsigned char  trigger_information[6];
+   unsigned short drs_trigger_cell;
+   unsigned int   sampling_frequency;
    unsigned short temperature;
-   unsigned int   reserved;
-   unsigned short packet_sequence_number;
+   unsigned short dac_ofs;
+   unsigned short dac_rofs;
+   unsigned short frontend_settings;
+   unsigned char  reserved[8];
 } WD2_FRAME_HEADER;
 
 #pragma pack() // reset alignment to default value
@@ -142,7 +151,9 @@ public:
    unsigned int     mEventNumber;
    unsigned short   mSamplingFrequency;
    unsigned short   mTriggerNumber;
-   int              mTriggerCell[2];
+   int              mTriggerCell[WD_N_CHANNELS];
+   int              mTriggerCellDrs0;
+   int              mTriggerCellDrs1;
    unsigned short   mTriggerType;
    float            mTemperature;
    bool             mWFTypeADC;
@@ -214,8 +225,7 @@ class WDEventRequest {
    bool             mBoardRequested;
    bool             mWfValid[WD_N_CHANNELS][2];
    unsigned int     mChannelMask;
-   int              mDrs0TriggerCell;
-   int              mDrs1TriggerCell;
+   int              mDrsTriggerCell[WD_N_CHANNELS];
  
 public:
    WDEventRequest(int boardId, unsigned int mask = 0xFFFF) {
@@ -224,6 +234,7 @@ public:
       for (int i=0 ; i<WD_N_CHANNELS ; i++) {
          mWfValid[i][0] = false;
          mWfValid[i][1] = false;
+         mDrsTriggerCell[i] = -1;
       }
       mChannelMask = mask;
    } ;
@@ -232,10 +243,8 @@ public:
    void             SetRequested(bool flag) { mBoardRequested = flag; }
    bool             IsRequested() { return mBoardRequested; }
    void             SetWfValid(int channel, int segment, bool v) { mWfValid[channel][segment] = v; }
-   void             SetDrs0TriggerCell(unsigned int c) { mDrs0TriggerCell = c; }
-   void             SetDrs1TriggerCell(unsigned int c) { mDrs1TriggerCell = c; }
-   int              GetDrs0TriggerCell() { return mDrs0TriggerCell; }
-   int              GetDrs1TriggerCell() { return mDrs1TriggerCell; }
+   void             SetDrsTriggerCell(int ch, unsigned int c) { mDrsTriggerCell[ch] = c; }
+   int              GetDrsTriggerCell(int ch) { return mDrsTriggerCell[ch]; }
    void             SetMask(unsigned int mask) { mChannelMask = mask; }
    unsigned int     GetMask() { return mChannelMask; }
    bool             IsWfValid();
@@ -318,8 +327,8 @@ class WP {
    } li;
    
    float             mOldRange;
-   int               mOldMask0;
-   int               mOldMask1;
+   int               mOldMaskDrs;
+   int               mOldMaskAdc;
 
    int               mOldReadoutSrc;
    bool              mOldCalibClock;
@@ -421,7 +430,7 @@ public:
 //--------------------------------------------------------------------
 
 // WaveDREAM board class. Interface functions to all WDB registers
-class WDB {
+class WDB: public WDBREG {
    std::string      mName;
    std::string      mPrompt;
    unsigned char    mEthAddrAscii[16];
@@ -430,6 +439,8 @@ class WDB {
    std::string      mLogfile;
    bool             mDemoMode;
    bool             mSendBlocked;
+   int              mSendTimeoutMs;
+   int              mReceiveTimeoutMs;
 
    unsigned int     creg[REG_NR_OF_CTRL_REGS];
    unsigned int     sreg[REG_NR_OF_STAT_REGS];
@@ -438,26 +449,28 @@ class WDB {
    static int       gBinSocket;
    static unsigned short udpSequenceNumber;
 
-   std::string      SendReceiveUDP(std::string str, int timeout_ms = 100);
-   void             SendUDP(std::string str, int timeout_ms = 100);
+   void             BlockSend(bool flag) { mSendBlocked = flag; }
+   int              GetSendTimeoutMs() { return mSendTimeoutMs; };
+   void             SetSendTimeoutMs(int to) { mSendTimeoutMs = to; };
+   int              GetReceiveTimeoutMs() { return mReceiveTimeoutMs; };
+   void             SetReceiveTimeoutMs(int to) { mReceiveTimeoutMs = to; };
+   
+   std::string      SendReceiveUDP(std::string str);
+   void             SendUDP(std::string str);
 
-   void             WriteUDP(unsigned int ofs, std::vector<unsigned int> data, int timeout_ms = 250);
-   std::vector<unsigned int> ReadUDP(unsigned int ofs, unsigned int len, int timeout_ms = 250);
+   void             WriteUDP(unsigned int ofs, std::vector<unsigned int> data);
+   std::vector<unsigned int> ReadUDP(unsigned int ofs, unsigned int len);
 
 public:
    
    // constructor
-   WDB(std::string name, int verbose = 0) {
-      mName = name;
-      mPrompt = "";
-      mVerbose = verbose;
-      mLogfile = "";
-      mDemoMode = (name == "demo");
-      mSendBlocked = false;
-   }
+   WDB(std::string name, int verbose = 0);
 
-   const unsigned int cRequiredCompatibilityLevel = 1;
-   
+   const unsigned int cRequiredRegLayoutCompatLevel = 4;
+   const unsigned int cRequiredFwCompatLevel = 2;
+   const int cDefaultSendTimeoutMs = 100;
+   const int cDefaultReceiveTimeoutMs = 100;
+
    // constants
    enum { cReadoutSrcDrs       = 0x01,
       cReadoutSrcAdc           = 0x02,
@@ -492,6 +505,11 @@ public:
    VCALIB           mVCalib;
    TCALIB           mTCalib;
    
+   // register functions, overload pure virtual functions from WDBREG
+   void SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v);
+   unsigned int BitExtractStatus(unsigned int rofs, unsigned int mask, unsigned int ofs);
+   unsigned int BitExtractControl(unsigned int rofs, unsigned int mask, unsigned int ofs);
+   
    // interface functions
    void SetVerbose(int verbose) { mVerbose = verbose; }
    void SetLogFile(std::string logfile) { mLogfile = logfile; }
@@ -500,7 +518,6 @@ public:
    void ReceiveControlRegisters(unsigned int index=0, unsigned int nReg=REG_NR_OF_CTRL_REGS);
    void ReceiveStatusRegisters(unsigned int index=0, unsigned int nReg=REG_NR_OF_STAT_REGS);
    void ReceiveStatusRegister(int ofs);
-   void SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v, bool send=true, int timeout_ms = 250);
    void SendControlRegisters();
    void PrintVersion();
    void SetSendBlocked(bool f) { mSendBlocked = f; }
@@ -508,103 +525,27 @@ public:
    // setter & getter ----------
    std::string GetName() { return mName; }
    
-   // status registers
+   // high level status registers
    std::string GetFwBuild();
    std::string GetHwVersion();
-   unsigned int GetCompatibilityLevel();
-   unsigned int GetProtocolVersion();
-   unsigned int GetSerialNumber();
-   float GetTemperature(bool refresh = true);
-   bool IsFlashSelect();
-   bool IsBoardSelect();
-   bool IsSerialBusy();
-   bool IsSysBusy();
-   bool IsWDBBusy();
-   bool IsHvBoardPlugged();
-   bool IsBackplanePlugged();
-   unsigned int GetPllLck(bool refresh = true);
-   bool IsExtPllLck(bool refresh = true);
-   bool IsIntPllLck(bool refresh = true);
-   unsigned int GetDrsSampleFreq();
-   void SetDrsSampleFreq(unsigned int f);
-   unsigned int GetLmkInputFreq();
-   void SetLmkInputFreq(unsigned int f);
-   unsigned int GetAdcSampleFreq();
-   unsigned int GetAdcInfo();
-   
+   float GetTemperatureDegree(bool refresh = true);
+   unsigned int GetPllLock(bool refresh = true);
    void GetScalers(std::vector<unsigned long> &s, bool refresh = true);
    void GetHVCurrents(std::vector<float> &c, bool refresh = true);
    void GetHVBaseVoltage(float &voltage, bool refresh = true);
    void Get1wireTemperatures(std::vector<float> &c, bool refresh = true);
 
-   unsigned int GetCompChannelStatus();
-   unsigned int GetLastEventNumber();
-   unsigned int GetTriggerBusParityErrorCount();
-   unsigned int GetTriggerBusType();
-   unsigned int GetTriggerBusNumber();
-   
-   unsigned int GetAdvTriggerStatus(int r);
+   // high level control registers
+   void SetDrsSampleFreq(unsigned int f);
+   void SetLmkInputFreq(unsigned int f);
+   unsigned int GetLmkInputFreq();
 
-   // control registers
-   unsigned int GetCrateId();
-   void SetCrateId(unsigned int value);
-   unsigned int GetSlotId();
-   void SetSlotId(unsigned int value);
-   unsigned int GetValidDelayADC();
-   void SetValidDelayADC(unsigned int value);
-   unsigned int GetDaqDataPhase();
-   void SetDaqDataPhase(unsigned int value);
-   bool IsCompPowerEnable();
-   void SetCompPowerEnable(bool value);
-   unsigned int GetReadoutSrcSel();
-   void SetReadoutSrcSel(unsigned int value);
-   unsigned int GetDRSReadoutMode();
-   void SetDRSReadoutMode(unsigned int value);
-   bool IsDRSWaveContinous();
-   void SetDRSWaveContinous(bool value);
-   
-   void TrgDRSConfigure();
-   void TrgDAQSoft(bool value);
-   void TrgDAQReinit();
-   bool IsDAQNormal();
-   
-   void SetDaqNormal(bool value);
-   bool IsDaqSingle();
-   void SetDaqSingle(bool value);
-   void StartDaqSingle();
-   unsigned int GetDrs0TimingRefSel();
-   void SetDrs0TimingRefSel(unsigned int value);
-   unsigned int GetDrs1TimingRefSel();
-   void SetDrs1TimingRefSel(unsigned int value);
-   bool IsCalibBufferEnable();
-   void SetCalibBufferEnable(bool value);
-   bool IsTimingCalibSignalEnable();
    void SetTimingCalibSignalEnable(bool value);
    void SetTimingCalibSignalDelay(int value);
    int GetTimingCalibSignalDelay();
-   int GetTimingReferenceSignal();
    void SetTimingReferenceSignal(int value);
-   unsigned int GetDaqClkSrcSel();
-   void SetDaqClkSrcSel(unsigned int value);
-   unsigned int GetExtClkInSel();
-   void SetExtClkInSel(unsigned int value);
-   unsigned int GetExtClkFreq();
-   unsigned int GetLocalClkFreq();
-   unsigned int GetDrs1ChnTxEnable();
-   void SetDrs1ChnTxEnable(unsigned int value);
-   unsigned int GetDrs0ChnTxEnable();
-   void SetDrs0ChnTxEnable(unsigned int value);
-   unsigned int GetDrsControl();
-   void SetDrsControl(unsigned int value);
-   unsigned int GetDataDestination();
-   void SetDataDestination(unsigned int value);
-   unsigned int GetDCBSerdesTrain();
-   void SetDCBSerdesTrain(unsigned int value);
-   unsigned int GetTcbSerdesTrain();
-   void SetTcbSerdesTrain(unsigned int value);
-   unsigned int GetInterPacketDelay();
-   void SetInterPacketDelay(unsigned int value);
-   
+   int GetTimingReferenceSignal();
+
    void ResetDaqPll();
    void ResetDcbOserdesPll();
    void ResetDcbOserdesIf();
@@ -615,18 +556,12 @@ public:
    void ResetTriggerParityErrorCounter();
    void LmkSyncLocal();
    void ResetAdcIf();
+   void ResetDataLinkIf();
    void ResetPackager();
    void ResetEventCounter();
    void ResetDrsControlFsm();
    void ReconfigureFpga();
    
-   void ApplyDrsSettings();
-   void ApplyDacSettings();
-   void ApplyFrontendSettings();
-   void ApplyControlSettings();
-   void ApplyAdcSettings();
-   void ApplyLmkSettings();
-
    float GetDacRofsV();
    void SetDacRofsV(float v);
    float GetDacOfsV();
@@ -644,7 +579,7 @@ public:
    float GetDacTriggerLevelV(int chn);
    void SetDacTriggerLevelV(int chn, float v);
 
-   bool IsFePzc(int chn);
+   bool GetFePzc(int chn);
    void SetFePzc(int chn, bool v);
    unsigned int GetFeAmp2Comp(int chn);
    void SetFeAmp2Comp(int chn, unsigned int v);
@@ -668,46 +603,10 @@ public:
    unsigned int GetLmk(int reg);
    void SetLmk(int reg, unsigned int v);
 
-   // ADC configuration intentionally skipped ...
-   
-   unsigned int GetTriggerPulseLength();
-   void SetTriggerShaperEnable(bool v);
-   bool IsTriggerShaperEnable();
-   void SetTriggerPulseLength(unsigned int v);
-   bool IsTriggerEnable();
-   void SetTriggerEnable(bool v);
-   bool IsTriggerFallingEdge();
-   void SetTriggerFallingEdge(bool v);
-   bool IsTriggerExternalOr();
-   void SetTriggerExternalOr(bool v);
-   bool IsTriggerExternalAnd();
-   void SetTriggerExternalAnd(bool v);
-   bool IsTriggerDelayEnable();
-   void SetTriggerDelayEnable(bool v);
-   unsigned int GetTriggerDelay();
-   void SetTriggerDelay(unsigned int v);
-   unsigned int GetTriggerComparatorMask();
-   void SetTriggerComparatorMask(unsigned int v);
-   unsigned int GetTriggerCfgOr();
-   void SetTriggerCfgOr(unsigned int v);
-   unsigned int GetTriggerCfgAnd();
-   void SetTriggerCfgAnd(unsigned int v);
-   unsigned int GetTriggerLocalScheme();
-   void SetTriggerLocalScheme(unsigned int v);
-   unsigned int GetTriggerBackplaneScheme(int chn);
-   void SetTriggerBackplaneScheme(int chn, unsigned int v);
-   unsigned int GetTriggerPatternEnLocal();
-   void SetTriggerPatternEnLocal(unsigned int v);
-   unsigned int GetTriggerPatternEnBackplane(int chn);
-   void SetTriggerPatternEnBackplane(int chn, unsigned int v);
-   unsigned int GetTriggerPattern(int chn);
-   void SetTriggerPattern(int chn, unsigned int v);
-   unsigned int GetCrc32RegBank();
-   void SetAdvTrgCfg(int i, unsigned int v);
-   void SetDbgSig(int rx, int tx);
-   unsigned int GetAdvTrgCfg(int i);
-   
-   // hihg level methods ----------
+   unsigned int GetTrgPtrn(int i);
+   void SetTrgPtrn(int i, unsigned int value);
+
+   // high level methods ----------
    unsigned int GetTriggerDelayNs();
    void SetTriggerDelayNs(unsigned int ns);
    
@@ -721,7 +620,8 @@ public:
    void SaveTimeCalibration(int freq);
    bool LoadTimeCalibration(int freq, std::string path="");
    
-   void SpecialTest();
+   unsigned int GetTriggerFallingEdge();
+   void SetTriggerFallingEdge(unsigned int value);
 };
 
 //--------------------------------------------------------------------

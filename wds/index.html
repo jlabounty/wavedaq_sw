@@ -6,6 +6,7 @@
    <link href="wds.css" rel="stylesheet" type="text/css">
    <link href="favicon.png" rel="shortcut icon" type="image/png" title="WaveDAQ Icon">
    <link href="iosicon.png" rel="apple-touch-icon" type="image/png" title="WaveDAQ Icon">
+   <script src="fft.js" type="text/javascript"></script>
    <script src="controls.js" type="text/javascript"></script>
    <script src="osc.js" type="text/javascript"></script>
    <script src="wds.js" type="text/javascript"></script>
@@ -118,7 +119,7 @@
 
       <button class="wideButton" id="btnConfig" type="button" onClick="btnConfig()">Config</button>
       <button class="wideButton" id="btnMeasure" type="button" onClick="dlgShow('dlgMeasure')">Measure</button>
-      <button class="wideButton" id="btnChannels" type="button" onClick="showDlgChannels()">Channels</button>
+      <button class="wideButton" id="btnChannels" type="button" onClick="dlgShow('dlgChannels')">Channels</button>
       <button class="wideButton" id="btnSave" type="button" onClick="btnSave()">Save</button>
       <button class="wideButton" id="btnAbout" type="button" onClick="dlgShow('dlgAbout')">About</button>
 
@@ -220,9 +221,9 @@
             </div>
             <div class="vSpacer5">
                Mode:
-               <input type="radio" id="inputReadoutSrcDRS" name="readoutSrcSel" checked="checked" value="1"
+               <input type="radio" id="inputReadoutSrcDRS" name="readoutSrcSel" disabled="1" checked="checked" value="1"
                       onClick="setParam(this)">DRS
-               <input type="radio" id="inputReadoutSrcADC" name="readoutSrcSel" value="2" onClick="setParam(this)">ADC
+               <input type="radio" id="inputReadoutSrcADC" name="readoutSrcSel" disabled="1" value="2" onClick="setParam(this)">ADC
             </div>
 
             <div class="vMiddleBox vSpacer5">
@@ -310,6 +311,39 @@
                   </select>
                </div>
 
+            </div>
+         </div>
+
+         <div class="groupTitle">Extra Channels</div>
+         <div class="group">
+            <div style="user-select: none">
+               <div class="vMiddleBox vSpacer5">
+                  <button class="squareButton" id="ch18" type="button" onClick="btnChn(event, 18)"
+                          onContextmenu="btnChn(event, 18)">&Sigma;</button>
+                  <button class="squareButton" id="ch19" type="button" onClick="btnChn(event, 19)"
+                          onContextmenu="btnChn(event, 19)" style="width: 50px">FFT</button>
+                  <select id="chnFft" class="select" name="chnFft">
+                     <option value="0">CH0</option>
+                     <option value="1">CH1</option>
+                     <option value="2">CH2</option>
+                     <option value="3">CH3</option>
+                     <option value="4">CH4</option>
+                     <option value="5">CH5</option>
+                     <option value="6">CH6</option>
+                     <option value="7">CH7</option>
+                     <option value="8">CH8</option>
+                     <option value="9">CH9</option>
+                     <option value="10">CH10</option>
+                     <option value="11">CH11</option>
+                     <option value="12">CH12</option>
+                     <option value="13">CH13</option>
+                     <option value="14">CH14</option>
+                     <option value="15">CH15</option>
+                     <option value="16">CH16</option>
+                     <option value="17">CH17</option>
+                     <option value="18">SUM</option>
+                  </select>
+               </div>
             </div>
          </div>
 
@@ -585,10 +619,10 @@
 
             var cell = row.insertCell(-1);
             cell.appendChild(document.createTextNode('Pattern:'));
-            for (var i = 0; i < 16; i++) {
+            for (var i = 0; i < 18; i++) {
                cell = row.insertCell(-1);
                cell.appendChild(document.createTextNode(i < 10 ? 'P0' + i : 'P' + i));
-               cell.id = 'P' + i;
+               cell.id = 'P' + (i<10 ? '0' + i : i);
                cell.enabled = false;
                cell.className = 'tableTriggerHeader';
                cell.addEventListener('click', triggerClickPattern.bind(cell));
@@ -600,7 +634,7 @@
                cell.appendChild(document.createTextNode('CH' + i));
                cell.style.backgroundColor = ChannelColors[i];
 
-               for (var j = 0; j < 16; j++) {
+               for (var j = 0; j < 18; j++) {
                   cell = row.insertCell(-1);
                   cell.appendChild(document.createTextNode(''));
                   cell.id = 'C' + (i<10 ? '0' + i : i) + (j<10 ? '0' + j : j);
@@ -618,12 +652,16 @@
       </div>
    </div>
 
-   <!-- trigger pattern dialog -->
+   <!-- trigger pattern help dialog -->
    <div id="dlgTriggerHelp" class="dlgFrame">
       <div class="dlgTitlebar">Trigger Help
       </div>
-      <div class="dlgPanel" id="panelTrigger" style="text-align: left; line-height: 2em;">
-            <div>&bull;&nbsp;To activate or de-activate a trigger pattern, click on the PXX table header</div>
+      <div class="dlgPanel" id="panelTriggerHelp" style="text-align: left; line-height: 2em; max-width: 950px;">
+         Each WaveDREAM board has 18 trigger patterns which are represented as columns in
+         the Trigger Patterns dialog. Each row represents one channel CH0 to CH15.
+         All 18 patterns are OR-ed to form the trigger. Each pattern can contain certain
+         channels in coincidence (&quot;&bull;&quot;) or in anti-coincidence (&quot;&times;&quot;).<br /><br />
+            <div>&bull;&nbsp;To activate or de-activate a trigger pattern, click on the PXX box at the table header</div>
             <div>&bull;&nbsp;To add a channel in coincidence to that pattern (AND), click once inside a cell.
                The symbol &quot;&bull;&quot; appears.</div>
             <div>&bull;&nbsp;To add a channel in anti-coincidence to that pattern (VETO), click again inside a cell.
@@ -633,7 +671,8 @@
             <button class="wideButton" type="button" onClick="dlgHide('dlgTriggerHelp')">Close</button>
          </div>
       </div>
-   </div> <!-- container -->
+   </div>
+</div> <!-- container -->
 
 </body>
 </html>
