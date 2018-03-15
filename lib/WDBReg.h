@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  29.01.2018 08:56:54
+// Created :  15.03.2018 11:52:37
 //
 
 
@@ -43,7 +43,7 @@ public:
 
 
 
-   ////// ------ Control Register 1 [0x1004]: CTRL - DAQ control register (Default: 0x1F200380) ------ //////
+   ////// ------ Control Register 1 [0x1004]: CTRL - DAQ control register (Default: 0x19200380) ------ //////
 
    // 0x3F000000: VALID_DELAY_ADC - Delay of the data valid at the ISERDES of the ADCs (delay = value + 1)
    unsigned int GetValidDelayAdc() { return BitExtractControl(WD2_VALID_DELAY_ADC_REG, WD2_VALID_DELAY_ADC_MASK, WD2_VALID_DELAY_ADC_OFS); };
@@ -2012,6 +2012,10 @@ public:
 
 
    ////// ------ Control Register 96 [0x1180]: TRG_CFG - Trigger Configuration (Default: 0x00000000) ------ //////
+
+   // 0x10000000: EXT_TRIGGER_OUT_ENABLE - Enable output of trigger signal to MCX connector
+   unsigned int GetExtTriggerOutEnable() { return BitExtractControl(WD2_EXT_TRIGGER_OUT_ENABLE_REG, WD2_EXT_TRIGGER_OUT_ENABLE_MASK, WD2_EXT_TRIGGER_OUT_ENABLE_OFS); };
+   void         SetExtTriggerOutEnable(unsigned int value) { SetRegMask(WD2_EXT_TRIGGER_OUT_ENABLE_REG, WD2_EXT_TRIGGER_OUT_ENABLE_MASK, WD2_EXT_TRIGGER_OUT_ENABLE_OFS, value); };
 
    // 0x08000000: TRIGGER_SHAPER_ENABLE - a "1" enables the pulse shaper of the trigger inputs
    unsigned int GetTriggerShaperEnable() { return BitExtractControl(WD2_TRIGGER_SHAPER_ENABLE_REG, WD2_TRIGGER_SHAPER_ENABLE_MASK, WD2_TRIGGER_SHAPER_ENABLE_OFS); };
