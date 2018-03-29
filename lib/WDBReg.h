@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  15.03.2018 11:52:37
+// Created :  22.03.2018 11:52:18
 //
 
 
@@ -257,15 +257,11 @@ public:
 
    ////// ------ Control Register 15 [0x103C]: ZERO_SUPR - Zero Suppression Configuration Register (Default: 0x00000080) ------ //////
 
-   // 0x00000200: ZERO_SUPR_POLARITY - 1 = positive (channels above threshold within window), 0 = inverted
-   unsigned int GetZeroSuprPolarity() { return BitExtractControl(WD2_ZERO_SUPR_POLARITY_REG, WD2_ZERO_SUPR_POLARITY_MASK, WD2_ZERO_SUPR_POLARITY_OFS); };
-   void         SetZeroSuprPolarity(unsigned int value) { SetRegMask(WD2_ZERO_SUPR_POLARITY_REG, WD2_ZERO_SUPR_POLARITY_MASK, WD2_ZERO_SUPR_POLARITY_OFS, value); };
-
    // 0x00000100: ZERO_SUPR_EN - Enable zero suppression for data transmission (only transmit channels that triggered)
    unsigned int GetZeroSuprEn() { return BitExtractControl(WD2_ZERO_SUPR_EN_REG, WD2_ZERO_SUPR_EN_MASK, WD2_ZERO_SUPR_EN_OFS); };
    void         SetZeroSuprEn(unsigned int value) { SetRegMask(WD2_ZERO_SUPR_EN_REG, WD2_ZERO_SUPR_EN_MASK, WD2_ZERO_SUPR_EN_OFS, value); };
 
-   // 0x000000FF: ZERO_SUPR_WINDOW - Zero suppression time window in DAQ clock ticks
+   // 0x000000FF: ZERO_SUPR_WINDOW - Zero suppression time window in DAQ clock ticks (channel polarity defined in TRG_SRC_POL)
    unsigned int GetZeroSuprWindow() { return BitExtractControl(WD2_ZERO_SUPR_WINDOW_REG, WD2_ZERO_SUPR_WINDOW_MASK, WD2_ZERO_SUPR_WINDOW_OFS); };
    void         SetZeroSuprWindow(unsigned int value) { SetRegMask(WD2_ZERO_SUPR_WINDOW_REG, WD2_ZERO_SUPR_WINDOW_MASK, WD2_ZERO_SUPR_WINDOW_OFS, value); };
 
@@ -2013,37 +2009,17 @@ public:
 
    ////// ------ Control Register 96 [0x1180]: TRG_CFG - Trigger Configuration (Default: 0x00000000) ------ //////
 
-   // 0x10000000: EXT_TRIGGER_OUT_ENABLE - Enable output of trigger signal to MCX connector
+   // 0x00002000: EXT_TRIGGER_OUT_ENABLE - Enable output of trigger signal to MCX connector
    unsigned int GetExtTriggerOutEnable() { return BitExtractControl(WD2_EXT_TRIGGER_OUT_ENABLE_REG, WD2_EXT_TRIGGER_OUT_ENABLE_MASK, WD2_EXT_TRIGGER_OUT_ENABLE_OFS); };
    void         SetExtTriggerOutEnable(unsigned int value) { SetRegMask(WD2_EXT_TRIGGER_OUT_ENABLE_REG, WD2_EXT_TRIGGER_OUT_ENABLE_MASK, WD2_EXT_TRIGGER_OUT_ENABLE_OFS, value); };
 
-   // 0x08000000: TRIGGER_SHAPER_ENABLE - a "1" enables the pulse shaper of the trigger inputs
-   unsigned int GetTriggerShaperEnable() { return BitExtractControl(WD2_TRIGGER_SHAPER_ENABLE_REG, WD2_TRIGGER_SHAPER_ENABLE_MASK, WD2_TRIGGER_SHAPER_ENABLE_OFS); };
-   void         SetTriggerShaperEnable(unsigned int value) { SetRegMask(WD2_TRIGGER_SHAPER_ENABLE_REG, WD2_TRIGGER_SHAPER_ENABLE_MASK, WD2_TRIGGER_SHAPER_ENABLE_OFS, value); };
+   // 0x00001000: LOCAL_TRIGGER_ENABLE - 1 = use local hardware trigger and external tirgger (synchronized), 0 = use asynchronous external trigger
+   unsigned int GetLocalTriggerEnable() { return BitExtractControl(WD2_LOCAL_TRIGGER_ENABLE_REG, WD2_LOCAL_TRIGGER_ENABLE_MASK, WD2_LOCAL_TRIGGER_ENABLE_OFS); };
+   void         SetLocalTriggerEnable(unsigned int value) { SetRegMask(WD2_LOCAL_TRIGGER_ENABLE_REG, WD2_LOCAL_TRIGGER_ENABLE_MASK, WD2_LOCAL_TRIGGER_ENABLE_OFS, value); };
 
-   // 0x07000000: TRIGGER_OUT_PULSE_LENGTH - Length of the trigger output pulse in cycles
+   // 0x00000700: TRIGGER_OUT_PULSE_LENGTH - Length of the trigger output pulse in cycles
    unsigned int GetTriggerOutPulseLength() { return BitExtractControl(WD2_TRIGGER_OUT_PULSE_LENGTH_REG, WD2_TRIGGER_OUT_PULSE_LENGTH_MASK, WD2_TRIGGER_OUT_PULSE_LENGTH_OFS); };
    void         SetTriggerOutPulseLength(unsigned int value) { SetRegMask(WD2_TRIGGER_OUT_PULSE_LENGTH_REG, WD2_TRIGGER_OUT_PULSE_LENGTH_MASK, WD2_TRIGGER_OUT_PULSE_LENGTH_OFS, value); };
-
-   // 0x00080000: TRIGGER_ENABLE - write a "1" to enable hardware trigger
-   unsigned int GetTriggerEnable() { return BitExtractControl(WD2_TRIGGER_ENABLE_REG, WD2_TRIGGER_ENABLE_MASK, WD2_TRIGGER_ENABLE_OFS); };
-   void         SetTriggerEnable(unsigned int value) { SetRegMask(WD2_TRIGGER_ENABLE_REG, WD2_TRIGGER_ENABLE_MASK, WD2_TRIGGER_ENABLE_OFS, value); };
-
-   // 0x00040000: TRIGGER_FALLING_EDGE - 1=trigger on high to low transition
-   unsigned int GetTriggerFallingEdge() { return BitExtractControl(WD2_TRIGGER_FALLING_EDGE_REG, WD2_TRIGGER_FALLING_EDGE_MASK, WD2_TRIGGER_FALLING_EDGE_OFS); };
-   void         SetTriggerFallingEdge(unsigned int value) { SetRegMask(WD2_TRIGGER_FALLING_EDGE_REG, WD2_TRIGGER_FALLING_EDGE_MASK, WD2_TRIGGER_FALLING_EDGE_OFS, value); };
-
-   // 0x00020000: TRIGGER_CFG_EXT_OR - Trigger Configuration (external or) **)
-   unsigned int GetTriggerCfgExtOr() { return BitExtractControl(WD2_TRIGGER_CFG_EXT_OR_REG, WD2_TRIGGER_CFG_EXT_OR_MASK, WD2_TRIGGER_CFG_EXT_OR_OFS); };
-   void         SetTriggerCfgExtOr(unsigned int value) { SetRegMask(WD2_TRIGGER_CFG_EXT_OR_REG, WD2_TRIGGER_CFG_EXT_OR_MASK, WD2_TRIGGER_CFG_EXT_OR_OFS, value); };
-
-   // 0x00010000: TRIGGER_CFG_EXT_AND - Trigger Configuration (external and) **)
-   unsigned int GetTriggerCfgExtAnd() { return BitExtractControl(WD2_TRIGGER_CFG_EXT_AND_REG, WD2_TRIGGER_CFG_EXT_AND_MASK, WD2_TRIGGER_CFG_EXT_AND_OFS); };
-   void         SetTriggerCfgExtAnd(unsigned int value) { SetRegMask(WD2_TRIGGER_CFG_EXT_AND_REG, WD2_TRIGGER_CFG_EXT_AND_MASK, WD2_TRIGGER_CFG_EXT_AND_OFS, value); };
-
-   // 0x00000100: TRIGGER_DELAY_ENABLE - 1 = delay enabled, 0 = bypass delay
-   unsigned int GetTriggerDelayEnable() { return BitExtractControl(WD2_TRIGGER_DELAY_ENABLE_REG, WD2_TRIGGER_DELAY_ENABLE_MASK, WD2_TRIGGER_DELAY_ENABLE_OFS); };
-   void         SetTriggerDelayEnable(unsigned int value) { SetRegMask(WD2_TRIGGER_DELAY_ENABLE_REG, WD2_TRIGGER_DELAY_ENABLE_MASK, WD2_TRIGGER_DELAY_ENABLE_OFS, value); };
 
    // 0x000000FF: TRIGGER_DELAY - trigger delay in ticks of roughly 2.3 ns
    unsigned int GetTriggerDelay() { return BitExtractControl(WD2_TRIGGER_DELAY_REG, WD2_TRIGGER_DELAY_MASK, WD2_TRIGGER_DELAY_OFS); };
@@ -2051,27 +2027,15 @@ public:
 
 
 
-   ////// ------ Control Register 97 [0x1184]: TRG_COMP_MASK - Trigger Comparator Mask (Default: 0x0000FFFF) ------ //////
+   ////// ------ Control Register 97 [0x1184]: TRG_SRC_POL - Trigger Source Polarity (Default: 0x00000000) ------ //////
 
-   // 0x0000FFFF: TRIGGER_COMP_MASK - Enables (1) or disables (0) the corresponding comparator channel
-   unsigned int GetTriggerCompMask() { return BitExtractControl(WD2_TRIGGER_COMP_MASK_REG, WD2_TRIGGER_COMP_MASK_MASK, WD2_TRIGGER_COMP_MASK_OFS); };
-   void         SetTriggerCompMask(unsigned int value) { SetRegMask(WD2_TRIGGER_COMP_MASK_REG, WD2_TRIGGER_COMP_MASK_MASK, WD2_TRIGGER_COMP_MASK_OFS, value); };
-
-
-
-   ////// ------ Control Register 98 [0x1188]: TRG_CH_CMB - Trigger Channel Logic Combine (Default: 0x00000000) ------ //////
-
-   // 0xFFFF0000: TRIGGER_CFG_OR - Trigger Configuration (logic or) **)
-   unsigned int GetTriggerCfgOr() { return BitExtractControl(WD2_TRIGGER_CFG_OR_REG, WD2_TRIGGER_CFG_OR_MASK, WD2_TRIGGER_CFG_OR_OFS); };
-   void         SetTriggerCfgOr(unsigned int value) { SetRegMask(WD2_TRIGGER_CFG_OR_REG, WD2_TRIGGER_CFG_OR_MASK, WD2_TRIGGER_CFG_OR_OFS, value); };
-
-   // 0x0000FFFF: TRIGGER_CFG_AND - Trigger Configuration (logic and) **)
-   unsigned int GetTriggerCfgAnd() { return BitExtractControl(WD2_TRIGGER_CFG_AND_REG, WD2_TRIGGER_CFG_AND_MASK, WD2_TRIGGER_CFG_AND_OFS); };
-   void         SetTriggerCfgAnd(unsigned int value) { SetRegMask(WD2_TRIGGER_CFG_AND_REG, WD2_TRIGGER_CFG_AND_MASK, WD2_TRIGGER_CFG_AND_OFS, value); };
+   // 0x0007FFFF: TRG_SRC_POLARITY - Polarity of trigger source (0 = normal, 1 = inverted) (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
+   unsigned int GetTrgSrcPolarity() { return BitExtractControl(WD2_TRG_SRC_POLARITY_REG, WD2_TRG_SRC_POLARITY_MASK, WD2_TRG_SRC_POLARITY_OFS); };
+   void         SetTrgSrcPolarity(unsigned int value) { SetRegMask(WD2_TRG_SRC_POLARITY_REG, WD2_TRG_SRC_POLARITY_MASK, WD2_TRG_SRC_POLARITY_OFS, value); };
 
 
 
-   ////// ------ Control Register 99 [0x118C]: TRG_AUTO_PERIOD - Automatic Trigger Period (Default: 0x04C4B400) ------ //////
+   ////// ------ Control Register 98 [0x1188]: TRG_AUTO_PERIOD - Automatic Trigger Period (Default: 0x04C4B400) ------ //////
 
    // 0xFFFFFFFF: AUTO_TRIGGER_PERIOD - Period of automatic trigger in ticks of the DAQ clock
    unsigned int GetAutoTriggerPeriod() { return BitExtractControl(WD2_AUTO_TRIGGER_PERIOD_REG, WD2_AUTO_TRIGGER_PERIOD_MASK, WD2_AUTO_TRIGGER_PERIOD_OFS); };
@@ -2079,167 +2043,319 @@ public:
 
 
 
-   ////// ------ Control Register 100 [0x1190]: TRG_SCH_SEL - Select Trigger Scheme for Corresponding Trigger (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 99 [0x118C]: TRG_PTRN_EN - Enable for trigger patterns (Default: 0x00000000) ------ //////
 
-   // 0x00000003: PATTERN_TRIGGER_SELECT - Select Local Trigger Scheme (0 = simple trigger, 2 = pattern trigger)
-   unsigned int GetPatternTriggerSelect() { return BitExtractControl(WD2_PATTERN_TRIGGER_SELECT_REG, WD2_PATTERN_TRIGGER_SELECT_MASK, WD2_PATTERN_TRIGGER_SELECT_OFS); };
-   void         SetPatternTriggerSelect(unsigned int value) { SetRegMask(WD2_PATTERN_TRIGGER_SELECT_REG, WD2_PATTERN_TRIGGER_SELECT_MASK, WD2_PATTERN_TRIGGER_SELECT_OFS, value); };
+   // 0x0007FFFF: TRG_PTRN_EN - 1 enables the corresponding trigger patterns for the local trigger
+   unsigned int GetTrgPtrnEn() { return BitExtractControl(WD2_TRG_PTRN_EN_REG, WD2_TRG_PTRN_EN_MASK, WD2_TRG_PTRN_EN_OFS); };
+   void         SetTrgPtrnEn(unsigned int value) { SetRegMask(WD2_TRG_PTRN_EN_REG, WD2_TRG_PTRN_EN_MASK, WD2_TRG_PTRN_EN_OFS, value); };
 
 
 
-   ////// ------ Control Register 101 [0x1194]: TRG_PTRN_EN_LOCAL - Enable for trigger patterns (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 100 [0x1190]: TRG_SRC_EN_PTRN0 - Trigger Source Enable Pattern 0 (Default: 0x00000000) ------ //////
 
-   // 0x0003FFFF: TRG_PTRN_EN_LOCAL - 1 enables the corresponding trigger patterns for the local trigger
-   unsigned int GetTrgPtrnEnLocal() { return BitExtractControl(WD2_TRG_PTRN_EN_LOCAL_REG, WD2_TRG_PTRN_EN_LOCAL_MASK, WD2_TRG_PTRN_EN_LOCAL_OFS); };
-   void         SetTrgPtrnEnLocal(unsigned int value) { SetRegMask(WD2_TRG_PTRN_EN_LOCAL_REG, WD2_TRG_PTRN_EN_LOCAL_MASK, WD2_TRG_PTRN_EN_LOCAL_OFS, value); };
+   // 0x0007FFFF: TRG_SRC_EN_PTRN0 - trigger source enables for pattern
+   unsigned int GetTrgSrcEnPtrn0() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN0_REG, WD2_TRG_SRC_EN_PTRN0_MASK, WD2_TRG_SRC_EN_PTRN0_OFS); };
+   void         SetTrgSrcEnPtrn0(unsigned int value) { SetRegMask(WD2_TRG_SRC_EN_PTRN0_REG, WD2_TRG_SRC_EN_PTRN0_MASK, WD2_TRG_SRC_EN_PTRN0_OFS, value); };
 
 
 
-   ////// ------ Control Register 102 [0x1198]: TRG_PTRN0 - Trigger Pattern (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 101 [0x1194]: TRG_STATE_PTRN0 - Trigger State Pattern 0 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: TRG_PTRN0 - 31:16 inhibit trigger bits, 15:0 trigger bits
-   unsigned int GetTrgPtrn0() { return BitExtractControl(WD2_TRG_PTRN0_REG, WD2_TRG_PTRN0_MASK, WD2_TRG_PTRN0_OFS); };
-   void         SetTrgPtrn0(unsigned int value) { SetRegMask(WD2_TRG_PTRN0_REG, WD2_TRG_PTRN0_MASK, WD2_TRG_PTRN0_OFS, value); };
+   // 0x0007FFFF: TRG_STATE_PTRN0 - trigger source state pattern
+   unsigned int GetTrgStatePtrn0() { return BitExtractControl(WD2_TRG_STATE_PTRN0_REG, WD2_TRG_STATE_PTRN0_MASK, WD2_TRG_STATE_PTRN0_OFS); };
+   void         SetTrgStatePtrn0(unsigned int value) { SetRegMask(WD2_TRG_STATE_PTRN0_REG, WD2_TRG_STATE_PTRN0_MASK, WD2_TRG_STATE_PTRN0_OFS, value); };
 
 
 
-   ////// ------ Control Register 103 [0x119C]: TRG_PTRN1 - Trigger Pattern (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 102 [0x1198]: TRG_SRC_EN_PTRN1 - Trigger Source Enable Pattern 1 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: TRG_PTRN1 - 31:16 inhibit trigger bits, 15:0 trigger bits
-   unsigned int GetTrgPtrn1() { return BitExtractControl(WD2_TRG_PTRN1_REG, WD2_TRG_PTRN1_MASK, WD2_TRG_PTRN1_OFS); };
-   void         SetTrgPtrn1(unsigned int value) { SetRegMask(WD2_TRG_PTRN1_REG, WD2_TRG_PTRN1_MASK, WD2_TRG_PTRN1_OFS, value); };
+   // 0x0007FFFF: TRG_SRC_EN_PTRN1 - trigger source enables for pattern
+   unsigned int GetTrgSrcEnPtrn1() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN1_REG, WD2_TRG_SRC_EN_PTRN1_MASK, WD2_TRG_SRC_EN_PTRN1_OFS); };
+   void         SetTrgSrcEnPtrn1(unsigned int value) { SetRegMask(WD2_TRG_SRC_EN_PTRN1_REG, WD2_TRG_SRC_EN_PTRN1_MASK, WD2_TRG_SRC_EN_PTRN1_OFS, value); };
 
 
 
-   ////// ------ Control Register 104 [0x11A0]: TRG_PTRN2 - Trigger Pattern (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 103 [0x119C]: TRG_STATE_PTRN1 - Trigger State Pattern 1 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: TRG_PTRN2 - 31:16 inhibit trigger bits, 15:0 trigger bits
-   unsigned int GetTrgPtrn2() { return BitExtractControl(WD2_TRG_PTRN2_REG, WD2_TRG_PTRN2_MASK, WD2_TRG_PTRN2_OFS); };
-   void         SetTrgPtrn2(unsigned int value) { SetRegMask(WD2_TRG_PTRN2_REG, WD2_TRG_PTRN2_MASK, WD2_TRG_PTRN2_OFS, value); };
+   // 0x0007FFFF: TRG_STATE_PTRN1 - trigger source state pattern
+   unsigned int GetTrgStatePtrn1() { return BitExtractControl(WD2_TRG_STATE_PTRN1_REG, WD2_TRG_STATE_PTRN1_MASK, WD2_TRG_STATE_PTRN1_OFS); };
+   void         SetTrgStatePtrn1(unsigned int value) { SetRegMask(WD2_TRG_STATE_PTRN1_REG, WD2_TRG_STATE_PTRN1_MASK, WD2_TRG_STATE_PTRN1_OFS, value); };
 
 
 
-   ////// ------ Control Register 105 [0x11A4]: TRG_PTRN3 - Trigger Pattern (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 104 [0x11A0]: TRG_SRC_EN_PTRN2 - Trigger Source Enable Pattern 2 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: TRG_PTRN3 - 31:16 inhibit trigger bits, 15:0 trigger bits
-   unsigned int GetTrgPtrn3() { return BitExtractControl(WD2_TRG_PTRN3_REG, WD2_TRG_PTRN3_MASK, WD2_TRG_PTRN3_OFS); };
-   void         SetTrgPtrn3(unsigned int value) { SetRegMask(WD2_TRG_PTRN3_REG, WD2_TRG_PTRN3_MASK, WD2_TRG_PTRN3_OFS, value); };
+   // 0x0007FFFF: TRG_SRC_EN_PTRN2 - trigger source enables for pattern
+   unsigned int GetTrgSrcEnPtrn2() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN2_REG, WD2_TRG_SRC_EN_PTRN2_MASK, WD2_TRG_SRC_EN_PTRN2_OFS); };
+   void         SetTrgSrcEnPtrn2(unsigned int value) { SetRegMask(WD2_TRG_SRC_EN_PTRN2_REG, WD2_TRG_SRC_EN_PTRN2_MASK, WD2_TRG_SRC_EN_PTRN2_OFS, value); };
 
 
 
-   ////// ------ Control Register 106 [0x11A8]: TRG_PTRN4 - Trigger Pattern (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 105 [0x11A4]: TRG_STATE_PTRN2 - Trigger State Pattern 2 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: TRG_PTRN4 - 31:16 inhibit trigger bits, 15:0 trigger bits
-   unsigned int GetTrgPtrn4() { return BitExtractControl(WD2_TRG_PTRN4_REG, WD2_TRG_PTRN4_MASK, WD2_TRG_PTRN4_OFS); };
-   void         SetTrgPtrn4(unsigned int value) { SetRegMask(WD2_TRG_PTRN4_REG, WD2_TRG_PTRN4_MASK, WD2_TRG_PTRN4_OFS, value); };
+   // 0x0007FFFF: TRG_STATE_PTRN2 - trigger source state pattern
+   unsigned int GetTrgStatePtrn2() { return BitExtractControl(WD2_TRG_STATE_PTRN2_REG, WD2_TRG_STATE_PTRN2_MASK, WD2_TRG_STATE_PTRN2_OFS); };
+   void         SetTrgStatePtrn2(unsigned int value) { SetRegMask(WD2_TRG_STATE_PTRN2_REG, WD2_TRG_STATE_PTRN2_MASK, WD2_TRG_STATE_PTRN2_OFS, value); };
 
 
 
-   ////// ------ Control Register 107 [0x11AC]: TRG_PTRN5 - Trigger Pattern (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 106 [0x11A8]: TRG_SRC_EN_PTRN3 - Trigger Source Enable Pattern 3 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: TRG_PTRN5 - 31:16 inhibit trigger bits, 15:0 trigger bits
-   unsigned int GetTrgPtrn5() { return BitExtractControl(WD2_TRG_PTRN5_REG, WD2_TRG_PTRN5_MASK, WD2_TRG_PTRN5_OFS); };
-   void         SetTrgPtrn5(unsigned int value) { SetRegMask(WD2_TRG_PTRN5_REG, WD2_TRG_PTRN5_MASK, WD2_TRG_PTRN5_OFS, value); };
+   // 0x0007FFFF: TRG_SRC_EN_PTRN3 - trigger source enables for pattern
+   unsigned int GetTrgSrcEnPtrn3() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN3_REG, WD2_TRG_SRC_EN_PTRN3_MASK, WD2_TRG_SRC_EN_PTRN3_OFS); };
+   void         SetTrgSrcEnPtrn3(unsigned int value) { SetRegMask(WD2_TRG_SRC_EN_PTRN3_REG, WD2_TRG_SRC_EN_PTRN3_MASK, WD2_TRG_SRC_EN_PTRN3_OFS, value); };
 
 
 
-   ////// ------ Control Register 108 [0x11B0]: TRG_PTRN6 - Trigger Pattern (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 107 [0x11AC]: TRG_STATE_PTRN3 - Trigger State Pattern 3 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: TRG_PTRN6 - 31:16 inhibit trigger bits, 15:0 trigger bits
-   unsigned int GetTrgPtrn6() { return BitExtractControl(WD2_TRG_PTRN6_REG, WD2_TRG_PTRN6_MASK, WD2_TRG_PTRN6_OFS); };
-   void         SetTrgPtrn6(unsigned int value) { SetRegMask(WD2_TRG_PTRN6_REG, WD2_TRG_PTRN6_MASK, WD2_TRG_PTRN6_OFS, value); };
+   // 0x0007FFFF: TRG_STATE_PTRN3 - trigger source state pattern
+   unsigned int GetTrgStatePtrn3() { return BitExtractControl(WD2_TRG_STATE_PTRN3_REG, WD2_TRG_STATE_PTRN3_MASK, WD2_TRG_STATE_PTRN3_OFS); };
+   void         SetTrgStatePtrn3(unsigned int value) { SetRegMask(WD2_TRG_STATE_PTRN3_REG, WD2_TRG_STATE_PTRN3_MASK, WD2_TRG_STATE_PTRN3_OFS, value); };
 
 
 
-   ////// ------ Control Register 109 [0x11B4]: TRG_PTRN7 - Trigger Pattern (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 108 [0x11B0]: TRG_SRC_EN_PTRN4 - Trigger Source Enable Pattern 4 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: TRG_PTRN7 - 31:16 inhibit trigger bits, 15:0 trigger bits
-   unsigned int GetTrgPtrn7() { return BitExtractControl(WD2_TRG_PTRN7_REG, WD2_TRG_PTRN7_MASK, WD2_TRG_PTRN7_OFS); };
-   void         SetTrgPtrn7(unsigned int value) { SetRegMask(WD2_TRG_PTRN7_REG, WD2_TRG_PTRN7_MASK, WD2_TRG_PTRN7_OFS, value); };
+   // 0x0007FFFF: TRG_SRC_EN_PTRN4 - trigger source enables for pattern
+   unsigned int GetTrgSrcEnPtrn4() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN4_REG, WD2_TRG_SRC_EN_PTRN4_MASK, WD2_TRG_SRC_EN_PTRN4_OFS); };
+   void         SetTrgSrcEnPtrn4(unsigned int value) { SetRegMask(WD2_TRG_SRC_EN_PTRN4_REG, WD2_TRG_SRC_EN_PTRN4_MASK, WD2_TRG_SRC_EN_PTRN4_OFS, value); };
 
 
 
-   ////// ------ Control Register 110 [0x11B8]: TRG_PTRN8 - Trigger Pattern (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 109 [0x11B4]: TRG_STATE_PTRN4 - Trigger State Pattern 4 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: TRG_PTRN8 - 31:16 inhibit trigger bits, 15:0 trigger bits
-   unsigned int GetTrgPtrn8() { return BitExtractControl(WD2_TRG_PTRN8_REG, WD2_TRG_PTRN8_MASK, WD2_TRG_PTRN8_OFS); };
-   void         SetTrgPtrn8(unsigned int value) { SetRegMask(WD2_TRG_PTRN8_REG, WD2_TRG_PTRN8_MASK, WD2_TRG_PTRN8_OFS, value); };
+   // 0x0007FFFF: TRG_STATE_PTRN4 - trigger source state pattern
+   unsigned int GetTrgStatePtrn4() { return BitExtractControl(WD2_TRG_STATE_PTRN4_REG, WD2_TRG_STATE_PTRN4_MASK, WD2_TRG_STATE_PTRN4_OFS); };
+   void         SetTrgStatePtrn4(unsigned int value) { SetRegMask(WD2_TRG_STATE_PTRN4_REG, WD2_TRG_STATE_PTRN4_MASK, WD2_TRG_STATE_PTRN4_OFS, value); };
 
 
 
-   ////// ------ Control Register 111 [0x11BC]: TRG_PTRN9 - Trigger Pattern (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 110 [0x11B8]: TRG_SRC_EN_PTRN5 - Trigger Source Enable Pattern 5 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: TRG_PTRN9 - 31:16 inhibit trigger bits, 15:0 trigger bits
-   unsigned int GetTrgPtrn9() { return BitExtractControl(WD2_TRG_PTRN9_REG, WD2_TRG_PTRN9_MASK, WD2_TRG_PTRN9_OFS); };
-   void         SetTrgPtrn9(unsigned int value) { SetRegMask(WD2_TRG_PTRN9_REG, WD2_TRG_PTRN9_MASK, WD2_TRG_PTRN9_OFS, value); };
+   // 0x0007FFFF: TRG_SRC_EN_PTRN5 - trigger source enables for pattern
+   unsigned int GetTrgSrcEnPtrn5() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN5_REG, WD2_TRG_SRC_EN_PTRN5_MASK, WD2_TRG_SRC_EN_PTRN5_OFS); };
+   void         SetTrgSrcEnPtrn5(unsigned int value) { SetRegMask(WD2_TRG_SRC_EN_PTRN5_REG, WD2_TRG_SRC_EN_PTRN5_MASK, WD2_TRG_SRC_EN_PTRN5_OFS, value); };
 
 
 
-   ////// ------ Control Register 112 [0x11C0]: TRG_PTRN10 - Trigger Pattern (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 111 [0x11BC]: TRG_STATE_PTRN5 - Trigger State Pattern 5 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: TRG_PTRN10 - 31:16 inhibit trigger bits, 15:0 trigger bits
-   unsigned int GetTrgPtrn10() { return BitExtractControl(WD2_TRG_PTRN10_REG, WD2_TRG_PTRN10_MASK, WD2_TRG_PTRN10_OFS); };
-   void         SetTrgPtrn10(unsigned int value) { SetRegMask(WD2_TRG_PTRN10_REG, WD2_TRG_PTRN10_MASK, WD2_TRG_PTRN10_OFS, value); };
+   // 0x0007FFFF: TRG_STATE_PTRN5 - trigger source state pattern
+   unsigned int GetTrgStatePtrn5() { return BitExtractControl(WD2_TRG_STATE_PTRN5_REG, WD2_TRG_STATE_PTRN5_MASK, WD2_TRG_STATE_PTRN5_OFS); };
+   void         SetTrgStatePtrn5(unsigned int value) { SetRegMask(WD2_TRG_STATE_PTRN5_REG, WD2_TRG_STATE_PTRN5_MASK, WD2_TRG_STATE_PTRN5_OFS, value); };
 
 
 
-   ////// ------ Control Register 113 [0x11C4]: TRG_PTRN11 - Trigger Pattern (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 112 [0x11C0]: TRG_SRC_EN_PTRN6 - Trigger Source Enable Pattern 6 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: TRG_PTRN11 - 31:16 inhibit trigger bits, 15:0 trigger bits
-   unsigned int GetTrgPtrn11() { return BitExtractControl(WD2_TRG_PTRN11_REG, WD2_TRG_PTRN11_MASK, WD2_TRG_PTRN11_OFS); };
-   void         SetTrgPtrn11(unsigned int value) { SetRegMask(WD2_TRG_PTRN11_REG, WD2_TRG_PTRN11_MASK, WD2_TRG_PTRN11_OFS, value); };
+   // 0x0007FFFF: TRG_SRC_EN_PTRN6 - trigger source enables for pattern
+   unsigned int GetTrgSrcEnPtrn6() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN6_REG, WD2_TRG_SRC_EN_PTRN6_MASK, WD2_TRG_SRC_EN_PTRN6_OFS); };
+   void         SetTrgSrcEnPtrn6(unsigned int value) { SetRegMask(WD2_TRG_SRC_EN_PTRN6_REG, WD2_TRG_SRC_EN_PTRN6_MASK, WD2_TRG_SRC_EN_PTRN6_OFS, value); };
 
 
 
-   ////// ------ Control Register 114 [0x11C8]: TRG_PTRN12 - Trigger Pattern (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 113 [0x11C4]: TRG_STATE_PTRN6 - Trigger State Pattern 6 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: TRG_PTRN12 - 31:16 inhibit trigger bits, 15:0 trigger bits
-   unsigned int GetTrgPtrn12() { return BitExtractControl(WD2_TRG_PTRN12_REG, WD2_TRG_PTRN12_MASK, WD2_TRG_PTRN12_OFS); };
-   void         SetTrgPtrn12(unsigned int value) { SetRegMask(WD2_TRG_PTRN12_REG, WD2_TRG_PTRN12_MASK, WD2_TRG_PTRN12_OFS, value); };
+   // 0x0007FFFF: TRG_STATE_PTRN6 - trigger source state pattern
+   unsigned int GetTrgStatePtrn6() { return BitExtractControl(WD2_TRG_STATE_PTRN6_REG, WD2_TRG_STATE_PTRN6_MASK, WD2_TRG_STATE_PTRN6_OFS); };
+   void         SetTrgStatePtrn6(unsigned int value) { SetRegMask(WD2_TRG_STATE_PTRN6_REG, WD2_TRG_STATE_PTRN6_MASK, WD2_TRG_STATE_PTRN6_OFS, value); };
 
 
 
-   ////// ------ Control Register 115 [0x11CC]: TRG_PTRN13 - Trigger Pattern (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 114 [0x11C8]: TRG_SRC_EN_PTRN7 - Trigger Source Enable Pattern 7 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: TRG_PTRN13 - 31:16 inhibit trigger bits, 15:0 trigger bits
-   unsigned int GetTrgPtrn13() { return BitExtractControl(WD2_TRG_PTRN13_REG, WD2_TRG_PTRN13_MASK, WD2_TRG_PTRN13_OFS); };
-   void         SetTrgPtrn13(unsigned int value) { SetRegMask(WD2_TRG_PTRN13_REG, WD2_TRG_PTRN13_MASK, WD2_TRG_PTRN13_OFS, value); };
+   // 0x0007FFFF: TRG_SRC_EN_PTRN7 - trigger source enables for pattern
+   unsigned int GetTrgSrcEnPtrn7() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN7_REG, WD2_TRG_SRC_EN_PTRN7_MASK, WD2_TRG_SRC_EN_PTRN7_OFS); };
+   void         SetTrgSrcEnPtrn7(unsigned int value) { SetRegMask(WD2_TRG_SRC_EN_PTRN7_REG, WD2_TRG_SRC_EN_PTRN7_MASK, WD2_TRG_SRC_EN_PTRN7_OFS, value); };
 
 
 
-   ////// ------ Control Register 116 [0x11D0]: TRG_PTRN14 - Trigger Pattern (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 115 [0x11CC]: TRG_STATE_PTRN7 - Trigger State Pattern 7 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: TRG_PTRN14 - 31:16 inhibit trigger bits, 15:0 trigger bits
-   unsigned int GetTrgPtrn14() { return BitExtractControl(WD2_TRG_PTRN14_REG, WD2_TRG_PTRN14_MASK, WD2_TRG_PTRN14_OFS); };
-   void         SetTrgPtrn14(unsigned int value) { SetRegMask(WD2_TRG_PTRN14_REG, WD2_TRG_PTRN14_MASK, WD2_TRG_PTRN14_OFS, value); };
+   // 0x0007FFFF: TRG_STATE_PTRN7 - trigger source state pattern
+   unsigned int GetTrgStatePtrn7() { return BitExtractControl(WD2_TRG_STATE_PTRN7_REG, WD2_TRG_STATE_PTRN7_MASK, WD2_TRG_STATE_PTRN7_OFS); };
+   void         SetTrgStatePtrn7(unsigned int value) { SetRegMask(WD2_TRG_STATE_PTRN7_REG, WD2_TRG_STATE_PTRN7_MASK, WD2_TRG_STATE_PTRN7_OFS, value); };
 
 
 
-   ////// ------ Control Register 117 [0x11D4]: TRG_PTRN15 - Trigger Pattern (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 116 [0x11D0]: TRG_SRC_EN_PTRN8 - Trigger Source Enable Pattern 8 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: TRG_PTRN15 - 31:16 inhibit trigger bits, 15:0 trigger bits
-   unsigned int GetTrgPtrn15() { return BitExtractControl(WD2_TRG_PTRN15_REG, WD2_TRG_PTRN15_MASK, WD2_TRG_PTRN15_OFS); };
-   void         SetTrgPtrn15(unsigned int value) { SetRegMask(WD2_TRG_PTRN15_REG, WD2_TRG_PTRN15_MASK, WD2_TRG_PTRN15_OFS, value); };
+   // 0x0007FFFF: TRG_SRC_EN_PTRN8 - trigger source enables for pattern
+   unsigned int GetTrgSrcEnPtrn8() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN8_REG, WD2_TRG_SRC_EN_PTRN8_MASK, WD2_TRG_SRC_EN_PTRN8_OFS); };
+   void         SetTrgSrcEnPtrn8(unsigned int value) { SetRegMask(WD2_TRG_SRC_EN_PTRN8_REG, WD2_TRG_SRC_EN_PTRN8_MASK, WD2_TRG_SRC_EN_PTRN8_OFS, value); };
 
 
 
-   ////// ------ Control Register 118 [0x11D8]: TRG_PTRN16 - Trigger Pattern (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 117 [0x11D4]: TRG_STATE_PTRN8 - Trigger State Pattern 8 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: TRG_PTRN16 - 31:16 inhibit trigger bits, 15:0 trigger bits
-   unsigned int GetTrgPtrn16() { return BitExtractControl(WD2_TRG_PTRN16_REG, WD2_TRG_PTRN16_MASK, WD2_TRG_PTRN16_OFS); };
-   void         SetTrgPtrn16(unsigned int value) { SetRegMask(WD2_TRG_PTRN16_REG, WD2_TRG_PTRN16_MASK, WD2_TRG_PTRN16_OFS, value); };
+   // 0x0007FFFF: TRG_STATE_PTRN8 - trigger source state pattern
+   unsigned int GetTrgStatePtrn8() { return BitExtractControl(WD2_TRG_STATE_PTRN8_REG, WD2_TRG_STATE_PTRN8_MASK, WD2_TRG_STATE_PTRN8_OFS); };
+   void         SetTrgStatePtrn8(unsigned int value) { SetRegMask(WD2_TRG_STATE_PTRN8_REG, WD2_TRG_STATE_PTRN8_MASK, WD2_TRG_STATE_PTRN8_OFS, value); };
 
 
 
-   ////// ------ Control Register 119 [0x11DC]: TRG_PTRN17 - Trigger Pattern (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 118 [0x11D8]: TRG_SRC_EN_PTRN9 - Trigger Source Enable Pattern 9 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: TRG_PTRN17 - 31:16 inhibit trigger bits, 15:0 trigger bits
-   unsigned int GetTrgPtrn17() { return BitExtractControl(WD2_TRG_PTRN17_REG, WD2_TRG_PTRN17_MASK, WD2_TRG_PTRN17_OFS); };
-   void         SetTrgPtrn17(unsigned int value) { SetRegMask(WD2_TRG_PTRN17_REG, WD2_TRG_PTRN17_MASK, WD2_TRG_PTRN17_OFS, value); };
+   // 0x0007FFFF: TRG_SRC_EN_PTRN9 - trigger source enables for pattern
+   unsigned int GetTrgSrcEnPtrn9() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN9_REG, WD2_TRG_SRC_EN_PTRN9_MASK, WD2_TRG_SRC_EN_PTRN9_OFS); };
+   void         SetTrgSrcEnPtrn9(unsigned int value) { SetRegMask(WD2_TRG_SRC_EN_PTRN9_REG, WD2_TRG_SRC_EN_PTRN9_MASK, WD2_TRG_SRC_EN_PTRN9_OFS, value); };
 
 
 
-   ////// ------ Control Register 120 [0x11E0]: ADV_TRG_CTRL - Advanced Trigger Control Register (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 119 [0x11DC]: TRG_STATE_PTRN9 - Trigger State Pattern 9 (Default: 0x00000000) ------ //////
+
+   // 0x0007FFFF: TRG_STATE_PTRN9 - trigger source state pattern
+   unsigned int GetTrgStatePtrn9() { return BitExtractControl(WD2_TRG_STATE_PTRN9_REG, WD2_TRG_STATE_PTRN9_MASK, WD2_TRG_STATE_PTRN9_OFS); };
+   void         SetTrgStatePtrn9(unsigned int value) { SetRegMask(WD2_TRG_STATE_PTRN9_REG, WD2_TRG_STATE_PTRN9_MASK, WD2_TRG_STATE_PTRN9_OFS, value); };
+
+
+
+   ////// ------ Control Register 120 [0x11E0]: TRG_SRC_EN_PTRN10 - Trigger Source Enable Pattern 10 (Default: 0x00000000) ------ //////
+
+   // 0x0007FFFF: TRG_SRC_EN_PTRN10 - trigger source enables for pattern
+   unsigned int GetTrgSrcEnPtrn10() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN10_REG, WD2_TRG_SRC_EN_PTRN10_MASK, WD2_TRG_SRC_EN_PTRN10_OFS); };
+   void         SetTrgSrcEnPtrn10(unsigned int value) { SetRegMask(WD2_TRG_SRC_EN_PTRN10_REG, WD2_TRG_SRC_EN_PTRN10_MASK, WD2_TRG_SRC_EN_PTRN10_OFS, value); };
+
+
+
+   ////// ------ Control Register 121 [0x11E4]: TRG_STATE_PTRN10 - Trigger State Pattern 10 (Default: 0x00000000) ------ //////
+
+   // 0x0007FFFF: TRG_STATE_PTRN10 - trigger source state pattern
+   unsigned int GetTrgStatePtrn10() { return BitExtractControl(WD2_TRG_STATE_PTRN10_REG, WD2_TRG_STATE_PTRN10_MASK, WD2_TRG_STATE_PTRN10_OFS); };
+   void         SetTrgStatePtrn10(unsigned int value) { SetRegMask(WD2_TRG_STATE_PTRN10_REG, WD2_TRG_STATE_PTRN10_MASK, WD2_TRG_STATE_PTRN10_OFS, value); };
+
+
+
+   ////// ------ Control Register 122 [0x11E8]: TRG_SRC_EN_PTRN11 - Trigger Source Enable Pattern 11 (Default: 0x00000000) ------ //////
+
+   // 0x0007FFFF: TRG_SRC_EN_PTRN11 - trigger source enables for pattern
+   unsigned int GetTrgSrcEnPtrn11() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN11_REG, WD2_TRG_SRC_EN_PTRN11_MASK, WD2_TRG_SRC_EN_PTRN11_OFS); };
+   void         SetTrgSrcEnPtrn11(unsigned int value) { SetRegMask(WD2_TRG_SRC_EN_PTRN11_REG, WD2_TRG_SRC_EN_PTRN11_MASK, WD2_TRG_SRC_EN_PTRN11_OFS, value); };
+
+
+
+   ////// ------ Control Register 123 [0x11EC]: TRG_STATE_PTRN11 - Trigger State Pattern 11 (Default: 0x00000000) ------ //////
+
+   // 0x0007FFFF: TRG_STATE_PTRN11 - trigger source state pattern
+   unsigned int GetTrgStatePtrn11() { return BitExtractControl(WD2_TRG_STATE_PTRN11_REG, WD2_TRG_STATE_PTRN11_MASK, WD2_TRG_STATE_PTRN11_OFS); };
+   void         SetTrgStatePtrn11(unsigned int value) { SetRegMask(WD2_TRG_STATE_PTRN11_REG, WD2_TRG_STATE_PTRN11_MASK, WD2_TRG_STATE_PTRN11_OFS, value); };
+
+
+
+   ////// ------ Control Register 124 [0x11F0]: TRG_SRC_EN_PTRN12 - Trigger Source Enable Pattern 12 (Default: 0x00000000) ------ //////
+
+   // 0x0007FFFF: TRG_SRC_EN_PTRN12 - trigger source enables for pattern
+   unsigned int GetTrgSrcEnPtrn12() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN12_REG, WD2_TRG_SRC_EN_PTRN12_MASK, WD2_TRG_SRC_EN_PTRN12_OFS); };
+   void         SetTrgSrcEnPtrn12(unsigned int value) { SetRegMask(WD2_TRG_SRC_EN_PTRN12_REG, WD2_TRG_SRC_EN_PTRN12_MASK, WD2_TRG_SRC_EN_PTRN12_OFS, value); };
+
+
+
+   ////// ------ Control Register 125 [0x11F4]: TRG_STATE_PTRN12 - Trigger State Pattern 12 (Default: 0x00000000) ------ //////
+
+   // 0x0007FFFF: TRG_STATE_PTRN12 - trigger source state pattern
+   unsigned int GetTrgStatePtrn12() { return BitExtractControl(WD2_TRG_STATE_PTRN12_REG, WD2_TRG_STATE_PTRN12_MASK, WD2_TRG_STATE_PTRN12_OFS); };
+   void         SetTrgStatePtrn12(unsigned int value) { SetRegMask(WD2_TRG_STATE_PTRN12_REG, WD2_TRG_STATE_PTRN12_MASK, WD2_TRG_STATE_PTRN12_OFS, value); };
+
+
+
+   ////// ------ Control Register 126 [0x11F8]: TRG_SRC_EN_PTRN13 - Trigger Source Enable Pattern 13 (Default: 0x00000000) ------ //////
+
+   // 0x0007FFFF: TRG_SRC_EN_PTRN13 - trigger source enables for pattern
+   unsigned int GetTrgSrcEnPtrn13() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN13_REG, WD2_TRG_SRC_EN_PTRN13_MASK, WD2_TRG_SRC_EN_PTRN13_OFS); };
+   void         SetTrgSrcEnPtrn13(unsigned int value) { SetRegMask(WD2_TRG_SRC_EN_PTRN13_REG, WD2_TRG_SRC_EN_PTRN13_MASK, WD2_TRG_SRC_EN_PTRN13_OFS, value); };
+
+
+
+   ////// ------ Control Register 127 [0x11FC]: TRG_STATE_PTRN13 - Trigger State Pattern 13 (Default: 0x00000000) ------ //////
+
+   // 0x0007FFFF: TRG_STATE_PTRN13 - trigger source state pattern
+   unsigned int GetTrgStatePtrn13() { return BitExtractControl(WD2_TRG_STATE_PTRN13_REG, WD2_TRG_STATE_PTRN13_MASK, WD2_TRG_STATE_PTRN13_OFS); };
+   void         SetTrgStatePtrn13(unsigned int value) { SetRegMask(WD2_TRG_STATE_PTRN13_REG, WD2_TRG_STATE_PTRN13_MASK, WD2_TRG_STATE_PTRN13_OFS, value); };
+
+
+
+   ////// ------ Control Register 128 [0x1200]: TRG_SRC_EN_PTRN14 - Trigger Source Enable Pattern 14 (Default: 0x00000000) ------ //////
+
+   // 0x0007FFFF: TRG_SRC_EN_PTRN14 - trigger source enables for pattern
+   unsigned int GetTrgSrcEnPtrn14() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN14_REG, WD2_TRG_SRC_EN_PTRN14_MASK, WD2_TRG_SRC_EN_PTRN14_OFS); };
+   void         SetTrgSrcEnPtrn14(unsigned int value) { SetRegMask(WD2_TRG_SRC_EN_PTRN14_REG, WD2_TRG_SRC_EN_PTRN14_MASK, WD2_TRG_SRC_EN_PTRN14_OFS, value); };
+
+
+
+   ////// ------ Control Register 129 [0x1204]: TRG_STATE_PTRN14 - Trigger State Pattern 14 (Default: 0x00000000) ------ //////
+
+   // 0x0007FFFF: TRG_STATE_PTRN14 - trigger source state pattern
+   unsigned int GetTrgStatePtrn14() { return BitExtractControl(WD2_TRG_STATE_PTRN14_REG, WD2_TRG_STATE_PTRN14_MASK, WD2_TRG_STATE_PTRN14_OFS); };
+   void         SetTrgStatePtrn14(unsigned int value) { SetRegMask(WD2_TRG_STATE_PTRN14_REG, WD2_TRG_STATE_PTRN14_MASK, WD2_TRG_STATE_PTRN14_OFS, value); };
+
+
+
+   ////// ------ Control Register 130 [0x1208]: TRG_SRC_EN_PTRN15 - Trigger Source Enable Pattern 15 (Default: 0x00000000) ------ //////
+
+   // 0x0007FFFF: TRG_SRC_EN_PTRN15 - trigger source enables for pattern
+   unsigned int GetTrgSrcEnPtrn15() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN15_REG, WD2_TRG_SRC_EN_PTRN15_MASK, WD2_TRG_SRC_EN_PTRN15_OFS); };
+   void         SetTrgSrcEnPtrn15(unsigned int value) { SetRegMask(WD2_TRG_SRC_EN_PTRN15_REG, WD2_TRG_SRC_EN_PTRN15_MASK, WD2_TRG_SRC_EN_PTRN15_OFS, value); };
+
+
+
+   ////// ------ Control Register 131 [0x120C]: TRG_STATE_PTRN15 - Trigger State Pattern 15 (Default: 0x00000000) ------ //////
+
+   // 0x0007FFFF: TRG_STATE_PTRN15 - trigger source state pattern
+   unsigned int GetTrgStatePtrn15() { return BitExtractControl(WD2_TRG_STATE_PTRN15_REG, WD2_TRG_STATE_PTRN15_MASK, WD2_TRG_STATE_PTRN15_OFS); };
+   void         SetTrgStatePtrn15(unsigned int value) { SetRegMask(WD2_TRG_STATE_PTRN15_REG, WD2_TRG_STATE_PTRN15_MASK, WD2_TRG_STATE_PTRN15_OFS, value); };
+
+
+
+   ////// ------ Control Register 132 [0x1210]: TRG_SRC_EN_PTRN16 - Trigger Source Enable Pattern 16 (Default: 0x00000000) ------ //////
+
+   // 0x0007FFFF: TRG_SRC_EN_PTRN16 - trigger source enables for pattern
+   unsigned int GetTrgSrcEnPtrn16() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN16_REG, WD2_TRG_SRC_EN_PTRN16_MASK, WD2_TRG_SRC_EN_PTRN16_OFS); };
+   void         SetTrgSrcEnPtrn16(unsigned int value) { SetRegMask(WD2_TRG_SRC_EN_PTRN16_REG, WD2_TRG_SRC_EN_PTRN16_MASK, WD2_TRG_SRC_EN_PTRN16_OFS, value); };
+
+
+
+   ////// ------ Control Register 133 [0x1214]: TRG_STATE_PTRN16 - Trigger State Pattern 16 (Default: 0x00000000) ------ //////
+
+   // 0x0007FFFF: TRG_STATE_PTRN16 - trigger source state pattern
+   unsigned int GetTrgStatePtrn16() { return BitExtractControl(WD2_TRG_STATE_PTRN16_REG, WD2_TRG_STATE_PTRN16_MASK, WD2_TRG_STATE_PTRN16_OFS); };
+   void         SetTrgStatePtrn16(unsigned int value) { SetRegMask(WD2_TRG_STATE_PTRN16_REG, WD2_TRG_STATE_PTRN16_MASK, WD2_TRG_STATE_PTRN16_OFS, value); };
+
+
+
+   ////// ------ Control Register 134 [0x1218]: TRG_SRC_EN_PTRN17 - Trigger Source Enable Pattern 17 (Default: 0x00000000) ------ //////
+
+   // 0x0007FFFF: TRG_SRC_EN_PTRN17 - trigger source enables for pattern
+   unsigned int GetTrgSrcEnPtrn17() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN17_REG, WD2_TRG_SRC_EN_PTRN17_MASK, WD2_TRG_SRC_EN_PTRN17_OFS); };
+   void         SetTrgSrcEnPtrn17(unsigned int value) { SetRegMask(WD2_TRG_SRC_EN_PTRN17_REG, WD2_TRG_SRC_EN_PTRN17_MASK, WD2_TRG_SRC_EN_PTRN17_OFS, value); };
+
+
+
+   ////// ------ Control Register 135 [0x121C]: TRG_STATE_PTRN17 - Trigger State Pattern 17 (Default: 0x00000000) ------ //////
+
+   // 0x0007FFFF: TRG_STATE_PTRN17 - trigger source state pattern
+   unsigned int GetTrgStatePtrn17() { return BitExtractControl(WD2_TRG_STATE_PTRN17_REG, WD2_TRG_STATE_PTRN17_MASK, WD2_TRG_STATE_PTRN17_OFS); };
+   void         SetTrgStatePtrn17(unsigned int value) { SetRegMask(WD2_TRG_STATE_PTRN17_REG, WD2_TRG_STATE_PTRN17_MASK, WD2_TRG_STATE_PTRN17_OFS, value); };
+
+
+
+   ////// ------ Control Register 136 [0x1220]: TRG_SRC_EN_PTRN18 - Trigger Source Enable Pattern 18 (Default: 0x00000000) ------ //////
+
+   // 0x0007FFFF: TRG_SRC_EN_PTRN18 - trigger source enables for pattern
+   unsigned int GetTrgSrcEnPtrn18() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN18_REG, WD2_TRG_SRC_EN_PTRN18_MASK, WD2_TRG_SRC_EN_PTRN18_OFS); };
+   void         SetTrgSrcEnPtrn18(unsigned int value) { SetRegMask(WD2_TRG_SRC_EN_PTRN18_REG, WD2_TRG_SRC_EN_PTRN18_MASK, WD2_TRG_SRC_EN_PTRN18_OFS, value); };
+
+
+
+   ////// ------ Control Register 137 [0x1224]: TRG_STATE_PTRN18 - Trigger State Pattern 18 (Default: 0x00000000) ------ //////
+
+   // 0x0007FFFF: TRG_STATE_PTRN18 - trigger source state pattern
+   unsigned int GetTrgStatePtrn18() { return BitExtractControl(WD2_TRG_STATE_PTRN18_REG, WD2_TRG_STATE_PTRN18_MASK, WD2_TRG_STATE_PTRN18_OFS); };
+   void         SetTrgStatePtrn18(unsigned int value) { SetRegMask(WD2_TRG_STATE_PTRN18_REG, WD2_TRG_STATE_PTRN18_MASK, WD2_TRG_STATE_PTRN18_OFS, value); };
+
+
+
+   ////// ------ Control Register 138 [0x1228]: ADV_TRG_CTRL - Advanced Trigger Control Register (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CTRL - Advanced trigger control register
    unsigned int GetAdvTrgCtrl() { return BitExtractControl(WD2_ADV_TRG_CTRL_REG, WD2_ADV_TRG_CTRL_MASK, WD2_ADV_TRG_CTRL_OFS); };
@@ -2247,7 +2363,7 @@ public:
 
 
 
-   ////// ------ Control Register 121 [0x11E4]: ADV_TRG_CH_CAL0 - Advanced Trigger Channel Calibration Register 0 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 139 [0x122C]: ADV_TRG_CH_CAL0 - Advanced Trigger Channel Calibration Register 0 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CH_CAL0 - Advanced trigger channel calibration register 0
    unsigned int GetAdvTrgChCal0() { return BitExtractControl(WD2_ADV_TRG_CH_CAL0_REG, WD2_ADV_TRG_CH_CAL0_MASK, WD2_ADV_TRG_CH_CAL0_OFS); };
@@ -2255,7 +2371,7 @@ public:
 
 
 
-   ////// ------ Control Register 122 [0x11E8]: ADV_TRG_CH_CAL1 - Advanced Trigger Channel Calibration Register 1 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 140 [0x1230]: ADV_TRG_CH_CAL1 - Advanced Trigger Channel Calibration Register 1 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CH_CAL1 - Advanced trigger channel calibration register 1
    unsigned int GetAdvTrgChCal1() { return BitExtractControl(WD2_ADV_TRG_CH_CAL1_REG, WD2_ADV_TRG_CH_CAL1_MASK, WD2_ADV_TRG_CH_CAL1_OFS); };
@@ -2263,7 +2379,7 @@ public:
 
 
 
-   ////// ------ Control Register 123 [0x11EC]: ADV_TRG_CH_CAL2 - Advanced Trigger Channel Calibration Register 2 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 141 [0x1234]: ADV_TRG_CH_CAL2 - Advanced Trigger Channel Calibration Register 2 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CH_CAL2 - Advanced trigger channel calibration register 2
    unsigned int GetAdvTrgChCal2() { return BitExtractControl(WD2_ADV_TRG_CH_CAL2_REG, WD2_ADV_TRG_CH_CAL2_MASK, WD2_ADV_TRG_CH_CAL2_OFS); };
@@ -2271,7 +2387,7 @@ public:
 
 
 
-   ////// ------ Control Register 124 [0x11F0]: ADV_TRG_CH_CAL3 - Advanced Trigger Channel Calibration Register 3 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 142 [0x1238]: ADV_TRG_CH_CAL3 - Advanced Trigger Channel Calibration Register 3 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CH_CAL3 - Advanced trigger channel calibration register 3
    unsigned int GetAdvTrgChCal3() { return BitExtractControl(WD2_ADV_TRG_CH_CAL3_REG, WD2_ADV_TRG_CH_CAL3_MASK, WD2_ADV_TRG_CH_CAL3_OFS); };
@@ -2279,7 +2395,7 @@ public:
 
 
 
-   ////// ------ Control Register 125 [0x11F4]: ADV_TRG_PED_CFG - Advanced Trigger Pedestal Configuration Register (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 143 [0x123C]: ADV_TRG_PED_CFG - Advanced Trigger Pedestal Configuration Register (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_PED_CFG - Advanced trigger pedestal configuration register
    unsigned int GetAdvTrgPedCfg() { return BitExtractControl(WD2_ADV_TRG_PED_CFG_REG, WD2_ADV_TRG_PED_CFG_MASK, WD2_ADV_TRG_PED_CFG_OFS); };
@@ -2287,7 +2403,7 @@ public:
 
 
 
-   ////// ------ Control Register 126 [0x11F8]: ADV_TRG_THR0 - Advanced Trigger Threshold 0 Register (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 144 [0x1240]: ADV_TRG_THR0 - Advanced Trigger Threshold 0 Register (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_THR0 - Advanced trigger threshold 0 register
    unsigned int GetAdvTrgThr0() { return BitExtractControl(WD2_ADV_TRG_THR0_REG, WD2_ADV_TRG_THR0_MASK, WD2_ADV_TRG_THR0_OFS); };
@@ -2295,7 +2411,7 @@ public:
 
 
 
-   ////// ------ Control Register 127 [0x11FC]: ADV_TRG_THR1 - Advanced Trigger Threshold 1 Register (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 145 [0x1244]: ADV_TRG_THR1 - Advanced Trigger Threshold 1 Register (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_THR1 - Advanced trigger threshold 1 register
    unsigned int GetAdvTrgThr1() { return BitExtractControl(WD2_ADV_TRG_THR1_REG, WD2_ADV_TRG_THR1_MASK, WD2_ADV_TRG_THR1_OFS); };
@@ -2303,7 +2419,7 @@ public:
 
 
 
-   ////// ------ Control Register 128 [0x1200]: ADV_TRG_THR2 - Advanced Trigger Threshold 2 Register (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 146 [0x1248]: ADV_TRG_THR2 - Advanced Trigger Threshold 2 Register (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_THR2 - Advanced trigger threshold 2 register
    unsigned int GetAdvTrgThr2() { return BitExtractControl(WD2_ADV_TRG_THR2_REG, WD2_ADV_TRG_THR2_MASK, WD2_ADV_TRG_THR2_OFS); };
@@ -2311,7 +2427,7 @@ public:
 
 
 
-   ////// ------ Control Register 129 [0x1204]: ADV_TRG_TX_CHK_WORD0 - Advanced Trigger Transmition Check Word 0 Register (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 147 [0x124C]: ADV_TRG_TX_CHK_WORD0 - Advanced Trigger Transmition Check Word 0 Register (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_TX_CHK_WORD0 - Advanced trigger transmition check word 0 register
    unsigned int GetAdvTrgTxChkWord0() { return BitExtractControl(WD2_ADV_TRG_TX_CHK_WORD0_REG, WD2_ADV_TRG_TX_CHK_WORD0_MASK, WD2_ADV_TRG_TX_CHK_WORD0_OFS); };
@@ -2319,7 +2435,7 @@ public:
 
 
 
-   ////// ------ Control Register 130 [0x1208]: ADV_TRG_TX_CHK_WORD1 - Advanced Trigger Transmition Check Word 1 Register (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 148 [0x1250]: ADV_TRG_TX_CHK_WORD1 - Advanced Trigger Transmition Check Word 1 Register (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_TX_CHK_WORD1 - Advanced trigger transmition check word 1 register
    unsigned int GetAdvTrgTxChkWord1() { return BitExtractControl(WD2_ADV_TRG_TX_CHK_WORD1_REG, WD2_ADV_TRG_TX_CHK_WORD1_MASK, WD2_ADV_TRG_TX_CHK_WORD1_OFS); };
@@ -2327,7 +2443,7 @@ public:
 
 
 
-   ////// ------ Control Register 131 [0x120C]: ADV_TRG_TDC_CH_MASK - Advanced Trigger TDC Channel Mask (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 149 [0x1254]: ADV_TRG_TDC_CH_MASK - Advanced Trigger TDC Channel Mask (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_TDC_CH_MASK - Advanced trigger TDC channel mask
    unsigned int GetAdvTrgTdcChMask() { return BitExtractControl(WD2_ADV_TRG_TDC_CH_MASK_REG, WD2_ADV_TRG_TDC_CH_MASK_MASK, WD2_ADV_TRG_TDC_CH_MASK_OFS); };
@@ -2335,7 +2451,7 @@ public:
 
 
 
-   ////// ------ Control Register 132 [0x1210]: ADV_TRG_CFG12 - Advanced Trigger Configuration Register 12 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 150 [0x1258]: ADV_TRG_CFG12 - Advanced Trigger Configuration Register 12 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CFG_12 - Advanced trigger configuration register 12
    unsigned int GetAdvTrgCfg12() { return BitExtractControl(WD2_ADV_TRG_CFG_12_REG, WD2_ADV_TRG_CFG_12_MASK, WD2_ADV_TRG_CFG_12_OFS); };
@@ -2343,7 +2459,7 @@ public:
 
 
 
-   ////// ------ Control Register 133 [0x1214]: ADV_TRG_CFG13 - Advanced Trigger Configuration Register 13 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 151 [0x125C]: ADV_TRG_CFG13 - Advanced Trigger Configuration Register 13 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CFG_13 - Advanced trigger configuration register 13
    unsigned int GetAdvTrgCfg13() { return BitExtractControl(WD2_ADV_TRG_CFG_13_REG, WD2_ADV_TRG_CFG_13_MASK, WD2_ADV_TRG_CFG_13_OFS); };
@@ -2351,7 +2467,7 @@ public:
 
 
 
-   ////// ------ Control Register 134 [0x1218]: ADV_TRG_CFG14 - Advanced Trigger Configuration Register 14 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 152 [0x1260]: ADV_TRG_CFG14 - Advanced Trigger Configuration Register 14 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CFG_14 - Advanced trigger configuration register 14
    unsigned int GetAdvTrgCfg14() { return BitExtractControl(WD2_ADV_TRG_CFG_14_REG, WD2_ADV_TRG_CFG_14_MASK, WD2_ADV_TRG_CFG_14_OFS); };
@@ -2359,7 +2475,7 @@ public:
 
 
 
-   ////// ------ Control Register 135 [0x121C]: ADV_TRG_CFG15 - Advanced Trigger Configuration Register 15 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 153 [0x1264]: ADV_TRG_CFG15 - Advanced Trigger Configuration Register 15 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CFG_15 - Advanced trigger configuration register 15
    unsigned int GetAdvTrgCfg15() { return BitExtractControl(WD2_ADV_TRG_CFG_15_REG, WD2_ADV_TRG_CFG_15_MASK, WD2_ADV_TRG_CFG_15_OFS); };
@@ -2367,7 +2483,7 @@ public:
 
 
 
-   ////// ------ Control Register 136 [0x1220]: ADV_TRG_CFG16 - Advanced Trigger Configuration Register 16 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 154 [0x1268]: ADV_TRG_CFG16 - Advanced Trigger Configuration Register 16 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CFG_16 - Advanced trigger configuration register 16
    unsigned int GetAdvTrgCfg16() { return BitExtractControl(WD2_ADV_TRG_CFG_16_REG, WD2_ADV_TRG_CFG_16_MASK, WD2_ADV_TRG_CFG_16_OFS); };
@@ -2375,7 +2491,7 @@ public:
 
 
 
-   ////// ------ Control Register 137 [0x1224]: ADV_TRG_CFG17 - Advanced Trigger Configuration Register 17 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 155 [0x126C]: ADV_TRG_CFG17 - Advanced Trigger Configuration Register 17 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CFG_17 - Advanced trigger configuration register 17
    unsigned int GetAdvTrgCfg17() { return BitExtractControl(WD2_ADV_TRG_CFG_17_REG, WD2_ADV_TRG_CFG_17_MASK, WD2_ADV_TRG_CFG_17_OFS); };
@@ -2383,7 +2499,7 @@ public:
 
 
 
-   ////// ------ Control Register 138 [0x1228]: ADV_TRG_CFG18 - Advanced Trigger Configuration Register 18 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 156 [0x1270]: ADV_TRG_CFG18 - Advanced Trigger Configuration Register 18 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CFG_18 - Advanced trigger configuration register 18
    unsigned int GetAdvTrgCfg18() { return BitExtractControl(WD2_ADV_TRG_CFG_18_REG, WD2_ADV_TRG_CFG_18_MASK, WD2_ADV_TRG_CFG_18_OFS); };
@@ -2391,7 +2507,7 @@ public:
 
 
 
-   ////// ------ Control Register 139 [0x122C]: ADV_TRG_CFG19 - Advanced Trigger Configuration Register 19 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 157 [0x1274]: ADV_TRG_CFG19 - Advanced Trigger Configuration Register 19 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CFG_19 - Advanced trigger configuration register 19
    unsigned int GetAdvTrgCfg19() { return BitExtractControl(WD2_ADV_TRG_CFG_19_REG, WD2_ADV_TRG_CFG_19_MASK, WD2_ADV_TRG_CFG_19_OFS); };
@@ -2399,7 +2515,7 @@ public:
 
 
 
-   ////// ------ Control Register 140 [0x1230]: SET_TIME_LSB - Set System Time (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 158 [0x1278]: SET_TIME_LSB - Set System Time (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SET_TIME_LSB - LSBs of 64bit system time counter set value  (time is updated when MSBs are written)
    unsigned int GetSetTimeLsb() { return BitExtractControl(WD2_SET_TIME_LSB_REG, WD2_SET_TIME_LSB_MASK, WD2_SET_TIME_LSB_OFS); };
@@ -2407,7 +2523,7 @@ public:
 
 
 
-   ////// ------ Control Register 141 [0x1234]: SET_TIME_MSB - Set System Time (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 159 [0x127C]: SET_TIME_MSB - Set System Time (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SET_TIME_MSB - MSBs of 64bit system time counter set value  (time is updated when MSBs are written)
    unsigned int GetSetTimeMsb() { return BitExtractControl(WD2_SET_TIME_MSB_REG, WD2_SET_TIME_MSB_MASK, WD2_SET_TIME_MSB_OFS); };
@@ -2415,7 +2531,7 @@ public:
 
 
 
-   ////// ------ Control Register 142 [0x1238]: DBG_SIG_SEL - Debug Signal Select for MCX Connectors on HV Board (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 160 [0x1280]: DBG_SIG_SEL - Debug Signal Select for MCX Connectors on HV Board (Default: 0x00000000) ------ //////
 
    // 0x000F0000: MCX_TX_SIG_SEL - Select for TX connector (see RX connector for mapping)
    unsigned int GetMcxTxSigSel() { return BitExtractControl(WD2_MCX_TX_SIG_SEL_REG, WD2_MCX_TX_SIG_SEL_MASK, WD2_MCX_TX_SIG_SEL_OFS); };
@@ -2438,7 +2554,7 @@ public:
 
 
 
-   ////// ------ Control Register 143 [0x123C]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: None) ------ //////
+   ////// ------ Control Register 161 [0x1284]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: None) ------ //////
 
    // 0xFFFFFFFF: CRC32_REG_BANK - Keep at the end of the register bank
    unsigned int GetCrc32RegBank() { return BitExtractControl(WD2_CRC32_REG_BANK_REG, WD2_CRC32_REG_BANK_MASK, WD2_CRC32_REG_BANK_OFS); };
@@ -2824,287 +2940,182 @@ public:
 
 
 
-   ////// ------ Status Register 39 [0x009C]: SCALER_0_LSB - Scaler for input #0 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 39 [0x009C]: SCALER_0 - Scaler for input #0 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: SCALER_0_LSB - LSBs of 64bit scaler value of channel 0 (MSBs are latched upon read of LSB register)
-   unsigned int GetScaler0Lsb() { return BitExtractStatus(WD2_SCALER_0_LSB_REG, WD2_SCALER_0_LSB_MASK, WD2_SCALER_0_LSB_OFS); };
+   // 0xFFFFFFFF: SCALER_0 - Count rate value of channel 0 (MSBs are latched upon read of LSB register)
+   unsigned int GetScaler0() { return BitExtractStatus(WD2_SCALER_0_REG, WD2_SCALER_0_MASK, WD2_SCALER_0_OFS); };
 
 
 
-   ////// ------ Status Register 40 [0x00A0]: SCALER_0_MSB - Scaler for input #0 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 40 [0x00A0]: SCALER_1 - Scaler for input #1 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: SCALER_0_MSB - MSBs of 64bit scaler value of channel 0 (latched upon read of LSB register)
-   unsigned int GetScaler0Msb() { return BitExtractStatus(WD2_SCALER_0_MSB_REG, WD2_SCALER_0_MSB_MASK, WD2_SCALER_0_MSB_OFS); };
+   // 0xFFFFFFFF: SCALER_1 - Count rate value of channel 1 (MSBs are latched upon read of LSB register)
+   unsigned int GetScaler1() { return BitExtractStatus(WD2_SCALER_1_REG, WD2_SCALER_1_MASK, WD2_SCALER_1_OFS); };
 
 
 
-   ////// ------ Status Register 41 [0x00A4]: SCALER_1_LSB - Scaler for input #1 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 41 [0x00A4]: SCALER_2 - Scaler for input #2 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: SCALER_1_LSB - LSBs of 64bit scaler value of channel 1 (MSBs are latched upon read of LSB register)
-   unsigned int GetScaler1Lsb() { return BitExtractStatus(WD2_SCALER_1_LSB_REG, WD2_SCALER_1_LSB_MASK, WD2_SCALER_1_LSB_OFS); };
+   // 0xFFFFFFFF: SCALER_2 - Count rate value of channel 2 (MSBs are latched upon read of LSB register)
+   unsigned int GetScaler2() { return BitExtractStatus(WD2_SCALER_2_REG, WD2_SCALER_2_MASK, WD2_SCALER_2_OFS); };
 
 
 
-   ////// ------ Status Register 42 [0x00A8]: SCALER_1_MSB - Scaler for input #1 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 42 [0x00A8]: SCALER_3 - Scaler for input #3 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: SCALER_1_MSB - MSBs of 64bit scaler value of channel 1 (latched upon read of LSB register)
-   unsigned int GetScaler1Msb() { return BitExtractStatus(WD2_SCALER_1_MSB_REG, WD2_SCALER_1_MSB_MASK, WD2_SCALER_1_MSB_OFS); };
+   // 0xFFFFFFFF: SCALER_3 - Count rate value of channel 3 (MSBs are latched upon read of LSB register)
+   unsigned int GetScaler3() { return BitExtractStatus(WD2_SCALER_3_REG, WD2_SCALER_3_MASK, WD2_SCALER_3_OFS); };
 
 
 
-   ////// ------ Status Register 43 [0x00AC]: SCALER_2_LSB - Scaler for input #2 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 43 [0x00AC]: SCALER_4 - Scaler for input #4 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: SCALER_2_LSB - LSBs of 64bit scaler value of channel 2 (MSBs are latched upon read of LSB register)
-   unsigned int GetScaler2Lsb() { return BitExtractStatus(WD2_SCALER_2_LSB_REG, WD2_SCALER_2_LSB_MASK, WD2_SCALER_2_LSB_OFS); };
+   // 0xFFFFFFFF: SCALER_4 - Count rate value of channel 4 (MSBs are latched upon read of LSB register)
+   unsigned int GetScaler4() { return BitExtractStatus(WD2_SCALER_4_REG, WD2_SCALER_4_MASK, WD2_SCALER_4_OFS); };
 
 
 
-   ////// ------ Status Register 44 [0x00B0]: SCALER_2_MSB - Scaler for input #2 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 44 [0x00B0]: SCALER_5 - Scaler for input #5 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: SCALER_2_MSB - MSBs of 64bit scaler value of channel 2 (latched upon read of LSB register)
-   unsigned int GetScaler2Msb() { return BitExtractStatus(WD2_SCALER_2_MSB_REG, WD2_SCALER_2_MSB_MASK, WD2_SCALER_2_MSB_OFS); };
+   // 0xFFFFFFFF: SCALER_5 - Count rate value of channel 5 (MSBs are latched upon read of LSB register)
+   unsigned int GetScaler5() { return BitExtractStatus(WD2_SCALER_5_REG, WD2_SCALER_5_MASK, WD2_SCALER_5_OFS); };
 
 
 
-   ////// ------ Status Register 45 [0x00B4]: SCALER_3_LSB - Scaler for input #3 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 45 [0x00B4]: SCALER_6 - Scaler for input #6 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: SCALER_3_LSB - LSBs of 64bit scaler value of channel 3 (MSBs are latched upon read of LSB register)
-   unsigned int GetScaler3Lsb() { return BitExtractStatus(WD2_SCALER_3_LSB_REG, WD2_SCALER_3_LSB_MASK, WD2_SCALER_3_LSB_OFS); };
+   // 0xFFFFFFFF: SCALER_6 - Count rate value of channel 6 (MSBs are latched upon read of LSB register)
+   unsigned int GetScaler6() { return BitExtractStatus(WD2_SCALER_6_REG, WD2_SCALER_6_MASK, WD2_SCALER_6_OFS); };
 
 
 
-   ////// ------ Status Register 46 [0x00B8]: SCALER_3_MSB - Scaler for input #3 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 46 [0x00B8]: SCALER_7 - Scaler for input #7 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: SCALER_3_MSB - MSBs of 64bit scaler value of channel 3 (latched upon read of LSB register)
-   unsigned int GetScaler3Msb() { return BitExtractStatus(WD2_SCALER_3_MSB_REG, WD2_SCALER_3_MSB_MASK, WD2_SCALER_3_MSB_OFS); };
+   // 0xFFFFFFFF: SCALER_7 - Count rate value of channel 7 (MSBs are latched upon read of LSB register)
+   unsigned int GetScaler7() { return BitExtractStatus(WD2_SCALER_7_REG, WD2_SCALER_7_MASK, WD2_SCALER_7_OFS); };
 
 
 
-   ////// ------ Status Register 47 [0x00BC]: SCALER_4_LSB - Scaler for input #4 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 47 [0x00BC]: SCALER_8 - Scaler for input #8 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: SCALER_4_LSB - LSBs of 64bit scaler value of channel 4 (MSBs are latched upon read of LSB register)
-   unsigned int GetScaler4Lsb() { return BitExtractStatus(WD2_SCALER_4_LSB_REG, WD2_SCALER_4_LSB_MASK, WD2_SCALER_4_LSB_OFS); };
+   // 0xFFFFFFFF: SCALER_8 - Count rate value of channel 8 (MSBs are latched upon read of LSB register)
+   unsigned int GetScaler8() { return BitExtractStatus(WD2_SCALER_8_REG, WD2_SCALER_8_MASK, WD2_SCALER_8_OFS); };
 
 
 
-   ////// ------ Status Register 48 [0x00C0]: SCALER_4_MSB - Scaler for input #4 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 48 [0x00C0]: SCALER_9 - Scaler for input #9 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: SCALER_4_MSB - MSBs of 64bit scaler value of channel 4 (latched upon read of LSB register)
-   unsigned int GetScaler4Msb() { return BitExtractStatus(WD2_SCALER_4_MSB_REG, WD2_SCALER_4_MSB_MASK, WD2_SCALER_4_MSB_OFS); };
+   // 0xFFFFFFFF: SCALER_9 - Count rate value of channel 9 (MSBs are latched upon read of LSB register)
+   unsigned int GetScaler9() { return BitExtractStatus(WD2_SCALER_9_REG, WD2_SCALER_9_MASK, WD2_SCALER_9_OFS); };
 
 
 
-   ////// ------ Status Register 49 [0x00C4]: SCALER_5_LSB - Scaler for input #5 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 49 [0x00C4]: SCALER_10 - Scaler for input #10 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: SCALER_5_LSB - LSBs of 64bit scaler value of channel 5 (MSBs are latched upon read of LSB register)
-   unsigned int GetScaler5Lsb() { return BitExtractStatus(WD2_SCALER_5_LSB_REG, WD2_SCALER_5_LSB_MASK, WD2_SCALER_5_LSB_OFS); };
+   // 0xFFFFFFFF: SCALER_10 - Count rate value of channel 10 (MSBs are latched upon read of LSB register)
+   unsigned int GetScaler10() { return BitExtractStatus(WD2_SCALER_10_REG, WD2_SCALER_10_MASK, WD2_SCALER_10_OFS); };
 
 
 
-   ////// ------ Status Register 50 [0x00C8]: SCALER_5_MSB - Scaler for input #5 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 50 [0x00C8]: SCALER_11 - Scaler for input #11 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: SCALER_5_MSB - MSBs of 64bit scaler value of channel 5 (latched upon read of LSB register)
-   unsigned int GetScaler5Msb() { return BitExtractStatus(WD2_SCALER_5_MSB_REG, WD2_SCALER_5_MSB_MASK, WD2_SCALER_5_MSB_OFS); };
+   // 0xFFFFFFFF: SCALER_11 - Count rate value of channel 11 (MSBs are latched upon read of LSB register)
+   unsigned int GetScaler11() { return BitExtractStatus(WD2_SCALER_11_REG, WD2_SCALER_11_MASK, WD2_SCALER_11_OFS); };
 
 
 
-   ////// ------ Status Register 51 [0x00CC]: SCALER_6_LSB - Scaler for input #6 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 51 [0x00CC]: SCALER_12 - Scaler for input #12 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: SCALER_6_LSB - LSBs of 64bit scaler value of channel 6 (MSBs are latched upon read of LSB register)
-   unsigned int GetScaler6Lsb() { return BitExtractStatus(WD2_SCALER_6_LSB_REG, WD2_SCALER_6_LSB_MASK, WD2_SCALER_6_LSB_OFS); };
+   // 0xFFFFFFFF: SCALER_12 - Count rate value of channel 12 (MSBs are latched upon read of LSB register)
+   unsigned int GetScaler12() { return BitExtractStatus(WD2_SCALER_12_REG, WD2_SCALER_12_MASK, WD2_SCALER_12_OFS); };
 
 
 
-   ////// ------ Status Register 52 [0x00D0]: SCALER_6_MSB - Scaler for input #6 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 52 [0x00D0]: SCALER_13 - Scaler for input #13 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: SCALER_6_MSB - MSBs of 64bit scaler value of channel 6 (latched upon read of LSB register)
-   unsigned int GetScaler6Msb() { return BitExtractStatus(WD2_SCALER_6_MSB_REG, WD2_SCALER_6_MSB_MASK, WD2_SCALER_6_MSB_OFS); };
+   // 0xFFFFFFFF: SCALER_13 - Count rate value of channel 13 (MSBs are latched upon read of LSB register)
+   unsigned int GetScaler13() { return BitExtractStatus(WD2_SCALER_13_REG, WD2_SCALER_13_MASK, WD2_SCALER_13_OFS); };
 
 
 
-   ////// ------ Status Register 53 [0x00D4]: SCALER_7_LSB - Scaler for input #7 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 53 [0x00D4]: SCALER_14 - Scaler for input #14 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: SCALER_7_LSB - LSBs of 64bit scaler value of channel 7 (MSBs are latched upon read of LSB register)
-   unsigned int GetScaler7Lsb() { return BitExtractStatus(WD2_SCALER_7_LSB_REG, WD2_SCALER_7_LSB_MASK, WD2_SCALER_7_LSB_OFS); };
+   // 0xFFFFFFFF: SCALER_14 - Count rate value of channel 14 (MSBs are latched upon read of LSB register)
+   unsigned int GetScaler14() { return BitExtractStatus(WD2_SCALER_14_REG, WD2_SCALER_14_MASK, WD2_SCALER_14_OFS); };
 
 
 
-   ////// ------ Status Register 54 [0x00D8]: SCALER_7_MSB - Scaler for input #7 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 54 [0x00D8]: SCALER_15 - Scaler for input #15 (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: SCALER_7_MSB - MSBs of 64bit scaler value of channel 7 (latched upon read of LSB register)
-   unsigned int GetScaler7Msb() { return BitExtractStatus(WD2_SCALER_7_MSB_REG, WD2_SCALER_7_MSB_MASK, WD2_SCALER_7_MSB_OFS); };
+   // 0xFFFFFFFF: SCALER_15 - Count rate value of channel 15 (MSBs are latched upon read of LSB register)
+   unsigned int GetScaler15() { return BitExtractStatus(WD2_SCALER_15_REG, WD2_SCALER_15_MASK, WD2_SCALER_15_OFS); };
 
 
 
-   ////// ------ Status Register 55 [0x00DC]: SCALER_8_LSB - Scaler for input #8 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 55 [0x00DC]: SCALER_TRG - Scaler for trigger (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: SCALER_8_LSB - LSBs of 64bit scaler value of channel 8 (MSBs are latched upon read of LSB register)
-   unsigned int GetScaler8Lsb() { return BitExtractStatus(WD2_SCALER_8_LSB_REG, WD2_SCALER_8_LSB_MASK, WD2_SCALER_8_LSB_OFS); };
+   // 0xFFFFFFFF: SCALER_TRG - Count rate for trigger signal
+   unsigned int GetScalerTrg() { return BitExtractStatus(WD2_SCALER_TRG_REG, WD2_SCALER_TRG_MASK, WD2_SCALER_TRG_OFS); };
 
 
 
-   ////// ------ Status Register 56 [0x00E0]: SCALER_8_MSB - Scaler for input #8 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 56 [0x00E0]: SCALER_EXT_CLK - Scaler for ext. clock input (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: SCALER_8_MSB - MSBs of 64bit scaler value of channel 8 (latched upon read of LSB register)
-   unsigned int GetScaler8Msb() { return BitExtractStatus(WD2_SCALER_8_MSB_REG, WD2_SCALER_8_MSB_MASK, WD2_SCALER_8_MSB_OFS); };
-
-
-
-   ////// ------ Status Register 57 [0x00E4]: SCALER_9_LSB - Scaler for input #9 (Default: 0x00000000) ------ //////
-
-   // 0xFFFFFFFF: SCALER_9_LSB - LSBs of 64bit scaler value of channel 9 (MSBs are latched upon read of LSB register)
-   unsigned int GetScaler9Lsb() { return BitExtractStatus(WD2_SCALER_9_LSB_REG, WD2_SCALER_9_LSB_MASK, WD2_SCALER_9_LSB_OFS); };
-
-
-
-   ////// ------ Status Register 58 [0x00E8]: SCALER_9_MSB - Scaler for input #9 (Default: 0x00000000) ------ //////
-
-   // 0xFFFFFFFF: SCALER_9_MSB - MSBs of 64bit scaler value of channel 9 (latched upon read of LSB register)
-   unsigned int GetScaler9Msb() { return BitExtractStatus(WD2_SCALER_9_MSB_REG, WD2_SCALER_9_MSB_MASK, WD2_SCALER_9_MSB_OFS); };
-
-
-
-   ////// ------ Status Register 59 [0x00EC]: SCALER_10_LSB - Scaler for input #10 (Default: 0x00000000) ------ //////
-
-   // 0xFFFFFFFF: SCALER_10_LSB - LSBs of 64bit scaler value of channel 10 (MSBs are latched upon read of LSB register)
-   unsigned int GetScaler10Lsb() { return BitExtractStatus(WD2_SCALER_10_LSB_REG, WD2_SCALER_10_LSB_MASK, WD2_SCALER_10_LSB_OFS); };
-
-
-
-   ////// ------ Status Register 60 [0x00F0]: SCALER_10_MSB - Scaler for input #10 (Default: 0x00000000) ------ //////
-
-   // 0xFFFFFFFF: SCALER_10_MSB - MSBs of 64bit scaler value of channel 10 (latched upon read of LSB register)
-   unsigned int GetScaler10Msb() { return BitExtractStatus(WD2_SCALER_10_MSB_REG, WD2_SCALER_10_MSB_MASK, WD2_SCALER_10_MSB_OFS); };
-
-
-
-   ////// ------ Status Register 61 [0x00F4]: SCALER_11_LSB - Scaler for input #11 (Default: 0x00000000) ------ //////
-
-   // 0xFFFFFFFF: SCALER_11_LSB - LSBs of 64bit scaler value of channel 11 (MSBs are latched upon read of LSB register)
-   unsigned int GetScaler11Lsb() { return BitExtractStatus(WD2_SCALER_11_LSB_REG, WD2_SCALER_11_LSB_MASK, WD2_SCALER_11_LSB_OFS); };
-
-
-
-   ////// ------ Status Register 62 [0x00F8]: SCALER_11_MSB - Scaler for input #11 (Default: 0x00000000) ------ //////
-
-   // 0xFFFFFFFF: SCALER_11_MSB - MSBs of 64bit scaler value of channel 11 (latched upon read of LSB register)
-   unsigned int GetScaler11Msb() { return BitExtractStatus(WD2_SCALER_11_MSB_REG, WD2_SCALER_11_MSB_MASK, WD2_SCALER_11_MSB_OFS); };
-
-
-
-   ////// ------ Status Register 63 [0x00FC]: SCALER_12_LSB - Scaler for input #12 (Default: 0x00000000) ------ //////
-
-   // 0xFFFFFFFF: SCALER_12_LSB - LSBs of 64bit scaler value of channel 12 (MSBs are latched upon read of LSB register)
-   unsigned int GetScaler12Lsb() { return BitExtractStatus(WD2_SCALER_12_LSB_REG, WD2_SCALER_12_LSB_MASK, WD2_SCALER_12_LSB_OFS); };
-
-
-
-   ////// ------ Status Register 64 [0x0100]: SCALER_12_MSB - Scaler for input #12 (Default: 0x00000000) ------ //////
-
-   // 0xFFFFFFFF: SCALER_12_MSB - MSBs of 64bit scaler value of channel 12 (latched upon read of LSB register)
-   unsigned int GetScaler12Msb() { return BitExtractStatus(WD2_SCALER_12_MSB_REG, WD2_SCALER_12_MSB_MASK, WD2_SCALER_12_MSB_OFS); };
-
-
-
-   ////// ------ Status Register 65 [0x0104]: SCALER_13_LSB - Scaler for input #13 (Default: 0x00000000) ------ //////
-
-   // 0xFFFFFFFF: SCALER_13_LSB - LSBs of 64bit scaler value of channel 13 (MSBs are latched upon read of LSB register)
-   unsigned int GetScaler13Lsb() { return BitExtractStatus(WD2_SCALER_13_LSB_REG, WD2_SCALER_13_LSB_MASK, WD2_SCALER_13_LSB_OFS); };
-
-
-
-   ////// ------ Status Register 66 [0x0108]: SCALER_13_MSB - Scaler for input #13 (Default: 0x00000000) ------ //////
-
-   // 0xFFFFFFFF: SCALER_13_MSB - MSBs of 64bit scaler value of channel 13 (latched upon read of LSB register)
-   unsigned int GetScaler13Msb() { return BitExtractStatus(WD2_SCALER_13_MSB_REG, WD2_SCALER_13_MSB_MASK, WD2_SCALER_13_MSB_OFS); };
-
-
-
-   ////// ------ Status Register 67 [0x010C]: SCALER_14_LSB - Scaler for input #14 (Default: 0x00000000) ------ //////
-
-   // 0xFFFFFFFF: SCALER_14_LSB - LSBs of 64bit scaler value of channel 14 (MSBs are latched upon read of LSB register)
-   unsigned int GetScaler14Lsb() { return BitExtractStatus(WD2_SCALER_14_LSB_REG, WD2_SCALER_14_LSB_MASK, WD2_SCALER_14_LSB_OFS); };
-
-
-
-   ////// ------ Status Register 68 [0x0110]: SCALER_14_MSB - Scaler for input #14 (Default: 0x00000000) ------ //////
-
-   // 0xFFFFFFFF: SCALER_14_MSB - MSBs of 64bit scaler value of channel 14 (latched upon read of LSB register)
-   unsigned int GetScaler14Msb() { return BitExtractStatus(WD2_SCALER_14_MSB_REG, WD2_SCALER_14_MSB_MASK, WD2_SCALER_14_MSB_OFS); };
-
-
-
-   ////// ------ Status Register 69 [0x0114]: SCALER_15_LSB - Scaler for input #15 (Default: 0x00000000) ------ //////
-
-   // 0xFFFFFFFF: SCALER_15_LSB - LSBs of 64bit scaler value of channel 15 (MSBs are latched upon read of LSB register)
-   unsigned int GetScaler15Lsb() { return BitExtractStatus(WD2_SCALER_15_LSB_REG, WD2_SCALER_15_LSB_MASK, WD2_SCALER_15_LSB_OFS); };
-
-
-
-   ////// ------ Status Register 70 [0x0118]: SCALER_15_MSB - Scaler for input #15 (Default: 0x00000000) ------ //////
-
-   // 0xFFFFFFFF: SCALER_15_MSB - MSBs of 64bit scaler value of channel 15 (latched upon read of LSB register)
-   unsigned int GetScaler15Msb() { return BitExtractStatus(WD2_SCALER_15_MSB_REG, WD2_SCALER_15_MSB_MASK, WD2_SCALER_15_MSB_OFS); };
-
-
-
-   ////// ------ Status Register 71 [0x011C]: SCALER_TRG_LSB - Scaler for trigger (Default: 0x00000000) ------ //////
-
-   // 0xFFFFFFFF: SCALER_TRG_LSB - LSBs of scaler for trigger signal
-   unsigned int GetScalerTrgLsb() { return BitExtractStatus(WD2_SCALER_TRG_LSB_REG, WD2_SCALER_TRG_LSB_MASK, WD2_SCALER_TRG_LSB_OFS); };
-
-
-
-   ////// ------ Status Register 72 [0x0120]: SCALER_TRG_MSB - Scaler for trigger (Default: 0x00000000) ------ //////
-
-   // 0xFFFFFFFF: SCALER_TRG_MSB - MSBs of scaler for trigger signal
-   unsigned int GetScalerTrgMsb() { return BitExtractStatus(WD2_SCALER_TRG_MSB_REG, WD2_SCALER_TRG_MSB_MASK, WD2_SCALER_TRG_MSB_OFS); };
-
-
-
-   ////// ------ Status Register 73 [0x0124]: SCALER_EXT_CLK - Scaler for ext. clock input (Default: 0x00000000) ------ //////
-
-   // 0xFFFFFFFF: SCALER_EXT_CLK - Scaler for external clock input (GLOB_CLK)
+   // 0xFFFFFFFF: SCALER_EXT_CLK - Count rate for external clock input (GLOB_CLK)
    unsigned int GetScalerExtClk() { return BitExtractStatus(WD2_SCALER_EXT_CLK_REG, WD2_SCALER_EXT_CLK_MASK, WD2_SCALER_EXT_CLK_OFS); };
 
 
 
-   ////// ------ Status Register 74 [0x0128]: EVENT_TX_RATE - Event Transmission Rate (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 57 [0x00E4]: SCALER_TIME_STAMP_LSB - Time Stamp for Scaler Values (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: EVENT_TX_RATE - Number of events transmitted per second
-   unsigned int GetEventTxRate() { return BitExtractStatus(WD2_EVENT_TX_RATE_REG, WD2_EVENT_TX_RATE_MASK, WD2_EVENT_TX_RATE_OFS); };
+   // 0xFFFFFFFF: SCALER_TIME_STAMP_LSB - LSBs of 64bit scaler time stamp (MSBs are latched upon read of LSB register)
+   unsigned int GetScalerTimeStampLsb() { return BitExtractStatus(WD2_SCALER_TIME_STAMP_LSB_REG, WD2_SCALER_TIME_STAMP_LSB_MASK, WD2_SCALER_TIME_STAMP_LSB_OFS); };
 
 
 
-   ////// ------ Status Register 75 [0x012C]: TIME_LSB - Current System Time (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 58 [0x00E8]: SCALER_TIME_STAMP_MSB - Time Stamp for Scaler Values (Default: 0x00000000) ------ //////
+
+   // 0xFFFFFFFF: SCALER_TIME_STAMP_MSB - MSBs of 64bit scaler time stamp (latched upon read of LSB register)
+   unsigned int GetScalerTimeStampMsb() { return BitExtractStatus(WD2_SCALER_TIME_STAMP_MSB_REG, WD2_SCALER_TIME_STAMP_MSB_MASK, WD2_SCALER_TIME_STAMP_MSB_OFS); };
+
+
+
+   ////// ------ Status Register 59 [0x00EC]: TIME_LSB - Current System Time (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: TIME_LSB - LSBs of 64bit system time counter (MSBs are latched upon read of LSB register)
    unsigned int GetTimeLsb() { return BitExtractStatus(WD2_TIME_LSB_REG, WD2_TIME_LSB_MASK, WD2_TIME_LSB_OFS); };
 
 
 
-   ////// ------ Status Register 76 [0x0130]: TIME_MSB - Current System Time (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 60 [0x00F0]: TIME_MSB - Current System Time (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: TIME_MSB - MSBs of 64bit system time counter (latched upon read of LSB register)
    unsigned int GetTimeMsb() { return BitExtractStatus(WD2_TIME_MSB_REG, WD2_TIME_MSB_MASK, WD2_TIME_MSB_OFS); };
 
 
 
-   ////// ------ Status Register 77 [0x0134]: COMP_CH_STAT - Comparator channel status (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 61 [0x00F4]: COMP_CH_STAT - Comparator channel status (Default: 0x00000000) ------ //////
 
    // 0x0000FFFF: COMP_CH_STAT - Status of the comparator inputs
    unsigned int GetCompChStat() { return BitExtractStatus(WD2_COMP_CH_STAT_REG, WD2_COMP_CH_STAT_MASK, WD2_COMP_CH_STAT_OFS); };
 
 
 
-   ////// ------ Status Register 78 [0x0138]: EVENT_NR - Number of latest event (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 62 [0x00F8]: EVENT_TX_RATE - Event Transmission Rate (Default: 0x00000000) ------ //////
+
+   // 0xFFFFFFFF: EVENT_TX_RATE - Number of events transmitted per second
+   unsigned int GetEventTxRate() { return BitExtractStatus(WD2_EVENT_TX_RATE_REG, WD2_EVENT_TX_RATE_MASK, WD2_EVENT_TX_RATE_OFS); };
+
+
+
+   ////// ------ Status Register 63 [0x00FC]: EVENT_NR - Number of latest event (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: EVENT_NUMBER - Number of latest event
    unsigned int GetEventNumber() { return BitExtractStatus(WD2_EVENT_NUMBER_REG, WD2_EVENT_NUMBER_MASK, WD2_EVENT_NUMBER_OFS); };
 
 
 
-   ////// ------ Status Register 79 [0x013C]: TRB_INFO_STAT - Trigger Information via Serial Trigger Bus Status (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 64 [0x0100]: TRB_INFO_STAT - Trigger Information via Serial Trigger Bus Status (Default: 0x00000000) ------ //////
 
    // 0x80000000: TRB_FLAG_NEW - Flag signalling that the current trigger information belongs to the latest trigger received
    unsigned int GetTrbFlagNew() { return BitExtractStatus(WD2_TRB_FLAG_NEW_REG, WD2_TRB_FLAG_NEW_MASK, WD2_TRB_FLAG_NEW_OFS); };
@@ -3117,84 +3128,84 @@ public:
 
 
 
-   ////// ------ Status Register 80 [0x0140]: TRB_INFO_LSB - Trigger Information via Serial Trigger Bus LSBs (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 65 [0x0104]: TRB_INFO_LSB - Trigger Information via Serial Trigger Bus LSBs (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: TRB_INFO_LSB - Trigger information LSBs
    unsigned int GetTrbInfoLsb() { return BitExtractStatus(WD2_TRB_INFO_LSB_REG, WD2_TRB_INFO_LSB_MASK, WD2_TRB_INFO_LSB_OFS); };
 
 
 
-   ////// ------ Status Register 81 [0x0144]: TRB_INFO_MSB - Trigger Information via Serial Trigger Bus MSBs (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 66 [0x0108]: TRB_INFO_MSB - Trigger Information via Serial Trigger Bus MSBs (Default: 0x00000000) ------ //////
 
    // 0x0000FFFF: TRB_INFO_MSB - Trigger information MSBs
    unsigned int GetTrbInfoMsb() { return BitExtractStatus(WD2_TRB_INFO_MSB_REG, WD2_TRB_INFO_MSB_MASK, WD2_TRB_INFO_MSB_OFS); };
 
 
 
-   ////// ------ Status Register 82 [0x0148]: ADV_TRG_TRIG_CELL - Advanced Trigger Cell Register (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 67 [0x010C]: ADV_TRG_TRIG_CELL - Advanced Trigger Cell Register (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_TRIG_CELL - Advanced trigger cell register
    unsigned int GetAdvTrgTrigCell() { return BitExtractStatus(WD2_ADV_TRG_TRIG_CELL_REG, WD2_ADV_TRG_TRIG_CELL_MASK, WD2_ADV_TRG_TRIG_CELL_OFS); };
 
 
 
-   ////// ------ Status Register 83 [0x014C]: ADV_TRG_STAT1 - Advanced Trigger Status Register 1 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 68 [0x0110]: ADV_TRG_STAT1 - Advanced Trigger Status Register 1 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_STAT_1 - Advanced trigger status register 1
    unsigned int GetAdvTrgStat1() { return BitExtractStatus(WD2_ADV_TRG_STAT_1_REG, WD2_ADV_TRG_STAT_1_MASK, WD2_ADV_TRG_STAT_1_OFS); };
 
 
 
-   ////// ------ Status Register 84 [0x0150]: ADV_TRG_STAT2 - Advanced Trigger Status Register 2 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 69 [0x0114]: ADV_TRG_STAT2 - Advanced Trigger Status Register 2 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_STAT_2 - Advanced trigger status register 2
    unsigned int GetAdvTrgStat2() { return BitExtractStatus(WD2_ADV_TRG_STAT_2_REG, WD2_ADV_TRG_STAT_2_MASK, WD2_ADV_TRG_STAT_2_OFS); };
 
 
 
-   ////// ------ Status Register 85 [0x0154]: ADV_TRG_STAT3 - Advanced Trigger Status Register 3 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 70 [0x0118]: ADV_TRG_STAT3 - Advanced Trigger Status Register 3 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_STAT_3 - Advanced trigger status register 3
    unsigned int GetAdvTrgStat3() { return BitExtractStatus(WD2_ADV_TRG_STAT_3_REG, WD2_ADV_TRG_STAT_3_MASK, WD2_ADV_TRG_STAT_3_OFS); };
 
 
 
-   ////// ------ Status Register 86 [0x0158]: ADV_TRG_STAT4 - Advanced Trigger Status Register 4 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 71 [0x011C]: ADV_TRG_STAT4 - Advanced Trigger Status Register 4 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_STAT_4 - Advanced trigger status register 4
    unsigned int GetAdvTrgStat4() { return BitExtractStatus(WD2_ADV_TRG_STAT_4_REG, WD2_ADV_TRG_STAT_4_MASK, WD2_ADV_TRG_STAT_4_OFS); };
 
 
 
-   ////// ------ Status Register 87 [0x015C]: MAX_DRS_ADC_PKT_SAMPLES - Maximum DRS/ADC samples per Packet (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 72 [0x0120]: MAX_DRS_ADC_PKT_SAMPLES - Maximum DRS/ADC samples per Packet (Default: 0x00000000) ------ //////
 
    // 0x0000FFFF: MAX_DRS_ADC_PKT_SAMPLES - Maximum number of DRS/ADC samples per packet
    unsigned int GetMaxDrsAdcPktSamples() { return BitExtractStatus(WD2_MAX_DRS_ADC_PKT_SAMPLES_REG, WD2_MAX_DRS_ADC_PKT_SAMPLES_MASK, WD2_MAX_DRS_ADC_PKT_SAMPLES_OFS); };
 
 
 
-   ////// ------ Status Register 88 [0x0160]: MAX_TDC_PKT_SAMPLES - Maximum TDC samples per Packet (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 73 [0x0124]: MAX_TDC_PKT_SAMPLES - Maximum TDC samples per Packet (Default: 0x00000000) ------ //////
 
    // 0x0003FFFF: MAX_TDC_PKT_SAMPLES - Maximum number of TDC samples per packet
    unsigned int GetMaxTdcPktSamples() { return BitExtractStatus(WD2_MAX_TDC_PKT_SAMPLES_REG, WD2_MAX_TDC_PKT_SAMPLES_MASK, WD2_MAX_TDC_PKT_SAMPLES_OFS); };
 
 
 
-   ////// ------ Status Register 89 [0x0164]: MAX_TRG_PKT_SAMPLES - Maximum advanced trigger output samples per Packet (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 74 [0x0128]: MAX_TRG_PKT_SAMPLES - Maximum advanced trigger output samples per Packet (Default: 0x00000000) ------ //////
 
    // 0x0000FFFF: MAX_TRG_PKT_SAMPLES - Maximum number of advanced trigger output samples per packet
    unsigned int GetMaxTrgPktSamples() { return BitExtractStatus(WD2_MAX_TRG_PKT_SAMPLES_REG, WD2_MAX_TRG_PKT_SAMPLES_MASK, WD2_MAX_TRG_PKT_SAMPLES_OFS); };
 
 
 
-   ////// ------ Status Register 90 [0x0168]: MAX_SCL_PKT_SAMPLES - Maximum scaler values per Packet (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 75 [0x012C]: MAX_SCL_PKT_SAMPLES - Maximum scaler values per Packet (Default: 0x00000000) ------ //////
 
    // 0x0000FFFF: MAX_SCL_PKT_SAMPLES - Maximum number of scaler values per packet
    unsigned int GetMaxSclPktSamples() { return BitExtractStatus(WD2_MAX_SCL_PKT_SAMPLES_REG, WD2_MAX_SCL_PKT_SAMPLES_MASK, WD2_MAX_SCL_PKT_SAMPLES_OFS); };
 
 
 
-   ////// ------ Status Register 91 [0x016C]: CLK_CTRL_MOD_FLAG - Set if WD2 configuration registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 76 [0x0130]: CLK_CTRL_MOD_FLAG - Set if WD2 configuration registers are modified (Default: 0x00000000) ------ //////
 
    // 0x00000004: CLK_SEL_AND_DRS_CLK_DIV_MOD - DAQ clock select and DRS clock divider modified flags
    unsigned int GetClkSelAndDrsClkDivMod() { return BitExtractStatus(WD2_CLK_SEL_AND_DRS_CLK_DIV_MOD_REG, WD2_CLK_SEL_AND_DRS_CLK_DIV_MOD_MASK, WD2_CLK_SEL_AND_DRS_CLK_DIV_MOD_OFS); };
@@ -3207,7 +3218,7 @@ public:
 
 
 
-   ////// ------ Status Register 92 [0x0170]: DRS_MOD_FLAG - Set if DRS configuration registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 77 [0x0134]: DRS_MOD_FLAG - Set if DRS configuration registers are modified (Default: 0x00000000) ------ //////
 
    // 0x00000004: DRS_CTRL_MOD - DRS control bits modified flags
    unsigned int GetDrsCtrlMod() { return BitExtractStatus(WD2_DRS_CTRL_MOD_REG, WD2_DRS_CTRL_MOD_MASK, WD2_DRS_CTRL_MOD_OFS); };
@@ -3220,21 +3231,21 @@ public:
 
 
 
-   ////// ------ Status Register 93 [0x0174]: COM_PLD_SIZE_MOD_FLAG - Set if maximum packet payload size register is modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 78 [0x0138]: COM_PLD_SIZE_MOD_FLAG - Set if maximum packet payload size register is modified (Default: 0x00000000) ------ //////
 
    // 0x0000000F: COM_PLD_SIZE_MOD - Maximum packet payload size modified flag
    unsigned int GetComPldSizeMod() { return BitExtractStatus(WD2_COM_PLD_SIZE_MOD_REG, WD2_COM_PLD_SIZE_MOD_MASK, WD2_COM_PLD_SIZE_MOD_OFS); };
 
 
 
-   ////// ------ Status Register 94 [0x0178]: ADC_SAMPLE_DIV_MOD_FLAG - Set if ADC downsampling divider register is modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 79 [0x013C]: ADC_SAMPLE_DIV_MOD_FLAG - Set if ADC downsampling divider register is modified (Default: 0x00000000) ------ //////
 
    // 0x0000000F: ADC_SAMPLE_DIV_MOD - ADC downsampling divider modified flags
    unsigned int GetAdcSampleDivMod() { return BitExtractStatus(WD2_ADC_SAMPLE_DIV_MOD_REG, WD2_ADC_SAMPLE_DIV_MOD_MASK, WD2_ADC_SAMPLE_DIV_MOD_OFS); };
 
 
 
-   ////// ------ Status Register 95 [0x017C]: DAC_0_1_MOD_FLAG - Set if DAC 0 and 1 configuration registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 80 [0x0140]: DAC_0_1_MOD_FLAG - Set if DAC 0 and 1 configuration registers are modified (Default: 0x00000000) ------ //////
 
    // 0xC0000000: DAC0_A_MOD - DAC channel a modified flags
    unsigned int GetDac0AMod() { return BitExtractStatus(WD2_DAC0_A_MOD_REG, WD2_DAC0_A_MOD_MASK, WD2_DAC0_A_MOD_OFS); };
@@ -3286,7 +3297,7 @@ public:
 
 
 
-   ////// ------ Status Register 96 [0x0180]: DAC_2_MOD_FLAG - Set if DAC 2 configuration registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 81 [0x0144]: DAC_2_MOD_FLAG - Set if DAC 2 configuration registers are modified (Default: 0x00000000) ------ //////
 
    // 0xC0000000: DAC2_A_MOD - DAC channel a modified flags
    unsigned int GetDac2AMod() { return BitExtractStatus(WD2_DAC2_A_MOD_REG, WD2_DAC2_A_MOD_MASK, WD2_DAC2_A_MOD_OFS); };
@@ -3314,7 +3325,7 @@ public:
 
 
 
-   ////// ------ Status Register 97 [0x0184]: FE_0_15_MOD_FLAG - Set if frontend configuraiton registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 82 [0x0148]: FE_0_15_MOD_FLAG - Set if frontend configuraiton registers are modified (Default: 0x00000000) ------ //////
 
    // 0xC0000000: FE_0_MOD - Frontend channel 0 register modified flags
    unsigned int GetFe0Mod() { return BitExtractStatus(WD2_FE_0_MOD_REG, WD2_FE_0_MOD_MASK, WD2_FE_0_MOD_OFS); };
@@ -3366,7 +3377,7 @@ public:
 
 
 
-   ////// ------ Status Register 98 [0x0188]: HV_U_TARGET_0_7_MOD_FLAG - Set if HV target voltage configuraiton of channel 0 to 7 registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 83 [0x014C]: HV_U_TARGET_0_7_MOD_FLAG - Set if HV target voltage configuraiton of channel 0 to 7 registers are modified (Default: 0x00000000) ------ //////
 
    // 0xF0000000: HV_U_TARGET_0_MOD - Target high voltage channel 0 register modified flags
    unsigned int GetHvUTarget0Mod() { return BitExtractStatus(WD2_HV_U_TARGET_0_MOD_REG, WD2_HV_U_TARGET_0_MOD_MASK, WD2_HV_U_TARGET_0_MOD_OFS); };
@@ -3394,7 +3405,7 @@ public:
 
 
 
-   ////// ------ Status Register 99 [0x018C]: HV_U_TARGET_8_15_MOD_FLAG - Set if HV target voltage configuraiton of channel 8 to 15 registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 84 [0x0150]: HV_U_TARGET_8_15_MOD_FLAG - Set if HV target voltage configuraiton of channel 8 to 15 registers are modified (Default: 0x00000000) ------ //////
 
    // 0xF0000000: HV_U_TARGET_8_MOD - Target high voltage channel 8 register modified flags
    unsigned int GetHvUTarget8Mod() { return BitExtractStatus(WD2_HV_U_TARGET_8_MOD_REG, WD2_HV_U_TARGET_8_MOD_MASK, WD2_HV_U_TARGET_8_MOD_OFS); };
@@ -3422,14 +3433,14 @@ public:
 
 
 
-   ////// ------ Status Register 100 [0x0190]: HV_MOD_FLAG - Set if single HV configuraiton registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 85 [0x0154]: HV_MOD_FLAG - Set if single HV configuraiton registers are modified (Default: 0x00000000) ------ //////
 
    // 0x0000000F: HV_R_SHUNT_MOD - HV supply shunt resistor register modified flags
    unsigned int GetHvRShuntMod() { return BitExtractStatus(WD2_HV_R_SHUNT_MOD_REG, WD2_HV_R_SHUNT_MOD_MASK, WD2_HV_R_SHUNT_MOD_OFS); };
 
 
 
-   ////// ------ Status Register 101 [0x0194]: LMK_0_7_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 86 [0x0158]: LMK_0_7_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ------ //////
 
    // 0xF0000000: LMK_0_MOD - LMK channel 0 register modified flags
    unsigned int GetLmk0Mod() { return BitExtractStatus(WD2_LMK_0_MOD_REG, WD2_LMK_0_MOD_MASK, WD2_LMK_0_MOD_OFS); };
@@ -3457,7 +3468,7 @@ public:
 
 
 
-   ////// ------ Status Register 102 [0x0198]: LMK_8_15_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 87 [0x015C]: LMK_8_15_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ------ //////
 
    // 0x00F00000: LMK_8_MOD - LMK Register 8 modified flags
    unsigned int GetLmk8Mod() { return BitExtractStatus(WD2_LMK_8_MOD_REG, WD2_LMK_8_MOD_MASK, WD2_LMK_8_MOD_OFS); };
@@ -3479,7 +3490,7 @@ public:
 
 
 
-   ////// ------ Status Register 103 [0x019C]: ADC_MOD_FLAG - Set if ADC registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 88 [0x0160]: ADC_MOD_FLAG - Set if ADC registers are modified (Default: 0x00000000) ------ //////
 
    // 0x0F000000: ADC_CFG_IND_TX_MOD - ADC configuration, index and transfer register modified flags
    unsigned int GetAdcCfgIndTxMod() { return BitExtractStatus(WD2_ADC_CFG_IND_TX_MOD_REG, WD2_ADC_CFG_IND_TX_MOD_MASK, WD2_ADC_CFG_IND_TX_MOD_OFS); };
@@ -3504,7 +3515,7 @@ public:
 
 
 
-   ////// ------ Status Register 104 [0x01A0]: ADC_0_CH_MOD_FLAG - Set if ADC 0 (A) Channel registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 89 [0x0164]: ADC_0_CH_MOD_FLAG - Set if ADC 0 (A) Channel registers are modified (Default: 0x00000000) ------ //////
 
    // 0xF0000000: ADC_0_CH_A_MOD - ADC 0 (A) Channel A register modified flags
    unsigned int GetAdc0ChAMod() { return BitExtractStatus(WD2_ADC_0_CH_A_MOD_REG, WD2_ADC_0_CH_A_MOD_MASK, WD2_ADC_0_CH_A_MOD_OFS); };
@@ -3532,7 +3543,7 @@ public:
 
 
 
-   ////// ------ Status Register 105 [0x01A4]: ADC_1_CH_MOD_FLAG - Set if ADC 1 (B) Channel registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 90 [0x0168]: ADC_1_CH_MOD_FLAG - Set if ADC 1 (B) Channel registers are modified (Default: 0x00000000) ------ //////
 
    // 0xF0000000: ADC_1_CH_A_MOD - ADC 1 (B) Channel A register modified flags
    unsigned int GetAdc1ChAMod() { return BitExtractStatus(WD2_ADC_1_CH_A_MOD_REG, WD2_ADC_1_CH_A_MOD_MASK, WD2_ADC_1_CH_A_MOD_OFS); };
@@ -3560,7 +3571,7 @@ public:
 
 
 
-   ////// ------ Status Register 106 [0x01A8]: ADC_01_CLK_MOD_FLAG - Set if ADC registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 91 [0x016C]: ADC_01_CLK_MOD_FLAG - Set if ADC registers are modified (Default: 0x00000000) ------ //////
 
    // 0x0000F000: ADC_1_DCO_MOD - ADC 1 (B) DCO Channel register modified flags
    unsigned int GetAdc1DcoMod() { return BitExtractStatus(WD2_ADC_1_DCO_MOD_REG, WD2_ADC_1_DCO_MOD_MASK, WD2_ADC_1_DCO_MOD_OFS); };
