@@ -1,45 +1,68 @@
-###########################################################
+#####################################################################
 #
-#  General purpose Makefile for Linux and Darwin, SR 2015
+#  Name:         Makefile
+#  Created by:   Stefan Ritt
 #
-###########################################################
+#  Contents:     Makefile for WaveDAQ Library
+#
+#####################################################################
 
-CFLAGS  = -O0 -g
+# directories
+MSCB_DIR      = ../../../mscb
+WDAQ_DIR      = ../../
 
-# search main file
-GREP = grep -l "main(" *c *cpp
-MAIN = $(shell $(GREP))
-OUTNAME = $(basename $(MAIN))
-
-# OS specific flags and libs
-ifeq ($(shell uname),Linux)
-LIBS    = -pthread
-endif
+# compiler, flags and libs
+CC            = cc
+CPP           = g++
+FLAGS         = -O3 -g -DOS_LINUX -Wall -Wpedantic
+CPPFLAGS      = -std=c++11
 
 ifeq ($(shell uname),Darwin)
-CFLAGS  += -std=gnu++11 -x c++
-LIBS    = -framework IOKit -framework CoreFoundation -lobjc
+FLAGS         += -DOS_DARWIN -DHAVE_STRLCPY
+LIBS          =  -framework IOKit -framework CoreFoundation
+else
+FLAGS         += 
+LIBS          =  -lrt -lbsd
 endif
 
-CFLAGS += -I../../firmware/WD2/wd2_hardware_test/wd2_xsdk_workspace/wd2_app_cmd_interpreter/src/
+FLAGS         += -I$(MSCB_DIR)/include 
+FLAGS         += -I$(WDAQ_DIR)/software/lib 
+FLAGS         += -I$(WDAQ_DIR)/software/tcb 
+FLAGS         += -I$(WDAQ_DIR)/firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/common/src/
+LIBS          += -lm -lutil -lpthread
 
-# search *.c and *.cpp files
-C_FILES = $(wildcard *.c)
-CPP_FILES = $(wildcard *.cpp)
-C_OBJ = $(C_FILES:%.c=%.o)
-CPP_OBJ = $(CPP_FILES:%.cpp=%.o)
+# system objects
+MSCB_OBJ      = mscb.o mscbrpc.o strlcpy.o mxml.o
+
+LIB_OBJ       = WDLib.o WDAQLib.o 
+WDB_DRV_OBJ   = WDBLib.o averager.o 
+TCB_DRV_OBJ   = TCBLib.o 
+OBJECTS       = $(MSCB_OBJ) $(WDB_DRV_OBJ) $(TCB_DRV_OBJ) $(LIB_OBJ)
+OUTNAME       = wd_cl
 
 all: $(OUTNAME)
 
-$(OUTNAME): $(C_OBJ) $(CPP_OBJ)
-	g++ $(C_OBJ) $(CPP_OBJ) -o $(OUTNAME) $(LIBS)
+$(OUTNAME): $(OBJECTS) wd_cl.o
+	$(CPP) $(FLAGS) $(OBJECTS) wd_cl.o -o $(OUTNAME) $(LIBS)
 
-$(CPP_OBJ): %.o: %.cpp
-	g++ $(CFLAGS) -c $<
+$(WDB_DRV_OBJ): %.o: $(WDAQ_DIR)/software/lib/%.cpp
+	$(CPP) $(FLAGS) $(CPPFLAGS) -MMD -MP -MF $(@:.o=.d) -MT $@ -c $<
 
-$(C_OBJ): %.o: %.c
-	g++ $(CFLAGS) -c $<
+$(TCB_DRV_OBJ): %.o: $(WDAQ_DIR)/software/tcb/%.cpp
+	$(CPP) $(FLAGS) $(CPPFLAGS) -MMD -MP -MF $(@:.o=.d) -MT $@ -c $<
+
+$(MSCB_OBJ): %.o: $(MSCB_DIR)/src/%.c
+	$(CC) $(FLAGS) -MMD -MP -MF $(@:.o=.d) -MT $@ -c $<
+
+$(LIB_OBJ): %.o: %.cpp
+	$(CPP) $(FLAGS) $(CPPFLAGS) -MMD -MP -MF $(@:.o=.d) -MT $@ -c $<
+
+wd_cl.o: wd_cl.cpp
+	$(CPP) $(FLAGS) $(CPPFLAGS) -MMD -MP -MF $(@:.o=.d) -MT $@ -c $<
 
 clean:
-	rm -f $(C_OBJ) $(CPP_OBJ) $(OUTNAME)
+	rm -f *.o *.d *~ \#* $(OUTNAME)
 
+ifneq ($(MAKECMDGOALS), clean)
+-include *.d
+endif
