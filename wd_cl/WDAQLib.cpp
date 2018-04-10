@@ -55,6 +55,33 @@ void WDAQDRSPacketData::AddToBoardEvent(WDAQBoardEvent *e){
       e->mDrsHasData[channel] = true; 
    }
 
+   if(mFlags & 0x10) e->mEndFlagReceived = true;
+
+}
+
+//WDAQ ADC Packet Data -  derived packet class to host ADC data
+//Add packet info to given Board Event
+void WDAQADCPacketData::AddToBoardEvent(WDAQBoardEvent *e){
+
+   int channel = mChannel;
+   int numberBins = (int) mPayloadLenght / 1.5;
+   int firstBin = mDataOffset / 1.5;
+
+   for(int i=0; i<numberBins; i++){
+      e->mAdcU[channel][firstBin+i] = data[i];
+   }
+
+   e->mAdcTxEnable = mTxEnable;
+   e->mAdcZeroSuppressionMask = mZeroSuppressionMask;
+
+   //check all data received
+   e->mAdcByteNumber[channel] += mPayloadLenght*8;
+   if(e->mAdcByteNumber[channel] >= mSamplesPerEventPerChannel*mBitsPerSample){
+      e->mAdcHasData[channel] = true; 
+   }
+
+   if(mFlags & 0x10) e->mEndFlagReceived = true;
+
 }
 //WDAQ Board Event - single WDB DAQ event
 //Constructor, init from packet data
@@ -72,10 +99,13 @@ WDAQBoardEvent::WDAQBoardEvent(WDAQPacketData* pkt){
 
    //reset status
    mVCalibrated = false;
+   mEndFlagReceived = false;
    for(int i=0; i<WD_N_CHANNELS; i++){
       mDrsHasData[i] = false;
+      mAdcHasData[i] = false;
       mDrsByteNumber[i] = 0;
-      for(int j=0; j<1024; j++) mDrsU[i][j] = 0;
+      mAdcByteNumber[i] = 0;
+      //for(int j=0; j<1024; j++) mDrsU[i][j] = 0;
    }
 }
 
@@ -86,9 +116,12 @@ bool WDAQBoardEvent::IsComplete(){
       if(mDrsTxEnable & (1<<i))
          if(mDrsHasData[i]==false)
             ret = false; 
+      if(mAdcTxEnable & (1<<i))
+         if(mAdcHasData[i]==false)
+            ret = false; 
    }
 
-   return ret;
+   return ret && mEndFlagReceived;
 }
 
 
@@ -184,36 +217,67 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
    data->dac_rofs                       = SWAP_UINT16(data->dac_rofs);
    data->frontend_settings              = SWAP_UINT16(data->frontend_settings);
 
-   //skip other data
-   if(data->data_type != 0) return;
+   if(data->data_type == 0){
+      //DRS Data
 
-   //create new packet
-   WDAQDRSPacketData *packet = new WDAQDRSPacketData();
-   packet->SetEventHeaderInfo(data);
+      //create new packet
+      WDAQDRSPacketData *packet = new WDAQDRSPacketData();
+      packet->SetEventHeaderInfo(data);
+      printf("drs enable: %x\n", packet->mTxEnable);
 
-   // decode waveform data
-   auto pd = (unsigned char*)(data+1);
-   int numberBins = (int) packet->mPayloadLenght / 1.5;
-   for (int i=0 ; i<numberBins ; i+=2) {
-      short data1   = ((pd[1] & 0x0F) << 8) | pd[0];
-      short data2 = ((unsigned short)pd[2] << 4) | (pd[1] >> 4);
-      // subtract binary offset
-      data1 -= 0x800;
-      data2 -= 0x800;
-      pd+=3;
+      // decode waveform data
+      auto pd = (unsigned char*)(data+1);
+      int numberBins = (int) packet->mPayloadLenght / 1.5;
+      for (int i=0 ; i<numberBins ; i+=2) {
+         short data1   = ((pd[1] & 0x0F) << 8) | pd[0];
+         short data2 = ((unsigned short)pd[2] << 4) | (pd[1] >> 4);
+         // subtract binary offset
+         data1 -= 0x800;
+         data2 -= 0x800;
+         pd+=3;
 
-      // first segment
-      packet->data[i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
-      packet->data[i+1]       = (float)data2 * (1 / 4096.0);
-   }
-   fNPackets++;
+         // first segment
+         packet->data[i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
+         packet->data[i+1]       = (float)data2 * (1 / 4096.0);
+      }
+      fNPackets++;
 
-   //push to buffer
-   if(!fBuf->Try_push(packet)){
-      //could not push packet to buffer
-      //printf("overflow pk\n");
-      fDroppedPackets++;
-      delete packet;
+      //push to buffer
+      if(!fBuf->Try_push(packet)){
+         //could not push packet to buffer
+         //printf("overflow pk\n");
+         fDroppedPackets++;
+         delete packet;
+      }
+   } else if (data->data_type == 1) {
+      //ADC Data
+
+      //create new packet
+      WDAQADCPacketData *packet = new WDAQADCPacketData();
+      packet->SetEventHeaderInfo(data);
+
+      // decode waveform data
+      auto pd = (unsigned char*)(data+1);
+      int numberBins = (int) packet->mPayloadLenght / 1.5;
+      for (int i=0 ; i<numberBins ; i+=2) {
+         unsigned short data1   = ((pd[1] & 0x0F) << 8) | pd[0];
+         unsigned short data2 = ((unsigned short)pd[2] << 4) | (pd[1] >> 4);
+         pd+=3;
+
+         // first segment
+         packet->data[i]         = data1; // 1V DRS range with 12 bits
+         packet->data[i+1]       = data2;
+      }
+      fNPackets++;
+
+      //push to buffer
+      if(!fBuf->Try_push(packet)){
+         //could not push packet to buffer
+         //printf("overflow pk\n");
+         fDroppedPackets++;
+         delete packet;
+      }
+      
    }
 }
 
@@ -415,7 +479,7 @@ void WDAQEventWriter::Loop(){
             //write only channels with data
             if(DRS->mDrsHasData[ch]){
                std::string chn_header = "C";
-               if(ch<9) chn_header += "00";
+               if(ch<=9) chn_header += "00";
                else chn_header += "0";
                chn_header += std::to_string(ch);
                fFile.write(chn_header.c_str(), 4);
@@ -428,6 +492,21 @@ void WDAQEventWriter::Loop(){
 
                for(int bin=0; bin<1024; bin++){
                   unsigned short val = (unsigned short) ((DRS->mDrsU[ch][bin]+0.5)*65535);
+                  fFile.write((const char *)&val, 2);
+               }
+            }
+         }
+         for(int ch=0;ch<18;ch++){
+            //write only channels with data
+            if(DRS->mAdcHasData[ch]){
+               std::string chn_header = "A";
+               if(ch<=9) chn_header += "00";
+               else chn_header += "0";
+               chn_header += std::to_string(ch);
+               fFile.write(chn_header.c_str(), 4);
+
+               for(int bin=0; bin<1024; bin++){
+                  unsigned short val = DRS->mAdcU[ch][bin];
                   fFile.write((const char *)&val, 2);
                }
             }

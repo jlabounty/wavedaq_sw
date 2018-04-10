@@ -57,6 +57,17 @@ public:
    ~WDAQDRSPacketData() { };
 };
 
+//WDAQ ADC Packet Data -  derived packet class to host ADC data
+class WDAQADCPacketData : public WDAQPacketData{
+public:
+   unsigned short data[1024];
+
+   //Add packet info to given Board Event
+   void AddToBoardEvent(WDAQBoardEvent *e);
+
+   ~WDAQADCPacketData() { };
+};
+
 //WDAQ board event - Board Event class
 class WDAQBoardEvent {
 public:
@@ -72,18 +83,24 @@ public:
    unsigned short   mDacROFS;
    float            mTemperature;
 
-   //channel od data depenant
+   //channel or data depenant
    unsigned short   mFrontendSettings[WD_N_CHANNELS];
    unsigned int     mTriggerCell[WD_N_CHANNELS];
    unsigned int     mDrsTxEnable;
+   unsigned int     mAdcTxEnable;
    unsigned short   mDrsZeroSuppressionMask;
+   unsigned short   mAdcZeroSuppressionMask;
    
    float            mDrsU[WD_N_CHANNELS][1024];
+   unsigned short   mAdcU[WD_N_CHANNELS][1024];
    
    //event status
    bool             mVCalibrated;
+   bool             mEndFlagReceived;
    bool             mDrsHasData[WD_N_CHANNELS];
    int              mDrsByteNumber[WD_N_CHANNELS];
+   bool             mAdcHasData[WD_N_CHANNELS];
+   int              mAdcByteNumber[WD_N_CHANNELS];
 
    bool IsComplete();
    
