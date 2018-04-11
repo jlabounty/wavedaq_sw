@@ -79,8 +79,11 @@ void decode(const char *filename) {
    unsigned int scaler;
    unsigned short voltage[1024];
    unsigned short adc_voltage[2048];
+   unsigned char tdc_data[512];
+   unsigned long trg_data[512];
    double waveform[16][18][1024], time[16][18][1024];
    unsigned short adc_waveform[16][18][2048];
+   unsigned char tdc_waveform[16][18][512];
    float bin_width[16][18][1024];
    int i, j, b, chn, n, chn_index, n_boards;
    double t1, t2, dt;
@@ -114,6 +117,11 @@ void decode(const char *filename) {
    rec->Branch("a2", adc_waveform[0][1] ,"a2[2048]/s");
    rec->Branch("a3", adc_waveform[0][2] ,"a3[2048]/s");
    rec->Branch("a4", adc_waveform[0][3] ,"a4[2048]/s");
+   rec->Branch("tdc1", tdc_waveform[0][0] ,"tdc1[512]/b");
+   rec->Branch("tdc2", tdc_waveform[0][1] ,"tdc2[512]/b");
+   rec->Branch("tdc3", tdc_waveform[0][2] ,"tdc3[512]/b");
+   rec->Branch("tdc4", tdc_waveform[0][3] ,"tdc4[512]/b");
+   rec->Branch("trg", trg_data ,"trg[512]/l");
    
    // create canvas
    TCanvas *c1 = new TCanvas();
@@ -195,7 +203,7 @@ void decode(const char *filename) {
             
             // read channel header
             fread(&ch, sizeof(ch), 1, f);
-            if (ch.c[0] != 'C' && ch.c[0] != 'A') {
+            if (ch.c[0] != 'C' && ch.c[0] != 'A' && ch.c[0] != 'T') {
                // event header found
                fseek(f, -4, SEEK_CUR);
                break;
@@ -222,13 +230,32 @@ void decode(const char *filename) {
                   for (j=0,time[b][chn_index][i]=0 ; j<i ; j++)
                      time[b][chn_index][i] += bin_width[b][chn_index][(j+tch.trigger_cell) % 1024];
                }
-            } else {
+            } else if(ch.c[0] == 'A') {
                //ADC
                //printf("found adc for channel %d\n", chn_index);
                fread(adc_voltage, sizeof(short), 2048, f);
                for (i=0 ; i<2048 ; i++) {
                   // convert data to volts
                   adc_waveform[b][chn_index][i] = adc_voltage[i];
+               }
+            } else if(ch.c[0] == 'T') {
+               if(ch.cn[0] == '0'){
+                  //TDC
+                  //printf("found tdc for channel %d\n", chn_index);
+                  fread(tdc_data, sizeof(char), 512, f);
+                  for (i=0 ; i<512 ; i++) {
+                     // convert data to volts
+                     tdc_waveform[b][chn_index][i] = tdc_data[i];
+                  }
+               } else if(ch.cn[0] == 'R'){
+                  //TRG
+                  fread(trg_data, sizeof(long), 512, f);
+                  /*for(int i=0; i<512; i++){
+                     int val = trg_data[i]&0xFFFF;
+                     if(val& 0x8000) val -=0x10000;
+                     g->SetPoint(i, i, val);
+                     printf("%016lx %d\n", trg_data[i], val);
+                  }*/
                }
             }
          }

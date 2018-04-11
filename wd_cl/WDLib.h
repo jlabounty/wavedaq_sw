@@ -352,9 +352,9 @@ class WDWDB : public WDBoard, public WDB{
          }
          SetDrsChTxEn(tx_ena);
          SetAdcChTxEn(tx_ena);
-         SetTdcChTxEn(0);
+         SetTdcChTxEn(tx_ena);
          SetZeroSuprEn(false);
-         SetTrgTxEn(0);
+         SetTrgTxEn(1);
          SetSclTxEn(0);
 
 

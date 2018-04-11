@@ -68,6 +68,28 @@ public:
    ~WDAQADCPacketData() { };
 };
 
+//WDAQ TDC Packet Data -  derived packet class to host TDC data
+class WDAQTDCPacketData : public WDAQPacketData{
+public:
+   unsigned char data[512];
+
+   //Add packet info to given Board Event
+   void AddToBoardEvent(WDAQBoardEvent *e);
+
+   ~WDAQTDCPacketData() { };
+};
+
+//WDAQ TRG Packet Data -  derived packet class to host TRG data
+class WDAQTRGPacketData : public WDAQPacketData{
+public:
+   unsigned long data[512];
+
+   //Add packet info to given Board Event
+   void AddToBoardEvent(WDAQBoardEvent *e);
+
+   ~WDAQTRGPacketData() { };
+};
+
 //WDAQ board event - Board Event class
 class WDAQBoardEvent {
 public:
@@ -88,11 +110,16 @@ public:
    unsigned int     mTriggerCell[WD_N_CHANNELS];
    unsigned int     mDrsTxEnable;
    unsigned int     mAdcTxEnable;
+   unsigned int     mTdcTxEnable;
+   unsigned int     mTrgTxEnable;
    unsigned short   mDrsZeroSuppressionMask;
    unsigned short   mAdcZeroSuppressionMask;
+   unsigned short   mTdcZeroSuppressionMask;
    
    float            mDrsU[WD_N_CHANNELS][1024];
-   unsigned short   mAdcU[WD_N_CHANNELS][2048];
+   unsigned short   mAdcU[WD_N_CHANNELS-2][2048];
+   unsigned char    mTdc[WD_N_CHANNELS-2][512];
+   unsigned long    mTrg[512];
    
    //event status
    bool             mVCalibrated;
@@ -101,6 +128,10 @@ public:
    int              mDrsByteNumber[WD_N_CHANNELS];
    bool             mAdcHasData[WD_N_CHANNELS];
    int              mAdcByteNumber[WD_N_CHANNELS];
+   bool             mTdcHasData[WD_N_CHANNELS];
+   int              mTdcByteNumber[WD_N_CHANNELS];
+   bool             mTrgHasData;
+   int              mTrgByteNumber;
 
    bool IsComplete();
    float GetRange() {

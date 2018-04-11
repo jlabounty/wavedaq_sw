@@ -1,5 +1,7 @@
 #include "WDAQLib.h"
 
+#define SWAP_UINT64(x) (((uint64_t)SWAP_UINT32((uint32_t)((x) & 0xffffffff)) << 32) | (uint64_t)SWAP_UINT32((uint32_t)((x) >> 32)))
+
 //WDAQ Packet Data - class for UDP DAQ packets 
 //Set properties according to UDP event header
 void WDAQPacketData::SetEventHeaderInfo(WD2_FRAME_HEADER *ph){
@@ -83,6 +85,56 @@ void WDAQADCPacketData::AddToBoardEvent(WDAQBoardEvent *e){
    if(mFlags & 0x10) e->mEndFlagReceived = true;
 
 }
+
+//WDAQ TDC Packet Data -  derived packet class to host TDC data
+//Add packet info to given Board Event
+void WDAQTDCPacketData::AddToBoardEvent(WDAQBoardEvent *e){
+
+   int channel = mChannel;
+   int numberBins = (int) mPayloadLenght;
+   int firstBin = mDataOffset;
+
+   for(int i=0; i<numberBins; i++){
+      e->mTdc[channel][firstBin+i] = data[i];
+   }
+
+   e->mTdcTxEnable = mTxEnable;
+   e->mTdcZeroSuppressionMask = mZeroSuppressionMask;
+
+   //check all data received
+   e->mTdcByteNumber[channel] += mPayloadLenght*8;
+   if(e->mTdcByteNumber[channel] >= mSamplesPerEventPerChannel*mBitsPerSample){
+      e->mTdcHasData[channel] = true; 
+   }
+
+   if(mFlags & 0x10) e->mEndFlagReceived = true;
+
+}
+
+//WDAQ TRG Packet Data -  derived packet class to host TRG data
+//Add packet info to given Board Event
+void WDAQTRGPacketData::AddToBoardEvent(WDAQBoardEvent *e){
+
+   int numberBins = (int) mPayloadLenght/8;
+   int firstBin = mDataOffset/8;
+
+   for(int i=0; i<numberBins; i++){
+      e->mTrg[firstBin+i] = data[i];
+   }
+
+   e->mTrgTxEnable = mTxEnable;
+
+   //check all data received
+   e->mTrgByteNumber += mPayloadLenght*8;
+
+   if(e->mTrgByteNumber >= mSamplesPerEventPerChannel*mBitsPerSample){
+      e->mTrgHasData = true; 
+   }
+
+   if(mFlags & 0x10) e->mEndFlagReceived = true;
+
+}
+
 //WDAQ Board Event - single WDB DAQ event
 //Constructor, init from packet data
 WDAQBoardEvent::WDAQBoardEvent(WDAQPacketData* pkt){
@@ -100,13 +152,21 @@ WDAQBoardEvent::WDAQBoardEvent(WDAQPacketData* pkt){
    //reset status
    mVCalibrated = false;
    mEndFlagReceived = false;
+   mDrsTxEnable = 0;
+   mAdcTxEnable = 0;
+   mTdcTxEnable = 0;
+   mTrgTxEnable = 0;
    for(int i=0; i<WD_N_CHANNELS; i++){
       mDrsHasData[i] = false;
       mAdcHasData[i] = false;
+      mTdcHasData[i] = false;
       mDrsByteNumber[i] = 0;
       mAdcByteNumber[i] = 0;
+      mTdcByteNumber[i] = 0;
       //for(int j=0; j<1024; j++) mDrsU[i][j] = 0;
    }
+   mTrgHasData = false;
+   mTrgByteNumber = 0;
 }
 
 //check complete
@@ -119,7 +179,13 @@ bool WDAQBoardEvent::IsComplete(){
       if(mAdcTxEnable & (1<<i))
          if(mAdcHasData[i]==false)
             ret = false; 
+      if(mTdcTxEnable & (1<<i))
+         if(mTdcHasData[i]==false)
+            ret = false;
    }
+   if(mTrgTxEnable)
+      if(mTrgHasData==false)
+         ret = false;
 
    return ret && mEndFlagReceived;
 }
@@ -266,6 +332,49 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
          // first segment
          packet->data[i]         = data1; // 1V DRS range with 12 bits
          packet->data[i+1]       = data2;
+      }
+      fNPackets++;
+
+      //push to buffer
+      if(!fBuf->Try_push(packet)){
+         //could not push packet to buffer
+         //printf("overflow pk\n");
+         fDroppedPackets++;
+         delete packet;
+      }
+   } else if (data->data_type == 2) {
+      //TDC Data
+
+      //create new packet
+      WDAQTDCPacketData *packet = new WDAQTDCPacketData();
+      packet->SetEventHeaderInfo(data);
+
+      // decode waveform data
+      auto pd = (unsigned char*)(data+1);
+      int numberBins = (int) packet->mPayloadLenght;
+      for (int i=0 ; i<numberBins ; i++) {
+         packet->data[i] = pd[i];
+      }
+      fNPackets++;
+
+      //push to buffer
+      if(!fBuf->Try_push(packet)){
+         //could not push packet to buffer
+         //printf("overflow pk\n");
+         fDroppedPackets++;
+         delete packet;
+      }
+   } else if (data->data_type == 3) {
+      //TRG Data
+      //create new packet
+      WDAQTRGPacketData *packet = new WDAQTRGPacketData();
+      packet->SetEventHeaderInfo(data);
+
+      // decode waveform data
+      auto pd = (unsigned long*)(data+1);
+      int numberBins = (int) packet->mPayloadLenght/8;
+      for (int i=0 ; i<numberBins ; i++) {
+         packet->data[i] = SWAP_UINT64(pd[i]);
       }
       fNPackets++;
 
@@ -526,6 +635,31 @@ void WDAQEventWriter::Loop(){
                   fFile.write((const char *)&val, 2);
                }
             }
+         }
+         for(int ch=0;ch<18;ch++){
+            //write only channels with data
+            if(DRS->mTdcHasData[ch]){
+               std::string chn_header = "T";
+               if(ch<=9) chn_header += "00";
+               else chn_header += "0";
+               chn_header += std::to_string(ch);
+               fFile.write(chn_header.c_str(), 4);
+
+               for(int bin=0; bin<512; bin++){
+                  unsigned char val = DRS->mTdc[ch][bin];
+                  fFile.write((const char *)&val, 1);
+               }
+            }
+         }
+         if(DRS->mTrgHasData){
+            std::string chn_header = "TRGO";
+            fFile.write(chn_header.c_str(), 4);
+
+            for(int bin=0; bin<512; bin++){
+               unsigned long val = DRS->mTrg[bin];
+               fFile.write((const char *)&val, 8);
+            }
+
          }
       }
 
