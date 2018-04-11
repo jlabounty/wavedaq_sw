@@ -223,7 +223,6 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
       //create new packet
       WDAQDRSPacketData *packet = new WDAQDRSPacketData();
       packet->SetEventHeaderInfo(data);
-      printf("drs enable: %x\n", packet->mTxEnable);
 
       // decode waveform data
       auto pd = (unsigned char*)(data+1);
@@ -374,10 +373,24 @@ void WDAQWorker::calibrateBoard(WDAQBoardEvent *ev){
 
    //amplitude e->mDrsU[ch][bin];
    //unrotate
+   float range = ev->GetRange();
    for(int ch=0; ch<WD_N_CHANNELS; ch++){
       //calibrate only channels with data
       if(ev->mDrsHasData[ch]){
          int tc = ch < 8 || ch == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
+
+         //extract range offset
+         float ofs;
+         if (fabs(range - (-0.45)) < 0.001){
+            ofs = calib->mCalib.drs_offset_range0[ch];
+         }else if (fabs(range) < 0.001){
+            ofs = calib->mCalib.drs_offset_range1[ch];
+         }else if (fabs(range - 0.45) < 0.001){
+            ofs = calib->mCalib.drs_offset_range2[ch];
+         }else{
+            ofs = 0;
+         }
+
          for (int bin=0 ; bin<1024 ; bin++){
             //offset calibration
             ev->mDrsU[ch][bin] -= calib->mCalib.wf_offset1[ch][(bin+tc)%1024];
@@ -392,7 +405,9 @@ void WDAQWorker::calibrateBoard(WDAQBoardEvent *ev){
                   ev->mDrsU[ch][bin] /= calib->mCalib.wf_gain2[ch][(bin+tc) % 1024];
 
                //range offset
-               ev->mDrsU[ch][bin] -= calib->mCalib.drs_offset_range2[ch];
+               //ev->mDrsU[ch][bin] -= calib->mCalib.drs_offset_range2[ch];
+               //
+               ev->mDrsU[ch][bin] -= ofs;
             }
          }
       }
@@ -467,14 +482,15 @@ void WDAQEventWriter::Loop(){
       const char head[] = "EHDR";
       fFile.write(head, 4);
       fFile.write((const char *)&ptr->mEventNumber, 4);
-      const char temp[] = "0000000000000000";
-      fFile.write(temp, 16);
+      const char temp = 0;
+      for(int i=0; i<16; i++) fFile.write(&temp, 1);
 
       //write DRS data
       for(auto DRS : ptr->fBoard){
          const char board_head[] = "B#";
          fFile.write(board_head, 2);
          fFile.write((const char *)&DRS->mBoardId, 2);
+         float range = DRS->GetRange();
          for(int ch=0;ch<18;ch++){
             //write only channels with data
             if(DRS->mDrsHasData[ch]){
@@ -491,7 +507,7 @@ void WDAQEventWriter::Loop(){
                fFile.write(trgcell_head, 2);
 
                for(int bin=0; bin<1024; bin++){
-                  unsigned short val = (unsigned short) ((DRS->mDrsU[ch][bin]+0.5)*65535);
+                  unsigned short val = (unsigned short) ((DRS->mDrsU[ch][bin]-range+0.5)*65535);
                   fFile.write((const char *)&val, 2);
                }
             }
@@ -505,7 +521,7 @@ void WDAQEventWriter::Loop(){
                chn_header += std::to_string(ch);
                fFile.write(chn_header.c_str(), 4);
 
-               for(int bin=0; bin<1024; bin++){
+               for(int bin=0; bin<2048; bin++){
                   unsigned short val = DRS->mAdcU[ch][bin];
                   fFile.write((const char *)&val, 2);
                }

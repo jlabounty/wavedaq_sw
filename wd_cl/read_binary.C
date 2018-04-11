@@ -78,8 +78,9 @@ void decode(const char *filename) {
    
    unsigned int scaler;
    unsigned short voltage[1024];
+   unsigned short adc_voltage[2048];
    double waveform[16][18][1024], time[16][18][1024];
-   unsigned short adc_waveform[16][18][1024];
+   unsigned short adc_waveform[16][18][2048];
    float bin_width[16][18][1024];
    int i, j, b, chn, n, chn_index, n_boards;
    double t1, t2, dt;
@@ -109,10 +110,10 @@ void decode(const char *filename) {
    rec->Branch("w2", waveform[0][1] ,"w2[1024]/D");
    rec->Branch("w3", waveform[0][2] ,"w3[1024]/D");
    rec->Branch("w4", waveform[0][3] ,"w4[1024]/D");
-   rec->Branch("a1", adc_waveform[0][0] ,"a1[1024]/s");
-   rec->Branch("a2", adc_waveform[0][1] ,"a2[1024]/s");
-   rec->Branch("a3", adc_waveform[0][2] ,"a3[1024]/s");
-   rec->Branch("a4", adc_waveform[0][3] ,"a4[1024]/s");
+   rec->Branch("a1", adc_waveform[0][0] ,"a1[2048]/s");
+   rec->Branch("a2", adc_waveform[0][1] ,"a2[2048]/s");
+   rec->Branch("a3", adc_waveform[0][2] ,"a3[2048]/s");
+   rec->Branch("a4", adc_waveform[0][3] ,"a4[2048]/s");
    
    // create canvas
    TCanvas *c1 = new TCanvas();
@@ -167,7 +168,7 @@ void decode(const char *filename) {
    n_boards = b;
    
    // loop over all events in data file
-   for (n=0 ; n<5 ; n++) {
+   for (n=0 ; n<1000 ; n++) {
       // read event header
       i = fread(&eh, sizeof(eh), 1, f);
       if (i < 1)
@@ -202,7 +203,7 @@ void decode(const char *filename) {
             chn_index = (ch.cn[1] - '0')*10 + ch.cn[2] - '0';
             
             if(ch.c[0] == 'C'){
-               printf("found drs for channel %d\n", chn_index);
+               //printf("found drs for channel %d\n", chn_index);
                //DRS
                fread(&scaler, sizeof(int), 1, f);
                // read trigger cell
@@ -223,11 +224,11 @@ void decode(const char *filename) {
                }
             } else {
                //ADC
-               printf("found adc for channel %d\n", chn_index);
-               fread(voltage, sizeof(short), 1024, f);
-               for (i=0 ; i<1024 ; i++) {
+               //printf("found adc for channel %d\n", chn_index);
+               fread(adc_voltage, sizeof(short), 2048, f);
+               for (i=0 ; i<2048 ; i++) {
                   // convert data to volts
-                  adc_waveform[b][chn_index][i] = voltage[i];
+                  adc_waveform[b][chn_index][i] = adc_voltage[i];
                }
             }
          }
@@ -247,10 +248,10 @@ void decode(const char *filename) {
          // fill graph
          printf("%lf - %lf\n", time[0][0][0], waveform[0][0][0]);
          for (i=0 ; i<1024 ; i++)
-            g->SetPoint(i, time[0][0][i], adc_waveform[0][0][i]+adc_waveform[0][1][i]+adc_waveform[0][2][i]+adc_waveform[0][3][i]);
+            g->SetPoint(i, time[0][0][i], waveform[0][0][i]);
          
          // draw graph and wait for user click
-         g->Draw("ACP");
+         g->Draw("ALP");
          c1->Update();
          gPad->WaitPrimitive();
       }

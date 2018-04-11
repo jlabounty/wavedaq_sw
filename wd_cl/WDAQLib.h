@@ -92,7 +92,7 @@ public:
    unsigned short   mAdcZeroSuppressionMask;
    
    float            mDrsU[WD_N_CHANNELS][1024];
-   unsigned short   mAdcU[WD_N_CHANNELS][1024];
+   unsigned short   mAdcU[WD_N_CHANNELS][2048];
    
    //event status
    bool             mVCalibrated;
@@ -103,9 +103,12 @@ public:
    int              mAdcByteNumber[WD_N_CHANNELS];
 
    bool IsComplete();
+   float GetRange() {
+      return (int)((0.68 - (mDacOFS/65535.0*2.5))*100)/100.0;
+   };
    
    WDAQBoardEvent(WDAQPacketData* pkt);
-}; 
+};
 
 //WDAQ Event - global DAQ event
 class WDAQEvent {
