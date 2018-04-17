@@ -1,332 +1,233 @@
-//
-//  wds.cpp
-//  WaveDAQ Server Application
-//
-//  Created by Stefan Ritt on 5/8/15.
-//
-
-#include <stdio.h>
+#include "WDLib.h"
+#include <vector>
+#include <chrono>
 #include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <stdlib.h>
-#include <ctype.h>
+//debug - Thread that prints packets
+class PacketDebug : public DAQThread{
+   DAQBuffer<WDAQPacketData> *fSource;
 
-#ifdef _MSC_VER
-#else
-#include <getopt.h>
-#endif
+   void Begin(){ };
 
+   void Loop(){
+      WDAQPacketData *ptr = nullptr;
+      if(fSource->Try_pop(ptr)){
+         printf("received packet\n");
+         printf("\t Board:%d\n", ptr->mBoardId);
+         printf("\t Crate:%d\n", ptr->mCrateId);
+         printf("\t Slot:%d\n", ptr->mSlotId);
+         printf("\t ADC:%d\n", ptr->mADC);
+         printf("\t Channel:%d\n", ptr->mChannel);
+         printf("\t DataType:%d\n", ptr->mDataType);
+         printf("\t TxEnable:%x\n", ptr->mTxEnable);
+         printf("\t ZeroSuppressionMask:%x\n", ptr->mZeroSuppressionMask);
+         printf("\t Flags:%x\n", ptr->mFlags);
+         printf("\t TriggerSource:%d\n", ptr->mTriggerSource);
+         printf("\t BitsPerSample:%d\n", ptr->mBitsPerSample);
+         printf("\t SamplesPerEventPerChannel:%d\n", ptr->mSamplesPerEventPerChannel);
+         printf("\t PayloadLenght:%d\n", ptr->mPayloadLenght);
+         printf("\t DataOffset:%d\n", ptr->mDataOffset);
+         printf("\t EventNumber:%d\n", ptr->mEventNumber);
+         printf("\t TriggerType:%x\n", ptr->mTriggerType);
+         printf("\t TriggerEventNumber:%d\n", ptr->mTriggerEventNumber);
+         printf("\t TriggerCell:%d\n", ptr->mTriggerCell);
+         printf("\t SamplingFrequency:%d\n", ptr->mSamplingFrequency);
+         printf("\t Temperature:%f\n", ptr->mTemperature);
+         printf("\t DacOFS:%d\n", ptr->mDacOFS);
+         printf("\t DacROFS:%d\n", ptr->mDacROFS);
+         printf("\t FrontendSettings:%x\n", ptr->mFrontendSettings);
 
-#include "wds.h"
+         delete ptr;
+      }
+   }
+      
 
-//#define CMD_OFS_CALIB 1
-//#define CMD_TIME_CALIB 2
+   void end() { };
 
-//comment the line below if you do not want to execute root macros
-//#define RUNROOT
+   public:
+   PacketDebug(DAQBuffer<WDAQPacketData> *source){
+      fSource = source;
+   }
+};
 
-//CALIB_PROGRESS ofs_prog;
-
-/*-----------------------------------------------------------------------------------------*/
-void runRoot(int sel){
-#ifdef RUNROOT
-	FILE* pipe;
-        
-	if(sel==0) pipe = popen("root -l readdata.C+ >/dev/null 2>&1", "w");
-	else pipe = popen("root -l readall.C+ >/dev/null 2>&1", "w");
-	
-	printf("ROOT Running.... press enter to exit");
-        char a;
-	do {
-            scanf("%c",&a);
-        } while (a!='\n') ;
-	
-	fprintf(pipe, ".q\n");
-	pclose(pipe);
-#endif
-}
-
-int main(int argc, char *argv[]) 
+int main(int argc, char *argv[])
 {
-   int i, j, i1, i2, cmd = 0;
-   GLOBALS gl;
-   char str[256], *p;
-   
-   memset(&gl, 0, sizeof(gl));
-   gl.http_port          = 8080; // default port
-   gl.nominal_sampling_frequency = 5;
-   gl.ofs_calib1_flag    = 1;
-   gl.ofs_calib2_flag    = 1;
-   gl.gain_calib_flag    = 1;
-   gl.range_calib_flag   = 1;
-   gl.rotate_flag        = 1;
-   gl.remove_spikes      = 1;
-   gl.trigger_mode       = TM_AUTO;
-   gl.osctca_flag        = 0;
-   gl.mux_flag           = 0;
-   gl.dcv_flag           = 0;
-   gl.dcv                = 0;
-   gl.clock_source       = 1;
-
-   for (i=0 ; i<16 ; i++) {
-      gl.board[i].trigger_level = 0;
-      gl.board[i].gain          = 0;       // gain 1
-      gl.board[i].range         = 0;       // range +-0.5V
-      gl.board[i].pzc           = 0;       // PZC off
-      strlcpy(gl.board[i].trigger_mask, "FFFF0000", sizeof(gl.board[i].trigger_mask)); // or of all 16 channels
-   }
-   
-
-   gl.n_boards=0;
-   
-   if(argc <2){
-           printf("usage: wd_cl [board number]\n");
-	   return FAILURE;
+   int option;
+   WDSystem *sys;
+   if(argc!=2){
+      printf("exectute %s wdsystem.xml\n", argv[0]);
+      return -1;
    }
 
-   sprintf(gl.board[gl.n_boards++].name, "wd%03d", atoi(argv[1]));
+   sys = new WDSystem();
+   sys->CreateFromXml(std::string(argv[1]));
 
+   /* main loop on the options */
+   do {
+      printf("\n  --- options: \n");
+      printf("[ 1]: configure system     \t \t  [ 2]: draw system          \n");
+      printf("[ 3]: system start         \t \t  [ 4]: get busy             \n");
+      printf("[ 5]: system stop          \t \t  [ 6]: system sync          \n");
+      printf("[ 7]: turn on              \t \t  [ 8]: turn off             \n");
+      printf("[ 9]: train serdes         \t \t  [10]: print serdes state   \n");
+      printf("[11]: spawn daq            \t \t  [12]: stop daq             \n");
+      printf("[13]: sync dly scan        \t \t  [14]:                      \n");
+      do {
+         char opline[256];
+         printf("give an option: ");
+         scanf("%s",opline);
+         option = strtod(opline,NULL);
+
+         if(option == 1)
+         {
+            printf("configuring system... ");
+            sys->Configure();
+         }
+         if(option == 2)
+         {
+            int size = sys->GetCrateSize();
+            printf("system with %d crates\n", size);
+            //for(int icrate=0; icrate<size; icrate++){
+            //   wdcrate *c = sys->getcrateat(icrate);
+            for(auto c : *sys){
+               printf("\t crate name %s",  c->GetMscbName().c_str());
+               if(c == sys->GetCrateAt(sys->GetTriggerCrateId())){
+                  printf(" trigger crate\n");
+               } else printf("\n");
+
+               //for(int iboard=0; iboard<18; iboard++){
+               //   printf("\t \t slot %d: ", iboard);
+               //   if(c->hasboardin(iboard)){
+               //      wdboard *b = c->getboardat(iboard);
+               for(auto b : *c){
+                  if(b!=0){
+                     printf("\t \t slot %d: ", b->GetSlot());
+                     if(dynamic_cast<WDWDB*>(b) == nullptr){
+                        if(dynamic_cast<WDTCB*>(b) == nullptr)
+                           printf("with board in slot %d of crate %s\n", b->GetSlot(), b->GetCrate()->GetMscbName().c_str());
+                        else
+                           printf("tcb group=%s\n", b->GetGroup().c_str());
+                     } else
+                        printf("wdb with name %s group=%s\n", dynamic_cast<WDWDB*>(b)->GetName().c_str(), b->GetGroup().c_str());
+
+                     std::map<std::string, std::string> p = b->GetProperties();
+                     for(std::map<std::string,std::string>::iterator it=p.begin(); it!=p.end(); it++){
+                        printf("\t \t \t %s: %s\n", it->first.c_str(), it->second.c_str());
+                     }
+
+                     std::string gr = b->GetGroup();
+                     std::map<std::string, std::string> pgr = sys->GetGroupProperties(gr);
+                     for(std::map<std::string,std::string>::iterator it=pgr.begin(); it!=pgr.end(); it++){
+                        printf("\t \t \t %s: %s from group %s\n", it->first.c_str(), it->second.c_str(), gr.c_str());
+                     }
+                  } else {
+                     printf("\t \t empty\n");
+                  }
+               }
+            }
+         }
+         if(option == 3)
+         {
+            printf("starting system...\n");
+            sys->GoRun();
+         }
+         if(option == 4)
+         {
+            WDBoard *triggerb = sys->GetTriggerBoard();
+            if(triggerb->IsBusy()){
+               printf("System is Busy\n");
+            } else {
+               printf("System is Not Busy\n");
+            }
+         }
+         if(option == 5)
+         {
+            printf("stopping system...\n");
+            sys->StopRun();
+         }
+         if(option == 6)
+         {
+            printf("generating SYNC...\n");
+            WDBoard *triggerb = sys->GetTriggerBoard();
+            triggerb->Sync();
+         }
+         if(option == 7)
+         {
+            sys->PowerOn();
+         }
+         if(option == 8)
+         {
+            sys->PowerOff();
+         }
+         if(option == 9)
+         {
+            sys->SetSerdesTraining(true);
+            sys->TrainSerdes();
+         }
+         if(option == 10)
+         {
+            for(auto c : *sys)
+               for(auto b :*c)
+                  if(b){
+                     if(dynamic_cast<WDTCB*>(b) != nullptr){
+                        printf("TCB %s\n", c->GetMscbName().c_str());
+                        unsigned int val;
+                        dynamic_cast<WDTCB*>(b)->GetAutoCalibrateBusy(&val);
+                        printf("busy: %08x\n", val);
+                        dynamic_cast<WDTCB*>(b)->GetAutoCalibrateFail(&val);
+                        printf("fail: %08x\n", val);
+                     }
+                  }
+         }
+         if(option == 11)
+         {
+            sys->SpawnDAQ();
+            //PacketDebug* p =  new PacketDebug(sys->fPacketBuffer);
+            //p->Start();
+            //p->GoRun();
+         }
+         if(option == 12)
+         {
+            sys->StopDAQ();
+         }
+         if(option == 13)
+         {
+            sys->SetSerdesTraining(true);
+            unsigned int dly = 0x08;
+            dynamic_cast<WDTCB*>(sys->GetTriggerBoard())->SetTRGBusIDLY(&dly, &dly, &dly);
+            for(dly=0; dly<32; dly++){
+               printf("testing dly %u\n", dly);
+               dynamic_cast<WDTCB*>(sys->GetTriggerBoard())->SetTRGBusODLY(&dly, &dly, &dly);
+               sys->GetTriggerBoard()->Sync();
+               sys->TrainSerdes();
+               std::this_thread::sleep_for(std::chrono::seconds(3));
+               for(auto c : *sys)
+                  for(auto b :*c)
+                     if(b){
+                        if(dynamic_cast<WDTCB*>(b) != nullptr){
+                           unsigned int val;
+                           dynamic_cast<WDTCB*>(b)->GetAutoCalibrateFail(&val);
+                              unsigned int val1=0;
+                              unsigned int val2=0;
+                              unsigned int val3=0;
+                              dynamic_cast<WDTCB*>(b)->ReadReg(0x355, &val1);
+                              dynamic_cast<WDTCB*>(b)->ReadReg(0x356, &val2);
+                              dynamic_cast<WDTCB*>(b)->ReadReg(0x357, &val3);
+                              printf("%s %08x %08x maxslot=%d ", c->GetMscbName().c_str(), val2, val1, val3);
+                           if(val & 0x80000000){
+                              printf("fail: %08x", val);
+                           }
+                           printf("\n");
+                        }
+                     }
+
+            }
+         }
+      } while ( option == 0 ) ;
+      /* end of the main loop on the options*/
+   } while ( option >= 0);
    
-   // initialize ethernet interface to WD board
-   if (wd_init(&gl) != SUCCESS)
-          return FAILURE;
+   
+   /* normal exit: close the VME crate */
+   printf(" exiting ... \n");
 
-    int option;
-    char opline[256];
-    do {
-        printf("\n --- Options: \n");
-        printf("[ 1]: Set Run reg          \t \t  [ 2]: Get Run Reg\n");
-        printf("[ 3]: Set Runmode          \t \t  [ 4]: Unset Runmode\n");
-        printf("[ 5]: Read MemAddr    	   \t \t  [ 6]: SW Sync\n");
-        printf("[ 7]: Dump input memory    \t \t  [ 8]: Dump output memory\n");
-        printf("[ 9]: Write input memory   \t \t  [10]: Set threshold\n");
-        printf("[11]: Set calibration      \t \t  [12]: Multiple Run\n");
-        printf("[13]: write output memory  \t \t  [14]: Reset Serdes\n");
-        printf("[-1]: Exit\n");
-        
-        do {
-            printf("Give an option: ");
-            scanf("%s",opline);
-            option = strtod(opline,NULL);
-        } while ( option == 0 ) ;
-        //
-        if(option == 1) {
-            unsigned int data=0;
-            int scanfdata;
-            wd_read_reg(&gl, 0,RRUN, &data);
-	    data &= 0xFFFFFFE9;
-            printf("FADCMODE? ");
-            scanf("%d", &scanfdata);
-	    data |= (scanfdata & 0x1)<<1;
-            printf("TESTTXMODE? ");
-            scanf("%d", &scanfdata);
-	    data |= (scanfdata & 0x1)<<2;
-            printf("ALGSEL (0=TC, 1=LXe)? ");
-            scanf("%d", &scanfdata);
-	    data |= (scanfdata & 0x1)<<4;
-            wd_write_reg(&gl, 0, RRUN, data);
-        }
-	//
-        if(option == 2) {
-            unsigned int data;
-            wd_read_reg(&gl, 0, RRUN, &data);
-	    if(data & 0x00000001) {
-	    	printf("STATE RUNMODE\n");
-	    } else {
-	    	printf("STATE STOP\n");
-	    }
-	    if(data & 0x00000002) {
-	    	printf("FADCMODE on\n");
-	    } else {
-	    	printf("FADCMODE off\n");
-	    }
-	    if(data & 0x00000004) {
-	    	printf("TESTTXMODE on\n");
-	    } else {
-	    	printf("TESTTXMODE off\n");
-	    }
-	    if(data & 0x00000010) {
-	    	printf("ALGSEL LXe\n");
-	    } else {
-	    	printf("ALGSEL TC\n");
-	    }
-
-	    printf("RUNREG value: %08x\n", data);
-
-	}
-	//
-        if(option == 3) {
-            wd_TRGSetRUN(&gl, 0);
-	}
-        //
-        if(option == 4) {
-            wd_TRGStopRUN(&gl, 0);
-        }
-	//
-        if(option == 5) {
-	  unsigned int counters[2];
-            wd_read_memaddr(&gl, 0, counters);
-	    printf("counterA:%09x counterB:%09x\n", counters[0], counters[1]);
-	}
-	//
-        if(option == 6) {
-            wd_swsync(&gl, 0);
-	}
-        //
-        if(option == 7) {
-            int channelID;
-            printf("channel: ");
-            scanf("%d", &channelID);
-            unsigned int memaddr;
-            wd_read_reg(&gl, 0,RMEMADDR, &memaddr, 1);
-            unsigned int data[512];
-            wd_read_reg(&gl, 0,MEMIN + 512*channelID, data, 512);
-            FILE* out = fopen("data.dat", "w");
-	    fprintf(out, "%x\n", memaddr&0x1FF);
-            for (int i=0; i<512; i++) {
-                fprintf(out, "%x\n", data[i]);
-            }
-            fclose(out);
-	    runRoot(0);
-        }
-        //
-        if(option == 8) {
-            int memID;
-            printf("memory: ");
-            scanf("%d", &memID);
-            unsigned int memaddr;
-            wd_read_reg(&gl, 0,RMEMADDR, &memaddr);
-            unsigned int data[2048];
-            wd_read_reg(&gl, 0,MEMOUT, data, 2048);
-            FILE* out = fopen("data.dat", "w");
-	    fprintf(out, "%x\n", memaddr&0x1ff);
-	
-            for (int i=0; i<512; i++) {
-	    	if (memID==0)
-			fprintf(out, "%08x\n", data[i] | (data[i+512]<<16) );
-		else
-	        	fprintf(out, "%08x\n", (data[i+1024]) | (data[i+1536]<<16));
-            }
-            fclose(out);
-            
-	    //	    runRoot(0);
-        }
-        //
-        if(option == 9) {
-            FILE* in = fopen("datain.dat", "r");
-            for (int i=0; i<512*16; i++) {
-		unsigned int data;
-                fscanf(in, "%x\n", &data);
-            	wd_write_reg(&gl, 0,MEMIN + i, data);
-            }
-            fclose(in);
-        }
-        //
-	if(option ==  10) {
-		unsigned int data;
-		unsigned int offset;
-		printf("Threshold (0-3): ");
-		scanf("%d", &offset);
-		printf("Value: ");
-		scanf("%x", &data);
-		wd_set_TRGThr(&gl, 0, offset, data);
-	}
-        //
-	if(option ==  11) {
-		unsigned int data;
-		unsigned int from, to;
-		printf("From input channel (0-15): ");
-		scanf("%d", &from);
-		printf("To input channel (0-15): ");
-		scanf("%d", &to);
-		printf("Value (0-255): ");
-		scanf("%x", &data);
-		if(to<from)
-		  printf("Please from > to!\n");
-		else {
-		  for(int icha = from; icha<to+1; icha++)
-		    wd_set_TRGCalib(&gl, 0, icha, data);
-		}
-	}
-	//
-	if(option == 12) {
-		int channel1, channel2;
-		printf("Input channel (0-15, -1 for all): ");
-		scanf("%d", &channel1);
-		if(channel1!=-1){
-			printf("Input channel (0-15): ");
-			scanf("%d", &channel2);
-		}
-		wd_write_reg(&gl, 0, RRUN, 0x6);
-		wd_set_TRGThr(&gl, 0, 0, 0xA);
-		for(int i =0; i<16; i++)
-		       	if(i == channel1 || i == channel2 || channel1 == -1)
-				wd_set_TRGCalib(&gl, 0, i, 0x01);
-			else
-				wd_set_TRGCalib(&gl, 0, i, 0x00);
-
-        	wd_TRGSetRUN(&gl, 0);
-        	wd_TRGStopRUN(&gl, 0);
-            unsigned int memaddr;
-            wd_read_reg(&gl, 0,RMEMADDR, &memaddr);
-            unsigned int data[8196];
-            wd_read_reg(&gl, 0,MEMOUT, data, 2048);
-            FILE* out = fopen("data.dat", "w");
-	    fprintf(out, "%x\n", memaddr);
-            for (int i=0; i<512; i++) {
-	        fprintf(out, "%08x", (data[i+1024]) | (data[i+1536]<<16));
-                fprintf(out, "%08x\n", data[i] | (data[i+512]<<16) );
-            }
-            fclose(out);
-	    out = fopen("datamemin.dat", "w");
-	    fprintf(out, "%x\n", memaddr);
-            wd_read_reg(&gl, 0,MEMIN, data, 8192);
-            for (int i=0; i<8192; i++) {
-	        fprintf(out, "%04x\n", (data[i] & 0xFFFF));
-            }
-            fclose(out);
-		
-	    //	    runRoot(1);
-	}
-	if(option == 13) {
-	    FILE* ram;
-	    ram = fopen("wdoutmem.dat", "r");
-            u_int32_t data[2];
-	    fscanf(ram, "%x", data);
-	    fscanf(ram, "%x", data+1);
-            fclose(ram);
-            
-            for (int i=0; i<512; i++) {
-            	wd_write_reg(&gl, 0,MEMOUT + i, data[0] & 0xffff);
-            }
-            for (int i=512; i<1024; i++) {
-            	wd_write_reg(&gl, 0,MEMOUT + i, (data[0] & 0xffff0000)>>16);
-            }
-            for (int i=1024; i<1536; i++) {
-            	wd_write_reg(&gl, 0,MEMOUT + i, data[1] & 0xffff);
-            }
-            for (int i=1536; i<2048; i++) {
-            	wd_write_reg(&gl, 0,MEMOUT + i, (data[1] & 0xffff0000)>>16);
-            }
-        }
-	if(option == 14) {
-    		char cmd[80];
-    		sprintf(cmd, "regset %08x %08x", 0x10, 0x800);
-    		wd_send(&gl, 0, 100, cmd, NULL, NULL);
-	}
-        /* end of the main loop on the options*/
-    } while ( option >= 0);
-    
-    /*wd_write_reg(&gl, 0, (0xC7000000>>2), (0xFFFFFFFF));
-    usleep(100);
-    wd_write_reg(&gl, 0, (0xC7000000>>2), (0x00000000));
-    unsigned int data[512];
-    wd_read_reg(&gl, 0,(0xC7108000>>2), data, 512);
-    
-    for (int j = 0; j<512; j++) {
-        printf("%x\n", data[j]);
-    }*/
-    
-   return 0;
 }
