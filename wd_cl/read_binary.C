@@ -191,7 +191,6 @@ void decode(const char *filename) {
          fread(&bh, sizeof(bh), 1, f);
          if (memcmp(bh.bn, "B#", 2) != 0) {
             printf("Invalid board header in file \'%s\', aborting.\n", filename);
-            printf("%02x %02x %04x\n", bh.bn[0], bh.bn[1], bh.board_serial_number);
             return;
          }
          
@@ -249,6 +248,7 @@ void decode(const char *filename) {
                   }
                } else if(ch.cn[0] == 'R'){
                   //TRG
+                  //printf("found trg info\n", chn_index);
                   fread(trg_data, sizeof(long), 512, f);
                   /*for(int i=0; i<512; i++){
                      int val = trg_data[i]&0xFFFF;
@@ -275,12 +275,12 @@ void decode(const char *filename) {
          // fill graph
          printf("%lf - %lf\n", time[0][0][0], waveform[0][0][0]);
          for (i=0 ; i<1024 ; i++)
-            g->SetPoint(i, time[0][0][i], waveform[0][0][i]);
+            g->SetPoint(i, time[0][0][i], adc_waveform[0][0][i]+adc_waveform[0][1][i]+adc_waveform[0][2][i]+adc_waveform[0][3][i]+adc_waveform[0][5][i]+adc_waveform[0][6][i]+adc_waveform[0][7][i]);
          
          // draw graph and wait for user click
-         g->Draw("ALP");
+         /*g->Draw("ALP");
          c1->Update();
-         gPad->WaitPrimitive();
+         gPad->WaitPrimitive();*/
       }
    }
    

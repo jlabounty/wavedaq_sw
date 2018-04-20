@@ -126,7 +126,6 @@ void WDAQTRGPacketData::AddToBoardEvent(WDAQBoardEvent *e){
 
    //check all data received
    e->mTrgByteNumber += mPayloadLenght*8;
-
    if(e->mTrgByteNumber >= mSamplesPerEventPerChannel*mBitsPerSample){
       e->mTrgHasData = true; 
    }
@@ -448,6 +447,12 @@ void WDAQEventBuilder::Loop(){
          //check older events (event id smaller than built one by 10)
          for(auto ev = fEvents.cbegin(); ev != fEvents.cend();){
             if((new_event_number - ev->first)>10){
+               //This is to print debug information
+               /*printf("Old event %d: ", ev->first);
+               for(auto be: ev->second->fBoard){
+                  for(int i=0; i<18; i++) printf("%d-%d-%d ", be->mDrsHasData[i], be->mAdcHasData[i], be->mTdcHasData[i]);
+                  printf("%d %d\n", be->mTrgHasData, be->mEndFlagReceived);
+               }*/
                //remove old event from list
                delete ev->second;
                fEvents.erase(ev++);
@@ -571,7 +576,7 @@ void WDAQEventWriter::Begin(){
       fFile.write((const char *)&board_id, 2);
       for(int ch=0; ch<18; ch++){
          std::string chn_header = "C";
-         if(ch<9) chn_header += "00";
+         if(ch<=9) chn_header += "00";
          else chn_header += "0";
          chn_header += std::to_string(ch);
          fFile.write(chn_header.c_str(), 4);
