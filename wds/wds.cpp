@@ -201,20 +201,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             if (iChannel == -1 || i == iChannel) {
                if (value == "0") {
                   // internal trigger
-                  gl->wdb[i]->SetTriggerEnable(true);
-                  gl->wdb[i]->SetTriggerCfgOr(0);
-                  gl->wdb[i]->SetTriggerCfgAnd(0);
-                  gl->wdb[i]->SetPatternTriggerSelect(2);
-                  gl->wdb[i]->SetTriggerCfgExtOr(false);
-                  gl->wdb[i]->SetTriggerCfgExtAnd(false);
+                  gl->wdb[i]->SetLocalTriggerEnable(1);
                } else {
                   // external trigger
-                  gl->wdb[i]->SetTriggerEnable(true);
-                  gl->wdb[i]->SetTriggerCfgOr(0);
-                  gl->wdb[i]->SetTriggerCfgAnd(0);
-                  gl->wdb[i]->SetPatternTriggerSelect(0);
-                  gl->wdb[i]->SetTriggerCfgExtOr(true);
-                  gl->wdb[i]->SetTriggerCfgExtAnd(false);
+                  gl->wdb[i]->SetLocalTriggerEnable(1);
                }
             }
          }
@@ -223,12 +213,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       else if (item == "triggerPatternEnLocal") {
          if (iBoard == -1)
             for (auto &b: gl->wdb) {
-               b->SetPatternTriggerSelect(2); // select pattern trigger
-               b->SetTrgPtrnEnLocal(std::stoi(value));
+               b->SetTrgPtrnEn(std::stoi(value));
             }
          else {
-            gl->wdb[iBoard]->SetPatternTriggerSelect(2);
-            gl->wdb[iBoard]->SetTrgPtrnEnLocal(std::stoi(value));
+            gl->wdb[iBoard]->SetTrgPtrnEn(std::stoi(value));
          }
       }
 
@@ -517,25 +505,18 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "        %d ],\n",                             w->GetFeMux(15));
 
          mg_printf_http_chunk(nc, "      \"triggerMode\": %d,\n",                gl->triggerMode);
-         mg_printf_http_chunk(nc, "      \"triggerSource\": %d,\n",              w->GetPatternTriggerSelect() == 2 ? 0 : 1);
-         mg_printf_http_chunk(nc, "      \"triggerShaperEnable\": %s,\n",        w->GetTriggerShaperEnable() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"triggerPulseLength\": %d,\n",         w->GetTriggerOutPulseLength());
-         mg_printf_http_chunk(nc, "      \"triggerEnable\": %s,\n",              w->GetTriggerEnable() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"triggerFallingEdge\": %s,\n",         w->GetTriggerFallingEdge() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"triggerExternalOr\": %s,\n",          w->GetTriggerCfgExtOr() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"triggerExternalAnd\": %s,\n",         w->GetTriggerCfgExtAnd() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"triggerDelayEnable\": %s,\n",         w->GetTriggerDelayEnable() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"triggerExtTriggerOutEnable\": %s,\n", w->GetExtTriggerOutEnable() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"triggerLocalEnable\": %d,\n",         w->GetLocalTriggerEnable() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"triggerOutPulseLength\": %d,\n",      w->GetTriggerOutPulseLength());
          mg_printf_http_chunk(nc, "      \"triggerDelay\": %d,\n",               w->GetTriggerDelayNs());
-         mg_printf_http_chunk(nc, "      \"triggerComparatorMask\": %d,\n",      w->GetTriggerCompMask());
-         mg_printf_http_chunk(nc, "      \"triggerCfgOr\": %d,\n",               w->GetTriggerCfgOr());
-         mg_printf_http_chunk(nc, "      \"triggerCfgAnd\": %d,\n",              w->GetTriggerCfgAnd());
-         mg_printf_http_chunk(nc, "      \"triggerLocalScheme\": %d,\n",         w->GetPatternTriggerSelect());
-         mg_printf_http_chunk(nc, "      \"triggerPatternEnLocal\": %d,\n",      w->GetTrgPtrnEnLocal());
+         mg_printf_http_chunk(nc, "      \"triggerSrcPolarity\": %d,\n",         w->GetTrgSrcPolarity());
+         mg_printf_http_chunk(nc, "      \"triggerAutoTriggerPeriod\": %d,\n",   w->GetAutoTriggerPeriod());
+         mg_printf_http_chunk(nc, "      \"triggerPtrnEn\": %d,\n",              w->GetTrgPtrnEn());
 
          mg_printf_http_chunk(nc, "      \"triggerPattern\": [\n");
          for (int i=0 ; i<17 ; i++)
-            mg_printf_http_chunk(nc, "        %d,\n",                            w->GetTrgPtrn(i));
-         mg_printf_http_chunk(nc, "        %d ],\n",                             w->GetTrgPtrn(17));
+            mg_printf_http_chunk(nc, "        %d,\n",                            w->GetTrgSrcEnPtrn(i));
+         mg_printf_http_chunk(nc, "        %d ],\n",                             w->GetTrgSrcEnPtrn(17));
 
          mg_printf_http_chunk(nc, "      \"scaler\": [\n");
          for (auto &s: scaler) {

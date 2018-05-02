@@ -819,25 +819,25 @@ void WDB::SetDrsSampleFreq(unsigned int f)
 void WDB::GetScalers(std::vector<unsigned long> &scaler, bool refresh)
 {
    int scalerWidth[] = {
-      64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, // 0:15
-      64, // trigger
+      32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, // 0:15
+      32, // trigger
       32, // external clock
-      32, // event transmission rate
-      64, // time
+      64, // time stamp
+      64, // system time
    };
    if (refresh)
-      ReceiveStatusRegisters((WD2_SCALER_0_LSB_REG & 0x0FFF)/4, 34);
+      ReceiveStatusRegisters((WD2_SCALER_0_REG & 0x0FFF)/4, 22);
 
-   // channels 0-15 are 64 bit counters
+   // decode scalers according to their bit width
    int adr = 0;
    unsigned long v;
    for (unsigned int i=0 ; i<16 ; i++) {
       if (scalerWidth[i] == 64) {
-         v = this->sreg[WD2_SCALER_0_LSB_REG/4+adr] |
-            ((unsigned long)this->sreg[WD2_SCALER_0_LSB_REG/4+adr+1] << 32);
+         v = this->sreg[WD2_SCALER_0_REG/4+adr] |
+            ((unsigned long)this->sreg[WD2_SCALER_0_REG/4+adr+1] << 32);
          adr += 2;
       } else {
-         v = this->sreg[WD2_SCALER_0_LSB_REG/4+adr];
+         v = this->sreg[WD2_SCALER_0_REG/4+adr];
          adr += 1;
       }
       
@@ -1237,15 +1237,15 @@ void WDB::SetDacBiasV(float v)
 void WDB::SetTriggerFallingEdge(unsigned int value)
 {
    // store in reserved bit
-   SetRegMask(WD2_TRIGGER_FALLING_EDGE_REG, 0x80000000, 31, value);
+   //SetRegMask(WD2_TRIGGER_FALLING_EDGE_REG, 0x80000000, 31, value);
    
    // falling edge is done via inverted pattern, so have real edge always rising
-   WDBREG::SetTriggerFallingEdge(0);
+   //WDBREG::SetTriggerFallingEdge(0);
 }
 
 unsigned int WDB::GetTriggerFallingEdge()
 {
-   return BitExtractControl(WD2_TRIGGER_FALLING_EDGE_REG, 0x80000000, 31);;
+   return 0; // BitExtractControl(WD2_TRIGGER_FALLING_EDGE_REG, 0x80000000, 31);;
 }
 
 float WDB::GetDacTriggerLevelV(int chn)
@@ -1559,15 +1559,26 @@ void WDB::SetLmk(int reg, unsigned int v)
 
 //--------------------------------------------------------------------
 
-unsigned int WDB::GetTrgPtrn(int i)
+unsigned int WDB::GetTrgSrcEnPtrn(int i)
 {
    assert(i >= 0 && i < 18);
-   return BitExtractControl(WD2_TRG_PTRN0_REG+i*4, WD2_TRG_PTRN0_MASK, WD2_TRG_PTRN0_OFS);
+   return BitExtractControl(WD2_TRG_SRC_EN_PTRN0_REG+i*4*2, WD2_TRG_SRC_EN_PTRN0_MASK, WD2_TRG_SRC_EN_PTRN0_OFS);
 };
 
-void WDB::SetTrgPtrn(int i, unsigned int value)
+void WDB::SetTrgSrcEnPtrn(int i, unsigned int value)
 {
-   SetRegMask(WD2_TRG_PTRN0_REG+i*4, WD2_TRG_PTRN0_MASK, WD2_TRG_PTRN0_OFS, value);
+   SetRegMask(WD2_TRG_SRC_EN_PTRN0_REG+i*4*2, WD2_TRG_SRC_EN_PTRN0_MASK, WD2_TRG_SRC_EN_PTRN0_OFS, value);
+};
+
+unsigned int WDB::GetTrgStatePtrn(int i)
+{
+   assert(i >= 0 && i < 18);
+   return BitExtractControl(WD2_TRG_STATE_PTRN0_REG+i*4*2, WD2_TRG_STATE_PTRN0_MASK, WD2_TRG_STATE_PTRN0_OFS);
+};
+
+void WDB::SetTrgStatePtrn(int i, unsigned int value)
+{
+   SetRegMask(WD2_TRG_STATE_PTRN0_REG+i*4*2, WD2_TRG_STATE_PTRN0_MASK, WD2_TRG_STATE_PTRN0_OFS, value);
 };
 
 unsigned int WDB::GetTriggerDelayNs()
@@ -1580,8 +1591,6 @@ unsigned int WDB::GetTriggerDelayNs()
 
 void WDB::SetTriggerDelayNs(unsigned int ns)
 {
-   SetTriggerDelayEnable(ns > 0);
-   
    unsigned int v = (unsigned int)(ns / 450.0 * 255 + 0.5);
    if (v > 255)
       v = 255;

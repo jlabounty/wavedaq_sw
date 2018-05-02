@@ -603,8 +603,11 @@ public:
    unsigned int GetLmk(int reg);
    void SetLmk(int reg, unsigned int v);
 
-   unsigned int GetTrgPtrn(int i);
-   void SetTrgPtrn(int i, unsigned int value);
+   unsigned int GetTrgSrcEnPtrn(int i);
+   void SetTrgSrcEnPtrn(int i, unsigned int value);
+
+   unsigned int GetTrgStatePtrn(int i);
+   void SetTrgStatePtrn(int i, unsigned int value);
 
    // high level methods ----------
    unsigned int GetTriggerDelayNs();
