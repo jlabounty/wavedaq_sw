@@ -1,0 +1,15 @@
+#!/bin/sh
+#
+# Put the current git revision into git-revision.h
+
+date_n_hash=`git log -n 1 --pretty=format:'%ad - %h' --date=short`
+
+if [ -z "$date_n_hash" ]; then
+   date_n_hash=`git log -n 1 --pretty=format:'%ad - %h' --date=short`
+fi
+
+if [ -z "$date_n_hash" ]; then
+   date_n_hash=\"xxxx-xx-xx - xxxxxxx\"
+fi
+
+echo \#define GIT_REVISION \"$date_n_hash\" > ../../git-revision.h

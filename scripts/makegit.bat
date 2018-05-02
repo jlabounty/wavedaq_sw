@@ -1,1 +1,1 @@
-/cygwin/bin/sh -c /cygdrive/c/WaveDAQ/makegit > c:\WaveDAQ\git-revision.h
+/cygwin/bin/sh -c /cygdrive/c/Wavedaq/software/scripts/makegit
