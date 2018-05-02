@@ -66,18 +66,18 @@ int main(int argc, char** argv)
       wdb->ResetTcbOserdesPll();
 
       // Set training pattern
-      wdb->SetAdvTrgCfg(0, 0x00000030);
-      wdb->SetAdvTrgCfg(9, TESTVALUE0);
-      wdb->SetAdvTrgCfg(10, TESTVALUE1);
+      wdb->SetAdvTrgCtrl(0x00000030);
+      wdb->SetAdvTrgTxChkWord0(TESTVALUE0);
+      wdb->SetAdvTrgTxChkWord1(TESTVALUE1);
 
       // now send all changed registers in one packet
       wdb->SetSendBlocked(false);
       wdb->SendControlRegisters();
 
       // Sync LMK
-      wdb->ApplyLmkSettings();
+      wdb->SetApplySettingsLmk(1);
       wdb->LmkSyncLocal();
-      wdb->ReceiveStatusRegister(WD2_REG_DRS_SAMPLE_FREQ_OFS);
+      wdb->ReceiveStatusRegister(WD2_DRS_SAMPLE_FREQ_OFS);
 
       // Reset DRS FSM
       wdb->ResetDrsControlFsm();
