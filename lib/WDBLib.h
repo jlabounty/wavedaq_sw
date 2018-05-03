@@ -36,7 +36,7 @@ class WDB;
 typedef struct {
    unsigned char  protocol_version;
    unsigned char  board_revision;
-   unsigned short board_id;
+   unsigned short serial_number;
    unsigned char  crate_id;
    unsigned char  slot_id;
    unsigned char  channel_info;

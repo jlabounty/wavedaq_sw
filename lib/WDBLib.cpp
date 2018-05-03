@@ -1657,7 +1657,7 @@ bool WDB::LoadTimeCalibration(int freq, std::string path)
 void WDEvent::SetEventHeaderInfo(WD2_FRAME_HEADER *ph)
 {
    int channel = ph->channel_info & 0x1F;
-   mBoardId = ph->board_id;
+   mBoardId = ph->serial_number;
    mCrateId = ph->crate_id;
    mSlotId  = ph->slot_id;
    mEventNumber = ph->event_number;
@@ -1938,7 +1938,7 @@ int WP::ReceiveWfPacket()
    }
    
    // correct endianness of header data
-   ph->board_id                       = SWAP_UINT16(ph->board_id);
+   ph->serial_number                  = SWAP_UINT16(ph->serial_number);
    int channel_adc                    = (ph->channel_info >> 7) & 0x1;
    int channel_number                 = (ph->channel_info) & 0x1f;
    int channel_segment                = (ph->data_offset > 0);
@@ -1971,7 +1971,7 @@ int WP::ReceiveWfPacket()
       sprintf(line, "%06dus #%04d from WD%03d, NB=%4d EN=%5d DT=%d A/C/S=%d/%02d/%d TC=%04d T=%1.1lf\n",
               usSince(mEventStartTime),
               mPacketsReceived-1,
-              ph->board_id,
+              ph->serial_number,
               numberBins,
               ph->event_number,
               ph->data_type,
@@ -1990,12 +1990,12 @@ int WP::ReceiveWfPacket()
    // drop package (for now...) if it is not DRS or ADC data
    if (ph->data_type != 0 && ph->data_type != 1) {
       std::cerr << "Package dropped, data type=" << ph->data_type << ", "
-      << "board id = " << ph->board_id << std::endl;
+      << "board id = " << ph->serial_number << std::endl;
       if (mLogfile != "") {
          std::ofstream f;
          f.open(mLogfile, std::ios_base::app);
          f << "Package dropped, data type=" << ph->data_type << ", "
-         << "board id = " << ph->board_id << std::endl;
+         << "board id = " << ph->serial_number << std::endl;
       }
       return 0;
    }
@@ -2003,17 +2003,17 @@ int WP::ReceiveWfPacket()
    // find event request belonging to this board
    WDEventRequest *er = nullptr;
    for (auto r: mEventRequest)
-      if (r->GetBoardId() == ph->board_id) {
+      if (r->GetBoardId() == ph->serial_number) {
          er = r;
          break;
       }
    if (!er) {
       if (mVerbose)
-         std::cerr << "Received unexpected packet from board #" << ph->board_id << std::endl;
+         std::cerr << "Received unexpected packet from board #" << ph->serial_number << std::endl;
       if (mLogfile != "") {
          std::ofstream f;
          f.open(mLogfile, std::ios_base::app);
-         f << "Received unexpected packet from board #" << ph->board_id << std::endl;
+         f << "Received unexpected packet from board #" << ph->serial_number << std::endl;
       }
       return 0;
    }
@@ -2038,14 +2038,14 @@ int WP::ReceiveWfPacket()
    if (ph->event_number == (unsigned int)mCurrentEvent-1) {
       std::cerr << "Package of previous event dropped, package event=" << ph->event_number << ", "
       << "current event=" << mCurrentEvent << ", "
-      << "board id=" << ph->board_id << std::endl;
+      << "board id=" << ph->serial_number << std::endl;
       
       if (mLogfile != "") {
          std::ofstream f;
          f.open(mLogfile, std::ios_base::app);
          f << "Package of previous event dropped, package event=" << ph->event_number << ", "
          << "current event=" << mCurrentEvent << ", "
-         << "board id=" << ph->board_id << std::endl;
+         << "board id=" << ph->serial_number << std::endl;
       }
       return 0;
    }
@@ -2056,14 +2056,14 @@ int WP::ReceiveWfPacket()
       if (mVerbose)
          std::cerr << "Partially received event dropped, package event=" << ph->event_number << ", "
          << "current event=" << mCurrentEvent << ", "
-         << "board id=" << ph->board_id << std::endl;
+         << "board id=" << ph->serial_number << std::endl;
       
       if (mLogfile != "") {
          std::ofstream f;
          f.open(mLogfile, std::ios_base::app);
          f << "Partially received event dropped, package event=" << ph->event_number << ", "
          << "current event=" << mCurrentEvent << ", "
-         << "board id=" << ph->board_id << std::endl;
+         << "board id=" << ph->serial_number << std::endl;
       }
       
       // count dropped packets
@@ -2087,13 +2087,13 @@ int WP::ReceiveWfPacket()
    // find event belonging to this baord
    WDEvent *event = nullptr;
    for (auto e: mEvent) {
-      if (e->mBoardId == ph->board_id) {
+      if (e->mBoardId == ph->serial_number) {
          event = e;
          break;
       }
    }
    if (!event) {
-      std::cerr << "Received unexpected packet from board #" << ph->board_id << std::endl;
+      std::cerr << "Received unexpected packet from board #" << ph->serial_number << std::endl;
       return 0;
    }
    
