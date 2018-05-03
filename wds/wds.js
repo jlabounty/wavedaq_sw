@@ -339,7 +339,7 @@ function populateControls(init) {
    // trigger pattern dialog box
    for (i = 0; i < 18; i++) {
       var p = document.getElementById(i<10 ? 'P0'+i : 'P'+i);
-      p.enabled = (OSC.wdb[OSC.curBoard].triggerPatternEnLocal & (1 << i)) > 0;
+      p.enabled = (OSC.wdb[OSC.curBoard].triggerPtrnEn & (1 << i)) > 0;
       if (p.enabled) {
          p.style.backgroundColor = 'darkgreen';
          p.style.color = 'white';
@@ -348,21 +348,24 @@ function populateControls(init) {
          p.style.color = 'black';
       }
 
-      for (var j = 0; j < 16; j++) {
-         var c = document.getElementById('C' + (j < 10 ? '0' + j : j) + (i < 10 ? '0' + i : i));
+      for (var j = 0; j < 17; j++) {
+         var c = document.getElementById('L' + (j < 10 ? '0' + j : j));
+         if ((OSC.wdb[OSC.curBoard].triggerSrcPolarity & (1 << j)) === 0)
+            c.innerHTML = "+";
+         else
+            c.innerHTML = "-";
+      }
+
+      for (j = 0; j < 17; j++) {
+         c = document.getElementById('C' + (j < 10 ? '0' + j : j) + (i < 10 ? '0' + i : i));
 
          c.mode = 0;
-
-         // invert pattern for negative trigger
-         if (OSC.wdb[OSC.curBoard].triggerFallingEdge) {
-            if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << (j+16))) > 0)
+         if ((OSC.wdb[OSC.curBoard].triggerSrcEnPtrn[i] & (1 << j)) === 0)
+            c.mode = 0;
+         else {
+            if ((OSC.wdb[OSC.curBoard].triggerStatePtrn[i] & (1 << j)) > 0)
                c.mode = 1;
-            if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << j)) > 0)
-               c.mode = 2;
-         } else {
-            if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << j)) > 0)
-               c.mode = 1;
-            if ((OSC.wdb[OSC.curBoard].triggerPattern[i] & (1 << (j+16))) > 0)
+            else
                c.mode = 2;
          }
          if (c.mode == 0)
@@ -1688,7 +1691,7 @@ function dispHisto(c) {
 
 function triggerSendPattern() {
    var e = {};
-   e.name = "triggerPatternEnLocal";
+   e.name = "triggerPtrnEn";
    e.value = 0;
    for (var i = 0; i < 18; i++) {
       if (document.getElementById(i<10? 'P0'+i : 'P'+i).enabled)
@@ -1698,24 +1701,34 @@ function triggerSendPattern() {
    setParam(e);
 }
 
-function triggerSendCell(p) {
+function triggerSendPolarity() {
    var e = {};
-   e.name = "triggerPattern";
+   e.name = "triggerSrcPolarity";
    e.value = 0;
-   for (var i = 0; i < 16; i++) {
-      if (OSC.wdb[OSC.curBoard].triggerFallingEdge) {
-         if (document.getElementById('C' + (i < 10 ? '0' + i : i) + (p < 10 ? '0' + p : p)).mode == 1)
-            e.value += (1 << (i + 16));
-         if (document.getElementById('C' + (i < 10 ? '0' + i : i) + (p < 10 ? '0' + p : p)).mode == 2)
-            e.value += (1 << i);
-      } else {
-         if (document.getElementById('C' + (i < 10 ? '0' + i : i) + (p < 10 ? '0' + p : p)).mode == 1)
-            e.value += (1 << i);
-         if (document.getElementById('C' + (i < 10 ? '0' + i : i) + (p < 10 ? '0' + p : p)).mode == 2)
-            e.value += (1 << (i + 16));
-      }
+   for (var i = 0; i < 17; i++) {
+      if (document.getElementById(i<10? 'L0'+i : 'L'+i).innerHTML === '-')
+         e.value += (1 << i);
    }
 
+   setParam(e);
+}
+
+function triggerSendCell(p) {
+   var e = {};
+   e.name = "triggerSrcEnPtrn";
+   e.value = 0;
+   for (var i = 0; i < 17; i++) {
+      if (document.getElementById('C' + (i < 10 ? '0' + i : i) + (p < 10 ? '0' + p : p)).mode > 0)
+         e.value += (1 << i);
+   }
+   setParam(e, p);
+
+   e.name = "triggerStatePtrn";
+   e.value = 0;
+   for (var i = 0; i < 17; i++) {
+      if (document.getElementById('C' + (i < 10 ? '0' + i : i) + (p < 10 ? '0' + p : p)).mode === 1)
+         e.value += (1 << i);
+   }
    setParam(e, p);
 }
 
@@ -1730,6 +1743,25 @@ function triggerClickPattern() {
    }
 
    triggerSendPattern();
+}
+
+function triggerClickPolarity() {
+   if (this.innerHTML === 'Pol') {
+      for (var i=0; i <17 ; i++) {
+         var cell = document.getElementById((i<10) ? 'L0' + i : 'L' + i);
+         if (cell.innerHTML === '+')
+            cell.innerHTML = '-';
+         else
+            cell.innerHTML = '+';
+      }
+   } else {
+      if (this.innerHTML === '+')
+         this.innerHTML = '-';
+      else
+         this.innerHTML = '+';
+   }
+
+   triggerSendPolarity();
 }
 
 function triggerClickCell() {
@@ -1766,7 +1798,7 @@ function triggerClearAll() {
       p.style.color = 'black';
    }
 
-   for (i = 0; i < 16; i++)
+   for (i = 0; i < 17; i++)
       for (var j = 0; j < 18; j++) {
          var c = document.getElementById('C' + (i < 10 ? '0' + i : i) + (j < 10 ? '0' + j : j));
          c.mode = 0;
@@ -1792,7 +1824,7 @@ function triggerOrAll() {
       p.style.color = 'black';
    }
 
-   for (i = 0; i < 16; i++)
+   for (i = 0; i < 17; i++)
       for (var j = 0; j < 18; j++) {
          var c = document.getElementById('C' + (i < 10 ? '0' + i : i) + (j < 10 ? '0' + j : j));
          if (i == j && j<16) {

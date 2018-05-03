@@ -176,6 +176,24 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             gl->wdb[iBoard]->SetDacTriggerLevelV(iChannel, std::stof(value));
       }
 
+      else if (item == "triggerMode") {
+         gl->triggerMode = std::stoi(value);
+      }
+
+      else if (item == "triggerSource") {
+         for (int i=0 ; i<gl->wdb.size() ; i++) {
+            if (iChannel == -1 || i == iChannel) {
+               if (value == "0") {
+                  // internal trigger
+                  gl->wdb[i]->SetLocalTriggerEnable(1);
+               } else {
+                  // external trigger
+                  gl->wdb[i]->SetLocalTriggerEnable(0);
+               }
+            }
+         }
+      }
+      
       else if (item == "triggerDelay") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
@@ -192,25 +210,17 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             gl->wdb[iBoard]->SetTriggerFallingEdge(value == "true");
       }
 
-      else if (item == "triggerMode") {
-         gl->triggerMode = std::stoi(value);
-      }
-
-      else if (item == "triggerSource") {
-         for (int i=0 ; i<gl->wdb.size() ; i++) {
-            if (iChannel == -1 || i == iChannel) {
-               if (value == "0") {
-                  // internal trigger
-                  gl->wdb[i]->SetLocalTriggerEnable(1);
-               } else {
-                  // external trigger
-                  gl->wdb[i]->SetLocalTriggerEnable(1);
-               }
+      else if (item == "triggerSrcPolarity") {
+         if (iBoard == -1)
+            for (auto &b: gl->wdb) {
+               b->SetTrgSrcPolarity(std::stoi(value));
             }
+         else {
+            gl->wdb[iBoard]->SetTrgSrcPolarity(std::stoi(value));
          }
       }
 
-      else if (item == "triggerPatternEnLocal") {
+      else if (item == "triggerPtrnEn") {
          if (iBoard == -1)
             for (auto &b: gl->wdb) {
                b->SetTrgPtrnEn(std::stoi(value));
@@ -220,12 +230,22 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          }
       }
 
-      else if (item == "triggerPattern") {
+      else if (item == "triggerSrcEnPtrn") {
+         printf("SrcEnPtrn: %04X\n", std::stoi(value));
          if (iBoard == -1)
             for (auto &b: gl->wdb)
-               b->SetTrgPtrn(iChannel, std::stoi(value));
+               b->SetTrgSrcEnPtrn(iChannel, std::stoi(value));
          else
-            gl->wdb[iBoard]->SetTrgPtrn(iChannel, std::stoi(value));
+            gl->wdb[iBoard]->SetTrgSrcEnPtrn(iChannel, std::stoi(value));
+      }
+
+      else if (item == "triggerStatePtrn") {
+         printf("StatePtrn: %04X\n", std::stoi(value));
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetTrgStatePtrn(iChannel, std::stoi(value));
+         else
+            gl->wdb[iBoard]->SetTrgStatePtrn(iChannel, std::stoi(value));
       }
 
       else if (item == "feGain") {
@@ -506,17 +526,22 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
          mg_printf_http_chunk(nc, "      \"triggerMode\": %d,\n",                gl->triggerMode);
          mg_printf_http_chunk(nc, "      \"triggerExtTriggerOutEnable\": %s,\n", w->GetExtTriggerOutEnable() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"triggerLocalEnable\": %d,\n",         w->GetLocalTriggerEnable() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"triggerSource\": %d,\n",              w->GetLocalTriggerEnable() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"triggerOutPulseLength\": %d,\n",      w->GetTriggerOutPulseLength());
          mg_printf_http_chunk(nc, "      \"triggerDelay\": %d,\n",               w->GetTriggerDelayNs());
          mg_printf_http_chunk(nc, "      \"triggerSrcPolarity\": %d,\n",         w->GetTrgSrcPolarity());
          mg_printf_http_chunk(nc, "      \"triggerAutoTriggerPeriod\": %d,\n",   w->GetAutoTriggerPeriod());
          mg_printf_http_chunk(nc, "      \"triggerPtrnEn\": %d,\n",              w->GetTrgPtrnEn());
 
-         mg_printf_http_chunk(nc, "      \"triggerPattern\": [\n");
+         mg_printf_http_chunk(nc, "      \"triggerSrcEnPtrn\": [\n");
          for (int i=0 ; i<17 ; i++)
             mg_printf_http_chunk(nc, "        %d,\n",                            w->GetTrgSrcEnPtrn(i));
          mg_printf_http_chunk(nc, "        %d ],\n",                             w->GetTrgSrcEnPtrn(17));
+
+         mg_printf_http_chunk(nc, "      \"triggerStatePtrn\": [\n");
+         for (int i=0 ; i<17 ; i++)
+            mg_printf_http_chunk(nc, "        %d,\n",                            w->GetTrgStatePtrn(i));
+         mg_printf_http_chunk(nc, "        %d ],\n",                             w->GetTrgStatePtrn(17));
 
          mg_printf_http_chunk(nc, "      \"scaler\": [\n");
          for (auto &s: scaler) {
