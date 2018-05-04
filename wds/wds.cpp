@@ -21,26 +21,35 @@
 
 std::vector<std::string> wdbName = { "wd094" };
 
-const int cTriggerModeNormal    = 1;
-const int cTriggerModeAuto      = 2;
+enum TRIGGERMODE {
+   cTriggerModeNormal = 1,
+   cTriggerModeAuto   = 2
+};
+
+enum READOUTMODE {
+   cReadoutModeDRS    = 1,
+   cReadoutModeADC    = 2,
+   cREadoutModeTDC    = 3
+};
 
 #define LI_FORMAT_BIN  1
 #define LI_FORMAT_XML  2
 
 typedef struct {
-   bool demoMode;
-   int  serverPort;
-   int  verbose;
-   std::string logFileName;
-   bool reset;
+   bool              demoMode;
+   int               serverPort;
+   int               verbose;
+   std::string       logFileName;
+   bool              reset;
    std::vector<WDB*> wdb;
-   WP*  wp;
-   int  triggerMode;
-   int  triggerSelfArm;
-   bool specialTest;
-   bool updatePeriodic;
-   int  dbgRx;
-   int  dbgTx;
+   WP*               wp;
+   TRIGGERMODE       triggerMode;
+   int               triggerSelfArm;
+   READOUTMODE       readoutMode;
+   bool              specialTest;
+   bool              updatePeriodic;
+   int               dbgRx;
+   int               dbgTx;
 } GLOBALS;
 
 unsigned int demoDrsSampleFreq = 5016;
@@ -117,10 +126,18 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          auto mask = std::stoi(value);
          if (iBoard == -1)
             for (auto &b: gl->wdb) {
-               b->SetDrsChTxEn(mask);
+               b->SetChnTxEn(mask);
+               if (gl->readoutMode == cReadoutModeDRS)
+                  b->SetDrsChTxEn(mask);
+               else
+                  b->SetAdcChTxEn(mask);
             }
          else {
-            gl->wdb[iBoard]->SetDrsChTxEn(mask);
+            gl->wdb[iBoard]->SetChnTxEn(mask);
+            if (gl->readoutMode == cReadoutModeDRS)
+               gl->wdb[iBoard]->SetDrsChTxEn(mask);
+            else
+               gl->wdb[iBoard]->SetAdcChTxEn(mask);
          }
       }
 
@@ -177,7 +194,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       }
 
       else if (item == "triggerMode") {
-         gl->triggerMode = std::stoi(value);
+         gl->triggerMode = (TRIGGERMODE) std::stoi(value);
       }
 
       else if (item == "triggerSource") {
@@ -277,15 +294,31 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             gl->wdb[iBoard]->SetRange(std::stof(value));
       }
 
-      /*##
       else if (item == "readoutSrcSel") {
          if (iBoard == -1)
-            for (auto &b: gl->wdb)
-               b->SetReadoutSrcSel(std::stoi(value));
-         else
-            gl->wdb[iBoard]->SetReadoutSrcSel(std::stoi(value));
+            for (auto &b: gl->wdb) {
+               if (std::stoi(value) == (int)cReadoutModeDRS) {
+                  gl->readoutMode = cReadoutModeDRS;
+                  b->SetDrsChTxEn(b->GetChnTxEn());
+                  b->SetAdcChTxEn(0);
+               } else {
+                  gl->readoutMode = cReadoutModeADC;
+                  b->SetDrsChTxEn(0);
+                  b->SetAdcChTxEn(b->GetChnTxEn());
+               }
+            }
+         else {
+            if (std::stoi(value) == (int)cReadoutModeDRS) {
+               gl->readoutMode = cReadoutModeDRS;
+               gl->wdb[iBoard]->SetDrsChTxEn(gl->wdb[iBoard]->GetChnTxEn());
+               gl->wdb[iBoard]->SetAdcChTxEn(0);
+            } else {
+               gl->readoutMode = cReadoutModeADC;
+               gl->wdb[iBoard]->SetDrsChTxEn(0);
+               gl->wdb[iBoard]->SetAdcChTxEn(gl->wdb[iBoard]->GetChnTxEn());
+            }
+         }
       }
-      */
 
       else if (item == "calibBufferEnable") {
          if (iBoard == -1)
@@ -486,7 +519,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"triggerBusNumber\": %d,\n",           w->GetTrbInfoLsb() >> 8);   // ??
          mg_printf_http_chunk(nc, "      \"crateId\": %d,\n",                    w->GetCrateId());
          mg_printf_http_chunk(nc, "      \"slotId\": %d,\n",                     w->GetSlotId());
-         mg_printf_http_chunk(nc, "      \"readoutSrcSel\": %d,\n",              0); // ##
+         mg_printf_http_chunk(nc, "      \"readoutSrcSel\": %d,\n",              gl->readoutMode);
          mg_printf_http_chunk(nc, "      \"daqNormal\": %s,\n",                  w->GetDaqNormal() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"daqSingle\": %s,\n",                  w->GetDaqSingle() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"drs0TimingRefSel\": %d,\n",           w->GetDrs0TimingRefSel());
@@ -497,8 +530,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"extClkInSel\": %d,\n",                w->GetExtClkInSel());
          mg_printf_http_chunk(nc, "      \"extClkFreq\": %d,\n",                 w->GetExtClkFreq());
          mg_printf_http_chunk(nc, "      \"localClkFreq\": %d,\n",               w->GetLocalClkFreq());
-         mg_printf_http_chunk(nc, "      \"drsDrsChnTxEn\": %d,\n",              w->GetDrsChTxEn());
-         mg_printf_http_chunk(nc, "      \"drsAdcChnTxEn\": %d,\n",              w->GetAdcChTxEn());
+         mg_printf_http_chunk(nc, "      \"chnTxEn\": %d,\n",                    w->GetChnTxEn());
          
          mg_printf_http_chunk(nc, "      \"dacOfs\": %1.3f,\n",                  w->GetDacOfsV());
          mg_printf_http_chunk(nc, "      \"dacCalDc\": %1.3f,\n",                w->GetDacCalDcV());
@@ -815,6 +847,7 @@ int main(int argc, const char * argv[])
    gl.reset = false;
    gl.triggerMode = cTriggerModeAuto;
    gl.triggerSelfArm = false;
+   gl.readoutMode = cReadoutModeDRS;
    gl.updatePeriodic = false;
    gl.dbgRx = gl.dbgTx = 0;
    
@@ -956,6 +989,9 @@ int main(int argc, const char * argv[])
                str << "PLL not locked on board " << b->GetName() << ". Mask = 0x" << std::hex << b->GetPllLock(false);
                throw std::runtime_error(str.str());
             }
+            
+            // retrieve enabled channels
+            b->SetChnTxEn(b->GetDrsChTxEn());
             
          } else {
             // turn all channels on in demo mode

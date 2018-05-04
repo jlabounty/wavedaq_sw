@@ -255,15 +255,19 @@ public:
 // waveform processor (waveform decoding, calibration, saving, ...
 class WP {
    // calibration states
-   enum { cCsInactive = 0,
+   enum {
+      cCsInactive     = 0,
       cCsSingleBoard  = 1,
       cCsFirstBoard   = 2,
       cCsFirstSample  = 3,
-      cCsRunning      = 4 };
+      cCsRunning      = 4
+   };
 
-   enum { cCmNone     = 0,
+   enum {
+      cCmNone         = 0,
       cCmVoltage      = 1,
-      cCmTime         = 2 };
+      cCmTime         = 2
+   };
 
    static int        gDataSocket;
    static int        gServerPort;
@@ -441,6 +445,7 @@ class WDB: public WDBREG {
    bool             mSendBlocked;
    int              mSendTimeoutMs;
    int              mReceiveTimeoutMs;
+   unsigned int     mChnTxEn;
 
    unsigned int     creg[REG_NR_OF_CTRL_REGS];
    unsigned int     sreg[REG_NR_OF_STAT_REGS];
@@ -454,7 +459,7 @@ class WDB: public WDBREG {
    void             SetSendTimeoutMs(int to) { mSendTimeoutMs = to; };
    int              GetReceiveTimeoutMs() { return mReceiveTimeoutMs; };
    void             SetReceiveTimeoutMs(int to) { mReceiveTimeoutMs = to; };
-   
+
    std::string      SendReceiveUDP(std::string str);
    void             SendUDP(std::string str);
 
@@ -472,24 +477,33 @@ public:
    const int cDefaultReceiveTimeoutMs = 100;
 
    // constants
-   enum { cReadoutSrcDrs       = 0x01,
+   enum {
+      cReadoutSrcDrs           = 0x01,
       cReadoutSrcAdc           = 0x02,
-      cReadoutSrcTdc           = 0x04 };
+      cReadoutSrcTdc           = 0x04
+   };
    
-   enum { cFeMuxNextChannel    = 0,
+   enum {
+      cFeMuxNextChannel        = 0,
       cFeMuxPreviousChannel    = 1,
       cFeMuxInput              = 2,
-      cFeMuxCalSource          = 3 };
+      cFeMuxCalSource          = 3
+   };
 
-   enum { cTriggerSchemeSimple = 0,
+   enum {
+      cTriggerSchemeSimple     = 0,
       cTriggerSchemeOr         = 1,
-      cTriggerSchemePattern    = 2};
+      cTriggerSchemePattern    = 2
+   };
 
-   enum { cTimingReferenceOff  = 0,
+   enum {
+      cTimingReferenceOff      = 0,
       cTimingReferenceSine     = 1,
-      cTimingReferenceSquare   = 2};
+      cTimingReferenceSquare   = 2
+   };
    
-   enum { cDbgUart             = 0x0,
+   enum {
+      cDbgUart                 = 0x0,
       cDbgTrigger              = 0x1,
       cDbgSoftTrigger          = 0x2,
       cDbgExtTrigger           = 0x3,
@@ -499,7 +513,8 @@ public:
       cDbgBusyBackplane        = 0x7,
       cDbgLMKInputClk          = 0x8,
       cDbgADCClk               = 0x9,
-      cDbgDataClk              = 0xA};
+      cDbgDataClk              = 0xA
+   };
 
    // calibrations
    VCALIB           mVCalib;
@@ -625,6 +640,9 @@ public:
    
    unsigned int GetTriggerFallingEdge();
    void SetTriggerFallingEdge(unsigned int value);
+   
+   unsigned int     GetChnTxEn() { return mChnTxEn; };
+   void             SetChnTxEn(int mask) { mChnTxEn = mask; };
 };
 
 //--------------------------------------------------------------------
