@@ -1680,9 +1680,15 @@ void WDEvent::SetEventHeaderInfo(WD2_FRAME_HEADER *ph)
 bool WDEventRequest::IsWfValid()
 {
    for (int i=0 ; i<WD_N_CHANNELS ; i++)
-      if (mChannelMask & (1 << i))
-         if (!mWfValid[i][0] || !mWfValid[i][1])
-            return false;
+      if (mChannelMask & (1 << i)) {
+         if (mRequestedSegments == 2) {
+            if (!mWfValid[i][0] || !mWfValid[i][1])
+               return false;
+         } else if (mRequestedSegments == 3) {
+            if (!mWfValid[i][0] || !mWfValid[i][1] || !mWfValid[i][2])
+               return false;
+         }
+      }
    return true;
 }
 
@@ -1763,8 +1769,18 @@ void WP::SetEventRequestMasks()
 {
    // set request mask from tx enable
    int i=0;
-   for (auto &b: mWdb)
-      mEventRequest[i++]->SetMask(b->GetDrsChTxEn());
+   for (auto &b: mWdb) {
+      if (b->GetDrsChTxEn() > 0)
+         mEventRequest[i++]->SetMask(b->GetDrsChTxEn());
+      else
+         mEventRequest[i++]->SetMask(b->GetAdcChTxEn());
+   }
+}
+
+void WP::SetRequestedSegments(int s)
+{
+   for (auto &r: mEventRequest)
+      r->SetRequestedSegments(s);
 }
 
 unsigned int WP::GetEventRequestMask(int board_id)
@@ -1867,6 +1883,7 @@ void WP::InvalidateAllWf()
       for (int i=0 ; i<WD_N_CHANNELS ; i++) {
          er->SetWfValid(i, 0, false);
          er->SetWfValid(i, 1, false);
+         er->SetWfValid(i, 2, false);
          er->SetDrsTriggerCell(i, -1);
       }
    }
@@ -1959,10 +1976,30 @@ int WP::ReceiveWfPacket()
 
    mPacketsReceived++;
    
+   if (ph->data_type == cDataTypeDummy) {
+      if (mLogfile != "" || mVerbose >= 3) {
+         std::ofstream f;
+         char line[256];
+         f.open(mLogfile, std::ios_base::app);
+         
+         sprintf(line, "%06dus #%04d from WD%03d, Dummy Data packet received (all channels disabled)\n",
+                 usSince(mEventStartTime),
+                 mPacketsReceived-1,
+                 ph->serial_number);
+         
+         f << line;
+         
+         if (mVerbose >= 3)
+            std::cout << line;
+      }
+      return 0;
+   }
+   
    assert(ph->payload_length % 3 == 0);
    assert(ph->data_offset % 3 == 0);
    int numberBins = (int) ph->payload_length / 1.5;
    int firstBin = ph->data_offset / 1.5;
+   int channelSegment = firstBin / 938;
    
    if (mLogfile != "" || mVerbose >= 3) {
       std::ofstream f;
@@ -2083,7 +2120,7 @@ int WP::ReceiveWfPacket()
    assert(channel_number < WD_N_CHANNELS);
    
    // mark valid package received
-   er->SetWfValid(channel_number, ph->data_offset > 0, true);
+   er->SetWfValid(channel_number, channelSegment, true);
    
    // find event belonging to this baord
    WDEvent *event = nullptr;
@@ -2103,21 +2140,40 @@ int WP::ReceiveWfPacket()
    event->mTCalibrated = false;
    mLastEventNumber = ph->event_number;
 
-   // decode waveform data
-   auto pd = (unsigned char*)(ph+1);
-   for (int i=0 ; i<numberBins ; i+=2) {
-      // decode two bins
-      short data1   = ((pd[1] & 0x0F) << 8) | pd[0];
-      short data2 = ((unsigned short)pd[2] << 4) | (pd[1] >> 4);
-      // subtract binary offset
-      data1 -= 0x800;
-      data2 -= 0x800;
-      pd+=3;
-      
-      event->mWfU[channel_number][firstBin+i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
-      event->mWfU[channel_number][firstBin+i+1]       = (float)data2 * (1 / 4096.0);
+   // decode DRS waveform data
+   if (ph->data_type == cDataTypeDRS) {
+      auto pd = (unsigned char*)(ph+1);
+      for (int i=0 ; i<numberBins ; i+=2) {
+         // decode two bins
+         short data1   = ((pd[1] & 0x0F) << 8) | pd[0];
+         short data2 = ((unsigned short)pd[2] << 4) | (pd[1] >> 4);
+         // subtract binary offset
+         data1 -= 0x800;
+         data2 -= 0x800;
+         pd+=3;
+         
+         event->mWfU[channel_number][firstBin+i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
+         event->mWfU[channel_number][firstBin+i+1]       = (float)data2 * (1 / 4096.0);
+      }
    }
-   
+
+   // decode ADC waveform data
+   if (ph->data_type == cDataTypeADC) {
+      auto pd = (unsigned char*)(ph+1);
+      for (int i=0 ; i<numberBins ; i+=2) {
+         // decode two bins
+         short data1   = ((pd[1] & 0x0F) << 8) | pd[0];
+         short data2 = ((unsigned short)pd[2] << 4) | (pd[1] >> 4);
+         // subtract binary offset
+         data1 -= 0x800;
+         data2 -= 0x800;
+         pd+=3;
+         
+         event->mWfUADC[channel_number][firstBin+i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
+         event->mWfUADC[channel_number][firstBin+i+1]       = (float)data2 * (1 / 4096.0);
+      }
+   }
+
    return SUCCESS;
 }
 
@@ -2316,20 +2372,20 @@ void WP::CalibrateWaveforms(WDEvent* ev)
                ofs = wdb->mVCalib.mCalib.adc_offset_range2[i];
             else
                ofs = 0;
-            for (int j=0 ; j<1024 ; j++)
-               ev->mWfU[i][j] -= ofs;
+            for (int j=0 ; j<2048 ; j++)
+               ev->mWfUADC[i][j] -= ofs;
          }
       }
       
       // just set nominal time bins from ADC sampling rate
       for (int i=0 ; i<WD_N_CHANNELS ; i++)
-         for (int j=0 ; j<1024 ; j++)
-            ev->mWfT[i][j] = (float)(j * 1E-6/ev->mSamplingFrequency);
+         for (int j=0 ; j<2048 ; j++)
+            ev->mWfTADC[i][j] = (float)(j * 1E-6/ev->mSamplingFrequency);
       
       // shift ADC values
       for (int i=0 ; i<WD_N_CHANNELS-2 ; i++)
-         for (int j=0 ; j<1024 ; j++)
-            ev->mWfU[i][j] += 0.35;
+         for (int j=0 ; j<2048 ; j++)
+            ev->mWfUADC[i][j] += 0.35;
       
    } else {  //---------- calibrate DRS data ----------
       
@@ -2613,9 +2669,16 @@ void WP::SaveWaveforms()
 
                mxml_start_element(li.xml, "Waveform");
                strcpy(str, "\n");
-               for (int j=0 ; j<1024 ; j++) {
-                  sprintf(str, "%1.3f,%1.1f", ev->mWfT[i][j]*1E9, ev->mWfU[i][j]*1E3);
-                  mxml_write_element(li.xml, "Data", str);
+               if (ev->mWFTypeADC) {
+                  for (int j=0 ; j<2048 ; j++) {
+                     sprintf(str, "%1.3f,%1.1f", ev->mWfTADC[i][j]*1E9, ev->mWfUADC[i][j]*1E3);
+                     mxml_write_element(li.xml, "Data", str);
+                  }
+               } else {
+                  for (int j=0 ; j<1024 ; j++) {
+                     sprintf(str, "%1.3f,%1.1f", ev->mWfT[i][j]*1E9, ev->mWfU[i][j]*1E3);
+                     mxml_write_element(li.xml, "Data", str);
+                  }
                }
                mxml_end_element(li.xml); // CHNx
                mxml_end_element(li.xml); // CHNx
@@ -2723,13 +2786,24 @@ void WP::SaveWaveforms()
                *(unsigned short *)p = ev->mTriggerCell[i];
                p += sizeof(unsigned short);
                
-               for (int j=0 ; j<1024 ; j++) {
-                  // save binary date as 16-bit value:
-                  // 0 = -0.5V,  65535 = +0.5V    for range 0
-                  // 0 = -0.05V, 65535 = +0.95V   for range 0.45
-                  unsigned short d = (unsigned short)((ev->mWfU[i][j] - wdb->GetRange() + 0.5) * 65535);
-                  *(unsigned short *)p = d;
-                  p += sizeof(unsigned short);
+               if (ev->mWFTypeADC) {
+                  for (int j=0 ; j<1024 ; j++) {
+                     // save binary date as 16-bit value:
+                     // 0 = -0.5V,  65535 = +0.5V    for range 0
+                     // 0 = -0.05V, 65535 = +0.95V   for range 0.45
+                     unsigned short d = (unsigned short)((ev->mWfU[i][j] - wdb->GetRange() + 0.5) * 65535);
+                     *(unsigned short *)p = d;
+                     p += sizeof(unsigned short);
+                  }
+               } else {
+                  for (int j=0 ; j<2048 ; j++) {
+                     // save binary date as 16-bit value:
+                     // 0 = -0.5V,  65535 = +0.5V    for range 0
+                     // 0 = -0.05V, 65535 = +0.95V   for range 0.45
+                     unsigned short d = (unsigned short)((ev->mWfUADC[i][j] - wdb->GetRange() + 0.5) * 65535);
+                     *(unsigned short *)p = d;
+                     p += sizeof(unsigned short);
+                  }
                }
             }
          }
@@ -3130,7 +3204,7 @@ void WP::DoCalibrationVoltageStep()
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
-         sum += event.mWfU[ch][i];
+         sum += event.mWfUADC[ch][i];
       b->mVCalib.mCalib.adc_offset_range0[ch] = sum / 1010;
    }
    
@@ -3165,7 +3239,7 @@ void WP::DoCalibrationVoltageStep()
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
-         sum += event.mWfU[ch][i];
+         sum += event.mWfUADC[ch][i];
       b->mVCalib.mCalib.adc_offset_range1[ch] = sum / 1010;
    }
    
@@ -3200,7 +3274,7 @@ void WP::DoCalibrationVoltageStep()
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
-         sum += event.mWfU[ch][i];
+         sum += event.mWfUADC[ch][i];
       b->mVCalib.mCalib.adc_offset_range2[ch] = sum / 1010;
    }
    

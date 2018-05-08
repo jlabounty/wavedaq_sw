@@ -821,7 +821,11 @@ Oscilloscope.prototype.drawWF = function (ctx) {
       ctx.stroke();
 
       for (i=1 ; i<10 ; i++) {
-         var freqMax = OSC.wdb[OSC.curBoard].drsSampleFreq / 2;
+         var freqMax;
+         if (OSC.wdb[OSC.curBoard].readoutSrcSel == 1)
+            freqMax = OSC.wdb[OSC.curBoard].drsSampleFreq / 2;
+         else
+            freqMax = OSC.wdb[OSC.curBoard].adcSampleFreq / 2;
          var f = i/10.0*freqMax;
 
          ctx.fillStyle = this.chnColors[19];

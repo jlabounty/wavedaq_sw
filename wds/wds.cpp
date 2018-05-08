@@ -318,6 +318,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                gl->wdb[iBoard]->SetAdcChTxEn(gl->wdb[iBoard]->GetChnTxEn());
             }
          }
+         if (gl->readoutMode == cReadoutModeDRS)
+            gl->wp->SetRequestedSegments(2);
+         else if (gl->readoutMode == cReadoutModeADC)
+            gl->wp->SetRequestedSegments(3);
       }
 
       else if (item == "calibBufferEnable") {
@@ -511,7 +515,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"pllLck\": %d,\n",                     w->GetPllLock(false));
          mg_printf_http_chunk(nc, "      \"drsSampleFreq\": %d,\n",              gl->demoMode ?
                                                                                    demoDrsSampleFreq : w->GetDrsSampleFreqMhz());
-         mg_printf_http_chunk(nc, "      \"adcSampleFreq\": %d,\n",              w->GetAdcSampleFreq());
+         mg_printf_http_chunk(nc, "      \"adcSampleFreq\": %d,\n",              w->GetAdcSampleFreq() / 1000);
          mg_printf_http_chunk(nc, "      \"compChannelStatus\": %d,\n",          w->GetCompChStat());
          mg_printf_http_chunk(nc, "      \"lastEventNumber\": %d,\n",            w->GetEventNumber());
          mg_printf_http_chunk(nc, "      \"triggerBusParityErrorCount\": %d,\n", w->GetTrbParityErrorCount());
@@ -525,7 +529,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"drs0TimingRefSel\": %d,\n",           w->GetDrs0TimingRefSel());
          mg_printf_http_chunk(nc, "      \"drs1TimingRefSel\": %d,\n",           w->GetDrs1TimingRefSel());
          mg_printf_http_chunk(nc, "      \"calibBufferEnable\": %s,\n",          w->GetCalibBufferEn() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"timingCalibSignalEnable\": %s,\n",    w->GetTimingCalibSignalEn() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"timingCalibSignalEnable\": %d,\n",    w->GetTimingCalibSignalEn());
+         mg_printf_http_chunk(nc, "      \"timingReferenceSignal\": %d,\n",      w->GetTimingReferenceSignal());
          mg_printf_http_chunk(nc, "      \"daqClkSrcSel\": %d,\n",               w->GetDaqClkSrcSel());
          mg_printf_http_chunk(nc, "      \"extClkInSel\": %d,\n",                w->GetExtClkInSel());
          mg_printf_http_chunk(nc, "      \"extClkFreq\": %d,\n",                 w->GetExtClkFreq());
@@ -746,34 +751,67 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          b = 0xFF; // signals demo data
       
       if (bNewEvent) {
-         int t = 1;                    // array type
-         int n = 1024;                 // number of elements
-         int vc = event.mVCalibrated;  // voltage calibrated
-         int tc = event.mTCalibrated;  // time calibrated
-         int l = gl->wp->GetNLogged(); // number of logged events
-         for (int c=0 ; c<WD_N_CHANNELS ; c++) {
-            if (chn & (1 << c)) {
-               t = 1; // time array
-               mg_send_http_chunk(nc, (const char *)&t, 4);
-               mg_send_http_chunk(nc, (const char *)&b, 4);
-               mg_send_http_chunk(nc, (const char *)&tc, 4);
-               mg_send_http_chunk(nc, (const char *)&l, 4);
-               mg_send_http_chunk(nc, (const char *)&c, 4);
-               mg_send_http_chunk(nc, (const char *)&n, 4);
-               mg_send_http_chunk(nc, (const char *)event.mWfT[c], sizeof(float)*n);
+         if (event.mWFTypeADC) { //---- ADC waveforms
+            int t = 1;                    // array type
+            int n = 1024;                 // number of elements
+            int vc = event.mVCalibrated;  // voltage calibrated
+            int tc = event.mTCalibrated;  // time calibrated
+            int l = gl->wp->GetNLogged(); // number of logged events
+            for (int c=0 ; c<WD_N_CHANNELS ; c++) {
+               if (chn & (1 << c)) {
+                  t = 1; // time array
+                  mg_send_http_chunk(nc, (const char *)&t, 4);
+                  mg_send_http_chunk(nc, (const char *)&b, 4);
+                  mg_send_http_chunk(nc, (const char *)&tc, 4);
+                  mg_send_http_chunk(nc, (const char *)&l, 4);
+                  mg_send_http_chunk(nc, (const char *)&c, 4);
+                  mg_send_http_chunk(nc, (const char *)&n, 4);
+                  mg_send_http_chunk(nc, (const char *)event.mWfTADC[c], sizeof(float)*n);
+               }
             }
-         }
-         
-         for (int c=0 ; c<WD_N_CHANNELS ; c++) {
-            if (chn & (1 << c)) {
-               t = 2; // voltage array
-               mg_send_http_chunk(nc, (const char *)&t, 4);
-               mg_send_http_chunk(nc, (const char *)&b, 4);
-               mg_send_http_chunk(nc, (const char *)&vc, 4);
-               mg_send_http_chunk(nc, (const char *)&l, 4);
-               mg_send_http_chunk(nc, (const char *)&c, 4);
-               mg_send_http_chunk(nc, (const char *)&n, 4);
-               mg_send_http_chunk(nc, (const char *)event.mWfU[c], sizeof(float)*n);
+            
+            for (int c=0 ; c<WD_N_CHANNELS ; c++) {
+               if (chn & (1 << c)) {
+                  t = 2; // voltage array
+                  mg_send_http_chunk(nc, (const char *)&t, 4);
+                  mg_send_http_chunk(nc, (const char *)&b, 4);
+                  mg_send_http_chunk(nc, (const char *)&vc, 4);
+                  mg_send_http_chunk(nc, (const char *)&l, 4);
+                  mg_send_http_chunk(nc, (const char *)&c, 4);
+                  mg_send_http_chunk(nc, (const char *)&n, 4);
+                  mg_send_http_chunk(nc, (const char *)event.mWfUADC[c], sizeof(float)*n);
+               }
+            }
+         } else { //---- DRS waveforms
+            int t = 1;                    // array type
+            int n = 1024;                 // number of elements
+            int vc = event.mVCalibrated;  // voltage calibrated
+            int tc = event.mTCalibrated;  // time calibrated
+            int l = gl->wp->GetNLogged(); // number of logged events
+            for (int c=0 ; c<WD_N_CHANNELS ; c++) {
+               if (chn & (1 << c)) {
+                  t = 1; // time array
+                  mg_send_http_chunk(nc, (const char *)&t, 4);
+                  mg_send_http_chunk(nc, (const char *)&b, 4);
+                  mg_send_http_chunk(nc, (const char *)&tc, 4);
+                  mg_send_http_chunk(nc, (const char *)&l, 4);
+                  mg_send_http_chunk(nc, (const char *)&c, 4);
+                  mg_send_http_chunk(nc, (const char *)&n, 4);
+                  mg_send_http_chunk(nc, (const char *)event.mWfT[c], sizeof(float)*n);
+               }
+            }
+            
+            for (int c=0 ; c<WD_N_CHANNELS ; c++) {
+               if (chn & (1 << c)) {
+                  t = 2; // voltage array
+                  mg_send_http_chunk(nc, (const char *)&t, 4);
+                  mg_send_http_chunk(nc, (const char *)&b, 4);
+                  mg_send_http_chunk(nc, (const char *)&vc, 4);
+                  mg_send_http_chunk(nc, (const char *)&l, 4);
+                  mg_send_http_chunk(nc, (const char *)&c, 4);
+                  mg_send_http_chunk(nc, (const char *)&n, 4);
+                  mg_send_http_chunk(nc, (const char *)event.mWfU[c], sizeof(float)*n);
+               }
             }
          }
          
@@ -991,8 +1029,20 @@ int main(int argc, const char * argv[])
             }
             
             // retrieve enabled channels
-            b->SetChnTxEn(b->GetDrsChTxEn());
+            printf("%0X - %0X\n", b->GetDrsChTxEn(), b->GetAdcChTxEn());
             
+            if (b->GetDrsChTxEn() > 0) {
+               gl.readoutMode = cReadoutModeDRS;
+               b->SetChnTxEn(b->GetDrsChTxEn());
+            } else if (b->GetAdcChTxEn() > 0) {
+               gl.readoutMode = cReadoutModeADC;
+               b->SetChnTxEn(b->GetAdcChTxEn());
+            }
+            else {
+               b->SetDrsChTxEn(0xFFFF);
+               b->SetChnTxEn(0xFFFF);
+            }
+
          } else {
             // turn all channels on in demo mode
             b->SetDrsChTxEn(0xFFFF);

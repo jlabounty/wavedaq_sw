@@ -169,7 +169,10 @@ public:
    
    float            mWfU[WD_N_CHANNELS][1024];
    float            mWfT[WD_N_CHANNELS][1024];
-   
+
+   float            mWfUADC[WD_N_CHANNELS][2048];
+   float            mWfTADC[WD_N_CHANNELS][2048];
+
    bool             mVCalibrated;
    bool             mTCalibrated;
    
@@ -232,17 +235,20 @@ public:
 class WDEventRequest {
    unsigned short   mBoardId;
    bool             mBoardRequested;
-   bool             mWfValid[WD_N_CHANNELS][2];
+   int              mRequestedSegments;
+   bool             mWfValid[WD_N_CHANNELS][3];
    unsigned int     mChannelMask;
    int              mDrsTriggerCell[WD_N_CHANNELS];
  
 public:
-   WDEventRequest(int boardId, unsigned int mask = 0xFFFF) {
+   WDEventRequest(int boardId, unsigned int mask = 0xFFFF, int segments = 2) {
       mBoardId = boardId;
       mBoardRequested = true;
+      mRequestedSegments = segments;
       for (int i=0 ; i<WD_N_CHANNELS ; i++) {
          mWfValid[i][0] = false;
          mWfValid[i][1] = false;
+         mWfValid[i][2] = false;
          mDrsTriggerCell[i] = -1;
       }
       mChannelMask = mask;
@@ -250,8 +256,9 @@ public:
    
    int              GetBoardId() { return mBoardId; }
    void             SetRequested(bool flag) { mBoardRequested = flag; }
+   void             SetRequestedSegments(int s) { mRequestedSegments = s; }
    bool             IsRequested() { return mBoardRequested; }
-   void             SetWfValid(int channel, int segment, bool v) { mWfValid[channel][segment] = v; }
+   void             SetWfValid(int channel, int segment, bool v) { if (segment<3) mWfValid[channel][segment] = v; }
    void             SetDrsTriggerCell(int ch, unsigned int c) { mDrsTriggerCell[ch] = c; }
    int              GetDrsTriggerCell(int ch) { return mDrsTriggerCell[ch]; }
    void             SetMask(unsigned int mask) { mChannelMask = mask; }
@@ -407,6 +414,7 @@ public:
    void RequestAllBoards();
    void RequestBoard(WDB* b);
    void SetEventRequestMasks();
+   void SetRequestedSegments(int s);
    WDB* GetBoard(int board_id);
    unsigned int GetEventRequestMask(int board_id);
    
@@ -651,8 +659,9 @@ public:
    unsigned int GetTriggerFallingEdge();
    void SetTriggerFallingEdge(unsigned int value);
    
-   unsigned int     GetChnTxEn() { return mChnTxEn; };
-   void             SetChnTxEn(int mask) { mChnTxEn = mask; };
+   unsigned int GetChnTxEn() { return mChnTxEn; };
+   void SetChnTxEn(int mask) { mChnTxEn = mask; };
+   // int GetTimingReferenceSignal() { return mTimingReferenceSignal; }
 };
 
 //--------------------------------------------------------------------

@@ -302,10 +302,7 @@ function populateControls(init) {
       document.getElementById("drsActualSampleFreq").innerHTML = OSC.wdb[OSC.curBoard].drsSampleFreq / 1000 + " GSPS";
    }
    var s = document.getElementById("timingReferenceSignalSelect");
-   if (OSC.wdb[OSC.curBoard].drs0TimingRefSel > 0)
-      s.selectedIndex = 2;
-   else if (OSC.wdb[OSC.curBoard].timingCalibSignalEnable)
-      s.selectedIndex = 1;
+   s.selectedIndex = OSC.wdb[OSC.curBoard].timingReferenceSignal;
 
    document.getElementById("calib1").checked = OSC.wp.ofsCalib1;
    document.getElementById("calib2").checked = OSC.wp.ofsCalib2;
