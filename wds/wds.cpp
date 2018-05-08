@@ -202,10 +202,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             if (iChannel == -1 || i == iChannel) {
                if (value == "0") {
                   // internal trigger
-                  gl->wdb[i]->SetLocalTriggerEnable(1);
+                  gl->wdb[i]->SetTriggerTypeSel(1);
                } else {
                   // external trigger
-                  gl->wdb[i]->SetLocalTriggerEnable(0);
+                  gl->wdb[i]->SetTriggerTypeSel(0);
                }
             }
          }
@@ -558,7 +558,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
          mg_printf_http_chunk(nc, "      \"triggerMode\": %d,\n",                gl->triggerMode);
          mg_printf_http_chunk(nc, "      \"triggerExtTriggerOutEnable\": %s,\n", w->GetExtTriggerOutEnable() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"triggerSource\": %d,\n",              w->GetLocalTriggerEnable() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"triggerSource\": %d,\n",              w->GetTriggerTypeSel() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"triggerOutPulseLength\": %d,\n",      w->GetTriggerOutPulseLength());
          mg_printf_http_chunk(nc, "      \"triggerDelay\": %d,\n",               w->GetTriggerDelayNs());
          mg_printf_http_chunk(nc, "      \"triggerSrcPolarity\": %d,\n",         w->GetTrgSrcPolarity());

@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  23.04.2018 11:09:03
+// Created :  07.05.2018 14:06:11
 //
 
 
@@ -2009,19 +2009,23 @@ public:
 
    ////// ------ Control Register 96 [0x1180]: TRG_CFG - Trigger Configuration (Default: 0x00000000) ------ //////
 
+   // 0x00010000: LEAD_TRAIL_EDGE_SEL - 0 = trigger on leading edge, 1 = trigger on trailing edge
+   unsigned int GetLeadTrailEdgeSel() { return BitExtractControl(WD2_LEAD_TRAIL_EDGE_SEL_REG, WD2_LEAD_TRAIL_EDGE_SEL_MASK, WD2_LEAD_TRAIL_EDGE_SEL_OFS); };
+   void         SetLeadTrailEdgeSel(unsigned int value) { SetRegMask(WD2_LEAD_TRAIL_EDGE_SEL_REG, WD2_LEAD_TRAIL_EDGE_SEL_MASK, WD2_LEAD_TRAIL_EDGE_SEL_OFS, value); };
+
    // 0x00002000: EXT_TRIGGER_OUT_ENABLE - Enable output of trigger signal to MCX connector
    unsigned int GetExtTriggerOutEnable() { return BitExtractControl(WD2_EXT_TRIGGER_OUT_ENABLE_REG, WD2_EXT_TRIGGER_OUT_ENABLE_MASK, WD2_EXT_TRIGGER_OUT_ENABLE_OFS); };
    void         SetExtTriggerOutEnable(unsigned int value) { SetRegMask(WD2_EXT_TRIGGER_OUT_ENABLE_REG, WD2_EXT_TRIGGER_OUT_ENABLE_MASK, WD2_EXT_TRIGGER_OUT_ENABLE_OFS, value); };
 
-   // 0x00001000: LOCAL_TRIGGER_ENABLE - 1 = use local hardware trigger and external tirgger (synchronized), 0 = use asynchronous external trigger
-   unsigned int GetLocalTriggerEnable() { return BitExtractControl(WD2_LOCAL_TRIGGER_ENABLE_REG, WD2_LOCAL_TRIGGER_ENABLE_MASK, WD2_LOCAL_TRIGGER_ENABLE_OFS); };
-   void         SetLocalTriggerEnable(unsigned int value) { SetRegMask(WD2_LOCAL_TRIGGER_ENABLE_REG, WD2_LOCAL_TRIGGER_ENABLE_MASK, WD2_LOCAL_TRIGGER_ENABLE_OFS, value); };
+   // 0x00001000: TRIGGER_TYPE_SEL - 0 = use local hardware trigger and external tirgger (synchronized), 1 = use asynchronous external trigger
+   unsigned int GetTriggerTypeSel() { return BitExtractControl(WD2_TRIGGER_TYPE_SEL_REG, WD2_TRIGGER_TYPE_SEL_MASK, WD2_TRIGGER_TYPE_SEL_OFS); };
+   void         SetTriggerTypeSel(unsigned int value) { SetRegMask(WD2_TRIGGER_TYPE_SEL_REG, WD2_TRIGGER_TYPE_SEL_MASK, WD2_TRIGGER_TYPE_SEL_OFS, value); };
 
    // 0x00000700: TRIGGER_OUT_PULSE_LENGTH - Length of the trigger output pulse in cycles
    unsigned int GetTriggerOutPulseLength() { return BitExtractControl(WD2_TRIGGER_OUT_PULSE_LENGTH_REG, WD2_TRIGGER_OUT_PULSE_LENGTH_MASK, WD2_TRIGGER_OUT_PULSE_LENGTH_OFS); };
    void         SetTriggerOutPulseLength(unsigned int value) { SetRegMask(WD2_TRIGGER_OUT_PULSE_LENGTH_REG, WD2_TRIGGER_OUT_PULSE_LENGTH_MASK, WD2_TRIGGER_OUT_PULSE_LENGTH_OFS, value); };
 
-   // 0x000000FF: TRIGGER_DELAY - trigger delay in ticks of roughly 2.3 ns
+   // 0x000000FF: TRIGGER_DELAY - trigger delay in ticks of 6.25 ns
    unsigned int GetTriggerDelay() { return BitExtractControl(WD2_TRIGGER_DELAY_REG, WD2_TRIGGER_DELAY_MASK, WD2_TRIGGER_DELAY_OFS); };
    void         SetTriggerDelay(unsigned int value) { SetRegMask(WD2_TRIGGER_DELAY_REG, WD2_TRIGGER_DELAY_MASK, WD2_TRIGGER_DELAY_OFS, value); };
 

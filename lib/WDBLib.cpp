@@ -720,7 +720,7 @@ std::string WDB::GetFwBuild()
    s << "Reg. Compat. Level:  ";
    s << GetRegLayoutCompLevel() << std::endl;
    s << "FW GIT Revision:     ";
-   s << "0x" << std::hex << std::uppercase << GetGitHashTag() << std::endl;
+   s << "0x" << std::hex << std::uppercase << GetFwGitHashTag() << std::endl;
    
    s << "FW Build:            ";
    s << std::dec << std::setw(2) << std::setfill('0');
