@@ -63,6 +63,15 @@ typedef struct {
 
 #pragma pack() // reset alignment to default value
 
+enum {
+   cDataTypeDRS    = 0,
+   cDataTypeADC    = 1,
+   cDataTypeTDC    = 2,
+   cDataTypeTrg    = 3,
+   cDataTypeScaler = 4,
+   cDataTypeDummy  = 5
+};
+
 //--------------------------------------------------------------------
 
 typedef struct {
@@ -149,7 +158,7 @@ public:
    unsigned short   mCrateId;
    unsigned short   mSlotId;
    unsigned int     mEventNumber;
-   unsigned short   mSamplingFrequency;
+   unsigned int     mSamplingFrequency;
    unsigned short   mTriggerNumber;
    int              mTriggerCell[WD_N_CHANNELS];
    int              mTriggerCellDrs0;
@@ -471,7 +480,7 @@ public:
    // constructor
    WDB(std::string name, int verbose = 0);
 
-   const unsigned int cRequiredRegLayoutCompatLevel = 5;
+   const unsigned int cRequiredRegLayoutCompatLevel = 6;
    const unsigned int cRequiredFwCompatLevel = 2;
    const int cDefaultSendTimeoutMs = 100;
    const int cDefaultReceiveTimeoutMs = 100;
@@ -633,6 +642,7 @@ public:
    
    void RequestEvent();
    
+   unsigned int GetDrsSampleFreqMhz();
    void SaveVoltageCalibration(int freq);
    bool LoadVoltageCalibration(int freq, std::string path="");
    void SaveTimeCalibration(int freq);

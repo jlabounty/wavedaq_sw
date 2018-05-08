@@ -356,13 +356,13 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          if (iBoard == -1)
             for (auto &b: gl->wdb) {
                b->SetDrsSampleFreq(std::stoi(value));
-               b->LoadVoltageCalibration(b->GetDrsSampleFreq());
-               b->LoadTimeCalibration(b->GetDrsSampleFreq());
+               b->LoadVoltageCalibration(b->GetDrsSampleFreqMhz());
+               b->LoadTimeCalibration(b->GetDrsSampleFreqMhz());
             }
          else {
             gl->wdb[iBoard]->SetDrsSampleFreq(std::stoi(value));
-            gl->wdb[iBoard]->LoadVoltageCalibration(gl->wdb[iBoard]->GetDrsSampleFreq());
-            gl->wdb[iBoard]->LoadTimeCalibration(gl->wdb[iBoard]->GetDrsSampleFreq());
+            gl->wdb[iBoard]->LoadVoltageCalibration(gl->wdb[iBoard]->GetDrsSampleFreqMhz());
+            gl->wdb[iBoard]->LoadTimeCalibration(gl->wdb[iBoard]->GetDrsSampleFreqMhz());
          }
          demoDrsSampleFreq = std::stoi(value);
       }
@@ -510,7 +510,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"hvBackplanePlugged\": %s,\n",         w->GetBackplanePlugged() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"pllLck\": %d,\n",                     w->GetPllLock(false));
          mg_printf_http_chunk(nc, "      \"drsSampleFreq\": %d,\n",              gl->demoMode ?
-                                                                                   demoDrsSampleFreq : w->GetDrsSampleFreq());
+                                                                                   demoDrsSampleFreq : w->GetDrsSampleFreqMhz());
          mg_printf_http_chunk(nc, "      \"adcSampleFreq\": %d,\n",              w->GetAdcSampleFreq());
          mg_printf_http_chunk(nc, "      \"compChannelStatus\": %d,\n",          w->GetCompChStat());
          mg_printf_http_chunk(nc, "      \"lastEventNumber\": %d,\n",            w->GetEventNumber());
@@ -961,8 +961,8 @@ int main(int argc, const char * argv[])
             }
 
             // load calibration data for board
-            b->LoadVoltageCalibration(b->GetDrsSampleFreq());
-            b->LoadTimeCalibration(b->GetDrsSampleFreq());
+            b->LoadVoltageCalibration(b->GetDrsSampleFreqMhz());
+            b->LoadTimeCalibration(b->GetDrsSampleFreqMhz());
             
             // debug output
             if (gl.dbgRx > 0)
@@ -973,7 +973,7 @@ int main(int argc, const char * argv[])
             // reset PLLs
             if (gl.reset) {
                b->ResetAllPll();
-               auto f = b->GetDrsSampleFreq();
+               auto f = b->GetDrsSampleFreqMhz();
                if (f > 5120)
                   f = 5120;
                if (f < 700)

@@ -1597,16 +1597,18 @@ void WDB::SetTriggerDelayNs(unsigned int ns)
 
 void WDB::RequestEvent()
 {
-   //if (GetReadoutSrcSel() == WDB::cReadoutSrcDrs)
-   //   SendReceive("drsget");
-   //else
-   //   SendReceive("adcget");
-   
    SetDaqSingle(true);  // start DRS domino wave
    SetDaqSingle(false);
    
    SetDaqSoftTrigger(true);
    SetDaqSoftTrigger(false);
+}
+
+//--------------------------------------------------------------------
+
+unsigned int WDB::GetDrsSampleFreqMhz()
+{
+   return (unsigned int)(GetDrsSampleFreq() / 1000.0 + 0.5);
 }
 
 //--------------------------------------------------------------------
@@ -1661,7 +1663,7 @@ void WDEvent::SetEventHeaderInfo(WD2_FRAME_HEADER *ph)
    mCrateId = ph->crate_id;
    mSlotId  = ph->slot_id;
    mEventNumber = ph->event_number;
-   mSamplingFrequency = ph->sampling_frequency;
+   mSamplingFrequency = (unsigned int)(ph->sampling_frequency / 1000.0 + 0.5);  // convert kHz to MHz
    mTriggerNumber = ph->trigger_information[0] | (ph->trigger_information[1] << 8); // ## to be changed
    mTriggerCell[channel] = ph->drs_trigger_cell;
    if (channel < 8 || channel == 16)
@@ -1670,7 +1672,7 @@ void WDEvent::SetEventHeaderInfo(WD2_FRAME_HEADER *ph)
       mTriggerCellDrs1 = ph->drs_trigger_cell;
    mTriggerType = ph->trigger_information[2] | (ph->trigger_information[3] << 8);   // ## to be changed
    mTemperature = std::round(ph->temperature*0.0625 * 10 + 0.5) / 10.0f;
-   mWFTypeADC = mSamplingFrequency <= 100;
+   mWFTypeADC = (ph->data_type == cDataTypeADC);
 }
 
 //--------------------------------------------------------------------
@@ -1941,7 +1943,6 @@ int WP::ReceiveWfPacket()
    ph->serial_number                  = SWAP_UINT16(ph->serial_number);
    int channel_adc                    = (ph->channel_info >> 7) & 0x1;
    int channel_number                 = (ph->channel_info) & 0x1f;
-   int channel_segment                = (ph->data_offset > 0);
    ph->tx_enable                      = SWAP_UINT32(ph->tx_enable);
    ph->zero_suppression_mask          = SWAP_UINT16(ph->zero_suppression_mask);
    ph->flags                          = SWAP_UINT16(ph->flags);
@@ -1968,7 +1969,7 @@ int WP::ReceiveWfPacket()
       char line[256];
       f.open(mLogfile, std::ios_base::app);
       
-      sprintf(line, "%06dus #%04d from WD%03d, NB=%4d EN=%5d DT=%d A/C/S=%d/%02d/%d TC=%04d T=%1.1lf\n",
+      sprintf(line, "%06dus #%04d from WD%03d, NB=%4d EN=%5d DT=%d A/C/B=%d/%02d/%d TC=%04d T=%1.1lf\n",
               usSince(mEventStartTime),
               mPacketsReceived-1,
               ph->serial_number,
@@ -1977,7 +1978,7 @@ int WP::ReceiveWfPacket()
               ph->data_type,
               channel_adc,
               channel_number,
-              channel_segment,
+              firstBin,
               ph->drs_trigger_cell,
               ph->temperature*0.0625);
       
@@ -1988,7 +1989,7 @@ int WP::ReceiveWfPacket()
    }
    
    // drop package (for now...) if it is not DRS or ADC data
-   if (ph->data_type != 0 && ph->data_type != 1) {
+   if (ph->data_type != cDataTypeDRS && ph->data_type != cDataTypeADC) {
       std::cerr << "Package dropped, data type=" << ph->data_type << ", "
       << "board id = " << ph->serial_number << std::endl;
       if (mLogfile != "") {
@@ -2082,7 +2083,7 @@ int WP::ReceiveWfPacket()
    assert(channel_number < WD_N_CHANNELS);
    
    // mark valid package received
-   er->SetWfValid(channel_number, channel_segment, true);
+   er->SetWfValid(channel_number, ph->data_offset > 0, true);
    
    // find event belonging to this baord
    WDEvent *event = nullptr;
@@ -2326,7 +2327,7 @@ void WP::CalibrateWaveforms(WDEvent* ev)
             ev->mWfT[i][j] = (float)(j * 1E-6/ev->mSamplingFrequency);
       
       // shift ADC values
-      for (int i=0 ; i<WD_N_CHANNELS ; i++)
+      for (int i=0 ; i<WD_N_CHANNELS-2 ; i++)
          for (int j=0 ; j<1024 ; j++)
             ev->mWfU[i][j] += 0.35;
       
@@ -2478,7 +2479,7 @@ void WP::CalibrateWaveforms(WDEvent* ev)
                      if (ev->mWfU[c][i] > tl && ev->mWfU[c][i+1] <= tl) {
                         double t0 = ev->mWfT[c][i] +
                         (ev->mWfT[c][i+1]-ev->mWfT[c][i])*(tl-ev->mWfU[c][i])/(ev->mWfU[c][i+1]-ev->mWfU[c][i]);
-                        double dt = t0 - (1024*1E-6/wdb->GetDrsSampleFreq() - 30E-9 - wdb->GetTriggerDelayNs() * 1E-9);
+                        double dt = t0 - (1024*1E-6/wdb->GetDrsSampleFreqMhz() - 30E-9 - wdb->GetTriggerDelayNs() * 1E-9);
                         if (fabs(dt) < fabs(dt_min))
                            dt_min = dt;
                         bFound = true;
@@ -2489,7 +2490,7 @@ void WP::CalibrateWaveforms(WDEvent* ev)
                   if (ev->mWfU[c][i] < tl && ev->mWfU[c][i+1] >= tl) {
                      double t0 = ev->mWfT[c][i] +
                      (ev->mWfT[c][i+1]-ev->mWfT[c][i])*(tl-ev->mWfU[c][i])/(ev->mWfU[c][i+1]-ev->mWfU[c][i]);
-                     double dt = t0 - (1024*1E-6/wdb->GetDrsSampleFreq() - 30E-9 - wdb->GetTriggerDelayNs() * 1E-9);
+                     double dt = t0 - (1024*1E-6/wdb->GetDrsSampleFreqMhz() - 30E-9 - wdb->GetTriggerDelayNs() * 1E-9);
                      if (fabs(dt) < fabs(dt_min))
                         dt_min = dt;
                      bFound = true;
@@ -2778,8 +2779,16 @@ void WP::Collector()
       do {
          
          status = ReceiveWfPacket();
-         if (status != SUCCESS)
+         if (status != SUCCESS) {
+            if (mVerbose >= 2)
+               std::cout << "Abort collecting event, status = " << status << ". (time = "<< usSince(mEventStartTime) << "us)" << std::endl;
+            if (mLogfile != "") {
+               std::ofstream f;
+               f.open(mLogfile, std::ios_base::app);
+               f << "Abort collecting event, status = " << status << ". (time = "<< usSince(mEventStartTime) << "us)" << std::endl;
+            }
             break; // abort loop if timeout or wrong packet etc.
+         }
 
       } while (!AllPacketsReceived());
       
@@ -2887,7 +2896,7 @@ void WP::DoCalibrationVoltageStep()
       mOldFeMux       = b->GetFeMux(0);
       mOldCalibBuffer = b->GetCalibBufferEn();
       
-      b->mVCalib.mCalib.sampling_frequency = b->GetDrsSampleFreq();
+      b->mVCalib.mCalib.sampling_frequency = b->GetDrsSampleFreqMhz();
       
       // turn off all calibration
       mRotateWaveform      = false;
@@ -3199,7 +3208,7 @@ void WP::DoCalibrationVoltageStep()
    calibProg.ave = NULL;
 
    // save calibration
-   b->SaveVoltageCalibration(b->GetDrsSampleFreq());
+   b->SaveVoltageCalibration(b->GetDrsSampleFreqMhz());
    
    // switch to next board
    calibProg.iBoard++;
@@ -3320,7 +3329,7 @@ void WP::CalibrateLocal(WDEvent *event, WDB *b)
 {
    float dv, llim, ulim;
    
-   if (b->GetDrsSampleFreq() >= 3000) {
+   if (b->GetDrsSampleFreqMhz() >= 3000) {
       llim = -0.15f;
       ulim =  0.15f;
    } else {
@@ -3372,7 +3381,7 @@ void WP::CalibrateLocal(WDEvent *event, WDB *b)
          }
          
          sum /= 1024;
-         double dtCell = 1.0/b->GetDrsSampleFreq()*1E-6;
+         double dtCell = 1.0/b->GetDrsSampleFreqMhz()*1E-6;
          
          // here comes the central calculation, dT = dV/average * dtCell
          for (int i=0 ; i<1024 ; i++)
@@ -3516,7 +3525,7 @@ void WP::DoCalibrationTimeStep()
       mOldFeMux       = b->GetFeMux(0);
       mOldCalibBuffer = b->GetCalibBufferEn();
 
-      b->mTCalib.mCalib.sampling_frequency = b->GetDrsSampleFreq();
+      b->mTCalib.mCalib.sampling_frequency = b->GetDrsSampleFreqMhz();
 
       mRotateWaveform       = false;
       mTimeCalib1           = false;
@@ -3524,7 +3533,7 @@ void WP::DoCalibrationTimeStep()
       // initialize delta-t array with nominal values
       for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
          for (int bin=0 ; bin<1024 ; bin++) {
-            b->mTCalib.mCalib.dt[ch][bin] = (float)(1.0/b->GetDrsSampleFreq()*1E-6); // [s]
+            b->mTCalib.mCalib.dt[ch][bin] = (float)(1.0/b->GetDrsSampleFreqMhz()*1E-6); // [s]
             b->mTCalib.mCalib.period[ch][bin] = 0;
          }
       
@@ -3657,7 +3666,7 @@ void WP::DoCalibrationTimeStep()
    delete calibProg.ave;
    calibProg.ave = NULL;
    
-   b->SaveTimeCalibration(b->GetDrsSampleFreq());
+   b->SaveTimeCalibration(b->GetDrsSampleFreqMhz());
    
    // switch to next board
    calibProg.iBoard++;
@@ -3754,7 +3763,7 @@ VCALIB::VCALIB()
 void VCALIB::save(WDB *b, std::string filename)
 {
    std::memcpy(mCalib.version_id, "CAL2", 4);
-   mCalib.sampling_frequency = b->GetDrsSampleFreq();
+   mCalib.sampling_frequency = b->GetDrsSampleFreqMhz();
    mCalib.temperature = b->GetTemperatureDegree();
    
    int fh = open(filename.c_str(), O_WRONLY | O_CREAT, 0644);
@@ -3781,11 +3790,11 @@ void VCALIB::load(WDB *b, std::string filename)
          return;
       }
       
-      if (fabs((float)mCalib.sampling_frequency - b->GetDrsSampleFreq()) > 1) {
+      if (fabs((float)mCalib.sampling_frequency - b->GetDrsSampleFreqMhz()) > 1) {
          std::cerr << "Warning: Voltage calibration data in " << filename << " is for "
          << mCalib.sampling_frequency/1000.0
          << " GSPS, running now at "
-         << b->GetDrsSampleFreq()/1000.0 << " GSPS"  << std::endl;
+         << b->GetDrsSampleFreqMhz()/1000.0 << " GSPS"  << std::endl;
       }
 
       if (fabs(mCalib.temperature - b->GetTemperatureDegree()) > 5) {
@@ -3809,7 +3818,7 @@ TCALIB::TCALIB()
 void TCALIB::save(WDB *b, std::string filename)
 {
    std::memcpy(mCalib.version_id, "CAL2", 4);
-   mCalib.sampling_frequency = b->GetDrsSampleFreq();
+   mCalib.sampling_frequency = b->GetDrsSampleFreqMhz();
    mCalib.temperature = b->GetTemperatureDegree();
    
    int fh = open(filename.c_str(), O_WRONLY | O_CREAT, 0644);
@@ -3836,11 +3845,11 @@ void TCALIB::load(WDB *b, std::string filename)
          return;
       }
       
-      if (fabs((float)mCalib.sampling_frequency - b->GetDrsSampleFreq()) > 1) {
+      if (fabs((float)mCalib.sampling_frequency - b->GetDrsSampleFreqMhz()) > 1) {
          std::cerr << "Error: Time calibration data in " << filename << " is for "
          << mCalib.sampling_frequency/1000.0
          << " GSPS, running now at "
-         << b->GetDrsSampleFreq()/1000.0 << " GSPS"  << std::endl;
+         << b->GetDrsSampleFreqMhz()/1000.0 << " GSPS"  << std::endl;
          return;
       }
       
