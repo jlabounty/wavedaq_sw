@@ -766,7 +766,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                   mg_send_http_chunk(nc, (const char *)&l, 4);
                   mg_send_http_chunk(nc, (const char *)&c, 4);
                   mg_send_http_chunk(nc, (const char *)&n, 4);
-                  mg_send_http_chunk(nc, (const char *)event.mWfTADC[c], sizeof(float)*n);
+                  mg_send_http_chunk(nc, (const char *)&event.mWfTADC[c][0], sizeof(float)*n);
                }
             }
             
@@ -779,7 +779,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                   mg_send_http_chunk(nc, (const char *)&l, 4);
                   mg_send_http_chunk(nc, (const char *)&c, 4);
                   mg_send_http_chunk(nc, (const char *)&n, 4);
-                  mg_send_http_chunk(nc, (const char *)event.mWfUADC[c], sizeof(float)*n);
+                  mg_send_http_chunk(nc, (const char *)&event.mWfUADC[c][1024], sizeof(float)*n);
                }
             }
          } else { //---- DRS waveforms

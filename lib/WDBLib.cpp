@@ -1783,6 +1783,18 @@ void WP::SetRequestedSegments(int s)
       r->SetRequestedSegments(s);
 }
 
+void WP::SetEventRequestType()
+{
+   // set request mask from tx enable
+   int i=0;
+   for (auto &b: mWdb) {
+      if (b->GetDrsChTxEn() > 0)
+         mEventRequest[i++]->SetWfType(cDataTypeDRS);
+      else
+         mEventRequest[i++]->SetWfType(cDataTypeADC);
+   }
+}
+
 unsigned int WP::GetEventRequestMask(int board_id)
 {
    for (auto &r: mEventRequest)
@@ -1803,6 +1815,7 @@ void WP::RequestBoard(WDB *b)
    }
    
    SetEventRequestMasks();
+   SetEventRequestType();
 }
 
 void WP::RequestAllBoards()
@@ -1811,6 +1824,7 @@ void WP::RequestAllBoards()
       r->SetRequested(true);
 
    SetEventRequestMasks();
+   SetEventRequestType();
 }
 
 //--------------------------------------------------------------------
@@ -2006,10 +2020,14 @@ int WP::ReceiveWfPacket()
       char line[256];
       f.open(mLogfile, std::ios_base::app);
       
-      sprintf(line, "%06dus #%04d from WD%03d, NB=%4d EN=%5d DT=%d A/C/B=%d/%02d/%d TC=%04d T=%1.1lf\n",
+      sprintf(line, "%06dus #%04d from WD%03d, T=%s NB=%4d EN=%5d DT=%d A/C/B=%d/%02d/%d TC=%04d T=%1.1lf\n",
               usSince(mEventStartTime),
               mPacketsReceived-1,
               ph->serial_number,
+              ph->data_type == cDataTypeDRS ? "DRS" :
+              ph->data_type == cDataTypeADC ? "ADC" :
+              ph->data_type == cDataTypeTDC ? "TDC" :
+              ph->data_type == cDataTypeTrg ? "TRG" : "DUMMY",
               numberBins,
               ph->event_number,
               ph->data_type,
@@ -2056,6 +2074,11 @@ int WP::ReceiveWfPacket()
       return 0;
    }
    
+   // drop packes if wrong type, but keep collecting event
+   if (er->GetWfType() != ph->data_type) {
+      return SUCCESS;
+   }
+
    if (mCurrentEvent == -1)
       mCurrentEvent = ph->event_number;
    if (er->GetDrsTriggerCell(channel_number) == -1)
@@ -2169,8 +2192,8 @@ int WP::ReceiveWfPacket()
          data2 -= 0x800;
          pd+=3;
          
-         event->mWfUADC[channel_number][firstBin+i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
-         event->mWfUADC[channel_number][firstBin+i+1]       = (float)data2 * (1 / 4096.0);
+         event->mWfUADC[channel_number][firstBin+i]         = (float)data1 * (2 / 4096.0); // 2V ADC range with 12 bits
+         event->mWfUADC[channel_number][firstBin+i+1]       = (float)data2 * (2 / 4096.0);
       }
    }
 
@@ -2385,7 +2408,7 @@ void WP::CalibrateWaveforms(WDEvent* ev)
       // shift ADC values
       for (int i=0 ; i<WD_N_CHANNELS-2 ; i++)
          for (int j=0 ; j<2048 ; j++)
-            ev->mWfUADC[i][j] += 0.35;
+            ev->mWfUADC[i][j] += 0.7;
       
    } else {  //---------- calibrate DRS data ----------
       

@@ -238,10 +238,11 @@ class WDEventRequest {
    int              mRequestedSegments;
    bool             mWfValid[WD_N_CHANNELS][3];
    unsigned int     mChannelMask;
+   int              mWfType;
    int              mDrsTriggerCell[WD_N_CHANNELS];
  
 public:
-   WDEventRequest(int boardId, unsigned int mask = 0xFFFF, int segments = 2) {
+   WDEventRequest(int boardId, unsigned int mask = 0xFFFF, int segments = 2, int type = cDataTypeDRS) {
       mBoardId = boardId;
       mBoardRequested = true;
       mRequestedSegments = segments;
@@ -252,6 +253,7 @@ public:
          mDrsTriggerCell[i] = -1;
       }
       mChannelMask = mask;
+      mWfType = type;
    } ;
    
    int              GetBoardId() { return mBoardId; }
@@ -263,6 +265,8 @@ public:
    int              GetDrsTriggerCell(int ch) { return mDrsTriggerCell[ch]; }
    void             SetMask(unsigned int mask) { mChannelMask = mask; }
    unsigned int     GetMask() { return mChannelMask; }
+   void             SetWfType(int type) { mWfType = type; }
+   int              GetWfType() { return mWfType; }
    bool             IsWfValid();
 };
 
@@ -414,6 +418,7 @@ public:
    void RequestAllBoards();
    void RequestBoard(WDB* b);
    void SetEventRequestMasks();
+   void SetEventRequestType();
    void SetRequestedSegments(int s);
    WDB* GetBoard(int board_id);
    unsigned int GetEventRequestMask(int board_id);
