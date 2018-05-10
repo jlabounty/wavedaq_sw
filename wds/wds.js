@@ -569,6 +569,10 @@ function setDisp(e) {
       OSC.resizeCanvas();
       OSC.redraw();
    }
+   if (e.name == "invert") {
+      OSC.disp.invert = e.checked;
+      OSC.redraw();
+   }
 }
 
 function setPers(s) {

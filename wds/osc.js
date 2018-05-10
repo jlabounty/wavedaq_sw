@@ -18,7 +18,7 @@ var ChannelColors = [
    "#FF9000", "#00AAFF", "#FF00A0", "#00C030",
    "#D0A060", "#A0C0D0", "#C04010", "#807060",
    "#F0C000", "#2090A0", "#D040D0", "#90B000",
-   "#FFFFFF", "#FFFFFF", "#FF0000", "#FF0000" ];
+   "#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF" ];
 
 function Oscilloscope(div) { // constructor
 
@@ -112,7 +112,8 @@ function Oscilloscope(div) { // constructor
       histo: false,
       histoDivider: 0.5,
       persistency: 0,
-      persDeltaInt: 0
+      persDeltaInt: 0,
+      invert: false
    };
    this.newImage = true;
 
@@ -406,13 +407,18 @@ Oscilloscope.prototype.printFPS = function () {
 };
 
 Oscilloscope.prototype.printTemperature = function (ctx) {
-   ctx.fillStyle = 'white';
-   ctx.strokeStyle = 'white';
+   if (this.disp.invert) {
+      ctx.fillStyle = 'black';
+      ctx.strokeStyle = 'black';
+   } else {
+      ctx.fillStyle = 'white';
+      ctx.strokeStyle = 'white';
+   }
    ctx.font = '14px sans-serif';
    ctx.textAlign = "left";
    ctx.textBaseline = "top";
 
-   if (OSC.wdb != undefined) {
+   if (OSC.wdb != undefined && !this.chOn[19]) { // hide when FFT on
       var t = OSC.wdb[OSC.curBoard].temperature;
       ctx.fillText("T = " + t.toFixed(1) + " C", this.x1 + 12, this.y2 - 24);
    }
@@ -544,7 +550,7 @@ Oscilloscope.prototype.printScalers = function (ctx) {
 };
 
 Oscilloscope.prototype.blackCanvas = function (ctx) {
-   ctx.fillStyle = "black";
+   ctx.fillStyle = this.disp.invert ? "white" : "black";
    ctx.fillRect(0, 0, this.width, this.height);
 };
 
@@ -680,6 +686,17 @@ Oscilloscope.prototype.drawWF = function (ctx) {
             ctx.beginPath();
             ctx.fillStyle = this.chnColors[c];
             ctx.strokeStyle = this.chnColors[c];
+            if (this.disp.invert) {
+               ctx.lineWidth = 3;
+               if (c === 0) { // make yellow a bit darker
+                  ctx.fillStyle = "#CCC73E";
+                  ctx.strokeStyle = "#CCC73E";
+               }
+               if (c > 15) {
+                  ctx.fillStyle = "#000000";
+                  ctx.strokeStyle = "#000000";
+               }
+            }
             for (var i = 0; i < 1024; i++) {
                var x = this.wf.T[c][i] * this.wfTS + this.wfTO;
                var y = this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c];
@@ -810,7 +827,12 @@ Oscilloscope.prototype.drawWF = function (ctx) {
       ctx.beginPath();
       ctx.fillStyle = this.chnColors[19];
       ctx.strokeStyle = this.chnColors[19];
-      for (i = 0; i < 512; i++) {
+      if (this.disp.invert) {
+         ctx.fillStyle = "#000000";
+         ctx.strokeStyle = "#000000";
+         ctx.lineWidth = 3;
+      }
+         for (i = 0; i < 512; i++) {
          var x = i/512.0 * (this.x2 - this.x1) + this.x1;
          var y = this.y2 - (f[i] - min) / (max - min) * (this.y2-this.y1);
          if (i == 0)
@@ -828,8 +850,6 @@ Oscilloscope.prototype.drawWF = function (ctx) {
             freqMax = OSC.wdb[OSC.curBoard].adcSampleFreq / 2;
          var f = i/10.0*freqMax;
 
-         ctx.fillStyle = this.chnColors[19];
-         ctx.strokeStyle = this.chnColors[19];
          ctx.font = '14px sans-serif';
          ctx.textAlign = "center";
          ctx.textBaseline = "top";
