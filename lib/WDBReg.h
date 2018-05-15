@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  07.05.2018 14:06:11
+// Created :  15.05.2018 10:38:57
 //
 
 
@@ -52,6 +52,10 @@ public:
    // 0x00FF0000: DAQ_DATA_PHASE - Phase step setting of the PLL generating the common DAQ clock
    unsigned int GetDaqDataPhase() { return BitExtractControl(WD2_DAQ_DATA_PHASE_REG, WD2_DAQ_DATA_PHASE_MASK, WD2_DAQ_DATA_PHASE_OFS); };
    void         SetDaqDataPhase(unsigned int value) { SetRegMask(WD2_DAQ_DATA_PHASE_REG, WD2_DAQ_DATA_PHASE_MASK, WD2_DAQ_DATA_PHASE_OFS, value); };
+
+   // 0x00000400: DRS_CLR_RSR_AFTER_RO - Clear the read shift register (remove the token) after each readout
+   unsigned int GetDrsClrRsrAfterRo() { return BitExtractControl(WD2_DRS_CLR_RSR_AFTER_RO_REG, WD2_DRS_CLR_RSR_AFTER_RO_MASK, WD2_DRS_CLR_RSR_AFTER_RO_OFS); };
+   void         SetDrsClrRsrAfterRo(unsigned int value) { SetRegMask(WD2_DRS_CLR_RSR_AFTER_RO_REG, WD2_DRS_CLR_RSR_AFTER_RO_MASK, WD2_DRS_CLR_RSR_AFTER_RO_OFS, value); };
 
    // 0x00000200: COMP_POWER_EN - Comparator power enable
    unsigned int GetCompPowerEn() { return BitExtractControl(WD2_COMP_POWER_EN_REG, WD2_COMP_POWER_EN_MASK, WD2_COMP_POWER_EN_OFS); };
