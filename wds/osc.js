@@ -20,10 +20,18 @@ var ChannelColors = [
    "#F0C000", "#2090A0", "#D040D0", "#90B000",
    "#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF" ];
 
+var ChannelColorsInverted = [
+   "#B0B040", "#B0B0FF", "#FFA0A0", "#A0FFA0",
+   "#FF9000", "#00AAFF", "#FF00A0", "#00C030",
+   "#D0A060", "#A0C0D0", "#C04010", "#807060",
+   "#F0C000", "#2090A0", "#D040D0", "#90B000",
+   "#000000", "#000000", "#000000", "#000000" ];
+
 function Oscilloscope(div) { // constructor
 
    // constants
    this.chnColors = ChannelColors;
+   this.chnColorsInverted = ChannelColorsInverted;
 
    this.UScaleTable =
       [[0.001, "1 mV"],
@@ -347,9 +355,15 @@ Oscilloscope.prototype.draw = function () {
       this.newImage = false;
       this.wfImg = ctx.createImageData(this.x2 - this.x1, this.y2 - this.y1);
       for (var i = 0; i < this.wfImg.data.length; i += 4) {
-         this.wfImg.data[i] = 0;
-         this.wfImg.data[i + 1] = 0;
-         this.wfImg.data[i + 2] = 0;
+         if (this.disp.invert) {
+            this.wfImg.data[i] = 255;
+            this.wfImg.data[i + 1] = 255;
+            this.wfImg.data[i + 2] = 255;
+         } else {
+            this.wfImg.data[i] = 0;
+            this.wfImg.data[i + 1] = 0;
+            this.wfImg.data[i + 2] = 0;
+         }
          this.wfImg.data[i + 3] = 255;
       }
       this.wfImgOccupied = new Uint8ClampedArray(this.wfImg.data.length / 4);
@@ -360,8 +374,8 @@ Oscilloscope.prototype.draw = function () {
       this.drawGrid(ctx);
       this.drawDT(ctx);
    } else {
-      this.drawGrid(ctx);
       this.drawWF(ctx);
+      this.drawGrid(ctx);
       this.drawMarker(ctx);
       this.drawMeasurements(ctx);
       this.drawCursors(ctx);
@@ -426,8 +440,10 @@ Oscilloscope.prototype.printTemperature = function (ctx) {
 
 Oscilloscope.prototype.printLogged = function (ctx) {
    if (OSC.logFlag) {
-      ctx.fillStyle = 'white';
-      ctx.strokeStyle = 'white';
+      if (this.disp.invert)
+         ctx.fillStyle = "white";
+      else
+         ctx.fillStyle = "white";
       ctx.font = '14px sans-serif';
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
@@ -444,8 +460,10 @@ Oscilloscope.prototype.printMeasurements = function (ctx) {
          n++;
 
    if (n > 1) {
-      ctx.fillStyle = 'white';
-      ctx.strokeStyle = 'white';
+      if (this.disp.invert)
+         ctx.fillStyle = "black";
+      else
+         ctx.fillStyle = "white";
       ctx.font = '14px monospace';
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
@@ -466,7 +484,10 @@ Oscilloscope.prototype.drawMeasurements = function (ctx) {
 
 Oscilloscope.prototype.drawCursors = function (ctx) {
    if (this.timeCursor.input) {
-      ctx.strokeStyle = 'white';
+      if (this.disp.invert)
+         ctx.strokeStyle = "black";
+      else
+         ctx.strokeStyle = "white";
       ctx.lineWidth = 2;
       ctx.drawLine(this.timeCursor.x, this.y1, this.timeCursor.x, this.y2);
       ctx.lineWidth = 1;
@@ -516,8 +537,8 @@ Oscilloscope.prototype.printScalers = function (ctx) {
       var scaler = OSC.wdb[OSC.curBoard].scaler;
 
       for (var c = 0; c < 18; c++) {
-         ctx.fillStyle = this.chnColors[c];
-         ctx.strokeStyle = this.chnColors[c];
+         ctx.fillStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
+         ctx.strokeStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
          ctx.font = '14px sans-serif';
          ctx.textBaseline = "top";
 
@@ -684,19 +705,10 @@ Oscilloscope.prototype.drawWF = function (ctx) {
       for (var c = 0; c < 19; c++) {
          if (this.chOn[c]) {
             ctx.beginPath();
-            ctx.fillStyle = this.chnColors[c];
-            ctx.strokeStyle = this.chnColors[c];
-            if (this.disp.invert) {
+            ctx.fillStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
+            ctx.strokeStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
+            if (this.disp.invert)
                ctx.lineWidth = 3;
-               if (c === 0) { // make yellow a bit darker
-                  ctx.fillStyle = "#CCC73E";
-                  ctx.strokeStyle = "#CCC73E";
-               }
-               if (c > 15) {
-                  ctx.fillStyle = "#000000";
-                  ctx.strokeStyle = "#000000";
-               }
-            }
             for (var i = 0; i < 1024; i++) {
                var x = this.wf.T[c][i] * this.wfTS + this.wfTO;
                var y = this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c];
@@ -731,28 +743,33 @@ Oscilloscope.prototype.drawWF = function (ctx) {
             for (i = 0; i < this.wfImgOccupied.length; i++) {
                if (this.wfImgOccupied[i]) {
                   var i1 = i * 4;
-                  if (this.wfImg.data[i1] > 0) {
-                     if (this.wfImg.data[i1] >= delta)
-                        this.wfImg.data[i1] -= delta;
-                     else
-                        this.wfImg.data[i1] = 0;
+                  if (this.disp.invert) {
+                     for (var rgb = 0; rgb < 3; rgb++) {
+                        if (this.wfImg.data[i1 + rgb] < 255) {
+                           if (this.wfImg.data[i1 + rgb] <= 255-delta)
+                              this.wfImg.data[i1 + rgb] += delta;
+                           else
+                              this.wfImg.data[i1 + rgb] = 255;
+                        }
+                     }
+                     if (this.wfImg.data[i1] == 255 &&
+                        this.wfImg.data[i1 + 1] == 255 &&
+                        this.wfImg.data[i1 + 2] == 255)
+                        this.wfImgOccupied[i] = 0;
+                  } else {
+                     for (var rgb = 0; rgb < 3; rgb++) {
+                        if (this.wfImg.data[i1 + rgb] > 0) {
+                           if (this.wfImg.data[i1 + rgb] >= delta)
+                              this.wfImg.data[i1 + rgb] -= delta;
+                           else
+                              this.wfImg.data[i1 + rgb] = 0;
+                        }
+                     }
+                     if (this.wfImg.data[i1] == 0 &&
+                        this.wfImg.data[i1 + 1] == 0 &&
+                        this.wfImg.data[i1 + 2] == 0)
+                        this.wfImgOccupied[i] = 0;
                   }
-                  if (this.wfImg.data[i1 + 1] > 0) {
-                     if (this.wfImg.data[i1 + 1] >= delta)
-                        this.wfImg.data[i1 + 1] -= delta;
-                     else
-                        this.wfImg.data[i1 + 1] = 0;
-                  }
-                  if (this.wfImg.data[i1 + 2] > 0) {
-                     if (this.wfImg.data[i1 + 2] >= delta)
-                        this.wfImg.data[i1 + 2] -= delta;
-                     else
-                        this.wfImg.data[i1 + 2] = 0;
-                  }
-                  if (this.wfImg.data[i1] == 0 &&
-                     this.wfImg.data[i1 + 1] == 0 &&
-                     this.wfImg.data[i1 + 2] == 0)
-                     this.wfImgOccupied[i] = 0;
                }
             }
          }
@@ -761,7 +778,10 @@ Oscilloscope.prototype.drawWF = function (ctx) {
 
       for (c = 0; c < 20; c++) {
          if (this.chOn[c]) {
-            var col = parseInt(this.chnColors[c].substr(1, 6), 16);
+            if (this.disp.invert)
+               col = parseInt(this.chnColorsInverted[c].substr(1, 6), 16);
+            else
+               col = parseInt(this.chnColors[c].substr(1, 6), 16);
             var r = (col >> 16) & 0xFF;
             var g = (col >> 8) & 0xFF;
             var b = col & 0xFF;
@@ -864,8 +884,8 @@ Oscilloscope.prototype.drawMarker = function (ctx) {
    for (var c = 18; c >= 0; c--) {
       if (this.chOn[c]) {
          var y = this.wfUO[c];
-         ctx.fillStyle = this.chnColors[c];
-         ctx.strokeStyle = this.chnColors[c];
+         ctx.fillStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
+         ctx.strokeStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
          ctx.beginPath();
          ctx.arc(this.x1 - 2, y, 8, 0, 2 * Math.PI);
          ctx.fill();
@@ -885,8 +905,8 @@ Oscilloscope.prototype.drawMarker = function (ctx) {
    // Trigger levels
    for (c = 15; c >= 0; c--) {
       if (this.chOn[c]) {
-         ctx.fillStyle = this.chnColors[c];
-         ctx.strokeStyle = this.chnColors[c];
+         ctx.fillStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
+         ctx.strokeStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
 
          y = (OSC.wdb[OSC.curBoard].dacTriggerLevel[c]) * this.wfUS[c] + this.wfUO[c];
 
@@ -948,7 +968,7 @@ Oscilloscope.prototype.drawDT = function (ctx) {
    for (var c = 15; c >= 0; c--) {
       if (this.chOn[c]) {
          var y = this.wfUO[c];
-         ctx.fillStyle = this.chnColors[c];
+         ctx.fillStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
          ctx.strokeStyle = "#E0E0E0";
          ctx.beginPath();
          ctx.arc(8, y, 8, 0, 2 * Math.PI);
@@ -970,8 +990,8 @@ Oscilloscope.prototype.drawDT = function (ctx) {
    for (c = 0; c < 18; c++) {
       if (this.chOn[c]) {
          ctx.beginPath();
-         ctx.fillStyle = this.chnColors[c];
-         ctx.strokeStyle = this.chnColors[c];
+         ctx.fillStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
+         ctx.strokeStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
          for (var i = 0; i < 1024; i++) {
             var x = this.x1 + i / 1024.0 * this.w;
             y = (10 - this.wf.T[c][i] * 1E9) * this.h / 10 + this.wfUO[c];
@@ -991,7 +1011,10 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
       return;
 
    // draw overall frame
-   ctx.fillStyle = "black";
+   if (this.disp.invert)
+      ctx.fillStyle = "white";
+   else
+      ctx.fillStyle = "black";
    ctx.fillRect(this.x1, this.wfHeight, this.hiWidth, this.hiHeight);
 
    ctx.strokeStyle = "#808080";
@@ -1115,7 +1138,10 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
 
          if (nMeas == 1) {
             ctx.save();
-            ctx.fillStyle = "white";
+            if (this.disp.invert)
+               ctx.fillStyle = "black";
+            else
+               ctx.fillStyle = "white";
             ctx.fillText("      Mean       Std         N     UFlow     OFlow", this.x1, this.hiy1 + 10);
             ctx.restore();
          }
@@ -1309,7 +1335,10 @@ Oscilloscope.prototype.drawHAxis = function (ctx, x1, y1, width, minor, major, t
                   str = x_act.toPrecision(n_sig1).stripZeros();
                   ext = ctx.measureText(str);
                   ctx.save();
-                  ctx.fillStyle = "white";
+                  if (this.disp.invert)
+                     ctx.fillStyle = "black";
+                  else
+                     ctx.fillStyle = "white";
                   if (xs - ext.width / 2 > x1 &&
                      xs + ext.width / 2 < x1 + width)
                      ctx.fillText(str, xs, y1 + label);

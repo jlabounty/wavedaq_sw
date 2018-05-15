@@ -222,9 +222,12 @@ Measurement.prototype.print = function (index, ctx) {
       if (this.param[i].type == "CH") {
          nCh++;
          name += "-CH" + this.param[i].value;
-         if (nCh == 1)
-            this.color = OSC.chnColors[this.param[i].value];
-         else
+         if (nCh == 1) {
+            if (OSC.disp.invert)
+               this.color = OSC.chnColorsInverted[this.param[i].value];
+            else
+               this.color = OSC.chnColors[this.param[i].value];
+         } else
             this.color = "#E0E0E0";
          ctx.fillStyle = this.color;
       }

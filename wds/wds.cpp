@@ -248,7 +248,6 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       }
 
       else if (item == "triggerSrcEnPtrn") {
-         printf("SrcEnPtrn: %04X\n", std::stoi(value));
          if (iBoard == -1)
             for (auto &b: gl->wdb)
                b->SetTrgSrcEnPtrn(iChannel, std::stoi(value));
@@ -257,7 +256,6 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       }
 
       else if (item == "triggerStatePtrn") {
-         printf("StatePtrn: %04X\n", std::stoi(value));
          if (iBoard == -1)
             for (auto &b: gl->wdb)
                b->SetTrgStatePtrn(iChannel, std::stoi(value));

@@ -571,6 +571,7 @@ function setDisp(e) {
    }
    if (e.name == "invert") {
       OSC.disp.invert = e.checked;
+      OSC.newImage = true;
       OSC.redraw();
    }
 }
