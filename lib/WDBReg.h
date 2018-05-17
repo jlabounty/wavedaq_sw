@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  15.05.2018 10:38:57
+// Created :  17.05.2018 09:20:08
 //
 
 
@@ -43,7 +43,7 @@ public:
 
 
 
-   ////// ------ Control Register 1 [0x1004]: CTRL - DAQ control register (Default: 0x19200380) ------ //////
+   ////// ------ Control Register 1 [0x1004]: CTRL - DAQ control register (Default: 0x19200780) ------ //////
 
    // 0x3F000000: VALID_DELAY_ADC - Delay of the data valid at the ISERDES of the ADCs (delay = value + 1)
    unsigned int GetValidDelayAdc() { return BitExtractControl(WD2_VALID_DELAY_ADC_REG, WD2_VALID_DELAY_ADC_MASK, WD2_VALID_DELAY_ADC_OFS); };
