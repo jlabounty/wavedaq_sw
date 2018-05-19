@@ -216,13 +216,15 @@ class WDWDB : public WDBoard, public WDB{
    private:
       void SetInCrate(){
          SetSendBlocked(true);
-         SetTriggerEnable(true);
+         /*SetTriggerEnable(true);
          SetTriggerFallingEdge(true);
          SetTriggerDelayEnable(false);
          SetTriggerCfgExtOr(true);
          SetTriggerCfgOr(0);
          SetTriggerCfgAnd(0);
-         SetPatternTriggerSelect(WDB::cTriggerSchemeSimple);
+         SetPatternTriggerSelect(WDB::cTriggerSchemeSimple);*/
+         SetTriggerTypeSel(1);
+         SetExtTriggerOutEnable(0);
          SetExtClkInSel(0);
          SetDaqClkSrcSel(0);
          SetLmkInputFreq(80);
@@ -230,7 +232,7 @@ class WDWDB : public WDBoard, public WDB{
          SendControlRegisters();
          SetApplySettingsLmk(1);
          LmkSyncLocal();
-         ReceiveStatusRegister(WD2_DRS_SAMPLE_FREQ_OFS);
+         ReceiveStatusRegister(WD2_DRS_SAMPLE_FREQ_REG);
 
       }
 
@@ -277,7 +279,7 @@ class WDWDB : public WDBoard, public WDB{
          SetDaqNormal(false);
 
          SetSendBlocked(true);
-         //SetInterPacketDelay(0x80000);
+         SetInterPkgDelay(0x60000);//default interpacket delay for 6 crate
          //SetInterPacketDelay(stoi(GetProperty("IPD")));
 
          //input
@@ -326,12 +328,12 @@ class WDWDB : public WDBoard, public WDB{
          }
          if(trigger_level.size() ==1){
             SetDacTriggerLevelV(-1, trigger_level[0]);
-            SetTriggerShaperEnable(true);
-            SetTriggerOutPulseLength(4);
+            //SetTriggerShaperEnable(true);
+            //SetTriggerOutPulseLength(4);
          } else if(trigger_level.size() == 16){
-            for(int i=0; i<16; i++) SetDacTriggerLevelV(i, trigger_level[i]);
+            /*for(int i=0; i<16; i++) SetDacTriggerLevelV(i, trigger_level[i]);
             SetTriggerShaperEnable(true);
-            SetTriggerOutPulseLength(4);
+            SetTriggerOutPulseLength(4);*/
          }
          //Baseline Shift
          float baseline;
@@ -351,10 +353,10 @@ class WDWDB : public WDBoard, public WDB{
             tx_ena = 0x3FFFF;
          }
          SetDrsChTxEn(tx_ena);
-         SetAdcChTxEn(tx_ena);
-         SetTdcChTxEn(tx_ena);
+         SetAdcChTxEn(0);
+         SetTdcChTxEn(0);
          SetZeroSuprEn(false);
-         SetTrgTxEn(1);
+         SetTrgTxEn(0);
          SetSclTxEn(0);
 
 
@@ -518,10 +520,10 @@ class WDWDB : public WDBoard, public WDB{
          ReceiveStatusRegisters();
 
          //Load Calibration file
-         if (!LoadVoltageCalibration(GetDrsSampleFreq(), "../wds/")) {
-            printf("missing voltege calibration file\n");
+         if (!LoadVoltageCalibration(GetDrsSampleFreqMhz(), "../wds/")) {
+            printf("missing voltage calibration file\n");
          }
-         if (!LoadTimeCalibration(GetDrsSampleFreq(), "../wds/")) {
+         if (!LoadTimeCalibration(GetDrsSampleFreqMhz(), "../wds/")) {
             printf("missing time calibration file\n");
          }
 
@@ -582,6 +584,7 @@ class WDTCB : public WDBoard, public TCB{
             //basic RRun
             u_int32_t rrun_config = 0x0000E014;  //masktrg, masksync, maskbusy, fadcmode, enable trg_bus
             //u_int32_t rrun_config = 0x00006014;  //masksync, maskbusy, fadcmode, enable trg_bus
+            if((fidcode >>12) != 3) rrun_config = 0x00006014;
             SetRRUN(&rrun_config);
 
             u_int32_t syncdly=0x1F;

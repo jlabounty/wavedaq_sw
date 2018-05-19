@@ -14,7 +14,7 @@ WDAQ_DIR      = ../../
 # compiler, flags and libs
 CC            = cc
 CPP           = g++
-FLAGS         = -O3 -g -DOS_LINUX -Wall -Wpedantic
+FLAGS         = -O3 -g -DOS_LINUX -Wall
 CPPFLAGS      = -std=c++11
 
 ifeq ($(shell uname),Darwin)

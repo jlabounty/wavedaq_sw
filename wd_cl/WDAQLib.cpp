@@ -5,7 +5,7 @@
 //WDAQ Packet Data - class for UDP DAQ packets 
 //Set properties according to UDP event header
 void WDAQPacketData::SetEventHeaderInfo(WD2_FRAME_HEADER *ph){
-   mBoardId = ph->board_id;
+   mBoardId = ph->serial_number;
    mCrateId = ph->crate_id;
    mSlotId  = ph->slot_id;
    mADC = (ph->channel_info >> 7) & 0x01;
@@ -266,8 +266,8 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
       return;
    }
 
-   //correct endianvess
-   data->board_id                       = SWAP_UINT16(data->board_id);
+   //correct endianess
+   data->serial_number                  = SWAP_UINT16(data->serial_number);
    data->tx_enable                      = SWAP_UINT32(data->tx_enable);
    data->zero_suppression_mask          = SWAP_UINT16(data->zero_suppression_mask);
    data->flags                          = SWAP_UINT16(data->flags);
