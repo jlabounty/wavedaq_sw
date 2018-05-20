@@ -494,7 +494,7 @@ function dlgShow(dlg, modal) {
       d.style.top = "0px";
    else
       d.style.top = Math.round(document.documentElement.clientHeight / 2 - d.offsetHeight / 2) + "px";
-   
+
    // put dialog on top of all other dialogs
    var dlgs = document.getElementsByClassName("dlgFrame");
    for (var i=0 ; i<dlgs.length ; i++)

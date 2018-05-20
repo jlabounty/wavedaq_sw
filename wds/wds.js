@@ -6,7 +6,7 @@
 //
 
 // demo mode
-var demoMode = true;
+var demoMode = false;
 
 var OSC; // global scope object
 
@@ -1017,54 +1017,58 @@ function receiveWF() {
 function calcMathWF(wf)
 {
    // add sum waveform
-   for (var i = 0; i < 1024; i++) {
-      wf.U[18][i] = 0;
-      for (var j=0 ; j<16 ; j++)
-         if (OSC.chOn[j]) {
-            wf.T[18][i] = wf.T[j][i];
-            wf.U[18][i] += wf.U[j][i];
-         }
+   if (OSC.chOn[18]) {
+      for (var i = 0; i < 1024; i++) {
+         wf.U[18][i] = 0;
+         for (var j = 0; j < 16; j++)
+            if (OSC.chOn[j]) {
+               wf.T[18][i] = wf.T[j][i];
+               wf.U[18][i] += wf.U[j][i];
+            }
+      }
    }
 
    // add FFT waveform
-   var w = [];
-   var t = [];
-   var e = document.getElementById('chnFft');
-   var c = e.options[e.selectedIndex].value;
+   if (OSC.chOn[19]) {
+      var w = [];
+      var t = [];
+      var e = document.getElementById('chnFft');
+      var c = e.options[e.selectedIndex].value;
 
 
-   for (i=1; i < 1024; i++)
-      w[i] = wf.U[c][i];
+      for (i = 1; i < 1024; i++)
+         w[i] = wf.U[c][i];
 
-   /*
-   // resample channel
+      /*
+       // resample channel
 
-   for (var i = 0; i < 1024; i++)
-      t[i] = i * 1E-6 /OSC.wdb[OSC.curBoard].drsSampleFreq;
+       for (var i = 0; i < 1024; i++)
+       t[i] = i * 1E-6 /OSC.wdb[OSC.curBoard].drsSampleFreq;
 
-   w[0] = wf.U[c][0];
-   for (i=1; i < 1024; i++) {
-      w[i] = wf.U[c][i];
+       w[0] = wf.U[c][0];
+       for (i=1; i < 1024; i++) {
+       w[i] = wf.U[c][i];
+       }
+
+       console.log("----------");
+       for (i=0 ; i<10 ; i++)
+       console.log((wf.T[0][i]*1E9).toFixed(3)+" "+wf.U[0][i].toFixed(3));
+
+       console.log("");
+       for (i=0 ; i<10 ; i++)
+       console.log((t[i]*1E9).toFixed(3)+" "+w[i].toFixed(3));
+       */
+
+
+      w[0] = w[1]; // fix for spike
+
+      fft(w);
+
+      for (i = 0; i < 512; i++)
+         wf.U[19][i] = Math.log(w[i]);
+      wf.T[19] = wf.T[19].slice(0, 512);
+      wf.U[19] = wf.U[19].slice(0, 512);
    }
-
-   console.log("----------");
-   for (i=0 ; i<10 ; i++)
-      console.log((wf.T[0][i]*1E9).toFixed(3)+" "+wf.U[0][i].toFixed(3));
-
-   console.log("");
-   for (i=0 ; i<10 ; i++)
-      console.log((t[i]*1E9).toFixed(3)+" "+w[i].toFixed(3));
-   */
-
-
-   w[0] = w[1]; // fix for spike
-
-   fft(w);
-
-   for (i = 0; i < 512; i++)
-      wf.U[19][i] = Math.log(w[i]);
-   wf.T[19] = wf.T[19].slice(0, 512);
-   wf.U[19] = wf.U[19].slice(0, 512);
 }
 
 /*---- UI event handler ----*/
