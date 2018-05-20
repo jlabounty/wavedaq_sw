@@ -567,7 +567,6 @@ function dlgShow(dlg, modal) {
    };
 
    d.dlgTouchStart = function (e) {
-
       if ((e.target == this || e.target.parentNode == this) &&
          e.target.className == "dlgTitlebar") {
          e.preventDefault();
@@ -579,10 +578,29 @@ function dlgShow(dlg, modal) {
    };
 
    d.dlgTouchMove = function (e) {
-      var x = e.changedTouches[e.changedTouches.length - 1].clientX;
-      var y = e.changedTouches[e.changedTouches.length - 1].clientY;
-      this.style.left = (this.Dx + (x - this.Ax)) + "px";
-      this.style.top = (this.Dy + (y - this.Ay)) + "px";
+      if (this.Ax > 0 && this.Ay > 0) {
+         e.preventDefault();
+         var x = e.changedTouches[e.changedTouches.length - 1].clientX;
+         var y = e.changedTouches[e.changedTouches.length - 1].clientY;
+         this.style.left = (this.Dx + (x - this.Ax)) + "px";
+         this.style.top = (this.Dy + (y - this.Ay)) + "px";
+      }
+   };
+
+   d.dlgTouchEnd = function (e) {
+      if (this.Ax > 0 && this.Ay > 0) {
+         e.preventDefault();
+         this.Ax = 0;
+         this.Ay = 0;
+      }
+   };
+
+   d.dlgTouchCancel = function (e) {
+      if (this.Ax > 0 && this.Ay > 0) {
+         e.preventDefault();
+         this.Ax = 0;
+         this.Ay = 0;
+      }
    };
 
    window.addEventListener("mousedown", d.dlgMouseDown.bind(d), true);
@@ -590,6 +608,8 @@ function dlgShow(dlg, modal) {
    window.addEventListener("mouseup", d.dlgMouseUp.bind(d), true);
    window.addEventListener("touchstart", d.dlgTouchStart.bind(d), true);
    window.addEventListener("touchmove", d.dlgTouchMove.bind(d), true);
+   window.addEventListener("touchend", d.dlgTouchEnd.bind(d), true);
+   window.addEventListener("touchcancel", d.dlgTouchCancel.bind(d), true);
 }
 
 function dlgHide(dlg) {
