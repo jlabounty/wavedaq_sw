@@ -721,7 +721,7 @@ Oscilloscope.prototype.drawWF = function (ctx) {
                   x = this.wf.T[c][i] * this.wfTS + this.wfTO;
                   y = this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c];
                }
-               if (x > -100 && x < this.w + 100) {
+               if (x > this.x1-100 && x < this.x2 + 100) {
                   if (i == 0)
                      ctx.moveTo(x, y);
                   else

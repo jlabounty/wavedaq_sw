@@ -567,7 +567,9 @@ function dlgShow(dlg, modal) {
    };
 
    d.dlgTouchStart = function (e) {
-      if (e.target == this || e.target.parentNode == this) {
+
+      if ((e.target == this || e.target.parentNode == this) &&
+         e.target.className == "dlgTitlebar") {
          e.preventDefault();
          this.Ax = e.targetTouches[0].clientX;
          this.Ay = e.targetTouches[0].clientY;

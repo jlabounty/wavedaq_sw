@@ -6,7 +6,7 @@
 //
 
 // demo mode
-var demoMode = false;
+var demoMode = true;
 
 var OSC; // global scope object
 
@@ -1604,7 +1604,8 @@ function downloadFile(filename) {
 function configSlide() {
    var config = document.getElementById("config");
 
-   config.t++;
+   //config.t += 1;
+   config.t += 10;
 
    if (config.visible) {
       config.slider = 1 - (1 - config.t / 10) * (1 - config.t / 10);
