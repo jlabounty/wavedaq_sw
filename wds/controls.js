@@ -494,8 +494,7 @@ function dlgShow(dlg, modal) {
       d.style.top = "0px";
    else
       d.style.top = Math.round(document.documentElement.clientHeight / 2 - d.offsetHeight / 2) + "px";
-
-
+   
    // put dialog on top of all other dialogs
    var dlgs = document.getElementsByClassName("dlgFrame");
    for (var i=0 ; i<dlgs.length ; i++)
@@ -574,6 +573,22 @@ function dlgShow(dlg, modal) {
          this.Ay = e.targetTouches[0].clientY;
          this.Dx = parseInt(this.style.left);
          this.Dy = parseInt(this.style.top);
+      }
+
+      if (d.modal) {
+         // catch all mouse events
+         e.preventDefault();
+      } else {
+         var p = e.target;
+         while (p != undefined && p != this && p != document.body)
+            p = p.parentElement;
+
+         if (p == this) {
+            var dlgs = document.getElementsByClassName("dlgFrame");
+            for (var i=0 ; i<dlgs.length ; i++)
+               dlgs[i].style.zIndex = 10;
+            d.style.zIndex = 11;
+         }
       }
    };
 
