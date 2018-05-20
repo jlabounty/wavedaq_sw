@@ -320,17 +320,19 @@ function populateControls(init) {
    document.getElementById("clksource").disabled = true;
 
    // channels dialog box with FE gain and HV
-   for (i = 0; i < 16; i++) {
-      if (document.getElementById("inpDacTriggerLevel" + i) != document.activeElement)
-         document.getElementById("inpDacTriggerLevel" + i).value = Math.round(OSC.wdb[OSC.curBoard].dacTriggerLevel[i] * 1000);
+   if (document.getElementById("inpDacTriggerLevel0") !== null) {
+      for (i = 0; i < 16; i++) {
+         if (document.getElementById("inpDacTriggerLevel" + i) != document.activeElement)
+            document.getElementById("inpDacTriggerLevel" + i).value = Math.round(OSC.wdb[OSC.curBoard].dacTriggerLevel[i] * 1000);
 
-      document.getElementById("selGain" + i).value = OSC.wdb[OSC.curBoard].feGain[i];
-      document.getElementById("cbPzc" + i).checked = OSC.wdb[OSC.curBoard].fePzc[i];
+         document.getElementById("selGain" + i).value = OSC.wdb[OSC.curBoard].feGain[i];
+         document.getElementById("cbPzc" + i).checked = OSC.wdb[OSC.curBoard].fePzc[i];
 
-      var e = document.getElementById("inpHvTarget" + i);
-      if (e != document.activeElement)
-         e.value = OSC.wdb[OSC.curBoard].hv.target[i];
-      document.getElementById("inpHvCurrent" + i).value = OSC.wdb[OSC.curBoard].hv.current[i];
+         var e = document.getElementById("inpHvTarget" + i);
+         if (e != document.activeElement)
+            e.value = OSC.wdb[OSC.curBoard].hv.target[i];
+         document.getElementById("inpHvCurrent" + i).value = OSC.wdb[OSC.curBoard].hv.current[i];
+      }
    }
 
    // trigger pattern dialog box
@@ -388,6 +390,15 @@ function populateControls(init) {
 }
 
 function loadGl(init) {
+   if (OSC.demoMode) {
+      OSC.gl = { demoMode: true, nWdb: 1, updatePeriodic: 0 };
+      OSC.wp = { gainCalib: true, ofsCalib1: true, ofsCalib2: true,
+                 rangeCalib: true, rotateWaveform: true,
+                 timeCalib1: true, timeCalib2: true, timeCalib3: true
+      };
+      readWdb(-1, init);
+      return;
+   }
    // send AJAX request
    var req = new XMLHttpRequest();
    req.onreadystatechange = function () {
@@ -412,6 +423,78 @@ function loadGl(init) {
 
 function readWdb(b, init) {
 
+   if (OSC.demoMode) {
+      return new Promise(function(resolve, reject) {
+         if (OSC.wdb === undefined) {
+            OSC.wdb = [];
+            OSC.wdb[0] = {
+               "name": "demo",
+               "temperature": 37.5,
+               "sysBusy": false,
+               "wdbBusy": false,
+               "hvBoardPlugged": false,
+               "hvBackplanePlugged": false,
+               "pllLck": 511,
+               "drsSampleFreq": 5016,
+               "adcSampleFreq": 0,
+               "compChannelStatus": 0,
+               "lastEventNumber": 0,
+               "triggerBusParityErrorCount": 0,
+               "triggerBusType": 0,
+               "triggerBusNumber": 0,
+               "crateId": 0,
+               "slotId": 0,
+               "readoutSrcSel": 1,
+               "daqNormal": false,
+               "daqSingle": false,
+               "drs0TimingRefSel": 0,
+               "drs1TimingRefSel": 0,
+               "calibBufferEnable": false,
+               "timingCalibSignalEnable": 0,
+               "timingReferenceSignal": 0,
+               "daqClkSrcSel": 0,
+               "extClkInSel": 0,
+               "extClkFreq": 0,
+               "localClkFreq": 0,
+               "chnTxEn": 3,
+               "dacOfs": 0.000,
+               "dacCalDc": 0.000,
+               "dacPzcLevel": 1,
+               "dacTriggerLevel": new Array(16).fill(0),
+               "fePzc": new Array(16).fill(false),
+               "feGain": new Array(16).fill(0),
+               "feMux": new Array(16).fill(0),
+               "triggerMode": 2,
+               "triggerExtTriggerOutEnable": false,
+               "triggerSource": 220152992,
+               "triggerOutPulseLength": 0,
+               "triggerDelay": 0,
+               "triggerSrcPolarity": 0,
+               "triggerAutoTriggerPeriod": 0,
+               "triggerPtrnEn": 0,
+               "triggerSrcEnPtrn": new Array(18).fill(0),
+               "triggerStatePtrn": new Array(18).fill(0),
+               "scaler": new Array(34).fill(0),
+               "hv": {
+                  "target": new Array(16).fill(0),
+                  "current": new Array(16).fill(0),
+                  "temperature": new Array(4).fill(37.5),
+                  "baseVoltage": 0
+               }
+            }
+         }
+
+         if (OSC.wdb != undefined) {
+            for (var i = 0; i < 18; i++)
+               OSC.wdb[0].scaler[i] = ((Math.random() + Math.random() + Math.random() + Math.random()) * 500).toFixed(0);
+         }
+
+         populateAllControls(init);
+         OSC.connected = true;
+         resolve();
+      });
+   }
+
    return new Promise(function(resolve, reject) {
       // send AJAX request
       var req = new XMLHttpRequest();
@@ -419,8 +502,11 @@ function readWdb(b, init) {
          if (req.readyState == 4 && req.status == 200) {
             if (b == -1)
                OSC.wdb = JSON.parse(req.responseText).wdb;
-            else
+            else {
+               if (OSC.wdb === undefined)
+                  OSC.wdb = [];
                OSC.wdb[b] = JSON.parse(req.responseText).wdb[0];
+            }
             populateAllControls(init);
             OSC.connected = true;
             resolve(req);
@@ -707,14 +793,14 @@ function loadWF() {
       var wf = {T: [], U: []};
       OSC.i1 = 0;
       OSC.i2 = 1023;
-      for (c = 0; c < 18; c++) {
+      for (c = 0; c < 20; c++) {
          wf.T[c] = [];
          wf.U[c] = [];
          for (i = 0; i < 1024; i++) {
-            var t = i * 1E-9 / OSC.wdb[OSC.curBoard].drsSampleFreq;
+            var t = i * 1E-6 / OSC.wdb[OSC.curBoard].drsSampleFreq;
             wf.T[c][i] = t;
-            wf.U[c][i] = Math.sin((wf.T[c][i] + c * 1E-9) * OSC.wdb[OSC.curBoard].drsSampleFreq /
-                  1E-9 / 50) / 4 + (Math.random() - 0.5) / 300;
+            wf.U[c][i] = Math.sin((wf.T[c][i] + c * 1E-6) * OSC.wdb[OSC.curBoard].drsSampleFreq /
+                  1E-6 / 50) / 4 + (Math.random() - 0.5) / 300;
 
             var xt = OSC.timeToX(t);
             if (OSC.i1 == 0 && xt >= OSC.x1)
@@ -740,6 +826,9 @@ function loadWF() {
       OSC.idle = false;
       if (OSC.running)
          OSC.timer.loadWF = window.setTimeout(loadWF, 10); // schedule next waveform read
+
+      // calculate sum and FFT waveforms
+      calcMathWF(wf);
 
       OSC.sendWaveforms(wf);
       OSC.redraw();
@@ -973,7 +1062,9 @@ function calcMathWF(wf)
    fft(w);
 
    for (i = 0; i < 512; i++)
-      wf.U[19][i] = w[i];
+      wf.U[19][i] = Math.log(w[i]);
+   wf.T[19] = wf.T[19].slice(0, 512);
+   wf.U[19] = wf.U[19].slice(0, 512);
 }
 
 /*---- UI event handler ----*/
@@ -1096,6 +1187,9 @@ function enableDRSChannels() {
    for (var i = 0; i < 18; i++)
       if (OSC.chOn[i])
          OSC.wdb[OSC.curBoard].chnTxEn |= (1 << i);
+
+   if (OSC.demoMode)
+      return;
 
    var req = new XMLHttpRequest();
 
@@ -1399,6 +1493,11 @@ function btnConfig() {
 }
 
 function btnSave() {
+   if (OSC.demoMode) {
+      alert("Not available in demo mode");
+      return;
+   }
+
    var e = document.getElementById('btnSave');
    if (e.innerHTML == "Stop") {
       var req = new XMLHttpRequest();
@@ -1423,6 +1522,9 @@ function btnSave() {
 }
 
 function btnStart() {
+   if (OSC.demoMode)
+      return;
+
    // check for download attribute
    var link = document.createElement("a");
    var filename = document.getElementById("filename").value;

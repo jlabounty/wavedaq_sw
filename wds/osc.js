@@ -147,7 +147,8 @@ function Oscilloscope(div) { // constructor
    this.lastTriggerLevelChange = 0;
 
    // used to suppress updates after a parameter change
-   this.lastParamSet = new Date() / 1000;
+   this.lastParamSet = new Date() / 1000
+   ;
 
    // histogram settings
    this.histo = {
@@ -702,16 +703,24 @@ Oscilloscope.prototype.drawWF = function (ctx) {
       ctx.rect(this.x1, this.y1, this.w, this.h);
       ctx.clip();
       var spacing = this.wfTS / (OSC.wdb[OSC.curBoard].drsSampleFreq * 1E6);
-      for (var c = 0; c < 19; c++) {
+      for (var c = 0; c < 20; c++) {
          if (this.chOn[c]) {
             ctx.beginPath();
             ctx.fillStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
             ctx.strokeStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
             if (this.disp.invert)
                ctx.lineWidth = 3;
-            for (var i = 0; i < 1024; i++) {
-               var x = this.wf.T[c][i] * this.wfTS + this.wfTO;
-               var y = this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c];
+            for (var i = 0; i < this.wf.U[c].length ; i++) {
+               var x, y;
+               if (c == 19) { // FFT
+                  var min = -6;
+                  var max = 6;
+                  x = this.x1 + (this.x2 - this.x1) / 512.0 * i;
+                  y = this.y2 - (this.wf.U[c][i]-min)/(max-min) * (this.y2-this.y1);
+               } else {
+                  x = this.wf.T[c][i] * this.wfTS + this.wfTO;
+                  y = this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c];
+               }
                if (x > -100 && x < this.w + 100) {
                   if (i == 0)
                      ctx.moveTo(x, y);
@@ -787,10 +796,18 @@ Oscilloscope.prototype.drawWF = function (ctx) {
             var b = col & 0xFF;
             var x1 = 0, y1 = 0, x2 = 0, y2 = 0;
 
-            for (i = 0; i < 1024; i++) {
-               x1 = Math.floor(this.wf.T[c][i] * this.wfTS + this.wfTO);
-               y1 = Math.floor(this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c]);
+            for (i = 0; i < this.wf.T[c].length; i++) {
 
+               var x1, y1;
+               if (c == 19) { // FFT
+                  var min = -6;
+                  var max = 6;
+                  x1 = Math.floor(this.x1 + (this.x2 - this.x1) / 512.0 * i);
+                  y1 = Math.floor(this.y2 - (this.wf.U[c][i]-min)/(max-min) * (this.y2-this.y1));
+               } else {
+                  x1 = Math.floor(this.wf.T[c][i] * this.wfTS + this.wfTO);
+                  y1 = Math.floor(this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c]);
+               }
                if (i == 0) {
                   x = x1;
                   y = y1;
@@ -833,18 +850,9 @@ Oscilloscope.prototype.drawWF = function (ctx) {
       ctx.putImageData(this.wfImg, this.x1, this.y1);
    }
 
-   // draw FFT
+   // draw FFT labels
    if (this.chOn[19]) {
 
-      var f = [];
-      for (i = 0; i < 512; i++) {
-         f[i] = Math.log(this.wf.U[19][i]);
-      }
-
-      var min = -6;
-      var max = 6;
-
-      ctx.beginPath();
       ctx.fillStyle = this.chnColors[19];
       ctx.strokeStyle = this.chnColors[19];
       if (this.disp.invert) {
@@ -852,16 +860,6 @@ Oscilloscope.prototype.drawWF = function (ctx) {
          ctx.strokeStyle = "#000000";
          ctx.lineWidth = 3;
       }
-         for (i = 0; i < 512; i++) {
-         var x = i/512.0 * (this.x2 - this.x1) + this.x1;
-         var y = this.y2 - (f[i] - min) / (max - min) * (this.y2-this.y1);
-         if (i == 0)
-            ctx.moveTo(x, y);
-         else
-            ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-
       for (i=1 ; i<10 ; i++) {
          var freqMax;
          if (OSC.wdb[OSC.curBoard].readoutSrcSel == 1)
@@ -890,8 +888,13 @@ Oscilloscope.prototype.drawMarker = function (ctx) {
          ctx.arc(this.x1 - 2, y, 8, 0, 2 * Math.PI);
          ctx.fill();
          ctx.stroke();
-         ctx.strokeStyle = "#000000";
-         ctx.fillStyle = "#000000";
+         if (ctx.fillStyle === "#000000") {
+            ctx.strokeStyle = "#FFFFFF";
+            ctx.fillStyle = "#FFFFFF";
+         } else {
+            ctx.strokeStyle = "#000000";
+            ctx.fillStyle = "#000000";
+         }
          ctx.textAlign = "center";
          ctx.textBaseline = "middle";
          ctx.font = '10px sans-serif';
