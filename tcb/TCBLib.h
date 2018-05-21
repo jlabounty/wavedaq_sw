@@ -279,4 +279,6 @@ public:
    void GetAutoCalibrateFail(u_int32_t* ret);
    //Get AutoLock Fail
    void GetAutoCalibrateBusy(u_int32_t* ret);
+   //perform dummy calibration and retrieve serdes eyes
+   void GetAutoCalibrateEye(u_int32_t* eyes);
 };

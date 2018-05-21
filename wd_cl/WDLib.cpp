@@ -201,7 +201,9 @@ void WDSystem::PowerOn(){
    GetTriggerCrate()->PowerOn();
    for(auto &c : fCrate){
       c->PowerOn();
-      std::this_thread::sleep_for(std::chrono::seconds(10));
+   }
+   std::this_thread::sleep_for(std::chrono::seconds(10));
+   for(auto &c : fCrate){
       for(auto &b : *c){
          if(b)
             b->Connect();
@@ -226,20 +228,20 @@ void WDSystem::SetSerdesTraining(bool state){
 //Go Run
 void WDSystem::GoRun(){
    GetTriggerBoard()->Sync();
-   fCollectorThread->GoRun();
-   fBuilderThread->GoRun();
-   fWriterThread->GoRun();
-   fWorkerThread->GoRun();
+   if(fCollectorThread) fCollectorThread->GoRun();
+   if(fBuilderThread) fBuilderThread->GoRun();
+   if(fWriterThread) fWriterThread->GoRun();
+   if(fWorkerThread) fWorkerThread->GoRun();
    GetTriggerBoard()->GoRun();
 }
 
 //Stop Run
 void WDSystem::StopRun(){
    GetTriggerBoard()->StopRun();
-   fCollectorThread->StopRun();
-   fBuilderThread->StopRun();
-   fWorkerThread->StopRun();
-   fWriterThread->StopRun();
+   if(fCollectorThread) fCollectorThread->StopRun();
+   if(fBuilderThread) fBuilderThread->StopRun();
+   if(fWriterThread) fWorkerThread->StopRun();
+   if(fWorkerThread) fWriterThread->StopRun();
 }
 //train serial links
 void WDSystem::TrainSerdes(){

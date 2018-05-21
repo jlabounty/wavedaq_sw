@@ -1394,3 +1394,15 @@ void TCB::GetAutoCalibrateFail(u_int32_t* ret){
 void TCB::GetAutoCalibrateBusy(u_int32_t* ret){
    ReadReg(RSERDESBUSY, ret);
 }
+void TCB::GetAutoCalibrateEye(u_int32_t* eyes){
+   u_int32_t tx_conf =0;
+   ReadReg(RSERDESTX, &tx_conf);
+   u_int32_t tx_conf_new = tx_conf | 0x00000200; //set CALIBMASK to force full scan
+   WriteReg(RSERDESTX, &tx_conf_new);
+   
+   AutoCalibrateSerdes();
+   usleep(1000000);
+
+   ReadBLT(RSERDESDLYSTATE, eyes, fnserdes);
+   WriteReg(RSERDESTX, &tx_conf);
+}

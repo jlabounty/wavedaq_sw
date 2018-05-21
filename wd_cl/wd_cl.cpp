@@ -138,6 +138,25 @@ int main(int argc, char *argv[])
             } else {
                printf("System is Not Busy\n");
             }
+            for(auto c : *sys)
+               for(auto b :*c)
+                  if(b){
+                     if(dynamic_cast<WDTCB*>(b) != nullptr){
+                        unsigned int r;
+                        dynamic_cast<WDTCB*>(b)->GetRRUN(&r);
+
+                        if(r & 0x2)
+                           printf("TCB %s is busy\n", c->GetMscbName().c_str());
+                        else
+                           printf("TCB %s is not busy\n", c->GetMscbName().c_str());
+                     } else if(dynamic_cast<WDWDB*>(b) != nullptr){
+                        if(b->IsBusy())
+                           printf("WDB %s is busy\n", dynamic_cast<WDWDB*>(b)->GetName().c_str());
+                        else
+                           printf("WDB %s is not busy\n", dynamic_cast<WDWDB*>(b)->GetName().c_str());
+
+                     }
+                  }
          }
          if(option == 5)
          {
@@ -219,7 +238,6 @@ int main(int argc, char *argv[])
                            printf("\n");
                         }
                      }
-
             }
          }
       } while ( option == 0 ) ;

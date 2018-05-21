@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
       printf("[35]: Read Unlock counter  \t \t  [36]: Get prescaling\n");
       printf("[37]: Set trigger delay    \t \t  [38]: Get trigger delay\n");
       printf("[39]: LockSerdes FSM Start \t \t  [40]: Get current serdes values\n");
-      printf("[41]: LockSerdes Status    \t \t  [42]:                          \n");
+      printf("[41]: LockSerdes Status    \t \t  [42]: LockSerdes Draw Eye      \n");
       printf("[-1]: Exit\n");
 
       do {
@@ -233,20 +233,20 @@ int main(int argc, char *argv[])
       }
       //
       if(option == 15) {
-	int crate,slot;
-	char cratestring[256];
-	printf(" opt = 15 : goto board, give crate number and slot ... \n");
-	printf("Crate number?\n");
-	scanf("%d",&crate);
-	sprintf(cratestring,"mscb%d",crate);
-	printf("Slot?\n");
-	scanf("%d",&slot);
-	//close current mscb connection and create a new one
-	mscb_exit(TCBBoard.fh);
-	handle = mscb_init(cratestring, 0, "", 0);
-	strlcpy(TCBBoard.fmscb_device, cratestring, sizeof(TCBBoard.fmscb_device));
-	TCBBoard.fslot = slot;
-	TCBBoard.SetIDCode();
+        int crate,slot;
+        char cratestring[256];
+        printf(" opt = 15 : goto board, give crate number and slot ... \n");
+        printf("Crate number?\n");
+        scanf("%d",&crate);
+        sprintf(cratestring,"mscb%d",crate);
+        printf("Slot?\n");
+        scanf("%d",&slot);
+        //close current mscb connection and create a new one
+        mscb_exit(TCBBoard.fh);
+        handle = mscb_init(cratestring, 0, "", 0);
+        strlcpy(TCBBoard.fmscb_device, cratestring, sizeof(TCBBoard.fmscb_device));
+        TCBBoard.fslot = slot;
+        TCBBoard.SetIDCode();
       }
       if(option == 16) {
          printf(" opt = 16 : Set trigger delay ... \n");
@@ -570,10 +570,10 @@ int main(int argc, char *argv[])
       }
       // get PLL unlock counter
       if(option == 35) {
-        u_int32_t *rpcou = 0;
+        u_int32_t rpcou;
         printf(" opt = 35 : read PLL unlock counter ... \n");
-        TCBBoard.GetPLLUnlockCou(rpcou);
-        printf(" PLL unlock counter value: %d\n", *rpcou);
+        TCBBoard.GetPLLUnlockCou(&rpcou);
+        printf(" PLL unlock counter value: %d\n", rpcou);
       }
       //
       if(option == 36) {
@@ -616,6 +616,23 @@ int main(int argc, char *argv[])
         printf("fail: %x\n", state);
         TCBBoard.GetAutoCalibrateBusy(&state);
         printf("busy: %x\n", state);
+      }
+      //
+      if(option == 42) {
+        printf(" opt = 42 : Performing dummy calibration to draw serdes eyes ... \n");
+        u_int32_t eyes[16];
+        TCBBoard.GetAutoCalibrateEye(eyes);
+        for(int i=0; i<16; i++){
+          printf("serdes %d: ", i);
+          for(int j=0; j<32; j++){
+            if(eyes[i] & (1<<j)){
+              printf("# ");
+            } else {
+              printf("- ");
+            }
+          }
+          printf("\n");
+        }
       }
       
 

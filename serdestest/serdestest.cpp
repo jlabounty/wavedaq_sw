@@ -48,66 +48,71 @@ int main(int argc, char** argv)
       return 1;
    }   
 
-   if(strstr(argv[1], "wd")){
-      printf("WDB as source");
-      wdb = new WDB(argv[1], 1);
-      wdb->Connect();
-      wdb->ReceiveControlRegisters();
+   char *board;
+   board = strtok(argv[1], ",-");
 
-      wdb->SetSendBlocked(true); // update all control register together
+   while(board != NULL){
+      if(strstr(board, "wd")){
+         wdb = new WDB(board, 1);
+         wdb->Connect();
+         printf("WDB as source %s\n", wdb->GetName().c_str());
+         wdb->ReceiveControlRegisters();
 
-      // Set backplane clock source 80 MHz
-      wdb->SetExtClkInSel(0);
-      wdb->SetDaqClkSrcSel(0);
-      wdb->SetLmkInputFreq(80);
+         wdb->SetSendBlocked(true); // update all control register together
 
-      // Reset Serdes Interface
-      wdb->ResetTcbOserdesIf();
-      wdb->ResetTcbOserdesPll();
+         // Set backplane clock source 80 MHz
+         wdb->SetExtClkInSel(0);
+         wdb->SetDaqClkSrcSel(0);
+         wdb->SetLmkInputFreq(80);
 
-      // Set training pattern
-      wdb->SetAdvTrgCtrl(0x00000030);
-      wdb->SetAdvTrgTxChkWord0(TESTVALUE0);
-      wdb->SetAdvTrgTxChkWord1(TESTVALUE1);
+         // Reset Serdes Interface
+         wdb->ResetTcbOserdesIf();
+         wdb->ResetTcbOserdesPll();
 
-      // now send all changed registers in one packet
-      wdb->SetSendBlocked(false);
-      wdb->SendControlRegisters();
+         // Set training pattern
+         wdb->SetAdvTrgCtrl(0x00000030);
+         wdb->SetAdvTrgTxChkWord0(TESTVALUE0);
+         wdb->SetAdvTrgTxChkWord1(TESTVALUE1);
 
-      // Sync LMK
-      wdb->SetApplySettingsLmk(1);
-      wdb->LmkSyncLocal();
-      wdb->ReceiveStatusRegister(WD2_DRS_SAMPLE_FREQ_OFS);
+         // now send all changed registers in one packet
+         wdb->SetSendBlocked(false);
+         wdb->SendControlRegisters();
 
-      // Reset DRS FSM
-      wdb->ResetDrsControlFsm();
+         // Sync LMK
+         wdb->SetApplySettingsLmk(1);
+         wdb->LmkSyncLocal();
+         wdb->ReceiveStatusRegister(WD2_DRS_SAMPLE_FREQ_OFS);
 
-      // Reset PLLs
-      wdb->ResetAllPll();
+         // Reset DRS FSM
+         wdb->ResetDrsControlFsm();
 
-      // read all status registers
-      wdb->ReceiveStatusRegisters();
+         // Reset PLLs
+         wdb->ResetAllPll();
 
-      std::cout << std::endl << "========== Board Info ==========" << std::endl;
-      wdb->PrintVersion();
-   } else {
-      char* nodename = strtok(argv[1], "-");
-      if(nodename == NULL){
-         printf("source can be wdXXX or mscbYYY-slot\n");
-         return 1;
+         // read all status registers
+         wdb->ReceiveStatusRegisters();
+
+         std::cout << std::endl << "========== Board Info ==========" << std::endl;
+         wdb->PrintVersion();
+      } else {
+         char* nodename = board;
+         if(nodename == NULL){
+            printf("source can be wdXXX or mscbYYY-slot\n");
+            return 1;
+         }
+         int slotnum = atoi(strtok(NULL, ",-"));
+         printf("TCB as source (node=%s slot=%d)\n", nodename, slotnum);
+
+         tcb_tx = new TCB(nodename, 20, slotnum, 1);
+         tcb_tx->fh = mscb_init(nodename, 0, "", 0);
+         tcb_tx->SetIDCode();
+         tcb_tx->fverbose = 1;
+         tcb_tx->SetCheckWord(TESTVALUE0, TESTVALUE1);
+         tcb_tx->ResetTransmitter();
+         u_int32_t RRUNVal = 0x100; //DBGSerdes
+         tcb_tx->SetRRUN(&RRUNVal);
       }
-      int slotnum = atoi(strtok(NULL, "-"));
-      printf("TCB as source (node=%s slot=%d)\n", nodename, slotnum);
-
-      tcb_tx = new TCB(nodename, 20, slotnum, 1);
-      tcb_tx->fh = mscb_init(nodename, 0, "", 0);
-      tcb_tx->SetIDCode();
-      tcb_tx->fverbose = 1;
-      tcb_tx->SetCheckWord(TESTVALUE0, TESTVALUE1);
-      tcb_tx->ResetTransmitter();
-      u_int32_t RRUNVal = 0x100; //DBGSerdes
-      tcb_tx->SetRRUN(&RRUNVal);
-
+      board = strtok(NULL, ",-");
    }
 
    char* nodename = strtok(argv[2], "-");

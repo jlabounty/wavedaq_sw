@@ -426,7 +426,7 @@ class WDWDB : public WDBoard, public WDB{
          try{
             freq = std::stoi(GetProperty("SamplingFrequency"));
          } catch (const std::runtime_error& ex){
-            freq = GetDrsSampleFreq();
+            freq = GetDrsSampleFreqMhz();
          }
          SetDrsSampleFreq(freq);
 
@@ -584,7 +584,6 @@ class WDTCB : public WDBoard, public TCB{
             //basic RRun
             u_int32_t rrun_config = 0x0000E014;  //masktrg, masksync, maskbusy, fadcmode, enable trg_bus
             //u_int32_t rrun_config = 0x00006014;  //masksync, maskbusy, fadcmode, enable trg_bus
-            if((fidcode >>12) != 3) rrun_config = 0x00006014;
             SetRRUN(&rrun_config);
 
             u_int32_t syncdly=0x1F;
