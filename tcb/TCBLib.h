@@ -215,6 +215,8 @@ public:
    void SetAllDCBSerdes(u_int32_t *, int *);
    //reset transmitter
    void ResetTransmitter();
+   //reset transmitter
+   void ResetIDLYCTRL();
    //check an error on a given serdes link
    void GetSerdesError(u_int32_t*);
    //return the number of errors in the transmission test

@@ -885,6 +885,15 @@ void TCB::SetAllDCBSerdes(u_int32_t *dlys, int *bits){
    }
 }
 //check errors on serdes
+void TCB::ResetIDLYCTRL(){
+   u_int32_t val;
+   ReadReg(RSERDESTX, &val);
+   val |= 0x00000100;
+   WriteReg(RSERDESTX, &val);
+   val &= 0xFFFFFEFF;
+   WriteReg(RSERDESTX, &val);
+}
+//check errors on serdes
 void TCB::ResetTransmitter(){
    u_int32_t val;
    ReadReg(RSERDESTX, &val);
