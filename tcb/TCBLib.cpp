@@ -1404,5 +1404,6 @@ void TCB::GetAutoCalibrateEye(u_int32_t* eyes){
    usleep(1000000);
 
    ReadBLT(RSERDESDLYSTATE, eyes, fnserdes);
+   tx_conf &= 0xFFFFFDFF;
    WriteReg(RSERDESTX, &tx_conf);
 }
