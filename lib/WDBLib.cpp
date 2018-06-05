@@ -1716,7 +1716,6 @@ WP::WP(std::vector<WDB *> w, int verbose, std::string logfile, bool demo)
    mTimeCalib1 = false;
    mTimeCalib2 = false;
    mTimeCalib3 = false;
-   mRemoveSpikes = false;
    
    mWDReceivedEvents = 0;
    
@@ -2480,12 +2479,6 @@ void WP::CalibrateWaveforms(WDEvent* ev)
          }
       };
       
-      // remove spikes
-      if (mRemoveSpikes) {
-         RemoveSpikes(ev->mTriggerCellDrs0, ev->mWfU);
-         RemoveSpikes(ev->mTriggerCellDrs1, ev->mWfU+WD_N_CHANNELS/2);
-      };
-      
       // calculate calibrated time for each event
       bValid = (ev->mSamplingFrequency == wdb->mTCalib.GetSamplingFrequency() &&
                 wdb->mTCalib.IsValid());
@@ -3001,7 +2994,6 @@ void WP::DoCalibrationVoltageStep()
       mOfsCalib2           = false;
       mGainCalib           = false;
       mRangeCalib          = false;
-      mRemoveSpikes        = false;
       
       // turn on power for calibration input (needed for clock channels)
       b->SetCalibBufferEn(true);
@@ -3190,7 +3182,6 @@ void WP::DoCalibrationVoltageStep()
    mOfsCalib2      = true;
    mGainCalib      = true;
    mRangeCalib     = false;
-   mRemoveSpikes   = false;
 
    // measure offset at different ranges
    
@@ -3326,7 +3317,6 @@ void WP::DoCalibrationVoltageStep()
       calibProg.mode  = cCmNone;
       
       mRangeCalib     = true;
-      mRemoveSpikes   = true;
    }
    
    return;
@@ -3596,7 +3586,6 @@ void WP::DoCalibrationTimeStep()
       mOfsCalib2            = true;
       mGainCalib            = true;
       mRangeCalib           = true;
-      mRemoveSpikes         = true;
 
       mTimeCalib1           = false;
       mTimeCalib2           = false;

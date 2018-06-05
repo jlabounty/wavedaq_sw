@@ -161,10 +161,6 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          gl->wp->SetRangeCalib(value == "true");
       }
 
-      else if (item == "removeSpikes") {
-         gl->wp->SetRemoveSpikes(value == "true");
-      }
-
       else if (item == "timeCalib1") {
          gl->wp->SetTimeCalib1(value == "true");
       }
@@ -437,8 +433,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "      \"rangeCalib\": %s,\n",                    gl->wp->IsRangeCalib() ? "true" : "false");
       mg_printf_http_chunk(nc, "      \"timeCalib1\": %s,\n",                    gl->wp->IsTimeCalib1() ? "true" : "false");
       mg_printf_http_chunk(nc, "      \"timeCalib2\": %s,\n",                    gl->wp->IsTimeCalib2() ? "true" : "false");
-      mg_printf_http_chunk(nc, "      \"timeCalib3\": %s,\n",                    gl->wp->IsTimeCalib3() ? "true" : "false");
-      mg_printf_http_chunk(nc, "      \"removeSpikes\": %s\n",                   gl->wp->IsRemoveSpikes() ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"timeCalib3\": %s\n",                    gl->wp->IsTimeCalib3() ? "true" : "false");
       mg_printf_http_chunk(nc, "   }\n");
       mg_printf_http_chunk(nc, "}\n");
       mg_send_http_chunk(nc, "", 0); // end of response
@@ -1067,7 +1062,6 @@ int main(int argc, const char * argv[])
       gl.wp->SetOfsCalib2(true);
       gl.wp->SetGainCalib(true);
       gl.wp->SetRangeCalib(true);
-      gl.wp->SetRemoveSpikes(true);
    }
    if (gl.wdb[0]->mTCalib.IsValid()) {
       gl.wp->SetTimeCalib1(true);

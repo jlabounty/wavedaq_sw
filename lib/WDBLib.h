@@ -308,7 +308,6 @@ class WP {
    bool              mTimeCalib1;
    bool              mTimeCalib2;
    bool              mTimeCalib3;
-   bool              mRemoveSpikes;
    
    int               mPacketsReceived;
    int               mCurrentEvent;
@@ -388,7 +387,6 @@ public:
    bool IsTimeCalib1() { return mTimeCalib1;}
    bool IsTimeCalib2() { return mTimeCalib2;}
    bool IsTimeCalib3() { return mTimeCalib3;}
-   bool IsRemoveSpikes() { return mRemoveSpikes; }
 
    void SetRotateWaveform(bool f) { mRotateWaveform = f; }
    void SetCalibrateWaveform(bool f) { mCalibrateWaveform = f; }
@@ -399,7 +397,6 @@ public:
    void SetTimeCalib1(bool f) { mTimeCalib1 = f; }
    void SetTimeCalib2(bool f) { mTimeCalib2 = f; }
    void SetTimeCalib3(bool f) { mTimeCalib3 = f; }
-   void SetRemoveSpikes(bool f) { mRemoveSpikes = f; }
    void SetAllCalib(bool f) {
       mOfsCalib1 = f; mOfsCalib2 = f; mGainCalib = f; mRangeCalib = f;
       mTimeCalib1 = f; mTimeCalib2 = f; mTimeCalib3 = f;

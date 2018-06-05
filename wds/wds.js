@@ -308,7 +308,6 @@ function populateControls(init) {
    document.getElementById("calib2").checked = OSC.wp.ofsCalib2;
    document.getElementById("calib3").checked = OSC.wp.gainCalib;
    document.getElementById("calib4").checked = OSC.wp.rangeCalib;
-   document.getElementById("spikes").checked = OSC.wp.removeSpikes;
    document.getElementById("rotate").checked = OSC.wp.rotateWaveform;
 
    document.getElementById("tcalib1").checked = OSC.wp.timeCalib1;
