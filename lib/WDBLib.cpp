@@ -494,9 +494,9 @@ void WDB::Connect()
 
    // check if board is alive
    try {
-      WDB::SetSendTimeoutMs(500); // increased timeout for first access
+      WDB::SetReceiveTimeoutMs(1000); // increased timeout for first access
       WDB::SendUDP("");
-      WDB::SetSendTimeoutMs(cDefaultSendTimeoutMs);
+      WDB::SetReceiveTimeoutMs(cDefaultReceiveTimeoutMs);
    } catch (...) {
       throw std::runtime_error(std::string("Cannot connect to board ")+mName+".");
    }
