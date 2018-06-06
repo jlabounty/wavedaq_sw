@@ -99,7 +99,7 @@ public:
    VCALIB();
    void SetValid(bool f) { bValid = f; }
    bool IsValid() { return bValid; }
-   int  GetSamplingFrequency() { return mCalib.sampling_frequency; }
+   unsigned int GetSamplingFrequency() { return mCalib.sampling_frequency; }
    void save(WDB *b, std::string filename);
    void load(WDB *b, std::string filename);
 };
@@ -124,7 +124,7 @@ public:
    TCALIB();
    void SetValid(bool f) { bValid = f; }
    bool IsValid() { return bValid; }
-   int  GetSamplingFrequency() { return mCalib.sampling_frequency; }
+   unsigned int GetSamplingFrequency() { return mCalib.sampling_frequency; }
    void save(WDB *b, std::string filename);
    void load(WDB *b, std::string filename);
 };
