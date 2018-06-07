@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  17.05.2018 09:20:08
+// Created :  07.06.2018 09:02:27
 //
 
 
@@ -1131,7 +1131,7 @@ public:
 
 
 
-   ////// ------ Control Register 55 [0x10DC]: LMK_0 - LMK Register 0 (Default: 0x00033100) ------ //////
+   ////// ------ Control Register 55 [0x10DC]: LMK_0 - LMK Register 0 (Default: 0x00032100) ------ //////
 
    // 0x80000000: LMK0_RESET - Resets LMK Registers to Their Power-On State
    unsigned int GetLmk0Reset() { return BitExtractControl(WD2_LMK0_RESET_REG, WD2_LMK0_RESET_MASK, WD2_LMK0_RESET_OFS); };
@@ -1215,7 +1215,7 @@ public:
 
 
 
-   ////// ------ Control Register 59 [0x10EC]: LMK_4 - LMK Register 4 (Default: 0x00020104) ------ //////
+   ////// ------ Control Register 59 [0x10EC]: LMK_4 - LMK Register 4 (Default: 0x00030104) ------ //////
 
    // 0x00060000: LMK4_CLKOUT_MUX - Channel 4 Clock Output Multiplexer (see datasheet)
    unsigned int GetLmk4ClkoutMux() { return BitExtractControl(WD2_LMK4_CLKOUT_MUX_REG, WD2_LMK4_CLKOUT_MUX_MASK, WD2_LMK4_CLKOUT_MUX_OFS); };
@@ -1363,7 +1363,7 @@ public:
 
 
 
-   ////// ------ Control Register 68 [0x1110]: LMK_15 - LMK Register 15 (Default: 0xD400300F) ------ //////
+   ////// ------ Control Register 68 [0x1110]: LMK_15 - LMK Register 15 (Default: 0xE000200F) ------ //////
 
    // 0xC0000000: LMK15_PLL_CP_GAIN - PLL Charge Pump Gain (see datasheet) (0..4)
    unsigned int GetLmk15PllCpGain() { return BitExtractControl(WD2_LMK15_PLL_CP_GAIN_REG, WD2_LMK15_PLL_CP_GAIN_MASK, WD2_LMK15_PLL_CP_GAIN_OFS); };
