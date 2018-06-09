@@ -20,7 +20,7 @@ int TCB::InitType1(TCB_SETTINGS *ts){
    u_int32_t fadcmode = 1;
    u_int32_t enable_trgbus = 1;
    u_int32_t testtxmode = 0;
-   u_int32_t trgbusmask = 0x7;
+   u_int32_t trgbusmask = 0x7; // TRG | SYNC | BUSY
    u_int32_t dbgserdes = 0;
 
    // load RRUN register
@@ -59,7 +59,7 @@ int TCB::InitType2(TCB_SETTINGS *ts){
    u_int32_t fadcmode = 1;
    u_int32_t enable_trgbus = 1;
    u_int32_t testtxmode = 0;
-   u_int32_t trgbusmask = 0x7;
+   u_int32_t trgbusmask = 0x7; // TRG | SYNC | BUSY
    u_int32_t dbgserdes = 0;
 
    // load RRUN register
@@ -94,7 +94,7 @@ int TCB::InitType3(TCB_SETTINGS *ts){
    u_int32_t fadcmode = 1;
    u_int32_t enable_trgbus = 1;
    u_int32_t testtxmode = 0;
-   u_int32_t trgbusmask = 0x7;
+   u_int32_t trgbusmask = 0x7; // TRG | SYNC | BUSY
 
    // set the number of available trigger 
    SetNTRG();
