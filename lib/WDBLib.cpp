@@ -1880,7 +1880,8 @@ bool WP::GetLastEvent(int timeout, std::vector<WDEvent *> event)
       
       std::vector<WDEvent*>::iterator ed = event.begin();
       for (auto es: mEventLast)
-         **(ed++) = *es;
+         if (es->mValid)
+            **(ed++) = *es;
       mEventNew = false;
       return true;
    }
