@@ -81,7 +81,6 @@ WDB::WDB(std::string name, int verbose)
    mLogfile = "";
    mDemoMode = (name == "demo");
    mSendBlocked = false;
-   mSendTimeoutMs = cDefaultSendTimeoutMs;
    mReceiveTimeoutMs = cDefaultReceiveTimeoutMs;
    
    if (mDemoMode) {
@@ -119,7 +118,7 @@ std::string WDB::SendReceiveUDP(std::string str)
    result.clear();
    
    // retry max five times
-   for (int retry=0 ; retry < 5 ; retry++) {
+   for (int retry=0 ; retry < 100 ; retry++) {
 
       // clear input queue
       do {
@@ -252,7 +251,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data)
    }
    
    // retry max five times
-   for (int retry=0 ; retry < 5 ; retry++) {
+   for (int retry=0 ; retry < 100 ; retry++) {
       
       // clear input queue
       do {
@@ -286,7 +285,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data)
       }
       
       // don't wait for reply for reset FPGA command
-      if (mSendTimeoutMs < 0)
+      if (mReceiveTimeoutMs < 0)
          return;
       
       // retrieve reply until acknowledge is found
@@ -296,7 +295,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data)
          FD_ZERO(&readfds);
          FD_SET(gBinSocket, &readfds);
          
-         ms = mSendTimeoutMs;
+         ms = mReceiveTimeoutMs;
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
          
@@ -494,9 +493,7 @@ void WDB::Connect()
 
    // check if board is alive
    try {
-      WDB::SetReceiveTimeoutMs(1000); // increased timeout for first access
       WDB::SendUDP("");
-      WDB::SetReceiveTimeoutMs(cDefaultReceiveTimeoutMs);
    } catch (...) {
       throw std::runtime_error(std::string("Cannot connect to board ")+mName+".");
    }
@@ -1117,7 +1114,7 @@ void WDB::ResetDrsControlFsm()
 
 void WDB::ReconfigureFpga()
 {
-   mSendTimeoutMs = -1;
+   mReceiveTimeoutMs = -1;
    SetReconfigureFpga(1);
    sleep_ms(1000);
 }

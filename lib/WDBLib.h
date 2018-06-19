@@ -462,7 +462,6 @@ class WDB: public WDBREG {
    std::string      mLogfile;
    bool             mDemoMode;
    bool             mSendBlocked;
-   int              mSendTimeoutMs;
    int              mReceiveTimeoutMs;
    unsigned int     mChnTxEn;
 
@@ -474,8 +473,6 @@ class WDB: public WDBREG {
    static unsigned short udpSequenceNumber;
 
    void             BlockSend(bool flag) { mSendBlocked = flag; }
-   int              GetSendTimeoutMs() { return mSendTimeoutMs; };
-   void             SetSendTimeoutMs(int to) { mSendTimeoutMs = to; };
    int              GetReceiveTimeoutMs() { return mReceiveTimeoutMs; };
    void             SetReceiveTimeoutMs(int to) { mReceiveTimeoutMs = to; };
 
@@ -492,7 +489,6 @@ public:
 
    const unsigned int cRequiredRegLayoutCompatLevel = 6;
    const unsigned int cRequiredFwCompatLevel = 2;
-   const int cDefaultSendTimeoutMs = 100;
    const int cDefaultReceiveTimeoutMs = 100;
 
    // constants
