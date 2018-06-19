@@ -1879,9 +1879,11 @@ bool WP::GetLastEvent(int timeout, std::vector<WDEvent *> event)
       std::lock_guard<std::mutex> lock(mEventAccessMutex);
       
       std::vector<WDEvent*>::iterator ed = event.begin();
-      for (auto es: mEventLast)
+      for (auto es: mEventLast) {
          if (es->mValid)
-            **(ed++) = *es;
+            **(ed) = *es;
+         ed++;
+      }
       mEventNew = false;
       return true;
    }
@@ -2932,8 +2934,9 @@ void WP::Collector()
       
             while (es != mEvent.end()) {
                if ((*es)->mValid)
-                 **(ed++) = **(es);
+                 **(ed) = **(es);
                es++;
+               ed++;
             }
       
             mEventNew = true;
