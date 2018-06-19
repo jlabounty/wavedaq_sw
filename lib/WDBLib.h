@@ -154,6 +154,7 @@ typedef struct {
 class WDEvent {
 public:
    
+   bool             mValid;
    unsigned short   mBoardId;
    unsigned short   mCrateId;
    unsigned short   mSlotId;
@@ -176,7 +177,7 @@ public:
    bool             mVCalibrated;
    bool             mTCalibrated;
    
-   WDEvent(int boardId) { mBoardId = boardId; };
+   WDEvent(int boardId) { mBoardId = boardId; mValid = false; };
 
    void             SetEventHeaderInfo(WD2_FRAME_HEADER *);
 };

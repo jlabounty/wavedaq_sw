@@ -1656,6 +1656,7 @@ bool WDB::LoadTimeCalibration(int freq, std::string path)
 void WDEvent::SetEventHeaderInfo(WD2_FRAME_HEADER *ph)
 {
    int channel = ph->channel_info & 0x1F;
+   mValid   = true;
    mBoardId = ph->serial_number;
    mCrateId = ph->crate_id;
    mSlotId  = ph->slot_id;
@@ -2204,6 +2205,8 @@ void WP::UnrotateWaveforms()
       auto ev = (*it);
       if (ev->mWFTypeADC)
          continue;
+      if (!ev->mValid)
+         continue;
       
       float wf[WD_N_CHANNELS][1024];
       
@@ -2362,7 +2365,8 @@ void WP::CalibrateWaveforms(std::vector<WDEvent *> event)
 {
    for (auto it = event.begin() ; it != event.end() ; it++) {
       WDEvent *ev = (*it);
-      CalibrateWaveforms(ev);
+      if (ev->mValid)
+         CalibrateWaveforms(ev);
    }
 
 }
@@ -2925,8 +2929,11 @@ void WP::Collector()
             auto es = mEvent.begin();
             auto ed = mEventLast.begin();
       
-            while (es != mEvent.end())
-               **(ed++) = **(es++);
+            while (es != mEvent.end()) {
+               if ((*es)->mValid)
+                 **(ed++) = **(es);
+               es++;
+            }
       
             mEventNew = true;
          }
