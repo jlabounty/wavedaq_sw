@@ -421,6 +421,7 @@ public:
    WDB* GetBoard(int board_id);
    unsigned int GetEventRequestMask(int board_id);
    
+   bool WaitNewEvent(int timeout);
    bool GetLastEvent(WDB* b, int timeout, WDEvent& event);
    bool GetLastEvent(int timeout, std::vector<WDEvent *> event);
    bool RequestEvent(WDB* b, int timeout, WDEvent& event);

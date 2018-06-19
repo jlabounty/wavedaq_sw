@@ -1836,6 +1836,20 @@ bool WP::RequestEvent(WDB *b, int timeout, WDEvent &event)
 
 //--------------------------------------------------------------------
 
+bool WP::WaitNewEvent(int timeout)
+{
+   // wait for new event with timeout
+   {
+   std::unique_lock<std::mutex> lock(mEventMutex);
+   if (!(mEventCV.wait_for(lock, std::chrono::milliseconds(timeout), [this](){return mEventNew;})))
+      return false;
+   }
+   
+   return true;
+}
+
+//--------------------------------------------------------------------
+
 bool WP::GetLastEvent(WDB *b, int timeout, WDEvent& event)
 {
    // wait for new event with timeout
