@@ -1915,6 +1915,9 @@ void WP::InvalidateAllWf()
          er->SetDrsTriggerCell(i, -1);
       }
    }
+   for (auto &e: mEvent) {
+      e->mValid = false;
+   }
    
    mPacketsReceived = 0;
    mCurrentEvent = -1;
