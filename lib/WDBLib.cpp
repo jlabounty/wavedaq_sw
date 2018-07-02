@@ -1863,8 +1863,9 @@ bool WP::GetLastEvent(WDB *b, int timeout, WDEvent& event)
       std::lock_guard<std::mutex> lock(mEventAccessMutex);
 
       for (auto e: mEventLast)
-         if (e->mBoardId == b->GetSerialNumber())
-            event = *e;
+         if (e->mValid)
+            if (e->mBoardId == b->GetSerialNumber())
+               event = *e;
       mEventNew = false;
       return true;
    }
