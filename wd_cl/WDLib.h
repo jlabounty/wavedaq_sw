@@ -291,7 +291,6 @@ class WDWDB : public WDBoard, public WDB{
             SetInterPkgDelay(interpacket_delay);
          }
 
-
          //input
          SetFeMux(-1, WDB::cFeMuxInput);
          //gain
@@ -374,7 +373,7 @@ class WDWDB : public WDBoard, public WDB{
          }
          SetDrsChTxEn(tx_ena);
          SetAdcChTxEn(tx_ena);
-         SetTdcChTxEn(0);
+         SetTdcChTxEn(tx_ena);
          SetZeroSuprEn(false);
          SetTrgTxEn(1);
          SetSclTxEn(0);
@@ -438,6 +437,17 @@ class WDWDB : public WDBoard, public WDB{
                      break;
                }
             }
+         }
+
+         //TDC Mask ch
+         unsigned int tdcmask;
+         try{
+            tdcmask = stoul(GetProperty("TriggerTDCMask"), 0, 16);
+         } catch (const std::runtime_error& ex){
+            tdcmask = 65536;
+         }
+         if(tdcmask < 65536){
+            SetAdvTrgTdcChMask(tdcmask);
          }
 
          //sampling frequency
