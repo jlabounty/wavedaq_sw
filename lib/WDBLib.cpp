@@ -1863,9 +1863,8 @@ bool WP::GetLastEvent(WDB *b, int timeout, WDEvent& event)
       std::lock_guard<std::mutex> lock(mEventAccessMutex);
 
       for (auto e: mEventLast)
-         if (e->mValid)
-            if (e->mBoardId == b->GetSerialNumber())
-               event = *e;
+         if (e->mBoardId == b->GetSerialNumber())
+            event = *e;
       mEventNew = false;
       return true;
    }
@@ -1889,17 +1888,29 @@ bool WP::GetLastEvent(int timeout, std::vector<WDEvent *> event)
       return false;
    }
    }
+
+   auto startTime = std::chrono::high_resolution_clock::now();
    
    {
       std::lock_guard<std::mutex> lock(mEventAccessMutex);
+      int copied = 0;
       
       std::vector<WDEvent*>::iterator ed = event.begin();
       for (auto es: mEventLast) {
-         if (es->mValid)
+         if (es->mValid){
             **(ed) = *es;
+            copied++;
+         } else {
+            (*ed)->mValid = false;
+         }
          ed++;
       }
       mEventNew = false;
+      if (mLogfile != "") {
+         std::ofstream f;
+         f.open(mLogfile, std::ios_base::app);
+         f << "Fully copied event " << usSince(startTime)<<" us with "<< copied <<" boards" << std::endl;
+      }
       return true;
    }
 }
@@ -2951,8 +2962,11 @@ void WP::Collector()
             auto ed = mEventLast.begin();
       
             while (es != mEvent.end()) {
-               if ((*es)->mValid)
+               if ((*es)->mValid){
                  **(ed) = **(es);
+               } else {
+                 (*ed)->mValid = false;
+               }
                es++;
                ed++;
             }
@@ -2965,6 +2979,13 @@ void WP::Collector()
          // debug output
          if (mVerbose >= 2)
             std::cout << "Ready to be read WD event. (time = "<< usSince(mEventStartTime) << "us)" << std::endl;
+
+         if (mLogfile != "") {
+            std::ofstream f;
+            f.open(mLogfile, std::ios_base::app);
+            f << "Ready to be read WD event. (time = "<< usSince(mEventStartTime) << "us)" << std::endl;
+            f << "===============================================================================================" << std::endl;
+         }
          
       } else {
          {
