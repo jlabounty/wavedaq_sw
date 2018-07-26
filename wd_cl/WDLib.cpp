@@ -4,19 +4,18 @@
 // --- WDBoard --- 
 // Set a property
 void WDBoard::AddProperty(std::string name, std::string val){
-   fProperties[name] = val;
+   fProperties[name].SetStringValue(val);
 }
-std::string WDBoard::GetProperty(std::string name){
-   std::string val;
+Property& WDBoard::GetProperty(std::string name){
    try{
-      val = fProperties.at(name);
+      return fProperties.at(name);
    } catch (const std::out_of_range& ex){
       //no value in local property list
       //try group one
 
-      std::map<std::string, std::string> groupProperties = fCrate->GetSystem()->GetGroupProperties(fGroupName);
+     PropertyGroup  group = fCrate->GetSystem()->GetGroupProperties(fGroupName);
       try{
-         val = groupProperties.at(name);
+         return group.at(name);
       } catch (const std::out_of_range& ex){
          //no property with given name
 
@@ -24,11 +23,9 @@ std::string WDBoard::GetProperty(std::string name){
       }
    }
 
-   return val;
-
 }
 // Getters
-void WDBoard::SetProperties(const std::map<std::string, std::string> &properties){
+void WDBoard::SetProperties(const PropertyGroup &properties){
    fProperties = properties;
 }
 // Contructor
@@ -105,12 +102,12 @@ void WDSystem::AddCrate(WDCrate *crate){
 
 // crate board properties from XML
 void WDSystem::CreatePropertiesFromXml(WDBoard *board, MXML_NODE *board_node){
-   std::map<std::string, std::string> p;
+   PropertyGroup p;
    for(int i=0; i<mxml_get_number_of_children(board_node); i++){
       MXML_NODE *child_node = mxml_subnode(board_node, i);
       std::string name = std::string(mxml_get_name(child_node));
       std::string value = std::string(mxml_get_value(child_node));
-      p[name] = value;
+      p[name].SetStringValue(value);
    }
 
    board->SetProperties(p);
@@ -167,12 +164,12 @@ void WDSystem::CreateFromXml(std::string filepath){
          //create a new property group
          std::string groupname = std::string(mxml_get_attribute(crate_xml, "Name"));
 
-         std::map<std::string, std::string> p;
+         PropertyGroup p;
          for(int i=0; i<mxml_get_number_of_children(crate_xml); i++){
             MXML_NODE *child_node = mxml_subnode(crate_xml, i);
             std::string name = std::string(mxml_get_name(child_node));
             std::string value = std::string(mxml_get_value(child_node));
-            p[name] = value;
+            p[name].SetStringValue(value);
          }
 
          SetGroupProperties(groupname, p);

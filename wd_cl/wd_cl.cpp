@@ -109,15 +109,17 @@ int main(int argc, char *argv[])
                      } else
                         printf("wdb with name %s group=%s\n", dynamic_cast<WDWDB*>(b)->GetName().c_str(), b->GetGroup().c_str());
 
-                     std::map<std::string, std::string> p = b->GetProperties();
-                     for(std::map<std::string,std::string>::iterator it=p.begin(); it!=p.end(); it++){
-                        printf("\t \t \t %s: %s\n", it->first.c_str(), it->second.c_str());
+                     PropertyGroup p = b->GetProperties();
+                     //for(std::map<std::string,std::string>::iterator it=p.begin(); it!=p.end(); it++){
+                     for(auto prop : p){
+                        printf("\t \t \t %s: %s\n", prop.first.c_str(), prop.second.GetStringValue().c_str());
                      }
 
                      std::string gr = b->GetGroup();
-                     std::map<std::string, std::string> pgr = sys->GetGroupProperties(gr);
-                     for(std::map<std::string,std::string>::iterator it=pgr.begin(); it!=pgr.end(); it++){
-                        printf("\t \t \t %s: %s from group %s\n", it->first.c_str(), it->second.c_str(), gr.c_str());
+                     PropertyGroup pgr = sys->GetGroupProperties(gr);
+                     //for(std::map<std::string,std::string>::iterator it=pgr.begin(); it!=pgr.end(); it++){
+                     for(auto prop : p){   
+                        printf("\t \t \t %s: %s from group %s\n", prop.first.c_str(), prop.second.GetStringValue().c_str(), gr.c_str());
                      }
                   } else {
                      printf("\t \t empty\n");
