@@ -215,12 +215,12 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             gl->wdb[iBoard]->SetTriggerDelayNs(std::stoi(value));
       }
 
-      else if (item == "triggerFallingEdge") {
+      else if (item == "triggerLeadTrailEdgeSel") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
-               b->SetTriggerFallingEdge(value == "true");
+               b->SetLeadTrailEdgeSel(std::stoi(value));
          else
-            gl->wdb[iBoard]->SetTriggerFallingEdge(value == "true");
+            gl->wdb[iBoard]->SetLeadTrailEdgeSel(std::stoi(value));
       }
 
       else if (item == "triggerSrcPolarity") {
@@ -555,6 +555,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "        %d ],\n",                             w->GetFeMux(15));
 
          mg_printf_http_chunk(nc, "      \"triggerMode\": %d,\n",                gl->triggerMode);
+         mg_printf_http_chunk(nc, "      \"triggerLeadTrailEdgeSel\": %d,\n",    w->GetLeadTrailEdgeSel());
          mg_printf_http_chunk(nc, "      \"triggerExtTriggerOutEnable\": %s,\n", w->GetExtTriggerOutEnable() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"triggerSource\": %d,\n",              w->GetTriggerTypeSel() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"triggerOutPulseLength\": %d,\n",      w->GetTriggerOutPulseLength());

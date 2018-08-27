@@ -1231,14 +1231,15 @@ void WDB::SetDacBiasV(float v)
    SetDac0ChH(d);
 }
 
-void WDB::SetTriggerFallingEdge(unsigned int value)
+void WDB::SetLeadTrailEdgeSel(unsigned int value)
 {
-   //## SetRegMask(WD2_TRIGGER_FALLING_EDGE_REG, 0x80000000, 31, value);
+   // 0: leading edge, 1: trailing edge
+   SetRegMask(WD2_LEAD_TRAIL_EDGE_SEL_REG, WD2_LEAD_TRAIL_EDGE_SEL_MASK, WD2_LEAD_TRAIL_EDGE_SEL_OFS, value);
 }
 
-unsigned int WDB::GetTriggerFallingEdge()
+unsigned int WDB::GetLeadTrailEdgeSel()
 {
-   return 0; //## BitExtractControl(WD2_TRIGGER_FALLING_EDGE_REG, 0x80000000, 31);;
+   return BitExtractControl(WD2_LEAD_TRAIL_EDGE_SEL_REG, WD2_LEAD_TRAIL_EDGE_SEL_MASK, WD2_LEAD_TRAIL_EDGE_SEL_OFS);
 }
 
 float WDB::GetDacTriggerLevelV(int chn)
@@ -1578,13 +1579,13 @@ unsigned int WDB::GetTriggerDelayNs()
 {
    auto v = GetTriggerDelay();
    
-   v = (unsigned int)(v / 255.0 * 450 + 0.5);
+   v = (unsigned int)(v * 6.25 + 0.5);
    return v;
 }
 
 void WDB::SetTriggerDelayNs(unsigned int ns)
 {
-   unsigned int v = (unsigned int)(ns / 450.0 * 255 + 0.5);
+   unsigned int v = (unsigned int)(ns / 6.25 + 0.5);
    if (v > 255)
       v = 255;
    SetTriggerDelay(v);
@@ -2578,7 +2579,7 @@ void WP::CalibrateWaveforms(WDEvent* ev)
                   continue;
                
                double tl = wdb->GetDacTriggerLevelV(c);
-               if (wdb->GetTriggerFallingEdge()) {
+               if (wdb->GetLeadTrailEdgeSel() == 1) {
                   if ((GetEventRequestMask(ev->mBoardId) & (1 << c)) > 0) {
                      // falling edge
                      if (ev->mWfU[c][i] > tl && ev->mWfU[c][i+1] <= tl) {

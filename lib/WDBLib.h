@@ -641,6 +641,9 @@ public:
    unsigned int GetTrgStatePtrn(int i);
    void SetTrgStatePtrn(int i, unsigned int value);
 
+   unsigned int GetLeadTrailEdgeSel();
+   void SetLeadTrailEdgeSel(unsigned int value);
+
    // high level methods ----------
    unsigned int GetTriggerDelayNs();
    void SetTriggerDelayNs(unsigned int ns);
@@ -655,9 +658,6 @@ public:
    bool LoadVoltageCalibration(int freq, std::string path="");
    void SaveTimeCalibration(int freq);
    bool LoadTimeCalibration(int freq, std::string path="");
-   
-   unsigned int GetTriggerFallingEdge();
-   void SetTriggerFallingEdge(unsigned int value);
    
    unsigned int GetChnTxEn() { return mChnTxEn; };
    void SetChnTxEn(int mask) { mChnTxEn = mask; };
