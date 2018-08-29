@@ -2579,31 +2579,33 @@ void WP::CalibrateWaveforms(WDEvent* ev)
                   continue;
                
                double tl = wdb->GetDacTriggerLevelV(c);
-               if (wdb->GetLeadTrailEdgeSel() == 1) {
-                  if ((GetEventRequestMask(ev->mBoardId) & (1 << c)) > 0) {
-                     // falling edge
-                     if (ev->mWfU[c][i] > tl && ev->mWfU[c][i+1] <= tl) {
-                        double t0 = ev->mWfT[c][i] +
-                        (ev->mWfT[c][i+1]-ev->mWfT[c][i])*(tl-ev->mWfU[c][i])/(ev->mWfU[c][i+1]-ev->mWfU[c][i]);
-                        double dt = t0 - (1024*1E-6/wdb->GetDrsSampleFreqMhz() - 30E-9 - wdb->GetTriggerDelayNs() * 1E-9);
-                        if (fabs(dt) < fabs(dt_min))
-                           dt_min = dt;
-                        bFound = true;
-                     }
-                  }
+               
+               // try to figure out if we trigger on rising or falling edge
+               bool rising = ((wdb->GetLeadTrailEdgeSel() == 0) &&
+                               ((wdb->GetTrgSrcPolarity() & (1 << c)) == 0)) ||
+                             ((wdb->GetLeadTrailEdgeSel() == 1) &&
+                               ((wdb->GetTrgSrcPolarity() & (1 << c)) > 0));
+               bool bEdge = false;
+               if (rising) {
+                  if (ev->mWfU[c][i] < tl && ev->mWfU[c][i+1] >= tl)
+                     bEdge = true;
                } else {
-                  // rising edge
-                  if (ev->mWfU[c][i] < tl && ev->mWfU[c][i+1] >= tl) {
-                     double t0 = ev->mWfT[c][i] +
-                     (ev->mWfT[c][i+1]-ev->mWfT[c][i])*(tl-ev->mWfU[c][i])/(ev->mWfU[c][i+1]-ev->mWfU[c][i]);
-                     double dt = t0 - (1024*1E-6/wdb->GetDrsSampleFreqMhz() - 30E-9 - wdb->GetTriggerDelayNs() * 1E-9);
-                     if (fabs(dt) < fabs(dt_min))
-                        dt_min = dt;
+                  if (ev->mWfU[c][i] > tl && ev->mWfU[c][i+1] <= tl)
+                     bEdge = true;
+               }
+               
+               if (bEdge) {
+                  double t0 = ev->mWfT[c][i] +
+                              (ev->mWfT[c][i+1]-ev->mWfT[c][i])*(tl-ev->mWfU[c][i])/(ev->mWfU[c][i+1]-ev->mWfU[c][i]);
+                  double iofs = 95 - (wdb->GetDrsSampleFreqMhz()/1000 - 1)*5;
+                  double dt = t0 - (1024*1E-6/wdb->GetDrsSampleFreqMhz() - iofs*1E-9 - wdb->GetTriggerDelayNs() * 1E-9);
+                  if (fabs(dt) < fabs(dt_min))
+                     dt_min = dt;
                      bFound = true;
                   }
                }
             }
-         }
+
          if (bFound) {
             for (int i=0 ; i<WD_N_CHANNELS ; i++)
                for (int j=0 ; j<1024 ; j++)
