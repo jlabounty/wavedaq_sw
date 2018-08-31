@@ -807,11 +807,13 @@ void WDB::SetDrsSampleFreq(unsigned int f)
    auto divider = (int) (160.0 / f * 2048 + 0.5);
    divider /= 2; // LMK multiplies divider by 2
    
+   SetAdcIfRst(1);
    SetLmk0ClkoutDiv(divider);
    SetApplySettingsLmk(1);
    
    LmkSyncLocal();
-   
+   SetAdcIfRst(0);
+
    // read back new sampling frquency in status register
    ReceiveStatusRegister(WD2_DRS_SAMPLE_FREQ_REG);
 }
