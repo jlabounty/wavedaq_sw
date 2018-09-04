@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <vector>
 
 
 void MemoryRewind(int ich, u_int32_t last, u_int32_t *mem, u_int32_t *outmem) {
@@ -69,6 +70,7 @@ int main(int argc, char *argv[])
       printf("[37]: Set trigger delay    \t \t  [38]: Get trigger delay\n");
       printf("[39]: LockSerdes FSM Start \t \t  [40]: Get current serdes values\n");
       printf("[41]: LockSerdes Status    \t \t  [42]: LockSerdes Draw Eye      \n");
+      printf("[43]: Single crate TRG conf\t \t  [44]:                          \n");
       printf("[-1]: Exit\n");
 
       do {
@@ -633,6 +635,32 @@ int main(int argc, char *argv[])
           }
           printf("\n");
         }
+      }
+      if(option == 43) {
+        printf(" opt = 43 : Single crate trigger configuration ...\n");
+	int choice;
+	printf("Select trigger conf (AND=0, OR=1): ");
+	scanf("%d", &choice);
+   short shaper;
+	printf("Select shaper time (0-32 clks): ");
+	scanf("%d", &shaper);
+	char buf[300];
+	printf("Channels to be configured (comma separated): ");
+   scanf("%s", buf);
+
+   char * p = strtok (buf,",");
+	std::vector<int> a;
+        while (p != NULL){
+	  int ch = atoi(p);
+	  p = strtok (NULL, ",");
+          a.push_back(ch);
+	}
+
+	if(choice==0){
+	  TCBBoard.SetSingleCrateTriggerAnd(a.size(), &a[0], shaper);
+	} else {
+	  TCBBoard.SetSingleCrateTriggerOr(a.size(), &a[0], shaper);
+	}
       }
       
 

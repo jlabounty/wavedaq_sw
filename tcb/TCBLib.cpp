@@ -1416,3 +1416,58 @@ void TCB::GetAutoCalibrateEye(u_int32_t* eyes){
    tx_conf &= 0xFFFFFDFF;
    WriteReg(RSERDESTX, &tx_conf);
 }
+void TCB::SetSingleCrateConfiguration(bool useGlobalAnd, short shape, short vetoShape){
+   u_int32_t val = 0;
+   val |= (shape & 0x1F);
+   val |= (vetoShape & 0x1F)<<8;
+   val |= (useGlobalAnd & 0x1)<<16;
+   
+   WriteReg(RSINGLECRATECFG, &val);
+}
+void TCB::SetSingleCrateChnMask(bool *state){
+   u_int32_t val[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+   for(int i=0; i<256; i++){
+      if(state[i]) val[i/32] |= ( 1 << (i%32));
+   }
+
+   WriteBLT(RSINGLEMASK, val, 8);
+}
+void TCB::SetSingleCrateChnIsVeto(bool *state){
+   u_int32_t val[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+   for(int i=0; i<256; i++){
+      if(state[i]) val[i/32] |= ( 1 << (i%32));
+   }
+
+   WriteBLT(RSINGLEISVETO, val, 8);
+}
+void TCB::SetSingleCrateChnLogic(bool *state){
+   u_int32_t val[4] = {0, 0, 0, 0};
+   for(int i=0; i<128; i++){
+      if(state[i]) val[i/32] |= ( 1 << (i%32));
+   }
+
+   WriteBLT(RSINGLELOGIC, val, 4);
+}
+void TCB::SetSingleCrateTriggerOr(int nChn, int* chn, short shape){
+   SetSingleCrateConfiguration(false, shape, shape);
+   bool arr[256];
+   for(int i=0; i<256; i++) arr[i]=false;
+   SetSingleCrateChnIsVeto(arr);
+   for(int i=0; i<256; i++) arr[i]=true;
+   for(int i=0; i<nChn; i++) arr[chn[i]]=false;
+   SetSingleCrateChnMask(arr);
+   for(int i=0; i<256; i++) arr[i]=false;
+   SetSingleCrateChnLogic(arr);
+}
+void TCB::SetSingleCrateTriggerAnd(int nChn, int* chn, short shape){
+   SetSingleCrateConfiguration(true, shape, shape);
+   bool arr[256];
+   for(int i=0; i<256; i++) arr[i]=true;
+   for(int i=0; i<nChn; i++) arr[chn[i]]=false;
+   SetSingleCrateChnIsVeto(arr);
+   for(int i=0; i<256; i++) arr[i]=true;
+   for(int i=0; i<nChn; i++) arr[chn[i]]=false;
+   SetSingleCrateChnMask(arr);
+   for(int i=0; i<256; i++) arr[i]=true;
+   SetSingleCrateChnLogic(arr);
+}

@@ -47,6 +47,11 @@
 #define RTRGCOU       0x400                     // trigger counter (first address)
 #define RTRGDLY       0x500                     // trigger delay (first address)
 #define RPARAM        0x600                     // start of parameter space
+#define RSINGLECRATECFG 0x800                     // configurations for single crate trigger logic
+#define RSINGLEISVETO 0x801                     // veto set for input channels in single crate logic
+#define RSINGLEMASK   0x809                     // mask for input channels in single crate logic
+#define RSINGLELOGIC  0x811                    // first stage configuration in single crate logic
+
 #define RMEMADDR      0x0FFFF                   // counter stop position
 #define MEMBASEADDR   0x10000                   //base address for memories
 #define GENTMEMBASE   0x12000                   //base address for trigger generation memories (two memories with size = GENTDIM)
@@ -283,4 +288,11 @@ public:
    void GetAutoCalibrateBusy(u_int32_t* ret);
    //perform dummy calibration and retrieve serdes eyes
    void GetAutoCalibrateEye(u_int32_t* eyes);
+   //single crate configuration
+   void SetSingleCrateConfiguration(bool useGlobalAnd, short shape, short vetoShape);
+   void SetSingleCrateChnMask(bool *state);
+   void SetSingleCrateChnIsVeto(bool *state);
+   void SetSingleCrateChnLogic(bool *state);
+   void SetSingleCrateTriggerOr(int nChn, int* chn, short shape);
+   void SetSingleCrateTriggerAnd(int nChn, int* chn, short shape);
 };

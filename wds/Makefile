@@ -19,7 +19,7 @@ endif
 
 ifeq ($(shell uname),Darwin)
 CFLAGS  += -std=gnu++11 -x c++
-LIBS    = -framework IOKit -framework CoreFoundation -lobjc
+LIBS    = -lobjc
 endif
 
 CFLAGS += -I. -I../lib -I../../firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/common/src/
