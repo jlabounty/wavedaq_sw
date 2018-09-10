@@ -81,7 +81,6 @@ WDB::WDB(std::string name, int verbose)
    mLogfile = "";
    mDemoMode = (name == "demo");
    mSendBlocked = false;
-   mSendTimeoutMs = cDefaultSendTimeoutMs;
    mReceiveTimeoutMs = cDefaultReceiveTimeoutMs;
    
    if (mDemoMode) {
@@ -119,7 +118,7 @@ std::string WDB::SendReceiveUDP(std::string str)
    result.clear();
    
    // retry max five times
-   for (int retry=0 ; retry < 5 ; retry++) {
+   for (int retry=0 ; retry < 100 ; retry++) {
 
       // clear input queue
       do {
@@ -252,7 +251,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data)
    }
    
    // retry max five times
-   for (int retry=0 ; retry < 5 ; retry++) {
+   for (int retry=0 ; retry < 100 ; retry++) {
       
       // clear input queue
       do {
@@ -286,7 +285,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data)
       }
       
       // don't wait for reply for reset FPGA command
-      if (mSendTimeoutMs < 0)
+      if (mReceiveTimeoutMs < 0)
          return;
       
       // retrieve reply until acknowledge is found
@@ -296,7 +295,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data)
          FD_ZERO(&readfds);
          FD_SET(gBinSocket, &readfds);
          
-         ms = mSendTimeoutMs;
+         ms = mReceiveTimeoutMs;
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
          
@@ -494,9 +493,7 @@ void WDB::Connect()
 
    // check if board is alive
    try {
-      WDB::SetSendTimeoutMs(500); // increased timeout for first access
       WDB::SendUDP("");
-      WDB::SetSendTimeoutMs(cDefaultSendTimeoutMs);
    } catch (...) {
       throw std::runtime_error(std::string("Cannot connect to board ")+mName+".");
    }
@@ -1119,7 +1116,7 @@ void WDB::ResetDrsControlFsm()
 
 void WDB::ReconfigureFpga()
 {
-   mSendTimeoutMs = -1;
+   mReceiveTimeoutMs = -1;
    SetReconfigureFpga(1);
    sleep_ms(1000);
 }
@@ -1236,14 +1233,15 @@ void WDB::SetDacBiasV(float v)
    SetDac0ChH(d);
 }
 
-void WDB::SetTriggerFallingEdge(unsigned int value)
+void WDB::SetLeadTrailEdgeSel(unsigned int value)
 {
-   //## SetRegMask(WD2_TRIGGER_FALLING_EDGE_REG, 0x80000000, 31, value);
+   // 0: leading edge, 1: trailing edge
+   SetRegMask(WD2_LEAD_TRAIL_EDGE_SEL_REG, WD2_LEAD_TRAIL_EDGE_SEL_MASK, WD2_LEAD_TRAIL_EDGE_SEL_OFS, value);
 }
 
-unsigned int WDB::GetTriggerFallingEdge()
+unsigned int WDB::GetLeadTrailEdgeSel()
 {
-   return 0; //## BitExtractControl(WD2_TRIGGER_FALLING_EDGE_REG, 0x80000000, 31);;
+   return BitExtractControl(WD2_LEAD_TRAIL_EDGE_SEL_REG, WD2_LEAD_TRAIL_EDGE_SEL_MASK, WD2_LEAD_TRAIL_EDGE_SEL_OFS);
 }
 
 float WDB::GetDacTriggerLevelV(int chn)
@@ -1583,13 +1581,13 @@ unsigned int WDB::GetTriggerDelayNs()
 {
    auto v = GetTriggerDelay();
    
-   v = (unsigned int)(v / 255.0 * 450 + 0.5);
+   v = (unsigned int)(v * 6.25 + 0.5);
    return v;
 }
 
 void WDB::SetTriggerDelayNs(unsigned int ns)
 {
-   unsigned int v = (unsigned int)(ns / 450.0 * 255 + 0.5);
+   unsigned int v = (unsigned int)(ns / 6.25 + 0.5);
    if (v > 255)
       v = 255;
    SetTriggerDelay(v);
@@ -1661,6 +1659,7 @@ bool WDB::LoadTimeCalibration(int freq, std::string path)
 void WDEvent::SetEventHeaderInfo(WD2_FRAME_HEADER *ph)
 {
    int channel = ph->channel_info & 0x1F;
+   mValid   = true;
    mBoardId = ph->serial_number;
    mCrateId = ph->crate_id;
    mSlotId  = ph->slot_id;
@@ -1718,7 +1717,6 @@ WP::WP(std::vector<WDB *> w, int verbose, std::string logfile, bool demo)
    mTimeCalib1 = false;
    mTimeCalib2 = false;
    mTimeCalib3 = false;
-   mRemoveSpikes = false;
    
    mWDReceivedEvents = 0;
    
@@ -1841,6 +1839,20 @@ bool WP::RequestEvent(WDB *b, int timeout, WDEvent &event)
 
 //--------------------------------------------------------------------
 
+bool WP::WaitNewEvent(int timeout)
+{
+   // wait for new event with timeout
+   {
+   std::unique_lock<std::mutex> lock(mEventMutex);
+   if (!(mEventCV.wait_for(lock, std::chrono::milliseconds(timeout), [this](){return mEventNew;})))
+      return false;
+   }
+   
+   return true;
+}
+
+//--------------------------------------------------------------------
+
 bool WP::GetLastEvent(WDB *b, int timeout, WDEvent& event)
 {
    // wait for new event with timeout
@@ -1879,14 +1891,29 @@ bool WP::GetLastEvent(int timeout, std::vector<WDEvent *> event)
       return false;
    }
    }
+
+   auto startTime = std::chrono::high_resolution_clock::now();
    
    {
       std::lock_guard<std::mutex> lock(mEventAccessMutex);
+      int copied = 0;
       
       std::vector<WDEvent*>::iterator ed = event.begin();
-      for (auto es: mEventLast)
-         **(ed++) = *es;
+      for (auto es: mEventLast) {
+         if (es->mValid){
+            **(ed) = *es;
+            copied++;
+         } else {
+            (*ed)->mValid = false;
+         }
+         ed++;
+      }
       mEventNew = false;
+      if (mLogfile != "") {
+         std::ofstream f;
+         f.open(mLogfile, std::ios_base::app);
+         f << "Fully copied event " << usSince(startTime)<<" us with "<< copied <<" boards" << std::endl;
+      }
       return true;
    }
 }
@@ -1902,6 +1929,9 @@ void WP::InvalidateAllWf()
          er->SetWfValid(i, 2, false);
          er->SetDrsTriggerCell(i, -1);
       }
+   }
+   for (auto &e: mEvent) {
+      e->mValid = false;
    }
    
    mPacketsReceived = 0;
@@ -2210,6 +2240,8 @@ void WP::UnrotateWaveforms()
       auto ev = (*it);
       if (ev->mWFTypeADC)
          continue;
+      if (!ev->mValid)
+         continue;
       
       float wf[WD_N_CHANNELS][1024];
       
@@ -2368,7 +2400,8 @@ void WP::CalibrateWaveforms(std::vector<WDEvent *> event)
 {
    for (auto it = event.begin() ; it != event.end() ; it++) {
       WDEvent *ev = (*it);
-      CalibrateWaveforms(ev);
+      if (ev->mValid)
+         CalibrateWaveforms(ev);
    }
 
 }
@@ -2482,12 +2515,6 @@ void WP::CalibrateWaveforms(WDEvent* ev)
          }
       };
       
-      // remove spikes
-      if (mRemoveSpikes) {
-         RemoveSpikes(ev->mTriggerCellDrs0, ev->mWfU);
-         RemoveSpikes(ev->mTriggerCellDrs1, ev->mWfU+WD_N_CHANNELS/2);
-      };
-      
       // calculate calibrated time for each event
       bValid = (ev->mSamplingFrequency == wdb->mTCalib.GetSamplingFrequency() &&
                 wdb->mTCalib.IsValid());
@@ -2554,31 +2581,33 @@ void WP::CalibrateWaveforms(WDEvent* ev)
                   continue;
                
                double tl = wdb->GetDacTriggerLevelV(c);
-               if (wdb->GetTriggerFallingEdge()) {
-                  if ((GetEventRequestMask(ev->mBoardId) & (1 << c)) > 0) {
-                     // falling edge
-                     if (ev->mWfU[c][i] > tl && ev->mWfU[c][i+1] <= tl) {
-                        double t0 = ev->mWfT[c][i] +
-                        (ev->mWfT[c][i+1]-ev->mWfT[c][i])*(tl-ev->mWfU[c][i])/(ev->mWfU[c][i+1]-ev->mWfU[c][i]);
-                        double dt = t0 - (1024*1E-6/wdb->GetDrsSampleFreqMhz() - 30E-9 - wdb->GetTriggerDelayNs() * 1E-9);
-                        if (fabs(dt) < fabs(dt_min))
-                           dt_min = dt;
-                        bFound = true;
-                     }
-                  }
+               
+               // try to figure out if we trigger on rising or falling edge
+               bool rising = ((wdb->GetLeadTrailEdgeSel() == 0) &&
+                               ((wdb->GetTrgSrcPolarity() & (1 << c)) == 0)) ||
+                             ((wdb->GetLeadTrailEdgeSel() == 1) &&
+                               ((wdb->GetTrgSrcPolarity() & (1 << c)) > 0));
+               bool bEdge = false;
+               if (rising) {
+                  if (ev->mWfU[c][i] < tl && ev->mWfU[c][i+1] >= tl)
+                     bEdge = true;
                } else {
-                  // rising edge
-                  if (ev->mWfU[c][i] < tl && ev->mWfU[c][i+1] >= tl) {
-                     double t0 = ev->mWfT[c][i] +
-                     (ev->mWfT[c][i+1]-ev->mWfT[c][i])*(tl-ev->mWfU[c][i])/(ev->mWfU[c][i+1]-ev->mWfU[c][i]);
-                     double dt = t0 - (1024*1E-6/wdb->GetDrsSampleFreqMhz() - 30E-9 - wdb->GetTriggerDelayNs() * 1E-9);
-                     if (fabs(dt) < fabs(dt_min))
-                        dt_min = dt;
+                  if (ev->mWfU[c][i] > tl && ev->mWfU[c][i+1] <= tl)
+                     bEdge = true;
+               }
+               
+               if (bEdge) {
+                  double t0 = ev->mWfT[c][i] +
+                              (ev->mWfT[c][i+1]-ev->mWfT[c][i])*(tl-ev->mWfU[c][i])/(ev->mWfU[c][i+1]-ev->mWfU[c][i]);
+                  double iofs = 95 - (wdb->GetDrsSampleFreqMhz()/1000 - 1)*5;
+                  double dt = t0 - (1024*1E-6/wdb->GetDrsSampleFreqMhz() - iofs*1E-9 - wdb->GetTriggerDelayNs() * 1E-9);
+                  if (fabs(dt) < fabs(dt_min))
+                     dt_min = dt;
                      bFound = true;
                   }
                }
             }
-         }
+
          if (bFound) {
             for (int i=0 ; i<WD_N_CHANNELS ; i++)
                for (int j=0 ; j<1024 ; j++)
@@ -2937,8 +2966,15 @@ void WP::Collector()
             auto es = mEvent.begin();
             auto ed = mEventLast.begin();
       
-            while (es != mEvent.end())
-               **(ed++) = **(es++);
+            while (es != mEvent.end()) {
+               if ((*es)->mValid){
+                 **(ed) = **(es);
+               } else {
+                 (*ed)->mValid = false;
+               }
+               es++;
+               ed++;
+            }
       
             mEventNew = true;
          }
@@ -2948,6 +2984,13 @@ void WP::Collector()
          // debug output
          if (mVerbose >= 2)
             std::cout << "Ready to be read WD event. (time = "<< usSince(mEventStartTime) << "us)" << std::endl;
+
+         if (mLogfile != "") {
+            std::ofstream f;
+            f.open(mLogfile, std::ios_base::app);
+            f << "Ready to be read WD event. (time = "<< usSince(mEventStartTime) << "us)" << std::endl;
+            f << "===============================================================================================" << std::endl;
+         }
          
       } else {
          {
@@ -3003,7 +3046,6 @@ void WP::DoCalibrationVoltageStep()
       mOfsCalib2           = false;
       mGainCalib           = false;
       mRangeCalib          = false;
-      mRemoveSpikes        = false;
       
       // turn on power for calibration input (needed for clock channels)
       b->SetCalibBufferEn(true);
@@ -3192,7 +3234,6 @@ void WP::DoCalibrationVoltageStep()
    mOfsCalib2      = true;
    mGainCalib      = true;
    mRangeCalib     = false;
-   mRemoveSpikes   = false;
 
    // measure offset at different ranges
    
@@ -3328,7 +3369,6 @@ void WP::DoCalibrationVoltageStep()
       calibProg.mode  = cCmNone;
       
       mRangeCalib     = true;
-      mRemoveSpikes   = true;
    }
    
    return;
@@ -3598,7 +3638,6 @@ void WP::DoCalibrationTimeStep()
       mOfsCalib2            = true;
       mGainCalib            = true;
       mRangeCalib           = true;
-      mRemoveSpikes         = true;
 
       mTimeCalib1           = false;
       mTimeCalib2           = false;

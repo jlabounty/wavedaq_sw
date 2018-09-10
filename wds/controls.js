@@ -287,6 +287,70 @@ Controls.prototype.init = function () // scan DOM
          ctx.fill();
       }
 
+      if (this.ctrlButton[i].dataset.icon == "edgelead") {
+         cvs.width = 36;
+         cvs.height = 36;
+         ctx = cvs.getContext("2d");
+         ctx.fillStyle = "#E0E0E0";
+         ctx.fillRect(0, 0, 36, 36);
+         ctx.strokeStyle = "#808080";
+         ctx.fillStyle = "#808080";
+         ctx.lineWidth = 2;
+         ctx.beginPath();
+         ctx.moveTo(3, 18);
+         ctx.lineTo(10, 18);
+         ctx.lineTo(10, 5);
+         ctx.lineTo(26, 5);
+         ctx.lineTo(26, 18);
+         ctx.lineTo(33, 18);
+         ctx.stroke();
+         ctx.beginPath();
+         ctx.lineTo(10, 18);
+         ctx.lineTo(10, 31);
+         ctx.lineTo(26, 31);
+         ctx.lineTo(26, 18);
+         ctx.stroke();
+         ctx.beginPath();
+         ctx.moveTo(13, 18);
+         ctx.lineTo(20, 11);
+         ctx.lineTo(20, 25);
+         ctx.lineTo(13, 18);
+         ctx.closePath();
+         ctx.fill();
+      }
+
+      if (this.ctrlButton[i].dataset.icon == "edgetrail") {
+         cvs.width = 36;
+         cvs.height = 36;
+         ctx = cvs.getContext("2d");
+         ctx.fillStyle = "#E0E0E0";
+         ctx.fillRect(0, 0, 36, 36);
+         ctx.strokeStyle = "#808080";
+         ctx.fillStyle = "#808080";
+         ctx.lineWidth = 2;
+         ctx.beginPath();
+         ctx.moveTo(3, 18);
+         ctx.lineTo(10, 18);
+         ctx.lineTo(10, 5);
+         ctx.lineTo(26, 5);
+         ctx.lineTo(26, 18);
+         ctx.lineTo(33, 18);
+         ctx.stroke();
+         ctx.beginPath();
+         ctx.lineTo(10, 18);
+         ctx.lineTo(10, 31);
+         ctx.lineTo(26, 31);
+         ctx.lineTo(26, 18);
+         ctx.stroke();
+         ctx.beginPath();
+         ctx.moveTo(23, 18);
+         ctx.lineTo(16, 11);
+         ctx.lineTo(16, 25);
+         ctx.lineTo(23, 18);
+         ctx.closePath();
+         ctx.fill();
+      }
+
    }
 
    // ctrlVSlider

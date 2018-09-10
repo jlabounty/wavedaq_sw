@@ -23,7 +23,7 @@ LIBS    = -framework IOKit -framework CoreFoundation -lobjc
 endif
 
 CFLAGS += -I. -I../lib -I../../firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/common/src/
-
+CFLAGS += -D WD2_DONT_INCLUDE_REG_ACCESS_VARS
 # search *.c and *.cpp files
 C_FILES = $(wildcard *.c)
 CPP_FILES = $(wildcard *.cpp)

@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  07.06.2018 09:02:27
+// Created :  07.09.2018 15:05:04
 //
 
 
@@ -2552,11 +2552,12 @@ public:
    // 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane)
    // 0x4 = Sync Signal from Backplane (direct, active high)
    // 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low)
-   // 0x6 = Busy Local (active high)
-   // 0x7 = Busy from Backplane (active high)
-   // 0x8 = LMK Reference Clock (LMK input clock)
-   // 0x9 = ADC Sampling Clock
-   // 0xA = Divided Data Clock (phase shifted)
+   // 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high)
+   // 0x7 = Busy Local (active high)
+   // 0x8 = Busy from Backplane (active high)
+   // 0x9 = LMK Reference Clock (LMK input clock) 
+   // 0xA = ADC Sampling Clock 
+   // 0xB = Divided Data Clock (phase shifted)
    unsigned int GetMcxRxSigSel() { return BitExtractControl(WD2_MCX_RX_SIG_SEL_REG, WD2_MCX_RX_SIG_SEL_MASK, WD2_MCX_RX_SIG_SEL_OFS); };
    void         SetMcxRxSigSel(unsigned int value) { SetRegMask(WD2_MCX_RX_SIG_SEL_REG, WD2_MCX_RX_SIG_SEL_MASK, WD2_MCX_RX_SIG_SEL_OFS, value); };
 
@@ -2589,7 +2590,7 @@ public:
 
 
 
-   ////// ------ Status Register 1 [0x0004]: REG_LAYOUT_VER - Register map layout version information (Default: 0x00060006) ------ //////
+   ////// ------ Status Register 1 [0x0004]: REG_LAYOUT_VER - Register map layout version information (Default: 0x00070007) ------ //////
 
    // 0xFFFF0000: REG_LAYOUT_COMP_LEVEL - Register map layout compatibility level
    unsigned int GetRegLayoutCompLevel() { return BitExtractStatus(WD2_REG_LAYOUT_COMP_LEVEL_REG, WD2_REG_LAYOUT_COMP_LEVEL_MASK, WD2_REG_LAYOUT_COMP_LEVEL_OFS); };
@@ -2612,7 +2613,7 @@ public:
 
 
 
-   ////// ------ Status Register 3 [0x000C]: FW_BUILD_TIME - Time when the firmware was built and compatibility level (Default: 0x02000000) ------ //////
+   ////// ------ Status Register 3 [0x000C]: FW_BUILD_TIME - Time when the firmware was built and compatibility level (Default: 0x03000000) ------ //////
 
    // 0xFF000000: FW_COMPAT_LEVEL - Firmware compatibility level
    unsigned int GetFwCompatLevel() { return BitExtractStatus(WD2_FW_COMPAT_LEVEL_REG, WD2_FW_COMPAT_LEVEL_MASK, WD2_FW_COMPAT_LEVEL_OFS); };
@@ -3502,103 +3503,6 @@ public:
 
    // 0x0000000F: LMK_15_MOD - LMK Register 15 modified flags
    unsigned int GetLmk15Mod() { return BitExtractStatus(WD2_LMK_15_MOD_REG, WD2_LMK_15_MOD_MASK, WD2_LMK_15_MOD_OFS); };
-
-
-
-   ////// ------ Status Register 89 [0x0164]: ADC_MOD_FLAG - Set if ADC registers are modified (Default: 0x00000000) ------ //////
-
-   // 0x0F000000: ADC_CFG_IND_TX_MOD - ADC configuration, index and transfer register modified flags
-   unsigned int GetAdcCfgIndTxMod() { return BitExtractStatus(WD2_ADC_CFG_IND_TX_MOD_REG, WD2_ADC_CFG_IND_TX_MOD_MASK, WD2_ADC_CFG_IND_TX_MOD_OFS); };
-
-   // 0x00F00000: ADC_PM_CLK_ENH_MOD - ADC power mode, clock and enhancement register modified flags
-   unsigned int GetAdcPmClkEnhMod() { return BitExtractStatus(WD2_ADC_PM_CLK_ENH_MOD_REG, WD2_ADC_PM_CLK_ENH_MOD_MASK, WD2_ADC_PM_CLK_ENH_MOD_OFS); };
-
-   // 0x000F0000: ADC_TEST_OFFS_OM_MOD - ADC test mode, offset adjust and output mode register modified flags
-   unsigned int GetAdcTestOffsOmMod() { return BitExtractStatus(WD2_ADC_TEST_OFFS_OM_MOD_REG, WD2_ADC_TEST_OFFS_OM_MOD_MASK, WD2_ADC_TEST_OFFS_OM_MOD_OFS); };
-
-   // 0x0000F000: ADC_OUT_VREF_MOD - ADC output and Vref register modified flags
-   unsigned int GetAdcOutVrefMod() { return BitExtractStatus(WD2_ADC_OUT_VREF_MOD_REG, WD2_ADC_OUT_VREF_MOD_MASK, WD2_ADC_OUT_VREF_MOD_OFS); };
-
-   // 0x00000F00: ADC_USR_PATT_MOD - ADC user pattern register modified flags
-   unsigned int GetAdcUsrPattMod() { return BitExtractStatus(WD2_ADC_USR_PATT_MOD_REG, WD2_ADC_USR_PATT_MOD_MASK, WD2_ADC_USR_PATT_MOD_OFS); };
-
-   // 0x000000F0: ADC_SER_RES_SR_MOD - ADC serial control and resolution/sample rate register modified flags
-   unsigned int GetAdcSerResSrMod() { return BitExtractStatus(WD2_ADC_SER_RES_SR_MOD_REG, WD2_ADC_SER_RES_SR_MOD_MASK, WD2_ADC_SER_RES_SR_MOD_OFS); };
-
-   // 0x0000000F: ADC_USR_IO_SYNC_MOD - ADC user io and sync register modified flags
-   unsigned int GetAdcUsrIoSyncMod() { return BitExtractStatus(WD2_ADC_USR_IO_SYNC_MOD_REG, WD2_ADC_USR_IO_SYNC_MOD_MASK, WD2_ADC_USR_IO_SYNC_MOD_OFS); };
-
-
-
-   ////// ------ Status Register 90 [0x0168]: ADC_0_CH_MOD_FLAG - Set if ADC 0 (A) Channel registers are modified (Default: 0x00000000) ------ //////
-
-   // 0xF0000000: ADC_0_CH_A_MOD - ADC 0 (A) Channel A register modified flags
-   unsigned int GetAdc0ChAMod() { return BitExtractStatus(WD2_ADC_0_CH_A_MOD_REG, WD2_ADC_0_CH_A_MOD_MASK, WD2_ADC_0_CH_A_MOD_OFS); };
-
-   // 0x0F000000: ADC_0_CH_B_MOD - ADC 0 (A) Channel B register modified flags
-   unsigned int GetAdc0ChBMod() { return BitExtractStatus(WD2_ADC_0_CH_B_MOD_REG, WD2_ADC_0_CH_B_MOD_MASK, WD2_ADC_0_CH_B_MOD_OFS); };
-
-   // 0x00F00000: ADC_0_CH_C_MOD - ADC 0 (A) Channel C register modified flags
-   unsigned int GetAdc0ChCMod() { return BitExtractStatus(WD2_ADC_0_CH_C_MOD_REG, WD2_ADC_0_CH_C_MOD_MASK, WD2_ADC_0_CH_C_MOD_OFS); };
-
-   // 0x000F0000: ADC_0_CH_D_MOD - ADC 0 (A) Channel D register modified flags
-   unsigned int GetAdc0ChDMod() { return BitExtractStatus(WD2_ADC_0_CH_D_MOD_REG, WD2_ADC_0_CH_D_MOD_MASK, WD2_ADC_0_CH_D_MOD_OFS); };
-
-   // 0x0000F000: ADC_0_CH_E_MOD - ADC 0 (A) Channel E register modified flags
-   unsigned int GetAdc0ChEMod() { return BitExtractStatus(WD2_ADC_0_CH_E_MOD_REG, WD2_ADC_0_CH_E_MOD_MASK, WD2_ADC_0_CH_E_MOD_OFS); };
-
-   // 0x00000F00: ADC_0_CH_F_MOD - ADC 0 (A) Channel F register modified flags
-   unsigned int GetAdc0ChFMod() { return BitExtractStatus(WD2_ADC_0_CH_F_MOD_REG, WD2_ADC_0_CH_F_MOD_MASK, WD2_ADC_0_CH_F_MOD_OFS); };
-
-   // 0x000000F0: ADC_0_CH_G_MOD - ADC 0 (A) Channel G register modified flags
-   unsigned int GetAdc0ChGMod() { return BitExtractStatus(WD2_ADC_0_CH_G_MOD_REG, WD2_ADC_0_CH_G_MOD_MASK, WD2_ADC_0_CH_G_MOD_OFS); };
-
-   // 0x0000000F: ADC_0_CH_H_MOD - ADC 0 (A) Channel H register modified flags
-   unsigned int GetAdc0ChHMod() { return BitExtractStatus(WD2_ADC_0_CH_H_MOD_REG, WD2_ADC_0_CH_H_MOD_MASK, WD2_ADC_0_CH_H_MOD_OFS); };
-
-
-
-   ////// ------ Status Register 91 [0x016C]: ADC_1_CH_MOD_FLAG - Set if ADC 1 (B) Channel registers are modified (Default: 0x00000000) ------ //////
-
-   // 0xF0000000: ADC_1_CH_A_MOD - ADC 1 (B) Channel A register modified flags
-   unsigned int GetAdc1ChAMod() { return BitExtractStatus(WD2_ADC_1_CH_A_MOD_REG, WD2_ADC_1_CH_A_MOD_MASK, WD2_ADC_1_CH_A_MOD_OFS); };
-
-   // 0x0F000000: ADC_1_CH_B_MOD - ADC 1 (B) Channel B register modified flags
-   unsigned int GetAdc1ChBMod() { return BitExtractStatus(WD2_ADC_1_CH_B_MOD_REG, WD2_ADC_1_CH_B_MOD_MASK, WD2_ADC_1_CH_B_MOD_OFS); };
-
-   // 0x00F00000: ADC_1_CH_C_MOD - ADC 1 (B) Channel C register modified flags
-   unsigned int GetAdc1ChCMod() { return BitExtractStatus(WD2_ADC_1_CH_C_MOD_REG, WD2_ADC_1_CH_C_MOD_MASK, WD2_ADC_1_CH_C_MOD_OFS); };
-
-   // 0x000F0000: ADC_1_CH_D_MOD - ADC 1 (B) Channel D register modified flags
-   unsigned int GetAdc1ChDMod() { return BitExtractStatus(WD2_ADC_1_CH_D_MOD_REG, WD2_ADC_1_CH_D_MOD_MASK, WD2_ADC_1_CH_D_MOD_OFS); };
-
-   // 0x0000F000: ADC_1_CH_E_MOD - ADC 1 (B) Channel E register modified flags
-   unsigned int GetAdc1ChEMod() { return BitExtractStatus(WD2_ADC_1_CH_E_MOD_REG, WD2_ADC_1_CH_E_MOD_MASK, WD2_ADC_1_CH_E_MOD_OFS); };
-
-   // 0x00000F00: ADC_1_CH_F_MOD - ADC 1 (B) Channel F register modified flags
-   unsigned int GetAdc1ChFMod() { return BitExtractStatus(WD2_ADC_1_CH_F_MOD_REG, WD2_ADC_1_CH_F_MOD_MASK, WD2_ADC_1_CH_F_MOD_OFS); };
-
-   // 0x000000F0: ADC_1_CH_G_MOD - ADC 1 (B) Channel G register modified flags
-   unsigned int GetAdc1ChGMod() { return BitExtractStatus(WD2_ADC_1_CH_G_MOD_REG, WD2_ADC_1_CH_G_MOD_MASK, WD2_ADC_1_CH_G_MOD_OFS); };
-
-   // 0x0000000F: ADC_1_CH_H_MOD - ADC 1 (B) Channel H register modified flags
-   unsigned int GetAdc1ChHMod() { return BitExtractStatus(WD2_ADC_1_CH_H_MOD_REG, WD2_ADC_1_CH_H_MOD_MASK, WD2_ADC_1_CH_H_MOD_OFS); };
-
-
-
-   ////// ------ Status Register 92 [0x0170]: ADC_01_CLK_MOD_FLAG - Set if ADC registers are modified (Default: 0x00000000) ------ //////
-
-   // 0x0000F000: ADC_1_DCO_MOD - ADC 1 (B) DCO Channel register modified flags
-   unsigned int GetAdc1DcoMod() { return BitExtractStatus(WD2_ADC_1_DCO_MOD_REG, WD2_ADC_1_DCO_MOD_MASK, WD2_ADC_1_DCO_MOD_OFS); };
-
-   // 0x00000F00: ADC_0_DCO_MOD - ADC 0 (A) DCO Channel register modified flags
-   unsigned int GetAdc0DcoMod() { return BitExtractStatus(WD2_ADC_0_DCO_MOD_REG, WD2_ADC_0_DCO_MOD_MASK, WD2_ADC_0_DCO_MOD_OFS); };
-
-   // 0x000000F0: ADC_1_FCO_MOD - ADC 1 (B) FCO Channel register modified flags
-   unsigned int GetAdc1FcoMod() { return BitExtractStatus(WD2_ADC_1_FCO_MOD_REG, WD2_ADC_1_FCO_MOD_MASK, WD2_ADC_1_FCO_MOD_OFS); };
-
-   // 0x0000000F: ADC_0_FCO_MOD - ADC 0 (A) FCO Channel register modified flags
-   unsigned int GetAdc0FcoMod() { return BitExtractStatus(WD2_ADC_0_FCO_MOD_REG, WD2_ADC_0_FCO_MOD_MASK, WD2_ADC_0_FCO_MOD_OFS); };
 
 
 };

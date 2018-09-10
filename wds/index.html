@@ -169,10 +169,10 @@
                   </td>
                   <td rowspan=2>
                      &nbsp;&nbsp;
-                     <button name="ctrlButton" data-icon="edgeup" id="trgEdgeUp" type="button"
+                     <button name="ctrlButton" data-icon="edgelead" id="trgEdgeLead" type="button"
                              class="squareButtonCanvas"
                              onClick="btnTedge(1)"></button>
-                     <button name="ctrlButton" data-icon="edgedown" id="trgEdgeDown" type="button"
+                     <button name="ctrlButton" data-icon="edgetrail" id="trgEdgeTrail" type="button"
                              class="squareButtonCanvas"
                              onClick="btnTedge(0)" style="display:none"></button>
                   </td>
@@ -368,10 +368,6 @@
                <tr>
                   <td><input type="checkbox" id="calib4" name="rangeCalib" onClick="setParam(this)"></td>
                   <td>Correct Range Offset</td>
-               </tr>
-               <tr>
-                  <td><input type="checkbox" id="spikes" name="removeSpikes" onClick="setParam(this)"></td>
-                  <td>Remove Spikes</td>
                </tr>
             </table>
             <button class="executeButton" id="btnVCalib" type="button" onClick="btnVcalib()">Execute Voltage

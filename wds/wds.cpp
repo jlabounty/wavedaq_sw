@@ -161,10 +161,6 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          gl->wp->SetRangeCalib(value == "true");
       }
 
-      else if (item == "removeSpikes") {
-         gl->wp->SetRemoveSpikes(value == "true");
-      }
-
       else if (item == "timeCalib1") {
          gl->wp->SetTimeCalib1(value == "true");
       }
@@ -219,12 +215,12 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             gl->wdb[iBoard]->SetTriggerDelayNs(std::stoi(value));
       }
 
-      else if (item == "triggerFallingEdge") {
+      else if (item == "triggerLeadTrailEdgeSel") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
-               b->SetTriggerFallingEdge(value == "true");
+               b->SetLeadTrailEdgeSel(std::stoi(value));
          else
-            gl->wdb[iBoard]->SetTriggerFallingEdge(value == "true");
+            gl->wdb[iBoard]->SetLeadTrailEdgeSel(std::stoi(value));
       }
 
       else if (item == "triggerSrcPolarity") {
@@ -437,8 +433,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "      \"rangeCalib\": %s,\n",                    gl->wp->IsRangeCalib() ? "true" : "false");
       mg_printf_http_chunk(nc, "      \"timeCalib1\": %s,\n",                    gl->wp->IsTimeCalib1() ? "true" : "false");
       mg_printf_http_chunk(nc, "      \"timeCalib2\": %s,\n",                    gl->wp->IsTimeCalib2() ? "true" : "false");
-      mg_printf_http_chunk(nc, "      \"timeCalib3\": %s,\n",                    gl->wp->IsTimeCalib3() ? "true" : "false");
-      mg_printf_http_chunk(nc, "      \"removeSpikes\": %s\n",                   gl->wp->IsRemoveSpikes() ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"timeCalib3\": %s\n",                    gl->wp->IsTimeCalib3() ? "true" : "false");
       mg_printf_http_chunk(nc, "   }\n");
       mg_printf_http_chunk(nc, "}\n");
       mg_send_http_chunk(nc, "", 0); // end of response
@@ -560,6 +555,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "        %d ],\n",                             w->GetFeMux(15));
 
          mg_printf_http_chunk(nc, "      \"triggerMode\": %d,\n",                gl->triggerMode);
+         mg_printf_http_chunk(nc, "      \"triggerLeadTrailEdgeSel\": %d,\n",    w->GetLeadTrailEdgeSel());
          mg_printf_http_chunk(nc, "      \"triggerExtTriggerOutEnable\": %s,\n", w->GetExtTriggerOutEnable() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"triggerSource\": %d,\n",              w->GetTriggerTypeSel() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"triggerOutPulseLength\": %d,\n",      w->GetTriggerOutPulseLength());
@@ -1067,7 +1063,6 @@ int main(int argc, const char * argv[])
       gl.wp->SetOfsCalib2(true);
       gl.wp->SetGainCalib(true);
       gl.wp->SetRangeCalib(true);
-      gl.wp->SetRemoveSpikes(true);
    }
    if (gl.wdb[0]->mTCalib.IsValid()) {
       gl.wp->SetTimeCalib1(true);

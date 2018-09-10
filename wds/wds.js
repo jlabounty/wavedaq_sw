@@ -246,7 +246,7 @@ function populateControls(init) {
    }
 
    if (document.getElementById("inpTriggerDelay") != document.activeElement) {
-      document.getElementById("sldTriggerDelay").set(1 - OSC.wdb[OSC.curBoard].triggerDelay / 450);
+      document.getElementById("sldTriggerDelay").set(1 - OSC.wdb[OSC.curBoard].triggerDelay / 1600);
       document.getElementById("inpTriggerDelay").value = Math.round(OSC.wdb[OSC.curBoard].triggerDelay);
    }
    if (OSC.wdb[OSC.curBoard].triggerMode == 1) {
@@ -265,12 +265,12 @@ function populateControls(init) {
       document.getElementById("rbTriggerSourceExt").checked = true;
    }
 
-   if (OSC.wdb[OSC.curBoard].triggerFallingEdge) {
-      document.getElementById("trgEdgeUp").style.display = "none";
-      document.getElementById("trgEdgeDown").style.display = "inline";
+   if (OSC.wdb[OSC.curBoard].triggerLeadTrailEdgeSel) {
+      document.getElementById("trgEdgeLead").style.display = "none";
+      document.getElementById("trgEdgeTrail").style.display = "inline";
    } else {
-      document.getElementById("trgEdgeUp").style.display = "inline";
-      document.getElementById("trgEdgeDown").style.display = "none";
+      document.getElementById("trgEdgeLead").style.display = "inline";
+      document.getElementById("trgEdgeTrail").style.display = "none";
    }
 
    document.getElementById("cbPzc").checked = OSC.wdb[OSC.curBoard].fePzc[0];
@@ -308,7 +308,6 @@ function populateControls(init) {
    document.getElementById("calib2").checked = OSC.wp.ofsCalib2;
    document.getElementById("calib3").checked = OSC.wp.gainCalib;
    document.getElementById("calib4").checked = OSC.wp.rangeCalib;
-   document.getElementById("spikes").checked = OSC.wp.removeSpikes;
    document.getElementById("rotate").checked = OSC.wp.rotateWaveform;
 
    document.getElementById("tcalib1").checked = OSC.wp.timeCalib1;
@@ -465,6 +464,7 @@ function readWdb(b, init) {
                "feGain": new Array(16).fill(0),
                "feMux": new Array(16).fill(0),
                "triggerMode": 2,
+               "triggerLeadTrailEdgeSel": 0,
                "triggerExtTriggerOutEnable": false,
                "triggerSource": 220152992,
                "triggerOutPulseLength": 0,
@@ -691,9 +691,9 @@ function validateParam(input, channel) {
    if (input.id == "inpTriggerDelay") {
       if (input.value < 0)
          input.value = 0;
-      if (input.value > 450)
-         input.value = 450;
-      document.getElementById("sldTriggerDelay").set(1 - input.value / 450);
+      if (input.value > 1600)
+         input.value = 1600;
+      document.getElementById("sldTriggerDelay").set(1 - input.value / 1600);
    }
 
    if (input.id == "drsSampleFreq") {
@@ -1387,7 +1387,7 @@ function sldDacTriggerLevel(value) {
 function sldTriggerDelay(value) {
    if (OSC.demoMode)
       return;
-   var del = 450 - Math.round(value * 450);
+   var del = 1600 - Math.round(value * 1600);
 
    OSC.wdb[OSC.curBoard].triggerDelay = del;
    document.getElementById("inpTriggerDelay").value = del;
@@ -1403,19 +1403,19 @@ function btnTedge(value) {
       return;
 
    var e = {};
-   e.name = "triggerFallingEdge";
-   e.value = (value == 1);
+   e.name = "triggerLeadTrailEdgeSel";
+   e.value = value;
    setParam(e);
 
    for (var i=0 ; i<18 ; i++)
       triggerSendCell(i);
 
    if (value == 1) {
-      document.getElementById('trgEdgeUp').style.display = "none";
-      document.getElementById('trgEdgeDown').style.display = "inline";
+      document.getElementById('trgEdgeLead').style.display = "none";
+      document.getElementById('trgEdgeTrail').style.display = "inline";
    } else {
-      document.getElementById('trgEdgeUp').style.display = "inline";
-      document.getElementById('trgEdgeDown').style.display = "none";
+      document.getElementById('trgEdgeLead').style.display = "inline";
+      document.getElementById('trgEdgeTrail').style.display = "none";
    }
 }
 

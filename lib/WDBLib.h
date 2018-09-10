@@ -99,7 +99,7 @@ public:
    VCALIB();
    void SetValid(bool f) { bValid = f; }
    bool IsValid() { return bValid; }
-   int  GetSamplingFrequency() { return mCalib.sampling_frequency; }
+   unsigned int GetSamplingFrequency() { return mCalib.sampling_frequency; }
    void save(WDB *b, std::string filename);
    void load(WDB *b, std::string filename);
 };
@@ -124,7 +124,7 @@ public:
    TCALIB();
    void SetValid(bool f) { bValid = f; }
    bool IsValid() { return bValid; }
-   int  GetSamplingFrequency() { return mCalib.sampling_frequency; }
+   unsigned int GetSamplingFrequency() { return mCalib.sampling_frequency; }
    void save(WDB *b, std::string filename);
    void load(WDB *b, std::string filename);
 };
@@ -154,6 +154,7 @@ typedef struct {
 class WDEvent {
 public:
    
+   bool             mValid;
    unsigned short   mBoardId;
    unsigned short   mCrateId;
    unsigned short   mSlotId;
@@ -176,7 +177,7 @@ public:
    bool             mVCalibrated;
    bool             mTCalibrated;
    
-   WDEvent(int boardId) { mBoardId = boardId; };
+   WDEvent(int boardId) { mBoardId = boardId; mValid = false; };
 
    void             SetEventHeaderInfo(WD2_FRAME_HEADER *);
 };
@@ -308,7 +309,6 @@ class WP {
    bool              mTimeCalib1;
    bool              mTimeCalib2;
    bool              mTimeCalib3;
-   bool              mRemoveSpikes;
    
    int               mPacketsReceived;
    int               mCurrentEvent;
@@ -388,7 +388,6 @@ public:
    bool IsTimeCalib1() { return mTimeCalib1;}
    bool IsTimeCalib2() { return mTimeCalib2;}
    bool IsTimeCalib3() { return mTimeCalib3;}
-   bool IsRemoveSpikes() { return mRemoveSpikes; }
 
    void SetRotateWaveform(bool f) { mRotateWaveform = f; }
    void SetCalibrateWaveform(bool f) { mCalibrateWaveform = f; }
@@ -399,7 +398,6 @@ public:
    void SetTimeCalib1(bool f) { mTimeCalib1 = f; }
    void SetTimeCalib2(bool f) { mTimeCalib2 = f; }
    void SetTimeCalib3(bool f) { mTimeCalib3 = f; }
-   void SetRemoveSpikes(bool f) { mRemoveSpikes = f; }
    void SetAllCalib(bool f) {
       mOfsCalib1 = f; mOfsCalib2 = f; mGainCalib = f; mRangeCalib = f;
       mTimeCalib1 = f; mTimeCalib2 = f; mTimeCalib3 = f;
@@ -423,6 +421,7 @@ public:
    WDB* GetBoard(int board_id);
    unsigned int GetEventRequestMask(int board_id);
    
+   bool WaitNewEvent(int timeout);
    bool GetLastEvent(WDB* b, int timeout, WDEvent& event);
    bool GetLastEvent(int timeout, std::vector<WDEvent *> event);
    bool RequestEvent(WDB* b, int timeout, WDEvent& event);
@@ -465,7 +464,6 @@ class WDB: public WDBREG {
    std::string      mLogfile;
    bool             mDemoMode;
    bool             mSendBlocked;
-   int              mSendTimeoutMs;
    int              mReceiveTimeoutMs;
    unsigned int     mChnTxEn;
 
@@ -477,8 +475,6 @@ class WDB: public WDBREG {
    static unsigned short udpSequenceNumber;
 
    void             BlockSend(bool flag) { mSendBlocked = flag; }
-   int              GetSendTimeoutMs() { return mSendTimeoutMs; };
-   void             SetSendTimeoutMs(int to) { mSendTimeoutMs = to; };
    int              GetReceiveTimeoutMs() { return mReceiveTimeoutMs; };
    void             SetReceiveTimeoutMs(int to) { mReceiveTimeoutMs = to; };
 
@@ -493,9 +489,8 @@ public:
    // constructor
    WDB(std::string name, int verbose = 0);
 
-   const unsigned int cRequiredRegLayoutCompatLevel = 6;
-   const unsigned int cRequiredFwCompatLevel = 2;
-   const int cDefaultSendTimeoutMs = 100;
+   const unsigned int cRequiredRegLayoutCompatLevel = 7;
+   const unsigned int cRequiredFwCompatLevel = 3;
    const int cDefaultReceiveTimeoutMs = 100;
 
    // constants
@@ -646,6 +641,9 @@ public:
    unsigned int GetTrgStatePtrn(int i);
    void SetTrgStatePtrn(int i, unsigned int value);
 
+   unsigned int GetLeadTrailEdgeSel();
+   void SetLeadTrailEdgeSel(unsigned int value);
+
    // high level methods ----------
    unsigned int GetTriggerDelayNs();
    void SetTriggerDelayNs(unsigned int ns);
@@ -660,9 +658,6 @@ public:
    bool LoadVoltageCalibration(int freq, std::string path="");
    void SaveTimeCalibration(int freq);
    bool LoadTimeCalibration(int freq, std::string path="");
-   
-   unsigned int GetTriggerFallingEdge();
-   void SetTriggerFallingEdge(unsigned int value);
    
    unsigned int GetChnTxEn() { return mChnTxEn; };
    void SetChnTxEn(int mask) { mChnTxEn = mask; };

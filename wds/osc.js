@@ -937,7 +937,10 @@ Oscilloscope.prototype.drawMarker = function (ctx) {
    ctx.strokeStyle = 'white';
 
    var t = 1024 / OSC.wdb[OSC.curBoard].drsSampleFreq * 1E-6;
-   t -= (30 + OSC.wdb[OSC.curBoard].triggerDelay) * 1E-9;
+   t -= OSC.wdb[OSC.curBoard].triggerDelay * 1E-9;
+   // internal offset
+   var iofs = 95 - (OSC.wdb[OSC.curBoard].drsSampleFreq/1000 - 1)*5;
+   t -= iofs * 1E-9;
    var xt = this.timeToX(t);
 
    ctx.beginPath();

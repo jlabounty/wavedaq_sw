@@ -225,6 +225,7 @@ class WDWDB : public WDBoard, public WDB{
          SetPatternTriggerSelect(WDB::cTriggerSchemeSimple);*/
          SetTriggerTypeSel(1);
          SetExtTriggerOutEnable(0);
+         SetTriggerOutPulseLength(4);
          SetExtClkInSel(0);
          SetDaqClkSrcSel(0);
          SetLmkInputFreq(80);
@@ -279,8 +280,16 @@ class WDWDB : public WDBoard, public WDB{
          SetDaqNormal(false);
 
          SetSendBlocked(true);
-         SetInterPkgDelay(0x60000);//default interpacket delay for 6 crate
-         //SetInterPacketDelay(stoi(GetProperty("IPD")));
+         //interpacket delay
+         unsigned int interpacket_delay;
+         try{
+            interpacket_delay = stoul(GetProperty("IPD"), 0, 16); 
+         } catch (const std::runtime_error& ex){
+            interpacket_delay = 0;
+         }
+         if(interpacket_delay != 0){
+            SetInterPkgDelay(interpacket_delay);
+         }
 
          //input
          SetFeMux(-1, WDB::cFeMuxInput);
@@ -296,6 +305,7 @@ class WDWDB : public WDBoard, public WDB{
          } else if(gain.size() == 16){
             for(int i=0; i<16; i++) SetFeGain(i, gain[i]);
          }
+
          //PZC
          std::vector<int> pzc;
          try{
@@ -319,6 +329,7 @@ class WDWDB : public WDBoard, public WDB{
                    SetFePzc(pzc[i+1], 1);
                }
          }
+
          //trigger discriminator level
          std::vector<float> trigger_level;
          try{
@@ -328,13 +339,21 @@ class WDWDB : public WDBoard, public WDB{
          }
          if(trigger_level.size() ==1){
             SetDacTriggerLevelV(-1, trigger_level[0]);
-            //SetTriggerShaperEnable(true);
-            //SetTriggerOutPulseLength(4);
          } else if(trigger_level.size() == 16){
-            /*for(int i=0; i<16; i++) SetDacTriggerLevelV(i, trigger_level[i]);
-            SetTriggerShaperEnable(true);
-            SetTriggerOutPulseLength(4);*/
+            for(int i=0; i<16; i++) SetDacTriggerLevelV(i, trigger_level[i]);
          }
+
+         //channel trigger polarity
+         unsigned int channel_polarity;
+         try{
+            channel_polarity = stoul(GetProperty("ChannelPolarity"), 0, 16); 
+         } catch (const std::runtime_error& ex){
+            channel_polarity = -1;
+         }
+         if(channel_polarity != -1){
+            SetTrgSrcPolarity(channel_polarity);
+         }
+
          //Baseline Shift
          float baseline;
          try{
@@ -353,12 +372,11 @@ class WDWDB : public WDBoard, public WDB{
             tx_ena = 0x3FFFF;
          }
          SetDrsChTxEn(tx_ena);
-         SetAdcChTxEn(0);
-         SetTdcChTxEn(0);
+         SetAdcChTxEn(tx_ena);
+         SetTdcChTxEn(tx_ena);
          SetZeroSuprEn(false);
-         SetTrgTxEn(0);
+         SetTrgTxEn(1);
          SetSclTxEn(0);
-
 
          //timing reference
          std::string timingreference;
@@ -419,6 +437,17 @@ class WDWDB : public WDBoard, public WDB{
                      break;
                }
             }
+         }
+
+         //TDC Mask ch
+         unsigned int tdcmask;
+         try{
+            tdcmask = stoul(GetProperty("TriggerTDCMask"), 0, 16);
+         } catch (const std::runtime_error& ex){
+            tdcmask = 65536;
+         }
+         if(tdcmask < 65536){
+            SetAdvTrgTdcChMask(tdcmask);
          }
 
          //sampling frequency
