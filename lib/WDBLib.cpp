@@ -879,15 +879,15 @@ void WDB::Get1wireTemperatures(std::vector<float> &temp, bool refresh)
 
 void WDB::SetLmkInputFreq(unsigned int f)
 {
-   if (f == 100) {       // R = 20, N = 48, VCO DIV = 5
+   if (f == 100) {       // R = 20, N = 32, VCO DIV = 8
       SetLmk14PllR(20);
-      SetLmk15PllN(48);
-      SetLmk15VcoDiv(5);
+      SetLmk15PllN(32);
+      SetLmk15VcoDiv(8);
       SetLmk13OscinFreq(100);
       SetExtClkFreq(100);
-   } else if (f == 80) { // R = 20, N = 60, VCO DIV = 5
+   } else if (f == 80) { // R = 20, N = 40, VCO DIV = 8
       SetLmk14PllR(20);
-      SetLmk15PllN(60);
+      SetLmk15PllN(40);
       SetLmk15VcoDiv(5);
       SetLmk13OscinFreq(80);
       SetExtClkFreq(80);
