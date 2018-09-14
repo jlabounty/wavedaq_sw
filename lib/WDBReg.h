@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  07.09.2018 15:05:04
+// Created :  13.09.2018 13:26:49
 //
 
 
@@ -273,37 +273,41 @@ public:
 
    ////// ------ Control Register 16 [0x1040]: RST - Reset bits for specific firmwar units (Default: 0x00000000) ------ //////
 
-   // 0x00002000: DAQ_PLL_RST - Reset the PLL for the DAQ clock
+   // 0x00004000: DAQ_PLL_RST - Reset the PLL for the DAQ clock
    unsigned int GetDaqPllRst() { return BitExtractControl(WD2_DAQ_PLL_RST_REG, WD2_DAQ_PLL_RST_MASK, WD2_DAQ_PLL_RST_OFS); };
    void         SetDaqPllRst(unsigned int value) { SetRegMask(WD2_DAQ_PLL_RST_REG, WD2_DAQ_PLL_RST_MASK, WD2_DAQ_PLL_RST_OFS, value); };
 
-   // 0x00001000: DCB_OSERDES_PLL_RST - Reset the PLL of the DCB OSERDES
+   // 0x00002000: DCB_OSERDES_PLL_RST - Reset the PLL of the DCB OSERDES
    unsigned int GetDcbOserdesPllRst() { return BitExtractControl(WD2_DCB_OSERDES_PLL_RST_REG, WD2_DCB_OSERDES_PLL_RST_MASK, WD2_DCB_OSERDES_PLL_RST_OFS); };
    void         SetDcbOserdesPllRst(unsigned int value) { SetRegMask(WD2_DCB_OSERDES_PLL_RST_REG, WD2_DCB_OSERDES_PLL_RST_MASK, WD2_DCB_OSERDES_PLL_RST_OFS, value); };
 
-   // 0x00000800: TCB_OSERDES_PLL_RST - Reset the PLL of the TCB OSERDES
+   // 0x00001000: TCB_OSERDES_PLL_RST - Reset the PLL of the TCB OSERDES
    unsigned int GetTcbOserdesPllRst() { return BitExtractControl(WD2_TCB_OSERDES_PLL_RST_REG, WD2_TCB_OSERDES_PLL_RST_MASK, WD2_TCB_OSERDES_PLL_RST_OFS); };
    void         SetTcbOserdesPllRst(unsigned int value) { SetRegMask(WD2_TCB_OSERDES_PLL_RST_REG, WD2_TCB_OSERDES_PLL_RST_MASK, WD2_TCB_OSERDES_PLL_RST_OFS, value); };
 
-   // 0x00000400: DCB_OSERDES_IF_RST - Reset the DCB OSERDES interface
+   // 0x00000800: DCB_OSERDES_IF_RST - Reset the DCB OSERDES interface
    unsigned int GetDcbOserdesIfRst() { return BitExtractControl(WD2_DCB_OSERDES_IF_RST_REG, WD2_DCB_OSERDES_IF_RST_MASK, WD2_DCB_OSERDES_IF_RST_OFS); };
    void         SetDcbOserdesIfRst(unsigned int value) { SetRegMask(WD2_DCB_OSERDES_IF_RST_REG, WD2_DCB_OSERDES_IF_RST_MASK, WD2_DCB_OSERDES_IF_RST_OFS, value); };
 
-   // 0x00000200: TCB_OSERDES_IF_RST - Reset the TCB OSERDES interface
+   // 0x00000400: TCB_OSERDES_IF_RST - Reset the TCB OSERDES interface
    unsigned int GetTcbOserdesIfRst() { return BitExtractControl(WD2_TCB_OSERDES_IF_RST_REG, WD2_TCB_OSERDES_IF_RST_MASK, WD2_TCB_OSERDES_IF_RST_OFS); };
    void         SetTcbOserdesIfRst(unsigned int value) { SetRegMask(WD2_TCB_OSERDES_IF_RST_REG, WD2_TCB_OSERDES_IF_RST_MASK, WD2_TCB_OSERDES_IF_RST_OFS, value); };
 
-   // 0x00000100: SCALER_RST - Reset all scalers
+   // 0x00000200: SCALER_RST - Reset all scalers
    unsigned int GetScalerRst() { return BitExtractControl(WD2_SCALER_RST_REG, WD2_SCALER_RST_MASK, WD2_SCALER_RST_OFS); };
    void         SetScalerRst(unsigned int value) { SetRegMask(WD2_SCALER_RST_REG, WD2_SCALER_RST_MASK, WD2_SCALER_RST_OFS, value); };
 
-   // 0x00000080: TRB_PARITY_ERROR_COUNT_RST - Reset the parity error counter of the trigger info serial connection
+   // 0x00000100: TRB_PARITY_ERROR_COUNT_RST - Reset the parity error counter of the trigger info serial connection
    unsigned int GetTrbParityErrorCountRst() { return BitExtractControl(WD2_TRB_PARITY_ERROR_COUNT_RST_REG, WD2_TRB_PARITY_ERROR_COUNT_RST_MASK, WD2_TRB_PARITY_ERROR_COUNT_RST_OFS); };
    void         SetTrbParityErrorCountRst(unsigned int value) { SetRegMask(WD2_TRB_PARITY_ERROR_COUNT_RST_REG, WD2_TRB_PARITY_ERROR_COUNT_RST_MASK, WD2_TRB_PARITY_ERROR_COUNT_RST_OFS, value); };
 
-   // 0x00000040: LMK_SYNC_LOCAL - Control LMK SYNC signal from FPGA: 0 = run / 1 = sync
+   // 0x00000080: LMK_SYNC_LOCAL - Control LMK SYNC signal from FPGA: 0 = run / 1 = sync
    unsigned int GetLmkSyncLocal() { return BitExtractControl(WD2_LMK_SYNC_LOCAL_REG, WD2_LMK_SYNC_LOCAL_MASK, WD2_LMK_SYNC_LOCAL_OFS); };
    void         SetLmkSyncLocal(unsigned int value) { SetRegMask(WD2_LMK_SYNC_LOCAL_REG, WD2_LMK_SYNC_LOCAL_MASK, WD2_LMK_SYNC_LOCAL_OFS, value); };
+
+   // 0x00000040: ADC_RST - ADC reset
+   unsigned int GetAdcRst() { return BitExtractControl(WD2_ADC_RST_REG, WD2_ADC_RST_MASK, WD2_ADC_RST_OFS); };
+   void         SetAdcRst(unsigned int value) { SetRegMask(WD2_ADC_RST_REG, WD2_ADC_RST_MASK, WD2_ADC_RST_OFS, value); };
 
    // 0x00000020: ADC_IF_RST - Reset the ADC interface
    unsigned int GetAdcIfRst() { return BitExtractControl(WD2_ADC_IF_RST_REG, WD2_ADC_IF_RST_MASK, WD2_ADC_IF_RST_OFS); };
@@ -2590,7 +2594,7 @@ public:
 
 
 
-   ////// ------ Status Register 1 [0x0004]: REG_LAYOUT_VER - Register map layout version information (Default: 0x00070007) ------ //////
+   ////// ------ Status Register 1 [0x0004]: REG_LAYOUT_VER - Register map layout version information (Default: 0x00080008) ------ //////
 
    // 0xFFFF0000: REG_LAYOUT_COMP_LEVEL - Register map layout compatibility level
    unsigned int GetRegLayoutCompLevel() { return BitExtractStatus(WD2_REG_LAYOUT_COMP_LEVEL_REG, WD2_REG_LAYOUT_COMP_LEVEL_MASK, WD2_REG_LAYOUT_COMP_LEVEL_OFS); };
@@ -2613,7 +2617,7 @@ public:
 
 
 
-   ////// ------ Status Register 3 [0x000C]: FW_BUILD_TIME - Time when the firmware was built and compatibility level (Default: 0x03000000) ------ //////
+   ////// ------ Status Register 3 [0x000C]: FW_BUILD_TIME - Time when the firmware was built and compatibility level (Default: 0x04000000) ------ //////
 
    // 0xFF000000: FW_COMPAT_LEVEL - Firmware compatibility level
    unsigned int GetFwCompatLevel() { return BitExtractStatus(WD2_FW_COMPAT_LEVEL_REG, WD2_FW_COMPAT_LEVEL_MASK, WD2_FW_COMPAT_LEVEL_OFS); };
@@ -3222,6 +3226,9 @@ public:
 
 
    ////// ------ Status Register 77 [0x0134]: CLK_CTRL_MOD_FLAG - Set if WD2 configuration registers are modified (Default: 0x00000000) ------ //////
+
+   // 0x00000008: ADC_RST_MOD - ADC reset modified flag
+   unsigned int GetAdcRstMod() { return BitExtractStatus(WD2_ADC_RST_MOD_REG, WD2_ADC_RST_MOD_MASK, WD2_ADC_RST_MOD_OFS); };
 
    // 0x00000004: CLK_SEL_AND_DRS_CLK_DIV_MOD - DAQ clock select and DRS clock divider modified flags
    unsigned int GetClkSelAndDrsClkDivMod() { return BitExtractStatus(WD2_CLK_SEL_AND_DRS_CLK_DIV_MOD_REG, WD2_CLK_SEL_AND_DRS_CLK_DIV_MOD_MASK, WD2_CLK_SEL_AND_DRS_CLK_DIV_MOD_OFS); };
