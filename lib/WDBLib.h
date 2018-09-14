@@ -489,8 +489,8 @@ public:
    // constructor
    WDB(std::string name, int verbose = 0);
 
-   const unsigned int cRequiredRegLayoutCompatLevel = 6;
-   const unsigned int cRequiredFwCompatLevel = 2;
+   const unsigned int cRequiredRegLayoutCompatLevel = 8;
+   const unsigned int cRequiredFwCompatLevel = 4;
    const int cDefaultReceiveTimeoutMs = 100;
 
    // constants

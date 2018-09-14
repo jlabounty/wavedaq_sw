@@ -801,14 +801,16 @@ void WDB::SetDrsSampleFreq(unsigned int f)
       return;
    }
    
-   auto divider = (int) (240.0 / f * 2048 + 0.5);
+   auto divider = (int) (160.0 / f * 2048 + 0.5);
    divider /= 2; // LMK multiplies divider by 2
    
+   SetAdcIfRst(1);
    SetLmk0ClkoutDiv(divider);
    SetApplySettingsLmk(1);
    
    LmkSyncLocal();
-   
+   SetAdcIfRst(0);
+
    // read back new sampling frquency in status register
    ReceiveStatusRegister(WD2_DRS_SAMPLE_FREQ_REG);
 }
@@ -912,7 +914,7 @@ void WDB::SetTimingCalibSignalEnable(bool value)
    
    // enable divider and delay
    SetLmk6ClkoutMux(3);
-   // divide 240 MHz by 2x1 = 120 MHz
+   // divide 160 MHz by 2x1 = 80 MHz
    SetLmk6ClkoutDiv(1);
    // enbable/disable output
    SetLmk6ClkoutEn(value);
@@ -3533,7 +3535,7 @@ void WP::CalibrateLocal(WDEvent *event, WDB *b)
 void WP::CalibrateGlobal(WDEvent *event, WDB *b)
 {
    double damping = 0.1f;
-   double nominalPeriod = 1 / 120E6; // Period of 120 MHz clock
+   double nominalPeriod = 1 / 80E6; // Period of 80 MHz clock
    
    for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
       int tc = event->mTriggerCell[ch];
