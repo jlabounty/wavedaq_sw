@@ -888,7 +888,7 @@ void WDB::SetLmkInputFreq(unsigned int f)
    } else if (f == 80) { // R = 20, N = 40, VCO DIV = 8
       SetLmk14PllR(20);
       SetLmk15PllN(40);
-      SetLmk15VcoDiv(5);
+      SetLmk15VcoDiv(8);
       SetLmk13OscinFreq(80);
       SetExtClkFreq(80);
    } else {
