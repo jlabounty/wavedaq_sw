@@ -19,7 +19,7 @@ CPPFLAGS      = -std=c++11
 
 ifeq ($(shell uname),Darwin)
 FLAGS         += -DOS_DARWIN -DHAVE_STRLCPY
-LIBS          =  -framework IOKit -framework CoreFoundation
+LIBS          =  -lobjc 
 else
 FLAGS         += 
 LIBS          =  -lrt -lbsd
@@ -29,6 +29,7 @@ FLAGS         += -I$(MSCB_DIR)/include
 FLAGS         += -I$(WDAQ_DIR)/software/lib 
 FLAGS         += -I$(WDAQ_DIR)/software/tcb 
 FLAGS         += -I$(WDAQ_DIR)/firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/common/src/
+FLAGS         += -D WD2_DONT_INCLUDE_REG_ACCESS_VARS
 LIBS          += -lm -lutil -lpthread
 
 # system objects
