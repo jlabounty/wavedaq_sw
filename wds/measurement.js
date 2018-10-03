@@ -48,7 +48,9 @@ var measList = [
          {name: "WD", type: "WD", value: 0},
          {name: "CH", type: "CH", value: 0},
          {name: "Time1", type: "tcursor", value: ""},
-         {name: "Time2", type: "tcursor", value: ""}
+         {name: "Time2", type: "tcursor", value: ""},
+         {name: "Time3", type: "tcursor", value: ""},
+         {name: "Time4", type: "tcursor", value: ""}
       ]
    },
    //------------------
@@ -393,45 +395,73 @@ function measVSlice(ctx, x, y) {
 function measCharge(ctx, x, y) {
    var c = this.param[1].value;
 
+   var baseline = 0;
+   var baseline_n = 0;
    var q = 0;
    var p1 = this.param[2].value * 1E-9;
    var p2 = this.param[3].value * 1E-9;
+   var p3 = this.param[4].value * 1E-9;
+   var p4 = this.param[5].value * 1E-9;
    var x1, y1, x2, y2;
    var first = true;
 
    for (var i = 0; i < x[c].length - 1; i++) {
-      if (x[c][i + 1] >= p1 && x[c][i] < p2) {
-         if (x[c][i] < p1) {
-            x1 = p1;
-            y1 = y[c][i] + (y[c][i + 1] - y[c][i]) * (p1 - x[c][i]) / (x[c][i + 1] - x[c][i]);
+      if (x[c][i] >= p1 && x[c][i] <= p2) {
+         baseline += y[c][i];
+         baseline_n++;
+      }
+   }
+
+   // average baseline
+   if (baseline_n > 0) {
+      baseline /= baseline_n;
+
+      if (ctx != undefined && OSC.chOn[c]) {
+         ctx.beginPath();
+         ctx.lineWidth = 3;
+         ctx.moveTo(OSC.timeToX(p1), OSC.voltToY(baseline, c));
+         ctx.lineTo(OSC.timeToX(p2), OSC.voltToY(baseline, c));
+
+         ctx.moveTo(OSC.timeToX(p1), OSC.voltToY(baseline, c) - 5);
+         ctx.lineTo(OSC.timeToX(p1), OSC.voltToY(baseline, c) + 5);
+
+         ctx.moveTo(OSC.timeToX(p2), OSC.voltToY(baseline, c) - 5);
+         ctx.lineTo(OSC.timeToX(p2), OSC.voltToY(baseline, c) + 5);
+
+         ctx.stroke();
+         ctx.lineWidth = 1;
+      }
+   }
+
+   for (var i = 0; i < x[c].length - 1; i++) {
+
+      if (x[c][i + 1] >= p3 && x[c][i] < p4) {
+         if (x[c][i] < p3) {
+            x1 = p3;
+            y1 = y[c][i] + (y[c][i + 1] - y[c][i]) * (p3 - x[c][i]) / (x[c][i + 1] - x[c][i]);
          } else {
             x1 = x[c][i];
             y1 = y[c][i];
          }
-         if (x[c][i + 1] > p2) {
-            x2 = p2;
-            y2 = y[c][i] + (y[c][i + 1] - y[c][i]) * (p2 - x[c][i]) / (x[c][i + 1] - x[c][i]);
+         if (x[c][i + 1] > p4) {
+            x2 = p4;
+            y2 = y[c][i] + (y[c][i + 1] - y[c][i]) * (p4 - x[c][i]) / (x[c][i + 1] - x[c][i]);
          } else {
             x2 = x[c][i + 1];
             y2 = y[c][i + 1];
          }
 
-         q += 0.5 * Math.abs((y1 + y2) * (x2 - x1));
+         q += 0.5 * Math.abs((y1 + y2 - 2*baseline) * (x2 - x1));
 
          if (ctx != undefined && OSC.chOn[c]) {
-            if (first) {
-               first = false;
-               ctx.beginPath();
-               ctx.moveTo(OSC.timeToX(x1), OSC.voltToY(0, c));
-            }
+            ctx.beginPath();
+            ctx.moveTo(OSC.timeToX(x1), OSC.voltToY(baseline, c));
             ctx.lineTo(OSC.timeToX(x1), OSC.voltToY(y1, c));
-
-            if (x[c][i+1] >= p2) {
-               ctx.lineTo(OSC.timeToX(x2), OSC.voltToY(y2, c));
-               ctx.lineTo(OSC.timeToX(x2), OSC.voltToY(0, c));
-               ctx.closePath();
-               ctx.fill();
-            }
+            ctx.lineTo(OSC.timeToX(x2), OSC.voltToY(y2, c));
+            ctx.lineTo(OSC.timeToX(x2), OSC.voltToY(baseline, c));
+            ctx.closePath();
+            ctx.stroke();
+            ctx.fill();
          }
       }
    }
