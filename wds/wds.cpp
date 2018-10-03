@@ -1022,9 +1022,6 @@ int main(int argc, const char * argv[])
                throw std::runtime_error(str.str());
             }
             
-            // retrieve enabled channels
-            printf("%0X - %0X\n", b->GetDrsChTxEn(), b->GetAdcChTxEn());
-            
             if (b->GetDrsChTxEn() > 0) {
                gl.readoutMode = cReadoutModeDRS;
                b->SetChnTxEn(b->GetDrsChTxEn());

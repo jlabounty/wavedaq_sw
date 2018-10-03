@@ -924,7 +924,12 @@ void WDB::SetTimingCalibSignalDelay(int value)
 {
    // set delay of LMK output #6
    assert(value >= -16 && value <= 16);
-   if (value >= 0) {
+   if (value == 0) {
+      SetLmk0ClkoutMux(1);
+      SetLmk0ClkoutDly(0);
+      SetLmk6ClkoutMux(1);
+      SetLmk6ClkoutDly(0);
+   } else if (value > 0) {
       SetLmk0ClkoutDly(0);
       // delay channel 6
       if (value == 16)
@@ -3468,13 +3473,8 @@ void WP::CalibrateLocal(WDEvent *event, WDB *b)
 {
    float dv, llim, ulim;
    
-   if (b->GetDrsSampleFreqMhz() >= 3000) {
-      llim = -0.15f;
-      ulim =  0.15f;
-   } else {
-      llim = -0.3f;
-      ulim =  0.3f;
-   }
+   llim = -0.3f;
+   ulim =  0.3f;
    
    for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
       int tc = event->mTriggerCell[ch];
@@ -3509,7 +3509,7 @@ void WP::CalibrateLocal(WDEvent *event, WDB *b)
       }
       
       // calculate calibration every 165 (5 events * 33 phases) events
-      if (calibProg.iIter1 % 165 == 0) {
+      if (calibProg.iIter1 % 10 == 0) {
          // average over all 1024 dU
          double sum = 0;
          double cellDV[1024];
@@ -3524,7 +3524,10 @@ void WP::CalibrateLocal(WDEvent *event, WDB *b)
          
          // here comes the central calculation, dT = dV/average * dtCell
          for (int i=0 ; i<1024 ; i++)
-            b->mTCalib.mCalib.dt[ch][i] = (float)(cellDV[i] / sum * dtCell);
+            if (cellDV[i] == 0)
+               b->mTCalib.mCalib.dt[ch][i] = dtCell; // set default value if cell has no data
+            else
+               b->mTCalib.mCalib.dt[ch][i] = (float)(cellDV[i] / sum * dtCell);
       }
       
    }
@@ -3626,9 +3629,9 @@ void WP::DoCalibrationTimeStep()
    if (calibProg.state == cCsFirstBoard) {
       
       calibProg.state       = cCsFirstSample;
-      calibProg.nIter1      = 495;
-      calibProg.nIter2      = 300;
-      calibProg.nIter3      = 100;
+      calibProg.nIter1      = 170; // local calibration
+      calibProg.nIter2      = 100; // global calibration
+      calibProg.nIter3      = 30;  // offset calibration
       calibProg.nIter4      = 0;
       calibProg.phase       = 0;
       
