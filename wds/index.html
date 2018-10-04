@@ -8,6 +8,7 @@
    <link href="iosicon.png" rel="apple-touch-icon" type="image/png" title="WaveDAQ Icon">
    <script src="fft.js" type="text/javascript"></script>
    <script src="controls.js" type="text/javascript"></script>
+   <script src="buttons.js" type="text/javascript"></script>
    <script src="osc.js" type="text/javascript"></script>
    <script src="wds.js" type="text/javascript"></script>
    <script src="measurement.js" type="text/javascript"></script>
@@ -84,19 +85,19 @@
 
       <div class="groupBtn">
          <div class="upDown">
-            <button name="ctrlButton" data-icon="up" id="scaleUp" type="button" class="squareButtonCanvas"
+            <button name="ctrlButton" data-draw="ButtonDrawUp" id="scaleUp" type="button" class="squareButtonCanvas"
                     onClick="btnScale(1)"></button>
             <div id="UScale">100 mV</div>
-            <button name="ctrlButton" data-icon="down" id="scaleDown" type="button" class="squareButtonCanvas"
+            <button name="ctrlButton" data-draw="ButtonDrawDown" id="scaleDown" type="button" class="squareButtonCanvas"
                     onClick="btnScale(-1)"></button>
          </div>
          <button name="ctrlVSlider" id="uofsSlider" class="vSlider" type="button" data-update="sldUOffset()"></button>
 
          <div class="zeroDist">
-            <button name="ctrlButton" data-icon="vcoll" class="highButton" id="ofsZero" type="button"
+            <button name="ctrlButton" data-draw="ButtonDrawVColl" class="highButton" id="ofsZero" type="button"
                     onClick="btnOfsZero()"></button>
             <div style="height:10px;"></div>
-            <button name="ctrlButton" data-icon="vexp" class="highButton" id="ofsDist" type="button"
+            <button name="ctrlButton" data-draw="ButtonDrawVExp" class="highButton" id="ofsDist" type="button"
                     onClick="btnOfsDist()"></button>
          </div>
       </div>
@@ -104,12 +105,12 @@
       <table class="timeScale">
          <tr>
             <td width="1%">
-               <button name="ctrlButton" data-icon="left" id="scaleLeft" type="button" class="squareButtonCanvas"
+               <button name="ctrlButton" data-draw="ButtonDrawLeft" id="scaleLeft" type="button" class="squareButtonCanvas"
                        onClick="btnTScale(1)"></button>
             </td>
             <td id="TScale" style="vertical-align:middle">20 ns</td>
             <td width="1%">
-               <button name="ctrlButton" data-icon="right" id="scaleRight" type="button" class="squareButtonCanvas"
+               <button name="ctrlButton" data-draw="ButtonDrawRight" id="scaleRight" type="button" class="squareButtonCanvas"
                        onClick="btnTScale(-1)"></button>
             </td>
          </tr>
@@ -169,10 +170,10 @@
                   </td>
                   <td rowspan=2>
                      &nbsp;&nbsp;
-                     <button name="ctrlButton" data-icon="edgelead" id="trgEdgeLead" type="button"
+                     <button name="ctrlButton" data-draw="ButtonDrawEdgeLead" id="trgEdgeLead" type="button"
                              class="squareButtonCanvas"
                              onClick="btnTedge(1)"></button>
-                     <button name="ctrlButton" data-icon="edgetrail" id="trgEdgeTrail" type="button"
+                     <button name="ctrlButton" data-draw="ButtonDrawEdgeTrail" id="trgEdgeTrail" type="button"
                              class="squareButtonCanvas"
                              onClick="btnTedge(0)" style="display:none"></button>
                   </td>
