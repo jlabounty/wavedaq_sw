@@ -109,6 +109,18 @@ var measList = [
       unit: "ns",
       digits: 3,
       param: [{name: "WD", type: "WD", value: 0}, {name: "CH", type: "CH", value: 0}]
+   },
+   {
+      name: "Chn correl",
+      unit: "",
+      digits: 3,
+      f: measChnCorrel,
+      param: [
+         {name: "WD1", type: "WD", value: 0},
+         {name: "CH1", type: "CH", value: 0},
+         {name: "WD2", type: "WD", value: 0},
+         {name: "CH2", type: "CH", value: 1},
+      ]
    }
 ];
 
@@ -605,4 +617,40 @@ function measChnDelay(ctx, x, y, i1, i2) {
    }
 
    return (t1 - t2) * 1E9;
+}
+
+function measChnCorrel(ctx, x, y, i1, i2) {
+   //var w1 = this.param[0].value;
+   var c1 = this.param[1].value;
+   //var w2 = this.param[2].value;
+   var c2 = this.param[3].value;
+
+   var mean1 = 0;
+   var mean2 = 0;
+   var rms1 = 0;
+   var rms2 = 0;
+   var cov = 0;
+
+   //calculate average
+   for (var i = i1; i < i2; i++){
+      mean1 += y[c1][i];
+      mean2 += y[c2][i];
+   }
+   if (i2 > i1){
+      mean1 /= (i2 - i1);
+      mean2 /= (i2 - i1);
+   }
+
+   //calculate rms
+   for (i = i1; i < i2; i++){
+      rms1 += (y[c1][i] - mean1) * (y[c1][i] - mean1);
+      rms2 += (y[c2][i] - mean2) * (y[c2][i] - mean2);
+      cov  += (y[c2][i] - mean2) * (y[c1][i] - mean1);
+   }
+   rms1 = Math.sqrt(rms1 / (i2 - i1));
+   rms2 = Math.sqrt(rms2 / (i2 - i1));
+   cov = cov / (i2 - i1);
+   cov = cov/(rms1*rms2);
+
+   return cov;
 }
