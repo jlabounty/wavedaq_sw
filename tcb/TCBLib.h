@@ -179,7 +179,7 @@ public:
    // read system event counter
    void GetSystemEventCounter(u_int32_t*);
    // read system trigger type
-   bool GetSystemTriggerType(u_int32_t*);
+   bool GetSystemTriggerType(u_int32_t*, u_int32_t*, u_int32_t*);
    // read trigger counters
    void GetTriggerCounters(u_int32_t*);
    // read memory address
