@@ -47,10 +47,10 @@ var measList = [
       param: [
          {name: "WD", type: "WD", value: 0},
          {name: "CH", type: "CH", value: 0},
-         {name: "Time1", type: "tcursor", value: ""},
-         {name: "Time2", type: "tcursor", value: ""},
-         {name: "Time3", type: "tcursor", value: ""},
-         {name: "Time4", type: "tcursor", value: ""}
+         {name: "T1Baseline", type: "tcursor", value: 100},
+         {name: "T2Baseline", type: "tcursor", value: 200},
+         {name: "T1Int", type: "tcursor", value: 300},
+         {name: "T2Int", type: "tcursor", value: 400}
       ]
    },
    //------------------
@@ -422,11 +422,11 @@ function measCharge(ctx, x, y) {
          ctx.moveTo(OSC.timeToX(p1), OSC.voltToY(baseline, c));
          ctx.lineTo(OSC.timeToX(p2), OSC.voltToY(baseline, c));
 
-         ctx.moveTo(OSC.timeToX(p1), OSC.voltToY(baseline, c) - 5);
-         ctx.lineTo(OSC.timeToX(p1), OSC.voltToY(baseline, c) + 5);
+         ctx.moveTo(OSC.timeToX(p1), OSC.voltToY(baseline, c) - 10);
+         ctx.lineTo(OSC.timeToX(p1), OSC.voltToY(baseline, c) + 10);
 
-         ctx.moveTo(OSC.timeToX(p2), OSC.voltToY(baseline, c) - 5);
-         ctx.lineTo(OSC.timeToX(p2), OSC.voltToY(baseline, c) + 5);
+         ctx.moveTo(OSC.timeToX(p2), OSC.voltToY(baseline, c) - 10);
+         ctx.lineTo(OSC.timeToX(p2), OSC.voltToY(baseline, c) + 10);
 
          ctx.stroke();
          ctx.lineWidth = 1;
@@ -451,7 +451,7 @@ function measCharge(ctx, x, y) {
             y2 = y[c][i + 1];
          }
 
-         q += 0.5 * Math.abs((y1 + y2 - 2*baseline) * (x2 - x1));
+         q += 0.5 * ((y1 + y2 - 2*baseline) * (x2 - x1));
 
          if (ctx != undefined && OSC.chOn[c]) {
             ctx.beginPath();

@@ -1625,6 +1625,7 @@ function configSlide() {
 
 function measRem() {
    this.parentNode.parentNode.removeChild(this.parentNode);
+   measOnFocus(undefined,undefined); // remove any cursor
 }
 
 function measAdd() {
@@ -1672,10 +1673,13 @@ function measAdd() {
    }
    meas.appendChild(s);
 
+   measOnFocus(undefined,undefined); // remove any cursor
    measSelect(meas, s, prev);
 }
 
 function measSelect(meas, sel, prev) {
+
+   measOnFocus(undefined,undefined); // remove any cursor
 
    // remove previous input fields
    for (var i = meas.childNodes.length - 1; i > 1; i--)
@@ -1734,6 +1738,13 @@ function measSelect(meas, sel, prev) {
          input[pi].onchange = function () {
             measParamChange(meas);
          };
+         input[pi].onfocus = (function () {
+            var i = pi;
+            var m = meas;
+            return function () { // hack: inline closure
+               measOnFocus(m, i);
+            }
+         })();
          input[pi].addEventListener('focus', function(e) {
             OSC.timeCursor.input = this;
             OSC.timeCursor.time = this.value;
@@ -1748,6 +1759,23 @@ function measSelect(meas, sel, prev) {
       measParamChange(meas);
    }
 
+}
+
+var activeMeas = undefined;
+var activeMeasIndex = undefined;
+
+function measOnFocus(meas, index) {
+   activeMeas = meas;
+   activeMeasIndex = index;
+   if (meas != undefined)
+      OSC.setTimeCursor(meas.childNodes[index], measParamChangeCB);
+   else
+      OSC.setTimeCursor(undefined);
+   console.log(meas, index);
+}
+
+function measParamChangeCB() {
+   measParamChange(activeMeas);
 }
 
 function measParamChange(meas) {

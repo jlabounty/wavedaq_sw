@@ -301,12 +301,16 @@ Oscilloscope.prototype.mouseEvent = function (e) {
          this.timeCursor.x = e.clientX;
          this.timeCursor.time = t;
          this.timeCursor.input.value = t;
+
+         if (this.timeCursor.callback != undefined)
+            this.timeCursor.callback();
       }
    }
 };
 
-Oscilloscope.prototype.setTimeCursor = function(i) {
+Oscilloscope.prototype.setTimeCursor = function(i, callback) {
    this.timeCursor.input = i;
+   this.timeCursor.callback = callback;
 }
 
 Oscilloscope.prototype.resizeCanvas = function () {
@@ -490,7 +494,8 @@ Oscilloscope.prototype.drawCursors = function (ctx) {
       else
          ctx.strokeStyle = "white";
       ctx.lineWidth = 2;
-      ctx.drawLine(this.timeCursor.x, this.y1, this.timeCursor.x, this.y2);
+      var x = this.timeToX(this.timeCursor.input.value*1E-9);
+      ctx.drawLine(x, this.y1, x, this.y2);
       ctx.lineWidth = 1;
    }
 };
