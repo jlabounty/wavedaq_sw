@@ -111,8 +111,8 @@ function Oscilloscope(div) { // constructor
    this.i1 = 0;
    this.i2 = 0;
 
-   this.timeCursor =  { input: undefined, drag: false, time: 0, x: 0 };
-   this.voltCursor =  { input: undefined, drag: false, volt: 0, y: 0 };
+   this.timeCursor =  { on: false, input: undefined, drag: false, time: 0, x: 0 };
+   this.voltageCursor =  { on: false, input: undefined, drag: false, voltage: 0, y: 0 };
 
    // display object
    this.disp = {
@@ -226,9 +226,17 @@ Oscilloscope.prototype.mouseEvent = function (e) {
       else if ((e.button & 2) > 0) e.which = 3; // Right
    }
 
+   // set default cursor to be changed below
+   var cursor = "default";
+
    if (this.disp.histo && e.target == this.canvas) {
 
       // division bar
+      if (Math.abs(e.clientY - this.hiy1) < 10 &&
+         e.clientX > this.x1 && e.clientX < this.x2 &&
+         e.type == "mousemove")
+         cursor = "ns-resize";
+
       if (Math.abs(e.clientY - this.hiy1) < 10 &&
          e.clientX > this.x1 && e.clientX < this.x2 &&
          e.type == "mousedown")
@@ -250,6 +258,12 @@ Oscilloscope.prototype.mouseEvent = function (e) {
       if (e.clientX > this.x1 && e.clientX < this.x1 + 15 &&
          e.clientY > this.hiy1 + this.hiHeight / 2 - 15 &&
          e.clientY < this.hiy1 + this.hiHeight / 2 + 15 &&
+         e.type == "mousemove")
+         cursor = "e-resize";
+
+      if (e.clientX > this.x1 && e.clientX < this.x1 + 15 &&
+         e.clientY > this.hiy1 + this.hiHeight / 2 - 15 &&
+         e.clientY < this.hiy1 + this.hiHeight / 2 + 15 &&
          e.type == "mousedown") {
          this.histo.dragLeftHandle = true;
       }
@@ -260,6 +274,7 @@ Oscilloscope.prototype.mouseEvent = function (e) {
             this.histo.dragX = this.x1;
          if (this.histo.dragX > this.x2)
             this.histo.dragX = this.x2;
+         cursor = "ew-resize";
       }
 
       if (e.type == "mouseup") {
@@ -279,14 +294,25 @@ Oscilloscope.prototype.mouseEvent = function (e) {
       if (e.clientX < this.x2 && e.clientX > this.x2 - 15 &&
          e.clientY > this.hiy1 + this.hiHeight / 2 - 15 &&
          e.clientY < this.hiy1 + this.hiHeight / 2 + 15 &&
+         e.type == "mousemove")
+         cursor = "w-resize";
+
+      if (e.clientX < this.x2 && e.clientX > this.x2 - 15 &&
+         e.clientY > this.hiy1 + this.hiHeight / 2 - 15 &&
+         e.clientY < this.hiy1 + this.hiHeight / 2 + 15 &&
          e.type == "mousedown") {
          this.histo.dragRightHandle = true;
       }
    }
 
-   if (this.timeCursor.input != undefined && e.target == this.canvas) {
+   if (this.timeCursor.on && e.target == this.canvas) {
 
-      if (e.clientX > this.x1 && e.clientX < this.x2 &&
+      if (e.clientX > this.timeCursor.x-5 && e.clientX < this.timeCursor.x+5 &&
+         e.clientY > this.y1 && e.clientY < this.y2 &&
+         e.type == "mousemove")
+         cursor = "ew-resize";
+
+      if (e.clientX > this.timeCursor.x-5 && e.clientX < this.timeCursor.x+5 &&
           e.clientY > this.y1 && e.clientY < this.y2 &&
           e.type == "mousedown")
          this.timeCursor.drag = true;
@@ -296,22 +322,45 @@ Oscilloscope.prototype.mouseEvent = function (e) {
       }
 
       if (e.type == "mousemove" && this.timeCursor.drag) {
+         cursor = "ew-resize";
          this.timeCursor.dragX = e.clientX;
          var t = (this.XToTime(e.clientX) / 1E-9).toFixed(1);
          this.timeCursor.x = e.clientX;
          this.timeCursor.time = t;
          this.timeCursor.input.value = t;
-
-         if (this.timeCursor.callback != undefined)
-            this.timeCursor.callback();
+         this.timeCursor.input.onchange();
       }
    }
-};
 
-Oscilloscope.prototype.setTimeCursor = function(i, callback) {
-   this.timeCursor.input = i;
-   this.timeCursor.callback = callback;
-}
+   if (this.voltageCursor.on && e.target == this.canvas) {
+
+      if (e.clientY > this.voltageCursor.y-5 && e.clientY < this.voltageCursor.y+5 &&
+         e.clientX > this.x1 && e.clientX < this.x2 &&
+         e.type == "mousemove")
+         cursor = "ns-resize";
+
+      if (e.clientY > this.voltageCursor.y-5 && e.clientY < this.voltageCursor.y+5 &&
+         e.clientX > this.x1 && e.clientX < this.x2 &&
+         e.type == "mousedown")
+         this.voltageCursor.drag = true;
+
+      if (e.type == "mouseup") {
+         this.voltageCursor.drag = false;
+      }
+
+      if (e.type == "mousemove" && this.voltageCursor.drag) {
+         cursor = "ns-resize";
+         this.voltageCursor.dragY = e.clientY;
+         var u = (this.YToVolt(e.clientY, this.voltageCursor.channel) * 1000).toFixed(1);
+         this.voltageCursor.y = e.clientY;
+         this.voltageCursor.voltage = u;
+         this.voltageCursor.input.value = u;
+         this.voltageCursor.input.onchange();
+      }
+   }
+
+   document.getElementById('scope').style.cursor = cursor;
+};
 
 Oscilloscope.prototype.resizeCanvas = function () {
    this.width = this.canvas.width;
@@ -488,16 +537,22 @@ Oscilloscope.prototype.drawMeasurements = function (ctx) {
 };
 
 Oscilloscope.prototype.drawCursors = function (ctx) {
-   if (this.timeCursor.input) {
-      if (this.disp.invert)
-         ctx.strokeStyle = "black";
-      else
-         ctx.strokeStyle = "white";
-      ctx.lineWidth = 2;
-      var x = this.timeToX(this.timeCursor.input.value*1E-9);
-      ctx.drawLine(x, this.y1, x, this.y2);
-      ctx.lineWidth = 1;
+   if (this.timeCursor.on) {
+      this.timeCursor.time = this.timeCursor.input.value*1E-9;
+      this.timeCursor.x = this.timeToX(this.timeCursor.time);
+      ctx.strokeStyle = "#808080";
+      ctx.fillStyle = "#808080";
+      ctx.drawLine(this.timeCursor.x, this.y1, this.timeCursor.x, this.y2);
    }
+
+   if (this.voltageCursor.on) {
+      this.voltageCursor.voltage = this.voltageCursor.input.value/1000;
+      this.voltageCursor.y = this.voltToY(this.voltageCursor.voltage, this.voltageCursor.channel);
+      ctx.strokeStyle = "#808080";
+      ctx.fillStyle = "#808080";
+      ctx.drawLine(this.x1, this.voltageCursor.y, this.x2, this.voltageCursor.y);
+   }
+
 };
 
 Oscilloscope.prototype.printStatus = function (ctx) {
@@ -690,12 +745,16 @@ Oscilloscope.prototype.timeToX = function (t) {
    return t * this.wfTS + this.wfTO;
 };
 
+Oscilloscope.prototype.voltToY = function (v, c) {
+   return v * this.wfUS[c] + this.wfUO[c];
+};
+
 Oscilloscope.prototype.XToTime = function (x) {
    return (x - this.wfTO) / this.wfTS;
 };
 
-Oscilloscope.prototype.voltToY = function (v, c) {
-   return v * this.wfUS[c] + this.wfUO[c];
+Oscilloscope.prototype.YToVolt = function (y, c) {
+   return (y - this.wfUO[c]) / this.wfUS[c];
 };
 
 Oscilloscope.prototype.drawWF = function (ctx) {
@@ -1176,7 +1235,7 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
    ctx.save();
 
    if (this.histo.dragLeftHandle)
-   // drag line
+      // draw drag line
       ctx.drawLine(this.histo.dragX, this.hiy1, this.histo.dragX, this.hiy2);
    else {
       ctx.beginPath();

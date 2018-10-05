@@ -162,7 +162,7 @@
             </div>
 
             <div class="vMiddleBox vSpacer5">
-            Holdoff:<input type="text" id="holdoff" value="0">&nbsp;ms
+            Holdoff:&nbsp;<input type="text" id="holdoff" value="0">&nbsp;ms
             </div>
 
             <table>
@@ -473,9 +473,7 @@
          <div class="vMiddleElement">
             <div style="text-align:center">
                <input type="checkbox" id="dispHisto" onclick="dispHisto(this)">&nbsp;Display Histograms
-            </div>
-            <div style="text-align:center">
-               Accumulate<select class="measSelect" onchange="setNStat(this.value)">
+               &nbsp;&nbsp;&nbsp;Accumulate <select class="measSelect" onchange="setNStat(this.value)">
                <option value="10">10</option>
                <option value="50">50</option>
                <option value="100">100</option>
@@ -486,11 +484,9 @@
                <option value="50000">50000</option>
                <option value="100000">100000</option>
                <option value="1000000">1000000</option>
-            </select>measurements
-            </div>
-            <div style="text-align:center">
-               <button style="background-color:#F8F8F8;margin:3px;padding:3px" type="button" onClick="clearStat()">Clear
-                  statistics
+               </select>measurements
+               &nbsp;&nbsp;&nbsp;<button style="background-color:#F8F8F8;margin:3px;padding:3px" type="button" onClick="clearStat()">&nbsp;Clear
+                  statistics&nbsp;
                </button>
             </div>
             <hr/>

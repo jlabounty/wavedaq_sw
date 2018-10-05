@@ -1644,7 +1644,8 @@ function configSlide() {
 
 function measRem() {
    this.parentNode.parentNode.removeChild(this.parentNode);
-   measOnFocus(undefined,undefined); // remove any cursor
+   OSC.timeCursor.on = false;
+   OSC.voltageCursor.on = false;
 }
 
 function measAdd() {
@@ -1692,13 +1693,13 @@ function measAdd() {
    }
    meas.appendChild(s);
 
-   measOnFocus(undefined,undefined); // remove any cursor
    measSelect(meas, s, prev);
 }
 
 function measSelect(meas, sel, prev) {
 
-   measOnFocus(undefined,undefined); // remove any cursor
+   OSC.timeCursor.on = false; // remove any cursor
+   OSC.voltageCursor.on = false;
 
    // remove previous input fields
    for (var i = meas.childNodes.length - 1; i > 1; i--)
@@ -1757,17 +1758,51 @@ function measSelect(meas, sel, prev) {
          input[pi].onchange = function () {
             measParamChange(meas);
          };
-         input[pi].onfocus = (function () {
-            var i = pi;
-            var m = meas;
-            return function () { // hack: inline closure
-               measOnFocus(m, i);
-            }
-         })();
+
+         if (meas.measurement.param[pi].type === "tcursor")
+            input[pi].addEventListener('focus', function(e) {
+               OSC.timeCursor.on = true;
+               OSC.voltageCursor.on = false;
+               OSC.timeCursor.input = this;
+               OSC.timeCursor.time = this.value;
+            }, false);
+
+         else if (meas.measurement.param[pi].type === "ucursor")
+            input[pi].addEventListener('focus', function(e) {
+               OSC.timeCursor.on = false;
+               OSC.voltageCursor.on = true;
+               OSC.voltageCursor.input = this;
+               OSC.voltageCursor.voltage = this.value;
+               OSC.voltageCursor.channel = meas.measurement.param[1].value;
+            }, false);
+
+         else
+            input[pi].addEventListener('focus', function(e) {
+               OSC.timeCursor.on = false;
+               OSC.voltageCursor.on = false;
+            }, false);
+
+            /*
          input[pi].addEventListener('focus', function(e) {
-            OSC.timeCursor.input = this;
-            OSC.timeCursor.time = this.value;
+            if (meas.measurement.param[i].type === "tcursor") {
+               OSC.timeCursor.on = true;
+               OSC.voltageCursor.on = false;
+               OSC.timeCursor.input = this;
+               OSC.timeCursor.time = this.value;
+               OSC.timeCursor.callback = measParamChange;
+            } else if (meas.measurement.param[i].type === "ucursor") {
+               OSC.timeCursor.on = false;
+               OSC.voltageCursor.on = true;
+               OSC.voltageCursor.input = this;
+               OSC.voltageCursor.voltage = this.value;
+               OSC.voltageCursor.callback = measParamChange;
+               OSC.voltageCursor.channel = meas.measurement.param[1].value;
+            } else {
+               OSC.timeCursor.on = false;
+               OSC.voltageCursor.on = false;
+            }
          }, false);
+*/
 
          var text = document.createElement("span");
          text.innerHTML = "&nbsp;" + meas.measurement.param[pi].name + ":&nbsp;";
@@ -1778,23 +1813,6 @@ function measSelect(meas, sel, prev) {
       measParamChange(meas);
    }
 
-}
-
-var activeMeas = undefined;
-var activeMeasIndex = undefined;
-
-function measOnFocus(meas, index) {
-   activeMeas = meas;
-   activeMeasIndex = index;
-   if (meas != undefined)
-      OSC.setTimeCursor(meas.childNodes[index], measParamChangeCB);
-   else
-      OSC.setTimeCursor(undefined);
-   console.log(meas, index);
-}
-
-function measParamChangeCB() {
-   measParamChange(activeMeas);
 }
 
 function measParamChange(meas) {
