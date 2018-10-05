@@ -406,6 +406,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       }
 
       else {
+         std::cout << "Invalid command \"" << item << "\" received. Aborting." << std::endl;
          assert(0);
       }
       

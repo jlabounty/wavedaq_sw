@@ -824,8 +824,18 @@ function loadWF() {
       }
 
       OSC.idle = false;
+
+      var holdoff = parseFloat(document.getElementById("holdoff").value);
+      if (holdoff > 10000) {
+         holdoff = 10000;
+         document.getElementById("holdoff").value = "10000";
+      }
+      if (holdoff < 0) {
+         holdoff = 0;
+         document.getElementById("holdoff").value = "0";
+      }
       if (OSC.running)
-         OSC.timer.loadWF = window.setTimeout(loadWF, 10); // schedule next waveform read
+         OSC.timer.loadWF = window.setTimeout(loadWF, holdoff); // schedule next waveform read
 
       // calculate sum and FFT waveforms
       calcMathWF(wf);
@@ -987,8 +997,17 @@ function receiveWF() {
 
       } else {
          // schedule next waveform read
+         var holdoff = parseFloat(document.getElementById("holdoff").value);
+         if (holdoff > 10000) {
+            holdoff = 10000;
+            document.getElementById("holdoff").value = "10000";
+         }
+         if (holdoff < 0) {
+            holdoff = 0;
+            document.getElementById("holdoff").value = "0";
+         }
          if (OSC.running)
-            OSC.timer.loadWF = window.setTimeout(loadWF, 10);
+            OSC.timer.loadWF = window.setTimeout(loadWF, holdoff);
 
          // send waveforms to oscilloscope
          if (!OSC.idle)
