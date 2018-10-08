@@ -165,6 +165,7 @@ Measurement.prototype.setFunc = function (name) {
 
    this.index = i;
    this.name = measList[i].name;
+   this.unit = measList[i].unit;
    this.param = JSON.parse(JSON.stringify(measList[i].param)); // clone whole array
 };
 

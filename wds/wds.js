@@ -1753,6 +1753,7 @@ function measSelect(meas, sel, prev) {
          input[pi] = document.createElement("input");
          input[pi].type = "text";
          input[pi].size = 10;
+         input[pi].style.width = "50px";
          input[pi].value = meas.measurement.param[pi].value;
          input[pi].onchange = function () {
             measParamChange(meas);
@@ -1832,6 +1833,30 @@ function clearStat() {
    for (i = 0; i < OSC.measList.childNodes.length; i++)
       if (OSC.measList.childNodes[i].measurement)
          OSC.measList.childNodes[i].measurement.resetStat();
+}
+
+function measSave() {
+   var text = OSC.saveHistos();
+   var blob = new Blob([text], {type:"text/plain"});
+   var url = window.URL.createObjectURL(blob);
+
+   var downloadLink = document.createElement("a");
+   var d = new Date();
+   downloadLink.download = "histos_"+d.getFullYear()+"_"+
+      (d.getMonth()<10?"0":"")+d.getMonth()+"_"+
+      (d.getDay()<10?"0":"")+d.getDay()+"_"+
+      (d.getHours()<10?"0":"")+d.getHours()+"_"+
+      (d.getMinutes()<10?"0":"")+d.getMinutes()+"_"+
+      (d.getSeconds()<10?"0":"")+d.getSeconds()+".txt";
+   downloadLink.innerHTML = "Download File";
+   downloadLink.href = url;
+   downloadLink.onclick = function(e) {
+      document.body.removeChild(event.target);
+   };
+   downloadLink.style.display = "none";
+   document.body.appendChild(downloadLink);
+
+   downloadLink.click();
 }
 
 function dispHisto(c) {

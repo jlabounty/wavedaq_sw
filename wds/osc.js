@@ -163,9 +163,10 @@ function Oscilloscope(div) { // constructor
    };
 
    this.histo.button[0] = document.getElementById("measClear");
-   this.histo.button[1] = document.getElementById("measZoomIn");
-   this.histo.button[2] = document.getElementById("measZoomOut");
-   this.histo.button[3] = document.getElementById("measZoomFit");
+   this.histo.button[1] = document.getElementById("measSave");
+   this.histo.button[2] = document.getElementById("measZoomIn");
+   this.histo.button[3] = document.getElementById("measZoomOut");
+   this.histo.button[4] = document.getElementById("measZoomFit");
 
    // mouse event handlers
    window.addEventListener("mousedown", this.mouseEvent.bind(this), true);
@@ -1297,6 +1298,86 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
       this.histo.button[i].style.top = (this.hiy1 + 10 + 30 * i) + "px";
    }
 };
+
+Oscilloscope.prototype.saveHistos = function () {
+   if (!OSC.connected)
+      return;
+
+   var nMeas = 0;
+   var histo = [];
+   var xMax = 0;
+   var text = "";
+   for (var idx = 0; idx < this.measList.childNodes.length; idx++) {
+      var m = this.measList.childNodes[idx].measurement;
+      if (m) {
+         var histoSum = 0;
+         var histoSum2 = 0;
+         var histoN = 0;
+
+         nMeas++;
+         var nBins = Math.floor(1.5 * Math.sqrt(m.nMeasured));
+         if (nBins > 1000)
+            nBins = 1000;
+         for (i = 0; i < nBins; i++)
+            histo[i] = 0;
+
+         var xmin = m.statArray[0];
+         var xmax = m.statArray[0];
+         for (i = 0; i < m.nMeasured; i++) {
+            if (m.statArray[i] < xmin)
+               xmin = m.statArray[i];
+            if (m.statArray[i] > xmax)
+               xmax = m.statArray[i];
+         }
+         // center around bins
+         var d = 0.5 * (xmax-xmin) / (nBins - 1);
+         xmin -= d;
+         xmax += d;
+
+         // fill data into histo
+         for (i = 0; i < m.nMeasured; i++) {
+            var bin = Math.floor((m.statArray[i] - xmin) /
+               (xmax - xmin) * nBins);
+            histo[bin]++;
+            histoSum += m.statArray[i];
+            histoSum2 += m.statArray[i] * m.statArray[i];
+            histoN++;
+         }
+
+         // save measurement
+         text += "--------------------\r\n";
+         text += "Measurement: "+m.name+" in "+m.unit+", ";
+         for (i = 0 ; i<m.param.length ; i++) {
+            text += m.param[i].name + ": ";
+            text += m.param[i].value;
+            if (i<m.param.length-1)
+               text += ", ";
+         }
+         text += "\r\n";
+
+         // print statistics
+         var mean = histoSum / histoN;
+         var std = Math.sqrt(histoSum2 / histoN - histoSum * histoSum / histoN / histoN);
+
+         text += "Mean: "+mean.toFixed(3)+"   Std: "+std.toFixed(4)+"   N: "+histoN+"\r\n\r\n";
+
+         // save histo
+         text += "Histogram:\r\n";
+         var x;
+         for (i = 0; i < nBins; i++) {
+            x = (xmin + (i/nBins) * (xmax-xmin)).toFixed(3);
+            text += x + "\t";
+            x = (xmin + ((i+1)/nBins) * (xmax-xmin)).toFixed(3);
+            text += x + "\t";
+            text += histo[i] + "\r\n";
+         }
+         text += "\r\n\r\n\r\n";
+      }
+   }
+
+   return text;
+};
+
 
 const LN10 = 2.302585094;
 const LOG2 = 0.301029996;
