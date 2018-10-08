@@ -3014,10 +3014,10 @@ void WP::DoCalibrationVoltageStep()
    if (calibProg.state == cCsFirstBoard) {
       calibProg.state    = cCsFirstSample;
       calibProg.progress = 0;
-      calibProg.nIter1   = 200;
-      calibProg.nIter2   = 200;
-      calibProg.nIter3   = 200;
-      calibProg.nIter4   = 200;
+      calibProg.nIter1   = 100;
+      calibProg.nIter2   = 100;
+      calibProg.nIter3   = 100;
+      calibProg.nIter4   = 100;
       calibProg.iIter1   = 0;
       calibProg.iIter2   = 0;
       calibProg.iIter3   = 0;
@@ -3074,6 +3074,9 @@ void WP::DoCalibrationVoltageStep()
       // set offset zero
       b->SetDacCalDcV(0);
       
+      // set holdoff to meet target DAQ rate
+      b->SetTriggerHoldoff(30);
+      
       int n = calibProg.nIter1;
       n = std::max(n, calibProg.nIter2);
       n = std::max(n, calibProg.nIter3);
@@ -3106,12 +3109,12 @@ void WP::DoCalibrationVoltageStep()
          for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
                b->mVCalib.mCalib.wf_offset1[ch][bin] = (float)calibProg.ave->Median(0, ch, bin);
-         
+
          // calibProg.ave->SaveNormalizedDistribution("wf.csv", 0);
          calibProg.ave->Reset();
       }
       
-      sleep_ms(10); // obtain 100 Hz rate
+      sleep_ms(b->GetTriggerHoldoff());
       return;
    }
    
@@ -3150,7 +3153,7 @@ void WP::DoCalibrationVoltageStep()
          calibProg.ave->Reset();
       }
       
-      sleep_ms(10); // obtain 100 Hz rate
+      sleep_ms(b->GetTriggerHoldoff());
       return;
    }
    
@@ -3191,7 +3194,7 @@ void WP::DoCalibrationVoltageStep()
          calibProg.ave->Reset();
       }
       
-      sleep_ms(10); // obtain 100 Hz rate
+      sleep_ms(b->GetTriggerHoldoff());
       return;
    }
    
@@ -3230,7 +3233,7 @@ void WP::DoCalibrationVoltageStep()
          calibProg.ave = NULL;
       }
       
-      sleep_ms(10); // obtain 100 Hz rate
+      sleep_ms(b->GetTriggerHoldoff());
       return;
    }
    
@@ -3252,7 +3255,7 @@ void WP::DoCalibrationVoltageStep()
    WDEvent event(b->GetSerialNumber());
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
-      sleep_ms(10);
+      sleep_ms(b->GetTriggerHoldoff());
    }
    while (!RequestEvent(b, 1000, event));
    
@@ -3268,7 +3271,7 @@ void WP::DoCalibrationVoltageStep()
    b->SetAdcChTxEn(0xFFFF);
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
-      sleep_ms(10);
+      sleep_ms(b->GetTriggerHoldoff());
    }
    while (!RequestEvent(b, 1000, event));
    
@@ -3287,7 +3290,7 @@ void WP::DoCalibrationVoltageStep()
    b->SetAdcChTxEn(0);
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
-      sleep_ms(10);
+      sleep_ms(b->GetTriggerHoldoff());
    }
    while (!RequestEvent(b, 1000, event));
    
@@ -3303,7 +3306,7 @@ void WP::DoCalibrationVoltageStep()
    b->SetAdcChTxEn(0xFFFF);
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
-      sleep_ms(10);
+      sleep_ms(b->GetTriggerHoldoff());
    }
    while (!RequestEvent(b, 1000, event));
    
@@ -3322,7 +3325,7 @@ void WP::DoCalibrationVoltageStep()
    b->SetAdcChTxEn(0);
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
-      sleep_ms(10);
+      sleep_ms(b->GetTriggerHoldoff());
    }
    while (!RequestEvent(b, 1000, event));
    
@@ -3338,7 +3341,7 @@ void WP::DoCalibrationVoltageStep()
    b->SetAdcChTxEn(0xFFFF);
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
-      sleep_ms(10);
+      sleep_ms(b->GetTriggerHoldoff());
    }
    while (!RequestEvent(b, 1000, event));
    

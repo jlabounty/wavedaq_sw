@@ -256,7 +256,9 @@ function populateControls(init) {
       document.getElementById("rbTriggerModeNormal").checked = false;
       document.getElementById("rbTriggerModeAuto").checked = true;
    }
-
+   if (document.getElementById("triggerHoldoff") != document.activeElement) {
+      document.getElementById("triggerHoldoff").value = OSC.wdb[OSC.curBoard].triggerHoldoff;
+   }
    if (OSC.wdb[OSC.curBoard].triggerSource == 0) {
       document.getElementById("rbTriggerSourceInt").checked = true;
       document.getElementById("rbTriggerSourceExt").checked = false;
@@ -825,14 +827,14 @@ function loadWF() {
 
       OSC.idle = false;
 
-      var holdoff = parseFloat(document.getElementById("holdoff").value);
+      var holdoff = parseFloat(document.getElementById("triggerHoldoff").value);
       if (holdoff > 10000) {
          holdoff = 10000;
-         document.getElementById("holdoff").value = "10000";
+         document.getElementById("triggerHoldoff").value = "10000";
       }
       if (holdoff < 0) {
          holdoff = 0;
-         document.getElementById("holdoff").value = "0";
+         document.getElementById("triggerHoldoff").value = "0";
       }
       if (OSC.running)
          OSC.timer.loadWF = window.setTimeout(loadWF, holdoff); // schedule next waveform read
@@ -997,14 +999,14 @@ function receiveWF() {
 
       } else {
          // schedule next waveform read
-         var holdoff = parseFloat(document.getElementById("holdoff").value);
+         var holdoff = parseFloat(document.getElementById("triggerHoldoff").value);
          if (holdoff > 10000) {
             holdoff = 10000;
-            document.getElementById("holdoff").value = "10000";
+            document.getElementById("triggerHoldoff").value = "10000";
          }
          if (holdoff < 0) {
             holdoff = 0;
-            document.getElementById("holdoff").value = "0";
+            document.getElementById("triggerHoldoff").value = "0";
          }
          if (OSC.running)
             OSC.timer.loadWF = window.setTimeout(loadWF, holdoff);

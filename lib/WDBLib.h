@@ -466,6 +466,7 @@ class WDB: public WDBREG {
    bool             mSendBlocked;
    int              mReceiveTimeoutMs;
    unsigned int     mChnTxEn;
+   int              mTriggerHoldoff;
 
    unsigned int     creg[REG_NR_OF_CTRL_REGS];
    unsigned int     sreg[REG_NR_OF_STAT_REGS];
@@ -662,6 +663,9 @@ public:
    unsigned int GetChnTxEn() { return mChnTxEn; };
    void SetChnTxEn(int mask) { mChnTxEn = mask; };
    // int GetTimingReferenceSignal() { return mTimingReferenceSignal; }
+   
+   void SetTriggerHoldoff(int holdoff) { mTriggerHoldoff = holdoff; }
+   int GetTriggerHoldoff() { return mTriggerHoldoff; }
 };
 
 //--------------------------------------------------------------------
