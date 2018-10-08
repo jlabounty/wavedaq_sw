@@ -96,13 +96,23 @@ var measList = [
       name: "Pos Width",
       unit: "ns",
       digits: 1,
-      param: [{name: "WD", type: "WD", value: 0}, {name: "CH", type: "CH", value: 0}]
+      f: measPosWidth,
+      param: [
+         {name: "WD", type: "WD", value: 0},
+         {name: "CH", type: "CH", value: 0},
+         {name: "Level", type: "ucursor", value: 50},
+         ]
    },
    {
       name: "Neg Width",
       unit: "ns",
       digits: 1,
-      param: [{name: "WD", type: "WD", value: 0}, {name: "CH", type: "CH", value: 0}]
+      f: measNegWidth,
+      param: [
+         {name: "WD", type: "WD", value: 0},
+         {name: "CH", type: "CH", value: 0},
+         {name: "Level", type: "ucursor", value: -20},
+      ]
    },
    {
       name: "Chn delay",
@@ -636,6 +646,78 @@ function measRise(ctx, xa, ya, i1, i2) {
 
       ctx.drawLine(x2, (y1+y2)/2, x2-4, (y1+y2)/2-4);
       ctx.drawLine(x2, (y1+y2)/2, x2-4, (y1+y2)/2+4);
+   }
+
+   return (t2 - t1) * 1E9;
+}
+
+function measPosWidth(ctx, xa, ya, i1, i2) {
+   var c = this.param[1].value;
+   var x = xa[c];
+   var y = ya[c];
+
+   var level =  parseFloat(this.param[2].value)/1000;
+
+   /* search level crossings with noise rejection */
+   var t1 = undefined;
+   var t2 = undefined;
+   for (i = i1 + 5; i < i2 - 5; i++) {
+      if (y[i] < level && y[i - 3] < level && y[i + 1] >= level && y[i + 3] >= level && t1 === undefined)
+         t1 = x[i] + (y[i]-level) * (x[i + 1] - x[i]) / (y[i] - y[i+1]);
+      if (y[i] > level && y[i - 3] > level && y[i + 1] <= level && y[i + 3] <= level && t1 !== undefined && t2 === undefined)
+         t2 = x[i] + (y[i]-level) * (x[i + 1] - x[i]) / (y[i] - y[i+1]);
+   }
+
+   if (ctx !== undefined && OSC.chOn[c]) {
+      var x1 = OSC.timeToX(t1);
+      var x2 = OSC.timeToX(t2);
+      var y  = OSC.voltToY(level, c);
+
+      ctx.drawLine(x1, y, x2, y);
+      ctx.drawLine(x1, y-10, x1, y+10);
+      ctx.drawLine(x2, y-10, x2, y+10);
+
+      ctx.drawLine(x1, y, x1+4, y-4);
+      ctx.drawLine(x1, y, x1+4, y+4);
+
+      ctx.drawLine(x2, y, x2-4, y-4);
+      ctx.drawLine(x2, y, x2-4, y+4);
+   }
+
+   return (t2 - t1) * 1E9;
+}
+
+function measNegWidth(ctx, xa, ya, i1, i2) {
+   var c = this.param[1].value;
+   var x = xa[c];
+   var y = ya[c];
+
+   var level =  parseFloat(this.param[2].value)/1000;
+
+   /* search level crossings with noise rejection */
+   var t1 = undefined;
+   var t2 = undefined;
+   for (i = i1 + 5; i < i2 - 5; i++) {
+      if (y[i] > level && y[i - 3] > level && y[i + 1] <= level && y[i + 3] <= level && t1 === undefined)
+         t1 = x[i] + (y[i]-level) * (x[i + 1] - x[i]) / (y[i] - y[i+1]);
+      if (y[i] < level && y[i - 3] < level && y[i + 1] >= level && y[i + 3] >= level && t1 !== undefined && t2 === undefined)
+         t2 = x[i] + (y[i]-level) * (x[i + 1] - x[i]) / (y[i] - y[i+1]);
+   }
+
+   if (ctx !== undefined && OSC.chOn[c]) {
+      var x1 = OSC.timeToX(t1);
+      var x2 = OSC.timeToX(t2);
+      var y  = OSC.voltToY(level, c);
+
+      ctx.drawLine(x1, y, x2, y);
+      ctx.drawLine(x1, y-10, x1, y+10);
+      ctx.drawLine(x2, y-10, x2, y+10);
+
+      ctx.drawLine(x1, y, x1+4, y-4);
+      ctx.drawLine(x1, y, x1+4, y+4);
+
+      ctx.drawLine(x2, y, x2-4, y-4);
+      ctx.drawLine(x2, y, x2-4, y+4);
    }
 
    return (t2 - t1) * 1E9;

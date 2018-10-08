@@ -1644,8 +1644,7 @@ function configSlide() {
 
 function measRem() {
    this.parentNode.parentNode.removeChild(this.parentNode);
-   OSC.timeCursor.on = false;
-   OSC.voltageCursor.on = false;
+   setCursorsOff();
 }
 
 function measAdd() {
@@ -1778,31 +1777,8 @@ function measSelect(meas, sel, prev) {
 
          else
             input[pi].addEventListener('focus', function(e) {
-               OSC.timeCursor.on = false;
-               OSC.voltageCursor.on = false;
+               setCursorsOff();
             }, false);
-
-            /*
-         input[pi].addEventListener('focus', function(e) {
-            if (meas.measurement.param[i].type === "tcursor") {
-               OSC.timeCursor.on = true;
-               OSC.voltageCursor.on = false;
-               OSC.timeCursor.input = this;
-               OSC.timeCursor.time = this.value;
-               OSC.timeCursor.callback = measParamChange;
-            } else if (meas.measurement.param[i].type === "ucursor") {
-               OSC.timeCursor.on = false;
-               OSC.voltageCursor.on = true;
-               OSC.voltageCursor.input = this;
-               OSC.voltageCursor.voltage = this.value;
-               OSC.voltageCursor.callback = measParamChange;
-               OSC.voltageCursor.channel = meas.measurement.param[1].value;
-            } else {
-               OSC.timeCursor.on = false;
-               OSC.voltageCursor.on = false;
-            }
-         }, false);
-*/
 
          var text = document.createElement("span");
          text.innerHTML = "&nbsp;" + meas.measurement.param[pi].name + ":&nbsp;";

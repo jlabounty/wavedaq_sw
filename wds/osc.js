@@ -536,6 +536,11 @@ Oscilloscope.prototype.drawMeasurements = function (ctx) {
          this.measList.childNodes[i].measurement.draw(ctx, this.wf.T, this.wf.U, this.i1, this.i2);
 };
 
+function setCursorsOff() {
+   OSC.timeCursor.on = false;
+   OSC.voltageCursor.on = false;
+}
+
 Oscilloscope.prototype.drawCursors = function (ctx) {
    if (this.timeCursor.on) {
       this.timeCursor.time = this.timeCursor.input.value*1E-9;
