@@ -1378,6 +1378,14 @@ void TCB::GetTRGDLY(u_int32_t *dly){
     ReadBLT(addr+(iblt*BLTSIZE),dly+(iblt*BLTSIZE), BLTSIZE);
   }
 }
+// set adc prescaling readout
+void TCB::SetPrescAdc(u_int32_t *val){
+   WriteReg(PRESCADC, val);
+  }
+// set adc prescaling readout
+void TCB::GetPrescAdc(u_int32_t *val){
+   ReadReg(PRESCADC, val);
+  }
 //Start AutoCalibration of Serdes
 void TCB::AutoCalibrateSerdes(){
    u_int32_t val = 0x80000000;
