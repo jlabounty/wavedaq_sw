@@ -1481,3 +1481,19 @@ void TCB::SetSingleCrateTriggerAnd(int nChn, int* chn, short shape){
    for(int i=0; i<256; i++) arr[i]=true;
    SetSingleCrateChnLogic(arr);
 }
+//Set trigger and busy masks from external DAQ system
+void TCB::SetFMask(bool trgmask, bool busymask){
+   u_int32_t data;
+   // first read the register
+   ReadReg(RRUN, &data);
+   // mask fmasks
+   data &= 0xFFFFFF3F;
+   // set trigger mask if required
+   if(trgmask)
+     data |= 1<<6;
+   // set busy mask if required
+   if(trgmask)
+     data |= 1<<7;
+   // write the reg
+   WriteReg(RRUN, &data);
+}
