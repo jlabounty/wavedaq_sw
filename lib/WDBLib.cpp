@@ -3162,7 +3162,7 @@ void WP::DoCalibrationVoltageStep()
       // initialize data on first iteration
       if (calibProg.iIter3 == 0) {
          calibProg.ave->Reset();
-         mRotateWaveform      = false; // rotate waveforms
+         mRotateWaveform      = false; // do not rotate waveforms
          mOfsCalib1           = true;  // do 1st calibration
          mOfsCalib2           = false; // do not do 2nd calibration
 

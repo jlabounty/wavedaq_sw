@@ -53,6 +53,18 @@ var measList = [
          {name: "T2Int", type: "tcursor", value: 400}
       ]
    },
+   {
+      name: "Chn correl",
+      unit: "",
+      digits: 3,
+      f: measChnCorrel,
+      param: [
+         {name: "WD1", type: "WD", value: 0},
+         {name: "CH1", type: "CH", value: 0},
+         {name: "WD2", type: "WD", value: 0},
+         {name: "CH2", type: "CH", value: 1},
+      ]
+   },
    //------------------
    {
       name: "Freq",
@@ -141,18 +153,6 @@ var measList = [
          {name: "T2", type: "tcursor", value: 200}
       ]
    },
-   {
-      name: "Chn correl",
-      unit: "",
-      digits: 3,
-      f: measChnCorrel,
-      param: [
-         {name: "WD1", type: "WD", value: 0},
-         {name: "CH1", type: "CH", value: 0},
-         {name: "WD2", type: "WD", value: 0},
-         {name: "CH2", type: "CH", value: 1},
-      ]
-   }
 ];
 
 function Measurement() // constructor
@@ -852,9 +852,7 @@ function measChnDelay(ctx, x, y, i1, i2) {
 }
 
 function measChnCorrel(ctx, x, y, i1, i2) {
-   //var w1 = this.param[0].value;
    var c1 = this.param[1].value;
-   //var w2 = this.param[2].value;
    var c2 = this.param[3].value;
 
    var mean1 = 0;
@@ -863,15 +861,17 @@ function measChnCorrel(ctx, x, y, i1, i2) {
    var rms2 = 0;
    var cov = 0;
 
+   if (i2 <= i1)
+      return undefined;
+
    //calculate average
    for (var i = i1; i < i2; i++){
       mean1 += y[c1][i];
       mean2 += y[c2][i];
    }
-   if (i2 > i1){
-      mean1 /= (i2 - i1);
-      mean2 /= (i2 - i1);
-   }
+
+   mean1 /= (i2 - i1);
+   mean2 /= (i2 - i1);
 
    //calculate rms
    for (i = i1; i < i2; i++){
@@ -882,7 +882,7 @@ function measChnCorrel(ctx, x, y, i1, i2) {
    rms1 = Math.sqrt(rms1 / (i2 - i1));
    rms2 = Math.sqrt(rms2 / (i2 - i1));
    cov = cov / (i2 - i1);
-   cov = cov/(rms1*rms2);
+   cov = cov / (rms1*rms2);
 
    return cov;
 }
