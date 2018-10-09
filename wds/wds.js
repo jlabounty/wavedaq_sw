@@ -827,17 +827,8 @@ function loadWF() {
 
       OSC.idle = false;
 
-      var holdoff = parseFloat(document.getElementById("triggerHoldoff").value);
-      if (holdoff > 10000) {
-         holdoff = 10000;
-         document.getElementById("triggerHoldoff").value = "10000";
-      }
-      if (holdoff < 0) {
-         holdoff = 0;
-         document.getElementById("triggerHoldoff").value = "0";
-      }
       if (OSC.running)
-         OSC.timer.loadWF = window.setTimeout(loadWF, holdoff); // schedule next waveform read
+         OSC.timer.loadWF = window.setTimeout(loadWF, 0); // schedule next waveform read
 
       // calculate sum and FFT waveforms
       calcMathWF(wf);
@@ -861,7 +852,7 @@ function loadWF() {
       }
 
    if (chn == 0 && OSC.running) {
-      OSC.timer.loadWF = window.setTimeout(loadWF, 10); // schedule next waveform read
+      OSC.timer.loadWF = window.setTimeout(loadWF, 0); // schedule next waveform read
       return;
    }
 
@@ -999,17 +990,8 @@ function receiveWF() {
 
       } else {
          // schedule next waveform read
-         var holdoff = parseFloat(document.getElementById("triggerHoldoff").value);
-         if (holdoff > 10000) {
-            holdoff = 10000;
-            document.getElementById("triggerHoldoff").value = "10000";
-         }
-         if (holdoff < 0) {
-            holdoff = 0;
-            document.getElementById("triggerHoldoff").value = "0";
-         }
          if (OSC.running)
-            OSC.timer.loadWF = window.setTimeout(loadWF, holdoff);
+            OSC.timer.loadWF = window.setTimeout(loadWF, 0);
 
          // send waveforms to oscilloscope
          if (!OSC.idle)

@@ -1605,6 +1605,8 @@ void WDB::RequestEvent()
    SetDaqSingle(true);  // start DRS domino wave
    SetDaqSingle(false);
    
+   sleep_ms(mTriggerHoldoff);
+   
    SetDaqSoftTrigger(true);
    SetDaqSoftTrigger(false);
 }
@@ -3113,8 +3115,6 @@ void WP::DoCalibrationVoltageStep()
          // calibProg.ave->SaveNormalizedDistribution("wf.csv", 0);
          calibProg.ave->Reset();
       }
-      
-      sleep_ms(b->GetTriggerHoldoff());
       return;
    }
    
@@ -3152,8 +3152,6 @@ void WP::DoCalibrationVoltageStep()
          
          calibProg.ave->Reset();
       }
-      
-      sleep_ms(b->GetTriggerHoldoff());
       return;
    }
    
@@ -3164,9 +3162,9 @@ void WP::DoCalibrationVoltageStep()
       // initialize data on first iteration
       if (calibProg.iIter3 == 0) {
          calibProg.ave->Reset();
-         mRotateWaveform      = true;  // rotate waveforms
+         mRotateWaveform      = false; // rotate waveforms
          mOfsCalib1           = true;  // do 1st calibration
-         mOfsCalib2           = true;  // do 2nd calibration
+         mOfsCalib2           = false; // do not do 2nd calibration
 
          b->SetDacCalDcV(0.45);
       }
@@ -3194,7 +3192,6 @@ void WP::DoCalibrationVoltageStep()
          calibProg.ave->Reset();
       }
       
-      sleep_ms(b->GetTriggerHoldoff());
       return;
    }
    
@@ -3233,7 +3230,6 @@ void WP::DoCalibrationVoltageStep()
          calibProg.ave = NULL;
       }
       
-      sleep_ms(b->GetTriggerHoldoff());
       return;
    }
    
@@ -3255,7 +3251,6 @@ void WP::DoCalibrationVoltageStep()
    WDEvent event(b->GetSerialNumber());
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
-      sleep_ms(b->GetTriggerHoldoff());
    }
    while (!RequestEvent(b, 1000, event));
    
@@ -3271,7 +3266,6 @@ void WP::DoCalibrationVoltageStep()
    b->SetAdcChTxEn(0xFFFF);
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
-      sleep_ms(b->GetTriggerHoldoff());
    }
    while (!RequestEvent(b, 1000, event));
    
@@ -3290,7 +3284,6 @@ void WP::DoCalibrationVoltageStep()
    b->SetAdcChTxEn(0);
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
-      sleep_ms(b->GetTriggerHoldoff());
    }
    while (!RequestEvent(b, 1000, event));
    
@@ -3306,7 +3299,6 @@ void WP::DoCalibrationVoltageStep()
    b->SetAdcChTxEn(0xFFFF);
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
-      sleep_ms(b->GetTriggerHoldoff());
    }
    while (!RequestEvent(b, 1000, event));
    
@@ -3325,7 +3317,6 @@ void WP::DoCalibrationVoltageStep()
    b->SetAdcChTxEn(0);
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
-      sleep_ms(b->GetTriggerHoldoff());
    }
    while (!RequestEvent(b, 1000, event));
    
@@ -3341,7 +3332,6 @@ void WP::DoCalibrationVoltageStep()
    b->SetAdcChTxEn(0xFFFF);
    for (int i=0 ; i<10 ; i++) {
       RequestEvent(b, 1000, event);
-      sleep_ms(b->GetTriggerHoldoff());
    }
    while (!RequestEvent(b, 1000, event));
    
@@ -3737,7 +3727,6 @@ void WP::DoCalibrationTimeStep()
          sleep_ms(10);
       }
       
-      sleep_ms(10); // obtain 100 Hz rate
       return;
    }
    
@@ -3777,7 +3766,6 @@ void WP::DoCalibrationTimeStep()
          b->mTCalib.SetValid(true);
       }
 
-      sleep_ms(10); // obtain 100 Hz rate
       return;
    }
    
@@ -3803,7 +3791,6 @@ void WP::DoCalibrationTimeStep()
             b->mTCalib.mCalib.offset[ch] = (float)(calibProg.ave->RobustAverage(0, ch, 0));
       }
       
-      sleep_ms(10); // obtain 100 Hz rate
       return;
    }
    

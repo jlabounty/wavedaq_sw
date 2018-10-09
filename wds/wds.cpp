@@ -45,7 +45,6 @@ typedef struct {
    WP*               wp;
    TRIGGERMODE       triggerMode;
    int               triggerSelfArm;
-   int               triggerHoldoff;
    READOUTMODE       readoutMode;
    bool              specialTest;
    bool              updatePeriodic;
@@ -195,7 +194,11 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       }
 
       else if (item == "triggerHoldoff") {
-         gl->triggerHoldoff = std::stoi(value);
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetTriggerHoldoff(std::stof(value));
+         else
+            gl->wdb[iBoard]->SetTriggerHoldoff(std::stof(value));
       }
 
       else if (item == "triggerSource") {
@@ -561,7 +564,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "        %d ],\n",                             w->GetFeMux(15));
 
          mg_printf_http_chunk(nc, "      \"triggerMode\": %d,\n",                gl->triggerMode);
-         mg_printf_http_chunk(nc, "      \"triggerHoldoff\": %d,\n",             gl->triggerHoldoff);
+         mg_printf_http_chunk(nc, "      \"triggerHoldoff\": %d,\n",             w->GetTriggerHoldoff());
          mg_printf_http_chunk(nc, "      \"triggerLeadTrailEdgeSel\": %d,\n",    w->GetLeadTrailEdgeSel());
          mg_printf_http_chunk(nc, "      \"triggerExtTriggerOutEnable\": %s,\n", w->GetExtTriggerOutEnable() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"triggerSource\": %d,\n",              w->GetTriggerTypeSel() ? "true" : "false");
@@ -886,7 +889,6 @@ int main(int argc, const char * argv[])
    gl.reset = false;
    gl.triggerMode = cTriggerModeAuto;
    gl.triggerSelfArm = false;
-   gl.triggerHoldoff = 0;
    gl.readoutMode = cReadoutModeDRS;
    gl.updatePeriodic = false;
    gl.dbgRx = gl.dbgTx = 0;
