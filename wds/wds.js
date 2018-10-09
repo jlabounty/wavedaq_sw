@@ -1809,6 +1809,7 @@ function measZoomFit() {
 
 function measLogY() {
    OSC.histo.logY = ! OSC.histo.logY;
+   document.getElementById("measLogY").innerHTML = OSC.histo.logY ? "Lin Y" : "Log Y";
 }
 
 function setNStat(v) {
