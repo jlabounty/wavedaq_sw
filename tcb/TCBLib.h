@@ -10,6 +10,8 @@
 #define RNTRG         0x02                      // trigger enable bits
 #define RALGSEL       0x03                      // algorithm select on TCB1/2_0
 #define RPLLRES       0x04                      // Reset PLLs
+#define RUDPHEA       0x05                      // UDP Header info register
+#define PRESCADC      0x06                      // ADC readout prescaling
 #define USR_ACCESS    0x0F                      // FW compilaiton date
 #define RENA          0x20                      // trigger enable (first address)
 #define RTRIPATT      0x30                      // trigger pattern (first address)
@@ -179,7 +181,7 @@ public:
    // read system event counter
    void GetSystemEventCounter(u_int32_t*);
    // read system trigger type
-   bool GetSystemTriggerType(u_int32_t*);
+   bool GetSystemTriggerType(u_int32_t*, u_int32_t*, u_int32_t*);
    // read trigger counters
    void GetTriggerCounters(u_int32_t*);
    // read memory address
@@ -274,6 +276,10 @@ public:
    void GetPLLUnlockCou(u_int32_t *data);
    //reset the PLL unlock counter PLLs
    void ResetPLLUnlockCou();
+   //Set adc prescaling readout value
+   void SetPrescAdc(u_int32_t *);
+   //Get adc prescaling readout value
+   void GetPrescAdc(u_int32_t *);
    //Set trigger delay
    void SetTRGDLY(u_int32_t *);
    //Get trigger delay

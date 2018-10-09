@@ -111,8 +111,8 @@ function Oscilloscope(div) { // constructor
    this.i1 = 0;
    this.i2 = 0;
 
-   this.timeCursor =  { input: undefined, drag: false, time: 0, x: 0 };
-   this.voltCursor =  { input: undefined, drag: false, volt: 0, y: 0 };
+   this.timeCursor =  { on: false, input: undefined, drag: false, time: 0, x: 0 };
+   this.voltageCursor =  { on: false, input: undefined, drag: false, voltage: 0, y: 0 };
 
    // display object
    this.disp = {
@@ -163,9 +163,10 @@ function Oscilloscope(div) { // constructor
    };
 
    this.histo.button[0] = document.getElementById("measClear");
-   this.histo.button[1] = document.getElementById("measZoomIn");
-   this.histo.button[2] = document.getElementById("measZoomOut");
-   this.histo.button[3] = document.getElementById("measZoomFit");
+   this.histo.button[1] = document.getElementById("measSave");
+   this.histo.button[2] = document.getElementById("measZoomIn");
+   this.histo.button[3] = document.getElementById("measZoomOut");
+   this.histo.button[4] = document.getElementById("measZoomFit");
 
    // mouse event handlers
    window.addEventListener("mousedown", this.mouseEvent.bind(this), true);
@@ -226,9 +227,17 @@ Oscilloscope.prototype.mouseEvent = function (e) {
       else if ((e.button & 2) > 0) e.which = 3; // Right
    }
 
+   // set default cursor to be changed below
+   var cursor = "default";
+
    if (this.disp.histo && e.target == this.canvas) {
 
       // division bar
+      if (Math.abs(e.clientY - this.hiy1) < 10 &&
+         e.clientX > this.x1 && e.clientX < this.x2 &&
+         e.type == "mousemove")
+         cursor = "ns-resize";
+
       if (Math.abs(e.clientY - this.hiy1) < 10 &&
          e.clientX > this.x1 && e.clientX < this.x2 &&
          e.type == "mousedown")
@@ -250,6 +259,12 @@ Oscilloscope.prototype.mouseEvent = function (e) {
       if (e.clientX > this.x1 && e.clientX < this.x1 + 15 &&
          e.clientY > this.hiy1 + this.hiHeight / 2 - 15 &&
          e.clientY < this.hiy1 + this.hiHeight / 2 + 15 &&
+         e.type == "mousemove")
+         cursor = "e-resize";
+
+      if (e.clientX > this.x1 && e.clientX < this.x1 + 15 &&
+         e.clientY > this.hiy1 + this.hiHeight / 2 - 15 &&
+         e.clientY < this.hiy1 + this.hiHeight / 2 + 15 &&
          e.type == "mousedown") {
          this.histo.dragLeftHandle = true;
       }
@@ -260,6 +275,7 @@ Oscilloscope.prototype.mouseEvent = function (e) {
             this.histo.dragX = this.x1;
          if (this.histo.dragX > this.x2)
             this.histo.dragX = this.x2;
+         cursor = "ew-resize";
       }
 
       if (e.type == "mouseup") {
@@ -279,14 +295,25 @@ Oscilloscope.prototype.mouseEvent = function (e) {
       if (e.clientX < this.x2 && e.clientX > this.x2 - 15 &&
          e.clientY > this.hiy1 + this.hiHeight / 2 - 15 &&
          e.clientY < this.hiy1 + this.hiHeight / 2 + 15 &&
+         e.type == "mousemove")
+         cursor = "w-resize";
+
+      if (e.clientX < this.x2 && e.clientX > this.x2 - 15 &&
+         e.clientY > this.hiy1 + this.hiHeight / 2 - 15 &&
+         e.clientY < this.hiy1 + this.hiHeight / 2 + 15 &&
          e.type == "mousedown") {
          this.histo.dragRightHandle = true;
       }
    }
 
-   if (this.timeCursor.input != undefined && e.target == this.canvas) {
+   if (this.timeCursor.on && e.target == this.canvas) {
 
-      if (e.clientX > this.x1 && e.clientX < this.x2 &&
+      if (e.clientX > this.timeCursor.x-5 && e.clientX < this.timeCursor.x+5 &&
+         e.clientY > this.y1 && e.clientY < this.y2 &&
+         e.type == "mousemove")
+         cursor = "ew-resize";
+
+      if (e.clientX > this.timeCursor.x-5 && e.clientX < this.timeCursor.x+5 &&
           e.clientY > this.y1 && e.clientY < this.y2 &&
           e.type == "mousedown")
          this.timeCursor.drag = true;
@@ -296,18 +323,45 @@ Oscilloscope.prototype.mouseEvent = function (e) {
       }
 
       if (e.type == "mousemove" && this.timeCursor.drag) {
+         cursor = "ew-resize";
          this.timeCursor.dragX = e.clientX;
          var t = (this.XToTime(e.clientX) / 1E-9).toFixed(1);
          this.timeCursor.x = e.clientX;
          this.timeCursor.time = t;
          this.timeCursor.input.value = t;
+         this.timeCursor.input.onchange();
       }
    }
-};
 
-Oscilloscope.prototype.setTimeCursor = function(i) {
-   this.timeCursor.input = i;
-}
+   if (this.voltageCursor.on && e.target == this.canvas) {
+
+      if (e.clientY > this.voltageCursor.y-5 && e.clientY < this.voltageCursor.y+5 &&
+         e.clientX > this.x1 && e.clientX < this.x2 &&
+         e.type == "mousemove")
+         cursor = "ns-resize";
+
+      if (e.clientY > this.voltageCursor.y-5 && e.clientY < this.voltageCursor.y+5 &&
+         e.clientX > this.x1 && e.clientX < this.x2 &&
+         e.type == "mousedown")
+         this.voltageCursor.drag = true;
+
+      if (e.type == "mouseup") {
+         this.voltageCursor.drag = false;
+      }
+
+      if (e.type == "mousemove" && this.voltageCursor.drag) {
+         cursor = "ns-resize";
+         this.voltageCursor.dragY = e.clientY;
+         var u = (this.YToVolt(e.clientY, this.voltageCursor.channel) * 1000).toFixed(1);
+         this.voltageCursor.y = e.clientY;
+         this.voltageCursor.voltage = u;
+         this.voltageCursor.input.value = u;
+         this.voltageCursor.input.onchange();
+      }
+   }
+
+   document.getElementById('scope').style.cursor = cursor;
+};
 
 Oscilloscope.prototype.resizeCanvas = function () {
    this.width = this.canvas.width;
@@ -483,16 +537,28 @@ Oscilloscope.prototype.drawMeasurements = function (ctx) {
          this.measList.childNodes[i].measurement.draw(ctx, this.wf.T, this.wf.U, this.i1, this.i2);
 };
 
+function setCursorsOff() {
+   OSC.timeCursor.on = false;
+   OSC.voltageCursor.on = false;
+}
+
 Oscilloscope.prototype.drawCursors = function (ctx) {
-   if (this.timeCursor.input) {
-      if (this.disp.invert)
-         ctx.strokeStyle = "black";
-      else
-         ctx.strokeStyle = "white";
-      ctx.lineWidth = 2;
+   if (this.timeCursor.on) {
+      this.timeCursor.time = this.timeCursor.input.value*1E-9;
+      this.timeCursor.x = this.timeToX(this.timeCursor.time);
+      ctx.strokeStyle = "#808080";
+      ctx.fillStyle = "#808080";
       ctx.drawLine(this.timeCursor.x, this.y1, this.timeCursor.x, this.y2);
-      ctx.lineWidth = 1;
    }
+
+   if (this.voltageCursor.on) {
+      this.voltageCursor.voltage = this.voltageCursor.input.value/1000;
+      this.voltageCursor.y = this.voltToY(this.voltageCursor.voltage, this.voltageCursor.channel);
+      ctx.strokeStyle = "#808080";
+      ctx.fillStyle = "#808080";
+      ctx.drawLine(this.x1, this.voltageCursor.y, this.x2, this.voltageCursor.y);
+   }
+
 };
 
 Oscilloscope.prototype.printStatus = function (ctx) {
@@ -685,12 +751,16 @@ Oscilloscope.prototype.timeToX = function (t) {
    return t * this.wfTS + this.wfTO;
 };
 
+Oscilloscope.prototype.voltToY = function (v, c) {
+   return v * this.wfUS[c] + this.wfUO[c];
+};
+
 Oscilloscope.prototype.XToTime = function (x) {
    return (x - this.wfTO) / this.wfTS;
 };
 
-Oscilloscope.prototype.voltToY = function (v, c) {
-   return v * this.wfUS[c] + this.wfUO[c];
+Oscilloscope.prototype.YToVolt = function (y, c) {
+   return (y - this.wfUO[c]) / this.wfUS[c];
 };
 
 Oscilloscope.prototype.drawWF = function (ctx) {
@@ -1171,7 +1241,7 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
    ctx.save();
 
    if (this.histo.dragLeftHandle)
-   // drag line
+      // draw drag line
       ctx.drawLine(this.histo.dragX, this.hiy1, this.histo.dragX, this.hiy2);
    else {
       ctx.beginPath();
@@ -1228,6 +1298,86 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
       this.histo.button[i].style.top = (this.hiy1 + 10 + 30 * i) + "px";
    }
 };
+
+Oscilloscope.prototype.saveHistos = function () {
+   if (!OSC.connected)
+      return;
+
+   var nMeas = 0;
+   var histo = [];
+   var xMax = 0;
+   var text = "";
+   for (var idx = 0; idx < this.measList.childNodes.length; idx++) {
+      var m = this.measList.childNodes[idx].measurement;
+      if (m) {
+         var histoSum = 0;
+         var histoSum2 = 0;
+         var histoN = 0;
+
+         nMeas++;
+         var nBins = Math.floor(1.5 * Math.sqrt(m.nMeasured));
+         if (nBins > 1000)
+            nBins = 1000;
+         for (i = 0; i < nBins; i++)
+            histo[i] = 0;
+
+         var xmin = m.statArray[0];
+         var xmax = m.statArray[0];
+         for (i = 0; i < m.nMeasured; i++) {
+            if (m.statArray[i] < xmin)
+               xmin = m.statArray[i];
+            if (m.statArray[i] > xmax)
+               xmax = m.statArray[i];
+         }
+         // center around bins
+         var d = 0.5 * (xmax-xmin) / (nBins - 1);
+         xmin -= d;
+         xmax += d;
+
+         // fill data into histo
+         for (i = 0; i < m.nMeasured; i++) {
+            var bin = Math.floor((m.statArray[i] - xmin) /
+               (xmax - xmin) * nBins);
+            histo[bin]++;
+            histoSum += m.statArray[i];
+            histoSum2 += m.statArray[i] * m.statArray[i];
+            histoN++;
+         }
+
+         // save measurement
+         text += "--------------------\r\n";
+         text += "Measurement: "+m.name+" in "+m.unit+", ";
+         for (i = 0 ; i<m.param.length ; i++) {
+            text += m.param[i].name + ": ";
+            text += m.param[i].value;
+            if (i<m.param.length-1)
+               text += ", ";
+         }
+         text += "\r\n";
+
+         // print statistics
+         var mean = histoSum / histoN;
+         var std = Math.sqrt(histoSum2 / histoN - histoSum * histoSum / histoN / histoN);
+
+         text += "Mean: "+mean.toFixed(3)+"   Std: "+std.toFixed(4)+"   N: "+histoN+"\r\n\r\n";
+
+         // save histo
+         text += "Histogram:\r\n";
+         var x;
+         for (i = 0; i < nBins; i++) {
+            x = (xmin + (i/nBins) * (xmax-xmin)).toFixed(3);
+            text += x + "\t";
+            x = (xmin + ((i+1)/nBins) * (xmax-xmin)).toFixed(3);
+            text += x + "\t";
+            text += histo[i] + "\r\n";
+         }
+         text += "\r\n\r\n\r\n";
+      }
+   }
+
+   return text;
+};
+
 
 const LN10 = 2.302585094;
 const LOG2 = 0.301029996;

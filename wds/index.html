@@ -160,6 +160,11 @@
                     class="vMiddleElement">&nbsp;ns
                </span>
             </div>
+
+            <div class="vMiddleBox vSpacer5">
+            Holdoff:&nbsp;<input type="text" id="triggerHoldoff" name="triggerHoldoff" value="0" onkeypress="keyParam(event,this)">&nbsp;ms
+            </div>
+
             <table>
                <tr>
                   <td>
@@ -190,7 +195,6 @@
             </table>
             <button class="executeButton" id="btnTrigger" type="button" onClick="dlgShow('dlgTrigger')">Trigger Pattern
             </button>
-
          </div>
 
          <div class="groupTitle">Analog Front-end</div>
@@ -456,7 +460,6 @@
          <button class="wideButton" style="background-color:#F8F8F8" type="button" onClick="dlgHide('dlgAbout')">Close
          </button>
       </div>
-
    </div>
 
 
@@ -469,9 +472,7 @@
          <div class="vMiddleElement">
             <div style="text-align:center">
                <input type="checkbox" id="dispHisto" onclick="dispHisto(this)">&nbsp;Display Histograms
-            </div>
-            <div style="text-align:center">
-               Accumulate<select class="measSelect" onchange="setNStat(this.value)">
+               &nbsp;&nbsp;&nbsp;Accumulate <select class="measSelect" onchange="setNStat(this.value)">
                <option value="10">10</option>
                <option value="50">50</option>
                <option value="100">100</option>
@@ -482,11 +483,9 @@
                <option value="50000">50000</option>
                <option value="100000">100000</option>
                <option value="1000000">1000000</option>
-            </select>measurements
-            </div>
-            <div style="text-align:center">
-               <button style="background-color:#F8F8F8;margin:3px;padding:3px" type="button" onClick="clearStat()">Clear
-                  statistics
+               </select>measurements
+               &nbsp;&nbsp;&nbsp;<button style="background-color:#F8F8F8;margin:3px;padding:3px" type="button" onClick="clearStat()">&nbsp;Clear
+                  statistics&nbsp;
                </button>
             </div>
             <hr/>
@@ -500,7 +499,7 @@
          </div>
          <br/>
          <div style="text-align:center">
-            <button class="wideButton" style="background-color:#F8F8F8" type="button" onClick="dlgHide('dlgMeasure')">
+            <button class="wideButton" style="background-color:#F8F8F8" type="button" onClick="dlgHide('dlgMeasure');setCursorsOff();">
                Close
             </button>
          </div>
@@ -593,6 +592,7 @@
    <!-- extra buttons -->
    <span>
       <button class="floatButton" id="measClear" type="button" onClick="clearStat()">CLR</button>
+      <button class="floatButton" id="measSave" type="button" onClick="measSave()">Save</button>
       <button class="floatButton" id="measZoomIn" type="button" onClick="measZoomIn()">&plus;</button>
       <button class="floatButton" id="measZoomOut" type="button" onClick="measZoomOut()">&minus;</button>
       <button class="floatButton" id="measZoomFit" type="button" onClick="measZoomFit()">&laquo;&nbsp;&raquo;</button>

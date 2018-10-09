@@ -216,7 +216,11 @@ int main(int argc, char *argv[])
                printf("trigger trgpattern = %08x bit [%d:%d] \n",tpattern,(iword+1)*32-1,iword*32);
             }
          }
-         if (TCBBoard.GetSystemTriggerType(&trgtype)){
+         u_int32_t trgreadoutenable;
+         u_int32_t adcenable;
+         if (TCBBoard.GetSystemTriggerType(&trgtype, &trgreadoutenable, &adcenable)){
+            printf("system readout enable = 0x%02x\n", trgreadoutenable);
+            printf("system adc read enable = 0x%01x\n", adcenable);
             printf("system trigger type = %d\n",trgtype);
          } else {
             printf("TRANSMISSION ERROR! reading = %d\n",trgtype);
@@ -638,29 +642,29 @@ int main(int argc, char *argv[])
       }
       if(option == 43) {
         printf(" opt = 43 : Single crate trigger configuration ...\n");
-	int choice;
-	printf("Select trigger conf (AND=0, OR=1): ");
-	scanf("%d", &choice);
+        int choice;
+        printf("Select trigger conf (AND=0, OR=1): ");
+        scanf("%d", &choice);
    short shaper;
-	printf("Select shaper time (0-32 clks): ");
-	scanf("%d", &shaper);
-	char buf[300];
-	printf("Channels to be configured (comma separated): ");
+        printf("Select shaper time (0-32 clks): ");
+        scanf("%d", &shaper);
+        char buf[300];
+        printf("Channels to be configured (comma separated): ");
    scanf("%s", buf);
 
    char * p = strtok (buf,",");
-	std::vector<int> a;
+        std::vector<int> a;
         while (p != NULL){
-	  int ch = atoi(p);
-	  p = strtok (NULL, ",");
+          int ch = atoi(p);
+          p = strtok (NULL, ",");
           a.push_back(ch);
-	}
+        }
 
-	if(choice==0){
-	  TCBBoard.SetSingleCrateTriggerAnd(a.size(), &a[0], shaper);
-	} else {
-	  TCBBoard.SetSingleCrateTriggerOr(a.size(), &a[0], shaper);
-	}
+        if(choice==0){
+          TCBBoard.SetSingleCrateTriggerAnd(a.size(), &a[0], shaper);
+        } else {
+          TCBBoard.SetSingleCrateTriggerOr(a.size(), &a[0], shaper);
+        }
       }
       
 

@@ -193,6 +193,14 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          gl->triggerMode = (TRIGGERMODE) std::stoi(value);
       }
 
+      else if (item == "triggerHoldoff") {
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetTriggerHoldoff(std::stof(value));
+         else
+            gl->wdb[iBoard]->SetTriggerHoldoff(std::stof(value));
+      }
+
       else if (item == "triggerSource") {
          for (int i=0 ; i<gl->wdb.size() ; i++) {
             if (iChannel == -1 || i == iChannel) {
@@ -406,6 +414,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       }
 
       else {
+         std::cout << "Invalid command \"" << item << "\" received. Aborting." << std::endl;
          assert(0);
       }
       
@@ -555,6 +564,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "        %d ],\n",                             w->GetFeMux(15));
 
          mg_printf_http_chunk(nc, "      \"triggerMode\": %d,\n",                gl->triggerMode);
+         mg_printf_http_chunk(nc, "      \"triggerHoldoff\": %d,\n",             w->GetTriggerHoldoff());
          mg_printf_http_chunk(nc, "      \"triggerLeadTrailEdgeSel\": %d,\n",    w->GetLeadTrailEdgeSel());
          mg_printf_http_chunk(nc, "      \"triggerExtTriggerOutEnable\": %s,\n", w->GetExtTriggerOutEnable() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"triggerSource\": %d,\n",              w->GetTriggerTypeSel() ? "true" : "false");

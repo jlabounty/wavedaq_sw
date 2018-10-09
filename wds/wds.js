@@ -256,7 +256,9 @@ function populateControls(init) {
       document.getElementById("rbTriggerModeNormal").checked = false;
       document.getElementById("rbTriggerModeAuto").checked = true;
    }
-
+   if (document.getElementById("triggerHoldoff") != document.activeElement) {
+      document.getElementById("triggerHoldoff").value = OSC.wdb[OSC.curBoard].triggerHoldoff;
+   }
    if (OSC.wdb[OSC.curBoard].triggerSource == 0) {
       document.getElementById("rbTriggerSourceInt").checked = true;
       document.getElementById("rbTriggerSourceExt").checked = false;
@@ -824,8 +826,9 @@ function loadWF() {
       }
 
       OSC.idle = false;
+
       if (OSC.running)
-         OSC.timer.loadWF = window.setTimeout(loadWF, 10); // schedule next waveform read
+         OSC.timer.loadWF = window.setTimeout(loadWF, 0); // schedule next waveform read
 
       // calculate sum and FFT waveforms
       calcMathWF(wf);
@@ -849,7 +852,7 @@ function loadWF() {
       }
 
    if (chn == 0 && OSC.running) {
-      OSC.timer.loadWF = window.setTimeout(loadWF, 10); // schedule next waveform read
+      OSC.timer.loadWF = window.setTimeout(loadWF, 0); // schedule next waveform read
       return;
    }
 
@@ -988,7 +991,7 @@ function receiveWF() {
       } else {
          // schedule next waveform read
          if (OSC.running)
-            OSC.timer.loadWF = window.setTimeout(loadWF, 10);
+            OSC.timer.loadWF = window.setTimeout(loadWF, 0);
 
          // send waveforms to oscilloscope
          if (!OSC.idle)
@@ -1625,6 +1628,7 @@ function configSlide() {
 
 function measRem() {
    this.parentNode.parentNode.removeChild(this.parentNode);
+   setCursorsOff();
 }
 
 function measAdd() {
@@ -1676,6 +1680,9 @@ function measAdd() {
 }
 
 function measSelect(meas, sel, prev) {
+
+   OSC.timeCursor.on = false; // remove any cursor
+   OSC.voltageCursor.on = false;
 
    // remove previous input fields
    for (var i = meas.childNodes.length - 1; i > 1; i--)
@@ -1730,14 +1737,33 @@ function measSelect(meas, sel, prev) {
          input[pi] = document.createElement("input");
          input[pi].type = "text";
          input[pi].size = 10;
+         input[pi].style.width = "50px";
          input[pi].value = meas.measurement.param[pi].value;
          input[pi].onchange = function () {
             measParamChange(meas);
          };
-         input[pi].addEventListener('focus', function(e) {
-            OSC.timeCursor.input = this;
-            OSC.timeCursor.time = this.value;
-         }, false);
+
+         if (meas.measurement.param[pi].type === "tcursor")
+            input[pi].addEventListener('focus', function(e) {
+               OSC.timeCursor.on = true;
+               OSC.voltageCursor.on = false;
+               OSC.timeCursor.input = this;
+               OSC.timeCursor.time = this.value;
+            }, false);
+
+         else if (meas.measurement.param[pi].type === "ucursor")
+            input[pi].addEventListener('focus', function(e) {
+               OSC.timeCursor.on = false;
+               OSC.voltageCursor.on = true;
+               OSC.voltageCursor.input = this;
+               OSC.voltageCursor.voltage = this.value;
+               OSC.voltageCursor.channel = meas.measurement.param[1].value;
+            }, false);
+
+         else
+            input[pi].addEventListener('focus', function(e) {
+               setCursorsOff();
+            }, false);
 
          var text = document.createElement("span");
          text.innerHTML = "&nbsp;" + meas.measurement.param[pi].name + ":&nbsp;";
@@ -1791,6 +1817,30 @@ function clearStat() {
    for (i = 0; i < OSC.measList.childNodes.length; i++)
       if (OSC.measList.childNodes[i].measurement)
          OSC.measList.childNodes[i].measurement.resetStat();
+}
+
+function measSave() {
+   var text = OSC.saveHistos();
+   var blob = new Blob([text], {type:"text/plain"});
+   var url = window.URL.createObjectURL(blob);
+
+   var downloadLink = document.createElement("a");
+   var d = new Date();
+   downloadLink.download = "histos_"+d.getFullYear()+"_"+
+      (d.getMonth()<10?"0":"")+d.getMonth()+"_"+
+      (d.getDay()<10?"0":"")+d.getDay()+"_"+
+      (d.getHours()<10?"0":"")+d.getHours()+"_"+
+      (d.getMinutes()<10?"0":"")+d.getMinutes()+"_"+
+      (d.getSeconds()<10?"0":"")+d.getSeconds()+".txt";
+   downloadLink.innerHTML = "Download File";
+   downloadLink.href = url;
+   downloadLink.onclick = function(e) {
+      document.body.removeChild(event.target);
+   };
+   downloadLink.style.display = "none";
+   document.body.appendChild(downloadLink);
+
+   downloadLink.click();
 }
 
 function dispHisto(c) {

@@ -36,7 +36,7 @@ var measList = [
       param: [
          {name: "WD", type: "WD", value: 0},
          {name: "CH", type: "CH", value: 0},
-         {name: "Time", type: "tcursor", value: 0}
+         {name: "Time", type: "tcursor", value: 100}
       ]
    },
    {
@@ -47,10 +47,10 @@ var measList = [
       param: [
          {name: "WD", type: "WD", value: 0},
          {name: "CH", type: "CH", value: 0},
-         {name: "Time1", type: "tcursor", value: ""},
-         {name: "Time2", type: "tcursor", value: ""},
-         {name: "Time3", type: "tcursor", value: ""},
-         {name: "Time4", type: "tcursor", value: ""}
+         {name: "T1Baseline", type: "tcursor", value: 100},
+         {name: "T2Baseline", type: "tcursor", value: 200},
+         {name: "T1Int", type: "tcursor", value: 300},
+         {name: "T2Int", type: "tcursor", value: 400}
       ]
    },
    //------------------
@@ -72,25 +72,47 @@ var measList = [
       name: "Rise",
       unit: "ns",
       digits: 1,
-      param: [{name: "WD", type: "WD", value: 0}, {name: "CH", type: "CH", value: 0}]
+      f: measRise,
+      param: [
+         {name: "WD", type: "WD", value: 0},
+         {name: "CH", type: "CH", value: 0},
+         {name: "Low Level", type: "ucursor", value: 10},
+         {name: "High Level", type: "ucursor", value: 100},
+         ]
    },
    {
       name: "Fall",
       unit: "ns",
       digits: 1,
-      param: [{name: "WD", type: "WD", value: 0}, {name: "CH", type: "CH", value: 0}]
+      f: measFall,
+      param: [
+         {name: "WD", type: "WD", value: 0},
+         {name: "CH", type: "CH", value: 0},
+         {name: "Low Level", type: "ucursor", value: 10},
+         {name: "High Level", type: "ucursor", value: 100},
+      ]
    },
    {
       name: "Pos Width",
       unit: "ns",
       digits: 1,
-      param: [{name: "WD", type: "WD", value: 0}, {name: "CH", type: "CH", value: 0}]
+      f: measPosWidth,
+      param: [
+         {name: "WD", type: "WD", value: 0},
+         {name: "CH", type: "CH", value: 0},
+         {name: "Level", type: "ucursor", value: 50},
+         ]
    },
    {
       name: "Neg Width",
       unit: "ns",
       digits: 1,
-      param: [{name: "WD", type: "WD", value: 0}, {name: "CH", type: "CH", value: 0}]
+      f: measNegWidth,
+      param: [
+         {name: "WD", type: "WD", value: 0},
+         {name: "CH", type: "CH", value: 0},
+         {name: "Level", type: "ucursor", value: -20},
+      ]
    },
    {
       name: "Chn delay",
@@ -110,7 +132,14 @@ var measList = [
       name: "HSlice",
       unit: "ns",
       digits: 3,
-      param: [{name: "WD", type: "WD", value: 0}, {name: "CH", type: "CH", value: 0}]
+      f: measHSlice,
+      param: [
+         {name: "WD", type: "WD", value: 0},
+         {name: "CH", type: "CH", value: 0},
+         {name: "Level", type: "ucursor", value: 100},
+         {name: "T1", type: "tcursor", value: 100},
+         {name: "T2", type: "tcursor", value: 200}
+      ]
    },
    {
       name: "Chn correl",
@@ -148,6 +177,7 @@ Measurement.prototype.setFunc = function (name) {
 
    this.index = i;
    this.name = measList[i].name;
+   this.unit = measList[i].unit;
    this.param = JSON.parse(JSON.stringify(measList[i].param)); // clone whole array
 };
 
@@ -280,9 +310,6 @@ function measMean(ctx, x, y, i1, i2) {
 
    if (ctx != undefined && OSC.chOn[c])
       ctx.drawLine(OSC.timeToX(x[c][i1]), OSC.voltToY(mean, c), OSC.timeToX(x[c][i2 - 1]), OSC.voltToY(mean, c));
-
-   if (!(mean < 100 && mean > -100))
-      console.log(mean);
 
    return mean * 1000;
 }
@@ -434,11 +461,11 @@ function measCharge(ctx, x, y) {
          ctx.moveTo(OSC.timeToX(p1), OSC.voltToY(baseline, c));
          ctx.lineTo(OSC.timeToX(p2), OSC.voltToY(baseline, c));
 
-         ctx.moveTo(OSC.timeToX(p1), OSC.voltToY(baseline, c) - 5);
-         ctx.lineTo(OSC.timeToX(p1), OSC.voltToY(baseline, c) + 5);
+         ctx.moveTo(OSC.timeToX(p1), OSC.voltToY(baseline, c) - 10);
+         ctx.lineTo(OSC.timeToX(p1), OSC.voltToY(baseline, c) + 10);
 
-         ctx.moveTo(OSC.timeToX(p2), OSC.voltToY(baseline, c) - 5);
-         ctx.lineTo(OSC.timeToX(p2), OSC.voltToY(baseline, c) + 5);
+         ctx.moveTo(OSC.timeToX(p2), OSC.voltToY(baseline, c) - 10);
+         ctx.lineTo(OSC.timeToX(p2), OSC.voltToY(baseline, c) + 10);
 
          ctx.stroke();
          ctx.lineWidth = 1;
@@ -463,7 +490,7 @@ function measCharge(ctx, x, y) {
             y2 = y[c][i + 1];
          }
 
-         q += 0.5 * Math.abs((y1 + y2 - 2*baseline) * (x2 - x1));
+         q += 0.5 * ((y1 + y2 - 2*baseline) * (x2 - x1));
 
          if (ctx != undefined && OSC.chOn[c]) {
             ctx.beginPath();
@@ -519,7 +546,7 @@ function measPeriod(ctx, xa, ya, i1, i2) {
 
    var xing = [];
 
-   /* search and store zero crossings wiht noise rejection */
+   /* search and store zero crossings with noise rejection */
    for (i = i1 + 5; i < i2 - 5; i++) {
       if (y[i] > 0 && y[i + 3] > 0 && y[i - 1] <= 0 && y[i - 4] <= 0)
          xing.push(i);
@@ -598,6 +625,181 @@ function measPeriod(ctx, xa, ya, i1, i2) {
 
    return (t2 - t1) * 1E9;
 }
+
+function measRise(ctx, xa, ya, i1, i2) {
+   var c = this.param[1].value;
+   var x = xa[c];
+   var y = ya[c];
+
+   var low =  parseFloat(this.param[2].value)/1000;
+   var high =  parseFloat(this.param[3].value)/1000;
+
+   /* search level crossings with noise rejection */
+   var t1 = undefined;
+   var t2 = undefined;
+   for (i = i1 + 5; i < i2 - 5; i++) {
+      if (y[i] < low && y[i - 3] < low && y[i + 1] >= low && y[i + 3] >= low && t1 === undefined)
+         t1 = x[i] + (y[i]-low) * (x[i + 1] - x[i]) / (y[i] - y[i+1]);
+      if (y[i] < high && y[i - 3] < high && y[i + 1] >= high && y[i + 3] >= high && t1 !== undefined && t2 === undefined)
+         t2 = x[i] + (y[i]-high) * (x[i + 1] - x[i]) / (y[i] - y[i+1]);
+   }
+
+   if (ctx !== undefined && OSC.chOn[c]) {
+      var x1 = OSC.timeToX(t1);
+      var x2 = OSC.timeToX(t2);
+      var y1 = OSC.voltToY(low, c);
+      var y2 = OSC.voltToY(high, c);
+
+      ctx.drawLine(x1, y1, x1, (y1+y2)/2-10);
+      ctx.drawLine(x2, y2, x2, (y1+y2)/2+10);
+      ctx.drawLine(x1, (y1+y2)/2, x2, (y1+y2)/2);
+
+      ctx.drawLine(x1, (y1+y2)/2, x1+4, (y1+y2)/2-4);
+      ctx.drawLine(x1, (y1+y2)/2, x1+4, (y1+y2)/2+4);
+
+      ctx.drawLine(x2, (y1+y2)/2, x2-4, (y1+y2)/2-4);
+      ctx.drawLine(x2, (y1+y2)/2, x2-4, (y1+y2)/2+4);
+   }
+
+   return (t2 - t1) * 1E9;
+}
+
+function measPosWidth(ctx, xa, ya, i1, i2) {
+   var c = this.param[1].value;
+   var x = xa[c];
+   var y = ya[c];
+
+   var level =  parseFloat(this.param[2].value)/1000;
+
+   /* search level crossings with noise rejection */
+   var t1 = undefined;
+   var t2 = undefined;
+   for (i = i1 + 5; i < i2 - 5; i++) {
+      if (y[i] < level && y[i - 3] < level && y[i + 1] >= level && y[i + 3] >= level && t1 === undefined)
+         t1 = x[i] + (y[i]-level) * (x[i + 1] - x[i]) / (y[i] - y[i+1]);
+      if (y[i] > level && y[i - 3] > level && y[i + 1] <= level && y[i + 3] <= level && t1 !== undefined && t2 === undefined)
+         t2 = x[i] + (y[i]-level) * (x[i + 1] - x[i]) / (y[i] - y[i+1]);
+   }
+
+   if (ctx !== undefined && OSC.chOn[c]) {
+      var x1 = OSC.timeToX(t1);
+      var x2 = OSC.timeToX(t2);
+      var y  = OSC.voltToY(level, c);
+
+      ctx.drawLine(x1, y, x2, y);
+      ctx.drawLine(x1, y-10, x1, y+10);
+      ctx.drawLine(x2, y-10, x2, y+10);
+
+      ctx.drawLine(x1, y, x1+4, y-4);
+      ctx.drawLine(x1, y, x1+4, y+4);
+
+      ctx.drawLine(x2, y, x2-4, y-4);
+      ctx.drawLine(x2, y, x2-4, y+4);
+   }
+
+   return (t2 - t1) * 1E9;
+}
+
+function measNegWidth(ctx, xa, ya, i1, i2) {
+   var c = this.param[1].value;
+   var x = xa[c];
+   var y = ya[c];
+
+   var level =  parseFloat(this.param[2].value)/1000;
+
+   /* search level crossings with noise rejection */
+   var t1 = undefined;
+   var t2 = undefined;
+   for (i = i1 + 5; i < i2 - 5; i++) {
+      if (y[i] > level && y[i - 3] > level && y[i + 1] <= level && y[i + 3] <= level && t1 === undefined)
+         t1 = x[i] + (y[i]-level) * (x[i + 1] - x[i]) / (y[i] - y[i+1]);
+      if (y[i] < level && y[i - 3] < level && y[i + 1] >= level && y[i + 3] >= level && t1 !== undefined && t2 === undefined)
+         t2 = x[i] + (y[i]-level) * (x[i + 1] - x[i]) / (y[i] - y[i+1]);
+   }
+
+   if (ctx !== undefined && OSC.chOn[c]) {
+      var x1 = OSC.timeToX(t1);
+      var x2 = OSC.timeToX(t2);
+      var y  = OSC.voltToY(level, c);
+
+      ctx.drawLine(x1, y, x2, y);
+      ctx.drawLine(x1, y-10, x1, y+10);
+      ctx.drawLine(x2, y-10, x2, y+10);
+
+      ctx.drawLine(x1, y, x1+4, y-4);
+      ctx.drawLine(x1, y, x1+4, y+4);
+
+      ctx.drawLine(x2, y, x2-4, y-4);
+      ctx.drawLine(x2, y, x2-4, y+4);
+   }
+
+   return (t2 - t1) * 1E9;
+}
+
+function measFall(ctx, xa, ya, i1, i2) {
+   var c = this.param[1].value;
+   var x = xa[c];
+   var y = ya[c];
+
+   var low =  parseFloat(this.param[2].value)/1000;
+   var high =  parseFloat(this.param[3].value)/1000;
+
+   /* search low level crossings with noise rejection */
+   var t1 = undefined;
+   var t2 = undefined;
+   for (i = i1 + 5; i < i2 - 5; i++) {
+      if (y[i] > high && y[i - 3] > high && y[i + 1] <= high && y[i + 3] <= high && t1 === undefined)
+         t1 = x[i] + (y[i]-high) * (x[i + 1] - x[i]) / (y[i] - y[i+1]);
+      if (y[i] > low && y[i - 3] > low && y[i + 1] <= low && y[i + 3] <= low && t1 !== undefined && t2 === undefined)
+         t2 = x[i] + (y[i]-low) * (x[i + 1] - x[i]) / (y[i] - y[i+1]);
+   }
+
+   if (ctx !== undefined && OSC.chOn[c]) {
+      var x1 = OSC.timeToX(t1);
+      var x2 = OSC.timeToX(t2);
+      var y1 = OSC.voltToY(high, c);
+      var y2 = OSC.voltToY(low, c);
+
+      ctx.drawLine(x1, y1, x1, (y1+y2)/2+10);
+      ctx.drawLine(x2, y2, x2, (y1+y2)/2-10);
+      ctx.drawLine(x1, (y1+y2)/2, x2, (y1+y2)/2);
+
+      ctx.drawLine(x1, (y1+y2)/2, x1+4, (y1+y2)/2-4);
+      ctx.drawLine(x1, (y1+y2)/2, x1+4, (y1+y2)/2+4);
+
+      ctx.drawLine(x2, (y1+y2)/2, x2-4, (y1+y2)/2-4);
+      ctx.drawLine(x2, (y1+y2)/2, x2-4, (y1+y2)/2+4);
+   }
+
+   return (t2 - t1) * 1E9;
+}
+
+function measHSlice(ctx, xa, ya, i1, i2) {
+   var c = this.param[1].value;
+   var x = xa[c];
+   var y = ya[c];
+   var level = this.param[2].value / 1000;
+   var t1 = this.param[3].value * 1E-9;
+   var t2 = this.param[4].value * 1E-9;
+
+   var t = undefined;
+   for (i = i1 + 5; i < i2 - 5; i++) {
+      if (x[i] > t1 && x[i + 1] < t2) {
+         if (y[i] < level && y[i - 3] < level && y[i + 1] >= level && y[i + 4] >= level) {
+            if (y[i] < level && y[i - 3] < level && y[i + 1] >= level && y[i + 3] >= level && t === undefined)
+               t = x[i] + (y[i] - level) * (x[i + 1] - x[i]) / (y[i] - y[i + 1]);
+         }
+      }
+   }
+
+   if (ctx != undefined && OSC.chOn[c]) {
+      ctx.drawLine(OSC.timeToX(t1), OSC.voltToY(level, c), OSC.timeToX(t2), OSC.voltToY(level, c));
+      ctx.drawLine(OSC.timeToX(t), OSC.voltToY(level, c)-10, OSC.timeToX(t), OSC.voltToY(level, c)+10);
+   }
+
+   return t * 1E9;
+}
+
 
 function measChnDelay(ctx, x, y, i1, i2) {
    //var w1 = this.param[0].value;
