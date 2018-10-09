@@ -295,7 +295,7 @@ function populateControls(init) {
    document.getElementById("calibBufferEnable").checked = OSC.wdb[OSC.curBoard].calibBufferEnable;
 
    if (document.getElementById("inpDacCalDc") != document.activeElement) {
-      document.getElementById("sldDacCalDc").set(OSC.wdb[OSC.curBoard].dacCalDc / 2 + 0.5);
+      document.getElementById("sldDacCalDc").set(OSC.wdb[OSC.curBoard].dacCalDc / 1.2 + 0.5);
       document.getElementById("inpDacCalDc").value = Math.round(OSC.wdb[OSC.curBoard].dacCalDc * 1000);
    }
 
@@ -710,7 +710,7 @@ function validateParam(input, channel) {
          input.value = -1000;
       if (input.value > 1000)
          input.value = 1000;
-      document.getElementById("sldDacCalDc").set(input.value / 2000 + 0.5);
+      document.getElementById("sldDacCalDc").set(input.value / 1200 + 0.5);
    }
 
    if (input.id.substr(0, 11) == "inpHvTarget") {
@@ -1426,7 +1426,7 @@ function sldDacCalDc(value) {
    if (OSC.demoMode)
       return;
 
-   document.getElementById("inpDacCalDc").value = Math.round(value * 2000 - 1000);
+   document.getElementById("inpDacCalDc").value = Math.round((value * 1200 - 600)/10)*10;
    setParam(document.getElementById("inpDacCalDc"));
 }
 
