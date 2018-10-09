@@ -301,4 +301,5 @@ public:
    void SetSingleCrateChnLogic(bool *state);
    void SetSingleCrateTriggerOr(int nChn, int* chn, short shape);
    void SetSingleCrateTriggerAnd(int nChn, int* chn, short shape);
+   void SetFMask(bool, bool);
 };
