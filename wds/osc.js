@@ -1111,8 +1111,13 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
       }
    }
 
-   if (this.histo.axisMin == this.histo.axisMax)
+   if (this.histo.axisMin === undefined || this.histo.axisMax === undefined)
       return;
+
+   if (Math.abs(this.histo.axisMin - this.histo.axisMax) < 0.01) {
+      this.histo.axisMin -= 1;
+      this.histo.axisMax += 1;
+   }
 
    var nMeas = 0;
    var histo = [];
