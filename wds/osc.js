@@ -159,14 +159,16 @@ function Oscilloscope(div) { // constructor
       dragLeftHandle: false,
       dragRightHande: false,
       dragX: 0,
+      logY: false,
       button: []
    };
 
    this.histo.button[0] = document.getElementById("measClear");
    this.histo.button[1] = document.getElementById("measSave");
-   this.histo.button[2] = document.getElementById("measZoomIn");
-   this.histo.button[3] = document.getElementById("measZoomOut");
-   this.histo.button[4] = document.getElementById("measZoomFit");
+   this.histo.button[2] = document.getElementById("measLogY");
+   this.histo.button[3] = document.getElementById("measZoomIn");
+   this.histo.button[4] = document.getElementById("measZoomOut");
+   this.histo.button[5] = document.getElementById("measZoomFit");
 
    // mouse event handlers
    window.addEventListener("mousedown", this.mouseEvent.bind(this), true);
@@ -1134,15 +1136,17 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
             histo[i] = 0;
          var oflow = 0;
          var uflow = 0;
+         var oflowN = 0;
+         var uflowN = 0;
 
          // fill data into histo
          for (i = 0; i < m.nMeasured; i++) {
             var bin = Math.floor((m.statArray[i] - this.histo.axisMin) /
                (this.histo.axisMax - this.histo.axisMin) * (nBins - 1));
             if (bin >= nBins)
-               oflow++;
+               oflowN++;
             else if (bin < 0)
-               uflow++;
+               uflowN++;
             else {
                histo[bin]++;
                histoSum += m.statArray[i];
@@ -1150,6 +1154,31 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
                histoN++;
             }
          }
+
+         if(this.histo.logY){
+            if(oflowN > 0){
+               oflow = Math.log(oflowN);
+            } else {
+               oflow = 0;
+            }
+
+            if(uflowN > 0){
+               uflow = Math.log(uflowN);
+            } else {
+               uflow = 0;
+            }
+
+            for (i = 0; i < nBins; i++)
+               if (histo[i] > 0) {
+                  histo[i] = Math.log(histo[i]);
+               } else {
+                  histo[i] = 0;
+               }
+         } else {
+            oflow = oflowN;
+            uflow = uflowN;
+         }
+
 
          var hmax = histo[0];
          for (i = 0; i < nBins; i++)
@@ -1221,11 +1250,12 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
             ctx.fillText("      Mean       Std         N     UFlow     OFlow", this.x1, this.hiy1 + 10);
             ctx.restore();
          }
+
          ctx.fillText(pad(mean, 10, 3) +
             pad(std, 10, 4) +
             pad(histoN, 10, 0) +
-            pad(uflow, 10, 0) +
-            pad(oflow, 10, 0),
+            pad(uflowN, 10, 0) +
+            pad(oflowN, 10, 0),
             this.x1, this.hiy1 + 10 + nMeas * 20);
       }
    }
@@ -1294,6 +1324,11 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
             this.histo.button[i].style.display = "block";
       } else
          this.histo.button[i].style.display = "block";
+      if(this.histo.button[i].id == "measLogY" && this.histo.logY) {
+         this.histo.button[i].style.border = "2px solid #00A0FF";
+      } else {
+         this.histo.button[i].style.border = "2px solid #C0C0C0";
+      }
       this.histo.button[i].style.left = (this.x2 - 70) + "px";
       this.histo.button[i].style.top = (this.hiy1 + 10 + 30 * i) + "px";
    }

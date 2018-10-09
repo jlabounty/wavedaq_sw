@@ -1807,6 +1807,10 @@ function measZoomFit() {
    OSC.histo.autoAxis = true;
 }
 
+function measLogY() {
+   OSC.histo.logY = ! OSC.histo.logY;
+}
+
 function setNStat(v) {
    for (i = 0; i < OSC.measList.childNodes.length; i++)
       if (OSC.measList.childNodes[i].measurement)
