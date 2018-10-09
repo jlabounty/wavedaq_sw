@@ -798,7 +798,7 @@ Oscilloscope.prototype.drawWF = function (ctx) {
                      ctx.moveTo(x, y);
                   else
                      ctx.lineTo(x, y);
-                  if (spacing > 20)
+                  if (spacing > 10)
                      ctx.fillRect(x - 2, y - 2, 5, 5);
                }
             }
