@@ -232,6 +232,14 @@ Oscilloscope.prototype.mouseEvent = function (e) {
    // set default cursor to be changed below
    var cursor = "default";
 
+   if (this.histo.dragLeftHandle || this.histo.dragRightHandle) {
+      for (var i = 0; i < this.histo.button.length; i++)
+         this.histo.button[i].style.pointerEvents = "none";
+   } else {
+      for (var i = 0; i < this.histo.button.length; i++)
+         this.histo.button[i].style.pointerEvents = "all";
+   }
+
    if (this.disp.histo && e.target == this.canvas) {
 
       // division bar
@@ -1141,17 +1149,15 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
             histo[i] = 0;
          var oflow = 0;
          var uflow = 0;
-         var oflowN = 0;
-         var uflowN = 0;
 
          // fill data into histo
          for (i = 0; i < m.nMeasured; i++) {
             var bin = Math.floor((m.statArray[i] - this.histo.axisMin) /
                (this.histo.axisMax - this.histo.axisMin) * (nBins - 1));
             if (bin >= nBins)
-               oflowN++;
+               oflow++;
             else if (bin < 0)
-               uflowN++;
+               uflow++;
             else {
                histo[bin]++;
                histoSum += m.statArray[i];
@@ -1160,37 +1166,18 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
             }
          }
 
-         if(this.histo.logY){
-            if(oflowN > 0){
-               oflow = Math.log(oflowN);
-            } else {
-               oflow = 0;
-            }
-
-            if(uflowN > 0){
-               uflow = Math.log(uflowN);
-            } else {
-               uflow = 0;
-            }
-
-            for (i = 0; i < nBins; i++)
-               if (histo[i] > 0) {
-                  histo[i] = Math.log(histo[i]);
-               } else {
-                  histo[i] = 0;
-               }
-         } else {
-            oflow = oflowN;
-            uflow = uflowN;
-         }
-
-
          var hmax = histo[0];
          for (i = 0; i < nBins; i++)
             if (histo[i] > hmax) {
                hmax = histo[i];
                this.histo.xMax = i/nBins * (this.histo.axisMax - this.histo.axisMin) + this.histo.axisMin;
             }
+
+         if (this.histo.logY) {
+            hmax = (hmax == 0 ? 0 : Math.log(hmax));
+            uflow = (uflow == 0 ? 0 : Math.log(uflow));
+            oflow = (oflow == 0 ? 0 : Math.log(oflow));
+         }
 
          // draw histo
          ctx.strokeStyle = m.color;
@@ -1201,7 +1188,8 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
          var y_old = 0;
          for (i = 0; i < nBins; i++) {
             x = this.x1 + Math.floor(i / nBins * (this.hiWidth));
-            y = this.hiy2 - Math.floor(histo[i] / hmax * (this.hiHeight - 30));
+            var h = this.histo.logY ? (histo[i] == 0 ? 0 : Math.log(histo[i])) : histo[i];
+            y = this.hiy2 - Math.floor(h / hmax * (this.hiHeight - 30));
             if (i == 0) {
                ctx.moveTo(x, this.hiy2);
                ctx.lineTo(x, y);
@@ -1259,8 +1247,8 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
          ctx.fillText(pad(mean, 10, 3) +
             pad(std, 10, 4) +
             pad(histoN, 10, 0) +
-            pad(uflowN, 10, 0) +
-            pad(oflowN, 10, 0),
+            pad(uflow, 10, 0) +
+            pad(oflow, 10, 0),
             this.x1, this.hiy1 + 10 + nMeas * 20);
       }
    }
@@ -1330,9 +1318,9 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
       } else
          this.histo.button[i].style.display = "block";
       if(this.histo.button[i].id == "measLogY" && this.histo.logY) {
-         this.histo.button[i].style.border = "2px solid #00A0FF";
+         this.histo.button[i].style.background = "yellow";
       } else {
-         this.histo.button[i].style.border = "2px solid #C0C0C0";
+         this.histo.button[i].style.background = "#F8F8F8";
       }
       this.histo.button[i].style.left = (this.x2 - 70) + "px";
       this.histo.button[i].style.top = (this.hiy1 + 10 + 30 * i) + "px";
