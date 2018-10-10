@@ -1831,11 +1831,12 @@ function measSave() {
 
    var downloadLink = document.createElement("a");
    var d = new Date();
-   downloadLink.download = "histos_"+d.getFullYear()+"_"+
-      (d.getMonth()<10?"0":"")+d.getMonth()+"_"+
-      (d.getDay()<10?"0":"")+d.getDay()+"_"+
-      (d.getHours()<10?"0":"")+d.getHours()+"_"+
-      (d.getMinutes()<10?"0":"")+d.getMinutes()+"_"+
+   var y = d.getFullYear() % 100;
+   downloadLink.download = "histos_"+(y<10?"0":"")+y+
+      (d.getMonth()+1<10?"0":"")+(d.getMonth()+1)+
+      (d.getDate()<10?"0":"")+d.getDate()+"_"+
+      (d.getHours()<10?"0":"")+d.getHours()+
+      (d.getMinutes()<10?"0":"")+d.getMinutes()+
       (d.getSeconds()<10?"0":"")+d.getSeconds()+".txt";
    downloadLink.innerHTML = "Download File";
    downloadLink.href = url;
