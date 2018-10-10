@@ -659,13 +659,20 @@ Oscilloscope.prototype.printScalers = function (ctx) {
 
 Oscilloscope.prototype.blackCanvas = function (ctx, mode) {
    ctx.fillStyle = this.disp.invert ? "white" : "black";
+   ctx.restore();
+
+   ctx.save();
    if (mode === undefined || mode === 0) { // complete window
       ctx.fillRect(0, 0, this.width, this.height);
+      ctx.rect(0, 0, this.width, this.height);
    } else if (mode == 1) { // waveform window
       ctx.fillRect(0, 0, this.width, this.h);
+      ctx.rect(0, 0, this.width, this.h);
    } else { // histo window
       ctx.fillRect(0, this.h, this.width, this.height-this.h);
+      ctx.rect(0, this.h, this.width, this.height-this.h);
    }
+   ctx.clip();
 };
 
 Oscilloscope.prototype.drawGrid = function (ctx) {
@@ -796,6 +803,7 @@ Oscilloscope.prototype.drawWF = function (ctx) {
    // Waveforms
    if (this.disp.persistency == 0) {
       ctx.save();
+      ctx.beginPath();
       ctx.rect(this.x1, this.y1, this.w, this.h);
       ctx.clip();
       var spacing = this.wfTS / (OSC.wdb[OSC.curBoard].drsSampleFreq * 1E6);
@@ -1122,6 +1130,7 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
    ctx.strokeStyle = "#808080";
    ctx.lineWidth = 1;
    ctx.strokeRect(this.x1 - 1, this.hiy1 - 1, this.hiWidth + 2, this.hiHeight + 2);
+   ctx.textBaseline = "top";
 
    if (this.histo.autoAxis) {
       this.histo.axisMin = undefined;
@@ -1457,6 +1466,7 @@ Oscilloscope.prototype.drawHAxis = function (ctx, x1, y1, width, minor, major, t
    var base = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000];
 
    ctx.textAlign = "center";
+   ctx.textBaseline = "top";
 
    if (xmax <= xmin || width <= 0)
       return;
