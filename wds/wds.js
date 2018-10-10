@@ -896,13 +896,13 @@ function receiveWF() {
             OSC.nLogged = intArray[i++];
             var c = intArray[i++];
             var n = intArray[i++];
-            OSC.i1 = 0;
-            OSC.i2 = 1023;
+            OSC.i1 = undefined;
+            OSC.i2 = undefined;
             for (var j = 0; j < n; j++) {
                var t = floatArray[i++];
                wf.T[c][j] = t;
                var xt = OSC.timeToX(t);
-               if (OSC.i1 == 0 && xt >= OSC.x1)
+               if (OSC.i1 == undefined && xt >= OSC.x1)
                   OSC.i1 = j;
                if (xt <= OSC.x2)
                   OSC.i2 = j;
@@ -1809,6 +1809,10 @@ function measZoomFit() {
 
 function measLogY() {
    OSC.histo.logY = ! OSC.histo.logY;
+}
+
+function measFilter() {
+   OSC.histo.filter = ! OSC.histo.filter;
 }
 
 function setNStat(v) {

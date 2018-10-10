@@ -202,6 +202,10 @@ Measurement.prototype.setNStat = function (n) {
 };
 
 Measurement.prototype.measure = function (x, y, i1, i2, update, ctx) {
+
+   if (i1 >= i2)
+      return;
+
    // execute measurement function in context of "this" object
    this.value = measList[this.index].f.call(this, ctx, x, y, i1, i2);
 
@@ -319,9 +323,6 @@ function measSigma(ctx, x, y, i1, i2) {
    var mean = 0;
    var rms = 0;
 
-   if (i1 == i2)
-      return;
-
    for (var i = i1; i < i2; i++)
       mean += y[c][i];
    mean /= (i2 - i1);
@@ -354,8 +355,8 @@ function measPkPk(ctx, x, y, i1, i2) {
    var c = this.param[1].value;
    var min_x, min_y, max_x, max_y;
 
-   min_x = max_x = x[c][0];
-   min_y = max_y = y[c][0];
+   min_x = max_x = x[c][i1];
+   min_y = max_y = y[c][i1];
    for (var i = i1; i < i2; i++) {
       if (y[c][i] < min_y) {
          min_x = x[c][i];
@@ -524,11 +525,8 @@ function measPeriod(ctx, xa, ya, i1, i2) {
    for (var i = 0; i < 1024; i++)
       y[i] = ya[c][i];
 
-   if (i1 == i2)
-      return;
-
-   var miny = y[0];
-   var maxy = y[0];
+   var miny = y[i1];
+   var maxy = y[i1];
    var mean = 0;
    for (i = i1; i < i2; i++) {
       if (y[i] > maxy)
@@ -802,10 +800,8 @@ function measHSlice(ctx, xa, ya, i1, i2) {
 
 
 function measChnDelay(ctx, x, y, i1, i2) {
-   //var w1 = this.param[0].value;
    var c1 = this.param[1].value;
    var thr1 = this.param[2].value / 1000;
-   //var w2 = this.param[3].value;
    var c2 = this.param[4].value;
    var thr2 = this.param[5].value / 1000;
 
