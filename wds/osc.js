@@ -1503,7 +1503,12 @@ Oscilloscope.prototype.drawHAxis = function (ctx, x1, y1, width, minor, major, t
          n_sig2 = Math.floor(Math.log(Math.abs(xmax)) / LN10) - Math.floor(Math.log(Math.abs(label_dx)) / LN10) + 1;
 
       n_sig1 = Math.max(n_sig1, n_sig2);
-      // n_sig1 = Math.max(n_sig1, 2);
+
+      // toPrecision displays 1050 with 3 digits as 1.05e+3, so increase presicion to number of digits
+      if (Math.abs(xmin) < 100000)
+         n_sig1 = Math.max(n_sig1, Math.floor(Math.log(Math.abs(xmin)) / LN10)+1);
+      if (Math.abs(xmax) < 100000)
+         n_sig1 = Math.max(n_sig1, Math.floor(Math.log(Math.abs(xmax)) / LN10)+1);
 
       /* determination of maximal width of labels */
       var str = (Math.floor(xmin / dx) * dx).toPrecision(n_sig1);
