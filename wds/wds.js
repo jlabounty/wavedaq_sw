@@ -1127,6 +1127,10 @@ function oscKeypress(e) {
       btnStop();
    }
 
+   if (charCode == 's'.charCodeAt(0)) {
+      btnSingle();
+   }
+
    if (charCode == ']'.charCodeAt(0)) {
       var ctls = document.getElementById("controls");
       ctls.hidden = !ctls.hidden;

@@ -329,3 +329,27 @@ input[type=text] {
 .tableTrigger tr:nth-child(event) {
    background-color: #EEEEEE;
 }
+
+.tableHelp {
+   border-collapse: collapse;
+}
+
+.tableHelp td {
+   border: 1px solid #808080;
+   padding: 5px;
+}
+
+.tableHelp th {
+   border: 1px solid #808080;
+   background-color: #808080;
+   color: white;
+   padding: 10px;
+}
+
+.tableHelp tr:nth-child(odd) {
+   background-color: #DDDDDD;
+}
+
+.tableHelp tr:nth-child(event) {
+   background-color: #EEEEEE;
+}

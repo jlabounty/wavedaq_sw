@@ -658,19 +658,18 @@ Oscilloscope.prototype.printScalers = function (ctx) {
 };
 
 Oscilloscope.prototype.blackCanvas = function (ctx, mode) {
-   ctx.fillStyle = this.disp.invert ? "white" : "black";
    ctx.restore();
-
    ctx.save();
+   ctx.fillStyle = this.disp.invert ? "white" : "black";
    if (mode === undefined || mode === 0) { // complete window
       ctx.fillRect(0, 0, this.width, this.height);
       ctx.rect(0, 0, this.width, this.height);
    } else if (mode == 1) { // waveform window
-      ctx.fillRect(0, 0, this.width, this.h);
-      ctx.rect(0, 0, this.width, this.h);
+      ctx.fillRect(0, 0, this.width, this.wfHeight);
+      ctx.rect(0, 0, this.width, this.wfHeight);
    } else { // histo window
-      ctx.fillRect(0, this.h, this.width, this.height-this.h);
-      ctx.rect(0, this.h, this.width, this.height-this.h);
+      ctx.fillRect(0, this.wfHeight, this.width, this.height * this.disp.histoDivider);
+      ctx.rect(0, this.wfHeight, this.width, this.height * this.disp.histoDivider);
    }
    ctx.clip();
 };

@@ -122,6 +122,7 @@
       <button class="wideButton" id="btnMeasure" type="button" onClick="dlgShow('dlgMeasure')">Measure</button>
       <button class="wideButton" id="btnChannels" type="button" onClick="dlgShow('dlgChannels')">Channels</button>
       <button class="wideButton" id="btnSave" type="button" onClick="btnSave()">Save</button>
+      <button class="wideButton" id="btnHelp" type="button" onClick="dlgShow('dlgHelp')">Help</button>
       <button class="wideButton" id="btnAbout" type="button" onClick="dlgShow('dlgAbout')">About</button>
 
    </div>
@@ -462,6 +463,29 @@
       </div>
    </div>
 
+
+   <!-- help dialog -->
+   <div id="dlgHelp" class="dlgFrame">
+
+      <div class="dlgTitlebar">Help</div>
+
+      <div class="dlgPanel">
+         <table class="tableHelp">
+            <tr><th colspan="2">Keyboard Shortcuts</th></tr>
+            <tr><td>&lt;Space&gt;</td><td>Start/Stop acquisition</td></tr>
+            <tr><td>s</td><td>Trigger single acquisition</td></tr>
+            <tr><td>]</td><td>Hide/Show controls</td></tr>
+            <tr><td>c</td><td>Hide/Show config page</td></tr>
+            <tr><td>a</td><td>Select all channels</td></tr>
+            <tr><td>o</td><td>Turn selected channesl on/off</td></tr>
+            <tr><td>^</td><td>Distribute channel offsets equally</td></tr>
+            <tr><td>v</td><td>Set channel offsets to zero</td></tr>
+         </table>
+
+         <button class="wideButton" style="background-color:#F8F8F8" type="button" onClick="dlgHide('dlgAbout')">Close
+         </button>
+      </div>
+   </div>
 
    <!-- measure dialog -->
    <div id="dlgMeasure" class="dlgFrame">
