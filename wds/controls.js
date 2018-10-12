@@ -131,6 +131,7 @@ Controls.prototype.init = function () // scan DOM
       sl.addEventListener("touchmove", this.ctrlVSliderHandler.bind(this));
       sl.draw = this.ctrlVSliderDraw;
       sl.draw(sl);
+      sl.set = this.ctrlVSliderSet;
    }
 
    // ctrlHSlider
@@ -186,6 +187,15 @@ Controls.prototype.ctrlVSliderDraw = function (b) {
    ctx.arc(w / 2, knob, 10, 0, 2 * Math.PI);
    ctx.stroke();
    ctx.fill();
+};
+
+Controls.prototype.ctrlVSliderSet = function (pos) {
+   if (pos < 0)
+      pos = 0;
+   if (pos > 1)
+      pos = 1;
+   this.position = pos;
+   this.draw();
 };
 
 Controls.prototype.ctrlVSliderHandler = function (e) {
@@ -259,6 +269,10 @@ Controls.prototype.ctrlHSliderDraw = function (b) {
 };
 
 Controls.prototype.ctrlHSliderSet = function (pos) {
+   if (pos < 0)
+      pos = 0;
+   if (pos > 1)
+      pos = 1;
    this.position = pos;
    this.draw();
 };

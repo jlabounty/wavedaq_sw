@@ -113,6 +113,7 @@ function Oscilloscope(div) { // constructor
 
    this.timeCursor =  { on: false, input: undefined, drag: false, time: 0, x: 0 };
    this.voltageCursor =  { on: false, input: undefined, drag: false, voltage: 0, y: 0 };
+   this.offsetCursor =  { drag: false, channel:0, xStart: 0, yStart: 0, offsetStart: 0, tOffsetStart: 0 };
 
    // display object
    this.disp = {
@@ -370,6 +371,61 @@ Oscilloscope.prototype.mouseEvent = function (e) {
          this.voltageCursor.voltage = u;
          this.voltageCursor.input.value = u;
          this.voltageCursor.input.onchange();
+      }
+   }
+
+   if (!this.voltageCursor.on && !this.timeCursor.on && e.target == this.canvas) {
+      // find which waveform is close to cursor
+      var dMin = 1E6;
+      var cMin = undefined;
+      for (var c = 0; c < 20; c++) {
+         if (c == 19) // exclude FFT
+            continue;
+         if (this.chOn[c]) {
+            for (var i = 0; i < this.wf.U[c].length; i++) {
+               var x, y;
+
+               x = this.wf.T[c][i] * this.wfTS + this.wfTO;
+               y = this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c];
+
+               d = Math.sqrt((x - e.clientX) * (x - e.clientX) + (y - e.clientY) * (y - e.clientY));
+               if (d < dMin) {
+                  dMin = d;
+                  cMin = c;
+               }
+            }
+         }
+      }
+
+      if (e.type === "mousemove") {
+         if (this.offsetCursor.drag || dMin < 10)
+            cursor = "move";
+
+         if (this.offsetCursor.drag) {
+            var ofs = OSC.YToVolt(e.clientY, this.offsetCursor.channel) -
+                      OSC.YToVolt(this.offsetCursor.yStart, this.offsetCursor.channel);
+
+            OSC.wfOffset[this.offsetCursor.channel] = this.offsetCursor.offsetStart + ofs;
+
+            var tOfs = OSC.XToTime(e.clientX) - OSC.XToTime(this.offsetCursor.xStart);
+            OSC.wfTOffset = this.offsetCursor.tOffsetStart + tOfs;
+            setSldTOffset(OSC.wfTOffset);
+         }
+      }
+
+      if (e.type == "mousedown") {
+         if (dMin < 20) {
+            this.offsetCursor.drag = true;
+            this.offsetCursor.channel = cMin;
+            this.offsetCursor.xStart = e.clientX;
+            this.offsetCursor.yStart = e.clientY;
+            this.offsetCursor.offsetStart = OSC.wfOffset[cMin];
+            this.offsetCursor.tOffsetStart = OSC.wfTOffset;
+         }
+      }
+
+      if (e.type == "mouseup") {
+         this.offsetCursor.drag = false;
       }
    }
 
