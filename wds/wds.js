@@ -1120,7 +1120,7 @@ function oscKeypress(e) {
    var charCode = (typeof e.which == "number") ? e.which : e.keyCode;
 
    // check if for some dialog box etc.
-   if (e.target != document.body)
+   if (e.target != document.body && e.target.id != "btnHelp")
       return;
 
    if (charCode == ' '.charCodeAt(0)) {
@@ -1143,6 +1143,13 @@ function oscKeypress(e) {
 
    if (charCode == 'a'.charCodeAt(0)) {
       btnChnAll();
+   }
+
+   if (charCode >= '0'.charCodeAt(0) && charCode <= '9'.charCodeAt(0)) {
+      var c = charCode - '0'.charCodeAt(0);
+      for (var i = 0; i < 20; i++)
+         OSC.chOnSelected[i] = (i == c);
+      OSC.drawChnButtons();
    }
 
    if (charCode == 'o'.charCodeAt(0)) {
@@ -1367,6 +1374,11 @@ function sldUOffset(value) {
    OSC.calcScaleOffset();
    OSC.clearPersistency();
    OSC.redraw();
+}
+
+function setSldUOffset(value) {
+   document.getElementById("uofsSlider").set(value);
+
 }
 
 var tLevelLast = -1;

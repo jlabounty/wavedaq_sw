@@ -175,6 +175,10 @@ public:
    float            mWfUADC[WD_N_CHANNELS][2048];
    float            mWfTADC[WD_N_CHANNELS][2048];
 
+   unsigned char    mWfTDC[WD_N_CHANNELS][2048];
+   
+   unsigned long    mScaler[19];
+
    bool             mVCalibrated;
    bool             mTCalibrated;
    

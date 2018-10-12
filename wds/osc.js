@@ -406,6 +406,7 @@ Oscilloscope.prototype.mouseEvent = function (e) {
                       OSC.YToVolt(this.offsetCursor.yStart, this.offsetCursor.channel);
 
             OSC.wfOffset[this.offsetCursor.channel] = this.offsetCursor.offsetStart + ofs;
+            setSldUOffset(OSC.wfOffset[this.offsetCursor.channel]+0.5);
 
             var tOfs = OSC.XToTime(e.clientX) - OSC.XToTime(this.offsetCursor.xStart);
             OSC.wfTOffset = this.offsetCursor.tOffsetStart + tOfs;
@@ -421,6 +422,9 @@ Oscilloscope.prototype.mouseEvent = function (e) {
             this.offsetCursor.yStart = e.clientY;
             this.offsetCursor.offsetStart = OSC.wfOffset[cMin];
             this.offsetCursor.tOffsetStart = OSC.wfTOffset;
+            for (i = 0; i < 20; i++)
+               OSC.chOnSelected[i] = (i == cMin);
+            OSC.drawChnButtons();
          }
       }
 
@@ -565,7 +569,7 @@ Oscilloscope.prototype.printTemperature = function (ctx) {
 
    if (OSC.wdb != undefined && !this.chOn[19]) { // hide when FFT on
       var t = OSC.wdb[OSC.curBoard].temperature;
-      ctx.fillText("T = " + t.toFixed(1) + " C", this.x1 + 12, this.y2 - 24);
+      ctx.fillText("T = " + t.toFixed(1) + "\xB0C", this.x1 + 12, this.y2 - 24);
    }
 };
 

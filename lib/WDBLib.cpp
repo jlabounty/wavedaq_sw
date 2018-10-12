@@ -2082,19 +2082,6 @@ int WP::ReceiveWfPacket()
          std::cout << line;
    }
    
-   // drop package (for now...) if it is not DRS or ADC data
-   if (ph->data_type != cDataTypeDRS && ph->data_type != cDataTypeADC) {
-      std::cerr << "Package dropped, data type=" << ph->data_type << ", "
-      << "board id = " << ph->serial_number << std::endl;
-      if (mLogfile != "") {
-         std::ofstream f;
-         f.open(mLogfile, std::ios_base::app);
-         f << "Package dropped, data type=" << ph->data_type << ", "
-         << "board id = " << ph->serial_number << std::endl;
-      }
-      return 0;
-   }
-   
    // find event request belonging to this board
    WDEventRequest *er = nullptr;
    for (auto r: mEventRequest)
@@ -2112,26 +2099,26 @@ int WP::ReceiveWfPacket()
       }
       return 0;
    }
-   
-   // drop packes if wrong type, but keep collecting event
-   if (er->GetWfType() != ph->data_type) {
-      return SUCCESS;
-   }
 
+   // derive event number
    if (mCurrentEvent == -1)
       mCurrentEvent = ph->event_number;
-   if (er->GetDrsTriggerCell(channel_number) == -1)
-      er->SetDrsTriggerCell(channel_number, ph->drs_trigger_cell);
-   
-   // print warning if inconsistent trigger cells are found
-   if (channel_number < 8 || channel_number == 16) {
-      for (int i=0 ; i<8 ; i++)
-         if (er->GetDrsTriggerCell(i) != -1 && er->GetDrsTriggerCell(i) != ph->drs_trigger_cell)
-            std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
-   } else {
-      for (int i=8 ; i<16 ; i++)
-         if (er->GetDrsTriggerCell(i) != -1 && er->GetDrsTriggerCell(i) != ph->drs_trigger_cell)
-            std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
+
+   // derive drs_trigger_cell
+   if (ph->data_type == cDataTypeDRS) {
+      if (er->GetDrsTriggerCell(channel_number) == -1)
+         er->SetDrsTriggerCell(channel_number, ph->drs_trigger_cell);
+      
+      // print warning if inconsistent trigger cells are found
+      if (channel_number < 8 || channel_number == 16) {
+         for (int i=0 ; i<8 ; i++)
+            if (er->GetDrsTriggerCell(i) != -1 && er->GetDrsTriggerCell(i) != ph->drs_trigger_cell)
+               std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
+      } else {
+         for (int i=8 ; i<16 ; i++)
+            if (er->GetDrsTriggerCell(i) != -1 && er->GetDrsTriggerCell(i) != ph->drs_trigger_cell)
+               std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
+      }
    }
 
    // drop package if it belongs to previous event
@@ -2262,142 +2249,6 @@ void WP::UnrotateWaveforms()
          for (int j=0 ; j<1024 ; j++)
             ev->mWfU[i][(j+tc) % 1024] = wf[i][j];
       }
-   }
-}
-
-//--------------------------------------------------------------------
-
-void WP::RemoveSpikes(int trigger_cell, float wf[][1024])
-{
-   /*
-    Remove a specific kind of spike on DRS4.
-    
-    This spike has some specific features, namely:
-    - Common on all the channels on a chip
-    - Constant heigh and width
-    - Two spikes per channel
-    - Symmetric to cell #0.
-    
-    
-    Please note that this is not a general purpose spike-remal function.
-    */
-   
-   int i, j, k, l;
-   double hp, x, y;
-   int sp[8][10];
-   int rsp[10], rot_sp[10];
-   int n_sp[8], n_rsp;
-   int  nNeighbor, nSymmetric;
-   float cwf[WD_N_CHANNELS][1024];
-   
-  
-   /* rotate waveform back relative to cell #0 */
-   if (mRotateWaveform) {
-      for (i=0 ; i<8 ; i++)
-         for (j=0 ; j<1024 ; j++)
-            cwf[i][(j+trigger_cell) % 1024] = wf[i][j];
-   } else {
-      for (i=0 ; i<8 ; i++)
-         for (j=0 ; j<1024 ; j++)
-            cwf[i][j] = wf[i][j];
-   }
-   
-   memset(sp, 0, sizeof(sp));
-   memset(n_sp, 0, sizeof(n_sp));
-   memset(rsp, 0, sizeof(rsp));
-   n_rsp = 0;
-   
-   /* find spikes with special high-pass filter, skip last values */
-   for (j=0 ; j<1020 ; j++) {
-      for (i=1 ; i<4 ; i++) { // TBD: temporary fix for bad channels 1,5,6,7
-         hp = -cwf[i][j] + cwf[i][(j+1)%1024]+cwf[i][(j+2)%1024] - cwf[i][(j+3) % 1024];
-         if (hp > 0.020) {
-            if (n_sp[i] < 10) // record maximum of 10 spikes
-               sp[i][n_sp[i]++] = j;
-            else
-               return;        // too many spikes -> something wrong
-         }
-      }
-   }
-   
-   /* go through all spikes and look for symmetric spikes and neighbors */
-   for (i=0 ; i<8 ; i++) {
-      for (j=0 ; j<n_sp[i] ; j++) {
-         /* check if this spike has a symmetric partner in any channel */
-         for (k=nSymmetric=0 ; k<8 ; k++) {
-            for (l=0 ; l<n_sp[k] ; l++)
-               if (sp[i][j] == (1020-sp[k][l]+1024) % 1024) {
-                  nSymmetric++;
-                  break;
-               }
-         }
-         
-         /* check if this spike has same spike in any other channels */
-         for (k=nNeighbor=0 ; k<8 ; k++)
-            if (i != k) {
-               for (l=0 ; l<n_sp[k] ; l++)
-                  if (sp[i][j] == sp[k][l]) {
-                     nNeighbor++;
-                     break;
-                  }
-            }
-         
-         if (nSymmetric + nNeighbor >= 2) {
-            /* if at least two matching spikes, treat this as a real spike */
-            for (k=0 ; k<n_rsp ; k++)
-               if (rsp[k] == sp[i][j])
-                  break;
-            if (n_rsp < 10 && k == n_rsp)
-               rsp[n_rsp++] = sp[i][j];
-         }
-      }
-   }
-   
-   /* rotate spikes according to trigger cell */
-   if (mRotateWaveform) {
-      for (i=0 ; i<n_rsp ; i++)
-         rot_sp[i] = (rsp[i] - trigger_cell + 1024) % 1024;
-   } else {
-      for (i=0 ; i<n_rsp ; i++)
-         rot_sp[i] = rsp[i];
-   }
-   
-   /* recognize spikes if at least one channel has it */
-   for (k=0 ; k<n_rsp ; k++) {
-      for (i=0 ; i<8 ; i++) {
-         
-         if (k < n_rsp-1 && rsp[k] == 0 && rsp[k+1] == 1020) {
-            /* remove double spike */
-            j = rot_sp[k] > rot_sp[k+1] ? rot_sp[k+1] : rot_sp[k];
-            x = wf[i][(j+1) % 1024];
-            y = wf[i][(j+6) % 1024];
-            if (fabs(x-y) < 0.015) {
-               wf[i][(j+2) % 1024] = (float)(x + 1*(y-x)/5);
-               wf[i][(j+3) % 1024] = (float)(x + 2*(y-x)/5);
-               wf[i][(j+4) % 1024] = (float)(x + 3*(y-x)/5);
-               wf[i][(j+5) % 1024] = (float)(x + 4*(y-x)/5);
-            } else {
-               wf[i][(j+2) % 1024] -= 0.0148f;
-               wf[i][(j+3) % 1024] -= 0.0148f;
-               wf[i][(j+4) % 1024] -= 0.0148f;
-               wf[i][(j+5) % 1024] -= 0.0148f;
-            }
-         } else {
-            /* remove single spike */
-            x = wf[i][rot_sp[k]];
-            y = wf[i][(rot_sp[k]+3) % 1024];
-            
-            if (fabs(x-y) < 0.010) {
-               wf[i][(rot_sp[k]+1) % 1024] = (float)(x + 1*(y-x)/3);
-               wf[i][(rot_sp[k]+2) % 1024] = (float)(x + 2*(y-x)/3);
-            } else {
-               wf[i][(rot_sp[k]+1) % 1024] -= 0.009f;
-               wf[i][(rot_sp[k]+2) % 1024] -= 0.009f;
-            }
-         }
-      }
-      if (k < n_rsp-1 && rsp[k] == 0 && rsp[k+1] == 1020)
-         k++; // skip second half of double spike
    }
 }
 
