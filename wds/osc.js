@@ -569,7 +569,7 @@ Oscilloscope.prototype.printTemperature = function (ctx) {
 
    if (OSC.wdb != undefined && !this.chOn[19]) { // hide when FFT on
       var t = OSC.wdb[OSC.curBoard].temperature;
-      ctx.fillText("T = " + t.toFixed(1) + " C", this.x1 + 12, this.y2 - 24);
+      ctx.fillText("T = " + t.toFixed(1) + "\xB0C", this.x1 + 12, this.y2 - 24);
    }
 };
 
