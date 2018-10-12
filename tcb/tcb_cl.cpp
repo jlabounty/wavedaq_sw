@@ -623,8 +623,9 @@ int main(int argc, char *argv[])
       }
       if(option == 32) {
         printf(" opt = 32 : Buffer Commands \n");
-        printf("[ 1]: Read Buffer    \t \t  [ 2]: Increment Pointer\n");
+        printf("[ 1]: Dump Buffer    \t \t  [ 2]: Increment Pointer\n");
         printf("[ 3]: Reset Logic    \t \t  [ 4]: Get State\n");
+        printf("[ 5]: Read Banks     \t \t  [  ]:          \n");
         int sel;
         do {
           printf("Give an option: ");
@@ -645,6 +646,21 @@ int main(int argc, char *argv[])
             break;
           case 4:
             printf ("SPI pointer: %d, Packetizer pointer %d, Memory State %x", TCBBoard.GetSPIBufferPointer(), TCBBoard.GetPacketizerBufferPointer(), TCBBoard.GetBufferState());
+            break;
+          case 5:
+            {
+            int nBanks=0;
+            char bankName[4];
+            u_int32_t data[4000];
+            int length;
+            u_int32_t ptr= TCBBoard.GetBufferHeadSPI(&nBanks);
+            while(TCBBoard.HasBufferBankSPI(ptr, bankName, &length)){
+               TCBBoard.GetBufferBankDataSPI(ptr, data, length);
+               printf("got bank %c %c %c %c", bankName[3], bankName[2], bankName[1], bankName[0]);
+               ptr = TCBBoard.SkipBufferBankSPI(ptr, length);
+            }
+            TCBBoard.IncrementBufferPointer();
+            }
             break;
           default: break;
         }

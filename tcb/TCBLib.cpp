@@ -1549,9 +1549,9 @@ void TCB::WritePacketizerProgram(std::vector<PacketInstruction> &list){
       }
    }
 
-   for(int i=0; i<=max_offset; i++){
+   /*for(int i=0; i<=max_offset; i++){
       printf("%08x %08x %08x\n", pack_mem_0[i], pack_mem_1[i], pack_mem_2[i]);
-   }
+   }*/
    int NBLT = (max_offset > 0)? (max_offset-1)/BLTSIZE + 1: 1;
    for (int iblt = 0; iblt<NBLT; iblt++) {
       WriteBLT(PACKAGERBASE+(iblt*BLTSIZE), pack_mem_0+(iblt*BLTSIZE), BLTSIZE);
@@ -1560,3 +1560,39 @@ void TCB::WritePacketizerProgram(std::vector<PacketInstruction> &list){
    }
    
 }
+//Get Current Buffer Head
+u_int32_t TCB::GetBufferHeadSPI(int *nBanks){
+   u_int32_t data[5];
+   ReadBLT(PACKAGERBASE, data, 5);
+
+   *nBanks = data[0];
+
+   return 6;
+}
+//Check current bank
+bool TCB::HasBufferBankSPI(u_int32_t ptr, char *bankName, int *length){
+   u_int32_t data[2];
+   ReadBLT(PACKAGERBASE+ptr, data, 2);
+   bankName[0] = data[0]&0xFF;
+   bankName[1] = (data[0]>>8)&0xFF;
+   bankName[2] = (data[0]>>16)&0xFF;
+   bankName[3] = (data[0]>>24)&0xFF;
+
+   *length = data[1];
+
+   return (data[0] != 0);
+}
+//Skip Bank
+u_int32_t TCB::SkipBufferBankSPI(u_int32_t ptr, int length){
+   return ptr+2+length;
+}
+//Read Bank
+void TCB::GetBufferBankDataSPI(u_int32_t ptr, u_int32_t *data, int length){
+   int iword;
+   for (iword = 0; iword+BLTSIZE<length; iword+=BLTSIZE) {
+      ReadBLT(ptr+iword,data+iword, BLTSIZE);
+   }
+   ReadBLT(ptr+iword,data+iword, length-(BLTSIZE*iword));
+}
+
+

@@ -327,4 +327,13 @@ public:
    void SetFMask(bool, bool);
    //write full Packetizer program
    void WritePacketizerProgram(std::vector<PacketInstruction> &list);
+   //read buffer head, return buffer read pointer
+   u_int32_t GetBufferHeadSPI(int *nBanks);
+   //check has bank
+   bool HasBufferBankSPI(u_int32_t ptr, char *bankName, int *length);
+   //skip bank
+   u_int32_t SkipBufferBankSPI(u_int32_t ptr, int length);
+   //get bank data
+   void GetBufferBankDataSPI(u_int32_t ptr, u_int32_t *data, int length);
+
 };
