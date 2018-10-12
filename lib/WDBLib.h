@@ -145,6 +145,7 @@ typedef struct {
    int            iIter3;
    int            nIter4;
    int            iIter4;
+   int            nIterTotal;
    Averager       *ave;
    int            phase;
 } CALIB_PROGRESS;

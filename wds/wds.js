@@ -1496,6 +1496,21 @@ function sldTOffset(value) {
    OSC.redraw();
 }
 
+function setSldTOffset(tOffset)
+{
+   var wfWidth = 1024 / OSC.wdb[OSC.curBoard].drsSampleFreq * 1E-6;
+   var scWidth = OSC.wfTScale * 10;
+   if (wfWidth >= scWidth)
+      value = (0.9 * scWidth - wfWidth - tOffset) / (0.8 * scWidth - wfWidth);
+   else
+      value = 1 - (0.9 * scWidth - wfWidth - tOffset) / (0.8 * scWidth - wfWidth);
+
+   var s = document.getElementById("tofsSlider");
+   s.set(value);
+
+   sldTOffset(value);
+}
+
 function btnConfig() {
    var config = document.getElementById("config");
    config.visible = !config.visible;
