@@ -295,7 +295,7 @@ function populateControls(init) {
    document.getElementById("calibBufferEnable").checked = OSC.wdb[OSC.curBoard].calibBufferEnable;
 
    if (document.getElementById("inpDacCalDc") != document.activeElement) {
-      document.getElementById("sldDacCalDc").set(OSC.wdb[OSC.curBoard].dacCalDc / 2 + 0.5);
+      document.getElementById("sldDacCalDc").set(OSC.wdb[OSC.curBoard].dacCalDc / 1.2 + 0.5);
       document.getElementById("inpDacCalDc").value = Math.round(OSC.wdb[OSC.curBoard].dacCalDc * 1000);
    }
 
@@ -710,7 +710,7 @@ function validateParam(input, channel) {
          input.value = -1000;
       if (input.value > 1000)
          input.value = 1000;
-      document.getElementById("sldDacCalDc").set(input.value / 2000 + 0.5);
+      document.getElementById("sldDacCalDc").set(input.value / 1200 + 0.5);
    }
 
    if (input.id.substr(0, 11) == "inpHvTarget") {
@@ -896,13 +896,13 @@ function receiveWF() {
             OSC.nLogged = intArray[i++];
             var c = intArray[i++];
             var n = intArray[i++];
-            OSC.i1 = 0;
-            OSC.i2 = 1023;
+            OSC.i1 = undefined;
+            OSC.i2 = undefined;
             for (var j = 0; j < n; j++) {
                var t = floatArray[i++];
                wf.T[c][j] = t;
                var xt = OSC.timeToX(t);
-               if (OSC.i1 == 0 && xt >= OSC.x1)
+               if (OSC.i1 == undefined && xt >= OSC.x1)
                   OSC.i1 = j;
                if (xt <= OSC.x2)
                   OSC.i2 = j;
@@ -1125,6 +1125,10 @@ function oscKeypress(e) {
 
    if (charCode == ' '.charCodeAt(0)) {
       btnStop();
+   }
+
+   if (charCode == 's'.charCodeAt(0)) {
+      btnSingle();
    }
 
    if (charCode == ']'.charCodeAt(0)) {
@@ -1426,7 +1430,7 @@ function sldDacCalDc(value) {
    if (OSC.demoMode)
       return;
 
-   document.getElementById("inpDacCalDc").value = Math.round(value * 2000 - 1000);
+   document.getElementById("inpDacCalDc").value = Math.round((value * 1200 - 600)/10)*10;
    setParam(document.getElementById("inpDacCalDc"));
 }
 
@@ -1811,6 +1815,10 @@ function measLogY() {
    OSC.histo.logY = ! OSC.histo.logY;
 }
 
+function measFilter() {
+   OSC.histo.filter = ! OSC.histo.filter;
+}
+
 function setNStat(v) {
    for (i = 0; i < OSC.measList.childNodes.length; i++)
       if (OSC.measList.childNodes[i].measurement)
@@ -1830,11 +1838,12 @@ function measSave() {
 
    var downloadLink = document.createElement("a");
    var d = new Date();
-   downloadLink.download = "histos_"+d.getFullYear()+"_"+
-      (d.getMonth()<10?"0":"")+d.getMonth()+"_"+
-      (d.getDay()<10?"0":"")+d.getDay()+"_"+
-      (d.getHours()<10?"0":"")+d.getHours()+"_"+
-      (d.getMinutes()<10?"0":"")+d.getMinutes()+"_"+
+   var y = d.getFullYear() % 100;
+   downloadLink.download = "histos_"+(y<10?"0":"")+y+
+      (d.getMonth()+1<10?"0":"")+(d.getMonth()+1)+
+      (d.getDate()<10?"0":"")+d.getDate()+"_"+
+      (d.getHours()<10?"0":"")+d.getHours()+
+      (d.getMinutes()<10?"0":"")+d.getMinutes()+
       (d.getSeconds()<10?"0":"")+d.getSeconds()+".txt";
    downloadLink.innerHTML = "Download File";
    downloadLink.href = url;
