@@ -12,6 +12,35 @@
 #include <sys/ioctl.h>
 #include <vector>
 
+void str2reg(char* str, u_int32_t * reg){
+   if(str[0] == '0' && str[1] == 'x'){
+       *reg = strtol(str+2, NULL, 16);
+   } else if(strcmp(str, "rA")==0){
+       *reg = PACK_A; 
+   } else if(strcmp(str, "rB")==0){
+       *reg = PACK_B; 
+   } else if(strcmp(str, "rC")==0){
+       *reg = PACK_C; 
+   } else if(strcmp(str, "rR")==0){
+       *reg = PACK_RADDR; 
+   } else if(strcmp(str, "rW")==0){
+       *reg = PACK_WADDR; 
+   } else if(strcmp(str, "rSUM")==0){
+       *reg = PACK_SUM; 
+   } else if(strcmp(str, "rAND")==0){
+       *reg = PACK_AND; 
+   } else if(strcmp(str, "rOR")==0){
+       *reg = PACK_OR; 
+   } else if(strcmp(str, "rXOR")==0){
+       *reg = PACK_XOR; 
+   } else if(strcmp(str, "aBUFF")==0){
+       *reg = BUFFERBASE;
+   } else if(strcmp(str, "rNEXTBUFF")==0){
+       *reg = PACK_NEXT_BUFFER; 
+   } else if(strcmp(str, "*")==0){
+       *reg = 0x80000000; 
+   } else *reg = atoi(str);
+}
 
 void MemoryRewind(int ich, u_int32_t last, u_int32_t *mem, u_int32_t *outmem) {
    *outmem = 0;
@@ -545,13 +574,14 @@ int main(int argc, char *argv[])
             while(!feof(fileIn)){
                int lineno=0;
                char cmd[16];
-               int arg0=0;
-               int arg1=0;
-               int arg2=0;
+               unsigned int arg0=0;
+               unsigned int arg1=0;
+               unsigned int arg2=0;
+               char arg0str[16];
+               char arg1str[16];
                PacketInstruction inst;
                fscanf(fileIn, "%d: %[^ \n]%*[ \n]",  &lineno, cmd);
                inst.offset = lineno;
-               printf("%s\n", cmd);
                if(strcmp(cmd, "STOP")==0){
                   inst.cmd = ::STOP;
                } else if(strcmp(cmd, "JUMP")==0){
@@ -559,18 +589,25 @@ int main(int argc, char *argv[])
                   fscanf(fileIn, " %d%*[ \n]", &arg2);
                } else if(strcmp(cmd, "COPY")==0){
                   inst.cmd = ::COPY;
-                  fscanf(fileIn, " %d %d%*[ \n]", &arg0, &arg1);
+                  fscanf(fileIn, " %s %s%*[ \n]", arg0str, arg1str);
+                  str2reg(arg0str, &arg0);
+                  str2reg(arg1str, &arg1);
                } else if(strcmp(cmd, "BLOCK_COPY")==0){
                   inst.cmd = ::BLOCK_COPY;
-                  fscanf(fileIn, " %d %d %d%*[ \n]", &arg0, &arg1, &arg2);
+                  fscanf(fileIn, " %s %s %d%*[ \n]", arg0str, arg1str, &arg2);
+                  str2reg(arg0str, &arg0);
+                  str2reg(arg1str, &arg1);
                } else if(strcmp(cmd, "W")==0){
                   inst.cmd = ::DIRECT_WRITE;
-                  fscanf(fileIn, " %d %d%*[ \n]", &arg0, &arg1);
+                  fscanf(fileIn, " %s %s%*[ \n]", arg0str, arg1str);
+                  str2reg(arg0str, &arg0);
+                  str2reg(arg1str, &arg1);
                } else if(strcmp(cmd, "JIF")==0){
                   inst.cmd = ::JUMP_IF;
-                  fscanf(fileIn, " %d %d %d\n", &arg0, &arg1, &arg2);
+                  fscanf(fileIn, " %s %s %d\n", arg0str, arg1str, &arg2);
+                  str2reg(arg0str, &arg0);
+                  str2reg(arg1str, &arg1);
                }
-               printf("\t\t%d %d %d\n", arg0, arg1, arg2);
                inst.arg0 = arg0;
                inst.arg1 = arg1;
                inst.arg2 = arg2;

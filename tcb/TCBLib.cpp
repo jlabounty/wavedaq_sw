@@ -1508,7 +1508,7 @@ void TCB::WritePacketizerProgram(std::vector<PacketInstruction> &list){
       pack_mem_2[i] = 0;
    }
 
-   unsigned long max_offset = 0;
+   long max_offset = 0;
 
    for(unsigned long i=0; i<list.size(); i++){
       if(list[i].offset >= PACKAGERSIZE){
