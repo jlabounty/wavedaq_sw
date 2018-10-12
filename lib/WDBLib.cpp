@@ -3024,6 +3024,9 @@ void WP::DoCalibrationVoltageStep()
       calibProg.iIter2   = 0;
       calibProg.iIter3   = 0;
       calibProg.iIter4   = 0;
+      
+      calibProg.nIterTotal = calibProg.nIter1 + calibProg.nIter2 +
+         calibProg.nIter3 + calibProg.nIter4 + 4;
    }
    
    WDB *b = mWdb[calibProg.iBoard];
@@ -3103,8 +3106,7 @@ void WP::DoCalibrationVoltageStep()
          for (int bin=0 ; bin<1024 ; bin++)
             calibProg.ave->Add(0, ch, bin, event.mWfU[ch][bin]);
       
-      calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3 + calibProg.iIter4) /
-      (calibProg.nIter1 + calibProg.nIter2 + calibProg.nIter3 + calibProg.nIter4);
+      calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3 + calibProg.iIter4) / calibProg.nIterTotal;
       
       // calibration finished
       if (calibProg.iIter1 == calibProg.nIter1) {
@@ -3141,8 +3143,7 @@ void WP::DoCalibrationVoltageStep()
          for (int bin=0 ; bin<1024 ; bin++)
             calibProg.ave->Add(0, ch, bin, event.mWfU[ch][bin]);
       
-      calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3 + calibProg.iIter4) /
-      (calibProg.nIter1 + calibProg.nIter2 + calibProg.nIter3 + calibProg.nIter4);
+      calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3 + calibProg.iIter4) / calibProg.nIterTotal;
       
       // calibration finished
       if (calibProg.iIter2 == calibProg.nIter2) {
@@ -3180,8 +3181,7 @@ void WP::DoCalibrationVoltageStep()
          for (int bin=0 ; bin<1024 ; bin++)
             calibProg.ave->Add(0, ch, bin, event.mWfU[ch][bin]);
       
-      calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3 + calibProg.iIter4) /
-      (calibProg.nIter1 + calibProg.nIter2 + calibProg.nIter3 + calibProg.nIter4);
+      calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3 + calibProg.iIter4) / calibProg.nIterTotal;
       
       // calibration finished
       if (calibProg.iIter3 == calibProg.nIter3) {
@@ -3217,8 +3217,7 @@ void WP::DoCalibrationVoltageStep()
          for (int bin=0 ; bin<1024 ; bin++)
             calibProg.ave->Add(0, ch, bin, event.mWfU[ch][bin]);
       
-      calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3 + calibProg.iIter4) /
-      (calibProg.nIter1 + calibProg.nIter2 + calibProg.nIter3 + calibProg.nIter4);
+      calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3 + calibProg.iIter4) / calibProg.nIterTotal;
       
       // calibration finished
       if (calibProg.iIter4 == calibProg.nIter4) {
@@ -3249,9 +3248,7 @@ void WP::DoCalibrationVoltageStep()
    b->SetDrsChTxEn(0x3FFFF);
    b->SetAdcChTxEn(0);
    WDEvent event(b->GetSerialNumber());
-   for (int i=0 ; i<10 ; i++) {
-      RequestEvent(b, 1000, event);
-   }
+   RequestEvent(b, 1000, event);
    while (!RequestEvent(b, 1000, event));
    
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
@@ -3264,9 +3261,7 @@ void WP::DoCalibrationVoltageStep()
    // ADC events
    b->SetDrsChTxEn(0);
    b->SetAdcChTxEn(0xFFFF);
-   for (int i=0 ; i<10 ; i++) {
-      RequestEvent(b, 1000, event);
-   }
+   RequestEvent(b, 1000, event);
    while (!RequestEvent(b, 1000, event));
    
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
@@ -3282,9 +3277,7 @@ void WP::DoCalibrationVoltageStep()
    // DRS events
    b->SetDrsChTxEn(0x3FFFF);
    b->SetAdcChTxEn(0);
-   for (int i=0 ; i<10 ; i++) {
-      RequestEvent(b, 1000, event);
-   }
+   RequestEvent(b, 1000, event);
    while (!RequestEvent(b, 1000, event));
    
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
@@ -3297,9 +3290,7 @@ void WP::DoCalibrationVoltageStep()
    // ADC events
    b->SetDrsChTxEn(0);
    b->SetAdcChTxEn(0xFFFF);
-   for (int i=0 ; i<10 ; i++) {
-      RequestEvent(b, 1000, event);
-   }
+   RequestEvent(b, 1000, event);
    while (!RequestEvent(b, 1000, event));
    
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
@@ -3315,9 +3306,7 @@ void WP::DoCalibrationVoltageStep()
    // DRS events
    b->SetDrsChTxEn(0x3FFFF);
    b->SetAdcChTxEn(0);
-   for (int i=0 ; i<10 ; i++) {
-      RequestEvent(b, 1000, event);
-   }
+   RequestEvent(b, 1000, event);
    while (!RequestEvent(b, 1000, event));
    
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
@@ -3330,9 +3319,7 @@ void WP::DoCalibrationVoltageStep()
    // ADC events
    b->SetDrsChTxEn(0);
    b->SetAdcChTxEn(0xFFFF);
-   for (int i=0 ; i<10 ; i++) {
-      RequestEvent(b, 1000, event);
-   }
+   RequestEvent(b, 1000, event);
    while (!RequestEvent(b, 1000, event));
    
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
