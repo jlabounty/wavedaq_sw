@@ -60,6 +60,7 @@
 #define PACKAGERBASE  0x01000000                //base address for packager memories
 #define RARBITER      0x01001000                //Bus Arbiter register and packager controller
 #define BUFFERBASE    0x02000000                //Buffer base address
+#define PACKAGERREGS  0x03000000                //PackagerRegs base address
 
 ///////////////////////////////////////////////////////////
 // LIBRARY ASSOCIATED TO TCB_X_0
@@ -72,7 +73,21 @@
 #define BLTSIZE            32
 ///////////////////////////////////////////////////////////
 
+//derived addresses (should not touch!)
+#define PACK_NEXT_BUFFER   BUFFERBASE+BUFFERSIZE
+#define PACK_A             PACKAGERREGS
+#define PACK_B             PACKAGERREGS+1
+#define PACK_C             PACKAGERREGS+2
+#define PACK_RADDR         PACKAGERREGS+3
+#define PACK_WADDR         PACKAGERREGS+4
+#define PACK_FLAGS         PACKAGERREGS+8
+#define PACK_SUM           PACKAGERREGS+9
+#define PACK_AND           PACKAGERREGS+10
+#define PACK_OR            PACKAGERREGS+11
+#define PACK_XOR           PACKAGERREGS+12
+
 #include "strlcpy.h"
+#include <vector>
 
 typedef struct {
     unsigned short     trgindly;
@@ -86,6 +101,14 @@ typedef struct {
 } TCB_SETTINGS;
 
 enum PACKETIZER_COMMAND {STOP, COPY, BLOCK_COPY, DIRECT_WRITE, JUMP, JUMP_IF};
+
+typedef struct {
+   int offset;
+   PACKETIZER_COMMAND cmd;
+   unsigned int arg0;
+   unsigned int arg1;
+   unsigned int arg2;
+} PacketInstruction;
 
 class TCB {
 private:
@@ -302,4 +325,6 @@ public:
    void SetSingleCrateTriggerOr(int nChn, int* chn, short shape);
    void SetSingleCrateTriggerAnd(int nChn, int* chn, short shape);
    void SetFMask(bool, bool);
+   //write full Packetizer program
+   void WritePacketizerProgram(std::vector<PacketInstruction> &list);
 };

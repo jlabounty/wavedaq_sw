@@ -1497,3 +1497,66 @@ void TCB::SetFMask(bool trgmask, bool busymask){
    // write the reg
    WriteReg(RRUN, &data);
 }
+//write full Packetizer program
+void TCB::WritePacketizerProgram(std::vector<PacketInstruction> &list){
+   u_int32_t pack_mem_0[PACKAGERSIZE];
+   u_int32_t pack_mem_1[PACKAGERSIZE];
+   u_int32_t pack_mem_2[PACKAGERSIZE];
+   for(unsigned long i=0; i<PACKAGERSIZE; i++){
+      pack_mem_0[i] = 0;
+      pack_mem_1[i] = 0;
+      pack_mem_2[i] = 0;
+   }
+
+   unsigned long max_offset = 0;
+
+   for(unsigned long i=0; i<list.size(); i++){
+      if(list[i].offset >= PACKAGERSIZE){
+         printf("Packager script out of bundaries!\n");
+         return;
+      } else if (list[i].offset > max_offset) 
+         max_offset = list[i].offset; 
+      
+      switch(list[i].cmd){
+      case STOP:
+         pack_mem_0[list[i].offset] = 0;
+         break;
+      case COPY:
+         pack_mem_0[list[i].offset] = 0x10000000;
+         pack_mem_1[list[i].offset] = list[i].arg0;
+         pack_mem_2[list[i].offset] = list[i].arg1;
+         break;
+      case BLOCK_COPY:
+         pack_mem_0[list[i].offset] = (0x20000000 | (list[i].arg2 & 0xFFFF));
+         pack_mem_1[list[i].offset] = list[i].arg0;
+         pack_mem_2[list[i].offset] = list[i].arg1;
+         break;
+      case DIRECT_WRITE:
+         pack_mem_0[list[i].offset] = 0x30000000;
+         pack_mem_1[list[i].offset] = list[i].arg0;
+         pack_mem_2[list[i].offset] = list[i].arg1;
+         break; 
+      case JUMP:
+         pack_mem_0[list[i].offset] = (0x40000000 | (list[i].arg2 & 0xFFFF));
+         pack_mem_1[list[i].offset] = 0;
+         pack_mem_2[list[i].offset] = 0;
+         break; 
+      case JUMP_IF:
+         pack_mem_0[list[i].offset] = (0x50000000 | (list[i].arg2 & 0xFFFF));
+         pack_mem_1[list[i].offset] = list[i].arg0;
+         pack_mem_2[list[i].offset] = list[i].arg0;
+         break; 
+      }
+   }
+
+   for(int i=0; i<=max_offset; i++){
+      printf("%08x %08x %08x\n", pack_mem_0[i], pack_mem_1[i], pack_mem_2[i]);
+   }
+   int NBLT = (max_offset > 0)? (max_offset-1)/BLTSIZE + 1: 1;
+   for (int iblt = 0; iblt<NBLT; iblt++) {
+      WriteBLT(PACKAGERBASE+(iblt*BLTSIZE), pack_mem_0+(iblt*BLTSIZE), BLTSIZE);
+      WriteBLT(PACKAGERBASE+(iblt*BLTSIZE)+PACKAGERSIZE, pack_mem_1+(iblt*BLTSIZE), BLTSIZE);
+      WriteBLT(PACKAGERBASE+(iblt*BLTSIZE)+2*PACKAGERSIZE, pack_mem_2+(iblt*BLTSIZE), BLTSIZE);
+   }
+   
+}

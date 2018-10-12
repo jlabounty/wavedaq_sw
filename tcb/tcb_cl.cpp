@@ -493,6 +493,7 @@ int main(int argc, char *argv[])
         printf("[ 1]: Enable Packetizer    \t \t  [ 2]: Start Packetizer     \n");
         printf("[ 3]: Set Autostart        \t \t  [ 4]: Assign bus \n");  
         printf("[ 5]: Abort Packetizer     \t \t  [ 6]: Set Packetizer Command\n");
+        printf("[ 7]: Load Program         \t \t  [  ]:                       \n");
         int sel;
         do {
           printf("Give an option: ");
@@ -533,6 +534,53 @@ int main(int argc, char *argv[])
             scanf("%x", &opt);
             TCBBoard.SetPacketizerCommandAt(offset, (PACKETIZER_COMMAND)cmd, arg0, arg1, opt);
             break;
+          case 7:
+            {
+            char filenameIn[256];
+            FILE *fileIn;
+            printf("Filename: ");
+            scanf("%s", filenameIn);
+            fileIn=fopen(filenameIn, "r");
+            std::vector<PacketInstruction> instVec;
+            while(!feof(fileIn)){
+               int lineno=0;
+               char cmd[16];
+               int arg0=0;
+               int arg1=0;
+               int arg2=0;
+               PacketInstruction inst;
+               fscanf(fileIn, "%d: %[^ \n]%*[ \n]",  &lineno, cmd);
+               inst.offset = lineno;
+               printf("%s\n", cmd);
+               if(strcmp(cmd, "STOP")==0){
+                  inst.cmd = ::STOP;
+               } else if(strcmp(cmd, "JUMP")==0){
+                  inst.cmd = ::JUMP;
+                  fscanf(fileIn, " %d%*[ \n]", &arg2);
+               } else if(strcmp(cmd, "COPY")==0){
+                  inst.cmd = ::COPY;
+                  fscanf(fileIn, " %d %d%*[ \n]", &arg0, &arg1);
+               } else if(strcmp(cmd, "BLOCK_COPY")==0){
+                  inst.cmd = ::BLOCK_COPY;
+                  fscanf(fileIn, " %d %d %d%*[ \n]", &arg0, &arg1, &arg2);
+               } else if(strcmp(cmd, "W")==0){
+                  inst.cmd = ::DIRECT_WRITE;
+                  fscanf(fileIn, " %d %d%*[ \n]", &arg0, &arg1);
+               } else if(strcmp(cmd, "JIF")==0){
+                  inst.cmd = ::JUMP_IF;
+                  fscanf(fileIn, " %d %d %d\n", &arg0, &arg1, &arg2);
+               }
+               printf("\t\t%d %d %d\n", arg0, arg1, arg2);
+               inst.arg0 = arg0;
+               inst.arg1 = arg1;
+               inst.arg2 = arg2;
+
+               instVec.push_back(inst);
+            }
+            TCBBoard.WritePacketizerProgram(instVec);
+            fclose(fileIn);
+            }
+            break; 
           default: break;
         }
       }
@@ -647,7 +695,7 @@ int main(int argc, char *argv[])
         scanf("%d", &choice);
    short shaper;
         printf("Select shaper time (0-32 clks): ");
-        scanf("%d", &shaper);
+        scanf("%hd", &shaper);
         char buf[300];
         printf("Channels to be configured (comma separated): ");
    scanf("%s", buf);

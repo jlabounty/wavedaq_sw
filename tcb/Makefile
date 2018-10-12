@@ -17,7 +17,8 @@ FLAGS         = -g -DOS_LINUX -Wall
 
 ifeq ($(shell uname),Darwin)
 FLAGS         += -DOS_DARWIN -DHAVE_STRLCPY
-LIBS          =  -framework IOKit -framework CoreFoundation
+#LIBS          =  -framework IOKit -framework CoreFoundation
+LIBS          =  
 else
 FLAGS         += 
 LIBS          =  -lrt -lbsd
