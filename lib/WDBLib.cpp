@@ -58,6 +58,14 @@ int WDB::gBinSocket   = 0;
 
 unsigned short WDB::udpSequenceNumber = 0; // sequence number to identify related send/acknowledge packets
 
+int cScalerWidth[] = {
+   32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, // 0:15
+   32, // trigger
+   32, // external clock
+   64, // time stamp
+   64, // system time
+};
+
 //--------------------------------------------------------------------
 
 // convert one data type into other, replaces *((float *)(&int))
@@ -817,21 +825,14 @@ void WDB::SetDrsSampleFreq(unsigned int f)
 
 void WDB::GetScalers(std::vector<unsigned long> &scaler, bool refresh)
 {
-   int scalerWidth[] = {
-      32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, // 0:15
-      32, // trigger
-      32, // external clock
-      64, // time stamp
-      64, // system time
-   };
    if (refresh)
       ReceiveStatusRegisters((WD2_SCALER_0_REG & 0x0FFF)/4, 22);
 
    // decode scalers according to their bit width
    int adr = 0;
    unsigned long v;
-   for (unsigned int i=0 ; i<16 ; i++) {
-      if (scalerWidth[i] == 64) {
+   for (unsigned int i=0 ; i<sizeof(cScalerWidth)/sizeof(int) ; i++) {
+      if (cScalerWidth[i] == 64) {
          v = this->sreg[WD2_SCALER_0_REG/4+adr] |
             ((unsigned long)this->sreg[WD2_SCALER_0_REG/4+adr+1] << 32);
          adr += 2;
@@ -2048,31 +2049,51 @@ int WP::ReceiveWfPacket()
       return 0;
    }
    
-   assert(ph->payload_length % 3 == 0);
-   assert(ph->data_offset % 3 == 0);
-   int numberBins = (int) ph->payload_length / 1.5;
-   int firstBin = ph->data_offset / 1.5;
-   int channelSegment = firstBin / 938;
-   
    if (mLogfile != "" || mVerbose >= 3) {
       std::ofstream f;
       char line[256];
+      std::string flags;
       f.open(mLogfile, std::ios_base::app);
       
-      sprintf(line, "%06dus #%04d from WD%03d, T=%s NB=%4d EN=%5d DT=%d A/C/B=%d/%02d/%d TC=%04d T=%1.1lf\n",
+      if (ph->flags & (1<<cFlagDRSPLLLock))
+         flags += "DLK,";
+      if (ph->flags & (1<<cFlagLMKPLLLock))
+         flags += "LLK,";
+      if (ph->flags & (1<<cFlagEndOfEvent))
+         flags += "EEV,";
+      if (ph->flags & (1<<cFlagStartOfEvent))
+         flags += "SEV,";
+      if (ph->flags & (1<<cFlagEndOfType))
+         flags += "ETY,";
+      if (ph->flags & (1<<cFlagStartOfType))
+         flags += "STY,";
+      if (ph->flags & (1<<cFlagNewTriggerInfo))
+         flags += "TIF,";
+      if (ph->flags & (1<<cFlagTriggerInfoParityError))
+         flags += "TPE,";
+      if (ph->flags & (1<<cFlagZeroSuppEnable))
+         flags += "ZDE,";
+      if (ph->flags & (1<<cFalgZeroSuppInhibit))
+         flags += "ZDE,";
+      if (flags.back() == ',')
+         flags.pop_back();
+
+      sprintf(line, "%06dus #%04d from WD%03d, T=%s F=%s PL=%4d EN=%5d DT=%d A/C/O=%d/%02d/%d TC=%04d T=%1.1lf\n",
               usSince(mEventStartTime),
               mPacketsReceived-1,
               ph->serial_number,
               ph->data_type == cDataTypeDRS ? "DRS" :
               ph->data_type == cDataTypeADC ? "ADC" :
               ph->data_type == cDataTypeTDC ? "TDC" :
-              ph->data_type == cDataTypeTrg ? "TRG" : "DUMMY",
-              numberBins,
+              ph->data_type == cDataTypeTrg ? "TRG" :
+              ph->data_type == cDataTypeScaler ? "SCALER" : "DUMMY",
+              flags.c_str(),
+              ph->payload_length,
               ph->event_number,
               ph->data_type,
               channel_adc,
               channel_number,
-              firstBin,
+              ph->data_offset,
               ph->drs_trigger_cell,
               ph->temperature*0.0625);
       
@@ -2168,9 +2189,6 @@ int WP::ReceiveWfPacket()
    
    assert(channel_number < WD_N_CHANNELS);
    
-   // mark valid package received
-   er->SetWfValid(channel_number, channelSegment, true);
-   
    // find event belonging to this baord
    WDEvent *event = nullptr;
    for (auto e: mEvent) {
@@ -2191,6 +2209,15 @@ int WP::ReceiveWfPacket()
 
    // decode DRS waveform data
    if (ph->data_type == cDataTypeDRS) {
+      assert(ph->payload_length % 3 == 0);
+      assert(ph->data_offset % 3 == 0);
+      int numberBins = (int) ph->payload_length / 1.5;
+      int firstBin = ph->data_offset / 1.5;
+      int channelSegment = firstBin / 938;
+      
+      // mark valid package received
+      er->SetWfValid(channel_number, channelSegment, true);
+
       auto pd = (unsigned char*)(ph+1);
       for (int i=0 ; i<numberBins ; i+=2) {
          // decode two bins
@@ -2201,13 +2228,22 @@ int WP::ReceiveWfPacket()
          data2 -= 0x800;
          pd+=3;
          
-         event->mWfU[channel_number][firstBin+i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
-         event->mWfU[channel_number][firstBin+i+1]       = (float)data2 * (1 / 4096.0);
+         event->mWfUDRS[channel_number][firstBin+i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
+         event->mWfUDRS[channel_number][firstBin+i+1]       = (float)data2 * (1 / 4096.0);
       }
    }
 
    // decode ADC waveform data
    if (ph->data_type == cDataTypeADC) {
+      assert(ph->payload_length % 3 == 0);
+      assert(ph->data_offset % 3 == 0);
+      int numberBins = (int) ph->payload_length / 1.5;
+      int firstBin = ph->data_offset / 1.5;
+      int channelSegment = firstBin / 938;
+
+      // mark valid package received
+      er->SetWfValid(channel_number, channelSegment, true);
+
       auto pd = (unsigned char*)(ph+1);
       for (int i=0 ; i<numberBins ; i+=2) {
          // decode two bins
@@ -2221,6 +2257,31 @@ int WP::ReceiveWfPacket()
          event->mWfUADC[channel_number][firstBin+i]         = (float)data1 * (2 / 4096.0); // 2V ADC range with 12 bits
          event->mWfUADC[channel_number][firstBin+i+1]       = (float)data2 * (2 / 4096.0);
       }
+   }
+
+   // decode TDC waveform data
+   if (ph->data_type == cDataTypeTDC) {
+      auto pd = (unsigned char*)(ph+1);
+      memcpy(&event->mWfTDC[channel_number][ph->data_offset], pd, ph->payload_length);
+      
+      if (ph->flags & (1<<cFlagEndOfType))
+         event->mWfTDCValid = true; // ## change later to check all channels
+   }
+
+   // decode advanced trigger data
+   if (ph->data_type == cDataTypeTrg) {
+      auto pd = (unsigned char*)(ph+1);
+      memcpy(event->mTrgData+ph->data_offset, pd, ph->payload_length);
+      event->mTrgValid = true;
+   }
+   
+   // decode scaler data
+   if (ph->data_type == cDataTypeScaler) {
+      auto pd = (unsigned long*)(ph+1);
+      assert(ph->payload_length <= sizeof(event->mScaler));
+      for (int i=0 ; i<18 ; i++)
+         event->mScaler[i] = SWAP_UINT64(pd[17-i]);
+      event->mScalerValid = true;
    }
 
    return SUCCESS;
@@ -2241,13 +2302,13 @@ void WP::UnrotateWaveforms()
       
       for (int i=0 ; i<WD_N_CHANNELS ; i++)
          for (int j=0 ; j<1024 ; j++)
-            wf[i][j] = ev->mWfU[i][j];
+            wf[i][j] = ev->mWfUDRS[i][j];
       
       // un-rotate waveforms
       for (int i=0 ; i<WD_N_CHANNELS ; i++) {
          int tc = ev->mTriggerCell[i];
          for (int j=0 ; j<1024 ; j++)
-            ev->mWfU[i][(j+tc) % 1024] = wf[i][j];
+            ev->mWfUDRS[i][(j+tc) % 1024] = wf[i][j];
       }
    }
 }
@@ -2316,12 +2377,12 @@ void WP::CalibrateWaveforms(WDEvent* ev)
             for (int i=0 ; i<WD_N_CHANNELS ; i++) {
                int tc = ev->mTriggerCell[i];
                for (int j=0 ; j<1024 ; j++)
-                  ev->mWfU[i][j] -= wdb->mVCalib.mCalib.wf_offset1[i][(j+tc) % 1024];
+                  ev->mWfUDRS[i][j] -= wdb->mVCalib.mCalib.wf_offset1[i][(j+tc) % 1024];
             }
          } else {
             for (int i=0 ; i<WD_N_CHANNELS ; i++)
                for (int j=0 ; j<1024 ; j++)
-                  ev->mWfU[i][j] -= wdb->mVCalib.mCalib.wf_offset1[i][j];
+                  ev->mWfUDRS[i][j] -= wdb->mVCalib.mCalib.wf_offset1[i][j];
          }
       };
       
@@ -2329,7 +2390,7 @@ void WP::CalibrateWaveforms(WDEvent* ev)
       if (mOfsCalib2 && bValid) {
          for (int i=0 ; i<WD_N_CHANNELS ; i++)
             for (int j=0 ; j<1024 ; j++)
-               ev->mWfU[i][j] -= wdb->mVCalib.mCalib.wf_offset2[i][j];
+               ev->mWfUDRS[i][j] -= wdb->mVCalib.mCalib.wf_offset2[i][j];
       };
       
       // gain calibration
@@ -2338,19 +2399,19 @@ void WP::CalibrateWaveforms(WDEvent* ev)
             for (int i=0 ; i<WD_N_CHANNELS-2 ; i++) { // exclude clock channels
                int tc = ev->mTriggerCell[i];
                for (int j=0 ; j<1024 ; j++) {
-                  if (ev->mWfU[i][j] > 0)
-                     ev->mWfU[i][j] /= wdb->mVCalib.mCalib.wf_gain1[i][(j+tc) % 1024];
+                  if (ev->mWfUDRS[i][j] > 0)
+                     ev->mWfUDRS[i][j] /= wdb->mVCalib.mCalib.wf_gain1[i][(j+tc) % 1024];
                   else
-                     ev->mWfU[i][j] /= wdb->mVCalib.mCalib.wf_gain2[i][(j+tc) % 1024];
+                     ev->mWfUDRS[i][j] /= wdb->mVCalib.mCalib.wf_gain2[i][(j+tc) % 1024];
                }
             }
          } else {
             for (int i=0 ; i<WD_N_CHANNELS-2 ; i++)
                for (int j=0 ; j<1024 ; j++) {
-                  if (ev->mWfU[i][j] > 0)
-                     ev->mWfU[i][j] /= wdb->mVCalib.mCalib.wf_gain1[i][j];
+                  if (ev->mWfUDRS[i][j] > 0)
+                     ev->mWfUDRS[i][j] /= wdb->mVCalib.mCalib.wf_gain1[i][j];
                   else
-                     ev->mWfU[i][j] /= wdb->mVCalib.mCalib.wf_gain2[i][j];
+                     ev->mWfUDRS[i][j] /= wdb->mVCalib.mCalib.wf_gain2[i][j];
                }
          }
       };
@@ -2369,7 +2430,7 @@ void WP::CalibrateWaveforms(WDEvent* ev)
             else
                ofs = 0;
             for (int j=0 ; j<1024 ; j++)
-               ev->mWfU[i][j] -= ofs;
+               ev->mWfUDRS[i][j] -= ofs;
          }
       };
       
@@ -2384,49 +2445,49 @@ void WP::CalibrateWaveforms(WDEvent* ev)
             int tc = ev->mTriggerCell[ch];
             if (!mRotateWaveform)
                tc = 0;
-            ev->mWfT[ch][0] = 0;
+            ev->mWfTDRS[ch][0] = 0;
             for (int i=1 ; i<1024 ; i++)
-               ev->mWfT[ch][i] = ev->mWfT[ch][i-1] + wdb->mTCalib.mCalib.dt[ch][(i-1+tc)%1024];
+               ev->mWfTDRS[ch][i] = ev->mWfTDRS[ch][i-1] + wdb->mTCalib.mCalib.dt[ch][(i-1+tc)%1024];
          }
          // align cell#0 of all channels inside chip0
          int tc = mRotateWaveform ? ev->mTriggerCellDrs0 : 0;
-         float t1 = ev->mWfT[0][(1024-tc) % 1024];
+         float t1 = ev->mWfTDRS[0][(1024-tc) % 1024];
          for (int ch=1 ; ch<8 ; ch++) {
-            float t2 = ev->mWfT[ch][(1024-tc) % 1024];
+            float t2 = ev->mWfTDRS[ch][(1024-tc) % 1024];
             float dt = t1 - t2;
             for (int i=0 ; i<1024 ; i++)
-               ev->mWfT[ch][i] += dt;
+               ev->mWfTDRS[ch][i] += dt;
          }
-         float t2 = ev->mWfT[16][(1024-tc) % 1024];
+         float t2 = ev->mWfTDRS[16][(1024-tc) % 1024];
          float dt = t1 - t2;
          for (int i=0 ; i<1024 ; i++)
-            ev->mWfT[16][i] += dt;
+            ev->mWfTDRS[16][i] += dt;
          
          // align cell#0 of all channels inside chip1 to chip0
          tc = mRotateWaveform ? ev->mTriggerCellDrs1 : 0;
          for (int ch=8 ; ch<16 ; ch++) {
-            float t2 = ev->mWfT[ch][(1024-tc) % 1024];
+            float t2 = ev->mWfTDRS[ch][(1024-tc) % 1024];
             float dt = t1 - t2;
             for (int i=0 ; i<1024 ; i++)
-               ev->mWfT[ch][i] += dt;
+               ev->mWfTDRS[ch][i] += dt;
          }
-         t2 = ev->mWfT[17][(1024-tc) % 1024];
+         t2 = ev->mWfTDRS[17][(1024-tc) % 1024];
          dt = t1 - t2;
          for (int i=0 ; i<1024 ; i++)
-            ev->mWfT[17][i] += dt;
+            ev->mWfTDRS[17][i] += dt;
          
       } else {
          // set nominal sampling intervals
          for (int i=0 ; i<WD_N_CHANNELS ; i++)
             for (int j=0 ; j<1024 ; j++)
-               ev->mWfT[i][j] = (float)(j * 1E-6/ev->mSamplingFrequency);
+               ev->mWfTDRS[i][j] = (float)(j * 1E-6/ev->mSamplingFrequency);
       }
       
       // apply time offsets (different PCB path traces)
       if (mTimeCalib2 && bValid) {
          for (int i=0 ; i<WD_N_CHANNELS ; i++)
             for (int j=0 ; j<1024 ; j++)
-               ev->mWfT[i][j] -= wdb->mTCalib.mCalib.offset[i];
+               ev->mWfTDRS[i][j] -= wdb->mTCalib.mCalib.offset[i];
       }
       
       // apply horizontal trigger position correction
@@ -2447,16 +2508,16 @@ void WP::CalibrateWaveforms(WDEvent* ev)
                                ((wdb->GetTrgSrcPolarity() & (1 << c)) > 0));
                bool bEdge = false;
                if (rising) {
-                  if (ev->mWfU[c][i] < tl && ev->mWfU[c][i+1] >= tl)
+                  if (ev->mWfUDRS[c][i] < tl && ev->mWfUDRS[c][i+1] >= tl)
                      bEdge = true;
                } else {
-                  if (ev->mWfU[c][i] > tl && ev->mWfU[c][i+1] <= tl)
+                  if (ev->mWfUDRS[c][i] > tl && ev->mWfUDRS[c][i+1] <= tl)
                      bEdge = true;
                }
                
                if (bEdge) {
-                  double t0 = ev->mWfT[c][i] +
-                              (ev->mWfT[c][i+1]-ev->mWfT[c][i])*(tl-ev->mWfU[c][i])/(ev->mWfU[c][i+1]-ev->mWfU[c][i]);
+                  double t0 = ev->mWfTDRS[c][i] +
+                              (ev->mWfTDRS[c][i+1]-ev->mWfTDRS[c][i])*(tl-ev->mWfUDRS[c][i])/(ev->mWfUDRS[c][i+1]-ev->mWfUDRS[c][i]);
                   double iofs = 95 - (wdb->GetDrsSampleFreqMhz()/1000 - 1)*5;
                   double dt = t0 - (1024*1E-6/wdb->GetDrsSampleFreqMhz() - iofs*1E-9 - wdb->GetTriggerDelayNs() * 1E-9);
                   if (fabs(dt) < fabs(dt_min))
@@ -2469,7 +2530,7 @@ void WP::CalibrateWaveforms(WDEvent* ev)
          if (bFound) {
             for (int i=0 ; i<WD_N_CHANNELS ; i++)
                for (int j=0 ; j<1024 ; j++)
-                  ev->mWfT[i][j] -= (float)dt_min;
+                  ev->mWfTDRS[i][j] -= (float)dt_min;
          }
       }
    }
@@ -2588,7 +2649,7 @@ void WP::SaveWaveforms()
                   }
                } else {
                   for (int j=0 ; j<1024 ; j++) {
-                     sprintf(str, "%1.3f,%1.1f", ev->mWfT[i][j]*1E9, ev->mWfU[i][j]*1E3);
+                     sprintf(str, "%1.3f,%1.1f", ev->mWfTDRS[i][j]*1E9, ev->mWfUDRS[i][j]*1E3);
                      mxml_write_element(li.xml, "Data", str);
                   }
                }
@@ -2703,7 +2764,7 @@ void WP::SaveWaveforms()
                      // save binary date as 16-bit value:
                      // 0 = -0.5V,  65535 = +0.5V    for range 0
                      // 0 = -0.05V, 65535 = +0.95V   for range 0.45
-                     unsigned short d = (unsigned short)((ev->mWfU[i][j] - wdb->GetRange() + 0.5) * 65535);
+                     unsigned short d = (unsigned short)((ev->mWfUDRS[i][j] - wdb->GetRange() + 0.5) * 65535);
                      *(unsigned short *)p = d;
                      p += sizeof(unsigned short);
                   }
@@ -2955,7 +3016,7 @@ void WP::DoCalibrationVoltageStep()
       
       for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
-            calibProg.ave->Add(0, ch, bin, event.mWfU[ch][bin]);
+            calibProg.ave->Add(0, ch, bin, event.mWfUDRS[ch][bin]);
       
       calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3 + calibProg.iIter4) / calibProg.nIterTotal;
       
@@ -2992,7 +3053,7 @@ void WP::DoCalibrationVoltageStep()
       
       for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
-            calibProg.ave->Add(0, ch, bin, event.mWfU[ch][bin]);
+            calibProg.ave->Add(0, ch, bin, event.mWfUDRS[ch][bin]);
       
       calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3 + calibProg.iIter4) / calibProg.nIterTotal;
       
@@ -3030,7 +3091,7 @@ void WP::DoCalibrationVoltageStep()
       
       for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
-            calibProg.ave->Add(0, ch, bin, event.mWfU[ch][bin]);
+            calibProg.ave->Add(0, ch, bin, event.mWfUDRS[ch][bin]);
       
       calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3 + calibProg.iIter4) / calibProg.nIterTotal;
       
@@ -3066,7 +3127,7 @@ void WP::DoCalibrationVoltageStep()
       
       for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
-            calibProg.ave->Add(0, ch, bin, event.mWfU[ch][bin]);
+            calibProg.ave->Add(0, ch, bin, event.mWfUDRS[ch][bin]);
       
       calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3 + calibProg.iIter4) / calibProg.nIterTotal;
       
@@ -3105,7 +3166,7 @@ void WP::DoCalibrationVoltageStep()
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
-         sum += event.mWfU[ch][i];
+         sum += event.mWfUDRS[ch][i];
       b->mVCalib.mCalib.drs_offset_range0[ch] = sum / 1010;
    }
    
@@ -3134,7 +3195,7 @@ void WP::DoCalibrationVoltageStep()
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
-         sum += event.mWfU[ch][i];
+         sum += event.mWfUDRS[ch][i];
       b->mVCalib.mCalib.drs_offset_range1[ch] = sum / 1010;
    }
    
@@ -3163,7 +3224,7 @@ void WP::DoCalibrationVoltageStep()
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
       for (int i=10 ; i<1020 ; i++)
-         sum += event.mWfU[ch][i];
+         sum += event.mWfUDRS[ch][i];
       b->mVCalib.mCalib.drs_offset_range2[ch] = sum / 1010;
    }
    
@@ -3219,12 +3280,12 @@ void WP::AnalyzePeriod(WDEvent *event, WDB *b)
       
       // rising edges
       for (int i1=tc+5; i1<tc+1024-5 ; i1++) {
-         if (event->mWfU[ch][i1 % 1024] <= 0 && event->mWfU[ch][(i1+1) % 1024] > 0) {
+         if (event->mWfUDRS[ch][i1 % 1024] <= 0 && event->mWfUDRS[ch][(i1+1) % 1024] > 0) {
             for (int i2=i1+1 ; i2<i1+1024 && i2<tc+1024-3; i2++) {
-               if (event->mWfU[ch][i2 % 1024] <= 0 && event->mWfU[ch][(i2+1) % 1024] > 0) {
+               if (event->mWfUDRS[ch][i2 % 1024] <= 0 && event->mWfUDRS[ch][(i2+1) % 1024] > 0) {
                   
                   // first partial cell
-                  double tPeriod = b->mTCalib.mCalib.dt[ch][i1%1024]*(1/(1-event->mWfU[ch][i1%1024]/event->mWfU[ch][(i1+1)%1024]));
+                  double tPeriod = b->mTCalib.mCalib.dt[ch][i1%1024]*(1/(1-event->mWfUDRS[ch][i1%1024]/event->mWfUDRS[ch][(i1+1)%1024]));
                   
                   // full cells between i1 and i2
                   if (i2 < i1)
@@ -3233,7 +3294,7 @@ void WP::AnalyzePeriod(WDEvent *event, WDB *b)
                      tPeriod += b->mTCalib.mCalib.dt[ch][j%1024];
                   
                   // second partial cell
-                  tPeriod += b->mTCalib.mCalib.dt[ch][i2 % 1024]*(1/(1-event->mWfU[ch][(i2+1)%1024]/event->mWfU[ch][i2%1024]));
+                  tPeriod += b->mTCalib.mCalib.dt[ch][i2 % 1024]*(1/(1-event->mWfUDRS[ch][(i2+1)%1024]/event->mWfUDRS[ch][i2%1024]));
                   
                   b->mTCalib.mCalib.period[ch][i1%1024] = (float)tPeriod;
                   
@@ -3245,12 +3306,12 @@ void WP::AnalyzePeriod(WDEvent *event, WDB *b)
       
       // falling edges
       for (int i1=tc+5; i1<tc+1024-5 ; i1++) {
-         if (event->mWfU[ch][i1 % 1024] >= 0 && event->mWfU[ch][(i1+1) % 1024] < 0) {
+         if (event->mWfUDRS[ch][i1 % 1024] >= 0 && event->mWfUDRS[ch][(i1+1) % 1024] < 0) {
             for (int i2=i1+1 ; i2<i1+1024 && i2<tc+1024-3; i2++) {
-               if (event->mWfU[ch][i2 % 1024] >= 0 && event->mWfU[ch][(i2+1) % 1024] < 0) {
+               if (event->mWfUDRS[ch][i2 % 1024] >= 0 && event->mWfUDRS[ch][(i2+1) % 1024] < 0) {
                   
                   // first partial cell
-                  double tPeriod = b->mTCalib.mCalib.dt[ch][i1%1024]*(1/(1-event->mWfU[ch][i1%1024]/event->mWfU[ch][(i1+1)%1024]));
+                  double tPeriod = b->mTCalib.mCalib.dt[ch][i1%1024]*(1/(1-event->mWfUDRS[ch][i1%1024]/event->mWfUDRS[ch][(i1+1)%1024]));
                   
                   // full cells between i1 and i2
                   if (i2 < i1)
@@ -3259,7 +3320,7 @@ void WP::AnalyzePeriod(WDEvent *event, WDB *b)
                      tPeriod += b->mTCalib.mCalib.dt[ch][j%1024];
                   
                   // second partial cell
-                  tPeriod += b->mTCalib.mCalib.dt[ch][i2 % 1024]*(1/(1-event->mWfU[ch][(i2+1)%1024]/event->mWfU[ch][i2%1024]));
+                  tPeriod += b->mTCalib.mCalib.dt[ch][i2 % 1024]*(1/(1-event->mWfUDRS[ch][(i2+1)%1024]/event->mWfUDRS[ch][i2%1024]));
                   
                   b->mTCalib.mCalib.period[ch][i1%1024] = (float)tPeriod;
                   
@@ -3278,13 +3339,13 @@ void WP::AnalyzeTimeOffset(WDEvent *event, WDB *b)
    
    // find rising edge in channel #0
    for (int i=10; i<1024-10 ; i++) {
-      if (event->mWfU[0][i] <= 0 && event->mWfU[0][i+1] > 0) {
-         double t0 = event->mWfT[0][i] + (event->mWfT[0][i+1]-event->mWfT[0][i]) * (event->mWfU[0][i]/(event->mWfU[0][i]-event->mWfU[0][i+1]));
+      if (event->mWfUDRS[0][i] <= 0 && event->mWfUDRS[0][i+1] > 0) {
+         double t0 = event->mWfTDRS[0][i] + (event->mWfTDRS[0][i+1]-event->mWfTDRS[0][i]) * (event->mWfUDRS[0][i]/(event->mWfUDRS[0][i]-event->mWfUDRS[0][i+1]));
          
          for (int ch=1 ; ch<WD_N_CHANNELS ; ch++) {
             for (int j=10; j<1024-10 ; j++) {
-               if (event->mWfU[ch][j] <= 0 && event->mWfU[ch][j+1] > 0) {
-                  double t = event->mWfT[ch][j] + (event->mWfT[ch][j+1]-event->mWfT[ch][j])*(event->mWfU[ch][j]/(event->mWfU[ch][j]-event->mWfU[ch][j+1]));
+               if (event->mWfUDRS[ch][j] <= 0 && event->mWfUDRS[ch][j+1] > 0) {
+                  double t = event->mWfTDRS[ch][j] + (event->mWfTDRS[ch][j+1]-event->mWfTDRS[ch][j])*(event->mWfUDRS[ch][j]/(event->mWfUDRS[ch][j]-event->mWfUDRS[ch][j+1]));
                   double dt = t - t0;
                   if (ch > 15)
                      dt -= 2E-9; // timing channels have a 2 ns offset
@@ -3315,24 +3376,24 @@ void WP::CalibrateLocal(WDEvent *event, WDB *b)
          // rising edges
          
          // test slope between previous and next cell to allow for negative cell width
-         if (event->mWfU[ch][(i+1024-1) % 1024] < event->mWfU[ch][(i+2) % 1024] &&
-             event->mWfU[ch][i % 1024] > llim &&
-             event->mWfU[ch][(i+1) % 1024] < ulim) {
+         if (event->mWfUDRS[ch][(i+1024-1) % 1024] < event->mWfUDRS[ch][(i+2) % 1024] &&
+             event->mWfUDRS[ch][i % 1024] > llim &&
+             event->mWfUDRS[ch][(i+1) % 1024] < ulim) {
             
             // calculate delta_v
-            dv = event->mWfU[ch][(i+1) % 1024] - event->mWfU[ch][i % 1024];
+            dv = event->mWfUDRS[ch][(i+1) % 1024] - event->mWfUDRS[ch][i % 1024];
             
             // average delta_v
             calibProg.ave->Add(0, ch, i % 1024, dv);
          }
          
          // falling edges
-         if (event->mWfU[ch][(i+1024-1) % 1024] > event->mWfU[ch][(i+2) % 1024] &&
-             event->mWfU[ch][i % 1024] < ulim &&
-             event->mWfU[ch][(i+1) % 1024] > llim) {
+         if (event->mWfUDRS[ch][(i+1024-1) % 1024] > event->mWfUDRS[ch][(i+2) % 1024] &&
+             event->mWfUDRS[ch][i % 1024] < ulim &&
+             event->mWfUDRS[ch][(i+1) % 1024] > llim) {
             
             // calculate delta_v
-            dv = event->mWfU[ch][(i+1) % 1024] - event->mWfU[ch][i % 1024];
+            dv = event->mWfUDRS[ch][(i+1) % 1024] - event->mWfUDRS[ch][i % 1024];
             
             // average delta_v
             calibProg.ave->Add(0, ch, i % 1024, -dv);
@@ -3376,12 +3437,12 @@ void WP::CalibrateGlobal(WDEvent *event, WDB *b)
       
       // rising edges
       for (int i1=tc+5; i1<tc+1024-5 ; i1++) {
-         if (event->mWfU[ch][i1 % 1024] <= 0 && event->mWfU[ch][(i1+1) % 1024] > 0) {
+         if (event->mWfUDRS[ch][i1 % 1024] <= 0 && event->mWfUDRS[ch][(i1+1) % 1024] > 0) {
             for (int i2=i1+1 ; i2<i1+1024 && i2<tc+1024-5; i2++) {
-               if (event->mWfU[ch][i2 % 1024] <= 0 && event->mWfU[ch][(i2+1) % 1024] > 0) {
+               if (event->mWfUDRS[ch][i2 % 1024] <= 0 && event->mWfUDRS[ch][(i2+1) % 1024] > 0) {
                   
                   // first partial cell
-                  double tPeriod = b->mTCalib.mCalib.dt[ch][i1%1024]*(1/(1-event->mWfU[ch][i1%1024]/event->mWfU[ch][(i1+1)%1024]));
+                  double tPeriod = b->mTCalib.mCalib.dt[ch][i1%1024]*(1/(1-event->mWfUDRS[ch][i1%1024]/event->mWfUDRS[ch][(i1+1)%1024]));
                   
                   // full cells between i1 and i2
                   if (i2 < i1)
@@ -3390,7 +3451,7 @@ void WP::CalibrateGlobal(WDEvent *event, WDB *b)
                      tPeriod += b->mTCalib.mCalib.dt[ch][j%1024];
                   
                   // second partial cell
-                  tPeriod += b->mTCalib.mCalib.dt[ch][i2 % 1024]*(1/(1-event->mWfU[ch][(i2+1)%1024]/event->mWfU[ch][i2%1024]));
+                  tPeriod += b->mTCalib.mCalib.dt[ch][i2 % 1024]*(1/(1-event->mWfUDRS[ch][(i2+1)%1024]/event->mWfUDRS[ch][i2%1024]));
                   
                   // calculate correction to nominal period of 10 ns as a fraction
                   float corr = (float)(nominalPeriod / tPeriod);
@@ -3414,12 +3475,12 @@ void WP::CalibrateGlobal(WDEvent *event, WDB *b)
       
       // falling edges
       for (int i1=tc+5; i1<tc+1024-5 ; i1++) {
-         if (event->mWfU[ch][i1 % 1024] >= 0 && event->mWfU[ch][(i1+1) % 1024] < 0) {
+         if (event->mWfUDRS[ch][i1 % 1024] >= 0 && event->mWfUDRS[ch][(i1+1) % 1024] < 0) {
             for (int i2=i1+1 ; i2<i1+1024 && i2<tc+1024-5; i2++) {
-               if (event->mWfU[ch][i2 % 1024] >= 0 && event->mWfU[ch][(i2+1) % 1024] < 0) {
+               if (event->mWfUDRS[ch][i2 % 1024] >= 0 && event->mWfUDRS[ch][(i2+1) % 1024] < 0) {
                   
                   // first partial cell
-                  double tPeriod = b->mTCalib.mCalib.dt[ch][i1%1024]*(1/(1-event->mWfU[ch][i1%1024]/event->mWfU[ch][(i1+1)%1024]));
+                  double tPeriod = b->mTCalib.mCalib.dt[ch][i1%1024]*(1/(1-event->mWfUDRS[ch][i1%1024]/event->mWfUDRS[ch][(i1+1)%1024]));
                   
                   // full cells between i1 and i2
                   if (i2 < i1)
@@ -3428,7 +3489,7 @@ void WP::CalibrateGlobal(WDEvent *event, WDB *b)
                      tPeriod += b->mTCalib.mCalib.dt[ch][j%1024];
                   
                   // second partial cell
-                  tPeriod += b->mTCalib.mCalib.dt[ch][i2 % 1024]*(1/(1-event->mWfU[ch][(i2+1)%1024]/event->mWfU[ch][i2%1024]));
+                  tPeriod += b->mTCalib.mCalib.dt[ch][i2 % 1024]*(1/(1-event->mWfUDRS[ch][(i2+1)%1024]/event->mWfUDRS[ch][i2%1024]));
                   
                   // calculate correction to nominal period of 10 ns as a fraction
                   float corr = (float)(nominalPeriod / tPeriod);

@@ -64,12 +64,25 @@ typedef struct {
 #pragma pack() // reset alignment to default value
 
 enum {
-   cDataTypeDRS    = 0,
-   cDataTypeADC    = 1,
-   cDataTypeTDC    = 2,
-   cDataTypeTrg    = 3,
-   cDataTypeScaler = 4,
-   cDataTypeDummy  = 5
+   cDataTypeDRS                = 0,
+   cDataTypeADC                = 1,
+   cDataTypeTDC                = 2,
+   cDataTypeTrg                = 3,
+   cDataTypeScaler             = 4,
+   cDataTypeDummy              = 5
+};
+
+enum {
+   cFlagDRSPLLLock             = 0,
+   cFlagLMKPLLLock             = 1,
+   cFlagEndOfEvent             = 4,
+   cFlagStartOfEvent           = 5,
+   cFlagEndOfType              = 6,
+   cFlagStartOfType            = 7,
+   cFlagNewTriggerInfo         = 8,
+   cFlagTriggerInfoParityError = 9,
+   cFlagZeroSuppEnable         = 12,
+   cFalgZeroSuppInhibit        = 13
 };
 
 //--------------------------------------------------------------------
@@ -168,16 +181,23 @@ public:
    unsigned short   mTriggerType;
    float            mTemperature;
    bool             mWFTypeADC;
-   
-   float            mWfU[WD_N_CHANNELS][1024];
-   float            mWfT[WD_N_CHANNELS][1024];
 
+   bool             mWfDRSValid;
+   float            mWfUDRS[WD_N_CHANNELS][1024];
+   float            mWfTDRS[WD_N_CHANNELS][1024];
+
+   bool             mWfADCValid;
    float            mWfUADC[WD_N_CHANNELS][2048];
    float            mWfTADC[WD_N_CHANNELS][2048];
 
-   unsigned char    mWfTDC[WD_N_CHANNELS][2048];
+   bool             mWfTDCValid;
+   unsigned char    mWfTDC[WD_N_CHANNELS][512];
    
-   unsigned long    mScaler[19];
+   bool             mTrgValid;
+   unsigned char    mTrgData[4096];
+
+   bool             mScalerValid;
+   unsigned long    mScaler[18];
 
    bool             mVCalibrated;
    bool             mTCalibrated;
@@ -690,6 +710,16 @@ public:
 
 /* Byte and Word swapping big endian <-> little endian */
 #define SWAP_UINT16(x) (((x) >> 8) | ((x) << 8))
-#define SWAP_UINT32(x) (((x) >> 24) | (((x) & 0x00FF0000) >> 8) | (((x) & 0x0000FF00) << 8) | ((x) << 24))
-
+#define SWAP_UINT32(x) (((x) >> 24) | \
+                       (((x) & 0x00FF0000) >> 8) | \
+                       (((x) & 0x0000FF00) << 8) | \
+                       ((x) << 24))
+#define SWAP_UINT64(x) (((uint64_t)(x) << 56) | \
+                       (((uint64_t)(x) << 40) & 0xff000000000000ULL) | \
+                       (((uint64_t)(x) << 24) & 0xff0000000000ULL) | \
+                       (((uint64_t)(x) << 8)  & 0xff00000000ULL) | \
+                       (((uint64_t)(x) >> 8)  & 0xff000000ULL) | \
+                       (((uint64_t)(x) >> 24) & 0xff0000ULL) | \
+                       (((uint64_t)(x) >> 40) & 0xff00ULL) | \
+                       ((uint64_t)(x)  >> 56))
 #endif /* defined(__wdblib_h__) */

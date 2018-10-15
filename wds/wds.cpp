@@ -704,8 +704,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          for (int c=0 ; c<WD_N_CHANNELS ; c++) {
             for (int i=0 ; i<1024 ; i++) {
                float t = i*1E-6 / demoDrsSampleFreq;
-               event.mWfT[c][i] = t;
-               event.mWfU[c][i] = (float)(sin(M_PI*2 * 100E6 * t + c/8.0)/2 + ((float)random()/RAND_MAX-0.5) / 300);
+               event.mWfTDRS[c][i] = t;
+               event.mWfUDRS[c][i] = (float)(sin(M_PI*2 * 100E6 * t + c/8.0)/2 + ((float)random()/RAND_MAX-0.5) / 300);
             }
             // add spikes
             for (int i=0 ; i<1024 ; i++) {
@@ -715,10 +715,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                   float f;
                   for (f=0 ; f<1 ; f += 0.2,j++)
                      if (j >= 0 && j< 1024)
-                        event.mWfU[c][j] += s * f;
+                        event.mWfUDRS[c][j] += s * f;
                   for (f=1 ; f>0 ; f -= 0.2,j++)
                      if (j >= 0 && j< 1024)
-                        event.mWfU[c][j] += s * f;
+                        event.mWfUDRS[c][j] += s * f;
                }
             }
          }
@@ -801,7 +801,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                   mg_send_http_chunk(nc, (const char *)&l, 4);
                   mg_send_http_chunk(nc, (const char *)&c, 4);
                   mg_send_http_chunk(nc, (const char *)&n, 4);
-                  mg_send_http_chunk(nc, (const char *)event.mWfT[c], sizeof(float)*n);
+                  mg_send_http_chunk(nc, (const char *)event.mWfTDRS[c], sizeof(float)*n);
                }
             }
             
@@ -814,7 +814,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                   mg_send_http_chunk(nc, (const char *)&l, 4);
                   mg_send_http_chunk(nc, (const char *)&c, 4);
                   mg_send_http_chunk(nc, (const char *)&n, 4);
-                  mg_send_http_chunk(nc, (const char *)event.mWfU[c], sizeof(float)*n);
+                  mg_send_http_chunk(nc, (const char *)event.mWfUDRS[c], sizeof(float)*n);
                }
             }
          }
@@ -1043,6 +1043,17 @@ int main(int argc, const char * argv[])
                b->SetDrsChTxEn(0xFFFF);
                b->SetChnTxEn(0xFFFF);
             }
+
+            // enable TDC readout
+            b->SetTdcChTxEn(0xFFFF);
+
+            // enable advanced trigger readout
+            b->SetTrgTxEn(0);
+
+            // enable scaler readout
+            b->SetSclTxEn(1);
+            b->SetScalerRst(1);
+            b->SetScalerRst(0);
 
          } else {
             // turn all channels on in demo mode
