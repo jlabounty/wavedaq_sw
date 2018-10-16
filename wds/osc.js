@@ -114,6 +114,8 @@ function Oscilloscope(div) { // constructor
    this.timeCursor =  { on: false, input: undefined, drag: false, time: 0, x: 0 };
    this.voltageCursor =  { on: false, input: undefined, drag: false, voltage: 0, y: 0 };
    this.offsetCursor =  { drag: false, channel:0, xStart: 0, yStart: 0, offsetStart: 0, tOffsetStart: 0 };
+   this.offsetMarkerCursor =  { drag: false, channel:0, xStart: 0, offsetStart: 0 };
+   this.triggerCursor =  { drag: false, channel:0, voltage: 0, y: 0 };
 
    // display object
    this.disp = {
@@ -244,6 +246,7 @@ Oscilloscope.prototype.mouseEvent = function (e) {
          this.histo.button[i].style.pointerEvents = "all";
    }
 
+   // process histogram handle dragging
    if (this.disp.histo && e.target == this.canvas) {
 
       // division bar
@@ -320,6 +323,7 @@ Oscilloscope.prototype.mouseEvent = function (e) {
       }
    }
 
+   // process time cursor
    if (this.timeCursor.on && e.target == this.canvas) {
 
       if (e.clientX > this.timeCursor.x-5 && e.clientX < this.timeCursor.x+5 &&
@@ -347,6 +351,7 @@ Oscilloscope.prototype.mouseEvent = function (e) {
       }
    }
 
+   // process voltage cursor
    if (this.voltageCursor.on && e.target == this.canvas) {
 
       if (e.clientY > this.voltageCursor.y-5 && e.clientY < this.voltageCursor.y+5 &&
@@ -374,8 +379,10 @@ Oscilloscope.prototype.mouseEvent = function (e) {
       }
    }
 
-   if (!this.voltageCursor.on && !this.timeCursor.on && e.target == this.canvas) {
-      // find which waveform is close to cursor
+   // process waveform dragging
+   if (!this.voltageCursor.on && !this.timeCursor.on && e.target == this.canvas &&
+      e.clientX < this.x2-10 && e.clientX > this.x1+10) {
+      // find which waveform is closest to cursor
       var dMin = 1E6;
       var cMin = undefined;
       for (var c = 0; c < 20; c++) {
@@ -383,12 +390,10 @@ Oscilloscope.prototype.mouseEvent = function (e) {
             continue;
          if (this.chOn[c]) {
             for (var i = 0; i < this.wf.U[c].length; i++) {
-               var x, y;
+               var x = this.wf.T[c][i] * this.wfTS + this.wfTO;
+               var y = this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c];
 
-               x = this.wf.T[c][i] * this.wfTS + this.wfTO;
-               y = this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c];
-
-               d = Math.sqrt((x - e.clientX) * (x - e.clientX) + (y - e.clientY) * (y - e.clientY));
+               var d = Math.sqrt((x - e.clientX) * (x - e.clientX) + (y - e.clientY) * (y - e.clientY));
                if (d < dMin) {
                   dMin = d;
                   cMin = c;
@@ -415,7 +420,7 @@ Oscilloscope.prototype.mouseEvent = function (e) {
       }
 
       if (e.type == "mousedown") {
-         if (dMin < 20) {
+         if (dMin < 10) {
             this.offsetCursor.drag = true;
             this.offsetCursor.channel = cMin;
             this.offsetCursor.xStart = e.clientX;
@@ -431,6 +436,114 @@ Oscilloscope.prototype.mouseEvent = function (e) {
       if (e.type == "mouseup") {
          this.offsetCursor.drag = false;
       }
+   }
+
+   // process waveform marker dragging
+   if (!this.voltageCursor.on && !this.timeCursor.on && e.target == this.canvas &&
+      (e.clientX < this.x1+10 || this.offsetMarkerCursor.drag)) {
+      // find which waveform marker is closest to cursor
+      var dMin = 1E6;
+      var cMin = undefined;
+      for (var c = 0; c < 20; c++) {
+         if (c == 19) // exclude FFT
+            continue;
+         if (this.chOn[c]) {
+            var y = this.wfUO[c];
+            var d = Math.abs(y - e.clientY);
+
+            if (d < dMin) {
+               dMin = d;
+               cMin = c;
+            }
+         }
+      }
+
+      if (e.type === "mousemove") {
+         if (this.offsetMarkerCursor.drag || dMin < 10)
+            cursor = "ns-resize";
+
+         if (this.offsetMarkerCursor.drag) {
+            var ofs = OSC.YToVolt(e.clientY, this.offsetMarkerCursor.channel) -
+               OSC.YToVolt(this.offsetMarkerCursor.yStart, this.offsetMarkerCursor.channel);
+
+            OSC.wfOffset[this.offsetMarkerCursor.channel] = this.offsetMarkerCursor.offsetStart + ofs;
+            setSldUOffset(OSC.wfOffset[this.offsetMarkerCursor.channel]+0.5);
+
+            this.calcScaleOffset();
+         }
+      }
+
+      if (e.type == "mousedown") {
+         if (dMin < 10) {
+            this.offsetMarkerCursor.drag = true;
+            this.offsetMarkerCursor.channel = cMin;
+            this.offsetMarkerCursor.yStart = e.clientY;
+            this.offsetMarkerCursor.offsetStart = OSC.wfOffset[cMin];
+            for (i = 0; i < 20; i++)
+               OSC.chOnSelected[i] = (i == cMin);
+            OSC.drawChnButtons();
+         }
+      }
+
+      if (e.type == "mouseup") {
+         this.offsetMarkerCursor.drag = false;
+      }
+   }
+
+   // process trigger level dragging
+   if (!this.voltageCursor.on && !this.timeCursor.on && e.target == this.canvas &&
+      (e.clientX > this.x2-10 && e.clientY < this.x2) || this.triggerCursor.drag) {
+      // find which trigger level is closest to cursor
+      var dMin = 1E6;
+      var cMin = undefined;
+      for (var c = 0; c < 16; c++) {
+         if (this.chOn[c] && OSC.wdb[OSC.curBoard].triggerChannelActive[c]) {
+            y = (OSC.wdb[OSC.curBoard].dacTriggerLevel[c]) * this.wfUS[c] + this.wfUO[c];
+
+            d = Math.abs(y - e.clientY);
+            if (d < dMin) {
+               dMin = d;
+               cMin = c;
+            }
+         }
+      }
+
+      if (e.type === "mousemove") {
+         if (this.triggerCursor.drag || dMin < 8)
+            cursor = "ns-resize";
+      }
+
+      if (e.type === "mousemove" && this.triggerCursor.drag) {
+         cursor = "ns-resize";
+         this.triggerCursor.dragY = e.clientY;
+         var u = (this.YToVolt(e.clientY, this.triggerCursor.channel) * 1000).toFixed(1);
+         if (u > 500)
+            u = 500;
+         if (u < -500)
+            u = -500;
+         this.triggerCursor.y = e.clientY;
+         this.triggerCursor.voltage = u;
+         console.log(u);
+         OSC.wdb[OSC.curBoard].dacTriggerLevel[this.triggerCursor.channel] = u / 1000;
+         var d = new Date();
+         this.lastTriggerLevelChange = d.getTime();
+         var e = {};
+         e.name = "dacTriggerLevel";
+         e.value = u;
+         setParam(e, this.triggerCursor.channel);
+         //this.voltageCursor.input.value = u;
+         //this.voltageCursor.input.onchange();
+      }
+
+      if (e.type == "mousedown") {
+         this.triggerCursor.drag = true;
+         this.triggerCursor.channel = cMin;
+      }
+
+      if (e.type == "mouseup") {
+         this.triggerCursor.drag = false;
+      }
+
    }
 
    document.getElementById('scope').style.cursor = cursor;
@@ -1070,7 +1183,7 @@ Oscilloscope.prototype.drawMarker = function (ctx) {
 
    // Trigger levels
    for (c = 15; c >= 0; c--) {
-      if (this.chOn[c]) {
+      if (this.chOn[c] && OSC.wdb[OSC.curBoard].triggerChannelActive[c]) {
          ctx.fillStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
          ctx.strokeStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
 

@@ -338,7 +338,7 @@ function populateControls(init) {
 
    // trigger pattern dialog box
    for (i = 0; i < 18; i++) {
-      var p = document.getElementById(i<10 ? 'P0'+i : 'P'+i);
+      var p = document.getElementById(i < 10 ? 'P0' + i : 'P' + i);
       p.enabled = (OSC.wdb[OSC.curBoard].triggerPtrnEn & (1 << i)) > 0;
       if (p.enabled) {
          p.style.backgroundColor = 'darkgreen';
@@ -376,7 +376,6 @@ function populateControls(init) {
             c.innerHTML = '&times';
       }
    }
-
 
    if (init) {
       // set scale according to sampling frequency
@@ -509,6 +508,18 @@ function readWdb(b, init) {
                   OSC.wdb = [];
                OSC.wdb[b] = JSON.parse(req.responseText).wdb[0];
             }
+
+            // remember which input channel is active (needed for trigger level display)
+            OSC.wdb[OSC.curBoard].triggerChannelActive = new Array(16).fill(false);
+            for (i=0 ; i<16 ; i++) {
+               for (j=0 ; j<18 ; j++) {
+                  if ((OSC.wdb[OSC.curBoard].triggerSrcEnPtrn[j] & (1 << i)) > 0) {
+                     OSC.wdb[OSC.curBoard].triggerChannelActive[i] = true;
+                     break;
+                  }
+               }
+            }
+
             populateAllControls(init);
             OSC.connected = true;
             resolve(req);
@@ -1378,7 +1389,6 @@ function sldUOffset(value) {
 
 function setSldUOffset(value) {
    document.getElementById("uofsSlider").set(value);
-
 }
 
 var tLevelLast = -1;

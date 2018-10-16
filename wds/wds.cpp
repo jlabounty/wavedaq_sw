@@ -1045,15 +1045,15 @@ int main(int argc, const char * argv[])
             }
 
             // enable TDC readout
-            b->SetTdcChTxEn(0xFFFF);
+            b->SetTdcChTxEn(0);
 
             // enable advanced trigger readout
             b->SetTrgTxEn(0);
 
             // enable scaler readout
-            b->SetSclTxEn(1);
             b->SetScalerRst(1);
             b->SetScalerRst(0);
+            b->SetSclTxEn(0);
 
          } else {
             // turn all channels on in demo mode
