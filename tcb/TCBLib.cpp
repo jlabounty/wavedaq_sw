@@ -468,7 +468,7 @@ void TCB::GetRRUN(u_int32_t *data)
    if(fverbose){
       if((*data&0xF000000)>>24==0xF) {
          printf("\n*********************************************************************************************************************\n");
-         printf("** Board configured to drive the trigger bus to the fron panel connector, check the cable to the Ancillary Master! **\n");
+         printf("** Board configured to drive the trigger bus to the front panel connector, check the cable to the Ancillary Master! **\n");
          printf("*********************************************************************************************************************\n\n");
       }   
       else if((*data&0xF000000)>>24==0xB) {
