@@ -905,20 +905,29 @@ unsigned int WDB::GetLmkInputFreq()
 
 void WDB::SetTimingCalibSignalEnable(bool value)
 {
-   // switch TCA_CTRL
-   SetTimingCalibSignalEn(value);
-
-   // enable delay on LMK output #0
-   SetLmk0ClkoutMux(3);
-   
-   // switch LMK output #6
-   
-   // enable divider and delay
-   SetLmk6ClkoutMux(3);
-   // divide 160 MHz by 2x1 = 80 MHz
-   SetLmk6ClkoutDiv(1);
-   // enbable/disable output
-   SetLmk6ClkoutEn(value);
+   if (value) {
+      // switch TCA_CTRL
+      SetTimingCalibSignalEn(true);
+      
+      // switch LMK output #6
+      
+      // enable divider and delay
+      SetLmk6ClkoutMux(3);
+      SetLmk6ClkoutDly(0);
+      // divide 160 MHz by 2x1 = 80 MHz
+      SetLmk6ClkoutDiv(1);
+      // enbable/disable output
+      SetLmk6ClkoutEn(value);
+   } else {
+      // switch TCA_CTRL
+      SetTimingCalibSignalEn(false);
+      
+      // disable LMK output #6
+      SetLmk6ClkoutMux(0);
+      SetLmk6ClkoutDiv(1);
+      SetLmk6ClkoutDly(0);
+      SetLmk6ClkoutEn(false);
+   }
 }
 
 void WDB::SetTimingCalibSignalDelay(int value)
