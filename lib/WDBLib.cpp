@@ -49,7 +49,7 @@
 #define WD2_CMD_PORT_BIN          4000
 #define WD2_CMD_PORT_ASCII        3000
 
-#define WD2_UDP_PROTOCOL_VERSION  5
+#define WD2_UDP_PROTOCOL_VERSION  6
 
 int WP::gDataSocket   = 0;
 int WP::gServerPort   = 0;
@@ -1664,13 +1664,13 @@ bool WDB::LoadTimeCalibration(int freq, std::string path)
 
 //====================================================================
 
-void WDEvent::SetEventHeaderInfo(WD2_FRAME_HEADER *ph)
+void WDEvent::SetEventHeaderInfo(WDAQ_FRAME_HEADER *pdaqh, WD_FRAME_HEADER *ph)
 {
    int channel = ph->channel_info & 0x1F;
    mValid   = true;
-   mBoardId = ph->serial_number;
-   mCrateId = ph->crate_id;
-   mSlotId  = ph->slot_id;
+   mBoardId = pdaqh->serial_number;
+   mCrateId = pdaqh->crate_id;
+   mSlotId  = pdaqh->slot_id;
    mEventNumber = ph->event_number;
    mSamplingFrequency = (unsigned int)(ph->sampling_frequency / 1000.0 + 0.5);  // convert kHz to MHz
    mTriggerNumber = ph->trigger_information[0] | (ph->trigger_information[1] << 8); // ## to be changed
@@ -1681,7 +1681,7 @@ void WDEvent::SetEventHeaderInfo(WD2_FRAME_HEADER *ph)
       mTriggerCellDrs1 = ph->drs_trigger_cell;
    mTriggerType = ph->trigger_information[2] | (ph->trigger_information[3] << 8);   // ## to be changed
    mTemperature = std::round(ph->temperature*0.0625 * 10 + 0.5) / 10.0f;
-   mWFTypeADC = (ph->data_type == cDataTypeADC);
+   mWFTypeADC = (pdaqh->data_type == cDataTypeADC);
 }
 
 //--------------------------------------------------------------------
@@ -1999,103 +1999,91 @@ int WP::ReceiveWfPacket()
                          (struct sockaddr *)&remote_addr, (socklen_t *)&len);
    
    // return if invalid header
-   if (n < (int)sizeof(WD2_FRAME_HEADER))
+   if (n < (int)sizeof(WDAQ_FRAME_HEADER))
       return 0;
    
-   WD2_FRAME_HEADER *ph = (WD2_FRAME_HEADER *)buffer;
-   
+   WDAQ_FRAME_HEADER *pdaqh = (WDAQ_FRAME_HEADER *)buffer;
+   WD_FRAME_HEADER   *ph    = (WD_FRAME_HEADER *)(((WDAQ_FRAME_HEADER *)buffer)+1);
+   WDEventRequest *event_request = nullptr;
+   int channel_adc = 0;
+   int channel_number = 0;
+
    // check protocol version
-   if (ph->protocol_version != WD2_UDP_PROTOCOL_VERSION) {
-      std::cerr << "Invalid protocol version " << (int)ph->protocol_version << ", expected " << WD2_UDP_PROTOCOL_VERSION << ". Probably WD firmware update required." << std::endl;
+   if (pdaqh->protocol_version > WD2_UDP_PROTOCOL_VERSION) {
+      std::cerr << "Invalid protocol version " << (int)pdaqh->protocol_version << ", expected " << WD2_UDP_PROTOCOL_VERSION << ". Probably WDBLib library update required." << std::endl;
       return 0;
    }
-   
+   if (pdaqh->protocol_version < WD2_UDP_PROTOCOL_VERSION) {
+      std::cerr << "Invalid protocol version " << (int)pdaqh->protocol_version << ", expected " << WD2_UDP_PROTOCOL_VERSION << ". Probably WDB firmware update required." << std::endl;
+      return 0;
+   }
+
    // correct endianness of header data
-   ph->serial_number                  = SWAP_UINT16(ph->serial_number);
-   int channel_adc                    = (ph->channel_info >> 7) & 0x1;
-   int channel_number                 = (ph->channel_info) & 0x1f;
-   ph->tx_enable                      = SWAP_UINT32(ph->tx_enable);
-   ph->zero_suppression_mask          = SWAP_UINT16(ph->zero_suppression_mask);
-   ph->flags                          = SWAP_UINT16(ph->flags);
-   ph->samples_per_event_per_channel  = SWAP_UINT16(ph->samples_per_event_per_channel);
-   ph->payload_length                 = SWAP_UINT16(ph->payload_length);
-   ph->data_offset                    = SWAP_UINT16(ph->data_offset);
-   ph->event_number                   = SWAP_UINT32(ph->event_number);
-   ph->drs_trigger_cell               = SWAP_UINT16(ph->drs_trigger_cell);
-   ph->sampling_frequency             = SWAP_UINT32(ph->sampling_frequency);
-   ph->temperature                    = SWAP_UINT16(ph->temperature);
-   ph->dac_ofs                        = SWAP_UINT16(ph->dac_ofs);
-   ph->dac_rofs                       = SWAP_UINT16(ph->dac_rofs);
-   ph->frontend_settings              = SWAP_UINT16(ph->frontend_settings);
+   pdaqh->reserved1         = SWAP_UINT16(pdaqh->reserved1);
+   pdaqh->serial_number     = SWAP_UINT16(pdaqh->serial_number);
+   pdaqh->packet_number     = SWAP_UINT16(pdaqh->packet_number);
+   pdaqh->payload_length    = SWAP_UINT16(pdaqh->payload_length);
+   pdaqh->data_chunk_offset = SWAP_UINT16(pdaqh->data_chunk_offset);
+
+   // correct endianness of WD header data
+   if (pdaqh->data_type == cDataTypeDRS || pdaqh->data_type == cDataTypeADC) {
+      channel_adc                        = (ph->channel_info >> 7) & 0x1;
+      channel_number                     = (ph->channel_info) & 0x1f;
+      ph->samples_per_event_per_channel  = SWAP_UINT16(ph->samples_per_event_per_channel);
+      ph->sampling_frequency             = SWAP_UINT32(ph->sampling_frequency);
+      ph->zero_suppression_mask          = SWAP_UINT16(ph->zero_suppression_mask);
+      ph->tx_enable                      = SWAP_UINT32(ph->tx_enable);
+      ph->drs_trigger_cell               = SWAP_UINT16(ph->drs_trigger_cell);
+      ph->event_number                   = SWAP_UINT32(ph->event_number);
+      ph->temperature                    = SWAP_UINT16(ph->temperature);
+      ph->dac_ofs                        = SWAP_UINT16(ph->dac_ofs);
+      ph->dac_rofs                       = SWAP_UINT16(ph->dac_rofs);
+      ph->frontend_settings              = SWAP_UINT16(ph->frontend_settings);
+   }
 
    mPacketsReceived++;
    
-   if (ph->data_type == cDataTypeDummy) {
-      if (mLogfile != "" || mVerbose >= 3) {
-         std::ofstream f;
-         char line[256];
-         f.open(mLogfile, std::ios_base::app);
-         
-         sprintf(line, "%06dus #%04d from WD%03d, Dummy Data packet received (all channels disabled)\n",
-                 usSince(mEventStartTime),
-                 mPacketsReceived-1,
-                 ph->serial_number);
-         
-         f << line;
-         
-         if (mVerbose >= 3)
-            std::cout << line;
-      }
-      return 0;
-   }
-   
+   // log general event header
    if (mLogfile != "" || mVerbose >= 3) {
       std::ofstream f;
       char line[256];
       std::string flags;
       f.open(mLogfile, std::ios_base::app);
-      
-      if (ph->flags & (1<<cFlagDRSPLLLock))
-         flags += "DLK,";
-      if (ph->flags & (1<<cFlagLMKPLLLock))
-         flags += "LLK,";
-      if (ph->flags & (1<<cFlagEndOfEvent))
+
+      // new line at start of event
+      if (pdaqh->wdaq_flags & (1<<cWDAQFlagStartOfEvent)) {
+         f << std::endl;
+         if (mVerbose >= 3)
+            std::cout << std::endl;
+      }
+
+      if (pdaqh->wdaq_flags & (1<<cWDAQFlagEndOfEvent))
          flags += "EEV,";
-      if (ph->flags & (1<<cFlagStartOfEvent))
+      if (pdaqh->wdaq_flags & (1<<cWDAQFlagStartOfEvent))
          flags += "SEV,";
-      if (ph->flags & (1<<cFlagEndOfType))
+      if (pdaqh->wdaq_flags & (1<<cWDAQFlagEndOfType))
          flags += "ETY,";
-      if (ph->flags & (1<<cFlagStartOfType))
+      if (pdaqh->wdaq_flags & (1<<cWDAQFlagStartOfType))
          flags += "STY,";
-      if (ph->flags & (1<<cFlagNewTriggerInfo))
-         flags += "TIF,";
-      if (ph->flags & (1<<cFlagTriggerInfoParityError))
-         flags += "TPE,";
-      if (ph->flags & (1<<cFlagZeroSuppEnable))
-         flags += "ZDE,";
-      if (ph->flags & (1<<cFalgZeroSuppInhibit))
-         flags += "ZDE,";
+      
       if (flags.back() == ',')
          flags.pop_back();
-
-      sprintf(line, "%06dus #%04d from WD%03d, T=%s F=%s PL=%4d EN=%5d DT=%d A/C/O=%d/%02d/%d TC=%04d T=%1.1lf\n",
+      
+      sprintf(line, "%06dus #%04d from WD%03d, T=%s QF=%15s PL=%4d OF=%5d, ",
               usSince(mEventStartTime),
               mPacketsReceived-1,
-              ph->serial_number,
-              ph->data_type == cDataTypeDRS ? "DRS" :
-              ph->data_type == cDataTypeADC ? "ADC" :
-              ph->data_type == cDataTypeTDC ? "TDC" :
-              ph->data_type == cDataTypeTrg ? "TRG" :
-              ph->data_type == cDataTypeScaler ? "SCALER" : "DUMMY",
+              pdaqh->serial_number,
+              pdaqh->data_type == cDataTypeDRS ? "DRS" :
+              pdaqh->data_type == cDataTypeADC ? "ADC" :
+              pdaqh->data_type == cDataTypeTDC ? "TDC" :
+              pdaqh->data_type == cDataTypeTrg ? "TRG" :
+              pdaqh->data_type == cDataTypeScaler ? "SLR" :
+              pdaqh->data_type == cDataTypeDummy ? "DMY" :
+              pdaqh->data_type == cDataTypeTCB ? "TCB" : "UNK",
               flags.c_str(),
-              ph->payload_length,
-              ph->event_number,
-              ph->data_type,
-              channel_adc,
-              channel_number,
-              ph->data_offset,
-              ph->drs_trigger_cell,
-              ph->temperature*0.0625);
+              pdaqh->payload_length,
+              pdaqh->data_chunk_offset
+              );
       
       f << line;
       
@@ -2103,120 +2091,163 @@ int WP::ReceiveWfPacket()
          std::cout << line;
    }
    
-   // find event request belonging to this board
-   WDEventRequest *er = nullptr;
+   // log event type specific data
+   if (mLogfile != "" || mVerbose >= 3) {
+      std::ofstream f;
+      char line[256];
+      std::string flags;
+      f.open(mLogfile, std::ios_base::app);
+      
+      if (pdaqh->data_type == cDataTypeDRS || pdaqh->data_type == cDataTypeADC) {
+         
+         if (ph->wd_flags & (1<<cWDFlagDRSPLLLock))
+            flags += "DLK,";
+         if (ph->wd_flags & (1<<cWDFlagLMKPLLLock))
+            flags += "LLK,";
+         if (ph->wd_flags & (1<<cWDFlagNewTriggerInfo))
+            flags += "TIF,";
+         if (ph->wd_flags & (1<<cWDFlagTriggerInfoParityError))
+            flags += "TPE,";
+         if (ph->wd_flags & (1<<cWDFlagZeroSuppEnable))
+            flags += "ZDE,";
+         if (ph->wd_flags & (1<<cWDFalgZeroSuppInhibit))
+            flags += "ZDE,";
+         if (flags.back() == ',')
+            flags.pop_back();
+         
+         sprintf(line, "WF=%7s EN=%5d A/C=%d/%02d TC=%04d T=%1.1lf\n",
+                 flags.c_str(),
+                 ph->event_number,
+                 channel_adc,
+                 channel_number,
+                 ph->drs_trigger_cell,
+                 ph->temperature*0.0625);
+      } else
+         sprintf(line, "\n");
+
+      f << line;
+      
+      if (mVerbose >= 3)
+         std::cout << line;
+   }
+   
+   // check that we have a request for that board
    for (auto r: mEventRequest)
-      if (r->GetBoardId() == ph->serial_number) {
-         er = r;
+      if (r->GetBoardId() == pdaqh->serial_number) {
+         event_request = r;
          break;
       }
-   if (!er) {
+   if (!event_request) {
       if (mVerbose)
-         std::cerr << "Received unexpected packet from board #" << ph->serial_number << std::endl;
+         std::cerr << "Received unexpected packet from board #" << pdaqh->serial_number << std::endl;
       if (mLogfile != "") {
          std::ofstream f;
          f.open(mLogfile, std::ios_base::app);
-         f << "Received unexpected packet from board #" << ph->serial_number << std::endl;
+         f << "Received unexpected packet from board #" << pdaqh->serial_number << std::endl;
       }
       return 0;
    }
 
-   // derive event number
-   if (mCurrentEvent == -1)
-      mCurrentEvent = ph->event_number;
-
-   // derive drs_trigger_cell
-   if (ph->data_type == cDataTypeDRS) {
-      if (er->GetDrsTriggerCell(channel_number) == -1)
-         er->SetDrsTriggerCell(channel_number, ph->drs_trigger_cell);
+   if (pdaqh->data_type == cDataTypeDRS) {
+      
+      // derive drs_trigger_cell
+      if (event_request->GetDrsTriggerCell(channel_number) == -1)
+         event_request->SetDrsTriggerCell(channel_number, ph->drs_trigger_cell);
       
       // print warning if inconsistent trigger cells are found
       if (channel_number < 8 || channel_number == 16) {
          for (int i=0 ; i<8 ; i++)
-            if (er->GetDrsTriggerCell(i) != -1 && er->GetDrsTriggerCell(i) != ph->drs_trigger_cell)
+            if (event_request->GetDrsTriggerCell(i) != -1 && event_request->GetDrsTriggerCell(i) != ph->drs_trigger_cell)
                std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
       } else {
          for (int i=8 ; i<16 ; i++)
-            if (er->GetDrsTriggerCell(i) != -1 && er->GetDrsTriggerCell(i) != ph->drs_trigger_cell)
+            if (event_request->GetDrsTriggerCell(i) != -1 && event_request->GetDrsTriggerCell(i) != ph->drs_trigger_cell)
                std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
       }
    }
 
-   // drop package if it belongs to previous event
-   if (ph->event_number == (unsigned int)mCurrentEvent-1) {
-      std::cerr << "Package of previous event dropped, package event=" << ph->event_number << ", "
-      << "current event=" << mCurrentEvent << ", "
-      << "board id=" << ph->serial_number << std::endl;
+   // process WD event
+   if ((pdaqh->data_type == cDataTypeDRS || pdaqh->data_type == cDataTypeADC)) {
       
-      if (mLogfile != "") {
-         std::ofstream f;
-         f.open(mLogfile, std::ios_base::app);
-         f << "Package of previous event dropped, package event=" << ph->event_number << ", "
-         << "current event=" << mCurrentEvent << ", "
-         << "board id=" << ph->serial_number << std::endl;
-      }
-      return 0;
-   }
-
-   // Drop whole event if package of different event has been received. This could
-   // be a new event or event #1 if the WDB has been reset.
-   if (ph->event_number != (unsigned int)mCurrentEvent) {
-      if (mVerbose)
-         std::cerr << "Partially received event dropped, package event=" << ph->event_number << ", "
-         << "current event=" << mCurrentEvent << ", "
-         << "board id=" << ph->serial_number << std::endl;
+      if (mCurrentEvent == -1)
+         mCurrentEvent = ph->event_number;
       
-      if (mLogfile != "") {
-         std::ofstream f;
-         f.open(mLogfile, std::ios_base::app);
-         f << "Partially received event dropped, package event=" << ph->event_number << ", "
+      // drop package if it belongs to previous event
+      if (ph->event_number == (unsigned int)mCurrentEvent-1) {
+         std::cerr << "Package of previous event dropped, package event=" << ph->event_number << ", "
          << "current event=" << mCurrentEvent << ", "
-         << "board id=" << ph->serial_number << std::endl;
+         << "board id=" << pdaqh->serial_number << std::endl;
+         
+         if (mLogfile != "") {
+            std::ofstream f;
+            f.open(mLogfile, std::ios_base::app);
+            f << "Package of previous event dropped, package event=" << ph->event_number << ", "
+            << "current event=" << mCurrentEvent << ", "
+            << "board id=" << pdaqh->serial_number << std::endl;
+         }
+         return 0;
       }
       
-      // count dropped packets
-      if (ph->event_number > mLastEventNumber)
-         mWDDroppedEvents = (ph->event_number - mLastEventNumber);
+      // Drop whole event if package of different event has been received. This could
+      // be a new event or event #1 if the WDB has been reset.
+      if (ph->event_number != (unsigned int)mCurrentEvent) {
+         if (mVerbose)
+            std::cerr << "Partially received event dropped, package event=" << ph->event_number << ", "
+            << "current event=" << mCurrentEvent << ", "
+            << "board id=" << pdaqh->serial_number << std::endl;
+         
+         if (mLogfile != "") {
+            std::ofstream f;
+            f.open(mLogfile, std::ios_base::app);
+            f << "Partially received event dropped, package event=" << ph->event_number << ", "
+            << "current event=" << mCurrentEvent << ", "
+            << "board id=" << pdaqh->serial_number << std::endl;
+         }
+         
+         // count dropped packets
+         if (ph->event_number > mLastEventNumber)
+            mWDDroppedEvents = (ph->event_number - mLastEventNumber);
+         
+         // switch to new event
+         InvalidateAllWf();
+         mCurrentEvent = ph->event_number;
+         mPacketsReceived = 1;
+         event_request->SetDrsTriggerCell(channel_number, ph->drs_trigger_cell);
+         
+         mEventStartTime = std::chrono::high_resolution_clock::now();
+      }
       
-      // switch to new event
-      InvalidateAllWf();
-      mCurrentEvent = ph->event_number;
-      mPacketsReceived = 1;
-      er->SetDrsTriggerCell(channel_number, ph->drs_trigger_cell);
-
-      mEventStartTime = std::chrono::high_resolution_clock::now();
+      assert(channel_number < WD_N_CHANNELS);
    }
-   
-   assert(channel_number < WD_N_CHANNELS);
    
    // find event belonging to this baord
    WDEvent *event = nullptr;
    for (auto e: mEvent) {
-      if (e->mBoardId == ph->serial_number) {
+      if (e->mBoardId == pdaqh->serial_number) {
          event = e;
          break;
       }
    }
    if (!event) {
-      std::cerr << "Received unexpected packet from board #" << ph->serial_number << std::endl;
+      std::cerr << "Received unexpected packet from board #" << pdaqh->serial_number << std::endl;
       return 0;
    }
    
-   event->SetEventHeaderInfo(ph);
+   event->SetEventHeaderInfo(pdaqh, ph);
    event->mVCalibrated = false;
    event->mTCalibrated = false;
    mLastEventNumber = ph->event_number;
 
    // decode DRS waveform data
-   if (ph->data_type == cDataTypeDRS) {
-      assert(ph->payload_length % 3 == 0);
-      assert(ph->data_offset % 3 == 0);
-      int numberBins = (int) ph->payload_length / 1.5;
-      int firstBin = ph->data_offset / 1.5;
+   if (pdaqh->data_type == cDataTypeDRS) {
+      assert(pdaqh->payload_length % 3 == 0);
+      assert(pdaqh->data_chunk_offset % 3 == 0);
+      int numberBins = (int) pdaqh->payload_length / 1.5;
+      int firstBin = pdaqh->data_chunk_offset / 1.5;
       int channelSegment = firstBin / 938;
       
       // mark valid package received
-      er->SetWfValid(channel_number, channelSegment, true);
+      event_request->SetWfValid(channel_number, channelSegment, true);
 
       auto pd = (unsigned char*)(ph+1);
       for (int i=0 ; i<numberBins ; i+=2) {
@@ -2234,15 +2265,15 @@ int WP::ReceiveWfPacket()
    }
 
    // decode ADC waveform data
-   if (ph->data_type == cDataTypeADC) {
-      assert(ph->payload_length % 3 == 0);
-      assert(ph->data_offset % 3 == 0);
-      int numberBins = (int) ph->payload_length / 1.5;
-      int firstBin = ph->data_offset / 1.5;
+   if (pdaqh->data_type == cDataTypeADC) {
+      assert(pdaqh->payload_length % 3 == 0);
+      assert(pdaqh->data_chunk_offset % 3 == 0);
+      int numberBins = (int) pdaqh->payload_length / 1.5;
+      int firstBin = pdaqh->data_chunk_offset / 1.5;
       int channelSegment = firstBin / 938;
 
       // mark valid package received
-      er->SetWfValid(channel_number, channelSegment, true);
+      event_request->SetWfValid(channel_number, channelSegment, true);
 
       auto pd = (unsigned char*)(ph+1);
       for (int i=0 ; i<numberBins ; i+=2) {
@@ -2260,25 +2291,25 @@ int WP::ReceiveWfPacket()
    }
 
    // decode TDC waveform data
-   if (ph->data_type == cDataTypeTDC) {
+   if (pdaqh->data_type == cDataTypeTDC) {
       auto pd = (unsigned char*)(ph+1);
-      memcpy(&event->mWfTDC[channel_number][ph->data_offset], pd, ph->payload_length);
+      memcpy(&event->mWfTDC[channel_number][pdaqh->data_chunk_offset], pd, pdaqh->payload_length);
       
-      if (ph->flags & (1<<cFlagEndOfType))
+      if (pdaqh->wdaq_flags & (1<<cWDAQFlagEndOfType))
          event->mWfTDCValid = true; // ## change later to check all channels
    }
 
    // decode advanced trigger data
-   if (ph->data_type == cDataTypeTrg) {
+   if (pdaqh->data_type == cDataTypeTrg) {
       auto pd = (unsigned char*)(ph+1);
-      memcpy(event->mTrgData+ph->data_offset, pd, ph->payload_length);
+      memcpy(event->mTrgData+pdaqh->data_chunk_offset, pd, pdaqh->payload_length);
       event->mTrgValid = true;
    }
    
    // decode scaler data
-   if (ph->data_type == cDataTypeScaler) {
+   if (pdaqh->data_type == cDataTypeScaler) {
       auto pd = (unsigned long*)(ph+1);
-      assert(ph->payload_length <= sizeof(event->mScaler));
+      assert(pdaqh->payload_length <= sizeof(event->mScaler));
       for (int i=0 ; i<18 ; i++)
          event->mScaler[i] = SWAP_UINT64(pd[17-i]);
       event->mScalerValid = true;
