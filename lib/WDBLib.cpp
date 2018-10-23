@@ -90,6 +90,7 @@ WDB::WDB(std::string name, int verbose)
    mDemoMode = (name == "demo");
    mSendBlocked = false;
    mReceiveTimeoutMs = cDefaultReceiveTimeoutMs;
+   mTimingReferenceSignal = cTimingReferenceOff;
    
    if (mDemoMode) {
       // set some meaningful values in demo mode to make wds happy
@@ -916,7 +917,7 @@ unsigned int WDB::GetLmkInputFreq()
    return GetExtClkFreq();
 }
 
-void WDB::SetTimingCalibSignalEnable(bool value)
+void WDB::SetSineWaveEnable(bool value)
 {
    if (value) {
       // switch TCA_CTRL
@@ -937,13 +938,13 @@ void WDB::SetTimingCalibSignalEnable(bool value)
       
       // disable LMK output #6
       SetLmk6ClkoutMux(0);
-      SetLmk6ClkoutDiv(1);
+      SetLmk6ClkoutDiv(0);
       SetLmk6ClkoutDly(0);
       SetLmk6ClkoutEn(false);
    }
 }
 
-void WDB::SetTimingCalibSignalDelay(int value)
+void WDB::SetSineWaveDelay(int value)
 {
    // set delay of LMK output #6
    assert(value >= -16 && value <= 16);
@@ -973,7 +974,7 @@ void WDB::SetTimingCalibSignalDelay(int value)
    }
 }
 
-int WDB::GetTimingCalibSignalDelay()
+int WDB::GetSineWaveDelay()
 {
    int v1 = GetLmk0ClkoutDly();
    int v2 = GetLmk6ClkoutDly();
@@ -984,22 +985,17 @@ int WDB::GetTimingCalibSignalDelay()
 
 int WDB::GetTimingReferenceSignal()
 {
-   if (GetDrs0TimingRefSel()) {
-      if (GetLmk1ClkoutEn())
-         return 2;
-   } else {
-      if (GetTimingCalibSignalEn())
-         return 1;
-   }
-   return 0;
+   return mTimingReferenceSignal;
 }
 
 void WDB::SetTimingReferenceSignal(int value)
 {
+   mTimingReferenceSignal = value;
+   
    if (value == cTimingReferenceOff) { // turn reference signal off
       
       // turn off sine wave generator
-      SetTimingCalibSignalEnable(false);
+      SetSineWaveEnable(false);
       
       // turn off calibration buffer
       SetCalibBufferEn(false);
@@ -1009,13 +1005,17 @@ void WDB::SetTimingReferenceSignal(int value)
       SetDrs1TimingRefSel(1);
       
       // disable LMK outputs #1 and #2
+      SetLmk1ClkoutMux(0);
+      SetLmk1ClkoutDiv(0);
       SetLmk1ClkoutEn(0);
+      SetLmk2ClkoutMux(0);
+      SetLmk2ClkoutDiv(0);
       SetLmk2ClkoutEn(0);
 
    } else if (value == cTimingReferenceSine) { // seclect sine wave generator
       
       // turn on sine wave generator
-      SetTimingCalibSignalEnable(true);
+      SetSineWaveEnable(true);
       
       // turn on calibration buffer
       SetCalibBufferEn(true);
@@ -1025,13 +1025,17 @@ void WDB::SetTimingReferenceSignal(int value)
       SetDrs1TimingRefSel(0);
       
       // disable LMK outputs #1 and #2
+      SetLmk1ClkoutMux(0);
+      SetLmk1ClkoutDiv(0);
       SetLmk1ClkoutEn(0);
+      SetLmk2ClkoutMux(0);
+      SetLmk2ClkoutDiv(0);
       SetLmk2ClkoutEn(0);
 
    } else if (value == cTimingReferenceSquare){ // select square wave
       
       // turn off sine wave generator
-      SetTimingCalibSignalEnable(false);
+      SetSineWaveEnable(false);
       
       // turn off calibration buffer
       SetCalibBufferEn(false);
@@ -1044,7 +1048,6 @@ void WDB::SetTimingReferenceSignal(int value)
       SetLmk1ClkoutMux(1);
       SetLmk1ClkoutDiv(1);
       SetLmk1ClkoutEn(1);
-      
       SetLmk2ClkoutMux(1);
       SetLmk2ClkoutDiv(1);
       SetLmk2ClkoutEn(1);
@@ -2441,7 +2444,7 @@ void WP::CalibrateWaveforms(WDEvent* ev)
       
       // start-to-end offset calibration
       if (mOfsCalib2 && bValid) {
-         for (int i=0 ; i<WD_N_CHANNELS ; i++)
+         for (int i=0 ; i<WD_N_CHANNELS-2 ; i++)
             for (int j=0 ; j<1024 ; j++)
                ev->mWfUDRS[i][j] -= wdb->mVCalib.mCalib.wf_offset2[i][j];
       };
@@ -2976,42 +2979,38 @@ void WP::Collector()
 
 //--------------------------------------------------------------------
 
-void WP::DoCalibrationVoltageStep()
+void WP::DoVoltageCalibrationStep()
 {
    if (calibProg.state == cCsFirstBoard) {
-      calibProg.state    = cCsFirstSample;
-      calibProg.progress = 0;
-      calibProg.nIter1   = 100;
-      calibProg.nIter2   = 100;
-      calibProg.nIter3   = 100;
-      calibProg.nIter4   = 100;
-      calibProg.iIter1   = 0;
-      calibProg.iIter2   = 0;
-      calibProg.iIter3   = 0;
-      calibProg.iIter4   = 0;
-      
+      calibProg.state      = cCsFirstSample;
+      calibProg.progress   = 0;
+      calibProg.nIter1     = 100; // primary
+      calibProg.nIter2     = 100; // secondary
+      calibProg.nIter3     = 100; // positive gain
+      calibProg.nIter4     = 100; // negative gain
+      calibProg.nIter5     = 100; // timing channels
+
       calibProg.nIterTotal = calibProg.nIter1 + calibProg.nIter2 +
-         calibProg.nIter3 + calibProg.nIter4 + 4;
+         calibProg.nIter3 + calibProg.nIter4 + calibProg.nIter5 + 4;
    }
    
    WDB *b = mWdb[calibProg.iBoard];
 
    if (calibProg.state == cCsFirstSample) {
-      calibProg.progress = 0;
-      calibProg.iIter1   = 0;
-      calibProg.iIter2   = 0;
-      calibProg.iIter3   = 0;
-      calibProg.iIter4   = 0;
-      calibProg.state    = cCsRunning;
+      calibProg.progress   = 0;
+      calibProg.iIter1     = 0;
+      calibProg.iIter2     = 0;
+      calibProg.iIter3     = 0;
+      calibProg.iIter4     = 0;
+      calibProg.iIter5     = 0;
+      calibProg.iIterTotal = 0;
+      calibProg.state      = cCsRunning;
 
       // save current board settings
       mOldRange = b->GetRange();
       mOldMaskDrs = b->GetDrsChTxEn();
       mOldMaskAdc = b->GetAdcChTxEn();
-
-      mOldCalibClock  = b->GetTimingCalibSignalEn();
-      mOldFeMux       = b->GetFeMux(0);
-      mOldCalibBuffer = b->GetCalibBufferEn();
+      mOldTimingReference  = b->GetTimingReferenceSignal();
       
       b->mVCalib.mCalib.sampling_frequency = b->GetDrsSampleFreqMhz();
       
@@ -3022,14 +3021,11 @@ void WP::DoCalibrationVoltageStep()
       mGainCalib           = false;
       mRangeCalib          = false;
       
-      // turn on power for calibration input (needed for clock channels)
-      b->SetCalibBufferEn(true);
+      // turn on square clock to correct for crosstalk
+      b->SetTimingReferenceSignal(WDB::cTimingReferenceSquare);
 
-      // turn off calibration clock
-      b->SetTimingCalibSignalEnable(false);
-      
-      // switch multiplexer to calibration source
-      b->SetFeMux(-1, WDB::cFeMuxCalSource);
+      // make sure multiplexer is connected to input
+      b->SetFeMux(-1, WDB::cFeMuxInput);
       
       // enable all DRSchannels
       b->SetDrsChTxEn(0x3FFFF);
@@ -3055,27 +3051,27 @@ void WP::DoCalibrationVoltageStep()
       calibProg.ave = new Averager(1, WD_N_CHANNELS, 1024, n);
    }
    
+   calibProg.iIterTotal++;
+   calibProg.progress = (double)calibProg.iIterTotal / calibProg.nIterTotal;
+
    //---- Primary Calibration ----
-   
    
    if (calibProg.iIter1 < calibProg.nIter1) {
       
       calibProg.iIter1++;
-      
+
       // get one event from board
       WDEvent event(b->GetSerialNumber());
       if (!RequestEvent(b, 1000, event))
          return; // just skip this event
       
-      for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
+      for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
             calibProg.ave->Add(0, ch, bin, event.mWfUDRS[ch][bin]);
       
-      calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3 + calibProg.iIter4) / calibProg.nIterTotal;
-      
       // calibration finished
       if (calibProg.iIter1 == calibProg.nIter1) {
-         for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
+         for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
                b->mVCalib.mCalib.wf_offset1[ch][bin] = (float)calibProg.ave->Median(0, ch, bin);
 
@@ -3098,21 +3094,19 @@ void WP::DoCalibrationVoltageStep()
       }
       
       calibProg.iIter2++;
-      
+
       // get one event from board
       WDEvent event(b->GetSerialNumber());
       if (!RequestEvent(b, 1000, event))
          return; // just skip this event
       
-      for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
+      for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
             calibProg.ave->Add(0, ch, bin, event.mWfUDRS[ch][bin]);
       
-      calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3 + calibProg.iIter4) / calibProg.nIterTotal;
-      
       // calibration finished
       if (calibProg.iIter2 == calibProg.nIter2) {
-         for (int ch=0 ; ch<WD_N_CHANNELS ; ch++)
+         for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++)
             for (int bin=0 ; bin<1024 ; bin++)
                b->mVCalib.mCalib.wf_offset2[ch][bin] = (float)calibProg.ave->Median(0, ch, bin);
          
@@ -3136,7 +3130,7 @@ void WP::DoCalibrationVoltageStep()
       }
       
       calibProg.iIter3++;
-      
+
       // get one event from board
       WDEvent event(b->GetSerialNumber());
       if (!RequestEvent(b, 1000, event))
@@ -3145,8 +3139,6 @@ void WP::DoCalibrationVoltageStep()
       for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
             calibProg.ave->Add(0, ch, bin, event.mWfUDRS[ch][bin]);
-      
-      calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3 + calibProg.iIter4) / calibProg.nIterTotal;
       
       // calibration finished
       if (calibProg.iIter3 == calibProg.nIter3) {
@@ -3166,13 +3158,11 @@ void WP::DoCalibrationVoltageStep()
       
       // initialize data on first iteration
       if (calibProg.iIter4 == 0) {
-         calibProg.ave->Reset();
-         
          b->SetDacCalDcV(-0.45);
       }
       
       calibProg.iIter4++;
-      
+
       // get one event from board
       WDEvent event(b->GetSerialNumber());
       if (!RequestEvent(b, 1000, event))
@@ -3182,13 +3172,56 @@ void WP::DoCalibrationVoltageStep()
          for (int bin=0 ; bin<1024 ; bin++)
             calibProg.ave->Add(0, ch, bin, event.mWfUDRS[ch][bin]);
       
-      calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3 + calibProg.iIter4) / calibProg.nIterTotal;
-      
       // calibration finished
       if (calibProg.iIter4 == calibProg.nIter4) {
          for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) // exclude clock channels
             for (int bin=0 ; bin<1024 ; bin++)
                b->mVCalib.mCalib.wf_gain2[ch][bin] = (float)(calibProg.ave->Median(0, ch, bin) / -0.45);
+         
+         calibProg.ave->Reset();
+      }
+      
+      return;
+   }
+   
+   //---- Timing channels calibration
+   
+   if (calibProg.iIter5 < calibProg.nIter5) {
+      
+      // initialize data on first iteration
+      if (calibProg.iIter5 == 0) {
+         // set offset zero
+         b->SetDacCalDcV(0);
+         
+         // turn on calibration source
+         b->SetCalibBufferEn(1);
+         
+         // turn off square clock to get DC level
+         b->SetTimingReferenceSignal(WDB::cTimingReferenceOff);
+         
+         mRotateWaveform      = false;
+         mOfsCalib1           = false;
+         mOfsCalib2           = false;
+         mGainCalib           = false;
+         mRangeCalib          = false;
+      }
+      
+      calibProg.iIter5++;
+
+      // get one event from board
+      WDEvent event(b->GetSerialNumber());
+      if (!RequestEvent(b, 1000, event))
+         return; // just skip this event
+      
+      for (int ch=16 ; ch<WD_N_CHANNELS ; ch++)
+         for (int bin=0 ; bin<1024 ; bin++)
+            calibProg.ave->Add(0, ch, bin, event.mWfUDRS[ch][bin]);
+      
+      // calibration finished
+      if (calibProg.iIter5 == calibProg.nIter5) {
+         for (int ch=16 ; ch<WD_N_CHANNELS ; ch++) // only clock channels
+            for (int bin=0 ; bin<1024 ; bin++)
+               b->mVCalib.mCalib.wf_offset1[ch][bin] = (float)calibProg.ave->Median(0, ch, bin);
          
          delete calibProg.ave;
          calibProg.ave = NULL;
@@ -3196,14 +3229,18 @@ void WP::DoCalibrationVoltageStep()
       
       return;
    }
-   
+
    mRotateWaveform = true;
    mOfsCalib1      = true;
    mOfsCalib2      = true;
    mGainCalib      = true;
    mRangeCalib     = false;
 
-   // measure offset at different ranges
+   // reset reference clocks
+   b->SetCalibBufferEn(0);
+   b->SetTimingReferenceSignal(WDB::cTimingReferenceSquare);
+   
+   //---- measure offset at different ranges
    
    // Range -0.45
    b->SetDacCalDcV(0);
@@ -3309,10 +3346,7 @@ void WP::DoCalibrationVoltageStep()
    b->SetRange(mOldRange);
    b->SetDrsChTxEn(mOldMaskDrs);
    b->SetAdcChTxEn(mOldMaskAdc);
-
-   b->SetTimingCalibSignalEnable(mOldCalibClock);
-   b->SetFeMux(-1, mOldFeMux);
-   b->SetCalibBufferEn(mOldCalibBuffer);
+   b->SetTimingReferenceSignal(mOldTimingReference);
    
    if (calibProg.iBoard == calibProg.nBoard) {
       calibProg.state = cCsInactive;
@@ -3568,7 +3602,7 @@ void WP::CalibrateGlobal(WDEvent *event, WDB *b)
 
 //--------------------------------------------------------------------
 
-void WP::DoCalibrationTimeStep()
+void WP::DoTimeCalibrationStep()
 {
    
    if (calibProg.state == cCsFirstBoard) {
@@ -3607,9 +3641,7 @@ void WP::DoCalibrationTimeStep()
       mOldMaskDrs = b->GetDrsChTxEn();
       mOldMaskAdc = b->GetAdcChTxEn();
       
-      mOldCalibClock  = b->GetTimingCalibSignalEn();
-      mOldFeMux       = b->GetFeMux(0);
-      mOldCalibBuffer = b->GetCalibBufferEn();
+      mOldTimingReference = b->GetTimingReferenceSignal();
 
       b->mTCalib.mCalib.sampling_frequency = b->GetDrsSampleFreqMhz();
 
@@ -3633,15 +3665,19 @@ void WP::DoCalibrationTimeStep()
       b->SetDacCalDcV(0);
 
       // turn on calibration clock
-      b->SetCalibBufferEn(true);
-      b->SetTimingCalibSignalEnable(true);
+      b->SetTimingReferenceSignal(WDB::cTimingReferenceSine);
+
+      // connect normal input to sine wave
       b->SetFeMux(-1, WDB::cFeMuxCalSource);
       
       // enable all channels
       b->SetDrsChTxEn(0x3FFFF);
 
+      // set holdoff to minimum
+      b->SetTriggerHoldoff(0);
+
       calibProg.phase = 0;
-      b->SetTimingCalibSignalDelay(calibProg.phase);
+      b->SetSineWaveDelay(calibProg.phase);
 
       calibProg.ave = new Averager(1, WD_N_CHANNELS, 1024, std::max(calibProg.nIter1, calibProg.nIter2));
    }
@@ -3657,7 +3693,7 @@ void WP::DoCalibrationTimeStep()
          calibProg.phase++;
          if (calibProg.phase == 17)
             calibProg.phase = -16;
-         b->SetTimingCalibSignalDelay(calibProg.phase);
+         b->SetSineWaveDelay(calibProg.phase);
          sleep_ms(10);
       }
       
@@ -3675,7 +3711,7 @@ void WP::DoCalibrationTimeStep()
       if (calibProg.iIter1 == calibProg.nIter1) {
          calibProg.ave->Reset();
          calibProg.phase = 0;
-         b->SetTimingCalibSignalDelay(calibProg.phase);
+         b->SetSineWaveDelay(calibProg.phase);
          sleep_ms(10);
       }
       
@@ -3693,7 +3729,7 @@ void WP::DoCalibrationTimeStep()
          calibProg.phase++;
          if (calibProg.phase == 17)
             calibProg.phase = -16;
-         b->SetTimingCalibSignalDelay(calibProg.phase);
+         b->SetSineWaveDelay(calibProg.phase);
          sleep_ms(10);
       }
       
@@ -3711,7 +3747,7 @@ void WP::DoCalibrationTimeStep()
       if (calibProg.iIter2 == calibProg.nIter2) {
          calibProg.ave->Reset();
          calibProg.phase = 0;
-         b->SetTimingCalibSignalDelay(calibProg.phase);
+         b->SetSineWaveDelay(calibProg.phase);
          sleep_ms(10);
          mRotateWaveform       = true;
          mTimeCalib1           = true;
@@ -3760,10 +3796,9 @@ void WP::DoCalibrationTimeStep()
    b->SetRange(mOldRange);
    b->SetDrsChTxEn(mOldMaskDrs);
    b->SetAdcChTxEn(mOldMaskAdc);
+   b->SetTimingReferenceSignal(mOldTimingReference);
 
-   b->SetTimingCalibSignalEnable(mOldCalibClock);
-   b->SetFeMux(-1, mOldFeMux);
-   b->SetCalibBufferEn(mOldCalibBuffer);
+   b->SetTriggerHoldoff(30);
 
    if (calibProg.iBoard == calibProg.nBoard) {
       calibProg.state = cCsInactive;

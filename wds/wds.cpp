@@ -337,9 +337,9 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       else if (item == "timingCalibSignalEnable") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
-               b->SetTimingCalibSignalEnable(value == "true");
+               b->SetSineWaveEnable(value == "true");
          else
-            gl->wdb[iBoard]->SetTimingCalibSignalEnable(value == "true");
+            gl->wdb[iBoard]->SetSineWaveEnable(value == "true");
       }
 
       else if (item == "timingReferenceSignal") {
@@ -1131,13 +1131,13 @@ int main(int argc, const char * argv[])
          
          // do calibration if asked for
          if (gl.wp->IsVcalibActive()) {
-            gl.wp->DoCalibrationVoltageStep();
+            gl.wp->DoVoltageCalibrationStep();
             
             // Yield to server, no timeout
             mg_mgr_poll(&mgr, 0);
          
          } else if (gl.wp->IsTcalibActive()) {
-            gl.wp->DoCalibrationTimeStep();
+            gl.wp->DoTimeCalibrationStep();
             
             // Yield to server, no timeout
             mg_mgr_poll(&mgr, 0);

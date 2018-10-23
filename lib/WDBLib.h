@@ -168,6 +168,9 @@ typedef struct {
    int            iIter3;
    int            nIter4;
    int            iIter4;
+   int            nIter5;
+   int            iIter5;
+   int            iIterTotal;
    int            nIterTotal;
    Averager       *ave;
    int            phase;
@@ -390,9 +393,7 @@ class WP {
    int               mOldMaskAdc;
 
    int               mOldReadoutSrc;
-   bool              mOldCalibClock;
-   int               mOldFeMux;
-   bool              mOldCalibBuffer;
+   bool              mOldTimingReference;
    
    void              AnalyzePeriod(WDEvent *, WDB *);
    void              AnalyzeTimeOffset(WDEvent *, WDB *);
@@ -474,8 +475,8 @@ public:
       calibProg.nBoard = (b == -1) ? mWdb.size() : b+1;
       calibProg.iBoard = (b == -1) ? 0 : b;
       calibProg.state = cCsFirstBoard; };
-   void DoCalibrationVoltageStep();
-   void DoCalibrationTimeStep();
+   void DoVoltageCalibrationStep();
+   void DoTimeCalibrationStep();
    
    void StartWaveformSaving(std::string fileName, int format, bool bAll, int board, int nEvents);
    void StopLogging();
@@ -502,6 +503,7 @@ class WDB: public WDBREG {
    int              mReceiveTimeoutMs;
    unsigned int     mChnTxEn;
    int              mTriggerHoldoff;
+   int              mTimingReferenceSignal;
 
    unsigned int     creg[REG_NR_OF_CTRL_REGS];
    unsigned int     sreg[REG_NR_OF_STAT_REGS];
@@ -608,9 +610,9 @@ public:
    void SetLmkInputFreq(unsigned int f);
    unsigned int GetLmkInputFreq();
 
-   void SetTimingCalibSignalEnable(bool value);
-   void SetTimingCalibSignalDelay(int value);
-   int GetTimingCalibSignalDelay();
+   void SetSineWaveEnable(bool value);
+   void SetSineWaveDelay(int value);
+   int GetSineWaveDelay();
    void SetTimingReferenceSignal(int value);
    int GetTimingReferenceSignal();
 
