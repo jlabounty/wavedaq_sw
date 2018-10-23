@@ -70,20 +70,20 @@ typedef struct {
 #pragma pack() // reset alignment to default value
 
 enum {
-   cDataTypeDRS                = 0,
-   cDataTypeADC                = 1,
-   cDataTypeTDC                = 2,
-   cDataTypeTrg                = 3,
-   cDataTypeScaler             = 4,
-   cDataTypeDummy              = 5,
-   cDataTypeTCB                = 8
+   cDataTypeDRS                  = 0,
+   cDataTypeADC                  = 1,
+   cDataTypeTDC                  = 2,
+   cDataTypeTrg                  = 3,
+   cDataTypeScaler               = 4,
+   cDataTypeDummy                = 5,
+   cDataTypeTCB                  = 8
 };
 
 enum {
-   cWDAQFlagEndOfEvent             = 0,
-   cWDAQFlagStartOfEvent           = 1,
-   cWDAQFlagEndOfType              = 2,
-   cWDAQFlagStartOfType            = 3
+   cWDAQFlagEndOfEvent           = 0,
+   cWDAQFlagStartOfEvent         = 1,
+   cWDAQFlagEndOfType            = 2,
+   cWDAQFlagStartOfType          = 3
 };
 
 enum {

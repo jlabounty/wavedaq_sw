@@ -512,6 +512,7 @@ void WDB::Connect()
    // check firmware compatibility level
    ReceiveStatusRegister(WD2_FW_COMPAT_LEVEL_REG);
    ReceiveStatusRegister(WD2_REG_LAYOUT_COMP_LEVEL_REG);
+   ReceiveStatusRegister(WD2_REG_PROT_VER);
    if (GetFwCompatLevel() < cRequiredFwCompatLevel) {
       std::string str("Board ");
       str += mName + " has incompatible firmware, please upgrade (Board compatibility level: "+
@@ -539,6 +540,18 @@ void WDB::Connect()
       str += mName + " has newer register layout, please update WD library (Board compatibility level: "+
       std::to_string(GetRegLayoutCompLevel())+", Software compatibility level: "+
       std::to_string(cRequiredRegLayoutCompatLevel)+")";
+      throw std::runtime_error(str);
+   }
+   if (GetProtocolVersion() > WD2_UDP_PROTOCOL_VERSION) {
+      std::string str("Board ");
+      str += mName + " has protocol version " + std::to_string(GetProtocolVersion()) +
+         ", WDBLib library has version " + std::to_string(WD2_UDP_PROTOCOL_VERSION) + ". Please update WDBLib library.";
+      throw std::runtime_error(str);
+   }
+   if (GetProtocolVersion() < WD2_UDP_PROTOCOL_VERSION) {
+      std::string str("Board ");
+      str += mName + " has protocol version " + std::to_string(GetProtocolVersion()) +
+      ", WDBLib library has version " + std::to_string(WD2_UDP_PROTOCOL_VERSION) + ". Please upgrade WDB firmware.";
       throw std::runtime_error(str);
    }
 }
