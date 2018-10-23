@@ -440,7 +440,8 @@ Oscilloscope.prototype.mouseEvent = function (e) {
 
    // process waveform marker dragging
    if (!this.voltageCursor.on && !this.timeCursor.on && e.target == this.canvas &&
-      (e.clientX < this.x1+10 || this.offsetMarkerCursor.drag)) {
+      ((e.clientX < this.x1+10 && e.clientY > this.y1 && e.clientY < this.y2) ||
+         this.offsetMarkerCursor.drag)) {
       // find which waveform marker is closest to cursor
       var dMin = 1E6;
       var cMin = undefined;
@@ -473,16 +474,14 @@ Oscilloscope.prototype.mouseEvent = function (e) {
          }
       }
 
-      if (e.type == "mousedown") {
-         if (dMin < 10) {
-            this.offsetMarkerCursor.drag = true;
-            this.offsetMarkerCursor.channel = cMin;
-            this.offsetMarkerCursor.yStart = e.clientY;
-            this.offsetMarkerCursor.offsetStart = OSC.wfOffset[cMin];
-            for (i = 0; i < 20; i++)
-               OSC.chOnSelected[i] = (i == cMin);
-            OSC.drawChnButtons();
-         }
+      if (e.type == "mousedown" && dMin < 10) {
+         this.offsetMarkerCursor.drag = true;
+         this.offsetMarkerCursor.channel = cMin;
+         this.offsetMarkerCursor.yStart = e.clientY;
+         this.offsetMarkerCursor.offsetStart = OSC.wfOffset[cMin];
+         for (i = 0; i < 20; i++)
+            OSC.chOnSelected[i] = (i == cMin);
+         OSC.drawChnButtons();
       }
 
       if (e.type == "mouseup") {
@@ -492,7 +491,8 @@ Oscilloscope.prototype.mouseEvent = function (e) {
 
    // process trigger level dragging
    if (!this.voltageCursor.on && !this.timeCursor.on && e.target == this.canvas &&
-      (e.clientX > this.x2-10 && e.clientY < this.x2) || this.triggerCursor.drag) {
+      ((e.clientX > this.x2-10 && e.clientX < this.x2 && e.clientY > this.y1 && e.clientY < this.y2-10) ||
+      this.triggerCursor.drag)) {
       // find which trigger level is closest to cursor
       var dMin = 1E6;
       var cMin = undefined;
@@ -531,11 +531,9 @@ Oscilloscope.prototype.mouseEvent = function (e) {
          e.name = "dacTriggerLevel";
          e.value = u;
          setParam(e, this.triggerCursor.channel);
-         //this.voltageCursor.input.value = u;
-         //this.voltageCursor.input.onchange();
       }
 
-      if (e.type == "mousedown") {
+      if (e.type == "mousedown" && dMin < 8) {
          this.triggerCursor.drag = true;
          this.triggerCursor.channel = cMin;
       }
