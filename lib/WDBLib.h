@@ -35,31 +35,37 @@ class WDB;
 
 typedef struct {
    unsigned char  protocol_version;
-   unsigned char  board_revision;
+   unsigned char  board_type_revision;
+   unsigned short reserved1;
    unsigned short serial_number;
    unsigned char  crate_id;
    unsigned char  slot_id;
-   unsigned char  channel_info;
+   unsigned short packet_number;
    unsigned char  data_type;
-   unsigned int   tx_enable;
-   unsigned short zero_suppression_mask;
-   unsigned short flags;
-   unsigned char  trigger_source;
-   unsigned char  bits_per_sample;
-   unsigned short samples_per_event_per_channel;
+   unsigned char  wdaq_flags;
    unsigned short payload_length;
-   unsigned short data_offset;
-   unsigned char  time_stamp[8];
-   unsigned int   event_number;
-   unsigned char  trigger_information[6];
-   unsigned short drs_trigger_cell;
+   unsigned short data_chunk_offset;
+} WDAQ_FRAME_HEADER;
+
+typedef struct {
+   unsigned char  channel_info;
+   unsigned char  wd_flags;
+   unsigned short samples_per_event_per_channel;
    unsigned int   sampling_frequency;
+   unsigned char  bits_per_sample;
+   unsigned char  trigger_source;
+   unsigned short zero_suppression_mask;
+   unsigned int   tx_enable;
+   unsigned short drs_trigger_cell;
+   unsigned char  trigger_information[6];
+   unsigned char  time_stamp[8];
+   unsigned char  reserved[4];
+   unsigned int   event_number;
    unsigned short temperature;
    unsigned short dac_ofs;
    unsigned short dac_rofs;
    unsigned short frontend_settings;
-   unsigned char  reserved[8];
-} WD2_FRAME_HEADER;
+} WD_FRAME_HEADER;
 
 #pragma pack() // reset alignment to default value
 
@@ -69,20 +75,24 @@ enum {
    cDataTypeTDC                = 2,
    cDataTypeTrg                = 3,
    cDataTypeScaler             = 4,
-   cDataTypeDummy              = 5
+   cDataTypeDummy              = 5,
+   cDataTypeTCB                = 8
 };
 
 enum {
-   cFlagDRSPLLLock             = 0,
-   cFlagLMKPLLLock             = 1,
-   cFlagEndOfEvent             = 4,
-   cFlagStartOfEvent           = 5,
-   cFlagEndOfType              = 6,
-   cFlagStartOfType            = 7,
-   cFlagNewTriggerInfo         = 8,
-   cFlagTriggerInfoParityError = 9,
-   cFlagZeroSuppEnable         = 12,
-   cFalgZeroSuppInhibit        = 13
+   cWDAQFlagEndOfEvent             = 0,
+   cWDAQFlagStartOfEvent           = 1,
+   cWDAQFlagEndOfType              = 2,
+   cWDAQFlagStartOfType            = 3
+};
+
+enum {
+   cWDFlagDRSPLLLock             = 0,
+   cWDFlagLMKPLLLock             = 1,
+   cWDFlagNewTriggerInfo         = 2,
+   cWDFlagTriggerInfoParityError = 3,
+   cWDFlagZeroSuppEnable         = 4,
+   cWDFalgZeroSuppInhibit        = 5
 };
 
 //--------------------------------------------------------------------
@@ -204,7 +214,7 @@ public:
    
    WDEvent(int boardId) { mBoardId = boardId; mValid = false; };
 
-   void             SetEventHeaderInfo(WD2_FRAME_HEADER *);
+   void             SetEventHeaderInfo(WDAQ_FRAME_HEADER *, WD_FRAME_HEADER *);
 };
 
 //--------------------------------------------------------------------
