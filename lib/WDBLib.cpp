@@ -3043,6 +3043,10 @@ void WP::DoVoltageCalibrationStep()
       // set holdoff to meet target DAQ rate
       b->SetTriggerHoldoff(30);
       
+      // disable external trigger
+      b->SetTriggerTypeSel(1);
+      b->SetTrgPtrnEn(0);
+
       int n = calibProg.nIter1;
       n = std::max(n, calibProg.nIter2);
       n = std::max(n, calibProg.nIter3);
@@ -3675,6 +3679,10 @@ void WP::DoTimeCalibrationStep()
 
       // set holdoff to minimum
       b->SetTriggerHoldoff(0);
+
+      // disable external trigger
+      b->SetTriggerTypeSel(1);
+      b->SetTrgPtrnEn(0);
 
       calibProg.phase = 0;
       b->SetSineWaveDelay(calibProg.phase);
