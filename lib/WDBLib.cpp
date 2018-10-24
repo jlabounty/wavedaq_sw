@@ -3496,13 +3496,17 @@ void WP::CalibrateLocal(WDEvent *event, WDB *b)
          // average over all 1024 dU
          double sum = 0;
          double cellDV[1024];
+         int    sum_n = 0;
          
          for (int i=0 ; i<1024 ; i++) {
             cellDV[i] = calibProg.ave->RobustAverage(0, ch, i);
-            sum += cellDV[i];
+            if (cellDV[i] > 0) {
+               sum += cellDV[i];
+               sum_n++;
+            }
          }
          
-         sum /= 1024;
+         sum /= sum_n;
          double dtCell = 1.0/b->GetDrsSampleFreqMhz()*1E-6;
          
          // here comes the central calculation, dT = dV/average * dtCell
