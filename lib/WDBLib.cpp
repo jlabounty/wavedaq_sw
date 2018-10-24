@@ -3044,7 +3044,7 @@ void WP::DoVoltageCalibrationStep()
       b->SetTriggerHoldoff(30);
       
       // disable external trigger
-      b->SetTriggerTypeSel(1);
+      b->SetTriggerTypeSel(0);
       b->SetTrgPtrnEn(0);
 
       int n = calibProg.nIter1;
@@ -3685,7 +3685,7 @@ void WP::DoTimeCalibrationStep()
       b->SetTriggerHoldoff(0);
 
       // disable external trigger
-      b->SetTriggerTypeSel(1);
+      b->SetTriggerTypeSel(0);
       b->SetTrgPtrnEn(0);
 
       calibProg.phase = 0;
