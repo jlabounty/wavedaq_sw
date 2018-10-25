@@ -3046,7 +3046,10 @@ void WP::DoVoltageCalibrationStep()
       // disable external trigger
       b->SetTriggerTypeSel(0);
       b->SetTrgPtrnEn(0);
-
+      
+      // select internal clock
+      b->SetDaqClkSrcSel(1);
+      
       int n = calibProg.nIter1;
       n = std::max(n, calibProg.nIter2);
       n = std::max(n, calibProg.nIter3);
@@ -3687,6 +3690,9 @@ void WP::DoTimeCalibrationStep()
       // disable external trigger
       b->SetTriggerTypeSel(0);
       b->SetTrgPtrnEn(0);
+
+      // select internal clock
+      b->SetDaqClkSrcSel(1);
 
       calibProg.phase = 0;
       b->SetSineWaveDelay(calibProg.phase);
