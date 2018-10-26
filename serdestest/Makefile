@@ -27,6 +27,7 @@ else
 FLAGS         += 
 LIBS          =  -lrt -lbsd
 endif
+FLAGS         += -D WD2_DONT_INCLUDE_REG_ACCESS_VARS
 
 FLAGS         += -I$(MSCB_DIR)/include -Iinclude -I$(WDB_DIR) -I$(TCB_DIR) -I$(FW_DIR) -I$(MXML_DIR)
 LIBS          += -lm -lutil -lpthread
