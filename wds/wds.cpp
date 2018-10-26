@@ -511,7 +511,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"name\": \"%s\",\n",                   w->GetName().c_str());
          mg_printf_http_chunk(nc, "      \"temperature\": %1.1lf,\n",            w->GetTemperatureDegree(false));
          mg_printf_http_chunk(nc, "      \"sysBusy\": %s,\n",                    w->GetSysBusy() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"wdbBusy\": %s,\n",                    w->GetWdbBusy() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"drsctrlBusy\": %s,\n",                w->GetDrsCtrlBusy() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"packagerBusy\": %s,\n",               w->GetPackagerBusy() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"hvBoardPlugged\": %s,\n",             w->GetHvBoardPlugged() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"hvBackplanePlugged\": %s,\n",         w->GetBackplanePlugged() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"pllLck\": %d,\n",                     w->GetPllLock(false));

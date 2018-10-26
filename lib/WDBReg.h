@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  13.09.2018 13:26:49
+// Created :  26.10.2018 09:31:37
 //
 
 
@@ -2673,7 +2673,7 @@ public:
 
 
 
-   ////// ------ Status Register 8 [0x0020]: PROT_VER - Vesion of the WaveDream2 protocol (Default: 0x00000005) ------ //////
+   ////// ------ Status Register 8 [0x0020]: PROT_VER - Vesion of the WaveDream2 protocol (Default: 0x00000006) ------ //////
 
    // 0x000000FF: PROTOCOL_VERSION - Version of the WaveDream2 protocol
    unsigned int GetProtocolVersion() { return BitExtractStatus(WD2_PROTOCOL_VERSION_REG, WD2_PROTOCOL_VERSION_MASK, WD2_PROTOCOL_VERSION_OFS); };
@@ -2692,23 +2692,26 @@ public:
    // 0xFFFF0000: TEMPERATURE - temperature in 0.0625 deg. C units
    unsigned int GetTemperature() { return BitExtractStatus(WD2_TEMPERATURE_REG, WD2_TEMPERATURE_MASK, WD2_TEMPERATURE_OFS); };
 
+   // 0x00000400: DRS_CONFIG_DONE - DRS configuration done
+   unsigned int GetDrsConfigDone() { return BitExtractStatus(WD2_DRS_CONFIG_DONE_REG, WD2_DRS_CONFIG_DONE_MASK, WD2_DRS_CONFIG_DONE_OFS); };
+
    // 0x00000200: FLASH_SEL - SPI Flash select from backplane (inverted = high active)
    unsigned int GetFlashSel() { return BitExtractStatus(WD2_FLASH_SEL_REG, WD2_FLASH_SEL_MASK, WD2_FLASH_SEL_OFS); };
 
    // 0x00000100: BOARD_SEL - Board select from backplane (inverted = high active)
    unsigned int GetBoardSel() { return BitExtractStatus(WD2_BOARD_SEL_REG, WD2_BOARD_SEL_MASK, WD2_BOARD_SEL_OFS); };
 
-   // 0x00000080: DRS_CONFIG_DONE - DRS configuration done
-   unsigned int GetDrsConfigDone() { return BitExtractStatus(WD2_DRS_CONFIG_DONE_REG, WD2_DRS_CONFIG_DONE_MASK, WD2_DRS_CONFIG_DONE_OFS); };
-
-   // 0x00000040: SERIAL_BUSY - "1" during serial activity like FLASH read/write
+   // 0x00000080: SERIAL_BUSY - "1" during serial activity like FLASH read/write
    unsigned int GetSerialBusy() { return BitExtractStatus(WD2_SERIAL_BUSY_REG, WD2_SERIAL_BUSY_MASK, WD2_SERIAL_BUSY_OFS); };
 
-   // 0x00000020: SYS_BUSY - Inverted busy signal from backplane (high active)
-   unsigned int GetSysBusy() { return BitExtractStatus(WD2_SYS_BUSY_REG, WD2_SYS_BUSY_MASK, WD2_SYS_BUSY_OFS); };
+   // 0x00000040: PACKAGER_BUSY - "1" while packager is not ready to process data (buffers are full or ethernet destination not configured)
+   unsigned int GetPackagerBusy() { return BitExtractStatus(WD2_PACKAGER_BUSY_REG, WD2_PACKAGER_BUSY_MASK, WD2_PACKAGER_BUSY_OFS); };
 
-   // 0x00000010: WDB_BUSY - "1" while domino wave running or readout in progress
-   unsigned int GetWdbBusy() { return BitExtractStatus(WD2_WDB_BUSY_REG, WD2_WDB_BUSY_MASK, WD2_WDB_BUSY_OFS); };
+   // 0x00000020: DRS_CTRL_BUSY - "1" while domino wave running or readout in progress
+   unsigned int GetDrsCtrlBusy() { return BitExtractStatus(WD2_DRS_CTRL_BUSY_REG, WD2_DRS_CTRL_BUSY_MASK, WD2_DRS_CTRL_BUSY_OFS); };
+
+   // 0x00000010: SYS_BUSY - Inverted busy signal from backplane (high active, not available until hardware revision G)
+   unsigned int GetSysBusy() { return BitExtractStatus(WD2_SYS_BUSY_REG, WD2_SYS_BUSY_MASK, WD2_SYS_BUSY_OFS); };
 
    // 0x00000002: HV_BOARD_PLUGGED - HV board is currently plugged (1) or unplugged (0)
    unsigned int GetHvBoardPlugged() { return BitExtractStatus(WD2_HV_BOARD_PLUGGED_REG, WD2_HV_BOARD_PLUGGED_MASK, WD2_HV_BOARD_PLUGGED_OFS); };
