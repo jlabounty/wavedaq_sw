@@ -60,6 +60,7 @@ a:focus { color:#0000FF; text-decoration:underline }
 }
 
 #controls {
+   overflow: scroll;
    position: absolute;
    top: 0;
    left: 0;
@@ -71,6 +72,7 @@ a:focus { color:#0000FF; text-decoration:underline }
 }
 
 #config {
+   overflow: scroll;
    border-left: 1px solid black;
    position: absolute;
    top: 0;
@@ -208,9 +210,9 @@ input[type=text] {
 
 .progressBar {
    border: 1px solid #A0A0A0;
-   border-radius: 10px;
+   border-radius: 5px;
    width: 270px;
-   height: 10px;
+   height: 5px;
    background-color: #E0E0E0;
    margin-left: 6px;
    margin-top: 5px;

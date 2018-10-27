@@ -1116,7 +1116,8 @@ function resize()
 
       // config full visible (configSlider = 1), hidden (configSlider = 0)
       ctls.style.left = (document.documentElement.clientWidth - ctls.offsetWidth -
-      config.offsetWidth * config.slider + "px");
+         config.offsetWidth * config.slider + "px");
+      ctls.style.height = document.documentElement.clientHeight + "px";
 
       config.style.left = (document.documentElement.clientWidth -
          config.offsetWidth * config.slider) + "px";
