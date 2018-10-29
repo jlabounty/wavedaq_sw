@@ -69,7 +69,9 @@ typedef struct {
 
 #pragma pack() // reset alignment to default value
 
-enum {
+#define WD_N_DATA_TYPES 9
+
+enum Type {
    cDataTypeDRS                  = 0,
    cDataTypeADC                  = 1,
    cDataTypeTDC                  = 2,
@@ -77,6 +79,16 @@ enum {
    cDataTypeScaler               = 4,
    cDataTypeDummy                = 5,
    cDataTypeTCB                  = 8
+};
+
+static const Type DataTypeAll[] = {
+   cDataTypeDRS,
+   cDataTypeADC,
+   cDataTypeTDC,
+   cDataTypeTrg,
+   cDataTypeScaler,
+   cDataTypeDummy,
+   cDataTypeTCB
 };
 
 enum {
@@ -181,7 +193,8 @@ typedef struct {
 class WDEvent {
 public:
    
-   bool             mValid;
+   bool             mEventValid;
+   std::map<int,bool> mTypeValid;
    unsigned short   mBoardId;
    unsigned short   mCrateId;
    unsigned short   mSlotId;
@@ -193,31 +206,29 @@ public:
    int              mTriggerCellDrs1;
    unsigned short   mTriggerType;
    float            mTemperature;
-   bool             mWFTypeADC;
 
-   bool             mWfDRSValid;
+   int              mDRSChannelPresent[WD_N_CHANNELS];
    float            mWfUDRS[WD_N_CHANNELS][1024];
    float            mWfTDRS[WD_N_CHANNELS][1024];
 
-   bool             mWfADCValid;
+   int              mADCChannelPresent[WD_N_CHANNELS];
    float            mWfUADC[WD_N_CHANNELS][2048];
    float            mWfTADC[WD_N_CHANNELS][2048];
 
-   bool             mWfTDCValid;
    unsigned char    mWfTDC[WD_N_CHANNELS][512];
    
-   bool             mTrgValid;
    unsigned char    mTrgData[4096];
 
-   bool             mScalerValid;
    unsigned long    mScaler[18];
 
    bool             mVCalibrated;
    bool             mTCalibrated;
    
-   WDEvent(int boardId) { mBoardId = boardId; mValid = false; };
+   WDEvent(int boardId) { mBoardId = boardId; };
 
-   void             SetEventHeaderInfo(WDAQ_FRAME_HEADER *, WD_FRAME_HEADER *);
+   void             ClearEvent();
+   void             SetEventHeaderInfo(WDAQ_FRAME_HEADER *);
+   void             SetWDEventHeaderInfo(WDAQ_FRAME_HEADER *, WD_FRAME_HEADER *);
 };
 
 //--------------------------------------------------------------------
@@ -271,42 +282,40 @@ public:
 
 //--------------------------------------------------------------------
 
+class WDEventTypeRequest {
+public:
+   int              mRequested;
+   bool             mValid;
+   bool             mBOTReceived;
+   bool             mEOTReceived;
+   unsigned short   mLastPacket;
+   int              mDroppedPackets;
+
+   WDEventTypeRequest() {
+      mRequested = false;
+      mValid = false;
+      mBOTReceived = false;
+      mEOTReceived = false;
+      mLastPacket = 0;
+      mDroppedPackets = 0;
+   }
+};
+
 class WDEventRequest {
+public:
    unsigned short   mBoardId;
    bool             mBoardRequested;
-   int              mRequestedSegments;
-   bool             mWfValid[WD_N_CHANNELS][3];
-   unsigned int     mChannelMask;
-   int              mWfType;
-   int              mDrsTriggerCell[WD_N_CHANNELS];
- 
-public:
-   WDEventRequest(int boardId, unsigned int mask = 0xFFFF, int segments = 2, int type = cDataTypeDRS) {
-      mBoardId = boardId;
-      mBoardRequested = true;
-      mRequestedSegments = segments;
-      for (int i=0 ; i<WD_N_CHANNELS ; i++) {
-         mWfValid[i][0] = false;
-         mWfValid[i][1] = false;
-         mWfValid[i][2] = false;
-         mDrsTriggerCell[i] = -1;
-      }
-      mChannelMask = mask;
-      mWfType = type;
-   } ;
+   std::map<int, WDEventTypeRequest *> mRequest;
+
+   WDEventRequest(int boardId);
    
    int              GetBoardId() { return mBoardId; }
-   void             SetRequested(bool flag) { mBoardRequested = flag; }
-   void             SetRequestedSegments(int s) { mRequestedSegments = s; }
-   bool             IsRequested() { return mBoardRequested; }
-   void             SetWfValid(int channel, int segment, bool v) { if (segment<3) mWfValid[channel][segment] = v; }
-   void             SetDrsTriggerCell(int ch, unsigned int c) { mDrsTriggerCell[ch] = c; }
-   int              GetDrsTriggerCell(int ch) { return mDrsTriggerCell[ch]; }
-   void             SetMask(unsigned int mask) { mChannelMask = mask; }
-   unsigned int     GetMask() { return mChannelMask; }
-   void             SetWfType(int type) { mWfType = type; }
-   int              GetWfType() { return mWfType; }
-   bool             IsWfValid();
+   void             SetBoardRequested(bool flag) { mBoardRequested = flag; }
+   bool             IsBoardRequested() { return mBoardRequested; }
+   void             RequestEventType(int type, bool flag);
+   void             ClearRequest();
+   void             ProcessPacket(WDAQ_FRAME_HEADER *pdaqh);
+   bool             IsEventValid();
 };
 
 //--------------------------------------------------------------------
@@ -357,9 +366,9 @@ class WP {
       return std::thread([=] { Collector(); });
    };
    
-   std::vector<WDEventRequest *> mEventRequest;
-   std::vector<WDEvent *> mEvent;
-   std::vector<WDEvent *> mEventLast;
+   std::map<int, WDEventRequest *> mEventRequest;
+   std::map<int, WDEvent *> mEvent;
+   std::map<int, WDEvent *> mEventLast;
 
    std::mutex        mEventMutex;
    std::mutex        mEventAccessMutex;
@@ -368,9 +377,10 @@ class WP {
    bool              mEventEmpty;
 
    unsigned int      usSince(std::chrono::time_point<std::chrono::high_resolution_clock> start);
-   void              InvalidateAllWf();
+   void              StartNewEvent();
+   void              LogEvent(WDAQ_FRAME_HEADER *pdaqh, WD_FRAME_HEADER   *ph);
    int               ReceiveWfPacket();
-   bool              AllPacketsReceived();
+   bool              IsEventValid();
    void              UnrotateWaveforms();
    void              RemoveSpikes(int tc, float wf[][1024]);
    std::chrono::time_point<std::chrono::high_resolution_clock> mEventStartTime;
@@ -391,9 +401,9 @@ class WP {
    float             mOldRange;
    int               mOldMaskDrs;
    int               mOldMaskAdc;
-
    int               mOldReadoutSrc;
-   bool              mOldTimingReference;
+   int               mOldFeMux;
+   int               mOldTimingReference;
    
    void              AnalyzePeriod(WDEvent *, WDB *);
    void              AnalyzeTimeOffset(WDEvent *, WDB *);
@@ -450,9 +460,8 @@ public:
 
    // functions
    void RequestAllBoards();
-   void RequestBoard(WDB* b);
-   void SetEventRequestMasks();
-   void SetEventRequestType();
+   void RequestSingleBoard(WDB* b);
+   void RequestTypes(WDB *b);
    void SetRequestedSegments(int s);
    WDB* GetBoard(int board_id);
    unsigned int GetEventRequestMask(int board_id);
@@ -463,7 +472,7 @@ public:
    bool RequestEvent(WDB* b, int timeout, WDEvent& event);
    
    void CalibrateWaveforms(WDEvent* event);
-   void CalibrateWaveforms(std::vector<WDEvent *> event);
+   void CalibrateWaveforms(std::map<int, WDEvent *> event);
 
    void StartCalibrationVoltage(int b) {
       calibProg.mode = cCmVoltage;
@@ -699,7 +708,6 @@ public:
    
    unsigned int GetChnTxEn() { return mChnTxEn; };
    void SetChnTxEn(int mask) { mChnTxEn = mask; };
-   // int GetTimingReferenceSignal() { return mTimingReferenceSignal; }
    
    void SetTriggerHoldoff(int holdoff) { mTriggerHoldoff = holdoff; }
    int GetTriggerHoldoff() { return mTriggerHoldoff; }

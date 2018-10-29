@@ -1689,40 +1689,96 @@ bool WDB::LoadTimeCalibration(int freq, std::string path)
 
 //====================================================================
 
-void WDEvent::SetEventHeaderInfo(WDAQ_FRAME_HEADER *pdaqh, WD_FRAME_HEADER *ph)
+void WDEvent::ClearEvent()
 {
-   int channel = ph->channel_info & 0x1F;
-   mValid   = true;
+   mEventValid = false;
+   for (auto &v: mTypeValid)
+      v.second = false;
+   mVCalibrated = false;
+   mTCalibrated = false;
+   for (int i=0 ; i<WD_N_CHANNELS ; i++) {
+      mDRSChannelPresent[i] = false;
+      mADCChannelPresent[i] = false;
+   }
+}
+
+void WDEvent::SetEventHeaderInfo(WDAQ_FRAME_HEADER *pdaqh)
+{
    mBoardId = pdaqh->serial_number;
    mCrateId = pdaqh->crate_id;
    mSlotId  = pdaqh->slot_id;
+}
+
+void WDEvent::SetWDEventHeaderInfo(WDAQ_FRAME_HEADER *pdaqh, WD_FRAME_HEADER *ph)
+{
+   int channel = ph->channel_info & 0x1F;
+   if (pdaqh->data_type == cDataTypeDRS)
+      mDRSChannelPresent[channel] = true;
+   if (pdaqh->data_type == cDataTypeADC)
+      mADCChannelPresent[channel] = true;
+   
    mEventNumber = ph->event_number;
    mSamplingFrequency = (unsigned int)(ph->sampling_frequency / 1000.0 + 0.5);  // convert kHz to MHz
    mTriggerNumber = ph->trigger_information[0] | (ph->trigger_information[1] << 8); // ## to be changed
    mTriggerCell[channel] = ph->drs_trigger_cell;
-   if (channel < 8 || channel == 16)
-      mTriggerCellDrs0 = ph->drs_trigger_cell;
-   else
-      mTriggerCellDrs1 = ph->drs_trigger_cell;
    mTriggerType = ph->trigger_information[2] | (ph->trigger_information[3] << 8);   // ## to be changed
    mTemperature = std::round(ph->temperature*0.0625 * 10 + 0.5) / 10.0f;
-   mWFTypeADC = (pdaqh->data_type == cDataTypeADC);
 }
 
 //--------------------------------------------------------------------
 
-bool WDEventRequest::IsWfValid()
+WDEventRequest::WDEventRequest(int boardId)
 {
-   for (int i=0 ; i<WD_N_CHANNELS ; i++)
-      if (mChannelMask & (1 << i)) {
-         if (mRequestedSegments == 2) {
-            if (!mWfValid[i][0] || !mWfValid[i][1])
-               return false;
-         } else if (mRequestedSegments == 3) {
-            if (!mWfValid[i][0] || !mWfValid[i][1] || !mWfValid[i][2])
-               return false;
-         }
+   mBoardId = boardId;
+   mBoardRequested = false;
+}
+
+void WDEventRequest::RequestEventType(int type, bool flag)
+{
+   mRequest[type]->mRequested = flag;
+}
+
+void WDEventRequest::ClearRequest()
+{
+   for (auto const& r : mRequest) {
+      r.second->mValid          = false;
+      r.second->mBOTReceived    = false;
+      r.second->mEOTReceived    = false;
+      r.second->mLastPacket     = 0;
+      r.second->mDroppedPackets = 0;
+   }
+}
+
+void WDEventRequest::ProcessPacket(WDAQ_FRAME_HEADER *pdaqh)
+{
+   // on first packet, set BOT
+   if (pdaqh->wdaq_flags & (1 << cWDAQFlagStartOfType)) {
+      mRequest[pdaqh->data_type]->mBOTReceived = true;
+   } else {
+      // check if any packets have been dropped
+      if (pdaqh->packet_number != mRequest[pdaqh->data_type]->mLastPacket+1) {
+         mRequest[pdaqh->data_type]->mDroppedPackets +=
+         (pdaqh->packet_number - mRequest[pdaqh->data_type]->mLastPacket)+1;
       }
+   }
+
+   // member current packet number
+   mRequest[pdaqh->data_type]->mLastPacket = pdaqh->packet_number;
+
+   if (pdaqh->wdaq_flags & (1 << cWDAQFlagEndOfType)) {
+      mRequest[pdaqh->data_type]->mEOTReceived = true;
+      if (mRequest[pdaqh->data_type]->mBOTReceived &&
+          mRequest[pdaqh->data_type]->mDroppedPackets == 0)
+         mRequest[pdaqh->data_type]->mValid = true;
+   }
+}
+
+bool WDEventRequest::IsEventValid()
+{
+   for (auto const& r : mRequest) {
+      if (r.second->mRequested &&!r.second->mValid)
+         return false;
+   }
    return true;
 }
 
@@ -1779,13 +1835,17 @@ WP::WP(std::vector<WDB *> w, int verbose, std::string logfile, bool demo)
    }
 
    // allocated event buffer and requests for all WDB
+   for (unsigned int i=0 ; i<mWdb.size() ; i++) {
+      mEventRequest[mWdb[i]->GetSerialNumber()] = new WDEventRequest(mWdb[i]->GetSerialNumber());
+      for (auto t: DataTypeAll)
+         if (mEventRequest[mWdb[i]->GetSerialNumber()]->mRequest[t] == NULL)
+            mEventRequest[mWdb[i]->GetSerialNumber()]->mRequest[t] = new WDEventTypeRequest();
+   }
    for (unsigned int i=0 ; i<mWdb.size() ; i++)
-      mEventRequest.push_back(new WDEventRequest(mWdb[i]->GetSerialNumber()));
+      mEvent[mWdb[i]->GetSerialNumber()] = new WDEvent(mWdb[i]->GetSerialNumber());
    for (unsigned int i=0 ; i<mWdb.size() ; i++)
-      mEvent.push_back(new WDEvent(mWdb[i]->GetSerialNumber()));
-   for (unsigned int i=0 ; i<mWdb.size() ; i++)
-      mEventLast.push_back(new WDEvent(mWdb[i]->GetSerialNumber()));
-   
+      mEventLast[mWdb[i]->GetSerialNumber()] = new WDEvent(mWdb[i]->GetSerialNumber());
+
    // initialize event flags
    mEventEmpty = true;
    mEventNew = false;
@@ -1798,73 +1858,41 @@ WP::WP(std::vector<WDB *> w, int verbose, std::string logfile, bool demo)
 
 //--------------------------------------------------------------------
 
-void WP::SetEventRequestMasks()
-{
-   // set request mask from tx enable
-   int i=0;
-   for (auto &b: mWdb) {
-      if (b->GetDrsChTxEn() > 0)
-         mEventRequest[i++]->SetMask(b->GetDrsChTxEn());
-      else
-         mEventRequest[i++]->SetMask(b->GetAdcChTxEn());
-   }
-}
-
-void WP::SetRequestedSegments(int s)
-{
-   for (auto &r: mEventRequest)
-      r->SetRequestedSegments(s);
-}
-
-void WP::SetEventRequestType()
-{
-   // set request mask from tx enable
-   int i=0;
-   for (auto &b: mWdb) {
-      if (b->GetDrsChTxEn() > 0)
-         mEventRequest[i++]->SetWfType(cDataTypeDRS);
-      else
-         mEventRequest[i++]->SetWfType(cDataTypeADC);
-   }
-}
-
-unsigned int WP::GetEventRequestMask(int board_id)
-{
-   for (auto &r: mEventRequest)
-      if (r->GetBoardId() == board_id)
-         return r->GetMask();
-   return 0;
-}
-
 WDB* WP::GetBoard(int board_id)
 {
    return mWdbMap.at(board_id);
 }
 
-void WP::RequestBoard(WDB *b)
+void WP::RequestSingleBoard(WDB *b)
 {
-   for (auto &r: mEventRequest) {
-      r->SetRequested(r->GetBoardId() == (int)b->GetSerialNumber());
-   }
-   
-   SetEventRequestMasks();
-   SetEventRequestType();
+   for (auto &r: mEventRequest)
+      r.second->mBoardRequested = false;
+   mEventRequest[(int)b->GetSerialNumber()]->mBoardRequested = true;
+
+   RequestTypes(b);
 }
 
 void WP::RequestAllBoards()
 {
-   for (auto &r: mEventRequest)
-      r->SetRequested(true);
+   for (auto &b: mWdb)
+      RequestSingleBoard(b);
+}
 
-   SetEventRequestMasks();
-   SetEventRequestType();
+void WP::RequestTypes(WDB *b)
+{
+   // set active data types in event request
+   mEventRequest[b->GetSerialNumber()]->mRequest[cDataTypeDRS]->mRequested    = (b->GetDrsChTxEn() > 0);
+   mEventRequest[b->GetSerialNumber()]->mRequest[cDataTypeADC]->mRequested    = (b->GetAdcChTxEn() > 0);
+   mEventRequest[b->GetSerialNumber()]->mRequest[cDataTypeTDC]->mRequested    = (b->GetTdcChTxEn() > 0);
+   mEventRequest[b->GetSerialNumber()]->mRequest[cDataTypeTrg]->mRequested    = b->GetTrgTxEn();
+   mEventRequest[b->GetSerialNumber()]->mRequest[cDataTypeScaler]->mRequested = b->GetSclTxEn();
 }
 
 //--------------------------------------------------------------------
 
 bool WP::RequestEvent(WDB *b, int timeout, WDEvent &event)
 {
-   RequestBoard(b);
+   RequestSingleBoard(b);
    b->RequestEvent();
    
    return GetLastEvent(b, timeout, event);
@@ -1898,9 +1926,7 @@ bool WP::GetLastEvent(WDB *b, int timeout, WDEvent& event)
    {
       std::lock_guard<std::mutex> lock(mEventAccessMutex);
 
-      for (auto e: mEventLast)
-         if (e->mBoardId == b->GetSerialNumber())
-            event = *e;
+      event = *mEventLast[b->GetSerialNumber()];
       mEventNew = false;
       return true;
    }
@@ -1933,11 +1959,11 @@ bool WP::GetLastEvent(int timeout, std::vector<WDEvent *> event)
       
       std::vector<WDEvent*>::iterator ed = event.begin();
       for (auto es: mEventLast) {
-         if (es->mValid){
-            **(ed) = *es;
+         if (es.second->mEventValid){
+            **(ed) = *es.second;
             copied++;
          } else {
-            (*ed)->mValid = false;
+            (*ed)->mEventValid = false;
          }
          ed++;
       }
@@ -1953,18 +1979,14 @@ bool WP::GetLastEvent(int timeout, std::vector<WDEvent *> event)
 
 //--------------------------------------------------------------------
 
-void WP::InvalidateAllWf()
+void WP::StartNewEvent()
 {
    for (auto &er: mEventRequest) {
-      for (int i=0 ; i<WD_N_CHANNELS ; i++) {
-         er->SetWfValid(i, 0, false);
-         er->SetWfValid(i, 1, false);
-         er->SetWfValid(i, 2, false);
-         er->SetDrsTriggerCell(i, -1);
-      }
+      er.second->ClearRequest();
    }
+
    for (auto &e: mEvent) {
-      e->mValid = false;
+      e.second->ClearEvent();
    }
    
    mPacketsReceived = 0;
@@ -1973,17 +1995,102 @@ void WP::InvalidateAllWf()
 
 //--------------------------------------------------------------------
 
-bool WP::AllPacketsReceived()
+bool WP::IsEventValid()
 {
-   auto it = mEventRequest.begin();
-   while (it != mEventRequest.end()) {
-      if ((*it)->IsRequested()  && !(*it)->IsWfValid())
-         break;
-      it++;
+   for (auto &er: mEventRequest) {
+      if (!er.second->IsEventValid())
+         return false;
    }
-   if (it == mEventRequest.end())
-      return true;
-   return false;
+
+   return true;
+}
+
+void WP::LogEvent(WDAQ_FRAME_HEADER *pdaqh, WD_FRAME_HEADER   *ph)
+{
+   // start event timer for debugging
+   if (mPacketsReceived == 1)
+      mEventStartTime = std::chrono::high_resolution_clock::now();
+
+   if (mLogfile != "" || mVerbose >= 3) {
+      std::ofstream f;
+      char line[256];
+      std::string flags;
+      f.open(mLogfile, std::ios_base::app);
+      
+      // new line at start of event
+      if (pdaqh->wdaq_flags & (1<<cWDAQFlagStartOfEvent)) {
+         f << std::endl;
+         if (mVerbose >= 3)
+            std::cout << std::endl;
+      }
+      
+      if (pdaqh->wdaq_flags & (1<<cWDAQFlagEndOfEvent))
+         flags += "EEV,";
+      if (pdaqh->wdaq_flags & (1<<cWDAQFlagStartOfEvent))
+         flags += "SEV,";
+      if (pdaqh->wdaq_flags & (1<<cWDAQFlagEndOfType))
+         flags += "ETY,";
+      if (pdaqh->wdaq_flags & (1<<cWDAQFlagStartOfType))
+         flags += "STY,";
+      
+      if (flags.back() == ',')
+         flags.pop_back();
+      
+      snprintf(line, sizeof(line), "%06dus #%04d from WD%03d, P#=%5d T=%s QF=%15s PL=%4d OF=%5d, ",
+              usSince(mEventStartTime),
+              mPacketsReceived-1,
+              pdaqh->serial_number,
+              pdaqh->packet_number,
+              pdaqh->data_type == cDataTypeDRS ? "DRS" :
+              pdaqh->data_type == cDataTypeADC ? "ADC" :
+              pdaqh->data_type == cDataTypeTDC ? "TDC" :
+              pdaqh->data_type == cDataTypeTrg ? "TRG" :
+              pdaqh->data_type == cDataTypeScaler ? "SLR" :
+              pdaqh->data_type == cDataTypeDummy ? "DMY" :
+              pdaqh->data_type == cDataTypeTCB ? "TCB" : "UNK",
+              flags.c_str(),
+              pdaqh->payload_length,
+              pdaqh->data_chunk_offset
+              );
+      
+      f << line;
+      
+      if (mVerbose >= 3)
+         std::cout << line;
+      
+      // log event type specific data
+      if (pdaqh->data_type == cDataTypeDRS || pdaqh->data_type == cDataTypeADC) {
+         flags.clear();
+         if (ph->wd_flags & (1<<cWDFlagDRSPLLLock))
+            flags += "DLK,";
+         if (ph->wd_flags & (1<<cWDFlagLMKPLLLock))
+            flags += "LLK,";
+         if (ph->wd_flags & (1<<cWDFlagNewTriggerInfo))
+            flags += "TIF,";
+         if (ph->wd_flags & (1<<cWDFlagTriggerInfoParityError))
+            flags += "TPE,";
+         if (ph->wd_flags & (1<<cWDFlagZeroSuppEnable))
+            flags += "ZDE,";
+         if (ph->wd_flags & (1<<cWDFalgZeroSuppInhibit))
+            flags += "ZDE,";
+         if (flags.back() == ',')
+            flags.pop_back();
+         
+         snprintf(line, sizeof(line), "WF=%7s EN=%5d A/C=%d/%02d TC=%04d T=%1.1lf\n",
+                 flags.c_str(),
+                 ph->event_number,
+                 (ph->channel_info >> 7) & 0x1,
+                 (ph->channel_info) & 0x1f,
+                 ph->drs_trigger_cell,
+                 ph->temperature*0.0625);
+      } else
+         snprintf(line, sizeof(line), "\n");
+      
+      f << line;
+      
+      if (mVerbose >= 3)
+         std::cout << line;
+   }
 }
 
 //--------------------------------------------------------------------
@@ -1993,10 +2100,6 @@ int WP::ReceiveWfPacket()
    fd_set readfds;
    struct timeval timeout;
    int status;
-   
-   // start event timer for debugging
-   if (mCurrentEvent == -1)
-      mEventStartTime = std::chrono::high_resolution_clock::now();
    
    FD_ZERO(&readfds);
    FD_SET(WP::gDataSocket, &readfds);
@@ -2027,11 +2130,12 @@ int WP::ReceiveWfPacket()
    if (n < (int)sizeof(WDAQ_FRAME_HEADER))
       return 0;
    
+   mPacketsReceived++;
+
    WDAQ_FRAME_HEADER *pdaqh = (WDAQ_FRAME_HEADER *)buffer;
    WD_FRAME_HEADER   *ph    = (WD_FRAME_HEADER *)(((WDAQ_FRAME_HEADER *)buffer)+1);
-   WDEventRequest *event_request = nullptr;
-   int channel_adc = 0;
-   int channel_number = 0;
+   WDEventRequest    *event_request = nullptr;
+   WDEvent           *event = nullptr;
 
    // check protocol version
    if (pdaqh->protocol_version > WD2_UDP_PROTOCOL_VERSION) {
@@ -2052,8 +2156,6 @@ int WP::ReceiveWfPacket()
 
    // correct endianness of WD header data
    if (pdaqh->data_type == cDataTypeDRS || pdaqh->data_type == cDataTypeADC) {
-      channel_adc                        = (ph->channel_info >> 7) & 0x1;
-      channel_number                     = (ph->channel_info) & 0x1f;
       ph->samples_per_event_per_channel  = SWAP_UINT16(ph->samples_per_event_per_channel);
       ph->sampling_frequency             = SWAP_UINT32(ph->sampling_frequency);
       ph->zero_suppression_mask          = SWAP_UINT16(ph->zero_suppression_mask);
@@ -2066,103 +2168,13 @@ int WP::ReceiveWfPacket()
       ph->frontend_settings              = SWAP_UINT16(ph->frontend_settings);
    }
 
-   mPacketsReceived++;
-   
    // log general event header
-   if (mLogfile != "" || mVerbose >= 3) {
-      std::ofstream f;
-      char line[256];
-      std::string flags;
-      f.open(mLogfile, std::ios_base::app);
-
-      // new line at start of event
-      if (pdaqh->wdaq_flags & (1<<cWDAQFlagStartOfEvent)) {
-         f << std::endl;
-         if (mVerbose >= 3)
-            std::cout << std::endl;
-      }
-
-      if (pdaqh->wdaq_flags & (1<<cWDAQFlagEndOfEvent))
-         flags += "EEV,";
-      if (pdaqh->wdaq_flags & (1<<cWDAQFlagStartOfEvent))
-         flags += "SEV,";
-      if (pdaqh->wdaq_flags & (1<<cWDAQFlagEndOfType))
-         flags += "ETY,";
-      if (pdaqh->wdaq_flags & (1<<cWDAQFlagStartOfType))
-         flags += "STY,";
-      
-      if (flags.back() == ',')
-         flags.pop_back();
-      
-      sprintf(line, "%06dus #%04d from WD%03d, T=%s QF=%15s PL=%4d OF=%5d, ",
-              usSince(mEventStartTime),
-              mPacketsReceived-1,
-              pdaqh->serial_number,
-              pdaqh->data_type == cDataTypeDRS ? "DRS" :
-              pdaqh->data_type == cDataTypeADC ? "ADC" :
-              pdaqh->data_type == cDataTypeTDC ? "TDC" :
-              pdaqh->data_type == cDataTypeTrg ? "TRG" :
-              pdaqh->data_type == cDataTypeScaler ? "SLR" :
-              pdaqh->data_type == cDataTypeDummy ? "DMY" :
-              pdaqh->data_type == cDataTypeTCB ? "TCB" : "UNK",
-              flags.c_str(),
-              pdaqh->payload_length,
-              pdaqh->data_chunk_offset
-              );
-      
-      f << line;
-      
-      if (mVerbose >= 3)
-         std::cout << line;
-   }
-   
-   // log event type specific data
-   if (mLogfile != "" || mVerbose >= 3) {
-      std::ofstream f;
-      char line[256];
-      std::string flags;
-      f.open(mLogfile, std::ios_base::app);
-      
-      if (pdaqh->data_type == cDataTypeDRS || pdaqh->data_type == cDataTypeADC) {
-         
-         if (ph->wd_flags & (1<<cWDFlagDRSPLLLock))
-            flags += "DLK,";
-         if (ph->wd_flags & (1<<cWDFlagLMKPLLLock))
-            flags += "LLK,";
-         if (ph->wd_flags & (1<<cWDFlagNewTriggerInfo))
-            flags += "TIF,";
-         if (ph->wd_flags & (1<<cWDFlagTriggerInfoParityError))
-            flags += "TPE,";
-         if (ph->wd_flags & (1<<cWDFlagZeroSuppEnable))
-            flags += "ZDE,";
-         if (ph->wd_flags & (1<<cWDFalgZeroSuppInhibit))
-            flags += "ZDE,";
-         if (flags.back() == ',')
-            flags.pop_back();
-         
-         sprintf(line, "WF=%7s EN=%5d A/C=%d/%02d TC=%04d T=%1.1lf\n",
-                 flags.c_str(),
-                 ph->event_number,
-                 channel_adc,
-                 channel_number,
-                 ph->drs_trigger_cell,
-                 ph->temperature*0.0625);
-      } else
-         sprintf(line, "\n");
-
-      f << line;
-      
-      if (mVerbose >= 3)
-         std::cout << line;
-   }
+   LogEvent(pdaqh, ph);
    
    // check that we have a request for that board
-   for (auto r: mEventRequest)
-      if (r->GetBoardId() == pdaqh->serial_number) {
-         event_request = r;
-         break;
-      }
-   if (!event_request) {
+   if (mEventRequest.count(pdaqh->serial_number) > 0) {
+      event_request = mEventRequest[pdaqh->serial_number];
+   } else {
       if (mVerbose)
          std::cerr << "Received unexpected packet from board #" << pdaqh->serial_number << std::endl;
       if (mLogfile != "") {
@@ -2173,27 +2185,60 @@ int WP::ReceiveWfPacket()
       return 0;
    }
 
+   // find event belonging to this baord
+   if (mEvent.find(pdaqh->serial_number) == mEvent.end()) {
+      std::cerr << "Received unexpected packet from board #" << pdaqh->serial_number << std::endl;
+      return 0;
+   }
+   event = mEvent[pdaqh->serial_number];
+
+   // obtain general event header from packet
+   event->SetEventHeaderInfo(pdaqh);
+
+   // mark valid package received
+   event_request->ProcessPacket(pdaqh);
+   
+   // copy valid flags to event
+   event->mTypeValid[pdaqh->data_type] = event_request->mRequest[pdaqh->data_type]->mValid;
+   
+   // mark event valid if all requested types have been received
+   if (event_request->IsEventValid())
+      event->mEventValid = true;
+   
+   // decode DRS waveform data ----------
    if (pdaqh->data_type == cDataTypeDRS) {
       
-      // derive drs_trigger_cell
-      if (event_request->GetDrsTriggerCell(channel_number) == -1)
-         event_request->SetDrsTriggerCell(channel_number, ph->drs_trigger_cell);
+      assert(pdaqh->payload_length % 3 == 0);
+      assert(pdaqh->data_chunk_offset % 3 == 0);
+      int numberBins = (int) pdaqh->payload_length / 1.5;
+      int firstBin = pdaqh->data_chunk_offset / 1.5;
+      int channel_number = (ph->channel_info) & 0x1f;
       
-      // print warning if inconsistent trigger cells are found
-      if (channel_number < 8 || channel_number == 16) {
-         for (int i=0 ; i<8 ; i++)
-            if (event_request->GetDrsTriggerCell(i) != -1 && event_request->GetDrsTriggerCell(i) != ph->drs_trigger_cell)
-               std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
-      } else {
-         for (int i=8 ; i<16 ; i++)
-            if (event_request->GetDrsTriggerCell(i) != -1 && event_request->GetDrsTriggerCell(i) != ph->drs_trigger_cell)
-               std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
-      }
-   }
+      // set DRS specific part from packet
+      event->SetWDEventHeaderInfo(pdaqh, ph);
+      event->mVCalibrated = false;
+      event->mTCalibrated = false;
+      mLastEventNumber = ph->event_number;
 
-   // process WD event
-   if ((pdaqh->data_type == cDataTypeDRS || pdaqh->data_type == cDataTypeADC)) {
+      if (pdaqh->wdaq_flags & (1 << cWDAQFlagStartOfType)) {
+         event->mTriggerCellDrs0 = -1;
+         event->mTriggerCellDrs1 = -1;
+      }
       
+      // check for valid channel number
+      if (channel_number >= WD_N_CHANNELS) {
+         std::cerr << "Found invalid DRS channel " << channel_number << " for event " << ph->event_number << std::endl;
+         return 0;
+      }
+      
+      if (channel_number < 8 || channel_number == 16) {
+         if (event->mTriggerCellDrs0 == -1)
+            event->mTriggerCellDrs0 = ph->drs_trigger_cell;
+      } else {
+         if (event->mTriggerCellDrs1 == -1)
+            event->mTriggerCellDrs1 = ph->drs_trigger_cell;
+      }
+
       if (mCurrentEvent == -1)
          mCurrentEvent = ph->event_number;
       
@@ -2234,46 +2279,22 @@ int WP::ReceiveWfPacket()
             mWDDroppedEvents = (ph->event_number - mLastEventNumber);
          
          // switch to new event
-         InvalidateAllWf();
+         StartNewEvent();
+         event_request->ProcessPacket(pdaqh);
          mCurrentEvent = ph->event_number;
          mPacketsReceived = 1;
-         event_request->SetDrsTriggerCell(channel_number, ph->drs_trigger_cell);
-         
          mEventStartTime = std::chrono::high_resolution_clock::now();
       }
-      
-      assert(channel_number < WD_N_CHANNELS);
-   }
-   
-   // find event belonging to this baord
-   WDEvent *event = nullptr;
-   for (auto e: mEvent) {
-      if (e->mBoardId == pdaqh->serial_number) {
-         event = e;
-         break;
+
+      // print warning if inconsistent trigger cells are found
+      if (channel_number < 8 || channel_number == 16) {
+         if (event->mTriggerCellDrs0 != ph->drs_trigger_cell)
+            std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
+      } else {
+         if (event->mTriggerCellDrs1 != ph->drs_trigger_cell)
+            std::cerr << "Found inconsistend trigger cell for event " << ph->event_number << std::endl;
       }
-   }
-   if (!event) {
-      std::cerr << "Received unexpected packet from board #" << pdaqh->serial_number << std::endl;
-      return 0;
-   }
-   
-   event->SetEventHeaderInfo(pdaqh, ph);
-   event->mVCalibrated = false;
-   event->mTCalibrated = false;
-   mLastEventNumber = ph->event_number;
-
-   // decode DRS waveform data
-   if (pdaqh->data_type == cDataTypeDRS) {
-      assert(pdaqh->payload_length % 3 == 0);
-      assert(pdaqh->data_chunk_offset % 3 == 0);
-      int numberBins = (int) pdaqh->payload_length / 1.5;
-      int firstBin = pdaqh->data_chunk_offset / 1.5;
-      int channelSegment = firstBin / 938;
       
-      // mark valid package received
-      event_request->SetWfValid(channel_number, channelSegment, true);
-
       auto pd = (unsigned char*)(ph+1);
       for (int i=0 ; i<numberBins ; i+=2) {
          // decode two bins
@@ -2287,18 +2308,34 @@ int WP::ReceiveWfPacket()
          event->mWfUDRS[channel_number][firstBin+i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
          event->mWfUDRS[channel_number][firstBin+i+1]       = (float)data2 * (1 / 4096.0);
       }
+      
+      // mark received channel
+      event->mDRSChannelPresent[channel_number] = true;
    }
 
-   // decode ADC waveform data
+   // decode ADC waveform data ----------
    if (pdaqh->data_type == cDataTypeADC) {
+      
       assert(pdaqh->payload_length % 3 == 0);
       assert(pdaqh->data_chunk_offset % 3 == 0);
       int numberBins = (int) pdaqh->payload_length / 1.5;
       int firstBin = pdaqh->data_chunk_offset / 1.5;
-      int channelSegment = firstBin / 938;
+      int channel_number = (ph->channel_info) & 0x1f;
 
-      // mark valid package received
-      event_request->SetWfValid(channel_number, channelSegment, true);
+      // set ADC specific part from packet
+      event->SetWDEventHeaderInfo(pdaqh, ph);
+      event->mVCalibrated = false;
+      event->mTCalibrated = false;
+      mLastEventNumber = ph->event_number;
+
+      // check for valid channel number
+      if (channel_number >= WD_N_CHANNELS) {
+         std::cerr << "Found inconsistend DRS channel " << channel_number << " for event " << ph->event_number << std::endl;
+         return 0;
+      }
+
+      if (mCurrentEvent == -1)
+         mCurrentEvent = ph->event_number;
 
       auto pd = (unsigned char*)(ph+1);
       for (int i=0 ; i<numberBins ; i+=2) {
@@ -2313,22 +2350,23 @@ int WP::ReceiveWfPacket()
          event->mWfUADC[channel_number][firstBin+i]         = (float)data1 * (2 / 4096.0); // 2V ADC range with 12 bits
          event->mWfUADC[channel_number][firstBin+i+1]       = (float)data2 * (2 / 4096.0);
       }
+      
+      // mark received channel
+      event->mADCChannelPresent[channel_number] = true;
    }
 
    // decode TDC waveform data
    if (pdaqh->data_type == cDataTypeTDC) {
+      int channel_number = (ph->channel_info) & 0x1f;
+
       auto pd = (unsigned char*)(ph+1);
       memcpy(&event->mWfTDC[channel_number][pdaqh->data_chunk_offset], pd, pdaqh->payload_length);
-      
-      if (pdaqh->wdaq_flags & (1<<cWDAQFlagEndOfType))
-         event->mWfTDCValid = true; // ## change later to check all channels
    }
 
    // decode advanced trigger data
    if (pdaqh->data_type == cDataTypeTrg) {
       auto pd = (unsigned char*)(ph+1);
       memcpy(event->mTrgData+pdaqh->data_chunk_offset, pd, pdaqh->payload_length);
-      event->mTrgValid = true;
    }
    
    // decode scaler data
@@ -2337,7 +2375,6 @@ int WP::ReceiveWfPacket()
       assert(pdaqh->payload_length <= sizeof(event->mScaler));
       for (int i=0 ; i<18 ; i++)
          event->mScaler[i] = SWAP_UINT64(pd[17-i]);
-      event->mScalerValid = true;
    }
 
    return SUCCESS;
@@ -2347,38 +2384,35 @@ int WP::ReceiveWfPacket()
 
 void WP::UnrotateWaveforms()
 {
-   for (auto it = mEvent.begin() ; it != mEvent.end() ; it++) {
-      auto ev = (*it);
-      if (ev->mWFTypeADC)
+   for (auto &ev: mEvent) {
+      if (!ev.second->mTypeValid[cDataTypeDRS])
          continue;
-      if (!ev->mValid)
+      if (!ev.second->mEventValid)
          continue;
       
       float wf[WD_N_CHANNELS][1024];
       
       for (int i=0 ; i<WD_N_CHANNELS ; i++)
          for (int j=0 ; j<1024 ; j++)
-            wf[i][j] = ev->mWfUDRS[i][j];
+            wf[i][j] = ev.second->mWfUDRS[i][j];
       
       // un-rotate waveforms
       for (int i=0 ; i<WD_N_CHANNELS ; i++) {
-         int tc = ev->mTriggerCell[i];
+         int tc = ev.second->mTriggerCell[i];
          for (int j=0 ; j<1024 ; j++)
-            ev->mWfUDRS[i][(j+tc) % 1024] = wf[i][j];
+            ev.second->mWfUDRS[i][(j+tc) % 1024] = wf[i][j];
       }
    }
 }
 
 //--------------------------------------------------------------------
 
-void WP::CalibrateWaveforms(std::vector<WDEvent *> event)
+void WP::CalibrateWaveforms(std::map<int, WDEvent *> event)
 {
-   for (auto it = event.begin() ; it != event.end() ; it++) {
-      WDEvent *ev = (*it);
-      if (ev->mValid)
-         CalibrateWaveforms(ev);
+   for (auto &ev: event) {
+      if (ev.second->mEventValid)
+         CalibrateWaveforms(ev.second);
    }
-
 }
 
 //--------------------------------------------------------------------
@@ -2388,7 +2422,7 @@ void WP::CalibrateWaveforms(WDEvent* ev)
    // search board belonging to this event
    WDB* wdb = WP::GetBoard(ev->mBoardId);
    
-   if (ev->mWFTypeADC) { //---------- calibrate ADC data ----------
+   if (ev->mTypeValid[cDataTypeADC]) { //---------- calibrate ADC data ----------
       
       ev->mTCalibrated = true;
       
@@ -2420,7 +2454,9 @@ void WP::CalibrateWaveforms(WDEvent* ev)
          for (int j=0 ; j<2048 ; j++)
             ev->mWfUADC[i][j] += 0.7;
       
-   } else {  //---------- calibrate DRS data ----------
+   }
+   
+   if (ev->mTypeValid[cDataTypeDRS]) {  //---------- calibrate DRS data ----------
       
       bool bValid = (ev->mSamplingFrequency == wdb->mVCalib.GetSamplingFrequency() &&
                      wdb->mVCalib.IsValid());
@@ -2552,7 +2588,7 @@ void WP::CalibrateWaveforms(WDEvent* ev)
          double dt_min = 1;
          for (int i=4 ; i<1020 ; i++) {
             for (int c=0 ; c<16 ; c++) {
-               if ((GetEventRequestMask(ev->mBoardId) & (1 << c)) == 0)
+               if (!ev->mDRSChannelPresent[c])
                   continue;
                
                double tl = wdb->GetDacTriggerLevelV(c);
@@ -2672,22 +2708,20 @@ void WP::SaveWaveforms()
       mxml_write_element(li.xml, "HUnit", "ns");
       mxml_write_element(li.xml, "VUnit", "mV");
       
-      for (auto it = mEvent.begin() ; it != mEvent.end() ; it++) {
-         auto ev = (*it);
-         int mask = GetEventRequestMask(ev->mBoardId);
+      for (auto &ev: mEvent) {
          
-         sprintf(str, "Board_%d", ev->mBoardId);
+         sprintf(str, "Board_%d", ev.first);
          mxml_start_element(li.xml, str);
          for (int i=0 ; i<WD_N_CHANNELS ; i++) {
-            if (mask & (1 << i)) {
+            if (ev.second->mDRSChannelPresent[i]) {
                sprintf(str, "CHN%d", i);
                mxml_start_element(li.xml, str);
-               sprintf(str, "%d", ev->mTriggerCell[i]);
+               sprintf(str, "%d", ev.second->mTriggerCell[i]);
                mxml_write_element(li.xml, "Trigger_Cell", str);
                
                unsigned int s = 0;
                for (auto &b: mWdb)
-                  if (b->GetSerialNumber() == ev->mBoardId) {
+                  if (b->GetSerialNumber() == ev.second->mBoardId) {
                      std::vector<unsigned long>sc;
                      b->GetScalers(sc, false);
                      s = sc[i];
@@ -2698,17 +2732,21 @@ void WP::SaveWaveforms()
 
                mxml_start_element(li.xml, "Waveform");
                strcpy(str, "\n");
-               if (ev->mWFTypeADC) {
-                  for (int j=0 ; j<2048 ; j++) {
-                     sprintf(str, "%1.3f,%1.1f", ev->mWfTADC[i][j]*1E9, ev->mWfUADC[i][j]*1E3);
-                     mxml_write_element(li.xml, "Data", str);
-                  }
-               } else {
+               
+               if (ev.second->mTypeValid[cDataTypeDRS]) {
                   for (int j=0 ; j<1024 ; j++) {
-                     sprintf(str, "%1.3f,%1.1f", ev->mWfTDRS[i][j]*1E9, ev->mWfUDRS[i][j]*1E3);
-                     mxml_write_element(li.xml, "Data", str);
+                     sprintf(str, "%1.3f,%1.1f", ev.second->mWfTDRS[i][j]*1E9, ev.second->mWfUDRS[i][j]*1E3);
+                     mxml_write_element(li.xml, "DRSData", str);
                   }
                }
+
+               if (ev.second->mTypeValid[cDataTypeADC]) {
+                  for (int j=0 ; j<2048 ; j++) {
+                     sprintf(str, "%1.3f,%1.1f", ev.second->mWfTADC[i][j]*1E9, ev.second->mWfUADC[i][j]*1E3);
+                     mxml_write_element(li.xml, "ADCData", str);
+                  }
+               }
+               
                mxml_end_element(li.xml); // CHNx
                mxml_end_element(li.xml); // CHNx
             }
@@ -2731,7 +2769,6 @@ void WP::SaveWaveforms()
          
          for (size_t b=0 ; b<mEvent.size() ; b++) {
             auto ev = mEvent[b];
-            int mask = GetEventRequestMask(ev->mBoardId);
             WDB *wdb = GetBoard(ev->mBoardId);
             assert(wdb);
             
@@ -2745,7 +2782,7 @@ void WP::SaveWaveforms()
             p += sizeof(unsigned short);
             
             for (int i=0 ; i<WD_N_CHANNELS ; i++) {
-               if (mask & (1 << i)) {
+               if (ev->mDRSChannelPresent[i]) {
                   
                   sprintf((char *)p, "C%03d", i);
                   p += 4;
@@ -2782,7 +2819,6 @@ void WP::SaveWaveforms()
       
       for (size_t b = 0 ; b<mEvent.size() ; b++) {
          auto ev = mEvent[b];
-         int mask = GetEventRequestMask(ev->mBoardId);
          
          if (!li.bAll && b != (size_t)li.board)
             continue;
@@ -2794,7 +2830,7 @@ void WP::SaveWaveforms()
          p += sizeof(unsigned short);
          
          for (int i=0 ; i<WD_N_CHANNELS ; i++) {
-            if (mask & (1 << i)) {
+            if (ev->mDRSChannelPresent[i]) {
                // channel header
                sprintf((char *)p, "C%03d", i);
                p += 4;
@@ -2815,7 +2851,7 @@ void WP::SaveWaveforms()
                *(unsigned short *)p = ev->mTriggerCell[i];
                p += sizeof(unsigned short);
                
-               if (ev->mWFTypeADC) {
+               if (ev->mTypeValid[cDataTypeDRS]) {
                   for (int j=0 ; j<1024 ; j++) {
                      // save binary date as 16-bit value:
                      // 0 = -0.5V,  65535 = +0.5V    for range 0
@@ -2824,7 +2860,7 @@ void WP::SaveWaveforms()
                      *(unsigned short *)p = d;
                      p += sizeof(unsigned short);
                   }
-               } else {
+               } else if (ev->mTypeValid[cDataTypeADC]) {
                   for (int j=0 ; j<2048 ; j++) {
                      // save binary date as 16-bit value:
                      // 0 = -0.5V,  65535 = +0.5V    for range 0
@@ -2870,14 +2906,13 @@ unsigned int WP::usSince(std::chrono::time_point<std::chrono::high_resolution_cl
 void WP::Collector()
 {
    int status;
-   mCurrentEvent = -1;
    
    if (mVerbose)
       std::cout << std::endl << "Started waveform collector." << std::endl;
 
    do {
 
-      InvalidateAllWf();
+      StartNewEvent();
       
       do {
          
@@ -2893,7 +2928,7 @@ void WP::Collector()
             break; // abort loop if timeout or wrong packet etc.
          }
 
-      } while (!AllPacketsReceived());
+      } while (!IsEventValid());
       
       if (mLogfile != "") {
          auto it = mEvent.begin();
@@ -2902,7 +2937,7 @@ void WP::Collector()
          f.open(mLogfile, std::ios_base::app);
          if (status == SUCCESS)
             f << std::setfill('0') << std::setw(6) << usSince(mEventStartTime) <<
-            "us All packets of event " << ev->mEventNumber << " received" << std::endl;
+            "us All packets of event " << ev.second->mEventNumber << " received" << std::endl;
          else
             f << std::setfill('0') << std::setw(6) << usSince(mEventStartTime) <<
             "us Abort receiving of event" << std::endl;
@@ -2942,10 +2977,10 @@ void WP::Collector()
             auto ed = mEventLast.begin();
       
             while (es != mEvent.end()) {
-               if ((*es)->mValid){
-                 **(ed) = **(es);
+               if ((*es).second->mEventValid){
+                 *(*ed).second = *(*es).second;
                } else {
-                 (*ed)->mValid = false;
+                 (*ed).second->mEventValid = false;
                }
                es++;
                ed++;
@@ -3651,7 +3686,7 @@ void WP::DoTimeCalibrationStep()
       mOldRange   = b->GetRange();
       mOldMaskDrs = b->GetDrsChTxEn();
       mOldMaskAdc = b->GetAdcChTxEn();
-      
+      mOldFeMux   = b->GetFeMux(0);
       mOldTimingReference = b->GetTimingReferenceSignal();
 
       b->mTCalib.mCalib.sampling_frequency = b->GetDrsSampleFreqMhz();
@@ -3678,7 +3713,7 @@ void WP::DoTimeCalibrationStep()
       // turn on calibration clock
       b->SetTimingReferenceSignal(WDB::cTimingReferenceSine);
 
-      // connect normal input to sine wave
+      // connect channel input to sine wave generator
       b->SetFeMux(-1, WDB::cFeMuxCalSource);
       
       // enable all channels
@@ -3815,6 +3850,7 @@ void WP::DoTimeCalibrationStep()
    b->SetDrsChTxEn(mOldMaskDrs);
    b->SetAdcChTxEn(mOldMaskAdc);
    b->SetTimingReferenceSignal(mOldTimingReference);
+   b->SetFeMux(-1, mOldFeMux);
 
    b->SetTriggerHoldoff(30);
 

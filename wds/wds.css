@@ -208,24 +208,6 @@ input[type=text] {
    padding-right: 10px;
 }
 
-.progressBar {
-   border: 1px solid #A0A0A0;
-   border-radius: 5px;
-   width: 270px;
-   height: 5px;
-   background-color: #E0E0E0;
-   margin-left: 6px;
-   margin-top: 5px;
-}
-
-.progressInd {
-   border-radius: 10px;
-   width: 0;
-   height: 10px;
-   background-color: #419bf9;
-   margin: 0;
-}
-
 .wdSelect {
    margin: 5px;
    background: white;

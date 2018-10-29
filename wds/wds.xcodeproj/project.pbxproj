@@ -28,7 +28,7 @@
 
 /* Begin PBXFileReference section */
 		D529FE721B7B437F004E2D39 /* osc.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = osc.js; sourceTree = SOURCE_ROOT; };
-		D53A7A882019D02A007C902E /* register_map_wd2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = register_map_wd2.h; path = ../../../firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/common/src/register_map_wd2.h; sourceTree = "<group>"; };
+		D53A7A882019D02A007C902E /* register_map_wd2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = register_map_wd2.h; path = /wavedaq/firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/common/src/register_map_wd2.h; sourceTree = "<group>"; };
 		D55471771B72428F002A92E4 /* wds */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = wds; sourceTree = BUILT_PRODUCTS_DIR; };
 		D55471811B7242DE002A92E4 /* wds.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = wds.cpp; sourceTree = SOURCE_ROOT; };
 		D55471821B7242DE002A92E4 /* wds.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = wds.h; sourceTree = SOURCE_ROOT; };
@@ -37,9 +37,9 @@
 		D55471881B72477A002A92E4 /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = SOURCE_ROOT; };
 		D55471891B72498D002A92E4 /* wds.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = wds.css; sourceTree = SOURCE_ROOT; };
 		D554718A1B72498D002A92E4 /* wds.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = wds.js; sourceTree = SOURCE_ROOT; };
-		D55E70AE2018AFED005CA001 /* WDBReg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WDBReg.h; path = ../../lib/WDBReg.h; sourceTree = "<group>"; };
-		D56DDED11EBF3BDE00A71E18 /* WDBLib.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WDBLib.cpp; path = ../../lib/WDBLib.cpp; sourceTree = "<group>"; };
-		D56DDED21EBF3BDE00A71E18 /* WDBLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WDBLib.h; path = ../../lib/WDBLib.h; sourceTree = "<group>"; };
+		D55E70AE2018AFED005CA001 /* WDBReg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WDBReg.h; path = /wavedaq/software/lib/WDBReg.h; sourceTree = "<group>"; };
+		D56DDED11EBF3BDE00A71E18 /* WDBLib.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WDBLib.cpp; path = /wavedaq/software/lib/WDBLib.cpp; sourceTree = "<group>"; };
+		D56DDED21EBF3BDE00A71E18 /* WDBLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WDBLib.h; path = /wavedaq/software/lib/WDBLib.h; sourceTree = "<group>"; };
 		D56DDED41EBF3BF100A71E18 /* averager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = averager.cpp; path = /wavedaq/software/lib/averager.cpp; sourceTree = "<group>"; };
 		D56DDED51EBF3BF100A71E18 /* averager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = averager.h; path = /wavedaq/software/lib/averager.h; sourceTree = "<group>"; };
 		D5A75A7D1EBF466300280601 /* mxml.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mxml.c; sourceTree = SOURCE_ROOT; };

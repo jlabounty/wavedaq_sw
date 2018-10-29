@@ -924,9 +924,9 @@ function receiveWF() {
             if (progressInd > 0) {
                progressInd = 0;
                var e = document.getElementById("progressIndVcalib");
-               e.style.width = "0";
+               e.set(0);
                e = document.getElementById("progressIndTcalib");
-               e.style.width = "0";
+               e.set(0);
 
                OSC.clearPersistency();
 
@@ -957,7 +957,7 @@ function receiveWF() {
             progressInd = floatArray[2];
 
             e = document.getElementById("progressIndVcalib");
-            e.style.width = (progressInd * 270) + "px";
+            e.set(progressInd);
 
             document.getElementById("wdSelect").selectedIndex = b;
             document.getElementById("btnVCalib").innerHTML = document.getElementById("wdSelect").value;
@@ -974,7 +974,7 @@ function receiveWF() {
             wf.type = 2; // indicate delta-T array
 
             e = document.getElementById("progressIndTcalib");
-            e.style.width = (progressInd * 270) + "px";
+            e.set(progressInd);
 
             document.getElementById("wdSelect").selectedIndex = b;
             document.getElementById("btnTCalib").innerHTML = document.getElementById("wdSelect").value;

@@ -17,11 +17,11 @@
 
 
  <div id="dlgXXX" class="dlgFrame">
- <div class="dlgTitlebar">Title</div>
- <div class="dlgPanel">
- <div>Dialog Contents</div>
- <button type="button" onClick="dlgHide('dlgXXX')">Close</button>
- </div>
+    <div class="dlgTitlebar">Title</div>
+    <div class="dlgPanel">
+       <div>Dialog Contents</div>
+       <button type="button" onClick="dlgHide('dlgXXX')">Close</button>
+    </div>
  </div>
 
 
@@ -29,20 +29,47 @@
  Sliders
  -------
 
- <button name="ctrlHSlider" type="button" data-update="xxx()"></button>
+ <button name="ctrlHSlider" type="button" data-update="xxx()" id="yyy"></button>
 
- <button name="ctrlVSlider" type="button" data-update="xxx()"></button>
+ <button name="ctrlVSlider" type="button" data-update="xxx()" id="yyy"></button>
+
+ document.getElementById("yyy").set(v); // v = 0...1
+
+
+
+ Progress bars
+ -------------
+
+ <div name="ctrlProgress" style="width:xxxpx;color:yyy;" id="zzz"></div>
+
+ document.getElementById('yyy').set(v); // v = 0...1
 
 
 
  Icon buttons
  ------------
 
- <button name="ctrlButton" data-icon="<icon>" type="button"></button>
+ <button name="ctrlButton" data-draw="xxx" type="button" id="yyy" onClick="zzz()"></button>
 
- <icon> = up, down, left, right, vcoll, vexp, add, remove
+ function xxx(cvs)
+ {
+   // example for an up-arrow with 36x36 pixels
+   cvs.width = 36;
+   cvs.height = 36;
+   var ctx = cvs.getContext("2d");
+   ctx.fillStyle = "#E0E0E0";
+   ctx.fillRect(0, 0, 36, 36);
+   ctx.beginPath();
+   ctx.moveTo(18, 7);
+   ctx.lineTo(31, 27);
+   ctx.lineTo(5, 27);
+   ctx.lineTo(18, 7);
+   ctx.closePath();
+   ctx.fillStyle = "#808080";
+   ctx.fill();
+ }
 
- */
+*/
 
 // default styles for dialog boxes
 document.write("<style>" +
@@ -84,7 +111,23 @@ document.write("<style>" +
    "   right: 0;" +
    "   z-index: 20;" +
    "}" +
-   "</style>");
+   ".ctrlProgress {" +
+   "   border: 1px solid #A0A0A0;" +
+   "   border-radius: 5px;" +
+   "   width: 500px;" +
+   "   height: 5px;" +
+   "   background-color: #E0E0E0;" +
+   "   margin-left: 6px;" +
+   "   margin-top: 5px;" +
+   "}" +
+   ".ctrlProgressInd {" +
+   "   border-radius: 5px;" +
+   "   width: 0;" +
+   "   height: 5px;" +
+   "   background-color: #419bf9;" +
+   "   margin: 0;" +
+   "}" +
+"</style>");
 
 (function (window) { // anonymous global function
    window.addEventListener("load", ctlInit, false);
@@ -105,6 +148,7 @@ Controls.prototype.init = function () // scan DOM
    this.ctrlButton = document.getElementsByName("ctrlButton");
    this.ctrlVSlider = document.getElementsByName("ctrlVSlider");
    this.ctrlHSlider = document.getElementsByName("ctrlHSlider");
+   this.ctrlProgress = document.getElementsByName("ctrlProgress");
 
    // ctrlButton
    for (var i = 0; i < this.ctrlButton.length; i++) {
@@ -151,6 +195,18 @@ Controls.prototype.init = function () // scan DOM
       sl.draw = this.ctrlHSliderDraw;
       sl.draw(sl);
       sl.set = this.ctrlHSliderSet;
+   }
+
+   // ctrlProgress
+   for (i = 0; i < this.ctrlProgress.length; i++) {
+      var p = this.ctrlProgress[i];
+      p.className = "ctrlProgress";
+      var ind = document.createElement("div");
+      ind.className = "ctrlProgressInd";
+      ind.style.height = p.style.height;
+      ind.style.backgroundColor = p.style.color;
+      p.appendChild(ind);
+      p.set = this.ctrlProgressSet;
    }
 
 };
@@ -311,6 +367,14 @@ Controls.prototype.ctrlHSliderHandler = function (e) {
          window[f](b.position);
       }
    }
+};
+
+Controls.prototype.ctrlProgressSet = function (value) {
+   if (value < 0)
+      value = 0;
+   if (value > 1)
+      value = 1;
+   this.firstChild.style.width = Math.round(parseInt(this.style.width) * value) + "px";
 };
 
 //-------------------------------------------------------------------------------------------------

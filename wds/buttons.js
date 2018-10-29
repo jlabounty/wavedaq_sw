@@ -11,7 +11,7 @@ function ButtonDrawUp(cvs)
    cvs.height = 32;
    var ctx = cvs.getContext("2d");
    ctx.fillStyle = "#E0E0E0";
-   ctx.fillRect(0, 0, 36, 36);
+   ctx.fillRect(0, 0, 36, 32);
    ctx.beginPath();
    ctx.moveTo(18, 7);
    ctx.lineTo(31, 27);

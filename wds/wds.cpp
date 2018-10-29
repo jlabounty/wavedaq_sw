@@ -320,10 +320,6 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                gl->wdb[iBoard]->SetAdcChTxEn(gl->wdb[iBoard]->GetChnTxEn());
             }
          }
-         if (gl->readoutMode == cReadoutModeDRS)
-            gl->wp->SetRequestedSegments(2);
-         else if (gl->readoutMode == cReadoutModeADC)
-            gl->wp->SetRequestedSegments(3);
       }
 
       else if (item == "calibBufferEnable") {
@@ -442,7 +438,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "      \"rangeCalib\": %s,\n",                    gl->wp->IsRangeCalib() ? "true" : "false");
       mg_printf_http_chunk(nc, "      \"timeCalib1\": %s,\n",                    gl->wp->IsTimeCalib1() ? "true" : "false");
       mg_printf_http_chunk(nc, "      \"timeCalib2\": %s,\n",                    gl->wp->IsTimeCalib2() ? "true" : "false");
-      mg_printf_http_chunk(nc, "      \"timeCalib3\": %s\n",                    gl->wp->IsTimeCalib3() ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"timeCalib3\": %s\n",                     gl->wp->IsTimeCalib3() ? "true" : "false");
       mg_printf_http_chunk(nc, "   }\n");
       mg_printf_http_chunk(nc, "}\n");
       mg_send_http_chunk(nc, "", 0); // end of response
@@ -738,7 +734,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             }
          } else {
             // only current board
-            gl->wp->RequestBoard(gl->wdb[b]);
+            gl->wp->RequestSingleBoard(gl->wdb[b]);
 
             if (gl->triggerMode == cTriggerModeAuto)
                gl->wdb[b]->RequestEvent();
@@ -756,7 +752,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          b = 0xFF; // signals demo data
       
       if (bNewEvent) {
-         if (event.mWFTypeADC) { //---- ADC waveforms
+         if (event.mTypeValid[cDataTypeADC]) { //---- ADC waveforms
             int t = 1;                    // array type
             int n = 1024;                 // number of elements
             int vc = event.mVCalibrated;  // voltage calibrated
@@ -787,7 +783,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                   mg_send_http_chunk(nc, (const char *)&event.mWfUADC[c][1024], sizeof(float)*n);
                }
             }
-         } else { //---- DRS waveforms
+         } else if (event.mTypeValid[cDataTypeDRS]) { //---- DRS waveforms
             int t = 1;                    // array type
             int n = 1024;                 // number of elements
             int vc = event.mVCalibrated;  // voltage calibrated
@@ -1046,7 +1042,7 @@ int main(int argc, const char * argv[])
             }
 
             // enable TDC readout
-            b->SetTdcChTxEn(0);
+            b->SetTdcChTxEn(1);
 
             // enable advanced trigger readout
             b->SetTrgTxEn(0);
