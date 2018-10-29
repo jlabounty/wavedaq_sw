@@ -1776,7 +1776,7 @@ void WDEventRequest::ProcessPacket(WDAQ_FRAME_HEADER *pdaqh)
 bool WDEventRequest::IsEventValid()
 {
    for (auto const& r : mRequest) {
-      if (r.second->mRequested &&!r.second->mValid)
+      if (r.second->mRequested && !r.second->mValid)
          return false;
    }
    return true;
@@ -1865,9 +1865,10 @@ WDB* WP::GetBoard(int board_id)
 
 void WP::RequestSingleBoard(WDB *b)
 {
+   // Caution: mEventRequest is accessed by the collector thread. We can only access it here
+   // without mutex since we only change it when the board configuration changes.
    for (auto &r: mEventRequest)
-      r.second->mBoardRequested = false;
-   mEventRequest[(int)b->GetSerialNumber()]->mBoardRequested = true;
+      r.second->mBoardRequested = (r.second->mBoardId == b->GetSerialNumber());
 
    RequestTypes(b);
 }
@@ -1998,7 +1999,7 @@ void WP::StartNewEvent()
 bool WP::IsEventValid()
 {
    for (auto &er: mEventRequest) {
-      if (!er.second->IsEventValid())
+      if (er.second->mBoardRequested && !er.second->IsEventValid())
          return false;
    }
 

@@ -1042,7 +1042,7 @@ int main(int argc, const char * argv[])
             }
 
             // enable TDC readout
-            b->SetTdcChTxEn(1);
+            b->SetTdcChTxEn(0);
 
             // enable advanced trigger readout
             b->SetTrgTxEn(0);

@@ -284,7 +284,7 @@ public:
 
 class WDEventTypeRequest {
 public:
-   int              mRequested;
+   bool             mRequested;
    bool             mValid;
    bool             mBOTReceived;
    bool             mEOTReceived;
