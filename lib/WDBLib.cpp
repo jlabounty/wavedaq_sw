@@ -1756,7 +1756,7 @@ void WDEventRequest::ProcessPacket(WDAQ_FRAME_HEADER *pdaqh)
       mRequest[pdaqh->data_type]->mBOTReceived = true;
    } else {
       // check if any packets have been dropped
-      if (pdaqh->packet_number != mRequest[pdaqh->data_type]->mLastPacket+1) {
+      if (pdaqh->packet_number != (unsigned short)(mRequest[pdaqh->data_type]->mLastPacket+1)) {
          mRequest[pdaqh->data_type]->mDroppedPackets +=
          (pdaqh->packet_number - mRequest[pdaqh->data_type]->mLastPacket)+1;
       }
@@ -2206,43 +2206,19 @@ int WP::ReceiveWfPacket()
    if (event_request->IsEventValid())
       event->mEventValid = true;
    
-   // decode DRS waveform data ----------
-   if (pdaqh->data_type == cDataTypeDRS) {
-      
-      assert(pdaqh->payload_length % 3 == 0);
-      assert(pdaqh->data_chunk_offset % 3 == 0);
-      int numberBins = (int) pdaqh->payload_length / 1.5;
-      int firstBin = pdaqh->data_chunk_offset / 1.5;
+   // check package consistency for DRS and ADC events
+   if (pdaqh->data_type == cDataTypeDRS || pdaqh->data_type == cDataTypeADC) {
       int channel_number = (ph->channel_info) & 0x1f;
-      
-      // set DRS specific part from packet
-      event->SetWDEventHeaderInfo(pdaqh, ph);
-      event->mVCalibrated = false;
-      event->mTCalibrated = false;
-      mLastEventNumber = ph->event_number;
 
-      if (pdaqh->wdaq_flags & (1 << cWDAQFlagStartOfType)) {
-         event->mTriggerCellDrs0 = -1;
-         event->mTriggerCellDrs1 = -1;
-      }
+      if (mCurrentEvent == -1)
+         mCurrentEvent = ph->event_number;
       
       // check for valid channel number
       if (channel_number >= WD_N_CHANNELS) {
          std::cerr << "Found invalid DRS channel " << channel_number << " for event " << ph->event_number << std::endl;
          return 0;
       }
-      
-      if (channel_number < 8 || channel_number == 16) {
-         if (event->mTriggerCellDrs0 == -1)
-            event->mTriggerCellDrs0 = ph->drs_trigger_cell;
-      } else {
-         if (event->mTriggerCellDrs1 == -1)
-            event->mTriggerCellDrs1 = ph->drs_trigger_cell;
-      }
 
-      if (mCurrentEvent == -1)
-         mCurrentEvent = ph->event_number;
-      
       // drop package if it belongs to previous event
       if (ph->event_number == (unsigned int)mCurrentEvent-1) {
          std::cerr << "Package of previous event dropped, package event=" << ph->event_number << ", "
@@ -2286,6 +2262,35 @@ int WP::ReceiveWfPacket()
          mPacketsReceived = 1;
          mEventStartTime = std::chrono::high_resolution_clock::now();
       }
+   }
+
+   // decode DRS waveform data ----------
+   if (pdaqh->data_type == cDataTypeDRS) {
+      
+      assert(pdaqh->payload_length % 3 == 0);
+      assert(pdaqh->data_chunk_offset % 3 == 0);
+      int numberBins = (int) pdaqh->payload_length / 1.5;
+      int firstBin = pdaqh->data_chunk_offset / 1.5;
+      int channel_number = (ph->channel_info) & 0x1f;
+      
+      // set DRS specific part from packet
+      event->SetWDEventHeaderInfo(pdaqh, ph);
+      event->mVCalibrated = false;
+      event->mTCalibrated = false;
+      mLastEventNumber = ph->event_number;
+
+      if (pdaqh->wdaq_flags & (1 << cWDAQFlagStartOfType)) {
+         event->mTriggerCellDrs0 = -1;
+         event->mTriggerCellDrs1 = -1;
+      }
+      
+      if (channel_number < 8 || channel_number == 16) {
+         if (event->mTriggerCellDrs0 == -1)
+            event->mTriggerCellDrs0 = ph->drs_trigger_cell;
+      } else {
+         if (event->mTriggerCellDrs1 == -1)
+            event->mTriggerCellDrs1 = ph->drs_trigger_cell;
+      }
 
       // print warning if inconsistent trigger cells are found
       if (channel_number < 8 || channel_number == 16) {
@@ -2328,15 +2333,6 @@ int WP::ReceiveWfPacket()
       event->mVCalibrated = false;
       event->mTCalibrated = false;
       mLastEventNumber = ph->event_number;
-
-      // check for valid channel number
-      if (channel_number >= WD_N_CHANNELS) {
-         std::cerr << "Found inconsistend DRS channel " << channel_number << " for event " << ph->event_number << std::endl;
-         return 0;
-      }
-
-      if (mCurrentEvent == -1)
-         mCurrentEvent = ph->event_number;
 
       auto pd = (unsigned char*)(ph+1);
       for (int i=0 ; i<numberBins ; i+=2) {
