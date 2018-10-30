@@ -1041,15 +1041,13 @@ int main(int argc, const char * argv[])
                b->SetChnTxEn(0xFFFF);
             }
 
-            // enable TDC readout
+            // disable TDC readout
             b->SetTdcChTxEn(0);
 
-            // enable advanced trigger readout
+            // disable advanced trigger readout
             b->SetTrgTxEn(0);
 
-            // enable scaler readout
-            b->SetScalerRst(1);
-            b->SetScalerRst(0);
+            // disable scaler readout
             b->SetSclTxEn(0);
 
          } else {

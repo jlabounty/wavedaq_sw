@@ -66,6 +66,8 @@ int cScalerWidth[] = {
    64, // system time
 };
 
+#define CALIB_TIMEOUT 10
+
 //--------------------------------------------------------------------
 
 // convert one data type into other, replaces *((float *)(&int))
@@ -1744,31 +1746,32 @@ void WDEventRequest::ClearRequest()
       r.second->mValid          = false;
       r.second->mBOTReceived    = false;
       r.second->mEOTReceived    = false;
-      r.second->mLastPacket     = 0;
-      r.second->mDroppedPackets = 0;
    }
+   mLastPacket     = 0;
+   mDroppedPackets = 0;
 }
 
 void WDEventRequest::ProcessPacket(WDAQ_FRAME_HEADER *pdaqh)
 {
-   // on first packet, set BOT
+   // on first packet for type, set BOT
    if (pdaqh->wdaq_flags & (1 << cWDAQFlagStartOfType)) {
       mRequest[pdaqh->data_type]->mBOTReceived = true;
+   }
+   
+   // check if any packets have been dropped
+   if (pdaqh->wdaq_flags & (1 << cWDAQFlagStartOfEvent)) {
+      mLastPacket = pdaqh->packet_number;
    } else {
-      // check if any packets have been dropped
-      if (pdaqh->packet_number != (unsigned short)(mRequest[pdaqh->data_type]->mLastPacket+1)) {
-         mRequest[pdaqh->data_type]->mDroppedPackets +=
-         (pdaqh->packet_number - mRequest[pdaqh->data_type]->mLastPacket)+1;
+      if (pdaqh->packet_number != (unsigned short)(mLastPacket+1)) {
+         mDroppedPackets += (pdaqh->packet_number - mLastPacket)-1;
       }
+      mLastPacket = pdaqh->packet_number;
    }
 
-   // member current packet number
-   mRequest[pdaqh->data_type]->mLastPacket = pdaqh->packet_number;
-
+   // on last packet for type, set type valid if no packets dropped
    if (pdaqh->wdaq_flags & (1 << cWDAQFlagEndOfType)) {
       mRequest[pdaqh->data_type]->mEOTReceived = true;
-      if (mRequest[pdaqh->data_type]->mBOTReceived &&
-          mRequest[pdaqh->data_type]->mDroppedPackets == 0)
+      if (mRequest[pdaqh->data_type]->mBOTReceived && mDroppedPackets == 0)
          mRequest[pdaqh->data_type]->mValid = true;
    }
 }
@@ -1808,6 +1811,8 @@ WP::WP(std::vector<WDB *> w, int verbose, std::string logfile, bool demo)
    mTimeCalib3 = false;
    
    mWDReceivedEvents = 0;
+   mWDDroppedEvents = 0;
+   mPacketsReceived = 0;
    
    li.fh = 0;
    li.xml = NULL;
@@ -2008,10 +2013,6 @@ bool WP::IsEventValid()
 
 void WP::LogEvent(WDAQ_FRAME_HEADER *pdaqh, WD_FRAME_HEADER   *ph)
 {
-   // start event timer for debugging
-   if (mPacketsReceived == 1)
-      mEventStartTime = std::chrono::high_resolution_clock::now();
-
    if (mLogfile != "" || mVerbose >= 3) {
       std::ofstream f;
       char line[256];
@@ -2026,13 +2027,13 @@ void WP::LogEvent(WDAQ_FRAME_HEADER *pdaqh, WD_FRAME_HEADER   *ph)
       }
       
       if (pdaqh->wdaq_flags & (1<<cWDAQFlagEndOfEvent))
-         flags += "EEV,";
+         flags += "EOE,";
       if (pdaqh->wdaq_flags & (1<<cWDAQFlagStartOfEvent))
-         flags += "SEV,";
+         flags += "BOE,";
       if (pdaqh->wdaq_flags & (1<<cWDAQFlagEndOfType))
-         flags += "ETY,";
+         flags += "EOT,";
       if (pdaqh->wdaq_flags & (1<<cWDAQFlagStartOfType))
-         flags += "STY,";
+         flags += "BOT,";
       
       if (flags.back() == ',')
          flags.pop_back();
@@ -2169,9 +2170,13 @@ int WP::ReceiveWfPacket()
       ph->frontend_settings              = SWAP_UINT16(ph->frontend_settings);
    }
 
-   // log general event header
-   LogEvent(pdaqh, ph);
-   
+   /* use following code to artificially dop packages for testing
+   if ((double)rand()/RAND_MAX < 0.01) {
+      std::cout << "Packet artificially dropped" << std::endl;
+      return SUCCESS;
+   }
+   */
+
    // check that we have a request for that board
    if (mEventRequest.count(pdaqh->serial_number) > 0) {
       event_request = mEventRequest[pdaqh->serial_number];
@@ -2193,10 +2198,35 @@ int WP::ReceiveWfPacket()
    }
    event = mEvent[pdaqh->serial_number];
 
+   // on first packet for event, start new event
+   if (pdaqh->wdaq_flags & (1 << cWDAQFlagStartOfEvent)) {
+    
+      if (!IsEventValid() && mPacketsReceived > 1){
+         if (mVerbose)
+            std::cerr << "Partially received event dropped, board id=" << pdaqh->serial_number
+            << ", efficiency=" << (double)mWDReceivedEvents/(mWDReceivedEvents+mWDDroppedEvents) << std::endl;
+         
+         if (mLogfile != "") {
+            std::ofstream f;
+            f.open(mLogfile, std::ios_base::app);
+            f << "Partially received event dropped, board id=" << pdaqh->serial_number << std::endl;
+         }
+         mWDDroppedEvents++;
+      }
+      
+      StartNewEvent();
+      mPacketsReceived = 1;
+      mEventStartTime = std::chrono::high_resolution_clock::now();
+      mCurrentEvent = -1;
+   }
+
+   // log general event header
+   LogEvent(pdaqh, ph);
+
    // obtain general event header from packet
    event->SetEventHeaderInfo(pdaqh);
 
-   // mark valid package received
+   // mark valid package type in event request
    event_request->ProcessPacket(pdaqh);
    
    // copy valid flags to event
@@ -2233,34 +2263,6 @@ int WP::ReceiveWfPacket()
             << "board id=" << pdaqh->serial_number << std::endl;
          }
          return 0;
-      }
-      
-      // Drop whole event if package of different event has been received. This could
-      // be a new event or event #1 if the WDB has been reset.
-      if (ph->event_number != (unsigned int)mCurrentEvent) {
-         if (mVerbose)
-            std::cerr << "Partially received event dropped, package event=" << ph->event_number << ", "
-            << "current event=" << mCurrentEvent << ", "
-            << "board id=" << pdaqh->serial_number << std::endl;
-         
-         if (mLogfile != "") {
-            std::ofstream f;
-            f.open(mLogfile, std::ios_base::app);
-            f << "Partially received event dropped, package event=" << ph->event_number << ", "
-            << "current event=" << mCurrentEvent << ", "
-            << "board id=" << pdaqh->serial_number << std::endl;
-         }
-         
-         // count dropped packets
-         if (ph->event_number > mLastEventNumber)
-            mWDDroppedEvents = (ph->event_number - mLastEventNumber);
-         
-         // switch to new event
-         StartNewEvent();
-         event_request->ProcessPacket(pdaqh);
-         mCurrentEvent = ph->event_number;
-         mPacketsReceived = 1;
-         mEventStartTime = std::chrono::high_resolution_clock::now();
       }
    }
 
@@ -3082,6 +3084,9 @@ void WP::DoVoltageCalibrationStep()
       // select internal clock
       b->SetDaqClkSrcSel(1);
       
+      // set inter-packet delay to default value
+      b->SetInterPkgDelay(1875);
+      
       int n = calibProg.nIter1;
       n = std::max(n, calibProg.nIter2);
       n = std::max(n, calibProg.nIter3);
@@ -3101,8 +3106,7 @@ void WP::DoVoltageCalibrationStep()
 
       // get one event from board
       WDEvent event(b->GetSerialNumber());
-      if (!RequestEvent(b, 1000, event))
-         return; // just skip this event
+      while (!RequestEvent(b, CALIB_TIMEOUT, event));
       
       for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
@@ -3136,8 +3140,7 @@ void WP::DoVoltageCalibrationStep()
 
       // get one event from board
       WDEvent event(b->GetSerialNumber());
-      if (!RequestEvent(b, 1000, event))
-         return; // just skip this event
+      while (!RequestEvent(b, CALIB_TIMEOUT, event));
       
       for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
@@ -3172,8 +3175,7 @@ void WP::DoVoltageCalibrationStep()
 
       // get one event from board
       WDEvent event(b->GetSerialNumber());
-      if (!RequestEvent(b, 1000, event))
-         return; // just skip this event
+      while (!RequestEvent(b, CALIB_TIMEOUT, event));
       
       for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
@@ -3204,8 +3206,7 @@ void WP::DoVoltageCalibrationStep()
 
       // get one event from board
       WDEvent event(b->GetSerialNumber());
-      if (!RequestEvent(b, 1000, event))
-         return; // just skip this event
+      while (!RequestEvent(b, CALIB_TIMEOUT, event));
       
       for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
@@ -3249,8 +3250,7 @@ void WP::DoVoltageCalibrationStep()
 
       // get one event from board
       WDEvent event(b->GetSerialNumber());
-      if (!RequestEvent(b, 1000, event))
-         return; // just skip this event
+      while (!RequestEvent(b, CALIB_TIMEOUT, event));
       
       for (int ch=16 ; ch<WD_N_CHANNELS ; ch++)
          for (int bin=0 ; bin<1024 ; bin++)
@@ -3289,8 +3289,8 @@ void WP::DoVoltageCalibrationStep()
    b->SetDrsChTxEn(0x3FFFF);
    b->SetAdcChTxEn(0);
    WDEvent event(b->GetSerialNumber());
-   RequestEvent(b, 1000, event);
-   while (!RequestEvent(b, 1000, event));
+   RequestEvent(b, CALIB_TIMEOUT, event);
+   while (!RequestEvent(b, CALIB_TIMEOUT, event));
    
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
@@ -3302,8 +3302,8 @@ void WP::DoVoltageCalibrationStep()
    // ADC events
    b->SetDrsChTxEn(0);
    b->SetAdcChTxEn(0xFFFF);
-   RequestEvent(b, 1000, event);
-   while (!RequestEvent(b, 1000, event));
+   RequestEvent(b, CALIB_TIMEOUT, event);
+   while (!RequestEvent(b, CALIB_TIMEOUT, event));
    
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
@@ -3318,8 +3318,8 @@ void WP::DoVoltageCalibrationStep()
    // DRS events
    b->SetDrsChTxEn(0x3FFFF);
    b->SetAdcChTxEn(0);
-   RequestEvent(b, 1000, event);
-   while (!RequestEvent(b, 1000, event));
+   RequestEvent(b, CALIB_TIMEOUT, event);
+   while (!RequestEvent(b, CALIB_TIMEOUT, event));
    
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
@@ -3331,8 +3331,8 @@ void WP::DoVoltageCalibrationStep()
    // ADC events
    b->SetDrsChTxEn(0);
    b->SetAdcChTxEn(0xFFFF);
-   RequestEvent(b, 1000, event);
-   while (!RequestEvent(b, 1000, event));
+   RequestEvent(b, CALIB_TIMEOUT, event);
+   while (!RequestEvent(b, CALIB_TIMEOUT, event));
    
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
@@ -3347,8 +3347,8 @@ void WP::DoVoltageCalibrationStep()
    // DRS events
    b->SetDrsChTxEn(0x3FFFF);
    b->SetAdcChTxEn(0);
-   RequestEvent(b, 1000, event);
-   while (!RequestEvent(b, 1000, event));
+   RequestEvent(b, CALIB_TIMEOUT, event);
+   while (!RequestEvent(b, CALIB_TIMEOUT, event));
    
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
@@ -3360,8 +3360,8 @@ void WP::DoVoltageCalibrationStep()
    // ADC events
    b->SetDrsChTxEn(0);
    b->SetAdcChTxEn(0xFFFF);
-   RequestEvent(b, 1000, event);
-   while (!RequestEvent(b, 1000, event));
+   RequestEvent(b, CALIB_TIMEOUT, event);
+   while (!RequestEvent(b, CALIB_TIMEOUT, event));
    
    for (int ch=0 ; ch<WD_N_CHANNELS-2 ; ch++) {
       float sum = 0;
@@ -3726,6 +3726,9 @@ void WP::DoTimeCalibrationStep()
       // select internal clock
       b->SetDaqClkSrcSel(1);
 
+      // set inter-packet delay to default value
+      b->SetInterPkgDelay(1875);
+
       calibProg.phase = 0;
       b->SetSineWaveDelay(calibProg.phase);
 
@@ -3749,8 +3752,7 @@ void WP::DoTimeCalibrationStep()
       
       // get one event from board
       WDEvent event(b->GetSerialNumber());
-      if (!RequestEvent(b, 1000, event))
-         return; // just skip this event
+      while (!RequestEvent(b, CALIB_TIMEOUT, event));
       
       AnalyzePeriod(&event, b);
       CalibrateLocal(&event, b);
@@ -3785,8 +3787,7 @@ void WP::DoTimeCalibrationStep()
       
       // get one event from board
       WDEvent event(b->GetSerialNumber());
-      if (!RequestEvent(b, 1000, event))
-         return; // just skip this event
+      while (!RequestEvent(b, CALIB_TIMEOUT, event));
       
       AnalyzePeriod(&event, b);
       CalibrateGlobal(&event, b);
@@ -3815,8 +3816,7 @@ void WP::DoTimeCalibrationStep()
       
       // get one event from board
       WDEvent event(b->GetSerialNumber());
-      if (!RequestEvent(b, 1000, event))
-         return; // just skip this event
+      while (!RequestEvent(b, CALIB_TIMEOUT, event));
       
       AnalyzeTimeOffset(&event, b);
       

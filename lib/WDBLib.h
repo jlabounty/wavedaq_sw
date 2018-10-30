@@ -288,16 +288,12 @@ public:
    bool             mValid;
    bool             mBOTReceived;
    bool             mEOTReceived;
-   unsigned short   mLastPacket;
-   int              mDroppedPackets;
 
    WDEventTypeRequest() {
       mRequested = false;
       mValid = false;
       mBOTReceived = false;
       mEOTReceived = false;
-      mLastPacket = 0;
-      mDroppedPackets = 0;
    }
 };
 
@@ -306,6 +302,9 @@ public:
    unsigned short   mBoardId;
    bool             mBoardRequested;
    std::map<int, WDEventTypeRequest *> mRequest;
+
+   unsigned short   mLastPacket;
+   int              mDroppedPackets;
 
    WDEventRequest(int boardId);
    
