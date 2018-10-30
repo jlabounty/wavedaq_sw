@@ -728,7 +728,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
             for (auto &b: gl->wdb) {
                if (gl->triggerMode == cTriggerModeAuto)
-                  b->RequestEvent();
+                  b->TriggerSoftEvent();
                else if (gl->triggerMode == cTriggerModeNormal)
                   b->SetDaqSingle(1);
             }
@@ -737,7 +737,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             gl->wp->RequestSingleBoard(gl->wdb[b]);
 
             if (gl->triggerMode == cTriggerModeAuto)
-               gl->wdb[b]->RequestEvent();
+               gl->wdb[b]->TriggerSoftEvent();
             else if (gl->triggerMode == cTriggerModeNormal) {
                if (!gl->triggerSelfArm)
                   gl->wdb[b]->SetDaqSingle(1);

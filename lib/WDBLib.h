@@ -303,7 +303,10 @@ public:
    bool             mBoardRequested;
    std::map<int, WDEventTypeRequest *> mRequest;
 
+   bool             mBOEReceived;
+   bool             mEOEReceived;
    unsigned short   mLastPacket;
+   int              mReceivedPackets;
    int              mDroppedPackets;
 
    WDEventRequest(int boardId);
@@ -697,7 +700,7 @@ public:
    void SetRange(float r);
    float GetRange();
    
-   void RequestEvent();
+   void TriggerSoftEvent();
    
    unsigned int GetDrsSampleFreqMhz();
    void SaveVoltageCalibration(int freq);

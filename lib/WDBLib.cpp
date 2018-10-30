@@ -1628,7 +1628,7 @@ void WDB::SetTriggerDelayNs(unsigned int ns)
 
 //--------------------------------------------------------------------
 
-void WDB::RequestEvent()
+void WDB::TriggerSoftEvent()
 {
    SetDaqSingle(true);  // start DRS domino wave
    SetDaqSingle(false);
@@ -1747,8 +1747,11 @@ void WDEventRequest::ClearRequest()
       r.second->mBOTReceived    = false;
       r.second->mEOTReceived    = false;
    }
-   mLastPacket     = 0;
-   mDroppedPackets = 0;
+   mBOEReceived     = false;
+   mEOEReceived     = false;
+   mLastPacket      = 0;
+   mReceivedPackets = 0;
+   mDroppedPackets  = 0;
 }
 
 void WDEventRequest::ProcessPacket(WDAQ_FRAME_HEADER *pdaqh)
@@ -1760,6 +1763,7 @@ void WDEventRequest::ProcessPacket(WDAQ_FRAME_HEADER *pdaqh)
    
    // check if any packets have been dropped
    if (pdaqh->wdaq_flags & (1 << cWDAQFlagStartOfEvent)) {
+      mBOEReceived = true;
       mLastPacket = pdaqh->packet_number;
    } else {
       if (pdaqh->packet_number != (unsigned short)(mLastPacket+1)) {
@@ -1774,6 +1778,12 @@ void WDEventRequest::ProcessPacket(WDAQ_FRAME_HEADER *pdaqh)
       if (mRequest[pdaqh->data_type]->mBOTReceived && mDroppedPackets == 0)
          mRequest[pdaqh->data_type]->mValid = true;
    }
+   
+   if (pdaqh->wdaq_flags & (1 << cWDAQFlagEndOfEvent)) {
+      mEOEReceived = true;
+   }
+
+   mReceivedPackets++;
 }
 
 bool WDEventRequest::IsEventValid()
@@ -1899,7 +1909,7 @@ void WP::RequestTypes(WDB *b)
 bool WP::RequestEvent(WDB *b, int timeout, WDEvent &event)
 {
    RequestSingleBoard(b);
-   b->RequestEvent();
+   b->TriggerSoftEvent();
    
    return GetLastEvent(b, timeout, event);
 }
@@ -2128,17 +2138,15 @@ int WP::ReceiveWfPacket()
    int n = (int)recvfrom(WP::gDataSocket, (char *)buffer, sizeof(buffer), 0,
                          (struct sockaddr *)&remote_addr, (socklen_t *)&len);
    
-   // return if invalid header
-   if (n < (int)sizeof(WDAQ_FRAME_HEADER))
-      return 0;
-   
-   mPacketsReceived++;
-
    WDAQ_FRAME_HEADER *pdaqh = (WDAQ_FRAME_HEADER *)buffer;
    WD_FRAME_HEADER   *ph    = (WD_FRAME_HEADER *)(((WDAQ_FRAME_HEADER *)buffer)+1);
    WDEventRequest    *event_request = nullptr;
    WDEvent           *event = nullptr;
 
+   // return if invalid header
+   if (n < (int)sizeof(WDAQ_FRAME_HEADER))
+      return 0;
+   
    // check protocol version
    if (pdaqh->protocol_version > WD2_UDP_PROTOCOL_VERSION) {
       std::cerr << "Invalid protocol version " << (int)pdaqh->protocol_version << ", expected " << WD2_UDP_PROTOCOL_VERSION << ". Probably WDBLib library update required." << std::endl;
@@ -2148,6 +2156,11 @@ int WP::ReceiveWfPacket()
       std::cerr << "Invalid protocol version " << (int)pdaqh->protocol_version << ", expected " << WD2_UDP_PROTOCOL_VERSION << ". Probably WDB firmware update required." << std::endl;
       return 0;
    }
+
+   if (mPacketsReceived == 0)
+      mEventStartTime = std::chrono::high_resolution_clock::now();
+
+   mPacketsReceived++;
 
    // correct endianness of header data
    pdaqh->reserved1         = SWAP_UINT16(pdaqh->reserved1);
@@ -2170,12 +2183,11 @@ int WP::ReceiveWfPacket()
       ph->frontend_settings              = SWAP_UINT16(ph->frontend_settings);
    }
 
-   /* use following code to artificially dop packages for testing
-   if ((double)rand()/RAND_MAX < 0.01) {
-      std::cout << "Packet artificially dropped" << std::endl;
-      return SUCCESS;
-   }
-   */
+   // use following code to artificially dop packages for testing
+   //if ((double)rand()/RAND_MAX < 0.01) {
+   //   std::cout << "Packet artificially dropped" << std::endl;
+   //   return SUCCESS;
+   //}
 
    // check that we have a request for that board
    if (mEventRequest.count(pdaqh->serial_number) > 0) {
@@ -2198,8 +2210,9 @@ int WP::ReceiveWfPacket()
    }
    event = mEvent[pdaqh->serial_number];
 
-   // on first packet for event, start new event
-   if (pdaqh->wdaq_flags & (1 << cWDAQFlagStartOfEvent)) {
+   // on first packet for event, start new event if previous event not fully received
+   if ((pdaqh->wdaq_flags & (1 << cWDAQFlagStartOfEvent)) &&
+       event_request->mReceivedPackets > 0) {
     
       if (!IsEventValid() && mPacketsReceived > 1){
          if (mVerbose)
