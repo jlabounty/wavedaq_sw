@@ -858,7 +858,7 @@ void TCB::SetAllDCBSerdes(u_int32_t *dlys, int *bits){
    WriteBLT(RDCBSERDESCONF, conf, 1);
 
    for(int i=0; i<1; i++)conf[i]=0;
-   for(int ilink=0; ilink<2; ilink++){
+   for(int ilink=0; ilink<1; ilink++){
       conf[ilink] |= (0x20202020|dlys[ilink]);
    }
    WriteBLT(RDCBSERDESCONF, conf, 1);
