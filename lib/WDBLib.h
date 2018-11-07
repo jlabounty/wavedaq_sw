@@ -463,7 +463,7 @@ public:
    // functions
    void RequestAllBoards();
    void RequestSingleBoard(WDB* b);
-   void RequestTypes(WDB *b);
+   bool RequestTypes(WDB *b);
    void SetRequestedSegments(int s);
    WDB* GetBoard(int board_id);
    unsigned int GetEventRequestMask(int board_id);
