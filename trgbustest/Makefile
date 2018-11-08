@@ -12,7 +12,7 @@ MXML_DIR      = ../../../mxml/
 MSCB_DIR      = ../../../mscb
 WDB_DIR       = ../lib
 TCB_DIR       = ../tcb
-FW_DIR        = ../../firmware/WD2/wd2_hardware_test/wd2_xsdk_workspace/wd2_app_cmd_interpreter/src/
+FW_DIR        = ../../firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/common/src/
 
 # compiler, flags and libs
 CC            = cc
@@ -27,6 +27,7 @@ else
 FLAGS         += 
 LIBS          =  -lrt -lbsd
 endif
+FLAGS         += -D WD2_DONT_INCLUDE_REG_ACCESS_VARS
 
 FLAGS         += -I$(MSCB_DIR)/include -Iinclude -I$(WDB_DIR) -I$(TCB_DIR) -I$(FW_DIR) -I$(MXML_DIR)
 LIBS          += -lm -lutil -lpthread

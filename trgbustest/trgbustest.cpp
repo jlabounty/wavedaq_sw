@@ -30,7 +30,7 @@
 #define TESTVALUE1 0xA5A5A5A5
 
 // WD board
-WDB * wdb;
+WDB * b;
 WP * wp;
 std::vector<WDEvent*> wde;
 // TCB board
@@ -45,7 +45,7 @@ int main(int argc, char** argv)
      return 1;
    }   
 
-   wdb = new WDB(argv[1], 3);
+   b = new WDB(argv[1], 3);
    // open mscb connection
    tcb = new TCB(argv[2], 20, 17, 1);
    tcb->fh = mscb_init(argv[2], 0, "", 0);
@@ -58,54 +58,93 @@ int main(int argc, char** argv)
 
    tcb->fverbose = 1;
 
-   wdb->Connect();
+   //WDB CONFIGURATION BEGIN
 
-   //Configure WDB
-   wdb->ReceiveControlRegisters();
-   wdb->SetSendBlocked(true); // update all control register together
-   //wdb->SetInterPacketDelay(0x40000);
-   wdb->SetInterPacketDelay(0x80000);
-   wdb->SetDrs0ChnTxEnable(0x1FF);
-   wdb->SetDrs1ChnTxEnable(0x1FF);
-   wdb->SetReadoutSrcSel(WDB::cReadoutSrcDrs);
-   wdb->SetFeMux(-1, WDB::cFeMuxInput);
-   wdb->SetTimingReferenceSignal(WDB::cTimingReferenceSine);
-   wdb->SetDrsSampleFreq(1200);
-   wdb->SetTriggerEnable(true);
-   wdb->SetTriggerFallingEdge(true);
-   wdb->SetTriggerDelayEnable(false);
-   wdb->SetTriggerExternalOr(true);
-   wdb->SetTriggerCfgOr(0);
-   wdb->SetTriggerCfgAnd(0);
-   wdb->SetTriggerLocalScheme(WDB::cTriggerSchemeSimple);
-   wdb->SetExtClkInSel(0);
-   wdb->SetDaqClkSrcSel(0);
-   wdb->SetLmkInputFreq(80);
-   wdb->ResetTcbOserdesIf();
-   wdb->ResetTcbOserdesPll();
-   wdb->SetTriggerShaperEnable(true);
-   wdb->SetTriggerPulseLength(4);
-   wdb->SetSendBlocked(false);
-   wdb->SendControlRegisters();
-   wdb->ResetDrsControlFsm();
-   wdb->ResetAllPll();
-   wdb->LoadVoltageCalibration(wdb->GetDrsSampleFreq(), "./");
-   wdb->LoadTimeCalibration(wdb->GetDrsSampleFreq(), "./");
-   wdb->SetDaqNormal(true);
+   b->Connect();
+   b->ReceiveControlRegisters();
+   
+   b->SetDaqSingle(false);
+   b->SetDaqAuto(false);
+   b->SetDaqNormal(false);
+   
+   b->SetSendBlocked(true); // update all control register together
+   
+   // general board settings
+   b->SetInterPkgDelay(0x60000);//default interpacket delay for 6 crate
+
+   // turn on all boards by default, to be changed later in trigger_settings_changed
+   b->SetDrsChTxEn(0x3FFFF);
+   b->SetAdcChTxEn(0);
+   b->SetTdcChTxEn(0);
+   b->SetTrgTxEn(0);
+   b->SetSclTxEn(0);
+   b->SetZeroSuprEn(false);
+   
+   // b->SetReadoutSrcSel(WDB::cReadoutSrcDrs);
+   b->SetFeMux(-1, WDB::cFeMuxInput);
+   
+   // reference clock settings
+   b->SetTimingReferenceSignal(WDB::cTimingReferenceSquare);
+   
+   // External trigger settings
+   b->SetTriggerTypeSel(1);
+   b->SetExtTriggerOutEnable(0);
+   
+   // Set backplane clock source 80 MHz
+   b->SetExtClkInSel(0);
+   b->SetDaqClkSrcSel(0);
+   b->SetLmkInputFreq(80);
+   
+   // Set training pattern
+   b->SetAdvTrgCtrl(0x00000431);
+   
+   // now send all changed registers in one packet
+   b->SetSendBlocked(false);
+   b->SendControlRegisters();
+   
+   // Sync LMK
+   b->SetApplySettingsLmk(1);
+   b->LmkSyncLocal();
+   b->ReceiveStatusRegister(WD2_DRS_SAMPLE_FREQ_REG);
+   
+   // Reset PLLs
+   b->ResetAllPll();
+   
+   // Check if PLLs locked
+   sleep_ms(100);
+   b->GetPllLock(true);
+   if (!b->GetLmkPllLock() || !b->GetDaqPllLock()) {
+     return 1;
+   }
+   
+   //Reset TCB OSerdes
+   b->ResetTcbOserdesIf();
+   
+   // Reset DRS FSM
+   b->ResetDrsControlFsm();
+   b->ResetPackager();
+   
+   // start DRS which removes the busy
+   b->SetDaqSingle(false);
+   b->SetDaqAuto(false);
+   b->SetDaqNormal(true);
+   
    // read all status registers
-   wdb->ReceiveStatusRegisters();
+   b->ReceiveStatusRegisters();
+   
+   //WDB CONFIGURATION END
    
    std::cout << std::endl << "========== Board Info ==========" << std::endl;
-   wdb->PrintVersion();
+   b->PrintVersion();
 
    //CONFIGURE WP
    std::vector<WDB*> wdbvec;
-   wdbvec.push_back(wdb);
+   wdbvec.push_back(b);
    wp = new WP(wdbvec, 3, "");
    wp->SetAllCalib(true);
    wp->RequestAllBoards();
-   wdb->SetDestinationPort(wp->GetServerPort());
-   WDEvent *e = new WDEvent(wdb->GetSerialNumber());
+   b->SetDestinationPort(wp->GetServerPort());
+   WDEvent *e = new WDEvent(b->GetSerialNumber());
    wde.push_back(e);
 
    //Configure TCB
@@ -119,7 +158,7 @@ int main(int argc, char** argv)
 
    tcb->SWStop();
    tcb->SWSync();
-   wdb->ResetEventCounter();
+   b->ResetEventCounter();
    wp->ResetStatistics();
    tcb->GoRun();   
 
@@ -143,26 +182,23 @@ int main(int argc, char** argv)
      printf("Trigger type: %d\n", trgtype&0x3F);
 
      //delay
-     //usleep(100000);
+     usleep(1000000);
 
      //READ WDB
      bool ret = wp->GetLastEvent(100, wde);
      printf("got WD event, return val=%d\n", ret);
      printf("WD event number %d\n", wde[0]->mTriggerNumber);
      printf("WD trigger type %d\n", wde[0]->mTriggerType&0x3F);
-
-     //COMPARE
-
+     for(int icha = 0; icha<18; icha++) 
+       printf("Channel %d trigger cell %d\n", icha,wde[0]->mTriggerCell[icha]);
 
      tcb->GoRun();
 
-     char c = getchar();
-     if(c=='q') flag=false;
       
    }
 
    delete tcb;
-   delete wdb;
+   delete b;
 
    return 0;
 }
