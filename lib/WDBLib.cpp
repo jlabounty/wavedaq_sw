@@ -1701,6 +1701,7 @@ void WDEvent::ClearEvent()
    for (int i=0 ; i<WD_N_CHANNELS ; i++) {
       mDRSChannelPresent[i] = false;
       mADCChannelPresent[i] = false;
+      mTDCChannelPresent[i] = false;
    }
 }
 
@@ -1718,6 +1719,8 @@ void WDEvent::SetWDEventHeaderInfo(WDAQ_FRAME_HEADER *pdaqh, WD_FRAME_HEADER *ph
       mDRSChannelPresent[channel] = true;
    if (pdaqh->data_type == cDataTypeADC)
       mADCChannelPresent[channel] = true;
+   if (pdaqh->data_type == cDataTypeTDC)
+      mTDCChannelPresent[channel] = true;
    
    mEventNumber = ph->event_number;
    mSamplingFrequency = (unsigned int)(ph->sampling_frequency / 1000.0 + 0.5);  // convert kHz to MHz
@@ -2416,12 +2419,20 @@ int WP::ReceiveWfPacket()
 
       auto pd = (unsigned char*)(ph+1);
       memcpy(&event->mWfTDC[channel_number][pdaqh->data_chunk_offset], pd, pdaqh->payload_length);
+
+      // mark received channel
+      event->mTDCChannelPresent[channel_number] = true;
    }
 
    // decode advanced trigger data
    if (pdaqh->data_type == cDataTypeTrg) {
-      auto pd = (unsigned char*)(ph+1);
-      memcpy(event->mTrgData+pdaqh->data_chunk_offset, pd, pdaqh->payload_length);
+      auto pd = (unsigned long*)(ph+1);
+      //assure data are transmitted in 64-bit blocks
+      assert(pdaqh->payload_length%8 == 0);
+      assert(pdaqh->data_chunk_offset%8 == 0);
+      for(int i=0; i<pdaqh->payload_length; i+=8){
+          event->mTrgData[pdaqh->data_chunk_offset/8] = SWAP_UINT64(pd[i]);
+      }
    }
    
    // decode scaler data
