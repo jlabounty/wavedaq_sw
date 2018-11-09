@@ -38,12 +38,17 @@ TCB* tcb;
 
 int main(int argc, char** argv)
 {
+  int nr_of_events = 20;
+  
   srand(time(NULL));
    // check arguments
-   if (argc != 3) {
-     printf("please use %s wdXXX mscbYYY\n", argv[0]);
+   if ( (argc < 3) || (argc > 4) ) {
+     printf("please use %s wdXXX mscbYYY\n [event count]", argv[0]);
      return 1;
    }   
+   if (argc == 4) {
+     nr_of_events = atoi(argv[3]);
+   }
 
    b = new WDB(argv[1], 3);
    // open mscb connection
@@ -165,21 +170,30 @@ int main(int argc, char** argv)
    std::cout << "OK" << std::endl;
    
    //MAIN LOOP
-   bool flag=true;
-   while(flag){
-
+   int trg_cell_drs_a;
+   int trg_cell_drs_b;
+   int trg_cell_a_error;
+   int trg_cell_b_error;
+   int offset_count[11] = {0,0,0,0,0,0,0,0,0,0,0};
+   int offset_ratio;
+   int bar_len;
+   
+//   bool flag=true;
+//   while(flag){
+   for( int evnt=0 ; evnt<nr_of_events ; evnt++)
+   {
      //GENERATE TRIGGER
      u_int32_t trgforce = rand()%64;
-     printf("generating trigger type %d\n", trgforce);
+     printf("\n\n===== Generated event %d / %d: generating trigger type %d =====\n", evnt+1, nr_of_events, trgforce);
      tcb->ForceTrigger(trgforce);
 
      //READ TCB
      u_int32_t evnumber;
      tcb->GetEventCounter(&evnumber);
-     printf("Event number %d\n", evnumber);
+     printf("TCB Event number %d\n", evnumber);
      u_int32_t trgtype;
      tcb->GetTriggerType(&trgtype);
-     printf("Trigger type: %d\n", trgtype&0x3F);
+     printf("TCB Trigger type: %d\n", trgtype&0x3F);
 
      //delay
      usleep(1000000);
@@ -189,14 +203,73 @@ int main(int argc, char** argv)
      printf("got WD event, return val=%d\n", ret);
      printf("WD event number %d\n", wde[0]->mTriggerNumber);
      printf("WD trigger type %d\n", wde[0]->mTriggerType&0x3F);
-     for(int icha = 0; icha<18; icha++) 
-       printf("Channel %d trigger cell %d\n", icha,wde[0]->mTriggerCell[icha]);
 
+     //Consistency check
+     trg_cell_a_error = 0;
+     trg_cell_b_error = 0;
+     trg_cell_drs_a = wde[0]->mTriggerCell[16];
+     for(int icha = 0; icha<8; icha++)
+     {
+       if( trg_cell_drs_a != wde[0]->mTriggerCell[icha] ) trg_cell_a_error = 1;
+     }
+     trg_cell_drs_b = wde[0]->mTriggerCell[17];
+     for(int icha = 8; icha<16; icha++)
+     {
+       if( trg_cell_drs_b != wde[0]->mTriggerCell[icha] ) trg_cell_b_error = 1;
+     }
+
+     if( trg_cell_a_error || trg_cell_b_error )
+     {
+       printf("=====> Trigger cell consistency error !!! <=====\n");
+//       printf("---------------------------\n");
+//       for(int icha = 0; icha<8; icha++) 
+//         printf("Channel %2d trigger cell %d\n", icha,wde[0]->mTriggerCell[icha]);
+//       printf("Channel 16 trigger cell %d\n", wde[0]->mTriggerCell[16]);
+//       printf("---------------------------\n");
+//       for(int icha = 8; icha<16; icha++) 
+//         printf("Channel %2d trigger cell %d\n", icha,wde[0]->mTriggerCell[icha]);
+//       printf("Channel 17 trigger cell %d\n", wde[0]->mTriggerCell[17]);
+//       printf("---------------------------\n");
+     }
+     printf("---------------------------\n");
+     for(int icha = 0; icha<8; icha++) 
+       printf("Channel %2d trigger cell %d\n", icha,wde[0]->mTriggerCell[icha]);
+     printf("Channel 16 trigger cell %d\n", wde[0]->mTriggerCell[16]);
+     printf("---------------------------\n");
+     for(int icha = 8; icha<16; icha++) 
+       printf("Channel %2d trigger cell %d\n", icha,wde[0]->mTriggerCell[icha]);
+     printf("Channel 17 trigger cell %d\n", wde[0]->mTriggerCell[17]);
+     printf("---------------------------\n");
+
+     //Store statistics
+     
+     //Offset (trg_cell_drs_b - trg_cell_drs_a) array
+     //Index     0   1   2   3   4   5   6   7   8   9  10
+     //Offset   -5  -4  -3  -2  -1   0   1   2   3   4   5
+     offset_count[ trg_cell_drs_b - trg_cell_drs_a + 5 ]++;
+     
      tcb->GoRun();
-
-      
+     
    }
 
+   //Print statistics
+   printf("\r\n\r\nTrigger Cell Offsets (DRS B - DRS A)\r\n");
+   printf(        "====================================\r\n\r\n");
+   printf(        "%d events captured\r\n\r\n", nr_of_events);
+
+   for( int i=0 ; i<11 ; i++)
+   {
+     offset_ratio = (1000*offset_count[i]/nr_of_events+5)/10;
+     //Show bar with 5% per item (max. 20 items)
+     bar_len = offset_ratio/5;
+     if( (bar_len == 0) && (offset_ratio > 0) ) bar_len = 1;
+     printf("Offset %2d:   ", i-5);
+     for( int j=0 ; j<bar_len    ; j++) printf("#");
+     for( int j=0 ; j<20-bar_len ; j++) printf(" ");
+     printf("   %3d %%   (%d)\r\n", offset_ratio, offset_count[i]);
+   }
+   printf("\r\n");
+   
    delete tcb;
    delete b;
 
