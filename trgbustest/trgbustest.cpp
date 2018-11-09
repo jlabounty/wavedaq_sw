@@ -172,8 +172,9 @@ int main(int argc, char** argv)
    //MAIN LOOP
    int trg_cell_drs_a;
    int trg_cell_drs_b;
-   int trg_cell_a_error;
-   int trg_cell_b_error;
+   int trg_cell_a_errors = 0;
+   int trg_cell_b_errors = 0;
+   int report_trg_cell_error;
    int offset_count[11] = {0,0,0,0,0,0,0,0,0,0,0};
    int offset_ratio;
    int bar_len;
@@ -205,20 +206,27 @@ int main(int argc, char** argv)
      printf("WD trigger type %d\n", wde[0]->mTriggerType&0x3F);
 
      //Consistency check
-     trg_cell_a_error = 0;
-     trg_cell_b_error = 0;
+     report_trg_cell_error = 0;
      trg_cell_drs_a = wde[0]->mTriggerCell[16];
      for(int icha = 0; icha<8; icha++)
      {
-       if( trg_cell_drs_a != wde[0]->mTriggerCell[icha] ) trg_cell_a_error = 1;
+       if( trg_cell_drs_a != wde[0]->mTriggerCell[icha] )
+       {
+         report_trg_cell_error = 1;
+         trg_cell_a_errors++;
+       }
      }
      trg_cell_drs_b = wde[0]->mTriggerCell[17];
      for(int icha = 8; icha<16; icha++)
      {
-       if( trg_cell_drs_b != wde[0]->mTriggerCell[icha] ) trg_cell_b_error = 1;
+       if( trg_cell_drs_b != wde[0]->mTriggerCell[icha] )
+       {
+         report_trg_cell_error = 1;
+         trg_cell_b_errors++;
+       }
      }
 
-     if( trg_cell_a_error || trg_cell_b_error )
+     if( report_trg_cell_error )
      {
        printf("=====> Trigger cell consistency error !!! <=====\n");
 //       printf("---------------------------\n");
@@ -231,6 +239,15 @@ int main(int argc, char** argv)
 //       printf("Channel 17 trigger cell %d\n", wde[0]->mTriggerCell[17]);
 //       printf("---------------------------\n");
      }
+     else
+     {
+       //Store statistics
+       
+       //Offset (trg_cell_drs_b - trg_cell_drs_a) array
+       //Index     0   1   2   3   4   5   6   7   8   9  10
+       //Offset   -5  -4  -3  -2  -1   0   1   2   3   4   5
+       offset_count[ trg_cell_drs_b - trg_cell_drs_a + 5 ]++;
+     }
      printf("---------------------------\n");
      for(int icha = 0; icha<8; icha++) 
        printf("Channel %2d trigger cell %d\n", icha,wde[0]->mTriggerCell[icha]);
@@ -240,13 +257,6 @@ int main(int argc, char** argv)
        printf("Channel %2d trigger cell %d\n", icha,wde[0]->mTriggerCell[icha]);
      printf("Channel 17 trigger cell %d\n", wde[0]->mTriggerCell[17]);
      printf("---------------------------\n");
-
-     //Store statistics
-     
-     //Offset (trg_cell_drs_b - trg_cell_drs_a) array
-     //Index     0   1   2   3   4   5   6   7   8   9  10
-     //Offset   -5  -4  -3  -2  -1   0   1   2   3   4   5
-     offset_count[ trg_cell_drs_b - trg_cell_drs_a + 5 ]++;
      
      tcb->GoRun();
      
@@ -255,18 +265,30 @@ int main(int argc, char** argv)
    //Print statistics
    printf("\r\n\r\nTrigger Cell Offsets (DRS B - DRS A)\r\n");
    printf(        "====================================\r\n\r\n");
-   printf(        "%d events captured\r\n\r\n", nr_of_events);
-
+   printf(        "%d events captured\r\n", nr_of_events);
+   if( trg_cell_a_errors || trg_cell_b_errors )
+   {
+     printf("Events ignored: %d %%   (%d)\r\n", (1000*(trg_cell_a_errors+trg_cell_b_errors)+5)/10, trg_cell_a_errors+trg_cell_b_errors);
+     printf("(due to inconsistent stop cell values)\r\n");
+   }
+   printf("\r\n");
+ 
    for( int i=0 ; i<11 ; i++)
    {
      offset_ratio = (1000*offset_count[i]/nr_of_events+5)/10;
      //Show bar with 5% per item (max. 20 items)
      bar_len = offset_ratio/5;
-     if( (bar_len == 0) && (offset_ratio > 0) ) bar_len = 1;
+     if( (bar_len == 0) && (offset_count[i] > 0) ) bar_len = 1;
      printf("Offset %2d:   ", i-5);
      for( int j=0 ; j<bar_len    ; j++) printf("#");
      for( int j=0 ; j<20-bar_len ; j++) printf(" ");
      printf("   %3d %%   (%d)\r\n", offset_ratio, offset_count[i]);
+   }
+   printf("\r\n");
+   if( trg_cell_a_errors || trg_cell_b_errors )
+   {
+     printf("DRS A Trigger Cell Consistency Errors: %d\n", trg_cell_a_errors);
+     printf("DRS B Trigger Cell Consistency Errors: %d\n", trg_cell_b_errors);
    }
    printf("\r\n");
    
