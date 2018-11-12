@@ -1701,6 +1701,7 @@ void WDEvent::ClearEvent()
    for (int i=0 ; i<WD_N_CHANNELS ; i++) {
       mDRSChannelPresent[i] = false;
       mADCChannelPresent[i] = false;
+      mTDCChannelPresent[i] = false;
    }
 }
 
@@ -1718,6 +1719,8 @@ void WDEvent::SetWDEventHeaderInfo(WDAQ_FRAME_HEADER *pdaqh, WD_FRAME_HEADER *ph
       mDRSChannelPresent[channel] = true;
    if (pdaqh->data_type == cDataTypeADC)
       mADCChannelPresent[channel] = true;
+   if (pdaqh->data_type == cDataTypeTDC)
+      mTDCChannelPresent[channel] = true;
    
    mEventNumber = ph->event_number;
    mSamplingFrequency = (unsigned int)(ph->sampling_frequency / 1000.0 + 0.5);  // convert kHz to MHz
@@ -1788,11 +1791,17 @@ void WDEventRequest::ProcessPacket(WDAQ_FRAME_HEADER *pdaqh)
 
 bool WDEventRequest::IsEventValid()
 {
+   bool valid = true;
    for (auto const& r : mRequest) {
-      if (r.second->mRequested && !r.second->mValid)
-         return false;
+      if(r.second->mRequested){
+         if (!r.second->mValid){
+            valid = false;
+            break;
+         }
+      }
    }
-   return true;
+
+   return valid;
 }
 
 //--------------------------------------------------------------------
@@ -1882,10 +1891,10 @@ void WP::RequestSingleBoard(WDB *b)
 {
    // Caution: mEventRequest is accessed by the collector thread. We can only access it here
    // without mutex since we only change it when the board configuration changes.
-   for (auto &r: mEventRequest)
-      r.second->mBoardRequested = (r.second->mBoardId == b->GetSerialNumber());
 
-   RequestTypes(b);
+   bool boardEnable = RequestTypes(b);
+   mEventRequest[b->GetSerialNumber()]->mBoardRequested = boardEnable;
+   if (mVerbose) printf("board %d %s\n", b->GetSerialNumber(), (boardEnable)?"enabled":"disabled");
 }
 
 void WP::RequestAllBoards()
@@ -1894,14 +1903,31 @@ void WP::RequestAllBoards()
       RequestSingleBoard(b);
 }
 
-void WP::RequestTypes(WDB *b)
+bool WP::RequestTypes(WDB *b)
 {
    // set active data types in event request
-   mEventRequest[b->GetSerialNumber()]->mRequest[cDataTypeDRS]->mRequested    = (b->GetDrsChTxEn() > 0);
-   mEventRequest[b->GetSerialNumber()]->mRequest[cDataTypeADC]->mRequested    = (b->GetAdcChTxEn() > 0);
-   mEventRequest[b->GetSerialNumber()]->mRequest[cDataTypeTDC]->mRequested    = (b->GetTdcChTxEn() > 0);
-   mEventRequest[b->GetSerialNumber()]->mRequest[cDataTypeTrg]->mRequested    = b->GetTrgTxEn();
-   mEventRequest[b->GetSerialNumber()]->mRequest[cDataTypeScaler]->mRequested = b->GetSclTxEn();
+   bool drsEnable = (b->GetDrsChTxEn() > 0);
+   bool adcEnable = (b->GetAdcChTxEn() > 0);
+   bool tdcEnable = (b->GetTdcChTxEn() > 0);
+   bool trgEnable = b->GetTrgTxEn();
+   bool sclEnable = b->GetSclTxEn();
+   mEventRequest[b->GetSerialNumber()]->mRequest[cDataTypeDRS]->mRequested    = drsEnable;
+   mEventRequest[b->GetSerialNumber()]->mRequest[cDataTypeADC]->mRequested    = adcEnable;
+   mEventRequest[b->GetSerialNumber()]->mRequest[cDataTypeTDC]->mRequested    = tdcEnable;
+   mEventRequest[b->GetSerialNumber()]->mRequest[cDataTypeTrg]->mRequested    = trgEnable;
+   mEventRequest[b->GetSerialNumber()]->mRequest[cDataTypeScaler]->mRequested = sclEnable;
+
+   if (mVerbose)
+      printf("Requesting board %3d Drs/Adc/Tdc/Trg/Scaler=%d/%d/%d/%d/%d\n",
+             b->GetSerialNumber(),
+             (drsEnable)?1:0,
+             (adcEnable)?1:0,
+             (tdcEnable)?1:0,
+             (trgEnable)?1:0,
+             (sclEnable)?1:0
+            );
+
+   return drsEnable || adcEnable || tdcEnable || trgEnable || sclEnable;
 }
 
 //--------------------------------------------------------------------
@@ -1973,16 +1999,16 @@ bool WP::GetLastEvent(int timeout, std::vector<WDEvent *> event)
       std::lock_guard<std::mutex> lock(mEventAccessMutex);
       int copied = 0;
       
-      std::vector<WDEvent*>::iterator ed = event.begin();
-      for (auto es: mEventLast) {
-         if (es.second->mEventValid){
-            **(ed) = *es.second;
-            copied++;
-         } else {
-            (*ed)->mEventValid = false;
-         }
-         ed++;
+      for (auto ed: event){
+        WDEvent* es = mEventLast[ed->mBoardId];
+        if(es->mEventValid){
+           *ed = *es;
+           copied++;
+        } else {
+           ed->mEventValid = false;
+        }
       }
+
       mEventNew = false;
       if (mLogfile != "") {
          std::ofstream f;
@@ -2013,12 +2039,32 @@ void WP::StartNewEvent()
 
 bool WP::IsEventValid()
 {
+   bool valid = true;
+   int validBoards = 0;
+   int requestedBoards = 0;
    for (auto &er: mEventRequest) {
-      if (er.second->mBoardRequested && !er.second->IsEventValid())
-         return false;
+      if (er.second->mBoardRequested){
+         requestedBoards++;
+         if (!er.second->IsEventValid()){
+            valid = false;
+            break;
+         } else {
+            validBoards++;
+         }
+      }
    }
 
-   return true;
+   /*if (mLogfile != "" || mVerbose >= 3) {
+      std::ofstream f;
+      f.open(mLogfile, std::ios_base::app);
+      if(valid){
+         f << "Valid event with " << validBoards << "/"<< requestedBoards << " out "<< mEventRequest.size() << " boards"<< std::endl;
+      } else {
+         f << "Invalid event with " << validBoards << "/"<< requestedBoards <<" out "<< mEventRequest.size() << " valid boards" << std::endl;
+      }
+   }*/
+
+   return valid;
 }
 
 void WP::LogEvent(WDAQ_FRAME_HEADER *pdaqh, WD_FRAME_HEADER   *ph)
@@ -2373,12 +2419,20 @@ int WP::ReceiveWfPacket()
 
       auto pd = (unsigned char*)(ph+1);
       memcpy(&event->mWfTDC[channel_number][pdaqh->data_chunk_offset], pd, pdaqh->payload_length);
+
+      // mark received channel
+      event->mTDCChannelPresent[channel_number] = true;
    }
 
    // decode advanced trigger data
    if (pdaqh->data_type == cDataTypeTrg) {
-      auto pd = (unsigned char*)(ph+1);
-      memcpy(event->mTrgData+pdaqh->data_chunk_offset, pd, pdaqh->payload_length);
+      auto pd = (unsigned long*)(ph+1);
+      //assure data are transmitted in 64-bit blocks
+      assert(pdaqh->payload_length%8 == 0);
+      assert(pdaqh->data_chunk_offset%8 == 0);
+      for(int i=0; i<pdaqh->payload_length; i+=8){
+          event->mTrgData[pdaqh->data_chunk_offset/8] = SWAP_UINT64(pd[i]);
+      }
    }
    
    // decode scaler data

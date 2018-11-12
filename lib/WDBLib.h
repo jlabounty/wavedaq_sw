@@ -215,9 +215,10 @@ public:
    float            mWfUADC[WD_N_CHANNELS][2048];
    float            mWfTADC[WD_N_CHANNELS][2048];
 
+   int              mTDCChannelPresent[WD_N_CHANNELS];
    unsigned char    mWfTDC[WD_N_CHANNELS][512];
    
-   unsigned char    mTrgData[4096];
+   unsigned long    mTrgData[512];
 
    unsigned long    mScaler[18];
 
@@ -463,7 +464,7 @@ public:
    // functions
    void RequestAllBoards();
    void RequestSingleBoard(WDB* b);
-   void RequestTypes(WDB *b);
+   bool RequestTypes(WDB *b);
    void SetRequestedSegments(int s);
    WDB* GetBoard(int board_id);
    unsigned int GetEventRequestMask(int board_id);

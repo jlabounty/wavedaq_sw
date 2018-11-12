@@ -50,6 +50,7 @@ typedef struct {
    bool              updatePeriodic;
    int               dbgRx;
    int               dbgTx;
+   bool              backplaneClk;
 } GLOBALS;
 
 unsigned int demoDrsSampleFreq = 5016;
@@ -889,6 +890,7 @@ int main(int argc, const char * argv[])
    gl.readoutMode = cReadoutModeDRS;
    gl.updatePeriodic = false;
    gl.dbgRx = gl.dbgTx = 0;
+   gl.backplaneClk = false;
    
    // parse command line parameters
    if (argc < 2) {
@@ -920,6 +922,9 @@ int main(int argc, const char * argv[])
 
       else if (arg == "-s")
          gl.triggerSelfArm = true;
+
+      else if (arg == "-bp")
+         gl.backplaneClk = true;
 
       else if (arg == "-u")
          gl.updatePeriodic = true;
@@ -999,6 +1004,27 @@ int main(int argc, const char * argv[])
                b->PrintVersion();
             }
 
+            //switch to backplane clock
+            if (gl.backplaneClk){
+               std::cout << "with external clk ...";
+               b->SetExtClkInSel(0);
+               b->SetDaqClkSrcSel(0);
+               b->SetLmkInputFreq(80);
+
+               b->SetApplySettingsLmk(1);
+               b->LmkSyncLocal();
+               b->ReceiveStatusRegister(WD2_DRS_SAMPLE_FREQ_REG);
+
+               b->ResetAllPll();
+               sleep_ms(10);
+               b->GetPllLock(true);
+               b->ResetTcbOserdesIf();
+               b->ResetDrsControlFsm();
+               b->ResetPackager();
+               b->ReceiveStatusRegisters();
+            }
+            
+
             // load calibration data for board
             b->LoadVoltageCalibration(b->GetDrsSampleFreqMhz());
             b->LoadTimeCalibration(b->GetDrsSampleFreqMhz());
@@ -1008,7 +1034,7 @@ int main(int argc, const char * argv[])
                b->SetMcxRxSigSel(gl.dbgRx);
             if (gl.dbgTx > 0)
                b->SetMcxTxSigSel(gl.dbgTx);
-            
+
             // reset PLLs
             if (gl.reset) {
                b->ResetAllPll();
