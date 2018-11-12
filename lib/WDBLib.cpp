@@ -608,18 +608,18 @@ void WDB::ReceiveControlRegisters(unsigned int index, unsigned int nReg)
 #else
    std::string result;
    std::ostringstream req;
-   req << "rr 0x" << std::hex << WD2_CTRL_REG_BASE_OFS+index*4 << " " << std::dec << nReg;
+   req << "rr 0x" << std::hex << WD2_REG_WDB_LOC+index*4 << " " << std::dec << nReg;
    
-   result = SendReceiveUDP(req.str(), 500);
+   result = SendReceiveUDP(req.str());
    std::stringstream ss(result);
    std::string line;
    
    for (auto i=index ; i<index+nReg ; i++) {
-      std::getline(ss, line, '\r');
+      std::getline(ss, line, '\n');
       auto adr = (unsigned int)std::stoul(line.substr(3), nullptr, 16);
-      auto idx = (adr - WD2_REG_WDB_LOC_OFS) / 4;
+      auto idx = (adr - WD2_REG_WDB_LOC) / 4;
       if (idx < REG_NR_OF_CTRL_REGS)
-         this->creg[idx] = (unsigned int)std::stoul(line.substr(10), nullptr, 16);
+         this->creg[idx] = (unsigned int)std::stoul(line.substr(12), nullptr, 16);
    }
 #endif
 }
@@ -642,16 +642,16 @@ void WDB::ReceiveStatusRegisters(unsigned int index, unsigned int nReg)
    std::ostringstream req;
    req << "rr 0x" << std::hex << WD2_STAT_REG_BASE_OFS+index*4 << " " << std::dec << nReg;
    
-   result = SendReceiveUDP(req.str(), 500);
+   result = SendReceiveUDP(req.str());
    std::stringstream ss(result);
    std::string line;
    
    for (unsigned int i=index ; i<index+nReg ; i++) {
-      std::getline(ss, line, '\r');
+      std::getline(ss, line, '\n');
       auto adr = (unsigned int)std::stoul(line.substr(3), nullptr, 16);
       auto idx = (adr - WD2_STAT_REG_BASE_OFS) / 4;
       if (idx < REG_NR_OF_STAT_REGS) {
-         this->sreg[idx] = (unsigned int)std::stoul(line.substr(10), nullptr, 16);
+         this->sreg[idx] = (unsigned int)std::stoul(line.substr(12), nullptr, 16);
       }
    }
 #endif
@@ -675,7 +675,7 @@ void WDB::ReceiveStatusRegister(int rofs)
    req << "rr 0x" << std::hex << rofs << " 1";
       
    result = SendReceiveUDP(req.str());
-   this->sreg[index] = (unsigned int)std::stoul(result.substr(13), nullptr, 16);
+   this->sreg[index] = (unsigned int)std::stoul(result.substr(12), nullptr, 16);
 #endif
 }
 
