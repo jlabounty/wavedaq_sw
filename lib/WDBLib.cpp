@@ -1715,17 +1715,18 @@ void WDEvent::SetEventHeaderInfo(WDAQ_FRAME_HEADER *pdaqh)
 void WDEvent::SetWDEventHeaderInfo(WDAQ_FRAME_HEADER *pdaqh, WD_FRAME_HEADER *ph)
 {
    int channel = ph->channel_info & 0x1F;
-   if (pdaqh->data_type == cDataTypeDRS)
+   if (pdaqh->data_type == cDataTypeDRS){
       mDRSChannelPresent[channel] = true;
+      mSamplingFrequency = (unsigned int)(ph->sampling_frequency / 1000.0 + 0.5);  // convert kHz to MHz
+      mTriggerCell[channel] = ph->drs_trigger_cell;
+   }
    if (pdaqh->data_type == cDataTypeADC)
       mADCChannelPresent[channel] = true;
    if (pdaqh->data_type == cDataTypeTDC)
       mTDCChannelPresent[channel] = true;
    
    mEventNumber = ph->event_number;
-   mSamplingFrequency = (unsigned int)(ph->sampling_frequency / 1000.0 + 0.5);  // convert kHz to MHz
    mTriggerNumber = ph->trigger_information[0] | (ph->trigger_information[1] << 8); // ## to be changed
-   mTriggerCell[channel] = ph->drs_trigger_cell;
    mTriggerType = ph->trigger_information[2] | (ph->trigger_information[3] << 8);   // ## to be changed
    mTemperature = std::round(ph->temperature*0.0625 * 10 + 0.5) / 10.0f;
 }
@@ -2508,6 +2509,12 @@ void WP::CalibrateWaveforms(WDEvent* ev)
             for (int j=0 ; j<2048 ; j++)
                ev->mWfUADC[i][j] -= ofs;
          }
+
+         if (mLogfile != "") {
+            std::ofstream f;
+            f.open(mLogfile, std::ios_base::app);
+            f << "Calibrated ADC for board " << wdb->GetName() << " (time = "<< usSince(mEventStartTime) << "us)" << std::endl;
+         }
       }
       
       // just set nominal time bins from ADC sampling rate
@@ -2527,6 +2534,20 @@ void WP::CalibrateWaveforms(WDEvent* ev)
       bool bValid = (ev->mSamplingFrequency == wdb->mVCalib.GetSamplingFrequency() &&
                      wdb->mVCalib.IsValid());
       
+      if(!bValid){
+         if (mLogfile != "") {
+            std::ofstream f;
+            f.open(mLogfile, std::ios_base::app);
+            f << "DRS data received for board " << wdb->GetName() << " but calibrations not valid: event sampling freq "<< ev->mSamplingFrequency << " calibration frequency "<< wdb->mVCalib.GetSamplingFrequency() << ", calibration valid flag "<< wdb->mVCalib.IsValid()<<" (time = "<< usSince(mEventStartTime) << "us)" << std::endl;
+         }
+      } else {
+         if (mLogfile != "") {
+            std::ofstream f;
+            f.open(mLogfile, std::ios_base::app);
+            f << "DRS data received for board " << wdb->GetName() << ", starting calibrations (time = "<< usSince(mEventStartTime) << "us)" << std::endl;
+         }
+      }
+
       // cell-by-cell offset calibration
       if (mOfsCalib1 && bValid) {
          ev->mVCalibrated = true;
@@ -2542,6 +2563,12 @@ void WP::CalibrateWaveforms(WDEvent* ev)
                for (int j=0 ; j<1024 ; j++)
                   ev->mWfUDRS[i][j] -= wdb->mVCalib.mCalib.wf_offset1[i][j];
          }
+
+         if (mLogfile != "") {
+            std::ofstream f;
+            f.open(mLogfile, std::ios_base::app);
+            f << "DRS cell calibrated for board " << wdb->GetName() << " (time = "<< usSince(mEventStartTime) << "us)" << std::endl;
+         }
       };
       
       // start-to-end offset calibration
@@ -2549,6 +2576,11 @@ void WP::CalibrateWaveforms(WDEvent* ev)
          for (int i=0 ; i<WD_N_CHANNELS-2 ; i++)
             for (int j=0 ; j<1024 ; j++)
                ev->mWfUDRS[i][j] -= wdb->mVCalib.mCalib.wf_offset2[i][j];
+         if (mLogfile != "") {
+            std::ofstream f;
+            f.open(mLogfile, std::ios_base::app);
+            f << "DRS start to end calibrated for board " << wdb->GetName() << " (time = "<< usSince(mEventStartTime) << "us)" << std::endl;
+         }
       };
       
       // gain calibration
@@ -2572,6 +2604,11 @@ void WP::CalibrateWaveforms(WDEvent* ev)
                      ev->mWfUDRS[i][j] /= wdb->mVCalib.mCalib.wf_gain2[i][j];
                }
          }
+         if (mLogfile != "") {
+            std::ofstream f;
+            f.open(mLogfile, std::ios_base::app);
+            f << "DRS gain calibrated for board " << wdb->GetName() << " (time = "<< usSince(mEventStartTime) << "us)" << std::endl;
+         }
       };
       
       // range calibration
@@ -2589,6 +2626,11 @@ void WP::CalibrateWaveforms(WDEvent* ev)
                ofs = 0;
             for (int j=0 ; j<1024 ; j++)
                ev->mWfUDRS[i][j] -= ofs;
+         }
+         if (mLogfile != "") {
+            std::ofstream f;
+            f.open(mLogfile, std::ios_base::app);
+            f << "DRS range calibrated for board " << wdb->GetName() << " (time = "<< usSince(mEventStartTime) << "us)" << std::endl;
          }
       };
       
