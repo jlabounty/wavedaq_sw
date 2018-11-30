@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  26.10.2018 09:31:37
+// Created :  29.11.2018 14:02:56
 //
 
 
@@ -2562,6 +2562,8 @@ public:
    // 0x9 = LMK Reference Clock (LMK input clock) 
    // 0xA = ADC Sampling Clock 
    // 0xB = Divided Data Clock (phase shifted)
+   // 0xC = LMK5 clock (directly routed from corresponding input)
+   // 0xD = SPI CS of LMK (active low)
    unsigned int GetMcxRxSigSel() { return BitExtractControl(WD2_MCX_RX_SIG_SEL_REG, WD2_MCX_RX_SIG_SEL_MASK, WD2_MCX_RX_SIG_SEL_OFS); };
    void         SetMcxRxSigSel(unsigned int value) { SetRegMask(WD2_MCX_RX_SIG_SEL_REG, WD2_MCX_RX_SIG_SEL_MASK, WD2_MCX_RX_SIG_SEL_OFS, value); };
 
