@@ -1896,7 +1896,8 @@ void WP::RequestSingleBoard(WDB *b)
 
    bool boardEnable = RequestTypes(b);
    mEventRequest[b->GetSerialNumber()]->mBoardRequested = boardEnable;
-   if (mVerbose) printf("board %d %s\n", b->GetSerialNumber(), (boardEnable)?"enabled":"disabled");
+   if (mVerbose >= 3)
+      printf("Board %d is %s\n", b->GetSerialNumber(), (boardEnable)?"enabled":"disabled");
 }
 
 void WP::RequestAllBoards()
@@ -1919,14 +1920,14 @@ bool WP::RequestTypes(WDB *b)
    mEventRequest[b->GetSerialNumber()]->mRequest[cDataTypeTrg]->mRequested    = trgEnable;
    mEventRequest[b->GetSerialNumber()]->mRequest[cDataTypeScaler]->mRequested = sclEnable;
 
-   if (mVerbose)
-      printf("Requesting board %3d Drs/Adc/Tdc/Trg/Scaler=%d/%d/%d/%d/%d\n",
+   if (mVerbose >= 3)
+      printf("Requesting board %3d DRS=%d/ADC=%d/TDC=%d/TRG=%d/Scaler=%d\n",
              b->GetSerialNumber(),
-             (drsEnable)?1:0,
-             (adcEnable)?1:0,
-             (tdcEnable)?1:0,
-             (trgEnable)?1:0,
-             (sclEnable)?1:0
+             drsEnable?1:0,
+             adcEnable?1:0,
+             tdcEnable?1:0,
+             trgEnable?1:0,
+             sclEnable?1:0
             );
 
    return drsEnable || adcEnable || tdcEnable || trgEnable || sclEnable;
@@ -2817,20 +2818,25 @@ void WP::SaveWaveforms()
       mxml_write_element(li.xml, "HUnit", "ns");
       mxml_write_element(li.xml, "VUnit", "mV");
       
-      for (auto &ev: mEvent) {
+      int b = 0;
+      for (auto &it: mEvent) {
+         auto ev = it.second;
          
-         sprintf(str, "Board_%d", ev.first);
+         if (!li.bAll && b != (size_t)li.board)
+            continue;
+         
+         sprintf(str, "Board_%d", it.first);
          mxml_start_element(li.xml, str);
          for (int i=0 ; i<WD_N_CHANNELS ; i++) {
-            if (ev.second->mDRSChannelPresent[i]) {
+            if (ev->mDRSChannelPresent[i]) {
                sprintf(str, "CHN%d", i);
                mxml_start_element(li.xml, str);
-               sprintf(str, "%d", ev.second->mTriggerCell[i]);
+               sprintf(str, "%d", ev->mTriggerCell[i]);
                mxml_write_element(li.xml, "Trigger_Cell", str);
                
                unsigned int s = 0;
                for (auto &b: mWdb)
-                  if (b->GetSerialNumber() == ev.second->mBoardId) {
+                  if (b->GetSerialNumber() == ev->mBoardId) {
                      std::vector<unsigned long>sc;
                      b->GetScalers(sc, false);
                      s = sc[i];
@@ -2842,16 +2848,16 @@ void WP::SaveWaveforms()
                mxml_start_element(li.xml, "Waveform");
                strcpy(str, "\n");
                
-               if (ev.second->mTypeValid[cDataTypeDRS]) {
+               if (ev->mTypeValid[cDataTypeDRS]) {
                   for (int j=0 ; j<1024 ; j++) {
-                     sprintf(str, "%1.3f,%1.1f", ev.second->mWfTDRS[i][j]*1E9, ev.second->mWfUDRS[i][j]*1E3);
+                     sprintf(str, "%1.3f,%1.1f", ev->mWfTDRS[i][j]*1E9, ev->mWfUDRS[i][j]*1E3);
                      mxml_write_element(li.xml, "DRSData", str);
                   }
                }
 
-               if (ev.second->mTypeValid[cDataTypeADC]) {
+               if (ev->mTypeValid[cDataTypeADC]) {
                   for (int j=0 ; j<2048 ; j++) {
-                     sprintf(str, "%1.3f,%1.1f", ev.second->mWfTADC[i][j]*1E9, ev.second->mWfUADC[i][j]*1E3);
+                     sprintf(str, "%1.3f,%1.1f", ev->mWfTADC[i][j]*1E9, ev->mWfUADC[i][j]*1E3);
                      mxml_write_element(li.xml, "ADCData", str);
                   }
                }
@@ -2861,6 +2867,7 @@ void WP::SaveWaveforms()
             }
          }
          mxml_end_element(li.xml); //Board
+         b++;
       }
       mxml_end_element(li.xml); // Event
    }
@@ -2876,9 +2883,10 @@ void WP::SaveWaveforms()
          memcpy(p, "TIME", 4);
          p += 4;
          
-         for (size_t b=0 ; b<mEvent.size() ; b++) {
-            auto ev = mEvent[b];
-            WDB *wdb = GetBoard(ev->mBoardId);
+         int b = 0;
+         for (auto const& it: mEvent) {
+            auto ev = it.second;
+            WDB *wdb = GetBoard(it.first);
             assert(wdb);
             
             if (!li.bAll && b != (size_t)li.board)
@@ -2902,6 +2910,7 @@ void WP::SaveWaveforms()
                   }
                }
             }
+            b++;
          }
       }
       
@@ -2926,9 +2935,10 @@ void WP::SaveWaveforms()
       *(unsigned short *)p = (unsigned short)(0); // range
       p += sizeof(unsigned short);
       
-      for (size_t b = 0 ; b<mEvent.size() ; b++) {
-         auto ev = mEvent[b];
-         
+      int b = 0;
+      for (auto &it: mEvent) {
+         auto ev = it.second;
+
          if (!li.bAll && b != (size_t)li.board)
             continue;
 
@@ -2981,6 +2991,7 @@ void WP::SaveWaveforms()
                }
             }
          }
+         b++;
       }
       
       int size = p - buffer;
