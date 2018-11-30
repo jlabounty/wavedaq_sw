@@ -830,6 +830,7 @@ void WDB::SetDrsSampleFreq(unsigned int f)
    
    SetAdcIfRst(1);
    SetLmk0ClkoutDiv(divider);
+   SetLmk5ClkoutDiv(divider); // CH5: smirror output to FPGA
    SetApplySettingsLmk(1);
    
    LmkSyncLocal();
