@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Extract number of WDB as address
 wdb=$1
 wdbaddr=`echo $wdb | cut -c3-5`
 
