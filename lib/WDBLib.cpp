@@ -2981,7 +2981,13 @@ void WP::SaveWaveforms()
                      // save binary date as 16-bit value:
                      // 0 = -0.5V,  65535 = +0.5V    for range 0
                      // 0 = -0.05V, 65535 = +0.95V   for range 0.45
-                     unsigned short d = (unsigned short)((ev->mWfUDRS[i][j] - wdb->GetRange() + 0.5) * 65535);
+                     // 0 = -0.95V, 65535 = +0.05V   for range -0.45
+                     float f = ev->mWfUDRS[i][j] - wdb->GetRange();
+                     if (f < -0.5)
+                        f = -0.5;
+                     if (f > 0.5)
+                        f = 0.5;
+                     unsigned short d = (unsigned short)((f + 0.5)*65535);
                      *(unsigned short *)p = d;
                      p += sizeof(unsigned short);
                   }
@@ -2990,7 +2996,13 @@ void WP::SaveWaveforms()
                      // save binary date as 16-bit value:
                      // 0 = -0.5V,  65535 = +0.5V    for range 0
                      // 0 = -0.05V, 65535 = +0.95V   for range 0.45
-                     unsigned short d = (unsigned short)((ev->mWfUADC[i][j] - wdb->GetRange() + 0.5) * 65535);
+                     // 0 = -0.95V, 65535 = +0.05V   for range -0.45
+                     float f = ev->mWfUADC[i][j] - wdb->GetRange();
+                     if (f < -0.5)
+                        f = -0.5;
+                     if (f > 0.5)
+                        f = 0.5;
+                     unsigned short d = (unsigned short)((f + 0.5)*65535);
                      *(unsigned short *)p = d;
                      p += sizeof(unsigned short);
                   }
