@@ -699,6 +699,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          bNewEvent = true;
          event.mVCalibrated = true;
          event.mTCalibrated = true;
+         event.mTypeValid[cDataTypeDRS] = true;
          for (int c=0 ; c<WD_N_CHANNELS ; c++) {
             for (int i=0 ; i<1024 ; i++) {
                float t = i*1E-6 / demoDrsSampleFreq;
