@@ -54,6 +54,7 @@
 #define RSINGLEMASK   0x809                     // mask for input channels in single crate logic
 #define RSINGLELOGIC  0x811                    // first stage configuration in single crate logic
 
+#define RALGCLKMEMADDR 0x0FFFE                   // counter stop position for ALGCLK memories
 #define RMEMADDR      0x0FFFF                   // counter stop position
 #define MEMBASEADDR   0x10000                   //base address for memories
 #define GENTMEMBASE   0x12000                   //base address for trigger generation memories (two memories with size = GENTDIM)
