@@ -249,7 +249,7 @@ class WDWDB : public WDBoard, public WDB{
       }
 
       bool IsBusy(){
-         return GetSysBusy(); 
+         return GetDrsCtrlBusy(); 
       }
 
       void Configure(){
