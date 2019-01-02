@@ -28,7 +28,7 @@ class PacketDebug : public DAQThread{
          printf("\t DataOffset:%d\n", ptr->mDataOffset);
          printf("\t EventNumber:%d\n", ptr->mEventNumber);
          printf("\t TriggerType:%x\n", ptr->mTriggerType);
-         printf("\t TriggerEventNumber:%d\n", ptr->mTriggerEventNumber);
+         printf("\t TriggerNumber:%d\n", ptr->mTriggerNumber);
          printf("\t TriggerCell:%d\n", ptr->mTriggerCell);
          printf("\t SamplingFrequency:%d\n", ptr->mSamplingFrequency);
          printf("\t Temperature:%f\n", ptr->mTemperature);

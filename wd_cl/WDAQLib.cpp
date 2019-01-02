@@ -4,33 +4,33 @@
 
 //WDAQ Packet Data - class for UDP DAQ packets 
 //Set properties according to UDP event header
-void WDAQPacketData::SetEventHeaderInfo(WD2_FRAME_HEADER *ph){
-   mBoardId = ph->serial_number;
-   mCrateId = ph->crate_id;
-   mSlotId  = ph->slot_id;
-   mADC = (ph->channel_info >> 7) & 0x01;
-   mChannel = (ph->channel_info) & 0x1f;
-   mDataType = ph->data_type;
-   mTxEnable = ph->tx_enable;
-   mZeroSuppressionMask = ph->zero_suppression_mask;
-   mFlags = ph->flags;
-   mTriggerSource = ph->trigger_source;
-   mBitsPerSample = ph->bits_per_sample;
-   mSamplesPerEventPerChannel = ph->samples_per_event_per_channel;
-   mPayloadLenght = ph->payload_length;
-   mDataOffset = ph->data_offset;
-   for(int i=0; i<8; i++) mTimeStamp[i] = ph->time_stamp[i];
-   mEventNumber = ph->event_number;
-   mTriggerType = ph->trigger_information[1];
-   mTriggerEventNumber |= ((unsigned int)ph->trigger_information[0])<<8;
-   mTriggerEventNumber = ph->trigger_information[5];
-   mTriggerEventNumber |= ((unsigned int)ph->trigger_information[4])<<8;
-   mTriggerCell = ph->drs_trigger_cell;
-   mSamplingFrequency = ph->sampling_frequency;
-   mTemperature = std::round(ph->temperature*0.0625 * 10 + 0.5) / 10.0f;
-   mDacOFS = ph->dac_ofs;
-   mDacROFS = ph->dac_rofs;
-   mFrontendSettings = ph->frontend_settings;
+void WDAQPacketData::SetEventHeaderInfo(WD_FRAME_HEADER *ph, WDAQ_FRAME_HEADER *pdaqh){
+  mBoardId = pdaqh->serial_number; // gets board Id (i.e. serial number)
+  mCrateId = pdaqh->crate_id;      // gets crate Id
+  mSlotId  = pdaqh->slot_id;       // gets slot Id 
+  mChannel = ph->channel_info & 0x1F; // channel in thi s packet
+  mDataType = pdaqh->data_type; // type of data in the packet
+  mEventNumber = ph->event_number; 
+  mTriggerNumber = ph->trigger_information[0] | (ph->trigger_information[1] << 8); // ## to be changed
+  mTriggerType = ph->trigger_information[2] | (ph->trigger_information[3] << 8);   // ## to be changed
+  mTemperature = std::round(ph->temperature*0.0625 * 10 + 0.5) / 10.0f;
+
+  mADC = (ph->channel_info >> 7) & 0x01; //which ADC sampled the data
+  mTxEnable = ph->tx_enable; // DRS transmission enble mask
+  mZeroSuppressionMask = ph->zero_suppression_mask; // mask for zero suppression
+  mFlags = ph->wd_flags;
+  mTriggerSource = ph->trigger_source;
+  mBitsPerSample = ph->bits_per_sample;
+  mSamplesPerEventPerChannel = ph->samples_per_event_per_channel;
+  mPayloadLenght = pdaqh->payload_length;
+  mDataOffset = pdaqh->data_chunk_offset;
+  for(int i=0; i<8; i++) mTimeStamp[i] = ph->time_stamp[i];
+  mEventNumber = ph->event_number;
+  mTriggerCell = ph->drs_trigger_cell;
+  mSamplingFrequency = ph->sampling_frequency;
+  mDacOFS = ph->dac_ofs;
+  mDacROFS = ph->dac_rofs;
+  mFrontendSettings = ph->frontend_settings;
 }
 
 //WDAQ DRS Packet Data -  derived packet class to host DRS data
@@ -196,7 +196,7 @@ WDAQEvent::WDAQEvent(WDAQPacketData* pkt){
 
    //copies info from first packet
    mEventNumber = pkt->mEventNumber;
-   mTriggerEventNumber = pkt->mTriggerEventNumber;
+   mTriggerNumber = pkt->mTriggerNumber;
    mTriggerType = pkt->mTriggerType;
 
 
@@ -257,23 +257,28 @@ void WDAQPacketCollector::Begin(){
 void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
 
    //check size of received datagram
-   if(size < (int)sizeof(WD2_FRAME_HEADER)) return;
+   if(size < (int)sizeof(WDAQ_FRAME_HEADER)) return;
 
-   WD2_FRAME_HEADER* data = (WD2_FRAME_HEADER*)dataptr;
+   //first link to the WDAQ_FRAME_HEADER
+   WDAQ_FRAME_HEADER* daqdata = (WDAQ_FRAME_HEADER*)dataptr;
+   //then to the WD_FRAME_HEADER
+   WD_FRAME_HEADER* data = (WD_FRAME_HEADER*) (dataptr + sizeof(WDAQ_FRAME_HEADER));
+
+   
    // check protocol version
-   if (data->protocol_version != WD2_UDP_PROTOCOL_VERSION) {
+   if (daqdata->protocol_version != WD2_UDP_PROTOCOL_VERSION) {
       printf("received packet with wrong protocol version\n");
       return;
    }
 
    //correct endianess
-   data->serial_number                  = SWAP_UINT16(data->serial_number);
+   daqdata->serial_number               = SWAP_UINT16(daqdata->serial_number);
    data->tx_enable                      = SWAP_UINT32(data->tx_enable);
    data->zero_suppression_mask          = SWAP_UINT16(data->zero_suppression_mask);
-   data->flags                          = SWAP_UINT16(data->flags);
+   daqdata->wdaq_flags                  = SWAP_UINT16(daqdata->wdaq_flags);
    data->samples_per_event_per_channel  = SWAP_UINT16(data->samples_per_event_per_channel);
-   data->payload_length                 = SWAP_UINT16(data->payload_length);
-   data->data_offset                    = SWAP_UINT16(data->data_offset);
+   daqdata->payload_length              = SWAP_UINT16(daqdata->payload_length);
+   daqdata->data_chunk_offset           = SWAP_UINT16(daqdata->data_chunk_offset);
    data->event_number                   = SWAP_UINT32(data->event_number);
    data->drs_trigger_cell               = SWAP_UINT16(data->drs_trigger_cell);
    data->sampling_frequency             = SWAP_UINT32(data->sampling_frequency);
@@ -282,12 +287,12 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
    data->dac_rofs                       = SWAP_UINT16(data->dac_rofs);
    data->frontend_settings              = SWAP_UINT16(data->frontend_settings);
 
-   if(data->data_type == 0){
+   if(daqdata->data_type == 0){
       //DRS Data
 
       //create new packet
       WDAQDRSPacketData *packet = new WDAQDRSPacketData();
-      packet->SetEventHeaderInfo(data);
+      packet->SetEventHeaderInfo(data, daqdata);
 
       // decode waveform data
       auto pd = (unsigned char*)(data+1);
@@ -313,12 +318,12 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
          fDroppedPackets++;
          delete packet;
       }
-   } else if (data->data_type == 1) {
+   } else if (daqdata->data_type == 1) {
       //ADC Data
 
       //create new packet
       WDAQADCPacketData *packet = new WDAQADCPacketData();
-      packet->SetEventHeaderInfo(data);
+      packet->SetEventHeaderInfo(data, daqdata);
 
       // decode waveform data
       auto pd = (unsigned char*)(data+1);
@@ -341,12 +346,12 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
          fDroppedPackets++;
          delete packet;
       }
-   } else if (data->data_type == 2) {
+   } else if (daqdata->data_type == 2) {
       //TDC Data
 
       //create new packet
       WDAQTDCPacketData *packet = new WDAQTDCPacketData();
-      packet->SetEventHeaderInfo(data);
+      packet->SetEventHeaderInfo(data, daqdata);
 
       // decode waveform data
       auto pd = (unsigned char*)(data+1);
@@ -363,11 +368,11 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
          fDroppedPackets++;
          delete packet;
       }
-   } else if (data->data_type == 3) {
+   } else if (daqdata->data_type == 3) {
       //TRG Data
       //create new packet
       WDAQTRGPacketData *packet = new WDAQTRGPacketData();
-      packet->SetEventHeaderInfo(data);
+      packet->SetEventHeaderInfo(data,daqdata);
 
       // decode waveform data
       auto pd = (unsigned long*)(data+1);
@@ -412,7 +417,7 @@ void WDAQEventBuilder::Loop(){
    WDAQPacketData *ptr = nullptr;
    if(fSource->Try_pop(ptr)){
       //search for matching packets
-      int new_event_number = ptr->mTriggerEventNumber;
+      int new_event_number = ptr->mTriggerNumber;
       WDAQEvent *evt_ptr;
 
       auto it = fEvents.find(new_event_number);
@@ -670,7 +675,7 @@ void WDAQEventWriter::Loop(){
 
       //statistics
       fNEvent++;
-      fLastEvent = ptr->mTriggerEventNumber;
+      fLastEvent = ptr->mTriggerNumber;
 
       delete ptr;
    }

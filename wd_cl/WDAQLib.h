@@ -29,7 +29,7 @@ class WDAQPacketData{
    unsigned int     mEventNumber;
    //unsigned char    mTriggerInfo[6];
    unsigned char    mTriggerType;
-   unsigned int     mTriggerEventNumber;
+   unsigned int     mTriggerNumber;
    unsigned short   mTriggerCell;
    unsigned int     mSamplingFrequency;
    float            mTemperature;
@@ -38,7 +38,7 @@ class WDAQPacketData{
    unsigned short   mFrontendSettings;
    
    //Set properties according to UDP event header
-   void SetEventHeaderInfo(WD2_FRAME_HEADER *);
+   void SetEventHeaderInfo(WD_FRAME_HEADER *, WDAQ_FRAME_HEADER *);
 
    //merge this packet information in given board event, to be implemented according to data
    virtual void AddToBoardEvent(WDAQBoardEvent *e) { };
@@ -145,7 +145,7 @@ public:
 class WDAQEvent {
 public:
    unsigned int     mEventNumber;
-   unsigned short   mTriggerEventNumber;
+   unsigned short   mTriggerNumber;
    unsigned short   mTriggerType;
    std::vector<WDAQBoardEvent *> fBoard;
    
