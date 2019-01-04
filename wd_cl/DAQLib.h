@@ -39,6 +39,7 @@ template <class T> class DAQBuffer {
             return false;
          }
       };
+      // pops outs one event if available
       bool Try_pop(T* &ptr){
          std::unique_lock<std::mutex> lock(fAccess);
          //check size
@@ -55,6 +56,7 @@ template <class T> class DAQBuffer {
          lock.unlock();
          return true;
       }
+
       unsigned int GetSize(){
          std::lock_guard<std::mutex> lock(fAccess);
 
@@ -205,8 +207,10 @@ class DAQServerThread : public DAQThread{
 
          struct sockaddr_in client_addr;
          socklen_t sockaddr_in_len = sizeof(client_addr);
+	 
+         fDatagramSize = (int) recvfrom(fDataSocket, (char*) fDatagramBuffer, sizeof(fDatagramBuffer), 0, 
+					(struct sockaddr *)&client_addr, (socklen_t *)&sockaddr_in_len);
 
-         fDatagramSize = recvfrom(fDataSocket, fDatagramBuffer, sizeof(fDatagramBuffer), 0, (struct sockaddr *)&client_addr, &sockaddr_in_len);
          if(fDatagramSize==-1){
             if(errno != EWOULDBLOCK){
                perror("recvfrom");

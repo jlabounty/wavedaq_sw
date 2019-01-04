@@ -57,7 +57,7 @@ void WDAQDRSPacketData::AddToBoardEvent(WDAQBoardEvent *e){
       e->mDrsHasData[channel] = true; 
    }
 
-   if(mFlags & 0x10) e->mEndFlagReceived = true;
+   if(mFlags & 0x1) e->mEndFlagReceived = true;
 
 }
 
@@ -73,7 +73,7 @@ void WDAQADCPacketData::AddToBoardEvent(WDAQBoardEvent *e){
       e->mAdcU[channel][firstBin+i] = data[i];
    }
 
-   e->mAdcTxEnable = mTxEnable;
+   e->mAdcTxEnable = 0; //this must be changed with proper ADC treatment!!
    e->mAdcZeroSuppressionMask = mZeroSuppressionMask;
 
    //check all data received
@@ -82,7 +82,7 @@ void WDAQADCPacketData::AddToBoardEvent(WDAQBoardEvent *e){
       e->mAdcHasData[channel] = true; 
    }
 
-   if(mFlags & 0x10) e->mEndFlagReceived = true;
+   //   if(mFlags & 0x1) e->mEndFlagReceived = true;
 
 }
 
@@ -98,7 +98,7 @@ void WDAQTDCPacketData::AddToBoardEvent(WDAQBoardEvent *e){
       e->mTdc[channel][firstBin+i] = data[i];
    }
 
-   e->mTdcTxEnable = mTxEnable;
+   e->mTdcTxEnable = 0; //this must be changed with proper TDC treament!!
    e->mTdcZeroSuppressionMask = mZeroSuppressionMask;
 
    //check all data received
@@ -107,7 +107,7 @@ void WDAQTDCPacketData::AddToBoardEvent(WDAQBoardEvent *e){
       e->mTdcHasData[channel] = true; 
    }
 
-   if(mFlags & 0x10) e->mEndFlagReceived = true;
+   //   if(mFlags & 0x1) e->mEndFlagReceived = true;
 
 }
 
@@ -122,7 +122,7 @@ void WDAQTRGPacketData::AddToBoardEvent(WDAQBoardEvent *e){
       e->mTrg[firstBin+i] = data[i];
    }
 
-   e->mTrgTxEnable = mTxEnable;
+   e->mTrgTxEnable = 0; //this must be changed with proper TRG data treatment
 
    //check all data received
    e->mTrgByteNumber += mPayloadLenght*8;
@@ -130,7 +130,7 @@ void WDAQTRGPacketData::AddToBoardEvent(WDAQBoardEvent *e){
       e->mTrgHasData = true; 
    }
 
-   if(mFlags & 0x10) e->mEndFlagReceived = true;
+   //   if(mFlags & 0x1) e->mEndFlagReceived = true;
 
 }
 
@@ -173,17 +173,17 @@ bool WDAQBoardEvent::IsComplete(){
    bool ret = true;
    for(int i=0; i<WD_N_CHANNELS; i++){
       if(mDrsTxEnable & (1<<i))
-         if(mDrsHasData[i]==false)
+	if(mDrsHasData[i]==false) 
             ret = false; 
       if(mAdcTxEnable & (1<<i))
-         if(mAdcHasData[i]==false)
+	if(mAdcHasData[i]==false)
             ret = false; 
       if(mTdcTxEnable & (1<<i))
-         if(mTdcHasData[i]==false)
+	if(mTdcHasData[i]==false)
             ret = false;
    }
    if(mTrgTxEnable)
-      if(mTrgHasData==false)
+     if(mTrgHasData==false)
          ret = false;
 
    return ret && mEndFlagReceived;
@@ -257,7 +257,10 @@ void WDAQPacketCollector::Begin(){
 void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
 
    //check size of received datagram
-   if(size < (int)sizeof(WDAQ_FRAME_HEADER)) return;
+  if(size < (int)sizeof(WDAQ_FRAME_HEADER)) {
+    printf("Problem with size\n");
+    return;
+  }
 
    //first link to the WDAQ_FRAME_HEADER
    WDAQ_FRAME_HEADER* daqdata = (WDAQ_FRAME_HEADER*)dataptr;
@@ -267,7 +270,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
    
    // check protocol version
    if (daqdata->protocol_version != WD2_UDP_PROTOCOL_VERSION) {
-      printf("received packet with wrong protocol version\n");
+     printf("received packet with wrong protocol version, got %d required %d\n",daqdata->protocol_version, WD2_UDP_PROTOCOL_VERSION);
       return;
    }
 
@@ -287,9 +290,33 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
    data->dac_rofs                       = SWAP_UINT16(data->dac_rofs);
    data->frontend_settings              = SWAP_UINT16(data->frontend_settings);
 
+   //   #define DEBUGGOT 
+
+   #ifdef DEBUGGOT
+   printf("---------------------------------\n");
+   printf("---------------------------------\n");
+   printf("serial number \t %d\n", daqdata->serial_number);
+   printf("tx enable \t %x\n", data->tx_enable);
+   printf("zero supp mask \t %d\n", data->zero_suppression_mask);
+   printf("flags \t\t %d\n", daqdata->wdaq_flags);
+   printf("sampl  ev cha \t %d\n", data->samples_per_event_per_channel);
+   printf("payload length \t %d\n", daqdata->payload_length);
+   printf("data chunk off \t %d\n", daqdata->data_chunk_offset);
+   printf("event number \t %d\n", data->event_number);
+   printf("drs trig cell \t %d\n", data->drs_trigger_cell);
+   printf("sampl freq \t %d\n", data->sampling_frequency);
+   printf("temperature \t %d\n", data->temperature);
+   printf("dac ofs \t %d\n", data->dac_ofs);
+   printf("daq rofs \t %x\n", data->dac_rofs);
+   printf("frontend sets \t %x\n", data->frontend_settings);
+   printf("data type \t %x\n", daqdata->data_type);
+   printf("flags   \t %x\n", data->wd_flags);
+   printf("\n");
+   printf("\n");
+   #endif
+
    if(daqdata->data_type == 0){
       //DRS Data
-
       //create new packet
       WDAQDRSPacketData *packet = new WDAQDRSPacketData();
       packet->SetEventHeaderInfo(data, daqdata);
@@ -416,8 +443,10 @@ void WDAQEventBuilder::Begin(){
 void WDAQEventBuilder::Loop(){
    WDAQPacketData *ptr = nullptr;
    if(fSource->Try_pop(ptr)){
+
       //search for matching packets
       int new_event_number = ptr->mTriggerNumber;
+
       WDAQEvent *evt_ptr;
 
       auto it = fEvents.find(new_event_number);

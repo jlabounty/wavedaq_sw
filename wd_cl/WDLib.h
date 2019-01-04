@@ -360,10 +360,10 @@ class WDWDB : public WDBoard, public WDB{
             tx_ena = 0x3FFFF;
          }
          SetDrsChTxEn(tx_ena);
-         SetAdcChTxEn(tx_ena);
-         SetTdcChTxEn(tx_ena);
+         SetAdcChTxEn(0);
+         SetTdcChTxEn(0);
          SetZeroSuprEn(false);
-         SetTrgTxEn(1);
+         SetTrgTxEn(0);
          SetSclTxEn(0);
 
          //timing reference
@@ -631,6 +631,7 @@ class WDTCB : public WDBoard, public TCB{
             trigger_enable = GetProperty("TriggerEnable").GetUIntVector(&arraySize);
          } catch (const std::runtime_error& ex){
             arraySize = -1;
+	    printf("cannot read prescaling\n");
          }
          for(int i=0; i<64; i++) trg_ena[i] = false;
          for(unsigned long i=0; i<arraySize; i++) if(trigger_enable[i] < 64) trg_ena[trigger_enable[i]] = true;
@@ -642,16 +643,17 @@ class WDTCB : public WDBoard, public TCB{
          unsigned int trg_presca[64];
          try{
             //trigger_prescaling = PropertyToArray<unsigned int>(GetProperty("TriggerPrescaling")); 
-            trigger_prescaling = GetProperty("TriggerPrescaling").GetUIntVector(&arraySize);
+	   trigger_prescaling = GetProperty("TriggerPrescaling").GetUIntVector(&arraySize);
          } catch (const std::runtime_error& ex){
             arraySize = -1;
+	    printf("cannot read prescaling\n");
          }
          for(int i=0; i<64; i++) trg_presca[i] = 0;
          if(triggerEnableSize == arraySize){
             for(unsigned long i=0; i<arraySize; i++) if(trigger_enable[i] < 64) trg_presca[trigger_enable[i]] = trigger_prescaling[i];
             SetPrescaling(trg_presca);
          }
-         else printf("TriggerPrescaling field should be same size of TriggerEnable\n");
+         else printf("TriggerPrescaling field (%d) should be same size of TriggerEnable (%d)\n",triggerEnableSize,arraySize);
 
          //trigger algorithm
          //unsigned int algorithm;
