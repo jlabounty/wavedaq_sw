@@ -199,6 +199,7 @@ WDAQEvent::WDAQEvent(WDAQPacketData* pkt){
    mTriggerNumber = pkt->mTriggerNumber;
    mTriggerType = pkt->mTriggerType;
 
+   //   printf("event number = %d\n",mTriggerNumber);
 
 }
 
@@ -445,7 +446,8 @@ void WDAQEventBuilder::Loop(){
    if(fSource->Try_pop(ptr)){
 
       //search for matching packets
-      int new_event_number = ptr->mTriggerNumber;
+      int new_event_number = ptr->mEventNumber;
+      //      int new_event_number = ptr->mTriggerNumber;
 
       WDAQEvent *evt_ptr;
 
@@ -704,7 +706,8 @@ void WDAQEventWriter::Loop(){
 
       //statistics
       fNEvent++;
-      fLastEvent = ptr->mTriggerNumber;
+      fLastEvent = ptr->mEventNumber;
+      //      fLastEvent = ptr->mTriggerNumber;
 
       delete ptr;
    }

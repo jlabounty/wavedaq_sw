@@ -631,7 +631,7 @@ class WDTCB : public WDBoard, public TCB{
             trigger_enable = GetProperty("TriggerEnable").GetUIntVector(&arraySize);
          } catch (const std::runtime_error& ex){
             arraySize = -1;
-	    printf("cannot read prescaling\n");
+	    printf("cannot read enable\n");
          }
          for(int i=0; i<64; i++) trg_ena[i] = false;
          for(unsigned long i=0; i<arraySize; i++) if(trigger_enable[i] < 64) trg_ena[trigger_enable[i]] = true;
@@ -653,7 +653,7 @@ class WDTCB : public WDBoard, public TCB{
             for(unsigned long i=0; i<arraySize; i++) if(trigger_enable[i] < 64) trg_presca[trigger_enable[i]] = trigger_prescaling[i];
             SetPrescaling(trg_presca);
          }
-         else printf("TriggerPrescaling field (%d) should be same size of TriggerEnable (%d)\n",triggerEnableSize,arraySize);
+         else printf("TriggerPrescaling field (%ld) should be same size of TriggerEnable (%ld)\n",triggerEnableSize,arraySize);
 
          //trigger algorithm
          //unsigned int algorithm;
