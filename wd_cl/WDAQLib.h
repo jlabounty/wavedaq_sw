@@ -5,6 +5,11 @@
 #include <iostream>
 #include <fstream>
 
+#define EOE 1
+#define SOE 2
+#define EOT 4
+#define SOT 8
+
 class WDAQBoardEvent;
 
 //WDAQ Packet Data - class for UDP DAQ packets 
@@ -125,7 +130,10 @@ public:
    //event status
    bool             mVCalibrated;
    bool             mEndFlagReceived;
-   //   bool             mPackReceived[1000]; //1000 is an safe over limit
+   bool             mStartFlagReceived;
+   int              mPacketsReceived;
+   int              mFirstPacket;
+   int              mLastPacket;
    bool             mDrsHasData[WD_N_CHANNELS];
    int              mDrsByteNumber[WD_N_CHANNELS];
    bool             mAdcHasData[WD_N_CHANNELS];

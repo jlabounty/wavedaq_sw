@@ -1,7 +1,5 @@
 #include "WDAQLib.h"
 
-#define SWAP_UINT64(x) (((uint64_t)SWAP_UINT32((uint32_t)((x) & 0xffffffff)) << 32) | (uint64_t)SWAP_UINT32((uint32_t)((x) >> 32)))
-
 //WDAQ Packet Data - class for UDP DAQ packets 
 //Set properties according to UDP event header
 void WDAQPacketData::SetEventHeaderInfo(WD_FRAME_HEADER *ph, WDAQ_FRAME_HEADER *pdaqh){
@@ -19,7 +17,7 @@ void WDAQPacketData::SetEventHeaderInfo(WD_FRAME_HEADER *ph, WDAQ_FRAME_HEADER *
   mADC = (ph->channel_info >> 7) & 0x01; //which ADC sampled the data
   mTxEnable = ph->tx_enable; // DRS transmission enble mask
   mZeroSuppressionMask = ph->zero_suppression_mask; // mask for zero suppression
-  mFlags = ph->wd_flags;
+  mFlags = pdaqh->wdaq_flags;
   mTriggerSource = ph->trigger_source;
   mBitsPerSample = ph->bits_per_sample;
   mSamplesPerEventPerChannel = ph->samples_per_event_per_channel;
@@ -58,7 +56,19 @@ void WDAQDRSPacketData::AddToBoardEvent(WDAQBoardEvent *e){
       e->mDrsHasData[channel] = true; 
    }
 
-   if(mFlags & 0x1) e->mEndFlagReceived = true;
+   //check if end of event is received
+   if(mFlags & EOE) {
+     e->mEndFlagReceived = true;
+     e->mLastPacket = mPacketNumber;
+   }
+   // the packet number offset is from the first packet
+   if(mFlags & SOE) {
+     e->mStartFlagReceived = true;
+     e->mFirstPacket = mPacketNumber;
+   }
+
+   //anyway increase packet counter
+   e->mPacketsReceived++;
 
 }
 
@@ -83,7 +93,19 @@ void WDAQADCPacketData::AddToBoardEvent(WDAQBoardEvent *e){
       e->mAdcHasData[channel] = true; 
    }
 
-   //   if(mFlags & 0x1) e->mEndFlagReceived = true;
+   //check if end of event is received
+   if(mFlags & EOE) {
+     e->mEndFlagReceived = true;
+     e->mLastPacket = mPacketNumber;
+   }
+   // the packet number offset is from the first packet
+   if(mFlags & SOE) {
+     e->mStartFlagReceived = true;
+     e->mFirstPacket = mPacketNumber;
+   }
+
+   //anyway increase packet counter
+   e->mPacketsReceived++;
 
 }
 
@@ -107,8 +129,20 @@ void WDAQTDCPacketData::AddToBoardEvent(WDAQBoardEvent *e){
    if(e->mTdcByteNumber[channel] >= mSamplesPerEventPerChannel*mBitsPerSample){
       e->mTdcHasData[channel] = true; 
    }
+ 
+   //check if end of event is received
+   if(mFlags & EOE) {
+     e->mEndFlagReceived = true;
+     e->mLastPacket = mPacketNumber;
+   }
+   // the packet number offset is from the first packet
+   if(mFlags & SOE) {
+     e->mStartFlagReceived = true;
+     e->mFirstPacket = mPacketNumber;
+   }
 
-   //   if(mFlags & 0x1) e->mEndFlagReceived = true;
+   //anyway increase packet counter
+   e->mPacketsReceived++;
 
 }
 
@@ -131,8 +165,19 @@ void WDAQTRGPacketData::AddToBoardEvent(WDAQBoardEvent *e){
       e->mTrgHasData = true; 
    }
 
-   //   if(mFlags & 0x1) e->mEndFlagReceived = true;
+   //check if end of event is received
+   if(mFlags & EOE) {
+     e->mEndFlagReceived = true;
+     e->mLastPacket = mPacketNumber;
+   }
+   // the packet number offset is from the first packet
+   if(mFlags & SOE) {
+     e->mStartFlagReceived = true;
+     e->mFirstPacket = mPacketNumber;
+   }
 
+   //anyway increase packet counter
+   e->mPacketsReceived++;
 }
 
 //WDAQ Board Event - single WDB DAQ event
@@ -151,7 +196,9 @@ WDAQBoardEvent::WDAQBoardEvent(WDAQPacketData* pkt){
 
    //reset status
    mVCalibrated = false;
+   mStartFlagReceived = false;
    mEndFlagReceived = false;
+   mPacketsReceived = 0;
    mDrsTxEnable = 0;
    mAdcTxEnable = 0;
    mTdcTxEnable = 0;
@@ -171,7 +218,7 @@ WDAQBoardEvent::WDAQBoardEvent(WDAQPacketData* pkt){
 
 //check complete
 bool WDAQBoardEvent::IsComplete(){
-   bool ret = true;
+  /*   bool ret = true;
    // first version ckecking that all the enabled channels sent data
    for(int i=0; i<WD_N_CHANNELS; i++){
      if(mDrsTxEnable & (1<<i))
@@ -187,14 +234,25 @@ bool WDAQBoardEvent::IsComplete(){
    if(mTrgTxEnable)
      if(mTrgHasData==false)
        ret = false;
-   return ret;
-   
+  */
 
    //second version: check that all the packets are received:
    // start of the event is received
    // end of the event is received
-   
+   // check if last packet is smaller than first, in case sum to last 2^16
 
+  bool ret = false;
+  if(mEndFlagReceived && mStartFlagReceived) {
+    
+    if(mLastPacket<mFirstPacket)
+      mLastPacket += 65536;
+    
+    if(mLastPacket-mFirstPacket+1 == mPacketsReceived)
+      ret = true;
+    
+  }
+  return ret;
+   
 }
 
 
@@ -241,10 +299,8 @@ bool WDAQEvent::IsComplete(){
 
    for(auto e :fBoard){
      //check only if end of event received
-     if(e->mEndFlagReceived)
-       ret &= e->IsComplete();
+     ret &= e->IsComplete();
    }
-
    return ret;
 }
 
@@ -290,7 +346,6 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
    daqdata->serial_number               = SWAP_UINT16(daqdata->serial_number);
    data->tx_enable                      = SWAP_UINT32(data->tx_enable);
    data->zero_suppression_mask          = SWAP_UINT16(data->zero_suppression_mask);
-   daqdata->wdaq_flags                  = SWAP_UINT16(daqdata->wdaq_flags);
    data->samples_per_event_per_channel  = SWAP_UINT16(data->samples_per_event_per_channel);
    daqdata->payload_length              = SWAP_UINT16(daqdata->payload_length);
    daqdata->packet_number               = SWAP_UINT16(daqdata->packet_number);

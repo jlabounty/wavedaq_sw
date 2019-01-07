@@ -390,7 +390,7 @@ class WDWDB : public WDBoard, public WDB{
          try{
             timingreference = GetProperty("TimingReference").GetStringValue();
          } catch (const std::runtime_error& ex){
-            timingreference = "";
+            timingreference = "Off";
          }
          if(timingreference == "Off"){
             SetTimingReferenceSignal(WDB::cTimingReferenceOff);
