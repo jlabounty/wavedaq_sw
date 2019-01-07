@@ -16,7 +16,8 @@ class WDAQPacketData{
    unsigned short   mSlotId;
    unsigned char    mADC;
    unsigned char    mChannel;
-   unsigned char    mDataType;//serve?
+   unsigned short   mPacketNumber;
+   unsigned char    mDataType;
    unsigned int     mTxEnable;
    unsigned short   mZeroSuppressionMask;
    unsigned short   mFlags;
@@ -124,6 +125,7 @@ public:
    //event status
    bool             mVCalibrated;
    bool             mEndFlagReceived;
+   //   bool             mPackReceived[1000]; //1000 is an safe over limit
    bool             mDrsHasData[WD_N_CHANNELS];
    int              mDrsByteNumber[WD_N_CHANNELS];
    bool             mAdcHasData[WD_N_CHANNELS];

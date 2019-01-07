@@ -9,6 +9,7 @@ void WDAQPacketData::SetEventHeaderInfo(WD_FRAME_HEADER *ph, WDAQ_FRAME_HEADER *
   mCrateId = pdaqh->crate_id;      // gets crate Id
   mSlotId  = pdaqh->slot_id;       // gets slot Id 
   mChannel = ph->channel_info & 0x1F; // channel in thi s packet
+  mPacketNumber = pdaqh->packet_number; // packet number
   mDataType = pdaqh->data_type; // type of data in the packet
   mEventNumber = ph->event_number; 
   mTriggerNumber = ph->trigger_information[0] | (ph->trigger_information[1] << 8); // ## to be changed
@@ -171,22 +172,29 @@ WDAQBoardEvent::WDAQBoardEvent(WDAQPacketData* pkt){
 //check complete
 bool WDAQBoardEvent::IsComplete(){
    bool ret = true;
+   // first version ckecking that all the enabled channels sent data
    for(int i=0; i<WD_N_CHANNELS; i++){
-      if(mDrsTxEnable & (1<<i))
-	if(mDrsHasData[i]==false) 
-            ret = false; 
-      if(mAdcTxEnable & (1<<i))
-	if(mAdcHasData[i]==false)
-            ret = false; 
-      if(mTdcTxEnable & (1<<i))
-	if(mTdcHasData[i]==false)
-            ret = false;
+     if(mDrsTxEnable & (1<<i))
+       if(mDrsHasData[i]==false) 
+	 ret = false; 
+     if(mAdcTxEnable & (1<<i))
+       if(mAdcHasData[i]==false)
+	 ret = false; 
+     if(mTdcTxEnable & (1<<i))
+       if(mTdcHasData[i]==false)
+	 ret = false;
    }
    if(mTrgTxEnable)
      if(mTrgHasData==false)
-         ret = false;
+       ret = false;
+   return ret;
+   
 
-   return ret && mEndFlagReceived;
+   //second version: check that all the packets are received:
+   // start of the event is received
+   // end of the event is received
+   
+
 }
 
 
@@ -230,8 +238,11 @@ void WDAQEvent::AddPacket(WDAQPacketData* pkt){
 //check event complete
 bool WDAQEvent::IsComplete(){
    bool ret = true;
+
    for(auto e :fBoard){
-      ret &= e->IsComplete();
+     //check only if end of event received
+     if(e->mEndFlagReceived)
+       ret &= e->IsComplete();
    }
 
    return ret;
@@ -282,6 +293,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
    daqdata->wdaq_flags                  = SWAP_UINT16(daqdata->wdaq_flags);
    data->samples_per_event_per_channel  = SWAP_UINT16(data->samples_per_event_per_channel);
    daqdata->payload_length              = SWAP_UINT16(daqdata->payload_length);
+   daqdata->packet_number               = SWAP_UINT16(daqdata->packet_number);
    daqdata->data_chunk_offset           = SWAP_UINT16(daqdata->data_chunk_offset);
    data->event_number                   = SWAP_UINT32(data->event_number);
    data->drs_trigger_cell               = SWAP_UINT16(data->drs_trigger_cell);
@@ -299,6 +311,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
    printf("serial number \t %d\n", daqdata->serial_number);
    printf("tx enable \t %x\n", data->tx_enable);
    printf("zero supp mask \t %d\n", data->zero_suppression_mask);
+   printf("packet num \t\t %d\n", daqdata->packet_number);
    printf("flags \t\t %d\n", daqdata->wdaq_flags);
    printf("sampl  ev cha \t %d\n", data->samples_per_event_per_channel);
    printf("payload length \t %d\n", daqdata->payload_length);
@@ -465,39 +478,40 @@ void WDAQEventBuilder::Loop(){
       evt_ptr->AddPacket(ptr); 
       delete ptr;
 
-      //check event complete
+      //check if event complete
       if(evt_ptr->IsComplete()){
-         //event complete
-         fBuildedEvent++;
-
-         if(!fDestination->Try_push(evt_ptr)){
-            //could not push to buffer
-            //printf("overflow eve\n");
-            fDroppedEvent++;
-            delete evt_ptr;
-         }
-
-         //remove from local event list
-         fEvents.erase(new_event_number);
-
-         //check older events (event id smaller than built one by 10)
-         for(auto ev = fEvents.cbegin(); ev != fEvents.cend();){
-            if((new_event_number - ev->first)>10){
-               //This is to print debug information
-               /*printf("Old event %d: ", ev->first);
-               for(auto be: ev->second->fBoard){
-                  for(int i=0; i<18; i++) printf("%d-%d-%d ", be->mDrsHasData[i], be->mAdcHasData[i], be->mTdcHasData[i]);
-                  printf("%d %d\n", be->mTrgHasData, be->mEndFlagReceived);
-               }*/
-               //remove old event from list
-               delete ev->second;
-               fEvents.erase(ev++);
-               fOldEvent++;
-            }else{
-               ++ev;
-            }
-         }
-      }
+	//event complete
+	fBuildedEvent++;
+	
+	if(!fDestination->Try_push(evt_ptr)){
+	  //could not push to buffer
+	  //printf("overflow eve\n");
+	  fDroppedEvent++;
+	  delete evt_ptr;
+	}
+	
+	
+	//remove from local event list
+	fEvents.erase(new_event_number);
+	
+	//check older events (event id smaller than built one by 10)
+	for(auto ev = fEvents.cbegin(); ev != fEvents.cend();){
+	  if((new_event_number - ev->first)>10){
+	    //This is to print debug information
+	    /*printf("Old event %d: ", ev->first);
+	      for(auto be: ev->second->fBoard){
+	      for(int i=0; i<18; i++) printf("%d-%d-%d ", be->mDrsHasData[i], be->mAdcHasData[i], be->mTdcHasData[i]);
+	      printf("%d %d\n", be->mTrgHasData, be->mEndFlagReceived);
+	      }*/
+	    //remove old event from list
+	    delete ev->second;
+	    fEvents.erase(ev++);
+	    fOldEvent++;
+	  }else{
+	    ++ev;
+	  }
+	}
+      }// end if evt_ptr->IsComplete()
    }
 }
 
