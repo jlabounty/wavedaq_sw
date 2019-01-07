@@ -350,20 +350,39 @@ class WDWDB : public WDBoard, public WDB{
          }
          if(abs(baseline)<1) SetDacCalDcV(baseline); 
 
-         //channel transmit
-         //SetReadoutSrcSel(WDB::cReadoutSrcDrs);
-         unsigned int tx_ena;
+         //DRS channel transmit
+         unsigned int drstx_ena;
          try{
-            //tx_ena = stoul(GetProperty("ChannelTxEnable"), 0, 16); 
-            tx_ena = GetProperty("ChannelTxEnable").GetUHex();
+            drstx_ena = GetProperty("DRSChannelTxEnable").GetUHex();
          } catch (const std::runtime_error& ex){
-            tx_ena = 0x3FFFF;
+            drstx_ena = 0x3FFFF;
          }
-         SetDrsChTxEn(tx_ena);
-         SetAdcChTxEn(0);
-         SetTdcChTxEn(0);
+         SetDrsChTxEn(drstx_ena);
+         //ADC channel transmit
+         unsigned int adctx_ena;
+         try{
+            adctx_ena = GetProperty("ADCChannelTxEnable").GetUHex();
+         } catch (const std::runtime_error& ex){
+            adctx_ena = 0;
+         }
+         SetAdcChTxEn(adctx_ena);
+         //TDC channel transmit
+         unsigned int tdctx_ena;
+         try{
+            tdctx_ena = GetProperty("TDCChannelTxEnable").GetUHex();
+         } catch (const std::runtime_error& ex){
+            tdctx_ena = 0;
+         }
+         SetTdcChTxEn(tdctx_ena);
+         //TRG channel transmit
+         unsigned int trgtx_ena;
+         try{
+            trgtx_ena = GetProperty("TRGChannelTxEnable").GetUHex();
+         } catch (const std::runtime_error& ex){
+            trgtx_ena = 0;
+         }
+         SetTrgTxEn(trgtx_ena);
          SetZeroSuprEn(false);
-         SetTrgTxEn(0);
          SetSclTxEn(0);
 
          //timing reference
