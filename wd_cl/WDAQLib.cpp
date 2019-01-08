@@ -588,7 +588,7 @@ void WDAQWorker::calibrateBoard(WDAQBoardEvent *ev){
    for(int ch=0; ch<WD_N_CHANNELS; ch++){
       //calibrate only channels with data
       if(ev->mDrsHasData[ch]){
-         int tc = ch < 8 || ch == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
+	int tc = ev->mTriggerCell[ch];
 
          //extract range offset
          float ofs;
@@ -607,7 +607,7 @@ void WDAQWorker::calibrateBoard(WDAQBoardEvent *ev){
             ev->mDrsU[ch][bin] -= calib->mCalib.wf_offset1[ch][(bin+tc)%1024];
             ev->mDrsU[ch][bin] -= calib->mCalib.wf_offset2[ch][bin];
 
-            //exclude clock channels from grain calibration
+            //exclude clock channels from gain calibration
             if(ch<WD_N_CHANNELS-2){
                //gain calibration
                if (ev->mDrsU[ch][bin] > 0)
@@ -692,8 +692,10 @@ void WDAQEventWriter::Loop(){
       //new event to write
       const char head[] = "EHDR";
       fFile.write(head, 4);
-      fFile.write((const char *)&ptr->mTriggerNumber, 4);
+      fFile.write((const char *)&ptr->mTriggerNumber, 2);
       const char temp = 0;
+      for(int i=0; i<2; i++) fFile.write(&temp, 1);
+      //writes 0 to time
       for(int i=0; i<16; i++) fFile.write(&temp, 1);
 
       //write DRS data
