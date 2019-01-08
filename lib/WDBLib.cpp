@@ -1733,8 +1733,8 @@ void WDEvent::SetWDEventHeaderInfo(WDAQ_FRAME_HEADER *pdaqh, WD_FRAME_HEADER *ph
       mTDCChannelPresent[channel] = true;
    
    mEventNumber = ph->event_number;
-   mTriggerNumber = ph->trigger_information[0] | (ph->trigger_information[1] << 8); // ## to be changed
-   mTriggerType = ph->trigger_information[2] | (ph->trigger_information[3] << 8);   // ## to be changed
+   mTriggerNumber = ph->trigger_information[5] | (ph->trigger_information[4] << 8); 
+   mTriggerType = (ph->trigger_information[2] | (ph->trigger_information[0] << 8))&0x3F;   
    mTemperature = std::round(ph->temperature*0.0625 * 10 + 0.5) / 10.0f;
 }
 
