@@ -75,6 +75,7 @@ template <class T> class DAQBuffer {
       //Getters
       unsigned int GetMaxSize(){ return fMaxSize; }
       std::string  GetName(){ return fName; }
+      float GetOccupancy(){ return fEvents.size() *1./fMaxSize; }//NOTE: only for monitoring
 
       //Constructor  
       DAQBuffer(unsigned int maxsize = 0, std::string name = "NEWBUFFER"){ 
@@ -93,6 +94,7 @@ class DAQThread{
    private:
       std::thread fThread;
       std::chrono::high_resolution_clock::duration fMinLoopDuration; //allows to avoid polling too much
+      std::chrono::high_resolution_clock::duration fLastLoopDuration; //for monitoring
       volatile bool fStop;
       volatile bool fRunning;
       bool fRunning_old;
@@ -113,10 +115,10 @@ class DAQThread{
             if(fRunning) Loop();
             std::chrono::high_resolution_clock::time_point loopEnd = std::chrono::high_resolution_clock::now();
 
-            std::chrono::high_resolution_clock::duration d = loopEnd - loopStart;
-            if(d<fMinLoopDuration){
+            fLastLoopDuration = loopEnd - loopStart;
+            if(fLastLoopDuration<fMinLoopDuration){
                //need to slow down
-               std::this_thread::sleep_for(fMinLoopDuration-d);
+               std::this_thread::sleep_for(fMinLoopDuration-fLastLoopDuration);
             }
          }
 
@@ -148,6 +150,14 @@ class DAQThread{
          fRunning = false;
       }
 
+      bool IsRunning(){
+         return fRunning;
+      }
+
+      std::chrono::microseconds GetLastLoopDuration(){
+         return std::chrono::duration_cast<std::chrono::microseconds>(fLastLoopDuration);
+      }
+
       //setter
       void SetMinLoopDuration(std::chrono::microseconds d){fMinLoopDuration = std::chrono::duration_cast<std::chrono::high_resolution_clock::duration>(d); }
 
@@ -157,6 +167,7 @@ class DAQThread{
          fRunning = false;
          fRunning_old = false;
          fMinLoopDuration = std::chrono::high_resolution_clock::duration::zero();
+         fLastLoopDuration = std::chrono::high_resolution_clock::duration::zero();
       }
 
       //Destructor

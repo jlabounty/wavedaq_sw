@@ -271,25 +271,19 @@ WDAQEvent::WDAQEvent(WDAQPacketData* pkt){
 
 //add packet to event
 void WDAQEvent::AddPacket(WDAQPacketData* pkt){
-   int id = pkt->mBoardId;
-   bool found = false;
+   unsigned short id = pkt->mBoardId;
    WDAQBoardEvent *boardEvent;
 
-   for(auto b :fBoard){
-      if(b->mBoardId==id){
-         found = true;
-         boardEvent = b;
-         break;
-      }
+   try {
+      boardEvent = fBoard.at(id);
+   } catch (const std::out_of_range&){
+      //no event, allocate a new one
+      boardEvent = new WDAQBoardEvent(pkt);
+      fBoard[id] = boardEvent;
    }
 
-   if(!found){
-      WDAQBoardEvent *e = new WDAQBoardEvent(pkt);
-      pkt->AddToBoardEvent(e);
-      fBoard.push_back(e);
-   } else{
-      pkt->AddToBoardEvent(boardEvent);
-   }
+   //process packet content
+   pkt->AddToBoardEvent(boardEvent);
 
 }
 
@@ -299,7 +293,7 @@ bool WDAQEvent::IsComplete(){
 
    for(auto e :fBoard){
      //check only if end of event received
-     ret &= e->IsComplete();
+     ret &= e.second->IsComplete();
    }
    return ret;
 }
@@ -308,7 +302,7 @@ bool WDAQEvent::IsComplete(){
 //destructor to remove child WDBoardEvent
 WDAQEvent::~WDAQEvent(){
    for(auto e :fBoard)
-      delete e;
+      delete e.second;
 }
 
 //---------- THREAD implementation -------
@@ -555,8 +549,8 @@ void WDAQEventBuilder::Loop(){
 	    //This is to print debug information
 	    /*printf("Old event %d: ", ev->first);
 	      for(auto be: ev->second->fBoard){
-	      for(int i=0; i<18; i++) printf("%d-%d-%d ", be->mDrsHasData[i], be->mAdcHasData[i], be->mTdcHasData[i]);
-	      printf("%d %d\n", be->mTrgHasData, be->mEndFlagReceived);
+	      for(int i=0; i<18; i++) printf("%d-%d-%d ", be.second->mDrsHasData[i], be.second->mAdcHasData[i], be.second->mTdcHasData[i]);
+	      printf("%d %d\n", be.second->mTrgHasData, be.second->mEndFlagReceived);
 	      }*/
 	    //remove old event from list
 	    delete ev->second;
@@ -641,7 +635,7 @@ void WDAQWorker::Loop(){
    if(fSource->Try_pop(ptr)){
       //new event to calibrate
       for(auto boardEvent : ptr->fBoard)
-         calibrateBoard(boardEvent);
+         calibrateBoard(boardEvent.second);
 
       //statistics
       fNEvent++;
@@ -705,14 +699,15 @@ void WDAQEventWriter::Loop(){
       for(int i=0; i<16; i++) fFile.write(&temp, 1);
 
       //write DRS data
-      for(auto DRS : ptr->fBoard){
+      for(auto keyval : ptr->fBoard){
+         WDAQBoardEvent* board= keyval.second;
          const char board_head[] = "B#";
          fFile.write(board_head, 2);
-         fFile.write((const char *)&DRS->mBoardId, 2);
-         float range = DRS->GetRange();
+         fFile.write((const char *)&board->mBoardId, 2);
+         float range = board->GetRange();
          for(int ch=0;ch<18;ch++){
             //write only channels with data
-            if(DRS->mDrsHasData[ch]){
+            if(board->mDrsHasData[ch]){
                std::string chn_header = "C";
                if(ch<=9) chn_header += "00";
                else chn_header += "0";
@@ -721,19 +716,19 @@ void WDAQEventWriter::Loop(){
 
                const char trgcell_head[] = "T#";
                fFile.write(trgcell_head, 2);
-               fFile.write((const char *)&(DRS->mTriggerCell[(ch<7||ch==16)?0:1]), 2);
+               fFile.write((const char *)&(board->mTriggerCell[(ch<7||ch==16)?0:1]), 2);
                fFile.write(trgcell_head, 2);
                fFile.write(trgcell_head, 2);
 
                for(int bin=0; bin<1024; bin++){
-                  unsigned short val = (unsigned short) ((DRS->mDrsU[ch][bin]-range+0.5)*65535);
+                  unsigned short val = (unsigned short) ((board->mDrsU[ch][bin]-range+0.5)*65535);
                   fFile.write((const char *)&val, 2);
                }
             }
          }
          for(int ch=0;ch<18;ch++){
             //write only channels with data
-            if(DRS->mAdcHasData[ch]){
+            if(board->mAdcHasData[ch]){
                std::string chn_header = "A";
                if(ch<=9) chn_header += "00";
                else chn_header += "0";
@@ -741,14 +736,14 @@ void WDAQEventWriter::Loop(){
                fFile.write(chn_header.c_str(), 4);
 
                for(int bin=0; bin<2048; bin++){
-                  unsigned short val = DRS->mAdcU[ch][bin];
+                  unsigned short val = board->mAdcU[ch][bin];
                   fFile.write((const char *)&val, 2);
                }
             }
          }
          for(int ch=0;ch<18;ch++){
             //write only channels with data
-            if(DRS->mTdcHasData[ch]){
+            if(board->mTdcHasData[ch]){
                std::string chn_header = "T";
                if(ch<=9) chn_header += "00";
                else chn_header += "0";
@@ -756,17 +751,17 @@ void WDAQEventWriter::Loop(){
                fFile.write(chn_header.c_str(), 4);
 
                for(int bin=0; bin<512; bin++){
-                  unsigned char val = DRS->mTdc[ch][bin];
+                  unsigned char val = board->mTdc[ch][bin];
                   fFile.write((const char *)&val, 1);
                }
             }
          }
-         if(DRS->mTrgHasData){
+         if(board->mTrgHasData){
             std::string chn_header = "TRGO";
             fFile.write(chn_header.c_str(), 4);
 
             for(int bin=0; bin<512; bin++){
-               unsigned long val = DRS->mTrg[bin];
+               unsigned long val = board->mTrg[bin];
                fFile.write((const char *)&val, 8);
             }
 

@@ -157,7 +157,7 @@ public:
    unsigned int     mEventNumber;
    unsigned short   mTriggerNumber;
    unsigned short   mTriggerType;
-   std::vector<WDAQBoardEvent *> fBoard;
+   std::map<unsigned short, WDAQBoardEvent *> fBoard;
    
    void AddPacket(WDAQPacketData* pkt);
    bool IsComplete();
