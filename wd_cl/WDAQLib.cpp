@@ -10,8 +10,8 @@ void WDAQPacketData::SetEventHeaderInfo(WD_FRAME_HEADER *ph, WDAQ_FRAME_HEADER *
   mPacketNumber = pdaqh->packet_number; // packet number
   mDataType = pdaqh->data_type; // type of data in the packet
   mEventNumber = ph->event_number; 
-  mTriggerNumber = ph->trigger_information[0] | (ph->trigger_information[1] << 8); // ## to be changed
-  mTriggerType = ph->trigger_information[2] | (ph->trigger_information[3] << 8);   // ## to be changed
+  mTriggerNumber = ph->trigger_information[5] | (ph->trigger_information[4] << 8);
+  mTriggerType = ph->trigger_information[1] | (ph->trigger_information[0] << 8);   
   mTemperature = std::round(ph->temperature*0.0625 * 10 + 0.5) / 10.0f;
 
   mADC = (ph->channel_info >> 7) & 0x01; //which ADC sampled the data
@@ -263,9 +263,8 @@ WDAQEvent::WDAQEvent(WDAQPacketData* pkt){
    //copies info from first packet
    mEventNumber = pkt->mEventNumber;
    mTriggerNumber = pkt->mTriggerNumber;
-   mTriggerType = pkt->mTriggerType;
+   mTriggerType = pkt->mTriggerType&0x3F;
 
-   //   printf("event number = %d\n",mTriggerNumber);
 
 }
 
@@ -508,8 +507,7 @@ void WDAQEventBuilder::Loop(){
    if(fSource->Try_pop(ptr)){
 
       //search for matching packets
-      int new_event_number = ptr->mEventNumber;
-      //      int new_event_number = ptr->mTriggerNumber;
+      int new_event_number = ptr->mTriggerNumber;
 
       WDAQEvent *evt_ptr;
 
@@ -694,7 +692,7 @@ void WDAQEventWriter::Loop(){
       //new event to write
       const char head[] = "EHDR";
       fFile.write(head, 4);
-      fFile.write((const char *)&ptr->mEventNumber, 4);
+      fFile.write((const char *)&ptr->mTriggerNumber, 4);
       const char temp = 0;
       for(int i=0; i<16; i++) fFile.write(&temp, 1);
 
@@ -770,7 +768,7 @@ void WDAQEventWriter::Loop(){
 
       //statistics
       fNEvent++;
-      fLastEvent = ptr->mEventNumber;
+      fLastEvent = ptr->mTriggerNumber;
       //      fLastEvent = ptr->mTriggerNumber;
 
       delete ptr;
