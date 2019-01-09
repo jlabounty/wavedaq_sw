@@ -716,7 +716,7 @@ void WDAQEventWriter::Loop(){
 
                const char trgcell_head[] = "T#";
                fFile.write(trgcell_head, 2);
-               fFile.write((const char *)&(board->mTriggerCell[(ch<7||ch==16)?0:1]), 2);
+               fFile.write((const char *)&(board->mTriggerCell[ch]), 2);
                fFile.write(trgcell_head, 2);
                fFile.write(trgcell_head, 2);
 

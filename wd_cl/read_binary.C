@@ -74,7 +74,7 @@ void decode(const char *filename) {
    THEADER  th;
    BHEADER  bh;
    EHEADER  eh;
-   TCHEADER tch;
+   TCHEADER tch[18];
    CHEADER  ch;
    
    unsigned int scaler;
@@ -169,6 +169,8 @@ void decode(const char *filename) {
          i = (ch.cn[1] - '0')*10 + ch.cn[2] - '0';
          printf("Found timing calibration for channel #%d\n", i);
          fread(bins[b].bin_width[i], sizeof(float), 1024, f);
+	 //	 for(Int_t j = 0; j<10; j++)
+	 //	   printf("Channel %d bin %d dt %le\n",chn, j, bins[b].bin_width[chn][j]);
       }
 
    }
@@ -177,32 +179,7 @@ void decode(const char *filename) {
    for(b = 0 ; b<n_boards; b++)
       rec->Branch(Form("board%02d", b), &data[b] ,"waveform[18][1024]/D:time[18][1024]/D:adc_waveform[16][2048]/s:tdc_waveform[16][512]/b:trigger_data[512]/l");
 
-/*   for(int i=0;i<10; i++){
-      for(int c=0; c<18;c++)
-         for(int p=0; p<1024;p++){
-            data[0].waveform[c][p]=10;
-            data[0].time[c][p]=1;
-         }
-      for(int c=0; c<16;c++)
-         for(int p=0; p<2048;p++)
-            data[0].adc_waveform[c][p]=2;
-
-      for(int c=0; c<16;c++)
-         for(int p=0; p<512;p++)
-            data[0].tdc_waveform[c][p]=3;
-
-      for(int p=0; p<512;p++)
-         data[0].trigger_data[p]=4;
-
-      rec->Fill();
-   }
-
-   rec->Write();
-   outfile->Close();
-   return ;*/
-   
    // loop over all events in data file
-   //for (n=0 ; getchar() ; n++) {
    for (n=0 ;  ; n++) {
       // read event header
       i = fread(&eh, sizeof(eh), 1, f);
@@ -238,23 +215,24 @@ void decode(const char *filename) {
             
             if(ch.c[0] == 'C'){
                //printf("found drs for channel %d\n", chn_index);
+               // read trigger cell
+               fread(tch+chn_index, sizeof(tch[0]), 1, f);
                //DRS
                fread(&scaler, sizeof(int), 1, f);
-               // read trigger cell
-               fread(&tch, sizeof(tch), 1, f);
-               if (memcmp(tch.tc, "T#", 2) != 0) {
+               if (memcmp(tch[chn_index].tc, "T#", 2) != 0) {
                   printf("Invalid trigger cell header in file \'%s\', aborting.\n", filename);
                   return;
                }
 
                fread(voltage, sizeof(short), 1024, f);
+
                for (i=0 ; i<1024 ; i++) {
                   // convert data to volts
                   data[b].waveform[chn_index][i] = (voltage[i] / 65536. + eh.range/1000.0 - 0.5);
 
                   // calculate time for this cell
                   for (j=0,data[b].time[chn_index][i]=0 ; j<i ; j++)
-                     data[b].time[chn_index][i] += bins[b].bin_width[chn_index][(j+tch.trigger_cell) % 1024];
+                     data[b].time[chn_index][i] += bins[b].bin_width[chn_index][(j+tch[chn_index].trigger_cell) % 1024];
                }
             } else if(ch.c[0] == 'A') {
                //ADC
@@ -266,40 +244,25 @@ void decode(const char *filename) {
             } else if(ch.c[0] == 'T') {
                if(ch.cn[0] == '0'){
                   //TDC
-                  //printf("found tdc for channel %d\n", chn_index);
                   fread(tdc_data, sizeof(char), 512, f);
                   for (i=0 ; i<512 ; i++) {
                      data[b].tdc_waveform[chn_index][i] = tdc_data[i];
-                     //if(i>1){
-                     //   if(tdc_data[i] != 0xFF && tdc_data[i-1] == 0xFF){
-                     //      int pos = -1;
-                     //      for(int bit=0; bit<8; bit++){
-                     //         if(! ((tdc_data[i] >>bit) & 0x1)){
-                     //            pos = bit;
-                     //         }
-                     //      }
-                     //      h->Fill(pos);
-                     //   }
-                     //}
                   }
                } else if(ch.cn[0] == 'R'){
                   //TRG
                   //printf("found trg info\n", chn_index);
                   fread(trg_data, sizeof(long), 512, f);
                   for(int i=0; i<512; i++){
-                     //int val = trg_data[i]&0xFFFF;
-                     //if(val& 0x8000) val -=0x10000;
-                     //printf("%02x %02x %016lx\n", data[b].tdc_waveform[0][i], data[b].tdc_waveform[1][i], trg_data[i]);
                      data[b].trigger_data[i] = trg_data[i];
                   }
                }
-            }
-         }
+            }// looks if trg data
+         }// end for channels
          
          // align cell #0 of all channels
-         t1 = data[b].time[0][(1024-tch.trigger_cell) % 1024];
-         for (chn=1 ; chn<4 ; chn++) {
-            t2 = data[b].time[chn][(1024-tch.trigger_cell) % 1024];
+         t1 = data[b].time[0][(1024-tch[0].trigger_cell) % 1024];
+         for (chn=1 ; chn<18 ; chn++) {
+            t2 = data[b].time[chn][(1024-tch[chn].trigger_cell) % 1024];
             dt = t1 - t2;
             for (i=0 ; i<1024 ; i++)
                data[b].time[chn][i] += dt;
@@ -308,18 +271,11 @@ void decode(const char *filename) {
          // fill root tree
          rec->Fill();
          
-         // draw graph and wait for user click
-         //h->Draw("");
-         //c1->Update();
-         //gPad->WaitPrimitive();
-      }
-   }
+      } //end loop on boards
+   }// end loop on events
    
    // print number of events
    printf("%d events processed, \"%s\" written.\n", n, rootfile);
-   //h->Draw("");
-   //c1->Update();
-   //gPad->WaitPrimitive();
    
    // save and close root file
    rec->Write();
