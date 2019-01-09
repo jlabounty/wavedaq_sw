@@ -381,9 +381,17 @@ class WDWDB : public WDBoard, public WDB{
          } catch (const std::runtime_error& ex){
             trgtx_ena = 0;
          }
-         SetTrgTxEn(trgtx_ena);
+
+         //scaler channel transmit
+         unsigned int scaler_ena;
+         try{
+            scaler_ena = GetProperty("ScalerChannelTxEnable").GetUHex();
+         } catch (const std::runtime_error& ex){
+            scaler_ena = 1;
+         }
+         SetSclTxEn(scaler_ena);
+
          SetZeroSuprEn(false);
-         SetSclTxEn(0);
 
          //timing reference
          std::string timingreference;

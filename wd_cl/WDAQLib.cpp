@@ -158,12 +158,38 @@ void WDAQTRGPacketData::AddToBoardEvent(WDAQBoardEvent *e){
    }
 
    e->mTrgTxEnable = 0; //this must be changed with proper TRG data treatment
-
+      
    //check all data received
    e->mTrgByteNumber += mPayloadLenght*8;
    if(e->mTrgByteNumber >= mSamplesPerEventPerChannel*mBitsPerSample){
       e->mTrgHasData = true; 
    }
+   
+   //check if end of event is received
+   if(mFlags & EOE) {
+     e->mEndFlagReceived = true;
+     e->mLastPacket = mPacketNumber;
+   }
+   // the packet number offset is from the first packet
+   if(mFlags & SOE) {
+     e->mStartFlagReceived = true;
+     e->mFirstPacket = mPacketNumber;
+   }
+
+   //anyway increase packet counter
+   e->mPacketsReceived++;
+}
+
+//WDAQ Scaler Packet Data -  derived packet class to host Scaler data
+//Add packet info to given Board Event
+void WDAQScaPacketData::AddToBoardEvent(WDAQBoardEvent *e){
+
+   for(int i=0; i<WD_N_CHANNELS; i++){
+      e->mScaler[i] = data[i];
+      printf("ch = %ld, scaler = %ld\n", i, e->mScaler[i]);
+   }
+
+   e->mTrgTxEnable = 0; //this must be changed with proper TRG data treatment
 
    //check if end of event is received
    if(mFlags & EOE) {
@@ -351,7 +377,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
    data->dac_rofs                       = SWAP_UINT16(data->dac_rofs);
    data->frontend_settings              = SWAP_UINT16(data->frontend_settings);
 
-   //   #define DEBUGGOT 
+#define DEBUGGOT 
 
    #ifdef DEBUGGOT
    printf("---------------------------------\n");
@@ -377,7 +403,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
    printf("\n");
    #endif
 
-   if(daqdata->data_type == 0){
+   if(daqdata->data_type == cDataTypeDRS){
       //DRS Data
       //create new packet
       WDAQDRSPacketData *packet = new WDAQDRSPacketData();
@@ -407,7 +433,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
          fDroppedPackets++;
          delete packet;
       }
-   } else if (daqdata->data_type == 1) {
+   } else if (daqdata->data_type == cDataTypeADC){
       //ADC Data
 
       //create new packet
@@ -435,7 +461,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
          fDroppedPackets++;
          delete packet;
       }
-   } else if (daqdata->data_type == 2) {
+   } else if (daqdata->data_type == cDataTypeTDC){
       //TDC Data
 
       //create new packet
@@ -457,7 +483,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
          fDroppedPackets++;
          delete packet;
       }
-   } else if (daqdata->data_type == 3) {
+   } else if (daqdata->data_type == cDataTypeTrg){
       //TRG Data
       //create new packet
       WDAQTRGPacketData *packet = new WDAQTRGPacketData();
@@ -468,6 +494,26 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
       int numberBins = (int) packet->mPayloadLenght/8;
       for (int i=0 ; i<numberBins ; i++) {
          packet->data[i] = SWAP_UINT64(pd[i]);
+      }
+      fNPackets++;
+
+      //push to buffer
+      if(!fBuf->Try_push(packet)){
+         //could not push packet to buffer
+         //printf("overflow pk\n");
+         fDroppedPackets++;
+         delete packet;
+      }
+   } else if (daqdata->data_type == cDataTypeScaler) {
+      //Scaler data
+      //create new packet
+      WDAQScaPacketData *packet = new WDAQScaPacketData();
+      packet->SetEventHeaderInfo(data,daqdata);
+
+      // decode waveform data
+      auto pd = (unsigned long*)(data+1);
+      for (int i=0 ; i<18 ; i++) {//Ch 0->16, Trigger, External Clock
+         packet->data[i] = SWAP_UINT64(pd[17-i]);
       }
       fNPackets++;
 

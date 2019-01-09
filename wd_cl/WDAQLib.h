@@ -96,6 +96,17 @@ public:
    ~WDAQTRGPacketData() { };
 };
 
+//WDAQ TRG Packet Data -  derived packet class to host TRG data
+class WDAQScaPacketData : public WDAQPacketData{
+public:
+   unsigned long data[18];
+
+   //Add packet info to given Board Event
+   void AddToBoardEvent(WDAQBoardEvent *e);
+
+   ~WDAQScaPacketData() { };
+};
+
 //WDAQ board event - Board Event class
 class WDAQBoardEvent {
 public:
@@ -126,7 +137,8 @@ public:
    unsigned short   mAdcU[WD_N_CHANNELS-2][2048];
    unsigned char    mTdc[WD_N_CHANNELS-2][512];
    unsigned long    mTrg[512];
-   
+   unsigned long    mScaler[WD_N_CHANNELS];
+
    //event status
    bool             mVCalibrated;
    bool             mEndFlagReceived;
