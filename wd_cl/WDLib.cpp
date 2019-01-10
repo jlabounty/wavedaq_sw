@@ -229,6 +229,7 @@ void WDSystem::GoRun(){
    if(fBuilderThread) fBuilderThread->GoRun();
    if(fWriterThread) fWriterThread->GoRun();
    if(fWorkerThread) fWorkerThread->GoRun();
+   sleep(1);
    GetTriggerBoard()->GoRun();
 }
 

@@ -381,17 +381,25 @@ class WDWDB : public WDBoard, public WDB{
          } catch (const std::runtime_error& ex){
             trgtx_ena = 0;
          }
+	 SetTrgTxEn(trgtx_ena);
 
          //scaler channel transmit
          unsigned int scaler_ena;
          try{
             scaler_ena = GetProperty("ScalerChannelTxEnable").GetUHex();
          } catch (const std::runtime_error& ex){
-            scaler_ena = 1;
+            scaler_ena = 0;
          }
          SetSclTxEn(scaler_ena);
 
-         SetZeroSuprEn(false);
+         //zero suppression enable
+         unsigned int zsuppr_ena;
+         try{
+            zsuppr_ena = GetProperty("ZeroSuppressionEnable").GetUHex();
+         } catch (const std::runtime_error& ex){
+            zsuppr_ena = 0;
+         }
+         SetZeroSuprEn(zsuppr_ena);
 
          //timing reference
          std::string timingreference;

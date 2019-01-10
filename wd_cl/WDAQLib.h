@@ -96,7 +96,7 @@ public:
    ~WDAQTRGPacketData() { };
 };
 
-//WDAQ TRG Packet Data -  derived packet class to host TRG data
+//WDAQ Scaler Packet Data -  derived packet class to host scaler
 class WDAQScaPacketData : public WDAQPacketData{
 public:
    unsigned long data[18];
@@ -105,6 +105,16 @@ public:
    void AddToBoardEvent(WDAQBoardEvent *e);
 
    ~WDAQScaPacketData() { };
+};
+
+//WDAQ Dummy Packet Data -  derived packet class for fully zero suppressed board
+class WDAQDummyPacketData : public WDAQPacketData{
+public:
+
+   //Add packet info to given Board Event
+   void AddToBoardEvent(WDAQBoardEvent *e);
+
+   ~WDAQDummyPacketData() { };
 };
 
 //WDAQ board event - Board Event class

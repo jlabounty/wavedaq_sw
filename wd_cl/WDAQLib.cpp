@@ -189,7 +189,25 @@ void WDAQScaPacketData::AddToBoardEvent(WDAQBoardEvent *e){
       printf("ch = %ld, scaler = %ld\n", i, e->mScaler[i]);
    }
 
-   e->mTrgTxEnable = 0; //this must be changed with proper TRG data treatment
+   //check if end of event is received
+   if(mFlags & EOE) {
+     e->mEndFlagReceived = true;
+     e->mLastPacket = mPacketNumber;
+   }
+   // the packet number offset is from the first packet
+   if(mFlags & SOE) {
+     e->mStartFlagReceived = true;
+     e->mFirstPacket = mPacketNumber;
+   }
+
+   //anyway increase packet counter
+   e->mPacketsReceived++;
+}
+
+//WDAQ Scaler Packet Data -  derived packet class to host Scaler data
+//Add packet info to given Board Event: this packet is EMPTY
+// this board has been fully zero suppressed
+void WDAQDummyPacketData::AddToBoardEvent(WDAQBoardEvent *e){
 
    //check if end of event is received
    if(mFlags & EOE) {
@@ -524,8 +542,23 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
          fDroppedPackets++;
          delete packet;
       }
+   } else if (daqdata->data_type == cDataTypeDummy) {
+      //Scaler data
+      //create new packet
+      WDAQDummyPacketData *packet = new WDAQDummyPacketData();
+      packet->SetEventHeaderInfo(data,daqdata);
+
+      fNPackets++;
+
+      //push to buffer
+      if(!fBuf->Try_push(packet)){
+         //could not push packet to buffer
+         //printf("overflow pk\n");
+         fDroppedPackets++;
+         delete packet;
+      }
       
-   }
+   }// end if data is dummy (completely zero suppressed)
 }
 
 //print statistics at thread end
