@@ -25,6 +25,7 @@
 #include "mxml.h"
 
 #define WD_N_CHANNELS 18
+#define WD_N_SCALER 18
 #define SUCCESS        1
 
 class WDB;
@@ -220,7 +221,7 @@ public:
    
    unsigned long    mTrgData[512];
 
-   unsigned long    mScaler[18];
+   unsigned long    mScaler[WD_N_SCALER];
 
    bool             mVCalibrated;
    bool             mTCalibrated;

@@ -2448,7 +2448,7 @@ int WP::ReceiveWfPacket()
    if (pdaqh->data_type == cDataTypeScaler) {
       auto pd = (unsigned long*)(ph+1);
       assert(pdaqh->payload_length <= sizeof(event->mScaler));
-      for (int i=0 ; i<18 ; i++)
+      for (int i=0 ; i<WD_N_SCALER ; i++)
          event->mScaler[i] = SWAP_UINT64(pd[17-i]);
    }
 

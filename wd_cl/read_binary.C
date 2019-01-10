@@ -82,6 +82,7 @@ void decode(const char *filename) {
    unsigned short adc_voltage[2048];
    unsigned char tdc_data[512];
    unsigned long trg_data[512];
+   unsigned long scaler_data[18];
    
    typedef struct {
       Double_t waveform[18][1024];
@@ -89,6 +90,7 @@ void decode(const char *filename) {
       UShort_t adc_waveform[16][2048];
       UChar_t tdc_waveform[16][512];
       ULong_t trigger_data[512];
+      ULong_t scaler_data[18];
    } WDBDATA;
    std::vector<WDBDATA> data;
 
@@ -177,7 +179,7 @@ void decode(const char *filename) {
    n_boards = b;
 
    for(b = 0 ; b<n_boards; b++)
-      rec->Branch(Form("board%02d", b), &data[b] ,"waveform[18][1024]/D:time[18][1024]/D:adc_waveform[16][2048]/s:tdc_waveform[16][512]/b:trigger_data[512]/l");
+      rec->Branch(Form("board%02d", b), &data[b] ,"waveform[18][1024]/D:time[18][1024]/D:adc_waveform[16][2048]/s:tdc_waveform[16][512]/b:trigger_data[512]/l:scaler_data[18]/l");
 
    // loop over all events in data file
    for (n=0 ;  ; n++) {
@@ -206,7 +208,7 @@ void decode(const char *filename) {
             
             // read channel header
             fread(&ch, sizeof(ch), 1, f);
-            if (ch.c[0] != 'C' && ch.c[0] != 'A' && ch.c[0] != 'T') {
+            if (ch.c[0] != 'C' && ch.c[0] != 'A' && ch.c[0] != 'T' && ch.c[0] != 'S') {
                // event header found
                fseek(f, -4, SEEK_CUR);
                break;
@@ -218,7 +220,7 @@ void decode(const char *filename) {
                // read trigger cell
                fread(tch+chn_index, sizeof(tch[0]), 1, f);
                //DRS
-               fread(&scaler, sizeof(int), 1, f);
+	       fread(&scaler, sizeof(int), 1, f);
                if (memcmp(tch[chn_index].tc, "T#", 2) != 0) {
                   printf("Invalid trigger cell header in file \'%s\', aborting.\n", filename);
                   return;
@@ -251,26 +253,33 @@ void decode(const char *filename) {
                } else if(ch.cn[0] == 'R'){
                   //TRG
                   //printf("found trg info\n", chn_index);
-                  fread(trg_data, sizeof(long), 512, f);
+		 fread(trg_data, sizeof(long), 512, f);
                   for(int i=0; i<512; i++){
-                     data[b].trigger_data[i] = trg_data[i];
+		    data[b].trigger_data[i] = trg_data[i];
                   }
                }
-            }// looks if trg data
-         }// end for channels
-         
-         // align cell #0 of all channels
-         t1 = data[b].time[0][(1024-tch[0].trigger_cell) % 1024];
-         for (chn=1 ; chn<18 ; chn++) {
-            t2 = data[b].time[chn][(1024-tch[chn].trigger_cell) % 1024];
-            dt = t1 - t2;
-            for (i=0 ; i<1024 ; i++)
-               data[b].time[chn][i] += dt;
-         }
-         
-         // fill root tree
-         rec->Fill();
-         
+            } else if(ch.c[0] == 'S') {
+	      //Scaler
+	      //printf("found adc for channel %d\n", chn_index);
+	      fread(scaler_data, sizeof(long), 18, f);
+	      for (int i=0 ; i<18 ; i++) {
+		data[b].scaler_data[i] = scaler_data[i];
+	      }
+	    } 
+	 }// end for channels
+	 
+	 // align cell #0 of all channels
+	 t1 = data[b].time[0][(1024-tch[0].trigger_cell) % 1024];
+	 for (chn=1 ; chn<18 ; chn++) {
+	   t2 = data[b].time[chn][(1024-tch[chn].trigger_cell) % 1024];
+	   dt = t1 - t2;
+	   for (i=0 ; i<1024 ; i++)
+	     data[b].time[chn][i] += dt;
+	 }
+	 
+	 // fill root tree
+	 rec->Fill();
+	 
       } //end loop on boards
    }// end loop on events
    

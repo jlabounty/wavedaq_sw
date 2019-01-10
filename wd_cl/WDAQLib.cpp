@@ -53,7 +53,8 @@ void WDAQDRSPacketData::AddToBoardEvent(WDAQBoardEvent *e){
    //check all data received
    e->mDrsByteNumber[channel] += mPayloadLenght*8;
    if(e->mDrsByteNumber[channel] >= mSamplesPerEventPerChannel*mBitsPerSample){
-      e->mDrsHasData[channel] = true; 
+   // set the flag of drs channel data reception for the writer
+     e->mDrsHasData[channel] = true; 
    }
 
    //check if end of event is received
@@ -90,6 +91,7 @@ void WDAQADCPacketData::AddToBoardEvent(WDAQBoardEvent *e){
    //check all data received
    e->mAdcByteNumber[channel] += mPayloadLenght*8;
    if(e->mAdcByteNumber[channel] >= mSamplesPerEventPerChannel*mBitsPerSample){
+     // set the flag of adc channel data reception for the writer
       e->mAdcHasData[channel] = true; 
    }
 
@@ -127,7 +129,8 @@ void WDAQTDCPacketData::AddToBoardEvent(WDAQBoardEvent *e){
    //check all data received
    e->mTdcByteNumber[channel] += mPayloadLenght*8;
    if(e->mTdcByteNumber[channel] >= mSamplesPerEventPerChannel*mBitsPerSample){
-      e->mTdcHasData[channel] = true; 
+   // set the flag of tdc channel data reception for the writer
+     e->mTdcHasData[channel] = true; 
    }
  
    //check if end of event is received
@@ -162,7 +165,8 @@ void WDAQTRGPacketData::AddToBoardEvent(WDAQBoardEvent *e){
    //check all data received
    e->mTrgByteNumber += mPayloadLenght*8;
    if(e->mTrgByteNumber >= mSamplesPerEventPerChannel*mBitsPerSample){
-      e->mTrgHasData = true; 
+   // set the flag of trigger data reception for the writer
+     e->mTrgHasData = true; 
    }
    
    //check if end of event is received
@@ -184,11 +188,12 @@ void WDAQTRGPacketData::AddToBoardEvent(WDAQBoardEvent *e){
 //Add packet info to given Board Event
 void WDAQScaPacketData::AddToBoardEvent(WDAQBoardEvent *e){
 
-   for(int i=0; i<WD_N_CHANNELS; i++){
+   for(int i=0; i<WD_N_SCALER; i++){
       e->mScaler[i] = data[i];
       printf("ch = %ld, scaler = %ld\n", i, e->mScaler[i]);
    }
-
+   // set the flag of scaler reception for the writer
+   e->mScalerHasData = true; 
    //check if end of event is received
    if(mFlags & EOE) {
      e->mEndFlagReceived = true;
@@ -257,30 +262,13 @@ WDAQBoardEvent::WDAQBoardEvent(WDAQPacketData* pkt){
       //for(int j=0; j<1024; j++) mDrsU[i][j] = 0;
    }
    mTrgHasData = false;
+   mScalerHasData = false;
    mTrgByteNumber = 0;
 }
 
 //check complete
 bool WDAQBoardEvent::IsComplete(){
-  /*   bool ret = true;
-   // first version ckecking that all the enabled channels sent data
-   for(int i=0; i<WD_N_CHANNELS; i++){
-     if(mDrsTxEnable & (1<<i))
-       if(mDrsHasData[i]==false) 
-	 ret = false; 
-     if(mAdcTxEnable & (1<<i))
-       if(mAdcHasData[i]==false)
-	 ret = false; 
-     if(mTdcTxEnable & (1<<i))
-       if(mTdcHasData[i]==false)
-	 ret = false;
-   }
-   if(mTrgTxEnable)
-     if(mTrgHasData==false)
-       ret = false;
-  */
-
-   //second version: check that all the packets are received:
+   // check that all the packets are received:
    // start of the event is received
    // end of the event is received
    // check if last packet is smaller than first, in case sum to last 2^16
@@ -395,7 +383,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
    data->dac_rofs                       = SWAP_UINT16(data->dac_rofs);
    data->frontend_settings              = SWAP_UINT16(data->frontend_settings);
 
-#define DEBUGGOT 
+   //#define DEBUGGOT 
 
    #ifdef DEBUGGOT
    printf("---------------------------------\n");
@@ -530,7 +518,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
 
       // decode waveform data
       auto pd = (unsigned long*)(data+1);
-      for (int i=0 ; i<18 ; i++) {//Ch 0->16, Trigger, External Clock
+      for (int i=0 ; i<WD_N_SCALER ; i++) {//Ch 0->16, Trigger, External Clock
          packet->data[i] = SWAP_UINT64(pd[17-i]);
       }
       fNPackets++;
@@ -796,7 +784,8 @@ void WDAQEventWriter::Loop(){
                const char trgcell_head[] = "T#";
                fFile.write(trgcell_head, 2);
                fFile.write((const char *)&(board->mTriggerCell[ch]), 2);
-               fFile.write(trgcell_head, 2);
+	       //this is a place holder for the scalers
+	       fFile.write(trgcell_head, 2);
                fFile.write(trgcell_head, 2);
 
                for(int bin=0; bin<1024; bin++){
@@ -804,8 +793,8 @@ void WDAQEventWriter::Loop(){
                   fFile.write((const char *)&val, 2);
                }
             }
-         }
-         for(int ch=0;ch<18;ch++){
+         }// end if there are drs data
+         for(int ch=0;ch<16;ch++){
             //write only channels with data
             if(board->mAdcHasData[ch]){
                std::string chn_header = "A";
@@ -819,8 +808,8 @@ void WDAQEventWriter::Loop(){
                   fFile.write((const char *)&val, 2);
                }
             }
-         }
-         for(int ch=0;ch<18;ch++){
+         }// end if there are adc data
+         for(int ch=0;ch<16;ch++){
             //write only channels with data
             if(board->mTdcHasData[ch]){
                std::string chn_header = "T";
@@ -834,7 +823,7 @@ void WDAQEventWriter::Loop(){
                   fFile.write((const char *)&val, 1);
                }
             }
-         }
+         }// end if there are tdc data
          if(board->mTrgHasData){
             std::string chn_header = "TRGO";
             fFile.write(chn_header.c_str(), 4);
@@ -844,7 +833,17 @@ void WDAQEventWriter::Loop(){
                fFile.write((const char *)&val, 8);
             }
 
-         }
+         }// end if there are trg data
+         if(board->mScalerHasData){
+            std::string chn_header = "SCAL";
+            fFile.write(chn_header.c_str(), 4);
+
+            for(int bin=0; bin<WD_N_SCALER; bin++){
+               unsigned long val = board->mScaler[bin];
+               fFile.write((const char *)&val, 8);
+            }
+
+         }// end if there are scaler data
       }
 
       //statistics

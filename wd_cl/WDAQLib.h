@@ -163,6 +163,7 @@ public:
    bool             mTdcHasData[WD_N_CHANNELS];
    int              mTdcByteNumber[WD_N_CHANNELS];
    bool             mTrgHasData;
+   bool             mScalerHasData;
    int              mTrgByteNumber;
 
    bool IsComplete();
