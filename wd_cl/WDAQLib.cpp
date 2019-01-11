@@ -23,7 +23,7 @@ void WDAQPacketData::SetEventHeaderInfo(WD_FRAME_HEADER *ph, WDAQ_FRAME_HEADER *
   mSamplesPerEventPerChannel = ph->samples_per_event_per_channel;
   mPayloadLenght = pdaqh->payload_length;
   mDataOffset = pdaqh->data_chunk_offset;
-  for(int i=0; i<8; i++) mTimeStamp[i] = ph->time_stamp[i];
+  mTimeStamp = ph->time_stamp;
   mEventNumber = ph->event_number;
   mTriggerCell = ph->drs_trigger_cell;
   mSamplingFrequency = ph->sampling_frequency;
@@ -190,7 +190,6 @@ void WDAQScaPacketData::AddToBoardEvent(WDAQBoardEvent *e){
 
    for(int i=0; i<WD_N_SCALER; i++){
       e->mScaler[i] = data[i];
-      printf("ch = %ld, scaler = %ld\n", i, e->mScaler[i]);
    }
    // set the flag of scaler reception for the writer
    e->mScalerHasData = true; 
@@ -238,7 +237,7 @@ WDAQBoardEvent::WDAQBoardEvent(WDAQPacketData* pkt){
    mSamplingFrequency = pkt->mSamplingFrequency;
    mFlags = pkt->mFlags;
    mTriggerSource = pkt->mTriggerSource;
-   for(int i=0; i<8; i++) mTimeStamp[i] = pkt->mTimeStamp[i];
+   mTimeStamp = pkt->mTimeStamp;
    mDacOFS = pkt->mDacOFS;
    mDacROFS = pkt->mDacROFS;
    mTemperature = pkt->mTemperature;
@@ -382,6 +381,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
    data->dac_ofs                        = SWAP_UINT16(data->dac_ofs);
    data->dac_rofs                       = SWAP_UINT16(data->dac_rofs);
    data->frontend_settings              = SWAP_UINT16(data->frontend_settings);
+   data->time_stamp                     = SWAP_UINT64(data->time_stamp);
 
    //#define DEBUGGOT 
 
@@ -784,9 +784,6 @@ void WDAQEventWriter::Loop(){
                const char trgcell_head[] = "T#";
                fFile.write(trgcell_head, 2);
                fFile.write((const char *)&(board->mTriggerCell[ch]), 2);
-	       //this is a place holder for the scalers
-	       fFile.write(trgcell_head, 2);
-               fFile.write(trgcell_head, 2);
 
                for(int bin=0; bin<1024; bin++){
                   unsigned short val = (unsigned short) ((board->mDrsU[ch][bin]-range+0.5)*65535);
@@ -837,11 +834,14 @@ void WDAQEventWriter::Loop(){
          if(board->mScalerHasData){
             std::string chn_header = "SCAL";
             fFile.write(chn_header.c_str(), 4);
-
+	    // first write 18 integral scaler values as received
             for(int bin=0; bin<WD_N_SCALER; bin++){
                unsigned long val = board->mScaler[bin];
                fFile.write((const char *)&val, 8);
             }
+	    // then the board time counter @80MHz
+	    unsigned long lval = board->mTimeStamp;
+	    fFile.write((const char *)&lval, 8);
 
          }// end if there are scaler data
       }

@@ -77,20 +77,20 @@ void decode(const char *filename) {
    TCHEADER tch[18];
    CHEADER  ch;
    
-   unsigned int scaler;
    unsigned short voltage[1024];
    unsigned short adc_voltage[2048];
    unsigned char tdc_data[512];
    unsigned long trg_data[512];
-   unsigned long scaler_data[18];
+   unsigned long scaler_data[18], scaler_data_old[18] = {0};
+   unsigned long scaler_time, scaler_time_old = 0;
    
    typedef struct {
-      Double_t waveform[18][1024];
-      Double_t time[18][1024];
-      UShort_t adc_waveform[16][2048];
-      UChar_t tdc_waveform[16][512];
-      ULong_t trigger_data[512];
-      ULong_t scaler_data[18];
+     Double_t waveform[18][1024];
+     Double_t time[18][1024];
+     UShort_t adc_waveform[16][2048];
+     UChar_t tdc_waveform[16][512];
+     ULong_t trigger_data[512];
+     Double_t scaler[18];
    } WDBDATA;
    std::vector<WDBDATA> data;
 
@@ -171,15 +171,13 @@ void decode(const char *filename) {
          i = (ch.cn[1] - '0')*10 + ch.cn[2] - '0';
          printf("Found timing calibration for channel #%d\n", i);
          fread(bins[b].bin_width[i], sizeof(float), 1024, f);
-	 //	 for(Int_t j = 0; j<10; j++)
-	 //	   printf("Channel %d bin %d dt %le\n",chn, j, bins[b].bin_width[chn][j]);
       }
 
    }
    n_boards = b;
 
    for(b = 0 ; b<n_boards; b++)
-      rec->Branch(Form("board%02d", b), &data[b] ,"waveform[18][1024]/D:time[18][1024]/D:adc_waveform[16][2048]/s:tdc_waveform[16][512]/b:trigger_data[512]/l:scaler_data[18]/l");
+      rec->Branch(Form("board%02d", b), &data[b] ,"waveform[18][1024]/D:time[18][1024]/D:adc_waveform[16][2048]/s:tdc_waveform[16][512]/b:trigger_data[512]/l:scaler[18]/D");
 
    // loop over all events in data file
    for (n=0 ;  ; n++) {
@@ -216,11 +214,8 @@ void decode(const char *filename) {
             chn_index = (ch.cn[1] - '0')*10 + ch.cn[2] - '0';
             
             if(ch.c[0] == 'C'){
-               //printf("found drs for channel %d\n", chn_index);
                // read trigger cell
                fread(tch+chn_index, sizeof(tch[0]), 1, f);
-               //DRS
-	       fread(&scaler, sizeof(int), 1, f);
                if (memcmp(tch[chn_index].tc, "T#", 2) != 0) {
                   printf("Invalid trigger cell header in file \'%s\', aborting.\n", filename);
                   return;
@@ -238,7 +233,6 @@ void decode(const char *filename) {
                }
             } else if(ch.c[0] == 'A') {
                //ADC
-               //printf("found adc for channel %d\n", chn_index);
                fread(adc_voltage, sizeof(short), 2048, f);
                for (i=0 ; i<2048 ; i++) {
                   data[b].adc_waveform[chn_index][i] = adc_voltage[i];
@@ -252,7 +246,6 @@ void decode(const char *filename) {
                   }
                } else if(ch.cn[0] == 'R'){
                   //TRG
-                  //printf("found trg info\n", chn_index);
 		 fread(trg_data, sizeof(long), 512, f);
                   for(int i=0; i<512; i++){
 		    data[b].trigger_data[i] = trg_data[i];
@@ -260,11 +253,13 @@ void decode(const char *filename) {
                }
             } else if(ch.c[0] == 'S') {
 	      //Scaler
-	      //printf("found adc for channel %d\n", chn_index);
 	      fread(scaler_data, sizeof(long), 18, f);
+	      fread(&scaler_time, sizeof(long), 1, f);
 	      for (int i=0 ; i<18 ; i++) {
-		data[b].scaler_data[i] = scaler_data[i];
+		data[b].scaler[i] = (Double_t) (scaler_data[i]-scaler_data_old[i])/(scaler_time-scaler_time_old)/12.5e-9;
+		scaler_data_old[i] = scaler_data[i];
 	      }
+	      scaler_time_old = scaler_time;
 	    } 
 	 }// end for channels
 	 

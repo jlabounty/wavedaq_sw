@@ -59,7 +59,7 @@ typedef struct {
    unsigned int   tx_enable;
    unsigned short drs_trigger_cell;
    unsigned char  trigger_information[6];
-   unsigned char  time_stamp[8];
+   unsigned long  time_stamp;
    unsigned char  reserved[4];
    unsigned int   event_number;
    unsigned short temperature;

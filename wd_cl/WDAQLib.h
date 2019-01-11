@@ -31,7 +31,7 @@ class WDAQPacketData{
    unsigned short   mSamplesPerEventPerChannel;//serve?
    unsigned short   mPayloadLenght;//serve?
    unsigned short   mDataOffset;
-   unsigned char    mTimeStamp[8];
+   unsigned long    mTimeStamp;
    unsigned int     mEventNumber;
    //unsigned char    mTriggerInfo[6];
    unsigned char    mTriggerType;
@@ -127,7 +127,7 @@ public:
    unsigned short   mSamplingFrequency;
    unsigned short   mFlags;
    unsigned char    mTriggerSource;//serve?
-   unsigned char    mTimeStamp[8];
+   unsigned long    mTimeStamp;
    unsigned short   mDacOFS;
    unsigned short   mDacROFS;
    float            mTemperature;
