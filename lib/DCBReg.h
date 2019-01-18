@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  18.12.2018 11:11:34
+// Created :  18.01.2019 11:04:37
 //
 
 
@@ -160,6 +160,8 @@ public:
 
    ////// ------ Register 12 [0x0030]: PLL_LOCK - Lock Status of PLLs (Default: 0x00000000) ------ //////
 
+   // 0x00000004: WDB_CLK_MGR_LOCK - Lock of the clock manager deriving clocks from the WDB clock (e.g. refclk for SYNC output delay)
+   unsigned int GetWdbClkMgrLock() { return BitExtract(DCB_WDB_CLK_MGR_LOCK_REG, DCB_WDB_CLK_MGR_LOCK_MASK, DCB_WDB_CLK_MGR_LOCK_OFS); };
    // 0x00000002: SYS_DCM_LOCK - Lock of system DCM (FPGA internal)
    unsigned int GetSysDcmLock() { return BitExtract(DCB_SYS_DCM_LOCK_REG, DCB_SYS_DCM_LOCK_MASK, DCB_SYS_DCM_LOCK_OFS); };
    // 0x00000001: LMK_PLL_LOCK - PLL lock signal of LMK (external)
@@ -179,6 +181,10 @@ public:
 
 
    ////// ------ Register 14 [0x0038]: CTRL - DCB control register (Default: 0x00000000) ------ //////
+
+   // 0x001F0000: SYNC_DELAY - Output delay of SYNC output to backplane
+   unsigned int GetSyncDelay() { return BitExtract(DCB_SYNC_DELAY_REG, DCB_SYNC_DELAY_MASK, DCB_SYNC_DELAY_OFS); };
+   void         SetSyncDelay(unsigned int value) { SetRegMask(DCB_SYNC_DELAY_REG, DCB_SYNC_DELAY_MASK, DCB_SYNC_DELAY_OFS, value); };
 
    // 0x00000001: DAQ_SOFT_TRIGGER - config 0
    unsigned int GetDaqSoftTrigger() { return BitExtract(DCB_DAQ_SOFT_TRIGGER_REG, DCB_DAQ_SOFT_TRIGGER_MASK, DCB_DAQ_SOFT_TRIGGER_OFS); };
@@ -243,6 +249,14 @@ public:
 
 
    ////// ------ Register 21 [0x0054]: RST - Reset bits for specific firmwar units (Default: 0x00000000) ------ //////
+
+   // 0x00000020: WDB_CLK_MGR_RST - Reset for clock manager deriving clocks from the WDB clock (e.g. refclk for SYNC output delay)
+   unsigned int GetWdbClkMgrRst() { return BitExtract(DCB_WDB_CLK_MGR_RST_REG, DCB_WDB_CLK_MGR_RST_MASK, DCB_WDB_CLK_MGR_RST_OFS); };
+   void         SetWdbClkMgrRst(unsigned int value) { SetRegMask(DCB_WDB_CLK_MGR_RST_REG, DCB_WDB_CLK_MGR_RST_MASK, DCB_WDB_CLK_MGR_RST_OFS, value); };
+
+   // 0x00000010: TRIGGER_MGR_RST - Trigger manager reset
+   unsigned int GetTriggerMgrRst() { return BitExtract(DCB_TRIGGER_MGR_RST_REG, DCB_TRIGGER_MGR_RST_MASK, DCB_TRIGGER_MGR_RST_OFS); };
+   void         SetTriggerMgrRst(unsigned int value) { SetRegMask(DCB_TRIGGER_MGR_RST_REG, DCB_TRIGGER_MGR_RST_MASK, DCB_TRIGGER_MGR_RST_OFS, value); };
 
    // 0x00000008: TR_SYNC_BPL - Trigger SYNC signal on the backplane
    unsigned int GetTrSyncBpl() { return BitExtract(DCB_TR_SYNC_BPL_REG, DCB_TR_SYNC_BPL_MASK, DCB_TR_SYNC_BPL_OFS); };
