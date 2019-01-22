@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  18.01.2019 11:04:37
+// Created :  21.01.2019 15:04:38
 //
 
 
@@ -634,43 +634,27 @@ public:
    unsigned int GetTrbInfoMsb() { return BitExtract(DCB_TRB_INFO_MSB_REG, DCB_TRB_INFO_MSB_MASK, DCB_TRB_INFO_MSB_OFS); };
 
 
-   ////// ------ Register 50 [0x00C8]: LMK_0_7_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Register 50 [0x00C8]: LMK_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ------ //////
 
-   // 0xF0000000: LMK_0_MOD - LMK channel 0 register modified flags
-   unsigned int GetLmk0Mod() { return BitExtract(DCB_LMK_0_MOD_REG, DCB_LMK_0_MOD_MASK, DCB_LMK_0_MOD_OFS); };
-   // 0x0F000000: LMK_1_MOD - LMK channel 1 register modified flags
-   unsigned int GetLmk1Mod() { return BitExtract(DCB_LMK_1_MOD_REG, DCB_LMK_1_MOD_MASK, DCB_LMK_1_MOD_OFS); };
-   // 0x00F00000: LMK_2_MOD - LMK channel 2 register modified flags
-   unsigned int GetLmk2Mod() { return BitExtract(DCB_LMK_2_MOD_REG, DCB_LMK_2_MOD_MASK, DCB_LMK_2_MOD_OFS); };
-   // 0x000F0000: LMK_3_MOD - LMK channel 3 register modified flags
-   unsigned int GetLmk3Mod() { return BitExtract(DCB_LMK_3_MOD_REG, DCB_LMK_3_MOD_MASK, DCB_LMK_3_MOD_OFS); };
-   // 0x0000F000: LMK_4_MOD - LMK channel 4 register modified flags
-   unsigned int GetLmk4Mod() { return BitExtract(DCB_LMK_4_MOD_REG, DCB_LMK_4_MOD_MASK, DCB_LMK_4_MOD_OFS); };
-   // 0x00000F00: LMK_5_MOD - LMK channel 5 register modified flags
-   unsigned int GetLmk5Mod() { return BitExtract(DCB_LMK_5_MOD_REG, DCB_LMK_5_MOD_MASK, DCB_LMK_5_MOD_OFS); };
-   // 0x000000F0: LMK_6_MOD - LMK channel 6 register modified flags
-   unsigned int GetLmk6Mod() { return BitExtract(DCB_LMK_6_MOD_REG, DCB_LMK_6_MOD_MASK, DCB_LMK_6_MOD_OFS); };
-   // 0x0000000F: LMK_7_MOD - LMK channel 7 register modified flags
+   // 0x00000080: LMK_7_MOD - LMK channel 7 register modified flags
    unsigned int GetLmk7Mod() { return BitExtract(DCB_LMK_7_MOD_REG, DCB_LMK_7_MOD_MASK, DCB_LMK_7_MOD_OFS); };
+   // 0x00000040: LMK_6_MOD - LMK channel 6 register modified flags
+   unsigned int GetLmk6Mod() { return BitExtract(DCB_LMK_6_MOD_REG, DCB_LMK_6_MOD_MASK, DCB_LMK_6_MOD_OFS); };
+   // 0x00000020: LMK_5_MOD - LMK channel 5 register modified flags
+   unsigned int GetLmk5Mod() { return BitExtract(DCB_LMK_5_MOD_REG, DCB_LMK_5_MOD_MASK, DCB_LMK_5_MOD_OFS); };
+   // 0x00000010: LMK_4_MOD - LMK channel 4 register modified flags
+   unsigned int GetLmk4Mod() { return BitExtract(DCB_LMK_4_MOD_REG, DCB_LMK_4_MOD_MASK, DCB_LMK_4_MOD_OFS); };
+   // 0x00000008: LMK_3_MOD - LMK channel 3 register modified flags
+   unsigned int GetLmk3Mod() { return BitExtract(DCB_LMK_3_MOD_REG, DCB_LMK_3_MOD_MASK, DCB_LMK_3_MOD_OFS); };
+   // 0x00000004: LMK_2_MOD - LMK channel 2 register modified flags
+   unsigned int GetLmk2Mod() { return BitExtract(DCB_LMK_2_MOD_REG, DCB_LMK_2_MOD_MASK, DCB_LMK_2_MOD_OFS); };
+   // 0x00000002: LMK_1_MOD - LMK channel 1 register modified flags
+   unsigned int GetLmk1Mod() { return BitExtract(DCB_LMK_1_MOD_REG, DCB_LMK_1_MOD_MASK, DCB_LMK_1_MOD_OFS); };
+   // 0x00000001: LMK_0_MOD - LMK Register 0 modified flags
+   unsigned int GetLmk0Mod() { return BitExtract(DCB_LMK_0_MOD_REG, DCB_LMK_0_MOD_MASK, DCB_LMK_0_MOD_OFS); };
 
 
-   ////// ------ Register 51 [0x00CC]: LMK_8_15_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ------ //////
-
-   // 0x00F00000: LMK_8_MOD - LMK Register 8 modified flags
-   unsigned int GetLmk8Mod() { return BitExtract(DCB_LMK_8_MOD_REG, DCB_LMK_8_MOD_MASK, DCB_LMK_8_MOD_OFS); };
-   // 0x000F0000: LMK_9_MOD - LMK Register 9 modified flags
-   unsigned int GetLmk9Mod() { return BitExtract(DCB_LMK_9_MOD_REG, DCB_LMK_9_MOD_MASK, DCB_LMK_9_MOD_OFS); };
-   // 0x0000F000: LMK_11_MOD - LMK Register 11 modified flags
-   unsigned int GetLmk11Mod() { return BitExtract(DCB_LMK_11_MOD_REG, DCB_LMK_11_MOD_MASK, DCB_LMK_11_MOD_OFS); };
-   // 0x00000F00: LMK_13_MOD - LMK Register 13 modified flags
-   unsigned int GetLmk13Mod() { return BitExtract(DCB_LMK_13_MOD_REG, DCB_LMK_13_MOD_MASK, DCB_LMK_13_MOD_OFS); };
-   // 0x000000F0: LMK_14_MOD - LMK Register 14 modified flags
-   unsigned int GetLmk14Mod() { return BitExtract(DCB_LMK_14_MOD_REG, DCB_LMK_14_MOD_MASK, DCB_LMK_14_MOD_OFS); };
-   // 0x0000000F: LMK_15_MOD - LMK Register 15 modified flags
-   unsigned int GetLmk15Mod() { return BitExtract(DCB_LMK_15_MOD_REG, DCB_LMK_15_MOD_MASK, DCB_LMK_15_MOD_OFS); };
-
-
-   ////// ------ Register 52 [0x00D0]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: 0x00000000) ------ //////
+   ////// ------ Register 51 [0x00CC]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: CRC32_REG_BANK - Keep at the end of the register bank
    unsigned int GetCrc32RegBank() { return BitExtract(DCB_CRC32_REG_BANK_REG, DCB_CRC32_REG_BANK_MASK, DCB_CRC32_REG_BANK_OFS); };
