@@ -2828,7 +2828,7 @@ void WP::SaveWaveforms()
       for (auto &it: mEvent) {
          auto ev = it.second;
          
-         if (!li.bAll && b != (size_t)li.board)
+         if (!li.bAll && b != li.board)
             continue;
          
          sprintf(str, "Board_%d", it.first);
@@ -2895,7 +2895,7 @@ void WP::SaveWaveforms()
             WDB *wdb = GetBoard(it.first);
             assert(wdb);
             
-            if (!li.bAll && b != (size_t)li.board)
+            if (!li.bAll && b != li.board)
                continue;
 
             // store board serial number
@@ -2945,7 +2945,7 @@ void WP::SaveWaveforms()
       for (auto &it: mEvent) {
          auto ev = it.second;
 
-         if (!li.bAll && b != (size_t)li.board)
+         if (!li.bAll && b != li.board)
             continue;
 
          // store board serial number
