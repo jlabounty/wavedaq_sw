@@ -119,6 +119,7 @@ class WDSystem {
       std::vector<WDCrate *> fCrate;
       int fTrgCrateId;
       std::map<std::string,PropertyGroup> fGroupProperties;
+      PropertyGroup fDaqProperties;
       int fDAQServerPort;
 
       //reserved Methods
@@ -152,9 +153,10 @@ class WDSystem {
       WDCrate ** end() { return  &(fCrate.back()) + 1; }
 
       //Getters
+      Property &GetDaqProperty(std::string name){ return fDaqProperties.at(name); };
       WDCrate *GetCrateAt(int crateid) { return fCrate.at(crateid); }
       WDCrate *GetTriggerCrate(){ return fCrate.at(fTrgCrateId); }
-      WDBoard *GetTriggerBoard(){ return fCrate.at(fTrgCrateId)->GetBoardAt(17); }
+      WDBoard *GetTriggerBoard(){ return GetTriggerCrate()->GetBoardAt(17); }
       int GetTriggerCrateId(){ return fTrgCrateId; }
       unsigned long GetCrateSize() { return fCrate.size(); }
       PropertyGroup &GetGroupProperties(std::string groupname){ return fGroupProperties[groupname]; }
@@ -163,11 +165,13 @@ class WDSystem {
       //Setters
       void SetTriggerCrateId(int triggercrateid){ fTrgCrateId = triggercrateid; }
       void SetGroupProperties(std::string groupname, PropertyGroup &properties){ fGroupProperties[groupname] = properties; }
+      void SetDaqProperties(PropertyGroup &properties){ fDaqProperties = properties; }
       void SetDAQServerPort(int port){ fDAQServerPort = port; }
 
       //Constructor
       WDSystem(){
          fTrgCrateId = -1;
+         fDaqProperties.clear();
          fPacketBuffer = nullptr;
          fCalibratedBuffer = nullptr;
          fEventBuffer = nullptr;

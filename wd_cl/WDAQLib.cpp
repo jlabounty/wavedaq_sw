@@ -720,11 +720,18 @@ void WDAQWorker::End(){
 }
 
 //Event writer - Thread that writes event to file
-//open file and writes headers and DRS time bins
-void WDAQEventWriter::Begin(){
-   //open file
-   fFile.open(fFileName, std::ios::binary);
+//function to write headers and DRS time bins
+std::string WDAQEventWriter::GetFileName(){
+   std::string ret = fFileName;
+   std::size_t found = ret.find('%');  
+   if (found!=std::string::npos){
+      ret.replace(found, 1, std::to_string(fRunNumber));
+   }
 
+   return ret;
+}
+//function to write headers and DRS time bins
+void WDAQEventWriter::WriteRunHeader(){
    //headers
    const char head[] = "DRS8";
    fFile.write(head, 4);
@@ -746,10 +753,19 @@ void WDAQEventWriter::Begin(){
          fFile.write(chn_header.c_str(), 4);
          fFile.write((char *)(calib->mCalib.dt[ch]), 1024*sizeof(float));
       }
-
-      //reset statistics
-      fNEvent=0;
    }
+}
+
+//open file and writes headers and DRS time bins
+void WDAQEventWriter::Begin(){
+   //open file
+   fFile.open(GetFileName(), std::ios::binary);
+   printf("File %s opened\n", fFileName.c_str());
+
+   WriteRunHeader();
+
+   //reset statistics
+   fNEvent=0;
 }
 
 //writer thread loop
@@ -849,9 +865,21 @@ void WDAQEventWriter::Loop(){
       //statistics
       fNEvent++;
       fLastEvent = ptr->mTriggerNumber;
-      //      fLastEvent = ptr->mTriggerNumber;
-
       delete ptr;
+
+      //check if new file is needed
+      if(fEventsPerFile && fNEvent>fEventsPerFile){
+         fFile.close();
+         fRunNumber++;
+         
+         //open file
+         fFile.open(GetFileName(), std::ios::binary);
+         printf("File %s opened\n", fFileName.c_str());
+         fNEvent = 0;
+  
+         //write header
+         WriteRunHeader();
+      }
    }
 }
 

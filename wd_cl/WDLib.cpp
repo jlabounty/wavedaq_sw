@@ -174,6 +174,24 @@ void WDSystem::CreateFromXml(std::string filepath){
 
          SetGroupProperties(groupname, p);
 
+      } else if (crate_node_name == "Daq"){
+         //create a new property group For DAQ
+         if(fDaqProperties.size() != 0){
+            printf("overwriting previous Daq Configuration!");
+         }
+
+         for(int i=0; i<mxml_get_number_of_children(crate_xml); i++){
+            MXML_NODE *child_node = mxml_subnode(crate_xml, i);
+            std::string name = std::string(mxml_get_name(child_node));
+            std::string value = std::string(mxml_get_value(child_node));
+            fDaqProperties[name].SetStringValue(value);
+         }
+
+         printf("DAQ Properties:\n");
+         for(auto p: fDaqProperties){
+            printf("\t%s:\t%s\n", p.first.c_str(), p.second.GetStringValue().c_str());
+         }
+
       }
    }
 
@@ -282,8 +300,27 @@ void WDSystem::SpawnDAQ(){
       }
    }
    fWorkerThread->Start();
-   fWriterThread = new WDAQEventWriter(fCalibratedBuffer, "out.bin");
-   //fWriterThread = new WDAQEventWriter(fEventBuffer, "out.bin");
+
+   std::string filename;
+   unsigned int eventsPerFile;
+   unsigned int startRunNumber;
+   try{
+      filename = GetDaqProperty("FileName").GetStringValue();
+   } catch (const std::out_of_range& ex){
+      filename = "out.bin";
+   }
+   try{
+      eventsPerFile = GetDaqProperty("EventsPerFile").GetUInt();
+   } catch (const std::out_of_range& ex){
+      eventsPerFile = 0;
+   }
+   try{
+      startRunNumber = GetDaqProperty("StartRunNumber").GetUInt();
+   } catch (const std::out_of_range& ex){
+      startRunNumber = 0;
+   }
+   fWriterThread = new WDAQEventWriter(fCalibratedBuffer, filename, eventsPerFile, startRunNumber);
+   //fWriterThread = new WDAQEventWriter(fEventBuffer, filename);
    //pass time calibrations to Event Writer
    for(auto &c : fCrate){
       for(auto &b : *c){

@@ -294,10 +294,14 @@ class WDAQEventWriter : public DAQThread{
    //output file data
    std::string fFileName;
    std::ofstream fFile;
+   unsigned int fRunNumber;
 
    //statistics
    unsigned long fNEvent;
    unsigned long fLastEvent;
+
+   //event per file
+   unsigned int fEventsPerFile;
 
    void Begin();
 
@@ -305,14 +309,22 @@ class WDAQEventWriter : public DAQThread{
 
    void End();
 
+   //write run header to file
+   void WriteRunHeader();
+
+   //return current file name inserting runnumber
+   std::string GetFileName();
+
    public:
    void AddTimeCalibration(int id, TCALIB *calib){
          fTCalib[id] = calib;
    }
 
-   WDAQEventWriter(DAQBuffer<WDAQEvent> *source, std::string file){
+   WDAQEventWriter(DAQBuffer<WDAQEvent> *source, std::string file, unsigned int eventsPerFile = 0, unsigned int startRunNumber = 0){
       fSource = source;
       fFileName = file;
+      fEventsPerFile = eventsPerFile;
+      fRunNumber = startRunNumber;
    }
 
    ~WDAQEventWriter(){

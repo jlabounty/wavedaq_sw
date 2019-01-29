@@ -183,6 +183,8 @@ class PropertyGroup : std::map<std::string,Property>{
    public:
       using std::map<std::string,Property>::at;
       using std::map<std::string,Property>::operator[];
+      using std::map<std::string,Property>::size;
+      using std::map<std::string,Property>::clear;
       using std::map<std::string,Property>::begin;
       using std::map<std::string,Property>::end;
 
