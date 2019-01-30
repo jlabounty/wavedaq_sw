@@ -42,6 +42,8 @@ class Property{
          fChanged = true;
          fIntConverted = false;
          fHexConverted = false;
+         fUIntConverted = false;
+         fUHexConverted = false;
          fFloatConverted = false;
       }
 
