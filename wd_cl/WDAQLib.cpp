@@ -874,9 +874,10 @@ void WDAQEventWriter::Loop(){
          
          //open file
          fFile.open(GetFileName(), std::ios::binary);
-         printf("File %s opened\n", fFileName.c_str());
+	 //         printf("File %s opened\n", fFileName.c_str());
+	 printf("Starting run number %d\n", fRunNumber);
          fNEvent = 0;
-  
+	 
          //write header
          WriteRunHeader();
       }
