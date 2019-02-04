@@ -1,9 +1,28 @@
 ROOTCFLAGS:= `root-config --cflags`
 ROOTLFLAGS:= `root-config --glibs`
 
-FLAGS         = -g -DOS_LINUX -Wall
+OSTYPE = $(shell uname)
+ifeq ($(OSTYPE),Darwin)
+OSTYPE = darwin
+endif
+
+ifeq ($(OSTYPE),Linux)
+OSTYPE = linux
+endif
+
+FLAGS = -g
+
+ifeq ($(OSTYPE),linux)
+FLAGS += -DOS_LINUX -fpic
+endif
+
+ifeq ($(OSTYPE),darwin)
+FLAGS += -DOS_DARWIN -DOS_LINUX
+endif
+
 FLAGS += -I $(MEG2SYS)/common/include
 FLAGS += -I $(WDBSYS)/software/tcb -I $(WDBSYS)/../mscb/include
+
 
 TESTER_OBJECTS=  TCBTester.o TCBTesterWaveform.o
 WFM_OBJECTS   =  MEGFADCWaveform.o MEGDiscrWaveform.o 
