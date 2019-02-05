@@ -10,31 +10,66 @@
  Usage
  =====
 
- Dialogs
- -------
+ Dialog boxes
+ ------------
 
+ Dialog boxes consists of normal HTML code defined on the current web page. By
+ using the class "dlgFrame" they are automatically hidden until the
+ dlgShow() function is called. The dialog has a title bar and can be moved
+ around by dragging the title bar. The dlgHide() function should be called
+ to close (hide) the dialog.
+ 
+ Following button shows the dialog dlgXXX:
+ 
  <button type="button" onClick="dlgShow('dlgXXX')">XXX</button>
 
-
+ Following HTML code defines the dialog dlgXXX:
+ 
  <div id="dlgXXX" class="dlgFrame">
     <div class="dlgTitlebar">Title</div>
     <div class="dlgPanel">
        <div>Dialog Contents</div>
-       <button type="button" onClick="dlgHide('dlgXXX')">Close</button>
+       <button class="dlgButton" onClick="dlgHide('dlgXXX')">Close</button>
     </div>
  </div>
 
 
+ Standard dialog boxes
+ ---------------------
 
+ dlgAlert(message)
+    Replacement for alert() function showing a standard notification
+ 
+ dlgConfirm(message, callback, param)
+    Replacement of confirm() dialog. Shows a message dialog with a 'Cancel'
+    and 'Ok' button. The callback is called with the first parameter either
+    true (if Ok has been clicked) or false (if Cancel has been clicked) and
+    the second parameter a copy of 'param' passed to dlgConfirm().
+ 
+ dlgMessage(title, message, modal, error, callback, param)
+    Similar to dlgAlert, but with the option to set a custom title which
+    gets a red background if error is true. After the 'Ok' button is pressed,
+    the callback function is called with an optional parameter passed to
+    dlgMessage. If modal equals true, the whole screen is greyed out and all
+    mouse events are captured until the 'Ok' button is pressed.
+ 
  Sliders
  -------
 
- <button name="ctrlHSlider" type="button" data-update="xxx()" id="yyy"></button>
+ <button name="ctrlHSlider" type="button" class="ctrlHSlider" data-update="xxx()" id="yyy"></button>
 
- <button name="ctrlVSlider" type="button" data-update="xxx()" id="yyy"></button>
+ <button name="ctrlVSlider" type="button" class="ctrlVSlider" data-update="xxx()" id="yyy"></button>
 
- document.getElementById("yyy").set(v); // v = 0...1
-
+ On each change of the slider, the function xxx(value, final) is called with
+ value ranging from 0 to 1. Dragging the slider will cause many updates with
+ final = false, and once the mouse button got released, the funciton is called
+ once with final = true.
+ 
+ To set the slider programmatically call
+ 
+ document.getElementById('yyy').set(0.5);
+ 
+ Valid range is again 0 to 1.
 
 
  Progress bars
@@ -74,6 +109,7 @@
 // default styles for dialog boxes
 document.write("<style>" +
    ".dlgFrame {" +
+   "   font-family: verdana,tahoma,sans-serif;" +
    "   border: 1px solid black;" +
    "   box-shadow: 6px 6px 10px 4px rgba(0,0,0,0.2);" +
    "   border-radius: 6px;" +
@@ -95,6 +131,17 @@ document.write("<style>" +
    ".dlgTitlebar:hover {" +
    "   cursor: pointer;" +
    "}" +
+   ".dlgButton {" +
+   "   font-size: 1em;" +
+   "   background-color: #D0D0D0;" +
+   "   border: 1px solid #808080;" +
+   "   border-radius: 6px;" +
+   "   padding: 4px 10px;" +
+   "   margin: 3px;" +
+   "}" +
+   ".dlgButton:hover {" +
+   "   background-color: #F0F0F0;" +
+   "}" +
    ".dlgPanel {" +
    "   background-color: #F0F0F0;" +
    "   text-align: center;" +
@@ -111,6 +158,17 @@ document.write("<style>" +
    "   right: 0;" +
    "   z-index: 20;" +
    "}" +
+   ".ctrlHSlider {" +
+   "   width: 200px;" +
+   "   height: 30px;" +
+   "   border-radius: 5px;" +
+   "   padding: 0;" +
+   "}" +
+   ".ctrlVSlider {" +
+   "   width: 20px;" +
+   "   height: 200px;" +
+   "   border-radius: 5px;" +
+   "   padding: 0;" +
    ".ctrlProgress {" +
    "   border: 1px solid #A0A0A0;" +
    "   border-radius: 5px;" +
@@ -212,7 +270,7 @@ Controls.prototype.init = function () // scan DOM
 };
 
 Controls.prototype.ctrlVSliderDraw = function (b) {
-   if (b == undefined)
+   if (b === undefined)
       b = this;
    var w = b.canvas.width;
    var h = b.canvas.height;
@@ -259,15 +317,15 @@ Controls.prototype.ctrlVSliderHandler = function (e) {
    var y = undefined;
    var b = e.currentTarget;
 
-   if (b.canvas == undefined) // we can get events from parent node
+   if (b.canvas === undefined) // we can get events from parent node
       return;
 
-   if ((e.buttons == 1 && e.type == "mousemove") || e.type == "click")
+   if ((e.buttons === 1 && e.type === "mousemove") || e.type === "click")
       y = e.offsetY;
-   if (e.type == "touchmove")
+   if (e.type === "touchmove")
       y = e.changedTouches[e.changedTouches.length - 1].clientY - b.getBoundingClientRect().top;
 
-   if (e.type == "contextmenu") {
+   if (e.type === "contextmenu") {
       b.position = 0.5;
       this.ctrlVSliderDraw(b);
       var f = b.dataset.update;
@@ -275,7 +333,7 @@ Controls.prototype.ctrlVSliderHandler = function (e) {
          f = f.substr(0, f.indexOf("("));
       window[f](b.position);
    } else {
-      if (y != undefined) {
+      if (y !== undefined) {
          b.position = 1 - (y - b.sliderOfs) / (b.clientHeight - 2 * b.sliderOfs);
          if (b.position < 0)
             b.position = 0;
@@ -291,7 +349,7 @@ Controls.prototype.ctrlVSliderHandler = function (e) {
 };
 
 Controls.prototype.ctrlHSliderDraw = function (b) {
-   if (b == undefined)
+   if (b === undefined)
       b = this;
    var w = b.canvas.width;
    var h = b.canvas.height;
@@ -338,15 +396,15 @@ Controls.prototype.ctrlHSliderHandler = function (e) {
    var x = undefined;
    var b = e.currentTarget;
 
-   if (b.canvas == undefined) // we can get events from parent node
+   if (b.canvas === undefined) // we can get events from parent node
       return;
 
-   if ((e.buttons == 1 && e.type == "mousemove") || e.type == "click")
+   if ((e.buttons === 1 && e.type === "mousemove") || e.type === "click")
       x = e.offsetX;
-   if (e.type == "touchmove")
+   if (e.type === "touchmove")
       x = e.changedTouches[e.changedTouches.length - 1].clientX - b.getBoundingClientRect().left;
 
-   if (e.type == "contextmenu") {
+   if (e.type === "contextmenu") {
       b.position = 0.5;
       this.ctrlHSliderDraw(b);
       var f = b.dataset.update;
@@ -354,7 +412,7 @@ Controls.prototype.ctrlHSliderHandler = function (e) {
          f = f.substr(0, f.indexOf("("));
       window[f](b.position);
    } else {
-      if (x != undefined) {
+      if (x !== undefined) {
          b.position = (x - b.sliderOfs) / (b.clientWidth - 2 * b.sliderOfs);
          if (b.position < 0)
             b.position = 0;
@@ -381,7 +439,7 @@ Controls.prototype.ctrlProgressSet = function (value) {
 
 function dlgShow(dlg, modal) {
    var d;
-   if (typeof dlg == "string")
+   if (typeof dlg === "string")
       d = document.getElementById(dlg);
    else
       d = dlg;
@@ -390,7 +448,7 @@ function dlgShow(dlg, modal) {
    d.dlgAy = 0;
    d.dlgDx = 0;
    d.dlgDy = 0;
-   d.modal = (modal != undefined);
+   d.modal = (modal !== undefined);
 
    d.style.display = "block";
    d.style.left = Math.round(document.documentElement.clientWidth / 2 - d.offsetWidth / 2) + "px";
@@ -407,7 +465,7 @@ function dlgShow(dlg, modal) {
 
    if (d.modal) {
       var b = document.getElementById("dlgBlackout");
-      if (b == undefined) {
+      if (b === undefined || b === null) {
          b =  document.createElement("div");
          b.id = "dlgBlackout";
          b.className = "dlgBlackout";
@@ -419,8 +477,8 @@ function dlgShow(dlg, modal) {
    }
    
    d.dlgMouseDown = function (e) {
-      if ((e.target == this || e.target.parentNode == this) &&
-         e.target.className == "dlgTitlebar") {
+      if ((e.target === this || e.target.parentNode === this) &&
+         e.target.className === "dlgTitlebar") {
          e.preventDefault();
          this.Ax = e.clientX;
          this.Ay = e.clientY;
@@ -433,10 +491,10 @@ function dlgShow(dlg, modal) {
          e.preventDefault();
       } else {
          var p = e.target;
-         while (p != undefined && p != this && p != document.body)
+         while (p !== undefined && p !== this && p !== document.body)
             p = p.parentElement;
          
-         if (p == this) {
+         if (p === this) {
             var dlgs = document.getElementsByClassName("dlgFrame");
             for (var i=0 ; i<dlgs.length ; i++)
                dlgs[i].style.zIndex = 10;
@@ -470,8 +528,8 @@ function dlgShow(dlg, modal) {
    };
 
    d.dlgTouchStart = function (e) {
-      if ((e.target == this || e.target.parentNode == this) &&
-         e.target.className == "dlgTitlebar") {
+      if ((e.target === this || e.target.parentNode === this) &&
+         e.target.className === "dlgTitlebar") {
          e.preventDefault();
          this.Ax = e.targetTouches[0].clientX;
          this.Ay = e.targetTouches[0].clientY;
@@ -533,9 +591,9 @@ function dlgShow(dlg, modal) {
 
 function dlgHide(dlg) {
    var d = document.getElementById("dlgBlackout");
-   if (d != undefined)
+   if (d !== undefined && d !== null)
       d.style.display = "none";
-   var d = document.getElementById(dlg);
+   d = document.getElementById(dlg);
    d.style.display = "none";
 }
 
@@ -544,33 +602,64 @@ function dlgMessageDestroy(b)
    var dlg = b.parentElement.parentElement;
    if (dlg.modal) {
       var d = document.getElementById("dlgBlackout");
-      if (d != undefined)
+      if (d !== undefined && d !== null)
          d.style.display = "none";
    }
    document.body.removeChild(dlg);
 }
 
-function dlgMessage(title, string, modal, error)
+function dlgMessage(title, string, modal, error, callback, param)
 {
    d =  document.createElement("div");
    d.className = "dlgFrame";
    d.style.zIndex = modal? 21 : 20;
+   d.callback = callback;
+   d.callbackParam = param;
 
    d.innerHTML = "<div class=\"dlgTitlebar\" id=\"dlgMessageTitle\">"+title+"</div>"+
    "<div class=\"dlgPanel\" style=\"padding: 30px;\">"+
    "<div id=\"dlgMessageString\">"+string+"</div>"+
-   "<br /><br /><button class=\"wideButton\" id=\"dlgMessageButton\" style=\"background-color:#F8F8F8\" type=\"button\" "+
-   " onClick=\"dlgMessageDestroy(this)\">Close</button>"+
+   "<br /><br /><button class=\"dlgButton\" id=\"dlgMessageButton\" style=\"background-color:#F8F8F8\" type=\"button\" "+
+   " onClick=\"var d=this.parentElement.parentElement;if(d.callback!==undefined)d.callback(d.callbackParam);dlgMessageDestroy(this)\">Close</button>"+
    "</div>";
 
    document.body.appendChild(d);
 
-   if (error != undefined) {
+   if (error === true) {
       var t = document.getElementById("dlgMessageTitle");
       t.style.backgroundColor = "#9E2A2A";
       t.style.color = "white";
    }
          
    dlgShow(d, modal);
+   return d;
+}
+
+function dlgAlert(s)
+{
+   dlgMessage('Message', s, true, false);
+}
+
+function dlgConfirm(string, confirmCallback, param)
+{
+   d = document.createElement("div");
+   d.className = "dlgFrame";
+   d.style.zIndex = 21;
+   d.callback = confirmCallback;
+   d.callbackParam = param;
+
+   d.innerHTML = "<div class=\"dlgTitlebar\" id=\"dlgMessageTitle\">Please confirm</div>"+
+      "<div class=\"dlgPanel\" style=\"padding: 30px;\">"+
+      "<div id=\"dlgMessageString\">"+string+"</div>"+
+      "<br /><br />" +
+      "<button class=\"dlgButton\" id=\"dlgMessageButton\" type=\"button\" "+
+      " onClick=\"var d=this.parentElement.parentElement;d.callback(true,d.callbackParam);dlgMessageDestroy(this);\">OK</button>"+
+      "<button class=\"dlgButton\" id=\"dlgMessageButton\" type=\"button\" "+
+      " onClick=\"var d=this.parentElement.parentElement;d.callback(false,d.callbackParam);dlgMessageDestroy(this);\">Cancel</button>"+
+      "</div>";
+
+   document.body.appendChild(d);
+
+   dlgShow(d, true);
    return d;
 }
