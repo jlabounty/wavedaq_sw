@@ -520,19 +520,23 @@ class WDWDB : public WDBoard, public WDB{
          } else if (s_tx == "SyncSampled"){
             tx = WDB::cDbgSyncSampled; 
          } else if (s_tx == "SyncLogic"){
-            tx = WDB::cDbgSyncSampled+1; 
+            tx = WDB::cDbgSyncInternal; 
          } else if (s_tx == "BusyLocal"){
-            tx = WDB::cDbgBusyLocal+1; 
+            tx = WDB::cDbgBusyLocal; 
          } else if (s_tx == "BusyBackplane"){
-            tx = WDB::cDbgBusyBackplane+1; 
+            tx = WDB::cDbgBusyBackplane; 
          } else if (s_tx == "LMKInputClk"){
-            tx = WDB::cDbgLMKInputClk+1; 
+            tx = WDB::cDbgLMKInputClk; 
          } else if (s_tx == "ADCClk"){
-            tx = WDB::cDbgADCClk+1; 
+            tx = WDB::cDbgADCClk; 
          } else if (s_tx == "DataClk"){
-            tx = WDB::cDbgDataClk+1; 
+            tx = WDB::cDbgDataClk; 
+         } else if (s_tx == "LMK5Clk"){
+            tx = WDB::cDbgLMK5Clk; 
+         } else if (s_tx == "LMKChipSelect"){
+            tx = WDB::cDbgLMKChipSelect; 
          } else {
-            tx = WDB::cDbgSyncSampled; 
+            tx = WDB::cDbgSyncDirect; 
          }
          if(s_rx == "Uart"){
             rx = WDB::cDbgUart; 
@@ -547,17 +551,21 @@ class WDWDB : public WDBoard, public WDB{
          } else if (s_rx == "SyncSampled"){
             rx = WDB::cDbgSyncSampled; 
          } else if (s_rx == "SyncLogic"){
-            rx = WDB::cDbgSyncSampled+1; 
+            rx = WDB::cDbgSyncInternal; 
          } else if (s_rx == "BusyLocal"){
-            rx = WDB::cDbgBusyLocal+1; 
+            rx = WDB::cDbgBusyLocal; 
          } else if (s_rx == "BusyBackplane"){
-            rx = WDB::cDbgBusyBackplane+1; 
+            rx = WDB::cDbgBusyBackplane; 
          } else if (s_rx == "LMKInputClk"){
-            rx = WDB::cDbgLMKInputClk+1; 
+            rx = WDB::cDbgLMKInputClk; 
          } else if (s_rx == "ADCClk"){
-            rx = WDB::cDbgADCClk+1; 
+            rx = WDB::cDbgADCClk; 
          } else if (s_rx == "DataClk"){
-            rx = WDB::cDbgDataClk+1; 
+            rx = WDB::cDbgDataClk; 
+         } else if (s_rx == "LMK5Clk"){
+            rx = WDB::cDbgLMK5Clk; 
+         } else if (s_rx == "LMKChipSelect"){
+            rx = WDB::cDbgLMKChipSelect; 
          } else {
             rx = WDB::cDbgSyncSampled; 
          }

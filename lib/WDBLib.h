@@ -577,11 +577,14 @@ public:
       cDbgExtTrigger           = 0x3,
       cDbgSyncDirect           = 0x4,
       cDbgSyncSampled          = 0x5,
-      cDbgBusyLocal            = 0x6,
-      cDbgBusyBackplane        = 0x7,
-      cDbgLMKInputClk          = 0x8,
-      cDbgADCClk               = 0x9,
-      cDbgDataClk              = 0xA
+      cDbgSyncInternal         = 0x6,
+      cDbgBusyLocal            = 0x7,
+      cDbgBusyBackplane        = 0x8,
+      cDbgLMKInputClk          = 0x9,
+      cDbgADCClk               = 0xA,
+      cDbgDataClk              = 0xB,
+      cDbgLMK5Clk              = 0xC,
+      cDbgLMKChipSelect        = 0xD
    };
 
    // calibrations

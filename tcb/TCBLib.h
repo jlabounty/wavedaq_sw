@@ -87,6 +87,7 @@
 #define PACK_OR            PACKAGERREGS+11
 #define PACK_XOR           PACKAGERREGS+12
 
+#include "sys/types.h"
 #include "strlcpy.h"
 #include <vector>
 
