@@ -586,10 +586,10 @@ class WDWDB : public WDBoard, public WDB{
          ReceiveStatusRegisters();
 
          //Load Calibration file
-         if (!LoadVoltageCalibration(GetDrsSampleFreqMhz(), "../wds/")) {
+         if (!LoadVoltageCalibration(GetDrsSampleFreqMhz(), "/home/git/wavedaq/software/wds/")) {
             printf("missing voltage calibration file\n");
          }
-         if (!LoadTimeCalibration(GetDrsSampleFreqMhz(), "../wds/")) {
+         if (!LoadTimeCalibration(GetDrsSampleFreqMhz(), "/home/git/wavedaq/software/wds/")) {
             printf("missing time calibration file\n");
          }
 

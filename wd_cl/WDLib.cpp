@@ -273,6 +273,8 @@ void WDSystem::SpawnDAQ(){
    //number of buffer at each buffer stage
    const int number_of_buffers = 5;
 
+   printf("starting all threads\n");
+
    //compute number of WDBs and expected number of packets
    int nWDBs=0;
    for(auto &c : fCrate){
