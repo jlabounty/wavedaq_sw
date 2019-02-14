@@ -5,12 +5,31 @@
 #include <iostream>
 #include <fstream>
 
+class WDAQPacketData;
+class WDAQDRSPacketData;
+class WDAQADCPacketData;
+class WDAQTDCPacketData;
+class WDAQTRGPacketData;
+class WDAQScaPacketData;
+class WDAQDummyPacketData;
+class WDAQBoardEvent;
+class WDAQEvent;
+class WDAQPacketCollector;
+class WDAQTCBReader;
+class WDAQEventBuilder;
+class WDAQWorker;
+class WDAQEventWriter;
+
+
+#ifndef WDAQLIB_H
+#define WDAQLIB_H
+
+#include "WDLib.h"
+
 #define EOE 1
 #define SOE 2
 #define EOT 4
 #define SOT 8
-
-class WDAQBoardEvent;
 
 //WDAQ Packet Data - class for UDP DAQ packets 
 class WDAQPacketData{
@@ -218,6 +237,24 @@ class WDAQPacketCollector: public DAQServerThread{
    }
 };
 
+// temporary thread to read TCB
+class WDAQTCBReader: public DAQThread{
+   DAQBuffer<WDAQPacketData> *fBuf;
+   WDTCB *fBoard;
+
+   void Begin();
+
+   void Loop();
+   
+   void End();
+
+   public:
+   WDAQTCBReader(DAQBuffer<WDAQPacketData> *buf, WDTCB *board){
+      fBuf = buf;
+      fBoard = board;
+   }
+};
+
 //Event builder - Thread that build events from packets
 class WDAQEventBuilder : public DAQThread{
    DAQBuffer<WDAQPacketData> *fSource;
@@ -332,3 +369,4 @@ class WDAQEventWriter : public DAQThread{
 
 };
 
+#endif

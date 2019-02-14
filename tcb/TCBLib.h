@@ -91,6 +91,10 @@
 #include "strlcpy.h"
 #include <vector>
 
+#ifndef TCBLIB_H
+#define TCBLIB_H
+
+
 typedef struct {
     unsigned short     trgindly;
     unsigned short     syncindly;
@@ -339,3 +343,5 @@ public:
    void GetBufferBankDataSPI(u_int32_t ptr, u_int32_t *data, int length);
 
 };
+
+#endif

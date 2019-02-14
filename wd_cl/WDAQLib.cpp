@@ -555,6 +555,33 @@ void WDAQPacketCollector::End(){
    printf("Dropped %lu packets\n", fDroppedPackets);
 }
 
+// functionalies of WDAQTCBReader
+void WDAQTCBReader::Begin(){
+  // reset the buffer pointers and busy
+  fBoard->ResetBufferLogic();
+  fBoard->SetPacketizerBus(true);
+  //printf("buffer logic resetted\n");
+}
+
+void WDAQTCBReader::Loop(){
+  // polling on the buffer status searching for an event
+  if(fBoard->GetBufferState() != 0) { 
+  // read the last available buffer on TCB
+    //uint32_t state = fBoard->GetBufferState();
+    //uint32_t pointer = fBoard->GetSPIBufferPointer();
+    //uint32_t pointer2 = fBoard->GetPacketizerBufferPointer();
+    uint32_t data[3];
+    fBoard->ReadBuffer(data, 1);
+    // remove the busy for the just read buffer
+    fBoard->IncrementBufferPointer();
+    //printf("got event %x, bufferstate %x pointer %x/%x\n",data[0], state, pointer, pointer2);
+  }
+}
+
+void WDAQTCBReader::End(){
+  fBoard->SetPacketizerBus(false);
+}
+
 //Event builder - Thread that build events from packets
 //reset statistics and drop packets at start
 void WDAQEventBuilder::Begin(){

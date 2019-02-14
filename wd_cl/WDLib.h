@@ -6,11 +6,18 @@
 #include "WDBLib.h"
 #include "register_map_wd2.h"
 #include "TCBLib.h"
-#include "WDAQLib.h"
 #include "Properties.h"
 
+class WDBoard;
 class WDCrate;
 class WDSystem;
+class WDWDB;
+class WDTCB;
+
+#ifndef WDLIB_H
+#define WDLIB_H
+#include "WDAQLib.h"
+
 
 // --- WaveDAQ board --- basic wrapper class for wavedaq board
 class WDBoard {
@@ -134,6 +141,7 @@ class WDSystem {
       WDAQEventBuilder *fBuilderThread;
       WDAQWorker *fWorkerThread;
       WDAQEventWriter *fWriterThread;
+      WDAQTCBReader *fTCBReaderThread;
 
       //Methods
       void AddCrate(WDCrate *crate);
@@ -178,6 +186,7 @@ class WDSystem {
          fCollectorThread = nullptr;
          fBuilderThread = nullptr;
          fWriterThread = nullptr;
+         fTCBReaderThread = nullptr;
       }
 
       //Destructor
@@ -189,6 +198,7 @@ class WDSystem {
          if(fBuilderThread != nullptr) delete fBuilderThread;
          if(fWorkerThread != nullptr) delete fWorkerThread;
          if(fWriterThread != nullptr) delete fWriterThread;
+         if(fTCBReaderThread != nullptr) delete fTCBReaderThread;
       }
    
 };
@@ -729,9 +739,28 @@ class WDTCB : public WDBoard, public TCB{
          //unsigned int thr = 0x100;
          //WriteReg(0x600, &thr);
 
-         SetPacketizerCommandAt(0, STOP, 0, 0);
-         SetPacketizerAutostart(true);
-         SetPacketizerEnable(true);
+         /*SetPacketizerCommandAt(0, COPY, REVECOU, BUFFERBASE);
+         SetPacketizerCommandAt(1, COPY, RTOTTIME, BUFFERBASE+1);
+         SetPacketizerCommandAt(2, COPY, RLIVETIME, BUFFERBASE+2);
+         SetPacketizerCommandAt(3, DIRECT_WRITE, 0x00000001, BUFFERBASE+BUFFERSIZE);
+         SetPacketizerCommandAt(4, STOP, 0, 0);
+	*/
+         std::string readEnable;
+         try{
+            readEnable = GetProperty("ReadEnable").GetStringValue();
+         } catch (const std::runtime_error& ex){
+            readEnable = "false";
+         }
+	 if(readEnable == "true"){
+	    SetPacketizerCommandAt(0, COPY, RTOTTIME, BUFFERBASE);
+	    SetPacketizerCommandAt(1, DIRECT_WRITE, 0x00000001, BUFFERBASE+BUFFERSIZE);
+	    SetPacketizerCommandAt(2, STOP, 0, 0);
+	 } else {
+	    SetPacketizerCommandAt(0, STOP, 0, 0);
+         }
+
+	 SetPacketizerAutostart(true);
+	 SetPacketizerEnable(true);
 
          if((fidcode >>12) != 3)
             GoRun();
@@ -747,5 +776,5 @@ class WDTCB : public WDBoard, public TCB{
       };
       ~WDTCB() { };
 };
-
+#endif
 

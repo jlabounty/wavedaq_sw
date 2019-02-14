@@ -4,6 +4,11 @@
 #include <iostream>
 #include <sstream>
 
+class Property;
+
+#ifndef PROPERTIES_H
+#define PROPERTIES_H
+
 // --- Property --- single property
 class Property{
    protected:
@@ -199,3 +204,4 @@ class PropertyGroup : std::map<std::string,Property>{
       }
 };
 
+#endif

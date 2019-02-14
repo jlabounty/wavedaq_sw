@@ -247,6 +247,7 @@ void WDSystem::GoRun(){
    if(fBuilderThread) fBuilderThread->GoRun();
    if(fWriterThread) fWriterThread->GoRun();
    if(fWorkerThread) fWorkerThread->GoRun();
+   if(fTCBReaderThread) fTCBReaderThread->GoRun();
    sleep(1);
    GetTriggerBoard()->GoRun();
 }
@@ -258,6 +259,7 @@ void WDSystem::StopRun(){
    if(fBuilderThread) fBuilderThread->StopRun();
    if(fWriterThread) fWorkerThread->StopRun();
    if(fWorkerThread) fWriterThread->StopRun();
+   if(fTCBReaderThread) fTCBReaderThread->StopRun();
 }
 //train serial links
 void WDSystem::TrainSerdes(){
@@ -331,6 +333,21 @@ void WDSystem::SpawnDAQ(){
    }
    fWriterThread->Start();
 
+   // create the TCBReadrer thread
+   WDBoard *trboard = GetTriggerBoard();
+   WDTCB* tcbboard = dynamic_cast <WDTCB*> (trboard);
+   if(tcbboard != nullptr) {
+      std::string readEnable;
+      try{
+          readEnable = tcbboard->GetProperty("ReadEnable").GetStringValue();
+      } catch(const std::runtime_error& ex){
+           readEnable = "false";
+      }
+      if(readEnable=="true"){
+         fTCBReaderThread = new WDAQTCBReader(fPacketBuffer,tcbboard);
+         fTCBReaderThread->Start();
+      }
+   }
    //wait for server port
    while(fCollectorThread->GetServerPort() == -1){  };
    printf("started on port %d\n", fCollectorThread->GetServerPort());

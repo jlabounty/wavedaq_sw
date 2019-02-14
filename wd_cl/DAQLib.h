@@ -10,6 +10,13 @@
 #include <netinet/in.h>
 #include <fcntl.h>
 
+template <class T> class DAQBuffer;
+class DAQThread;
+class DAQServerThread;
+
+#ifndef DAQLIB_H
+#define DAQLIB_H
+
 // --- DAQ Buffer --- thread safe queue with max size
 
 template <class T> class DAQBuffer {
@@ -105,15 +112,17 @@ class DAQThread{
 
          while(fStop != true){
 
-            //checks begin/end
+            //checks begin
             if(fRunning && !fRunning_old) Begin();
-            if(!fRunning && fRunning_old) End();
-            fRunning_old = fRunning;
 
             //timed loop
             std::chrono::high_resolution_clock::time_point loopStart = std::chrono::high_resolution_clock::now();
-            if(fRunning) Loop();
+            if(fRunning && fRunning_old) Loop();
             std::chrono::high_resolution_clock::time_point loopEnd = std::chrono::high_resolution_clock::now();
+
+            //checks end 
+            if(!fRunning && fRunning_old) End();
+            fRunning_old = fRunning;
 
             fLastLoopDuration = loopEnd - loopStart;
             if(fLastLoopDuration<fMinLoopDuration){
@@ -263,3 +272,5 @@ class DAQServerThread : public DAQThread{
       virtual ~DAQServerThread(){
       }
 };
+
+#endif
