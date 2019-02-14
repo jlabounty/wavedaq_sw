@@ -305,48 +305,59 @@ void WDSystem::SpawnDAQ(){
    }
    fWorkerThread->Start();
 
-   std::string filename;
-   unsigned int eventsPerFile;
-   unsigned int startRunNumber;
+   std::string noWriter;
    try{
-      filename = GetDaqProperty("FileName").GetStringValue();
+      noWriter = GetDaqProperty("NoWriter").GetStringValue();
    } catch (const std::out_of_range& ex){
-      filename = "out.bin";
+      noWriter = "false";
    }
-   try{
-      eventsPerFile = GetDaqProperty("EventsPerFile").GetUInt();
-   } catch (const std::out_of_range& ex){
-      eventsPerFile = 0;
-   }
-   try{
-      startRunNumber = GetDaqProperty("StartRunNumber").GetUInt();
-   } catch (const std::out_of_range& ex){
-      startRunNumber = 0;
-   }
-   fWriterThread = new WDAQEventWriter(fCalibratedBuffer, filename, eventsPerFile, startRunNumber);
-   //fWriterThread = new WDAQEventWriter(fEventBuffer, filename);
-   //pass time calibrations to Event Writer
-   for(auto &c : fCrate){
-      for(auto &b : *c){
-         if(b) if(dynamic_cast<WDWDB*>(b) != nullptr) fWriterThread->AddTimeCalibration(dynamic_cast<WDWDB*>(b)->GetSerialNumber(), &(dynamic_cast<WDWDB*>(b)->mTCalib));
+   if(noWriter != "true"){
+      std::string filename;
+      unsigned int eventsPerFile;
+      unsigned int startRunNumber;
+      try{
+         filename = GetDaqProperty("FileName").GetStringValue();
+      } catch (const std::out_of_range& ex){
+         filename = "out.bin";
       }
+      try{
+         eventsPerFile = GetDaqProperty("EventsPerFile").GetUInt();
+      } catch (const std::out_of_range& ex){
+         eventsPerFile = 0;
+      }
+      try{
+         startRunNumber = GetDaqProperty("StartRunNumber").GetUInt();
+      } catch (const std::out_of_range& ex){
+         startRunNumber = 0;
+      }
+      fWriterThread = new WDAQEventWriter(fCalibratedBuffer, filename, eventsPerFile, startRunNumber);
+      //fWriterThread = new WDAQEventWriter(fEventBuffer, filename);
+      //pass time calibrations to Event Writer
+      for(auto &c : fCrate){
+         for(auto &b : *c){
+            if(b) if(dynamic_cast<WDWDB*>(b) != nullptr) fWriterThread->AddTimeCalibration(dynamic_cast<WDWDB*>(b)->GetSerialNumber(), &(dynamic_cast<WDWDB*>(b)->mTCalib));
+         }
+      }
+      fWriterThread->Start();
+   } else {
+      printf("No writer thread running\n");
    }
-   fWriterThread->Start();
 
    // create the TCBReadrer thread
-   WDBoard *trboard = GetTriggerBoard();
-   WDTCB* tcbboard = dynamic_cast <WDTCB*> (trboard);
-   if(tcbboard != nullptr) {
-      std::string readEnable;
-      try{
-          readEnable = tcbboard->GetProperty("ReadEnable").GetStringValue();
-      } catch(const std::runtime_error& ex){
-           readEnable = "false";
-      }
-      if(readEnable=="true"){
-         fTCBReaderThread = new WDAQTCBReader(fPacketBuffer,tcbboard);
-         fTCBReaderThread->Start();
-      }
+
+   std::string readEnable;
+   WDTCB* tcbboard = nullptr;
+   try{
+      WDBoard *trboard = GetTriggerBoard();
+      tcbboard = dynamic_cast <WDTCB*> (trboard);
+      if(tcbboard != nullptr) readEnable = tcbboard->GetProperty("ReadEnable").GetStringValue();
+   } catch(const std::out_of_range &e){
+      readEnable = "false";
+   }
+
+   if(readEnable=="true"){
+      fTCBReaderThread = new WDAQTCBReader(fPacketBuffer,tcbboard);
+      fTCBReaderThread->Start();
    }
    //wait for server port
    while(fCollectorThread->GetServerPort() == -1){  };

@@ -41,13 +41,41 @@ class PacketDebug : public DAQThread{
    }
       
 
-   void end() { };
+   void End() { };
 
    public:
    PacketDebug(DAQBuffer<WDAQPacketData> *source){
       fSource = source;
    }
 };
+//debug events, to be used with no-writer
+class EventDebug : public DAQThread{
+   DAQBuffer<WDAQEvent> *fSource;
+   void Setup(){
+      printf("DAQ event debug thread started\n");
+   }
+
+   void Begin(){
+      printf("DAQ event debug thread running\n");
+   };
+
+   void Loop(){
+      WDAQEvent *ptr = nullptr;
+      if(fSource->Try_pop(ptr)){
+         printf("Got Event %d\n", ptr->mEventNumber);
+
+         delete ptr;
+      }
+   }
+   void End() { };
+
+   public:
+   EventDebug(DAQBuffer<WDAQEvent> *source){
+      fSource = source;
+   }
+};
+
+
 
 int main(int argc, char *argv[])
 {
@@ -70,7 +98,7 @@ int main(int argc, char *argv[])
       printf("[ 7]: turn on              \t \t  [ 8]: turn off             \n");
       printf("[ 9]: train serdes         \t \t  [10]: print serdes state   \n");
       printf("[11]: spawn daq            \t \t  [12]: stop daq             \n");
-      printf("[13]: sync dly scan        \t \t  [14]:                      \n");
+      printf("[13]: sync dly scan        \t \t  [14]: Attach debug thread  \n");
       do {
          char opline[256];
          printf("give an option: ");
@@ -241,6 +269,13 @@ int main(int argc, char *argv[])
                         }
                      }
             }
+         }
+         if(option == 14)
+         {
+            EventDebug* debugger = new EventDebug(sys->fCalibratedBuffer);
+            debugger->Start();
+            //sleep(10);
+            debugger->GoRun();
          }
       } while ( option == 0 ) ;
       /* end of the main loop on the options*/

@@ -112,17 +112,20 @@ class DAQThread{
 
          while(fStop != true){
 
-            //checks begin
+            bool shouldEnd = false;
+            //checks and run begin of run
             if(fRunning && !fRunning_old) Begin();
+            //checks end of run
+            if(!fRunning && fRunning_old) shouldEnd = true;
+            fRunning_old = fRunning;
 
             //timed loop
             std::chrono::high_resolution_clock::time_point loopStart = std::chrono::high_resolution_clock::now();
             if(fRunning && fRunning_old) Loop();
             std::chrono::high_resolution_clock::time_point loopEnd = std::chrono::high_resolution_clock::now();
 
-            //checks end 
-            if(!fRunning && fRunning_old) End();
-            fRunning_old = fRunning;
+            //run end of run
+            if(shouldEnd) End();
 
             fLastLoopDuration = loopEnd - loopStart;
             if(fLastLoopDuration<fMinLoopDuration){
