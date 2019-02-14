@@ -203,7 +203,7 @@ void WDSystem::Configure(){
    for(auto &c : fCrate){
       printf("configuring crate %s\n", c->GetMscbName().c_str());
       for(int i=0; i<18; i++){
-         if(c->HasBoardIn(i))
+	if(c->HasBoardIn(i)) 
             c->GetBoardAt(i)->Configure();
       }
    }

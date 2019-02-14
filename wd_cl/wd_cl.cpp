@@ -62,7 +62,7 @@ class EventDebug : public DAQThread{
    void Loop(){
       WDAQEvent *ptr = nullptr;
       if(fSource->Try_pop(ptr)){
-         printf("Got Event %d\n", ptr->mEventNumber);
+         printf("Got Event %d\n", ptr->mTriggerNumber);
 
          delete ptr;
       }

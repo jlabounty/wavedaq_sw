@@ -407,13 +407,16 @@ class WDWDB : public WDBoard, public WDB{
          SetSclTxEn(scaler_ena);
 
          //zero suppression enable
-         unsigned int zsuppr_ena;
+	 std::string zsuppr_ena;
          try{
-            zsuppr_ena = GetProperty("ZeroSuppressionEnable").GetUHex();
+            zsuppr_ena = GetProperty("ZeroSuppressionEnable").GetStringValue();
          } catch (const std::runtime_error& ex){
-            zsuppr_ena = 0;
+            zsuppr_ena = "false";
          }
-         SetZeroSuprEn(zsuppr_ena);
+	 if(zsuppr_ena == "true") 
+	   SetZeroSuprEn(1);
+	 else
+	   SetZeroSuprEn(0);
 
          //timing reference
          std::string timingreference;
