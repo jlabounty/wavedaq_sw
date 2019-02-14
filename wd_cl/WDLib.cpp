@@ -257,8 +257,8 @@ void WDSystem::StopRun(){
    GetTriggerBoard()->StopRun();
    if(fCollectorThread) fCollectorThread->StopRun();
    if(fBuilderThread) fBuilderThread->StopRun();
-   if(fWriterThread) fWorkerThread->StopRun();
-   if(fWorkerThread) fWriterThread->StopRun();
+   if(fWriterThread) fWriterThread->StopRun();
+   if(fWorkerThread) fWorkerThread->StopRun();
    if(fTCBReaderThread) fTCBReaderThread->StopRun();
 }
 //train serial links
