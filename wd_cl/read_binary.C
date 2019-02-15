@@ -40,32 +40,30 @@ typedef struct {
 } THEADER;
 
 typedef struct {
-   char           bn[2];
-   unsigned short board_serial_number;
+  char           bn[2];
+  unsigned short board_serial_number;
+  float          board_temperature;
+  float          board_range;
+  unsigned short sampling_frequency;
+  unsigned short flags;
 } BHEADER;
 
 typedef struct {
    char           event_header[4];
-   unsigned int   event_serial_number;
-   unsigned short year;
-   unsigned short month;
-   unsigned short day;
-   unsigned short hour;
-   unsigned short minute;
-   unsigned short second;
-   unsigned short millisecond;
-   unsigned short range;
+   unsigned short event_serial_number;
+   unsigned short trigger_type;
+   unsigned int serial_trigger_data;
 } EHEADER;
-
-typedef struct {
-   char           tc[2];
-   unsigned short trigger_cell;
-} TCHEADER;
 
 typedef struct {
    char           c[1];
    char           cn[3];
 } CHEADER;
+
+typedef struct {
+   unsigned short frontendsettings;
+   unsigned short trigger_cell;
+} DRSCHEADER;
 
 /*-----------------------------------------------------------------------------*/
 
@@ -74,8 +72,8 @@ void decode(const char *filename) {
    THEADER  th;
    BHEADER  bh;
    EHEADER  eh;
-   TCHEADER tch[18];
    CHEADER  ch;
+   DRSCHEADER drsch[18];
    
    unsigned short voltage[1024];
    unsigned short adc_voltage[2048];
@@ -128,12 +126,12 @@ void decode(const char *filename) {
    
    // read file header
    fread(&fh, sizeof(fh), 1, f);
-   if (fh.tag[0] != 'D' || fh.tag[1] != 'R' || fh.tag[2] != 'S') {
+   if (fh.tag[0] != 'W' || fh.tag[1] != 'D' || fh.tag[2] != 'Q') {
       printf("Found invalid file header in file \'%s\', aborting.\n", filename);
       return;
    }
    
-   if (fh.version != '8') {
+   if (fh.version != '0') {
       printf("Found invalid file version \'%c\' in file \'%s\', should be \'8\', aborting.\n", fh.version, filename);
       return;
    }
@@ -186,7 +184,7 @@ void decode(const char *filename) {
       if (i < 1)
          break;
       
-      printf("Found event #%d, t=%d.%d\n", eh.event_serial_number, eh.second, eh.millisecond);
+      printf("Found event #%d, type =%d , serial = %d\n", eh.event_serial_number, eh.trigger_type, eh.serial_trigger_data);
       
       // loop over all boards in data file
       for (b=0 ; b<n_boards ; b++) {
@@ -214,22 +212,19 @@ void decode(const char *filename) {
             chn_index = (ch.cn[1] - '0')*10 + ch.cn[2] - '0';
             
             if(ch.c[0] == 'C'){
-               // read trigger cell
-               fread(tch+chn_index, sizeof(tch[0]), 1, f);
-               if (memcmp(tch[chn_index].tc, "T#", 2) != 0) {
-                  printf("Invalid trigger cell header in file \'%s\', aborting.\n", filename);
-                  return;
-               }
-
-               fread(voltage, sizeof(short), 1024, f);
-
-               for (i=0 ; i<1024 ; i++) {
+	      
+	      // read trigger cell and frontend settings
+	      fread(drsch+chn_index, sizeof(drsch[0]), 1, f);
+	    
+	      fread(voltage, sizeof(short), 1024, f);
+	      
+	      for (i=0 ; i<1024 ; i++) {
                   // convert data to volts
-                  data[b].waveform[chn_index][i] = (voltage[i] / 65536. + eh.range/1000.0 - 0.5);
+                  data[b].waveform[chn_index][i] = (voltage[i] / 65536. + bh.board_range/1000.0 - 0.5);
 
                   // calculate time for this cell
                   for (j=0,data[b].time[chn_index][i]=0 ; j<i ; j++)
-                     data[b].time[chn_index][i] += bins[b].bin_width[chn_index][(j+tch[chn_index].trigger_cell) % 1024];
+		    data[b].time[chn_index][i] += bins[b].bin_width[chn_index][(j+drsch[chn_index].trigger_cell) % 1024];
                }
             } else if(ch.c[0] == 'A') {
                //ADC
@@ -264,9 +259,9 @@ void decode(const char *filename) {
 	 }// end for channels
 	 
 	 // align cell #0 of all channels
-	 t1 = data[b].time[0][(1024-tch[0].trigger_cell) % 1024];
+	 t1 = data[b].time[0][(1024-drsch[0].trigger_cell) % 1024];
 	 for (chn=1 ; chn<18 ; chn++) {
-	   t2 = data[b].time[chn][(1024-tch[chn].trigger_cell) % 1024];
+	   t2 = data[b].time[chn][(1024-drsch[chn].trigger_cell) % 1024];
 	   dt = t1 - t2;
 	   for (i=0 ; i<1024 ; i++)
 	     data[b].time[chn][i] += dt;

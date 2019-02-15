@@ -12,6 +12,7 @@ void WDAQPacketData::SetEventHeaderInfo(WD_FRAME_HEADER *ph, WDAQ_FRAME_HEADER *
   mEventNumber = ph->event_number; 
   mTriggerNumber = ph->trigger_information[5] | (ph->trigger_information[4] << 8);
   mTriggerType = ph->trigger_information[1] | (ph->trigger_information[0] << 8);   
+  mSerialTriggerData = ph->trigger_information[3] | (ph->trigger_information[2] << 8);   
   mTemperature = std::round(ph->temperature*0.0625 * 10 + 0.5) / 10.0f;
 
   mADC = (ph->channel_info >> 7) & 0x01; //which ADC sampled the data
@@ -295,7 +296,7 @@ WDAQEvent::WDAQEvent(WDAQPacketData* pkt){
    mEventNumber = pkt->mEventNumber;
    mTriggerNumber = pkt->mTriggerNumber;
    mTriggerType = pkt->mTriggerType&0x3F;
-
+   mSerialTriggerData = pkt->mSerialTriggerData;
 
 }
 
@@ -601,7 +602,7 @@ void WDAQEventBuilder::Loop(){
    if(fSource->Try_pop(ptr)){
 
       //search for matching packets
-      int new_event_number = ptr->mTriggerNumber;
+      short new_event_number = ptr->mTriggerNumber;
 
       WDAQEvent *evt_ptr;
 
@@ -760,7 +761,7 @@ std::string WDAQEventWriter::GetFileName(){
 //function to write headers and DRS time bins
 void WDAQEventWriter::WriteRunHeader(){
    //headers
-   const char head[] = "DRS8";
+   const char head[] = "WDQ0";
    fFile.write(head, 4);
    const char time_head[] = "TIME";
    fFile.write(time_head, 4);
@@ -801,20 +802,33 @@ void WDAQEventWriter::Loop(){
    if(fSource->Try_pop(ptr)){
       //new event to write
       const char head[] = "EHDR";
+      const char temp = '0';
       fFile.write(head, 4);
+      // write the event number from trigger bus
       fFile.write((const char *)&ptr->mTriggerNumber, 2);
-      const char temp = 0;
-      for(int i=0; i<2; i++) fFile.write(&temp, 1);
-      //writes 0 to time
-      for(int i=0; i<16; i++) fFile.write(&temp, 1);
-
+      // write the trigger type from trigger bus
+      fFile.write((const char *)&ptr->mTriggerType, 2);
+      // write the serial trigger data from trigger bus
+      fFile.write((const char *)&ptr->mSerialTriggerData, 2);
+      fFile.write((const char *)&temp, 1);
+      fFile.write((const char *)&temp, 1);
+      
       //write DRS data
       for(auto keyval : ptr->fBoard){
          WDAQBoardEvent* board= keyval.second;
+	 // write board Id
          const char board_head[] = "B#";
          fFile.write(board_head, 2);
          fFile.write((const char *)&board->mBoardId, 2);
+	 //write board temperature
+	 fFile.write((const char *)&board->mTemperature, sizeof(float));
+	 //write board range
          float range = board->GetRange();
+	 fFile.write((const char *)&range, sizeof(float));
+	 //write board sampling speed
+	 fFile.write((const char *)&board->mSamplingFrequency, 2);
+	 //write board flags
+	 fFile.write((const char *)&board->mFlags, 2); //useless to now, to be changed with WDBFlags earlier than 2030
          for(int ch=0;ch<18;ch++){
             //write only channels with data
             if(board->mDrsHasData[ch]){
@@ -824,8 +838,9 @@ void WDAQEventWriter::Loop(){
                chn_header += std::to_string(ch);
                fFile.write(chn_header.c_str(), 4);
 
-               const char trgcell_head[] = "T#";
-               fFile.write(trgcell_head, 2);
+	       //write frontend settings
+               fFile.write((const char *)&(board->mFrontendSettings[ch]), 2);
+	       //write trigger cell
                fFile.write((const char *)&(board->mTriggerCell[ch]), 2);
 
                for(int bin=0; bin<1024; bin++){

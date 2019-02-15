@@ -54,7 +54,8 @@ class WDAQPacketData{
    unsigned int     mEventNumber;
    //unsigned char    mTriggerInfo[6];
    unsigned char    mTriggerType;
-   unsigned int     mTriggerNumber;
+   unsigned short   mTriggerNumber;
+   unsigned short   mSerialTriggerData;  
    unsigned short   mTriggerCell;
    unsigned int     mSamplingFrequency;
    float            mTemperature;
@@ -199,6 +200,8 @@ public:
    unsigned int     mEventNumber;
    unsigned short   mTriggerNumber;
    unsigned short   mTriggerType;
+   unsigned short   mSerialTriggerData;
+
    std::map<unsigned short, WDAQBoardEvent *> fBoard;
    
    void AddPacket(WDAQPacketData* pkt);
