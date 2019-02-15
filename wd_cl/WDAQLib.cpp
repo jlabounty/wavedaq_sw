@@ -802,7 +802,7 @@ void WDAQEventWriter::Loop(){
    if(fSource->Try_pop(ptr)){
       //new event to write
       const char head[] = "EHDR";
-      const char temp = '0';
+      const char temp = 0;
       fFile.write(head, 4);
       // write the event number from trigger bus
       fFile.write((const char *)&ptr->mTriggerNumber, 2);

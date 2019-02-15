@@ -42,11 +42,14 @@ typedef struct {
 typedef struct {
   char           bn[2];
   unsigned short board_serial_number;
+} BHEADER;
+
+typedef struct {
   float          board_temperature;
   float          board_range;
   unsigned short sampling_frequency;
   unsigned short flags;
-} BHEADER;
+} DRSBHEADER;
 
 typedef struct {
    char           event_header[4];
@@ -71,6 +74,7 @@ void decode(const char *filename) {
    FHEADER  fh;
    THEADER  th;
    BHEADER  bh;
+   DRSBHEADER  drsbh;
    EHEADER  eh;
    CHEADER  ch;
    DRSCHEADER drsch[18];
@@ -198,7 +202,10 @@ void decode(const char *filename) {
          
          if (n_boards > 1)
             printf("Found data for board #%d\n", bh.board_serial_number);
-         
+
+         // read board header
+         fread(&drsbh, sizeof(drsbh), 1, f);
+                  
          // reach channel data
          for (chn=0 ; !feof(f) ; chn++) {
             
@@ -220,7 +227,7 @@ void decode(const char *filename) {
 	      
 	      for (i=0 ; i<1024 ; i++) {
                   // convert data to volts
-                  data[b].waveform[chn_index][i] = (voltage[i] / 65536. + bh.board_range/1000.0 - 0.5);
+                  data[b].waveform[chn_index][i] = (voltage[i] / 65536. + drsbh.board_range/1000.0 - 0.5);
 
                   // calculate time for this cell
                   for (j=0,data[b].time[chn_index][i]=0 ; j<i ; j++)
