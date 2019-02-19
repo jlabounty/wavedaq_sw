@@ -1849,6 +1849,32 @@ WP::WP(std::vector<WDB *> w, int verbose, std::string logfile, bool demo)
       WP::gDataSocket = socket(AF_INET, SOCK_DGRAM, 0);
       assert(WP::gDataSocket);
       
+      // increase receive buffer size
+      int rcvBufferSizeSet = 4*1024*1024; // 4 MB
+      int rcvBufferSizeGet;
+      socklen_t sockOptSize = sizeof(rcvBufferSizeGet);
+      
+      getsockopt(WP::gDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeGet, &sockOptSize);
+      //std::cout << "Initial rcvBufferSizeGet " << rcvBufferSizeGet/1024 << " kB" << std::endl;
+      if (rcvBufferSizeGet < 2*rcvBufferSizeSet) {
+         setsockopt(WP::gDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeSet, sizeof(rcvBufferSizeSet));
+         getsockopt(WP::gDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeGet, &sockOptSize);
+         //std::cout << "Modified rcvBufferSizeGet " << rcvBufferSizeGet/1024 << " kb" << std::endl;
+         
+         if (rcvBufferSizeGet < rcvBufferSizeSet) {
+            std::cout << "Warning: Receive Buffer Size quite small, consider:" << std::endl << std::endl
+#ifdef __linux__
+            << "$ sudo sysctl -w net.core.rmem_max=" << rcvBufferSizeSet << std::endl << std::endl
+            << "or insert to /etc/sysctl.d/99-sysctl.conf (/etc/sysctl.conf on legacy systems)"  << std::endl
+            << "for permanent settings" << std::endl;
+#endif
+#ifdef __APPLE__
+            << "$ sudo sysctl net.inet.udp.recvspace=" << rcvBufferSizeSet << std::endl << std::endl
+            << "or insert to /etc/sysctl.conf for permanent settings" << std::endl;
+#endif
+         }
+      }
+      
       // bind socket to port chosen by OS
       std::memset((char*)&server_addr, 0, sizeof(server_addr));
       server_addr.sin_family = AF_INET;
