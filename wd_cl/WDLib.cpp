@@ -29,7 +29,8 @@ void WDBoard::SetProperties(const PropertyGroup &properties){
    fProperties = properties;
 }
 // Contructor
-WDBoard::WDBoard(WDCrate * crate, char slot){
+WDBoard::WDBoard(WDCrate * crate, char slot, std::string name){
+   fBoardName = name;
    crate->AddBoard(this, slot);
 }
 
@@ -42,6 +43,9 @@ void WDCrate::AddBoard(WDBoard *board, int slot){
    //board->SetCrate(this, slot);
    board->fSlot = slot;
    board->fCrate = this;
+   if(fSystem != nullptr) {
+      fSystem->fBoardMap[board->fBoardName] = WDPosition(fCrateNumber, slot);
+   }
 }
 
 // Checks slot is filled
@@ -97,7 +101,15 @@ void WDSystem::AddCrate(WDCrate *crate){
    }
 
    crate->fSystem = this;
+   crate->fCrateNumber = fCrate.size() - 1;
 
+   //add boards already in crate in the map
+   for(int slot=0; slot<18; slot++){
+      if(crate->HasBoardIn(slot)){ 
+         WDBoard *b = crate->GetBoardAt(slot);
+         fBoardMap[b->GetBoardName()] = WDPosition(crate->fCrateNumber, slot);
+      }
+   }
 }
 
 // crate board properties from XML
@@ -128,7 +140,12 @@ void WDSystem::CreateFromXml(std::string filepath){
       std::string crate_node_name = std::string(mxml_get_name(crate_xml));
       if(crate_node_name == "Crate"){
          //create a new Crate
-         WDCrate *c = new WDCrate(std::string(mxml_get_attribute(crate_xml, "MscbNode")));
+         char* mscbnodestring = mxml_get_attribute(crate_xml, "MscbNode");
+         if(mscbnodestring==NULL){
+            printf("error parsing XML: Crate need MscbNode attribute");
+            return;
+         }
+         WDCrate *c = new WDCrate(std::string(mscbnodestring));
 
          bool triggerFlag = false;
          //loop on Boards
@@ -137,20 +154,61 @@ void WDSystem::CreateFromXml(std::string filepath){
             std::string board_node_name = std::string(mxml_get_name(board_xml));
             if(board_node_name == "Board"){
                //create a new board
-               WDBoard *b = new WDBoard(c, atoi(mxml_get_attribute(board_xml, "Slot")));
-               b->SetGroup(mxml_get_attribute(board_xml, "Group"));
+               char* slotstring = mxml_get_attribute(board_xml, "Slot");
+               if(slotstring==NULL){
+                  printf("error parsing XML: Board needs a Slot attributes");
+                  return;
+               }
+               WDBoard *b = new WDBoard(c, atoi(slotstring));
+
+               //board property group is optional
+               char* groupstring = mxml_get_attribute(board_xml, "Group");
+               if(groupstring!=NULL){
+                  b->SetGroup(groupstring);
+               }
+
+               //parse remaining tags as properties
                CreatePropertiesFromXml(b, board_xml);
             }
             else if(board_node_name == "WDB"){
                //create a new board
-               WDWDB *b = new WDWDB(mxml_get_attribute(board_xml, "Name"), c, atoi(mxml_get_attribute(board_xml, "Slot")));
-               b->SetGroup(mxml_get_attribute(board_xml, "Group"));
+               char* slotstring = mxml_get_attribute(board_xml, "Slot");
+               char* namestring = mxml_get_attribute(board_xml, "Name");
+               if(slotstring == NULL || namestring==NULL) {
+                  printf("error parsing XML: WDB needs a Slot and a Name attributes");
+                  return;
+               }
+
+               WDWDB *b = new WDWDB(c, atoi(slotstring), std::string(namestring));
+
+               //board property group is optional
+               char* groupstring = mxml_get_attribute(board_xml, "Group");
+               if(groupstring!=NULL){
+                  b->SetGroup(groupstring);
+               }
+
+               //parse remaining tags as properties
                CreatePropertiesFromXml(b, board_xml);
             }
             else if(board_node_name == "TCB"){
                //create a new board
-               WDTCB *b = new WDTCB(c, atoi(mxml_get_attribute(board_xml, "Slot")));
-               b->SetGroup(mxml_get_attribute(board_xml, "Group"));
+               
+               char* slotstring = mxml_get_attribute(board_xml, "Slot");
+               char* namestring = mxml_get_attribute(board_xml, "Name");
+               if(slotstring == NULL || namestring==NULL) {
+                  printf("error parsing XML: TCB needs a Slot and a Name attributes");
+                  return;
+               }
+
+               WDTCB *b = new WDTCB(c, atoi(slotstring), std::string(namestring));
+
+               //board property group is optional
+               char* groupstring = mxml_get_attribute(board_xml, "Group");
+               if(groupstring!=NULL){
+                  b->SetGroup(groupstring);
+               }
+
+               //parse remaining tags as properties
                CreatePropertiesFromXml(b, board_xml);
             }
             else if(board_node_name == "Trigger") triggerFlag = true;
@@ -162,7 +220,12 @@ void WDSystem::CreateFromXml(std::string filepath){
          }
       } else if (crate_node_name == "Group"){
          //create a new property group
-         std::string groupname = std::string(mxml_get_attribute(crate_xml, "Name"));
+         char* namestring = mxml_get_attribute(crate_xml, "Name");
+         if(namestring==NULL){
+            printf("error parsing XML: Group needs a Name attribute");
+            return;
+         }
+         std::string groupname = std::string(namestring);
 
          PropertyGroup p;
          for(int i=0; i<mxml_get_number_of_children(crate_xml); i++){
@@ -203,7 +266,7 @@ void WDSystem::Configure(){
    for(auto &c : fCrate){
       printf("configuring crate %s\n", c->GetMscbName().c_str());
       for(int i=0; i<18; i++){
-	if(c->HasBoardIn(i)) 
+         if(c->HasBoardIn(i)) 
             c->GetBoardAt(i)->Configure();
       }
    }
@@ -382,4 +445,8 @@ void WDSystem::StopDAQ(){
    delete fBuilderThread;
    delete fWorkerThread;
    delete fWriterThread;
+}
+
+WDPosition &WDSystem::FindBoard(std::string name){
+   return fBoardMap[name];
 }

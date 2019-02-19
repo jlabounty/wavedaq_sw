@@ -146,13 +146,18 @@ int main(int argc, char *argv[])
                      std::string gr = b->GetGroup();
                      PropertyGroup pgr = sys->GetGroupProperties(gr);
                      //for(std::map<std::string,std::string>::iterator it=pgr.begin(); it!=pgr.end(); it++){
-                     for(auto prop : p){   
+                     for(auto prop : pgr){   
                         printf("\t \t \t %s: %s from group %s\n", prop.first.c_str(), prop.second.GetStringValue().c_str(), gr.c_str());
                      }
                   } else {
                      printf("\t \t empty\n");
                   }
                }
+            }
+            printf("\n");
+            printf("board map:\n");
+            for(auto i: sys->fBoardMap){
+               printf("\t%s crateId:%ld Slot:%d\n", i.first.c_str(), i.second.fCrate, i.second.fSlot);
             }
          }
          if(option == 3)

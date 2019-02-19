@@ -23,6 +23,7 @@ class WDTCB;
 class WDBoard {
    friend class WDCrate;
    private:
+      std::string fBoardName;
       char fSlot;
       WDCrate *fCrate;
       PropertyGroup fProperties;
@@ -54,15 +55,17 @@ class WDBoard {
       char GetSlot(){ return fSlot; }
       WDCrate *GetCrate(){ return fCrate; }
       PropertyGroup &GetProperties(){ return fProperties; }
-      std::string GetGroup() { return fGroupName; };
+      std::string GetGroup() { return fGroupName; }
+      std::string GetBoardName() {return fBoardName; }
 
       //Constructor
       //standalone
-      WDBoard(){
+      WDBoard(std::string name="standalone"){
+         fBoardName = name;
          fSlot = -1;
       }
       //inside a crate
-      WDBoard(WDCrate * crate, char slot);
+      WDBoard(WDCrate * crate, char slot, std::string name="BoardXXX");
 
       //Destructor
       virtual ~WDBoard() {}
@@ -77,6 +80,7 @@ class WDCrate {
       WDSystem *fSystem;
       std::string fMscbName;
       int fMscbHandle;
+      long fCrateNumber;
 
       //reserved Methods
 
@@ -100,6 +104,9 @@ class WDCrate {
 
       //Constructor
       WDCrate(std::string mscbname = ""){
+         fCrateNumber = -1;
+         fSystem = nullptr;
+
          for(int i=0; i<18; i++){
             fBoard[i] = 0;
          }
@@ -120,8 +127,29 @@ class WDCrate {
 
 };
 
+// --- WaveDAQ board position --- utility class to store board position in the system
+class WDPosition {
+   public:
+      char fSlot;
+      long fCrate;
+   WDPosition (long crate=-1, char slot=-1){
+      fSlot = slot;
+      fCrate = crate;
+   }
+   WDPosition (const WDPosition &old_obj){
+      fSlot = old_obj.fSlot;
+      fCrate = old_obj.fCrate;
+   }
+   void Set (long crate, char slot){
+      fSlot = slot;
+      fCrate = crate;
+   }
+};
+
 // --- WaveDAQ system --- manage multicrate setup
 class WDSystem {
+   friend class WDCrate;
+
    private:
       std::vector<WDCrate *> fCrate;
       int fTrgCrateId;
@@ -133,6 +161,7 @@ class WDSystem {
       void CreatePropertiesFromXml(WDBoard *board, MXML_NODE *board_node);
 
    public:
+      std::map<std::string,WDPosition> fBoardMap;
       //DAQ stuff
       DAQBuffer<WDAQPacketData> *fPacketBuffer;
       DAQBuffer<WDAQEvent> *fEventBuffer;
@@ -155,6 +184,7 @@ class WDSystem {
       void TrainSerdes();
       void SpawnDAQ();
       void StopDAQ();
+      WDPosition &FindBoard(std::string name);
 
       //Iterator on crates
       WDCrate ** begin() { return &fCrate[0]; }
@@ -165,6 +195,7 @@ class WDSystem {
       WDCrate *GetCrateAt(int crateid) { return fCrate.at(crateid); }
       WDCrate *GetTriggerCrate(){ return fCrate.at(fTrgCrateId); }
       WDBoard *GetTriggerBoard(){ return GetTriggerCrate()->GetBoardAt(17); }
+      WDBoard *GetBoardAt(WDPosition &p) {return fCrate[p.fCrate]->GetBoardAt(p.fSlot);}
       int GetTriggerCrateId(){ return fTrgCrateId; }
       unsigned long GetCrateSize() { return fCrate.size(); }
       PropertyGroup &GetGroupProperties(std::string groupname){ return fGroupProperties[groupname]; }
@@ -616,8 +647,8 @@ class WDWDB : public WDBoard, public WDB{
 
       }
 
-      WDWDB(std::string name, int verbose = 0) : WDBoard(), WDB(name, verbose) { };
-      WDWDB(std::string name, WDCrate *crate, int slot, int verbose = 0) : WDBoard(crate, slot), WDB(name, verbose) {
+      WDWDB(std::string name="WDXXX", int verbose = 0) : WDBoard(name), WDB(name, verbose) { };
+      WDWDB(WDCrate *crate, int slot, std::string name="WDXXX", int verbose = 0) : WDBoard(crate, slot, name), WDB(name, verbose) {
          //try to connect only if the crate is powered
          if(crate->IsPowered()){
             Connect();
@@ -770,7 +801,7 @@ class WDTCB : public WDBoard, public TCB{
 
       }
 
-      WDTCB(WDCrate *crate, int slot, int verbose = 0) : WDBoard(crate, slot), TCB(crate->GetMscbName().c_str(), 20, slot, verbose) {
+      WDTCB(WDCrate *crate, int slot, std::string name="TCBXXX", int verbose = 0) : WDBoard(crate, slot, name), TCB(crate->GetMscbName().c_str(), 20, slot, verbose) {
          fh = crate->GetMscbHandle();
          //try to connect only if the crate is powered
          if(crate->IsPowered()){
