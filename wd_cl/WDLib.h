@@ -616,6 +616,7 @@ class WDWDB : public WDBoard, public WDB{
          SetMcxTxSigSel(tx);
          SetMcxRxSigSel(rx);
 
+
          SetSendBlocked(false);
          SendControlRegisters();
 
@@ -636,6 +637,31 @@ class WDWDB : public WDBoard, public WDB{
 
          //Read Status
          ReceiveStatusRegisters();
+
+	 // Set HV if required
+	 // as a default it is not touched
+         const float *cha_hv;
+         try{
+            cha_hv = GetProperty("ChannelHV").GetFloatVector(&arraySize); 
+         } catch (const std::runtime_error& ex){
+            arraySize = -1;
+         }
+	 // if only 1 value the same to all
+         if(arraySize ==1){
+	   for(int i=0; i<16; i++) { 
+	     SetHVTarget(i, cha_hv[0]);
+	   }
+         } // if not set each one independently 
+	 else if(arraySize == 16){
+	   for(int i=0; i<16; i++) {
+	     SetHVTarget(i, cha_hv[i]);
+	   }
+	 }
+	 else if(arraySize != -1)
+	   std::cout<<"Please provide 1 or 16 channel HV values  "<<std::endl;
+
+
+
 
          //Load Calibration file
          if (!LoadVoltageCalibration(GetDrsSampleFreqMhz(), "/home/git/wavedaq/software/wds/")) {
