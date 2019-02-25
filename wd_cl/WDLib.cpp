@@ -326,6 +326,8 @@ void WDSystem::StopRun(){
 }
 //train serial links
 void WDSystem::TrainSerdes(){
+   GetTriggerBoard()->Sync();
+
    for(auto &c : fCrate){
       for(auto &b : *c){
          if(b) b->TrainSerdes();

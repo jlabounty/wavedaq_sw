@@ -258,6 +258,11 @@ class WDWDB : public WDBoard, public WDB{
          LmkSyncLocal();
          ReceiveStatusRegister(WD2_DRS_SAMPLE_FREQ_REG);
 
+         //Reset everything
+         ResetAllPll();
+         ResetTcbOserdesIf();
+         ResetDrsControlFsm();
+
       }
 
    
@@ -271,10 +276,12 @@ class WDWDB : public WDBoard, public WDB{
 
       }
       void SetSerdesTraining(bool state){
-         SetAdvTrgCtrl(0x00000430);
+         unsigned int regbits = GetAdvTrgCtrl();
+         SetAdvTrgCtrl((regbits&0xFFFF7FF) | 0x00000430);//MASKSYNC=0, DEBUG_CTRL=1, ALGSEL=3
+         SetInCrate();
       }
       bool IsSerdesTraining(){
-         return (GetAdvTrgCtrl() >>4) == 0x43;
+         return (((GetAdvTrgCtrl() >>4) ^ 0x43)|0x3C)==0xFF;//require MASKSYNC=0, DEBUG_CTRL=1, ALGSEL=3
          
       }
       void TrainSerdes(){
@@ -616,17 +623,33 @@ class WDWDB : public WDBoard, public WDB{
          SetMcxTxSigSel(tx);
          SetMcxRxSigSel(rx);
 
+         // Set HV if required
+         // as a default it is not touched
+         const float *cha_hv;
+         try{
+            cha_hv = GetProperty("ChannelHV").GetFloatVector(&arraySize); 
+         } catch (const std::runtime_error& ex){
+            arraySize = -1;
+         }
+         // if only 1 value the same to all
+         if(arraySize ==1){
+            for(int i=0; i<16; i++) { 
+               SetHVTarget(i, cha_hv[0]);
+            }
+         } // if not set each one independently 
+         else if(arraySize == 16){
+            for(int i=0; i<16; i++) {
+               SetHVTarget(i, cha_hv[i]);
+            }
+         }
+         else if(arraySize != -1)
+            std::cout<<"Please provide 1 or 16 channel HV values  "<<std::endl;
 
          SetSendBlocked(false);
          SendControlRegisters();
 
          //LMK and PLL configuration to be in crate
          SetInCrate();
-
-         //Reset everything
-         ResetAllPll();
-         ResetTcbOserdesIf();
-         ResetDrsControlFsm();
 
          //set destination port
          SetDestinationPort(GetCrate()->GetSystem()->GetDAQServerPort());
@@ -637,31 +660,6 @@ class WDWDB : public WDBoard, public WDB{
 
          //Read Status
          ReceiveStatusRegisters();
-
-	 // Set HV if required
-	 // as a default it is not touched
-         const float *cha_hv;
-         try{
-            cha_hv = GetProperty("ChannelHV").GetFloatVector(&arraySize); 
-         } catch (const std::runtime_error& ex){
-            arraySize = -1;
-         }
-	 // if only 1 value the same to all
-         if(arraySize ==1){
-	   for(int i=0; i<16; i++) { 
-	     SetHVTarget(i, cha_hv[0]);
-	   }
-         } // if not set each one independently 
-	 else if(arraySize == 16){
-	   for(int i=0; i<16; i++) {
-	     SetHVTarget(i, cha_hv[i]);
-	   }
-	 }
-	 else if(arraySize != -1)
-	   std::cout<<"Please provide 1 or 16 channel HV values  "<<std::endl;
-
-
-
 
          //Load Calibration file
          if (!LoadVoltageCalibration(GetDrsSampleFreqMhz(), "/home/git/wavedaq/software/wds/")) {
@@ -695,7 +693,18 @@ class WDTCB : public WDBoard, public TCB{
       }
 
       void SetSerdesTraining(bool state){
-         SetSerdesPattern(true);
+         //SetSerdesPattern(true);
+         u_int32_t rrun;
+         ReadReg(RRUN,&rrun);
+         rrun |= 0x4000; //enable MASKSYNC
+         rrun |= 0x10;   //enable ENABLE TRGBUS
+         //enable serdespattern according to request
+         if(state){
+            rrun |= 0x00000200;
+         } else {
+            rrun &= 0xFFFFFDFF;
+         }
+         SetRRUN(&rrun);
       }
       bool IsSerdesTraining(){
          unsigned int val=0;
@@ -705,7 +714,6 @@ class WDTCB : public WDBoard, public TCB{
       }
       void TrainSerdes(){
          AutoCalibrateSerdes();
-
       }
 
       void Sync(){
