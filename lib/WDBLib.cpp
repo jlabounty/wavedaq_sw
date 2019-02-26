@@ -2344,7 +2344,7 @@ int WP::ReceiveWfPacket()
       }
 
       // drop package if it belongs to previous event
-      if (ph->event_number == (unsigned int)mCurrentEvent-1) {
+      if (ph->event_number < (unsigned int)mCurrentEvent) {
          std::cerr << "Package of previous event dropped, package event=" << ph->event_number << ", "
          << "current event=" << mCurrentEvent << ", "
          << "board id=" << pdaqh->serial_number << std::endl;
