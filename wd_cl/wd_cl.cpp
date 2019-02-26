@@ -92,13 +92,14 @@ int main(int argc, char *argv[])
    /* main loop on the options */
    do {
       printf("\n  --- options: \n");
-      printf("[ 1]: configure system     \t \t  [ 2]: draw system          \n");
+      printf("[ 1]: configure system     \t \t  [ 2]: prepare to run       \n");
       printf("[ 3]: system start         \t \t  [ 4]: get busy             \n");
       printf("[ 5]: system stop          \t \t  [ 6]: system sync          \n");
       printf("[ 7]: turn on              \t \t  [ 8]: turn off             \n");
       printf("[ 9]: train serdes         \t \t  [10]: print serdes state   \n");
       printf("[11]: spawn daq            \t \t  [12]: stop daq             \n");
-      printf("[13]: sync dly scan        \t \t  [14]: Attach debug thread  \n");
+      printf("[13]: sync dly scan        \t \t  [14]: attach debug thread  \n");
+      printf("[13]: draw system          \t \t   \n");
       do {
          char opline[256];
          printf("give an option: ");
@@ -112,53 +113,12 @@ int main(int argc, char *argv[])
          }
          if(option == 2)
          {
-            int size = sys->GetCrateSize();
-            printf("system with %d crates\n", size);
-            //for(int icrate=0; icrate<size; icrate++){
-            //   wdcrate *c = sys->getcrateat(icrate);
-            for(auto c : *sys){
-               printf("\t crate name %s",  c->GetMscbName().c_str());
-               if(c == sys->GetCrateAt(sys->GetTriggerCrateId())){
-                  printf(" trigger crate\n");
-               } else printf("\n");
-
-               //for(int iboard=0; iboard<18; iboard++){
-               //   printf("\t \t slot %d: ", iboard);
-               //   if(c->hasboardin(iboard)){
-               //      wdboard *b = c->getboardat(iboard);
-               for(auto b : *c){
-                  if(b!=0){
-                     printf("\t \t slot %d: ", b->GetSlot());
-                     if(dynamic_cast<WDWDB*>(b) == nullptr){
-                        if(dynamic_cast<WDTCB*>(b) == nullptr)
-                           printf("with board in slot %d of crate %s\n", b->GetSlot(), b->GetCrate()->GetMscbName().c_str());
-                        else
-                           printf("tcb group=%s\n", b->GetGroup().c_str());
-                     } else
-                        printf("wdb with name %s group=%s\n", dynamic_cast<WDWDB*>(b)->GetName().c_str(), b->GetGroup().c_str());
-
-                     PropertyGroup p = b->GetProperties();
-                     //for(std::map<std::string,std::string>::iterator it=p.begin(); it!=p.end(); it++){
-                     for(auto prop : p){
-                        printf("\t \t \t %s: %s\n", prop.first.c_str(), prop.second.GetStringValue().c_str());
-                     }
-
-                     std::string gr = b->GetGroup();
-                     PropertyGroup pgr = sys->GetGroupProperties(gr);
-                     //for(std::map<std::string,std::string>::iterator it=pgr.begin(); it!=pgr.end(); it++){
-                     for(auto prop : pgr){   
-                        printf("\t \t \t %s: %s from group %s\n", prop.first.c_str(), prop.second.GetStringValue().c_str(), gr.c_str());
-                     }
-                  } else {
-                     printf("\t \t empty\n");
-                  }
-               }
-            }
-            printf("\n");
-            printf("board map:\n");
-            for(auto i: sys->fBoardMap){
-               printf("\t%s crateId:%ld Slot:%d\n", i.first.c_str(), i.second.fCrate, i.second.fSlot);
-            }
+            printf("prepare for the run... ");
+            sys->SpawnDAQ();
+            sys->SetSerdesTraining(true);
+            sys->TrainSerdes();
+	    usleep(50000);
+            sys->Configure();
          }
          if(option == 3)
          {
@@ -281,6 +241,56 @@ int main(int argc, char *argv[])
             debugger->Start();
             //sleep(10);
             debugger->GoRun();
+         }
+         if(option == 15)
+         {
+            int size = sys->GetCrateSize();
+            printf("system with %d crates\n", size);
+            //for(int icrate=0; icrate<size; icrate++){
+            //   wdcrate *c = sys->getcrateat(icrate);
+            for(auto c : *sys){
+               printf("\t crate name %s",  c->GetMscbName().c_str());
+               if(c == sys->GetCrateAt(sys->GetTriggerCrateId())){
+                  printf(" trigger crate\n");
+               } else printf("\n");
+
+               //for(int iboard=0; iboard<18; iboard++){
+               //   printf("\t \t slot %d: ", iboard);
+               //   if(c->hasboardin(iboard)){
+               //      wdboard *b = c->getboardat(iboard);
+               for(auto b : *c){
+                  if(b!=0){
+                     printf("\t \t slot %d: ", b->GetSlot());
+                     if(dynamic_cast<WDWDB*>(b) == nullptr){
+                        if(dynamic_cast<WDTCB*>(b) == nullptr)
+                           printf("with board in slot %d of crate %s\n", b->GetSlot(), b->GetCrate()->GetMscbName().c_str());
+                        else
+                           printf("tcb group=%s\n", b->GetGroup().c_str());
+                     } else
+                        printf("wdb with name %s group=%s\n", dynamic_cast<WDWDB*>(b)->GetName().c_str(), b->GetGroup().c_str());
+
+                     PropertyGroup p = b->GetProperties();
+                     //for(std::map<std::string,std::string>::iterator it=p.begin(); it!=p.end(); it++){
+                     for(auto prop : p){
+                        printf("\t \t \t %s: %s\n", prop.first.c_str(), prop.second.GetStringValue().c_str());
+                     }
+
+                     std::string gr = b->GetGroup();
+                     PropertyGroup pgr = sys->GetGroupProperties(gr);
+                     //for(std::map<std::string,std::string>::iterator it=pgr.begin(); it!=pgr.end(); it++){
+                     for(auto prop : pgr){   
+                        printf("\t \t \t %s: %s from group %s\n", prop.first.c_str(), prop.second.GetStringValue().c_str(), gr.c_str());
+                     }
+                  } else {
+                     printf("\t \t empty\n");
+                  }
+               }
+            }
+            printf("\n");
+            printf("board map:\n");
+            for(auto i: sys->fBoardMap){
+               printf("\t%s crateId:%ld Slot:%d\n", i.first.c_str(), i.second.fCrate, i.second.fSlot);
+            }
          }
       } while ( option == 0 ) ;
       /* end of the main loop on the options*/
