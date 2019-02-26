@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
       printf("[ 9]: train serdes         \t \t  [10]: print serdes state   \n");
       printf("[11]: spawn daq            \t \t  [12]: stop daq             \n");
       printf("[13]: sync dly scan        \t \t  [14]: attach debug thread  \n");
-      printf("[13]: draw system          \t \t   \n");
+      printf("[15]: draw system          \t \t   \n");
       do {
          char opline[256];
          printf("give an option: ");
