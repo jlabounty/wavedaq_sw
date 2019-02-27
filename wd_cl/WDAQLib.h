@@ -217,7 +217,7 @@ public:
 
 //---------- THREAD implementation -------
 //Packet Collector - Thread to collect packets
-#define WD2_UDP_PROTOCOL_VERSION  6
+#define WD2_UDP_PROTOCOL_VERSION  7
 
 class WDAQPacketCollector: public DAQServerThread{
    DAQBuffer<WDAQPacketData> *fBuf;
