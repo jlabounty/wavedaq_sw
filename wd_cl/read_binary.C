@@ -225,19 +225,13 @@ void decode(const char *filename) {
 	    
 	      fread(voltage, sizeof(short), 1024, f);
 	      
-	      double oldwaveform = 0.0;
 	      for (i=0 ; i<1024 ; i++) {
-		waveform[b][chn_index][i] = (voltage[i] / 65536. + eh.range/1000.0 - 0.5);
-		if(fabs(waveform[b][chn_index][i]-oldwaveform)>0.8){
-                  Int_t newvoltage;
-                  newvoltage = voltage[i] + 65536;
-                  waveform[b][chn_index][i] = (newvoltage / 65536. + eh.range/1000.0 - 0.5);
-		}
+		data[b].waveform[chn_index][i] = (voltage[i] / 65536. + drsbh.board_range/1000.0 - 0.5);
+		
+		// calculate time for this cell
+		for (j=0,data[b].time[chn_index][i]=0 ; j<i ; j++)
+		  data[b].time[chn_index][i] += bins[b].bin_width[chn_index][(j+drsch[chn_index].trigger_cell) % 1024];
 	      }
-	      
-	      // calculate time for this cell
-	      for (j=0,data[b].time[chn_index][i]=0 ; j<i ; j++)
-		data[b].time[chn_index][i] += bins[b].bin_width[chn_index][(j+drsch[chn_index].trigger_cell) % 1024];
 	      
             } else if(ch.c[0] == 'A') {
                //ADC
