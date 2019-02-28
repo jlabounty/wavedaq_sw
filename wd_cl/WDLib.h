@@ -392,7 +392,7 @@ class WDWDB : public WDBoard, public WDB{
             //channel_polarity = stoul(GetProperty("ChannelPolarity"), 0, 16); 
             channel_polarity = GetProperty("ChannelPolarity").GetUHex();
          } catch (const std::runtime_error& ex){
-            channel_polarity = -1;
+            channel_polarity = 0xffff;
          }
          if(channel_polarity != -1){
             SetTrgSrcPolarity(channel_polarity);
@@ -653,19 +653,13 @@ class WDWDB : public WDBoard, public WDB{
          } catch (const std::runtime_error& ex){
             arraySize = -1;
          }
-         // if only 1 value the same to all
-         if(arraySize ==1){
-            for(int i=0; i<16; i++) { 
-               SetHVTarget(i, cha_hv[0]);
-            }
-         } // if not set each one independently 
-         else if(arraySize == 16){
+         if(arraySize == 16){
             for(int i=0; i<16; i++) {
                SetHVTarget(i, cha_hv[i]);
             }
          }
          else if(arraySize != -1)
-            std::cout<<"Please provide 1 or 16 channel HV values  "<<std::endl;
+            std::cout<<"Please provide 16 channel HV values  "<<std::endl;
 
 
          //Load Calibration file
