@@ -340,6 +340,9 @@ class WDWDB : public WDBoard, public WDB{
          } else if(arraySize == 16){
             for(int i=0; i<16; i++) SetFeGain(i, gain[i]);
          }
+         else if(arraySize != -1)
+	   std::cout<<"Please provide 1 or 16 channel Frontend Gain values  "<<std::endl;
+
 
          //PZC
          const int* pzc;
@@ -379,6 +382,9 @@ class WDWDB : public WDBoard, public WDB{
          } else if(arraySize == 16){
             for(int i=0; i<16; i++) SetDacTriggerLevelV(i, trigger_level[i]);
          }
+         else if(arraySize != -1)
+            std::cout<<"Please provide 1 or 16 trigger level values  "<<std::endl;
+
 
          //channel trigger polarity
          unsigned int channel_polarity;
@@ -623,6 +629,22 @@ class WDWDB : public WDBoard, public WDB{
          SetMcxTxSigSel(tx);
          SetMcxRxSigSel(rx);
 
+         SetSendBlocked(false);
+         SendControlRegisters();
+
+         //LMK and PLL configuration to be in crate
+         SetInCrate();
+
+         //set destination port
+         SetDestinationPort(GetCrate()->GetSystem()->GetDAQServerPort());
+
+         //start
+         SetDaqSingle(false);
+         SetDaqNormal(true);
+
+         //Read Status
+         ReceiveStatusRegisters();
+
          // Set HV if required
          // as a default it is not touched
          const float *cha_hv;
@@ -645,21 +667,6 @@ class WDWDB : public WDBoard, public WDB{
          else if(arraySize != -1)
             std::cout<<"Please provide 1 or 16 channel HV values  "<<std::endl;
 
-         SetSendBlocked(false);
-         SendControlRegisters();
-
-         //LMK and PLL configuration to be in crate
-         SetInCrate();
-
-         //set destination port
-         SetDestinationPort(GetCrate()->GetSystem()->GetDAQServerPort());
-
-         //start
-         SetDaqSingle(false);
-         SetDaqNormal(true);
-
-         //Read Status
-         ReceiveStatusRegisters();
 
          //Load Calibration file
          if (!LoadVoltageCalibration(GetDrsSampleFreqMhz(), "/home/git/wavedaq/software/wds/")) {
