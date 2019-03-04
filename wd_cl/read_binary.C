@@ -200,8 +200,8 @@ void decode(const char *filename) {
             return;
          }
          
-         if (n_boards > 1)
-            printf("Found data for board #%d\n", bh.board_serial_number);
+	 //	 if (n_boards > 1)
+	 //	   printf("Found data for board #%d\n", bh.board_serial_number);
 
          // read board header
          fread(&drsbh, sizeof(drsbh), 1, f);
@@ -219,7 +219,6 @@ void decode(const char *filename) {
             chn_index = (ch.cn[1] - '0')*10 + ch.cn[2] - '0';
             
             if(ch.c[0] == 'C'){
-	      
 	      // read trigger cell and frontend settings
 	      fread(drsch+chn_index, sizeof(drsch[0]), 1, f);
 	    
@@ -227,12 +226,13 @@ void decode(const char *filename) {
 	      
 	      for (i=0 ; i<1024 ; i++) {
 		data[b].waveform[chn_index][i] = (voltage[i] / 65536. + drsbh.board_range/1000.0 - 0.5);
-		
+	
+	
 		// calculate time for this cell
 		for (j=0,data[b].time[chn_index][i]=0 ; j<i ; j++)
 		  data[b].time[chn_index][i] += bins[b].bin_width[chn_index][(j+drsch[chn_index].trigger_cell) % 1024];
 	      }
-	      
+
             } else if(ch.c[0] == 'A') {
                //ADC
                fread(adc_voltage, sizeof(short), 2048, f);
@@ -266,7 +266,7 @@ void decode(const char *filename) {
 	 }// end for channels
 	 
 	 // align cell #0 of all channels
-	 t1 = data[b].time[0][(1024-drsch[0].trigger_cell) % 1024];
+	 t1 = data[b].time[16][(1024-drsch[16].trigger_cell) % 1024];
 	 for (chn=1 ; chn<18 ; chn++) {
 	   t2 = data[b].time[chn][(1024-drsch[chn].trigger_cell) % 1024];
 	   dt = t1 - t2;
@@ -274,10 +274,10 @@ void decode(const char *filename) {
 	     data[b].time[chn][i] += dt;
 	 }
 	 
-	 // fill root tree
-	 rec->Fill();
-	 
       } //end loop on boards
+      // fill root tree
+      rec->Fill();
+      
    }// end loop on events
    
    // print number of events
