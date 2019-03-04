@@ -205,7 +205,7 @@ public:
    std::map<unsigned short, WDAQBoardEvent *> fBoard;
    
    void AddPacket(WDAQPacketData* pkt);
-   bool IsComplete();
+   int IsComplete();
    
    //constructor
    WDAQEvent(WDAQPacketData* pkt);
@@ -269,6 +269,7 @@ class WDAQEventBuilder : public DAQThread{
    unsigned long fBuildedEvent;
    unsigned long fDroppedEvent;
    unsigned long fOldEvent;
+   int           fNWDB;
 
    void Begin();
 
@@ -277,10 +278,11 @@ class WDAQEventBuilder : public DAQThread{
    void End();
 
    public:
-   WDAQEventBuilder(DAQBuffer<WDAQPacketData> *source, DAQBuffer<WDAQEvent> *destination){
+   WDAQEventBuilder(DAQBuffer<WDAQPacketData> *source, DAQBuffer<WDAQEvent> *destination, int nWDB){
       fSource = source;
       fDestination = destination;
-
+      fNWDB = nWDB;
+      
       fBuildedEvent = 0;
       fDroppedEvent = 0;
       fOldEvent = 0;

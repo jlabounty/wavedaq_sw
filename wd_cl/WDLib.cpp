@@ -360,7 +360,7 @@ void WDSystem::SpawnDAQ(){
    //spawn threads
    fCollectorThread = new WDAQPacketCollector(fPacketBuffer);
    fCollectorThread->Start();
-   fBuilderThread = new WDAQEventBuilder(fPacketBuffer, fEventBuffer);
+   fBuilderThread = new WDAQEventBuilder(fPacketBuffer, fEventBuffer, nWDBs);
    fBuilderThread->Start();
    fWorkerThread = new WDAQWorker(fEventBuffer, fCalibratedBuffer);
    for(auto &c : fCrate){

@@ -319,14 +319,19 @@ void WDAQEvent::AddPacket(WDAQPacketData* pkt){
 }
 
 //check event complete
-bool WDAQEvent::IsComplete(){
+int WDAQEvent::IsComplete(){
    bool ret = true;
+   int nboards = 0;
 
    for(auto e :fBoard){
      //check only if end of event received
      ret &= e.second->IsComplete();
+     nboards++;
    }
-   return ret;
+   if(ret)
+     return nboards;
+   else
+     return 0;
 }
 
 
@@ -621,7 +626,7 @@ void WDAQEventBuilder::Loop(){
       delete ptr;
 
       //check if event complete
-      if(evt_ptr->IsComplete()){
+      if(evt_ptr->IsComplete() == fNWDB){
 	//event complete
 	fBuildedEvent++;
 	
