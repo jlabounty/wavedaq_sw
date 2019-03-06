@@ -336,7 +336,7 @@ class WDWDB : public WDBoard, public WDB{
             arraySize = -1;
          }
          if(arraySize == 1){
-	   if(gain[0] != 0.5 || gain[0] != 1 || gain[0] != 2.5 || gain[0] != 5 || gain[0] != 10 || gain[0] != 25 || gain[0] != 50 || gain[0] != 100)
+	   if(gain[0] != 0.5 && gain[0] != 1 && gain[0] != 2.5 && gain[0] != 5 && gain[0] != 10 && gain[0] != 25 && gain[0] != 50 && gain[0] != 100)
 	     std::cout<<" ERROR invalid gain value, won't be applied! Valid gains are 0.5, 1, 2.5, 5, 10 25, 50, 100"<<std::endl;
 	     else
             SetFeGain(-1, gain[0]);
@@ -355,7 +355,6 @@ class WDWDB : public WDBoard, public WDB{
          //PZC
          const int* pzc;
          try{
-            //pzc = PropertyToArray<int>(GetProperty("FrontendPzc")); 
             pzc = GetProperty("FrontendPzc").GetIntVector(&arraySize);
          } catch (const std::runtime_error& ex){
             arraySize = -1;
@@ -363,16 +362,21 @@ class WDWDB : public WDBoard, public WDB{
          if(arraySize == 1){
 	   if (pzc[0] > 0) {
 	     SetFePzc(-1, 1);
-	     SetDacPzcLevelN(pzc[0]-1); // 1...7 -> 0...6
+	     if(pzc[0] <1 || pzc[0] >6) std::cout<<" ERROR first PZC value must be between 1 and 7 included, the value won't be written"<<std::endl;
+	     else   SetDacPzcLevelN(pzc[0]-1);
 	   } else {
 	     SetFePzc(-1, 0);
 	     SetDacPzcLevelN(0);
 	   }
          } else if(arraySize == 17){
-	   SetDacPzcLevelN(pzc[0]-1);
 	   for(unsigned long i=1; i<17; i++){
-	     SetFePzc(pzc[i], i);
+	     if(pzc[i])
+	       SetFePzc(i-1, 1);
+	     else
+	       SetFePzc(i-1, 0);
 	   }
+	   if(pzc[0] <1 || pzc[0] >6) std::cout<<" ERROR first PZC value must be between 1 and 7 included, the value won't be written"<<std::endl;
+	   else   SetDacPzcLevelN(pzc[0]-1);
 	 }
 	 else if(arraySize != -1) {
 	   std::cout<<"Please provide 1 or 17 channel PZC values  "<<std::endl;
