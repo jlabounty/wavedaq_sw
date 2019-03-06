@@ -336,9 +336,17 @@ class WDWDB : public WDBoard, public WDB{
             arraySize = -1;
          }
          if(arraySize == 1){
+	   if(gain[0] != 0.5 || gain[0] != 1 || gain[0] != 2.5 || gain[0] != 5 || gain[0] != 10 || gain[0] != 25 || gain[0] != 50 || gain[0] != 100)
+	     std::cout<<" ERROR invalid gain value, won't be applied! Valid gains are 0.5, 1, 2.5, 5, 10 25, 50, 100"<<std::endl;
+	     else
             SetFeGain(-1, gain[0]);
          } else if(arraySize == 16){
-            for(int i=0; i<16; i++) SetFeGain(i, gain[i]);
+	   for(int i=0; i<16; i++) { 
+	     if(gain[i] != 0.5 || gain[i] != 1 || gain[i] != 2.5 || gain[i] != 5 || gain[i] != 10 || gain[i] != 25 || gain[i] != 50 || gain[i] != 100)
+	       std::cout<<" ERROR invalid gain value, gain["<<i"<<] won't be applied! Valid gains are 0.5, 1, 2.5, 5, 10 25, 50, 100"<<std::endl;
+	     else
+	       SetFeGain(i, gain[i]);
+	   }// end for
          }
          else if(arraySize != -1)
 	   std::cout<<"Please provide 1 or 16 channel Frontend Gain values  "<<std::endl;
@@ -653,13 +661,18 @@ class WDWDB : public WDBoard, public WDB{
          } catch (const std::runtime_error& ex){
             arraySize = -1;
          }
-         if(arraySize == 16){
+         if(arraySize == 1){
+            for(int i=0; i<16; i++) {
+               SetHVTarget(i, cha_hv[0]);
+            }
+         }
+         else if(arraySize == 16){
             for(int i=0; i<16; i++) {
                SetHVTarget(i, cha_hv[i]);
             }
          }
          else if(arraySize != -1)
-            std::cout<<"Please provide 16 channel HV values  "<<std::endl;
+            std::cout<<"Please provide 1 or 16 channel HV values  "<<std::endl;
 
 
          //Load Calibration file
