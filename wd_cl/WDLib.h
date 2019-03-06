@@ -361,21 +361,25 @@ class WDWDB : public WDBoard, public WDB{
             arraySize = -1;
          }
          if(arraySize == 1){
-            if (pzc[0] > 0) {
-               SetFePzc(-1, 1);
-               SetDacPzcLevelN(pzc[0]-1); // 1...7 -> 0...6
-            } else {
-               SetFePzc(-1, 0);
-               SetDacPzcLevelN(0);
-            }
-         } else if(arraySize > 0 && ((arraySize - 1) < 16)){
-            SetDacPzcLevelN(pzc[0]-1);
-               for(int i=0; i<16; i++)
-                  SetFePzc(i, 0);
-               for(unsigned long i=0; i<arraySize; i++){
-                   SetFePzc(pzc[i+1], 1);
-               }
-         }
+	   if (pzc[0] > 0) {
+	     SetFePzc(-1, 1);
+	     SetDacPzcLevelN(pzc[0]-1); // 1...7 -> 0...6
+	   } else {
+	     SetFePzc(-1, 0);
+	     SetDacPzcLevelN(0);
+	   }
+         } else if(arraySize == 17){
+	   SetDacPzcLevelN(pzc[0]-1);
+	   for(unsigned long i=1; i<17; i++){
+	     SetFePzc(pzc[i], i);
+	   }
+	 }
+	 else if(arraySize != -1) {
+	   std::cout<<"Please provide 1 or 17 channel PZC values  "<<std::endl;
+	   std::cout<<"If 1 value is given then all the inputs have the same PZC levels  "<<std::endl;
+	   std::cout<<"If 17 then the first value is the level and the other 16 are the individual on/off flags  "<<std::endl;
+      }
+
 
          //trigger discriminator level
          const float* trigger_level;
