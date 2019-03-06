@@ -343,7 +343,7 @@ class WDWDB : public WDBoard, public WDB{
          } else if(arraySize == 16){
 	   for(int i=0; i<16; i++) { 
 	     if(gain[i] != 0.5 || gain[i] != 1 || gain[i] != 2.5 || gain[i] != 5 || gain[i] != 10 || gain[i] != 25 || gain[i] != 50 || gain[i] != 100)
-	       std::cout<<" ERROR invalid gain value, gain["<<i"<<] won't be applied! Valid gains are 0.5, 1, 2.5, 5, 10 25, 50, 100"<<std::endl;
+	       std::cout<<" ERROR invalid gain value, gain["<<i<<"] won't be applied! Valid gains are 0.5, 1, 2.5, 5, 10 25, 50, 100"<<std::endl;
 	     else
 	       SetFeGain(i, gain[i]);
 	   }// end for
