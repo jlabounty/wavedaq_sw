@@ -266,7 +266,7 @@ void decode(const char *filename) {
 	 }// end for channels
 	 
 	 // align cell #0 of all channels
-	 t1 = data[b].time[16][(1024-drsch[16].trigger_cell) % 1024];
+	 t1 = data[0].time[16][(1024-drsch[16].trigger_cell) % 1024];
 	 for (chn=1 ; chn<18 ; chn++) {
 	   t2 = data[b].time[chn][(1024-drsch[chn].trigger_cell) % 1024];
 	   dt = t1 - t2;
