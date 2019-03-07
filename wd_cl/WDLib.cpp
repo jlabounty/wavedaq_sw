@@ -416,7 +416,7 @@ void WDSystem::SpawnDAQ(){
       WDBoard *trboard = GetTriggerBoard();
       tcbboard = dynamic_cast <WDTCB*> (trboard);
       if(tcbboard != nullptr) readEnable = tcbboard->GetProperty("ReadEnable").GetStringValue();
-   } catch(const std::out_of_range &e){
+   } catch (const std::runtime_error& ex){
       readEnable = "false";
    }
 
