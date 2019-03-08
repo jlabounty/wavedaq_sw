@@ -305,6 +305,7 @@ class WDWDB : public WDBoard, public WDB{
       }
 
       void Configure(){
+         //printf("configuring board %s\n", GetBoardName().c_str());
          //stop
          SetDaqSingle(false);
          SetDaqNormal(false);
@@ -312,6 +313,7 @@ class WDWDB : public WDBoard, public WDB{
          SetSendBlocked(true);
          long arraySize = 0;
 
+         //printf("configuring IPD...\n");
          //interpacket delay
          unsigned int interpacket_delay;
          try{
@@ -324,6 +326,7 @@ class WDWDB : public WDBoard, public WDB{
             SetInterPkgDelay(interpacket_delay);
          }
 
+         //printf("configuring FE...\n");
          //input
          SetFeMux(-1, WDB::cFeMuxInput);
          //gain
@@ -385,6 +388,7 @@ class WDWDB : public WDBoard, public WDB{
       }
 
 
+         //printf("configuring Trigger Level...\n");
          //trigger discriminator level
          const float* trigger_level;
          try{
@@ -402,6 +406,7 @@ class WDWDB : public WDBoard, public WDB{
             std::cout<<"Please provide 1 or 16 trigger level values  "<<std::endl;
 
 
+         //printf("configuring Polarity...\n");
          //channel trigger polarity
          unsigned int channel_polarity;
          try{
@@ -414,6 +419,7 @@ class WDWDB : public WDBoard, public WDB{
             SetTrgSrcPolarity(channel_polarity);
          }
 
+         //printf("configuring Baseline...\n");
          //Baseline Shift
          float baseline;
          try{
@@ -424,6 +430,7 @@ class WDWDB : public WDBoard, public WDB{
          }
          if(abs(baseline)<1) SetDacCalDcV(baseline); 
 
+         //printf("configuring TX Enable...\n");
          //DRS channel transmit
          unsigned int drstx_ena;
          try{
@@ -478,6 +485,7 @@ class WDWDB : public WDBoard, public WDB{
 	 else
 	   SetZeroSuprEn(0);
 
+         //printf("configuring Timing Reference...\n");
          //timing reference
          std::string timingreference;
          try{
@@ -493,6 +501,7 @@ class WDWDB : public WDBoard, public WDB{
             SetTimingReferenceSignal(WDB::cTimingReferenceSquare);
          }
 
+         //printf("configuring ALGSEL...\n");
          //trigger algorithm
          unsigned char algorithm;
          try{
@@ -503,6 +512,7 @@ class WDWDB : public WDBoard, public WDB{
          }
          SetAdvTrgCtrl(0x00000203 | ((algorithm & 0xF) << 4) );//TDCPolarity, FADCMODE, RUNMODE
 
+         //printf("configuring Trigger Gain...\n");
          //trigger gain
          SetAdvTrgPedCfg(0x013E000A);
          //std::vector<unsigned short> trigger_gain;
@@ -545,6 +555,7 @@ class WDWDB : public WDBoard, public WDB{
             }
          }
 
+         //printf("configuring TDC Channel Mask...\n");
          //TDC Mask ch
          unsigned int tdcmask;
          try{
@@ -557,16 +568,7 @@ class WDWDB : public WDBoard, public WDB{
             SetAdvTrgTdcChMask(tdcmask);
          }
 
-         //sampling frequency
-         unsigned int freq;
-         try{
-            //freq = std::stoi(GetProperty("SamplingFrequency"));
-            freq = GetProperty("SamplingFrequency").GetUInt();
-         } catch (const std::runtime_error& ex){
-            freq = GetDrsSampleFreqMhz();
-         }
-         SetDrsSampleFreq(freq);
-
+         //printf("configuring Debug...\n");
          //set debug outputs
          std::string s_tx;
          std::string s_rx;
@@ -577,6 +579,8 @@ class WDWDB : public WDBoard, public WDB{
             s_rx = GetProperty("RxDebugSignal").GetStringValue();
          } catch (const std::runtime_error& ex){
             //not defined
+            s_tx="";
+            s_rx="";
          }
          //decode according to missing Sync Local signal
          int tx, rx;
@@ -645,22 +649,8 @@ class WDWDB : public WDBoard, public WDB{
          SetMcxTxSigSel(tx);
          SetMcxRxSigSel(rx);
 
-         SetSendBlocked(false);
-         SendControlRegisters();
 
-         //LMK and PLL configuration to be in crate
-         SetInCrate();
-
-         //set destination port
-         SetDestinationPort(GetCrate()->GetSystem()->GetDAQServerPort());
-
-         //start
-         SetDaqSingle(false);
-         SetDaqNormal(true);
-
-         //Read Status
-         ReceiveStatusRegisters();
-
+         //printf("configuring HV...\n");
          // Set HV if required
          // as a default it is not touched
          const float *cha_hv;
@@ -681,6 +671,37 @@ class WDWDB : public WDBoard, public WDB{
          }
          else if(arraySize != -1)
             std::cout<<"Please provide 1 or 16 channel HV values  "<<std::endl;
+
+
+
+         SetSendBlocked(false);
+         SendControlRegisters();
+
+         //printf("resetting PLLs...\n");
+         //LMK and PLL configuration to be in crate
+         SetInCrate();
+
+         //printf("configuring Destination Port...\n");
+         //set destination port
+         SetDestinationPort(GetCrate()->GetSystem()->GetDAQServerPort());
+
+         //start
+         SetDaqSingle(false);
+         SetDaqNormal(true);
+
+         //Read Status
+         ReceiveStatusRegisters();
+
+         //printf("configuring Sampling Frequency...\n");
+         //sampling frequency
+         unsigned int freq;
+         try{
+            //freq = std::stoi(GetProperty("SamplingFrequency"));
+            freq = GetProperty("SamplingFrequency").GetUInt();
+         } catch (const std::runtime_error& ex){
+            freq = GetDrsSampleFreqMhz();
+         }
+         SetDrsSampleFreq(freq);
 
 
          //Load Calibration file
@@ -755,6 +776,7 @@ class WDTCB : public WDBoard, public TCB{
       }
 
       void Configure(){
+         //printf("configuring board %s\n", GetBoardName().c_str());
          long arraySize = 0;
          //basic RRun
          u_int32_t rrun_config = 0x0000E014;  //masktrg, masksync, maskbusy, fadcmode, enable trg_bus
@@ -770,48 +792,52 @@ class WDTCB : public WDBoard, public TCB{
          sprdly=0x10;
          SetTRGBusODLY(&syncdly, &trgdly, &sprdly);
 
-         //trigger enable
-         const unsigned int* trigger_enable;
-         bool trg_ena[64];
-         try{
-            //trigger_enable = PropertyToArray<int>(GetProperty("TriggerEnable")); 
-            trigger_enable = GetProperty("TriggerEnable").GetUIntVector(&arraySize);
-         } catch (const std::runtime_error& ex){
-            arraySize = -1;
-	    printf("cannot read enable\n");
-         }
-         for(int i=0; i<64; i++) trg_ena[i] = false;
-         for(unsigned long i=0; i<arraySize; i++) if(trigger_enable[i] < 64) trg_ena[trigger_enable[i]] = true;
-         long triggerEnableSize = arraySize;
-         SetTriggerEnable(trg_ena);
+         //configure trigger enable and prescaling only on TCB_3
+         if(( GetIDCode()>>12)==3){
+            //trigger enable
+            const unsigned int* trigger_enable;
+            bool trg_ena[64];
+            try{
+               //trigger_enable = PropertyToArray<int>(GetProperty("TriggerEnable")); 
+               trigger_enable = GetProperty("TriggerEnable").GetUIntVector(&arraySize);
+            } catch (const std::runtime_error& ex){
+               arraySize = -1;
+               printf("cannot read enable\n");
+            }
+            for(int i=0; i<64; i++) trg_ena[i] = false;
+            for(unsigned long i=0; i<arraySize; i++) if(trigger_enable[i] < 64) trg_ena[trigger_enable[i]] = true;
+            long triggerEnableSize = arraySize;
+            SetTriggerEnable(trg_ena);
 
-         //trigger prescaling
-         const unsigned int* trigger_prescaling;
-         unsigned int trg_presca[64];
-         try{
-            //trigger_prescaling = PropertyToArray<unsigned int>(GetProperty("TriggerPrescaling")); 
-	   trigger_prescaling = GetProperty("TriggerPrescaling").GetUIntVector(&arraySize);
-         } catch (const std::runtime_error& ex){
-            arraySize = -1;
-	    printf("cannot read prescaling\n");
-         }
-         for(int i=0; i<64; i++) trg_presca[i] = 0;
-         if(triggerEnableSize == arraySize){
-            for(unsigned long i=0; i<arraySize; i++) if(trigger_enable[i] < 64) trg_presca[trigger_enable[i]] = trigger_prescaling[i];
-            SetPrescaling(trg_presca);
-         }
-         else printf("TriggerPrescaling field (%ld) should be same size of TriggerEnable (%ld)\n",triggerEnableSize,arraySize);
+            //trigger prescaling
+            const unsigned int* trigger_prescaling;
+            unsigned int trg_presca[64];
+            try{
+               //trigger_prescaling = PropertyToArray<unsigned int>(GetProperty("TriggerPrescaling")); 
+               trigger_prescaling = GetProperty("TriggerPrescaling").GetUIntVector(&arraySize);
+            } catch (const std::runtime_error& ex){
+               arraySize = -1;
+               printf("cannot read prescaling\n");
+            }
+            for(int i=0; i<64; i++) trg_presca[i] = 0;
+            if(triggerEnableSize == arraySize){
+               for(unsigned long i=0; i<arraySize; i++) if(trigger_enable[i] < 64) trg_presca[trigger_enable[i]] = trigger_prescaling[i];
+               SetPrescaling(trg_presca);
+            }
+            else printf("TriggerPrescaling field (%ld) should be same size of TriggerEnable (%ld)\n",triggerEnableSize,arraySize);
 
-         //trigger algorithm
-         //unsigned int algorithm;
-         unsigned int algorithm;
-         try{
-            //algorithm = std::stoi(GetProperty("TriggerAlgorithm"));
-            algorithm = GetProperty("TriggerAlgorithm").GetUInt();
-         } catch (const std::runtime_error& ex){
-            algorithm = 0;
+         } else {
+            //trigger algorithm on other TCB_X
+            //unsigned int algorithm;
+            unsigned int algorithm;
+            try{
+               //algorithm = std::stoi(GetProperty("TriggerAlgorithm"));
+               algorithm = GetProperty("TriggerAlgorithm").GetUInt();
+            } catch (const std::runtime_error& ex){
+               algorithm = 0;
+            }
+            SetRALGSEL((unsigned int *)&algorithm);
          }
-         SetRALGSEL((unsigned int *)&algorithm);
 
          //Experiment-oriented parameters
          //std::vector<unsigned int> parameters;
