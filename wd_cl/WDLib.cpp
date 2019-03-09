@@ -13,9 +13,12 @@ Property& WDBoard::GetProperty(std::string name){
       //no value in local property list
       //try group one
 
-     PropertyGroup  group = fCrate->GetSystem()->GetGroupProperties(fGroupName);
       try{
-         return group.at(name);
+         WDSystem* sysptr = fCrate->GetSystem();
+         if(sysptr!= nullptr){
+            return sysptr->GetGroupProperties(fGroupName).at(name);
+         } else
+            throw  std::out_of_range("");
       } catch (const std::out_of_range& ex){
          //no property with given name
 

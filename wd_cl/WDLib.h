@@ -198,7 +198,7 @@ class WDSystem {
       WDBoard *GetBoardAt(WDPosition &p) {return fCrate[p.fCrate]->GetBoardAt(p.fSlot);}
       int GetTriggerCrateId(){ return fTrgCrateId; }
       unsigned long GetCrateSize() { return fCrate.size(); }
-      PropertyGroup &GetGroupProperties(std::string groupname){ return fGroupProperties[groupname]; }
+      PropertyGroup &GetGroupProperties(std::string groupname){ return fGroupProperties.at(groupname); }
       int GetDAQServerPort(){ return fDAQServerPort; }
 
       //Setters
