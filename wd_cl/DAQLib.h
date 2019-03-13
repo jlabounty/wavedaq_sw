@@ -205,6 +205,18 @@ class DAQServerThread : public DAQThread{
          if(fDataSocket == 0){
             throw std::runtime_error(std::string("Cannot create socket"));
          }
+      
+	 // increase receive buffer size
+	 int rcvBufferSizeSet = 4*1024*1024; // 4 MB
+	 int rcvBufferSizeGet;
+	 socklen_t sockOptSize = sizeof(rcvBufferSizeGet);
+      
+	 getsockopt(fDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeGet, &sockOptSize);
+	 if (rcvBufferSizeGet < 2*rcvBufferSizeSet) {
+	   setsockopt(fDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeSet, sizeof(rcvBufferSizeSet));
+	   getsockopt(fDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeGet, &sockOptSize);
+	 }
+  
 
          int flags = fcntl(fDataSocket, F_GETFL, 0);
          fcntl(fDataSocket, F_SETFL, flags | O_NONBLOCK);
