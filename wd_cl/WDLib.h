@@ -428,7 +428,9 @@ class WDWDB : public WDBoard, public WDB{
          } catch (const std::runtime_error& ex){
             baseline = 1;
          }
-         if(abs(baseline)<1) SetDacCalDcV(baseline); 
+         if(abs(baseline)<1) {
+	   SetRange(baseline);
+	 }
 
          //printf("configuring TX Enable...\n");
          //DRS channel transmit
