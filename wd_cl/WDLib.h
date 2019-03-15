@@ -471,7 +471,7 @@ class WDWDB : public WDBoard, public WDB{
          try{
             scaler_ena = GetProperty("ScalerChannelTxEnable").GetUHex();
          } catch (const std::runtime_error& ex){
-            scaler_ena = 1;
+            scaler_ena = 0;
          }
          SetSclTxEn(scaler_ena);
 
