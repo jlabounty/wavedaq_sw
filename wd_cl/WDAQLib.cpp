@@ -281,6 +281,10 @@ bool WDAQBoardEvent::IsComplete(){
     
     if(mLastPacket-mFirstPacket+1 == mPacketsReceived)
       ret = true;
+
+    // CLK channels masked with the presence of at least one associated channels in the event
+    mDrsHasData[16] &= mDrsHasData[0]&mDrsHasData[1]&mDrsHasData[2]&mDrsHasData[3]&mDrsHasData[4]&mDrsHasData[5]&mDrsHasData[6]&mDrsHasData[7];
+    mDrsHasData[17] &= mDrsHasData[8]&mDrsHasData[9]&mDrsHasData[10]&mDrsHasData[11]&mDrsHasData[12]&mDrsHasData[13]&mDrsHasData[14]&mDrsHasData[15];
     
   }
   return ret;
