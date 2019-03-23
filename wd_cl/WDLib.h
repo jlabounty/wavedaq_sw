@@ -877,6 +877,16 @@ class WDTCB : public WDBoard, public TCB{
 	    SetPacketizerCommandAt(0, STOP, 0, 0);
          }
 
+	 //BUSY mask from external DAQ
+	 unsigned int extdaqbmask;
+	 try{
+	   extdaqbmask = GetProperty("ExtDAQBusyMask").GetUInt();
+	 } catch (const std::runtime_error& ex){
+	   extdaqbmask = 0;
+	 }
+	 // set the mask
+	 SetFMask(false, extdaqbmask==1);
+      
 	 SetPacketizerAutostart(true);
 	 SetPacketizerEnable(true);
 

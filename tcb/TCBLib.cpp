@@ -483,10 +483,12 @@ void TCB::GetRRUN(u_int32_t *data)
          printf(" DBGSERDES status %x \n",(*data&0x100)>>8);
       printf(" INBUSY status %x \n",(*data&0x2)>>1);
       printf(" EXBUSY status %x \n",(*data&0x8)>>3);
+      printf(" FBUSY status %x \n",(*data&0x400)>>10);
       printf(" ENABLE TRGBUS status %x \n",(*data&0x10)>>4);
       printf(" MASKBUSY status %x \n",(*data&0x2000)>>13);
       printf(" MASKSYNC status %x \n",(*data&0x4000)>>14);
       printf(" MASKTRG status %x \n",(*data&0x8000)>>15);
+      printf(" MASKFBUSY status %x \n",(*data&0x80)>>7);
       printf(" IDCODE status %x \n",(*data&0xffff0000)>>16);
    }
 }
@@ -1492,7 +1494,7 @@ void TCB::SetFMask(bool trgmask, bool busymask){
    if(trgmask)
      data |= 1<<6;
    // set busy mask if required
-   if(trgmask)
+   if(busymask)
      data |= 1<<7;
    // write the reg
    WriteReg(RRUN, &data);
