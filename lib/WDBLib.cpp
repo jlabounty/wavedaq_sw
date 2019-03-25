@@ -3247,7 +3247,7 @@ void WP::DoVoltageCalibrationStep()
       b->SetTrgPtrnEn(0);
 
       // select internal clock
-      b->SetDaqClkSrcSel(1);
+  //    b->SetDaqClkSrcSel(1);
 
       // set inter-packet delay to default value
       b->SetInterPkgDelay(1875);
@@ -3889,7 +3889,7 @@ void WP::DoTimeCalibrationStep()
       b->SetTrgPtrnEn(0);
 
       // select internal clock
-      b->SetDaqClkSrcSel(1);
+   //   b->SetDaqClkSrcSel(1);
 
       // set inter-packet delay to default value
       b->SetInterPkgDelay(1875);
