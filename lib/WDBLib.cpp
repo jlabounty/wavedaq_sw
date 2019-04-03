@@ -1734,7 +1734,7 @@ void WDEvent::SetWDEventHeaderInfo(WDAQ_FRAME_HEADER *pdaqh, WD_FRAME_HEADER *ph
 
    mEventNumber = ph->event_number;
    mTriggerNumber = ph->trigger_information[5] | (ph->trigger_information[4] << 8);
-   mTriggerType = ph->trigger_information[1] | (ph->trigger_information[0] << 8)&0x3F;   
+   mTriggerType = ph->trigger_information[1] | (ph->trigger_information[0] << 8)&0x3F;
    mTemperature = std::round(ph->temperature*0.0625 * 10 + 0.5) / 10.0f;
 }
 
@@ -3243,8 +3243,8 @@ void WP::DoVoltageCalibrationStep()
       b->SetTriggerHoldoff(30);
 
       // disable external trigger
-      b->SetTriggerTypeSel(0);
-      b->SetTrgPtrnEn(0);
+      b->SetExtAsyncTriggerEn(0);
+      b->SetPatternTriggerEn(0);
 
       // select internal clock
   //    b->SetDaqClkSrcSel(1);
@@ -3885,8 +3885,8 @@ void WP::DoTimeCalibrationStep()
       b->SetTriggerHoldoff(0);
 
       // disable external trigger
-      b->SetTriggerTypeSel(0);
-      b->SetTrgPtrnEn(0);
+      b->SetExtAsyncTriggerEn(0);
+      b->SetPatternTriggerEn(0);
 
       // select internal clock
    //   b->SetDaqClkSrcSel(1);

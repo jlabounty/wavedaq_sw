@@ -60,7 +60,7 @@ unsigned int demoDrsSampleFreq = 5016;
 std::vector<std::string> split(const std::string&input , char separator)
 {
    std::vector<std::string> output;
-   
+
    std::istringstream stream(input);
    std::string s;
    while (getline(stream, s, separator)) {
@@ -74,7 +74,7 @@ std::vector<std::string> split(const std::string&input , char separator)
          s = s.substr(0, endpos+1);
       output.push_back(s);
    }
-   
+
    return output;
 }
 
@@ -88,14 +88,14 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
    struct http_message *hm = (struct http_message *)p;
    char str[256];
    static std::default_random_engine randomGenerator;
-   
+
    GLOBALS *gl = (GLOBALS *)nc->mgr->user_data;
 
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->method, "PUT") == 0) {
       std::string uri, value, item;
       std::vector<std::string> args;
       int iBoard = -1, iChannel = -1;
-      
+
       // get parameters from URI in the format /<item>/<board>/<channel>
       if (hm->uri.p) {
          uri = split(std::string(hm->uri.p), ' ')[0];
@@ -113,7 +113,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       }
       if (hm->body.p)
          value = std::string(hm->body.p, hm->body.len);
-      
+
       if (gl->verbose)
          std::cout << "Received item " << item
          << ", value " << value
@@ -121,7 +121,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          << ", channel " << iChannel
          << " from browser"
          << std::endl;
-      
+
       if (item == "enableChannel") {
          // bits0-15 normal DRS channels bit16: clock0, bit17: clock1
          auto mask = std::stoi(value);
@@ -207,15 +207,17 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             if (iChannel == -1 || i == iChannel) {
                if (value == "0") {
                   // internal trigger
-                  gl->wdb[i]->SetTriggerTypeSel(0);
+                  gl->wdb[i]->SetExtAsyncTriggerEn(0);
+                  gl->wdb[i]->SetPatternTriggerEn(1);
                } else {
                   // external trigger
-                  gl->wdb[i]->SetTriggerTypeSel(1);
+                  gl->wdb[i]->SetExtAsyncTriggerEn(1);
+                  gl->wdb[i]->SetPatternTriggerEn(0);
                }
             }
          }
       }
-      
+
       else if (item == "triggerDelay") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
@@ -414,17 +416,17 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          std::cout << "Invalid command \"" << item << "\" received. Aborting." << std::endl;
          assert(0);
       }
-      
+
       mg_printf(nc, "HTTP/1.1 204 No Content\r\n");
    }
-   
+
    // gloabls
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/gl") == 0) {
       if (gl->verbose)
          std::cout<< "Sending /gl to browser" << std::endl;
-      
+
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
-      
+
       mg_printf_http_chunk(nc, "{\n");
       mg_printf_http_chunk(nc, "   \"gl\": {\n");
       mg_printf_http_chunk(nc, "      \"demoMode\": %s,\n",                      gl->demoMode ? "true" : "false");
@@ -445,7 +447,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_send_http_chunk(nc, "", 0); // end of response
       return;
    }
-   
+
    // boards
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/wdb") == 0) {
       if (gl->verbose)
@@ -465,11 +467,11 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          b1 = 0;
          b2 = 1;
       }
-      
+
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
       mg_printf_http_chunk(nc, "{\n");
       mg_printf_http_chunk(nc, "  \"wdb\": [\n");
-      
+
       for (int b = b1 ; b<b2 ; b++) {
          auto w = gl->wdb[b];
 
@@ -477,12 +479,12 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          std::vector<unsigned long> scaler;
          if (gl->demoMode) {
             std::poisson_distribution<int> dist(1000);
-            
+
             for (auto i=0 ; i<34 ; i++)
                scaler.push_back(dist(randomGenerator));
          } else
             w->GetScalers(scaler, false);
-         
+
          // obtain HVs
          std::vector<float> hv_target;
          std::vector<float> hv_current;
@@ -503,7 +505,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             w->Get1wireTemperatures(hv_temp);
             w->GetHVBaseVoltage(hv_base);
          }
-         
+
          mg_printf_http_chunk(nc, "    {\n");
          mg_printf_http_chunk(nc, "      \"name\": \"%s\",\n",                   w->GetName().c_str());
          mg_printf_http_chunk(nc, "      \"temperature\": %1.1lf,\n",            w->GetTemperatureDegree(false));
@@ -536,7 +538,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"extClkFreq\": %d,\n",                 w->GetExtClkFreq());
          mg_printf_http_chunk(nc, "      \"localClkFreq\": %d,\n",               w->GetLocalClkFreq());
          mg_printf_http_chunk(nc, "      \"chnTxEn\": %d,\n",                    w->GetChnTxEn());
-         
+
          mg_printf_http_chunk(nc, "      \"dacOfs\": %1.3f,\n",                  w->GetDacOfsV());
          mg_printf_http_chunk(nc, "      \"dacCalDc\": %1.3f,\n",                w->GetDacCalDcV());
          mg_printf_http_chunk(nc, "      \"dacPzcLevel\": %d,\n",                w->GetDacPzcLevelN());
@@ -565,7 +567,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"triggerHoldoff\": %d,\n",             w->GetTriggerHoldoff());
          mg_printf_http_chunk(nc, "      \"triggerLeadTrailEdgeSel\": %d,\n",    w->GetLeadTrailEdgeSel());
          mg_printf_http_chunk(nc, "      \"triggerExtTriggerOutEnable\": %s,\n", w->GetExtTriggerOutEnable() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"triggerSource\": %d,\n",              w->GetTriggerTypeSel());
+         mg_printf_http_chunk(nc, "      \"triggerSource\": %d,\n",              w->GetExtAsyncTriggerEn());
          mg_printf_http_chunk(nc, "      \"triggerOutPulseLength\": %d,\n",      w->GetTriggerOutPulseLength());
          mg_printf_http_chunk(nc, "      \"triggerDelay\": %d,\n",               w->GetTriggerDelayNs());
          mg_printf_http_chunk(nc, "      \"triggerSrcPolarity\": %d,\n",         w->GetTrgSrcPolarity());
@@ -589,7 +591,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             else
                mg_printf_http_chunk(nc, "        %d],\n", s);
          }
-         
+
          mg_printf_http_chunk(nc, "      \"hv\": {\n");
 
          mg_printf_http_chunk(nc, "        \"target\": [\n");
@@ -622,12 +624,12 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          else
             mg_printf_http_chunk(nc, "    },\n");
       }
-      
+
       mg_printf_http_chunk(nc, "  ]\n");
       mg_printf_http_chunk(nc, "}\n");
       mg_send_http_chunk(nc, "", 0);
    }
-   
+
    // software build
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/build") == 0) {
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
@@ -640,61 +642,61 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
    // binary encoded waveforms
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/wf") == 0) {
-      
+
       mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
       int b = atoi(str);
-      
+
       mg_get_http_var(&hm->query_string, "c", str, sizeof(str));
       int chn = atoi(str);
-      
+
       mg_send_response_line(nc, 200, "Content-Type: application/octet-stream\r\nTransfer-Encoding: chunked\r\n");
-      
+
       // return progress if in voltage calibration mode
       if (gl->wp->IsVcalibActive()) {
          int t = 10;    // array type
          mg_send_http_chunk(nc, (const char *)&t, 4);
-         
+
          int b = gl->wp->GetVcalibBoard();
          mg_send_http_chunk(nc, (const char *)&b, 4);
-         
+
          float f = gl->wp->GetVcalibProgress();
          mg_send_http_chunk(nc, (const char *)&f, 4);
-         
+
          mg_send_http_chunk(nc, "", 0);
          return;
       }
-      
+
       // return progress and period in time calibration mode
       if (gl->wp->IsTcalibActive()) {
          int t = 11;    // array type
          mg_send_http_chunk(nc, (const char *)&t, 4);
-         
+
          int b = gl->wp->GetTcalibBoard();
          mg_send_http_chunk(nc, (const char *)&b, 4);
-         
+
          float f = gl->wp->GetTcalibProgress();
          mg_send_http_chunk(nc, (const char *)&f, 4);
-         
+
          for (int c=0 ; c<WD_N_CHANNELS ; c++)
             if (chn & (1 << c)) {
                int n = 1024;
                mg_send_http_chunk(nc, (const char *)&c, 4);
                mg_send_http_chunk(nc, (const char *)&n, 4);
-               
+
                mg_send_http_chunk(nc, (const char *)gl->wdb[b]->mTCalib.mCalib.period[c], sizeof(float)*n);
             }
-         
+
          mg_send_http_chunk(nc, "", 0);
          return;
       }
-      
+
       // avoid invalid board index
       if (b < 0 || b >= gl->wdb.size())
          b = 0;
-      
+
       WDEvent event(gl->wdb[b]->GetSerialNumber());
       bool bNewEvent = false;
-      
+
       if (gl->demoMode) {
          bNewEvent = true;
          event.mVCalibrated = true;
@@ -722,7 +724,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             }
          }
       } else {
-         
+
          // request single event
          if (b == -1) {
             // all boards
@@ -745,14 +747,14 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                   gl->wdb[b]->SetDaqSingle(1);
             }
          }
-         
+
          // read waveforms
          bNewEvent = gl->wp->GetLastEvent(gl->wdb[b], 100, event);
       }
-      
+
       if (gl->demoMode)
          b = 0xFF; // signals demo data
-      
+
       if (bNewEvent) {
          if (event.mTypeValid[cDataTypeADC]) { //---- ADC waveforms
             int t = 1;                    // array type
@@ -772,7 +774,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                   mg_send_http_chunk(nc, (const char *)&event.mWfTADC[c][0], sizeof(float)*n);
                }
             }
-            
+
             for (int c=0 ; c<WD_N_CHANNELS ; c++) {
                if (chn & (1 << c)) {
                   t = 2; // voltage array
@@ -803,7 +805,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                   mg_send_http_chunk(nc, (const char *)event.mWfTDRS[c], sizeof(float)*n);
                }
             }
-            
+
             for (int c=0 ; c<WD_N_CHANNELS ; c++) {
                if (chn & (1 << c)) {
                   t = 2; // voltage array
@@ -817,16 +819,16 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                }
             }
          }
-         
+
       } else {
          // just return idle message
          int t = 0;
          mg_send_http_chunk(nc, (const char *)&t, 4);
          mg_send_http_chunk(nc, (const char *)&b, 4);
       }
-      
+
       mg_send_http_chunk(nc, "", 0);
-      
+
       return;
    }
 
@@ -843,7 +845,7 @@ void showUsage(std::string name)
 {
    if (name.find("/") != std::string::npos)
       name = name.substr(name.rfind("/")+1); // strip path
-      
+
    std::cerr << "usage: " << name << " [options] [-w <address> [-w <address> ...]]" << std::endl;
    std::cerr << "valid options:" << std::endl;
    std::cerr << "  -h              Show this help" << std::endl;
@@ -864,10 +866,10 @@ void showUsage(std::string name)
 void handler(int sig) {
    void *array[10];
    size_t size;
-   
+
    // get void*'s for all entries on the stack
    size = backtrace(array, 10);
-   
+
    // print out all the frames to stderr
    fprintf(stderr, "Error: signal %d:\n", sig);
    backtrace_symbols_fd(array, size, STDERR_FILENO);
@@ -877,10 +879,10 @@ void handler(int sig) {
 int main(int argc, const char * argv[])
 {
    GLOBALS gl = {};
-   
+
    // install handle to show stack trace on segment violation
    signal(SIGSEGV, handler);
-   
+
    // default values
    gl.serverPort = 8080;
    gl.verbose = 0;
@@ -892,13 +894,13 @@ int main(int argc, const char * argv[])
    gl.updatePeriodic = false;
    gl.dbgRx = gl.dbgTx = 0;
    gl.backplaneClk = false;
-   
+
    // parse command line parameters
    if (argc < 2) {
       showUsage(argv[0]);
       return 1;
    }
-   
+
    for (int i=1 ; i<argc ; i++) {
       std::string arg = argv[i];
       if (arg == "-h" || arg == "-help" || arg == "--help") {
@@ -906,7 +908,7 @@ int main(int argc, const char * argv[])
          return 0;
       } else if (arg == "-d")
          gl.demoMode = true;
-      
+
       else if (arg == "-p")
          gl.serverPort = std::stoi(argv[++i]);
 
@@ -929,7 +931,7 @@ int main(int argc, const char * argv[])
 
       else if (arg == "-u")
          gl.updatePeriodic = true;
-      
+
       else if (arg == "-v") {
          gl.verbose = 1;
          if (i < argc-1 && isdigit(argv[i+1][0]))
@@ -940,7 +942,7 @@ int main(int argc, const char * argv[])
          gl.specialTest = true;
 
       else if (arg == "-w") {
-         
+
          if (i+1 == argc) {
             showUsage(argv[0]);
             return 0;
@@ -979,7 +981,7 @@ int main(int argc, const char * argv[])
          return 1;
       }
    }
-   
+
    if (gl.demoMode) {
       gl.wdb.clear();
       gl.wdb.push_back(new WDB("demo"));
@@ -989,7 +991,7 @@ int main(int argc, const char * argv[])
       std::cerr << "You have to specify at least one WaveDREAM board via the \"-w\" option." << std::endl;
       return 1;
    }
-   
+
    // connect to all WDB and retrieve registers
    for (auto &b: gl.wdb) {
       std::cout << "Connect to " << b->GetName() << " ... " << std::flush;
@@ -1024,12 +1026,12 @@ int main(int argc, const char * argv[])
                b->ResetPackager();
                b->ReceiveStatusRegisters();
             }
-            
+
 
             // load calibration data for board
             b->LoadVoltageCalibration(b->GetDrsSampleFreqMhz());
             b->LoadTimeCalibration(b->GetDrsSampleFreqMhz());
-            
+
             // debug output
             if (gl.dbgRx > 0)
                b->SetMcxRxSigSel(gl.dbgRx);
@@ -1048,14 +1050,14 @@ int main(int argc, const char * argv[])
                sleep_ms(10);
                b->GetPllLock(true);
             }
-            
+
             // check PLL locked status
             if (!b->GetPllLock(false)) {
                std::ostringstream str;
                str << "PLL not locked on board " << b->GetName() << ". Mask = 0x" << std::hex << b->GetPllLock(false);
                throw std::runtime_error(str.str());
             }
-            
+
             if (b->GetDrsChTxEn() > 0) {
                gl.readoutMode = cReadoutModeDRS;
                b->SetChnTxEn(b->GetDrsChTxEn());
@@ -1091,7 +1093,7 @@ int main(int argc, const char * argv[])
       if (gl.verbose)
          std::cout << std::endl << std::endl;
    }
-   
+
    if (gl.reset) {
       std::cout << "All PLLs reset" << std::endl;
       return 0;
@@ -1113,7 +1115,7 @@ int main(int argc, const char * argv[])
    // set destination port after WP has been initialized
    for (auto &b: gl.wdb)
       b->SetDestinationPort(gl.wp->GetServerPort());
-   
+
    // switch boards to normal mode to send events
    if (gl.triggerSelfArm)
       gl.triggerMode = cTriggerModeNormal;
@@ -1125,11 +1127,11 @@ int main(int argc, const char * argv[])
 
    if (gl.specialTest) {
    }
-   
+
    // initialize web server
    struct mg_mgr mgr;
    struct mg_connection *con;
-   
+
    mg_mgr_init(&mgr, &gl);
    con = mg_bind(&mgr, std::to_string(gl.serverPort).c_str(), wds_handler);
    if (con == NULL) {
@@ -1140,34 +1142,34 @@ int main(int argc, const char * argv[])
    s_http_server_opts.document_root = ".";  // Serve current directory
    s_http_server_opts.dav_auth_file = "-";  // Allow access via WebDav
    s_http_server_opts.enable_directory_listing = "yes";
-   
+
    std::cout << "Starting HTTP server at port " << gl.serverPort << std::endl;
-   
+
    if (gl.demoMode)
       std::cout << "Starting in DEMO mode." << std::endl;
-   
+
    time_t last = 0, now;
-   
+
    try {
       while (true) {
-         
+
          // do calibration if asked for
          if (gl.wp->IsVcalibActive()) {
             gl.wp->DoVoltageCalibrationStep();
-            
+
             // Yield to server, no timeout
             mg_mgr_poll(&mgr, 0);
-         
+
          } else if (gl.wp->IsTcalibActive()) {
             gl.wp->DoTimeCalibrationStep();
-            
+
             // Yield to server, no timeout
             mg_mgr_poll(&mgr, 0);
-         
+
          } else
             // Yield to server, 10ms timeout
             mg_mgr_poll(&mgr, 10);
-         
+
          // read board temperatures and lock status periodically
          time(&now);
 
@@ -1187,9 +1189,9 @@ int main(int argc, const char * argv[])
       std::cout << std::endl;
       std::cout << e.what() << std::endl;
       std::cout << "Aborting." << std::endl;
-      
+
       return 1;
    }
-   
+
    return 0;
 }

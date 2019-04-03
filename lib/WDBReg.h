@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  29.11.2018 14:02:56
+// Created :  02.04.2019 11:08:58
 //
 
 
@@ -43,7 +43,7 @@ public:
 
 
 
-   ////// ------ Control Register 1 [0x1004]: CTRL - DAQ control register (Default: 0x19200780) ------ //////
+   ////// ------ Control Register 1 [0x1004]: CTRL - DAQ control register (Default: 0x14200780) ------ //////
 
    // 0x3F000000: VALID_DELAY_ADC - Delay of the data valid at the ISERDES of the ADCs (delay = value + 1)
    unsigned int GetValidDelayAdc() { return BitExtractControl(WD2_VALID_DELAY_ADC_REG, WD2_VALID_DELAY_ADC_MASK, WD2_VALID_DELAY_ADC_OFS); };
@@ -2021,13 +2021,17 @@ public:
    unsigned int GetLeadTrailEdgeSel() { return BitExtractControl(WD2_LEAD_TRAIL_EDGE_SEL_REG, WD2_LEAD_TRAIL_EDGE_SEL_MASK, WD2_LEAD_TRAIL_EDGE_SEL_OFS); };
    void         SetLeadTrailEdgeSel(unsigned int value) { SetRegMask(WD2_LEAD_TRAIL_EDGE_SEL_REG, WD2_LEAD_TRAIL_EDGE_SEL_MASK, WD2_LEAD_TRAIL_EDGE_SEL_OFS, value); };
 
-   // 0x00002000: EXT_TRIGGER_OUT_ENABLE - Enable output of trigger signal to MCX connector
+   // 0x00008000: EXT_TRIGGER_OUT_ENABLE - Enable output of trigger signal to MCX connector
    unsigned int GetExtTriggerOutEnable() { return BitExtractControl(WD2_EXT_TRIGGER_OUT_ENABLE_REG, WD2_EXT_TRIGGER_OUT_ENABLE_MASK, WD2_EXT_TRIGGER_OUT_ENABLE_OFS); };
    void         SetExtTriggerOutEnable(unsigned int value) { SetRegMask(WD2_EXT_TRIGGER_OUT_ENABLE_REG, WD2_EXT_TRIGGER_OUT_ENABLE_MASK, WD2_EXT_TRIGGER_OUT_ENABLE_OFS, value); };
 
-   // 0x00001000: TRIGGER_TYPE_SEL - 0 = use local hardware trigger and external tirgger (synchronized), 1 = use asynchronous external trigger
-   unsigned int GetTriggerTypeSel() { return BitExtractControl(WD2_TRIGGER_TYPE_SEL_REG, WD2_TRIGGER_TYPE_SEL_MASK, WD2_TRIGGER_TYPE_SEL_OFS); };
-   void         SetTriggerTypeSel(unsigned int value) { SetRegMask(WD2_TRIGGER_TYPE_SEL_REG, WD2_TRIGGER_TYPE_SEL_MASK, WD2_TRIGGER_TYPE_SEL_OFS, value); };
+   // 0x00002000: EXT_ASYNC_TRIGGER_EN - Enable asynchronous external trigger
+   unsigned int GetExtAsyncTriggerEn() { return BitExtractControl(WD2_EXT_ASYNC_TRIGGER_EN_REG, WD2_EXT_ASYNC_TRIGGER_EN_MASK, WD2_EXT_ASYNC_TRIGGER_EN_OFS); };
+   void         SetExtAsyncTriggerEn(unsigned int value) { SetRegMask(WD2_EXT_ASYNC_TRIGGER_EN_REG, WD2_EXT_ASYNC_TRIGGER_EN_MASK, WD2_EXT_ASYNC_TRIGGER_EN_OFS, value); };
+
+   // 0x00001000: PATTERN_TRIGGER_EN - Enable internal (synchronous) pattern trigger
+   unsigned int GetPatternTriggerEn() { return BitExtractControl(WD2_PATTERN_TRIGGER_EN_REG, WD2_PATTERN_TRIGGER_EN_MASK, WD2_PATTERN_TRIGGER_EN_OFS); };
+   void         SetPatternTriggerEn(unsigned int value) { SetRegMask(WD2_PATTERN_TRIGGER_EN_REG, WD2_PATTERN_TRIGGER_EN_MASK, WD2_PATTERN_TRIGGER_EN_OFS, value); };
 
    // 0x00000700: TRIGGER_OUT_PULSE_LENGTH - Length of the trigger output pulse in cycles
    unsigned int GetTriggerOutPulseLength() { return BitExtractControl(WD2_TRIGGER_OUT_PULSE_LENGTH_REG, WD2_TRIGGER_OUT_PULSE_LENGTH_MASK, WD2_TRIGGER_OUT_PULSE_LENGTH_OFS); };
@@ -3077,70 +3081,77 @@ public:
 
 
 
-   ////// ------ Status Register 56 [0x00E0]: SCALER_TRG - Scaler for trigger (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 56 [0x00E0]: SCALER_PTRN_TRG - Scaler for pattern trigger (Default: 0x00000000) ------ //////
 
-   // 0xFFFFFFFF: SCALER_TRG - Count rate for trigger signal
-   unsigned int GetScalerTrg() { return BitExtractStatus(WD2_SCALER_TRG_REG, WD2_SCALER_TRG_MASK, WD2_SCALER_TRG_OFS); };
+   // 0xFFFFFFFF: SCALER_PTRN_TRG - Count rate for pattern trigger signal
+   unsigned int GetScalerPtrnTrg() { return BitExtractStatus(WD2_SCALER_PTRN_TRG_REG, WD2_SCALER_PTRN_TRG_MASK, WD2_SCALER_PTRN_TRG_OFS); };
 
 
 
-   ////// ------ Status Register 57 [0x00E4]: SCALER_EXT_CLK - Scaler for ext. clock input (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 57 [0x00E4]: SCALER_EXT_TRG - Scaler for external trigger (Default: 0x00000000) ------ //////
+
+   // 0xFFFFFFFF: SCALER_EXT_TRG - Count rate for trigger signal
+   unsigned int GetScalerExtTrg() { return BitExtractStatus(WD2_SCALER_EXT_TRG_REG, WD2_SCALER_EXT_TRG_MASK, WD2_SCALER_EXT_TRG_OFS); };
+
+
+
+   ////// ------ Status Register 58 [0x00E8]: SCALER_EXT_CLK - Scaler for ext. clock input (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_EXT_CLK - Count rate for external clock input (GLOB_CLK)
    unsigned int GetScalerExtClk() { return BitExtractStatus(WD2_SCALER_EXT_CLK_REG, WD2_SCALER_EXT_CLK_MASK, WD2_SCALER_EXT_CLK_OFS); };
 
 
 
-   ////// ------ Status Register 58 [0x00E8]: SCALER_TIME_STAMP_LSB - Time Stamp for Scaler Values (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 59 [0x00EC]: SCALER_TIME_STAMP_LSB - Time Stamp for Scaler Values (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_TIME_STAMP_LSB - LSBs of 64bit scaler time stamp (MSBs are latched upon read of LSB register)
    unsigned int GetScalerTimeStampLsb() { return BitExtractStatus(WD2_SCALER_TIME_STAMP_LSB_REG, WD2_SCALER_TIME_STAMP_LSB_MASK, WD2_SCALER_TIME_STAMP_LSB_OFS); };
 
 
 
-   ////// ------ Status Register 59 [0x00EC]: SCALER_TIME_STAMP_MSB - Time Stamp for Scaler Values (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 60 [0x00F0]: SCALER_TIME_STAMP_MSB - Time Stamp for Scaler Values (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_TIME_STAMP_MSB - MSBs of 64bit scaler time stamp (latched upon read of LSB register)
    unsigned int GetScalerTimeStampMsb() { return BitExtractStatus(WD2_SCALER_TIME_STAMP_MSB_REG, WD2_SCALER_TIME_STAMP_MSB_MASK, WD2_SCALER_TIME_STAMP_MSB_OFS); };
 
 
 
-   ////// ------ Status Register 60 [0x00F0]: TIME_LSB - Current System Time (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 61 [0x00F4]: TIME_LSB - Current System Time (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: TIME_LSB - LSBs of 64bit system time counter (MSBs are latched upon read of LSB register)
    unsigned int GetTimeLsb() { return BitExtractStatus(WD2_TIME_LSB_REG, WD2_TIME_LSB_MASK, WD2_TIME_LSB_OFS); };
 
 
 
-   ////// ------ Status Register 61 [0x00F4]: TIME_MSB - Current System Time (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 62 [0x00F8]: TIME_MSB - Current System Time (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: TIME_MSB - MSBs of 64bit system time counter (latched upon read of LSB register)
    unsigned int GetTimeMsb() { return BitExtractStatus(WD2_TIME_MSB_REG, WD2_TIME_MSB_MASK, WD2_TIME_MSB_OFS); };
 
 
 
-   ////// ------ Status Register 62 [0x00F8]: COMP_CH_STAT - Comparator channel status (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 63 [0x00FC]: COMP_CH_STAT - Comparator channel status (Default: 0x00000000) ------ //////
 
    // 0x0000FFFF: COMP_CH_STAT - Status of the comparator inputs
    unsigned int GetCompChStat() { return BitExtractStatus(WD2_COMP_CH_STAT_REG, WD2_COMP_CH_STAT_MASK, WD2_COMP_CH_STAT_OFS); };
 
 
 
-   ////// ------ Status Register 63 [0x00FC]: EVENT_TX_RATE - Event Transmission Rate (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 64 [0x0100]: EVENT_TX_RATE - Event Transmission Rate (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: EVENT_TX_RATE - Number of events transmitted per second
    unsigned int GetEventTxRate() { return BitExtractStatus(WD2_EVENT_TX_RATE_REG, WD2_EVENT_TX_RATE_MASK, WD2_EVENT_TX_RATE_OFS); };
 
 
 
-   ////// ------ Status Register 64 [0x0100]: EVENT_NR - Number of latest event (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 65 [0x0104]: EVENT_NR - Number of latest event (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: EVENT_NUMBER - Number of latest event
    unsigned int GetEventNumber() { return BitExtractStatus(WD2_EVENT_NUMBER_REG, WD2_EVENT_NUMBER_MASK, WD2_EVENT_NUMBER_OFS); };
 
 
 
-   ////// ------ Status Register 65 [0x0104]: TRB_INFO_STAT - Trigger Information via Serial Trigger Bus Status (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 66 [0x0108]: TRB_INFO_STAT - Trigger Information via Serial Trigger Bus Status (Default: 0x00000000) ------ //////
 
    // 0x80000000: TRB_FLAG_NEW - Flag signalling that the current trigger information belongs to the latest trigger received
    unsigned int GetTrbFlagNew() { return BitExtractStatus(WD2_TRB_FLAG_NEW_REG, WD2_TRB_FLAG_NEW_MASK, WD2_TRB_FLAG_NEW_OFS); };
@@ -3153,84 +3164,84 @@ public:
 
 
 
-   ////// ------ Status Register 66 [0x0108]: TRB_INFO_LSB - Trigger Information via Serial Trigger Bus LSBs (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 67 [0x010C]: TRB_INFO_LSB - Trigger Information via Serial Trigger Bus LSBs (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: TRB_INFO_LSB - Trigger information LSBs
    unsigned int GetTrbInfoLsb() { return BitExtractStatus(WD2_TRB_INFO_LSB_REG, WD2_TRB_INFO_LSB_MASK, WD2_TRB_INFO_LSB_OFS); };
 
 
 
-   ////// ------ Status Register 67 [0x010C]: TRB_INFO_MSB - Trigger Information via Serial Trigger Bus MSBs (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 68 [0x0110]: TRB_INFO_MSB - Trigger Information via Serial Trigger Bus MSBs (Default: 0x00000000) ------ //////
 
    // 0x0000FFFF: TRB_INFO_MSB - Trigger information MSBs
    unsigned int GetTrbInfoMsb() { return BitExtractStatus(WD2_TRB_INFO_MSB_REG, WD2_TRB_INFO_MSB_MASK, WD2_TRB_INFO_MSB_OFS); };
 
 
 
-   ////// ------ Status Register 68 [0x0110]: ADV_TRG_TRIG_CELL - Advanced Trigger Cell Register (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 69 [0x0114]: ADV_TRG_TRIG_CELL - Advanced Trigger Cell Register (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_TRIG_CELL - Advanced trigger cell register
    unsigned int GetAdvTrgTrigCell() { return BitExtractStatus(WD2_ADV_TRG_TRIG_CELL_REG, WD2_ADV_TRG_TRIG_CELL_MASK, WD2_ADV_TRG_TRIG_CELL_OFS); };
 
 
 
-   ////// ------ Status Register 69 [0x0114]: ADV_TRG_STAT1 - Advanced Trigger Status Register 1 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 70 [0x0118]: ADV_TRG_STAT1 - Advanced Trigger Status Register 1 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_STAT_1 - Advanced trigger status register 1
    unsigned int GetAdvTrgStat1() { return BitExtractStatus(WD2_ADV_TRG_STAT_1_REG, WD2_ADV_TRG_STAT_1_MASK, WD2_ADV_TRG_STAT_1_OFS); };
 
 
 
-   ////// ------ Status Register 70 [0x0118]: ADV_TRG_STAT2 - Advanced Trigger Status Register 2 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 71 [0x011C]: ADV_TRG_STAT2 - Advanced Trigger Status Register 2 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_STAT_2 - Advanced trigger status register 2
    unsigned int GetAdvTrgStat2() { return BitExtractStatus(WD2_ADV_TRG_STAT_2_REG, WD2_ADV_TRG_STAT_2_MASK, WD2_ADV_TRG_STAT_2_OFS); };
 
 
 
-   ////// ------ Status Register 71 [0x011C]: ADV_TRG_STAT3 - Advanced Trigger Status Register 3 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 72 [0x0120]: ADV_TRG_STAT3 - Advanced Trigger Status Register 3 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_STAT_3 - Advanced trigger status register 3
    unsigned int GetAdvTrgStat3() { return BitExtractStatus(WD2_ADV_TRG_STAT_3_REG, WD2_ADV_TRG_STAT_3_MASK, WD2_ADV_TRG_STAT_3_OFS); };
 
 
 
-   ////// ------ Status Register 72 [0x0120]: ADV_TRG_STAT4 - Advanced Trigger Status Register 4 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 73 [0x0124]: ADV_TRG_STAT4 - Advanced Trigger Status Register 4 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_STAT_4 - Advanced trigger status register 4
    unsigned int GetAdvTrgStat4() { return BitExtractStatus(WD2_ADV_TRG_STAT_4_REG, WD2_ADV_TRG_STAT_4_MASK, WD2_ADV_TRG_STAT_4_OFS); };
 
 
 
-   ////// ------ Status Register 73 [0x0124]: MAX_DRS_ADC_PKT_SAMPLES - Maximum DRS/ADC samples per Packet (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 74 [0x0128]: MAX_DRS_ADC_PKT_SAMPLES - Maximum DRS/ADC samples per Packet (Default: 0x00000000) ------ //////
 
    // 0x0000FFFF: MAX_DRS_ADC_PKT_SAMPLES - Maximum number of DRS/ADC samples per packet
    unsigned int GetMaxDrsAdcPktSamples() { return BitExtractStatus(WD2_MAX_DRS_ADC_PKT_SAMPLES_REG, WD2_MAX_DRS_ADC_PKT_SAMPLES_MASK, WD2_MAX_DRS_ADC_PKT_SAMPLES_OFS); };
 
 
 
-   ////// ------ Status Register 74 [0x0128]: MAX_TDC_PKT_SAMPLES - Maximum TDC samples per Packet (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 75 [0x012C]: MAX_TDC_PKT_SAMPLES - Maximum TDC samples per Packet (Default: 0x00000000) ------ //////
 
    // 0x0003FFFF: MAX_TDC_PKT_SAMPLES - Maximum number of TDC samples per packet
    unsigned int GetMaxTdcPktSamples() { return BitExtractStatus(WD2_MAX_TDC_PKT_SAMPLES_REG, WD2_MAX_TDC_PKT_SAMPLES_MASK, WD2_MAX_TDC_PKT_SAMPLES_OFS); };
 
 
 
-   ////// ------ Status Register 75 [0x012C]: MAX_TRG_PKT_SAMPLES - Maximum advanced trigger output samples per Packet (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 76 [0x0130]: MAX_TRG_PKT_SAMPLES - Maximum advanced trigger output samples per Packet (Default: 0x00000000) ------ //////
 
    // 0x0000FFFF: MAX_TRG_PKT_SAMPLES - Maximum number of advanced trigger output samples per packet
    unsigned int GetMaxTrgPktSamples() { return BitExtractStatus(WD2_MAX_TRG_PKT_SAMPLES_REG, WD2_MAX_TRG_PKT_SAMPLES_MASK, WD2_MAX_TRG_PKT_SAMPLES_OFS); };
 
 
 
-   ////// ------ Status Register 76 [0x0130]: MAX_SCL_PKT_SAMPLES - Maximum scaler values per Packet (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 77 [0x0134]: MAX_SCL_PKT_SAMPLES - Maximum scaler values per Packet (Default: 0x00000000) ------ //////
 
    // 0x0000FFFF: MAX_SCL_PKT_SAMPLES - Maximum number of scaler values per packet
    unsigned int GetMaxSclPktSamples() { return BitExtractStatus(WD2_MAX_SCL_PKT_SAMPLES_REG, WD2_MAX_SCL_PKT_SAMPLES_MASK, WD2_MAX_SCL_PKT_SAMPLES_OFS); };
 
 
 
-   ////// ------ Status Register 77 [0x0134]: CLK_CTRL_MOD_FLAG - Set if WD2 configuration registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 78 [0x0138]: CLK_CTRL_MOD_FLAG - Set if WD2 configuration registers are modified (Default: 0x00000000) ------ //////
 
    // 0x00000008: ADC_RST_MOD - ADC reset modified flag
    unsigned int GetAdcRstMod() { return BitExtractStatus(WD2_ADC_RST_MOD_REG, WD2_ADC_RST_MOD_MASK, WD2_ADC_RST_MOD_OFS); };
@@ -3246,7 +3257,7 @@ public:
 
 
 
-   ////// ------ Status Register 78 [0x0138]: DRS_MOD_FLAG - Set if DRS configuration registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 79 [0x013C]: DRS_MOD_FLAG - Set if DRS configuration registers are modified (Default: 0x00000000) ------ //////
 
    // 0x00000004: DRS_CTRL_MOD - DRS control bits modified flags
    unsigned int GetDrsCtrlMod() { return BitExtractStatus(WD2_DRS_CTRL_MOD_REG, WD2_DRS_CTRL_MOD_MASK, WD2_DRS_CTRL_MOD_OFS); };
@@ -3259,21 +3270,21 @@ public:
 
 
 
-   ////// ------ Status Register 79 [0x013C]: COM_PLD_SIZE_MOD_FLAG - Set if maximum packet payload size register is modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 80 [0x0140]: COM_PLD_SIZE_MOD_FLAG - Set if maximum packet payload size register is modified (Default: 0x00000000) ------ //////
 
    // 0x0000000F: COM_PLD_SIZE_MOD - Maximum packet payload size modified flag
    unsigned int GetComPldSizeMod() { return BitExtractStatus(WD2_COM_PLD_SIZE_MOD_REG, WD2_COM_PLD_SIZE_MOD_MASK, WD2_COM_PLD_SIZE_MOD_OFS); };
 
 
 
-   ////// ------ Status Register 80 [0x0140]: ADC_SAMPLE_DIV_MOD_FLAG - Set if ADC downsampling divider register is modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 81 [0x0144]: ADC_SAMPLE_DIV_MOD_FLAG - Set if ADC downsampling divider register is modified (Default: 0x00000000) ------ //////
 
    // 0x0000000F: ADC_SAMPLE_DIV_MOD - ADC downsampling divider modified flags
    unsigned int GetAdcSampleDivMod() { return BitExtractStatus(WD2_ADC_SAMPLE_DIV_MOD_REG, WD2_ADC_SAMPLE_DIV_MOD_MASK, WD2_ADC_SAMPLE_DIV_MOD_OFS); };
 
 
 
-   ////// ------ Status Register 81 [0x0144]: DAC_0_1_MOD_FLAG - Set if DAC 0 and 1 configuration registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 82 [0x0148]: DAC_0_1_MOD_FLAG - Set if DAC 0 and 1 configuration registers are modified (Default: 0x00000000) ------ //////
 
    // 0xC0000000: DAC0_A_MOD - DAC channel a modified flags
    unsigned int GetDac0AMod() { return BitExtractStatus(WD2_DAC0_A_MOD_REG, WD2_DAC0_A_MOD_MASK, WD2_DAC0_A_MOD_OFS); };
@@ -3325,7 +3336,7 @@ public:
 
 
 
-   ////// ------ Status Register 82 [0x0148]: DAC_2_MOD_FLAG - Set if DAC 2 configuration registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 83 [0x014C]: DAC_2_MOD_FLAG - Set if DAC 2 configuration registers are modified (Default: 0x00000000) ------ //////
 
    // 0xC0000000: DAC2_A_MOD - DAC channel a modified flags
    unsigned int GetDac2AMod() { return BitExtractStatus(WD2_DAC2_A_MOD_REG, WD2_DAC2_A_MOD_MASK, WD2_DAC2_A_MOD_OFS); };
@@ -3353,7 +3364,7 @@ public:
 
 
 
-   ////// ------ Status Register 83 [0x014C]: FE_0_15_MOD_FLAG - Set if frontend configuraiton registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 84 [0x0150]: FE_0_15_MOD_FLAG - Set if frontend configuraiton registers are modified (Default: 0x00000000) ------ //////
 
    // 0xC0000000: FE_0_MOD - Frontend channel 0 register modified flags
    unsigned int GetFe0Mod() { return BitExtractStatus(WD2_FE_0_MOD_REG, WD2_FE_0_MOD_MASK, WD2_FE_0_MOD_OFS); };
@@ -3405,7 +3416,7 @@ public:
 
 
 
-   ////// ------ Status Register 84 [0x0150]: HV_U_TARGET_0_7_MOD_FLAG - Set if HV target voltage configuraiton of channel 0 to 7 registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 85 [0x0154]: HV_U_TARGET_0_7_MOD_FLAG - Set if HV target voltage configuraiton of channel 0 to 7 registers are modified (Default: 0x00000000) ------ //////
 
    // 0xF0000000: HV_U_TARGET_0_MOD - Target high voltage channel 0 register modified flags
    unsigned int GetHvUTarget0Mod() { return BitExtractStatus(WD2_HV_U_TARGET_0_MOD_REG, WD2_HV_U_TARGET_0_MOD_MASK, WD2_HV_U_TARGET_0_MOD_OFS); };
@@ -3433,7 +3444,7 @@ public:
 
 
 
-   ////// ------ Status Register 85 [0x0154]: HV_U_TARGET_8_15_MOD_FLAG - Set if HV target voltage configuraiton of channel 8 to 15 registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 86 [0x0158]: HV_U_TARGET_8_15_MOD_FLAG - Set if HV target voltage configuraiton of channel 8 to 15 registers are modified (Default: 0x00000000) ------ //////
 
    // 0xF0000000: HV_U_TARGET_8_MOD - Target high voltage channel 8 register modified flags
    unsigned int GetHvUTarget8Mod() { return BitExtractStatus(WD2_HV_U_TARGET_8_MOD_REG, WD2_HV_U_TARGET_8_MOD_MASK, WD2_HV_U_TARGET_8_MOD_OFS); };
@@ -3461,14 +3472,14 @@ public:
 
 
 
-   ////// ------ Status Register 86 [0x0158]: HV_MOD_FLAG - Set if single HV configuraiton registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 87 [0x015C]: HV_MOD_FLAG - Set if single HV configuraiton registers are modified (Default: 0x00000000) ------ //////
 
    // 0x0000000F: HV_R_SHUNT_MOD - HV supply shunt resistor register modified flags
    unsigned int GetHvRShuntMod() { return BitExtractStatus(WD2_HV_R_SHUNT_MOD_REG, WD2_HV_R_SHUNT_MOD_MASK, WD2_HV_R_SHUNT_MOD_OFS); };
 
 
 
-   ////// ------ Status Register 87 [0x015C]: LMK_0_7_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 88 [0x0160]: LMK_0_7_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ------ //////
 
    // 0xF0000000: LMK_0_MOD - LMK channel 0 register modified flags
    unsigned int GetLmk0Mod() { return BitExtractStatus(WD2_LMK_0_MOD_REG, WD2_LMK_0_MOD_MASK, WD2_LMK_0_MOD_OFS); };
@@ -3496,7 +3507,7 @@ public:
 
 
 
-   ////// ------ Status Register 88 [0x0160]: LMK_8_15_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 89 [0x0164]: LMK_8_15_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ------ //////
 
    // 0x00F00000: LMK_8_MOD - LMK Register 8 modified flags
    unsigned int GetLmk8Mod() { return BitExtractStatus(WD2_LMK_8_MOD_REG, WD2_LMK_8_MOD_MASK, WD2_LMK_8_MOD_OFS); };
