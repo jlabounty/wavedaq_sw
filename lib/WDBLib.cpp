@@ -3246,9 +3246,6 @@ void WP::DoVoltageCalibrationStep()
       b->SetExtAsyncTriggerEn(0);
       b->SetPatternTriggerEn(0);
 
-      // select internal clock
-  //    b->SetDaqClkSrcSel(1);
-
       // set inter-packet delay to default value
       b->SetInterPkgDelay(1875);
 
@@ -3887,9 +3884,6 @@ void WP::DoTimeCalibrationStep()
       // disable external trigger
       b->SetExtAsyncTriggerEn(0);
       b->SetPatternTriggerEn(0);
-
-      // select internal clock
-   //   b->SetDaqClkSrcSel(1);
 
       // set inter-packet delay to default value
       b->SetInterPkgDelay(1875);
