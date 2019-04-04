@@ -64,8 +64,8 @@ a:focus { color:#0000FF; text-decoration:underline }
    position: absolute;
    top: 0;
    left: 0;
-   max-width: 190px;
-   width: 190px;
+   max-width: 205px;
+   width: 205px;
    background-color: white;
    text-align: center;
    opacity: 0; /* pre-hidden */
