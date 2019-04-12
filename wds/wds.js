@@ -281,6 +281,7 @@ function populateControls(init) {
 
    document.getElementById("inputReadoutSrcDRS").checked = (OSC.wdb[OSC.curBoard].readoutSrcSel == 1);
    document.getElementById("inputReadoutSrcADC").checked = (OSC.wdb[OSC.curBoard].readoutSrcSel == 2);
+   document.getElementById("inputReadoutSrcTDC").checked = (OSC.wdb[OSC.curBoard].readoutSrcSel == 3);
 
    document.getElementById("timingCalibSignalEnable").checked = OSC.wdb[OSC.curBoard].timingCalibSignalEnable;
 
@@ -437,7 +438,7 @@ function readWdb(b, init) {
                "hvBackplanePlugged": false,
                "pllLck": 511,
                "drsSampleFreq": 5016,
-               "adcSampleFreq": 0,
+               "adcSampleFreq": 80,
                "compChannelStatus": 0,
                "lastEventNumber": 0,
                "triggerBusParityErrorCount": 0,
@@ -893,6 +894,7 @@ function receiveWF() {
       }
 
       var intArray = new Uint32Array(OSC.req.response);
+      var charArray = new Uint8Array(OSC.req.response);
       var floatArray = new Float32Array(OSC.req.response);
 
       for (i = 0; i < intArray.length;) {
@@ -951,6 +953,21 @@ function receiveWF() {
             for (j = 0; j < n; j++)
                wf.U[c][j] = floatArray[i++];
             OSC.remoteDemo = (OSC.wd == 0xFF);
+
+         } else if (responseType == 3) { // tdc array
+            i++;
+            OSC.idle = false;
+            OSC.wd = intArray[i++];
+            OSC.vCalibrated = intArray[i++];
+            OSC.nLogged = intArray[i++];
+            c = intArray[i++];
+            n = intArray[i++];
+            for (j = 0; j < n; j++){
+               wf.U[c][j] = charArray[4*i+j];
+            }
+            i += n/4;
+            OSC.remoteDemo = (OSC.wd == 0xFF);
+
 
          } else if (responseType == 10) { // vcalib progress data
             var b = intArray[1];
@@ -1507,7 +1524,14 @@ function btnOfsDist() {
 }
 
 function sldTOffset(value) {
-   var wfWidth = 1024 / OSC.wdb[OSC.curBoard].drsSampleFreq * 1E-6;
+   var wfWidth=0;
+   if(OSC.wdb[OSC.curBoard].readoutSrcSel == 1)
+      wfWidth = 1024. / OSC.wdb[OSC.curBoard].drsSampleFreq * 1E-6;
+   else if (OSC.wdb[OSC.curBoard].readoutSrcSel == 2)
+      wfWidth = 1024. / OSC.wdb[OSC.curBoard].adcSampleFreq * 1E-6;
+   else if (OSC.wdb[OSC.curBoard].readoutSrcSel == 3)
+      wfWidth = 512. / OSC.wdb[OSC.curBoard].adcSampleFreq * 1E-6;
+
    var scWidth = OSC.wfTScale * 10;
    if (wfWidth >= scWidth)
       OSC.wfTOffset = 0.9 * scWidth - wfWidth - value * (0.8 * scWidth - wfWidth);
@@ -1522,7 +1546,14 @@ function sldTOffset(value) {
 
 function setSldTOffset(tOffset)
 {
-   var wfWidth = 1024 / OSC.wdb[OSC.curBoard].drsSampleFreq * 1E-6;
+   var wfWidth=0;
+   if(OSC.wdb[OSC.curBoard].readoutSrcSel == 1)
+      wfWidth = 1024. / OSC.wdb[OSC.curBoard].drsSampleFreq * 1E-6;
+   else if (OSC.wdb[OSC.curBoard].readoutSrcSel == 2)
+      wfWidth = 1024. / OSC.wdb[OSC.curBoard].adcSampleFreq * 1E-6;
+   else if (OSC.wdb[OSC.curBoard].readoutSrcSel == 2)
+      wfWidth = 512. / OSC.wdb[OSC.curBoard].adcSampleFreq * 1E-6;
+
    var scWidth = OSC.wfTScale * 10;
    if (wfWidth >= scWidth)
       value = (0.9 * scWidth - wfWidth - tOffset) / (0.8 * scWidth - wfWidth);
