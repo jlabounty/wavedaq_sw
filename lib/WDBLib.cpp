@@ -748,10 +748,21 @@ std::string WDB::GetFwBuild()
    s << monthName[bcd2dec(GetFwBuildMonth())-1] << ' ';
    s << bcd2dec(GetFwBuildDay()) << ' ';
    s << bcd2dec(GetFwBuildYear()) << "  ";
-
    s << std::setfill('0') << std::setw(2) << bcd2dec(GetFwBuildHour()) << ':';
    s << std::setfill('0') << std::setw(2) << bcd2dec(GetFwBuildMinute()) << ':';
    s << std::setfill('0') << std::setw(2) << bcd2dec(GetFwBuildSecond()) << std::endl;
+
+   s << "SW GIT Revision:     ";
+   s << "0x" << std::hex << std::uppercase << GetSwGitHashTag() << std::endl;
+
+   s << "SW Build:            ";
+   s << std::dec << std::setw(2) << std::setfill('0');
+   s << monthName[bcd2dec(GetSwBuildMonth())-1] << ' ';
+   s << bcd2dec(GetSwBuildDay()) << ' ';
+   s << bcd2dec(GetSwBuildYear()) << "  ";
+   s << std::setfill('0') << std::setw(2) << bcd2dec(GetSwBuildHour()) << ':';
+   s << std::setfill('0') << std::setw(2) << bcd2dec(GetSwBuildMinute()) << ':';
+   s << std::setfill('0') << std::setw(2) << bcd2dec(GetSwBuildSecond()) << std::endl;
 
    return s.str();
 }

@@ -1008,7 +1008,7 @@ int main(int argc, const char * argv[])
             }
 
             //switch to backplane clock
-            if (gl.backplaneClk){
+            if (gl.backplaneClk) {
                std::cout << "with external clk ...";
                b->SetExtClkInSel(0);
                b->SetDaqClkSrcSel(0);
@@ -1026,7 +1026,6 @@ int main(int argc, const char * argv[])
                b->ResetPackager();
                b->ReceiveStatusRegisters();
             }
-
 
             // load calibration data for board
             b->LoadVoltageCalibration(b->GetDrsSampleFreqMhz());
