@@ -458,7 +458,9 @@ function dlgShow(dlg, modal) {
       d.style.top = "0px";
    else
       d.style.top = Math.round(document.documentElement.clientHeight / 2 - d.offsetHeight / 2) + "px";
-
+   if (d.offsetHeight > document.documentElement.clientHeight)
+      d.style.position = "absolute";
+   
    // put dialog on top of all other dialogs
    var dlgs = document.getElementsByClassName("dlgFrame");
    for (var i=0 ; i<dlgs.length ; i++)
@@ -491,20 +493,15 @@ function dlgShow(dlg, modal) {
          this.Dy = parseInt(this.style.top);
       }
 
-      if (d.modal) {
-         // catch all mouse events
+      if (d.modal && e.target !== d && !d.contains(e.target)) {
+         // catch all mouse events outside the dialog
          e.preventDefault();
-         console.log("Prevent default");
       } else {
-         var p = e.target;
-         while (p !== undefined && p !== this && p !== document.body)
-            p = p.parentElement;
-         
-         if (p === this) {
+         if (e.target === this || d.contains(e.target)) {
             var dlgs = document.getElementsByClassName("dlgFrame");
             for (var i=0 ; i<dlgs.length ; i++)
                dlgs[i].style.zIndex = 10;
-            d.style.zIndex = 11;
+            d.style.zIndex = d.modal ? 21 : 11;
          }
       }
    };
@@ -532,9 +529,6 @@ function dlgShow(dlg, modal) {
    };
    
    d.dlgMouseUp = function () {
-      if (d.style.display === "none")
-         return;
-
       this.Ax = 0;
       this.Ay = 0;
    };
@@ -552,15 +546,11 @@ function dlgShow(dlg, modal) {
          this.Dy = parseInt(this.style.top);
       }
 
-      if (d.modal) {
+      if (d.modal && e.target !== d && !d.contains(e.target)) {
          // catch all mouse events
          e.preventDefault();
       } else {
-         var p = e.target;
-         while (p !== undefined && p !== this && p !== document.body)
-            p = p.parentElement;
-
-         if (p === this) {
+         if (e.target === this || d.contains(e.target)) {
             var dlgs = document.getElementsByClassName("dlgFrame");
             for (var i=0 ; i<dlgs.length ; i++)
                dlgs[i].style.zIndex = 10;
@@ -629,6 +619,9 @@ function dlgMessageDestroy(b)
       if (d !== undefined && d !== null)
          d.style.display = "none";
    }
+   // dialog is not really removed from memory, event listerner is still active and
+   // grabs mousdown events, so mark its display "none" to prevent eating mouse events
+   // above in dlgMouseDown routine
    dlg.style.display = "none";
    document.body.removeChild(dlg);
 }
