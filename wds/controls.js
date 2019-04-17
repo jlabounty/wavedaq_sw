@@ -479,6 +479,9 @@ function dlgShow(dlg, modal) {
    }
    
    d.dlgMouseDown = function (e) {
+      if (d.style.display === "none")
+         return;
+
       if ((e.target === this || e.target.parentNode === this) &&
          e.target.className === "dlgTitlebar") {
          e.preventDefault();
@@ -491,6 +494,7 @@ function dlgShow(dlg, modal) {
       if (d.modal) {
          // catch all mouse events
          e.preventDefault();
+         console.log("Prevent default");
       } else {
          var p = e.target;
          while (p !== undefined && p !== this && p !== document.body)
@@ -506,6 +510,9 @@ function dlgShow(dlg, modal) {
    };
 
    d.dlgMouseMove = function (e) {
+      if (d.style.display === "none")
+         return;
+
       if (this.Ax > 0 && this.Ay > 0) {
          e.preventDefault();
          var x = e.clientX;
@@ -525,11 +532,17 @@ function dlgShow(dlg, modal) {
    };
    
    d.dlgMouseUp = function () {
+      if (d.style.display === "none")
+         return;
+
       this.Ax = 0;
       this.Ay = 0;
    };
 
    d.dlgTouchStart = function (e) {
+      if (d.style.display === "none")
+         return;
+
       if ((e.target === this || e.target.parentNode === this) &&
          e.target.className === "dlgTitlebar") {
          e.preventDefault();
@@ -544,10 +557,10 @@ function dlgShow(dlg, modal) {
          e.preventDefault();
       } else {
          var p = e.target;
-         while (p != undefined && p != this && p != document.body)
+         while (p !== undefined && p !== this && p !== document.body)
             p = p.parentElement;
 
-         if (p == this) {
+         if (p === this) {
             var dlgs = document.getElementsByClassName("dlgFrame");
             for (var i=0 ; i<dlgs.length ; i++)
                dlgs[i].style.zIndex = 10;
@@ -557,6 +570,9 @@ function dlgShow(dlg, modal) {
    };
 
    d.dlgTouchMove = function (e) {
+      if (d.style.display === "none")
+         return;
+
       if (this.Ax > 0 && this.Ay > 0) {
          e.preventDefault();
          var x = e.changedTouches[e.changedTouches.length - 1].clientX;
@@ -567,6 +583,9 @@ function dlgShow(dlg, modal) {
    };
 
    d.dlgTouchEnd = function (e) {
+      if (d.style.display === "none")
+         return;
+
       if (this.Ax > 0 && this.Ay > 0) {
          e.preventDefault();
          this.Ax = 0;
@@ -575,6 +594,9 @@ function dlgShow(dlg, modal) {
    };
 
    d.dlgTouchCancel = function (e) {
+      if (d.style.display === "none")
+         return;
+
       if (this.Ax > 0 && this.Ay > 0) {
          e.preventDefault();
          this.Ax = 0;
@@ -607,6 +629,7 @@ function dlgMessageDestroy(b)
       if (d !== undefined && d !== null)
          d.style.display = "none";
    }
+   dlg.style.display = "none";
    document.body.removeChild(dlg);
 }
 
