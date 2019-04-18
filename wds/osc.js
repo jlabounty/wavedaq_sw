@@ -1267,6 +1267,8 @@ Oscilloscope.prototype.drawDT = function (ctx) {
    ctx.rect(this.x1, this.y1, this.w, this.h);
    ctx.clip();
 
+   var period = 1 / this.wdb[this.curBoard].calibClkFreq*1000; // period of calibration clock in ns
+
    for (c = 0; c < 18; c++) {
       if (this.chOn[c]) {
          ctx.beginPath();
@@ -1274,7 +1276,7 @@ Oscilloscope.prototype.drawDT = function (ctx) {
          ctx.strokeStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
          for (var i = 0; i < 1024; i++) {
             var x = this.x1 + i / 1024.0 * this.w;
-            y = (10 - this.wf.T[c][i] * 1E9) * this.h / 10 + this.wfUO[c];
+            y = (period - this.wf.T[c][i] * 1E9) * this.h / 10 + this.wfUO[c];
 
             if (this.wf.T[c][i] * 1E9 != 0)
                ctx.fillRect(x, y, 3, 3);

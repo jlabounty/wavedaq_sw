@@ -407,7 +407,12 @@ class WP {
    int               mOldMaskAdc;
    int               mOldReadoutSrc;
    int               mOldFeMux;
+   int               mOldTimingCalibSignalEn;
+   int               mOldCalibBufferEn;
    int               mOldTimingReference;
+   int               mOldExtAsyncTriggerEn;
+   int               mOldPatternTriggerEn;
+   int               mOldTriggerHoldoff;
    
    void              AnalyzePeriod(WDEvent *, WDB *);
    void              AnalyzeTimeOffset(WDEvent *, WDB *);
@@ -517,6 +522,8 @@ class WDB: public WDBREG {
    unsigned int     mChnTxEn;
    int              mTriggerHoldoff;
    int              mTimingReferenceSignal;
+   
+   int              mCalibClkFreq;
 
    unsigned int     creg[REG_NR_OF_CTRL_REGS];
    unsigned int     sreg[REG_NR_OF_STAT_REGS];
@@ -620,6 +627,7 @@ public:
    void GetHVCurrents(std::vector<float> &c, bool refresh = true);
    void GetHVBaseVoltage(float &voltage, bool refresh = true);
    void Get1wireTemperatures(std::vector<float> &c, bool refresh = true);
+   int GetCalibClkFreq() { return mCalibClkFreq; }
 
    // high level control registers
    void SetDrsSampleFreq(unsigned int f);

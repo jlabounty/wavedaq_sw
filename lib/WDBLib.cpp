@@ -655,6 +655,16 @@ void WDB::ReceiveStatusRegisters(unsigned int index, unsigned int nReg)
       }
    }
 #endif
+   
+   // set calibration clock frequency depending on board
+   if (GetBoardRevision()+'A' == 'G')
+      mCalibClkFreq = 100;   // WD2G: 100 MHz
+   else if (GetBoardRevision()+'A' == 'F')
+      mCalibClkFreq = 160;   // WD2F: 160 MHz
+   else if (GetBoardRevision()+'A' == 'E')
+      mCalibClkFreq = 160;   // WD2E: 160 MHz
+   else
+      mCalibClkFreq = 100;   // WD2E: 100 MHz
 }
 
 void WDB::ReceiveStatusRegister(int rofs)
@@ -939,29 +949,16 @@ unsigned int WDB::GetLmkInputFreq()
 
 void WDB::SetSineWaveEnable(bool value)
 {
-   if (value) {
-      // switch TCA_CTRL
-      SetTimingCalibSignalEn(true);
-
-      // switch LMK output #6
-
-      // enable divider and delay
-      SetLmk6ClkoutMux(3);
-      SetLmk6ClkoutDly(0);
-      // divide 160 MHz by 2x1 = 80 MHz
-      SetLmk6ClkoutDiv(1);
-      // enbable/disable output
-      SetLmk6ClkoutEn(value);
-   } else {
-      // switch TCA_CTRL
-      SetTimingCalibSignalEn(false);
-
-      // disable LMK output #6
-      SetLmk6ClkoutMux(0);
-      SetLmk6ClkoutDiv(0);
-      SetLmk6ClkoutDly(0);
-      SetLmk6ClkoutEn(false);
-   }
+   // switch TCA_CTRL
+   SetTimingCalibSignalEn(value);
+   
+   // switch LMK output #6
+   
+   // disable divider and delay
+   SetLmk6ClkoutMux(0);
+   SetLmk6ClkoutDly(0);
+   // enbable/disable output
+   SetLmk6ClkoutEn(value);
 }
 
 void WDB::SetSineWaveDelay(int value)
@@ -971,26 +968,20 @@ void WDB::SetSineWaveDelay(int value)
    if (value == 0) {
       SetLmk0ClkoutMux(1);
       SetLmk0ClkoutDly(0);
-      SetLmk6ClkoutMux(1);
+      SetLmk6ClkoutMux(0);
       SetLmk6ClkoutDly(0);
    } else if (value > 0) {
+      SetLmk0ClkoutMux(1);
       SetLmk0ClkoutDly(0);
       // delay channel 6
-      if (value == 16)
-         SetLmk6ClkoutMux(1);
-      else {
-         SetLmk6ClkoutMux(3);
-         SetLmk6ClkoutDly(value);
-      }
+      SetLmk6ClkoutMux(2);
+      SetLmk6ClkoutDly(value-1);
    } else {
-      // delay channel 0
-      if (value == -16)
-         SetLmk0ClkoutMux(1);
-      else {
-         SetLmk0ClkoutMux(3);
-         SetLmk0ClkoutDly(-value);
-      }
+      SetLmk6ClkoutMux(0);
       SetLmk6ClkoutDly(0);
+      // delay channel 0
+      SetLmk0ClkoutMux(3);
+      SetLmk0ClkoutDly(-value+1);
    }
 }
 
@@ -3664,8 +3655,8 @@ void WP::CalibrateLocal(WDEvent *event, WDB *b)
 {
    float dv, llim, ulim;
 
-   llim = -0.3f;
-   ulim =  0.3f;
+   llim = -0.2f;
+   ulim =  0.2f;
 
    for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
       int tc = event->mTriggerCell[ch];
@@ -3733,7 +3724,7 @@ void WP::CalibrateLocal(WDEvent *event, WDB *b)
 void WP::CalibrateGlobal(WDEvent *event, WDB *b)
 {
    double damping = 0.1f;
-   double nominalPeriod = 1 / 80E6; // Period of 80 MHz clock
+   double nominalPeriod = 1.0 / b->GetCalibClkFreq() / 1E6; // Period of calibration clock
 
    for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
       int tc = event->mTriggerCell[ch];
@@ -3857,7 +3848,12 @@ void WP::DoTimeCalibrationStep()
       mOldMaskDrs = b->GetDrsChTxEn();
       mOldMaskAdc = b->GetAdcChTxEn();
       mOldFeMux   = b->GetFeMux(0);
+      mOldTimingCalibSignalEn = b->GetTimingCalibSignalEn();
+      mOldCalibBufferEn = b->GetCalibBufferEn();
       mOldTimingReference = b->GetTimingReferenceSignal();
+      mOldExtAsyncTriggerEn = b->GetExtAsyncTriggerEn();
+      mOldPatternTriggerEn = b->GetPatternTriggerEn();
+      mOldTriggerHoldoff = b->GetTriggerHoldoff();
 
       b->mTCalib.mCalib.sampling_frequency = b->GetDrsSampleFreqMhz();
 
@@ -4018,8 +4014,11 @@ void WP::DoTimeCalibrationStep()
    b->SetAdcChTxEn(mOldMaskAdc);
    b->SetTimingReferenceSignal(mOldTimingReference);
    b->SetFeMux(-1, mOldFeMux);
-
-   b->SetTriggerHoldoff(30);
+   b->SetSineWaveEnable(mOldTimingCalibSignalEn);
+   b->SetCalibBufferEn(mOldCalibBufferEn);
+   b->SetExtAsyncTriggerEn(mOldExtAsyncTriggerEn);
+   b->SetPatternTriggerEn(mOldPatternTriggerEn);
+   b->SetTriggerHoldoff(mOldTriggerHoldoff);
 
    if (calibProg.iBoard == calibProg.nBoard) {
       calibProg.state = cCsInactive;

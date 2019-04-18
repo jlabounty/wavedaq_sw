@@ -537,6 +537,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"extClkInSel\": %d,\n",                w->GetExtClkInSel());
          mg_printf_http_chunk(nc, "      \"extClkFreq\": %d,\n",                 w->GetExtClkFreq());
          mg_printf_http_chunk(nc, "      \"localClkFreq\": %d,\n",               w->GetLocalClkFreq());
+         mg_printf_http_chunk(nc, "      \"calibClkFreq\": %d,\n",               w->GetCalibClkFreq());
          mg_printf_http_chunk(nc, "      \"chnTxEn\": %d,\n",                    w->GetChnTxEn());
 
          mg_printf_http_chunk(nc, "      \"dacOfs\": %1.3f,\n",                  w->GetDacOfsV());
@@ -1182,8 +1183,16 @@ int main(int argc, const char * argv[])
                for (auto &b: gl.wdb)
                   b->ReceiveControlRegisters();
             }
+
+            // cycle phase of sine wave
+            //static int delay = 0;
+            //for (auto &b: gl.wdb)
+            //   b->SetSineWaveDelay(delay);
+            //delay = (delay == 16) ? -16 : delay + 1;
+            
             last = now;
          }
+         
       }
    } catch  (std::runtime_error &e) {
       std::cout << std::endl;

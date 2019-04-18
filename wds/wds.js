@@ -457,6 +457,7 @@ function readWdb(b, init) {
                "extClkInSel": 0,
                "extClkFreq": 0,
                "localClkFreq": 0,
+               "calibClkFreq": 100,
                "chnTxEn": 3,
                "dacOfs": 0.000,
                "dacCalDc": 0.000,
