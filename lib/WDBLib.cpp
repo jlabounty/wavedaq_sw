@@ -659,12 +659,8 @@ void WDB::ReceiveStatusRegisters(unsigned int index, unsigned int nReg)
    // set calibration clock frequency depending on board
    if (GetBoardRevision()+'A' == 'G')
       mCalibClkFreq = 100;   // WD2G: 100 MHz
-   else if (GetBoardRevision()+'A' == 'F')
-      mCalibClkFreq = 160;   // WD2F: 160 MHz
-   else if (GetBoardRevision()+'A' == 'E')
-      mCalibClkFreq = 160;   // WD2E: 160 MHz
    else
-      mCalibClkFreq = 100;   // WD2E: 100 MHz
+      mCalibClkFreq = 100;   // others: 100 MHz
 }
 
 void WDB::ReceiveStatusRegister(int rofs)
@@ -2734,14 +2730,29 @@ void WP::CalibrateWaveforms(WDEvent* ev)
             for (int c=0 ; c<16 ; c++) {
                if (!ev->mDRSChannelPresent[c])
                   continue;
-
+               
+               // check if current channel is in any pattern
+               bool chActive = false;
+               for (int p=0 ; p<18 ; p++) {
+                  if (wdb->GetTrgPtrnEn() & (1 << p)) {
+                     if (wdb->GetTrgSrcEnPtrn(p) & (1 << c)) {
+                        chActive = true;
+                        break;
+                     }
+                  }
+               }
+               
+               if (!chActive)
+                  continue;
+               
                double tl = wdb->GetDacTriggerLevelV(c);
-
+               
                // try to figure out if we trigger on rising or falling edge
                bool rising = ((wdb->GetLeadTrailEdgeSel() == 0) &&
-                               ((wdb->GetTrgSrcPolarity() & (1 << c)) == 0)) ||
-                             ((wdb->GetLeadTrailEdgeSel() == 1) &&
-                               ((wdb->GetTrgSrcPolarity() & (1 << c)) > 0));
+                              ((wdb->GetTrgSrcPolarity() & (1 << c)) == 0)) ||
+                              ((wdb->GetLeadTrailEdgeSel() == 1) &&
+                              ((wdb->GetTrgSrcPolarity() & (1 << c)) > 0));
+               
                bool bEdge = false;
                if (rising) {
                   if (ev->mWfUDRS[c][i] < tl && ev->mWfUDRS[c][i+1] >= tl)
@@ -2753,15 +2764,18 @@ void WP::CalibrateWaveforms(WDEvent* ev)
 
                if (bEdge) {
                   double t0 = ev->mWfTDRS[c][i] +
-                              (ev->mWfTDRS[c][i+1]-ev->mWfTDRS[c][i])*(tl-ev->mWfUDRS[c][i])/(ev->mWfUDRS[c][i+1]-ev->mWfUDRS[c][i]);
+                    (ev->mWfTDRS[c][i+1]-ev->mWfTDRS[c][i])*(tl-ev->mWfUDRS[c][i]) /
+                    (ev->mWfUDRS[c][i+1]-ev->mWfUDRS[c][i]);
                   double iofs = 95 - (wdb->GetDrsSampleFreqMhz()/1000 - 1)*5;
-                  double dt = t0 - (1024*1E-6/wdb->GetDrsSampleFreqMhz() - iofs*1E-9 - wdb->GetTriggerDelayNs() * 1E-9);
-                  if (fabs(dt) < fabs(dt_min))
+                  double dt = t0 - (1024*1E-6/wdb->GetDrsSampleFreqMhz() - iofs*1E-9
+                                    - wdb->GetTriggerDelayNs() * 1E-9);
+                  if (fabs(dt) < fabs(dt_min)) {
                      dt_min = dt;
                      bFound = true;
                   }
                }
             }
+         }
 
          if (bFound) {
             for (int i=0 ; i<WD_N_CHANNELS ; i++)
@@ -3655,8 +3669,8 @@ void WP::CalibrateLocal(WDEvent *event, WDB *b)
 {
    float dv, llim, ulim;
 
-   llim = -0.2f;
-   ulim =  0.2f;
+   llim = -0.35f;
+   ulim =  0.35f;
 
    for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
       int tc = event->mTriggerCell[ch];
@@ -3815,8 +3829,8 @@ void WP::DoTimeCalibrationStep()
    if (calibProg.state == cCsFirstBoard) {
 
       calibProg.state       = cCsFirstSample;
-      calibProg.nIter1      = 170; // local calibration
-      calibProg.nIter2      = 100; // global calibration
+      calibProg.nIter1      = 500; // local calibration
+      calibProg.nIter2      = 500; // global calibration
       calibProg.nIter3      = 30;  // offset calibration
       calibProg.nIter4      = 0;
       calibProg.phase       = 0;
