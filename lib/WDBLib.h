@@ -508,6 +508,26 @@ public:
 
 //--------------------------------------------------------------------
 
+class WDBS {
+   int mRange;
+   int mDrsChTxEn;
+   int mAdcChTxEn;
+   int mFeMux;
+   int mFeGain;
+   int mDacCalDcV;
+   int mInterPkgDelay;
+   int mTriggerHoldoff;
+   int mTimingCalibSignalEn;
+   int mCalibBufferEn;
+   int mTimingReferenceSignal;
+   int mExtAsyncTriggerEn;
+   int mPatternTriggerEn;
+   
+public:
+   void Save(WDB *b);
+   void Restore(WDB *b);
+};
+
 // WaveDREAM board class. Interface functions to all WDB registers
 class WDB: public WDBREG {
    std::string      mName;
@@ -542,6 +562,7 @@ class WDB: public WDBREG {
    void             WriteUDP(unsigned int ofs, std::vector<unsigned int> data);
    std::vector<unsigned int> ReadUDP(unsigned int ofs, unsigned int len);
 
+   WDBS             mSave;
 public:
    
    // constructor
@@ -629,6 +650,9 @@ public:
    void Get1wireTemperatures(std::vector<float> &c, bool refresh = true);
    int GetCalibClkFreq() { return mCalibClkFreq; }
 
+   void Save() { mSave.Save(this); };
+   void Restore() { mSave.Restore(this); };
+   
    // high level control registers
    void SetDrsSampleFreq(unsigned int f);
    void SetLmkInputFreq(unsigned int f);

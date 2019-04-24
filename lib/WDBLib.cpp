@@ -656,11 +656,8 @@ void WDB::ReceiveStatusRegisters(unsigned int index, unsigned int nReg)
    }
 #endif
    
-   // set calibration clock frequency depending on board
-   if (GetBoardRevision()+'A' == 'G')
-      mCalibClkFreq = 100;   // WD2G: 100 MHz
-   else
-      mCalibClkFreq = 100;   // others: 100 MHz
+   // set calibration clock frequency
+   mCalibClkFreq = 100; // 100 MHz
 }
 
 void WDB::ReceiveStatusRegister(int rofs)
@@ -935,6 +932,7 @@ void WDB::SetLmkInputFreq(unsigned int f)
    } else {
       throw std::runtime_error(std::string("Unsupported LMK03000 input frequency"));
    }
+   
    SetApplySettingsLmk(1);
 }
 
@@ -1692,6 +1690,44 @@ bool WDB::LoadTimeCalibration(int freq, std::string path)
    if (mVerbose)
       std::cout << (mVCalib.IsValid() ? "ok" : "failure") << std::endl;
    return mTCalib.IsValid();
+}
+
+//--------------------------------------------------------------------
+
+void WDBS::Save(WDB *b)
+{
+   mRange = b->GetRange();
+   mFeGain = b->GetFeGain(-1);
+   mDacCalDcV = b->GetDacCalDcV();
+   mDrsChTxEn = b->GetDrsChTxEn();
+   mAdcChTxEn = b->GetAdcChTxEn();
+   mFeMux = b->GetFeMux(0);
+   mInterPkgDelay = b->GetInterPkgDelay();
+   mTriggerHoldoff = b->GetTriggerHoldoff();
+   mTimingCalibSignalEn = b->GetTimingCalibSignalEn();
+   mCalibBufferEn = b->GetCalibBufferEn();
+   mTimingReferenceSignal = b->GetTimingReferenceSignal();
+   mExtAsyncTriggerEn = b->GetExtAsyncTriggerEn();
+   mPatternTriggerEn = b->GetPatternTriggerEn();
+   mTriggerHoldoff = b->GetTriggerHoldoff();
+}
+
+void WDBS::Restore(WDB *b)
+{
+   b->SetRange(mRange);
+   b->SetFeGain(-1, mFeGain);
+   b->SetDacCalDcV(mDacCalDcV);
+   b->SetDrsChTxEn(mDrsChTxEn);
+   b->SetAdcChTxEn(mAdcChTxEn);
+   b->SetFeMux(-1, mFeMux);
+   b->SetInterPkgDelay(mInterPkgDelay);
+   b->SetTriggerHoldoff(mTriggerHoldoff);
+   b->SetTimingCalibSignalEn(mTimingCalibSignalEn);
+   b->SetCalibBufferEn(mCalibBufferEn);
+   b->SetTimingReferenceSignal(mTimingReferenceSignal);
+   b->SetExtAsyncTriggerEn(mExtAsyncTriggerEn);
+   b->SetPatternTriggerEn(mPatternTriggerEn);
+   b->SetTriggerHoldoff(mTriggerHoldoff);
 }
 
 //====================================================================
@@ -3222,10 +3258,7 @@ void WP::DoVoltageCalibrationStep()
       calibProg.state      = cCsRunning;
 
       // save current board settings
-      mOldRange = b->GetRange();
-      mOldMaskDrs = b->GetDrsChTxEn();
-      mOldMaskAdc = b->GetAdcChTxEn();
-      mOldTimingReference  = b->GetTimingReferenceSignal();
+      b->Save();
 
       b->mVCalib.mCalib.sampling_frequency = b->GetDrsSampleFreqMhz();
 
@@ -3560,11 +3593,8 @@ void WP::DoVoltageCalibrationStep()
    calibProg.progress = 1;
 
    // switch back to old board settings
-   b->SetRange(mOldRange);
-   b->SetDrsChTxEn(mOldMaskDrs);
-   b->SetAdcChTxEn(mOldMaskAdc);
-   b->SetTimingReferenceSignal(mOldTimingReference);
-
+   b->Restore();
+   
    if (calibProg.iBoard == calibProg.nBoard) {
       calibProg.state = cCsInactive;
       calibProg.mode  = cCmNone;
@@ -3858,16 +3888,7 @@ void WP::DoTimeCalibrationStep()
       calibProg.state       = cCsRunning;
 
       // save current board settings
-      mOldRange   = b->GetRange();
-      mOldMaskDrs = b->GetDrsChTxEn();
-      mOldMaskAdc = b->GetAdcChTxEn();
-      mOldFeMux   = b->GetFeMux(0);
-      mOldTimingCalibSignalEn = b->GetTimingCalibSignalEn();
-      mOldCalibBufferEn = b->GetCalibBufferEn();
-      mOldTimingReference = b->GetTimingReferenceSignal();
-      mOldExtAsyncTriggerEn = b->GetExtAsyncTriggerEn();
-      mOldPatternTriggerEn = b->GetPatternTriggerEn();
-      mOldTriggerHoldoff = b->GetTriggerHoldoff();
+      b->Save();
 
       b->mTCalib.mCalib.sampling_frequency = b->GetDrsSampleFreqMhz();
 
@@ -4023,17 +4044,8 @@ void WP::DoTimeCalibrationStep()
    calibProg.progress = 1;
 
    // switch back to old board settings
-   b->SetRange(mOldRange);
-   b->SetDrsChTxEn(mOldMaskDrs);
-   b->SetAdcChTxEn(mOldMaskAdc);
-   b->SetTimingReferenceSignal(mOldTimingReference);
-   b->SetFeMux(-1, mOldFeMux);
-   b->SetSineWaveEnable(mOldTimingCalibSignalEn);
-   b->SetCalibBufferEn(mOldCalibBufferEn);
-   b->SetExtAsyncTriggerEn(mOldExtAsyncTriggerEn);
-   b->SetPatternTriggerEn(mOldPatternTriggerEn);
-   b->SetTriggerHoldoff(mOldTriggerHoldoff);
-
+   b->Restore();
+   
    if (calibProg.iBoard == calibProg.nBoard) {
       calibProg.state = cCsInactive;
       calibProg.mode  = cCmNone;
