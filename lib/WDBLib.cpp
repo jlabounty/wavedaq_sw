@@ -945,47 +945,6 @@ void WDB::SetSineWaveEnable(bool value)
 {
    // switch TCA_CTRL
    SetTimingCalibSignalEn(value);
-   
-   // switch LMK output #6
-   
-   // disable divider and delay
-   SetLmk6ClkoutMux(0);
-   SetLmk6ClkoutDly(0);
-   // enbable/disable output
-   SetLmk6ClkoutEn(value);
-}
-
-void WDB::SetSineWaveDelay(int value)
-{
-   // set delay of LMK output #6
-   assert(value >= -16 && value <= 16);
-   if (value == 0) {
-      SetLmk0ClkoutMux(1);
-      SetLmk0ClkoutDly(0);
-      SetLmk6ClkoutMux(0);
-      SetLmk6ClkoutDly(0);
-   } else if (value > 0) {
-      SetLmk0ClkoutMux(1);
-      SetLmk0ClkoutDly(0);
-      // delay channel 6
-      SetLmk6ClkoutMux(2);
-      SetLmk6ClkoutDly(value-1);
-   } else {
-      SetLmk6ClkoutMux(0);
-      SetLmk6ClkoutDly(0);
-      // delay channel 0
-      SetLmk0ClkoutMux(3);
-      SetLmk0ClkoutDly(-value+1);
-   }
-}
-
-int WDB::GetSineWaveDelay()
-{
-   int v1 = GetLmk0ClkoutDly();
-   int v2 = GetLmk6ClkoutDly();
-   if (v2 > 0)
-      return -v2;
-   return v1;
 }
 
 int WDB::GetTimingReferenceSignal()
@@ -3605,11 +3564,22 @@ void WP::DoVoltageCalibrationStep()
 
 //--------------------------------------------------------------------
 
-void WP::AnalyzePeriod(WDEvent *event, WDB *b)
+int WP::AnalyzePeriod(WDEvent *event, WDB *b)
 {
    for (int ch=0 ; ch<WD_N_CHANNELS ; ch++) {
       int tc = event->mTriggerCell[ch];
 
+      double umin=0, umax=0;
+      for (int i1=tc+5; i1<tc+1024-5 ; i1++) {
+         if (event->mWfUDRS[ch][i1 % 1024] > umax)
+            umax = event->mWfUDRS[ch][i1 % 1024];
+         if (event->mWfUDRS[ch][i1 % 1024] < umin)
+            umin = event->mWfUDRS[ch][i1 % 1024];
+      }
+
+      if (umax - umin < 0.1)
+         return -1;
+      
       // rising edges
       for (int i1=tc+5; i1<tc+1024-5 ; i1++) {
          if (event->mWfUDRS[ch][i1 % 1024] <= 0 && event->mWfUDRS[ch][(i1+1) % 1024] > 0) {
@@ -3662,6 +3632,8 @@ void WP::AnalyzePeriod(WDEvent *event, WDB *b)
          }
       }
    }
+   
+   return 1;
 }
 
 /*-----------------------------------------------------------------------------------------*/
@@ -3861,7 +3833,6 @@ void WP::DoTimeCalibrationStep()
       calibProg.nIter2      = 500; // global calibration
       calibProg.nIter3      = 30;  // offset calibration
       calibProg.nIter4      = 0;
-      calibProg.phase       = 0;
 
       // turn off all calibration
       mRotateWaveform       = false;
@@ -3928,9 +3899,6 @@ void WP::DoTimeCalibrationStep()
       // set inter-packet delay to default value
       b->SetInterPkgDelay(1875);
 
-      calibProg.phase = 0;
-      b->SetSineWaveDelay(calibProg.phase);
-
       calibProg.ave = new Averager(1, WD_N_CHANNELS, 1024, std::max(calibProg.nIter1, calibProg.nIter2));
    }
 
@@ -3940,20 +3908,17 @@ void WP::DoTimeCalibrationStep()
 
       calibProg.iIter1++;
 
-      // switch phase of LMK clock
-      if (calibProg.iIter1 % 5 == 0) {
-         calibProg.phase++;
-         if (calibProg.phase == 17)
-            calibProg.phase = -16;
-         b->SetSineWaveDelay(calibProg.phase);
-         sleep_ms(10);
-      }
-
       // get one event from board
       WDEvent event(b->GetSerialNumber());
       while (!RequestEvent(b, CALIB_TIMEOUT, event));
 
-      AnalyzePeriod(&event, b);
+      if (AnalyzePeriod(&event, b) == -1) {
+         b->Restore();
+         calibProg.state = cCsInactive;
+         calibProg.mode  = cCmTimeError;
+         return;
+      }
+      
       CalibrateLocal(&event, b);
 
       calibProg.progress = (double)(calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3) /
@@ -3961,9 +3926,6 @@ void WP::DoTimeCalibrationStep()
 
       if (calibProg.iIter1 == calibProg.nIter1) {
          calibProg.ave->Reset();
-         calibProg.phase = 0;
-         b->SetSineWaveDelay(calibProg.phase);
-         sleep_ms(10);
       }
 
       return;
@@ -3974,15 +3936,6 @@ void WP::DoTimeCalibrationStep()
    if (calibProg.iIter2 < calibProg.nIter2) {
 
       calibProg.iIter2++;
-
-      // switch phase of LMK clock
-      if (calibProg.iIter1 % 10 == 0) {
-         calibProg.phase++;
-         if (calibProg.phase == 17)
-            calibProg.phase = -16;
-         b->SetSineWaveDelay(calibProg.phase);
-         sleep_ms(10);
-      }
 
       // get one event from board
       WDEvent event(b->GetSerialNumber());
@@ -3996,9 +3949,6 @@ void WP::DoTimeCalibrationStep()
 
       if (calibProg.iIter2 == calibProg.nIter2) {
          calibProg.ave->Reset();
-         calibProg.phase = 0;
-         b->SetSineWaveDelay(calibProg.phase);
-         sleep_ms(10);
          mRotateWaveform       = true;
          mTimeCalib1           = true;
          b->mTCalib.SetValid(true);

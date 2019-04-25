@@ -667,6 +667,21 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          return;
       }
 
+      // return error code from time calibration
+      if (gl->wp->IsTcalibError()) {
+         gl->wp->ClearTcalibError();
+
+         int t = 12;    // array type indicating error
+         mg_send_http_chunk(nc, (const char *)&t, 4);
+         
+         int b = gl->wp->GetTcalibBoard();
+         mg_send_http_chunk(nc, (const char *)&b, 4);
+         
+         mg_send_http_chunk(nc, "", 0);
+         return;
+
+      }
+      
       // return progress and period in time calibration mode
       if (gl->wp->IsTcalibActive()) {
          int t = 11;    // array type

@@ -988,8 +988,11 @@ function receiveWF() {
                   wf.T[c][j] = floatArray[i++];
             }
 
+         } else if (responseType == 12) { // tcalib error
+            dlgMessage("Error", "Board has no calibration oscillator", true, true);
+            break;
          } else {
-            alert("WDS: Invalid binary data received form server");
+            dlgMessage("Error", "Invalid binary data received form server", true, true);
             break;
          }
       }

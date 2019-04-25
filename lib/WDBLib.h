@@ -186,7 +186,6 @@ typedef struct {
    int            iIterTotal;
    int            nIterTotal;
    Averager       *ave;
-   int            phase;
 } CALIB_PROGRESS;
 
 //--------------------------------------------------------------------
@@ -338,7 +337,8 @@ class WP {
    enum {
       cCmNone         = 0,
       cCmVoltage      = 1,
-      cCmTime         = 2
+      cCmTime         = 2,
+      cCmTimeError    = 3
    };
 
    static int        gDataSocket;
@@ -414,7 +414,7 @@ class WP {
    int               mOldPatternTriggerEn;
    int               mOldTriggerHoldoff;
    
-   void              AnalyzePeriod(WDEvent *, WDB *);
+   int               AnalyzePeriod(WDEvent *, WDB *);
    void              AnalyzeTimeOffset(WDEvent *, WDB *);
    void              CalibrateLocal(WDEvent *, WDB *);
    void              CalibrateGlobal(WDEvent *, WDB *);
@@ -460,6 +460,8 @@ public:
    
    bool IsVcalibActive() { return calibProg.mode == cCmVoltage; }
    bool IsTcalibActive() { return calibProg.mode == cCmTime; }
+   bool IsTcalibError() { return calibProg.mode == cCmTimeError; }
+   void ClearTcalibError() { calibProg.mode = cCmNone; }
    
    int  GetVcalibBoard() { return calibProg.iBoard; }
    float GetVcalibProgress() { return calibProg.progress; }
@@ -659,8 +661,6 @@ public:
    unsigned int GetLmkInputFreq();
 
    void SetSineWaveEnable(bool value);
-   void SetSineWaveDelay(int value);
-   int GetSineWaveDelay();
    void SetTimingReferenceSignal(int value);
    int GetTimingReferenceSignal();
 
