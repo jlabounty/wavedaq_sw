@@ -1709,7 +1709,6 @@ void WDBS::Save(WDB *b)
    mTimingReferenceSignal = b->GetTimingReferenceSignal();
    mExtAsyncTriggerEn = b->GetExtAsyncTriggerEn();
    mPatternTriggerEn = b->GetPatternTriggerEn();
-   mTriggerHoldoff = b->GetTriggerHoldoff();
 }
 
 void WDBS::Restore(WDB *b)
@@ -1727,7 +1726,6 @@ void WDBS::Restore(WDB *b)
    b->SetTimingReferenceSignal(mTimingReferenceSignal);
    b->SetExtAsyncTriggerEn(mExtAsyncTriggerEn);
    b->SetPatternTriggerEn(mPatternTriggerEn);
-   b->SetTriggerHoldoff(mTriggerHoldoff);
 }
 
 //====================================================================

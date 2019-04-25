@@ -744,8 +744,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             if (gl->triggerMode == cTriggerModeAuto)
                gl->wdb[b]->TriggerSoftEvent();
             else if (gl->triggerMode == cTriggerModeNormal) {
-               if (!gl->triggerSelfArm)
+               if (!gl->triggerSelfArm) {
+                  sleep_ms(gl->wdb[b]->GetTriggerHoldoff());
                   gl->wdb[b]->SetDaqSingle(1);
+               }
             }
          }
 
