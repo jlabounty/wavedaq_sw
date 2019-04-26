@@ -1276,7 +1276,7 @@ Oscilloscope.prototype.drawDT = function (ctx) {
          ctx.strokeStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
          for (var i = 0; i < 1024; i++) {
             var x = this.x1 + i / 1024.0 * this.w;
-            y = (period - this.wf.T[c][i] * 1E9) * this.h / 10 + this.wfUO[c];
+            y = (period - this.wf.T[c][i] * 1E9) * this.h + this.wfUO[c]; // 100 ps per division
 
             if (this.wf.T[c][i] * 1E9 != 0)
                ctx.fillRect(x, y, 3, 3);

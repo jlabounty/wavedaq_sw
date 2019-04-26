@@ -3667,7 +3667,7 @@ void WP::AnalyzeTimeOffset(WDEvent *event, WDB *b)
 
 void WP::CalibrateLocal(WDEvent *event, WDB *b)
 {
-   float dv, llim, ulim;
+   float u1, u2, llim, ulim, av;
 
    llim = -0.35f;
    ulim =  0.35f;
@@ -3677,48 +3677,47 @@ void WP::CalibrateLocal(WDEvent *event, WDB *b)
 
       for (int i=tc+5; i<tc+1024-5 ; i++) {
 
-         // rising edges
+         u1 = event->mWfUDRS[ch][i % 1024];
+         u2 = event->mWfUDRS[ch][(i+1) % 1024];
+         av = (u1 + u2) / 2;
 
+         // check if samples inside the limits
+         if (u1 < llim || u1 > ulim || u2 < llim || u2 > ulim)
+            continue;
+         
          // test slope between previous and next cell to allow for negative cell width
-         if (event->mWfUDRS[ch][(i+1024-1) % 1024] < event->mWfUDRS[ch][(i+2) % 1024] &&
-             event->mWfUDRS[ch][i % 1024] > llim &&
-             event->mWfUDRS[ch][(i+1) % 1024] < ulim) {
 
-            // calculate delta_v
-            dv = event->mWfUDRS[ch][(i+1) % 1024] - event->mWfUDRS[ch][i % 1024];
-
-            // average delta_v
-            calibProg.ave->Add(0, ch, i % 1024, dv);
+         // rising edges
+         if (event->mWfUDRS[ch][(i+1024-1) % 1024] < event->mWfUDRS[ch][(i+2) % 1024]) {
+            calibProg.ave->Add(0, ch, i % 1024, u2 - u1);
          }
 
          // falling edges
-         if (event->mWfUDRS[ch][(i+1024-1) % 1024] > event->mWfUDRS[ch][(i+2) % 1024] &&
-             event->mWfUDRS[ch][i % 1024] < ulim &&
-             event->mWfUDRS[ch][(i+1) % 1024] > llim) {
-
-            // calculate delta_v
-            dv = event->mWfUDRS[ch][(i+1) % 1024] - event->mWfUDRS[ch][i % 1024];
-
-            // average delta_v
-            calibProg.ave->Add(0, ch, i % 1024, -dv);
+         if (event->mWfUDRS[ch][(i+1024-1) % 1024] > event->mWfUDRS[ch][(i+2) % 1024]) {
+            calibProg.ave->Add(0, ch, i % 1024, u1 - u2);
          }
       }
 
-      // calculate calibration every 165 (5 events * 33 phases) events
-      if (calibProg.iIter1 % 10 == 0) {
+      // calculate calibration every 100 events
+      if (calibProg.iIter1 % 100 == 0) {
          // average over all 1024 dU
          double sum = 0;
          double cellDV[1024];
          int    sum_n = 0;
 
          for (int i=0 ; i<1024 ; i++) {
-            cellDV[i] = calibProg.ave->RobustAverage(0, ch, i);
+            cellDV[i] = calibProg.ave->Average(0, ch, i);
             if (cellDV[i] > 0) {
                sum += cellDV[i];
                sum_n++;
             }
          }
-
+         
+         /*
+         if (calibProg.iIter1 == calibProg.nIter1 && ch == 0)
+            calibProg.ave->SaveDistribution("dist.txt", 0, 0, -1);
+         */
+         
          sum /= sum_n;
          double dtCell = 1.0/b->GetDrsSampleFreqMhz()*1E-6;
 
@@ -3821,6 +3820,16 @@ void WP::CalibrateGlobal(WDEvent *event, WDB *b)
    }
 }
 
+void saveCalib(WDB *b, const char *fn)
+{
+   FILE *f;
+   
+   f = fopen(fn, "wt");
+   for (int i=0 ; i<1024 ; i++)
+      fprintf(f, "%lf\t%lf\n", b->mTCalib.mCalib.dt[0][i]*1E9, b->mTCalib.mCalib.dt[1][i]*1E9);
+   fclose(f);
+}
+
 //--------------------------------------------------------------------
 
 void WP::DoTimeCalibrationStep()
@@ -3829,9 +3838,9 @@ void WP::DoTimeCalibrationStep()
    if (calibProg.state == cCsFirstBoard) {
 
       calibProg.state       = cCsFirstSample;
-      calibProg.nIter1      = 500; // local calibration
-      calibProg.nIter2      = 500; // global calibration
-      calibProg.nIter3      = 30;  // offset calibration
+      calibProg.nIter1      = 2000; // local calibration
+      calibProg.nIter2      = 500;  // global calibration
+      calibProg.nIter3      = 30;   // offset calibration
       calibProg.nIter4      = 0;
 
       // turn off all calibration
@@ -3926,6 +3935,7 @@ void WP::DoTimeCalibrationStep()
 
       if (calibProg.iIter1 == calibProg.nIter1) {
          calibProg.ave->Reset();
+         //saveCalib(b, "_local.txt");
       }
 
       return;
@@ -3952,6 +3962,7 @@ void WP::DoTimeCalibrationStep()
          mRotateWaveform       = true;
          mTimeCalib1           = true;
          b->mTCalib.SetValid(true);
+         //saveCalib(b, "_global.txt");
       }
 
       return;

@@ -19,7 +19,7 @@ public:
    double Average(int x, int y, int z);
    double Median(int x, int y, int z);
    double RobustAverage(int x, int y, int z);
-   int SaveNormalizedDistribution(const char *filename, int x);
+   int SaveDistribution(const char *filename, int x, int y, int z);
    int Debug();
 
 };

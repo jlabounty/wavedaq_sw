@@ -159,52 +159,64 @@ double Averager::RobustAverage(int x, int y, int z)
 
 /*----------------------------------------------------------------*/
 
-int Averager::SaveNormalizedDistribution(const char *filename, int x)
+int Averager::SaveDistribution(const char *filename, int ax, int ay, int az)
 {
-   assert(x < fNx);
+   assert(ax < fNx);
+   assert(ay < fNy);
+   assert(az < fNz);
    FILE *f = fopen(filename, "wt");
    
    if (!f)
       return 0;
    
-   fprintf(f, "X, Y, Z, Min, Max, Ave, Sigma\n");
+   fprintf(f, "X, Y, Z, N, Min, Max, Ave, Sigma, Median\n");
    
-   for (int y=0 ; y<fNy ; y++)
-      for (int z=0 ; z<fNz ; z++) {
-         
-         int nIndex = (x*fNy + y)*fNz + z;
-         int aIndex = ((x*fNy + y)*fNz + z) * fDim;
-         
-         if (fN[nIndex] > 1) {
-            fprintf(f, "%d,%d, %d, ", x, y, z);
+   for (int x=0 ; x<fNx ; x++)
+      for (int y=0 ; y<fNy ; y++)
+         for (int z=0 ; z<fNz ; z++) {
             
-            double s = 0;
-            double s2 = 0;
-            double min = 0;
-            double max = 0;
-            int n = fN[nIndex];
-            double m = Median(x, y, z);
+            if (ax != -1 && x != ax)
+               continue;
+            if (ay != -1 && y != ay)
+               continue;
+            if (az != -1 && z != az)
+               continue;
             
-            for (int i=0 ; i<n ; i++) {
-               double v = fArray[aIndex + i] - m;
-               s += v;
-               s2 += v*v;
-               if (v < min)
-                  min = v;
-               if (v > max)
-                  max = v;
+            int nIndex = (x*fNy + y)*fNz + z;
+            int aIndex = ((x*fNy + y)*fNz + z) * fDim;
+            
+            if (fN[nIndex] > 1) {
+               fprintf(f, "%d,%d, %d, ", x, y, z);
+               
+               double s = 0;
+               double s2 = 0;
+               double min = fArray[aIndex];
+               double max = fArray[aIndex];
+               int n = fN[nIndex];
+               double median = Median(x, y, z);
+               
+               for (int i=0 ; i<n ; i++) {
+                  //double v = fArray[aIndex + i] - median;
+                  double v = fArray[aIndex + i];
+                  s += v;
+                  s2 += v*v;
+                  if (v < min)
+                     min = v;
+                  if (v > max)
+                     max = v;
+               }
+               double sigma = sqrt((n * s2 - s * s) / (n * (n-1)));
+               double average = s / n;
+               
+               fprintf(f, "%d, %6.4lf, %6.4lf, %6.4lf, %8.6lf, %6.4lf, ", fN[nIndex], min, max, average, sigma, median);
+               
+               for (int i=0 ; i<n ; i++)
+                  //fprintf(f, "%6.4lf,", fArray[aIndex + i] - median);
+                  fprintf(f, "%6.4lf,", fArray[aIndex + i]);
+
+               fprintf(f, "\n");
             }
-            double sigma = sqrt((n * s2 - s * s) / (n * (n-1)));
-            double average = s / n;
-            
-            fprintf(f, "%6.4lf, %6.4lf, %6.4lf, %8.6lf, ", min, max, average, sigma);
-            
-            for (int i=0 ; i<n ; i++)
-               fprintf(f, "%6.4lf,", fArray[aIndex + i] - m);
-            
-            fprintf(f, "\n");
          }
-      }
    
    fclose(f);
    return 1;
