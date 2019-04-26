@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
       printf("[37]: Set trigger delay    \t \t  [38]: Get trigger delay\n");
       printf("[39]: LockSerdes FSM Start \t \t  [40]: Get current serdes values\n");
       printf("[41]: LockSerdes Status    \t \t  [42]: LockSerdes Draw Eye      \n");
-      printf("[43]: Single crate TRG conf\t \t  [44]:                          \n");
+      printf("[43]: Single crate TRG conf\t \t  [44]: Read Prescaling          \n");
       printf("[-1]: Exit\n");
 
       do {
@@ -767,6 +767,15 @@ int main(int argc, char *argv[])
           TCBBoard.SetSingleCrateTriggerOr(a.size(), &a[0], shaper);
         }
       }
+      if(option == 44) {
+         printf(" opt = 44 : Read precaling values ... \n");
+	 u_int32_t pvalue[64];
+	 TCBBoard.GetPrescaling(pvalue);
+         for(int irow = 0; irow<TCBBoard.fntrg; irow++) {
+	   printf("prescaling for trigger %d is %d\n",irow,pvalue[irow]);
+         }
+      }
+
       
 
       /* end of the main loop on the options*/

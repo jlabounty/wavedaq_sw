@@ -365,7 +365,7 @@ class WDWDB : public WDBoard, public WDB{
          if(arraySize == 1){
 	   if (pzc[0] > 0) {
 	     SetFePzc(-1, 1);
-	     if(pzc[0] <1 || pzc[0] >6) std::cout<<" ERROR first PZC value must be between 1 and 7 included, the value won't be written"<<std::endl;
+	     if(pzc[0] <1 || pzc[0] >7) std::cout<<" ERROR first PZC value must be between 1 and 7 included, the value won't be written"<<std::endl;
 	     else   SetDacPzcLevelN(pzc[0]-1);
 	   } else {
 	     SetFePzc(-1, 0);

@@ -341,7 +341,8 @@ void WDSystem::TrainSerdes(){
 //allocate buffers and spawn DAQ threads
 void WDSystem::SpawnDAQ(){
    //number of buffer at each buffer stage
-   const int number_of_buffers = 5;
+   const int number_of_buffers = 50;
+   const int number_of_calibrated_buffers = 100000;
 
    printf("starting all threads\n");
 
@@ -357,8 +358,8 @@ void WDSystem::SpawnDAQ(){
 
    //create buffers
    fPacketBuffer= new DAQBuffer<WDAQPacketData>(nWDBs*128*number_of_buffers, "PACKETBUFFER");
-   fEventBuffer= new DAQBuffer<WDAQEvent>(number_of_buffers, "BUILDBUFFER");
-   fCalibratedBuffer= new DAQBuffer<WDAQEvent>(number_of_buffers, "EVENTBUFFER");
+   fEventBuffer= new DAQBuffer<WDAQEvent>(number_of_calibrated_buffers, "BUILDBUFFER");
+   fCalibratedBuffer= new DAQBuffer<WDAQEvent>(number_of_calibrated_buffers, "EVENTBUFFER");
 
    //spawn threads
    fCollectorThread = new WDAQPacketCollector(fPacketBuffer);
