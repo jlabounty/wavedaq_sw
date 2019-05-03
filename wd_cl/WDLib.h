@@ -736,6 +736,10 @@ class WDTCB : public WDBoard, public TCB{
          SetIDCode();
          SetNTRG();
          printf("connected to TCB with IDCode = %04x\n", fidcode);
+
+         //reset stuff
+         ResetIDLYCTRL();
+         ResetBufferLogic();
       }
 
       void SetSerdesTraining(bool state){
@@ -747,10 +751,15 @@ class WDTCB : public WDBoard, public TCB{
          //enable serdespattern according to request
          if(state){
             rrun |= 0x00000200;
+
+            //if enabling also reset transmitter SERDES
+            ResetTransmitter();
          } else {
             rrun &= 0xFFFFFDFF;
          }
          SetRRUN(&rrun);
+
+    
       }
       bool IsSerdesTraining(){
          unsigned int val=0;
@@ -878,21 +887,21 @@ class WDTCB : public WDBoard, public TCB{
 	    SetPacketizerCommandAt(0, STOP, 0, 0);
          }
 
-	 //BUSY mask from external DAQ
-	 unsigned int extdaqbmask;
-	 try{
-	   extdaqbmask = GetProperty("ExtDAQBusyMask").GetUInt();
-	 } catch (const std::runtime_error& ex){
-	   extdaqbmask = 0;
-	 }
-	 // set the mask
-	 SetFMask(false, extdaqbmask==1);
-      
-	 SetPacketizerAutostart(true);
-	 SetPacketizerEnable(true);
+    //BUSY mask from external DAQ
+    unsigned int extdaqbmask;
+    try{
+       extdaqbmask = GetProperty("ExtDAQBusyMask").GetUInt();
+    } catch (const std::runtime_error& ex){
+       extdaqbmask = 0;
+    }
+    // set the mask
+    SetFMask(false, extdaqbmask==1);
 
-         if((fidcode >>12) != 3)
-            GoRun();
+    SetPacketizerAutostart(true);
+    SetPacketizerEnable(true);
+
+    if((fidcode >>12) != 3)
+       GoRun();
 
       }
 
