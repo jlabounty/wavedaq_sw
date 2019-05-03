@@ -246,7 +246,8 @@ class WDWDB : public WDBoard, public WDB{
          SetTriggerCfgOr(0);
          SetTriggerCfgAnd(0);
          SetPatternTriggerSelect(WDB::cTriggerSchemeSimple);*/
-         SetTriggerTypeSel(1);
+         SetPatternTriggerEn(0);
+         SetExtAsyncTriggerEn(1);
          SetExtTriggerOutEnable(0);
          SetTriggerOutPulseLength(4);
          SetExtClkInSel(0);
