@@ -739,6 +739,7 @@ class WDTCB : public WDBoard, public TCB{
 
          //reset stuff
          ResetIDLYCTRL();
+         ResetSyncWaveformSerdes();
          ResetBufferLogic();
       }
 

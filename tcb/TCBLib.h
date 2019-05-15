@@ -5,63 +5,69 @@
 //  Created by Luca Galli on 12/12/2015
 //
 
-#define RRUN          0x00                      // run control
-#define RBUSDLY       0x01                      // trigger bus delay
-#define RNTRG         0x02                      // trigger enable bits
-#define RALGSEL       0x03                      // algorithm select on TCB1/2_0
-#define RPLLRES       0x04                      // Reset PLLs
-#define RUDPHEA       0x05                      // UDP Header info register
-#define PRESCADC      0x06                      // ADC readout prescaling
-#define USR_ACCESS    0x0F                      // FW compilaiton date
-#define RENA          0x20                      // trigger enable (first address)
-#define RTRIPATT      0x30                      // trigger pattern (first address)
-#define RTRGFORCE     0x40                      // force a trigger (first address)
-#define RCMD          0xFF                      // daq state machine control
-#define RPRESCA       0x100                     // prescaling value first address
-#define RTOTTIME      0x200                     // total time
-#define RLIVETIME     0x201                     // live time
-#define REVECOU       0x202                     // event counter
-#define RTRITYPE      0x203                     // trigger type
-#define RSYSEVECOU    0x204                     // system (trgbus) event counter
-#define RSYSTRITYPE   0x205                     // system (trgbus) trigger type
-#define RSERDESCONF   0x300                     // serdes configuration and reset
-#define RDCBSERDESCONF 0x320                     // serdes configuration and reset for dcb
-#define RSERDESTX     0x321                     // tx serdes configuration and delay load
-#define RSERDESBSLP   0x322                     // individual bitslip for each channel (first address)
-#define RDCBSERDESBSLP 0x326                     // individual bitslip for dcb
-#define RSERDESMSK    0x327                      // mask for input serdes
-#define RSERDESVAL0   0x328                     // serdes value to be checked (lower part)
-#define RSERDESVAL1   0x329                     // serdes value to be checked (upper part)
-#define RSERDESCHECK  0x32A                     // serdes status (first address)
-#define RDCBSERDESCHECK 0x32E                    // serdes status DCB
-#define RSERDESSTATUS  0x330                    // readout of serdes configuration
-#define RDCBSERDESSTATUS 0x350                    // readout of dcb serdes configuration
-#define RSERDESBUSY   0x351                     // autolock serdes busy
-#define RSERDESFAIL   0x352                     // autolock serdes fail
-#define RSERDESDLYSTATE 0x360                     // autolock serdes sate for each delay
-#define RDCBSERDESDLYSTATE 0x370                     // autolock serdes sate for each delay
-#define RSERDESDLYTEST 0x380                     // autolock serdes tested for each delay
-#define RDCBSERDESDLYTEST 0x390                     // autolock serdes tested for each delay
+#define RRUN               0x00       // run control
+#define RBUSDLY            0x01       // trigger bus delay
+#define RNTRG              0x02       // trigger enable bits
+#define RALGSEL            0x03       // algorithm select on TCB1/2_0
+#define RPLLRES            0x04       // Reset PLLs
+#define RUDPHEA            0x05       // UDP Header info register
+#define PRESCADC           0x06       // ADC readout prescaling
+#define RSYNCWFM           0x07       // SYNC Waveform from serdes
+#define USR_ACCESS         0x0F       // FW compilaiton date
+#define RENA               0x20       // trigger enable (first address)
+#define RTRIPATT           0x30       // trigger pattern (first address)
+#define RTRGFORCE          0x40       // force a trigger (first address)
+#define RCMD               0xFF       // daq state machine control
+#define RPRESCA            0x100      // prescaling value first address
+#define RTOTTIME           0x200      // total time
+#define RLIVETIME          0x201      // live time
+#define REVECOU            0x202      // event counter
+#define RTRITYPE           0x203      // trigger type
+#define RSYSEVECOU         0x204      // system (trgbus) event counter
+#define RSYSTRITYPE        0x205      // system (trgbus) trigger type
+#define RSERDESCONF        0x300      // serdes configuration and reset
+#define RDCBSERDESCONF     0x320      // serdes configuration and reset for dcb
+#define RSERDESTX          0x321      // tx serdes configuration and delay load
+#define RSERDESBSLP        0x322      // individual bitslip for each channel (first address)
+#define RDCBSERDESBSLP     0x326      // individual bitslip for dcb
+#define RSERDESMSK         0x327      // mask for input serdes
+#define RSERDESVAL0        0x328      // serdes value to be checked (lower part)
+#define RSERDESVAL1        0x329      // serdes value to be checked (upper part)
+#define RSERDESCHECK       0x32A      // serdes status (first address)
+#define RDCBSERDESCHECK    0x32E      // serdes status DCB
+#define RSERDESSTATUS      0x330      // readout of serdes configuration
+#define RDCBSERDESSTATUS   0x350      // readout of dcb serdes configuration
+#define RSERDESBUSY        0x351      // autolock serdes busy
+#define RSERDESFAIL        0x352      // autolock serdes fail
+#define RDCBDATA           0x353      // Serdes Data From DCB
+#define RSERDESALIGNDLY    0x354      // autolock serdes slot delay enable
+#define RSERDESALIGNDELTA0 0x355      // autolock serdes measured time offsets
+#define RSERDESALIGNDELTA1 0x356      // autolock serdes measured time offsets
+#define RSERDESMINLATENCY  0x357      // autolock serdes slot with minimum latency
+#define RSERDESDLYSTATE    0x360      // autolock serdes sate for each delay
+#define RDCBSERDESDLYSTATE 0x370      // autolock serdes sate for each delay
+#define RSERDESDLYTEST     0x380      // autolock serdes tested for each delay
+#define RDCBSERDESDLYTEST  0x390      // autolock serdes tested for each delay
+#define RTRGCOU            0x400      // trigger counter (first address)
+#define RTRGDLY            0x500      // trigger delay (first address)
+#define RPARAM             0x600      // start of parameter space
+#define RSINGLECRATECFG    0x800      // configurations for single crate trigger logic
+#define RSINGLEISVETO      0x801      // veto set for input channels in single crate logic
+#define RSINGLEMASK        0x809      // mask for input channels in single crate logic
+#define RSINGLELOGIC       0x811      // first stage configuration in single crate logic
+#define RSERDESCOU         0x900      // serdes error counter (first address)
+#define RSERDESTIME        0x980      // serdes test time
+#define RDCBSERDESCOU      0x981      // serdes error counter dcb
 
-#define RSERDESCOU    0x900                     // serdes error counter (first address)
-#define RSERDESTIME   0x980                     // serdes test time
-#define RDCBSERDESCOU    0x981                     // serdes error counter dcb
-#define RTRGCOU       0x400                     // trigger counter (first address)
-#define RTRGDLY       0x500                     // trigger delay (first address)
-#define RPARAM        0x600                     // start of parameter space
-#define RSINGLECRATECFG 0x800                     // configurations for single crate trigger logic
-#define RSINGLEISVETO 0x801                     // veto set for input channels in single crate logic
-#define RSINGLEMASK   0x809                     // mask for input channels in single crate logic
-#define RSINGLELOGIC  0x811                    // first stage configuration in single crate logic
+#define RALGCLKMEMADDR     0x0FFFE    // counter stop position for ALGCLK memories
+#define RMEMADDR           0x0FFFF    // counter stop position
+#define MEMBASEADDR        0x10000    //base address for memories
+#define GENTMEMBASE        0x12000    //base address for trigger generation memories (two memories with size = GENTDIM)
 
-#define RALGCLKMEMADDR 0x0FFFE                   // counter stop position for ALGCLK memories
-#define RMEMADDR      0x0FFFF                   // counter stop position
-#define MEMBASEADDR   0x10000                   //base address for memories
-#define GENTMEMBASE   0x12000                   //base address for trigger generation memories (two memories with size = GENTDIM)
-#define PACKAGERBASE  0x01000000                //base address for packager memories
-#define RARBITER      0x01001000                //Bus Arbiter register and packager controller
-#define BUFFERBASE    0x02000000                //Buffer base address
-#define PACKAGERREGS  0x03000000                //PackagerRegs base address
+#define PACKAGERBASE       0x01000000 //base address for packager memories
+#define RARBITER           0x01001000 //Bus Arbiter register and packager controller
+#define BUFFERBASE         0x02000000 //Buffer base address
+#define PACKAGERREGS       0x03000000 //PackagerRegs base address
 
 ///////////////////////////////////////////////////////////
 // LIBRARY ASSOCIATED TO TCB_X_0
@@ -341,6 +347,10 @@ public:
    u_int32_t SkipBufferBankSPI(u_int32_t ptr, int length);
    //get bank data
    void GetBufferBankDataSPI(u_int32_t ptr, u_int32_t *data, int length);
+   //get SYNC waveform
+   void GetSyncWaveform(u_int32_t *ptr);
+   //reset SYNC waveform serdes
+   void ResetSyncWaveformSerdes();
 
 };
 

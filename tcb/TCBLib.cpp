@@ -1596,5 +1596,13 @@ void TCB::GetBufferBankDataSPI(u_int32_t ptr, u_int32_t *data, int length){
    }
    ReadBLT(ptr+iword,data+iword, length-(BLTSIZE*iword));
 }
-
+//get SYNC waveform
+void TCB::GetSyncWaveform(u_int32_t *ptr){
+   ReadReg(RSYNCWFM, ptr); 
+}
+//reset SYNC waveform serdes
+void TCB::ResetSyncWaveformSerdes(){
+   u_int32_t data = 0x80000000;
+   WriteReg(RSYNCWFM, &data); 
+}
 
