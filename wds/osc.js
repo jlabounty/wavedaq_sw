@@ -1138,8 +1138,12 @@ Oscilloscope.prototype.drawWF = function (ctx) {
          var freqMax;
          if (OSC.wdb[OSC.curBoard].readoutSrcSel == 1)
             freqMax = OSC.wdb[OSC.curBoard].drsSampleFreq / 2;
-         else
+         else if (OSC.wdb[OSC.curBoard].readoutSrcSel == 2)
             freqMax = OSC.wdb[OSC.curBoard].adcSampleFreq / 2;
+         else if (OSC.wdb[OSC.curBoard].readoutSrcSel == 3)
+            freqMax = OSC.wdb[OSC.curBoard].adcSampleFreq * 8 / 2;
+         else
+            freqMax = OSC.wdb[OSC.curBoard].adcSampleFreq / 2
          var f = i/10.0*freqMax;
 
          ctx.font = '14px sans-serif';

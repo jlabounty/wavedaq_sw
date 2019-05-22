@@ -29,7 +29,7 @@ enum TRIGGERMODE {
 enum READOUTMODE {
    cReadoutModeDRS    = 1,
    cReadoutModeADC    = 2,
-   cREadoutModeTDC    = 3
+   cReadoutModeTDC    = 3
 };
 
 #define LI_FORMAT_BIN  1
@@ -130,15 +130,19 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                b->SetChnTxEn(mask);
                if (gl->readoutMode == cReadoutModeDRS)
                   b->SetDrsChTxEn(mask);
-               else
+               else if (gl->readoutMode == cReadoutModeADC)
                   b->SetAdcChTxEn(mask);
+               else
+                  b->SetTdcChTxEn(mask);
             }
          else {
             gl->wdb[iBoard]->SetChnTxEn(mask);
             if (gl->readoutMode == cReadoutModeDRS)
                gl->wdb[iBoard]->SetDrsChTxEn(mask);
-            else
+            else if (gl->readoutMode == cReadoutModeADC)
                gl->wdb[iBoard]->SetAdcChTxEn(mask);
+            else
+               gl->wdb[iBoard]->SetTdcChTxEn(mask);
          }
       }
 
@@ -306,10 +310,17 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                   gl->readoutMode = cReadoutModeDRS;
                   b->SetDrsChTxEn(b->GetChnTxEn());
                   b->SetAdcChTxEn(0);
-               } else {
+                  b->SetTdcChTxEn(0);
+               } else if (std::stoi(value) == (int)cReadoutModeADC) {
                   gl->readoutMode = cReadoutModeADC;
                   b->SetDrsChTxEn(0);
                   b->SetAdcChTxEn(b->GetChnTxEn());
+                  b->SetTdcChTxEn(0);
+               } else {
+                  gl->readoutMode = cReadoutModeTDC;
+                  b->SetDrsChTxEn(0);
+                  b->SetAdcChTxEn(0);
+                  b->SetTdcChTxEn(b->GetChnTxEn());
                }
             }
          else {
@@ -317,10 +328,17 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                gl->readoutMode = cReadoutModeDRS;
                gl->wdb[iBoard]->SetDrsChTxEn(gl->wdb[iBoard]->GetChnTxEn());
                gl->wdb[iBoard]->SetAdcChTxEn(0);
-            } else {
+               gl->wdb[iBoard]->SetTdcChTxEn(0);
+            } else if (std::stoi(value) == (int)cReadoutModeADC) {
                gl->readoutMode = cReadoutModeADC;
                gl->wdb[iBoard]->SetDrsChTxEn(0);
                gl->wdb[iBoard]->SetAdcChTxEn(gl->wdb[iBoard]->GetChnTxEn());
+               gl->wdb[iBoard]->SetTdcChTxEn(0);
+            } else {
+               gl->readoutMode = cReadoutModeTDC;
+               gl->wdb[iBoard]->SetDrsChTxEn(0);
+               gl->wdb[iBoard]->SetAdcChTxEn(0);
+               gl->wdb[iBoard]->SetTdcChTxEn(gl->wdb[iBoard]->GetChnTxEn());
             }
          }
       }
@@ -805,6 +823,47 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                   mg_send_http_chunk(nc, (const char *)&event.mWfUADC[c][1024], sizeof(float)*n);
                }
             }
+         } else if (event.mTypeValid[cDataTypeTDC]) { //---- TDC waveforms
+            int t = 1;                    // array type
+            int n = 512*8;                 // number of elements
+            int vc = event.mVCalibrated;  // voltage calibrated
+            int tc = event.mTCalibrated;  // time calibrated
+            int l = gl->wp->GetNLogged(); // number of logged events
+            float time[512*8];
+            for(int i=0; i<512*8; i++){
+              time[i] = i*1.56e-9; 
+            }
+            for (int c=0 ; c<WD_N_CHANNELS ; c++) {
+               if (chn & (1 << c)) {
+                  t = 1; // time array
+                  mg_send_http_chunk(nc, (const char *)&t, 4);
+                  mg_send_http_chunk(nc, (const char *)&b, 4);
+                  mg_send_http_chunk(nc, (const char *)&tc, 4);
+                  mg_send_http_chunk(nc, (const char *)&l, 4);
+                  mg_send_http_chunk(nc, (const char *)&c, 4);
+                  mg_send_http_chunk(nc, (const char *)&n, 4);
+                  mg_send_http_chunk(nc, (const char *)&time[0], sizeof(float)*n);
+               }
+            }
+            for (int c=0 ; c<WD_N_CHANNELS ; c++) {
+               if (chn & (1 << c)) {
+                  t = 3; // bit value array
+                  mg_send_http_chunk(nc, (const char *)&t, 4);
+                  mg_send_http_chunk(nc, (const char *)&b, 4);
+                  mg_send_http_chunk(nc, (const char *)&vc, 4);
+                  mg_send_http_chunk(nc, (const char *)&l, 4);
+                  mg_send_http_chunk(nc, (const char *)&c, 4);
+                  mg_send_http_chunk(nc, (const char *)&n, 4);
+                  unsigned char ampl[512*8];
+                  for(int i=0; i<512; i++){
+                     unsigned char binval = event.mWfTDC[c][i];
+                     for(int j=0; j<8; j++){
+                        ampl[8*i+7-j]= (binval&(1<<j))?1:0;
+                     }
+                  }
+                  mg_send_http_chunk(nc, (const char *)&ampl[0], sizeof(unsigned char)*n);
+               }
+            }
          } else if (event.mTypeValid[cDataTypeDRS]) { //---- DRS waveforms
             int t = 1;                    // array type
             int n = 1024;                 // number of elements
@@ -909,7 +968,6 @@ int main(int argc, const char * argv[])
    gl.reset = false;
    gl.triggerMode = cTriggerModeAuto;
    gl.triggerSelfArm = false;
-   gl.readoutMode = cReadoutModeDRS;
    gl.updatePeriodic = false;
    gl.dbgRx = gl.dbgTx = 0;
    gl.backplaneClk = false;
@@ -1082,14 +1140,14 @@ int main(int argc, const char * argv[])
             } else if (b->GetAdcChTxEn() > 0) {
                gl.readoutMode = cReadoutModeADC;
                b->SetChnTxEn(b->GetAdcChTxEn());
-            }
-            else {
+            } else if (b->GetTdcChTxEn() > 0) {
+               gl.readoutMode = cReadoutModeTDC;
+               b->SetChnTxEn(b->GetTdcChTxEn());
+            } else {
                b->SetDrsChTxEn(0xFFFF);
                b->SetChnTxEn(0xFFFF);
+               gl.readoutMode = cReadoutModeDRS;
             }
-
-            // disable TDC readout
-            b->SetTdcChTxEn(0);
 
             // disable advanced trigger readout
             b->SetTrgTxEn(0);
