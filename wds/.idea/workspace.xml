@@ -2,6 +2,7 @@
 <project version="4">
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
+      <config projectName="wds" targetName="read_binary" />
       <config projectName="wds" targetName="wds" />
     </generated>
   </component>
@@ -13,31 +14,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="03db0880-339c-4018-a019-204bfc705186" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/codeStyleSettings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/buttons.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/controls.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/favicon.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fft.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/iosicon.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/measurement.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mongoose.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mongoose.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mongoose.zip" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxml.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxml.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/osc.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spinning-wheel-wds.gif" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/strlcpy.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/strlcpy.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wds.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wds.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wds.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wds.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wds.sln" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wds.vcxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wds.vcxproj.user" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wds.xcodeproj/project.pbxproj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <ignored path="$PROJECT_DIR$/cmake-build-release/" />
@@ -56,24 +34,29 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/wds.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="264">
+            <state relative-caret-position="3810">
               <caret line="254" column="13" selection-start-line="254" selection-start-column="13" selection-end-line="254" selection-end-column="13" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/.gitignore">
           <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="345">
-              <caret line="23" selection-start-line="23" selection-end-line="23" />
+            <state relative-caret-position="225">
+              <caret line="15" column="17" selection-start-line="15" selection-start-column="17" selection-end-line="15" selection-end-column="17" />
             </state>
           </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/read_binary/CMakeLists.txt">
+          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
@@ -102,8 +85,8 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/html/osc.js" />
-        <option value="$PROJECT_DIR$/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/src/wds.cpp" />
+        <option value="$PROJECT_DIR$/CMakeLists.txt" />
       </list>
     </option>
   </component>
@@ -119,6 +102,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -135,13 +119,18 @@
               <item name="wds" type="b2602c69:ProjectViewProjectNode" />
               <item name="wds" type="47feb1d3:ProjectViewModuleNode" />
               <item name="wds" type="462c0819:PsiDirectoryNode" />
+              <item name="read_binary" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wds" type="b2602c69:ProjectViewProjectNode" />
+              <item name="wds" type="47feb1d3:ProjectViewModuleNode" />
+              <item name="wds" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -161,8 +150,13 @@
       </list>
     </option>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="CMake Application.wds">
     <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="-w 134" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" RUN_PATH="$PROJECT_DIR$/cmake-build-debug/wds">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="read_binary" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="-w 134" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="wds" TARGET_NAME="read_binary" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="wds" RUN_TARGET_NAME="read_binary">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -172,6 +166,10 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue="CMake Application.wds" />
+      <item itemvalue="CMake Application.read_binary" />
+    </list>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -189,16 +187,17 @@
       <workItem from="1558536535072" duration="182000" />
       <workItem from="1558536733606" duration="537000" />
       <workItem from="1558537462272" duration="15000" />
+      <workItem from="1558538446985" duration="168000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1471000" />
+    <option name="totallyTimeSpent" value="1639000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="138" y="23" width="2294" height="1352" extended-state="0" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49920633" visible="true" weight="0.26110125" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49920633" visible="true" weight="0.2633215" />
       <window_info id="Structure" order="1" sideWeight="0.50079364" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -212,7 +211,7 @@
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.32936507" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info anchor="bottom" id="Messages" order="11" weight="0.32936507" />
+      <window_info active="true" anchor="bottom" id="Messages" order="11" visible="true" weight="0.32936507" />
       <window_info anchor="bottom" id="CMake" order="12" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -226,15 +225,8 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/src/wds.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="264">
+        <state relative-caret-position="3810">
           <caret line="254" column="13" selection-start-line="254" selection-start-column="13" selection-end-line="254" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="345">
-          <caret line="23" selection-start-line="23" selection-end-line="23" />
         </state>
       </provider>
     </entry>
@@ -250,6 +242,16 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/read_binary/CMakeLists.txt">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="15" column="17" selection-start-line="15" selection-start-column="17" selection-end-line="15" selection-end-column="17" />
+        </state>
+      </provider>
     </entry>
   </component>
 </project>

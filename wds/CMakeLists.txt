@@ -3,6 +3,8 @@ project(wds)
 
 set(CMAKE_CXX_STANDARD 11)
 
+add_subdirectory(read_binary)
+
 include_directories(src ../lib)
 include_directories(../../firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/common/src/)
 
