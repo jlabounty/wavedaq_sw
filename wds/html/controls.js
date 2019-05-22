@@ -214,7 +214,7 @@ Controls.prototype.init = function () // scan DOM
       var cvs = document.createElement("canvas");
       this.ctrlButton[i].appendChild(cvs);
 
-      if (this.ctrlButton[i].dataset.draw != undefined)
+      if (this.ctrlButton[i].dataset.draw !== undefined)
          eval(this.ctrlButton[i].dataset.draw+"(cvs)");
    }
 
@@ -341,7 +341,7 @@ Controls.prototype.ctrlVSliderHandler = function (e) {
          if (b.position > 1)
             b.position = 1;
          this.ctrlVSliderDraw(b);
-         var f = b.dataset.update;
+         f = b.dataset.update;
          if (f.indexOf("("))
             f = f.substr(0, f.indexOf("("));
          window[f](b.position);
@@ -420,7 +420,7 @@ Controls.prototype.ctrlHSliderHandler = function (e) {
          if (b.position > 1)
             b.position = 1;
          this.ctrlHSliderDraw(b);
-         var f = b.dataset.update;
+         f = b.dataset.update;
          if (f.indexOf("("))
             f = f.substr(0, f.indexOf("("));
          window[f](b.position);

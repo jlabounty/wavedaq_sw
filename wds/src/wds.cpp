@@ -422,7 +422,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             gl->wp->StopLogging();
          else if (item != "") {
             auto args = split(value, '\n');
-            gl->wp->StartWaveformSaving(args[0],
+            gl->wp->StartWaveformSaving("html/"+args[0],
                                         args[1] == "bin" ? WP::cLiFormatBinary : WP::cLiFormatXML,
                                         args[2] == "all",
                                         args[2] == "all" ? -1 : std::stoi(args[2]),
@@ -1215,8 +1215,8 @@ int main(int argc, const char * argv[])
       return 1;
    }
    mg_set_protocol_http_websocket(con);
-   s_http_server_opts.document_root = ".";  // Serve current directory
-   s_http_server_opts.dav_auth_file = "-";  // Allow access via WebDav
+   s_http_server_opts.document_root = "html";  // Serve files from html subdirectory
+   s_http_server_opts.dav_auth_file = "-";     // Allow access via WebDav
    s_http_server_opts.enable_directory_listing = "yes";
 
    std::cout << "Starting HTTP server at port " << gl.serverPort << std::endl;

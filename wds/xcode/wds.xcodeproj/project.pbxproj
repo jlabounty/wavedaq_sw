@@ -7,11 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D55471831B7242DE002A92E4 /* wds.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D55471811B7242DE002A92E4 /* wds.cpp */; };
-		D55471861B72439A002A92E4 /* mongoose.c in Sources */ = {isa = PBXBuildFile; fileRef = D55471841B72439A002A92E4 /* mongoose.c */; };
+		D5513C65229591C1005D94E6 /* mxml.c in Sources */ = {isa = PBXBuildFile; fileRef = D5513C61229591C0005D94E6 /* mxml.c */; };
+		D5513C66229591C1005D94E6 /* mongoose.c in Sources */ = {isa = PBXBuildFile; fileRef = D5513C64229591C0005D94E6 /* mongoose.c */; };
 		D56DDED31EBF3BDE00A71E18 /* WDBLib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D56DDED11EBF3BDE00A71E18 /* WDBLib.cpp */; };
 		D56DDED61EBF3BF100A71E18 /* averager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D56DDED41EBF3BF100A71E18 /* averager.cpp */; };
-		D5A75A7E1EBF466300280601 /* mxml.c in Sources */ = {isa = PBXBuildFile; fileRef = D5A75A7D1EBF466300280601 /* mxml.c */; };
+		D5B44F2A2295911600D43751 /* wds.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5B44F282295911600D43751 /* wds.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,23 +29,23 @@
 /* Begin PBXFileReference section */
 		D529FE721B7B437F004E2D39 /* osc.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = osc.js; sourceTree = SOURCE_ROOT; };
 		D53A7A882019D02A007C902E /* register_map_wd2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = register_map_wd2.h; path = /wavedaq/firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/common/src/register_map_wd2.h; sourceTree = "<group>"; };
+		D5513C61229591C0005D94E6 /* mxml.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mxml.c; path = /wavedaq/software/wds/src/mxml.c; sourceTree = "<group>"; };
+		D5513C62229591C0005D94E6 /* mxml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mxml.h; path = /wavedaq/software/wds/src/mxml.h; sourceTree = "<group>"; };
+		D5513C63229591C0005D94E6 /* mongoose.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mongoose.h; path = /wavedaq/software/wds/src/mongoose.h; sourceTree = "<group>"; };
+		D5513C64229591C0005D94E6 /* mongoose.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mongoose.c; path = /wavedaq/software/wds/src/mongoose.c; sourceTree = "<group>"; };
 		D55471771B72428F002A92E4 /* wds */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = wds; sourceTree = BUILT_PRODUCTS_DIR; };
-		D55471811B7242DE002A92E4 /* wds.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = wds.cpp; sourceTree = SOURCE_ROOT; };
-		D55471821B7242DE002A92E4 /* wds.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = wds.h; sourceTree = SOURCE_ROOT; };
-		D55471841B72439A002A92E4 /* mongoose.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mongoose.c; sourceTree = SOURCE_ROOT; };
-		D55471851B72439A002A92E4 /* mongoose.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mongoose.h; sourceTree = SOURCE_ROOT; };
-		D55471881B72477A002A92E4 /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = SOURCE_ROOT; };
-		D55471891B72498D002A92E4 /* wds.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = wds.css; sourceTree = SOURCE_ROOT; };
-		D554718A1B72498D002A92E4 /* wds.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = wds.js; sourceTree = SOURCE_ROOT; };
+		D55471881B72477A002A92E4 /* /wavedaq/software/wds/html/index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = /wavedaq/software/wds/html/index.html; sourceTree = SOURCE_ROOT; };
+		D55471891B72498D002A92E4 /* /wavedaq/software/wds/html/wds.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = /wavedaq/software/wds/html/wds.css; sourceTree = SOURCE_ROOT; };
+		D554718A1B72498D002A92E4 /* /wavedaq/software/wds/html/wds.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = /wavedaq/software/wds/html/wds.js; sourceTree = "<group>"; };
 		D55E70AE2018AFED005CA001 /* WDBReg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WDBReg.h; path = /wavedaq/software/lib/WDBReg.h; sourceTree = "<group>"; };
 		D56DDED11EBF3BDE00A71E18 /* WDBLib.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WDBLib.cpp; path = /wavedaq/software/lib/WDBLib.cpp; sourceTree = "<group>"; };
 		D56DDED21EBF3BDE00A71E18 /* WDBLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WDBLib.h; path = /wavedaq/software/lib/WDBLib.h; sourceTree = "<group>"; };
 		D56DDED41EBF3BF100A71E18 /* averager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = averager.cpp; path = /wavedaq/software/lib/averager.cpp; sourceTree = "<group>"; };
 		D56DDED51EBF3BF100A71E18 /* averager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = averager.h; path = /wavedaq/software/lib/averager.h; sourceTree = "<group>"; };
-		D5A75A7D1EBF466300280601 /* mxml.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mxml.c; sourceTree = SOURCE_ROOT; };
-		D5A75A7F1EBF467800280601 /* mxml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mxml.h; sourceTree = SOURCE_ROOT; };
-		D5D7CE451B74EFB40037D843 /* controls.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = controls.js; sourceTree = SOURCE_ROOT; };
-		D5EE12301E3B6BF0007FA7E6 /* measurement.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = measurement.js; sourceTree = SOURCE_ROOT; };
+		D5B44F282295911600D43751 /* wds.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = wds.cpp; path = /wavedaq/software/wds/src/wds.cpp; sourceTree = "<group>"; };
+		D5B44F292295911600D43751 /* wds.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wds.h; path = /wavedaq/software/wds/src/wds.h; sourceTree = "<group>"; };
+		D5D7CE451B74EFB40037D843 /* /wavedaq/software/wds/html/controls.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = /wavedaq/software/wds/html/controls.js; sourceTree = SOURCE_ROOT; };
+		D5EE12301E3B6BF0007FA7E6 /* /wavedaq/software/wds/html/measurement.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = /wavedaq/software/wds/html/measurement.js; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,14 +92,14 @@
 		D55471791B72428F002A92E4 /* wds */ = {
 			isa = PBXGroup;
 			children = (
-				D5A75A7F1EBF467800280601 /* mxml.h */,
-				D5A75A7D1EBF466300280601 /* mxml.c */,
+				D5513C64229591C0005D94E6 /* mongoose.c */,
+				D5513C63229591C0005D94E6 /* mongoose.h */,
+				D5513C61229591C0005D94E6 /* mxml.c */,
+				D5513C62229591C0005D94E6 /* mxml.h */,
+				D5B44F282295911600D43751 /* wds.cpp */,
+				D5B44F292295911600D43751 /* wds.h */,
 				D56DDED41EBF3BF100A71E18 /* averager.cpp */,
 				D56DDED51EBF3BF100A71E18 /* averager.h */,
-				D55471841B72439A002A92E4 /* mongoose.c */,
-				D55471851B72439A002A92E4 /* mongoose.h */,
-				D55471811B7242DE002A92E4 /* wds.cpp */,
-				D55471821B7242DE002A92E4 /* wds.h */,
 			);
 			path = wds;
 			sourceTree = "<group>";
@@ -107,12 +107,12 @@
 		D5FC799C201B6E970017B857 /* html */ = {
 			isa = PBXGroup;
 			children = (
-				D5D7CE451B74EFB40037D843 /* controls.js */,
-				D55471891B72498D002A92E4 /* wds.css */,
+				D5D7CE451B74EFB40037D843 /* /wavedaq/software/wds/html/controls.js */,
+				D55471891B72498D002A92E4 /* /wavedaq/software/wds/html/wds.css */,
 				D529FE721B7B437F004E2D39 /* osc.js */,
-				D554718A1B72498D002A92E4 /* wds.js */,
-				D5EE12301E3B6BF0007FA7E6 /* measurement.js */,
-				D55471881B72477A002A92E4 /* index.html */,
+				D554718A1B72498D002A92E4 /* /wavedaq/software/wds/html/wds.js */,
+				D5EE12301E3B6BF0007FA7E6 /* /wavedaq/software/wds/html/measurement.js */,
+				D55471881B72477A002A92E4 /* /wavedaq/software/wds/html/index.html */,
 			);
 			name = html;
 			sourceTree = "<group>";
@@ -174,11 +174,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D5A75A7E1EBF466300280601 /* mxml.c in Sources */,
 				D56DDED61EBF3BF100A71E18 /* averager.cpp in Sources */,
-				D55471861B72439A002A92E4 /* mongoose.c in Sources */,
+				D5513C65229591C1005D94E6 /* mxml.c in Sources */,
+				D5513C66229591C1005D94E6 /* mongoose.c in Sources */,
 				D56DDED31EBF3BDE00A71E18 /* WDBLib.cpp in Sources */,
-				D55471831B7242DE002A92E4 /* wds.cpp in Sources */,
+				D5B44F2A2295911600D43751 /* wds.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

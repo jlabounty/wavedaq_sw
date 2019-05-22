@@ -474,7 +474,7 @@ Oscilloscope.prototype.mouseEvent = function (e) {
          }
       }
 
-      if (e.type == "mousedown" && dMin < 10) {
+      if (e.type === "mousedown" && dMin < 10) {
          this.offsetMarkerCursor.drag = true;
          this.offsetMarkerCursor.channel = cMin;
          this.offsetMarkerCursor.yStart = e.clientY;
@@ -484,13 +484,13 @@ Oscilloscope.prototype.mouseEvent = function (e) {
          OSC.drawChnButtons();
       }
 
-      if (e.type == "mouseup") {
+      if (e.type === "mouseup") {
          this.offsetMarkerCursor.drag = false;
       }
    }
 
    // process trigger level dragging
-   if (!this.voltageCursor.on && !this.timeCursor.on && e.target == this.canvas &&
+   if (!this.voltageCursor.on && !this.timeCursor.on && e.target === this.canvas &&
       ((e.clientX > this.x2-10 && e.clientX < this.x2 && e.clientY > this.y1 && e.clientY < this.y2-10) ||
       this.triggerCursor.drag)) {
       // find which trigger level is closest to cursor
@@ -533,12 +533,12 @@ Oscilloscope.prototype.mouseEvent = function (e) {
          setParam(e, this.triggerCursor.channel);
       }
 
-      if (e.type == "mousedown" && dMin < 8) {
+      if (e.type === "mousedown" && dMin < 8) {
          this.triggerCursor.drag = true;
          this.triggerCursor.channel = cMin;
       }
 
-      if (e.type == "mouseup") {
+      if (e.type === "mouseup") {
          this.triggerCursor.drag = false;
       }
 
@@ -608,7 +608,7 @@ Oscilloscope.prototype.draw = function () {
       this.wfImgOccupied = new Uint8ClampedArray(this.wfImg.data.length / 4);
    }
 
-   if (this.wf.type == 2) {
+   if (this.wf.type === 2) {
       this.blackCanvas(ctx);
       this.drawGrid(ctx);
       this.drawDT(ctx);
@@ -644,7 +644,7 @@ Oscilloscope.prototype.drawChnButtons = function () {
    // set blue border of active channel buttons
    for (var i = 0; i < 20; i++) {
       var cb = document.getElementById("ch" + i);
-      if (cb == undefined)
+      if (cb === undefined)
          continue;
       if (this.chOnSelected[i])
          cb.style.border = "3px solid blue";
@@ -678,7 +678,7 @@ Oscilloscope.prototype.printTemperature = function (ctx) {
    ctx.textAlign = "left";
    ctx.textBaseline = "top";
 
-   if (OSC.wdb != undefined && !this.chOn[19]) { // hide when FFT on
+   if (OSC.wdb !== undefined && !this.chOn[19]) { // hide when FFT on
       var t = OSC.wdb[OSC.curBoard].temperature;
       ctx.fillText("T = " + t.toFixed(1) + "\xB0C", this.x1 + 12, this.y2 - 24);
    }
@@ -702,7 +702,7 @@ Oscilloscope.prototype.printLogged = function (ctx) {
 Oscilloscope.prototype.printMeasurements = function (ctx) {
    var n = 0;
    for (var i = 0; i < this.measList.childNodes.length; i++)
-      if (this.measList.childNodes[i].nodeName == "DIV")
+      if (this.measList.childNodes[i].nodeName === "DIV")
          n++;
 
    if (n > 1) {
@@ -753,8 +753,8 @@ Oscilloscope.prototype.drawCursors = function (ctx) {
 };
 
 Oscilloscope.prototype.printStatus = function (ctx) {
-   if (OSC.wdb != undefined) {
-      if (OSC.wdb[OSC.curBoard].pllLck != 0x1FF) {
+   if (OSC.wdb !== undefined) {
+      if (OSC.wdb[OSC.curBoard].pllLck !== 0x1FF) {
          ctx.fillStyle = 'red';
          ctx.strokeStyle = 'red';
          ctx.font = '48px sans-serif';
@@ -791,7 +791,7 @@ Oscilloscope.prototype.printStatus = function (ctx) {
 };
 
 Oscilloscope.prototype.printScalers = function (ctx) {
-   if (OSC.wdb != undefined && OSC.disp.scaler && OSC.wdb[OSC.curBoard].scaler) {
+   if (OSC.wdb !== undefined && OSC.disp.scaler && OSC.wdb[OSC.curBoard].scaler) {
       var scaler = OSC.wdb[OSC.curBoard].scaler;
 
       for (var c = 0; c < 18; c++) {
@@ -801,9 +801,9 @@ Oscilloscope.prototype.printScalers = function (ctx) {
          ctx.textBaseline = "top";
 
          ctx.textAlign = "right";
-         if (c == 16)
+         if (c === 16)
             ctx.fillText("T", 20, 4 + c * 20);
-         else if (c == 17)
+         else if (c === 17)
             ctx.fillText("E", 20, 4 + c * 20);
          else
             ctx.fillText(c.toString(), 20, 4 + c * 20);
@@ -835,7 +835,7 @@ Oscilloscope.prototype.blackCanvas = function (ctx, mode) {
    if (mode === undefined || mode === 0) { // complete window
       ctx.fillRect(0, 0, this.width, this.height);
       ctx.rect(0, 0, this.width, this.height);
-   } else if (mode == 1) { // waveform window
+   } else if (mode === 1) { // waveform window
       ctx.fillRect(0, 0, this.width, this.wfHeight);
       ctx.rect(0, 0, this.width, this.wfHeight);
    } else { // histo window
@@ -870,13 +870,13 @@ Oscilloscope.prototype.drawGrid = function (ctx) {
          ctx.rect(x, this.y1 + j * this.h / 10.0, 1, 1);
 
       ctx.moveTo(x, this.y1);
-      if (i % 5 == 0)
+      if (i % 5 === 0)
          ctx.lineTo(x, this.y1 + 10);
       else
          ctx.lineTo(x, this.y1 + 6);
 
       var y = this.y1 + this.h / 2;
-      if (i % 5 == 0) {
+      if (i % 5 === 0) {
          ctx.moveTo(x, y - 5);
          ctx.lineTo(x, y + 5);
       } else {
@@ -885,7 +885,7 @@ Oscilloscope.prototype.drawGrid = function (ctx) {
       }
 
       ctx.moveTo(x, this.y2);
-      if (i % 5 == 0)
+      if (i % 5 === 0)
          ctx.lineTo(x, this.y2 - 10);
       else
          ctx.lineTo(x, this.y2 - 6);
@@ -899,13 +899,13 @@ Oscilloscope.prototype.drawGrid = function (ctx) {
          ctx.rect(this.x1 + j * this.w / 10.0, y, 1, 1);
 
       ctx.moveTo(this.x1, y);
-      if (i % 5 == 0)
+      if (i % 5 === 0)
          ctx.lineTo(this.x1 + 10, y);
       else
          ctx.lineTo(this.x1 + 6, y);
 
       x = this.x1 + this.w / 2;
-      if (i % 5 == 0) {
+      if (i % 5 === 0) {
          ctx.moveTo(x - 5, y);
          ctx.lineTo(x + 5, y);
       } else {
@@ -914,7 +914,7 @@ Oscilloscope.prototype.drawGrid = function (ctx) {
       }
 
       ctx.moveTo(this.x2, y);
-      if (i % 5 == 0)
+      if (i % 5 === 0)
          ctx.lineTo(this.x2 - 10, y);
       else
          ctx.lineTo(this.x2 - 6, y);
@@ -971,7 +971,7 @@ Oscilloscope.prototype.drawWF = function (ctx) {
       return;
 
    // Waveforms
-   if (this.disp.persistency == 0) {
+   if (this.disp.persistency === 0) {
       ctx.save();
       ctx.beginPath();
       ctx.rect(this.x1, this.y1, this.w, this.h);
@@ -986,7 +986,7 @@ Oscilloscope.prototype.drawWF = function (ctx) {
                ctx.lineWidth = 3;
             for (var i = 0; i < this.wf.U[c].length ; i++) {
                var x, y;
-               if (c == 19) { // FFT
+               if (c === 19) { // FFT
                   var min = -6;
                   var max = 6;
                   x = this.x1 + (this.x2 - this.x1) / 512.0 * i;
@@ -996,7 +996,7 @@ Oscilloscope.prototype.drawWF = function (ctx) {
                   y = this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c];
                }
                if (x > this.x1-100 && x < this.x2 + 100) {
-                  if (i == 0)
+                  if (i === 0)
                      ctx.moveTo(x, y);
                   else
                      ctx.lineTo(x, y);
@@ -1014,7 +1014,7 @@ Oscilloscope.prototype.drawWF = function (ctx) {
       // reduce alpha
       if (!isNaN(this.disp.persistency)) {
          var delta;
-         if (OSC.nEPS == 0)
+         if (OSC.nEPS === 0)
             delta = 200 / this.disp.persistency;
          else
             delta = 200 / this.disp.persistency / OSC.nEPS;
@@ -1035,12 +1035,12 @@ Oscilloscope.prototype.drawWF = function (ctx) {
                               this.wfImg.data[i1 + rgb] = 255;
                         }
                      }
-                     if (this.wfImg.data[i1] == 255 &&
-                        this.wfImg.data[i1 + 1] == 255 &&
-                        this.wfImg.data[i1 + 2] == 255)
+                     if (this.wfImg.data[i1] === 255 &&
+                        this.wfImg.data[i1 + 1] === 255 &&
+                        this.wfImg.data[i1 + 2] === 255)
                         this.wfImgOccupied[i] = 0;
                   } else {
-                     for (var rgb = 0; rgb < 3; rgb++) {
+                     for (rgb = 0; rgb < 3; rgb++) {
                         if (this.wfImg.data[i1 + rgb] > 0) {
                            if (this.wfImg.data[i1 + rgb] >= delta)
                               this.wfImg.data[i1 + rgb] -= delta;
@@ -1048,9 +1048,9 @@ Oscilloscope.prototype.drawWF = function (ctx) {
                               this.wfImg.data[i1 + rgb] = 0;
                         }
                      }
-                     if (this.wfImg.data[i1] == 0 &&
-                        this.wfImg.data[i1 + 1] == 0 &&
-                        this.wfImg.data[i1 + 2] == 0)
+                     if (this.wfImg.data[i1] === 0 &&
+                        this.wfImg.data[i1 + 1] === 0 &&
+                        this.wfImg.data[i1 + 2] === 0)
                         this.wfImgOccupied[i] = 0;
                   }
                }
@@ -1073,7 +1073,7 @@ Oscilloscope.prototype.drawWF = function (ctx) {
             for (i = 0; i < this.wf.T[c].length; i++) {
 
                var x1, y1;
-               if (c == 19) { // FFT
+               if (c === 19) { // FFT
                   var min = -6;
                   var max = 6;
                   x1 = Math.floor(this.x1 + (this.x2 - this.x1) / 512.0 * i);
@@ -1082,7 +1082,7 @@ Oscilloscope.prototype.drawWF = function (ctx) {
                   x1 = Math.floor(this.wf.T[c][i] * this.wfTS + this.wfTO);
                   y1 = Math.floor(this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c]);
                }
-               if (i == 0) {
+               if (i === 0) {
                   x = x1;
                   y = y1;
                   if (x >= this.x1 && x < this.x2 &&
@@ -1176,7 +1176,7 @@ Oscilloscope.prototype.drawMarker = function (ctx) {
          ctx.textAlign = "center";
          ctx.textBaseline = "middle";
          ctx.font = '10px sans-serif';
-         if (c == 18)
+         if (c === 18)
             ctx.fillText("\u03A3", this.x1 - 2, y);
          else
             ctx.fillText(c.toString(), this.x1 - 2, y);
@@ -1621,9 +1621,9 @@ Oscilloscope.prototype.saveHistos = function () {
 };
 
 
-const LN10 = 2.302585094;
-const LOG2 = 0.301029996;
-const LOG5 = 0.698970005;
+LN10 = 2.302585094;
+LOG2 = 0.301029996;
+LOG5 = 0.698970005;
 
 String.prototype.stripZeros = function () {
    var s = this.trim();
