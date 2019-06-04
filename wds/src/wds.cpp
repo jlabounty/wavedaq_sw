@@ -13,6 +13,8 @@
 #include <vector>
 #include <thread>
 #include <random>
+#include <execinfo.h>
+#include <fstream>
 
 #include "WDBLib.h"
 #include "mongoose.h"
@@ -939,8 +941,6 @@ void showUsage(std::string name)
    std::cerr << "  -v 2            Print each received waveform packet header" << std::endl;
 }
 
-#include <execinfo.h>
-
 void handler(int sig) {
    void *array[10];
    size_t size;
@@ -1214,10 +1214,29 @@ int main(int argc, const char * argv[])
       std::cerr << "Cannot bind to port " << gl.serverPort << ". Probably other server is already running." << std::endl;
       return 1;
    }
+
    mg_set_protocol_http_websocket(con);
-   s_http_server_opts.document_root = "html";  // Serve files from html subdirectory
    s_http_server_opts.dav_auth_file = "-";     // Allow access via WebDav
    s_http_server_opts.enable_directory_listing = "yes";
+
+   // find index.html to set document_root properly
+   char tmp[256];
+   getcwd(tmp, sizeof(tmp));
+   std::string dir(tmp);
+   std::ifstream f(dir + "/html/index.html");
+   if (f.good()) {
+      s_http_server_opts.document_root = "html";
+   } else {
+      std::string topdir = dir.substr(0, dir.find_last_of("/\\"));
+      std::ifstream f(topdir + "/html/index.html");
+      if (f.good()) {
+         dir = topdir + "/html";
+         s_http_server_opts.document_root = dir.c_str();
+      } else {
+         std::cerr << "Cannot find 'html' directory. Please run from the root of the wds directory." << std::endl;
+         return 1;
+      }
+   }
 
    std::cout << "Starting HTTP server at port " << gl.serverPort << std::endl;
 
