@@ -29,6 +29,8 @@
 #include "TCanvas.h"
 #include "Getline.h"
 
+#define NBOARDS 16
+
 typedef struct {
    char           tag[3];
    char           version;
@@ -78,8 +80,11 @@ void decode(const char *filename) {
    
    unsigned int scaler;
    unsigned short voltage[1024];
-   double waveform[16][18][1024], time[16][18][1024];
-   float bin_width[16][18][1024];
+   double waveform[NBOARDS][18][1024], time[NBOARDS][18][1024];
+   float adc_waveform[NBOARDS][16][2048];
+   unsigned char tdc_waveform[NBOARDS][16][512];
+   unsigned long trg_data[NBOARDS][512];
+   float bin_width[NBOARDS][18][1024];
    int i, j, b, chn, n, chn_index, n_boards;
    double t1, t2, dt;
    char rootfile[256];
@@ -162,7 +167,7 @@ void decode(const char *filename) {
    n_boards = b;
    
    // loop over all events in data file
-   for (n=0 ; n<5 ; n++) {
+   for (n=0 ;  ; n++) {
       // read event header
       i = fread(&eh, sizeof(eh), 1, f);
       if (i < 1)
@@ -184,35 +189,55 @@ void decode(const char *filename) {
             printf("Found data for board #%d\n", bh.board_serial_number);
          
          // reach channel data
-         for (chn=0 ; chn<18 ; chn++) {
-            
-            // read channel header
-            fread(&ch, sizeof(ch), 1, f);
-            if (ch.c[0] != 'C') {
-               // event header found
-               fseek(f, -4, SEEK_CUR);
-               break;
-            }
+         size_t nbytes;
+         for (nbytes = fread(&ch, sizeof(ch), 1, f); nbytes >0 && (ch.c[0] == 'C' || ch.c[0] == 'A' || ch.c[0] == 'T'); nbytes = fread(&ch, sizeof(ch), 1, f)) {
             chn_index = (ch.cn[1] - '0')*10 + ch.cn[2] - '0';
-            fread(&scaler, sizeof(int), 1, f);
             
-            // read trigger cell
-            fread(&tch, sizeof(tch), 1, f);
-            if (memcmp(tch.tc, "T#", 2) != 0) {
-               printf("Invalid trigger cell header in file \'%s\', aborting.\n", filename);
-               return;
-            }
             
-            fread(voltage, sizeof(short), 1024, f);
-            for (i=0 ; i<1024 ; i++) {
-               // convert data to volts
-               waveform[b][chn_index][i] = (voltage[i] / 65536. + eh.range/1000.0 - 0.5);
+            if(ch.c[0] == 'C'){
+               //Read DRS
+               fread(&scaler, sizeof(int), 1, f);
+               // read trigger cell
+               fread(&tch, sizeof(tch), 1, f);
+               if (memcmp(tch.tc, "T#", 2) != 0) {
+                  printf("Invalid trigger cell header in file \'%s\', aborting.\n", filename);
+                  return;
+               }
                
-               // calculate time for this cell
-               for (j=0,time[b][chn_index][i]=0 ; j<i ; j++)
-                  time[b][chn_index][i] += bin_width[b][chn_index][(j+tch.trigger_cell) % 1024];
+               fread(voltage, sizeof(short), 1024, f);
+               for (i=0 ; i<1024 ; i++) {
+                  // convert data to volts
+                  waveform[b][chn_index][i] = (voltage[i] / 65536. + eh.range/1000.0 - 0.5);
+                  
+                  // calculate time for this cell
+                  for (j=0,time[b][chn_index][i]=0 ; j<i ; j++)
+                     time[b][chn_index][i] += bin_width[b][chn_index][(j+tch.trigger_cell) % 1024];
+               }
+               printf("Got DRS %d\n", chn_index);
+            } else if(ch.c[0] == 'A'){
+               //Read ADC
+               short adc_voltage[2048];
+               fread(adc_voltage, sizeof(short), 2048, f);
+               for (i=0 ; i<2048 ; i++) {
+                  // convert data to volts
+                  adc_waveform[b][chn_index][i] = (adc_voltage[i] / 65536. + eh.range/1000.0 - 0.5);
+               }
+               printf("Got ADC %d\n", chn_index);
+            } else if(ch.c[0] == 'T'){
+               if(ch.cn[0] == '0'){
+                  //Read TDC
+                  fread(tdc_waveform[b][chn_index], sizeof(unsigned char), 512, f);
+                  printf("Got TDC %d\n", chn_index);
+               } else {
+                  //Read TRG
+                  fread(trg_data[b], sizeof(unsigned long), 512, f);
+                  printf("Got TRG\n");
+               }
             }
+
          }
+         // event header found
+         fseek(f, -4, SEEK_CUR);
          
          // align cell #0 of all channels
          t1 = time[b][0][(1024-tch.trigger_cell) % 1024];
