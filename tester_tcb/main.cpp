@@ -76,7 +76,7 @@ void testXEC(){
          }
       }
    }
-   TCBTester *tester = new TCBTester("mscb176", 2, 0);
+   TCBTester *tester = new TCBTester("mscb184", 17, 0);
    //set parameters
    tester->SetTcbParameter(0, 0x100);//QH
    tester->SetTcbParameter(6, 0x50);//QL
@@ -178,7 +178,7 @@ void testTC(){
       }
    }
    
-   TCBTester *tester = new TCBTester("mscb176", 2, 1);
+   TCBTester *tester = new TCBTester("mscb184", 17, 1);
    //set parameters
    tester->SetTcbParameter(1, 0xFFFFFFFF); 
    tester->SetTcbParameter(2, 0xFFFFFFFF); 
@@ -227,11 +227,12 @@ int main(int argc, char** argv)
    std::string nodename(argv[1]);
    int slot = atoi(argv[2]);
    printf("connecting to crate %s slot %d\n", nodename.c_str(), slot);
-   tester = new TCBTester(nodename.c_str(), slot, 1); //algsel temporarely fixed to 1
-   printf("select a test:");
-   printf("[ 1] Simple Write-Read test \t [ 2] TCB_1 XEC test");
-   printf("[-1] To exit");
+   //tester = new TCBTester(nodename.c_str(), slot, 1); //algsel temporarely fixed to 1
+   printf("select a test:\n");
+   printf("[ 1] Simple Write-Read test \t [ 2] TCB_1 XEC test\n");
+   printf("[-1] To exit\n");
    //testTC();
+   testXEC();
    app.Run();
    return 0;
 }

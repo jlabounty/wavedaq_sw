@@ -35,7 +35,7 @@ class TCB1XECWriter : public TCBMemoryWriter{
    MEGFADCWaveform* fWDBTdcSum;
    MEGFADCWaveform* fWDBTdcNum;
    public:
-   TCB1XECWriter(int slot): TCBMemoryWriter(MEMBASEADDR+slot*2*MEMBASEADDR, MEMDIM*2) {}
+   TCB1XECWriter(int slot): TCBMemoryWriter(MEMBASEADDR+slot*2*MEMDIM, MEMDIM*2) {}
 
    void SetWaveforms(MEGFADCWaveform* sum, MEGFADCWaveform* tdcsum, MEGFADCWaveform* tdcnum) {fWDBSum=sum; fWDBTdcSum=tdcsum; fWDBTdcNum=tdcnum; }
 
@@ -50,7 +50,7 @@ class TCB1TCWriter : public TCBMemoryWriter{
    MEGFADCWaveform* fHitTime[16];
    MEGDiscrWaveform* fHit[16];
    public:
-   TCB1TCWriter(int slot): TCBMemoryWriter(MEMBASEADDR+slot*2*MEMBASEADDR, MEMDIM*2) {}
+   TCB1TCWriter(int slot): TCBMemoryWriter(MEMBASEADDR+slot*2*MEMDIM, MEMDIM*2) {}
 
    void SetWaveforms(MEGFADCWaveform** times, MEGDiscrWaveform**hits) { for(int i=0; i<16; i++){ fHitTime[i]=times[i]; fHit[i]=hits[i];} }
 
@@ -67,7 +67,7 @@ class TCB1XECReader : public TCBMemoryReader{
    MEGFADCWaveform* fTdcSum;
    MEGFADCWaveform* fTdcNum;
    public:
-   TCB1XECReader(int slot=16): TCBMemoryReader(MEMBASEADDR+slot*2*MEMBASEADDR, MEMDIM*2) {}
+   TCB1XECReader(int slot=16): TCBMemoryReader(MEMBASEADDR+slot*2*MEMDIM, MEMDIM*2) {}
 
    void SetWaveforms(MEGFADCWaveform* sum, MEGFADCWaveform* maxid, MEGFADCWaveform* tdcsum, MEGFADCWaveform* tdcnum) {fSum=sum; fMaxId=maxid; fTdcSum=tdcsum; fTdcNum=tdcnum; }
 
@@ -88,7 +88,7 @@ class TCB1TCReader : public TCBMemoryReader{
    MEGFADCWaveform* fTCTileTime1;
    MEGFADCWaveform* fTCMultiplicity;
    public:
-   TCB1TCReader(int slot=16): TCBMemoryReader(MEMBASEADDR+slot*2*MEMBASEADDR, MEMDIM*2) {}
+   TCB1TCReader(int slot=16): TCBMemoryReader(MEMBASEADDR+slot*2*MEMDIM, MEMDIM*2) {}
 
    void SetWaveforms(MEGDiscrWaveform* tcor, MEGDiscrWaveform* tchit0, MEGFADCWaveform* tctileid0, MEGFADCWaveform* tctiletime0, MEGDiscrWaveform* tchit1, MEGFADCWaveform* tctileid1,MEGFADCWaveform* tctiletime1, MEGFADCWaveform* tcmultiplicity) { fTCOr=tcor; fTCHit0=tchit0; fTCTileId0=tctileid0; fTCTileTime0=tctiletime0; fTCHit1=tchit1; fTCTileId1=tctileid1; fTCTileTime1=tctiletime1; fTCMultiplicity=tcmultiplicity; }
 
@@ -105,7 +105,7 @@ class TCB2XECWriter : public TCBMemoryWriter{
    MEGFADCWaveform* fTdcSum;
    MEGFADCWaveform* fTdcNum;
    public:
-   TCB2XECWriter(int slot): TCBMemoryWriter(MEMBASEADDR+slot*2*MEMBASEADDR, MEMDIM*2) {}
+   TCB2XECWriter(int slot): TCBMemoryWriter(MEMBASEADDR+slot*2*MEMDIM, MEMDIM*2) {}
 
    void SetWaveforms(MEGFADCWaveform* sum, MEGFADCWaveform* tdcsum, MEGFADCWaveform* tdcnum) {fSum=sum; fTdcSum=tdcsum; fTdcNum=tdcnum; }
 
@@ -122,7 +122,7 @@ class TCB2XECReader : public TCBMemoryReader{
    MEGFADCWaveform* fTdcNum;
    MEGFADCWaveform* fTdcSum;
    public:
-   TCB2XECReader(int slot=16): TCBMemoryReader(MEMBASEADDR+slot*2*MEMBASEADDR, MEMDIM*2) {}
+   TCB2XECReader(int slot=16): TCBMemoryReader(MEMBASEADDR+slot*2*MEMDIM, MEMDIM*2) {}
 
    void SetWaveforms(MEGFADCWaveform* sum, MEGFADCWaveform* maxid, MEGFADCWaveform* tdcsum, MEGFADCWaveform* tdcnum) {fSum=sum; fMaxId=maxid; fTdcSum=tdcsum; fTdcNum=tdcnum; }
 

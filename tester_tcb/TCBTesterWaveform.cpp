@@ -38,7 +38,7 @@ void TCB1XECWriter::Compose(){
    //upper memory
    for(unsigned i=fSize/2; i< fSize; i++){
       unsigned tdcnum = fWDBTdcNum->GetAmplitudeAt(i-fSize/2);
-      unsigned tdcsum = fWDBTdcNum->GetAmplitudeAt(i-fSize/2); 
+      unsigned tdcsum = fWDBTdcSum->GetAmplitudeAt(i-fSize/2); 
 
       uint32_t val =0;
       val |= (tdcsum&0xFF)<<16;
@@ -124,7 +124,7 @@ void TCB2XECWriter::Compose(){
    for(unsigned i=fSize/2; i< fSize; i++){
       unsigned maxid = fMaxId->GetAmplitudeAt(i);
       unsigned tdcnum = fTdcNum->GetAmplitudeAt(i-fSize/2);
-      unsigned tdcsum = fTdcNum->GetAmplitudeAt(i-fSize/2); 
+      unsigned tdcsum = fTdcSum->GetAmplitudeAt(i-fSize/2); 
 
       uint32_t val =0;
       val |= (maxid>>3) & 0x1;

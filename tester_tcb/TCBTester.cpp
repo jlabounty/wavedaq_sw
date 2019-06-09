@@ -102,7 +102,7 @@ TCBTester::TCBTester(std::string crateId, int slot, char algsel){
    sprintf(temp, "%s", crateId.c_str());
    fTCB->fh = mscb_init(temp, 0, "", 0); 
 
-   u_int32_t rrun_config = 0x0000E010;  //masktrg, masksync, maskbusy, ~fadcmode, ~testtxmode, enable trg_bus
+   u_int32_t rrun_config = 0x00000010;  //~masktrg, ~masksync, ~maskbusy, ~fadcmode, ~testtxmode, enable trg_bus
    fTCB->SetRRUN(&rrun_config);
    SetTcbAlgsel(algsel);
 }
