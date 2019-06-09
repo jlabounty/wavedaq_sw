@@ -94,10 +94,27 @@ class TCBTester {
             delete reader;
          fMemoryReaders.clear(); 
       }
+
+      //interface functions with fTCB
+      void SetTcbParameter(uint32_t position, uint32_t value){
+         fTCB->SetParameter(position, &value);
+      }
+      uint32_t GetTcbIdCode(){
+         return fTCB->GetIDCode();
+      }
+      uint32_t GetTcbAlgsel(){
+         uint32_t algsel;
+         fTCB->GetRALGSEL(&algsel);
+         return algsel;
+      }
+      void SetTcbAlgsel(char algsel){
+         uint32_t alg=algsel;
+         fTCB->SetRALGSEL(&alg);
+      }
       
       void DoTest();
       TCBTester(std::string crateId, int slot, char algsel=0);
-      ~TCBTester(){ DeleteMemoryWriters(); delete fTCB; }
+      ~TCBTester(){ DeleteMemoryWriters(); DeleteMemoryReaders(); delete fTCB; }
 
 };
 
