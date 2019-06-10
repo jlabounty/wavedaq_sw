@@ -67,20 +67,18 @@ void testXEC(){
          wfSum[j]->SetAmplitudeAt(i, randgen->Gaus(0, 2));
          if(i == pos[j]){
             int ntdc = randgen->Integer(8)+1;
+            //int ntdc = 0x1f;
             int sumtdc = randgen->Integer(256);
 
             printf("slot %d hit at %d with %d tdcs and val=%u\n", j, i, ntdc, sumtdc);
 
             wfTdcNum[j]->SetAmplitudeAt(i, ntdc);
             wfTdcSum[j]->SetAmplitudeAt(i, sumtdc);
-         }
+         } else wfTdcNum[j]->SetAmplitudeAt(i, 0);
       }
    }
    TCBTester *tester = new TCBTester("mscb184", 17, 0);
-   //set parameters
-   tester->SetTcbParameter(0, 0x100);//QH
-   tester->SetTcbParameter(6, 0x50);//QL
-   tester->SetTcbParameter(7, 0x200);//QC
+
    for(Int_t i=0; i<16; i++){
       TCB1XECWriter *writer = new TCB1XECWriter(i);
       writer->SetWaveforms(wfSum[i], wfTdcSum[i], wfTdcNum[i]);
@@ -98,6 +96,7 @@ void testXEC(){
    TCanvas *c = new TCanvas();
    c->Divide(2);
    c->cd(1);
+   for(int i=1; i<16; i++) wfSum[0]->Add(wfSum[i]);
    wfSum[0]->Draw();
    c->cd(2);
    wfSumOut->Draw();
@@ -107,6 +106,171 @@ void testXEC(){
          int tdcsum = wfTdcSumOut->GetAmplitudeAt(i);
          int tdcnum = wfTdcNumOut->GetAmplitudeAt(i);
          printf("got hit at %d with maxid=%d tdcnum=%d and tdcsum=%d\n", i, maxid, tdcnum, tdcsum);
+      }
+   }
+   delete tester;
+   delete randgen;
+}
+void testXEC2(){
+   TRandom *randgen = new TRandom();
+
+   MEGFADCWaveform *wfSum[4];
+   MEGFADCWaveform *wfMax[4];
+   MEGFADCWaveform *wfTdcSum[4];
+   MEGFADCWaveform *wfTdcNum[4];
+   for(int i=0; i<4; i++){
+      wfSum[i] = new MEGFADCWaveform(MEMDIM, 12.5e-9, - MEMDIM*12.5e-9);
+      wfMax[i] = new MEGFADCWaveform(MEMDIM, 12.5e-9, - MEMDIM*12.5e-9);
+      wfTdcNum[i] = new MEGFADCWaveform(MEMDIM, 12.5e-9, - MEMDIM*12.5e-9);
+      wfTdcSum[i] = new MEGFADCWaveform(MEMDIM, 12.5e-9, - MEMDIM*12.5e-9);
+   }
+
+   int pos[4];
+   for(int i=0; i<4; i++)
+      pos[i]= randgen->Integer(MEMDIM);
+
+   for(Int_t i=0; i<MEMDIM; i++){
+      for(int j=0; j<4; j++){
+         wfSum[j]->SetAmplitudeAt(i, randgen->Gaus(0, 2));
+         if(i == pos[j]){
+            int ntdc = randgen->Integer(8)+1;
+            //int ntdc = 0x1f;
+            int sumtdc = randgen->Integer(256);
+            int max = randgen->Integer(16);
+
+            printf("slot %d hit at %d with %d tdcs and val=%u max=%1x\n", j, i, ntdc, sumtdc, max);
+
+            wfTdcNum[j]->SetAmplitudeAt(i, ntdc);
+            wfTdcSum[j]->SetAmplitudeAt(i, sumtdc);
+            wfMax[j]->SetAmplitudeAt(i, max);
+         }else wfTdcNum[j]->SetAmplitudeAt(i, 0);
+      }
+   }
+   TCBTester *tester = new TCBTester("mscb195", 3, 0);
+
+   for(Int_t i=0; i<4; i++){
+      TCB2XECWriter *writer = new TCB2XECWriter(i);
+      writer->SetWaveforms(wfSum[i], wfMax[i], wfTdcSum[i], wfTdcNum[i]);
+      tester->AddMemoryWriter(writer);
+   }
+   MEGFADCWaveform *wfSumOut = new MEGFADCWaveform(MEMDIM, 12.5e-9, - MEMDIM*12.5e-9);
+   MEGFADCWaveform *wfMaxOut = new MEGFADCWaveform(MEMDIM, 12.5e-9, - MEMDIM*12.5e-9);
+   MEGFADCWaveform *wfTdcSumOut = new MEGFADCWaveform(MEMDIM, 12.5e-9, - MEMDIM*12.5e-9);
+   MEGFADCWaveform *wfTdcNumOut = new MEGFADCWaveform(MEMDIM, 12.5e-9, - MEMDIM*12.5e-9);
+   TCB2XECReader *reader = new TCB2XECReader();
+   tester->AddMemoryReader(reader);
+   reader->SetWaveforms(wfSumOut, wfMaxOut, wfTdcSumOut, wfTdcNumOut);
+
+   tester->DoTest();
+   TCanvas *c = new TCanvas();
+   c->Divide(2);
+   c->cd(1);
+   for(int i=1; i<4; i++) wfSum[0]->Add(wfSum[i]);
+   wfSum[0]->Draw();
+   c->cd(2);
+   wfSumOut->Draw();
+   for(Int_t i=0; i<MEMDIM; i++){
+      if(wfTdcNumOut->GetAmplitudeAt(i) != 0){
+         int maxid = wfMaxOut->GetAmplitudeAt(i);
+         int tdcsum = wfTdcSumOut->GetAmplitudeAt(i);
+         int tdcnum = wfTdcNumOut->GetAmplitudeAt(i);
+         printf("got hit at %d with maxid=%2x tdcnum=%d and tdcsum=%u\n", i, maxid, tdcnum, tdcsum);
+      }
+   }
+   delete tester;
+   delete randgen;
+}
+void testTCB3(){
+   TRandom *randgen = new TRandom();
+
+   //init waveforms
+   MEGFADCWaveform *wfSum[4];
+   MEGFADCWaveform *wfMax[4];
+   MEGFADCWaveform *wfTdcSum[4];
+   MEGFADCWaveform *wfTdcNum[4];
+   for(int i=0; i<4; i++){
+      wfSum[i] = new MEGFADCWaveform(MEMDIM, 12.5e-9, - MEMDIM*12.5e-9);
+      wfMax[i] = new MEGFADCWaveform(MEMDIM, 12.5e-9, - MEMDIM*12.5e-9);
+      wfTdcNum[i] = new MEGFADCWaveform(MEMDIM, 12.5e-9, - MEMDIM*12.5e-9);
+      wfTdcSum[i] = new MEGFADCWaveform(MEMDIM, 12.5e-9, - MEMDIM*12.5e-9);
+   }
+   MEGFADCWaveform *wfPmtSum = new MEGFADCWaveform(MEMDIM, 12.5e-9, - MEMDIM*12.5e-9);
+   MEGFADCWaveform *wfPmtDummy = new MEGFADCWaveform(MEMDIM, 12.5e-9, - MEMDIM*12.5e-9);
+
+   //simulate MPPCs
+   int pos[4];
+   for(int i=0; i<4; i++)
+      pos[i]= randgen->Integer(MEMDIM);
+   for(Int_t i=0; i<MEMDIM; i++){
+      for(int j=0; j<4; j++){
+         //wfSum[j]->SetAmplitudeAt(i, randgen->Gaus(0, 2));
+         if((i%10)==0) wfSum[j]->SetAmplitudeAt(i, 2);
+         else wfSum[j]->SetAmplitudeAt(i, 0);
+         if(i == pos[j]){
+            int ntdc = randgen->Integer(8)+1;
+            //int ntdc = 0x1f;
+            int sumtdc = randgen->Integer(256);
+            int max = randgen->Integer(64);
+
+            printf("slot %d hit at %d with %d tdcs and val=%u max=%1x\n", j, i, ntdc, sumtdc, max);
+
+            wfTdcNum[j]->SetAmplitudeAt(i, ntdc);
+            wfTdcSum[j]->SetAmplitudeAt(i, sumtdc);
+            wfMax[j]->SetAmplitudeAt(i, max);
+         }else wfTdcNum[j]->SetAmplitudeAt(i, 0);
+      }
+   }
+   //simulate PMTs
+   for(Int_t i=0; i<MEMDIM; i++){
+      //wfPmtSum->SetAmplitudeAt(i, randgen->Gaus(0, 2));
+      if((i%10)==0) wfPmtSum->SetAmplitudeAt(i, 1);
+      else wfPmtSum->SetAmplitudeAt(i, 0);
+      //wfPmtSum->SetAmplitudeAt(i, 0);
+   }
+
+
+   TCBTester *tester = new TCBTester("mscb195", 17);
+   //set parameters
+   tester->SetTcbParameter(0, 0x100);//QH
+   tester->SetTcbParameter(6, 0x50);//QL
+   tester->SetTcbParameter(7, 0x200);//QC
+
+   //create writers
+   const int mppc_slot[4]={5,6,7,9};
+   const int pmt_slot = 10;
+   for(Int_t i=0; i<4; i++){
+      TCB3XECWriter *writer = new TCB3XECWriter(mppc_slot[i]);
+      writer->SetWaveforms(wfSum[i], wfMax[i], wfTdcSum[i], wfTdcNum[i]);
+      tester->AddMemoryWriter(writer);
+   }
+   TCB3XECWriter *writer = new TCB3XECWriter(pmt_slot);
+   writer->SetWaveforms(wfPmtSum, wfPmtDummy, wfPmtDummy, wfPmtDummy);
+   tester->AddMemoryWriter(writer);
+
+   //init reader waveforms
+   MEGFADCWaveform *wfSumOut = new MEGFADCWaveform(MEMDIM, 12.5e-9, - MEMDIM*12.5e-9);
+   MEGFADCWaveform *wfMaxOut = new MEGFADCWaveform(MEMDIM, 12.5e-9, - MEMDIM*12.5e-9);
+   MEGFADCWaveform *wfTdcSumOut = new MEGFADCWaveform(MEMDIM, 12.5e-9, - MEMDIM*12.5e-9);
+   MEGFADCWaveform *wfTdcNumOut = new MEGFADCWaveform(MEMDIM, 12.5e-9, - MEMDIM*12.5e-9);
+   //create reader
+   TCB3XECReader *reader = new TCB3XECReader();
+   tester->AddMemoryReader(reader);
+   reader->SetWaveforms(wfSumOut, wfMaxOut, wfTdcSumOut, wfTdcNumOut);
+
+   tester->DoTest();
+   TCanvas *c = new TCanvas();
+   c->Divide(2);
+   c->cd(1);
+   for(int i=0; i<4; i++) wfPmtSum->Add(wfSum[i]);
+   wfPmtSum->Draw();
+   c->cd(2);
+   wfSumOut->Draw();
+   for(Int_t i=0; i<MEMDIM; i++){
+      if(wfTdcNumOut->GetAmplitudeAt(i) != 0){
+         int maxid = wfMaxOut->GetAmplitudeAt(i);
+         int tdcsum = wfTdcSumOut->GetAmplitudeAt(i);
+         int tdcnum = wfTdcNumOut->GetAmplitudeAt(i);
+         printf("got hit at %d with maxid=%2x tdcnum=%d and tdcsum=%u\n", i, maxid, tdcnum, tdcsum);
       }
    }
    delete tester;
@@ -232,7 +396,9 @@ int main(int argc, char** argv)
    printf("[ 1] Simple Write-Read test \t [ 2] TCB_1 XEC test\n");
    printf("[-1] To exit\n");
    //testTC();
-   testXEC();
+   //testXEC();
+   //testXEC2();
+   testTCB3();
    app.Run();
    return 0;
 }

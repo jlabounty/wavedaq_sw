@@ -87,7 +87,7 @@ void TCB1XECReader::Decompose(){
          sum -= 0x20000000;
       }
       fSum->SetAmplitudeAt(i, sum);
-      fMaxId->SetAmplitudeAt(i, ((upperval)&0x1)|((lowerval>>29)&0x7));
+      fMaxId->SetAmplitudeAt(i, ((upperval&0x1)<<3)|((lowerval>>29)&0x7));
       fTdcSum->SetAmplitudeAt(i, (upperval>>16)&0xFF);
       fTdcNum->SetAmplitudeAt(i, (upperval>>24)&0x1F);
    }
@@ -122,7 +122,7 @@ void TCB2XECWriter::Compose(){
    }
    //upper memory
    for(unsigned i=fSize/2; i< fSize; i++){
-      unsigned maxid = fMaxId->GetAmplitudeAt(i);
+      unsigned maxid = fMaxId->GetAmplitudeAt(i-fSize/2);
       unsigned tdcnum = fTdcNum->GetAmplitudeAt(i-fSize/2);
       unsigned tdcsum = fTdcSum->GetAmplitudeAt(i-fSize/2); 
 
@@ -144,10 +144,49 @@ void TCB2XECReader::Decompose(){
          sum -= 0x80000000;
       }
       fSum->SetAmplitudeAt(i, sum);
-      fMaxId->SetAmplitudeAt(i, ((upperval)&0x5)|((lowerval>>31)&0x1));
+      fMaxId->SetAmplitudeAt(i, ((upperval&0x1F)<<1)|((lowerval>>31)&0x1));
       fTdcSum->SetAmplitudeAt(i, (upperval>>16)&0xFF);
       fTdcNum->SetAmplitudeAt(i, (upperval>>24)&0x1F);
    }
 
 }
 
+void TCB3XECWriter::Compose(){
+   //lower memory
+   for(unsigned i=0; i< fSize/2; i++){
+      unsigned sum = fSum->GetAmplitudeAt(i);
+      unsigned maxid = fMaxId->GetAmplitudeAt(i);
+
+      uint32_t val =0;
+      val |= sum & 0x7FFFFFFF;
+      val |= ((maxid &0x1) << 31);
+      fBuffer[i]= val;
+   }
+   //upper memory
+   for(unsigned i=fSize/2; i< fSize; i++){
+      unsigned maxid = fMaxId->GetAmplitudeAt(i-fSize/2);
+      unsigned tdcnum = fTdcNum->GetAmplitudeAt(i-fSize/2);
+      unsigned tdcsum = fTdcSum->GetAmplitudeAt(i-fSize/2); 
+
+      uint32_t val =0;
+      val |= (maxid>>1) & 0x1F;
+      val |= (tdcsum&0xFF)<<16;
+      val |= (tdcnum&0x1F)<<24;
+      fBuffer[i]= val;
+   }
+}
+
+void TCB3XECReader::Decompose(){
+   for(unsigned i=0; i< fSize/2; i++){
+      uint32_t lowerval = fBuffer[i];
+      uint32_t upperval = fBuffer[i+fSize/2];
+
+      int sum = ((upperval&0x7)==0x0 || (upperval&0x7)==0x7)?lowerval:0x7FFFFFFF;
+      fSum->SetAmplitudeAt(i, sum);
+
+      fMaxId->SetAmplitudeAt(i, (upperval>>8)&0xFF);
+      fTdcSum->SetAmplitudeAt(i, (upperval>>16)&0xFF);
+      fTdcNum->SetAmplitudeAt(i, (upperval>>24)&0x1F);
+   }
+
+}

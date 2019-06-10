@@ -96,7 +96,7 @@ class TCB1TCReader : public TCBMemoryReader{
 };
 
 //--------------------------------------------------------------------
-//       TCB2 XEC-Like WDB Writer
+//       TCB2 XEC-Like Writer
 //--------------------------------------------------------------------
 
 class TCB2XECWriter : public TCBMemoryWriter{
@@ -107,7 +107,7 @@ class TCB2XECWriter : public TCBMemoryWriter{
    public:
    TCB2XECWriter(int slot): TCBMemoryWriter(MEMBASEADDR+slot*2*MEMDIM, MEMDIM*2) {}
 
-   void SetWaveforms(MEGFADCWaveform* sum, MEGFADCWaveform* tdcsum, MEGFADCWaveform* tdcnum) {fSum=sum; fTdcSum=tdcsum; fTdcNum=tdcnum; }
+   void SetWaveforms(MEGFADCWaveform* sum, MEGFADCWaveform* maxid, MEGFADCWaveform* tdcsum, MEGFADCWaveform* tdcnum) {fSum=sum; fMaxId=maxid, fTdcSum=tdcsum; fTdcNum=tdcnum; }
 
    void Compose();
 };
@@ -129,3 +129,37 @@ class TCB2XECReader : public TCBMemoryReader{
    void Decompose();
 };
 
+//--------------------------------------------------------------------
+//       TCB3 XEC-Like Writer
+//--------------------------------------------------------------------
+
+class TCB3XECWriter : public TCBMemoryWriter{
+   MEGFADCWaveform* fSum;
+   MEGFADCWaveform* fMaxId;
+   MEGFADCWaveform* fTdcSum;
+   MEGFADCWaveform* fTdcNum;
+   public:
+   TCB3XECWriter(int slot): TCBMemoryWriter(MEMBASEADDR+slot*2*MEMDIM, MEMDIM*2) {}
+
+   void SetWaveforms(MEGFADCWaveform* sum, MEGFADCWaveform* maxid, MEGFADCWaveform* tdcsum, MEGFADCWaveform* tdcnum) {fSum=sum; fMaxId=maxid, fTdcSum=tdcsum; fTdcNum=tdcnum; }
+
+   void Compose();
+};
+
+//--------------------------------------------------------------------
+//       TCB3 XEC Bank Reader
+//--------------------------------------------------------------------
+
+#define XECMEMBASE 0x11100
+class TCB3XECReader : public TCBMemoryReader{
+   MEGFADCWaveform* fSum;
+   MEGFADCWaveform* fMaxId;
+   MEGFADCWaveform* fTdcNum;
+   MEGFADCWaveform* fTdcSum;
+   public:
+   TCB3XECReader(): TCBMemoryReader(XECMEMBASE, MEMDIM*2) {}
+
+   void SetWaveforms(MEGFADCWaveform* sum, MEGFADCWaveform* maxid, MEGFADCWaveform* tdcsum, MEGFADCWaveform* tdcnum) {fSum=sum; fMaxId=maxid; fTdcSum=tdcsum; fTdcNum=tdcnum; }
+
+   void Decompose();
+};
