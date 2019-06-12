@@ -651,12 +651,16 @@ int main(int argc, char *argv[])
             {
             int nBanks=0;
             char bankName[4];
-            u_int32_t data[4000];
             int length;
             u_int32_t ptr= TCBBoard.GetBufferHeadSPI(&nBanks);
+            printf("packager with %d banks\n", nBanks);
             while(TCBBoard.HasBufferBankSPI(ptr, bankName, &length)){
+               printf("Got bank %c %c %c %c\n", bankName[3], bankName[2], bankName[1], bankName[0]);
+               u_int32_t *data = new u_int32_t[length];
+               printf("Data:\n");
                TCBBoard.GetBufferBankDataSPI(ptr, data, length);
-               printf("got bank %c %c %c %c", bankName[3], bankName[2], bankName[1], bankName[0]);
+               for(int i=0; i<length; i++ ) printf("%3d: %08x\n", i, data[i]);
+               delete[] data;
                ptr = TCBBoard.SkipBufferBankSPI(ptr, length);
             }
             TCBBoard.IncrementBufferPointer();

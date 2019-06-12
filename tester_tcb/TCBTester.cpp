@@ -102,18 +102,7 @@ TCBTester::TCBTester(std::string crateId, int slot, char algsel){
    sprintf(temp, "%s", crateId.c_str());
    fTCB->fh = mscb_init(temp, 0, "", 0); 
 
-   u_int32_t rrun_config = 0x0000E010;  //masktrg, masksync, maskbusy, ~fadcmode, ~testtxmode, enable trg_bus
+   u_int32_t rrun_config = 0x00000010;  //~masktrg, ~masksync, ~maskbusy, ~fadcmode, ~testtxmode, enable trg_bus
    fTCB->SetRRUN(&rrun_config);
-   uint32_t alg = algsel;
-   fTCB->SetRALGSEL(&alg);
-   uint32_t all=0xFFFFFFFF;
-   fTCB->SetParameter(1, &all);
-   fTCB->SetParameter(2, &all);
-   fTCB->SetParameter(3, &all);
-   fTCB->SetParameter(4, &all);
-   uint32_t lowThr=4;
-   fTCB->SetParameter(12, &lowThr);
-   uint32_t highThr=8;
-   fTCB->SetParameter(13, &highThr);
-   //printf("created a tester for board in %s slot %d\n", crateId.c_str(), slot);
+   SetTcbAlgsel(algsel);
 }

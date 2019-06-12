@@ -1565,16 +1565,16 @@ void TCB::WritePacketizerProgram(std::vector<PacketInstruction> &list){
 //Get Current Buffer Head
 u_int32_t TCB::GetBufferHeadSPI(int *nBanks){
    u_int32_t data[5];
-   ReadBLT(PACKAGERBASE, data, 5);
+   ReadBuffer(data, 5);
 
    *nBanks = data[0];
 
-   return 6;
+   return 5;
 }
 //Check current bank
 bool TCB::HasBufferBankSPI(u_int32_t ptr, char *bankName, int *length){
    u_int32_t data[2];
-   ReadBLT(PACKAGERBASE+ptr, data, 2);
+   ReadBuffer(data, 2, ptr);
    bankName[0] = data[0]&0xFF;
    bankName[1] = (data[0]>>8)&0xFF;
    bankName[2] = (data[0]>>16)&0xFF;
@@ -1590,11 +1590,12 @@ u_int32_t TCB::SkipBufferBankSPI(u_int32_t ptr, int length){
 }
 //Read Bank
 void TCB::GetBufferBankDataSPI(u_int32_t ptr, u_int32_t *data, int length){
-   int iword;
-   for (iword = 0; iword+BLTSIZE<length; iword+=BLTSIZE) {
-      ReadBLT(ptr+iword,data+iword, BLTSIZE);
-   }
-   ReadBLT(ptr+iword,data+iword, length-(BLTSIZE*iword));
+//   int iword;
+//   for (iword = 0; iword+BLTSIZE<length; iword+=BLTSIZE) {
+//      ReadBLT(ptr+2+iword,data+iword, BLTSIZE);
+//   }
+//   ReadBLT(ptr+2+iword,data+iword, length-(BLTSIZE*iword));
+   ReadBuffer(data, length, ptr+2);
 }
 //get SYNC waveform
 void TCB::GetSyncWaveform(u_int32_t *ptr){

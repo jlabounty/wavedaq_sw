@@ -27,30 +27,22 @@ void TCBWaveformReader::Decompose(){
 }
 
 void TCB1XECWriter::Compose(){
-   //lower memeory
+   //lower memory
    for(unsigned i=0; i< fSize/2; i++){
       unsigned sum = fWDBSum->GetAmplitudeAt(i);
-      unsigned max = fWDBMaxId->GetAmplitudeAt(i);
 
       uint32_t val =0;
-      val |= sum & 0x3FFFFF;
-      val |= ((sum >>22)&0x1)<<22;
-      val |= ((sum >>22)&0x1)<<23;
-      val |= ((sum >>22)&0x1)<<24;
-      val |= ((sum >>22)&0x1)<<25;
-      val |= ((sum >>22)&0x1)<<26;
-      val |= ((sum >>22)&0x1)<<27;
-      val |= (max&0xF)<<28;
+      val |= sum & 0x1FFFFFF;
       fBuffer[i]= val;
    }
    //upper memory
    for(unsigned i=fSize/2; i< fSize; i++){
-      unsigned maxval = fWDBMaxVal->GetAmplitudeAt(i-fSize/2);
-      unsigned time = fWDBTime->GetAmplitudeAt(i-fSize/2); 
+      unsigned tdcnum = fWDBTdcNum->GetAmplitudeAt(i-fSize/2);
+      unsigned tdcsum = fWDBTdcSum->GetAmplitudeAt(i-fSize/2); 
 
       uint32_t val =0;
-      val |= (maxval&0x3FFFF)<<2;
-      val |= (time&0xFFFF)<<20;
+      val |= (tdcsum&0xFF)<<16;
+      val |= (tdcnum&0x1F)<<24;
       fBuffer[i]= val;
    }
 }
@@ -90,18 +82,14 @@ void TCB1XECReader::Decompose(){
       uint32_t lowerval = fBuffer[i];
       uint32_t upperval = fBuffer[i+fSize/2];
 
-      int sum = lowerval&0x1FFFFFF;
-      if(sum > 0x1000000){
-         sum -= 0x2000000;
+      int sum = lowerval & 0x1FFFFFFF;
+      if(sum > 0x10000000){
+         sum -= 0x20000000;
       }
-      fWDBSum->SetAmplitudeAt(i, sum);
-      fWDBMaxId->SetAmplitudeAt(i, (lowerval>>26)&0xF);
-      int maxAmpl = ((lowerval>>30)&0x3)|((upperval<<2)&0x3FFFFC);
-      if(maxAmpl>0x200000){
-         maxAmpl -= 0x400000;
-      }
-      fWDBMaxVal->SetAmplitudeAt(i, maxAmpl);
-      fWDBTime->SetAmplitudeAt(i,upperval>>20);
+      fSum->SetAmplitudeAt(i, sum);
+      fMaxId->SetAmplitudeAt(i, ((upperval&0x1)<<3)|((lowerval>>29)&0x7));
+      fTdcSum->SetAmplitudeAt(i, (upperval>>16)&0xFF);
+      fTdcNum->SetAmplitudeAt(i, (upperval>>24)&0x1F);
    }
 }
 
@@ -122,25 +110,26 @@ void TCB1TCReader::Decompose(){
 }
 
 void TCB2XECWriter::Compose(){
-   //lower memeory
+   //lower memory
    for(unsigned i=0; i< fSize/2; i++){
-      unsigned sum = fWDBSum->GetAmplitudeAt(i);
-      unsigned max = fWDBMaxId->GetAmplitudeAt(i);
+      unsigned sum = fSum->GetAmplitudeAt(i);
+      unsigned maxid = fMaxId->GetAmplitudeAt(i);
 
       uint32_t val =0;
-      val |= sum & 0x3FFFFFF;
-      val |= (max&0xF)<<26;
-      val |= (max&0x3)<<30;
+      val |= sum & 0x1FFFFFFF;
+      val |= ((maxid &0x7) << 29);
       fBuffer[i]= val;
    }
    //upper memory
    for(unsigned i=fSize/2; i< fSize; i++){
-      unsigned maxval = fWDBMaxVal->GetAmplitudeAt(i-fSize/2);
-      unsigned time = fWDBTime->GetAmplitudeAt(i-fSize/2); 
+      unsigned maxid = fMaxId->GetAmplitudeAt(i-fSize/2);
+      unsigned tdcnum = fTdcNum->GetAmplitudeAt(i-fSize/2);
+      unsigned tdcsum = fTdcSum->GetAmplitudeAt(i-fSize/2); 
 
       uint32_t val =0;
-      val |= (maxval&0x3FFFF)>>2;
-      val |= (time&0xFFFF)<<22;
+      val |= (maxid>>3) & 0x1;
+      val |= (tdcsum&0xFF)<<16;
+      val |= (tdcnum&0x1F)<<24;
       fBuffer[i]= val;
    }
 }
@@ -150,18 +139,54 @@ void TCB2XECReader::Decompose(){
       uint32_t lowerval = fBuffer[i];
       uint32_t upperval = fBuffer[i+fSize/2];
 
-      int sum = lowerval&0xFFFFFFF;
-      if(sum > 0x8000000){
-         sum -= 0x10000000;
+      int sum = lowerval & 0x7FFFFFFF;
+      if(sum > 0x70000000){
+         sum -= 0x80000000;
       }
-      fWDBSum->SetAmplitudeAt(i, sum);
-      fWDBMaxId->SetAmplitudeAt(i, ((upperval&0x3)<<2)|(lowerval>>28)&0xF);
-      int maxAmpl = ((upperval>>2)&0x3FFFFF);
-      if(maxAmpl>0x200000){
-         maxAmpl -= 0x400000;
-      }
-      fWDBMaxVal->SetAmplitudeAt(i, maxAmpl);
-      fWDBTime->SetAmplitudeAt(i,upperval>>24);
+      fSum->SetAmplitudeAt(i, sum);
+      fMaxId->SetAmplitudeAt(i, ((upperval&0x1F)<<1)|((lowerval>>31)&0x1));
+      fTdcSum->SetAmplitudeAt(i, (upperval>>16)&0xFF);
+      fTdcNum->SetAmplitudeAt(i, (upperval>>24)&0x1F);
+   }
+
+}
+
+void TCB3XECWriter::Compose(){
+   //lower memory
+   for(unsigned i=0; i< fSize/2; i++){
+      unsigned sum = fSum->GetAmplitudeAt(i);
+      unsigned maxid = fMaxId->GetAmplitudeAt(i);
+
+      uint32_t val =0;
+      val |= sum & 0x7FFFFFFF;
+      val |= ((maxid &0x1) << 31);
+      fBuffer[i]= val;
+   }
+   //upper memory
+   for(unsigned i=fSize/2; i< fSize; i++){
+      unsigned maxid = fMaxId->GetAmplitudeAt(i-fSize/2);
+      unsigned tdcnum = fTdcNum->GetAmplitudeAt(i-fSize/2);
+      unsigned tdcsum = fTdcSum->GetAmplitudeAt(i-fSize/2); 
+
+      uint32_t val =0;
+      val |= (maxid>>1) & 0x1F;
+      val |= (tdcsum&0xFF)<<16;
+      val |= (tdcnum&0x1F)<<24;
+      fBuffer[i]= val;
    }
 }
 
+void TCB3XECReader::Decompose(){
+   for(unsigned i=0; i< fSize/2; i++){
+      uint32_t lowerval = fBuffer[i];
+      uint32_t upperval = fBuffer[i+fSize/2];
+
+      int sum = ((upperval&0x7)==0x0 || (upperval&0x7)==0x7)?lowerval:0x7FFFFFFF;
+      fSum->SetAmplitudeAt(i, sum);
+
+      fMaxId->SetAmplitudeAt(i, (upperval>>8)&0xFF);
+      fTdcSum->SetAmplitudeAt(i, (upperval>>16)&0xFF);
+      fTdcNum->SetAmplitudeAt(i, (upperval>>24)&0x1F);
+   }
+
+}
