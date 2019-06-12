@@ -646,7 +646,7 @@ public:
    std::string GetHwVersion();
    float GetTemperatureDegree(bool refresh = true);
    unsigned int GetPllLock(bool refresh = true);
-   void GetScalers(std::vector<unsigned long> &s, bool refresh = true);
+   void GetScalers(std::vector<unsigned long long> &s, bool refresh = true);
    void GetHVCurrents(std::vector<float> &c, bool refresh = true);
    void GetHVBaseVoltage(float &voltage, bool refresh = true);
    void Get1wireTemperatures(std::vector<float> &c, bool refresh = true);
