@@ -860,18 +860,18 @@ void WDB::SetDrsSampleFreq(unsigned int f)
    ReceiveStatusRegister(WD2_DRS_SAMPLE_FREQ_REG);
 }
 
-void WDB::GetScalers(std::vector<unsigned long> &scaler, bool refresh)
+void WDB::GetScalers(std::vector<unsigned long long> &scaler, bool refresh)
 {
    if (refresh)
       ReceiveStatusRegisters((WD2_SCALER_0_REG & 0x0FFF)/4, 22);
 
    // decode scalers according to their bit width
    int adr = 0;
-   unsigned long v;
+   unsigned long long v;
    for (unsigned int i=0 ; i<sizeof(cScalerWidth)/sizeof(int) ; i++) {
       if (cScalerWidth[i] == 64) {
          v = this->sreg[WD2_SCALER_0_REG/4+adr] |
-            ((unsigned long)this->sreg[WD2_SCALER_0_REG/4+adr+1] << 32);
+            ((unsigned long long)this->sreg[WD2_SCALER_0_REG/4+adr+1] << 32);
          adr += 2;
       } else {
          v = this->sreg[WD2_SCALER_0_REG/4+adr];
@@ -2452,7 +2452,7 @@ int WP::ReceiveWfPacket()
 
    // decode advanced trigger data
    if (pdaqh->data_type == cDataTypeTrg) {
-      auto pd = (unsigned long*)(ph+1);
+      auto pd = (unsigned long long*)(ph+1);
       //assure data are transmitted in 64-bit blocks
       assert(pdaqh->payload_length%8 == 0);
       assert(pdaqh->data_chunk_offset%8 == 0);
@@ -2463,7 +2463,7 @@ int WP::ReceiveWfPacket()
 
    // decode scaler data
    if (pdaqh->data_type == cDataTypeScaler) {
-      auto pd = (unsigned long*)(ph+1);
+      auto pd = (unsigned long long*)(ph+1);
       assert(pdaqh->payload_length <= sizeof(event->mScaler));
       for (int i=0 ; i<WD_N_SCALER ; i++)
          event->mScaler[i] = SWAP_UINT64(pd[17-i]);
@@ -2875,15 +2875,15 @@ void WP::SaveWaveforms()
                sprintf(str, "%d", ev->mTriggerCell[i]);
                mxml_write_element(li.xml, "Trigger_Cell", str);
 
-               unsigned int s = 0;
+               unsigned long long s = 0;
                for (auto &b: mWdb)
                   if (b->GetSerialNumber() == ev->mBoardId) {
-                     std::vector<unsigned long>sc;
+                     std::vector<unsigned long long>sc;
                      b->GetScalers(sc, false);
                      s = sc[i];
                      break;
                   }
-               sprintf(str, "%u", s);
+               sprintf(str, "%llu", s);
                mxml_write_element(li.xml, "Scaler", str);
 
                mxml_start_element(li.xml, "Waveform");
@@ -2999,9 +2999,9 @@ void WP::SaveWaveforms()
                WDB *wdb = GetBoard(ev->mBoardId);
                assert(wdb);
 
-               std::vector<unsigned long>sc;
+               std::vector<unsigned long long>sc;
                wdb->GetScalers(sc, false);
-               unsigned int s = sc[i];
+               unsigned long long s = sc[i];
                memcpy(p, &s, sizeof(unsigned int));
                p += sizeof(int);
 
