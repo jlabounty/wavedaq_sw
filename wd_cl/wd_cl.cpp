@@ -116,8 +116,9 @@ int main(int argc, char *argv[])
             printf("prepare for the run... ");
             sys->SpawnDAQ();
             sys->SetSerdesTraining(true);
+            usleep(50000);
             sys->TrainSerdes();
-	    usleep(50000);
+            usleep(100000);
             sys->Configure();
          }
          if(option == 3)
@@ -163,6 +164,34 @@ int main(int argc, char *argv[])
             printf("generating SYNC...\n");
             WDBoard *triggerb = sys->GetTriggerBoard();
             triggerb->Sync();
+            printf("SYNC generated from board %s\n", triggerb->GetBoardName().c_str());
+            for(auto c : *sys)
+               for(auto b :*c)
+                  if(b){
+                     if(dynamic_cast<WDTCB*>(b) != nullptr){
+                        u_int32_t val = 0;
+                         dynamic_cast<WDTCB*>(b)->GetSyncWaveform(&val);
+                         /*val =  val >>8;
+                         if(val&0x80){
+                            val = 0;
+                         } else if(val&0x40){
+                            val = 1;
+                         } else if(val&0x20){
+                            val = 2;
+                         } else if(val&0x10){
+                            val = 3;
+                         } else if(val&0x8){
+                            val = 4;
+                         } else if(val&0x4){
+                            val = 5;
+                         } else if(val&0x2){
+                            val = 6;
+                         } else if(val&0x1){
+                            val = 7;
+                         }*/
+                         printf("%s %d %04x\n", c->GetMscbName().c_str(), b->GetSlot(), val);
+                     }
+                  }
          }
          if(option == 7)
          {

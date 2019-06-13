@@ -415,6 +415,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
    printf("frontend sets \t %x\n", data->frontend_settings);
    printf("data type \t %x\n", daqdata->data_type);
    printf("flags   \t %x\n", data->wd_flags);
+   printf("trigger event \t %d\n", data->trigger_information[5] | (data->trigger_information[4] << 8));
    printf("\n");
    printf("\n");
    #endif
@@ -567,24 +568,34 @@ void WDAQPacketCollector::End(){
 
 // functionalies of WDAQTCBReader
 void WDAQTCBReader::Begin(){
-  // reset the buffer pointers and busy
-  fBoard->ResetBufferLogic();
-  fBoard->SetPacketizerBus(true);
-  //printf("buffer logic resetted\n");
+   fBoard->SetPacketizerBus(true);
+   fBoard->SetPacketizerEnable(true);
+   fBoard->SetPacketizerAutostart(true);
+   printf("Spawned TCBReader\n");
+
+
+   // reset the buffer pointers and busy
+   fBoard->ResetBufferLogic();
 }
 
 void WDAQTCBReader::Loop(){
   // polling on the buffer status searching for an event
   if(fBoard->GetBufferState() != 0) { 
-  // read the last available buffer on TCB
-    //uint32_t state = fBoard->GetBufferState();
-    //uint32_t pointer = fBoard->GetSPIBufferPointer();
-    //uint32_t pointer2 = fBoard->GetPacketizerBufferPointer();
-    uint32_t data[3];
-    fBoard->ReadBuffer(data, 1);
-    // remove the busy for the just read buffer
-    fBoard->IncrementBufferPointer();
-    //printf("got event %x, bufferstate %x pointer %x/%x\n",data[0], state, pointer, pointer2);
+     int nBanks=0;
+     char bankName[4];
+     int length;
+     u_int32_t ptr= fBoard->GetBufferHeadSPI(&nBanks);
+     printf("%d banks\n", nBanks);
+     while(fBoard->HasBufferBankSPI(ptr, bankName, &length)){
+        printf("Got bank %c %c %c %c\n", bankName[3], bankName[2], bankName[1], bankName[0]);
+        u_int32_t *data = new u_int32_t[length];
+        printf("Data:\n");
+        fBoard->GetBufferBankDataSPI(ptr, data, length);
+        for(int i=0; i<length; i++ ) printf("%3d: %08x\n", i, data[i]);
+        delete[] data;
+        ptr = fBoard->SkipBufferBankSPI(ptr, length);
+     }
+     fBoard->IncrementBufferPointer();
   }
 }
 
@@ -631,37 +642,37 @@ void WDAQEventBuilder::Loop(){
 
       //check if event complete
       if(evt_ptr->IsComplete() == fNWDB){
-	//event complete
-	fBuildedEvent++;
-	
-	if(!fDestination->Try_push(evt_ptr)){
-	  //could not push to buffer
-	  //printf("overflow eve\n");
-	  fDroppedEvent++;
-	  delete evt_ptr;
-	}
-	
-	
-	//remove from local event list
-	fEvents.erase(new_event_number);
-	
-	//check older events (event id smaller than built one by 10)
-	for(auto ev = fEvents.cbegin(); ev != fEvents.cend();){
-	  if((new_event_number - ev->first)>10){
-	    //This is to print debug information
-	    /*printf("Old event %d: ", ev->first);
-	      for(auto be: ev->second->fBoard){
-	      for(int i=0; i<18; i++) printf("%d-%d-%d ", be.second->mDrsHasData[i], be.second->mAdcHasData[i], be.second->mTdcHasData[i]);
-	      printf("%d %d\n", be.second->mTrgHasData, be.second->mEndFlagReceived);
-	      }*/
-	    //remove old event from list
-	    delete ev->second;
-	    fEvents.erase(ev++);
-	    fOldEvent++;
-	  }else{
-	    ++ev;
-	  }
-	}
+         //event complete
+         fBuildedEvent++;
+         
+         if(!fDestination->Try_push(evt_ptr)){
+           //could not push to buffer
+           //printf("overflow eve\n");
+           fDroppedEvent++;
+           delete evt_ptr;
+         }
+         
+         
+         //remove from local event list
+         fEvents.erase(new_event_number);
+         
+         //check older events (event id smaller than built one by 10)
+         for(auto ev = fEvents.cbegin(); ev != fEvents.cend();){
+            if((new_event_number - ev->first)>10){
+               //This is to print debug information
+               /*printf("Old event %d: ", ev->first);
+               for(auto be: ev->second->fBoard){
+                  for(int i=0; i<18; i++) printf("%d-%d-%d ", be.second->mDrsHasData[i], be.second->mAdcHasData[i], be.second->mTdcHasData[i]);
+                  printf("%d %d\n", be.second->mTrgHasData, be.second->mEndFlagReceived);
+               }*/
+               //remove old event from list
+               delete ev->second;
+               fEvents.erase(ev++);
+               fOldEvent++;
+           }else{
+             ++ev;
+           }
+         }
       }// end if evt_ptr->IsComplete()
    }
 }
