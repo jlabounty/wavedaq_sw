@@ -22,7 +22,7 @@ CFLAGS  += -std=gnu++11 -x c++
 LIBS    = -lobjc
 endif
 
-CFLAGS += -I./src -I../lib -I../../firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/common/src/
+CFLAGS += -I./src -I../src -I../../firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/common/src/
 CFLAGS += -D WD2_DONT_INCLUDE_REG_ACCESS_VARS
 # search *.c and *.cpp files
 C_FILES = $(wildcard src/*.c)
@@ -32,7 +32,7 @@ C_OBJ = $(notdir $(C_FILES:%.c=%.o))
 #CPP_OBJ = $(CPP_FILES:%.cpp=%.o)
 CPP_OBJ = $(notdir $(CPP_FILES:%.cpp=%.o))
 
-LIB_FILES = $(wildcard ../lib/*.cpp)
+LIB_FILES = $(wildcard ../src/*.cpp)
 LIB_OBJ = $(notdir $(LIB_FILES:%.cpp=%.o))
 
 all: $(OUTNAME)
@@ -40,10 +40,10 @@ all: $(OUTNAME)
 $(OUTNAME): $(C_OBJ) $(CPP_OBJ) $(LIB_OBJ)
 	g++ $(C_OBJ) $(CPP_OBJ) $(LIB_OBJ) -o $(OUTNAME) $(LIBS)
 
-$(CPP_OBJ): %.o: src/%.cpp src/%.h ../lib/WDBLib.h
+$(CPP_OBJ): %.o: src/%.cpp src/%.h ../src/WDBLib.h
 	g++ $(CFLAGS) -c $<
 
-$(LIB_OBJ): %.o: ../lib/%.cpp ../lib/%.h
+$(LIB_OBJ): %.o: ../src/%.cpp ../src/%.h
 	g++ $(CFLAGS) -c $<
 
 $(C_OBJ): %.o: src/%.c

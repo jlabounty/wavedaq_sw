@@ -13,7 +13,6 @@
 #ifndef __wdblib_h__
 #define __wdblib_h__
 
-#include "register_map_wd2.h"
 #include "WDBReg.h"
 
 #include <thread>
