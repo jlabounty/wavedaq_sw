@@ -1,0 +1,6 @@
+.idea
+build
+bin
+lib
+cmake-build-debug
+camke-build-release
