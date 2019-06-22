@@ -10,7 +10,7 @@
 # directories
 MXML_DIR      = ../../../mxml/
 MSCB_DIR      = ../../../mscb
-WDB_DIR       = ../lib
+WDB_DIR       = ../src
 TCB_DIR       = ../tcb
 FW_DIR        = ../../firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/common/src/
 

@@ -150,7 +150,8 @@ int main(int argc, char** argv)
       b->SetTimingReferenceSignal(WDB::cTimingReferenceSquare);
       
       // External trigger settings
-      b->SetTriggerTypeSel(1);
+      b->SetPatternTriggerEn(0);
+      b->SetExtAsyncTriggerEn(1);
       b->SetExtTriggerOutEnable(0);
       
       // Set backplane clock source 80 MHz

@@ -26,7 +26,7 @@ LIBS          =  -lrt -lbsd
 endif
 
 FLAGS         += -I$(MSCB_DIR)/include 
-FLAGS         += -I$(WDAQ_DIR)/software/lib 
+FLAGS         += -I$(WDAQ_DIR)/software/src 
 FLAGS         += -I$(WDAQ_DIR)/software/tcb 
 FLAGS         += -I$(WDAQ_DIR)/firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/common/src/
 FLAGS         += -D WD2_DONT_INCLUDE_REG_ACCESS_VARS
@@ -46,7 +46,7 @@ all: $(OUTNAME)
 $(OUTNAME): $(OBJECTS) wd_cl.o
 	$(CPP) $(FLAGS) $(OBJECTS) wd_cl.o -o $(OUTNAME) $(LIBS)
 
-$(WDB_DRV_OBJ): %.o: $(WDAQ_DIR)/software/lib/%.cpp
+$(WDB_DRV_OBJ): %.o: $(WDAQ_DIR)/software/src/%.cpp
 	$(CPP) $(FLAGS) $(CPPFLAGS) -MMD -MP -MF $(@:.o=.d) -MT $@ -c $<
 
 $(TCB_DRV_OBJ): %.o: $(WDAQ_DIR)/software/tcb/%.cpp
