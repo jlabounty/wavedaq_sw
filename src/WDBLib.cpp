@@ -95,6 +95,10 @@ WDB::WDB(std::string name, int verbose)
    mTimingReferenceSignal = cTimingReferenceOff;
 
    if (mDemoMode) {
+      for (auto i=0 ; i<REG_NR_OF_CTRL_REGS; i++)
+         this->creg[i] = ctrl_reg_default[i];
+      for (auto i=0 ; i<REG_NR_OF_STAT_REGS; i++)
+         this->sreg[i] = 0;
       // set some meaningful values in demo mode to make wds happy
       this->sreg[(WD2_DRS_SAMPLE_FREQ_REG & 0x0FFF)/4] = 5120;
       this->sreg[(WD2_ADC_SAMPLE_FREQ_REG & 0x0FFF)/4] = 80;
@@ -595,8 +599,8 @@ void bitReplace(unsigned int &reg, unsigned int mask, unsigned int ofs, unsigned
 void WDB::ReceiveControlRegisters(unsigned int index, unsigned int nReg)
 {
    if (mDemoMode) {
-      for (auto i=index ; i<index+nReg ; i++)
-         this->creg[i] = ctrl_reg_default[i];
+      //for (auto i=index ; i<index+nReg ; i++)
+      //   this->creg[i] = ctrl_reg_default[i];
       return;
    }
 
@@ -627,8 +631,8 @@ void WDB::ReceiveControlRegisters(unsigned int index, unsigned int nReg)
 void WDB::ReceiveStatusRegisters(unsigned int index, unsigned int nReg)
 {
    if (mDemoMode) {
-      for (auto i=index ; i<index+nReg ; i++)
-         this->sreg[i] = 0;
+      //for (auto i=index ; i<index+nReg ; i++)
+      //   this->sreg[i] = 0;
       return;
    }
 
@@ -665,7 +669,7 @@ void WDB::ReceiveStatusRegister(int rofs)
    int index = (rofs & 0x0FFF)/4;
 
    if (mDemoMode) {
-      this->sreg[index] = 0;
+      //this->sreg[index] = 0;
       return;
    }
 
@@ -2456,8 +2460,8 @@ int WP::ReceiveWfPacket()
       //assure data are transmitted in 64-bit blocks
       assert(pdaqh->payload_length%8 == 0);
       assert(pdaqh->data_chunk_offset%8 == 0);
-      for(int i=0; i<pdaqh->payload_length; i+=8){
-          event->mTrgData[pdaqh->data_chunk_offset/8] = SWAP_UINT64(pd[i]);
+      for(int i=0; i<pdaqh->payload_length/8; i++){
+          event->mTrgData[pdaqh->data_chunk_offset/8+i] = SWAP_UINT64(pd[i]);
       }
    }
 
@@ -2840,6 +2844,9 @@ void WP::SaveWaveforms()
    int n = mEvent.size();
    buffer_size = 8 + n*(4+18*(4+1024*4)); // time array
    buffer_size += 8+16+n*(4+18*(12+1024*2));  // voltage array
+   buffer_size += n*(18*(4+2048*2));  // adc array
+   buffer_size += n*(18*(4+512*1));  // tdc array
+   buffer_size += n*(4+512*4);  // trg array
    if (!buffer) {
       buffer = (unsigned char *)malloc(buffer_size);
       assert(buffer);
@@ -2989,29 +2996,32 @@ void WP::SaveWaveforms()
          *(unsigned short *)p = ev->mBoardId;
          p += sizeof(unsigned short);
 
-         for (int i=0 ; i<WD_N_CHANNELS ; i++) {
-            if (ev->mDRSChannelPresent[i]) {
-               // channel header
-               sprintf((char *)p, "C%03d", i);
-               p += 4;
+         //Get Board
+         WDB *wdb = GetBoard(ev->mBoardId);
+         assert(wdb);
 
-               // write scaler
-               WDB *wdb = GetBoard(ev->mBoardId);
-               assert(wdb);
+         //Get Scalers
+         std::vector<unsigned long long>sc;
+         wdb->GetScalers(sc, false);
 
-               std::vector<unsigned long long>sc;
-               wdb->GetScalers(sc, false);
-               unsigned long long s = sc[i];
-               memcpy(p, &s, sizeof(unsigned int));
-               p += sizeof(int);
+         if (ev->mTypeValid[cDataTypeDRS]) {
+            for (int i=0 ; i<WD_N_CHANNELS ; i++) {
+               if (ev->mDRSChannelPresent[i]) {
+                  // channel header
+                  sprintf((char *)p, "C%03d", i);
+                  p += 4;
 
-               // write trigger cell
-               sprintf((char *)p, "T#");
-               p += 2;
-               *(unsigned short *)p = ev->mTriggerCell[i];
-               p += sizeof(unsigned short);
+                  // write scaler
+                  unsigned long long s = sc[i];
+                  memcpy(p, &s, sizeof(unsigned int));
+                  p += sizeof(int);
 
-               if (ev->mTypeValid[cDataTypeDRS]) {
+                  // write trigger cell
+                  sprintf((char *)p, "T#");
+                  p += 2;
+                  *(unsigned short *)p = ev->mTriggerCell[i];
+                  p += sizeof(unsigned short);
+
                   for (int j=0 ; j<1024 ; j++) {
                      // save binary date as 16-bit value:
                      // 0 = -0.5V,  65535 = +0.5V    for range 0
@@ -3026,7 +3036,16 @@ void WP::SaveWaveforms()
                      *(unsigned short *)p = d;
                      p += sizeof(unsigned short);
                   }
-               } else if (ev->mTypeValid[cDataTypeADC]) {
+               }
+            }
+         }
+
+         if (ev->mTypeValid[cDataTypeADC]) {
+            for (int i=0 ; i<WD_N_CHANNELS ; i++) {
+               if (ev->mADCChannelPresent[i]) {
+                  // channel header
+                  sprintf((char *)p, "A%03d", i);
+                  p += 4;
                   for (int j=0 ; j<2048 ; j++) {
                      // save binary date as 16-bit value:
                      // 0 = -0.5V,  65535 = +0.5V    for range 0
@@ -3044,6 +3063,31 @@ void WP::SaveWaveforms()
                }
             }
          }
+
+         if (ev->mTypeValid[cDataTypeTDC]) {
+            for (int i=0 ; i<WD_N_CHANNELS ; i++) {
+               if (ev->mTDCChannelPresent[i]) {
+                  // channel header
+                  sprintf((char *)p, "T%03d", i);
+                  p += 4;
+                  for (int j=0 ; j<512 ; j++) {
+                     *(unsigned char *)p = ev->mWfTDC[i][j];
+                     p += sizeof(unsigned char);
+                  }
+               }
+            }
+         }
+
+         if (ev->mTypeValid[cDataTypeTrg]) {
+            // channel header
+            sprintf((char *)p, "TRGD");
+            p += 4;
+            for (int j=0 ; j<512 ; j++) {
+               *(unsigned long *)p = ev->mTrgData[j];
+               p += sizeof(unsigned long);
+            }
+         }
+
          b++;
       }
 

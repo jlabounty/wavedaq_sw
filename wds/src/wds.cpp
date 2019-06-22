@@ -130,21 +130,18 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          if (iBoard == -1)
             for (auto &b: gl->wdb) {
                b->SetChnTxEn(mask);
-               if (gl->readoutMode == cReadoutModeDRS)
-                  b->SetDrsChTxEn(mask);
-               else if (gl->readoutMode == cReadoutModeADC)
-                  b->SetAdcChTxEn(mask);
-               else
-                  b->SetTdcChTxEn(mask);
+               auto adcEnable = b->GetAdcChTxEn();
+               auto tdcEnable = b->GetTdcChTxEn();
+               auto drsEnable = b->GetDrsChTxEn();
+               if (b->GetAdcChTxEn() != 0 || gl->readoutMode == cReadoutModeADC) b->SetAdcChTxEn(mask);
+               if (b->GetTdcChTxEn() != 0 || gl->readoutMode == cReadoutModeTDC) b->SetTdcChTxEn(mask);
+               if (b->GetDrsChTxEn() != 0 || gl->readoutMode == cReadoutModeDRS) b->SetDrsChTxEn(mask);
             }
          else {
             gl->wdb[iBoard]->SetChnTxEn(mask);
-            if (gl->readoutMode == cReadoutModeDRS)
-               gl->wdb[iBoard]->SetDrsChTxEn(mask);
-            else if (gl->readoutMode == cReadoutModeADC)
-               gl->wdb[iBoard]->SetAdcChTxEn(mask);
-            else
-               gl->wdb[iBoard]->SetTdcChTxEn(mask);
+            if (gl->wdb[iBoard]->GetAdcChTxEn() != 0 || gl->readoutMode == cReadoutModeADC) gl->wdb[iBoard]->SetAdcChTxEn(mask);
+            if (gl->wdb[iBoard]->GetTdcChTxEn() != 0 || gl->readoutMode == cReadoutModeTDC) gl->wdb[iBoard]->SetTdcChTxEn(mask);
+            if (gl->wdb[iBoard]->GetDrsChTxEn() != 0 || gl->readoutMode == cReadoutModeDRS) gl->wdb[iBoard]->SetDrsChTxEn(mask);
          }
       }
 
@@ -311,17 +308,11 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                if (std::stoi(value) == (int)cReadoutModeDRS) {
                   gl->readoutMode = cReadoutModeDRS;
                   b->SetDrsChTxEn(b->GetChnTxEn());
-                  b->SetAdcChTxEn(0);
-                  b->SetTdcChTxEn(0);
                } else if (std::stoi(value) == (int)cReadoutModeADC) {
                   gl->readoutMode = cReadoutModeADC;
-                  b->SetDrsChTxEn(0);
                   b->SetAdcChTxEn(b->GetChnTxEn());
-                  b->SetTdcChTxEn(0);
                } else {
                   gl->readoutMode = cReadoutModeTDC;
-                  b->SetDrsChTxEn(0);
-                  b->SetAdcChTxEn(0);
                   b->SetTdcChTxEn(b->GetChnTxEn());
                }
             }
@@ -329,18 +320,66 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             if (std::stoi(value) == (int)cReadoutModeDRS) {
                gl->readoutMode = cReadoutModeDRS;
                gl->wdb[iBoard]->SetDrsChTxEn(gl->wdb[iBoard]->GetChnTxEn());
-               gl->wdb[iBoard]->SetAdcChTxEn(0);
-               gl->wdb[iBoard]->SetTdcChTxEn(0);
             } else if (std::stoi(value) == (int)cReadoutModeADC) {
                gl->readoutMode = cReadoutModeADC;
-               gl->wdb[iBoard]->SetDrsChTxEn(0);
                gl->wdb[iBoard]->SetAdcChTxEn(gl->wdb[iBoard]->GetChnTxEn());
-               gl->wdb[iBoard]->SetTdcChTxEn(0);
             } else {
                gl->readoutMode = cReadoutModeTDC;
-               gl->wdb[iBoard]->SetDrsChTxEn(0);
-               gl->wdb[iBoard]->SetAdcChTxEn(0);
                gl->wdb[iBoard]->SetTdcChTxEn(gl->wdb[iBoard]->GetChnTxEn());
+            }
+         }
+      }
+      else if (item.find("readoutEnable") == 0) {
+         std::string source = item.substr(13,3);
+         if (iBoard == -1)
+            for (auto &b: gl->wdb) {
+               if(source == "DRS"){
+                  if (value == "true")
+                     b->SetDrsChTxEn(b->GetChnTxEn());
+                  else
+                     b->SetDrsChTxEn(0);
+
+               } else if (source == "ADC"){
+                  if (value == "true")
+                     b->SetAdcChTxEn(b->GetChnTxEn());
+                  else
+                     b->SetAdcChTxEn(0);
+
+               } else if (source == "TDC"){
+                  if (value == "true")
+                     b->SetTdcChTxEn(b->GetChnTxEn());
+                  else
+                     b->SetTdcChTxEn(0);
+               } else if (source == "TRG"){
+                  if (value == "true")
+                     b->SetTrgTxEn(1);
+                  else
+                     b->SetTrgTxEn(0);
+               }
+            }
+         else {
+            if(source == "DRS"){
+               if (value == "true")
+                  gl->wdb[iBoard]->SetDrsChTxEn(gl->wdb[iBoard]->GetChnTxEn());
+               else
+                  gl->wdb[iBoard]->SetDrsChTxEn(0);
+
+            } else if (source == "ADC"){
+               if (value == "true")
+                  gl->wdb[iBoard]->SetAdcChTxEn(gl->wdb[iBoard]->GetChnTxEn());
+               else
+                  gl->wdb[iBoard]->SetAdcChTxEn(0);
+
+            } else if (source == "TDC"){
+               if (value == "true")
+                  gl->wdb[iBoard]->SetTdcChTxEn(gl->wdb[iBoard]->GetChnTxEn());
+               else
+                  gl->wdb[iBoard]->SetTdcChTxEn(0);
+            } else if (source == "TRG"){
+               if (value == "true")
+                  gl->wdb[iBoard]->SetTrgTxEn(1);
+               else
+                  gl->wdb[iBoard]->SetTrgTxEn(0);
             }
          }
       }
@@ -546,6 +585,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          mg_printf_http_chunk(nc, "      \"crateId\": %d,\n",                    w->GetCrateId());
          mg_printf_http_chunk(nc, "      \"slotId\": %d,\n",                     w->GetSlotId());
          mg_printf_http_chunk(nc, "      \"readoutSrcSel\": %d,\n",              gl->readoutMode);
+         mg_printf_http_chunk(nc, "      \"readoutEnable\": %d,\n",              ((w->GetTrgTxEn()!=0)<<3)
+                                                                               | ((w->GetTdcChTxEn()!=0)<<2)
+                                                                               | ((w->GetAdcChTxEn()!=0)<<1)
+                                                                               | (w->GetDrsChTxEn()!=0));
          mg_printf_http_chunk(nc, "      \"daqNormal\": %s,\n",                  w->GetDaqNormal() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"daqSingle\": %s,\n",                  w->GetDaqSingle() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"drs0TimingRefSel\": %d,\n",           w->GetDrs0TimingRefSel());
@@ -737,28 +780,30 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          bNewEvent = true;
          event.mVCalibrated = true;
          event.mTCalibrated = true;
-         event.mTypeValid[cDataTypeDRS] = true;
-         for (int c=0 ; c<WD_N_CHANNELS ; c++) {
-            for (int i=0 ; i<1024 ; i++) {
-               float t = i*1E-6 / demoDrsSampleFreq;
-               event.mWfTDRS[c][i] = t;
-               event.mWfUDRS[c][i] = (float)(sin(M_PI*2 * 100E6 * t + c/8.0)/2 + ((float)random()/RAND_MAX-0.5) / 300);
-            }
-            // add spikes
-            for (int i=0 ; i<1024 ; i++) {
-               if ((float)random()/RAND_MAX < 0.00005) {
-                  float s = ((float)random()/RAND_MAX-0.5) / 5;
-                  int j = i-5;
-                  float f;
-                  for (f=0 ; f<1 ; f += 0.2,j++)
-                     if (j >= 0 && j< 1024)
-                        event.mWfUDRS[c][j] += s * f;
-                  for (f=1 ; f>0 ; f -= 0.2,j++)
-                     if (j >= 0 && j< 1024)
-                        event.mWfUDRS[c][j] += s * f;
+         if(gl->readoutMode == cReadoutModeDRS){
+            event.mTypeValid[cDataTypeDRS] = true;
+            for (int c=0 ; c<WD_N_CHANNELS ; c++) {
+               for (int i=0 ; i<1024 ; i++) {
+                  float t = i*1E-6 / demoDrsSampleFreq;
+                  event.mWfTDRS[c][i] = t;
+                  event.mWfUDRS[c][i] = (float)(sin(M_PI*2 * 100E6 * t + c/8.0)/2 + ((float)random()/RAND_MAX-0.5) / 300);
+               }
+               // add spikes
+               for (int i=0 ; i<1024 ; i++) {
+                  if ((float)random()/RAND_MAX < 0.00005) {
+                     float s = ((float)random()/RAND_MAX-0.5) / 5;
+                     int j = i-5;
+                     float f;
+                     for (f=0 ; f<1 ; f += 0.2,j++)
+                        if (j >= 0 && j< 1024)
+                           event.mWfUDRS[c][j] += s * f;
+                     for (f=1 ; f>0 ; f -= 0.2,j++)
+                        if (j >= 0 && j< 1024)
+                           event.mWfUDRS[c][j] += s * f;
+                  }
                }
             }
-         }
+         } 
       } else {
 
          // request single event
@@ -794,7 +839,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          b = 0xFF; // signals demo data
 
       if (bNewEvent) {
-         if (event.mTypeValid[cDataTypeADC]) { //---- ADC waveforms
+         if (event.mTypeValid[cDataTypeADC] && gl->readoutMode == cReadoutModeADC) { //---- ADC waveforms
             int t = 1;                    // array type
             int n = 1024;                 // number of elements
             int vc = event.mVCalibrated;  // voltage calibrated
@@ -825,7 +870,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                   mg_send_http_chunk(nc, (const char *)&event.mWfUADC[c][1024], sizeof(float)*n);
                }
             }
-         } else if (event.mTypeValid[cDataTypeTDC]) { //---- TDC waveforms
+         } else if (event.mTypeValid[cDataTypeTDC] && gl->readoutMode == cReadoutModeTDC) { //---- TDC waveforms
             int t = 1;                    // array type
             int n = 512*8;                 // number of elements
             int vc = event.mVCalibrated;  // voltage calibrated
@@ -866,7 +911,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                   mg_send_http_chunk(nc, (const char *)&ampl[0], sizeof(unsigned char)*n);
                }
             }
-         } else if (event.mTypeValid[cDataTypeDRS]) { //---- DRS waveforms
+         } else if (event.mTypeValid[cDataTypeDRS] && gl->readoutMode == cReadoutModeDRS) { //---- DRS waveforms
             int t = 1;                    // array type
             int n = 1024;                 // number of elements
             int vc = event.mVCalibrated;  // voltage calibrated
@@ -1062,6 +1107,7 @@ int main(int argc, const char * argv[])
    if (gl.demoMode) {
       gl.wdb.clear();
       gl.wdb.push_back(new WDB("demo"));
+      gl.readoutMode = cReadoutModeDRS;
    }
 
    if (gl.wdb.size() == 0) {
@@ -1149,15 +1195,13 @@ int main(int argc, const char * argv[])
                gl.readoutMode = cReadoutModeDRS;
             }
 
-            // disable advanced trigger readout
-            b->SetTrgTxEn(0);
-
             // disable scaler readout
             b->SetSclTxEn(0);
 
          } else {
             // turn all channels on in demo mode
             b->SetDrsChTxEn(0xFFFF);
+            b->SetChnTxEn(0xFFFF);
          }
       } catch (std::runtime_error &e) {
          std::cout << std::endl;

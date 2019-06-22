@@ -283,6 +283,11 @@ function populateControls(init) {
    document.getElementById("inputReadoutSrcADC").checked = (OSC.wdb[OSC.curBoard].readoutSrcSel == 2);
    document.getElementById("inputReadoutSrcTDC").checked = (OSC.wdb[OSC.curBoard].readoutSrcSel == 3);
 
+   document.getElementById("readoutDRSEnable").checked = (OSC.wdb[OSC.curBoard].readoutEnable & 0x1);
+   document.getElementById("readoutADCEnable").checked = (OSC.wdb[OSC.curBoard].readoutEnable & 0x2);
+   document.getElementById("readoutTDCEnable").checked = (OSC.wdb[OSC.curBoard].readoutEnable & 0x4);
+   document.getElementById("readoutTRGEnable").checked = (OSC.wdb[OSC.curBoard].readoutEnable & 0x8);
+
    document.getElementById("timingCalibSignalEnable").checked = OSC.wdb[OSC.curBoard].timingCalibSignalEnable;
 
    if (OSC.wdb[OSC.curBoard].dacCalDc > 0.4)
