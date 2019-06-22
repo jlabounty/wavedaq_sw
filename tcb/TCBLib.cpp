@@ -1428,6 +1428,10 @@ void TCB::GetAutoCalibrateEye(u_int32_t* eyes){
    tx_conf &= 0xFFFFFDFF;
    WriteReg(RSERDESTX, &tx_conf);
 }
+//Returns enable value for latency compensations of SerDes
+void TCB::GetAutoAlignDlys(u_int32_t* ret){
+   ReadReg(RSERDESALIGNDLY, ret);
+}
 void TCB::SetSingleCrateConfiguration(bool useGlobalAnd, short shape, short vetoShape){
    u_int32_t val = 0;
    val |= (shape & 0x1F);
@@ -1563,11 +1567,15 @@ void TCB::WritePacketizerProgram(std::vector<PacketInstruction> &list){
    
 }
 //Get Current Buffer Head
-u_int32_t TCB::GetBufferHeadSPI(int *nBanks){
+u_int32_t TCB::GetBufferHeadSPI(int *nBanks, u_int32_t *evecou, u_int32_t* totaltime, u_int32_t* sys_tritype, u_int32_t* sys_evecou){
    u_int32_t data[5];
    ReadBuffer(data, 5);
 
    *nBanks = data[0];
+   if(evecou) *evecou = data[1];
+   if(totaltime) *totaltime = data[2];
+   if(sys_tritype) *sys_tritype = data[3];
+   if(sys_evecou) *sys_evecou = data[4];
 
    return 5;
 }

@@ -170,7 +170,7 @@ class WDSystem {
       WDAQEventBuilder *fBuilderThread;
       WDAQWorker *fWorkerThread;
       WDAQEventWriter *fWriterThread;
-      WDAQTCBReader *fTCBReaderThread;
+      std::vector<WDAQTCBReader*> fTCBReaderThreads;
 
       //Methods
       void AddCrate(WDCrate *crate);
@@ -217,7 +217,7 @@ class WDSystem {
          fCollectorThread = nullptr;
          fBuilderThread = nullptr;
          fWriterThread = nullptr;
-         fTCBReaderThread = nullptr;
+         fTCBReaderThreads.clear();
       }
 
       //Destructor
@@ -229,7 +229,7 @@ class WDSystem {
          if(fBuilderThread != nullptr) delete fBuilderThread;
          if(fWorkerThread != nullptr) delete fWorkerThread;
          if(fWriterThread != nullptr) delete fWriterThread;
-         if(fTCBReaderThread != nullptr) delete fTCBReaderThread;
+         for(auto t: fTCBReaderThreads) delete t;
       }
    
 };
@@ -340,20 +340,20 @@ class WDWDB : public WDBoard, public WDB{
             arraySize = -1;
          }
          if(arraySize == 1){
-	   if(gain[0] != 0.5 && gain[0] != 1 && gain[0] != 2.5 && gain[0] != 5 && gain[0] != 10 && gain[0] != 25 && gain[0] != 50 && gain[0] != 100)
-	     std::cout<<" ERROR invalid gain value, won't be applied! Valid gains are 0.5, 1, 2.5, 5, 10 25, 50, 100"<<std::endl;
-	     else
+      if(gain[0] != 0.5 && gain[0] != 1 && gain[0] != 2.5 && gain[0] != 5 && gain[0] != 10 && gain[0] != 25 && gain[0] != 50 && gain[0] != 100)
+        std::cout<<" ERROR invalid gain value, won't be applied! Valid gains are 0.5, 1, 2.5, 5, 10 25, 50, 100"<<std::endl;
+        else
             SetFeGain(-1, gain[0]);
          } else if(arraySize == 16){
-	   for(int i=0; i<16; i++) { 
-	     if(gain[i] != 0.5 || gain[i] != 1 || gain[i] != 2.5 || gain[i] != 5 || gain[i] != 10 || gain[i] != 25 || gain[i] != 50 || gain[i] != 100)
-	       std::cout<<" ERROR invalid gain value, gain["<<i<<"] won't be applied! Valid gains are 0.5, 1, 2.5, 5, 10 25, 50, 100"<<std::endl;
-	     else
-	       SetFeGain(i, gain[i]);
-	   }// end for
+      for(int i=0; i<16; i++) { 
+        if(gain[i] != 0.5 || gain[i] != 1 || gain[i] != 2.5 || gain[i] != 5 || gain[i] != 10 || gain[i] != 25 || gain[i] != 50 || gain[i] != 100)
+          std::cout<<" ERROR invalid gain value, gain["<<i<<"] won't be applied! Valid gains are 0.5, 1, 2.5, 5, 10 25, 50, 100"<<std::endl;
+        else
+          SetFeGain(i, gain[i]);
+      }// end for
          }
          else if(arraySize != -1)
-	   std::cout<<"Please provide 1 or 16 channel Frontend Gain values  "<<std::endl;
+      std::cout<<"Please provide 1 or 16 channel Frontend Gain values  "<<std::endl;
 
 
          //PZC
@@ -364,28 +364,28 @@ class WDWDB : public WDBoard, public WDB{
             arraySize = -1;
          }
          if(arraySize == 1){
-	   if (pzc[0] > 0) {
-	     SetFePzc(-1, 1);
-	     if(pzc[0] <1 || pzc[0] >7) std::cout<<" ERROR first PZC value must be between 1 and 7 included, the value won't be written"<<std::endl;
-	     else   SetDacPzcLevelN(pzc[0]-1);
-	   } else {
-	     SetFePzc(-1, 0);
-	     SetDacPzcLevelN(0);
-	   }
+      if (pzc[0] > 0) {
+        SetFePzc(-1, 1);
+        if(pzc[0] <1 || pzc[0] >7) std::cout<<" ERROR first PZC value must be between 1 and 7 included, the value won't be written"<<std::endl;
+        else   SetDacPzcLevelN(pzc[0]-1);
+      } else {
+        SetFePzc(-1, 0);
+        SetDacPzcLevelN(0);
+      }
          } else if(arraySize == 17){
-	   for(unsigned long i=1; i<17; i++){
-	     if(pzc[i])
-	       SetFePzc(i-1, 1);
-	     else
-	       SetFePzc(i-1, 0);
-	   }
-	   if(pzc[0] <1 || pzc[0] >6) std::cout<<" ERROR first PZC value must be between 1 and 7 included, the value won't be written"<<std::endl;
-	   else   SetDacPzcLevelN(pzc[0]-1);
-	 }
-	 else if(arraySize != -1) {
-	   std::cout<<"Please provide 1 or 17 channel PZC values  "<<std::endl;
-	   std::cout<<"If 1 value is given then all the inputs have the same PZC levels  "<<std::endl;
-	   std::cout<<"If 17 then the first value is the level and the other 16 are the individual on/off flags  "<<std::endl;
+      for(unsigned long i=1; i<17; i++){
+        if(pzc[i])
+          SetFePzc(i-1, 1);
+        else
+          SetFePzc(i-1, 0);
+      }
+      if(pzc[0] <1 || pzc[0] >6) std::cout<<" ERROR first PZC value must be between 1 and 7 included, the value won't be written"<<std::endl;
+      else   SetDacPzcLevelN(pzc[0]-1);
+    }
+    else if(arraySize != -1) {
+      std::cout<<"Please provide 1 or 17 channel PZC values  "<<std::endl;
+      std::cout<<"If 1 value is given then all the inputs have the same PZC levels  "<<std::endl;
+      std::cout<<"If 17 then the first value is the level and the other 16 are the individual on/off flags  "<<std::endl;
       }
 
 
@@ -430,8 +430,8 @@ class WDWDB : public WDBoard, public WDB{
             baseline = 1;
          }
          if(abs(baseline)<1) {
-	   SetRange(baseline);
-	 }
+      SetRange(baseline);
+    }
 
          //printf("configuring TX Enable...\n");
          //DRS channel transmit
@@ -465,7 +465,7 @@ class WDWDB : public WDBoard, public WDB{
          } catch (const std::runtime_error& ex){
             trgtx_ena = 0;
          }
-	 SetTrgTxEn(trgtx_ena);
+    SetTrgTxEn(trgtx_ena);
 
          //scaler channel transmit
          unsigned int scaler_ena;
@@ -477,16 +477,16 @@ class WDWDB : public WDBoard, public WDB{
          SetSclTxEn(scaler_ena);
 
          //zero suppression enable
-	 std::string zsuppr_ena;
+    std::string zsuppr_ena;
          try{
             zsuppr_ena = GetProperty("ZeroSuppressionEnable").GetStringValue();
          } catch (const std::runtime_error& ex){
             zsuppr_ena = "false";
          }
-	 if(zsuppr_ena == "true") 
-	   SetZeroSuprEn(1);
-	 else
-	   SetZeroSuprEn(0);
+    if(zsuppr_ena == "true") 
+      SetZeroSuprEn(1);
+    else
+      SetZeroSuprEn(0);
 
          //printf("configuring Timing Reference...\n");
          //timing reference
@@ -814,7 +814,7 @@ class WDTCB : public WDBoard, public TCB{
                //trigger_enable = PropertyToArray<int>(GetProperty("TriggerEnable")); 
                trigger_enable = GetProperty("TriggerEnable").GetUIntVector(&arraySize);
             } catch (const std::runtime_error& ex){
-               arraySize = -1;
+               arraySize = 0;
                printf("cannot read enable\n");
             }
             for(int i=0; i<64; i++) trg_ena[i] = false;
@@ -829,7 +829,7 @@ class WDTCB : public WDBoard, public TCB{
                //trigger_prescaling = PropertyToArray<unsigned int>(GetProperty("TriggerPrescaling")); 
                trigger_prescaling = GetProperty("TriggerPrescaling").GetUIntVector(&arraySize);
             } catch (const std::runtime_error& ex){
-               arraySize = -1;
+               arraySize = 0;
                printf("cannot read prescaling\n");
             }
             for(int i=0; i<64; i++) trg_presca[i] = 0;
@@ -873,38 +873,173 @@ class WDTCB : public WDBoard, public TCB{
          SetPacketizerCommandAt(2, COPY, RLIVETIME, BUFFERBASE+2);
          SetPacketizerCommandAt(3, DIRECT_WRITE, 0x00000001, BUFFERBASE+BUFFERSIZE);
          SetPacketizerCommandAt(4, STOP, 0, 0);
-	*/
+   */
          std::string readEnable;
          try{
             readEnable = GetProperty("ReadEnable").GetStringValue();
          } catch (const std::runtime_error& ex){
             readEnable = "false";
          }
-	 if(readEnable == "true"){
-	    SetPacketizerCommandAt(0, COPY, RTOTTIME, BUFFERBASE);
-	    SetPacketizerCommandAt(1, DIRECT_WRITE, 0x00000001, BUFFERBASE+BUFFERSIZE);
-	    SetPacketizerCommandAt(2, STOP, 0, 0);
-	 } else {
-	    SetPacketizerCommandAt(0, STOP, 0, 0);
+         if(readEnable == "true"){
+            std::vector<PacketInstruction> instVec;
+            PacketInstruction inst;
+
+            inst.offset = 0;
+            inst.cmd = ::DIRECT_WRITE;
+            inst.arg0 = 3;//nbanks
+            inst.arg1 = BUFFERBASE;
+            instVec.push_back(inst);
+
+            inst.offset += 1;
+            inst.cmd = ::BLOCK_COPY;
+            inst.arg0 = MEMBASEADDR;
+            inst.arg1 = BUFFERBASE+10;
+            inst.arg2 = 1024;
+            instVec.push_back(inst);
+            inst.arg2 = 0;
+
+            inst.offset += 1;
+            inst.cmd = ::BLOCK_COPY;
+            inst.arg0 = MEMBASEADDR;
+            inst.arg1 = BUFFERBASE+10;
+            inst.arg2 = 1024;
+            instVec.push_back(inst);
+            inst.arg2 = 0;
+
+            inst.offset += 1;
+            inst.cmd = ::COPY;
+            inst.arg0 = REVECOU;
+            inst.arg1 = BUFFERBASE+1;
+            instVec.push_back(inst);
+
+            inst.offset += 1;
+            inst.cmd = ::COPY;
+            inst.arg0 = RTOTTIME;
+            inst.arg1 = BUFFERBASE+2;
+            instVec.push_back(inst);
+
+            inst.offset += 1;
+            inst.cmd = ::COPY;
+            inst.arg0 = RSYSTRITYPE;
+            inst.arg1 = BUFFERBASE+3;
+            instVec.push_back(inst);
+
+            inst.offset += 1;
+            inst.cmd = ::COPY;
+            inst.arg0 = RSYSEVECOU;
+            inst.arg1 = BUFFERBASE+4;
+            instVec.push_back(inst);
+
+            inst.offset += 1;
+            inst.cmd = ::DIRECT_WRITE;
+            inst.arg0 = 0x494E3035;//IN05
+            inst.arg1 = BUFFERBASE+5;
+            instVec.push_back(inst);
+
+            inst.offset += 1;
+            inst.cmd = ::DIRECT_WRITE;
+            inst.arg0 = 2*MEMDIM+1;
+            inst.arg1 = BUFFERBASE+6;
+            instVec.push_back(inst);
+
+            inst.offset += 1;
+            inst.cmd = ::COPY;
+            inst.arg0 = RMEMADDR;
+            inst.arg1 = BUFFERBASE+7;
+            instVec.push_back(inst);
+
+            inst.offset += 1;
+            inst.cmd = ::BLOCK_COPY;
+            inst.arg0 = MEMBASEADDR+5*(MEMDIM*2);
+            inst.arg1 = BUFFERBASE+8;
+            inst.arg2 = 2*MEMDIM;
+            instVec.push_back(inst);
+            inst.arg2 = 0;
+
+            inst.offset += 1;
+            inst.cmd = ::DIRECT_WRITE;
+            inst.arg0 = 0x494E3038;//IN08
+            inst.arg1 = BUFFERBASE+8+(2*MEMDIM);
+            instVec.push_back(inst);
+
+            inst.offset += 1;
+            inst.cmd = ::DIRECT_WRITE;
+            inst.arg0 = 2*MEMDIM+1;
+            inst.arg1 = BUFFERBASE+8+(2*MEMDIM)+1;
+            instVec.push_back(inst);
+
+            inst.offset += 1;
+            inst.cmd = ::COPY;
+            inst.arg0 = RMEMADDR;
+            inst.arg1 = BUFFERBASE+8+(2*MEMDIM)+2;
+            instVec.push_back(inst);
+
+            inst.offset += 1;
+            inst.cmd = ::BLOCK_COPY;
+            inst.arg0 = MEMBASEADDR+8*(MEMDIM*2);
+            inst.arg1 = BUFFERBASE+8+(2*MEMDIM)+3;
+            inst.arg2 = 2*MEMDIM;
+            instVec.push_back(inst);
+            inst.arg2 = 0;
+
+            inst.offset += 1;
+            inst.cmd = ::DIRECT_WRITE;
+            inst.arg0 = 0x47454e54;//GENT
+            inst.arg1 = BUFFERBASE+8+(2*MEMDIM)+3+(2*MEMDIM);
+            instVec.push_back(inst);
+
+            inst.offset += 1;
+            inst.cmd = ::DIRECT_WRITE;
+            inst.arg0 = 2*GENTDIM+1;
+            inst.arg1 = BUFFERBASE+8+(2*MEMDIM)+3+(2*MEMDIM)+1;
+            instVec.push_back(inst);
+
+            inst.offset += 1;
+            inst.cmd = ::COPY;
+            inst.arg0 = RMEMADDR;
+            inst.arg1 = BUFFERBASE+8+(2*MEMDIM)+3+(2*MEMDIM)+2;
+            instVec.push_back(inst);
+
+            inst.offset += 1;
+            inst.cmd = ::BLOCK_COPY;
+            inst.arg0 = GENTMEMBASE;
+            inst.arg1 = BUFFERBASE+8+(2*MEMDIM)+3+(2*MEMDIM)+3;
+            inst.arg2 = 2*GENTDIM;
+            instVec.push_back(inst);
+            inst.arg2 = 0;
+
+            inst.offset += 1;
+            inst.cmd = ::DIRECT_WRITE;
+            inst.arg0 = 1;
+            inst.arg1 = PACK_NEXT_BUFFER;
+            instVec.push_back(inst);
+
+            inst.offset += 1;
+            inst.cmd = ::STOP;
+            instVec.push_back(inst);
+
+            WritePacketizerProgram(instVec);
+         } else {
+            SetPacketizerCommandAt(0, STOP, 0, 0);
          }
 
-    //BUSY mask from external DAQ
-    unsigned int extdaqbmask;
-    try{
-       extdaqbmask = GetProperty("ExtDAQBusyMask").GetUInt();
-    } catch (const std::runtime_error& ex){
-       extdaqbmask = 0;
+         //BUSY mask from external DAQ
+         unsigned int extdaqbmask;
+         try{
+            extdaqbmask = GetProperty("ExtDAQBusyMask").GetUInt();
+         } catch (const std::runtime_error& ex){
+            extdaqbmask = 0;
+         }
+         // set the mask
+         SetFMask(false, extdaqbmask==1);
+
+         SetPacketizerAutostart(true);
+         SetPacketizerEnable(true);
+
+         if((fidcode >>12) != 3)
+            GoRun();
+
     }
-    // set the mask
-    SetFMask(false, extdaqbmask==1);
-
-    SetPacketizerAutostart(true);
-    SetPacketizerEnable(true);
-
-    if((fidcode >>12) != 3)
-       GoRun();
-
-      }
 
       WDTCB(WDCrate *crate, int slot, std::string name="TCBXXX", int verbose = 0) : WDBoard(crate, slot, name), TCB(crate->GetMscbName().c_str(), 20, slot, verbose) {
          fh = crate->GetMscbHandle();

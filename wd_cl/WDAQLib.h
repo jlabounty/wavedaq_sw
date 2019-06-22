@@ -6,14 +6,21 @@
 #include <fstream>
 
 class WDAQPacketData;
+class WDAQWdbPacketData;
 class WDAQDRSPacketData;
 class WDAQADCPacketData;
 class WDAQTDCPacketData;
 class WDAQTRGPacketData;
 class WDAQScaPacketData;
 class WDAQDummyPacketData;
+class WDAQTcbPacketData;
+
 class WDAQBoardEvent;
+class WDAQWdbEvent;
+class WDAQTcbEvent;
+
 class WDAQEvent;
+
 class WDAQPacketCollector;
 class WDAQTCBReader;
 class WDAQEventBuilder;
@@ -31,31 +38,69 @@ class WDAQEventWriter;
 #define EOT 4
 #define SOT 8
 
+#define WD2_BOARD_ID 0
+#define TCB_BOARD_ID 1
+
+typedef struct {
+   char           bank_name[4];
+   unsigned int   time_stamp;
+   unsigned int   event_number;
+   unsigned char  trigger_information[8];
+   unsigned short temperature;
+   unsigned short reserved;
+} TCB_FRAME_HEADER;
+
 //WDAQ Packet Data - class for UDP DAQ packets 
 class WDAQPacketData{
-   //informations from packet header
    public:
+   //informations from WDAQ packet header
+   unsigned char    mProtocolVersion;
+   unsigned char    mBoardType;
+   unsigned char    mBoardRevision;
    unsigned short   mBoardId;
    unsigned short   mCrateId;
    unsigned short   mSlotId;
-   unsigned char    mADC;
-   unsigned char    mChannel;
    unsigned short   mPacketNumber;
    unsigned char    mDataType;
+   unsigned char    mWDAQFlags;
+   unsigned short   mPayloadLength;
+   unsigned short   mDataOffset; 
+   //informations from board specific headers
+   unsigned int     mEventNumber;
+   unsigned short   mTriggerNumber;
+   unsigned char    mTriggerType;
+   unsigned short   mSerialTriggerData;  
+   //Set properties according to UDP event header
+   void SetEventHeaderInfo(WDAQ_FRAME_HEADER *);
+
+   //idea to how to handle board event merging across different board types
+   void AddToBoardEvent(WDAQBoardEvent *e) {
+      HeaderToBoardEvent(e);
+      AddDataToBoardEvent(e);
+   };
+
+   virtual ~WDAQPacketData() { };
+
+   protected:
+   //Set WDAQBoardEvent Header
+   void HeaderToBoardEvent(WDAQBoardEvent *e);
+   //To be overwritten by derived classes
+   virtual void AddDataToBoardEvent(WDAQBoardEvent *e) { };
+};
+
+//WDAQ WDB Packet Data - class for WDB UDP DAQ packets 
+class WDAQWdbPacketData: public WDAQPacketData{
+   //informations from packet header
+   public:
+   unsigned char    mADC;
+   unsigned char    mChannel;
    unsigned int     mTxEnable;
    unsigned short   mZeroSuppressionMask;
-   unsigned short   mFlags;
+   unsigned char    mWDBFlags;
    unsigned char    mTriggerSource;//serve?
    unsigned char    mBitsPerSample;//serve?
    unsigned short   mSamplesPerEventPerChannel;//serve?
-   unsigned short   mPayloadLenght;//serve?
-   unsigned short   mDataOffset;
    unsigned long    mTimeStamp;
-   unsigned int     mEventNumber;
-   //unsigned char    mTriggerInfo[6];
-   unsigned char    mTriggerType;
-   unsigned short   mTriggerNumber;
-   unsigned short   mSerialTriggerData;  
    unsigned short   mTriggerCell;
    unsigned int     mSamplingFrequency;
    float            mTemperature;
@@ -64,88 +109,123 @@ class WDAQPacketData{
    unsigned short   mFrontendSettings;
    
    //Set properties according to UDP event header
-   void SetEventHeaderInfo(WD_FRAME_HEADER *, WDAQ_FRAME_HEADER *);
+   void SetWdbHeaderInfo(WD_FRAME_HEADER *);
 
    //merge this packet information in given board event, to be implemented according to data
-   virtual void AddToBoardEvent(WDAQBoardEvent *e) { };
+   virtual void AddDataToBoardEvent(WDAQBoardEvent *e) { };
 
-   virtual ~WDAQPacketData() { };
+   virtual ~WDAQWdbPacketData() { };
 };
 
 //WDAQ DRS Packet Data -  derived packet class to host DRS data
-class WDAQDRSPacketData : public WDAQPacketData{
+class WDAQDRSPacketData : public WDAQWdbPacketData{
 public:
    float data[1024];
 
    //Add packet info to given Board Event
-   void AddToBoardEvent(WDAQBoardEvent *e);
+   void AddDataToBoardEvent(WDAQBoardEvent *e);
 
    ~WDAQDRSPacketData() { };
 };
 
 //WDAQ ADC Packet Data -  derived packet class to host ADC data
-class WDAQADCPacketData : public WDAQPacketData{
+class WDAQADCPacketData : public WDAQWdbPacketData{
 public:
    unsigned short data[1024];
 
    //Add packet info to given Board Event
-   void AddToBoardEvent(WDAQBoardEvent *e);
+   void AddDataToBoardEvent(WDAQBoardEvent *e);
 
    ~WDAQADCPacketData() { };
 };
 
 //WDAQ TDC Packet Data -  derived packet class to host TDC data
-class WDAQTDCPacketData : public WDAQPacketData{
+class WDAQTDCPacketData : public WDAQWdbPacketData{
 public:
    unsigned char data[512];
 
    //Add packet info to given Board Event
-   void AddToBoardEvent(WDAQBoardEvent *e);
+   void AddDataToBoardEvent(WDAQBoardEvent *e);
 
    ~WDAQTDCPacketData() { };
 };
 
 //WDAQ TRG Packet Data -  derived packet class to host TRG data
-class WDAQTRGPacketData : public WDAQPacketData{
+class WDAQTRGPacketData : public WDAQWdbPacketData{
 public:
    unsigned long data[512];
 
    //Add packet info to given Board Event
-   void AddToBoardEvent(WDAQBoardEvent *e);
+   void AddDataToBoardEvent(WDAQBoardEvent *e);
 
    ~WDAQTRGPacketData() { };
 };
 
 //WDAQ Scaler Packet Data -  derived packet class to host scaler
-class WDAQScaPacketData : public WDAQPacketData{
+class WDAQScaPacketData : public WDAQWdbPacketData{
 public:
    unsigned long data[18];
 
    //Add packet info to given Board Event
-   void AddToBoardEvent(WDAQBoardEvent *e);
+   void AddDataToBoardEvent(WDAQBoardEvent *e);
 
    ~WDAQScaPacketData() { };
 };
 
 //WDAQ Dummy Packet Data -  derived packet class for fully zero suppressed board
-class WDAQDummyPacketData : public WDAQPacketData{
+class WDAQDummyPacketData : public WDAQWdbPacketData{
 public:
 
    //Add packet info to given Board Event
-   void AddToBoardEvent(WDAQBoardEvent *e);
+   void AddDataToBoardEvent(WDAQBoardEvent *e);
 
    ~WDAQDummyPacketData() { };
+};
+
+//WDAQ TCB Packet Data - class for TCB UDP DAQ packets 
+class WDAQTcbPacketData: public WDAQPacketData{
+   public:
+   //informations from packet header
+   std::array<char,4> mBankName;
+   unsigned int       mTimeStamp;
+   float              mTemperature;
+   
+   unsigned int     data[1024];//update this to match max event size
+   //Set properties according to UDP event header
+   void SetTcbHeaderInfo(TCB_FRAME_HEADER *);
+
+   //merge this packet information in given board event, to be implemented according to data
+   void AddDataToBoardEvent(WDAQBoardEvent *e);
 };
 
 //WDAQ board event - Board Event class
 class WDAQBoardEvent {
 public:
-   //from header 
+   //from WDAQ header 
+   unsigned char    mBoardType;
+   unsigned char    mBoardRevision;
    unsigned short   mBoardId;
    unsigned short   mCrateId;
    unsigned short   mSlotId;
+   unsigned short   mWDAQFlags;
+
+   //event status
+   bool             mEndFlagReceived;
+   bool             mStartFlagReceived;
+   int              mPacketsReceived;
+   int              mFirstPacket;
+   int              mLastPacket;
+
+   bool IsComplete();
+   WDAQBoardEvent(WDAQPacketData* pkt);
+};
+
+//WDB board event - WDB Board Event class
+class WDAQWdbEvent : public WDAQBoardEvent {
+public:
+   //from WDB header 
    unsigned short   mSamplingFrequency;
-   unsigned short   mFlags;
+   unsigned short   mWDBFlags;
    unsigned char    mTriggerSource;//serve?
    unsigned long    mTimeStamp;
    unsigned short   mDacOFS;
@@ -171,11 +251,6 @@ public:
 
    //event status
    bool             mVCalibrated;
-   bool             mEndFlagReceived;
-   bool             mStartFlagReceived;
-   int              mPacketsReceived;
-   int              mFirstPacket;
-   int              mLastPacket;
    bool             mDrsHasData[WD_N_CHANNELS];
    int              mDrsByteNumber[WD_N_CHANNELS];
    bool             mAdcHasData[WD_N_CHANNELS];
@@ -186,12 +261,41 @@ public:
    bool             mScalerHasData;
    int              mTrgByteNumber;
 
-   bool IsComplete();
    float GetRange() {
       return (int)((0.68 - (mDacOFS/65535.0*2.5))*100)/100.0;
    };
    
-   WDAQBoardEvent(WDAQPacketData* pkt);
+   WDAQWdbEvent(WDAQPacketData* pkt);
+};
+
+class WDAQTcbBank {
+public:
+   std::vector<unsigned int> data;
+   std::array<char,4> fName;
+
+   WDAQTcbBank(std::array<char,4> name, unsigned long length){
+      fName = name;
+      data.reserve(1000);//should be the max bank size to be matched with WDAQTcbPacket
+      data.resize(length);
+   }
+};
+
+//TCB board event - TCB Board Event class
+class WDAQTcbEvent : public WDAQBoardEvent {
+public:
+   //from TCB header 
+   unsigned long    mTimeStamp;
+   float            mTemperature;
+
+   //data
+   std::map<std::array<char,4>,WDAQTcbBank*>     mBanks;
+
+   WDAQTcbEvent(WDAQPacketData* pkt);
+   ~WDAQTcbEvent(){
+      for(auto i: mBanks)
+         delete i.second;
+      mBanks.clear();
+   }
 };
 
 //WDAQ Event - global DAQ event
@@ -202,7 +306,8 @@ public:
    unsigned short   mTriggerType;
    unsigned short   mSerialTriggerData;
 
-   std::map<unsigned short, WDAQBoardEvent *> fBoard;
+   //map (BoardType -> map(BoardSerial -> Board))
+   std::map<unsigned char, std::map<unsigned short, WDAQBoardEvent *>> fBoard;
    
    void AddPacket(WDAQPacketData* pkt);
    int IsComplete();
@@ -229,6 +334,7 @@ class WDAQPacketCollector: public DAQServerThread{
    void Begin();
 
    void GotData(int size, unsigned char* dataptr);
+   void PushPacket(WDAQPacketData*);
    
    void End();
 
@@ -269,7 +375,7 @@ class WDAQEventBuilder : public DAQThread{
    unsigned long fBuildedEvent;
    unsigned long fDroppedEvent;
    unsigned long fOldEvent;
-   int           fNWDB;
+   int           fNBoards;
 
    void Begin();
 
@@ -278,10 +384,10 @@ class WDAQEventBuilder : public DAQThread{
    void End();
 
    public:
-   WDAQEventBuilder(DAQBuffer<WDAQPacketData> *source, DAQBuffer<WDAQEvent> *destination, int nWDB){
+   WDAQEventBuilder(DAQBuffer<WDAQPacketData> *source, DAQBuffer<WDAQEvent> *destination, int nNBoards){
       fSource = source;
       fDestination = destination;
-      fNWDB = nWDB;
+      fNBoards = nNBoards;
       
       fBuildedEvent = 0;
       fDroppedEvent = 0;
@@ -302,7 +408,7 @@ class WDAQWorker : public DAQThread{
    unsigned long fDroppedEvent;
 
    //single board calibration
-   void calibrateBoard(WDAQBoardEvent *ev);
+   void calibrateBoard(WDAQWdbEvent *ev);
 
    void Begin();
 
@@ -333,6 +439,9 @@ class WDAQEventWriter : public DAQThread{
    //map for time bins
    std::map<int, TCALIB*> fTCalib;
 
+   //vetor to hold tcb numbers
+   std::vector<int> fTCBList;
+
    //output file data
    std::string fFileName;
    std::ofstream fFile;
@@ -361,12 +470,18 @@ class WDAQEventWriter : public DAQThread{
    void AddTimeCalibration(int id, TCALIB *calib){
          fTCalib[id] = calib;
    }
+   void AddTcbName(int id){
+         fTCBList.push_back(id);
+   }
 
    WDAQEventWriter(DAQBuffer<WDAQEvent> *source, std::string file, unsigned int eventsPerFile = 0, unsigned int startRunNumber = 0){
       fSource = source;
       fFileName = file;
       fEventsPerFile = eventsPerFile;
       fRunNumber = startRunNumber;
+
+      fNEvent = 0;
+      fLastEvent = 0;
    }
 
    ~WDAQEventWriter(){

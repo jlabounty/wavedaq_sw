@@ -4,12 +4,12 @@
 #include <stdlib.h>
 //debug - Thread that prints packets
 class PacketDebug : public DAQThread{
-   DAQBuffer<WDAQPacketData> *fSource;
+   DAQBuffer<WDAQWdbPacketData> *fSource;
 
    void Begin(){ };
 
    void Loop(){
-      WDAQPacketData *ptr = nullptr;
+      WDAQWdbPacketData *ptr = nullptr;
       if(fSource->Try_pop(ptr)){
          printf("received packet\n");
          printf("\t Board:%d\n", ptr->mBoardId);
@@ -20,11 +20,12 @@ class PacketDebug : public DAQThread{
          printf("\t DataType:%d\n", ptr->mDataType);
          printf("\t TxEnable:%x\n", ptr->mTxEnable);
          printf("\t ZeroSuppressionMask:%x\n", ptr->mZeroSuppressionMask);
-         printf("\t Flags:%x\n", ptr->mFlags);
+         printf("\t WDAQ Flags:%x\n", ptr->mWDAQFlags);
+         printf("\t WDB Flags:%x\n", ptr->mWDBFlags);
          printf("\t TriggerSource:%d\n", ptr->mTriggerSource);
          printf("\t BitsPerSample:%d\n", ptr->mBitsPerSample);
          printf("\t SamplesPerEventPerChannel:%d\n", ptr->mSamplesPerEventPerChannel);
-         printf("\t PayloadLenght:%d\n", ptr->mPayloadLenght);
+         printf("\t PayloadLenght:%d\n", ptr->mPayloadLength);
          printf("\t DataOffset:%d\n", ptr->mDataOffset);
          printf("\t EventNumber:%d\n", ptr->mEventNumber);
          printf("\t TriggerType:%x\n", ptr->mTriggerType);
@@ -44,7 +45,7 @@ class PacketDebug : public DAQThread{
    void End() { };
 
    public:
-   PacketDebug(DAQBuffer<WDAQPacketData> *source){
+   PacketDebug(DAQBuffer<WDAQWdbPacketData> *source){
       fSource = source;
    }
 };
@@ -118,7 +119,7 @@ int main(int argc, char *argv[])
             sys->SetSerdesTraining(true);
             usleep(50000);
             sys->TrainSerdes();
-            usleep(100000);
+            usleep(1000000);
             sys->Configure();
          }
          if(option == 3)
@@ -218,6 +219,8 @@ int main(int argc, char *argv[])
                         printf("busy: %08x\n", val);
                         dynamic_cast<WDTCB*>(b)->GetAutoCalibrateFail(&val);
                         printf("fail: %08x\n", val);
+                        dynamic_cast<WDTCB*>(b)->GetAutoAlignDlys(&val);
+                        printf("dlys: %08x\n", val);
                      }
                   }
          }

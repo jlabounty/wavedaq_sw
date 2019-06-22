@@ -329,6 +329,8 @@ public:
    void GetAutoCalibrateBusy(u_int32_t* ret);
    //perform dummy calibration and retrieve serdes eyes
    void GetAutoCalibrateEye(u_int32_t* eyes);
+   //Returns enable value for latency compensations of SerDes
+   void GetAutoAlignDlys(u_int32_t* ret);
    //single crate configuration
    void SetSingleCrateConfiguration(bool useGlobalAnd, short shape, short vetoShape);
    void SetSingleCrateChnMask(bool *state);
@@ -340,7 +342,7 @@ public:
    //write full Packetizer program
    void WritePacketizerProgram(std::vector<PacketInstruction> &list);
    //read buffer head, return buffer read pointer
-   u_int32_t GetBufferHeadSPI(int *nBanks);
+   u_int32_t GetBufferHeadSPI(int *nBanks, u_int32_t *evecou=0, u_int32_t *totaltime=0, u_int32_t* sys_tritype=0, u_int32_t *sys_evecou=0);
    //check has bank
    bool HasBufferBankSPI(u_int32_t ptr, char *bankName, int *length);
    //skip bank

@@ -313,7 +313,7 @@ void WDSystem::GoRun(){
    if(fBuilderThread) fBuilderThread->GoRun();
    if(fWriterThread) fWriterThread->GoRun();
    if(fWorkerThread) fWorkerThread->GoRun();
-   if(fTCBReaderThread) fTCBReaderThread->GoRun();
+   for(auto t: fTCBReaderThreads) t->GoRun();
    sleep(1);
    GetTriggerBoard()->GoRun();
 }
@@ -325,7 +325,7 @@ void WDSystem::StopRun(){
    if(fBuilderThread) fBuilderThread->StopRun();
    if(fWriterThread) fWriterThread->StopRun();
    if(fWorkerThread) fWorkerThread->StopRun();
-   if(fTCBReaderThread) fTCBReaderThread->StopRun();
+   for(auto t: fTCBReaderThreads) t->StopRun();
 }
 //train serial links
 void WDSystem::TrainSerdes(){
@@ -361,15 +361,45 @@ void WDSystem::SpawnDAQ(){
    fEventBuffer= new DAQBuffer<WDAQEvent>(number_of_calibrated_buffers, "BUILDBUFFER");
    fCalibratedBuffer= new DAQBuffer<WDAQEvent>(number_of_calibrated_buffers, "EVENTBUFFER");
 
+   // create the TCBReadrer thread
+
+   int nTCBs=0;
+   for(auto &c : fCrate){
+      for(auto &b : *c){
+         if(b) if(dynamic_cast<WDTCB*>(b) != nullptr){
+            std::string readEnable;
+            try{
+               readEnable = b->GetProperty("ReadEnable").GetStringValue();
+            } catch (const std::runtime_error& ex){
+               readEnable = "false";
+            }
+
+            if(readEnable=="true"){
+               WDAQTCBReader* tcbreaderthread = new WDAQTCBReader(fPacketBuffer,static_cast<WDTCB*>(b));
+               tcbreaderthread->Start();
+               fTCBReaderThreads.push_back(tcbreaderthread);
+               nTCBs++;
+            }
+            
+         }
+      }
+   }
+   if(fTCBReaderThreads.size())
+      printf("including %d TCBs...\n", nTCBs);
+
    //spawn threads
    fCollectorThread = new WDAQPacketCollector(fPacketBuffer);
    fCollectorThread->Start();
-   fBuilderThread = new WDAQEventBuilder(fPacketBuffer, fEventBuffer, nWDBs);
+   fBuilderThread = new WDAQEventBuilder(fPacketBuffer, fEventBuffer, nWDBs+nTCBs);
    fBuilderThread->Start();
    fWorkerThread = new WDAQWorker(fEventBuffer, fCalibratedBuffer);
    for(auto &c : fCrate){
       for(auto &b : *c){
-         if(b) if(dynamic_cast<WDWDB*>(b) != nullptr) fWorkerThread->AddVoltageCalibration(dynamic_cast<WDWDB*>(b)->GetSerialNumber(), &(dynamic_cast<WDWDB*>(b)->mVCalib));
+         if(b) {
+            if(dynamic_cast<WDWDB*>(b) != nullptr){
+                fWorkerThread->AddVoltageCalibration(static_cast<WDWDB*>(b)->GetSerialNumber(), &(static_cast<WDWDB*>(b)->mVCalib));
+            }
+         }
       }
    }
    fWorkerThread->Start();
@@ -404,7 +434,15 @@ void WDSystem::SpawnDAQ(){
       //pass time calibrations to Event Writer
       for(auto &c : fCrate){
          for(auto &b : *c){
-            if(b) if(dynamic_cast<WDWDB*>(b) != nullptr) fWriterThread->AddTimeCalibration(dynamic_cast<WDWDB*>(b)->GetSerialNumber(), &(dynamic_cast<WDWDB*>(b)->mTCalib));
+            if(b) {
+               if(dynamic_cast<WDWDB*>(b) != nullptr){
+                  fWriterThread->AddTimeCalibration(dynamic_cast<WDWDB*>(b)->GetSerialNumber(), &(dynamic_cast<WDWDB*>(b)->mTCalib));
+               } else if (dynamic_cast<WDTCB*>(b) != nullptr){
+                     std::hash<std::string> hashFunc;
+                     fWriterThread->AddTcbName(hashFunc(b->GetBoardName()));
+               }
+            }
+
          }
       }
       fWriterThread->Start();
@@ -412,22 +450,6 @@ void WDSystem::SpawnDAQ(){
       printf("No writer thread running\n");
    }
 
-   // create the TCBReadrer thread
-
-   std::string readEnable;
-   WDTCB* tcbboard = nullptr;
-   try{
-      WDBoard *trboard = GetTriggerBoard();
-      tcbboard = dynamic_cast <WDTCB*> (trboard);
-      if(tcbboard != nullptr) readEnable = tcbboard->GetProperty("ReadEnable").GetStringValue();
-   } catch (const std::runtime_error& ex){
-      readEnable = "false";
-   }
-
-   if(readEnable=="true"){
-      fTCBReaderThread = new WDAQTCBReader(fPacketBuffer,tcbboard);
-      fTCBReaderThread->Start();
-   }
    //wait for server port
    while(fCollectorThread->GetServerPort() == -1){  };
    printf("started on port %d\n", fCollectorThread->GetServerPort());

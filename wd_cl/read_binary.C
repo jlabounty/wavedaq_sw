@@ -96,18 +96,23 @@ void decode(const char *filename) {
      ULong_t trigger_data[512];
      Double_t scaler[18];
    } WDBDATA;
-   std::vector<WDBDATA> data;
+   std::map<unsigned short, WDBDATA> data;
+
+   typedef struct {
+     ULong_t in_waveform[16][128];
+     ULong_t out_waveform[128];
+     ULong_t gent_waveform[32];
+   } TCBDATA;
+   std::map<unsigned short, TCBDATA> data_tcb;
 
    typedef struct{
       float bin_width[18][1024];
    } WDBBIN;
-   std::vector<WDBBIN> bins;
+   std::map<unsigned short, WDBBIN> bins;
 
-   int i, j, b, chn, n, chn_index, n_boards;
+   int i, j, b, chn, n, chn_index;
    double t1, t2, dt;
    char rootfile[256];
-
-
 
    // open the binary waveform file
    FILE *f = fopen(Form("%s", filename), "r");
@@ -154,156 +159,204 @@ void decode(const char *filename) {
    }
 
    for (b = 0 ; ; b++) {
-      data.resize(b+1);
-      bins.resize(b+1);
-
       // read board header
       fread(&bh, sizeof(bh), 1, f);
-      if (memcmp(bh.bn, "B#", 2) != 0) {
+      if (memcmp(bh.bn, "B#", 2) == 0) {
+
+         printf("Found data for board #%d\n", bh.board_serial_number);
+
+         //branch output tree to house the data
+         rec->Branch(Form("board%02d", b), &data[bh.board_serial_number] ,"waveform[18][1024]/D:time[18][1024]/D:adc_waveform[16][2048]/s:tdc_waveform[16][512]/b:trigger_data[512]/l:scaler[18]/D");
+
+         // read time bin widths
+         memset(bins[bh.board_serial_number].bin_width, sizeof(WDBBIN), 0);
+         for (chn=0 ; chn<18 ; chn++) {
+            fread(&ch, sizeof(ch), 1, f);
+            if (ch.c[0] != 'C') {
+               // event header found
+               fseek(f, -4, SEEK_CUR);
+               break;
+            }
+            i = (ch.cn[1] - '0')*10 + ch.cn[2] - '0';
+            printf("Found timing calibration for channel #%d\n", i);
+            fread(bins[bh.board_serial_number].bin_width[i], sizeof(float), 1024, f);
+         }
+      } else if (memcmp(bh.bn, "T#", 2) == 0) {
+         printf("expecting TCB %d\n", bh.board_serial_number);
+         //branch output tree to house the data
+         rec->Branch(Form("tcb%02d", bh.board_serial_number), &data_tcb[bh.board_serial_number] ,"in_waveform[16][128]/l:out_waveform[128]/l:gent_waveform[32]/l");
+      } else {
          // probably event header found
          fseek(f, -4, SEEK_CUR);
          break;
       }
 
-      printf("Found data for board #%d\n", bh.board_serial_number);
-
-      // read time bin widths
-      memset(bins[b].bin_width, sizeof(WDBBIN), 0);
-      for (chn=0 ; chn<18 ; chn++) {
-         fread(&ch, sizeof(ch), 1, f);
-         if (ch.c[0] != 'C') {
-            // event header found
-            fseek(f, -4, SEEK_CUR);
-            break;
-         }
-         i = (ch.cn[1] - '0')*10 + ch.cn[2] - '0';
-         printf("Found timing calibration for channel #%d\n", i);
-         fread(bins[b].bin_width[i], sizeof(float), 1024, f);
-      }
-
    }
-   n_boards = b;
-
-   for(b = 0 ; b<n_boards; b++)
-      rec->Branch(Form("board%02d", b), &data[b] ,"waveform[18][1024]/D:time[18][1024]/D:adc_waveform[16][2048]/s:tdc_waveform[16][512]/b:trigger_data[512]/l:scaler[18]/D");
 
    // loop over all events in data file
-   for (n=0 ; n<100 ; n++) {
+   for (n=0 ; ; n++) {
       // read event header
       i = fread(&eh, sizeof(eh), 1, f);
-      if (i < 1)
+      if (i < 1 || memcmp(eh.event_header, "EHDR", 4) != 0)
          break;
 
       printf("Found event #%d, type =%d , serial = %d\n", eh.event_serial_number, eh.trigger_type, eh.serial_trigger_data);
 
       // loop over all boards in data file
-      for (b=0 ; b<n_boards ; b++) {
+      for (b=0 ; !feof(f); b++) {
           for (i=0; i<18; i++)
           {
             triggered[i]=false;
           }
 
          // read board header
-         fread(&bh, sizeof(bh), 1, f);
-         if (memcmp(bh.bn, "B#", 2) != 0) {
-            printf("Invalid board header in file \'%s\', aborting.\n", filename);
-            return;
-         }
+         int bhsize = fread(&bh, sizeof(bh), 1, f);
+         if (memcmp(bh.bn, "B#", 2) == 0) {
 
-	 //	 if (n_boards > 1)
-	 //	   printf("Found data for board #%d\n", bh.board_serial_number);
+            // read board header
+            fread(&drsbh, sizeof(drsbh), 1, f);
 
-         // read board header
-         fread(&drsbh, sizeof(drsbh), 1, f);
+            WDBBIN &this_bins =  bins[bh.board_serial_number];
+            WDBDATA &this_data =  data[bh.board_serial_number];
 
-         // reach channel data
-         for (chn=0 ; !feof(f) ; chn++) {
 
-            // read channel header
-            fread(&ch, sizeof(ch), 1, f);
-            if (ch.c[0] != 'C' && ch.c[0] != 'A' && ch.c[0] != 'T' && ch.c[0] != 'S') {
-               // event header found
-               fseek(f, -4, SEEK_CUR);
-               break;
+            // reach channel data
+            for (chn=0 ; !feof(f) ; chn++) {
+
+               // read channel header
+               fread(&ch, sizeof(ch), 1, f);
+               if (ch.c[0] != 'C' && ch.c[0] != 'A' && (ch.c[0] != 'T' || ch.cn[0] == '#') && ch.c[0] != 'S') {
+                  // event header found
+                  fseek(f, -4, SEEK_CUR);
+                  break;
+               }
+               chn_index = (ch.cn[1] - '0')*10 + ch.cn[2] - '0';
+               triggered[chn_index]=true;
+
+               if(ch.c[0] == 'C'){
+                  // read trigger cell and frontend settings
+                  fread(drsch+chn_index, sizeof(drsch[0]), 1, f);
+
+                  fread(voltage, sizeof(short), 1024, f);
+
+                  for (i=0 ; i<1024 ; i++) {
+                     data[bh.board_serial_number].waveform[chn_index][i] = (voltage[i] / 65536. + drsbh.board_range/1000.0 - 0.5);
+                     // calculate time for this cell
+                     for (j=0,data[bh.board_serial_number].time[chn_index][i]=0 ; j<i ; j++)
+                        this_data.time[chn_index][i] += this_bins.bin_width[chn_index][(j+drsch[chn_index].trigger_cell) % 1024];
+                  }
+
+
+
+               } else if(ch.c[0] == 'A') {
+                  //ADC
+                  fread(adc_voltage, sizeof(short), 2048, f);
+                  WDBDATA &this_data =  data[bh.board_serial_number];
+                  for (i=0 ; i<2048 ; i++) {
+                     this_data.adc_waveform[chn_index][i] = adc_voltage[i];
+                  }
+               } else if(ch.c[0] == 'T') {
+                  if(ch.cn[0] == '0'){
+                     //TDC
+                     fread(tdc_data, sizeof(char), 512, f);
+                     WDBDATA &this_data =  data[bh.board_serial_number];
+                     for (i=0 ; i<512 ; i++) {
+                        this_data.tdc_waveform[chn_index][i] = tdc_data[i];
+                     }
+                  } else if(ch.cn[0] == 'R'){
+                     //TRG
+                     fread(trg_data, sizeof(long), 512, f);
+                     WDBDATA &this_data =  data[bh.board_serial_number];
+                     for(int i=0; i<512; i++){
+                        this_data.trigger_data[i] = trg_data[i];
+                     }
+                  }
+               } else if(ch.c[0] == 'S') {
+                  //Scaler
+                  WDBDATA &this_data =  data[bh.board_serial_number];
+                  fread(scaler_data, sizeof(long), 18, f);
+                  fread(&scaler_time, sizeof(long), 1, f);
+                  for (int i=0 ; i<18 ; i++) {
+                     this_data.scaler[i] = (Double_t) (scaler_data[i]-scaler_data_old[i])/(scaler_time-scaler_time_old)/12.5e-9;
+                     scaler_data_old[i] = scaler_data[i];
+                  }
+                  scaler_time_old = scaler_time;
+               }
+            }// end for channels
+
+         } else if (memcmp(bh.bn, "T#", 2) == 0) {
+            //printf("Trigger board\n");
+            TCBDATA &this_data =  data_tcb[bh.board_serial_number];
+
+            unsigned int nBanks;
+            fread(&nBanks, sizeof(nBanks), 1, f);
+            //printf("with %u banks\n", nBanks);
+            for(unsigned int iBank=0; iBank<nBanks; iBank++){
+               char bankName[4];
+               unsigned int bankSize;
+               fread(&bankName, sizeof(char), 4, f);
+               fread(&bankSize, sizeof(bankSize), 1, f);
+               printf("tcb %d: got bank %c%c%c%c size:%u\n", bh.board_serial_number, bankName[0], bankName[1], bankName[2], bankName[3], bankSize);
+               unsigned int temp[1000];
+               fread(&temp, sizeof(unsigned int), bankSize, f);
+               if(bankName[0]=='I' && bankName[1]=='N'){
+                  int serdesNumber = (bankName[2]-'0')*10+(bankName[3]-'0');
+                  for(int i=0; i<128; i++){
+                     unsigned long long val = temp[129+(i+temp[0])%128];
+                     val = val <<32;
+                     val |= temp[1+(i+temp[0])%128];
+                     this_data.in_waveform[serdesNumber][i] = val;
+                     //printf("%016llx %08x %08x\n", val, temp[129+(i+temp[0])%128],  temp[1+(i+temp[0])%128]);
+                  }
+               } else if (bankName[0]=='G' && bankName[1]=='E' && bankName[2]=='N' && bankName[3]=='T'){
+                  for(int i=0; i<32; i++){
+                     unsigned long long val = temp[33+(i+temp[0])%32];
+                     val = val <<32;
+                     val |= temp[1+(i+temp[0])%32];
+                     //printf("%016llx %08x %08x\n", val, temp[33+(i+temp[0])%32],  temp[1+(i+temp[0])%32]);
+                     this_data.gent_waveform[i] = val;
+                  }
+               }
             }
-            chn_index = (ch.cn[1] - '0')*10 + ch.cn[2] - '0';
-            triggered[chn_index]=true;
-
-            if(ch.c[0] == 'C'){
-	      // read trigger cell and frontend settings
-	      fread(drsch+chn_index, sizeof(drsch[0]), 1, f);
-
-	      fread(voltage, sizeof(short), 1024, f);
-
-	      for (i=0 ; i<1024 ; i++) {
-    		  data[b].waveform[chn_index][i] = (voltage[i] / 65536. + drsbh.board_range/1000.0 - 0.5);
-    		// calculate time for this cell
-    		  for (j=0,data[b].time[chn_index][i]=0 ; j<i ; j++)
-    		  data[b].time[chn_index][i] += bins[b].bin_width[chn_index][(j+drsch[chn_index].trigger_cell) % 1024];
-	      }
-
-
-
-            } else if(ch.c[0] == 'A') {
-               //ADC
-               fread(adc_voltage, sizeof(short), 2048, f);
-               for (i=0 ; i<2048 ; i++) {
-                  data[b].adc_waveform[chn_index][i] = adc_voltage[i];
-               }
-            } else if(ch.c[0] == 'T') {
-               if(ch.cn[0] == '0'){
-                  //TDC
-                  fread(tdc_data, sizeof(char), 512, f);
-                  for (i=0 ; i<512 ; i++) {
-                     data[b].tdc_waveform[chn_index][i] = tdc_data[i];
-                  }
-               } else if(ch.cn[0] == 'R'){
-                  //TRG
-		 fread(trg_data, sizeof(long), 512, f);
-                  for(int i=0; i<512; i++){
-		    data[b].trigger_data[i] = trg_data[i];
-                  }
-               }
-            } else if(ch.c[0] == 'S') {
-	      //Scaler
-	      fread(scaler_data, sizeof(long), 18, f);
-	      fread(&scaler_time, sizeof(long), 1, f);
-	      for (int i=0 ; i<18 ; i++) {
-		data[b].scaler[i] = (Double_t) (scaler_data[i]-scaler_data_old[i])/(scaler_time-scaler_time_old)/12.5e-9;
-		scaler_data_old[i] = scaler_data[i];
-	      }
-	      scaler_time_old = scaler_time;
-	    }
-	 }// end for channels
-
-	 // align cell #0 of all channels
-  	 t1 = data[0].time[16][(1024-drsch[16].trigger_cell) % 1024];
-  	 for (chn=1 ; chn<18 ; chn++) {
-  	   t2 = data[b].time[chn][(1024-drsch[chn].trigger_cell) % 1024];
-  	   dt = t1 - t2;
-  	   for (i=0 ; i<1024 ; i++)
-  	     data[b].time[chn][i] += dt;
-  	 }
-
-     for (i=0; i<18; i++)
-     {
-       if (triggered[i])
-       {
-         header_array[0] = (Double_t) i;
-         header_array[1] = (Double_t) bh.board_serial_number;
-         header_array[2] = (Double_t) n;
-         header_array[3] = 0;
-
-         //printf("Writing %lu events \n", sizeof(data[b].waveform[i])/8);
-         fwrite(header_array,sizeof(Double_t),4,f2);
-         fwrite(data[b].waveform[i], sizeof(Double_t), sizeof(data[b].waveform[i])/8, f2);
-         fwrite(data[b].time[i], sizeof(Double_t), sizeof(data[b].time[i])/8, f2);
-       }
-     }
+         } else {
+            //probably next event, rewind
+            fseek(f, -4, SEEK_CUR);
+            break;
+         }
 
 
 
       } //end loop on boards
+
+      for (auto it: data){
+         // align cell #0 of all channels
+         WDBDATA &this_data =  it.second;
+         t1 = data.begin()->second.time[16][(1024-drsch[16].trigger_cell) % 1024];
+         for (chn=1 ; chn<18 ; chn++) {
+            t2 = this_data.time[chn][(1024-drsch[chn].trigger_cell) % 1024];
+            dt = t1 - t2;
+            for (i=0 ; i<1024 ; i++)
+               this_data.time[chn][i] += dt;
+         }
+
+         for (i=0; i<18; i++)
+         {
+            if (triggered[i])
+            {
+               WDBDATA &this_data =  data[bh.board_serial_number];
+               header_array[0] = (Double_t) i;
+               header_array[1] = (Double_t) bh.board_serial_number;
+               header_array[2] = (Double_t) n;
+               header_array[3] = 0;
+
+               //printf("Writing %lu events \n", sizeof(data[b].waveform[i])/8);
+               fwrite(header_array,sizeof(Double_t),4,f2);
+               fwrite(this_data.waveform[i], sizeof(Double_t), sizeof(this_data.waveform[i])/8, f2);
+               fwrite(this_data.time[i], sizeof(Double_t), sizeof(this_data.time[i])/8, f2);
+            }
+         }
+      }
+
       // fill root tree
       rec->Fill();
 
