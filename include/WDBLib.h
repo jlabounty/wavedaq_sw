@@ -627,6 +627,7 @@ public:
    
    // interface functions
    void SetVerbose(int verbose) { mVerbose = verbose; }
+   int IsVerbose() { return mVerbose; }
    void SetLogFile(std::string logfile) { mLogfile = logfile; }
    void Connect();
    void SetDestinationPort(int port);
