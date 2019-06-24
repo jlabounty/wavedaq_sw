@@ -1267,18 +1267,25 @@ int main(int argc, const char * argv[])
    char tmp[256];
    getcwd(tmp, sizeof(tmp));
    std::string dir(tmp);
-   std::ifstream f(dir + "/html/index.html");
-   if (f.good()) {
+   std::ifstream f1(dir + "/html/index.html");
+   if (f1.good()) {
       s_http_server_opts.document_root = "html";
    } else {
-      std::string topdir = dir.substr(0, dir.find_last_of("/\\"));
-      std::ifstream f(topdir + "/html/index.html");
-      if (f.good()) {
-         dir = topdir + "/html";
+      dir = dir.substr(0, dir.find_last_of("/\\"));
+      std::ifstream f2(dir + "/html/index.html");
+      if (f2.good()) {
+         dir += "/html";
          s_http_server_opts.document_root = dir.c_str();
       } else {
-         std::cerr << "Cannot find 'html' directory. Please run from the root of the wds directory." << std::endl;
-         return 1;
+         dir = getenv("WDBSYS");
+         std::ifstream f3(dir + "/software/wds/html/index.html");
+         if (f3.good()) {
+            dir += "/software/wds/html";
+            s_http_server_opts.document_root = dir.c_str();
+         } else {
+            std::cerr << "Cannot find 'html' directory. Please run from the root of the wds directory." << std::endl;
+            return 1;
+         }
       }
    }
 
