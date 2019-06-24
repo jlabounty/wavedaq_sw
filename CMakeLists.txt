@@ -1,8 +1,10 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.0)
 project(wds)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR})
+
+find_package(Threads)
 
 add_subdirectory(read_binary)
 
@@ -25,7 +27,7 @@ add_executable(wds
    wds/src/wds.cpp)
 
 target_include_directories(wds PUBLIC wds/src src mxml)
-target_link_libraries(wds wdb)
+target_link_libraries(wds wdb ${CMAKE_THREAD_LIBS_INIT})
 add_dependencies(wds register_map_wd2)
 add_dependencies(wdb register_map_wd2)
 
