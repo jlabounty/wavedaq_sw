@@ -6,6 +6,19 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR})
 
 find_package(Threads)
 
+# Check for mscb
+#
+if (EXISTS $ENV{MSCBSYS}/src/mscb.cxx)
+   # add tcb folder
+   add_subdirectory(tcb)
+endif()
+
+if (NOT EXISTS $ENV{MSCBSYS}/src/mscb.cxx)
+      message("\nError: 'mscb' submodule not found. Please install\n"
+      "in git root directory. TCB library and executables won't be built\n\n"
+   )
+endif()
+
 add_subdirectory(read_binary)
 
 add_definitions(-DWD2_DONT_INCLUDE_REG_ACCESS_VARS)
