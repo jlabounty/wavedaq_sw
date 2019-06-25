@@ -1,4 +1,4 @@
-link_directories(/Users/galli/Documents/MEGII/git/mscb/lib/)
+link_directories($ENV{MSCBSYS}/lib/)
 
 add_library(tcb
    TCBLib.cpp)
