@@ -19,7 +19,7 @@ add_library(wdb
    src/WDBLib.cpp
    src/averager.cpp)
 
-target_include_directories(wdb PRIVATE wds/src src mxml)
+target_include_directories(wdb PRIVATE wds/src include mxml)
 
 add_executable(wds
    wds/src/mongoose.c
@@ -27,7 +27,7 @@ add_executable(wds
    mxml/strlcpy.cxx
    wds/src/wds.cpp)
 
-target_include_directories(wds PUBLIC wds/src src mxml)
+target_include_directories(wds PUBLIC wds/src include mxml)
 target_link_libraries(wds wdb ${CMAKE_THREAD_LIBS_INIT})
 add_dependencies(wds register_map_wd2)
 add_dependencies(wdb register_map_wd2)
