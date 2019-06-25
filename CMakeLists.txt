@@ -7,7 +7,6 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR})
 find_package(Threads)
 
 add_subdirectory(read_binary)
-add_subdirectory(tcb)
 
 add_definitions(-DWD2_DONT_INCLUDE_REG_ACCESS_VARS)
 

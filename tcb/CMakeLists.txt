@@ -1,9 +1,10 @@
+cmake_minimum_required(VERSION 3.0)
+project(tcb)
+
 link_directories($ENV{MSCBSYS}/lib/)
 
 add_library(tcb
    TCBLib.cpp)
-
-message ($ENV{MSCBSYS})
 
 target_include_directories(tcb PRIVATE $ENV{MSCBSYS}/include)
 
