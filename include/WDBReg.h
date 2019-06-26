@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  02.04.2019 11:08:58
+// Created :  25.06.2019 11:48:03
 //
 
 
@@ -112,6 +112,10 @@ public:
 
 
    ////// ------ Control Register 3 [0x100C]: CLK_CTRL - Clock Control (Default: 0x00026464) ------ //////
+
+   // 0x01000000: TRIG_DAQ_CLK_CAL_CHK - Trigger DAQ clock calibration check
+   unsigned int GetTrigDaqClkCalChk() { return BitExtractControl(WD2_TRIG_DAQ_CLK_CAL_CHK_REG, WD2_TRIG_DAQ_CLK_CAL_CHK_MASK, WD2_TRIG_DAQ_CLK_CAL_CHK_OFS); };
+   void         SetTrigDaqClkCalChk(unsigned int value) { SetRegMask(WD2_TRIG_DAQ_CLK_CAL_CHK_REG, WD2_TRIG_DAQ_CLK_CAL_CHK_MASK, WD2_TRIG_DAQ_CLK_CAL_CHK_OFS, value); };
 
    // 0x00020000: DAQ_CLK_SRC_SEL - DAQ clock source select: 0 = DCB clock / 1 = on board oscillator (CLK_SEL)
    unsigned int GetDaqClkSrcSel() { return BitExtractControl(WD2_DAQ_CLK_SRC_SEL_REG, WD2_DAQ_CLK_SRC_SEL_MASK, WD2_DAQ_CLK_SRC_SEL_OFS); };
@@ -2698,6 +2702,12 @@ public:
    // 0xFFFF0000: TEMPERATURE - temperature in 0.0625 deg. C units
    unsigned int GetTemperature() { return BitExtractStatus(WD2_TEMPERATURE_REG, WD2_TEMPERATURE_MASK, WD2_TEMPERATURE_OFS); };
 
+   // 0x00002000: DAQ_CLK_DEF_PHASE_OK - DAQ clock default phase setting is valid
+   unsigned int GetDaqClkDefPhaseOk() { return BitExtractStatus(WD2_DAQ_CLK_DEF_PHASE_OK_REG, WD2_DAQ_CLK_DEF_PHASE_OK_MASK, WD2_DAQ_CLK_DEF_PHASE_OK_OFS); };
+
+   // 0x00001000: DAQ_CLK_DEF_PHASE_CHKD - DAQ clock default phase setting is checked
+   unsigned int GetDaqClkDefPhaseChkd() { return BitExtractStatus(WD2_DAQ_CLK_DEF_PHASE_CHKD_REG, WD2_DAQ_CLK_DEF_PHASE_CHKD_MASK, WD2_DAQ_CLK_DEF_PHASE_CHKD_OFS); };
+
    // 0x00000400: DRS_CONFIG_DONE - DRS configuration done
    unsigned int GetDrsConfigDone() { return BitExtractStatus(WD2_DRS_CONFIG_DONE_REG, WD2_DRS_CONFIG_DONE_MASK, WD2_DRS_CONFIG_DONE_OFS); };
 
@@ -3242,6 +3252,9 @@ public:
 
 
    ////// ------ Status Register 78 [0x0138]: CLK_CTRL_MOD_FLAG - Set if WD2 configuration registers are modified (Default: 0x00000000) ------ //////
+
+   // 0x00000010: TRIGGER_DAQ_CLK_CAL_MOD - Trigger DAQ clock calibration modified flag
+   unsigned int GetTriggerDaqClkCalMod() { return BitExtractStatus(WD2_TRIGGER_DAQ_CLK_CAL_MOD_REG, WD2_TRIGGER_DAQ_CLK_CAL_MOD_MASK, WD2_TRIGGER_DAQ_CLK_CAL_MOD_OFS); };
 
    // 0x00000008: ADC_RST_MOD - ADC reset modified flag
    unsigned int GetAdcRstMod() { return BitExtractStatus(WD2_ADC_RST_MOD_REG, WD2_ADC_RST_MOD_MASK, WD2_ADC_RST_MOD_OFS); };

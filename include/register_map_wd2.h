@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  02.04.2019 11:08:58
+ *  Created :  25.06.2019 11:48:03
  *
  *  Description :  Register map definitions.
  *
@@ -389,6 +389,11 @@
 
 
 /* ****** Control Register 3 [0x100C]: CLK_CTRL - Clock Control (Default: 0x00026464) ****** */
+
+/* TRIG_DAQ_CLK_CAL_CHK - Trigger DAQ clock calibration check */
+#define WD2_TRIG_DAQ_CLK_CAL_CHK_REG                              WD2_REG_CLK_CTRL
+#define WD2_TRIG_DAQ_CLK_CAL_CHK_MASK                                   0x01000000
+#define WD2_TRIG_DAQ_CLK_CAL_CHK_OFS                                            24
 
 /* DAQ_CLK_SRC_SEL - DAQ clock source select: 0 = DCB clock / 1 = on board oscillator (CLK_SEL) */
 #define WD2_DAQ_CLK_SRC_SEL_REG                                   WD2_REG_CLK_CTRL
@@ -3488,6 +3493,16 @@
 #define WD2_TEMPERATURE_MASK                                            0xFFFF0000
 #define WD2_TEMPERATURE_OFS                                                     16
 
+/* DAQ_CLK_DEF_PHASE_OK - DAQ clock default phase setting is valid */
+#define WD2_DAQ_CLK_DEF_PHASE_OK_REG                                WD2_REG_STATUS
+#define WD2_DAQ_CLK_DEF_PHASE_OK_MASK                                   0x00002000
+#define WD2_DAQ_CLK_DEF_PHASE_OK_OFS                                            13
+
+/* DAQ_CLK_DEF_PHASE_CHKD - DAQ clock default phase setting is checked */
+#define WD2_DAQ_CLK_DEF_PHASE_CHKD_REG                              WD2_REG_STATUS
+#define WD2_DAQ_CLK_DEF_PHASE_CHKD_MASK                                 0x00001000
+#define WD2_DAQ_CLK_DEF_PHASE_CHKD_OFS                                          12
+
 /* DRS_CONFIG_DONE - DRS configuration done */
 #define WD2_DRS_CONFIG_DONE_REG                                     WD2_REG_STATUS
 #define WD2_DRS_CONFIG_DONE_MASK                                        0x00000400
@@ -4214,6 +4229,11 @@
 
 
 /* ****** Status Register 78 [0x0138]: CLK_CTRL_MOD_FLAG - Set if WD2 configuration registers are modified (Default: 0x00000000) ****** */
+
+/* TRIGGER_DAQ_CLK_CAL_MOD - Trigger DAQ clock calibration modified flag */
+#define WD2_TRIGGER_DAQ_CLK_CAL_MOD_REG                  WD2_REG_CLK_CTRL_MOD_FLAG
+#define WD2_TRIGGER_DAQ_CLK_CAL_MOD_MASK                                0x00000010
+#define WD2_TRIGGER_DAQ_CLK_CAL_MOD_OFS                                          4
 
 /* ADC_RST_MOD - ADC reset modified flag */
 #define WD2_ADC_RST_MOD_REG                              WD2_REG_CLK_CTRL_MOD_FLAG
@@ -5228,6 +5248,7 @@ const wd2_bit_group_entry_type  wd2_bit_group_list[] = {
   { "DRS_1_TIMING_REF_SEL"          , WD2_DRS_1_TIMING_REF_SEL_REG          , WD2_DRS_1_TIMING_REF_SEL_MASK          , WD2_DRS_1_TIMING_REF_SEL_OFS          },
   { "CALIB_BUFFER_EN"               , WD2_CALIB_BUFFER_EN_REG               , WD2_CALIB_BUFFER_EN_MASK               , WD2_CALIB_BUFFER_EN_OFS               },
   { "TIMING_CALIB_SIGNAL_EN"        , WD2_TIMING_CALIB_SIGNAL_EN_REG        , WD2_TIMING_CALIB_SIGNAL_EN_MASK        , WD2_TIMING_CALIB_SIGNAL_EN_OFS        },
+  { "TRIG_DAQ_CLK_CAL_CHK"          , WD2_TRIG_DAQ_CLK_CAL_CHK_REG          , WD2_TRIG_DAQ_CLK_CAL_CHK_MASK          , WD2_TRIG_DAQ_CLK_CAL_CHK_OFS          },
   { "DAQ_CLK_SRC_SEL"               , WD2_DAQ_CLK_SRC_SEL_REG               , WD2_DAQ_CLK_SRC_SEL_MASK               , WD2_DAQ_CLK_SRC_SEL_OFS               },
   { "EXT_CLK_IN_SEL"                , WD2_EXT_CLK_IN_SEL_REG                , WD2_EXT_CLK_IN_SEL_MASK                , WD2_EXT_CLK_IN_SEL_OFS                },
   { "EXT_CLK_FREQ"                  , WD2_EXT_CLK_FREQ_REG                  , WD2_EXT_CLK_FREQ_MASK                  , WD2_EXT_CLK_FREQ_OFS                  },
@@ -5733,6 +5754,10 @@ const wd2_bit_group_entry_type  wd2_bit_group_list[] = {
   { "SERIAL_NUMBER"                 , WD2_SERIAL_NUMBER_REG                 , WD2_SERIAL_NUMBER_MASK                 , WD2_SERIAL_NUMBER_OFS                 },
   { "TEMPERATURE"                   , WD2_TEMPERATURE_REG                   , WD2_TEMPERATURE_MASK                   , WD2_TEMPERATURE_OFS                   },
   { "TEMPERATURE"                   , WD2_TEMPERATURE_REG                   , WD2_TEMPERATURE_MASK                   , WD2_TEMPERATURE_OFS                   },
+  { "DAQ_CLK_DEF_PHASE_OK"          , WD2_DAQ_CLK_DEF_PHASE_OK_REG          , WD2_DAQ_CLK_DEF_PHASE_OK_MASK          , WD2_DAQ_CLK_DEF_PHASE_OK_OFS          },
+  { "DAQ_CLK_DEF_PHASE_OK"          , WD2_DAQ_CLK_DEF_PHASE_OK_REG          , WD2_DAQ_CLK_DEF_PHASE_OK_MASK          , WD2_DAQ_CLK_DEF_PHASE_OK_OFS          },
+  { "DAQ_CLK_DEF_PHASE_CHKD"        , WD2_DAQ_CLK_DEF_PHASE_CHKD_REG        , WD2_DAQ_CLK_DEF_PHASE_CHKD_MASK        , WD2_DAQ_CLK_DEF_PHASE_CHKD_OFS        },
+  { "DAQ_CLK_DEF_PHASE_CHKD"        , WD2_DAQ_CLK_DEF_PHASE_CHKD_REG        , WD2_DAQ_CLK_DEF_PHASE_CHKD_MASK        , WD2_DAQ_CLK_DEF_PHASE_CHKD_OFS        },
   { "DRS_CONFIG_DONE"               , WD2_DRS_CONFIG_DONE_REG               , WD2_DRS_CONFIG_DONE_MASK               , WD2_DRS_CONFIG_DONE_OFS               },
   { "DRS_CONFIG_DONE"               , WD2_DRS_CONFIG_DONE_REG               , WD2_DRS_CONFIG_DONE_MASK               , WD2_DRS_CONFIG_DONE_OFS               },
   { "FLASH_SEL"                     , WD2_FLASH_SEL_REG                     , WD2_FLASH_SEL_MASK                     , WD2_FLASH_SEL_OFS                     },
@@ -5915,6 +5940,8 @@ const wd2_bit_group_entry_type  wd2_bit_group_list[] = {
   { "MAX_TRG_PKT_SAMPLES"           , WD2_MAX_TRG_PKT_SAMPLES_REG           , WD2_MAX_TRG_PKT_SAMPLES_MASK           , WD2_MAX_TRG_PKT_SAMPLES_OFS           },
   { "MAX_SCL_PKT_SAMPLES"           , WD2_MAX_SCL_PKT_SAMPLES_REG           , WD2_MAX_SCL_PKT_SAMPLES_MASK           , WD2_MAX_SCL_PKT_SAMPLES_OFS           },
   { "MAX_SCL_PKT_SAMPLES"           , WD2_MAX_SCL_PKT_SAMPLES_REG           , WD2_MAX_SCL_PKT_SAMPLES_MASK           , WD2_MAX_SCL_PKT_SAMPLES_OFS           },
+  { "TRIGGER_DAQ_CLK_CAL_MOD"       , WD2_TRIGGER_DAQ_CLK_CAL_MOD_REG       , WD2_TRIGGER_DAQ_CLK_CAL_MOD_MASK       , WD2_TRIGGER_DAQ_CLK_CAL_MOD_OFS       },
+  { "TRIGGER_DAQ_CLK_CAL_MOD"       , WD2_TRIGGER_DAQ_CLK_CAL_MOD_REG       , WD2_TRIGGER_DAQ_CLK_CAL_MOD_MASK       , WD2_TRIGGER_DAQ_CLK_CAL_MOD_OFS       },
   { "ADC_RST_MOD"                   , WD2_ADC_RST_MOD_REG                   , WD2_ADC_RST_MOD_MASK                   , WD2_ADC_RST_MOD_OFS                   },
   { "ADC_RST_MOD"                   , WD2_ADC_RST_MOD_REG                   , WD2_ADC_RST_MOD_MASK                   , WD2_ADC_RST_MOD_OFS                   },
   { "CLK_SEL_AND_DRS_CLK_DIV_MOD"   , WD2_CLK_SEL_AND_DRS_CLK_DIV_MOD_REG   , WD2_CLK_SEL_AND_DRS_CLK_DIV_MOD_MASK   , WD2_CLK_SEL_AND_DRS_CLK_DIV_MOD_OFS   },
