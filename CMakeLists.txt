@@ -1,5 +1,6 @@
+
 cmake_minimum_required(VERSION 3.0)
-project(wds)
+project(wdaq)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR})
@@ -11,11 +12,12 @@ find_package(Threads)
 if (EXISTS $ENV{MSCBSYS}/src/mscb.cxx)
    # add tcb folder
    add_subdirectory(tcb)
+   add_subdirectory(serdestest)
 endif()
 
 if (NOT EXISTS $ENV{MSCBSYS}/src/mscb.cxx)
       message("\nError: 'mscb' submodule not found. Please install\n"
-      "in git root directory. TCB library and executables won't be built\n\n"
+      "in git root directory. TCB library, tcb_cl and serdestest won't be built\n\n"
    )
 endif()
 

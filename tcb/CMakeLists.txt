@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.0)
 project(tcb)
 
+if (NOT EXISTS $ENV{MSCBSYS}/src/mscb.cxx)
+      message(FATAL_ERROR "\nError: 'mscb' submodule not found. Please install\n"
+      "in git root directory. TCB library and executables won't be built\n\n"
+   )
+endif()
+
 link_directories($ENV{MSCBSYS}/lib/)
 
 add_library(tcb
