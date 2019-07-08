@@ -16,8 +16,8 @@ if (EXISTS $ENV{MSCBSYS}/src/mscb.cxx)
 endif()
 
 if (NOT EXISTS $ENV{MSCBSYS}/src/mscb.cxx)
-      message("\nError: 'mscb' submodule not found. Please install\n"
-      "in git root directory. TCB library, tcb_cl and serdestest won't be built\n\n"
+      message("\nError: 'MSCBSYS' environment variable not found.\n"
+      "Please install mscb and set MSCBSYS to compile TCB library, tcb_cl and serdestest.\n\n"
    )
 endif()
 
