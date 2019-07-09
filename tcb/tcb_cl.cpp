@@ -800,10 +800,12 @@ int main(int argc, char *argv[])
 	   FILE *ffile;
 	   char filename[100];
 	   sprintf(filename,"%s-%d.dat", fname, irun);
+      printf("starting run to file %s\n", filename);
 	   ffile = fopen(filename,"w");
 	   // disable all trigger
-	   TCBBoard.SetRENA(0,0);
-	   TCBBoard.SetRENA(0,1);
+      u_int32_t rena = 0;
+	   TCBBoard.SetRENA(&rena,0);
+	   TCBBoard.SetRENA(&rena,1);
 	   // give a sync
 	   TCBBoard.SWSync();
 	   // put in runmode
