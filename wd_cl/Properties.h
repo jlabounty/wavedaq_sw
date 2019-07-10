@@ -14,10 +14,12 @@ class Property{
    protected:
       std::string fStringVal;
       std::vector<int> fIntVal;
+      bool fBoolVal;
       std::vector<unsigned int> fUIntVal;
       std::vector<float> fFloatVal;
       bool fChanged;
       bool fIntConverted;
+      bool fBoolConverted;
       bool fUIntConverted;
       bool fHexConverted;
       bool fUHexConverted;
@@ -40,12 +42,20 @@ class Property{
          }
       }
 
+      void PropertyToBool(){
+         if(fStringVal.rfind('y',0)==0 || fStringVal.rfind("true",0)==0)
+            fBoolVal = true;
+         else
+            fBoolVal = false;
+      }
+
    public:
       //Setter and Getter
       void SetStringValue(std::string value){
          fStringVal = value;
          fChanged = true;
          fIntConverted = false;
+         fBoolConverted = false;
          fHexConverted = false;
          fUIntConverted = false;
          fUHexConverted = false;
@@ -149,6 +159,18 @@ class Property{
          else return -1;
       }
 
+      void ConvertBool(){
+         PropertyToBool();
+         fBoolConverted = true;
+      }
+
+      bool GetBool(){
+         if(! fBoolConverted) {
+            ConvertBool();
+         }
+         return fBoolVal;
+      }
+
       void ConvertFloat(){
          PropertyToArray<float>(fFloatVal, std::ios_base::hex);
          fFloatConverted = true;
@@ -194,6 +216,14 @@ class PropertyGroup : std::map<std::string,Property>{
       using std::map<std::string,Property>::clear;
       using std::map<std::string,Property>::begin;
       using std::map<std::string,Property>::end;
+
+      bool contains(std::string val){
+         if(find(val)==end())
+            return false;
+         else
+            return true;
+         
+      }
 
       //Constructor
       PropertyGroup(){

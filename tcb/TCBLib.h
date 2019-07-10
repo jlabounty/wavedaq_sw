@@ -25,6 +25,7 @@
 #define RTRITYPE           0x203      // trigger type
 #define RSYSEVECOU         0x204      // system (trgbus) event counter
 #define RSYSTRITYPE        0x205      // system (trgbus) trigger type
+#define RPCURR             0x206      //proton current
 #define RSERDESCONF        0x300      // serdes configuration and reset
 #define RDCBSERDESCONF     0x320      // serdes configuration and reset for dcb
 #define RSERDESTX          0x321      // tx serdes configuration and delay load
@@ -51,6 +52,35 @@
 #define RTRGCOU            0x400      // trigger counter (first address)
 #define RTRGDLY            0x500      // trigger delay (first address)
 #define RPARAM             0x600      // start of parameter space
+#define RQHTHR             0x600      // sum threshold high
+#define RTILEMSK0          0x601      // tile mask 0
+#define RTILEMSK1          0x602      // tile mask 1
+#define RTILEMSK2          0x603      // tile mask 2
+#define RTILEMSK3          0x604      // tile mask 3
+#define RQLTHR             0x606      // sum threshold low
+#define RQCTHR             0x607      // sum threshold cosmic
+#define RLXePATCH          0x608      // LXe sum patch 
+#define RTCMERGEH1         0x60A      // TC high threshold for crate hit merge
+#define RTCMERGEL1         0x60B      // TC low threhsold for crate hit merge
+#define RTCMERGEH2         0x60C      // TC high threshold for sector hit merge
+#define RTCMERGEL2         0x60D      // TC low threshold for sector hit merge
+#define RRDCLYSOTHR        0x60E      // RDC QSUM threshold
+#define RBGOTHR            0x60F      // BGO QSUM threshold
+#define RBGOMASK           0x611      // BGO trigger definition
+#define RRDCMASK           0x610      // RDC trigger definition
+#define RALPHATHR          0x612      // threshold alpha
+#define RALPHAPEAK         0x613      // alpha peak scale
+#define RQSUMSEL           0x614      // selects the qsum as std or running average
+#define RBGOVETOTHR        0x615      // BGO QSUM veto threshold
+#define RTCMULTITHR        0x616      // TC Multiplicity threshold
+#define RNGENDLY           0x617      // Delay of NGEN Window
+#define RNGENWIDTH         0x618      // Width of NGEN Window
+#define RLXeNGENQH         0x619      // LXe threshold for NGEN TRG
+#define RLXeNGENQL         0x61A      // LXe veto threshold for NGEN TRG
+#define RBGOHITDLY         0x61B      // Delay of BGO and Preshower hit
+#define RCRCHITMASK        0x61C      // Masking bit for CRC counters (7:0)
+#define RCRCPAIRENA        0x61D      // Enable bits for CRC top-bottom coincidences
+#define RFIBCOUNTER        0x700      // SCIFI fiber event counter address (42 values)
 #define RSINGLECRATECFG    0x800      // configurations for single crate trigger logic
 #define RSINGLEISVETO      0x801      // veto set for input channels in single crate logic
 #define RSINGLEMASK        0x809      // mask for input channels in single crate logic
@@ -63,6 +93,13 @@
 #define RMEMADDR           0x0FFFF    // counter stop position
 #define MEMBASEADDR        0x10000    //base address for memories
 #define GENTMEMBASE        0x12000    //base address for trigger generation memories (two memories with size = GENTDIM)
+
+/// Detector memories (size = MEMDIM)
+#define XECMEMBASE    0x11100                   // XEC memories base address (2 memories)
+#define BGOMEMBASE    0x13000                   // BGO memories base address (1 memory)
+#define RDCMEMBASE    0x14000                   // RDC memories base address (2 memories)
+#define TCMEMBASE     0x15000                   // TC memories base address (2 memories)
+#define ALFAMEMBASE   0x16000                   // ALFA memories base address (2 memories)
 
 #define PACKAGERBASE       0x01000000 //base address for packager memories
 #define RARBITER           0x01001000 //Bus Arbiter register and packager controller
@@ -78,6 +115,7 @@
 #define BUFFERNUM          4
 #define PACKAGERSIZE       1024
 #define BLTSIZE            32
+#define NSCIFI             42
 ///////////////////////////////////////////////////////////
 
 //derived addresses (should not touch!)
@@ -353,6 +391,38 @@ public:
    void GetSyncWaveform(u_int32_t *ptr);
    //reset SYNC waveform serdes
    void ResetSyncWaveformSerdes();
+
+   //trigger-specific calls
+   // Set waveform sum trigger threshold
+   void SetSumHighThreshold(u_int32_t*);
+   void SetSumLowThreshold(u_int32_t*);
+   void SetSumVetoThreshold(u_int32_t*);
+   void SetSumPatch(u_int32_t*);
+   //Alpha configuration
+   void SetAlphaThreshold(u_int32_t*);
+   void SetAlphaPeakScale(float);
+   //qsum std or moving average
+   void SetQsumSelect(u_int32_t*);
+   // Set TC masks
+   void SetTCMasks(u_int32_t*);
+   void SetTCMultiplicityThreshold(u_int32_t*);
+   void SetTCCrateMergeThreshold(u_int32_t*, u_int32_t*);
+   void SetTCSectorMergeThreshold(u_int32_t*, u_int32_t*);
+   //Set BGO Stuff
+   void SetBGOThreshold(u_int32_t *);
+   void SetBGOVetoThreshold(u_int32_t *);
+   void SetBGOTriggerMask(u_int32_t *);
+   void SetBGOHitDelay(u_int32_t *);
+   //Set RDC Stuff
+   void SetRDCThreshold(u_int32_t *);
+   void SetRDCTriggerMask(u_int32_t *);
+   //Set CRC Stuff
+   void SetCRCHitMask(u_int32_t *);
+   void SetCRCPairEnable(u_int32_t *);
+   //Get proton current
+   void GetPCurr(u_int32_t *);
+   //Get SciFi counters
+   void GetSciFICou(u_int32_t *);
 
 };
 
