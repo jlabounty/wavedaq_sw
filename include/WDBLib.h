@@ -553,7 +553,6 @@ class WDB: public WDBREG {
    static int       gBinSocket;
    static unsigned short udpSequenceNumber;
 
-   void             BlockSend(bool flag) { mSendBlocked = flag; }
    int              GetReceiveTimeoutMs() { return mReceiveTimeoutMs; };
    void             SetReceiveTimeoutMs(int to) { mReceiveTimeoutMs = to; };
 
@@ -636,7 +635,8 @@ public:
    void ReceiveStatusRegister(int ofs);
    void SendControlRegisters();
    void PrintVersion();
-   void SetSendBlocked(bool f) { mSendBlocked = f; }
+   bool GetSendBlock() { return mSendBlocked; }
+   void SetSendBlock(bool flag) { mSendBlocked = flag; }
 
    // setter & getter ----------
    std::string GetName() { return mName; }

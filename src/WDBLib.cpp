@@ -133,7 +133,7 @@ std::string WDB::SendReceiveUDP(std::string str)
    result.clear();
 
    // retry max five times
-   for (int retry=0 ; retry < 100 ; retry++) {
+   for (int retry=0 ; retry < 5 ; retry++) {
 
       // clear input queue
       do {
@@ -1272,18 +1272,22 @@ void WDB::SetDacTriggerLevelV(int chn, float v)
    assert(chn < 16);
    if (chn == -1) {
       std::vector<unsigned int> regs;
-      BlockSend(true);
+      bool blocked = GetSendBlock();
+      if (!blocked)
+         SetSendBlock(true);
       for (chn=0 ; chn<16 ; chn++) {
          if (chn % 2 == 0)
             SetRegMask(WD2_DAC1_CH_A_REG+(chn/2)*4, WD2_DAC1_CH_A_MASK, WD2_DAC1_CH_A_OFS, d);
          else
             SetRegMask(WD2_DAC1_CH_A_REG+(chn/2)*4, WD2_DAC1_CH_B_MASK, WD2_DAC1_CH_B_OFS, d);
       }
-      BlockSend(false);
+      if (!blocked)
+         SetSendBlock(false);
       for (chn=0 ; chn<8 ; chn++)
          regs.push_back(creg[(WD2_DAC1_CH_A_REG & 0x0FFF)/4+chn]);
 #ifdef WD2_USE_UDP_BIN
-      WriteUDP(WD2_DAC1_CH_A_REG, regs);
+      if (!mDemoMode && !mSendBlocked)
+         WriteUDP(WD2_DAC1_CH_A_REG, regs);
 #else
       for (chn=0 ; chn<8 ; chn++) {
          std::ostringstream req;
@@ -1471,14 +1475,17 @@ void WDB::SetFeGain(int chn, float gain)
          break;
 
    if (i < 8) {
-      BlockSend(true);
+      auto blocked = GetSendBlock();
+      if (!blocked)
+         SetSendBlock(true);
 
       SetFeAttenuation(chn, gain_table[i].att0 | (gain_table[i].att1 << 1));
       SetFeAmp1Enable(chn, gain_table[i].en1);
       SetFeAmp1Comp(chn, gain_table[i].comp1);
       SetFeAmp2Enable(chn, gain_table[i].en2);
 
-      BlockSend(false); // now send register
+      if (!blocked)
+         SetSendBlock(false); // now send register
       SetFeAmp1Comp(chn, gain_table[i].comp2);
    }
 }
@@ -1507,7 +1514,8 @@ void WDB::SetFeMux(int chn, unsigned int v)
       for (chn=0 ; chn<8 ; chn++)
          regs.push_back(creg[(WD2_FE0_MUX_REG & 0x0FFF)/4+chn]);
 #ifdef WD2_USE_UDP_BIN
-      WriteUDP(WD2_FE0_MUX_REG, regs);
+      if (!mDemoMode && !mSendBlocked)
+         WriteUDP(WD2_FE0_MUX_REG, regs);
 #else
       for (chn=0 ; chn<8 ; chn++) {
          std::ostringstream req;
