@@ -594,14 +594,15 @@ void WDWDB::ConfigureProperty(const std::string &name, Property &property) {
 };
 
 void WDWDB::ConfigurationStarted(){
-   SetSendBlocked(true);
+   //SetSendBlock(true);
    SetDestinationPort(GetCrate()->GetSystem()->GetDAQServerPort());
    SetFeMux(-1, WDB::cFeMuxInput);
+   SetTriggerOutPulseLength(4);
 }
 
 void WDWDB::ConfigurationEnded(){
-   SetSendBlocked(false);
-   SendControlRegisters();
+   //SetSendBlock(false);
+   //SendControlRegisters();
    SetDaqNormal(true);
    ReceiveStatusRegisters();
 }
@@ -910,11 +911,11 @@ void WDWDB::ConfigureSamplingFrequency(Property &property) {
    unsigned int freq;
    freq = property.GetUInt();
 
-   SetSendBlocked(false);
-
+   bool isSendBlocked = GetSendBlock();
+   if(isSendBlocked) SetSendBlock(false);
    SetDrsSampleFreq(freq);
+   if(isSendBlocked) SetSendBlock(true);
 
-   SetSendBlocked(true);
    if (!LoadVoltageCalibration(GetDrsSampleFreqMhz(), "/home/git/wavedaq/software/wds/")) {
       printf("missing voltage calibration file\n");
    }
@@ -926,24 +927,28 @@ void WDWDB::ConfigureSamplingFrequency(Property &property) {
 
 // Set configurations to be used in a crate
 void WDWDB::SetInCrate(){
-   SetSendBlocked(true);
    SetPatternTriggerEn(0);
    SetExtAsyncTriggerEn(1);
    SetExtTriggerOutEnable(0);
-   SetTriggerOutPulseLength(4);
-   SetExtClkInSel(0);
-   SetDaqClkSrcSel(0);
-   SetLmkInputFreq(80);
-   SetSendBlocked(false);
-   SendControlRegisters();
-   SetApplySettingsLmk(1);
-   LmkSyncLocal();
-   ReceiveStatusRegister(WD2_DRS_SAMPLE_FREQ_REG);
 
-   //Reset everything
-   ResetAllPll();
-   ResetTcbOserdesIf();
-   ResetDrsControlFsm();
+   if(GetExtClkInSel() != 0 || GetDaqClkSrcSel() != 0 || GetLmkInputFreq() != 80){
+
+      SetSendBlock(true);
+      SetExtClkInSel(0);
+      SetDaqClkSrcSel(0);
+      SetLmkInputFreq(80);
+      SetSendBlock(false);
+      SendControlRegisters();
+
+      SetApplySettingsLmk(1);
+      LmkSyncLocal();
+      ReceiveStatusRegister(WD2_DRS_SAMPLE_FREQ_REG);
+
+      //Reset everything
+      ResetAllPll();
+      ResetTcbOserdesIf();
+      ResetDrsControlFsm();
+   }
 }
 
 // --- WDTCB ---

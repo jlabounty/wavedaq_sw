@@ -52,7 +52,7 @@ template <class T> class DAQBuffer {
          //check size
          if(fEvents.size() == 0){
             //no data, wait
-            std::cv_status status = fHasData.wait_for(lock,std::chrono::seconds(1));
+            std::cv_status status = fHasData.wait_for(lock,std::chrono::milliseconds(100));
             if(status == std::cv_status::timeout) {
                lock.unlock();
                return false;
