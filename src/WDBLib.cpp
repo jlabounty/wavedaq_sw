@@ -132,8 +132,8 @@ std::string WDB::SendReceiveUDP(std::string str)
 
    result.clear();
 
-   // retry max five times
-   for (int retry=0 ; retry < 5 ; retry++) {
+   // retry max ten times
+   for (int retry=0 ; retry < 10 ; retry++) {
 
       // clear input queue
       do {
@@ -265,8 +265,8 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data)
       writeBuf.push_back((d >>  0) & 0xFF);
    }
 
-   // retry max five times
-   for (int retry=0 ; retry < 100 ; retry++) {
+   // retry max ten times
+   for (int retry=0 ; retry < 10 ; retry++) {
 
       // clear input queue
       do {
@@ -379,8 +379,8 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg)
    writeBuf[10] = (len >>  8) & 0xFF;
    writeBuf[11] = (len >>  0) & 0xFF;
 
-   // retry max five times
-   for (int retry=0 ; retry < 5 ; retry++) {
+   // retry max ten times
+   for (int retry=0 ; retry < 10 ; retry++) {
 
       // clear input queue
       do {
