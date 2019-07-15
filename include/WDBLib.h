@@ -639,6 +639,8 @@ public:
 
    // setter & getter ----------
    std::string GetName() { return mName; }
+   int GetReceiveTimeoutMs() { return mReceiveTimeoutMs; };
+   void SetReceiveTimeoutMs(int to) { mReceiveTimeoutMs = to; };
    
    // high level status registers
    std::string GetFwBuild();

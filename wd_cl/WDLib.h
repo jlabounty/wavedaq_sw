@@ -67,6 +67,7 @@ class WDBoard {
       WDBoard(std::string name="standalone"){
          fBoardName = name;
          fSlot = -1;
+         fCrate = nullptr;
       }
       //inside a crate
       WDBoard(WDCrate * crate, char slot, std::string name="BoardXXX");
@@ -99,10 +100,11 @@ class WDCrate {
 
       //Getters
       WDBoard *GetBoardAt(int slot);
-      const std::string GetCrateName(){ return fCrateName; };
-      const std::string GetMscbName(){ return fMscbName; };
+      const std::string GetCrateName(){ return fCrateName; }
+      const std::string GetMscbName(){ return fMscbName; }
       WDSystem *GetSystem() { return fSystem; }
       int GetMscbHandle() { return fMscbHandle; }
+      long GetCrateNumber() { return fCrateNumber; }
 
       //iterators
       WDBoard **begin() { return fBoard; }
@@ -244,7 +246,7 @@ class WDSystem {
 };
  
 // --- WaveDAQ WDB --- wrapper class for WDB
-class WDWDB : public WDBoard, public WDB{
+class WDWDB : public WDB, public WDBoard{
    private:
       void SetInCrate();
 
@@ -299,8 +301,8 @@ class WDWDB : public WDBoard, public WDB{
       void ConfigureSamplingFrequency(Property &property);
 
 
-      WDWDB(std::string name="WDXXX", std::string netname="WDXXX", int verbose = 0) : WDBoard(name), WDB(netname, verbose) { };
-      WDWDB(WDCrate *crate, int slot, std::string name="WDXXX", std::string netname="WDXXX", int verbose = 0) : WDBoard(crate, slot, name), WDB(netname, verbose) {
+      WDWDB(std::string name="WDXXX", std::string netname="WDXXX", int verbose = 0) :  WDB(netname, verbose), WDBoard(name) { };
+      WDWDB(WDCrate *crate, int slot, std::string name="WDXXX", std::string netname="WDXXX", int verbose = 0) : WDB(netname, verbose), WDBoard(crate, slot, name) {
          //try to connect only if the crate is powered
          if(crate->IsPowered()){
             Connect();
@@ -311,7 +313,7 @@ class WDWDB : public WDBoard, public WDB{
 };
 
 // --- WaveDAQ TCB --- wrapper class for TCB
-class WDTCB : public WDBoard, public TCB{
+class WDTCB : public TCB, public WDBoard {
    
    public:
       void Connect();
@@ -370,8 +372,9 @@ class WDTCB : public WDBoard, public TCB{
       void ConfigureCrcHitMask(Property &property);
       void ConfigureCrcPairMask(Property &property);
 
-      WDTCB(WDCrate *crate, int slot, std::string name="TCBXXX", int verbose = 0) : WDBoard(crate, slot, name), TCB(crate->GetMscbName().c_str(), 20, slot, verbose) {
+      WDTCB(WDCrate *crate, int slot, std::string name="TCBXXX", int verbose = 0) : TCB(crate->GetMscbName().c_str(), 20, slot, verbose), WDBoard(crate, slot, name) {
          fh = crate->GetMscbHandle();
+
          //try to connect only if the crate is powered
          if(crate->IsPowered()){
             Connect();
