@@ -553,9 +553,6 @@ class WDB: public WDBREG {
    static int       gBinSocket;
    static unsigned short udpSequenceNumber;
 
-   int              GetReceiveTimeoutMs() { return mReceiveTimeoutMs; };
-   void             SetReceiveTimeoutMs(int to) { mReceiveTimeoutMs = to; };
-
    std::string      SendReceiveUDP(std::string str);
    void             SendUDP(std::string str);
 
@@ -640,6 +637,8 @@ public:
 
    // setter & getter ----------
    std::string GetName() { return mName; }
+   int GetReceiveTimeoutMs() { return mReceiveTimeoutMs; };
+   void SetReceiveTimeoutMs(int to) { mReceiveTimeoutMs = to; };
    
    // high level status registers
    std::string GetFwBuild();

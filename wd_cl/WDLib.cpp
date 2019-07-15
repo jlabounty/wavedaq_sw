@@ -954,10 +954,12 @@ void WDWDB::ConfigureSamplingFrequency(Property &property) {
 
 // Set configurations to be used in a crate
 void WDWDB::SetInCrate(){
+   //switch to backplane trigger
    SetPatternTriggerEn(0);
    SetExtAsyncTriggerEn(1);
    SetExtTriggerOutEnable(0);
 
+   //switch to backplane clock
    if(GetExtClkInSel() != 0 || GetDaqClkSrcSel() != 0 || GetLmkInputFreq() != 80){
 
       SetSendBlock(true);
@@ -965,10 +967,17 @@ void WDWDB::SetInCrate(){
       SetDaqClkSrcSel(0);
       SetLmkInputFreq(80);
       SetSendBlock(false);
+
+      int old_timeout = GetReceiveTimeoutMs(); 
+      SetReceiveTimeoutMs(15*cDefaultReceiveTimeoutMs);
       SendControlRegisters();
 
+      SetReceiveTimeoutMs(3*cDefaultReceiveTimeoutMs);
       SetApplySettingsLmk(1);
+
+      SetReceiveTimeoutMs(3*cDefaultReceiveTimeoutMs);
       LmkSyncLocal();
+      SetReceiveTimeoutMs(old_timeout);
       ReceiveStatusRegister(WD2_DRS_SAMPLE_FREQ_REG);
 
       //Reset everything
