@@ -58,9 +58,11 @@ void WDBoard::Configure(){
    }
    ConfigurationEnded(); 
 }
-// Contructor
+
+// Contructor in a crate
 WDBoard::WDBoard(WDCrate * crate, char slot, std::string name){
    fBoardName = name;
+
    crate->AddBoard(this, slot);
 }
 
@@ -69,10 +71,13 @@ WDBoard::WDBoard(WDCrate * crate, char slot, std::string name){
 void WDCrate::AddBoard(WDBoard *board, int slot){
    if(slot > 17 || slot < -1) throw std::runtime_error("slot out of range");
    if(fBoard[slot] != 0) throw std::runtime_error("two board in same slot");
+
+   //Add Board
    fBoard[slot] = board;
-   //board->SetCrate(this, slot);
    board->fSlot = slot;
    board->fCrate = this;
+
+   //Add to System Map
    if(fSystem != nullptr) {
       fSystem->fBoardMap[board->fBoardName] = WDPosition(fCrateNumber, slot);
    }
@@ -183,6 +188,7 @@ void WDSystem::CreateFromXml(std::string filepath){
          }
 
          WDCrate *c = new WDCrate(std::string(cratenamestring), std::string(mscbnodestring));
+         AddCrate(c);
 
          bool triggerFlag = false;
          //loop on Boards
@@ -258,7 +264,6 @@ void WDSystem::CreateFromXml(std::string filepath){
             else if(board_node_name == "Trigger") triggerFlag = true;
          }
 
-         AddCrate(c);
          if(triggerFlag){
             SetTriggerCrateId(GetCrateSize()-1);
          }
@@ -528,6 +533,28 @@ void WDWDB::Connect(){
    WDB::Connect();
    ReceiveControlRegisters();
    ReceiveStatusRegisters();
+
+   //Set SlotId and CrateId
+   WDCrate *crate = GetCrate();
+   if(crate != nullptr){
+      //Set SlotId
+      SetSlotId(GetSlot());
+
+      long crateNumber = crate->GetCrateNumber();
+      if(crateNumber >= 0){
+         //Set CrateId
+         SetCrateId(crateNumber);
+      } else {
+         //WDCrate not in a WDSystem
+         //could work if only a WDCrate is used
+         printf("Board %s in a crate not belonging to any system, cannot set CrateId\n", GetBoardName().c_str());
+      }
+   } else {
+      //WDBoard not in a WDCrate
+      //ok for standalone cards
+      printf("Board %s not in a crate, cannot set SlotId and CrateId\n", GetBoardName().c_str());
+   }
+
    printf("WD number %d\n", GetSerialNumber());
 }
 
@@ -956,6 +983,9 @@ void WDWDB::SetInCrate(){
 void WDTCB::Connect(){
    SetIDCode();
    SetNTRG();
+
+   //TODO: write CrateId and SlotId into the board 
+
    printf("connected to TCB with IDCode = %04x\n", fidcode);
 
    //reset stuff
@@ -1073,7 +1103,7 @@ void WDTCB::ConfigureTriggerEnable(Property &property){
 
    bool trg_ena[64];
    for(int i=0; i<64; i++) trg_ena[i] = false;
-   for(unsigned long i=0; i<arraySize; i++) 
+   for(long i=0; i<arraySize; i++) 
       if(trigger_enable[i] < 64)
          trg_ena[trigger_enable[i]] = true;
 
@@ -1097,7 +1127,7 @@ void WDTCB::ConfigureTriggerPrescaling(Property &property){
    if(arraySizeEnable != arraySize)
       throw std::runtime_error("Cannot set TriggerPrescaling: TriggerEnable has a different array length");
    else {
-      for(unsigned long i=0; i<arraySize; i++)
+      for(long i=0; i<arraySize; i++)
          if(trigger_enable[i] < 64)
             trg_presca[trigger_enable[i]] = trigger_prescaling[i];
 
@@ -1122,7 +1152,7 @@ void WDTCB::ConfigureTriggerDelay(Property &property){
    if(arraySizeEnable != arraySize)
       throw std::runtime_error("Cannot set TriggerDelay: TriggerEnable has a different array length");
    else {
-      for(unsigned long i=0; i<arraySize; i++)
+      for(long i=0; i<arraySize; i++)
          if(trigger_enable[i] < 64)
             trg_delay[trigger_enable[i]] = trigger_delay[i];
 

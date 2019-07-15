@@ -572,6 +572,8 @@ void WDAQTCBReader::Loop(){
      daqdata.board_type_revision = TCB_BOARD_ID<<4;
      std::hash<std::string> hashFunc;
      daqdata.serial_number = hashFunc(fBoard->GetBoardName());
+     daqdata.crate_id = fBoard->GetCrate()->GetCrateNumber();
+     daqdata.slot_id = fBoard->GetSlot();
      daqdata.packet_number = 0;
      daqdata.data_chunk_offset = 0;
 

@@ -178,7 +178,7 @@ public:
    int            fnserdes;          // number of available trigger
    // getters
    u_int32_t      GetIDCode() { return fidcode; }
-   u_int32_t      GetSlot() { return fslot; }
+   u_int32_t      GetSlotNum() { return fslot; }
    
    // Constructor
    TCB(const char *mscb_device, int mscb_addr, int slot, int verbose = 0) {
