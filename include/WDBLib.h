@@ -553,9 +553,6 @@ class WDB: public WDBREG {
    static int       gBinSocket;
    static unsigned short udpSequenceNumber;
 
-   int              GetReceiveTimeoutMs() { return mReceiveTimeoutMs; };
-   void             SetReceiveTimeoutMs(int to) { mReceiveTimeoutMs = to; };
-
    std::string      SendReceiveUDP(std::string str);
    void             SendUDP(std::string str);
 
@@ -625,6 +622,8 @@ public:
    unsigned int BitExtractControl(unsigned int rofs, unsigned int mask, unsigned int ofs);
    
    // interface functions
+   int GetReceiveTimeoutMs() { return mReceiveTimeoutMs; };
+   void SetReceiveTimeoutMs(int to) { mReceiveTimeoutMs = to; };
    void SetVerbose(int verbose) { mVerbose = verbose; }
    int IsVerbose() { return mVerbose; }
    void SetLogFile(std::string logfile) { mLogfile = logfile; }

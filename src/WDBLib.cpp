@@ -235,7 +235,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data)
    size_t i;
    fd_set readfds;
    struct timeval timeout;
-   int    status, ms;
+   int    status, ms, retry;
    struct sockaddr_in client_addr;
    bool   bSuccess = false;
 
@@ -265,8 +265,10 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data)
       writeBuf.push_back((d >>  0) & 0xFF);
    }
 
+   auto startTime = std::chrono::high_resolution_clock::now();
+
    // retry max ten times
-   for (int retry=0 ; retry < 10 ; retry++) {
+   for (retry=0 ; retry < 10 ; retry++) {
 
       // clear input queue
       do {
@@ -337,6 +339,14 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data)
 
       if (this->mVerbose)
          std::cout << mName << " retry " << retry+1 << std::endl;
+   }
+
+   if (this->mVerbose && retry > 0) {
+      auto elapsed = std::chrono::high_resolution_clock::now() - startTime;
+      std::cout << "Communication to " << mName << " took " <<
+         std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() <<
+         " ms" << std::endl;
+
    }
 
    if (!bSuccess) {
