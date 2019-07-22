@@ -618,15 +618,20 @@ void WDAQTCBReader::Loop(){
 
      //generate dummy package if no bank is available
      if(nBanks==0){
-        WDAQTcbPacketData *packet = new WDAQTcbPacketData();
+        //WDAQTcbPacketData *packet = new WDAQTcbPacketData();
+        WDAQPacketData *packet = new WDAQPacketData();
         daqdata.wdaq_flags = SOE | EOT | SOT | EOE;
         daqdata.payload_length = 0;
-	ph.bank_name[0]= 'D';
+	/*ph.bank_name[0]= 'D';
         ph.bank_name[1]= 'M';
         ph.bank_name[2]= 'M';
-	ph.bank_name[3]= 'Y';
+	ph.bank_name[3]= 'Y';*/
         packet->SetEventHeaderInfo(&daqdata); 
-        packet->SetTcbHeaderInfo(&ph);
+	packet->mEventNumber=ph.event_number;
+	packet->mTriggerNumber = ph.trigger_information[0] | (ph.trigger_information[1] << 8);
+	packet->mTriggerType = ph.trigger_information[4] | (ph.trigger_information[5] << 8);
+	packet->mSerialTriggerData = ph.trigger_information[2] | (ph.trigger_information[3] << 8);
+        //packet->SetTcbHeaderInfo(&ph);
 
         daqdata.packet_number++;//prepare for next packet
 

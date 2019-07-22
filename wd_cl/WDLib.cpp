@@ -1204,7 +1204,6 @@ void WDTCB::ConfigurePacketizer(Property &property){
    std::string list = property.GetStringValue();
 
    //if(readEnable){
-   printf("Cofiguring packetizer\n");
       std::vector<PacketInstruction> instVec;
       PacketInstruction inst;
 
@@ -1254,7 +1253,6 @@ void WDTCB::ConfigurePacketizer(Property &property){
       int nbank = 0;
 
       if(list.find("GENT")!=std::string::npos){
-		printf("with GENT!!!\n");
 	      inst.offset += 1;
 	      inst.cmd = ::DIRECT_WRITE;
 	      inst.arg0 = 0x47454e54;//GENT
