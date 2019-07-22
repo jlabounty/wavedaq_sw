@@ -1413,7 +1413,7 @@ void WDTCB::ConfigureTcMultiplicityThreshold(Property &property){
    unsigned int multtheshold;
    multtheshold = property.GetInt();
 
-   SetAlphaThreshold(&multtheshold);
+   SetTCMultiplicityThreshold(&multtheshold);
 }
 
 void WDTCB::ConfigureTcCrateMergeThreshold(Property &property){

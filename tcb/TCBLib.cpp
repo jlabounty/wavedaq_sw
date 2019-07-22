@@ -1646,7 +1646,6 @@ void TCB::SetAlphaPeakScale(float value)
 {
    u_int32_t data;
    data = static_cast<u_int32_t>(value*(1<<10));
-   printf("setting alfa trhrehsold %lf to %08x\n", value, data);
    if ((fidcode>>12)!=2) printf("setting Alpha on TCB %4x!!!!!\n", fidcode);
    
    WriteReg(RALPHAPEAK,&data);
