@@ -415,16 +415,14 @@ void WDSystem::SpawnDAQ(){
          if(b) if(dynamic_cast<WDTCB*>(b) != nullptr){
             std::string readEnable;
             try{
-               readEnable = b->GetProperty("ReadEnable").GetStringValue();
-            } catch (const std::runtime_error& ex){
-               readEnable = "false";
-            }
-
-            if(readEnable=="true"){
+               readEnable = b->GetProperty("Banks").GetStringValue();
                WDAQTCBReader* tcbreaderthread = new WDAQTCBReader(fPacketBuffer,static_cast<WDTCB*>(b));
+	       tcbreaderthread->SetMinLoopDuration(std::chrono::milliseconds(10));
                tcbreaderthread->Start();
                fTCBReaderThreads.push_back(tcbreaderthread);
                nTCBs++;
+
+            } catch (const std::runtime_error& ex){
             }
             
          }
@@ -1038,7 +1036,7 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureTriggerAlgorithm(property);
    } else if(name=="Parameters"){
       ConfigureParameters(property);
-   } else if(name=="ReadEnable"){
+   } else if(name=="Banks"){
       ConfigurePacketizer(property);
    } else if(name=="ExtDAQBusyMask"){
       ConfigureExtDAQ(property);
@@ -1108,6 +1106,7 @@ void WDTCB::ConfigurationStarted(){
    trgdly=0x10;
    sprdly=0x10;
    SetTRGBusODLY(&syncdly, &trgdly, &sprdly);
+   SetPacketizerCommandAt(0, ::STOP, 0, 0);
    SetPacketizerAutostart(true);
    SetPacketizerEnable(true);
 }
@@ -1200,20 +1199,17 @@ void WDTCB::ConfigureParameters(Property &property){
 }
 
 void WDTCB::ConfigurePacketizer(Property &property){
-   bool readEnable;
-   readEnable = property.GetBool();
+   //bool readEnable;
+   //readEnable = property.GetBool();
+   std::string list = property.GetStringValue();
 
-   if(readEnable){
+   //if(readEnable){
+   printf("Cofiguring packetizer\n");
       std::vector<PacketInstruction> instVec;
       PacketInstruction inst;
 
+      //to be changed: waiting for deserialization
       inst.offset = 0;
-      inst.cmd = ::DIRECT_WRITE;
-      inst.arg0 = 3;//nbanks
-      inst.arg1 = BUFFERBASE;
-      instVec.push_back(inst);
-
-      inst.offset += 1;
       inst.cmd = ::BLOCK_COPY;
       inst.arg0 = MEMBASEADDR;
       inst.arg1 = BUFFERBASE+10;
@@ -1229,6 +1225,7 @@ void WDTCB::ConfigurePacketizer(Property &property){
       instVec.push_back(inst);
       inst.arg2 = 0;
 
+      //fill header
       inst.offset += 1;
       inst.cmd = ::COPY;
       inst.arg0 = REVECOU;
@@ -1253,7 +1250,42 @@ void WDTCB::ConfigurePacketizer(Property &property){
       inst.arg1 = BUFFERBASE+4;
       instVec.push_back(inst);
 
-      inst.offset += 1;
+      int bufptr = BUFFERBASE+5;
+      int nbank = 0;
+
+      if(list.find("GENT")!=std::string::npos){
+		printf("with GENT!!!\n");
+	      inst.offset += 1;
+	      inst.cmd = ::DIRECT_WRITE;
+	      inst.arg0 = 0x47454e54;//GENT
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::DIRECT_WRITE;
+	      inst.arg0 = 2*GENTDIM+1;
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::COPY;
+	      inst.arg0 = RMEMADDR;
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::BLOCK_COPY;
+	      inst.arg0 = GENTMEMBASE;
+	      inst.arg1 = bufptr;
+	      inst.arg2 = 2*GENTDIM;
+	      instVec.push_back(inst);
+	      inst.arg2 = 0;
+
+	      bufptr += 2*GENTDIM;
+	      nbank++;
+      }
+
+      /*inst.offset += 1;
       inst.cmd = ::DIRECT_WRITE;
       inst.arg0 = 0x494E3035;//IN05
       inst.arg1 = BUFFERBASE+5;
@@ -1329,7 +1361,19 @@ void WDTCB::ConfigurePacketizer(Property &property){
       inst.arg1 = BUFFERBASE+8+(2*MEMDIM)+3+(2*MEMDIM)+3;
       inst.arg2 = 2*GENTDIM;
       instVec.push_back(inst);
-      inst.arg2 = 0;
+      inst.arg2 = 0;*/
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 0;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = nbank;//nbanks
+      inst.arg1 = BUFFERBASE;
+      instVec.push_back(inst);
 
       inst.offset += 1;
       inst.cmd = ::DIRECT_WRITE;
@@ -1342,9 +1386,9 @@ void WDTCB::ConfigurePacketizer(Property &property){
       instVec.push_back(inst);
 
       WritePacketizerProgram(instVec);
-   } else {
-      SetPacketizerCommandAt(0, STOP, 0, 0);
-   }
+   //} else {
+   //   SetPacketizerCommandAt(0, STOP, 0, 0);
+   //}
 }
 
 void WDTCB::ConfigureExtDAQ(Property &property){

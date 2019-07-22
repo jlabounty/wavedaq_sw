@@ -616,6 +616,26 @@ void WDAQTCBReader::Loop(){
         }
      }
 
+     //generate dummy package if no bank is available
+     if(nBanks==0){
+        WDAQTcbPacketData *packet = new WDAQTcbPacketData();
+        daqdata.wdaq_flags = SOE | EOT | SOT | EOE;
+        daqdata.payload_length = 0;
+	ph.bank_name[0]= 'D';
+        ph.bank_name[1]= 'M';
+        ph.bank_name[2]= 'M';
+	ph.bank_name[3]= 'Y';
+        packet->SetEventHeaderInfo(&daqdata); 
+        packet->SetTcbHeaderInfo(&ph);
+
+        daqdata.packet_number++;//prepare for next packet
+
+        if(!fBuf->Try_push(packet)){
+           delete packet;
+        }
+
+     }
+
      fBoard->IncrementBufferPointer();
   }
 }
@@ -660,6 +680,8 @@ void WDAQEventBuilder::Loop(){
 
       evt_ptr->AddPacket(ptr); 
       delete ptr;
+
+      //printf("%d/%d\n", evt_ptr->IsComplete(), fNBoards);
 
       //check if event complete
       if(evt_ptr->IsComplete() == fNBoards){
