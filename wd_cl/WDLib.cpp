@@ -1042,6 +1042,10 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigurePacketizer(property);
    } else if(name=="ExtDAQBusyMask"){
       ConfigureExtDAQ(property);
+   } else if(name=="TimeNarrowThreshold"){
+      ConfigureTimeNarrowThreshold(property);
+   } else if(name=="TimeWideThreshold"){
+      ConfigureTimeWideThreshold(property);
    } else if(name=="XecHighThreshold"){
       ConfigureXecHighThreshold(property);
    } else if(name=="XecLowThreshold"){
@@ -1080,6 +1084,14 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureCrcHitMask(property);
    } else if(name=="CrcPairMask"){
       ConfigureCrcPairMask(property);
+   } else if(name=="NgenDelay"){
+      ConfigureNgenDelay(property);
+   } else if(name=="NgenWidth"){
+      ConfigureNgenWidth(property);
+   } else if(name=="NgenHighThreshold"){
+      ConfigureNgenHighThreshold(property);
+   } else if(name=="NgenLowThreshold"){
+      ConfigureNgenLowThreshold(property);
    } else {
       printf("Unknown property %s in WDTCB\n", name.c_str());
    }
@@ -1342,6 +1354,20 @@ void WDTCB::ConfigureExtDAQ(Property &property){
    SetFMask(false, extdaqbmask);
 }
 
+void WDTCB::ConfigureTimeNarrowThreshold(Property &property){
+   unsigned int timenarrow;
+   timenarrow = property.GetUHex();
+
+   SetTimeNarrow(&timenarrow);
+}
+
+void WDTCB::ConfigureTimeWideThreshold(Property &property){
+   unsigned int timewide;
+   timewide = property.GetUHex();
+
+   SetTimeWide(&timewide);
+}
+
 void WDTCB::ConfigureXecHighThreshold(Property &property){
    unsigned int xechighthreshold;
    xechighthreshold = property.GetUHex();
@@ -1492,4 +1518,32 @@ void WDTCB::ConfigureCrcPairMask(Property &property){
    crcpairmask = property.GetUHex();
 
    SetCRCPairEnable(&crcpairmask);
+}
+
+void WDTCB::ConfigureNgenDelay(Property &property){
+   unsigned int ngendly;
+   ngendly = property.GetUHex();
+
+   SetNGENDly(&ngendly);
+}
+
+void WDTCB::ConfigureNgenWidth(Property &property){
+   unsigned int ngenwidth;
+   ngenwidth = property.GetUHex();
+
+   SetNGENWidth(&ngenwidth);
+}
+
+void WDTCB::ConfigureNgenHighThreshold(Property &property){
+   unsigned int ngenhigh;
+   ngenhigh = property.GetUHex();
+
+   SetNGENHighThreshold(&ngenhigh);
+}
+
+void WDTCB::ConfigureNgenLowThreshold(Property &property){
+   unsigned int ngenlow;
+   ngenlow = property.GetUHex();
+
+   SetNGENLowThreshold(&ngenlow);
 }

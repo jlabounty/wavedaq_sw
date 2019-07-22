@@ -60,10 +60,10 @@
 #define RQLTHR             0x606      // sum threshold low
 #define RQCTHR             0x607      // sum threshold cosmic
 #define RLXePATCH          0x608      // LXe sum patch 
-#define RTCMERGEH1         0x60A      // TC high threshold for crate hit merge
-#define RTCMERGEL1         0x60B      // TC low threhsold for crate hit merge
-#define RTCMERGEH2         0x60C      // TC high threshold for sector hit merge
-#define RTCMERGEL2         0x60D      // TC low threshold for sector hit merge
+#define RTIMEN             0x60A      // Time Difference threshold Narrow
+#define RTIMEW             0x60B      // Time Difference threshold Wide
+#define RTCMERGEH          0x60C      // TC high threshold for hit merge
+#define RTCMERGEL          0x60D      // TC low threshold for hit merge
 #define RRDCLYSOTHR        0x60E      // RDC QSUM threshold
 #define RBGOTHR            0x60F      // BGO QSUM threshold
 #define RBGOMASK           0x611      // BGO trigger definition
@@ -398,6 +398,9 @@ public:
    void SetSumLowThreshold(u_int32_t*);
    void SetSumVetoThreshold(u_int32_t*);
    void SetSumPatch(u_int32_t*);
+   //time thresholds
+   void SetTimeNarrow(u_int32_t*);
+   void SetTimeWide(u_int32_t*);
    //Alpha configuration
    void SetAlphaThreshold(u_int32_t*);
    void SetAlphaPeakScale(float);
@@ -419,6 +422,11 @@ public:
    //Set CRC Stuff
    void SetCRCHitMask(u_int32_t *);
    void SetCRCPairEnable(u_int32_t *);
+   //Set NGEN Stuff
+   void SetNGENDly(u_int32_t *);
+   void SetNGENWidth(u_int32_t *);
+   void SetNGENHighThreshold(u_int32_t *);
+   void SetNGENLowThreshold(u_int32_t *);
    //Get proton current
    void GetPCurr(u_int32_t *);
    //Get SciFi counters

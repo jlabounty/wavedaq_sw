@@ -352,6 +352,8 @@ class WDTCB : public TCB, public WDBoard {
       void ConfigureParameters(Property &property);
       void ConfigurePacketizer(Property &property);
       void ConfigureExtDAQ(Property &property);
+      void ConfigureTimeNarrowThreshold(Property &property);
+      void ConfigureTimeWideThreshold(Property &property);
       void ConfigureXecHighThreshold(Property &property);
       void ConfigureXecLowThreshold(Property &property);
       void ConfigureXecVetoThreshold(Property &property);
@@ -371,6 +373,10 @@ class WDTCB : public TCB, public WDBoard {
       void ConfigureRdcTriggerMask(Property &property);
       void ConfigureCrcHitMask(Property &property);
       void ConfigureCrcPairMask(Property &property);
+      void ConfigureNgenDelay(Property &property);
+      void ConfigureNgenWidth(Property &property);
+      void ConfigureNgenHighThreshold(Property &property);
+      void ConfigureNgenLowThreshold(Property &property);
 
       WDTCB(WDCrate *crate, int slot, std::string name="TCBXXX", int verbose = 0) : TCB(crate->GetMscbName().c_str(), 20, slot, verbose), WDBoard(crate, slot, name) {
          fh = crate->GetMscbHandle();

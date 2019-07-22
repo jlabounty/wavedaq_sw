@@ -1636,6 +1636,15 @@ void TCB::SetSumPatch(u_int32_t *data)
    if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
    WriteReg(RLXePATCH,data);
 }
+// time windows
+void TCB::SetTimeNarrow(u_int32_t *data){
+   if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RTIMEN,data);
+}
+void TCB::SetTimeWide(u_int32_t *data){
+   if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RTIMEW,data);
+}
 //Alpha configuration
 void TCB::SetAlphaThreshold(u_int32_t *data)
 {
@@ -1674,15 +1683,15 @@ void TCB::SetTCMultiplicityThreshold(u_int32_t *data)
 void TCB::SetTCCrateMergeThreshold(u_int32_t *low, u_int32_t* high)
 {
    if ((fidcode>>12)!=1) printf("setting Crate TC Hit Merge on TCB %4x!!!!!\n", fidcode);
-   WriteReg(RTCMERGEL1,low);
-   WriteReg(RTCMERGEH1,high);
+   WriteReg(RTCMERGEL,low);
+   WriteReg(RTCMERGEH,high);
 }
 // TC Crate Hit Merge
 void TCB::SetTCSectorMergeThreshold(u_int32_t *low, u_int32_t* high)
 {
    if ((fidcode>>12)!=2) printf("setting Crate TC Hit Merge on TCB %4x!!!!!\n", fidcode);
-   WriteReg(RTCMERGEL2,low);
-   WriteReg(RTCMERGEH2,high);
+   WriteReg(RTCMERGEL,low);
+   WriteReg(RTCMERGEH,high);
 }
 // BGO QSUM Threshold
 void TCB::SetBGOThreshold(u_int32_t *data)
@@ -1731,6 +1740,26 @@ void TCB::SetCRCPairEnable(u_int32_t *data)
 {
    if ((fidcode>>12)!=1) printf("setting CRC Pair Enable on TCB %4x!!!!!\n", fidcode);
    WriteReg(RCRCPAIRENA,data);
+}
+// set NGEN widow delay
+void TCB::SetNGENDly(u_int32_t *data){
+   if ((fidcode>>12)!=1) printf("setting NGEN delay on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RNGENDLY,data);
+}
+// set NGEN widow width
+void TCB::SetNGENWidth(u_int32_t *data){
+   if ((fidcode>>12)!=1) printf("setting NGEN width on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RNGENWIDTH,data);
+}
+// set NGEN LXe High threshold
+void TCB::SetNGENHighThreshold(u_int32_t *data){
+   if ((fidcode>>12)!=3) printf("setting NGEN delay on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RLXeNGENQH,data);
+}
+// set NGEN LXe Low threshold
+void TCB::SetNGENLowThreshold(u_int32_t *data){
+   if ((fidcode>>12)!=3) printf("setting NGEN delay on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RLXeNGENQL,data);
 }
 // Get proton current
 void TCB::GetPCurr(u_int32_t *data)
