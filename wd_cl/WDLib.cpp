@@ -953,8 +953,6 @@ void WDWDB::ConfigureSamplingFrequency(Property &property) {
       }
    }
 
-   printf("using calibpath=%s\n", calibpath.c_str());
-
    if (!LoadVoltageCalibration(GetDrsSampleFreqMhz(), calibpath.c_str())) {
       printf("missing voltage calibration file\n");
    }
