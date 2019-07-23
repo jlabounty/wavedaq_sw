@@ -339,7 +339,7 @@ class WDAQPacketCollector: public DAQServerThread{
    void End();
 
    public:
-   WDAQPacketCollector(DAQBuffer<WDAQPacketData> *buf){
+   WDAQPacketCollector(DAQBuffer<WDAQPacketData> *buf, int nWDB=-1): DAQServerThread(nWDB*4*1024*1024){ //  4*1MB/WDB
       fBuf = buf;
       fNPackets = 0;
       fDroppedPackets = 0;

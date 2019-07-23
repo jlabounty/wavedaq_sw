@@ -432,7 +432,7 @@ void WDSystem::SpawnDAQ(){
       printf("including %d TCBs...\n", nTCBs);
 
    //spawn threads
-   fCollectorThread = new WDAQPacketCollector(fPacketBuffer);
+   fCollectorThread = new WDAQPacketCollector(fPacketBuffer, nWDBs);
    fCollectorThread->Start();
    fBuilderThread = new WDAQEventBuilder(fPacketBuffer, fEventBuffer, nWDBs+nTCBs);
    fBuilderThread->Start();

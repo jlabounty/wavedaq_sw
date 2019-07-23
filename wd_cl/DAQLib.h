@@ -196,6 +196,7 @@ class DAQServerThread : public DAQThread{
       volatile int fServerPort;
       unsigned char fDatagramBuffer[MAXUDPSIZE];
       int fDatagramSize;
+      int fBufferSize;
 
       //reserved Methods
       void Setup(){
@@ -207,14 +208,18 @@ class DAQServerThread : public DAQThread{
          }
       
 	 // increase receive buffer size
-	 int rcvBufferSizeSet = 4*1024*1024; // 4 MB
+	 int rcvBufferSizeSet = fBufferSize;
 	 int rcvBufferSizeGet;
 	 socklen_t sockOptSize = sizeof(rcvBufferSizeGet);
-      
+
+	 printf("allocating %d bytes\n", fBufferSize);      
+
 	 getsockopt(fDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeGet, &sockOptSize);
 	 if (rcvBufferSizeGet < 2*rcvBufferSizeSet) {
 	   setsockopt(fDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeSet, sizeof(rcvBufferSizeSet));
 	   getsockopt(fDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeGet, &sockOptSize);
+	 } else {
+            throw std::runtime_error(std::string("Cannot allocate enough memory for kernel buffer"));
 	 }
   
 
@@ -277,10 +282,12 @@ class DAQServerThread : public DAQThread{
       int GetServerPort(){ return fServerPort; }
 
       //Constructor
-      DAQServerThread(){
+      DAQServerThread(int buffersize=-1){
          fDataSocket = -1;
          fServerPort = -1;
          fDatagramSize = 0;
+	 if(buffersize>0) fBufferSize = buffersize;
+	 else fBufferSize = 4*1024*1024; //default
       }
 
       //Destructor
