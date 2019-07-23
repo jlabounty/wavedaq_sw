@@ -941,10 +941,24 @@ void WDWDB::ConfigureSamplingFrequency(Property &property) {
    SetDrsSampleFreq(freq);
    if(isSendBlocked) SetSendBlock(true);
 
-   if (!LoadVoltageCalibration(GetDrsSampleFreqMhz(), "/home/git/wavedaq/software/wds/")) {
+   std::string calibpath = "."; 
+   WDCrate* c = GetCrate();
+   if(c!=nullptr){
+      WDSystem * sys= c->GetSystem();
+      if(sys!=nullptr){
+         try{
+	    calibpath = sys->GetDaqProperty("CalibPath").GetStringValue();
+	 } catch (const std::out_of_range& ex){
+         }
+      }
+   }
+
+   printf("using calibpath=%s\n", calibpath.c_str());
+
+   if (!LoadVoltageCalibration(GetDrsSampleFreqMhz(), calibpath.c_str())) {
       printf("missing voltage calibration file\n");
    }
-   if (!LoadTimeCalibration(GetDrsSampleFreqMhz(), "/home/git/wavedaq/software/wds/")) {
+   if (!LoadTimeCalibration(GetDrsSampleFreqMhz(), calibpath.c_str())) {
       printf("missing time calibration file\n");
    }
 
