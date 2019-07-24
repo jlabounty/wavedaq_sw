@@ -571,6 +571,8 @@ bool WDWDB::IsSerdesTraining(){
 void WDWDB::ConfigureProperty(const std::string &name, Property &property) { 
    if(name=="IPD"){
       ConfigureIPD(property);
+   } else if(name=="FPD"){
+      ConfigureFPD(property);
    } else if(name=="FrontendGain"){
       ConfigureFrontendGain(property);
    } else if(name=="FrontendPzc"){
@@ -637,6 +639,14 @@ void WDWDB::ConfigureIPD(Property &property) {
    interpacket_delay = property.GetUHex(); 
    if(interpacket_delay != 0){
       SetInterPkgDelay(interpacket_delay);
+   }
+}
+
+void WDWDB::ConfigureFPD(Property &property) {
+   unsigned int firstpacket_delay;
+   firstpacket_delay = property.GetUHex(); 
+   if(firstpacket_delay != 0){
+      SetFirstPkgDly(firstpacket_delay);
    }
 }
 

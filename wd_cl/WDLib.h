@@ -278,6 +278,7 @@ class WDWDB : public WDB, public WDBoard{
       void ConfigurationStarted();
       void ConfigurationEnded();
 
+      void ConfigureFPD(Property &property);
       void ConfigureIPD(Property &property);
       void ConfigureFrontendGain(Property &property);
       void ConfigureFrontendPzc(Property &property);
