@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  25.06.2019 11:48:03
+ *  Created :  24.07.2019 11:41:38
  *
  *  Description :  Register map definitions.
  *
@@ -486,6 +486,11 @@
 
 
 /* ****** Control Register 6 [0x1018]: COM_PLD_SIZE - Maximum Payload Size (Default: 0x000005C0) ****** */
+
+/* FIRST_PKG_DLY - Delay of first data packet of an event (resolution 1.6us) */
+#define WD2_FIRST_PKG_DLY_REG                                 WD2_REG_COM_PLD_SIZE
+#define WD2_FIRST_PKG_DLY_MASK                                          0xFFFC0000
+#define WD2_FIRST_PKG_DLY_OFS                                                   18
 
 /* COM_PLD_SIZE - Maximum number of UDP payload bytes to transmit (must be a multiple of 6 with range 6 to 8892) */
 #define WD2_COM_PLD_SIZE_REG                                  WD2_REG_COM_PLD_SIZE
@@ -5265,6 +5270,7 @@ const wd2_bit_group_entry_type  wd2_bit_group_list[] = {
   { "SERDES_COM_EN"                 , WD2_SERDES_COM_EN_REG                 , WD2_SERDES_COM_EN_MASK                 , WD2_SERDES_COM_EN_OFS                 },
   { "ETH_COM_EN"                    , WD2_ETH_COM_EN_REG                    , WD2_ETH_COM_EN_MASK                    , WD2_ETH_COM_EN_OFS                    },
   { "INTER_PKG_DELAY"               , WD2_INTER_PKG_DELAY_REG               , WD2_INTER_PKG_DELAY_MASK               , WD2_INTER_PKG_DELAY_OFS               },
+  { "FIRST_PKG_DLY"                 , WD2_FIRST_PKG_DLY_REG                 , WD2_FIRST_PKG_DLY_MASK                 , WD2_FIRST_PKG_DLY_OFS                 },
   { "COM_PLD_SIZE"                  , WD2_COM_PLD_SIZE_REG                  , WD2_COM_PLD_SIZE_MASK                  , WD2_COM_PLD_SIZE_OFS                  },
   { "DRS_CH_TX_EN"                  , WD2_DRS_CH_TX_EN_REG                  , WD2_DRS_CH_TX_EN_MASK                  , WD2_DRS_CH_TX_EN_OFS                  },
   { "ADC_CH_TX_EN"                  , WD2_ADC_CH_TX_EN_REG                  , WD2_ADC_CH_TX_EN_MASK                  , WD2_ADC_CH_TX_EN_OFS                  },

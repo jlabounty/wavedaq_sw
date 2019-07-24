@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  25.06.2019 11:48:03
+// Created :  24.07.2019 11:41:38
 //
 
 
@@ -192,6 +192,10 @@ public:
 
 
    ////// ------ Control Register 6 [0x1018]: COM_PLD_SIZE - Maximum Payload Size (Default: 0x000005C0) ------ //////
+
+   // 0xFFFC0000: FIRST_PKG_DLY - Delay of first data packet of an event (resolution 1.6us)
+   unsigned int GetFirstPkgDly() { return BitExtractControl(WD2_FIRST_PKG_DLY_REG, WD2_FIRST_PKG_DLY_MASK, WD2_FIRST_PKG_DLY_OFS); };
+   void         SetFirstPkgDly(unsigned int value) { SetRegMask(WD2_FIRST_PKG_DLY_REG, WD2_FIRST_PKG_DLY_MASK, WD2_FIRST_PKG_DLY_OFS, value); };
 
    // 0x0003FFFF: COM_PLD_SIZE - Maximum number of UDP payload bytes to transmit (must be a multiple of 6 with range 6 to 8892)
    unsigned int GetComPldSize() { return BitExtractControl(WD2_COM_PLD_SIZE_REG, WD2_COM_PLD_SIZE_MASK, WD2_COM_PLD_SIZE_OFS); };
