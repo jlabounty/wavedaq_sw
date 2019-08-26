@@ -1134,8 +1134,8 @@ void WDTCB::ConfigurationStarted(){
 }
 
 void WDTCB::ConfigurationEnded(){
-   //if((fidcode >>12) != 3)
-   //   GoRun();
+   if((fidcode >>12) != 3)
+      GoRun();
 }
 
 void WDTCB::ConfigureTriggerEnable(Property &property){
@@ -1354,10 +1354,10 @@ void WDTCB::ConfigurePacketizer(Property &property){
 
 	      nbank++;
       }
-      if(list.find("GENT")!=std::string::npos){
+      if(list.find("TGEN")!=std::string::npos){
 	      inst.offset += 1;
 	      inst.cmd = ::DIRECT_WRITE;
-	      inst.arg0 = 0x47454e54;//GENT
+	      inst.arg0 = 0x5447454e;//TGEN
 	      inst.arg1 = bufptr++;
 	      instVec.push_back(inst);
 
