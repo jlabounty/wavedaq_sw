@@ -298,6 +298,9 @@ class WDWDB : public WDB, public WDBoard{
       void ConfigureTriggerGain(Property &property);
       void ConfigureTriggerTdcMask(Property &property);
       void ConfigureTriggerTdcOffset(Property &property);
+      void ConfigureTriggerPedestalThreshold(Property &property);
+      void ConfigureTriggerPedestalDelay(Property &property);
+      void ConfigureTriggerPedestalAddersel(Property &property);
       void ConfigureDebugSignal(int port, Property &property);
       void ConfigureSamplingFrequency(Property &property);
 

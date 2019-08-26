@@ -609,6 +609,12 @@ void WDWDB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureTriggerTdcMask(property);
    } else if(name=="TriggerTdcOffset"){
       ConfigureTriggerTdcOffset(property);
+   } else if(name=="TriggerPedestalThreshold"){
+      ConfigureTriggerPedestalThreshold(property);
+   } else if(name=="TriggerPedestalDelay"){
+      ConfigureTriggerPedestalDelay(property);
+   } else if(name=="TriggerPedestalAddersel"){
+      ConfigureTriggerPedestalAddersel(property);
    } else if(name=="TxDebugSignal"){
       ConfigureDebugSignal(0, property);
    } else if(name=="RxDebugSignal"){
@@ -624,7 +630,8 @@ void WDWDB::ConfigurationStarted(){
    //SetSendBlock(true);
    SetDestinationPort(GetCrate()->GetSystem()->GetDAQServerPort());
    SetFeMux(-1, WDB::cFeMuxInput);
-   SetTriggerOutPulseLength(4);
+   SetTriggerOutPulseLength(4); // 4 clock shaping
+   SetAdvTrgPedCfg(0x013E000A); // default pedestal subtraction config
 }
 
 void WDWDB::ConfigurationEnded(){
@@ -812,7 +819,6 @@ void WDWDB::ConfigureTriggerAlgorithm(Property &property) {
    unsigned char algorithm;
    algorithm = property.GetUInt();
    SetAdvTrgCtrl(0x00000203 | ((algorithm & 0xF) << 4) );//TDCPolarity, FADCMODE, RUNMODE
-   SetAdvTrgPedCfg(0x013E000A);
 }
 
 void WDWDB::ConfigureTriggerGain(Property &property) {
@@ -892,6 +898,40 @@ void WDWDB::ConfigureTriggerTdcOffset(Property &property) {
       }
    }
 }
+
+void WDWDB::ConfigureTriggerPedestalThreshold(Property &property){
+   unsigned int thr;
+   thr = property.GetUHex();
+   unsigned int pedconf = GetAdvTrgPedCfg();
+
+   pedconf &= 0xFFFF0000;
+   pedconf |= thr & 0xFFFF;
+
+   SetAdvTrgPedCfg(pedconf);
+}
+
+void WDWDB::ConfigureTriggerPedestalDelay(Property &property){
+   unsigned int dly;
+   dly = property.GetUHex();
+   unsigned int pedconf = GetAdvTrgPedCfg();
+
+   pedconf &= 0xFFC0FFFF;
+   pedconf |= (dly & 0x3F) << 16;
+
+   SetAdvTrgPedCfg(pedconf);
+}
+
+void WDWDB::ConfigureTriggerPedestalAddersel(Property &property){
+   unsigned int addersel;
+   addersel = property.GetUHex();
+   unsigned int pedconf = GetAdvTrgPedCfg();
+
+   pedconf &= 0xF8FFFFFF;
+   pedconf |= (addersel & 0x7) << 24;
+
+   SetAdvTrgPedCfg(pedconf);
+}
+
 
 void WDWDB::ConfigureDebugSignal(int port, Property &property) {
    std::string confString;
