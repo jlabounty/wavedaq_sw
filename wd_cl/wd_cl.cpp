@@ -417,6 +417,10 @@ int main(int argc, char *argv[])
                            ret = mscb_upload(tcb->GetCrate()->GetMscbHandle(), 20, tcb->GetSlot(), "../../firmware/TCB/TCB_3_0/TCB_3_0.runs/impl_1/TCB_TOP.bit", MSCB_UPLOAD_SUBADDR);
                            break;
                         }
+                        if(ret == MSCB_SUCCESS){
+                           char val = 3; //Init slot
+                           ret = mscb_write(tcb->GetCrate()->GetMscbHandle(), 20, 17+tcb->GetSlot(), &val, sizeof(val));  
+                        }
                      }
 
                      if(ret != MSCB_SUCCESS){
