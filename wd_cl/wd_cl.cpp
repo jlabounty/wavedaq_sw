@@ -100,7 +100,8 @@ int main(int argc, char *argv[])
       printf("[ 9]: train serdes         \t \t  [10]: print serdes state   \n");
       printf("[11]: spawn daq            \t \t  [12]: stop daq             \n");
       printf("[13]: sync dly scan        \t \t  [14]: attach debug thread  \n");
-      printf("[15]: draw system          \t \t   \n");
+      printf("[15]: draw system          \t \t  [16]: print firmware version\n");
+      printf("[17]: update firmware      \t \t  [  ]:                      \n");
       do {
          char opline[256];
          printf("give an option: ");
@@ -323,6 +324,105 @@ int main(int argc, char *argv[])
             for(auto i: sys->fBoardMap){
                printf("\t%s crateId:%ld Slot:%d\n", i.first.c_str(), i.second.fCrate, i.second.fSlot);
             }
+         }
+         if(option == 16)
+         {
+            bool difference = false;
+            unsigned int wdbFwHash = 0;
+            unsigned int wdbSwHash = 0;
+            unsigned int tcb1Date = 0;
+            unsigned int tcb2Date = 0;
+            unsigned int tcb3Date = 0;
+            for(auto c : *sys)
+               for(auto b :*c)
+                  if(b){
+                     if(dynamic_cast<WDWDB*>(b) != nullptr){
+                        WDWDB* wdb = static_cast<WDWDB*>(b);
+                        printf("WDB %s: %08x %08x\n", wdb->GetBoardName().c_str(), wdb->GetFwGitHashTag(), wdb->GetSwGitHashTag());
+                        if(wdbFwHash){
+                           if(wdbFwHash != wdb->GetFwGitHashTag())
+                              difference = true;
+                        } else wdbFwHash = wdb->GetFwGitHashTag();
+                        if(wdbSwHash){
+                           if(wdbSwHash != wdb->GetFwGitHashTag())
+                              difference = true;
+                        } else wdbSwHash = wdb->GetSwGitHashTag();
+                     }
+                     if(dynamic_cast<WDTCB*>(b) != nullptr){
+                        WDTCB* tcb = static_cast<WDTCB*>(b);
+                        unsigned int val;
+                        tcb->GetCompilDate(&val);
+                        
+                        unsigned int *p;
+                        switch(tcb->GetIDCode()>>12){
+                        case 1:
+                           printf("TCB1 %s: %08x\n", tcb->GetBoardName().c_str(), val);
+                           p = &tcb1Date;
+                           break;
+                        case 2:
+                           printf("TCB2 %s: %08x\n", tcb->GetBoardName().c_str(), val);
+                           p = &tcb2Date;
+                           break;
+                        case 3:
+                        default:
+                           printf("TCB3 %s: %08x\n", tcb->GetBoardName().c_str(), val);
+                           p = &tcb3Date;
+                           break;
+                        }
+
+                        if(*p){
+                           if(*p != val)
+                              difference = true;
+                        } else
+                           *p = val;
+                     }
+                  }
+
+            if(difference) printf("\n\tDifferent firmware version in the system!\n");
+         }
+
+         if(option == 17)
+         {
+            for(auto c : *sys)
+               for(auto b :*c)
+                  if(b){
+                     int ret = MSCB_SUCCESS;
+
+                     if(dynamic_cast<WDWDB*>(b) != nullptr){
+                        WDWDB* wdb = static_cast<WDWDB*>(b);
+                        char cstr[wdb->GetName().size() + 1];
+                        strcpy(cstr, wdb->GetName().c_str());
+                        int fd = mscb_init(cstr, 0, "", 0);
+                        if(fd>0){
+                           ret = mscb_upload(fd, wdb->GetSerialNumber(), 0, "../../firmware/WD2/wd2_sys_ctrl/wd2_xps_hw/implementation/download.bit", 0);
+                           if(ret == MSCB_SUCCESS)
+                              ret = mscb_upload(fd, wdb->GetSerialNumber(), 0, "../../firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/app_sys_ctrl/Debug/app_sys_ctrl.srec", 0);
+                           if(ret == MSCB_SUCCESS)
+                              ret = mscb_exit(fd);
+
+                        } else ret = MSCB_NOT_FOUND; 
+                     }
+
+                     if(dynamic_cast<WDTCB*>(b) != nullptr){
+                        WDTCB* tcb = static_cast<WDTCB*>(b);
+                        switch(tcb->GetIDCode()>>12){
+                        case 1:
+                           ret = mscb_upload(tcb->GetCrate()->GetMscbHandle(), 20, tcb->GetSlot(), "../../firmware/TCB/TCB_1_0/TCB_1_0.runs/impl_1/TCB_TOP.bit", MSCB_UPLOAD_SUBADDR); 
+                           break;
+                        case 2:
+                           ret = mscb_upload(tcb->GetCrate()->GetMscbHandle(), 20, tcb->GetSlot(), "../../firmware/TCB/TCB_2_0/TCB_2_0.runs/impl_1/TCB_TOP.bit", MSCB_UPLOAD_SUBADDR);
+                           break;
+                        case 3:
+                        default:
+                           ret = mscb_upload(tcb->GetCrate()->GetMscbHandle(), 20, tcb->GetSlot(), "../../firmware/TCB/TCB_3_0/TCB_3_0.runs/impl_1/TCB_TOP.bit", MSCB_UPLOAD_SUBADDR);
+                           break;
+                        }
+                     }
+
+                     if(ret != MSCB_SUCCESS){
+                        printf("Upload failed!");
+                     }
+                  }
          }
       } while ( option == 0 ) ;
       /* end of the main loop on the options*/
