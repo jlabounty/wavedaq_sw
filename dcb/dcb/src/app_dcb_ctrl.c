@@ -1,5 +1,4 @@
 #include "cmd_processor.h"
-#include "xfs_printf.h"
 #include "utilities.h"
 #include "string.h"
 
