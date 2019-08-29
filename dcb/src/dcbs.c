@@ -22,7 +22,8 @@
 // port to start the UDP server on
 #define SERVER_PORT 4000
 
-#define WD2_UDP_PROTOCOL_VERSION  7
+#define CMD_WRITE32 0x14
+#define CMD_READ32  0x24
 
 int _server_abort = 0;
 
@@ -142,8 +143,49 @@ int main(int argc, char *argv[]) {
          printf("\n");
       }
 
-      // send same content back to the client ("echo")
-      sendto(sock, buffer, len, 0, (struct sockaddr *) &client_address, sizeof(client_address));
+      // interpret packet
+      unsigned int cmd = buffer[0];
+      unsigned int seq = (buffer[2] << 8) | buffer[3];
+      unsigned int adr = (buffer[4] << 24) | (buffer[5] << 16) | (buffer[6] << 8) | buffer[7];
+
+      if (cmd == CMD_WRITE32) {
+         unsigned n = (len - 8) / 4;
+
+         printf("Write to %04X, seq %d: ", adr, seq);
+
+         unsigned int *p = (unsigned int *) (&buffer[8]);
+         for (int i = 0; i < n; i++,p++)
+            printf("%08X ", *p);
+
+      } else if (cmd == CMD_READ32) {
+         unsigned char rbuffer[1600];
+
+         unsigned int n = (buffer[8] << 24) | (buffer[9] << 16) | (buffer[10] << 8) | buffer[11];
+
+         // limit data to 1024 bytes for the moment
+         n = n > 256 ? 256 : n;
+
+         printf("Read %d from %04X, seq %d:", n, adr, seq);
+
+         rbuffer[0] = 0x24;
+         rbuffer[1] = 0x01;
+         rbuffer[2] = buffer[2];
+         rbuffer[3] = buffer[3];
+
+         unsigned int *p = (unsigned int *) (&rbuffer[4]);
+         for (int i = 0; i < n && i < 256; i++,p++) {
+            *p = i;
+         }
+
+         // send same content back to the client ("echo")
+         sendto(sock, rbuffer, n*4+4, 0, (struct sockaddr *) &client_address, sizeof(client_address));
+
+      } else {
+
+         // send same content back to the client ("echo")
+         sendto(sock, buffer, len, 0, (struct sockaddr *) &client_address, sizeof(client_address));
+
+      }
    }
 
    return 0;
