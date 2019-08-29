@@ -974,7 +974,8 @@ void showUsage(std::string name)
    std::cerr << "usage: " << name << " [options] [-w <address> [-w <address> ...]]" << std::endl;
    std::cerr << "valid options:" << std::endl;
    std::cerr << "  -h              Show this help" << std::endl;
-   std::cerr << "  -d              Demo mode" << std::endl;
+   std::cerr << "  -d <address>    Internet address of DCB board" << std::endl;
+   std::cerr << "  -demo           Demo mode" << std::endl;
    std::cerr << "  -g rx tx        Debug output at RX/TX ports" << std::endl;
    std::cerr << "  -l <logfile>    Log file for debugging" << std::endl;
    std::cerr << "  -p              HTTP server port (default is 8080)" << std::endl;
@@ -1028,7 +1029,7 @@ int main(int argc, const char * argv[])
       if (arg == "-h" || arg == "-help" || arg == "--help") {
          showUsage(argv[0]);
          return 0;
-      } else if (arg == "-d")
+      } else if (arg == "-demo")
          gl.demoMode = true;
 
       else if (arg == "-p")
@@ -1065,17 +1066,17 @@ int main(int argc, const char * argv[])
 
       else if (arg == "-w") {
 
-         if (i+1 == argc) {
+         if (i + 1 == argc) {
             showUsage(argv[0]);
             return 0;
          }
-         std::string b = argv[i+1];
-         if (isdigit(b.c_str()[0]) && b.find(".") == std::string::npos) {
-            if (b.find("-") != std::string::npos) {
+         std::string b = argv[i + 1];
+         if (isdigit(b.c_str()[0]) && b.find('.') == std::string::npos) {
+            if (b.find('-') != std::string::npos) {
                int i1 = std::stoi(b);
-               int i2 = std::stoi(b.substr(b.find("-")+1));
-               if (i1 >= 0 && i1 < 1000 && i2>0 && i2<1000) {
-                  for (int j=i1 ; j<=i2; j++) {
+               int i2 = std::stoi(b.substr(b.find('-') + 1));
+               if (i1 >= 0 && i1 < 1000 && i2 > 0 && i2 < 1000) {
+                  for (int j = i1; j <= i2; j++) {
                      std::ostringstream name;
                      name << "wd" << std::setfill('0') << std::setw(3) << j;
                      gl.wdb.push_back(new WDB(name.str()));
@@ -1085,10 +1086,10 @@ int main(int argc, const char * argv[])
                   return 1;
                }
             } else {
-               if (argc > i+1 && isdigit(argv[i+1][0])) {
-                  while (argc > i+1 && isdigit(argv[i+1][0])) {
+               if (argc > i + 1 && isdigit(argv[i + 1][0])) {
+                  while (argc > i + 1 && isdigit(argv[i + 1][0])) {
                      std::ostringstream name;
-                     name << "wd" << std::setfill('0') << std::setw(3) << atoi(argv[i+1]);
+                     name << "wd" << std::setfill('0') << std::setw(3) << std::stoi(argv[i + 1]);
                      gl.wdb.push_back(new WDB(name.str()));
                      i++;
                   }
@@ -1098,6 +1099,26 @@ int main(int argc, const char * argv[])
          } else
             gl.wdb.push_back(new WDB(b));
          i++;
+
+      } else if (arg == "-d") {
+
+         if (i+3 >  argc) {
+            showUsage(argv[0]);
+            return 0;
+         }
+         std::string name = argv[i+1];
+         if (isdigit(name.c_str()[0]))
+            name = std::string("dcb") + argv[i+1];
+
+         if (!isdigit(argv[i+2][0])) {
+            showUsage(argv[0]);
+            return 0;
+         }
+         int slot = std::stoi(argv[i+2]);
+         gl.wdb.push_back(new WDB(name, slot));
+
+         i+=2;
+
       } else {
          showUsage(argv[0]);
          return 1;
@@ -1110,8 +1131,8 @@ int main(int argc, const char * argv[])
       gl.readoutMode = cReadoutModeDRS;
    }
 
-   if (gl.wdb.size() == 0) {
-      std::cerr << "You have to specify at least one WaveDREAM board via the \"-w\" option." << std::endl;
+   if (gl.wdb.empty()) {
+      std::cerr << "You have to specify at least one WaveDREAM board via the \"-w\" or the \"-d\" option." << std::endl;
       return 1;
    }
 

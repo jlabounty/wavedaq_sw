@@ -531,11 +531,12 @@ public:
 
 // WaveDREAM board class. Interface functions to all WDB registers
 class WDB: public WDBREG {
-   std::string      mName;
+   std::string      mWDBName;
+   std::string      mDCBName;
    std::string      mPrompt;
    unsigned char    mEthAddrAscii[16];
    unsigned char    mEthAddrBin[16];
-   int              mVerbose;
+   bool             mVerbose;
    std::string      mLogfile;
    bool             mDemoMode;
    bool             mSendBlocked;
@@ -563,7 +564,8 @@ class WDB: public WDBREG {
 public:
    
    // constructor
-   WDB(std::string name, int verbose = 0);
+   WDB(std::string name, bool verbose = false);
+   WDB(std::string name, int slot, bool verbose = false);
 
    const unsigned int cRequiredRegLayoutCompatLevel = 8;
    const unsigned int cRequiredFwCompatLevel = 4;
@@ -636,7 +638,7 @@ public:
    void SetSendBlock(bool flag) { mSendBlocked = flag; }
 
    // setter & getter ----------
-   std::string GetName() { return mName; }
+   std::string GetName() { return mWDBName; }
    int GetReceiveTimeoutMs() { return mReceiveTimeoutMs; };
    void SetReceiveTimeoutMs(int to) { mReceiveTimeoutMs = to; };
    

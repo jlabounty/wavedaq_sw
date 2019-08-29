@@ -83,9 +83,9 @@ T access_as(U* p)
 
 //--------------------------------------------------------------------
 
-WDB::WDB(std::string name, int verbose)
+WDB::WDB(std::string name, bool verbose)
 {
-   mName = name;
+   mWDBName = name;
    mPrompt = "";
    mVerbose = verbose;
    mLogfile = "";
@@ -103,6 +103,20 @@ WDB::WDB(std::string name, int verbose)
       this->sreg[(WD2_DRS_SAMPLE_FREQ_REG & 0x0FFF)/4] = 5120;
       this->sreg[(WD2_ADC_SAMPLE_FREQ_REG & 0x0FFF)/4] = 80;
    }
+}
+
+//--------------------------------------------------------------------
+
+WDB::WDB(std::string name, int slot, bool verbose)
+{
+   mWDBName = "";
+   mDCBName = name;
+   mPrompt = "";
+   mVerbose = verbose;
+   mLogfile = "";
+   mSendBlocked = false;
+   mReceiveTimeoutMs = cDefaultReceiveTimeoutMs;
+   mTimingReferenceSignal = cTimingReferenceOff;
 }
 
 //--------------------------------------------------------------------
@@ -162,7 +176,7 @@ std::string WDB::SendReceiveUDP(std::string str)
 
       if (i != str.size()) {
          if (this->mVerbose)
-            std::cout << mName << " send retry " << retry+1 << std::endl;
+            std::cout << mWDBName << " send retry " << retry+1 << std::endl;
          continue;
       }
 
@@ -210,14 +224,14 @@ std::string WDB::SendReceiveUDP(std::string str)
          break;
 
       if (this->mVerbose)
-         std::cout << mName << " retry " << retry+1 << std::endl;
+         std::cout << mWDBName << " retry " << retry+1 << std::endl;
       result.clear();
    }
 
    if (result.size() == 0) {
       if (str.back() == '\n')
         str = str.substr(0, str.size()-1);
-      throw std::runtime_error(std::string("Error sending \"")+str+"\" to "+mName+".");
+      throw std::runtime_error(std::string("Error sending \"")+str+"\" to "+mWDBName+".");
       return result;
    }
 
@@ -297,7 +311,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data)
 
       if (i != writeBuf.size()) {
          if (this->mVerbose)
-            std::cout << mName << " send retry " << retry+1 << std::endl;
+            std::cout << mWDBName << " send retry " << retry+1 << std::endl;
          continue;
       }
 
@@ -338,19 +352,19 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data)
 
 
       if (this->mVerbose)
-         std::cout << mName << " retry " << retry+1 << std::endl;
+         std::cout << mWDBName << " retry " << retry+1 << std::endl;
    }
 
    if (this->mVerbose && retry > 0) {
       auto elapsed = std::chrono::high_resolution_clock::now() - startTime;
-      std::cout << "Communication to " << mName << " took " <<
+      std::cout << "Communication to " << mWDBName << " took " <<
          std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() <<
          " ms" << std::endl;
 
    }
 
    if (!bSuccess) {
-      throw std::runtime_error(std::string("Error writing binary UDP data to "+mName+"."));
+      throw std::runtime_error(std::string("Error writing binary UDP data to "+mWDBName+"."));
       return;
    }
 }
@@ -419,7 +433,7 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg)
 
       if (i != writeBuf.size()) {
          if (this->mVerbose)
-            std::cout << mName << " send retry " << retry+1 << std::endl;
+            std::cout << mWDBName << " send retry " << retry+1 << std::endl;
          continue;
       }
 
@@ -467,11 +481,11 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg)
 
 
       if (this->mVerbose)
-         std::cout << mName << " retry " << retry+1 << std::endl;
+         std::cout << mWDBName << " retry " << retry+1 << std::endl;
    }
 
    if (!bSuccess)
-      throw std::runtime_error(std::string("Error reading binary UDP data from "+mName+"."));
+      throw std::runtime_error(std::string("Error reading binary UDP data from "+mWDBName+"."));
 
    return result;
 }
@@ -504,9 +518,9 @@ void WDB::Connect()
    assert(gBinSocket);
 
    // retrieve Ethernet address of board
-   phe = gethostbyname(mName.c_str());
+   phe = gethostbyname(mWDBName.c_str());
    if (phe == NULL)
-      throw std::runtime_error(std::string("Cannot resolve host name ")+mName+".");
+      throw std::runtime_error(std::string("Cannot resolve host name ")+mWDBName+".");
 
    std::memcpy((char *)&client_addr.sin_addr, phe->h_addr, phe->h_length);
    client_addr.sin_family = AF_INET;
@@ -520,7 +534,7 @@ void WDB::Connect()
    try {
       WDB::SendUDP("");
    } catch (...) {
-      throw std::runtime_error(std::string("Cannot connect to board ")+mName+".");
+      throw std::runtime_error(std::string("Cannot connect to board ")+mWDBName+".");
    }
 
    // set dbglevel none
@@ -532,14 +546,14 @@ void WDB::Connect()
    ReceiveStatusRegister(WD2_REG_PROT_VER);
    if (GetFwCompatLevel() < cRequiredFwCompatLevel) {
       std::string str("Board ");
-      str += mName + " has incompatible firmware, please upgrade (Board compatibility level: "+
+      str += mWDBName + " has incompatible firmware, please upgrade (Board compatibility level: "+
       std::to_string(GetFwCompatLevel())+", Software compatibility level: "+
       std::to_string(cRequiredFwCompatLevel)+")";
       throw std::runtime_error(str);
    }
    if (cRequiredFwCompatLevel < GetFwCompatLevel()) {
       std::string str("Board ");
-      str += mName + " has newer incompatible firmware, please update WD library (Firmware compatibility level: "+
+      str += mWDBName + " has newer incompatible firmware, please update WD library (Firmware compatibility level: "+
       std::to_string(GetFwCompatLevel())+", Software compatibility level: "+
       std::to_string(cRequiredFwCompatLevel)+")";
       throw std::runtime_error(str);
@@ -547,27 +561,27 @@ void WDB::Connect()
    // check register layout compatibility level
    if (GetRegLayoutCompLevel() < cRequiredRegLayoutCompatLevel) {
       std::string str("Board ");
-      str += mName + " has incompatible register layout, please upgrade (Board compatibility level: "+
+      str += mWDBName + " has incompatible register layout, please upgrade (Board compatibility level: "+
       std::to_string(GetRegLayoutCompLevel())+", Software compatibility level: "+
       std::to_string(cRequiredRegLayoutCompatLevel)+")";
       throw std::runtime_error(str);
    }
    if (cRequiredRegLayoutCompatLevel < GetRegLayoutCompLevel()) {
       std::string str("Board ");
-      str += mName + " has newer register layout, please update WD library (Board compatibility level: "+
+      str += mWDBName + " has newer register layout, please update WD library (Board compatibility level: "+
       std::to_string(GetRegLayoutCompLevel())+", Software compatibility level: "+
       std::to_string(cRequiredRegLayoutCompatLevel)+")";
       throw std::runtime_error(str);
    }
    if (GetProtocolVersion() > WD2_UDP_PROTOCOL_VERSION) {
       std::string str("Board ");
-      str += mName + " has protocol version " + std::to_string(GetProtocolVersion()) +
+      str += mWDBName + " has protocol version " + std::to_string(GetProtocolVersion()) +
          ", WDBLib library has version " + std::to_string(WD2_UDP_PROTOCOL_VERSION) + ". Please update WDBLib library.";
       throw std::runtime_error(str);
    }
    if (GetProtocolVersion() < WD2_UDP_PROTOCOL_VERSION) {
       std::string str("Board ");
-      str += mName + " has protocol version " + std::to_string(GetProtocolVersion()) +
+      str += mWDBName + " has protocol version " + std::to_string(GetProtocolVersion()) +
       ", WDBLib library has version " + std::to_string(WD2_UDP_PROTOCOL_VERSION) + ". Please upgrade WDB firmware.";
       throw std::runtime_error(str);
    }
@@ -1635,7 +1649,7 @@ unsigned int WDB::GetDrsSampleFreqMhz()
 void WDB::SaveVoltageCalibration(int freq)
 {
    mkdir("calib", 0755);
-   mVCalib.save(this, "calib/"+mName+"-"+std::to_string(freq)+".vcal");
+   mVCalib.save(this, "calib/"+mWDBName+"-"+std::to_string(freq)+".vcal");
 }
 
 //--------------------------------------------------------------------
@@ -1643,9 +1657,9 @@ void WDB::SaveVoltageCalibration(int freq)
 bool WDB::LoadVoltageCalibration(int freq, std::string path)
 {
    if (mVerbose)
-      std::cout << "Loading voltage calibration for "+mName+" for " << freq/1000.0 << " GSPS ... ";
+      std::cout << "Loading voltage calibration for "+mWDBName+" for " << freq/1000.0 << " GSPS ... ";
 
-   mVCalib.load(this, path+"calib/"+mName+"-"+std::to_string(freq)+".vcal");
+   mVCalib.load(this, path+"calib/"+mWDBName+"-"+std::to_string(freq)+".vcal");
    if (mVerbose)
       std::cout << (mVCalib.IsValid() ? "ok" : "failure") << std::endl;
    return mVCalib.IsValid();
@@ -1656,7 +1670,7 @@ bool WDB::LoadVoltageCalibration(int freq, std::string path)
 void WDB::SaveTimeCalibration(int freq)
 {
    mkdir("calib", 0755);
-   mTCalib.save(this, "calib/"+mName+"-"+std::to_string(freq)+".tcal");
+   mTCalib.save(this, "calib/"+mWDBName+"-"+std::to_string(freq)+".tcal");
 }
 
 //--------------------------------------------------------------------
@@ -1664,9 +1678,9 @@ void WDB::SaveTimeCalibration(int freq)
 bool WDB::LoadTimeCalibration(int freq, std::string path)
 {
    if (mVerbose)
-      std::cout << "Loading time calibration for "+mName+" for " << freq/1000.0 << " GSPS ... ";
+      std::cout << "Loading time calibration for "+mWDBName+" for " << freq/1000.0 << " GSPS ... ";
 
-   mTCalib.load(this, path+"calib/"+mName+"-"+std::to_string(freq)+".tcal");
+   mTCalib.load(this, path+"calib/"+mWDBName+"-"+std::to_string(freq)+".tcal");
 
    if (mVerbose)
       std::cout << (mVCalib.IsValid() ? "ok" : "failure") << std::endl;
