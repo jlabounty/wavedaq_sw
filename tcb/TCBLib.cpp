@@ -483,10 +483,12 @@ void TCB::GetRRUN(u_int32_t *data)
          printf(" DBGSERDES status %x \n",(*data&0x100)>>8);
       printf(" INBUSY status %x \n",(*data&0x2)>>1);
       printf(" EXBUSY status %x \n",(*data&0x8)>>3);
+      printf(" FBUSY status %x \n",(*data&0x400)>>10);
       printf(" ENABLE TRGBUS status %x \n",(*data&0x10)>>4);
       printf(" MASKBUSY status %x \n",(*data&0x2000)>>13);
       printf(" MASKSYNC status %x \n",(*data&0x4000)>>14);
       printf(" MASKTRG status %x \n",(*data&0x8000)>>15);
+      printf(" MASKFBUSY status %x \n",(*data&0x80)>>7);
       printf(" IDCODE status %x \n",(*data&0xffff0000)>>16);
    }
 }
@@ -858,7 +860,7 @@ void TCB::SetAllDCBSerdes(u_int32_t *dlys, int *bits){
    WriteBLT(RDCBSERDESCONF, conf, 1);
 
    for(int i=0; i<1; i++)conf[i]=0;
-   for(int ilink=0; ilink<2; ilink++){
+   for(int ilink=0; ilink<1; ilink++){
       conf[ilink] |= (0x20202020|dlys[ilink]);
    }
    WriteBLT(RDCBSERDESCONF, conf, 1);
@@ -1426,6 +1428,10 @@ void TCB::GetAutoCalibrateEye(u_int32_t* eyes){
    tx_conf &= 0xFFFFFDFF;
    WriteReg(RSERDESTX, &tx_conf);
 }
+//Returns enable value for latency compensations of SerDes
+void TCB::GetAutoAlignDlys(u_int32_t* ret){
+   ReadReg(RSERDESALIGNDLY, ret);
+}
 void TCB::SetSingleCrateConfiguration(bool useGlobalAnd, short shape, short vetoShape){
    u_int32_t val = 0;
    val |= (shape & 0x1F);
@@ -1492,7 +1498,7 @@ void TCB::SetFMask(bool trgmask, bool busymask){
    if(trgmask)
      data |= 1<<6;
    // set busy mask if required
-   if(trgmask)
+   if(busymask)
      data |= 1<<7;
    // write the reg
    WriteReg(RRUN, &data);
@@ -1561,18 +1567,22 @@ void TCB::WritePacketizerProgram(std::vector<PacketInstruction> &list){
    
 }
 //Get Current Buffer Head
-u_int32_t TCB::GetBufferHeadSPI(int *nBanks){
+u_int32_t TCB::GetBufferHeadSPI(int *nBanks, u_int32_t *evecou, u_int32_t* totaltime, u_int32_t* sys_tritype, u_int32_t* sys_evecou){
    u_int32_t data[5];
-   ReadBLT(PACKAGERBASE, data, 5);
+   ReadBuffer(data, 5);
 
    *nBanks = data[0];
+   if(evecou) *evecou = data[1];
+   if(totaltime) *totaltime = data[2];
+   if(sys_tritype) *sys_tritype = data[3];
+   if(sys_evecou) *sys_evecou = data[4];
 
-   return 6;
+   return 5;
 }
 //Check current bank
 bool TCB::HasBufferBankSPI(u_int32_t ptr, char *bankName, int *length){
    u_int32_t data[2];
-   ReadBLT(PACKAGERBASE+ptr, data, 2);
+   ReadBuffer(data, 2, ptr);
    bankName[0] = data[0]&0xFF;
    bankName[1] = (data[0]>>8)&0xFF;
    bankName[2] = (data[0]>>16)&0xFF;
@@ -1588,11 +1598,180 @@ u_int32_t TCB::SkipBufferBankSPI(u_int32_t ptr, int length){
 }
 //Read Bank
 void TCB::GetBufferBankDataSPI(u_int32_t ptr, u_int32_t *data, int length){
-   int iword;
-   for (iword = 0; iword+BLTSIZE<length; iword+=BLTSIZE) {
-      ReadBLT(ptr+iword,data+iword, BLTSIZE);
-   }
-   ReadBLT(ptr+iword,data+iword, length-(BLTSIZE*iword));
+//   int iword;
+//   for (iword = 0; iword+BLTSIZE<length; iword+=BLTSIZE) {
+//      ReadBLT(ptr+2+iword,data+iword, BLTSIZE);
+//   }
+//   ReadBLT(ptr+2+iword,data+iword, length-(BLTSIZE*iword));
+   ReadBuffer(data, length, ptr+2);
+}
+//get SYNC waveform
+void TCB::GetSyncWaveform(u_int32_t *ptr){
+   ReadReg(RSYNCWFM, ptr); 
+}
+//reset SYNC waveform serdes
+void TCB::ResetSyncWaveformSerdes(){
+   u_int32_t data = 0x80000000;
+   WriteReg(RSYNCWFM, &data); 
 }
 
+// waveform sum threshold
+void TCB::SetSumHighThreshold(u_int32_t *data)
+{
+   if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RQHTHR,data);
+}
+void TCB::SetSumLowThreshold(u_int32_t *data)
+{
+   if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RQLTHR,data);
+}
+void TCB::SetSumVetoThreshold(u_int32_t *data)
+{
+   if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RQCTHR,data);
+}
+void TCB::SetSumPatch(u_int32_t *data)
+{
+   if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RLXePATCH,data);
+}
+// time windows
+void TCB::SetTimeNarrow(u_int32_t *data){
+   if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RTIMEN,data);
+}
+void TCB::SetTimeWide(u_int32_t *data){
+   if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RTIMEW,data);
+}
+//Alpha configuration
+void TCB::SetAlphaThreshold(u_int32_t *data)
+{
+   if ((fidcode>>12)!=2) printf("setting Alpha on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RALPHATHR,data);
+}
+void TCB::SetAlphaPeakScale(float value)
+{
+   u_int32_t data;
+   data = static_cast<u_int32_t>(value*(1<<10));
+   if ((fidcode>>12)!=2) printf("setting Alpha on TCB %4x!!!!!\n", fidcode);
+   
+   WriteReg(RALPHAPEAK,&data);
+}
+void TCB::SetQsumSelect(u_int32_t *data)
+{
+   if ((fidcode>>12)!=3) printf("setting QSUM select on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RQSUMSEL,data);
+}
+// TC Masks
+void TCB::SetTCMasks(u_int32_t *data)
+{
+   if ((fidcode>>12)!=1) printf("setting Tile Masks on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RTILEMSK0,data);
+   WriteReg(RTILEMSK1,data+1);
+   WriteReg(RTILEMSK2,data+2);
+   WriteReg(RTILEMSK3,data+3);
+}
+// TC Multiplicity
+void TCB::SetTCMultiplicityThreshold(u_int32_t *data)
+{
+   if ((fidcode>>12)!=3) printf("setting Tile Masks on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RTCMULTITHR,data);
+}
+// TC Crate Hit Merge
+void TCB::SetTCCrateMergeThreshold(u_int32_t *low, u_int32_t* high)
+{
+   if ((fidcode>>12)!=1) printf("setting Crate TC Hit Merge on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RTCMERGEL,low);
+   WriteReg(RTCMERGEH,high);
+}
+// TC Crate Hit Merge
+void TCB::SetTCSectorMergeThreshold(u_int32_t *low, u_int32_t* high)
+{
+   if ((fidcode>>12)!=2) printf("setting Crate TC Hit Merge on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RTCMERGEL,low);
+   WriteReg(RTCMERGEH,high);
+}
+// BGO QSUM Threshold
+void TCB::SetBGOThreshold(u_int32_t *data)
+{
+   if ((fidcode>>12)!=1) printf("setting BGO Threshold on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RBGOTHR,data);
+}
+// Trigger mask enable for BGO  trigger definition
+void TCB::SetBGOTriggerMask(u_int32_t *data)
+{
+   if ((fidcode>>12)!=1) printf("setting BGO Mask on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RBGOMASK,data);
+}
+// BGO QSUM Veto Threshold
+void TCB::SetBGOVetoThreshold(u_int32_t *data)
+{
+   if ((fidcode>>12)!=1) printf("setting BGO Veto Threshold on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RBGOVETOTHR,data);
+}
+// BGO Hit Delay
+void TCB::SetBGOHitDelay(u_int32_t *data)
+{
+   if ((fidcode>>12)!=1) printf("setting BGO Hit delay on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RBGOHITDLY,data);
+}
+// RDC QSUM Threshold
+void TCB::SetRDCThreshold(u_int32_t *data)
+{
+   if ((fidcode>>12)!=1) printf("setting RDC Threshold on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RRDCLYSOTHR,data);
+}
+// Trigger mask enable for RDC  trigger definition
+void TCB::SetRDCTriggerMask(u_int32_t *data)
+{
+   if ((fidcode>>12)!=1) printf("setting RDC Mask on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RRDCMASK,data);
+}
+// set CRC bar masking 
+void TCB::SetCRCHitMask(u_int32_t *data)
+{
+   if ((fidcode>>12)!=1) printf("setting CRC Hit Mask on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RCRCHITMASK,data);
+}
+// set CRC pair enable
+void TCB::SetCRCPairEnable(u_int32_t *data)
+{
+   if ((fidcode>>12)!=1) printf("setting CRC Pair Enable on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RCRCPAIRENA,data);
+}
+// set NGEN widow delay
+void TCB::SetNGENDly(u_int32_t *data){
+   if ((fidcode>>12)!=1) printf("setting NGEN delay on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RNGENDLY,data);
+}
+// set NGEN widow width
+void TCB::SetNGENWidth(u_int32_t *data){
+   if ((fidcode>>12)!=1) printf("setting NGEN width on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RNGENWIDTH,data);
+}
+// set NGEN LXe High threshold
+void TCB::SetNGENHighThreshold(u_int32_t *data){
+   if ((fidcode>>12)!=3) printf("setting NGEN delay on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RLXeNGENQH,data);
+}
+// set NGEN LXe Low threshold
+void TCB::SetNGENLowThreshold(u_int32_t *data){
+   if ((fidcode>>12)!=3) printf("setting NGEN delay on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RLXeNGENQL,data);
+}
+// Get proton current
+void TCB::GetPCurr(u_int32_t *data)
+{
+   if ((fidcode>>12)==2) printf("reading proton current on TCB %4x!!!!!\n", fidcode);
+   ReadReg(RPCURR,data);
+}
+// Get SciFi counters
+void TCB::GetSciFICou(u_int32_t *data)
+{
+  int ncycle = (NSCIFI-1)/BLTSIZE + 1;
+  for(int icycle = 0; icycle<ncycle; icycle++)
+    ReadBLT(RFIBCOUNTER+icycle*BLTSIZE,data+icycle*BLTSIZE,BLTSIZE);
+}
 

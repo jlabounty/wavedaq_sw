@@ -1,0 +1,342 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D5513C65229591C1005D94E6 /* mxml.c in Sources */ = {isa = PBXBuildFile; fileRef = D5513C61229591C0005D94E6 /* mxml.c */; };
+		D5513C66229591C1005D94E6 /* mongoose.c in Sources */ = {isa = PBXBuildFile; fileRef = D5513C64229591C0005D94E6 /* mongoose.c */; };
+		D56DDED31EBF3BDE00A71E18 /* WDBLib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D56DDED11EBF3BDE00A71E18 /* WDBLib.cpp */; };
+		D56DDED61EBF3BF100A71E18 /* averager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D56DDED41EBF3BF100A71E18 /* averager.cpp */; };
+		D5B44F2A2295911600D43751 /* wds.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D5B44F282295911600D43751 /* wds.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		D55471751B72428F002A92E4 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		D529FE721B7B437F004E2D39 /* osc.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = osc.js; sourceTree = SOURCE_ROOT; };
+		D53A7A882019D02A007C902E /* register_map_wd2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = register_map_wd2.h; path = /wavedaq/firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/common/src/register_map_wd2.h; sourceTree = "<group>"; };
+		D5513C61229591C0005D94E6 /* mxml.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mxml.c; path = /wavedaq/software/wds/src/mxml.c; sourceTree = "<group>"; };
+		D5513C62229591C0005D94E6 /* mxml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mxml.h; path = /wavedaq/software/wds/src/mxml.h; sourceTree = "<group>"; };
+		D5513C63229591C0005D94E6 /* mongoose.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mongoose.h; path = /wavedaq/software/wds/src/mongoose.h; sourceTree = "<group>"; };
+		D5513C64229591C0005D94E6 /* mongoose.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mongoose.c; path = /wavedaq/software/wds/src/mongoose.c; sourceTree = "<group>"; };
+		D55471771B72428F002A92E4 /* wds */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = wds; sourceTree = BUILT_PRODUCTS_DIR; };
+		D55471881B72477A002A92E4 /* /wavedaq/software/wds/html/index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = /wavedaq/software/wds/html/index.html; sourceTree = SOURCE_ROOT; };
+		D55471891B72498D002A92E4 /* /wavedaq/software/wds/html/wds.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = /wavedaq/software/wds/html/wds.css; sourceTree = SOURCE_ROOT; };
+		D554718A1B72498D002A92E4 /* /wavedaq/software/wds/html/wds.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = /wavedaq/software/wds/html/wds.js; sourceTree = "<group>"; };
+		D55E70AE2018AFED005CA001 /* WDBReg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WDBReg.h; path = /wavedaq/software/lib/WDBReg.h; sourceTree = "<group>"; };
+		D56DDED11EBF3BDE00A71E18 /* WDBLib.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WDBLib.cpp; path = /wavedaq/software/lib/WDBLib.cpp; sourceTree = "<group>"; };
+		D56DDED21EBF3BDE00A71E18 /* WDBLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WDBLib.h; path = /wavedaq/software/lib/WDBLib.h; sourceTree = "<group>"; };
+		D56DDED41EBF3BF100A71E18 /* averager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = averager.cpp; path = /wavedaq/software/lib/averager.cpp; sourceTree = "<group>"; };
+		D56DDED51EBF3BF100A71E18 /* averager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = averager.h; path = /wavedaq/software/lib/averager.h; sourceTree = "<group>"; };
+		D5B44F282295911600D43751 /* wds.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = wds.cpp; path = /wavedaq/software/wds/src/wds.cpp; sourceTree = "<group>"; };
+		D5B44F292295911600D43751 /* wds.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wds.h; path = /wavedaq/software/wds/src/wds.h; sourceTree = "<group>"; };
+		D5D7CE451B74EFB40037D843 /* /wavedaq/software/wds/html/controls.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = /wavedaq/software/wds/html/controls.js; sourceTree = SOURCE_ROOT; };
+		D5EE12301E3B6BF0007FA7E6 /* /wavedaq/software/wds/html/measurement.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = /wavedaq/software/wds/html/measurement.js; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D55471741B72428F002A92E4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D53A7A862019CFC2007C902E /* Library */ = {
+			isa = PBXGroup;
+			children = (
+				D53A7A882019D02A007C902E /* register_map_wd2.h */,
+				D55E70AE2018AFED005CA001 /* WDBReg.h */,
+				D56DDED21EBF3BDE00A71E18 /* WDBLib.h */,
+				D56DDED11EBF3BDE00A71E18 /* WDBLib.cpp */,
+			);
+			name = Library;
+			path = wds;
+			sourceTree = "<group>";
+		};
+		D554716E1B72428F002A92E4 = {
+			isa = PBXGroup;
+			children = (
+				D5FC799C201B6E970017B857 /* html */,
+				D53A7A862019CFC2007C902E /* Library */,
+				D55471791B72428F002A92E4 /* wds */,
+				D55471781B72428F002A92E4 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D55471781B72428F002A92E4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D55471771B72428F002A92E4 /* wds */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D55471791B72428F002A92E4 /* wds */ = {
+			isa = PBXGroup;
+			children = (
+				D5513C64229591C0005D94E6 /* mongoose.c */,
+				D5513C63229591C0005D94E6 /* mongoose.h */,
+				D5513C61229591C0005D94E6 /* mxml.c */,
+				D5513C62229591C0005D94E6 /* mxml.h */,
+				D5B44F282295911600D43751 /* wds.cpp */,
+				D5B44F292295911600D43751 /* wds.h */,
+				D56DDED41EBF3BF100A71E18 /* averager.cpp */,
+				D56DDED51EBF3BF100A71E18 /* averager.h */,
+			);
+			path = wds;
+			sourceTree = "<group>";
+		};
+		D5FC799C201B6E970017B857 /* html */ = {
+			isa = PBXGroup;
+			children = (
+				D5D7CE451B74EFB40037D843 /* /wavedaq/software/wds/html/controls.js */,
+				D55471891B72498D002A92E4 /* /wavedaq/software/wds/html/wds.css */,
+				D529FE721B7B437F004E2D39 /* osc.js */,
+				D554718A1B72498D002A92E4 /* /wavedaq/software/wds/html/wds.js */,
+				D5EE12301E3B6BF0007FA7E6 /* /wavedaq/software/wds/html/measurement.js */,
+				D55471881B72477A002A92E4 /* /wavedaq/software/wds/html/index.html */,
+			);
+			name = html;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D55471761B72428F002A92E4 /* wds */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D554717E1B72428F002A92E4 /* Build configuration list for PBXNativeTarget "wds" */;
+			buildPhases = (
+				D55471731B72428F002A92E4 /* Sources */,
+				D55471741B72428F002A92E4 /* Frameworks */,
+				D55471751B72428F002A92E4 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = wds;
+			productName = wds;
+			productReference = D55471771B72428F002A92E4 /* wds */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D554716F1B72428F002A92E4 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1020;
+				ORGANIZATIONNAME = "Stefan Ritt";
+				TargetAttributes = {
+					D55471761B72428F002A92E4 = {
+						CreatedOnToolsVersion = 6.4;
+					};
+				};
+			};
+			buildConfigurationList = D55471721B72428F002A92E4 /* Build configuration list for PBXProject "wds" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D554716E1B72428F002A92E4;
+			productRefGroup = D55471781B72428F002A92E4 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D55471761B72428F002A92E4 /* wds */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D55471731B72428F002A92E4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D56DDED61EBF3BF100A71E18 /* averager.cpp in Sources */,
+				D5513C65229591C1005D94E6 /* mxml.c in Sources */,
+				D5513C66229591C1005D94E6 /* mongoose.c in Sources */,
+				D56DDED31EBF3BDE00A71E18 /* WDBLib.cpp in Sources */,
+				D5B44F2A2295911600D43751 /* wds.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		D554717C1B72428F002A92E4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		D554717D1B72428F002A92E4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		D554717F1B72428F002A92E4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+					WD2_DONT_INCLUDE_REG_ACCESS_VARS,
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
+				HEADER_SEARCH_PATHS = (
+					/wavedaq/firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/common/src/,
+					/wavedaq/software/lib/,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		D55471801B72428F002A92E4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = WD2_DONT_INCLUDE_REG_ACCESS_VARS;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
+				HEADER_SEARCH_PATHS = (
+					/wavedaq/firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/common/src/,
+					/wavedaq/software/lib/,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D55471721B72428F002A92E4 /* Build configuration list for PBXProject "wds" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D554717C1B72428F002A92E4 /* Debug */,
+				D554717D1B72428F002A92E4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D554717E1B72428F002A92E4 /* Build configuration list for PBXNativeTarget "wds" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D554717F1B72428F002A92E4 /* Debug */,
+				D55471801B72428F002A92E4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D554716F1B72428F002A92E4 /* Project object */;
+}

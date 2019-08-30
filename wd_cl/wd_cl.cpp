@@ -4,12 +4,12 @@
 #include <stdlib.h>
 //debug - Thread that prints packets
 class PacketDebug : public DAQThread{
-   DAQBuffer<WDAQPacketData> *fSource;
+   DAQBuffer<WDAQWdbPacketData> *fSource;
 
    void Begin(){ };
 
    void Loop(){
-      WDAQPacketData *ptr = nullptr;
+      WDAQWdbPacketData *ptr = nullptr;
       if(fSource->Try_pop(ptr)){
          printf("received packet\n");
          printf("\t Board:%d\n", ptr->mBoardId);
@@ -20,15 +20,16 @@ class PacketDebug : public DAQThread{
          printf("\t DataType:%d\n", ptr->mDataType);
          printf("\t TxEnable:%x\n", ptr->mTxEnable);
          printf("\t ZeroSuppressionMask:%x\n", ptr->mZeroSuppressionMask);
-         printf("\t Flags:%x\n", ptr->mFlags);
+         printf("\t WDAQ Flags:%x\n", ptr->mWDAQFlags);
+         printf("\t WDB Flags:%x\n", ptr->mWDBFlags);
          printf("\t TriggerSource:%d\n", ptr->mTriggerSource);
          printf("\t BitsPerSample:%d\n", ptr->mBitsPerSample);
          printf("\t SamplesPerEventPerChannel:%d\n", ptr->mSamplesPerEventPerChannel);
-         printf("\t PayloadLenght:%d\n", ptr->mPayloadLenght);
+         printf("\t PayloadLenght:%d\n", ptr->mPayloadLength);
          printf("\t DataOffset:%d\n", ptr->mDataOffset);
          printf("\t EventNumber:%d\n", ptr->mEventNumber);
          printf("\t TriggerType:%x\n", ptr->mTriggerType);
-         printf("\t TriggerEventNumber:%d\n", ptr->mTriggerEventNumber);
+         printf("\t TriggerNumber:%d\n", ptr->mTriggerNumber);
          printf("\t TriggerCell:%d\n", ptr->mTriggerCell);
          printf("\t SamplingFrequency:%d\n", ptr->mSamplingFrequency);
          printf("\t Temperature:%f\n", ptr->mTemperature);
@@ -41,13 +42,41 @@ class PacketDebug : public DAQThread{
    }
       
 
-   void end() { };
+   void End() { };
 
    public:
-   PacketDebug(DAQBuffer<WDAQPacketData> *source){
+   PacketDebug(DAQBuffer<WDAQWdbPacketData> *source){
       fSource = source;
    }
 };
+//debug events, to be used with no-writer
+class EventDebug : public DAQThread{
+   DAQBuffer<WDAQEvent> *fSource;
+   void Setup(){
+      printf("DAQ event debug thread started\n");
+   }
+
+   void Begin(){
+      printf("DAQ event debug thread running\n");
+   };
+
+   void Loop(){
+      WDAQEvent *ptr = nullptr;
+      if(fSource->Try_pop(ptr)){
+         printf("Got Event %d\n", ptr->mTriggerNumber);
+
+         delete ptr;
+      }
+   }
+   void End() { };
+
+   public:
+   EventDebug(DAQBuffer<WDAQEvent> *source){
+      fSource = source;
+   }
+};
+
+
 
 int main(int argc, char *argv[])
 {
@@ -64,13 +93,15 @@ int main(int argc, char *argv[])
    /* main loop on the options */
    do {
       printf("\n  --- options: \n");
-      printf("[ 1]: configure system     \t \t  [ 2]: draw system          \n");
+      printf("[ 1]: configure system     \t \t  [ 2]: prepare to run       \n");
       printf("[ 3]: system start         \t \t  [ 4]: get busy             \n");
       printf("[ 5]: system stop          \t \t  [ 6]: system sync          \n");
       printf("[ 7]: turn on              \t \t  [ 8]: turn off             \n");
       printf("[ 9]: train serdes         \t \t  [10]: print serdes state   \n");
       printf("[11]: spawn daq            \t \t  [12]: stop daq             \n");
-      printf("[13]: sync dly scan        \t \t  [14]:                      \n");
+      printf("[13]: sync dly scan        \t \t  [14]: attach debug thread  \n");
+      printf("[15]: draw system          \t \t  [16]: print firmware version\n");
+      printf("[17]: update firmware      \t \t  [  ]:                      \n");
       do {
          char opline[256];
          printf("give an option: ");
@@ -84,48 +115,13 @@ int main(int argc, char *argv[])
          }
          if(option == 2)
          {
-            int size = sys->GetCrateSize();
-            printf("system with %d crates\n", size);
-            //for(int icrate=0; icrate<size; icrate++){
-            //   wdcrate *c = sys->getcrateat(icrate);
-            for(auto c : *sys){
-               printf("\t crate name %s",  c->GetMscbName().c_str());
-               if(c == sys->GetCrateAt(sys->GetTriggerCrateId())){
-                  printf(" trigger crate\n");
-               } else printf("\n");
-
-               //for(int iboard=0; iboard<18; iboard++){
-               //   printf("\t \t slot %d: ", iboard);
-               //   if(c->hasboardin(iboard)){
-               //      wdboard *b = c->getboardat(iboard);
-               for(auto b : *c){
-                  if(b!=0){
-                     printf("\t \t slot %d: ", b->GetSlot());
-                     if(dynamic_cast<WDWDB*>(b) == nullptr){
-                        if(dynamic_cast<WDTCB*>(b) == nullptr)
-                           printf("with board in slot %d of crate %s\n", b->GetSlot(), b->GetCrate()->GetMscbName().c_str());
-                        else
-                           printf("tcb group=%s\n", b->GetGroup().c_str());
-                     } else
-                        printf("wdb with name %s group=%s\n", dynamic_cast<WDWDB*>(b)->GetName().c_str(), b->GetGroup().c_str());
-
-                     PropertyGroup p = b->GetProperties();
-                     //for(std::map<std::string,std::string>::iterator it=p.begin(); it!=p.end(); it++){
-                     for(auto prop : p){
-                        printf("\t \t \t %s: %s\n", prop.first.c_str(), prop.second.GetStringValue().c_str());
-                     }
-
-                     std::string gr = b->GetGroup();
-                     PropertyGroup pgr = sys->GetGroupProperties(gr);
-                     //for(std::map<std::string,std::string>::iterator it=pgr.begin(); it!=pgr.end(); it++){
-                     for(auto prop : p){   
-                        printf("\t \t \t %s: %s from group %s\n", prop.first.c_str(), prop.second.GetStringValue().c_str(), gr.c_str());
-                     }
-                  } else {
-                     printf("\t \t empty\n");
-                  }
-               }
-            }
+            printf("prepare for the run... ");
+            sys->SpawnDAQ();
+            sys->SetSerdesTraining(true);
+            usleep(50000);
+            sys->TrainSerdes();
+            usleep(1000000);
+            sys->Configure();
          }
          if(option == 3)
          {
@@ -170,6 +166,34 @@ int main(int argc, char *argv[])
             printf("generating SYNC...\n");
             WDBoard *triggerb = sys->GetTriggerBoard();
             triggerb->Sync();
+            printf("SYNC generated from board %s\n", triggerb->GetBoardName().c_str());
+            for(auto c : *sys)
+               for(auto b :*c)
+                  if(b){
+                     if(dynamic_cast<WDTCB*>(b) != nullptr){
+                        u_int32_t val = 0;
+                         dynamic_cast<WDTCB*>(b)->GetSyncWaveform(&val);
+                         /*val =  val >>8;
+                         if(val&0x80){
+                            val = 0;
+                         } else if(val&0x40){
+                            val = 1;
+                         } else if(val&0x20){
+                            val = 2;
+                         } else if(val&0x10){
+                            val = 3;
+                         } else if(val&0x8){
+                            val = 4;
+                         } else if(val&0x4){
+                            val = 5;
+                         } else if(val&0x2){
+                            val = 6;
+                         } else if(val&0x1){
+                            val = 7;
+                         }*/
+                         printf("%s %d %04x\n", c->GetMscbName().c_str(), b->GetSlot(), val);
+                     }
+                  }
          }
          if(option == 7)
          {
@@ -196,6 +220,8 @@ int main(int argc, char *argv[])
                         printf("busy: %08x\n", val);
                         dynamic_cast<WDTCB*>(b)->GetAutoCalibrateFail(&val);
                         printf("fail: %08x\n", val);
+                        dynamic_cast<WDTCB*>(b)->GetAutoAlignDlys(&val);
+                        printf("dlys: %08x\n", val);
                      }
                   }
          }
@@ -241,6 +267,166 @@ int main(int argc, char *argv[])
                         }
                      }
             }
+         }
+         if(option == 14)
+         {
+            EventDebug* debugger = new EventDebug(sys->fCalibratedBuffer);
+            debugger->Start();
+            //sleep(10);
+            debugger->GoRun();
+         }
+         if(option == 15)
+         {
+            int size = sys->GetCrateSize();
+            printf("system with %d crates\n", size);
+            //for(int icrate=0; icrate<size; icrate++){
+            //   wdcrate *c = sys->getcrateat(icrate);
+            for(auto c : *sys){
+               printf("\t crate name %s",  c->GetMscbName().c_str());
+               if(c == sys->GetCrateAt(sys->GetTriggerCrateId())){
+                  printf(" trigger crate\n");
+               } else printf("\n");
+
+               //for(int iboard=0; iboard<18; iboard++){
+               //   printf("\t \t slot %d: ", iboard);
+               //   if(c->hasboardin(iboard)){
+               //      wdboard *b = c->getboardat(iboard);
+               for(auto b : *c){
+                  if(b!=0){
+                     printf("\t \t slot %d: ", b->GetSlot());
+                     if(dynamic_cast<WDWDB*>(b) == nullptr){
+                        if(dynamic_cast<WDTCB*>(b) == nullptr)
+                           printf("with board in slot %d of crate %s\n", b->GetSlot(), b->GetCrate()->GetMscbName().c_str());
+                        else
+                           printf("tcb group=%s\n", b->GetGroup().c_str());
+                     } else
+                        printf("wdb with name %s group=%s\n", dynamic_cast<WDWDB*>(b)->GetName().c_str(), b->GetGroup().c_str());
+
+                     PropertyGroup p = b->GetProperties();
+                     //for(std::map<std::string,std::string>::iterator it=p.begin(); it!=p.end(); it++){
+                     for(auto prop : p){
+                        printf("\t \t \t %s: %s\n", prop.first.c_str(), prop.second.GetStringValue().c_str());
+                     }
+
+                     std::string gr = b->GetGroup();
+                     PropertyGroup pgr = sys->GetGroupProperties(gr);
+                     //for(std::map<std::string,std::string>::iterator it=pgr.begin(); it!=pgr.end(); it++){
+                     for(auto prop : pgr){   
+                        printf("\t \t \t %s: %s from group %s\n", prop.first.c_str(), prop.second.GetStringValue().c_str(), gr.c_str());
+                     }
+                  } else {
+                     printf("\t \t empty\n");
+                  }
+               }
+            }
+            printf("\n");
+            printf("board map:\n");
+            for(auto i: sys->fBoardMap){
+               printf("\t%s crateId:%ld Slot:%d\n", i.first.c_str(), i.second.fCrate, i.second.fSlot);
+            }
+         }
+         if(option == 16)
+         {
+            bool difference = false;
+            unsigned int wdbFwHash = 0;
+            unsigned int wdbSwHash = 0;
+            unsigned int tcb1Date = 0;
+            unsigned int tcb2Date = 0;
+            unsigned int tcb3Date = 0;
+            for(auto c : *sys)
+               for(auto b :*c)
+                  if(b){
+                     if(dynamic_cast<WDWDB*>(b) != nullptr){
+                        WDWDB* wdb = static_cast<WDWDB*>(b);
+                        printf("WDB %s: %08x %08x\n", wdb->GetBoardName().c_str(), wdb->GetFwGitHashTag(), wdb->GetSwGitHashTag());
+                        if(wdbFwHash){
+                           if(wdbFwHash != wdb->GetFwGitHashTag())
+                              difference = true;
+                        } else wdbFwHash = wdb->GetFwGitHashTag();
+                        if(wdbSwHash){
+                           if(wdbSwHash != wdb->GetFwGitHashTag())
+                              difference = true;
+                        } else wdbSwHash = wdb->GetSwGitHashTag();
+                     }
+                     if(dynamic_cast<WDTCB*>(b) != nullptr){
+                        WDTCB* tcb = static_cast<WDTCB*>(b);
+                        unsigned int val;
+                        tcb->GetCompilDate(&val);
+                        
+                        unsigned int *p;
+                        switch(tcb->GetIDCode()>>12){
+                        case 1:
+                           printf("TCB1 %s: %08x\n", tcb->GetBoardName().c_str(), val);
+                           p = &tcb1Date;
+                           break;
+                        case 2:
+                           printf("TCB2 %s: %08x\n", tcb->GetBoardName().c_str(), val);
+                           p = &tcb2Date;
+                           break;
+                        case 3:
+                        default:
+                           printf("TCB3 %s: %08x\n", tcb->GetBoardName().c_str(), val);
+                           p = &tcb3Date;
+                           break;
+                        }
+
+                        if(*p){
+                           if(*p != val)
+                              difference = true;
+                        } else
+                           *p = val;
+                     }
+                  }
+
+            if(difference) printf("\n\tDifferent firmware version in the system!\n");
+         }
+
+         if(option == 17)
+         {
+            for(auto c : *sys)
+               for(auto b :*c)
+                  if(b){
+                     int ret = MSCB_SUCCESS;
+
+                     if(dynamic_cast<WDWDB*>(b) != nullptr){
+                        WDWDB* wdb = static_cast<WDWDB*>(b);
+                        char cstr[wdb->GetName().size() + 1];
+                        strcpy(cstr, wdb->GetName().c_str());
+                        int fd = mscb_init(cstr, 0, "", 0);
+                        if(fd>0){
+                           ret = mscb_upload(fd, wdb->GetSerialNumber(), 0, "../../firmware/WD2/wd2_sys_ctrl/wd2_xps_hw/implementation/download.bit", 0);
+                           if(ret == MSCB_SUCCESS)
+                              ret = mscb_upload(fd, wdb->GetSerialNumber(), 0, "../../firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/app_sys_ctrl/Debug/app_sys_ctrl.srec", 0);
+                           if(ret == MSCB_SUCCESS)
+                              ret = mscb_exit(fd);
+
+                        } else ret = MSCB_NOT_FOUND; 
+                     }
+
+                     if(dynamic_cast<WDTCB*>(b) != nullptr){
+                        WDTCB* tcb = static_cast<WDTCB*>(b);
+                        switch(tcb->GetIDCode()>>12){
+                        case 1:
+                           ret = mscb_upload(tcb->GetCrate()->GetMscbHandle(), 20, tcb->GetSlot(), "../../firmware/TCB/TCB_1_0/TCB_1_0.runs/impl_1/TCB_TOP.bit", MSCB_UPLOAD_SUBADDR); 
+                           break;
+                        case 2:
+                           ret = mscb_upload(tcb->GetCrate()->GetMscbHandle(), 20, tcb->GetSlot(), "../../firmware/TCB/TCB_2_0/TCB_2_0.runs/impl_1/TCB_TOP.bit", MSCB_UPLOAD_SUBADDR);
+                           break;
+                        case 3:
+                        default:
+                           ret = mscb_upload(tcb->GetCrate()->GetMscbHandle(), 20, tcb->GetSlot(), "../../firmware/TCB/TCB_3_0/TCB_3_0.runs/impl_1/TCB_TOP.bit", MSCB_UPLOAD_SUBADDR);
+                           break;
+                        }
+                        if(ret == MSCB_SUCCESS){
+                           char val = 3; //Init slot
+                           ret = mscb_write(tcb->GetCrate()->GetMscbHandle(), 20, 17+tcb->GetSlot(), &val, sizeof(val));  
+                        }
+                     }
+
+                     if(ret != MSCB_SUCCESS){
+                        printf("Upload failed!");
+                     }
+                  }
          }
       } while ( option == 0 ) ;
       /* end of the main loop on the options*/

@@ -1,156 +1,276 @@
 #include "WDAQLib.h"
 
-#define SWAP_UINT64(x) (((uint64_t)SWAP_UINT32((uint32_t)((x) & 0xffffffff)) << 32) | (uint64_t)SWAP_UINT32((uint32_t)((x) >> 32)))
-
 //WDAQ Packet Data - class for UDP DAQ packets 
 //Set properties according to UDP event header
-void WDAQPacketData::SetEventHeaderInfo(WD2_FRAME_HEADER *ph){
-   mBoardId = ph->serial_number;
-   mCrateId = ph->crate_id;
-   mSlotId  = ph->slot_id;
-   mADC = (ph->channel_info >> 7) & 0x01;
-   mChannel = (ph->channel_info) & 0x1f;
-   mDataType = ph->data_type;
-   mTxEnable = ph->tx_enable;
-   mZeroSuppressionMask = ph->zero_suppression_mask;
-   mFlags = ph->flags;
-   mTriggerSource = ph->trigger_source;
-   mBitsPerSample = ph->bits_per_sample;
-   mSamplesPerEventPerChannel = ph->samples_per_event_per_channel;
-   mPayloadLenght = ph->payload_length;
-   mDataOffset = ph->data_offset;
-   for(int i=0; i<8; i++) mTimeStamp[i] = ph->time_stamp[i];
-   mEventNumber = ph->event_number;
-   mTriggerType = ph->trigger_information[1];
-   mTriggerEventNumber |= ((unsigned int)ph->trigger_information[0])<<8;
-   mTriggerEventNumber = ph->trigger_information[5];
-   mTriggerEventNumber |= ((unsigned int)ph->trigger_information[4])<<8;
-   mTriggerCell = ph->drs_trigger_cell;
-   mSamplingFrequency = ph->sampling_frequency;
-   mTemperature = std::round(ph->temperature*0.0625 * 10 + 0.5) / 10.0f;
-   mDacOFS = ph->dac_ofs;
-   mDacROFS = ph->dac_rofs;
-   mFrontendSettings = ph->frontend_settings;
+void WDAQPacketData::SetEventHeaderInfo(WDAQ_FRAME_HEADER *pdaqh){
+   mProtocolVersion =  pdaqh->protocol_version;
+   mBoardType = pdaqh->board_type_revision >> 4;
+   mBoardRevision = pdaqh->board_type_revision & 0xF;
+   mBoardId = pdaqh->serial_number; // gets board Id (i.e. serial number)
+   mCrateId = pdaqh->crate_id;      // gets crate Id
+   mSlotId  = pdaqh->slot_id;       // gets slot Id 
+   mPacketNumber = pdaqh->packet_number; // packet number
+   mDataType = pdaqh->data_type; // type of data in the packet
+   mWDAQFlags = pdaqh->wdaq_flags;
+   mPayloadLength = pdaqh->payload_length;
+   mDataOffset = pdaqh->data_chunk_offset;
+}
+//Set WDAQBoardEvent header from Packet Data
+void WDAQPacketData::HeaderToBoardEvent(WDAQBoardEvent *e){
+   //check if end of event is received
+   if(mWDAQFlags & EOE) {
+     e->mEndFlagReceived = true;
+     e->mLastPacket = mPacketNumber;
+   }
+   // the packet number offset is from the first packet
+   if(mWDAQFlags & SOE) {
+     e->mStartFlagReceived = true;
+     e->mFirstPacket = mPacketNumber;
+   }
+
+   //anyway increase packet counter
+   e->mPacketsReceived++;
+}
+
+//WDAQ WDB Packet Data - class for WDB UDP DAQ packets 
+//Set properties according to UDP event header
+void WDAQWdbPacketData::SetWdbHeaderInfo(WD_FRAME_HEADER *ph){
+   //propertis from WDAPacketData
+  mEventNumber = ph->event_number; 
+  mTriggerNumber = ph->trigger_information[5] | (ph->trigger_information[4] << 8);
+  mTriggerType = ph->trigger_information[1] | (ph->trigger_information[0] << 8);   
+  mSerialTriggerData = ph->trigger_information[3] | (ph->trigger_information[2] << 8);   
+
+   //others
+  mTemperature = std::round(ph->temperature*0.0625 * 10 + 0.5) / 10.0f;
+  mChannel = (ph->channel_info &0x1F); 
+  mADC = (ph->channel_info >> 7) & 0x01; //which ADC sampled the data
+  mTxEnable = ph->tx_enable; // DRS transmission enble mask
+  mZeroSuppressionMask = ph->zero_suppression_mask; // mask for zero suppression
+  mWDBFlags = ph->wd_flags;
+  mTriggerSource = ph->trigger_source;
+  mBitsPerSample = ph->bits_per_sample;
+  mSamplesPerEventPerChannel = ph->samples_per_event_per_channel;
+  mTimeStamp = ph->time_stamp;
+  mEventNumber = ph->event_number;
+  mTriggerCell = ph->drs_trigger_cell;
+  mSamplingFrequency = ph->sampling_frequency;
+  mDacOFS = ph->dac_ofs;
+  mDacROFS = ph->dac_rofs;
+  mFrontendSettings = ph->frontend_settings;
 }
 
 //WDAQ DRS Packet Data -  derived packet class to host DRS data
 //Add packet info to given Board Event
-void WDAQDRSPacketData::AddToBoardEvent(WDAQBoardEvent *e){
+void WDAQDRSPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
+   //Should check e->mBoardType is WDB 
+   WDAQWdbEvent *wdb_e = static_cast<WDAQWdbEvent*>(e);
 
    //int channel = (mChannel!=8)? mChannel+8*mADC : 16+mADC;//arrange clock channel
    int channel = mChannel;
-   int numberBins = (int) mPayloadLenght / 1.5;
+   int numberBins = (int) mPayloadLength / 1.5;
    int firstBin = mDataOffset / 1.5;
 
    for(int i=0; i<numberBins; i++){
-      e->mDrsU[channel][firstBin+i] = data[i];
+      wdb_e->mDrsU[channel][firstBin+i] = data[i];
    }
 
-   e->mFrontendSettings[channel] = mFrontendSettings;
-   e->mTriggerCell[channel] = mTriggerCell;
-   e->mDrsTxEnable = mTxEnable;
-   e->mDrsZeroSuppressionMask = mZeroSuppressionMask;
+   wdb_e->mFrontendSettings[channel] = mFrontendSettings;
+   wdb_e->mTriggerCell[channel] = mTriggerCell;
+   wdb_e->mDrsTxEnable = mTxEnable;
+   wdb_e->mDrsZeroSuppressionMask = mZeroSuppressionMask;
+   wdb_e->mSamplingFrequency = mSamplingFrequency;
+   wdb_e->mTriggerSource = mTriggerSource;
+   wdb_e->mTimeStamp = mTimeStamp;
+   wdb_e->mDacOFS = mDacOFS;
+   wdb_e->mDacROFS = mDacROFS;
+   wdb_e->mTemperature = mTemperature;
 
    //check all data received
-   e->mDrsByteNumber[channel] += mPayloadLenght*8;
-   if(e->mDrsByteNumber[channel] >= mSamplesPerEventPerChannel*mBitsPerSample){
-      e->mDrsHasData[channel] = true; 
+   wdb_e->mDrsByteNumber[channel] += mPayloadLength*8;
+   if(wdb_e->mDrsByteNumber[channel] >= mSamplesPerEventPerChannel*mBitsPerSample){
+   // set the flag of drs channel data reception for the writer
+     wdb_e->mDrsHasData[channel] = true; 
    }
-
-   if(mFlags & 0x10) e->mEndFlagReceived = true;
 
 }
 
 //WDAQ ADC Packet Data -  derived packet class to host ADC data
 //Add packet info to given Board Event
-void WDAQADCPacketData::AddToBoardEvent(WDAQBoardEvent *e){
+void WDAQADCPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
+   //Should check e->mBoardType is WDB 
+   WDAQWdbEvent *wdb_e = static_cast<WDAQWdbEvent*>(e);
 
    int channel = mChannel;
-   int numberBins = (int) mPayloadLenght / 1.5;
+   int numberBins = (int) mPayloadLength / 1.5;
    int firstBin = mDataOffset / 1.5;
 
    for(int i=0; i<numberBins; i++){
-      e->mAdcU[channel][firstBin+i] = data[i];
+      wdb_e->mAdcU[channel][firstBin+i] = data[i];
    }
 
-   e->mAdcTxEnable = mTxEnable;
-   e->mAdcZeroSuppressionMask = mZeroSuppressionMask;
+   wdb_e->mAdcTxEnable = mTxEnable;
+   wdb_e->mAdcZeroSuppressionMask = mZeroSuppressionMask;
 
    //check all data received
-   e->mAdcByteNumber[channel] += mPayloadLenght*8;
-   if(e->mAdcByteNumber[channel] >= mSamplesPerEventPerChannel*mBitsPerSample){
-      e->mAdcHasData[channel] = true; 
+   wdb_e->mAdcByteNumber[channel] += mPayloadLength*8;
+   if(wdb_e->mAdcByteNumber[channel] >= mSamplesPerEventPerChannel*mBitsPerSample){
+     // set the flag of adc channel data reception for the writer
+      wdb_e->mAdcHasData[channel] = true; 
    }
-
-   if(mFlags & 0x10) e->mEndFlagReceived = true;
 
 }
 
 //WDAQ TDC Packet Data -  derived packet class to host TDC data
 //Add packet info to given Board Event
-void WDAQTDCPacketData::AddToBoardEvent(WDAQBoardEvent *e){
+void WDAQTDCPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
+   //Should check e->mBoardType is WDB 
+   WDAQWdbEvent *wdb_e = static_cast<WDAQWdbEvent*>(e);
 
    int channel = mChannel;
-   int numberBins = (int) mPayloadLenght;
+   int numberBins = (int) mPayloadLength;
    int firstBin = mDataOffset;
 
    for(int i=0; i<numberBins; i++){
-      e->mTdc[channel][firstBin+i] = data[i];
+      wdb_e->mTdc[channel][firstBin+i] = data[i];
    }
 
-   e->mTdcTxEnable = mTxEnable;
-   e->mTdcZeroSuppressionMask = mZeroSuppressionMask;
+   wdb_e->mTdcTxEnable = mTxEnable;
+   wdb_e->mTdcZeroSuppressionMask = mZeroSuppressionMask;
 
    //check all data received
-   e->mTdcByteNumber[channel] += mPayloadLenght*8;
-   if(e->mTdcByteNumber[channel] >= mSamplesPerEventPerChannel*mBitsPerSample){
-      e->mTdcHasData[channel] = true; 
+   wdb_e->mTdcByteNumber[channel] += mPayloadLength*8;
+   if(wdb_e->mTdcByteNumber[channel] >= mSamplesPerEventPerChannel*mBitsPerSample){
+   // set the flag of tdc channel data reception for the writer
+     wdb_e->mTdcHasData[channel] = true; 
    }
-
-   if(mFlags & 0x10) e->mEndFlagReceived = true;
-
 }
 
 //WDAQ TRG Packet Data -  derived packet class to host TRG data
 //Add packet info to given Board Event
-void WDAQTRGPacketData::AddToBoardEvent(WDAQBoardEvent *e){
+void WDAQTRGPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
+   //Should check e->mBoardType is WDB 
+   WDAQWdbEvent *wdb_e = static_cast<WDAQWdbEvent*>(e);
 
-   int numberBins = (int) mPayloadLenght/8;
+   int numberBins = (int) mPayloadLength/8;
    int firstBin = mDataOffset/8;
 
    for(int i=0; i<numberBins; i++){
-      e->mTrg[firstBin+i] = data[i];
+      wdb_e->mTrg[firstBin+i] = data[i];
    }
 
-   e->mTrgTxEnable = mTxEnable;
-
+   wdb_e->mTrgTxEnable = 0; //this must be changed with proper TRG data treatment
+      
    //check all data received
-   e->mTrgByteNumber += mPayloadLenght*8;
-   if(e->mTrgByteNumber >= mSamplesPerEventPerChannel*mBitsPerSample){
-      e->mTrgHasData = true; 
+   wdb_e->mTrgByteNumber += mPayloadLength*8;
+   if(wdb_e->mTrgByteNumber >= mSamplesPerEventPerChannel*mBitsPerSample){
+   // set the flag of trigger data reception for the writer
+     wdb_e->mTrgHasData = true; 
    }
-
-   if(mFlags & 0x10) e->mEndFlagReceived = true;
-
 }
 
-//WDAQ Board Event - single WDB DAQ event
+//WDAQ Scaler Packet Data -  derived packet class to host Scaler data
+//Add packet info to given Board Event
+void WDAQScaPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
+   //Should check e->mBoardType is WDB 
+   WDAQWdbEvent *wdb_e = static_cast<WDAQWdbEvent*>(e);
+
+   for(int i=0; i<WD_N_SCALER; i++){
+      wdb_e->mScaler[i] = data[i];
+   }
+   // set the flag of scaler reception for the writer
+   wdb_e->mScalerHasData = true; 
+}
+
+//WDAQ Scaler Packet Data -  derived packet class to host Scaler data
+//Add packet info to given Board Event: this packet is EMPTY
+// this board has been fully zero suppressed
+void WDAQDummyPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
+}
+
+//WDAQ TCB Packet Data - class for TCB UDP DAQ packets 
+//Set properties according to UDP event header
+void WDAQTcbPacketData::SetTcbHeaderInfo(TCB_FRAME_HEADER *ph){
+   //NOTE: inversion of endianess: please check again with DCBs
+
+   //propertis from WDAPacketData
+   mEventNumber = ph->event_number; 
+   mTriggerNumber = ph->trigger_information[0] | (ph->trigger_information[1] << 8);
+   mTriggerType = ph->trigger_information[4] | (ph->trigger_information[5] << 8);
+   mSerialTriggerData = ph->trigger_information[2] | (ph->trigger_information[3] << 8);
+
+   //others
+   mBankName[0] = ph->bank_name[3];
+   mBankName[1] = ph->bank_name[2];
+   mBankName[2] = ph->bank_name[1];
+   mBankName[3] = ph->bank_name[0];
+   mTimeStamp = 0.;
+}
+//Add packet info to given Board Event
+void WDAQTcbPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
+   //Should check e->mBoardType is TCB 
+   WDAQTcbEvent *tcb_e = static_cast<WDAQTcbEvent*>(e);
+   
+   //printf("additing event %c%c%c%c flags:%x\n", mBankName[3], mBankName[2], mBankName[1], mBankName[0], mWDAQFlags);
+
+   int numberBins = (int) mPayloadLength/4;
+   int firstBin = mDataOffset/4;
+   WDAQTcbBank* bank;
+
+   try{
+      bank = tcb_e->mBanks.at(mBankName);
+   }catch (const std::out_of_range&){
+      bank = new WDAQTcbBank(mBankName, numberBins);
+      tcb_e->mBanks[mBankName] = bank;
+   }
+
+   for(int i=0; i<numberBins; i++){
+      bank->data[firstBin+i] = data[i];
+   }
+   //printf("TCB event is complete %d: %d %d %d %d\n", tcb_e->IsComplete(), tcb_e->mStartFlagReceived, tcb_e->mEndFlagReceived, tcb_e->mLastPacket-tcb_e->mFirstPacket+1, tcb_e->mPacketsReceived);
+}
+
+//WDAQ Board Event - single board DAQ event
 //Constructor, init from packet data
 WDAQBoardEvent::WDAQBoardEvent(WDAQPacketData* pkt){
+   mBoardType = pkt->mBoardType; 
+   mBoardRevision = pkt->mBoardRevision;
+   mWDAQFlags = pkt->mWDAQFlags;
    mBoardId = pkt->mBoardId;
    mCrateId = pkt->mCrateId;
    mSlotId = pkt->mSlotId;
-   mSamplingFrequency = pkt->mSamplingFrequency;
-   mFlags = pkt->mFlags;
-   mTriggerSource = pkt->mTriggerSource;
-   for(int i=0; i<8; i++) mTimeStamp[i] = pkt->mTimeStamp[i];
-   mDacOFS = pkt->mDacOFS;
-   mDacROFS = pkt->mDacROFS;
-   mTemperature = pkt->mTemperature;
 
+   mStartFlagReceived = false;
+   mEndFlagReceived = false;
+   mPacketsReceived = 0;
+}
+
+//check complete
+bool WDAQBoardEvent::IsComplete(){
+   // check that all the packets are received:
+   // start of the event is received
+   // end of the event is received
+   // check if last packet is smaller than first, in case sum to last 2^16
+
+  bool ret = false;
+  if(mEndFlagReceived && mStartFlagReceived) {
+    
+    if(mLastPacket<mFirstPacket)
+      mLastPacket += 65536;
+    
+    if(mLastPacket-mFirstPacket+1 == mPacketsReceived)
+      ret = true;
+
+  }
+  return ret;
+   
+}
+
+//WDAQ Wdb Event - single Wdb DAQ event
+//Constructor, init from packet data
+WDAQWdbEvent::WDAQWdbEvent(WDAQPacketData* pkt): WDAQBoardEvent(pkt){
    //reset status
    mVCalibrated = false;
-   mEndFlagReceived = false;
    mDrsTxEnable = 0;
    mAdcTxEnable = 0;
    mTdcTxEnable = 0;
@@ -162,33 +282,17 @@ WDAQBoardEvent::WDAQBoardEvent(WDAQPacketData* pkt){
       mDrsByteNumber[i] = 0;
       mAdcByteNumber[i] = 0;
       mTdcByteNumber[i] = 0;
-      //for(int j=0; j<1024; j++) mDrsU[i][j] = 0;
    }
    mTrgHasData = false;
+   mScalerHasData = false;
    mTrgByteNumber = 0;
 }
 
-//check complete
-bool WDAQBoardEvent::IsComplete(){
-   bool ret = true;
-   for(int i=0; i<WD_N_CHANNELS; i++){
-      if(mDrsTxEnable & (1<<i))
-         if(mDrsHasData[i]==false)
-            ret = false; 
-      if(mAdcTxEnable & (1<<i))
-         if(mAdcHasData[i]==false)
-            ret = false; 
-      if(mTdcTxEnable & (1<<i))
-         if(mTdcHasData[i]==false)
-            ret = false;
-   }
-   if(mTrgTxEnable)
-      if(mTrgHasData==false)
-         ret = false;
-
-   return ret && mEndFlagReceived;
+//WDAQ Wdb Event - single Wdb DAQ event
+//Constructor, init from packet data
+WDAQTcbEvent::WDAQTcbEvent(WDAQPacketData* pkt): WDAQBoardEvent(pkt){
+   //should reset
 }
-
 
 //WDAQ Event - global DAQ event
 //constructor, copies data from given packet
@@ -196,51 +300,61 @@ WDAQEvent::WDAQEvent(WDAQPacketData* pkt){
 
    //copies info from first packet
    mEventNumber = pkt->mEventNumber;
-   mTriggerEventNumber = pkt->mTriggerEventNumber;
-   mTriggerType = pkt->mTriggerType;
-
+   mTriggerNumber = pkt->mTriggerNumber;
+   mTriggerType = pkt->mTriggerType&0x3F;
+   mSerialTriggerData = pkt->mSerialTriggerData;
 
 }
 
 //add packet to event
 void WDAQEvent::AddPacket(WDAQPacketData* pkt){
-   int id = pkt->mBoardId;
-   bool found = false;
+   unsigned char type = pkt->mBoardType;
+   unsigned short id = pkt->mBoardId;
    WDAQBoardEvent *boardEvent;
 
-   for(auto b :fBoard){
-      if(b->mBoardId==id){
-         found = true;
-         boardEvent = b;
-         break;
+   try {
+      boardEvent = fBoard.at(type).at(id);
+   } catch (const std::out_of_range&){
+      //no event, allocate a new one according to Board Type
+      if(type == WD2_BOARD_ID){
+         boardEvent = new WDAQWdbEvent(pkt);
+         //printf("Event %d: Created WDB board event for board %d-%d\n", mEventNumber, type, id);
+      } else if(type == TCB_BOARD_ID) {
+         boardEvent = new WDAQTcbEvent(pkt);
+         //printf("Event %d: Created TCB board event for board %d-%d\n", mEventNumber, type, id);
+      } else {
+         boardEvent = new WDAQBoardEvent(pkt);
+         //printf("Event %d: Created board event for board %d-%d\n", mEventNumber, type, id);
       }
+
+      fBoard[type][id] = boardEvent;
    }
 
-   if(!found){
-      WDAQBoardEvent *e = new WDAQBoardEvent(pkt);
-      pkt->AddToBoardEvent(e);
-      fBoard.push_back(e);
-   } else{
-      pkt->AddToBoardEvent(boardEvent);
-   }
-
+   //process packet content
+   pkt->AddToBoardEvent(boardEvent);
 }
 
 //check event complete
-bool WDAQEvent::IsComplete(){
-   bool ret = true;
-   for(auto e :fBoard){
-      ret &= e->IsComplete();
+int WDAQEvent::IsComplete(){
+   int nboards = 0;
+
+   for(auto &e1 :fBoard){
+      for(auto &e2 :e1.second){
+        //check only if end of event received
+        if(e2.second->IsComplete())
+           nboards++;
+      }
    }
 
-   return ret;
+   return nboards;
 }
 
 
 //destructor to remove child WDBoardEvent
 WDAQEvent::~WDAQEvent(){
-   for(auto e :fBoard)
-      delete e;
+   for(auto &e1 :fBoard)
+      for(auto &e2 :e1.second)
+         delete e2.second;
 }
 
 //---------- THREAD implementation -------
@@ -253,27 +367,48 @@ void WDAQPacketCollector::Begin(){
    fDroppedPackets=0;
 }
 
+//push a packet to the output buffer
+void WDAQPacketCollector::PushPacket(WDAQPacketData* packet){
+   fNPackets++;
+
+   //push to buffer
+   if(!fBuf->Try_push(packet)){
+      //could not push packet to buffer
+      //printf("overflow pk\n");
+      fDroppedPackets++;
+      delete packet;
+   }
+}
+
 //called on every UDP packet
 void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
 
    //check size of received datagram
-   if(size < (int)sizeof(WD2_FRAME_HEADER)) return;
+  if(size < (int)sizeof(WDAQ_FRAME_HEADER)) {
+    printf("Problem with size\n");
+    return;
+  }
 
-   WD2_FRAME_HEADER* data = (WD2_FRAME_HEADER*)dataptr;
+   //first link to the WDAQ_FRAME_HEADER
+   WDAQ_FRAME_HEADER* daqdata = (WDAQ_FRAME_HEADER*)dataptr;
+   //then to the WD_FRAME_HEADER
+   WD_FRAME_HEADER* data = (WD_FRAME_HEADER*) (dataptr + sizeof(WDAQ_FRAME_HEADER));
+
+   
    // check protocol version
-   if (data->protocol_version != WD2_UDP_PROTOCOL_VERSION) {
-      printf("received packet with wrong protocol version\n");
+   if (daqdata->protocol_version != WD2_UDP_PROTOCOL_VERSION) {
+     printf("received packet with wrong protocol version, got %d required %d\n",daqdata->protocol_version, WD2_UDP_PROTOCOL_VERSION);
       return;
    }
 
    //correct endianess
-   data->serial_number                  = SWAP_UINT16(data->serial_number);
+   daqdata->serial_number               = SWAP_UINT16(daqdata->serial_number);
    data->tx_enable                      = SWAP_UINT32(data->tx_enable);
    data->zero_suppression_mask          = SWAP_UINT16(data->zero_suppression_mask);
-   data->flags                          = SWAP_UINT16(data->flags);
    data->samples_per_event_per_channel  = SWAP_UINT16(data->samples_per_event_per_channel);
-   data->payload_length                 = SWAP_UINT16(data->payload_length);
-   data->data_offset                    = SWAP_UINT16(data->data_offset);
+   daqdata->payload_length              = SWAP_UINT16(daqdata->payload_length);
+   daqdata->packet_number               = SWAP_UINT16(daqdata->packet_number);
+   daqdata->data_chunk_offset           = SWAP_UINT16(daqdata->data_chunk_offset);
    data->event_number                   = SWAP_UINT32(data->event_number);
    data->drs_trigger_cell               = SWAP_UINT16(data->drs_trigger_cell);
    data->sampling_frequency             = SWAP_UINT32(data->sampling_frequency);
@@ -281,17 +416,46 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
    data->dac_ofs                        = SWAP_UINT16(data->dac_ofs);
    data->dac_rofs                       = SWAP_UINT16(data->dac_rofs);
    data->frontend_settings              = SWAP_UINT16(data->frontend_settings);
+   data->time_stamp                     = SWAP_UINT64(data->time_stamp);
 
-   if(data->data_type == 0){
+   //#define DEBUGGOT 
+
+   #ifdef DEBUGGOT
+   printf("---------------------------------\n");
+   printf("---------------------------------\n");
+   printf("serial number \t %d\n", daqdata->serial_number);
+   printf("board type & rev \t %x\n", daqdata->board_type_revision);
+   printf("tx enable \t %x\n", data->tx_enable);
+   printf("zero supp mask \t %d\n", data->zero_suppression_mask);
+   printf("packet num \t\t %d\n", daqdata->packet_number);
+   printf("flags \t\t %d\n", daqdata->wdaq_flags);
+   printf("sampl  ev cha \t %d\n", data->samples_per_event_per_channel);
+   printf("payload length \t %d\n", daqdata->payload_length);
+   printf("data chunk off \t %d\n", daqdata->data_chunk_offset);
+   printf("event number \t %d\n", data->event_number);
+   printf("drs trig cell \t %d\n", data->drs_trigger_cell);
+   printf("sampl freq \t %d\n", data->sampling_frequency);
+   printf("temperature \t %d\n", data->temperature);
+   printf("dac ofs \t %d\n", data->dac_ofs);
+   printf("daq rofs \t %x\n", data->dac_rofs);
+   printf("frontend sets \t %x\n", data->frontend_settings);
+   printf("data type \t %x\n", daqdata->data_type);
+   printf("flags   \t %x\n", data->wd_flags);
+   printf("trigger event \t %d\n", data->trigger_information[5] | (data->trigger_information[4] << 8));
+   printf("\n");
+   printf("\n");
+   #endif
+
+   if(daqdata->data_type == cDataTypeDRS){
       //DRS Data
-
       //create new packet
       WDAQDRSPacketData *packet = new WDAQDRSPacketData();
-      packet->SetEventHeaderInfo(data);
+      packet->SetEventHeaderInfo(daqdata);
+      packet->SetWdbHeaderInfo(data);
 
       // decode waveform data
       auto pd = (unsigned char*)(data+1);
-      int numberBins = (int) packet->mPayloadLenght / 1.5;
+      int numberBins = (int) packet->mPayloadLength / 1.5;
       for (int i=0 ; i<numberBins ; i+=2) {
          short data1   = ((pd[1] & 0x0F) << 8) | pd[0];
          short data2 = ((unsigned short)pd[2] << 4) | (pd[1] >> 4);
@@ -304,25 +468,20 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
          packet->data[i]         = (float)data1 * (1 / 4096.0); // 1V DRS range with 12 bits
          packet->data[i+1]       = (float)data2 * (1 / 4096.0);
       }
-      fNPackets++;
 
-      //push to buffer
-      if(!fBuf->Try_push(packet)){
-         //could not push packet to buffer
-         //printf("overflow pk\n");
-         fDroppedPackets++;
-         delete packet;
-      }
-   } else if (data->data_type == 1) {
+      PushPacket(packet);
+
+   } else if (daqdata->data_type == cDataTypeADC){
       //ADC Data
 
       //create new packet
       WDAQADCPacketData *packet = new WDAQADCPacketData();
-      packet->SetEventHeaderInfo(data);
+      packet->SetEventHeaderInfo(daqdata);
+      packet->SetWdbHeaderInfo(data);
 
       // decode waveform data
       auto pd = (unsigned char*)(data+1);
-      int numberBins = (int) packet->mPayloadLenght / 1.5;
+      int numberBins = (int) packet->mPayloadLength / 1.5;
       for (int i=0 ; i<numberBins ; i+=2) {
          unsigned short data1   = ((pd[1] & 0x0F) << 8) | pd[0];
          unsigned short data2 = ((unsigned short)pd[2] << 4) | (pd[1] >> 4);
@@ -332,66 +491,156 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
          packet->data[i]         = data1; // 1V DRS range with 12 bits
          packet->data[i+1]       = data2;
       }
-      fNPackets++;
 
-      //push to buffer
-      if(!fBuf->Try_push(packet)){
-         //could not push packet to buffer
-         //printf("overflow pk\n");
-         fDroppedPackets++;
-         delete packet;
-      }
-   } else if (data->data_type == 2) {
+      PushPacket(packet);
+   } else if (daqdata->data_type == cDataTypeTDC){
       //TDC Data
 
       //create new packet
       WDAQTDCPacketData *packet = new WDAQTDCPacketData();
-      packet->SetEventHeaderInfo(data);
+      packet->SetEventHeaderInfo(daqdata);
+      packet->SetWdbHeaderInfo(data);
 
       // decode waveform data
       auto pd = (unsigned char*)(data+1);
-      int numberBins = (int) packet->mPayloadLenght;
+      int numberBins = (int) packet->mPayloadLength;
       for (int i=0 ; i<numberBins ; i++) {
          packet->data[i] = pd[i];
       }
-      fNPackets++;
 
-      //push to buffer
-      if(!fBuf->Try_push(packet)){
-         //could not push packet to buffer
-         //printf("overflow pk\n");
-         fDroppedPackets++;
-         delete packet;
-      }
-   } else if (data->data_type == 3) {
+      PushPacket(packet);
+   } else if (daqdata->data_type == cDataTypeTrg){
       //TRG Data
       //create new packet
       WDAQTRGPacketData *packet = new WDAQTRGPacketData();
-      packet->SetEventHeaderInfo(data);
+      packet->SetEventHeaderInfo(daqdata);
+      packet->SetWdbHeaderInfo(data);
 
       // decode waveform data
       auto pd = (unsigned long*)(data+1);
-      int numberBins = (int) packet->mPayloadLenght/8;
+      int numberBins = (int) packet->mPayloadLength/8;
       for (int i=0 ; i<numberBins ; i++) {
          packet->data[i] = SWAP_UINT64(pd[i]);
       }
-      fNPackets++;
 
-      //push to buffer
-      if(!fBuf->Try_push(packet)){
-         //could not push packet to buffer
-         //printf("overflow pk\n");
-         fDroppedPackets++;
-         delete packet;
+      PushPacket(packet);
+   } else if (daqdata->data_type == cDataTypeScaler) {
+      //Scaler data
+      //create new packet
+      WDAQScaPacketData *packet = new WDAQScaPacketData();
+      packet->SetEventHeaderInfo(daqdata);
+      packet->SetWdbHeaderInfo(data);
+
+      // decode waveform data
+      auto pd = (unsigned long*)(data+1);
+      for (int i=0 ; i<WD_N_SCALER ; i++) {//Ch 0->16, Trigger, External Clock
+         packet->data[i] = SWAP_UINT64(pd[17-i]);
       }
+
+      PushPacket(packet);
+   } else if (daqdata->data_type == cDataTypeDummy) {
+      //Scaler data
+      //create new packet
+      WDAQDummyPacketData *packet = new WDAQDummyPacketData();
+      packet->SetEventHeaderInfo(daqdata);
+      packet->SetWdbHeaderInfo(data);
+
+      PushPacket(packet);
       
-   }
+   }// end if data is dummy (completely zero suppressed)
 }
 
 //print statistics at thread end
 void WDAQPacketCollector::End(){
-   printf("Got %lu packets\n", fNPackets);
-   printf("Dropped %lu packets\n", fDroppedPackets);
+   printf("Got %lu packets\nDropped %lu packets\n", fNPackets, fDroppedPackets);
+}
+
+// functionalies of WDAQTCBReader
+void WDAQTCBReader::Begin(){
+   fBoard->SetPacketizerBus(true);
+   fBoard->SetPacketizerEnable(true);
+   fBoard->SetPacketizerAutostart(true);
+
+   // reset the buffer pointers and busy
+   fBoard->ResetBufferLogic();
+}
+
+void WDAQTCBReader::Loop(){
+  // polling on the buffer status searching for an event
+  if(fBoard->GetBufferState() != 0) { 
+     WDAQ_FRAME_HEADER daqdata;
+     daqdata.board_type_revision = TCB_BOARD_ID<<4;
+     std::hash<std::string> hashFunc;
+     daqdata.serial_number = hashFunc(fBoard->GetBoardName());
+     daqdata.crate_id = fBoard->GetCrate()->GetCrateNumber();
+     daqdata.slot_id = fBoard->GetSlot();
+     daqdata.packet_number = 0;
+     daqdata.data_chunk_offset = 0;
+
+     TCB_FRAME_HEADER ph;
+
+     int nBanks=0;
+     int iBank=0;
+     int length;
+
+     u_int32_t ptr= fBoard->GetBufferHeadSPI(&nBanks, &ph.event_number, &ph.time_stamp, (unsigned int*)&ph.trigger_information[4], (unsigned int*)&ph.trigger_information[0]);
+     //printf("%d banks, %08x %08x %0x%0x %0x%0x\n", nBanks, ph.event_number, ph.time_stamp, ph.trigger_information[4], ph.trigger_information[3], ph.trigger_information[1], ph.trigger_information[0]);
+
+     while(fBoard->HasBufferBankSPI(ptr, ph.bank_name, &length) && iBank<nBanks){
+        WDAQTcbPacketData *packet = new WDAQTcbPacketData();
+
+        //printf("Got bank %c %c %c %c\n", ph.bank_name[3], ph.bank_name[2], ph.bank_name[1], ph.bank_name[0]);
+        //u_int32_t *data = new u_int32_t[length];
+        //printf("Data:\n");
+        //fBoard->GetBufferBankDataSPI(ptr, data, length);
+        fBoard->GetBufferBankDataSPI(ptr, packet->data, length);
+        //for(int i=0; i<length; i++ ) printf("%3d: %08x\n", i, data[i]);
+        //delete[] data;
+        ptr = fBoard->SkipBufferBankSPI(ptr, length);
+     
+        //set flags and length
+        daqdata.wdaq_flags = EOT | SOT;
+        if (iBank == 0) daqdata.wdaq_flags = SOE | EOT | SOT;
+        if(iBank == (nBanks-1)) daqdata.wdaq_flags |= EOE;
+
+        daqdata.payload_length = length*4;
+
+        packet->SetEventHeaderInfo(&daqdata); 
+        packet->SetTcbHeaderInfo(&ph);
+
+        daqdata.packet_number++;//prepare for next packet
+        iBank++;
+
+        if(!fBuf->Try_push(packet)){
+           delete packet;
+        }
+     }
+
+     //generate dummy package if no bank is available
+     if(nBanks==0){
+        WDAQPacketData *packet = new WDAQPacketData();
+        daqdata.wdaq_flags = SOE | EOT | SOT | EOE;
+        daqdata.payload_length = 0;
+        packet->SetEventHeaderInfo(&daqdata); 
+	packet->mEventNumber=ph.event_number;
+	packet->mTriggerNumber = ph.trigger_information[0] | (ph.trigger_information[1] << 8);
+	packet->mTriggerType = ph.trigger_information[4] | (ph.trigger_information[5] << 8);
+	packet->mSerialTriggerData = ph.trigger_information[2] | (ph.trigger_information[3] << 8);
+
+        daqdata.packet_number++;//prepare for next packet
+
+        if(!fBuf->Try_push(packet)){
+           delete packet;
+        }
+
+     }
+
+     fBoard->IncrementBufferPointer();
+  }
+}
+
+void WDAQTCBReader::End(){
+  fBoard->SetPacketizerBus(false);
 }
 
 //Event builder - Thread that build events from packets
@@ -411,8 +660,10 @@ void WDAQEventBuilder::Begin(){
 void WDAQEventBuilder::Loop(){
    WDAQPacketData *ptr = nullptr;
    if(fSource->Try_pop(ptr)){
+
       //search for matching packets
-      int new_event_number = ptr->mTriggerEventNumber;
+      short new_event_number = ptr->mTriggerNumber;
+
       WDAQEvent *evt_ptr;
 
       auto it = fEvents.find(new_event_number);
@@ -429,48 +680,48 @@ void WDAQEventBuilder::Loop(){
       evt_ptr->AddPacket(ptr); 
       delete ptr;
 
-      //check event complete
-      if(evt_ptr->IsComplete()){
+      //printf("%d/%d\n", evt_ptr->IsComplete(), fNBoards);
+
+      //check if event complete
+      if(evt_ptr->IsComplete() == fNBoards){
          //event complete
          fBuildedEvent++;
-
+         
          if(!fDestination->Try_push(evt_ptr)){
-            //could not push to buffer
-            //printf("overflow eve\n");
-            fDroppedEvent++;
-            delete evt_ptr;
+           //could not push to buffer
+           //printf("overflow eve\n");
+           fDroppedEvent++;
+           delete evt_ptr;
          }
-
+         
+         
          //remove from local event list
          fEvents.erase(new_event_number);
-
+         
          //check older events (event id smaller than built one by 10)
          for(auto ev = fEvents.cbegin(); ev != fEvents.cend();){
             if((new_event_number - ev->first)>10){
                //This is to print debug information
                /*printf("Old event %d: ", ev->first);
                for(auto be: ev->second->fBoard){
-                  for(int i=0; i<18; i++) printf("%d-%d-%d ", be->mDrsHasData[i], be->mAdcHasData[i], be->mTdcHasData[i]);
-                  printf("%d %d\n", be->mTrgHasData, be->mEndFlagReceived);
+                  for(int i=0; i<18; i++) printf("%d-%d-%d ", be.second->mDrsHasData[i], be.second->mAdcHasData[i], be.second->mTdcHasData[i]);
+                  printf("%d %d\n", be.second->mTrgHasData, be.second->mEndFlagReceived);
                }*/
                //remove old event from list
                delete ev->second;
                fEvents.erase(ev++);
                fOldEvent++;
-            }else{
-               ++ev;
-            }
+           }else{
+             ++ev;
+           }
          }
-      }
+      }// end if evt_ptr->IsComplete()
    }
 }
 
 //print statistics at thread end
 void WDAQEventBuilder::End(){
-   printf("event built: %lu\n", fBuildedEvent);
-   printf("event dropped: %lu\n", fDroppedEvent);
-   printf("event dropped because old: %lu\n", fOldEvent);
-   printf("in queue: %lu\n", fEvents.size());
+   printf("event built: %lu\nevent dropped: %lu\nevent dropped because old: %lu\nevent in queue: %lu\n", fBuildedEvent, fDroppedEvent, fOldEvent, fEvents.size());
 }
 
 //Event worker - Thread that calibrate events
@@ -482,8 +733,12 @@ void WDAQWorker::Begin(){
 }
 
 //single board calibration
-void WDAQWorker::calibrateBoard(WDAQBoardEvent *ev){
+void WDAQWorker::calibrateBoard(WDAQWdbEvent *ev){
    VCALIB *calib = fVCalib.at(ev->mBoardId);
+
+   // CLK channels masked with the presence of at least one associated channels in the event
+   ev->mDrsHasData[16] &= ev->mDrsHasData[0]|ev->mDrsHasData[1]|ev->mDrsHasData[2]|ev->mDrsHasData[3]|ev->mDrsHasData[4]|ev->mDrsHasData[5]|ev->mDrsHasData[6]|ev->mDrsHasData[7];
+   ev->mDrsHasData[17] &= ev->mDrsHasData[8]|ev->mDrsHasData[9]|ev->mDrsHasData[10]|ev->mDrsHasData[11]|ev->mDrsHasData[12]|ev->mDrsHasData[13]|ev->mDrsHasData[14]|ev->mDrsHasData[15];
 
    //amplitude e->mDrsU[ch][bin];
    //unrotate
@@ -491,7 +746,7 @@ void WDAQWorker::calibrateBoard(WDAQBoardEvent *ev){
    for(int ch=0; ch<WD_N_CHANNELS; ch++){
       //calibrate only channels with data
       if(ev->mDrsHasData[ch]){
-         int tc = ch < 8 || ch == 16  ? ev->mTriggerCell[0] : ev->mTriggerCell[1];
+         int tc = ev->mTriggerCell[ch];
 
          //extract range offset
          float ofs;
@@ -510,7 +765,7 @@ void WDAQWorker::calibrateBoard(WDAQBoardEvent *ev){
             ev->mDrsU[ch][bin] -= calib->mCalib.wf_offset1[ch][(bin+tc)%1024];
             ev->mDrsU[ch][bin] -= calib->mCalib.wf_offset2[ch][bin];
 
-            //exclude clock channels from grain calibration
+            //exclude clock channels from gain calibration
             if(ch<WD_N_CHANNELS-2){
                //gain calibration
                if (ev->mDrsU[ch][bin] > 0)
@@ -535,8 +790,8 @@ void WDAQWorker::Loop(){
    WDAQEvent *ptr = nullptr;
    if(fSource->Try_pop(ptr)){
       //new event to calibrate
-      for(auto boardEvent : ptr->fBoard)
-         calibrateBoard(boardEvent);
+      for(auto& boardEvent : ptr->fBoard[WD2_BOARD_ID])
+         calibrateBoard(static_cast<WDAQWdbEvent*>(boardEvent.second));
 
       //statistics
       fNEvent++;
@@ -551,18 +806,24 @@ void WDAQWorker::Loop(){
 
 //print statistics
 void WDAQWorker::End(){
-   printf("closed with %lu events calibrated\n", fNEvent);
-   printf("event calibrated but dropped: %lu\n", fDroppedEvent);
+   printf("closed with %lu events calibrated\nevent calibrated but dropped: %lu\n", fNEvent, fDroppedEvent);
 }
 
 //Event writer - Thread that writes event to file
-//open file and writes headers and DRS time bins
-void WDAQEventWriter::Begin(){
-   //open file
-   fFile.open(fFileName, std::ios::binary);
+//function to write headers and DRS time bins
+std::string WDAQEventWriter::GetFileName(){
+   std::string ret = fFileName;
+   std::size_t found = ret.find('%');  
+   if (found!=std::string::npos){
+      ret.replace(found, 1, std::to_string(fRunNumber));
+   }
 
+   return ret;
+}
+//function to write headers and DRS time bins
+void WDAQEventWriter::WriteRunHeader(){
    //headers
-   const char head[] = "DRS8";
+   const char head[] = "WDQ0";
    fFile.write(head, 4);
    const char time_head[] = "TIME";
    fFile.write(time_head, 4);
@@ -582,10 +843,26 @@ void WDAQEventWriter::Begin(){
          fFile.write(chn_header.c_str(), 4);
          fFile.write((char *)(calib->mCalib.dt[ch]), 1024*sizeof(float));
       }
-
-      //reset statistics
-      fNEvent=0;
    }
+
+   //TCB boards
+   for(auto it : fTCBList){
+      const char board_head[] = "T#";
+      fFile.write(board_head, 2);
+      fFile.write((const char *)&it, 2);
+   }
+}
+
+//open file and writes headers and DRS time bins
+void WDAQEventWriter::Begin(){
+   //open file
+   fFile.open(GetFileName(), std::ios::binary);
+   printf("File %s opened\n", fFileName.c_str());
+
+   WriteRunHeader();
+
+   //reset statistics
+   fNEvent=0;
 }
 
 //writer thread loop
@@ -594,41 +871,56 @@ void WDAQEventWriter::Loop(){
    if(fSource->Try_pop(ptr)){
       //new event to write
       const char head[] = "EHDR";
-      fFile.write(head, 4);
-      fFile.write((const char *)&ptr->mEventNumber, 4);
       const char temp = 0;
-      for(int i=0; i<16; i++) fFile.write(&temp, 1);
-
-      //write DRS data
-      for(auto DRS : ptr->fBoard){
+      fFile.write(head, 4);
+      // write the event number from trigger bus
+      fFile.write((const char *)&ptr->mTriggerNumber, 2);
+      // write the trigger type from trigger bus
+      fFile.write((const char *)&ptr->mTriggerType, 2);
+      // write the serial trigger data from trigger bus
+      fFile.write((const char *)&ptr->mSerialTriggerData, 2);
+      fFile.write((const char *)&temp, 1);
+      fFile.write((const char *)&temp, 1);
+      
+      //write WDB data
+      for(auto &keyval : ptr->fBoard[WD2_BOARD_ID]){
+         WDAQWdbEvent* board= static_cast<WDAQWdbEvent*>(keyval.second);
+         // write board Id
          const char board_head[] = "B#";
          fFile.write(board_head, 2);
-         fFile.write((const char *)&DRS->mBoardId, 2);
-         float range = DRS->GetRange();
+         fFile.write((const char *)&board->mBoardId, 2);
+         //write board temperature
+         fFile.write((const char *)&board->mTemperature, sizeof(float));
+         //write board range
+         float range = board->GetRange();
+         fFile.write((const char *)&range, sizeof(float));
+         //write board sampling speed
+         fFile.write((const char *)&board->mSamplingFrequency, 2);
+         //write board flags
+         fFile.write((const char *)&board->mWDBFlags, 2);
          for(int ch=0;ch<18;ch++){
             //write only channels with data
-            if(DRS->mDrsHasData[ch]){
+            if(board->mDrsHasData[ch]){
                std::string chn_header = "C";
                if(ch<=9) chn_header += "00";
                else chn_header += "0";
                chn_header += std::to_string(ch);
                fFile.write(chn_header.c_str(), 4);
 
-               const char trgcell_head[] = "T#";
-               fFile.write(trgcell_head, 2);
-               fFile.write((const char *)&(DRS->mTriggerCell[(ch<7||ch==16)?0:1]), 2);
-               fFile.write(trgcell_head, 2);
-               fFile.write(trgcell_head, 2);
+               //write frontend settings
+               fFile.write((const char *)&(board->mFrontendSettings[ch]), 2);
+               //write trigger cell
+               fFile.write((const char *)&(board->mTriggerCell[ch]), 2);
 
                for(int bin=0; bin<1024; bin++){
-                  unsigned short val = (unsigned short) ((DRS->mDrsU[ch][bin]-range+0.5)*65535);
+                  unsigned short val = (unsigned short) ((board->mDrsU[ch][bin]-range+0.5)*65535);
                   fFile.write((const char *)&val, 2);
                }
             }
-         }
-         for(int ch=0;ch<18;ch++){
+         }// end if there are drs data
+         for(int ch=0;ch<16;ch++){
             //write only channels with data
-            if(DRS->mAdcHasData[ch]){
+            if(board->mAdcHasData[ch]){
                std::string chn_header = "A";
                if(ch<=9) chn_header += "00";
                else chn_header += "0";
@@ -636,14 +928,14 @@ void WDAQEventWriter::Loop(){
                fFile.write(chn_header.c_str(), 4);
 
                for(int bin=0; bin<2048; bin++){
-                  unsigned short val = DRS->mAdcU[ch][bin];
+                  unsigned short val = board->mAdcU[ch][bin];
                   fFile.write((const char *)&val, 2);
                }
             }
-         }
-         for(int ch=0;ch<18;ch++){
+         }// end if there are adc data
+         for(int ch=0;ch<16;ch++){
             //write only channels with data
-            if(DRS->mTdcHasData[ch]){
+            if(board->mTdcHasData[ch]){
                std::string chn_header = "T";
                if(ch<=9) chn_header += "00";
                else chn_header += "0";
@@ -651,18 +943,57 @@ void WDAQEventWriter::Loop(){
                fFile.write(chn_header.c_str(), 4);
 
                for(int bin=0; bin<512; bin++){
-                  unsigned char val = DRS->mTdc[ch][bin];
+                  unsigned char val = board->mTdc[ch][bin];
                   fFile.write((const char *)&val, 1);
                }
             }
-         }
-         if(DRS->mTrgHasData){
+         }// end if there are tdc data
+         if(board->mTrgHasData){
             std::string chn_header = "TRGO";
             fFile.write(chn_header.c_str(), 4);
 
             for(int bin=0; bin<512; bin++){
-               unsigned long val = DRS->mTrg[bin];
+               unsigned long val = board->mTrg[bin];
                fFile.write((const char *)&val, 8);
+            }
+
+         }// end if there are trg data
+         if(board->mScalerHasData){
+            std::string chn_header = "SCAL";
+            fFile.write(chn_header.c_str(), 4);
+            // first write 18 integral scaler values as received
+            for(int bin=0; bin<WD_N_SCALER; bin++){
+               unsigned long val = board->mScaler[bin];
+               fFile.write((const char *)&val, 8);
+            }
+            // then the board time counter @80MHz
+            unsigned long lval = board->mTimeStamp;
+            fFile.write((const char *)&lval, 8);
+
+         }// end if there are scaler data
+      }
+      for(auto &keyval : ptr->fBoard[TCB_BOARD_ID]){
+         WDAQTcbEvent* board= static_cast<WDAQTcbEvent*>(keyval.second);
+         // write board Id
+         const char board_head[] = "T#";
+         fFile.write(board_head, 2);
+         fFile.write((const char *)&board->mBoardId, 2);
+         unsigned int nbanks = board->mBanks.size();
+         fFile.write((const char *)&nbanks, 4);
+         for(auto &keybank : board->mBanks){
+            //write bank header
+            WDAQTcbBank *bank= keybank.second;
+            fFile.write((const char *)&bank->fName[0], 1);
+            fFile.write((const char *)&bank->fName[1], 1);
+            fFile.write((const char *)&bank->fName[2], 1);
+            fFile.write((const char *)&bank->fName[3], 1);
+            int size = (int) bank->data.size();
+            fFile.write((const char *)&size, 4);
+
+            //write bank content
+            for(int bin=0; bin < size; bin++){
+               unsigned int val = bank->data[bin];
+               fFile.write((const char *)&val, 4);
             }
 
          }
@@ -670,9 +1001,23 @@ void WDAQEventWriter::Loop(){
 
       //statistics
       fNEvent++;
-      fLastEvent = ptr->mTriggerEventNumber;
-
+      fLastEvent = ptr->mTriggerNumber;
       delete ptr;
+
+      //check if new file is needed
+      if(fEventsPerFile && fNEvent>fEventsPerFile){
+         fFile.close();
+         fRunNumber++;
+         
+         //open file
+         fFile.open(GetFileName(), std::ios::binary);
+         //printf("File %s opened\n", fFileName.c_str());
+         printf("Starting run number %d\n", fRunNumber);
+         fNEvent = 0;
+
+         //write header
+         WriteRunHeader();
+      }
    }
 }
 

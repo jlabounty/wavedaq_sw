@@ -10,6 +10,13 @@
 #include <netinet/in.h>
 #include <fcntl.h>
 
+template <class T> class DAQBuffer;
+class DAQThread;
+class DAQServerThread;
+
+#ifndef DAQLIB_H
+#define DAQLIB_H
+
 // --- DAQ Buffer --- thread safe queue with max size
 
 template <class T> class DAQBuffer {
@@ -39,12 +46,13 @@ template <class T> class DAQBuffer {
             return false;
          }
       };
+      // pops outs one event if available
       bool Try_pop(T* &ptr){
          std::unique_lock<std::mutex> lock(fAccess);
          //check size
          if(fEvents.size() == 0){
             //no data, wait
-            std::cv_status status = fHasData.wait_for(lock,std::chrono::seconds(1));
+            std::cv_status status = fHasData.wait_for(lock,std::chrono::milliseconds(100));
             if(status == std::cv_status::timeout) {
                lock.unlock();
                return false;
@@ -55,6 +63,7 @@ template <class T> class DAQBuffer {
          lock.unlock();
          return true;
       }
+
       unsigned int GetSize(){
          std::lock_guard<std::mutex> lock(fAccess);
 
@@ -73,6 +82,7 @@ template <class T> class DAQBuffer {
       //Getters
       unsigned int GetMaxSize(){ return fMaxSize; }
       std::string  GetName(){ return fName; }
+      float GetOccupancy(){ return fEvents.size() *1./fMaxSize; }//NOTE: only for monitoring
 
       //Constructor  
       DAQBuffer(unsigned int maxsize = 0, std::string name = "NEWBUFFER"){ 
@@ -91,6 +101,7 @@ class DAQThread{
    private:
       std::thread fThread;
       std::chrono::high_resolution_clock::duration fMinLoopDuration; //allows to avoid polling too much
+      std::chrono::high_resolution_clock::duration fLastLoopDuration; //for monitoring
       volatile bool fStop;
       volatile bool fRunning;
       bool fRunning_old;
@@ -101,20 +112,25 @@ class DAQThread{
 
          while(fStop != true){
 
-            //checks begin/end
+            bool shouldEnd = false;
+            //checks and run begin of run
             if(fRunning && !fRunning_old) Begin();
-            if(!fRunning && fRunning_old) End();
+            //checks end of run
+            if(!fRunning && fRunning_old) shouldEnd = true;
             fRunning_old = fRunning;
 
             //timed loop
             std::chrono::high_resolution_clock::time_point loopStart = std::chrono::high_resolution_clock::now();
-            if(fRunning) Loop();
+            if(fRunning && fRunning_old) Loop();
             std::chrono::high_resolution_clock::time_point loopEnd = std::chrono::high_resolution_clock::now();
 
-            std::chrono::high_resolution_clock::duration d = loopEnd - loopStart;
-            if(d<fMinLoopDuration){
+            //run end of run
+            if(shouldEnd) End();
+
+            fLastLoopDuration = loopEnd - loopStart;
+            if(fLastLoopDuration<fMinLoopDuration){
                //need to slow down
-               std::this_thread::sleep_for(fMinLoopDuration-d);
+               std::this_thread::sleep_for(fMinLoopDuration-fLastLoopDuration);
             }
          }
 
@@ -146,6 +162,14 @@ class DAQThread{
          fRunning = false;
       }
 
+      bool IsRunning(){
+         return fRunning;
+      }
+
+      std::chrono::microseconds GetLastLoopDuration(){
+         return std::chrono::duration_cast<std::chrono::microseconds>(fLastLoopDuration);
+      }
+
       //setter
       void SetMinLoopDuration(std::chrono::microseconds d){fMinLoopDuration = std::chrono::duration_cast<std::chrono::high_resolution_clock::duration>(d); }
 
@@ -155,6 +179,7 @@ class DAQThread{
          fRunning = false;
          fRunning_old = false;
          fMinLoopDuration = std::chrono::high_resolution_clock::duration::zero();
+         fLastLoopDuration = std::chrono::high_resolution_clock::duration::zero();
       }
 
       //Destructor
@@ -171,6 +196,7 @@ class DAQServerThread : public DAQThread{
       volatile int fServerPort;
       unsigned char fDatagramBuffer[MAXUDPSIZE];
       int fDatagramSize;
+      int fBufferSize;
 
       //reserved Methods
       void Setup(){
@@ -180,6 +206,22 @@ class DAQServerThread : public DAQThread{
          if(fDataSocket == 0){
             throw std::runtime_error(std::string("Cannot create socket"));
          }
+      
+	 // increase receive buffer size
+	 int rcvBufferSizeSet = fBufferSize;
+	 int rcvBufferSizeGet;
+	 socklen_t sockOptSize = sizeof(rcvBufferSizeGet);
+
+	 printf("allocating %d bytes\n", fBufferSize);      
+
+	 getsockopt(fDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeGet, &sockOptSize);
+	 if (rcvBufferSizeGet < 2*rcvBufferSizeSet) {
+	   setsockopt(fDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeSet, sizeof(rcvBufferSizeSet));
+	   getsockopt(fDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeGet, &sockOptSize);
+	 } else {
+            throw std::runtime_error(std::string("Cannot allocate enough memory for kernel buffer"));
+	 }
+  
 
          int flags = fcntl(fDataSocket, F_GETFL, 0);
          fcntl(fDataSocket, F_SETFL, flags | O_NONBLOCK);
@@ -205,8 +247,10 @@ class DAQServerThread : public DAQThread{
 
          struct sockaddr_in client_addr;
          socklen_t sockaddr_in_len = sizeof(client_addr);
+	 
+         fDatagramSize = (int) recvfrom(fDataSocket, (char*) fDatagramBuffer, sizeof(fDatagramBuffer), 0, 
+					(struct sockaddr *)&client_addr, (socklen_t *)&sockaddr_in_len);
 
-         fDatagramSize = recvfrom(fDataSocket, fDatagramBuffer, sizeof(fDatagramBuffer), 0, (struct sockaddr *)&client_addr, &sockaddr_in_len);
          if(fDatagramSize==-1){
             if(errno != EWOULDBLOCK){
                perror("recvfrom");
@@ -238,13 +282,17 @@ class DAQServerThread : public DAQThread{
       int GetServerPort(){ return fServerPort; }
 
       //Constructor
-      DAQServerThread(){
+      DAQServerThread(int buffersize=-1){
          fDataSocket = -1;
          fServerPort = -1;
          fDatagramSize = 0;
+	 if(buffersize>0) fBufferSize = buffersize;
+	 else fBufferSize = 4*1024*1024; //default
       }
 
       //Destructor
       virtual ~DAQServerThread(){
       }
 };
+
+#endif

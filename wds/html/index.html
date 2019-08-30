@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+   <meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1">
+   <title>WaveDAQ</title>
+   <link href="wds.css" rel="stylesheet" type="text/css">
+   <link href="favicon.png" rel="shortcut icon" type="image/png" title="WaveDAQ Icon">
+   <link href="iosicon.png" rel="apple-touch-icon" type="image/png" title="WaveDAQ Icon">
+   <script src="fft.js" type="text/javascript"></script>
+   <script src="controls.js" type="text/javascript"></script>
+   <script src="buttons.js" type="text/javascript"></script>
+   <script src="osc.js" type="text/javascript"></script>
+   <script src="wds.js" type="text/javascript"></script>
+   <script src="measurement.js" type="text/javascript"></script>
+</head>
+<body onload="init();">
+
+<div id="container">
+
+   <div id="scope"></div>
+
+   <div id="controls">
+      <select id="wdSelect" class="wdSelect" onchange="wdSelect(this)">
+      </select><br/>
+      <button class="wideButton" type="button" id="btnStop" style="background-color:#A0FFA0" onClick="btnStop()">Stop
+      </button>
+      <button class="wideButton" type="button" id="btnSingle" onClick="btnSingle()">Single</button>
+
+      <div class="chnButtons">
+         <button class="squareButton" id="ch0" type="button" onClick="btnChn(event, 0)"
+                 onContextmenu="btnChn(event, 0)">0
+         </button>
+         <button class="squareButton" id="ch1" type="button" onClick="btnChn(event, 1)"
+                 onContextmenu="btnChn(event, 1)">1
+         </button>
+         <button class="squareButton" id="ch2" type="button" onClick="btnChn(event, 2)"
+                 onContextmenu="btnChn(event, 2)">2
+         </button>
+         <button class="squareButton" id="ch3" type="button" onClick="btnChn(event, 3)"
+                 onContextmenu="btnChn(event, 3)">3
+         </button>
+         <br/>
+         <button class="squareButton" id="ch4" type="button" onClick="btnChn(event, 4)"
+                 onContextmenu="btnChn(event, 4)">4
+         </button>
+         <button class="squareButton" id="ch5" type="button" onClick="btnChn(event, 5)"
+                 onContextmenu="btnChn(event, 5)">5
+         </button>
+         <button class="squareButton" id="ch6" type="button" onClick="btnChn(event, 6)"
+                 onContextmenu="btnChn(event, 6)">6
+         </button>
+         <button class="squareButton" id="ch7" type="button" onClick="btnChn(event, 7)"
+                 onContextmenu="btnChn(event, 7)">7
+         </button>
+         <br/>
+         <button class="squareButton" id="ch8" type="button" onClick="btnChn(event, 8)"
+                 onContextmenu="btnChn(event, 8)">8
+         </button>
+         <button class="squareButton" id="ch9" type="button" onClick="btnChn(event, 9)"
+                 onContextmenu="btnChn(event, 9)">9
+         </button>
+         <button class="squareButton" id="ch10" type="button" onClick="btnChn(event, 10)"
+                 onContextmenu="btnChn(event, 10)">10
+         </button>
+         <button class="squareButton" id="ch11" type="button" onClick="btnChn(event, 11)"
+                 onContextmenu="btnChn(event, 11)">11
+         </button>
+         <br/>
+         <button class="squareButton" id="ch12" type="button" onClick="btnChn(event, 12)"
+                 onContextmenu="btnChn(event, 12)">12
+         </button>
+         <button class="squareButton" id="ch13" type="button" onClick="btnChn(event, 13)"
+                 onContextmenu="btnChn(event, 13)">13
+         </button>
+         <button class="squareButton" id="ch14" type="button" onClick="btnChn(event, 14)"
+                 onContextmenu="btnChn(event, 14)">14
+         </button>
+         <button class="squareButton" id="ch15" type="button" onClick="btnChn(event, 15)"
+                 onContextmenu="btnChn(event, 15)">15
+         </button>
+      </div>
+
+      <button class="wideButton" id="chAll" type="button" onClick="btnChnAll()">All</button>
+      <button class="wideButton" id="chOn" type="button" onClick="btnOn()">Off</button>
+
+      <div class="groupBtn">
+         <div class="upDown">
+            <button name="ctrlButton" data-draw="ButtonDrawUp" id="scaleUp" type="button" class="squareButtonCanvas"
+                    onClick="btnScale(1)"></button>
+            <div id="UScale">100 mV</div>
+            <button name="ctrlButton" data-draw="ButtonDrawDown" id="scaleDown" type="button" class="squareButtonCanvas"
+                    onClick="btnScale(-1)"></button>
+         </div>
+         <button name="ctrlVSlider" id="uofsSlider" class="vSlider" type="button" data-update="sldUOffset()"></button>
+
+         <div class="zeroDist">
+            <button name="ctrlButton" data-draw="ButtonDrawVColl" class="highButton" id="ofsZero" type="button"
+                    onClick="btnOfsZero()"></button>
+            <div style="height:10px;"></div>
+            <button name="ctrlButton" data-draw="ButtonDrawVExp" class="highButton" id="ofsDist" type="button"
+                    onClick="btnOfsDist()"></button>
+         </div>
+      </div>
+
+      <table class="timeScale">
+         <tr>
+            <td width="1%">
+               <button name="ctrlButton" data-draw="ButtonDrawLeft" id="scaleLeft" type="button" class="squareButtonCanvas"
+                       onClick="btnTScale(1)"></button>
+            </td>
+            <td id="TScale" style="vertical-align:middle">20 ns</td>
+            <td width="1%">
+               <button name="ctrlButton" data-draw="ButtonDrawRight" id="scaleRight" type="button" class="squareButtonCanvas"
+                       onClick="btnTScale(-1)"></button>
+            </td>
+         </tr>
+      </table>
+
+      <button name="ctrlHSlider" id="tofsSlider" class="hSlider" type="button" data-update="sldTOffset()"></button>
+
+      <button class="wideButton" id="btnConfig" type="button" onClick="btnConfig()">Config</button>
+      <button class="wideButton" id="btnMeasure" type="button" onClick="dlgShow('dlgMeasure')">Measure</button>
+      <button class="wideButton" id="btnChannels" type="button" onClick="dlgShow('dlgChannels')">Channels</button>
+      <button class="wideButton" id="btnSave" type="button" onClick="btnSave()">Save</button>
+      <button class="wideButton" id="btnHelp" type="button" onClick="dlgShow('dlgHelp')">Help</button>
+      <button class="wideButton" id="btnAbout" type="button" onClick="dlgShow('dlgAbout')">About</button>
+
+   </div>
+
+   <div id="config">
+      <form name="config" onsubmit="return false;">
+
+
+         <div class="groupTitle">General</div>
+         <div class="group">
+            <input type="checkbox" id="applyAll" name="applyAll" onClick="OSC.applyAll = this.checked;">
+            Apply changes to all boards
+         </div>
+
+         <div class="groupTitle">Trigger</div>
+         <div class="group">
+            <div class="vMiddleBox vSpacer5">
+               <button name="ctrlHSlider" id="sldDacTriggerLevel" class="hSlider vMiddleElement" type="button"
+                       data-update="sldDacTriggerLevel()" style="width:180px;"></button>
+               <span class="hSpacer5 vMiddleElement"></span>
+               <input name="dacTriggerLevel" class="vMiddleElement"
+                      type="text" id="inpDacTriggerLevel"
+                      onkeypress="keyParam(event,this)"
+                      onblur="validateParam(this)"
+                      value="0"><span
+                    class="vMiddleElement">&nbsp;mV
+               </span>
+            </div>
+            <div class="vMiddleBox vSpacer5">
+               <div class="vMiddleElement">Delay:&nbsp;</div>
+               <button name="ctrlHSlider" id="sldTriggerDelay" class="hSlider vMiddleElement" type="button"
+                       data-update="sldTriggerDelay()" style="width:130px;"></button>
+               <span class="hSpacer5"></span>
+               <input name="triggerDelay" class="vMiddleElement" type="text"
+                      id="inpTriggerDelay" onkeypress="keyParam(event,this)" value="0"><span
+                    class="vMiddleElement">&nbsp;ns
+               </span>
+            </div>
+
+            <div class="vMiddleBox vSpacer5">
+            Holdoff:&nbsp;<input type="text" id="triggerHoldoff" name="triggerHoldoff" value="0" onkeypress="keyParam(event,this)">&nbsp;ms
+            </div>
+
+            <table>
+               <tr>
+                  <td>
+                     Type:&nbsp;&nbsp;
+                     <input type="radio" id="rbTriggerModeNormal" name="triggerMode" value="1" checked
+                            onClick="setParam(this)">normal
+                     <input type="radio" id="rbTriggerModeAuto" name="triggerMode" value="2" onClick="setParam(this)">auto
+                  </td>
+                  <td rowspan=2>
+                     &nbsp;&nbsp;
+                     <button name="ctrlButton" data-draw="ButtonDrawEdgeLead" id="trgEdgeLead" type="button"
+                             class="squareButtonCanvas"
+                             onClick="btnTedge(1)"></button>
+                     <button name="ctrlButton" data-draw="ButtonDrawEdgeTrail" id="trgEdgeTrail" type="button"
+                             class="squareButtonCanvas"
+                             onClick="btnTedge(0)" style="display:none"></button>
+                  </td>
+               </tr>
+               <tr>
+                  <td>
+                     Source:&nbsp;&nbsp;
+                     <input type="radio" id="rbTriggerSourceInt" name="triggerSource" value="0" checked
+                            onClick="setParam(this)">int
+                     <input type="radio" id="rbTriggerSourceExt" name="triggerSource" value="1"
+                            onClick="setParam(this)">ext
+                  </td>
+               </tr>
+            </table>
+            <button class="executeButton" id="btnTrigger" type="button" onClick="dlgShow('dlgTrigger')">Trigger Pattern
+            </button>
+         </div>
+
+         <div class="groupTitle">Analog Front-end</div>
+         <div class="group">
+            <div class="vSpacer5">
+               <label for="selGain">Gain:</label>
+               <select id="selGain" name="feGain" class="select" onchange="setParam(this)">
+                  <option value="0.5">0.5</option>
+                  <option selected value="1">1</option>
+                  <option value="2.5">2.5</option>
+                  <option value="5">5</option>
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+               </select>
+               &nbsp;&nbsp;&nbsp;
+               <input type="checkbox" id="cbPzc" name="fePzc" onClick="setParam(this)">PZC
+               <select id="selPzcLevel" name="dacPzcLevel" class="select" onchange="setParam(this)">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                  <option value="7">7</option>
+               </select>
+
+            </div>
+            <div class="vSpacer5">
+               Mode:
+               <input type="radio" id="inputReadoutSrcDRS" name="readoutSrcSel" checked="checked" value="1"
+                      onClick="setParam(this)">DRS
+               <input type="radio" id="inputReadoutSrcADC" name="readoutSrcSel" value="2" onClick="setParam(this)">ADC
+               <input type="radio" id="inputReadoutSrcTDC" name="readoutSrcSel" value="3" onClick="setParam(this)">TDC
+            </div>
+            <div class="vSpacer5">
+               Readout enable:</br>
+               <input type="checkbox" id="readoutDRSEnable" name="readoutEnableDRS" checked="checked"
+                      onClick="setParam(this)">DRS
+               <input type="checkbox" id="readoutADCEnable" name="readoutEnableADC" onClick="setParam(this)">ADC
+               <input type="checkbox" id="readoutTDCEnable" name="readoutEnableTDC" onClick="setParam(this)">TDC
+               <input type="checkbox" id="readoutTRGEnable" name="readoutEnableTRG" onClick="setParam(this)">TRG
+            </div>
+
+            <div class="vMiddleBox vSpacer5">
+               <div class="vMiddleElement">Input range:&nbsp;</div>
+               <select id="selRange" class="select" onchange="setRange(this)">
+                  <option value="-0.45">-0.95 V ... +0.05 V</option>
+                  <option value="0">-0.5 V ... +0.5 V</option>
+                  <option value="0.45">-0.05 V ... +0.95 V</option>
+               </select>
+            </div>
+
+            <div class="vSpacer5">
+               <input type="checkbox" id="timingCalibSignalEnable" name="timingCalibSignalEnable"
+                      onClick="setCalibClock(this)">
+               Enable calibration clock
+            </div>
+            <div class="vMiddleBox vSpacer5">
+               <input type="checkbox" id="feMux" name="feMux" onClick="setParam(this)">
+               Connect inputs to calib. source
+            </div>
+            <div class="vMiddleBox vSpacer5">
+               <input type="checkbox" id="calibBufferEnable" name="calibBufferEnable" onClick="setParam(this)">
+               Power calib. source
+            </div>
+
+            <div class="vMiddleBox vSpacer5">
+               <div class="vMiddleElement">DC:&nbsp;</div>
+               <button name="ctrlHSlider" id="sldDacCalDc" class="hSlider vMiddleElement" type="button"
+                       data-update="sldDacCalDc()" style="width:140px;"></button>
+               <span class="hSpacer5"></span><input name="dacCalDc" class="vMiddleElement" type="text" id="inpDacCalDc"
+                                                    onkeypress="keyParam(event,this)" value="0"><span
+                    class="vMiddleElement">&nbsp;mV</span>
+            </div>
+         </div>
+
+         <div class="groupTitle">Sampling Speed</div>
+         <div class="group">
+            <input type="text" id="drsSampleFreq" name="drsSampleFreq" value="5"
+                   onkeypress="keyParam(event,this)">&nbsp;GSPS
+            &nbsp;Actual:&nbsp;<span id="drsActualSampleFreq">N/A</span>
+         </div>
+
+         <div class="groupTitle">Display</div>
+         <div class="group">
+            <div class="vMiddleBox vSpacer5">
+               <div class="vMiddleElement">Waveform persistency:&nbsp;</div>
+               <select id="persSelect" class="select" onchange="setPers(this)">
+                  <option value="0">None</option>
+                  <option value="0.5">0.5 s</option>
+                  <option value="1">1 s</option>
+                  <option value="2">2 s</option>
+                  <option value="5">5 s</option>
+                  <option value="10">10 s</option>
+                  <option value="60">60 s</option>
+                  <option value="inf">Infnite</option>
+               </select>
+            </div>
+
+            <div class="vMiddleBox vSpacer5">
+               <input type="checkbox" id="scaler" title="Show hardware scalers" name="scaler"
+                      onClick="setDisp(this)">
+               Show hardware scalers
+            </div>
+            <div class="vMiddleBox vSpacer5">
+               <input type="checkbox" id="invert" title="Invert display colors" name="invert"
+                      onClick="setDisp(this)">
+               Invert colors
+            </div>
+         </div>
+
+         <div class="groupTitle">Clock Channels</div>
+         <div class="group">
+            <div style="user-select: none">
+               Clock channels:
+               <button class="squareButton" id="ch16" type="button" onClick="btnChn(event, 16)"
+                       onContextmenu="btnChn(event, 16)">16
+               </button>
+               <button class="squareButton" id="ch17" type="button" onClick="btnChn(event, 17)"
+                       onContextmenu="btnChn(event, 17)">17
+               </button>
+               <div class="vMiddleBox vSpacer5">
+                  <div class="vMiddleElement">Input:&nbsp;</div>
+                  <select id="timingReferenceSignalSelect" class="select" name="timingReferenceSignal"
+                          onchange="setReferenceSignal(this)">
+                     <option value="0">Off</option>
+                     <option value="1">Sine</option>
+                     <option value="2">Square</option>
+                  </select>
+               </div>
+
+            </div>
+         </div>
+
+         <div class="groupTitle">Extra Channels</div>
+         <div class="group">
+            <div style="user-select: none">
+               <div class="vMiddleBox vSpacer5">
+                  <button class="squareButton" id="ch18" type="button" onClick="btnChn(event, 18)"
+                          onContextmenu="btnChn(event, 18)">&Sigma;</button>
+                  <button class="squareButton" id="ch19" type="button" onClick="btnChn(event, 19)"
+                          onContextmenu="btnChn(event, 19)" style="width: 50px">FFT</button>
+                  <select id="chnFft" class="select" name="chnFft">
+                     <option value="0">CH0</option>
+                     <option value="1">CH1</option>
+                     <option value="2">CH2</option>
+                     <option value="3">CH3</option>
+                     <option value="4">CH4</option>
+                     <option value="5">CH5</option>
+                     <option value="6">CH6</option>
+                     <option value="7">CH7</option>
+                     <option value="8">CH8</option>
+                     <option value="9">CH9</option>
+                     <option value="10">CH10</option>
+                     <option value="11">CH11</option>
+                     <option value="12">CH12</option>
+                     <option value="13">CH13</option>
+                     <option value="14">CH14</option>
+                     <option value="15">CH15</option>
+                     <option value="16">CH16</option>
+                     <option value="17">CH17</option>
+                     <option value="18">SUM</option>
+                  </select>
+               </div>
+            </div>
+         </div>
+
+         <div class="groupTitle">Voltage Calibration</div>
+         <div class="group">
+            <table border="0">
+               <tr>
+                  <td><input type="checkbox" id="calib1" name="ofsCalib1" onClick="setParam(this)"></td>
+                  <td>Apply Cell Calibration</td>
+               </tr>
+               <tr>
+                  <td><input type="checkbox" id="calib2" name="ofsCalib2" onClick="setParam(this)"></td>
+                  <td>Apply Readout Calibration</td>
+               </tr>
+               <tr>
+                  <td><input type="checkbox" id="calib3" name="gainCalib" onClick="setParam(this)"></td>
+                  <td>Apply Gain Calibration</td>
+               </tr>
+               <tr>
+                  <td><input type="checkbox" id="calib4" name="rangeCalib" onClick="setParam(this)"></td>
+                  <td>Correct Range Offset</td>
+               </tr>
+            </table>
+            <button class="executeButton" id="btnVCalib" type="button" onClick="btnVcalib()">Execute Voltage
+               Calibration
+            </button>
+            <div name="ctrlProgress" style="width:270px;" id="progressIndVcalib"></div>
+         </div>
+
+         <div class="groupTitle">Timing Calibration</div>
+         <div class="group">
+            <table border="0">
+               <tr>
+                  <td><input type="checkbox" id="rotate" name="rotateWaveform" onClick="setParam(this)"></td>
+                  <td>Rotate waveform relative to trigger</td>
+               </tr>
+               <tr>
+                  <td><input type="checkbox" id="tcalib1" name="timeCalib1" onClick="setParam(this)"></td>
+                  <td>Apply timing calibration</td>
+               </tr>
+               <tr>
+                  <td><input type="checkbox" id="tcalib2" name="timeCalib2" onClick="setParam(this)"></td>
+                  <td>Apply timing offset correction</td>
+               </tr>
+               <tr>
+                  <td><input type="checkbox" id="tcalib3" name="timeCalib3" onClick="setParam(this)"></td>
+                  <td>Correct horizontal trigger position</td>
+               </tr>
+               <tr>
+                  <td><input type="checkbox" id="clksource" name="daqClkSrcSel" onClick="setParam(this)"></td>
+                  <td>Use internal reference clock</td>
+               </tr>
+            </table>
+            <button class="executeButton" id="btnTCalib" type="button" onClick="btnTcalib()">Execute Time Calibration
+            </button>
+
+            <div name="ctrlProgress" style="width:270px;" id="progressIndTcalib"></div>
+         </div>
+
+      </form>
+   </div>
+
+   <!-- channels dialog -->
+   <div id="dlgChannels" class="dlgFrame">
+
+      <div class="dlgTitlebar">Channel Configuration</div>
+
+      <div class="dlgPanel" style="padding:0">
+         <div id="channels">
+            <table id="channelsTable">
+               <tr class="channelsTitle">
+                  <th class="channelsTh">Chn</th>
+                  <th class="channelsTh">Gain</th>
+                  <th class="channelsTh">PZC</th>
+                  <th class="channelsTh">Trigger Level</th>
+                  <th class="channelsTh">HV</th>
+                  <th class="channelsTh">Current</th>
+               </tr>
+               <!-- channel rows will be created dynamically in init() -->
+            </table>
+         </div>
+         <button class="wideButton" style="background-color:#F8F8F8" type="button" onClick="dlgHide('dlgChannels')">
+            Close
+         </button>
+      </div>
+   </div>
+
+   <!-- about dialog -->
+   <div id="dlgAbout" class="dlgFrame">
+
+      <div class="dlgTitlebar">About</div>
+
+      <div class="dlgPanel">
+         <div style="font-size:16pt">WaveDAQ Oscilloscope</div>
+         <div id="build" style="font-size:12pt"></div>
+         <hr/>
+         <div>Events per second: <span id="EPS">N/A</span></div>
+         <div>Frames per second: <span id="FPS">N/A</span></div>
+         <hr/>
+         <div style="font-size:8pt">Stefan Ritt</div>
+         <div style="font-size:8pt">Paul Scherrer Institute</div>
+         <button class="wideButton" style="background-color:#F8F8F8" type="button" onClick="dlgHide('dlgAbout')">Close
+         </button>
+      </div>
+   </div>
+
+
+   <!-- help dialog -->
+   <div id="dlgHelp" class="dlgFrame">
+
+      <div class="dlgTitlebar">Help</div>
+
+      <div class="dlgPanel">
+         <table class="tableHelp">
+            <tr><th colspan="2">Keyboard Shortcuts</th></tr>
+            <tr><td>&lt;Space&gt;</td><td>Start/Stop acquisition</td></tr>
+            <tr><td>s</td><td>Trigger single acquisition</td></tr>
+            <tr><td>]</td><td>Hide/Show controls</td></tr>
+            <tr><td>c</td><td>Hide/Show config page</td></tr>
+            <tr><td>0 ... 9</td><td>Select specific channel</td></tr>
+            <tr><td>a</td><td>Select all channels</td></tr>
+            <tr><td>o</td><td>Turn selected channesl on/off</td></tr>
+            <tr><td>^</td><td>Distribute channel offsets equally</td></tr>
+            <tr><td>v</td><td>Set channel offsets to zero</td></tr>
+         </table>
+
+         <button class="wideButton" style="background-color:#F8F8F8" type="button" onClick="dlgHide('dlgHelp')">Close
+         </button>
+      </div>
+   </div>
+
+   <!-- measure dialog -->
+   <div id="dlgMeasure" class="dlgFrame">
+
+      <div class="dlgTitlebar">Measure</div>
+
+      <div class="dlgPanel" style="text-align: left">
+         <div class="vMiddleElement">
+            <div style="text-align:center">
+               <input type="checkbox" id="dispHisto" onclick="dispHisto(this)">&nbsp;Display Histograms
+               &nbsp;&nbsp;&nbsp;Accumulate <select class="measSelect" onchange="setNStat(this.value)">
+               <option value="10">10</option>
+               <option value="50">50</option>
+               <option value="100">100</option>
+               <option value="500">500</option>
+               <option value="1000" selected>1000</option>
+               <option value="5000">5000</option>
+               <option value="10000">10000</option>
+               <option value="50000">50000</option>
+               <option value="100000">100000</option>
+               <option value="1000000">1000000</option>
+               </select>measurements
+               &nbsp;&nbsp;&nbsp;<button style="background-color:#F8F8F8;margin:3px;padding:3px" type="button" onClick="clearStat()">&nbsp;Clear
+                  statistics&nbsp;
+               </button>
+            </div>
+            <hr/>
+            <div id="measList">
+               <!-- will be filled dynamically -->
+               <div id="measAdd">
+                  <button type="button" class="plusButton" onClick="measAdd()">+</button>
+                  <span id="addHint" style="color:green;font-style:italic">&nbsp;&larr;&nbsp;Click to create new measurement</span>
+               </div>
+            </div>
+         </div>
+         <br/>
+         <div style="text-align:center">
+            <button class="wideButton" style="background-color:#F8F8F8" type="button" onClick="dlgHide('dlgMeasure');setCursorsOff();">
+               Close
+            </button>
+         </div>
+      </div>
+
+   </div>
+
+   <!-- save events dialog -->
+   <div id="dlgSave" class="dlgFrame">
+
+      <div class="dlgTitlebar">Save waveforms</div>
+
+      <div class="dlgPanel">
+         <table style="padding: 10px;border-spacing: 10px">
+            <tr>
+               <td style="text-align: right">Filename:</td>
+               <td><input type="text" name="filename" id="filename" style="width: 150px;text-align: left"></td>
+            </tr>
+            <tr>
+               <td style="text-align: right">Format:</td>
+               <td style="text-align: left">
+                  <select id="fileformat">
+                     <option selected value="bin">binary</option>
+                     <option value="xml">xml</option>
+                  </select>
+               </td>
+            </tr>
+            <tr>
+               <td style="text-align: right">Boards:</td>
+               <td style="text-align: left">
+                  <select id="saveboards">
+                     <option selected value="cur">Current board only</option>
+                     <option value="all">All boards</option>
+                  </select>
+               </td>
+            </tr>
+            <tr>
+               <td style="text-align: right">Number of events:</td>
+               <td style="text-align: left">
+                  <input type="text" id="nevents" style="width: 150px;text-align: left">
+               </td>
+            </tr>
+         </table>
+         <br/>
+         <div style="text-align:center">
+            <button id="btnSaveDialog" class="wideButton" type="button" onClick="btnStart();">Start</button>
+            <button class="wideButton" type="button" onClick="dlgHide('dlgSave')">Cancel</button>
+         </div>
+      </div>
+
+   </div>
+
+   <!-- calibrate single/all boards dialog -->
+   <div id="dlgVCalib" class="dlgFrame">
+      <div class="dlgTitlebar">Please select which boards to calibrate
+      </div>
+      <div class="dlgPanel">
+         <div>
+            <button style="width:200px;padding:6px" type="button" onClick="doVCalib(false)">Calibrate current board
+            </button>
+            <br/><br/>
+            <button style="width:200px;padding:6px" type="button" onClick="doVCalib(true)">Calibrate all boards</button>
+            <br/>
+         </div>
+         <hr/>
+         <div style="text-align:center">
+            <button class="wideButton" type="button" onClick="dlgHide('dlgVCalib')">Cancel</button>
+         </div>
+      </div>
+   </div>
+
+   <div id="dlgTCalib" class="dlgFrame">
+      <div class="dlgTitlebar">Please select which boards to calibrate
+      </div>
+      <div class="dlgPanel">
+         <div>
+            <button style="width:200px;padding:6px" type="button" onClick="doTCalib(false)">Calibrate current board
+            </button>
+            <br/><br/>
+            <button style="width:200px;padding:6px" type="button" onClick="doTCalib(true)">Calibrate all boards</button>
+            <br/>
+         </div>
+         <hr/>
+         <div style="text-align:center">
+            <button class="wideButton" type="button" onClick="dlgHide('dlgTCalib')">Cancel</button>
+         </div>
+      </div>
+   </div>
+
+   <!-- extra buttons -->
+   <span>
+      <button class="floatButton" id="measClear" type="button" onClick="clearStat()">CLR</button>
+      <button class="floatButton" id="measSave" type="button" onClick="measSave()">Save</button>
+      <button class="floatButton" id="measLogY" type="button" onClick="measLogY()">Log Y</button>
+      <button class="floatButton" id="measFilter" type="button" onClick="measFilter()">Filter</button>
+      <button class="floatButton" id="measZoomIn" type="button" onClick="measZoomIn()">&plus;</button>
+      <button class="floatButton" id="measZoomOut" type="button" onClick="measZoomOut()">&minus;</button>
+      <button class="floatButton" id="measZoomFit" type="button" onClick="measZoomFit()">&laquo;&nbsp;&raquo;</button>
+   </span>
+
+   <!-- trigger pattern dialog -->
+   <div id="dlgTrigger" class="dlgFrame">
+      <div class="dlgTitlebar">Trigger Patterns
+      </div>
+      <div class="dlgPanel" id="panelTrigger">
+
+         <div style="text-align:center; padding-bottom: 10px;">
+            <button class="wideButton" type="button" onClick="triggerClearAll();">Clear</button>
+            <button class="wideButton" type="button" onClick="triggerOrAll();">Or&nbsp;All</button>
+            <button class="wideButton" type="button" onClick="dlgShow('dlgTriggerHelp');">Help</button>
+         </div>
+
+         <script>
+            var d = document.getElementById('panelTrigger');
+            var table = document.createElement('table');
+            table.className = 'tableTrigger';
+            d.appendChild(table);
+            var row = table.insertRow(-1);
+
+            var cell = row.insertCell(-1);
+            cell.appendChild(document.createTextNode('Chn'));
+
+            cell = row.insertCell(-1);
+            cell.appendChild(document.createTextNode('Pol'));
+            cell.className = 'tableTriggerHeader';
+            cell.addEventListener('click', triggerClickPolarity.bind(cell));
+
+            for (var i = 0; i < 18; i++) {
+               cell = row.insertCell(-1);
+               cell.appendChild(document.createTextNode(i < 10 ? 'P0' + i : 'P' + i));
+               cell.id = 'P' + (i<10 ? '0' + i : i);
+               cell.enabled = false;
+               cell.className = 'tableTriggerHeader';
+               cell.addEventListener('click', triggerClickPattern.bind(cell));
+            }
+
+            for (i = 0; i < 17; i++) {
+               var row = table.insertRow(-1);
+               cell = row.insertCell(-1);
+               if (i === 16)
+                  cell.appendChild(document.createTextNode('EXT'));
+               else
+                  cell.appendChild(document.createTextNode('CH' + i));
+               cell.style.backgroundColor = ChannelColors[i];
+
+               cell = row.insertCell(-1);
+               cell.appendChild(document.createTextNode('+'));
+               cell.id = (i<10) ? 'L0' + i : 'L' + i;
+               cell.className = 'tableTriggerCell';
+               cell.addEventListener('click', triggerClickPolarity.bind(cell));
+
+               for (var j = 0; j < 18; j++) {
+                  cell = row.insertCell(-1);
+                  cell.appendChild(document.createTextNode(''));
+                  cell.id = 'C' + (i<10 ? '0' + i : i) + (j<10 ? '0' + j : j);
+                  cell.pa = j;
+                  cell.ch = i;
+                  cell.mode = 0;
+                  cell.className = 'tableTriggerCell';
+                  cell.addEventListener('click', triggerClickCell.bind(cell));
+               }
+            }
+         </script>
+         <div style="text-align:center; padding-top: 10px;">
+            <button class="wideButton" type="button" onClick="dlgHide('dlgTrigger')">Close</button>
+         </div>
+      </div>
+   </div>
+
+   <!-- trigger pattern help dialog -->
+   <div id="dlgTriggerHelp" class="dlgFrame">
+      <div class="dlgTitlebar">Trigger Help
+      </div>
+      <div class="dlgPanel" id="panelTriggerHelp" style="text-align: left; line-height: 2em; max-width: 950px;">
+         Each WaveDREAM board has 18 trigger patterns which are represented as columns in
+         the Trigger Patterns dialog. Each row represents one channel "CH0" to "CH15" plus the
+         external trigger input "EXT".
+         All 18 patterns are OR-ed to form the trigger. Each pattern can contain certain
+         channels in coincidence (&quot;&bull;&quot;) or in anti-coincidence (&quot;&times;&quot;). Each channel can have positive polarity
+         ("+") or inverted polarity ("-").<br /><br />
+            <div>&bull;&nbsp;To change the polarity of a channel, click on the "+" or "-" next to the channel.</div>
+            <div>&bull;&nbsp;To invert the polarity of all channels, click on "Pol" at the top row.</div>
+            <div>&bull;&nbsp;To activate or de-activate a trigger pattern, click on the PXX box at the table header.
+            Active patterns are shown in dark green.</div>
+            <div>&bull;&nbsp;To add a channel in coincidence to that pattern (AND), click once inside a cell.
+               The symbol &quot;&bull;&quot; appears.</div>
+            <div>&bull;&nbsp;To add a channel in anti-coincidence to that pattern (VETO), click again inside a cell.
+               The symbol &quot;&times;&quot; appears.</div>
+            <div>&bull;&nbsp;To remove a channel from a pattern, click until a cell become empty.</div>
+         <div style="text-align:center">
+            <button class="wideButton" type="button" onClick="dlgHide('dlgTriggerHelp')">Close</button>
+         </div>
+      </div>
+   </div>
+</div> <!-- container -->
+
+</body>
+</html>

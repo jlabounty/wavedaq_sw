@@ -99,8 +99,9 @@ int main(int argc, char *argv[])
       printf("[37]: Set trigger delay    \t \t  [38]: Get trigger delay\n");
       printf("[39]: LockSerdes FSM Start \t \t  [40]: Get current serdes values\n");
       printf("[41]: LockSerdes Status    \t \t  [42]: LockSerdes Draw Eye      \n");
-      printf("[43]: Single crate TRG conf\t \t  [44]:                          \n");
-      printf("[-1]: Exit\n");
+      printf("[43]: Single crate TRG conf\t \t  [44]: Read Prescaling          \n");      
+      printf("[45]: SCIFI run            \t \t  [-1]: Exit          \n");
+      //printf("[-1]: Exit\n");
 
       do {
          printf("Give an option: ");
@@ -651,12 +652,16 @@ int main(int argc, char *argv[])
             {
             int nBanks=0;
             char bankName[4];
-            u_int32_t data[4000];
             int length;
             u_int32_t ptr= TCBBoard.GetBufferHeadSPI(&nBanks);
+            printf("packager with %d banks\n", nBanks);
             while(TCBBoard.HasBufferBankSPI(ptr, bankName, &length)){
+               printf("Got bank %c %c %c %c\n", bankName[3], bankName[2], bankName[1], bankName[0]);
+               u_int32_t *data = new u_int32_t[length];
+               printf("Data:\n");
                TCBBoard.GetBufferBankDataSPI(ptr, data, length);
-               printf("got bank %c %c %c %c", bankName[3], bankName[2], bankName[1], bankName[0]);
+               for(int i=0; i<length; i++ ) printf("%3d: %08x\n", i, data[i]);
+               delete[] data;
                ptr = TCBBoard.SkipBufferBankSPI(ptr, length);
             }
             TCBBoard.IncrementBufferPointer();
@@ -767,6 +772,63 @@ int main(int argc, char *argv[])
           TCBBoard.SetSingleCrateTriggerOr(a.size(), &a[0], shaper);
         }
       }
+      if(option == 44) {
+         printf(" opt = 44 : Read precaling values ... \n");
+	 u_int32_t pvalue[64];
+	 TCBBoard.GetPrescaling(pvalue);
+         for(int irow = 0; irow<TCBBoard.fntrg; irow++) {
+	   printf("prescaling for trigger %d is %d\n",irow,pvalue[irow]);
+         }
+      }
+      if(option == 45) {
+         printf(" opt = 45 : Perform a SCIFI run ... \n");
+	 // file name
+	 printf("type the file name\n");
+	 char fname[100];
+	 scanf("%s", fname);
+	 // how many runs?
+	 printf("type how many runs\n");
+	 int nrun;
+	 scanf("%d", &nrun);
+	 // how long in sec?
+	 printf("type run un duration in sec\n");
+	 int rsec;
+	 scanf("%d", &rsec);
+	 // loop on runs
+	 for(int irun = 0; irun<nrun; irun++) {
+	   // open the file
+	   FILE *ffile;
+	   char filename[100];
+	   sprintf(filename,"%s-%d.dat", fname, irun);
+      printf("starting run to file %s\n", filename);
+	   ffile = fopen(filename,"w");
+	   // disable all trigger
+      u_int32_t rena = 0;
+	   TCBBoard.SetRENA(&rena,0);
+	   TCBBoard.SetRENA(&rena,1);
+	   // give a sync
+	   TCBBoard.SWSync();
+	   // put in runmode
+	   TCBBoard.GoRun();
+	   // wait n seconds
+	   sleep(rsec-1);
+	   // put in stop
+	   TCBBoard.SWStop();
+	   // read counter values + total time
+	   u_int32_t data[44];
+	   TCBBoard.ReadBLT(0x700,data,43);
+	   // read total time 
+	   TCBBoard.GetTotalTime(data+43);
+	   //write to file
+	   for(int iword = 0; iword<44; iword++)
+	     fprintf(ffile,"%d\n",data[iword]);
+	   //close the file
+	   fclose(ffile);
+	   printf(" Run %d DONE!\n", irun);
+	 }// end loop on runs
+	 
+      }
+
       
 
       /* end of the main loop on the options*/

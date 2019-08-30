@@ -58,7 +58,7 @@ int main(int argc, char** argv)
          printf("WDB as source %s\n", wdb->GetName().c_str());
          wdb->ReceiveControlRegisters();
 
-         wdb->SetSendBlocked(true); // update all control register together
+         wdb->SetSendBlock(true); // update all control register together
 
          // Set backplane clock source 80 MHz
          wdb->SetExtClkInSel(0);
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
          wdb->SetAdvTrgTxChkWord1(TESTVALUE1);
 
          // now send all changed registers in one packet
-         wdb->SetSendBlocked(false);
+         wdb->SetSendBlock(false);
          wdb->SendControlRegisters();
 
          // Sync LMK

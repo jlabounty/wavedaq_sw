@@ -1,21 +1,30 @@
 #include <string>
 #include <vector>
+#include <array>
 #include <sstream>
 #include <map>
 #include "mscb.h"
 #include "WDBLib.h"
 #include "register_map_wd2.h"
 #include "TCBLib.h"
-#include "WDAQLib.h"
 #include "Properties.h"
 
+class WDBoard;
 class WDCrate;
 class WDSystem;
+class WDWDB;
+class WDTCB;
+
+#ifndef WDLIB_H
+#define WDLIB_H
+#include "WDAQLib.h"
+
 
 // --- WaveDAQ board --- basic wrapper class for wavedaq board
 class WDBoard {
    friend class WDCrate;
    private:
+      std::string fBoardName;
       char fSlot;
       WDCrate *fCrate;
       PropertyGroup fProperties;
@@ -27,10 +36,13 @@ class WDBoard {
       //Methods
       void AddProperty(std::string name, std::string val);
       Property &GetProperty(std::string name);
+      void Configure(); //called to configure with properties
 
       //for derived classes
       virtual void Connect() { };  //called to init connection to the board
-      virtual void Configure() { };//called to configure with properties
+      virtual void ConfigurationStarted() { };//called when a configuration starts
+      virtual void ConfigurationEnded() { };//called when a vonfiguration ends
+      virtual void ConfigureProperty(const std::string &name, Property &property) { }; //called to configure a setting to a property
       virtual void SetSerdesTraining(bool state) { };//called to enable/disable serdes training pattern
       //virtual bool IsSerdesTraining();//check serdes training pattern status
       virtual void TrainSerdes() { };//called to train serdes
@@ -47,15 +59,18 @@ class WDBoard {
       char GetSlot(){ return fSlot; }
       WDCrate *GetCrate(){ return fCrate; }
       PropertyGroup &GetProperties(){ return fProperties; }
-      std::string GetGroup() { return fGroupName; };
+      std::string GetGroup() { return fGroupName; }
+      std::string GetBoardName() {return fBoardName; }
 
       //Constructor
       //standalone
-      WDBoard(){
+      WDBoard(std::string name="standalone"){
+         fBoardName = name;
          fSlot = -1;
+         fCrate = nullptr;
       }
       //inside a crate
-      WDBoard(WDCrate * crate, char slot);
+      WDBoard(WDCrate * crate, char slot, std::string name="BoardXXX");
 
       //Destructor
       virtual ~WDBoard() {}
@@ -68,8 +83,10 @@ class WDCrate {
    private:
       WDBoard *fBoard[18];
       WDSystem *fSystem;
+      std::string fCrateName;
       std::string fMscbName;
       int fMscbHandle;
+      long fCrateNumber;
 
       //reserved Methods
 
@@ -83,16 +100,23 @@ class WDCrate {
 
       //Getters
       WDBoard *GetBoardAt(int slot);
-      const std::string GetMscbName(){ return fMscbName; };
+      const std::string GetCrateName(){ return fCrateName; }
+      const std::string GetMscbName(){ return fMscbName; }
       WDSystem *GetSystem() { return fSystem; }
       int GetMscbHandle() { return fMscbHandle; }
+      long GetCrateNumber() { return fCrateNumber; }
 
       //iterators
       WDBoard **begin() { return fBoard; }
       WDBoard **end() { return fBoard + 18; }
 
       //Constructor
-      WDCrate(std::string mscbname = ""){
+      WDCrate(std::string name="", std::string mscbname = ""){
+         fCrateNumber = -1;
+         fSystem = nullptr;
+
+         fCrateName = name;
+
          for(int i=0; i<18; i++){
             fBoard[i] = 0;
          }
@@ -113,18 +137,41 @@ class WDCrate {
 
 };
 
+// --- WaveDAQ board position --- utility class to store board position in the system
+class WDPosition {
+   public:
+      char fSlot;
+      long fCrate;
+   WDPosition (long crate=-1, char slot=-1){
+      fSlot = slot;
+      fCrate = crate;
+   }
+   WDPosition (const WDPosition &old_obj){
+      fSlot = old_obj.fSlot;
+      fCrate = old_obj.fCrate;
+   }
+   void Set (long crate, char slot){
+      fSlot = slot;
+      fCrate = crate;
+   }
+};
+
 // --- WaveDAQ system --- manage multicrate setup
 class WDSystem {
+   friend class WDCrate;
+
    private:
       std::vector<WDCrate *> fCrate;
       int fTrgCrateId;
       std::map<std::string,PropertyGroup> fGroupProperties;
+      PropertyGroup fDaqProperties;
       int fDAQServerPort;
 
       //reserved Methods
       void CreatePropertiesFromXml(WDBoard *board, MXML_NODE *board_node);
 
    public:
+      std::map<std::string,WDPosition> fBoardMap;
       //DAQ stuff
       DAQBuffer<WDAQPacketData> *fPacketBuffer;
       DAQBuffer<WDAQEvent> *fEventBuffer;
@@ -133,6 +180,7 @@ class WDSystem {
       WDAQEventBuilder *fBuilderThread;
       WDAQWorker *fWorkerThread;
       WDAQEventWriter *fWriterThread;
+      std::vector<WDAQTCBReader*> fTCBReaderThreads;
 
       //Methods
       void AddCrate(WDCrate *crate);
@@ -146,34 +194,41 @@ class WDSystem {
       void TrainSerdes();
       void SpawnDAQ();
       void StopDAQ();
+      WDPosition &FindBoard(std::string name);
 
       //Iterator on crates
       WDCrate ** begin() { return &fCrate[0]; }
       WDCrate ** end() { return  &(fCrate.back()) + 1; }
 
       //Getters
+      Property &GetDaqProperty(std::string name){ return fDaqProperties.at(name); };
       WDCrate *GetCrateAt(int crateid) { return fCrate.at(crateid); }
       WDCrate *GetTriggerCrate(){ return fCrate.at(fTrgCrateId); }
-      WDBoard *GetTriggerBoard(){ return fCrate.at(fTrgCrateId)->GetBoardAt(17); }
+      WDBoard *GetTriggerBoard(){ return GetTriggerCrate()->GetBoardAt(17); }
+      WDBoard *GetBoardAt(WDPosition &p) {return fCrate[p.fCrate]->GetBoardAt(p.fSlot);}
       int GetTriggerCrateId(){ return fTrgCrateId; }
       unsigned long GetCrateSize() { return fCrate.size(); }
-      PropertyGroup &GetGroupProperties(std::string groupname){ return fGroupProperties[groupname]; }
+      PropertyGroup &GetGroupProperties(std::string groupname){ return fGroupProperties.at(groupname); }
       int GetDAQServerPort(){ return fDAQServerPort; }
 
       //Setters
       void SetTriggerCrateId(int triggercrateid){ fTrgCrateId = triggercrateid; }
       void SetGroupProperties(std::string groupname, PropertyGroup &properties){ fGroupProperties[groupname] = properties; }
+      void SetDaqProperties(PropertyGroup &properties){ fDaqProperties = properties; }
+      void SetDaqProperty(std::string propertyname, std::string val){ fDaqProperties[propertyname].SetStringValue(val); }
       void SetDAQServerPort(int port){ fDAQServerPort = port; }
 
       //Constructor
       WDSystem(){
          fTrgCrateId = -1;
+         fDaqProperties.clear();
          fPacketBuffer = nullptr;
          fCalibratedBuffer = nullptr;
          fEventBuffer = nullptr;
          fCollectorThread = nullptr;
          fBuilderThread = nullptr;
          fWriterThread = nullptr;
+         fTCBReaderThreads.clear();
       }
 
       //Destructor
@@ -185,56 +240,22 @@ class WDSystem {
          if(fBuilderThread != nullptr) delete fBuilderThread;
          if(fWorkerThread != nullptr) delete fWorkerThread;
          if(fWriterThread != nullptr) delete fWriterThread;
+         for(auto t: fTCBReaderThreads) delete t;
       }
    
 };
  
 // --- WaveDAQ WDB --- wrapper class for WDB
-class WDWDB : public WDBoard, public WDB{
+class WDWDB : public WDB, public WDBoard{
    private:
-      void SetInCrate(){
-         SetSendBlocked(true);
-         /*SetTriggerEnable(true);
-         SetTriggerFallingEdge(true);
-         SetTriggerDelayEnable(false);
-         SetTriggerCfgExtOr(true);
-         SetTriggerCfgOr(0);
-         SetTriggerCfgAnd(0);
-         SetPatternTriggerSelect(WDB::cTriggerSchemeSimple);*/
-         SetTriggerTypeSel(1);
-         SetExtTriggerOutEnable(0);
-         SetTriggerOutPulseLength(4);
-         SetExtClkInSel(0);
-         SetDaqClkSrcSel(0);
-         SetLmkInputFreq(80);
-         SetSendBlocked(false);
-         SendControlRegisters();
-         SetApplySettingsLmk(1);
-         LmkSyncLocal();
-         ReceiveStatusRegister(WD2_DRS_SAMPLE_FREQ_REG);
-
-      }
+      void SetInCrate();
 
    
    public:
-      void Connect(){
-
-         WDB::Connect();
-         ReceiveControlRegisters();
-         ReceiveStatusRegisters();
-         printf("WD number %d\n", GetSerialNumber());
-
-      }
-      void SetSerdesTraining(bool state){
-         SetAdvTrgCtrl(0x00000430);
-      }
-      bool IsSerdesTraining(){
-         return (GetAdvTrgCtrl() >>4) == 0x43;
-         
-      }
-      void TrainSerdes(){
-
-      }
+      void Connect();
+      void SetSerdesTraining(bool state);
+      bool IsSerdesTraining();
+      void TrainSerdes(){ } //No Serdes to train
 
       void Sync(){
          LmkSyncLocal();
@@ -249,315 +270,43 @@ class WDWDB : public WDBoard, public WDB{
       }
 
       bool IsBusy(){
-         return GetWdbBusy(); 
+         return GetDrsCtrlBusy(); 
       }
 
-      void Configure(){
-         //stop
-         SetDaqSingle(false);
-         SetDaqNormal(false);
+      //Configuration handlers
+      void ConfigureProperty(const std::string &name, Property &property);
+      void ConfigurationStarted();
+      void ConfigurationEnded();
 
-         SetSendBlocked(true);
-         long arraySize = 0;
+      void ConfigureFPD(Property &property);
+      void ConfigureIPD(Property &property);
+      void ConfigureFrontendGain(Property &property);
+      void ConfigureFrontendPzc(Property &property);
+      void ConfigureFrontendPzcLevel(Property &property);
+      void ConfigureTriggerLevel(Property &property);
+      void ConfigureChannelPolarity(Property &property);
+      void ConfigureChannelHV(Property &property);
+      void ConfigureBaselineShift(Property &property);
+      void ConfigureDRSChannelTxEnable(Property &property);
+      void ConfigureADCChannelTxEnable(Property &property);
+      void ConfigureTDCChannelTxEnable(Property &property);
+      void ConfigureTRGTxEnable(Property &property);
+      void ConfigureScalerTxEnable(Property &property);
+      void ConfigureZeroSuppression(Property &property);
+      void ConfigureTimingReference(Property &property);
+      void ConfigureTriggerAlgorithm(Property &property);
+      void ConfigureTriggerGain(Property &property);
+      void ConfigureTriggerTdcMask(Property &property);
+      void ConfigureTriggerTdcOffset(Property &property);
+      void ConfigureTriggerPedestalThreshold(Property &property);
+      void ConfigureTriggerPedestalDelay(Property &property);
+      void ConfigureTriggerPedestalAddersel(Property &property);
+      void ConfigureDebugSignal(int port, Property &property);
+      void ConfigureSamplingFrequency(Property &property);
 
-         //interpacket delay
-         unsigned int interpacket_delay;
-         try{
-            //interpacket_delay = stoul(GetProperty("IPD"), 0, 16); 
-            interpacket_delay = GetProperty("IPD").GetUHex(); 
-         } catch (const std::runtime_error& ex){
-            interpacket_delay = 0;
-         }
-         if(interpacket_delay != 0){
-            SetInterPkgDelay(interpacket_delay);
-         }
 
-         //input
-         SetFeMux(-1, WDB::cFeMuxInput);
-         //gain
-         //std::vector<float> gain;
-         const float* gain;
-         try{
-            //gain = PropertyToArray<float>(GetProperty("FrontendGain")); 
-            gain = GetProperty("FrontendGain").GetFloatVector(&arraySize);
-         } catch (const std::runtime_error& ex){
-            arraySize = -1;
-         }
-         if(arraySize == 1){
-            SetFeGain(-1, gain[0]);
-         } else if(arraySize == 16){
-            for(int i=0; i<16; i++) SetFeGain(i, gain[i]);
-         }
-
-         //PZC
-         const int* pzc;
-         try{
-            //pzc = PropertyToArray<int>(GetProperty("FrontendPzc")); 
-            pzc = GetProperty("FrontendPzc").GetIntVector(&arraySize);
-         } catch (const std::runtime_error& ex){
-            arraySize = -1;
-         }
-         if(arraySize == 1){
-            if (pzc[0] > 0) {
-               SetFePzc(-1, 1);
-               SetDacPzcLevelN(pzc[0]-1); // 1...7 -> 0...6
-            } else {
-               SetFePzc(-1, 0);
-               SetDacPzcLevelN(0);
-            }
-         } else if(arraySize > 0 && ((arraySize - 1) < 16)){
-            SetDacPzcLevelN(pzc[0]-1);
-               for(int i=0; i<16; i++)
-                  SetFePzc(i, 0);
-               for(unsigned long i=0; i<arraySize; i++){
-                   SetFePzc(pzc[i+1], 1);
-               }
-         }
-
-         //trigger discriminator level
-         const float* trigger_level;
-         try{
-            //trigger_level = PropertyToArray<float>(GetProperty("TriggerLevel")); 
-            trigger_level = GetProperty("TriggerLevel").GetFloatVector(&arraySize); 
-         } catch (const std::runtime_error& ex){
-            arraySize = -1;
-         }
-         if(arraySize ==1){
-            SetDacTriggerLevelV(-1, trigger_level[0]);
-         } else if(arraySize == 16){
-            for(int i=0; i<16; i++) SetDacTriggerLevelV(i, trigger_level[i]);
-         }
-
-         //channel trigger polarity
-         unsigned int channel_polarity;
-         try{
-            //channel_polarity = stoul(GetProperty("ChannelPolarity"), 0, 16); 
-            channel_polarity = GetProperty("ChannelPolarity").GetUHex();
-         } catch (const std::runtime_error& ex){
-            channel_polarity = -1;
-         }
-         if(channel_polarity != -1){
-            SetTrgSrcPolarity(channel_polarity);
-         }
-
-         //Baseline Shift
-         float baseline;
-         try{
-            //baseline = std::stof(GetProperty("BaselineShift"));
-            baseline = GetProperty("BaselineShift").GetFloat();
-         } catch (const std::runtime_error& ex){
-            baseline = 1;
-         }
-         if(abs(baseline)<1) SetDacCalDcV(baseline); 
-
-         //channel transmit
-         //SetReadoutSrcSel(WDB::cReadoutSrcDrs);
-         unsigned int tx_ena;
-         try{
-            //tx_ena = stoul(GetProperty("ChannelTxEnable"), 0, 16); 
-            tx_ena = GetProperty("ChannelTxEnable").GetUHex();
-         } catch (const std::runtime_error& ex){
-            tx_ena = 0x3FFFF;
-         }
-         SetDrsChTxEn(tx_ena);
-         SetAdcChTxEn(tx_ena);
-         SetTdcChTxEn(tx_ena);
-         SetZeroSuprEn(false);
-         SetTrgTxEn(1);
-         SetSclTxEn(0);
-
-         //timing reference
-         std::string timingreference;
-         try{
-            timingreference = GetProperty("TimingReference").GetStringValue();
-         } catch (const std::runtime_error& ex){
-            timingreference = "";
-         }
-         if(timingreference == "Off"){
-            SetTimingReferenceSignal(WDB::cTimingReferenceOff);
-         } else if (timingreference == "Sine"){
-            SetTimingReferenceSignal(WDB::cTimingReferenceSine);
-         } else if (timingreference == "Square"){
-            SetTimingReferenceSignal(WDB::cTimingReferenceSquare);
-         }
-
-         //trigger algorithm
-         unsigned char algorithm;
-         try{
-            //algorithm = std::stoi(GetProperty("TriggerAlgorithm"));
-            algorithm = GetProperty("TriggerAlgorithm").GetUInt();
-         } catch (const std::runtime_error& ex){
-            algorithm = 0;
-         }
-         SetAdvTrgCtrl(0x00000203 | ((algorithm & 0xF) << 4) );//TDCPolarity, FADCMODE, RUNMODE
-
-         //trigger gain
-         SetAdvTrgPedCfg(0x013E000A);
-         //std::vector<unsigned short> trigger_gain;
-         const int* trigger_gain;
-         int trg_gain[16];
-         try{
-            //trigger_gain = PropertyToArray<unsigned short>(GetProperty("TriggerGain"), std::ios_base::hex); 
-            trigger_gain = GetProperty("TriggerGain").GetIntVector(&arraySize);
-         } catch (const std::runtime_error& ex){
-            arraySize = -1;
-         }
-         if(arraySize ==1){
-            for(int i=0; i<15; i++) trg_gain[i] = trigger_gain[0];
-            arraySize = 16;
-         } else if(arraySize ==16) {
-            for(int i=0; i<15; i++) trg_gain[i] =  trigger_gain[i];
-         }
-         if(arraySize == 16){
-            for(int i=0; i<4; i++){
-               unsigned int calib=0;
-               for (int j=0 ; j<4 ; j++){
-                  unsigned int temp = trg_gain[i*4+j];
-                  temp &= 0xFF;
-                  calib |= temp<<(j*8);
-               }
-               switch(i){
-                  case 0:
-                     SetAdvTrgChCal0(calib);
-                     break;
-                  case 1:
-                     SetAdvTrgChCal1(calib);
-                     break;
-                  case 2:
-                     SetAdvTrgChCal2(calib);
-                     break;
-                  case 3:
-                     SetAdvTrgChCal3(calib);
-                     break;
-               }
-            }
-         }
-
-         //TDC Mask ch
-         unsigned int tdcmask;
-         try{
-            //tdcmask = stoul(GetProperty("TriggerTDCMask"), 0, 16);
-            tdcmask = GetProperty("TriggerTDCMask").GetUHex();
-         } catch (const std::runtime_error& ex){
-            tdcmask = 65536;
-         }
-         if(tdcmask < 65536){
-            SetAdvTrgTdcChMask(tdcmask);
-         }
-
-         //sampling frequency
-         unsigned int freq;
-         try{
-            //freq = std::stoi(GetProperty("SamplingFrequency"));
-            freq = GetProperty("SamplingFrequency").GetUInt();
-         } catch (const std::runtime_error& ex){
-            freq = GetDrsSampleFreqMhz();
-         }
-         SetDrsSampleFreq(freq);
-
-         //set debug outputs
-         std::string s_tx;
-         std::string s_rx;
-         try {
-            //s_tx = GetProperty("TxDebugSignal");
-            //s_rx = GetProperty("RxDebugSignal");
-            s_tx = GetProperty("TxDebugSignal").GetStringValue();
-            s_rx = GetProperty("RxDebugSignal").GetStringValue();
-         } catch (const std::runtime_error& ex){
-            //not defined
-         }
-         //decode according to missing Sync Local signal
-         int tx, rx;
-         if(s_tx == "Uart"){
-            tx = WDB::cDbgUart; 
-         } else if (s_tx == "Trigger"){
-            tx = WDB::cDbgTrigger; 
-         } else if (s_tx == "SoftTrigger"){
-            tx = WDB::cDbgSoftTrigger; 
-         } else if (s_tx == "ExtTrigger"){
-            tx = WDB::cDbgExtTrigger; 
-         } else if (s_tx == "SyncDirect"){
-            tx = WDB::cDbgSyncDirect; 
-         } else if (s_tx == "SyncSampled"){
-            tx = WDB::cDbgSyncSampled; 
-         } else if (s_tx == "SyncLogic"){
-            tx = WDB::cDbgSyncSampled+1; 
-         } else if (s_tx == "BusyLocal"){
-            tx = WDB::cDbgBusyLocal+1; 
-         } else if (s_tx == "BusyBackplane"){
-            tx = WDB::cDbgBusyBackplane+1; 
-         } else if (s_tx == "LMKInputClk"){
-            tx = WDB::cDbgLMKInputClk+1; 
-         } else if (s_tx == "ADCClk"){
-            tx = WDB::cDbgADCClk+1; 
-         } else if (s_tx == "DataClk"){
-            tx = WDB::cDbgDataClk+1; 
-         } else {
-            tx = WDB::cDbgSyncSampled; 
-         }
-         if(s_rx == "Uart"){
-            rx = WDB::cDbgUart; 
-         } else if (s_rx == "Trigger"){
-            rx = WDB::cDbgTrigger; 
-         } else if (s_rx == "SoftTrigger"){
-            rx = WDB::cDbgSoftTrigger; 
-         } else if (s_rx == "ExtTrigger"){
-            rx = WDB::cDbgExtTrigger; 
-         } else if (s_rx == "SyncDirect"){
-            rx = WDB::cDbgSyncDirect; 
-         } else if (s_rx == "SyncSampled"){
-            rx = WDB::cDbgSyncSampled; 
-         } else if (s_rx == "SyncLogic"){
-            rx = WDB::cDbgSyncSampled+1; 
-         } else if (s_rx == "BusyLocal"){
-            rx = WDB::cDbgBusyLocal+1; 
-         } else if (s_rx == "BusyBackplane"){
-            rx = WDB::cDbgBusyBackplane+1; 
-         } else if (s_rx == "LMKInputClk"){
-            rx = WDB::cDbgLMKInputClk+1; 
-         } else if (s_rx == "ADCClk"){
-            rx = WDB::cDbgADCClk+1; 
-         } else if (s_rx == "DataClk"){
-            rx = WDB::cDbgDataClk+1; 
-         } else {
-            rx = WDB::cDbgSyncSampled; 
-         }
-         SetMcxTxSigSel(tx);
-         SetMcxRxSigSel(rx);
-
-         SetSendBlocked(false);
-         SendControlRegisters();
-
-         //LMK and PLL configuration to be in crate
-         SetInCrate();
-
-         //Reset everything
-         ResetAllPll();
-         ResetTcbOserdesIf();
-         ResetDrsControlFsm();
-
-         //set destination port
-         SetDestinationPort(GetCrate()->GetSystem()->GetDAQServerPort());
-
-         //start
-         SetDaqSingle(false);
-         SetDaqNormal(true);
-
-         //Read Status
-         ReceiveStatusRegisters();
-
-         //Load Calibration file
-         if (!LoadVoltageCalibration(GetDrsSampleFreqMhz(), "../wds/")) {
-            printf("missing voltage calibration file\n");
-         }
-         if (!LoadTimeCalibration(GetDrsSampleFreqMhz(), "../wds/")) {
-            printf("missing time calibration file\n");
-         }
-
-      }
-
-      WDWDB(std::string name, int verbose = 0) : WDBoard(), WDB(name, verbose) { };
-      WDWDB(std::string name, WDCrate *crate, int slot, int verbose = 0) : WDBoard(crate, slot), WDB(name, verbose) {
+      WDWDB(std::string name="WDXXX", std::string netname="WDXXX", int verbose = 0) :  WDB(netname, verbose), WDBoard(name) { };
+      WDWDB(WDCrate *crate, int slot, std::string name="WDXXX", std::string netname="WDXXX", int verbose = 0) : WDB(netname, verbose), WDBoard(crate, slot, name) {
          //try to connect only if the crate is powered
          if(crate->IsPowered()){
             Connect();
@@ -568,27 +317,15 @@ class WDWDB : public WDBoard, public WDB{
 };
 
 // --- WaveDAQ TCB --- wrapper class for TCB
-class WDTCB : public WDBoard, public TCB{
+class WDTCB : public TCB, public WDBoard {
    
    public:
-      void Connect(){
-         SetIDCode();
-         SetNTRG();
-         printf("connected to TCB with IDCode = %04x\n", fidcode);
-      }
+      void Connect();
 
-      void SetSerdesTraining(bool state){
-         SetSerdesPattern(true);
-      }
-      bool IsSerdesTraining(){
-         unsigned int val=0;
-         GetRRUN( &val );
-         return (val >> 9) & 0x1;
-
-      }
+      void SetSerdesTraining(bool state);
+      bool IsSerdesTraining();
       void TrainSerdes(){
          AutoCalibrateSerdes();
-
       }
 
       void Sync(){
@@ -607,90 +344,47 @@ class WDTCB : public WDBoard, public TCB{
          return TCB::IsBusy();
       }
 
-      void Configure(){
-         long arraySize = 0;
-         //basic RRun
-         u_int32_t rrun_config = 0x0000E014;  //masktrg, masksync, maskbusy, fadcmode, enable trg_bus
-         //u_int32_t rrun_config = 0x00006014;  //masksync, maskbusy, fadcmode, enable trg_bus
-         SetRRUN(&rrun_config);
+      //Configuration handlers
+      void ConfigureProperty(const std::string &name, Property &property);
+      void ConfigurationStarted();
+      void ConfigurationEnded();
 
-         u_int32_t syncdly=0x1F;
-         u_int32_t trgdly=0x1F;
-         u_int32_t sprdly=0x1F;
-         SetTRGBusIDLY(&syncdly, &trgdly, &sprdly);
-         syncdly=0x10;
-         trgdly=0x10;
-         sprdly=0x10;
-         SetTRGBusODLY(&syncdly, &trgdly, &sprdly);
+      void ConfigureTriggerEnable(Property &property);
+      void ConfigureTriggerPrescaling(Property &property);
+      void ConfigureTriggerDelay(Property &property);
+      void ConfigureTriggerAlgorithm(Property &property);
+      void ConfigureParameters(Property &property);
+      void ConfigurePacketizer(Property &property);
+      void ConfigureExtDAQ(Property &property);
+      void ConfigureTimeNarrowThreshold(Property &property);
+      void ConfigureTimeWideThreshold(Property &property);
+      void ConfigureXecHighThreshold(Property &property);
+      void ConfigureXecLowThreshold(Property &property);
+      void ConfigureXecVetoThreshold(Property &property);
+      void ConfigureXecPatchId(Property &property);
+      void ConfigureXecAlfaThreshold(Property &property);
+      void ConfigureXecAlfaScale(Property &property);
+      void ConfigureXecMovingAverage(Property &property);
+      void ConfigureTcMask(Property &property);
+      void ConfigureTcMultiplicityThreshold(Property &property);
+      void ConfigureTcCrateMergeThreshold(Property &property);
+      void ConfigureTcSectorMergeThreshold(Property &property);
+      void ConfigureBgoThreshold(Property &property);
+      void ConfigureBgoVetoThreshold(Property &property);
+      void ConfigureBgoHitDelay(Property &property);
+      void ConfigureBgoTriggerMask(Property &property);
+      void ConfigureRdcThreshold(Property &property);
+      void ConfigureRdcTriggerMask(Property &property);
+      void ConfigureCrcHitMask(Property &property);
+      void ConfigureCrcPairMask(Property &property);
+      void ConfigureNgenDelay(Property &property);
+      void ConfigureNgenWidth(Property &property);
+      void ConfigureNgenHighThreshold(Property &property);
+      void ConfigureNgenLowThreshold(Property &property);
 
-         //trigger enable
-         const unsigned int* trigger_enable;
-         bool trg_ena[64];
-         try{
-            //trigger_enable = PropertyToArray<int>(GetProperty("TriggerEnable")); 
-            trigger_enable = GetProperty("TriggerEnable").GetUIntVector(&arraySize);
-         } catch (const std::runtime_error& ex){
-            arraySize = -1;
-         }
-         for(int i=0; i<64; i++) trg_ena[i] = false;
-         for(unsigned long i=0; i<arraySize; i++) if(trigger_enable[i] < 64) trg_ena[trigger_enable[i]] = true;
-         long triggerEnableSize = arraySize;
-         SetTriggerEnable(trg_ena);
-
-         //trigger prescaling
-         const unsigned int* trigger_prescaling;
-         unsigned int trg_presca[64];
-         try{
-            //trigger_prescaling = PropertyToArray<unsigned int>(GetProperty("TriggerPrescaling")); 
-            trigger_prescaling = GetProperty("TriggerPrescaling").GetUIntVector(&arraySize);
-         } catch (const std::runtime_error& ex){
-            arraySize = -1;
-         }
-         for(int i=0; i<64; i++) trg_presca[i] = 0;
-         if(triggerEnableSize == arraySize){
-            for(unsigned long i=0; i<arraySize; i++) if(trigger_enable[i] < 64) trg_presca[trigger_enable[i]] = trigger_prescaling[i];
-            SetPrescaling(trg_presca);
-         }
-         else printf("TriggerPrescaling field should be same size of TriggerEnable\n");
-
-         //trigger algorithm
-         //unsigned int algorithm;
-         unsigned int algorithm;
-         try{
-            //algorithm = std::stoi(GetProperty("TriggerAlgorithm"));
-            algorithm = GetProperty("TriggerAlgorithm").GetUInt();
-         } catch (const std::runtime_error& ex){
-            algorithm = 0;
-         }
-         SetRALGSEL((unsigned int *)&algorithm);
-
-         //Experiment-oriented parameters
-         //std::vector<unsigned int> parameters;
-         const unsigned int* parameters;
-         try{
-            //parameters = PropertyToArray<unsigned int>(GetProperty("Parameters"), std::ios_base::hex); 
-            parameters = GetProperty("Parameters").GetUHexVector(&arraySize);
-         } catch (const std::runtime_error& ex){
-            arraySize = -1;
-         }
-         for(int i=0; i<arraySize-1; i+=2){
-            unsigned int val = parameters[i+1];
-            SetParameter(parameters[i], &val);
-         }
-         //unsigned int thr = 0x100;
-         //WriteReg(0x600, &thr);
-
-         SetPacketizerCommandAt(0, STOP, 0, 0);
-         SetPacketizerAutostart(true);
-         SetPacketizerEnable(true);
-
-         if((fidcode >>12) != 3)
-            GoRun();
-
-      }
-
-      WDTCB(WDCrate *crate, int slot, int verbose = 0) : WDBoard(crate, slot), TCB(crate->GetMscbName().c_str(), 20, slot, verbose) {
+      WDTCB(WDCrate *crate, int slot, std::string name="TCBXXX", int verbose = 0) : TCB(crate->GetMscbName().c_str(), 20, slot, verbose), WDBoard(crate, slot, name) {
          fh = crate->GetMscbHandle();
+
          //try to connect only if the crate is powered
          if(crate->IsPowered()){
             Connect();
@@ -698,5 +392,5 @@ class WDTCB : public WDBoard, public TCB{
       };
       ~WDTCB() { };
 };
-
+#endif
 

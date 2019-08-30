@@ -13,9 +13,12 @@ Property& WDBoard::GetProperty(std::string name){
       //no value in local property list
       //try group one
 
-     PropertyGroup  group = fCrate->GetSystem()->GetGroupProperties(fGroupName);
       try{
-         return group.at(name);
+         WDSystem* sysptr = fCrate->GetSystem();
+         if(sysptr!= nullptr){
+            return sysptr->GetGroupProperties(fGroupName).at(name);
+         } else
+            throw  std::out_of_range("");
       } catch (const std::out_of_range& ex){
          //no property with given name
 
@@ -28,8 +31,38 @@ Property& WDBoard::GetProperty(std::string name){
 void WDBoard::SetProperties(const PropertyGroup &properties){
    fProperties = properties;
 }
-// Contructor
-WDBoard::WDBoard(WDCrate * crate, char slot){
+// Configure
+void WDBoard::Configure(){
+   //printf("configuring board %s\n", GetBoardName().c_str());
+   ConfigurationStarted(); 
+
+   WDSystem* sysptr = fCrate->GetSystem();
+   //loop on Group Properties
+   bool groupExist;
+   try{
+      sysptr->GetGroupProperties(fGroupName);
+      groupExist = true;
+   } catch (const std::out_of_range& ex){
+      groupExist = false;
+   }
+   if(sysptr!=nullptr && groupExist){
+      for(auto it : sysptr->GetGroupProperties(fGroupName)){
+         //checks property is not overwritten in local board
+         if(! fProperties.contains(it.first))
+            ConfigureProperty(it.first, it.second);
+      }
+   }
+   //loop on Board local properties
+   for(auto it : fProperties){
+      ConfigureProperty(it.first, it.second);
+   }
+   ConfigurationEnded(); 
+}
+
+// Contructor in a crate
+WDBoard::WDBoard(WDCrate * crate, char slot, std::string name){
+   fBoardName = name;
+
    crate->AddBoard(this, slot);
 }
 
@@ -38,10 +71,16 @@ WDBoard::WDBoard(WDCrate * crate, char slot){
 void WDCrate::AddBoard(WDBoard *board, int slot){
    if(slot > 17 || slot < -1) throw std::runtime_error("slot out of range");
    if(fBoard[slot] != 0) throw std::runtime_error("two board in same slot");
+
+   //Add Board
    fBoard[slot] = board;
-   //board->SetCrate(this, slot);
    board->fSlot = slot;
    board->fCrate = this;
+
+   //Add to System Map
+   if(fSystem != nullptr) {
+      fSystem->fBoardMap[board->fBoardName] = WDPosition(fCrateNumber, slot);
+   }
 }
 
 // Checks slot is filled
@@ -97,7 +136,15 @@ void WDSystem::AddCrate(WDCrate *crate){
    }
 
    crate->fSystem = this;
+   crate->fCrateNumber = fCrate.size() - 1;
 
+   //add boards already in crate in the map
+   for(int slot=0; slot<18; slot++){
+      if(crate->HasBoardIn(slot)){ 
+         WDBoard *b = crate->GetBoardAt(slot);
+         fBoardMap[b->GetBoardName()] = WDPosition(crate->fCrateNumber, slot);
+      }
+   }
 }
 
 // crate board properties from XML
@@ -128,7 +175,20 @@ void WDSystem::CreateFromXml(std::string filepath){
       std::string crate_node_name = std::string(mxml_get_name(crate_xml));
       if(crate_node_name == "Crate"){
          //create a new Crate
-         WDCrate *c = new WDCrate(std::string(mxml_get_attribute(crate_xml, "MscbNode")));
+         char* mscbnodestring = mxml_get_attribute(crate_xml, "MscbNode");
+         if(mscbnodestring==NULL){
+            printf("error parsing XML: Crate need MscbNode attribute\n");
+            return;
+         }
+
+         char* cratenamestring = mxml_get_attribute(crate_xml, "Name");
+         if(cratenamestring==NULL){
+            printf("warning parsing XML: MscbNode used as crate name\n");
+            cratenamestring = mscbnodestring;
+         }
+
+         WDCrate *c = new WDCrate(std::string(cratenamestring), std::string(mscbnodestring));
+         AddCrate(c);
 
          bool triggerFlag = false;
          //loop on Boards
@@ -137,32 +197,84 @@ void WDSystem::CreateFromXml(std::string filepath){
             std::string board_node_name = std::string(mxml_get_name(board_xml));
             if(board_node_name == "Board"){
                //create a new board
-               WDBoard *b = new WDBoard(c, atoi(mxml_get_attribute(board_xml, "Slot")));
-               b->SetGroup(mxml_get_attribute(board_xml, "Group"));
+               char* slotstring = mxml_get_attribute(board_xml, "Slot");
+               if(slotstring==NULL){
+                  printf("error parsing XML: Board needs a Slot attributes\n");
+                  return;
+               }
+               WDBoard *b = new WDBoard(c, atoi(slotstring));
+
+               //board property group is optional
+               char* groupstring = mxml_get_attribute(board_xml, "Group");
+               if(groupstring!=NULL){
+                  b->SetGroup(groupstring);
+               }
+
+               //parse remaining tags as properties
                CreatePropertiesFromXml(b, board_xml);
             }
             else if(board_node_name == "WDB"){
                //create a new board
-               WDWDB *b = new WDWDB(mxml_get_attribute(board_xml, "Name"), c, atoi(mxml_get_attribute(board_xml, "Slot")));
-               b->SetGroup(mxml_get_attribute(board_xml, "Group"));
+               char* slotstring = mxml_get_attribute(board_xml, "Slot");
+               char* namestring = mxml_get_attribute(board_xml, "Name");
+               if(slotstring == NULL || namestring==NULL) {
+                  printf("error parsing XML: WDB needs a Slot and a Name attributes\n");
+                  return;
+               }
+
+               //try to get a Node (ip), if not given use Name attribute
+               char* mscbnodestring = mxml_get_attribute(board_xml, "MscbNode");
+               if(mscbnodestring == NULL) {
+                  printf("warning parsing XML: WDB Name used as MscbNode name\n");
+                  mscbnodestring = namestring;
+               }
+
+               WDWDB *b = new WDWDB(c, atoi(slotstring), std::string(namestring), std::string(mscbnodestring));
+
+               //board property group is optional
+               char* groupstring = mxml_get_attribute(board_xml, "Group");
+               if(groupstring!=NULL){
+                  b->SetGroup(groupstring);
+               }
+
+               //parse remaining tags as properties
                CreatePropertiesFromXml(b, board_xml);
             }
             else if(board_node_name == "TCB"){
                //create a new board
-               WDTCB *b = new WDTCB(c, atoi(mxml_get_attribute(board_xml, "Slot")));
-               b->SetGroup(mxml_get_attribute(board_xml, "Group"));
+               
+               char* slotstring = mxml_get_attribute(board_xml, "Slot");
+               char* namestring = mxml_get_attribute(board_xml, "Name");
+               if(slotstring == NULL || namestring==NULL) {
+                  printf("error parsing XML: TCB needs a Slot and a Name attributes\n");
+                  return;
+               }
+
+               WDTCB *b = new WDTCB(c, atoi(slotstring), std::string(namestring));
+
+               //board property group is optional
+               char* groupstring = mxml_get_attribute(board_xml, "Group");
+               if(groupstring!=NULL){
+                  b->SetGroup(groupstring);
+               }
+
+               //parse remaining tags as properties
                CreatePropertiesFromXml(b, board_xml);
             }
             else if(board_node_name == "Trigger") triggerFlag = true;
          }
 
-         AddCrate(c);
          if(triggerFlag){
             SetTriggerCrateId(GetCrateSize()-1);
          }
       } else if (crate_node_name == "Group"){
          //create a new property group
-         std::string groupname = std::string(mxml_get_attribute(crate_xml, "Name"));
+         char* namestring = mxml_get_attribute(crate_xml, "Name");
+         if(namestring==NULL){
+            printf("error parsing XML: Group needs a Name attribute");
+            return;
+         }
+         std::string groupname = std::string(namestring);
 
          PropertyGroup p;
          for(int i=0; i<mxml_get_number_of_children(crate_xml); i++){
@@ -173,6 +285,24 @@ void WDSystem::CreateFromXml(std::string filepath){
          }
 
          SetGroupProperties(groupname, p);
+
+      } else if (crate_node_name == "Daq"){
+         //create a new property group For DAQ
+         if(fDaqProperties.size() != 0){
+            printf("overwriting previous Daq Configuration!");
+         }
+
+         for(int i=0; i<mxml_get_number_of_children(crate_xml); i++){
+            MXML_NODE *child_node = mxml_subnode(crate_xml, i);
+            std::string name = std::string(mxml_get_name(child_node));
+            std::string value = std::string(mxml_get_value(child_node));
+            fDaqProperties[name].SetStringValue(value);
+         }
+
+         printf("DAQ Properties:\n");
+         for(auto p: fDaqProperties){
+            printf("\t%s:\t%s\n", p.first.c_str(), p.second.GetStringValue().c_str());
+         }
 
       }
    }
@@ -185,7 +315,7 @@ void WDSystem::Configure(){
    for(auto &c : fCrate){
       printf("configuring crate %s\n", c->GetMscbName().c_str());
       for(int i=0; i<18; i++){
-         if(c->HasBoardIn(i))
+         if(c->HasBoardIn(i)) 
             c->GetBoardAt(i)->Configure();
       }
    }
@@ -229,6 +359,8 @@ void WDSystem::GoRun(){
    if(fBuilderThread) fBuilderThread->GoRun();
    if(fWriterThread) fWriterThread->GoRun();
    if(fWorkerThread) fWorkerThread->GoRun();
+   for(auto t: fTCBReaderThreads) t->GoRun();
+   sleep(1);
    GetTriggerBoard()->GoRun();
 }
 
@@ -237,11 +369,14 @@ void WDSystem::StopRun(){
    GetTriggerBoard()->StopRun();
    if(fCollectorThread) fCollectorThread->StopRun();
    if(fBuilderThread) fBuilderThread->StopRun();
-   if(fWriterThread) fWorkerThread->StopRun();
-   if(fWorkerThread) fWriterThread->StopRun();
+   if(fWriterThread) fWriterThread->StopRun();
+   if(fWorkerThread) fWorkerThread->StopRun();
+   for(auto t: fTCBReaderThreads) t->StopRun();
 }
 //train serial links
 void WDSystem::TrainSerdes(){
+   GetTriggerBoard()->Sync();
+
    for(auto &c : fCrate){
       for(auto &b : *c){
          if(b) b->TrainSerdes();
@@ -252,7 +387,10 @@ void WDSystem::TrainSerdes(){
 //allocate buffers and spawn DAQ threads
 void WDSystem::SpawnDAQ(){
    //number of buffer at each buffer stage
-   const int number_of_buffers = 5;
+   const int number_of_buffers = 50;
+   const int number_of_calibrated_buffers = 100000;
+
+   printf("starting all threads\n");
 
    //compute number of WDBs and expected number of packets
    int nWDBs=0;
@@ -266,30 +404,95 @@ void WDSystem::SpawnDAQ(){
 
    //create buffers
    fPacketBuffer= new DAQBuffer<WDAQPacketData>(nWDBs*128*number_of_buffers, "PACKETBUFFER");
-   fEventBuffer= new DAQBuffer<WDAQEvent>(number_of_buffers, "BUILDBUFFER");
-   fCalibratedBuffer= new DAQBuffer<WDAQEvent>(number_of_buffers, "EVENTBUFFER");
+   fEventBuffer= new DAQBuffer<WDAQEvent>(number_of_calibrated_buffers, "BUILDBUFFER");
+   fCalibratedBuffer= new DAQBuffer<WDAQEvent>(number_of_calibrated_buffers, "EVENTBUFFER");
+
+   // create the TCBReadrer thread
+
+   int nTCBs=0;
+   for(auto &c : fCrate){
+      for(auto &b : *c){
+         if(b) if(dynamic_cast<WDTCB*>(b) != nullptr){
+            std::string readEnable;
+            try{
+               readEnable = b->GetProperty("Banks").GetStringValue();
+               WDAQTCBReader* tcbreaderthread = new WDAQTCBReader(fPacketBuffer,static_cast<WDTCB*>(b));
+	       tcbreaderthread->SetMinLoopDuration(std::chrono::milliseconds(10));
+               tcbreaderthread->Start();
+               fTCBReaderThreads.push_back(tcbreaderthread);
+               nTCBs++;
+
+            } catch (const std::runtime_error& ex){
+            }
+            
+         }
+      }
+   }
+   if(fTCBReaderThreads.size())
+      printf("including %d TCBs...\n", nTCBs);
 
    //spawn threads
-   fCollectorThread = new WDAQPacketCollector(fPacketBuffer);
+   fCollectorThread = new WDAQPacketCollector(fPacketBuffer, nWDBs);
    fCollectorThread->Start();
-   fBuilderThread = new WDAQEventBuilder(fPacketBuffer, fEventBuffer);
+   fBuilderThread = new WDAQEventBuilder(fPacketBuffer, fEventBuffer, nWDBs+nTCBs);
    fBuilderThread->Start();
    fWorkerThread = new WDAQWorker(fEventBuffer, fCalibratedBuffer);
    for(auto &c : fCrate){
       for(auto &b : *c){
-         if(b) if(dynamic_cast<WDWDB*>(b) != nullptr) fWorkerThread->AddVoltageCalibration(dynamic_cast<WDWDB*>(b)->GetSerialNumber(), &(dynamic_cast<WDWDB*>(b)->mVCalib));
+         if(b) {
+            if(dynamic_cast<WDWDB*>(b) != nullptr){
+                fWorkerThread->AddVoltageCalibration(static_cast<WDWDB*>(b)->GetSerialNumber(), &(static_cast<WDWDB*>(b)->mVCalib));
+            }
+         }
       }
    }
    fWorkerThread->Start();
-   fWriterThread = new WDAQEventWriter(fCalibratedBuffer, "out.bin");
-   //fWriterThread = new WDAQEventWriter(fEventBuffer, "out.bin");
-   //pass time calibrations to Event Writer
-   for(auto &c : fCrate){
-      for(auto &b : *c){
-         if(b) if(dynamic_cast<WDWDB*>(b) != nullptr) fWriterThread->AddTimeCalibration(dynamic_cast<WDWDB*>(b)->GetSerialNumber(), &(dynamic_cast<WDWDB*>(b)->mTCalib));
-      }
+
+   std::string noWriter;
+   try{
+      noWriter = GetDaqProperty("NoWriter").GetStringValue();
+   } catch (const std::out_of_range& ex){
+      noWriter = "false";
    }
-   fWriterThread->Start();
+   if(noWriter != "true"){
+      std::string filename;
+      unsigned int eventsPerFile;
+      unsigned int startRunNumber;
+      try{
+         filename = GetDaqProperty("FileName").GetStringValue();
+      } catch (const std::out_of_range& ex){
+         filename = "out.bin";
+      }
+      try{
+         eventsPerFile = GetDaqProperty("EventsPerFile").GetUInt();
+      } catch (const std::out_of_range& ex){
+         eventsPerFile = 0;
+      }
+      try{
+         startRunNumber = GetDaqProperty("StartRunNumber").GetUInt();
+      } catch (const std::out_of_range& ex){
+         startRunNumber = 0;
+      }
+      fWriterThread = new WDAQEventWriter(fCalibratedBuffer, filename, eventsPerFile, startRunNumber);
+      //fWriterThread = new WDAQEventWriter(fEventBuffer, filename);
+      //pass time calibrations to Event Writer
+      for(auto &c : fCrate){
+         for(auto &b : *c){
+            if(b) {
+               if(dynamic_cast<WDWDB*>(b) != nullptr){
+                  fWriterThread->AddTimeCalibration(dynamic_cast<WDWDB*>(b)->GetSerialNumber(), &(dynamic_cast<WDWDB*>(b)->mTCalib));
+               } else if (dynamic_cast<WDTCB*>(b) != nullptr){
+                     std::hash<std::string> hashFunc;
+                     fWriterThread->AddTcbName(hashFunc(b->GetBoardName()));
+               }
+            }
+
+         }
+      }
+      fWriterThread->Start();
+   } else {
+      printf("No writer thread running\n");
+   }
 
    //wait for server port
    while(fCollectorThread->GetServerPort() == -1){  };
@@ -314,4 +517,1337 @@ void WDSystem::StopDAQ(){
    delete fBuilderThread;
    delete fWorkerThread;
    delete fWriterThread;
+}
+
+WDPosition &WDSystem::FindBoard(std::string name){
+   return fBoardMap[name];
+}
+
+// --- WDWDB ---
+// WDBoard derived methods
+
+//connect to the board
+void WDWDB::Connect(){
+   WDB::Connect();
+   ReceiveControlRegisters();
+   ReceiveStatusRegisters();
+
+   //Set SlotId and CrateId
+   WDCrate *crate = GetCrate();
+   if(crate != nullptr){
+      //Set SlotId
+      SetSlotId(GetSlot());
+
+      long crateNumber = crate->GetCrateNumber();
+      if(crateNumber >= 0){
+         //Set CrateId
+         SetCrateId(crateNumber);
+      } else {
+         //WDCrate not in a WDSystem
+         //could work if only a WDCrate is used
+         printf("Board %s in a crate not belonging to any system, cannot set CrateId\n", GetBoardName().c_str());
+      }
+   } else {
+      //WDBoard not in a WDCrate
+      //ok for standalone cards
+      printf("Board %s not in a crate, cannot set SlotId and CrateId\n", GetBoardName().c_str());
+   }
+
+   printf("WD number %d\n", GetSerialNumber());
+}
+
+void WDWDB::SetSerdesTraining(bool state){
+   unsigned int regbits = GetAdvTrgCtrl();
+   SetAdvTrgCtrl((regbits&0xFFFF7FF) | 0x00000430);//MASKSYNC=0, DEBUG_CTRL=1, ALGSEL=3
+   SetInCrate();
+}
+
+bool WDWDB::IsSerdesTraining(){
+   return (((GetAdvTrgCtrl() >>4) ^ 0x43)|0x3C)==0xFF;//require MASKSYNC=0, DEBUG_CTRL=1, ALGSEL=3
+
+}
+
+//Properties
+void WDWDB::ConfigureProperty(const std::string &name, Property &property) { 
+   if(name=="IPD"){
+      ConfigureIPD(property);
+   } else if(name=="FPD"){
+      ConfigureFPD(property);
+   } else if(name=="FrontendGain"){
+      ConfigureFrontendGain(property);
+   } else if(name=="FrontendPzc"){
+      ConfigureFrontendPzc(property);
+   } else if(name=="FrontendPzcLevel"){
+      ConfigureFrontendPzcLevel(property);
+   } else if(name=="TriggerLevel"){
+      ConfigureTriggerLevel(property);
+   } else if(name=="ChannelPolarity"){
+      ConfigureChannelPolarity(property);
+   } else if(name=="ChannelHV"){
+      ConfigureChannelHV(property);
+   } else if(name=="BaselineShift"){
+      ConfigureBaselineShift(property);
+   } else if(name=="DRSChannelTxEnable"){
+      ConfigureDRSChannelTxEnable(property);
+   } else if(name=="ADCChannelTxEnable"){
+      ConfigureADCChannelTxEnable(property);
+   } else if(name=="TDCChannelTxEnable"){
+      ConfigureTDCChannelTxEnable(property);
+   } else if(name=="TRGTxEnable"){
+      ConfigureTRGTxEnable(property);
+   } else if(name=="ScalerTxEnable"){
+      ConfigureScalerTxEnable(property);
+   } else if(name=="ZeroSuppressionEnable"){
+      ConfigureZeroSuppression(property);
+   } else if(name=="TimingReference"){
+      ConfigureTimingReference(property);
+   } else if(name=="TriggerAlgorithm"){
+      ConfigureTriggerAlgorithm(property);
+   } else if(name=="TriggerGain"){
+      ConfigureTriggerGain(property);
+   } else if(name=="TriggerTdcMask"){
+      ConfigureTriggerTdcMask(property);
+   } else if(name=="TriggerTdcOffset"){
+      ConfigureTriggerTdcOffset(property);
+   } else if(name=="TriggerPedestalThreshold"){
+      ConfigureTriggerPedestalThreshold(property);
+   } else if(name=="TriggerPedestalDelay"){
+      ConfigureTriggerPedestalDelay(property);
+   } else if(name=="TriggerPedestalAddersel"){
+      ConfigureTriggerPedestalAddersel(property);
+   } else if(name=="TxDebugSignal"){
+      ConfigureDebugSignal(0, property);
+   } else if(name=="RxDebugSignal"){
+      ConfigureDebugSignal(1, property);
+   } else if(name=="SamplingFrequency"){
+      ConfigureSamplingFrequency(property);
+   } else {
+      printf("Unknown property %s in WDWDB\n", name.c_str());
+   }
+};
+
+void WDWDB::ConfigurationStarted(){
+   //SetSendBlock(true);
+   SetDestinationPort(GetCrate()->GetSystem()->GetDAQServerPort());
+   SetFeMux(-1, WDB::cFeMuxInput);
+   SetTriggerOutPulseLength(4); // 4 clock shaping
+   SetAdvTrgPedCfg(0x013E000A); // default pedestal subtraction config
+}
+
+void WDWDB::ConfigurationEnded(){
+   //SetSendBlock(false);
+   //SendControlRegisters();
+   SetDaqNormal(true);
+   ReceiveStatusRegisters();
+}
+
+void WDWDB::ConfigureIPD(Property &property) {
+   unsigned int interpacket_delay;
+   interpacket_delay = property.GetUHex(); 
+   if(interpacket_delay != 0){
+      SetInterPkgDelay(interpacket_delay);
+   }
+}
+
+void WDWDB::ConfigureFPD(Property &property) {
+   unsigned int firstpacket_delay;
+   firstpacket_delay = property.GetUHex(); 
+   if(firstpacket_delay != 0){
+      SetFirstPkgDly(firstpacket_delay);
+   }
+}
+
+void WDWDB::ConfigureFrontendGain(Property &property) {
+   long arraySize = 0;
+   const float* gain;
+   gain = property.GetFloatVector(&arraySize);
+   
+   if(arraySize == 1){
+      if(gain[0] != 0.5 && gain[0] != 1 && gain[0] != 2.5 && gain[0] != 5 && gain[0] != 10 && gain[0] != 25 && gain[0] != 50 && gain[0] != 100)
+         throw std::runtime_error("Invalid FrontendGain, supported values: 0.5, 1, 2.5, 5, 10, 25, 50, 100");
+      else
+         SetFeGain(-1, gain[0]);
+   } else if(arraySize == 16){
+      for(int i=0; i<16; i++){
+         if(gain[i] != 0.5 && gain[i] != 1 && gain[i] != 2.5 && gain[i] != 5 && gain[i] != 10 && gain[i] != 25 && gain[i] != 50 && gain[i] != 100)
+            throw std::runtime_error("Invalid FrontendGain, supported values: 0.5, 1, 2.5, 5, 10, 25, 50, 100");
+         else
+            SetFeGain(i, gain[i]);
+      }
+   } else
+      throw std::runtime_error("FrontendGain size should be 1 or 16 values");
+}
+
+void WDWDB::ConfigureFrontendPzc(Property &property) {
+   long arraySize = 0;
+   const int* pzc;
+   pzc = property.GetIntVector(&arraySize);
+   
+   if(arraySize == 1){
+      if(pzc[0]!=0 && pzc[0]!=1){
+            throw std::runtime_error("Invalid FrontendPzc, supported values: 0 to disable, 1 to enable");
+      } else {
+         SetFePzc(-1, pzc[0]);
+      }
+   } else if(arraySize == 16) {
+      for(int i=0; i<16; i++){
+         if(pzc[i]!=0 && pzc[i]!=1){
+            throw std::runtime_error("Invalid FrontendPzc, supported values: 0 to disable, 1 to enable");
+         } else {
+            SetFePzc(i, pzc[i]);
+         }
+      }
+   } else
+      throw std::runtime_error("FrontendPzc size should be 1 or 16 values");
+}
+
+void WDWDB::ConfigureFrontendPzcLevel(Property &property) {
+   int pzc_value;
+   pzc_value = property.GetInt(); 
+   if(pzc_value<0 || pzc_value>7)
+      throw std::runtime_error("Invalid FrontendPzcLevel, supported values: from 1 to 7");
+   else
+      SetDacPzcLevelN(pzc_value-1);
+}
+
+void WDWDB::ConfigureTriggerLevel(Property &property) {
+   long arraySize = 0;
+   const float* trigger_level;
+   trigger_level = property.GetFloatVector(&arraySize);
+   
+   if(arraySize == 1){
+      if(trigger_level[0]<-1 || trigger_level[0]>1) 
+         throw std::runtime_error("Invalid TriggerLevel, supported values: beetween -1 and 1");
+      else
+         SetDacTriggerLevelV(-1, trigger_level[0]);
+   } else if(arraySize == 16){
+      for(int i=0; i<16; i++){
+         if(trigger_level[i]<-1 || trigger_level[i]>1) 
+            throw std::runtime_error("Invalid TriggerLevel, supported values: beetween -1 and 1");
+         else
+            SetDacTriggerLevelV(i, trigger_level[i]);
+      }
+   } else
+      throw std::runtime_error("TriggerLevel size should be 1 or 16 values");
+}
+
+void WDWDB::ConfigureChannelPolarity(Property &property) {
+   unsigned int channel_polarity;
+   channel_polarity = property.GetUHex();
+   channel_polarity &=0xFFFF;
+
+   SetTrgSrcPolarity(channel_polarity);
+}
+
+void WDWDB::ConfigureChannelHV(Property &property) {
+   long arraySize = 0;
+   const float* demand;
+   demand = property.GetFloatVector(&arraySize);
+   
+   if(arraySize == 1){
+      for(int i=0; i<16; i++){
+         SetHVTarget(i, demand[0]);
+      }
+   } else if(arraySize == 16){
+      for(int i=0; i<16; i++){
+         SetHVTarget(i, demand[i]);
+      }
+   } else
+      throw std::runtime_error("ChannelHV size should be 1 or 16 values");
+}
+
+void WDWDB::ConfigureBaselineShift(Property &property) {
+   float baseline;
+   baseline = property.GetFloat();
+   if(baseline>1 || baseline<-1)
+      throw std::runtime_error("Invalid BaselineShift, supported values: beetween -1 and 1");
+   else
+      SetRange(baseline);
+}
+
+void WDWDB::ConfigureDRSChannelTxEnable(Property &property) {
+   unsigned int drstx_ena;
+   drstx_ena = property.GetUHex();
+   SetDrsChTxEn(drstx_ena);
+}
+
+void WDWDB::ConfigureADCChannelTxEnable(Property &property) {
+   unsigned int adctx_ena;
+   adctx_ena = property.GetUHex();
+   SetAdcChTxEn(adctx_ena);
+}
+
+void WDWDB::ConfigureTDCChannelTxEnable(Property &property) {
+   unsigned int tdctx_ena;
+   tdctx_ena = property.GetUHex();
+   SetTdcChTxEn(tdctx_ena);
+}
+
+void WDWDB::ConfigureTRGTxEnable(Property &property) {
+   bool trgtx_ena;
+   trgtx_ena = property.GetBool();
+   SetTrgTxEn(trgtx_ena);
+}
+
+void WDWDB::ConfigureScalerTxEnable(Property &property) {
+   bool scalertx_ena;
+   scalertx_ena = property.GetBool();
+   SetSclTxEn(scalertx_ena);
+}
+
+void WDWDB::ConfigureZeroSuppression(Property &property) {
+   bool zerosuppr_ena;
+   zerosuppr_ena = property.GetBool();
+   SetZeroSuprEn(zerosuppr_ena);
+}
+
+void WDWDB::ConfigureTimingReference(Property &property) {
+   std::string timingreference;
+   timingreference = property.GetStringValue();
+   if(timingreference == "Off"){
+      SetTimingReferenceSignal(WDB::cTimingReferenceOff);
+   } else if (timingreference == "Sine"){
+      SetTimingReferenceSignal(WDB::cTimingReferenceSine);
+   } else if (timingreference == "Square"){
+      SetTimingReferenceSignal(WDB::cTimingReferenceSquare);
+   } else
+      throw std::runtime_error("Invalid TimingReference, supported values: Off, Sine or Square");
+
+}
+
+void WDWDB::ConfigureTriggerAlgorithm(Property &property) {
+   unsigned char algorithm;
+   algorithm = property.GetUInt();
+   SetAdvTrgCtrl(0x00000203 | ((algorithm & 0xF) << 4) );//TDCPolarity, FADCMODE, RUNMODE
+}
+
+void WDWDB::ConfigureTriggerGain(Property &property) {
+   long arraySize = 0;
+   const int* trigger_gain;
+   trigger_gain = property.GetIntVector(&arraySize);
+
+   int trg_gain[16];
+   if(arraySize ==1){
+      for(int i=0; i<15; i++) trg_gain[i] = trigger_gain[0];
+      arraySize = 16;
+   } else if(arraySize ==16) {
+      for(int i=0; i<15; i++) trg_gain[i] =  trigger_gain[i];
+   } else
+      throw std::runtime_error("TriggerGain size should be 1 or 16 values");
+
+   for(int i=0; i<4; i++){
+      unsigned int calib=0;
+      for (int j=0 ; j<4 ; j++){
+         unsigned int temp = trg_gain[i*4+j];
+         temp &= 0xFF;
+         calib |= temp<<(j*8);
+      }
+      switch(i){
+      case 0:
+         SetAdvTrgChCal0(calib);
+         break;
+      case 1:
+         SetAdvTrgChCal1(calib);
+         break;
+      case 2:
+         SetAdvTrgChCal2(calib);
+         break;
+      case 3:
+         SetAdvTrgChCal3(calib);
+         break;
+      }
+   }
+}
+
+void WDWDB::ConfigureTriggerTdcMask(Property &property) {
+   unsigned int tdcmask;
+   tdcmask = property.GetUHex();
+
+   tdcmask &= 0xFFFF;
+   SetAdvTrgTdcChMask(tdcmask);
+}
+
+void WDWDB::ConfigureTriggerTdcOffset(Property &property) {
+   long arraySize = 0;
+   const int* tdc_offset;
+   tdc_offset = property.GetIntVector(&arraySize);
+
+   int trg_offset[16];
+   if(arraySize ==1){
+      for(int i=0; i<15; i++) trg_offset[i] = tdc_offset[0];
+      arraySize = 16;
+   } else if(arraySize ==16) {
+      for(int i=0; i<15; i++) trg_offset[i] =  tdc_offset[i];
+   } else
+      throw std::runtime_error("TriggerTdcOffset size should be 1 or 16 values");
+
+   for(int i=0; i<1; i++){
+      unsigned int calib=0;
+      for (int j=0 ; j<8 ; j++){
+         unsigned int temp = trg_offset[i*8+j];
+         temp &= 0xF;
+         calib |= temp<<(j*4);
+      }
+      switch(i){
+      case 0:
+         SetAdvTrgCfg12(calib);
+         break;
+      case 1:
+         SetAdvTrgCfg13(calib);
+         break;
+      }
+   }
+}
+
+void WDWDB::ConfigureTriggerPedestalThreshold(Property &property){
+   unsigned int thr;
+   thr = property.GetUHex();
+   unsigned int pedconf = GetAdvTrgPedCfg();
+
+   pedconf &= 0xFFFF0000;
+   pedconf |= thr & 0xFFFF;
+
+   SetAdvTrgPedCfg(pedconf);
+}
+
+void WDWDB::ConfigureTriggerPedestalDelay(Property &property){
+   unsigned int dly;
+   dly = property.GetUHex();
+   unsigned int pedconf = GetAdvTrgPedCfg();
+
+   pedconf &= 0xFFC0FFFF;
+   pedconf |= (dly & 0x3F) << 16;
+
+   SetAdvTrgPedCfg(pedconf);
+}
+
+void WDWDB::ConfigureTriggerPedestalAddersel(Property &property){
+   unsigned int addersel;
+   addersel = property.GetUHex();
+   unsigned int pedconf = GetAdvTrgPedCfg();
+
+   pedconf &= 0xF8FFFFFF;
+   pedconf |= (addersel & 0x7) << 24;
+
+   SetAdvTrgPedCfg(pedconf);
+}
+
+
+void WDWDB::ConfigureDebugSignal(int port, Property &property) {
+   std::string confString;
+   int conf;
+
+   confString = property.GetStringValue();
+   if(confString == "Uart"){
+      conf = WDB::cDbgUart; 
+   } else if (confString == "Trigger"){
+      conf = WDB::cDbgTrigger; 
+   } else if (confString == "SoftTrigger"){
+      conf = WDB::cDbgSoftTrigger; 
+   } else if (confString == "ExtTrigger"){
+      conf = WDB::cDbgExtTrigger; 
+   } else if (confString == "SyncDirect"){
+      conf = WDB::cDbgSyncDirect; 
+   } else if (confString == "SyncSampled"){
+      conf = WDB::cDbgSyncSampled; 
+   } else if (confString == "SyncLogic"){
+      conf = WDB::cDbgSyncInternal; 
+   } else if (confString == "BusyLocal"){
+      conf = WDB::cDbgBusyLocal; 
+   } else if (confString == "BusyBackplane"){
+      conf = WDB::cDbgBusyBackplane; 
+   } else if (confString == "LMKInputClk"){
+      conf = WDB::cDbgLMKInputClk; 
+   } else if (confString == "ADCClk"){
+      conf = WDB::cDbgADCClk; 
+   } else if (confString == "DataClk"){
+      conf = WDB::cDbgDataClk; 
+   } else if (confString == "LMK5Clk"){
+      conf = WDB::cDbgLMK5Clk; 
+   } else if (confString == "LMKChipSelect"){
+      conf = WDB::cDbgLMKChipSelect; 
+   } else {
+      conf = WDB::cDbgSyncDirect; 
+   }
+
+   switch(port){
+   case 0:
+      SetMcxTxSigSel(conf);
+      break;
+   case 1:
+      SetMcxRxSigSel(conf);
+      break;
+   default:
+      break;
+   }
+}
+
+void WDWDB::ConfigureSamplingFrequency(Property &property) {
+   unsigned int freq;
+   freq = property.GetUInt();
+
+   bool isSendBlocked = GetSendBlock();
+   if(isSendBlocked) SetSendBlock(false);
+   SetDrsSampleFreq(freq);
+   if(isSendBlocked) SetSendBlock(true);
+
+   std::string calibpath = "."; 
+   WDCrate* c = GetCrate();
+   if(c!=nullptr){
+      WDSystem * sys= c->GetSystem();
+      if(sys!=nullptr){
+         try{
+	    calibpath = sys->GetDaqProperty("CalibPath").GetStringValue();
+	 } catch (const std::out_of_range& ex){
+         }
+      }
+   }
+
+   if (!LoadVoltageCalibration(GetDrsSampleFreqMhz(), calibpath.c_str())) {
+      printf("missing voltage calibration file\n");
+   }
+   if (!LoadTimeCalibration(GetDrsSampleFreqMhz(), calibpath.c_str())) {
+      printf("missing time calibration file\n");
+   }
+
+}
+
+// Set configurations to be used in a crate
+void WDWDB::SetInCrate(){
+   //switch to backplane trigger
+   SetPatternTriggerEn(0);
+   SetExtAsyncTriggerEn(1);
+   SetExtTriggerOutEnable(0);
+
+   //switch to backplane clock
+   if(GetExtClkInSel() != 0 || GetDaqClkSrcSel() != 0 || GetLmkInputFreq() != 80){
+
+      SetSendBlock(true);
+      SetExtClkInSel(0);
+      SetDaqClkSrcSel(0);
+      SetLmkInputFreq(80);
+      SetSendBlock(false);
+
+      int old_timeout = GetReceiveTimeoutMs(); 
+      SetReceiveTimeoutMs(15*cDefaultReceiveTimeoutMs);
+      SendControlRegisters();
+
+      SetReceiveTimeoutMs(3*cDefaultReceiveTimeoutMs);
+      SetApplySettingsLmk(1);
+
+      SetReceiveTimeoutMs(3*cDefaultReceiveTimeoutMs);
+      LmkSyncLocal();
+      SetReceiveTimeoutMs(old_timeout);
+      ReceiveStatusRegister(WD2_DRS_SAMPLE_FREQ_REG);
+
+      //Reset everything
+      ResetAllPll();
+      ResetTcbOserdesIf();
+      ResetDrsControlFsm();
+   }
+}
+
+// --- WDTCB ---
+// WDBoard derived methods
+void WDTCB::Connect(){
+   SetIDCode();
+   SetNTRG();
+
+   //TODO: write CrateId and SlotId into the board 
+
+   printf("connected to TCB with IDCode = %04x\n", fidcode);
+
+   //reset stuff
+   ResetIDLYCTRL();
+   ResetSyncWaveformSerdes();
+   ResetBufferLogic();
+}
+
+void WDTCB::SetSerdesTraining(bool state){
+   u_int32_t rrun;
+   ReadReg(RRUN,&rrun);
+   rrun |= 0x4000; //enable MASKSYNC
+   rrun |= 0x10;   //enable ENABLE TRGBUS
+   //enable serdespattern according to request
+   if(state){
+      rrun |= 0x00000200;
+
+      //if enabling also reset transmitter SERDES
+      ResetTransmitter();
+   } else {
+      rrun &= 0xFFFFFDFF;
+   }
+   SetRRUN(&rrun);
+}
+
+bool WDTCB::IsSerdesTraining(){
+   unsigned int val=0;
+   GetRRUN( &val );
+   return (val >> 9) & 0x1;
+
+}
+
+void WDTCB::ConfigureProperty(const std::string &name, Property &property) { 
+   if(name=="TriggerEnable"){
+      ConfigureTriggerEnable(property);
+   } else if(name=="TriggerPrescaling"){
+      ConfigureTriggerPrescaling(property);
+   } else if(name=="TriggerDelay"){
+      ConfigureTriggerDelay(property);
+   } else if(name=="TriggerAlgorithm"){
+      ConfigureTriggerAlgorithm(property);
+   } else if(name=="Parameters"){
+      ConfigureParameters(property);
+   } else if(name=="Banks"){
+      ConfigurePacketizer(property);
+   } else if(name=="ExtDAQBusyMask"){
+      ConfigureExtDAQ(property);
+   } else if(name=="TimeNarrowThreshold"){
+      ConfigureTimeNarrowThreshold(property);
+   } else if(name=="TimeWideThreshold"){
+      ConfigureTimeWideThreshold(property);
+   } else if(name=="XecHighThreshold"){
+      ConfigureXecHighThreshold(property);
+   } else if(name=="XecLowThreshold"){
+      ConfigureXecLowThreshold(property);
+   } else if(name=="XecVetoThreshold"){
+      ConfigureXecVetoThreshold(property);
+   } else if(name=="XecPatchId"){
+      ConfigureXecPatchId(property);
+   } else if(name=="XecAlfaThreshold"){
+      ConfigureXecAlfaThreshold(property);
+   } else if(name=="XecAlfaScale"){
+      ConfigureXecAlfaScale(property);
+   } else if(name=="XecMovingAverage"){
+      ConfigureXecMovingAverage(property);
+   } else if(name=="TcMask"){
+      ConfigureTcMask(property);
+   } else if(name=="TcMultiplicityThreshold"){
+      ConfigureTcMultiplicityThreshold(property);
+   } else if(name=="TcCrateMergeThreshold"){
+      ConfigureTcCrateMergeThreshold(property);
+   } else if(name=="TcSectorMergeThreshold"){
+      ConfigureTcSectorMergeThreshold(property);
+   } else if(name=="BgoThreshold"){
+      ConfigureBgoThreshold(property);
+   } else if(name=="BgoVetoThreshold"){
+      ConfigureBgoVetoThreshold(property);
+   } else if(name=="BgoHitDelay"){
+      ConfigureBgoHitDelay(property);
+   } else if(name=="BgoTriggerMask"){
+      ConfigureBgoTriggerMask(property);
+   } else if(name=="RdcThreshold"){
+      ConfigureRdcThreshold(property);
+   } else if(name=="RdcTriggerMask"){
+      ConfigureRdcTriggerMask(property);
+   } else if(name=="CrcHitMask"){
+      ConfigureCrcHitMask(property);
+   } else if(name=="CrcPairMask"){
+      ConfigureCrcPairMask(property);
+   } else if(name=="NgenDelay"){
+      ConfigureNgenDelay(property);
+   } else if(name=="NgenWidth"){
+      ConfigureNgenWidth(property);
+   } else if(name=="NgenHighThreshold"){
+      ConfigureNgenHighThreshold(property);
+   } else if(name=="NgenLowThreshold"){
+      ConfigureNgenLowThreshold(property);
+   } else {
+      printf("Unknown property %s in WDTCB\n", name.c_str());
+   }
+};
+
+void WDTCB::ConfigurationStarted(){
+   u_int32_t rrun_config = 0x0000E014;  //masktrg, masksync, maskbusy, fadcmode, enable trg_bus
+   SetRRUN(&rrun_config);
+   u_int32_t syncdly=0x1F;
+   u_int32_t trgdly=0x1F;
+   u_int32_t sprdly=0x1F;
+   SetTRGBusIDLY(&syncdly, &trgdly, &sprdly);
+   syncdly=0x10;
+   trgdly=0x10;
+   sprdly=0x10;
+   SetTRGBusODLY(&syncdly, &trgdly, &sprdly);
+   SetPacketizerCommandAt(0, ::STOP, 0, 0);
+   SetPacketizerAutostart(true);
+   SetPacketizerEnable(true);
+}
+
+void WDTCB::ConfigurationEnded(){
+   if((fidcode >>12) != 3)
+      GoRun();
+}
+
+void WDTCB::ConfigureTriggerEnable(Property &property){
+   long arraySize = 0;
+   const unsigned int* trigger_enable;
+   trigger_enable = GetProperty("TriggerEnable").GetUIntVector(&arraySize);
+
+   bool trg_ena[64];
+   for(int i=0; i<64; i++) trg_ena[i] = false;
+   for(long i=0; i<arraySize; i++) 
+      if(trigger_enable[i] < 64)
+         trg_ena[trigger_enable[i]] = true;
+
+   SetTriggerEnable(trg_ena);
+}
+
+void WDTCB::ConfigureTriggerPrescaling(Property &property){
+   long arraySize = 0;
+   const unsigned int* trigger_prescaling;
+   trigger_prescaling = property.GetUIntVector(&arraySize);
+
+   long arraySizeEnable = 0;
+   const unsigned int* trigger_enable;
+   try{
+      trigger_enable = GetProperty("TriggerEnable").GetUIntVector(&arraySizeEnable);
+   } catch (const std::runtime_error& ex){
+      throw std::runtime_error("Cannot set TriggerPrescaling: TriggerEnable should be also defined");
+   }
+   unsigned int trg_presca[64];
+   for(int i=0; i<64; i++) trg_presca[i] = 0;
+   if(arraySizeEnable != arraySize)
+      throw std::runtime_error("Cannot set TriggerPrescaling: TriggerEnable has a different array length");
+   else {
+      for(long i=0; i<arraySize; i++)
+         if(trigger_enable[i] < 64)
+            trg_presca[trigger_enable[i]] = trigger_prescaling[i];
+
+      SetPrescaling(trg_presca);
+   }
+}
+
+void WDTCB::ConfigureTriggerDelay(Property &property){
+   long arraySize = 0;
+   const unsigned int* trigger_delay;
+   trigger_delay = property.GetUIntVector(&arraySize);
+
+   long arraySizeEnable = 0;
+   const unsigned int* trigger_enable;
+   try{
+      trigger_enable = GetProperty("TriggerEnable").GetUIntVector(&arraySizeEnable);
+   } catch (const std::runtime_error& ex){
+      throw std::runtime_error("Cannot set TriggerDelay: TriggerEnable should be also defined");
+   }
+   unsigned int trg_delay[64];
+   for(int i=0; i<64; i++) trg_delay[i] = 0;
+   if(arraySizeEnable != arraySize)
+      throw std::runtime_error("Cannot set TriggerDelay: TriggerEnable has a different array length");
+   else {
+      for(long i=0; i<arraySize; i++)
+         if(trigger_enable[i] < 64)
+            trg_delay[trigger_enable[i]] = trigger_delay[i];
+
+      SetTRGDLY(trg_delay);
+   }
+}
+
+void WDTCB::ConfigureTriggerAlgorithm(Property &property){
+   unsigned int algorithm;
+   algorithm = property.GetUInt();
+
+   SetRALGSEL((unsigned int *)&algorithm);
+}
+
+void WDTCB::ConfigureParameters(Property &property){
+   long arraySize = 0;
+   const unsigned int* parameters;
+
+   parameters = property.GetUHexVector(&arraySize);
+   for(int i=0; i<arraySize-1; i+=2){
+      unsigned int val = parameters[i+1];
+      SetParameter(parameters[i], &val);
+   }
+}
+
+void WDTCB::ConfigurePacketizer(Property &property){
+   //bool readEnable;
+   //readEnable = property.GetBool();
+   std::string list = property.GetStringValue();
+
+   //if(readEnable){
+      std::vector<PacketInstruction> instVec;
+      PacketInstruction inst;
+
+      //to be changed: waiting for deserialization
+      inst.offset = 0;
+      inst.cmd = ::BLOCK_COPY;
+      inst.arg0 = MEMBASEADDR;
+      inst.arg1 = BUFFERBASE+10;
+      inst.arg2 = 1024;
+      instVec.push_back(inst);
+      inst.arg2 = 0;
+
+      inst.offset += 1;
+      inst.cmd = ::BLOCK_COPY;
+      inst.arg0 = MEMBASEADDR;
+      inst.arg1 = BUFFERBASE+10;
+      inst.arg2 = 1024;
+      instVec.push_back(inst);
+      inst.arg2 = 0;
+
+      //fill header
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = REVECOU;
+      inst.arg1 = BUFFERBASE+1;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RTOTTIME;
+      inst.arg1 = BUFFERBASE+2;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RSYSTRITYPE;
+      inst.arg1 = BUFFERBASE+3;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RSYSEVECOU;
+      inst.arg1 = BUFFERBASE+4;
+      instVec.push_back(inst);
+
+      int bufptr = BUFFERBASE+5;
+      int nbank = 0;
+
+      if(list.find("TRGI")!=std::string::npos){
+	      inst.offset += 1;
+	      inst.cmd = ::DIRECT_WRITE;
+	      inst.arg0 = 0x54524749;//TRGI
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::DIRECT_WRITE;
+	      inst.arg0 = 7;
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::COPY;
+	      inst.arg0 = RTRITYPE;
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::BLOCK_COPY;
+	      inst.arg0 = RTRIPATT;
+	      inst.arg1 = bufptr;
+	      inst.arg2 = 2;
+	      instVec.push_back(inst);
+	      inst.arg2 = 0;
+
+	      bufptr += 2;
+
+	      inst.offset += 1;
+	      inst.cmd = ::COPY;
+	      inst.arg0 = RTOTTIME;
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::COPY;
+	      inst.arg0 = RLIVETIME;
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::COPY;
+	      inst.arg0 = REVECOU;
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::COPY;
+	      inst.arg0 = RPCURR;
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      nbank++;
+      }
+      if(list.find("TRGC")!=std::string::npos){
+	      inst.offset += 1;
+	      inst.cmd = ::DIRECT_WRITE;
+	      inst.arg0 = 0x54524743;//TRGC
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::DIRECT_WRITE;
+	      inst.arg0 = 64;
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::BLOCK_COPY;
+	      inst.arg0 = RTRGCOU;
+	      inst.arg1 = bufptr;
+	      inst.arg2 = 64;
+	      instVec.push_back(inst);
+	      inst.arg2 = 0;
+
+	      bufptr += 64;
+
+	      nbank++;
+      }
+      if(list.find("TGEN")!=std::string::npos){
+	      inst.offset += 1;
+	      inst.cmd = ::DIRECT_WRITE;
+	      inst.arg0 = 0x5447454e;//TGEN
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::DIRECT_WRITE;
+	      inst.arg0 = 2*GENTDIM+1;
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::COPY;
+	      inst.arg0 = RMEMADDR;
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::BLOCK_COPY;
+	      inst.arg0 = GENTMEMBASE;
+	      inst.arg1 = bufptr;
+	      inst.arg2 = 2*GENTDIM;
+	      instVec.push_back(inst);
+	      inst.arg2 = 0;
+
+	      bufptr += 2*GENTDIM;
+	      nbank++;
+      }
+      if(list.find("BGO")!=std::string::npos){
+	      inst.offset += 1;
+	      inst.cmd = ::DIRECT_WRITE;
+	      inst.arg0 = 0x5442474F;//TBGO
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::DIRECT_WRITE;
+	      inst.arg0 = MEMDIM+1;
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::COPY;
+	      inst.arg0 = RMEMADDR;
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::BLOCK_COPY;
+	      inst.arg0 = BGOMEMBASE;
+	      inst.arg1 = bufptr;
+	      inst.arg2 = MEMDIM;
+	      instVec.push_back(inst);
+	      inst.arg2 = 0;
+
+	      bufptr += MEMDIM;
+	      nbank++;
+      }
+      if(list.find("RDC")!=std::string::npos){
+	      inst.offset += 1;
+	      inst.cmd = ::DIRECT_WRITE;
+	      inst.arg0 = 0x54524443;//TRDC
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::DIRECT_WRITE;
+	      inst.arg0 = 2*MEMDIM+1;
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::COPY;
+	      inst.arg0 = RMEMADDR;
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::BLOCK_COPY;
+	      inst.arg0 = RDCMEMBASE;
+	      inst.arg1 = bufptr;
+	      inst.arg2 = 2*MEMDIM;
+	      instVec.push_back(inst);
+	      inst.arg2 = 0;
+
+	      bufptr += 2*MEMDIM;
+	      nbank++;
+      }
+      if(list.find("ALFA")!=std::string::npos){
+	      inst.offset += 1;
+	      inst.cmd = ::DIRECT_WRITE;
+	      inst.arg0 = 0x54414c46;//TALF
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::DIRECT_WRITE;
+	      inst.arg0 = 2*MEMDIM+1;
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::COPY;
+	      inst.arg0 = RALGCLKMEMADDR;
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::BLOCK_COPY;
+	      inst.arg0 = ALFAMEMBASE;
+	      inst.arg1 = bufptr;
+	      inst.arg2 = 2*MEMDIM;
+	      instVec.push_back(inst);
+	      inst.arg2 = 0;
+
+	      bufptr += 2*MEMDIM;
+	      nbank++;
+      }
+      if(list.find("XEC")!=std::string::npos){
+	      inst.offset += 1;
+	      inst.cmd = ::DIRECT_WRITE;
+	      inst.arg0 = 0x54584543;//TXEC
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::DIRECT_WRITE;
+	      inst.arg0 = 2*MEMDIM+1;
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::COPY;
+	      inst.arg0 = RMEMADDR;
+	      inst.arg1 = bufptr++;
+	      instVec.push_back(inst);
+
+	      inst.offset += 1;
+	      inst.cmd = ::BLOCK_COPY;
+	      inst.arg0 = XECMEMBASE;
+	      inst.arg1 = bufptr;
+	      inst.arg2 = 2*MEMDIM;
+	      instVec.push_back(inst);
+	      inst.arg2 = 0;
+
+	      bufptr += 2*MEMDIM;
+	      nbank++;
+      }
+
+      /*inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 0x494E3035;//IN05
+      inst.arg1 = BUFFERBASE+5;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 2*MEMDIM+1;
+      inst.arg1 = BUFFERBASE+6;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RMEMADDR;
+      inst.arg1 = BUFFERBASE+7;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::BLOCK_COPY;
+      inst.arg0 = MEMBASEADDR+5*(MEMDIM*2);
+      inst.arg1 = BUFFERBASE+8;
+      inst.arg2 = 2*MEMDIM;
+      instVec.push_back(inst);
+      inst.arg2 = 0;
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 0x494E3038;//IN08
+      inst.arg1 = BUFFERBASE+8+(2*MEMDIM);
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 2*MEMDIM+1;
+      inst.arg1 = BUFFERBASE+8+(2*MEMDIM)+1;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RMEMADDR;
+      inst.arg1 = BUFFERBASE+8+(2*MEMDIM)+2;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::BLOCK_COPY;
+      inst.arg0 = MEMBASEADDR+8*(MEMDIM*2);
+      inst.arg1 = BUFFERBASE+8+(2*MEMDIM)+3;
+      inst.arg2 = 2*MEMDIM;
+      instVec.push_back(inst);
+      inst.arg2 = 0;
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 0x47454e54;//GENT
+      inst.arg1 = BUFFERBASE+8+(2*MEMDIM)+3+(2*MEMDIM);
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 2*GENTDIM+1;
+      inst.arg1 = BUFFERBASE+8+(2*MEMDIM)+3+(2*MEMDIM)+1;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RMEMADDR;
+      inst.arg1 = BUFFERBASE+8+(2*MEMDIM)+3+(2*MEMDIM)+2;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::BLOCK_COPY;
+      inst.arg0 = GENTMEMBASE;
+      inst.arg1 = BUFFERBASE+8+(2*MEMDIM)+3+(2*MEMDIM)+3;
+      inst.arg2 = 2*GENTDIM;
+      instVec.push_back(inst);
+      inst.arg2 = 0;*/
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 0;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = nbank;//nbanks
+      inst.arg1 = BUFFERBASE;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 1;
+      inst.arg1 = PACK_NEXT_BUFFER;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::STOP;
+      instVec.push_back(inst);
+
+      WritePacketizerProgram(instVec);
+   //} else {
+   //   SetPacketizerCommandAt(0, STOP, 0, 0);
+   //}
+}
+
+void WDTCB::ConfigureExtDAQ(Property &property){
+   bool extdaqbmask;
+   extdaqbmask = property.GetBool();
+
+   SetFMask(false, extdaqbmask);
+}
+
+void WDTCB::ConfigureTimeNarrowThreshold(Property &property){
+   unsigned int timenarrow;
+   timenarrow = property.GetUHex();
+
+   SetTimeNarrow(&timenarrow);
+}
+
+void WDTCB::ConfigureTimeWideThreshold(Property &property){
+   unsigned int timewide;
+   timewide = property.GetUHex();
+
+   SetTimeWide(&timewide);
+}
+
+void WDTCB::ConfigureXecHighThreshold(Property &property){
+   unsigned int xechighthreshold;
+   xechighthreshold = property.GetUHex();
+
+   SetSumHighThreshold(&xechighthreshold);
+}
+
+void WDTCB::ConfigureXecLowThreshold(Property &property){
+   unsigned int xeclowthreshold;
+   xeclowthreshold = property.GetUHex();
+
+   SetSumLowThreshold(&xeclowthreshold);
+}
+
+void WDTCB::ConfigureXecVetoThreshold(Property &property){
+   unsigned int xecvetothreshold;
+   xecvetothreshold = property.GetUHex();
+
+   SetSumVetoThreshold(&xecvetothreshold);
+}
+
+void WDTCB::ConfigureXecPatchId(Property &property){
+   unsigned int xecpatchid;
+   xecpatchid = property.GetUHex();
+
+   SetSumPatch(&xecpatchid);
+}
+
+void WDTCB::ConfigureXecAlfaThreshold(Property &property){
+   unsigned int xecalfathreshold;
+   xecalfathreshold = property.GetUHex();
+
+   SetAlphaThreshold(&xecalfathreshold);
+}
+
+void WDTCB::ConfigureXecAlfaScale(Property &property){
+   float xecalfascale;
+   xecalfascale = property.GetFloat();
+
+   SetAlphaPeakScale(xecalfascale);
+}
+
+void WDTCB::ConfigureXecMovingAverage(Property &property){
+   bool xecmovingaverage;
+   xecmovingaverage = property.GetBool();
+
+   unsigned int val;
+   if(xecmovingaverage){
+      val = 1;
+   } else {
+      val = 0;
+   }
+
+   SetQsumSelect(&val);
+}
+
+void WDTCB::ConfigureTcMask(Property &property){
+   long arraySize = 0;
+   const unsigned int* masks;
+
+   masks = property.GetUHexVector(&arraySize);
+   if(arraySize == 4){
+      SetTCMasks((unsigned int*)masks);
+   } else
+      throw std::runtime_error("TcMask size should be 4 values");
+}
+
+void WDTCB::ConfigureTcMultiplicityThreshold(Property &property){
+   unsigned int multtheshold;
+   multtheshold = property.GetInt();
+
+   SetTCMultiplicityThreshold(&multtheshold);
+}
+
+void WDTCB::ConfigureTcCrateMergeThreshold(Property &property){
+   long arraySize = 0;
+   const unsigned int* thresholds;
+
+   thresholds = property.GetUHexVector(&arraySize);
+   if(arraySize == 2){
+      SetTCCrateMergeThreshold((unsigned int*)thresholds, (unsigned int*)thresholds+1);
+   } else
+      throw std::runtime_error("TcCrateMergeThreshold size should be 2 values");
+}
+
+void WDTCB::ConfigureTcSectorMergeThreshold(Property &property){
+   long arraySize = 0;
+   const unsigned int* thresholds;
+
+   thresholds = property.GetUHexVector(&arraySize);
+   if(arraySize == 2){
+      SetTCSectorMergeThreshold((unsigned int*)thresholds, (unsigned int*)thresholds+1);
+   } else
+      throw std::runtime_error("TcSectorMergeThreshold size should be 2 values");
+}
+
+void WDTCB::ConfigureBgoThreshold(Property &property){
+   unsigned int bgothreshold;
+   bgothreshold = property.GetUHex();
+
+   SetBGOThreshold(&bgothreshold);
+}
+
+void WDTCB::ConfigureBgoVetoThreshold(Property &property){
+   unsigned int bgovetothreshold;
+   bgovetothreshold = property.GetUHex();
+
+   SetBGOVetoThreshold(&bgovetothreshold);
+}
+
+void WDTCB::ConfigureBgoHitDelay(Property &property){
+   unsigned int bgohitdelay;
+   bgohitdelay = property.GetUInt();
+
+   SetBGOHitDelay(&bgohitdelay);
+}
+
+void WDTCB::ConfigureBgoTriggerMask(Property &property){
+   unsigned int bgotriggermask;
+   bgotriggermask = property.GetUHex();
+
+   SetBGOTriggerMask(&bgotriggermask);
+}
+
+void WDTCB::ConfigureRdcThreshold(Property &property){
+   unsigned int rdcthreshold;
+   rdcthreshold = property.GetUHex();
+
+   SetRDCThreshold(&rdcthreshold);
+}
+
+void WDTCB::ConfigureRdcTriggerMask(Property &property){
+   unsigned int rdctriggermask;
+   rdctriggermask = property.GetUHex();
+
+   SetRDCTriggerMask(&rdctriggermask);
+}
+
+void WDTCB::ConfigureCrcHitMask(Property &property){
+   unsigned int crchitmask;
+   crchitmask = property.GetUHex();
+
+   SetCRCHitMask(&crchitmask);
+}
+
+void WDTCB::ConfigureCrcPairMask(Property &property){
+   unsigned int crcpairmask;
+   crcpairmask = property.GetUHex();
+
+   SetCRCPairEnable(&crcpairmask);
+}
+
+void WDTCB::ConfigureNgenDelay(Property &property){
+   unsigned int ngendly;
+   ngendly = property.GetUHex();
+
+   SetNGENDly(&ngendly);
+}
+
+void WDTCB::ConfigureNgenWidth(Property &property){
+   unsigned int ngenwidth;
+   ngenwidth = property.GetUHex();
+
+   SetNGENWidth(&ngenwidth);
+}
+
+void WDTCB::ConfigureNgenHighThreshold(Property &property){
+   unsigned int ngenhigh;
+   ngenhigh = property.GetUHex();
+
+   SetNGENHighThreshold(&ngenhigh);
+}
+
+void WDTCB::ConfigureNgenLowThreshold(Property &property){
+   unsigned int ngenlow;
+   ngenlow = property.GetUHex();
+
+   SetNGENLowThreshold(&ngenlow);
 }
