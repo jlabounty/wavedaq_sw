@@ -17,50 +17,51 @@
 #include <fstream>
 
 #include "WDBLib.h"
+#include "DCBLib.h"
+
 #include "mongoose.h"
 
 /*-- Globals -------------------------------------------------------*/
 
-std::vector<std::string> wdbName = { "wd094" };
+std::vector<std::string> wdbName = {"wd094"};
 
 enum TRIGGERMODE {
    cTriggerModeNormal = 1,
-   cTriggerModeAuto   = 2
+   cTriggerModeAuto = 2
 };
 
 enum READOUTMODE {
-   cReadoutModeDRS    = 1,
-   cReadoutModeADC    = 2,
-   cReadoutModeTDC    = 3
+   cReadoutModeDRS = 1,
+   cReadoutModeADC = 2,
+   cReadoutModeTDC = 3
 };
 
 #define LI_FORMAT_BIN  1
 #define LI_FORMAT_XML  2
 
 typedef struct {
-   bool              demoMode;
-   int               serverPort;
-   int               verbose;
-   std::string       logFileName;
-   bool              reset;
-   std::vector<WDB*> wdb;
-   WP*               wp;
-   TRIGGERMODE       triggerMode;
-   int               triggerSelfArm;
-   READOUTMODE       readoutMode;
-   bool              specialTest;
-   bool              updatePeriodic;
-   int               dbgRx;
-   int               dbgTx;
-   bool              backplaneClk;
+   bool demoMode;
+   int serverPort;
+   int verbose;
+   std::string logFileName;
+   bool reset;
+   std::vector<WDB *> wdb;
+   WP *wp;
+   TRIGGERMODE triggerMode;
+   int triggerSelfArm;
+   READOUTMODE readoutMode;
+   bool specialTest;
+   bool updatePeriodic;
+   int dbgRx;
+   int dbgTx;
+   bool backplaneClk;
 } GLOBALS;
 
 unsigned int demoDrsSampleFreq = 5016;
 
 /*------------------------------------------------------------------*/
 
-std::vector<std::string> split(const std::string&input , char separator)
-{
+std::vector<std::string> split(const std::string &input, char separator) {
    std::vector<std::string> output;
 
    std::istringstream stream(input);
@@ -73,7 +74,7 @@ std::vector<std::string> split(const std::string&input , char separator)
       // trim trailing spaces
       size_t endpos = s.find_last_not_of(" \t\r\n");
       if (endpos != std::string::npos)
-         s = s.substr(0, endpos+1);
+         s = s.substr(0, endpos + 1);
       output.push_back(s);
    }
 
@@ -85,13 +86,12 @@ std::vector<std::string> split(const std::string&input , char separator)
 static struct mg_serve_http_opts s_http_server_opts;
 
 // This function will be called by mongoose on every new request
-static void wds_handler(struct mg_connection *nc, int event, void *p)
-{
-   struct http_message *hm = (struct http_message *)p;
+static void wds_handler(struct mg_connection *nc, int event, void *p) {
+   struct http_message *hm = (struct http_message *) p;
    char str[256];
    static std::default_random_engine randomGenerator;
 
-   GLOBALS *gl = (GLOBALS *)nc->mgr->user_data;
+   GLOBALS *gl = (GLOBALS *) nc->mgr->user_data;
 
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->method, "PUT") == 0) {
       std::string uri, value, item;
@@ -118,11 +118,11 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
       if (gl->verbose)
          std::cout << "Received item " << item
-         << ", value " << value
-         << ", board " << iBoard
-         << ", channel " << iChannel
-         << " from browser"
-         << std::endl;
+                   << ", value " << value
+                   << ", board " << iBoard
+                   << ", channel " << iChannel
+                   << " from browser"
+                   << std::endl;
 
       if (item == "enableChannel") {
          // bits0-15 normal DRS channels bit16: clock0, bit17: clock1
@@ -139,74 +139,51 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             }
          else {
             gl->wdb[iBoard]->SetChnTxEn(mask);
-            if (gl->wdb[iBoard]->GetAdcChTxEn() != 0 || gl->readoutMode == cReadoutModeADC) gl->wdb[iBoard]->SetAdcChTxEn(mask);
-            if (gl->wdb[iBoard]->GetTdcChTxEn() != 0 || gl->readoutMode == cReadoutModeTDC) gl->wdb[iBoard]->SetTdcChTxEn(mask);
-            if (gl->wdb[iBoard]->GetDrsChTxEn() != 0 || gl->readoutMode == cReadoutModeDRS) gl->wdb[iBoard]->SetDrsChTxEn(mask);
+            if (gl->wdb[iBoard]->GetAdcChTxEn() != 0 || gl->readoutMode == cReadoutModeADC)
+               gl->wdb[iBoard]->SetAdcChTxEn(mask);
+            if (gl->wdb[iBoard]->GetTdcChTxEn() != 0 || gl->readoutMode == cReadoutModeTDC)
+               gl->wdb[iBoard]->SetTdcChTxEn(mask);
+            if (gl->wdb[iBoard]->GetDrsChTxEn() != 0 || gl->readoutMode == cReadoutModeDRS)
+               gl->wdb[iBoard]->SetDrsChTxEn(mask);
          }
-      }
-
-      else if (item == "rotateWaveform") {
+      } else if (item == "rotateWaveform") {
          gl->wp->SetRotateWaveform(value == "true");
-      }
-
-      else if (item == "ofsCalib1") {
+      } else if (item == "ofsCalib1") {
          gl->wp->SetOfsCalib1(value == "true");
-      }
-
-      else if (item == "ofsCalib2") {
+      } else if (item == "ofsCalib2") {
          gl->wp->SetOfsCalib2(value == "true");
-      }
-
-      else if (item == "gainCalib") {
+      } else if (item == "gainCalib") {
          gl->wp->SetGainCalib(value == "true");
-      }
-
-      else if (item == "rangeCalib") {
+      } else if (item == "rangeCalib") {
          gl->wp->SetRangeCalib(value == "true");
-      }
-
-      else if (item == "timeCalib1") {
+      } else if (item == "timeCalib1") {
          gl->wp->SetTimeCalib1(value == "true");
-      }
-
-      else if (item == "timeCalib2") {
+      } else if (item == "timeCalib2") {
          gl->wp->SetTimeCalib2(value == "true");
-      }
-
-      else if (item == "timeCalib3") {
+      } else if (item == "timeCalib3") {
          gl->wp->SetTimeCalib3(value == "true");
-      }
-
-      else if (item == "daqClkSrcSel") {
+      } else if (item == "daqClkSrcSel") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
                b->SetDaqClkSrcSel(std::stoi(value));
          else
             gl->wdb[iBoard]->SetDaqClkSrcSel(value == "true");
-      }
-
-      else if (item == "dacTriggerLevel") {
+      } else if (item == "dacTriggerLevel") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
                b->SetDacTriggerLevelV(iChannel, std::stof(value));
          else
             gl->wdb[iBoard]->SetDacTriggerLevelV(iChannel, std::stof(value));
-      }
-
-      else if (item == "triggerMode") {
+      } else if (item == "triggerMode") {
          gl->triggerMode = (TRIGGERMODE) std::stoi(value);
-      }
-
-      else if (item == "triggerHoldoff") {
+      } else if (item == "triggerHoldoff") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
                b->SetTriggerHoldoff(std::stof(value));
          else
             gl->wdb[iBoard]->SetTriggerHoldoff(std::stof(value));
-      }
-
-      else if (item == "triggerSource") {
-         for (int i=0 ; i<gl->wdb.size() ; i++) {
+      } else if (item == "triggerSource") {
+         for (int i = 0; i < gl->wdb.size(); i++) {
             if (iChannel == -1 || i == iChannel) {
                if (value == "0") {
                   // internal trigger
@@ -219,25 +196,19 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                }
             }
          }
-      }
-
-      else if (item == "triggerDelay") {
+      } else if (item == "triggerDelay") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
                b->SetTriggerDelayNs(std::stoi(value));
          else
             gl->wdb[iBoard]->SetTriggerDelayNs(std::stoi(value));
-      }
-
-      else if (item == "triggerLeadTrailEdgeSel") {
+      } else if (item == "triggerLeadTrailEdgeSel") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
                b->SetLeadTrailEdgeSel(std::stoi(value));
          else
             gl->wdb[iBoard]->SetLeadTrailEdgeSel(std::stoi(value));
-      }
-
-      else if (item == "triggerSrcPolarity") {
+      } else if (item == "triggerSrcPolarity") {
          if (iBoard == -1)
             for (auto &b: gl->wdb) {
                b->SetTrgSrcPolarity(std::stoi(value));
@@ -245,9 +216,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          else {
             gl->wdb[iBoard]->SetTrgSrcPolarity(std::stoi(value));
          }
-      }
-
-      else if (item == "triggerPtrnEn") {
+      } else if (item == "triggerPtrnEn") {
          if (iBoard == -1)
             for (auto &b: gl->wdb) {
                b->SetTrgPtrnEn(std::stoi(value));
@@ -255,60 +224,46 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          else {
             gl->wdb[iBoard]->SetTrgPtrnEn(std::stoi(value));
          }
-      }
-
-      else if (item == "triggerSrcEnPtrn") {
+      } else if (item == "triggerSrcEnPtrn") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
                b->SetTrgSrcEnPtrn(iChannel, std::stoi(value));
          else
             gl->wdb[iBoard]->SetTrgSrcEnPtrn(iChannel, std::stoi(value));
-      }
-
-      else if (item == "triggerStatePtrn") {
+      } else if (item == "triggerStatePtrn") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
                b->SetTrgStatePtrn(iChannel, std::stoi(value));
          else
             gl->wdb[iBoard]->SetTrgStatePtrn(iChannel, std::stoi(value));
-      }
-
-      else if (item == "feGain") {
+      } else if (item == "feGain") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
                b->SetFeGain(iChannel, std::stof(value));
          else
             gl->wdb[iBoard]->SetFeGain(iChannel, std::stof(value));
-      }
-
-      else if (item == "fePzc") {
+      } else if (item == "fePzc") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
                b->SetFePzc(iChannel, value == "true");
          else
             gl->wdb[iBoard]->SetFePzc(iChannel, value == "true");
-      }
-
-      else if (item == "dacPzcLevel") {
+      } else if (item == "dacPzcLevel") {
          assert(iBoard != -1);
-         gl->wdb[iBoard]->SetDacPzcLevelN(std::stoi(value)-1);
-      }
-
-      else if (item == "range") {
+         gl->wdb[iBoard]->SetDacPzcLevelN(std::stoi(value) - 1);
+      } else if (item == "range") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
                b->SetRange(std::stof(value));
          else
             gl->wdb[iBoard]->SetRange(std::stof(value));
-      }
-
-      else if (item == "readoutSrcSel") {
+      } else if (item == "readoutSrcSel") {
          if (iBoard == -1)
             for (auto &b: gl->wdb) {
-               if (std::stoi(value) == (int)cReadoutModeDRS) {
+               if (std::stoi(value) == (int) cReadoutModeDRS) {
                   gl->readoutMode = cReadoutModeDRS;
                   b->SetDrsChTxEn(b->GetChnTxEn());
-               } else if (std::stoi(value) == (int)cReadoutModeADC) {
+               } else if (std::stoi(value) == (int) cReadoutModeADC) {
                   gl->readoutMode = cReadoutModeADC;
                   b->SetAdcChTxEn(b->GetChnTxEn());
                } else {
@@ -317,10 +272,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                }
             }
          else {
-            if (std::stoi(value) == (int)cReadoutModeDRS) {
+            if (std::stoi(value) == (int) cReadoutModeDRS) {
                gl->readoutMode = cReadoutModeDRS;
                gl->wdb[iBoard]->SetDrsChTxEn(gl->wdb[iBoard]->GetChnTxEn());
-            } else if (std::stoi(value) == (int)cReadoutModeADC) {
+            } else if (std::stoi(value) == (int) cReadoutModeADC) {
                gl->readoutMode = cReadoutModeADC;
                gl->wdb[iBoard]->SetAdcChTxEn(gl->wdb[iBoard]->GetChnTxEn());
             } else {
@@ -328,29 +283,28 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                gl->wdb[iBoard]->SetTdcChTxEn(gl->wdb[iBoard]->GetChnTxEn());
             }
          }
-      }
-      else if (item.find("readoutEnable") == 0) {
-         std::string source = item.substr(13,3);
+      } else if (item.find("readoutEnable") == 0) {
+         std::string source = item.substr(13, 3);
          if (iBoard == -1)
             for (auto &b: gl->wdb) {
-               if(source == "DRS"){
+               if (source == "DRS") {
                   if (value == "true")
                      b->SetDrsChTxEn(b->GetChnTxEn());
                   else
                      b->SetDrsChTxEn(0);
 
-               } else if (source == "ADC"){
+               } else if (source == "ADC") {
                   if (value == "true")
                      b->SetAdcChTxEn(b->GetChnTxEn());
                   else
                      b->SetAdcChTxEn(0);
 
-               } else if (source == "TDC"){
+               } else if (source == "TDC") {
                   if (value == "true")
                      b->SetTdcChTxEn(b->GetChnTxEn());
                   else
                      b->SetTdcChTxEn(0);
-               } else if (source == "TRG"){
+               } else if (source == "TRG") {
                   if (value == "true")
                      b->SetTrgTxEn(1);
                   else
@@ -358,65 +312,55 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
                }
             }
          else {
-            if(source == "DRS"){
+            if (source == "DRS") {
                if (value == "true")
                   gl->wdb[iBoard]->SetDrsChTxEn(gl->wdb[iBoard]->GetChnTxEn());
                else
                   gl->wdb[iBoard]->SetDrsChTxEn(0);
 
-            } else if (source == "ADC"){
+            } else if (source == "ADC") {
                if (value == "true")
                   gl->wdb[iBoard]->SetAdcChTxEn(gl->wdb[iBoard]->GetChnTxEn());
                else
                   gl->wdb[iBoard]->SetAdcChTxEn(0);
 
-            } else if (source == "TDC"){
+            } else if (source == "TDC") {
                if (value == "true")
                   gl->wdb[iBoard]->SetTdcChTxEn(gl->wdb[iBoard]->GetChnTxEn());
                else
                   gl->wdb[iBoard]->SetTdcChTxEn(0);
-            } else if (source == "TRG"){
+            } else if (source == "TRG") {
                if (value == "true")
                   gl->wdb[iBoard]->SetTrgTxEn(1);
                else
                   gl->wdb[iBoard]->SetTrgTxEn(0);
             }
          }
-      }
-
-      else if (item == "calibBufferEnable") {
+      } else if (item == "calibBufferEnable") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
                b->SetCalibBufferEn(value == "true");
          else
             gl->wdb[iBoard]->SetCalibBufferEn(value == "true");
-      }
-
-      else if (item == "timingCalibSignalEnable") {
+      } else if (item == "timingCalibSignalEnable") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
                b->SetSineWaveEnable(value == "true");
          else
             gl->wdb[iBoard]->SetSineWaveEnable(value == "true");
-      }
-
-      else if (item == "timingReferenceSignal") {
+      } else if (item == "timingReferenceSignal") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
                b->SetTimingReferenceSignal(std::stoi(value));
          else
             gl->wdb[iBoard]->SetTimingReferenceSignal(std::stoi(value));
-      }
-
-      else if (item == "feMux") {
+      } else if (item == "feMux") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
                b->SetFeMux(iChannel, value == "true" ? WDB::cFeMuxCalSource : WDB::cFeMuxInput);
          else
             gl->wdb[iBoard]->SetFeMux(iChannel, value == "true" ? WDB::cFeMuxCalSource : WDB::cFeMuxInput);
-      }
-
-      else if (item == "drsSampleFreq") {
+      } else if (item == "drsSampleFreq") {
          if (iBoard == -1)
             for (auto &b: gl->wdb) {
                b->SetDrsSampleFreq(std::stoi(value));
@@ -429,17 +373,13 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             gl->wdb[iBoard]->LoadTimeCalibration(gl->wdb[iBoard]->GetDrsSampleFreqMhz());
          }
          demoDrsSampleFreq = std::stoi(value);
-      }
-
-      else if (item == "dacCalDc") {
+      } else if (item == "dacCalDc") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
                b->SetDacCalDcV(std::stof(value));
          else
             gl->wdb[iBoard]->SetDacCalDcV(std::stof(value));
-      }
-
-      else if (item == "hvTarget") {
+      } else if (item == "hvTarget") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
                b->SetHVTarget(iChannel, std::stof(value));
@@ -447,31 +387,25 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             gl->wdb[iBoard]->SetHVTarget(iChannel, std::stof(value));
       }
 
-      //---------- commands ----------
+         //---------- commands ----------
       else if (item == "vcalib") {
          if (!gl->demoMode)
             gl->wp->StartCalibrationVoltage(iBoard);
-      }
-
-      else if (item == "tcalib") {
+      } else if (item == "tcalib") {
          if (!gl->demoMode)
             gl->wp->StartCalibrationTime(iBoard);
-      }
-
-      else if (item == "save") {
+      } else if (item == "save") {
          if (value == "stop")
             gl->wp->StopLogging();
          else if (item != "") {
             auto args = split(value, '\n');
-            gl->wp->StartWaveformSaving("html/"+args[0],
+            gl->wp->StartWaveformSaving("html/" + args[0],
                                         args[1] == "bin" ? WP::cLiFormatBinary : WP::cLiFormatXML,
                                         args[2] == "all",
                                         args[2] == "all" ? -1 : std::stoi(args[2]),
                                         std::stoi(args[3]));
          }
-      }
-
-      else {
+      } else {
          std::cout << "Invalid command \"" << item << "\" received. Aborting." << std::endl;
          assert(0);
       }
@@ -482,25 +416,25 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
    // gloabls
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/gl") == 0) {
       if (gl->verbose)
-         std::cout<< "Sending /gl to browser" << std::endl;
+         std::cout << "Sending /gl to browser" << std::endl;
 
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
 
       mg_printf_http_chunk(nc, "{\n");
       mg_printf_http_chunk(nc, "   \"gl\": {\n");
-      mg_printf_http_chunk(nc, "      \"demoMode\": %s,\n",                      gl->demoMode ? "true" : "false");
-      mg_printf_http_chunk(nc, "      \"updatePeriodic\": %d,\n",                gl->updatePeriodic);
-      mg_printf_http_chunk(nc, "      \"nWdb\": %d\n",                           gl->wdb.size());
+      mg_printf_http_chunk(nc, "      \"demoMode\": %s,\n", gl->demoMode ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"updatePeriodic\": %d,\n", gl->updatePeriodic);
+      mg_printf_http_chunk(nc, "      \"nWdb\": %d\n", gl->wdb.size());
       mg_printf_http_chunk(nc, "   },\n");
       mg_printf_http_chunk(nc, "   \"wp\": {\n");
-      mg_printf_http_chunk(nc, "      \"rotateWaveform\": %s,\n",                gl->wp->IsRotateWaveform() ? "true" : "false");
-      mg_printf_http_chunk(nc, "      \"ofsCalib1\": %s,\n",                     gl->wp->IsOfsCalib1() ? "true" : "false");
-      mg_printf_http_chunk(nc, "      \"ofsCalib2\": %s,\n",                     gl->wp->IsOfsCalib2() ? "true" : "false");
-      mg_printf_http_chunk(nc, "      \"gainCalib\": %s,\n",                     gl->wp->IsGainCalib() ? "true" : "false");
-      mg_printf_http_chunk(nc, "      \"rangeCalib\": %s,\n",                    gl->wp->IsRangeCalib() ? "true" : "false");
-      mg_printf_http_chunk(nc, "      \"timeCalib1\": %s,\n",                    gl->wp->IsTimeCalib1() ? "true" : "false");
-      mg_printf_http_chunk(nc, "      \"timeCalib2\": %s,\n",                    gl->wp->IsTimeCalib2() ? "true" : "false");
-      mg_printf_http_chunk(nc, "      \"timeCalib3\": %s\n",                     gl->wp->IsTimeCalib3() ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"rotateWaveform\": %s,\n", gl->wp->IsRotateWaveform() ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"ofsCalib1\": %s,\n", gl->wp->IsOfsCalib1() ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"ofsCalib2\": %s,\n", gl->wp->IsOfsCalib2() ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"gainCalib\": %s,\n", gl->wp->IsGainCalib() ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"rangeCalib\": %s,\n", gl->wp->IsRangeCalib() ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"timeCalib1\": %s,\n", gl->wp->IsTimeCalib1() ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"timeCalib2\": %s,\n", gl->wp->IsTimeCalib2() ? "true" : "false");
+      mg_printf_http_chunk(nc, "      \"timeCalib3\": %s\n", gl->wp->IsTimeCalib3() ? "true" : "false");
       mg_printf_http_chunk(nc, "   }\n");
       mg_printf_http_chunk(nc, "}\n");
       mg_send_http_chunk(nc, "", 0); // end of response
@@ -510,7 +444,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
    // boards
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/wdb") == 0) {
       if (gl->verbose)
-         std::cout<< "Sending /wdb to browser" << std::endl;
+         std::cout << "Sending /wdb to browser" << std::endl;
       mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
       int b1, b2;
       if (str[0]) {
@@ -531,7 +465,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       mg_printf_http_chunk(nc, "{\n");
       mg_printf_http_chunk(nc, "  \"wdb\": [\n");
 
-      for (int b = b1 ; b<b2 ; b++) {
+      for (int b = b1; b < b2; b++) {
          auto w = gl->wdb[b];
 
          // simulate gaussian distributed scalers in demo mode
@@ -539,7 +473,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          if (gl->demoMode) {
             std::poisson_distribution<int> dist(1000);
 
-            for (auto i=0 ; i<34 ; i++)
+            for (auto i = 0; i < 34; i++)
                scaler.push_back(dist(randomGenerator));
          } else
             w->GetScalers(scaler, false);
@@ -550,11 +484,11 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          std::vector<float> hv_temp;
          float hv_base;
          if (gl->demoMode) {
-            for (auto i=0 ; i<16 ; i++) {
+            for (auto i = 0; i < 16; i++) {
                hv_target.push_back(0);
                hv_current.push_back(0);
             }
-            for (auto i=0 ; i<4 ; i++) {
+            for (auto i = 0; i < 4; i++) {
                hv_temp.push_back(20.0);
             }
             hv_base = 0;
@@ -566,87 +500,88 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          }
 
          mg_printf_http_chunk(nc, "    {\n");
-         mg_printf_http_chunk(nc, "      \"name\": \"%s\",\n",                   w->GetName().c_str());
-         mg_printf_http_chunk(nc, "      \"temperature\": %1.1lf,\n",            w->GetTemperatureDegree(false));
-         mg_printf_http_chunk(nc, "      \"sysBusy\": %s,\n",                    w->GetSysBusy() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"drsctrlBusy\": %s,\n",                w->GetDrsCtrlBusy() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"packagerBusy\": %s,\n",               w->GetPackagerBusy() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"hvBoardPlugged\": %s,\n",             w->GetHvBoardPlugged() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"hvBackplanePlugged\": %s,\n",         w->GetBackplanePlugged() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"pllLck\": %d,\n",                     w->GetPllLock(false));
-         mg_printf_http_chunk(nc, "      \"drsSampleFreq\": %d,\n",              gl->demoMode ?
-                                                                                   demoDrsSampleFreq : w->GetDrsSampleFreqMhz());
-         mg_printf_http_chunk(nc, "      \"adcSampleFreq\": %d,\n",              w->GetAdcSampleFreq() / 1000);
-         mg_printf_http_chunk(nc, "      \"compChannelStatus\": %d,\n",          w->GetCompChStat());
-         mg_printf_http_chunk(nc, "      \"lastEventNumber\": %d,\n",            w->GetEventNumber());
+         mg_printf_http_chunk(nc, "      \"name\": \"%s\",\n", w->GetName().c_str());
+         mg_printf_http_chunk(nc, "      \"temperature\": %1.1lf,\n", w->GetTemperatureDegree(false));
+         mg_printf_http_chunk(nc, "      \"sysBusy\": %s,\n", w->GetSysBusy() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"drsctrlBusy\": %s,\n", w->GetDrsCtrlBusy() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"packagerBusy\": %s,\n", w->GetPackagerBusy() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"hvBoardPlugged\": %s,\n", w->GetHvBoardPlugged() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"hvBackplanePlugged\": %s,\n", w->GetBackplanePlugged() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"pllLck\": %d,\n", w->GetPllLock(false));
+         mg_printf_http_chunk(nc, "      \"drsSampleFreq\": %d,\n", gl->demoMode ?
+                                                                    demoDrsSampleFreq : w->GetDrsSampleFreqMhz());
+         mg_printf_http_chunk(nc, "      \"adcSampleFreq\": %d,\n", w->GetAdcSampleFreq() / 1000);
+         mg_printf_http_chunk(nc, "      \"compChannelStatus\": %d,\n", w->GetCompChStat());
+         mg_printf_http_chunk(nc, "      \"lastEventNumber\": %d,\n", w->GetEventNumber());
          mg_printf_http_chunk(nc, "      \"triggerBusParityErrorCount\": %d,\n", w->GetTrbParityErrorCount());
-         mg_printf_http_chunk(nc, "      \"triggerBusType\": %d,\n",             w->GetTrbInfoLsb() & 0xFF); // ??
-         mg_printf_http_chunk(nc, "      \"triggerBusNumber\": %d,\n",           w->GetTrbInfoLsb() >> 8);   // ??
-         mg_printf_http_chunk(nc, "      \"crateId\": %d,\n",                    w->GetCrateId());
-         mg_printf_http_chunk(nc, "      \"slotId\": %d,\n",                     w->GetSlotId());
-         mg_printf_http_chunk(nc, "      \"readoutSrcSel\": %d,\n",              gl->readoutMode);
-         mg_printf_http_chunk(nc, "      \"readoutEnable\": %d,\n",              ((w->GetTrgTxEn()!=0)<<3)
-                                                                               | ((w->GetTdcChTxEn()!=0)<<2)
-                                                                               | ((w->GetAdcChTxEn()!=0)<<1)
-                                                                               | (w->GetDrsChTxEn()!=0));
-         mg_printf_http_chunk(nc, "      \"daqNormal\": %s,\n",                  w->GetDaqNormal() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"daqSingle\": %s,\n",                  w->GetDaqSingle() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"drs0TimingRefSel\": %d,\n",           w->GetDrs0TimingRefSel());
-         mg_printf_http_chunk(nc, "      \"drs1TimingRefSel\": %d,\n",           w->GetDrs1TimingRefSel());
-         mg_printf_http_chunk(nc, "      \"calibBufferEnable\": %s,\n",          w->GetCalibBufferEn() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"timingCalibSignalEnable\": %d,\n",    w->GetTimingCalibSignalEn());
-         mg_printf_http_chunk(nc, "      \"timingReferenceSignal\": %d,\n",      w->GetTimingReferenceSignal());
-         mg_printf_http_chunk(nc, "      \"daqClkSrcSel\": %d,\n",               w->GetDaqClkSrcSel());
-         mg_printf_http_chunk(nc, "      \"extClkInSel\": %d,\n",                w->GetExtClkInSel());
-         mg_printf_http_chunk(nc, "      \"extClkFreq\": %d,\n",                 w->GetExtClkFreq());
-         mg_printf_http_chunk(nc, "      \"localClkFreq\": %d,\n",               w->GetLocalClkFreq());
-         mg_printf_http_chunk(nc, "      \"calibClkFreq\": %d,\n",               w->GetCalibClkFreq());
-         mg_printf_http_chunk(nc, "      \"chnTxEn\": %d,\n",                    w->GetChnTxEn());
+         mg_printf_http_chunk(nc, "      \"triggerBusType\": %d,\n", w->GetTrbInfoLsb() & 0xFF); // ??
+         mg_printf_http_chunk(nc, "      \"triggerBusNumber\": %d,\n", w->GetTrbInfoLsb() >> 8);   // ??
+         mg_printf_http_chunk(nc, "      \"crateId\": %d,\n", w->GetCrateId());
+         mg_printf_http_chunk(nc, "      \"slotId\": %d,\n", w->GetSlotId());
+         mg_printf_http_chunk(nc, "      \"readoutSrcSel\": %d,\n", gl->readoutMode);
+         mg_printf_http_chunk(nc, "      \"readoutEnable\": %d,\n", ((w->GetTrgTxEn() != 0) << 3)
+                                                                    | ((w->GetTdcChTxEn() != 0) << 2)
+                                                                    | ((w->GetAdcChTxEn() != 0) << 1)
+                                                                    | (w->GetDrsChTxEn() != 0));
+         mg_printf_http_chunk(nc, "      \"daqNormal\": %s,\n", w->GetDaqNormal() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"daqSingle\": %s,\n", w->GetDaqSingle() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"drs0TimingRefSel\": %d,\n", w->GetDrs0TimingRefSel());
+         mg_printf_http_chunk(nc, "      \"drs1TimingRefSel\": %d,\n", w->GetDrs1TimingRefSel());
+         mg_printf_http_chunk(nc, "      \"calibBufferEnable\": %s,\n", w->GetCalibBufferEn() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"timingCalibSignalEnable\": %d,\n", w->GetTimingCalibSignalEn());
+         mg_printf_http_chunk(nc, "      \"timingReferenceSignal\": %d,\n", w->GetTimingReferenceSignal());
+         mg_printf_http_chunk(nc, "      \"daqClkSrcSel\": %d,\n", w->GetDaqClkSrcSel());
+         mg_printf_http_chunk(nc, "      \"extClkInSel\": %d,\n", w->GetExtClkInSel());
+         mg_printf_http_chunk(nc, "      \"extClkFreq\": %d,\n", w->GetExtClkFreq());
+         mg_printf_http_chunk(nc, "      \"localClkFreq\": %d,\n", w->GetLocalClkFreq());
+         mg_printf_http_chunk(nc, "      \"calibClkFreq\": %d,\n", w->GetCalibClkFreq());
+         mg_printf_http_chunk(nc, "      \"chnTxEn\": %d,\n", w->GetChnTxEn());
 
-         mg_printf_http_chunk(nc, "      \"dacOfs\": %1.3f,\n",                  w->GetDacOfsV());
-         mg_printf_http_chunk(nc, "      \"dacCalDc\": %1.3f,\n",                w->GetDacCalDcV());
-         mg_printf_http_chunk(nc, "      \"dacPzcLevel\": %d,\n",                w->GetDacPzcLevelN());
+         mg_printf_http_chunk(nc, "      \"dacOfs\": %1.3f,\n", w->GetDacOfsV());
+         mg_printf_http_chunk(nc, "      \"dacCalDc\": %1.3f,\n", w->GetDacCalDcV());
+         mg_printf_http_chunk(nc, "      \"dacPzcLevel\": %d,\n", w->GetDacPzcLevelN());
 
          mg_printf_http_chunk(nc, "      \"dacTriggerLevel\": [\n");
-         for (int i=0 ; i<15 ; i++)
-            mg_printf_http_chunk(nc, "        %1.3f,\n",                         w->GetDacTriggerLevelV(i));
-         mg_printf_http_chunk(nc, "        %1.3f ],\n",                          w->GetDacTriggerLevelV(15));
+         for (int i = 0; i < 15; i++)
+            mg_printf_http_chunk(nc, "        %1.3f,\n", w->GetDacTriggerLevelV(i));
+         mg_printf_http_chunk(nc, "        %1.3f ],\n", w->GetDacTriggerLevelV(15));
 
          mg_printf_http_chunk(nc, "      \"fePzc\": [\n");
-         for (int i=0 ; i<15 ; i++)
-            mg_printf_http_chunk(nc, "        %s,\n",                            w->GetFePzc(i) ? "true" : "false");
-         mg_printf_http_chunk(nc, "        %s ],\n",                             w->GetFePzc(15) ? "true" : "false");
+         for (int i = 0; i < 15; i++)
+            mg_printf_http_chunk(nc, "        %s,\n", w->GetFePzc(i) ? "true" : "false");
+         mg_printf_http_chunk(nc, "        %s ],\n", w->GetFePzc(15) ? "true" : "false");
 
          mg_printf_http_chunk(nc, "      \"feGain\": [\n");
-         for (int i=0 ; i<15 ; i++)
-            mg_printf_http_chunk(nc, "        %1g,\n",                           w->GetFeGain(i));
-         mg_printf_http_chunk(nc, "        %1g ],\n",                            w->GetFeGain(15));
+         for (int i = 0; i < 15; i++)
+            mg_printf_http_chunk(nc, "        %1g,\n", w->GetFeGain(i));
+         mg_printf_http_chunk(nc, "        %1g ],\n", w->GetFeGain(15));
 
          mg_printf_http_chunk(nc, "      \"feMux\": [\n");
-         for (int i=0 ; i<15 ; i++)
-            mg_printf_http_chunk(nc, "        %d,\n",                            w->GetFeMux(i));
-         mg_printf_http_chunk(nc, "        %d ],\n",                             w->GetFeMux(15));
+         for (int i = 0; i < 15; i++)
+            mg_printf_http_chunk(nc, "        %d,\n", w->GetFeMux(i));
+         mg_printf_http_chunk(nc, "        %d ],\n", w->GetFeMux(15));
 
-         mg_printf_http_chunk(nc, "      \"triggerMode\": %d,\n",                gl->triggerMode);
-         mg_printf_http_chunk(nc, "      \"triggerHoldoff\": %d,\n",             w->GetTriggerHoldoff());
-         mg_printf_http_chunk(nc, "      \"triggerLeadTrailEdgeSel\": %d,\n",    w->GetLeadTrailEdgeSel());
-         mg_printf_http_chunk(nc, "      \"triggerExtTriggerOutEnable\": %s,\n", w->GetExtTriggerOutEnable() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"triggerSource\": %d,\n",              w->GetExtAsyncTriggerEn());
-         mg_printf_http_chunk(nc, "      \"triggerOutPulseLength\": %d,\n",      w->GetTriggerOutPulseLength());
-         mg_printf_http_chunk(nc, "      \"triggerDelay\": %d,\n",               w->GetTriggerDelayNs());
-         mg_printf_http_chunk(nc, "      \"triggerSrcPolarity\": %d,\n",         w->GetTrgSrcPolarity());
-         mg_printf_http_chunk(nc, "      \"triggerAutoTriggerPeriod\": %d,\n",   w->GetAutoTriggerPeriod());
-         mg_printf_http_chunk(nc, "      \"triggerPtrnEn\": %d,\n",              w->GetTrgPtrnEn());
+         mg_printf_http_chunk(nc, "      \"triggerMode\": %d,\n", gl->triggerMode);
+         mg_printf_http_chunk(nc, "      \"triggerHoldoff\": %d,\n", w->GetTriggerHoldoff());
+         mg_printf_http_chunk(nc, "      \"triggerLeadTrailEdgeSel\": %d,\n", w->GetLeadTrailEdgeSel());
+         mg_printf_http_chunk(nc, "      \"triggerExtTriggerOutEnable\": %s,\n",
+                              w->GetExtTriggerOutEnable() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"triggerSource\": %d,\n", w->GetExtAsyncTriggerEn());
+         mg_printf_http_chunk(nc, "      \"triggerOutPulseLength\": %d,\n", w->GetTriggerOutPulseLength());
+         mg_printf_http_chunk(nc, "      \"triggerDelay\": %d,\n", w->GetTriggerDelayNs());
+         mg_printf_http_chunk(nc, "      \"triggerSrcPolarity\": %d,\n", w->GetTrgSrcPolarity());
+         mg_printf_http_chunk(nc, "      \"triggerAutoTriggerPeriod\": %d,\n", w->GetAutoTriggerPeriod());
+         mg_printf_http_chunk(nc, "      \"triggerPtrnEn\": %d,\n", w->GetTrgPtrnEn());
 
          mg_printf_http_chunk(nc, "      \"triggerSrcEnPtrn\": [\n");
-         for (int i=0 ; i<17 ; i++)
-            mg_printf_http_chunk(nc, "        %d,\n",                            w->GetTrgSrcEnPtrn(i));
-         mg_printf_http_chunk(nc, "        %d ],\n",                             w->GetTrgSrcEnPtrn(17));
+         for (int i = 0; i < 17; i++)
+            mg_printf_http_chunk(nc, "        %d,\n", w->GetTrgSrcEnPtrn(i));
+         mg_printf_http_chunk(nc, "        %d ],\n", w->GetTrgSrcEnPtrn(17));
 
          mg_printf_http_chunk(nc, "      \"triggerStatePtrn\": [\n");
-         for (int i=0 ; i<17 ; i++)
-            mg_printf_http_chunk(nc, "        %d,\n",                            w->GetTrgStatePtrn(i));
-         mg_printf_http_chunk(nc, "        %d ],\n",                             w->GetTrgStatePtrn(17));
+         for (int i = 0; i < 17; i++)
+            mg_printf_http_chunk(nc, "        %d,\n", w->GetTrgStatePtrn(i));
+         mg_printf_http_chunk(nc, "        %d ],\n", w->GetTrgStatePtrn(17));
 
          mg_printf_http_chunk(nc, "      \"scaler\": [\n");
          for (auto &s: scaler) {
@@ -683,7 +618,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
          mg_printf_http_chunk(nc, "      }\n");
 
-         if (b == b2-1)
+         if (b == b2 - 1)
             mg_printf_http_chunk(nc, "    }\n");
          else
             mg_printf_http_chunk(nc, "    },\n");
@@ -718,13 +653,13 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       // return progress if in voltage calibration mode
       if (gl->wp->IsVcalibActive()) {
          int t = 10;    // array type
-         mg_send_http_chunk(nc, (const char *)&t, 4);
+         mg_send_http_chunk(nc, (const char *) &t, 4);
 
          int b = gl->wp->GetVcalibBoard();
-         mg_send_http_chunk(nc, (const char *)&b, 4);
+         mg_send_http_chunk(nc, (const char *) &b, 4);
 
          float f = gl->wp->GetVcalibProgress();
-         mg_send_http_chunk(nc, (const char *)&f, 4);
+         mg_send_http_chunk(nc, (const char *) &f, 4);
 
          mg_send_http_chunk(nc, "", 0);
          return;
@@ -735,34 +670,34 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          gl->wp->ClearTcalibError();
 
          int t = 12;    // array type indicating error
-         mg_send_http_chunk(nc, (const char *)&t, 4);
-         
+         mg_send_http_chunk(nc, (const char *) &t, 4);
+
          int b = gl->wp->GetTcalibBoard();
-         mg_send_http_chunk(nc, (const char *)&b, 4);
-         
+         mg_send_http_chunk(nc, (const char *) &b, 4);
+
          mg_send_http_chunk(nc, "", 0);
          return;
 
       }
-      
+
       // return progress and period in time calibration mode
       if (gl->wp->IsTcalibActive()) {
          int t = 11;    // array type
-         mg_send_http_chunk(nc, (const char *)&t, 4);
+         mg_send_http_chunk(nc, (const char *) &t, 4);
 
          int b = gl->wp->GetTcalibBoard();
-         mg_send_http_chunk(nc, (const char *)&b, 4);
+         mg_send_http_chunk(nc, (const char *) &b, 4);
 
          float f = gl->wp->GetTcalibProgress();
-         mg_send_http_chunk(nc, (const char *)&f, 4);
+         mg_send_http_chunk(nc, (const char *) &f, 4);
 
-         for (int c=0 ; c<WD_N_CHANNELS ; c++)
+         for (int c = 0; c < WD_N_CHANNELS; c++)
             if (chn & (1 << c)) {
                int n = 1024;
-               mg_send_http_chunk(nc, (const char *)&c, 4);
-               mg_send_http_chunk(nc, (const char *)&n, 4);
+               mg_send_http_chunk(nc, (const char *) &c, 4);
+               mg_send_http_chunk(nc, (const char *) &n, 4);
 
-               mg_send_http_chunk(nc, (const char *)gl->wdb[b]->mTCalib.mCalib.period[c], sizeof(float)*n);
+               mg_send_http_chunk(nc, (const char *) gl->wdb[b]->mTCalib.mCalib.period[c], sizeof(float) * n);
             }
 
          mg_send_http_chunk(nc, "", 0);
@@ -780,30 +715,31 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
          bNewEvent = true;
          event.mVCalibrated = true;
          event.mTCalibrated = true;
-         if(gl->readoutMode == cReadoutModeDRS){
+         if (gl->readoutMode == cReadoutModeDRS) {
             event.mTypeValid[cDataTypeDRS] = true;
-            for (int c=0 ; c<WD_N_CHANNELS ; c++) {
-               for (int i=0 ; i<1024 ; i++) {
-                  float t = i*1E-6 / demoDrsSampleFreq;
+            for (int c = 0; c < WD_N_CHANNELS; c++) {
+               for (int i = 0; i < 1024; i++) {
+                  float t = i * 1E-6 / demoDrsSampleFreq;
                   event.mWfTDRS[c][i] = t;
-                  event.mWfUDRS[c][i] = (float)(sin(M_PI*2 * 100E6 * t + c/8.0)/2 + ((float)random()/RAND_MAX-0.5) / 300);
+                  event.mWfUDRS[c][i] = (float) (sin(M_PI * 2 * 100E6 * t + c / 8.0) / 2 +
+                                                 ((float) random() / RAND_MAX - 0.5) / 300);
                }
                // add spikes
-               for (int i=0 ; i<1024 ; i++) {
-                  if ((float)random()/RAND_MAX < 0.00005) {
-                     float s = ((float)random()/RAND_MAX-0.5) / 5;
-                     int j = i-5;
+               for (int i = 0; i < 1024; i++) {
+                  if ((float) random() / RAND_MAX < 0.00005) {
+                     float s = ((float) random() / RAND_MAX - 0.5) / 5;
+                     int j = i - 5;
                      float f;
-                     for (f=0 ; f<1 ; f += 0.2,j++)
-                        if (j >= 0 && j< 1024)
+                     for (f = 0; f < 1; f += 0.2, j++)
+                        if (j >= 0 && j < 1024)
                            event.mWfUDRS[c][j] += s * f;
-                     for (f=1 ; f>0 ; f -= 0.2,j++)
-                        if (j >= 0 && j< 1024)
+                     for (f = 1; f > 0; f -= 0.2, j++)
+                        if (j >= 0 && j < 1024)
                            event.mWfUDRS[c][j] += s * f;
                   }
                }
             }
-         } 
+         }
       } else {
 
          // request single event
@@ -845,70 +781,70 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             int vc = event.mVCalibrated;  // voltage calibrated
             int tc = event.mTCalibrated;  // time calibrated
             int l = gl->wp->GetNLogged(); // number of logged events
-            for (int c=0 ; c<WD_N_CHANNELS ; c++) {
+            for (int c = 0; c < WD_N_CHANNELS; c++) {
                if (chn & (1 << c)) {
                   t = 1; // time array
-                  mg_send_http_chunk(nc, (const char *)&t, 4);
-                  mg_send_http_chunk(nc, (const char *)&b, 4);
-                  mg_send_http_chunk(nc, (const char *)&tc, 4);
-                  mg_send_http_chunk(nc, (const char *)&l, 4);
-                  mg_send_http_chunk(nc, (const char *)&c, 4);
-                  mg_send_http_chunk(nc, (const char *)&n, 4);
-                  mg_send_http_chunk(nc, (const char *)&event.mWfTADC[c][0], sizeof(float)*n);
+                  mg_send_http_chunk(nc, (const char *) &t, 4);
+                  mg_send_http_chunk(nc, (const char *) &b, 4);
+                  mg_send_http_chunk(nc, (const char *) &tc, 4);
+                  mg_send_http_chunk(nc, (const char *) &l, 4);
+                  mg_send_http_chunk(nc, (const char *) &c, 4);
+                  mg_send_http_chunk(nc, (const char *) &n, 4);
+                  mg_send_http_chunk(nc, (const char *) &event.mWfTADC[c][0], sizeof(float) * n);
                }
             }
 
-            for (int c=0 ; c<WD_N_CHANNELS ; c++) {
+            for (int c = 0; c < WD_N_CHANNELS; c++) {
                if (chn & (1 << c)) {
                   t = 2; // voltage array
-                  mg_send_http_chunk(nc, (const char *)&t, 4);
-                  mg_send_http_chunk(nc, (const char *)&b, 4);
-                  mg_send_http_chunk(nc, (const char *)&vc, 4);
-                  mg_send_http_chunk(nc, (const char *)&l, 4);
-                  mg_send_http_chunk(nc, (const char *)&c, 4);
-                  mg_send_http_chunk(nc, (const char *)&n, 4);
-                  mg_send_http_chunk(nc, (const char *)&event.mWfUADC[c][1024], sizeof(float)*n);
+                  mg_send_http_chunk(nc, (const char *) &t, 4);
+                  mg_send_http_chunk(nc, (const char *) &b, 4);
+                  mg_send_http_chunk(nc, (const char *) &vc, 4);
+                  mg_send_http_chunk(nc, (const char *) &l, 4);
+                  mg_send_http_chunk(nc, (const char *) &c, 4);
+                  mg_send_http_chunk(nc, (const char *) &n, 4);
+                  mg_send_http_chunk(nc, (const char *) &event.mWfUADC[c][1024], sizeof(float) * n);
                }
             }
          } else if (event.mTypeValid[cDataTypeTDC] && gl->readoutMode == cReadoutModeTDC) { //---- TDC waveforms
             int t = 1;                    // array type
-            int n = 512*8;                 // number of elements
+            int n = 512 * 8;                 // number of elements
             int vc = event.mVCalibrated;  // voltage calibrated
             int tc = event.mTCalibrated;  // time calibrated
             int l = gl->wp->GetNLogged(); // number of logged events
-            float time[512*8];
-            for(int i=0; i<512*8; i++){
-              time[i] = i*1.56e-9; 
+            float time[512 * 8];
+            for (int i = 0; i < 512 * 8; i++) {
+               time[i] = i * 1.56e-9;
             }
-            for (int c=0 ; c<WD_N_CHANNELS ; c++) {
+            for (int c = 0; c < WD_N_CHANNELS; c++) {
                if (chn & (1 << c)) {
                   t = 1; // time array
-                  mg_send_http_chunk(nc, (const char *)&t, 4);
-                  mg_send_http_chunk(nc, (const char *)&b, 4);
-                  mg_send_http_chunk(nc, (const char *)&tc, 4);
-                  mg_send_http_chunk(nc, (const char *)&l, 4);
-                  mg_send_http_chunk(nc, (const char *)&c, 4);
-                  mg_send_http_chunk(nc, (const char *)&n, 4);
-                  mg_send_http_chunk(nc, (const char *)&time[0], sizeof(float)*n);
+                  mg_send_http_chunk(nc, (const char *) &t, 4);
+                  mg_send_http_chunk(nc, (const char *) &b, 4);
+                  mg_send_http_chunk(nc, (const char *) &tc, 4);
+                  mg_send_http_chunk(nc, (const char *) &l, 4);
+                  mg_send_http_chunk(nc, (const char *) &c, 4);
+                  mg_send_http_chunk(nc, (const char *) &n, 4);
+                  mg_send_http_chunk(nc, (const char *) &time[0], sizeof(float) * n);
                }
             }
-            for (int c=0 ; c<WD_N_CHANNELS ; c++) {
+            for (int c = 0; c < WD_N_CHANNELS; c++) {
                if (chn & (1 << c)) {
                   t = 3; // bit value array
-                  mg_send_http_chunk(nc, (const char *)&t, 4);
-                  mg_send_http_chunk(nc, (const char *)&b, 4);
-                  mg_send_http_chunk(nc, (const char *)&vc, 4);
-                  mg_send_http_chunk(nc, (const char *)&l, 4);
-                  mg_send_http_chunk(nc, (const char *)&c, 4);
-                  mg_send_http_chunk(nc, (const char *)&n, 4);
-                  unsigned char ampl[512*8];
-                  for(int i=0; i<512; i++){
+                  mg_send_http_chunk(nc, (const char *) &t, 4);
+                  mg_send_http_chunk(nc, (const char *) &b, 4);
+                  mg_send_http_chunk(nc, (const char *) &vc, 4);
+                  mg_send_http_chunk(nc, (const char *) &l, 4);
+                  mg_send_http_chunk(nc, (const char *) &c, 4);
+                  mg_send_http_chunk(nc, (const char *) &n, 4);
+                  unsigned char ampl[512 * 8];
+                  for (int i = 0; i < 512; i++) {
                      unsigned char binval = event.mWfTDC[c][i];
-                     for(int j=0; j<8; j++){
-                        ampl[8*i+7-j]= (binval&(1<<j))?1:0;
+                     for (int j = 0; j < 8; j++) {
+                        ampl[8 * i + 7 - j] = (binval & (1 << j)) ? 1 : 0;
                      }
                   }
-                  mg_send_http_chunk(nc, (const char *)&ampl[0], sizeof(unsigned char)*n);
+                  mg_send_http_chunk(nc, (const char *) &ampl[0], sizeof(unsigned char) * n);
                }
             }
          } else if (event.mTypeValid[cDataTypeDRS] && gl->readoutMode == cReadoutModeDRS) { //---- DRS waveforms
@@ -917,29 +853,29 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
             int vc = event.mVCalibrated;  // voltage calibrated
             int tc = event.mTCalibrated;  // time calibrated
             int l = gl->wp->GetNLogged(); // number of logged events
-            for (int c=0 ; c<WD_N_CHANNELS ; c++) {
+            for (int c = 0; c < WD_N_CHANNELS; c++) {
                if (chn & (1 << c)) {
                   t = 1; // time array
-                  mg_send_http_chunk(nc, (const char *)&t, 4);
-                  mg_send_http_chunk(nc, (const char *)&b, 4);
-                  mg_send_http_chunk(nc, (const char *)&tc, 4);
-                  mg_send_http_chunk(nc, (const char *)&l, 4);
-                  mg_send_http_chunk(nc, (const char *)&c, 4);
-                  mg_send_http_chunk(nc, (const char *)&n, 4);
-                  mg_send_http_chunk(nc, (const char *)event.mWfTDRS[c], sizeof(float)*n);
+                  mg_send_http_chunk(nc, (const char *) &t, 4);
+                  mg_send_http_chunk(nc, (const char *) &b, 4);
+                  mg_send_http_chunk(nc, (const char *) &tc, 4);
+                  mg_send_http_chunk(nc, (const char *) &l, 4);
+                  mg_send_http_chunk(nc, (const char *) &c, 4);
+                  mg_send_http_chunk(nc, (const char *) &n, 4);
+                  mg_send_http_chunk(nc, (const char *) event.mWfTDRS[c], sizeof(float) * n);
                }
             }
 
-            for (int c=0 ; c<WD_N_CHANNELS ; c++) {
+            for (int c = 0; c < WD_N_CHANNELS; c++) {
                if (chn & (1 << c)) {
                   t = 2; // voltage array
-                  mg_send_http_chunk(nc, (const char *)&t, 4);
-                  mg_send_http_chunk(nc, (const char *)&b, 4);
-                  mg_send_http_chunk(nc, (const char *)&vc, 4);
-                  mg_send_http_chunk(nc, (const char *)&l, 4);
-                  mg_send_http_chunk(nc, (const char *)&c, 4);
-                  mg_send_http_chunk(nc, (const char *)&n, 4);
-                  mg_send_http_chunk(nc, (const char *)event.mWfUDRS[c], sizeof(float)*n);
+                  mg_send_http_chunk(nc, (const char *) &t, 4);
+                  mg_send_http_chunk(nc, (const char *) &b, 4);
+                  mg_send_http_chunk(nc, (const char *) &vc, 4);
+                  mg_send_http_chunk(nc, (const char *) &l, 4);
+                  mg_send_http_chunk(nc, (const char *) &c, 4);
+                  mg_send_http_chunk(nc, (const char *) &n, 4);
+                  mg_send_http_chunk(nc, (const char *) event.mWfUDRS[c], sizeof(float) * n);
                }
             }
          }
@@ -947,8 +883,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
       } else {
          // just return idle message
          int t = 0;
-         mg_send_http_chunk(nc, (const char *)&t, 4);
-         mg_send_http_chunk(nc, (const char *)&b, 4);
+         mg_send_http_chunk(nc, (const char *) &t, 4);
+         mg_send_http_chunk(nc, (const char *) &b, 4);
          printf("Idle\n");
       }
 
@@ -966,10 +902,9 @@ static void wds_handler(struct mg_connection *nc, int event, void *p)
 
 /*------------------------------------------------------------------*/
 
-void showUsage(std::string name)
-{
+void showUsage(std::string name) {
    if (name.find("/") != std::string::npos)
-      name = name.substr(name.rfind("/")+1); // strip path
+      name = name.substr(name.rfind("/") + 1); // strip path
 
    std::cerr << "usage: " << name << " [options] [-w <address> [-w <address> ...]]" << std::endl;
    std::cerr << "valid options:" << std::endl;
@@ -981,7 +916,8 @@ void showUsage(std::string name)
    std::cerr << "  -p              HTTP server port (default is 8080)" << std::endl;
    std::cerr << "  -r              Reset all PLLs" << std::endl;
    std::cerr << "  -s              Run WDB in self-arm mode (use with caution!)" << std::endl;
-   std::cerr << "  -u              Retrieve WDB registers once per second to capture changes by other control programs" << std::endl;
+   std::cerr << "  -u              Retrieve WDB registers once per second to capture changes by other control programs"
+             << std::endl;
    std::cerr << "  -w <address>    Internet address(es) of WaveDREAM board(s)" << std::endl;
    std::cerr << "  -v 1            Print extra information (verbose)" << std::endl;
    std::cerr << "  -v 2            Print each received waveform packet header" << std::endl;
@@ -1000,8 +936,7 @@ void handler(int sig) {
    exit(1);
 }
 
-int main(int argc, const char * argv[])
-{
+int main(int argc, const char *argv[]) {
    GLOBALS gl = {};
 
    // install handle to show stack trace on segment violation
@@ -1024,7 +959,7 @@ int main(int argc, const char * argv[])
       return 1;
    }
 
-   for (int i=1 ; i<argc ; i++) {
+   for (int i = 1; i < argc; i++) {
       std::string arg = argv[i];
       if (arg == "-h" || arg == "-help" || arg == "--help") {
          showUsage(argv[0]);
@@ -1038,9 +973,7 @@ int main(int argc, const char * argv[])
       else if (arg == "-g") {
          gl.dbgRx = std::stoi(argv[++i]);
          gl.dbgTx = std::stoi(argv[++i]);
-      }
-
-      else if (arg == "-l")
+      } else if (arg == "-l")
          gl.logFileName = std::string(argv[++i]);
 
       else if (arg == "-r")
@@ -1057,11 +990,9 @@ int main(int argc, const char * argv[])
 
       else if (arg == "-v") {
          gl.verbose = 1;
-         if (i < argc-1 && isdigit(argv[i+1][0]))
+         if (i < argc - 1 && isdigit(argv[i + 1][0]))
             gl.verbose = std::stoi(argv[++i]);
-      }
-
-      else if (arg == "-t")
+      } else if (arg == "-t")
          gl.specialTest = true;
 
       else if (arg == "-w") {
@@ -1102,22 +1033,22 @@ int main(int argc, const char * argv[])
 
       } else if (arg == "-d") {
 
-         if (i+3 >  argc) {
+         if (i + 3 > argc) {
             showUsage(argv[0]);
             return 0;
          }
-         std::string name = argv[i+1];
+         std::string name = argv[i + 1];
          if (isdigit(name.c_str()[0]))
-            name = std::string("dcb") + argv[i+1];
+            name = std::string("dcb") + argv[i + 1];
 
-         if (!isdigit(argv[i+2][0])) {
+         if (!isdigit(argv[i + 2][0])) {
             showUsage(argv[0]);
             return 0;
          }
-         int slot = std::stoi(argv[i+2]);
+         int slot = std::stoi(argv[i + 2]);
          gl.wdb.push_back(new WDB(name, slot));
 
-         i+=2;
+         i += 2;
 
       } else {
          showUsage(argv[0]);
@@ -1276,7 +1207,8 @@ int main(int argc, const char * argv[])
    mg_mgr_init(&mgr, &gl);
    con = mg_bind(&mgr, std::to_string(gl.serverPort).c_str(), wds_handler);
    if (con == NULL) {
-      std::cerr << "Cannot bind to port " << gl.serverPort << ". Probably other server is already running." << std::endl;
+      std::cerr << "Cannot bind to port " << gl.serverPort << ". Probably other server is already running."
+                << std::endl;
       return 1;
    }
 
@@ -1355,12 +1287,12 @@ int main(int argc, const char * argv[])
             //for (auto &b: gl.wdb)
             //   b->SetSineWaveDelay(delay);
             //delay = (delay == 16) ? -16 : delay + 1;
-            
+
             last = now;
          }
-         
+
       }
-   } catch  (std::runtime_error &e) {
+   } catch (std::runtime_error &e) {
       std::cout << std::endl;
       std::cout << e.what() << std::endl;
       std::cout << "Aborting." << std::endl;

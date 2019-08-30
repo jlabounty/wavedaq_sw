@@ -23,14 +23,19 @@ endif()
 
 add_subdirectory(read_binary)
 
-add_definitions(-DWD2_DONT_INCLUDE_REG_ACCESS_VARS)
+add_definitions(-DWD2_DONT_INCLUDE_REG_ACCESS_VARS -DDCB_DONT_INCLUDE_REG_ACCESS_VARS -DDCB_DONT_INCLUDE_VARS)
 
 add_custom_target(register_map_wd2
-   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/../firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/common/src/register_map_wd2.h ${CMAKE_SOURCE_DIR}/src/register_map_wd2.h
+   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/../firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/common/src/register_map_wd2.h ${CMAKE_SOURCE_DIR}/include/register_map_wd2.h
 )
+
+add_custom_target(register_map_dcb
+   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/../firmware/DCB/dcb_xsdk_workspace/dcb_app_sw/app_dcb_ctrl/src/register_map_dcb.h ${CMAKE_SOURCE_DIR}/include/register_map_dcb.h
+   )
 
 add_library(wdb
    src/WDBLib.cpp
+   src/DCBLib.cpp
    src/averager.cpp)
 
 target_include_directories(wdb PRIVATE wds/src include mxml)
@@ -43,8 +48,8 @@ add_executable(wds
 
 target_include_directories(wds PUBLIC wds/src include mxml)
 target_link_libraries(wds wdb ${CMAKE_THREAD_LIBS_INIT})
-add_dependencies(wds register_map_wd2)
-add_dependencies(wdb register_map_wd2)
+add_dependencies(wds register_map_wd2 register_map_dcb)
+add_dependencies(wdb register_map_wd2 register_map_dcb)
 
 install(TARGETS wds DESTINATION bin)
 install(TARGETS wdb

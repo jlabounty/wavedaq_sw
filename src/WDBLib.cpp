@@ -610,7 +610,7 @@ unsigned int WDB::BitExtractControl(unsigned int rofs, unsigned int mask, unsign
    return (creg[(rofs & 0x0FFF)/4] & mask) >> ofs;
 }
 
-void bitReplace(unsigned int &reg, unsigned int mask, unsigned int ofs, unsigned int value)
+void WDB::bitReplace(unsigned int &reg, unsigned int mask, unsigned int ofs, unsigned int value)
 {
    reg = reg & (~mask); // clear bits from mask
    value <<= ofs;       // shift values
@@ -757,7 +757,7 @@ void WDB::PrintVersion()
    std::cout << "Serial number:       " << GetSerialNumber() << std::endl;
 }
 
-unsigned int bcd2dec(unsigned int bcd)
+unsigned int WDB::bcd2dec(const unsigned int bcd)
 {
    return ((bcd & 0xF000) >> 12) * 1000 + ((bcd & 0x0F00) >> 8) * 100 + ((bcd & 0x00F0) >> 4) * 10 + (bcd & 0xF);
 }
@@ -830,7 +830,7 @@ float WDB::GetTemperatureDegree(bool refresh)
    if (refresh)
       ReceiveStatusRegister(WD2_TEMPERATURE_REG);
    float temp = GetTemperature() * 0.0625;
-   temp = std::roundf(temp * 10 + 0.5) / 10.0f;
+   temp = std::roundf(temp * 10) / 10.0f;
    return temp;
 }
 
@@ -1762,7 +1762,7 @@ void WDEvent::SetWDEventHeaderInfo(WDAQ_FRAME_HEADER *pdaqh, WD_FRAME_HEADER *ph
    mEventNumber = ph->event_number;
    mTriggerNumber = ph->trigger_information[5] | (ph->trigger_information[4] << 8);
    mTriggerType = ph->trigger_information[1] | ((ph->trigger_information[0] << 8)&0x3F);
-   mTemperature = std::round(ph->temperature*0.0625 * 10 + 0.5) / 10.0f;
+   mTemperature = std::round(ph->temperature*0.0625 * 10) / 10.0f;
 }
 
 //--------------------------------------------------------------------
