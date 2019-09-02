@@ -19,6 +19,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "git-revision.h"
+
 #include "drv_axi_dcb_reg_bank.h"
 
 // port to start the UDP server on
@@ -178,8 +180,14 @@ int main(int argc, char *argv[]) {
 
       } else {
 
+         char str[2000];
+
+         strncpy(str, "DCBS Server\nRevision: ", sizeof(str));
+         strncat(str, GIT_REVISION, sizeof(str)-strlen(str));
+         strncat(str, "\n\n", sizeof(str)-strlen(str));
+
          // send same content back to the client ("echo")
-         sendto(sock, buffer, len, 0, (struct sockaddr *) &client_address, sizeof(client_address));
+         sendto(sock, str, strlen(str), 0, (struct sockaddr *) &client_address, sizeof(client_address));
 
       }
    }
