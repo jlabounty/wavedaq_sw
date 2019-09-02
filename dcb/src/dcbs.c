@@ -96,11 +96,11 @@ int main(int argc, char *argv[]) {
    struct sockaddr_in client_address;
    socklen_t client_address_len = sizeof(client_address);
 
-   printf("Server listening on port %d\n", server_port);
+   printf("DCB server listening on port %d\n", server_port);
 
 
    if (daemon) {
-      printf("Becoming a daemon...\n");
+      printf("DCB server becoming a daemon...\n");
       int i, fd, pid;
 
       if ((pid = fork()) < 0)
