@@ -98,7 +98,6 @@ int main(int argc, char *argv[]) {
 
    printf("DCB server listening on port %d\n", server_port);
 
-
    if (daemon) {
       printf("DCB server becoming a daemon...\n");
       int i, fd, pid;
@@ -137,12 +136,13 @@ int main(int argc, char *argv[]) {
       if (cmd == CMD_WRITE32) {
          unsigned n = (len - 8) / 4;
 
-         printf("Write to %04X, seq %d: ", adr, seq);
+         if (verbose)
+            printf("Write to %04X, seq %d: ", adr, seq);
 
          unsigned int *p = (unsigned int *) (&buffer[8]);
          unsigned int d;
          for (int i = 0; i < n; i++, p++) {
-            d = SWAP_UINT32(*p);
+            d = *p;
             reg_bank_write(adr + i * 4, &d, 1);
          }
 
@@ -158,7 +158,8 @@ int main(int argc, char *argv[]) {
          // limit data to 1024 bytes for the moment
          n = n > 1024 ? 1024 : n;
 
-         printf("Read %d bytes from 0x%08X, seq %d:\n", n, adr, seq);
+         if (verbose)
+            printf("Read %d bytes from 0x%08X, seq %d:\n", n, adr, seq);
 
          rbuffer[0] = 0x24;
          rbuffer[1] = 0x01;
@@ -169,7 +170,7 @@ int main(int argc, char *argv[]) {
          unsigned int d;
          for (int i = 0; i < n / 4 && i < 1024 / 4; i++, p++) {
             reg_bank_read(adr + i * 4, &d, 1);
-            *p = SWAP_UINT32(d);
+            *p = d;
          }
 
          if (verbose)
