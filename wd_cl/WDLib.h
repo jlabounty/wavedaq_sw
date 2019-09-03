@@ -305,8 +305,8 @@ class WDWDB : public WDB, public WDBoard{
       void ConfigureSamplingFrequency(Property &property);
 
 
-      WDWDB(std::string name="WDXXX", std::string netname="WDXXX", int verbose = 0) :  WDB(netname, verbose), WDBoard(name) { };
-      WDWDB(WDCrate *crate, int slot, std::string name="WDXXX", std::string netname="WDXXX", int verbose = 0) : WDB(netname, verbose), WDBoard(crate, slot, name) {
+      WDWDB(std::string name="WDXXX", std::string netname="WDXXX", bool verbose = false) :  WDB(netname, verbose), WDBoard(name) { };
+      WDWDB(WDCrate *crate, int slot, std::string name="WDXXX", std::string netname="WDXXX", bool verbose = false) : WDB(netname, verbose), WDBoard(crate, slot, name) {
          //try to connect only if the crate is powered
          if(crate->IsPowered()){
             Connect();
