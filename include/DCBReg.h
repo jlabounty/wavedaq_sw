@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  21.01.2019 15:04:38
+// Created :  03.09.2019 10:37:05
 //
 
 
@@ -208,11 +208,19 @@ public:
 
 
 
-   ////// ------ Register 17 [0x0044]: CLK_CTRL - Clock Control (Default: 0x00000006) ------ //////
+   ////// ------ Register 17 [0x0044]: CLK_CTRL - Clock Control (Default: 0xFFFFC00E) ------ //////
 
-   // 0x00000004: DISTRIBUTOR_CLK_SRC_SEL - Backplane clock distributor source select: 0 = external clock / 1 = LMK
+   // 0xFFFFF000: DISTRIBUTOR_CLK_OUT_EN - Clock distributor output enable (31:16 = LSK15:0, 15 = TCB, 14 = FPGA, 13:12 = spare)
+   unsigned int GetDistributorClkOutEn() { return BitExtract(DCB_DISTRIBUTOR_CLK_OUT_EN_REG, DCB_DISTRIBUTOR_CLK_OUT_EN_MASK, DCB_DISTRIBUTOR_CLK_OUT_EN_OFS); };
+   void         SetDistributorClkOutEn(unsigned int value) { SetRegMask(DCB_DISTRIBUTOR_CLK_OUT_EN_REG, DCB_DISTRIBUTOR_CLK_OUT_EN_MASK, DCB_DISTRIBUTOR_CLK_OUT_EN_OFS, value); };
+
+   // 0x00000008: DISTRIBUTOR_CLK_SRC_SEL - Backplane clock distributor source select: 0 = external clock / 1 = LMK
    unsigned int GetDistributorClkSrcSel() { return BitExtract(DCB_DISTRIBUTOR_CLK_SRC_SEL_REG, DCB_DISTRIBUTOR_CLK_SRC_SEL_MASK, DCB_DISTRIBUTOR_CLK_SRC_SEL_OFS); };
    void         SetDistributorClkSrcSel(unsigned int value) { SetRegMask(DCB_DISTRIBUTOR_CLK_SRC_SEL_REG, DCB_DISTRIBUTOR_CLK_SRC_SEL_MASK, DCB_DISTRIBUTOR_CLK_SRC_SEL_OFS, value); };
+
+   // 0x00000004: BUS_CLK_SRC_SEL - BUS (backplane) clock source select: 0 = LMK output 2 / 1 = AUX_OUT from FPGA (BUS_CLK_SEL)
+   unsigned int GetBusClkSrcSel() { return BitExtract(DCB_BUS_CLK_SRC_SEL_REG, DCB_BUS_CLK_SRC_SEL_MASK, DCB_BUS_CLK_SRC_SEL_OFS); };
+   void         SetBusClkSrcSel(unsigned int value) { SetRegMask(DCB_BUS_CLK_SRC_SEL_REG, DCB_BUS_CLK_SRC_SEL_MASK, DCB_BUS_CLK_SRC_SEL_OFS, value); };
 
    // 0x00000002: LMK_CLK_SRC_SEL - LMK clock source select: 0 = external clock / 1 = on board oscillator (CLK_SEL)
    unsigned int GetLmkClkSrcSel() { return BitExtract(DCB_LMK_CLK_SRC_SEL_REG, DCB_LMK_CLK_SRC_SEL_MASK, DCB_LMK_CLK_SRC_SEL_OFS); };
@@ -290,7 +298,7 @@ public:
    unsigned int GetLmk0Reset() { return BitExtract(DCB_LMK0_RESET_REG, DCB_LMK0_RESET_MASK, DCB_LMK0_RESET_OFS); };
    void         SetLmk0Reset(unsigned int value) { SetRegMask(DCB_LMK0_RESET_REG, DCB_LMK0_RESET_MASK, DCB_LMK0_RESET_OFS, value); };
 
-   // 0x00060000: LMK0_CLKOUT_MUX - Channel 0 Clock Output Multiplexer (see datasheet)
+   // 0x00060000: LMK0_CLKOUT_MUX - Channel 0 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed)
    unsigned int GetLmk0ClkoutMux() { return BitExtract(DCB_LMK0_CLKOUT_MUX_REG, DCB_LMK0_CLKOUT_MUX_MASK, DCB_LMK0_CLKOUT_MUX_OFS); };
    void         SetLmk0ClkoutMux(unsigned int value) { SetRegMask(DCB_LMK0_CLKOUT_MUX_REG, DCB_LMK0_CLKOUT_MUX_MASK, DCB_LMK0_CLKOUT_MUX_OFS, value); };
 
@@ -310,7 +318,7 @@ public:
 
    ////// ------ Register 24 [0x0060]: LMK_1 - LMK Register 1 (Default: 0x00030101) ------ //////
 
-   // 0x00060000: LMK1_CLKOUT_MUX - Channel 1 Clock Output Multiplexer (see datasheet)
+   // 0x00060000: LMK1_CLKOUT_MUX - Channel 1 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed)
    unsigned int GetLmk1ClkoutMux() { return BitExtract(DCB_LMK1_CLKOUT_MUX_REG, DCB_LMK1_CLKOUT_MUX_MASK, DCB_LMK1_CLKOUT_MUX_OFS); };
    void         SetLmk1ClkoutMux(unsigned int value) { SetRegMask(DCB_LMK1_CLKOUT_MUX_REG, DCB_LMK1_CLKOUT_MUX_MASK, DCB_LMK1_CLKOUT_MUX_OFS, value); };
 
@@ -330,7 +338,7 @@ public:
 
    ////// ------ Register 25 [0x0064]: LMK_2 - LMK Register 2 (Default: 0x00020102) ------ //////
 
-   // 0x00060000: LMK2_CLKOUT_MUX - Channel 2 Clock Output Multiplexer (see datasheet)
+   // 0x00060000: LMK2_CLKOUT_MUX - Channel 2 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed)
    unsigned int GetLmk2ClkoutMux() { return BitExtract(DCB_LMK2_CLKOUT_MUX_REG, DCB_LMK2_CLKOUT_MUX_MASK, DCB_LMK2_CLKOUT_MUX_OFS); };
    void         SetLmk2ClkoutMux(unsigned int value) { SetRegMask(DCB_LMK2_CLKOUT_MUX_REG, DCB_LMK2_CLKOUT_MUX_MASK, DCB_LMK2_CLKOUT_MUX_OFS, value); };
 
@@ -350,7 +358,7 @@ public:
 
    ////// ------ Register 26 [0x0068]: LMK_3 - LMK Register 3 (Default: 0x00020103) ------ //////
 
-   // 0x00060000: LMK3_CLKOUT_MUX - Channel 3 Clock Output Multiplexer (see datasheet)
+   // 0x00060000: LMK3_CLKOUT_MUX - Channel 3 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed)
    unsigned int GetLmk3ClkoutMux() { return BitExtract(DCB_LMK3_CLKOUT_MUX_REG, DCB_LMK3_CLKOUT_MUX_MASK, DCB_LMK3_CLKOUT_MUX_OFS); };
    void         SetLmk3ClkoutMux(unsigned int value) { SetRegMask(DCB_LMK3_CLKOUT_MUX_REG, DCB_LMK3_CLKOUT_MUX_MASK, DCB_LMK3_CLKOUT_MUX_OFS, value); };
 
@@ -370,7 +378,7 @@ public:
 
    ////// ------ Register 27 [0x006C]: LMK_4 - LMK Register 4 (Default: 0x00000104) ------ //////
 
-   // 0x00060000: LMK4_CLKOUT_MUX - Channel 4 Clock Output Multiplexer (see datasheet)
+   // 0x00060000: LMK4_CLKOUT_MUX - Channel 4 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed)
    unsigned int GetLmk4ClkoutMux() { return BitExtract(DCB_LMK4_CLKOUT_MUX_REG, DCB_LMK4_CLKOUT_MUX_MASK, DCB_LMK4_CLKOUT_MUX_OFS); };
    void         SetLmk4ClkoutMux(unsigned int value) { SetRegMask(DCB_LMK4_CLKOUT_MUX_REG, DCB_LMK4_CLKOUT_MUX_MASK, DCB_LMK4_CLKOUT_MUX_OFS, value); };
 
@@ -390,7 +398,7 @@ public:
 
    ////// ------ Register 28 [0x0070]: LMK_5 - LMK Register 5 (Default: 0x00000105) ------ //////
 
-   // 0x00060000: LMK5_CLKOUT_MUX - Channel 5 Clock Output Multiplexer (see datasheet)
+   // 0x00060000: LMK5_CLKOUT_MUX - Channel 5 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed)
    unsigned int GetLmk5ClkoutMux() { return BitExtract(DCB_LMK5_CLKOUT_MUX_REG, DCB_LMK5_CLKOUT_MUX_MASK, DCB_LMK5_CLKOUT_MUX_OFS); };
    void         SetLmk5ClkoutMux(unsigned int value) { SetRegMask(DCB_LMK5_CLKOUT_MUX_REG, DCB_LMK5_CLKOUT_MUX_MASK, DCB_LMK5_CLKOUT_MUX_OFS, value); };
 
@@ -410,7 +418,7 @@ public:
 
    ////// ------ Register 29 [0x0074]: LMK_6 - LMK Register 6 (Default: 0x00000106) ------ //////
 
-   // 0x00060000: LMK6_CLKOUT_MUX - Channel 6 Clock Output Multiplexer (see datasheet)
+   // 0x00060000: LMK6_CLKOUT_MUX - Channel 6 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed)
    unsigned int GetLmk6ClkoutMux() { return BitExtract(DCB_LMK6_CLKOUT_MUX_REG, DCB_LMK6_CLKOUT_MUX_MASK, DCB_LMK6_CLKOUT_MUX_OFS); };
    void         SetLmk6ClkoutMux(unsigned int value) { SetRegMask(DCB_LMK6_CLKOUT_MUX_REG, DCB_LMK6_CLKOUT_MUX_MASK, DCB_LMK6_CLKOUT_MUX_OFS, value); };
 
@@ -430,7 +438,7 @@ public:
 
    ////// ------ Register 30 [0x0078]: LMK_7 - LMK Register 7 (Default: 0x00000107) ------ //////
 
-   // 0x00060000: LMK7_CLKOUT_MUX - Channel 7 Clock Output Multiplexer (see datasheet)
+   // 0x00060000: LMK7_CLKOUT_MUX - Channel 7 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed)
    unsigned int GetLmk7ClkoutMux() { return BitExtract(DCB_LMK7_CLKOUT_MUX_REG, DCB_LMK7_CLKOUT_MUX_MASK, DCB_LMK7_CLKOUT_MUX_OFS); };
    void         SetLmk7ClkoutMux(unsigned int value) { SetRegMask(DCB_LMK7_CLKOUT_MUX_REG, DCB_LMK7_CLKOUT_MUX_MASK, DCB_LMK7_CLKOUT_MUX_OFS, value); };
 
