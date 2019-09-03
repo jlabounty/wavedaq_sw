@@ -1230,13 +1230,17 @@ int main(int argc, const char *argv[]) {
          dir += "/html";
          s_http_server_opts.document_root = dir.c_str();
       } else {
-         dir = getenv("WDBSYS");
-         std::ifstream f3(dir + "/software/wds/html/index.html");
-         if (f3.good()) {
-            dir += "/software/wds/html";
-            s_http_server_opts.document_root = dir.c_str();
+         if (getenv("WDBSYS")) {
+            std::ifstream f3(dir + "/software/wds/html/index.html");
+            if (f3.good()) {
+               dir += "/software/wds/html";
+               s_http_server_opts.document_root = dir.c_str();
+            } else {
+               std::cerr << "Cannot find 'html' directory. Please run from the root of the wds directory." << std::endl;
+               return 1;
+            }
          } else {
-            std::cerr << "Cannot find 'html' directory. Please run from the root of the wds directory." << std::endl;
+            std::cerr << "Cannot find 'WDBSYS' environment variable. Please set it to the wavedaq directory." << std::endl;
             return 1;
          }
       }
