@@ -632,7 +632,9 @@ void WDWDB::ConfigurationStarted(){
    SetFeMux(-1, WDB::cFeMuxInput);
    SetTriggerOutPulseLength(4); // 4 clock shaping
    //SetAdvTrgPedCfg(0x0124000A); // default pedestal subtraction config
-   SetAdvTrgPedCfg(0x010A000A); // default pedestal subtraction config
+   SetAdvTrgPedCfg(0x0124000A); // default pedestal subtraction config
+   //SetAdvTrgPedCfg(0x010A000A); // default pedestal subtraction config
+   //SetAdvTrgPedCfg(0x010A0018); // default pedestal subtraction config
 }
 
 void WDWDB::ConfigurationEnded(){
@@ -1676,6 +1678,7 @@ void WDTCB::ConfigureTimeWideThreshold(Property &property){
 void WDTCB::ConfigureXecHighThreshold(Property &property){
    unsigned int xechighthreshold;
    xechighthreshold = property.GetUHex();
+   xechighthreshold /= 8;
 
    SetSumHighThreshold(&xechighthreshold);
 }
@@ -1683,6 +1686,7 @@ void WDTCB::ConfigureXecHighThreshold(Property &property){
 void WDTCB::ConfigureXecLowThreshold(Property &property){
    unsigned int xeclowthreshold;
    xeclowthreshold = property.GetUHex();
+   xeclowthreshold /= 8;
 
    SetSumLowThreshold(&xeclowthreshold);
 }
@@ -1690,6 +1694,7 @@ void WDTCB::ConfigureXecLowThreshold(Property &property){
 void WDTCB::ConfigureXecVetoThreshold(Property &property){
    unsigned int xecvetothreshold;
    xecvetothreshold = property.GetUHex();
+   xecvetothreshold /= 8;
 
    SetSumVetoThreshold(&xecvetothreshold);
 }
