@@ -5,6 +5,9 @@ project(wdaq)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR})
 
+# suppress warnings due to compiler bug on ARM targets
+set(CMAKE_CXX_FLAGS "-Wno-psabi")
+
 find_package(Threads)
 
 # Check for mscb
