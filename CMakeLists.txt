@@ -19,7 +19,7 @@ if (EXISTS $ENV{MSCBSYS}/src/mscb.cxx)
 endif()
 
 if (NOT EXISTS $ENV{MSCBSYS}/src/mscb.cxx)
-      message("\nError: 'MSCBSYS' environment variable not found.\n"
+      message("\nWarning: 'MSCBSYS' environment variable not found.\n"
       "Please install mscb and set MSCBSYS to compile TCB library, tcb_cl and serdestest.\n\n"
    )
 endif()
