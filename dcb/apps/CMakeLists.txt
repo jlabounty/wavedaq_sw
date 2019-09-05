@@ -6,7 +6,7 @@ set(CMAKE_INSTALL_PREFIX /)
 # generate git-revision.h
 #
 find_package(Git)
-set(GIT_REVISION ${PROJECT_SOURCE_DIR}/../include/git-revision.h)
+set(GIT_REVISION ${PROJECT_SOURCE_DIR}/../../include/git-revision.h)
 set(GIT_REVISION_TMP ${GIT_REVISION}.tmp)
 
 add_custom_target(git_revision_h
@@ -19,7 +19,7 @@ add_custom_target(git_revision_h
    COMMAND ${CMAKE_COMMAND} -E echo \\\" >> ${GIT_REVISION_TMP}
    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GIT_REVISION_TMP} ${GIT_REVISION}
    COMMAND ${CMAKE_COMMAND} -E remove ${GIT_REVISION_TMP}
-   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../include/
+   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../../include/
 )
 
 #
@@ -48,7 +48,7 @@ add_executable(dcbc src/dcbc.c ${SRC})
 add_executable(wdbc src/wdbc.c ${SRC})
 add_executable(dcbs src/dcbs.c ${SRC})
 
-target_include_directories(dcbs PRIVATE ${PROJECT_SOURCE_DIR}/../include)
+target_include_directories(dcbs PRIVATE ${PROJECT_SOURCE_DIR}/../../include)
 
 target_compile_options(dcbi PRIVATE -D LINUX_COMPILE)
 target_compile_options(dcbc PRIVATE -D LINUX_COMPILE)
