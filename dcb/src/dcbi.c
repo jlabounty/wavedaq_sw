@@ -24,7 +24,9 @@ int main()
   }
 
   /* Initialization done */
-  emio_reset_sw_state();
+  /* Set SW state ready to signal normal operation on LED */
+//  emio_set_sw_state(BIT_IDX_EMIO_CTRL_SW_STATE_MARKER_PIN);
+  emio_set_sw_state(BIT_IDX_EMIO_CTRL_SW_STATE_SW_READY_PIN);
 
   return 0;
 }

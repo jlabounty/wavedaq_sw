@@ -520,9 +520,7 @@ int init_system()
 
   init_gpio_mio();
 
-//  emio_set_sw_state(SYSPTR(gpio_mio), SW_STATUS_BL_LOAD);
   emio_flash_sw_state(BIT_IDX_EMIO_CTRL_SW_STATE_DCB_ACCESS_PIN);
-  emio_set_sw_state(BIT_IDX_EMIO_CTRL_SW_STATE_BL_LOAD_PIN);
 
   init_spi_bpl();
 
