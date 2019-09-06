@@ -376,6 +376,9 @@ class WDAQEventBuilder : public DAQThread{
    unsigned long fDroppedEvent;
    unsigned long fOldEvent;
    int           fNBoards;
+   //flags
+   bool          fNotBuilding;
+   bool          fDropping;
 
    void Begin();
 
@@ -392,7 +395,13 @@ class WDAQEventBuilder : public DAQThread{
       fBuildedEvent = 0;
       fDroppedEvent = 0;
       fOldEvent = 0;
+      fNotBuilding = false;
+      fDropping = false;
    }
+
+   //building state getters
+   bool GetIsNotBuilding() const { return fNotBuilding; }
+   bool GetIsDropping() const { return fDropping; }
 };
 
 //Event worker - Thread that calibrate events

@@ -649,6 +649,8 @@ void WDAQEventBuilder::Begin(){
    fBuildedEvent = 0;
    fDroppedEvent = 0;
    fOldEvent = 0;
+   fNotBuilding = false;
+   fDropping = false;
 
    //clean event builder buffer
    for(auto event: fEvents){
@@ -686,6 +688,9 @@ void WDAQEventBuilder::Loop(){
       if(evt_ptr->IsComplete() == fNBoards){
          //event complete
          fBuildedEvent++;
+
+         //managed to build an event: reset error
+         fNotBuilding = false;
          
          if(!fDestination->Try_push(evt_ptr)){
            //could not push to buffer
@@ -711,11 +716,25 @@ void WDAQEventBuilder::Loop(){
                delete ev->second;
                fEvents.erase(ev++);
                fOldEvent++;
+               fDropping = true;
            }else{
              ++ev;
            }
          }
       }// end if evt_ptr->IsComplete()
+
+      //check for too many events in the building map
+      if(fEvents.size() > 20){
+         // not building any event:
+         // dropping oldest
+         auto ev = fEvents.cbegin();
+         //printf("dropping event %d because too many unbilt events\n", ev->first);
+         delete ev->second;
+         fEvents.erase(ev);
+
+         fNotBuilding = true;
+         fOldEvent++;
+      }
    }
 }
 
