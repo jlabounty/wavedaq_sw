@@ -552,6 +552,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
 
 //print statistics at thread end
 void WDAQPacketCollector::End(){
+   Clean();
    printf("Got %lu packets\nDropped %lu packets\n", fNPackets, fDroppedPackets);
 }
 
@@ -728,7 +729,12 @@ void WDAQEventBuilder::Loop(){
          // not building any event:
          // dropping oldest
          auto ev = fEvents.cbegin();
-         //printf("dropping event %d because too many unbilt events\n", ev->first);
+
+         //debug printf
+         /*printf("dropping event %d constaining %d boards\n", ev->first, ev->second->IsComplete());
+         for(auto& boardEvent : ev->second->fBoard[WD2_BOARD_ID])
+            printf("board %d (%d)\n", boardEvent.first, boardEvent.second->IsComplete());*/
+
          delete ev->second;
          fEvents.erase(ev);
 

@@ -277,6 +277,10 @@ class DAQServerThread : public DAQThread{
 
    public:
       //Methods
+      void Clean(){
+         //TODO: clean fDataSocket kernel buffer
+      }
+
 
       //Getter
       int GetServerPort(){ return fServerPort; }

@@ -366,12 +366,21 @@ void WDSystem::GoRun(){
 
 //Stop Run
 void WDSystem::StopRun(){
+   //Stop master trigger board
    GetTriggerBoard()->StopRun();
+
+   //stop all threads
    if(fCollectorThread) fCollectorThread->StopRun();
    if(fBuilderThread) fBuilderThread->StopRun();
    if(fWriterThread) fWriterThread->StopRun();
    if(fWorkerThread) fWorkerThread->StopRun();
    for(auto t: fTCBReaderThreads) t->StopRun();
+
+   //clean all buffers 
+   if(fPacketBuffer) fPacketBuffer->Clean();
+   if(fCalibratedBuffer) fCalibratedBuffer->Clean();
+   if(fEventBuffer) fEventBuffer->Clean();
+
 }
 //train serial links
 void WDSystem::TrainSerdes(){
