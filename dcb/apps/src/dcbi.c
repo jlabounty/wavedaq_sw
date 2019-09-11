@@ -6,6 +6,13 @@
 
 int main()
 {
+  if (DBG_INIT)
+  {
+    xfs_printf("\r\n");
+    xfs_printf("---------------------------------------------------------\r\n");
+    xfs_printf("-- WDAQ DCB Firmware Initialization                    --\r\n");
+    xfs_printf("---------------------------------------------------------\r\n\r\n");
+  }
   /* Set default debug level */
   set_dbg_level(DBG_LEVEL_SPAM);
 
@@ -14,9 +21,6 @@ int main()
   if (DBG_INIT)
   {
     xfs_printf("\r\n");
-    xfs_printf("---------------------------------------------------------\r\n");
-    xfs_printf("-- WDAQ DCB Firmware Initialization                    --\r\n");
-    xfs_printf("---------------------------------------------------------\r\n\r\n");
     xfs_printf("---------------------------------------------------------\r\n");
     xfs_printf("-- Version Information:\r\n");
     print_sys_info();

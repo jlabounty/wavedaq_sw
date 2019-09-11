@@ -46,7 +46,7 @@ void reg_bank_init(unsigned int base_address)
   SYSPTR(reg_bank)->base_address = base_address;
 }
 #else /* No LINUX_COMPILE */
-unsigned int initialized = 0;
+static unsigned int initialized = 0;
 void reg_bank_init(unsigned int base_address)
 {
   if(!initialized)

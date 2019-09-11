@@ -30,7 +30,7 @@
 
 /* modules */
 #define CFG_INCLUDE_HELP                1
-#define CFG_INCLUDE_INFO                0
+#define CFG_INCLUDE_INFO                1
 #define CFG_INCLUDE_DCB_REG_ACCESS      1
 #define CFG_INCLUDE_FW_ENV              0
 #define CFG_INCLUDE_SPI_FLASH           0

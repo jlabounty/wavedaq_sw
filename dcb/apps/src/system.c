@@ -505,6 +505,39 @@ char default_env[] = "sn=0\0"
 
 /******************************************************************************/
 
+void init_lmk03000()
+{
+#ifndef LINUX_COMPILE
+  lmk03000_init(SYSPTR(lmk),     SYSPTR(spi_eclk_lmk_adc), SPI_SLAVE_NR_LMK);
+#else /* not LINUX_COMPILE */
+  lmk03000_init(SYSPTR(lmk), SPI_DEV_ECLK_LMK_ADC, SPI_SLAVE_NR_LMK);
+#endif /* not LINUX_COMPILE */
+}
+
+/******************************************************************************/
+
+void init_si5324()
+{
+#ifndef LINUX_COMPILE
+  si5324_init(SYSPTR(si5324),  SYSPTR(spi_eclk_lmk_adc), SPI_SLAVE_NR_SI3524);
+#else /* not LINUX_COMPILE */
+  si5324_init(SYSPTR(si5324), SPI_DEV_ECLK_LMK_ADC, SPI_SLAVE_NR_SI3524);
+#endif /* not LINUX_COMPILE */
+}
+
+/******************************************************************************/
+
+void init_sysmon()
+{
+#ifndef LINUX_COMPILE
+  sysmon_init(SYSPTR(sys_mon), SYSPTR(spi_eclk_lmk_adc), SPI_SLAVE_NR_SYS_MON);
+#else /* not LINUX_COMPILE */
+  sysmon_init(SYSPTR(sys_mon), SPI_DEV_ECLK_LMK_ADC, SPI_SLAVE_NR_SYS_MON);
+#endif /* not LINUX_COMPILE */
+}
+
+/******************************************************************************/
+
 int init_system()
 {
 #ifndef LINUX_COMPILE
@@ -537,8 +570,10 @@ int init_system()
   fw_env_load(SYSPTR(env));
   /* End of environment initialization */
 
+#endif
   /* Register bank initialization */
   init_reg_bank();
+#ifndef LINUX_COMPILE
   reg_bank_load();
    /* write software build date to status register */
   reg_val = reg_sw_build_date();
@@ -555,10 +590,10 @@ int init_system()
   init_sfp();
 
   init_spi_eclk_lmk_adc();
-  lmk03000_init(SYSPTR(lmk),     SYSPTR(spi_eclk_lmk_adc), SPI_SLAVE_NR_LMK);
-  si5324_init  (SYSPTR(si5324),  SYSPTR(spi_eclk_lmk_adc), SPI_SLAVE_NR_SI3524);
-  sysmon_init  (SYSPTR(sys_mon), SYSPTR(spi_eclk_lmk_adc), SPI_SLAVE_NR_SYS_MON);
-#endif
+#endif /* not LINUX_COMPILE */
+  /* init_si5324(); */ /* done by fsbl, not needed in application */
+  init_lmk03000();
+  init_sysmon();
 
   return XST_SUCCESS;
 }

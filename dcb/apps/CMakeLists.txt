@@ -37,10 +37,16 @@ set(SRC
    src/xspi_selftest.c
    src/xspi_sinit.c
    src/drv_axi_dcb_reg_bank.c
+   src/drv_spi_ps.c
+   src/drv_lmk.c
+   src/drv_si5324.c
+   src/drv_sys_mon.c
    src/mod_crate_com.c
    src/mod_reg_access.c
+   src/mod_status.c
    src/dbg.c
    src/utilities.c
+   src/update_config.c
 )
 
 add_executable(dcbi src/dcbi.c ${SRC})
@@ -50,10 +56,10 @@ add_executable(dcbs src/dcbs.c ${SRC})
 
 target_include_directories(dcbs PRIVATE ${PROJECT_SOURCE_DIR}/../../include)
 
-target_compile_options(dcbi PRIVATE -D LINUX_COMPILE)
-target_compile_options(dcbc PRIVATE -D LINUX_COMPILE)
-target_compile_options(wdbc PRIVATE -D LINUX_COMPILE)
-target_compile_options(dcbs PRIVATE -D LINUX_COMPILE)
+target_compile_definitions(dcbi PRIVATE LINUX_COMPILE DCB_DONT_INCLUDE_REG_ACCESS_VARS DCB_DONT_INCLUDE_VARS)
+target_compile_definitions(dcbc PRIVATE LINUX_COMPILE DCB_DONT_INCLUDE_REG_ACCESS_VARS DCB_DONT_INCLUDE_VARS)
+target_compile_definitions(wdbc PRIVATE LINUX_COMPILE DCB_DONT_INCLUDE_REG_ACCESS_VARS DCB_DONT_INCLUDE_VARS)
+target_compile_definitions(dcbs PRIVATE LINUX_COMPILE DCB_DONT_INCLUDE_REG_ACCESS_VARS DCB_DONT_INCLUDE_VARS)
 
 #
 # libraries

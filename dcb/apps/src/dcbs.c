@@ -22,6 +22,7 @@
 #include "git-revision.h"
 
 #include "drv_axi_dcb_reg_bank.h"
+#include "update_config.h"
 
 // port to start the UDP server on
 #define SERVER_PORT 4000
@@ -192,6 +193,9 @@ int main(int argc, char *argv[]) {
 
       }
    }
+
+   auto_update_configurations();
+   trigger_update_configurations();
 
    return 0;
 }

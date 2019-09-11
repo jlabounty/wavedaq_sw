@@ -54,9 +54,9 @@
 /*#define BIT_IDX_AXI_...._RESERVED_MASK             0x00000100 */
 /*#define BIT_IDX_AXI_...._RESERVED_OFFSET                    8 */
 /*#define BIT_IDX_AXI_...._RESERVED_PIN                       8 */
-/*#define BIT_IDX_AXI_...._RESERVED_MASK             0x00000200 */
-/*#define BIT_IDX_AXI_...._RESERVED_OFFSET                    9 */
-/*#define BIT_IDX_AXI_...._RESERVED_PIN                       9 */
+#define BIT_IDX_AXI_SI_RESET_RESERVED_MASK         0x00000200
+#define BIT_IDX_AXI_SI_RESET_RESERVED_OFFSET                9
+#define BIT_IDX_AXI_SI_RESET_RESERVED_PIN                   9
 /*#define BIT_IDX_AXI_...._RESERVED_MASK             0x00000400 */
 /*#define BIT_IDX_AXI_...._RESERVED_OFFSET                   10 */
 /*#define BIT_IDX_AXI_...._RESERVED_PIN                      10 */
@@ -293,12 +293,12 @@
 #define BIT_IDX_EMIO_CTRL_SW_STATE_ERROR_OFFSET              31
 #define BIT_IDX_EMIO_CTRL_SW_STATE_ERROR_PIN                 85
 
-#define BIT_IDX_EMIO_STAT_INIT_MASK                  0x00000001
-#define BIT_IDX_EMIO_STAT_INIT_OFFSET                         0
-#define BIT_IDX_EMIO_STAT_INIT_PIN                           86
-#define BIT_IDX_EMIO_STAT_FLASH_SEL_MASK             0x00000002
-#define BIT_IDX_EMIO_STAT_FLASH_SEL_OFFSET                    1
-#define BIT_IDX_EMIO_STAT_FLASH_SEL_PIN                      87
+#define BIT_IDX_EMIO_STAT_FS_INIT_MASK               0x00000001
+#define BIT_IDX_EMIO_STAT_FS_INIT_OFFSET                      0
+#define BIT_IDX_EMIO_STAT_FS_INIT_PIN                        86
+#define BIT_IDX_EMIO_STAT_SPI_CS_MASK                0x00000002
+#define BIT_IDX_EMIO_STAT_SPI_CS_OFFSET                       1
+#define BIT_IDX_EMIO_STAT_SPI_CS_PIN                         87
 #define BIT_IDX_EMIO_STAT_BOARD_SEL_MASK             0x00000004
 #define BIT_IDX_EMIO_STAT_BOARD_SEL_OFFSET                    2
 #define BIT_IDX_EMIO_STAT_BOARD_SEL_PIN                      88
