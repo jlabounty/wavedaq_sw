@@ -48,6 +48,13 @@ const char system_sw_build_date[] = __DATE__;
 const char system_sw_build_time[] = __TIME__;
 const char *system_month_str[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
+#ifdef LINUX_COMPILE
+static int sys_mon_initialized  = 0;
+static int lmk03000_initialized = 0;
+static int si5324_initialized   = 0;
+static int reg_bank_initialized = 0;
+#endif /* LINUX_COMPILE */
+
 /******************************************************************************/
 
 #ifndef LINUX_COMPILE
@@ -337,7 +344,15 @@ int init_spi_bpl()
 
 void init_reg_bank()
 {
-  reg_bank_init(XPAR_REGISTER_BANK_0_AXI_DCB_REGISTER_BANK_0_S00_AXI_BASEADDR);
+  if(reg_bank_initialized)
+  {
+    return;
+  }
+  else
+  {
+    reg_bank_initialized = 1;
+    reg_bank_init(XPAR_REGISTER_BANK_0_AXI_DCB_REGISTER_BANK_0_S00_AXI_BASEADDR);
+  }
 }
 
 /******************************************************************************/
@@ -507,33 +522,57 @@ char default_env[] = "sn=0\0"
 
 void init_lmk03000()
 {
-#ifndef LINUX_COMPILE
+#ifdef LINUX_COMPILE
+  if(lmk03000_initialized)
+  {
+    return;
+  }
+  else
+  {
+    lmk03000_initialized = 1;
+    lmk03000_init(SYSPTR(lmk), SPI_DEV_ECLK_LMK_ADC, SPI_SLAVE_NR_LMK);
+  }
+#else /* LINUX_COMPILE */
   lmk03000_init(SYSPTR(lmk),     SYSPTR(spi_eclk_lmk_adc), SPI_SLAVE_NR_LMK);
-#else /* not LINUX_COMPILE */
-  lmk03000_init(SYSPTR(lmk), SPI_DEV_ECLK_LMK_ADC, SPI_SLAVE_NR_LMK);
-#endif /* not LINUX_COMPILE */
+#endif /* LINUX_COMPILE */
 }
 
 /******************************************************************************/
 
 void init_si5324()
 {
-#ifndef LINUX_COMPILE
+#ifdef LINUX_COMPILE
+  if(si5324_initialized)
+  {
+    return;
+  }
+  else
+  {
+    si5324_initialized = 1;
+    si5324_init(SYSPTR(si5324), SPI_DEV_ECLK_LMK_ADC, SPI_SLAVE_NR_SI3524);
+  }
+#else /* LINUX_COMPILE */
   si5324_init(SYSPTR(si5324),  SYSPTR(spi_eclk_lmk_adc), SPI_SLAVE_NR_SI3524);
-#else /* not LINUX_COMPILE */
-  si5324_init(SYSPTR(si5324), SPI_DEV_ECLK_LMK_ADC, SPI_SLAVE_NR_SI3524);
-#endif /* not LINUX_COMPILE */
+#endif /* LINUX_COMPILE */
 }
 
 /******************************************************************************/
 
 void init_sysmon()
 {
-#ifndef LINUX_COMPILE
+#ifdef LINUX_COMPILE
+  if(sys_mon_initialized)
+  {
+    return;
+  }
+  else
+  {
+    sys_mon_initialized = 1;
+    sysmon_init(SYSPTR(sys_mon), SPI_DEV_ECLK_LMK_ADC, SPI_SLAVE_NR_SYS_MON);
+  }
+#else /* LINUX_COMPILE */
   sysmon_init(SYSPTR(sys_mon), SYSPTR(spi_eclk_lmk_adc), SPI_SLAVE_NR_SYS_MON);
-#else /* not LINUX_COMPILE */
-  sysmon_init(SYSPTR(sys_mon), SPI_DEV_ECLK_LMK_ADC, SPI_SLAVE_NR_SYS_MON);
-#endif /* not LINUX_COMPILE */
+#endif /* LINUX_COMPILE */
 }
 
 /******************************************************************************/

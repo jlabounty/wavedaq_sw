@@ -46,14 +46,9 @@ void reg_bank_init(unsigned int base_address)
   SYSPTR(reg_bank)->base_address = base_address;
 }
 #else /* No LINUX_COMPILE */
-static unsigned int initialized = 0;
 void reg_bank_init(unsigned int base_address)
 {
-  if(!initialized)
-  {
-    SYSPTR(reg_bank)->base_address = (unsigned int)(io_remap(base_address));
-    initialized = 1;
-  }
+  SYSPTR(reg_bank)->base_address = (unsigned int)(io_remap(base_address));
 }
 #endif
 
@@ -317,7 +312,7 @@ unsigned int dcb_hw_reg(unsigned int cmd, unsigned int par, unsigned int offs, u
   unsigned int base_address;
 
 #ifdef LINUX_COMPILE
-    init_reg_bank();
+  init_reg_bank();
 #endif
   base_address = SYSPTR(reg_bank)->base_address;
 

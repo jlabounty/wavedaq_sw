@@ -23,23 +23,13 @@
 /******************************************************************************/
 /******************************************************************************/
 
-#ifdef LINUX_COMPILE
-static int initialized = 0;
-#endif
-
-/******************************************************************************/
-
 void lmk03000_send(lmk_ctrl_type *self, unsigned int tx_data)
 {
   unsigned char tx_buffer[4];
 
 #ifdef LINUX_COMPILE
-  if(!initialized)
-  {
-    initialized = 1;
-    init_reg_bank();
-    init_lmk03000();
-  }
+  init_reg_bank();
+  init_lmk03000();
 #endif
 
   for(int i=3;i>=0;i--)
@@ -58,7 +48,6 @@ void lmk03000_init(lmk_ctrl_type *self, unsigned char device_nr, unsigned char s
 {
   spi_ps_init((spi_ps_type*)self, device_nr, slave_nr, 0, 8, 1000000, 0);
 
-  initialized = 1;
   lmk03000_send(self, DCB_LMK0_RESET_MASK);
 
   lmk03000_upload_configuration(self);
