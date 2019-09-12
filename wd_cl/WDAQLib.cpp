@@ -920,7 +920,8 @@ void WDAQEventWriter::Loop(){
          float range = board->GetRange();
          fFile.write((const char *)&range, sizeof(float));
          //write board sampling speed
-         fFile.write((const char *)&board->mSamplingFrequency, 2);
+         short sampl = board->mSamplingFrequency/1000;
+         fFile.write((const char *)&sampl, 2);
          //write board flags
          fFile.write((const char *)&board->mWDBFlags, 2);
          for(int ch=0;ch<18;ch++){

@@ -224,7 +224,7 @@ public:
 class WDAQWdbEvent : public WDAQBoardEvent {
 public:
    //from WDB header 
-   unsigned short   mSamplingFrequency;
+   unsigned int     mSamplingFrequency;
    unsigned short   mWDBFlags;
    unsigned char    mTriggerSource;//serve?
    unsigned long    mTimeStamp;
