@@ -612,9 +612,9 @@ int init_system()
 #endif
   /* Register bank initialization */
   init_reg_bank();
-#ifndef LINUX_COMPILE
   reg_bank_load();
-   /* write software build date to status register */
+#ifndef LINUX_COMPILE
+  /* write software build date to status register */
   reg_val = reg_sw_build_date();
   reg_bank_write(DCB_REG_SW_BUILD_DATE, &reg_val, 1);
   /* write software build time to status register */

@@ -40,15 +40,11 @@ void reg_bank_set(unsigned int offset, unsigned int *buffer_ptr, unsigned int no
 void reg_bank_clr(unsigned int offset, unsigned int *buffer_ptr, unsigned int no_words);
 void reg_bank_read(unsigned int offset, unsigned int *buffer_ptr, unsigned int no_words);
 unsigned int reg_bank_get(unsigned int offset);
-
-#ifndef LINUX_COMPILE
 void reg_bank_load();
 
 #ifndef DCB_DONT_IMPLEMENT_REGISTER_STORE
 void reg_bank_store();
 #endif /* DCB_DONT_IMPLEMENT_REGISTER_STORE */
-
-#endif /* No LINUX_COMPILE */
 
 /***************************************************************************/
 

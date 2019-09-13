@@ -36,14 +36,17 @@ set(SRC
    src/xspi_options.c
    src/xspi_selftest.c
    src/xspi_sinit.c
+   src/register_map_dcb.c
    src/drv_axi_dcb_reg_bank.c
    src/drv_spi_ps.c
    src/drv_lmk.c
    src/drv_si5324.c
    src/drv_sys_mon.c
+   src/drv_qspi_flash.c
    src/mod_crate_com.c
    src/mod_reg_access.c
    src/mod_status.c
+   src/crc32.c
    src/dbg.c
    src/utilities.c
    src/update_config.c
@@ -56,10 +59,10 @@ add_executable(dcbs src/dcbs.c ${SRC})
 
 target_include_directories(dcbs PRIVATE ${PROJECT_SOURCE_DIR}/../../include)
 
-target_compile_definitions(dcbi PRIVATE LINUX_COMPILE DCB_DONT_INCLUDE_REG_ACCESS_VARS DCB_DONT_INCLUDE_VARS)
-target_compile_definitions(dcbc PRIVATE LINUX_COMPILE DCB_DONT_INCLUDE_REG_ACCESS_VARS DCB_DONT_INCLUDE_VARS)
-target_compile_definitions(wdbc PRIVATE LINUX_COMPILE DCB_DONT_INCLUDE_REG_ACCESS_VARS DCB_DONT_INCLUDE_VARS)
-target_compile_definitions(dcbs PRIVATE LINUX_COMPILE DCB_DONT_INCLUDE_REG_ACCESS_VARS DCB_DONT_INCLUDE_VARS)
+target_compile_definitions(dcbi PRIVATE LINUX_COMPILE)
+target_compile_definitions(dcbc PRIVATE LINUX_COMPILE)
+target_compile_definitions(wdbc PRIVATE LINUX_COMPILE)
+target_compile_definitions(dcbs PRIVATE LINUX_COMPILE)
 
 #
 # libraries
