@@ -22,8 +22,8 @@
 #include "dbg.h"
 #include "xstatus.h"
 #include "sc_io.h"
-#ifndef LINUX_COMPILE
 #include "register_map_dcb.h"
+#ifndef LINUX_COMPILE
 #include "sw_state.h"
 #include "drv_qspi_flash.h"
 #include "dcb_flash_memory_map.h"
@@ -57,7 +57,6 @@ static int reg_bank_initialized = 0;
 
 /******************************************************************************/
 
-#ifndef LINUX_COMPILE
 unsigned int reg_sw_build_date()
 {
  /* STATUS REGISTERS SW_BUILD_DATE            Read only Register */
@@ -75,11 +74,9 @@ unsigned int reg_sw_build_date()
          | ((m/10)<<12) | ((m%10)<<8)                     /* Month */
          | ((s[4]==' ')?0:(s[4]-'0')<<4) | (s[5]-'0') );  /* Day   */
 }
-#endif
 
 /******************************************************************************/
 
-#ifndef LINUX_COMPILE
 unsigned int reg_sw_build_time()
 {
  /* STATUS REGISTERS SW_BUILD_TIME            Read only Register */
@@ -93,7 +90,6 @@ unsigned int reg_sw_build_time()
 
   return ((s[0]-'0')<<20)|((s[1]-'0')<<16)|((s[3]-'0')<<12)|((s[4]-'0')<<8)|((s[6]-'0')<<4)|(s[7]-'0');
 }
-#endif
 
 /******************************************************************************/
 
@@ -579,9 +575,9 @@ void init_sysmon()
 
 int init_system()
 {
-#ifndef LINUX_COMPILE
   unsigned int reg_val;
 
+#ifndef LINUX_COMPILE
   /* ps7_init();*/
   /* psu_init();*/
   /*enable_caches();*/
@@ -613,7 +609,6 @@ int init_system()
   /* Register bank initialization */
   init_reg_bank();
   reg_bank_load();
-#ifndef LINUX_COMPILE
   /* write software build date to status register */
   reg_val = reg_sw_build_date();
   reg_bank_write(DCB_REG_SW_BUILD_DATE, &reg_val, 1);
@@ -621,6 +616,7 @@ int init_system()
   reg_val = reg_sw_build_time();
   reg_bank_write(DCB_REG_SW_BUILD_TIME, &reg_val, 1);
   /* write software GIT hashtag to status register */
+#ifndef LINUX_COMPILE
   reg_val = get_sw_git_hash();
   reg_bank_write(DCB_REG_SW_GIT_HASH_TAG, &reg_val, 1);
 
