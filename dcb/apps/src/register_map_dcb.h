@@ -5,7 +5,7 @@
  *  Project :  MEGII - DCB
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  21.01.2019 15:04:38
+ *  Created :  17.09.2019 13:02:21
  *
  *  Description :  Register map definitions.
  *
@@ -85,7 +85,7 @@
  * Bit Positions
  */
 
-/* ****** Register 0 [0x0000]: HW_VER - Hardware version information of the PCB (Default: 0xFF010303) ****** */
+/* ****** Register 0 [0x0000]: HW_VER - Hardware version information of the PCB (Default: 0xFF010307) ****** */
 
 /* BOARD_MAGIC - 0xFF, Magic number for board identification */
 #define DCB_BOARD_MAGIC_REG                         DCB_REG_HW_VER
@@ -105,11 +105,11 @@
 #define DCB_BOARD_TYPE_OFS                                       8
 #define DCB_BOARD_TYPE_CONST                                  0x03
 
-/* BOARD_REVISION - Board revision (A=0x00, C=0x02, D=0x03, E=0x04) */
+/* BOARD_REVISION - Board revision (A=0x00, B=0x01, C=0x02, D=0x03, E=0x04) */
 #define DCB_BOARD_REVISION_REG                      DCB_REG_HW_VER
 #define DCB_BOARD_REVISION_MASK                         0x000000FC
 #define DCB_BOARD_REVISION_OFS                                   2
-#define DCB_BOARD_REVISION_CONST                              0x00
+#define DCB_BOARD_REVISION_CONST                              0x01
 
 /* BOARD_VARIANT - Version indicator pins reflecting the variant of the board (XXX,YYY) */
 #define DCB_BOARD_VARIANT_REG                       DCB_REG_HW_VER
@@ -356,12 +356,22 @@
 
 
 
-/* ****** Register 17 [0x0044]: CLK_CTRL - Clock Control (Default: 0x00000006) ****** */
+/* ****** Register 17 [0x0044]: CLK_CTRL - Clock Control (Default: 0xFFFFC00E) ****** */
+
+/* DISTRIBUTOR_CLK_OUT_EN - Clock distributor output enable (31:16 = LSK15:0, 15 = TCB, 14 = FPGA, 13:12 = spare) */
+#define DCB_DISTRIBUTOR_CLK_OUT_EN_REG            DCB_REG_CLK_CTRL
+#define DCB_DISTRIBUTOR_CLK_OUT_EN_MASK                 0xFFFFF000
+#define DCB_DISTRIBUTOR_CLK_OUT_EN_OFS                          12
 
 /* DISTRIBUTOR_CLK_SRC_SEL - Backplane clock distributor source select: 0 = external clock / 1 = LMK */
 #define DCB_DISTRIBUTOR_CLK_SRC_SEL_REG           DCB_REG_CLK_CTRL
-#define DCB_DISTRIBUTOR_CLK_SRC_SEL_MASK                0x00000004
-#define DCB_DISTRIBUTOR_CLK_SRC_SEL_OFS                          2
+#define DCB_DISTRIBUTOR_CLK_SRC_SEL_MASK                0x00000008
+#define DCB_DISTRIBUTOR_CLK_SRC_SEL_OFS                          3
+
+/* BUS_CLK_SRC_SEL - BUS (backplane) clock source select: 0 = LMK output 2 / 1 = AUX_OUT from FPGA (BUS_CLK_SEL) */
+#define DCB_BUS_CLK_SRC_SEL_REG                   DCB_REG_CLK_CTRL
+#define DCB_BUS_CLK_SRC_SEL_MASK                        0x00000004
+#define DCB_BUS_CLK_SRC_SEL_OFS                                  2
 
 /* LMK_CLK_SRC_SEL - LMK clock source select: 0 = external clock / 1 = on board oscillator (CLK_SEL) */
 #define DCB_LMK_CLK_SRC_SEL_REG                   DCB_REG_CLK_CTRL
@@ -452,7 +462,7 @@
 #define DCB_LMK0_RESET_MASK                             0x80000000
 #define DCB_LMK0_RESET_OFS                                      31
 
-/* LMK0_CLKOUT_MUX - Channel 0 Clock Output Multiplexer (see datasheet) */
+/* LMK0_CLKOUT_MUX - Channel 0 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed) */
 #define DCB_LMK0_CLKOUT_MUX_REG                      DCB_REG_LMK_0
 #define DCB_LMK0_CLKOUT_MUX_MASK                        0x00060000
 #define DCB_LMK0_CLKOUT_MUX_OFS                                 17
@@ -476,7 +486,7 @@
 
 /* ****** Register 24 [0x0060]: LMK_1 - LMK Register 1 (Default: 0x00030101) ****** */
 
-/* LMK1_CLKOUT_MUX - Channel 1 Clock Output Multiplexer (see datasheet) */
+/* LMK1_CLKOUT_MUX - Channel 1 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed) */
 #define DCB_LMK1_CLKOUT_MUX_REG                      DCB_REG_LMK_1
 #define DCB_LMK1_CLKOUT_MUX_MASK                        0x00060000
 #define DCB_LMK1_CLKOUT_MUX_OFS                                 17
@@ -500,7 +510,7 @@
 
 /* ****** Register 25 [0x0064]: LMK_2 - LMK Register 2 (Default: 0x00020102) ****** */
 
-/* LMK2_CLKOUT_MUX - Channel 2 Clock Output Multiplexer (see datasheet) */
+/* LMK2_CLKOUT_MUX - Channel 2 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed) */
 #define DCB_LMK2_CLKOUT_MUX_REG                      DCB_REG_LMK_2
 #define DCB_LMK2_CLKOUT_MUX_MASK                        0x00060000
 #define DCB_LMK2_CLKOUT_MUX_OFS                                 17
@@ -524,7 +534,7 @@
 
 /* ****** Register 26 [0x0068]: LMK_3 - LMK Register 3 (Default: 0x00020103) ****** */
 
-/* LMK3_CLKOUT_MUX - Channel 3 Clock Output Multiplexer (see datasheet) */
+/* LMK3_CLKOUT_MUX - Channel 3 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed) */
 #define DCB_LMK3_CLKOUT_MUX_REG                      DCB_REG_LMK_3
 #define DCB_LMK3_CLKOUT_MUX_MASK                        0x00060000
 #define DCB_LMK3_CLKOUT_MUX_OFS                                 17
@@ -548,7 +558,7 @@
 
 /* ****** Register 27 [0x006C]: LMK_4 - LMK Register 4 (Default: 0x00000104) ****** */
 
-/* LMK4_CLKOUT_MUX - Channel 4 Clock Output Multiplexer (see datasheet) */
+/* LMK4_CLKOUT_MUX - Channel 4 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed) */
 #define DCB_LMK4_CLKOUT_MUX_REG                      DCB_REG_LMK_4
 #define DCB_LMK4_CLKOUT_MUX_MASK                        0x00060000
 #define DCB_LMK4_CLKOUT_MUX_OFS                                 17
@@ -572,7 +582,7 @@
 
 /* ****** Register 28 [0x0070]: LMK_5 - LMK Register 5 (Default: 0x00000105) ****** */
 
-/* LMK5_CLKOUT_MUX - Channel 5 Clock Output Multiplexer (see datasheet) */
+/* LMK5_CLKOUT_MUX - Channel 5 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed) */
 #define DCB_LMK5_CLKOUT_MUX_REG                      DCB_REG_LMK_5
 #define DCB_LMK5_CLKOUT_MUX_MASK                        0x00060000
 #define DCB_LMK5_CLKOUT_MUX_OFS                                 17
@@ -596,7 +606,7 @@
 
 /* ****** Register 29 [0x0074]: LMK_6 - LMK Register 6 (Default: 0x00000106) ****** */
 
-/* LMK6_CLKOUT_MUX - Channel 6 Clock Output Multiplexer (see datasheet) */
+/* LMK6_CLKOUT_MUX - Channel 6 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed) */
 #define DCB_LMK6_CLKOUT_MUX_REG                      DCB_REG_LMK_6
 #define DCB_LMK6_CLKOUT_MUX_MASK                        0x00060000
 #define DCB_LMK6_CLKOUT_MUX_OFS                                 17
@@ -620,7 +630,7 @@
 
 /* ****** Register 30 [0x0078]: LMK_7 - LMK Register 7 (Default: 0x00000107) ****** */
 
-/* LMK7_CLKOUT_MUX - Channel 7 Clock Output Multiplexer (see datasheet) */
+/* LMK7_CLKOUT_MUX - Channel 7 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed) */
 #define DCB_LMK7_CLKOUT_MUX_REG                      DCB_REG_LMK_7
 #define DCB_LMK7_CLKOUT_MUX_MASK                        0x00060000
 #define DCB_LMK7_CLKOUT_MUX_OFS                                 17
@@ -973,10 +983,6 @@ extern const unsigned int reg_default[];
 
 #define DCB_WRITABLE_REG   0
 #define DCB_READONLY_REG   1
-
-/******************************************************************************/
-/* Register Restore                                                          */
-/******************************************************************************/
 
 #define DCB_DONT_TOUCH_REG   0
 #define DCB_RESTORE_REG      1

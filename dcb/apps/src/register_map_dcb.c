@@ -5,7 +5,7 @@
  *  Project :  MEGII - DCB
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  21.01.2019 15:04:38
+ *  Created :  17.09.2019 13:02:21
  *
  *  Description :  Register map definitions.
  *
@@ -16,7 +16,7 @@
 #include "register_map_dcb.h"
 
 #ifndef DCB_DONT_INCLUDE_REG_ACCESS_VARS
-#include "drv_axi_dcb_reg_bank.h"
+
 
 const dcb_reg_func_type  dcb_reg_func_list[] = {
   { dcb_hw_reg , 0 },   /* register 0 [0x0000]: HW_VER */
@@ -77,6 +77,10 @@ const dcb_reg_func_type  dcb_reg_func_list[] = {
 
 #ifndef DCB_DONT_INCLUDE_VARS
 
+/******************************************************************************/
+/* Register Mapping                                                           */
+/******************************************************************************/
+
 const dcb_reg_entry_type  dcb_reg_list[] = {
   { "HW_VER"          , DCB_REG_HW_VER         , DCB_READONLY_REG },
   { "REG_LAYOUT_VER"  , DCB_REG_REG_LAYOUT_VER , DCB_READONLY_REG },
@@ -133,6 +137,10 @@ const dcb_reg_entry_type  dcb_reg_list[] = {
   { (const char*)0    , 0                      , 0                }
 };
 
+/******************************************************************************/
+/* Bit Mapping                                                                */
+/******************************************************************************/
+
 const dcb_bit_group_entry_type  dcb_bit_group_list[] = {
   { "BOARD_MAGIC"             , DCB_BOARD_MAGIC_REG             , DCB_BOARD_MAGIC_MASK             , DCB_BOARD_MAGIC_OFS             },
   { "VENDOR_ID"               , DCB_VENDOR_ID_REG               , DCB_VENDOR_ID_MASK               , DCB_VENDOR_ID_OFS               },
@@ -173,7 +181,9 @@ const dcb_bit_group_entry_type  dcb_bit_group_list[] = {
   { "DAQ_SOFT_TRIGGER"        , DCB_DAQ_SOFT_TRIGGER_REG        , DCB_DAQ_SOFT_TRIGGER_MASK        , DCB_DAQ_SOFT_TRIGGER_OFS        },
   { "SET_BIT_CTRL"            , DCB_SET_BIT_CTRL_REG            , DCB_SET_BIT_CTRL_MASK            , DCB_SET_BIT_CTRL_OFS            },
   { "CLR_BIT_CTRL"            , DCB_CLR_BIT_CTRL_REG            , DCB_CLR_BIT_CTRL_MASK            , DCB_CLR_BIT_CTRL_OFS            },
+  { "DISTRIBUTOR_CLK_OUT_EN"  , DCB_DISTRIBUTOR_CLK_OUT_EN_REG  , DCB_DISTRIBUTOR_CLK_OUT_EN_MASK  , DCB_DISTRIBUTOR_CLK_OUT_EN_OFS  },
   { "DISTRIBUTOR_CLK_SRC_SEL" , DCB_DISTRIBUTOR_CLK_SRC_SEL_REG , DCB_DISTRIBUTOR_CLK_SRC_SEL_MASK , DCB_DISTRIBUTOR_CLK_SRC_SEL_OFS },
+  { "BUS_CLK_SRC_SEL"         , DCB_BUS_CLK_SRC_SEL_REG         , DCB_BUS_CLK_SRC_SEL_MASK         , DCB_BUS_CLK_SRC_SEL_OFS         },
   { "LMK_CLK_SRC_SEL"         , DCB_LMK_CLK_SRC_SEL_REG         , DCB_LMK_CLK_SRC_SEL_MASK         , DCB_LMK_CLK_SRC_SEL_OFS         },
   { "EXT_CLK_IN_SEL"          , DCB_EXT_CLK_IN_SEL_REG          , DCB_EXT_CLK_IN_SEL_MASK          , DCB_EXT_CLK_IN_SEL_OFS          },
   { "SET_BIT_CLK_CTRL"        , DCB_SET_BIT_CLK_CTRL_REG        , DCB_SET_BIT_CLK_CTRL_MASK        , DCB_SET_BIT_CLK_CTRL_OFS        },
@@ -326,8 +336,9 @@ const unsigned char reg_restore[] = {
 /******************************************************************************/
 /* Register Defaults                                                          */
 /******************************************************************************/
+
 const unsigned int reg_default[] = {
-  0xFF010303,   /* Offset 0x0000 */
+  0xFF010307,   /* Offset 0x0000 */
   0x00000000,   /* Offset 0x0004 */
   0x00000000,   /* Offset 0x0008 */
   0x00000000,   /* Offset 0x000C */
@@ -344,7 +355,7 @@ const unsigned int reg_default[] = {
   0x00000000,   /* Offset 0x0038 */
   0x00000000,   /* Offset 0x003C */
   0x00000000,   /* Offset 0x0040 */
-  0x00000006,   /* Offset 0x0044 */
+  0xFFFFC00E,   /* Offset 0x0044 */
   0x00000000,   /* Offset 0x0048 */
   0x00000000,   /* Offset 0x004C */
   0x00000753,   /* Offset 0x0050 */
@@ -381,5 +392,6 @@ const unsigned int reg_default[] = {
 };
 
 #endif /* DCB_DONT_INCLUDE_VARS */
+
 
 /******************************************************************************/
