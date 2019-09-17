@@ -117,6 +117,9 @@ int main(int argc, char *argv[]) {
    while (!_server_abort) {
       unsigned char buffer[1600];
 
+      auto_update_configurations();
+      trigger_update_configurations();
+
       // read content into buffer from an incoming client
       int len = recvfrom(sock, buffer, sizeof(buffer), 0, (struct sockaddr *) &client_address,
                          &client_address_len);
@@ -194,8 +197,6 @@ int main(int argc, char *argv[]) {
       }
    }
 
-   auto_update_configurations();
-   trigger_update_configurations();
 
    return 0;
 }
