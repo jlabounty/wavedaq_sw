@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  03.09.2019 10:37:05
+// Created :  17.09.2019 13:02:21
 //
 
 
@@ -30,7 +30,7 @@ public:
 
 
 
-   ////// ------ Register 0 [0x0000]: HW_VER - Hardware version information of the PCB (Default: 0xFF010303) ------ //////
+   ////// ------ Register 0 [0x0000]: HW_VER - Hardware version information of the PCB (Default: 0xFF010307) ------ //////
 
    // 0xFF000000: BOARD_MAGIC - 0xFF, Magic number for board identification
    unsigned int GetBoardMagic() { return BitExtract(DCB_BOARD_MAGIC_REG, DCB_BOARD_MAGIC_MASK, DCB_BOARD_MAGIC_OFS); };
@@ -38,7 +38,7 @@ public:
    unsigned int GetVendorId() { return BitExtract(DCB_VENDOR_ID_REG, DCB_VENDOR_ID_MASK, DCB_VENDOR_ID_OFS); };
    // 0x0000FF00: BOARD_TYPE - DCB Number (0x03 for DCB ???)
    unsigned int GetBoardType() { return BitExtract(DCB_BOARD_TYPE_REG, DCB_BOARD_TYPE_MASK, DCB_BOARD_TYPE_OFS); };
-   // 0x000000FC: BOARD_REVISION - Board revision (A=0x00, C=0x02, D=0x03, E=0x04)
+   // 0x000000FC: BOARD_REVISION - Board revision (A=0x00, B=0x01, C=0x02, D=0x03, E=0x04)
    unsigned int GetBoardRevision() { return BitExtract(DCB_BOARD_REVISION_REG, DCB_BOARD_REVISION_MASK, DCB_BOARD_REVISION_OFS); };
    // 0x00000003: BOARD_VARIANT - Version indicator pins reflecting the variant of the board (XXX,YYY)
    unsigned int GetBoardVariant() { return BitExtract(DCB_BOARD_VARIANT_REG, DCB_BOARD_VARIANT_MASK, DCB_BOARD_VARIANT_OFS); };
