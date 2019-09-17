@@ -23,11 +23,11 @@
 #include "xstatus.h"
 #include "sc_io.h"
 #include "register_map_dcb.h"
+#include "../../../../git-revision.h"
 #ifndef LINUX_COMPILE
 #include "sw_state.h"
 #include "drv_qspi_flash.h"
 #include "dcb_flash_memory_map.h"
-#include "../../../../../../git-revision.h"
 #endif
 
 /******************************************************************************/
@@ -93,7 +93,6 @@ unsigned int reg_sw_build_time()
 
 /******************************************************************************/
 
-#ifndef LINUX_COMPILE
 unsigned int get_sw_git_hash()
 {
   const char *git_rev_sw_ptr;
@@ -103,7 +102,6 @@ unsigned int get_sw_git_hash()
   ncpy(&sw_git_hash[2], git_rev_sw_ptr, 8);
   return xfs_atoui((const char*)sw_git_hash);
 }
-#endif
 
 /******************************************************************************/
 
@@ -616,9 +614,9 @@ int init_system()
   reg_val = reg_sw_build_time();
   reg_bank_write(DCB_REG_SW_BUILD_TIME, &reg_val, 1);
   /* write software GIT hashtag to status register */
-#ifndef LINUX_COMPILE
   reg_val = get_sw_git_hash();
   reg_bank_write(DCB_REG_SW_GIT_HASH_TAG, &reg_val, 1);
+#ifndef LINUX_COMPILE
 
   init_iic();
 
@@ -740,14 +738,14 @@ void init_reg_settings(int snr)
 
 void print_sys_info(void)
 {
-//  const char *git_rev_sw_ptr;
-//
+  const char *git_rev_sw_ptr;
+
 //  /*unsigned int version; */
 //  unsigned int build_date;
 //  unsigned int build_time;
 ////  unsigned int git_rev_fw;
-//  unsigned int hw_version;
-//
+  unsigned int hw_version;
+
 //  unsigned short year;
 //  unsigned char month;
 //  unsigned char day;
@@ -756,17 +754,17 @@ void print_sys_info(void)
 //  unsigned char minute;
 //  unsigned char second;
 //  unsigned char compat_level;
-//
-//  unsigned char board_variant;
-//  unsigned char board_type;
-//  unsigned char board_revision;
-//
-//
+
+  unsigned char board_variant;
+  unsigned char board_type;
+  unsigned char board_revision;
+
+
 //  /* version = xfs_in32(baseaddr); */
 //  build_date = reg_bank_get(DCB_REG_FW_BUILD_DATE);
 //  build_time = reg_bank_get(DCB_REG_FW_BUILD_TIME);
 ////  git_rev_fw = reg_bank_get(DCB_REG_FW_GIT_HASH_TAG);
-//  hw_version = reg_bank_get(DCB_REG_HW_VER);
+  hw_version = reg_bank_get(DCB_REG_HW_VER);
 //
 //
 //  /* read and convert from BCD to binary */
@@ -787,26 +785,26 @@ void print_sys_info(void)
 //  minute       = ((minute >> 4) & 0xF) * 10 + (minute & 0xF);
 //  second       = (build_time & DCB_FW_BUILD_SECOND_MASK) >> DCB_FW_BUILD_SECOND_OFS;
 //  second       = ((second >> 4) & 0xF) * 10 + (second & 0xF);
-//
-//
-//  git_rev_sw_ptr = GIT_REVISION + 13;
-//
-//  board_variant  = (hw_version & DCB_BOARD_VARIANT_MASK)  >> DCB_BOARD_VARIANT_OFS;
-//  board_type     = (hw_version & DCB_BOARD_TYPE_MASK)     >> DCB_BOARD_TYPE_OFS;
-//  board_revision = (hw_version & DCB_BOARD_REVISION_MASK) >> DCB_BOARD_REVISION_OFS;
+
+
+  git_rev_sw_ptr = GIT_REVISION + 13;
+
+  board_variant  = (hw_version & DCB_BOARD_VARIANT_MASK)  >> DCB_BOARD_VARIANT_OFS;
+  board_type     = (hw_version & DCB_BOARD_TYPE_MASK)     >> DCB_BOARD_TYPE_OFS;
+  board_revision = (hw_version & DCB_BOARD_REVISION_MASK) >> DCB_BOARD_REVISION_OFS;
 
 
 //  xfs_printf("-- Compatibility Level: %d\r\n\r\n", compat_level);
 ////  xfs_printf("-- FW GIT Revision:     0x%07X\r\n", git_rev_fw);
 //
-//  xfs_printf("-- SW GIT Revision:     0x%s\r\n\r\n", git_rev_sw_ptr);
+  xfs_printf("-- SW GIT Revision:     0x%s\r\n\r\n", git_rev_sw_ptr);
 ////  xfs_printf("-- FW Build:            %s %2d %04d  %02d:%02d:%02d\r\n", system_month_str[(month-1)%12], day, year, hour, minute, second);
 
   xfs_printf("-- SW Build:            %s  %s (UTC)\r\n\r\n",system_sw_build_date,system_sw_build_time);
-//  if(board_type == 0x03) xfs_printf("-- Board Type:          WaveDAQ DCB\r\n");
-//  else                   xfs_printf("-- Board Type:          0x%02X -> error\r\n", board_type);
-//  xfs_printf("-- Board Revision:      %c\r\n", 0x41 + board_revision); /* 0x41 = ASCII "A" */
-//  xfs_printf("-- Board Variant:       0x%02X\r\n", board_variant);
+  if(board_type == 0x03) xfs_printf("-- Board Type:          WaveDAQ DCB\r\n");
+  else                   xfs_printf("-- Board Type:          0x%02X -> error\r\n", board_type);
+  xfs_printf("-- Board Revision:      %c\r\n", 0x41 + board_revision); /* 0x41 = ASCII "A" */
+  xfs_printf("-- Board Variant:       0x%02X\r\n", board_variant);
 }
 
 /******************************************************************************/
