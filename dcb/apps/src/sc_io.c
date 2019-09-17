@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include "system.h"
 #include "sc_io.h"
 
 #define NR_OF_MIOS        54
@@ -100,6 +101,10 @@ void set_gpio(unsigned int pin, unsigned int value)
   int gpio_nr;
   char data_str[50];
 
+#ifdef LINUX_COMPILE
+  init_gpio_mio();
+#endif
+
   gpio_nr = ZYNQ_GPIO_OFFS + pin;
 
   /* set value */
@@ -123,6 +128,10 @@ unsigned int get_gpio(unsigned int pin)
   int gpio_nr;
   char data_str[50];
   char value;
+
+#ifdef LINUX_COMPILE
+  init_gpio_mio();
+#endif
 
   gpio_nr = ZYNQ_GPIO_OFFS + pin;
 

@@ -53,6 +53,7 @@ static int sys_mon_initialized  = 0;
 static int lmk03000_initialized = 0;
 static int si5324_initialized   = 0;
 static int reg_bank_initialized = 0;
+static int gpio_initialized     = 0;
 #endif /* LINUX_COMPILE */
 
 /******************************************************************************/
@@ -219,9 +220,17 @@ int init_gpio_mio()
   return XST_SUCCESS;
 }
 #else
-int init_gpio_mio()
+void init_gpio_mio()
 {
-  gpio_init();
+  if(gpio_initialized)
+  {
+    return;
+  }
+  else
+  {
+    gpio_initialized = 1;
+    gpio_init();
+  }
 }
 #endif
 

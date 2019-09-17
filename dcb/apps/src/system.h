@@ -109,6 +109,7 @@ void init_reg_bank();
 void init_lmk03000();
 void init_si5324();
 void init_sysmon();
+void init_gpio_mio();
 void init_settings(int snr);
 void init_env_settings(int snr);
 void init_reg_settings(int snr);
