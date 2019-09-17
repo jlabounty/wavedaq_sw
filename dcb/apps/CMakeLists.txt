@@ -46,6 +46,7 @@ set(SRC
    src/mod_crate_com.c
    src/mod_reg_access.c
    src/mod_status.c
+   src/mod_system_management.c
    src/crc32.c
    src/dbg.c
    src/utilities.c

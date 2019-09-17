@@ -40,7 +40,7 @@
 //#define CFG_INCLUDE_LMK                 1
 #define CFG_INCLUDE_LED_CONTROL         0
 //#define CFG_INCLUDE_EXT_MEMORY          0
-#define CFG_INCLUDE_SYSTEM_MANAGEMENT   0
+#define CFG_INCLUDE_SYSTEM_MANAGEMENT   1
 //#define CFG_INCLUDE_GMAC                1
 #define CFG_INCLUDE_CRATE_COM           1
 

@@ -633,14 +633,14 @@ int init_system()
 
 /******************************************************************************/
 
-#ifndef LINUX_COMPILE
 void init_settings(int snr)
 {
+#ifndef LINUX_COMPILE
   init_env_settings(snr);
+#endif
   init_reg_settings(snr);
   xfs_printf("\r\n*** System Initialization Complete ***\r\n\r\n");
 }
-#endif
 
 /******************************************************************************/
 
@@ -705,7 +705,6 @@ void init_env_settings(int snr)
 
 /******************************************************************************/
 
-#ifndef LINUX_COMPILE
 void init_reg_settings(int snr)
 {
   unsigned int reg_val;
@@ -732,7 +731,6 @@ void init_reg_settings(int snr)
   xfs_printf("\r\nStoring register bank contents in SPI flash\r\n");
   reg_bank_store();
 }
-#endif
 
 /******************************************************************************/
 
