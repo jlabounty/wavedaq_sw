@@ -3305,8 +3305,9 @@ void WP::DoVoltageCalibrationStep()
       // turn on square clock to correct for crosstalk
       b->SetTimingReferenceSignal(WDB::cTimingReferenceSquare);
 
-      // make sure multiplexer is connected to input
-      b->SetFeMux(-1, WDB::cFeMuxInput);
+      // disconnect channel from input
+      b->SetFeMux(-1, WDB::cFeMuxCalSource);
+      b->SetCalibBufferEn(true);
 
       // enable all DRSchannels
       b->SetDrsChTxEn(0x3FFFF);
@@ -3477,9 +3478,6 @@ void WP::DoVoltageCalibrationStep()
          // set offset zero
          b->SetDacCalDcV(0);
 
-         // turn on calibration source
-         b->SetCalibBufferEn(1);
-
          // turn off square clock to get DC level
          b->SetTimingReferenceSignal(WDB::cTimingReferenceOff);
 
@@ -3520,10 +3518,13 @@ void WP::DoVoltageCalibrationStep()
    mRangeCalib     = false;
 
    // reset reference clocks
-   b->SetCalibBufferEn(0);
    b->SetTimingReferenceSignal(WDB::cTimingReferenceSquare);
 
    //---- measure offset at different ranges
+
+   // disconnect channel from input
+   b->SetFeMux(-1, WDB::cFeMuxCalSource);
+   b->SetCalibBufferEn(true);
 
    // Range -0.45
    b->SetDacCalDcV(0);
