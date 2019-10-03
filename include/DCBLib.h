@@ -13,33 +13,29 @@
 #ifndef __dcblib_h__
 #define __dcblib_h__
 
-#include "WDBReg.h"
+#include "DCBReg.h"
 
 #include <thread>
 #include <queue>
 #include <mutex>
 #include <condition_variable>
 #include <map>
-#include "averager.h"
-#include "mxml.h"
 
 #define SUCCESS        1
 
 //--------------------------------------------------------------------
 
 // Data Concentrator Board class. Interface functions to all WDB registers
-class DCB: public WDBREG {
+class DCB: public DCBREG {
    std::string      mDCBName;
-   unsigned char    mEthAddrAscii[16];
-   unsigned char    mEthAddrBin[16];
+   unsigned char    mEthAddrBin[16]{};
    bool             mVerbose;
-   std::string      mLogfile;
-   bool             mSendBlocked;
+   std::string      mLogfile = "";
+   bool             mSendBlocked = false;
    int              mReceiveTimeoutMs;
 
-   unsigned int     creg[REG_NR_OF_CTRL_REGS];
-   unsigned int     sreg[REG_NR_OF_STAT_REGS];
-   
+   unsigned int     reg[NR_OF_REGS]{};
+
    static int       gASCIISocket;
    static int       gBinSocket;
    static unsigned short udpSequenceNumber;
@@ -50,33 +46,31 @@ class DCB: public WDBREG {
 public:
    
    // constructor
-   DCB(std::string name, bool verbose = false);
+   DCB(const std::string &name, bool verbose = false);
 
-   const unsigned int cRequiredRegLayoutCompatLevel = 8;
-   const unsigned int cRequiredFwCompatLevel = 4;
+   const unsigned int cRequiredRegLayoutCompatLevel = 0;
+   const unsigned int cRequiredFwCompatLevel = 0;
    const int cDefaultReceiveTimeoutMs = 100;
 
    // register functions, overload pure virtual functions from WDBREG
+   void bitReplace(unsigned int &reg, unsigned int mask, unsigned int ofs, unsigned int value);
    void SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v);
-   unsigned int BitExtractStatus(unsigned int rofs, unsigned int mask, unsigned int ofs);
-   unsigned int BitExtractControl(unsigned int rofs, unsigned int mask, unsigned int ofs);
+   unsigned int BitExtract(unsigned int rofs, unsigned int mask, unsigned int ofs);
    
    // interface functions
    void SetVerbose(int verbose) { mVerbose = verbose; }
    int IsVerbose() { return mVerbose; }
    void SetLogFile(std::string logfile) { mLogfile = logfile; }
    void Connect();
-   void SetDestinationPort(int port);
-   void ReceiveControlRegisters(unsigned int index=0, unsigned int nReg=REG_NR_OF_CTRL_REGS);
-   void ReceiveStatusRegisters(unsigned int index=0, unsigned int nReg=REG_NR_OF_STAT_REGS);
-   void ReceiveStatusRegister(int ofs);
-   void SendControlRegisters();
+   void ReceiveRegisters(unsigned int index=0, unsigned int nReg=NR_OF_REGS);
+   void SendRegisters(unsigned int index, unsigned int nReg);
+   unsigned int bcd2dec(const unsigned int bcd);
    void PrintVersion();
    bool GetSendBlock() { return mSendBlocked; }
    void SetSendBlock(bool flag) { mSendBlocked = flag; }
 
    // setter & getter ----------
-   std::string GetName() { return mWDBName; }
+   std::string GetName() { return mDCBName; }
    int GetReceiveTimeoutMs() { return mReceiveTimeoutMs; };
    void SetReceiveTimeoutMs(int to) { mReceiveTimeoutMs = to; };
    

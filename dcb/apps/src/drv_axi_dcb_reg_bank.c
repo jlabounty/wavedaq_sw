@@ -20,13 +20,13 @@
 #include "xfs_printf.h"
 #include "dbg.h"
 #include "utilities.h"
+#include "crc32.h"
+#include "drv_qspi_flash.h"
 #ifndef LINUX_COMPILE
 #include "axi_dcb_register_bank.h"
-#include "drv_qspi_flash.h"
-#include "crc32.h"
 #include "dcb_flash_memory_map.h"
 #include "fw_env.h"
-#endif
+#endif /* not LINUX_COMPILE */
 
 #undef DCB_DONT_INCLUDE_REG_ACCESS_VARS
 #undef DCB_DONT_INCLUDE_VARS
@@ -46,14 +46,9 @@ void reg_bank_init(unsigned int base_address)
   SYSPTR(reg_bank)->base_address = base_address;
 }
 #else /* No LINUX_COMPILE */
-unsigned int initialized = 0;
 void reg_bank_init(unsigned int base_address)
 {
-  if(!initialized)
-  {
-    SYSPTR(reg_bank)->base_address = (unsigned int)(io_remap(base_address));
-    initialized = 1;
-  }
+  SYSPTR(reg_bank)->base_address = (unsigned int)(io_remap(base_address));
 }
 #endif
 
@@ -212,7 +207,6 @@ unsigned int reg_bank_get(unsigned int offset)
 
 /***************************************************************************/
 
-#ifndef LINUX_COMPILE
 void reg_bank_load()
 {
   unsigned int reg_buffer[NR_OF_REGS];
@@ -221,8 +215,11 @@ void reg_bank_load()
   char *cp;
 
   /* read register contents from SPI flash */
+#ifdef LINUX_COMPILE
+  qspi_flash_read(MTD_QSPI_FLASH_REGCONTENT, 0, sizeof(reg_buffer), (unsigned char*)reg_buffer);
+#else
   qspi_flash_read(SYSPTR(spi_flash), QSPI_FLASH_REG_CONTENTS_ADDR, NR_OF_REGS*4, QSFL_QUAD_READ_CMD, (unsigned char*)(reg_buffer));
-//  spi_flash_read(SYSPTR(spi_flash), (unsigned char*)(reg_buffer), SPI_FLASH_REG_CONTENTS_ADDR, NR_OF_REGS*4);
+#endif
 
   /* verify crc32 checksum */
   checksum = crc32 (0, (unsigned char*)(reg_buffer), (NR_OF_REGS-1)*4);
@@ -242,6 +239,7 @@ void reg_bank_load()
       xfs_printf("         From flash: 0x%08X\r\n", reg_buffer[NR_OF_REGS-1]);
     }
 
+#if 0
     if ((cp = fw_getenv(SYSPTR(env), "sn")))
     {
       snr = xfs_atoi(cp);
@@ -260,11 +258,11 @@ void reg_bank_load()
         xfs_printf("         Register contents are not updated.\r\n\r\n");
       }
     }
+#endif
   }
 }
 
 /***************************************************************************/
-
 #ifndef DCB_DONT_IMPLEMENT_REGISTER_STORE
 
 void reg_bank_store()
@@ -280,14 +278,18 @@ void reg_bank_store()
   reg_bank_write(DCB_REG_CRC32_REG_BANK, &checksum, 1);
   reg_buffer[NR_OF_REGS-1] = checksum;
 
+#ifdef LINUX_COMPILE
+  qspi_flash_erase_partition(MTD_QSPI_FLASH_REGCONTENT);
+  qspi_flash_write(MTD_QSPI_FLASH_REGCONTENT, 0, sizeof(reg_buffer), (unsigned char*)reg_buffer);
+#else
   /* erase SPI flash sector */
   qspi_flash_parameter_erase(SYSPTR(spi_flash), QSPI_FLASH_REG_CONTENTS_ADDR);
   /* store register bank contents */
   qspi_flash_write(SYSPTR(spi_flash), QSPI_FLASH_REG_CONTENTS_ADDR, NR_OF_REGS*4, QSFL_QUAD_WRITE_CMD, (unsigned char*)(reg_buffer));
+#endif
 }
 
 #endif /* DCB_DONT_IMPLEMENT_REGISTER_STORE */
-#endif /* No LINUX_COMPILE */
 
 /***************************************************************************/
 /* register handler functions                                              */
@@ -317,7 +319,7 @@ unsigned int dcb_hw_reg(unsigned int cmd, unsigned int par, unsigned int offs, u
   unsigned int base_address;
 
 #ifdef LINUX_COMPILE
-    init_reg_bank();
+  init_reg_bank();
 #endif
   base_address = SYSPTR(reg_bank)->base_address;
 

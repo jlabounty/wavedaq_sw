@@ -22,12 +22,12 @@
 #include "dbg.h"
 #include "xstatus.h"
 #include "sc_io.h"
-#ifndef LINUX_COMPILE
 #include "register_map_dcb.h"
+#include "../../../../git-revision.h"
+#ifndef LINUX_COMPILE
 #include "sw_state.h"
 #include "drv_qspi_flash.h"
 #include "dcb_flash_memory_map.h"
-#include "../../../../../../git-revision.h"
 #endif
 
 /******************************************************************************/
@@ -48,9 +48,16 @@ const char system_sw_build_date[] = __DATE__;
 const char system_sw_build_time[] = __TIME__;
 const char *system_month_str[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
+#ifdef LINUX_COMPILE
+static int sys_mon_initialized  = 0;
+static int lmk03000_initialized = 0;
+static int si5324_initialized   = 0;
+static int reg_bank_initialized = 0;
+static int gpio_initialized     = 0;
+#endif /* LINUX_COMPILE */
+
 /******************************************************************************/
 
-#ifndef LINUX_COMPILE
 unsigned int reg_sw_build_date()
 {
  /* STATUS REGISTERS SW_BUILD_DATE            Read only Register */
@@ -68,11 +75,9 @@ unsigned int reg_sw_build_date()
          | ((m/10)<<12) | ((m%10)<<8)                     /* Month */
          | ((s[4]==' ')?0:(s[4]-'0')<<4) | (s[5]-'0') );  /* Day   */
 }
-#endif
 
 /******************************************************************************/
 
-#ifndef LINUX_COMPILE
 unsigned int reg_sw_build_time()
 {
  /* STATUS REGISTERS SW_BUILD_TIME            Read only Register */
@@ -86,11 +91,9 @@ unsigned int reg_sw_build_time()
 
   return ((s[0]-'0')<<20)|((s[1]-'0')<<16)|((s[3]-'0')<<12)|((s[4]-'0')<<8)|((s[6]-'0')<<4)|(s[7]-'0');
 }
-#endif
 
 /******************************************************************************/
 
-#ifndef LINUX_COMPILE
 unsigned int get_sw_git_hash()
 {
   const char *git_rev_sw_ptr;
@@ -100,7 +103,6 @@ unsigned int get_sw_git_hash()
   ncpy(&sw_git_hash[2], git_rev_sw_ptr, 8);
   return xfs_atoui((const char*)sw_git_hash);
 }
-#endif
 
 /******************************************************************************/
 
@@ -218,9 +220,17 @@ int init_gpio_mio()
   return XST_SUCCESS;
 }
 #else
-int init_gpio_mio()
+void init_gpio_mio()
 {
-  gpio_init();
+  if(gpio_initialized)
+  {
+    return;
+  }
+  else
+  {
+    gpio_initialized = 1;
+    gpio_init();
+  }
 }
 #endif
 
@@ -337,7 +347,15 @@ int init_spi_bpl()
 
 void init_reg_bank()
 {
-  reg_bank_init(XPAR_REGISTER_BANK_0_AXI_DCB_REGISTER_BANK_0_S00_AXI_BASEADDR);
+  if(reg_bank_initialized)
+  {
+    return;
+  }
+  else
+  {
+    reg_bank_initialized = 1;
+    reg_bank_init(XPAR_REGISTER_BANK_0_AXI_DCB_REGISTER_BANK_0_S00_AXI_BASEADDR);
+  }
 }
 
 /******************************************************************************/
@@ -505,11 +523,68 @@ char default_env[] = "sn=0\0"
 
 /******************************************************************************/
 
+void init_lmk03000()
+{
+#ifdef LINUX_COMPILE
+  if(lmk03000_initialized)
+  {
+    return;
+  }
+  else
+  {
+    lmk03000_initialized = 1;
+    lmk03000_init(SYSPTR(lmk), SPI_DEV_ECLK_LMK_ADC, SPI_SLAVE_NR_LMK);
+  }
+#else /* LINUX_COMPILE */
+  lmk03000_init(SYSPTR(lmk),     SYSPTR(spi_eclk_lmk_adc), SPI_SLAVE_NR_LMK);
+#endif /* LINUX_COMPILE */
+}
+
+/******************************************************************************/
+
+void init_si5324()
+{
+#ifdef LINUX_COMPILE
+  if(si5324_initialized)
+  {
+    return;
+  }
+  else
+  {
+    si5324_initialized = 1;
+    si5324_init(SYSPTR(si5324), SPI_DEV_ECLK_LMK_ADC, SPI_SLAVE_NR_SI3524);
+  }
+#else /* LINUX_COMPILE */
+  si5324_init(SYSPTR(si5324),  SYSPTR(spi_eclk_lmk_adc), SPI_SLAVE_NR_SI3524);
+#endif /* LINUX_COMPILE */
+}
+
+/******************************************************************************/
+
+void init_sysmon()
+{
+#ifdef LINUX_COMPILE
+  if(sys_mon_initialized)
+  {
+    return;
+  }
+  else
+  {
+    sys_mon_initialized = 1;
+    sysmon_init(SYSPTR(sys_mon), SPI_DEV_ECLK_LMK_ADC, SPI_SLAVE_NR_SYS_MON);
+  }
+#else /* LINUX_COMPILE */
+  sysmon_init(SYSPTR(sys_mon), SYSPTR(spi_eclk_lmk_adc), SPI_SLAVE_NR_SYS_MON);
+#endif /* LINUX_COMPILE */
+}
+
+/******************************************************************************/
+
 int init_system()
 {
-#ifndef LINUX_COMPILE
   unsigned int reg_val;
 
+#ifndef LINUX_COMPILE
   /* ps7_init();*/
   /* psu_init();*/
   /*enable_caches();*/
@@ -520,9 +595,7 @@ int init_system()
 
   init_gpio_mio();
 
-//  emio_set_sw_state(SYSPTR(gpio_mio), SW_STATUS_BL_LOAD);
   emio_flash_sw_state(BIT_IDX_EMIO_CTRL_SW_STATE_DCB_ACCESS_PIN);
-  emio_set_sw_state(BIT_IDX_EMIO_CTRL_SW_STATE_BL_LOAD_PIN);
 
   init_spi_bpl();
 
@@ -539,10 +612,11 @@ int init_system()
   fw_env_load(SYSPTR(env));
   /* End of environment initialization */
 
+#endif
   /* Register bank initialization */
   init_reg_bank();
   reg_bank_load();
-   /* write software build date to status register */
+  /* write software build date to status register */
   reg_val = reg_sw_build_date();
   reg_bank_write(DCB_REG_SW_BUILD_DATE, &reg_val, 1);
   /* write software build time to status register */
@@ -551,30 +625,31 @@ int init_system()
   /* write software GIT hashtag to status register */
   reg_val = get_sw_git_hash();
   reg_bank_write(DCB_REG_SW_GIT_HASH_TAG, &reg_val, 1);
+#ifndef LINUX_COMPILE
 
   init_iic();
 
   init_sfp();
 
   init_spi_eclk_lmk_adc();
-  lmk03000_init(SYSPTR(lmk),     SYSPTR(spi_eclk_lmk_adc), SPI_SLAVE_NR_LMK);
-  si5324_init  (SYSPTR(si5324),  SYSPTR(spi_eclk_lmk_adc), SPI_SLAVE_NR_SI3524);
-  sysmon_init  (SYSPTR(sys_mon), SYSPTR(spi_eclk_lmk_adc), SPI_SLAVE_NR_SYS_MON);
-#endif
+#endif /* not LINUX_COMPILE */
+  /* init_si5324(); */ /* done by fsbl, not needed in application */
+  init_lmk03000();
+  init_sysmon();
 
   return XST_SUCCESS;
 }
 
 /******************************************************************************/
 
-#ifndef LINUX_COMPILE
 void init_settings(int snr)
 {
+#ifndef LINUX_COMPILE
   init_env_settings(snr);
+#endif
   init_reg_settings(snr);
   xfs_printf("\r\n*** System Initialization Complete ***\r\n\r\n");
 }
-#endif
 
 /******************************************************************************/
 
@@ -639,7 +714,6 @@ void init_env_settings(int snr)
 
 /******************************************************************************/
 
-#ifndef LINUX_COMPILE
 void init_reg_settings(int snr)
 {
   unsigned int reg_val;
@@ -666,20 +740,19 @@ void init_reg_settings(int snr)
   xfs_printf("\r\nStoring register bank contents in SPI flash\r\n");
   reg_bank_store();
 }
-#endif
 
 /******************************************************************************/
 
 void print_sys_info(void)
 {
-//  const char *git_rev_sw_ptr;
-//
+  const char *git_rev_sw_ptr;
+
 //  /*unsigned int version; */
 //  unsigned int build_date;
 //  unsigned int build_time;
 ////  unsigned int git_rev_fw;
-//  unsigned int hw_version;
-//
+  unsigned int hw_version;
+
 //  unsigned short year;
 //  unsigned char month;
 //  unsigned char day;
@@ -688,17 +761,17 @@ void print_sys_info(void)
 //  unsigned char minute;
 //  unsigned char second;
 //  unsigned char compat_level;
-//
-//  unsigned char board_variant;
-//  unsigned char board_type;
-//  unsigned char board_revision;
-//
-//
+
+  unsigned char board_variant;
+  unsigned char board_type;
+  unsigned char board_revision;
+
+
 //  /* version = xfs_in32(baseaddr); */
 //  build_date = reg_bank_get(DCB_REG_FW_BUILD_DATE);
 //  build_time = reg_bank_get(DCB_REG_FW_BUILD_TIME);
 ////  git_rev_fw = reg_bank_get(DCB_REG_FW_GIT_HASH_TAG);
-//  hw_version = reg_bank_get(DCB_REG_HW_VER);
+  hw_version = reg_bank_get(DCB_REG_HW_VER);
 //
 //
 //  /* read and convert from BCD to binary */
@@ -719,26 +792,26 @@ void print_sys_info(void)
 //  minute       = ((minute >> 4) & 0xF) * 10 + (minute & 0xF);
 //  second       = (build_time & DCB_FW_BUILD_SECOND_MASK) >> DCB_FW_BUILD_SECOND_OFS;
 //  second       = ((second >> 4) & 0xF) * 10 + (second & 0xF);
-//
-//
-//  git_rev_sw_ptr = GIT_REVISION + 13;
-//
-//  board_variant  = (hw_version & DCB_BOARD_VARIANT_MASK)  >> DCB_BOARD_VARIANT_OFS;
-//  board_type     = (hw_version & DCB_BOARD_TYPE_MASK)     >> DCB_BOARD_TYPE_OFS;
-//  board_revision = (hw_version & DCB_BOARD_REVISION_MASK) >> DCB_BOARD_REVISION_OFS;
+
+
+  git_rev_sw_ptr = GIT_REVISION + 13;
+
+  board_variant  = (hw_version & DCB_BOARD_VARIANT_MASK)  >> DCB_BOARD_VARIANT_OFS;
+  board_type     = (hw_version & DCB_BOARD_TYPE_MASK)     >> DCB_BOARD_TYPE_OFS;
+  board_revision = (hw_version & DCB_BOARD_REVISION_MASK) >> DCB_BOARD_REVISION_OFS;
 
 
 //  xfs_printf("-- Compatibility Level: %d\r\n\r\n", compat_level);
 ////  xfs_printf("-- FW GIT Revision:     0x%07X\r\n", git_rev_fw);
 //
-//  xfs_printf("-- SW GIT Revision:     0x%s\r\n\r\n", git_rev_sw_ptr);
+  xfs_printf("-- SW GIT Revision:     0x%s\r\n\r\n", git_rev_sw_ptr);
 ////  xfs_printf("-- FW Build:            %s %2d %04d  %02d:%02d:%02d\r\n", system_month_str[(month-1)%12], day, year, hour, minute, second);
 
   xfs_printf("-- SW Build:            %s  %s (UTC)\r\n\r\n",system_sw_build_date,system_sw_build_time);
-//  if(board_type == 0x03) xfs_printf("-- Board Type:          WaveDAQ DCB\r\n");
-//  else                   xfs_printf("-- Board Type:          0x%02X -> error\r\n", board_type);
-//  xfs_printf("-- Board Revision:      %c\r\n", 0x41 + board_revision); /* 0x41 = ASCII "A" */
-//  xfs_printf("-- Board Variant:       0x%02X\r\n", board_variant);
+  if(board_type == 0x03) xfs_printf("-- Board Type:          WaveDAQ DCB\r\n");
+  else                   xfs_printf("-- Board Type:          0x%02X -> error\r\n", board_type);
+  xfs_printf("-- Board Revision:      %c\r\n", 0x41 + board_revision); /* 0x41 = ASCII "A" */
+  xfs_printf("-- Board Variant:       0x%02X\r\n", board_variant);
 }
 
 /******************************************************************************/

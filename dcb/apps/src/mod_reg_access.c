@@ -14,7 +14,7 @@
  */
 
 #include "drv_axi_dcb_reg_bank.h"
-//#include "register_map_dcb.h"
+#include "register_map_dcb.h"
 #include "dbg.h"
 #include "xfs_printf.h"
 #include "utilities.h"
@@ -22,9 +22,9 @@
 #include "cmd_processor.h"
 #include <ctype.h>
 #include <stdlib.h>
+#include "drv_qspi_flash.h"
 
 #ifndef LINUX_COMPILE
-#include "drv_qspi_flash.h"
 #include "dcb_flash_memory_map.h"
 #endif
 
@@ -205,14 +205,13 @@ int reg_read_cmd(int argc, char **argv)
 
 /************************************************************/
 
-#ifndef LINUX_COMPILE
   int reg_store_cmd(int argc, char **argv)
   {
     CMD_HELP("",
-             "store register bank contents into SPI flash"
+             "store register bank contents into QSPI flash"
             );
 
-    if(DBG_INFO) xfs_printf("\r\nStoring register bank contents in SPI flash\r\n");
+    if(DBG_INFO) xfs_printf("\r\nStoring register bank contents in QSPI flash\r\n");
     reg_bank_store();
 
     return 0;
@@ -223,10 +222,10 @@ int reg_read_cmd(int argc, char **argv)
   int reg_load_cmd(int argc, char **argv)
   {
     CMD_HELP("",
-             "loads the register contents from the SPI flash"
+             "loads the register contents from the QSPI flash"
             );
 
-    if(DBG_INFO) xfs_printf("\r\nLoading register bank contents from SPI flash\r\n");
+    if(DBG_INFO) xfs_printf("\r\nLoading register bank contents from QSPI flash\r\n");
     reg_bank_load();
 
     return 0;
@@ -245,7 +244,11 @@ int reg_read_cmd(int argc, char **argv)
     }
     else if (sel == REGDIFF_CMP_STORED)
     {
-      qspi_flash_read(SYSPTR(spi_flash), QSPI_FLASH_REG_CONTENTS_ADDR+reg, 4, QSFL_QUAD_READ_CMD, (unsigned char*)(&flash_reg));
+#ifdef LINUX_COMPILE
+      qspi_flash_read(MTD_QSPI_FLASH_REGCONTENT, reg, sizeof(flash_reg), flash_reg);
+#else
+      qspi_flash_read(SYSPTR(spi_flash), QSPI_FLASH_REG_CONTENTS_ADDR+reg, 4, QSFL_QUAD_READ_CMD, flash_reg);
+#endif
       val = 0;
       for(int i=3;i>=0;i--)
       {
@@ -356,7 +359,6 @@ int reg_read_cmd(int argc, char **argv)
 
     return 0;
   }
-#endif /* No LINUX_COMPILE */
 
 /************************************************************/
 
@@ -387,11 +389,9 @@ int reg_read_cmd(int argc, char **argv)
     {0, "rc", reg_clr_cmd},
     {0, "regmwr", reg_mask_write_cmd},
     {0, "rmw", reg_mask_write_cmd},
-#ifndef LINUX_COMPILE
     {0, "regstore", reg_store_cmd},
     {0, "regload", reg_load_cmd},
     {0, "regdiff", reg_diff_cmd},
-#endif
     {0, NULL, NULL}
   };
 

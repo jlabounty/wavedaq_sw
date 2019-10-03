@@ -619,6 +619,7 @@ public:
    TCALIB           mTCalib;
    
    // register functions, overload pure virtual functions from WDBREG
+   void bitReplace(unsigned int &reg, unsigned int mask, unsigned int ofs, unsigned int value);
    void SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v);
    unsigned int BitExtractStatus(unsigned int rofs, unsigned int mask, unsigned int ofs);
    unsigned int BitExtractControl(unsigned int rofs, unsigned int mask, unsigned int ofs);
@@ -633,6 +634,7 @@ public:
    void ReceiveStatusRegisters(unsigned int index=0, unsigned int nReg=REG_NR_OF_STAT_REGS);
    void ReceiveStatusRegister(int ofs);
    void SendControlRegisters();
+   unsigned int bcd2dec(const unsigned int bcd);
    void PrintVersion();
    bool GetSendBlock() { return mSendBlocked; }
    void SetSendBlock(bool flag) { mSendBlocked = flag; }

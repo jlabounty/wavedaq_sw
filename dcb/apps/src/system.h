@@ -18,12 +18,12 @@
 
 #include "xspi.h"
 #include "drv_axi_dcb_reg_bank.h"
+#include "drv_lmk.h"
+#include "drv_sys_mon.h"
+#include "drv_si5324.h"
 
 #ifndef LINUX_COMPILE
 #include "term_cmd_input.h"
-#include "drv_lmk.h"
-#include "drv_si5324.h"
-#include "drv_sys_mon.h"
 #include "xqspips.h"
 #include "xiicps.h"
 #include "sfp_ctrl.h"
@@ -48,10 +48,23 @@
 #define SFP_IIC_SCLK_RATE               100000   /* Hz */
 /* Max. for Finisar FCLF8521-3 is 100kHz */
 
+/* SPI Devices */
+#define SPI_DEV_ECLK_LMK_ADC                 2
+
 /* SPI Slaves */
 #define SPI_SLAVE_NR_SI3524                  0
 #define SPI_SLAVE_NR_LMK                     1
 #define SPI_SLAVE_NR_SYS_MON                 2
+
+#ifdef LINUX_COMPILE
+/* Flash MTDs */
+#define MTD_QSPI_FLASH_HEADER                "/dev/mtd0"
+#define MTD_QSPI_FLASH_REGCONTENT            "/dev/mtd1"
+#define MTD_QSPI_FLASH_FSBL                  "/dev/mtd2"
+#define MTD_QSPI_FLASH_BITSTREAM             "/dev/mtd3"
+#define MTD_QSPI_FLASH_RESERVED              "/dev/mtd4"
+#define MTD_QSPI_FLASH_ENV                   "/dev/mtd5"
+#endif
 
 /******************************************************************************/
 /* System Environment                                                         */
@@ -71,11 +84,11 @@ typedef struct
 {
   XSpi                       spi_bpl;      /* SPI connection to backplane (WDB, TCB) */
   axi_dcb_register_bank      reg_bank;
+  lmk_ctrl_type              lmk;
+  sysmon_ctrl_type           sys_mon;
+  si5324_ctrl_type           si5324;
 #ifndef LINUX_COMPILE
   term_cmd_input_type        term_stdin;   /* Std input terminal */
-  lmk_ctrl_type              lmk;
-  si5324_ctrl_type           si5324;
-  sysmon_ctrl_type           sys_mon;
   XEmacPs                    emac_0;       /* ETH0 MAC */
   XGpioPs                    gpio_mio;	   /* GPIO for MIO pins */
   XQspiPs                    spi_flash;    /* DCB SPI flash memory */
@@ -93,6 +106,10 @@ extern system_type system_hw;
 int init_system();
 int init_spi_bpl();
 void init_reg_bank();
+void init_lmk03000();
+void init_si5324();
+void init_sysmon();
+void init_gpio_mio();
 void init_settings(int snr);
 void init_env_settings(int snr);
 void init_reg_settings(int snr);

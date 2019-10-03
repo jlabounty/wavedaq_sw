@@ -6,6 +6,13 @@
 
 int main()
 {
+  if (DBG_INIT)
+  {
+    xfs_printf("\r\n");
+    xfs_printf("---------------------------------------------------------\r\n");
+    xfs_printf("-- WDAQ DCB Firmware Initialization                    --\r\n");
+    xfs_printf("---------------------------------------------------------\r\n\r\n");
+  }
   /* Set default debug level */
   set_dbg_level(DBG_LEVEL_SPAM);
 
@@ -15,16 +22,15 @@ int main()
   {
     xfs_printf("\r\n");
     xfs_printf("---------------------------------------------------------\r\n");
-    xfs_printf("-- WDAQ DCB Firmware Initialization                    --\r\n");
-    xfs_printf("---------------------------------------------------------\r\n\r\n");
-    xfs_printf("---------------------------------------------------------\r\n");
     xfs_printf("-- Version Information:\r\n");
     print_sys_info();
     xfs_printf("---------------------------------------------------------\r\n\r\n");
   }
 
   /* Initialization done */
-  emio_reset_sw_state();
+  /* Set SW state ready to signal normal operation on LED */
+//  emio_set_sw_state(BIT_IDX_EMIO_CTRL_SW_STATE_MARKER_PIN);
+  emio_set_sw_state(BIT_IDX_EMIO_CTRL_SW_STATE_SW_READY_PIN);
 
   return 0;
 }
