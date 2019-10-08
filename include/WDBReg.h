@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  24.07.2019 11:41:38
+// Created :  26.09.2019 15:45:04
 //
 
 
@@ -52,6 +52,10 @@ public:
    // 0x00FF0000: DAQ_DATA_PHASE - Phase step setting of the PLL generating the common DAQ clock
    unsigned int GetDaqDataPhase() { return BitExtractControl(WD2_DAQ_DATA_PHASE_REG, WD2_DAQ_DATA_PHASE_MASK, WD2_DAQ_DATA_PHASE_OFS); };
    void         SetDaqDataPhase(unsigned int value) { SetRegMask(WD2_DAQ_DATA_PHASE_REG, WD2_DAQ_DATA_PHASE_MASK, WD2_DAQ_DATA_PHASE_OFS, value); };
+
+   // 0x00000800: FE_POWER - Frontend Power (0=Power OFF, 1=Power ON)
+   unsigned int GetFePower() { return BitExtractControl(WD2_FE_POWER_REG, WD2_FE_POWER_MASK, WD2_FE_POWER_OFS); };
+   void         SetFePower(unsigned int value) { SetRegMask(WD2_FE_POWER_REG, WD2_FE_POWER_MASK, WD2_FE_POWER_OFS, value); };
 
    // 0x00000400: DRS_CLR_RSR_AFTER_RO - Clear the read shift register (remove the token) after each readout
    unsigned int GetDrsClrRsrAfterRo() { return BitExtractControl(WD2_DRS_CLR_RSR_AFTER_RO_REG, WD2_DRS_CLR_RSR_AFTER_RO_MASK, WD2_DRS_CLR_RSR_AFTER_RO_OFS); };
@@ -111,7 +115,7 @@ public:
 
 
 
-   ////// ------ Control Register 3 [0x100C]: CLK_CTRL - Clock Control (Default: 0x00026464) ------ //////
+   ////// ------ Control Register 3 [0x100C]: CLK_CTRL - Clock Control (Default: 0x00025050) ------ //////
 
    // 0x01000000: TRIG_DAQ_CLK_CAL_CHK - Trigger DAQ clock calibration check
    unsigned int GetTrigDaqClkCalChk() { return BitExtractControl(WD2_TRIG_DAQ_CLK_CAL_CHK_REG, WD2_TRIG_DAQ_CLK_CAL_CHK_MASK, WD2_TRIG_DAQ_CLK_CAL_CHK_OFS); };
@@ -395,7 +399,7 @@ public:
 
 
 
-   ////// ------ Control Register 19 [0x104C]: DAC0_C_D - DAC0 values for Channel C and D (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 19 [0x104C]: DAC0_C_D - DAC0 values for Channel C and D (Default: 0x828F0000) ------ //////
 
    // 0xFFFF0000: DAC0_CH_C - Set DAC0 channel C (CAL_DC) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (+/- 0.625V)
    unsigned int GetDac0ChC() { return BitExtractControl(WD2_DAC0_CH_C_REG, WD2_DAC0_CH_C_MASK, WD2_DAC0_CH_C_OFS); };
@@ -407,13 +411,13 @@ public:
 
 
 
-   ////// ------ Control Register 20 [0x1050]: DAC0_E_F - DAC0 values for Channel E and F (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 20 [0x1050]: DAC0_E_F - DAC0 values for Channel E and F (Default: 0x0000FFFF) ------ //////
 
    // 0xFFFF0000: DAC0_CH_E - Set DAC0 channel E (PZC_LEVEL) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (+/- 2.5V)
    unsigned int GetDac0ChE() { return BitExtractControl(WD2_DAC0_CH_E_REG, WD2_DAC0_CH_E_MASK, WD2_DAC0_CH_E_OFS); };
    void         SetDac0ChE(unsigned int value) { SetRegMask(WD2_DAC0_CH_E_REG, WD2_DAC0_CH_E_MASK, WD2_DAC0_CH_E_OFS, value); };
 
-   // 0x0000FFFF: DAC0_CH_F - Set DAC0 channel F (RESERVED) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
+   // 0x0000FFFF: DAC0_CH_F - Set DAC0 channel F (DAC_REF_A) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
    unsigned int GetDac0ChF() { return BitExtractControl(WD2_DAC0_CH_F_REG, WD2_DAC0_CH_F_MASK, WD2_DAC0_CH_F_OFS); };
    void         SetDac0ChF(unsigned int value) { SetRegMask(WD2_DAC0_CH_F_REG, WD2_DAC0_CH_F_MASK, WD2_DAC0_CH_F_OFS, value); };
 
@@ -1391,639 +1395,263 @@ public:
 
 
 
-   ////// ------ Control Register 69 [0x1114]: ADC_CFG_IND_TX - ADC Chip Configuration, Index and Transfer Register (Default: 0x180F3F00) ------ //////
+   ////// ------ Control Register 69 [0x1114]: ADC_0_CFG_1458 - ADC 0 (A) Chip Configuration for channels 1, 4, 5 and 8 (Default: 0x00A63F00) ------ //////
 
-   // 0x80000000: ADC_CFG_SDO_ACTIVE_MSB - Activate SDO (to be mirrored to bit24)
-   unsigned int GetAdcCfgSdoActiveMsb() { return BitExtractControl(WD2_ADC_CFG_SDO_ACTIVE_MSB_REG, WD2_ADC_CFG_SDO_ACTIVE_MSB_MASK, WD2_ADC_CFG_SDO_ACTIVE_MSB_OFS); };
-   void         SetAdcCfgSdoActiveMsb(unsigned int value) { SetRegMask(WD2_ADC_CFG_SDO_ACTIVE_MSB_REG, WD2_ADC_CFG_SDO_ACTIVE_MSB_MASK, WD2_ADC_CFG_SDO_ACTIVE_MSB_OFS, value); };
+   // 0x80000000: ADC_0_1458_DCSOFF - Clock Duty Cycle Stabilizer (0=ON, 1=OFF)
+   unsigned int GetAdc01458Dcsoff() { return BitExtractControl(WD2_ADC_0_1458_DCSOFF_REG, WD2_ADC_0_1458_DCSOFF_MASK, WD2_ADC_0_1458_DCSOFF_OFS); };
+   void         SetAdc01458Dcsoff(unsigned int value) { SetRegMask(WD2_ADC_0_1458_DCSOFF_REG, WD2_ADC_0_1458_DCSOFF_MASK, WD2_ADC_0_1458_DCSOFF_OFS, value); };
 
-   // 0x40000000: ADC_CFG_LSB_FIRST_MSB - Transmit LSB First (to be mirrored to bit25)
-   unsigned int GetAdcCfgLsbFirstMsb() { return BitExtractControl(WD2_ADC_CFG_LSB_FIRST_MSB_REG, WD2_ADC_CFG_LSB_FIRST_MSB_MASK, WD2_ADC_CFG_LSB_FIRST_MSB_OFS); };
-   void         SetAdcCfgLsbFirstMsb(unsigned int value) { SetRegMask(WD2_ADC_CFG_LSB_FIRST_MSB_REG, WD2_ADC_CFG_LSB_FIRST_MSB_MASK, WD2_ADC_CFG_LSB_FIRST_MSB_OFS, value); };
+   // 0x40000000: ADC_0_1458_RAND - Data Output Randomizer Mode Control Bit (0=OFF, 1=ON)
+   unsigned int GetAdc01458Rand() { return BitExtractControl(WD2_ADC_0_1458_RAND_REG, WD2_ADC_0_1458_RAND_MASK, WD2_ADC_0_1458_RAND_OFS); };
+   void         SetAdc01458Rand(unsigned int value) { SetRegMask(WD2_ADC_0_1458_RAND_REG, WD2_ADC_0_1458_RAND_MASK, WD2_ADC_0_1458_RAND_OFS, value); };
 
-   // 0x20000000: ADC_CFG_SOFT_RESET_MSB - Soft Reset (automatically cleared) (to be mirrored to bit26)
-   unsigned int GetAdcCfgSoftResetMsb() { return BitExtractControl(WD2_ADC_CFG_SOFT_RESET_MSB_REG, WD2_ADC_CFG_SOFT_RESET_MSB_MASK, WD2_ADC_CFG_SOFT_RESET_MSB_OFS); };
-   void         SetAdcCfgSoftResetMsb(unsigned int value) { SetRegMask(WD2_ADC_CFG_SOFT_RESET_MSB_REG, WD2_ADC_CFG_SOFT_RESET_MSB_MASK, WD2_ADC_CFG_SOFT_RESET_MSB_OFS, value); };
+   // 0x20000000: ADC_0_1458_TWOSCOMP - Two's Complement Mode Control Bit (0=Offset Binary, 1=Two's Complement)
+   unsigned int GetAdc01458Twoscomp() { return BitExtractControl(WD2_ADC_0_1458_TWOSCOMP_REG, WD2_ADC_0_1458_TWOSCOMP_MASK, WD2_ADC_0_1458_TWOSCOMP_OFS); };
+   void         SetAdc01458Twoscomp(unsigned int value) { SetRegMask(WD2_ADC_0_1458_TWOSCOMP_REG, WD2_ADC_0_1458_TWOSCOMP_MASK, WD2_ADC_0_1458_TWOSCOMP_OFS, value); };
 
-   // 0x10000000: ADC_CFG_16_BIT_ADDR_MSB - ADC Address Mode (to be mirrored to bit27)
-   unsigned int GetAdcCfg16BitAddrMsb() { return BitExtractControl(WD2_ADC_CFG_16_BIT_ADDR_MSB_REG, WD2_ADC_CFG_16_BIT_ADDR_MSB_MASK, WD2_ADC_CFG_16_BIT_ADDR_MSB_OFS); };
-   void         SetAdcCfg16BitAddrMsb(unsigned int value) { SetRegMask(WD2_ADC_CFG_16_BIT_ADDR_MSB_REG, WD2_ADC_CFG_16_BIT_ADDR_MSB_MASK, WD2_ADC_CFG_16_BIT_ADDR_MSB_OFS, value); };
+   // 0x10000000: ADC_0_1458_SLEEP - Sleep Mode (1=Channels 1, 4, 5 and 8 are disabled)
+   unsigned int GetAdc01458Sleep() { return BitExtractControl(WD2_ADC_0_1458_SLEEP_REG, WD2_ADC_0_1458_SLEEP_MASK, WD2_ADC_0_1458_SLEEP_OFS); };
+   void         SetAdc01458Sleep(unsigned int value) { SetRegMask(WD2_ADC_0_1458_SLEEP_REG, WD2_ADC_0_1458_SLEEP_MASK, WD2_ADC_0_1458_SLEEP_OFS, value); };
 
-   // 0x08000000: ADC_CFG_16_BIT_ADDR_LSB - ADC Address Mode (to be mirrored to bit28)
-   unsigned int GetAdcCfg16BitAddrLsb() { return BitExtractControl(WD2_ADC_CFG_16_BIT_ADDR_LSB_REG, WD2_ADC_CFG_16_BIT_ADDR_LSB_MASK, WD2_ADC_CFG_16_BIT_ADDR_LSB_OFS); };
-   void         SetAdcCfg16BitAddrLsb(unsigned int value) { SetRegMask(WD2_ADC_CFG_16_BIT_ADDR_LSB_REG, WD2_ADC_CFG_16_BIT_ADDR_LSB_MASK, WD2_ADC_CFG_16_BIT_ADDR_LSB_OFS, value); };
+   // 0x08000000: ADC_0_8_NAP_MODE - Channel 8 Nap Mode (0=OFF, 1=ON)
+   unsigned int GetAdc08NapMode() { return BitExtractControl(WD2_ADC_0_8_NAP_MODE_REG, WD2_ADC_0_8_NAP_MODE_MASK, WD2_ADC_0_8_NAP_MODE_OFS); };
+   void         SetAdc08NapMode(unsigned int value) { SetRegMask(WD2_ADC_0_8_NAP_MODE_REG, WD2_ADC_0_8_NAP_MODE_MASK, WD2_ADC_0_8_NAP_MODE_OFS, value); };
 
-   // 0x04000000: ADC_CFG_SOFT_RESET_LSB - Soft Reset (automatically cleared) (to be mirrored to bit29)
-   unsigned int GetAdcCfgSoftResetLsb() { return BitExtractControl(WD2_ADC_CFG_SOFT_RESET_LSB_REG, WD2_ADC_CFG_SOFT_RESET_LSB_MASK, WD2_ADC_CFG_SOFT_RESET_LSB_OFS); };
-   void         SetAdcCfgSoftResetLsb(unsigned int value) { SetRegMask(WD2_ADC_CFG_SOFT_RESET_LSB_REG, WD2_ADC_CFG_SOFT_RESET_LSB_MASK, WD2_ADC_CFG_SOFT_RESET_LSB_OFS, value); };
+   // 0x04000000: ADC_0_5_NAP_MODE - Channel 5 Nap Mode (0=OFF, 1=ON)
+   unsigned int GetAdc05NapMode() { return BitExtractControl(WD2_ADC_0_5_NAP_MODE_REG, WD2_ADC_0_5_NAP_MODE_MASK, WD2_ADC_0_5_NAP_MODE_OFS); };
+   void         SetAdc05NapMode(unsigned int value) { SetRegMask(WD2_ADC_0_5_NAP_MODE_REG, WD2_ADC_0_5_NAP_MODE_MASK, WD2_ADC_0_5_NAP_MODE_OFS, value); };
 
-   // 0x02000000: ADC_CFG_LSB_FIRST_LSB - Transmit LSB First (to be mirrored to bit30)
-   unsigned int GetAdcCfgLsbFirstLsb() { return BitExtractControl(WD2_ADC_CFG_LSB_FIRST_LSB_REG, WD2_ADC_CFG_LSB_FIRST_LSB_MASK, WD2_ADC_CFG_LSB_FIRST_LSB_OFS); };
-   void         SetAdcCfgLsbFirstLsb(unsigned int value) { SetRegMask(WD2_ADC_CFG_LSB_FIRST_LSB_REG, WD2_ADC_CFG_LSB_FIRST_LSB_MASK, WD2_ADC_CFG_LSB_FIRST_LSB_OFS, value); };
+   // 0x02000000: ADC_0_4_NAP_MODE - Channel 4 Nap Mode (0=OFF, 1=ON)
+   unsigned int GetAdc04NapMode() { return BitExtractControl(WD2_ADC_0_4_NAP_MODE_REG, WD2_ADC_0_4_NAP_MODE_MASK, WD2_ADC_0_4_NAP_MODE_OFS); };
+   void         SetAdc04NapMode(unsigned int value) { SetRegMask(WD2_ADC_0_4_NAP_MODE_REG, WD2_ADC_0_4_NAP_MODE_MASK, WD2_ADC_0_4_NAP_MODE_OFS, value); };
 
-   // 0x01000000: ADC_CFG_SDO_ACTIVE_LSB - Activate SDO (to be mirrored to bit31)
-   unsigned int GetAdcCfgSdoActiveLsb() { return BitExtractControl(WD2_ADC_CFG_SDO_ACTIVE_LSB_REG, WD2_ADC_CFG_SDO_ACTIVE_LSB_MASK, WD2_ADC_CFG_SDO_ACTIVE_LSB_OFS); };
-   void         SetAdcCfgSdoActiveLsb(unsigned int value) { SetRegMask(WD2_ADC_CFG_SDO_ACTIVE_LSB_REG, WD2_ADC_CFG_SDO_ACTIVE_LSB_MASK, WD2_ADC_CFG_SDO_ACTIVE_LSB_OFS, value); };
+   // 0x01000000: ADC_0_1_NAP_MODE - Channel 1 Nap Mode (0=OFF, 1=ON)
+   unsigned int GetAdc01NapMode() { return BitExtractControl(WD2_ADC_0_1_NAP_MODE_REG, WD2_ADC_0_1_NAP_MODE_MASK, WD2_ADC_0_1_NAP_MODE_OFS); };
+   void         SetAdc01NapMode(unsigned int value) { SetRegMask(WD2_ADC_0_1_NAP_MODE_REG, WD2_ADC_0_1_NAP_MODE_MASK, WD2_ADC_0_1_NAP_MODE_OFS, value); };
 
-   // 0x00080000: ADC_DI2_D_CHN_H - Data Channel H Activiation for Writes
-   unsigned int GetAdcDi2DChnH() { return BitExtractControl(WD2_ADC_DI2_D_CHN_H_REG, WD2_ADC_DI2_D_CHN_H_MASK, WD2_ADC_DI2_D_CHN_H_OFS); };
-   void         SetAdcDi2DChnH(unsigned int value) { SetRegMask(WD2_ADC_DI2_D_CHN_H_REG, WD2_ADC_DI2_D_CHN_H_MASK, WD2_ADC_DI2_D_CHN_H_OFS, value); };
+   // 0x00E00000: ADC_0_1458_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
+   unsigned int GetAdc01458Ilvds() { return BitExtractControl(WD2_ADC_0_1458_ILVDS_REG, WD2_ADC_0_1458_ILVDS_MASK, WD2_ADC_0_1458_ILVDS_OFS); };
+   void         SetAdc01458Ilvds(unsigned int value) { SetRegMask(WD2_ADC_0_1458_ILVDS_REG, WD2_ADC_0_1458_ILVDS_MASK, WD2_ADC_0_1458_ILVDS_OFS, value); };
 
-   // 0x00040000: ADC_DI2_D_CHN_G - Data Channel G Activiation for Writes
-   unsigned int GetAdcDi2DChnG() { return BitExtractControl(WD2_ADC_DI2_D_CHN_G_REG, WD2_ADC_DI2_D_CHN_G_MASK, WD2_ADC_DI2_D_CHN_G_OFS); };
-   void         SetAdcDi2DChnG(unsigned int value) { SetRegMask(WD2_ADC_DI2_D_CHN_G_REG, WD2_ADC_DI2_D_CHN_G_MASK, WD2_ADC_DI2_D_CHN_G_OFS, value); };
+   // 0x00100000: ADC_0_1458_TERMON - LVDS Internal Termination Bit (0=OFF, 1=ON)
+   unsigned int GetAdc01458Termon() { return BitExtractControl(WD2_ADC_0_1458_TERMON_REG, WD2_ADC_0_1458_TERMON_MASK, WD2_ADC_0_1458_TERMON_OFS); };
+   void         SetAdc01458Termon(unsigned int value) { SetRegMask(WD2_ADC_0_1458_TERMON_REG, WD2_ADC_0_1458_TERMON_MASK, WD2_ADC_0_1458_TERMON_OFS, value); };
 
-   // 0x00020000: ADC_DI2_D_CHN_F - Data Channel F Activiation for Writes
-   unsigned int GetAdcDi2DChnF() { return BitExtractControl(WD2_ADC_DI2_D_CHN_F_REG, WD2_ADC_DI2_D_CHN_F_MASK, WD2_ADC_DI2_D_CHN_F_OFS); };
-   void         SetAdcDi2DChnF(unsigned int value) { SetRegMask(WD2_ADC_DI2_D_CHN_F_REG, WD2_ADC_DI2_D_CHN_F_MASK, WD2_ADC_DI2_D_CHN_F_OFS, value); };
+   // 0x00080000: ADC_0_1458_OUTOFF - Digital Output Disable Bit (0=Enabled, 1=Disabled)
+   unsigned int GetAdc01458Outoff() { return BitExtractControl(WD2_ADC_0_1458_OUTOFF_REG, WD2_ADC_0_1458_OUTOFF_MASK, WD2_ADC_0_1458_OUTOFF_OFS); };
+   void         SetAdc01458Outoff(unsigned int value) { SetRegMask(WD2_ADC_0_1458_OUTOFF_REG, WD2_ADC_0_1458_OUTOFF_MASK, WD2_ADC_0_1458_OUTOFF_OFS, value); };
 
-   // 0x00010000: ADC_DI2_D_CHN_E - Data Channel E Activiation for Writes
-   unsigned int GetAdcDi2DChnE() { return BitExtractControl(WD2_ADC_DI2_D_CHN_E_REG, WD2_ADC_DI2_D_CHN_E_MASK, WD2_ADC_DI2_D_CHN_E_OFS); };
-   void         SetAdcDi2DChnE(unsigned int value) { SetRegMask(WD2_ADC_DI2_D_CHN_E_REG, WD2_ADC_DI2_D_CHN_E_MASK, WD2_ADC_DI2_D_CHN_E_OFS, value); };
+   // 0x00070000: ADC_0_1458_OUTMODE - Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet) 
+   unsigned int GetAdc01458Outmode() { return BitExtractControl(WD2_ADC_0_1458_OUTMODE_REG, WD2_ADC_0_1458_OUTMODE_MASK, WD2_ADC_0_1458_OUTMODE_OFS); };
+   void         SetAdc01458Outmode(unsigned int value) { SetRegMask(WD2_ADC_0_1458_OUTMODE_REG, WD2_ADC_0_1458_OUTMODE_MASK, WD2_ADC_0_1458_OUTMODE_OFS, value); };
 
-   // 0x00002000: ADC_DI1_C_CHN_DCO - Clock Channel DCO Activiation for Writes
-   unsigned int GetAdcDi1CChnDco() { return BitExtractControl(WD2_ADC_DI1_C_CHN_DCO_REG, WD2_ADC_DI1_C_CHN_DCO_MASK, WD2_ADC_DI1_C_CHN_DCO_OFS); };
-   void         SetAdcDi1CChnDco(unsigned int value) { SetRegMask(WD2_ADC_DI1_C_CHN_DCO_REG, WD2_ADC_DI1_C_CHN_DCO_MASK, WD2_ADC_DI1_C_CHN_DCO_OFS, value); };
+   // 0x00008000: ADC_0_1458_OUTTEST - Output Test Pattern Control Bit (0=Pattern Off, 1=Pattern On)
+   unsigned int GetAdc01458Outtest() { return BitExtractControl(WD2_ADC_0_1458_OUTTEST_REG, WD2_ADC_0_1458_OUTTEST_MASK, WD2_ADC_0_1458_OUTTEST_OFS); };
+   void         SetAdc01458Outtest(unsigned int value) { SetRegMask(WD2_ADC_0_1458_OUTTEST_REG, WD2_ADC_0_1458_OUTTEST_MASK, WD2_ADC_0_1458_OUTTEST_OFS, value); };
 
-   // 0x00001000: ADC_DI1_C_CHN_FCO - Clock Channel FCO Activiation for Writes
-   unsigned int GetAdcDi1CChnFco() { return BitExtractControl(WD2_ADC_DI1_C_CHN_FCO_REG, WD2_ADC_DI1_C_CHN_FCO_MASK, WD2_ADC_DI1_C_CHN_FCO_OFS); };
-   void         SetAdcDi1CChnFco(unsigned int value) { SetRegMask(WD2_ADC_DI1_C_CHN_FCO_REG, WD2_ADC_DI1_C_CHN_FCO_MASK, WD2_ADC_DI1_C_CHN_FCO_OFS, value); };
+   // 0x00003FFC: ADC_0_1458_TP - Test Pattern MSBs (actual test pattern in 12 bit mode)
+   unsigned int GetAdc01458Tp() { return BitExtractControl(WD2_ADC_0_1458_TP_REG, WD2_ADC_0_1458_TP_MASK, WD2_ADC_0_1458_TP_OFS); };
+   void         SetAdc01458Tp(unsigned int value) { SetRegMask(WD2_ADC_0_1458_TP_REG, WD2_ADC_0_1458_TP_MASK, WD2_ADC_0_1458_TP_OFS, value); };
 
-   // 0x00000800: ADC_DI1_D_CHN_D - Data Channel D Activiation for Writes
-   unsigned int GetAdcDi1DChnD() { return BitExtractControl(WD2_ADC_DI1_D_CHN_D_REG, WD2_ADC_DI1_D_CHN_D_MASK, WD2_ADC_DI1_D_CHN_D_OFS); };
-   void         SetAdcDi1DChnD(unsigned int value) { SetRegMask(WD2_ADC_DI1_D_CHN_D_REG, WD2_ADC_DI1_D_CHN_D_MASK, WD2_ADC_DI1_D_CHN_D_OFS, value); };
+   // 0x00000003: ADC_0_1458_TP_LSBS - Test Pattern LSBs
+   unsigned int GetAdc01458TpLsbs() { return BitExtractControl(WD2_ADC_0_1458_TP_LSBS_REG, WD2_ADC_0_1458_TP_LSBS_MASK, WD2_ADC_0_1458_TP_LSBS_OFS); };
+   void         SetAdc01458TpLsbs(unsigned int value) { SetRegMask(WD2_ADC_0_1458_TP_LSBS_REG, WD2_ADC_0_1458_TP_LSBS_MASK, WD2_ADC_0_1458_TP_LSBS_OFS, value); };
 
-   // 0x00000400: ADC_DI1_D_CHN_C - Data Channel C Activiation for Writes
-   unsigned int GetAdcDi1DChnC() { return BitExtractControl(WD2_ADC_DI1_D_CHN_C_REG, WD2_ADC_DI1_D_CHN_C_MASK, WD2_ADC_DI1_D_CHN_C_OFS); };
-   void         SetAdcDi1DChnC(unsigned int value) { SetRegMask(WD2_ADC_DI1_D_CHN_C_REG, WD2_ADC_DI1_D_CHN_C_MASK, WD2_ADC_DI1_D_CHN_C_OFS, value); };
 
-   // 0x00000200: ADC_DI1_D_CHN_B - Data Channel B Activiation for Writes
-   unsigned int GetAdcDi1DChnB() { return BitExtractControl(WD2_ADC_DI1_D_CHN_B_REG, WD2_ADC_DI1_D_CHN_B_MASK, WD2_ADC_DI1_D_CHN_B_OFS); };
-   void         SetAdcDi1DChnB(unsigned int value) { SetRegMask(WD2_ADC_DI1_D_CHN_B_REG, WD2_ADC_DI1_D_CHN_B_MASK, WD2_ADC_DI1_D_CHN_B_OFS, value); };
 
-   // 0x00000100: ADC_DI1_D_CHN_A - Data Channel A Activiation for Writes
-   unsigned int GetAdcDi1DChnA() { return BitExtractControl(WD2_ADC_DI1_D_CHN_A_REG, WD2_ADC_DI1_D_CHN_A_MASK, WD2_ADC_DI1_D_CHN_A_OFS); };
-   void         SetAdcDi1DChnA(unsigned int value) { SetRegMask(WD2_ADC_DI1_D_CHN_A_REG, WD2_ADC_DI1_D_CHN_A_MASK, WD2_ADC_DI1_D_CHN_A_OFS, value); };
+   ////// ------ Control Register 70 [0x1118]: ADC_0_CFG_2367 - ADC 0 (A) Chip Configuration for channels 2, 3, 6 and 7 (Default: 0x00A63F00) ------ //////
 
-   // 0x00000001: ADC_TX_INIT_OVERRIDE - Set Resolution/Sample Rate Override
-   unsigned int GetAdcTxInitOverride() { return BitExtractControl(WD2_ADC_TX_INIT_OVERRIDE_REG, WD2_ADC_TX_INIT_OVERRIDE_MASK, WD2_ADC_TX_INIT_OVERRIDE_OFS); };
-   void         SetAdcTxInitOverride(unsigned int value) { SetRegMask(WD2_ADC_TX_INIT_OVERRIDE_REG, WD2_ADC_TX_INIT_OVERRIDE_MASK, WD2_ADC_TX_INIT_OVERRIDE_OFS, value); };
+   // 0x80000000: ADC_0_2367_DCSOFF - Clock Duty Cycle Stabilizer (0=ON, 1=OFF)
+   unsigned int GetAdc02367Dcsoff() { return BitExtractControl(WD2_ADC_0_2367_DCSOFF_REG, WD2_ADC_0_2367_DCSOFF_MASK, WD2_ADC_0_2367_DCSOFF_OFS); };
+   void         SetAdc02367Dcsoff(unsigned int value) { SetRegMask(WD2_ADC_0_2367_DCSOFF_REG, WD2_ADC_0_2367_DCSOFF_MASK, WD2_ADC_0_2367_DCSOFF_OFS, value); };
 
+   // 0x40000000: ADC_0_2367_RAND - Data Output Randomizer Mode Control Bit (0=OFF, 1=ON)
+   unsigned int GetAdc02367Rand() { return BitExtractControl(WD2_ADC_0_2367_RAND_REG, WD2_ADC_0_2367_RAND_MASK, WD2_ADC_0_2367_RAND_OFS); };
+   void         SetAdc02367Rand(unsigned int value) { SetRegMask(WD2_ADC_0_2367_RAND_REG, WD2_ADC_0_2367_RAND_MASK, WD2_ADC_0_2367_RAND_OFS, value); };
 
+   // 0x20000000: ADC_0_2367_TWOSCOMP - Two's Complement Mode Control Bit (0=Offset Binary, 1=Two's Complement)
+   unsigned int GetAdc02367Twoscomp() { return BitExtractControl(WD2_ADC_0_2367_TWOSCOMP_REG, WD2_ADC_0_2367_TWOSCOMP_MASK, WD2_ADC_0_2367_TWOSCOMP_OFS); };
+   void         SetAdc02367Twoscomp(unsigned int value) { SetRegMask(WD2_ADC_0_2367_TWOSCOMP_REG, WD2_ADC_0_2367_TWOSCOMP_MASK, WD2_ADC_0_2367_TWOSCOMP_OFS, value); };
 
-   ////// ------ Control Register 70 [0x1118]: ADC_PM_CLK_ENH - ADC Power Modes, Clock, Enhancement (Default: 0x00010000) ------ //////
+   // 0x10000000: ADC_0_2367_SLEEP - Sleep Mode (1=Channels 2, 3, 6 and 7 are disabled)
+   unsigned int GetAdc02367Sleep() { return BitExtractControl(WD2_ADC_0_2367_SLEEP_REG, WD2_ADC_0_2367_SLEEP_MASK, WD2_ADC_0_2367_SLEEP_OFS); };
+   void         SetAdc02367Sleep(unsigned int value) { SetRegMask(WD2_ADC_0_2367_SLEEP_REG, WD2_ADC_0_2367_SLEEP_MASK, WD2_ADC_0_2367_SLEEP_OFS, value); };
 
-   // 0x20000000: ADC_PM_EXT_PD - Extrenal Power Down Pin Function (0 = full, 1 = standby)
-   unsigned int GetAdcPmExtPd() { return BitExtractControl(WD2_ADC_PM_EXT_PD_REG, WD2_ADC_PM_EXT_PD_MASK, WD2_ADC_PM_EXT_PD_OFS); };
-   void         SetAdcPmExtPd(unsigned int value) { SetRegMask(WD2_ADC_PM_EXT_PD_REG, WD2_ADC_PM_EXT_PD_MASK, WD2_ADC_PM_EXT_PD_OFS, value); };
+   // 0x08000000: ADC_0_7_NAP_MODE - Channel 7 Nap Mode (0=OFF, 1=ON)
+   unsigned int GetAdc07NapMode() { return BitExtractControl(WD2_ADC_0_7_NAP_MODE_REG, WD2_ADC_0_7_NAP_MODE_MASK, WD2_ADC_0_7_NAP_MODE_OFS); };
+   void         SetAdc07NapMode(unsigned int value) { SetRegMask(WD2_ADC_0_7_NAP_MODE_REG, WD2_ADC_0_7_NAP_MODE_MASK, WD2_ADC_0_7_NAP_MODE_OFS, value); };
 
-   // 0x03000000: ADC_PM_INT_PD_MODE - Internal Power Down Mode (see datasheet)
-   unsigned int GetAdcPmIntPdMode() { return BitExtractControl(WD2_ADC_PM_INT_PD_MODE_REG, WD2_ADC_PM_INT_PD_MODE_MASK, WD2_ADC_PM_INT_PD_MODE_OFS); };
-   void         SetAdcPmIntPdMode(unsigned int value) { SetRegMask(WD2_ADC_PM_INT_PD_MODE_REG, WD2_ADC_PM_INT_PD_MODE_MASK, WD2_ADC_PM_INT_PD_MODE_OFS, value); };
+   // 0x04000000: ADC_0_6_NAP_MODE - Channel 6 Nap Mode (0=OFF, 1=ON)
+   unsigned int GetAdc06NapMode() { return BitExtractControl(WD2_ADC_0_6_NAP_MODE_REG, WD2_ADC_0_6_NAP_MODE_MASK, WD2_ADC_0_6_NAP_MODE_OFS); };
+   void         SetAdc06NapMode(unsigned int value) { SetRegMask(WD2_ADC_0_6_NAP_MODE_REG, WD2_ADC_0_6_NAP_MODE_MASK, WD2_ADC_0_6_NAP_MODE_OFS, value); };
 
-   // 0x00010000: ADC_CLK_DUTY_CYC_STAB - Duty Cycle Stabilizer (0 = off, 1 = on)
-   unsigned int GetAdcClkDutyCycStab() { return BitExtractControl(WD2_ADC_CLK_DUTY_CYC_STAB_REG, WD2_ADC_CLK_DUTY_CYC_STAB_MASK, WD2_ADC_CLK_DUTY_CYC_STAB_OFS); };
-   void         SetAdcClkDutyCycStab(unsigned int value) { SetRegMask(WD2_ADC_CLK_DUTY_CYC_STAB_REG, WD2_ADC_CLK_DUTY_CYC_STAB_MASK, WD2_ADC_CLK_DUTY_CYC_STAB_OFS, value); };
+   // 0x02000000: ADC_0_3_NAP_MODE - Channel 3 Nap Mode (0=OFF, 1=ON)
+   unsigned int GetAdc03NapMode() { return BitExtractControl(WD2_ADC_0_3_NAP_MODE_REG, WD2_ADC_0_3_NAP_MODE_MASK, WD2_ADC_0_3_NAP_MODE_OFS); };
+   void         SetAdc03NapMode(unsigned int value) { SetRegMask(WD2_ADC_0_3_NAP_MODE_REG, WD2_ADC_0_3_NAP_MODE_MASK, WD2_ADC_0_3_NAP_MODE_OFS, value); };
 
-   // 0x00000700: ADC_CLK_DIV_RATIO - Clock Divide Ratio (value+1)
-   unsigned int GetAdcClkDivRatio() { return BitExtractControl(WD2_ADC_CLK_DIV_RATIO_REG, WD2_ADC_CLK_DIV_RATIO_MASK, WD2_ADC_CLK_DIV_RATIO_OFS); };
-   void         SetAdcClkDivRatio(unsigned int value) { SetRegMask(WD2_ADC_CLK_DIV_RATIO_REG, WD2_ADC_CLK_DIV_RATIO_MASK, WD2_ADC_CLK_DIV_RATIO_OFS, value); };
+   // 0x01000000: ADC_0_2_NAP_MODE - Channel 2 Nap Mode (0=OFF, 1=ON)
+   unsigned int GetAdc02NapMode() { return BitExtractControl(WD2_ADC_0_2_NAP_MODE_REG, WD2_ADC_0_2_NAP_MODE_MASK, WD2_ADC_0_2_NAP_MODE_OFS); };
+   void         SetAdc02NapMode(unsigned int value) { SetRegMask(WD2_ADC_0_2_NAP_MODE_REG, WD2_ADC_0_2_NAP_MODE_MASK, WD2_ADC_0_2_NAP_MODE_OFS, value); };
 
-   // 0x00000010: ADC_ENH_CHOP_MODE - Chop Mode (0 = off, 1 = on)
-   unsigned int GetAdcEnhChopMode() { return BitExtractControl(WD2_ADC_ENH_CHOP_MODE_REG, WD2_ADC_ENH_CHOP_MODE_MASK, WD2_ADC_ENH_CHOP_MODE_OFS); };
-   void         SetAdcEnhChopMode(unsigned int value) { SetRegMask(WD2_ADC_ENH_CHOP_MODE_REG, WD2_ADC_ENH_CHOP_MODE_MASK, WD2_ADC_ENH_CHOP_MODE_OFS, value); };
+   // 0x00E00000: ADC_0_2367_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
+   unsigned int GetAdc02367Ilvds() { return BitExtractControl(WD2_ADC_0_2367_ILVDS_REG, WD2_ADC_0_2367_ILVDS_MASK, WD2_ADC_0_2367_ILVDS_OFS); };
+   void         SetAdc02367Ilvds(unsigned int value) { SetRegMask(WD2_ADC_0_2367_ILVDS_REG, WD2_ADC_0_2367_ILVDS_MASK, WD2_ADC_0_2367_ILVDS_OFS, value); };
 
+   // 0x00100000: ADC_0_2367_TERMON - LVDS Internal Termination Bit (0=OFF, 1=ON)
+   unsigned int GetAdc02367Termon() { return BitExtractControl(WD2_ADC_0_2367_TERMON_REG, WD2_ADC_0_2367_TERMON_MASK, WD2_ADC_0_2367_TERMON_OFS); };
+   void         SetAdc02367Termon(unsigned int value) { SetRegMask(WD2_ADC_0_2367_TERMON_REG, WD2_ADC_0_2367_TERMON_MASK, WD2_ADC_0_2367_TERMON_OFS, value); };
 
+   // 0x00080000: ADC_0_2367_OUTOFF - Digital Output Disable Bit (0=Enabled, 1=Disabled)
+   unsigned int GetAdc02367Outoff() { return BitExtractControl(WD2_ADC_0_2367_OUTOFF_REG, WD2_ADC_0_2367_OUTOFF_MASK, WD2_ADC_0_2367_OUTOFF_OFS); };
+   void         SetAdc02367Outoff(unsigned int value) { SetRegMask(WD2_ADC_0_2367_OUTOFF_REG, WD2_ADC_0_2367_OUTOFF_MASK, WD2_ADC_0_2367_OUTOFF_OFS, value); };
 
-   ////// ------ Control Register 71 [0x111C]: ADC_TEST_OFFS_OM - ADC Test Mode, Offset Adjust and Output Mode (Default: 0x00000044) ------ //////
+   // 0x00070000: ADC_0_2367_OUTMODE - Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet) 
+   unsigned int GetAdc02367Outmode() { return BitExtractControl(WD2_ADC_0_2367_OUTMODE_REG, WD2_ADC_0_2367_OUTMODE_MASK, WD2_ADC_0_2367_OUTMODE_OFS); };
+   void         SetAdc02367Outmode(unsigned int value) { SetRegMask(WD2_ADC_0_2367_OUTMODE_REG, WD2_ADC_0_2367_OUTMODE_MASK, WD2_ADC_0_2367_OUTMODE_OFS, value); };
 
-   // 0x00C00000: ADC_TM_USR_IN_MODE - User Input Test Mode (see datasheet) (Local)
-   unsigned int GetAdcTmUsrInMode() { return BitExtractControl(WD2_ADC_TM_USR_IN_MODE_REG, WD2_ADC_TM_USR_IN_MODE_MASK, WD2_ADC_TM_USR_IN_MODE_OFS); };
-   void         SetAdcTmUsrInMode(unsigned int value) { SetRegMask(WD2_ADC_TM_USR_IN_MODE_REG, WD2_ADC_TM_USR_IN_MODE_MASK, WD2_ADC_TM_USR_IN_MODE_OFS, value); };
+   // 0x00008000: ADC_0_2367_OUTTEST - Output Test Pattern Control Bit (0=Pattern Off, 1=Pattern On)
+   unsigned int GetAdc02367Outtest() { return BitExtractControl(WD2_ADC_0_2367_OUTTEST_REG, WD2_ADC_0_2367_OUTTEST_MASK, WD2_ADC_0_2367_OUTTEST_OFS); };
+   void         SetAdc02367Outtest(unsigned int value) { SetRegMask(WD2_ADC_0_2367_OUTTEST_REG, WD2_ADC_0_2367_OUTTEST_MASK, WD2_ADC_0_2367_OUTTEST_OFS, value); };
 
-   // 0x00200000: ADC_TM_RST_PN_LONG_GEN - Reset Pseudo Random Long Generator (Global)
-   unsigned int GetAdcTmRstPnLongGen() { return BitExtractControl(WD2_ADC_TM_RST_PN_LONG_GEN_REG, WD2_ADC_TM_RST_PN_LONG_GEN_MASK, WD2_ADC_TM_RST_PN_LONG_GEN_OFS); };
-   void         SetAdcTmRstPnLongGen(unsigned int value) { SetRegMask(WD2_ADC_TM_RST_PN_LONG_GEN_REG, WD2_ADC_TM_RST_PN_LONG_GEN_MASK, WD2_ADC_TM_RST_PN_LONG_GEN_OFS, value); };
+   // 0x00003FFC: ADC_0_2367_TP - Test Pattern MSBs (actual test pattern in 12 bit mode)
+   unsigned int GetAdc02367Tp() { return BitExtractControl(WD2_ADC_0_2367_TP_REG, WD2_ADC_0_2367_TP_MASK, WD2_ADC_0_2367_TP_OFS); };
+   void         SetAdc02367Tp(unsigned int value) { SetRegMask(WD2_ADC_0_2367_TP_REG, WD2_ADC_0_2367_TP_MASK, WD2_ADC_0_2367_TP_OFS, value); };
 
-   // 0x00100000: ADC_TM_RST_PN_SHORT_GEN - Reset Pseudo Random Short Generator (Global)
-   unsigned int GetAdcTmRstPnShortGen() { return BitExtractControl(WD2_ADC_TM_RST_PN_SHORT_GEN_REG, WD2_ADC_TM_RST_PN_SHORT_GEN_MASK, WD2_ADC_TM_RST_PN_SHORT_GEN_OFS); };
-   void         SetAdcTmRstPnShortGen(unsigned int value) { SetRegMask(WD2_ADC_TM_RST_PN_SHORT_GEN_REG, WD2_ADC_TM_RST_PN_SHORT_GEN_MASK, WD2_ADC_TM_RST_PN_SHORT_GEN_OFS, value); };
+   // 0x00000003: ADC_0_2367_TP_LSBS - Test Pattern LSBs
+   unsigned int GetAdc02367TpLsbs() { return BitExtractControl(WD2_ADC_0_2367_TP_LSBS_REG, WD2_ADC_0_2367_TP_LSBS_MASK, WD2_ADC_0_2367_TP_LSBS_OFS); };
+   void         SetAdc02367TpLsbs(unsigned int value) { SetRegMask(WD2_ADC_0_2367_TP_LSBS_REG, WD2_ADC_0_2367_TP_LSBS_MASK, WD2_ADC_0_2367_TP_LSBS_OFS, value); };
 
-   // 0x000F0000: ADC_TM_OUT - Output Test Mode (see datasheet) (Local)
-   unsigned int GetAdcTmOut() { return BitExtractControl(WD2_ADC_TM_OUT_REG, WD2_ADC_TM_OUT_MASK, WD2_ADC_TM_OUT_OFS); };
-   void         SetAdcTmOut(unsigned int value) { SetRegMask(WD2_ADC_TM_OUT_REG, WD2_ADC_TM_OUT_MASK, WD2_ADC_TM_OUT_OFS, value); };
 
-   // 0x0000FF00: ADC_OFFS_ADJ - Device Offset Trim (Local)
-   unsigned int GetAdcOffsAdj() { return BitExtractControl(WD2_ADC_OFFS_ADJ_REG, WD2_ADC_OFFS_ADJ_MASK, WD2_ADC_OFFS_ADJ_OFS); };
-   void         SetAdcOffsAdj(unsigned int value) { SetRegMask(WD2_ADC_OFFS_ADJ_REG, WD2_ADC_OFFS_ADJ_MASK, WD2_ADC_OFFS_ADJ_OFS, value); };
 
-   // 0x00000040: ADC_OM_LVDS_MODE - LVDS ANSI/IEEE Option (0 = ANSI, 1 = IEEE) (Global)
-   unsigned int GetAdcOmLvdsMode() { return BitExtractControl(WD2_ADC_OM_LVDS_MODE_REG, WD2_ADC_OM_LVDS_MODE_MASK, WD2_ADC_OM_LVDS_MODE_OFS); };
-   void         SetAdcOmLvdsMode(unsigned int value) { SetRegMask(WD2_ADC_OM_LVDS_MODE_REG, WD2_ADC_OM_LVDS_MODE_MASK, WD2_ADC_OM_LVDS_MODE_OFS, value); };
+   ////// ------ Control Register 71 [0x111C]: ADC_1_CFG_1458 - ADC 1 (B) Chip Configuration for channels 1, 4, 5 and 8 (Default: 0x00A63F00) ------ //////
 
-   // 0x00000004: ADC_OM_OUT_INVERT - Output Invert (Local)
-   unsigned int GetAdcOmOutInvert() { return BitExtractControl(WD2_ADC_OM_OUT_INVERT_REG, WD2_ADC_OM_OUT_INVERT_MASK, WD2_ADC_OM_OUT_INVERT_OFS); };
-   void         SetAdcOmOutInvert(unsigned int value) { SetRegMask(WD2_ADC_OM_OUT_INVERT_REG, WD2_ADC_OM_OUT_INVERT_MASK, WD2_ADC_OM_OUT_INVERT_OFS, value); };
+   // 0x80000000: ADC_1_1458_DCSOFF - Clock Duty Cycle Stabilizer (0=ON, 1=OFF)
+   unsigned int GetAdc11458Dcsoff() { return BitExtractControl(WD2_ADC_1_1458_DCSOFF_REG, WD2_ADC_1_1458_DCSOFF_MASK, WD2_ADC_1_1458_DCSOFF_OFS); };
+   void         SetAdc11458Dcsoff(unsigned int value) { SetRegMask(WD2_ADC_1_1458_DCSOFF_REG, WD2_ADC_1_1458_DCSOFF_MASK, WD2_ADC_1_1458_DCSOFF_OFS, value); };
 
-   // 0x00000001: ADC_OM_OUT_FORMAT - Output Format (0 = offset binary, 1 = twos complement) (Global)
-   unsigned int GetAdcOmOutFormat() { return BitExtractControl(WD2_ADC_OM_OUT_FORMAT_REG, WD2_ADC_OM_OUT_FORMAT_MASK, WD2_ADC_OM_OUT_FORMAT_OFS); };
-   void         SetAdcOmOutFormat(unsigned int value) { SetRegMask(WD2_ADC_OM_OUT_FORMAT_REG, WD2_ADC_OM_OUT_FORMAT_MASK, WD2_ADC_OM_OUT_FORMAT_OFS, value); };
+   // 0x40000000: ADC_1_1458_RAND - Data Output Randomizer Mode Control Bit (0=OFF, 1=ON)
+   unsigned int GetAdc11458Rand() { return BitExtractControl(WD2_ADC_1_1458_RAND_REG, WD2_ADC_1_1458_RAND_MASK, WD2_ADC_1_1458_RAND_OFS); };
+   void         SetAdc11458Rand(unsigned int value) { SetRegMask(WD2_ADC_1_1458_RAND_REG, WD2_ADC_1_1458_RAND_MASK, WD2_ADC_1_1458_RAND_OFS, value); };
 
+   // 0x20000000: ADC_1_1458_TWOSCOMP - Two's Complement Mode Control Bit (0=Offset Binary, 1=Two's Complement)
+   unsigned int GetAdc11458Twoscomp() { return BitExtractControl(WD2_ADC_1_1458_TWOSCOMP_REG, WD2_ADC_1_1458_TWOSCOMP_MASK, WD2_ADC_1_1458_TWOSCOMP_OFS); };
+   void         SetAdc11458Twoscomp(unsigned int value) { SetRegMask(WD2_ADC_1_1458_TWOSCOMP_REG, WD2_ADC_1_1458_TWOSCOMP_MASK, WD2_ADC_1_1458_TWOSCOMP_OFS, value); };
 
+   // 0x10000000: ADC_1_1458_SLEEP - Sleep Mode (1=Channels 1, 4, 5 and 8 are disabled)
+   unsigned int GetAdc11458Sleep() { return BitExtractControl(WD2_ADC_1_1458_SLEEP_REG, WD2_ADC_1_1458_SLEEP_MASK, WD2_ADC_1_1458_SLEEP_OFS); };
+   void         SetAdc11458Sleep(unsigned int value) { SetRegMask(WD2_ADC_1_1458_SLEEP_REG, WD2_ADC_1_1458_SLEEP_MASK, WD2_ADC_1_1458_SLEEP_OFS, value); };
 
-   ////// ------ Control Register 72 [0x1120]: ADC_OUT_VREF - ADC Output and Vref Settings (Default: 0x00300304) ------ //////
+   // 0x08000000: ADC_1_8_NAP_MODE - Channel 8 Nap Mode (0=OFF, 1=ON)
+   unsigned int GetAdc18NapMode() { return BitExtractControl(WD2_ADC_1_8_NAP_MODE_REG, WD2_ADC_1_8_NAP_MODE_MASK, WD2_ADC_1_8_NAP_MODE_OFS); };
+   void         SetAdc18NapMode(unsigned int value) { SetRegMask(WD2_ADC_1_8_NAP_MODE_REG, WD2_ADC_1_8_NAP_MODE_MASK, WD2_ADC_1_8_NAP_MODE_OFS, value); };
 
-   // 0x00300000: ADC_OA_OUT_DRV_TERM - Output Driver Termination (see datasheet)
-   unsigned int GetAdcOaOutDrvTerm() { return BitExtractControl(WD2_ADC_OA_OUT_DRV_TERM_REG, WD2_ADC_OA_OUT_DRV_TERM_MASK, WD2_ADC_OA_OUT_DRV_TERM_OFS); };
-   void         SetAdcOaOutDrvTerm(unsigned int value) { SetRegMask(WD2_ADC_OA_OUT_DRV_TERM_REG, WD2_ADC_OA_OUT_DRV_TERM_MASK, WD2_ADC_OA_OUT_DRV_TERM_OFS, value); };
+   // 0x04000000: ADC_1_5_NAP_MODE - Channel 5 Nap Mode (0=OFF, 1=ON)
+   unsigned int GetAdc15NapMode() { return BitExtractControl(WD2_ADC_1_5_NAP_MODE_REG, WD2_ADC_1_5_NAP_MODE_MASK, WD2_ADC_1_5_NAP_MODE_OFS); };
+   void         SetAdc15NapMode(unsigned int value) { SetRegMask(WD2_ADC_1_5_NAP_MODE_REG, WD2_ADC_1_5_NAP_MODE_MASK, WD2_ADC_1_5_NAP_MODE_OFS, value); };
 
-   // 0x00010000: ADC_OA_OUT_DRIVE - Output Drive (0 = 1x, 1 = 2x)
-   unsigned int GetAdcOaOutDrive() { return BitExtractControl(WD2_ADC_OA_OUT_DRIVE_REG, WD2_ADC_OA_OUT_DRIVE_MASK, WD2_ADC_OA_OUT_DRIVE_OFS); };
-   void         SetAdcOaOutDrive(unsigned int value) { SetRegMask(WD2_ADC_OA_OUT_DRIVE_REG, WD2_ADC_OA_OUT_DRIVE_MASK, WD2_ADC_OA_OUT_DRIVE_OFS, value); };
+   // 0x02000000: ADC_1_4_NAP_MODE - Channel 4 Nap Mode (0=OFF, 1=ON)
+   unsigned int GetAdc14NapMode() { return BitExtractControl(WD2_ADC_1_4_NAP_MODE_REG, WD2_ADC_1_4_NAP_MODE_MASK, WD2_ADC_1_4_NAP_MODE_OFS); };
+   void         SetAdc14NapMode(unsigned int value) { SetRegMask(WD2_ADC_1_4_NAP_MODE_REG, WD2_ADC_1_4_NAP_MODE_MASK, WD2_ADC_1_4_NAP_MODE_OFS, value); };
 
-   // 0x00007000: ADC_OP_IN_CLK_PH_ADJ - Input Clock Phase Adjust (see datasheet)
-   unsigned int GetAdcOpInClkPhAdj() { return BitExtractControl(WD2_ADC_OP_IN_CLK_PH_ADJ_REG, WD2_ADC_OP_IN_CLK_PH_ADJ_MASK, WD2_ADC_OP_IN_CLK_PH_ADJ_OFS); };
-   void         SetAdcOpInClkPhAdj(unsigned int value) { SetRegMask(WD2_ADC_OP_IN_CLK_PH_ADJ_REG, WD2_ADC_OP_IN_CLK_PH_ADJ_MASK, WD2_ADC_OP_IN_CLK_PH_ADJ_OFS, value); };
+   // 0x01000000: ADC_1_1_NAP_MODE - Channel 1 Nap Mode (0=OFF, 1=ON)
+   unsigned int GetAdc11NapMode() { return BitExtractControl(WD2_ADC_1_1_NAP_MODE_REG, WD2_ADC_1_1_NAP_MODE_MASK, WD2_ADC_1_1_NAP_MODE_OFS); };
+   void         SetAdc11NapMode(unsigned int value) { SetRegMask(WD2_ADC_1_1_NAP_MODE_REG, WD2_ADC_1_1_NAP_MODE_MASK, WD2_ADC_1_1_NAP_MODE_OFS, value); };
 
-   // 0x00000F00: ADC_OP_OUT_CLK_PH_ADJ - Output Clock Phase Adjust (see datasheet)
-   unsigned int GetAdcOpOutClkPhAdj() { return BitExtractControl(WD2_ADC_OP_OUT_CLK_PH_ADJ_REG, WD2_ADC_OP_OUT_CLK_PH_ADJ_MASK, WD2_ADC_OP_OUT_CLK_PH_ADJ_OFS); };
-   void         SetAdcOpOutClkPhAdj(unsigned int value) { SetRegMask(WD2_ADC_OP_OUT_CLK_PH_ADJ_REG, WD2_ADC_OP_OUT_CLK_PH_ADJ_MASK, WD2_ADC_OP_OUT_CLK_PH_ADJ_OFS, value); };
+   // 0x00E00000: ADC_1_1458_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
+   unsigned int GetAdc11458Ilvds() { return BitExtractControl(WD2_ADC_1_1458_ILVDS_REG, WD2_ADC_1_1458_ILVDS_MASK, WD2_ADC_1_1458_ILVDS_OFS); };
+   void         SetAdc11458Ilvds(unsigned int value) { SetRegMask(WD2_ADC_1_1458_ILVDS_REG, WD2_ADC_1_1458_ILVDS_MASK, WD2_ADC_1_1458_ILVDS_OFS, value); };
 
-   // 0x00000007: ADC_INT_VREF_ADJ - Internal Vref Adjustment Digital Scheme (see datasheet)
-   unsigned int GetAdcIntVrefAdj() { return BitExtractControl(WD2_ADC_INT_VREF_ADJ_REG, WD2_ADC_INT_VREF_ADJ_MASK, WD2_ADC_INT_VREF_ADJ_OFS); };
-   void         SetAdcIntVrefAdj(unsigned int value) { SetRegMask(WD2_ADC_INT_VREF_ADJ_REG, WD2_ADC_INT_VREF_ADJ_MASK, WD2_ADC_INT_VREF_ADJ_OFS, value); };
+   // 0x00100000: ADC_1_1458_TERMON - LVDS Internal Termination Bit (0=OFF, 1=ON)
+   unsigned int GetAdc11458Termon() { return BitExtractControl(WD2_ADC_1_1458_TERMON_REG, WD2_ADC_1_1458_TERMON_MASK, WD2_ADC_1_1458_TERMON_OFS); };
+   void         SetAdc11458Termon(unsigned int value) { SetRegMask(WD2_ADC_1_1458_TERMON_REG, WD2_ADC_1_1458_TERMON_MASK, WD2_ADC_1_1458_TERMON_OFS, value); };
 
+   // 0x00080000: ADC_1_1458_OUTOFF - Digital Output Disable Bit (0=Enabled, 1=Disabled)
+   unsigned int GetAdc11458Outoff() { return BitExtractControl(WD2_ADC_1_1458_OUTOFF_REG, WD2_ADC_1_1458_OUTOFF_MASK, WD2_ADC_1_1458_OUTOFF_OFS); };
+   void         SetAdc11458Outoff(unsigned int value) { SetRegMask(WD2_ADC_1_1458_OUTOFF_REG, WD2_ADC_1_1458_OUTOFF_MASK, WD2_ADC_1_1458_OUTOFF_OFS, value); };
 
+   // 0x00070000: ADC_1_1458_OUTMODE - Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet) 
+   unsigned int GetAdc11458Outmode() { return BitExtractControl(WD2_ADC_1_1458_OUTMODE_REG, WD2_ADC_1_1458_OUTMODE_MASK, WD2_ADC_1_1458_OUTMODE_OFS); };
+   void         SetAdc11458Outmode(unsigned int value) { SetRegMask(WD2_ADC_1_1458_OUTMODE_REG, WD2_ADC_1_1458_OUTMODE_MASK, WD2_ADC_1_1458_OUTMODE_OFS, value); };
 
-   ////// ------ Control Register 73 [0x1124]: ADC_USR_PATT - ADC User Patterns (Default: 0xFC00FC00) ------ //////
+   // 0x00008000: ADC_1_1458_OUTTEST - Output Test Pattern Control Bit (0=Pattern Off, 1=Pattern On)
+   unsigned int GetAdc11458Outtest() { return BitExtractControl(WD2_ADC_1_1458_OUTTEST_REG, WD2_ADC_1_1458_OUTTEST_MASK, WD2_ADC_1_1458_OUTTEST_OFS); };
+   void         SetAdc11458Outtest(unsigned int value) { SetRegMask(WD2_ADC_1_1458_OUTTEST_REG, WD2_ADC_1_1458_OUTTEST_MASK, WD2_ADC_1_1458_OUTTEST_OFS, value); };
 
-   // 0xFFFF0000: ADC_USR_PATT1 - ADC User Pattern 1 (0x1A, 0x19) (Global)
-   unsigned int GetAdcUsrPatt1() { return BitExtractControl(WD2_ADC_USR_PATT1_REG, WD2_ADC_USR_PATT1_MASK, WD2_ADC_USR_PATT1_OFS); };
-   void         SetAdcUsrPatt1(unsigned int value) { SetRegMask(WD2_ADC_USR_PATT1_REG, WD2_ADC_USR_PATT1_MASK, WD2_ADC_USR_PATT1_OFS, value); };
+   // 0x00003FFC: ADC_1_1458_TP - Test Pattern MSBs (actual test pattern in 12 bit mode)
+   unsigned int GetAdc11458Tp() { return BitExtractControl(WD2_ADC_1_1458_TP_REG, WD2_ADC_1_1458_TP_MASK, WD2_ADC_1_1458_TP_OFS); };
+   void         SetAdc11458Tp(unsigned int value) { SetRegMask(WD2_ADC_1_1458_TP_REG, WD2_ADC_1_1458_TP_MASK, WD2_ADC_1_1458_TP_OFS, value); };
 
-   // 0x0000FFFF: ADC_USR_PATT2 - ADC User Pattern 2 (0x1C, 0x1B) (Global)
-   unsigned int GetAdcUsrPatt2() { return BitExtractControl(WD2_ADC_USR_PATT2_REG, WD2_ADC_USR_PATT2_MASK, WD2_ADC_USR_PATT2_OFS); };
-   void         SetAdcUsrPatt2(unsigned int value) { SetRegMask(WD2_ADC_USR_PATT2_REG, WD2_ADC_USR_PATT2_MASK, WD2_ADC_USR_PATT2_OFS, value); };
+   // 0x00000003: ADC_1_1458_TP_LSBS - Test Pattern LSBs
+   unsigned int GetAdc11458TpLsbs() { return BitExtractControl(WD2_ADC_1_1458_TP_LSBS_REG, WD2_ADC_1_1458_TP_LSBS_MASK, WD2_ADC_1_1458_TP_LSBS_OFS); };
+   void         SetAdc11458TpLsbs(unsigned int value) { SetRegMask(WD2_ADC_1_1458_TP_LSBS_REG, WD2_ADC_1_1458_TP_LSBS_MASK, WD2_ADC_1_1458_TP_LSBS_OFS, value); };
 
 
 
-   ////// ------ Control Register 74 [0x1128]: ADC_SER_RES_SR - ADC Serial Control and Resolution/Sample Rate Override (Default: 0x00420000) ------ //////
+   ////// ------ Control Register 72 [0x1120]: ADC_1_CFG_2367 - ADC 1 (B) Chip Configuration for channels 2, 3, 6 and 7 (Default: 0x00A63F00) ------ //////
 
-   // 0x00800000: ADC_SC_LVDS_OUT_LSB_FIRST - LVDS Output LSB First
-   unsigned int GetAdcScLvdsOutLsbFirst() { return BitExtractControl(WD2_ADC_SC_LVDS_OUT_LSB_FIRST_REG, WD2_ADC_SC_LVDS_OUT_LSB_FIRST_MASK, WD2_ADC_SC_LVDS_OUT_LSB_FIRST_OFS); };
-   void         SetAdcScLvdsOutLsbFirst(unsigned int value) { SetRegMask(WD2_ADC_SC_LVDS_OUT_LSB_FIRST_REG, WD2_ADC_SC_LVDS_OUT_LSB_FIRST_MASK, WD2_ADC_SC_LVDS_OUT_LSB_FIRST_OFS, value); };
+   // 0x80000000: ADC_1_2367_DCSOFF - Clock Duty Cycle Stabilizer (0=ON, 1=OFF)
+   unsigned int GetAdc12367Dcsoff() { return BitExtractControl(WD2_ADC_1_2367_DCSOFF_REG, WD2_ADC_1_2367_DCSOFF_MASK, WD2_ADC_1_2367_DCSOFF_OFS); };
+   void         SetAdc12367Dcsoff(unsigned int value) { SetRegMask(WD2_ADC_1_2367_DCSOFF_REG, WD2_ADC_1_2367_DCSOFF_MASK, WD2_ADC_1_2367_DCSOFF_OFS, value); };
 
-   // 0x00700000: ADC_SC_WORD_WISE_DDR - Word-Wise DDR 1-Lane (see datasheet)
-   unsigned int GetAdcScWordWiseDdr() { return BitExtractControl(WD2_ADC_SC_WORD_WISE_DDR_REG, WD2_ADC_SC_WORD_WISE_DDR_MASK, WD2_ADC_SC_WORD_WISE_DDR_OFS); };
-   void         SetAdcScWordWiseDdr(unsigned int value) { SetRegMask(WD2_ADC_SC_WORD_WISE_DDR_REG, WD2_ADC_SC_WORD_WISE_DDR_MASK, WD2_ADC_SC_WORD_WISE_DDR_OFS, value); };
+   // 0x40000000: ADC_1_2367_RAND - Data Output Randomizer Mode Control Bit (0=OFF, 1=ON)
+   unsigned int GetAdc12367Rand() { return BitExtractControl(WD2_ADC_1_2367_RAND_REG, WD2_ADC_1_2367_RAND_MASK, WD2_ADC_1_2367_RAND_OFS); };
+   void         SetAdc12367Rand(unsigned int value) { SetRegMask(WD2_ADC_1_2367_RAND_REG, WD2_ADC_1_2367_RAND_MASK, WD2_ADC_1_2367_RAND_OFS, value); };
 
-   // 0x00030000: ADC_SC_OUT_NR_BITS - Serial Output Number of Bits (10 = 12bits, 11 = 10bits)
-   unsigned int GetAdcScOutNrBits() { return BitExtractControl(WD2_ADC_SC_OUT_NR_BITS_REG, WD2_ADC_SC_OUT_NR_BITS_MASK, WD2_ADC_SC_OUT_NR_BITS_OFS); };
-   void         SetAdcScOutNrBits(unsigned int value) { SetRegMask(WD2_ADC_SC_OUT_NR_BITS_REG, WD2_ADC_SC_OUT_NR_BITS_MASK, WD2_ADC_SC_OUT_NR_BITS_OFS, value); };
+   // 0x20000000: ADC_1_2367_TWOSCOMP - Two's Complement Mode Control Bit (0=Offset Binary, 1=Two's Complement)
+   unsigned int GetAdc12367Twoscomp() { return BitExtractControl(WD2_ADC_1_2367_TWOSCOMP_REG, WD2_ADC_1_2367_TWOSCOMP_MASK, WD2_ADC_1_2367_TWOSCOMP_OFS); };
+   void         SetAdc12367Twoscomp(unsigned int value) { SetRegMask(WD2_ADC_1_2367_TWOSCOMP_REG, WD2_ADC_1_2367_TWOSCOMP_MASK, WD2_ADC_1_2367_TWOSCOMP_OFS, value); };
 
-   // 0x00000200: ADC_SC_OUT_RST - Serial Channel Status Output Reset
-   unsigned int GetAdcScOutRst() { return BitExtractControl(WD2_ADC_SC_OUT_RST_REG, WD2_ADC_SC_OUT_RST_MASK, WD2_ADC_SC_OUT_RST_OFS); };
-   void         SetAdcScOutRst(unsigned int value) { SetRegMask(WD2_ADC_SC_OUT_RST_REG, WD2_ADC_SC_OUT_RST_MASK, WD2_ADC_SC_OUT_RST_OFS, value); };
+   // 0x10000000: ADC_1_2367_SLEEP - Sleep Mode (1=Channels 2, 3, 6 and 7 are disabled)
+   unsigned int GetAdc12367Sleep() { return BitExtractControl(WD2_ADC_1_2367_SLEEP_REG, WD2_ADC_1_2367_SLEEP_MASK, WD2_ADC_1_2367_SLEEP_OFS); };
+   void         SetAdc12367Sleep(unsigned int value) { SetRegMask(WD2_ADC_1_2367_SLEEP_REG, WD2_ADC_1_2367_SLEEP_MASK, WD2_ADC_1_2367_SLEEP_OFS, value); };
 
-   // 0x00000100: ADC_SC_PWR_DN - Serial Channel Status Power Down
-   unsigned int GetAdcScPwrDn() { return BitExtractControl(WD2_ADC_SC_PWR_DN_REG, WD2_ADC_SC_PWR_DN_MASK, WD2_ADC_SC_PWR_DN_OFS); };
-   void         SetAdcScPwrDn(unsigned int value) { SetRegMask(WD2_ADC_SC_PWR_DN_REG, WD2_ADC_SC_PWR_DN_MASK, WD2_ADC_SC_PWR_DN_OFS, value); };
+   // 0x08000000: ADC_1_7_NAP_MODE - Channel 7 Nap Mode (0=OFF, 1=ON)
+   unsigned int GetAdc17NapMode() { return BitExtractControl(WD2_ADC_1_7_NAP_MODE_REG, WD2_ADC_1_7_NAP_MODE_MASK, WD2_ADC_1_7_NAP_MODE_OFS); };
+   void         SetAdc17NapMode(unsigned int value) { SetRegMask(WD2_ADC_1_7_NAP_MODE_REG, WD2_ADC_1_7_NAP_MODE_MASK, WD2_ADC_1_7_NAP_MODE_OFS, value); };
 
-   // 0x00000040: ADC_RES_SR_OVR - Resolution/Sample Rate Override Enable
-   unsigned int GetAdcResSrOvr() { return BitExtractControl(WD2_ADC_RES_SR_OVR_REG, WD2_ADC_RES_SR_OVR_MASK, WD2_ADC_RES_SR_OVR_OFS); };
-   void         SetAdcResSrOvr(unsigned int value) { SetRegMask(WD2_ADC_RES_SR_OVR_REG, WD2_ADC_RES_SR_OVR_MASK, WD2_ADC_RES_SR_OVR_OFS, value); };
+   // 0x04000000: ADC_1_6_NAP_MODE - Channel 6 Nap Mode (0=OFF, 1=ON)
+   unsigned int GetAdc16NapMode() { return BitExtractControl(WD2_ADC_1_6_NAP_MODE_REG, WD2_ADC_1_6_NAP_MODE_MASK, WD2_ADC_1_6_NAP_MODE_OFS); };
+   void         SetAdc16NapMode(unsigned int value) { SetRegMask(WD2_ADC_1_6_NAP_MODE_REG, WD2_ADC_1_6_NAP_MODE_MASK, WD2_ADC_1_6_NAP_MODE_OFS, value); };
 
-   // 0x00000030: ADC_RESOLUTION - Resolution (10 = 12bits, 11 = 10bits)
-   unsigned int GetAdcResolution() { return BitExtractControl(WD2_ADC_RESOLUTION_REG, WD2_ADC_RESOLUTION_MASK, WD2_ADC_RESOLUTION_OFS); };
-   void         SetAdcResolution(unsigned int value) { SetRegMask(WD2_ADC_RESOLUTION_REG, WD2_ADC_RESOLUTION_MASK, WD2_ADC_RESOLUTION_OFS, value); };
+   // 0x02000000: ADC_1_3_NAP_MODE - Channel 3 Nap Mode (0=OFF, 1=ON)
+   unsigned int GetAdc13NapMode() { return BitExtractControl(WD2_ADC_1_3_NAP_MODE_REG, WD2_ADC_1_3_NAP_MODE_MASK, WD2_ADC_1_3_NAP_MODE_OFS); };
+   void         SetAdc13NapMode(unsigned int value) { SetRegMask(WD2_ADC_1_3_NAP_MODE_REG, WD2_ADC_1_3_NAP_MODE_MASK, WD2_ADC_1_3_NAP_MODE_OFS, value); };
 
-   // 0x00000007: ADC_SAMPLE_RATE - Sample Rate (see datasheet)
-   unsigned int GetAdcSampleRate() { return BitExtractControl(WD2_ADC_SAMPLE_RATE_REG, WD2_ADC_SAMPLE_RATE_MASK, WD2_ADC_SAMPLE_RATE_OFS); };
-   void         SetAdcSampleRate(unsigned int value) { SetRegMask(WD2_ADC_SAMPLE_RATE_REG, WD2_ADC_SAMPLE_RATE_MASK, WD2_ADC_SAMPLE_RATE_OFS, value); };
+   // 0x01000000: ADC_1_2_NAP_MODE - Channel 2 Nap Mode (0=OFF, 1=ON)
+   unsigned int GetAdc12NapMode() { return BitExtractControl(WD2_ADC_1_2_NAP_MODE_REG, WD2_ADC_1_2_NAP_MODE_MASK, WD2_ADC_1_2_NAP_MODE_OFS); };
+   void         SetAdc12NapMode(unsigned int value) { SetRegMask(WD2_ADC_1_2_NAP_MODE_REG, WD2_ADC_1_2_NAP_MODE_MASK, WD2_ADC_1_2_NAP_MODE_OFS, value); };
 
+   // 0x00E00000: ADC_1_2367_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
+   unsigned int GetAdc12367Ilvds() { return BitExtractControl(WD2_ADC_1_2367_ILVDS_REG, WD2_ADC_1_2367_ILVDS_MASK, WD2_ADC_1_2367_ILVDS_OFS); };
+   void         SetAdc12367Ilvds(unsigned int value) { SetRegMask(WD2_ADC_1_2367_ILVDS_REG, WD2_ADC_1_2367_ILVDS_MASK, WD2_ADC_1_2367_ILVDS_OFS, value); };
 
+   // 0x00100000: ADC_1_2367_TERMON - LVDS Internal Termination Bit (0=OFF, 1=ON)
+   unsigned int GetAdc12367Termon() { return BitExtractControl(WD2_ADC_1_2367_TERMON_REG, WD2_ADC_1_2367_TERMON_MASK, WD2_ADC_1_2367_TERMON_OFS); };
+   void         SetAdc12367Termon(unsigned int value) { SetRegMask(WD2_ADC_1_2367_TERMON_REG, WD2_ADC_1_2367_TERMON_MASK, WD2_ADC_1_2367_TERMON_OFS, value); };
 
-   ////// ------ Control Register 75 [0x112C]: ADC_USR_IO_SYNC - ADC User I/O Control and Sync (Default: 0x00000000) ------ //////
+   // 0x00080000: ADC_1_2367_OUTOFF - Digital Output Disable Bit (0=Enabled, 1=Disabled)
+   unsigned int GetAdc12367Outoff() { return BitExtractControl(WD2_ADC_1_2367_OUTOFF_REG, WD2_ADC_1_2367_OUTOFF_MASK, WD2_ADC_1_2367_OUTOFF_OFS); };
+   void         SetAdc12367Outoff(unsigned int value) { SetRegMask(WD2_ADC_1_2367_OUTOFF_REG, WD2_ADC_1_2367_OUTOFF_MASK, WD2_ADC_1_2367_OUTOFF_OFS, value); };
 
-   // 0x00010000: ADC_UIOC2_SDIO_PD - SDIO Pull-Down Disable
-   unsigned int GetAdcUioc2SdioPd() { return BitExtractControl(WD2_ADC_UIOC2_SDIO_PD_REG, WD2_ADC_UIOC2_SDIO_PD_MASK, WD2_ADC_UIOC2_SDIO_PD_OFS); };
-   void         SetAdcUioc2SdioPd(unsigned int value) { SetRegMask(WD2_ADC_UIOC2_SDIO_PD_REG, WD2_ADC_UIOC2_SDIO_PD_MASK, WD2_ADC_UIOC2_SDIO_PD_OFS, value); };
+   // 0x00070000: ADC_1_2367_OUTMODE - Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet) 
+   unsigned int GetAdc12367Outmode() { return BitExtractControl(WD2_ADC_1_2367_OUTMODE_REG, WD2_ADC_1_2367_OUTMODE_MASK, WD2_ADC_1_2367_OUTMODE_OFS); };
+   void         SetAdc12367Outmode(unsigned int value) { SetRegMask(WD2_ADC_1_2367_OUTMODE_REG, WD2_ADC_1_2367_OUTMODE_MASK, WD2_ADC_1_2367_OUTMODE_OFS, value); };
 
-   // 0x00000800: ADC_UIOC3_VCM_PWR_DN - VCM Power Control
-   unsigned int GetAdcUioc3VcmPwrDn() { return BitExtractControl(WD2_ADC_UIOC3_VCM_PWR_DN_REG, WD2_ADC_UIOC3_VCM_PWR_DN_MASK, WD2_ADC_UIOC3_VCM_PWR_DN_OFS); };
-   void         SetAdcUioc3VcmPwrDn(unsigned int value) { SetRegMask(WD2_ADC_UIOC3_VCM_PWR_DN_REG, WD2_ADC_UIOC3_VCM_PWR_DN_MASK, WD2_ADC_UIOC3_VCM_PWR_DN_OFS, value); };
+   // 0x00008000: ADC_1_2367_OUTTEST - Output Test Pattern Control Bit (0=Pattern Off, 1=Pattern On)
+   unsigned int GetAdc12367Outtest() { return BitExtractControl(WD2_ADC_1_2367_OUTTEST_REG, WD2_ADC_1_2367_OUTTEST_MASK, WD2_ADC_1_2367_OUTTEST_OFS); };
+   void         SetAdc12367Outtest(unsigned int value) { SetRegMask(WD2_ADC_1_2367_OUTTEST_REG, WD2_ADC_1_2367_OUTTEST_MASK, WD2_ADC_1_2367_OUTTEST_OFS, value); };
 
-   // 0x00000002: ADC_SYNC_NEXT_ONLY - Sync Next Only
-   unsigned int GetAdcSyncNextOnly() { return BitExtractControl(WD2_ADC_SYNC_NEXT_ONLY_REG, WD2_ADC_SYNC_NEXT_ONLY_MASK, WD2_ADC_SYNC_NEXT_ONLY_OFS); };
-   void         SetAdcSyncNextOnly(unsigned int value) { SetRegMask(WD2_ADC_SYNC_NEXT_ONLY_REG, WD2_ADC_SYNC_NEXT_ONLY_MASK, WD2_ADC_SYNC_NEXT_ONLY_OFS, value); };
+   // 0x00003FFC: ADC_1_2367_TP - Test Pattern MSBs (actual test pattern in 12 bit mode)
+   unsigned int GetAdc12367Tp() { return BitExtractControl(WD2_ADC_1_2367_TP_REG, WD2_ADC_1_2367_TP_MASK, WD2_ADC_1_2367_TP_OFS); };
+   void         SetAdc12367Tp(unsigned int value) { SetRegMask(WD2_ADC_1_2367_TP_REG, WD2_ADC_1_2367_TP_MASK, WD2_ADC_1_2367_TP_OFS, value); };
 
-   // 0x00000001: ADC_EN_SYNC - Enable Sync
-   unsigned int GetAdcEnSync() { return BitExtractControl(WD2_ADC_EN_SYNC_REG, WD2_ADC_EN_SYNC_MASK, WD2_ADC_EN_SYNC_OFS); };
-   void         SetAdcEnSync(unsigned int value) { SetRegMask(WD2_ADC_EN_SYNC_REG, WD2_ADC_EN_SYNC_MASK, WD2_ADC_EN_SYNC_OFS, value); };
+   // 0x00000003: ADC_1_2367_TP_LSBS - Test Pattern LSBs
+   unsigned int GetAdc12367TpLsbs() { return BitExtractControl(WD2_ADC_1_2367_TP_LSBS_REG, WD2_ADC_1_2367_TP_LSBS_MASK, WD2_ADC_1_2367_TP_LSBS_OFS); };
+   void         SetAdc12367TpLsbs(unsigned int value) { SetRegMask(WD2_ADC_1_2367_TP_LSBS_REG, WD2_ADC_1_2367_TP_LSBS_MASK, WD2_ADC_1_2367_TP_LSBS_OFS, value); };
 
 
 
-   ////// ------ Control Register 76 [0x1130]: ADC_0_CH_A_CFG - ADC 0 (A) Channel A Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ------ //////
-
-   // 0x00C00000: ADC_TM_USR_IN_MODE_0_A - User Input Test Mode (see datasheet)
-   unsigned int GetAdcTmUsrInMode0A() { return BitExtractControl(WD2_ADC_TM_USR_IN_MODE_0_A_REG, WD2_ADC_TM_USR_IN_MODE_0_A_MASK, WD2_ADC_TM_USR_IN_MODE_0_A_OFS); };
-   void         SetAdcTmUsrInMode0A(unsigned int value) { SetRegMask(WD2_ADC_TM_USR_IN_MODE_0_A_REG, WD2_ADC_TM_USR_IN_MODE_0_A_MASK, WD2_ADC_TM_USR_IN_MODE_0_A_OFS, value); };
-
-   // 0x000F0000: ADC_TM_OUT_0_A - Output Test Mode (see datasheet)
-   unsigned int GetAdcTmOut0A() { return BitExtractControl(WD2_ADC_TM_OUT_0_A_REG, WD2_ADC_TM_OUT_0_A_MASK, WD2_ADC_TM_OUT_0_A_OFS); };
-   void         SetAdcTmOut0A(unsigned int value) { SetRegMask(WD2_ADC_TM_OUT_0_A_REG, WD2_ADC_TM_OUT_0_A_MASK, WD2_ADC_TM_OUT_0_A_OFS, value); };
-
-   // 0x0000FF00: ADC_OFFS_ADJ_0_A - Device Offset Trim
-   unsigned int GetAdcOffsAdj0A() { return BitExtractControl(WD2_ADC_OFFS_ADJ_0_A_REG, WD2_ADC_OFFS_ADJ_0_A_MASK, WD2_ADC_OFFS_ADJ_0_A_OFS); };
-   void         SetAdcOffsAdj0A(unsigned int value) { SetRegMask(WD2_ADC_OFFS_ADJ_0_A_REG, WD2_ADC_OFFS_ADJ_0_A_MASK, WD2_ADC_OFFS_ADJ_0_A_OFS, value); };
-
-   // 0x00000004: ADC_OM_OUT_INVERT_0_A - Output Invert
-   unsigned int GetAdcOmOutInvert0A() { return BitExtractControl(WD2_ADC_OM_OUT_INVERT_0_A_REG, WD2_ADC_OM_OUT_INVERT_0_A_MASK, WD2_ADC_OM_OUT_INVERT_0_A_OFS); };
-   void         SetAdcOmOutInvert0A(unsigned int value) { SetRegMask(WD2_ADC_OM_OUT_INVERT_0_A_REG, WD2_ADC_OM_OUT_INVERT_0_A_MASK, WD2_ADC_OM_OUT_INVERT_0_A_OFS, value); };
-
-
-
-   ////// ------ Control Register 77 [0x1134]: ADC_0_CH_B_CFG - ADC 0 (A) Channel B Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ------ //////
-
-   // 0x00C00000: ADC_TM_USR_IN_MODE_0_B - User Input Test Mode (see datasheet)
-   unsigned int GetAdcTmUsrInMode0B() { return BitExtractControl(WD2_ADC_TM_USR_IN_MODE_0_B_REG, WD2_ADC_TM_USR_IN_MODE_0_B_MASK, WD2_ADC_TM_USR_IN_MODE_0_B_OFS); };
-   void         SetAdcTmUsrInMode0B(unsigned int value) { SetRegMask(WD2_ADC_TM_USR_IN_MODE_0_B_REG, WD2_ADC_TM_USR_IN_MODE_0_B_MASK, WD2_ADC_TM_USR_IN_MODE_0_B_OFS, value); };
-
-   // 0x000F0000: ADC_TM_OUT_0_B - Output Test Mode (see datasheet)
-   unsigned int GetAdcTmOut0B() { return BitExtractControl(WD2_ADC_TM_OUT_0_B_REG, WD2_ADC_TM_OUT_0_B_MASK, WD2_ADC_TM_OUT_0_B_OFS); };
-   void         SetAdcTmOut0B(unsigned int value) { SetRegMask(WD2_ADC_TM_OUT_0_B_REG, WD2_ADC_TM_OUT_0_B_MASK, WD2_ADC_TM_OUT_0_B_OFS, value); };
-
-   // 0x0000FF00: ADC_OFFS_ADJ_0_B - Device Offset Trim
-   unsigned int GetAdcOffsAdj0B() { return BitExtractControl(WD2_ADC_OFFS_ADJ_0_B_REG, WD2_ADC_OFFS_ADJ_0_B_MASK, WD2_ADC_OFFS_ADJ_0_B_OFS); };
-   void         SetAdcOffsAdj0B(unsigned int value) { SetRegMask(WD2_ADC_OFFS_ADJ_0_B_REG, WD2_ADC_OFFS_ADJ_0_B_MASK, WD2_ADC_OFFS_ADJ_0_B_OFS, value); };
-
-   // 0x00000004: ADC_OM_OUT_INVERT_0_B - Output Invert
-   unsigned int GetAdcOmOutInvert0B() { return BitExtractControl(WD2_ADC_OM_OUT_INVERT_0_B_REG, WD2_ADC_OM_OUT_INVERT_0_B_MASK, WD2_ADC_OM_OUT_INVERT_0_B_OFS); };
-   void         SetAdcOmOutInvert0B(unsigned int value) { SetRegMask(WD2_ADC_OM_OUT_INVERT_0_B_REG, WD2_ADC_OM_OUT_INVERT_0_B_MASK, WD2_ADC_OM_OUT_INVERT_0_B_OFS, value); };
-
-
-
-   ////// ------ Control Register 78 [0x1138]: ADC_0_CH_C_CFG - ADC 0 (A) Channel C Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ------ //////
-
-   // 0x00C00000: ADC_TM_USR_IN_MODE_0_C - User Input Test Mode (see datasheet)
-   unsigned int GetAdcTmUsrInMode0C() { return BitExtractControl(WD2_ADC_TM_USR_IN_MODE_0_C_REG, WD2_ADC_TM_USR_IN_MODE_0_C_MASK, WD2_ADC_TM_USR_IN_MODE_0_C_OFS); };
-   void         SetAdcTmUsrInMode0C(unsigned int value) { SetRegMask(WD2_ADC_TM_USR_IN_MODE_0_C_REG, WD2_ADC_TM_USR_IN_MODE_0_C_MASK, WD2_ADC_TM_USR_IN_MODE_0_C_OFS, value); };
-
-   // 0x000F0000: ADC_TM_OUT_0_C - Output Test Mode (see datasheet)
-   unsigned int GetAdcTmOut0C() { return BitExtractControl(WD2_ADC_TM_OUT_0_C_REG, WD2_ADC_TM_OUT_0_C_MASK, WD2_ADC_TM_OUT_0_C_OFS); };
-   void         SetAdcTmOut0C(unsigned int value) { SetRegMask(WD2_ADC_TM_OUT_0_C_REG, WD2_ADC_TM_OUT_0_C_MASK, WD2_ADC_TM_OUT_0_C_OFS, value); };
-
-   // 0x0000FF00: ADC_OFFS_ADJ_0_C - Device Offset Trim
-   unsigned int GetAdcOffsAdj0C() { return BitExtractControl(WD2_ADC_OFFS_ADJ_0_C_REG, WD2_ADC_OFFS_ADJ_0_C_MASK, WD2_ADC_OFFS_ADJ_0_C_OFS); };
-   void         SetAdcOffsAdj0C(unsigned int value) { SetRegMask(WD2_ADC_OFFS_ADJ_0_C_REG, WD2_ADC_OFFS_ADJ_0_C_MASK, WD2_ADC_OFFS_ADJ_0_C_OFS, value); };
-
-   // 0x00000004: ADC_OM_OUT_INVERT_0_C - Output Invert
-   unsigned int GetAdcOmOutInvert0C() { return BitExtractControl(WD2_ADC_OM_OUT_INVERT_0_C_REG, WD2_ADC_OM_OUT_INVERT_0_C_MASK, WD2_ADC_OM_OUT_INVERT_0_C_OFS); };
-   void         SetAdcOmOutInvert0C(unsigned int value) { SetRegMask(WD2_ADC_OM_OUT_INVERT_0_C_REG, WD2_ADC_OM_OUT_INVERT_0_C_MASK, WD2_ADC_OM_OUT_INVERT_0_C_OFS, value); };
-
-
-
-   ////// ------ Control Register 79 [0x113C]: ADC_0_CH_D_CFG - ADC 0 (A) Channel D Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ------ //////
-
-   // 0x00C00000: ADC_TM_USR_IN_MODE_0_D - User Input Test Mode (see datasheet)
-   unsigned int GetAdcTmUsrInMode0D() { return BitExtractControl(WD2_ADC_TM_USR_IN_MODE_0_D_REG, WD2_ADC_TM_USR_IN_MODE_0_D_MASK, WD2_ADC_TM_USR_IN_MODE_0_D_OFS); };
-   void         SetAdcTmUsrInMode0D(unsigned int value) { SetRegMask(WD2_ADC_TM_USR_IN_MODE_0_D_REG, WD2_ADC_TM_USR_IN_MODE_0_D_MASK, WD2_ADC_TM_USR_IN_MODE_0_D_OFS, value); };
-
-   // 0x000F0000: ADC_TM_OUT_0_D - Output Test Mode (see datasheet)
-   unsigned int GetAdcTmOut0D() { return BitExtractControl(WD2_ADC_TM_OUT_0_D_REG, WD2_ADC_TM_OUT_0_D_MASK, WD2_ADC_TM_OUT_0_D_OFS); };
-   void         SetAdcTmOut0D(unsigned int value) { SetRegMask(WD2_ADC_TM_OUT_0_D_REG, WD2_ADC_TM_OUT_0_D_MASK, WD2_ADC_TM_OUT_0_D_OFS, value); };
-
-   // 0x0000FF00: ADC_OFFS_ADJ_0_D - Device Offset Trim
-   unsigned int GetAdcOffsAdj0D() { return BitExtractControl(WD2_ADC_OFFS_ADJ_0_D_REG, WD2_ADC_OFFS_ADJ_0_D_MASK, WD2_ADC_OFFS_ADJ_0_D_OFS); };
-   void         SetAdcOffsAdj0D(unsigned int value) { SetRegMask(WD2_ADC_OFFS_ADJ_0_D_REG, WD2_ADC_OFFS_ADJ_0_D_MASK, WD2_ADC_OFFS_ADJ_0_D_OFS, value); };
-
-   // 0x00000004: ADC_OM_OUT_INVERT_0_D - Output Invert
-   unsigned int GetAdcOmOutInvert0D() { return BitExtractControl(WD2_ADC_OM_OUT_INVERT_0_D_REG, WD2_ADC_OM_OUT_INVERT_0_D_MASK, WD2_ADC_OM_OUT_INVERT_0_D_OFS); };
-   void         SetAdcOmOutInvert0D(unsigned int value) { SetRegMask(WD2_ADC_OM_OUT_INVERT_0_D_REG, WD2_ADC_OM_OUT_INVERT_0_D_MASK, WD2_ADC_OM_OUT_INVERT_0_D_OFS, value); };
-
-
-
-   ////// ------ Control Register 80 [0x1140]: ADC_0_CH_E_CFG - ADC 0 (A) Channel E Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ------ //////
-
-   // 0x00C00000: ADC_TM_USR_IN_MODE_0_E - User Input Test Mode (see datasheet)
-   unsigned int GetAdcTmUsrInMode0E() { return BitExtractControl(WD2_ADC_TM_USR_IN_MODE_0_E_REG, WD2_ADC_TM_USR_IN_MODE_0_E_MASK, WD2_ADC_TM_USR_IN_MODE_0_E_OFS); };
-   void         SetAdcTmUsrInMode0E(unsigned int value) { SetRegMask(WD2_ADC_TM_USR_IN_MODE_0_E_REG, WD2_ADC_TM_USR_IN_MODE_0_E_MASK, WD2_ADC_TM_USR_IN_MODE_0_E_OFS, value); };
-
-   // 0x000F0000: ADC_TM_OUT_0_E - Output Test Mode (see datasheet)
-   unsigned int GetAdcTmOut0E() { return BitExtractControl(WD2_ADC_TM_OUT_0_E_REG, WD2_ADC_TM_OUT_0_E_MASK, WD2_ADC_TM_OUT_0_E_OFS); };
-   void         SetAdcTmOut0E(unsigned int value) { SetRegMask(WD2_ADC_TM_OUT_0_E_REG, WD2_ADC_TM_OUT_0_E_MASK, WD2_ADC_TM_OUT_0_E_OFS, value); };
-
-   // 0x0000FF00: ADC_OFFS_ADJ_0_E - Device Offset Trim
-   unsigned int GetAdcOffsAdj0E() { return BitExtractControl(WD2_ADC_OFFS_ADJ_0_E_REG, WD2_ADC_OFFS_ADJ_0_E_MASK, WD2_ADC_OFFS_ADJ_0_E_OFS); };
-   void         SetAdcOffsAdj0E(unsigned int value) { SetRegMask(WD2_ADC_OFFS_ADJ_0_E_REG, WD2_ADC_OFFS_ADJ_0_E_MASK, WD2_ADC_OFFS_ADJ_0_E_OFS, value); };
-
-   // 0x00000004: ADC_OM_OUT_INVERT_0_E - Output Invert
-   unsigned int GetAdcOmOutInvert0E() { return BitExtractControl(WD2_ADC_OM_OUT_INVERT_0_E_REG, WD2_ADC_OM_OUT_INVERT_0_E_MASK, WD2_ADC_OM_OUT_INVERT_0_E_OFS); };
-   void         SetAdcOmOutInvert0E(unsigned int value) { SetRegMask(WD2_ADC_OM_OUT_INVERT_0_E_REG, WD2_ADC_OM_OUT_INVERT_0_E_MASK, WD2_ADC_OM_OUT_INVERT_0_E_OFS, value); };
-
-
-
-   ////// ------ Control Register 81 [0x1144]: ADC_0_CH_F_CFG - ADC 0 (A) Channel F Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ------ //////
-
-   // 0x00C00000: ADC_TM_USR_IN_MODE_0_F - User Input Test Mode (see datasheet)
-   unsigned int GetAdcTmUsrInMode0F() { return BitExtractControl(WD2_ADC_TM_USR_IN_MODE_0_F_REG, WD2_ADC_TM_USR_IN_MODE_0_F_MASK, WD2_ADC_TM_USR_IN_MODE_0_F_OFS); };
-   void         SetAdcTmUsrInMode0F(unsigned int value) { SetRegMask(WD2_ADC_TM_USR_IN_MODE_0_F_REG, WD2_ADC_TM_USR_IN_MODE_0_F_MASK, WD2_ADC_TM_USR_IN_MODE_0_F_OFS, value); };
-
-   // 0x000F0000: ADC_TM_OUT_0_F - Output Test Mode (see datasheet)
-   unsigned int GetAdcTmOut0F() { return BitExtractControl(WD2_ADC_TM_OUT_0_F_REG, WD2_ADC_TM_OUT_0_F_MASK, WD2_ADC_TM_OUT_0_F_OFS); };
-   void         SetAdcTmOut0F(unsigned int value) { SetRegMask(WD2_ADC_TM_OUT_0_F_REG, WD2_ADC_TM_OUT_0_F_MASK, WD2_ADC_TM_OUT_0_F_OFS, value); };
-
-   // 0x0000FF00: ADC_OFFS_ADJ_0_F - Device Offset Trim
-   unsigned int GetAdcOffsAdj0F() { return BitExtractControl(WD2_ADC_OFFS_ADJ_0_F_REG, WD2_ADC_OFFS_ADJ_0_F_MASK, WD2_ADC_OFFS_ADJ_0_F_OFS); };
-   void         SetAdcOffsAdj0F(unsigned int value) { SetRegMask(WD2_ADC_OFFS_ADJ_0_F_REG, WD2_ADC_OFFS_ADJ_0_F_MASK, WD2_ADC_OFFS_ADJ_0_F_OFS, value); };
-
-   // 0x00000004: ADC_OM_OUT_INVERT_0_F - Output Invert
-   unsigned int GetAdcOmOutInvert0F() { return BitExtractControl(WD2_ADC_OM_OUT_INVERT_0_F_REG, WD2_ADC_OM_OUT_INVERT_0_F_MASK, WD2_ADC_OM_OUT_INVERT_0_F_OFS); };
-   void         SetAdcOmOutInvert0F(unsigned int value) { SetRegMask(WD2_ADC_OM_OUT_INVERT_0_F_REG, WD2_ADC_OM_OUT_INVERT_0_F_MASK, WD2_ADC_OM_OUT_INVERT_0_F_OFS, value); };
-
-
-
-   ////// ------ Control Register 82 [0x1148]: ADC_0_CH_G_CFG - ADC 0 (A) Channel G Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ------ //////
-
-   // 0x00C00000: ADC_TM_USR_IN_MODE_0_G - User Input Test Mode (see datasheet)
-   unsigned int GetAdcTmUsrInMode0G() { return BitExtractControl(WD2_ADC_TM_USR_IN_MODE_0_G_REG, WD2_ADC_TM_USR_IN_MODE_0_G_MASK, WD2_ADC_TM_USR_IN_MODE_0_G_OFS); };
-   void         SetAdcTmUsrInMode0G(unsigned int value) { SetRegMask(WD2_ADC_TM_USR_IN_MODE_0_G_REG, WD2_ADC_TM_USR_IN_MODE_0_G_MASK, WD2_ADC_TM_USR_IN_MODE_0_G_OFS, value); };
-
-   // 0x000F0000: ADC_TM_OUT_0_G - Output Test Mode (see datasheet)
-   unsigned int GetAdcTmOut0G() { return BitExtractControl(WD2_ADC_TM_OUT_0_G_REG, WD2_ADC_TM_OUT_0_G_MASK, WD2_ADC_TM_OUT_0_G_OFS); };
-   void         SetAdcTmOut0G(unsigned int value) { SetRegMask(WD2_ADC_TM_OUT_0_G_REG, WD2_ADC_TM_OUT_0_G_MASK, WD2_ADC_TM_OUT_0_G_OFS, value); };
-
-   // 0x0000FF00: ADC_OFFS_ADJ_0_G - Device Offset Trim
-   unsigned int GetAdcOffsAdj0G() { return BitExtractControl(WD2_ADC_OFFS_ADJ_0_G_REG, WD2_ADC_OFFS_ADJ_0_G_MASK, WD2_ADC_OFFS_ADJ_0_G_OFS); };
-   void         SetAdcOffsAdj0G(unsigned int value) { SetRegMask(WD2_ADC_OFFS_ADJ_0_G_REG, WD2_ADC_OFFS_ADJ_0_G_MASK, WD2_ADC_OFFS_ADJ_0_G_OFS, value); };
-
-   // 0x00000004: ADC_OM_OUT_INVERT_0_G - Output Invert
-   unsigned int GetAdcOmOutInvert0G() { return BitExtractControl(WD2_ADC_OM_OUT_INVERT_0_G_REG, WD2_ADC_OM_OUT_INVERT_0_G_MASK, WD2_ADC_OM_OUT_INVERT_0_G_OFS); };
-   void         SetAdcOmOutInvert0G(unsigned int value) { SetRegMask(WD2_ADC_OM_OUT_INVERT_0_G_REG, WD2_ADC_OM_OUT_INVERT_0_G_MASK, WD2_ADC_OM_OUT_INVERT_0_G_OFS, value); };
-
-
-
-   ////// ------ Control Register 83 [0x114C]: ADC_0_CH_H_CFG - ADC 0 (A) Channel H Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000000) ------ //////
-
-   // 0x00C00000: ADC_TM_USR_IN_MODE_0_H - User Input Test Mode (see datasheet)
-   unsigned int GetAdcTmUsrInMode0H() { return BitExtractControl(WD2_ADC_TM_USR_IN_MODE_0_H_REG, WD2_ADC_TM_USR_IN_MODE_0_H_MASK, WD2_ADC_TM_USR_IN_MODE_0_H_OFS); };
-   void         SetAdcTmUsrInMode0H(unsigned int value) { SetRegMask(WD2_ADC_TM_USR_IN_MODE_0_H_REG, WD2_ADC_TM_USR_IN_MODE_0_H_MASK, WD2_ADC_TM_USR_IN_MODE_0_H_OFS, value); };
-
-   // 0x000F0000: ADC_TM_OUT_0_H - Output Test Mode (see datasheet)
-   unsigned int GetAdcTmOut0H() { return BitExtractControl(WD2_ADC_TM_OUT_0_H_REG, WD2_ADC_TM_OUT_0_H_MASK, WD2_ADC_TM_OUT_0_H_OFS); };
-   void         SetAdcTmOut0H(unsigned int value) { SetRegMask(WD2_ADC_TM_OUT_0_H_REG, WD2_ADC_TM_OUT_0_H_MASK, WD2_ADC_TM_OUT_0_H_OFS, value); };
-
-   // 0x0000FF00: ADC_OFFS_ADJ_0_H - Device Offset Trim
-   unsigned int GetAdcOffsAdj0H() { return BitExtractControl(WD2_ADC_OFFS_ADJ_0_H_REG, WD2_ADC_OFFS_ADJ_0_H_MASK, WD2_ADC_OFFS_ADJ_0_H_OFS); };
-   void         SetAdcOffsAdj0H(unsigned int value) { SetRegMask(WD2_ADC_OFFS_ADJ_0_H_REG, WD2_ADC_OFFS_ADJ_0_H_MASK, WD2_ADC_OFFS_ADJ_0_H_OFS, value); };
-
-   // 0x00000004: ADC_OM_OUT_INVERT_0_H - Output Invert
-   unsigned int GetAdcOmOutInvert0H() { return BitExtractControl(WD2_ADC_OM_OUT_INVERT_0_H_REG, WD2_ADC_OM_OUT_INVERT_0_H_MASK, WD2_ADC_OM_OUT_INVERT_0_H_OFS); };
-   void         SetAdcOmOutInvert0H(unsigned int value) { SetRegMask(WD2_ADC_OM_OUT_INVERT_0_H_REG, WD2_ADC_OM_OUT_INVERT_0_H_MASK, WD2_ADC_OM_OUT_INVERT_0_H_OFS, value); };
-
-
-
-   ////// ------ Control Register 84 [0x1150]: ADC_0_CH_DCO_CFG - ADC 0 (A) Channel DCO Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000000) ------ //////
-
-   // 0x00C00000: ADC_TM_USR_IN_MODE_0_DCO - User Input Test Mode (see datasheet)
-   unsigned int GetAdcTmUsrInMode0Dco() { return BitExtractControl(WD2_ADC_TM_USR_IN_MODE_0_DCO_REG, WD2_ADC_TM_USR_IN_MODE_0_DCO_MASK, WD2_ADC_TM_USR_IN_MODE_0_DCO_OFS); };
-   void         SetAdcTmUsrInMode0Dco(unsigned int value) { SetRegMask(WD2_ADC_TM_USR_IN_MODE_0_DCO_REG, WD2_ADC_TM_USR_IN_MODE_0_DCO_MASK, WD2_ADC_TM_USR_IN_MODE_0_DCO_OFS, value); };
-
-   // 0x000F0000: ADC_TM_OUT_0_DCO - Output Test Mode (see datasheet)
-   unsigned int GetAdcTmOut0Dco() { return BitExtractControl(WD2_ADC_TM_OUT_0_DCO_REG, WD2_ADC_TM_OUT_0_DCO_MASK, WD2_ADC_TM_OUT_0_DCO_OFS); };
-   void         SetAdcTmOut0Dco(unsigned int value) { SetRegMask(WD2_ADC_TM_OUT_0_DCO_REG, WD2_ADC_TM_OUT_0_DCO_MASK, WD2_ADC_TM_OUT_0_DCO_OFS, value); };
-
-   // 0x0000FF00: ADC_OFFS_ADJ_0_DCO - Device Offset Trim
-   unsigned int GetAdcOffsAdj0Dco() { return BitExtractControl(WD2_ADC_OFFS_ADJ_0_DCO_REG, WD2_ADC_OFFS_ADJ_0_DCO_MASK, WD2_ADC_OFFS_ADJ_0_DCO_OFS); };
-   void         SetAdcOffsAdj0Dco(unsigned int value) { SetRegMask(WD2_ADC_OFFS_ADJ_0_DCO_REG, WD2_ADC_OFFS_ADJ_0_DCO_MASK, WD2_ADC_OFFS_ADJ_0_DCO_OFS, value); };
-
-   // 0x00000004: ADC_OM_OUT_INVERT_0_DCO - Output Invert
-   unsigned int GetAdcOmOutInvert0Dco() { return BitExtractControl(WD2_ADC_OM_OUT_INVERT_0_DCO_REG, WD2_ADC_OM_OUT_INVERT_0_DCO_MASK, WD2_ADC_OM_OUT_INVERT_0_DCO_OFS); };
-   void         SetAdcOmOutInvert0Dco(unsigned int value) { SetRegMask(WD2_ADC_OM_OUT_INVERT_0_DCO_REG, WD2_ADC_OM_OUT_INVERT_0_DCO_MASK, WD2_ADC_OM_OUT_INVERT_0_DCO_OFS, value); };
-
-
-
-   ////// ------ Control Register 85 [0x1154]: ADC_0_CH_FCO_CFG - ADC 0 (A) Channel FCO Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000000) ------ //////
-
-   // 0x00C00000: ADC_TM_USR_IN_MODE_0_FCO - User Input Test Mode (see datasheet)
-   unsigned int GetAdcTmUsrInMode0Fco() { return BitExtractControl(WD2_ADC_TM_USR_IN_MODE_0_FCO_REG, WD2_ADC_TM_USR_IN_MODE_0_FCO_MASK, WD2_ADC_TM_USR_IN_MODE_0_FCO_OFS); };
-   void         SetAdcTmUsrInMode0Fco(unsigned int value) { SetRegMask(WD2_ADC_TM_USR_IN_MODE_0_FCO_REG, WD2_ADC_TM_USR_IN_MODE_0_FCO_MASK, WD2_ADC_TM_USR_IN_MODE_0_FCO_OFS, value); };
-
-   // 0x000F0000: ADC_TM_OUT_0_FCO - Output Test Mode (see datasheet)
-   unsigned int GetAdcTmOut0Fco() { return BitExtractControl(WD2_ADC_TM_OUT_0_FCO_REG, WD2_ADC_TM_OUT_0_FCO_MASK, WD2_ADC_TM_OUT_0_FCO_OFS); };
-   void         SetAdcTmOut0Fco(unsigned int value) { SetRegMask(WD2_ADC_TM_OUT_0_FCO_REG, WD2_ADC_TM_OUT_0_FCO_MASK, WD2_ADC_TM_OUT_0_FCO_OFS, value); };
-
-   // 0x0000FF00: ADC_OFFS_ADJ_0_FCO - Device Offset Trim
-   unsigned int GetAdcOffsAdj0Fco() { return BitExtractControl(WD2_ADC_OFFS_ADJ_0_FCO_REG, WD2_ADC_OFFS_ADJ_0_FCO_MASK, WD2_ADC_OFFS_ADJ_0_FCO_OFS); };
-   void         SetAdcOffsAdj0Fco(unsigned int value) { SetRegMask(WD2_ADC_OFFS_ADJ_0_FCO_REG, WD2_ADC_OFFS_ADJ_0_FCO_MASK, WD2_ADC_OFFS_ADJ_0_FCO_OFS, value); };
-
-   // 0x00000004: ADC_OM_OUT_INVERT_0_FCO - Output Invert
-   unsigned int GetAdcOmOutInvert0Fco() { return BitExtractControl(WD2_ADC_OM_OUT_INVERT_0_FCO_REG, WD2_ADC_OM_OUT_INVERT_0_FCO_MASK, WD2_ADC_OM_OUT_INVERT_0_FCO_OFS); };
-   void         SetAdcOmOutInvert0Fco(unsigned int value) { SetRegMask(WD2_ADC_OM_OUT_INVERT_0_FCO_REG, WD2_ADC_OM_OUT_INVERT_0_FCO_MASK, WD2_ADC_OM_OUT_INVERT_0_FCO_OFS, value); };
-
-
-
-   ////// ------ Control Register 86 [0x1158]: ADC_1_CH_A_CFG - ADC 1 (B) Channel A Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ------ //////
-
-   // 0x00C00000: ADC_TM_USR_IN_MODE_1_A - User Input Test Mode (see datasheet)
-   unsigned int GetAdcTmUsrInMode1A() { return BitExtractControl(WD2_ADC_TM_USR_IN_MODE_1_A_REG, WD2_ADC_TM_USR_IN_MODE_1_A_MASK, WD2_ADC_TM_USR_IN_MODE_1_A_OFS); };
-   void         SetAdcTmUsrInMode1A(unsigned int value) { SetRegMask(WD2_ADC_TM_USR_IN_MODE_1_A_REG, WD2_ADC_TM_USR_IN_MODE_1_A_MASK, WD2_ADC_TM_USR_IN_MODE_1_A_OFS, value); };
-
-   // 0x000F0000: ADC_TM_OUT_1_A - Output Test Mode (see datasheet)
-   unsigned int GetAdcTmOut1A() { return BitExtractControl(WD2_ADC_TM_OUT_1_A_REG, WD2_ADC_TM_OUT_1_A_MASK, WD2_ADC_TM_OUT_1_A_OFS); };
-   void         SetAdcTmOut1A(unsigned int value) { SetRegMask(WD2_ADC_TM_OUT_1_A_REG, WD2_ADC_TM_OUT_1_A_MASK, WD2_ADC_TM_OUT_1_A_OFS, value); };
-
-   // 0x0000FF00: ADC_OFFS_ADJ_1_A - Device Offset Trim
-   unsigned int GetAdcOffsAdj1A() { return BitExtractControl(WD2_ADC_OFFS_ADJ_1_A_REG, WD2_ADC_OFFS_ADJ_1_A_MASK, WD2_ADC_OFFS_ADJ_1_A_OFS); };
-   void         SetAdcOffsAdj1A(unsigned int value) { SetRegMask(WD2_ADC_OFFS_ADJ_1_A_REG, WD2_ADC_OFFS_ADJ_1_A_MASK, WD2_ADC_OFFS_ADJ_1_A_OFS, value); };
-
-   // 0x00000004: ADC_OM_OUT_INVERT_1_A - Output Invert
-   unsigned int GetAdcOmOutInvert1A() { return BitExtractControl(WD2_ADC_OM_OUT_INVERT_1_A_REG, WD2_ADC_OM_OUT_INVERT_1_A_MASK, WD2_ADC_OM_OUT_INVERT_1_A_OFS); };
-   void         SetAdcOmOutInvert1A(unsigned int value) { SetRegMask(WD2_ADC_OM_OUT_INVERT_1_A_REG, WD2_ADC_OM_OUT_INVERT_1_A_MASK, WD2_ADC_OM_OUT_INVERT_1_A_OFS, value); };
-
-
-
-   ////// ------ Control Register 87 [0x115C]: ADC_1_CH_B_CFG - ADC 1 (B) Channel B Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ------ //////
-
-   // 0x00C00000: ADC_TM_USR_IN_MODE_1_B - User Input Test Mode (see datasheet)
-   unsigned int GetAdcTmUsrInMode1B() { return BitExtractControl(WD2_ADC_TM_USR_IN_MODE_1_B_REG, WD2_ADC_TM_USR_IN_MODE_1_B_MASK, WD2_ADC_TM_USR_IN_MODE_1_B_OFS); };
-   void         SetAdcTmUsrInMode1B(unsigned int value) { SetRegMask(WD2_ADC_TM_USR_IN_MODE_1_B_REG, WD2_ADC_TM_USR_IN_MODE_1_B_MASK, WD2_ADC_TM_USR_IN_MODE_1_B_OFS, value); };
-
-   // 0x000F0000: ADC_TM_OUT_1_B - Output Test Mode (see datasheet)
-   unsigned int GetAdcTmOut1B() { return BitExtractControl(WD2_ADC_TM_OUT_1_B_REG, WD2_ADC_TM_OUT_1_B_MASK, WD2_ADC_TM_OUT_1_B_OFS); };
-   void         SetAdcTmOut1B(unsigned int value) { SetRegMask(WD2_ADC_TM_OUT_1_B_REG, WD2_ADC_TM_OUT_1_B_MASK, WD2_ADC_TM_OUT_1_B_OFS, value); };
-
-   // 0x0000FF00: ADC_OFFS_ADJ_1_B - Device Offset Trim
-   unsigned int GetAdcOffsAdj1B() { return BitExtractControl(WD2_ADC_OFFS_ADJ_1_B_REG, WD2_ADC_OFFS_ADJ_1_B_MASK, WD2_ADC_OFFS_ADJ_1_B_OFS); };
-   void         SetAdcOffsAdj1B(unsigned int value) { SetRegMask(WD2_ADC_OFFS_ADJ_1_B_REG, WD2_ADC_OFFS_ADJ_1_B_MASK, WD2_ADC_OFFS_ADJ_1_B_OFS, value); };
-
-   // 0x00000004: ADC_OM_OUT_INVERT_1_B - Output Invert
-   unsigned int GetAdcOmOutInvert1B() { return BitExtractControl(WD2_ADC_OM_OUT_INVERT_1_B_REG, WD2_ADC_OM_OUT_INVERT_1_B_MASK, WD2_ADC_OM_OUT_INVERT_1_B_OFS); };
-   void         SetAdcOmOutInvert1B(unsigned int value) { SetRegMask(WD2_ADC_OM_OUT_INVERT_1_B_REG, WD2_ADC_OM_OUT_INVERT_1_B_MASK, WD2_ADC_OM_OUT_INVERT_1_B_OFS, value); };
-
-
-
-   ////// ------ Control Register 88 [0x1160]: ADC_1_CH_C_CFG - ADC 1 (B) Channel C Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ------ //////
-
-   // 0x00C00000: ADC_TM_USR_IN_MODE_1_C - User Input Test Mode (see datasheet)
-   unsigned int GetAdcTmUsrInMode1C() { return BitExtractControl(WD2_ADC_TM_USR_IN_MODE_1_C_REG, WD2_ADC_TM_USR_IN_MODE_1_C_MASK, WD2_ADC_TM_USR_IN_MODE_1_C_OFS); };
-   void         SetAdcTmUsrInMode1C(unsigned int value) { SetRegMask(WD2_ADC_TM_USR_IN_MODE_1_C_REG, WD2_ADC_TM_USR_IN_MODE_1_C_MASK, WD2_ADC_TM_USR_IN_MODE_1_C_OFS, value); };
-
-   // 0x000F0000: ADC_TM_OUT_1_C - Output Test Mode (see datasheet)
-   unsigned int GetAdcTmOut1C() { return BitExtractControl(WD2_ADC_TM_OUT_1_C_REG, WD2_ADC_TM_OUT_1_C_MASK, WD2_ADC_TM_OUT_1_C_OFS); };
-   void         SetAdcTmOut1C(unsigned int value) { SetRegMask(WD2_ADC_TM_OUT_1_C_REG, WD2_ADC_TM_OUT_1_C_MASK, WD2_ADC_TM_OUT_1_C_OFS, value); };
-
-   // 0x0000FF00: ADC_OFFS_ADJ_1_C - Device Offset Trim
-   unsigned int GetAdcOffsAdj1C() { return BitExtractControl(WD2_ADC_OFFS_ADJ_1_C_REG, WD2_ADC_OFFS_ADJ_1_C_MASK, WD2_ADC_OFFS_ADJ_1_C_OFS); };
-   void         SetAdcOffsAdj1C(unsigned int value) { SetRegMask(WD2_ADC_OFFS_ADJ_1_C_REG, WD2_ADC_OFFS_ADJ_1_C_MASK, WD2_ADC_OFFS_ADJ_1_C_OFS, value); };
-
-   // 0x00000004: ADC_OM_OUT_INVERT_1_C - Output Invert
-   unsigned int GetAdcOmOutInvert1C() { return BitExtractControl(WD2_ADC_OM_OUT_INVERT_1_C_REG, WD2_ADC_OM_OUT_INVERT_1_C_MASK, WD2_ADC_OM_OUT_INVERT_1_C_OFS); };
-   void         SetAdcOmOutInvert1C(unsigned int value) { SetRegMask(WD2_ADC_OM_OUT_INVERT_1_C_REG, WD2_ADC_OM_OUT_INVERT_1_C_MASK, WD2_ADC_OM_OUT_INVERT_1_C_OFS, value); };
-
-
-
-   ////// ------ Control Register 89 [0x1164]: ADC_1_CH_D_CFG - ADC 1 (B) Channel D Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ------ //////
-
-   // 0x00C00000: ADC_TM_USR_IN_MODE_1_D - User Input Test Mode (see datasheet)
-   unsigned int GetAdcTmUsrInMode1D() { return BitExtractControl(WD2_ADC_TM_USR_IN_MODE_1_D_REG, WD2_ADC_TM_USR_IN_MODE_1_D_MASK, WD2_ADC_TM_USR_IN_MODE_1_D_OFS); };
-   void         SetAdcTmUsrInMode1D(unsigned int value) { SetRegMask(WD2_ADC_TM_USR_IN_MODE_1_D_REG, WD2_ADC_TM_USR_IN_MODE_1_D_MASK, WD2_ADC_TM_USR_IN_MODE_1_D_OFS, value); };
-
-   // 0x000F0000: ADC_TM_OUT_1_D - Output Test Mode (see datasheet)
-   unsigned int GetAdcTmOut1D() { return BitExtractControl(WD2_ADC_TM_OUT_1_D_REG, WD2_ADC_TM_OUT_1_D_MASK, WD2_ADC_TM_OUT_1_D_OFS); };
-   void         SetAdcTmOut1D(unsigned int value) { SetRegMask(WD2_ADC_TM_OUT_1_D_REG, WD2_ADC_TM_OUT_1_D_MASK, WD2_ADC_TM_OUT_1_D_OFS, value); };
-
-   // 0x0000FF00: ADC_OFFS_ADJ_1_D - Device Offset Trim
-   unsigned int GetAdcOffsAdj1D() { return BitExtractControl(WD2_ADC_OFFS_ADJ_1_D_REG, WD2_ADC_OFFS_ADJ_1_D_MASK, WD2_ADC_OFFS_ADJ_1_D_OFS); };
-   void         SetAdcOffsAdj1D(unsigned int value) { SetRegMask(WD2_ADC_OFFS_ADJ_1_D_REG, WD2_ADC_OFFS_ADJ_1_D_MASK, WD2_ADC_OFFS_ADJ_1_D_OFS, value); };
-
-   // 0x00000004: ADC_OM_OUT_INVERT_1_D - Output Invert
-   unsigned int GetAdcOmOutInvert1D() { return BitExtractControl(WD2_ADC_OM_OUT_INVERT_1_D_REG, WD2_ADC_OM_OUT_INVERT_1_D_MASK, WD2_ADC_OM_OUT_INVERT_1_D_OFS); };
-   void         SetAdcOmOutInvert1D(unsigned int value) { SetRegMask(WD2_ADC_OM_OUT_INVERT_1_D_REG, WD2_ADC_OM_OUT_INVERT_1_D_MASK, WD2_ADC_OM_OUT_INVERT_1_D_OFS, value); };
-
-
-
-   ////// ------ Control Register 90 [0x1168]: ADC_1_CH_E_CFG - ADC 1 (B) Channel E Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ------ //////
-
-   // 0x00C00000: ADC_TM_USR_IN_MODE_1_E - User Input Test Mode (see datasheet)
-   unsigned int GetAdcTmUsrInMode1E() { return BitExtractControl(WD2_ADC_TM_USR_IN_MODE_1_E_REG, WD2_ADC_TM_USR_IN_MODE_1_E_MASK, WD2_ADC_TM_USR_IN_MODE_1_E_OFS); };
-   void         SetAdcTmUsrInMode1E(unsigned int value) { SetRegMask(WD2_ADC_TM_USR_IN_MODE_1_E_REG, WD2_ADC_TM_USR_IN_MODE_1_E_MASK, WD2_ADC_TM_USR_IN_MODE_1_E_OFS, value); };
-
-   // 0x000F0000: ADC_TM_OUT_1_E - Output Test Mode (see datasheet)
-   unsigned int GetAdcTmOut1E() { return BitExtractControl(WD2_ADC_TM_OUT_1_E_REG, WD2_ADC_TM_OUT_1_E_MASK, WD2_ADC_TM_OUT_1_E_OFS); };
-   void         SetAdcTmOut1E(unsigned int value) { SetRegMask(WD2_ADC_TM_OUT_1_E_REG, WD2_ADC_TM_OUT_1_E_MASK, WD2_ADC_TM_OUT_1_E_OFS, value); };
-
-   // 0x0000FF00: ADC_OFFS_ADJ_1_E - Device Offset Trim
-   unsigned int GetAdcOffsAdj1E() { return BitExtractControl(WD2_ADC_OFFS_ADJ_1_E_REG, WD2_ADC_OFFS_ADJ_1_E_MASK, WD2_ADC_OFFS_ADJ_1_E_OFS); };
-   void         SetAdcOffsAdj1E(unsigned int value) { SetRegMask(WD2_ADC_OFFS_ADJ_1_E_REG, WD2_ADC_OFFS_ADJ_1_E_MASK, WD2_ADC_OFFS_ADJ_1_E_OFS, value); };
-
-   // 0x00000004: ADC_OM_OUT_INVERT_1_E - Output Invert
-   unsigned int GetAdcOmOutInvert1E() { return BitExtractControl(WD2_ADC_OM_OUT_INVERT_1_E_REG, WD2_ADC_OM_OUT_INVERT_1_E_MASK, WD2_ADC_OM_OUT_INVERT_1_E_OFS); };
-   void         SetAdcOmOutInvert1E(unsigned int value) { SetRegMask(WD2_ADC_OM_OUT_INVERT_1_E_REG, WD2_ADC_OM_OUT_INVERT_1_E_MASK, WD2_ADC_OM_OUT_INVERT_1_E_OFS, value); };
-
-
-
-   ////// ------ Control Register 91 [0x116C]: ADC_1_CH_F_CFG - ADC 1 (B) Channel F Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ------ //////
-
-   // 0x00C00000: ADC_TM_USR_IN_MODE_1_F - User Input Test Mode (see datasheet)
-   unsigned int GetAdcTmUsrInMode1F() { return BitExtractControl(WD2_ADC_TM_USR_IN_MODE_1_F_REG, WD2_ADC_TM_USR_IN_MODE_1_F_MASK, WD2_ADC_TM_USR_IN_MODE_1_F_OFS); };
-   void         SetAdcTmUsrInMode1F(unsigned int value) { SetRegMask(WD2_ADC_TM_USR_IN_MODE_1_F_REG, WD2_ADC_TM_USR_IN_MODE_1_F_MASK, WD2_ADC_TM_USR_IN_MODE_1_F_OFS, value); };
-
-   // 0x000F0000: ADC_TM_OUT_1_F - Output Test Mode (see datasheet)
-   unsigned int GetAdcTmOut1F() { return BitExtractControl(WD2_ADC_TM_OUT_1_F_REG, WD2_ADC_TM_OUT_1_F_MASK, WD2_ADC_TM_OUT_1_F_OFS); };
-   void         SetAdcTmOut1F(unsigned int value) { SetRegMask(WD2_ADC_TM_OUT_1_F_REG, WD2_ADC_TM_OUT_1_F_MASK, WD2_ADC_TM_OUT_1_F_OFS, value); };
-
-   // 0x0000FF00: ADC_OFFS_ADJ_1_F - Device Offset Trim
-   unsigned int GetAdcOffsAdj1F() { return BitExtractControl(WD2_ADC_OFFS_ADJ_1_F_REG, WD2_ADC_OFFS_ADJ_1_F_MASK, WD2_ADC_OFFS_ADJ_1_F_OFS); };
-   void         SetAdcOffsAdj1F(unsigned int value) { SetRegMask(WD2_ADC_OFFS_ADJ_1_F_REG, WD2_ADC_OFFS_ADJ_1_F_MASK, WD2_ADC_OFFS_ADJ_1_F_OFS, value); };
-
-   // 0x00000004: ADC_OM_OUT_INVERT_1_F - Output Invert
-   unsigned int GetAdcOmOutInvert1F() { return BitExtractControl(WD2_ADC_OM_OUT_INVERT_1_F_REG, WD2_ADC_OM_OUT_INVERT_1_F_MASK, WD2_ADC_OM_OUT_INVERT_1_F_OFS); };
-   void         SetAdcOmOutInvert1F(unsigned int value) { SetRegMask(WD2_ADC_OM_OUT_INVERT_1_F_REG, WD2_ADC_OM_OUT_INVERT_1_F_MASK, WD2_ADC_OM_OUT_INVERT_1_F_OFS, value); };
-
-
-
-   ////// ------ Control Register 92 [0x1170]: ADC_1_CH_G_CFG - ADC 1 (B) Channel G Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ------ //////
-
-   // 0x00C00000: ADC_TM_USR_IN_MODE_1_G - User Input Test Mode (see datasheet)
-   unsigned int GetAdcTmUsrInMode1G() { return BitExtractControl(WD2_ADC_TM_USR_IN_MODE_1_G_REG, WD2_ADC_TM_USR_IN_MODE_1_G_MASK, WD2_ADC_TM_USR_IN_MODE_1_G_OFS); };
-   void         SetAdcTmUsrInMode1G(unsigned int value) { SetRegMask(WD2_ADC_TM_USR_IN_MODE_1_G_REG, WD2_ADC_TM_USR_IN_MODE_1_G_MASK, WD2_ADC_TM_USR_IN_MODE_1_G_OFS, value); };
-
-   // 0x000F0000: ADC_TM_OUT_1_G - Output Test Mode (see datasheet)
-   unsigned int GetAdcTmOut1G() { return BitExtractControl(WD2_ADC_TM_OUT_1_G_REG, WD2_ADC_TM_OUT_1_G_MASK, WD2_ADC_TM_OUT_1_G_OFS); };
-   void         SetAdcTmOut1G(unsigned int value) { SetRegMask(WD2_ADC_TM_OUT_1_G_REG, WD2_ADC_TM_OUT_1_G_MASK, WD2_ADC_TM_OUT_1_G_OFS, value); };
-
-   // 0x0000FF00: ADC_OFFS_ADJ_1_G - Device Offset Trim
-   unsigned int GetAdcOffsAdj1G() { return BitExtractControl(WD2_ADC_OFFS_ADJ_1_G_REG, WD2_ADC_OFFS_ADJ_1_G_MASK, WD2_ADC_OFFS_ADJ_1_G_OFS); };
-   void         SetAdcOffsAdj1G(unsigned int value) { SetRegMask(WD2_ADC_OFFS_ADJ_1_G_REG, WD2_ADC_OFFS_ADJ_1_G_MASK, WD2_ADC_OFFS_ADJ_1_G_OFS, value); };
-
-   // 0x00000004: ADC_OM_OUT_INVERT_1_G - Output Invert
-   unsigned int GetAdcOmOutInvert1G() { return BitExtractControl(WD2_ADC_OM_OUT_INVERT_1_G_REG, WD2_ADC_OM_OUT_INVERT_1_G_MASK, WD2_ADC_OM_OUT_INVERT_1_G_OFS); };
-   void         SetAdcOmOutInvert1G(unsigned int value) { SetRegMask(WD2_ADC_OM_OUT_INVERT_1_G_REG, WD2_ADC_OM_OUT_INVERT_1_G_MASK, WD2_ADC_OM_OUT_INVERT_1_G_OFS, value); };
-
-
-
-   ////// ------ Control Register 93 [0x1174]: ADC_1_CH_H_CFG - ADC 1 (B) Channel H Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000000) ------ //////
-
-   // 0x00C00000: ADC_TM_USR_IN_MODE_1_H - User Input Test Mode (see datasheet)
-   unsigned int GetAdcTmUsrInMode1H() { return BitExtractControl(WD2_ADC_TM_USR_IN_MODE_1_H_REG, WD2_ADC_TM_USR_IN_MODE_1_H_MASK, WD2_ADC_TM_USR_IN_MODE_1_H_OFS); };
-   void         SetAdcTmUsrInMode1H(unsigned int value) { SetRegMask(WD2_ADC_TM_USR_IN_MODE_1_H_REG, WD2_ADC_TM_USR_IN_MODE_1_H_MASK, WD2_ADC_TM_USR_IN_MODE_1_H_OFS, value); };
-
-   // 0x000F0000: ADC_TM_OUT_1_H - Output Test Mode (see datasheet)
-   unsigned int GetAdcTmOut1H() { return BitExtractControl(WD2_ADC_TM_OUT_1_H_REG, WD2_ADC_TM_OUT_1_H_MASK, WD2_ADC_TM_OUT_1_H_OFS); };
-   void         SetAdcTmOut1H(unsigned int value) { SetRegMask(WD2_ADC_TM_OUT_1_H_REG, WD2_ADC_TM_OUT_1_H_MASK, WD2_ADC_TM_OUT_1_H_OFS, value); };
-
-   // 0x0000FF00: ADC_OFFS_ADJ_1_H - Device Offset Trim
-   unsigned int GetAdcOffsAdj1H() { return BitExtractControl(WD2_ADC_OFFS_ADJ_1_H_REG, WD2_ADC_OFFS_ADJ_1_H_MASK, WD2_ADC_OFFS_ADJ_1_H_OFS); };
-   void         SetAdcOffsAdj1H(unsigned int value) { SetRegMask(WD2_ADC_OFFS_ADJ_1_H_REG, WD2_ADC_OFFS_ADJ_1_H_MASK, WD2_ADC_OFFS_ADJ_1_H_OFS, value); };
-
-   // 0x00000004: ADC_OM_OUT_INVERT_1_H - Output Invert
-   unsigned int GetAdcOmOutInvert1H() { return BitExtractControl(WD2_ADC_OM_OUT_INVERT_1_H_REG, WD2_ADC_OM_OUT_INVERT_1_H_MASK, WD2_ADC_OM_OUT_INVERT_1_H_OFS); };
-   void         SetAdcOmOutInvert1H(unsigned int value) { SetRegMask(WD2_ADC_OM_OUT_INVERT_1_H_REG, WD2_ADC_OM_OUT_INVERT_1_H_MASK, WD2_ADC_OM_OUT_INVERT_1_H_OFS, value); };
-
-
-
-   ////// ------ Control Register 94 [0x1178]: ADC_1_CH_DCO_CFG - ADC 1 (B) Channel DCO Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000000) ------ //////
-
-   // 0x00C00000: ADC_TM_USR_IN_MODE_1_DCO - User Input Test Mode (see datasheet)
-   unsigned int GetAdcTmUsrInMode1Dco() { return BitExtractControl(WD2_ADC_TM_USR_IN_MODE_1_DCO_REG, WD2_ADC_TM_USR_IN_MODE_1_DCO_MASK, WD2_ADC_TM_USR_IN_MODE_1_DCO_OFS); };
-   void         SetAdcTmUsrInMode1Dco(unsigned int value) { SetRegMask(WD2_ADC_TM_USR_IN_MODE_1_DCO_REG, WD2_ADC_TM_USR_IN_MODE_1_DCO_MASK, WD2_ADC_TM_USR_IN_MODE_1_DCO_OFS, value); };
-
-   // 0x000F0000: ADC_TM_OUT_1_DCO - Output Test Mode (see datasheet)
-   unsigned int GetAdcTmOut1Dco() { return BitExtractControl(WD2_ADC_TM_OUT_1_DCO_REG, WD2_ADC_TM_OUT_1_DCO_MASK, WD2_ADC_TM_OUT_1_DCO_OFS); };
-   void         SetAdcTmOut1Dco(unsigned int value) { SetRegMask(WD2_ADC_TM_OUT_1_DCO_REG, WD2_ADC_TM_OUT_1_DCO_MASK, WD2_ADC_TM_OUT_1_DCO_OFS, value); };
-
-   // 0x0000FF00: ADC_OFFS_ADJ_1_DCO - Device Offset Trim
-   unsigned int GetAdcOffsAdj1Dco() { return BitExtractControl(WD2_ADC_OFFS_ADJ_1_DCO_REG, WD2_ADC_OFFS_ADJ_1_DCO_MASK, WD2_ADC_OFFS_ADJ_1_DCO_OFS); };
-   void         SetAdcOffsAdj1Dco(unsigned int value) { SetRegMask(WD2_ADC_OFFS_ADJ_1_DCO_REG, WD2_ADC_OFFS_ADJ_1_DCO_MASK, WD2_ADC_OFFS_ADJ_1_DCO_OFS, value); };
-
-   // 0x00000004: ADC_OM_OUT_INVERT_1_DCO - Output Invert
-   unsigned int GetAdcOmOutInvert1Dco() { return BitExtractControl(WD2_ADC_OM_OUT_INVERT_1_DCO_REG, WD2_ADC_OM_OUT_INVERT_1_DCO_MASK, WD2_ADC_OM_OUT_INVERT_1_DCO_OFS); };
-   void         SetAdcOmOutInvert1Dco(unsigned int value) { SetRegMask(WD2_ADC_OM_OUT_INVERT_1_DCO_REG, WD2_ADC_OM_OUT_INVERT_1_DCO_MASK, WD2_ADC_OM_OUT_INVERT_1_DCO_OFS, value); };
-
-
-
-   ////// ------ Control Register 95 [0x117C]: ADC_1_CH_FCO_CFG - ADC 1 (B) Channel FCO Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000000) ------ //////
-
-   // 0x00C00000: ADC_TM_USR_IN_MODE_1_FCO - User Input Test Mode (see datasheet)
-   unsigned int GetAdcTmUsrInMode1Fco() { return BitExtractControl(WD2_ADC_TM_USR_IN_MODE_1_FCO_REG, WD2_ADC_TM_USR_IN_MODE_1_FCO_MASK, WD2_ADC_TM_USR_IN_MODE_1_FCO_OFS); };
-   void         SetAdcTmUsrInMode1Fco(unsigned int value) { SetRegMask(WD2_ADC_TM_USR_IN_MODE_1_FCO_REG, WD2_ADC_TM_USR_IN_MODE_1_FCO_MASK, WD2_ADC_TM_USR_IN_MODE_1_FCO_OFS, value); };
-
-   // 0x000F0000: ADC_TM_OUT_1_FCO - Output Test Mode (see datasheet)
-   unsigned int GetAdcTmOut1Fco() { return BitExtractControl(WD2_ADC_TM_OUT_1_FCO_REG, WD2_ADC_TM_OUT_1_FCO_MASK, WD2_ADC_TM_OUT_1_FCO_OFS); };
-   void         SetAdcTmOut1Fco(unsigned int value) { SetRegMask(WD2_ADC_TM_OUT_1_FCO_REG, WD2_ADC_TM_OUT_1_FCO_MASK, WD2_ADC_TM_OUT_1_FCO_OFS, value); };
-
-   // 0x0000FF00: ADC_OFFS_ADJ_1_FCO - Device Offset Trim
-   unsigned int GetAdcOffsAdj1Fco() { return BitExtractControl(WD2_ADC_OFFS_ADJ_1_FCO_REG, WD2_ADC_OFFS_ADJ_1_FCO_MASK, WD2_ADC_OFFS_ADJ_1_FCO_OFS); };
-   void         SetAdcOffsAdj1Fco(unsigned int value) { SetRegMask(WD2_ADC_OFFS_ADJ_1_FCO_REG, WD2_ADC_OFFS_ADJ_1_FCO_MASK, WD2_ADC_OFFS_ADJ_1_FCO_OFS, value); };
-
-   // 0x00000004: ADC_OM_OUT_INVERT_1_FCO - Output Invert
-   unsigned int GetAdcOmOutInvert1Fco() { return BitExtractControl(WD2_ADC_OM_OUT_INVERT_1_FCO_REG, WD2_ADC_OM_OUT_INVERT_1_FCO_MASK, WD2_ADC_OM_OUT_INVERT_1_FCO_OFS); };
-   void         SetAdcOmOutInvert1Fco(unsigned int value) { SetRegMask(WD2_ADC_OM_OUT_INVERT_1_FCO_REG, WD2_ADC_OM_OUT_INVERT_1_FCO_MASK, WD2_ADC_OM_OUT_INVERT_1_FCO_OFS, value); };
-
-
-
-   ////// ------ Control Register 96 [0x1180]: TRG_CFG - Trigger Configuration (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 73 [0x1124]: TRG_CFG - Trigger Configuration (Default: 0x00000000) ------ //////
 
    // 0x00010000: LEAD_TRAIL_EDGE_SEL - 0 = trigger on leading edge, 1 = trigger on trailing edge
    unsigned int GetLeadTrailEdgeSel() { return BitExtractControl(WD2_LEAD_TRAIL_EDGE_SEL_REG, WD2_LEAD_TRAIL_EDGE_SEL_MASK, WD2_LEAD_TRAIL_EDGE_SEL_OFS); };
@@ -2051,7 +1679,7 @@ public:
 
 
 
-   ////// ------ Control Register 97 [0x1184]: TRG_SRC_POL - Trigger Source Polarity (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 74 [0x1128]: TRG_SRC_POL - Trigger Source Polarity (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_SRC_POLARITY - Polarity of trigger source (0 = normal, 1 = inverted) (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
    unsigned int GetTrgSrcPolarity() { return BitExtractControl(WD2_TRG_SRC_POLARITY_REG, WD2_TRG_SRC_POLARITY_MASK, WD2_TRG_SRC_POLARITY_OFS); };
@@ -2059,7 +1687,7 @@ public:
 
 
 
-   ////// ------ Control Register 98 [0x1188]: TRG_AUTO_PERIOD - Automatic Trigger Period (Default: 0x04C4B400) ------ //////
+   ////// ------ Control Register 75 [0x112C]: TRG_AUTO_PERIOD - Automatic Trigger Period (Default: 0x04C4B400) ------ //////
 
    // 0xFFFFFFFF: AUTO_TRIGGER_PERIOD - Period of automatic trigger in ticks of the DAQ clock
    unsigned int GetAutoTriggerPeriod() { return BitExtractControl(WD2_AUTO_TRIGGER_PERIOD_REG, WD2_AUTO_TRIGGER_PERIOD_MASK, WD2_AUTO_TRIGGER_PERIOD_OFS); };
@@ -2067,7 +1695,7 @@ public:
 
 
 
-   ////// ------ Control Register 99 [0x118C]: TRG_PTRN_EN - Enable for trigger patterns (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 76 [0x1130]: TRG_PTRN_EN - Enable for trigger patterns (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_PTRN_EN - 1 enables the corresponding trigger patterns for the local trigger
    unsigned int GetTrgPtrnEn() { return BitExtractControl(WD2_TRG_PTRN_EN_REG, WD2_TRG_PTRN_EN_MASK, WD2_TRG_PTRN_EN_OFS); };
@@ -2075,7 +1703,7 @@ public:
 
 
 
-   ////// ------ Control Register 100 [0x1190]: TRG_SRC_EN_PTRN0 - Trigger Source Enable Pattern 0 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 77 [0x1134]: TRG_SRC_EN_PTRN0 - Trigger Source Enable Pattern 0 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_SRC_EN_PTRN0 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
    unsigned int GetTrgSrcEnPtrn0() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN0_REG, WD2_TRG_SRC_EN_PTRN0_MASK, WD2_TRG_SRC_EN_PTRN0_OFS); };
@@ -2083,7 +1711,7 @@ public:
 
 
 
-   ////// ------ Control Register 101 [0x1194]: TRG_STATE_PTRN0 - Trigger State Pattern 0 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 78 [0x1138]: TRG_STATE_PTRN0 - Trigger State Pattern 0 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_STATE_PTRN0 - trigger source state pattern (0 = Inhibit, 1 = Coincidence)
    unsigned int GetTrgStatePtrn0() { return BitExtractControl(WD2_TRG_STATE_PTRN0_REG, WD2_TRG_STATE_PTRN0_MASK, WD2_TRG_STATE_PTRN0_OFS); };
@@ -2091,7 +1719,7 @@ public:
 
 
 
-   ////// ------ Control Register 102 [0x1198]: TRG_SRC_EN_PTRN1 - Trigger Source Enable Pattern 1 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 79 [0x113C]: TRG_SRC_EN_PTRN1 - Trigger Source Enable Pattern 1 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_SRC_EN_PTRN1 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
    unsigned int GetTrgSrcEnPtrn1() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN1_REG, WD2_TRG_SRC_EN_PTRN1_MASK, WD2_TRG_SRC_EN_PTRN1_OFS); };
@@ -2099,7 +1727,7 @@ public:
 
 
 
-   ////// ------ Control Register 103 [0x119C]: TRG_STATE_PTRN1 - Trigger State Pattern 1 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 80 [0x1140]: TRG_STATE_PTRN1 - Trigger State Pattern 1 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_STATE_PTRN1 - trigger source state pattern (0 = Inhibit, 1 = Coincidence)
    unsigned int GetTrgStatePtrn1() { return BitExtractControl(WD2_TRG_STATE_PTRN1_REG, WD2_TRG_STATE_PTRN1_MASK, WD2_TRG_STATE_PTRN1_OFS); };
@@ -2107,7 +1735,7 @@ public:
 
 
 
-   ////// ------ Control Register 104 [0x11A0]: TRG_SRC_EN_PTRN2 - Trigger Source Enable Pattern 2 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 81 [0x1144]: TRG_SRC_EN_PTRN2 - Trigger Source Enable Pattern 2 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_SRC_EN_PTRN2 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
    unsigned int GetTrgSrcEnPtrn2() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN2_REG, WD2_TRG_SRC_EN_PTRN2_MASK, WD2_TRG_SRC_EN_PTRN2_OFS); };
@@ -2115,7 +1743,7 @@ public:
 
 
 
-   ////// ------ Control Register 105 [0x11A4]: TRG_STATE_PTRN2 - Trigger State Pattern 2 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 82 [0x1148]: TRG_STATE_PTRN2 - Trigger State Pattern 2 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_STATE_PTRN2 - trigger source state pattern (0 = Inhibit, 1 = Coincidence)
    unsigned int GetTrgStatePtrn2() { return BitExtractControl(WD2_TRG_STATE_PTRN2_REG, WD2_TRG_STATE_PTRN2_MASK, WD2_TRG_STATE_PTRN2_OFS); };
@@ -2123,7 +1751,7 @@ public:
 
 
 
-   ////// ------ Control Register 106 [0x11A8]: TRG_SRC_EN_PTRN3 - Trigger Source Enable Pattern 3 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 83 [0x114C]: TRG_SRC_EN_PTRN3 - Trigger Source Enable Pattern 3 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_SRC_EN_PTRN3 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
    unsigned int GetTrgSrcEnPtrn3() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN3_REG, WD2_TRG_SRC_EN_PTRN3_MASK, WD2_TRG_SRC_EN_PTRN3_OFS); };
@@ -2131,7 +1759,7 @@ public:
 
 
 
-   ////// ------ Control Register 107 [0x11AC]: TRG_STATE_PTRN3 - Trigger State Pattern 3 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 84 [0x1150]: TRG_STATE_PTRN3 - Trigger State Pattern 3 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_STATE_PTRN3 - trigger source state pattern (0 = Inhibit, 1 = Coincidence)
    unsigned int GetTrgStatePtrn3() { return BitExtractControl(WD2_TRG_STATE_PTRN3_REG, WD2_TRG_STATE_PTRN3_MASK, WD2_TRG_STATE_PTRN3_OFS); };
@@ -2139,7 +1767,7 @@ public:
 
 
 
-   ////// ------ Control Register 108 [0x11B0]: TRG_SRC_EN_PTRN4 - Trigger Source Enable Pattern 4 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 85 [0x1154]: TRG_SRC_EN_PTRN4 - Trigger Source Enable Pattern 4 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_SRC_EN_PTRN4 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
    unsigned int GetTrgSrcEnPtrn4() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN4_REG, WD2_TRG_SRC_EN_PTRN4_MASK, WD2_TRG_SRC_EN_PTRN4_OFS); };
@@ -2147,7 +1775,7 @@ public:
 
 
 
-   ////// ------ Control Register 109 [0x11B4]: TRG_STATE_PTRN4 - Trigger State Pattern 4 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 86 [0x1158]: TRG_STATE_PTRN4 - Trigger State Pattern 4 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_STATE_PTRN4 - trigger source state pattern (0 = Inhibit, 1 = Coincidence)
    unsigned int GetTrgStatePtrn4() { return BitExtractControl(WD2_TRG_STATE_PTRN4_REG, WD2_TRG_STATE_PTRN4_MASK, WD2_TRG_STATE_PTRN4_OFS); };
@@ -2155,7 +1783,7 @@ public:
 
 
 
-   ////// ------ Control Register 110 [0x11B8]: TRG_SRC_EN_PTRN5 - Trigger Source Enable Pattern 5 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 87 [0x115C]: TRG_SRC_EN_PTRN5 - Trigger Source Enable Pattern 5 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_SRC_EN_PTRN5 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
    unsigned int GetTrgSrcEnPtrn5() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN5_REG, WD2_TRG_SRC_EN_PTRN5_MASK, WD2_TRG_SRC_EN_PTRN5_OFS); };
@@ -2163,7 +1791,7 @@ public:
 
 
 
-   ////// ------ Control Register 111 [0x11BC]: TRG_STATE_PTRN5 - Trigger State Pattern 5 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 88 [0x1160]: TRG_STATE_PTRN5 - Trigger State Pattern 5 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_STATE_PTRN5 - trigger source state pattern (0 = Inhibit, 1 = Coincidence)
    unsigned int GetTrgStatePtrn5() { return BitExtractControl(WD2_TRG_STATE_PTRN5_REG, WD2_TRG_STATE_PTRN5_MASK, WD2_TRG_STATE_PTRN5_OFS); };
@@ -2171,7 +1799,7 @@ public:
 
 
 
-   ////// ------ Control Register 112 [0x11C0]: TRG_SRC_EN_PTRN6 - Trigger Source Enable Pattern 6 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 89 [0x1164]: TRG_SRC_EN_PTRN6 - Trigger Source Enable Pattern 6 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_SRC_EN_PTRN6 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
    unsigned int GetTrgSrcEnPtrn6() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN6_REG, WD2_TRG_SRC_EN_PTRN6_MASK, WD2_TRG_SRC_EN_PTRN6_OFS); };
@@ -2179,7 +1807,7 @@ public:
 
 
 
-   ////// ------ Control Register 113 [0x11C4]: TRG_STATE_PTRN6 - Trigger State Pattern 6 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 90 [0x1168]: TRG_STATE_PTRN6 - Trigger State Pattern 6 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_STATE_PTRN6 - trigger source state pattern (0 = Inhibit, 1 = Coincidence)
    unsigned int GetTrgStatePtrn6() { return BitExtractControl(WD2_TRG_STATE_PTRN6_REG, WD2_TRG_STATE_PTRN6_MASK, WD2_TRG_STATE_PTRN6_OFS); };
@@ -2187,7 +1815,7 @@ public:
 
 
 
-   ////// ------ Control Register 114 [0x11C8]: TRG_SRC_EN_PTRN7 - Trigger Source Enable Pattern 7 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 91 [0x116C]: TRG_SRC_EN_PTRN7 - Trigger Source Enable Pattern 7 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_SRC_EN_PTRN7 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
    unsigned int GetTrgSrcEnPtrn7() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN7_REG, WD2_TRG_SRC_EN_PTRN7_MASK, WD2_TRG_SRC_EN_PTRN7_OFS); };
@@ -2195,7 +1823,7 @@ public:
 
 
 
-   ////// ------ Control Register 115 [0x11CC]: TRG_STATE_PTRN7 - Trigger State Pattern 7 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 92 [0x1170]: TRG_STATE_PTRN7 - Trigger State Pattern 7 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_STATE_PTRN7 - trigger source state pattern (0 = Inhibit, 1 = Coincidence)
    unsigned int GetTrgStatePtrn7() { return BitExtractControl(WD2_TRG_STATE_PTRN7_REG, WD2_TRG_STATE_PTRN7_MASK, WD2_TRG_STATE_PTRN7_OFS); };
@@ -2203,7 +1831,7 @@ public:
 
 
 
-   ////// ------ Control Register 116 [0x11D0]: TRG_SRC_EN_PTRN8 - Trigger Source Enable Pattern 8 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 93 [0x1174]: TRG_SRC_EN_PTRN8 - Trigger Source Enable Pattern 8 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_SRC_EN_PTRN8 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
    unsigned int GetTrgSrcEnPtrn8() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN8_REG, WD2_TRG_SRC_EN_PTRN8_MASK, WD2_TRG_SRC_EN_PTRN8_OFS); };
@@ -2211,7 +1839,7 @@ public:
 
 
 
-   ////// ------ Control Register 117 [0x11D4]: TRG_STATE_PTRN8 - Trigger State Pattern 8 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 94 [0x1178]: TRG_STATE_PTRN8 - Trigger State Pattern 8 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_STATE_PTRN8 - trigger source state pattern (0 = Inhibit, 1 = Coincidence)
    unsigned int GetTrgStatePtrn8() { return BitExtractControl(WD2_TRG_STATE_PTRN8_REG, WD2_TRG_STATE_PTRN8_MASK, WD2_TRG_STATE_PTRN8_OFS); };
@@ -2219,7 +1847,7 @@ public:
 
 
 
-   ////// ------ Control Register 118 [0x11D8]: TRG_SRC_EN_PTRN9 - Trigger Source Enable Pattern 9 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 95 [0x117C]: TRG_SRC_EN_PTRN9 - Trigger Source Enable Pattern 9 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_SRC_EN_PTRN9 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
    unsigned int GetTrgSrcEnPtrn9() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN9_REG, WD2_TRG_SRC_EN_PTRN9_MASK, WD2_TRG_SRC_EN_PTRN9_OFS); };
@@ -2227,7 +1855,7 @@ public:
 
 
 
-   ////// ------ Control Register 119 [0x11DC]: TRG_STATE_PTRN9 - Trigger State Pattern 9 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 96 [0x1180]: TRG_STATE_PTRN9 - Trigger State Pattern 9 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_STATE_PTRN9 - trigger source state pattern (0 = Inhibit, 1 = Coincidence)
    unsigned int GetTrgStatePtrn9() { return BitExtractControl(WD2_TRG_STATE_PTRN9_REG, WD2_TRG_STATE_PTRN9_MASK, WD2_TRG_STATE_PTRN9_OFS); };
@@ -2235,7 +1863,7 @@ public:
 
 
 
-   ////// ------ Control Register 120 [0x11E0]: TRG_SRC_EN_PTRN10 - Trigger Source Enable Pattern 10 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 97 [0x1184]: TRG_SRC_EN_PTRN10 - Trigger Source Enable Pattern 10 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_SRC_EN_PTRN10 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
    unsigned int GetTrgSrcEnPtrn10() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN10_REG, WD2_TRG_SRC_EN_PTRN10_MASK, WD2_TRG_SRC_EN_PTRN10_OFS); };
@@ -2243,7 +1871,7 @@ public:
 
 
 
-   ////// ------ Control Register 121 [0x11E4]: TRG_STATE_PTRN10 - Trigger State Pattern 10 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 98 [0x1188]: TRG_STATE_PTRN10 - Trigger State Pattern 10 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_STATE_PTRN10 - trigger source state pattern (0 = Inhibit, 1 = Coincidence)
    unsigned int GetTrgStatePtrn10() { return BitExtractControl(WD2_TRG_STATE_PTRN10_REG, WD2_TRG_STATE_PTRN10_MASK, WD2_TRG_STATE_PTRN10_OFS); };
@@ -2251,7 +1879,7 @@ public:
 
 
 
-   ////// ------ Control Register 122 [0x11E8]: TRG_SRC_EN_PTRN11 - Trigger Source Enable Pattern 11 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 99 [0x118C]: TRG_SRC_EN_PTRN11 - Trigger Source Enable Pattern 11 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_SRC_EN_PTRN11 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
    unsigned int GetTrgSrcEnPtrn11() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN11_REG, WD2_TRG_SRC_EN_PTRN11_MASK, WD2_TRG_SRC_EN_PTRN11_OFS); };
@@ -2259,7 +1887,7 @@ public:
 
 
 
-   ////// ------ Control Register 123 [0x11EC]: TRG_STATE_PTRN11 - Trigger State Pattern 11 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 100 [0x1190]: TRG_STATE_PTRN11 - Trigger State Pattern 11 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_STATE_PTRN11 - trigger source state pattern (0 = Inhibit, 1 = Coincidence)
    unsigned int GetTrgStatePtrn11() { return BitExtractControl(WD2_TRG_STATE_PTRN11_REG, WD2_TRG_STATE_PTRN11_MASK, WD2_TRG_STATE_PTRN11_OFS); };
@@ -2267,7 +1895,7 @@ public:
 
 
 
-   ////// ------ Control Register 124 [0x11F0]: TRG_SRC_EN_PTRN12 - Trigger Source Enable Pattern 12 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 101 [0x1194]: TRG_SRC_EN_PTRN12 - Trigger Source Enable Pattern 12 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_SRC_EN_PTRN12 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
    unsigned int GetTrgSrcEnPtrn12() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN12_REG, WD2_TRG_SRC_EN_PTRN12_MASK, WD2_TRG_SRC_EN_PTRN12_OFS); };
@@ -2275,7 +1903,7 @@ public:
 
 
 
-   ////// ------ Control Register 125 [0x11F4]: TRG_STATE_PTRN12 - Trigger State Pattern 12 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 102 [0x1198]: TRG_STATE_PTRN12 - Trigger State Pattern 12 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_STATE_PTRN12 - trigger source state pattern (0 = Inhibit, 1 = Coincidence)
    unsigned int GetTrgStatePtrn12() { return BitExtractControl(WD2_TRG_STATE_PTRN12_REG, WD2_TRG_STATE_PTRN12_MASK, WD2_TRG_STATE_PTRN12_OFS); };
@@ -2283,7 +1911,7 @@ public:
 
 
 
-   ////// ------ Control Register 126 [0x11F8]: TRG_SRC_EN_PTRN13 - Trigger Source Enable Pattern 13 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 103 [0x119C]: TRG_SRC_EN_PTRN13 - Trigger Source Enable Pattern 13 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_SRC_EN_PTRN13 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
    unsigned int GetTrgSrcEnPtrn13() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN13_REG, WD2_TRG_SRC_EN_PTRN13_MASK, WD2_TRG_SRC_EN_PTRN13_OFS); };
@@ -2291,7 +1919,7 @@ public:
 
 
 
-   ////// ------ Control Register 127 [0x11FC]: TRG_STATE_PTRN13 - Trigger State Pattern 13 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 104 [0x11A0]: TRG_STATE_PTRN13 - Trigger State Pattern 13 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_STATE_PTRN13 - trigger source state pattern (0 = Inhibit, 1 = Coincidence)
    unsigned int GetTrgStatePtrn13() { return BitExtractControl(WD2_TRG_STATE_PTRN13_REG, WD2_TRG_STATE_PTRN13_MASK, WD2_TRG_STATE_PTRN13_OFS); };
@@ -2299,7 +1927,7 @@ public:
 
 
 
-   ////// ------ Control Register 128 [0x1200]: TRG_SRC_EN_PTRN14 - Trigger Source Enable Pattern 14 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 105 [0x11A4]: TRG_SRC_EN_PTRN14 - Trigger Source Enable Pattern 14 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_SRC_EN_PTRN14 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
    unsigned int GetTrgSrcEnPtrn14() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN14_REG, WD2_TRG_SRC_EN_PTRN14_MASK, WD2_TRG_SRC_EN_PTRN14_OFS); };
@@ -2307,7 +1935,7 @@ public:
 
 
 
-   ////// ------ Control Register 129 [0x1204]: TRG_STATE_PTRN14 - Trigger State Pattern 14 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 106 [0x11A8]: TRG_STATE_PTRN14 - Trigger State Pattern 14 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_STATE_PTRN14 - trigger source state pattern (0 = Inhibit, 1 = Coincidence)
    unsigned int GetTrgStatePtrn14() { return BitExtractControl(WD2_TRG_STATE_PTRN14_REG, WD2_TRG_STATE_PTRN14_MASK, WD2_TRG_STATE_PTRN14_OFS); };
@@ -2315,7 +1943,7 @@ public:
 
 
 
-   ////// ------ Control Register 130 [0x1208]: TRG_SRC_EN_PTRN15 - Trigger Source Enable Pattern 15 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 107 [0x11AC]: TRG_SRC_EN_PTRN15 - Trigger Source Enable Pattern 15 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_SRC_EN_PTRN15 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
    unsigned int GetTrgSrcEnPtrn15() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN15_REG, WD2_TRG_SRC_EN_PTRN15_MASK, WD2_TRG_SRC_EN_PTRN15_OFS); };
@@ -2323,7 +1951,7 @@ public:
 
 
 
-   ////// ------ Control Register 131 [0x120C]: TRG_STATE_PTRN15 - Trigger State Pattern 15 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 108 [0x11B0]: TRG_STATE_PTRN15 - Trigger State Pattern 15 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_STATE_PTRN15 - trigger source state pattern (0 = Inhibit, 1 = Coincidence)
    unsigned int GetTrgStatePtrn15() { return BitExtractControl(WD2_TRG_STATE_PTRN15_REG, WD2_TRG_STATE_PTRN15_MASK, WD2_TRG_STATE_PTRN15_OFS); };
@@ -2331,7 +1959,7 @@ public:
 
 
 
-   ////// ------ Control Register 132 [0x1210]: TRG_SRC_EN_PTRN16 - Trigger Source Enable Pattern 16 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 109 [0x11B4]: TRG_SRC_EN_PTRN16 - Trigger Source Enable Pattern 16 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_SRC_EN_PTRN16 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
    unsigned int GetTrgSrcEnPtrn16() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN16_REG, WD2_TRG_SRC_EN_PTRN16_MASK, WD2_TRG_SRC_EN_PTRN16_OFS); };
@@ -2339,7 +1967,7 @@ public:
 
 
 
-   ////// ------ Control Register 133 [0x1214]: TRG_STATE_PTRN16 - Trigger State Pattern 16 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 110 [0x11B8]: TRG_STATE_PTRN16 - Trigger State Pattern 16 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_STATE_PTRN16 - trigger source state pattern (0 = Inhibit, 1 = Coincidence)
    unsigned int GetTrgStatePtrn16() { return BitExtractControl(WD2_TRG_STATE_PTRN16_REG, WD2_TRG_STATE_PTRN16_MASK, WD2_TRG_STATE_PTRN16_OFS); };
@@ -2347,7 +1975,7 @@ public:
 
 
 
-   ////// ------ Control Register 134 [0x1218]: TRG_SRC_EN_PTRN17 - Trigger Source Enable Pattern 17 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 111 [0x11BC]: TRG_SRC_EN_PTRN17 - Trigger Source Enable Pattern 17 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_SRC_EN_PTRN17 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
    unsigned int GetTrgSrcEnPtrn17() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN17_REG, WD2_TRG_SRC_EN_PTRN17_MASK, WD2_TRG_SRC_EN_PTRN17_OFS); };
@@ -2355,7 +1983,7 @@ public:
 
 
 
-   ////// ------ Control Register 135 [0x121C]: TRG_STATE_PTRN17 - Trigger State Pattern 17 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 112 [0x11C0]: TRG_STATE_PTRN17 - Trigger State Pattern 17 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_STATE_PTRN17 - trigger source state pattern (0 = Inhibit, 1 = Coincidence)
    unsigned int GetTrgStatePtrn17() { return BitExtractControl(WD2_TRG_STATE_PTRN17_REG, WD2_TRG_STATE_PTRN17_MASK, WD2_TRG_STATE_PTRN17_OFS); };
@@ -2363,7 +1991,7 @@ public:
 
 
 
-   ////// ------ Control Register 136 [0x1220]: TRG_SRC_EN_PTRN18 - Trigger Source Enable Pattern 18 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 113 [0x11C4]: TRG_SRC_EN_PTRN18 - Trigger Source Enable Pattern 18 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_SRC_EN_PTRN18 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
    unsigned int GetTrgSrcEnPtrn18() { return BitExtractControl(WD2_TRG_SRC_EN_PTRN18_REG, WD2_TRG_SRC_EN_PTRN18_MASK, WD2_TRG_SRC_EN_PTRN18_OFS); };
@@ -2371,7 +1999,7 @@ public:
 
 
 
-   ////// ------ Control Register 137 [0x1224]: TRG_STATE_PTRN18 - Trigger State Pattern 18 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 114 [0x11C8]: TRG_STATE_PTRN18 - Trigger State Pattern 18 (Default: 0x00000000) ------ //////
 
    // 0x0007FFFF: TRG_STATE_PTRN18 - trigger source state pattern (0 = Inhibit, 1 = Coincidence)
    unsigned int GetTrgStatePtrn18() { return BitExtractControl(WD2_TRG_STATE_PTRN18_REG, WD2_TRG_STATE_PTRN18_MASK, WD2_TRG_STATE_PTRN18_OFS); };
@@ -2379,7 +2007,7 @@ public:
 
 
 
-   ////// ------ Control Register 138 [0x1228]: ADV_TRG_CTRL - Advanced Trigger Control Register (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 115 [0x11CC]: ADV_TRG_CTRL - Advanced Trigger Control Register (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CTRL - Advanced trigger control register
    unsigned int GetAdvTrgCtrl() { return BitExtractControl(WD2_ADV_TRG_CTRL_REG, WD2_ADV_TRG_CTRL_MASK, WD2_ADV_TRG_CTRL_OFS); };
@@ -2387,7 +2015,7 @@ public:
 
 
 
-   ////// ------ Control Register 139 [0x122C]: ADV_TRG_CH_CAL0 - Advanced Trigger Channel Calibration Register 0 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 116 [0x11D0]: ADV_TRG_CH_CAL0 - Advanced Trigger Channel Calibration Register 0 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CH_CAL0 - Advanced trigger channel calibration register 0
    unsigned int GetAdvTrgChCal0() { return BitExtractControl(WD2_ADV_TRG_CH_CAL0_REG, WD2_ADV_TRG_CH_CAL0_MASK, WD2_ADV_TRG_CH_CAL0_OFS); };
@@ -2395,7 +2023,7 @@ public:
 
 
 
-   ////// ------ Control Register 140 [0x1230]: ADV_TRG_CH_CAL1 - Advanced Trigger Channel Calibration Register 1 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 117 [0x11D4]: ADV_TRG_CH_CAL1 - Advanced Trigger Channel Calibration Register 1 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CH_CAL1 - Advanced trigger channel calibration register 1
    unsigned int GetAdvTrgChCal1() { return BitExtractControl(WD2_ADV_TRG_CH_CAL1_REG, WD2_ADV_TRG_CH_CAL1_MASK, WD2_ADV_TRG_CH_CAL1_OFS); };
@@ -2403,7 +2031,7 @@ public:
 
 
 
-   ////// ------ Control Register 141 [0x1234]: ADV_TRG_CH_CAL2 - Advanced Trigger Channel Calibration Register 2 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 118 [0x11D8]: ADV_TRG_CH_CAL2 - Advanced Trigger Channel Calibration Register 2 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CH_CAL2 - Advanced trigger channel calibration register 2
    unsigned int GetAdvTrgChCal2() { return BitExtractControl(WD2_ADV_TRG_CH_CAL2_REG, WD2_ADV_TRG_CH_CAL2_MASK, WD2_ADV_TRG_CH_CAL2_OFS); };
@@ -2411,7 +2039,7 @@ public:
 
 
 
-   ////// ------ Control Register 142 [0x1238]: ADV_TRG_CH_CAL3 - Advanced Trigger Channel Calibration Register 3 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 119 [0x11DC]: ADV_TRG_CH_CAL3 - Advanced Trigger Channel Calibration Register 3 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CH_CAL3 - Advanced trigger channel calibration register 3
    unsigned int GetAdvTrgChCal3() { return BitExtractControl(WD2_ADV_TRG_CH_CAL3_REG, WD2_ADV_TRG_CH_CAL3_MASK, WD2_ADV_TRG_CH_CAL3_OFS); };
@@ -2419,7 +2047,7 @@ public:
 
 
 
-   ////// ------ Control Register 143 [0x123C]: ADV_TRG_PED_CFG - Advanced Trigger Pedestal Configuration Register (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 120 [0x11E0]: ADV_TRG_PED_CFG - Advanced Trigger Pedestal Configuration Register (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_PED_CFG - Advanced trigger pedestal configuration register
    unsigned int GetAdvTrgPedCfg() { return BitExtractControl(WD2_ADV_TRG_PED_CFG_REG, WD2_ADV_TRG_PED_CFG_MASK, WD2_ADV_TRG_PED_CFG_OFS); };
@@ -2427,7 +2055,7 @@ public:
 
 
 
-   ////// ------ Control Register 144 [0x1240]: ADV_TRG_THR0 - Advanced Trigger Threshold 0 Register (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 121 [0x11E4]: ADV_TRG_THR0 - Advanced Trigger Threshold 0 Register (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_THR0 - Advanced trigger threshold 0 register
    unsigned int GetAdvTrgThr0() { return BitExtractControl(WD2_ADV_TRG_THR0_REG, WD2_ADV_TRG_THR0_MASK, WD2_ADV_TRG_THR0_OFS); };
@@ -2435,7 +2063,7 @@ public:
 
 
 
-   ////// ------ Control Register 145 [0x1244]: ADV_TRG_THR1 - Advanced Trigger Threshold 1 Register (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 122 [0x11E8]: ADV_TRG_THR1 - Advanced Trigger Threshold 1 Register (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_THR1 - Advanced trigger threshold 1 register
    unsigned int GetAdvTrgThr1() { return BitExtractControl(WD2_ADV_TRG_THR1_REG, WD2_ADV_TRG_THR1_MASK, WD2_ADV_TRG_THR1_OFS); };
@@ -2443,7 +2071,7 @@ public:
 
 
 
-   ////// ------ Control Register 146 [0x1248]: ADV_TRG_THR2 - Advanced Trigger Threshold 2 Register (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 123 [0x11EC]: ADV_TRG_THR2 - Advanced Trigger Threshold 2 Register (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_THR2 - Advanced trigger threshold 2 register
    unsigned int GetAdvTrgThr2() { return BitExtractControl(WD2_ADV_TRG_THR2_REG, WD2_ADV_TRG_THR2_MASK, WD2_ADV_TRG_THR2_OFS); };
@@ -2451,7 +2079,7 @@ public:
 
 
 
-   ////// ------ Control Register 147 [0x124C]: ADV_TRG_TX_CHK_WORD0 - Advanced Trigger Transmition Check Word 0 Register (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 124 [0x11F0]: ADV_TRG_TX_CHK_WORD0 - Advanced Trigger Transmition Check Word 0 Register (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_TX_CHK_WORD0 - Advanced trigger transmition check word 0 register
    unsigned int GetAdvTrgTxChkWord0() { return BitExtractControl(WD2_ADV_TRG_TX_CHK_WORD0_REG, WD2_ADV_TRG_TX_CHK_WORD0_MASK, WD2_ADV_TRG_TX_CHK_WORD0_OFS); };
@@ -2459,7 +2087,7 @@ public:
 
 
 
-   ////// ------ Control Register 148 [0x1250]: ADV_TRG_TX_CHK_WORD1 - Advanced Trigger Transmition Check Word 1 Register (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 125 [0x11F4]: ADV_TRG_TX_CHK_WORD1 - Advanced Trigger Transmition Check Word 1 Register (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_TX_CHK_WORD1 - Advanced trigger transmition check word 1 register
    unsigned int GetAdvTrgTxChkWord1() { return BitExtractControl(WD2_ADV_TRG_TX_CHK_WORD1_REG, WD2_ADV_TRG_TX_CHK_WORD1_MASK, WD2_ADV_TRG_TX_CHK_WORD1_OFS); };
@@ -2467,7 +2095,7 @@ public:
 
 
 
-   ////// ------ Control Register 149 [0x1254]: ADV_TRG_TDC_CH_MASK - Advanced Trigger TDC Channel Mask (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 126 [0x11F8]: ADV_TRG_TDC_CH_MASK - Advanced Trigger TDC Channel Mask (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_TDC_CH_MASK - Advanced trigger TDC channel mask
    unsigned int GetAdvTrgTdcChMask() { return BitExtractControl(WD2_ADV_TRG_TDC_CH_MASK_REG, WD2_ADV_TRG_TDC_CH_MASK_MASK, WD2_ADV_TRG_TDC_CH_MASK_OFS); };
@@ -2475,7 +2103,7 @@ public:
 
 
 
-   ////// ------ Control Register 150 [0x1258]: ADV_TRG_CFG12 - Advanced Trigger Configuration Register 12 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 127 [0x11FC]: ADV_TRG_CFG12 - Advanced Trigger Configuration Register 12 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CFG_12 - Advanced trigger configuration register 12
    unsigned int GetAdvTrgCfg12() { return BitExtractControl(WD2_ADV_TRG_CFG_12_REG, WD2_ADV_TRG_CFG_12_MASK, WD2_ADV_TRG_CFG_12_OFS); };
@@ -2483,7 +2111,7 @@ public:
 
 
 
-   ////// ------ Control Register 151 [0x125C]: ADV_TRG_CFG13 - Advanced Trigger Configuration Register 13 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 128 [0x1200]: ADV_TRG_CFG13 - Advanced Trigger Configuration Register 13 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CFG_13 - Advanced trigger configuration register 13
    unsigned int GetAdvTrgCfg13() { return BitExtractControl(WD2_ADV_TRG_CFG_13_REG, WD2_ADV_TRG_CFG_13_MASK, WD2_ADV_TRG_CFG_13_OFS); };
@@ -2491,7 +2119,7 @@ public:
 
 
 
-   ////// ------ Control Register 152 [0x1260]: ADV_TRG_CFG14 - Advanced Trigger Configuration Register 14 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 129 [0x1204]: ADV_TRG_CFG14 - Advanced Trigger Configuration Register 14 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CFG_14 - Advanced trigger configuration register 14
    unsigned int GetAdvTrgCfg14() { return BitExtractControl(WD2_ADV_TRG_CFG_14_REG, WD2_ADV_TRG_CFG_14_MASK, WD2_ADV_TRG_CFG_14_OFS); };
@@ -2499,7 +2127,7 @@ public:
 
 
 
-   ////// ------ Control Register 153 [0x1264]: ADV_TRG_CFG15 - Advanced Trigger Configuration Register 15 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 130 [0x1208]: ADV_TRG_CFG15 - Advanced Trigger Configuration Register 15 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CFG_15 - Advanced trigger configuration register 15
    unsigned int GetAdvTrgCfg15() { return BitExtractControl(WD2_ADV_TRG_CFG_15_REG, WD2_ADV_TRG_CFG_15_MASK, WD2_ADV_TRG_CFG_15_OFS); };
@@ -2507,7 +2135,7 @@ public:
 
 
 
-   ////// ------ Control Register 154 [0x1268]: ADV_TRG_CFG16 - Advanced Trigger Configuration Register 16 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 131 [0x120C]: ADV_TRG_CFG16 - Advanced Trigger Configuration Register 16 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CFG_16 - Advanced trigger configuration register 16
    unsigned int GetAdvTrgCfg16() { return BitExtractControl(WD2_ADV_TRG_CFG_16_REG, WD2_ADV_TRG_CFG_16_MASK, WD2_ADV_TRG_CFG_16_OFS); };
@@ -2515,7 +2143,7 @@ public:
 
 
 
-   ////// ------ Control Register 155 [0x126C]: ADV_TRG_CFG17 - Advanced Trigger Configuration Register 17 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 132 [0x1210]: ADV_TRG_CFG17 - Advanced Trigger Configuration Register 17 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CFG_17 - Advanced trigger configuration register 17
    unsigned int GetAdvTrgCfg17() { return BitExtractControl(WD2_ADV_TRG_CFG_17_REG, WD2_ADV_TRG_CFG_17_MASK, WD2_ADV_TRG_CFG_17_OFS); };
@@ -2523,7 +2151,7 @@ public:
 
 
 
-   ////// ------ Control Register 156 [0x1270]: ADV_TRG_CFG18 - Advanced Trigger Configuration Register 18 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 133 [0x1214]: ADV_TRG_CFG18 - Advanced Trigger Configuration Register 18 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CFG_18 - Advanced trigger configuration register 18
    unsigned int GetAdvTrgCfg18() { return BitExtractControl(WD2_ADV_TRG_CFG_18_REG, WD2_ADV_TRG_CFG_18_MASK, WD2_ADV_TRG_CFG_18_OFS); };
@@ -2531,7 +2159,7 @@ public:
 
 
 
-   ////// ------ Control Register 157 [0x1274]: ADV_TRG_CFG19 - Advanced Trigger Configuration Register 19 (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 134 [0x1218]: ADV_TRG_CFG19 - Advanced Trigger Configuration Register 19 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_CFG_19 - Advanced trigger configuration register 19
    unsigned int GetAdvTrgCfg19() { return BitExtractControl(WD2_ADV_TRG_CFG_19_REG, WD2_ADV_TRG_CFG_19_MASK, WD2_ADV_TRG_CFG_19_OFS); };
@@ -2539,7 +2167,7 @@ public:
 
 
 
-   ////// ------ Control Register 158 [0x1278]: SET_TIME_LSB - Set System Time (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 135 [0x121C]: SET_TIME_LSB - Set System Time (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SET_TIME_LSB - LSBs of 64bit system time counter set value  (time is updated when MSBs are written)
    unsigned int GetSetTimeLsb() { return BitExtractControl(WD2_SET_TIME_LSB_REG, WD2_SET_TIME_LSB_MASK, WD2_SET_TIME_LSB_OFS); };
@@ -2547,7 +2175,7 @@ public:
 
 
 
-   ////// ------ Control Register 159 [0x127C]: SET_TIME_MSB - Set System Time (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 136 [0x1220]: SET_TIME_MSB - Set System Time (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SET_TIME_MSB - MSBs of 64bit system time counter set value  (time is updated when MSBs are written)
    unsigned int GetSetTimeMsb() { return BitExtractControl(WD2_SET_TIME_MSB_REG, WD2_SET_TIME_MSB_MASK, WD2_SET_TIME_MSB_OFS); };
@@ -2555,7 +2183,7 @@ public:
 
 
 
-   ////// ------ Control Register 160 [0x1280]: DBG_SIG_SEL - Debug Signal Select for MCX Connectors on HV Board (Default: 0x00000000) ------ //////
+   ////// ------ Control Register 137 [0x1224]: DBG_SIG_SEL - Debug Signal Select for MCX Connectors on HV Board (Default: 0x00000000) ------ //////
 
    // 0x000F0000: MCX_TX_SIG_SEL - Select for TX connector (see RX connector for mapping)
    unsigned int GetMcxTxSigSel() { return BitExtractControl(WD2_MCX_TX_SIG_SEL_REG, WD2_MCX_TX_SIG_SEL_MASK, WD2_MCX_TX_SIG_SEL_OFS); };
@@ -2581,7 +2209,7 @@ public:
 
 
 
-   ////// ------ Control Register 161 [0x1284]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: None) ------ //////
+   ////// ------ Control Register 138 [0x1228]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: None) ------ //////
 
    // 0xFFFFFFFF: CRC32_REG_BANK - Keep at the end of the register bank
    unsigned int GetCrc32RegBank() { return BitExtractControl(WD2_CRC32_REG_BANK_REG, WD2_CRC32_REG_BANK_MASK, WD2_CRC32_REG_BANK_OFS); };
@@ -2589,7 +2217,7 @@ public:
 
 
 
-   ////// ------ Status Register 0 [0x0000]: HW_VER - Hardware version information of the PCB (Default: 0xAC010213) ------ //////
+   ////// ------ Status Register 0 [0x0000]: HW_VER - Hardware version information of the PCB (Default: 0xAC01021B) ------ //////
 
    // 0xFF000000: BOARD_MAGIC - 0xAC, Magic number for DRS board identification
    unsigned int GetBoardMagic() { return BitExtractStatus(WD2_BOARD_MAGIC_REG, WD2_BOARD_MAGIC_MASK, WD2_BOARD_MAGIC_OFS); };
@@ -2608,7 +2236,7 @@ public:
 
 
 
-   ////// ------ Status Register 1 [0x0004]: REG_LAYOUT_VER - Register map layout version information (Default: 0x00080008) ------ //////
+   ////// ------ Status Register 1 [0x0004]: REG_LAYOUT_VER - Register map layout version information (Default: 0x00090009) ------ //////
 
    // 0xFFFF0000: REG_LAYOUT_COMP_LEVEL - Register map layout compatibility level
    unsigned int GetRegLayoutCompLevel() { return BitExtractStatus(WD2_REG_LAYOUT_COMP_LEVEL_REG, WD2_REG_LAYOUT_COMP_LEVEL_MASK, WD2_REG_LAYOUT_COMP_LEVEL_OFS); };
@@ -2631,7 +2259,7 @@ public:
 
 
 
-   ////// ------ Status Register 3 [0x000C]: FW_BUILD_TIME - Time when the firmware was built and compatibility level (Default: 0x04000000) ------ //////
+   ////// ------ Status Register 3 [0x000C]: FW_BUILD_TIME - Time when the firmware was built and compatibility level (Default: 0x05000000) ------ //////
 
    // 0xFF000000: FW_COMPAT_LEVEL - Firmware compatibility level
    unsigned int GetFwCompatLevel() { return BitExtractStatus(WD2_FW_COMPAT_LEVEL_REG, WD2_FW_COMPAT_LEVEL_MASK, WD2_FW_COMPAT_LEVEL_OFS); };
@@ -2706,17 +2334,17 @@ public:
    // 0xFFFF0000: TEMPERATURE - temperature in 0.0625 deg. C units
    unsigned int GetTemperature() { return BitExtractStatus(WD2_TEMPERATURE_REG, WD2_TEMPERATURE_MASK, WD2_TEMPERATURE_OFS); };
 
-   // 0x00002000: DAQ_CLK_DEF_PHASE_OK - DAQ clock default phase setting is valid
+   // 0x00008000: OVERTEMP - Overtemperature from external sensor
+   unsigned int GetOvertemp() { return BitExtractStatus(WD2_OVERTEMP_REG, WD2_OVERTEMP_MASK, WD2_OVERTEMP_OFS); };
+
+   // 0x00001000: DAQ_CLK_DEF_PHASE_OK - DAQ clock default phase setting is valid
    unsigned int GetDaqClkDefPhaseOk() { return BitExtractStatus(WD2_DAQ_CLK_DEF_PHASE_OK_REG, WD2_DAQ_CLK_DEF_PHASE_OK_MASK, WD2_DAQ_CLK_DEF_PHASE_OK_OFS); };
 
-   // 0x00001000: DAQ_CLK_DEF_PHASE_CHKD - DAQ clock default phase setting is checked
+   // 0x00000800: DAQ_CLK_DEF_PHASE_CHKD - DAQ clock default phase setting is checked
    unsigned int GetDaqClkDefPhaseChkd() { return BitExtractStatus(WD2_DAQ_CLK_DEF_PHASE_CHKD_REG, WD2_DAQ_CLK_DEF_PHASE_CHKD_MASK, WD2_DAQ_CLK_DEF_PHASE_CHKD_OFS); };
 
-   // 0x00000400: DRS_CONFIG_DONE - DRS configuration done
+   // 0x00000200: DRS_CONFIG_DONE - DRS configuration done
    unsigned int GetDrsConfigDone() { return BitExtractStatus(WD2_DRS_CONFIG_DONE_REG, WD2_DRS_CONFIG_DONE_MASK, WD2_DRS_CONFIG_DONE_OFS); };
-
-   // 0x00000200: FLASH_SEL - SPI Flash select from backplane (inverted = high active)
-   unsigned int GetFlashSel() { return BitExtractStatus(WD2_FLASH_SEL_REG, WD2_FLASH_SEL_MASK, WD2_FLASH_SEL_OFS); };
 
    // 0x00000100: BOARD_SEL - Board select from backplane (inverted = high active)
    unsigned int GetBoardSel() { return BitExtractStatus(WD2_BOARD_SEL_REG, WD2_BOARD_SEL_MASK, WD2_BOARD_SEL_OFS); };
@@ -2813,359 +2441,343 @@ public:
 
 
 
-   ////// ------ Status Register 17 [0x0044]: ADC_INFO - Chip ID and Grade of the ADCs (Default: 0x00000000) ------ //////
-
-   // 0xFF000000: ADC_0_CHIP_ID - Chip ID of ADC 0 (A) (0x93 for AD9637)
-   unsigned int GetAdc0ChipId() { return BitExtractStatus(WD2_ADC_0_CHIP_ID_REG, WD2_ADC_0_CHIP_ID_MASK, WD2_ADC_0_CHIP_ID_OFS); };
-
-   // 0x00700000: ADC_0_SPEED - Speed Grade of ADC 0 (A) (0=40MS, 1=80MS)
-   unsigned int GetAdc0Speed() { return BitExtractStatus(WD2_ADC_0_SPEED_REG, WD2_ADC_0_SPEED_MASK, WD2_ADC_0_SPEED_OFS); };
-
-   // 0x0000FF00: ADC_1_CHIP_ID - Chip ID of ADC 1 (B) (0x93 for AD9637)
-   unsigned int GetAdc1ChipId() { return BitExtractStatus(WD2_ADC_1_CHIP_ID_REG, WD2_ADC_1_CHIP_ID_MASK, WD2_ADC_1_CHIP_ID_OFS); };
-
-   // 0x00000070: ADC_1_SPEED - Speed Grade of ADC 1 (B) (0=40MS, 1=80MS)
-   unsigned int GetAdc1Speed() { return BitExtractStatus(WD2_ADC_1_SPEED_REG, WD2_ADC_1_SPEED_MASK, WD2_ADC_1_SPEED_OFS); };
-
-
-
-   ////// ------ Status Register 18 [0x0048]: HV_VER - HV Board Version (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 17 [0x0044]: HV_VER - HV Board Version (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: HV_VER - HV board version (16bit Voltage in V, 16bit Current in mA)
    unsigned int GetHvVer() { return BitExtractStatus(WD2_HV_VER_REG, WD2_HV_VER_MASK, WD2_HV_VER_OFS); };
 
 
 
-   ////// ------ Status Register 19 [0x004C]: HV_I_MEAS_0 - Measured actual current of the HV supply on channel 0 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 18 [0x0048]: HV_I_MEAS_0 - Measured actual current of the HV supply on channel 0 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: HV_I_MEAS_0 - Float value (i_meas)
    unsigned int GetHvIMeas0() { return BitExtractStatus(WD2_HV_I_MEAS_0_REG, WD2_HV_I_MEAS_0_MASK, WD2_HV_I_MEAS_0_OFS); };
 
 
 
-   ////// ------ Status Register 20 [0x0050]: HV_I_MEAS_1 - Measured actual current of the HV supply on channel 1 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 19 [0x004C]: HV_I_MEAS_1 - Measured actual current of the HV supply on channel 1 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: HV_I_MEAS_1 - Float value (i_meas)
    unsigned int GetHvIMeas1() { return BitExtractStatus(WD2_HV_I_MEAS_1_REG, WD2_HV_I_MEAS_1_MASK, WD2_HV_I_MEAS_1_OFS); };
 
 
 
-   ////// ------ Status Register 21 [0x0054]: HV_I_MEAS_2 - Measured actual current of the HV supply on channel 2 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 20 [0x0050]: HV_I_MEAS_2 - Measured actual current of the HV supply on channel 2 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: HV_I_MEAS_2 - Float value (i_meas)
    unsigned int GetHvIMeas2() { return BitExtractStatus(WD2_HV_I_MEAS_2_REG, WD2_HV_I_MEAS_2_MASK, WD2_HV_I_MEAS_2_OFS); };
 
 
 
-   ////// ------ Status Register 22 [0x0058]: HV_I_MEAS_3 - Measured actual current of the HV supply on channel 3 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 21 [0x0054]: HV_I_MEAS_3 - Measured actual current of the HV supply on channel 3 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: HV_I_MEAS_3 - Float value (i_meas)
    unsigned int GetHvIMeas3() { return BitExtractStatus(WD2_HV_I_MEAS_3_REG, WD2_HV_I_MEAS_3_MASK, WD2_HV_I_MEAS_3_OFS); };
 
 
 
-   ////// ------ Status Register 23 [0x005C]: HV_I_MEAS_4 - Measured actual current of the HV supply on channel 4 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 22 [0x0058]: HV_I_MEAS_4 - Measured actual current of the HV supply on channel 4 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: HV_I_MEAS_4 - Float value (i_meas)
    unsigned int GetHvIMeas4() { return BitExtractStatus(WD2_HV_I_MEAS_4_REG, WD2_HV_I_MEAS_4_MASK, WD2_HV_I_MEAS_4_OFS); };
 
 
 
-   ////// ------ Status Register 24 [0x0060]: HV_I_MEAS_5 - Measured actual current of the HV supply on channel 5 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 23 [0x005C]: HV_I_MEAS_5 - Measured actual current of the HV supply on channel 5 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: HV_I_MEAS_5 - Float value (i_meas)
    unsigned int GetHvIMeas5() { return BitExtractStatus(WD2_HV_I_MEAS_5_REG, WD2_HV_I_MEAS_5_MASK, WD2_HV_I_MEAS_5_OFS); };
 
 
 
-   ////// ------ Status Register 25 [0x0064]: HV_I_MEAS_6 - Measured actual current of the HV supply on channel 6 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 24 [0x0060]: HV_I_MEAS_6 - Measured actual current of the HV supply on channel 6 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: HV_I_MEAS_6 - Float value (i_meas)
    unsigned int GetHvIMeas6() { return BitExtractStatus(WD2_HV_I_MEAS_6_REG, WD2_HV_I_MEAS_6_MASK, WD2_HV_I_MEAS_6_OFS); };
 
 
 
-   ////// ------ Status Register 26 [0x0068]: HV_I_MEAS_7 - Measured actual current of the HV supply on channel 7 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 25 [0x0064]: HV_I_MEAS_7 - Measured actual current of the HV supply on channel 7 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: HV_I_MEAS_7 - Float value (i_meas)
    unsigned int GetHvIMeas7() { return BitExtractStatus(WD2_HV_I_MEAS_7_REG, WD2_HV_I_MEAS_7_MASK, WD2_HV_I_MEAS_7_OFS); };
 
 
 
-   ////// ------ Status Register 27 [0x006C]: HV_I_MEAS_8 - Measured actual current of the HV supply on channel 8 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 26 [0x0068]: HV_I_MEAS_8 - Measured actual current of the HV supply on channel 8 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: HV_I_MEAS_8 - Float value (i_meas)
    unsigned int GetHvIMeas8() { return BitExtractStatus(WD2_HV_I_MEAS_8_REG, WD2_HV_I_MEAS_8_MASK, WD2_HV_I_MEAS_8_OFS); };
 
 
 
-   ////// ------ Status Register 28 [0x0070]: HV_I_MEAS_9 - Measured actual current of the HV supply on channel 9 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 27 [0x006C]: HV_I_MEAS_9 - Measured actual current of the HV supply on channel 9 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: HV_I_MEAS_9 - Float value (i_meas)
    unsigned int GetHvIMeas9() { return BitExtractStatus(WD2_HV_I_MEAS_9_REG, WD2_HV_I_MEAS_9_MASK, WD2_HV_I_MEAS_9_OFS); };
 
 
 
-   ////// ------ Status Register 29 [0x0074]: HV_I_MEAS_10 - Measured actual current of the HV supply on channel 10 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 28 [0x0070]: HV_I_MEAS_10 - Measured actual current of the HV supply on channel 10 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: HV_I_MEAS_10 - Float value (i_meas)
    unsigned int GetHvIMeas10() { return BitExtractStatus(WD2_HV_I_MEAS_10_REG, WD2_HV_I_MEAS_10_MASK, WD2_HV_I_MEAS_10_OFS); };
 
 
 
-   ////// ------ Status Register 30 [0x0078]: HV_I_MEAS_11 - Measured actual current of the HV supply on channel 11 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 29 [0x0074]: HV_I_MEAS_11 - Measured actual current of the HV supply on channel 11 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: HV_I_MEAS_11 - Float value (i_meas)
    unsigned int GetHvIMeas11() { return BitExtractStatus(WD2_HV_I_MEAS_11_REG, WD2_HV_I_MEAS_11_MASK, WD2_HV_I_MEAS_11_OFS); };
 
 
 
-   ////// ------ Status Register 31 [0x007C]: HV_I_MEAS_12 - Measured actual current of the HV supply on channel 12 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 30 [0x0078]: HV_I_MEAS_12 - Measured actual current of the HV supply on channel 12 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: HV_I_MEAS_12 - Float value (i_meas)
    unsigned int GetHvIMeas12() { return BitExtractStatus(WD2_HV_I_MEAS_12_REG, WD2_HV_I_MEAS_12_MASK, WD2_HV_I_MEAS_12_OFS); };
 
 
 
-   ////// ------ Status Register 32 [0x0080]: HV_I_MEAS_13 - Measured actual current of the HV supply on channel 13 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 31 [0x007C]: HV_I_MEAS_13 - Measured actual current of the HV supply on channel 13 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: HV_I_MEAS_13 - Float value (i_meas)
    unsigned int GetHvIMeas13() { return BitExtractStatus(WD2_HV_I_MEAS_13_REG, WD2_HV_I_MEAS_13_MASK, WD2_HV_I_MEAS_13_OFS); };
 
 
 
-   ////// ------ Status Register 33 [0x0084]: HV_I_MEAS_14 - Measured actual current of the HV supply on channel 14 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 32 [0x0080]: HV_I_MEAS_14 - Measured actual current of the HV supply on channel 14 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: HV_I_MEAS_14 - Float value (i_meas)
    unsigned int GetHvIMeas14() { return BitExtractStatus(WD2_HV_I_MEAS_14_REG, WD2_HV_I_MEAS_14_MASK, WD2_HV_I_MEAS_14_OFS); };
 
 
 
-   ////// ------ Status Register 34 [0x0088]: HV_I_MEAS_15 - Measured actual current of the HV supply on channel 15 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 33 [0x0084]: HV_I_MEAS_15 - Measured actual current of the HV supply on channel 15 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: HV_I_MEAS_15 - Float value (i_meas)
    unsigned int GetHvIMeas15() { return BitExtractStatus(WD2_HV_I_MEAS_15_REG, WD2_HV_I_MEAS_15_MASK, WD2_HV_I_MEAS_15_OFS); };
 
 
 
-   ////// ------ Status Register 35 [0x008C]: HV_U_BASE_MEAS - Measured actual HV base voltage (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 34 [0x0088]: HV_U_BASE_MEAS - Measured actual HV base voltage (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: HV_U_BASE_MEAS - Float value (ub_meas)
    unsigned int GetHvUBaseMeas() { return BitExtractStatus(WD2_HV_U_BASE_MEAS_REG, WD2_HV_U_BASE_MEAS_MASK, WD2_HV_U_BASE_MEAS_OFS); };
 
 
 
-   ////// ------ Status Register 36 [0x0090]: HV_TEMP_0 - Measured actual temperature of sensor 0 connected to the HV board (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 35 [0x008C]: HV_TEMP_0 - Measured actual temperature of sensor 0 connected to the HV board (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: HV_TEMP_0 - Float value (temp)
    unsigned int GetHvTemp0() { return BitExtractStatus(WD2_HV_TEMP_0_REG, WD2_HV_TEMP_0_MASK, WD2_HV_TEMP_0_OFS); };
 
 
 
-   ////// ------ Status Register 37 [0x0094]: HV_TEMP_1 - Measured actual temperature of sensor 1 connected to the HV board (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 36 [0x0090]: HV_TEMP_1 - Measured actual temperature of sensor 1 connected to the HV board (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: HV_TEMP_1 - Float value (temp)
    unsigned int GetHvTemp1() { return BitExtractStatus(WD2_HV_TEMP_1_REG, WD2_HV_TEMP_1_MASK, WD2_HV_TEMP_1_OFS); };
 
 
 
-   ////// ------ Status Register 38 [0x0098]: HV_TEMP_2 - Measured actual temperature of sensor 2 connected to the HV board (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 37 [0x0094]: HV_TEMP_2 - Measured actual temperature of sensor 2 connected to the HV board (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: HV_TEMP_2 - Float value (temp)
    unsigned int GetHvTemp2() { return BitExtractStatus(WD2_HV_TEMP_2_REG, WD2_HV_TEMP_2_MASK, WD2_HV_TEMP_2_OFS); };
 
 
 
-   ////// ------ Status Register 39 [0x009C]: HV_TEMP_3 - Measured actual temperature of sensor 3 connected to the HV board (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 38 [0x0098]: HV_TEMP_3 - Measured actual temperature of sensor 3 connected to the HV board (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: HV_TEMP_3 - Float value (temp)
    unsigned int GetHvTemp3() { return BitExtractStatus(WD2_HV_TEMP_3_REG, WD2_HV_TEMP_3_MASK, WD2_HV_TEMP_3_OFS); };
 
 
 
-   ////// ------ Status Register 40 [0x00A0]: SCALER_0 - Scaler for input #0 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 39 [0x009C]: SCALER_0 - Scaler for input #0 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_0 - Count rate value of channel 0 (MSBs are latched upon read of LSB register)
    unsigned int GetScaler0() { return BitExtractStatus(WD2_SCALER_0_REG, WD2_SCALER_0_MASK, WD2_SCALER_0_OFS); };
 
 
 
-   ////// ------ Status Register 41 [0x00A4]: SCALER_1 - Scaler for input #1 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 40 [0x00A0]: SCALER_1 - Scaler for input #1 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_1 - Count rate value of channel 1 (MSBs are latched upon read of LSB register)
    unsigned int GetScaler1() { return BitExtractStatus(WD2_SCALER_1_REG, WD2_SCALER_1_MASK, WD2_SCALER_1_OFS); };
 
 
 
-   ////// ------ Status Register 42 [0x00A8]: SCALER_2 - Scaler for input #2 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 41 [0x00A4]: SCALER_2 - Scaler for input #2 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_2 - Count rate value of channel 2 (MSBs are latched upon read of LSB register)
    unsigned int GetScaler2() { return BitExtractStatus(WD2_SCALER_2_REG, WD2_SCALER_2_MASK, WD2_SCALER_2_OFS); };
 
 
 
-   ////// ------ Status Register 43 [0x00AC]: SCALER_3 - Scaler for input #3 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 42 [0x00A8]: SCALER_3 - Scaler for input #3 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_3 - Count rate value of channel 3 (MSBs are latched upon read of LSB register)
    unsigned int GetScaler3() { return BitExtractStatus(WD2_SCALER_3_REG, WD2_SCALER_3_MASK, WD2_SCALER_3_OFS); };
 
 
 
-   ////// ------ Status Register 44 [0x00B0]: SCALER_4 - Scaler for input #4 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 43 [0x00AC]: SCALER_4 - Scaler for input #4 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_4 - Count rate value of channel 4 (MSBs are latched upon read of LSB register)
    unsigned int GetScaler4() { return BitExtractStatus(WD2_SCALER_4_REG, WD2_SCALER_4_MASK, WD2_SCALER_4_OFS); };
 
 
 
-   ////// ------ Status Register 45 [0x00B4]: SCALER_5 - Scaler for input #5 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 44 [0x00B0]: SCALER_5 - Scaler for input #5 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_5 - Count rate value of channel 5 (MSBs are latched upon read of LSB register)
    unsigned int GetScaler5() { return BitExtractStatus(WD2_SCALER_5_REG, WD2_SCALER_5_MASK, WD2_SCALER_5_OFS); };
 
 
 
-   ////// ------ Status Register 46 [0x00B8]: SCALER_6 - Scaler for input #6 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 45 [0x00B4]: SCALER_6 - Scaler for input #6 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_6 - Count rate value of channel 6 (MSBs are latched upon read of LSB register)
    unsigned int GetScaler6() { return BitExtractStatus(WD2_SCALER_6_REG, WD2_SCALER_6_MASK, WD2_SCALER_6_OFS); };
 
 
 
-   ////// ------ Status Register 47 [0x00BC]: SCALER_7 - Scaler for input #7 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 46 [0x00B8]: SCALER_7 - Scaler for input #7 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_7 - Count rate value of channel 7 (MSBs are latched upon read of LSB register)
    unsigned int GetScaler7() { return BitExtractStatus(WD2_SCALER_7_REG, WD2_SCALER_7_MASK, WD2_SCALER_7_OFS); };
 
 
 
-   ////// ------ Status Register 48 [0x00C0]: SCALER_8 - Scaler for input #8 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 47 [0x00BC]: SCALER_8 - Scaler for input #8 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_8 - Count rate value of channel 8 (MSBs are latched upon read of LSB register)
    unsigned int GetScaler8() { return BitExtractStatus(WD2_SCALER_8_REG, WD2_SCALER_8_MASK, WD2_SCALER_8_OFS); };
 
 
 
-   ////// ------ Status Register 49 [0x00C4]: SCALER_9 - Scaler for input #9 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 48 [0x00C0]: SCALER_9 - Scaler for input #9 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_9 - Count rate value of channel 9 (MSBs are latched upon read of LSB register)
    unsigned int GetScaler9() { return BitExtractStatus(WD2_SCALER_9_REG, WD2_SCALER_9_MASK, WD2_SCALER_9_OFS); };
 
 
 
-   ////// ------ Status Register 50 [0x00C8]: SCALER_10 - Scaler for input #10 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 49 [0x00C4]: SCALER_10 - Scaler for input #10 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_10 - Count rate value of channel 10 (MSBs are latched upon read of LSB register)
    unsigned int GetScaler10() { return BitExtractStatus(WD2_SCALER_10_REG, WD2_SCALER_10_MASK, WD2_SCALER_10_OFS); };
 
 
 
-   ////// ------ Status Register 51 [0x00CC]: SCALER_11 - Scaler for input #11 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 50 [0x00C8]: SCALER_11 - Scaler for input #11 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_11 - Count rate value of channel 11 (MSBs are latched upon read of LSB register)
    unsigned int GetScaler11() { return BitExtractStatus(WD2_SCALER_11_REG, WD2_SCALER_11_MASK, WD2_SCALER_11_OFS); };
 
 
 
-   ////// ------ Status Register 52 [0x00D0]: SCALER_12 - Scaler for input #12 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 51 [0x00CC]: SCALER_12 - Scaler for input #12 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_12 - Count rate value of channel 12 (MSBs are latched upon read of LSB register)
    unsigned int GetScaler12() { return BitExtractStatus(WD2_SCALER_12_REG, WD2_SCALER_12_MASK, WD2_SCALER_12_OFS); };
 
 
 
-   ////// ------ Status Register 53 [0x00D4]: SCALER_13 - Scaler for input #13 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 52 [0x00D0]: SCALER_13 - Scaler for input #13 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_13 - Count rate value of channel 13 (MSBs are latched upon read of LSB register)
    unsigned int GetScaler13() { return BitExtractStatus(WD2_SCALER_13_REG, WD2_SCALER_13_MASK, WD2_SCALER_13_OFS); };
 
 
 
-   ////// ------ Status Register 54 [0x00D8]: SCALER_14 - Scaler for input #14 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 53 [0x00D4]: SCALER_14 - Scaler for input #14 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_14 - Count rate value of channel 14 (MSBs are latched upon read of LSB register)
    unsigned int GetScaler14() { return BitExtractStatus(WD2_SCALER_14_REG, WD2_SCALER_14_MASK, WD2_SCALER_14_OFS); };
 
 
 
-   ////// ------ Status Register 55 [0x00DC]: SCALER_15 - Scaler for input #15 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 54 [0x00D8]: SCALER_15 - Scaler for input #15 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_15 - Count rate value of channel 15 (MSBs are latched upon read of LSB register)
    unsigned int GetScaler15() { return BitExtractStatus(WD2_SCALER_15_REG, WD2_SCALER_15_MASK, WD2_SCALER_15_OFS); };
 
 
 
-   ////// ------ Status Register 56 [0x00E0]: SCALER_PTRN_TRG - Scaler for pattern trigger (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 55 [0x00DC]: SCALER_PTRN_TRG - Scaler for pattern trigger (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_PTRN_TRG - Count rate for pattern trigger signal
    unsigned int GetScalerPtrnTrg() { return BitExtractStatus(WD2_SCALER_PTRN_TRG_REG, WD2_SCALER_PTRN_TRG_MASK, WD2_SCALER_PTRN_TRG_OFS); };
 
 
 
-   ////// ------ Status Register 57 [0x00E4]: SCALER_EXT_TRG - Scaler for external trigger (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 56 [0x00E0]: SCALER_EXT_TRG - Scaler for external trigger (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_EXT_TRG - Count rate for trigger signal
    unsigned int GetScalerExtTrg() { return BitExtractStatus(WD2_SCALER_EXT_TRG_REG, WD2_SCALER_EXT_TRG_MASK, WD2_SCALER_EXT_TRG_OFS); };
 
 
 
-   ////// ------ Status Register 58 [0x00E8]: SCALER_EXT_CLK - Scaler for ext. clock input (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 57 [0x00E4]: SCALER_EXT_CLK - Scaler for ext. clock input (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_EXT_CLK - Count rate for external clock input (GLOB_CLK)
    unsigned int GetScalerExtClk() { return BitExtractStatus(WD2_SCALER_EXT_CLK_REG, WD2_SCALER_EXT_CLK_MASK, WD2_SCALER_EXT_CLK_OFS); };
 
 
 
-   ////// ------ Status Register 59 [0x00EC]: SCALER_TIME_STAMP_LSB - Time Stamp for Scaler Values (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 58 [0x00E8]: SCALER_TIME_STAMP_LSB - Time Stamp for Scaler Values (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_TIME_STAMP_LSB - LSBs of 64bit scaler time stamp (MSBs are latched upon read of LSB register)
    unsigned int GetScalerTimeStampLsb() { return BitExtractStatus(WD2_SCALER_TIME_STAMP_LSB_REG, WD2_SCALER_TIME_STAMP_LSB_MASK, WD2_SCALER_TIME_STAMP_LSB_OFS); };
 
 
 
-   ////// ------ Status Register 60 [0x00F0]: SCALER_TIME_STAMP_MSB - Time Stamp for Scaler Values (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 59 [0x00EC]: SCALER_TIME_STAMP_MSB - Time Stamp for Scaler Values (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SCALER_TIME_STAMP_MSB - MSBs of 64bit scaler time stamp (latched upon read of LSB register)
    unsigned int GetScalerTimeStampMsb() { return BitExtractStatus(WD2_SCALER_TIME_STAMP_MSB_REG, WD2_SCALER_TIME_STAMP_MSB_MASK, WD2_SCALER_TIME_STAMP_MSB_OFS); };
 
 
 
-   ////// ------ Status Register 61 [0x00F4]: TIME_LSB - Current System Time (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 60 [0x00F0]: TIME_LSB - Current System Time (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: TIME_LSB - LSBs of 64bit system time counter (MSBs are latched upon read of LSB register)
    unsigned int GetTimeLsb() { return BitExtractStatus(WD2_TIME_LSB_REG, WD2_TIME_LSB_MASK, WD2_TIME_LSB_OFS); };
 
 
 
-   ////// ------ Status Register 62 [0x00F8]: TIME_MSB - Current System Time (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 61 [0x00F4]: TIME_MSB - Current System Time (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: TIME_MSB - MSBs of 64bit system time counter (latched upon read of LSB register)
    unsigned int GetTimeMsb() { return BitExtractStatus(WD2_TIME_MSB_REG, WD2_TIME_MSB_MASK, WD2_TIME_MSB_OFS); };
 
 
 
-   ////// ------ Status Register 63 [0x00FC]: COMP_CH_STAT - Comparator channel status (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 62 [0x00F8]: COMP_CH_STAT - Comparator channel status (Default: 0x00000000) ------ //////
 
    // 0x0000FFFF: COMP_CH_STAT - Status of the comparator inputs
    unsigned int GetCompChStat() { return BitExtractStatus(WD2_COMP_CH_STAT_REG, WD2_COMP_CH_STAT_MASK, WD2_COMP_CH_STAT_OFS); };
 
 
 
-   ////// ------ Status Register 64 [0x0100]: EVENT_TX_RATE - Event Transmission Rate (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 63 [0x00FC]: EVENT_TX_RATE - Event Transmission Rate (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: EVENT_TX_RATE - Number of events transmitted per second
    unsigned int GetEventTxRate() { return BitExtractStatus(WD2_EVENT_TX_RATE_REG, WD2_EVENT_TX_RATE_MASK, WD2_EVENT_TX_RATE_OFS); };
 
 
 
-   ////// ------ Status Register 65 [0x0104]: EVENT_NR - Number of latest event (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 64 [0x0100]: EVENT_NR - Number of latest event (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: EVENT_NUMBER - Number of latest event
    unsigned int GetEventNumber() { return BitExtractStatus(WD2_EVENT_NUMBER_REG, WD2_EVENT_NUMBER_MASK, WD2_EVENT_NUMBER_OFS); };
 
 
 
-   ////// ------ Status Register 66 [0x0108]: TRB_INFO_STAT - Trigger Information via Serial Trigger Bus Status (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 65 [0x0104]: TRB_INFO_STAT - Trigger Information via Serial Trigger Bus Status (Default: 0x00000000) ------ //////
 
    // 0x80000000: TRB_FLAG_NEW - Flag signalling that the current trigger information belongs to the latest trigger received
    unsigned int GetTrbFlagNew() { return BitExtractStatus(WD2_TRB_FLAG_NEW_REG, WD2_TRB_FLAG_NEW_MASK, WD2_TRB_FLAG_NEW_OFS); };
@@ -3178,84 +2790,84 @@ public:
 
 
 
-   ////// ------ Status Register 67 [0x010C]: TRB_INFO_LSB - Trigger Information via Serial Trigger Bus LSBs (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 66 [0x0108]: TRB_INFO_LSB - Trigger Information via Serial Trigger Bus LSBs (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: TRB_INFO_LSB - Trigger information LSBs
    unsigned int GetTrbInfoLsb() { return BitExtractStatus(WD2_TRB_INFO_LSB_REG, WD2_TRB_INFO_LSB_MASK, WD2_TRB_INFO_LSB_OFS); };
 
 
 
-   ////// ------ Status Register 68 [0x0110]: TRB_INFO_MSB - Trigger Information via Serial Trigger Bus MSBs (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 67 [0x010C]: TRB_INFO_MSB - Trigger Information via Serial Trigger Bus MSBs (Default: 0x00000000) ------ //////
 
    // 0x0000FFFF: TRB_INFO_MSB - Trigger information MSBs
    unsigned int GetTrbInfoMsb() { return BitExtractStatus(WD2_TRB_INFO_MSB_REG, WD2_TRB_INFO_MSB_MASK, WD2_TRB_INFO_MSB_OFS); };
 
 
 
-   ////// ------ Status Register 69 [0x0114]: ADV_TRG_TRIG_CELL - Advanced Trigger Cell Register (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 68 [0x0110]: ADV_TRG_TRIG_CELL - Advanced Trigger Cell Register (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_TRIG_CELL - Advanced trigger cell register
    unsigned int GetAdvTrgTrigCell() { return BitExtractStatus(WD2_ADV_TRG_TRIG_CELL_REG, WD2_ADV_TRG_TRIG_CELL_MASK, WD2_ADV_TRG_TRIG_CELL_OFS); };
 
 
 
-   ////// ------ Status Register 70 [0x0118]: ADV_TRG_STAT1 - Advanced Trigger Status Register 1 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 69 [0x0114]: ADV_TRG_STAT1 - Advanced Trigger Status Register 1 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_STAT_1 - Advanced trigger status register 1
    unsigned int GetAdvTrgStat1() { return BitExtractStatus(WD2_ADV_TRG_STAT_1_REG, WD2_ADV_TRG_STAT_1_MASK, WD2_ADV_TRG_STAT_1_OFS); };
 
 
 
-   ////// ------ Status Register 71 [0x011C]: ADV_TRG_STAT2 - Advanced Trigger Status Register 2 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 70 [0x0118]: ADV_TRG_STAT2 - Advanced Trigger Status Register 2 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_STAT_2 - Advanced trigger status register 2
    unsigned int GetAdvTrgStat2() { return BitExtractStatus(WD2_ADV_TRG_STAT_2_REG, WD2_ADV_TRG_STAT_2_MASK, WD2_ADV_TRG_STAT_2_OFS); };
 
 
 
-   ////// ------ Status Register 72 [0x0120]: ADV_TRG_STAT3 - Advanced Trigger Status Register 3 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 71 [0x011C]: ADV_TRG_STAT3 - Advanced Trigger Status Register 3 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_STAT_3 - Advanced trigger status register 3
    unsigned int GetAdvTrgStat3() { return BitExtractStatus(WD2_ADV_TRG_STAT_3_REG, WD2_ADV_TRG_STAT_3_MASK, WD2_ADV_TRG_STAT_3_OFS); };
 
 
 
-   ////// ------ Status Register 73 [0x0124]: ADV_TRG_STAT4 - Advanced Trigger Status Register 4 (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 72 [0x0120]: ADV_TRG_STAT4 - Advanced Trigger Status Register 4 (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: ADV_TRG_STAT_4 - Advanced trigger status register 4
    unsigned int GetAdvTrgStat4() { return BitExtractStatus(WD2_ADV_TRG_STAT_4_REG, WD2_ADV_TRG_STAT_4_MASK, WD2_ADV_TRG_STAT_4_OFS); };
 
 
 
-   ////// ------ Status Register 74 [0x0128]: MAX_DRS_ADC_PKT_SAMPLES - Maximum DRS/ADC samples per Packet (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 73 [0x0124]: MAX_DRS_ADC_PKT_SAMPLES - Maximum DRS/ADC samples per Packet (Default: 0x00000000) ------ //////
 
    // 0x0000FFFF: MAX_DRS_ADC_PKT_SAMPLES - Maximum number of DRS/ADC samples per packet
    unsigned int GetMaxDrsAdcPktSamples() { return BitExtractStatus(WD2_MAX_DRS_ADC_PKT_SAMPLES_REG, WD2_MAX_DRS_ADC_PKT_SAMPLES_MASK, WD2_MAX_DRS_ADC_PKT_SAMPLES_OFS); };
 
 
 
-   ////// ------ Status Register 75 [0x012C]: MAX_TDC_PKT_SAMPLES - Maximum TDC samples per Packet (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 74 [0x0128]: MAX_TDC_PKT_SAMPLES - Maximum TDC samples per Packet (Default: 0x00000000) ------ //////
 
    // 0x0003FFFF: MAX_TDC_PKT_SAMPLES - Maximum number of TDC samples per packet
    unsigned int GetMaxTdcPktSamples() { return BitExtractStatus(WD2_MAX_TDC_PKT_SAMPLES_REG, WD2_MAX_TDC_PKT_SAMPLES_MASK, WD2_MAX_TDC_PKT_SAMPLES_OFS); };
 
 
 
-   ////// ------ Status Register 76 [0x0130]: MAX_TRG_PKT_SAMPLES - Maximum advanced trigger output samples per Packet (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 75 [0x012C]: MAX_TRG_PKT_SAMPLES - Maximum advanced trigger output samples per Packet (Default: 0x00000000) ------ //////
 
    // 0x0000FFFF: MAX_TRG_PKT_SAMPLES - Maximum number of advanced trigger output samples per packet
    unsigned int GetMaxTrgPktSamples() { return BitExtractStatus(WD2_MAX_TRG_PKT_SAMPLES_REG, WD2_MAX_TRG_PKT_SAMPLES_MASK, WD2_MAX_TRG_PKT_SAMPLES_OFS); };
 
 
 
-   ////// ------ Status Register 77 [0x0134]: MAX_SCL_PKT_SAMPLES - Maximum scaler values per Packet (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 76 [0x0130]: MAX_SCL_PKT_SAMPLES - Maximum scaler values per Packet (Default: 0x00000000) ------ //////
 
    // 0x0000FFFF: MAX_SCL_PKT_SAMPLES - Maximum number of scaler values per packet
    unsigned int GetMaxSclPktSamples() { return BitExtractStatus(WD2_MAX_SCL_PKT_SAMPLES_REG, WD2_MAX_SCL_PKT_SAMPLES_MASK, WD2_MAX_SCL_PKT_SAMPLES_OFS); };
 
 
 
-   ////// ------ Status Register 78 [0x0138]: CLK_CTRL_MOD_FLAG - Set if WD2 configuration registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 77 [0x0134]: CLK_CTRL_MOD_FLAG - Set if WD2 configuration registers are modified (Default: 0x00000000) ------ //////
 
    // 0x00000010: TRIGGER_DAQ_CLK_CAL_MOD - Trigger DAQ clock calibration modified flag
    unsigned int GetTriggerDaqClkCalMod() { return BitExtractStatus(WD2_TRIGGER_DAQ_CLK_CAL_MOD_REG, WD2_TRIGGER_DAQ_CLK_CAL_MOD_MASK, WD2_TRIGGER_DAQ_CLK_CAL_MOD_OFS); };
@@ -3274,7 +2886,7 @@ public:
 
 
 
-   ////// ------ Status Register 79 [0x013C]: DRS_MOD_FLAG - Set if DRS configuration registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 78 [0x0138]: DRS_MOD_FLAG - Set if DRS configuration registers are modified (Default: 0x00000000) ------ //////
 
    // 0x00000004: DRS_CTRL_MOD - DRS control bits modified flags
    unsigned int GetDrsCtrlMod() { return BitExtractStatus(WD2_DRS_CTRL_MOD_REG, WD2_DRS_CTRL_MOD_MASK, WD2_DRS_CTRL_MOD_OFS); };
@@ -3287,21 +2899,21 @@ public:
 
 
 
-   ////// ------ Status Register 80 [0x0140]: COM_PLD_SIZE_MOD_FLAG - Set if maximum packet payload size register is modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 79 [0x013C]: COM_PLD_SIZE_MOD_FLAG - Set if maximum packet payload size register is modified (Default: 0x00000000) ------ //////
 
    // 0x0000000F: COM_PLD_SIZE_MOD - Maximum packet payload size modified flag
    unsigned int GetComPldSizeMod() { return BitExtractStatus(WD2_COM_PLD_SIZE_MOD_REG, WD2_COM_PLD_SIZE_MOD_MASK, WD2_COM_PLD_SIZE_MOD_OFS); };
 
 
 
-   ////// ------ Status Register 81 [0x0144]: ADC_SAMPLE_DIV_MOD_FLAG - Set if ADC downsampling divider register is modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 80 [0x0140]: ADC_SAMPLE_DIV_MOD_FLAG - Set if ADC downsampling divider register is modified (Default: 0x00000000) ------ //////
 
    // 0x0000000F: ADC_SAMPLE_DIV_MOD - ADC downsampling divider modified flags
    unsigned int GetAdcSampleDivMod() { return BitExtractStatus(WD2_ADC_SAMPLE_DIV_MOD_REG, WD2_ADC_SAMPLE_DIV_MOD_MASK, WD2_ADC_SAMPLE_DIV_MOD_OFS); };
 
 
 
-   ////// ------ Status Register 82 [0x0148]: DAC_0_1_MOD_FLAG - Set if DAC 0 and 1 configuration registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 81 [0x0144]: DAC_0_1_MOD_FLAG - Set if DAC 0 and 1 configuration registers are modified (Default: 0x00000000) ------ //////
 
    // 0xC0000000: DAC0_A_MOD - DAC channel a modified flags
    unsigned int GetDac0AMod() { return BitExtractStatus(WD2_DAC0_A_MOD_REG, WD2_DAC0_A_MOD_MASK, WD2_DAC0_A_MOD_OFS); };
@@ -3353,7 +2965,7 @@ public:
 
 
 
-   ////// ------ Status Register 83 [0x014C]: DAC_2_MOD_FLAG - Set if DAC 2 configuration registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 82 [0x0148]: DAC_2_MOD_FLAG - Set if DAC 2 configuration registers are modified (Default: 0x00000000) ------ //////
 
    // 0xC0000000: DAC2_A_MOD - DAC channel a modified flags
    unsigned int GetDac2AMod() { return BitExtractStatus(WD2_DAC2_A_MOD_REG, WD2_DAC2_A_MOD_MASK, WD2_DAC2_A_MOD_OFS); };
@@ -3381,7 +2993,7 @@ public:
 
 
 
-   ////// ------ Status Register 84 [0x0150]: FE_0_15_MOD_FLAG - Set if frontend configuraiton registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 83 [0x014C]: FE_0_15_MOD_FLAG - Set if frontend configuraiton registers are modified (Default: 0x00000000) ------ //////
 
    // 0xC0000000: FE_0_MOD - Frontend channel 0 register modified flags
    unsigned int GetFe0Mod() { return BitExtractStatus(WD2_FE_0_MOD_REG, WD2_FE_0_MOD_MASK, WD2_FE_0_MOD_OFS); };
@@ -3433,7 +3045,7 @@ public:
 
 
 
-   ////// ------ Status Register 85 [0x0154]: HV_U_TARGET_0_7_MOD_FLAG - Set if HV target voltage configuraiton of channel 0 to 7 registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 84 [0x0150]: HV_U_TARGET_0_7_MOD_FLAG - Set if HV target voltage configuraiton of channel 0 to 7 registers are modified (Default: 0x00000000) ------ //////
 
    // 0xF0000000: HV_U_TARGET_0_MOD - Target high voltage channel 0 register modified flags
    unsigned int GetHvUTarget0Mod() { return BitExtractStatus(WD2_HV_U_TARGET_0_MOD_REG, WD2_HV_U_TARGET_0_MOD_MASK, WD2_HV_U_TARGET_0_MOD_OFS); };
@@ -3461,7 +3073,7 @@ public:
 
 
 
-   ////// ------ Status Register 86 [0x0158]: HV_U_TARGET_8_15_MOD_FLAG - Set if HV target voltage configuraiton of channel 8 to 15 registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 85 [0x0154]: HV_U_TARGET_8_15_MOD_FLAG - Set if HV target voltage configuraiton of channel 8 to 15 registers are modified (Default: 0x00000000) ------ //////
 
    // 0xF0000000: HV_U_TARGET_8_MOD - Target high voltage channel 8 register modified flags
    unsigned int GetHvUTarget8Mod() { return BitExtractStatus(WD2_HV_U_TARGET_8_MOD_REG, WD2_HV_U_TARGET_8_MOD_MASK, WD2_HV_U_TARGET_8_MOD_OFS); };
@@ -3489,14 +3101,14 @@ public:
 
 
 
-   ////// ------ Status Register 87 [0x015C]: HV_MOD_FLAG - Set if single HV configuraiton registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 86 [0x0158]: HV_MOD_FLAG - Set if single HV configuraiton registers are modified (Default: 0x00000000) ------ //////
 
    // 0x0000000F: HV_R_SHUNT_MOD - HV supply shunt resistor register modified flags
    unsigned int GetHvRShuntMod() { return BitExtractStatus(WD2_HV_R_SHUNT_MOD_REG, WD2_HV_R_SHUNT_MOD_MASK, WD2_HV_R_SHUNT_MOD_OFS); };
 
 
 
-   ////// ------ Status Register 88 [0x0160]: LMK_0_7_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 87 [0x015C]: LMK_0_7_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ------ //////
 
    // 0xF0000000: LMK_0_MOD - LMK channel 0 register modified flags
    unsigned int GetLmk0Mod() { return BitExtractStatus(WD2_LMK_0_MOD_REG, WD2_LMK_0_MOD_MASK, WD2_LMK_0_MOD_OFS); };
@@ -3524,7 +3136,7 @@ public:
 
 
 
-   ////// ------ Status Register 89 [0x0164]: LMK_8_15_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Status Register 88 [0x0160]: LMK_8_15_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ------ //////
 
    // 0x00F00000: LMK_8_MOD - LMK Register 8 modified flags
    unsigned int GetLmk8Mod() { return BitExtractStatus(WD2_LMK_8_MOD_REG, WD2_LMK_8_MOD_MASK, WD2_LMK_8_MOD_OFS); };

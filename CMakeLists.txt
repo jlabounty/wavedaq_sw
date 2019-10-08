@@ -1,4 +1,3 @@
-
 cmake_minimum_required(VERSION 3.0)
 project(wdaq)
 
@@ -6,7 +5,9 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR})
 
 # suppress warnings due to compiler bug on ARM targets
-set(CMAKE_CXX_FLAGS "-Wno-psabi")
+if (${CMAKE_SYSTEM_NAME} MATCHES "ARM")
+   set(CMAKE_CXX_FLAGS "-Wno-psabi")
+endif()
 
 find_package(Threads)
 
@@ -29,7 +30,7 @@ add_subdirectory(read_binary)
 add_definitions(-DWD2_DONT_INCLUDE_REG_ACCESS_VARS -DDCB_DONT_INCLUDE_REG_ACCESS_VARS -DDCB_DONT_INCLUDE_VARS)
 
 add_custom_target(register_map_wd2
-   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/../firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/common/src/register_map_wd2.h ${CMAKE_SOURCE_DIR}/include/register_map_wd2.h
+#   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/../firmware/WD2/wd2_sys_ctrl/wd2_xsdk_sw/rev_g_workspace/wd2_app_sw/common/src/register_map_wd2.h ${CMAKE_SOURCE_DIR}/include/register_map_wd2.h
 )
 
 add_custom_target(register_map_dcb

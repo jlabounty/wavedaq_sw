@@ -492,8 +492,7 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg)
 
 //--------------------------------------------------------------------
 
-void WDB::Connect()
-{
+void WDB::Connect() {
    struct sockaddr_in client_addr;
    struct hostent *phe;
 
@@ -520,9 +519,9 @@ void WDB::Connect()
    // retrieve Ethernet address of board
    phe = gethostbyname(mWDBName.c_str());
    if (phe == NULL)
-      throw std::runtime_error(std::string("Cannot resolve host name ")+mWDBName+".");
+      throw std::runtime_error(std::string("Cannot resolve host name ") + mWDBName + ".");
 
-   std::memcpy((char *)&client_addr.sin_addr, phe->h_addr, phe->h_length);
+   std::memcpy((char *) &client_addr.sin_addr, phe->h_addr, phe->h_length);
    client_addr.sin_family = AF_INET;
    client_addr.sin_port = htons(WD2_CMD_PORT_ASCII);
    std::memcpy(mEthAddrAscii, &client_addr, sizeof(client_addr));
@@ -534,45 +533,84 @@ void WDB::Connect()
    try {
       WDB::SendUDP("");
    } catch (...) {
-      throw std::runtime_error(std::string("Cannot connect to board ")+mWDBName+".");
+      throw std::runtime_error(std::string("Cannot connect to board ") + mWDBName + ".");
    }
 
    // set dbglevel none
    SendUDP("dbglvl none");
 
    // check firmware compatibility level
+   ReceiveStatusRegister(WD2_BOARD_REVISION_REG);
    ReceiveStatusRegister(WD2_FW_COMPAT_LEVEL_REG);
    ReceiveStatusRegister(WD2_REG_LAYOUT_COMP_LEVEL_REG);
    ReceiveStatusRegister(WD2_REG_PROT_VER);
-   if (GetFwCompatLevel() < cRequiredFwCompatLevel) {
-      std::string str("Board ");
-      str += mWDBName + " has incompatible firmware, please upgrade (Board compatibility level: "+
-      std::to_string(GetFwCompatLevel())+", Software compatibility level: "+
-      std::to_string(cRequiredFwCompatLevel)+")";
-      throw std::runtime_error(str);
+
+   if (GetBoardRevision() + 'A' == 'E' || GetBoardRevision() + 'A' == 'F') {
+      if (GetFwCompatLevel() < cRequiredFwCompatLevel2F) {
+         std::string str("Board ");
+         str += mWDBName + " has incompatible firmware, please upgrade (Board compatibility level: " +
+                std::to_string(GetFwCompatLevel()) + ", Software compatibility level: " +
+                std::to_string(cRequiredFwCompatLevel2F) + ")";
+         throw std::runtime_error(str);
+      }
+      if (cRequiredFwCompatLevel2F < GetFwCompatLevel()) {
+         std::string str("Board ");
+         str += mWDBName +
+                " has newer incompatible firmware, please update WD library (Firmware compatibility level: " +
+                std::to_string(GetFwCompatLevel()) + ", Software compatibility level: " +
+                std::to_string(cRequiredFwCompatLevel2F) + ")";
+         throw std::runtime_error(str);
+      }
+      // check register layout compatibility level
+      if (GetRegLayoutCompLevel() < cRequiredRegLayoutCompatLevel2F) {
+         std::string str("Board ");
+         str += mWDBName + " has incompatible register layout, please upgrade (Board compatibility level: " +
+                std::to_string(GetRegLayoutCompLevel()) + ", Software compatibility level: " +
+                std::to_string(cRequiredRegLayoutCompatLevel2F) + ")";
+         throw std::runtime_error(str);
+      }
+      if (cRequiredRegLayoutCompatLevel2F < GetRegLayoutCompLevel()) {
+         std::string str("Board ");
+         str += mWDBName + " has newer register layout, please update WD library (Board compatibility level: " +
+                std::to_string(GetRegLayoutCompLevel()) + ", Software compatibility level: " +
+                std::to_string(cRequiredRegLayoutCompatLevel2F) + ")";
+         throw std::runtime_error(str);
+      }
    }
-   if (cRequiredFwCompatLevel < GetFwCompatLevel()) {
-      std::string str("Board ");
-      str += mWDBName + " has newer incompatible firmware, please update WD library (Firmware compatibility level: "+
-      std::to_string(GetFwCompatLevel())+", Software compatibility level: "+
-      std::to_string(cRequiredFwCompatLevel)+")";
-      throw std::runtime_error(str);
+
+   if (GetBoardRevision() + 'A' == 'G') {
+      if (GetFwCompatLevel() < cRequiredFwCompatLevel2G) {
+         std::string str("Board ");
+         str += mWDBName + " has incompatible firmware, please upgrade (Board compatibility level: " +
+                std::to_string(GetFwCompatLevel()) + ", Software compatibility level: " +
+                std::to_string(cRequiredFwCompatLevel2G) + ")";
+         throw std::runtime_error(str);
+      }
+      if (cRequiredFwCompatLevel2G < GetFwCompatLevel()) {
+         std::string str("Board ");
+         str += mWDBName +
+                " has newer incompatible firmware, please update WD library (Firmware compatibility level: " +
+                std::to_string(GetFwCompatLevel()) + ", Software compatibility level: " +
+                std::to_string(cRequiredFwCompatLevel2G) + ")";
+         throw std::runtime_error(str);
+      }
+      // check register layout compatibility level
+      if (GetRegLayoutCompLevel() < cRequiredRegLayoutCompatLevel2G) {
+         std::string str("Board ");
+         str += mWDBName + " has incompatible register layout, please upgrade (Board compatibility level: " +
+                std::to_string(GetRegLayoutCompLevel()) + ", Software compatibility level: " +
+                std::to_string(cRequiredRegLayoutCompatLevel2G) + ")";
+         throw std::runtime_error(str);
+      }
+      if (cRequiredRegLayoutCompatLevel2G < GetRegLayoutCompLevel()) {
+         std::string str("Board ");
+         str += mWDBName + " has newer register layout, please update WD library (Board compatibility level: " +
+                std::to_string(GetRegLayoutCompLevel()) + ", Software compatibility level: " +
+                std::to_string(cRequiredRegLayoutCompatLevel2G) + ")";
+         throw std::runtime_error(str);
+      }
    }
-   // check register layout compatibility level
-   if (GetRegLayoutCompLevel() < cRequiredRegLayoutCompatLevel) {
-      std::string str("Board ");
-      str += mWDBName + " has incompatible register layout, please upgrade (Board compatibility level: "+
-      std::to_string(GetRegLayoutCompLevel())+", Software compatibility level: "+
-      std::to_string(cRequiredRegLayoutCompatLevel)+")";
-      throw std::runtime_error(str);
-   }
-   if (cRequiredRegLayoutCompatLevel < GetRegLayoutCompLevel()) {
-      std::string str("Board ");
-      str += mWDBName + " has newer register layout, please update WD library (Board compatibility level: "+
-      std::to_string(GetRegLayoutCompLevel())+", Software compatibility level: "+
-      std::to_string(cRequiredRegLayoutCompatLevel)+")";
-      throw std::runtime_error(str);
-   }
+
    if (GetProtocolVersion() > WD2_UDP_PROTOCOL_VERSION) {
       std::string str("Board ");
       str += mWDBName + " has protocol version " + std::to_string(GetProtocolVersion()) +

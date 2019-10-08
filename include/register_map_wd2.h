@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  24.07.2019 11:41:38
+ *  Created :  26.09.2019 15:45:04
  *
  *  Description :  Register map definitions.
  *
@@ -101,99 +101,76 @@
 #define WD2_REG_LMK_13                                  0x1108
 #define WD2_REG_LMK_14                                  0x110C
 #define WD2_REG_LMK_15                                  0x1110
-#define WD2_REG_ADC_CFG_IND_TX                          0x1114
-#define WD2_REG_ADC_PM_CLK_ENH                          0x1118
-#define WD2_REG_ADC_TEST_OFFS_OM                        0x111C
-#define WD2_REG_ADC_OUT_VREF                            0x1120
-#define WD2_REG_ADC_USR_PATT                            0x1124
-#define WD2_REG_ADC_SER_RES_SR                          0x1128
-#define WD2_REG_ADC_USR_IO_SYNC                         0x112C
-#define WD2_REG_ADC_0_CH_A_CFG                          0x1130
-#define WD2_REG_ADC_0_CH_B_CFG                          0x1134
-#define WD2_REG_ADC_0_CH_C_CFG                          0x1138
-#define WD2_REG_ADC_0_CH_D_CFG                          0x113C
-#define WD2_REG_ADC_0_CH_E_CFG                          0x1140
-#define WD2_REG_ADC_0_CH_F_CFG                          0x1144
-#define WD2_REG_ADC_0_CH_G_CFG                          0x1148
-#define WD2_REG_ADC_0_CH_H_CFG                          0x114C
-#define WD2_REG_ADC_0_CH_DCO_CFG                        0x1150
-#define WD2_REG_ADC_0_CH_FCO_CFG                        0x1154
-#define WD2_REG_ADC_1_CH_A_CFG                          0x1158
-#define WD2_REG_ADC_1_CH_B_CFG                          0x115C
-#define WD2_REG_ADC_1_CH_C_CFG                          0x1160
-#define WD2_REG_ADC_1_CH_D_CFG                          0x1164
-#define WD2_REG_ADC_1_CH_E_CFG                          0x1168
-#define WD2_REG_ADC_1_CH_F_CFG                          0x116C
-#define WD2_REG_ADC_1_CH_G_CFG                          0x1170
-#define WD2_REG_ADC_1_CH_H_CFG                          0x1174
-#define WD2_REG_ADC_1_CH_DCO_CFG                        0x1178
-#define WD2_REG_ADC_1_CH_FCO_CFG                        0x117C
-#define WD2_REG_TRG_CFG                                 0x1180
-#define WD2_REG_TRG_SRC_POL                             0x1184
-#define WD2_REG_TRG_AUTO_PERIOD                         0x1188
-#define WD2_REG_TRG_PTRN_EN                             0x118C
-#define WD2_REG_TRG_SRC_EN_PTRN0                        0x1190
-#define WD2_REG_TRG_STATE_PTRN0                         0x1194
-#define WD2_REG_TRG_SRC_EN_PTRN1                        0x1198
-#define WD2_REG_TRG_STATE_PTRN1                         0x119C
-#define WD2_REG_TRG_SRC_EN_PTRN2                        0x11A0
-#define WD2_REG_TRG_STATE_PTRN2                         0x11A4
-#define WD2_REG_TRG_SRC_EN_PTRN3                        0x11A8
-#define WD2_REG_TRG_STATE_PTRN3                         0x11AC
-#define WD2_REG_TRG_SRC_EN_PTRN4                        0x11B0
-#define WD2_REG_TRG_STATE_PTRN4                         0x11B4
-#define WD2_REG_TRG_SRC_EN_PTRN5                        0x11B8
-#define WD2_REG_TRG_STATE_PTRN5                         0x11BC
-#define WD2_REG_TRG_SRC_EN_PTRN6                        0x11C0
-#define WD2_REG_TRG_STATE_PTRN6                         0x11C4
-#define WD2_REG_TRG_SRC_EN_PTRN7                        0x11C8
-#define WD2_REG_TRG_STATE_PTRN7                         0x11CC
-#define WD2_REG_TRG_SRC_EN_PTRN8                        0x11D0
-#define WD2_REG_TRG_STATE_PTRN8                         0x11D4
-#define WD2_REG_TRG_SRC_EN_PTRN9                        0x11D8
-#define WD2_REG_TRG_STATE_PTRN9                         0x11DC
-#define WD2_REG_TRG_SRC_EN_PTRN10                       0x11E0
-#define WD2_REG_TRG_STATE_PTRN10                        0x11E4
-#define WD2_REG_TRG_SRC_EN_PTRN11                       0x11E8
-#define WD2_REG_TRG_STATE_PTRN11                        0x11EC
-#define WD2_REG_TRG_SRC_EN_PTRN12                       0x11F0
-#define WD2_REG_TRG_STATE_PTRN12                        0x11F4
-#define WD2_REG_TRG_SRC_EN_PTRN13                       0x11F8
-#define WD2_REG_TRG_STATE_PTRN13                        0x11FC
-#define WD2_REG_TRG_SRC_EN_PTRN14                       0x1200
-#define WD2_REG_TRG_STATE_PTRN14                        0x1204
-#define WD2_REG_TRG_SRC_EN_PTRN15                       0x1208
-#define WD2_REG_TRG_STATE_PTRN15                        0x120C
-#define WD2_REG_TRG_SRC_EN_PTRN16                       0x1210
-#define WD2_REG_TRG_STATE_PTRN16                        0x1214
-#define WD2_REG_TRG_SRC_EN_PTRN17                       0x1218
-#define WD2_REG_TRG_STATE_PTRN17                        0x121C
-#define WD2_REG_TRG_SRC_EN_PTRN18                       0x1220
-#define WD2_REG_TRG_STATE_PTRN18                        0x1224
-#define WD2_REG_ADV_TRG_CTRL                            0x1228
-#define WD2_REG_ADV_TRG_CH_CAL0                         0x122C
-#define WD2_REG_ADV_TRG_CH_CAL1                         0x1230
-#define WD2_REG_ADV_TRG_CH_CAL2                         0x1234
-#define WD2_REG_ADV_TRG_CH_CAL3                         0x1238
-#define WD2_REG_ADV_TRG_PED_CFG                         0x123C
-#define WD2_REG_ADV_TRG_THR0                            0x1240
-#define WD2_REG_ADV_TRG_THR1                            0x1244
-#define WD2_REG_ADV_TRG_THR2                            0x1248
-#define WD2_REG_ADV_TRG_TX_CHK_WORD0                    0x124C
-#define WD2_REG_ADV_TRG_TX_CHK_WORD1                    0x1250
-#define WD2_REG_ADV_TRG_TDC_CH_MASK                     0x1254
-#define WD2_REG_ADV_TRG_CFG12                           0x1258
-#define WD2_REG_ADV_TRG_CFG13                           0x125C
-#define WD2_REG_ADV_TRG_CFG14                           0x1260
-#define WD2_REG_ADV_TRG_CFG15                           0x1264
-#define WD2_REG_ADV_TRG_CFG16                           0x1268
-#define WD2_REG_ADV_TRG_CFG17                           0x126C
-#define WD2_REG_ADV_TRG_CFG18                           0x1270
-#define WD2_REG_ADV_TRG_CFG19                           0x1274
-#define WD2_REG_SET_TIME_LSB                            0x1278
-#define WD2_REG_SET_TIME_MSB                            0x127C
-#define WD2_REG_DBG_SIG_SEL                             0x1280
-#define WD2_REG_CRC32_REG_BANK                          0x1284
+#define WD2_REG_ADC_0_CFG_1458                          0x1114
+#define WD2_REG_ADC_0_CFG_2367                          0x1118
+#define WD2_REG_ADC_1_CFG_1458                          0x111C
+#define WD2_REG_ADC_1_CFG_2367                          0x1120
+#define WD2_REG_TRG_CFG                                 0x1124
+#define WD2_REG_TRG_SRC_POL                             0x1128
+#define WD2_REG_TRG_AUTO_PERIOD                         0x112C
+#define WD2_REG_TRG_PTRN_EN                             0x1130
+#define WD2_REG_TRG_SRC_EN_PTRN0                        0x1134
+#define WD2_REG_TRG_STATE_PTRN0                         0x1138
+#define WD2_REG_TRG_SRC_EN_PTRN1                        0x113C
+#define WD2_REG_TRG_STATE_PTRN1                         0x1140
+#define WD2_REG_TRG_SRC_EN_PTRN2                        0x1144
+#define WD2_REG_TRG_STATE_PTRN2                         0x1148
+#define WD2_REG_TRG_SRC_EN_PTRN3                        0x114C
+#define WD2_REG_TRG_STATE_PTRN3                         0x1150
+#define WD2_REG_TRG_SRC_EN_PTRN4                        0x1154
+#define WD2_REG_TRG_STATE_PTRN4                         0x1158
+#define WD2_REG_TRG_SRC_EN_PTRN5                        0x115C
+#define WD2_REG_TRG_STATE_PTRN5                         0x1160
+#define WD2_REG_TRG_SRC_EN_PTRN6                        0x1164
+#define WD2_REG_TRG_STATE_PTRN6                         0x1168
+#define WD2_REG_TRG_SRC_EN_PTRN7                        0x116C
+#define WD2_REG_TRG_STATE_PTRN7                         0x1170
+#define WD2_REG_TRG_SRC_EN_PTRN8                        0x1174
+#define WD2_REG_TRG_STATE_PTRN8                         0x1178
+#define WD2_REG_TRG_SRC_EN_PTRN9                        0x117C
+#define WD2_REG_TRG_STATE_PTRN9                         0x1180
+#define WD2_REG_TRG_SRC_EN_PTRN10                       0x1184
+#define WD2_REG_TRG_STATE_PTRN10                        0x1188
+#define WD2_REG_TRG_SRC_EN_PTRN11                       0x118C
+#define WD2_REG_TRG_STATE_PTRN11                        0x1190
+#define WD2_REG_TRG_SRC_EN_PTRN12                       0x1194
+#define WD2_REG_TRG_STATE_PTRN12                        0x1198
+#define WD2_REG_TRG_SRC_EN_PTRN13                       0x119C
+#define WD2_REG_TRG_STATE_PTRN13                        0x11A0
+#define WD2_REG_TRG_SRC_EN_PTRN14                       0x11A4
+#define WD2_REG_TRG_STATE_PTRN14                        0x11A8
+#define WD2_REG_TRG_SRC_EN_PTRN15                       0x11AC
+#define WD2_REG_TRG_STATE_PTRN15                        0x11B0
+#define WD2_REG_TRG_SRC_EN_PTRN16                       0x11B4
+#define WD2_REG_TRG_STATE_PTRN16                        0x11B8
+#define WD2_REG_TRG_SRC_EN_PTRN17                       0x11BC
+#define WD2_REG_TRG_STATE_PTRN17                        0x11C0
+#define WD2_REG_TRG_SRC_EN_PTRN18                       0x11C4
+#define WD2_REG_TRG_STATE_PTRN18                        0x11C8
+#define WD2_REG_ADV_TRG_CTRL                            0x11CC
+#define WD2_REG_ADV_TRG_CH_CAL0                         0x11D0
+#define WD2_REG_ADV_TRG_CH_CAL1                         0x11D4
+#define WD2_REG_ADV_TRG_CH_CAL2                         0x11D8
+#define WD2_REG_ADV_TRG_CH_CAL3                         0x11DC
+#define WD2_REG_ADV_TRG_PED_CFG                         0x11E0
+#define WD2_REG_ADV_TRG_THR0                            0x11E4
+#define WD2_REG_ADV_TRG_THR1                            0x11E8
+#define WD2_REG_ADV_TRG_THR2                            0x11EC
+#define WD2_REG_ADV_TRG_TX_CHK_WORD0                    0x11F0
+#define WD2_REG_ADV_TRG_TX_CHK_WORD1                    0x11F4
+#define WD2_REG_ADV_TRG_TDC_CH_MASK                     0x11F8
+#define WD2_REG_ADV_TRG_CFG12                           0x11FC
+#define WD2_REG_ADV_TRG_CFG13                           0x1200
+#define WD2_REG_ADV_TRG_CFG14                           0x1204
+#define WD2_REG_ADV_TRG_CFG15                           0x1208
+#define WD2_REG_ADV_TRG_CFG16                           0x120C
+#define WD2_REG_ADV_TRG_CFG17                           0x1210
+#define WD2_REG_ADV_TRG_CFG18                           0x1214
+#define WD2_REG_ADV_TRG_CFG19                           0x1218
+#define WD2_REG_SET_TIME_LSB                            0x121C
+#define WD2_REG_SET_TIME_MSB                            0x1220
+#define WD2_REG_DBG_SIG_SEL                             0x1224
+#define WD2_REG_CRC32_REG_BANK                          0x1228
 
 /* *** Status Registers *** */
 #define WD2_REG_HW_VER                                  0x0000
@@ -213,79 +190,78 @@
 #define WD2_REG_DRS_SAMPLE_FREQ                         0x0038
 #define WD2_REG_ADC_SAMPLE_FREQ                         0x003C
 #define WD2_REG_TDC_SAMPLE_FREQ                         0x0040
-#define WD2_REG_ADC_INFO                                0x0044
-#define WD2_REG_HV_VER                                  0x0048
-#define WD2_REG_HV_I_MEAS_0                             0x004C
-#define WD2_REG_HV_I_MEAS_1                             0x0050
-#define WD2_REG_HV_I_MEAS_2                             0x0054
-#define WD2_REG_HV_I_MEAS_3                             0x0058
-#define WD2_REG_HV_I_MEAS_4                             0x005C
-#define WD2_REG_HV_I_MEAS_5                             0x0060
-#define WD2_REG_HV_I_MEAS_6                             0x0064
-#define WD2_REG_HV_I_MEAS_7                             0x0068
-#define WD2_REG_HV_I_MEAS_8                             0x006C
-#define WD2_REG_HV_I_MEAS_9                             0x0070
-#define WD2_REG_HV_I_MEAS_10                            0x0074
-#define WD2_REG_HV_I_MEAS_11                            0x0078
-#define WD2_REG_HV_I_MEAS_12                            0x007C
-#define WD2_REG_HV_I_MEAS_13                            0x0080
-#define WD2_REG_HV_I_MEAS_14                            0x0084
-#define WD2_REG_HV_I_MEAS_15                            0x0088
-#define WD2_REG_HV_U_BASE_MEAS                          0x008C
-#define WD2_REG_HV_TEMP_0                               0x0090
-#define WD2_REG_HV_TEMP_1                               0x0094
-#define WD2_REG_HV_TEMP_2                               0x0098
-#define WD2_REG_HV_TEMP_3                               0x009C
-#define WD2_REG_SCALER_0                                0x00A0
-#define WD2_REG_SCALER_1                                0x00A4
-#define WD2_REG_SCALER_2                                0x00A8
-#define WD2_REG_SCALER_3                                0x00AC
-#define WD2_REG_SCALER_4                                0x00B0
-#define WD2_REG_SCALER_5                                0x00B4
-#define WD2_REG_SCALER_6                                0x00B8
-#define WD2_REG_SCALER_7                                0x00BC
-#define WD2_REG_SCALER_8                                0x00C0
-#define WD2_REG_SCALER_9                                0x00C4
-#define WD2_REG_SCALER_10                               0x00C8
-#define WD2_REG_SCALER_11                               0x00CC
-#define WD2_REG_SCALER_12                               0x00D0
-#define WD2_REG_SCALER_13                               0x00D4
-#define WD2_REG_SCALER_14                               0x00D8
-#define WD2_REG_SCALER_15                               0x00DC
-#define WD2_REG_SCALER_PTRN_TRG                         0x00E0
-#define WD2_REG_SCALER_EXT_TRG                          0x00E4
-#define WD2_REG_SCALER_EXT_CLK                          0x00E8
-#define WD2_REG_SCALER_TIME_STAMP_LSB                   0x00EC
-#define WD2_REG_SCALER_TIME_STAMP_MSB                   0x00F0
-#define WD2_REG_TIME_LSB                                0x00F4
-#define WD2_REG_TIME_MSB                                0x00F8
-#define WD2_REG_COMP_CH_STAT                            0x00FC
-#define WD2_REG_EVENT_TX_RATE                           0x0100
-#define WD2_REG_EVENT_NR                                0x0104
-#define WD2_REG_TRB_INFO_STAT                           0x0108
-#define WD2_REG_TRB_INFO_LSB                            0x010C
-#define WD2_REG_TRB_INFO_MSB                            0x0110
-#define WD2_REG_ADV_TRG_TRIG_CELL                       0x0114
-#define WD2_REG_ADV_TRG_STAT1                           0x0118
-#define WD2_REG_ADV_TRG_STAT2                           0x011C
-#define WD2_REG_ADV_TRG_STAT3                           0x0120
-#define WD2_REG_ADV_TRG_STAT4                           0x0124
-#define WD2_REG_MAX_DRS_ADC_PKT_SAMPLES                 0x0128
-#define WD2_REG_MAX_TDC_PKT_SAMPLES                     0x012C
-#define WD2_REG_MAX_TRG_PKT_SAMPLES                     0x0130
-#define WD2_REG_MAX_SCL_PKT_SAMPLES                     0x0134
-#define WD2_REG_CLK_CTRL_MOD_FLAG                       0x0138
-#define WD2_REG_DRS_MOD_FLAG                            0x013C
-#define WD2_REG_COM_PLD_SIZE_MOD_FLAG                   0x0140
-#define WD2_REG_ADC_SAMPLE_DIV_MOD_FLAG                 0x0144
-#define WD2_REG_DAC_0_1_MOD_FLAG                        0x0148
-#define WD2_REG_DAC_2_MOD_FLAG                          0x014C
-#define WD2_REG_FE_0_15_MOD_FLAG                        0x0150
-#define WD2_REG_HV_U_TARGET_0_7_MOD_FLAG                0x0154
-#define WD2_REG_HV_U_TARGET_8_15_MOD_FLAG               0x0158
-#define WD2_REG_HV_MOD_FLAG                             0x015C
-#define WD2_REG_LMK_0_7_MOD_FLAG                        0x0160
-#define WD2_REG_LMK_8_15_MOD_FLAG                       0x0164
+#define WD2_REG_HV_VER                                  0x0044
+#define WD2_REG_HV_I_MEAS_0                             0x0048
+#define WD2_REG_HV_I_MEAS_1                             0x004C
+#define WD2_REG_HV_I_MEAS_2                             0x0050
+#define WD2_REG_HV_I_MEAS_3                             0x0054
+#define WD2_REG_HV_I_MEAS_4                             0x0058
+#define WD2_REG_HV_I_MEAS_5                             0x005C
+#define WD2_REG_HV_I_MEAS_6                             0x0060
+#define WD2_REG_HV_I_MEAS_7                             0x0064
+#define WD2_REG_HV_I_MEAS_8                             0x0068
+#define WD2_REG_HV_I_MEAS_9                             0x006C
+#define WD2_REG_HV_I_MEAS_10                            0x0070
+#define WD2_REG_HV_I_MEAS_11                            0x0074
+#define WD2_REG_HV_I_MEAS_12                            0x0078
+#define WD2_REG_HV_I_MEAS_13                            0x007C
+#define WD2_REG_HV_I_MEAS_14                            0x0080
+#define WD2_REG_HV_I_MEAS_15                            0x0084
+#define WD2_REG_HV_U_BASE_MEAS                          0x0088
+#define WD2_REG_HV_TEMP_0                               0x008C
+#define WD2_REG_HV_TEMP_1                               0x0090
+#define WD2_REG_HV_TEMP_2                               0x0094
+#define WD2_REG_HV_TEMP_3                               0x0098
+#define WD2_REG_SCALER_0                                0x009C
+#define WD2_REG_SCALER_1                                0x00A0
+#define WD2_REG_SCALER_2                                0x00A4
+#define WD2_REG_SCALER_3                                0x00A8
+#define WD2_REG_SCALER_4                                0x00AC
+#define WD2_REG_SCALER_5                                0x00B0
+#define WD2_REG_SCALER_6                                0x00B4
+#define WD2_REG_SCALER_7                                0x00B8
+#define WD2_REG_SCALER_8                                0x00BC
+#define WD2_REG_SCALER_9                                0x00C0
+#define WD2_REG_SCALER_10                               0x00C4
+#define WD2_REG_SCALER_11                               0x00C8
+#define WD2_REG_SCALER_12                               0x00CC
+#define WD2_REG_SCALER_13                               0x00D0
+#define WD2_REG_SCALER_14                               0x00D4
+#define WD2_REG_SCALER_15                               0x00D8
+#define WD2_REG_SCALER_PTRN_TRG                         0x00DC
+#define WD2_REG_SCALER_EXT_TRG                          0x00E0
+#define WD2_REG_SCALER_EXT_CLK                          0x00E4
+#define WD2_REG_SCALER_TIME_STAMP_LSB                   0x00E8
+#define WD2_REG_SCALER_TIME_STAMP_MSB                   0x00EC
+#define WD2_REG_TIME_LSB                                0x00F0
+#define WD2_REG_TIME_MSB                                0x00F4
+#define WD2_REG_COMP_CH_STAT                            0x00F8
+#define WD2_REG_EVENT_TX_RATE                           0x00FC
+#define WD2_REG_EVENT_NR                                0x0100
+#define WD2_REG_TRB_INFO_STAT                           0x0104
+#define WD2_REG_TRB_INFO_LSB                            0x0108
+#define WD2_REG_TRB_INFO_MSB                            0x010C
+#define WD2_REG_ADV_TRG_TRIG_CELL                       0x0110
+#define WD2_REG_ADV_TRG_STAT1                           0x0114
+#define WD2_REG_ADV_TRG_STAT2                           0x0118
+#define WD2_REG_ADV_TRG_STAT3                           0x011C
+#define WD2_REG_ADV_TRG_STAT4                           0x0120
+#define WD2_REG_MAX_DRS_ADC_PKT_SAMPLES                 0x0124
+#define WD2_REG_MAX_TDC_PKT_SAMPLES                     0x0128
+#define WD2_REG_MAX_TRG_PKT_SAMPLES                     0x012C
+#define WD2_REG_MAX_SCL_PKT_SAMPLES                     0x0130
+#define WD2_REG_CLK_CTRL_MOD_FLAG                       0x0134
+#define WD2_REG_DRS_MOD_FLAG                            0x0138
+#define WD2_REG_COM_PLD_SIZE_MOD_FLAG                   0x013C
+#define WD2_REG_ADC_SAMPLE_DIV_MOD_FLAG                 0x0140
+#define WD2_REG_DAC_0_1_MOD_FLAG                        0x0144
+#define WD2_REG_DAC_2_MOD_FLAG                          0x0148
+#define WD2_REG_FE_0_15_MOD_FLAG                        0x014C
+#define WD2_REG_HV_U_TARGET_0_7_MOD_FLAG                0x0150
+#define WD2_REG_HV_U_TARGET_8_15_MOD_FLAG               0x0154
+#define WD2_REG_HV_MOD_FLAG                             0x0158
+#define WD2_REG_LMK_0_7_MOD_FLAG                        0x015C
+#define WD2_REG_LMK_8_15_MOD_FLAG                       0x0160
 
 /*
  * Bit Positions
@@ -316,6 +292,11 @@
 #define WD2_DAQ_DATA_PHASE_REG                                        WD2_REG_CTRL
 #define WD2_DAQ_DATA_PHASE_MASK                                         0x00FF0000
 #define WD2_DAQ_DATA_PHASE_OFS                                                  16
+
+/* FE_POWER - Frontend Power (0=Power OFF, 1=Power ON) */
+#define WD2_FE_POWER_REG                                              WD2_REG_CTRL
+#define WD2_FE_POWER_MASK                                               0x00000800
+#define WD2_FE_POWER_OFS                                                        11
 
 /* DRS_CLR_RSR_AFTER_RO - Clear the read shift register (remove the token) after each readout */
 #define WD2_DRS_CLR_RSR_AFTER_RO_REG                                  WD2_REG_CTRL
@@ -388,7 +369,7 @@
 
 
 
-/* ****** Control Register 3 [0x100C]: CLK_CTRL - Clock Control (Default: 0x00026464) ****** */
+/* ****** Control Register 3 [0x100C]: CLK_CTRL - Clock Control (Default: 0x00025050) ****** */
 
 /* TRIG_DAQ_CLK_CAL_CHK - Trigger DAQ clock calibration check */
 #define WD2_TRIG_DAQ_CLK_CAL_CHK_REG                              WD2_REG_CLK_CTRL
@@ -727,7 +708,7 @@
 
 
 
-/* ****** Control Register 19 [0x104C]: DAC0_C_D - DAC0 values for Channel C and D (Default: 0x00000000) ****** */
+/* ****** Control Register 19 [0x104C]: DAC0_C_D - DAC0 values for Channel C and D (Default: 0x828F0000) ****** */
 
 /* DAC0_CH_C - Set DAC0 channel C (CAL_DC) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (+/- 0.625V) */
 #define WD2_DAC0_CH_C_REG                                         WD2_REG_DAC0_C_D
@@ -741,14 +722,14 @@
 
 
 
-/* ****** Control Register 20 [0x1050]: DAC0_E_F - DAC0 values for Channel E and F (Default: 0x00000000) ****** */
+/* ****** Control Register 20 [0x1050]: DAC0_E_F - DAC0 values for Channel E and F (Default: 0x0000FFFF) ****** */
 
 /* DAC0_CH_E - Set DAC0 channel E (PZC_LEVEL) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (+/- 2.5V) */
 #define WD2_DAC0_CH_E_REG                                         WD2_REG_DAC0_E_F
 #define WD2_DAC0_CH_E_MASK                                              0xFFFF0000
 #define WD2_DAC0_CH_E_OFS                                                       16
 
-/* DAC0_CH_F - Set DAC0 channel F (RESERVED) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V) */
+/* DAC0_CH_F - Set DAC0 channel F (DAC_REF_A) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V) */
 #define WD2_DAC0_CH_F_REG                                         WD2_REG_DAC0_E_F
 #define WD2_DAC0_CH_F_MASK                                              0x0000FFFF
 #define WD2_DAC0_CH_F_OFS                                                        0
@@ -1922,770 +1903,323 @@
 
 
 
-/* ****** Control Register 69 [0x1114]: ADC_CFG_IND_TX - ADC Chip Configuration, Index and Transfer Register (Default: 0x180F3F00) ****** */
-
-/* ADC_CFG_SDO_ACTIVE_MSB - Activate SDO (to be mirrored to bit24) */
-#define WD2_ADC_CFG_SDO_ACTIVE_MSB_REG                      WD2_REG_ADC_CFG_IND_TX
-#define WD2_ADC_CFG_SDO_ACTIVE_MSB_MASK                                 0x80000000
-#define WD2_ADC_CFG_SDO_ACTIVE_MSB_OFS                                          31
-
-/* ADC_CFG_LSB_FIRST_MSB - Transmit LSB First (to be mirrored to bit25) */
-#define WD2_ADC_CFG_LSB_FIRST_MSB_REG                       WD2_REG_ADC_CFG_IND_TX
-#define WD2_ADC_CFG_LSB_FIRST_MSB_MASK                                  0x40000000
-#define WD2_ADC_CFG_LSB_FIRST_MSB_OFS                                           30
-
-/* ADC_CFG_SOFT_RESET_MSB - Soft Reset (automatically cleared) (to be mirrored to bit26) */
-#define WD2_ADC_CFG_SOFT_RESET_MSB_REG                      WD2_REG_ADC_CFG_IND_TX
-#define WD2_ADC_CFG_SOFT_RESET_MSB_MASK                                 0x20000000
-#define WD2_ADC_CFG_SOFT_RESET_MSB_OFS                                          29
-
-/* ADC_CFG_16_BIT_ADDR_MSB - ADC Address Mode (to be mirrored to bit27) */
-#define WD2_ADC_CFG_16_BIT_ADDR_MSB_REG                     WD2_REG_ADC_CFG_IND_TX
-#define WD2_ADC_CFG_16_BIT_ADDR_MSB_MASK                                0x10000000
-#define WD2_ADC_CFG_16_BIT_ADDR_MSB_OFS                                         28
-
-/* ADC_CFG_16_BIT_ADDR_LSB - ADC Address Mode (to be mirrored to bit28) */
-#define WD2_ADC_CFG_16_BIT_ADDR_LSB_REG                     WD2_REG_ADC_CFG_IND_TX
-#define WD2_ADC_CFG_16_BIT_ADDR_LSB_MASK                                0x08000000
-#define WD2_ADC_CFG_16_BIT_ADDR_LSB_OFS                                         27
-
-/* ADC_CFG_SOFT_RESET_LSB - Soft Reset (automatically cleared) (to be mirrored to bit29) */
-#define WD2_ADC_CFG_SOFT_RESET_LSB_REG                      WD2_REG_ADC_CFG_IND_TX
-#define WD2_ADC_CFG_SOFT_RESET_LSB_MASK                                 0x04000000
-#define WD2_ADC_CFG_SOFT_RESET_LSB_OFS                                          26
-
-/* ADC_CFG_LSB_FIRST_LSB - Transmit LSB First (to be mirrored to bit30) */
-#define WD2_ADC_CFG_LSB_FIRST_LSB_REG                       WD2_REG_ADC_CFG_IND_TX
-#define WD2_ADC_CFG_LSB_FIRST_LSB_MASK                                  0x02000000
-#define WD2_ADC_CFG_LSB_FIRST_LSB_OFS                                           25
-
-/* ADC_CFG_SDO_ACTIVE_LSB - Activate SDO (to be mirrored to bit31) */
-#define WD2_ADC_CFG_SDO_ACTIVE_LSB_REG                      WD2_REG_ADC_CFG_IND_TX
-#define WD2_ADC_CFG_SDO_ACTIVE_LSB_MASK                                 0x01000000
-#define WD2_ADC_CFG_SDO_ACTIVE_LSB_OFS                                          24
-
-/* ADC_DI2_D_CHN_H - Data Channel H Activiation for Writes */
-#define WD2_ADC_DI2_D_CHN_H_REG                             WD2_REG_ADC_CFG_IND_TX
-#define WD2_ADC_DI2_D_CHN_H_MASK                                        0x00080000
-#define WD2_ADC_DI2_D_CHN_H_OFS                                                 19
-
-/* ADC_DI2_D_CHN_G - Data Channel G Activiation for Writes */
-#define WD2_ADC_DI2_D_CHN_G_REG                             WD2_REG_ADC_CFG_IND_TX
-#define WD2_ADC_DI2_D_CHN_G_MASK                                        0x00040000
-#define WD2_ADC_DI2_D_CHN_G_OFS                                                 18
-
-/* ADC_DI2_D_CHN_F - Data Channel F Activiation for Writes */
-#define WD2_ADC_DI2_D_CHN_F_REG                             WD2_REG_ADC_CFG_IND_TX
-#define WD2_ADC_DI2_D_CHN_F_MASK                                        0x00020000
-#define WD2_ADC_DI2_D_CHN_F_OFS                                                 17
-
-/* ADC_DI2_D_CHN_E - Data Channel E Activiation for Writes */
-#define WD2_ADC_DI2_D_CHN_E_REG                             WD2_REG_ADC_CFG_IND_TX
-#define WD2_ADC_DI2_D_CHN_E_MASK                                        0x00010000
-#define WD2_ADC_DI2_D_CHN_E_OFS                                                 16
-
-/* ADC_DI1_C_CHN_DCO - Clock Channel DCO Activiation for Writes */
-#define WD2_ADC_DI1_C_CHN_DCO_REG                           WD2_REG_ADC_CFG_IND_TX
-#define WD2_ADC_DI1_C_CHN_DCO_MASK                                      0x00002000
-#define WD2_ADC_DI1_C_CHN_DCO_OFS                                               13
-
-/* ADC_DI1_C_CHN_FCO - Clock Channel FCO Activiation for Writes */
-#define WD2_ADC_DI1_C_CHN_FCO_REG                           WD2_REG_ADC_CFG_IND_TX
-#define WD2_ADC_DI1_C_CHN_FCO_MASK                                      0x00001000
-#define WD2_ADC_DI1_C_CHN_FCO_OFS                                               12
-
-/* ADC_DI1_D_CHN_D - Data Channel D Activiation for Writes */
-#define WD2_ADC_DI1_D_CHN_D_REG                             WD2_REG_ADC_CFG_IND_TX
-#define WD2_ADC_DI1_D_CHN_D_MASK                                        0x00000800
-#define WD2_ADC_DI1_D_CHN_D_OFS                                                 11
-
-/* ADC_DI1_D_CHN_C - Data Channel C Activiation for Writes */
-#define WD2_ADC_DI1_D_CHN_C_REG                             WD2_REG_ADC_CFG_IND_TX
-#define WD2_ADC_DI1_D_CHN_C_MASK                                        0x00000400
-#define WD2_ADC_DI1_D_CHN_C_OFS                                                 10
-
-/* ADC_DI1_D_CHN_B - Data Channel B Activiation for Writes */
-#define WD2_ADC_DI1_D_CHN_B_REG                             WD2_REG_ADC_CFG_IND_TX
-#define WD2_ADC_DI1_D_CHN_B_MASK                                        0x00000200
-#define WD2_ADC_DI1_D_CHN_B_OFS                                                  9
-
-/* ADC_DI1_D_CHN_A - Data Channel A Activiation for Writes */
-#define WD2_ADC_DI1_D_CHN_A_REG                             WD2_REG_ADC_CFG_IND_TX
-#define WD2_ADC_DI1_D_CHN_A_MASK                                        0x00000100
-#define WD2_ADC_DI1_D_CHN_A_OFS                                                  8
-
-/* ADC_TX_INIT_OVERRIDE - Set Resolution/Sample Rate Override */
-#define WD2_ADC_TX_INIT_OVERRIDE_REG                        WD2_REG_ADC_CFG_IND_TX
-#define WD2_ADC_TX_INIT_OVERRIDE_MASK                                   0x00000001
-#define WD2_ADC_TX_INIT_OVERRIDE_OFS                                             0
-
-
-
-/* ****** Control Register 70 [0x1118]: ADC_PM_CLK_ENH - ADC Power Modes, Clock, Enhancement (Default: 0x00010000) ****** */
-
-/* ADC_PM_EXT_PD - Extrenal Power Down Pin Function (0 = full, 1 = standby) */
-#define WD2_ADC_PM_EXT_PD_REG                               WD2_REG_ADC_PM_CLK_ENH
-#define WD2_ADC_PM_EXT_PD_MASK                                          0x20000000
-#define WD2_ADC_PM_EXT_PD_OFS                                                   29
-
-/* ADC_PM_INT_PD_MODE - Internal Power Down Mode (see datasheet) */
-#define WD2_ADC_PM_INT_PD_MODE_REG                          WD2_REG_ADC_PM_CLK_ENH
-#define WD2_ADC_PM_INT_PD_MODE_MASK                                     0x03000000
-#define WD2_ADC_PM_INT_PD_MODE_OFS                                              24
-
-/* ADC_CLK_DUTY_CYC_STAB - Duty Cycle Stabilizer (0 = off, 1 = on) */
-#define WD2_ADC_CLK_DUTY_CYC_STAB_REG                       WD2_REG_ADC_PM_CLK_ENH
-#define WD2_ADC_CLK_DUTY_CYC_STAB_MASK                                  0x00010000
-#define WD2_ADC_CLK_DUTY_CYC_STAB_OFS                                           16
-
-/* ADC_CLK_DIV_RATIO - Clock Divide Ratio (value+1) */
-#define WD2_ADC_CLK_DIV_RATIO_REG                           WD2_REG_ADC_PM_CLK_ENH
-#define WD2_ADC_CLK_DIV_RATIO_MASK                                      0x00000700
-#define WD2_ADC_CLK_DIV_RATIO_OFS                                                8
-
-/* ADC_ENH_CHOP_MODE - Chop Mode (0 = off, 1 = on) */
-#define WD2_ADC_ENH_CHOP_MODE_REG                           WD2_REG_ADC_PM_CLK_ENH
-#define WD2_ADC_ENH_CHOP_MODE_MASK                                      0x00000010
-#define WD2_ADC_ENH_CHOP_MODE_OFS                                                4
-
-
-
-/* ****** Control Register 71 [0x111C]: ADC_TEST_OFFS_OM - ADC Test Mode, Offset Adjust and Output Mode (Default: 0x00000044) ****** */
-
-/* ADC_TM_USR_IN_MODE - User Input Test Mode (see datasheet) (Local) */
-#define WD2_ADC_TM_USR_IN_MODE_REG                        WD2_REG_ADC_TEST_OFFS_OM
-#define WD2_ADC_TM_USR_IN_MODE_MASK                                     0x00C00000
-#define WD2_ADC_TM_USR_IN_MODE_OFS                                              22
-
-/* ADC_TM_RST_PN_LONG_GEN - Reset Pseudo Random Long Generator (Global) */
-#define WD2_ADC_TM_RST_PN_LONG_GEN_REG                    WD2_REG_ADC_TEST_OFFS_OM
-#define WD2_ADC_TM_RST_PN_LONG_GEN_MASK                                 0x00200000
-#define WD2_ADC_TM_RST_PN_LONG_GEN_OFS                                          21
-
-/* ADC_TM_RST_PN_SHORT_GEN - Reset Pseudo Random Short Generator (Global) */
-#define WD2_ADC_TM_RST_PN_SHORT_GEN_REG                   WD2_REG_ADC_TEST_OFFS_OM
-#define WD2_ADC_TM_RST_PN_SHORT_GEN_MASK                                0x00100000
-#define WD2_ADC_TM_RST_PN_SHORT_GEN_OFS                                         20
-
-/* ADC_TM_OUT - Output Test Mode (see datasheet) (Local) */
-#define WD2_ADC_TM_OUT_REG                                WD2_REG_ADC_TEST_OFFS_OM
-#define WD2_ADC_TM_OUT_MASK                                             0x000F0000
-#define WD2_ADC_TM_OUT_OFS                                                      16
-
-/* ADC_OFFS_ADJ - Device Offset Trim (Local) */
-#define WD2_ADC_OFFS_ADJ_REG                              WD2_REG_ADC_TEST_OFFS_OM
-#define WD2_ADC_OFFS_ADJ_MASK                                           0x0000FF00
-#define WD2_ADC_OFFS_ADJ_OFS                                                     8
-
-/* ADC_OM_LVDS_MODE - LVDS ANSI/IEEE Option (0 = ANSI, 1 = IEEE) (Global) */
-#define WD2_ADC_OM_LVDS_MODE_REG                          WD2_REG_ADC_TEST_OFFS_OM
-#define WD2_ADC_OM_LVDS_MODE_MASK                                       0x00000040
-#define WD2_ADC_OM_LVDS_MODE_OFS                                                 6
-
-/* ADC_OM_OUT_INVERT - Output Invert (Local) */
-#define WD2_ADC_OM_OUT_INVERT_REG                         WD2_REG_ADC_TEST_OFFS_OM
-#define WD2_ADC_OM_OUT_INVERT_MASK                                      0x00000004
-#define WD2_ADC_OM_OUT_INVERT_OFS                                                2
-
-/* ADC_OM_OUT_FORMAT - Output Format (0 = offset binary, 1 = twos complement) (Global) */
-#define WD2_ADC_OM_OUT_FORMAT_REG                         WD2_REG_ADC_TEST_OFFS_OM
-#define WD2_ADC_OM_OUT_FORMAT_MASK                                      0x00000001
-#define WD2_ADC_OM_OUT_FORMAT_OFS                                                0
-
-
-
-/* ****** Control Register 72 [0x1120]: ADC_OUT_VREF - ADC Output and Vref Settings (Default: 0x00300304) ****** */
-
-/* ADC_OA_OUT_DRV_TERM - Output Driver Termination (see datasheet) */
-#define WD2_ADC_OA_OUT_DRV_TERM_REG                           WD2_REG_ADC_OUT_VREF
-#define WD2_ADC_OA_OUT_DRV_TERM_MASK                                    0x00300000
-#define WD2_ADC_OA_OUT_DRV_TERM_OFS                                             20
-
-/* ADC_OA_OUT_DRIVE - Output Drive (0 = 1x, 1 = 2x) */
-#define WD2_ADC_OA_OUT_DRIVE_REG                              WD2_REG_ADC_OUT_VREF
-#define WD2_ADC_OA_OUT_DRIVE_MASK                                       0x00010000
-#define WD2_ADC_OA_OUT_DRIVE_OFS                                                16
-
-/* ADC_OP_IN_CLK_PH_ADJ - Input Clock Phase Adjust (see datasheet) */
-#define WD2_ADC_OP_IN_CLK_PH_ADJ_REG                          WD2_REG_ADC_OUT_VREF
-#define WD2_ADC_OP_IN_CLK_PH_ADJ_MASK                                   0x00007000
-#define WD2_ADC_OP_IN_CLK_PH_ADJ_OFS                                            12
-
-/* ADC_OP_OUT_CLK_PH_ADJ - Output Clock Phase Adjust (see datasheet) */
-#define WD2_ADC_OP_OUT_CLK_PH_ADJ_REG                         WD2_REG_ADC_OUT_VREF
-#define WD2_ADC_OP_OUT_CLK_PH_ADJ_MASK                                  0x00000F00
-#define WD2_ADC_OP_OUT_CLK_PH_ADJ_OFS                                            8
-
-/* ADC_INT_VREF_ADJ - Internal Vref Adjustment Digital Scheme (see datasheet) */
-#define WD2_ADC_INT_VREF_ADJ_REG                              WD2_REG_ADC_OUT_VREF
-#define WD2_ADC_INT_VREF_ADJ_MASK                                       0x00000007
-#define WD2_ADC_INT_VREF_ADJ_OFS                                                 0
-
-
-
-/* ****** Control Register 73 [0x1124]: ADC_USR_PATT - ADC User Patterns (Default: 0xFC00FC00) ****** */
-
-/* ADC_USR_PATT1 - ADC User Pattern 1 (0x1A, 0x19) (Global) */
-#define WD2_ADC_USR_PATT1_REG                                 WD2_REG_ADC_USR_PATT
-#define WD2_ADC_USR_PATT1_MASK                                          0xFFFF0000
-#define WD2_ADC_USR_PATT1_OFS                                                   16
-
-/* ADC_USR_PATT2 - ADC User Pattern 2 (0x1C, 0x1B) (Global) */
-#define WD2_ADC_USR_PATT2_REG                                 WD2_REG_ADC_USR_PATT
-#define WD2_ADC_USR_PATT2_MASK                                          0x0000FFFF
-#define WD2_ADC_USR_PATT2_OFS                                                    0
-
-
-
-/* ****** Control Register 74 [0x1128]: ADC_SER_RES_SR - ADC Serial Control and Resolution/Sample Rate Override (Default: 0x00420000) ****** */
-
-/* ADC_SC_LVDS_OUT_LSB_FIRST - LVDS Output LSB First */
-#define WD2_ADC_SC_LVDS_OUT_LSB_FIRST_REG                   WD2_REG_ADC_SER_RES_SR
-#define WD2_ADC_SC_LVDS_OUT_LSB_FIRST_MASK                              0x00800000
-#define WD2_ADC_SC_LVDS_OUT_LSB_FIRST_OFS                                       23
-
-/* ADC_SC_WORD_WISE_DDR - Word-Wise DDR 1-Lane (see datasheet) */
-#define WD2_ADC_SC_WORD_WISE_DDR_REG                        WD2_REG_ADC_SER_RES_SR
-#define WD2_ADC_SC_WORD_WISE_DDR_MASK                                   0x00700000
-#define WD2_ADC_SC_WORD_WISE_DDR_OFS                                            20
-
-/* ADC_SC_OUT_NR_BITS - Serial Output Number of Bits (10 = 12bits, 11 = 10bits) */
-#define WD2_ADC_SC_OUT_NR_BITS_REG                          WD2_REG_ADC_SER_RES_SR
-#define WD2_ADC_SC_OUT_NR_BITS_MASK                                     0x00030000
-#define WD2_ADC_SC_OUT_NR_BITS_OFS                                              16
-
-/* ADC_SC_OUT_RST - Serial Channel Status Output Reset */
-#define WD2_ADC_SC_OUT_RST_REG                              WD2_REG_ADC_SER_RES_SR
-#define WD2_ADC_SC_OUT_RST_MASK                                         0x00000200
-#define WD2_ADC_SC_OUT_RST_OFS                                                   9
-
-/* ADC_SC_PWR_DN - Serial Channel Status Power Down */
-#define WD2_ADC_SC_PWR_DN_REG                               WD2_REG_ADC_SER_RES_SR
-#define WD2_ADC_SC_PWR_DN_MASK                                          0x00000100
-#define WD2_ADC_SC_PWR_DN_OFS                                                    8
-
-/* ADC_RES_SR_OVR - Resolution/Sample Rate Override Enable */
-#define WD2_ADC_RES_SR_OVR_REG                              WD2_REG_ADC_SER_RES_SR
-#define WD2_ADC_RES_SR_OVR_MASK                                         0x00000040
-#define WD2_ADC_RES_SR_OVR_OFS                                                   6
-
-/* ADC_RESOLUTION - Resolution (10 = 12bits, 11 = 10bits) */
-#define WD2_ADC_RESOLUTION_REG                              WD2_REG_ADC_SER_RES_SR
-#define WD2_ADC_RESOLUTION_MASK                                         0x00000030
-#define WD2_ADC_RESOLUTION_OFS                                                   4
-
-/* ADC_SAMPLE_RATE - Sample Rate (see datasheet) */
-#define WD2_ADC_SAMPLE_RATE_REG                             WD2_REG_ADC_SER_RES_SR
-#define WD2_ADC_SAMPLE_RATE_MASK                                        0x00000007
-#define WD2_ADC_SAMPLE_RATE_OFS                                                  0
-
-
-
-/* ****** Control Register 75 [0x112C]: ADC_USR_IO_SYNC - ADC User I/O Control and Sync (Default: 0x00000000) ****** */
-
-/* ADC_UIOC2_SDIO_PD - SDIO Pull-Down Disable */
-#define WD2_ADC_UIOC2_SDIO_PD_REG                          WD2_REG_ADC_USR_IO_SYNC
-#define WD2_ADC_UIOC2_SDIO_PD_MASK                                      0x00010000
-#define WD2_ADC_UIOC2_SDIO_PD_OFS                                               16
-
-/* ADC_UIOC3_VCM_PWR_DN - VCM Power Control */
-#define WD2_ADC_UIOC3_VCM_PWR_DN_REG                       WD2_REG_ADC_USR_IO_SYNC
-#define WD2_ADC_UIOC3_VCM_PWR_DN_MASK                                   0x00000800
-#define WD2_ADC_UIOC3_VCM_PWR_DN_OFS                                            11
-
-/* ADC_SYNC_NEXT_ONLY - Sync Next Only */
-#define WD2_ADC_SYNC_NEXT_ONLY_REG                         WD2_REG_ADC_USR_IO_SYNC
-#define WD2_ADC_SYNC_NEXT_ONLY_MASK                                     0x00000002
-#define WD2_ADC_SYNC_NEXT_ONLY_OFS                                               1
-
-/* ADC_EN_SYNC - Enable Sync */
-#define WD2_ADC_EN_SYNC_REG                                WD2_REG_ADC_USR_IO_SYNC
-#define WD2_ADC_EN_SYNC_MASK                                            0x00000001
-#define WD2_ADC_EN_SYNC_OFS                                                      0
-
-
-
-/* ****** Control Register 76 [0x1130]: ADC_0_CH_A_CFG - ADC 0 (A) Channel A Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ****** */
-
-/* ADC_TM_USR_IN_MODE_0_A - User Input Test Mode (see datasheet) */
-#define WD2_ADC_TM_USR_IN_MODE_0_A_REG                      WD2_REG_ADC_0_CH_A_CFG
-#define WD2_ADC_TM_USR_IN_MODE_0_A_MASK                                 0x00C00000
-#define WD2_ADC_TM_USR_IN_MODE_0_A_OFS                                          22
-
-/* ADC_TM_OUT_0_A - Output Test Mode (see datasheet) */
-#define WD2_ADC_TM_OUT_0_A_REG                              WD2_REG_ADC_0_CH_A_CFG
-#define WD2_ADC_TM_OUT_0_A_MASK                                         0x000F0000
-#define WD2_ADC_TM_OUT_0_A_OFS                                                  16
-
-/* ADC_OFFS_ADJ_0_A - Device Offset Trim */
-#define WD2_ADC_OFFS_ADJ_0_A_REG                            WD2_REG_ADC_0_CH_A_CFG
-#define WD2_ADC_OFFS_ADJ_0_A_MASK                                       0x0000FF00
-#define WD2_ADC_OFFS_ADJ_0_A_OFS                                                 8
-
-/* ADC_OM_OUT_INVERT_0_A - Output Invert */
-#define WD2_ADC_OM_OUT_INVERT_0_A_REG                       WD2_REG_ADC_0_CH_A_CFG
-#define WD2_ADC_OM_OUT_INVERT_0_A_MASK                                  0x00000004
-#define WD2_ADC_OM_OUT_INVERT_0_A_OFS                                            2
-
-
-
-/* ****** Control Register 77 [0x1134]: ADC_0_CH_B_CFG - ADC 0 (A) Channel B Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ****** */
-
-/* ADC_TM_USR_IN_MODE_0_B - User Input Test Mode (see datasheet) */
-#define WD2_ADC_TM_USR_IN_MODE_0_B_REG                      WD2_REG_ADC_0_CH_B_CFG
-#define WD2_ADC_TM_USR_IN_MODE_0_B_MASK                                 0x00C00000
-#define WD2_ADC_TM_USR_IN_MODE_0_B_OFS                                          22
-
-/* ADC_TM_OUT_0_B - Output Test Mode (see datasheet) */
-#define WD2_ADC_TM_OUT_0_B_REG                              WD2_REG_ADC_0_CH_B_CFG
-#define WD2_ADC_TM_OUT_0_B_MASK                                         0x000F0000
-#define WD2_ADC_TM_OUT_0_B_OFS                                                  16
-
-/* ADC_OFFS_ADJ_0_B - Device Offset Trim */
-#define WD2_ADC_OFFS_ADJ_0_B_REG                            WD2_REG_ADC_0_CH_B_CFG
-#define WD2_ADC_OFFS_ADJ_0_B_MASK                                       0x0000FF00
-#define WD2_ADC_OFFS_ADJ_0_B_OFS                                                 8
-
-/* ADC_OM_OUT_INVERT_0_B - Output Invert */
-#define WD2_ADC_OM_OUT_INVERT_0_B_REG                       WD2_REG_ADC_0_CH_B_CFG
-#define WD2_ADC_OM_OUT_INVERT_0_B_MASK                                  0x00000004
-#define WD2_ADC_OM_OUT_INVERT_0_B_OFS                                            2
-
-
-
-/* ****** Control Register 78 [0x1138]: ADC_0_CH_C_CFG - ADC 0 (A) Channel C Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ****** */
-
-/* ADC_TM_USR_IN_MODE_0_C - User Input Test Mode (see datasheet) */
-#define WD2_ADC_TM_USR_IN_MODE_0_C_REG                      WD2_REG_ADC_0_CH_C_CFG
-#define WD2_ADC_TM_USR_IN_MODE_0_C_MASK                                 0x00C00000
-#define WD2_ADC_TM_USR_IN_MODE_0_C_OFS                                          22
-
-/* ADC_TM_OUT_0_C - Output Test Mode (see datasheet) */
-#define WD2_ADC_TM_OUT_0_C_REG                              WD2_REG_ADC_0_CH_C_CFG
-#define WD2_ADC_TM_OUT_0_C_MASK                                         0x000F0000
-#define WD2_ADC_TM_OUT_0_C_OFS                                                  16
-
-/* ADC_OFFS_ADJ_0_C - Device Offset Trim */
-#define WD2_ADC_OFFS_ADJ_0_C_REG                            WD2_REG_ADC_0_CH_C_CFG
-#define WD2_ADC_OFFS_ADJ_0_C_MASK                                       0x0000FF00
-#define WD2_ADC_OFFS_ADJ_0_C_OFS                                                 8
-
-/* ADC_OM_OUT_INVERT_0_C - Output Invert */
-#define WD2_ADC_OM_OUT_INVERT_0_C_REG                       WD2_REG_ADC_0_CH_C_CFG
-#define WD2_ADC_OM_OUT_INVERT_0_C_MASK                                  0x00000004
-#define WD2_ADC_OM_OUT_INVERT_0_C_OFS                                            2
-
-
-
-/* ****** Control Register 79 [0x113C]: ADC_0_CH_D_CFG - ADC 0 (A) Channel D Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ****** */
-
-/* ADC_TM_USR_IN_MODE_0_D - User Input Test Mode (see datasheet) */
-#define WD2_ADC_TM_USR_IN_MODE_0_D_REG                      WD2_REG_ADC_0_CH_D_CFG
-#define WD2_ADC_TM_USR_IN_MODE_0_D_MASK                                 0x00C00000
-#define WD2_ADC_TM_USR_IN_MODE_0_D_OFS                                          22
-
-/* ADC_TM_OUT_0_D - Output Test Mode (see datasheet) */
-#define WD2_ADC_TM_OUT_0_D_REG                              WD2_REG_ADC_0_CH_D_CFG
-#define WD2_ADC_TM_OUT_0_D_MASK                                         0x000F0000
-#define WD2_ADC_TM_OUT_0_D_OFS                                                  16
-
-/* ADC_OFFS_ADJ_0_D - Device Offset Trim */
-#define WD2_ADC_OFFS_ADJ_0_D_REG                            WD2_REG_ADC_0_CH_D_CFG
-#define WD2_ADC_OFFS_ADJ_0_D_MASK                                       0x0000FF00
-#define WD2_ADC_OFFS_ADJ_0_D_OFS                                                 8
-
-/* ADC_OM_OUT_INVERT_0_D - Output Invert */
-#define WD2_ADC_OM_OUT_INVERT_0_D_REG                       WD2_REG_ADC_0_CH_D_CFG
-#define WD2_ADC_OM_OUT_INVERT_0_D_MASK                                  0x00000004
-#define WD2_ADC_OM_OUT_INVERT_0_D_OFS                                            2
-
-
-
-/* ****** Control Register 80 [0x1140]: ADC_0_CH_E_CFG - ADC 0 (A) Channel E Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ****** */
-
-/* ADC_TM_USR_IN_MODE_0_E - User Input Test Mode (see datasheet) */
-#define WD2_ADC_TM_USR_IN_MODE_0_E_REG                      WD2_REG_ADC_0_CH_E_CFG
-#define WD2_ADC_TM_USR_IN_MODE_0_E_MASK                                 0x00C00000
-#define WD2_ADC_TM_USR_IN_MODE_0_E_OFS                                          22
-
-/* ADC_TM_OUT_0_E - Output Test Mode (see datasheet) */
-#define WD2_ADC_TM_OUT_0_E_REG                              WD2_REG_ADC_0_CH_E_CFG
-#define WD2_ADC_TM_OUT_0_E_MASK                                         0x000F0000
-#define WD2_ADC_TM_OUT_0_E_OFS                                                  16
-
-/* ADC_OFFS_ADJ_0_E - Device Offset Trim */
-#define WD2_ADC_OFFS_ADJ_0_E_REG                            WD2_REG_ADC_0_CH_E_CFG
-#define WD2_ADC_OFFS_ADJ_0_E_MASK                                       0x0000FF00
-#define WD2_ADC_OFFS_ADJ_0_E_OFS                                                 8
-
-/* ADC_OM_OUT_INVERT_0_E - Output Invert */
-#define WD2_ADC_OM_OUT_INVERT_0_E_REG                       WD2_REG_ADC_0_CH_E_CFG
-#define WD2_ADC_OM_OUT_INVERT_0_E_MASK                                  0x00000004
-#define WD2_ADC_OM_OUT_INVERT_0_E_OFS                                            2
-
-
-
-/* ****** Control Register 81 [0x1144]: ADC_0_CH_F_CFG - ADC 0 (A) Channel F Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ****** */
-
-/* ADC_TM_USR_IN_MODE_0_F - User Input Test Mode (see datasheet) */
-#define WD2_ADC_TM_USR_IN_MODE_0_F_REG                      WD2_REG_ADC_0_CH_F_CFG
-#define WD2_ADC_TM_USR_IN_MODE_0_F_MASK                                 0x00C00000
-#define WD2_ADC_TM_USR_IN_MODE_0_F_OFS                                          22
-
-/* ADC_TM_OUT_0_F - Output Test Mode (see datasheet) */
-#define WD2_ADC_TM_OUT_0_F_REG                              WD2_REG_ADC_0_CH_F_CFG
-#define WD2_ADC_TM_OUT_0_F_MASK                                         0x000F0000
-#define WD2_ADC_TM_OUT_0_F_OFS                                                  16
-
-/* ADC_OFFS_ADJ_0_F - Device Offset Trim */
-#define WD2_ADC_OFFS_ADJ_0_F_REG                            WD2_REG_ADC_0_CH_F_CFG
-#define WD2_ADC_OFFS_ADJ_0_F_MASK                                       0x0000FF00
-#define WD2_ADC_OFFS_ADJ_0_F_OFS                                                 8
-
-/* ADC_OM_OUT_INVERT_0_F - Output Invert */
-#define WD2_ADC_OM_OUT_INVERT_0_F_REG                       WD2_REG_ADC_0_CH_F_CFG
-#define WD2_ADC_OM_OUT_INVERT_0_F_MASK                                  0x00000004
-#define WD2_ADC_OM_OUT_INVERT_0_F_OFS                                            2
-
-
-
-/* ****** Control Register 82 [0x1148]: ADC_0_CH_G_CFG - ADC 0 (A) Channel G Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ****** */
-
-/* ADC_TM_USR_IN_MODE_0_G - User Input Test Mode (see datasheet) */
-#define WD2_ADC_TM_USR_IN_MODE_0_G_REG                      WD2_REG_ADC_0_CH_G_CFG
-#define WD2_ADC_TM_USR_IN_MODE_0_G_MASK                                 0x00C00000
-#define WD2_ADC_TM_USR_IN_MODE_0_G_OFS                                          22
-
-/* ADC_TM_OUT_0_G - Output Test Mode (see datasheet) */
-#define WD2_ADC_TM_OUT_0_G_REG                              WD2_REG_ADC_0_CH_G_CFG
-#define WD2_ADC_TM_OUT_0_G_MASK                                         0x000F0000
-#define WD2_ADC_TM_OUT_0_G_OFS                                                  16
-
-/* ADC_OFFS_ADJ_0_G - Device Offset Trim */
-#define WD2_ADC_OFFS_ADJ_0_G_REG                            WD2_REG_ADC_0_CH_G_CFG
-#define WD2_ADC_OFFS_ADJ_0_G_MASK                                       0x0000FF00
-#define WD2_ADC_OFFS_ADJ_0_G_OFS                                                 8
-
-/* ADC_OM_OUT_INVERT_0_G - Output Invert */
-#define WD2_ADC_OM_OUT_INVERT_0_G_REG                       WD2_REG_ADC_0_CH_G_CFG
-#define WD2_ADC_OM_OUT_INVERT_0_G_MASK                                  0x00000004
-#define WD2_ADC_OM_OUT_INVERT_0_G_OFS                                            2
-
-
-
-/* ****** Control Register 83 [0x114C]: ADC_0_CH_H_CFG - ADC 0 (A) Channel H Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000000) ****** */
-
-/* ADC_TM_USR_IN_MODE_0_H - User Input Test Mode (see datasheet) */
-#define WD2_ADC_TM_USR_IN_MODE_0_H_REG                      WD2_REG_ADC_0_CH_H_CFG
-#define WD2_ADC_TM_USR_IN_MODE_0_H_MASK                                 0x00C00000
-#define WD2_ADC_TM_USR_IN_MODE_0_H_OFS                                          22
-
-/* ADC_TM_OUT_0_H - Output Test Mode (see datasheet) */
-#define WD2_ADC_TM_OUT_0_H_REG                              WD2_REG_ADC_0_CH_H_CFG
-#define WD2_ADC_TM_OUT_0_H_MASK                                         0x000F0000
-#define WD2_ADC_TM_OUT_0_H_OFS                                                  16
-
-/* ADC_OFFS_ADJ_0_H - Device Offset Trim */
-#define WD2_ADC_OFFS_ADJ_0_H_REG                            WD2_REG_ADC_0_CH_H_CFG
-#define WD2_ADC_OFFS_ADJ_0_H_MASK                                       0x0000FF00
-#define WD2_ADC_OFFS_ADJ_0_H_OFS                                                 8
-
-/* ADC_OM_OUT_INVERT_0_H - Output Invert */
-#define WD2_ADC_OM_OUT_INVERT_0_H_REG                       WD2_REG_ADC_0_CH_H_CFG
-#define WD2_ADC_OM_OUT_INVERT_0_H_MASK                                  0x00000004
-#define WD2_ADC_OM_OUT_INVERT_0_H_OFS                                            2
-
-
-
-/* ****** Control Register 84 [0x1150]: ADC_0_CH_DCO_CFG - ADC 0 (A) Channel DCO Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000000) ****** */
-
-/* ADC_TM_USR_IN_MODE_0_DCO - User Input Test Mode (see datasheet) */
-#define WD2_ADC_TM_USR_IN_MODE_0_DCO_REG                  WD2_REG_ADC_0_CH_DCO_CFG
-#define WD2_ADC_TM_USR_IN_MODE_0_DCO_MASK                               0x00C00000
-#define WD2_ADC_TM_USR_IN_MODE_0_DCO_OFS                                        22
-
-/* ADC_TM_OUT_0_DCO - Output Test Mode (see datasheet) */
-#define WD2_ADC_TM_OUT_0_DCO_REG                          WD2_REG_ADC_0_CH_DCO_CFG
-#define WD2_ADC_TM_OUT_0_DCO_MASK                                       0x000F0000
-#define WD2_ADC_TM_OUT_0_DCO_OFS                                                16
-
-/* ADC_OFFS_ADJ_0_DCO - Device Offset Trim */
-#define WD2_ADC_OFFS_ADJ_0_DCO_REG                        WD2_REG_ADC_0_CH_DCO_CFG
-#define WD2_ADC_OFFS_ADJ_0_DCO_MASK                                     0x0000FF00
-#define WD2_ADC_OFFS_ADJ_0_DCO_OFS                                               8
-
-/* ADC_OM_OUT_INVERT_0_DCO - Output Invert */
-#define WD2_ADC_OM_OUT_INVERT_0_DCO_REG                   WD2_REG_ADC_0_CH_DCO_CFG
-#define WD2_ADC_OM_OUT_INVERT_0_DCO_MASK                                0x00000004
-#define WD2_ADC_OM_OUT_INVERT_0_DCO_OFS                                          2
-
-
-
-/* ****** Control Register 85 [0x1154]: ADC_0_CH_FCO_CFG - ADC 0 (A) Channel FCO Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000000) ****** */
-
-/* ADC_TM_USR_IN_MODE_0_FCO - User Input Test Mode (see datasheet) */
-#define WD2_ADC_TM_USR_IN_MODE_0_FCO_REG                  WD2_REG_ADC_0_CH_FCO_CFG
-#define WD2_ADC_TM_USR_IN_MODE_0_FCO_MASK                               0x00C00000
-#define WD2_ADC_TM_USR_IN_MODE_0_FCO_OFS                                        22
-
-/* ADC_TM_OUT_0_FCO - Output Test Mode (see datasheet) */
-#define WD2_ADC_TM_OUT_0_FCO_REG                          WD2_REG_ADC_0_CH_FCO_CFG
-#define WD2_ADC_TM_OUT_0_FCO_MASK                                       0x000F0000
-#define WD2_ADC_TM_OUT_0_FCO_OFS                                                16
-
-/* ADC_OFFS_ADJ_0_FCO - Device Offset Trim */
-#define WD2_ADC_OFFS_ADJ_0_FCO_REG                        WD2_REG_ADC_0_CH_FCO_CFG
-#define WD2_ADC_OFFS_ADJ_0_FCO_MASK                                     0x0000FF00
-#define WD2_ADC_OFFS_ADJ_0_FCO_OFS                                               8
-
-/* ADC_OM_OUT_INVERT_0_FCO - Output Invert */
-#define WD2_ADC_OM_OUT_INVERT_0_FCO_REG                   WD2_REG_ADC_0_CH_FCO_CFG
-#define WD2_ADC_OM_OUT_INVERT_0_FCO_MASK                                0x00000004
-#define WD2_ADC_OM_OUT_INVERT_0_FCO_OFS                                          2
-
-
-
-/* ****** Control Register 86 [0x1158]: ADC_1_CH_A_CFG - ADC 1 (B) Channel A Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ****** */
-
-/* ADC_TM_USR_IN_MODE_1_A - User Input Test Mode (see datasheet) */
-#define WD2_ADC_TM_USR_IN_MODE_1_A_REG                      WD2_REG_ADC_1_CH_A_CFG
-#define WD2_ADC_TM_USR_IN_MODE_1_A_MASK                                 0x00C00000
-#define WD2_ADC_TM_USR_IN_MODE_1_A_OFS                                          22
-
-/* ADC_TM_OUT_1_A - Output Test Mode (see datasheet) */
-#define WD2_ADC_TM_OUT_1_A_REG                              WD2_REG_ADC_1_CH_A_CFG
-#define WD2_ADC_TM_OUT_1_A_MASK                                         0x000F0000
-#define WD2_ADC_TM_OUT_1_A_OFS                                                  16
-
-/* ADC_OFFS_ADJ_1_A - Device Offset Trim */
-#define WD2_ADC_OFFS_ADJ_1_A_REG                            WD2_REG_ADC_1_CH_A_CFG
-#define WD2_ADC_OFFS_ADJ_1_A_MASK                                       0x0000FF00
-#define WD2_ADC_OFFS_ADJ_1_A_OFS                                                 8
-
-/* ADC_OM_OUT_INVERT_1_A - Output Invert */
-#define WD2_ADC_OM_OUT_INVERT_1_A_REG                       WD2_REG_ADC_1_CH_A_CFG
-#define WD2_ADC_OM_OUT_INVERT_1_A_MASK                                  0x00000004
-#define WD2_ADC_OM_OUT_INVERT_1_A_OFS                                            2
-
-
-
-/* ****** Control Register 87 [0x115C]: ADC_1_CH_B_CFG - ADC 1 (B) Channel B Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ****** */
-
-/* ADC_TM_USR_IN_MODE_1_B - User Input Test Mode (see datasheet) */
-#define WD2_ADC_TM_USR_IN_MODE_1_B_REG                      WD2_REG_ADC_1_CH_B_CFG
-#define WD2_ADC_TM_USR_IN_MODE_1_B_MASK                                 0x00C00000
-#define WD2_ADC_TM_USR_IN_MODE_1_B_OFS                                          22
-
-/* ADC_TM_OUT_1_B - Output Test Mode (see datasheet) */
-#define WD2_ADC_TM_OUT_1_B_REG                              WD2_REG_ADC_1_CH_B_CFG
-#define WD2_ADC_TM_OUT_1_B_MASK                                         0x000F0000
-#define WD2_ADC_TM_OUT_1_B_OFS                                                  16
-
-/* ADC_OFFS_ADJ_1_B - Device Offset Trim */
-#define WD2_ADC_OFFS_ADJ_1_B_REG                            WD2_REG_ADC_1_CH_B_CFG
-#define WD2_ADC_OFFS_ADJ_1_B_MASK                                       0x0000FF00
-#define WD2_ADC_OFFS_ADJ_1_B_OFS                                                 8
-
-/* ADC_OM_OUT_INVERT_1_B - Output Invert */
-#define WD2_ADC_OM_OUT_INVERT_1_B_REG                       WD2_REG_ADC_1_CH_B_CFG
-#define WD2_ADC_OM_OUT_INVERT_1_B_MASK                                  0x00000004
-#define WD2_ADC_OM_OUT_INVERT_1_B_OFS                                            2
-
-
-
-/* ****** Control Register 88 [0x1160]: ADC_1_CH_C_CFG - ADC 1 (B) Channel C Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ****** */
-
-/* ADC_TM_USR_IN_MODE_1_C - User Input Test Mode (see datasheet) */
-#define WD2_ADC_TM_USR_IN_MODE_1_C_REG                      WD2_REG_ADC_1_CH_C_CFG
-#define WD2_ADC_TM_USR_IN_MODE_1_C_MASK                                 0x00C00000
-#define WD2_ADC_TM_USR_IN_MODE_1_C_OFS                                          22
-
-/* ADC_TM_OUT_1_C - Output Test Mode (see datasheet) */
-#define WD2_ADC_TM_OUT_1_C_REG                              WD2_REG_ADC_1_CH_C_CFG
-#define WD2_ADC_TM_OUT_1_C_MASK                                         0x000F0000
-#define WD2_ADC_TM_OUT_1_C_OFS                                                  16
-
-/* ADC_OFFS_ADJ_1_C - Device Offset Trim */
-#define WD2_ADC_OFFS_ADJ_1_C_REG                            WD2_REG_ADC_1_CH_C_CFG
-#define WD2_ADC_OFFS_ADJ_1_C_MASK                                       0x0000FF00
-#define WD2_ADC_OFFS_ADJ_1_C_OFS                                                 8
-
-/* ADC_OM_OUT_INVERT_1_C - Output Invert */
-#define WD2_ADC_OM_OUT_INVERT_1_C_REG                       WD2_REG_ADC_1_CH_C_CFG
-#define WD2_ADC_OM_OUT_INVERT_1_C_MASK                                  0x00000004
-#define WD2_ADC_OM_OUT_INVERT_1_C_OFS                                            2
-
-
-
-/* ****** Control Register 89 [0x1164]: ADC_1_CH_D_CFG - ADC 1 (B) Channel D Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ****** */
-
-/* ADC_TM_USR_IN_MODE_1_D - User Input Test Mode (see datasheet) */
-#define WD2_ADC_TM_USR_IN_MODE_1_D_REG                      WD2_REG_ADC_1_CH_D_CFG
-#define WD2_ADC_TM_USR_IN_MODE_1_D_MASK                                 0x00C00000
-#define WD2_ADC_TM_USR_IN_MODE_1_D_OFS                                          22
-
-/* ADC_TM_OUT_1_D - Output Test Mode (see datasheet) */
-#define WD2_ADC_TM_OUT_1_D_REG                              WD2_REG_ADC_1_CH_D_CFG
-#define WD2_ADC_TM_OUT_1_D_MASK                                         0x000F0000
-#define WD2_ADC_TM_OUT_1_D_OFS                                                  16
-
-/* ADC_OFFS_ADJ_1_D - Device Offset Trim */
-#define WD2_ADC_OFFS_ADJ_1_D_REG                            WD2_REG_ADC_1_CH_D_CFG
-#define WD2_ADC_OFFS_ADJ_1_D_MASK                                       0x0000FF00
-#define WD2_ADC_OFFS_ADJ_1_D_OFS                                                 8
-
-/* ADC_OM_OUT_INVERT_1_D - Output Invert */
-#define WD2_ADC_OM_OUT_INVERT_1_D_REG                       WD2_REG_ADC_1_CH_D_CFG
-#define WD2_ADC_OM_OUT_INVERT_1_D_MASK                                  0x00000004
-#define WD2_ADC_OM_OUT_INVERT_1_D_OFS                                            2
-
-
-
-/* ****** Control Register 90 [0x1168]: ADC_1_CH_E_CFG - ADC 1 (B) Channel E Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ****** */
-
-/* ADC_TM_USR_IN_MODE_1_E - User Input Test Mode (see datasheet) */
-#define WD2_ADC_TM_USR_IN_MODE_1_E_REG                      WD2_REG_ADC_1_CH_E_CFG
-#define WD2_ADC_TM_USR_IN_MODE_1_E_MASK                                 0x00C00000
-#define WD2_ADC_TM_USR_IN_MODE_1_E_OFS                                          22
-
-/* ADC_TM_OUT_1_E - Output Test Mode (see datasheet) */
-#define WD2_ADC_TM_OUT_1_E_REG                              WD2_REG_ADC_1_CH_E_CFG
-#define WD2_ADC_TM_OUT_1_E_MASK                                         0x000F0000
-#define WD2_ADC_TM_OUT_1_E_OFS                                                  16
-
-/* ADC_OFFS_ADJ_1_E - Device Offset Trim */
-#define WD2_ADC_OFFS_ADJ_1_E_REG                            WD2_REG_ADC_1_CH_E_CFG
-#define WD2_ADC_OFFS_ADJ_1_E_MASK                                       0x0000FF00
-#define WD2_ADC_OFFS_ADJ_1_E_OFS                                                 8
-
-/* ADC_OM_OUT_INVERT_1_E - Output Invert */
-#define WD2_ADC_OM_OUT_INVERT_1_E_REG                       WD2_REG_ADC_1_CH_E_CFG
-#define WD2_ADC_OM_OUT_INVERT_1_E_MASK                                  0x00000004
-#define WD2_ADC_OM_OUT_INVERT_1_E_OFS                                            2
-
-
-
-/* ****** Control Register 91 [0x116C]: ADC_1_CH_F_CFG - ADC 1 (B) Channel F Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ****** */
-
-/* ADC_TM_USR_IN_MODE_1_F - User Input Test Mode (see datasheet) */
-#define WD2_ADC_TM_USR_IN_MODE_1_F_REG                      WD2_REG_ADC_1_CH_F_CFG
-#define WD2_ADC_TM_USR_IN_MODE_1_F_MASK                                 0x00C00000
-#define WD2_ADC_TM_USR_IN_MODE_1_F_OFS                                          22
-
-/* ADC_TM_OUT_1_F - Output Test Mode (see datasheet) */
-#define WD2_ADC_TM_OUT_1_F_REG                              WD2_REG_ADC_1_CH_F_CFG
-#define WD2_ADC_TM_OUT_1_F_MASK                                         0x000F0000
-#define WD2_ADC_TM_OUT_1_F_OFS                                                  16
-
-/* ADC_OFFS_ADJ_1_F - Device Offset Trim */
-#define WD2_ADC_OFFS_ADJ_1_F_REG                            WD2_REG_ADC_1_CH_F_CFG
-#define WD2_ADC_OFFS_ADJ_1_F_MASK                                       0x0000FF00
-#define WD2_ADC_OFFS_ADJ_1_F_OFS                                                 8
-
-/* ADC_OM_OUT_INVERT_1_F - Output Invert */
-#define WD2_ADC_OM_OUT_INVERT_1_F_REG                       WD2_REG_ADC_1_CH_F_CFG
-#define WD2_ADC_OM_OUT_INVERT_1_F_MASK                                  0x00000004
-#define WD2_ADC_OM_OUT_INVERT_1_F_OFS                                            2
-
-
-
-/* ****** Control Register 92 [0x1170]: ADC_1_CH_G_CFG - ADC 1 (B) Channel G Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000004) ****** */
-
-/* ADC_TM_USR_IN_MODE_1_G - User Input Test Mode (see datasheet) */
-#define WD2_ADC_TM_USR_IN_MODE_1_G_REG                      WD2_REG_ADC_1_CH_G_CFG
-#define WD2_ADC_TM_USR_IN_MODE_1_G_MASK                                 0x00C00000
-#define WD2_ADC_TM_USR_IN_MODE_1_G_OFS                                          22
-
-/* ADC_TM_OUT_1_G - Output Test Mode (see datasheet) */
-#define WD2_ADC_TM_OUT_1_G_REG                              WD2_REG_ADC_1_CH_G_CFG
-#define WD2_ADC_TM_OUT_1_G_MASK                                         0x000F0000
-#define WD2_ADC_TM_OUT_1_G_OFS                                                  16
-
-/* ADC_OFFS_ADJ_1_G - Device Offset Trim */
-#define WD2_ADC_OFFS_ADJ_1_G_REG                            WD2_REG_ADC_1_CH_G_CFG
-#define WD2_ADC_OFFS_ADJ_1_G_MASK                                       0x0000FF00
-#define WD2_ADC_OFFS_ADJ_1_G_OFS                                                 8
-
-/* ADC_OM_OUT_INVERT_1_G - Output Invert */
-#define WD2_ADC_OM_OUT_INVERT_1_G_REG                       WD2_REG_ADC_1_CH_G_CFG
-#define WD2_ADC_OM_OUT_INVERT_1_G_MASK                                  0x00000004
-#define WD2_ADC_OM_OUT_INVERT_1_G_OFS                                            2
-
-
-
-/* ****** Control Register 93 [0x1174]: ADC_1_CH_H_CFG - ADC 1 (B) Channel H Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000000) ****** */
-
-/* ADC_TM_USR_IN_MODE_1_H - User Input Test Mode (see datasheet) */
-#define WD2_ADC_TM_USR_IN_MODE_1_H_REG                      WD2_REG_ADC_1_CH_H_CFG
-#define WD2_ADC_TM_USR_IN_MODE_1_H_MASK                                 0x00C00000
-#define WD2_ADC_TM_USR_IN_MODE_1_H_OFS                                          22
-
-/* ADC_TM_OUT_1_H - Output Test Mode (see datasheet) */
-#define WD2_ADC_TM_OUT_1_H_REG                              WD2_REG_ADC_1_CH_H_CFG
-#define WD2_ADC_TM_OUT_1_H_MASK                                         0x000F0000
-#define WD2_ADC_TM_OUT_1_H_OFS                                                  16
-
-/* ADC_OFFS_ADJ_1_H - Device Offset Trim */
-#define WD2_ADC_OFFS_ADJ_1_H_REG                            WD2_REG_ADC_1_CH_H_CFG
-#define WD2_ADC_OFFS_ADJ_1_H_MASK                                       0x0000FF00
-#define WD2_ADC_OFFS_ADJ_1_H_OFS                                                 8
-
-/* ADC_OM_OUT_INVERT_1_H - Output Invert */
-#define WD2_ADC_OM_OUT_INVERT_1_H_REG                       WD2_REG_ADC_1_CH_H_CFG
-#define WD2_ADC_OM_OUT_INVERT_1_H_MASK                                  0x00000004
-#define WD2_ADC_OM_OUT_INVERT_1_H_OFS                                            2
-
-
-
-/* ****** Control Register 94 [0x1178]: ADC_1_CH_DCO_CFG - ADC 1 (B) Channel DCO Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000000) ****** */
-
-/* ADC_TM_USR_IN_MODE_1_DCO - User Input Test Mode (see datasheet) */
-#define WD2_ADC_TM_USR_IN_MODE_1_DCO_REG                  WD2_REG_ADC_1_CH_DCO_CFG
-#define WD2_ADC_TM_USR_IN_MODE_1_DCO_MASK                               0x00C00000
-#define WD2_ADC_TM_USR_IN_MODE_1_DCO_OFS                                        22
-
-/* ADC_TM_OUT_1_DCO - Output Test Mode (see datasheet) */
-#define WD2_ADC_TM_OUT_1_DCO_REG                          WD2_REG_ADC_1_CH_DCO_CFG
-#define WD2_ADC_TM_OUT_1_DCO_MASK                                       0x000F0000
-#define WD2_ADC_TM_OUT_1_DCO_OFS                                                16
-
-/* ADC_OFFS_ADJ_1_DCO - Device Offset Trim */
-#define WD2_ADC_OFFS_ADJ_1_DCO_REG                        WD2_REG_ADC_1_CH_DCO_CFG
-#define WD2_ADC_OFFS_ADJ_1_DCO_MASK                                     0x0000FF00
-#define WD2_ADC_OFFS_ADJ_1_DCO_OFS                                               8
-
-/* ADC_OM_OUT_INVERT_1_DCO - Output Invert */
-#define WD2_ADC_OM_OUT_INVERT_1_DCO_REG                   WD2_REG_ADC_1_CH_DCO_CFG
-#define WD2_ADC_OM_OUT_INVERT_1_DCO_MASK                                0x00000004
-#define WD2_ADC_OM_OUT_INVERT_1_DCO_OFS                                          2
-
-
-
-/* ****** Control Register 95 [0x117C]: ADC_1_CH_FCO_CFG - ADC 1 (B) Channel FCO Specific Configuration (ADC_CFG_IND_TX) (Default: 0x00000000) ****** */
-
-/* ADC_TM_USR_IN_MODE_1_FCO - User Input Test Mode (see datasheet) */
-#define WD2_ADC_TM_USR_IN_MODE_1_FCO_REG                  WD2_REG_ADC_1_CH_FCO_CFG
-#define WD2_ADC_TM_USR_IN_MODE_1_FCO_MASK                               0x00C00000
-#define WD2_ADC_TM_USR_IN_MODE_1_FCO_OFS                                        22
-
-/* ADC_TM_OUT_1_FCO - Output Test Mode (see datasheet) */
-#define WD2_ADC_TM_OUT_1_FCO_REG                          WD2_REG_ADC_1_CH_FCO_CFG
-#define WD2_ADC_TM_OUT_1_FCO_MASK                                       0x000F0000
-#define WD2_ADC_TM_OUT_1_FCO_OFS                                                16
-
-/* ADC_OFFS_ADJ_1_FCO - Device Offset Trim */
-#define WD2_ADC_OFFS_ADJ_1_FCO_REG                        WD2_REG_ADC_1_CH_FCO_CFG
-#define WD2_ADC_OFFS_ADJ_1_FCO_MASK                                     0x0000FF00
-#define WD2_ADC_OFFS_ADJ_1_FCO_OFS                                               8
-
-/* ADC_OM_OUT_INVERT_1_FCO - Output Invert */
-#define WD2_ADC_OM_OUT_INVERT_1_FCO_REG                   WD2_REG_ADC_1_CH_FCO_CFG
-#define WD2_ADC_OM_OUT_INVERT_1_FCO_MASK                                0x00000004
-#define WD2_ADC_OM_OUT_INVERT_1_FCO_OFS                                          2
-
-
-
-/* ****** Control Register 96 [0x1180]: TRG_CFG - Trigger Configuration (Default: 0x00000000) ****** */
+/* ****** Control Register 69 [0x1114]: ADC_0_CFG_1458 - ADC 0 (A) Chip Configuration for channels 1, 4, 5 and 8 (Default: 0x00A63F00) ****** */
+
+/* ADC_0_1458_DCSOFF - Clock Duty Cycle Stabilizer (0=ON, 1=OFF) */
+#define WD2_ADC_0_1458_DCSOFF_REG                           WD2_REG_ADC_0_CFG_1458
+#define WD2_ADC_0_1458_DCSOFF_MASK                                      0x80000000
+#define WD2_ADC_0_1458_DCSOFF_OFS                                               31
+
+/* ADC_0_1458_RAND - Data Output Randomizer Mode Control Bit (0=OFF, 1=ON) */
+#define WD2_ADC_0_1458_RAND_REG                             WD2_REG_ADC_0_CFG_1458
+#define WD2_ADC_0_1458_RAND_MASK                                        0x40000000
+#define WD2_ADC_0_1458_RAND_OFS                                                 30
+
+/* ADC_0_1458_TWOSCOMP - Two's Complement Mode Control Bit (0=Offset Binary, 1=Two's Complement) */
+#define WD2_ADC_0_1458_TWOSCOMP_REG                         WD2_REG_ADC_0_CFG_1458
+#define WD2_ADC_0_1458_TWOSCOMP_MASK                                    0x20000000
+#define WD2_ADC_0_1458_TWOSCOMP_OFS                                             29
+
+/* ADC_0_1458_SLEEP - Sleep Mode (1=Channels 1, 4, 5 and 8 are disabled) */
+#define WD2_ADC_0_1458_SLEEP_REG                            WD2_REG_ADC_0_CFG_1458
+#define WD2_ADC_0_1458_SLEEP_MASK                                       0x10000000
+#define WD2_ADC_0_1458_SLEEP_OFS                                                28
+
+/* ADC_0_8_NAP_MODE - Channel 8 Nap Mode (0=OFF, 1=ON) */
+#define WD2_ADC_0_8_NAP_MODE_REG                            WD2_REG_ADC_0_CFG_1458
+#define WD2_ADC_0_8_NAP_MODE_MASK                                       0x08000000
+#define WD2_ADC_0_8_NAP_MODE_OFS                                                27
+
+/* ADC_0_5_NAP_MODE - Channel 5 Nap Mode (0=OFF, 1=ON) */
+#define WD2_ADC_0_5_NAP_MODE_REG                            WD2_REG_ADC_0_CFG_1458
+#define WD2_ADC_0_5_NAP_MODE_MASK                                       0x04000000
+#define WD2_ADC_0_5_NAP_MODE_OFS                                                26
+
+/* ADC_0_4_NAP_MODE - Channel 4 Nap Mode (0=OFF, 1=ON) */
+#define WD2_ADC_0_4_NAP_MODE_REG                            WD2_REG_ADC_0_CFG_1458
+#define WD2_ADC_0_4_NAP_MODE_MASK                                       0x02000000
+#define WD2_ADC_0_4_NAP_MODE_OFS                                                25
+
+/* ADC_0_1_NAP_MODE - Channel 1 Nap Mode (0=OFF, 1=ON) */
+#define WD2_ADC_0_1_NAP_MODE_REG                            WD2_REG_ADC_0_CFG_1458
+#define WD2_ADC_0_1_NAP_MODE_MASK                                       0x01000000
+#define WD2_ADC_0_1_NAP_MODE_OFS                                                24
+
+/* ADC_0_1458_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet) */
+#define WD2_ADC_0_1458_ILVDS_REG                            WD2_REG_ADC_0_CFG_1458
+#define WD2_ADC_0_1458_ILVDS_MASK                                       0x00E00000
+#define WD2_ADC_0_1458_ILVDS_OFS                                                21
+
+/* ADC_0_1458_TERMON - LVDS Internal Termination Bit (0=OFF, 1=ON) */
+#define WD2_ADC_0_1458_TERMON_REG                           WD2_REG_ADC_0_CFG_1458
+#define WD2_ADC_0_1458_TERMON_MASK                                      0x00100000
+#define WD2_ADC_0_1458_TERMON_OFS                                               20
+
+/* ADC_0_1458_OUTOFF - Digital Output Disable Bit (0=Enabled, 1=Disabled) */
+#define WD2_ADC_0_1458_OUTOFF_REG                           WD2_REG_ADC_0_CFG_1458
+#define WD2_ADC_0_1458_OUTOFF_MASK                                      0x00080000
+#define WD2_ADC_0_1458_OUTOFF_OFS                                               19
+
+/* ADC_0_1458_OUTMODE - Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet)  */
+#define WD2_ADC_0_1458_OUTMODE_REG                          WD2_REG_ADC_0_CFG_1458
+#define WD2_ADC_0_1458_OUTMODE_MASK                                     0x00070000
+#define WD2_ADC_0_1458_OUTMODE_OFS                                              16
+
+/* ADC_0_1458_OUTTEST - Output Test Pattern Control Bit (0=Pattern Off, 1=Pattern On) */
+#define WD2_ADC_0_1458_OUTTEST_REG                          WD2_REG_ADC_0_CFG_1458
+#define WD2_ADC_0_1458_OUTTEST_MASK                                     0x00008000
+#define WD2_ADC_0_1458_OUTTEST_OFS                                              15
+
+/* ADC_0_1458_TP - Test Pattern MSBs (actual test pattern in 12 bit mode) */
+#define WD2_ADC_0_1458_TP_REG                               WD2_REG_ADC_0_CFG_1458
+#define WD2_ADC_0_1458_TP_MASK                                          0x00003FFC
+#define WD2_ADC_0_1458_TP_OFS                                                    2
+
+/* ADC_0_1458_TP_LSBS - Test Pattern LSBs */
+#define WD2_ADC_0_1458_TP_LSBS_REG                          WD2_REG_ADC_0_CFG_1458
+#define WD2_ADC_0_1458_TP_LSBS_MASK                                     0x00000003
+#define WD2_ADC_0_1458_TP_LSBS_OFS                                               0
+
+
+
+/* ****** Control Register 70 [0x1118]: ADC_0_CFG_2367 - ADC 0 (A) Chip Configuration for channels 2, 3, 6 and 7 (Default: 0x00A63F00) ****** */
+
+/* ADC_0_2367_DCSOFF - Clock Duty Cycle Stabilizer (0=ON, 1=OFF) */
+#define WD2_ADC_0_2367_DCSOFF_REG                           WD2_REG_ADC_0_CFG_2367
+#define WD2_ADC_0_2367_DCSOFF_MASK                                      0x80000000
+#define WD2_ADC_0_2367_DCSOFF_OFS                                               31
+
+/* ADC_0_2367_RAND - Data Output Randomizer Mode Control Bit (0=OFF, 1=ON) */
+#define WD2_ADC_0_2367_RAND_REG                             WD2_REG_ADC_0_CFG_2367
+#define WD2_ADC_0_2367_RAND_MASK                                        0x40000000
+#define WD2_ADC_0_2367_RAND_OFS                                                 30
+
+/* ADC_0_2367_TWOSCOMP - Two's Complement Mode Control Bit (0=Offset Binary, 1=Two's Complement) */
+#define WD2_ADC_0_2367_TWOSCOMP_REG                         WD2_REG_ADC_0_CFG_2367
+#define WD2_ADC_0_2367_TWOSCOMP_MASK                                    0x20000000
+#define WD2_ADC_0_2367_TWOSCOMP_OFS                                             29
+
+/* ADC_0_2367_SLEEP - Sleep Mode (1=Channels 2, 3, 6 and 7 are disabled) */
+#define WD2_ADC_0_2367_SLEEP_REG                            WD2_REG_ADC_0_CFG_2367
+#define WD2_ADC_0_2367_SLEEP_MASK                                       0x10000000
+#define WD2_ADC_0_2367_SLEEP_OFS                                                28
+
+/* ADC_0_7_NAP_MODE - Channel 7 Nap Mode (0=OFF, 1=ON) */
+#define WD2_ADC_0_7_NAP_MODE_REG                            WD2_REG_ADC_0_CFG_2367
+#define WD2_ADC_0_7_NAP_MODE_MASK                                       0x08000000
+#define WD2_ADC_0_7_NAP_MODE_OFS                                                27
+
+/* ADC_0_6_NAP_MODE - Channel 6 Nap Mode (0=OFF, 1=ON) */
+#define WD2_ADC_0_6_NAP_MODE_REG                            WD2_REG_ADC_0_CFG_2367
+#define WD2_ADC_0_6_NAP_MODE_MASK                                       0x04000000
+#define WD2_ADC_0_6_NAP_MODE_OFS                                                26
+
+/* ADC_0_3_NAP_MODE - Channel 3 Nap Mode (0=OFF, 1=ON) */
+#define WD2_ADC_0_3_NAP_MODE_REG                            WD2_REG_ADC_0_CFG_2367
+#define WD2_ADC_0_3_NAP_MODE_MASK                                       0x02000000
+#define WD2_ADC_0_3_NAP_MODE_OFS                                                25
+
+/* ADC_0_2_NAP_MODE - Channel 2 Nap Mode (0=OFF, 1=ON) */
+#define WD2_ADC_0_2_NAP_MODE_REG                            WD2_REG_ADC_0_CFG_2367
+#define WD2_ADC_0_2_NAP_MODE_MASK                                       0x01000000
+#define WD2_ADC_0_2_NAP_MODE_OFS                                                24
+
+/* ADC_0_2367_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet) */
+#define WD2_ADC_0_2367_ILVDS_REG                            WD2_REG_ADC_0_CFG_2367
+#define WD2_ADC_0_2367_ILVDS_MASK                                       0x00E00000
+#define WD2_ADC_0_2367_ILVDS_OFS                                                21
+
+/* ADC_0_2367_TERMON - LVDS Internal Termination Bit (0=OFF, 1=ON) */
+#define WD2_ADC_0_2367_TERMON_REG                           WD2_REG_ADC_0_CFG_2367
+#define WD2_ADC_0_2367_TERMON_MASK                                      0x00100000
+#define WD2_ADC_0_2367_TERMON_OFS                                               20
+
+/* ADC_0_2367_OUTOFF - Digital Output Disable Bit (0=Enabled, 1=Disabled) */
+#define WD2_ADC_0_2367_OUTOFF_REG                           WD2_REG_ADC_0_CFG_2367
+#define WD2_ADC_0_2367_OUTOFF_MASK                                      0x00080000
+#define WD2_ADC_0_2367_OUTOFF_OFS                                               19
+
+/* ADC_0_2367_OUTMODE - Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet)  */
+#define WD2_ADC_0_2367_OUTMODE_REG                          WD2_REG_ADC_0_CFG_2367
+#define WD2_ADC_0_2367_OUTMODE_MASK                                     0x00070000
+#define WD2_ADC_0_2367_OUTMODE_OFS                                              16
+
+/* ADC_0_2367_OUTTEST - Output Test Pattern Control Bit (0=Pattern Off, 1=Pattern On) */
+#define WD2_ADC_0_2367_OUTTEST_REG                          WD2_REG_ADC_0_CFG_2367
+#define WD2_ADC_0_2367_OUTTEST_MASK                                     0x00008000
+#define WD2_ADC_0_2367_OUTTEST_OFS                                              15
+
+/* ADC_0_2367_TP - Test Pattern MSBs (actual test pattern in 12 bit mode) */
+#define WD2_ADC_0_2367_TP_REG                               WD2_REG_ADC_0_CFG_2367
+#define WD2_ADC_0_2367_TP_MASK                                          0x00003FFC
+#define WD2_ADC_0_2367_TP_OFS                                                    2
+
+/* ADC_0_2367_TP_LSBS - Test Pattern LSBs */
+#define WD2_ADC_0_2367_TP_LSBS_REG                          WD2_REG_ADC_0_CFG_2367
+#define WD2_ADC_0_2367_TP_LSBS_MASK                                     0x00000003
+#define WD2_ADC_0_2367_TP_LSBS_OFS                                               0
+
+
+
+/* ****** Control Register 71 [0x111C]: ADC_1_CFG_1458 - ADC 1 (B) Chip Configuration for channels 1, 4, 5 and 8 (Default: 0x00A63F00) ****** */
+
+/* ADC_1_1458_DCSOFF - Clock Duty Cycle Stabilizer (0=ON, 1=OFF) */
+#define WD2_ADC_1_1458_DCSOFF_REG                           WD2_REG_ADC_1_CFG_1458
+#define WD2_ADC_1_1458_DCSOFF_MASK                                      0x80000000
+#define WD2_ADC_1_1458_DCSOFF_OFS                                               31
+
+/* ADC_1_1458_RAND - Data Output Randomizer Mode Control Bit (0=OFF, 1=ON) */
+#define WD2_ADC_1_1458_RAND_REG                             WD2_REG_ADC_1_CFG_1458
+#define WD2_ADC_1_1458_RAND_MASK                                        0x40000000
+#define WD2_ADC_1_1458_RAND_OFS                                                 30
+
+/* ADC_1_1458_TWOSCOMP - Two's Complement Mode Control Bit (0=Offset Binary, 1=Two's Complement) */
+#define WD2_ADC_1_1458_TWOSCOMP_REG                         WD2_REG_ADC_1_CFG_1458
+#define WD2_ADC_1_1458_TWOSCOMP_MASK                                    0x20000000
+#define WD2_ADC_1_1458_TWOSCOMP_OFS                                             29
+
+/* ADC_1_1458_SLEEP - Sleep Mode (1=Channels 1, 4, 5 and 8 are disabled) */
+#define WD2_ADC_1_1458_SLEEP_REG                            WD2_REG_ADC_1_CFG_1458
+#define WD2_ADC_1_1458_SLEEP_MASK                                       0x10000000
+#define WD2_ADC_1_1458_SLEEP_OFS                                                28
+
+/* ADC_1_8_NAP_MODE - Channel 8 Nap Mode (0=OFF, 1=ON) */
+#define WD2_ADC_1_8_NAP_MODE_REG                            WD2_REG_ADC_1_CFG_1458
+#define WD2_ADC_1_8_NAP_MODE_MASK                                       0x08000000
+#define WD2_ADC_1_8_NAP_MODE_OFS                                                27
+
+/* ADC_1_5_NAP_MODE - Channel 5 Nap Mode (0=OFF, 1=ON) */
+#define WD2_ADC_1_5_NAP_MODE_REG                            WD2_REG_ADC_1_CFG_1458
+#define WD2_ADC_1_5_NAP_MODE_MASK                                       0x04000000
+#define WD2_ADC_1_5_NAP_MODE_OFS                                                26
+
+/* ADC_1_4_NAP_MODE - Channel 4 Nap Mode (0=OFF, 1=ON) */
+#define WD2_ADC_1_4_NAP_MODE_REG                            WD2_REG_ADC_1_CFG_1458
+#define WD2_ADC_1_4_NAP_MODE_MASK                                       0x02000000
+#define WD2_ADC_1_4_NAP_MODE_OFS                                                25
+
+/* ADC_1_1_NAP_MODE - Channel 1 Nap Mode (0=OFF, 1=ON) */
+#define WD2_ADC_1_1_NAP_MODE_REG                            WD2_REG_ADC_1_CFG_1458
+#define WD2_ADC_1_1_NAP_MODE_MASK                                       0x01000000
+#define WD2_ADC_1_1_NAP_MODE_OFS                                                24
+
+/* ADC_1_1458_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet) */
+#define WD2_ADC_1_1458_ILVDS_REG                            WD2_REG_ADC_1_CFG_1458
+#define WD2_ADC_1_1458_ILVDS_MASK                                       0x00E00000
+#define WD2_ADC_1_1458_ILVDS_OFS                                                21
+
+/* ADC_1_1458_TERMON - LVDS Internal Termination Bit (0=OFF, 1=ON) */
+#define WD2_ADC_1_1458_TERMON_REG                           WD2_REG_ADC_1_CFG_1458
+#define WD2_ADC_1_1458_TERMON_MASK                                      0x00100000
+#define WD2_ADC_1_1458_TERMON_OFS                                               20
+
+/* ADC_1_1458_OUTOFF - Digital Output Disable Bit (0=Enabled, 1=Disabled) */
+#define WD2_ADC_1_1458_OUTOFF_REG                           WD2_REG_ADC_1_CFG_1458
+#define WD2_ADC_1_1458_OUTOFF_MASK                                      0x00080000
+#define WD2_ADC_1_1458_OUTOFF_OFS                                               19
+
+/* ADC_1_1458_OUTMODE - Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet)  */
+#define WD2_ADC_1_1458_OUTMODE_REG                          WD2_REG_ADC_1_CFG_1458
+#define WD2_ADC_1_1458_OUTMODE_MASK                                     0x00070000
+#define WD2_ADC_1_1458_OUTMODE_OFS                                              16
+
+/* ADC_1_1458_OUTTEST - Output Test Pattern Control Bit (0=Pattern Off, 1=Pattern On) */
+#define WD2_ADC_1_1458_OUTTEST_REG                          WD2_REG_ADC_1_CFG_1458
+#define WD2_ADC_1_1458_OUTTEST_MASK                                     0x00008000
+#define WD2_ADC_1_1458_OUTTEST_OFS                                              15
+
+/* ADC_1_1458_TP - Test Pattern MSBs (actual test pattern in 12 bit mode) */
+#define WD2_ADC_1_1458_TP_REG                               WD2_REG_ADC_1_CFG_1458
+#define WD2_ADC_1_1458_TP_MASK                                          0x00003FFC
+#define WD2_ADC_1_1458_TP_OFS                                                    2
+
+/* ADC_1_1458_TP_LSBS - Test Pattern LSBs */
+#define WD2_ADC_1_1458_TP_LSBS_REG                          WD2_REG_ADC_1_CFG_1458
+#define WD2_ADC_1_1458_TP_LSBS_MASK                                     0x00000003
+#define WD2_ADC_1_1458_TP_LSBS_OFS                                               0
+
+
+
+/* ****** Control Register 72 [0x1120]: ADC_1_CFG_2367 - ADC 1 (B) Chip Configuration for channels 2, 3, 6 and 7 (Default: 0x00A63F00) ****** */
+
+/* ADC_1_2367_DCSOFF - Clock Duty Cycle Stabilizer (0=ON, 1=OFF) */
+#define WD2_ADC_1_2367_DCSOFF_REG                           WD2_REG_ADC_1_CFG_2367
+#define WD2_ADC_1_2367_DCSOFF_MASK                                      0x80000000
+#define WD2_ADC_1_2367_DCSOFF_OFS                                               31
+
+/* ADC_1_2367_RAND - Data Output Randomizer Mode Control Bit (0=OFF, 1=ON) */
+#define WD2_ADC_1_2367_RAND_REG                             WD2_REG_ADC_1_CFG_2367
+#define WD2_ADC_1_2367_RAND_MASK                                        0x40000000
+#define WD2_ADC_1_2367_RAND_OFS                                                 30
+
+/* ADC_1_2367_TWOSCOMP - Two's Complement Mode Control Bit (0=Offset Binary, 1=Two's Complement) */
+#define WD2_ADC_1_2367_TWOSCOMP_REG                         WD2_REG_ADC_1_CFG_2367
+#define WD2_ADC_1_2367_TWOSCOMP_MASK                                    0x20000000
+#define WD2_ADC_1_2367_TWOSCOMP_OFS                                             29
+
+/* ADC_1_2367_SLEEP - Sleep Mode (1=Channels 2, 3, 6 and 7 are disabled) */
+#define WD2_ADC_1_2367_SLEEP_REG                            WD2_REG_ADC_1_CFG_2367
+#define WD2_ADC_1_2367_SLEEP_MASK                                       0x10000000
+#define WD2_ADC_1_2367_SLEEP_OFS                                                28
+
+/* ADC_1_7_NAP_MODE - Channel 7 Nap Mode (0=OFF, 1=ON) */
+#define WD2_ADC_1_7_NAP_MODE_REG                            WD2_REG_ADC_1_CFG_2367
+#define WD2_ADC_1_7_NAP_MODE_MASK                                       0x08000000
+#define WD2_ADC_1_7_NAP_MODE_OFS                                                27
+
+/* ADC_1_6_NAP_MODE - Channel 6 Nap Mode (0=OFF, 1=ON) */
+#define WD2_ADC_1_6_NAP_MODE_REG                            WD2_REG_ADC_1_CFG_2367
+#define WD2_ADC_1_6_NAP_MODE_MASK                                       0x04000000
+#define WD2_ADC_1_6_NAP_MODE_OFS                                                26
+
+/* ADC_1_3_NAP_MODE - Channel 3 Nap Mode (0=OFF, 1=ON) */
+#define WD2_ADC_1_3_NAP_MODE_REG                            WD2_REG_ADC_1_CFG_2367
+#define WD2_ADC_1_3_NAP_MODE_MASK                                       0x02000000
+#define WD2_ADC_1_3_NAP_MODE_OFS                                                25
+
+/* ADC_1_2_NAP_MODE - Channel 2 Nap Mode (0=OFF, 1=ON) */
+#define WD2_ADC_1_2_NAP_MODE_REG                            WD2_REG_ADC_1_CFG_2367
+#define WD2_ADC_1_2_NAP_MODE_MASK                                       0x01000000
+#define WD2_ADC_1_2_NAP_MODE_OFS                                                24
+
+/* ADC_1_2367_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet) */
+#define WD2_ADC_1_2367_ILVDS_REG                            WD2_REG_ADC_1_CFG_2367
+#define WD2_ADC_1_2367_ILVDS_MASK                                       0x00E00000
+#define WD2_ADC_1_2367_ILVDS_OFS                                                21
+
+/* ADC_1_2367_TERMON - LVDS Internal Termination Bit (0=OFF, 1=ON) */
+#define WD2_ADC_1_2367_TERMON_REG                           WD2_REG_ADC_1_CFG_2367
+#define WD2_ADC_1_2367_TERMON_MASK                                      0x00100000
+#define WD2_ADC_1_2367_TERMON_OFS                                               20
+
+/* ADC_1_2367_OUTOFF - Digital Output Disable Bit (0=Enabled, 1=Disabled) */
+#define WD2_ADC_1_2367_OUTOFF_REG                           WD2_REG_ADC_1_CFG_2367
+#define WD2_ADC_1_2367_OUTOFF_MASK                                      0x00080000
+#define WD2_ADC_1_2367_OUTOFF_OFS                                               19
+
+/* ADC_1_2367_OUTMODE - Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet)  */
+#define WD2_ADC_1_2367_OUTMODE_REG                          WD2_REG_ADC_1_CFG_2367
+#define WD2_ADC_1_2367_OUTMODE_MASK                                     0x00070000
+#define WD2_ADC_1_2367_OUTMODE_OFS                                              16
+
+/* ADC_1_2367_OUTTEST - Output Test Pattern Control Bit (0=Pattern Off, 1=Pattern On) */
+#define WD2_ADC_1_2367_OUTTEST_REG                          WD2_REG_ADC_1_CFG_2367
+#define WD2_ADC_1_2367_OUTTEST_MASK                                     0x00008000
+#define WD2_ADC_1_2367_OUTTEST_OFS                                              15
+
+/* ADC_1_2367_TP - Test Pattern MSBs (actual test pattern in 12 bit mode) */
+#define WD2_ADC_1_2367_TP_REG                               WD2_REG_ADC_1_CFG_2367
+#define WD2_ADC_1_2367_TP_MASK                                          0x00003FFC
+#define WD2_ADC_1_2367_TP_OFS                                                    2
+
+/* ADC_1_2367_TP_LSBS - Test Pattern LSBs */
+#define WD2_ADC_1_2367_TP_LSBS_REG                          WD2_REG_ADC_1_CFG_2367
+#define WD2_ADC_1_2367_TP_LSBS_MASK                                     0x00000003
+#define WD2_ADC_1_2367_TP_LSBS_OFS                                               0
+
+
+
+/* ****** Control Register 73 [0x1124]: TRG_CFG - Trigger Configuration (Default: 0x00000000) ****** */
 
 /* LEAD_TRAIL_EDGE_SEL - 0 = trigger on leading edge, 1 = trigger on trailing edge */
 #define WD2_LEAD_TRAIL_EDGE_SEL_REG                                WD2_REG_TRG_CFG
@@ -2719,7 +2253,7 @@
 
 
 
-/* ****** Control Register 97 [0x1184]: TRG_SRC_POL - Trigger Source Polarity (Default: 0x00000000) ****** */
+/* ****** Control Register 74 [0x1128]: TRG_SRC_POL - Trigger Source Polarity (Default: 0x00000000) ****** */
 
 /* TRG_SRC_POLARITY - Polarity of trigger source (0 = normal, 1 = inverted) (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch) */
 #define WD2_TRG_SRC_POLARITY_REG                               WD2_REG_TRG_SRC_POL
@@ -2728,7 +2262,7 @@
 
 
 
-/* ****** Control Register 98 [0x1188]: TRG_AUTO_PERIOD - Automatic Trigger Period (Default: 0x04C4B400) ****** */
+/* ****** Control Register 75 [0x112C]: TRG_AUTO_PERIOD - Automatic Trigger Period (Default: 0x04C4B400) ****** */
 
 /* AUTO_TRIGGER_PERIOD - Period of automatic trigger in ticks of the DAQ clock */
 #define WD2_AUTO_TRIGGER_PERIOD_REG                        WD2_REG_TRG_AUTO_PERIOD
@@ -2737,7 +2271,7 @@
 
 
 
-/* ****** Control Register 99 [0x118C]: TRG_PTRN_EN - Enable for trigger patterns (Default: 0x00000000) ****** */
+/* ****** Control Register 76 [0x1130]: TRG_PTRN_EN - Enable for trigger patterns (Default: 0x00000000) ****** */
 
 /* TRG_PTRN_EN - 1 enables the corresponding trigger patterns for the local trigger */
 #define WD2_TRG_PTRN_EN_REG                                    WD2_REG_TRG_PTRN_EN
@@ -2746,7 +2280,7 @@
 
 
 
-/* ****** Control Register 100 [0x1190]: TRG_SRC_EN_PTRN0 - Trigger Source Enable Pattern 0 (Default: 0x00000000) ****** */
+/* ****** Control Register 77 [0x1134]: TRG_SRC_EN_PTRN0 - Trigger Source Enable Pattern 0 (Default: 0x00000000) ****** */
 
 /* TRG_SRC_EN_PTRN0 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch) */
 #define WD2_TRG_SRC_EN_PTRN0_REG                          WD2_REG_TRG_SRC_EN_PTRN0
@@ -2755,7 +2289,7 @@
 
 
 
-/* ****** Control Register 101 [0x1194]: TRG_STATE_PTRN0 - Trigger State Pattern 0 (Default: 0x00000000) ****** */
+/* ****** Control Register 78 [0x1138]: TRG_STATE_PTRN0 - Trigger State Pattern 0 (Default: 0x00000000) ****** */
 
 /* TRG_STATE_PTRN0 - trigger source state pattern (0 = Inhibit, 1 = Coincidence) */
 #define WD2_TRG_STATE_PTRN0_REG                            WD2_REG_TRG_STATE_PTRN0
@@ -2764,7 +2298,7 @@
 
 
 
-/* ****** Control Register 102 [0x1198]: TRG_SRC_EN_PTRN1 - Trigger Source Enable Pattern 1 (Default: 0x00000000) ****** */
+/* ****** Control Register 79 [0x113C]: TRG_SRC_EN_PTRN1 - Trigger Source Enable Pattern 1 (Default: 0x00000000) ****** */
 
 /* TRG_SRC_EN_PTRN1 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch) */
 #define WD2_TRG_SRC_EN_PTRN1_REG                          WD2_REG_TRG_SRC_EN_PTRN1
@@ -2773,7 +2307,7 @@
 
 
 
-/* ****** Control Register 103 [0x119C]: TRG_STATE_PTRN1 - Trigger State Pattern 1 (Default: 0x00000000) ****** */
+/* ****** Control Register 80 [0x1140]: TRG_STATE_PTRN1 - Trigger State Pattern 1 (Default: 0x00000000) ****** */
 
 /* TRG_STATE_PTRN1 - trigger source state pattern (0 = Inhibit, 1 = Coincidence) */
 #define WD2_TRG_STATE_PTRN1_REG                            WD2_REG_TRG_STATE_PTRN1
@@ -2782,7 +2316,7 @@
 
 
 
-/* ****** Control Register 104 [0x11A0]: TRG_SRC_EN_PTRN2 - Trigger Source Enable Pattern 2 (Default: 0x00000000) ****** */
+/* ****** Control Register 81 [0x1144]: TRG_SRC_EN_PTRN2 - Trigger Source Enable Pattern 2 (Default: 0x00000000) ****** */
 
 /* TRG_SRC_EN_PTRN2 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch) */
 #define WD2_TRG_SRC_EN_PTRN2_REG                          WD2_REG_TRG_SRC_EN_PTRN2
@@ -2791,7 +2325,7 @@
 
 
 
-/* ****** Control Register 105 [0x11A4]: TRG_STATE_PTRN2 - Trigger State Pattern 2 (Default: 0x00000000) ****** */
+/* ****** Control Register 82 [0x1148]: TRG_STATE_PTRN2 - Trigger State Pattern 2 (Default: 0x00000000) ****** */
 
 /* TRG_STATE_PTRN2 - trigger source state pattern (0 = Inhibit, 1 = Coincidence) */
 #define WD2_TRG_STATE_PTRN2_REG                            WD2_REG_TRG_STATE_PTRN2
@@ -2800,7 +2334,7 @@
 
 
 
-/* ****** Control Register 106 [0x11A8]: TRG_SRC_EN_PTRN3 - Trigger Source Enable Pattern 3 (Default: 0x00000000) ****** */
+/* ****** Control Register 83 [0x114C]: TRG_SRC_EN_PTRN3 - Trigger Source Enable Pattern 3 (Default: 0x00000000) ****** */
 
 /* TRG_SRC_EN_PTRN3 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch) */
 #define WD2_TRG_SRC_EN_PTRN3_REG                          WD2_REG_TRG_SRC_EN_PTRN3
@@ -2809,7 +2343,7 @@
 
 
 
-/* ****** Control Register 107 [0x11AC]: TRG_STATE_PTRN3 - Trigger State Pattern 3 (Default: 0x00000000) ****** */
+/* ****** Control Register 84 [0x1150]: TRG_STATE_PTRN3 - Trigger State Pattern 3 (Default: 0x00000000) ****** */
 
 /* TRG_STATE_PTRN3 - trigger source state pattern (0 = Inhibit, 1 = Coincidence) */
 #define WD2_TRG_STATE_PTRN3_REG                            WD2_REG_TRG_STATE_PTRN3
@@ -2818,7 +2352,7 @@
 
 
 
-/* ****** Control Register 108 [0x11B0]: TRG_SRC_EN_PTRN4 - Trigger Source Enable Pattern 4 (Default: 0x00000000) ****** */
+/* ****** Control Register 85 [0x1154]: TRG_SRC_EN_PTRN4 - Trigger Source Enable Pattern 4 (Default: 0x00000000) ****** */
 
 /* TRG_SRC_EN_PTRN4 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch) */
 #define WD2_TRG_SRC_EN_PTRN4_REG                          WD2_REG_TRG_SRC_EN_PTRN4
@@ -2827,7 +2361,7 @@
 
 
 
-/* ****** Control Register 109 [0x11B4]: TRG_STATE_PTRN4 - Trigger State Pattern 4 (Default: 0x00000000) ****** */
+/* ****** Control Register 86 [0x1158]: TRG_STATE_PTRN4 - Trigger State Pattern 4 (Default: 0x00000000) ****** */
 
 /* TRG_STATE_PTRN4 - trigger source state pattern (0 = Inhibit, 1 = Coincidence) */
 #define WD2_TRG_STATE_PTRN4_REG                            WD2_REG_TRG_STATE_PTRN4
@@ -2836,7 +2370,7 @@
 
 
 
-/* ****** Control Register 110 [0x11B8]: TRG_SRC_EN_PTRN5 - Trigger Source Enable Pattern 5 (Default: 0x00000000) ****** */
+/* ****** Control Register 87 [0x115C]: TRG_SRC_EN_PTRN5 - Trigger Source Enable Pattern 5 (Default: 0x00000000) ****** */
 
 /* TRG_SRC_EN_PTRN5 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch) */
 #define WD2_TRG_SRC_EN_PTRN5_REG                          WD2_REG_TRG_SRC_EN_PTRN5
@@ -2845,7 +2379,7 @@
 
 
 
-/* ****** Control Register 111 [0x11BC]: TRG_STATE_PTRN5 - Trigger State Pattern 5 (Default: 0x00000000) ****** */
+/* ****** Control Register 88 [0x1160]: TRG_STATE_PTRN5 - Trigger State Pattern 5 (Default: 0x00000000) ****** */
 
 /* TRG_STATE_PTRN5 - trigger source state pattern (0 = Inhibit, 1 = Coincidence) */
 #define WD2_TRG_STATE_PTRN5_REG                            WD2_REG_TRG_STATE_PTRN5
@@ -2854,7 +2388,7 @@
 
 
 
-/* ****** Control Register 112 [0x11C0]: TRG_SRC_EN_PTRN6 - Trigger Source Enable Pattern 6 (Default: 0x00000000) ****** */
+/* ****** Control Register 89 [0x1164]: TRG_SRC_EN_PTRN6 - Trigger Source Enable Pattern 6 (Default: 0x00000000) ****** */
 
 /* TRG_SRC_EN_PTRN6 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch) */
 #define WD2_TRG_SRC_EN_PTRN6_REG                          WD2_REG_TRG_SRC_EN_PTRN6
@@ -2863,7 +2397,7 @@
 
 
 
-/* ****** Control Register 113 [0x11C4]: TRG_STATE_PTRN6 - Trigger State Pattern 6 (Default: 0x00000000) ****** */
+/* ****** Control Register 90 [0x1168]: TRG_STATE_PTRN6 - Trigger State Pattern 6 (Default: 0x00000000) ****** */
 
 /* TRG_STATE_PTRN6 - trigger source state pattern (0 = Inhibit, 1 = Coincidence) */
 #define WD2_TRG_STATE_PTRN6_REG                            WD2_REG_TRG_STATE_PTRN6
@@ -2872,7 +2406,7 @@
 
 
 
-/* ****** Control Register 114 [0x11C8]: TRG_SRC_EN_PTRN7 - Trigger Source Enable Pattern 7 (Default: 0x00000000) ****** */
+/* ****** Control Register 91 [0x116C]: TRG_SRC_EN_PTRN7 - Trigger Source Enable Pattern 7 (Default: 0x00000000) ****** */
 
 /* TRG_SRC_EN_PTRN7 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch) */
 #define WD2_TRG_SRC_EN_PTRN7_REG                          WD2_REG_TRG_SRC_EN_PTRN7
@@ -2881,7 +2415,7 @@
 
 
 
-/* ****** Control Register 115 [0x11CC]: TRG_STATE_PTRN7 - Trigger State Pattern 7 (Default: 0x00000000) ****** */
+/* ****** Control Register 92 [0x1170]: TRG_STATE_PTRN7 - Trigger State Pattern 7 (Default: 0x00000000) ****** */
 
 /* TRG_STATE_PTRN7 - trigger source state pattern (0 = Inhibit, 1 = Coincidence) */
 #define WD2_TRG_STATE_PTRN7_REG                            WD2_REG_TRG_STATE_PTRN7
@@ -2890,7 +2424,7 @@
 
 
 
-/* ****** Control Register 116 [0x11D0]: TRG_SRC_EN_PTRN8 - Trigger Source Enable Pattern 8 (Default: 0x00000000) ****** */
+/* ****** Control Register 93 [0x1174]: TRG_SRC_EN_PTRN8 - Trigger Source Enable Pattern 8 (Default: 0x00000000) ****** */
 
 /* TRG_SRC_EN_PTRN8 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch) */
 #define WD2_TRG_SRC_EN_PTRN8_REG                          WD2_REG_TRG_SRC_EN_PTRN8
@@ -2899,7 +2433,7 @@
 
 
 
-/* ****** Control Register 117 [0x11D4]: TRG_STATE_PTRN8 - Trigger State Pattern 8 (Default: 0x00000000) ****** */
+/* ****** Control Register 94 [0x1178]: TRG_STATE_PTRN8 - Trigger State Pattern 8 (Default: 0x00000000) ****** */
 
 /* TRG_STATE_PTRN8 - trigger source state pattern (0 = Inhibit, 1 = Coincidence) */
 #define WD2_TRG_STATE_PTRN8_REG                            WD2_REG_TRG_STATE_PTRN8
@@ -2908,7 +2442,7 @@
 
 
 
-/* ****** Control Register 118 [0x11D8]: TRG_SRC_EN_PTRN9 - Trigger Source Enable Pattern 9 (Default: 0x00000000) ****** */
+/* ****** Control Register 95 [0x117C]: TRG_SRC_EN_PTRN9 - Trigger Source Enable Pattern 9 (Default: 0x00000000) ****** */
 
 /* TRG_SRC_EN_PTRN9 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch) */
 #define WD2_TRG_SRC_EN_PTRN9_REG                          WD2_REG_TRG_SRC_EN_PTRN9
@@ -2917,7 +2451,7 @@
 
 
 
-/* ****** Control Register 119 [0x11DC]: TRG_STATE_PTRN9 - Trigger State Pattern 9 (Default: 0x00000000) ****** */
+/* ****** Control Register 96 [0x1180]: TRG_STATE_PTRN9 - Trigger State Pattern 9 (Default: 0x00000000) ****** */
 
 /* TRG_STATE_PTRN9 - trigger source state pattern (0 = Inhibit, 1 = Coincidence) */
 #define WD2_TRG_STATE_PTRN9_REG                            WD2_REG_TRG_STATE_PTRN9
@@ -2926,7 +2460,7 @@
 
 
 
-/* ****** Control Register 120 [0x11E0]: TRG_SRC_EN_PTRN10 - Trigger Source Enable Pattern 10 (Default: 0x00000000) ****** */
+/* ****** Control Register 97 [0x1184]: TRG_SRC_EN_PTRN10 - Trigger Source Enable Pattern 10 (Default: 0x00000000) ****** */
 
 /* TRG_SRC_EN_PTRN10 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch) */
 #define WD2_TRG_SRC_EN_PTRN10_REG                        WD2_REG_TRG_SRC_EN_PTRN10
@@ -2935,7 +2469,7 @@
 
 
 
-/* ****** Control Register 121 [0x11E4]: TRG_STATE_PTRN10 - Trigger State Pattern 10 (Default: 0x00000000) ****** */
+/* ****** Control Register 98 [0x1188]: TRG_STATE_PTRN10 - Trigger State Pattern 10 (Default: 0x00000000) ****** */
 
 /* TRG_STATE_PTRN10 - trigger source state pattern (0 = Inhibit, 1 = Coincidence) */
 #define WD2_TRG_STATE_PTRN10_REG                          WD2_REG_TRG_STATE_PTRN10
@@ -2944,7 +2478,7 @@
 
 
 
-/* ****** Control Register 122 [0x11E8]: TRG_SRC_EN_PTRN11 - Trigger Source Enable Pattern 11 (Default: 0x00000000) ****** */
+/* ****** Control Register 99 [0x118C]: TRG_SRC_EN_PTRN11 - Trigger Source Enable Pattern 11 (Default: 0x00000000) ****** */
 
 /* TRG_SRC_EN_PTRN11 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch) */
 #define WD2_TRG_SRC_EN_PTRN11_REG                        WD2_REG_TRG_SRC_EN_PTRN11
@@ -2953,7 +2487,7 @@
 
 
 
-/* ****** Control Register 123 [0x11EC]: TRG_STATE_PTRN11 - Trigger State Pattern 11 (Default: 0x00000000) ****** */
+/* ****** Control Register 100 [0x1190]: TRG_STATE_PTRN11 - Trigger State Pattern 11 (Default: 0x00000000) ****** */
 
 /* TRG_STATE_PTRN11 - trigger source state pattern (0 = Inhibit, 1 = Coincidence) */
 #define WD2_TRG_STATE_PTRN11_REG                          WD2_REG_TRG_STATE_PTRN11
@@ -2962,7 +2496,7 @@
 
 
 
-/* ****** Control Register 124 [0x11F0]: TRG_SRC_EN_PTRN12 - Trigger Source Enable Pattern 12 (Default: 0x00000000) ****** */
+/* ****** Control Register 101 [0x1194]: TRG_SRC_EN_PTRN12 - Trigger Source Enable Pattern 12 (Default: 0x00000000) ****** */
 
 /* TRG_SRC_EN_PTRN12 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch) */
 #define WD2_TRG_SRC_EN_PTRN12_REG                        WD2_REG_TRG_SRC_EN_PTRN12
@@ -2971,7 +2505,7 @@
 
 
 
-/* ****** Control Register 125 [0x11F4]: TRG_STATE_PTRN12 - Trigger State Pattern 12 (Default: 0x00000000) ****** */
+/* ****** Control Register 102 [0x1198]: TRG_STATE_PTRN12 - Trigger State Pattern 12 (Default: 0x00000000) ****** */
 
 /* TRG_STATE_PTRN12 - trigger source state pattern (0 = Inhibit, 1 = Coincidence) */
 #define WD2_TRG_STATE_PTRN12_REG                          WD2_REG_TRG_STATE_PTRN12
@@ -2980,7 +2514,7 @@
 
 
 
-/* ****** Control Register 126 [0x11F8]: TRG_SRC_EN_PTRN13 - Trigger Source Enable Pattern 13 (Default: 0x00000000) ****** */
+/* ****** Control Register 103 [0x119C]: TRG_SRC_EN_PTRN13 - Trigger Source Enable Pattern 13 (Default: 0x00000000) ****** */
 
 /* TRG_SRC_EN_PTRN13 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch) */
 #define WD2_TRG_SRC_EN_PTRN13_REG                        WD2_REG_TRG_SRC_EN_PTRN13
@@ -2989,7 +2523,7 @@
 
 
 
-/* ****** Control Register 127 [0x11FC]: TRG_STATE_PTRN13 - Trigger State Pattern 13 (Default: 0x00000000) ****** */
+/* ****** Control Register 104 [0x11A0]: TRG_STATE_PTRN13 - Trigger State Pattern 13 (Default: 0x00000000) ****** */
 
 /* TRG_STATE_PTRN13 - trigger source state pattern (0 = Inhibit, 1 = Coincidence) */
 #define WD2_TRG_STATE_PTRN13_REG                          WD2_REG_TRG_STATE_PTRN13
@@ -2998,7 +2532,7 @@
 
 
 
-/* ****** Control Register 128 [0x1200]: TRG_SRC_EN_PTRN14 - Trigger Source Enable Pattern 14 (Default: 0x00000000) ****** */
+/* ****** Control Register 105 [0x11A4]: TRG_SRC_EN_PTRN14 - Trigger Source Enable Pattern 14 (Default: 0x00000000) ****** */
 
 /* TRG_SRC_EN_PTRN14 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch) */
 #define WD2_TRG_SRC_EN_PTRN14_REG                        WD2_REG_TRG_SRC_EN_PTRN14
@@ -3007,7 +2541,7 @@
 
 
 
-/* ****** Control Register 129 [0x1204]: TRG_STATE_PTRN14 - Trigger State Pattern 14 (Default: 0x00000000) ****** */
+/* ****** Control Register 106 [0x11A8]: TRG_STATE_PTRN14 - Trigger State Pattern 14 (Default: 0x00000000) ****** */
 
 /* TRG_STATE_PTRN14 - trigger source state pattern (0 = Inhibit, 1 = Coincidence) */
 #define WD2_TRG_STATE_PTRN14_REG                          WD2_REG_TRG_STATE_PTRN14
@@ -3016,7 +2550,7 @@
 
 
 
-/* ****** Control Register 130 [0x1208]: TRG_SRC_EN_PTRN15 - Trigger Source Enable Pattern 15 (Default: 0x00000000) ****** */
+/* ****** Control Register 107 [0x11AC]: TRG_SRC_EN_PTRN15 - Trigger Source Enable Pattern 15 (Default: 0x00000000) ****** */
 
 /* TRG_SRC_EN_PTRN15 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch) */
 #define WD2_TRG_SRC_EN_PTRN15_REG                        WD2_REG_TRG_SRC_EN_PTRN15
@@ -3025,7 +2559,7 @@
 
 
 
-/* ****** Control Register 131 [0x120C]: TRG_STATE_PTRN15 - Trigger State Pattern 15 (Default: 0x00000000) ****** */
+/* ****** Control Register 108 [0x11B0]: TRG_STATE_PTRN15 - Trigger State Pattern 15 (Default: 0x00000000) ****** */
 
 /* TRG_STATE_PTRN15 - trigger source state pattern (0 = Inhibit, 1 = Coincidence) */
 #define WD2_TRG_STATE_PTRN15_REG                          WD2_REG_TRG_STATE_PTRN15
@@ -3034,7 +2568,7 @@
 
 
 
-/* ****** Control Register 132 [0x1210]: TRG_SRC_EN_PTRN16 - Trigger Source Enable Pattern 16 (Default: 0x00000000) ****** */
+/* ****** Control Register 109 [0x11B4]: TRG_SRC_EN_PTRN16 - Trigger Source Enable Pattern 16 (Default: 0x00000000) ****** */
 
 /* TRG_SRC_EN_PTRN16 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch) */
 #define WD2_TRG_SRC_EN_PTRN16_REG                        WD2_REG_TRG_SRC_EN_PTRN16
@@ -3043,7 +2577,7 @@
 
 
 
-/* ****** Control Register 133 [0x1214]: TRG_STATE_PTRN16 - Trigger State Pattern 16 (Default: 0x00000000) ****** */
+/* ****** Control Register 110 [0x11B8]: TRG_STATE_PTRN16 - Trigger State Pattern 16 (Default: 0x00000000) ****** */
 
 /* TRG_STATE_PTRN16 - trigger source state pattern (0 = Inhibit, 1 = Coincidence) */
 #define WD2_TRG_STATE_PTRN16_REG                          WD2_REG_TRG_STATE_PTRN16
@@ -3052,7 +2586,7 @@
 
 
 
-/* ****** Control Register 134 [0x1218]: TRG_SRC_EN_PTRN17 - Trigger Source Enable Pattern 17 (Default: 0x00000000) ****** */
+/* ****** Control Register 111 [0x11BC]: TRG_SRC_EN_PTRN17 - Trigger Source Enable Pattern 17 (Default: 0x00000000) ****** */
 
 /* TRG_SRC_EN_PTRN17 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch) */
 #define WD2_TRG_SRC_EN_PTRN17_REG                        WD2_REG_TRG_SRC_EN_PTRN17
@@ -3061,7 +2595,7 @@
 
 
 
-/* ****** Control Register 135 [0x121C]: TRG_STATE_PTRN17 - Trigger State Pattern 17 (Default: 0x00000000) ****** */
+/* ****** Control Register 112 [0x11C0]: TRG_STATE_PTRN17 - Trigger State Pattern 17 (Default: 0x00000000) ****** */
 
 /* TRG_STATE_PTRN17 - trigger source state pattern (0 = Inhibit, 1 = Coincidence) */
 #define WD2_TRG_STATE_PTRN17_REG                          WD2_REG_TRG_STATE_PTRN17
@@ -3070,7 +2604,7 @@
 
 
 
-/* ****** Control Register 136 [0x1220]: TRG_SRC_EN_PTRN18 - Trigger Source Enable Pattern 18 (Default: 0x00000000) ****** */
+/* ****** Control Register 113 [0x11C4]: TRG_SRC_EN_PTRN18 - Trigger Source Enable Pattern 18 (Default: 0x00000000) ****** */
 
 /* TRG_SRC_EN_PTRN18 - trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch) */
 #define WD2_TRG_SRC_EN_PTRN18_REG                        WD2_REG_TRG_SRC_EN_PTRN18
@@ -3079,7 +2613,7 @@
 
 
 
-/* ****** Control Register 137 [0x1224]: TRG_STATE_PTRN18 - Trigger State Pattern 18 (Default: 0x00000000) ****** */
+/* ****** Control Register 114 [0x11C8]: TRG_STATE_PTRN18 - Trigger State Pattern 18 (Default: 0x00000000) ****** */
 
 /* TRG_STATE_PTRN18 - trigger source state pattern (0 = Inhibit, 1 = Coincidence) */
 #define WD2_TRG_STATE_PTRN18_REG                          WD2_REG_TRG_STATE_PTRN18
@@ -3088,7 +2622,7 @@
 
 
 
-/* ****** Control Register 138 [0x1228]: ADV_TRG_CTRL - Advanced Trigger Control Register (Default: 0x00000000) ****** */
+/* ****** Control Register 115 [0x11CC]: ADV_TRG_CTRL - Advanced Trigger Control Register (Default: 0x00000000) ****** */
 
 /* ADV_TRG_CTRL - Advanced trigger control register */
 #define WD2_ADV_TRG_CTRL_REG                                  WD2_REG_ADV_TRG_CTRL
@@ -3097,7 +2631,7 @@
 
 
 
-/* ****** Control Register 139 [0x122C]: ADV_TRG_CH_CAL0 - Advanced Trigger Channel Calibration Register 0 (Default: 0x00000000) ****** */
+/* ****** Control Register 116 [0x11D0]: ADV_TRG_CH_CAL0 - Advanced Trigger Channel Calibration Register 0 (Default: 0x00000000) ****** */
 
 /* ADV_TRG_CH_CAL0 - Advanced trigger channel calibration register 0 */
 #define WD2_ADV_TRG_CH_CAL0_REG                            WD2_REG_ADV_TRG_CH_CAL0
@@ -3106,7 +2640,7 @@
 
 
 
-/* ****** Control Register 140 [0x1230]: ADV_TRG_CH_CAL1 - Advanced Trigger Channel Calibration Register 1 (Default: 0x00000000) ****** */
+/* ****** Control Register 117 [0x11D4]: ADV_TRG_CH_CAL1 - Advanced Trigger Channel Calibration Register 1 (Default: 0x00000000) ****** */
 
 /* ADV_TRG_CH_CAL1 - Advanced trigger channel calibration register 1 */
 #define WD2_ADV_TRG_CH_CAL1_REG                            WD2_REG_ADV_TRG_CH_CAL1
@@ -3115,7 +2649,7 @@
 
 
 
-/* ****** Control Register 141 [0x1234]: ADV_TRG_CH_CAL2 - Advanced Trigger Channel Calibration Register 2 (Default: 0x00000000) ****** */
+/* ****** Control Register 118 [0x11D8]: ADV_TRG_CH_CAL2 - Advanced Trigger Channel Calibration Register 2 (Default: 0x00000000) ****** */
 
 /* ADV_TRG_CH_CAL2 - Advanced trigger channel calibration register 2 */
 #define WD2_ADV_TRG_CH_CAL2_REG                            WD2_REG_ADV_TRG_CH_CAL2
@@ -3124,7 +2658,7 @@
 
 
 
-/* ****** Control Register 142 [0x1238]: ADV_TRG_CH_CAL3 - Advanced Trigger Channel Calibration Register 3 (Default: 0x00000000) ****** */
+/* ****** Control Register 119 [0x11DC]: ADV_TRG_CH_CAL3 - Advanced Trigger Channel Calibration Register 3 (Default: 0x00000000) ****** */
 
 /* ADV_TRG_CH_CAL3 - Advanced trigger channel calibration register 3 */
 #define WD2_ADV_TRG_CH_CAL3_REG                            WD2_REG_ADV_TRG_CH_CAL3
@@ -3133,7 +2667,7 @@
 
 
 
-/* ****** Control Register 143 [0x123C]: ADV_TRG_PED_CFG - Advanced Trigger Pedestal Configuration Register (Default: 0x00000000) ****** */
+/* ****** Control Register 120 [0x11E0]: ADV_TRG_PED_CFG - Advanced Trigger Pedestal Configuration Register (Default: 0x00000000) ****** */
 
 /* ADV_TRG_PED_CFG - Advanced trigger pedestal configuration register */
 #define WD2_ADV_TRG_PED_CFG_REG                            WD2_REG_ADV_TRG_PED_CFG
@@ -3142,7 +2676,7 @@
 
 
 
-/* ****** Control Register 144 [0x1240]: ADV_TRG_THR0 - Advanced Trigger Threshold 0 Register (Default: 0x00000000) ****** */
+/* ****** Control Register 121 [0x11E4]: ADV_TRG_THR0 - Advanced Trigger Threshold 0 Register (Default: 0x00000000) ****** */
 
 /* ADV_TRG_THR0 - Advanced trigger threshold 0 register */
 #define WD2_ADV_TRG_THR0_REG                                  WD2_REG_ADV_TRG_THR0
@@ -3151,7 +2685,7 @@
 
 
 
-/* ****** Control Register 145 [0x1244]: ADV_TRG_THR1 - Advanced Trigger Threshold 1 Register (Default: 0x00000000) ****** */
+/* ****** Control Register 122 [0x11E8]: ADV_TRG_THR1 - Advanced Trigger Threshold 1 Register (Default: 0x00000000) ****** */
 
 /* ADV_TRG_THR1 - Advanced trigger threshold 1 register */
 #define WD2_ADV_TRG_THR1_REG                                  WD2_REG_ADV_TRG_THR1
@@ -3160,7 +2694,7 @@
 
 
 
-/* ****** Control Register 146 [0x1248]: ADV_TRG_THR2 - Advanced Trigger Threshold 2 Register (Default: 0x00000000) ****** */
+/* ****** Control Register 123 [0x11EC]: ADV_TRG_THR2 - Advanced Trigger Threshold 2 Register (Default: 0x00000000) ****** */
 
 /* ADV_TRG_THR2 - Advanced trigger threshold 2 register */
 #define WD2_ADV_TRG_THR2_REG                                  WD2_REG_ADV_TRG_THR2
@@ -3169,7 +2703,7 @@
 
 
 
-/* ****** Control Register 147 [0x124C]: ADV_TRG_TX_CHK_WORD0 - Advanced Trigger Transmition Check Word 0 Register (Default: 0x00000000) ****** */
+/* ****** Control Register 124 [0x11F0]: ADV_TRG_TX_CHK_WORD0 - Advanced Trigger Transmition Check Word 0 Register (Default: 0x00000000) ****** */
 
 /* ADV_TRG_TX_CHK_WORD0 - Advanced trigger transmition check word 0 register */
 #define WD2_ADV_TRG_TX_CHK_WORD0_REG                  WD2_REG_ADV_TRG_TX_CHK_WORD0
@@ -3178,7 +2712,7 @@
 
 
 
-/* ****** Control Register 148 [0x1250]: ADV_TRG_TX_CHK_WORD1 - Advanced Trigger Transmition Check Word 1 Register (Default: 0x00000000) ****** */
+/* ****** Control Register 125 [0x11F4]: ADV_TRG_TX_CHK_WORD1 - Advanced Trigger Transmition Check Word 1 Register (Default: 0x00000000) ****** */
 
 /* ADV_TRG_TX_CHK_WORD1 - Advanced trigger transmition check word 1 register */
 #define WD2_ADV_TRG_TX_CHK_WORD1_REG                  WD2_REG_ADV_TRG_TX_CHK_WORD1
@@ -3187,7 +2721,7 @@
 
 
 
-/* ****** Control Register 149 [0x1254]: ADV_TRG_TDC_CH_MASK - Advanced Trigger TDC Channel Mask (Default: 0x00000000) ****** */
+/* ****** Control Register 126 [0x11F8]: ADV_TRG_TDC_CH_MASK - Advanced Trigger TDC Channel Mask (Default: 0x00000000) ****** */
 
 /* ADV_TRG_TDC_CH_MASK - Advanced trigger TDC channel mask */
 #define WD2_ADV_TRG_TDC_CH_MASK_REG                    WD2_REG_ADV_TRG_TDC_CH_MASK
@@ -3196,7 +2730,7 @@
 
 
 
-/* ****** Control Register 150 [0x1258]: ADV_TRG_CFG12 - Advanced Trigger Configuration Register 12 (Default: 0x00000000) ****** */
+/* ****** Control Register 127 [0x11FC]: ADV_TRG_CFG12 - Advanced Trigger Configuration Register 12 (Default: 0x00000000) ****** */
 
 /* ADV_TRG_CFG_12 - Advanced trigger configuration register 12 */
 #define WD2_ADV_TRG_CFG_12_REG                               WD2_REG_ADV_TRG_CFG12
@@ -3205,7 +2739,7 @@
 
 
 
-/* ****** Control Register 151 [0x125C]: ADV_TRG_CFG13 - Advanced Trigger Configuration Register 13 (Default: 0x00000000) ****** */
+/* ****** Control Register 128 [0x1200]: ADV_TRG_CFG13 - Advanced Trigger Configuration Register 13 (Default: 0x00000000) ****** */
 
 /* ADV_TRG_CFG_13 - Advanced trigger configuration register 13 */
 #define WD2_ADV_TRG_CFG_13_REG                               WD2_REG_ADV_TRG_CFG13
@@ -3214,7 +2748,7 @@
 
 
 
-/* ****** Control Register 152 [0x1260]: ADV_TRG_CFG14 - Advanced Trigger Configuration Register 14 (Default: 0x00000000) ****** */
+/* ****** Control Register 129 [0x1204]: ADV_TRG_CFG14 - Advanced Trigger Configuration Register 14 (Default: 0x00000000) ****** */
 
 /* ADV_TRG_CFG_14 - Advanced trigger configuration register 14 */
 #define WD2_ADV_TRG_CFG_14_REG                               WD2_REG_ADV_TRG_CFG14
@@ -3223,7 +2757,7 @@
 
 
 
-/* ****** Control Register 153 [0x1264]: ADV_TRG_CFG15 - Advanced Trigger Configuration Register 15 (Default: 0x00000000) ****** */
+/* ****** Control Register 130 [0x1208]: ADV_TRG_CFG15 - Advanced Trigger Configuration Register 15 (Default: 0x00000000) ****** */
 
 /* ADV_TRG_CFG_15 - Advanced trigger configuration register 15 */
 #define WD2_ADV_TRG_CFG_15_REG                               WD2_REG_ADV_TRG_CFG15
@@ -3232,7 +2766,7 @@
 
 
 
-/* ****** Control Register 154 [0x1268]: ADV_TRG_CFG16 - Advanced Trigger Configuration Register 16 (Default: 0x00000000) ****** */
+/* ****** Control Register 131 [0x120C]: ADV_TRG_CFG16 - Advanced Trigger Configuration Register 16 (Default: 0x00000000) ****** */
 
 /* ADV_TRG_CFG_16 - Advanced trigger configuration register 16 */
 #define WD2_ADV_TRG_CFG_16_REG                               WD2_REG_ADV_TRG_CFG16
@@ -3241,7 +2775,7 @@
 
 
 
-/* ****** Control Register 155 [0x126C]: ADV_TRG_CFG17 - Advanced Trigger Configuration Register 17 (Default: 0x00000000) ****** */
+/* ****** Control Register 132 [0x1210]: ADV_TRG_CFG17 - Advanced Trigger Configuration Register 17 (Default: 0x00000000) ****** */
 
 /* ADV_TRG_CFG_17 - Advanced trigger configuration register 17 */
 #define WD2_ADV_TRG_CFG_17_REG                               WD2_REG_ADV_TRG_CFG17
@@ -3250,7 +2784,7 @@
 
 
 
-/* ****** Control Register 156 [0x1270]: ADV_TRG_CFG18 - Advanced Trigger Configuration Register 18 (Default: 0x00000000) ****** */
+/* ****** Control Register 133 [0x1214]: ADV_TRG_CFG18 - Advanced Trigger Configuration Register 18 (Default: 0x00000000) ****** */
 
 /* ADV_TRG_CFG_18 - Advanced trigger configuration register 18 */
 #define WD2_ADV_TRG_CFG_18_REG                               WD2_REG_ADV_TRG_CFG18
@@ -3259,7 +2793,7 @@
 
 
 
-/* ****** Control Register 157 [0x1274]: ADV_TRG_CFG19 - Advanced Trigger Configuration Register 19 (Default: 0x00000000) ****** */
+/* ****** Control Register 134 [0x1218]: ADV_TRG_CFG19 - Advanced Trigger Configuration Register 19 (Default: 0x00000000) ****** */
 
 /* ADV_TRG_CFG_19 - Advanced trigger configuration register 19 */
 #define WD2_ADV_TRG_CFG_19_REG                               WD2_REG_ADV_TRG_CFG19
@@ -3268,7 +2802,7 @@
 
 
 
-/* ****** Control Register 158 [0x1278]: SET_TIME_LSB - Set System Time (Default: 0x00000000) ****** */
+/* ****** Control Register 135 [0x121C]: SET_TIME_LSB - Set System Time (Default: 0x00000000) ****** */
 
 /* SET_TIME_LSB - LSBs of 64bit system time counter set value  (time is updated when MSBs are written) */
 #define WD2_SET_TIME_LSB_REG                                  WD2_REG_SET_TIME_LSB
@@ -3277,7 +2811,7 @@
 
 
 
-/* ****** Control Register 159 [0x127C]: SET_TIME_MSB - Set System Time (Default: 0x00000000) ****** */
+/* ****** Control Register 136 [0x1220]: SET_TIME_MSB - Set System Time (Default: 0x00000000) ****** */
 
 /* SET_TIME_MSB - MSBs of 64bit system time counter set value  (time is updated when MSBs are written) */
 #define WD2_SET_TIME_MSB_REG                                  WD2_REG_SET_TIME_MSB
@@ -3286,7 +2820,7 @@
 
 
 
-/* ****** Control Register 160 [0x1280]: DBG_SIG_SEL - Debug Signal Select for MCX Connectors on HV Board (Default: 0x00000000) ****** */
+/* ****** Control Register 137 [0x1224]: DBG_SIG_SEL - Debug Signal Select for MCX Connectors on HV Board (Default: 0x00000000) ****** */
 
 /* MCX_TX_SIG_SEL - Select for TX connector (see RX connector for mapping) */
 #define WD2_MCX_TX_SIG_SEL_REG                                 WD2_REG_DBG_SIG_SEL
@@ -3314,7 +2848,7 @@
 
 
 
-/* ****** Control Register 161 [0x1284]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: None) ****** */
+/* ****** Control Register 138 [0x1228]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: None) ****** */
 
 /* CRC32_REG_BANK - Keep at the end of the register bank */
 #define WD2_CRC32_REG_BANK_REG                              WD2_REG_CRC32_REG_BANK
@@ -3323,7 +2857,7 @@
 
 
 
-/* ****** Status Register 0 [0x0000]: HW_VER - Hardware version information of the PCB (Default: 0xAC010213) ****** */
+/* ****** Status Register 0 [0x0000]: HW_VER - Hardware version information of the PCB (Default: 0xAC01021B) ****** */
 
 /* BOARD_MAGIC - 0xAC, Magic number for DRS board identification */
 #define WD2_BOARD_MAGIC_REG                                         WD2_REG_HW_VER
@@ -3347,7 +2881,7 @@
 #define WD2_BOARD_REVISION_REG                                      WD2_REG_HW_VER
 #define WD2_BOARD_REVISION_MASK                                         0x000000FC
 #define WD2_BOARD_REVISION_OFS                                                   2
-#define WD2_BOARD_REVISION_CONST                                              0x04
+#define WD2_BOARD_REVISION_CONST                                              0x06
 
 /* BOARD_VARIANT - Version indicator pins reflecting the variant of the board (Y15,Y10) */
 #define WD2_BOARD_VARIANT_REG                                       WD2_REG_HW_VER
@@ -3357,19 +2891,19 @@
 
 
 
-/* ****** Status Register 1 [0x0004]: REG_LAYOUT_VER - Register map layout version information (Default: 0x00080008) ****** */
+/* ****** Status Register 1 [0x0004]: REG_LAYOUT_VER - Register map layout version information (Default: 0x00090009) ****** */
 
 /* REG_LAYOUT_COMP_LEVEL - Register map layout compatibility level */
 #define WD2_REG_LAYOUT_COMP_LEVEL_REG                       WD2_REG_REG_LAYOUT_VER
 #define WD2_REG_LAYOUT_COMP_LEVEL_MASK                                  0xFFFF0000
 #define WD2_REG_LAYOUT_COMP_LEVEL_OFS                                           16
-#define WD2_REG_LAYOUT_COMP_LEVEL_CONST                                     0x0008
+#define WD2_REG_LAYOUT_COMP_LEVEL_CONST                                     0x0009
 
 /* REG_LAYOUT_VERSION - Register map layout version */
 #define WD2_REG_LAYOUT_VERSION_REG                          WD2_REG_REG_LAYOUT_VER
 #define WD2_REG_LAYOUT_VERSION_MASK                                     0x0000FFFF
 #define WD2_REG_LAYOUT_VERSION_OFS                                               0
-#define WD2_REG_LAYOUT_VERSION_CONST                                        0x0008
+#define WD2_REG_LAYOUT_VERSION_CONST                                        0x0009
 
 
 
@@ -3392,13 +2926,13 @@
 
 
 
-/* ****** Status Register 3 [0x000C]: FW_BUILD_TIME - Time when the firmware was built and compatibility level (Default: 0x04000000) ****** */
+/* ****** Status Register 3 [0x000C]: FW_BUILD_TIME - Time when the firmware was built and compatibility level (Default: 0x05000000) ****** */
 
 /* FW_COMPAT_LEVEL - Firmware compatibility level */
 #define WD2_FW_COMPAT_LEVEL_REG                              WD2_REG_FW_BUILD_TIME
 #define WD2_FW_COMPAT_LEVEL_MASK                                        0xFF000000
 #define WD2_FW_COMPAT_LEVEL_OFS                                                 24
-#define WD2_FW_COMPAT_LEVEL_CONST                                             0x04
+#define WD2_FW_COMPAT_LEVEL_CONST                                             0x05
 
 /* FW_BUILD_HOUR - Hour of the firmware build */
 #define WD2_FW_BUILD_HOUR_REG                                WD2_REG_FW_BUILD_TIME
@@ -3498,25 +3032,25 @@
 #define WD2_TEMPERATURE_MASK                                            0xFFFF0000
 #define WD2_TEMPERATURE_OFS                                                     16
 
+/* OVERTEMP - Overtemperature from external sensor */
+#define WD2_OVERTEMP_REG                                            WD2_REG_STATUS
+#define WD2_OVERTEMP_MASK                                               0x00008000
+#define WD2_OVERTEMP_OFS                                                        15
+
 /* DAQ_CLK_DEF_PHASE_OK - DAQ clock default phase setting is valid */
 #define WD2_DAQ_CLK_DEF_PHASE_OK_REG                                WD2_REG_STATUS
-#define WD2_DAQ_CLK_DEF_PHASE_OK_MASK                                   0x00002000
-#define WD2_DAQ_CLK_DEF_PHASE_OK_OFS                                            13
+#define WD2_DAQ_CLK_DEF_PHASE_OK_MASK                                   0x00001000
+#define WD2_DAQ_CLK_DEF_PHASE_OK_OFS                                            12
 
 /* DAQ_CLK_DEF_PHASE_CHKD - DAQ clock default phase setting is checked */
 #define WD2_DAQ_CLK_DEF_PHASE_CHKD_REG                              WD2_REG_STATUS
-#define WD2_DAQ_CLK_DEF_PHASE_CHKD_MASK                                 0x00001000
-#define WD2_DAQ_CLK_DEF_PHASE_CHKD_OFS                                          12
+#define WD2_DAQ_CLK_DEF_PHASE_CHKD_MASK                                 0x00000800
+#define WD2_DAQ_CLK_DEF_PHASE_CHKD_OFS                                          11
 
 /* DRS_CONFIG_DONE - DRS configuration done */
 #define WD2_DRS_CONFIG_DONE_REG                                     WD2_REG_STATUS
-#define WD2_DRS_CONFIG_DONE_MASK                                        0x00000400
-#define WD2_DRS_CONFIG_DONE_OFS                                                 10
-
-/* FLASH_SEL - SPI Flash select from backplane (inverted = high active) */
-#define WD2_FLASH_SEL_REG                                           WD2_REG_STATUS
-#define WD2_FLASH_SEL_MASK                                              0x00000200
-#define WD2_FLASH_SEL_OFS                                                        9
+#define WD2_DRS_CONFIG_DONE_MASK                                        0x00000200
+#define WD2_DRS_CONFIG_DONE_OFS                                                  9
 
 /* BOARD_SEL - Board select from backplane (inverted = high active) */
 #define WD2_BOARD_SEL_REG                                           WD2_REG_STATUS
@@ -3659,31 +3193,7 @@
 
 
 
-/* ****** Status Register 17 [0x0044]: ADC_INFO - Chip ID and Grade of the ADCs (Default: 0x00000000) ****** */
-
-/* ADC_0_CHIP_ID - Chip ID of ADC 0 (A) (0x93 for AD9637) */
-#define WD2_ADC_0_CHIP_ID_REG                                     WD2_REG_ADC_INFO
-#define WD2_ADC_0_CHIP_ID_MASK                                          0xFF000000
-#define WD2_ADC_0_CHIP_ID_OFS                                                   24
-
-/* ADC_0_SPEED - Speed Grade of ADC 0 (A) (0=40MS, 1=80MS) */
-#define WD2_ADC_0_SPEED_REG                                       WD2_REG_ADC_INFO
-#define WD2_ADC_0_SPEED_MASK                                            0x00700000
-#define WD2_ADC_0_SPEED_OFS                                                     20
-
-/* ADC_1_CHIP_ID - Chip ID of ADC 1 (B) (0x93 for AD9637) */
-#define WD2_ADC_1_CHIP_ID_REG                                     WD2_REG_ADC_INFO
-#define WD2_ADC_1_CHIP_ID_MASK                                          0x0000FF00
-#define WD2_ADC_1_CHIP_ID_OFS                                                    8
-
-/* ADC_1_SPEED - Speed Grade of ADC 1 (B) (0=40MS, 1=80MS) */
-#define WD2_ADC_1_SPEED_REG                                       WD2_REG_ADC_INFO
-#define WD2_ADC_1_SPEED_MASK                                            0x00000070
-#define WD2_ADC_1_SPEED_OFS                                                      4
-
-
-
-/* ****** Status Register 18 [0x0048]: HV_VER - HV Board Version (Default: 0x00000000) ****** */
+/* ****** Status Register 17 [0x0044]: HV_VER - HV Board Version (Default: 0x00000000) ****** */
 
 /* HV_VER - HV board version (16bit Voltage in V, 16bit Current in mA) */
 #define WD2_HV_VER_REG                                              WD2_REG_HV_VER
@@ -3692,7 +3202,7 @@
 
 
 
-/* ****** Status Register 19 [0x004C]: HV_I_MEAS_0 - Measured actual current of the HV supply on channel 0 (Default: 0x00000000) ****** */
+/* ****** Status Register 18 [0x0048]: HV_I_MEAS_0 - Measured actual current of the HV supply on channel 0 (Default: 0x00000000) ****** */
 
 /* HV_I_MEAS_0 - Float value (i_meas) */
 #define WD2_HV_I_MEAS_0_REG                                    WD2_REG_HV_I_MEAS_0
@@ -3701,7 +3211,7 @@
 
 
 
-/* ****** Status Register 20 [0x0050]: HV_I_MEAS_1 - Measured actual current of the HV supply on channel 1 (Default: 0x00000000) ****** */
+/* ****** Status Register 19 [0x004C]: HV_I_MEAS_1 - Measured actual current of the HV supply on channel 1 (Default: 0x00000000) ****** */
 
 /* HV_I_MEAS_1 - Float value (i_meas) */
 #define WD2_HV_I_MEAS_1_REG                                    WD2_REG_HV_I_MEAS_1
@@ -3710,7 +3220,7 @@
 
 
 
-/* ****** Status Register 21 [0x0054]: HV_I_MEAS_2 - Measured actual current of the HV supply on channel 2 (Default: 0x00000000) ****** */
+/* ****** Status Register 20 [0x0050]: HV_I_MEAS_2 - Measured actual current of the HV supply on channel 2 (Default: 0x00000000) ****** */
 
 /* HV_I_MEAS_2 - Float value (i_meas) */
 #define WD2_HV_I_MEAS_2_REG                                    WD2_REG_HV_I_MEAS_2
@@ -3719,7 +3229,7 @@
 
 
 
-/* ****** Status Register 22 [0x0058]: HV_I_MEAS_3 - Measured actual current of the HV supply on channel 3 (Default: 0x00000000) ****** */
+/* ****** Status Register 21 [0x0054]: HV_I_MEAS_3 - Measured actual current of the HV supply on channel 3 (Default: 0x00000000) ****** */
 
 /* HV_I_MEAS_3 - Float value (i_meas) */
 #define WD2_HV_I_MEAS_3_REG                                    WD2_REG_HV_I_MEAS_3
@@ -3728,7 +3238,7 @@
 
 
 
-/* ****** Status Register 23 [0x005C]: HV_I_MEAS_4 - Measured actual current of the HV supply on channel 4 (Default: 0x00000000) ****** */
+/* ****** Status Register 22 [0x0058]: HV_I_MEAS_4 - Measured actual current of the HV supply on channel 4 (Default: 0x00000000) ****** */
 
 /* HV_I_MEAS_4 - Float value (i_meas) */
 #define WD2_HV_I_MEAS_4_REG                                    WD2_REG_HV_I_MEAS_4
@@ -3737,7 +3247,7 @@
 
 
 
-/* ****** Status Register 24 [0x0060]: HV_I_MEAS_5 - Measured actual current of the HV supply on channel 5 (Default: 0x00000000) ****** */
+/* ****** Status Register 23 [0x005C]: HV_I_MEAS_5 - Measured actual current of the HV supply on channel 5 (Default: 0x00000000) ****** */
 
 /* HV_I_MEAS_5 - Float value (i_meas) */
 #define WD2_HV_I_MEAS_5_REG                                    WD2_REG_HV_I_MEAS_5
@@ -3746,7 +3256,7 @@
 
 
 
-/* ****** Status Register 25 [0x0064]: HV_I_MEAS_6 - Measured actual current of the HV supply on channel 6 (Default: 0x00000000) ****** */
+/* ****** Status Register 24 [0x0060]: HV_I_MEAS_6 - Measured actual current of the HV supply on channel 6 (Default: 0x00000000) ****** */
 
 /* HV_I_MEAS_6 - Float value (i_meas) */
 #define WD2_HV_I_MEAS_6_REG                                    WD2_REG_HV_I_MEAS_6
@@ -3755,7 +3265,7 @@
 
 
 
-/* ****** Status Register 26 [0x0068]: HV_I_MEAS_7 - Measured actual current of the HV supply on channel 7 (Default: 0x00000000) ****** */
+/* ****** Status Register 25 [0x0064]: HV_I_MEAS_7 - Measured actual current of the HV supply on channel 7 (Default: 0x00000000) ****** */
 
 /* HV_I_MEAS_7 - Float value (i_meas) */
 #define WD2_HV_I_MEAS_7_REG                                    WD2_REG_HV_I_MEAS_7
@@ -3764,7 +3274,7 @@
 
 
 
-/* ****** Status Register 27 [0x006C]: HV_I_MEAS_8 - Measured actual current of the HV supply on channel 8 (Default: 0x00000000) ****** */
+/* ****** Status Register 26 [0x0068]: HV_I_MEAS_8 - Measured actual current of the HV supply on channel 8 (Default: 0x00000000) ****** */
 
 /* HV_I_MEAS_8 - Float value (i_meas) */
 #define WD2_HV_I_MEAS_8_REG                                    WD2_REG_HV_I_MEAS_8
@@ -3773,7 +3283,7 @@
 
 
 
-/* ****** Status Register 28 [0x0070]: HV_I_MEAS_9 - Measured actual current of the HV supply on channel 9 (Default: 0x00000000) ****** */
+/* ****** Status Register 27 [0x006C]: HV_I_MEAS_9 - Measured actual current of the HV supply on channel 9 (Default: 0x00000000) ****** */
 
 /* HV_I_MEAS_9 - Float value (i_meas) */
 #define WD2_HV_I_MEAS_9_REG                                    WD2_REG_HV_I_MEAS_9
@@ -3782,7 +3292,7 @@
 
 
 
-/* ****** Status Register 29 [0x0074]: HV_I_MEAS_10 - Measured actual current of the HV supply on channel 10 (Default: 0x00000000) ****** */
+/* ****** Status Register 28 [0x0070]: HV_I_MEAS_10 - Measured actual current of the HV supply on channel 10 (Default: 0x00000000) ****** */
 
 /* HV_I_MEAS_10 - Float value (i_meas) */
 #define WD2_HV_I_MEAS_10_REG                                  WD2_REG_HV_I_MEAS_10
@@ -3791,7 +3301,7 @@
 
 
 
-/* ****** Status Register 30 [0x0078]: HV_I_MEAS_11 - Measured actual current of the HV supply on channel 11 (Default: 0x00000000) ****** */
+/* ****** Status Register 29 [0x0074]: HV_I_MEAS_11 - Measured actual current of the HV supply on channel 11 (Default: 0x00000000) ****** */
 
 /* HV_I_MEAS_11 - Float value (i_meas) */
 #define WD2_HV_I_MEAS_11_REG                                  WD2_REG_HV_I_MEAS_11
@@ -3800,7 +3310,7 @@
 
 
 
-/* ****** Status Register 31 [0x007C]: HV_I_MEAS_12 - Measured actual current of the HV supply on channel 12 (Default: 0x00000000) ****** */
+/* ****** Status Register 30 [0x0078]: HV_I_MEAS_12 - Measured actual current of the HV supply on channel 12 (Default: 0x00000000) ****** */
 
 /* HV_I_MEAS_12 - Float value (i_meas) */
 #define WD2_HV_I_MEAS_12_REG                                  WD2_REG_HV_I_MEAS_12
@@ -3809,7 +3319,7 @@
 
 
 
-/* ****** Status Register 32 [0x0080]: HV_I_MEAS_13 - Measured actual current of the HV supply on channel 13 (Default: 0x00000000) ****** */
+/* ****** Status Register 31 [0x007C]: HV_I_MEAS_13 - Measured actual current of the HV supply on channel 13 (Default: 0x00000000) ****** */
 
 /* HV_I_MEAS_13 - Float value (i_meas) */
 #define WD2_HV_I_MEAS_13_REG                                  WD2_REG_HV_I_MEAS_13
@@ -3818,7 +3328,7 @@
 
 
 
-/* ****** Status Register 33 [0x0084]: HV_I_MEAS_14 - Measured actual current of the HV supply on channel 14 (Default: 0x00000000) ****** */
+/* ****** Status Register 32 [0x0080]: HV_I_MEAS_14 - Measured actual current of the HV supply on channel 14 (Default: 0x00000000) ****** */
 
 /* HV_I_MEAS_14 - Float value (i_meas) */
 #define WD2_HV_I_MEAS_14_REG                                  WD2_REG_HV_I_MEAS_14
@@ -3827,7 +3337,7 @@
 
 
 
-/* ****** Status Register 34 [0x0088]: HV_I_MEAS_15 - Measured actual current of the HV supply on channel 15 (Default: 0x00000000) ****** */
+/* ****** Status Register 33 [0x0084]: HV_I_MEAS_15 - Measured actual current of the HV supply on channel 15 (Default: 0x00000000) ****** */
 
 /* HV_I_MEAS_15 - Float value (i_meas) */
 #define WD2_HV_I_MEAS_15_REG                                  WD2_REG_HV_I_MEAS_15
@@ -3836,7 +3346,7 @@
 
 
 
-/* ****** Status Register 35 [0x008C]: HV_U_BASE_MEAS - Measured actual HV base voltage (Default: 0x00000000) ****** */
+/* ****** Status Register 34 [0x0088]: HV_U_BASE_MEAS - Measured actual HV base voltage (Default: 0x00000000) ****** */
 
 /* HV_U_BASE_MEAS - Float value (ub_meas) */
 #define WD2_HV_U_BASE_MEAS_REG                              WD2_REG_HV_U_BASE_MEAS
@@ -3845,7 +3355,7 @@
 
 
 
-/* ****** Status Register 36 [0x0090]: HV_TEMP_0 - Measured actual temperature of sensor 0 connected to the HV board (Default: 0x00000000) ****** */
+/* ****** Status Register 35 [0x008C]: HV_TEMP_0 - Measured actual temperature of sensor 0 connected to the HV board (Default: 0x00000000) ****** */
 
 /* HV_TEMP_0 - Float value (temp) */
 #define WD2_HV_TEMP_0_REG                                        WD2_REG_HV_TEMP_0
@@ -3854,7 +3364,7 @@
 
 
 
-/* ****** Status Register 37 [0x0094]: HV_TEMP_1 - Measured actual temperature of sensor 1 connected to the HV board (Default: 0x00000000) ****** */
+/* ****** Status Register 36 [0x0090]: HV_TEMP_1 - Measured actual temperature of sensor 1 connected to the HV board (Default: 0x00000000) ****** */
 
 /* HV_TEMP_1 - Float value (temp) */
 #define WD2_HV_TEMP_1_REG                                        WD2_REG_HV_TEMP_1
@@ -3863,7 +3373,7 @@
 
 
 
-/* ****** Status Register 38 [0x0098]: HV_TEMP_2 - Measured actual temperature of sensor 2 connected to the HV board (Default: 0x00000000) ****** */
+/* ****** Status Register 37 [0x0094]: HV_TEMP_2 - Measured actual temperature of sensor 2 connected to the HV board (Default: 0x00000000) ****** */
 
 /* HV_TEMP_2 - Float value (temp) */
 #define WD2_HV_TEMP_2_REG                                        WD2_REG_HV_TEMP_2
@@ -3872,7 +3382,7 @@
 
 
 
-/* ****** Status Register 39 [0x009C]: HV_TEMP_3 - Measured actual temperature of sensor 3 connected to the HV board (Default: 0x00000000) ****** */
+/* ****** Status Register 38 [0x0098]: HV_TEMP_3 - Measured actual temperature of sensor 3 connected to the HV board (Default: 0x00000000) ****** */
 
 /* HV_TEMP_3 - Float value (temp) */
 #define WD2_HV_TEMP_3_REG                                        WD2_REG_HV_TEMP_3
@@ -3881,7 +3391,7 @@
 
 
 
-/* ****** Status Register 40 [0x00A0]: SCALER_0 - Scaler for input #0 (Default: 0x00000000) ****** */
+/* ****** Status Register 39 [0x009C]: SCALER_0 - Scaler for input #0 (Default: 0x00000000) ****** */
 
 /* SCALER_0 - Count rate value of channel 0 (MSBs are latched upon read of LSB register) */
 #define WD2_SCALER_0_REG                                          WD2_REG_SCALER_0
@@ -3890,7 +3400,7 @@
 
 
 
-/* ****** Status Register 41 [0x00A4]: SCALER_1 - Scaler for input #1 (Default: 0x00000000) ****** */
+/* ****** Status Register 40 [0x00A0]: SCALER_1 - Scaler for input #1 (Default: 0x00000000) ****** */
 
 /* SCALER_1 - Count rate value of channel 1 (MSBs are latched upon read of LSB register) */
 #define WD2_SCALER_1_REG                                          WD2_REG_SCALER_1
@@ -3899,7 +3409,7 @@
 
 
 
-/* ****** Status Register 42 [0x00A8]: SCALER_2 - Scaler for input #2 (Default: 0x00000000) ****** */
+/* ****** Status Register 41 [0x00A4]: SCALER_2 - Scaler for input #2 (Default: 0x00000000) ****** */
 
 /* SCALER_2 - Count rate value of channel 2 (MSBs are latched upon read of LSB register) */
 #define WD2_SCALER_2_REG                                          WD2_REG_SCALER_2
@@ -3908,7 +3418,7 @@
 
 
 
-/* ****** Status Register 43 [0x00AC]: SCALER_3 - Scaler for input #3 (Default: 0x00000000) ****** */
+/* ****** Status Register 42 [0x00A8]: SCALER_3 - Scaler for input #3 (Default: 0x00000000) ****** */
 
 /* SCALER_3 - Count rate value of channel 3 (MSBs are latched upon read of LSB register) */
 #define WD2_SCALER_3_REG                                          WD2_REG_SCALER_3
@@ -3917,7 +3427,7 @@
 
 
 
-/* ****** Status Register 44 [0x00B0]: SCALER_4 - Scaler for input #4 (Default: 0x00000000) ****** */
+/* ****** Status Register 43 [0x00AC]: SCALER_4 - Scaler for input #4 (Default: 0x00000000) ****** */
 
 /* SCALER_4 - Count rate value of channel 4 (MSBs are latched upon read of LSB register) */
 #define WD2_SCALER_4_REG                                          WD2_REG_SCALER_4
@@ -3926,7 +3436,7 @@
 
 
 
-/* ****** Status Register 45 [0x00B4]: SCALER_5 - Scaler for input #5 (Default: 0x00000000) ****** */
+/* ****** Status Register 44 [0x00B0]: SCALER_5 - Scaler for input #5 (Default: 0x00000000) ****** */
 
 /* SCALER_5 - Count rate value of channel 5 (MSBs are latched upon read of LSB register) */
 #define WD2_SCALER_5_REG                                          WD2_REG_SCALER_5
@@ -3935,7 +3445,7 @@
 
 
 
-/* ****** Status Register 46 [0x00B8]: SCALER_6 - Scaler for input #6 (Default: 0x00000000) ****** */
+/* ****** Status Register 45 [0x00B4]: SCALER_6 - Scaler for input #6 (Default: 0x00000000) ****** */
 
 /* SCALER_6 - Count rate value of channel 6 (MSBs are latched upon read of LSB register) */
 #define WD2_SCALER_6_REG                                          WD2_REG_SCALER_6
@@ -3944,7 +3454,7 @@
 
 
 
-/* ****** Status Register 47 [0x00BC]: SCALER_7 - Scaler for input #7 (Default: 0x00000000) ****** */
+/* ****** Status Register 46 [0x00B8]: SCALER_7 - Scaler for input #7 (Default: 0x00000000) ****** */
 
 /* SCALER_7 - Count rate value of channel 7 (MSBs are latched upon read of LSB register) */
 #define WD2_SCALER_7_REG                                          WD2_REG_SCALER_7
@@ -3953,7 +3463,7 @@
 
 
 
-/* ****** Status Register 48 [0x00C0]: SCALER_8 - Scaler for input #8 (Default: 0x00000000) ****** */
+/* ****** Status Register 47 [0x00BC]: SCALER_8 - Scaler for input #8 (Default: 0x00000000) ****** */
 
 /* SCALER_8 - Count rate value of channel 8 (MSBs are latched upon read of LSB register) */
 #define WD2_SCALER_8_REG                                          WD2_REG_SCALER_8
@@ -3962,7 +3472,7 @@
 
 
 
-/* ****** Status Register 49 [0x00C4]: SCALER_9 - Scaler for input #9 (Default: 0x00000000) ****** */
+/* ****** Status Register 48 [0x00C0]: SCALER_9 - Scaler for input #9 (Default: 0x00000000) ****** */
 
 /* SCALER_9 - Count rate value of channel 9 (MSBs are latched upon read of LSB register) */
 #define WD2_SCALER_9_REG                                          WD2_REG_SCALER_9
@@ -3971,7 +3481,7 @@
 
 
 
-/* ****** Status Register 50 [0x00C8]: SCALER_10 - Scaler for input #10 (Default: 0x00000000) ****** */
+/* ****** Status Register 49 [0x00C4]: SCALER_10 - Scaler for input #10 (Default: 0x00000000) ****** */
 
 /* SCALER_10 - Count rate value of channel 10 (MSBs are latched upon read of LSB register) */
 #define WD2_SCALER_10_REG                                        WD2_REG_SCALER_10
@@ -3980,7 +3490,7 @@
 
 
 
-/* ****** Status Register 51 [0x00CC]: SCALER_11 - Scaler for input #11 (Default: 0x00000000) ****** */
+/* ****** Status Register 50 [0x00C8]: SCALER_11 - Scaler for input #11 (Default: 0x00000000) ****** */
 
 /* SCALER_11 - Count rate value of channel 11 (MSBs are latched upon read of LSB register) */
 #define WD2_SCALER_11_REG                                        WD2_REG_SCALER_11
@@ -3989,7 +3499,7 @@
 
 
 
-/* ****** Status Register 52 [0x00D0]: SCALER_12 - Scaler for input #12 (Default: 0x00000000) ****** */
+/* ****** Status Register 51 [0x00CC]: SCALER_12 - Scaler for input #12 (Default: 0x00000000) ****** */
 
 /* SCALER_12 - Count rate value of channel 12 (MSBs are latched upon read of LSB register) */
 #define WD2_SCALER_12_REG                                        WD2_REG_SCALER_12
@@ -3998,7 +3508,7 @@
 
 
 
-/* ****** Status Register 53 [0x00D4]: SCALER_13 - Scaler for input #13 (Default: 0x00000000) ****** */
+/* ****** Status Register 52 [0x00D0]: SCALER_13 - Scaler for input #13 (Default: 0x00000000) ****** */
 
 /* SCALER_13 - Count rate value of channel 13 (MSBs are latched upon read of LSB register) */
 #define WD2_SCALER_13_REG                                        WD2_REG_SCALER_13
@@ -4007,7 +3517,7 @@
 
 
 
-/* ****** Status Register 54 [0x00D8]: SCALER_14 - Scaler for input #14 (Default: 0x00000000) ****** */
+/* ****** Status Register 53 [0x00D4]: SCALER_14 - Scaler for input #14 (Default: 0x00000000) ****** */
 
 /* SCALER_14 - Count rate value of channel 14 (MSBs are latched upon read of LSB register) */
 #define WD2_SCALER_14_REG                                        WD2_REG_SCALER_14
@@ -4016,7 +3526,7 @@
 
 
 
-/* ****** Status Register 55 [0x00DC]: SCALER_15 - Scaler for input #15 (Default: 0x00000000) ****** */
+/* ****** Status Register 54 [0x00D8]: SCALER_15 - Scaler for input #15 (Default: 0x00000000) ****** */
 
 /* SCALER_15 - Count rate value of channel 15 (MSBs are latched upon read of LSB register) */
 #define WD2_SCALER_15_REG                                        WD2_REG_SCALER_15
@@ -4025,7 +3535,7 @@
 
 
 
-/* ****** Status Register 56 [0x00E0]: SCALER_PTRN_TRG - Scaler for pattern trigger (Default: 0x00000000) ****** */
+/* ****** Status Register 55 [0x00DC]: SCALER_PTRN_TRG - Scaler for pattern trigger (Default: 0x00000000) ****** */
 
 /* SCALER_PTRN_TRG - Count rate for pattern trigger signal */
 #define WD2_SCALER_PTRN_TRG_REG                            WD2_REG_SCALER_PTRN_TRG
@@ -4034,7 +3544,7 @@
 
 
 
-/* ****** Status Register 57 [0x00E4]: SCALER_EXT_TRG - Scaler for external trigger (Default: 0x00000000) ****** */
+/* ****** Status Register 56 [0x00E0]: SCALER_EXT_TRG - Scaler for external trigger (Default: 0x00000000) ****** */
 
 /* SCALER_EXT_TRG - Count rate for trigger signal */
 #define WD2_SCALER_EXT_TRG_REG                              WD2_REG_SCALER_EXT_TRG
@@ -4043,7 +3553,7 @@
 
 
 
-/* ****** Status Register 58 [0x00E8]: SCALER_EXT_CLK - Scaler for ext. clock input (Default: 0x00000000) ****** */
+/* ****** Status Register 57 [0x00E4]: SCALER_EXT_CLK - Scaler for ext. clock input (Default: 0x00000000) ****** */
 
 /* SCALER_EXT_CLK - Count rate for external clock input (GLOB_CLK) */
 #define WD2_SCALER_EXT_CLK_REG                              WD2_REG_SCALER_EXT_CLK
@@ -4052,7 +3562,7 @@
 
 
 
-/* ****** Status Register 59 [0x00EC]: SCALER_TIME_STAMP_LSB - Time Stamp for Scaler Values (Default: 0x00000000) ****** */
+/* ****** Status Register 58 [0x00E8]: SCALER_TIME_STAMP_LSB - Time Stamp for Scaler Values (Default: 0x00000000) ****** */
 
 /* SCALER_TIME_STAMP_LSB - LSBs of 64bit scaler time stamp (MSBs are latched upon read of LSB register) */
 #define WD2_SCALER_TIME_STAMP_LSB_REG                WD2_REG_SCALER_TIME_STAMP_LSB
@@ -4061,7 +3571,7 @@
 
 
 
-/* ****** Status Register 60 [0x00F0]: SCALER_TIME_STAMP_MSB - Time Stamp for Scaler Values (Default: 0x00000000) ****** */
+/* ****** Status Register 59 [0x00EC]: SCALER_TIME_STAMP_MSB - Time Stamp for Scaler Values (Default: 0x00000000) ****** */
 
 /* SCALER_TIME_STAMP_MSB - MSBs of 64bit scaler time stamp (latched upon read of LSB register) */
 #define WD2_SCALER_TIME_STAMP_MSB_REG                WD2_REG_SCALER_TIME_STAMP_MSB
@@ -4070,7 +3580,7 @@
 
 
 
-/* ****** Status Register 61 [0x00F4]: TIME_LSB - Current System Time (Default: 0x00000000) ****** */
+/* ****** Status Register 60 [0x00F0]: TIME_LSB - Current System Time (Default: 0x00000000) ****** */
 
 /* TIME_LSB - LSBs of 64bit system time counter (MSBs are latched upon read of LSB register) */
 #define WD2_TIME_LSB_REG                                          WD2_REG_TIME_LSB
@@ -4079,7 +3589,7 @@
 
 
 
-/* ****** Status Register 62 [0x00F8]: TIME_MSB - Current System Time (Default: 0x00000000) ****** */
+/* ****** Status Register 61 [0x00F4]: TIME_MSB - Current System Time (Default: 0x00000000) ****** */
 
 /* TIME_MSB - MSBs of 64bit system time counter (latched upon read of LSB register) */
 #define WD2_TIME_MSB_REG                                          WD2_REG_TIME_MSB
@@ -4088,7 +3598,7 @@
 
 
 
-/* ****** Status Register 63 [0x00FC]: COMP_CH_STAT - Comparator channel status (Default: 0x00000000) ****** */
+/* ****** Status Register 62 [0x00F8]: COMP_CH_STAT - Comparator channel status (Default: 0x00000000) ****** */
 
 /* COMP_CH_STAT - Status of the comparator inputs */
 #define WD2_COMP_CH_STAT_REG                                  WD2_REG_COMP_CH_STAT
@@ -4097,7 +3607,7 @@
 
 
 
-/* ****** Status Register 64 [0x0100]: EVENT_TX_RATE - Event Transmission Rate (Default: 0x00000000) ****** */
+/* ****** Status Register 63 [0x00FC]: EVENT_TX_RATE - Event Transmission Rate (Default: 0x00000000) ****** */
 
 /* EVENT_TX_RATE - Number of events transmitted per second */
 #define WD2_EVENT_TX_RATE_REG                                WD2_REG_EVENT_TX_RATE
@@ -4106,7 +3616,7 @@
 
 
 
-/* ****** Status Register 65 [0x0104]: EVENT_NR - Number of latest event (Default: 0x00000000) ****** */
+/* ****** Status Register 64 [0x0100]: EVENT_NR - Number of latest event (Default: 0x00000000) ****** */
 
 /* EVENT_NUMBER - Number of latest event */
 #define WD2_EVENT_NUMBER_REG                                      WD2_REG_EVENT_NR
@@ -4115,7 +3625,7 @@
 
 
 
-/* ****** Status Register 66 [0x0108]: TRB_INFO_STAT - Trigger Information via Serial Trigger Bus Status (Default: 0x00000000) ****** */
+/* ****** Status Register 65 [0x0104]: TRB_INFO_STAT - Trigger Information via Serial Trigger Bus Status (Default: 0x00000000) ****** */
 
 /* TRB_FLAG_NEW - Flag signalling that the current trigger information belongs to the latest trigger received */
 #define WD2_TRB_FLAG_NEW_REG                                 WD2_REG_TRB_INFO_STAT
@@ -4134,7 +3644,7 @@
 
 
 
-/* ****** Status Register 67 [0x010C]: TRB_INFO_LSB - Trigger Information via Serial Trigger Bus LSBs (Default: 0x00000000) ****** */
+/* ****** Status Register 66 [0x0108]: TRB_INFO_LSB - Trigger Information via Serial Trigger Bus LSBs (Default: 0x00000000) ****** */
 
 /* TRB_INFO_LSB - Trigger information LSBs */
 #define WD2_TRB_INFO_LSB_REG                                  WD2_REG_TRB_INFO_LSB
@@ -4143,7 +3653,7 @@
 
 
 
-/* ****** Status Register 68 [0x0110]: TRB_INFO_MSB - Trigger Information via Serial Trigger Bus MSBs (Default: 0x00000000) ****** */
+/* ****** Status Register 67 [0x010C]: TRB_INFO_MSB - Trigger Information via Serial Trigger Bus MSBs (Default: 0x00000000) ****** */
 
 /* TRB_INFO_MSB - Trigger information MSBs */
 #define WD2_TRB_INFO_MSB_REG                                  WD2_REG_TRB_INFO_MSB
@@ -4152,7 +3662,7 @@
 
 
 
-/* ****** Status Register 69 [0x0114]: ADV_TRG_TRIG_CELL - Advanced Trigger Cell Register (Default: 0x00000000) ****** */
+/* ****** Status Register 68 [0x0110]: ADV_TRG_TRIG_CELL - Advanced Trigger Cell Register (Default: 0x00000000) ****** */
 
 /* ADV_TRG_TRIG_CELL - Advanced trigger cell register */
 #define WD2_ADV_TRG_TRIG_CELL_REG                        WD2_REG_ADV_TRG_TRIG_CELL
@@ -4161,7 +3671,7 @@
 
 
 
-/* ****** Status Register 70 [0x0118]: ADV_TRG_STAT1 - Advanced Trigger Status Register 1 (Default: 0x00000000) ****** */
+/* ****** Status Register 69 [0x0114]: ADV_TRG_STAT1 - Advanced Trigger Status Register 1 (Default: 0x00000000) ****** */
 
 /* ADV_TRG_STAT_1 - Advanced trigger status register 1 */
 #define WD2_ADV_TRG_STAT_1_REG                               WD2_REG_ADV_TRG_STAT1
@@ -4170,7 +3680,7 @@
 
 
 
-/* ****** Status Register 71 [0x011C]: ADV_TRG_STAT2 - Advanced Trigger Status Register 2 (Default: 0x00000000) ****** */
+/* ****** Status Register 70 [0x0118]: ADV_TRG_STAT2 - Advanced Trigger Status Register 2 (Default: 0x00000000) ****** */
 
 /* ADV_TRG_STAT_2 - Advanced trigger status register 2 */
 #define WD2_ADV_TRG_STAT_2_REG                               WD2_REG_ADV_TRG_STAT2
@@ -4179,7 +3689,7 @@
 
 
 
-/* ****** Status Register 72 [0x0120]: ADV_TRG_STAT3 - Advanced Trigger Status Register 3 (Default: 0x00000000) ****** */
+/* ****** Status Register 71 [0x011C]: ADV_TRG_STAT3 - Advanced Trigger Status Register 3 (Default: 0x00000000) ****** */
 
 /* ADV_TRG_STAT_3 - Advanced trigger status register 3 */
 #define WD2_ADV_TRG_STAT_3_REG                               WD2_REG_ADV_TRG_STAT3
@@ -4188,7 +3698,7 @@
 
 
 
-/* ****** Status Register 73 [0x0124]: ADV_TRG_STAT4 - Advanced Trigger Status Register 4 (Default: 0x00000000) ****** */
+/* ****** Status Register 72 [0x0120]: ADV_TRG_STAT4 - Advanced Trigger Status Register 4 (Default: 0x00000000) ****** */
 
 /* ADV_TRG_STAT_4 - Advanced trigger status register 4 */
 #define WD2_ADV_TRG_STAT_4_REG                               WD2_REG_ADV_TRG_STAT4
@@ -4197,7 +3707,7 @@
 
 
 
-/* ****** Status Register 74 [0x0128]: MAX_DRS_ADC_PKT_SAMPLES - Maximum DRS/ADC samples per Packet (Default: 0x00000000) ****** */
+/* ****** Status Register 73 [0x0124]: MAX_DRS_ADC_PKT_SAMPLES - Maximum DRS/ADC samples per Packet (Default: 0x00000000) ****** */
 
 /* MAX_DRS_ADC_PKT_SAMPLES - Maximum number of DRS/ADC samples per packet */
 #define WD2_MAX_DRS_ADC_PKT_SAMPLES_REG            WD2_REG_MAX_DRS_ADC_PKT_SAMPLES
@@ -4206,7 +3716,7 @@
 
 
 
-/* ****** Status Register 75 [0x012C]: MAX_TDC_PKT_SAMPLES - Maximum TDC samples per Packet (Default: 0x00000000) ****** */
+/* ****** Status Register 74 [0x0128]: MAX_TDC_PKT_SAMPLES - Maximum TDC samples per Packet (Default: 0x00000000) ****** */
 
 /* MAX_TDC_PKT_SAMPLES - Maximum number of TDC samples per packet */
 #define WD2_MAX_TDC_PKT_SAMPLES_REG                    WD2_REG_MAX_TDC_PKT_SAMPLES
@@ -4215,7 +3725,7 @@
 
 
 
-/* ****** Status Register 76 [0x0130]: MAX_TRG_PKT_SAMPLES - Maximum advanced trigger output samples per Packet (Default: 0x00000000) ****** */
+/* ****** Status Register 75 [0x012C]: MAX_TRG_PKT_SAMPLES - Maximum advanced trigger output samples per Packet (Default: 0x00000000) ****** */
 
 /* MAX_TRG_PKT_SAMPLES - Maximum number of advanced trigger output samples per packet */
 #define WD2_MAX_TRG_PKT_SAMPLES_REG                    WD2_REG_MAX_TRG_PKT_SAMPLES
@@ -4224,7 +3734,7 @@
 
 
 
-/* ****** Status Register 77 [0x0134]: MAX_SCL_PKT_SAMPLES - Maximum scaler values per Packet (Default: 0x00000000) ****** */
+/* ****** Status Register 76 [0x0130]: MAX_SCL_PKT_SAMPLES - Maximum scaler values per Packet (Default: 0x00000000) ****** */
 
 /* MAX_SCL_PKT_SAMPLES - Maximum number of scaler values per packet */
 #define WD2_MAX_SCL_PKT_SAMPLES_REG                    WD2_REG_MAX_SCL_PKT_SAMPLES
@@ -4233,7 +3743,7 @@
 
 
 
-/* ****** Status Register 78 [0x0138]: CLK_CTRL_MOD_FLAG - Set if WD2 configuration registers are modified (Default: 0x00000000) ****** */
+/* ****** Status Register 77 [0x0134]: CLK_CTRL_MOD_FLAG - Set if WD2 configuration registers are modified (Default: 0x00000000) ****** */
 
 /* TRIGGER_DAQ_CLK_CAL_MOD - Trigger DAQ clock calibration modified flag */
 #define WD2_TRIGGER_DAQ_CLK_CAL_MOD_REG                  WD2_REG_CLK_CTRL_MOD_FLAG
@@ -4262,7 +3772,7 @@
 
 
 
-/* ****** Status Register 79 [0x013C]: DRS_MOD_FLAG - Set if DRS configuration registers are modified (Default: 0x00000000) ****** */
+/* ****** Status Register 78 [0x0138]: DRS_MOD_FLAG - Set if DRS configuration registers are modified (Default: 0x00000000) ****** */
 
 /* DRS_CTRL_MOD - DRS control bits modified flags */
 #define WD2_DRS_CTRL_MOD_REG                                  WD2_REG_DRS_MOD_FLAG
@@ -4281,7 +3791,7 @@
 
 
 
-/* ****** Status Register 80 [0x0140]: COM_PLD_SIZE_MOD_FLAG - Set if maximum packet payload size register is modified (Default: 0x00000000) ****** */
+/* ****** Status Register 79 [0x013C]: COM_PLD_SIZE_MOD_FLAG - Set if maximum packet payload size register is modified (Default: 0x00000000) ****** */
 
 /* COM_PLD_SIZE_MOD - Maximum packet payload size modified flag */
 #define WD2_COM_PLD_SIZE_MOD_REG                     WD2_REG_COM_PLD_SIZE_MOD_FLAG
@@ -4290,7 +3800,7 @@
 
 
 
-/* ****** Status Register 81 [0x0144]: ADC_SAMPLE_DIV_MOD_FLAG - Set if ADC downsampling divider register is modified (Default: 0x00000000) ****** */
+/* ****** Status Register 80 [0x0140]: ADC_SAMPLE_DIV_MOD_FLAG - Set if ADC downsampling divider register is modified (Default: 0x00000000) ****** */
 
 /* ADC_SAMPLE_DIV_MOD - ADC downsampling divider modified flags */
 #define WD2_ADC_SAMPLE_DIV_MOD_REG                 WD2_REG_ADC_SAMPLE_DIV_MOD_FLAG
@@ -4299,7 +3809,7 @@
 
 
 
-/* ****** Status Register 82 [0x0148]: DAC_0_1_MOD_FLAG - Set if DAC 0 and 1 configuration registers are modified (Default: 0x00000000) ****** */
+/* ****** Status Register 81 [0x0144]: DAC_0_1_MOD_FLAG - Set if DAC 0 and 1 configuration registers are modified (Default: 0x00000000) ****** */
 
 /* DAC0_A_MOD - DAC channel a modified flags */
 #define WD2_DAC0_A_MOD_REG                                WD2_REG_DAC_0_1_MOD_FLAG
@@ -4383,7 +3893,7 @@
 
 
 
-/* ****** Status Register 83 [0x014C]: DAC_2_MOD_FLAG - Set if DAC 2 configuration registers are modified (Default: 0x00000000) ****** */
+/* ****** Status Register 82 [0x0148]: DAC_2_MOD_FLAG - Set if DAC 2 configuration registers are modified (Default: 0x00000000) ****** */
 
 /* DAC2_A_MOD - DAC channel a modified flags */
 #define WD2_DAC2_A_MOD_REG                                  WD2_REG_DAC_2_MOD_FLAG
@@ -4427,7 +3937,7 @@
 
 
 
-/* ****** Status Register 84 [0x0150]: FE_0_15_MOD_FLAG - Set if frontend configuraiton registers are modified (Default: 0x00000000) ****** */
+/* ****** Status Register 83 [0x014C]: FE_0_15_MOD_FLAG - Set if frontend configuraiton registers are modified (Default: 0x00000000) ****** */
 
 /* FE_0_MOD - Frontend channel 0 register modified flags */
 #define WD2_FE_0_MOD_REG                                  WD2_REG_FE_0_15_MOD_FLAG
@@ -4511,7 +4021,7 @@
 
 
 
-/* ****** Status Register 85 [0x0154]: HV_U_TARGET_0_7_MOD_FLAG - Set if HV target voltage configuraiton of channel 0 to 7 registers are modified (Default: 0x00000000) ****** */
+/* ****** Status Register 84 [0x0150]: HV_U_TARGET_0_7_MOD_FLAG - Set if HV target voltage configuraiton of channel 0 to 7 registers are modified (Default: 0x00000000) ****** */
 
 /* HV_U_TARGET_0_MOD - Target high voltage channel 0 register modified flags */
 #define WD2_HV_U_TARGET_0_MOD_REG                 WD2_REG_HV_U_TARGET_0_7_MOD_FLAG
@@ -4555,7 +4065,7 @@
 
 
 
-/* ****** Status Register 86 [0x0158]: HV_U_TARGET_8_15_MOD_FLAG - Set if HV target voltage configuraiton of channel 8 to 15 registers are modified (Default: 0x00000000) ****** */
+/* ****** Status Register 85 [0x0154]: HV_U_TARGET_8_15_MOD_FLAG - Set if HV target voltage configuraiton of channel 8 to 15 registers are modified (Default: 0x00000000) ****** */
 
 /* HV_U_TARGET_8_MOD - Target high voltage channel 8 register modified flags */
 #define WD2_HV_U_TARGET_8_MOD_REG                WD2_REG_HV_U_TARGET_8_15_MOD_FLAG
@@ -4599,7 +4109,7 @@
 
 
 
-/* ****** Status Register 87 [0x015C]: HV_MOD_FLAG - Set if single HV configuraiton registers are modified (Default: 0x00000000) ****** */
+/* ****** Status Register 86 [0x0158]: HV_MOD_FLAG - Set if single HV configuraiton registers are modified (Default: 0x00000000) ****** */
 
 /* HV_R_SHUNT_MOD - HV supply shunt resistor register modified flags */
 #define WD2_HV_R_SHUNT_MOD_REG                                 WD2_REG_HV_MOD_FLAG
@@ -4608,7 +4118,7 @@
 
 
 
-/* ****** Status Register 88 [0x0160]: LMK_0_7_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ****** */
+/* ****** Status Register 87 [0x015C]: LMK_0_7_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ****** */
 
 /* LMK_0_MOD - LMK channel 0 register modified flags */
 #define WD2_LMK_0_MOD_REG                                 WD2_REG_LMK_0_7_MOD_FLAG
@@ -4652,7 +4162,7 @@
 
 
 
-/* ****** Status Register 89 [0x0164]: LMK_8_15_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ****** */
+/* ****** Status Register 88 [0x0160]: LMK_8_15_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ****** */
 
 /* LMK_8_MOD - LMK Register 8 modified flags */
 #define WD2_LMK_8_MOD_REG                                WD2_REG_LMK_8_15_MOD_FLAG
@@ -4689,8 +4199,8 @@
  * Number of Registers
  */
 
-#define REG_NR_OF_CTRL_REGS          162
-#define REG_NR_OF_STAT_REGS          90
+#define REG_NR_OF_CTRL_REGS          139
+#define REG_NR_OF_STAT_REGS          89
 
 #ifndef WD2_DONT_INCLUDE_REG_ACCESS_VARS
 
@@ -4772,99 +4282,76 @@ const wd2_reg_func_type  wd2_ctrl_reg_func_list[] = {
   { wd2_hw_reg       , 0 },   /* ctrl register 66: LMK_13 */
   { wd2_hw_reg       , 0 },   /* ctrl register 67: LMK_14 */
   { wd2_hw_reg       , 0 },   /* ctrl register 68: LMK_15 */
-  { wd2_reg_adc_glob , 0 },   /* ctrl register 69: ADC_CFG_IND_TX */
-  { wd2_reg_adc_glob , 0 },   /* ctrl register 70: ADC_PM_CLK_ENH */
-  { wd2_reg_adc_glob , 0 },   /* ctrl register 71: ADC_TEST_OFFS_OM */
-  { wd2_reg_adc_glob , 0 },   /* ctrl register 72: ADC_OUT_VREF */
-  { wd2_reg_adc_glob , 0 },   /* ctrl register 73: ADC_USR_PATT */
-  { wd2_reg_adc_glob , 0 },   /* ctrl register 74: ADC_SER_RES_SR */
-  { wd2_reg_adc_glob , 0 },   /* ctrl register 75: ADC_USR_IO_SYNC */
-  { wd2_reg_adc0_ch  , 0 },   /* ctrl register 76: ADC_0_CH_A_CFG */
-  { wd2_reg_adc0_ch  , 1 },   /* ctrl register 77: ADC_0_CH_B_CFG */
-  { wd2_reg_adc0_ch  , 2 },   /* ctrl register 78: ADC_0_CH_C_CFG */
-  { wd2_reg_adc0_ch  , 3 },   /* ctrl register 79: ADC_0_CH_D_CFG */
-  { wd2_reg_adc0_ch  , 4 },   /* ctrl register 80: ADC_0_CH_E_CFG */
-  { wd2_reg_adc0_ch  , 5 },   /* ctrl register 81: ADC_0_CH_F_CFG */
-  { wd2_reg_adc0_ch  , 6 },   /* ctrl register 82: ADC_0_CH_G_CFG */
-  { wd2_reg_adc0_ch  , 7 },   /* ctrl register 83: ADC_0_CH_H_CFG */
-  { wd2_reg_adc0_ch  , 8 },   /* ctrl register 84: ADC_0_CH_DCO_CFG */
-  { wd2_reg_adc0_ch  , 9 },   /* ctrl register 85: ADC_0_CH_FCO_CFG */
-  { wd2_reg_adc1_ch  , 0 },   /* ctrl register 86: ADC_1_CH_A_CFG */
-  { wd2_reg_adc1_ch  , 1 },   /* ctrl register 87: ADC_1_CH_B_CFG */
-  { wd2_reg_adc1_ch  , 2 },   /* ctrl register 88: ADC_1_CH_C_CFG */
-  { wd2_reg_adc1_ch  , 3 },   /* ctrl register 89: ADC_1_CH_D_CFG */
-  { wd2_reg_adc1_ch  , 4 },   /* ctrl register 90: ADC_1_CH_E_CFG */
-  { wd2_reg_adc1_ch  , 5 },   /* ctrl register 91: ADC_1_CH_F_CFG */
-  { wd2_reg_adc1_ch  , 6 },   /* ctrl register 92: ADC_1_CH_G_CFG */
-  { wd2_reg_adc1_ch  , 7 },   /* ctrl register 93: ADC_1_CH_H_CFG */
-  { wd2_reg_adc1_ch  , 8 },   /* ctrl register 94: ADC_1_CH_DCO_CFG */
-  { wd2_reg_adc1_ch  , 9 },   /* ctrl register 95: ADC_1_CH_FCO_CFG */
-  { wd2_hw_reg       , 0 },   /* ctrl register 96: TRG_CFG */
-  { wd2_hw_reg       , 0 },   /* ctrl register 97: TRG_SRC_POL */
-  { wd2_hw_reg       , 0 },   /* ctrl register 98: TRG_AUTO_PERIOD */
-  { wd2_hw_reg       , 0 },   /* ctrl register 99: TRG_PTRN_EN */
-  { wd2_hw_reg       , 0 },   /* ctrl register 100: TRG_SRC_EN_PTRN0 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 101: TRG_STATE_PTRN0 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 102: TRG_SRC_EN_PTRN1 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 103: TRG_STATE_PTRN1 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 104: TRG_SRC_EN_PTRN2 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 105: TRG_STATE_PTRN2 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 106: TRG_SRC_EN_PTRN3 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 107: TRG_STATE_PTRN3 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 108: TRG_SRC_EN_PTRN4 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 109: TRG_STATE_PTRN4 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 110: TRG_SRC_EN_PTRN5 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 111: TRG_STATE_PTRN5 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 112: TRG_SRC_EN_PTRN6 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 113: TRG_STATE_PTRN6 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 114: TRG_SRC_EN_PTRN7 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 115: TRG_STATE_PTRN7 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 116: TRG_SRC_EN_PTRN8 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 117: TRG_STATE_PTRN8 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 118: TRG_SRC_EN_PTRN9 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 119: TRG_STATE_PTRN9 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 120: TRG_SRC_EN_PTRN10 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 121: TRG_STATE_PTRN10 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 122: TRG_SRC_EN_PTRN11 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 123: TRG_STATE_PTRN11 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 124: TRG_SRC_EN_PTRN12 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 125: TRG_STATE_PTRN12 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 126: TRG_SRC_EN_PTRN13 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 127: TRG_STATE_PTRN13 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 128: TRG_SRC_EN_PTRN14 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 129: TRG_STATE_PTRN14 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 130: TRG_SRC_EN_PTRN15 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 131: TRG_STATE_PTRN15 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 132: TRG_SRC_EN_PTRN16 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 133: TRG_STATE_PTRN16 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 134: TRG_SRC_EN_PTRN17 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 135: TRG_STATE_PTRN17 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 136: TRG_SRC_EN_PTRN18 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 137: TRG_STATE_PTRN18 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 138: ADV_TRG_CTRL */
-  { wd2_hw_reg       , 0 },   /* ctrl register 139: ADV_TRG_CH_CAL0 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 140: ADV_TRG_CH_CAL1 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 141: ADV_TRG_CH_CAL2 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 142: ADV_TRG_CH_CAL3 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 143: ADV_TRG_PED_CFG */
-  { wd2_hw_reg       , 0 },   /* ctrl register 144: ADV_TRG_THR0 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 145: ADV_TRG_THR1 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 146: ADV_TRG_THR2 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 147: ADV_TRG_TX_CHK_WORD0 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 148: ADV_TRG_TX_CHK_WORD1 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 149: ADV_TRG_TDC_CH_MASK */
-  { wd2_hw_reg       , 0 },   /* ctrl register 150: ADV_TRG_CFG12 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 151: ADV_TRG_CFG13 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 152: ADV_TRG_CFG14 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 153: ADV_TRG_CFG15 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 154: ADV_TRG_CFG16 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 155: ADV_TRG_CFG17 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 156: ADV_TRG_CFG18 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 157: ADV_TRG_CFG19 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 158: SET_TIME_LSB */
-  { wd2_hw_reg       , 0 },   /* ctrl register 159: SET_TIME_MSB */
-  { wd2_hw_reg       , 0 },   /* ctrl register 160: DBG_SIG_SEL */
-  { wd2_hw_reg       , 0 }    /* stat register 89: LMK_8_15_MOD_FLAG */
+  { wd2_reg_adc_0_1458 , 0 },   /* ctrl register 69: ADC_0_CFG_1458 */
+  { wd2_reg_adc_0_2367 , 0 },   /* ctrl register 70: ADC_0_CFG_2367 */
+  { wd2_reg_adc_1_1458 , 0 },   /* ctrl register 71: ADC_1_CFG_1458 */
+  { wd2_reg_adc_1_2367 , 0 },   /* ctrl register 72: ADC_1_CFG_2367 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 73: TRG_CFG */
+  { wd2_hw_reg         , 0 },   /* ctrl register 74: TRG_SRC_POL */
+  { wd2_hw_reg         , 0 },   /* ctrl register 75: TRG_AUTO_PERIOD */
+  { wd2_hw_reg         , 0 },   /* ctrl register 76: TRG_PTRN_EN */
+  { wd2_hw_reg         , 0 },   /* ctrl register 77: TRG_SRC_EN_PTRN0 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 78: TRG_STATE_PTRN0 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 79: TRG_SRC_EN_PTRN1 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 80: TRG_STATE_PTRN1 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 81: TRG_SRC_EN_PTRN2 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 82: TRG_STATE_PTRN2 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 83: TRG_SRC_EN_PTRN3 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 84: TRG_STATE_PTRN3 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 85: TRG_SRC_EN_PTRN4 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 86: TRG_STATE_PTRN4 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 87: TRG_SRC_EN_PTRN5 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 88: TRG_STATE_PTRN5 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 89: TRG_SRC_EN_PTRN6 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 90: TRG_STATE_PTRN6 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 91: TRG_SRC_EN_PTRN7 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 92: TRG_STATE_PTRN7 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 93: TRG_SRC_EN_PTRN8 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 94: TRG_STATE_PTRN8 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 95: TRG_SRC_EN_PTRN9 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 96: TRG_STATE_PTRN9 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 97: TRG_SRC_EN_PTRN10 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 98: TRG_STATE_PTRN10 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 99: TRG_SRC_EN_PTRN11 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 100: TRG_STATE_PTRN11 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 101: TRG_SRC_EN_PTRN12 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 102: TRG_STATE_PTRN12 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 103: TRG_SRC_EN_PTRN13 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 104: TRG_STATE_PTRN13 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 105: TRG_SRC_EN_PTRN14 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 106: TRG_STATE_PTRN14 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 107: TRG_SRC_EN_PTRN15 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 108: TRG_STATE_PTRN15 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 109: TRG_SRC_EN_PTRN16 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 110: TRG_STATE_PTRN16 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 111: TRG_SRC_EN_PTRN17 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 112: TRG_STATE_PTRN17 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 113: TRG_SRC_EN_PTRN18 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 114: TRG_STATE_PTRN18 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 115: ADV_TRG_CTRL */
+  { wd2_hw_reg         , 0 },   /* ctrl register 116: ADV_TRG_CH_CAL0 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 117: ADV_TRG_CH_CAL1 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 118: ADV_TRG_CH_CAL2 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 119: ADV_TRG_CH_CAL3 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 120: ADV_TRG_PED_CFG */
+  { wd2_hw_reg         , 0 },   /* ctrl register 121: ADV_TRG_THR0 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 122: ADV_TRG_THR1 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 123: ADV_TRG_THR2 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 124: ADV_TRG_TX_CHK_WORD0 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 125: ADV_TRG_TX_CHK_WORD1 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 126: ADV_TRG_TDC_CH_MASK */
+  { wd2_hw_reg         , 0 },   /* ctrl register 127: ADV_TRG_CFG12 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 128: ADV_TRG_CFG13 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 129: ADV_TRG_CFG14 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 130: ADV_TRG_CFG15 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 131: ADV_TRG_CFG16 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 132: ADV_TRG_CFG17 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 133: ADV_TRG_CFG18 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 134: ADV_TRG_CFG19 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 135: SET_TIME_LSB */
+  { wd2_hw_reg         , 0 },   /* ctrl register 136: SET_TIME_MSB */
+  { wd2_hw_reg         , 0 },   /* ctrl register 137: DBG_SIG_SEL */
+  { wd2_hw_reg         , 0 }    /* stat register 88: LMK_8_15_MOD_FLAG */
 };
 
 const wd2_reg_func_type  wd2_stat_reg_func_list[] = {
@@ -4937,27 +4424,26 @@ const wd2_reg_func_type  wd2_stat_reg_func_list[] = {
   { wd2_hw_reg       , 0 },   /* ctrl register 66: LMK_13 */
   { wd2_hw_reg       , 0 },   /* ctrl register 67: LMK_14 */
   { wd2_hw_reg       , 0 },   /* ctrl register 68: LMK_15 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 69: ADC_CFG_IND_TX */
-  { wd2_hw_reg       , 0 },   /* ctrl register 70: ADC_PM_CLK_ENH */
-  { wd2_hw_reg       , 0 },   /* ctrl register 71: ADC_TEST_OFFS_OM */
-  { wd2_hw_reg       , 0 },   /* ctrl register 72: ADC_OUT_VREF */
-  { wd2_hw_reg       , 0 },   /* ctrl register 73: ADC_USR_PATT */
-  { wd2_hw_reg       , 0 },   /* ctrl register 74: ADC_SER_RES_SR */
-  { wd2_hw_reg       , 0 },   /* ctrl register 75: ADC_USR_IO_SYNC */
-  { wd2_hw_reg       , 0 },   /* ctrl register 76: ADC_0_CH_A_CFG */
-  { wd2_hw_reg       , 0 },   /* ctrl register 77: ADC_0_CH_B_CFG */
-  { wd2_hw_reg       , 0 },   /* ctrl register 78: ADC_0_CH_C_CFG */
-  { wd2_hw_reg       , 0 },   /* ctrl register 79: ADC_0_CH_D_CFG */
-  { wd2_hw_reg       , 0 },   /* ctrl register 80: ADC_0_CH_E_CFG */
-  { wd2_hw_reg       , 0 },   /* ctrl register 81: ADC_0_CH_F_CFG */
-  { wd2_hw_reg       , 0 },   /* ctrl register 82: ADC_0_CH_G_CFG */
-  { wd2_hw_reg       , 0 },   /* ctrl register 83: ADC_0_CH_H_CFG */
-  { wd2_hw_reg       , 0 },   /* ctrl register 84: ADC_0_CH_DCO_CFG */
-  { wd2_hw_reg       , 0 },   /* ctrl register 85: ADC_0_CH_FCO_CFG */
-  { wd2_hw_reg       , 0 },   /* ctrl register 86: ADC_1_CH_A_CFG */
-  { wd2_hw_reg       , 0 },   /* ctrl register 87: ADC_1_CH_B_CFG */
-  { wd2_hw_reg       , 0 },   /* ctrl register 88: ADC_1_CH_C_CFG */
-  { wd2_hw_reg       , 0 }    /* stat register 89: LMK_8_15_MOD_FLAG */
+  { wd2_hw_reg         , 0 },   /* ctrl register 69: ADC_0_CFG_1458 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 70: ADC_0_CFG_2367 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 71: ADC_1_CFG_1458 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 72: ADC_1_CFG_2367 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 73: TRG_CFG */
+  { wd2_hw_reg         , 0 },   /* ctrl register 74: TRG_SRC_POL */
+  { wd2_hw_reg         , 0 },   /* ctrl register 75: TRG_AUTO_PERIOD */
+  { wd2_hw_reg         , 0 },   /* ctrl register 76: TRG_PTRN_EN */
+  { wd2_hw_reg         , 0 },   /* ctrl register 77: TRG_SRC_EN_PTRN0 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 78: TRG_STATE_PTRN0 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 79: TRG_SRC_EN_PTRN1 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 80: TRG_STATE_PTRN1 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 81: TRG_SRC_EN_PTRN2 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 82: TRG_STATE_PTRN2 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 83: TRG_SRC_EN_PTRN3 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 84: TRG_STATE_PTRN3 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 85: TRG_SRC_EN_PTRN4 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 86: TRG_STATE_PTRN4 */
+  { wd2_hw_reg         , 0 },   /* ctrl register 87: TRG_SRC_EN_PTRN5 */
+  { wd2_hw_reg         , 0 }    /* stat register 88: LMK_8_15_MOD_FLAG */
 };
 
 #endif /* WD2_DONT_INCLUDE_REG_ACCESS_VARS */
@@ -5049,33 +4535,10 @@ const wd2_reg_name_entry_type  wd2_reg_list[] = {
   { "LMK_13"                    , WD2_REG_LMK_13                    },
   { "LMK_14"                    , WD2_REG_LMK_14                    },
   { "LMK_15"                    , WD2_REG_LMK_15                    },
-  { "ADC_CFG_IND_TX"            , WD2_REG_ADC_CFG_IND_TX            },
-  { "ADC_PM_CLK_ENH"            , WD2_REG_ADC_PM_CLK_ENH            },
-  { "ADC_TEST_OFFS_OM"          , WD2_REG_ADC_TEST_OFFS_OM          },
-  { "ADC_OUT_VREF"              , WD2_REG_ADC_OUT_VREF              },
-  { "ADC_USR_PATT"              , WD2_REG_ADC_USR_PATT              },
-  { "ADC_SER_RES_SR"            , WD2_REG_ADC_SER_RES_SR            },
-  { "ADC_USR_IO_SYNC"           , WD2_REG_ADC_USR_IO_SYNC           },
-  { "ADC_0_CH_A_CFG"            , WD2_REG_ADC_0_CH_A_CFG            },
-  { "ADC_0_CH_B_CFG"            , WD2_REG_ADC_0_CH_B_CFG            },
-  { "ADC_0_CH_C_CFG"            , WD2_REG_ADC_0_CH_C_CFG            },
-  { "ADC_0_CH_D_CFG"            , WD2_REG_ADC_0_CH_D_CFG            },
-  { "ADC_0_CH_E_CFG"            , WD2_REG_ADC_0_CH_E_CFG            },
-  { "ADC_0_CH_F_CFG"            , WD2_REG_ADC_0_CH_F_CFG            },
-  { "ADC_0_CH_G_CFG"            , WD2_REG_ADC_0_CH_G_CFG            },
-  { "ADC_0_CH_H_CFG"            , WD2_REG_ADC_0_CH_H_CFG            },
-  { "ADC_0_CH_DCO_CFG"          , WD2_REG_ADC_0_CH_DCO_CFG          },
-  { "ADC_0_CH_FCO_CFG"          , WD2_REG_ADC_0_CH_FCO_CFG          },
-  { "ADC_1_CH_A_CFG"            , WD2_REG_ADC_1_CH_A_CFG            },
-  { "ADC_1_CH_B_CFG"            , WD2_REG_ADC_1_CH_B_CFG            },
-  { "ADC_1_CH_C_CFG"            , WD2_REG_ADC_1_CH_C_CFG            },
-  { "ADC_1_CH_D_CFG"            , WD2_REG_ADC_1_CH_D_CFG            },
-  { "ADC_1_CH_E_CFG"            , WD2_REG_ADC_1_CH_E_CFG            },
-  { "ADC_1_CH_F_CFG"            , WD2_REG_ADC_1_CH_F_CFG            },
-  { "ADC_1_CH_G_CFG"            , WD2_REG_ADC_1_CH_G_CFG            },
-  { "ADC_1_CH_H_CFG"            , WD2_REG_ADC_1_CH_H_CFG            },
-  { "ADC_1_CH_DCO_CFG"          , WD2_REG_ADC_1_CH_DCO_CFG          },
-  { "ADC_1_CH_FCO_CFG"          , WD2_REG_ADC_1_CH_FCO_CFG          },
+  { "ADC_0_CFG_1458"            , WD2_REG_ADC_0_CFG_1458            },
+  { "ADC_0_CFG_2367"            , WD2_REG_ADC_0_CFG_2367            },
+  { "ADC_1_CFG_1458"            , WD2_REG_ADC_1_CFG_1458            },
+  { "ADC_1_CFG_2367"            , WD2_REG_ADC_1_CFG_2367            },
   { "TRG_CFG"                   , WD2_REG_TRG_CFG                   },
   { "TRG_SRC_POL"               , WD2_REG_TRG_SRC_POL               },
   { "TRG_AUTO_PERIOD"           , WD2_REG_TRG_AUTO_PERIOD           },
@@ -5159,7 +4622,6 @@ const wd2_reg_name_entry_type  wd2_reg_list[] = {
   { "DRS_SAMPLE_FREQ"           , WD2_REG_DRS_SAMPLE_FREQ           },
   { "ADC_SAMPLE_FREQ"           , WD2_REG_ADC_SAMPLE_FREQ           },
   { "TDC_SAMPLE_FREQ"           , WD2_REG_TDC_SAMPLE_FREQ           },
-  { "ADC_INFO"                  , WD2_REG_ADC_INFO                  },
   { "HV_VER"                    , WD2_REG_HV_VER                    },
   { "HV_I_MEAS_0"               , WD2_REG_HV_I_MEAS_0               },
   { "HV_I_MEAS_1"               , WD2_REG_HV_I_MEAS_1               },
@@ -5240,6 +4702,7 @@ const wd2_bit_group_entry_type  wd2_bit_group_list[] = {
   { "SLOT_ID"                       , WD2_SLOT_ID_REG                       , WD2_SLOT_ID_MASK                       , WD2_SLOT_ID_OFS                       },
   { "VALID_DELAY_ADC"               , WD2_VALID_DELAY_ADC_REG               , WD2_VALID_DELAY_ADC_MASK               , WD2_VALID_DELAY_ADC_OFS               },
   { "DAQ_DATA_PHASE"                , WD2_DAQ_DATA_PHASE_REG                , WD2_DAQ_DATA_PHASE_MASK                , WD2_DAQ_DATA_PHASE_OFS                },
+  { "FE_POWER"                      , WD2_FE_POWER_REG                      , WD2_FE_POWER_MASK                      , WD2_FE_POWER_OFS                      },
   { "DRS_CLR_RSR_AFTER_RO"          , WD2_DRS_CLR_RSR_AFTER_RO_REG          , WD2_DRS_CLR_RSR_AFTER_RO_MASK          , WD2_DRS_CLR_RSR_AFTER_RO_OFS          },
   { "COMP_POWER_EN"                 , WD2_COMP_POWER_EN_REG                 , WD2_COMP_POWER_EN_MASK                 , WD2_COMP_POWER_EN_OFS                 },
   { "DRS_READOUT_MODE"              , WD2_DRS_READOUT_MODE_REG              , WD2_DRS_READOUT_MODE_MASK              , WD2_DRS_READOUT_MODE_OFS              },
@@ -5507,137 +4970,66 @@ const wd2_bit_group_entry_type  wd2_bit_group_list[] = {
   { "LMK15_PLL_CP_GAIN"             , WD2_LMK15_PLL_CP_GAIN_REG             , WD2_LMK15_PLL_CP_GAIN_MASK             , WD2_LMK15_PLL_CP_GAIN_OFS             },
   { "LMK15_VCO_DIV"                 , WD2_LMK15_VCO_DIV_REG                 , WD2_LMK15_VCO_DIV_MASK                 , WD2_LMK15_VCO_DIV_OFS                 },
   { "LMK15_PLL_N"                   , WD2_LMK15_PLL_N_REG                   , WD2_LMK15_PLL_N_MASK                   , WD2_LMK15_PLL_N_OFS                   },
-  { "ADC_CFG_SDO_ACTIVE_MSB"        , WD2_ADC_CFG_SDO_ACTIVE_MSB_REG        , WD2_ADC_CFG_SDO_ACTIVE_MSB_MASK        , WD2_ADC_CFG_SDO_ACTIVE_MSB_OFS        },
-  { "ADC_CFG_LSB_FIRST_MSB"         , WD2_ADC_CFG_LSB_FIRST_MSB_REG         , WD2_ADC_CFG_LSB_FIRST_MSB_MASK         , WD2_ADC_CFG_LSB_FIRST_MSB_OFS         },
-  { "ADC_CFG_SOFT_RESET_MSB"        , WD2_ADC_CFG_SOFT_RESET_MSB_REG        , WD2_ADC_CFG_SOFT_RESET_MSB_MASK        , WD2_ADC_CFG_SOFT_RESET_MSB_OFS        },
-  { "ADC_CFG_16_BIT_ADDR_MSB"       , WD2_ADC_CFG_16_BIT_ADDR_MSB_REG       , WD2_ADC_CFG_16_BIT_ADDR_MSB_MASK       , WD2_ADC_CFG_16_BIT_ADDR_MSB_OFS       },
-  { "ADC_CFG_16_BIT_ADDR_LSB"       , WD2_ADC_CFG_16_BIT_ADDR_LSB_REG       , WD2_ADC_CFG_16_BIT_ADDR_LSB_MASK       , WD2_ADC_CFG_16_BIT_ADDR_LSB_OFS       },
-  { "ADC_CFG_SOFT_RESET_LSB"        , WD2_ADC_CFG_SOFT_RESET_LSB_REG        , WD2_ADC_CFG_SOFT_RESET_LSB_MASK        , WD2_ADC_CFG_SOFT_RESET_LSB_OFS        },
-  { "ADC_CFG_LSB_FIRST_LSB"         , WD2_ADC_CFG_LSB_FIRST_LSB_REG         , WD2_ADC_CFG_LSB_FIRST_LSB_MASK         , WD2_ADC_CFG_LSB_FIRST_LSB_OFS         },
-  { "ADC_CFG_SDO_ACTIVE_LSB"        , WD2_ADC_CFG_SDO_ACTIVE_LSB_REG        , WD2_ADC_CFG_SDO_ACTIVE_LSB_MASK        , WD2_ADC_CFG_SDO_ACTIVE_LSB_OFS        },
-  { "ADC_DI2_D_CHN_H"               , WD2_ADC_DI2_D_CHN_H_REG               , WD2_ADC_DI2_D_CHN_H_MASK               , WD2_ADC_DI2_D_CHN_H_OFS               },
-  { "ADC_DI2_D_CHN_G"               , WD2_ADC_DI2_D_CHN_G_REG               , WD2_ADC_DI2_D_CHN_G_MASK               , WD2_ADC_DI2_D_CHN_G_OFS               },
-  { "ADC_DI2_D_CHN_F"               , WD2_ADC_DI2_D_CHN_F_REG               , WD2_ADC_DI2_D_CHN_F_MASK               , WD2_ADC_DI2_D_CHN_F_OFS               },
-  { "ADC_DI2_D_CHN_E"               , WD2_ADC_DI2_D_CHN_E_REG               , WD2_ADC_DI2_D_CHN_E_MASK               , WD2_ADC_DI2_D_CHN_E_OFS               },
-  { "ADC_DI1_C_CHN_DCO"             , WD2_ADC_DI1_C_CHN_DCO_REG             , WD2_ADC_DI1_C_CHN_DCO_MASK             , WD2_ADC_DI1_C_CHN_DCO_OFS             },
-  { "ADC_DI1_C_CHN_FCO"             , WD2_ADC_DI1_C_CHN_FCO_REG             , WD2_ADC_DI1_C_CHN_FCO_MASK             , WD2_ADC_DI1_C_CHN_FCO_OFS             },
-  { "ADC_DI1_D_CHN_D"               , WD2_ADC_DI1_D_CHN_D_REG               , WD2_ADC_DI1_D_CHN_D_MASK               , WD2_ADC_DI1_D_CHN_D_OFS               },
-  { "ADC_DI1_D_CHN_C"               , WD2_ADC_DI1_D_CHN_C_REG               , WD2_ADC_DI1_D_CHN_C_MASK               , WD2_ADC_DI1_D_CHN_C_OFS               },
-  { "ADC_DI1_D_CHN_B"               , WD2_ADC_DI1_D_CHN_B_REG               , WD2_ADC_DI1_D_CHN_B_MASK               , WD2_ADC_DI1_D_CHN_B_OFS               },
-  { "ADC_DI1_D_CHN_A"               , WD2_ADC_DI1_D_CHN_A_REG               , WD2_ADC_DI1_D_CHN_A_MASK               , WD2_ADC_DI1_D_CHN_A_OFS               },
-  { "ADC_TX_INIT_OVERRIDE"          , WD2_ADC_TX_INIT_OVERRIDE_REG          , WD2_ADC_TX_INIT_OVERRIDE_MASK          , WD2_ADC_TX_INIT_OVERRIDE_OFS          },
-  { "ADC_PM_EXT_PD"                 , WD2_ADC_PM_EXT_PD_REG                 , WD2_ADC_PM_EXT_PD_MASK                 , WD2_ADC_PM_EXT_PD_OFS                 },
-  { "ADC_PM_INT_PD_MODE"            , WD2_ADC_PM_INT_PD_MODE_REG            , WD2_ADC_PM_INT_PD_MODE_MASK            , WD2_ADC_PM_INT_PD_MODE_OFS            },
-  { "ADC_CLK_DUTY_CYC_STAB"         , WD2_ADC_CLK_DUTY_CYC_STAB_REG         , WD2_ADC_CLK_DUTY_CYC_STAB_MASK         , WD2_ADC_CLK_DUTY_CYC_STAB_OFS         },
-  { "ADC_CLK_DIV_RATIO"             , WD2_ADC_CLK_DIV_RATIO_REG             , WD2_ADC_CLK_DIV_RATIO_MASK             , WD2_ADC_CLK_DIV_RATIO_OFS             },
-  { "ADC_ENH_CHOP_MODE"             , WD2_ADC_ENH_CHOP_MODE_REG             , WD2_ADC_ENH_CHOP_MODE_MASK             , WD2_ADC_ENH_CHOP_MODE_OFS             },
-  { "ADC_TM_USR_IN_MODE"            , WD2_ADC_TM_USR_IN_MODE_REG            , WD2_ADC_TM_USR_IN_MODE_MASK            , WD2_ADC_TM_USR_IN_MODE_OFS            },
-  { "ADC_TM_RST_PN_LONG_GEN"        , WD2_ADC_TM_RST_PN_LONG_GEN_REG        , WD2_ADC_TM_RST_PN_LONG_GEN_MASK        , WD2_ADC_TM_RST_PN_LONG_GEN_OFS        },
-  { "ADC_TM_RST_PN_SHORT_GEN"       , WD2_ADC_TM_RST_PN_SHORT_GEN_REG       , WD2_ADC_TM_RST_PN_SHORT_GEN_MASK       , WD2_ADC_TM_RST_PN_SHORT_GEN_OFS       },
-  { "ADC_TM_OUT"                    , WD2_ADC_TM_OUT_REG                    , WD2_ADC_TM_OUT_MASK                    , WD2_ADC_TM_OUT_OFS                    },
-  { "ADC_OFFS_ADJ"                  , WD2_ADC_OFFS_ADJ_REG                  , WD2_ADC_OFFS_ADJ_MASK                  , WD2_ADC_OFFS_ADJ_OFS                  },
-  { "ADC_OM_LVDS_MODE"              , WD2_ADC_OM_LVDS_MODE_REG              , WD2_ADC_OM_LVDS_MODE_MASK              , WD2_ADC_OM_LVDS_MODE_OFS              },
-  { "ADC_OM_OUT_INVERT"             , WD2_ADC_OM_OUT_INVERT_REG             , WD2_ADC_OM_OUT_INVERT_MASK             , WD2_ADC_OM_OUT_INVERT_OFS             },
-  { "ADC_OM_OUT_FORMAT"             , WD2_ADC_OM_OUT_FORMAT_REG             , WD2_ADC_OM_OUT_FORMAT_MASK             , WD2_ADC_OM_OUT_FORMAT_OFS             },
-  { "ADC_OA_OUT_DRV_TERM"           , WD2_ADC_OA_OUT_DRV_TERM_REG           , WD2_ADC_OA_OUT_DRV_TERM_MASK           , WD2_ADC_OA_OUT_DRV_TERM_OFS           },
-  { "ADC_OA_OUT_DRIVE"              , WD2_ADC_OA_OUT_DRIVE_REG              , WD2_ADC_OA_OUT_DRIVE_MASK              , WD2_ADC_OA_OUT_DRIVE_OFS              },
-  { "ADC_OP_IN_CLK_PH_ADJ"          , WD2_ADC_OP_IN_CLK_PH_ADJ_REG          , WD2_ADC_OP_IN_CLK_PH_ADJ_MASK          , WD2_ADC_OP_IN_CLK_PH_ADJ_OFS          },
-  { "ADC_OP_OUT_CLK_PH_ADJ"         , WD2_ADC_OP_OUT_CLK_PH_ADJ_REG         , WD2_ADC_OP_OUT_CLK_PH_ADJ_MASK         , WD2_ADC_OP_OUT_CLK_PH_ADJ_OFS         },
-  { "ADC_INT_VREF_ADJ"              , WD2_ADC_INT_VREF_ADJ_REG              , WD2_ADC_INT_VREF_ADJ_MASK              , WD2_ADC_INT_VREF_ADJ_OFS              },
-  { "ADC_USR_PATT1"                 , WD2_ADC_USR_PATT1_REG                 , WD2_ADC_USR_PATT1_MASK                 , WD2_ADC_USR_PATT1_OFS                 },
-  { "ADC_USR_PATT2"                 , WD2_ADC_USR_PATT2_REG                 , WD2_ADC_USR_PATT2_MASK                 , WD2_ADC_USR_PATT2_OFS                 },
-  { "ADC_SC_LVDS_OUT_LSB_FIRST"     , WD2_ADC_SC_LVDS_OUT_LSB_FIRST_REG     , WD2_ADC_SC_LVDS_OUT_LSB_FIRST_MASK     , WD2_ADC_SC_LVDS_OUT_LSB_FIRST_OFS     },
-  { "ADC_SC_WORD_WISE_DDR"          , WD2_ADC_SC_WORD_WISE_DDR_REG          , WD2_ADC_SC_WORD_WISE_DDR_MASK          , WD2_ADC_SC_WORD_WISE_DDR_OFS          },
-  { "ADC_SC_OUT_NR_BITS"            , WD2_ADC_SC_OUT_NR_BITS_REG            , WD2_ADC_SC_OUT_NR_BITS_MASK            , WD2_ADC_SC_OUT_NR_BITS_OFS            },
-  { "ADC_SC_OUT_RST"                , WD2_ADC_SC_OUT_RST_REG                , WD2_ADC_SC_OUT_RST_MASK                , WD2_ADC_SC_OUT_RST_OFS                },
-  { "ADC_SC_PWR_DN"                 , WD2_ADC_SC_PWR_DN_REG                 , WD2_ADC_SC_PWR_DN_MASK                 , WD2_ADC_SC_PWR_DN_OFS                 },
-  { "ADC_RES_SR_OVR"                , WD2_ADC_RES_SR_OVR_REG                , WD2_ADC_RES_SR_OVR_MASK                , WD2_ADC_RES_SR_OVR_OFS                },
-  { "ADC_RESOLUTION"                , WD2_ADC_RESOLUTION_REG                , WD2_ADC_RESOLUTION_MASK                , WD2_ADC_RESOLUTION_OFS                },
-  { "ADC_SAMPLE_RATE"               , WD2_ADC_SAMPLE_RATE_REG               , WD2_ADC_SAMPLE_RATE_MASK               , WD2_ADC_SAMPLE_RATE_OFS               },
-  { "ADC_UIOC2_SDIO_PD"             , WD2_ADC_UIOC2_SDIO_PD_REG             , WD2_ADC_UIOC2_SDIO_PD_MASK             , WD2_ADC_UIOC2_SDIO_PD_OFS             },
-  { "ADC_UIOC3_VCM_PWR_DN"          , WD2_ADC_UIOC3_VCM_PWR_DN_REG          , WD2_ADC_UIOC3_VCM_PWR_DN_MASK          , WD2_ADC_UIOC3_VCM_PWR_DN_OFS          },
-  { "ADC_SYNC_NEXT_ONLY"            , WD2_ADC_SYNC_NEXT_ONLY_REG            , WD2_ADC_SYNC_NEXT_ONLY_MASK            , WD2_ADC_SYNC_NEXT_ONLY_OFS            },
-  { "ADC_EN_SYNC"                   , WD2_ADC_EN_SYNC_REG                   , WD2_ADC_EN_SYNC_MASK                   , WD2_ADC_EN_SYNC_OFS                   },
-  { "ADC_TM_USR_IN_MODE_0_A"        , WD2_ADC_TM_USR_IN_MODE_0_A_REG        , WD2_ADC_TM_USR_IN_MODE_0_A_MASK        , WD2_ADC_TM_USR_IN_MODE_0_A_OFS        },
-  { "ADC_TM_OUT_0_A"                , WD2_ADC_TM_OUT_0_A_REG                , WD2_ADC_TM_OUT_0_A_MASK                , WD2_ADC_TM_OUT_0_A_OFS                },
-  { "ADC_OFFS_ADJ_0_A"              , WD2_ADC_OFFS_ADJ_0_A_REG              , WD2_ADC_OFFS_ADJ_0_A_MASK              , WD2_ADC_OFFS_ADJ_0_A_OFS              },
-  { "ADC_OM_OUT_INVERT_0_A"         , WD2_ADC_OM_OUT_INVERT_0_A_REG         , WD2_ADC_OM_OUT_INVERT_0_A_MASK         , WD2_ADC_OM_OUT_INVERT_0_A_OFS         },
-  { "ADC_TM_USR_IN_MODE_0_B"        , WD2_ADC_TM_USR_IN_MODE_0_B_REG        , WD2_ADC_TM_USR_IN_MODE_0_B_MASK        , WD2_ADC_TM_USR_IN_MODE_0_B_OFS        },
-  { "ADC_TM_OUT_0_B"                , WD2_ADC_TM_OUT_0_B_REG                , WD2_ADC_TM_OUT_0_B_MASK                , WD2_ADC_TM_OUT_0_B_OFS                },
-  { "ADC_OFFS_ADJ_0_B"              , WD2_ADC_OFFS_ADJ_0_B_REG              , WD2_ADC_OFFS_ADJ_0_B_MASK              , WD2_ADC_OFFS_ADJ_0_B_OFS              },
-  { "ADC_OM_OUT_INVERT_0_B"         , WD2_ADC_OM_OUT_INVERT_0_B_REG         , WD2_ADC_OM_OUT_INVERT_0_B_MASK         , WD2_ADC_OM_OUT_INVERT_0_B_OFS         },
-  { "ADC_TM_USR_IN_MODE_0_C"        , WD2_ADC_TM_USR_IN_MODE_0_C_REG        , WD2_ADC_TM_USR_IN_MODE_0_C_MASK        , WD2_ADC_TM_USR_IN_MODE_0_C_OFS        },
-  { "ADC_TM_OUT_0_C"                , WD2_ADC_TM_OUT_0_C_REG                , WD2_ADC_TM_OUT_0_C_MASK                , WD2_ADC_TM_OUT_0_C_OFS                },
-  { "ADC_OFFS_ADJ_0_C"              , WD2_ADC_OFFS_ADJ_0_C_REG              , WD2_ADC_OFFS_ADJ_0_C_MASK              , WD2_ADC_OFFS_ADJ_0_C_OFS              },
-  { "ADC_OM_OUT_INVERT_0_C"         , WD2_ADC_OM_OUT_INVERT_0_C_REG         , WD2_ADC_OM_OUT_INVERT_0_C_MASK         , WD2_ADC_OM_OUT_INVERT_0_C_OFS         },
-  { "ADC_TM_USR_IN_MODE_0_D"        , WD2_ADC_TM_USR_IN_MODE_0_D_REG        , WD2_ADC_TM_USR_IN_MODE_0_D_MASK        , WD2_ADC_TM_USR_IN_MODE_0_D_OFS        },
-  { "ADC_TM_OUT_0_D"                , WD2_ADC_TM_OUT_0_D_REG                , WD2_ADC_TM_OUT_0_D_MASK                , WD2_ADC_TM_OUT_0_D_OFS                },
-  { "ADC_OFFS_ADJ_0_D"              , WD2_ADC_OFFS_ADJ_0_D_REG              , WD2_ADC_OFFS_ADJ_0_D_MASK              , WD2_ADC_OFFS_ADJ_0_D_OFS              },
-  { "ADC_OM_OUT_INVERT_0_D"         , WD2_ADC_OM_OUT_INVERT_0_D_REG         , WD2_ADC_OM_OUT_INVERT_0_D_MASK         , WD2_ADC_OM_OUT_INVERT_0_D_OFS         },
-  { "ADC_TM_USR_IN_MODE_0_E"        , WD2_ADC_TM_USR_IN_MODE_0_E_REG        , WD2_ADC_TM_USR_IN_MODE_0_E_MASK        , WD2_ADC_TM_USR_IN_MODE_0_E_OFS        },
-  { "ADC_TM_OUT_0_E"                , WD2_ADC_TM_OUT_0_E_REG                , WD2_ADC_TM_OUT_0_E_MASK                , WD2_ADC_TM_OUT_0_E_OFS                },
-  { "ADC_OFFS_ADJ_0_E"              , WD2_ADC_OFFS_ADJ_0_E_REG              , WD2_ADC_OFFS_ADJ_0_E_MASK              , WD2_ADC_OFFS_ADJ_0_E_OFS              },
-  { "ADC_OM_OUT_INVERT_0_E"         , WD2_ADC_OM_OUT_INVERT_0_E_REG         , WD2_ADC_OM_OUT_INVERT_0_E_MASK         , WD2_ADC_OM_OUT_INVERT_0_E_OFS         },
-  { "ADC_TM_USR_IN_MODE_0_F"        , WD2_ADC_TM_USR_IN_MODE_0_F_REG        , WD2_ADC_TM_USR_IN_MODE_0_F_MASK        , WD2_ADC_TM_USR_IN_MODE_0_F_OFS        },
-  { "ADC_TM_OUT_0_F"                , WD2_ADC_TM_OUT_0_F_REG                , WD2_ADC_TM_OUT_0_F_MASK                , WD2_ADC_TM_OUT_0_F_OFS                },
-  { "ADC_OFFS_ADJ_0_F"              , WD2_ADC_OFFS_ADJ_0_F_REG              , WD2_ADC_OFFS_ADJ_0_F_MASK              , WD2_ADC_OFFS_ADJ_0_F_OFS              },
-  { "ADC_OM_OUT_INVERT_0_F"         , WD2_ADC_OM_OUT_INVERT_0_F_REG         , WD2_ADC_OM_OUT_INVERT_0_F_MASK         , WD2_ADC_OM_OUT_INVERT_0_F_OFS         },
-  { "ADC_TM_USR_IN_MODE_0_G"        , WD2_ADC_TM_USR_IN_MODE_0_G_REG        , WD2_ADC_TM_USR_IN_MODE_0_G_MASK        , WD2_ADC_TM_USR_IN_MODE_0_G_OFS        },
-  { "ADC_TM_OUT_0_G"                , WD2_ADC_TM_OUT_0_G_REG                , WD2_ADC_TM_OUT_0_G_MASK                , WD2_ADC_TM_OUT_0_G_OFS                },
-  { "ADC_OFFS_ADJ_0_G"              , WD2_ADC_OFFS_ADJ_0_G_REG              , WD2_ADC_OFFS_ADJ_0_G_MASK              , WD2_ADC_OFFS_ADJ_0_G_OFS              },
-  { "ADC_OM_OUT_INVERT_0_G"         , WD2_ADC_OM_OUT_INVERT_0_G_REG         , WD2_ADC_OM_OUT_INVERT_0_G_MASK         , WD2_ADC_OM_OUT_INVERT_0_G_OFS         },
-  { "ADC_TM_USR_IN_MODE_0_H"        , WD2_ADC_TM_USR_IN_MODE_0_H_REG        , WD2_ADC_TM_USR_IN_MODE_0_H_MASK        , WD2_ADC_TM_USR_IN_MODE_0_H_OFS        },
-  { "ADC_TM_OUT_0_H"                , WD2_ADC_TM_OUT_0_H_REG                , WD2_ADC_TM_OUT_0_H_MASK                , WD2_ADC_TM_OUT_0_H_OFS                },
-  { "ADC_OFFS_ADJ_0_H"              , WD2_ADC_OFFS_ADJ_0_H_REG              , WD2_ADC_OFFS_ADJ_0_H_MASK              , WD2_ADC_OFFS_ADJ_0_H_OFS              },
-  { "ADC_OM_OUT_INVERT_0_H"         , WD2_ADC_OM_OUT_INVERT_0_H_REG         , WD2_ADC_OM_OUT_INVERT_0_H_MASK         , WD2_ADC_OM_OUT_INVERT_0_H_OFS         },
-  { "ADC_TM_USR_IN_MODE_0_DCO"      , WD2_ADC_TM_USR_IN_MODE_0_DCO_REG      , WD2_ADC_TM_USR_IN_MODE_0_DCO_MASK      , WD2_ADC_TM_USR_IN_MODE_0_DCO_OFS      },
-  { "ADC_TM_OUT_0_DCO"              , WD2_ADC_TM_OUT_0_DCO_REG              , WD2_ADC_TM_OUT_0_DCO_MASK              , WD2_ADC_TM_OUT_0_DCO_OFS              },
-  { "ADC_OFFS_ADJ_0_DCO"            , WD2_ADC_OFFS_ADJ_0_DCO_REG            , WD2_ADC_OFFS_ADJ_0_DCO_MASK            , WD2_ADC_OFFS_ADJ_0_DCO_OFS            },
-  { "ADC_OM_OUT_INVERT_0_DCO"       , WD2_ADC_OM_OUT_INVERT_0_DCO_REG       , WD2_ADC_OM_OUT_INVERT_0_DCO_MASK       , WD2_ADC_OM_OUT_INVERT_0_DCO_OFS       },
-  { "ADC_TM_USR_IN_MODE_0_FCO"      , WD2_ADC_TM_USR_IN_MODE_0_FCO_REG      , WD2_ADC_TM_USR_IN_MODE_0_FCO_MASK      , WD2_ADC_TM_USR_IN_MODE_0_FCO_OFS      },
-  { "ADC_TM_OUT_0_FCO"              , WD2_ADC_TM_OUT_0_FCO_REG              , WD2_ADC_TM_OUT_0_FCO_MASK              , WD2_ADC_TM_OUT_0_FCO_OFS              },
-  { "ADC_OFFS_ADJ_0_FCO"            , WD2_ADC_OFFS_ADJ_0_FCO_REG            , WD2_ADC_OFFS_ADJ_0_FCO_MASK            , WD2_ADC_OFFS_ADJ_0_FCO_OFS            },
-  { "ADC_OM_OUT_INVERT_0_FCO"       , WD2_ADC_OM_OUT_INVERT_0_FCO_REG       , WD2_ADC_OM_OUT_INVERT_0_FCO_MASK       , WD2_ADC_OM_OUT_INVERT_0_FCO_OFS       },
-  { "ADC_TM_USR_IN_MODE_1_A"        , WD2_ADC_TM_USR_IN_MODE_1_A_REG        , WD2_ADC_TM_USR_IN_MODE_1_A_MASK        , WD2_ADC_TM_USR_IN_MODE_1_A_OFS        },
-  { "ADC_TM_OUT_1_A"                , WD2_ADC_TM_OUT_1_A_REG                , WD2_ADC_TM_OUT_1_A_MASK                , WD2_ADC_TM_OUT_1_A_OFS                },
-  { "ADC_OFFS_ADJ_1_A"              , WD2_ADC_OFFS_ADJ_1_A_REG              , WD2_ADC_OFFS_ADJ_1_A_MASK              , WD2_ADC_OFFS_ADJ_1_A_OFS              },
-  { "ADC_OM_OUT_INVERT_1_A"         , WD2_ADC_OM_OUT_INVERT_1_A_REG         , WD2_ADC_OM_OUT_INVERT_1_A_MASK         , WD2_ADC_OM_OUT_INVERT_1_A_OFS         },
-  { "ADC_TM_USR_IN_MODE_1_B"        , WD2_ADC_TM_USR_IN_MODE_1_B_REG        , WD2_ADC_TM_USR_IN_MODE_1_B_MASK        , WD2_ADC_TM_USR_IN_MODE_1_B_OFS        },
-  { "ADC_TM_OUT_1_B"                , WD2_ADC_TM_OUT_1_B_REG                , WD2_ADC_TM_OUT_1_B_MASK                , WD2_ADC_TM_OUT_1_B_OFS                },
-  { "ADC_OFFS_ADJ_1_B"              , WD2_ADC_OFFS_ADJ_1_B_REG              , WD2_ADC_OFFS_ADJ_1_B_MASK              , WD2_ADC_OFFS_ADJ_1_B_OFS              },
-  { "ADC_OM_OUT_INVERT_1_B"         , WD2_ADC_OM_OUT_INVERT_1_B_REG         , WD2_ADC_OM_OUT_INVERT_1_B_MASK         , WD2_ADC_OM_OUT_INVERT_1_B_OFS         },
-  { "ADC_TM_USR_IN_MODE_1_C"        , WD2_ADC_TM_USR_IN_MODE_1_C_REG        , WD2_ADC_TM_USR_IN_MODE_1_C_MASK        , WD2_ADC_TM_USR_IN_MODE_1_C_OFS        },
-  { "ADC_TM_OUT_1_C"                , WD2_ADC_TM_OUT_1_C_REG                , WD2_ADC_TM_OUT_1_C_MASK                , WD2_ADC_TM_OUT_1_C_OFS                },
-  { "ADC_OFFS_ADJ_1_C"              , WD2_ADC_OFFS_ADJ_1_C_REG              , WD2_ADC_OFFS_ADJ_1_C_MASK              , WD2_ADC_OFFS_ADJ_1_C_OFS              },
-  { "ADC_OM_OUT_INVERT_1_C"         , WD2_ADC_OM_OUT_INVERT_1_C_REG         , WD2_ADC_OM_OUT_INVERT_1_C_MASK         , WD2_ADC_OM_OUT_INVERT_1_C_OFS         },
-  { "ADC_TM_USR_IN_MODE_1_D"        , WD2_ADC_TM_USR_IN_MODE_1_D_REG        , WD2_ADC_TM_USR_IN_MODE_1_D_MASK        , WD2_ADC_TM_USR_IN_MODE_1_D_OFS        },
-  { "ADC_TM_OUT_1_D"                , WD2_ADC_TM_OUT_1_D_REG                , WD2_ADC_TM_OUT_1_D_MASK                , WD2_ADC_TM_OUT_1_D_OFS                },
-  { "ADC_OFFS_ADJ_1_D"              , WD2_ADC_OFFS_ADJ_1_D_REG              , WD2_ADC_OFFS_ADJ_1_D_MASK              , WD2_ADC_OFFS_ADJ_1_D_OFS              },
-  { "ADC_OM_OUT_INVERT_1_D"         , WD2_ADC_OM_OUT_INVERT_1_D_REG         , WD2_ADC_OM_OUT_INVERT_1_D_MASK         , WD2_ADC_OM_OUT_INVERT_1_D_OFS         },
-  { "ADC_TM_USR_IN_MODE_1_E"        , WD2_ADC_TM_USR_IN_MODE_1_E_REG        , WD2_ADC_TM_USR_IN_MODE_1_E_MASK        , WD2_ADC_TM_USR_IN_MODE_1_E_OFS        },
-  { "ADC_TM_OUT_1_E"                , WD2_ADC_TM_OUT_1_E_REG                , WD2_ADC_TM_OUT_1_E_MASK                , WD2_ADC_TM_OUT_1_E_OFS                },
-  { "ADC_OFFS_ADJ_1_E"              , WD2_ADC_OFFS_ADJ_1_E_REG              , WD2_ADC_OFFS_ADJ_1_E_MASK              , WD2_ADC_OFFS_ADJ_1_E_OFS              },
-  { "ADC_OM_OUT_INVERT_1_E"         , WD2_ADC_OM_OUT_INVERT_1_E_REG         , WD2_ADC_OM_OUT_INVERT_1_E_MASK         , WD2_ADC_OM_OUT_INVERT_1_E_OFS         },
-  { "ADC_TM_USR_IN_MODE_1_F"        , WD2_ADC_TM_USR_IN_MODE_1_F_REG        , WD2_ADC_TM_USR_IN_MODE_1_F_MASK        , WD2_ADC_TM_USR_IN_MODE_1_F_OFS        },
-  { "ADC_TM_OUT_1_F"                , WD2_ADC_TM_OUT_1_F_REG                , WD2_ADC_TM_OUT_1_F_MASK                , WD2_ADC_TM_OUT_1_F_OFS                },
-  { "ADC_OFFS_ADJ_1_F"              , WD2_ADC_OFFS_ADJ_1_F_REG              , WD2_ADC_OFFS_ADJ_1_F_MASK              , WD2_ADC_OFFS_ADJ_1_F_OFS              },
-  { "ADC_OM_OUT_INVERT_1_F"         , WD2_ADC_OM_OUT_INVERT_1_F_REG         , WD2_ADC_OM_OUT_INVERT_1_F_MASK         , WD2_ADC_OM_OUT_INVERT_1_F_OFS         },
-  { "ADC_TM_USR_IN_MODE_1_G"        , WD2_ADC_TM_USR_IN_MODE_1_G_REG        , WD2_ADC_TM_USR_IN_MODE_1_G_MASK        , WD2_ADC_TM_USR_IN_MODE_1_G_OFS        },
-  { "ADC_TM_OUT_1_G"                , WD2_ADC_TM_OUT_1_G_REG                , WD2_ADC_TM_OUT_1_G_MASK                , WD2_ADC_TM_OUT_1_G_OFS                },
-  { "ADC_OFFS_ADJ_1_G"              , WD2_ADC_OFFS_ADJ_1_G_REG              , WD2_ADC_OFFS_ADJ_1_G_MASK              , WD2_ADC_OFFS_ADJ_1_G_OFS              },
-  { "ADC_OM_OUT_INVERT_1_G"         , WD2_ADC_OM_OUT_INVERT_1_G_REG         , WD2_ADC_OM_OUT_INVERT_1_G_MASK         , WD2_ADC_OM_OUT_INVERT_1_G_OFS         },
-  { "ADC_TM_USR_IN_MODE_1_H"        , WD2_ADC_TM_USR_IN_MODE_1_H_REG        , WD2_ADC_TM_USR_IN_MODE_1_H_MASK        , WD2_ADC_TM_USR_IN_MODE_1_H_OFS        },
-  { "ADC_TM_OUT_1_H"                , WD2_ADC_TM_OUT_1_H_REG                , WD2_ADC_TM_OUT_1_H_MASK                , WD2_ADC_TM_OUT_1_H_OFS                },
-  { "ADC_OFFS_ADJ_1_H"              , WD2_ADC_OFFS_ADJ_1_H_REG              , WD2_ADC_OFFS_ADJ_1_H_MASK              , WD2_ADC_OFFS_ADJ_1_H_OFS              },
-  { "ADC_OM_OUT_INVERT_1_H"         , WD2_ADC_OM_OUT_INVERT_1_H_REG         , WD2_ADC_OM_OUT_INVERT_1_H_MASK         , WD2_ADC_OM_OUT_INVERT_1_H_OFS         },
-  { "ADC_TM_USR_IN_MODE_1_DCO"      , WD2_ADC_TM_USR_IN_MODE_1_DCO_REG      , WD2_ADC_TM_USR_IN_MODE_1_DCO_MASK      , WD2_ADC_TM_USR_IN_MODE_1_DCO_OFS      },
-  { "ADC_TM_OUT_1_DCO"              , WD2_ADC_TM_OUT_1_DCO_REG              , WD2_ADC_TM_OUT_1_DCO_MASK              , WD2_ADC_TM_OUT_1_DCO_OFS              },
-  { "ADC_OFFS_ADJ_1_DCO"            , WD2_ADC_OFFS_ADJ_1_DCO_REG            , WD2_ADC_OFFS_ADJ_1_DCO_MASK            , WD2_ADC_OFFS_ADJ_1_DCO_OFS            },
-  { "ADC_OM_OUT_INVERT_1_DCO"       , WD2_ADC_OM_OUT_INVERT_1_DCO_REG       , WD2_ADC_OM_OUT_INVERT_1_DCO_MASK       , WD2_ADC_OM_OUT_INVERT_1_DCO_OFS       },
-  { "ADC_TM_USR_IN_MODE_1_FCO"      , WD2_ADC_TM_USR_IN_MODE_1_FCO_REG      , WD2_ADC_TM_USR_IN_MODE_1_FCO_MASK      , WD2_ADC_TM_USR_IN_MODE_1_FCO_OFS      },
-  { "ADC_TM_OUT_1_FCO"              , WD2_ADC_TM_OUT_1_FCO_REG              , WD2_ADC_TM_OUT_1_FCO_MASK              , WD2_ADC_TM_OUT_1_FCO_OFS              },
-  { "ADC_OFFS_ADJ_1_FCO"            , WD2_ADC_OFFS_ADJ_1_FCO_REG            , WD2_ADC_OFFS_ADJ_1_FCO_MASK            , WD2_ADC_OFFS_ADJ_1_FCO_OFS            },
-  { "ADC_OM_OUT_INVERT_1_FCO"       , WD2_ADC_OM_OUT_INVERT_1_FCO_REG       , WD2_ADC_OM_OUT_INVERT_1_FCO_MASK       , WD2_ADC_OM_OUT_INVERT_1_FCO_OFS       },
+  { "ADC_0_1458_DCSOFF"             , WD2_ADC_0_1458_DCSOFF_REG             , WD2_ADC_0_1458_DCSOFF_MASK             , WD2_ADC_0_1458_DCSOFF_OFS             },
+  { "ADC_0_1458_RAND"               , WD2_ADC_0_1458_RAND_REG               , WD2_ADC_0_1458_RAND_MASK               , WD2_ADC_0_1458_RAND_OFS               },
+  { "ADC_0_1458_TWOSCOMP"           , WD2_ADC_0_1458_TWOSCOMP_REG           , WD2_ADC_0_1458_TWOSCOMP_MASK           , WD2_ADC_0_1458_TWOSCOMP_OFS           },
+  { "ADC_0_1458_SLEEP"              , WD2_ADC_0_1458_SLEEP_REG              , WD2_ADC_0_1458_SLEEP_MASK              , WD2_ADC_0_1458_SLEEP_OFS              },
+  { "ADC_0_8_NAP_MODE"              , WD2_ADC_0_8_NAP_MODE_REG              , WD2_ADC_0_8_NAP_MODE_MASK              , WD2_ADC_0_8_NAP_MODE_OFS              },
+  { "ADC_0_5_NAP_MODE"              , WD2_ADC_0_5_NAP_MODE_REG              , WD2_ADC_0_5_NAP_MODE_MASK              , WD2_ADC_0_5_NAP_MODE_OFS              },
+  { "ADC_0_4_NAP_MODE"              , WD2_ADC_0_4_NAP_MODE_REG              , WD2_ADC_0_4_NAP_MODE_MASK              , WD2_ADC_0_4_NAP_MODE_OFS              },
+  { "ADC_0_1_NAP_MODE"              , WD2_ADC_0_1_NAP_MODE_REG              , WD2_ADC_0_1_NAP_MODE_MASK              , WD2_ADC_0_1_NAP_MODE_OFS              },
+  { "ADC_0_1458_ILVDS"              , WD2_ADC_0_1458_ILVDS_REG              , WD2_ADC_0_1458_ILVDS_MASK              , WD2_ADC_0_1458_ILVDS_OFS              },
+  { "ADC_0_1458_TERMON"             , WD2_ADC_0_1458_TERMON_REG             , WD2_ADC_0_1458_TERMON_MASK             , WD2_ADC_0_1458_TERMON_OFS             },
+  { "ADC_0_1458_OUTOFF"             , WD2_ADC_0_1458_OUTOFF_REG             , WD2_ADC_0_1458_OUTOFF_MASK             , WD2_ADC_0_1458_OUTOFF_OFS             },
+  { "ADC_0_1458_OUTMODE"            , WD2_ADC_0_1458_OUTMODE_REG            , WD2_ADC_0_1458_OUTMODE_MASK            , WD2_ADC_0_1458_OUTMODE_OFS            },
+  { "ADC_0_1458_OUTTEST"            , WD2_ADC_0_1458_OUTTEST_REG            , WD2_ADC_0_1458_OUTTEST_MASK            , WD2_ADC_0_1458_OUTTEST_OFS            },
+  { "ADC_0_1458_TP"                 , WD2_ADC_0_1458_TP_REG                 , WD2_ADC_0_1458_TP_MASK                 , WD2_ADC_0_1458_TP_OFS                 },
+  { "ADC_0_1458_TP_LSBS"            , WD2_ADC_0_1458_TP_LSBS_REG            , WD2_ADC_0_1458_TP_LSBS_MASK            , WD2_ADC_0_1458_TP_LSBS_OFS            },
+  { "ADC_0_2367_DCSOFF"             , WD2_ADC_0_2367_DCSOFF_REG             , WD2_ADC_0_2367_DCSOFF_MASK             , WD2_ADC_0_2367_DCSOFF_OFS             },
+  { "ADC_0_2367_RAND"               , WD2_ADC_0_2367_RAND_REG               , WD2_ADC_0_2367_RAND_MASK               , WD2_ADC_0_2367_RAND_OFS               },
+  { "ADC_0_2367_TWOSCOMP"           , WD2_ADC_0_2367_TWOSCOMP_REG           , WD2_ADC_0_2367_TWOSCOMP_MASK           , WD2_ADC_0_2367_TWOSCOMP_OFS           },
+  { "ADC_0_2367_SLEEP"              , WD2_ADC_0_2367_SLEEP_REG              , WD2_ADC_0_2367_SLEEP_MASK              , WD2_ADC_0_2367_SLEEP_OFS              },
+  { "ADC_0_7_NAP_MODE"              , WD2_ADC_0_7_NAP_MODE_REG              , WD2_ADC_0_7_NAP_MODE_MASK              , WD2_ADC_0_7_NAP_MODE_OFS              },
+  { "ADC_0_6_NAP_MODE"              , WD2_ADC_0_6_NAP_MODE_REG              , WD2_ADC_0_6_NAP_MODE_MASK              , WD2_ADC_0_6_NAP_MODE_OFS              },
+  { "ADC_0_3_NAP_MODE"              , WD2_ADC_0_3_NAP_MODE_REG              , WD2_ADC_0_3_NAP_MODE_MASK              , WD2_ADC_0_3_NAP_MODE_OFS              },
+  { "ADC_0_2_NAP_MODE"              , WD2_ADC_0_2_NAP_MODE_REG              , WD2_ADC_0_2_NAP_MODE_MASK              , WD2_ADC_0_2_NAP_MODE_OFS              },
+  { "ADC_0_2367_ILVDS"              , WD2_ADC_0_2367_ILVDS_REG              , WD2_ADC_0_2367_ILVDS_MASK              , WD2_ADC_0_2367_ILVDS_OFS              },
+  { "ADC_0_2367_TERMON"             , WD2_ADC_0_2367_TERMON_REG             , WD2_ADC_0_2367_TERMON_MASK             , WD2_ADC_0_2367_TERMON_OFS             },
+  { "ADC_0_2367_OUTOFF"             , WD2_ADC_0_2367_OUTOFF_REG             , WD2_ADC_0_2367_OUTOFF_MASK             , WD2_ADC_0_2367_OUTOFF_OFS             },
+  { "ADC_0_2367_OUTMODE"            , WD2_ADC_0_2367_OUTMODE_REG            , WD2_ADC_0_2367_OUTMODE_MASK            , WD2_ADC_0_2367_OUTMODE_OFS            },
+  { "ADC_0_2367_OUTTEST"            , WD2_ADC_0_2367_OUTTEST_REG            , WD2_ADC_0_2367_OUTTEST_MASK            , WD2_ADC_0_2367_OUTTEST_OFS            },
+  { "ADC_0_2367_TP"                 , WD2_ADC_0_2367_TP_REG                 , WD2_ADC_0_2367_TP_MASK                 , WD2_ADC_0_2367_TP_OFS                 },
+  { "ADC_0_2367_TP_LSBS"            , WD2_ADC_0_2367_TP_LSBS_REG            , WD2_ADC_0_2367_TP_LSBS_MASK            , WD2_ADC_0_2367_TP_LSBS_OFS            },
+  { "ADC_1_1458_DCSOFF"             , WD2_ADC_1_1458_DCSOFF_REG             , WD2_ADC_1_1458_DCSOFF_MASK             , WD2_ADC_1_1458_DCSOFF_OFS             },
+  { "ADC_1_1458_RAND"               , WD2_ADC_1_1458_RAND_REG               , WD2_ADC_1_1458_RAND_MASK               , WD2_ADC_1_1458_RAND_OFS               },
+  { "ADC_1_1458_TWOSCOMP"           , WD2_ADC_1_1458_TWOSCOMP_REG           , WD2_ADC_1_1458_TWOSCOMP_MASK           , WD2_ADC_1_1458_TWOSCOMP_OFS           },
+  { "ADC_1_1458_SLEEP"              , WD2_ADC_1_1458_SLEEP_REG              , WD2_ADC_1_1458_SLEEP_MASK              , WD2_ADC_1_1458_SLEEP_OFS              },
+  { "ADC_1_8_NAP_MODE"              , WD2_ADC_1_8_NAP_MODE_REG              , WD2_ADC_1_8_NAP_MODE_MASK              , WD2_ADC_1_8_NAP_MODE_OFS              },
+  { "ADC_1_5_NAP_MODE"              , WD2_ADC_1_5_NAP_MODE_REG              , WD2_ADC_1_5_NAP_MODE_MASK              , WD2_ADC_1_5_NAP_MODE_OFS              },
+  { "ADC_1_4_NAP_MODE"              , WD2_ADC_1_4_NAP_MODE_REG              , WD2_ADC_1_4_NAP_MODE_MASK              , WD2_ADC_1_4_NAP_MODE_OFS              },
+  { "ADC_1_1_NAP_MODE"              , WD2_ADC_1_1_NAP_MODE_REG              , WD2_ADC_1_1_NAP_MODE_MASK              , WD2_ADC_1_1_NAP_MODE_OFS              },
+  { "ADC_1_1458_ILVDS"              , WD2_ADC_1_1458_ILVDS_REG              , WD2_ADC_1_1458_ILVDS_MASK              , WD2_ADC_1_1458_ILVDS_OFS              },
+  { "ADC_1_1458_TERMON"             , WD2_ADC_1_1458_TERMON_REG             , WD2_ADC_1_1458_TERMON_MASK             , WD2_ADC_1_1458_TERMON_OFS             },
+  { "ADC_1_1458_OUTOFF"             , WD2_ADC_1_1458_OUTOFF_REG             , WD2_ADC_1_1458_OUTOFF_MASK             , WD2_ADC_1_1458_OUTOFF_OFS             },
+  { "ADC_1_1458_OUTMODE"            , WD2_ADC_1_1458_OUTMODE_REG            , WD2_ADC_1_1458_OUTMODE_MASK            , WD2_ADC_1_1458_OUTMODE_OFS            },
+  { "ADC_1_1458_OUTTEST"            , WD2_ADC_1_1458_OUTTEST_REG            , WD2_ADC_1_1458_OUTTEST_MASK            , WD2_ADC_1_1458_OUTTEST_OFS            },
+  { "ADC_1_1458_TP"                 , WD2_ADC_1_1458_TP_REG                 , WD2_ADC_1_1458_TP_MASK                 , WD2_ADC_1_1458_TP_OFS                 },
+  { "ADC_1_1458_TP_LSBS"            , WD2_ADC_1_1458_TP_LSBS_REG            , WD2_ADC_1_1458_TP_LSBS_MASK            , WD2_ADC_1_1458_TP_LSBS_OFS            },
+  { "ADC_1_2367_DCSOFF"             , WD2_ADC_1_2367_DCSOFF_REG             , WD2_ADC_1_2367_DCSOFF_MASK             , WD2_ADC_1_2367_DCSOFF_OFS             },
+  { "ADC_1_2367_RAND"               , WD2_ADC_1_2367_RAND_REG               , WD2_ADC_1_2367_RAND_MASK               , WD2_ADC_1_2367_RAND_OFS               },
+  { "ADC_1_2367_TWOSCOMP"           , WD2_ADC_1_2367_TWOSCOMP_REG           , WD2_ADC_1_2367_TWOSCOMP_MASK           , WD2_ADC_1_2367_TWOSCOMP_OFS           },
+  { "ADC_1_2367_SLEEP"              , WD2_ADC_1_2367_SLEEP_REG              , WD2_ADC_1_2367_SLEEP_MASK              , WD2_ADC_1_2367_SLEEP_OFS              },
+  { "ADC_1_7_NAP_MODE"              , WD2_ADC_1_7_NAP_MODE_REG              , WD2_ADC_1_7_NAP_MODE_MASK              , WD2_ADC_1_7_NAP_MODE_OFS              },
+  { "ADC_1_6_NAP_MODE"              , WD2_ADC_1_6_NAP_MODE_REG              , WD2_ADC_1_6_NAP_MODE_MASK              , WD2_ADC_1_6_NAP_MODE_OFS              },
+  { "ADC_1_3_NAP_MODE"              , WD2_ADC_1_3_NAP_MODE_REG              , WD2_ADC_1_3_NAP_MODE_MASK              , WD2_ADC_1_3_NAP_MODE_OFS              },
+  { "ADC_1_2_NAP_MODE"              , WD2_ADC_1_2_NAP_MODE_REG              , WD2_ADC_1_2_NAP_MODE_MASK              , WD2_ADC_1_2_NAP_MODE_OFS              },
+  { "ADC_1_2367_ILVDS"              , WD2_ADC_1_2367_ILVDS_REG              , WD2_ADC_1_2367_ILVDS_MASK              , WD2_ADC_1_2367_ILVDS_OFS              },
+  { "ADC_1_2367_TERMON"             , WD2_ADC_1_2367_TERMON_REG             , WD2_ADC_1_2367_TERMON_MASK             , WD2_ADC_1_2367_TERMON_OFS             },
+  { "ADC_1_2367_OUTOFF"             , WD2_ADC_1_2367_OUTOFF_REG             , WD2_ADC_1_2367_OUTOFF_MASK             , WD2_ADC_1_2367_OUTOFF_OFS             },
+  { "ADC_1_2367_OUTMODE"            , WD2_ADC_1_2367_OUTMODE_REG            , WD2_ADC_1_2367_OUTMODE_MASK            , WD2_ADC_1_2367_OUTMODE_OFS            },
+  { "ADC_1_2367_OUTTEST"            , WD2_ADC_1_2367_OUTTEST_REG            , WD2_ADC_1_2367_OUTTEST_MASK            , WD2_ADC_1_2367_OUTTEST_OFS            },
+  { "ADC_1_2367_TP"                 , WD2_ADC_1_2367_TP_REG                 , WD2_ADC_1_2367_TP_MASK                 , WD2_ADC_1_2367_TP_OFS                 },
+  { "ADC_1_2367_TP_LSBS"            , WD2_ADC_1_2367_TP_LSBS_REG            , WD2_ADC_1_2367_TP_LSBS_MASK            , WD2_ADC_1_2367_TP_LSBS_OFS            },
   { "LEAD_TRAIL_EDGE_SEL"           , WD2_LEAD_TRAIL_EDGE_SEL_REG           , WD2_LEAD_TRAIL_EDGE_SEL_MASK           , WD2_LEAD_TRAIL_EDGE_SEL_OFS           },
   { "EXT_TRIGGER_OUT_ENABLE"        , WD2_EXT_TRIGGER_OUT_ENABLE_REG        , WD2_EXT_TRIGGER_OUT_ENABLE_MASK        , WD2_EXT_TRIGGER_OUT_ENABLE_OFS        },
   { "EXT_ASYNC_TRIGGER_EN"          , WD2_EXT_ASYNC_TRIGGER_EN_REG          , WD2_EXT_ASYNC_TRIGGER_EN_MASK          , WD2_EXT_ASYNC_TRIGGER_EN_OFS          },
@@ -5760,14 +5152,14 @@ const wd2_bit_group_entry_type  wd2_bit_group_list[] = {
   { "SERIAL_NUMBER"                 , WD2_SERIAL_NUMBER_REG                 , WD2_SERIAL_NUMBER_MASK                 , WD2_SERIAL_NUMBER_OFS                 },
   { "TEMPERATURE"                   , WD2_TEMPERATURE_REG                   , WD2_TEMPERATURE_MASK                   , WD2_TEMPERATURE_OFS                   },
   { "TEMPERATURE"                   , WD2_TEMPERATURE_REG                   , WD2_TEMPERATURE_MASK                   , WD2_TEMPERATURE_OFS                   },
+  { "OVERTEMP"                      , WD2_OVERTEMP_REG                      , WD2_OVERTEMP_MASK                      , WD2_OVERTEMP_OFS                      },
+  { "OVERTEMP"                      , WD2_OVERTEMP_REG                      , WD2_OVERTEMP_MASK                      , WD2_OVERTEMP_OFS                      },
   { "DAQ_CLK_DEF_PHASE_OK"          , WD2_DAQ_CLK_DEF_PHASE_OK_REG          , WD2_DAQ_CLK_DEF_PHASE_OK_MASK          , WD2_DAQ_CLK_DEF_PHASE_OK_OFS          },
   { "DAQ_CLK_DEF_PHASE_OK"          , WD2_DAQ_CLK_DEF_PHASE_OK_REG          , WD2_DAQ_CLK_DEF_PHASE_OK_MASK          , WD2_DAQ_CLK_DEF_PHASE_OK_OFS          },
   { "DAQ_CLK_DEF_PHASE_CHKD"        , WD2_DAQ_CLK_DEF_PHASE_CHKD_REG        , WD2_DAQ_CLK_DEF_PHASE_CHKD_MASK        , WD2_DAQ_CLK_DEF_PHASE_CHKD_OFS        },
   { "DAQ_CLK_DEF_PHASE_CHKD"        , WD2_DAQ_CLK_DEF_PHASE_CHKD_REG        , WD2_DAQ_CLK_DEF_PHASE_CHKD_MASK        , WD2_DAQ_CLK_DEF_PHASE_CHKD_OFS        },
   { "DRS_CONFIG_DONE"               , WD2_DRS_CONFIG_DONE_REG               , WD2_DRS_CONFIG_DONE_MASK               , WD2_DRS_CONFIG_DONE_OFS               },
   { "DRS_CONFIG_DONE"               , WD2_DRS_CONFIG_DONE_REG               , WD2_DRS_CONFIG_DONE_MASK               , WD2_DRS_CONFIG_DONE_OFS               },
-  { "FLASH_SEL"                     , WD2_FLASH_SEL_REG                     , WD2_FLASH_SEL_MASK                     , WD2_FLASH_SEL_OFS                     },
-  { "FLASH_SEL"                     , WD2_FLASH_SEL_REG                     , WD2_FLASH_SEL_MASK                     , WD2_FLASH_SEL_OFS                     },
   { "BOARD_SEL"                     , WD2_BOARD_SEL_REG                     , WD2_BOARD_SEL_MASK                     , WD2_BOARD_SEL_OFS                     },
   { "BOARD_SEL"                     , WD2_BOARD_SEL_REG                     , WD2_BOARD_SEL_MASK                     , WD2_BOARD_SEL_OFS                     },
   { "SERIAL_BUSY"                   , WD2_SERIAL_BUSY_REG                   , WD2_SERIAL_BUSY_MASK                   , WD2_SERIAL_BUSY_OFS                   },
@@ -5814,14 +5206,6 @@ const wd2_bit_group_entry_type  wd2_bit_group_list[] = {
   { "ADC_SAMPLE_FREQ"               , WD2_ADC_SAMPLE_FREQ_REG               , WD2_ADC_SAMPLE_FREQ_MASK               , WD2_ADC_SAMPLE_FREQ_OFS               },
   { "TDC_SAMPLE_FREQ"               , WD2_TDC_SAMPLE_FREQ_REG               , WD2_TDC_SAMPLE_FREQ_MASK               , WD2_TDC_SAMPLE_FREQ_OFS               },
   { "TDC_SAMPLE_FREQ"               , WD2_TDC_SAMPLE_FREQ_REG               , WD2_TDC_SAMPLE_FREQ_MASK               , WD2_TDC_SAMPLE_FREQ_OFS               },
-  { "ADC_0_CHIP_ID"                 , WD2_ADC_0_CHIP_ID_REG                 , WD2_ADC_0_CHIP_ID_MASK                 , WD2_ADC_0_CHIP_ID_OFS                 },
-  { "ADC_0_CHIP_ID"                 , WD2_ADC_0_CHIP_ID_REG                 , WD2_ADC_0_CHIP_ID_MASK                 , WD2_ADC_0_CHIP_ID_OFS                 },
-  { "ADC_0_SPEED"                   , WD2_ADC_0_SPEED_REG                   , WD2_ADC_0_SPEED_MASK                   , WD2_ADC_0_SPEED_OFS                   },
-  { "ADC_0_SPEED"                   , WD2_ADC_0_SPEED_REG                   , WD2_ADC_0_SPEED_MASK                   , WD2_ADC_0_SPEED_OFS                   },
-  { "ADC_1_CHIP_ID"                 , WD2_ADC_1_CHIP_ID_REG                 , WD2_ADC_1_CHIP_ID_MASK                 , WD2_ADC_1_CHIP_ID_OFS                 },
-  { "ADC_1_CHIP_ID"                 , WD2_ADC_1_CHIP_ID_REG                 , WD2_ADC_1_CHIP_ID_MASK                 , WD2_ADC_1_CHIP_ID_OFS                 },
-  { "ADC_1_SPEED"                   , WD2_ADC_1_SPEED_REG                   , WD2_ADC_1_SPEED_MASK                   , WD2_ADC_1_SPEED_OFS                   },
-  { "ADC_1_SPEED"                   , WD2_ADC_1_SPEED_REG                   , WD2_ADC_1_SPEED_MASK                   , WD2_ADC_1_SPEED_OFS                   },
   { "HV_VER"                        , WD2_HV_VER_REG                        , WD2_HV_VER_MASK                        , WD2_HV_VER_OFS                        },
   { "HV_VER"                        , WD2_HV_VER_REG                        , WD2_HV_VER_MASK                        , WD2_HV_VER_OFS                        },
   { "HV_I_MEAS_0"                   , WD2_HV_I_MEAS_0_REG                   , WD2_HV_I_MEAS_0_MASK                   , WD2_HV_I_MEAS_0_OFS                   },
@@ -6118,7 +5502,7 @@ const unsigned int ctrl_reg_default[REG_NR_OF_CTRL_REGS] = {
   0xFFFFFFFF,   /* Offset 0x1000 */
   0x14200780,   /* Offset 0x1004 */
   0x00000000,   /* Offset 0x1008 */
-  0x00026464,   /* Offset 0x100C */
+  0x00025050,   /* Offset 0x100C */
   0x00FFFFFF,   /* Offset 0x1010 */
   0x01000753,   /* Offset 0x1014 */
   0x000005C0,   /* Offset 0x1018 */
@@ -6134,8 +5518,8 @@ const unsigned int ctrl_reg_default[REG_NR_OF_CTRL_REGS] = {
   0x00000000,   /* Offset 0x1040 */
   0x00000000,   /* Offset 0x1044 */
   0x9EC045A0,   /* Offset 0x1048 */
-  0x00000000,   /* Offset 0x104C */
-  0x00000000,   /* Offset 0x1050 */
+  0x828F0000,   /* Offset 0x104C */
+  0x0000FFFF,   /* Offset 0x1050 */
   0x000047B0,   /* Offset 0x1054 */
   0x57105710,   /* Offset 0x1058 */
   0x57105710,   /* Offset 0x105C */
@@ -6184,36 +5568,36 @@ const unsigned int ctrl_reg_default[REG_NR_OF_CTRL_REGS] = {
   0x029900AD,   /* Offset 0x1108 */
   0x0830140E,   /* Offset 0x110C */
   0xE000200F,   /* Offset 0x1110 */
-  0x180F3F00,   /* Offset 0x1114 */
-  0x00010000,   /* Offset 0x1118 */
-  0x00000044,   /* Offset 0x111C */
-  0x00300304,   /* Offset 0x1120 */
-  0xFC00FC00,   /* Offset 0x1124 */
-  0x00420000,   /* Offset 0x1128 */
-  0x00000000,   /* Offset 0x112C */
-  0x00000004,   /* Offset 0x1130 */
-  0x00000004,   /* Offset 0x1134 */
-  0x00000004,   /* Offset 0x1138 */
-  0x00000004,   /* Offset 0x113C */
-  0x00000004,   /* Offset 0x1140 */
-  0x00000004,   /* Offset 0x1144 */
-  0x00000004,   /* Offset 0x1148 */
+  0x00A63F00,   /* Offset 0x1114 */
+  0x00A63F00,   /* Offset 0x1118 */
+  0x00A63F00,   /* Offset 0x111C */
+  0x00A63F00,   /* Offset 0x1120 */
+  0x00000000,   /* Offset 0x1124 */
+  0x00000000,   /* Offset 0x1128 */
+  0x04C4B400,   /* Offset 0x112C */
+  0x00000000,   /* Offset 0x1130 */
+  0x00000000,   /* Offset 0x1134 */
+  0x00000000,   /* Offset 0x1138 */
+  0x00000000,   /* Offset 0x113C */
+  0x00000000,   /* Offset 0x1140 */
+  0x00000000,   /* Offset 0x1144 */
+  0x00000000,   /* Offset 0x1148 */
   0x00000000,   /* Offset 0x114C */
   0x00000000,   /* Offset 0x1150 */
   0x00000000,   /* Offset 0x1154 */
-  0x00000004,   /* Offset 0x1158 */
-  0x00000004,   /* Offset 0x115C */
-  0x00000004,   /* Offset 0x1160 */
-  0x00000004,   /* Offset 0x1164 */
-  0x00000004,   /* Offset 0x1168 */
-  0x00000004,   /* Offset 0x116C */
-  0x00000004,   /* Offset 0x1170 */
+  0x00000000,   /* Offset 0x1158 */
+  0x00000000,   /* Offset 0x115C */
+  0x00000000,   /* Offset 0x1160 */
+  0x00000000,   /* Offset 0x1164 */
+  0x00000000,   /* Offset 0x1168 */
+  0x00000000,   /* Offset 0x116C */
+  0x00000000,   /* Offset 0x1170 */
   0x00000000,   /* Offset 0x1174 */
   0x00000000,   /* Offset 0x1178 */
   0x00000000,   /* Offset 0x117C */
   0x00000000,   /* Offset 0x1180 */
   0x00000000,   /* Offset 0x1184 */
-  0x04C4B400,   /* Offset 0x1188 */
+  0x00000000,   /* Offset 0x1188 */
   0x00000000,   /* Offset 0x118C */
   0x00000000,   /* Offset 0x1190 */
   0x00000000,   /* Offset 0x1194 */
@@ -6252,30 +5636,7 @@ const unsigned int ctrl_reg_default[REG_NR_OF_CTRL_REGS] = {
   0x00000000,   /* Offset 0x1218 */
   0x00000000,   /* Offset 0x121C */
   0x00000000,   /* Offset 0x1220 */
-  0x00000000,   /* Offset 0x1224 */
-  0x00000000,   /* Offset 0x1228 */
-  0x00000000,   /* Offset 0x122C */
-  0x00000000,   /* Offset 0x1230 */
-  0x00000000,   /* Offset 0x1234 */
-  0x00000000,   /* Offset 0x1238 */
-  0x00000000,   /* Offset 0x123C */
-  0x00000000,   /* Offset 0x1240 */
-  0x00000000,   /* Offset 0x1244 */
-  0x00000000,   /* Offset 0x1248 */
-  0x00000000,   /* Offset 0x124C */
-  0x00000000,   /* Offset 0x1250 */
-  0x00000000,   /* Offset 0x1254 */
-  0x00000000,   /* Offset 0x1258 */
-  0x00000000,   /* Offset 0x125C */
-  0x00000000,   /* Offset 0x1260 */
-  0x00000000,   /* Offset 0x1264 */
-  0x00000000,   /* Offset 0x1268 */
-  0x00000000,   /* Offset 0x126C */
-  0x00000000,   /* Offset 0x1270 */
-  0x00000000,   /* Offset 0x1274 */
-  0x00000000,   /* Offset 0x1278 */
-  0x00000000,   /* Offset 0x127C */
-  0x00000000    /* Offset 0x1280 */
+  0x00000000    /* Offset 0x1224 */
 };
 
 #endif /* WD2_DONT_INCLUDE_VARS */

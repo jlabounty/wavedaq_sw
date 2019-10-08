@@ -567,8 +567,11 @@ public:
    WDB(std::string name, bool verbose = false);
    WDB(std::string name, int slot, bool verbose = false);
 
-   const unsigned int cRequiredRegLayoutCompatLevel = 8;
-   const unsigned int cRequiredFwCompatLevel = 4;
+   const unsigned int cRequiredRegLayoutCompatLevel2F = 8;
+   const unsigned int cRequiredFwCompatLevel2F = 4;
+   const unsigned int cRequiredRegLayoutCompatLevel2G = 9;
+   const unsigned int cRequiredFwCompatLevel2G = 5;
+
    const int cDefaultReceiveTimeoutMs = 100;
 
    // constants
