@@ -263,6 +263,7 @@ int main(int argc, char *argv[]) {
             sendto(sock_asc, rbuffer, strlen(rbuffer)+1, 0, (struct sockaddr *) &client_address, sizeof(client_address));
             system("reboot");
             exit(0);
+         } else if (buffer[0] == '\n') {
          } else {
             snprintf(rbuffer, sizeof(rbuffer), "Unknown command: %s\n", buffer);
          }
