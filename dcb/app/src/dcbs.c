@@ -22,6 +22,7 @@
 #include "git-revision.h"
 
 #include "drv_axi_dcb_reg_bank.h"
+#include "register_map_dcb.h"
 #include "update_config.h"
 
 // port to start the UDP servers on
@@ -256,14 +257,27 @@ int main(int argc, char *argv[]) {
 
          if (buffer[0] == 'h') {
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "List of available commands:\n\n");
+            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "delay <n>   Set SYNC delay\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "help        This help page\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "reset       Reboot DCB\n\n");
+         } else if (strncmp(buffer, "delay", 5) == 0) {
+            char *p = strchr(buffer, ' ');
+            if (p == NULL) {
+               snprintf(rbuffer, sizeof(rbuffer), "Please specify delay value\n");
+            } else {
+               unsigned int d = atoi(p);
+               unsigned int data = (d << DCB_SYNC_DELAY_OFS);
+               unsigned int mask = DCB_SYNC_DELAY_MASK;
+               reg_bank_mask_write(DCB_SYNC_DELAY_REG, &data, &mask, 1);
+               snprintf(rbuffer, sizeof(rbuffer), "Set delay to %d\n", d);
+            }
          } else if (strncmp(buffer, "reset", 5) == 0) {
             snprintf(rbuffer, sizeof(rbuffer), "Rebooting...\n\n");
             sendto(sock_asc, rbuffer, strlen(rbuffer)+1, 0, (struct sockaddr *) &client_address, sizeof(client_address));
             system("reboot");
             exit(0);
          } else if (buffer[0] == '\n') {
+            // just ignore <CR>
          } else {
             snprintf(rbuffer, sizeof(rbuffer), "Unknown command: %s\n", buffer);
          }
