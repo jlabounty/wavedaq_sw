@@ -28,7 +28,7 @@ add_custom_target(git_revision_h
    COMMAND ${CMAKE_COMMAND} -E echo \\\" >> ${GIT_REVISION_TMP}
    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GIT_REVISION_TMP} ${GIT_REVISION}
    COMMAND ${CMAKE_COMMAND} -E remove ${GIT_REVISION_TMP}
-   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../../include/
+   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../
 )
 
 # Check for mscb
@@ -72,7 +72,7 @@ add_executable(wds
 
 target_include_directories(wds PUBLIC wds/src include mxml ../)
 target_link_libraries(wds wdb ${CMAKE_THREAD_LIBS_INIT})
-add_dependencies(wds register_map_wd2 register_map_dcb)
+add_dependencies(wds register_map_wd2 register_map_dcb git_revision_h)
 add_dependencies(wdb register_map_wd2 register_map_dcb)
 
 install(TARGETS wds DESTINATION bin)
