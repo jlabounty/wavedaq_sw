@@ -11,6 +11,26 @@ endif()
 
 find_package(Threads)
 
+#
+# generate git-revision.h
+#
+find_package(Git)
+set(GIT_REVISION ${PROJECT_SOURCE_DIR}/../git-revision.h)
+set(GIT_REVISION_TMP ${GIT_REVISION}.tmp)
+
+add_custom_target(git_revision_h
+   COMMAND ${CMAKE_COMMAND} -E echo_append "\\#define GIT_REVISION \\\"" > ${GIT_REVISION_TMP}
+   COMMAND ${GIT_EXECUTABLE} log -n 1 --pretty=format:"%ad" >> ${GIT_REVISION_TMP}
+   COMMAND ${CMAKE_COMMAND} -E echo_append " - " >> ${GIT_REVISION_TMP}
+   COMMAND ${GIT_EXECUTABLE} log -n 1 --pretty=format:"%h" >> ${GIT_REVISION_TMP}
+   COMMAND ${CMAKE_COMMAND} -E echo_append " on branch " >> ${GIT_REVISION_TMP}
+   COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD  | tr -d '\\n' >> ${GIT_REVISION_TMP}
+   COMMAND ${CMAKE_COMMAND} -E echo \\\" >> ${GIT_REVISION_TMP}
+   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GIT_REVISION_TMP} ${GIT_REVISION}
+   COMMAND ${CMAKE_COMMAND} -E remove ${GIT_REVISION_TMP}
+   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../../include/
+)
+
 # Check for mscb
 #
 if (EXISTS $ENV{MSCBSYS}/src/mscb.cxx)
@@ -50,7 +70,7 @@ add_executable(wds
    mxml/strlcpy.cxx
    wds/src/wds.cpp)
 
-target_include_directories(wds PUBLIC wds/src include mxml)
+target_include_directories(wds PUBLIC wds/src include mxml ../)
 target_link_libraries(wds wdb ${CMAKE_THREAD_LIBS_INIT})
 add_dependencies(wds register_map_wd2 register_map_dcb)
 add_dependencies(wdb register_map_wd2 register_map_dcb)

@@ -21,6 +21,8 @@
 
 #include "mongoose.h"
 
+#include "git-revision.h"
+
 /*-- Globals -------------------------------------------------------*/
 
 std::vector<std::string> wdbName = {"wd094"};
@@ -1246,6 +1248,7 @@ int main(int argc, const char *argv[]) {
       }
    }
 
+   std::cout << "GIT revision: " << GIT_REVISION << std::endl;
    std::cout << "Starting HTTP server at port " << gl.serverPort << std::endl;
 
    if (gl.demoMode)
