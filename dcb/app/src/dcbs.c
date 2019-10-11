@@ -263,6 +263,7 @@ int main(int argc, char *argv[]) {
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "List of available commands:\n\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "delay <n>   Set SYNC delay\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "help        This help page\n");
+            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "info        Show system information\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "reset       Reboot DCB\n\n");
          } else if (strncmp(buffer, "delay", 5) == 0) {
             char *p = strchr(buffer, ' ');
@@ -275,6 +276,20 @@ int main(int argc, char *argv[]) {
                reg_bank_mask_write(DCB_SYNC_DELAY_REG, &data, &mask, 1);
                snprintf(rbuffer, sizeof(rbuffer), "Set delay to %d\n", d);
             }
+         } else if (strncmp(buffer, "info", 4) == 0) {
+            snprintf(rbuffer, sizeof(rbuffer), "Version Information of DCB:\n\n");
+            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "-- SW GIT Revision:       %s\n\n", GIT_REVISION);
+            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "-- Board Type:            WaveDAQ DCB\n");
+
+            unsigned int d;
+            reg_bank_read(DCB_BOARD_REVISION_REG, &d, 1);
+            d = (d & DCB_BOARD_REVISION_MASK) >> DCB_BOARD_REVISION_OFS;
+            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "-- Board Revision:        %c\n", 'A'+d);
+
+            reg_bank_read(DCB_BOARD_VARIANT_REG, &d, 1);
+            d = (d & DCB_BOARD_VARIANT_MASK) >> DCB_BOARD_VARIANT_OFS;
+            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "-- Board Variant:         0x%02X\n\n", d);
+
          } else if (strncmp(buffer, "reset", 5) == 0) {
             snprintf(rbuffer, sizeof(rbuffer), "Rebooting...\n\n");
             sendto(sock_asc, rbuffer, strlen(rbuffer)+1, 0, (struct sockaddr *) &client_address, sizeof(client_address));

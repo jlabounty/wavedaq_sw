@@ -58,7 +58,9 @@ add_executable(dcbc src/dcbc.c ${SRC})
 add_executable(wdbc src/wdbc.c ${SRC})
 add_executable(dcbs src/dcbs.c ${SRC})
 
-target_include_directories(dcbs PRIVATE ${PROJECT_SOURCE_DIR}/../../include)
+target_include_directories(dcbs PRIVATE 
+   ${PROJECT_SOURCE_DIR}/../../include 
+   ${PROJECT_SOURCE_DIR}/../../../)
 
 target_compile_definitions(dcbi PRIVATE LINUX_COMPILE)
 target_compile_definitions(dcbc PRIVATE LINUX_COMPILE)
