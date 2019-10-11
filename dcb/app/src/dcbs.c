@@ -261,11 +261,29 @@ int main(int argc, char *argv[]) {
 
          if (buffer[0] == 'h') {
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "List of available commands:\n\n");
+            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "clkint      Switch bus clock to quartz\n");
+            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "clkext      Switch bus clock to FCI input\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "delay <n>   Set SYNC delay\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "help        This help page\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "info        Show system information\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "reset       Reboot DCB\n\n");
+
+         } else if (strncmp(buffer, "clkint", 6) == 0) {
+
+            unsigned int data = (1 << DCB_DISTRIBUTOR_CLK_SRC_SEL_OFS);
+            unsigned int mask = DCB_DISTRIBUTOR_CLK_SRC_SEL_MASK;
+            reg_bank_mask_write(DCB_DISTRIBUTOR_CLK_SRC_SEL_REG, &data, &mask, 1);
+            snprintf(rbuffer, sizeof(rbuffer), "Set bus clock to internal 80 MHz quartz\n");
+
+         } else if (strncmp(buffer, "clkext", 6) == 0) {
+
+            unsigned int data = (0 << DCB_DISTRIBUTOR_CLK_SRC_SEL_OFS);
+            unsigned int mask = DCB_DISTRIBUTOR_CLK_SRC_SEL_MASK;
+            reg_bank_mask_write(DCB_DISTRIBUTOR_CLK_SRC_SEL_REG, &data, &mask, 1);
+            snprintf(rbuffer, sizeof(rbuffer), "Set bus clock to external FCI connector input\n");
+
          } else if (strncmp(buffer, "delay", 5) == 0) {
+
             char *p = strchr(buffer, ' ');
             if (p == NULL) {
                snprintf(rbuffer, sizeof(rbuffer), "Please specify delay value\n");
@@ -276,6 +294,7 @@ int main(int argc, char *argv[]) {
                reg_bank_mask_write(DCB_SYNC_DELAY_REG, &data, &mask, 1);
                snprintf(rbuffer, sizeof(rbuffer), "Set delay to %d\n", d);
             }
+
          } else if (strncmp(buffer, "info", 4) == 0) {
             snprintf(rbuffer, sizeof(rbuffer), "Version Information of DCB:\n\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "-- SW GIT Revision:       %s\n\n", GIT_REVISION);
@@ -291,12 +310,15 @@ int main(int argc, char *argv[]) {
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "-- Board Variant:         0x%02X\n\n", d);
 
          } else if (strncmp(buffer, "reset", 5) == 0) {
+
             snprintf(rbuffer, sizeof(rbuffer), "Rebooting...\n\n");
             sendto(sock_asc, rbuffer, strlen(rbuffer)+1, 0, (struct sockaddr *) &client_address, sizeof(client_address));
             system("reboot");
             exit(0);
+
          } else if (buffer[0] == '\n') {
             // just ignore <CR>
+
          } else {
             snprintf(rbuffer, sizeof(rbuffer), "Unknown command: %s\n", buffer);
          }
