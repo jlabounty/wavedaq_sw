@@ -171,8 +171,8 @@ int main(int argc, char *argv[]) {
 
          // interpret packet
          unsigned int cmd = buffer[0];
-         unsigned int seq = (buffer[2] << 8) | buffer[3];
-         unsigned int adr = (buffer[4] << 24) | (buffer[5] << 16) | (buffer[6] << 8) | buffer[7];
+         unsigned int seq = (buffer[2] <<  8 )| (buffer[3] <<  0);
+         unsigned int adr = (buffer[4] << 24) | (buffer[5] << 16) | (buffer[6] << 8) | (buffer[7] << 0);
 
          if (cmd == CMD_WRITE32) {
             unsigned n = (len - 8) / 4;
@@ -201,7 +201,7 @@ int main(int argc, char *argv[]) {
          } else if (cmd == CMD_READ32) {
             unsigned char rbuffer[1600];
 
-            unsigned int n = (buffer[8] << 24) | (buffer[9] << 16) | (buffer[10] << 8) | buffer[11];
+            unsigned int n = (buffer[8] << 24) | (buffer[9] << 16) | (buffer[10] << 8) | (buffer[11] << 0);
 
             // limit data to 1024 bytes for the moment
             n = n > 1024 ? 1024 : n;
