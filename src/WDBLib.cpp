@@ -506,12 +506,12 @@ void WDB::Connect() {
    }
 #endif
 
-   // create UDB socket for ASCII command interpreter
+   // create UDP socket for ASCII command interpreter
    if (gASCIISocket == 0)
       gASCIISocket = socket(AF_INET, SOCK_DGRAM, 0);
    assert(gASCIISocket);
 
-   // create UDB socket for binary commands
+   // create UDP socket for binary commands
    if (gBinSocket == 0)
       gBinSocket = socket(AF_INET, SOCK_DGRAM, 0);
    assert(gBinSocket);

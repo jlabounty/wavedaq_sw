@@ -48,17 +48,143 @@
 #include "register_map_dcb.h"
 #include "DCBReg.h"
 
+#define DCB_CMD_PORT_ASCII        3000
 #define DCB_CMD_PORT_BIN          4000
 
 int DCB::gBinSocket = 0;
+int DCB::gASCIISocket = 0;
 unsigned short DCB::udpSequenceNumber = 0; // sequence number to identify related send/acknowledge packets
 
 //--------------------------------------------------------------------
 
 DCB::DCB(const std::string &name, bool verbose) {
    mDCBName = name;
+   mPrompt = "";
    mVerbose = verbose;
    mReceiveTimeoutMs = cDefaultReceiveTimeoutMs;
+}
+
+//--------------------------------------------------------------------
+
+void DCB::SendUDP(std::string str)
+{
+   std::string result;
+   result = SendReceiveUDP(str);
+}
+
+//--------------------------------------------------------------------
+
+std::string DCB::SendReceiveUDP(std::string str)
+{
+   size_t i;
+   fd_set readfds;
+   struct timeval timeout;
+   int    status, ms;
+   struct sockaddr_in client_addr;
+   char   rx_buffer[1600];
+   std::string result;
+
+   std::memcpy(&client_addr, mEthAddrAscii, sizeof(client_addr));
+
+   if (str.back() != '\n')
+      str += '\n';
+
+   result.clear();
+
+   // retry max ten times
+   for (int retry=0 ; retry < 10 ; retry++) {
+
+      // clear input queue
+      do {
+         FD_ZERO(&readfds);
+         FD_SET(gASCIISocket, &readfds);
+
+         timeout.tv_sec = 0;
+         timeout.tv_usec = 0;
+         do {
+            status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
+         } while (status == -1); // don't return on interrupt
+
+         if (!FD_ISSET(gASCIISocket, &readfds))
+            break;
+
+         i = recv(gASCIISocket, rx_buffer, sizeof(rx_buffer), 0);
+      } while (true);
+
+      // send request
+      i = sendto(gASCIISocket,
+                 str.c_str(),
+                 str.size(),
+                 0,
+                 (struct sockaddr *)&client_addr,
+                 sizeof(client_addr));
+
+      if (i != str.size()) {
+         if (this->mVerbose)
+            std::cout << mDCBName << " send retry " << retry+1 << std::endl;
+         continue;
+      }
+
+      // retrieve reply until prompt is found
+      do {
+         std::memset(rx_buffer, 0, sizeof(rx_buffer));
+
+         FD_ZERO(&readfds);
+         FD_SET(gASCIISocket, &readfds);
+
+         if (retry == 0) // reduce timeout on first retry (ARP problem)
+            ms = 100;
+         else
+            ms = mReceiveTimeoutMs;
+         timeout.tv_sec = ms / 1000;
+         timeout.tv_usec = (ms % 1000) * 1000;
+
+         do {
+            status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
+         } while (status == -1);        /* dont return if an alarm signal was cought */
+
+         if (!FD_ISSET(gASCIISocket, &readfds))
+            break;
+
+         i = recv(gASCIISocket, rx_buffer, sizeof(rx_buffer), 0);
+         assert(i > 0);
+
+         if (rx_buffer[i-1] == 0) // don't count trailing zero
+            i--;
+
+         result += rx_buffer;
+
+         // on th first contact, read back prompt
+         if (mPrompt == "")
+            mPrompt = result;
+
+         // check for prompt
+         if (result.substr(result.size()-mPrompt.size()) == mPrompt)
+            break;
+
+      } while (1);
+
+      // check for prompt
+      if (mPrompt.size() > 0 && result.size() >= mPrompt.size() && result.substr(result.size()-mPrompt.size()) == mPrompt)
+         break;
+
+      if (this->mVerbose)
+         std::cout << mDCBName << " retry " << retry+1 << std::endl;
+      result.clear();
+   }
+
+   if (result.size() == 0) {
+      if (str.back() == '\n')
+         str = str.substr(0, str.size()-1);
+      throw std::runtime_error(std::string("Error sending \"")+str+"\" to "+mDCBName+".");
+      return result;
+   }
+
+   // chop off prompt
+   if (result.size() >= mPrompt.size())
+      result = result.substr(0, result.size()-mPrompt.size());
+
+   return result;
 }
 
 //--------------------------------------------------------------------
@@ -84,14 +210,14 @@ void DCB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data) {
 
    writeBuf[4] = (ofs >> 24u) & 0xFFu;
    writeBuf[5] = (ofs >> 16u) & 0xFFu;
-   writeBuf[6] = (ofs >> 8u) & 0xFFu;
-   writeBuf[7] = (ofs >> 0u) & 0xFFu;
+   writeBuf[6] = (ofs >>  8u) & 0xFFu;
+   writeBuf[7] = (ofs >>  0u) & 0xFFu;
 
    for (auto &d: data) {
-      writeBuf.push_back((d >> 24u) & 0xFFu);
+      writeBuf.push_back((d >> 24u) & 0xFFu); // big endian!
       writeBuf.push_back((d >> 16u) & 0xFFu);
-      writeBuf.push_back((d >> 8u) & 0xFFu);
-      writeBuf.push_back((d >> 0u) & 0xFFu);
+      writeBuf.push_back((d >>  8u) & 0xFFu);
+      writeBuf.push_back((d >>  0u) & 0xFFu);
    }
 
    auto startTime = std::chrono::high_resolution_clock::now();
@@ -201,20 +327,20 @@ std::vector<unsigned int> DCB::ReadUDP(unsigned int ofs, unsigned int nReg) {
    std::vector<unsigned char> writeBuf(12);
    std::vector<unsigned char> readBuf(1600);
 
-   writeBuf[0] = 0x24; // Read32 command
-   writeBuf[1] = 0;
-   writeBuf[2] = udpSequenceNumber >> 8;
-   writeBuf[3] = udpSequenceNumber & 0xFF;
+   writeBuf[0]  = 0x24; // Read32 command
+   writeBuf[1]  = 0;
+   writeBuf[2]  = udpSequenceNumber >> 8;
+   writeBuf[3]  = udpSequenceNumber & 0xFF;
 
-   writeBuf[4] = (ofs >> 24) & 0xFF;
-   writeBuf[5] = (ofs >> 16) & 0xFF;
-   writeBuf[6] = (ofs >> 8) & 0xFF;
-   writeBuf[7] = (ofs >> 0) & 0xFF;
+   writeBuf[4]  = (ofs >> 24) & 0xFF;
+   writeBuf[5]  = (ofs >> 16) & 0xFF;
+   writeBuf[6]  = (ofs >>  8) & 0xFF;
+   writeBuf[7]  = (ofs >>  0) & 0xFF;
 
-   writeBuf[8] = (len >> 24) & 0xFF;
-   writeBuf[9] = (len >> 16) & 0xFF;
-   writeBuf[10] = (len >> 8) & 0xFF;
-   writeBuf[11] = (len >> 0) & 0xFF;
+   writeBuf[8]  = (len >> 24) & 0xFF;
+   writeBuf[9]  = (len >> 16) & 0xFF;
+   writeBuf[10] = (len >>  8) & 0xFF;
+   writeBuf[11] = (len >>  0) & 0xFF;
 
    // retry max ten times
    for (int retry = 0; retry < 10; retry++) {
@@ -283,10 +409,10 @@ std::vector<unsigned int> DCB::ReadUDP(unsigned int ofs, unsigned int nReg) {
          if (bSuccess) {
             // copy data
             for (unsigned int i = 0; i < len / 4; i++)
-               result.push_back(readBuf[i * 4 + 4] << 24 |
-                                readBuf[i * 4 + 5] << 16 |
-                                readBuf[i * 4 + 6] << 8 |
-                                readBuf[i * 4 + 7]);
+               result.push_back((readBuf[i * 4 + 4] << 24) |
+                                (readBuf[i * 4 + 5] << 16) |
+                                (readBuf[i * 4 + 6] <<  8) |
+                                (readBuf[i * 4 + 7] <<  0));
             return result;
          }
 
@@ -319,7 +445,12 @@ void DCB::Connect() {
    }
 #endif
 
-   // create UDB socket for binary commands
+   // create UDP socket for ASCII command interpreter
+   if (gASCIISocket == 0)
+      gASCIISocket = socket(AF_INET, SOCK_DGRAM, 0);
+   assert(gASCIISocket);
+
+   // create UDP socket for binary commands
    if (gBinSocket == 0)
       gBinSocket = socket(AF_INET, SOCK_DGRAM, 0);
    assert(gBinSocket);
@@ -331,18 +462,21 @@ void DCB::Connect() {
 
    std::memcpy((char *) &client_addr.sin_addr, phe->h_addr, phe->h_length);
    client_addr.sin_family = AF_INET;
+   client_addr.sin_port = htons(DCB_CMD_PORT_ASCII);
+   std::memcpy(mEthAddrAscii, &client_addr, sizeof(client_addr));
+
    client_addr.sin_port = htons(DCB_CMD_PORT_BIN);
    std::memcpy(mEthAddrBin, &client_addr, sizeof(client_addr));
 
    // check if board is alive
    try {
-      DCB::ReadUDP(0, 1);
+      DCB::SendUDP("");
    } catch (...) {
       throw std::runtime_error(std::string("Cannot connect to board ") + mDCBName + ".");
    }
 
    // check firmware compatibility level
-   ReceiveRegisters(DCB_REG_HW_VER, NR_OF_REGS);
+   ReceiveRegisters();
    if (GetFwCompatLevel() < cRequiredFwCompatLevel) {
       std::string str("Board ");
       str += mDCBName + " has incompatible firmware, please upgrade (Board compatibility level: " +
@@ -494,8 +628,8 @@ std::string DCB::GetHwVersion() {
 float DCB::GetTemperatureDegree(bool refresh)
 // temperature in deg. C
 {
-   //if (refresh)
-   ReceiveRegisters(DCB_TEMPERATURE_REG, 1);
+   if (refresh)
+      ReceiveRegisters(DCB_TEMPERATURE_REG, 1);
    float temp = GetTemperature() * 0.0625;
    temp = std::roundf(temp * 10) / 10.0f;
    return temp;

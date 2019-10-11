@@ -28,7 +28,9 @@
 // Data Concentrator Board class. Interface functions to all WDB registers
 class DCB: public DCBREG {
    std::string      mDCBName;
-   unsigned char    mEthAddrBin[16]{};
+   std::string      mPrompt;
+   unsigned char    mEthAddrAscii[16];
+   unsigned char    mEthAddrBin[16];
    bool             mVerbose;
    std::string      mLogfile = "";
    bool             mSendBlocked = false;
@@ -39,6 +41,9 @@ class DCB: public DCBREG {
    static int       gASCIISocket;
    static int       gBinSocket;
    static unsigned short udpSequenceNumber;
+
+   std::string SendReceiveUDP(std::string str);
+   void SendUDP(std::string str);
 
    void             WriteUDP(unsigned int ofs, std::vector<unsigned int> data);
    std::vector<unsigned int> ReadUDP(unsigned int ofs, unsigned int len);
