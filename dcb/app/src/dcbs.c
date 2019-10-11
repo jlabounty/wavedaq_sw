@@ -177,11 +177,14 @@ int main(int argc, char *argv[]) {
          if (cmd == CMD_WRITE32) {
             unsigned n = (len - 8) / 4;
 
-            if (verbose)
-               printf("Write to %04X, seq %d: ", adr, seq);
+            if (verbose) {
+               printf("Write to 0x%04X, seq %d:\n", adr, seq);
+               print_buffer(buffer+8, n * 4);
+            }
 
             unsigned int *p = (unsigned int *) (&buffer[8]);
             unsigned int d;
+
             for (int i = 0; i < n; i++, p++) {
                d = *p;
                reg_bank_write(adr + i * 4, &d, 1);
