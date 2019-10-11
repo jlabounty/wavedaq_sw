@@ -149,11 +149,16 @@ int main(int argc, char *argv[]) {
       unsigned char buffer[1600];
       fd_set fds;
 
+      // periodically propagate new register contents to hardware
+      auto_update_configurations();
+      trigger_update_configurations();
+
       FD_ZERO(&fds);
       FD_SET(sock_bin, &fds);
       FD_SET(sock_asc, &fds);
 
-      if (select(FD_SETSIZE, &fds, NULL, NULL, NULL) < 0)
+      struct timeval tv = {0, 10000}; // 10 ms
+      if (select(FD_SETSIZE, &fds, NULL, NULL, &tv) < 0)
          perror("select");
 
       if (FD_ISSET(sock_bin, &fds)) {
@@ -186,17 +191,13 @@ int main(int argc, char *argv[]) {
             unsigned int d;
 
             for (int i = 0; i < n; i++, p++) {
-               d = *p;
+               d = SWAP_UINT32(*p);
                reg_bank_write(adr + i * 4, &d, 1);
             }
 
             // send acknowledge back to client
             buffer[1] = 0x01;
             sendto(sock_bin, buffer, 4, 0, (struct sockaddr *) &client_address, sizeof(client_address));
-
-            // propagate new register contents to hardware
-            auto_update_configurations();
-            trigger_update_configurations();
 
          } else if (cmd == CMD_READ32) {
             unsigned char rbuffer[1600];
@@ -218,7 +219,7 @@ int main(int argc, char *argv[]) {
             unsigned int d;
             for (int i = 0; i < n / 4 && i < 1024 / 4; i++, p++) {
                reg_bank_read(adr + i * 4, &d, 1);
-               *p = d;
+               *p = SWAP_UINT32(d);
             }
 
             if (verbose)
