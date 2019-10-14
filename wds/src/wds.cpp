@@ -56,7 +56,6 @@ typedef struct {
    bool updatePeriodic;
    int dbgRx;
    int dbgTx;
-   bool backplaneClk;
 } GLOBALS;
 
 unsigned int demoDrsSampleFreq = 5016;
@@ -166,10 +165,28 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
          gl->wp->SetTimeCalib3(value == "true");
       } else if (item == "daqClkSrcSel") {
          if (iBoard == -1)
-            for (auto &b: gl->wdb)
-               b->SetDaqClkSrcSel(std::stoi(value));
-         else
-            gl->wdb[iBoard]->SetDaqClkSrcSel(value == "true");
+            for (auto &b: gl->wdb) {
+               if (value == "true") {
+                  b->SetDaqClkSrcSel(1);
+                  sleep_ms(2000);
+               } else {
+                  b->SetExtClkFreq(80);
+                  sleep_ms(2000);
+                  b->SetDaqClkSrcSel(0);
+                  sleep_ms(2000);
+               }
+            }
+         else {
+            if (value == "true") {
+               gl->wdb[iBoard]->SetDaqClkSrcSel(1);
+               sleep_ms(2000);
+            } else {
+               gl->wdb[iBoard]->SetExtClkFreq(80);
+               sleep_ms(2000);
+               gl->wdb[iBoard]->SetDaqClkSrcSel(0);
+               sleep_ms(2000);
+            }
+         }
       } else if (item == "dacTriggerLevel") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
@@ -953,7 +970,6 @@ int main(int argc, const char *argv[]) {
    gl.triggerSelfArm = false;
    gl.updatePeriodic = false;
    gl.dbgRx = gl.dbgTx = 0;
-   gl.backplaneClk = false;
 
    // parse command line parameters
    if (argc < 2) {
@@ -983,9 +999,6 @@ int main(int argc, const char *argv[]) {
 
       else if (arg == "-s")
          gl.triggerSelfArm = true;
-
-      else if (arg == "-bp")
-         gl.backplaneClk = true;
 
       else if (arg == "-u")
          gl.updatePeriodic = true;
@@ -1082,26 +1095,6 @@ int main(int argc, const char *argv[]) {
             if (gl.verbose) {
                std::cout << std::endl << "========== Board Info ==========" << std::endl;
                b->PrintVersion();
-            }
-
-            //switch to backplane clock
-            if (gl.backplaneClk) {
-               std::cout << "with external clk ...";
-               b->SetExtClkInSel(0);
-               b->SetDaqClkSrcSel(0);
-               b->SetLmkInputFreq(80);
-
-               b->SetApplySettingsLmk(1);
-               b->LmkSyncLocal();
-               b->ReceiveStatusRegister(WD2_DRS_SAMPLE_FREQ_REG);
-
-               b->ResetAllPll();
-               sleep_ms(10);
-               b->GetPllLock(true);
-               b->ResetTcbOserdesIf();
-               b->ResetDrsControlFsm();
-               b->ResetPackager();
-               b->ReceiveStatusRegisters();
             }
 
             // load calibration data for board
