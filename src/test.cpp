@@ -14,7 +14,7 @@
 #include <execinfo.h>
 #include <fstream>
 
-#include "WDBLib2.h"
+#include "WDBLib.h"
 #include "DCBLib.h"
 
 /*-- Globals -------------------------------------------------------*/
@@ -36,8 +36,8 @@ int main(int argc, const char *argv[])
    dcb->SetDistributorClkSrcSel(0);
    dcb->SetDistributorClkSrcSel(1);
 
-    wdb.push_back(new WDB("WD134"));
-   wdb.push_back(new WDB("WD162"));
+   wdb.push_back(new WDB("WD134"));
+   // wdb.push_back(new WDB("WD162"));
 
    // connect to all WDB and retrieve registers
    for (auto &b: wdb) {
