@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  18.10.2019 12:03:49
+// Created :  18.10.2019 12:55:30
 //
 // Register Layout Versions :  8, 9
 //
@@ -81,6 +81,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Clock Duty Cycle Stabilizer (0=ON, 1=OFF)
             return BitExtractControl(0x1114, 0x80000000, 31);
          default:
             throw std::invalid_argument("Function GetAdc01458Dcsoff() not defined for this board version");
@@ -91,6 +92,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Clock Duty Cycle Stabilizer (0=ON, 1=OFF)
             return SetRegMask(0x1114, 0x80000000, 31, value);
          default:
             throw std::invalid_argument("Function SetAdc01458Dcsoff() not defined for this board version");
@@ -101,6 +103,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Clock Duty Cycle Stabilizer (0=ON, 1=OFF)
             if(BitMask) *BitMask = 0x80000000;
             if(BitOfs) *BitOfs = 31;
             return 0x1114;
@@ -115,6 +118,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
             return BitExtractControl(0x1114, 0x00E00000, 21);
          default:
             throw std::invalid_argument("Function GetAdc01458Ilvds() not defined for this board version");
@@ -125,6 +129,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
             return SetRegMask(0x1114, 0x00E00000, 21, value);
          default:
             throw std::invalid_argument("Function SetAdc01458Ilvds() not defined for this board version");
@@ -135,6 +140,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
             if(BitMask) *BitMask = 0x00E00000;
             if(BitOfs) *BitOfs = 21;
             return 0x1114;
@@ -149,6 +155,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet) 
             return BitExtractControl(0x1114, 0x00070000, 16);
          default:
             throw std::invalid_argument("Function GetAdc01458Outmode() not defined for this board version");
@@ -159,6 +166,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet) 
             return SetRegMask(0x1114, 0x00070000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdc01458Outmode() not defined for this board version");
@@ -169,6 +177,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet) 
             if(BitMask) *BitMask = 0x00070000;
             if(BitOfs) *BitOfs = 16;
             return 0x1114;
@@ -183,6 +192,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Disable Bit (0=Enabled, 1=Disabled)
             return BitExtractControl(0x1114, 0x00080000, 19);
          default:
             throw std::invalid_argument("Function GetAdc01458Outoff() not defined for this board version");
@@ -193,6 +203,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Disable Bit (0=Enabled, 1=Disabled)
             return SetRegMask(0x1114, 0x00080000, 19, value);
          default:
             throw std::invalid_argument("Function SetAdc01458Outoff() not defined for this board version");
@@ -203,6 +214,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Disable Bit (0=Enabled, 1=Disabled)
             if(BitMask) *BitMask = 0x00080000;
             if(BitOfs) *BitOfs = 19;
             return 0x1114;
@@ -217,6 +229,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Output Test Pattern Control Bit (0=Pattern Off, 1=Pattern On)
             return BitExtractControl(0x1114, 0x00008000, 15);
          default:
             throw std::invalid_argument("Function GetAdc01458Outtest() not defined for this board version");
@@ -227,6 +240,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Output Test Pattern Control Bit (0=Pattern Off, 1=Pattern On)
             return SetRegMask(0x1114, 0x00008000, 15, value);
          default:
             throw std::invalid_argument("Function SetAdc01458Outtest() not defined for this board version");
@@ -237,6 +251,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Output Test Pattern Control Bit (0=Pattern Off, 1=Pattern On)
             if(BitMask) *BitMask = 0x00008000;
             if(BitOfs) *BitOfs = 15;
             return 0x1114;
@@ -251,6 +266,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Data Output Randomizer Mode Control Bit (0=OFF, 1=ON)
             return BitExtractControl(0x1114, 0x40000000, 30);
          default:
             throw std::invalid_argument("Function GetAdc01458Rand() not defined for this board version");
@@ -261,6 +277,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Data Output Randomizer Mode Control Bit (0=OFF, 1=ON)
             return SetRegMask(0x1114, 0x40000000, 30, value);
          default:
             throw std::invalid_argument("Function SetAdc01458Rand() not defined for this board version");
@@ -271,6 +288,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Data Output Randomizer Mode Control Bit (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x40000000;
             if(BitOfs) *BitOfs = 30;
             return 0x1114;
@@ -285,6 +303,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Sleep Mode (1=Channels 1, 4, 5 and 8 are disabled)
             return BitExtractControl(0x1114, 0x10000000, 28);
          default:
             throw std::invalid_argument("Function GetAdc01458Sleep() not defined for this board version");
@@ -295,6 +314,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Sleep Mode (1=Channels 1, 4, 5 and 8 are disabled)
             return SetRegMask(0x1114, 0x10000000, 28, value);
          default:
             throw std::invalid_argument("Function SetAdc01458Sleep() not defined for this board version");
@@ -305,6 +325,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Sleep Mode (1=Channels 1, 4, 5 and 8 are disabled)
             if(BitMask) *BitMask = 0x10000000;
             if(BitOfs) *BitOfs = 28;
             return 0x1114;
@@ -319,6 +340,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Internal Termination Bit (0=OFF, 1=ON)
             return BitExtractControl(0x1114, 0x00100000, 20);
          default:
             throw std::invalid_argument("Function GetAdc01458Termon() not defined for this board version");
@@ -329,6 +351,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Internal Termination Bit (0=OFF, 1=ON)
             return SetRegMask(0x1114, 0x00100000, 20, value);
          default:
             throw std::invalid_argument("Function SetAdc01458Termon() not defined for this board version");
@@ -339,6 +362,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Internal Termination Bit (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x00100000;
             if(BitOfs) *BitOfs = 20;
             return 0x1114;
@@ -353,6 +377,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern MSBs (actual test pattern in 12 bit mode)
             return BitExtractControl(0x1114, 0x00003FFC, 2);
          default:
             throw std::invalid_argument("Function GetAdc01458Tp() not defined for this board version");
@@ -363,6 +388,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern MSBs (actual test pattern in 12 bit mode)
             return SetRegMask(0x1114, 0x00003FFC, 2, value);
          default:
             throw std::invalid_argument("Function SetAdc01458Tp() not defined for this board version");
@@ -373,6 +399,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern MSBs (actual test pattern in 12 bit mode)
             if(BitMask) *BitMask = 0x00003FFC;
             if(BitOfs) *BitOfs = 2;
             return 0x1114;
@@ -387,6 +414,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern LSBs
             return BitExtractControl(0x1114, 0x00000003, 0);
          default:
             throw std::invalid_argument("Function GetAdc01458TpLsbs() not defined for this board version");
@@ -397,6 +425,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern LSBs
             return SetRegMask(0x1114, 0x00000003, 0, value);
          default:
             throw std::invalid_argument("Function SetAdc01458TpLsbs() not defined for this board version");
@@ -407,6 +436,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern LSBs
             if(BitMask) *BitMask = 0x00000003;
             if(BitOfs) *BitOfs = 0;
             return 0x1114;
@@ -421,6 +451,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Two's Complement Mode Control Bit (0=Offset Binary, 1=Two's Complement)
             return BitExtractControl(0x1114, 0x20000000, 29);
          default:
             throw std::invalid_argument("Function GetAdc01458Twoscomp() not defined for this board version");
@@ -431,6 +462,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Two's Complement Mode Control Bit (0=Offset Binary, 1=Two's Complement)
             return SetRegMask(0x1114, 0x20000000, 29, value);
          default:
             throw std::invalid_argument("Function SetAdc01458Twoscomp() not defined for this board version");
@@ -441,6 +473,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Two's Complement Mode Control Bit (0=Offset Binary, 1=Two's Complement)
             if(BitMask) *BitMask = 0x20000000;
             if(BitOfs) *BitOfs = 29;
             return 0x1114;
@@ -455,6 +488,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 1 Nap Mode (0=OFF, 1=ON)
             return BitExtractControl(0x1114, 0x01000000, 24);
          default:
             throw std::invalid_argument("Function GetAdc01NapMode() not defined for this board version");
@@ -465,6 +499,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 1 Nap Mode (0=OFF, 1=ON)
             return SetRegMask(0x1114, 0x01000000, 24, value);
          default:
             throw std::invalid_argument("Function SetAdc01NapMode() not defined for this board version");
@@ -475,6 +510,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 1 Nap Mode (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x01000000;
             if(BitOfs) *BitOfs = 24;
             return 0x1114;
@@ -489,6 +525,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Clock Duty Cycle Stabilizer (0=ON, 1=OFF)
             return BitExtractControl(0x1118, 0x80000000, 31);
          default:
             throw std::invalid_argument("Function GetAdc02367Dcsoff() not defined for this board version");
@@ -499,6 +536,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Clock Duty Cycle Stabilizer (0=ON, 1=OFF)
             return SetRegMask(0x1118, 0x80000000, 31, value);
          default:
             throw std::invalid_argument("Function SetAdc02367Dcsoff() not defined for this board version");
@@ -509,6 +547,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Clock Duty Cycle Stabilizer (0=ON, 1=OFF)
             if(BitMask) *BitMask = 0x80000000;
             if(BitOfs) *BitOfs = 31;
             return 0x1118;
@@ -523,6 +562,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
             return BitExtractControl(0x1118, 0x00E00000, 21);
          default:
             throw std::invalid_argument("Function GetAdc02367Ilvds() not defined for this board version");
@@ -533,6 +573,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
             return SetRegMask(0x1118, 0x00E00000, 21, value);
          default:
             throw std::invalid_argument("Function SetAdc02367Ilvds() not defined for this board version");
@@ -543,6 +584,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
             if(BitMask) *BitMask = 0x00E00000;
             if(BitOfs) *BitOfs = 21;
             return 0x1118;
@@ -557,6 +599,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet) 
             return BitExtractControl(0x1118, 0x00070000, 16);
          default:
             throw std::invalid_argument("Function GetAdc02367Outmode() not defined for this board version");
@@ -567,6 +610,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet) 
             return SetRegMask(0x1118, 0x00070000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdc02367Outmode() not defined for this board version");
@@ -577,6 +621,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet) 
             if(BitMask) *BitMask = 0x00070000;
             if(BitOfs) *BitOfs = 16;
             return 0x1118;
@@ -591,6 +636,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Disable Bit (0=Enabled, 1=Disabled)
             return BitExtractControl(0x1118, 0x00080000, 19);
          default:
             throw std::invalid_argument("Function GetAdc02367Outoff() not defined for this board version");
@@ -601,6 +647,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Disable Bit (0=Enabled, 1=Disabled)
             return SetRegMask(0x1118, 0x00080000, 19, value);
          default:
             throw std::invalid_argument("Function SetAdc02367Outoff() not defined for this board version");
@@ -611,6 +658,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Disable Bit (0=Enabled, 1=Disabled)
             if(BitMask) *BitMask = 0x00080000;
             if(BitOfs) *BitOfs = 19;
             return 0x1118;
@@ -625,6 +673,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Output Test Pattern Control Bit (0=Pattern Off, 1=Pattern On)
             return BitExtractControl(0x1118, 0x00008000, 15);
          default:
             throw std::invalid_argument("Function GetAdc02367Outtest() not defined for this board version");
@@ -635,6 +684,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Output Test Pattern Control Bit (0=Pattern Off, 1=Pattern On)
             return SetRegMask(0x1118, 0x00008000, 15, value);
          default:
             throw std::invalid_argument("Function SetAdc02367Outtest() not defined for this board version");
@@ -645,6 +695,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Output Test Pattern Control Bit (0=Pattern Off, 1=Pattern On)
             if(BitMask) *BitMask = 0x00008000;
             if(BitOfs) *BitOfs = 15;
             return 0x1118;
@@ -659,6 +710,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Data Output Randomizer Mode Control Bit (0=OFF, 1=ON)
             return BitExtractControl(0x1118, 0x40000000, 30);
          default:
             throw std::invalid_argument("Function GetAdc02367Rand() not defined for this board version");
@@ -669,6 +721,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Data Output Randomizer Mode Control Bit (0=OFF, 1=ON)
             return SetRegMask(0x1118, 0x40000000, 30, value);
          default:
             throw std::invalid_argument("Function SetAdc02367Rand() not defined for this board version");
@@ -679,6 +732,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Data Output Randomizer Mode Control Bit (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x40000000;
             if(BitOfs) *BitOfs = 30;
             return 0x1118;
@@ -693,6 +747,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Sleep Mode (1=Channels 2, 3, 6 and 7 are disabled)
             return BitExtractControl(0x1118, 0x10000000, 28);
          default:
             throw std::invalid_argument("Function GetAdc02367Sleep() not defined for this board version");
@@ -703,6 +758,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Sleep Mode (1=Channels 2, 3, 6 and 7 are disabled)
             return SetRegMask(0x1118, 0x10000000, 28, value);
          default:
             throw std::invalid_argument("Function SetAdc02367Sleep() not defined for this board version");
@@ -713,6 +769,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Sleep Mode (1=Channels 2, 3, 6 and 7 are disabled)
             if(BitMask) *BitMask = 0x10000000;
             if(BitOfs) *BitOfs = 28;
             return 0x1118;
@@ -727,6 +784,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Internal Termination Bit (0=OFF, 1=ON)
             return BitExtractControl(0x1118, 0x00100000, 20);
          default:
             throw std::invalid_argument("Function GetAdc02367Termon() not defined for this board version");
@@ -737,6 +795,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Internal Termination Bit (0=OFF, 1=ON)
             return SetRegMask(0x1118, 0x00100000, 20, value);
          default:
             throw std::invalid_argument("Function SetAdc02367Termon() not defined for this board version");
@@ -747,6 +806,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Internal Termination Bit (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x00100000;
             if(BitOfs) *BitOfs = 20;
             return 0x1118;
@@ -761,6 +821,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern MSBs (actual test pattern in 12 bit mode)
             return BitExtractControl(0x1118, 0x00003FFC, 2);
          default:
             throw std::invalid_argument("Function GetAdc02367Tp() not defined for this board version");
@@ -771,6 +832,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern MSBs (actual test pattern in 12 bit mode)
             return SetRegMask(0x1118, 0x00003FFC, 2, value);
          default:
             throw std::invalid_argument("Function SetAdc02367Tp() not defined for this board version");
@@ -781,6 +843,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern MSBs (actual test pattern in 12 bit mode)
             if(BitMask) *BitMask = 0x00003FFC;
             if(BitOfs) *BitOfs = 2;
             return 0x1118;
@@ -795,6 +858,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern LSBs
             return BitExtractControl(0x1118, 0x00000003, 0);
          default:
             throw std::invalid_argument("Function GetAdc02367TpLsbs() not defined for this board version");
@@ -805,6 +869,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern LSBs
             return SetRegMask(0x1118, 0x00000003, 0, value);
          default:
             throw std::invalid_argument("Function SetAdc02367TpLsbs() not defined for this board version");
@@ -815,6 +880,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern LSBs
             if(BitMask) *BitMask = 0x00000003;
             if(BitOfs) *BitOfs = 0;
             return 0x1118;
@@ -829,6 +895,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Two's Complement Mode Control Bit (0=Offset Binary, 1=Two's Complement)
             return BitExtractControl(0x1118, 0x20000000, 29);
          default:
             throw std::invalid_argument("Function GetAdc02367Twoscomp() not defined for this board version");
@@ -839,6 +906,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Two's Complement Mode Control Bit (0=Offset Binary, 1=Two's Complement)
             return SetRegMask(0x1118, 0x20000000, 29, value);
          default:
             throw std::invalid_argument("Function SetAdc02367Twoscomp() not defined for this board version");
@@ -849,6 +917,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Two's Complement Mode Control Bit (0=Offset Binary, 1=Two's Complement)
             if(BitMask) *BitMask = 0x20000000;
             if(BitOfs) *BitOfs = 29;
             return 0x1118;
@@ -863,6 +932,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 2 Nap Mode (0=OFF, 1=ON)
             return BitExtractControl(0x1118, 0x01000000, 24);
          default:
             throw std::invalid_argument("Function GetAdc02NapMode() not defined for this board version");
@@ -873,6 +943,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 2 Nap Mode (0=OFF, 1=ON)
             return SetRegMask(0x1118, 0x01000000, 24, value);
          default:
             throw std::invalid_argument("Function SetAdc02NapMode() not defined for this board version");
@@ -883,6 +954,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 2 Nap Mode (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x01000000;
             if(BitOfs) *BitOfs = 24;
             return 0x1118;
@@ -897,6 +969,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 3 Nap Mode (0=OFF, 1=ON)
             return BitExtractControl(0x1118, 0x02000000, 25);
          default:
             throw std::invalid_argument("Function GetAdc03NapMode() not defined for this board version");
@@ -907,6 +980,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 3 Nap Mode (0=OFF, 1=ON)
             return SetRegMask(0x1118, 0x02000000, 25, value);
          default:
             throw std::invalid_argument("Function SetAdc03NapMode() not defined for this board version");
@@ -917,6 +991,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 3 Nap Mode (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x02000000;
             if(BitOfs) *BitOfs = 25;
             return 0x1118;
@@ -931,6 +1006,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 4 Nap Mode (0=OFF, 1=ON)
             return BitExtractControl(0x1114, 0x02000000, 25);
          default:
             throw std::invalid_argument("Function GetAdc04NapMode() not defined for this board version");
@@ -941,6 +1017,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 4 Nap Mode (0=OFF, 1=ON)
             return SetRegMask(0x1114, 0x02000000, 25, value);
          default:
             throw std::invalid_argument("Function SetAdc04NapMode() not defined for this board version");
@@ -951,6 +1028,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 4 Nap Mode (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x02000000;
             if(BitOfs) *BitOfs = 25;
             return 0x1114;
@@ -965,6 +1043,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 5 Nap Mode (0=OFF, 1=ON)
             return BitExtractControl(0x1114, 0x04000000, 26);
          default:
             throw std::invalid_argument("Function GetAdc05NapMode() not defined for this board version");
@@ -975,6 +1054,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 5 Nap Mode (0=OFF, 1=ON)
             return SetRegMask(0x1114, 0x04000000, 26, value);
          default:
             throw std::invalid_argument("Function SetAdc05NapMode() not defined for this board version");
@@ -985,6 +1065,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 5 Nap Mode (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x04000000;
             if(BitOfs) *BitOfs = 26;
             return 0x1114;
@@ -999,6 +1080,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 6 Nap Mode (0=OFF, 1=ON)
             return BitExtractControl(0x1118, 0x04000000, 26);
          default:
             throw std::invalid_argument("Function GetAdc06NapMode() not defined for this board version");
@@ -1009,6 +1091,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 6 Nap Mode (0=OFF, 1=ON)
             return SetRegMask(0x1118, 0x04000000, 26, value);
          default:
             throw std::invalid_argument("Function SetAdc06NapMode() not defined for this board version");
@@ -1019,6 +1102,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 6 Nap Mode (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x04000000;
             if(BitOfs) *BitOfs = 26;
             return 0x1118;
@@ -1033,6 +1117,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 7 Nap Mode (0=OFF, 1=ON)
             return BitExtractControl(0x1118, 0x08000000, 27);
          default:
             throw std::invalid_argument("Function GetAdc07NapMode() not defined for this board version");
@@ -1043,6 +1128,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 7 Nap Mode (0=OFF, 1=ON)
             return SetRegMask(0x1118, 0x08000000, 27, value);
          default:
             throw std::invalid_argument("Function SetAdc07NapMode() not defined for this board version");
@@ -1053,6 +1139,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 7 Nap Mode (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x08000000;
             if(BitOfs) *BitOfs = 27;
             return 0x1118;
@@ -1067,6 +1154,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 8 Nap Mode (0=OFF, 1=ON)
             return BitExtractControl(0x1114, 0x08000000, 27);
          default:
             throw std::invalid_argument("Function GetAdc08NapMode() not defined for this board version");
@@ -1077,6 +1165,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 8 Nap Mode (0=OFF, 1=ON)
             return SetRegMask(0x1114, 0x08000000, 27, value);
          default:
             throw std::invalid_argument("Function SetAdc08NapMode() not defined for this board version");
@@ -1087,6 +1176,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 8 Nap Mode (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x08000000;
             if(BitOfs) *BitOfs = 27;
             return 0x1114;
@@ -1101,6 +1191,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Chip ID of ADC 0 (A) (0x93 for AD9637)
             return BitExtractStatus(0x0044, 0xFF000000, 24);
          default:
             throw std::invalid_argument("Function GetAdc0ChipId() not defined for this board version");
@@ -1111,6 +1202,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Chip ID of ADC 0 (A) (0x93 for AD9637)
             if(BitMask) *BitMask = 0xFF000000;
             if(BitOfs) *BitOfs = 24;
             return 0x0044;
@@ -1125,6 +1217,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Speed Grade of ADC 0 (A) (0=40MS, 1=80MS)
             return BitExtractStatus(0x0044, 0x00700000, 20);
          default:
             throw std::invalid_argument("Function GetAdc0Speed() not defined for this board version");
@@ -1135,6 +1228,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Speed Grade of ADC 0 (A) (0=40MS, 1=80MS)
             if(BitMask) *BitMask = 0x00700000;
             if(BitOfs) *BitOfs = 20;
             return 0x0044;
@@ -1149,6 +1243,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Clock Duty Cycle Stabilizer (0=ON, 1=OFF)
             return BitExtractControl(0x111C, 0x80000000, 31);
          default:
             throw std::invalid_argument("Function GetAdc11458Dcsoff() not defined for this board version");
@@ -1159,6 +1254,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Clock Duty Cycle Stabilizer (0=ON, 1=OFF)
             return SetRegMask(0x111C, 0x80000000, 31, value);
          default:
             throw std::invalid_argument("Function SetAdc11458Dcsoff() not defined for this board version");
@@ -1169,6 +1265,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Clock Duty Cycle Stabilizer (0=ON, 1=OFF)
             if(BitMask) *BitMask = 0x80000000;
             if(BitOfs) *BitOfs = 31;
             return 0x111C;
@@ -1183,6 +1280,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
             return BitExtractControl(0x111C, 0x00E00000, 21);
          default:
             throw std::invalid_argument("Function GetAdc11458Ilvds() not defined for this board version");
@@ -1193,6 +1291,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
             return SetRegMask(0x111C, 0x00E00000, 21, value);
          default:
             throw std::invalid_argument("Function SetAdc11458Ilvds() not defined for this board version");
@@ -1203,6 +1302,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
             if(BitMask) *BitMask = 0x00E00000;
             if(BitOfs) *BitOfs = 21;
             return 0x111C;
@@ -1217,6 +1317,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet) 
             return BitExtractControl(0x111C, 0x00070000, 16);
          default:
             throw std::invalid_argument("Function GetAdc11458Outmode() not defined for this board version");
@@ -1227,6 +1328,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet) 
             return SetRegMask(0x111C, 0x00070000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdc11458Outmode() not defined for this board version");
@@ -1237,6 +1339,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet) 
             if(BitMask) *BitMask = 0x00070000;
             if(BitOfs) *BitOfs = 16;
             return 0x111C;
@@ -1251,6 +1354,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Disable Bit (0=Enabled, 1=Disabled)
             return BitExtractControl(0x111C, 0x00080000, 19);
          default:
             throw std::invalid_argument("Function GetAdc11458Outoff() not defined for this board version");
@@ -1261,6 +1365,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Disable Bit (0=Enabled, 1=Disabled)
             return SetRegMask(0x111C, 0x00080000, 19, value);
          default:
             throw std::invalid_argument("Function SetAdc11458Outoff() not defined for this board version");
@@ -1271,6 +1376,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Disable Bit (0=Enabled, 1=Disabled)
             if(BitMask) *BitMask = 0x00080000;
             if(BitOfs) *BitOfs = 19;
             return 0x111C;
@@ -1285,6 +1391,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Output Test Pattern Control Bit (0=Pattern Off, 1=Pattern On)
             return BitExtractControl(0x111C, 0x00008000, 15);
          default:
             throw std::invalid_argument("Function GetAdc11458Outtest() not defined for this board version");
@@ -1295,6 +1402,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Output Test Pattern Control Bit (0=Pattern Off, 1=Pattern On)
             return SetRegMask(0x111C, 0x00008000, 15, value);
          default:
             throw std::invalid_argument("Function SetAdc11458Outtest() not defined for this board version");
@@ -1305,6 +1413,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Output Test Pattern Control Bit (0=Pattern Off, 1=Pattern On)
             if(BitMask) *BitMask = 0x00008000;
             if(BitOfs) *BitOfs = 15;
             return 0x111C;
@@ -1319,6 +1428,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Data Output Randomizer Mode Control Bit (0=OFF, 1=ON)
             return BitExtractControl(0x111C, 0x40000000, 30);
          default:
             throw std::invalid_argument("Function GetAdc11458Rand() not defined for this board version");
@@ -1329,6 +1439,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Data Output Randomizer Mode Control Bit (0=OFF, 1=ON)
             return SetRegMask(0x111C, 0x40000000, 30, value);
          default:
             throw std::invalid_argument("Function SetAdc11458Rand() not defined for this board version");
@@ -1339,6 +1450,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Data Output Randomizer Mode Control Bit (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x40000000;
             if(BitOfs) *BitOfs = 30;
             return 0x111C;
@@ -1353,6 +1465,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Sleep Mode (1=Channels 1, 4, 5 and 8 are disabled)
             return BitExtractControl(0x111C, 0x10000000, 28);
          default:
             throw std::invalid_argument("Function GetAdc11458Sleep() not defined for this board version");
@@ -1363,6 +1476,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Sleep Mode (1=Channels 1, 4, 5 and 8 are disabled)
             return SetRegMask(0x111C, 0x10000000, 28, value);
          default:
             throw std::invalid_argument("Function SetAdc11458Sleep() not defined for this board version");
@@ -1373,6 +1487,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Sleep Mode (1=Channels 1, 4, 5 and 8 are disabled)
             if(BitMask) *BitMask = 0x10000000;
             if(BitOfs) *BitOfs = 28;
             return 0x111C;
@@ -1387,6 +1502,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Internal Termination Bit (0=OFF, 1=ON)
             return BitExtractControl(0x111C, 0x00100000, 20);
          default:
             throw std::invalid_argument("Function GetAdc11458Termon() not defined for this board version");
@@ -1397,6 +1513,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Internal Termination Bit (0=OFF, 1=ON)
             return SetRegMask(0x111C, 0x00100000, 20, value);
          default:
             throw std::invalid_argument("Function SetAdc11458Termon() not defined for this board version");
@@ -1407,6 +1524,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Internal Termination Bit (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x00100000;
             if(BitOfs) *BitOfs = 20;
             return 0x111C;
@@ -1421,6 +1539,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern MSBs (actual test pattern in 12 bit mode)
             return BitExtractControl(0x111C, 0x00003FFC, 2);
          default:
             throw std::invalid_argument("Function GetAdc11458Tp() not defined for this board version");
@@ -1431,6 +1550,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern MSBs (actual test pattern in 12 bit mode)
             return SetRegMask(0x111C, 0x00003FFC, 2, value);
          default:
             throw std::invalid_argument("Function SetAdc11458Tp() not defined for this board version");
@@ -1441,6 +1561,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern MSBs (actual test pattern in 12 bit mode)
             if(BitMask) *BitMask = 0x00003FFC;
             if(BitOfs) *BitOfs = 2;
             return 0x111C;
@@ -1455,6 +1576,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern LSBs
             return BitExtractControl(0x111C, 0x00000003, 0);
          default:
             throw std::invalid_argument("Function GetAdc11458TpLsbs() not defined for this board version");
@@ -1465,6 +1587,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern LSBs
             return SetRegMask(0x111C, 0x00000003, 0, value);
          default:
             throw std::invalid_argument("Function SetAdc11458TpLsbs() not defined for this board version");
@@ -1475,6 +1598,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern LSBs
             if(BitMask) *BitMask = 0x00000003;
             if(BitOfs) *BitOfs = 0;
             return 0x111C;
@@ -1489,6 +1613,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Two's Complement Mode Control Bit (0=Offset Binary, 1=Two's Complement)
             return BitExtractControl(0x111C, 0x20000000, 29);
          default:
             throw std::invalid_argument("Function GetAdc11458Twoscomp() not defined for this board version");
@@ -1499,6 +1624,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Two's Complement Mode Control Bit (0=Offset Binary, 1=Two's Complement)
             return SetRegMask(0x111C, 0x20000000, 29, value);
          default:
             throw std::invalid_argument("Function SetAdc11458Twoscomp() not defined for this board version");
@@ -1509,6 +1635,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Two's Complement Mode Control Bit (0=Offset Binary, 1=Two's Complement)
             if(BitMask) *BitMask = 0x20000000;
             if(BitOfs) *BitOfs = 29;
             return 0x111C;
@@ -1523,6 +1650,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 1 Nap Mode (0=OFF, 1=ON)
             return BitExtractControl(0x111C, 0x01000000, 24);
          default:
             throw std::invalid_argument("Function GetAdc11NapMode() not defined for this board version");
@@ -1533,6 +1661,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 1 Nap Mode (0=OFF, 1=ON)
             return SetRegMask(0x111C, 0x01000000, 24, value);
          default:
             throw std::invalid_argument("Function SetAdc11NapMode() not defined for this board version");
@@ -1543,6 +1672,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 1 Nap Mode (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x01000000;
             if(BitOfs) *BitOfs = 24;
             return 0x111C;
@@ -1557,6 +1687,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Clock Duty Cycle Stabilizer (0=ON, 1=OFF)
             return BitExtractControl(0x1120, 0x80000000, 31);
          default:
             throw std::invalid_argument("Function GetAdc12367Dcsoff() not defined for this board version");
@@ -1567,6 +1698,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Clock Duty Cycle Stabilizer (0=ON, 1=OFF)
             return SetRegMask(0x1120, 0x80000000, 31, value);
          default:
             throw std::invalid_argument("Function SetAdc12367Dcsoff() not defined for this board version");
@@ -1577,6 +1709,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Clock Duty Cycle Stabilizer (0=ON, 1=OFF)
             if(BitMask) *BitMask = 0x80000000;
             if(BitOfs) *BitOfs = 31;
             return 0x1120;
@@ -1591,6 +1724,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
             return BitExtractControl(0x1120, 0x00E00000, 21);
          default:
             throw std::invalid_argument("Function GetAdc12367Ilvds() not defined for this board version");
@@ -1601,6 +1735,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
             return SetRegMask(0x1120, 0x00E00000, 21, value);
          default:
             throw std::invalid_argument("Function SetAdc12367Ilvds() not defined for this board version");
@@ -1611,6 +1746,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
             if(BitMask) *BitMask = 0x00E00000;
             if(BitOfs) *BitOfs = 21;
             return 0x1120;
@@ -1625,6 +1761,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet) 
             return BitExtractControl(0x1120, 0x00070000, 16);
          default:
             throw std::invalid_argument("Function GetAdc12367Outmode() not defined for this board version");
@@ -1635,6 +1772,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet) 
             return SetRegMask(0x1120, 0x00070000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdc12367Outmode() not defined for this board version");
@@ -1645,6 +1783,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet) 
             if(BitMask) *BitMask = 0x00070000;
             if(BitOfs) *BitOfs = 16;
             return 0x1120;
@@ -1659,6 +1798,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Disable Bit (0=Enabled, 1=Disabled)
             return BitExtractControl(0x1120, 0x00080000, 19);
          default:
             throw std::invalid_argument("Function GetAdc12367Outoff() not defined for this board version");
@@ -1669,6 +1809,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Disable Bit (0=Enabled, 1=Disabled)
             return SetRegMask(0x1120, 0x00080000, 19, value);
          default:
             throw std::invalid_argument("Function SetAdc12367Outoff() not defined for this board version");
@@ -1679,6 +1820,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Digital Output Disable Bit (0=Enabled, 1=Disabled)
             if(BitMask) *BitMask = 0x00080000;
             if(BitOfs) *BitOfs = 19;
             return 0x1120;
@@ -1693,6 +1835,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Output Test Pattern Control Bit (0=Pattern Off, 1=Pattern On)
             return BitExtractControl(0x1120, 0x00008000, 15);
          default:
             throw std::invalid_argument("Function GetAdc12367Outtest() not defined for this board version");
@@ -1703,6 +1846,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Output Test Pattern Control Bit (0=Pattern Off, 1=Pattern On)
             return SetRegMask(0x1120, 0x00008000, 15, value);
          default:
             throw std::invalid_argument("Function SetAdc12367Outtest() not defined for this board version");
@@ -1713,6 +1857,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Output Test Pattern Control Bit (0=Pattern Off, 1=Pattern On)
             if(BitMask) *BitMask = 0x00008000;
             if(BitOfs) *BitOfs = 15;
             return 0x1120;
@@ -1727,6 +1872,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Data Output Randomizer Mode Control Bit (0=OFF, 1=ON)
             return BitExtractControl(0x1120, 0x40000000, 30);
          default:
             throw std::invalid_argument("Function GetAdc12367Rand() not defined for this board version");
@@ -1737,6 +1883,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Data Output Randomizer Mode Control Bit (0=OFF, 1=ON)
             return SetRegMask(0x1120, 0x40000000, 30, value);
          default:
             throw std::invalid_argument("Function SetAdc12367Rand() not defined for this board version");
@@ -1747,6 +1894,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Data Output Randomizer Mode Control Bit (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x40000000;
             if(BitOfs) *BitOfs = 30;
             return 0x1120;
@@ -1761,6 +1909,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Sleep Mode (1=Channels 2, 3, 6 and 7 are disabled)
             return BitExtractControl(0x1120, 0x10000000, 28);
          default:
             throw std::invalid_argument("Function GetAdc12367Sleep() not defined for this board version");
@@ -1771,6 +1920,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Sleep Mode (1=Channels 2, 3, 6 and 7 are disabled)
             return SetRegMask(0x1120, 0x10000000, 28, value);
          default:
             throw std::invalid_argument("Function SetAdc12367Sleep() not defined for this board version");
@@ -1781,6 +1931,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Sleep Mode (1=Channels 2, 3, 6 and 7 are disabled)
             if(BitMask) *BitMask = 0x10000000;
             if(BitOfs) *BitOfs = 28;
             return 0x1120;
@@ -1795,6 +1946,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Internal Termination Bit (0=OFF, 1=ON)
             return BitExtractControl(0x1120, 0x00100000, 20);
          default:
             throw std::invalid_argument("Function GetAdc12367Termon() not defined for this board version");
@@ -1805,6 +1957,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Internal Termination Bit (0=OFF, 1=ON)
             return SetRegMask(0x1120, 0x00100000, 20, value);
          default:
             throw std::invalid_argument("Function SetAdc12367Termon() not defined for this board version");
@@ -1815,6 +1968,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // LVDS Internal Termination Bit (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x00100000;
             if(BitOfs) *BitOfs = 20;
             return 0x1120;
@@ -1829,6 +1983,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern MSBs (actual test pattern in 12 bit mode)
             return BitExtractControl(0x1120, 0x00003FFC, 2);
          default:
             throw std::invalid_argument("Function GetAdc12367Tp() not defined for this board version");
@@ -1839,6 +1994,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern MSBs (actual test pattern in 12 bit mode)
             return SetRegMask(0x1120, 0x00003FFC, 2, value);
          default:
             throw std::invalid_argument("Function SetAdc12367Tp() not defined for this board version");
@@ -1849,6 +2005,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern MSBs (actual test pattern in 12 bit mode)
             if(BitMask) *BitMask = 0x00003FFC;
             if(BitOfs) *BitOfs = 2;
             return 0x1120;
@@ -1863,6 +2020,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern LSBs
             return BitExtractControl(0x1120, 0x00000003, 0);
          default:
             throw std::invalid_argument("Function GetAdc12367TpLsbs() not defined for this board version");
@@ -1873,6 +2031,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern LSBs
             return SetRegMask(0x1120, 0x00000003, 0, value);
          default:
             throw std::invalid_argument("Function SetAdc12367TpLsbs() not defined for this board version");
@@ -1883,6 +2042,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Test Pattern LSBs
             if(BitMask) *BitMask = 0x00000003;
             if(BitOfs) *BitOfs = 0;
             return 0x1120;
@@ -1897,6 +2057,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Two's Complement Mode Control Bit (0=Offset Binary, 1=Two's Complement)
             return BitExtractControl(0x1120, 0x20000000, 29);
          default:
             throw std::invalid_argument("Function GetAdc12367Twoscomp() not defined for this board version");
@@ -1907,6 +2068,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Two's Complement Mode Control Bit (0=Offset Binary, 1=Two's Complement)
             return SetRegMask(0x1120, 0x20000000, 29, value);
          default:
             throw std::invalid_argument("Function SetAdc12367Twoscomp() not defined for this board version");
@@ -1917,6 +2079,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Two's Complement Mode Control Bit (0=Offset Binary, 1=Two's Complement)
             if(BitMask) *BitMask = 0x20000000;
             if(BitOfs) *BitOfs = 29;
             return 0x1120;
@@ -1931,6 +2094,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 2 Nap Mode (0=OFF, 1=ON)
             return BitExtractControl(0x1120, 0x01000000, 24);
          default:
             throw std::invalid_argument("Function GetAdc12NapMode() not defined for this board version");
@@ -1941,6 +2105,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 2 Nap Mode (0=OFF, 1=ON)
             return SetRegMask(0x1120, 0x01000000, 24, value);
          default:
             throw std::invalid_argument("Function SetAdc12NapMode() not defined for this board version");
@@ -1951,6 +2116,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 2 Nap Mode (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x01000000;
             if(BitOfs) *BitOfs = 24;
             return 0x1120;
@@ -1965,6 +2131,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 3 Nap Mode (0=OFF, 1=ON)
             return BitExtractControl(0x1120, 0x02000000, 25);
          default:
             throw std::invalid_argument("Function GetAdc13NapMode() not defined for this board version");
@@ -1975,6 +2142,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 3 Nap Mode (0=OFF, 1=ON)
             return SetRegMask(0x1120, 0x02000000, 25, value);
          default:
             throw std::invalid_argument("Function SetAdc13NapMode() not defined for this board version");
@@ -1985,6 +2153,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 3 Nap Mode (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x02000000;
             if(BitOfs) *BitOfs = 25;
             return 0x1120;
@@ -1999,6 +2168,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 4 Nap Mode (0=OFF, 1=ON)
             return BitExtractControl(0x111C, 0x02000000, 25);
          default:
             throw std::invalid_argument("Function GetAdc14NapMode() not defined for this board version");
@@ -2009,6 +2179,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 4 Nap Mode (0=OFF, 1=ON)
             return SetRegMask(0x111C, 0x02000000, 25, value);
          default:
             throw std::invalid_argument("Function SetAdc14NapMode() not defined for this board version");
@@ -2019,6 +2190,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 4 Nap Mode (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x02000000;
             if(BitOfs) *BitOfs = 25;
             return 0x111C;
@@ -2033,6 +2205,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 5 Nap Mode (0=OFF, 1=ON)
             return BitExtractControl(0x111C, 0x04000000, 26);
          default:
             throw std::invalid_argument("Function GetAdc15NapMode() not defined for this board version");
@@ -2043,6 +2216,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 5 Nap Mode (0=OFF, 1=ON)
             return SetRegMask(0x111C, 0x04000000, 26, value);
          default:
             throw std::invalid_argument("Function SetAdc15NapMode() not defined for this board version");
@@ -2053,6 +2227,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 5 Nap Mode (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x04000000;
             if(BitOfs) *BitOfs = 26;
             return 0x111C;
@@ -2067,6 +2242,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 6 Nap Mode (0=OFF, 1=ON)
             return BitExtractControl(0x1120, 0x04000000, 26);
          default:
             throw std::invalid_argument("Function GetAdc16NapMode() not defined for this board version");
@@ -2077,6 +2253,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 6 Nap Mode (0=OFF, 1=ON)
             return SetRegMask(0x1120, 0x04000000, 26, value);
          default:
             throw std::invalid_argument("Function SetAdc16NapMode() not defined for this board version");
@@ -2087,6 +2264,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 6 Nap Mode (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x04000000;
             if(BitOfs) *BitOfs = 26;
             return 0x1120;
@@ -2101,6 +2279,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 7 Nap Mode (0=OFF, 1=ON)
             return BitExtractControl(0x1120, 0x08000000, 27);
          default:
             throw std::invalid_argument("Function GetAdc17NapMode() not defined for this board version");
@@ -2111,6 +2290,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 7 Nap Mode (0=OFF, 1=ON)
             return SetRegMask(0x1120, 0x08000000, 27, value);
          default:
             throw std::invalid_argument("Function SetAdc17NapMode() not defined for this board version");
@@ -2121,6 +2301,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 7 Nap Mode (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x08000000;
             if(BitOfs) *BitOfs = 27;
             return 0x1120;
@@ -2135,6 +2316,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 8 Nap Mode (0=OFF, 1=ON)
             return BitExtractControl(0x111C, 0x08000000, 27);
          default:
             throw std::invalid_argument("Function GetAdc18NapMode() not defined for this board version");
@@ -2145,6 +2327,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 8 Nap Mode (0=OFF, 1=ON)
             return SetRegMask(0x111C, 0x08000000, 27, value);
          default:
             throw std::invalid_argument("Function SetAdc18NapMode() not defined for this board version");
@@ -2155,6 +2338,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Channel 8 Nap Mode (0=OFF, 1=ON)
             if(BitMask) *BitMask = 0x08000000;
             if(BitOfs) *BitOfs = 27;
             return 0x111C;
@@ -2169,6 +2353,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Chip ID of ADC 1 (B) (0x93 for AD9637)
             return BitExtractStatus(0x0044, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetAdc1ChipId() not defined for this board version");
@@ -2179,6 +2364,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Chip ID of ADC 1 (B) (0x93 for AD9637)
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x0044;
@@ -2193,6 +2379,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Speed Grade of ADC 1 (B) (0=40MS, 1=80MS)
             return BitExtractStatus(0x0044, 0x00000070, 4);
          default:
             throw std::invalid_argument("Function GetAdc1Speed() not defined for this board version");
@@ -2203,6 +2390,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Speed Grade of ADC 1 (B) (0=40MS, 1=80MS)
             if(BitMask) *BitMask = 0x00000070;
             if(BitOfs) *BitOfs = 4;
             return 0x0044;
@@ -2217,6 +2405,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // ADC Address Mode (to be mirrored to bit28)
             return BitExtractControl(0x1114, 0x08000000, 27);
          default:
             throw std::invalid_argument("Function GetAdcCfg16BitAddrLsb() not defined for this board version");
@@ -2227,6 +2416,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // ADC Address Mode (to be mirrored to bit28)
             return SetRegMask(0x1114, 0x08000000, 27, value);
          default:
             throw std::invalid_argument("Function SetAdcCfg16BitAddrLsb() not defined for this board version");
@@ -2237,6 +2427,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // ADC Address Mode (to be mirrored to bit28)
             if(BitMask) *BitMask = 0x08000000;
             if(BitOfs) *BitOfs = 27;
             return 0x1114;
@@ -2251,6 +2442,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // ADC Address Mode (to be mirrored to bit27)
             return BitExtractControl(0x1114, 0x10000000, 28);
          default:
             throw std::invalid_argument("Function GetAdcCfg16BitAddrMsb() not defined for this board version");
@@ -2261,6 +2453,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // ADC Address Mode (to be mirrored to bit27)
             return SetRegMask(0x1114, 0x10000000, 28, value);
          default:
             throw std::invalid_argument("Function SetAdcCfg16BitAddrMsb() not defined for this board version");
@@ -2271,6 +2464,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // ADC Address Mode (to be mirrored to bit27)
             if(BitMask) *BitMask = 0x10000000;
             if(BitOfs) *BitOfs = 28;
             return 0x1114;
@@ -2285,6 +2479,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Transmit LSB First (to be mirrored to bit30)
             return BitExtractControl(0x1114, 0x02000000, 25);
          default:
             throw std::invalid_argument("Function GetAdcCfgLsbFirstLsb() not defined for this board version");
@@ -2295,6 +2490,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Transmit LSB First (to be mirrored to bit30)
             return SetRegMask(0x1114, 0x02000000, 25, value);
          default:
             throw std::invalid_argument("Function SetAdcCfgLsbFirstLsb() not defined for this board version");
@@ -2305,6 +2501,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Transmit LSB First (to be mirrored to bit30)
             if(BitMask) *BitMask = 0x02000000;
             if(BitOfs) *BitOfs = 25;
             return 0x1114;
@@ -2319,6 +2516,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Transmit LSB First (to be mirrored to bit25)
             return BitExtractControl(0x1114, 0x40000000, 30);
          default:
             throw std::invalid_argument("Function GetAdcCfgLsbFirstMsb() not defined for this board version");
@@ -2329,6 +2527,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Transmit LSB First (to be mirrored to bit25)
             return SetRegMask(0x1114, 0x40000000, 30, value);
          default:
             throw std::invalid_argument("Function SetAdcCfgLsbFirstMsb() not defined for this board version");
@@ -2339,6 +2538,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Transmit LSB First (to be mirrored to bit25)
             if(BitMask) *BitMask = 0x40000000;
             if(BitOfs) *BitOfs = 30;
             return 0x1114;
@@ -2353,6 +2553,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Activate SDO (to be mirrored to bit31)
             return BitExtractControl(0x1114, 0x01000000, 24);
          default:
             throw std::invalid_argument("Function GetAdcCfgSdoActiveLsb() not defined for this board version");
@@ -2363,6 +2564,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Activate SDO (to be mirrored to bit31)
             return SetRegMask(0x1114, 0x01000000, 24, value);
          default:
             throw std::invalid_argument("Function SetAdcCfgSdoActiveLsb() not defined for this board version");
@@ -2373,6 +2575,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Activate SDO (to be mirrored to bit31)
             if(BitMask) *BitMask = 0x01000000;
             if(BitOfs) *BitOfs = 24;
             return 0x1114;
@@ -2387,6 +2590,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Activate SDO (to be mirrored to bit24)
             return BitExtractControl(0x1114, 0x80000000, 31);
          default:
             throw std::invalid_argument("Function GetAdcCfgSdoActiveMsb() not defined for this board version");
@@ -2397,6 +2601,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Activate SDO (to be mirrored to bit24)
             return SetRegMask(0x1114, 0x80000000, 31, value);
          default:
             throw std::invalid_argument("Function SetAdcCfgSdoActiveMsb() not defined for this board version");
@@ -2407,6 +2612,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Activate SDO (to be mirrored to bit24)
             if(BitMask) *BitMask = 0x80000000;
             if(BitOfs) *BitOfs = 31;
             return 0x1114;
@@ -2421,6 +2627,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Soft Reset (automatically cleared) (to be mirrored to bit29)
             return BitExtractControl(0x1114, 0x04000000, 26);
          default:
             throw std::invalid_argument("Function GetAdcCfgSoftResetLsb() not defined for this board version");
@@ -2431,6 +2638,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Soft Reset (automatically cleared) (to be mirrored to bit29)
             return SetRegMask(0x1114, 0x04000000, 26, value);
          default:
             throw std::invalid_argument("Function SetAdcCfgSoftResetLsb() not defined for this board version");
@@ -2441,6 +2649,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Soft Reset (automatically cleared) (to be mirrored to bit29)
             if(BitMask) *BitMask = 0x04000000;
             if(BitOfs) *BitOfs = 26;
             return 0x1114;
@@ -2455,6 +2664,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Soft Reset (automatically cleared) (to be mirrored to bit26)
             return BitExtractControl(0x1114, 0x20000000, 29);
          default:
             throw std::invalid_argument("Function GetAdcCfgSoftResetMsb() not defined for this board version");
@@ -2465,6 +2675,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Soft Reset (automatically cleared) (to be mirrored to bit26)
             return SetRegMask(0x1114, 0x20000000, 29, value);
          default:
             throw std::invalid_argument("Function SetAdcCfgSoftResetMsb() not defined for this board version");
@@ -2475,6 +2686,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Soft Reset (automatically cleared) (to be mirrored to bit26)
             if(BitMask) *BitMask = 0x20000000;
             if(BitOfs) *BitOfs = 29;
             return 0x1114;
@@ -2490,6 +2702,7 @@ public:
       {
          case 8:
          case 9:
+            // ADC channel transmission enable [Ch15:Ch0]
             return BitExtractControl(0x1020, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdcChTxEn() not defined for this board version");
@@ -2501,6 +2714,7 @@ public:
       {
          case 8:
          case 9:
+            // ADC channel transmission enable [Ch15:Ch0]
             return SetRegMask(0x1020, 0x0000FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdcChTxEn() not defined for this board version");
@@ -2512,6 +2726,7 @@ public:
       {
          case 8:
          case 9:
+            // ADC channel transmission enable [Ch15:Ch0]
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1020;
@@ -2526,6 +2741,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Clock Divide Ratio (value+1)
             return BitExtractControl(0x1118, 0x00000700, 8);
          default:
             throw std::invalid_argument("Function GetAdcClkDivRatio() not defined for this board version");
@@ -2536,6 +2752,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Clock Divide Ratio (value+1)
             return SetRegMask(0x1118, 0x00000700, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcClkDivRatio() not defined for this board version");
@@ -2546,6 +2763,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Clock Divide Ratio (value+1)
             if(BitMask) *BitMask = 0x00000700;
             if(BitOfs) *BitOfs = 8;
             return 0x1118;
@@ -2560,6 +2778,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Duty Cycle Stabilizer (0 = off, 1 = on)
             return BitExtractControl(0x1118, 0x00010000, 16);
          default:
             throw std::invalid_argument("Function GetAdcClkDutyCycStab() not defined for this board version");
@@ -2570,6 +2789,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Duty Cycle Stabilizer (0 = off, 1 = on)
             return SetRegMask(0x1118, 0x00010000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcClkDutyCycStab() not defined for this board version");
@@ -2580,6 +2800,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Duty Cycle Stabilizer (0 = off, 1 = on)
             if(BitMask) *BitMask = 0x00010000;
             if(BitOfs) *BitOfs = 16;
             return 0x1118;
@@ -2594,6 +2815,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Clock Channel DCO Activiation for Writes
             return BitExtractControl(0x1114, 0x00002000, 13);
          default:
             throw std::invalid_argument("Function GetAdcDi1CChnDco() not defined for this board version");
@@ -2604,6 +2826,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Clock Channel DCO Activiation for Writes
             return SetRegMask(0x1114, 0x00002000, 13, value);
          default:
             throw std::invalid_argument("Function SetAdcDi1CChnDco() not defined for this board version");
@@ -2614,6 +2837,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Clock Channel DCO Activiation for Writes
             if(BitMask) *BitMask = 0x00002000;
             if(BitOfs) *BitOfs = 13;
             return 0x1114;
@@ -2628,6 +2852,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Clock Channel FCO Activiation for Writes
             return BitExtractControl(0x1114, 0x00001000, 12);
          default:
             throw std::invalid_argument("Function GetAdcDi1CChnFco() not defined for this board version");
@@ -2638,6 +2863,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Clock Channel FCO Activiation for Writes
             return SetRegMask(0x1114, 0x00001000, 12, value);
          default:
             throw std::invalid_argument("Function SetAdcDi1CChnFco() not defined for this board version");
@@ -2648,6 +2874,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Clock Channel FCO Activiation for Writes
             if(BitMask) *BitMask = 0x00001000;
             if(BitOfs) *BitOfs = 12;
             return 0x1114;
@@ -2662,6 +2889,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel A Activiation for Writes
             return BitExtractControl(0x1114, 0x00000100, 8);
          default:
             throw std::invalid_argument("Function GetAdcDi1DChnA() not defined for this board version");
@@ -2672,6 +2900,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel A Activiation for Writes
             return SetRegMask(0x1114, 0x00000100, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcDi1DChnA() not defined for this board version");
@@ -2682,6 +2911,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel A Activiation for Writes
             if(BitMask) *BitMask = 0x00000100;
             if(BitOfs) *BitOfs = 8;
             return 0x1114;
@@ -2696,6 +2926,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel B Activiation for Writes
             return BitExtractControl(0x1114, 0x00000200, 9);
          default:
             throw std::invalid_argument("Function GetAdcDi1DChnB() not defined for this board version");
@@ -2706,6 +2937,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel B Activiation for Writes
             return SetRegMask(0x1114, 0x00000200, 9, value);
          default:
             throw std::invalid_argument("Function SetAdcDi1DChnB() not defined for this board version");
@@ -2716,6 +2948,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel B Activiation for Writes
             if(BitMask) *BitMask = 0x00000200;
             if(BitOfs) *BitOfs = 9;
             return 0x1114;
@@ -2730,6 +2963,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel C Activiation for Writes
             return BitExtractControl(0x1114, 0x00000400, 10);
          default:
             throw std::invalid_argument("Function GetAdcDi1DChnC() not defined for this board version");
@@ -2740,6 +2974,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel C Activiation for Writes
             return SetRegMask(0x1114, 0x00000400, 10, value);
          default:
             throw std::invalid_argument("Function SetAdcDi1DChnC() not defined for this board version");
@@ -2750,6 +2985,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel C Activiation for Writes
             if(BitMask) *BitMask = 0x00000400;
             if(BitOfs) *BitOfs = 10;
             return 0x1114;
@@ -2764,6 +3000,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel D Activiation for Writes
             return BitExtractControl(0x1114, 0x00000800, 11);
          default:
             throw std::invalid_argument("Function GetAdcDi1DChnD() not defined for this board version");
@@ -2774,6 +3011,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel D Activiation for Writes
             return SetRegMask(0x1114, 0x00000800, 11, value);
          default:
             throw std::invalid_argument("Function SetAdcDi1DChnD() not defined for this board version");
@@ -2784,6 +3022,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel D Activiation for Writes
             if(BitMask) *BitMask = 0x00000800;
             if(BitOfs) *BitOfs = 11;
             return 0x1114;
@@ -2798,6 +3037,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel E Activiation for Writes
             return BitExtractControl(0x1114, 0x00010000, 16);
          default:
             throw std::invalid_argument("Function GetAdcDi2DChnE() not defined for this board version");
@@ -2808,6 +3048,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel E Activiation for Writes
             return SetRegMask(0x1114, 0x00010000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcDi2DChnE() not defined for this board version");
@@ -2818,6 +3059,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel E Activiation for Writes
             if(BitMask) *BitMask = 0x00010000;
             if(BitOfs) *BitOfs = 16;
             return 0x1114;
@@ -2832,6 +3074,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel F Activiation for Writes
             return BitExtractControl(0x1114, 0x00020000, 17);
          default:
             throw std::invalid_argument("Function GetAdcDi2DChnF() not defined for this board version");
@@ -2842,6 +3085,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel F Activiation for Writes
             return SetRegMask(0x1114, 0x00020000, 17, value);
          default:
             throw std::invalid_argument("Function SetAdcDi2DChnF() not defined for this board version");
@@ -2852,6 +3096,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel F Activiation for Writes
             if(BitMask) *BitMask = 0x00020000;
             if(BitOfs) *BitOfs = 17;
             return 0x1114;
@@ -2866,6 +3111,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel G Activiation for Writes
             return BitExtractControl(0x1114, 0x00040000, 18);
          default:
             throw std::invalid_argument("Function GetAdcDi2DChnG() not defined for this board version");
@@ -2876,6 +3122,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel G Activiation for Writes
             return SetRegMask(0x1114, 0x00040000, 18, value);
          default:
             throw std::invalid_argument("Function SetAdcDi2DChnG() not defined for this board version");
@@ -2886,6 +3133,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel G Activiation for Writes
             if(BitMask) *BitMask = 0x00040000;
             if(BitOfs) *BitOfs = 18;
             return 0x1114;
@@ -2900,6 +3148,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel H Activiation for Writes
             return BitExtractControl(0x1114, 0x00080000, 19);
          default:
             throw std::invalid_argument("Function GetAdcDi2DChnH() not defined for this board version");
@@ -2910,6 +3159,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel H Activiation for Writes
             return SetRegMask(0x1114, 0x00080000, 19, value);
          default:
             throw std::invalid_argument("Function SetAdcDi2DChnH() not defined for this board version");
@@ -2920,6 +3170,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Data Channel H Activiation for Writes
             if(BitMask) *BitMask = 0x00080000;
             if(BitOfs) *BitOfs = 19;
             return 0x1114;
@@ -2934,6 +3185,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Chop Mode (0 = off, 1 = on)
             return BitExtractControl(0x1118, 0x00000010, 4);
          default:
             throw std::invalid_argument("Function GetAdcEnhChopMode() not defined for this board version");
@@ -2944,6 +3196,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Chop Mode (0 = off, 1 = on)
             return SetRegMask(0x1118, 0x00000010, 4, value);
          default:
             throw std::invalid_argument("Function SetAdcEnhChopMode() not defined for this board version");
@@ -2954,6 +3207,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Chop Mode (0 = off, 1 = on)
             if(BitMask) *BitMask = 0x00000010;
             if(BitOfs) *BitOfs = 4;
             return 0x1118;
@@ -2968,6 +3222,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Enable Sync
             return BitExtractControl(0x112C, 0x00000001, 0);
          default:
             throw std::invalid_argument("Function GetAdcEnSync() not defined for this board version");
@@ -2978,6 +3233,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Enable Sync
             return SetRegMask(0x112C, 0x00000001, 0, value);
          default:
             throw std::invalid_argument("Function SetAdcEnSync() not defined for this board version");
@@ -2988,6 +3244,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Enable Sync
             if(BitMask) *BitMask = 0x00000001;
             if(BitOfs) *BitOfs = 0;
             return 0x112C;
@@ -3003,6 +3260,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset the ADC interface
             return BitExtractControl(0x1040, 0x00000020, 5);
          default:
             throw std::invalid_argument("Function GetAdcIfRst() not defined for this board version");
@@ -3014,6 +3272,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset the ADC interface
             return SetRegMask(0x1040, 0x00000020, 5, value);
          default:
             throw std::invalid_argument("Function SetAdcIfRst() not defined for this board version");
@@ -3025,6 +3284,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset the ADC interface
             if(BitMask) *BitMask = 0x00000020;
             if(BitOfs) *BitOfs = 5;
             return 0x1040;
@@ -3039,6 +3299,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Internal Vref Adjustment Digital Scheme (see datasheet)
             return BitExtractControl(0x1120, 0x00000007, 0);
          default:
             throw std::invalid_argument("Function GetAdcIntVrefAdj() not defined for this board version");
@@ -3049,6 +3310,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Internal Vref Adjustment Digital Scheme (see datasheet)
             return SetRegMask(0x1120, 0x00000007, 0, value);
          default:
             throw std::invalid_argument("Function SetAdcIntVrefAdj() not defined for this board version");
@@ -3059,6 +3321,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Internal Vref Adjustment Digital Scheme (see datasheet)
             if(BitMask) *BitMask = 0x00000007;
             if(BitOfs) *BitOfs = 0;
             return 0x1120;
@@ -3073,6 +3336,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Drive (0 = 1x, 1 = 2x)
             return BitExtractControl(0x1120, 0x00010000, 16);
          default:
             throw std::invalid_argument("Function GetAdcOaOutDrive() not defined for this board version");
@@ -3083,6 +3347,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Drive (0 = 1x, 1 = 2x)
             return SetRegMask(0x1120, 0x00010000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcOaOutDrive() not defined for this board version");
@@ -3093,6 +3358,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Drive (0 = 1x, 1 = 2x)
             if(BitMask) *BitMask = 0x00010000;
             if(BitOfs) *BitOfs = 16;
             return 0x1120;
@@ -3107,6 +3373,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Driver Termination (see datasheet)
             return BitExtractControl(0x1120, 0x00300000, 20);
          default:
             throw std::invalid_argument("Function GetAdcOaOutDrvTerm() not defined for this board version");
@@ -3117,6 +3384,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Driver Termination (see datasheet)
             return SetRegMask(0x1120, 0x00300000, 20, value);
          default:
             throw std::invalid_argument("Function SetAdcOaOutDrvTerm() not defined for this board version");
@@ -3127,6 +3395,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Driver Termination (see datasheet)
             if(BitMask) *BitMask = 0x00300000;
             if(BitOfs) *BitOfs = 20;
             return 0x1120;
@@ -3141,6 +3410,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim (Local)
             return BitExtractControl(0x111C, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetAdcOffsAdj() not defined for this board version");
@@ -3151,6 +3421,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim (Local)
             return SetRegMask(0x111C, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcOffsAdj() not defined for this board version");
@@ -3161,6 +3432,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim (Local)
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x111C;
@@ -3175,6 +3447,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return BitExtractControl(0x1130, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetAdcOffsAdj0A() not defined for this board version");
@@ -3185,6 +3458,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return SetRegMask(0x1130, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcOffsAdj0A() not defined for this board version");
@@ -3195,6 +3469,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x1130;
@@ -3209,6 +3484,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return BitExtractControl(0x1134, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetAdcOffsAdj0B() not defined for this board version");
@@ -3219,6 +3495,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return SetRegMask(0x1134, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcOffsAdj0B() not defined for this board version");
@@ -3229,6 +3506,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x1134;
@@ -3243,6 +3521,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return BitExtractControl(0x1138, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetAdcOffsAdj0C() not defined for this board version");
@@ -3253,6 +3532,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return SetRegMask(0x1138, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcOffsAdj0C() not defined for this board version");
@@ -3263,6 +3543,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x1138;
@@ -3277,6 +3558,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return BitExtractControl(0x113C, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetAdcOffsAdj0D() not defined for this board version");
@@ -3287,6 +3569,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return SetRegMask(0x113C, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcOffsAdj0D() not defined for this board version");
@@ -3297,6 +3580,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x113C;
@@ -3311,6 +3595,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return BitExtractControl(0x1150, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetAdcOffsAdj0Dco() not defined for this board version");
@@ -3321,6 +3606,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return SetRegMask(0x1150, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcOffsAdj0Dco() not defined for this board version");
@@ -3331,6 +3617,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x1150;
@@ -3345,6 +3632,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return BitExtractControl(0x1140, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetAdcOffsAdj0E() not defined for this board version");
@@ -3355,6 +3643,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return SetRegMask(0x1140, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcOffsAdj0E() not defined for this board version");
@@ -3365,6 +3654,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x1140;
@@ -3379,6 +3669,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return BitExtractControl(0x1144, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetAdcOffsAdj0F() not defined for this board version");
@@ -3389,6 +3680,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return SetRegMask(0x1144, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcOffsAdj0F() not defined for this board version");
@@ -3399,6 +3691,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x1144;
@@ -3413,6 +3706,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return BitExtractControl(0x1154, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetAdcOffsAdj0Fco() not defined for this board version");
@@ -3423,6 +3717,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return SetRegMask(0x1154, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcOffsAdj0Fco() not defined for this board version");
@@ -3433,6 +3728,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x1154;
@@ -3447,6 +3743,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return BitExtractControl(0x1148, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetAdcOffsAdj0G() not defined for this board version");
@@ -3457,6 +3754,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return SetRegMask(0x1148, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcOffsAdj0G() not defined for this board version");
@@ -3467,6 +3765,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x1148;
@@ -3481,6 +3780,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return BitExtractControl(0x114C, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetAdcOffsAdj0H() not defined for this board version");
@@ -3491,6 +3791,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return SetRegMask(0x114C, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcOffsAdj0H() not defined for this board version");
@@ -3501,6 +3802,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x114C;
@@ -3515,6 +3817,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return BitExtractControl(0x1158, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetAdcOffsAdj1A() not defined for this board version");
@@ -3525,6 +3828,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return SetRegMask(0x1158, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcOffsAdj1A() not defined for this board version");
@@ -3535,6 +3839,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x1158;
@@ -3549,6 +3854,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return BitExtractControl(0x115C, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetAdcOffsAdj1B() not defined for this board version");
@@ -3559,6 +3865,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return SetRegMask(0x115C, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcOffsAdj1B() not defined for this board version");
@@ -3569,6 +3876,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x115C;
@@ -3583,6 +3891,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return BitExtractControl(0x1160, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetAdcOffsAdj1C() not defined for this board version");
@@ -3593,6 +3902,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return SetRegMask(0x1160, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcOffsAdj1C() not defined for this board version");
@@ -3603,6 +3913,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x1160;
@@ -3617,6 +3928,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return BitExtractControl(0x1164, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetAdcOffsAdj1D() not defined for this board version");
@@ -3627,6 +3939,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return SetRegMask(0x1164, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcOffsAdj1D() not defined for this board version");
@@ -3637,6 +3950,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x1164;
@@ -3651,6 +3965,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return BitExtractControl(0x1178, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetAdcOffsAdj1Dco() not defined for this board version");
@@ -3661,6 +3976,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return SetRegMask(0x1178, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcOffsAdj1Dco() not defined for this board version");
@@ -3671,6 +3987,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x1178;
@@ -3685,6 +4002,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return BitExtractControl(0x1168, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetAdcOffsAdj1E() not defined for this board version");
@@ -3695,6 +4013,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return SetRegMask(0x1168, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcOffsAdj1E() not defined for this board version");
@@ -3705,6 +4024,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x1168;
@@ -3719,6 +4039,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return BitExtractControl(0x116C, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetAdcOffsAdj1F() not defined for this board version");
@@ -3729,6 +4050,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return SetRegMask(0x116C, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcOffsAdj1F() not defined for this board version");
@@ -3739,6 +4061,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x116C;
@@ -3753,6 +4076,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return BitExtractControl(0x117C, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetAdcOffsAdj1Fco() not defined for this board version");
@@ -3763,6 +4087,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return SetRegMask(0x117C, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcOffsAdj1Fco() not defined for this board version");
@@ -3773,6 +4098,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x117C;
@@ -3787,6 +4113,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return BitExtractControl(0x1170, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetAdcOffsAdj1G() not defined for this board version");
@@ -3797,6 +4124,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return SetRegMask(0x1170, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcOffsAdj1G() not defined for this board version");
@@ -3807,6 +4135,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x1170;
@@ -3821,6 +4150,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return BitExtractControl(0x1174, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetAdcOffsAdj1H() not defined for this board version");
@@ -3831,6 +4161,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             return SetRegMask(0x1174, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcOffsAdj1H() not defined for this board version");
@@ -3841,6 +4172,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Device Offset Trim
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x1174;
@@ -3855,6 +4187,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LVDS ANSI/IEEE Option (0 = ANSI, 1 = IEEE) (Global)
             return BitExtractControl(0x111C, 0x00000040, 6);
          default:
             throw std::invalid_argument("Function GetAdcOmLvdsMode() not defined for this board version");
@@ -3865,6 +4198,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LVDS ANSI/IEEE Option (0 = ANSI, 1 = IEEE) (Global)
             return SetRegMask(0x111C, 0x00000040, 6, value);
          default:
             throw std::invalid_argument("Function SetAdcOmLvdsMode() not defined for this board version");
@@ -3875,6 +4209,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LVDS ANSI/IEEE Option (0 = ANSI, 1 = IEEE) (Global)
             if(BitMask) *BitMask = 0x00000040;
             if(BitOfs) *BitOfs = 6;
             return 0x111C;
@@ -3889,6 +4224,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Format (0 = offset binary, 1 = twos complement) (Global)
             return BitExtractControl(0x111C, 0x00000001, 0);
          default:
             throw std::invalid_argument("Function GetAdcOmOutFormat() not defined for this board version");
@@ -3899,6 +4235,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Format (0 = offset binary, 1 = twos complement) (Global)
             return SetRegMask(0x111C, 0x00000001, 0, value);
          default:
             throw std::invalid_argument("Function SetAdcOmOutFormat() not defined for this board version");
@@ -3909,6 +4246,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Format (0 = offset binary, 1 = twos complement) (Global)
             if(BitMask) *BitMask = 0x00000001;
             if(BitOfs) *BitOfs = 0;
             return 0x111C;
@@ -3923,6 +4261,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert (Local)
             return BitExtractControl(0x111C, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetAdcOmOutInvert() not defined for this board version");
@@ -3933,6 +4272,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert (Local)
             return SetRegMask(0x111C, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetAdcOmOutInvert() not defined for this board version");
@@ -3943,6 +4283,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert (Local)
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x111C;
@@ -3957,6 +4298,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return BitExtractControl(0x1130, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetAdcOmOutInvert0A() not defined for this board version");
@@ -3967,6 +4309,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return SetRegMask(0x1130, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetAdcOmOutInvert0A() not defined for this board version");
@@ -3977,6 +4320,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x1130;
@@ -3991,6 +4335,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return BitExtractControl(0x1134, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetAdcOmOutInvert0B() not defined for this board version");
@@ -4001,6 +4346,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return SetRegMask(0x1134, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetAdcOmOutInvert0B() not defined for this board version");
@@ -4011,6 +4357,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x1134;
@@ -4025,6 +4372,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return BitExtractControl(0x1138, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetAdcOmOutInvert0C() not defined for this board version");
@@ -4035,6 +4383,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return SetRegMask(0x1138, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetAdcOmOutInvert0C() not defined for this board version");
@@ -4045,6 +4394,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x1138;
@@ -4059,6 +4409,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return BitExtractControl(0x113C, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetAdcOmOutInvert0D() not defined for this board version");
@@ -4069,6 +4420,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return SetRegMask(0x113C, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetAdcOmOutInvert0D() not defined for this board version");
@@ -4079,6 +4431,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x113C;
@@ -4093,6 +4446,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return BitExtractControl(0x1150, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetAdcOmOutInvert0Dco() not defined for this board version");
@@ -4103,6 +4457,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return SetRegMask(0x1150, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetAdcOmOutInvert0Dco() not defined for this board version");
@@ -4113,6 +4468,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x1150;
@@ -4127,6 +4483,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return BitExtractControl(0x1140, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetAdcOmOutInvert0E() not defined for this board version");
@@ -4137,6 +4494,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return SetRegMask(0x1140, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetAdcOmOutInvert0E() not defined for this board version");
@@ -4147,6 +4505,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x1140;
@@ -4161,6 +4520,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return BitExtractControl(0x1144, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetAdcOmOutInvert0F() not defined for this board version");
@@ -4171,6 +4531,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return SetRegMask(0x1144, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetAdcOmOutInvert0F() not defined for this board version");
@@ -4181,6 +4542,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x1144;
@@ -4195,6 +4557,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return BitExtractControl(0x1154, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetAdcOmOutInvert0Fco() not defined for this board version");
@@ -4205,6 +4568,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return SetRegMask(0x1154, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetAdcOmOutInvert0Fco() not defined for this board version");
@@ -4215,6 +4579,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x1154;
@@ -4229,6 +4594,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return BitExtractControl(0x1148, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetAdcOmOutInvert0G() not defined for this board version");
@@ -4239,6 +4605,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return SetRegMask(0x1148, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetAdcOmOutInvert0G() not defined for this board version");
@@ -4249,6 +4616,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x1148;
@@ -4263,6 +4631,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return BitExtractControl(0x114C, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetAdcOmOutInvert0H() not defined for this board version");
@@ -4273,6 +4642,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return SetRegMask(0x114C, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetAdcOmOutInvert0H() not defined for this board version");
@@ -4283,6 +4653,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x114C;
@@ -4297,6 +4668,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return BitExtractControl(0x1158, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetAdcOmOutInvert1A() not defined for this board version");
@@ -4307,6 +4679,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return SetRegMask(0x1158, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetAdcOmOutInvert1A() not defined for this board version");
@@ -4317,6 +4690,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x1158;
@@ -4331,6 +4705,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return BitExtractControl(0x115C, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetAdcOmOutInvert1B() not defined for this board version");
@@ -4341,6 +4716,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return SetRegMask(0x115C, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetAdcOmOutInvert1B() not defined for this board version");
@@ -4351,6 +4727,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x115C;
@@ -4365,6 +4742,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return BitExtractControl(0x1160, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetAdcOmOutInvert1C() not defined for this board version");
@@ -4375,6 +4753,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return SetRegMask(0x1160, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetAdcOmOutInvert1C() not defined for this board version");
@@ -4385,6 +4764,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x1160;
@@ -4399,6 +4779,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return BitExtractControl(0x1164, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetAdcOmOutInvert1D() not defined for this board version");
@@ -4409,6 +4790,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return SetRegMask(0x1164, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetAdcOmOutInvert1D() not defined for this board version");
@@ -4419,6 +4801,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x1164;
@@ -4433,6 +4816,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return BitExtractControl(0x1178, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetAdcOmOutInvert1Dco() not defined for this board version");
@@ -4443,6 +4827,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return SetRegMask(0x1178, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetAdcOmOutInvert1Dco() not defined for this board version");
@@ -4453,6 +4838,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x1178;
@@ -4467,6 +4853,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return BitExtractControl(0x1168, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetAdcOmOutInvert1E() not defined for this board version");
@@ -4477,6 +4864,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return SetRegMask(0x1168, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetAdcOmOutInvert1E() not defined for this board version");
@@ -4487,6 +4875,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x1168;
@@ -4501,6 +4890,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return BitExtractControl(0x116C, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetAdcOmOutInvert1F() not defined for this board version");
@@ -4511,6 +4901,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return SetRegMask(0x116C, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetAdcOmOutInvert1F() not defined for this board version");
@@ -4521,6 +4912,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x116C;
@@ -4535,6 +4927,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return BitExtractControl(0x117C, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetAdcOmOutInvert1Fco() not defined for this board version");
@@ -4545,6 +4938,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return SetRegMask(0x117C, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetAdcOmOutInvert1Fco() not defined for this board version");
@@ -4555,6 +4949,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x117C;
@@ -4569,6 +4964,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return BitExtractControl(0x1170, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetAdcOmOutInvert1G() not defined for this board version");
@@ -4579,6 +4975,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return SetRegMask(0x1170, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetAdcOmOutInvert1G() not defined for this board version");
@@ -4589,6 +4986,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x1170;
@@ -4603,6 +5001,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return BitExtractControl(0x1174, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetAdcOmOutInvert1H() not defined for this board version");
@@ -4613,6 +5012,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             return SetRegMask(0x1174, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetAdcOmOutInvert1H() not defined for this board version");
@@ -4623,6 +5023,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Invert
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x1174;
@@ -4637,6 +5038,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Input Clock Phase Adjust (see datasheet)
             return BitExtractControl(0x1120, 0x00007000, 12);
          default:
             throw std::invalid_argument("Function GetAdcOpInClkPhAdj() not defined for this board version");
@@ -4647,6 +5049,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Input Clock Phase Adjust (see datasheet)
             return SetRegMask(0x1120, 0x00007000, 12, value);
          default:
             throw std::invalid_argument("Function SetAdcOpInClkPhAdj() not defined for this board version");
@@ -4657,6 +5060,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Input Clock Phase Adjust (see datasheet)
             if(BitMask) *BitMask = 0x00007000;
             if(BitOfs) *BitOfs = 12;
             return 0x1120;
@@ -4671,6 +5075,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Clock Phase Adjust (see datasheet)
             return BitExtractControl(0x1120, 0x00000F00, 8);
          default:
             throw std::invalid_argument("Function GetAdcOpOutClkPhAdj() not defined for this board version");
@@ -4681,6 +5086,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Clock Phase Adjust (see datasheet)
             return SetRegMask(0x1120, 0x00000F00, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcOpOutClkPhAdj() not defined for this board version");
@@ -4691,6 +5097,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Clock Phase Adjust (see datasheet)
             if(BitMask) *BitMask = 0x00000F00;
             if(BitOfs) *BitOfs = 8;
             return 0x1120;
@@ -4705,6 +5112,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Extrenal Power Down Pin Function (0 = full, 1 = standby)
             return BitExtractControl(0x1118, 0x20000000, 29);
          default:
             throw std::invalid_argument("Function GetAdcPmExtPd() not defined for this board version");
@@ -4715,6 +5123,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Extrenal Power Down Pin Function (0 = full, 1 = standby)
             return SetRegMask(0x1118, 0x20000000, 29, value);
          default:
             throw std::invalid_argument("Function SetAdcPmExtPd() not defined for this board version");
@@ -4725,6 +5134,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Extrenal Power Down Pin Function (0 = full, 1 = standby)
             if(BitMask) *BitMask = 0x20000000;
             if(BitOfs) *BitOfs = 29;
             return 0x1118;
@@ -4739,6 +5149,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Internal Power Down Mode (see datasheet)
             return BitExtractControl(0x1118, 0x03000000, 24);
          default:
             throw std::invalid_argument("Function GetAdcPmIntPdMode() not defined for this board version");
@@ -4749,6 +5160,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Internal Power Down Mode (see datasheet)
             return SetRegMask(0x1118, 0x03000000, 24, value);
          default:
             throw std::invalid_argument("Function SetAdcPmIntPdMode() not defined for this board version");
@@ -4759,6 +5171,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Internal Power Down Mode (see datasheet)
             if(BitMask) *BitMask = 0x03000000;
             if(BitOfs) *BitOfs = 24;
             return 0x1118;
@@ -4773,6 +5186,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Resolution (10 = 12bits, 11 = 10bits)
             return BitExtractControl(0x1128, 0x00000030, 4);
          default:
             throw std::invalid_argument("Function GetAdcResolution() not defined for this board version");
@@ -4783,6 +5197,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Resolution (10 = 12bits, 11 = 10bits)
             return SetRegMask(0x1128, 0x00000030, 4, value);
          default:
             throw std::invalid_argument("Function SetAdcResolution() not defined for this board version");
@@ -4793,6 +5208,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Resolution (10 = 12bits, 11 = 10bits)
             if(BitMask) *BitMask = 0x00000030;
             if(BitOfs) *BitOfs = 4;
             return 0x1128;
@@ -4807,6 +5223,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Resolution/Sample Rate Override Enable
             return BitExtractControl(0x1128, 0x00000040, 6);
          default:
             throw std::invalid_argument("Function GetAdcResSrOvr() not defined for this board version");
@@ -4817,6 +5234,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Resolution/Sample Rate Override Enable
             return SetRegMask(0x1128, 0x00000040, 6, value);
          default:
             throw std::invalid_argument("Function SetAdcResSrOvr() not defined for this board version");
@@ -4827,6 +5245,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Resolution/Sample Rate Override Enable
             if(BitMask) *BitMask = 0x00000040;
             if(BitOfs) *BitOfs = 6;
             return 0x1128;
@@ -4842,6 +5261,7 @@ public:
       {
          case 8:
          case 9:
+            // ADC reset
             return BitExtractControl(0x1040, 0x00000040, 6);
          default:
             throw std::invalid_argument("Function GetAdcRst() not defined for this board version");
@@ -4853,6 +5273,7 @@ public:
       {
          case 8:
          case 9:
+            // ADC reset
             return SetRegMask(0x1040, 0x00000040, 6, value);
          default:
             throw std::invalid_argument("Function SetAdcRst() not defined for this board version");
@@ -4864,6 +5285,7 @@ public:
       {
          case 8:
          case 9:
+            // ADC reset
             if(BitMask) *BitMask = 0x00000040;
             if(BitOfs) *BitOfs = 6;
             return 0x1040;
@@ -4878,8 +5300,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // ADC reset modified flag
             return BitExtractStatus(0x0138, 0x00000008, 3);
          case 9:
+            // ADC reset modified flag
             return BitExtractStatus(0x0134, 0x00000008, 3);
          default:
             throw std::invalid_argument("Function GetAdcRstMod() not defined for this board version");
@@ -4890,10 +5314,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // ADC reset modified flag
             if(BitMask) *BitMask = 0x00000008;
             if(BitOfs) *BitOfs = 3;
             return 0x0138;
          case 9:
+            // ADC reset modified flag
             if(BitMask) *BitMask = 0x00000008;
             if(BitOfs) *BitOfs = 3;
             return 0x0134;
@@ -4909,6 +5335,7 @@ public:
       {
          case 8:
          case 9:
+            // Only store every n-th sample to buffer
             return BitExtractControl(0x1038, 0x000000FF, 0);
          default:
             throw std::invalid_argument("Function GetAdcSampleDiv() not defined for this board version");
@@ -4920,6 +5347,7 @@ public:
       {
          case 8:
          case 9:
+            // Only store every n-th sample to buffer
             return SetRegMask(0x1038, 0x000000FF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdcSampleDiv() not defined for this board version");
@@ -4931,6 +5359,7 @@ public:
       {
          case 8:
          case 9:
+            // Only store every n-th sample to buffer
             if(BitMask) *BitMask = 0x000000FF;
             if(BitOfs) *BitOfs = 0;
             return 0x1038;
@@ -4945,8 +5374,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // ADC downsampling divider modified flags
             return BitExtractStatus(0x0144, 0x0000000F, 0);
          case 9:
+            // ADC downsampling divider modified flags
             return BitExtractStatus(0x0140, 0x0000000F, 0);
          default:
             throw std::invalid_argument("Function GetAdcSampleDivMod() not defined for this board version");
@@ -4957,10 +5388,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // ADC downsampling divider modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
             return 0x0144;
          case 9:
+            // ADC downsampling divider modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
             return 0x0140;
@@ -4976,6 +5409,7 @@ public:
       {
          case 8:
          case 9:
+            // ADC Sampling Frequency in kHz
             return BitExtractStatus(0x003C, 0x00FFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdcSampleFreq() not defined for this board version");
@@ -4987,6 +5421,7 @@ public:
       {
          case 8:
          case 9:
+            // ADC Sampling Frequency in kHz
             if(BitMask) *BitMask = 0x00FFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x003C;
@@ -5001,6 +5436,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Sample Rate (see datasheet)
             return BitExtractControl(0x1128, 0x00000007, 0);
          default:
             throw std::invalid_argument("Function GetAdcSampleRate() not defined for this board version");
@@ -5011,6 +5447,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Sample Rate (see datasheet)
             return SetRegMask(0x1128, 0x00000007, 0, value);
          default:
             throw std::invalid_argument("Function SetAdcSampleRate() not defined for this board version");
@@ -5021,6 +5458,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Sample Rate (see datasheet)
             if(BitMask) *BitMask = 0x00000007;
             if(BitOfs) *BitOfs = 0;
             return 0x1128;
@@ -5035,6 +5473,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LVDS Output LSB First
             return BitExtractControl(0x1128, 0x00800000, 23);
          default:
             throw std::invalid_argument("Function GetAdcScLvdsOutLsbFirst() not defined for this board version");
@@ -5045,6 +5484,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LVDS Output LSB First
             return SetRegMask(0x1128, 0x00800000, 23, value);
          default:
             throw std::invalid_argument("Function SetAdcScLvdsOutLsbFirst() not defined for this board version");
@@ -5055,6 +5495,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LVDS Output LSB First
             if(BitMask) *BitMask = 0x00800000;
             if(BitOfs) *BitOfs = 23;
             return 0x1128;
@@ -5069,6 +5510,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Serial Output Number of Bits (10 = 12bits, 11 = 10bits)
             return BitExtractControl(0x1128, 0x00030000, 16);
          default:
             throw std::invalid_argument("Function GetAdcScOutNrBits() not defined for this board version");
@@ -5079,6 +5521,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Serial Output Number of Bits (10 = 12bits, 11 = 10bits)
             return SetRegMask(0x1128, 0x00030000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcScOutNrBits() not defined for this board version");
@@ -5089,6 +5532,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Serial Output Number of Bits (10 = 12bits, 11 = 10bits)
             if(BitMask) *BitMask = 0x00030000;
             if(BitOfs) *BitOfs = 16;
             return 0x1128;
@@ -5103,6 +5547,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Serial Channel Status Output Reset
             return BitExtractControl(0x1128, 0x00000200, 9);
          default:
             throw std::invalid_argument("Function GetAdcScOutRst() not defined for this board version");
@@ -5113,6 +5558,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Serial Channel Status Output Reset
             return SetRegMask(0x1128, 0x00000200, 9, value);
          default:
             throw std::invalid_argument("Function SetAdcScOutRst() not defined for this board version");
@@ -5123,6 +5569,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Serial Channel Status Output Reset
             if(BitMask) *BitMask = 0x00000200;
             if(BitOfs) *BitOfs = 9;
             return 0x1128;
@@ -5137,6 +5584,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Serial Channel Status Power Down
             return BitExtractControl(0x1128, 0x00000100, 8);
          default:
             throw std::invalid_argument("Function GetAdcScPwrDn() not defined for this board version");
@@ -5147,6 +5595,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Serial Channel Status Power Down
             return SetRegMask(0x1128, 0x00000100, 8, value);
          default:
             throw std::invalid_argument("Function SetAdcScPwrDn() not defined for this board version");
@@ -5157,6 +5606,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Serial Channel Status Power Down
             if(BitMask) *BitMask = 0x00000100;
             if(BitOfs) *BitOfs = 8;
             return 0x1128;
@@ -5171,6 +5621,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Word-Wise DDR 1-Lane (see datasheet)
             return BitExtractControl(0x1128, 0x00700000, 20);
          default:
             throw std::invalid_argument("Function GetAdcScWordWiseDdr() not defined for this board version");
@@ -5181,6 +5632,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Word-Wise DDR 1-Lane (see datasheet)
             return SetRegMask(0x1128, 0x00700000, 20, value);
          default:
             throw std::invalid_argument("Function SetAdcScWordWiseDdr() not defined for this board version");
@@ -5191,6 +5643,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Word-Wise DDR 1-Lane (see datasheet)
             if(BitMask) *BitMask = 0x00700000;
             if(BitOfs) *BitOfs = 20;
             return 0x1128;
@@ -5205,6 +5658,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Sync Next Only
             return BitExtractControl(0x112C, 0x00000002, 1);
          default:
             throw std::invalid_argument("Function GetAdcSyncNextOnly() not defined for this board version");
@@ -5215,6 +5669,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Sync Next Only
             return SetRegMask(0x112C, 0x00000002, 1, value);
          default:
             throw std::invalid_argument("Function SetAdcSyncNextOnly() not defined for this board version");
@@ -5225,6 +5680,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Sync Next Only
             if(BitMask) *BitMask = 0x00000002;
             if(BitOfs) *BitOfs = 1;
             return 0x112C;
@@ -5239,6 +5695,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet) (Local)
             return BitExtractControl(0x111C, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetAdcTmOut() not defined for this board version");
@@ -5249,6 +5706,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet) (Local)
             return SetRegMask(0x111C, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcTmOut() not defined for this board version");
@@ -5259,6 +5717,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet) (Local)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x111C;
@@ -5273,6 +5732,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return BitExtractControl(0x1130, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetAdcTmOut0A() not defined for this board version");
@@ -5283,6 +5743,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return SetRegMask(0x1130, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcTmOut0A() not defined for this board version");
@@ -5293,6 +5754,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1130;
@@ -5307,6 +5769,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return BitExtractControl(0x1134, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetAdcTmOut0B() not defined for this board version");
@@ -5317,6 +5780,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return SetRegMask(0x1134, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcTmOut0B() not defined for this board version");
@@ -5327,6 +5791,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1134;
@@ -5341,6 +5806,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return BitExtractControl(0x1138, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetAdcTmOut0C() not defined for this board version");
@@ -5351,6 +5817,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return SetRegMask(0x1138, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcTmOut0C() not defined for this board version");
@@ -5361,6 +5828,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1138;
@@ -5375,6 +5843,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return BitExtractControl(0x113C, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetAdcTmOut0D() not defined for this board version");
@@ -5385,6 +5854,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return SetRegMask(0x113C, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcTmOut0D() not defined for this board version");
@@ -5395,6 +5865,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x113C;
@@ -5409,6 +5880,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return BitExtractControl(0x1150, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetAdcTmOut0Dco() not defined for this board version");
@@ -5419,6 +5891,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return SetRegMask(0x1150, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcTmOut0Dco() not defined for this board version");
@@ -5429,6 +5902,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1150;
@@ -5443,6 +5917,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return BitExtractControl(0x1140, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetAdcTmOut0E() not defined for this board version");
@@ -5453,6 +5928,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return SetRegMask(0x1140, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcTmOut0E() not defined for this board version");
@@ -5463,6 +5939,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1140;
@@ -5477,6 +5954,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return BitExtractControl(0x1144, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetAdcTmOut0F() not defined for this board version");
@@ -5487,6 +5965,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return SetRegMask(0x1144, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcTmOut0F() not defined for this board version");
@@ -5497,6 +5976,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1144;
@@ -5511,6 +5991,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return BitExtractControl(0x1154, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetAdcTmOut0Fco() not defined for this board version");
@@ -5521,6 +6002,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return SetRegMask(0x1154, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcTmOut0Fco() not defined for this board version");
@@ -5531,6 +6013,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1154;
@@ -5545,6 +6028,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return BitExtractControl(0x1148, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetAdcTmOut0G() not defined for this board version");
@@ -5555,6 +6039,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return SetRegMask(0x1148, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcTmOut0G() not defined for this board version");
@@ -5565,6 +6050,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1148;
@@ -5579,6 +6065,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return BitExtractControl(0x114C, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetAdcTmOut0H() not defined for this board version");
@@ -5589,6 +6076,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return SetRegMask(0x114C, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcTmOut0H() not defined for this board version");
@@ -5599,6 +6087,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x114C;
@@ -5613,6 +6102,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return BitExtractControl(0x1158, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetAdcTmOut1A() not defined for this board version");
@@ -5623,6 +6113,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return SetRegMask(0x1158, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcTmOut1A() not defined for this board version");
@@ -5633,6 +6124,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1158;
@@ -5647,6 +6139,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return BitExtractControl(0x115C, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetAdcTmOut1B() not defined for this board version");
@@ -5657,6 +6150,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return SetRegMask(0x115C, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcTmOut1B() not defined for this board version");
@@ -5667,6 +6161,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x115C;
@@ -5681,6 +6176,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return BitExtractControl(0x1160, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetAdcTmOut1C() not defined for this board version");
@@ -5691,6 +6187,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return SetRegMask(0x1160, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcTmOut1C() not defined for this board version");
@@ -5701,6 +6198,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1160;
@@ -5715,6 +6213,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return BitExtractControl(0x1164, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetAdcTmOut1D() not defined for this board version");
@@ -5725,6 +6224,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return SetRegMask(0x1164, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcTmOut1D() not defined for this board version");
@@ -5735,6 +6235,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1164;
@@ -5749,6 +6250,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return BitExtractControl(0x1178, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetAdcTmOut1Dco() not defined for this board version");
@@ -5759,6 +6261,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return SetRegMask(0x1178, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcTmOut1Dco() not defined for this board version");
@@ -5769,6 +6272,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1178;
@@ -5783,6 +6287,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return BitExtractControl(0x1168, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetAdcTmOut1E() not defined for this board version");
@@ -5793,6 +6298,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return SetRegMask(0x1168, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcTmOut1E() not defined for this board version");
@@ -5803,6 +6309,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1168;
@@ -5817,6 +6324,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return BitExtractControl(0x116C, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetAdcTmOut1F() not defined for this board version");
@@ -5827,6 +6335,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return SetRegMask(0x116C, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcTmOut1F() not defined for this board version");
@@ -5837,6 +6346,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x116C;
@@ -5851,6 +6361,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return BitExtractControl(0x117C, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetAdcTmOut1Fco() not defined for this board version");
@@ -5861,6 +6372,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return SetRegMask(0x117C, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcTmOut1Fco() not defined for this board version");
@@ -5871,6 +6383,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x117C;
@@ -5885,6 +6398,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return BitExtractControl(0x1170, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetAdcTmOut1G() not defined for this board version");
@@ -5895,6 +6409,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return SetRegMask(0x1170, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcTmOut1G() not defined for this board version");
@@ -5905,6 +6420,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1170;
@@ -5919,6 +6435,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return BitExtractControl(0x1174, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetAdcTmOut1H() not defined for this board version");
@@ -5929,6 +6446,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             return SetRegMask(0x1174, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcTmOut1H() not defined for this board version");
@@ -5939,6 +6457,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Output Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1174;
@@ -5953,6 +6472,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Reset Pseudo Random Long Generator (Global)
             return BitExtractControl(0x111C, 0x00200000, 21);
          default:
             throw std::invalid_argument("Function GetAdcTmRstPnLongGen() not defined for this board version");
@@ -5963,6 +6483,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Reset Pseudo Random Long Generator (Global)
             return SetRegMask(0x111C, 0x00200000, 21, value);
          default:
             throw std::invalid_argument("Function SetAdcTmRstPnLongGen() not defined for this board version");
@@ -5973,6 +6494,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Reset Pseudo Random Long Generator (Global)
             if(BitMask) *BitMask = 0x00200000;
             if(BitOfs) *BitOfs = 21;
             return 0x111C;
@@ -5987,6 +6509,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Reset Pseudo Random Short Generator (Global)
             return BitExtractControl(0x111C, 0x00100000, 20);
          default:
             throw std::invalid_argument("Function GetAdcTmRstPnShortGen() not defined for this board version");
@@ -5997,6 +6520,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Reset Pseudo Random Short Generator (Global)
             return SetRegMask(0x111C, 0x00100000, 20, value);
          default:
             throw std::invalid_argument("Function SetAdcTmRstPnShortGen() not defined for this board version");
@@ -6007,6 +6531,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Reset Pseudo Random Short Generator (Global)
             if(BitMask) *BitMask = 0x00100000;
             if(BitOfs) *BitOfs = 20;
             return 0x111C;
@@ -6021,6 +6546,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet) (Local)
             return BitExtractControl(0x111C, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetAdcTmUsrInMode() not defined for this board version");
@@ -6031,6 +6557,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet) (Local)
             return SetRegMask(0x111C, 0x00C00000, 22, value);
          default:
             throw std::invalid_argument("Function SetAdcTmUsrInMode() not defined for this board version");
@@ -6041,6 +6568,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet) (Local)
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x111C;
@@ -6055,6 +6583,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return BitExtractControl(0x1130, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetAdcTmUsrInMode0A() not defined for this board version");
@@ -6065,6 +6594,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return SetRegMask(0x1130, 0x00C00000, 22, value);
          default:
             throw std::invalid_argument("Function SetAdcTmUsrInMode0A() not defined for this board version");
@@ -6075,6 +6605,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x1130;
@@ -6089,6 +6620,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return BitExtractControl(0x1134, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetAdcTmUsrInMode0B() not defined for this board version");
@@ -6099,6 +6631,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return SetRegMask(0x1134, 0x00C00000, 22, value);
          default:
             throw std::invalid_argument("Function SetAdcTmUsrInMode0B() not defined for this board version");
@@ -6109,6 +6642,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x1134;
@@ -6123,6 +6657,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return BitExtractControl(0x1138, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetAdcTmUsrInMode0C() not defined for this board version");
@@ -6133,6 +6668,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return SetRegMask(0x1138, 0x00C00000, 22, value);
          default:
             throw std::invalid_argument("Function SetAdcTmUsrInMode0C() not defined for this board version");
@@ -6143,6 +6679,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x1138;
@@ -6157,6 +6694,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return BitExtractControl(0x113C, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetAdcTmUsrInMode0D() not defined for this board version");
@@ -6167,6 +6705,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return SetRegMask(0x113C, 0x00C00000, 22, value);
          default:
             throw std::invalid_argument("Function SetAdcTmUsrInMode0D() not defined for this board version");
@@ -6177,6 +6716,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x113C;
@@ -6191,6 +6731,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return BitExtractControl(0x1150, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetAdcTmUsrInMode0Dco() not defined for this board version");
@@ -6201,6 +6742,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return SetRegMask(0x1150, 0x00C00000, 22, value);
          default:
             throw std::invalid_argument("Function SetAdcTmUsrInMode0Dco() not defined for this board version");
@@ -6211,6 +6753,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x1150;
@@ -6225,6 +6768,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return BitExtractControl(0x1140, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetAdcTmUsrInMode0E() not defined for this board version");
@@ -6235,6 +6779,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return SetRegMask(0x1140, 0x00C00000, 22, value);
          default:
             throw std::invalid_argument("Function SetAdcTmUsrInMode0E() not defined for this board version");
@@ -6245,6 +6790,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x1140;
@@ -6259,6 +6805,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return BitExtractControl(0x1144, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetAdcTmUsrInMode0F() not defined for this board version");
@@ -6269,6 +6816,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return SetRegMask(0x1144, 0x00C00000, 22, value);
          default:
             throw std::invalid_argument("Function SetAdcTmUsrInMode0F() not defined for this board version");
@@ -6279,6 +6827,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x1144;
@@ -6293,6 +6842,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return BitExtractControl(0x1154, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetAdcTmUsrInMode0Fco() not defined for this board version");
@@ -6303,6 +6853,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return SetRegMask(0x1154, 0x00C00000, 22, value);
          default:
             throw std::invalid_argument("Function SetAdcTmUsrInMode0Fco() not defined for this board version");
@@ -6313,6 +6864,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x1154;
@@ -6327,6 +6879,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return BitExtractControl(0x1148, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetAdcTmUsrInMode0G() not defined for this board version");
@@ -6337,6 +6890,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return SetRegMask(0x1148, 0x00C00000, 22, value);
          default:
             throw std::invalid_argument("Function SetAdcTmUsrInMode0G() not defined for this board version");
@@ -6347,6 +6901,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x1148;
@@ -6361,6 +6916,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return BitExtractControl(0x114C, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetAdcTmUsrInMode0H() not defined for this board version");
@@ -6371,6 +6927,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return SetRegMask(0x114C, 0x00C00000, 22, value);
          default:
             throw std::invalid_argument("Function SetAdcTmUsrInMode0H() not defined for this board version");
@@ -6381,6 +6938,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x114C;
@@ -6395,6 +6953,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return BitExtractControl(0x1158, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetAdcTmUsrInMode1A() not defined for this board version");
@@ -6405,6 +6964,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return SetRegMask(0x1158, 0x00C00000, 22, value);
          default:
             throw std::invalid_argument("Function SetAdcTmUsrInMode1A() not defined for this board version");
@@ -6415,6 +6975,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x1158;
@@ -6429,6 +6990,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return BitExtractControl(0x115C, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetAdcTmUsrInMode1B() not defined for this board version");
@@ -6439,6 +7001,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return SetRegMask(0x115C, 0x00C00000, 22, value);
          default:
             throw std::invalid_argument("Function SetAdcTmUsrInMode1B() not defined for this board version");
@@ -6449,6 +7012,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x115C;
@@ -6463,6 +7027,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return BitExtractControl(0x1160, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetAdcTmUsrInMode1C() not defined for this board version");
@@ -6473,6 +7038,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return SetRegMask(0x1160, 0x00C00000, 22, value);
          default:
             throw std::invalid_argument("Function SetAdcTmUsrInMode1C() not defined for this board version");
@@ -6483,6 +7049,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x1160;
@@ -6497,6 +7064,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return BitExtractControl(0x1164, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetAdcTmUsrInMode1D() not defined for this board version");
@@ -6507,6 +7075,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return SetRegMask(0x1164, 0x00C00000, 22, value);
          default:
             throw std::invalid_argument("Function SetAdcTmUsrInMode1D() not defined for this board version");
@@ -6517,6 +7086,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x1164;
@@ -6531,6 +7101,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return BitExtractControl(0x1178, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetAdcTmUsrInMode1Dco() not defined for this board version");
@@ -6541,6 +7112,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return SetRegMask(0x1178, 0x00C00000, 22, value);
          default:
             throw std::invalid_argument("Function SetAdcTmUsrInMode1Dco() not defined for this board version");
@@ -6551,6 +7123,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x1178;
@@ -6565,6 +7138,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return BitExtractControl(0x1168, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetAdcTmUsrInMode1E() not defined for this board version");
@@ -6575,6 +7149,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return SetRegMask(0x1168, 0x00C00000, 22, value);
          default:
             throw std::invalid_argument("Function SetAdcTmUsrInMode1E() not defined for this board version");
@@ -6585,6 +7160,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x1168;
@@ -6599,6 +7175,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return BitExtractControl(0x116C, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetAdcTmUsrInMode1F() not defined for this board version");
@@ -6609,6 +7186,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return SetRegMask(0x116C, 0x00C00000, 22, value);
          default:
             throw std::invalid_argument("Function SetAdcTmUsrInMode1F() not defined for this board version");
@@ -6619,6 +7197,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x116C;
@@ -6633,6 +7212,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return BitExtractControl(0x117C, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetAdcTmUsrInMode1Fco() not defined for this board version");
@@ -6643,6 +7223,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return SetRegMask(0x117C, 0x00C00000, 22, value);
          default:
             throw std::invalid_argument("Function SetAdcTmUsrInMode1Fco() not defined for this board version");
@@ -6653,6 +7234,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x117C;
@@ -6667,6 +7249,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return BitExtractControl(0x1170, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetAdcTmUsrInMode1G() not defined for this board version");
@@ -6677,6 +7260,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return SetRegMask(0x1170, 0x00C00000, 22, value);
          default:
             throw std::invalid_argument("Function SetAdcTmUsrInMode1G() not defined for this board version");
@@ -6687,6 +7271,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x1170;
@@ -6701,6 +7286,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return BitExtractControl(0x1174, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetAdcTmUsrInMode1H() not defined for this board version");
@@ -6711,6 +7297,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             return SetRegMask(0x1174, 0x00C00000, 22, value);
          default:
             throw std::invalid_argument("Function SetAdcTmUsrInMode1H() not defined for this board version");
@@ -6721,6 +7308,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // User Input Test Mode (see datasheet)
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x1174;
@@ -6735,6 +7323,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Set Resolution/Sample Rate Override
             return BitExtractControl(0x1114, 0x00000001, 0);
          default:
             throw std::invalid_argument("Function GetAdcTxInitOverride() not defined for this board version");
@@ -6745,6 +7334,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Set Resolution/Sample Rate Override
             return SetRegMask(0x1114, 0x00000001, 0, value);
          default:
             throw std::invalid_argument("Function SetAdcTxInitOverride() not defined for this board version");
@@ -6755,6 +7345,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Set Resolution/Sample Rate Override
             if(BitMask) *BitMask = 0x00000001;
             if(BitOfs) *BitOfs = 0;
             return 0x1114;
@@ -6770,6 +7361,7 @@ public:
       {
          case 8:
          case 9:
+            // Number of ADC samples to transmit per channel (must be an even value with range 2 to 2048)
             return BitExtractControl(0x102C, 0x00000FFF, 0);
          default:
             throw std::invalid_argument("Function GetAdcTxSamples() not defined for this board version");
@@ -6781,6 +7373,7 @@ public:
       {
          case 8:
          case 9:
+            // Number of ADC samples to transmit per channel (must be an even value with range 2 to 2048)
             return SetRegMask(0x102C, 0x00000FFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdcTxSamples() not defined for this board version");
@@ -6792,6 +7385,7 @@ public:
       {
          case 8:
          case 9:
+            // Number of ADC samples to transmit per channel (must be an even value with range 2 to 2048)
             if(BitMask) *BitMask = 0x00000FFF;
             if(BitOfs) *BitOfs = 0;
             return 0x102C;
@@ -6806,6 +7400,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // SDIO Pull-Down Disable
             return BitExtractControl(0x112C, 0x00010000, 16);
          default:
             throw std::invalid_argument("Function GetAdcUioc2SdioPd() not defined for this board version");
@@ -6816,6 +7411,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // SDIO Pull-Down Disable
             return SetRegMask(0x112C, 0x00010000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcUioc2SdioPd() not defined for this board version");
@@ -6826,6 +7422,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // SDIO Pull-Down Disable
             if(BitMask) *BitMask = 0x00010000;
             if(BitOfs) *BitOfs = 16;
             return 0x112C;
@@ -6840,6 +7437,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // VCM Power Control
             return BitExtractControl(0x112C, 0x00000800, 11);
          default:
             throw std::invalid_argument("Function GetAdcUioc3VcmPwrDn() not defined for this board version");
@@ -6850,6 +7448,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // VCM Power Control
             return SetRegMask(0x112C, 0x00000800, 11, value);
          default:
             throw std::invalid_argument("Function SetAdcUioc3VcmPwrDn() not defined for this board version");
@@ -6860,6 +7459,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // VCM Power Control
             if(BitMask) *BitMask = 0x00000800;
             if(BitOfs) *BitOfs = 11;
             return 0x112C;
@@ -6874,6 +7474,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // ADC User Pattern 1 (0x1A, 0x19) (Global)
             return BitExtractControl(0x1124, 0xFFFF0000, 16);
          default:
             throw std::invalid_argument("Function GetAdcUsrPatt1() not defined for this board version");
@@ -6884,6 +7485,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // ADC User Pattern 1 (0x1A, 0x19) (Global)
             return SetRegMask(0x1124, 0xFFFF0000, 16, value);
          default:
             throw std::invalid_argument("Function SetAdcUsrPatt1() not defined for this board version");
@@ -6894,6 +7496,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // ADC User Pattern 1 (0x1A, 0x19) (Global)
             if(BitMask) *BitMask = 0xFFFF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1124;
@@ -6908,6 +7511,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // ADC User Pattern 2 (0x1C, 0x1B) (Global)
             return BitExtractControl(0x1124, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdcUsrPatt2() not defined for this board version");
@@ -6918,6 +7522,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // ADC User Pattern 2 (0x1C, 0x1B) (Global)
             return SetRegMask(0x1124, 0x0000FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdcUsrPatt2() not defined for this board version");
@@ -6928,6 +7533,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // ADC User Pattern 2 (0x1C, 0x1B) (Global)
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1124;
@@ -6942,8 +7548,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 12
             return BitExtractControl(0x1258, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger configuration register 12
             return BitExtractControl(0x11FC, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgCfg12() not defined for this board version");
@@ -6954,8 +7562,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 12
             return SetRegMask(0x1258, 0xFFFFFFFF, 0, value);
          case 9:
+            // Advanced trigger configuration register 12
             return SetRegMask(0x11FC, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdvTrgCfg12() not defined for this board version");
@@ -6966,10 +7576,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 12
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1258;
          case 9:
+            // Advanced trigger configuration register 12
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11FC;
@@ -6984,8 +7596,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 13
             return BitExtractControl(0x125C, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger configuration register 13
             return BitExtractControl(0x1200, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgCfg13() not defined for this board version");
@@ -6996,8 +7610,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 13
             return SetRegMask(0x125C, 0xFFFFFFFF, 0, value);
          case 9:
+            // Advanced trigger configuration register 13
             return SetRegMask(0x1200, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdvTrgCfg13() not defined for this board version");
@@ -7008,10 +7624,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 13
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x125C;
          case 9:
+            // Advanced trigger configuration register 13
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1200;
@@ -7026,8 +7644,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 14
             return BitExtractControl(0x1260, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger configuration register 14
             return BitExtractControl(0x1204, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgCfg14() not defined for this board version");
@@ -7038,8 +7658,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 14
             return SetRegMask(0x1260, 0xFFFFFFFF, 0, value);
          case 9:
+            // Advanced trigger configuration register 14
             return SetRegMask(0x1204, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdvTrgCfg14() not defined for this board version");
@@ -7050,10 +7672,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 14
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1260;
          case 9:
+            // Advanced trigger configuration register 14
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1204;
@@ -7068,8 +7692,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 15
             return BitExtractControl(0x1264, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger configuration register 15
             return BitExtractControl(0x1208, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgCfg15() not defined for this board version");
@@ -7080,8 +7706,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 15
             return SetRegMask(0x1264, 0xFFFFFFFF, 0, value);
          case 9:
+            // Advanced trigger configuration register 15
             return SetRegMask(0x1208, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdvTrgCfg15() not defined for this board version");
@@ -7092,10 +7720,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 15
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1264;
          case 9:
+            // Advanced trigger configuration register 15
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1208;
@@ -7110,8 +7740,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 16
             return BitExtractControl(0x1268, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger configuration register 16
             return BitExtractControl(0x120C, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgCfg16() not defined for this board version");
@@ -7122,8 +7754,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 16
             return SetRegMask(0x1268, 0xFFFFFFFF, 0, value);
          case 9:
+            // Advanced trigger configuration register 16
             return SetRegMask(0x120C, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdvTrgCfg16() not defined for this board version");
@@ -7134,10 +7768,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 16
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1268;
          case 9:
+            // Advanced trigger configuration register 16
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x120C;
@@ -7152,8 +7788,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 17
             return BitExtractControl(0x126C, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger configuration register 17
             return BitExtractControl(0x1210, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgCfg17() not defined for this board version");
@@ -7164,8 +7802,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 17
             return SetRegMask(0x126C, 0xFFFFFFFF, 0, value);
          case 9:
+            // Advanced trigger configuration register 17
             return SetRegMask(0x1210, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdvTrgCfg17() not defined for this board version");
@@ -7176,10 +7816,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 17
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x126C;
          case 9:
+            // Advanced trigger configuration register 17
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1210;
@@ -7194,8 +7836,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 18
             return BitExtractControl(0x1270, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger configuration register 18
             return BitExtractControl(0x1214, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgCfg18() not defined for this board version");
@@ -7206,8 +7850,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 18
             return SetRegMask(0x1270, 0xFFFFFFFF, 0, value);
          case 9:
+            // Advanced trigger configuration register 18
             return SetRegMask(0x1214, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdvTrgCfg18() not defined for this board version");
@@ -7218,10 +7864,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 18
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1270;
          case 9:
+            // Advanced trigger configuration register 18
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1214;
@@ -7236,8 +7884,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 19
             return BitExtractControl(0x1274, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger configuration register 19
             return BitExtractControl(0x1218, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgCfg19() not defined for this board version");
@@ -7248,8 +7898,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 19
             return SetRegMask(0x1274, 0xFFFFFFFF, 0, value);
          case 9:
+            // Advanced trigger configuration register 19
             return SetRegMask(0x1218, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdvTrgCfg19() not defined for this board version");
@@ -7260,10 +7912,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger configuration register 19
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1274;
          case 9:
+            // Advanced trigger configuration register 19
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1218;
@@ -7278,8 +7932,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger channel calibration register 0
             return BitExtractControl(0x122C, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger channel calibration register 0
             return BitExtractControl(0x11D0, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgChCal0() not defined for this board version");
@@ -7290,8 +7946,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger channel calibration register 0
             return SetRegMask(0x122C, 0xFFFFFFFF, 0, value);
          case 9:
+            // Advanced trigger channel calibration register 0
             return SetRegMask(0x11D0, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdvTrgChCal0() not defined for this board version");
@@ -7302,10 +7960,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger channel calibration register 0
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x122C;
          case 9:
+            // Advanced trigger channel calibration register 0
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11D0;
@@ -7320,8 +7980,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger channel calibration register 1
             return BitExtractControl(0x1230, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger channel calibration register 1
             return BitExtractControl(0x11D4, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgChCal1() not defined for this board version");
@@ -7332,8 +7994,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger channel calibration register 1
             return SetRegMask(0x1230, 0xFFFFFFFF, 0, value);
          case 9:
+            // Advanced trigger channel calibration register 1
             return SetRegMask(0x11D4, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdvTrgChCal1() not defined for this board version");
@@ -7344,10 +8008,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger channel calibration register 1
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1230;
          case 9:
+            // Advanced trigger channel calibration register 1
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11D4;
@@ -7362,8 +8028,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger channel calibration register 2
             return BitExtractControl(0x1234, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger channel calibration register 2
             return BitExtractControl(0x11D8, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgChCal2() not defined for this board version");
@@ -7374,8 +8042,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger channel calibration register 2
             return SetRegMask(0x1234, 0xFFFFFFFF, 0, value);
          case 9:
+            // Advanced trigger channel calibration register 2
             return SetRegMask(0x11D8, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdvTrgChCal2() not defined for this board version");
@@ -7386,10 +8056,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger channel calibration register 2
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1234;
          case 9:
+            // Advanced trigger channel calibration register 2
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11D8;
@@ -7404,8 +8076,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger channel calibration register 3
             return BitExtractControl(0x1238, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger channel calibration register 3
             return BitExtractControl(0x11DC, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgChCal3() not defined for this board version");
@@ -7416,8 +8090,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger channel calibration register 3
             return SetRegMask(0x1238, 0xFFFFFFFF, 0, value);
          case 9:
+            // Advanced trigger channel calibration register 3
             return SetRegMask(0x11DC, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdvTrgChCal3() not defined for this board version");
@@ -7428,10 +8104,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger channel calibration register 3
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1238;
          case 9:
+            // Advanced trigger channel calibration register 3
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11DC;
@@ -7446,8 +8124,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger control register
             return BitExtractControl(0x1228, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger control register
             return BitExtractControl(0x11CC, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgCtrl() not defined for this board version");
@@ -7458,8 +8138,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger control register
             return SetRegMask(0x1228, 0xFFFFFFFF, 0, value);
          case 9:
+            // Advanced trigger control register
             return SetRegMask(0x11CC, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdvTrgCtrl() not defined for this board version");
@@ -7470,10 +8152,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger control register
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1228;
          case 9:
+            // Advanced trigger control register
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11CC;
@@ -7488,8 +8172,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger pedestal configuration register
             return BitExtractControl(0x123C, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger pedestal configuration register
             return BitExtractControl(0x11E0, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgPedCfg() not defined for this board version");
@@ -7500,8 +8186,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger pedestal configuration register
             return SetRegMask(0x123C, 0xFFFFFFFF, 0, value);
          case 9:
+            // Advanced trigger pedestal configuration register
             return SetRegMask(0x11E0, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdvTrgPedCfg() not defined for this board version");
@@ -7512,10 +8200,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger pedestal configuration register
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x123C;
          case 9:
+            // Advanced trigger pedestal configuration register
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11E0;
@@ -7530,8 +8220,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger status register 1
             return BitExtractStatus(0x0118, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger status register 1
             return BitExtractStatus(0x0114, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgStat1() not defined for this board version");
@@ -7542,10 +8234,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger status register 1
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0118;
          case 9:
+            // Advanced trigger status register 1
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0114;
@@ -7560,8 +8254,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger status register 2
             return BitExtractStatus(0x011C, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger status register 2
             return BitExtractStatus(0x0118, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgStat2() not defined for this board version");
@@ -7572,10 +8268,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger status register 2
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x011C;
          case 9:
+            // Advanced trigger status register 2
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0118;
@@ -7590,8 +8288,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger status register 3
             return BitExtractStatus(0x0120, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger status register 3
             return BitExtractStatus(0x011C, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgStat3() not defined for this board version");
@@ -7602,10 +8302,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger status register 3
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0120;
          case 9:
+            // Advanced trigger status register 3
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x011C;
@@ -7620,8 +8322,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger status register 4
             return BitExtractStatus(0x0124, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger status register 4
             return BitExtractStatus(0x0120, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgStat4() not defined for this board version");
@@ -7632,10 +8336,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger status register 4
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0124;
          case 9:
+            // Advanced trigger status register 4
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0120;
@@ -7650,8 +8356,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger TDC channel mask
             return BitExtractControl(0x1254, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger TDC channel mask
             return BitExtractControl(0x11F8, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgTdcChMask() not defined for this board version");
@@ -7662,8 +8370,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger TDC channel mask
             return SetRegMask(0x1254, 0xFFFFFFFF, 0, value);
          case 9:
+            // Advanced trigger TDC channel mask
             return SetRegMask(0x11F8, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdvTrgTdcChMask() not defined for this board version");
@@ -7674,10 +8384,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger TDC channel mask
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1254;
          case 9:
+            // Advanced trigger TDC channel mask
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11F8;
@@ -7692,8 +8404,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger threshold 0 register
             return BitExtractControl(0x1240, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger threshold 0 register
             return BitExtractControl(0x11E4, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgThr0() not defined for this board version");
@@ -7704,8 +8418,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger threshold 0 register
             return SetRegMask(0x1240, 0xFFFFFFFF, 0, value);
          case 9:
+            // Advanced trigger threshold 0 register
             return SetRegMask(0x11E4, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdvTrgThr0() not defined for this board version");
@@ -7716,10 +8432,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger threshold 0 register
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1240;
          case 9:
+            // Advanced trigger threshold 0 register
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11E4;
@@ -7734,8 +8452,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger threshold 1 register
             return BitExtractControl(0x1244, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger threshold 1 register
             return BitExtractControl(0x11E8, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgThr1() not defined for this board version");
@@ -7746,8 +8466,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger threshold 1 register
             return SetRegMask(0x1244, 0xFFFFFFFF, 0, value);
          case 9:
+            // Advanced trigger threshold 1 register
             return SetRegMask(0x11E8, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdvTrgThr1() not defined for this board version");
@@ -7758,10 +8480,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger threshold 1 register
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1244;
          case 9:
+            // Advanced trigger threshold 1 register
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11E8;
@@ -7776,8 +8500,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger threshold 2 register
             return BitExtractControl(0x1248, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger threshold 2 register
             return BitExtractControl(0x11EC, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgThr2() not defined for this board version");
@@ -7788,8 +8514,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger threshold 2 register
             return SetRegMask(0x1248, 0xFFFFFFFF, 0, value);
          case 9:
+            // Advanced trigger threshold 2 register
             return SetRegMask(0x11EC, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdvTrgThr2() not defined for this board version");
@@ -7800,10 +8528,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger threshold 2 register
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1248;
          case 9:
+            // Advanced trigger threshold 2 register
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11EC;
@@ -7818,8 +8548,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger cell register
             return BitExtractStatus(0x0114, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger cell register
             return BitExtractStatus(0x0110, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgTrigCell() not defined for this board version");
@@ -7830,10 +8562,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger cell register
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0114;
          case 9:
+            // Advanced trigger cell register
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0110;
@@ -7848,8 +8582,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger transmition check word 0 register
             return BitExtractControl(0x124C, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger transmition check word 0 register
             return BitExtractControl(0x11F0, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgTxChkWord0() not defined for this board version");
@@ -7860,8 +8596,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger transmition check word 0 register
             return SetRegMask(0x124C, 0xFFFFFFFF, 0, value);
          case 9:
+            // Advanced trigger transmition check word 0 register
             return SetRegMask(0x11F0, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdvTrgTxChkWord0() not defined for this board version");
@@ -7872,10 +8610,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger transmition check word 0 register
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x124C;
          case 9:
+            // Advanced trigger transmition check word 0 register
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11F0;
@@ -7890,8 +8630,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger transmition check word 1 register
             return BitExtractControl(0x1250, 0xFFFFFFFF, 0);
          case 9:
+            // Advanced trigger transmition check word 1 register
             return BitExtractControl(0x11F4, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgTxChkWord1() not defined for this board version");
@@ -7902,8 +8644,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger transmition check word 1 register
             return SetRegMask(0x1250, 0xFFFFFFFF, 0, value);
          case 9:
+            // Advanced trigger transmition check word 1 register
             return SetRegMask(0x11F4, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAdvTrgTxChkWord1() not defined for this board version");
@@ -7914,10 +8658,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Advanced trigger transmition check word 1 register
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1250;
          case 9:
+            // Advanced trigger transmition check word 1 register
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11F4;
@@ -7933,6 +8679,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank to ADC
             return BitExtractControl(0x1044, 0x00000002, 1);
          default:
             throw std::invalid_argument("Function GetApplySettingsAdc() not defined for this board version");
@@ -7944,6 +8691,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank to ADC
             return SetRegMask(0x1044, 0x00000002, 1, value);
          default:
             throw std::invalid_argument("Function SetApplySettingsAdc() not defined for this board version");
@@ -7955,6 +8703,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank to ADC
             if(BitMask) *BitMask = 0x00000002;
             if(BitOfs) *BitOfs = 1;
             return 0x1044;
@@ -7970,6 +8719,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank to ADC sampling frequency (auto update)
             return BitExtractControl(0x1044, 0x00000100, 8);
          default:
             throw std::invalid_argument("Function GetApplySettingsAdcSampleDiv() not defined for this board version");
@@ -7981,6 +8731,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank to ADC sampling frequency (auto update)
             return SetRegMask(0x1044, 0x00000100, 8, value);
          default:
             throw std::invalid_argument("Function SetApplySettingsAdcSampleDiv() not defined for this board version");
@@ -7992,6 +8743,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank to ADC sampling frequency (auto update)
             if(BitMask) *BitMask = 0x00000100;
             if(BitOfs) *BitOfs = 8;
             return 0x1044;
@@ -8007,6 +8759,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank control register
             return BitExtractControl(0x1044, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetApplySettingsCtrl() not defined for this board version");
@@ -8018,6 +8771,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank control register
             return SetRegMask(0x1044, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetApplySettingsCtrl() not defined for this board version");
@@ -8029,6 +8783,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank control register
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x1044;
@@ -8044,6 +8799,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank to DAC (auto update)
             return BitExtractControl(0x1044, 0x00000010, 4);
          default:
             throw std::invalid_argument("Function GetApplySettingsDac() not defined for this board version");
@@ -8055,6 +8811,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank to DAC (auto update)
             return SetRegMask(0x1044, 0x00000010, 4, value);
          default:
             throw std::invalid_argument("Function SetApplySettingsDac() not defined for this board version");
@@ -8066,6 +8823,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank to DAC (auto update)
             if(BitMask) *BitMask = 0x00000010;
             if(BitOfs) *BitOfs = 4;
             return 0x1044;
@@ -8081,6 +8839,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank to DRS chip (auto update)
             return BitExtractControl(0x1044, 0x00000020, 5);
          default:
             throw std::invalid_argument("Function GetApplySettingsDrs() not defined for this board version");
@@ -8092,6 +8851,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank to DRS chip (auto update)
             return SetRegMask(0x1044, 0x00000020, 5, value);
          default:
             throw std::invalid_argument("Function SetApplySettingsDrs() not defined for this board version");
@@ -8103,6 +8863,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank to DRS chip (auto update)
             if(BitMask) *BitMask = 0x00000020;
             if(BitOfs) *BitOfs = 5;
             return 0x1044;
@@ -8118,6 +8879,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank to frontend (auto update)
             return BitExtractControl(0x1044, 0x00000008, 3);
          default:
             throw std::invalid_argument("Function GetApplySettingsFrontend() not defined for this board version");
@@ -8129,6 +8891,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank to frontend (auto update)
             return SetRegMask(0x1044, 0x00000008, 3, value);
          default:
             throw std::invalid_argument("Function SetApplySettingsFrontend() not defined for this board version");
@@ -8140,6 +8903,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank to frontend (auto update)
             if(BitMask) *BitMask = 0x00000008;
             if(BitOfs) *BitOfs = 3;
             return 0x1044;
@@ -8155,6 +8919,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank to HV (auto update)
             return BitExtractControl(0x1044, 0x00000040, 6);
          default:
             throw std::invalid_argument("Function GetApplySettingsHv() not defined for this board version");
@@ -8166,6 +8931,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank to HV (auto update)
             return SetRegMask(0x1044, 0x00000040, 6, value);
          default:
             throw std::invalid_argument("Function SetApplySettingsHv() not defined for this board version");
@@ -8177,6 +8943,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank to HV (auto update)
             if(BitMask) *BitMask = 0x00000040;
             if(BitOfs) *BitOfs = 6;
             return 0x1044;
@@ -8192,6 +8959,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from regsiter bank to LMK
             return BitExtractControl(0x1044, 0x00000001, 0);
          default:
             throw std::invalid_argument("Function GetApplySettingsLmk() not defined for this board version");
@@ -8203,6 +8971,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from regsiter bank to LMK
             return SetRegMask(0x1044, 0x00000001, 0, value);
          default:
             throw std::invalid_argument("Function SetApplySettingsLmk() not defined for this board version");
@@ -8214,6 +8983,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from regsiter bank to LMK
             if(BitMask) *BitMask = 0x00000001;
             if(BitOfs) *BitOfs = 0;
             return 0x1044;
@@ -8229,6 +8999,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank to max samples per packet (auto update)
             return BitExtractControl(0x1044, 0x00000080, 7);
          default:
             throw std::invalid_argument("Function GetApplySettingsMaxPldSize() not defined for this board version");
@@ -8240,6 +9011,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank to max samples per packet (auto update)
             return SetRegMask(0x1044, 0x00000080, 7, value);
          default:
             throw std::invalid_argument("Function SetApplySettingsMaxPldSize() not defined for this board version");
@@ -8251,6 +9023,7 @@ public:
       {
          case 8:
          case 9:
+            // Apply configuration from register bank to max samples per packet (auto update)
             if(BitMask) *BitMask = 0x00000080;
             if(BitOfs) *BitOfs = 7;
             return 0x1044;
@@ -8265,8 +9038,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Period of automatic trigger in ticks of the DAQ clock
             return BitExtractControl(0x1188, 0xFFFFFFFF, 0);
          case 9:
+            // Period of automatic trigger in ticks of the DAQ clock
             return BitExtractControl(0x112C, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAutoTriggerPeriod() not defined for this board version");
@@ -8277,8 +9052,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Period of automatic trigger in ticks of the DAQ clock
             return SetRegMask(0x1188, 0xFFFFFFFF, 0, value);
          case 9:
+            // Period of automatic trigger in ticks of the DAQ clock
             return SetRegMask(0x112C, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetAutoTriggerPeriod() not defined for this board version");
@@ -8289,10 +9066,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Period of automatic trigger in ticks of the DAQ clock
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1188;
          case 9:
+            // Period of automatic trigger in ticks of the DAQ clock
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x112C;
@@ -8308,6 +9087,7 @@ public:
       {
          case 8:
          case 9:
+            // Backplane is currently plugged (1) or unplugged (0)
             return BitExtractStatus(0x0028, 0x00000001, 0);
          default:
             throw std::invalid_argument("Function GetBackplanePlugged() not defined for this board version");
@@ -8319,6 +9099,7 @@ public:
       {
          case 8:
          case 9:
+            // Backplane is currently plugged (1) or unplugged (0)
             if(BitMask) *BitMask = 0x00000001;
             if(BitOfs) *BitOfs = 0;
             return 0x0028;
@@ -8334,6 +9115,7 @@ public:
       {
          case 8:
          case 9:
+            // 0xAC, Magic number for DRS board identification
             return BitExtractStatus(0x0000, 0xFF000000, 24);
          default:
             throw std::invalid_argument("Function GetBoardMagic() not defined for this board version");
@@ -8345,6 +9127,7 @@ public:
       {
          case 8:
          case 9:
+            // 0xAC, Magic number for DRS board identification
             if(BitMask) *BitMask = 0xFF000000;
             if(BitOfs) *BitOfs = 24;
             return 0x0000;
@@ -8360,6 +9143,7 @@ public:
       {
          case 8:
          case 9:
+            // Board revision (A=0x00, C=0x02, D=0x03, E=0x04)
             return BitExtractStatus(0x0000, 0x000000FC, 2);
          default:
             throw std::invalid_argument("Function GetBoardRevision() not defined for this board version");
@@ -8371,6 +9155,7 @@ public:
       {
          case 8:
          case 9:
+            // Board revision (A=0x00, C=0x02, D=0x03, E=0x04)
             if(BitMask) *BitMask = 0x000000FC;
             if(BitOfs) *BitOfs = 2;
             return 0x0000;
@@ -8386,6 +9171,7 @@ public:
       {
          case 8:
          case 9:
+            // Board select from backplane (inverted = high active)
             return BitExtractStatus(0x0028, 0x00000100, 8);
          default:
             throw std::invalid_argument("Function GetBoardSel() not defined for this board version");
@@ -8397,6 +9183,7 @@ public:
       {
          case 8:
          case 9:
+            // Board select from backplane (inverted = high active)
             if(BitMask) *BitMask = 0x00000100;
             if(BitOfs) *BitOfs = 8;
             return 0x0028;
@@ -8412,6 +9199,7 @@ public:
       {
          case 8:
          case 9:
+            // WaveDream Number (0x02 for WD2)
             return BitExtractStatus(0x0000, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetBoardType() not defined for this board version");
@@ -8423,6 +9211,7 @@ public:
       {
          case 8:
          case 9:
+            // WaveDream Number (0x02 for WD2)
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x0000;
@@ -8438,6 +9227,7 @@ public:
       {
          case 8:
          case 9:
+            // Version indicator pins reflecting the variant of the board (Y15,Y10)
             return BitExtractStatus(0x0000, 0x00000003, 0);
          default:
             throw std::invalid_argument("Function GetBoardVariant() not defined for this board version");
@@ -8449,6 +9239,7 @@ public:
       {
          case 8:
          case 9:
+            // Version indicator pins reflecting the variant of the board (Y15,Y10)
             if(BitMask) *BitMask = 0x00000003;
             if(BitOfs) *BitOfs = 0;
             return 0x0000;
@@ -8464,6 +9255,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable buffers driving the calib. signal to the frontend MUX (BUFFER_CTRL)
             return BitExtractControl(0x1008, 0x00000002, 1);
          default:
             throw std::invalid_argument("Function GetCalibBufferEn() not defined for this board version");
@@ -8475,6 +9267,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable buffers driving the calib. signal to the frontend MUX (BUFFER_CTRL)
             return SetRegMask(0x1008, 0x00000002, 1, value);
          default:
             throw std::invalid_argument("Function SetCalibBufferEn() not defined for this board version");
@@ -8486,6 +9279,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable buffers driving the calib. signal to the frontend MUX (BUFFER_CTRL)
             if(BitMask) *BitMask = 0x00000002;
             if(BitOfs) *BitOfs = 1;
             return 0x1008;
@@ -8500,8 +9294,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAQ clock select and DRS clock divider modified flags
             return BitExtractStatus(0x0138, 0x00000004, 2);
          case 9:
+            // DAQ clock select and DRS clock divider modified flags
             return BitExtractStatus(0x0134, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetClkSelAndDrsClkDivMod() not defined for this board version");
@@ -8512,10 +9308,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAQ clock select and DRS clock divider modified flags
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x0138;
          case 9:
+            // DAQ clock select and DRS clock divider modified flags
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x0134;
@@ -8530,8 +9328,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Status of the comparator inputs
             return BitExtractStatus(0x00FC, 0x0000FFFF, 0);
          case 9:
+            // Status of the comparator inputs
             return BitExtractStatus(0x00F8, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetCompChStat() not defined for this board version");
@@ -8542,10 +9342,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Status of the comparator inputs
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00FC;
          case 9:
+            // Status of the comparator inputs
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00F8;
@@ -8561,6 +9363,7 @@ public:
       {
          case 8:
          case 9:
+            // Comparator power enable
             return BitExtractControl(0x1004, 0x00000200, 9);
          default:
             throw std::invalid_argument("Function GetCompPowerEn() not defined for this board version");
@@ -8572,6 +9375,7 @@ public:
       {
          case 8:
          case 9:
+            // Comparator power enable
             return SetRegMask(0x1004, 0x00000200, 9, value);
          default:
             throw std::invalid_argument("Function SetCompPowerEn() not defined for this board version");
@@ -8583,6 +9387,7 @@ public:
       {
          case 8:
          case 9:
+            // Comparator power enable
             if(BitMask) *BitMask = 0x00000200;
             if(BitOfs) *BitOfs = 9;
             return 0x1004;
@@ -8598,6 +9403,7 @@ public:
       {
          case 8:
          case 9:
+            // Maximum number of UDP payload bytes to transmit (must be a multiple of 6 with range 6 to 8892)
             return BitExtractControl(0x1018, 0x0003FFFF, 0);
          default:
             throw std::invalid_argument("Function GetComPldSize() not defined for this board version");
@@ -8609,6 +9415,7 @@ public:
       {
          case 8:
          case 9:
+            // Maximum number of UDP payload bytes to transmit (must be a multiple of 6 with range 6 to 8892)
             return SetRegMask(0x1018, 0x0003FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetComPldSize() not defined for this board version");
@@ -8620,6 +9427,7 @@ public:
       {
          case 8:
          case 9:
+            // Maximum number of UDP payload bytes to transmit (must be a multiple of 6 with range 6 to 8892)
             if(BitMask) *BitMask = 0x0003FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1018;
@@ -8634,8 +9442,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Maximum packet payload size modified flag
             return BitExtractStatus(0x0140, 0x0000000F, 0);
          case 9:
+            // Maximum packet payload size modified flag
             return BitExtractStatus(0x013C, 0x0000000F, 0);
          default:
             throw std::invalid_argument("Function GetComPldSizeMod() not defined for this board version");
@@ -8646,10 +9456,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Maximum packet payload size modified flag
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
             return 0x0140;
          case 9:
+            // Maximum packet payload size modified flag
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
             return 0x013C;
@@ -8665,6 +9477,7 @@ public:
       {
          case 8:
          case 9:
+            // ID of the crate where the current board is plugged in
             return BitExtractControl(0x1000, 0x00FF0000, 16);
          default:
             throw std::invalid_argument("Function GetCrateId() not defined for this board version");
@@ -8676,6 +9489,7 @@ public:
       {
          case 8:
          case 9:
+            // ID of the crate where the current board is plugged in
             return SetRegMask(0x1000, 0x00FF0000, 16, value);
          default:
             throw std::invalid_argument("Function SetCrateId() not defined for this board version");
@@ -8687,6 +9501,7 @@ public:
       {
          case 8:
          case 9:
+            // ID of the crate where the current board is plugged in
             if(BitMask) *BitMask = 0x00FF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1000;
@@ -8701,8 +9516,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Keep at the end of the register bank
             return BitExtractControl(0x1284, 0xFFFFFFFF, 0);
          case 9:
+            // Keep at the end of the register bank
             return BitExtractControl(0x1228, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetCrc32RegBank() not defined for this board version");
@@ -8713,8 +9530,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Keep at the end of the register bank
             return SetRegMask(0x1284, 0xFFFFFFFF, 0, value);
          case 9:
+            // Keep at the end of the register bank
             return SetRegMask(0x1228, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetCrc32RegBank() not defined for this board version");
@@ -8725,10 +9544,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Keep at the end of the register bank
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1284;
          case 9:
+            // Keep at the end of the register bank
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1228;
@@ -8743,8 +9564,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel a modified flags
             return BitExtractStatus(0x0148, 0xC0000000, 30);
          case 9:
+            // DAC channel a modified flags
             return BitExtractStatus(0x0144, 0xC0000000, 30);
          default:
             throw std::invalid_argument("Function GetDac0AMod() not defined for this board version");
@@ -8755,10 +9578,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel a modified flags
             if(BitMask) *BitMask = 0xC0000000;
             if(BitOfs) *BitOfs = 30;
             return 0x0148;
          case 9:
+            // DAC channel a modified flags
             if(BitMask) *BitMask = 0xC0000000;
             if(BitOfs) *BitOfs = 30;
             return 0x0144;
@@ -8773,8 +9598,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel b modified flags
             return BitExtractStatus(0x0148, 0x30000000, 28);
          case 9:
+            // DAC channel b modified flags
             return BitExtractStatus(0x0144, 0x30000000, 28);
          default:
             throw std::invalid_argument("Function GetDac0BMod() not defined for this board version");
@@ -8785,10 +9612,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel b modified flags
             if(BitMask) *BitMask = 0x30000000;
             if(BitOfs) *BitOfs = 28;
             return 0x0148;
          case 9:
+            // DAC channel b modified flags
             if(BitMask) *BitMask = 0x30000000;
             if(BitOfs) *BitOfs = 28;
             return 0x0144;
@@ -8804,6 +9633,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC0 channel A (ROFS) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return BitExtractControl(0x1048, 0xFFFF0000, 16);
          default:
             throw std::invalid_argument("Function GetDac0ChA() not defined for this board version");
@@ -8815,6 +9645,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC0 channel A (ROFS) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return SetRegMask(0x1048, 0xFFFF0000, 16, value);
          default:
             throw std::invalid_argument("Function SetDac0ChA() not defined for this board version");
@@ -8826,6 +9657,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC0 channel A (ROFS) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             if(BitMask) *BitMask = 0xFFFF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1048;
@@ -8841,6 +9673,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC0 channel B (OFS) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (+/- 0.625V)
             return BitExtractControl(0x1048, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetDac0ChB() not defined for this board version");
@@ -8852,6 +9685,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC0 channel B (OFS) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (+/- 0.625V)
             return SetRegMask(0x1048, 0x0000FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetDac0ChB() not defined for this board version");
@@ -8863,6 +9697,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC0 channel B (OFS) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (+/- 0.625V)
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1048;
@@ -8878,6 +9713,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC0 channel C (CAL_DC) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (+/- 0.625V)
             return BitExtractControl(0x104C, 0xFFFF0000, 16);
          default:
             throw std::invalid_argument("Function GetDac0ChC() not defined for this board version");
@@ -8889,6 +9725,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC0 channel C (CAL_DC) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (+/- 0.625V)
             return SetRegMask(0x104C, 0xFFFF0000, 16, value);
          default:
             throw std::invalid_argument("Function SetDac0ChC() not defined for this board version");
@@ -8900,6 +9737,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC0 channel C (CAL_DC) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (+/- 0.625V)
             if(BitMask) *BitMask = 0xFFFF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x104C;
@@ -8915,6 +9753,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC0 channel D (PULSE_AMP) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..1V)
             return BitExtractControl(0x104C, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetDac0ChD() not defined for this board version");
@@ -8926,6 +9765,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC0 channel D (PULSE_AMP) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..1V)
             return SetRegMask(0x104C, 0x0000FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetDac0ChD() not defined for this board version");
@@ -8937,6 +9777,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC0 channel D (PULSE_AMP) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..1V)
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x104C;
@@ -8952,6 +9793,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC0 channel E (PZC_LEVEL) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (+/- 2.5V)
             return BitExtractControl(0x1050, 0xFFFF0000, 16);
          default:
             throw std::invalid_argument("Function GetDac0ChE() not defined for this board version");
@@ -8963,6 +9805,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC0 channel E (PZC_LEVEL) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (+/- 2.5V)
             return SetRegMask(0x1050, 0xFFFF0000, 16, value);
          default:
             throw std::invalid_argument("Function SetDac0ChE() not defined for this board version");
@@ -8974,6 +9817,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC0 channel E (PZC_LEVEL) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (+/- 2.5V)
             if(BitMask) *BitMask = 0xFFFF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1050;
@@ -8988,7 +9832,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Set DAC0 channel F (RESERVED) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
+            return BitExtractControl(0x1050, 0x0000FFFF, 0);
          case 9:
+            // Set DAC0 channel F (DAC_REF_A) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return BitExtractControl(0x1050, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetDac0ChF() not defined for this board version");
@@ -8999,7 +9846,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Set DAC0 channel F (RESERVED) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
+            return SetRegMask(0x1050, 0x0000FFFF, 0, value);
          case 9:
+            // Set DAC0 channel F (DAC_REF_A) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return SetRegMask(0x1050, 0x0000FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetDac0ChF() not defined for this board version");
@@ -9010,7 +9860,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Set DAC0 channel F (RESERVED) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
+            if(BitMask) *BitMask = 0x0000FFFF;
+            if(BitOfs) *BitOfs = 0;
+            return 0x1050;
          case 9:
+            // Set DAC0 channel F (DAC_REF_A) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1050;
@@ -9026,6 +9881,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC0 channel G (RESERVED) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return BitExtractControl(0x1054, 0xFFFF0000, 16);
          default:
             throw std::invalid_argument("Function GetDac0ChG() not defined for this board version");
@@ -9037,6 +9893,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC0 channel G (RESERVED) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return SetRegMask(0x1054, 0xFFFF0000, 16, value);
          default:
             throw std::invalid_argument("Function SetDac0ChG() not defined for this board version");
@@ -9048,6 +9905,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC0 channel G (RESERVED) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             if(BitMask) *BitMask = 0xFFFF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1054;
@@ -9063,6 +9921,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC0 channel H (BIAS) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return BitExtractControl(0x1054, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetDac0ChH() not defined for this board version");
@@ -9074,6 +9933,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC0 channel H (BIAS) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return SetRegMask(0x1054, 0x0000FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetDac0ChH() not defined for this board version");
@@ -9085,6 +9945,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC0 channel H (BIAS) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1054;
@@ -9099,8 +9960,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel c modified flags
             return BitExtractStatus(0x0148, 0x0C000000, 26);
          case 9:
+            // DAC channel c modified flags
             return BitExtractStatus(0x0144, 0x0C000000, 26);
          default:
             throw std::invalid_argument("Function GetDac0CMod() not defined for this board version");
@@ -9111,10 +9974,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel c modified flags
             if(BitMask) *BitMask = 0x0C000000;
             if(BitOfs) *BitOfs = 26;
             return 0x0148;
          case 9:
+            // DAC channel c modified flags
             if(BitMask) *BitMask = 0x0C000000;
             if(BitOfs) *BitOfs = 26;
             return 0x0144;
@@ -9129,8 +9994,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel d modified flags
             return BitExtractStatus(0x0148, 0x03000000, 24);
          case 9:
+            // DAC channel d modified flags
             return BitExtractStatus(0x0144, 0x03000000, 24);
          default:
             throw std::invalid_argument("Function GetDac0DMod() not defined for this board version");
@@ -9141,10 +10008,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel d modified flags
             if(BitMask) *BitMask = 0x03000000;
             if(BitOfs) *BitOfs = 24;
             return 0x0148;
          case 9:
+            // DAC channel d modified flags
             if(BitMask) *BitMask = 0x03000000;
             if(BitOfs) *BitOfs = 24;
             return 0x0144;
@@ -9159,8 +10028,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel e modified flags
             return BitExtractStatus(0x0148, 0x00C00000, 22);
          case 9:
+            // DAC channel e modified flags
             return BitExtractStatus(0x0144, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetDac0EMod() not defined for this board version");
@@ -9171,10 +10042,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel e modified flags
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x0148;
          case 9:
+            // DAC channel e modified flags
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x0144;
@@ -9189,8 +10062,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel f modified flags
             return BitExtractStatus(0x0148, 0x00300000, 20);
          case 9:
+            // DAC channel f modified flags
             return BitExtractStatus(0x0144, 0x00300000, 20);
          default:
             throw std::invalid_argument("Function GetDac0FMod() not defined for this board version");
@@ -9201,10 +10076,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel f modified flags
             if(BitMask) *BitMask = 0x00300000;
             if(BitOfs) *BitOfs = 20;
             return 0x0148;
          case 9:
+            // DAC channel f modified flags
             if(BitMask) *BitMask = 0x00300000;
             if(BitOfs) *BitOfs = 20;
             return 0x0144;
@@ -9219,8 +10096,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel g modified flags
             return BitExtractStatus(0x0148, 0x000C0000, 18);
          case 9:
+            // DAC channel g modified flags
             return BitExtractStatus(0x0144, 0x000C0000, 18);
          default:
             throw std::invalid_argument("Function GetDac0GMod() not defined for this board version");
@@ -9231,10 +10110,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel g modified flags
             if(BitMask) *BitMask = 0x000C0000;
             if(BitOfs) *BitOfs = 18;
             return 0x0148;
          case 9:
+            // DAC channel g modified flags
             if(BitMask) *BitMask = 0x000C0000;
             if(BitOfs) *BitOfs = 18;
             return 0x0144;
@@ -9249,8 +10130,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel h modified flags
             return BitExtractStatus(0x0148, 0x00030000, 16);
          case 9:
+            // DAC channel h modified flags
             return BitExtractStatus(0x0144, 0x00030000, 16);
          default:
             throw std::invalid_argument("Function GetDac0HMod() not defined for this board version");
@@ -9261,10 +10144,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel h modified flags
             if(BitMask) *BitMask = 0x00030000;
             if(BitOfs) *BitOfs = 16;
             return 0x0148;
          case 9:
+            // DAC channel h modified flags
             if(BitMask) *BitMask = 0x00030000;
             if(BitOfs) *BitOfs = 16;
             return 0x0144;
@@ -9279,8 +10164,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel a modified flags
             return BitExtractStatus(0x0148, 0x0000C000, 14);
          case 9:
+            // DAC channel a modified flags
             return BitExtractStatus(0x0144, 0x0000C000, 14);
          default:
             throw std::invalid_argument("Function GetDac1AMod() not defined for this board version");
@@ -9291,10 +10178,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel a modified flags
             if(BitMask) *BitMask = 0x0000C000;
             if(BitOfs) *BitOfs = 14;
             return 0x0148;
          case 9:
+            // DAC channel a modified flags
             if(BitMask) *BitMask = 0x0000C000;
             if(BitOfs) *BitOfs = 14;
             return 0x0144;
@@ -9309,8 +10198,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel b modified flags
             return BitExtractStatus(0x0148, 0x00003000, 12);
          case 9:
+            // DAC channel b modified flags
             return BitExtractStatus(0x0144, 0x00003000, 12);
          default:
             throw std::invalid_argument("Function GetDac1BMod() not defined for this board version");
@@ -9321,10 +10212,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel b modified flags
             if(BitMask) *BitMask = 0x00003000;
             if(BitOfs) *BitOfs = 12;
             return 0x0148;
          case 9:
+            // DAC channel b modified flags
             if(BitMask) *BitMask = 0x00003000;
             if(BitOfs) *BitOfs = 12;
             return 0x0144;
@@ -9340,6 +10233,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel A (TLEVEL_0) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return BitExtractControl(0x1058, 0xFFFF0000, 16);
          default:
             throw std::invalid_argument("Function GetDac1ChA() not defined for this board version");
@@ -9351,6 +10245,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel A (TLEVEL_0) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return SetRegMask(0x1058, 0xFFFF0000, 16, value);
          default:
             throw std::invalid_argument("Function SetDac1ChA() not defined for this board version");
@@ -9362,6 +10257,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel A (TLEVEL_0) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             if(BitMask) *BitMask = 0xFFFF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1058;
@@ -9377,6 +10273,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel B (TLEVEL_1) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return BitExtractControl(0x1058, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetDac1ChB() not defined for this board version");
@@ -9388,6 +10285,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel B (TLEVEL_1) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return SetRegMask(0x1058, 0x0000FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetDac1ChB() not defined for this board version");
@@ -9399,6 +10297,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel B (TLEVEL_1) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1058;
@@ -9414,6 +10313,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel C (TLEVEL_2) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return BitExtractControl(0x105C, 0xFFFF0000, 16);
          default:
             throw std::invalid_argument("Function GetDac1ChC() not defined for this board version");
@@ -9425,6 +10325,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel C (TLEVEL_2) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return SetRegMask(0x105C, 0xFFFF0000, 16, value);
          default:
             throw std::invalid_argument("Function SetDac1ChC() not defined for this board version");
@@ -9436,6 +10337,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel C (TLEVEL_2) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             if(BitMask) *BitMask = 0xFFFF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x105C;
@@ -9451,6 +10353,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel D (TLEVEL_3) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return BitExtractControl(0x105C, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetDac1ChD() not defined for this board version");
@@ -9462,6 +10365,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel D (TLEVEL_3) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return SetRegMask(0x105C, 0x0000FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetDac1ChD() not defined for this board version");
@@ -9473,6 +10377,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel D (TLEVEL_3) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x105C;
@@ -9488,6 +10393,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel E (TLEVEL_4) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return BitExtractControl(0x1060, 0xFFFF0000, 16);
          default:
             throw std::invalid_argument("Function GetDac1ChE() not defined for this board version");
@@ -9499,6 +10405,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel E (TLEVEL_4) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return SetRegMask(0x1060, 0xFFFF0000, 16, value);
          default:
             throw std::invalid_argument("Function SetDac1ChE() not defined for this board version");
@@ -9510,6 +10417,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel E (TLEVEL_4) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             if(BitMask) *BitMask = 0xFFFF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1060;
@@ -9525,6 +10433,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel F (TLEVEL_5) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return BitExtractControl(0x1060, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetDac1ChF() not defined for this board version");
@@ -9536,6 +10445,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel F (TLEVEL_5) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return SetRegMask(0x1060, 0x0000FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetDac1ChF() not defined for this board version");
@@ -9547,6 +10457,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel F (TLEVEL_5) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1060;
@@ -9562,6 +10473,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel G (TLEVEL_6) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return BitExtractControl(0x1064, 0xFFFF0000, 16);
          default:
             throw std::invalid_argument("Function GetDac1ChG() not defined for this board version");
@@ -9573,6 +10485,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel G (TLEVEL_6) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return SetRegMask(0x1064, 0xFFFF0000, 16, value);
          default:
             throw std::invalid_argument("Function SetDac1ChG() not defined for this board version");
@@ -9584,6 +10497,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel G (TLEVEL_6) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             if(BitMask) *BitMask = 0xFFFF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1064;
@@ -9599,6 +10513,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel H (TLEVEL_7) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return BitExtractControl(0x1064, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetDac1ChH() not defined for this board version");
@@ -9610,6 +10525,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel H (TLEVEL_7) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return SetRegMask(0x1064, 0x0000FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetDac1ChH() not defined for this board version");
@@ -9621,6 +10537,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC1 channel H (TLEVEL_7) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1064;
@@ -9635,8 +10552,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel c modified flags
             return BitExtractStatus(0x0148, 0x00000C00, 10);
          case 9:
+            // DAC channel c modified flags
             return BitExtractStatus(0x0144, 0x00000C00, 10);
          default:
             throw std::invalid_argument("Function GetDac1CMod() not defined for this board version");
@@ -9647,10 +10566,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel c modified flags
             if(BitMask) *BitMask = 0x00000C00;
             if(BitOfs) *BitOfs = 10;
             return 0x0148;
          case 9:
+            // DAC channel c modified flags
             if(BitMask) *BitMask = 0x00000C00;
             if(BitOfs) *BitOfs = 10;
             return 0x0144;
@@ -9665,8 +10586,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel d modified flags
             return BitExtractStatus(0x0148, 0x00000300, 8);
          case 9:
+            // DAC channel d modified flags
             return BitExtractStatus(0x0144, 0x00000300, 8);
          default:
             throw std::invalid_argument("Function GetDac1DMod() not defined for this board version");
@@ -9677,10 +10600,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel d modified flags
             if(BitMask) *BitMask = 0x00000300;
             if(BitOfs) *BitOfs = 8;
             return 0x0148;
          case 9:
+            // DAC channel d modified flags
             if(BitMask) *BitMask = 0x00000300;
             if(BitOfs) *BitOfs = 8;
             return 0x0144;
@@ -9695,8 +10620,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel e modified flags
             return BitExtractStatus(0x0148, 0x000000C0, 6);
          case 9:
+            // DAC channel e modified flags
             return BitExtractStatus(0x0144, 0x000000C0, 6);
          default:
             throw std::invalid_argument("Function GetDac1EMod() not defined for this board version");
@@ -9707,10 +10634,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel e modified flags
             if(BitMask) *BitMask = 0x000000C0;
             if(BitOfs) *BitOfs = 6;
             return 0x0148;
          case 9:
+            // DAC channel e modified flags
             if(BitMask) *BitMask = 0x000000C0;
             if(BitOfs) *BitOfs = 6;
             return 0x0144;
@@ -9725,8 +10654,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel f modified flags
             return BitExtractStatus(0x0148, 0x00000030, 4);
          case 9:
+            // DAC channel f modified flags
             return BitExtractStatus(0x0144, 0x00000030, 4);
          default:
             throw std::invalid_argument("Function GetDac1FMod() not defined for this board version");
@@ -9737,10 +10668,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel f modified flags
             if(BitMask) *BitMask = 0x00000030;
             if(BitOfs) *BitOfs = 4;
             return 0x0148;
          case 9:
+            // DAC channel f modified flags
             if(BitMask) *BitMask = 0x00000030;
             if(BitOfs) *BitOfs = 4;
             return 0x0144;
@@ -9755,8 +10688,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel g modified flags
             return BitExtractStatus(0x0148, 0x0000000C, 2);
          case 9:
+            // DAC channel g modified flags
             return BitExtractStatus(0x0144, 0x0000000C, 2);
          default:
             throw std::invalid_argument("Function GetDac1GMod() not defined for this board version");
@@ -9767,10 +10702,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel g modified flags
             if(BitMask) *BitMask = 0x0000000C;
             if(BitOfs) *BitOfs = 2;
             return 0x0148;
          case 9:
+            // DAC channel g modified flags
             if(BitMask) *BitMask = 0x0000000C;
             if(BitOfs) *BitOfs = 2;
             return 0x0144;
@@ -9785,8 +10722,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel h modified flags
             return BitExtractStatus(0x0148, 0x00000003, 0);
          case 9:
+            // DAC channel h modified flags
             return BitExtractStatus(0x0144, 0x00000003, 0);
          default:
             throw std::invalid_argument("Function GetDac1HMod() not defined for this board version");
@@ -9797,10 +10736,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel h modified flags
             if(BitMask) *BitMask = 0x00000003;
             if(BitOfs) *BitOfs = 0;
             return 0x0148;
          case 9:
+            // DAC channel h modified flags
             if(BitMask) *BitMask = 0x00000003;
             if(BitOfs) *BitOfs = 0;
             return 0x0144;
@@ -9815,8 +10756,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel a modified flags
             return BitExtractStatus(0x014C, 0xC0000000, 30);
          case 9:
+            // DAC channel a modified flags
             return BitExtractStatus(0x0148, 0xC0000000, 30);
          default:
             throw std::invalid_argument("Function GetDac2AMod() not defined for this board version");
@@ -9827,10 +10770,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel a modified flags
             if(BitMask) *BitMask = 0xC0000000;
             if(BitOfs) *BitOfs = 30;
             return 0x014C;
          case 9:
+            // DAC channel a modified flags
             if(BitMask) *BitMask = 0xC0000000;
             if(BitOfs) *BitOfs = 30;
             return 0x0148;
@@ -9845,8 +10790,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel b modified flags
             return BitExtractStatus(0x014C, 0x30000000, 28);
          case 9:
+            // DAC channel b modified flags
             return BitExtractStatus(0x0148, 0x30000000, 28);
          default:
             throw std::invalid_argument("Function GetDac2BMod() not defined for this board version");
@@ -9857,10 +10804,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel b modified flags
             if(BitMask) *BitMask = 0x30000000;
             if(BitOfs) *BitOfs = 28;
             return 0x014C;
          case 9:
+            // DAC channel b modified flags
             if(BitMask) *BitMask = 0x30000000;
             if(BitOfs) *BitOfs = 28;
             return 0x0148;
@@ -9876,6 +10825,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel A (TLEVEL_8) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return BitExtractControl(0x1068, 0xFFFF0000, 16);
          default:
             throw std::invalid_argument("Function GetDac2ChA() not defined for this board version");
@@ -9887,6 +10837,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel A (TLEVEL_8) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return SetRegMask(0x1068, 0xFFFF0000, 16, value);
          default:
             throw std::invalid_argument("Function SetDac2ChA() not defined for this board version");
@@ -9898,6 +10849,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel A (TLEVEL_8) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             if(BitMask) *BitMask = 0xFFFF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1068;
@@ -9913,6 +10865,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel B (TLEVEL_9) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return BitExtractControl(0x1068, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetDac2ChB() not defined for this board version");
@@ -9924,6 +10877,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel B (TLEVEL_9) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return SetRegMask(0x1068, 0x0000FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetDac2ChB() not defined for this board version");
@@ -9935,6 +10889,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel B (TLEVEL_9) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1068;
@@ -9950,6 +10905,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel C (TLEVEL_10) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return BitExtractControl(0x106C, 0xFFFF0000, 16);
          default:
             throw std::invalid_argument("Function GetDac2ChC() not defined for this board version");
@@ -9961,6 +10917,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel C (TLEVEL_10) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return SetRegMask(0x106C, 0xFFFF0000, 16, value);
          default:
             throw std::invalid_argument("Function SetDac2ChC() not defined for this board version");
@@ -9972,6 +10929,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel C (TLEVEL_10) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             if(BitMask) *BitMask = 0xFFFF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x106C;
@@ -9987,6 +10945,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel D (TLEVEL_11) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return BitExtractControl(0x106C, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetDac2ChD() not defined for this board version");
@@ -9998,6 +10957,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel D (TLEVEL_11) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return SetRegMask(0x106C, 0x0000FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetDac2ChD() not defined for this board version");
@@ -10009,6 +10969,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel D (TLEVEL_11) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x106C;
@@ -10024,6 +10985,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel E (TLEVEL_12) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return BitExtractControl(0x1070, 0xFFFF0000, 16);
          default:
             throw std::invalid_argument("Function GetDac2ChE() not defined for this board version");
@@ -10035,6 +10997,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel E (TLEVEL_12) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return SetRegMask(0x1070, 0xFFFF0000, 16, value);
          default:
             throw std::invalid_argument("Function SetDac2ChE() not defined for this board version");
@@ -10046,6 +11009,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel E (TLEVEL_12) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             if(BitMask) *BitMask = 0xFFFF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1070;
@@ -10061,6 +11025,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel F (TLEVEL_13) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return BitExtractControl(0x1070, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetDac2ChF() not defined for this board version");
@@ -10072,6 +11037,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel F (TLEVEL_13) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return SetRegMask(0x1070, 0x0000FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetDac2ChF() not defined for this board version");
@@ -10083,6 +11049,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel F (TLEVEL_13) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1070;
@@ -10098,6 +11065,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel G (TLEVEL_14) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return BitExtractControl(0x1074, 0xFFFF0000, 16);
          default:
             throw std::invalid_argument("Function GetDac2ChG() not defined for this board version");
@@ -10109,6 +11077,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel G (TLEVEL_14) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return SetRegMask(0x1074, 0xFFFF0000, 16, value);
          default:
             throw std::invalid_argument("Function SetDac2ChG() not defined for this board version");
@@ -10120,6 +11089,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel G (TLEVEL_14) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             if(BitMask) *BitMask = 0xFFFF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1074;
@@ -10135,6 +11105,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel H (TLEVEL_15) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return BitExtractControl(0x1074, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetDac2ChH() not defined for this board version");
@@ -10146,6 +11117,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel H (TLEVEL_15) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             return SetRegMask(0x1074, 0x0000FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetDac2ChH() not defined for this board version");
@@ -10157,6 +11129,7 @@ public:
       {
          case 8:
          case 9:
+            // Set DAC2 channel H (TLEVEL_15) (12 bit MSBs: DAC value, 4 bit LSBs: don't care) (0..2.5V)
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1074;
@@ -10171,8 +11144,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel c modified flags
             return BitExtractStatus(0x014C, 0x0C000000, 26);
          case 9:
+            // DAC channel c modified flags
             return BitExtractStatus(0x0148, 0x0C000000, 26);
          default:
             throw std::invalid_argument("Function GetDac2CMod() not defined for this board version");
@@ -10183,10 +11158,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel c modified flags
             if(BitMask) *BitMask = 0x0C000000;
             if(BitOfs) *BitOfs = 26;
             return 0x014C;
          case 9:
+            // DAC channel c modified flags
             if(BitMask) *BitMask = 0x0C000000;
             if(BitOfs) *BitOfs = 26;
             return 0x0148;
@@ -10201,8 +11178,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel d modified flags
             return BitExtractStatus(0x014C, 0x03000000, 24);
          case 9:
+            // DAC channel d modified flags
             return BitExtractStatus(0x0148, 0x03000000, 24);
          default:
             throw std::invalid_argument("Function GetDac2DMod() not defined for this board version");
@@ -10213,10 +11192,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel d modified flags
             if(BitMask) *BitMask = 0x03000000;
             if(BitOfs) *BitOfs = 24;
             return 0x014C;
          case 9:
+            // DAC channel d modified flags
             if(BitMask) *BitMask = 0x03000000;
             if(BitOfs) *BitOfs = 24;
             return 0x0148;
@@ -10231,8 +11212,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel e modified flags
             return BitExtractStatus(0x014C, 0x00C00000, 22);
          case 9:
+            // DAC channel e modified flags
             return BitExtractStatus(0x0148, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetDac2EMod() not defined for this board version");
@@ -10243,10 +11226,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel e modified flags
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x014C;
          case 9:
+            // DAC channel e modified flags
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x0148;
@@ -10261,8 +11246,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel f modified flags
             return BitExtractStatus(0x014C, 0x00300000, 20);
          case 9:
+            // DAC channel f modified flags
             return BitExtractStatus(0x0148, 0x00300000, 20);
          default:
             throw std::invalid_argument("Function GetDac2FMod() not defined for this board version");
@@ -10273,10 +11260,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel f modified flags
             if(BitMask) *BitMask = 0x00300000;
             if(BitOfs) *BitOfs = 20;
             return 0x014C;
          case 9:
+            // DAC channel f modified flags
             if(BitMask) *BitMask = 0x00300000;
             if(BitOfs) *BitOfs = 20;
             return 0x0148;
@@ -10291,8 +11280,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel g modified flags
             return BitExtractStatus(0x014C, 0x000C0000, 18);
          case 9:
+            // DAC channel g modified flags
             return BitExtractStatus(0x0148, 0x000C0000, 18);
          default:
             throw std::invalid_argument("Function GetDac2GMod() not defined for this board version");
@@ -10303,10 +11294,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel g modified flags
             if(BitMask) *BitMask = 0x000C0000;
             if(BitOfs) *BitOfs = 18;
             return 0x014C;
          case 9:
+            // DAC channel g modified flags
             if(BitMask) *BitMask = 0x000C0000;
             if(BitOfs) *BitOfs = 18;
             return 0x0148;
@@ -10321,8 +11314,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel h modified flags
             return BitExtractStatus(0x014C, 0x00030000, 16);
          case 9:
+            // DAC channel h modified flags
             return BitExtractStatus(0x0148, 0x00030000, 16);
          default:
             throw std::invalid_argument("Function GetDac2HMod() not defined for this board version");
@@ -10333,10 +11328,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAC channel h modified flags
             if(BitMask) *BitMask = 0x00030000;
             if(BitOfs) *BitOfs = 16;
             return 0x014C;
          case 9:
+            // DAC channel h modified flags
             if(BitMask) *BitMask = 0x00030000;
             if(BitOfs) *BitOfs = 16;
             return 0x0148;
@@ -10352,6 +11349,7 @@ public:
       {
          case 8:
          case 9:
+            // Auto-Trigger readout state machine every 0.5s if no other trigger (like "auto" acquisition on scope)
             return BitExtractControl(0x1004, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetDaqAuto() not defined for this board version");
@@ -10363,6 +11361,7 @@ public:
       {
          case 8:
          case 9:
+            // Auto-Trigger readout state machine every 0.5s if no other trigger (like "auto" acquisition on scope)
             return SetRegMask(0x1004, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetDaqAuto() not defined for this board version");
@@ -10374,6 +11373,7 @@ public:
       {
          case 8:
          case 9:
+            // Auto-Trigger readout state machine every 0.5s if no other trigger (like "auto" acquisition on scope)
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x1004;
@@ -10388,8 +11388,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAQ clock default phase setting is checked
             return BitExtractStatus(0x0028, 0x00001000, 12);
          case 9:
+            // DAQ clock default phase setting is checked
             return BitExtractStatus(0x0028, 0x00000800, 11);
          default:
             throw std::invalid_argument("Function GetDaqClkDefPhaseChkd() not defined for this board version");
@@ -10400,10 +11402,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAQ clock default phase setting is checked
             if(BitMask) *BitMask = 0x00001000;
             if(BitOfs) *BitOfs = 12;
             return 0x0028;
          case 9:
+            // DAQ clock default phase setting is checked
             if(BitMask) *BitMask = 0x00000800;
             if(BitOfs) *BitOfs = 11;
             return 0x0028;
@@ -10418,8 +11422,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAQ clock default phase setting is valid
             return BitExtractStatus(0x0028, 0x00002000, 13);
          case 9:
+            // DAQ clock default phase setting is valid
             return BitExtractStatus(0x0028, 0x00001000, 12);
          default:
             throw std::invalid_argument("Function GetDaqClkDefPhaseOk() not defined for this board version");
@@ -10430,10 +11436,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DAQ clock default phase setting is valid
             if(BitMask) *BitMask = 0x00002000;
             if(BitOfs) *BitOfs = 13;
             return 0x0028;
          case 9:
+            // DAQ clock default phase setting is valid
             if(BitMask) *BitMask = 0x00001000;
             if(BitOfs) *BitOfs = 12;
             return 0x0028;
@@ -10449,6 +11457,7 @@ public:
       {
          case 8:
          case 9:
+            // DAQ clock source select: 0 = DCB clock / 1 = on board oscillator (CLK_SEL)
             return BitExtractControl(0x100C, 0x00020000, 17);
          default:
             throw std::invalid_argument("Function GetDaqClkSrcSel() not defined for this board version");
@@ -10460,6 +11469,7 @@ public:
       {
          case 8:
          case 9:
+            // DAQ clock source select: 0 = DCB clock / 1 = on board oscillator (CLK_SEL)
             return SetRegMask(0x100C, 0x00020000, 17, value);
          default:
             throw std::invalid_argument("Function SetDaqClkSrcSel() not defined for this board version");
@@ -10471,6 +11481,7 @@ public:
       {
          case 8:
          case 9:
+            // DAQ clock source select: 0 = DCB clock / 1 = on board oscillator (CLK_SEL)
             if(BitMask) *BitMask = 0x00020000;
             if(BitOfs) *BitOfs = 17;
             return 0x100C;
@@ -10486,6 +11497,7 @@ public:
       {
          case 8:
          case 9:
+            // Phase step setting of the PLL generating the common DAQ clock
             return BitExtractControl(0x1004, 0x00FF0000, 16);
          default:
             throw std::invalid_argument("Function GetDaqDataPhase() not defined for this board version");
@@ -10497,6 +11509,7 @@ public:
       {
          case 8:
          case 9:
+            // Phase step setting of the PLL generating the common DAQ clock
             return SetRegMask(0x1004, 0x00FF0000, 16, value);
          default:
             throw std::invalid_argument("Function SetDaqDataPhase() not defined for this board version");
@@ -10508,6 +11521,7 @@ public:
       {
          case 8:
          case 9:
+            // Phase step setting of the PLL generating the common DAQ clock
             if(BitMask) *BitMask = 0x00FF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1004;
@@ -10523,6 +11537,7 @@ public:
       {
          case 8:
          case 9:
+            // Restart readout state machine automatically after readout (like "normal" acquisition on scope)
             return BitExtractControl(0x1004, 0x00000002, 1);
          default:
             throw std::invalid_argument("Function GetDaqNormal() not defined for this board version");
@@ -10534,6 +11549,7 @@ public:
       {
          case 8:
          case 9:
+            // Restart readout state machine automatically after readout (like "normal" acquisition on scope)
             return SetRegMask(0x1004, 0x00000002, 1, value);
          default:
             throw std::invalid_argument("Function SetDaqNormal() not defined for this board version");
@@ -10545,6 +11561,7 @@ public:
       {
          case 8:
          case 9:
+            // Restart readout state machine automatically after readout (like "normal" acquisition on scope)
             if(BitMask) *BitMask = 0x00000002;
             if(BitOfs) *BitOfs = 1;
             return 0x1004;
@@ -10560,6 +11577,7 @@ public:
       {
          case 8:
          case 9:
+            // Lock of DAQ PLL (FPGA internal)
             return BitExtractStatus(0x002C, 0x00000080, 7);
          default:
             throw std::invalid_argument("Function GetDaqPllLock() not defined for this board version");
@@ -10571,6 +11589,7 @@ public:
       {
          case 8:
          case 9:
+            // Lock of DAQ PLL (FPGA internal)
             if(BitMask) *BitMask = 0x00000080;
             if(BitOfs) *BitOfs = 7;
             return 0x002C;
@@ -10586,6 +11605,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset the PLL for the DAQ clock
             return BitExtractControl(0x1040, 0x00004000, 14);
          default:
             throw std::invalid_argument("Function GetDaqPllRst() not defined for this board version");
@@ -10597,6 +11617,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset the PLL for the DAQ clock
             return SetRegMask(0x1040, 0x00004000, 14, value);
          default:
             throw std::invalid_argument("Function SetDaqPllRst() not defined for this board version");
@@ -10608,6 +11629,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset the PLL for the DAQ clock
             if(BitMask) *BitMask = 0x00004000;
             if(BitOfs) *BitOfs = 14;
             return 0x1040;
@@ -10623,6 +11645,7 @@ public:
       {
          case 8:
          case 9:
+            // Start readout state machine automatically and stop after readout (like "single" acquisition on scope)
             return BitExtractControl(0x1004, 0x00000001, 0);
          default:
             throw std::invalid_argument("Function GetDaqSingle() not defined for this board version");
@@ -10634,6 +11657,7 @@ public:
       {
          case 8:
          case 9:
+            // Start readout state machine automatically and stop after readout (like "single" acquisition on scope)
             return SetRegMask(0x1004, 0x00000001, 0, value);
          default:
             throw std::invalid_argument("Function SetDaqSingle() not defined for this board version");
@@ -10645,6 +11669,7 @@ public:
       {
          case 8:
          case 9:
+            // Start readout state machine automatically and stop after readout (like "single" acquisition on scope)
             if(BitMask) *BitMask = 0x00000001;
             if(BitOfs) *BitOfs = 0;
             return 0x1004;
@@ -10660,6 +11685,7 @@ public:
       {
          case 8:
          case 9:
+            // write a "1" to stop the DRS chip & read the data to RAM
             return BitExtractControl(0x1004, 0x00000020, 5);
          default:
             throw std::invalid_argument("Function GetDaqSoftTrigger() not defined for this board version");
@@ -10671,6 +11697,7 @@ public:
       {
          case 8:
          case 9:
+            // write a "1" to stop the DRS chip & read the data to RAM
             return SetRegMask(0x1004, 0x00000020, 5, value);
          default:
             throw std::invalid_argument("Function SetDaqSoftTrigger() not defined for this board version");
@@ -10682,6 +11709,7 @@ public:
       {
          case 8:
          case 9:
+            // write a "1" to stop the DRS chip & read the data to RAM
             if(BitMask) *BitMask = 0x00000020;
             if(BitOfs) *BitOfs = 5;
             return 0x1004;
@@ -10697,6 +11725,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset of the interface between packager and Ethernet/SERDES interface
             return BitExtractControl(0x1040, 0x00000010, 4);
          default:
             throw std::invalid_argument("Function GetDataLinkIfRst() not defined for this board version");
@@ -10708,6 +11737,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset of the interface between packager and Ethernet/SERDES interface
             return SetRegMask(0x1040, 0x00000010, 4, value);
          default:
             throw std::invalid_argument("Function SetDataLinkIfRst() not defined for this board version");
@@ -10719,6 +11749,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset of the interface between packager and Ethernet/SERDES interface
             if(BitMask) *BitMask = 0x00000010;
             if(BitOfs) *BitOfs = 4;
             return 0x1040;
@@ -10734,6 +11765,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset the DCB OSERDES interface
             return BitExtractControl(0x1040, 0x00000800, 11);
          default:
             throw std::invalid_argument("Function GetDcbOserdesIfRst() not defined for this board version");
@@ -10745,6 +11777,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset the DCB OSERDES interface
             return SetRegMask(0x1040, 0x00000800, 11, value);
          default:
             throw std::invalid_argument("Function SetDcbOserdesIfRst() not defined for this board version");
@@ -10756,6 +11789,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset the DCB OSERDES interface
             if(BitMask) *BitMask = 0x00000800;
             if(BitOfs) *BitOfs = 11;
             return 0x1040;
@@ -10771,6 +11805,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset the PLL of the DCB OSERDES
             return BitExtractControl(0x1040, 0x00002000, 13);
          default:
             throw std::invalid_argument("Function GetDcbOserdesPllRst() not defined for this board version");
@@ -10782,6 +11817,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset the PLL of the DCB OSERDES
             return SetRegMask(0x1040, 0x00002000, 13, value);
          default:
             throw std::invalid_argument("Function SetDcbOserdesPllRst() not defined for this board version");
@@ -10793,6 +11829,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset the PLL of the DCB OSERDES
             if(BitMask) *BitMask = 0x00002000;
             if(BitOfs) *BitOfs = 13;
             return 0x1040;
@@ -10808,6 +11845,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable training pattern for DCB SERDES connection
             return BitExtractControl(0x1014, 0x80000000, 31);
          default:
             throw std::invalid_argument("Function GetDcbSerdesTrain() not defined for this board version");
@@ -10819,6 +11857,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable training pattern for DCB SERDES connection
             return SetRegMask(0x1014, 0x80000000, 31, value);
          default:
             throw std::invalid_argument("Function SetDcbSerdesTrain() not defined for this board version");
@@ -10830,6 +11869,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable training pattern for DCB SERDES connection
             if(BitMask) *BitMask = 0x80000000;
             if(BitOfs) *BitOfs = 31;
             return 0x1014;
@@ -10845,6 +11885,7 @@ public:
       {
          case 8:
          case 9:
+            // Select timing reference signal for DRS 0: 0 = oscillator / 1 = LMK (CAL_CTRL_A)
             return BitExtractControl(0x1008, 0x00000008, 3);
          default:
             throw std::invalid_argument("Function GetDrs0TimingRefSel() not defined for this board version");
@@ -10856,6 +11897,7 @@ public:
       {
          case 8:
          case 9:
+            // Select timing reference signal for DRS 0: 0 = oscillator / 1 = LMK (CAL_CTRL_A)
             return SetRegMask(0x1008, 0x00000008, 3, value);
          default:
             throw std::invalid_argument("Function SetDrs0TimingRefSel() not defined for this board version");
@@ -10867,6 +11909,7 @@ public:
       {
          case 8:
          case 9:
+            // Select timing reference signal for DRS 0: 0 = oscillator / 1 = LMK (CAL_CTRL_A)
             if(BitMask) *BitMask = 0x00000008;
             if(BitOfs) *BitOfs = 3;
             return 0x1008;
@@ -10882,6 +11925,7 @@ public:
       {
          case 8:
          case 9:
+            // Select timing reference signal for DRS 1: 0 = oscillator / 1 = LMK  (CAL_CTRL_B)
             return BitExtractControl(0x1008, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetDrs1TimingRefSel() not defined for this board version");
@@ -10893,6 +11937,7 @@ public:
       {
          case 8:
          case 9:
+            // Select timing reference signal for DRS 1: 0 = oscillator / 1 = LMK  (CAL_CTRL_B)
             return SetRegMask(0x1008, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetDrs1TimingRefSel() not defined for this board version");
@@ -10904,6 +11949,7 @@ public:
       {
          case 8:
          case 9:
+            // Select timing reference signal for DRS 1: 0 = oscillator / 1 = LMK  (CAL_CTRL_B)
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x1008;
@@ -10919,6 +11965,7 @@ public:
       {
          case 8:
          case 9:
+            // DRS channel transmission enable [Ch17:Ch0] - (CH17:CH16 = timing channels)
             return BitExtractControl(0x101C, 0x0003FFFF, 0);
          default:
             throw std::invalid_argument("Function GetDrsChTxEn() not defined for this board version");
@@ -10930,6 +11977,7 @@ public:
       {
          case 8:
          case 9:
+            // DRS channel transmission enable [Ch17:Ch0] - (CH17:CH16 = timing channels)
             return SetRegMask(0x101C, 0x0003FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetDrsChTxEn() not defined for this board version");
@@ -10941,6 +11989,7 @@ public:
       {
          case 8:
          case 9:
+            // DRS channel transmission enable [Ch17:Ch0] - (CH17:CH16 = timing channels)
             if(BitMask) *BitMask = 0x0003FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x101C;
@@ -10956,6 +12005,7 @@ public:
       {
          case 8:
          case 9:
+            // Clear the read shift register (remove the token) after each readout
             return BitExtractControl(0x1004, 0x00000400, 10);
          default:
             throw std::invalid_argument("Function GetDrsClrRsrAfterRo() not defined for this board version");
@@ -10967,6 +12017,7 @@ public:
       {
          case 8:
          case 9:
+            // Clear the read shift register (remove the token) after each readout
             return SetRegMask(0x1004, 0x00000400, 10, value);
          default:
             throw std::invalid_argument("Function SetDrsClrRsrAfterRo() not defined for this board version");
@@ -10978,6 +12029,7 @@ public:
       {
          case 8:
          case 9:
+            // Clear the read shift register (remove the token) after each readout
             if(BitMask) *BitMask = 0x00000400;
             if(BitOfs) *BitOfs = 10;
             return 0x1004;
@@ -10993,6 +12045,7 @@ public:
       {
          case 8:
          case 9:
+            // write a "1" to trigger the DRS chip register configuration
             return BitExtractControl(0x1004, 0x00000040, 6);
          default:
             throw std::invalid_argument("Function GetDrsConfigure() not defined for this board version");
@@ -11004,6 +12057,7 @@ public:
       {
          case 8:
          case 9:
+            // write a "1" to trigger the DRS chip register configuration
             return SetRegMask(0x1004, 0x00000040, 6, value);
          default:
             throw std::invalid_argument("Function SetDrsConfigure() not defined for this board version");
@@ -11015,6 +12069,7 @@ public:
       {
          case 8:
          case 9:
+            // write a "1" to trigger the DRS chip register configuration
             if(BitMask) *BitMask = 0x00000040;
             if(BitOfs) *BitOfs = 6;
             return 0x1004;
@@ -11029,8 +12084,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DRS configuration done
             return BitExtractStatus(0x0028, 0x00000400, 10);
          case 9:
+            // DRS configuration done
             return BitExtractStatus(0x0028, 0x00000200, 9);
          default:
             throw std::invalid_argument("Function GetDrsConfigDone() not defined for this board version");
@@ -11041,10 +12098,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DRS configuration done
             if(BitMask) *BitMask = 0x00000400;
             if(BitOfs) *BitOfs = 10;
             return 0x0028;
          case 9:
+            // DRS configuration done
             if(BitMask) *BitMask = 0x00000200;
             if(BitOfs) *BitOfs = 9;
             return 0x0028;
@@ -11060,6 +12119,7 @@ public:
       {
          case 8:
          case 9:
+            // "1" while domino wave running or readout in progress
             return BitExtractStatus(0x0028, 0x00000020, 5);
          default:
             throw std::invalid_argument("Function GetDrsCtrlBusy() not defined for this board version");
@@ -11071,6 +12131,7 @@ public:
       {
          case 8:
          case 9:
+            // "1" while domino wave running or readout in progress
             if(BitMask) *BitMask = 0x00000020;
             if(BitOfs) *BitOfs = 5;
             return 0x0028;
@@ -11086,6 +12147,7 @@ public:
       {
          case 8:
          case 9:
+            // DRS control FSM reset
             return BitExtractControl(0x1040, 0x00000002, 1);
          default:
             throw std::invalid_argument("Function GetDrsCtrlFsmRst() not defined for this board version");
@@ -11097,6 +12159,7 @@ public:
       {
          case 8:
          case 9:
+            // DRS control FSM reset
             return SetRegMask(0x1040, 0x00000002, 1, value);
          default:
             throw std::invalid_argument("Function SetDrsCtrlFsmRst() not defined for this board version");
@@ -11108,6 +12171,7 @@ public:
       {
          case 8:
          case 9:
+            // DRS control FSM reset
             if(BitMask) *BitMask = 0x00000002;
             if(BitOfs) *BitOfs = 1;
             return 0x1040;
@@ -11122,8 +12186,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DRS control bits modified flags
             return BitExtractStatus(0x013C, 0x00000004, 2);
          case 9:
+            // DRS control bits modified flags
             return BitExtractStatus(0x0138, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetDrsCtrlMod() not defined for this board version");
@@ -11134,10 +12200,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DRS control bits modified flags
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x013C;
          case 9:
+            // DRS control bits modified flags
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x0138;
@@ -11153,6 +12221,7 @@ public:
       {
          case 8:
          case 9:
+            // Domino Mode Control (0 = single shot, 1 = continuous)
             return BitExtractControl(0x1010, 0x00010000, 16);
          default:
             throw std::invalid_argument("Function GetDrsDmode() not defined for this board version");
@@ -11164,6 +12233,7 @@ public:
       {
          case 8:
          case 9:
+            // Domino Mode Control (0 = single shot, 1 = continuous)
             return SetRegMask(0x1010, 0x00010000, 16, value);
          default:
             throw std::invalid_argument("Function SetDrsDmode() not defined for this board version");
@@ -11175,6 +12245,7 @@ public:
       {
          case 8:
          case 9:
+            // Domino Mode Control (0 = single shot, 1 = continuous)
             if(BitMask) *BitMask = 0x00010000;
             if(BitOfs) *BitOfs = 16;
             return 0x1010;
@@ -11190,6 +12261,7 @@ public:
       {
          case 8:
          case 9:
+            // Internal PLL Enable (0 = disable, 1 = enable)
             return BitExtractControl(0x1010, 0x00020000, 17);
          default:
             throw std::invalid_argument("Function GetDrsPllen() not defined for this board version");
@@ -11201,6 +12273,7 @@ public:
       {
          case 8:
          case 9:
+            // Internal PLL Enable (0 = disable, 1 = enable)
             return SetRegMask(0x1010, 0x00020000, 17, value);
          default:
             throw std::invalid_argument("Function SetDrsPllen() not defined for this board version");
@@ -11212,6 +12285,7 @@ public:
       {
          case 8:
          case 9:
+            // Internal PLL Enable (0 = disable, 1 = enable)
             if(BitMask) *BitMask = 0x00020000;
             if(BitOfs) *BitOfs = 17;
             return 0x1010;
@@ -11227,6 +12301,7 @@ public:
       {
          case 8:
          case 9:
+            // PLL lock signal of DRS Channel 0 (A) (external)
             return BitExtractStatus(0x002C, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetDrsPllLock0() not defined for this board version");
@@ -11238,6 +12313,7 @@ public:
       {
          case 8:
          case 9:
+            // PLL lock signal of DRS Channel 0 (A) (external)
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x002C;
@@ -11253,6 +12329,7 @@ public:
       {
          case 8:
          case 9:
+            // PLL lock signal of DRS Channel 1 (B) (external)
             return BitExtractStatus(0x002C, 0x00000002, 1);
          default:
             throw std::invalid_argument("Function GetDrsPllLock1() not defined for this board version");
@@ -11264,6 +12341,7 @@ public:
       {
          case 8:
          case 9:
+            // PLL lock signal of DRS Channel 1 (B) (external)
             if(BitMask) *BitMask = 0x00000002;
             if(BitOfs) *BitOfs = 1;
             return 0x002C;
@@ -11279,6 +12357,7 @@ public:
       {
          case 8:
          case 9:
+            // 0:start from first bin, 1:start from domino stop
             return BitExtractControl(0x1004, 0x00000100, 8);
          default:
             throw std::invalid_argument("Function GetDrsReadoutMode() not defined for this board version");
@@ -11290,6 +12369,7 @@ public:
       {
          case 8:
          case 9:
+            // 0:start from first bin, 1:start from domino stop
             return SetRegMask(0x1004, 0x00000100, 8, value);
          default:
             throw std::invalid_argument("Function SetDrsReadoutMode() not defined for this board version");
@@ -11301,6 +12381,7 @@ public:
       {
          case 8:
          case 9:
+            // 0:start from first bin, 1:start from domino stop
             if(BitMask) *BitMask = 0x00000100;
             if(BitOfs) *BitOfs = 8;
             return 0x1004;
@@ -11316,6 +12397,7 @@ public:
       {
          case 8:
          case 9:
+            // DRS Sampling frequency in kHz
             return BitExtractStatus(0x0038, 0x00FFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetDrsSampleFreq() not defined for this board version");
@@ -11327,6 +12409,7 @@ public:
       {
          case 8:
          case 9:
+            // DRS Sampling frequency in kHz
             if(BitMask) *BitMask = 0x00FFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0038;
@@ -11342,6 +12425,7 @@ public:
       {
          case 8:
          case 9:
+            // Stop position of DRS Channel 0 (A)
             return BitExtractStatus(0x0030, 0x03FF0000, 16);
          default:
             throw std::invalid_argument("Function GetDrsStopCell0() not defined for this board version");
@@ -11353,6 +12437,7 @@ public:
       {
          case 8:
          case 9:
+            // Stop position of DRS Channel 0 (A)
             if(BitMask) *BitMask = 0x03FF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x0030;
@@ -11368,6 +12453,7 @@ public:
       {
          case 8:
          case 9:
+            // Stop position of DRS Channel 1 (B)
             return BitExtractStatus(0x0030, 0x000003FF, 0);
          default:
             throw std::invalid_argument("Function GetDrsStopCell1() not defined for this board version");
@@ -11379,6 +12465,7 @@ public:
       {
          case 8:
          case 9:
+            // Stop position of DRS Channel 1 (B)
             if(BitMask) *BitMask = 0x000003FF;
             if(BitOfs) *BitOfs = 0;
             return 0x0030;
@@ -11394,6 +12481,7 @@ public:
       {
          case 8:
          case 9:
+            // WSR contents after stop of DRS Channel 0 (A)
             return BitExtractStatus(0x0034, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetDrsStopWsr0() not defined for this board version");
@@ -11405,6 +12493,7 @@ public:
       {
          case 8:
          case 9:
+            // WSR contents after stop of DRS Channel 0 (A)
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x0034;
@@ -11420,6 +12509,7 @@ public:
       {
          case 8:
          case 9:
+            // WSR contents after stop of DRS Channel 1 (B)
             return BitExtractStatus(0x0034, 0x000000FF, 0);
          default:
             throw std::invalid_argument("Function GetDrsStopWsr1() not defined for this board version");
@@ -11431,6 +12521,7 @@ public:
       {
          case 8:
          case 9:
+            // WSR contents after stop of DRS Channel 1 (B)
             if(BitMask) *BitMask = 0x000000FF;
             if(BitOfs) *BitOfs = 0;
             return 0x0034;
@@ -11446,6 +12537,7 @@ public:
       {
          case 8:
          case 9:
+            // Number of DRS samples to transmit per channel (must be an even value with range 2 to 1024)
             return BitExtractControl(0x1028, 0x000007FF, 0);
          default:
             throw std::invalid_argument("Function GetDrsTxSamples() not defined for this board version");
@@ -11457,6 +12549,7 @@ public:
       {
          case 8:
          case 9:
+            // Number of DRS samples to transmit per channel (must be an even value with range 2 to 1024)
             return SetRegMask(0x1028, 0x000007FF, 0, value);
          default:
             throw std::invalid_argument("Function SetDrsTxSamples() not defined for this board version");
@@ -11468,6 +12561,7 @@ public:
       {
          case 8:
          case 9:
+            // Number of DRS samples to transmit per channel (must be an even value with range 2 to 1024)
             if(BitMask) *BitMask = 0x000007FF;
             if(BitOfs) *BitOfs = 0;
             return 0x1028;
@@ -11483,6 +12577,7 @@ public:
       {
          case 8:
          case 9:
+            // 0:stop domino wave during readout, 1:keep it running
             return BitExtractControl(0x1004, 0x00000080, 7);
          default:
             throw std::invalid_argument("Function GetDrsWaveContinuous() not defined for this board version");
@@ -11494,6 +12589,7 @@ public:
       {
          case 8:
          case 9:
+            // 0:stop domino wave during readout, 1:keep it running
             return SetRegMask(0x1004, 0x00000080, 7, value);
          default:
             throw std::invalid_argument("Function SetDrsWaveContinuous() not defined for this board version");
@@ -11505,6 +12601,7 @@ public:
       {
          case 8:
          case 9:
+            // 0:stop domino wave during readout, 1:keep it running
             if(BitMask) *BitMask = 0x00000080;
             if(BitOfs) *BitOfs = 7;
             return 0x1004;
@@ -11520,6 +12617,7 @@ public:
       {
          case 8:
          case 9:
+            // DRS4 Write Configuration Register (0xE)
             return BitExtractControl(0x1010, 0x000000FF, 0);
          default:
             throw std::invalid_argument("Function GetDrsWcr() not defined for this board version");
@@ -11531,6 +12629,7 @@ public:
       {
          case 8:
          case 9:
+            // DRS4 Write Configuration Register (0xE)
             return SetRegMask(0x1010, 0x000000FF, 0, value);
          default:
             throw std::invalid_argument("Function SetDrsWcr() not defined for this board version");
@@ -11542,6 +12641,7 @@ public:
       {
          case 8:
          case 9:
+            // DRS4 Write Configuration Register (0xE)
             if(BitMask) *BitMask = 0x000000FF;
             if(BitOfs) *BitOfs = 0;
             return 0x1010;
@@ -11556,8 +12656,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DRS write control register modified flags
             return BitExtractStatus(0x013C, 0x00000001, 0);
          case 9:
+            // DRS write control register modified flags
             return BitExtractStatus(0x0138, 0x00000001, 0);
          default:
             throw std::invalid_argument("Function GetDrsWcrMod() not defined for this board version");
@@ -11568,10 +12670,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DRS write control register modified flags
             if(BitMask) *BitMask = 0x00000001;
             if(BitOfs) *BitOfs = 0;
             return 0x013C;
          case 9:
+            // DRS write control register modified flags
             if(BitMask) *BitMask = 0x00000001;
             if(BitOfs) *BitOfs = 0;
             return 0x0138;
@@ -11587,6 +12691,7 @@ public:
       {
          case 8:
          case 9:
+            // DRS4 Write Shift Register (0xD)
             return BitExtractControl(0x1010, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetDrsWsr() not defined for this board version");
@@ -11598,6 +12703,7 @@ public:
       {
          case 8:
          case 9:
+            // DRS4 Write Shift Register (0xD)
             return SetRegMask(0x1010, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetDrsWsr() not defined for this board version");
@@ -11609,6 +12715,7 @@ public:
       {
          case 8:
          case 9:
+            // DRS4 Write Shift Register (0xD)
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x1010;
@@ -11624,6 +12731,7 @@ public:
       {
          case 8:
          case 9:
+            // Internally Connect WSRIN to WSROUT (if set to 1)
             return BitExtractControl(0x1010, 0x00040000, 18);
          default:
             throw std::invalid_argument("Function GetDrsWsrloop() not defined for this board version");
@@ -11635,6 +12743,7 @@ public:
       {
          case 8:
          case 9:
+            // Internally Connect WSRIN to WSROUT (if set to 1)
             return SetRegMask(0x1010, 0x00040000, 18, value);
          default:
             throw std::invalid_argument("Function SetDrsWsrloop() not defined for this board version");
@@ -11646,6 +12755,7 @@ public:
       {
          case 8:
          case 9:
+            // Internally Connect WSRIN to WSROUT (if set to 1)
             if(BitMask) *BitMask = 0x00040000;
             if(BitOfs) *BitOfs = 18;
             return 0x1010;
@@ -11660,8 +12770,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DRS write shift register modified flags
             return BitExtractStatus(0x013C, 0x00000002, 1);
          case 9:
+            // DRS write shift register modified flags
             return BitExtractStatus(0x0138, 0x00000002, 1);
          default:
             throw std::invalid_argument("Function GetDrsWsrMod() not defined for this board version");
@@ -11672,10 +12784,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // DRS write shift register modified flags
             if(BitMask) *BitMask = 0x00000002;
             if(BitOfs) *BitOfs = 1;
             return 0x013C;
          case 9:
+            // DRS write shift register modified flags
             if(BitMask) *BitMask = 0x00000002;
             if(BitOfs) *BitOfs = 1;
             return 0x0138;
@@ -11691,6 +12805,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable ethernet communication
             return BitExtractControl(0x1014, 0x01000000, 24);
          default:
             throw std::invalid_argument("Function GetEthComEn() not defined for this board version");
@@ -11702,6 +12817,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable ethernet communication
             return SetRegMask(0x1014, 0x01000000, 24, value);
          default:
             throw std::invalid_argument("Function SetEthComEn() not defined for this board version");
@@ -11713,6 +12829,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable ethernet communication
             if(BitMask) *BitMask = 0x01000000;
             if(BitOfs) *BitOfs = 24;
             return 0x1014;
@@ -11728,6 +12845,7 @@ public:
       {
          case 8:
          case 9:
+            // Event Counter Reset
             return BitExtractControl(0x1040, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetEventCounterRst() not defined for this board version");
@@ -11739,6 +12857,7 @@ public:
       {
          case 8:
          case 9:
+            // Event Counter Reset
             return SetRegMask(0x1040, 0x00000004, 2, value);
          default:
             throw std::invalid_argument("Function SetEventCounterRst() not defined for this board version");
@@ -11750,6 +12869,7 @@ public:
       {
          case 8:
          case 9:
+            // Event Counter Reset
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
             return 0x1040;
@@ -11764,8 +12884,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Number of latest event
             return BitExtractStatus(0x0104, 0xFFFFFFFF, 0);
          case 9:
+            // Number of latest event
             return BitExtractStatus(0x0100, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetEventNumber() not defined for this board version");
@@ -11776,10 +12898,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Number of latest event
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0104;
          case 9:
+            // Number of latest event
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0100;
@@ -11794,8 +12918,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Number of events transmitted per second
             return BitExtractStatus(0x0100, 0xFFFFFFFF, 0);
          case 9:
+            // Number of events transmitted per second
             return BitExtractStatus(0x00FC, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetEventTxRate() not defined for this board version");
@@ -11806,10 +12932,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Number of events transmitted per second
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0100;
          case 9:
+            // Number of events transmitted per second
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00FC;
@@ -11824,8 +12952,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Enable asynchronous external trigger
             return BitExtractControl(0x1180, 0x00002000, 13);
          case 9:
+            // Enable asynchronous external trigger
             return BitExtractControl(0x1124, 0x00002000, 13);
          default:
             throw std::invalid_argument("Function GetExtAsyncTriggerEn() not defined for this board version");
@@ -11836,8 +12966,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Enable asynchronous external trigger
             return SetRegMask(0x1180, 0x00002000, 13, value);
          case 9:
+            // Enable asynchronous external trigger
             return SetRegMask(0x1124, 0x00002000, 13, value);
          default:
             throw std::invalid_argument("Function SetExtAsyncTriggerEn() not defined for this board version");
@@ -11848,10 +12980,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Enable asynchronous external trigger
             if(BitMask) *BitMask = 0x00002000;
             if(BitOfs) *BitOfs = 13;
             return 0x1180;
          case 9:
+            // Enable asynchronous external trigger
             if(BitMask) *BitMask = 0x00002000;
             if(BitOfs) *BitOfs = 13;
             return 0x1124;
@@ -11867,6 +13001,7 @@ public:
       {
          case 8:
          case 9:
+            // External clock frequency (MCX or backplane) in MHz
             return BitExtractControl(0x100C, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetExtClkFreq() not defined for this board version");
@@ -11878,6 +13013,7 @@ public:
       {
          case 8:
          case 9:
+            // External clock frequency (MCX or backplane) in MHz
             return SetRegMask(0x100C, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetExtClkFreq() not defined for this board version");
@@ -11889,6 +13025,7 @@ public:
       {
          case 8:
          case 9:
+            // External clock frequency (MCX or backplane) in MHz
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x100C;
@@ -11903,8 +13040,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // External clock frequency modified flags
             return BitExtractStatus(0x0138, 0x00000002, 1);
          case 9:
+            // External clock frequency modified flags
             return BitExtractStatus(0x0134, 0x00000002, 1);
          default:
             throw std::invalid_argument("Function GetExtClkFreqMod() not defined for this board version");
@@ -11915,10 +13054,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // External clock frequency modified flags
             if(BitMask) *BitMask = 0x00000002;
             if(BitOfs) *BitOfs = 1;
             return 0x0138;
          case 9:
+            // External clock frequency modified flags
             if(BitMask) *BitMask = 0x00000002;
             if(BitOfs) *BitOfs = 1;
             return 0x0134;
@@ -11934,6 +13075,7 @@ public:
       {
          case 8:
          case 9:
+            // External clk input select: 0 = backplane / 1 = MCX connector (CLK_SEL_EXT)
             return BitExtractControl(0x100C, 0x00010000, 16);
          default:
             throw std::invalid_argument("Function GetExtClkInSel() not defined for this board version");
@@ -11945,6 +13087,7 @@ public:
       {
          case 8:
          case 9:
+            // External clk input select: 0 = backplane / 1 = MCX connector (CLK_SEL_EXT)
             return SetRegMask(0x100C, 0x00010000, 16, value);
          default:
             throw std::invalid_argument("Function SetExtClkInSel() not defined for this board version");
@@ -11956,6 +13099,7 @@ public:
       {
          case 8:
          case 9:
+            // External clk input select: 0 = backplane / 1 = MCX connector (CLK_SEL_EXT)
             if(BitMask) *BitMask = 0x00010000;
             if(BitOfs) *BitOfs = 16;
             return 0x100C;
@@ -11970,8 +13114,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Enable output of trigger signal to MCX connector
             return BitExtractControl(0x1180, 0x00008000, 15);
          case 9:
+            // Enable output of trigger signal to MCX connector
             return BitExtractControl(0x1124, 0x00008000, 15);
          default:
             throw std::invalid_argument("Function GetExtTriggerOutEnable() not defined for this board version");
@@ -11982,8 +13128,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Enable output of trigger signal to MCX connector
             return SetRegMask(0x1180, 0x00008000, 15, value);
          case 9:
+            // Enable output of trigger signal to MCX connector
             return SetRegMask(0x1124, 0x00008000, 15, value);
          default:
             throw std::invalid_argument("Function SetExtTriggerOutEnable() not defined for this board version");
@@ -11994,10 +13142,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Enable output of trigger signal to MCX connector
             if(BitMask) *BitMask = 0x00008000;
             if(BitOfs) *BitOfs = 15;
             return 0x1180;
          case 9:
+            // Enable output of trigger signal to MCX connector
             if(BitMask) *BitMask = 0x00008000;
             if(BitOfs) *BitOfs = 15;
             return 0x1124;
@@ -12013,6 +13163,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 0 amplifier 1 compensation enable (COMP1)
             return BitExtractControl(0x1078, 0x00200000, 21);
          default:
             throw std::invalid_argument("Function GetFe0Amplifier1CompEn() not defined for this board version");
@@ -12024,6 +13175,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 0 amplifier 1 compensation enable (COMP1)
             return SetRegMask(0x1078, 0x00200000, 21, value);
          default:
             throw std::invalid_argument("Function SetFe0Amplifier1CompEn() not defined for this board version");
@@ -12035,6 +13187,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 0 amplifier 1 compensation enable (COMP1)
             if(BitMask) *BitMask = 0x00200000;
             if(BitOfs) *BitOfs = 21;
             return 0x1078;
@@ -12050,6 +13203,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 0 amplifier 1 enable (gain: 10) (OP1)
             return BitExtractControl(0x1078, 0x00100000, 20);
          default:
             throw std::invalid_argument("Function GetFe0Amplifier1En() not defined for this board version");
@@ -12061,6 +13215,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 0 amplifier 1 enable (gain: 10) (OP1)
             return SetRegMask(0x1078, 0x00100000, 20, value);
          default:
             throw std::invalid_argument("Function SetFe0Amplifier1En() not defined for this board version");
@@ -12072,6 +13227,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 0 amplifier 1 enable (gain: 10) (OP1)
             if(BitMask) *BitMask = 0x00100000;
             if(BitOfs) *BitOfs = 20;
             return 0x1078;
@@ -12087,6 +13243,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 0 amplifier 2 compensation enable (COMP2)
             return BitExtractControl(0x1078, 0x00800000, 23);
          default:
             throw std::invalid_argument("Function GetFe0Amplifier2CompEn() not defined for this board version");
@@ -12098,6 +13255,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 0 amplifier 2 compensation enable (COMP2)
             return SetRegMask(0x1078, 0x00800000, 23, value);
          default:
             throw std::invalid_argument("Function SetFe0Amplifier2CompEn() not defined for this board version");
@@ -12109,6 +13267,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 0 amplifier 2 compensation enable (COMP2)
             if(BitMask) *BitMask = 0x00800000;
             if(BitOfs) *BitOfs = 23;
             return 0x1078;
@@ -12124,6 +13283,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 0 amplifier 2 enable (gain: 10) (OP2)
             return BitExtractControl(0x1078, 0x00400000, 22);
          default:
             throw std::invalid_argument("Function GetFe0Amplifier2En() not defined for this board version");
@@ -12135,6 +13295,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 0 amplifier 2 enable (gain: 10) (OP2)
             return SetRegMask(0x1078, 0x00400000, 22, value);
          default:
             throw std::invalid_argument("Function SetFe0Amplifier2En() not defined for this board version");
@@ -12146,6 +13307,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 0 amplifier 2 enable (gain: 10) (OP2)
             if(BitMask) *BitMask = 0x00400000;
             if(BitOfs) *BitOfs = 22;
             return 0x1078;
@@ -12161,6 +13323,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 0 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return BitExtractControl(0x1078, 0x000C0000, 18);
          default:
             throw std::invalid_argument("Function GetFe0Attenuation() not defined for this board version");
@@ -12172,6 +13335,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 0 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return SetRegMask(0x1078, 0x000C0000, 18, value);
          default:
             throw std::invalid_argument("Function SetFe0Attenuation() not defined for this board version");
@@ -12183,6 +13347,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 0 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             if(BitMask) *BitMask = 0x000C0000;
             if(BitOfs) *BitOfs = 18;
             return 0x1078;
@@ -12198,6 +13363,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 0 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return BitExtractControl(0x1078, 0x00030000, 16);
          default:
             throw std::invalid_argument("Function GetFe0Mux() not defined for this board version");
@@ -12209,6 +13375,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 0 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return SetRegMask(0x1078, 0x00030000, 16, value);
          default:
             throw std::invalid_argument("Function SetFe0Mux() not defined for this board version");
@@ -12220,6 +13387,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 0 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             if(BitMask) *BitMask = 0x00030000;
             if(BitOfs) *BitOfs = 16;
             return 0x1078;
@@ -12235,6 +13403,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 0 PZC (pole-zero cancellation) enable (ACDC)
             return BitExtractControl(0x1078, 0x01000000, 24);
          default:
             throw std::invalid_argument("Function GetFe0PzcEn() not defined for this board version");
@@ -12246,6 +13415,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 0 PZC (pole-zero cancellation) enable (ACDC)
             return SetRegMask(0x1078, 0x01000000, 24, value);
          default:
             throw std::invalid_argument("Function SetFe0PzcEn() not defined for this board version");
@@ -12257,6 +13427,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 0 PZC (pole-zero cancellation) enable (ACDC)
             if(BitMask) *BitMask = 0x01000000;
             if(BitOfs) *BitOfs = 24;
             return 0x1078;
@@ -12272,6 +13443,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 10 amplifier 1 compensation enable (COMP1)
             return BitExtractControl(0x108C, 0x00200000, 21);
          default:
             throw std::invalid_argument("Function GetFe10Amplifier1CompEn() not defined for this board version");
@@ -12283,6 +13455,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 10 amplifier 1 compensation enable (COMP1)
             return SetRegMask(0x108C, 0x00200000, 21, value);
          default:
             throw std::invalid_argument("Function SetFe10Amplifier1CompEn() not defined for this board version");
@@ -12294,6 +13467,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 10 amplifier 1 compensation enable (COMP1)
             if(BitMask) *BitMask = 0x00200000;
             if(BitOfs) *BitOfs = 21;
             return 0x108C;
@@ -12309,6 +13483,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 10 amplifier 1 enable (gain: 10) (OP1)
             return BitExtractControl(0x108C, 0x00100000, 20);
          default:
             throw std::invalid_argument("Function GetFe10Amplifier1En() not defined for this board version");
@@ -12320,6 +13495,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 10 amplifier 1 enable (gain: 10) (OP1)
             return SetRegMask(0x108C, 0x00100000, 20, value);
          default:
             throw std::invalid_argument("Function SetFe10Amplifier1En() not defined for this board version");
@@ -12331,6 +13507,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 10 amplifier 1 enable (gain: 10) (OP1)
             if(BitMask) *BitMask = 0x00100000;
             if(BitOfs) *BitOfs = 20;
             return 0x108C;
@@ -12346,6 +13523,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 10 amplifier 2 compensation enable (COMP2)
             return BitExtractControl(0x108C, 0x00800000, 23);
          default:
             throw std::invalid_argument("Function GetFe10Amplifier2CompEn() not defined for this board version");
@@ -12357,6 +13535,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 10 amplifier 2 compensation enable (COMP2)
             return SetRegMask(0x108C, 0x00800000, 23, value);
          default:
             throw std::invalid_argument("Function SetFe10Amplifier2CompEn() not defined for this board version");
@@ -12368,6 +13547,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 10 amplifier 2 compensation enable (COMP2)
             if(BitMask) *BitMask = 0x00800000;
             if(BitOfs) *BitOfs = 23;
             return 0x108C;
@@ -12383,6 +13563,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 10 amplifier 2 enable (gain: 10) (OP2)
             return BitExtractControl(0x108C, 0x00400000, 22);
          default:
             throw std::invalid_argument("Function GetFe10Amplifier2En() not defined for this board version");
@@ -12394,6 +13575,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 10 amplifier 2 enable (gain: 10) (OP2)
             return SetRegMask(0x108C, 0x00400000, 22, value);
          default:
             throw std::invalid_argument("Function SetFe10Amplifier2En() not defined for this board version");
@@ -12405,6 +13587,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 10 amplifier 2 enable (gain: 10) (OP2)
             if(BitMask) *BitMask = 0x00400000;
             if(BitOfs) *BitOfs = 22;
             return 0x108C;
@@ -12420,6 +13603,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 10 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return BitExtractControl(0x108C, 0x000C0000, 18);
          default:
             throw std::invalid_argument("Function GetFe10Attenuation() not defined for this board version");
@@ -12431,6 +13615,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 10 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return SetRegMask(0x108C, 0x000C0000, 18, value);
          default:
             throw std::invalid_argument("Function SetFe10Attenuation() not defined for this board version");
@@ -12442,6 +13627,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 10 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             if(BitMask) *BitMask = 0x000C0000;
             if(BitOfs) *BitOfs = 18;
             return 0x108C;
@@ -12457,6 +13643,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 10 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return BitExtractControl(0x108C, 0x00030000, 16);
          default:
             throw std::invalid_argument("Function GetFe10Mux() not defined for this board version");
@@ -12468,6 +13655,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 10 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return SetRegMask(0x108C, 0x00030000, 16, value);
          default:
             throw std::invalid_argument("Function SetFe10Mux() not defined for this board version");
@@ -12479,6 +13667,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 10 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             if(BitMask) *BitMask = 0x00030000;
             if(BitOfs) *BitOfs = 16;
             return 0x108C;
@@ -12494,6 +13683,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 10 PZC (pole-zero cancellation) enable (ACDC)
             return BitExtractControl(0x108C, 0x01000000, 24);
          default:
             throw std::invalid_argument("Function GetFe10PzcEn() not defined for this board version");
@@ -12505,6 +13695,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 10 PZC (pole-zero cancellation) enable (ACDC)
             return SetRegMask(0x108C, 0x01000000, 24, value);
          default:
             throw std::invalid_argument("Function SetFe10PzcEn() not defined for this board version");
@@ -12516,6 +13707,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 10 PZC (pole-zero cancellation) enable (ACDC)
             if(BitMask) *BitMask = 0x01000000;
             if(BitOfs) *BitOfs = 24;
             return 0x108C;
@@ -12531,6 +13723,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 11 amplifier 1 compensation enable (COMP1)
             return BitExtractControl(0x108C, 0x00000020, 5);
          default:
             throw std::invalid_argument("Function GetFe11Amplifier1CompEn() not defined for this board version");
@@ -12542,6 +13735,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 11 amplifier 1 compensation enable (COMP1)
             return SetRegMask(0x108C, 0x00000020, 5, value);
          default:
             throw std::invalid_argument("Function SetFe11Amplifier1CompEn() not defined for this board version");
@@ -12553,6 +13747,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 11 amplifier 1 compensation enable (COMP1)
             if(BitMask) *BitMask = 0x00000020;
             if(BitOfs) *BitOfs = 5;
             return 0x108C;
@@ -12568,6 +13763,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 11 amplifier 1 enable (gain: 10) (OP1)
             return BitExtractControl(0x108C, 0x00000010, 4);
          default:
             throw std::invalid_argument("Function GetFe11Amplifier1En() not defined for this board version");
@@ -12579,6 +13775,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 11 amplifier 1 enable (gain: 10) (OP1)
             return SetRegMask(0x108C, 0x00000010, 4, value);
          default:
             throw std::invalid_argument("Function SetFe11Amplifier1En() not defined for this board version");
@@ -12590,6 +13787,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 11 amplifier 1 enable (gain: 10) (OP1)
             if(BitMask) *BitMask = 0x00000010;
             if(BitOfs) *BitOfs = 4;
             return 0x108C;
@@ -12605,6 +13803,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 11 amplifier 2 compensation enable (COMP2)
             return BitExtractControl(0x108C, 0x00000080, 7);
          default:
             throw std::invalid_argument("Function GetFe11Amplifier2CompEn() not defined for this board version");
@@ -12616,6 +13815,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 11 amplifier 2 compensation enable (COMP2)
             return SetRegMask(0x108C, 0x00000080, 7, value);
          default:
             throw std::invalid_argument("Function SetFe11Amplifier2CompEn() not defined for this board version");
@@ -12627,6 +13827,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 11 amplifier 2 compensation enable (COMP2)
             if(BitMask) *BitMask = 0x00000080;
             if(BitOfs) *BitOfs = 7;
             return 0x108C;
@@ -12642,6 +13843,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 11 amplifier 2 enable (gain: 10) (OP2)
             return BitExtractControl(0x108C, 0x00000040, 6);
          default:
             throw std::invalid_argument("Function GetFe11Amplifier2En() not defined for this board version");
@@ -12653,6 +13855,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 11 amplifier 2 enable (gain: 10) (OP2)
             return SetRegMask(0x108C, 0x00000040, 6, value);
          default:
             throw std::invalid_argument("Function SetFe11Amplifier2En() not defined for this board version");
@@ -12664,6 +13867,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 11 amplifier 2 enable (gain: 10) (OP2)
             if(BitMask) *BitMask = 0x00000040;
             if(BitOfs) *BitOfs = 6;
             return 0x108C;
@@ -12679,6 +13883,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 11 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return BitExtractControl(0x108C, 0x0000000C, 2);
          default:
             throw std::invalid_argument("Function GetFe11Attenuation() not defined for this board version");
@@ -12690,6 +13895,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 11 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return SetRegMask(0x108C, 0x0000000C, 2, value);
          default:
             throw std::invalid_argument("Function SetFe11Attenuation() not defined for this board version");
@@ -12701,6 +13907,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 11 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             if(BitMask) *BitMask = 0x0000000C;
             if(BitOfs) *BitOfs = 2;
             return 0x108C;
@@ -12716,6 +13923,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 11 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return BitExtractControl(0x108C, 0x00000003, 0);
          default:
             throw std::invalid_argument("Function GetFe11Mux() not defined for this board version");
@@ -12727,6 +13935,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 11 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return SetRegMask(0x108C, 0x00000003, 0, value);
          default:
             throw std::invalid_argument("Function SetFe11Mux() not defined for this board version");
@@ -12738,6 +13947,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 11 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             if(BitMask) *BitMask = 0x00000003;
             if(BitOfs) *BitOfs = 0;
             return 0x108C;
@@ -12753,6 +13963,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 11 PZC (pole-zero cancellation) enable (ACDC)
             return BitExtractControl(0x108C, 0x00000100, 8);
          default:
             throw std::invalid_argument("Function GetFe11PzcEn() not defined for this board version");
@@ -12764,6 +13975,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 11 PZC (pole-zero cancellation) enable (ACDC)
             return SetRegMask(0x108C, 0x00000100, 8, value);
          default:
             throw std::invalid_argument("Function SetFe11PzcEn() not defined for this board version");
@@ -12775,6 +13987,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 11 PZC (pole-zero cancellation) enable (ACDC)
             if(BitMask) *BitMask = 0x00000100;
             if(BitOfs) *BitOfs = 8;
             return 0x108C;
@@ -12790,6 +14003,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 12 amplifier 1 compensation enable (COMP1)
             return BitExtractControl(0x1090, 0x00200000, 21);
          default:
             throw std::invalid_argument("Function GetFe12Amplifier1CompEn() not defined for this board version");
@@ -12801,6 +14015,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 12 amplifier 1 compensation enable (COMP1)
             return SetRegMask(0x1090, 0x00200000, 21, value);
          default:
             throw std::invalid_argument("Function SetFe12Amplifier1CompEn() not defined for this board version");
@@ -12812,6 +14027,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 12 amplifier 1 compensation enable (COMP1)
             if(BitMask) *BitMask = 0x00200000;
             if(BitOfs) *BitOfs = 21;
             return 0x1090;
@@ -12827,6 +14043,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 12 amplifier 1 enable (gain: 10) (OP1)
             return BitExtractControl(0x1090, 0x00100000, 20);
          default:
             throw std::invalid_argument("Function GetFe12Amplifier1En() not defined for this board version");
@@ -12838,6 +14055,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 12 amplifier 1 enable (gain: 10) (OP1)
             return SetRegMask(0x1090, 0x00100000, 20, value);
          default:
             throw std::invalid_argument("Function SetFe12Amplifier1En() not defined for this board version");
@@ -12849,6 +14067,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 12 amplifier 1 enable (gain: 10) (OP1)
             if(BitMask) *BitMask = 0x00100000;
             if(BitOfs) *BitOfs = 20;
             return 0x1090;
@@ -12864,6 +14083,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 12 amplifier 2 compensation enable (COMP2)
             return BitExtractControl(0x1090, 0x00800000, 23);
          default:
             throw std::invalid_argument("Function GetFe12Amplifier2CompEn() not defined for this board version");
@@ -12875,6 +14095,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 12 amplifier 2 compensation enable (COMP2)
             return SetRegMask(0x1090, 0x00800000, 23, value);
          default:
             throw std::invalid_argument("Function SetFe12Amplifier2CompEn() not defined for this board version");
@@ -12886,6 +14107,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 12 amplifier 2 compensation enable (COMP2)
             if(BitMask) *BitMask = 0x00800000;
             if(BitOfs) *BitOfs = 23;
             return 0x1090;
@@ -12901,6 +14123,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 12 amplifier 2 enable (gain: 10) (OP2)
             return BitExtractControl(0x1090, 0x00400000, 22);
          default:
             throw std::invalid_argument("Function GetFe12Amplifier2En() not defined for this board version");
@@ -12912,6 +14135,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 12 amplifier 2 enable (gain: 10) (OP2)
             return SetRegMask(0x1090, 0x00400000, 22, value);
          default:
             throw std::invalid_argument("Function SetFe12Amplifier2En() not defined for this board version");
@@ -12923,6 +14147,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 12 amplifier 2 enable (gain: 10) (OP2)
             if(BitMask) *BitMask = 0x00400000;
             if(BitOfs) *BitOfs = 22;
             return 0x1090;
@@ -12938,6 +14163,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 12 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return BitExtractControl(0x1090, 0x000C0000, 18);
          default:
             throw std::invalid_argument("Function GetFe12Attenuation() not defined for this board version");
@@ -12949,6 +14175,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 12 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return SetRegMask(0x1090, 0x000C0000, 18, value);
          default:
             throw std::invalid_argument("Function SetFe12Attenuation() not defined for this board version");
@@ -12960,6 +14187,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 12 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             if(BitMask) *BitMask = 0x000C0000;
             if(BitOfs) *BitOfs = 18;
             return 0x1090;
@@ -12975,6 +14203,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 12 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return BitExtractControl(0x1090, 0x00030000, 16);
          default:
             throw std::invalid_argument("Function GetFe12Mux() not defined for this board version");
@@ -12986,6 +14215,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 12 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return SetRegMask(0x1090, 0x00030000, 16, value);
          default:
             throw std::invalid_argument("Function SetFe12Mux() not defined for this board version");
@@ -12997,6 +14227,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 12 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             if(BitMask) *BitMask = 0x00030000;
             if(BitOfs) *BitOfs = 16;
             return 0x1090;
@@ -13012,6 +14243,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 12 PZC (pole-zero cancellation) enable (ACDC)
             return BitExtractControl(0x1090, 0x01000000, 24);
          default:
             throw std::invalid_argument("Function GetFe12PzcEn() not defined for this board version");
@@ -13023,6 +14255,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 12 PZC (pole-zero cancellation) enable (ACDC)
             return SetRegMask(0x1090, 0x01000000, 24, value);
          default:
             throw std::invalid_argument("Function SetFe12PzcEn() not defined for this board version");
@@ -13034,6 +14267,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 12 PZC (pole-zero cancellation) enable (ACDC)
             if(BitMask) *BitMask = 0x01000000;
             if(BitOfs) *BitOfs = 24;
             return 0x1090;
@@ -13049,6 +14283,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 13 amplifier 1 compensation enable (COMP1)
             return BitExtractControl(0x1090, 0x00000020, 5);
          default:
             throw std::invalid_argument("Function GetFe13Amplifier1CompEn() not defined for this board version");
@@ -13060,6 +14295,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 13 amplifier 1 compensation enable (COMP1)
             return SetRegMask(0x1090, 0x00000020, 5, value);
          default:
             throw std::invalid_argument("Function SetFe13Amplifier1CompEn() not defined for this board version");
@@ -13071,6 +14307,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 13 amplifier 1 compensation enable (COMP1)
             if(BitMask) *BitMask = 0x00000020;
             if(BitOfs) *BitOfs = 5;
             return 0x1090;
@@ -13086,6 +14323,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 13 amplifier 1 enable (gain: 10) (OP1)
             return BitExtractControl(0x1090, 0x00000010, 4);
          default:
             throw std::invalid_argument("Function GetFe13Amplifier1En() not defined for this board version");
@@ -13097,6 +14335,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 13 amplifier 1 enable (gain: 10) (OP1)
             return SetRegMask(0x1090, 0x00000010, 4, value);
          default:
             throw std::invalid_argument("Function SetFe13Amplifier1En() not defined for this board version");
@@ -13108,6 +14347,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 13 amplifier 1 enable (gain: 10) (OP1)
             if(BitMask) *BitMask = 0x00000010;
             if(BitOfs) *BitOfs = 4;
             return 0x1090;
@@ -13123,6 +14363,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 13 amplifier 2 compensation enable (COMP2)
             return BitExtractControl(0x1090, 0x00000080, 7);
          default:
             throw std::invalid_argument("Function GetFe13Amplifier2CompEn() not defined for this board version");
@@ -13134,6 +14375,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 13 amplifier 2 compensation enable (COMP2)
             return SetRegMask(0x1090, 0x00000080, 7, value);
          default:
             throw std::invalid_argument("Function SetFe13Amplifier2CompEn() not defined for this board version");
@@ -13145,6 +14387,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 13 amplifier 2 compensation enable (COMP2)
             if(BitMask) *BitMask = 0x00000080;
             if(BitOfs) *BitOfs = 7;
             return 0x1090;
@@ -13160,6 +14403,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 13 amplifier 2 enable (gain: 10) (OP2)
             return BitExtractControl(0x1090, 0x00000040, 6);
          default:
             throw std::invalid_argument("Function GetFe13Amplifier2En() not defined for this board version");
@@ -13171,6 +14415,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 13 amplifier 2 enable (gain: 10) (OP2)
             return SetRegMask(0x1090, 0x00000040, 6, value);
          default:
             throw std::invalid_argument("Function SetFe13Amplifier2En() not defined for this board version");
@@ -13182,6 +14427,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 13 amplifier 2 enable (gain: 10) (OP2)
             if(BitMask) *BitMask = 0x00000040;
             if(BitOfs) *BitOfs = 6;
             return 0x1090;
@@ -13197,6 +14443,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 13 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return BitExtractControl(0x1090, 0x0000000C, 2);
          default:
             throw std::invalid_argument("Function GetFe13Attenuation() not defined for this board version");
@@ -13208,6 +14455,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 13 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return SetRegMask(0x1090, 0x0000000C, 2, value);
          default:
             throw std::invalid_argument("Function SetFe13Attenuation() not defined for this board version");
@@ -13219,6 +14467,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 13 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             if(BitMask) *BitMask = 0x0000000C;
             if(BitOfs) *BitOfs = 2;
             return 0x1090;
@@ -13234,6 +14483,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 13 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return BitExtractControl(0x1090, 0x00000003, 0);
          default:
             throw std::invalid_argument("Function GetFe13Mux() not defined for this board version");
@@ -13245,6 +14495,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 13 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return SetRegMask(0x1090, 0x00000003, 0, value);
          default:
             throw std::invalid_argument("Function SetFe13Mux() not defined for this board version");
@@ -13256,6 +14507,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 13 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             if(BitMask) *BitMask = 0x00000003;
             if(BitOfs) *BitOfs = 0;
             return 0x1090;
@@ -13271,6 +14523,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 13 PZC (pole-zero cancellation) enable (ACDC)
             return BitExtractControl(0x1090, 0x00000100, 8);
          default:
             throw std::invalid_argument("Function GetFe13PzcEn() not defined for this board version");
@@ -13282,6 +14535,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 13 PZC (pole-zero cancellation) enable (ACDC)
             return SetRegMask(0x1090, 0x00000100, 8, value);
          default:
             throw std::invalid_argument("Function SetFe13PzcEn() not defined for this board version");
@@ -13293,6 +14547,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 13 PZC (pole-zero cancellation) enable (ACDC)
             if(BitMask) *BitMask = 0x00000100;
             if(BitOfs) *BitOfs = 8;
             return 0x1090;
@@ -13308,6 +14563,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 14 amplifier 1 compensation enable (COMP1)
             return BitExtractControl(0x1094, 0x00200000, 21);
          default:
             throw std::invalid_argument("Function GetFe14Amplifier1CompEn() not defined for this board version");
@@ -13319,6 +14575,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 14 amplifier 1 compensation enable (COMP1)
             return SetRegMask(0x1094, 0x00200000, 21, value);
          default:
             throw std::invalid_argument("Function SetFe14Amplifier1CompEn() not defined for this board version");
@@ -13330,6 +14587,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 14 amplifier 1 compensation enable (COMP1)
             if(BitMask) *BitMask = 0x00200000;
             if(BitOfs) *BitOfs = 21;
             return 0x1094;
@@ -13345,6 +14603,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 14 amplifier 1 enable (gain: 10) (OP1)
             return BitExtractControl(0x1094, 0x00100000, 20);
          default:
             throw std::invalid_argument("Function GetFe14Amplifier1En() not defined for this board version");
@@ -13356,6 +14615,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 14 amplifier 1 enable (gain: 10) (OP1)
             return SetRegMask(0x1094, 0x00100000, 20, value);
          default:
             throw std::invalid_argument("Function SetFe14Amplifier1En() not defined for this board version");
@@ -13367,6 +14627,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 14 amplifier 1 enable (gain: 10) (OP1)
             if(BitMask) *BitMask = 0x00100000;
             if(BitOfs) *BitOfs = 20;
             return 0x1094;
@@ -13382,6 +14643,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 14 amplifier 2 compensation enable (COMP2)
             return BitExtractControl(0x1094, 0x00800000, 23);
          default:
             throw std::invalid_argument("Function GetFe14Amplifier2CompEn() not defined for this board version");
@@ -13393,6 +14655,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 14 amplifier 2 compensation enable (COMP2)
             return SetRegMask(0x1094, 0x00800000, 23, value);
          default:
             throw std::invalid_argument("Function SetFe14Amplifier2CompEn() not defined for this board version");
@@ -13404,6 +14667,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 14 amplifier 2 compensation enable (COMP2)
             if(BitMask) *BitMask = 0x00800000;
             if(BitOfs) *BitOfs = 23;
             return 0x1094;
@@ -13419,6 +14683,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 14 amplifier 2 enable (gain: 10) (OP2)
             return BitExtractControl(0x1094, 0x00400000, 22);
          default:
             throw std::invalid_argument("Function GetFe14Amplifier2En() not defined for this board version");
@@ -13430,6 +14695,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 14 amplifier 2 enable (gain: 10) (OP2)
             return SetRegMask(0x1094, 0x00400000, 22, value);
          default:
             throw std::invalid_argument("Function SetFe14Amplifier2En() not defined for this board version");
@@ -13441,6 +14707,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 14 amplifier 2 enable (gain: 10) (OP2)
             if(BitMask) *BitMask = 0x00400000;
             if(BitOfs) *BitOfs = 22;
             return 0x1094;
@@ -13456,6 +14723,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 14 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return BitExtractControl(0x1094, 0x000C0000, 18);
          default:
             throw std::invalid_argument("Function GetFe14Attenuation() not defined for this board version");
@@ -13467,6 +14735,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 14 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return SetRegMask(0x1094, 0x000C0000, 18, value);
          default:
             throw std::invalid_argument("Function SetFe14Attenuation() not defined for this board version");
@@ -13478,6 +14747,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 14 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             if(BitMask) *BitMask = 0x000C0000;
             if(BitOfs) *BitOfs = 18;
             return 0x1094;
@@ -13493,6 +14763,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 14 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return BitExtractControl(0x1094, 0x00030000, 16);
          default:
             throw std::invalid_argument("Function GetFe14Mux() not defined for this board version");
@@ -13504,6 +14775,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 14 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return SetRegMask(0x1094, 0x00030000, 16, value);
          default:
             throw std::invalid_argument("Function SetFe14Mux() not defined for this board version");
@@ -13515,6 +14787,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 14 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             if(BitMask) *BitMask = 0x00030000;
             if(BitOfs) *BitOfs = 16;
             return 0x1094;
@@ -13530,6 +14803,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 14 PZC (pole-zero cancellation) enable (ACDC)
             return BitExtractControl(0x1094, 0x01000000, 24);
          default:
             throw std::invalid_argument("Function GetFe14PzcEn() not defined for this board version");
@@ -13541,6 +14815,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 14 PZC (pole-zero cancellation) enable (ACDC)
             return SetRegMask(0x1094, 0x01000000, 24, value);
          default:
             throw std::invalid_argument("Function SetFe14PzcEn() not defined for this board version");
@@ -13552,6 +14827,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 14 PZC (pole-zero cancellation) enable (ACDC)
             if(BitMask) *BitMask = 0x01000000;
             if(BitOfs) *BitOfs = 24;
             return 0x1094;
@@ -13567,6 +14843,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 15 amplifier 1 compensation enable (COMP1)
             return BitExtractControl(0x1094, 0x00000020, 5);
          default:
             throw std::invalid_argument("Function GetFe15Amplifier1CompEn() not defined for this board version");
@@ -13578,6 +14855,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 15 amplifier 1 compensation enable (COMP1)
             return SetRegMask(0x1094, 0x00000020, 5, value);
          default:
             throw std::invalid_argument("Function SetFe15Amplifier1CompEn() not defined for this board version");
@@ -13589,6 +14867,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 15 amplifier 1 compensation enable (COMP1)
             if(BitMask) *BitMask = 0x00000020;
             if(BitOfs) *BitOfs = 5;
             return 0x1094;
@@ -13604,6 +14883,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 15 amplifier 1 enable (gain: 10) (OP1)
             return BitExtractControl(0x1094, 0x00000010, 4);
          default:
             throw std::invalid_argument("Function GetFe15Amplifier1En() not defined for this board version");
@@ -13615,6 +14895,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 15 amplifier 1 enable (gain: 10) (OP1)
             return SetRegMask(0x1094, 0x00000010, 4, value);
          default:
             throw std::invalid_argument("Function SetFe15Amplifier1En() not defined for this board version");
@@ -13626,6 +14907,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 15 amplifier 1 enable (gain: 10) (OP1)
             if(BitMask) *BitMask = 0x00000010;
             if(BitOfs) *BitOfs = 4;
             return 0x1094;
@@ -13641,6 +14923,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 15 amplifier 2 compensation enable (COMP2)
             return BitExtractControl(0x1094, 0x00000080, 7);
          default:
             throw std::invalid_argument("Function GetFe15Amplifier2CompEn() not defined for this board version");
@@ -13652,6 +14935,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 15 amplifier 2 compensation enable (COMP2)
             return SetRegMask(0x1094, 0x00000080, 7, value);
          default:
             throw std::invalid_argument("Function SetFe15Amplifier2CompEn() not defined for this board version");
@@ -13663,6 +14947,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 15 amplifier 2 compensation enable (COMP2)
             if(BitMask) *BitMask = 0x00000080;
             if(BitOfs) *BitOfs = 7;
             return 0x1094;
@@ -13678,6 +14963,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 15 amplifier 2 enable (gain: 10) (OP2)
             return BitExtractControl(0x1094, 0x00000040, 6);
          default:
             throw std::invalid_argument("Function GetFe15Amplifier2En() not defined for this board version");
@@ -13689,6 +14975,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 15 amplifier 2 enable (gain: 10) (OP2)
             return SetRegMask(0x1094, 0x00000040, 6, value);
          default:
             throw std::invalid_argument("Function SetFe15Amplifier2En() not defined for this board version");
@@ -13700,6 +14987,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 15 amplifier 2 enable (gain: 10) (OP2)
             if(BitMask) *BitMask = 0x00000040;
             if(BitOfs) *BitOfs = 6;
             return 0x1094;
@@ -13715,6 +15003,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 15 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return BitExtractControl(0x1094, 0x0000000C, 2);
          default:
             throw std::invalid_argument("Function GetFe15Attenuation() not defined for this board version");
@@ -13726,6 +15015,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 15 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return SetRegMask(0x1094, 0x0000000C, 2, value);
          default:
             throw std::invalid_argument("Function SetFe15Attenuation() not defined for this board version");
@@ -13737,6 +15027,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 15 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             if(BitMask) *BitMask = 0x0000000C;
             if(BitOfs) *BitOfs = 2;
             return 0x1094;
@@ -13752,6 +15043,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 15 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return BitExtractControl(0x1094, 0x00000003, 0);
          default:
             throw std::invalid_argument("Function GetFe15Mux() not defined for this board version");
@@ -13763,6 +15055,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 15 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return SetRegMask(0x1094, 0x00000003, 0, value);
          default:
             throw std::invalid_argument("Function SetFe15Mux() not defined for this board version");
@@ -13774,6 +15067,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 15 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             if(BitMask) *BitMask = 0x00000003;
             if(BitOfs) *BitOfs = 0;
             return 0x1094;
@@ -13789,6 +15083,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 15 PZC (pole-zero cancellation) enable (ACDC)
             return BitExtractControl(0x1094, 0x00000100, 8);
          default:
             throw std::invalid_argument("Function GetFe15PzcEn() not defined for this board version");
@@ -13800,6 +15095,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 15 PZC (pole-zero cancellation) enable (ACDC)
             return SetRegMask(0x1094, 0x00000100, 8, value);
          default:
             throw std::invalid_argument("Function SetFe15PzcEn() not defined for this board version");
@@ -13811,6 +15107,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 15 PZC (pole-zero cancellation) enable (ACDC)
             if(BitMask) *BitMask = 0x00000100;
             if(BitOfs) *BitOfs = 8;
             return 0x1094;
@@ -13826,6 +15123,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 1 amplifier 1 compensation enable (COMP1)
             return BitExtractControl(0x1078, 0x00000020, 5);
          default:
             throw std::invalid_argument("Function GetFe1Amplifier1CompEn() not defined for this board version");
@@ -13837,6 +15135,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 1 amplifier 1 compensation enable (COMP1)
             return SetRegMask(0x1078, 0x00000020, 5, value);
          default:
             throw std::invalid_argument("Function SetFe1Amplifier1CompEn() not defined for this board version");
@@ -13848,6 +15147,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 1 amplifier 1 compensation enable (COMP1)
             if(BitMask) *BitMask = 0x00000020;
             if(BitOfs) *BitOfs = 5;
             return 0x1078;
@@ -13863,6 +15163,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 1 amplifier 1 enable (gain: 10) (OP1)
             return BitExtractControl(0x1078, 0x00000010, 4);
          default:
             throw std::invalid_argument("Function GetFe1Amplifier1En() not defined for this board version");
@@ -13874,6 +15175,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 1 amplifier 1 enable (gain: 10) (OP1)
             return SetRegMask(0x1078, 0x00000010, 4, value);
          default:
             throw std::invalid_argument("Function SetFe1Amplifier1En() not defined for this board version");
@@ -13885,6 +15187,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 1 amplifier 1 enable (gain: 10) (OP1)
             if(BitMask) *BitMask = 0x00000010;
             if(BitOfs) *BitOfs = 4;
             return 0x1078;
@@ -13900,6 +15203,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 1 amplifier 2 compensation enable (COMP2)
             return BitExtractControl(0x1078, 0x00000080, 7);
          default:
             throw std::invalid_argument("Function GetFe1Amplifier2CompEn() not defined for this board version");
@@ -13911,6 +15215,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 1 amplifier 2 compensation enable (COMP2)
             return SetRegMask(0x1078, 0x00000080, 7, value);
          default:
             throw std::invalid_argument("Function SetFe1Amplifier2CompEn() not defined for this board version");
@@ -13922,6 +15227,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 1 amplifier 2 compensation enable (COMP2)
             if(BitMask) *BitMask = 0x00000080;
             if(BitOfs) *BitOfs = 7;
             return 0x1078;
@@ -13937,6 +15243,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 1 amplifier 2 enable (gain: 10) (OP2)
             return BitExtractControl(0x1078, 0x00000040, 6);
          default:
             throw std::invalid_argument("Function GetFe1Amplifier2En() not defined for this board version");
@@ -13948,6 +15255,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 1 amplifier 2 enable (gain: 10) (OP2)
             return SetRegMask(0x1078, 0x00000040, 6, value);
          default:
             throw std::invalid_argument("Function SetFe1Amplifier2En() not defined for this board version");
@@ -13959,6 +15267,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 1 amplifier 2 enable (gain: 10) (OP2)
             if(BitMask) *BitMask = 0x00000040;
             if(BitOfs) *BitOfs = 6;
             return 0x1078;
@@ -13974,6 +15283,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 1 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return BitExtractControl(0x1078, 0x0000000C, 2);
          default:
             throw std::invalid_argument("Function GetFe1Attenuation() not defined for this board version");
@@ -13985,6 +15295,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 1 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return SetRegMask(0x1078, 0x0000000C, 2, value);
          default:
             throw std::invalid_argument("Function SetFe1Attenuation() not defined for this board version");
@@ -13996,6 +15307,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 1 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             if(BitMask) *BitMask = 0x0000000C;
             if(BitOfs) *BitOfs = 2;
             return 0x1078;
@@ -14011,6 +15323,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 1 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return BitExtractControl(0x1078, 0x00000003, 0);
          default:
             throw std::invalid_argument("Function GetFe1Mux() not defined for this board version");
@@ -14022,6 +15335,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 1 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return SetRegMask(0x1078, 0x00000003, 0, value);
          default:
             throw std::invalid_argument("Function SetFe1Mux() not defined for this board version");
@@ -14033,6 +15347,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 1 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             if(BitMask) *BitMask = 0x00000003;
             if(BitOfs) *BitOfs = 0;
             return 0x1078;
@@ -14048,6 +15363,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 1 PZC (pole-zero cancellation) enable (ACDC)
             return BitExtractControl(0x1078, 0x00000100, 8);
          default:
             throw std::invalid_argument("Function GetFe1PzcEn() not defined for this board version");
@@ -14059,6 +15375,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 1 PZC (pole-zero cancellation) enable (ACDC)
             return SetRegMask(0x1078, 0x00000100, 8, value);
          default:
             throw std::invalid_argument("Function SetFe1PzcEn() not defined for this board version");
@@ -14070,6 +15387,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 1 PZC (pole-zero cancellation) enable (ACDC)
             if(BitMask) *BitMask = 0x00000100;
             if(BitOfs) *BitOfs = 8;
             return 0x1078;
@@ -14085,6 +15403,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 2 amplifier 1 compensation enable (COMP1)
             return BitExtractControl(0x107C, 0x00200000, 21);
          default:
             throw std::invalid_argument("Function GetFe2Amplifier1CompEn() not defined for this board version");
@@ -14096,6 +15415,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 2 amplifier 1 compensation enable (COMP1)
             return SetRegMask(0x107C, 0x00200000, 21, value);
          default:
             throw std::invalid_argument("Function SetFe2Amplifier1CompEn() not defined for this board version");
@@ -14107,6 +15427,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 2 amplifier 1 compensation enable (COMP1)
             if(BitMask) *BitMask = 0x00200000;
             if(BitOfs) *BitOfs = 21;
             return 0x107C;
@@ -14122,6 +15443,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 2 amplifier 1 enable (gain: 10) (OP1)
             return BitExtractControl(0x107C, 0x00100000, 20);
          default:
             throw std::invalid_argument("Function GetFe2Amplifier1En() not defined for this board version");
@@ -14133,6 +15455,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 2 amplifier 1 enable (gain: 10) (OP1)
             return SetRegMask(0x107C, 0x00100000, 20, value);
          default:
             throw std::invalid_argument("Function SetFe2Amplifier1En() not defined for this board version");
@@ -14144,6 +15467,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 2 amplifier 1 enable (gain: 10) (OP1)
             if(BitMask) *BitMask = 0x00100000;
             if(BitOfs) *BitOfs = 20;
             return 0x107C;
@@ -14159,6 +15483,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 2 amplifier 2 compensation enable (COMP2)
             return BitExtractControl(0x107C, 0x00800000, 23);
          default:
             throw std::invalid_argument("Function GetFe2Amplifier2CompEn() not defined for this board version");
@@ -14170,6 +15495,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 2 amplifier 2 compensation enable (COMP2)
             return SetRegMask(0x107C, 0x00800000, 23, value);
          default:
             throw std::invalid_argument("Function SetFe2Amplifier2CompEn() not defined for this board version");
@@ -14181,6 +15507,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 2 amplifier 2 compensation enable (COMP2)
             if(BitMask) *BitMask = 0x00800000;
             if(BitOfs) *BitOfs = 23;
             return 0x107C;
@@ -14196,6 +15523,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 2 amplifier 2 enable (gain: 10) (OP2)
             return BitExtractControl(0x107C, 0x00400000, 22);
          default:
             throw std::invalid_argument("Function GetFe2Amplifier2En() not defined for this board version");
@@ -14207,6 +15535,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 2 amplifier 2 enable (gain: 10) (OP2)
             return SetRegMask(0x107C, 0x00400000, 22, value);
          default:
             throw std::invalid_argument("Function SetFe2Amplifier2En() not defined for this board version");
@@ -14218,6 +15547,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 2 amplifier 2 enable (gain: 10) (OP2)
             if(BitMask) *BitMask = 0x00400000;
             if(BitOfs) *BitOfs = 22;
             return 0x107C;
@@ -14233,6 +15563,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 2 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return BitExtractControl(0x107C, 0x000C0000, 18);
          default:
             throw std::invalid_argument("Function GetFe2Attenuation() not defined for this board version");
@@ -14244,6 +15575,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 2 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return SetRegMask(0x107C, 0x000C0000, 18, value);
          default:
             throw std::invalid_argument("Function SetFe2Attenuation() not defined for this board version");
@@ -14255,6 +15587,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 2 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             if(BitMask) *BitMask = 0x000C0000;
             if(BitOfs) *BitOfs = 18;
             return 0x107C;
@@ -14270,6 +15603,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 2 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return BitExtractControl(0x107C, 0x00030000, 16);
          default:
             throw std::invalid_argument("Function GetFe2Mux() not defined for this board version");
@@ -14281,6 +15615,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 2 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return SetRegMask(0x107C, 0x00030000, 16, value);
          default:
             throw std::invalid_argument("Function SetFe2Mux() not defined for this board version");
@@ -14292,6 +15627,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 2 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             if(BitMask) *BitMask = 0x00030000;
             if(BitOfs) *BitOfs = 16;
             return 0x107C;
@@ -14307,6 +15643,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 2 PZC (pole-zero cancellation) enable (ACDC)
             return BitExtractControl(0x107C, 0x01000000, 24);
          default:
             throw std::invalid_argument("Function GetFe2PzcEn() not defined for this board version");
@@ -14318,6 +15655,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 2 PZC (pole-zero cancellation) enable (ACDC)
             return SetRegMask(0x107C, 0x01000000, 24, value);
          default:
             throw std::invalid_argument("Function SetFe2PzcEn() not defined for this board version");
@@ -14329,6 +15667,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 2 PZC (pole-zero cancellation) enable (ACDC)
             if(BitMask) *BitMask = 0x01000000;
             if(BitOfs) *BitOfs = 24;
             return 0x107C;
@@ -14344,6 +15683,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 3 amplifier 1 compensation enable (COMP1)
             return BitExtractControl(0x107C, 0x00000020, 5);
          default:
             throw std::invalid_argument("Function GetFe3Amplifier1CompEn() not defined for this board version");
@@ -14355,6 +15695,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 3 amplifier 1 compensation enable (COMP1)
             return SetRegMask(0x107C, 0x00000020, 5, value);
          default:
             throw std::invalid_argument("Function SetFe3Amplifier1CompEn() not defined for this board version");
@@ -14366,6 +15707,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 3 amplifier 1 compensation enable (COMP1)
             if(BitMask) *BitMask = 0x00000020;
             if(BitOfs) *BitOfs = 5;
             return 0x107C;
@@ -14381,6 +15723,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 3 amplifier 1 enable (gain: 10) (OP1)
             return BitExtractControl(0x107C, 0x00000010, 4);
          default:
             throw std::invalid_argument("Function GetFe3Amplifier1En() not defined for this board version");
@@ -14392,6 +15735,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 3 amplifier 1 enable (gain: 10) (OP1)
             return SetRegMask(0x107C, 0x00000010, 4, value);
          default:
             throw std::invalid_argument("Function SetFe3Amplifier1En() not defined for this board version");
@@ -14403,6 +15747,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 3 amplifier 1 enable (gain: 10) (OP1)
             if(BitMask) *BitMask = 0x00000010;
             if(BitOfs) *BitOfs = 4;
             return 0x107C;
@@ -14418,6 +15763,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 3 amplifier 2 compensation enable (COMP2)
             return BitExtractControl(0x107C, 0x00000080, 7);
          default:
             throw std::invalid_argument("Function GetFe3Amplifier2CompEn() not defined for this board version");
@@ -14429,6 +15775,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 3 amplifier 2 compensation enable (COMP2)
             return SetRegMask(0x107C, 0x00000080, 7, value);
          default:
             throw std::invalid_argument("Function SetFe3Amplifier2CompEn() not defined for this board version");
@@ -14440,6 +15787,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 3 amplifier 2 compensation enable (COMP2)
             if(BitMask) *BitMask = 0x00000080;
             if(BitOfs) *BitOfs = 7;
             return 0x107C;
@@ -14455,6 +15803,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 3 amplifier 2 enable (gain: 10) (OP2)
             return BitExtractControl(0x107C, 0x00000040, 6);
          default:
             throw std::invalid_argument("Function GetFe3Amplifier2En() not defined for this board version");
@@ -14466,6 +15815,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 3 amplifier 2 enable (gain: 10) (OP2)
             return SetRegMask(0x107C, 0x00000040, 6, value);
          default:
             throw std::invalid_argument("Function SetFe3Amplifier2En() not defined for this board version");
@@ -14477,6 +15827,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 3 amplifier 2 enable (gain: 10) (OP2)
             if(BitMask) *BitMask = 0x00000040;
             if(BitOfs) *BitOfs = 6;
             return 0x107C;
@@ -14492,6 +15843,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 3 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return BitExtractControl(0x107C, 0x0000000C, 2);
          default:
             throw std::invalid_argument("Function GetFe3Attenuation() not defined for this board version");
@@ -14503,6 +15855,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 3 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return SetRegMask(0x107C, 0x0000000C, 2, value);
          default:
             throw std::invalid_argument("Function SetFe3Attenuation() not defined for this board version");
@@ -14514,6 +15867,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 3 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             if(BitMask) *BitMask = 0x0000000C;
             if(BitOfs) *BitOfs = 2;
             return 0x107C;
@@ -14529,6 +15883,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 3 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return BitExtractControl(0x107C, 0x00000003, 0);
          default:
             throw std::invalid_argument("Function GetFe3Mux() not defined for this board version");
@@ -14540,6 +15895,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 3 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return SetRegMask(0x107C, 0x00000003, 0, value);
          default:
             throw std::invalid_argument("Function SetFe3Mux() not defined for this board version");
@@ -14551,6 +15907,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 3 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             if(BitMask) *BitMask = 0x00000003;
             if(BitOfs) *BitOfs = 0;
             return 0x107C;
@@ -14566,6 +15923,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 3 PZC (pole-zero cancellation) enable (ACDC)
             return BitExtractControl(0x107C, 0x00000100, 8);
          default:
             throw std::invalid_argument("Function GetFe3PzcEn() not defined for this board version");
@@ -14577,6 +15935,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 3 PZC (pole-zero cancellation) enable (ACDC)
             return SetRegMask(0x107C, 0x00000100, 8, value);
          default:
             throw std::invalid_argument("Function SetFe3PzcEn() not defined for this board version");
@@ -14588,6 +15947,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 3 PZC (pole-zero cancellation) enable (ACDC)
             if(BitMask) *BitMask = 0x00000100;
             if(BitOfs) *BitOfs = 8;
             return 0x107C;
@@ -14603,6 +15963,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 4 amplifier 1 compensation enable (COMP1)
             return BitExtractControl(0x1080, 0x00200000, 21);
          default:
             throw std::invalid_argument("Function GetFe4Amplifier1CompEn() not defined for this board version");
@@ -14614,6 +15975,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 4 amplifier 1 compensation enable (COMP1)
             return SetRegMask(0x1080, 0x00200000, 21, value);
          default:
             throw std::invalid_argument("Function SetFe4Amplifier1CompEn() not defined for this board version");
@@ -14625,6 +15987,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 4 amplifier 1 compensation enable (COMP1)
             if(BitMask) *BitMask = 0x00200000;
             if(BitOfs) *BitOfs = 21;
             return 0x1080;
@@ -14640,6 +16003,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 4 amplifier 1 enable (gain: 10) (OP1)
             return BitExtractControl(0x1080, 0x00100000, 20);
          default:
             throw std::invalid_argument("Function GetFe4Amplifier1En() not defined for this board version");
@@ -14651,6 +16015,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 4 amplifier 1 enable (gain: 10) (OP1)
             return SetRegMask(0x1080, 0x00100000, 20, value);
          default:
             throw std::invalid_argument("Function SetFe4Amplifier1En() not defined for this board version");
@@ -14662,6 +16027,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 4 amplifier 1 enable (gain: 10) (OP1)
             if(BitMask) *BitMask = 0x00100000;
             if(BitOfs) *BitOfs = 20;
             return 0x1080;
@@ -14677,6 +16043,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 4 amplifier 2 compensation enable (COMP2)
             return BitExtractControl(0x1080, 0x00800000, 23);
          default:
             throw std::invalid_argument("Function GetFe4Amplifier2CompEn() not defined for this board version");
@@ -14688,6 +16055,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 4 amplifier 2 compensation enable (COMP2)
             return SetRegMask(0x1080, 0x00800000, 23, value);
          default:
             throw std::invalid_argument("Function SetFe4Amplifier2CompEn() not defined for this board version");
@@ -14699,6 +16067,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 4 amplifier 2 compensation enable (COMP2)
             if(BitMask) *BitMask = 0x00800000;
             if(BitOfs) *BitOfs = 23;
             return 0x1080;
@@ -14714,6 +16083,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 4 amplifier 2 enable (gain: 10) (OP2)
             return BitExtractControl(0x1080, 0x00400000, 22);
          default:
             throw std::invalid_argument("Function GetFe4Amplifier2En() not defined for this board version");
@@ -14725,6 +16095,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 4 amplifier 2 enable (gain: 10) (OP2)
             return SetRegMask(0x1080, 0x00400000, 22, value);
          default:
             throw std::invalid_argument("Function SetFe4Amplifier2En() not defined for this board version");
@@ -14736,6 +16107,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 4 amplifier 2 enable (gain: 10) (OP2)
             if(BitMask) *BitMask = 0x00400000;
             if(BitOfs) *BitOfs = 22;
             return 0x1080;
@@ -14751,6 +16123,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 4 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return BitExtractControl(0x1080, 0x000C0000, 18);
          default:
             throw std::invalid_argument("Function GetFe4Attenuation() not defined for this board version");
@@ -14762,6 +16135,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 4 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return SetRegMask(0x1080, 0x000C0000, 18, value);
          default:
             throw std::invalid_argument("Function SetFe4Attenuation() not defined for this board version");
@@ -14773,6 +16147,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 4 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             if(BitMask) *BitMask = 0x000C0000;
             if(BitOfs) *BitOfs = 18;
             return 0x1080;
@@ -14788,6 +16163,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 4 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return BitExtractControl(0x1080, 0x00030000, 16);
          default:
             throw std::invalid_argument("Function GetFe4Mux() not defined for this board version");
@@ -14799,6 +16175,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 4 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return SetRegMask(0x1080, 0x00030000, 16, value);
          default:
             throw std::invalid_argument("Function SetFe4Mux() not defined for this board version");
@@ -14810,6 +16187,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 4 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             if(BitMask) *BitMask = 0x00030000;
             if(BitOfs) *BitOfs = 16;
             return 0x1080;
@@ -14825,6 +16203,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 4 PZC (pole-zero cancellation) enable (ACDC)
             return BitExtractControl(0x1080, 0x01000000, 24);
          default:
             throw std::invalid_argument("Function GetFe4PzcEn() not defined for this board version");
@@ -14836,6 +16215,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 4 PZC (pole-zero cancellation) enable (ACDC)
             return SetRegMask(0x1080, 0x01000000, 24, value);
          default:
             throw std::invalid_argument("Function SetFe4PzcEn() not defined for this board version");
@@ -14847,6 +16227,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 4 PZC (pole-zero cancellation) enable (ACDC)
             if(BitMask) *BitMask = 0x01000000;
             if(BitOfs) *BitOfs = 24;
             return 0x1080;
@@ -14862,6 +16243,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 5 amplifier 1 compensation enable (COMP1)
             return BitExtractControl(0x1080, 0x00000020, 5);
          default:
             throw std::invalid_argument("Function GetFe5Amplifier1CompEn() not defined for this board version");
@@ -14873,6 +16255,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 5 amplifier 1 compensation enable (COMP1)
             return SetRegMask(0x1080, 0x00000020, 5, value);
          default:
             throw std::invalid_argument("Function SetFe5Amplifier1CompEn() not defined for this board version");
@@ -14884,6 +16267,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 5 amplifier 1 compensation enable (COMP1)
             if(BitMask) *BitMask = 0x00000020;
             if(BitOfs) *BitOfs = 5;
             return 0x1080;
@@ -14899,6 +16283,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 5 amplifier 1 enable (gain: 10) (OP1)
             return BitExtractControl(0x1080, 0x00000010, 4);
          default:
             throw std::invalid_argument("Function GetFe5Amplifier1En() not defined for this board version");
@@ -14910,6 +16295,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 5 amplifier 1 enable (gain: 10) (OP1)
             return SetRegMask(0x1080, 0x00000010, 4, value);
          default:
             throw std::invalid_argument("Function SetFe5Amplifier1En() not defined for this board version");
@@ -14921,6 +16307,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 5 amplifier 1 enable (gain: 10) (OP1)
             if(BitMask) *BitMask = 0x00000010;
             if(BitOfs) *BitOfs = 4;
             return 0x1080;
@@ -14936,6 +16323,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 5 amplifier 2 compensation enable (COMP2)
             return BitExtractControl(0x1080, 0x00000080, 7);
          default:
             throw std::invalid_argument("Function GetFe5Amplifier2CompEn() not defined for this board version");
@@ -14947,6 +16335,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 5 amplifier 2 compensation enable (COMP2)
             return SetRegMask(0x1080, 0x00000080, 7, value);
          default:
             throw std::invalid_argument("Function SetFe5Amplifier2CompEn() not defined for this board version");
@@ -14958,6 +16347,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 5 amplifier 2 compensation enable (COMP2)
             if(BitMask) *BitMask = 0x00000080;
             if(BitOfs) *BitOfs = 7;
             return 0x1080;
@@ -14973,6 +16363,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 5 amplifier 2 enable (gain: 10) (OP2)
             return BitExtractControl(0x1080, 0x00000040, 6);
          default:
             throw std::invalid_argument("Function GetFe5Amplifier2En() not defined for this board version");
@@ -14984,6 +16375,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 5 amplifier 2 enable (gain: 10) (OP2)
             return SetRegMask(0x1080, 0x00000040, 6, value);
          default:
             throw std::invalid_argument("Function SetFe5Amplifier2En() not defined for this board version");
@@ -14995,6 +16387,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 5 amplifier 2 enable (gain: 10) (OP2)
             if(BitMask) *BitMask = 0x00000040;
             if(BitOfs) *BitOfs = 6;
             return 0x1080;
@@ -15010,6 +16403,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 5 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return BitExtractControl(0x1080, 0x0000000C, 2);
          default:
             throw std::invalid_argument("Function GetFe5Attenuation() not defined for this board version");
@@ -15021,6 +16415,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 5 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return SetRegMask(0x1080, 0x0000000C, 2, value);
          default:
             throw std::invalid_argument("Function SetFe5Attenuation() not defined for this board version");
@@ -15032,6 +16427,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 5 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             if(BitMask) *BitMask = 0x0000000C;
             if(BitOfs) *BitOfs = 2;
             return 0x1080;
@@ -15047,6 +16443,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 5 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return BitExtractControl(0x1080, 0x00000003, 0);
          default:
             throw std::invalid_argument("Function GetFe5Mux() not defined for this board version");
@@ -15058,6 +16455,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 5 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return SetRegMask(0x1080, 0x00000003, 0, value);
          default:
             throw std::invalid_argument("Function SetFe5Mux() not defined for this board version");
@@ -15069,6 +16467,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 5 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             if(BitMask) *BitMask = 0x00000003;
             if(BitOfs) *BitOfs = 0;
             return 0x1080;
@@ -15084,6 +16483,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 5 PZC (pole-zero cancellation) enable (ACDC)
             return BitExtractControl(0x1080, 0x00000100, 8);
          default:
             throw std::invalid_argument("Function GetFe5PzcEn() not defined for this board version");
@@ -15095,6 +16495,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 5 PZC (pole-zero cancellation) enable (ACDC)
             return SetRegMask(0x1080, 0x00000100, 8, value);
          default:
             throw std::invalid_argument("Function SetFe5PzcEn() not defined for this board version");
@@ -15106,6 +16507,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 5 PZC (pole-zero cancellation) enable (ACDC)
             if(BitMask) *BitMask = 0x00000100;
             if(BitOfs) *BitOfs = 8;
             return 0x1080;
@@ -15121,6 +16523,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 6 amplifier 1 compensation enable (COMP1)
             return BitExtractControl(0x1084, 0x00200000, 21);
          default:
             throw std::invalid_argument("Function GetFe6Amplifier1CompEn() not defined for this board version");
@@ -15132,6 +16535,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 6 amplifier 1 compensation enable (COMP1)
             return SetRegMask(0x1084, 0x00200000, 21, value);
          default:
             throw std::invalid_argument("Function SetFe6Amplifier1CompEn() not defined for this board version");
@@ -15143,6 +16547,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 6 amplifier 1 compensation enable (COMP1)
             if(BitMask) *BitMask = 0x00200000;
             if(BitOfs) *BitOfs = 21;
             return 0x1084;
@@ -15158,6 +16563,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 6 amplifier 1 enable (gain: 10) (OP1)
             return BitExtractControl(0x1084, 0x00100000, 20);
          default:
             throw std::invalid_argument("Function GetFe6Amplifier1En() not defined for this board version");
@@ -15169,6 +16575,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 6 amplifier 1 enable (gain: 10) (OP1)
             return SetRegMask(0x1084, 0x00100000, 20, value);
          default:
             throw std::invalid_argument("Function SetFe6Amplifier1En() not defined for this board version");
@@ -15180,6 +16587,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 6 amplifier 1 enable (gain: 10) (OP1)
             if(BitMask) *BitMask = 0x00100000;
             if(BitOfs) *BitOfs = 20;
             return 0x1084;
@@ -15195,6 +16603,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 6 amplifier 2 compensation enable (COMP2)
             return BitExtractControl(0x1084, 0x00800000, 23);
          default:
             throw std::invalid_argument("Function GetFe6Amplifier2CompEn() not defined for this board version");
@@ -15206,6 +16615,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 6 amplifier 2 compensation enable (COMP2)
             return SetRegMask(0x1084, 0x00800000, 23, value);
          default:
             throw std::invalid_argument("Function SetFe6Amplifier2CompEn() not defined for this board version");
@@ -15217,6 +16627,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 6 amplifier 2 compensation enable (COMP2)
             if(BitMask) *BitMask = 0x00800000;
             if(BitOfs) *BitOfs = 23;
             return 0x1084;
@@ -15232,6 +16643,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 6 amplifier 2 enable (gain: 10) (OP2)
             return BitExtractControl(0x1084, 0x00400000, 22);
          default:
             throw std::invalid_argument("Function GetFe6Amplifier2En() not defined for this board version");
@@ -15243,6 +16655,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 6 amplifier 2 enable (gain: 10) (OP2)
             return SetRegMask(0x1084, 0x00400000, 22, value);
          default:
             throw std::invalid_argument("Function SetFe6Amplifier2En() not defined for this board version");
@@ -15254,6 +16667,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 6 amplifier 2 enable (gain: 10) (OP2)
             if(BitMask) *BitMask = 0x00400000;
             if(BitOfs) *BitOfs = 22;
             return 0x1084;
@@ -15269,6 +16683,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 6 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return BitExtractControl(0x1084, 0x000C0000, 18);
          default:
             throw std::invalid_argument("Function GetFe6Attenuation() not defined for this board version");
@@ -15280,6 +16695,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 6 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return SetRegMask(0x1084, 0x000C0000, 18, value);
          default:
             throw std::invalid_argument("Function SetFe6Attenuation() not defined for this board version");
@@ -15291,6 +16707,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 6 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             if(BitMask) *BitMask = 0x000C0000;
             if(BitOfs) *BitOfs = 18;
             return 0x1084;
@@ -15306,6 +16723,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 6 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return BitExtractControl(0x1084, 0x00030000, 16);
          default:
             throw std::invalid_argument("Function GetFe6Mux() not defined for this board version");
@@ -15317,6 +16735,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 6 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return SetRegMask(0x1084, 0x00030000, 16, value);
          default:
             throw std::invalid_argument("Function SetFe6Mux() not defined for this board version");
@@ -15328,6 +16747,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 6 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             if(BitMask) *BitMask = 0x00030000;
             if(BitOfs) *BitOfs = 16;
             return 0x1084;
@@ -15343,6 +16763,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 6 PZC (pole-zero cancellation) enable (ACDC)
             return BitExtractControl(0x1084, 0x01000000, 24);
          default:
             throw std::invalid_argument("Function GetFe6PzcEn() not defined for this board version");
@@ -15354,6 +16775,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 6 PZC (pole-zero cancellation) enable (ACDC)
             return SetRegMask(0x1084, 0x01000000, 24, value);
          default:
             throw std::invalid_argument("Function SetFe6PzcEn() not defined for this board version");
@@ -15365,6 +16787,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 6 PZC (pole-zero cancellation) enable (ACDC)
             if(BitMask) *BitMask = 0x01000000;
             if(BitOfs) *BitOfs = 24;
             return 0x1084;
@@ -15380,6 +16803,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 7 amplifier 1 compensation enable (COMP1)
             return BitExtractControl(0x1084, 0x00000020, 5);
          default:
             throw std::invalid_argument("Function GetFe7Amplifier1CompEn() not defined for this board version");
@@ -15391,6 +16815,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 7 amplifier 1 compensation enable (COMP1)
             return SetRegMask(0x1084, 0x00000020, 5, value);
          default:
             throw std::invalid_argument("Function SetFe7Amplifier1CompEn() not defined for this board version");
@@ -15402,6 +16827,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 7 amplifier 1 compensation enable (COMP1)
             if(BitMask) *BitMask = 0x00000020;
             if(BitOfs) *BitOfs = 5;
             return 0x1084;
@@ -15417,6 +16843,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 7 amplifier 1 enable (gain: 10) (OP1)
             return BitExtractControl(0x1084, 0x00000010, 4);
          default:
             throw std::invalid_argument("Function GetFe7Amplifier1En() not defined for this board version");
@@ -15428,6 +16855,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 7 amplifier 1 enable (gain: 10) (OP1)
             return SetRegMask(0x1084, 0x00000010, 4, value);
          default:
             throw std::invalid_argument("Function SetFe7Amplifier1En() not defined for this board version");
@@ -15439,6 +16867,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 7 amplifier 1 enable (gain: 10) (OP1)
             if(BitMask) *BitMask = 0x00000010;
             if(BitOfs) *BitOfs = 4;
             return 0x1084;
@@ -15454,6 +16883,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 7 amplifier 2 compensation enable (COMP2)
             return BitExtractControl(0x1084, 0x00000080, 7);
          default:
             throw std::invalid_argument("Function GetFe7Amplifier2CompEn() not defined for this board version");
@@ -15465,6 +16895,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 7 amplifier 2 compensation enable (COMP2)
             return SetRegMask(0x1084, 0x00000080, 7, value);
          default:
             throw std::invalid_argument("Function SetFe7Amplifier2CompEn() not defined for this board version");
@@ -15476,6 +16907,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 7 amplifier 2 compensation enable (COMP2)
             if(BitMask) *BitMask = 0x00000080;
             if(BitOfs) *BitOfs = 7;
             return 0x1084;
@@ -15491,6 +16923,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 7 amplifier 2 enable (gain: 10) (OP2)
             return BitExtractControl(0x1084, 0x00000040, 6);
          default:
             throw std::invalid_argument("Function GetFe7Amplifier2En() not defined for this board version");
@@ -15502,6 +16935,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 7 amplifier 2 enable (gain: 10) (OP2)
             return SetRegMask(0x1084, 0x00000040, 6, value);
          default:
             throw std::invalid_argument("Function SetFe7Amplifier2En() not defined for this board version");
@@ -15513,6 +16947,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 7 amplifier 2 enable (gain: 10) (OP2)
             if(BitMask) *BitMask = 0x00000040;
             if(BitOfs) *BitOfs = 6;
             return 0x1084;
@@ -15528,6 +16963,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 7 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return BitExtractControl(0x1084, 0x0000000C, 2);
          default:
             throw std::invalid_argument("Function GetFe7Attenuation() not defined for this board version");
@@ -15539,6 +16975,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 7 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return SetRegMask(0x1084, 0x0000000C, 2, value);
          default:
             throw std::invalid_argument("Function SetFe7Attenuation() not defined for this board version");
@@ -15550,6 +16987,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 7 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             if(BitMask) *BitMask = 0x0000000C;
             if(BitOfs) *BitOfs = 2;
             return 0x1084;
@@ -15565,6 +17003,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 7 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return BitExtractControl(0x1084, 0x00000003, 0);
          default:
             throw std::invalid_argument("Function GetFe7Mux() not defined for this board version");
@@ -15576,6 +17015,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 7 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return SetRegMask(0x1084, 0x00000003, 0, value);
          default:
             throw std::invalid_argument("Function SetFe7Mux() not defined for this board version");
@@ -15587,6 +17027,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 7 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             if(BitMask) *BitMask = 0x00000003;
             if(BitOfs) *BitOfs = 0;
             return 0x1084;
@@ -15602,6 +17043,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 7 PZC (pole-zero cancellation) enable (ACDC)
             return BitExtractControl(0x1084, 0x00000100, 8);
          default:
             throw std::invalid_argument("Function GetFe7PzcEn() not defined for this board version");
@@ -15613,6 +17055,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 7 PZC (pole-zero cancellation) enable (ACDC)
             return SetRegMask(0x1084, 0x00000100, 8, value);
          default:
             throw std::invalid_argument("Function SetFe7PzcEn() not defined for this board version");
@@ -15624,6 +17067,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 7 PZC (pole-zero cancellation) enable (ACDC)
             if(BitMask) *BitMask = 0x00000100;
             if(BitOfs) *BitOfs = 8;
             return 0x1084;
@@ -15639,6 +17083,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 8 amplifier 1 compensation enable (COMP1)
             return BitExtractControl(0x1088, 0x00200000, 21);
          default:
             throw std::invalid_argument("Function GetFe8Amplifier1CompEn() not defined for this board version");
@@ -15650,6 +17095,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 8 amplifier 1 compensation enable (COMP1)
             return SetRegMask(0x1088, 0x00200000, 21, value);
          default:
             throw std::invalid_argument("Function SetFe8Amplifier1CompEn() not defined for this board version");
@@ -15661,6 +17107,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 8 amplifier 1 compensation enable (COMP1)
             if(BitMask) *BitMask = 0x00200000;
             if(BitOfs) *BitOfs = 21;
             return 0x1088;
@@ -15676,6 +17123,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 8 amplifier 1 enable (gain: 10) (OP1)
             return BitExtractControl(0x1088, 0x00100000, 20);
          default:
             throw std::invalid_argument("Function GetFe8Amplifier1En() not defined for this board version");
@@ -15687,6 +17135,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 8 amplifier 1 enable (gain: 10) (OP1)
             return SetRegMask(0x1088, 0x00100000, 20, value);
          default:
             throw std::invalid_argument("Function SetFe8Amplifier1En() not defined for this board version");
@@ -15698,6 +17147,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 8 amplifier 1 enable (gain: 10) (OP1)
             if(BitMask) *BitMask = 0x00100000;
             if(BitOfs) *BitOfs = 20;
             return 0x1088;
@@ -15713,6 +17163,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 8 amplifier 2 compensation enable (COMP2)
             return BitExtractControl(0x1088, 0x00800000, 23);
          default:
             throw std::invalid_argument("Function GetFe8Amplifier2CompEn() not defined for this board version");
@@ -15724,6 +17175,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 8 amplifier 2 compensation enable (COMP2)
             return SetRegMask(0x1088, 0x00800000, 23, value);
          default:
             throw std::invalid_argument("Function SetFe8Amplifier2CompEn() not defined for this board version");
@@ -15735,6 +17187,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 8 amplifier 2 compensation enable (COMP2)
             if(BitMask) *BitMask = 0x00800000;
             if(BitOfs) *BitOfs = 23;
             return 0x1088;
@@ -15750,6 +17203,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 8 amplifier 2 enable (gain: 10) (OP2)
             return BitExtractControl(0x1088, 0x00400000, 22);
          default:
             throw std::invalid_argument("Function GetFe8Amplifier2En() not defined for this board version");
@@ -15761,6 +17215,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 8 amplifier 2 enable (gain: 10) (OP2)
             return SetRegMask(0x1088, 0x00400000, 22, value);
          default:
             throw std::invalid_argument("Function SetFe8Amplifier2En() not defined for this board version");
@@ -15772,6 +17227,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 8 amplifier 2 enable (gain: 10) (OP2)
             if(BitMask) *BitMask = 0x00400000;
             if(BitOfs) *BitOfs = 22;
             return 0x1088;
@@ -15787,6 +17243,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 8 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return BitExtractControl(0x1088, 0x000C0000, 18);
          default:
             throw std::invalid_argument("Function GetFe8Attenuation() not defined for this board version");
@@ -15798,6 +17255,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 8 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return SetRegMask(0x1088, 0x000C0000, 18, value);
          default:
             throw std::invalid_argument("Function SetFe8Attenuation() not defined for this board version");
@@ -15809,6 +17267,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 8 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             if(BitMask) *BitMask = 0x000C0000;
             if(BitOfs) *BitOfs = 18;
             return 0x1088;
@@ -15824,6 +17283,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 8 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return BitExtractControl(0x1088, 0x00030000, 16);
          default:
             throw std::invalid_argument("Function GetFe8Mux() not defined for this board version");
@@ -15835,6 +17295,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 8 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return SetRegMask(0x1088, 0x00030000, 16, value);
          default:
             throw std::invalid_argument("Function SetFe8Mux() not defined for this board version");
@@ -15846,6 +17307,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 8 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             if(BitMask) *BitMask = 0x00030000;
             if(BitOfs) *BitOfs = 16;
             return 0x1088;
@@ -15861,6 +17323,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 8 PZC (pole-zero cancellation) enable (ACDC)
             return BitExtractControl(0x1088, 0x01000000, 24);
          default:
             throw std::invalid_argument("Function GetFe8PzcEn() not defined for this board version");
@@ -15872,6 +17335,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 8 PZC (pole-zero cancellation) enable (ACDC)
             return SetRegMask(0x1088, 0x01000000, 24, value);
          default:
             throw std::invalid_argument("Function SetFe8PzcEn() not defined for this board version");
@@ -15883,6 +17347,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 8 PZC (pole-zero cancellation) enable (ACDC)
             if(BitMask) *BitMask = 0x01000000;
             if(BitOfs) *BitOfs = 24;
             return 0x1088;
@@ -15898,6 +17363,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 9 amplifier 1 compensation enable (COMP1)
             return BitExtractControl(0x1088, 0x00000020, 5);
          default:
             throw std::invalid_argument("Function GetFe9Amplifier1CompEn() not defined for this board version");
@@ -15909,6 +17375,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 9 amplifier 1 compensation enable (COMP1)
             return SetRegMask(0x1088, 0x00000020, 5, value);
          default:
             throw std::invalid_argument("Function SetFe9Amplifier1CompEn() not defined for this board version");
@@ -15920,6 +17387,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 9 amplifier 1 compensation enable (COMP1)
             if(BitMask) *BitMask = 0x00000020;
             if(BitOfs) *BitOfs = 5;
             return 0x1088;
@@ -15935,6 +17403,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 9 amplifier 1 enable (gain: 10) (OP1)
             return BitExtractControl(0x1088, 0x00000010, 4);
          default:
             throw std::invalid_argument("Function GetFe9Amplifier1En() not defined for this board version");
@@ -15946,6 +17415,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 9 amplifier 1 enable (gain: 10) (OP1)
             return SetRegMask(0x1088, 0x00000010, 4, value);
          default:
             throw std::invalid_argument("Function SetFe9Amplifier1En() not defined for this board version");
@@ -15957,6 +17427,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 9 amplifier 1 enable (gain: 10) (OP1)
             if(BitMask) *BitMask = 0x00000010;
             if(BitOfs) *BitOfs = 4;
             return 0x1088;
@@ -15972,6 +17443,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 9 amplifier 2 compensation enable (COMP2)
             return BitExtractControl(0x1088, 0x00000080, 7);
          default:
             throw std::invalid_argument("Function GetFe9Amplifier2CompEn() not defined for this board version");
@@ -15983,6 +17455,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 9 amplifier 2 compensation enable (COMP2)
             return SetRegMask(0x1088, 0x00000080, 7, value);
          default:
             throw std::invalid_argument("Function SetFe9Amplifier2CompEn() not defined for this board version");
@@ -15994,6 +17467,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 9 amplifier 2 compensation enable (COMP2)
             if(BitMask) *BitMask = 0x00000080;
             if(BitOfs) *BitOfs = 7;
             return 0x1088;
@@ -16009,6 +17483,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 9 amplifier 2 enable (gain: 10) (OP2)
             return BitExtractControl(0x1088, 0x00000040, 6);
          default:
             throw std::invalid_argument("Function GetFe9Amplifier2En() not defined for this board version");
@@ -16020,6 +17495,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 9 amplifier 2 enable (gain: 10) (OP2)
             return SetRegMask(0x1088, 0x00000040, 6, value);
          default:
             throw std::invalid_argument("Function SetFe9Amplifier2En() not defined for this board version");
@@ -16031,6 +17507,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 9 amplifier 2 enable (gain: 10) (OP2)
             if(BitMask) *BitMask = 0x00000040;
             if(BitOfs) *BitOfs = 6;
             return 0x1088;
@@ -16046,6 +17523,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 9 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return BitExtractControl(0x1088, 0x0000000C, 2);
          default:
             throw std::invalid_argument("Function GetFe9Attenuation() not defined for this board version");
@@ -16057,6 +17535,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 9 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             return SetRegMask(0x1088, 0x0000000C, 2, value);
          default:
             throw std::invalid_argument("Function SetFe9Attenuation() not defined for this board version");
@@ -16068,6 +17547,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 9 attenuation (0: 0dB, 1: 6dB, 2: 12dB, 3: 18dB) (ATT_1,ATT_0)
             if(BitMask) *BitMask = 0x0000000C;
             if(BitOfs) *BitOfs = 2;
             return 0x1088;
@@ -16083,6 +17563,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 9 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return BitExtractControl(0x1088, 0x00000003, 0);
          default:
             throw std::invalid_argument("Function GetFe9Mux() not defined for this board version");
@@ -16094,6 +17575,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 9 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             return SetRegMask(0x1088, 0x00000003, 0, value);
          default:
             throw std::invalid_argument("Function SetFe9Mux() not defined for this board version");
@@ -16105,6 +17587,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 9 input MUX (0: next ch, 1: prev ch, 2: input, 3: cal src) (CAL_1,CAL_0)
             if(BitMask) *BitMask = 0x00000003;
             if(BitOfs) *BitOfs = 0;
             return 0x1088;
@@ -16120,6 +17603,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 9 PZC (pole-zero cancellation) enable (ACDC)
             return BitExtractControl(0x1088, 0x00000100, 8);
          default:
             throw std::invalid_argument("Function GetFe9PzcEn() not defined for this board version");
@@ -16131,6 +17615,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 9 PZC (pole-zero cancellation) enable (ACDC)
             return SetRegMask(0x1088, 0x00000100, 8, value);
          default:
             throw std::invalid_argument("Function SetFe9PzcEn() not defined for this board version");
@@ -16142,6 +17627,7 @@ public:
       {
          case 8:
          case 9:
+            // Frontend channel 9 PZC (pole-zero cancellation) enable (ACDC)
             if(BitMask) *BitMask = 0x00000100;
             if(BitOfs) *BitOfs = 8;
             return 0x1088;
@@ -16156,8 +17642,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 0 register modified flags
             return BitExtractStatus(0x0150, 0xC0000000, 30);
          case 9:
+            // Frontend channel 0 register modified flags
             return BitExtractStatus(0x014C, 0xC0000000, 30);
          default:
             throw std::invalid_argument("Function GetFe0Mod() not defined for this board version");
@@ -16168,10 +17656,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 0 register modified flags
             if(BitMask) *BitMask = 0xC0000000;
             if(BitOfs) *BitOfs = 30;
             return 0x0150;
          case 9:
+            // Frontend channel 0 register modified flags
             if(BitMask) *BitMask = 0xC0000000;
             if(BitOfs) *BitOfs = 30;
             return 0x014C;
@@ -16186,8 +17676,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 10 register modified flags
             return BitExtractStatus(0x0150, 0x00000C00, 10);
          case 9:
+            // Frontend channel 10 register modified flags
             return BitExtractStatus(0x014C, 0x00000C00, 10);
          default:
             throw std::invalid_argument("Function GetFe10Mod() not defined for this board version");
@@ -16198,10 +17690,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 10 register modified flags
             if(BitMask) *BitMask = 0x00000C00;
             if(BitOfs) *BitOfs = 10;
             return 0x0150;
          case 9:
+            // Frontend channel 10 register modified flags
             if(BitMask) *BitMask = 0x00000C00;
             if(BitOfs) *BitOfs = 10;
             return 0x014C;
@@ -16216,8 +17710,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 11 register modified flags
             return BitExtractStatus(0x0150, 0x00000300, 8);
          case 9:
+            // Frontend channel 11 register modified flags
             return BitExtractStatus(0x014C, 0x00000300, 8);
          default:
             throw std::invalid_argument("Function GetFe11Mod() not defined for this board version");
@@ -16228,10 +17724,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 11 register modified flags
             if(BitMask) *BitMask = 0x00000300;
             if(BitOfs) *BitOfs = 8;
             return 0x0150;
          case 9:
+            // Frontend channel 11 register modified flags
             if(BitMask) *BitMask = 0x00000300;
             if(BitOfs) *BitOfs = 8;
             return 0x014C;
@@ -16246,8 +17744,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 12 register modified flags
             return BitExtractStatus(0x0150, 0x000000C0, 6);
          case 9:
+            // Frontend channel 12 register modified flags
             return BitExtractStatus(0x014C, 0x000000C0, 6);
          default:
             throw std::invalid_argument("Function GetFe12Mod() not defined for this board version");
@@ -16258,10 +17758,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 12 register modified flags
             if(BitMask) *BitMask = 0x000000C0;
             if(BitOfs) *BitOfs = 6;
             return 0x0150;
          case 9:
+            // Frontend channel 12 register modified flags
             if(BitMask) *BitMask = 0x000000C0;
             if(BitOfs) *BitOfs = 6;
             return 0x014C;
@@ -16276,8 +17778,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 13 register modified flags
             return BitExtractStatus(0x0150, 0x00000030, 4);
          case 9:
+            // Frontend channel 13 register modified flags
             return BitExtractStatus(0x014C, 0x00000030, 4);
          default:
             throw std::invalid_argument("Function GetFe13Mod() not defined for this board version");
@@ -16288,10 +17792,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 13 register modified flags
             if(BitMask) *BitMask = 0x00000030;
             if(BitOfs) *BitOfs = 4;
             return 0x0150;
          case 9:
+            // Frontend channel 13 register modified flags
             if(BitMask) *BitMask = 0x00000030;
             if(BitOfs) *BitOfs = 4;
             return 0x014C;
@@ -16306,8 +17812,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 14 register modified flags
             return BitExtractStatus(0x0150, 0x0000000C, 2);
          case 9:
+            // Frontend channel 14 register modified flags
             return BitExtractStatus(0x014C, 0x0000000C, 2);
          default:
             throw std::invalid_argument("Function GetFe14Mod() not defined for this board version");
@@ -16318,10 +17826,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 14 register modified flags
             if(BitMask) *BitMask = 0x0000000C;
             if(BitOfs) *BitOfs = 2;
             return 0x0150;
          case 9:
+            // Frontend channel 14 register modified flags
             if(BitMask) *BitMask = 0x0000000C;
             if(BitOfs) *BitOfs = 2;
             return 0x014C;
@@ -16336,8 +17846,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 15 register modified flags
             return BitExtractStatus(0x0150, 0x00000003, 0);
          case 9:
+            // Frontend channel 15 register modified flags
             return BitExtractStatus(0x014C, 0x00000003, 0);
          default:
             throw std::invalid_argument("Function GetFe15Mod() not defined for this board version");
@@ -16348,10 +17860,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 15 register modified flags
             if(BitMask) *BitMask = 0x00000003;
             if(BitOfs) *BitOfs = 0;
             return 0x0150;
          case 9:
+            // Frontend channel 15 register modified flags
             if(BitMask) *BitMask = 0x00000003;
             if(BitOfs) *BitOfs = 0;
             return 0x014C;
@@ -16366,8 +17880,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 1 register modified flags
             return BitExtractStatus(0x0150, 0x30000000, 28);
          case 9:
+            // Frontend channel 1 register modified flags
             return BitExtractStatus(0x014C, 0x30000000, 28);
          default:
             throw std::invalid_argument("Function GetFe1Mod() not defined for this board version");
@@ -16378,10 +17894,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 1 register modified flags
             if(BitMask) *BitMask = 0x30000000;
             if(BitOfs) *BitOfs = 28;
             return 0x0150;
          case 9:
+            // Frontend channel 1 register modified flags
             if(BitMask) *BitMask = 0x30000000;
             if(BitOfs) *BitOfs = 28;
             return 0x014C;
@@ -16396,8 +17914,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 2 register modified flags
             return BitExtractStatus(0x0150, 0x0C000000, 26);
          case 9:
+            // Frontend channel 2 register modified flags
             return BitExtractStatus(0x014C, 0x0C000000, 26);
          default:
             throw std::invalid_argument("Function GetFe2Mod() not defined for this board version");
@@ -16408,10 +17928,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 2 register modified flags
             if(BitMask) *BitMask = 0x0C000000;
             if(BitOfs) *BitOfs = 26;
             return 0x0150;
          case 9:
+            // Frontend channel 2 register modified flags
             if(BitMask) *BitMask = 0x0C000000;
             if(BitOfs) *BitOfs = 26;
             return 0x014C;
@@ -16426,8 +17948,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 3 register modified flags
             return BitExtractStatus(0x0150, 0x03000000, 24);
          case 9:
+            // Frontend channel 3 register modified flags
             return BitExtractStatus(0x014C, 0x03000000, 24);
          default:
             throw std::invalid_argument("Function GetFe3Mod() not defined for this board version");
@@ -16438,10 +17962,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 3 register modified flags
             if(BitMask) *BitMask = 0x03000000;
             if(BitOfs) *BitOfs = 24;
             return 0x0150;
          case 9:
+            // Frontend channel 3 register modified flags
             if(BitMask) *BitMask = 0x03000000;
             if(BitOfs) *BitOfs = 24;
             return 0x014C;
@@ -16456,8 +17982,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 4 register modified flags
             return BitExtractStatus(0x0150, 0x00C00000, 22);
          case 9:
+            // Frontend channel 4 register modified flags
             return BitExtractStatus(0x014C, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetFe4Mod() not defined for this board version");
@@ -16468,10 +17996,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 4 register modified flags
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x0150;
          case 9:
+            // Frontend channel 4 register modified flags
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
             return 0x014C;
@@ -16486,8 +18016,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 5 register modified flags
             return BitExtractStatus(0x0150, 0x00300000, 20);
          case 9:
+            // Frontend channel 5 register modified flags
             return BitExtractStatus(0x014C, 0x00300000, 20);
          default:
             throw std::invalid_argument("Function GetFe5Mod() not defined for this board version");
@@ -16498,10 +18030,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 5 register modified flags
             if(BitMask) *BitMask = 0x00300000;
             if(BitOfs) *BitOfs = 20;
             return 0x0150;
          case 9:
+            // Frontend channel 5 register modified flags
             if(BitMask) *BitMask = 0x00300000;
             if(BitOfs) *BitOfs = 20;
             return 0x014C;
@@ -16516,8 +18050,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 6 register modified flags
             return BitExtractStatus(0x0150, 0x000C0000, 18);
          case 9:
+            // Frontend channel 6 register modified flags
             return BitExtractStatus(0x014C, 0x000C0000, 18);
          default:
             throw std::invalid_argument("Function GetFe6Mod() not defined for this board version");
@@ -16528,10 +18064,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 6 register modified flags
             if(BitMask) *BitMask = 0x000C0000;
             if(BitOfs) *BitOfs = 18;
             return 0x0150;
          case 9:
+            // Frontend channel 6 register modified flags
             if(BitMask) *BitMask = 0x000C0000;
             if(BitOfs) *BitOfs = 18;
             return 0x014C;
@@ -16546,8 +18084,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 7 register modified flags
             return BitExtractStatus(0x0150, 0x00030000, 16);
          case 9:
+            // Frontend channel 7 register modified flags
             return BitExtractStatus(0x014C, 0x00030000, 16);
          default:
             throw std::invalid_argument("Function GetFe7Mod() not defined for this board version");
@@ -16558,10 +18098,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 7 register modified flags
             if(BitMask) *BitMask = 0x00030000;
             if(BitOfs) *BitOfs = 16;
             return 0x0150;
          case 9:
+            // Frontend channel 7 register modified flags
             if(BitMask) *BitMask = 0x00030000;
             if(BitOfs) *BitOfs = 16;
             return 0x014C;
@@ -16576,8 +18118,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 8 register modified flags
             return BitExtractStatus(0x0150, 0x0000C000, 14);
          case 9:
+            // Frontend channel 8 register modified flags
             return BitExtractStatus(0x014C, 0x0000C000, 14);
          default:
             throw std::invalid_argument("Function GetFe8Mod() not defined for this board version");
@@ -16588,10 +18132,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 8 register modified flags
             if(BitMask) *BitMask = 0x0000C000;
             if(BitOfs) *BitOfs = 14;
             return 0x0150;
          case 9:
+            // Frontend channel 8 register modified flags
             if(BitMask) *BitMask = 0x0000C000;
             if(BitOfs) *BitOfs = 14;
             return 0x014C;
@@ -16606,8 +18152,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 9 register modified flags
             return BitExtractStatus(0x0150, 0x00003000, 12);
          case 9:
+            // Frontend channel 9 register modified flags
             return BitExtractStatus(0x014C, 0x00003000, 12);
          default:
             throw std::invalid_argument("Function GetFe9Mod() not defined for this board version");
@@ -16618,10 +18166,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Frontend channel 9 register modified flags
             if(BitMask) *BitMask = 0x00003000;
             if(BitOfs) *BitOfs = 12;
             return 0x0150;
          case 9:
+            // Frontend channel 9 register modified flags
             if(BitMask) *BitMask = 0x00003000;
             if(BitOfs) *BitOfs = 12;
             return 0x014C;
@@ -16636,6 +18186,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Frontend Power (0=Power OFF, 1=Power ON)
             return BitExtractControl(0x1004, 0x00000800, 11);
          default:
             throw std::invalid_argument("Function GetFePower() not defined for this board version");
@@ -16646,6 +18197,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Frontend Power (0=Power OFF, 1=Power ON)
             return SetRegMask(0x1004, 0x00000800, 11, value);
          default:
             throw std::invalid_argument("Function SetFePower() not defined for this board version");
@@ -16656,6 +18208,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Frontend Power (0=Power OFF, 1=Power ON)
             if(BitMask) *BitMask = 0x00000800;
             if(BitOfs) *BitOfs = 11;
             return 0x1004;
@@ -16671,6 +18224,7 @@ public:
       {
          case 8:
          case 9:
+            // Delay of first data packet of an event (resolution 1.6us)
             return BitExtractControl(0x1018, 0xFFFC0000, 18);
          default:
             throw std::invalid_argument("Function GetFirstPkgDly() not defined for this board version");
@@ -16682,6 +18236,7 @@ public:
       {
          case 8:
          case 9:
+            // Delay of first data packet of an event (resolution 1.6us)
             return SetRegMask(0x1018, 0xFFFC0000, 18, value);
          default:
             throw std::invalid_argument("Function SetFirstPkgDly() not defined for this board version");
@@ -16693,6 +18248,7 @@ public:
       {
          case 8:
          case 9:
+            // Delay of first data packet of an event (resolution 1.6us)
             if(BitMask) *BitMask = 0xFFFC0000;
             if(BitOfs) *BitOfs = 18;
             return 0x1018;
@@ -16707,6 +18263,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // SPI Flash select from backplane (inverted = high active)
             return BitExtractStatus(0x0028, 0x00000200, 9);
          default:
             throw std::invalid_argument("Function GetFlashSel() not defined for this board version");
@@ -16717,6 +18274,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // SPI Flash select from backplane (inverted = high active)
             if(BitMask) *BitMask = 0x00000200;
             if(BitOfs) *BitOfs = 9;
             return 0x0028;
@@ -16732,6 +18290,7 @@ public:
       {
          case 8:
          case 9:
+            // Day of the firmware build
             return BitExtractStatus(0x0008, 0x000000FF, 0);
          default:
             throw std::invalid_argument("Function GetFwBuildDay() not defined for this board version");
@@ -16743,6 +18302,7 @@ public:
       {
          case 8:
          case 9:
+            // Day of the firmware build
             if(BitMask) *BitMask = 0x000000FF;
             if(BitOfs) *BitOfs = 0;
             return 0x0008;
@@ -16758,6 +18318,7 @@ public:
       {
          case 8:
          case 9:
+            // Hour of the firmware build
             return BitExtractStatus(0x000C, 0x00FF0000, 16);
          default:
             throw std::invalid_argument("Function GetFwBuildHour() not defined for this board version");
@@ -16769,6 +18330,7 @@ public:
       {
          case 8:
          case 9:
+            // Hour of the firmware build
             if(BitMask) *BitMask = 0x00FF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x000C;
@@ -16784,6 +18346,7 @@ public:
       {
          case 8:
          case 9:
+            // Minute of the firmware build
             return BitExtractStatus(0x000C, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetFwBuildMinute() not defined for this board version");
@@ -16795,6 +18358,7 @@ public:
       {
          case 8:
          case 9:
+            // Minute of the firmware build
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x000C;
@@ -16810,6 +18374,7 @@ public:
       {
          case 8:
          case 9:
+            // Month of the firmware build
             return BitExtractStatus(0x0008, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetFwBuildMonth() not defined for this board version");
@@ -16821,6 +18386,7 @@ public:
       {
          case 8:
          case 9:
+            // Month of the firmware build
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x0008;
@@ -16836,6 +18402,7 @@ public:
       {
          case 8:
          case 9:
+            // Second of the firmware build
             return BitExtractStatus(0x000C, 0x000000FF, 0);
          default:
             throw std::invalid_argument("Function GetFwBuildSecond() not defined for this board version");
@@ -16847,6 +18414,7 @@ public:
       {
          case 8:
          case 9:
+            // Second of the firmware build
             if(BitMask) *BitMask = 0x000000FF;
             if(BitOfs) *BitOfs = 0;
             return 0x000C;
@@ -16862,6 +18430,7 @@ public:
       {
          case 8:
          case 9:
+            // Year of the firmware build
             return BitExtractStatus(0x0008, 0xFFFF0000, 16);
          default:
             throw std::invalid_argument("Function GetFwBuildYear() not defined for this board version");
@@ -16873,6 +18442,7 @@ public:
       {
          case 8:
          case 9:
+            // Year of the firmware build
             if(BitMask) *BitMask = 0xFFFF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x0008;
@@ -16888,6 +18458,7 @@ public:
       {
          case 8:
          case 9:
+            // Firmware compatibility level
             return BitExtractStatus(0x000C, 0xFF000000, 24);
          default:
             throw std::invalid_argument("Function GetFwCompatLevel() not defined for this board version");
@@ -16899,6 +18470,7 @@ public:
       {
          case 8:
          case 9:
+            // Firmware compatibility level
             if(BitMask) *BitMask = 0xFF000000;
             if(BitOfs) *BitOfs = 24;
             return 0x000C;
@@ -16914,6 +18486,7 @@ public:
       {
          case 8:
          case 9:
+            // Hash tag of the firmware commit in the GIT repository
             return BitExtractStatus(0x0018, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetFwGitHashTag() not defined for this board version");
@@ -16925,6 +18498,7 @@ public:
       {
          case 8:
          case 9:
+            // Hash tag of the firmware commit in the GIT repository
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0018;
@@ -16940,6 +18514,7 @@ public:
       {
          case 8:
          case 9:
+            // HV board is currently plugged (1) or unplugged (0)
             return BitExtractStatus(0x0028, 0x00000002, 1);
          default:
             throw std::invalid_argument("Function GetHvBoardPlugged() not defined for this board version");
@@ -16951,6 +18526,7 @@ public:
       {
          case 8:
          case 9:
+            // HV board is currently plugged (1) or unplugged (0)
             if(BitMask) *BitMask = 0x00000002;
             if(BitOfs) *BitOfs = 1;
             return 0x0028;
@@ -16965,8 +18541,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             return BitExtractStatus(0x004C, 0xFFFFFFFF, 0);
          case 9:
+            // Float value (i_meas)
             return BitExtractStatus(0x0048, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvIMeas0() not defined for this board version");
@@ -16977,10 +18555,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x004C;
          case 9:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0048;
@@ -16995,8 +18575,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             return BitExtractStatus(0x0050, 0xFFFFFFFF, 0);
          case 9:
+            // Float value (i_meas)
             return BitExtractStatus(0x004C, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvIMeas1() not defined for this board version");
@@ -17007,10 +18589,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0050;
          case 9:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x004C;
@@ -17025,8 +18609,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             return BitExtractStatus(0x0074, 0xFFFFFFFF, 0);
          case 9:
+            // Float value (i_meas)
             return BitExtractStatus(0x0070, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvIMeas10() not defined for this board version");
@@ -17037,10 +18623,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0074;
          case 9:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0070;
@@ -17055,8 +18643,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             return BitExtractStatus(0x0078, 0xFFFFFFFF, 0);
          case 9:
+            // Float value (i_meas)
             return BitExtractStatus(0x0074, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvIMeas11() not defined for this board version");
@@ -17067,10 +18657,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0078;
          case 9:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0074;
@@ -17085,8 +18677,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             return BitExtractStatus(0x007C, 0xFFFFFFFF, 0);
          case 9:
+            // Float value (i_meas)
             return BitExtractStatus(0x0078, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvIMeas12() not defined for this board version");
@@ -17097,10 +18691,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x007C;
          case 9:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0078;
@@ -17115,8 +18711,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             return BitExtractStatus(0x0080, 0xFFFFFFFF, 0);
          case 9:
+            // Float value (i_meas)
             return BitExtractStatus(0x007C, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvIMeas13() not defined for this board version");
@@ -17127,10 +18725,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0080;
          case 9:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x007C;
@@ -17145,8 +18745,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             return BitExtractStatus(0x0084, 0xFFFFFFFF, 0);
          case 9:
+            // Float value (i_meas)
             return BitExtractStatus(0x0080, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvIMeas14() not defined for this board version");
@@ -17157,10 +18759,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0084;
          case 9:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0080;
@@ -17175,8 +18779,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             return BitExtractStatus(0x0088, 0xFFFFFFFF, 0);
          case 9:
+            // Float value (i_meas)
             return BitExtractStatus(0x0084, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvIMeas15() not defined for this board version");
@@ -17187,10 +18793,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0088;
          case 9:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0084;
@@ -17205,8 +18813,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             return BitExtractStatus(0x0054, 0xFFFFFFFF, 0);
          case 9:
+            // Float value (i_meas)
             return BitExtractStatus(0x0050, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvIMeas2() not defined for this board version");
@@ -17217,10 +18827,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0054;
          case 9:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0050;
@@ -17235,8 +18847,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             return BitExtractStatus(0x0058, 0xFFFFFFFF, 0);
          case 9:
+            // Float value (i_meas)
             return BitExtractStatus(0x0054, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvIMeas3() not defined for this board version");
@@ -17247,10 +18861,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0058;
          case 9:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0054;
@@ -17265,8 +18881,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             return BitExtractStatus(0x005C, 0xFFFFFFFF, 0);
          case 9:
+            // Float value (i_meas)
             return BitExtractStatus(0x0058, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvIMeas4() not defined for this board version");
@@ -17277,10 +18895,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x005C;
          case 9:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0058;
@@ -17295,8 +18915,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             return BitExtractStatus(0x0060, 0xFFFFFFFF, 0);
          case 9:
+            // Float value (i_meas)
             return BitExtractStatus(0x005C, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvIMeas5() not defined for this board version");
@@ -17307,10 +18929,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0060;
          case 9:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x005C;
@@ -17325,8 +18949,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             return BitExtractStatus(0x0064, 0xFFFFFFFF, 0);
          case 9:
+            // Float value (i_meas)
             return BitExtractStatus(0x0060, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvIMeas6() not defined for this board version");
@@ -17337,10 +18963,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0064;
          case 9:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0060;
@@ -17355,8 +18983,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             return BitExtractStatus(0x0068, 0xFFFFFFFF, 0);
          case 9:
+            // Float value (i_meas)
             return BitExtractStatus(0x0064, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvIMeas7() not defined for this board version");
@@ -17367,10 +18997,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0068;
          case 9:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0064;
@@ -17385,8 +19017,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             return BitExtractStatus(0x006C, 0xFFFFFFFF, 0);
          case 9:
+            // Float value (i_meas)
             return BitExtractStatus(0x0068, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvIMeas8() not defined for this board version");
@@ -17397,10 +19031,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x006C;
          case 9:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0068;
@@ -17415,8 +19051,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             return BitExtractStatus(0x0070, 0xFFFFFFFF, 0);
          case 9:
+            // Float value (i_meas)
             return BitExtractStatus(0x006C, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvIMeas9() not defined for this board version");
@@ -17427,10 +19065,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0070;
          case 9:
+            // Float value (i_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x006C;
@@ -17446,6 +19086,7 @@ public:
       {
          case 8:
          case 9:
+            // Resistor value in Ohm (r_current)
             return BitExtractControl(0x10D8, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvRShunt() not defined for this board version");
@@ -17457,6 +19098,7 @@ public:
       {
          case 8:
          case 9:
+            // Resistor value in Ohm (r_current)
             return SetRegMask(0x10D8, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetHvRShunt() not defined for this board version");
@@ -17468,6 +19110,7 @@ public:
       {
          case 8:
          case 9:
+            // Resistor value in Ohm (r_current)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x10D8;
@@ -17482,8 +19125,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // HV supply shunt resistor register modified flags
             return BitExtractStatus(0x015C, 0x0000000F, 0);
          case 9:
+            // HV supply shunt resistor register modified flags
             return BitExtractStatus(0x0158, 0x0000000F, 0);
          default:
             throw std::invalid_argument("Function GetHvRShuntMod() not defined for this board version");
@@ -17494,10 +19139,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // HV supply shunt resistor register modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
             return 0x015C;
          case 9:
+            // HV supply shunt resistor register modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
             return 0x0158;
@@ -17512,8 +19159,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (temp)
             return BitExtractStatus(0x0090, 0xFFFFFFFF, 0);
          case 9:
+            // Float value (temp)
             return BitExtractStatus(0x008C, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvTemp0() not defined for this board version");
@@ -17524,10 +19173,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (temp)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0090;
          case 9:
+            // Float value (temp)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x008C;
@@ -17542,8 +19193,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (temp)
             return BitExtractStatus(0x0094, 0xFFFFFFFF, 0);
          case 9:
+            // Float value (temp)
             return BitExtractStatus(0x0090, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvTemp1() not defined for this board version");
@@ -17554,10 +19207,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (temp)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0094;
          case 9:
+            // Float value (temp)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0090;
@@ -17572,8 +19227,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (temp)
             return BitExtractStatus(0x0098, 0xFFFFFFFF, 0);
          case 9:
+            // Float value (temp)
             return BitExtractStatus(0x0094, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvTemp2() not defined for this board version");
@@ -17584,10 +19241,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (temp)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0098;
          case 9:
+            // Float value (temp)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0094;
@@ -17602,8 +19261,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (temp)
             return BitExtractStatus(0x009C, 0xFFFFFFFF, 0);
          case 9:
+            // Float value (temp)
             return BitExtractStatus(0x0098, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvTemp3() not defined for this board version");
@@ -17614,10 +19275,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (temp)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x009C;
          case 9:
+            // Float value (temp)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0098;
@@ -17632,8 +19295,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (ub_meas)
             return BitExtractStatus(0x008C, 0xFFFFFFFF, 0);
          case 9:
+            // Float value (ub_meas)
             return BitExtractStatus(0x0088, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvUBaseMeas() not defined for this board version");
@@ -17644,10 +19309,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Float value (ub_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x008C;
          case 9:
+            // Float value (ub_meas)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0088;
@@ -17663,6 +19330,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return BitExtractControl(0x1098, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvUTarget0() not defined for this board version");
@@ -17674,6 +19342,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return SetRegMask(0x1098, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetHvUTarget0() not defined for this board version");
@@ -17685,6 +19354,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1098;
@@ -17699,8 +19369,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 0 register modified flags
             return BitExtractStatus(0x0154, 0xF0000000, 28);
          case 9:
+            // Target high voltage channel 0 register modified flags
             return BitExtractStatus(0x0150, 0xF0000000, 28);
          default:
             throw std::invalid_argument("Function GetHvUTarget0Mod() not defined for this board version");
@@ -17711,10 +19383,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 0 register modified flags
             if(BitMask) *BitMask = 0xF0000000;
             if(BitOfs) *BitOfs = 28;
             return 0x0154;
          case 9:
+            // Target high voltage channel 0 register modified flags
             if(BitMask) *BitMask = 0xF0000000;
             if(BitOfs) *BitOfs = 28;
             return 0x0150;
@@ -17730,6 +19404,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return BitExtractControl(0x109C, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvUTarget1() not defined for this board version");
@@ -17741,6 +19416,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return SetRegMask(0x109C, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetHvUTarget1() not defined for this board version");
@@ -17752,6 +19428,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x109C;
@@ -17767,6 +19444,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return BitExtractControl(0x10C0, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvUTarget10() not defined for this board version");
@@ -17778,6 +19456,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return SetRegMask(0x10C0, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetHvUTarget10() not defined for this board version");
@@ -17789,6 +19468,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x10C0;
@@ -17803,8 +19483,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 10 register modified flags
             return BitExtractStatus(0x0158, 0x00F00000, 20);
          case 9:
+            // Target high voltage channel 10 register modified flags
             return BitExtractStatus(0x0154, 0x00F00000, 20);
          default:
             throw std::invalid_argument("Function GetHvUTarget10Mod() not defined for this board version");
@@ -17815,10 +19497,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 10 register modified flags
             if(BitMask) *BitMask = 0x00F00000;
             if(BitOfs) *BitOfs = 20;
             return 0x0158;
          case 9:
+            // Target high voltage channel 10 register modified flags
             if(BitMask) *BitMask = 0x00F00000;
             if(BitOfs) *BitOfs = 20;
             return 0x0154;
@@ -17834,6 +19518,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return BitExtractControl(0x10C4, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvUTarget11() not defined for this board version");
@@ -17845,6 +19530,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return SetRegMask(0x10C4, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetHvUTarget11() not defined for this board version");
@@ -17856,6 +19542,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x10C4;
@@ -17870,8 +19557,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 11 register modified flags
             return BitExtractStatus(0x0158, 0x000F0000, 16);
          case 9:
+            // Target high voltage channel 11 register modified flags
             return BitExtractStatus(0x0154, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetHvUTarget11Mod() not defined for this board version");
@@ -17882,10 +19571,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 11 register modified flags
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x0158;
          case 9:
+            // Target high voltage channel 11 register modified flags
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x0154;
@@ -17901,6 +19592,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return BitExtractControl(0x10C8, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvUTarget12() not defined for this board version");
@@ -17912,6 +19604,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return SetRegMask(0x10C8, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetHvUTarget12() not defined for this board version");
@@ -17923,6 +19616,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x10C8;
@@ -17937,8 +19631,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 12 register modified flags
             return BitExtractStatus(0x0158, 0x0000F000, 12);
          case 9:
+            // Target high voltage channel 12 register modified flags
             return BitExtractStatus(0x0154, 0x0000F000, 12);
          default:
             throw std::invalid_argument("Function GetHvUTarget12Mod() not defined for this board version");
@@ -17949,10 +19645,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 12 register modified flags
             if(BitMask) *BitMask = 0x0000F000;
             if(BitOfs) *BitOfs = 12;
             return 0x0158;
          case 9:
+            // Target high voltage channel 12 register modified flags
             if(BitMask) *BitMask = 0x0000F000;
             if(BitOfs) *BitOfs = 12;
             return 0x0154;
@@ -17968,6 +19666,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return BitExtractControl(0x10CC, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvUTarget13() not defined for this board version");
@@ -17979,6 +19678,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return SetRegMask(0x10CC, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetHvUTarget13() not defined for this board version");
@@ -17990,6 +19690,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x10CC;
@@ -18004,8 +19705,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 13 register modified flags
             return BitExtractStatus(0x0158, 0x00000F00, 8);
          case 9:
+            // Target high voltage channel 13 register modified flags
             return BitExtractStatus(0x0154, 0x00000F00, 8);
          default:
             throw std::invalid_argument("Function GetHvUTarget13Mod() not defined for this board version");
@@ -18016,10 +19719,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 13 register modified flags
             if(BitMask) *BitMask = 0x00000F00;
             if(BitOfs) *BitOfs = 8;
             return 0x0158;
          case 9:
+            // Target high voltage channel 13 register modified flags
             if(BitMask) *BitMask = 0x00000F00;
             if(BitOfs) *BitOfs = 8;
             return 0x0154;
@@ -18035,6 +19740,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return BitExtractControl(0x10D0, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvUTarget14() not defined for this board version");
@@ -18046,6 +19752,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return SetRegMask(0x10D0, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetHvUTarget14() not defined for this board version");
@@ -18057,6 +19764,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x10D0;
@@ -18071,8 +19779,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 14 register modified flags
             return BitExtractStatus(0x0158, 0x000000F0, 4);
          case 9:
+            // Target high voltage channel 14 register modified flags
             return BitExtractStatus(0x0154, 0x000000F0, 4);
          default:
             throw std::invalid_argument("Function GetHvUTarget14Mod() not defined for this board version");
@@ -18083,10 +19793,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 14 register modified flags
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
             return 0x0158;
          case 9:
+            // Target high voltage channel 14 register modified flags
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
             return 0x0154;
@@ -18102,6 +19814,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return BitExtractControl(0x10D4, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvUTarget15() not defined for this board version");
@@ -18113,6 +19826,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return SetRegMask(0x10D4, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetHvUTarget15() not defined for this board version");
@@ -18124,6 +19838,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x10D4;
@@ -18138,8 +19853,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 15 register modified flags
             return BitExtractStatus(0x0158, 0x0000000F, 0);
          case 9:
+            // Target high voltage channel 15 register modified flags
             return BitExtractStatus(0x0154, 0x0000000F, 0);
          default:
             throw std::invalid_argument("Function GetHvUTarget15Mod() not defined for this board version");
@@ -18150,10 +19867,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 15 register modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
             return 0x0158;
          case 9:
+            // Target high voltage channel 15 register modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
             return 0x0154;
@@ -18168,8 +19887,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 1 register modified flags
             return BitExtractStatus(0x0154, 0x0F000000, 24);
          case 9:
+            // Target high voltage channel 1 register modified flags
             return BitExtractStatus(0x0150, 0x0F000000, 24);
          default:
             throw std::invalid_argument("Function GetHvUTarget1Mod() not defined for this board version");
@@ -18180,10 +19901,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 1 register modified flags
             if(BitMask) *BitMask = 0x0F000000;
             if(BitOfs) *BitOfs = 24;
             return 0x0154;
          case 9:
+            // Target high voltage channel 1 register modified flags
             if(BitMask) *BitMask = 0x0F000000;
             if(BitOfs) *BitOfs = 24;
             return 0x0150;
@@ -18199,6 +19922,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return BitExtractControl(0x10A0, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvUTarget2() not defined for this board version");
@@ -18210,6 +19934,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return SetRegMask(0x10A0, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetHvUTarget2() not defined for this board version");
@@ -18221,6 +19946,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x10A0;
@@ -18235,8 +19961,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 2 register modified flags
             return BitExtractStatus(0x0154, 0x00F00000, 20);
          case 9:
+            // Target high voltage channel 2 register modified flags
             return BitExtractStatus(0x0150, 0x00F00000, 20);
          default:
             throw std::invalid_argument("Function GetHvUTarget2Mod() not defined for this board version");
@@ -18247,10 +19975,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 2 register modified flags
             if(BitMask) *BitMask = 0x00F00000;
             if(BitOfs) *BitOfs = 20;
             return 0x0154;
          case 9:
+            // Target high voltage channel 2 register modified flags
             if(BitMask) *BitMask = 0x00F00000;
             if(BitOfs) *BitOfs = 20;
             return 0x0150;
@@ -18266,6 +19996,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return BitExtractControl(0x10A4, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvUTarget3() not defined for this board version");
@@ -18277,6 +20008,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return SetRegMask(0x10A4, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetHvUTarget3() not defined for this board version");
@@ -18288,6 +20020,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x10A4;
@@ -18302,8 +20035,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 3 register modified flags
             return BitExtractStatus(0x0154, 0x000F0000, 16);
          case 9:
+            // Target high voltage channel 3 register modified flags
             return BitExtractStatus(0x0150, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetHvUTarget3Mod() not defined for this board version");
@@ -18314,10 +20049,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 3 register modified flags
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x0154;
          case 9:
+            // Target high voltage channel 3 register modified flags
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x0150;
@@ -18333,6 +20070,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return BitExtractControl(0x10A8, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvUTarget4() not defined for this board version");
@@ -18344,6 +20082,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return SetRegMask(0x10A8, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetHvUTarget4() not defined for this board version");
@@ -18355,6 +20094,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x10A8;
@@ -18369,8 +20109,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 4 register modified flags
             return BitExtractStatus(0x0154, 0x0000F000, 12);
          case 9:
+            // Target high voltage channel 4 register modified flags
             return BitExtractStatus(0x0150, 0x0000F000, 12);
          default:
             throw std::invalid_argument("Function GetHvUTarget4Mod() not defined for this board version");
@@ -18381,10 +20123,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 4 register modified flags
             if(BitMask) *BitMask = 0x0000F000;
             if(BitOfs) *BitOfs = 12;
             return 0x0154;
          case 9:
+            // Target high voltage channel 4 register modified flags
             if(BitMask) *BitMask = 0x0000F000;
             if(BitOfs) *BitOfs = 12;
             return 0x0150;
@@ -18400,6 +20144,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return BitExtractControl(0x10AC, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvUTarget5() not defined for this board version");
@@ -18411,6 +20156,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return SetRegMask(0x10AC, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetHvUTarget5() not defined for this board version");
@@ -18422,6 +20168,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x10AC;
@@ -18436,8 +20183,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 5 register modified flags
             return BitExtractStatus(0x0154, 0x00000F00, 8);
          case 9:
+            // Target high voltage channel 5 register modified flags
             return BitExtractStatus(0x0150, 0x00000F00, 8);
          default:
             throw std::invalid_argument("Function GetHvUTarget5Mod() not defined for this board version");
@@ -18448,10 +20197,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 5 register modified flags
             if(BitMask) *BitMask = 0x00000F00;
             if(BitOfs) *BitOfs = 8;
             return 0x0154;
          case 9:
+            // Target high voltage channel 5 register modified flags
             if(BitMask) *BitMask = 0x00000F00;
             if(BitOfs) *BitOfs = 8;
             return 0x0150;
@@ -18467,6 +20218,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return BitExtractControl(0x10B0, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvUTarget6() not defined for this board version");
@@ -18478,6 +20230,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return SetRegMask(0x10B0, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetHvUTarget6() not defined for this board version");
@@ -18489,6 +20242,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x10B0;
@@ -18503,8 +20257,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 6 register modified flags
             return BitExtractStatus(0x0154, 0x000000F0, 4);
          case 9:
+            // Target high voltage channel 6 register modified flags
             return BitExtractStatus(0x0150, 0x000000F0, 4);
          default:
             throw std::invalid_argument("Function GetHvUTarget6Mod() not defined for this board version");
@@ -18515,10 +20271,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 6 register modified flags
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
             return 0x0154;
          case 9:
+            // Target high voltage channel 6 register modified flags
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
             return 0x0150;
@@ -18534,6 +20292,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return BitExtractControl(0x10B4, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvUTarget7() not defined for this board version");
@@ -18545,6 +20304,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return SetRegMask(0x10B4, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetHvUTarget7() not defined for this board version");
@@ -18556,6 +20316,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x10B4;
@@ -18570,8 +20331,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 7 register modified flags
             return BitExtractStatus(0x0154, 0x0000000F, 0);
          case 9:
+            // Target high voltage channel 7 register modified flags
             return BitExtractStatus(0x0150, 0x0000000F, 0);
          default:
             throw std::invalid_argument("Function GetHvUTarget7Mod() not defined for this board version");
@@ -18582,10 +20345,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 7 register modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
             return 0x0154;
          case 9:
+            // Target high voltage channel 7 register modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
             return 0x0150;
@@ -18601,6 +20366,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return BitExtractControl(0x10B8, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvUTarget8() not defined for this board version");
@@ -18612,6 +20378,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return SetRegMask(0x10B8, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetHvUTarget8() not defined for this board version");
@@ -18623,6 +20390,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x10B8;
@@ -18637,8 +20405,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 8 register modified flags
             return BitExtractStatus(0x0158, 0xF0000000, 28);
          case 9:
+            // Target high voltage channel 8 register modified flags
             return BitExtractStatus(0x0154, 0xF0000000, 28);
          default:
             throw std::invalid_argument("Function GetHvUTarget8Mod() not defined for this board version");
@@ -18649,10 +20419,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 8 register modified flags
             if(BitMask) *BitMask = 0xF0000000;
             if(BitOfs) *BitOfs = 28;
             return 0x0158;
          case 9:
+            // Target high voltage channel 8 register modified flags
             if(BitMask) *BitMask = 0xF0000000;
             if(BitOfs) *BitOfs = 28;
             return 0x0154;
@@ -18668,6 +20440,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return BitExtractControl(0x10BC, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvUTarget9() not defined for this board version");
@@ -18679,6 +20452,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             return SetRegMask(0x10BC, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetHvUTarget9() not defined for this board version");
@@ -18690,6 +20464,7 @@ public:
       {
          case 8:
          case 9:
+            // Float value (u_demand)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x10BC;
@@ -18704,8 +20479,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 9 register modified flags
             return BitExtractStatus(0x0158, 0x0F000000, 24);
          case 9:
+            // Target high voltage channel 9 register modified flags
             return BitExtractStatus(0x0154, 0x0F000000, 24);
          default:
             throw std::invalid_argument("Function GetHvUTarget9Mod() not defined for this board version");
@@ -18716,10 +20493,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Target high voltage channel 9 register modified flags
             if(BitMask) *BitMask = 0x0F000000;
             if(BitOfs) *BitOfs = 24;
             return 0x0158;
          case 9:
+            // Target high voltage channel 9 register modified flags
             if(BitMask) *BitMask = 0x0F000000;
             if(BitOfs) *BitOfs = 24;
             return 0x0154;
@@ -18734,8 +20513,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // HV board version (16bit Voltage in V, 16bit Current in mA)
             return BitExtractStatus(0x0048, 0xFFFFFFFF, 0);
          case 9:
+            // HV board version (16bit Voltage in V, 16bit Current in mA)
             return BitExtractStatus(0x0044, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetHvVer() not defined for this board version");
@@ -18746,10 +20527,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // HV board version (16bit Voltage in V, 16bit Current in mA)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0048;
          case 9:
+            // HV board version (16bit Voltage in V, 16bit Current in mA)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0044;
@@ -18765,6 +20548,7 @@ public:
       {
          case 8:
          case 9:
+            // Delay between transmission of two UDP packages in 8ns steps
             return BitExtractControl(0x1014, 0x00FFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetInterPkgDelay() not defined for this board version");
@@ -18776,6 +20560,7 @@ public:
       {
          case 8:
          case 9:
+            // Delay between transmission of two UDP packages in 8ns steps
             return SetRegMask(0x1014, 0x00FFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetInterPkgDelay() not defined for this board version");
@@ -18787,6 +20572,7 @@ public:
       {
          case 8:
          case 9:
+            // Delay between transmission of two UDP packages in 8ns steps
             if(BitMask) *BitMask = 0x00FFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1014;
@@ -18802,6 +20588,7 @@ public:
       {
          case 8:
          case 9:
+            // Lock of PLL for ISERDES from ADC 0 (A) (FPGA internal)
             return BitExtractStatus(0x002C, 0x00000010, 4);
          default:
             throw std::invalid_argument("Function GetIserdesPllLock0() not defined for this board version");
@@ -18813,6 +20600,7 @@ public:
       {
          case 8:
          case 9:
+            // Lock of PLL for ISERDES from ADC 0 (A) (FPGA internal)
             if(BitMask) *BitMask = 0x00000010;
             if(BitOfs) *BitOfs = 4;
             return 0x002C;
@@ -18828,6 +20616,7 @@ public:
       {
          case 8:
          case 9:
+            // Lock of PLL for ISERDES from ADC 1 (B) (FPGA internal)
             return BitExtractStatus(0x002C, 0x00000008, 3);
          default:
             throw std::invalid_argument("Function GetIserdesPllLock1() not defined for this board version");
@@ -18839,6 +20628,7 @@ public:
       {
          case 8:
          case 9:
+            // Lock of PLL for ISERDES from ADC 1 (B) (FPGA internal)
             if(BitMask) *BitMask = 0x00000008;
             if(BitOfs) *BitOfs = 3;
             return 0x002C;
@@ -18853,8 +20643,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // 0 = trigger on leading edge, 1 = trigger on trailing edge
             return BitExtractControl(0x1180, 0x00010000, 16);
          case 9:
+            // 0 = trigger on leading edge, 1 = trigger on trailing edge
             return BitExtractControl(0x1124, 0x00010000, 16);
          default:
             throw std::invalid_argument("Function GetLeadTrailEdgeSel() not defined for this board version");
@@ -18865,8 +20657,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // 0 = trigger on leading edge, 1 = trigger on trailing edge
             return SetRegMask(0x1180, 0x00010000, 16, value);
          case 9:
+            // 0 = trigger on leading edge, 1 = trigger on trailing edge
             return SetRegMask(0x1124, 0x00010000, 16, value);
          default:
             throw std::invalid_argument("Function SetLeadTrailEdgeSel() not defined for this board version");
@@ -18877,10 +20671,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // 0 = trigger on leading edge, 1 = trigger on trailing edge
             if(BitMask) *BitMask = 0x00010000;
             if(BitOfs) *BitOfs = 16;
             return 0x1180;
          case 9:
+            // 0 = trigger on leading edge, 1 = trigger on trailing edge
             if(BitMask) *BitMask = 0x00010000;
             if(BitOfs) *BitOfs = 16;
             return 0x1124;
@@ -18896,6 +20692,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 0 Clock Output Divider (value x 2) (1..255)
             return BitExtractControl(0x10DC, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetLmk0ClkoutDiv() not defined for this board version");
@@ -18907,6 +20704,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 0 Clock Output Divider (value x 2) (1..255)
             return SetRegMask(0x10DC, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetLmk0ClkoutDiv() not defined for this board version");
@@ -18918,6 +20716,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 0 Clock Output Divider (value x 2) (1..255)
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x10DC;
@@ -18933,6 +20732,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 0 Clock Output Delay (value x 150ps)
             return BitExtractControl(0x10DC, 0x000000F0, 4);
          default:
             throw std::invalid_argument("Function GetLmk0ClkoutDly() not defined for this board version");
@@ -18944,6 +20744,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 0 Clock Output Delay (value x 150ps)
             return SetRegMask(0x10DC, 0x000000F0, 4, value);
          default:
             throw std::invalid_argument("Function SetLmk0ClkoutDly() not defined for this board version");
@@ -18955,6 +20756,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 0 Clock Output Delay (value x 150ps)
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
             return 0x10DC;
@@ -18970,6 +20772,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 0 Clock Output Enable (0 = Disabled, 1 = Enabled)
             return BitExtractControl(0x10DC, 0x00010000, 16);
          default:
             throw std::invalid_argument("Function GetLmk0ClkoutEn() not defined for this board version");
@@ -18981,6 +20784,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 0 Clock Output Enable (0 = Disabled, 1 = Enabled)
             return SetRegMask(0x10DC, 0x00010000, 16, value);
          default:
             throw std::invalid_argument("Function SetLmk0ClkoutEn() not defined for this board version");
@@ -18992,6 +20796,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 0 Clock Output Enable (0 = Disabled, 1 = Enabled)
             if(BitMask) *BitMask = 0x00010000;
             if(BitOfs) *BitOfs = 16;
             return 0x10DC;
@@ -19007,6 +20812,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 0 Clock Output Multiplexer (see datasheet)
             return BitExtractControl(0x10DC, 0x00060000, 17);
          default:
             throw std::invalid_argument("Function GetLmk0ClkoutMux() not defined for this board version");
@@ -19018,6 +20824,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 0 Clock Output Multiplexer (see datasheet)
             return SetRegMask(0x10DC, 0x00060000, 17, value);
          default:
             throw std::invalid_argument("Function SetLmk0ClkoutMux() not defined for this board version");
@@ -19029,6 +20836,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 0 Clock Output Multiplexer (see datasheet)
             if(BitMask) *BitMask = 0x00060000;
             if(BitOfs) *BitOfs = 17;
             return 0x10DC;
@@ -19044,6 +20852,7 @@ public:
       {
          case 8:
          case 9:
+            // Resets LMK Registers to Their Power-On State
             return BitExtractControl(0x10DC, 0x80000000, 31);
          default:
             throw std::invalid_argument("Function GetLmk0Reset() not defined for this board version");
@@ -19055,6 +20864,7 @@ public:
       {
          case 8:
          case 9:
+            // Resets LMK Registers to Their Power-On State
             return SetRegMask(0x10DC, 0x80000000, 31, value);
          default:
             throw std::invalid_argument("Function SetLmk0Reset() not defined for this board version");
@@ -19066,6 +20876,7 @@ public:
       {
          case 8:
          case 9:
+            // Resets LMK Registers to Their Power-On State
             if(BitMask) *BitMask = 0x80000000;
             if(BitOfs) *BitOfs = 31;
             return 0x10DC;
@@ -19081,6 +20892,7 @@ public:
       {
          case 8:
          case 9:
+            // Divider Enable for Digital Lock Detect Circuit
             return BitExtractControl(0x1104, 0x00008000, 15);
          default:
             throw std::invalid_argument("Function GetLmk11Div4() not defined for this board version");
@@ -19092,6 +20904,7 @@ public:
       {
          case 8:
          case 9:
+            // Divider Enable for Digital Lock Detect Circuit
             return SetRegMask(0x1104, 0x00008000, 15, value);
          default:
             throw std::invalid_argument("Function SetLmk11Div4() not defined for this board version");
@@ -19103,6 +20916,7 @@ public:
       {
          case 8:
          case 9:
+            // Divider Enable for Digital Lock Detect Circuit
             if(BitMask) *BitMask = 0x00008000;
             if(BitOfs) *BitOfs = 15;
             return 0x1104;
@@ -19118,6 +20932,7 @@ public:
       {
          case 8:
          case 9:
+            // Oscillator Input Calibration Adjustment in MHz (1..200)
             return BitExtractControl(0x1108, 0x003FC000, 14);
          default:
             throw std::invalid_argument("Function GetLmk13OscinFreq() not defined for this board version");
@@ -19129,6 +20944,7 @@ public:
       {
          case 8:
          case 9:
+            // Oscillator Input Calibration Adjustment in MHz (1..200)
             return SetRegMask(0x1108, 0x003FC000, 14, value);
          default:
             throw std::invalid_argument("Function SetLmk13OscinFreq() not defined for this board version");
@@ -19140,6 +20956,7 @@ public:
       {
          case 8:
          case 9:
+            // Oscillator Input Calibration Adjustment in MHz (1..200)
             if(BitMask) *BitMask = 0x003FC000;
             if(BitOfs) *BitOfs = 14;
             return 0x1108;
@@ -19155,6 +20972,7 @@ public:
       {
          case 8:
          case 9:
+            // Value for Internal Loop Filter Capacitors C3/C4 (0..11) (see ds)
             return BitExtractControl(0x1108, 0x000000F0, 4);
          default:
             throw std::invalid_argument("Function GetLmk13VcoC3C4Lf() not defined for this board version");
@@ -19166,6 +20984,7 @@ public:
       {
          case 8:
          case 9:
+            // Value for Internal Loop Filter Capacitors C3/C4 (0..11) (see ds)
             return SetRegMask(0x1108, 0x000000F0, 4, value);
          default:
             throw std::invalid_argument("Function SetLmk13VcoC3C4Lf() not defined for this board version");
@@ -19177,6 +20996,7 @@ public:
       {
          case 8:
          case 9:
+            // Value for Internal Loop Filter Capacitors C3/C4 (0..11) (see ds)
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
             return 0x1108;
@@ -19192,6 +21012,7 @@ public:
       {
          case 8:
          case 9:
+            // Value for Internal Loop Filter Resistor R3 (0..4) (see datasheet)
             return BitExtractControl(0x1108, 0x00000700, 8);
          default:
             throw std::invalid_argument("Function GetLmk13VcoR3Lf() not defined for this board version");
@@ -19203,6 +21024,7 @@ public:
       {
          case 8:
          case 9:
+            // Value for Internal Loop Filter Resistor R3 (0..4) (see datasheet)
             return SetRegMask(0x1108, 0x00000700, 8, value);
          default:
             throw std::invalid_argument("Function SetLmk13VcoR3Lf() not defined for this board version");
@@ -19214,6 +21036,7 @@ public:
       {
          case 8:
          case 9:
+            // Value for Internal Loop Filter Resistor R3 (0..4) (see datasheet)
             if(BitMask) *BitMask = 0x00000700;
             if(BitOfs) *BitOfs = 8;
             return 0x1108;
@@ -19229,6 +21052,7 @@ public:
       {
          case 8:
          case 9:
+            // Value for Internal Loop Filter Resistor R4 (0..4) (see datasheet)
             return BitExtractControl(0x1108, 0x00003800, 11);
          default:
             throw std::invalid_argument("Function GetLmk13VcoR4Lf() not defined for this board version");
@@ -19240,6 +21064,7 @@ public:
       {
          case 8:
          case 9:
+            // Value for Internal Loop Filter Resistor R4 (0..4) (see datasheet)
             return SetRegMask(0x1108, 0x00003800, 11, value);
          default:
             throw std::invalid_argument("Function SetLmk13VcoR4Lf() not defined for this board version");
@@ -19251,6 +21076,7 @@ public:
       {
          case 8:
          case 9:
+            // Value for Internal Loop Filter Resistor R4 (0..4) (see datasheet)
             if(BitMask) *BitMask = 0x00003800;
             if(BitOfs) *BitOfs = 11;
             return 0x1108;
@@ -19266,6 +21092,7 @@ public:
       {
          case 8:
          case 9:
+            // Global Clock Output Enable (0 = All Off, 1 = Normal Operation)
             return BitExtractControl(0x110C, 0x08000000, 27);
          default:
             throw std::invalid_argument("Function GetLmk14EnClkoutGlobal() not defined for this board version");
@@ -19277,6 +21104,7 @@ public:
       {
          case 8:
          case 9:
+            // Global Clock Output Enable (0 = All Off, 1 = Normal Operation)
             return SetRegMask(0x110C, 0x08000000, 27, value);
          default:
             throw std::invalid_argument("Function SetLmk14EnClkoutGlobal() not defined for this board version");
@@ -19288,6 +21116,7 @@ public:
       {
          case 8:
          case 9:
+            // Global Clock Output Enable (0 = All Off, 1 = Normal Operation)
             if(BitMask) *BitMask = 0x08000000;
             if(BitOfs) *BitOfs = 27;
             return 0x110C;
@@ -19303,6 +21132,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable for the Fout Pin (0 = Disabled, 1 = Enabled)
             return BitExtractControl(0x110C, 0x10000000, 28);
          default:
             throw std::invalid_argument("Function GetLmk14EnFout() not defined for this board version");
@@ -19314,6 +21144,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable for the Fout Pin (0 = Disabled, 1 = Enabled)
             return SetRegMask(0x110C, 0x10000000, 28, value);
          default:
             throw std::invalid_argument("Function SetLmk14EnFout() not defined for this board version");
@@ -19325,6 +21156,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable for the Fout Pin (0 = Disabled, 1 = Enabled)
             if(BitMask) *BitMask = 0x10000000;
             if(BitOfs) *BitOfs = 28;
             return 0x110C;
@@ -19340,6 +21172,7 @@ public:
       {
          case 8:
          case 9:
+            // Output Mode of  LD Pin (0..7,9,11)
             return BitExtractControl(0x110C, 0x00F00000, 20);
          default:
             throw std::invalid_argument("Function GetLmk14PllMux() not defined for this board version");
@@ -19351,6 +21184,7 @@ public:
       {
          case 8:
          case 9:
+            // Output Mode of  LD Pin (0..7,9,11)
             return SetRegMask(0x110C, 0x00F00000, 20, value);
          default:
             throw std::invalid_argument("Function SetLmk14PllMux() not defined for this board version");
@@ -19362,6 +21196,7 @@ public:
       {
          case 8:
          case 9:
+            // Output Mode of  LD Pin (0..7,9,11)
             if(BitMask) *BitMask = 0x00F00000;
             if(BitOfs) *BitOfs = 20;
             return 0x110C;
@@ -19377,6 +21212,7 @@ public:
       {
          case 8:
          case 9:
+            // PLL R Divider Value (1..4095)
             return BitExtractControl(0x110C, 0x000FFF00, 8);
          default:
             throw std::invalid_argument("Function GetLmk14PllR() not defined for this board version");
@@ -19388,6 +21224,7 @@ public:
       {
          case 8:
          case 9:
+            // PLL R Divider Value (1..4095)
             return SetRegMask(0x110C, 0x000FFF00, 8, value);
          default:
             throw std::invalid_argument("Function SetLmk14PllR() not defined for this board version");
@@ -19399,6 +21236,7 @@ public:
       {
          case 8:
          case 9:
+            // PLL R Divider Value (1..4095)
             if(BitMask) *BitMask = 0x000FFF00;
             if(BitOfs) *BitOfs = 8;
             return 0x110C;
@@ -19414,6 +21252,7 @@ public:
       {
          case 8:
          case 9:
+            // Powerdown (0 = Normal Operation, 1 = Device Powered Down)
             return BitExtractControl(0x110C, 0x04000000, 26);
          default:
             throw std::invalid_argument("Function GetLmk14Powerdown() not defined for this board version");
@@ -19425,6 +21264,7 @@ public:
       {
          case 8:
          case 9:
+            // Powerdown (0 = Normal Operation, 1 = Device Powered Down)
             return SetRegMask(0x110C, 0x04000000, 26, value);
          default:
             throw std::invalid_argument("Function SetLmk14Powerdown() not defined for this board version");
@@ -19436,6 +21276,7 @@ public:
       {
          case 8:
          case 9:
+            // Powerdown (0 = Normal Operation, 1 = Device Powered Down)
             if(BitMask) *BitMask = 0x04000000;
             if(BitOfs) *BitOfs = 26;
             return 0x110C;
@@ -19451,6 +21292,7 @@ public:
       {
          case 8:
          case 9:
+            // PLL Charge Pump Gain (see datasheet) (0..4)
             return BitExtractControl(0x1110, 0xC0000000, 30);
          default:
             throw std::invalid_argument("Function GetLmk15PllCpGain() not defined for this board version");
@@ -19462,6 +21304,7 @@ public:
       {
          case 8:
          case 9:
+            // PLL Charge Pump Gain (see datasheet) (0..4)
             return SetRegMask(0x1110, 0xC0000000, 30, value);
          default:
             throw std::invalid_argument("Function SetLmk15PllCpGain() not defined for this board version");
@@ -19473,6 +21316,7 @@ public:
       {
          case 8:
          case 9:
+            // PLL Charge Pump Gain (see datasheet) (0..4)
             if(BitMask) *BitMask = 0xC0000000;
             if(BitOfs) *BitOfs = 30;
             return 0x1110;
@@ -19488,6 +21332,7 @@ public:
       {
          case 8:
          case 9:
+            // PLL N Divider Value (1..0x3FFFF)
             return BitExtractControl(0x1110, 0x03FFFF00, 8);
          default:
             throw std::invalid_argument("Function GetLmk15PllN() not defined for this board version");
@@ -19499,6 +21344,7 @@ public:
       {
          case 8:
          case 9:
+            // PLL N Divider Value (1..0x3FFFF)
             return SetRegMask(0x1110, 0x03FFFF00, 8, value);
          default:
             throw std::invalid_argument("Function SetLmk15PllN() not defined for this board version");
@@ -19510,6 +21356,7 @@ public:
       {
          case 8:
          case 9:
+            // PLL N Divider Value (1..0x3FFFF)
             if(BitMask) *BitMask = 0x03FFFF00;
             if(BitOfs) *BitOfs = 8;
             return 0x1110;
@@ -19525,6 +21372,7 @@ public:
       {
          case 8:
          case 9:
+            // VCO Divider Value (2..8)
             return BitExtractControl(0x1110, 0x3C000000, 26);
          default:
             throw std::invalid_argument("Function GetLmk15VcoDiv() not defined for this board version");
@@ -19536,6 +21384,7 @@ public:
       {
          case 8:
          case 9:
+            // VCO Divider Value (2..8)
             return SetRegMask(0x1110, 0x3C000000, 26, value);
          default:
             throw std::invalid_argument("Function SetLmk15VcoDiv() not defined for this board version");
@@ -19547,6 +21396,7 @@ public:
       {
          case 8:
          case 9:
+            // VCO Divider Value (2..8)
             if(BitMask) *BitMask = 0x3C000000;
             if(BitOfs) *BitOfs = 26;
             return 0x1110;
@@ -19562,6 +21412,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 1 Clock Output Divider (value x 2) (1..255)
             return BitExtractControl(0x10E0, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetLmk1ClkoutDiv() not defined for this board version");
@@ -19573,6 +21424,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 1 Clock Output Divider (value x 2) (1..255)
             return SetRegMask(0x10E0, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetLmk1ClkoutDiv() not defined for this board version");
@@ -19584,6 +21436,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 1 Clock Output Divider (value x 2) (1..255)
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x10E0;
@@ -19599,6 +21452,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 1 Clock Output Delay (value x 150ps)
             return BitExtractControl(0x10E0, 0x000000F0, 4);
          default:
             throw std::invalid_argument("Function GetLmk1ClkoutDly() not defined for this board version");
@@ -19610,6 +21464,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 1 Clock Output Delay (value x 150ps)
             return SetRegMask(0x10E0, 0x000000F0, 4, value);
          default:
             throw std::invalid_argument("Function SetLmk1ClkoutDly() not defined for this board version");
@@ -19621,6 +21476,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 1 Clock Output Delay (value x 150ps)
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
             return 0x10E0;
@@ -19636,6 +21492,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 1 Clock Output Enable (0 = Disabled, 1 = Enabled)
             return BitExtractControl(0x10E0, 0x00010000, 16);
          default:
             throw std::invalid_argument("Function GetLmk1ClkoutEn() not defined for this board version");
@@ -19647,6 +21504,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 1 Clock Output Enable (0 = Disabled, 1 = Enabled)
             return SetRegMask(0x10E0, 0x00010000, 16, value);
          default:
             throw std::invalid_argument("Function SetLmk1ClkoutEn() not defined for this board version");
@@ -19658,6 +21516,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 1 Clock Output Enable (0 = Disabled, 1 = Enabled)
             if(BitMask) *BitMask = 0x00010000;
             if(BitOfs) *BitOfs = 16;
             return 0x10E0;
@@ -19673,6 +21532,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 1 Clock Output Multiplexer (see datasheet)
             return BitExtractControl(0x10E0, 0x00060000, 17);
          default:
             throw std::invalid_argument("Function GetLmk1ClkoutMux() not defined for this board version");
@@ -19684,6 +21544,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 1 Clock Output Multiplexer (see datasheet)
             return SetRegMask(0x10E0, 0x00060000, 17, value);
          default:
             throw std::invalid_argument("Function SetLmk1ClkoutMux() not defined for this board version");
@@ -19695,6 +21556,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 1 Clock Output Multiplexer (see datasheet)
             if(BitMask) *BitMask = 0x00060000;
             if(BitOfs) *BitOfs = 17;
             return 0x10E0;
@@ -19710,6 +21572,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 2 Clock Output Divider (value x 2) (1..255)
             return BitExtractControl(0x10E4, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetLmk2ClkoutDiv() not defined for this board version");
@@ -19721,6 +21584,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 2 Clock Output Divider (value x 2) (1..255)
             return SetRegMask(0x10E4, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetLmk2ClkoutDiv() not defined for this board version");
@@ -19732,6 +21596,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 2 Clock Output Divider (value x 2) (1..255)
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x10E4;
@@ -19747,6 +21612,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 2 Clock Output Delay (value x 150ps)
             return BitExtractControl(0x10E4, 0x000000F0, 4);
          default:
             throw std::invalid_argument("Function GetLmk2ClkoutDly() not defined for this board version");
@@ -19758,6 +21624,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 2 Clock Output Delay (value x 150ps)
             return SetRegMask(0x10E4, 0x000000F0, 4, value);
          default:
             throw std::invalid_argument("Function SetLmk2ClkoutDly() not defined for this board version");
@@ -19769,6 +21636,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 2 Clock Output Delay (value x 150ps)
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
             return 0x10E4;
@@ -19784,6 +21652,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 2 Clock Output Enable (0 = Disabled, 1 = Enabled)
             return BitExtractControl(0x10E4, 0x00010000, 16);
          default:
             throw std::invalid_argument("Function GetLmk2ClkoutEn() not defined for this board version");
@@ -19795,6 +21664,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 2 Clock Output Enable (0 = Disabled, 1 = Enabled)
             return SetRegMask(0x10E4, 0x00010000, 16, value);
          default:
             throw std::invalid_argument("Function SetLmk2ClkoutEn() not defined for this board version");
@@ -19806,6 +21676,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 2 Clock Output Enable (0 = Disabled, 1 = Enabled)
             if(BitMask) *BitMask = 0x00010000;
             if(BitOfs) *BitOfs = 16;
             return 0x10E4;
@@ -19821,6 +21692,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 2 Clock Output Multiplexer (see datasheet)
             return BitExtractControl(0x10E4, 0x00060000, 17);
          default:
             throw std::invalid_argument("Function GetLmk2ClkoutMux() not defined for this board version");
@@ -19832,6 +21704,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 2 Clock Output Multiplexer (see datasheet)
             return SetRegMask(0x10E4, 0x00060000, 17, value);
          default:
             throw std::invalid_argument("Function SetLmk2ClkoutMux() not defined for this board version");
@@ -19843,6 +21716,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 2 Clock Output Multiplexer (see datasheet)
             if(BitMask) *BitMask = 0x00060000;
             if(BitOfs) *BitOfs = 17;
             return 0x10E4;
@@ -19858,6 +21732,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 3 Clock Output Divider (value x 2) (1..255)
             return BitExtractControl(0x10E8, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetLmk3ClkoutDiv() not defined for this board version");
@@ -19869,6 +21744,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 3 Clock Output Divider (value x 2) (1..255)
             return SetRegMask(0x10E8, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetLmk3ClkoutDiv() not defined for this board version");
@@ -19880,6 +21756,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 3 Clock Output Divider (value x 2) (1..255)
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x10E8;
@@ -19895,6 +21772,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 3 Clock Output Delay (value x 150ps)
             return BitExtractControl(0x10E8, 0x000000F0, 4);
          default:
             throw std::invalid_argument("Function GetLmk3ClkoutDly() not defined for this board version");
@@ -19906,6 +21784,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 3 Clock Output Delay (value x 150ps)
             return SetRegMask(0x10E8, 0x000000F0, 4, value);
          default:
             throw std::invalid_argument("Function SetLmk3ClkoutDly() not defined for this board version");
@@ -19917,6 +21796,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 3 Clock Output Delay (value x 150ps)
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
             return 0x10E8;
@@ -19932,6 +21812,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 3 Clock Output Enable (0 = Disabled, 1 = Enabled)
             return BitExtractControl(0x10E8, 0x00010000, 16);
          default:
             throw std::invalid_argument("Function GetLmk3ClkoutEn() not defined for this board version");
@@ -19943,6 +21824,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 3 Clock Output Enable (0 = Disabled, 1 = Enabled)
             return SetRegMask(0x10E8, 0x00010000, 16, value);
          default:
             throw std::invalid_argument("Function SetLmk3ClkoutEn() not defined for this board version");
@@ -19954,6 +21836,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 3 Clock Output Enable (0 = Disabled, 1 = Enabled)
             if(BitMask) *BitMask = 0x00010000;
             if(BitOfs) *BitOfs = 16;
             return 0x10E8;
@@ -19969,6 +21852,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 3 Clock Output Multiplexer (see datasheet)
             return BitExtractControl(0x10E8, 0x00060000, 17);
          default:
             throw std::invalid_argument("Function GetLmk3ClkoutMux() not defined for this board version");
@@ -19980,6 +21864,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 3 Clock Output Multiplexer (see datasheet)
             return SetRegMask(0x10E8, 0x00060000, 17, value);
          default:
             throw std::invalid_argument("Function SetLmk3ClkoutMux() not defined for this board version");
@@ -19991,6 +21876,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 3 Clock Output Multiplexer (see datasheet)
             if(BitMask) *BitMask = 0x00060000;
             if(BitOfs) *BitOfs = 17;
             return 0x10E8;
@@ -20006,6 +21892,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 4 Clock Output Divider (value x 2) (1..255)
             return BitExtractControl(0x10EC, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetLmk4ClkoutDiv() not defined for this board version");
@@ -20017,6 +21904,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 4 Clock Output Divider (value x 2) (1..255)
             return SetRegMask(0x10EC, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetLmk4ClkoutDiv() not defined for this board version");
@@ -20028,6 +21916,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 4 Clock Output Divider (value x 2) (1..255)
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x10EC;
@@ -20043,6 +21932,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 4 Clock Output Delay (value x 150ps)
             return BitExtractControl(0x10EC, 0x000000F0, 4);
          default:
             throw std::invalid_argument("Function GetLmk4ClkoutDly() not defined for this board version");
@@ -20054,6 +21944,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 4 Clock Output Delay (value x 150ps)
             return SetRegMask(0x10EC, 0x000000F0, 4, value);
          default:
             throw std::invalid_argument("Function SetLmk4ClkoutDly() not defined for this board version");
@@ -20065,6 +21956,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 4 Clock Output Delay (value x 150ps)
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
             return 0x10EC;
@@ -20080,6 +21972,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 4 Clock Output Enable (0 = Disabled, 1 = Enabled)
             return BitExtractControl(0x10EC, 0x00010000, 16);
          default:
             throw std::invalid_argument("Function GetLmk4ClkoutEn() not defined for this board version");
@@ -20091,6 +21984,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 4 Clock Output Enable (0 = Disabled, 1 = Enabled)
             return SetRegMask(0x10EC, 0x00010000, 16, value);
          default:
             throw std::invalid_argument("Function SetLmk4ClkoutEn() not defined for this board version");
@@ -20102,6 +21996,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 4 Clock Output Enable (0 = Disabled, 1 = Enabled)
             if(BitMask) *BitMask = 0x00010000;
             if(BitOfs) *BitOfs = 16;
             return 0x10EC;
@@ -20117,6 +22012,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 4 Clock Output Multiplexer (see datasheet)
             return BitExtractControl(0x10EC, 0x00060000, 17);
          default:
             throw std::invalid_argument("Function GetLmk4ClkoutMux() not defined for this board version");
@@ -20128,6 +22024,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 4 Clock Output Multiplexer (see datasheet)
             return SetRegMask(0x10EC, 0x00060000, 17, value);
          default:
             throw std::invalid_argument("Function SetLmk4ClkoutMux() not defined for this board version");
@@ -20139,6 +22036,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 4 Clock Output Multiplexer (see datasheet)
             if(BitMask) *BitMask = 0x00060000;
             if(BitOfs) *BitOfs = 17;
             return 0x10EC;
@@ -20154,6 +22052,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 5 Clock Output Divider (value x 2) (1..255)
             return BitExtractControl(0x10F0, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetLmk5ClkoutDiv() not defined for this board version");
@@ -20165,6 +22064,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 5 Clock Output Divider (value x 2) (1..255)
             return SetRegMask(0x10F0, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetLmk5ClkoutDiv() not defined for this board version");
@@ -20176,6 +22076,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 5 Clock Output Divider (value x 2) (1..255)
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x10F0;
@@ -20191,6 +22092,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 5 Clock Output Delay (value x 150ps)
             return BitExtractControl(0x10F0, 0x000000F0, 4);
          default:
             throw std::invalid_argument("Function GetLmk5ClkoutDly() not defined for this board version");
@@ -20202,6 +22104,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 5 Clock Output Delay (value x 150ps)
             return SetRegMask(0x10F0, 0x000000F0, 4, value);
          default:
             throw std::invalid_argument("Function SetLmk5ClkoutDly() not defined for this board version");
@@ -20213,6 +22116,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 5 Clock Output Delay (value x 150ps)
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
             return 0x10F0;
@@ -20228,6 +22132,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 5 Clock Output Enable (0 = Disabled, 1 = Enabled)
             return BitExtractControl(0x10F0, 0x00010000, 16);
          default:
             throw std::invalid_argument("Function GetLmk5ClkoutEn() not defined for this board version");
@@ -20239,6 +22144,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 5 Clock Output Enable (0 = Disabled, 1 = Enabled)
             return SetRegMask(0x10F0, 0x00010000, 16, value);
          default:
             throw std::invalid_argument("Function SetLmk5ClkoutEn() not defined for this board version");
@@ -20250,6 +22156,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 5 Clock Output Enable (0 = Disabled, 1 = Enabled)
             if(BitMask) *BitMask = 0x00010000;
             if(BitOfs) *BitOfs = 16;
             return 0x10F0;
@@ -20265,6 +22172,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 5 Clock Output Multiplexer (see datasheet)
             return BitExtractControl(0x10F0, 0x00060000, 17);
          default:
             throw std::invalid_argument("Function GetLmk5ClkoutMux() not defined for this board version");
@@ -20276,6 +22184,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 5 Clock Output Multiplexer (see datasheet)
             return SetRegMask(0x10F0, 0x00060000, 17, value);
          default:
             throw std::invalid_argument("Function SetLmk5ClkoutMux() not defined for this board version");
@@ -20287,6 +22196,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 5 Clock Output Multiplexer (see datasheet)
             if(BitMask) *BitMask = 0x00060000;
             if(BitOfs) *BitOfs = 17;
             return 0x10F0;
@@ -20302,6 +22212,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 6 Clock Output Divider (value x 2) (1..255)
             return BitExtractControl(0x10F4, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetLmk6ClkoutDiv() not defined for this board version");
@@ -20313,6 +22224,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 6 Clock Output Divider (value x 2) (1..255)
             return SetRegMask(0x10F4, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetLmk6ClkoutDiv() not defined for this board version");
@@ -20324,6 +22236,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 6 Clock Output Divider (value x 2) (1..255)
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x10F4;
@@ -20339,6 +22252,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 6 Clock Output Delay (value x 150ps)
             return BitExtractControl(0x10F4, 0x000000F0, 4);
          default:
             throw std::invalid_argument("Function GetLmk6ClkoutDly() not defined for this board version");
@@ -20350,6 +22264,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 6 Clock Output Delay (value x 150ps)
             return SetRegMask(0x10F4, 0x000000F0, 4, value);
          default:
             throw std::invalid_argument("Function SetLmk6ClkoutDly() not defined for this board version");
@@ -20361,6 +22276,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 6 Clock Output Delay (value x 150ps)
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
             return 0x10F4;
@@ -20376,6 +22292,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 6 Clock Output Enable (0 = Disabled, 1 = Enabled)
             return BitExtractControl(0x10F4, 0x00010000, 16);
          default:
             throw std::invalid_argument("Function GetLmk6ClkoutEn() not defined for this board version");
@@ -20387,6 +22304,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 6 Clock Output Enable (0 = Disabled, 1 = Enabled)
             return SetRegMask(0x10F4, 0x00010000, 16, value);
          default:
             throw std::invalid_argument("Function SetLmk6ClkoutEn() not defined for this board version");
@@ -20398,6 +22316,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 6 Clock Output Enable (0 = Disabled, 1 = Enabled)
             if(BitMask) *BitMask = 0x00010000;
             if(BitOfs) *BitOfs = 16;
             return 0x10F4;
@@ -20413,6 +22332,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 6 Clock Output Multiplexer (see datasheet)
             return BitExtractControl(0x10F4, 0x00060000, 17);
          default:
             throw std::invalid_argument("Function GetLmk6ClkoutMux() not defined for this board version");
@@ -20424,6 +22344,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 6 Clock Output Multiplexer (see datasheet)
             return SetRegMask(0x10F4, 0x00060000, 17, value);
          default:
             throw std::invalid_argument("Function SetLmk6ClkoutMux() not defined for this board version");
@@ -20435,6 +22356,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 6 Clock Output Multiplexer (see datasheet)
             if(BitMask) *BitMask = 0x00060000;
             if(BitOfs) *BitOfs = 17;
             return 0x10F4;
@@ -20450,6 +22372,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 7 Clock Output Divider (value x 2) (1..255)
             return BitExtractControl(0x10F8, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetLmk7ClkoutDiv() not defined for this board version");
@@ -20461,6 +22384,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 7 Clock Output Divider (value x 2) (1..255)
             return SetRegMask(0x10F8, 0x0000FF00, 8, value);
          default:
             throw std::invalid_argument("Function SetLmk7ClkoutDiv() not defined for this board version");
@@ -20472,6 +22396,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 7 Clock Output Divider (value x 2) (1..255)
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x10F8;
@@ -20487,6 +22412,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 7 Clock Output Delay (value x 150ps)
             return BitExtractControl(0x10F8, 0x000000F0, 4);
          default:
             throw std::invalid_argument("Function GetLmk7ClkoutDly() not defined for this board version");
@@ -20498,6 +22424,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 7 Clock Output Delay (value x 150ps)
             return SetRegMask(0x10F8, 0x000000F0, 4, value);
          default:
             throw std::invalid_argument("Function SetLmk7ClkoutDly() not defined for this board version");
@@ -20509,6 +22436,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 7 Clock Output Delay (value x 150ps)
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
             return 0x10F8;
@@ -20524,6 +22452,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 7 Clock Output Enable (0 = Disabled, 1 = Enabled)
             return BitExtractControl(0x10F8, 0x00010000, 16);
          default:
             throw std::invalid_argument("Function GetLmk7ClkoutEn() not defined for this board version");
@@ -20535,6 +22464,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 7 Clock Output Enable (0 = Disabled, 1 = Enabled)
             return SetRegMask(0x10F8, 0x00010000, 16, value);
          default:
             throw std::invalid_argument("Function SetLmk7ClkoutEn() not defined for this board version");
@@ -20546,6 +22476,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 7 Clock Output Enable (0 = Disabled, 1 = Enabled)
             if(BitMask) *BitMask = 0x00010000;
             if(BitOfs) *BitOfs = 16;
             return 0x10F8;
@@ -20561,6 +22492,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 7 Clock Output Multiplexer (see datasheet)
             return BitExtractControl(0x10F8, 0x00060000, 17);
          default:
             throw std::invalid_argument("Function GetLmk7ClkoutMux() not defined for this board version");
@@ -20572,6 +22504,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 7 Clock Output Multiplexer (see datasheet)
             return SetRegMask(0x10F8, 0x00060000, 17, value);
          default:
             throw std::invalid_argument("Function SetLmk7ClkoutMux() not defined for this board version");
@@ -20583,6 +22516,7 @@ public:
       {
          case 8:
          case 9:
+            // Channel 7 Clock Output Multiplexer (see datasheet)
             if(BitMask) *BitMask = 0x00060000;
             if(BitOfs) *BitOfs = 17;
             return 0x10F8;
@@ -20598,6 +22532,7 @@ public:
       {
          case 8:
          case 9:
+            // Set LMK Register 8 (Phase Noise Optimization)
             return BitExtractControl(0x10FC, 0xFFFFFFF0, 4);
          default:
             throw std::invalid_argument("Function GetLmk8PhaseNoiseOpt() not defined for this board version");
@@ -20609,6 +22544,7 @@ public:
       {
          case 8:
          case 9:
+            // Set LMK Register 8 (Phase Noise Optimization)
             return SetRegMask(0x10FC, 0xFFFFFFF0, 4, value);
          default:
             throw std::invalid_argument("Function SetLmk8PhaseNoiseOpt() not defined for this board version");
@@ -20620,6 +22556,7 @@ public:
       {
          case 8:
          case 9:
+            // Set LMK Register 8 (Phase Noise Optimization)
             if(BitMask) *BitMask = 0xFFFFFFF0;
             if(BitOfs) *BitOfs = 4;
             return 0x10FC;
@@ -20635,6 +22572,7 @@ public:
       {
          case 8:
          case 9:
+            // Voltage Level Boost for Clock Outputs
             return BitExtractControl(0x1100, 0x00010000, 16);
          default:
             throw std::invalid_argument("Function GetLmk9Vboost() not defined for this board version");
@@ -20646,6 +22584,7 @@ public:
       {
          case 8:
          case 9:
+            // Voltage Level Boost for Clock Outputs
             return SetRegMask(0x1100, 0x00010000, 16, value);
          default:
             throw std::invalid_argument("Function SetLmk9Vboost() not defined for this board version");
@@ -20657,6 +22596,7 @@ public:
       {
          case 8:
          case 9:
+            // Voltage Level Boost for Clock Outputs
             if(BitMask) *BitMask = 0x00010000;
             if(BitOfs) *BitOfs = 16;
             return 0x1100;
@@ -20671,8 +22611,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK channel 0 register modified flags
             return BitExtractStatus(0x0160, 0xF0000000, 28);
          case 9:
+            // LMK channel 0 register modified flags
             return BitExtractStatus(0x015C, 0xF0000000, 28);
          default:
             throw std::invalid_argument("Function GetLmk0Mod() not defined for this board version");
@@ -20683,10 +22625,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK channel 0 register modified flags
             if(BitMask) *BitMask = 0xF0000000;
             if(BitOfs) *BitOfs = 28;
             return 0x0160;
          case 9:
+            // LMK channel 0 register modified flags
             if(BitMask) *BitMask = 0xF0000000;
             if(BitOfs) *BitOfs = 28;
             return 0x015C;
@@ -20701,8 +22645,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK Register 11 modified flags
             return BitExtractStatus(0x0164, 0x0000F000, 12);
          case 9:
+            // LMK Register 11 modified flags
             return BitExtractStatus(0x0160, 0x0000F000, 12);
          default:
             throw std::invalid_argument("Function GetLmk11Mod() not defined for this board version");
@@ -20713,10 +22659,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK Register 11 modified flags
             if(BitMask) *BitMask = 0x0000F000;
             if(BitOfs) *BitOfs = 12;
             return 0x0164;
          case 9:
+            // LMK Register 11 modified flags
             if(BitMask) *BitMask = 0x0000F000;
             if(BitOfs) *BitOfs = 12;
             return 0x0160;
@@ -20731,8 +22679,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK Register 13 modified flags
             return BitExtractStatus(0x0164, 0x00000F00, 8);
          case 9:
+            // LMK Register 13 modified flags
             return BitExtractStatus(0x0160, 0x00000F00, 8);
          default:
             throw std::invalid_argument("Function GetLmk13Mod() not defined for this board version");
@@ -20743,10 +22693,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK Register 13 modified flags
             if(BitMask) *BitMask = 0x00000F00;
             if(BitOfs) *BitOfs = 8;
             return 0x0164;
          case 9:
+            // LMK Register 13 modified flags
             if(BitMask) *BitMask = 0x00000F00;
             if(BitOfs) *BitOfs = 8;
             return 0x0160;
@@ -20761,8 +22713,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK Register 14 modified flags
             return BitExtractStatus(0x0164, 0x000000F0, 4);
          case 9:
+            // LMK Register 14 modified flags
             return BitExtractStatus(0x0160, 0x000000F0, 4);
          default:
             throw std::invalid_argument("Function GetLmk14Mod() not defined for this board version");
@@ -20773,10 +22727,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK Register 14 modified flags
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
             return 0x0164;
          case 9:
+            // LMK Register 14 modified flags
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
             return 0x0160;
@@ -20791,8 +22747,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK Register 15 modified flags
             return BitExtractStatus(0x0164, 0x0000000F, 0);
          case 9:
+            // LMK Register 15 modified flags
             return BitExtractStatus(0x0160, 0x0000000F, 0);
          default:
             throw std::invalid_argument("Function GetLmk15Mod() not defined for this board version");
@@ -20803,10 +22761,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK Register 15 modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
             return 0x0164;
          case 9:
+            // LMK Register 15 modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
             return 0x0160;
@@ -20821,8 +22781,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK channel 1 register modified flags
             return BitExtractStatus(0x0160, 0x0F000000, 24);
          case 9:
+            // LMK channel 1 register modified flags
             return BitExtractStatus(0x015C, 0x0F000000, 24);
          default:
             throw std::invalid_argument("Function GetLmk1Mod() not defined for this board version");
@@ -20833,10 +22795,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK channel 1 register modified flags
             if(BitMask) *BitMask = 0x0F000000;
             if(BitOfs) *BitOfs = 24;
             return 0x0160;
          case 9:
+            // LMK channel 1 register modified flags
             if(BitMask) *BitMask = 0x0F000000;
             if(BitOfs) *BitOfs = 24;
             return 0x015C;
@@ -20851,8 +22815,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK channel 2 register modified flags
             return BitExtractStatus(0x0160, 0x00F00000, 20);
          case 9:
+            // LMK channel 2 register modified flags
             return BitExtractStatus(0x015C, 0x00F00000, 20);
          default:
             throw std::invalid_argument("Function GetLmk2Mod() not defined for this board version");
@@ -20863,10 +22829,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK channel 2 register modified flags
             if(BitMask) *BitMask = 0x00F00000;
             if(BitOfs) *BitOfs = 20;
             return 0x0160;
          case 9:
+            // LMK channel 2 register modified flags
             if(BitMask) *BitMask = 0x00F00000;
             if(BitOfs) *BitOfs = 20;
             return 0x015C;
@@ -20881,8 +22849,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK channel 3 register modified flags
             return BitExtractStatus(0x0160, 0x000F0000, 16);
          case 9:
+            // LMK channel 3 register modified flags
             return BitExtractStatus(0x015C, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetLmk3Mod() not defined for this board version");
@@ -20893,10 +22863,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK channel 3 register modified flags
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x0160;
          case 9:
+            // LMK channel 3 register modified flags
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x015C;
@@ -20911,8 +22883,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK channel 4 register modified flags
             return BitExtractStatus(0x0160, 0x0000F000, 12);
          case 9:
+            // LMK channel 4 register modified flags
             return BitExtractStatus(0x015C, 0x0000F000, 12);
          default:
             throw std::invalid_argument("Function GetLmk4Mod() not defined for this board version");
@@ -20923,10 +22897,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK channel 4 register modified flags
             if(BitMask) *BitMask = 0x0000F000;
             if(BitOfs) *BitOfs = 12;
             return 0x0160;
          case 9:
+            // LMK channel 4 register modified flags
             if(BitMask) *BitMask = 0x0000F000;
             if(BitOfs) *BitOfs = 12;
             return 0x015C;
@@ -20941,8 +22917,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK channel 5 register modified flags
             return BitExtractStatus(0x0160, 0x00000F00, 8);
          case 9:
+            // LMK channel 5 register modified flags
             return BitExtractStatus(0x015C, 0x00000F00, 8);
          default:
             throw std::invalid_argument("Function GetLmk5Mod() not defined for this board version");
@@ -20953,10 +22931,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK channel 5 register modified flags
             if(BitMask) *BitMask = 0x00000F00;
             if(BitOfs) *BitOfs = 8;
             return 0x0160;
          case 9:
+            // LMK channel 5 register modified flags
             if(BitMask) *BitMask = 0x00000F00;
             if(BitOfs) *BitOfs = 8;
             return 0x015C;
@@ -20971,8 +22951,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK channel 6 register modified flags
             return BitExtractStatus(0x0160, 0x000000F0, 4);
          case 9:
+            // LMK channel 6 register modified flags
             return BitExtractStatus(0x015C, 0x000000F0, 4);
          default:
             throw std::invalid_argument("Function GetLmk6Mod() not defined for this board version");
@@ -20983,10 +22965,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK channel 6 register modified flags
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
             return 0x0160;
          case 9:
+            // LMK channel 6 register modified flags
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
             return 0x015C;
@@ -21001,8 +22985,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK channel 7 register modified flags
             return BitExtractStatus(0x0160, 0x0000000F, 0);
          case 9:
+            // LMK channel 7 register modified flags
             return BitExtractStatus(0x015C, 0x0000000F, 0);
          default:
             throw std::invalid_argument("Function GetLmk7Mod() not defined for this board version");
@@ -21013,10 +22999,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK channel 7 register modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
             return 0x0160;
          case 9:
+            // LMK channel 7 register modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
             return 0x015C;
@@ -21031,8 +23019,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK Register 8 modified flags
             return BitExtractStatus(0x0164, 0x00F00000, 20);
          case 9:
+            // LMK Register 8 modified flags
             return BitExtractStatus(0x0160, 0x00F00000, 20);
          default:
             throw std::invalid_argument("Function GetLmk8Mod() not defined for this board version");
@@ -21043,10 +23033,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK Register 8 modified flags
             if(BitMask) *BitMask = 0x00F00000;
             if(BitOfs) *BitOfs = 20;
             return 0x0164;
          case 9:
+            // LMK Register 8 modified flags
             if(BitMask) *BitMask = 0x00F00000;
             if(BitOfs) *BitOfs = 20;
             return 0x0160;
@@ -21061,8 +23053,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK Register 9 modified flags
             return BitExtractStatus(0x0164, 0x000F0000, 16);
          case 9:
+            // LMK Register 9 modified flags
             return BitExtractStatus(0x0160, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetLmk9Mod() not defined for this board version");
@@ -21073,10 +23067,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LMK Register 9 modified flags
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x0164;
          case 9:
+            // LMK Register 9 modified flags
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x0160;
@@ -21092,6 +23088,7 @@ public:
       {
          case 8:
          case 9:
+            // PLL lock signal of LMK (external)
             return BitExtractStatus(0x002C, 0x00000001, 0);
          default:
             throw std::invalid_argument("Function GetLmkPllLock() not defined for this board version");
@@ -21103,6 +23100,7 @@ public:
       {
          case 8:
          case 9:
+            // PLL lock signal of LMK (external)
             if(BitMask) *BitMask = 0x00000001;
             if(BitOfs) *BitOfs = 0;
             return 0x002C;
@@ -21118,6 +23116,7 @@ public:
       {
          case 8:
          case 9:
+            // Control LMK SYNC signal from FPGA: 0 = run / 1 = sync
             return BitExtractControl(0x1040, 0x00000080, 7);
          default:
             throw std::invalid_argument("Function GetLmkSyncLocal() not defined for this board version");
@@ -21129,6 +23128,7 @@ public:
       {
          case 8:
          case 9:
+            // Control LMK SYNC signal from FPGA: 0 = run / 1 = sync
             return SetRegMask(0x1040, 0x00000080, 7, value);
          default:
             throw std::invalid_argument("Function SetLmkSyncLocal() not defined for this board version");
@@ -21140,6 +23140,7 @@ public:
       {
          case 8:
          case 9:
+            // Control LMK SYNC signal from FPGA: 0 = run / 1 = sync
             if(BitMask) *BitMask = 0x00000080;
             if(BitOfs) *BitOfs = 7;
             return 0x1040;
@@ -21155,6 +23156,7 @@ public:
       {
          case 8:
          case 9:
+            // Local (on board) oscillator frequency in MHz
             return BitExtractControl(0x100C, 0x000000FF, 0);
          default:
             throw std::invalid_argument("Function GetLocalClkFreq() not defined for this board version");
@@ -21166,6 +23168,7 @@ public:
       {
          case 8:
          case 9:
+            // Local (on board) oscillator frequency in MHz
             return SetRegMask(0x100C, 0x000000FF, 0, value);
          default:
             throw std::invalid_argument("Function SetLocalClkFreq() not defined for this board version");
@@ -21177,6 +23180,7 @@ public:
       {
          case 8:
          case 9:
+            // Local (on board) oscillator frequency in MHz
             if(BitMask) *BitMask = 0x000000FF;
             if(BitOfs) *BitOfs = 0;
             return 0x100C;
@@ -21191,8 +23195,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Local clock frequency modified flags
             return BitExtractStatus(0x0138, 0x00000001, 0);
          case 9:
+            // Local clock frequency modified flags
             return BitExtractStatus(0x0134, 0x00000001, 0);
          default:
             throw std::invalid_argument("Function GetLocalClkFreqMod() not defined for this board version");
@@ -21203,10 +23209,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Local clock frequency modified flags
             if(BitMask) *BitMask = 0x00000001;
             if(BitOfs) *BitOfs = 0;
             return 0x0138;
          case 9:
+            // Local clock frequency modified flags
             if(BitMask) *BitMask = 0x00000001;
             if(BitOfs) *BitOfs = 0;
             return 0x0134;
@@ -21221,8 +23229,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Maximum number of DRS/ADC samples per packet
             return BitExtractStatus(0x0128, 0x0000FFFF, 0);
          case 9:
+            // Maximum number of DRS/ADC samples per packet
             return BitExtractStatus(0x0124, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetMaxDrsAdcPktSamples() not defined for this board version");
@@ -21233,10 +23243,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Maximum number of DRS/ADC samples per packet
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0128;
          case 9:
+            // Maximum number of DRS/ADC samples per packet
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0124;
@@ -21251,8 +23263,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Maximum number of scaler values per packet
             return BitExtractStatus(0x0134, 0x0000FFFF, 0);
          case 9:
+            // Maximum number of scaler values per packet
             return BitExtractStatus(0x0130, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetMaxSclPktSamples() not defined for this board version");
@@ -21263,10 +23277,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Maximum number of scaler values per packet
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0134;
          case 9:
+            // Maximum number of scaler values per packet
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0130;
@@ -21281,8 +23297,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Maximum number of TDC samples per packet
             return BitExtractStatus(0x012C, 0x0003FFFF, 0);
          case 9:
+            // Maximum number of TDC samples per packet
             return BitExtractStatus(0x0128, 0x0003FFFF, 0);
          default:
             throw std::invalid_argument("Function GetMaxTdcPktSamples() not defined for this board version");
@@ -21293,10 +23311,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Maximum number of TDC samples per packet
             if(BitMask) *BitMask = 0x0003FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x012C;
          case 9:
+            // Maximum number of TDC samples per packet
             if(BitMask) *BitMask = 0x0003FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0128;
@@ -21311,8 +23331,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Maximum number of advanced trigger output samples per packet
             return BitExtractStatus(0x0130, 0x0000FFFF, 0);
          case 9:
+            // Maximum number of advanced trigger output samples per packet
             return BitExtractStatus(0x012C, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetMaxTrgPktSamples() not defined for this board version");
@@ -21323,10 +23345,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Maximum number of advanced trigger output samples per packet
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0130;
          case 9:
+            // Maximum number of advanced trigger output samples per packet
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x012C;
@@ -21341,8 +23365,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low)
             return BitExtractControl(0x1280, 0x0000000F, 0);
          case 9:
+            // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low)
             return BitExtractControl(0x1224, 0x0000000F, 0);
          default:
             throw std::invalid_argument("Function GetMcxRxSigSel() not defined for this board version");
@@ -21353,8 +23379,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low)
             return SetRegMask(0x1280, 0x0000000F, 0, value);
          case 9:
+            // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low)
             return SetRegMask(0x1224, 0x0000000F, 0, value);
          default:
             throw std::invalid_argument("Function SetMcxRxSigSel() not defined for this board version");
@@ -21365,10 +23393,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low)
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
             return 0x1280;
          case 9:
+            // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low)
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
             return 0x1224;
@@ -21383,8 +23413,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Select for TX connector (see RX connector for mapping)
             return BitExtractControl(0x1280, 0x000F0000, 16);
          case 9:
+            // Select for TX connector (see RX connector for mapping)
             return BitExtractControl(0x1224, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetMcxTxSigSel() not defined for this board version");
@@ -21395,8 +23427,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Select for TX connector (see RX connector for mapping)
             return SetRegMask(0x1280, 0x000F0000, 16, value);
          case 9:
+            // Select for TX connector (see RX connector for mapping)
             return SetRegMask(0x1224, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetMcxTxSigSel() not defined for this board version");
@@ -21407,10 +23441,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Select for TX connector (see RX connector for mapping)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1280;
          case 9:
+            // Select for TX connector (see RX connector for mapping)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
             return 0x1224;
@@ -21426,6 +23462,7 @@ public:
       {
          case 8:
          case 9:
+            // Lock of PLL for OSERDES to DCB (FPGA internal)
             return BitExtractStatus(0x002C, 0x00000040, 6);
          default:
             throw std::invalid_argument("Function GetOserdesPllLockDcb() not defined for this board version");
@@ -21437,6 +23474,7 @@ public:
       {
          case 8:
          case 9:
+            // Lock of PLL for OSERDES to DCB (FPGA internal)
             if(BitMask) *BitMask = 0x00000040;
             if(BitOfs) *BitOfs = 6;
             return 0x002C;
@@ -21452,6 +23490,7 @@ public:
       {
          case 8:
          case 9:
+            // Lock of PLL for OSERDES to TCB (FPGA internal)
             return BitExtractStatus(0x002C, 0x00000020, 5);
          default:
             throw std::invalid_argument("Function GetOserdesPllLockTcb() not defined for this board version");
@@ -21463,6 +23502,7 @@ public:
       {
          case 8:
          case 9:
+            // Lock of PLL for OSERDES to TCB (FPGA internal)
             if(BitMask) *BitMask = 0x00000020;
             if(BitOfs) *BitOfs = 5;
             return 0x002C;
@@ -21477,6 +23517,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Overtemperature from external sensor
             return BitExtractStatus(0x0028, 0x00008000, 15);
          default:
             throw std::invalid_argument("Function GetOvertemp() not defined for this board version");
@@ -21487,6 +23528,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
+            // Overtemperature from external sensor
             if(BitMask) *BitMask = 0x00008000;
             if(BitOfs) *BitOfs = 15;
             return 0x0028;
@@ -21502,6 +23544,7 @@ public:
       {
          case 8:
          case 9:
+            // "1" while packager is not ready to process data (buffers are full or ethernet destination not configured)
             return BitExtractStatus(0x0028, 0x00000040, 6);
          default:
             throw std::invalid_argument("Function GetPackagerBusy() not defined for this board version");
@@ -21513,6 +23556,7 @@ public:
       {
          case 8:
          case 9:
+            // "1" while packager is not ready to process data (buffers are full or ethernet destination not configured)
             if(BitMask) *BitMask = 0x00000040;
             if(BitOfs) *BitOfs = 6;
             return 0x0028;
@@ -21527,8 +23571,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Enable internal (synchronous) pattern trigger
             return BitExtractControl(0x1180, 0x00001000, 12);
          case 9:
+            // Enable internal (synchronous) pattern trigger
             return BitExtractControl(0x1124, 0x00001000, 12);
          default:
             throw std::invalid_argument("Function GetPatternTriggerEn() not defined for this board version");
@@ -21539,8 +23585,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Enable internal (synchronous) pattern trigger
             return SetRegMask(0x1180, 0x00001000, 12, value);
          case 9:
+            // Enable internal (synchronous) pattern trigger
             return SetRegMask(0x1124, 0x00001000, 12, value);
          default:
             throw std::invalid_argument("Function SetPatternTriggerEn() not defined for this board version");
@@ -21551,10 +23599,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Enable internal (synchronous) pattern trigger
             if(BitMask) *BitMask = 0x00001000;
             if(BitOfs) *BitOfs = 12;
             return 0x1180;
          case 9:
+            // Enable internal (synchronous) pattern trigger
             if(BitMask) *BitMask = 0x00001000;
             if(BitOfs) *BitOfs = 12;
             return 0x1124;
@@ -21570,6 +23620,7 @@ public:
       {
          case 8:
          case 9:
+            // Version of the WaveDream2 protocol
             return BitExtractStatus(0x0020, 0x000000FF, 0);
          default:
             throw std::invalid_argument("Function GetProtocolVersion() not defined for this board version");
@@ -21581,6 +23632,7 @@ public:
       {
          case 8:
          case 9:
+            // Version of the WaveDream2 protocol
             if(BitMask) *BitMask = 0x000000FF;
             if(BitOfs) *BitOfs = 0;
             return 0x0020;
@@ -21596,6 +23648,7 @@ public:
       {
          case 8:
          case 9:
+            // Initiate FPGA Reconfiguration
             return BitExtractControl(0x1040, 0x00000001, 0);
          default:
             throw std::invalid_argument("Function GetReconfigureFpga() not defined for this board version");
@@ -21607,6 +23660,7 @@ public:
       {
          case 8:
          case 9:
+            // Initiate FPGA Reconfiguration
             return SetRegMask(0x1040, 0x00000001, 0, value);
          default:
             throw std::invalid_argument("Function SetReconfigureFpga() not defined for this board version");
@@ -21618,6 +23672,7 @@ public:
       {
          case 8:
          case 9:
+            // Initiate FPGA Reconfiguration
             if(BitMask) *BitMask = 0x00000001;
             if(BitOfs) *BitOfs = 0;
             return 0x1040;
@@ -21633,6 +23688,7 @@ public:
       {
          case 8:
          case 9:
+            // Register map layout compatibility level
             return BitExtractStatus(0x0004, 0xFFFF0000, 16);
          default:
             throw std::invalid_argument("Function GetRegLayoutCompLevel() not defined for this board version");
@@ -21644,6 +23700,7 @@ public:
       {
          case 8:
          case 9:
+            // Register map layout compatibility level
             if(BitMask) *BitMask = 0xFFFF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x0004;
@@ -21659,6 +23716,7 @@ public:
       {
          case 8:
          case 9:
+            // Register map layout version
             return BitExtractStatus(0x0004, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetRegLayoutVersion() not defined for this board version");
@@ -21670,6 +23728,7 @@ public:
       {
          case 8:
          case 9:
+            // Register map layout version
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0004;
@@ -21684,8 +23743,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 0 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00A0, 0xFFFFFFFF, 0);
          case 9:
+            // Count rate value of channel 0 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x009C, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetScaler0() not defined for this board version");
@@ -21696,10 +23757,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 0 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00A0;
          case 9:
+            // Count rate value of channel 0 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x009C;
@@ -21714,8 +23777,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 1 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00A4, 0xFFFFFFFF, 0);
          case 9:
+            // Count rate value of channel 1 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00A0, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetScaler1() not defined for this board version");
@@ -21726,10 +23791,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 1 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00A4;
          case 9:
+            // Count rate value of channel 1 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00A0;
@@ -21744,8 +23811,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 10 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00C8, 0xFFFFFFFF, 0);
          case 9:
+            // Count rate value of channel 10 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00C4, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetScaler10() not defined for this board version");
@@ -21756,10 +23825,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 10 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00C8;
          case 9:
+            // Count rate value of channel 10 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00C4;
@@ -21774,8 +23845,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 11 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00CC, 0xFFFFFFFF, 0);
          case 9:
+            // Count rate value of channel 11 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00C8, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetScaler11() not defined for this board version");
@@ -21786,10 +23859,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 11 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00CC;
          case 9:
+            // Count rate value of channel 11 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00C8;
@@ -21804,8 +23879,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 12 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00D0, 0xFFFFFFFF, 0);
          case 9:
+            // Count rate value of channel 12 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00CC, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetScaler12() not defined for this board version");
@@ -21816,10 +23893,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 12 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00D0;
          case 9:
+            // Count rate value of channel 12 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00CC;
@@ -21834,8 +23913,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 13 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00D4, 0xFFFFFFFF, 0);
          case 9:
+            // Count rate value of channel 13 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00D0, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetScaler13() not defined for this board version");
@@ -21846,10 +23927,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 13 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00D4;
          case 9:
+            // Count rate value of channel 13 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00D0;
@@ -21864,8 +23947,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 14 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00D8, 0xFFFFFFFF, 0);
          case 9:
+            // Count rate value of channel 14 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00D4, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetScaler14() not defined for this board version");
@@ -21876,10 +23961,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 14 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00D8;
          case 9:
+            // Count rate value of channel 14 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00D4;
@@ -21894,8 +23981,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 15 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00DC, 0xFFFFFFFF, 0);
          case 9:
+            // Count rate value of channel 15 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00D8, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetScaler15() not defined for this board version");
@@ -21906,10 +23995,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 15 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00DC;
          case 9:
+            // Count rate value of channel 15 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00D8;
@@ -21924,8 +24015,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 2 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00A8, 0xFFFFFFFF, 0);
          case 9:
+            // Count rate value of channel 2 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00A4, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetScaler2() not defined for this board version");
@@ -21936,10 +24029,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 2 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00A8;
          case 9:
+            // Count rate value of channel 2 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00A4;
@@ -21954,8 +24049,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 3 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00AC, 0xFFFFFFFF, 0);
          case 9:
+            // Count rate value of channel 3 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00A8, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetScaler3() not defined for this board version");
@@ -21966,10 +24063,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 3 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00AC;
          case 9:
+            // Count rate value of channel 3 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00A8;
@@ -21984,8 +24083,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 4 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00B0, 0xFFFFFFFF, 0);
          case 9:
+            // Count rate value of channel 4 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00AC, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetScaler4() not defined for this board version");
@@ -21996,10 +24097,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 4 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00B0;
          case 9:
+            // Count rate value of channel 4 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00AC;
@@ -22014,8 +24117,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 5 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00B4, 0xFFFFFFFF, 0);
          case 9:
+            // Count rate value of channel 5 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00B0, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetScaler5() not defined for this board version");
@@ -22026,10 +24131,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 5 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00B4;
          case 9:
+            // Count rate value of channel 5 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00B0;
@@ -22044,8 +24151,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 6 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00B8, 0xFFFFFFFF, 0);
          case 9:
+            // Count rate value of channel 6 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00B4, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetScaler6() not defined for this board version");
@@ -22056,10 +24165,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 6 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00B8;
          case 9:
+            // Count rate value of channel 6 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00B4;
@@ -22074,8 +24185,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 7 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00BC, 0xFFFFFFFF, 0);
          case 9:
+            // Count rate value of channel 7 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00B8, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetScaler7() not defined for this board version");
@@ -22086,10 +24199,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 7 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00BC;
          case 9:
+            // Count rate value of channel 7 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00B8;
@@ -22104,8 +24219,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 8 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00C0, 0xFFFFFFFF, 0);
          case 9:
+            // Count rate value of channel 8 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00BC, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetScaler8() not defined for this board version");
@@ -22116,10 +24233,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 8 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00C0;
          case 9:
+            // Count rate value of channel 8 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00BC;
@@ -22134,8 +24253,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 9 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00C4, 0xFFFFFFFF, 0);
          case 9:
+            // Count rate value of channel 9 (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00C0, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetScaler9() not defined for this board version");
@@ -22146,10 +24267,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate value of channel 9 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00C4;
          case 9:
+            // Count rate value of channel 9 (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00C0;
@@ -22164,8 +24287,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate for external clock input (GLOB_CLK)
             return BitExtractStatus(0x00E8, 0xFFFFFFFF, 0);
          case 9:
+            // Count rate for external clock input (GLOB_CLK)
             return BitExtractStatus(0x00E4, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetScalerExtClk() not defined for this board version");
@@ -22176,10 +24301,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate for external clock input (GLOB_CLK)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00E8;
          case 9:
+            // Count rate for external clock input (GLOB_CLK)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00E4;
@@ -22194,8 +24321,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate for trigger signal
             return BitExtractStatus(0x00E4, 0xFFFFFFFF, 0);
          case 9:
+            // Count rate for trigger signal
             return BitExtractStatus(0x00E0, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetScalerExtTrg() not defined for this board version");
@@ -22206,10 +24335,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate for trigger signal
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00E4;
          case 9:
+            // Count rate for trigger signal
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00E0;
@@ -22224,8 +24355,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate for pattern trigger signal
             return BitExtractStatus(0x00E0, 0xFFFFFFFF, 0);
          case 9:
+            // Count rate for pattern trigger signal
             return BitExtractStatus(0x00DC, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetScalerPtrnTrg() not defined for this board version");
@@ -22236,10 +24369,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Count rate for pattern trigger signal
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00E0;
          case 9:
+            // Count rate for pattern trigger signal
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00DC;
@@ -22255,6 +24390,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset all scalers
             return BitExtractControl(0x1040, 0x00000200, 9);
          default:
             throw std::invalid_argument("Function GetScalerRst() not defined for this board version");
@@ -22266,6 +24402,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset all scalers
             return SetRegMask(0x1040, 0x00000200, 9, value);
          default:
             throw std::invalid_argument("Function SetScalerRst() not defined for this board version");
@@ -22277,6 +24414,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset all scalers
             if(BitMask) *BitMask = 0x00000200;
             if(BitOfs) *BitOfs = 9;
             return 0x1040;
@@ -22291,8 +24429,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LSBs of 64bit scaler time stamp (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00EC, 0xFFFFFFFF, 0);
          case 9:
+            // LSBs of 64bit scaler time stamp (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00E8, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetScalerTimeStampLsb() not defined for this board version");
@@ -22303,10 +24443,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LSBs of 64bit scaler time stamp (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00EC;
          case 9:
+            // LSBs of 64bit scaler time stamp (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00E8;
@@ -22321,8 +24463,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // MSBs of 64bit scaler time stamp (latched upon read of LSB register)
             return BitExtractStatus(0x00F0, 0xFFFFFFFF, 0);
          case 9:
+            // MSBs of 64bit scaler time stamp (latched upon read of LSB register)
             return BitExtractStatus(0x00EC, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetScalerTimeStampMsb() not defined for this board version");
@@ -22333,10 +24477,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // MSBs of 64bit scaler time stamp (latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00F0;
          case 9:
+            // MSBs of 64bit scaler time stamp (latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00EC;
@@ -22352,6 +24498,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable transmission of scaler data
             return BitExtractControl(0x1014, 0x04000000, 26);
          default:
             throw std::invalid_argument("Function GetSclTxEn() not defined for this board version");
@@ -22363,6 +24510,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable transmission of scaler data
             return SetRegMask(0x1014, 0x04000000, 26, value);
          default:
             throw std::invalid_argument("Function SetSclTxEn() not defined for this board version");
@@ -22374,6 +24522,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable transmission of scaler data
             if(BitMask) *BitMask = 0x04000000;
             if(BitOfs) *BitOfs = 26;
             return 0x1014;
@@ -22389,6 +24538,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable SERDES communication to backplane
             return BitExtractControl(0x1014, 0x02000000, 25);
          default:
             throw std::invalid_argument("Function GetSerdesComEn() not defined for this board version");
@@ -22400,6 +24550,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable SERDES communication to backplane
             return SetRegMask(0x1014, 0x02000000, 25, value);
          default:
             throw std::invalid_argument("Function SetSerdesComEn() not defined for this board version");
@@ -22411,6 +24562,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable SERDES communication to backplane
             if(BitMask) *BitMask = 0x02000000;
             if(BitOfs) *BitOfs = 25;
             return 0x1014;
@@ -22426,6 +24578,7 @@ public:
       {
          case 8:
          case 9:
+            // "1" during serial activity like FLASH read/write
             return BitExtractStatus(0x0028, 0x00000080, 7);
          default:
             throw std::invalid_argument("Function GetSerialBusy() not defined for this board version");
@@ -22437,6 +24590,7 @@ public:
       {
          case 8:
          case 9:
+            // "1" during serial activity like FLASH read/write
             if(BitMask) *BitMask = 0x00000080;
             if(BitOfs) *BitOfs = 7;
             return 0x0028;
@@ -22452,6 +24606,7 @@ public:
       {
          case 8:
          case 9:
+            // Serial Number of the WD2 Board (Board ID)
             return BitExtractStatus(0x0024, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetSerialNumber() not defined for this board version");
@@ -22463,6 +24618,7 @@ public:
       {
          case 8:
          case 9:
+            // Serial Number of the WD2 Board (Board ID)
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0024;
@@ -22477,8 +24633,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LSBs of 64bit system time counter set value  (time is updated when MSBs are written)
             return BitExtractControl(0x1278, 0xFFFFFFFF, 0);
          case 9:
+            // LSBs of 64bit system time counter set value  (time is updated when MSBs are written)
             return BitExtractControl(0x121C, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetSetTimeLsb() not defined for this board version");
@@ -22489,8 +24647,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LSBs of 64bit system time counter set value  (time is updated when MSBs are written)
             return SetRegMask(0x1278, 0xFFFFFFFF, 0, value);
          case 9:
+            // LSBs of 64bit system time counter set value  (time is updated when MSBs are written)
             return SetRegMask(0x121C, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetSetTimeLsb() not defined for this board version");
@@ -22501,10 +24661,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LSBs of 64bit system time counter set value  (time is updated when MSBs are written)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1278;
          case 9:
+            // LSBs of 64bit system time counter set value  (time is updated when MSBs are written)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x121C;
@@ -22519,8 +24681,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // MSBs of 64bit system time counter set value  (time is updated when MSBs are written)
             return BitExtractControl(0x127C, 0xFFFFFFFF, 0);
          case 9:
+            // MSBs of 64bit system time counter set value  (time is updated when MSBs are written)
             return BitExtractControl(0x1220, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetSetTimeMsb() not defined for this board version");
@@ -22531,8 +24695,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // MSBs of 64bit system time counter set value  (time is updated when MSBs are written)
             return SetRegMask(0x127C, 0xFFFFFFFF, 0, value);
          case 9:
+            // MSBs of 64bit system time counter set value  (time is updated when MSBs are written)
             return SetRegMask(0x1220, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetSetTimeMsb() not defined for this board version");
@@ -22543,10 +24709,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // MSBs of 64bit system time counter set value  (time is updated when MSBs are written)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x127C;
          case 9:
+            // MSBs of 64bit system time counter set value  (time is updated when MSBs are written)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1220;
@@ -22562,6 +24730,7 @@ public:
       {
          case 8:
          case 9:
+            // ID of the slot where the current board is plugged in
             return BitExtractControl(0x1000, 0x000000FF, 0);
          default:
             throw std::invalid_argument("Function GetSlotId() not defined for this board version");
@@ -22573,6 +24742,7 @@ public:
       {
          case 8:
          case 9:
+            // ID of the slot where the current board is plugged in
             return SetRegMask(0x1000, 0x000000FF, 0, value);
          default:
             throw std::invalid_argument("Function SetSlotId() not defined for this board version");
@@ -22584,6 +24754,7 @@ public:
       {
          case 8:
          case 9:
+            // ID of the slot where the current board is plugged in
             if(BitMask) *BitMask = 0x000000FF;
             if(BitOfs) *BitOfs = 0;
             return 0x1000;
@@ -22599,6 +24770,7 @@ public:
       {
          case 8:
          case 9:
+            // Day of the software build
             return BitExtractStatus(0x0010, 0x000000FF, 0);
          default:
             throw std::invalid_argument("Function GetSwBuildDay() not defined for this board version");
@@ -22610,6 +24782,7 @@ public:
       {
          case 8:
          case 9:
+            // Day of the software build
             if(BitMask) *BitMask = 0x000000FF;
             if(BitOfs) *BitOfs = 0;
             return 0x0010;
@@ -22625,6 +24798,7 @@ public:
       {
          case 8:
          case 9:
+            // Hour of the software build
             return BitExtractStatus(0x0014, 0x00FF0000, 16);
          default:
             throw std::invalid_argument("Function GetSwBuildHour() not defined for this board version");
@@ -22636,6 +24810,7 @@ public:
       {
          case 8:
          case 9:
+            // Hour of the software build
             if(BitMask) *BitMask = 0x00FF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x0014;
@@ -22651,6 +24826,7 @@ public:
       {
          case 8:
          case 9:
+            // Minute of the software build
             return BitExtractStatus(0x0014, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetSwBuildMinute() not defined for this board version");
@@ -22662,6 +24838,7 @@ public:
       {
          case 8:
          case 9:
+            // Minute of the software build
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x0014;
@@ -22677,6 +24854,7 @@ public:
       {
          case 8:
          case 9:
+            // Month of the software build
             return BitExtractStatus(0x0010, 0x0000FF00, 8);
          default:
             throw std::invalid_argument("Function GetSwBuildMonth() not defined for this board version");
@@ -22688,6 +24866,7 @@ public:
       {
          case 8:
          case 9:
+            // Month of the software build
             if(BitMask) *BitMask = 0x0000FF00;
             if(BitOfs) *BitOfs = 8;
             return 0x0010;
@@ -22703,6 +24882,7 @@ public:
       {
          case 8:
          case 9:
+            // Second of the software build
             return BitExtractStatus(0x0014, 0x000000FF, 0);
          default:
             throw std::invalid_argument("Function GetSwBuildSecond() not defined for this board version");
@@ -22714,6 +24894,7 @@ public:
       {
          case 8:
          case 9:
+            // Second of the software build
             if(BitMask) *BitMask = 0x000000FF;
             if(BitOfs) *BitOfs = 0;
             return 0x0014;
@@ -22729,6 +24910,7 @@ public:
       {
          case 8:
          case 9:
+            // Year of the software build
             return BitExtractStatus(0x0010, 0xFFFF0000, 16);
          default:
             throw std::invalid_argument("Function GetSwBuildYear() not defined for this board version");
@@ -22740,6 +24922,7 @@ public:
       {
          case 8:
          case 9:
+            // Year of the software build
             if(BitMask) *BitMask = 0xFFFF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x0010;
@@ -22755,6 +24938,7 @@ public:
       {
          case 8:
          case 9:
+            // Hash tag of the software commit in the GIT repository
             return BitExtractStatus(0x001C, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetSwGitHashTag() not defined for this board version");
@@ -22766,6 +24950,7 @@ public:
       {
          case 8:
          case 9:
+            // Hash tag of the software commit in the GIT repository
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x001C;
@@ -22781,6 +24966,7 @@ public:
       {
          case 8:
          case 9:
+            // Inverted busy signal from backplane (high active, not available until hardware revision G)
             return BitExtractStatus(0x0028, 0x00000010, 4);
          default:
             throw std::invalid_argument("Function GetSysBusy() not defined for this board version");
@@ -22792,6 +24978,7 @@ public:
       {
          case 8:
          case 9:
+            // Inverted busy signal from backplane (high active, not available until hardware revision G)
             if(BitMask) *BitMask = 0x00000010;
             if(BitOfs) *BitOfs = 4;
             return 0x0028;
@@ -22807,6 +24994,7 @@ public:
       {
          case 8:
          case 9:
+            // Lock of system DCM (FPGA internal)
             return BitExtractStatus(0x002C, 0x00000100, 8);
          default:
             throw std::invalid_argument("Function GetSysDcmLock() not defined for this board version");
@@ -22818,6 +25006,7 @@ public:
       {
          case 8:
          case 9:
+            // Lock of system DCM (FPGA internal)
             if(BitMask) *BitMask = 0x00000100;
             if(BitOfs) *BitOfs = 8;
             return 0x002C;
@@ -22833,6 +25022,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset the TCB OSERDES interface
             return BitExtractControl(0x1040, 0x00000400, 10);
          default:
             throw std::invalid_argument("Function GetTcbOserdesIfRst() not defined for this board version");
@@ -22844,6 +25034,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset the TCB OSERDES interface
             return SetRegMask(0x1040, 0x00000400, 10, value);
          default:
             throw std::invalid_argument("Function SetTcbOserdesIfRst() not defined for this board version");
@@ -22855,6 +25046,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset the TCB OSERDES interface
             if(BitMask) *BitMask = 0x00000400;
             if(BitOfs) *BitOfs = 10;
             return 0x1040;
@@ -22870,6 +25062,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset the PLL of the TCB OSERDES
             return BitExtractControl(0x1040, 0x00001000, 12);
          default:
             throw std::invalid_argument("Function GetTcbOserdesPllRst() not defined for this board version");
@@ -22881,6 +25074,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset the PLL of the TCB OSERDES
             return SetRegMask(0x1040, 0x00001000, 12, value);
          default:
             throw std::invalid_argument("Function SetTcbOserdesPllRst() not defined for this board version");
@@ -22892,6 +25086,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset the PLL of the TCB OSERDES
             if(BitMask) *BitMask = 0x00001000;
             if(BitOfs) *BitOfs = 12;
             return 0x1040;
@@ -22907,6 +25102,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable training pattern for TCB SERDES connection
             return BitExtractControl(0x1014, 0x40000000, 30);
          default:
             throw std::invalid_argument("Function GetTcbSerdesTrain() not defined for this board version");
@@ -22918,6 +25114,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable training pattern for TCB SERDES connection
             return SetRegMask(0x1014, 0x40000000, 30, value);
          default:
             throw std::invalid_argument("Function SetTcbSerdesTrain() not defined for this board version");
@@ -22929,6 +25126,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable training pattern for TCB SERDES connection
             if(BitMask) *BitMask = 0x40000000;
             if(BitOfs) *BitOfs = 30;
             return 0x1014;
@@ -22944,6 +25142,7 @@ public:
       {
          case 8:
          case 9:
+            // TDC channel transmission enable [Ch15:Ch0]
             return BitExtractControl(0x1024, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTdcChTxEn() not defined for this board version");
@@ -22955,6 +25154,7 @@ public:
       {
          case 8:
          case 9:
+            // TDC channel transmission enable [Ch15:Ch0]
             return SetRegMask(0x1024, 0x0000FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTdcChTxEn() not defined for this board version");
@@ -22966,6 +25166,7 @@ public:
       {
          case 8:
          case 9:
+            // TDC channel transmission enable [Ch15:Ch0]
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1024;
@@ -22981,6 +25182,7 @@ public:
       {
          case 8:
          case 9:
+            // TDC Sampling Frequency in kHz
             return BitExtractStatus(0x0040, 0x00FFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetTdcSampleFreq() not defined for this board version");
@@ -22992,6 +25194,7 @@ public:
       {
          case 8:
          case 9:
+            // TDC Sampling Frequency in kHz
             if(BitMask) *BitMask = 0x00FFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0040;
@@ -23007,6 +25210,7 @@ public:
       {
          case 8:
          case 9:
+            // Number of TDC samples to transmit per channel (must be a multiple of 8 with range 16 to 4096)
             return BitExtractControl(0x1030, 0x00001FFF, 0);
          default:
             throw std::invalid_argument("Function GetTdcTxSamples() not defined for this board version");
@@ -23018,6 +25222,7 @@ public:
       {
          case 8:
          case 9:
+            // Number of TDC samples to transmit per channel (must be a multiple of 8 with range 16 to 4096)
             return SetRegMask(0x1030, 0x00001FFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTdcTxSamples() not defined for this board version");
@@ -23029,6 +25234,7 @@ public:
       {
          case 8:
          case 9:
+            // Number of TDC samples to transmit per channel (must be a multiple of 8 with range 16 to 4096)
             if(BitMask) *BitMask = 0x00001FFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1030;
@@ -23044,6 +25250,7 @@ public:
       {
          case 8:
          case 9:
+            // temperature in 0.0625 deg. C units
             return BitExtractStatus(0x0028, 0xFFFF0000, 16);
          default:
             throw std::invalid_argument("Function GetTemperature() not defined for this board version");
@@ -23055,6 +25262,7 @@ public:
       {
          case 8:
          case 9:
+            // temperature in 0.0625 deg. C units
             if(BitMask) *BitMask = 0xFFFF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x0028;
@@ -23069,8 +25277,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LSBs of 64bit system time counter (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00F4, 0xFFFFFFFF, 0);
          case 9:
+            // LSBs of 64bit system time counter (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00F0, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetTimeLsb() not defined for this board version");
@@ -23081,10 +25291,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // LSBs of 64bit system time counter (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00F4;
          case 9:
+            // LSBs of 64bit system time counter (MSBs are latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00F0;
@@ -23099,8 +25311,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // MSBs of 64bit system time counter (latched upon read of LSB register)
             return BitExtractStatus(0x00F8, 0xFFFFFFFF, 0);
          case 9:
+            // MSBs of 64bit system time counter (latched upon read of LSB register)
             return BitExtractStatus(0x00F4, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetTimeMsb() not defined for this board version");
@@ -23111,10 +25325,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // MSBs of 64bit system time counter (latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00F8;
          case 9:
+            // MSBs of 64bit system time counter (latched upon read of LSB register)
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00F4;
@@ -23130,6 +25346,7 @@ public:
       {
          case 8:
          case 9:
+            // switch on (1) / off (0) 100 MHz calibration signal for DRS chip (TCA_CTRL)
             return BitExtractControl(0x1008, 0x00000001, 0);
          default:
             throw std::invalid_argument("Function GetTimingCalibSignalEn() not defined for this board version");
@@ -23141,6 +25358,7 @@ public:
       {
          case 8:
          case 9:
+            // switch on (1) / off (0) 100 MHz calibration signal for DRS chip (TCA_CTRL)
             return SetRegMask(0x1008, 0x00000001, 0, value);
          default:
             throw std::invalid_argument("Function SetTimingCalibSignalEn() not defined for this board version");
@@ -23152,6 +25370,7 @@ public:
       {
          case 8:
          case 9:
+            // switch on (1) / off (0) 100 MHz calibration signal for DRS chip (TCA_CTRL)
             if(BitMask) *BitMask = 0x00000001;
             if(BitOfs) *BitOfs = 0;
             return 0x1008;
@@ -23166,8 +25385,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Flag signalling that the current trigger information belongs to the latest trigger received
             return BitExtractStatus(0x0108, 0x80000000, 31);
          case 9:
+            // Flag signalling that the current trigger information belongs to the latest trigger received
             return BitExtractStatus(0x0104, 0x80000000, 31);
          default:
             throw std::invalid_argument("Function GetTrbFlagNew() not defined for this board version");
@@ -23178,10 +25399,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Flag signalling that the current trigger information belongs to the latest trigger received
             if(BitMask) *BitMask = 0x80000000;
             if(BitOfs) *BitOfs = 31;
             return 0x0108;
          case 9:
+            // Flag signalling that the current trigger information belongs to the latest trigger received
             if(BitMask) *BitMask = 0x80000000;
             if(BitOfs) *BitOfs = 31;
             return 0x0104;
@@ -23196,8 +25419,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Parity error flag of the current trigger information
             return BitExtractStatus(0x0108, 0x40000000, 30);
          case 9:
+            // Parity error flag of the current trigger information
             return BitExtractStatus(0x0104, 0x40000000, 30);
          default:
             throw std::invalid_argument("Function GetTrbFlagParityError() not defined for this board version");
@@ -23208,10 +25433,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Parity error flag of the current trigger information
             if(BitMask) *BitMask = 0x40000000;
             if(BitOfs) *BitOfs = 30;
             return 0x0108;
          case 9:
+            // Parity error flag of the current trigger information
             if(BitMask) *BitMask = 0x40000000;
             if(BitOfs) *BitOfs = 30;
             return 0x0104;
@@ -23226,8 +25453,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Trigger information LSBs
             return BitExtractStatus(0x010C, 0xFFFFFFFF, 0);
          case 9:
+            // Trigger information LSBs
             return BitExtractStatus(0x0108, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrbInfoLsb() not defined for this board version");
@@ -23238,10 +25467,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Trigger information LSBs
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x010C;
          case 9:
+            // Trigger information LSBs
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0108;
@@ -23256,8 +25487,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Trigger information MSBs
             return BitExtractStatus(0x0110, 0x0000FFFF, 0);
          case 9:
+            // Trigger information MSBs
             return BitExtractStatus(0x010C, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrbInfoMsb() not defined for this board version");
@@ -23268,10 +25501,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Trigger information MSBs
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0110;
          case 9:
+            // Trigger information MSBs
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x010C;
@@ -23286,8 +25521,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Parity error count of the serial transmission
             return BitExtractStatus(0x0108, 0x0000FFFF, 0);
          case 9:
+            // Parity error count of the serial transmission
             return BitExtractStatus(0x0104, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrbParityErrorCount() not defined for this board version");
@@ -23298,10 +25535,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Parity error count of the serial transmission
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0108;
          case 9:
+            // Parity error count of the serial transmission
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x0104;
@@ -23317,6 +25556,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset the parity error counter of the trigger info serial connection
             return BitExtractControl(0x1040, 0x00000100, 8);
          default:
             throw std::invalid_argument("Function GetTrbParityErrorCountRst() not defined for this board version");
@@ -23328,6 +25568,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset the parity error counter of the trigger info serial connection
             return SetRegMask(0x1040, 0x00000100, 8, value);
          default:
             throw std::invalid_argument("Function SetTrbParityErrorCountRst() not defined for this board version");
@@ -23339,6 +25580,7 @@ public:
       {
          case 8:
          case 9:
+            // Reset the parity error counter of the trigger info serial connection
             if(BitMask) *BitMask = 0x00000100;
             if(BitOfs) *BitOfs = 8;
             return 0x1040;
@@ -23353,8 +25595,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // 1 enables the corresponding trigger patterns for the local trigger
             return BitExtractControl(0x118C, 0x0007FFFF, 0);
          case 9:
+            // 1 enables the corresponding trigger patterns for the local trigger
             return BitExtractControl(0x1130, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgPtrnEn() not defined for this board version");
@@ -23365,8 +25609,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // 1 enables the corresponding trigger patterns for the local trigger
             return SetRegMask(0x118C, 0x0007FFFF, 0, value);
          case 9:
+            // 1 enables the corresponding trigger patterns for the local trigger
             return SetRegMask(0x1130, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgPtrnEn() not defined for this board version");
@@ -23377,10 +25623,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // 1 enables the corresponding trigger patterns for the local trigger
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x118C;
          case 9:
+            // 1 enables the corresponding trigger patterns for the local trigger
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1130;
@@ -23395,8 +25643,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x1190, 0x0007FFFF, 0);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x1134, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgSrcEnPtrn0() not defined for this board version");
@@ -23407,8 +25657,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x1190, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x1134, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgSrcEnPtrn0() not defined for this board version");
@@ -23419,10 +25671,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1190;
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1134;
@@ -23437,8 +25691,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x1198, 0x0007FFFF, 0);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x113C, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgSrcEnPtrn1() not defined for this board version");
@@ -23449,8 +25705,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x1198, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x113C, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgSrcEnPtrn1() not defined for this board version");
@@ -23461,10 +25719,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1198;
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x113C;
@@ -23479,8 +25739,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x11E0, 0x0007FFFF, 0);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x1184, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgSrcEnPtrn10() not defined for this board version");
@@ -23491,8 +25753,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x11E0, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x1184, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgSrcEnPtrn10() not defined for this board version");
@@ -23503,10 +25767,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11E0;
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1184;
@@ -23521,8 +25787,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x11E8, 0x0007FFFF, 0);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x118C, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgSrcEnPtrn11() not defined for this board version");
@@ -23533,8 +25801,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x11E8, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x118C, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgSrcEnPtrn11() not defined for this board version");
@@ -23545,10 +25815,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11E8;
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x118C;
@@ -23563,8 +25835,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x11F0, 0x0007FFFF, 0);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x1194, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgSrcEnPtrn12() not defined for this board version");
@@ -23575,8 +25849,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x11F0, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x1194, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgSrcEnPtrn12() not defined for this board version");
@@ -23587,10 +25863,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11F0;
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1194;
@@ -23605,8 +25883,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x11F8, 0x0007FFFF, 0);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x119C, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgSrcEnPtrn13() not defined for this board version");
@@ -23617,8 +25897,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x11F8, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x119C, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgSrcEnPtrn13() not defined for this board version");
@@ -23629,10 +25911,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11F8;
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x119C;
@@ -23647,8 +25931,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x1200, 0x0007FFFF, 0);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x11A4, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgSrcEnPtrn14() not defined for this board version");
@@ -23659,8 +25945,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x1200, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x11A4, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgSrcEnPtrn14() not defined for this board version");
@@ -23671,10 +25959,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1200;
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11A4;
@@ -23689,8 +25979,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x1208, 0x0007FFFF, 0);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x11AC, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgSrcEnPtrn15() not defined for this board version");
@@ -23701,8 +25993,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x1208, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x11AC, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgSrcEnPtrn15() not defined for this board version");
@@ -23713,10 +26007,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1208;
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11AC;
@@ -23731,8 +26027,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x1210, 0x0007FFFF, 0);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x11B4, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgSrcEnPtrn16() not defined for this board version");
@@ -23743,8 +26041,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x1210, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x11B4, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgSrcEnPtrn16() not defined for this board version");
@@ -23755,10 +26055,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1210;
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11B4;
@@ -23773,8 +26075,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x1218, 0x0007FFFF, 0);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x11BC, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgSrcEnPtrn17() not defined for this board version");
@@ -23785,8 +26089,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x1218, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x11BC, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgSrcEnPtrn17() not defined for this board version");
@@ -23797,10 +26103,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1218;
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11BC;
@@ -23815,8 +26123,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x1220, 0x0007FFFF, 0);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x11C4, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgSrcEnPtrn18() not defined for this board version");
@@ -23827,8 +26137,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x1220, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x11C4, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgSrcEnPtrn18() not defined for this board version");
@@ -23839,10 +26151,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1220;
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11C4;
@@ -23857,8 +26171,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x11A0, 0x0007FFFF, 0);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x1144, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgSrcEnPtrn2() not defined for this board version");
@@ -23869,8 +26185,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x11A0, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x1144, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgSrcEnPtrn2() not defined for this board version");
@@ -23881,10 +26199,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11A0;
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1144;
@@ -23899,8 +26219,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x11A8, 0x0007FFFF, 0);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x114C, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgSrcEnPtrn3() not defined for this board version");
@@ -23911,8 +26233,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x11A8, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x114C, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgSrcEnPtrn3() not defined for this board version");
@@ -23923,10 +26247,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11A8;
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x114C;
@@ -23941,8 +26267,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x11B0, 0x0007FFFF, 0);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x1154, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgSrcEnPtrn4() not defined for this board version");
@@ -23953,8 +26281,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x11B0, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x1154, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgSrcEnPtrn4() not defined for this board version");
@@ -23965,10 +26295,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11B0;
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1154;
@@ -23983,8 +26315,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x11B8, 0x0007FFFF, 0);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x115C, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgSrcEnPtrn5() not defined for this board version");
@@ -23995,8 +26329,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x11B8, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x115C, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgSrcEnPtrn5() not defined for this board version");
@@ -24007,10 +26343,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11B8;
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x115C;
@@ -24025,8 +26363,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x11C0, 0x0007FFFF, 0);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x1164, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgSrcEnPtrn6() not defined for this board version");
@@ -24037,8 +26377,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x11C0, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x1164, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgSrcEnPtrn6() not defined for this board version");
@@ -24049,10 +26391,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11C0;
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1164;
@@ -24067,8 +26411,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x11C8, 0x0007FFFF, 0);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x116C, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgSrcEnPtrn7() not defined for this board version");
@@ -24079,8 +26425,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x11C8, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x116C, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgSrcEnPtrn7() not defined for this board version");
@@ -24091,10 +26439,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11C8;
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x116C;
@@ -24109,8 +26459,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x11D0, 0x0007FFFF, 0);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x1174, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgSrcEnPtrn8() not defined for this board version");
@@ -24121,8 +26473,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x11D0, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x1174, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgSrcEnPtrn8() not defined for this board version");
@@ -24133,10 +26487,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11D0;
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1174;
@@ -24151,8 +26507,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x11D8, 0x0007FFFF, 0);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x117C, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgSrcEnPtrn9() not defined for this board version");
@@ -24163,8 +26521,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x11D8, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x117C, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgSrcEnPtrn9() not defined for this board version");
@@ -24175,10 +26535,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11D8;
          case 9:
+            // trigger source enables for pattern (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x117C;
@@ -24193,8 +26555,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Polarity of trigger source (0 = normal, 1 = inverted) (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x1184, 0x0007FFFF, 0);
          case 9:
+            // Polarity of trigger source (0 = normal, 1 = inverted) (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return BitExtractControl(0x1128, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgSrcPolarity() not defined for this board version");
@@ -24205,8 +26569,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Polarity of trigger source (0 = normal, 1 = inverted) (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x1184, 0x0007FFFF, 0, value);
          case 9:
+            // Polarity of trigger source (0 = normal, 1 = inverted) (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             return SetRegMask(0x1128, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgSrcPolarity() not defined for this board version");
@@ -24217,10 +26583,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Polarity of trigger source (0 = normal, 1 = inverted) (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1184;
          case 9:
+            // Polarity of trigger source (0 = normal, 1 = inverted) (sources: 18=adv, 17=adv_veto, 16=ext, 15:0=drs ch)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1128;
@@ -24235,8 +26603,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x1194, 0x0007FFFF, 0);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x1138, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgStatePtrn0() not defined for this board version");
@@ -24247,8 +26617,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x1194, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x1138, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgStatePtrn0() not defined for this board version");
@@ -24259,10 +26631,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1194;
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1138;
@@ -24277,8 +26651,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x119C, 0x0007FFFF, 0);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x1140, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgStatePtrn1() not defined for this board version");
@@ -24289,8 +26665,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x119C, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x1140, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgStatePtrn1() not defined for this board version");
@@ -24301,10 +26679,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x119C;
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1140;
@@ -24319,8 +26699,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x11E4, 0x0007FFFF, 0);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x1188, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgStatePtrn10() not defined for this board version");
@@ -24331,8 +26713,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x11E4, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x1188, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgStatePtrn10() not defined for this board version");
@@ -24343,10 +26727,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11E4;
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1188;
@@ -24361,8 +26747,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x11EC, 0x0007FFFF, 0);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x1190, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgStatePtrn11() not defined for this board version");
@@ -24373,8 +26761,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x11EC, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x1190, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgStatePtrn11() not defined for this board version");
@@ -24385,10 +26775,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11EC;
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1190;
@@ -24403,8 +26795,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x11F4, 0x0007FFFF, 0);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x1198, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgStatePtrn12() not defined for this board version");
@@ -24415,8 +26809,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x11F4, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x1198, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgStatePtrn12() not defined for this board version");
@@ -24427,10 +26823,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11F4;
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1198;
@@ -24445,8 +26843,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x11FC, 0x0007FFFF, 0);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x11A0, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgStatePtrn13() not defined for this board version");
@@ -24457,8 +26857,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x11FC, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x11A0, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgStatePtrn13() not defined for this board version");
@@ -24469,10 +26871,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11FC;
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11A0;
@@ -24487,8 +26891,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x1204, 0x0007FFFF, 0);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x11A8, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgStatePtrn14() not defined for this board version");
@@ -24499,8 +26905,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x1204, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x11A8, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgStatePtrn14() not defined for this board version");
@@ -24511,10 +26919,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1204;
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11A8;
@@ -24529,8 +26939,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x120C, 0x0007FFFF, 0);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x11B0, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgStatePtrn15() not defined for this board version");
@@ -24541,8 +26953,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x120C, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x11B0, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgStatePtrn15() not defined for this board version");
@@ -24553,10 +26967,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x120C;
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11B0;
@@ -24571,8 +26987,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x1214, 0x0007FFFF, 0);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x11B8, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgStatePtrn16() not defined for this board version");
@@ -24583,8 +27001,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x1214, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x11B8, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgStatePtrn16() not defined for this board version");
@@ -24595,10 +27015,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1214;
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11B8;
@@ -24613,8 +27035,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x121C, 0x0007FFFF, 0);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x11C0, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgStatePtrn17() not defined for this board version");
@@ -24625,8 +27049,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x121C, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x11C0, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgStatePtrn17() not defined for this board version");
@@ -24637,10 +27063,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x121C;
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11C0;
@@ -24655,8 +27083,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x1224, 0x0007FFFF, 0);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x11C8, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgStatePtrn18() not defined for this board version");
@@ -24667,8 +27097,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x1224, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x11C8, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgStatePtrn18() not defined for this board version");
@@ -24679,10 +27111,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1224;
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11C8;
@@ -24697,8 +27131,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x11A4, 0x0007FFFF, 0);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x1148, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgStatePtrn2() not defined for this board version");
@@ -24709,8 +27145,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x11A4, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x1148, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgStatePtrn2() not defined for this board version");
@@ -24721,10 +27159,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11A4;
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1148;
@@ -24739,8 +27179,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x11AC, 0x0007FFFF, 0);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x1150, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgStatePtrn3() not defined for this board version");
@@ -24751,8 +27193,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x11AC, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x1150, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgStatePtrn3() not defined for this board version");
@@ -24763,10 +27207,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11AC;
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1150;
@@ -24781,8 +27227,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x11B4, 0x0007FFFF, 0);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x1158, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgStatePtrn4() not defined for this board version");
@@ -24793,8 +27241,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x11B4, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x1158, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgStatePtrn4() not defined for this board version");
@@ -24805,10 +27255,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11B4;
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1158;
@@ -24823,8 +27275,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x11BC, 0x0007FFFF, 0);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x1160, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgStatePtrn5() not defined for this board version");
@@ -24835,8 +27289,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x11BC, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x1160, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgStatePtrn5() not defined for this board version");
@@ -24847,10 +27303,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11BC;
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1160;
@@ -24865,8 +27323,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x11C4, 0x0007FFFF, 0);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x1168, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgStatePtrn6() not defined for this board version");
@@ -24877,8 +27337,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x11C4, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x1168, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgStatePtrn6() not defined for this board version");
@@ -24889,10 +27351,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11C4;
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1168;
@@ -24907,8 +27371,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x11CC, 0x0007FFFF, 0);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x1170, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgStatePtrn7() not defined for this board version");
@@ -24919,8 +27385,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x11CC, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x1170, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgStatePtrn7() not defined for this board version");
@@ -24931,10 +27399,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11CC;
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1170;
@@ -24949,8 +27419,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x11D4, 0x0007FFFF, 0);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x1178, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgStatePtrn8() not defined for this board version");
@@ -24961,8 +27433,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x11D4, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x1178, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgStatePtrn8() not defined for this board version");
@@ -24973,10 +27447,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11D4;
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1178;
@@ -24991,8 +27467,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x11DC, 0x0007FFFF, 0);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return BitExtractControl(0x1180, 0x0007FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrgStatePtrn9() not defined for this board version");
@@ -25003,8 +27481,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x11DC, 0x0007FFFF, 0, value);
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             return SetRegMask(0x1180, 0x0007FFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgStatePtrn9() not defined for this board version");
@@ -25015,10 +27495,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x11DC;
          case 9:
+            // trigger source state pattern (0 = Inhibit, 1 = Coincidence)
             if(BitMask) *BitMask = 0x0007FFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1180;
@@ -25034,6 +27516,7 @@ public:
       {
          case 8:
          case 9:
+            // enable transmission of advanced trigger output data
             return BitExtractControl(0x1014, 0x08000000, 27);
          default:
             throw std::invalid_argument("Function GetTrgTxEn() not defined for this board version");
@@ -25045,6 +27528,7 @@ public:
       {
          case 8:
          case 9:
+            // enable transmission of advanced trigger output data
             return SetRegMask(0x1014, 0x08000000, 27, value);
          default:
             throw std::invalid_argument("Function SetTrgTxEn() not defined for this board version");
@@ -25056,6 +27540,7 @@ public:
       {
          case 8:
          case 9:
+            // enable transmission of advanced trigger output data
             if(BitMask) *BitMask = 0x08000000;
             if(BitOfs) *BitOfs = 27;
             return 0x1014;
@@ -25071,6 +27556,7 @@ public:
       {
          case 8:
          case 9:
+            // Number of advanced trigger output samples to transmit (range 1 to 512)
             return BitExtractControl(0x1034, 0x000003FF, 0);
          default:
             throw std::invalid_argument("Function GetTrgTxSamples() not defined for this board version");
@@ -25082,6 +27568,7 @@ public:
       {
          case 8:
          case 9:
+            // Number of advanced trigger output samples to transmit (range 1 to 512)
             return SetRegMask(0x1034, 0x000003FF, 0, value);
          default:
             throw std::invalid_argument("Function SetTrgTxSamples() not defined for this board version");
@@ -25093,6 +27580,7 @@ public:
       {
          case 8:
          case 9:
+            // Number of advanced trigger output samples to transmit (range 1 to 512)
             if(BitMask) *BitMask = 0x000003FF;
             if(BitOfs) *BitOfs = 0;
             return 0x1034;
@@ -25107,8 +27595,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Trigger DAQ clock calibration modified flag
             return BitExtractStatus(0x0138, 0x00000010, 4);
          case 9:
+            // Trigger DAQ clock calibration modified flag
             return BitExtractStatus(0x0134, 0x00000010, 4);
          default:
             throw std::invalid_argument("Function GetTriggerDaqClkCalMod() not defined for this board version");
@@ -25119,10 +27609,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Trigger DAQ clock calibration modified flag
             if(BitMask) *BitMask = 0x00000010;
             if(BitOfs) *BitOfs = 4;
             return 0x0138;
          case 9:
+            // Trigger DAQ clock calibration modified flag
             if(BitMask) *BitMask = 0x00000010;
             if(BitOfs) *BitOfs = 4;
             return 0x0134;
@@ -25137,8 +27629,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger delay in ticks of 6.25 ns
             return BitExtractControl(0x1180, 0x000000FF, 0);
          case 9:
+            // trigger delay in ticks of 6.25 ns
             return BitExtractControl(0x1124, 0x000000FF, 0);
          default:
             throw std::invalid_argument("Function GetTriggerDelay() not defined for this board version");
@@ -25149,8 +27643,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger delay in ticks of 6.25 ns
             return SetRegMask(0x1180, 0x000000FF, 0, value);
          case 9:
+            // trigger delay in ticks of 6.25 ns
             return SetRegMask(0x1124, 0x000000FF, 0, value);
          default:
             throw std::invalid_argument("Function SetTriggerDelay() not defined for this board version");
@@ -25161,10 +27657,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // trigger delay in ticks of 6.25 ns
             if(BitMask) *BitMask = 0x000000FF;
             if(BitOfs) *BitOfs = 0;
             return 0x1180;
          case 9:
+            // trigger delay in ticks of 6.25 ns
             if(BitMask) *BitMask = 0x000000FF;
             if(BitOfs) *BitOfs = 0;
             return 0x1124;
@@ -25179,8 +27677,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Length of the trigger output pulse in cycles
             return BitExtractControl(0x1180, 0x00000700, 8);
          case 9:
+            // Length of the trigger output pulse in cycles
             return BitExtractControl(0x1124, 0x00000700, 8);
          default:
             throw std::invalid_argument("Function GetTriggerOutPulseLength() not defined for this board version");
@@ -25191,8 +27691,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Length of the trigger output pulse in cycles
             return SetRegMask(0x1180, 0x00000700, 8, value);
          case 9:
+            // Length of the trigger output pulse in cycles
             return SetRegMask(0x1124, 0x00000700, 8, value);
          default:
             throw std::invalid_argument("Function SetTriggerOutPulseLength() not defined for this board version");
@@ -25203,10 +27705,12 @@ public:
       switch(this->mVersion)
       {
          case 8:
+            // Length of the trigger output pulse in cycles
             if(BitMask) *BitMask = 0x00000700;
             if(BitOfs) *BitOfs = 8;
             return 0x1180;
          case 9:
+            // Length of the trigger output pulse in cycles
             if(BitMask) *BitMask = 0x00000700;
             if(BitOfs) *BitOfs = 8;
             return 0x1124;
@@ -25222,6 +27726,7 @@ public:
       {
          case 8:
          case 9:
+            // Trigger DAQ clock calibration check
             return BitExtractControl(0x100C, 0x01000000, 24);
          default:
             throw std::invalid_argument("Function GetTrigDaqClkCalChk() not defined for this board version");
@@ -25233,6 +27738,7 @@ public:
       {
          case 8:
          case 9:
+            // Trigger DAQ clock calibration check
             return SetRegMask(0x100C, 0x01000000, 24, value);
          default:
             throw std::invalid_argument("Function SetTrigDaqClkCalChk() not defined for this board version");
@@ -25244,6 +27750,7 @@ public:
       {
          case 8:
          case 9:
+            // Trigger DAQ clock calibration check
             if(BitMask) *BitMask = 0x01000000;
             if(BitOfs) *BitOfs = 24;
             return 0x100C;
@@ -25259,6 +27766,7 @@ public:
       {
          case 8:
          case 9:
+            // Delay of the data valid at the ISERDES of the ADCs (delay = value + 1)
             return BitExtractControl(0x1004, 0x3F000000, 24);
          default:
             throw std::invalid_argument("Function GetValidDelayAdc() not defined for this board version");
@@ -25270,6 +27778,7 @@ public:
       {
          case 8:
          case 9:
+            // Delay of the data valid at the ISERDES of the ADCs (delay = value + 1)
             return SetRegMask(0x1004, 0x3F000000, 24, value);
          default:
             throw std::invalid_argument("Function SetValidDelayAdc() not defined for this board version");
@@ -25281,6 +27790,7 @@ public:
       {
          case 8:
          case 9:
+            // Delay of the data valid at the ISERDES of the ADCs (delay = value + 1)
             if(BitMask) *BitMask = 0x3F000000;
             if(BitOfs) *BitOfs = 24;
             return 0x1004;
@@ -25296,6 +27806,7 @@ public:
       {
          case 8:
          case 9:
+            // ID of the board vendor (0x01 for PSI)
             return BitExtractStatus(0x0000, 0x00FF0000, 16);
          default:
             throw std::invalid_argument("Function GetVendorId() not defined for this board version");
@@ -25307,6 +27818,7 @@ public:
       {
          case 8:
          case 9:
+            // ID of the board vendor (0x01 for PSI)
             if(BitMask) *BitMask = 0x00FF0000;
             if(BitOfs) *BitOfs = 16;
             return 0x0000;
@@ -25322,6 +27834,7 @@ public:
       {
          case 8:
          case 9:
+            // WaveDream packager reset
             return BitExtractControl(0x1040, 0x00000008, 3);
          default:
             throw std::invalid_argument("Function GetWdPkgrRst() not defined for this board version");
@@ -25333,6 +27846,7 @@ public:
       {
          case 8:
          case 9:
+            // WaveDream packager reset
             return SetRegMask(0x1040, 0x00000008, 3, value);
          default:
             throw std::invalid_argument("Function SetWdPkgrRst() not defined for this board version");
@@ -25344,6 +27858,7 @@ public:
       {
          case 8:
          case 9:
+            // WaveDream packager reset
             if(BitMask) *BitMask = 0x00000008;
             if(BitOfs) *BitOfs = 3;
             return 0x1040;
@@ -25359,6 +27874,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable zero suppression for data transmission (only transmit channels that triggered)
             return BitExtractControl(0x103C, 0x00000100, 8);
          default:
             throw std::invalid_argument("Function GetZeroSuprEn() not defined for this board version");
@@ -25370,6 +27886,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable zero suppression for data transmission (only transmit channels that triggered)
             return SetRegMask(0x103C, 0x00000100, 8, value);
          default:
             throw std::invalid_argument("Function SetZeroSuprEn() not defined for this board version");
@@ -25381,6 +27898,7 @@ public:
       {
          case 8:
          case 9:
+            // Enable zero suppression for data transmission (only transmit channels that triggered)
             if(BitMask) *BitMask = 0x00000100;
             if(BitOfs) *BitOfs = 8;
             return 0x103C;
@@ -25396,6 +27914,7 @@ public:
       {
          case 8:
          case 9:
+            // Zero suppression time window in DAQ clock ticks (channel polarity defined in TRG_SRC_POL)
             return BitExtractControl(0x103C, 0x000000FF, 0);
          default:
             throw std::invalid_argument("Function GetZeroSuprWindow() not defined for this board version");
@@ -25407,6 +27926,7 @@ public:
       {
          case 8:
          case 9:
+            // Zero suppression time window in DAQ clock ticks (channel polarity defined in TRG_SRC_POL)
             return SetRegMask(0x103C, 0x000000FF, 0, value);
          default:
             throw std::invalid_argument("Function SetZeroSuprWindow() not defined for this board version");
@@ -25418,6 +27938,7 @@ public:
       {
          case 8:
          case 9:
+            // Zero suppression time window in DAQ clock ticks (channel polarity defined in TRG_SRC_POL)
             if(BitMask) *BitMask = 0x000000FF;
             if(BitOfs) *BitOfs = 0;
             return 0x103C;
