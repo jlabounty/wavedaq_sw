@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  18.10.2019 09:41:58
+// Created :  18.10.2019 12:03:49
 //
 // Register Layout Versions :  8, 9
 //
@@ -34,10 +34,41 @@ private:
 public:
 
    // constructor
-   unsigned int WDBREG()
-   {
+   WDBREG() {
+     this->mVersion = 0;
+   };
+
+   unsigned int GetVersion() {
       this->mVersion = BitExtractStatus(mVersionReg, mVersionMask, mVersionOffs);
-      retur this->mVersion;
+      return mVersion;
+   }
+
+   // Number of Control Registers
+   unsigned int GetNrOfCtrlRegs()
+   {
+      switch(this->mVersion)
+      {
+         case 8:
+            return 162;
+         case 9:
+            return 139;
+         default:
+            throw std::invalid_argument("Function GetNrOfCtrlRegs() not defined for this board version");
+      };
+   };
+
+   // Number of Status Registers
+   unsigned int GetNrOfStatRegs()
+   {
+      switch(this->mVersion)
+      {
+         case 8:
+            return 90;
+         case 9:
+            return 89;
+         default:
+            throw std::invalid_argument("Function GetNrOfStatRegs() not defined for this board version");
+      };
    };
 
 //--------------------------------------------------------------------
@@ -52,17 +83,17 @@ public:
          case 9:
             return BitExtractControl(0x1114, 0x80000000, 31);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01458Dcsoff() not defined for this board version");
       };
    };
-   unsigned int SetAdc01458Dcsoff(unsigned int value)
+   void SetAdc01458Dcsoff(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1114, 0x80000000, 31, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc01458Dcsoff() not defined for this board version");
       };
    };
    unsigned int GetAdc01458DcsoffLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -74,7 +105,7 @@ public:
             if(BitOfs) *BitOfs = 31;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01458DcsoffLoc() not defined for this board version");
       };
    };
 
@@ -86,17 +117,17 @@ public:
          case 9:
             return BitExtractControl(0x1114, 0x00E00000, 21);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01458Ilvds() not defined for this board version");
       };
    };
-   unsigned int SetAdc01458Ilvds(unsigned int value)
+   void SetAdc01458Ilvds(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1114, 0x00E00000, 21, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc01458Ilvds() not defined for this board version");
       };
    };
    unsigned int GetAdc01458IlvdsLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -108,7 +139,7 @@ public:
             if(BitOfs) *BitOfs = 21;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01458IlvdsLoc() not defined for this board version");
       };
    };
 
@@ -120,17 +151,17 @@ public:
          case 9:
             return BitExtractControl(0x1114, 0x00070000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01458Outmode() not defined for this board version");
       };
    };
-   unsigned int SetAdc01458Outmode(unsigned int value)
+   void SetAdc01458Outmode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1114, 0x00070000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc01458Outmode() not defined for this board version");
       };
    };
    unsigned int GetAdc01458OutmodeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -142,7 +173,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01458OutmodeLoc() not defined for this board version");
       };
    };
 
@@ -154,17 +185,17 @@ public:
          case 9:
             return BitExtractControl(0x1114, 0x00080000, 19);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01458Outoff() not defined for this board version");
       };
    };
-   unsigned int SetAdc01458Outoff(unsigned int value)
+   void SetAdc01458Outoff(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1114, 0x00080000, 19, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc01458Outoff() not defined for this board version");
       };
    };
    unsigned int GetAdc01458OutoffLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -176,7 +207,7 @@ public:
             if(BitOfs) *BitOfs = 19;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01458OutoffLoc() not defined for this board version");
       };
    };
 
@@ -188,17 +219,17 @@ public:
          case 9:
             return BitExtractControl(0x1114, 0x00008000, 15);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01458Outtest() not defined for this board version");
       };
    };
-   unsigned int SetAdc01458Outtest(unsigned int value)
+   void SetAdc01458Outtest(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1114, 0x00008000, 15, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc01458Outtest() not defined for this board version");
       };
    };
    unsigned int GetAdc01458OuttestLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -210,7 +241,7 @@ public:
             if(BitOfs) *BitOfs = 15;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01458OuttestLoc() not defined for this board version");
       };
    };
 
@@ -222,17 +253,17 @@ public:
          case 9:
             return BitExtractControl(0x1114, 0x40000000, 30);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01458Rand() not defined for this board version");
       };
    };
-   unsigned int SetAdc01458Rand(unsigned int value)
+   void SetAdc01458Rand(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1114, 0x40000000, 30, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc01458Rand() not defined for this board version");
       };
    };
    unsigned int GetAdc01458RandLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -244,7 +275,7 @@ public:
             if(BitOfs) *BitOfs = 30;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01458RandLoc() not defined for this board version");
       };
    };
 
@@ -256,17 +287,17 @@ public:
          case 9:
             return BitExtractControl(0x1114, 0x10000000, 28);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01458Sleep() not defined for this board version");
       };
    };
-   unsigned int SetAdc01458Sleep(unsigned int value)
+   void SetAdc01458Sleep(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1114, 0x10000000, 28, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc01458Sleep() not defined for this board version");
       };
    };
    unsigned int GetAdc01458SleepLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -278,7 +309,7 @@ public:
             if(BitOfs) *BitOfs = 28;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01458SleepLoc() not defined for this board version");
       };
    };
 
@@ -290,17 +321,17 @@ public:
          case 9:
             return BitExtractControl(0x1114, 0x00100000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01458Termon() not defined for this board version");
       };
    };
-   unsigned int SetAdc01458Termon(unsigned int value)
+   void SetAdc01458Termon(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1114, 0x00100000, 20, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc01458Termon() not defined for this board version");
       };
    };
    unsigned int GetAdc01458TermonLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -312,7 +343,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01458TermonLoc() not defined for this board version");
       };
    };
 
@@ -324,17 +355,17 @@ public:
          case 9:
             return BitExtractControl(0x1114, 0x00003FFC, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01458Tp() not defined for this board version");
       };
    };
-   unsigned int SetAdc01458Tp(unsigned int value)
+   void SetAdc01458Tp(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1114, 0x00003FFC, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc01458Tp() not defined for this board version");
       };
    };
    unsigned int GetAdc01458TpLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -346,7 +377,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01458TpLoc() not defined for this board version");
       };
    };
 
@@ -358,17 +389,17 @@ public:
          case 9:
             return BitExtractControl(0x1114, 0x00000003, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01458TpLsbs() not defined for this board version");
       };
    };
-   unsigned int SetAdc01458TpLsbs(unsigned int value)
+   void SetAdc01458TpLsbs(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1114, 0x00000003, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc01458TpLsbs() not defined for this board version");
       };
    };
    unsigned int GetAdc01458TpLsbsLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -380,7 +411,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01458TpLsbsLoc() not defined for this board version");
       };
    };
 
@@ -392,17 +423,17 @@ public:
          case 9:
             return BitExtractControl(0x1114, 0x20000000, 29);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01458Twoscomp() not defined for this board version");
       };
    };
-   unsigned int SetAdc01458Twoscomp(unsigned int value)
+   void SetAdc01458Twoscomp(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1114, 0x20000000, 29, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc01458Twoscomp() not defined for this board version");
       };
    };
    unsigned int GetAdc01458TwoscompLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -414,7 +445,7 @@ public:
             if(BitOfs) *BitOfs = 29;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01458TwoscompLoc() not defined for this board version");
       };
    };
 
@@ -426,17 +457,17 @@ public:
          case 9:
             return BitExtractControl(0x1114, 0x01000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01NapMode() not defined for this board version");
       };
    };
-   unsigned int SetAdc01NapMode(unsigned int value)
+   void SetAdc01NapMode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1114, 0x01000000, 24, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc01NapMode() not defined for this board version");
       };
    };
    unsigned int GetAdc01NapModeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -448,7 +479,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc01NapModeLoc() not defined for this board version");
       };
    };
 
@@ -460,17 +491,17 @@ public:
          case 9:
             return BitExtractControl(0x1118, 0x80000000, 31);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02367Dcsoff() not defined for this board version");
       };
    };
-   unsigned int SetAdc02367Dcsoff(unsigned int value)
+   void SetAdc02367Dcsoff(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1118, 0x80000000, 31, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc02367Dcsoff() not defined for this board version");
       };
    };
    unsigned int GetAdc02367DcsoffLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -482,7 +513,7 @@ public:
             if(BitOfs) *BitOfs = 31;
             return 0x1118;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02367DcsoffLoc() not defined for this board version");
       };
    };
 
@@ -494,17 +525,17 @@ public:
          case 9:
             return BitExtractControl(0x1118, 0x00E00000, 21);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02367Ilvds() not defined for this board version");
       };
    };
-   unsigned int SetAdc02367Ilvds(unsigned int value)
+   void SetAdc02367Ilvds(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1118, 0x00E00000, 21, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc02367Ilvds() not defined for this board version");
       };
    };
    unsigned int GetAdc02367IlvdsLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -516,7 +547,7 @@ public:
             if(BitOfs) *BitOfs = 21;
             return 0x1118;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02367IlvdsLoc() not defined for this board version");
       };
    };
 
@@ -528,17 +559,17 @@ public:
          case 9:
             return BitExtractControl(0x1118, 0x00070000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02367Outmode() not defined for this board version");
       };
    };
-   unsigned int SetAdc02367Outmode(unsigned int value)
+   void SetAdc02367Outmode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1118, 0x00070000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc02367Outmode() not defined for this board version");
       };
    };
    unsigned int GetAdc02367OutmodeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -550,7 +581,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1118;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02367OutmodeLoc() not defined for this board version");
       };
    };
 
@@ -562,17 +593,17 @@ public:
          case 9:
             return BitExtractControl(0x1118, 0x00080000, 19);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02367Outoff() not defined for this board version");
       };
    };
-   unsigned int SetAdc02367Outoff(unsigned int value)
+   void SetAdc02367Outoff(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1118, 0x00080000, 19, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc02367Outoff() not defined for this board version");
       };
    };
    unsigned int GetAdc02367OutoffLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -584,7 +615,7 @@ public:
             if(BitOfs) *BitOfs = 19;
             return 0x1118;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02367OutoffLoc() not defined for this board version");
       };
    };
 
@@ -596,17 +627,17 @@ public:
          case 9:
             return BitExtractControl(0x1118, 0x00008000, 15);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02367Outtest() not defined for this board version");
       };
    };
-   unsigned int SetAdc02367Outtest(unsigned int value)
+   void SetAdc02367Outtest(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1118, 0x00008000, 15, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc02367Outtest() not defined for this board version");
       };
    };
    unsigned int GetAdc02367OuttestLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -618,7 +649,7 @@ public:
             if(BitOfs) *BitOfs = 15;
             return 0x1118;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02367OuttestLoc() not defined for this board version");
       };
    };
 
@@ -630,17 +661,17 @@ public:
          case 9:
             return BitExtractControl(0x1118, 0x40000000, 30);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02367Rand() not defined for this board version");
       };
    };
-   unsigned int SetAdc02367Rand(unsigned int value)
+   void SetAdc02367Rand(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1118, 0x40000000, 30, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc02367Rand() not defined for this board version");
       };
    };
    unsigned int GetAdc02367RandLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -652,7 +683,7 @@ public:
             if(BitOfs) *BitOfs = 30;
             return 0x1118;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02367RandLoc() not defined for this board version");
       };
    };
 
@@ -664,17 +695,17 @@ public:
          case 9:
             return BitExtractControl(0x1118, 0x10000000, 28);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02367Sleep() not defined for this board version");
       };
    };
-   unsigned int SetAdc02367Sleep(unsigned int value)
+   void SetAdc02367Sleep(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1118, 0x10000000, 28, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc02367Sleep() not defined for this board version");
       };
    };
    unsigned int GetAdc02367SleepLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -686,7 +717,7 @@ public:
             if(BitOfs) *BitOfs = 28;
             return 0x1118;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02367SleepLoc() not defined for this board version");
       };
    };
 
@@ -698,17 +729,17 @@ public:
          case 9:
             return BitExtractControl(0x1118, 0x00100000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02367Termon() not defined for this board version");
       };
    };
-   unsigned int SetAdc02367Termon(unsigned int value)
+   void SetAdc02367Termon(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1118, 0x00100000, 20, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc02367Termon() not defined for this board version");
       };
    };
    unsigned int GetAdc02367TermonLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -720,7 +751,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x1118;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02367TermonLoc() not defined for this board version");
       };
    };
 
@@ -732,17 +763,17 @@ public:
          case 9:
             return BitExtractControl(0x1118, 0x00003FFC, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02367Tp() not defined for this board version");
       };
    };
-   unsigned int SetAdc02367Tp(unsigned int value)
+   void SetAdc02367Tp(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1118, 0x00003FFC, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc02367Tp() not defined for this board version");
       };
    };
    unsigned int GetAdc02367TpLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -754,7 +785,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1118;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02367TpLoc() not defined for this board version");
       };
    };
 
@@ -766,17 +797,17 @@ public:
          case 9:
             return BitExtractControl(0x1118, 0x00000003, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02367TpLsbs() not defined for this board version");
       };
    };
-   unsigned int SetAdc02367TpLsbs(unsigned int value)
+   void SetAdc02367TpLsbs(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1118, 0x00000003, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc02367TpLsbs() not defined for this board version");
       };
    };
    unsigned int GetAdc02367TpLsbsLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -788,7 +819,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1118;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02367TpLsbsLoc() not defined for this board version");
       };
    };
 
@@ -800,17 +831,17 @@ public:
          case 9:
             return BitExtractControl(0x1118, 0x20000000, 29);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02367Twoscomp() not defined for this board version");
       };
    };
-   unsigned int SetAdc02367Twoscomp(unsigned int value)
+   void SetAdc02367Twoscomp(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1118, 0x20000000, 29, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc02367Twoscomp() not defined for this board version");
       };
    };
    unsigned int GetAdc02367TwoscompLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -822,7 +853,7 @@ public:
             if(BitOfs) *BitOfs = 29;
             return 0x1118;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02367TwoscompLoc() not defined for this board version");
       };
    };
 
@@ -834,17 +865,17 @@ public:
          case 9:
             return BitExtractControl(0x1118, 0x01000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02NapMode() not defined for this board version");
       };
    };
-   unsigned int SetAdc02NapMode(unsigned int value)
+   void SetAdc02NapMode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1118, 0x01000000, 24, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc02NapMode() not defined for this board version");
       };
    };
    unsigned int GetAdc02NapModeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -856,7 +887,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x1118;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc02NapModeLoc() not defined for this board version");
       };
    };
 
@@ -868,17 +899,17 @@ public:
          case 9:
             return BitExtractControl(0x1118, 0x02000000, 25);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc03NapMode() not defined for this board version");
       };
    };
-   unsigned int SetAdc03NapMode(unsigned int value)
+   void SetAdc03NapMode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1118, 0x02000000, 25, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc03NapMode() not defined for this board version");
       };
    };
    unsigned int GetAdc03NapModeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -890,7 +921,7 @@ public:
             if(BitOfs) *BitOfs = 25;
             return 0x1118;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc03NapModeLoc() not defined for this board version");
       };
    };
 
@@ -902,17 +933,17 @@ public:
          case 9:
             return BitExtractControl(0x1114, 0x02000000, 25);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc04NapMode() not defined for this board version");
       };
    };
-   unsigned int SetAdc04NapMode(unsigned int value)
+   void SetAdc04NapMode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1114, 0x02000000, 25, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc04NapMode() not defined for this board version");
       };
    };
    unsigned int GetAdc04NapModeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -924,7 +955,7 @@ public:
             if(BitOfs) *BitOfs = 25;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc04NapModeLoc() not defined for this board version");
       };
    };
 
@@ -936,17 +967,17 @@ public:
          case 9:
             return BitExtractControl(0x1114, 0x04000000, 26);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc05NapMode() not defined for this board version");
       };
    };
-   unsigned int SetAdc05NapMode(unsigned int value)
+   void SetAdc05NapMode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1114, 0x04000000, 26, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc05NapMode() not defined for this board version");
       };
    };
    unsigned int GetAdc05NapModeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -958,7 +989,7 @@ public:
             if(BitOfs) *BitOfs = 26;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc05NapModeLoc() not defined for this board version");
       };
    };
 
@@ -970,17 +1001,17 @@ public:
          case 9:
             return BitExtractControl(0x1118, 0x04000000, 26);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc06NapMode() not defined for this board version");
       };
    };
-   unsigned int SetAdc06NapMode(unsigned int value)
+   void SetAdc06NapMode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1118, 0x04000000, 26, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc06NapMode() not defined for this board version");
       };
    };
    unsigned int GetAdc06NapModeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -992,7 +1023,7 @@ public:
             if(BitOfs) *BitOfs = 26;
             return 0x1118;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc06NapModeLoc() not defined for this board version");
       };
    };
 
@@ -1004,17 +1035,17 @@ public:
          case 9:
             return BitExtractControl(0x1118, 0x08000000, 27);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc07NapMode() not defined for this board version");
       };
    };
-   unsigned int SetAdc07NapMode(unsigned int value)
+   void SetAdc07NapMode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1118, 0x08000000, 27, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc07NapMode() not defined for this board version");
       };
    };
    unsigned int GetAdc07NapModeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1026,7 +1057,7 @@ public:
             if(BitOfs) *BitOfs = 27;
             return 0x1118;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc07NapModeLoc() not defined for this board version");
       };
    };
 
@@ -1038,17 +1069,17 @@ public:
          case 9:
             return BitExtractControl(0x1114, 0x08000000, 27);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc08NapMode() not defined for this board version");
       };
    };
-   unsigned int SetAdc08NapMode(unsigned int value)
+   void SetAdc08NapMode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1114, 0x08000000, 27, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc08NapMode() not defined for this board version");
       };
    };
    unsigned int GetAdc08NapModeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1060,7 +1091,7 @@ public:
             if(BitOfs) *BitOfs = 27;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc08NapModeLoc() not defined for this board version");
       };
    };
 
@@ -1072,7 +1103,7 @@ public:
          case 8:
             return BitExtractStatus(0x0044, 0xFF000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc0ChipId() not defined for this board version");
       };
    };
    unsigned int GetAdc0ChipIdLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1084,7 +1115,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x0044;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc0ChipIdLoc() not defined for this board version");
       };
    };
 
@@ -1096,7 +1127,7 @@ public:
          case 8:
             return BitExtractStatus(0x0044, 0x00700000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc0Speed() not defined for this board version");
       };
    };
    unsigned int GetAdc0SpeedLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1108,7 +1139,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x0044;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc0SpeedLoc() not defined for this board version");
       };
    };
 
@@ -1120,17 +1151,17 @@ public:
          case 9:
             return BitExtractControl(0x111C, 0x80000000, 31);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11458Dcsoff() not defined for this board version");
       };
    };
-   unsigned int SetAdc11458Dcsoff(unsigned int value)
+   void SetAdc11458Dcsoff(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x111C, 0x80000000, 31, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc11458Dcsoff() not defined for this board version");
       };
    };
    unsigned int GetAdc11458DcsoffLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1142,7 +1173,7 @@ public:
             if(BitOfs) *BitOfs = 31;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11458DcsoffLoc() not defined for this board version");
       };
    };
 
@@ -1154,17 +1185,17 @@ public:
          case 9:
             return BitExtractControl(0x111C, 0x00E00000, 21);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11458Ilvds() not defined for this board version");
       };
    };
-   unsigned int SetAdc11458Ilvds(unsigned int value)
+   void SetAdc11458Ilvds(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x111C, 0x00E00000, 21, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc11458Ilvds() not defined for this board version");
       };
    };
    unsigned int GetAdc11458IlvdsLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1176,7 +1207,7 @@ public:
             if(BitOfs) *BitOfs = 21;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11458IlvdsLoc() not defined for this board version");
       };
    };
 
@@ -1188,17 +1219,17 @@ public:
          case 9:
             return BitExtractControl(0x111C, 0x00070000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11458Outmode() not defined for this board version");
       };
    };
-   unsigned int SetAdc11458Outmode(unsigned int value)
+   void SetAdc11458Outmode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x111C, 0x00070000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc11458Outmode() not defined for this board version");
       };
    };
    unsigned int GetAdc11458OutmodeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1210,7 +1241,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11458OutmodeLoc() not defined for this board version");
       };
    };
 
@@ -1222,17 +1253,17 @@ public:
          case 9:
             return BitExtractControl(0x111C, 0x00080000, 19);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11458Outoff() not defined for this board version");
       };
    };
-   unsigned int SetAdc11458Outoff(unsigned int value)
+   void SetAdc11458Outoff(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x111C, 0x00080000, 19, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc11458Outoff() not defined for this board version");
       };
    };
    unsigned int GetAdc11458OutoffLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1244,7 +1275,7 @@ public:
             if(BitOfs) *BitOfs = 19;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11458OutoffLoc() not defined for this board version");
       };
    };
 
@@ -1256,17 +1287,17 @@ public:
          case 9:
             return BitExtractControl(0x111C, 0x00008000, 15);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11458Outtest() not defined for this board version");
       };
    };
-   unsigned int SetAdc11458Outtest(unsigned int value)
+   void SetAdc11458Outtest(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x111C, 0x00008000, 15, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc11458Outtest() not defined for this board version");
       };
    };
    unsigned int GetAdc11458OuttestLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1278,7 +1309,7 @@ public:
             if(BitOfs) *BitOfs = 15;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11458OuttestLoc() not defined for this board version");
       };
    };
 
@@ -1290,17 +1321,17 @@ public:
          case 9:
             return BitExtractControl(0x111C, 0x40000000, 30);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11458Rand() not defined for this board version");
       };
    };
-   unsigned int SetAdc11458Rand(unsigned int value)
+   void SetAdc11458Rand(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x111C, 0x40000000, 30, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc11458Rand() not defined for this board version");
       };
    };
    unsigned int GetAdc11458RandLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1312,7 +1343,7 @@ public:
             if(BitOfs) *BitOfs = 30;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11458RandLoc() not defined for this board version");
       };
    };
 
@@ -1324,17 +1355,17 @@ public:
          case 9:
             return BitExtractControl(0x111C, 0x10000000, 28);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11458Sleep() not defined for this board version");
       };
    };
-   unsigned int SetAdc11458Sleep(unsigned int value)
+   void SetAdc11458Sleep(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x111C, 0x10000000, 28, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc11458Sleep() not defined for this board version");
       };
    };
    unsigned int GetAdc11458SleepLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1346,7 +1377,7 @@ public:
             if(BitOfs) *BitOfs = 28;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11458SleepLoc() not defined for this board version");
       };
    };
 
@@ -1358,17 +1389,17 @@ public:
          case 9:
             return BitExtractControl(0x111C, 0x00100000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11458Termon() not defined for this board version");
       };
    };
-   unsigned int SetAdc11458Termon(unsigned int value)
+   void SetAdc11458Termon(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x111C, 0x00100000, 20, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc11458Termon() not defined for this board version");
       };
    };
    unsigned int GetAdc11458TermonLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1380,7 +1411,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11458TermonLoc() not defined for this board version");
       };
    };
 
@@ -1392,17 +1423,17 @@ public:
          case 9:
             return BitExtractControl(0x111C, 0x00003FFC, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11458Tp() not defined for this board version");
       };
    };
-   unsigned int SetAdc11458Tp(unsigned int value)
+   void SetAdc11458Tp(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x111C, 0x00003FFC, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc11458Tp() not defined for this board version");
       };
    };
    unsigned int GetAdc11458TpLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1414,7 +1445,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11458TpLoc() not defined for this board version");
       };
    };
 
@@ -1426,17 +1457,17 @@ public:
          case 9:
             return BitExtractControl(0x111C, 0x00000003, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11458TpLsbs() not defined for this board version");
       };
    };
-   unsigned int SetAdc11458TpLsbs(unsigned int value)
+   void SetAdc11458TpLsbs(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x111C, 0x00000003, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc11458TpLsbs() not defined for this board version");
       };
    };
    unsigned int GetAdc11458TpLsbsLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1448,7 +1479,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11458TpLsbsLoc() not defined for this board version");
       };
    };
 
@@ -1460,17 +1491,17 @@ public:
          case 9:
             return BitExtractControl(0x111C, 0x20000000, 29);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11458Twoscomp() not defined for this board version");
       };
    };
-   unsigned int SetAdc11458Twoscomp(unsigned int value)
+   void SetAdc11458Twoscomp(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x111C, 0x20000000, 29, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc11458Twoscomp() not defined for this board version");
       };
    };
    unsigned int GetAdc11458TwoscompLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1482,7 +1513,7 @@ public:
             if(BitOfs) *BitOfs = 29;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11458TwoscompLoc() not defined for this board version");
       };
    };
 
@@ -1494,17 +1525,17 @@ public:
          case 9:
             return BitExtractControl(0x111C, 0x01000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11NapMode() not defined for this board version");
       };
    };
-   unsigned int SetAdc11NapMode(unsigned int value)
+   void SetAdc11NapMode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x111C, 0x01000000, 24, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc11NapMode() not defined for this board version");
       };
    };
    unsigned int GetAdc11NapModeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1516,7 +1547,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc11NapModeLoc() not defined for this board version");
       };
    };
 
@@ -1528,17 +1559,17 @@ public:
          case 9:
             return BitExtractControl(0x1120, 0x80000000, 31);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12367Dcsoff() not defined for this board version");
       };
    };
-   unsigned int SetAdc12367Dcsoff(unsigned int value)
+   void SetAdc12367Dcsoff(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1120, 0x80000000, 31, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc12367Dcsoff() not defined for this board version");
       };
    };
    unsigned int GetAdc12367DcsoffLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1550,7 +1581,7 @@ public:
             if(BitOfs) *BitOfs = 31;
             return 0x1120;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12367DcsoffLoc() not defined for this board version");
       };
    };
 
@@ -1562,17 +1593,17 @@ public:
          case 9:
             return BitExtractControl(0x1120, 0x00E00000, 21);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12367Ilvds() not defined for this board version");
       };
    };
-   unsigned int SetAdc12367Ilvds(unsigned int value)
+   void SetAdc12367Ilvds(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1120, 0x00E00000, 21, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc12367Ilvds() not defined for this board version");
       };
    };
    unsigned int GetAdc12367IlvdsLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1584,7 +1615,7 @@ public:
             if(BitOfs) *BitOfs = 21;
             return 0x1120;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12367IlvdsLoc() not defined for this board version");
       };
    };
 
@@ -1596,17 +1627,17 @@ public:
          case 9:
             return BitExtractControl(0x1120, 0x00070000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12367Outmode() not defined for this board version");
       };
    };
-   unsigned int SetAdc12367Outmode(unsigned int value)
+   void SetAdc12367Outmode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1120, 0x00070000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc12367Outmode() not defined for this board version");
       };
    };
    unsigned int GetAdc12367OutmodeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1618,7 +1649,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1120;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12367OutmodeLoc() not defined for this board version");
       };
    };
 
@@ -1630,17 +1661,17 @@ public:
          case 9:
             return BitExtractControl(0x1120, 0x00080000, 19);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12367Outoff() not defined for this board version");
       };
    };
-   unsigned int SetAdc12367Outoff(unsigned int value)
+   void SetAdc12367Outoff(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1120, 0x00080000, 19, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc12367Outoff() not defined for this board version");
       };
    };
    unsigned int GetAdc12367OutoffLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1652,7 +1683,7 @@ public:
             if(BitOfs) *BitOfs = 19;
             return 0x1120;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12367OutoffLoc() not defined for this board version");
       };
    };
 
@@ -1664,17 +1695,17 @@ public:
          case 9:
             return BitExtractControl(0x1120, 0x00008000, 15);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12367Outtest() not defined for this board version");
       };
    };
-   unsigned int SetAdc12367Outtest(unsigned int value)
+   void SetAdc12367Outtest(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1120, 0x00008000, 15, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc12367Outtest() not defined for this board version");
       };
    };
    unsigned int GetAdc12367OuttestLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1686,7 +1717,7 @@ public:
             if(BitOfs) *BitOfs = 15;
             return 0x1120;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12367OuttestLoc() not defined for this board version");
       };
    };
 
@@ -1698,17 +1729,17 @@ public:
          case 9:
             return BitExtractControl(0x1120, 0x40000000, 30);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12367Rand() not defined for this board version");
       };
    };
-   unsigned int SetAdc12367Rand(unsigned int value)
+   void SetAdc12367Rand(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1120, 0x40000000, 30, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc12367Rand() not defined for this board version");
       };
    };
    unsigned int GetAdc12367RandLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1720,7 +1751,7 @@ public:
             if(BitOfs) *BitOfs = 30;
             return 0x1120;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12367RandLoc() not defined for this board version");
       };
    };
 
@@ -1732,17 +1763,17 @@ public:
          case 9:
             return BitExtractControl(0x1120, 0x10000000, 28);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12367Sleep() not defined for this board version");
       };
    };
-   unsigned int SetAdc12367Sleep(unsigned int value)
+   void SetAdc12367Sleep(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1120, 0x10000000, 28, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc12367Sleep() not defined for this board version");
       };
    };
    unsigned int GetAdc12367SleepLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1754,7 +1785,7 @@ public:
             if(BitOfs) *BitOfs = 28;
             return 0x1120;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12367SleepLoc() not defined for this board version");
       };
    };
 
@@ -1766,17 +1797,17 @@ public:
          case 9:
             return BitExtractControl(0x1120, 0x00100000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12367Termon() not defined for this board version");
       };
    };
-   unsigned int SetAdc12367Termon(unsigned int value)
+   void SetAdc12367Termon(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1120, 0x00100000, 20, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc12367Termon() not defined for this board version");
       };
    };
    unsigned int GetAdc12367TermonLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1788,7 +1819,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x1120;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12367TermonLoc() not defined for this board version");
       };
    };
 
@@ -1800,17 +1831,17 @@ public:
          case 9:
             return BitExtractControl(0x1120, 0x00003FFC, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12367Tp() not defined for this board version");
       };
    };
-   unsigned int SetAdc12367Tp(unsigned int value)
+   void SetAdc12367Tp(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1120, 0x00003FFC, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc12367Tp() not defined for this board version");
       };
    };
    unsigned int GetAdc12367TpLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1822,7 +1853,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1120;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12367TpLoc() not defined for this board version");
       };
    };
 
@@ -1834,17 +1865,17 @@ public:
          case 9:
             return BitExtractControl(0x1120, 0x00000003, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12367TpLsbs() not defined for this board version");
       };
    };
-   unsigned int SetAdc12367TpLsbs(unsigned int value)
+   void SetAdc12367TpLsbs(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1120, 0x00000003, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc12367TpLsbs() not defined for this board version");
       };
    };
    unsigned int GetAdc12367TpLsbsLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1856,7 +1887,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1120;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12367TpLsbsLoc() not defined for this board version");
       };
    };
 
@@ -1868,17 +1899,17 @@ public:
          case 9:
             return BitExtractControl(0x1120, 0x20000000, 29);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12367Twoscomp() not defined for this board version");
       };
    };
-   unsigned int SetAdc12367Twoscomp(unsigned int value)
+   void SetAdc12367Twoscomp(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1120, 0x20000000, 29, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc12367Twoscomp() not defined for this board version");
       };
    };
    unsigned int GetAdc12367TwoscompLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1890,7 +1921,7 @@ public:
             if(BitOfs) *BitOfs = 29;
             return 0x1120;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12367TwoscompLoc() not defined for this board version");
       };
    };
 
@@ -1902,17 +1933,17 @@ public:
          case 9:
             return BitExtractControl(0x1120, 0x01000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12NapMode() not defined for this board version");
       };
    };
-   unsigned int SetAdc12NapMode(unsigned int value)
+   void SetAdc12NapMode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1120, 0x01000000, 24, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc12NapMode() not defined for this board version");
       };
    };
    unsigned int GetAdc12NapModeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1924,7 +1955,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x1120;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc12NapModeLoc() not defined for this board version");
       };
    };
 
@@ -1936,17 +1967,17 @@ public:
          case 9:
             return BitExtractControl(0x1120, 0x02000000, 25);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc13NapMode() not defined for this board version");
       };
    };
-   unsigned int SetAdc13NapMode(unsigned int value)
+   void SetAdc13NapMode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1120, 0x02000000, 25, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc13NapMode() not defined for this board version");
       };
    };
    unsigned int GetAdc13NapModeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1958,7 +1989,7 @@ public:
             if(BitOfs) *BitOfs = 25;
             return 0x1120;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc13NapModeLoc() not defined for this board version");
       };
    };
 
@@ -1970,17 +2001,17 @@ public:
          case 9:
             return BitExtractControl(0x111C, 0x02000000, 25);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc14NapMode() not defined for this board version");
       };
    };
-   unsigned int SetAdc14NapMode(unsigned int value)
+   void SetAdc14NapMode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x111C, 0x02000000, 25, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc14NapMode() not defined for this board version");
       };
    };
    unsigned int GetAdc14NapModeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -1992,7 +2023,7 @@ public:
             if(BitOfs) *BitOfs = 25;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc14NapModeLoc() not defined for this board version");
       };
    };
 
@@ -2004,17 +2035,17 @@ public:
          case 9:
             return BitExtractControl(0x111C, 0x04000000, 26);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc15NapMode() not defined for this board version");
       };
    };
-   unsigned int SetAdc15NapMode(unsigned int value)
+   void SetAdc15NapMode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x111C, 0x04000000, 26, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc15NapMode() not defined for this board version");
       };
    };
    unsigned int GetAdc15NapModeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2026,7 +2057,7 @@ public:
             if(BitOfs) *BitOfs = 26;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc15NapModeLoc() not defined for this board version");
       };
    };
 
@@ -2038,17 +2069,17 @@ public:
          case 9:
             return BitExtractControl(0x1120, 0x04000000, 26);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc16NapMode() not defined for this board version");
       };
    };
-   unsigned int SetAdc16NapMode(unsigned int value)
+   void SetAdc16NapMode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1120, 0x04000000, 26, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc16NapMode() not defined for this board version");
       };
    };
    unsigned int GetAdc16NapModeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2060,7 +2091,7 @@ public:
             if(BitOfs) *BitOfs = 26;
             return 0x1120;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc16NapModeLoc() not defined for this board version");
       };
    };
 
@@ -2072,17 +2103,17 @@ public:
          case 9:
             return BitExtractControl(0x1120, 0x08000000, 27);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc17NapMode() not defined for this board version");
       };
    };
-   unsigned int SetAdc17NapMode(unsigned int value)
+   void SetAdc17NapMode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1120, 0x08000000, 27, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc17NapMode() not defined for this board version");
       };
    };
    unsigned int GetAdc17NapModeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2094,7 +2125,7 @@ public:
             if(BitOfs) *BitOfs = 27;
             return 0x1120;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc17NapModeLoc() not defined for this board version");
       };
    };
 
@@ -2106,17 +2137,17 @@ public:
          case 9:
             return BitExtractControl(0x111C, 0x08000000, 27);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc18NapMode() not defined for this board version");
       };
    };
-   unsigned int SetAdc18NapMode(unsigned int value)
+   void SetAdc18NapMode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x111C, 0x08000000, 27, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdc18NapMode() not defined for this board version");
       };
    };
    unsigned int GetAdc18NapModeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2128,7 +2159,7 @@ public:
             if(BitOfs) *BitOfs = 27;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc18NapModeLoc() not defined for this board version");
       };
    };
 
@@ -2140,7 +2171,7 @@ public:
          case 8:
             return BitExtractStatus(0x0044, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc1ChipId() not defined for this board version");
       };
    };
    unsigned int GetAdc1ChipIdLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2152,7 +2183,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x0044;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc1ChipIdLoc() not defined for this board version");
       };
    };
 
@@ -2164,7 +2195,7 @@ public:
          case 8:
             return BitExtractStatus(0x0044, 0x00000070, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc1Speed() not defined for this board version");
       };
    };
    unsigned int GetAdc1SpeedLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2176,7 +2207,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x0044;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdc1SpeedLoc() not defined for this board version");
       };
    };
 
@@ -2188,17 +2219,17 @@ public:
          case 8:
             return BitExtractControl(0x1114, 0x08000000, 27);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcCfg16BitAddrLsb() not defined for this board version");
       };
    };
-   unsigned int SetAdcCfg16BitAddrLsb(unsigned int value)
+   void SetAdcCfg16BitAddrLsb(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1114, 0x08000000, 27, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcCfg16BitAddrLsb() not defined for this board version");
       };
    };
    unsigned int GetAdcCfg16BitAddrLsbLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2210,7 +2241,7 @@ public:
             if(BitOfs) *BitOfs = 27;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcCfg16BitAddrLsbLoc() not defined for this board version");
       };
    };
 
@@ -2222,17 +2253,17 @@ public:
          case 8:
             return BitExtractControl(0x1114, 0x10000000, 28);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcCfg16BitAddrMsb() not defined for this board version");
       };
    };
-   unsigned int SetAdcCfg16BitAddrMsb(unsigned int value)
+   void SetAdcCfg16BitAddrMsb(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1114, 0x10000000, 28, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcCfg16BitAddrMsb() not defined for this board version");
       };
    };
    unsigned int GetAdcCfg16BitAddrMsbLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2244,7 +2275,7 @@ public:
             if(BitOfs) *BitOfs = 28;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcCfg16BitAddrMsbLoc() not defined for this board version");
       };
    };
 
@@ -2256,17 +2287,17 @@ public:
          case 8:
             return BitExtractControl(0x1114, 0x02000000, 25);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcCfgLsbFirstLsb() not defined for this board version");
       };
    };
-   unsigned int SetAdcCfgLsbFirstLsb(unsigned int value)
+   void SetAdcCfgLsbFirstLsb(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1114, 0x02000000, 25, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcCfgLsbFirstLsb() not defined for this board version");
       };
    };
    unsigned int GetAdcCfgLsbFirstLsbLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2278,7 +2309,7 @@ public:
             if(BitOfs) *BitOfs = 25;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcCfgLsbFirstLsbLoc() not defined for this board version");
       };
    };
 
@@ -2290,17 +2321,17 @@ public:
          case 8:
             return BitExtractControl(0x1114, 0x40000000, 30);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcCfgLsbFirstMsb() not defined for this board version");
       };
    };
-   unsigned int SetAdcCfgLsbFirstMsb(unsigned int value)
+   void SetAdcCfgLsbFirstMsb(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1114, 0x40000000, 30, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcCfgLsbFirstMsb() not defined for this board version");
       };
    };
    unsigned int GetAdcCfgLsbFirstMsbLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2312,7 +2343,7 @@ public:
             if(BitOfs) *BitOfs = 30;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcCfgLsbFirstMsbLoc() not defined for this board version");
       };
    };
 
@@ -2324,17 +2355,17 @@ public:
          case 8:
             return BitExtractControl(0x1114, 0x01000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcCfgSdoActiveLsb() not defined for this board version");
       };
    };
-   unsigned int SetAdcCfgSdoActiveLsb(unsigned int value)
+   void SetAdcCfgSdoActiveLsb(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1114, 0x01000000, 24, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcCfgSdoActiveLsb() not defined for this board version");
       };
    };
    unsigned int GetAdcCfgSdoActiveLsbLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2346,7 +2377,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcCfgSdoActiveLsbLoc() not defined for this board version");
       };
    };
 
@@ -2358,17 +2389,17 @@ public:
          case 8:
             return BitExtractControl(0x1114, 0x80000000, 31);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcCfgSdoActiveMsb() not defined for this board version");
       };
    };
-   unsigned int SetAdcCfgSdoActiveMsb(unsigned int value)
+   void SetAdcCfgSdoActiveMsb(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1114, 0x80000000, 31, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcCfgSdoActiveMsb() not defined for this board version");
       };
    };
    unsigned int GetAdcCfgSdoActiveMsbLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2380,7 +2411,7 @@ public:
             if(BitOfs) *BitOfs = 31;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcCfgSdoActiveMsbLoc() not defined for this board version");
       };
    };
 
@@ -2392,17 +2423,17 @@ public:
          case 8:
             return BitExtractControl(0x1114, 0x04000000, 26);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcCfgSoftResetLsb() not defined for this board version");
       };
    };
-   unsigned int SetAdcCfgSoftResetLsb(unsigned int value)
+   void SetAdcCfgSoftResetLsb(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1114, 0x04000000, 26, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcCfgSoftResetLsb() not defined for this board version");
       };
    };
    unsigned int GetAdcCfgSoftResetLsbLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2414,7 +2445,7 @@ public:
             if(BitOfs) *BitOfs = 26;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcCfgSoftResetLsbLoc() not defined for this board version");
       };
    };
 
@@ -2426,17 +2457,17 @@ public:
          case 8:
             return BitExtractControl(0x1114, 0x20000000, 29);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcCfgSoftResetMsb() not defined for this board version");
       };
    };
-   unsigned int SetAdcCfgSoftResetMsb(unsigned int value)
+   void SetAdcCfgSoftResetMsb(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1114, 0x20000000, 29, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcCfgSoftResetMsb() not defined for this board version");
       };
    };
    unsigned int GetAdcCfgSoftResetMsbLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2448,7 +2479,7 @@ public:
             if(BitOfs) *BitOfs = 29;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcCfgSoftResetMsbLoc() not defined for this board version");
       };
    };
 
@@ -2461,10 +2492,10 @@ public:
          case 9:
             return BitExtractControl(0x1020, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcChTxEn() not defined for this board version");
       };
    };
-   unsigned int SetAdcChTxEn(unsigned int value)
+   void SetAdcChTxEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -2472,7 +2503,7 @@ public:
          case 9:
             return SetRegMask(0x1020, 0x0000FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcChTxEn() not defined for this board version");
       };
    };
    unsigned int GetAdcChTxEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2485,7 +2516,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1020;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcChTxEnLoc() not defined for this board version");
       };
    };
 
@@ -2497,17 +2528,17 @@ public:
          case 8:
             return BitExtractControl(0x1118, 0x00000700, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcClkDivRatio() not defined for this board version");
       };
    };
-   unsigned int SetAdcClkDivRatio(unsigned int value)
+   void SetAdcClkDivRatio(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1118, 0x00000700, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcClkDivRatio() not defined for this board version");
       };
    };
    unsigned int GetAdcClkDivRatioLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2519,7 +2550,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1118;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcClkDivRatioLoc() not defined for this board version");
       };
    };
 
@@ -2531,17 +2562,17 @@ public:
          case 8:
             return BitExtractControl(0x1118, 0x00010000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcClkDutyCycStab() not defined for this board version");
       };
    };
-   unsigned int SetAdcClkDutyCycStab(unsigned int value)
+   void SetAdcClkDutyCycStab(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1118, 0x00010000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcClkDutyCycStab() not defined for this board version");
       };
    };
    unsigned int GetAdcClkDutyCycStabLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2553,7 +2584,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1118;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcClkDutyCycStabLoc() not defined for this board version");
       };
    };
 
@@ -2565,17 +2596,17 @@ public:
          case 8:
             return BitExtractControl(0x1114, 0x00002000, 13);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcDi1CChnDco() not defined for this board version");
       };
    };
-   unsigned int SetAdcDi1CChnDco(unsigned int value)
+   void SetAdcDi1CChnDco(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1114, 0x00002000, 13, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcDi1CChnDco() not defined for this board version");
       };
    };
    unsigned int GetAdcDi1CChnDcoLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2587,7 +2618,7 @@ public:
             if(BitOfs) *BitOfs = 13;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcDi1CChnDcoLoc() not defined for this board version");
       };
    };
 
@@ -2599,17 +2630,17 @@ public:
          case 8:
             return BitExtractControl(0x1114, 0x00001000, 12);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcDi1CChnFco() not defined for this board version");
       };
    };
-   unsigned int SetAdcDi1CChnFco(unsigned int value)
+   void SetAdcDi1CChnFco(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1114, 0x00001000, 12, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcDi1CChnFco() not defined for this board version");
       };
    };
    unsigned int GetAdcDi1CChnFcoLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2621,7 +2652,7 @@ public:
             if(BitOfs) *BitOfs = 12;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcDi1CChnFcoLoc() not defined for this board version");
       };
    };
 
@@ -2633,17 +2664,17 @@ public:
          case 8:
             return BitExtractControl(0x1114, 0x00000100, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcDi1DChnA() not defined for this board version");
       };
    };
-   unsigned int SetAdcDi1DChnA(unsigned int value)
+   void SetAdcDi1DChnA(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1114, 0x00000100, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcDi1DChnA() not defined for this board version");
       };
    };
    unsigned int GetAdcDi1DChnALoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2655,7 +2686,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcDi1DChnALoc() not defined for this board version");
       };
    };
 
@@ -2667,17 +2698,17 @@ public:
          case 8:
             return BitExtractControl(0x1114, 0x00000200, 9);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcDi1DChnB() not defined for this board version");
       };
    };
-   unsigned int SetAdcDi1DChnB(unsigned int value)
+   void SetAdcDi1DChnB(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1114, 0x00000200, 9, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcDi1DChnB() not defined for this board version");
       };
    };
    unsigned int GetAdcDi1DChnBLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2689,7 +2720,7 @@ public:
             if(BitOfs) *BitOfs = 9;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcDi1DChnBLoc() not defined for this board version");
       };
    };
 
@@ -2701,17 +2732,17 @@ public:
          case 8:
             return BitExtractControl(0x1114, 0x00000400, 10);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcDi1DChnC() not defined for this board version");
       };
    };
-   unsigned int SetAdcDi1DChnC(unsigned int value)
+   void SetAdcDi1DChnC(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1114, 0x00000400, 10, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcDi1DChnC() not defined for this board version");
       };
    };
    unsigned int GetAdcDi1DChnCLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2723,7 +2754,7 @@ public:
             if(BitOfs) *BitOfs = 10;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcDi1DChnCLoc() not defined for this board version");
       };
    };
 
@@ -2735,17 +2766,17 @@ public:
          case 8:
             return BitExtractControl(0x1114, 0x00000800, 11);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcDi1DChnD() not defined for this board version");
       };
    };
-   unsigned int SetAdcDi1DChnD(unsigned int value)
+   void SetAdcDi1DChnD(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1114, 0x00000800, 11, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcDi1DChnD() not defined for this board version");
       };
    };
    unsigned int GetAdcDi1DChnDLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2757,7 +2788,7 @@ public:
             if(BitOfs) *BitOfs = 11;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcDi1DChnDLoc() not defined for this board version");
       };
    };
 
@@ -2769,17 +2800,17 @@ public:
          case 8:
             return BitExtractControl(0x1114, 0x00010000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcDi2DChnE() not defined for this board version");
       };
    };
-   unsigned int SetAdcDi2DChnE(unsigned int value)
+   void SetAdcDi2DChnE(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1114, 0x00010000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcDi2DChnE() not defined for this board version");
       };
    };
    unsigned int GetAdcDi2DChnELoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2791,7 +2822,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcDi2DChnELoc() not defined for this board version");
       };
    };
 
@@ -2803,17 +2834,17 @@ public:
          case 8:
             return BitExtractControl(0x1114, 0x00020000, 17);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcDi2DChnF() not defined for this board version");
       };
    };
-   unsigned int SetAdcDi2DChnF(unsigned int value)
+   void SetAdcDi2DChnF(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1114, 0x00020000, 17, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcDi2DChnF() not defined for this board version");
       };
    };
    unsigned int GetAdcDi2DChnFLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2825,7 +2856,7 @@ public:
             if(BitOfs) *BitOfs = 17;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcDi2DChnFLoc() not defined for this board version");
       };
    };
 
@@ -2837,17 +2868,17 @@ public:
          case 8:
             return BitExtractControl(0x1114, 0x00040000, 18);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcDi2DChnG() not defined for this board version");
       };
    };
-   unsigned int SetAdcDi2DChnG(unsigned int value)
+   void SetAdcDi2DChnG(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1114, 0x00040000, 18, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcDi2DChnG() not defined for this board version");
       };
    };
    unsigned int GetAdcDi2DChnGLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2859,7 +2890,7 @@ public:
             if(BitOfs) *BitOfs = 18;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcDi2DChnGLoc() not defined for this board version");
       };
    };
 
@@ -2871,17 +2902,17 @@ public:
          case 8:
             return BitExtractControl(0x1114, 0x00080000, 19);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcDi2DChnH() not defined for this board version");
       };
    };
-   unsigned int SetAdcDi2DChnH(unsigned int value)
+   void SetAdcDi2DChnH(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1114, 0x00080000, 19, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcDi2DChnH() not defined for this board version");
       };
    };
    unsigned int GetAdcDi2DChnHLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2893,7 +2924,7 @@ public:
             if(BitOfs) *BitOfs = 19;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcDi2DChnHLoc() not defined for this board version");
       };
    };
 
@@ -2905,17 +2936,17 @@ public:
          case 8:
             return BitExtractControl(0x1118, 0x00000010, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcEnhChopMode() not defined for this board version");
       };
    };
-   unsigned int SetAdcEnhChopMode(unsigned int value)
+   void SetAdcEnhChopMode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1118, 0x00000010, 4, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcEnhChopMode() not defined for this board version");
       };
    };
    unsigned int GetAdcEnhChopModeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2927,7 +2958,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x1118;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcEnhChopModeLoc() not defined for this board version");
       };
    };
 
@@ -2939,17 +2970,17 @@ public:
          case 8:
             return BitExtractControl(0x112C, 0x00000001, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcEnSync() not defined for this board version");
       };
    };
-   unsigned int SetAdcEnSync(unsigned int value)
+   void SetAdcEnSync(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x112C, 0x00000001, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcEnSync() not defined for this board version");
       };
    };
    unsigned int GetAdcEnSyncLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2961,7 +2992,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x112C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcEnSyncLoc() not defined for this board version");
       };
    };
 
@@ -2974,10 +3005,10 @@ public:
          case 9:
             return BitExtractControl(0x1040, 0x00000020, 5);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcIfRst() not defined for this board version");
       };
    };
-   unsigned int SetAdcIfRst(unsigned int value)
+   void SetAdcIfRst(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -2985,7 +3016,7 @@ public:
          case 9:
             return SetRegMask(0x1040, 0x00000020, 5, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcIfRst() not defined for this board version");
       };
    };
    unsigned int GetAdcIfRstLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -2998,7 +3029,7 @@ public:
             if(BitOfs) *BitOfs = 5;
             return 0x1040;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcIfRstLoc() not defined for this board version");
       };
    };
 
@@ -3010,17 +3041,17 @@ public:
          case 8:
             return BitExtractControl(0x1120, 0x00000007, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcIntVrefAdj() not defined for this board version");
       };
    };
-   unsigned int SetAdcIntVrefAdj(unsigned int value)
+   void SetAdcIntVrefAdj(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1120, 0x00000007, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcIntVrefAdj() not defined for this board version");
       };
    };
    unsigned int GetAdcIntVrefAdjLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3032,7 +3063,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1120;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcIntVrefAdjLoc() not defined for this board version");
       };
    };
 
@@ -3044,17 +3075,17 @@ public:
          case 8:
             return BitExtractControl(0x1120, 0x00010000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOaOutDrive() not defined for this board version");
       };
    };
-   unsigned int SetAdcOaOutDrive(unsigned int value)
+   void SetAdcOaOutDrive(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1120, 0x00010000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOaOutDrive() not defined for this board version");
       };
    };
    unsigned int GetAdcOaOutDriveLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3066,7 +3097,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1120;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOaOutDriveLoc() not defined for this board version");
       };
    };
 
@@ -3078,17 +3109,17 @@ public:
          case 8:
             return BitExtractControl(0x1120, 0x00300000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOaOutDrvTerm() not defined for this board version");
       };
    };
-   unsigned int SetAdcOaOutDrvTerm(unsigned int value)
+   void SetAdcOaOutDrvTerm(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1120, 0x00300000, 20, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOaOutDrvTerm() not defined for this board version");
       };
    };
    unsigned int GetAdcOaOutDrvTermLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3100,7 +3131,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x1120;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOaOutDrvTermLoc() not defined for this board version");
       };
    };
 
@@ -3112,17 +3143,17 @@ public:
          case 8:
             return BitExtractControl(0x111C, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj() not defined for this board version");
       };
    };
-   unsigned int SetAdcOffsAdj(unsigned int value)
+   void SetAdcOffsAdj(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x111C, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOffsAdj() not defined for this board version");
       };
    };
    unsigned int GetAdcOffsAdjLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3134,7 +3165,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdjLoc() not defined for this board version");
       };
    };
 
@@ -3146,17 +3177,17 @@ public:
          case 8:
             return BitExtractControl(0x1130, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj0A() not defined for this board version");
       };
    };
-   unsigned int SetAdcOffsAdj0A(unsigned int value)
+   void SetAdcOffsAdj0A(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1130, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOffsAdj0A() not defined for this board version");
       };
    };
    unsigned int GetAdcOffsAdj0ALoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3168,7 +3199,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1130;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj0ALoc() not defined for this board version");
       };
    };
 
@@ -3180,17 +3211,17 @@ public:
          case 8:
             return BitExtractControl(0x1134, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj0B() not defined for this board version");
       };
    };
-   unsigned int SetAdcOffsAdj0B(unsigned int value)
+   void SetAdcOffsAdj0B(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1134, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOffsAdj0B() not defined for this board version");
       };
    };
    unsigned int GetAdcOffsAdj0BLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3202,7 +3233,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1134;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj0BLoc() not defined for this board version");
       };
    };
 
@@ -3214,17 +3245,17 @@ public:
          case 8:
             return BitExtractControl(0x1138, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj0C() not defined for this board version");
       };
    };
-   unsigned int SetAdcOffsAdj0C(unsigned int value)
+   void SetAdcOffsAdj0C(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1138, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOffsAdj0C() not defined for this board version");
       };
    };
    unsigned int GetAdcOffsAdj0CLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3236,7 +3267,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1138;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj0CLoc() not defined for this board version");
       };
    };
 
@@ -3248,17 +3279,17 @@ public:
          case 8:
             return BitExtractControl(0x113C, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj0D() not defined for this board version");
       };
    };
-   unsigned int SetAdcOffsAdj0D(unsigned int value)
+   void SetAdcOffsAdj0D(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x113C, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOffsAdj0D() not defined for this board version");
       };
    };
    unsigned int GetAdcOffsAdj0DLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3270,7 +3301,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x113C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj0DLoc() not defined for this board version");
       };
    };
 
@@ -3282,17 +3313,17 @@ public:
          case 8:
             return BitExtractControl(0x1150, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj0Dco() not defined for this board version");
       };
    };
-   unsigned int SetAdcOffsAdj0Dco(unsigned int value)
+   void SetAdcOffsAdj0Dco(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1150, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOffsAdj0Dco() not defined for this board version");
       };
    };
    unsigned int GetAdcOffsAdj0DcoLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3304,7 +3335,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1150;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj0DcoLoc() not defined for this board version");
       };
    };
 
@@ -3316,17 +3347,17 @@ public:
          case 8:
             return BitExtractControl(0x1140, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj0E() not defined for this board version");
       };
    };
-   unsigned int SetAdcOffsAdj0E(unsigned int value)
+   void SetAdcOffsAdj0E(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1140, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOffsAdj0E() not defined for this board version");
       };
    };
    unsigned int GetAdcOffsAdj0ELoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3338,7 +3369,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1140;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj0ELoc() not defined for this board version");
       };
    };
 
@@ -3350,17 +3381,17 @@ public:
          case 8:
             return BitExtractControl(0x1144, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj0F() not defined for this board version");
       };
    };
-   unsigned int SetAdcOffsAdj0F(unsigned int value)
+   void SetAdcOffsAdj0F(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1144, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOffsAdj0F() not defined for this board version");
       };
    };
    unsigned int GetAdcOffsAdj0FLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3372,7 +3403,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1144;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj0FLoc() not defined for this board version");
       };
    };
 
@@ -3384,17 +3415,17 @@ public:
          case 8:
             return BitExtractControl(0x1154, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj0Fco() not defined for this board version");
       };
    };
-   unsigned int SetAdcOffsAdj0Fco(unsigned int value)
+   void SetAdcOffsAdj0Fco(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1154, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOffsAdj0Fco() not defined for this board version");
       };
    };
    unsigned int GetAdcOffsAdj0FcoLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3406,7 +3437,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1154;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj0FcoLoc() not defined for this board version");
       };
    };
 
@@ -3418,17 +3449,17 @@ public:
          case 8:
             return BitExtractControl(0x1148, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj0G() not defined for this board version");
       };
    };
-   unsigned int SetAdcOffsAdj0G(unsigned int value)
+   void SetAdcOffsAdj0G(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1148, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOffsAdj0G() not defined for this board version");
       };
    };
    unsigned int GetAdcOffsAdj0GLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3440,7 +3471,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1148;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj0GLoc() not defined for this board version");
       };
    };
 
@@ -3452,17 +3483,17 @@ public:
          case 8:
             return BitExtractControl(0x114C, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj0H() not defined for this board version");
       };
    };
-   unsigned int SetAdcOffsAdj0H(unsigned int value)
+   void SetAdcOffsAdj0H(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x114C, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOffsAdj0H() not defined for this board version");
       };
    };
    unsigned int GetAdcOffsAdj0HLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3474,7 +3505,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x114C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj0HLoc() not defined for this board version");
       };
    };
 
@@ -3486,17 +3517,17 @@ public:
          case 8:
             return BitExtractControl(0x1158, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj1A() not defined for this board version");
       };
    };
-   unsigned int SetAdcOffsAdj1A(unsigned int value)
+   void SetAdcOffsAdj1A(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1158, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOffsAdj1A() not defined for this board version");
       };
    };
    unsigned int GetAdcOffsAdj1ALoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3508,7 +3539,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1158;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj1ALoc() not defined for this board version");
       };
    };
 
@@ -3520,17 +3551,17 @@ public:
          case 8:
             return BitExtractControl(0x115C, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj1B() not defined for this board version");
       };
    };
-   unsigned int SetAdcOffsAdj1B(unsigned int value)
+   void SetAdcOffsAdj1B(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x115C, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOffsAdj1B() not defined for this board version");
       };
    };
    unsigned int GetAdcOffsAdj1BLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3542,7 +3573,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x115C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj1BLoc() not defined for this board version");
       };
    };
 
@@ -3554,17 +3585,17 @@ public:
          case 8:
             return BitExtractControl(0x1160, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj1C() not defined for this board version");
       };
    };
-   unsigned int SetAdcOffsAdj1C(unsigned int value)
+   void SetAdcOffsAdj1C(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1160, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOffsAdj1C() not defined for this board version");
       };
    };
    unsigned int GetAdcOffsAdj1CLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3576,7 +3607,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1160;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj1CLoc() not defined for this board version");
       };
    };
 
@@ -3588,17 +3619,17 @@ public:
          case 8:
             return BitExtractControl(0x1164, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj1D() not defined for this board version");
       };
    };
-   unsigned int SetAdcOffsAdj1D(unsigned int value)
+   void SetAdcOffsAdj1D(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1164, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOffsAdj1D() not defined for this board version");
       };
    };
    unsigned int GetAdcOffsAdj1DLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3610,7 +3641,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1164;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj1DLoc() not defined for this board version");
       };
    };
 
@@ -3622,17 +3653,17 @@ public:
          case 8:
             return BitExtractControl(0x1178, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj1Dco() not defined for this board version");
       };
    };
-   unsigned int SetAdcOffsAdj1Dco(unsigned int value)
+   void SetAdcOffsAdj1Dco(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1178, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOffsAdj1Dco() not defined for this board version");
       };
    };
    unsigned int GetAdcOffsAdj1DcoLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3644,7 +3675,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1178;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj1DcoLoc() not defined for this board version");
       };
    };
 
@@ -3656,17 +3687,17 @@ public:
          case 8:
             return BitExtractControl(0x1168, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj1E() not defined for this board version");
       };
    };
-   unsigned int SetAdcOffsAdj1E(unsigned int value)
+   void SetAdcOffsAdj1E(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1168, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOffsAdj1E() not defined for this board version");
       };
    };
    unsigned int GetAdcOffsAdj1ELoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3678,7 +3709,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1168;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj1ELoc() not defined for this board version");
       };
    };
 
@@ -3690,17 +3721,17 @@ public:
          case 8:
             return BitExtractControl(0x116C, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj1F() not defined for this board version");
       };
    };
-   unsigned int SetAdcOffsAdj1F(unsigned int value)
+   void SetAdcOffsAdj1F(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x116C, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOffsAdj1F() not defined for this board version");
       };
    };
    unsigned int GetAdcOffsAdj1FLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3712,7 +3743,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x116C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj1FLoc() not defined for this board version");
       };
    };
 
@@ -3724,17 +3755,17 @@ public:
          case 8:
             return BitExtractControl(0x117C, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj1Fco() not defined for this board version");
       };
    };
-   unsigned int SetAdcOffsAdj1Fco(unsigned int value)
+   void SetAdcOffsAdj1Fco(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x117C, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOffsAdj1Fco() not defined for this board version");
       };
    };
    unsigned int GetAdcOffsAdj1FcoLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3746,7 +3777,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x117C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj1FcoLoc() not defined for this board version");
       };
    };
 
@@ -3758,17 +3789,17 @@ public:
          case 8:
             return BitExtractControl(0x1170, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj1G() not defined for this board version");
       };
    };
-   unsigned int SetAdcOffsAdj1G(unsigned int value)
+   void SetAdcOffsAdj1G(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1170, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOffsAdj1G() not defined for this board version");
       };
    };
    unsigned int GetAdcOffsAdj1GLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3780,7 +3811,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1170;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj1GLoc() not defined for this board version");
       };
    };
 
@@ -3792,17 +3823,17 @@ public:
          case 8:
             return BitExtractControl(0x1174, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj1H() not defined for this board version");
       };
    };
-   unsigned int SetAdcOffsAdj1H(unsigned int value)
+   void SetAdcOffsAdj1H(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1174, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOffsAdj1H() not defined for this board version");
       };
    };
    unsigned int GetAdcOffsAdj1HLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3814,7 +3845,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1174;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOffsAdj1HLoc() not defined for this board version");
       };
    };
 
@@ -3826,17 +3857,17 @@ public:
          case 8:
             return BitExtractControl(0x111C, 0x00000040, 6);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmLvdsMode() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmLvdsMode(unsigned int value)
+   void SetAdcOmLvdsMode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x111C, 0x00000040, 6, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmLvdsMode() not defined for this board version");
       };
    };
    unsigned int GetAdcOmLvdsModeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3848,7 +3879,7 @@ public:
             if(BitOfs) *BitOfs = 6;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmLvdsModeLoc() not defined for this board version");
       };
    };
 
@@ -3860,17 +3891,17 @@ public:
          case 8:
             return BitExtractControl(0x111C, 0x00000001, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutFormat() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmOutFormat(unsigned int value)
+   void SetAdcOmOutFormat(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x111C, 0x00000001, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmOutFormat() not defined for this board version");
       };
    };
    unsigned int GetAdcOmOutFormatLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3882,7 +3913,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutFormatLoc() not defined for this board version");
       };
    };
 
@@ -3894,17 +3925,17 @@ public:
          case 8:
             return BitExtractControl(0x111C, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmOutInvert(unsigned int value)
+   void SetAdcOmOutInvert(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x111C, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmOutInvert() not defined for this board version");
       };
    };
    unsigned int GetAdcOmOutInvertLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3916,7 +3947,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvertLoc() not defined for this board version");
       };
    };
 
@@ -3928,17 +3959,17 @@ public:
          case 8:
             return BitExtractControl(0x1130, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert0A() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmOutInvert0A(unsigned int value)
+   void SetAdcOmOutInvert0A(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1130, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmOutInvert0A() not defined for this board version");
       };
    };
    unsigned int GetAdcOmOutInvert0ALoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3950,7 +3981,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1130;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert0ALoc() not defined for this board version");
       };
    };
 
@@ -3962,17 +3993,17 @@ public:
          case 8:
             return BitExtractControl(0x1134, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert0B() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmOutInvert0B(unsigned int value)
+   void SetAdcOmOutInvert0B(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1134, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmOutInvert0B() not defined for this board version");
       };
    };
    unsigned int GetAdcOmOutInvert0BLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -3984,7 +4015,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1134;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert0BLoc() not defined for this board version");
       };
    };
 
@@ -3996,17 +4027,17 @@ public:
          case 8:
             return BitExtractControl(0x1138, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert0C() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmOutInvert0C(unsigned int value)
+   void SetAdcOmOutInvert0C(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1138, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmOutInvert0C() not defined for this board version");
       };
    };
    unsigned int GetAdcOmOutInvert0CLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4018,7 +4049,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1138;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert0CLoc() not defined for this board version");
       };
    };
 
@@ -4030,17 +4061,17 @@ public:
          case 8:
             return BitExtractControl(0x113C, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert0D() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmOutInvert0D(unsigned int value)
+   void SetAdcOmOutInvert0D(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x113C, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmOutInvert0D() not defined for this board version");
       };
    };
    unsigned int GetAdcOmOutInvert0DLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4052,7 +4083,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x113C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert0DLoc() not defined for this board version");
       };
    };
 
@@ -4064,17 +4095,17 @@ public:
          case 8:
             return BitExtractControl(0x1150, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert0Dco() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmOutInvert0Dco(unsigned int value)
+   void SetAdcOmOutInvert0Dco(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1150, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmOutInvert0Dco() not defined for this board version");
       };
    };
    unsigned int GetAdcOmOutInvert0DcoLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4086,7 +4117,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1150;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert0DcoLoc() not defined for this board version");
       };
    };
 
@@ -4098,17 +4129,17 @@ public:
          case 8:
             return BitExtractControl(0x1140, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert0E() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmOutInvert0E(unsigned int value)
+   void SetAdcOmOutInvert0E(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1140, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmOutInvert0E() not defined for this board version");
       };
    };
    unsigned int GetAdcOmOutInvert0ELoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4120,7 +4151,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1140;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert0ELoc() not defined for this board version");
       };
    };
 
@@ -4132,17 +4163,17 @@ public:
          case 8:
             return BitExtractControl(0x1144, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert0F() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmOutInvert0F(unsigned int value)
+   void SetAdcOmOutInvert0F(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1144, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmOutInvert0F() not defined for this board version");
       };
    };
    unsigned int GetAdcOmOutInvert0FLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4154,7 +4185,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1144;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert0FLoc() not defined for this board version");
       };
    };
 
@@ -4166,17 +4197,17 @@ public:
          case 8:
             return BitExtractControl(0x1154, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert0Fco() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmOutInvert0Fco(unsigned int value)
+   void SetAdcOmOutInvert0Fco(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1154, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmOutInvert0Fco() not defined for this board version");
       };
    };
    unsigned int GetAdcOmOutInvert0FcoLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4188,7 +4219,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1154;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert0FcoLoc() not defined for this board version");
       };
    };
 
@@ -4200,17 +4231,17 @@ public:
          case 8:
             return BitExtractControl(0x1148, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert0G() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmOutInvert0G(unsigned int value)
+   void SetAdcOmOutInvert0G(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1148, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmOutInvert0G() not defined for this board version");
       };
    };
    unsigned int GetAdcOmOutInvert0GLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4222,7 +4253,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1148;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert0GLoc() not defined for this board version");
       };
    };
 
@@ -4234,17 +4265,17 @@ public:
          case 8:
             return BitExtractControl(0x114C, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert0H() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmOutInvert0H(unsigned int value)
+   void SetAdcOmOutInvert0H(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x114C, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmOutInvert0H() not defined for this board version");
       };
    };
    unsigned int GetAdcOmOutInvert0HLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4256,7 +4287,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x114C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert0HLoc() not defined for this board version");
       };
    };
 
@@ -4268,17 +4299,17 @@ public:
          case 8:
             return BitExtractControl(0x1158, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert1A() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmOutInvert1A(unsigned int value)
+   void SetAdcOmOutInvert1A(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1158, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmOutInvert1A() not defined for this board version");
       };
    };
    unsigned int GetAdcOmOutInvert1ALoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4290,7 +4321,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1158;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert1ALoc() not defined for this board version");
       };
    };
 
@@ -4302,17 +4333,17 @@ public:
          case 8:
             return BitExtractControl(0x115C, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert1B() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmOutInvert1B(unsigned int value)
+   void SetAdcOmOutInvert1B(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x115C, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmOutInvert1B() not defined for this board version");
       };
    };
    unsigned int GetAdcOmOutInvert1BLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4324,7 +4355,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x115C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert1BLoc() not defined for this board version");
       };
    };
 
@@ -4336,17 +4367,17 @@ public:
          case 8:
             return BitExtractControl(0x1160, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert1C() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmOutInvert1C(unsigned int value)
+   void SetAdcOmOutInvert1C(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1160, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmOutInvert1C() not defined for this board version");
       };
    };
    unsigned int GetAdcOmOutInvert1CLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4358,7 +4389,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1160;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert1CLoc() not defined for this board version");
       };
    };
 
@@ -4370,17 +4401,17 @@ public:
          case 8:
             return BitExtractControl(0x1164, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert1D() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmOutInvert1D(unsigned int value)
+   void SetAdcOmOutInvert1D(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1164, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmOutInvert1D() not defined for this board version");
       };
    };
    unsigned int GetAdcOmOutInvert1DLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4392,7 +4423,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1164;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert1DLoc() not defined for this board version");
       };
    };
 
@@ -4404,17 +4435,17 @@ public:
          case 8:
             return BitExtractControl(0x1178, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert1Dco() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmOutInvert1Dco(unsigned int value)
+   void SetAdcOmOutInvert1Dco(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1178, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmOutInvert1Dco() not defined for this board version");
       };
    };
    unsigned int GetAdcOmOutInvert1DcoLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4426,7 +4457,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1178;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert1DcoLoc() not defined for this board version");
       };
    };
 
@@ -4438,17 +4469,17 @@ public:
          case 8:
             return BitExtractControl(0x1168, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert1E() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmOutInvert1E(unsigned int value)
+   void SetAdcOmOutInvert1E(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1168, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmOutInvert1E() not defined for this board version");
       };
    };
    unsigned int GetAdcOmOutInvert1ELoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4460,7 +4491,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1168;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert1ELoc() not defined for this board version");
       };
    };
 
@@ -4472,17 +4503,17 @@ public:
          case 8:
             return BitExtractControl(0x116C, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert1F() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmOutInvert1F(unsigned int value)
+   void SetAdcOmOutInvert1F(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x116C, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmOutInvert1F() not defined for this board version");
       };
    };
    unsigned int GetAdcOmOutInvert1FLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4494,7 +4525,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x116C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert1FLoc() not defined for this board version");
       };
    };
 
@@ -4506,17 +4537,17 @@ public:
          case 8:
             return BitExtractControl(0x117C, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert1Fco() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmOutInvert1Fco(unsigned int value)
+   void SetAdcOmOutInvert1Fco(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x117C, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmOutInvert1Fco() not defined for this board version");
       };
    };
    unsigned int GetAdcOmOutInvert1FcoLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4528,7 +4559,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x117C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert1FcoLoc() not defined for this board version");
       };
    };
 
@@ -4540,17 +4571,17 @@ public:
          case 8:
             return BitExtractControl(0x1170, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert1G() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmOutInvert1G(unsigned int value)
+   void SetAdcOmOutInvert1G(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1170, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmOutInvert1G() not defined for this board version");
       };
    };
    unsigned int GetAdcOmOutInvert1GLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4562,7 +4593,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1170;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert1GLoc() not defined for this board version");
       };
    };
 
@@ -4574,17 +4605,17 @@ public:
          case 8:
             return BitExtractControl(0x1174, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert1H() not defined for this board version");
       };
    };
-   unsigned int SetAdcOmOutInvert1H(unsigned int value)
+   void SetAdcOmOutInvert1H(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1174, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOmOutInvert1H() not defined for this board version");
       };
    };
    unsigned int GetAdcOmOutInvert1HLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4596,7 +4627,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1174;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOmOutInvert1HLoc() not defined for this board version");
       };
    };
 
@@ -4608,17 +4639,17 @@ public:
          case 8:
             return BitExtractControl(0x1120, 0x00007000, 12);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOpInClkPhAdj() not defined for this board version");
       };
    };
-   unsigned int SetAdcOpInClkPhAdj(unsigned int value)
+   void SetAdcOpInClkPhAdj(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1120, 0x00007000, 12, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOpInClkPhAdj() not defined for this board version");
       };
    };
    unsigned int GetAdcOpInClkPhAdjLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4630,7 +4661,7 @@ public:
             if(BitOfs) *BitOfs = 12;
             return 0x1120;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOpInClkPhAdjLoc() not defined for this board version");
       };
    };
 
@@ -4642,17 +4673,17 @@ public:
          case 8:
             return BitExtractControl(0x1120, 0x00000F00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOpOutClkPhAdj() not defined for this board version");
       };
    };
-   unsigned int SetAdcOpOutClkPhAdj(unsigned int value)
+   void SetAdcOpOutClkPhAdj(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1120, 0x00000F00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcOpOutClkPhAdj() not defined for this board version");
       };
    };
    unsigned int GetAdcOpOutClkPhAdjLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4664,7 +4695,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1120;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcOpOutClkPhAdjLoc() not defined for this board version");
       };
    };
 
@@ -4676,17 +4707,17 @@ public:
          case 8:
             return BitExtractControl(0x1118, 0x20000000, 29);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcPmExtPd() not defined for this board version");
       };
    };
-   unsigned int SetAdcPmExtPd(unsigned int value)
+   void SetAdcPmExtPd(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1118, 0x20000000, 29, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcPmExtPd() not defined for this board version");
       };
    };
    unsigned int GetAdcPmExtPdLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4698,7 +4729,7 @@ public:
             if(BitOfs) *BitOfs = 29;
             return 0x1118;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcPmExtPdLoc() not defined for this board version");
       };
    };
 
@@ -4710,17 +4741,17 @@ public:
          case 8:
             return BitExtractControl(0x1118, 0x03000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcPmIntPdMode() not defined for this board version");
       };
    };
-   unsigned int SetAdcPmIntPdMode(unsigned int value)
+   void SetAdcPmIntPdMode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1118, 0x03000000, 24, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcPmIntPdMode() not defined for this board version");
       };
    };
    unsigned int GetAdcPmIntPdModeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4732,7 +4763,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x1118;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcPmIntPdModeLoc() not defined for this board version");
       };
    };
 
@@ -4744,17 +4775,17 @@ public:
          case 8:
             return BitExtractControl(0x1128, 0x00000030, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcResolution() not defined for this board version");
       };
    };
-   unsigned int SetAdcResolution(unsigned int value)
+   void SetAdcResolution(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1128, 0x00000030, 4, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcResolution() not defined for this board version");
       };
    };
    unsigned int GetAdcResolutionLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4766,7 +4797,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x1128;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcResolutionLoc() not defined for this board version");
       };
    };
 
@@ -4778,17 +4809,17 @@ public:
          case 8:
             return BitExtractControl(0x1128, 0x00000040, 6);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcResSrOvr() not defined for this board version");
       };
    };
-   unsigned int SetAdcResSrOvr(unsigned int value)
+   void SetAdcResSrOvr(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1128, 0x00000040, 6, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcResSrOvr() not defined for this board version");
       };
    };
    unsigned int GetAdcResSrOvrLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4800,7 +4831,7 @@ public:
             if(BitOfs) *BitOfs = 6;
             return 0x1128;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcResSrOvrLoc() not defined for this board version");
       };
    };
 
@@ -4813,10 +4844,10 @@ public:
          case 9:
             return BitExtractControl(0x1040, 0x00000040, 6);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcRst() not defined for this board version");
       };
    };
-   unsigned int SetAdcRst(unsigned int value)
+   void SetAdcRst(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -4824,7 +4855,7 @@ public:
          case 9:
             return SetRegMask(0x1040, 0x00000040, 6, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcRst() not defined for this board version");
       };
    };
    unsigned int GetAdcRstLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4837,7 +4868,7 @@ public:
             if(BitOfs) *BitOfs = 6;
             return 0x1040;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcRstLoc() not defined for this board version");
       };
    };
 
@@ -4851,7 +4882,7 @@ public:
          case 9:
             return BitExtractStatus(0x0134, 0x00000008, 3);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcRstMod() not defined for this board version");
       };
    };
    unsigned int GetAdcRstModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4867,7 +4898,7 @@ public:
             if(BitOfs) *BitOfs = 3;
             return 0x0134;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcRstModLoc() not defined for this board version");
       };
    };
 
@@ -4880,10 +4911,10 @@ public:
          case 9:
             return BitExtractControl(0x1038, 0x000000FF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcSampleDiv() not defined for this board version");
       };
    };
-   unsigned int SetAdcSampleDiv(unsigned int value)
+   void SetAdcSampleDiv(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -4891,7 +4922,7 @@ public:
          case 9:
             return SetRegMask(0x1038, 0x000000FF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcSampleDiv() not defined for this board version");
       };
    };
    unsigned int GetAdcSampleDivLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4904,7 +4935,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1038;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcSampleDivLoc() not defined for this board version");
       };
    };
 
@@ -4918,7 +4949,7 @@ public:
          case 9:
             return BitExtractStatus(0x0140, 0x0000000F, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcSampleDivMod() not defined for this board version");
       };
    };
    unsigned int GetAdcSampleDivModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4934,7 +4965,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0140;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcSampleDivModLoc() not defined for this board version");
       };
    };
 
@@ -4947,7 +4978,7 @@ public:
          case 9:
             return BitExtractStatus(0x003C, 0x00FFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcSampleFreq() not defined for this board version");
       };
    };
    unsigned int GetAdcSampleFreqLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4960,7 +4991,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x003C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcSampleFreqLoc() not defined for this board version");
       };
    };
 
@@ -4972,17 +5003,17 @@ public:
          case 8:
             return BitExtractControl(0x1128, 0x00000007, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcSampleRate() not defined for this board version");
       };
    };
-   unsigned int SetAdcSampleRate(unsigned int value)
+   void SetAdcSampleRate(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1128, 0x00000007, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcSampleRate() not defined for this board version");
       };
    };
    unsigned int GetAdcSampleRateLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -4994,7 +5025,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1128;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcSampleRateLoc() not defined for this board version");
       };
    };
 
@@ -5006,17 +5037,17 @@ public:
          case 8:
             return BitExtractControl(0x1128, 0x00800000, 23);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcScLvdsOutLsbFirst() not defined for this board version");
       };
    };
-   unsigned int SetAdcScLvdsOutLsbFirst(unsigned int value)
+   void SetAdcScLvdsOutLsbFirst(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1128, 0x00800000, 23, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcScLvdsOutLsbFirst() not defined for this board version");
       };
    };
    unsigned int GetAdcScLvdsOutLsbFirstLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5028,7 +5059,7 @@ public:
             if(BitOfs) *BitOfs = 23;
             return 0x1128;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcScLvdsOutLsbFirstLoc() not defined for this board version");
       };
    };
 
@@ -5040,17 +5071,17 @@ public:
          case 8:
             return BitExtractControl(0x1128, 0x00030000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcScOutNrBits() not defined for this board version");
       };
    };
-   unsigned int SetAdcScOutNrBits(unsigned int value)
+   void SetAdcScOutNrBits(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1128, 0x00030000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcScOutNrBits() not defined for this board version");
       };
    };
    unsigned int GetAdcScOutNrBitsLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5062,7 +5093,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1128;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcScOutNrBitsLoc() not defined for this board version");
       };
    };
 
@@ -5074,17 +5105,17 @@ public:
          case 8:
             return BitExtractControl(0x1128, 0x00000200, 9);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcScOutRst() not defined for this board version");
       };
    };
-   unsigned int SetAdcScOutRst(unsigned int value)
+   void SetAdcScOutRst(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1128, 0x00000200, 9, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcScOutRst() not defined for this board version");
       };
    };
    unsigned int GetAdcScOutRstLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5096,7 +5127,7 @@ public:
             if(BitOfs) *BitOfs = 9;
             return 0x1128;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcScOutRstLoc() not defined for this board version");
       };
    };
 
@@ -5108,17 +5139,17 @@ public:
          case 8:
             return BitExtractControl(0x1128, 0x00000100, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcScPwrDn() not defined for this board version");
       };
    };
-   unsigned int SetAdcScPwrDn(unsigned int value)
+   void SetAdcScPwrDn(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1128, 0x00000100, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcScPwrDn() not defined for this board version");
       };
    };
    unsigned int GetAdcScPwrDnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5130,7 +5161,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1128;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcScPwrDnLoc() not defined for this board version");
       };
    };
 
@@ -5142,17 +5173,17 @@ public:
          case 8:
             return BitExtractControl(0x1128, 0x00700000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcScWordWiseDdr() not defined for this board version");
       };
    };
-   unsigned int SetAdcScWordWiseDdr(unsigned int value)
+   void SetAdcScWordWiseDdr(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1128, 0x00700000, 20, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcScWordWiseDdr() not defined for this board version");
       };
    };
    unsigned int GetAdcScWordWiseDdrLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5164,7 +5195,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x1128;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcScWordWiseDdrLoc() not defined for this board version");
       };
    };
 
@@ -5176,17 +5207,17 @@ public:
          case 8:
             return BitExtractControl(0x112C, 0x00000002, 1);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcSyncNextOnly() not defined for this board version");
       };
    };
-   unsigned int SetAdcSyncNextOnly(unsigned int value)
+   void SetAdcSyncNextOnly(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x112C, 0x00000002, 1, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcSyncNextOnly() not defined for this board version");
       };
    };
    unsigned int GetAdcSyncNextOnlyLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5198,7 +5229,7 @@ public:
             if(BitOfs) *BitOfs = 1;
             return 0x112C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcSyncNextOnlyLoc() not defined for this board version");
       };
    };
 
@@ -5210,17 +5241,17 @@ public:
          case 8:
             return BitExtractControl(0x111C, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmOut(unsigned int value)
+   void SetAdcTmOut(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x111C, 0x000F0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmOut() not defined for this board version");
       };
    };
    unsigned int GetAdcTmOutLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5232,7 +5263,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOutLoc() not defined for this board version");
       };
    };
 
@@ -5244,17 +5275,17 @@ public:
          case 8:
             return BitExtractControl(0x1130, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut0A() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmOut0A(unsigned int value)
+   void SetAdcTmOut0A(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1130, 0x000F0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmOut0A() not defined for this board version");
       };
    };
    unsigned int GetAdcTmOut0ALoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5266,7 +5297,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1130;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut0ALoc() not defined for this board version");
       };
    };
 
@@ -5278,17 +5309,17 @@ public:
          case 8:
             return BitExtractControl(0x1134, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut0B() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmOut0B(unsigned int value)
+   void SetAdcTmOut0B(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1134, 0x000F0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmOut0B() not defined for this board version");
       };
    };
    unsigned int GetAdcTmOut0BLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5300,7 +5331,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1134;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut0BLoc() not defined for this board version");
       };
    };
 
@@ -5312,17 +5343,17 @@ public:
          case 8:
             return BitExtractControl(0x1138, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut0C() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmOut0C(unsigned int value)
+   void SetAdcTmOut0C(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1138, 0x000F0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmOut0C() not defined for this board version");
       };
    };
    unsigned int GetAdcTmOut0CLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5334,7 +5365,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1138;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut0CLoc() not defined for this board version");
       };
    };
 
@@ -5346,17 +5377,17 @@ public:
          case 8:
             return BitExtractControl(0x113C, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut0D() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmOut0D(unsigned int value)
+   void SetAdcTmOut0D(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x113C, 0x000F0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmOut0D() not defined for this board version");
       };
    };
    unsigned int GetAdcTmOut0DLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5368,7 +5399,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x113C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut0DLoc() not defined for this board version");
       };
    };
 
@@ -5380,17 +5411,17 @@ public:
          case 8:
             return BitExtractControl(0x1150, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut0Dco() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmOut0Dco(unsigned int value)
+   void SetAdcTmOut0Dco(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1150, 0x000F0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmOut0Dco() not defined for this board version");
       };
    };
    unsigned int GetAdcTmOut0DcoLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5402,7 +5433,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1150;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut0DcoLoc() not defined for this board version");
       };
    };
 
@@ -5414,17 +5445,17 @@ public:
          case 8:
             return BitExtractControl(0x1140, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut0E() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmOut0E(unsigned int value)
+   void SetAdcTmOut0E(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1140, 0x000F0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmOut0E() not defined for this board version");
       };
    };
    unsigned int GetAdcTmOut0ELoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5436,7 +5467,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1140;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut0ELoc() not defined for this board version");
       };
    };
 
@@ -5448,17 +5479,17 @@ public:
          case 8:
             return BitExtractControl(0x1144, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut0F() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmOut0F(unsigned int value)
+   void SetAdcTmOut0F(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1144, 0x000F0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmOut0F() not defined for this board version");
       };
    };
    unsigned int GetAdcTmOut0FLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5470,7 +5501,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1144;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut0FLoc() not defined for this board version");
       };
    };
 
@@ -5482,17 +5513,17 @@ public:
          case 8:
             return BitExtractControl(0x1154, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut0Fco() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmOut0Fco(unsigned int value)
+   void SetAdcTmOut0Fco(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1154, 0x000F0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmOut0Fco() not defined for this board version");
       };
    };
    unsigned int GetAdcTmOut0FcoLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5504,7 +5535,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1154;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut0FcoLoc() not defined for this board version");
       };
    };
 
@@ -5516,17 +5547,17 @@ public:
          case 8:
             return BitExtractControl(0x1148, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut0G() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmOut0G(unsigned int value)
+   void SetAdcTmOut0G(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1148, 0x000F0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmOut0G() not defined for this board version");
       };
    };
    unsigned int GetAdcTmOut0GLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5538,7 +5569,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1148;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut0GLoc() not defined for this board version");
       };
    };
 
@@ -5550,17 +5581,17 @@ public:
          case 8:
             return BitExtractControl(0x114C, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut0H() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmOut0H(unsigned int value)
+   void SetAdcTmOut0H(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x114C, 0x000F0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmOut0H() not defined for this board version");
       };
    };
    unsigned int GetAdcTmOut0HLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5572,7 +5603,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x114C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut0HLoc() not defined for this board version");
       };
    };
 
@@ -5584,17 +5615,17 @@ public:
          case 8:
             return BitExtractControl(0x1158, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut1A() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmOut1A(unsigned int value)
+   void SetAdcTmOut1A(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1158, 0x000F0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmOut1A() not defined for this board version");
       };
    };
    unsigned int GetAdcTmOut1ALoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5606,7 +5637,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1158;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut1ALoc() not defined for this board version");
       };
    };
 
@@ -5618,17 +5649,17 @@ public:
          case 8:
             return BitExtractControl(0x115C, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut1B() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmOut1B(unsigned int value)
+   void SetAdcTmOut1B(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x115C, 0x000F0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmOut1B() not defined for this board version");
       };
    };
    unsigned int GetAdcTmOut1BLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5640,7 +5671,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x115C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut1BLoc() not defined for this board version");
       };
    };
 
@@ -5652,17 +5683,17 @@ public:
          case 8:
             return BitExtractControl(0x1160, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut1C() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmOut1C(unsigned int value)
+   void SetAdcTmOut1C(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1160, 0x000F0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmOut1C() not defined for this board version");
       };
    };
    unsigned int GetAdcTmOut1CLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5674,7 +5705,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1160;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut1CLoc() not defined for this board version");
       };
    };
 
@@ -5686,17 +5717,17 @@ public:
          case 8:
             return BitExtractControl(0x1164, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut1D() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmOut1D(unsigned int value)
+   void SetAdcTmOut1D(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1164, 0x000F0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmOut1D() not defined for this board version");
       };
    };
    unsigned int GetAdcTmOut1DLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5708,7 +5739,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1164;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut1DLoc() not defined for this board version");
       };
    };
 
@@ -5720,17 +5751,17 @@ public:
          case 8:
             return BitExtractControl(0x1178, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut1Dco() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmOut1Dco(unsigned int value)
+   void SetAdcTmOut1Dco(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1178, 0x000F0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmOut1Dco() not defined for this board version");
       };
    };
    unsigned int GetAdcTmOut1DcoLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5742,7 +5773,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1178;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut1DcoLoc() not defined for this board version");
       };
    };
 
@@ -5754,17 +5785,17 @@ public:
          case 8:
             return BitExtractControl(0x1168, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut1E() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmOut1E(unsigned int value)
+   void SetAdcTmOut1E(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1168, 0x000F0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmOut1E() not defined for this board version");
       };
    };
    unsigned int GetAdcTmOut1ELoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5776,7 +5807,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1168;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut1ELoc() not defined for this board version");
       };
    };
 
@@ -5788,17 +5819,17 @@ public:
          case 8:
             return BitExtractControl(0x116C, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut1F() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmOut1F(unsigned int value)
+   void SetAdcTmOut1F(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x116C, 0x000F0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmOut1F() not defined for this board version");
       };
    };
    unsigned int GetAdcTmOut1FLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5810,7 +5841,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x116C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut1FLoc() not defined for this board version");
       };
    };
 
@@ -5822,17 +5853,17 @@ public:
          case 8:
             return BitExtractControl(0x117C, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut1Fco() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmOut1Fco(unsigned int value)
+   void SetAdcTmOut1Fco(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x117C, 0x000F0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmOut1Fco() not defined for this board version");
       };
    };
    unsigned int GetAdcTmOut1FcoLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5844,7 +5875,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x117C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut1FcoLoc() not defined for this board version");
       };
    };
 
@@ -5856,17 +5887,17 @@ public:
          case 8:
             return BitExtractControl(0x1170, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut1G() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmOut1G(unsigned int value)
+   void SetAdcTmOut1G(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1170, 0x000F0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmOut1G() not defined for this board version");
       };
    };
    unsigned int GetAdcTmOut1GLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5878,7 +5909,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1170;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut1GLoc() not defined for this board version");
       };
    };
 
@@ -5890,17 +5921,17 @@ public:
          case 8:
             return BitExtractControl(0x1174, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut1H() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmOut1H(unsigned int value)
+   void SetAdcTmOut1H(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1174, 0x000F0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmOut1H() not defined for this board version");
       };
    };
    unsigned int GetAdcTmOut1HLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5912,7 +5943,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1174;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmOut1HLoc() not defined for this board version");
       };
    };
 
@@ -5924,17 +5955,17 @@ public:
          case 8:
             return BitExtractControl(0x111C, 0x00200000, 21);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmRstPnLongGen() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmRstPnLongGen(unsigned int value)
+   void SetAdcTmRstPnLongGen(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x111C, 0x00200000, 21, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmRstPnLongGen() not defined for this board version");
       };
    };
    unsigned int GetAdcTmRstPnLongGenLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5946,7 +5977,7 @@ public:
             if(BitOfs) *BitOfs = 21;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmRstPnLongGenLoc() not defined for this board version");
       };
    };
 
@@ -5958,17 +5989,17 @@ public:
          case 8:
             return BitExtractControl(0x111C, 0x00100000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmRstPnShortGen() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmRstPnShortGen(unsigned int value)
+   void SetAdcTmRstPnShortGen(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x111C, 0x00100000, 20, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmRstPnShortGen() not defined for this board version");
       };
    };
    unsigned int GetAdcTmRstPnShortGenLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -5980,7 +6011,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmRstPnShortGenLoc() not defined for this board version");
       };
    };
 
@@ -5992,17 +6023,17 @@ public:
          case 8:
             return BitExtractControl(0x111C, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmUsrInMode(unsigned int value)
+   void SetAdcTmUsrInMode(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x111C, 0x00C00000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmUsrInMode() not defined for this board version");
       };
    };
    unsigned int GetAdcTmUsrInModeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6014,7 +6045,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x111C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInModeLoc() not defined for this board version");
       };
    };
 
@@ -6026,17 +6057,17 @@ public:
          case 8:
             return BitExtractControl(0x1130, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode0A() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmUsrInMode0A(unsigned int value)
+   void SetAdcTmUsrInMode0A(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1130, 0x00C00000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmUsrInMode0A() not defined for this board version");
       };
    };
    unsigned int GetAdcTmUsrInMode0ALoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6048,7 +6079,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x1130;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode0ALoc() not defined for this board version");
       };
    };
 
@@ -6060,17 +6091,17 @@ public:
          case 8:
             return BitExtractControl(0x1134, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode0B() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmUsrInMode0B(unsigned int value)
+   void SetAdcTmUsrInMode0B(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1134, 0x00C00000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmUsrInMode0B() not defined for this board version");
       };
    };
    unsigned int GetAdcTmUsrInMode0BLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6082,7 +6113,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x1134;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode0BLoc() not defined for this board version");
       };
    };
 
@@ -6094,17 +6125,17 @@ public:
          case 8:
             return BitExtractControl(0x1138, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode0C() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmUsrInMode0C(unsigned int value)
+   void SetAdcTmUsrInMode0C(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1138, 0x00C00000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmUsrInMode0C() not defined for this board version");
       };
    };
    unsigned int GetAdcTmUsrInMode0CLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6116,7 +6147,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x1138;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode0CLoc() not defined for this board version");
       };
    };
 
@@ -6128,17 +6159,17 @@ public:
          case 8:
             return BitExtractControl(0x113C, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode0D() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmUsrInMode0D(unsigned int value)
+   void SetAdcTmUsrInMode0D(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x113C, 0x00C00000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmUsrInMode0D() not defined for this board version");
       };
    };
    unsigned int GetAdcTmUsrInMode0DLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6150,7 +6181,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x113C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode0DLoc() not defined for this board version");
       };
    };
 
@@ -6162,17 +6193,17 @@ public:
          case 8:
             return BitExtractControl(0x1150, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode0Dco() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmUsrInMode0Dco(unsigned int value)
+   void SetAdcTmUsrInMode0Dco(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1150, 0x00C00000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmUsrInMode0Dco() not defined for this board version");
       };
    };
    unsigned int GetAdcTmUsrInMode0DcoLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6184,7 +6215,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x1150;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode0DcoLoc() not defined for this board version");
       };
    };
 
@@ -6196,17 +6227,17 @@ public:
          case 8:
             return BitExtractControl(0x1140, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode0E() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmUsrInMode0E(unsigned int value)
+   void SetAdcTmUsrInMode0E(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1140, 0x00C00000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmUsrInMode0E() not defined for this board version");
       };
    };
    unsigned int GetAdcTmUsrInMode0ELoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6218,7 +6249,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x1140;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode0ELoc() not defined for this board version");
       };
    };
 
@@ -6230,17 +6261,17 @@ public:
          case 8:
             return BitExtractControl(0x1144, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode0F() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmUsrInMode0F(unsigned int value)
+   void SetAdcTmUsrInMode0F(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1144, 0x00C00000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmUsrInMode0F() not defined for this board version");
       };
    };
    unsigned int GetAdcTmUsrInMode0FLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6252,7 +6283,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x1144;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode0FLoc() not defined for this board version");
       };
    };
 
@@ -6264,17 +6295,17 @@ public:
          case 8:
             return BitExtractControl(0x1154, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode0Fco() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmUsrInMode0Fco(unsigned int value)
+   void SetAdcTmUsrInMode0Fco(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1154, 0x00C00000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmUsrInMode0Fco() not defined for this board version");
       };
    };
    unsigned int GetAdcTmUsrInMode0FcoLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6286,7 +6317,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x1154;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode0FcoLoc() not defined for this board version");
       };
    };
 
@@ -6298,17 +6329,17 @@ public:
          case 8:
             return BitExtractControl(0x1148, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode0G() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmUsrInMode0G(unsigned int value)
+   void SetAdcTmUsrInMode0G(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1148, 0x00C00000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmUsrInMode0G() not defined for this board version");
       };
    };
    unsigned int GetAdcTmUsrInMode0GLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6320,7 +6351,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x1148;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode0GLoc() not defined for this board version");
       };
    };
 
@@ -6332,17 +6363,17 @@ public:
          case 8:
             return BitExtractControl(0x114C, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode0H() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmUsrInMode0H(unsigned int value)
+   void SetAdcTmUsrInMode0H(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x114C, 0x00C00000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmUsrInMode0H() not defined for this board version");
       };
    };
    unsigned int GetAdcTmUsrInMode0HLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6354,7 +6385,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x114C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode0HLoc() not defined for this board version");
       };
    };
 
@@ -6366,17 +6397,17 @@ public:
          case 8:
             return BitExtractControl(0x1158, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode1A() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmUsrInMode1A(unsigned int value)
+   void SetAdcTmUsrInMode1A(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1158, 0x00C00000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmUsrInMode1A() not defined for this board version");
       };
    };
    unsigned int GetAdcTmUsrInMode1ALoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6388,7 +6419,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x1158;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode1ALoc() not defined for this board version");
       };
    };
 
@@ -6400,17 +6431,17 @@ public:
          case 8:
             return BitExtractControl(0x115C, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode1B() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmUsrInMode1B(unsigned int value)
+   void SetAdcTmUsrInMode1B(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x115C, 0x00C00000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmUsrInMode1B() not defined for this board version");
       };
    };
    unsigned int GetAdcTmUsrInMode1BLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6422,7 +6453,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x115C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode1BLoc() not defined for this board version");
       };
    };
 
@@ -6434,17 +6465,17 @@ public:
          case 8:
             return BitExtractControl(0x1160, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode1C() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmUsrInMode1C(unsigned int value)
+   void SetAdcTmUsrInMode1C(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1160, 0x00C00000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmUsrInMode1C() not defined for this board version");
       };
    };
    unsigned int GetAdcTmUsrInMode1CLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6456,7 +6487,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x1160;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode1CLoc() not defined for this board version");
       };
    };
 
@@ -6468,17 +6499,17 @@ public:
          case 8:
             return BitExtractControl(0x1164, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode1D() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmUsrInMode1D(unsigned int value)
+   void SetAdcTmUsrInMode1D(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1164, 0x00C00000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmUsrInMode1D() not defined for this board version");
       };
    };
    unsigned int GetAdcTmUsrInMode1DLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6490,7 +6521,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x1164;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode1DLoc() not defined for this board version");
       };
    };
 
@@ -6502,17 +6533,17 @@ public:
          case 8:
             return BitExtractControl(0x1178, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode1Dco() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmUsrInMode1Dco(unsigned int value)
+   void SetAdcTmUsrInMode1Dco(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1178, 0x00C00000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmUsrInMode1Dco() not defined for this board version");
       };
    };
    unsigned int GetAdcTmUsrInMode1DcoLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6524,7 +6555,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x1178;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode1DcoLoc() not defined for this board version");
       };
    };
 
@@ -6536,17 +6567,17 @@ public:
          case 8:
             return BitExtractControl(0x1168, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode1E() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmUsrInMode1E(unsigned int value)
+   void SetAdcTmUsrInMode1E(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1168, 0x00C00000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmUsrInMode1E() not defined for this board version");
       };
    };
    unsigned int GetAdcTmUsrInMode1ELoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6558,7 +6589,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x1168;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode1ELoc() not defined for this board version");
       };
    };
 
@@ -6570,17 +6601,17 @@ public:
          case 8:
             return BitExtractControl(0x116C, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode1F() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmUsrInMode1F(unsigned int value)
+   void SetAdcTmUsrInMode1F(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x116C, 0x00C00000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmUsrInMode1F() not defined for this board version");
       };
    };
    unsigned int GetAdcTmUsrInMode1FLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6592,7 +6623,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x116C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode1FLoc() not defined for this board version");
       };
    };
 
@@ -6604,17 +6635,17 @@ public:
          case 8:
             return BitExtractControl(0x117C, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode1Fco() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmUsrInMode1Fco(unsigned int value)
+   void SetAdcTmUsrInMode1Fco(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x117C, 0x00C00000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmUsrInMode1Fco() not defined for this board version");
       };
    };
    unsigned int GetAdcTmUsrInMode1FcoLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6626,7 +6657,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x117C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode1FcoLoc() not defined for this board version");
       };
    };
 
@@ -6638,17 +6669,17 @@ public:
          case 8:
             return BitExtractControl(0x1170, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode1G() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmUsrInMode1G(unsigned int value)
+   void SetAdcTmUsrInMode1G(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1170, 0x00C00000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmUsrInMode1G() not defined for this board version");
       };
    };
    unsigned int GetAdcTmUsrInMode1GLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6660,7 +6691,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x1170;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode1GLoc() not defined for this board version");
       };
    };
 
@@ -6672,17 +6703,17 @@ public:
          case 8:
             return BitExtractControl(0x1174, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode1H() not defined for this board version");
       };
    };
-   unsigned int SetAdcTmUsrInMode1H(unsigned int value)
+   void SetAdcTmUsrInMode1H(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1174, 0x00C00000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTmUsrInMode1H() not defined for this board version");
       };
    };
    unsigned int GetAdcTmUsrInMode1HLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6694,7 +6725,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x1174;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTmUsrInMode1HLoc() not defined for this board version");
       };
    };
 
@@ -6706,17 +6737,17 @@ public:
          case 8:
             return BitExtractControl(0x1114, 0x00000001, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTxInitOverride() not defined for this board version");
       };
    };
-   unsigned int SetAdcTxInitOverride(unsigned int value)
+   void SetAdcTxInitOverride(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1114, 0x00000001, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTxInitOverride() not defined for this board version");
       };
    };
    unsigned int GetAdcTxInitOverrideLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6728,7 +6759,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTxInitOverrideLoc() not defined for this board version");
       };
    };
 
@@ -6741,10 +6772,10 @@ public:
          case 9:
             return BitExtractControl(0x102C, 0x00000FFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTxSamples() not defined for this board version");
       };
    };
-   unsigned int SetAdcTxSamples(unsigned int value)
+   void SetAdcTxSamples(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -6752,7 +6783,7 @@ public:
          case 9:
             return SetRegMask(0x102C, 0x00000FFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcTxSamples() not defined for this board version");
       };
    };
    unsigned int GetAdcTxSamplesLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6765,7 +6796,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x102C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcTxSamplesLoc() not defined for this board version");
       };
    };
 
@@ -6777,17 +6808,17 @@ public:
          case 8:
             return BitExtractControl(0x112C, 0x00010000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcUioc2SdioPd() not defined for this board version");
       };
    };
-   unsigned int SetAdcUioc2SdioPd(unsigned int value)
+   void SetAdcUioc2SdioPd(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x112C, 0x00010000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcUioc2SdioPd() not defined for this board version");
       };
    };
    unsigned int GetAdcUioc2SdioPdLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6799,7 +6830,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x112C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcUioc2SdioPdLoc() not defined for this board version");
       };
    };
 
@@ -6811,17 +6842,17 @@ public:
          case 8:
             return BitExtractControl(0x112C, 0x00000800, 11);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcUioc3VcmPwrDn() not defined for this board version");
       };
    };
-   unsigned int SetAdcUioc3VcmPwrDn(unsigned int value)
+   void SetAdcUioc3VcmPwrDn(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x112C, 0x00000800, 11, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcUioc3VcmPwrDn() not defined for this board version");
       };
    };
    unsigned int GetAdcUioc3VcmPwrDnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6833,7 +6864,7 @@ public:
             if(BitOfs) *BitOfs = 11;
             return 0x112C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcUioc3VcmPwrDnLoc() not defined for this board version");
       };
    };
 
@@ -6845,17 +6876,17 @@ public:
          case 8:
             return BitExtractControl(0x1124, 0xFFFF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcUsrPatt1() not defined for this board version");
       };
    };
-   unsigned int SetAdcUsrPatt1(unsigned int value)
+   void SetAdcUsrPatt1(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1124, 0xFFFF0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcUsrPatt1() not defined for this board version");
       };
    };
    unsigned int GetAdcUsrPatt1Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6867,7 +6898,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1124;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcUsrPatt1Loc() not defined for this board version");
       };
    };
 
@@ -6879,17 +6910,17 @@ public:
          case 8:
             return BitExtractControl(0x1124, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcUsrPatt2() not defined for this board version");
       };
    };
-   unsigned int SetAdcUsrPatt2(unsigned int value)
+   void SetAdcUsrPatt2(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 8:
             return SetRegMask(0x1124, 0x0000FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdcUsrPatt2() not defined for this board version");
       };
    };
    unsigned int GetAdcUsrPatt2Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6901,7 +6932,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1124;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcUsrPatt2Loc() not defined for this board version");
       };
    };
 
@@ -6915,10 +6946,10 @@ public:
          case 9:
             return BitExtractControl(0x11FC, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgCfg12() not defined for this board version");
       };
    };
-   unsigned int SetAdvTrgCfg12(unsigned int value)
+   void SetAdvTrgCfg12(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -6927,7 +6958,7 @@ public:
          case 9:
             return SetRegMask(0x11FC, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdvTrgCfg12() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgCfg12Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6943,7 +6974,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11FC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgCfg12Loc() not defined for this board version");
       };
    };
 
@@ -6957,10 +6988,10 @@ public:
          case 9:
             return BitExtractControl(0x1200, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgCfg13() not defined for this board version");
       };
    };
-   unsigned int SetAdvTrgCfg13(unsigned int value)
+   void SetAdvTrgCfg13(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -6969,7 +7000,7 @@ public:
          case 9:
             return SetRegMask(0x1200, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdvTrgCfg13() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgCfg13Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -6985,7 +7016,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1200;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgCfg13Loc() not defined for this board version");
       };
    };
 
@@ -6999,10 +7030,10 @@ public:
          case 9:
             return BitExtractControl(0x1204, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgCfg14() not defined for this board version");
       };
    };
-   unsigned int SetAdvTrgCfg14(unsigned int value)
+   void SetAdvTrgCfg14(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -7011,7 +7042,7 @@ public:
          case 9:
             return SetRegMask(0x1204, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdvTrgCfg14() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgCfg14Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7027,7 +7058,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1204;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgCfg14Loc() not defined for this board version");
       };
    };
 
@@ -7041,10 +7072,10 @@ public:
          case 9:
             return BitExtractControl(0x1208, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgCfg15() not defined for this board version");
       };
    };
-   unsigned int SetAdvTrgCfg15(unsigned int value)
+   void SetAdvTrgCfg15(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -7053,7 +7084,7 @@ public:
          case 9:
             return SetRegMask(0x1208, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdvTrgCfg15() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgCfg15Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7069,7 +7100,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1208;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgCfg15Loc() not defined for this board version");
       };
    };
 
@@ -7083,10 +7114,10 @@ public:
          case 9:
             return BitExtractControl(0x120C, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgCfg16() not defined for this board version");
       };
    };
-   unsigned int SetAdvTrgCfg16(unsigned int value)
+   void SetAdvTrgCfg16(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -7095,7 +7126,7 @@ public:
          case 9:
             return SetRegMask(0x120C, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdvTrgCfg16() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgCfg16Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7111,7 +7142,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x120C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgCfg16Loc() not defined for this board version");
       };
    };
 
@@ -7125,10 +7156,10 @@ public:
          case 9:
             return BitExtractControl(0x1210, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgCfg17() not defined for this board version");
       };
    };
-   unsigned int SetAdvTrgCfg17(unsigned int value)
+   void SetAdvTrgCfg17(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -7137,7 +7168,7 @@ public:
          case 9:
             return SetRegMask(0x1210, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdvTrgCfg17() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgCfg17Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7153,7 +7184,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1210;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgCfg17Loc() not defined for this board version");
       };
    };
 
@@ -7167,10 +7198,10 @@ public:
          case 9:
             return BitExtractControl(0x1214, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgCfg18() not defined for this board version");
       };
    };
-   unsigned int SetAdvTrgCfg18(unsigned int value)
+   void SetAdvTrgCfg18(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -7179,7 +7210,7 @@ public:
          case 9:
             return SetRegMask(0x1214, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdvTrgCfg18() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgCfg18Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7195,7 +7226,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1214;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgCfg18Loc() not defined for this board version");
       };
    };
 
@@ -7209,10 +7240,10 @@ public:
          case 9:
             return BitExtractControl(0x1218, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgCfg19() not defined for this board version");
       };
    };
-   unsigned int SetAdvTrgCfg19(unsigned int value)
+   void SetAdvTrgCfg19(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -7221,7 +7252,7 @@ public:
          case 9:
             return SetRegMask(0x1218, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdvTrgCfg19() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgCfg19Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7237,7 +7268,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1218;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgCfg19Loc() not defined for this board version");
       };
    };
 
@@ -7251,10 +7282,10 @@ public:
          case 9:
             return BitExtractControl(0x11D0, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgChCal0() not defined for this board version");
       };
    };
-   unsigned int SetAdvTrgChCal0(unsigned int value)
+   void SetAdvTrgChCal0(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -7263,7 +7294,7 @@ public:
          case 9:
             return SetRegMask(0x11D0, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdvTrgChCal0() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgChCal0Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7279,7 +7310,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11D0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgChCal0Loc() not defined for this board version");
       };
    };
 
@@ -7293,10 +7324,10 @@ public:
          case 9:
             return BitExtractControl(0x11D4, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgChCal1() not defined for this board version");
       };
    };
-   unsigned int SetAdvTrgChCal1(unsigned int value)
+   void SetAdvTrgChCal1(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -7305,7 +7336,7 @@ public:
          case 9:
             return SetRegMask(0x11D4, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdvTrgChCal1() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgChCal1Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7321,7 +7352,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11D4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgChCal1Loc() not defined for this board version");
       };
    };
 
@@ -7335,10 +7366,10 @@ public:
          case 9:
             return BitExtractControl(0x11D8, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgChCal2() not defined for this board version");
       };
    };
-   unsigned int SetAdvTrgChCal2(unsigned int value)
+   void SetAdvTrgChCal2(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -7347,7 +7378,7 @@ public:
          case 9:
             return SetRegMask(0x11D8, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdvTrgChCal2() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgChCal2Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7363,7 +7394,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11D8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgChCal2Loc() not defined for this board version");
       };
    };
 
@@ -7377,10 +7408,10 @@ public:
          case 9:
             return BitExtractControl(0x11DC, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgChCal3() not defined for this board version");
       };
    };
-   unsigned int SetAdvTrgChCal3(unsigned int value)
+   void SetAdvTrgChCal3(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -7389,7 +7420,7 @@ public:
          case 9:
             return SetRegMask(0x11DC, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdvTrgChCal3() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgChCal3Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7405,7 +7436,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11DC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgChCal3Loc() not defined for this board version");
       };
    };
 
@@ -7419,10 +7450,10 @@ public:
          case 9:
             return BitExtractControl(0x11CC, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgCtrl() not defined for this board version");
       };
    };
-   unsigned int SetAdvTrgCtrl(unsigned int value)
+   void SetAdvTrgCtrl(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -7431,7 +7462,7 @@ public:
          case 9:
             return SetRegMask(0x11CC, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdvTrgCtrl() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgCtrlLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7447,7 +7478,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11CC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgCtrlLoc() not defined for this board version");
       };
    };
 
@@ -7461,10 +7492,10 @@ public:
          case 9:
             return BitExtractControl(0x11E0, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgPedCfg() not defined for this board version");
       };
    };
-   unsigned int SetAdvTrgPedCfg(unsigned int value)
+   void SetAdvTrgPedCfg(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -7473,7 +7504,7 @@ public:
          case 9:
             return SetRegMask(0x11E0, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdvTrgPedCfg() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgPedCfgLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7489,7 +7520,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11E0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgPedCfgLoc() not defined for this board version");
       };
    };
 
@@ -7503,7 +7534,7 @@ public:
          case 9:
             return BitExtractStatus(0x0114, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgStat1() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgStat1Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7519,7 +7550,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgStat1Loc() not defined for this board version");
       };
    };
 
@@ -7533,7 +7564,7 @@ public:
          case 9:
             return BitExtractStatus(0x0118, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgStat2() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgStat2Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7549,7 +7580,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0118;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgStat2Loc() not defined for this board version");
       };
    };
 
@@ -7563,7 +7594,7 @@ public:
          case 9:
             return BitExtractStatus(0x011C, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgStat3() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgStat3Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7579,7 +7610,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x011C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgStat3Loc() not defined for this board version");
       };
    };
 
@@ -7593,7 +7624,7 @@ public:
          case 9:
             return BitExtractStatus(0x0120, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgStat4() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgStat4Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7609,7 +7640,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0120;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgStat4Loc() not defined for this board version");
       };
    };
 
@@ -7623,10 +7654,10 @@ public:
          case 9:
             return BitExtractControl(0x11F8, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgTdcChMask() not defined for this board version");
       };
    };
-   unsigned int SetAdvTrgTdcChMask(unsigned int value)
+   void SetAdvTrgTdcChMask(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -7635,7 +7666,7 @@ public:
          case 9:
             return SetRegMask(0x11F8, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdvTrgTdcChMask() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgTdcChMaskLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7651,7 +7682,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11F8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgTdcChMaskLoc() not defined for this board version");
       };
    };
 
@@ -7665,10 +7696,10 @@ public:
          case 9:
             return BitExtractControl(0x11E4, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgThr0() not defined for this board version");
       };
    };
-   unsigned int SetAdvTrgThr0(unsigned int value)
+   void SetAdvTrgThr0(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -7677,7 +7708,7 @@ public:
          case 9:
             return SetRegMask(0x11E4, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdvTrgThr0() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgThr0Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7693,7 +7724,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11E4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgThr0Loc() not defined for this board version");
       };
    };
 
@@ -7707,10 +7738,10 @@ public:
          case 9:
             return BitExtractControl(0x11E8, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgThr1() not defined for this board version");
       };
    };
-   unsigned int SetAdvTrgThr1(unsigned int value)
+   void SetAdvTrgThr1(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -7719,7 +7750,7 @@ public:
          case 9:
             return SetRegMask(0x11E8, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdvTrgThr1() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgThr1Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7735,7 +7766,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11E8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgThr1Loc() not defined for this board version");
       };
    };
 
@@ -7749,10 +7780,10 @@ public:
          case 9:
             return BitExtractControl(0x11EC, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgThr2() not defined for this board version");
       };
    };
-   unsigned int SetAdvTrgThr2(unsigned int value)
+   void SetAdvTrgThr2(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -7761,7 +7792,7 @@ public:
          case 9:
             return SetRegMask(0x11EC, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdvTrgThr2() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgThr2Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7777,7 +7808,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11EC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgThr2Loc() not defined for this board version");
       };
    };
 
@@ -7791,7 +7822,7 @@ public:
          case 9:
             return BitExtractStatus(0x0110, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgTrigCell() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgTrigCellLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7807,7 +7838,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0110;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgTrigCellLoc() not defined for this board version");
       };
    };
 
@@ -7821,10 +7852,10 @@ public:
          case 9:
             return BitExtractControl(0x11F0, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgTxChkWord0() not defined for this board version");
       };
    };
-   unsigned int SetAdvTrgTxChkWord0(unsigned int value)
+   void SetAdvTrgTxChkWord0(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -7833,7 +7864,7 @@ public:
          case 9:
             return SetRegMask(0x11F0, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdvTrgTxChkWord0() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgTxChkWord0Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7849,7 +7880,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11F0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgTxChkWord0Loc() not defined for this board version");
       };
    };
 
@@ -7863,10 +7894,10 @@ public:
          case 9:
             return BitExtractControl(0x11F4, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgTxChkWord1() not defined for this board version");
       };
    };
-   unsigned int SetAdvTrgTxChkWord1(unsigned int value)
+   void SetAdvTrgTxChkWord1(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -7875,7 +7906,7 @@ public:
          case 9:
             return SetRegMask(0x11F4, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAdvTrgTxChkWord1() not defined for this board version");
       };
    };
    unsigned int GetAdvTrgTxChkWord1Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7891,7 +7922,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11F4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgTxChkWord1Loc() not defined for this board version");
       };
    };
 
@@ -7904,10 +7935,10 @@ public:
          case 9:
             return BitExtractControl(0x1044, 0x00000002, 1);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetApplySettingsAdc() not defined for this board version");
       };
    };
-   unsigned int SetApplySettingsAdc(unsigned int value)
+   void SetApplySettingsAdc(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -7915,7 +7946,7 @@ public:
          case 9:
             return SetRegMask(0x1044, 0x00000002, 1, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetApplySettingsAdc() not defined for this board version");
       };
    };
    unsigned int GetApplySettingsAdcLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7928,7 +7959,7 @@ public:
             if(BitOfs) *BitOfs = 1;
             return 0x1044;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetApplySettingsAdcLoc() not defined for this board version");
       };
    };
 
@@ -7941,10 +7972,10 @@ public:
          case 9:
             return BitExtractControl(0x1044, 0x00000100, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetApplySettingsAdcSampleDiv() not defined for this board version");
       };
    };
-   unsigned int SetApplySettingsAdcSampleDiv(unsigned int value)
+   void SetApplySettingsAdcSampleDiv(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -7952,7 +7983,7 @@ public:
          case 9:
             return SetRegMask(0x1044, 0x00000100, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetApplySettingsAdcSampleDiv() not defined for this board version");
       };
    };
    unsigned int GetApplySettingsAdcSampleDivLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -7965,7 +7996,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1044;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetApplySettingsAdcSampleDivLoc() not defined for this board version");
       };
    };
 
@@ -7978,10 +8009,10 @@ public:
          case 9:
             return BitExtractControl(0x1044, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetApplySettingsCtrl() not defined for this board version");
       };
    };
-   unsigned int SetApplySettingsCtrl(unsigned int value)
+   void SetApplySettingsCtrl(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -7989,7 +8020,7 @@ public:
          case 9:
             return SetRegMask(0x1044, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetApplySettingsCtrl() not defined for this board version");
       };
    };
    unsigned int GetApplySettingsCtrlLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8002,7 +8033,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1044;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetApplySettingsCtrlLoc() not defined for this board version");
       };
    };
 
@@ -8015,10 +8046,10 @@ public:
          case 9:
             return BitExtractControl(0x1044, 0x00000010, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetApplySettingsDac() not defined for this board version");
       };
    };
-   unsigned int SetApplySettingsDac(unsigned int value)
+   void SetApplySettingsDac(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -8026,7 +8057,7 @@ public:
          case 9:
             return SetRegMask(0x1044, 0x00000010, 4, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetApplySettingsDac() not defined for this board version");
       };
    };
    unsigned int GetApplySettingsDacLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8039,7 +8070,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x1044;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetApplySettingsDacLoc() not defined for this board version");
       };
    };
 
@@ -8052,10 +8083,10 @@ public:
          case 9:
             return BitExtractControl(0x1044, 0x00000020, 5);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetApplySettingsDrs() not defined for this board version");
       };
    };
-   unsigned int SetApplySettingsDrs(unsigned int value)
+   void SetApplySettingsDrs(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -8063,7 +8094,7 @@ public:
          case 9:
             return SetRegMask(0x1044, 0x00000020, 5, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetApplySettingsDrs() not defined for this board version");
       };
    };
    unsigned int GetApplySettingsDrsLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8076,7 +8107,7 @@ public:
             if(BitOfs) *BitOfs = 5;
             return 0x1044;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetApplySettingsDrsLoc() not defined for this board version");
       };
    };
 
@@ -8089,10 +8120,10 @@ public:
          case 9:
             return BitExtractControl(0x1044, 0x00000008, 3);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetApplySettingsFrontend() not defined for this board version");
       };
    };
-   unsigned int SetApplySettingsFrontend(unsigned int value)
+   void SetApplySettingsFrontend(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -8100,7 +8131,7 @@ public:
          case 9:
             return SetRegMask(0x1044, 0x00000008, 3, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetApplySettingsFrontend() not defined for this board version");
       };
    };
    unsigned int GetApplySettingsFrontendLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8113,7 +8144,7 @@ public:
             if(BitOfs) *BitOfs = 3;
             return 0x1044;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetApplySettingsFrontendLoc() not defined for this board version");
       };
    };
 
@@ -8126,10 +8157,10 @@ public:
          case 9:
             return BitExtractControl(0x1044, 0x00000040, 6);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetApplySettingsHv() not defined for this board version");
       };
    };
-   unsigned int SetApplySettingsHv(unsigned int value)
+   void SetApplySettingsHv(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -8137,7 +8168,7 @@ public:
          case 9:
             return SetRegMask(0x1044, 0x00000040, 6, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetApplySettingsHv() not defined for this board version");
       };
    };
    unsigned int GetApplySettingsHvLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8150,7 +8181,7 @@ public:
             if(BitOfs) *BitOfs = 6;
             return 0x1044;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetApplySettingsHvLoc() not defined for this board version");
       };
    };
 
@@ -8163,10 +8194,10 @@ public:
          case 9:
             return BitExtractControl(0x1044, 0x00000001, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetApplySettingsLmk() not defined for this board version");
       };
    };
-   unsigned int SetApplySettingsLmk(unsigned int value)
+   void SetApplySettingsLmk(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -8174,7 +8205,7 @@ public:
          case 9:
             return SetRegMask(0x1044, 0x00000001, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetApplySettingsLmk() not defined for this board version");
       };
    };
    unsigned int GetApplySettingsLmkLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8187,7 +8218,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1044;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetApplySettingsLmkLoc() not defined for this board version");
       };
    };
 
@@ -8200,10 +8231,10 @@ public:
          case 9:
             return BitExtractControl(0x1044, 0x00000080, 7);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetApplySettingsMaxPldSize() not defined for this board version");
       };
    };
-   unsigned int SetApplySettingsMaxPldSize(unsigned int value)
+   void SetApplySettingsMaxPldSize(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -8211,7 +8242,7 @@ public:
          case 9:
             return SetRegMask(0x1044, 0x00000080, 7, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetApplySettingsMaxPldSize() not defined for this board version");
       };
    };
    unsigned int GetApplySettingsMaxPldSizeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8224,7 +8255,7 @@ public:
             if(BitOfs) *BitOfs = 7;
             return 0x1044;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetApplySettingsMaxPldSizeLoc() not defined for this board version");
       };
    };
 
@@ -8238,10 +8269,10 @@ public:
          case 9:
             return BitExtractControl(0x112C, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAutoTriggerPeriod() not defined for this board version");
       };
    };
-   unsigned int SetAutoTriggerPeriod(unsigned int value)
+   void SetAutoTriggerPeriod(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -8250,7 +8281,7 @@ public:
          case 9:
             return SetRegMask(0x112C, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetAutoTriggerPeriod() not defined for this board version");
       };
    };
    unsigned int GetAutoTriggerPeriodLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8266,7 +8297,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x112C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAutoTriggerPeriodLoc() not defined for this board version");
       };
    };
 
@@ -8279,7 +8310,7 @@ public:
          case 9:
             return BitExtractStatus(0x0028, 0x00000001, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetBackplanePlugged() not defined for this board version");
       };
    };
    unsigned int GetBackplanePluggedLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8292,7 +8323,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0028;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetBackplanePluggedLoc() not defined for this board version");
       };
    };
 
@@ -8305,7 +8336,7 @@ public:
          case 9:
             return BitExtractStatus(0x0000, 0xFF000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetBoardMagic() not defined for this board version");
       };
    };
    unsigned int GetBoardMagicLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8318,7 +8349,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x0000;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetBoardMagicLoc() not defined for this board version");
       };
    };
 
@@ -8331,7 +8362,7 @@ public:
          case 9:
             return BitExtractStatus(0x0000, 0x000000FC, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetBoardRevision() not defined for this board version");
       };
    };
    unsigned int GetBoardRevisionLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8344,7 +8375,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x0000;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetBoardRevisionLoc() not defined for this board version");
       };
    };
 
@@ -8357,7 +8388,7 @@ public:
          case 9:
             return BitExtractStatus(0x0028, 0x00000100, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetBoardSel() not defined for this board version");
       };
    };
    unsigned int GetBoardSelLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8370,7 +8401,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x0028;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetBoardSelLoc() not defined for this board version");
       };
    };
 
@@ -8383,7 +8414,7 @@ public:
          case 9:
             return BitExtractStatus(0x0000, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetBoardType() not defined for this board version");
       };
    };
    unsigned int GetBoardTypeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8396,7 +8427,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x0000;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetBoardTypeLoc() not defined for this board version");
       };
    };
 
@@ -8409,7 +8440,7 @@ public:
          case 9:
             return BitExtractStatus(0x0000, 0x00000003, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetBoardVariant() not defined for this board version");
       };
    };
    unsigned int GetBoardVariantLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8422,7 +8453,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0000;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetBoardVariantLoc() not defined for this board version");
       };
    };
 
@@ -8435,10 +8466,10 @@ public:
          case 9:
             return BitExtractControl(0x1008, 0x00000002, 1);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetCalibBufferEn() not defined for this board version");
       };
    };
-   unsigned int SetCalibBufferEn(unsigned int value)
+   void SetCalibBufferEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -8446,7 +8477,7 @@ public:
          case 9:
             return SetRegMask(0x1008, 0x00000002, 1, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetCalibBufferEn() not defined for this board version");
       };
    };
    unsigned int GetCalibBufferEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8459,7 +8490,7 @@ public:
             if(BitOfs) *BitOfs = 1;
             return 0x1008;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetCalibBufferEnLoc() not defined for this board version");
       };
    };
 
@@ -8473,7 +8504,7 @@ public:
          case 9:
             return BitExtractStatus(0x0134, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetClkSelAndDrsClkDivMod() not defined for this board version");
       };
    };
    unsigned int GetClkSelAndDrsClkDivModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8489,7 +8520,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x0134;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetClkSelAndDrsClkDivModLoc() not defined for this board version");
       };
    };
 
@@ -8503,7 +8534,7 @@ public:
          case 9:
             return BitExtractStatus(0x00F8, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetCompChStat() not defined for this board version");
       };
    };
    unsigned int GetCompChStatLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8519,7 +8550,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00F8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetCompChStatLoc() not defined for this board version");
       };
    };
 
@@ -8532,10 +8563,10 @@ public:
          case 9:
             return BitExtractControl(0x1004, 0x00000200, 9);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetCompPowerEn() not defined for this board version");
       };
    };
-   unsigned int SetCompPowerEn(unsigned int value)
+   void SetCompPowerEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -8543,7 +8574,7 @@ public:
          case 9:
             return SetRegMask(0x1004, 0x00000200, 9, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetCompPowerEn() not defined for this board version");
       };
    };
    unsigned int GetCompPowerEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8556,7 +8587,7 @@ public:
             if(BitOfs) *BitOfs = 9;
             return 0x1004;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetCompPowerEnLoc() not defined for this board version");
       };
    };
 
@@ -8569,10 +8600,10 @@ public:
          case 9:
             return BitExtractControl(0x1018, 0x0003FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetComPldSize() not defined for this board version");
       };
    };
-   unsigned int SetComPldSize(unsigned int value)
+   void SetComPldSize(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -8580,7 +8611,7 @@ public:
          case 9:
             return SetRegMask(0x1018, 0x0003FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetComPldSize() not defined for this board version");
       };
    };
    unsigned int GetComPldSizeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8593,7 +8624,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1018;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetComPldSizeLoc() not defined for this board version");
       };
    };
 
@@ -8607,7 +8638,7 @@ public:
          case 9:
             return BitExtractStatus(0x013C, 0x0000000F, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetComPldSizeMod() not defined for this board version");
       };
    };
    unsigned int GetComPldSizeModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8623,7 +8654,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x013C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetComPldSizeModLoc() not defined for this board version");
       };
    };
 
@@ -8636,10 +8667,10 @@ public:
          case 9:
             return BitExtractControl(0x1000, 0x00FF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetCrateId() not defined for this board version");
       };
    };
-   unsigned int SetCrateId(unsigned int value)
+   void SetCrateId(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -8647,7 +8678,7 @@ public:
          case 9:
             return SetRegMask(0x1000, 0x00FF0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetCrateId() not defined for this board version");
       };
    };
    unsigned int GetCrateIdLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8660,7 +8691,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1000;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetCrateIdLoc() not defined for this board version");
       };
    };
 
@@ -8674,10 +8705,10 @@ public:
          case 9:
             return BitExtractControl(0x1228, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetCrc32RegBank() not defined for this board version");
       };
    };
-   unsigned int SetCrc32RegBank(unsigned int value)
+   void SetCrc32RegBank(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -8686,7 +8717,7 @@ public:
          case 9:
             return SetRegMask(0x1228, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetCrc32RegBank() not defined for this board version");
       };
    };
    unsigned int GetCrc32RegBankLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8702,7 +8733,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1228;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetCrc32RegBankLoc() not defined for this board version");
       };
    };
 
@@ -8716,7 +8747,7 @@ public:
          case 9:
             return BitExtractStatus(0x0144, 0xC0000000, 30);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0AMod() not defined for this board version");
       };
    };
    unsigned int GetDac0AModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8732,7 +8763,7 @@ public:
             if(BitOfs) *BitOfs = 30;
             return 0x0144;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0AModLoc() not defined for this board version");
       };
    };
 
@@ -8746,7 +8777,7 @@ public:
          case 9:
             return BitExtractStatus(0x0144, 0x30000000, 28);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0BMod() not defined for this board version");
       };
    };
    unsigned int GetDac0BModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8762,7 +8793,7 @@ public:
             if(BitOfs) *BitOfs = 28;
             return 0x0144;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0BModLoc() not defined for this board version");
       };
    };
 
@@ -8775,10 +8806,10 @@ public:
          case 9:
             return BitExtractControl(0x1048, 0xFFFF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0ChA() not defined for this board version");
       };
    };
-   unsigned int SetDac0ChA(unsigned int value)
+   void SetDac0ChA(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -8786,7 +8817,7 @@ public:
          case 9:
             return SetRegMask(0x1048, 0xFFFF0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac0ChA() not defined for this board version");
       };
    };
    unsigned int GetDac0ChALoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8799,7 +8830,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1048;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0ChALoc() not defined for this board version");
       };
    };
 
@@ -8812,10 +8843,10 @@ public:
          case 9:
             return BitExtractControl(0x1048, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0ChB() not defined for this board version");
       };
    };
-   unsigned int SetDac0ChB(unsigned int value)
+   void SetDac0ChB(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -8823,7 +8854,7 @@ public:
          case 9:
             return SetRegMask(0x1048, 0x0000FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac0ChB() not defined for this board version");
       };
    };
    unsigned int GetDac0ChBLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8836,7 +8867,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1048;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0ChBLoc() not defined for this board version");
       };
    };
 
@@ -8849,10 +8880,10 @@ public:
          case 9:
             return BitExtractControl(0x104C, 0xFFFF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0ChC() not defined for this board version");
       };
    };
-   unsigned int SetDac0ChC(unsigned int value)
+   void SetDac0ChC(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -8860,7 +8891,7 @@ public:
          case 9:
             return SetRegMask(0x104C, 0xFFFF0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac0ChC() not defined for this board version");
       };
    };
    unsigned int GetDac0ChCLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8873,7 +8904,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x104C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0ChCLoc() not defined for this board version");
       };
    };
 
@@ -8886,10 +8917,10 @@ public:
          case 9:
             return BitExtractControl(0x104C, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0ChD() not defined for this board version");
       };
    };
-   unsigned int SetDac0ChD(unsigned int value)
+   void SetDac0ChD(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -8897,7 +8928,7 @@ public:
          case 9:
             return SetRegMask(0x104C, 0x0000FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac0ChD() not defined for this board version");
       };
    };
    unsigned int GetDac0ChDLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8910,7 +8941,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x104C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0ChDLoc() not defined for this board version");
       };
    };
 
@@ -8923,10 +8954,10 @@ public:
          case 9:
             return BitExtractControl(0x1050, 0xFFFF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0ChE() not defined for this board version");
       };
    };
-   unsigned int SetDac0ChE(unsigned int value)
+   void SetDac0ChE(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -8934,7 +8965,7 @@ public:
          case 9:
             return SetRegMask(0x1050, 0xFFFF0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac0ChE() not defined for this board version");
       };
    };
    unsigned int GetDac0ChELoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8947,7 +8978,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1050;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0ChELoc() not defined for this board version");
       };
    };
 
@@ -8960,10 +8991,10 @@ public:
          case 9:
             return BitExtractControl(0x1050, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0ChF() not defined for this board version");
       };
    };
-   unsigned int SetDac0ChF(unsigned int value)
+   void SetDac0ChF(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -8971,7 +9002,7 @@ public:
          case 9:
             return SetRegMask(0x1050, 0x0000FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac0ChF() not defined for this board version");
       };
    };
    unsigned int GetDac0ChFLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -8984,7 +9015,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1050;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0ChFLoc() not defined for this board version");
       };
    };
 
@@ -8997,10 +9028,10 @@ public:
          case 9:
             return BitExtractControl(0x1054, 0xFFFF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0ChG() not defined for this board version");
       };
    };
-   unsigned int SetDac0ChG(unsigned int value)
+   void SetDac0ChG(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -9008,7 +9039,7 @@ public:
          case 9:
             return SetRegMask(0x1054, 0xFFFF0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac0ChG() not defined for this board version");
       };
    };
    unsigned int GetDac0ChGLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9021,7 +9052,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1054;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0ChGLoc() not defined for this board version");
       };
    };
 
@@ -9034,10 +9065,10 @@ public:
          case 9:
             return BitExtractControl(0x1054, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0ChH() not defined for this board version");
       };
    };
-   unsigned int SetDac0ChH(unsigned int value)
+   void SetDac0ChH(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -9045,7 +9076,7 @@ public:
          case 9:
             return SetRegMask(0x1054, 0x0000FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac0ChH() not defined for this board version");
       };
    };
    unsigned int GetDac0ChHLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9058,7 +9089,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1054;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0ChHLoc() not defined for this board version");
       };
    };
 
@@ -9072,7 +9103,7 @@ public:
          case 9:
             return BitExtractStatus(0x0144, 0x0C000000, 26);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0CMod() not defined for this board version");
       };
    };
    unsigned int GetDac0CModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9088,7 +9119,7 @@ public:
             if(BitOfs) *BitOfs = 26;
             return 0x0144;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0CModLoc() not defined for this board version");
       };
    };
 
@@ -9102,7 +9133,7 @@ public:
          case 9:
             return BitExtractStatus(0x0144, 0x03000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0DMod() not defined for this board version");
       };
    };
    unsigned int GetDac0DModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9118,7 +9149,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x0144;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0DModLoc() not defined for this board version");
       };
    };
 
@@ -9132,7 +9163,7 @@ public:
          case 9:
             return BitExtractStatus(0x0144, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0EMod() not defined for this board version");
       };
    };
    unsigned int GetDac0EModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9148,7 +9179,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x0144;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0EModLoc() not defined for this board version");
       };
    };
 
@@ -9162,7 +9193,7 @@ public:
          case 9:
             return BitExtractStatus(0x0144, 0x00300000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0FMod() not defined for this board version");
       };
    };
    unsigned int GetDac0FModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9178,7 +9209,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x0144;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0FModLoc() not defined for this board version");
       };
    };
 
@@ -9192,7 +9223,7 @@ public:
          case 9:
             return BitExtractStatus(0x0144, 0x000C0000, 18);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0GMod() not defined for this board version");
       };
    };
    unsigned int GetDac0GModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9208,7 +9239,7 @@ public:
             if(BitOfs) *BitOfs = 18;
             return 0x0144;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0GModLoc() not defined for this board version");
       };
    };
 
@@ -9222,7 +9253,7 @@ public:
          case 9:
             return BitExtractStatus(0x0144, 0x00030000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0HMod() not defined for this board version");
       };
    };
    unsigned int GetDac0HModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9238,7 +9269,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x0144;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac0HModLoc() not defined for this board version");
       };
    };
 
@@ -9252,7 +9283,7 @@ public:
          case 9:
             return BitExtractStatus(0x0144, 0x0000C000, 14);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1AMod() not defined for this board version");
       };
    };
    unsigned int GetDac1AModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9268,7 +9299,7 @@ public:
             if(BitOfs) *BitOfs = 14;
             return 0x0144;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1AModLoc() not defined for this board version");
       };
    };
 
@@ -9282,7 +9313,7 @@ public:
          case 9:
             return BitExtractStatus(0x0144, 0x00003000, 12);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1BMod() not defined for this board version");
       };
    };
    unsigned int GetDac1BModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9298,7 +9329,7 @@ public:
             if(BitOfs) *BitOfs = 12;
             return 0x0144;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1BModLoc() not defined for this board version");
       };
    };
 
@@ -9311,10 +9342,10 @@ public:
          case 9:
             return BitExtractControl(0x1058, 0xFFFF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1ChA() not defined for this board version");
       };
    };
-   unsigned int SetDac1ChA(unsigned int value)
+   void SetDac1ChA(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -9322,7 +9353,7 @@ public:
          case 9:
             return SetRegMask(0x1058, 0xFFFF0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac1ChA() not defined for this board version");
       };
    };
    unsigned int GetDac1ChALoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9335,7 +9366,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1058;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1ChALoc() not defined for this board version");
       };
    };
 
@@ -9348,10 +9379,10 @@ public:
          case 9:
             return BitExtractControl(0x1058, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1ChB() not defined for this board version");
       };
    };
-   unsigned int SetDac1ChB(unsigned int value)
+   void SetDac1ChB(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -9359,7 +9390,7 @@ public:
          case 9:
             return SetRegMask(0x1058, 0x0000FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac1ChB() not defined for this board version");
       };
    };
    unsigned int GetDac1ChBLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9372,7 +9403,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1058;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1ChBLoc() not defined for this board version");
       };
    };
 
@@ -9385,10 +9416,10 @@ public:
          case 9:
             return BitExtractControl(0x105C, 0xFFFF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1ChC() not defined for this board version");
       };
    };
-   unsigned int SetDac1ChC(unsigned int value)
+   void SetDac1ChC(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -9396,7 +9427,7 @@ public:
          case 9:
             return SetRegMask(0x105C, 0xFFFF0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac1ChC() not defined for this board version");
       };
    };
    unsigned int GetDac1ChCLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9409,7 +9440,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x105C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1ChCLoc() not defined for this board version");
       };
    };
 
@@ -9422,10 +9453,10 @@ public:
          case 9:
             return BitExtractControl(0x105C, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1ChD() not defined for this board version");
       };
    };
-   unsigned int SetDac1ChD(unsigned int value)
+   void SetDac1ChD(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -9433,7 +9464,7 @@ public:
          case 9:
             return SetRegMask(0x105C, 0x0000FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac1ChD() not defined for this board version");
       };
    };
    unsigned int GetDac1ChDLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9446,7 +9477,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x105C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1ChDLoc() not defined for this board version");
       };
    };
 
@@ -9459,10 +9490,10 @@ public:
          case 9:
             return BitExtractControl(0x1060, 0xFFFF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1ChE() not defined for this board version");
       };
    };
-   unsigned int SetDac1ChE(unsigned int value)
+   void SetDac1ChE(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -9470,7 +9501,7 @@ public:
          case 9:
             return SetRegMask(0x1060, 0xFFFF0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac1ChE() not defined for this board version");
       };
    };
    unsigned int GetDac1ChELoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9483,7 +9514,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1060;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1ChELoc() not defined for this board version");
       };
    };
 
@@ -9496,10 +9527,10 @@ public:
          case 9:
             return BitExtractControl(0x1060, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1ChF() not defined for this board version");
       };
    };
-   unsigned int SetDac1ChF(unsigned int value)
+   void SetDac1ChF(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -9507,7 +9538,7 @@ public:
          case 9:
             return SetRegMask(0x1060, 0x0000FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac1ChF() not defined for this board version");
       };
    };
    unsigned int GetDac1ChFLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9520,7 +9551,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1060;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1ChFLoc() not defined for this board version");
       };
    };
 
@@ -9533,10 +9564,10 @@ public:
          case 9:
             return BitExtractControl(0x1064, 0xFFFF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1ChG() not defined for this board version");
       };
    };
-   unsigned int SetDac1ChG(unsigned int value)
+   void SetDac1ChG(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -9544,7 +9575,7 @@ public:
          case 9:
             return SetRegMask(0x1064, 0xFFFF0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac1ChG() not defined for this board version");
       };
    };
    unsigned int GetDac1ChGLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9557,7 +9588,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1064;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1ChGLoc() not defined for this board version");
       };
    };
 
@@ -9570,10 +9601,10 @@ public:
          case 9:
             return BitExtractControl(0x1064, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1ChH() not defined for this board version");
       };
    };
-   unsigned int SetDac1ChH(unsigned int value)
+   void SetDac1ChH(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -9581,7 +9612,7 @@ public:
          case 9:
             return SetRegMask(0x1064, 0x0000FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac1ChH() not defined for this board version");
       };
    };
    unsigned int GetDac1ChHLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9594,7 +9625,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1064;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1ChHLoc() not defined for this board version");
       };
    };
 
@@ -9608,7 +9639,7 @@ public:
          case 9:
             return BitExtractStatus(0x0144, 0x00000C00, 10);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1CMod() not defined for this board version");
       };
    };
    unsigned int GetDac1CModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9624,7 +9655,7 @@ public:
             if(BitOfs) *BitOfs = 10;
             return 0x0144;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1CModLoc() not defined for this board version");
       };
    };
 
@@ -9638,7 +9669,7 @@ public:
          case 9:
             return BitExtractStatus(0x0144, 0x00000300, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1DMod() not defined for this board version");
       };
    };
    unsigned int GetDac1DModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9654,7 +9685,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x0144;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1DModLoc() not defined for this board version");
       };
    };
 
@@ -9668,7 +9699,7 @@ public:
          case 9:
             return BitExtractStatus(0x0144, 0x000000C0, 6);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1EMod() not defined for this board version");
       };
    };
    unsigned int GetDac1EModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9684,7 +9715,7 @@ public:
             if(BitOfs) *BitOfs = 6;
             return 0x0144;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1EModLoc() not defined for this board version");
       };
    };
 
@@ -9698,7 +9729,7 @@ public:
          case 9:
             return BitExtractStatus(0x0144, 0x00000030, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1FMod() not defined for this board version");
       };
    };
    unsigned int GetDac1FModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9714,7 +9745,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x0144;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1FModLoc() not defined for this board version");
       };
    };
 
@@ -9728,7 +9759,7 @@ public:
          case 9:
             return BitExtractStatus(0x0144, 0x0000000C, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1GMod() not defined for this board version");
       };
    };
    unsigned int GetDac1GModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9744,7 +9775,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x0144;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1GModLoc() not defined for this board version");
       };
    };
 
@@ -9758,7 +9789,7 @@ public:
          case 9:
             return BitExtractStatus(0x0144, 0x00000003, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1HMod() not defined for this board version");
       };
    };
    unsigned int GetDac1HModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9774,7 +9805,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0144;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac1HModLoc() not defined for this board version");
       };
    };
 
@@ -9788,7 +9819,7 @@ public:
          case 9:
             return BitExtractStatus(0x0148, 0xC0000000, 30);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2AMod() not defined for this board version");
       };
    };
    unsigned int GetDac2AModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9804,7 +9835,7 @@ public:
             if(BitOfs) *BitOfs = 30;
             return 0x0148;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2AModLoc() not defined for this board version");
       };
    };
 
@@ -9818,7 +9849,7 @@ public:
          case 9:
             return BitExtractStatus(0x0148, 0x30000000, 28);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2BMod() not defined for this board version");
       };
    };
    unsigned int GetDac2BModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9834,7 +9865,7 @@ public:
             if(BitOfs) *BitOfs = 28;
             return 0x0148;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2BModLoc() not defined for this board version");
       };
    };
 
@@ -9847,10 +9878,10 @@ public:
          case 9:
             return BitExtractControl(0x1068, 0xFFFF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2ChA() not defined for this board version");
       };
    };
-   unsigned int SetDac2ChA(unsigned int value)
+   void SetDac2ChA(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -9858,7 +9889,7 @@ public:
          case 9:
             return SetRegMask(0x1068, 0xFFFF0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac2ChA() not defined for this board version");
       };
    };
    unsigned int GetDac2ChALoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9871,7 +9902,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1068;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2ChALoc() not defined for this board version");
       };
    };
 
@@ -9884,10 +9915,10 @@ public:
          case 9:
             return BitExtractControl(0x1068, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2ChB() not defined for this board version");
       };
    };
-   unsigned int SetDac2ChB(unsigned int value)
+   void SetDac2ChB(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -9895,7 +9926,7 @@ public:
          case 9:
             return SetRegMask(0x1068, 0x0000FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac2ChB() not defined for this board version");
       };
    };
    unsigned int GetDac2ChBLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9908,7 +9939,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1068;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2ChBLoc() not defined for this board version");
       };
    };
 
@@ -9921,10 +9952,10 @@ public:
          case 9:
             return BitExtractControl(0x106C, 0xFFFF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2ChC() not defined for this board version");
       };
    };
-   unsigned int SetDac2ChC(unsigned int value)
+   void SetDac2ChC(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -9932,7 +9963,7 @@ public:
          case 9:
             return SetRegMask(0x106C, 0xFFFF0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac2ChC() not defined for this board version");
       };
    };
    unsigned int GetDac2ChCLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9945,7 +9976,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x106C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2ChCLoc() not defined for this board version");
       };
    };
 
@@ -9958,10 +9989,10 @@ public:
          case 9:
             return BitExtractControl(0x106C, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2ChD() not defined for this board version");
       };
    };
-   unsigned int SetDac2ChD(unsigned int value)
+   void SetDac2ChD(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -9969,7 +10000,7 @@ public:
          case 9:
             return SetRegMask(0x106C, 0x0000FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac2ChD() not defined for this board version");
       };
    };
    unsigned int GetDac2ChDLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -9982,7 +10013,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x106C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2ChDLoc() not defined for this board version");
       };
    };
 
@@ -9995,10 +10026,10 @@ public:
          case 9:
             return BitExtractControl(0x1070, 0xFFFF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2ChE() not defined for this board version");
       };
    };
-   unsigned int SetDac2ChE(unsigned int value)
+   void SetDac2ChE(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -10006,7 +10037,7 @@ public:
          case 9:
             return SetRegMask(0x1070, 0xFFFF0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac2ChE() not defined for this board version");
       };
    };
    unsigned int GetDac2ChELoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10019,7 +10050,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1070;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2ChELoc() not defined for this board version");
       };
    };
 
@@ -10032,10 +10063,10 @@ public:
          case 9:
             return BitExtractControl(0x1070, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2ChF() not defined for this board version");
       };
    };
-   unsigned int SetDac2ChF(unsigned int value)
+   void SetDac2ChF(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -10043,7 +10074,7 @@ public:
          case 9:
             return SetRegMask(0x1070, 0x0000FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac2ChF() not defined for this board version");
       };
    };
    unsigned int GetDac2ChFLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10056,7 +10087,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1070;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2ChFLoc() not defined for this board version");
       };
    };
 
@@ -10069,10 +10100,10 @@ public:
          case 9:
             return BitExtractControl(0x1074, 0xFFFF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2ChG() not defined for this board version");
       };
    };
-   unsigned int SetDac2ChG(unsigned int value)
+   void SetDac2ChG(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -10080,7 +10111,7 @@ public:
          case 9:
             return SetRegMask(0x1074, 0xFFFF0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac2ChG() not defined for this board version");
       };
    };
    unsigned int GetDac2ChGLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10093,7 +10124,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1074;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2ChGLoc() not defined for this board version");
       };
    };
 
@@ -10106,10 +10137,10 @@ public:
          case 9:
             return BitExtractControl(0x1074, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2ChH() not defined for this board version");
       };
    };
-   unsigned int SetDac2ChH(unsigned int value)
+   void SetDac2ChH(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -10117,7 +10148,7 @@ public:
          case 9:
             return SetRegMask(0x1074, 0x0000FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDac2ChH() not defined for this board version");
       };
    };
    unsigned int GetDac2ChHLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10130,7 +10161,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1074;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2ChHLoc() not defined for this board version");
       };
    };
 
@@ -10144,7 +10175,7 @@ public:
          case 9:
             return BitExtractStatus(0x0148, 0x0C000000, 26);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2CMod() not defined for this board version");
       };
    };
    unsigned int GetDac2CModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10160,7 +10191,7 @@ public:
             if(BitOfs) *BitOfs = 26;
             return 0x0148;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2CModLoc() not defined for this board version");
       };
    };
 
@@ -10174,7 +10205,7 @@ public:
          case 9:
             return BitExtractStatus(0x0148, 0x03000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2DMod() not defined for this board version");
       };
    };
    unsigned int GetDac2DModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10190,7 +10221,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x0148;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2DModLoc() not defined for this board version");
       };
    };
 
@@ -10204,7 +10235,7 @@ public:
          case 9:
             return BitExtractStatus(0x0148, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2EMod() not defined for this board version");
       };
    };
    unsigned int GetDac2EModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10220,7 +10251,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x0148;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2EModLoc() not defined for this board version");
       };
    };
 
@@ -10234,7 +10265,7 @@ public:
          case 9:
             return BitExtractStatus(0x0148, 0x00300000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2FMod() not defined for this board version");
       };
    };
    unsigned int GetDac2FModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10250,7 +10281,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x0148;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2FModLoc() not defined for this board version");
       };
    };
 
@@ -10264,7 +10295,7 @@ public:
          case 9:
             return BitExtractStatus(0x0148, 0x000C0000, 18);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2GMod() not defined for this board version");
       };
    };
    unsigned int GetDac2GModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10280,7 +10311,7 @@ public:
             if(BitOfs) *BitOfs = 18;
             return 0x0148;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2GModLoc() not defined for this board version");
       };
    };
 
@@ -10294,7 +10325,7 @@ public:
          case 9:
             return BitExtractStatus(0x0148, 0x00030000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2HMod() not defined for this board version");
       };
    };
    unsigned int GetDac2HModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10310,7 +10341,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x0148;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDac2HModLoc() not defined for this board version");
       };
    };
 
@@ -10323,10 +10354,10 @@ public:
          case 9:
             return BitExtractControl(0x1004, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDaqAuto() not defined for this board version");
       };
    };
-   unsigned int SetDaqAuto(unsigned int value)
+   void SetDaqAuto(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -10334,7 +10365,7 @@ public:
          case 9:
             return SetRegMask(0x1004, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDaqAuto() not defined for this board version");
       };
    };
    unsigned int GetDaqAutoLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10347,7 +10378,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1004;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDaqAutoLoc() not defined for this board version");
       };
    };
 
@@ -10361,7 +10392,7 @@ public:
          case 9:
             return BitExtractStatus(0x0028, 0x00000800, 11);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDaqClkDefPhaseChkd() not defined for this board version");
       };
    };
    unsigned int GetDaqClkDefPhaseChkdLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10377,7 +10408,7 @@ public:
             if(BitOfs) *BitOfs = 11;
             return 0x0028;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDaqClkDefPhaseChkdLoc() not defined for this board version");
       };
    };
 
@@ -10391,7 +10422,7 @@ public:
          case 9:
             return BitExtractStatus(0x0028, 0x00001000, 12);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDaqClkDefPhaseOk() not defined for this board version");
       };
    };
    unsigned int GetDaqClkDefPhaseOkLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10407,7 +10438,7 @@ public:
             if(BitOfs) *BitOfs = 12;
             return 0x0028;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDaqClkDefPhaseOkLoc() not defined for this board version");
       };
    };
 
@@ -10420,10 +10451,10 @@ public:
          case 9:
             return BitExtractControl(0x100C, 0x00020000, 17);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDaqClkSrcSel() not defined for this board version");
       };
    };
-   unsigned int SetDaqClkSrcSel(unsigned int value)
+   void SetDaqClkSrcSel(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -10431,7 +10462,7 @@ public:
          case 9:
             return SetRegMask(0x100C, 0x00020000, 17, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDaqClkSrcSel() not defined for this board version");
       };
    };
    unsigned int GetDaqClkSrcSelLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10444,7 +10475,7 @@ public:
             if(BitOfs) *BitOfs = 17;
             return 0x100C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDaqClkSrcSelLoc() not defined for this board version");
       };
    };
 
@@ -10457,10 +10488,10 @@ public:
          case 9:
             return BitExtractControl(0x1004, 0x00FF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDaqDataPhase() not defined for this board version");
       };
    };
-   unsigned int SetDaqDataPhase(unsigned int value)
+   void SetDaqDataPhase(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -10468,7 +10499,7 @@ public:
          case 9:
             return SetRegMask(0x1004, 0x00FF0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDaqDataPhase() not defined for this board version");
       };
    };
    unsigned int GetDaqDataPhaseLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10481,7 +10512,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1004;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDaqDataPhaseLoc() not defined for this board version");
       };
    };
 
@@ -10494,10 +10525,10 @@ public:
          case 9:
             return BitExtractControl(0x1004, 0x00000002, 1);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDaqNormal() not defined for this board version");
       };
    };
-   unsigned int SetDaqNormal(unsigned int value)
+   void SetDaqNormal(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -10505,7 +10536,7 @@ public:
          case 9:
             return SetRegMask(0x1004, 0x00000002, 1, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDaqNormal() not defined for this board version");
       };
    };
    unsigned int GetDaqNormalLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10518,7 +10549,7 @@ public:
             if(BitOfs) *BitOfs = 1;
             return 0x1004;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDaqNormalLoc() not defined for this board version");
       };
    };
 
@@ -10531,7 +10562,7 @@ public:
          case 9:
             return BitExtractStatus(0x002C, 0x00000080, 7);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDaqPllLock() not defined for this board version");
       };
    };
    unsigned int GetDaqPllLockLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10544,7 +10575,7 @@ public:
             if(BitOfs) *BitOfs = 7;
             return 0x002C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDaqPllLockLoc() not defined for this board version");
       };
    };
 
@@ -10557,10 +10588,10 @@ public:
          case 9:
             return BitExtractControl(0x1040, 0x00004000, 14);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDaqPllRst() not defined for this board version");
       };
    };
-   unsigned int SetDaqPllRst(unsigned int value)
+   void SetDaqPllRst(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -10568,7 +10599,7 @@ public:
          case 9:
             return SetRegMask(0x1040, 0x00004000, 14, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDaqPllRst() not defined for this board version");
       };
    };
    unsigned int GetDaqPllRstLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10581,7 +10612,7 @@ public:
             if(BitOfs) *BitOfs = 14;
             return 0x1040;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDaqPllRstLoc() not defined for this board version");
       };
    };
 
@@ -10594,10 +10625,10 @@ public:
          case 9:
             return BitExtractControl(0x1004, 0x00000001, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDaqSingle() not defined for this board version");
       };
    };
-   unsigned int SetDaqSingle(unsigned int value)
+   void SetDaqSingle(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -10605,7 +10636,7 @@ public:
          case 9:
             return SetRegMask(0x1004, 0x00000001, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDaqSingle() not defined for this board version");
       };
    };
    unsigned int GetDaqSingleLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10618,7 +10649,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1004;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDaqSingleLoc() not defined for this board version");
       };
    };
 
@@ -10631,10 +10662,10 @@ public:
          case 9:
             return BitExtractControl(0x1004, 0x00000020, 5);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDaqSoftTrigger() not defined for this board version");
       };
    };
-   unsigned int SetDaqSoftTrigger(unsigned int value)
+   void SetDaqSoftTrigger(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -10642,7 +10673,7 @@ public:
          case 9:
             return SetRegMask(0x1004, 0x00000020, 5, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDaqSoftTrigger() not defined for this board version");
       };
    };
    unsigned int GetDaqSoftTriggerLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10655,7 +10686,7 @@ public:
             if(BitOfs) *BitOfs = 5;
             return 0x1004;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDaqSoftTriggerLoc() not defined for this board version");
       };
    };
 
@@ -10668,10 +10699,10 @@ public:
          case 9:
             return BitExtractControl(0x1040, 0x00000010, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDataLinkIfRst() not defined for this board version");
       };
    };
-   unsigned int SetDataLinkIfRst(unsigned int value)
+   void SetDataLinkIfRst(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -10679,7 +10710,7 @@ public:
          case 9:
             return SetRegMask(0x1040, 0x00000010, 4, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDataLinkIfRst() not defined for this board version");
       };
    };
    unsigned int GetDataLinkIfRstLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10692,7 +10723,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x1040;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDataLinkIfRstLoc() not defined for this board version");
       };
    };
 
@@ -10705,10 +10736,10 @@ public:
          case 9:
             return BitExtractControl(0x1040, 0x00000800, 11);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDcbOserdesIfRst() not defined for this board version");
       };
    };
-   unsigned int SetDcbOserdesIfRst(unsigned int value)
+   void SetDcbOserdesIfRst(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -10716,7 +10747,7 @@ public:
          case 9:
             return SetRegMask(0x1040, 0x00000800, 11, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDcbOserdesIfRst() not defined for this board version");
       };
    };
    unsigned int GetDcbOserdesIfRstLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10729,7 +10760,7 @@ public:
             if(BitOfs) *BitOfs = 11;
             return 0x1040;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDcbOserdesIfRstLoc() not defined for this board version");
       };
    };
 
@@ -10742,10 +10773,10 @@ public:
          case 9:
             return BitExtractControl(0x1040, 0x00002000, 13);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDcbOserdesPllRst() not defined for this board version");
       };
    };
-   unsigned int SetDcbOserdesPllRst(unsigned int value)
+   void SetDcbOserdesPllRst(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -10753,7 +10784,7 @@ public:
          case 9:
             return SetRegMask(0x1040, 0x00002000, 13, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDcbOserdesPllRst() not defined for this board version");
       };
    };
    unsigned int GetDcbOserdesPllRstLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10766,7 +10797,7 @@ public:
             if(BitOfs) *BitOfs = 13;
             return 0x1040;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDcbOserdesPllRstLoc() not defined for this board version");
       };
    };
 
@@ -10779,10 +10810,10 @@ public:
          case 9:
             return BitExtractControl(0x1014, 0x80000000, 31);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDcbSerdesTrain() not defined for this board version");
       };
    };
-   unsigned int SetDcbSerdesTrain(unsigned int value)
+   void SetDcbSerdesTrain(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -10790,7 +10821,7 @@ public:
          case 9:
             return SetRegMask(0x1014, 0x80000000, 31, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDcbSerdesTrain() not defined for this board version");
       };
    };
    unsigned int GetDcbSerdesTrainLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10803,7 +10834,7 @@ public:
             if(BitOfs) *BitOfs = 31;
             return 0x1014;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDcbSerdesTrainLoc() not defined for this board version");
       };
    };
 
@@ -10816,10 +10847,10 @@ public:
          case 9:
             return BitExtractControl(0x1008, 0x00000008, 3);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrs0TimingRefSel() not defined for this board version");
       };
    };
-   unsigned int SetDrs0TimingRefSel(unsigned int value)
+   void SetDrs0TimingRefSel(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -10827,7 +10858,7 @@ public:
          case 9:
             return SetRegMask(0x1008, 0x00000008, 3, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDrs0TimingRefSel() not defined for this board version");
       };
    };
    unsigned int GetDrs0TimingRefSelLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10840,7 +10871,7 @@ public:
             if(BitOfs) *BitOfs = 3;
             return 0x1008;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrs0TimingRefSelLoc() not defined for this board version");
       };
    };
 
@@ -10853,10 +10884,10 @@ public:
          case 9:
             return BitExtractControl(0x1008, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrs1TimingRefSel() not defined for this board version");
       };
    };
-   unsigned int SetDrs1TimingRefSel(unsigned int value)
+   void SetDrs1TimingRefSel(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -10864,7 +10895,7 @@ public:
          case 9:
             return SetRegMask(0x1008, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDrs1TimingRefSel() not defined for this board version");
       };
    };
    unsigned int GetDrs1TimingRefSelLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10877,7 +10908,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1008;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrs1TimingRefSelLoc() not defined for this board version");
       };
    };
 
@@ -10890,10 +10921,10 @@ public:
          case 9:
             return BitExtractControl(0x101C, 0x0003FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsChTxEn() not defined for this board version");
       };
    };
-   unsigned int SetDrsChTxEn(unsigned int value)
+   void SetDrsChTxEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -10901,7 +10932,7 @@ public:
          case 9:
             return SetRegMask(0x101C, 0x0003FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDrsChTxEn() not defined for this board version");
       };
    };
    unsigned int GetDrsChTxEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10914,7 +10945,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x101C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsChTxEnLoc() not defined for this board version");
       };
    };
 
@@ -10927,10 +10958,10 @@ public:
          case 9:
             return BitExtractControl(0x1004, 0x00000400, 10);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsClrRsrAfterRo() not defined for this board version");
       };
    };
-   unsigned int SetDrsClrRsrAfterRo(unsigned int value)
+   void SetDrsClrRsrAfterRo(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -10938,7 +10969,7 @@ public:
          case 9:
             return SetRegMask(0x1004, 0x00000400, 10, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDrsClrRsrAfterRo() not defined for this board version");
       };
    };
    unsigned int GetDrsClrRsrAfterRoLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10951,7 +10982,7 @@ public:
             if(BitOfs) *BitOfs = 10;
             return 0x1004;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsClrRsrAfterRoLoc() not defined for this board version");
       };
    };
 
@@ -10964,10 +10995,10 @@ public:
          case 9:
             return BitExtractControl(0x1004, 0x00000040, 6);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsConfigure() not defined for this board version");
       };
    };
-   unsigned int SetDrsConfigure(unsigned int value)
+   void SetDrsConfigure(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -10975,7 +11006,7 @@ public:
          case 9:
             return SetRegMask(0x1004, 0x00000040, 6, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDrsConfigure() not defined for this board version");
       };
    };
    unsigned int GetDrsConfigureLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -10988,7 +11019,7 @@ public:
             if(BitOfs) *BitOfs = 6;
             return 0x1004;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsConfigureLoc() not defined for this board version");
       };
    };
 
@@ -11002,7 +11033,7 @@ public:
          case 9:
             return BitExtractStatus(0x0028, 0x00000200, 9);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsConfigDone() not defined for this board version");
       };
    };
    unsigned int GetDrsConfigDoneLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11018,7 +11049,7 @@ public:
             if(BitOfs) *BitOfs = 9;
             return 0x0028;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsConfigDoneLoc() not defined for this board version");
       };
    };
 
@@ -11031,7 +11062,7 @@ public:
          case 9:
             return BitExtractStatus(0x0028, 0x00000020, 5);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsCtrlBusy() not defined for this board version");
       };
    };
    unsigned int GetDrsCtrlBusyLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11044,7 +11075,7 @@ public:
             if(BitOfs) *BitOfs = 5;
             return 0x0028;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsCtrlBusyLoc() not defined for this board version");
       };
    };
 
@@ -11057,10 +11088,10 @@ public:
          case 9:
             return BitExtractControl(0x1040, 0x00000002, 1);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsCtrlFsmRst() not defined for this board version");
       };
    };
-   unsigned int SetDrsCtrlFsmRst(unsigned int value)
+   void SetDrsCtrlFsmRst(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -11068,7 +11099,7 @@ public:
          case 9:
             return SetRegMask(0x1040, 0x00000002, 1, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDrsCtrlFsmRst() not defined for this board version");
       };
    };
    unsigned int GetDrsCtrlFsmRstLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11081,7 +11112,7 @@ public:
             if(BitOfs) *BitOfs = 1;
             return 0x1040;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsCtrlFsmRstLoc() not defined for this board version");
       };
    };
 
@@ -11095,7 +11126,7 @@ public:
          case 9:
             return BitExtractStatus(0x0138, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsCtrlMod() not defined for this board version");
       };
    };
    unsigned int GetDrsCtrlModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11111,7 +11142,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x0138;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsCtrlModLoc() not defined for this board version");
       };
    };
 
@@ -11124,10 +11155,10 @@ public:
          case 9:
             return BitExtractControl(0x1010, 0x00010000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsDmode() not defined for this board version");
       };
    };
-   unsigned int SetDrsDmode(unsigned int value)
+   void SetDrsDmode(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -11135,7 +11166,7 @@ public:
          case 9:
             return SetRegMask(0x1010, 0x00010000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDrsDmode() not defined for this board version");
       };
    };
    unsigned int GetDrsDmodeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11148,7 +11179,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1010;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsDmodeLoc() not defined for this board version");
       };
    };
 
@@ -11161,10 +11192,10 @@ public:
          case 9:
             return BitExtractControl(0x1010, 0x00020000, 17);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsPllen() not defined for this board version");
       };
    };
-   unsigned int SetDrsPllen(unsigned int value)
+   void SetDrsPllen(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -11172,7 +11203,7 @@ public:
          case 9:
             return SetRegMask(0x1010, 0x00020000, 17, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDrsPllen() not defined for this board version");
       };
    };
    unsigned int GetDrsPllenLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11185,7 +11216,7 @@ public:
             if(BitOfs) *BitOfs = 17;
             return 0x1010;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsPllenLoc() not defined for this board version");
       };
    };
 
@@ -11198,7 +11229,7 @@ public:
          case 9:
             return BitExtractStatus(0x002C, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsPllLock0() not defined for this board version");
       };
    };
    unsigned int GetDrsPllLock0Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11211,7 +11242,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x002C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsPllLock0Loc() not defined for this board version");
       };
    };
 
@@ -11224,7 +11255,7 @@ public:
          case 9:
             return BitExtractStatus(0x002C, 0x00000002, 1);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsPllLock1() not defined for this board version");
       };
    };
    unsigned int GetDrsPllLock1Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11237,7 +11268,7 @@ public:
             if(BitOfs) *BitOfs = 1;
             return 0x002C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsPllLock1Loc() not defined for this board version");
       };
    };
 
@@ -11250,10 +11281,10 @@ public:
          case 9:
             return BitExtractControl(0x1004, 0x00000100, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsReadoutMode() not defined for this board version");
       };
    };
-   unsigned int SetDrsReadoutMode(unsigned int value)
+   void SetDrsReadoutMode(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -11261,7 +11292,7 @@ public:
          case 9:
             return SetRegMask(0x1004, 0x00000100, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDrsReadoutMode() not defined for this board version");
       };
    };
    unsigned int GetDrsReadoutModeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11274,7 +11305,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1004;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsReadoutModeLoc() not defined for this board version");
       };
    };
 
@@ -11287,7 +11318,7 @@ public:
          case 9:
             return BitExtractStatus(0x0038, 0x00FFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsSampleFreq() not defined for this board version");
       };
    };
    unsigned int GetDrsSampleFreqLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11300,7 +11331,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0038;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsSampleFreqLoc() not defined for this board version");
       };
    };
 
@@ -11313,7 +11344,7 @@ public:
          case 9:
             return BitExtractStatus(0x0030, 0x03FF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsStopCell0() not defined for this board version");
       };
    };
    unsigned int GetDrsStopCell0Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11326,7 +11357,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x0030;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsStopCell0Loc() not defined for this board version");
       };
    };
 
@@ -11339,7 +11370,7 @@ public:
          case 9:
             return BitExtractStatus(0x0030, 0x000003FF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsStopCell1() not defined for this board version");
       };
    };
    unsigned int GetDrsStopCell1Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11352,7 +11383,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0030;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsStopCell1Loc() not defined for this board version");
       };
    };
 
@@ -11365,7 +11396,7 @@ public:
          case 9:
             return BitExtractStatus(0x0034, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsStopWsr0() not defined for this board version");
       };
    };
    unsigned int GetDrsStopWsr0Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11378,7 +11409,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x0034;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsStopWsr0Loc() not defined for this board version");
       };
    };
 
@@ -11391,7 +11422,7 @@ public:
          case 9:
             return BitExtractStatus(0x0034, 0x000000FF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsStopWsr1() not defined for this board version");
       };
    };
    unsigned int GetDrsStopWsr1Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11404,7 +11435,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0034;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsStopWsr1Loc() not defined for this board version");
       };
    };
 
@@ -11417,10 +11448,10 @@ public:
          case 9:
             return BitExtractControl(0x1028, 0x000007FF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsTxSamples() not defined for this board version");
       };
    };
-   unsigned int SetDrsTxSamples(unsigned int value)
+   void SetDrsTxSamples(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -11428,7 +11459,7 @@ public:
          case 9:
             return SetRegMask(0x1028, 0x000007FF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDrsTxSamples() not defined for this board version");
       };
    };
    unsigned int GetDrsTxSamplesLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11441,7 +11472,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1028;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsTxSamplesLoc() not defined for this board version");
       };
    };
 
@@ -11454,10 +11485,10 @@ public:
          case 9:
             return BitExtractControl(0x1004, 0x00000080, 7);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsWaveContinuous() not defined for this board version");
       };
    };
-   unsigned int SetDrsWaveContinuous(unsigned int value)
+   void SetDrsWaveContinuous(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -11465,7 +11496,7 @@ public:
          case 9:
             return SetRegMask(0x1004, 0x00000080, 7, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDrsWaveContinuous() not defined for this board version");
       };
    };
    unsigned int GetDrsWaveContinuousLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11478,7 +11509,7 @@ public:
             if(BitOfs) *BitOfs = 7;
             return 0x1004;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsWaveContinuousLoc() not defined for this board version");
       };
    };
 
@@ -11491,10 +11522,10 @@ public:
          case 9:
             return BitExtractControl(0x1010, 0x000000FF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsWcr() not defined for this board version");
       };
    };
-   unsigned int SetDrsWcr(unsigned int value)
+   void SetDrsWcr(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -11502,7 +11533,7 @@ public:
          case 9:
             return SetRegMask(0x1010, 0x000000FF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDrsWcr() not defined for this board version");
       };
    };
    unsigned int GetDrsWcrLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11515,7 +11546,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1010;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsWcrLoc() not defined for this board version");
       };
    };
 
@@ -11529,7 +11560,7 @@ public:
          case 9:
             return BitExtractStatus(0x0138, 0x00000001, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsWcrMod() not defined for this board version");
       };
    };
    unsigned int GetDrsWcrModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11545,7 +11576,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0138;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsWcrModLoc() not defined for this board version");
       };
    };
 
@@ -11558,10 +11589,10 @@ public:
          case 9:
             return BitExtractControl(0x1010, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsWsr() not defined for this board version");
       };
    };
-   unsigned int SetDrsWsr(unsigned int value)
+   void SetDrsWsr(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -11569,7 +11600,7 @@ public:
          case 9:
             return SetRegMask(0x1010, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDrsWsr() not defined for this board version");
       };
    };
    unsigned int GetDrsWsrLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11582,7 +11613,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1010;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsWsrLoc() not defined for this board version");
       };
    };
 
@@ -11595,10 +11626,10 @@ public:
          case 9:
             return BitExtractControl(0x1010, 0x00040000, 18);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsWsrloop() not defined for this board version");
       };
    };
-   unsigned int SetDrsWsrloop(unsigned int value)
+   void SetDrsWsrloop(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -11606,7 +11637,7 @@ public:
          case 9:
             return SetRegMask(0x1010, 0x00040000, 18, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetDrsWsrloop() not defined for this board version");
       };
    };
    unsigned int GetDrsWsrloopLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11619,7 +11650,7 @@ public:
             if(BitOfs) *BitOfs = 18;
             return 0x1010;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsWsrloopLoc() not defined for this board version");
       };
    };
 
@@ -11633,7 +11664,7 @@ public:
          case 9:
             return BitExtractStatus(0x0138, 0x00000002, 1);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsWsrMod() not defined for this board version");
       };
    };
    unsigned int GetDrsWsrModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11649,7 +11680,7 @@ public:
             if(BitOfs) *BitOfs = 1;
             return 0x0138;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDrsWsrModLoc() not defined for this board version");
       };
    };
 
@@ -11662,10 +11693,10 @@ public:
          case 9:
             return BitExtractControl(0x1014, 0x01000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetEthComEn() not defined for this board version");
       };
    };
-   unsigned int SetEthComEn(unsigned int value)
+   void SetEthComEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -11673,7 +11704,7 @@ public:
          case 9:
             return SetRegMask(0x1014, 0x01000000, 24, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetEthComEn() not defined for this board version");
       };
    };
    unsigned int GetEthComEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11686,7 +11717,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x1014;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetEthComEnLoc() not defined for this board version");
       };
    };
 
@@ -11699,10 +11730,10 @@ public:
          case 9:
             return BitExtractControl(0x1040, 0x00000004, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetEventCounterRst() not defined for this board version");
       };
    };
-   unsigned int SetEventCounterRst(unsigned int value)
+   void SetEventCounterRst(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -11710,7 +11741,7 @@ public:
          case 9:
             return SetRegMask(0x1040, 0x00000004, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetEventCounterRst() not defined for this board version");
       };
    };
    unsigned int GetEventCounterRstLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11723,7 +11754,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1040;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetEventCounterRstLoc() not defined for this board version");
       };
    };
 
@@ -11737,7 +11768,7 @@ public:
          case 9:
             return BitExtractStatus(0x0100, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetEventNumber() not defined for this board version");
       };
    };
    unsigned int GetEventNumberLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11753,7 +11784,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0100;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetEventNumberLoc() not defined for this board version");
       };
    };
 
@@ -11767,7 +11798,7 @@ public:
          case 9:
             return BitExtractStatus(0x00FC, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetEventTxRate() not defined for this board version");
       };
    };
    unsigned int GetEventTxRateLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11783,7 +11814,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00FC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetEventTxRateLoc() not defined for this board version");
       };
    };
 
@@ -11797,10 +11828,10 @@ public:
          case 9:
             return BitExtractControl(0x1124, 0x00002000, 13);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetExtAsyncTriggerEn() not defined for this board version");
       };
    };
-   unsigned int SetExtAsyncTriggerEn(unsigned int value)
+   void SetExtAsyncTriggerEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -11809,7 +11840,7 @@ public:
          case 9:
             return SetRegMask(0x1124, 0x00002000, 13, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetExtAsyncTriggerEn() not defined for this board version");
       };
    };
    unsigned int GetExtAsyncTriggerEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11825,7 +11856,7 @@ public:
             if(BitOfs) *BitOfs = 13;
             return 0x1124;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetExtAsyncTriggerEnLoc() not defined for this board version");
       };
    };
 
@@ -11838,10 +11869,10 @@ public:
          case 9:
             return BitExtractControl(0x100C, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetExtClkFreq() not defined for this board version");
       };
    };
-   unsigned int SetExtClkFreq(unsigned int value)
+   void SetExtClkFreq(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -11849,7 +11880,7 @@ public:
          case 9:
             return SetRegMask(0x100C, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetExtClkFreq() not defined for this board version");
       };
    };
    unsigned int GetExtClkFreqLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11862,7 +11893,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x100C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetExtClkFreqLoc() not defined for this board version");
       };
    };
 
@@ -11876,7 +11907,7 @@ public:
          case 9:
             return BitExtractStatus(0x0134, 0x00000002, 1);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetExtClkFreqMod() not defined for this board version");
       };
    };
    unsigned int GetExtClkFreqModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11892,7 +11923,7 @@ public:
             if(BitOfs) *BitOfs = 1;
             return 0x0134;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetExtClkFreqModLoc() not defined for this board version");
       };
    };
 
@@ -11905,10 +11936,10 @@ public:
          case 9:
             return BitExtractControl(0x100C, 0x00010000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetExtClkInSel() not defined for this board version");
       };
    };
-   unsigned int SetExtClkInSel(unsigned int value)
+   void SetExtClkInSel(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -11916,7 +11947,7 @@ public:
          case 9:
             return SetRegMask(0x100C, 0x00010000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetExtClkInSel() not defined for this board version");
       };
    };
    unsigned int GetExtClkInSelLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11929,7 +11960,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x100C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetExtClkInSelLoc() not defined for this board version");
       };
    };
 
@@ -11943,10 +11974,10 @@ public:
          case 9:
             return BitExtractControl(0x1124, 0x00008000, 15);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetExtTriggerOutEnable() not defined for this board version");
       };
    };
-   unsigned int SetExtTriggerOutEnable(unsigned int value)
+   void SetExtTriggerOutEnable(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -11955,7 +11986,7 @@ public:
          case 9:
             return SetRegMask(0x1124, 0x00008000, 15, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetExtTriggerOutEnable() not defined for this board version");
       };
    };
    unsigned int GetExtTriggerOutEnableLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -11971,7 +12002,7 @@ public:
             if(BitOfs) *BitOfs = 15;
             return 0x1124;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetExtTriggerOutEnableLoc() not defined for this board version");
       };
    };
 
@@ -11984,10 +12015,10 @@ public:
          case 9:
             return BitExtractControl(0x1078, 0x00200000, 21);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe0Amplifier1CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe0Amplifier1CompEn(unsigned int value)
+   void SetFe0Amplifier1CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -11995,7 +12026,7 @@ public:
          case 9:
             return SetRegMask(0x1078, 0x00200000, 21, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe0Amplifier1CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe0Amplifier1CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12008,7 +12039,7 @@ public:
             if(BitOfs) *BitOfs = 21;
             return 0x1078;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe0Amplifier1CompEnLoc() not defined for this board version");
       };
    };
 
@@ -12021,10 +12052,10 @@ public:
          case 9:
             return BitExtractControl(0x1078, 0x00100000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe0Amplifier1En() not defined for this board version");
       };
    };
-   unsigned int SetFe0Amplifier1En(unsigned int value)
+   void SetFe0Amplifier1En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12032,7 +12063,7 @@ public:
          case 9:
             return SetRegMask(0x1078, 0x00100000, 20, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe0Amplifier1En() not defined for this board version");
       };
    };
    unsigned int GetFe0Amplifier1EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12045,7 +12076,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x1078;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe0Amplifier1EnLoc() not defined for this board version");
       };
    };
 
@@ -12058,10 +12089,10 @@ public:
          case 9:
             return BitExtractControl(0x1078, 0x00800000, 23);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe0Amplifier2CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe0Amplifier2CompEn(unsigned int value)
+   void SetFe0Amplifier2CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12069,7 +12100,7 @@ public:
          case 9:
             return SetRegMask(0x1078, 0x00800000, 23, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe0Amplifier2CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe0Amplifier2CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12082,7 +12113,7 @@ public:
             if(BitOfs) *BitOfs = 23;
             return 0x1078;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe0Amplifier2CompEnLoc() not defined for this board version");
       };
    };
 
@@ -12095,10 +12126,10 @@ public:
          case 9:
             return BitExtractControl(0x1078, 0x00400000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe0Amplifier2En() not defined for this board version");
       };
    };
-   unsigned int SetFe0Amplifier2En(unsigned int value)
+   void SetFe0Amplifier2En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12106,7 +12137,7 @@ public:
          case 9:
             return SetRegMask(0x1078, 0x00400000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe0Amplifier2En() not defined for this board version");
       };
    };
    unsigned int GetFe0Amplifier2EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12119,7 +12150,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x1078;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe0Amplifier2EnLoc() not defined for this board version");
       };
    };
 
@@ -12132,10 +12163,10 @@ public:
          case 9:
             return BitExtractControl(0x1078, 0x000C0000, 18);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe0Attenuation() not defined for this board version");
       };
    };
-   unsigned int SetFe0Attenuation(unsigned int value)
+   void SetFe0Attenuation(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12143,7 +12174,7 @@ public:
          case 9:
             return SetRegMask(0x1078, 0x000C0000, 18, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe0Attenuation() not defined for this board version");
       };
    };
    unsigned int GetFe0AttenuationLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12156,7 +12187,7 @@ public:
             if(BitOfs) *BitOfs = 18;
             return 0x1078;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe0AttenuationLoc() not defined for this board version");
       };
    };
 
@@ -12169,10 +12200,10 @@ public:
          case 9:
             return BitExtractControl(0x1078, 0x00030000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe0Mux() not defined for this board version");
       };
    };
-   unsigned int SetFe0Mux(unsigned int value)
+   void SetFe0Mux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12180,7 +12211,7 @@ public:
          case 9:
             return SetRegMask(0x1078, 0x00030000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe0Mux() not defined for this board version");
       };
    };
    unsigned int GetFe0MuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12193,7 +12224,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1078;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe0MuxLoc() not defined for this board version");
       };
    };
 
@@ -12206,10 +12237,10 @@ public:
          case 9:
             return BitExtractControl(0x1078, 0x01000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe0PzcEn() not defined for this board version");
       };
    };
-   unsigned int SetFe0PzcEn(unsigned int value)
+   void SetFe0PzcEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12217,7 +12248,7 @@ public:
          case 9:
             return SetRegMask(0x1078, 0x01000000, 24, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe0PzcEn() not defined for this board version");
       };
    };
    unsigned int GetFe0PzcEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12230,7 +12261,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x1078;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe0PzcEnLoc() not defined for this board version");
       };
    };
 
@@ -12243,10 +12274,10 @@ public:
          case 9:
             return BitExtractControl(0x108C, 0x00200000, 21);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe10Amplifier1CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe10Amplifier1CompEn(unsigned int value)
+   void SetFe10Amplifier1CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12254,7 +12285,7 @@ public:
          case 9:
             return SetRegMask(0x108C, 0x00200000, 21, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe10Amplifier1CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe10Amplifier1CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12267,7 +12298,7 @@ public:
             if(BitOfs) *BitOfs = 21;
             return 0x108C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe10Amplifier1CompEnLoc() not defined for this board version");
       };
    };
 
@@ -12280,10 +12311,10 @@ public:
          case 9:
             return BitExtractControl(0x108C, 0x00100000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe10Amplifier1En() not defined for this board version");
       };
    };
-   unsigned int SetFe10Amplifier1En(unsigned int value)
+   void SetFe10Amplifier1En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12291,7 +12322,7 @@ public:
          case 9:
             return SetRegMask(0x108C, 0x00100000, 20, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe10Amplifier1En() not defined for this board version");
       };
    };
    unsigned int GetFe10Amplifier1EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12304,7 +12335,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x108C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe10Amplifier1EnLoc() not defined for this board version");
       };
    };
 
@@ -12317,10 +12348,10 @@ public:
          case 9:
             return BitExtractControl(0x108C, 0x00800000, 23);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe10Amplifier2CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe10Amplifier2CompEn(unsigned int value)
+   void SetFe10Amplifier2CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12328,7 +12359,7 @@ public:
          case 9:
             return SetRegMask(0x108C, 0x00800000, 23, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe10Amplifier2CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe10Amplifier2CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12341,7 +12372,7 @@ public:
             if(BitOfs) *BitOfs = 23;
             return 0x108C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe10Amplifier2CompEnLoc() not defined for this board version");
       };
    };
 
@@ -12354,10 +12385,10 @@ public:
          case 9:
             return BitExtractControl(0x108C, 0x00400000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe10Amplifier2En() not defined for this board version");
       };
    };
-   unsigned int SetFe10Amplifier2En(unsigned int value)
+   void SetFe10Amplifier2En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12365,7 +12396,7 @@ public:
          case 9:
             return SetRegMask(0x108C, 0x00400000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe10Amplifier2En() not defined for this board version");
       };
    };
    unsigned int GetFe10Amplifier2EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12378,7 +12409,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x108C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe10Amplifier2EnLoc() not defined for this board version");
       };
    };
 
@@ -12391,10 +12422,10 @@ public:
          case 9:
             return BitExtractControl(0x108C, 0x000C0000, 18);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe10Attenuation() not defined for this board version");
       };
    };
-   unsigned int SetFe10Attenuation(unsigned int value)
+   void SetFe10Attenuation(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12402,7 +12433,7 @@ public:
          case 9:
             return SetRegMask(0x108C, 0x000C0000, 18, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe10Attenuation() not defined for this board version");
       };
    };
    unsigned int GetFe10AttenuationLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12415,7 +12446,7 @@ public:
             if(BitOfs) *BitOfs = 18;
             return 0x108C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe10AttenuationLoc() not defined for this board version");
       };
    };
 
@@ -12428,10 +12459,10 @@ public:
          case 9:
             return BitExtractControl(0x108C, 0x00030000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe10Mux() not defined for this board version");
       };
    };
-   unsigned int SetFe10Mux(unsigned int value)
+   void SetFe10Mux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12439,7 +12470,7 @@ public:
          case 9:
             return SetRegMask(0x108C, 0x00030000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe10Mux() not defined for this board version");
       };
    };
    unsigned int GetFe10MuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12452,7 +12483,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x108C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe10MuxLoc() not defined for this board version");
       };
    };
 
@@ -12465,10 +12496,10 @@ public:
          case 9:
             return BitExtractControl(0x108C, 0x01000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe10PzcEn() not defined for this board version");
       };
    };
-   unsigned int SetFe10PzcEn(unsigned int value)
+   void SetFe10PzcEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12476,7 +12507,7 @@ public:
          case 9:
             return SetRegMask(0x108C, 0x01000000, 24, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe10PzcEn() not defined for this board version");
       };
    };
    unsigned int GetFe10PzcEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12489,7 +12520,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x108C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe10PzcEnLoc() not defined for this board version");
       };
    };
 
@@ -12502,10 +12533,10 @@ public:
          case 9:
             return BitExtractControl(0x108C, 0x00000020, 5);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe11Amplifier1CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe11Amplifier1CompEn(unsigned int value)
+   void SetFe11Amplifier1CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12513,7 +12544,7 @@ public:
          case 9:
             return SetRegMask(0x108C, 0x00000020, 5, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe11Amplifier1CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe11Amplifier1CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12526,7 +12557,7 @@ public:
             if(BitOfs) *BitOfs = 5;
             return 0x108C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe11Amplifier1CompEnLoc() not defined for this board version");
       };
    };
 
@@ -12539,10 +12570,10 @@ public:
          case 9:
             return BitExtractControl(0x108C, 0x00000010, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe11Amplifier1En() not defined for this board version");
       };
    };
-   unsigned int SetFe11Amplifier1En(unsigned int value)
+   void SetFe11Amplifier1En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12550,7 +12581,7 @@ public:
          case 9:
             return SetRegMask(0x108C, 0x00000010, 4, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe11Amplifier1En() not defined for this board version");
       };
    };
    unsigned int GetFe11Amplifier1EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12563,7 +12594,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x108C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe11Amplifier1EnLoc() not defined for this board version");
       };
    };
 
@@ -12576,10 +12607,10 @@ public:
          case 9:
             return BitExtractControl(0x108C, 0x00000080, 7);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe11Amplifier2CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe11Amplifier2CompEn(unsigned int value)
+   void SetFe11Amplifier2CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12587,7 +12618,7 @@ public:
          case 9:
             return SetRegMask(0x108C, 0x00000080, 7, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe11Amplifier2CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe11Amplifier2CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12600,7 +12631,7 @@ public:
             if(BitOfs) *BitOfs = 7;
             return 0x108C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe11Amplifier2CompEnLoc() not defined for this board version");
       };
    };
 
@@ -12613,10 +12644,10 @@ public:
          case 9:
             return BitExtractControl(0x108C, 0x00000040, 6);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe11Amplifier2En() not defined for this board version");
       };
    };
-   unsigned int SetFe11Amplifier2En(unsigned int value)
+   void SetFe11Amplifier2En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12624,7 +12655,7 @@ public:
          case 9:
             return SetRegMask(0x108C, 0x00000040, 6, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe11Amplifier2En() not defined for this board version");
       };
    };
    unsigned int GetFe11Amplifier2EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12637,7 +12668,7 @@ public:
             if(BitOfs) *BitOfs = 6;
             return 0x108C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe11Amplifier2EnLoc() not defined for this board version");
       };
    };
 
@@ -12650,10 +12681,10 @@ public:
          case 9:
             return BitExtractControl(0x108C, 0x0000000C, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe11Attenuation() not defined for this board version");
       };
    };
-   unsigned int SetFe11Attenuation(unsigned int value)
+   void SetFe11Attenuation(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12661,7 +12692,7 @@ public:
          case 9:
             return SetRegMask(0x108C, 0x0000000C, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe11Attenuation() not defined for this board version");
       };
    };
    unsigned int GetFe11AttenuationLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12674,7 +12705,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x108C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe11AttenuationLoc() not defined for this board version");
       };
    };
 
@@ -12687,10 +12718,10 @@ public:
          case 9:
             return BitExtractControl(0x108C, 0x00000003, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe11Mux() not defined for this board version");
       };
    };
-   unsigned int SetFe11Mux(unsigned int value)
+   void SetFe11Mux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12698,7 +12729,7 @@ public:
          case 9:
             return SetRegMask(0x108C, 0x00000003, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe11Mux() not defined for this board version");
       };
    };
    unsigned int GetFe11MuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12711,7 +12742,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x108C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe11MuxLoc() not defined for this board version");
       };
    };
 
@@ -12724,10 +12755,10 @@ public:
          case 9:
             return BitExtractControl(0x108C, 0x00000100, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe11PzcEn() not defined for this board version");
       };
    };
-   unsigned int SetFe11PzcEn(unsigned int value)
+   void SetFe11PzcEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12735,7 +12766,7 @@ public:
          case 9:
             return SetRegMask(0x108C, 0x00000100, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe11PzcEn() not defined for this board version");
       };
    };
    unsigned int GetFe11PzcEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12748,7 +12779,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x108C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe11PzcEnLoc() not defined for this board version");
       };
    };
 
@@ -12761,10 +12792,10 @@ public:
          case 9:
             return BitExtractControl(0x1090, 0x00200000, 21);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe12Amplifier1CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe12Amplifier1CompEn(unsigned int value)
+   void SetFe12Amplifier1CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12772,7 +12803,7 @@ public:
          case 9:
             return SetRegMask(0x1090, 0x00200000, 21, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe12Amplifier1CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe12Amplifier1CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12785,7 +12816,7 @@ public:
             if(BitOfs) *BitOfs = 21;
             return 0x1090;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe12Amplifier1CompEnLoc() not defined for this board version");
       };
    };
 
@@ -12798,10 +12829,10 @@ public:
          case 9:
             return BitExtractControl(0x1090, 0x00100000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe12Amplifier1En() not defined for this board version");
       };
    };
-   unsigned int SetFe12Amplifier1En(unsigned int value)
+   void SetFe12Amplifier1En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12809,7 +12840,7 @@ public:
          case 9:
             return SetRegMask(0x1090, 0x00100000, 20, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe12Amplifier1En() not defined for this board version");
       };
    };
    unsigned int GetFe12Amplifier1EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12822,7 +12853,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x1090;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe12Amplifier1EnLoc() not defined for this board version");
       };
    };
 
@@ -12835,10 +12866,10 @@ public:
          case 9:
             return BitExtractControl(0x1090, 0x00800000, 23);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe12Amplifier2CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe12Amplifier2CompEn(unsigned int value)
+   void SetFe12Amplifier2CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12846,7 +12877,7 @@ public:
          case 9:
             return SetRegMask(0x1090, 0x00800000, 23, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe12Amplifier2CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe12Amplifier2CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12859,7 +12890,7 @@ public:
             if(BitOfs) *BitOfs = 23;
             return 0x1090;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe12Amplifier2CompEnLoc() not defined for this board version");
       };
    };
 
@@ -12872,10 +12903,10 @@ public:
          case 9:
             return BitExtractControl(0x1090, 0x00400000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe12Amplifier2En() not defined for this board version");
       };
    };
-   unsigned int SetFe12Amplifier2En(unsigned int value)
+   void SetFe12Amplifier2En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12883,7 +12914,7 @@ public:
          case 9:
             return SetRegMask(0x1090, 0x00400000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe12Amplifier2En() not defined for this board version");
       };
    };
    unsigned int GetFe12Amplifier2EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12896,7 +12927,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x1090;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe12Amplifier2EnLoc() not defined for this board version");
       };
    };
 
@@ -12909,10 +12940,10 @@ public:
          case 9:
             return BitExtractControl(0x1090, 0x000C0000, 18);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe12Attenuation() not defined for this board version");
       };
    };
-   unsigned int SetFe12Attenuation(unsigned int value)
+   void SetFe12Attenuation(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12920,7 +12951,7 @@ public:
          case 9:
             return SetRegMask(0x1090, 0x000C0000, 18, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe12Attenuation() not defined for this board version");
       };
    };
    unsigned int GetFe12AttenuationLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12933,7 +12964,7 @@ public:
             if(BitOfs) *BitOfs = 18;
             return 0x1090;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe12AttenuationLoc() not defined for this board version");
       };
    };
 
@@ -12946,10 +12977,10 @@ public:
          case 9:
             return BitExtractControl(0x1090, 0x00030000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe12Mux() not defined for this board version");
       };
    };
-   unsigned int SetFe12Mux(unsigned int value)
+   void SetFe12Mux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12957,7 +12988,7 @@ public:
          case 9:
             return SetRegMask(0x1090, 0x00030000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe12Mux() not defined for this board version");
       };
    };
    unsigned int GetFe12MuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -12970,7 +13001,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1090;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe12MuxLoc() not defined for this board version");
       };
    };
 
@@ -12983,10 +13014,10 @@ public:
          case 9:
             return BitExtractControl(0x1090, 0x01000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe12PzcEn() not defined for this board version");
       };
    };
-   unsigned int SetFe12PzcEn(unsigned int value)
+   void SetFe12PzcEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -12994,7 +13025,7 @@ public:
          case 9:
             return SetRegMask(0x1090, 0x01000000, 24, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe12PzcEn() not defined for this board version");
       };
    };
    unsigned int GetFe12PzcEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13007,7 +13038,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x1090;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe12PzcEnLoc() not defined for this board version");
       };
    };
 
@@ -13020,10 +13051,10 @@ public:
          case 9:
             return BitExtractControl(0x1090, 0x00000020, 5);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe13Amplifier1CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe13Amplifier1CompEn(unsigned int value)
+   void SetFe13Amplifier1CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13031,7 +13062,7 @@ public:
          case 9:
             return SetRegMask(0x1090, 0x00000020, 5, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe13Amplifier1CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe13Amplifier1CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13044,7 +13075,7 @@ public:
             if(BitOfs) *BitOfs = 5;
             return 0x1090;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe13Amplifier1CompEnLoc() not defined for this board version");
       };
    };
 
@@ -13057,10 +13088,10 @@ public:
          case 9:
             return BitExtractControl(0x1090, 0x00000010, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe13Amplifier1En() not defined for this board version");
       };
    };
-   unsigned int SetFe13Amplifier1En(unsigned int value)
+   void SetFe13Amplifier1En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13068,7 +13099,7 @@ public:
          case 9:
             return SetRegMask(0x1090, 0x00000010, 4, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe13Amplifier1En() not defined for this board version");
       };
    };
    unsigned int GetFe13Amplifier1EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13081,7 +13112,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x1090;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe13Amplifier1EnLoc() not defined for this board version");
       };
    };
 
@@ -13094,10 +13125,10 @@ public:
          case 9:
             return BitExtractControl(0x1090, 0x00000080, 7);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe13Amplifier2CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe13Amplifier2CompEn(unsigned int value)
+   void SetFe13Amplifier2CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13105,7 +13136,7 @@ public:
          case 9:
             return SetRegMask(0x1090, 0x00000080, 7, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe13Amplifier2CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe13Amplifier2CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13118,7 +13149,7 @@ public:
             if(BitOfs) *BitOfs = 7;
             return 0x1090;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe13Amplifier2CompEnLoc() not defined for this board version");
       };
    };
 
@@ -13131,10 +13162,10 @@ public:
          case 9:
             return BitExtractControl(0x1090, 0x00000040, 6);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe13Amplifier2En() not defined for this board version");
       };
    };
-   unsigned int SetFe13Amplifier2En(unsigned int value)
+   void SetFe13Amplifier2En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13142,7 +13173,7 @@ public:
          case 9:
             return SetRegMask(0x1090, 0x00000040, 6, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe13Amplifier2En() not defined for this board version");
       };
    };
    unsigned int GetFe13Amplifier2EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13155,7 +13186,7 @@ public:
             if(BitOfs) *BitOfs = 6;
             return 0x1090;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe13Amplifier2EnLoc() not defined for this board version");
       };
    };
 
@@ -13168,10 +13199,10 @@ public:
          case 9:
             return BitExtractControl(0x1090, 0x0000000C, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe13Attenuation() not defined for this board version");
       };
    };
-   unsigned int SetFe13Attenuation(unsigned int value)
+   void SetFe13Attenuation(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13179,7 +13210,7 @@ public:
          case 9:
             return SetRegMask(0x1090, 0x0000000C, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe13Attenuation() not defined for this board version");
       };
    };
    unsigned int GetFe13AttenuationLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13192,7 +13223,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1090;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe13AttenuationLoc() not defined for this board version");
       };
    };
 
@@ -13205,10 +13236,10 @@ public:
          case 9:
             return BitExtractControl(0x1090, 0x00000003, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe13Mux() not defined for this board version");
       };
    };
-   unsigned int SetFe13Mux(unsigned int value)
+   void SetFe13Mux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13216,7 +13247,7 @@ public:
          case 9:
             return SetRegMask(0x1090, 0x00000003, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe13Mux() not defined for this board version");
       };
    };
    unsigned int GetFe13MuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13229,7 +13260,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1090;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe13MuxLoc() not defined for this board version");
       };
    };
 
@@ -13242,10 +13273,10 @@ public:
          case 9:
             return BitExtractControl(0x1090, 0x00000100, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe13PzcEn() not defined for this board version");
       };
    };
-   unsigned int SetFe13PzcEn(unsigned int value)
+   void SetFe13PzcEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13253,7 +13284,7 @@ public:
          case 9:
             return SetRegMask(0x1090, 0x00000100, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe13PzcEn() not defined for this board version");
       };
    };
    unsigned int GetFe13PzcEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13266,7 +13297,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1090;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe13PzcEnLoc() not defined for this board version");
       };
    };
 
@@ -13279,10 +13310,10 @@ public:
          case 9:
             return BitExtractControl(0x1094, 0x00200000, 21);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe14Amplifier1CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe14Amplifier1CompEn(unsigned int value)
+   void SetFe14Amplifier1CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13290,7 +13321,7 @@ public:
          case 9:
             return SetRegMask(0x1094, 0x00200000, 21, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe14Amplifier1CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe14Amplifier1CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13303,7 +13334,7 @@ public:
             if(BitOfs) *BitOfs = 21;
             return 0x1094;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe14Amplifier1CompEnLoc() not defined for this board version");
       };
    };
 
@@ -13316,10 +13347,10 @@ public:
          case 9:
             return BitExtractControl(0x1094, 0x00100000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe14Amplifier1En() not defined for this board version");
       };
    };
-   unsigned int SetFe14Amplifier1En(unsigned int value)
+   void SetFe14Amplifier1En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13327,7 +13358,7 @@ public:
          case 9:
             return SetRegMask(0x1094, 0x00100000, 20, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe14Amplifier1En() not defined for this board version");
       };
    };
    unsigned int GetFe14Amplifier1EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13340,7 +13371,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x1094;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe14Amplifier1EnLoc() not defined for this board version");
       };
    };
 
@@ -13353,10 +13384,10 @@ public:
          case 9:
             return BitExtractControl(0x1094, 0x00800000, 23);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe14Amplifier2CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe14Amplifier2CompEn(unsigned int value)
+   void SetFe14Amplifier2CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13364,7 +13395,7 @@ public:
          case 9:
             return SetRegMask(0x1094, 0x00800000, 23, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe14Amplifier2CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe14Amplifier2CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13377,7 +13408,7 @@ public:
             if(BitOfs) *BitOfs = 23;
             return 0x1094;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe14Amplifier2CompEnLoc() not defined for this board version");
       };
    };
 
@@ -13390,10 +13421,10 @@ public:
          case 9:
             return BitExtractControl(0x1094, 0x00400000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe14Amplifier2En() not defined for this board version");
       };
    };
-   unsigned int SetFe14Amplifier2En(unsigned int value)
+   void SetFe14Amplifier2En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13401,7 +13432,7 @@ public:
          case 9:
             return SetRegMask(0x1094, 0x00400000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe14Amplifier2En() not defined for this board version");
       };
    };
    unsigned int GetFe14Amplifier2EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13414,7 +13445,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x1094;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe14Amplifier2EnLoc() not defined for this board version");
       };
    };
 
@@ -13427,10 +13458,10 @@ public:
          case 9:
             return BitExtractControl(0x1094, 0x000C0000, 18);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe14Attenuation() not defined for this board version");
       };
    };
-   unsigned int SetFe14Attenuation(unsigned int value)
+   void SetFe14Attenuation(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13438,7 +13469,7 @@ public:
          case 9:
             return SetRegMask(0x1094, 0x000C0000, 18, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe14Attenuation() not defined for this board version");
       };
    };
    unsigned int GetFe14AttenuationLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13451,7 +13482,7 @@ public:
             if(BitOfs) *BitOfs = 18;
             return 0x1094;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe14AttenuationLoc() not defined for this board version");
       };
    };
 
@@ -13464,10 +13495,10 @@ public:
          case 9:
             return BitExtractControl(0x1094, 0x00030000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe14Mux() not defined for this board version");
       };
    };
-   unsigned int SetFe14Mux(unsigned int value)
+   void SetFe14Mux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13475,7 +13506,7 @@ public:
          case 9:
             return SetRegMask(0x1094, 0x00030000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe14Mux() not defined for this board version");
       };
    };
    unsigned int GetFe14MuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13488,7 +13519,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1094;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe14MuxLoc() not defined for this board version");
       };
    };
 
@@ -13501,10 +13532,10 @@ public:
          case 9:
             return BitExtractControl(0x1094, 0x01000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe14PzcEn() not defined for this board version");
       };
    };
-   unsigned int SetFe14PzcEn(unsigned int value)
+   void SetFe14PzcEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13512,7 +13543,7 @@ public:
          case 9:
             return SetRegMask(0x1094, 0x01000000, 24, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe14PzcEn() not defined for this board version");
       };
    };
    unsigned int GetFe14PzcEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13525,7 +13556,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x1094;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe14PzcEnLoc() not defined for this board version");
       };
    };
 
@@ -13538,10 +13569,10 @@ public:
          case 9:
             return BitExtractControl(0x1094, 0x00000020, 5);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe15Amplifier1CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe15Amplifier1CompEn(unsigned int value)
+   void SetFe15Amplifier1CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13549,7 +13580,7 @@ public:
          case 9:
             return SetRegMask(0x1094, 0x00000020, 5, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe15Amplifier1CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe15Amplifier1CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13562,7 +13593,7 @@ public:
             if(BitOfs) *BitOfs = 5;
             return 0x1094;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe15Amplifier1CompEnLoc() not defined for this board version");
       };
    };
 
@@ -13575,10 +13606,10 @@ public:
          case 9:
             return BitExtractControl(0x1094, 0x00000010, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe15Amplifier1En() not defined for this board version");
       };
    };
-   unsigned int SetFe15Amplifier1En(unsigned int value)
+   void SetFe15Amplifier1En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13586,7 +13617,7 @@ public:
          case 9:
             return SetRegMask(0x1094, 0x00000010, 4, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe15Amplifier1En() not defined for this board version");
       };
    };
    unsigned int GetFe15Amplifier1EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13599,7 +13630,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x1094;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe15Amplifier1EnLoc() not defined for this board version");
       };
    };
 
@@ -13612,10 +13643,10 @@ public:
          case 9:
             return BitExtractControl(0x1094, 0x00000080, 7);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe15Amplifier2CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe15Amplifier2CompEn(unsigned int value)
+   void SetFe15Amplifier2CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13623,7 +13654,7 @@ public:
          case 9:
             return SetRegMask(0x1094, 0x00000080, 7, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe15Amplifier2CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe15Amplifier2CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13636,7 +13667,7 @@ public:
             if(BitOfs) *BitOfs = 7;
             return 0x1094;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe15Amplifier2CompEnLoc() not defined for this board version");
       };
    };
 
@@ -13649,10 +13680,10 @@ public:
          case 9:
             return BitExtractControl(0x1094, 0x00000040, 6);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe15Amplifier2En() not defined for this board version");
       };
    };
-   unsigned int SetFe15Amplifier2En(unsigned int value)
+   void SetFe15Amplifier2En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13660,7 +13691,7 @@ public:
          case 9:
             return SetRegMask(0x1094, 0x00000040, 6, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe15Amplifier2En() not defined for this board version");
       };
    };
    unsigned int GetFe15Amplifier2EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13673,7 +13704,7 @@ public:
             if(BitOfs) *BitOfs = 6;
             return 0x1094;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe15Amplifier2EnLoc() not defined for this board version");
       };
    };
 
@@ -13686,10 +13717,10 @@ public:
          case 9:
             return BitExtractControl(0x1094, 0x0000000C, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe15Attenuation() not defined for this board version");
       };
    };
-   unsigned int SetFe15Attenuation(unsigned int value)
+   void SetFe15Attenuation(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13697,7 +13728,7 @@ public:
          case 9:
             return SetRegMask(0x1094, 0x0000000C, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe15Attenuation() not defined for this board version");
       };
    };
    unsigned int GetFe15AttenuationLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13710,7 +13741,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1094;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe15AttenuationLoc() not defined for this board version");
       };
    };
 
@@ -13723,10 +13754,10 @@ public:
          case 9:
             return BitExtractControl(0x1094, 0x00000003, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe15Mux() not defined for this board version");
       };
    };
-   unsigned int SetFe15Mux(unsigned int value)
+   void SetFe15Mux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13734,7 +13765,7 @@ public:
          case 9:
             return SetRegMask(0x1094, 0x00000003, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe15Mux() not defined for this board version");
       };
    };
    unsigned int GetFe15MuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13747,7 +13778,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1094;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe15MuxLoc() not defined for this board version");
       };
    };
 
@@ -13760,10 +13791,10 @@ public:
          case 9:
             return BitExtractControl(0x1094, 0x00000100, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe15PzcEn() not defined for this board version");
       };
    };
-   unsigned int SetFe15PzcEn(unsigned int value)
+   void SetFe15PzcEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13771,7 +13802,7 @@ public:
          case 9:
             return SetRegMask(0x1094, 0x00000100, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe15PzcEn() not defined for this board version");
       };
    };
    unsigned int GetFe15PzcEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13784,7 +13815,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1094;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe15PzcEnLoc() not defined for this board version");
       };
    };
 
@@ -13797,10 +13828,10 @@ public:
          case 9:
             return BitExtractControl(0x1078, 0x00000020, 5);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe1Amplifier1CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe1Amplifier1CompEn(unsigned int value)
+   void SetFe1Amplifier1CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13808,7 +13839,7 @@ public:
          case 9:
             return SetRegMask(0x1078, 0x00000020, 5, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe1Amplifier1CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe1Amplifier1CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13821,7 +13852,7 @@ public:
             if(BitOfs) *BitOfs = 5;
             return 0x1078;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe1Amplifier1CompEnLoc() not defined for this board version");
       };
    };
 
@@ -13834,10 +13865,10 @@ public:
          case 9:
             return BitExtractControl(0x1078, 0x00000010, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe1Amplifier1En() not defined for this board version");
       };
    };
-   unsigned int SetFe1Amplifier1En(unsigned int value)
+   void SetFe1Amplifier1En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13845,7 +13876,7 @@ public:
          case 9:
             return SetRegMask(0x1078, 0x00000010, 4, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe1Amplifier1En() not defined for this board version");
       };
    };
    unsigned int GetFe1Amplifier1EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13858,7 +13889,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x1078;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe1Amplifier1EnLoc() not defined for this board version");
       };
    };
 
@@ -13871,10 +13902,10 @@ public:
          case 9:
             return BitExtractControl(0x1078, 0x00000080, 7);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe1Amplifier2CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe1Amplifier2CompEn(unsigned int value)
+   void SetFe1Amplifier2CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13882,7 +13913,7 @@ public:
          case 9:
             return SetRegMask(0x1078, 0x00000080, 7, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe1Amplifier2CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe1Amplifier2CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13895,7 +13926,7 @@ public:
             if(BitOfs) *BitOfs = 7;
             return 0x1078;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe1Amplifier2CompEnLoc() not defined for this board version");
       };
    };
 
@@ -13908,10 +13939,10 @@ public:
          case 9:
             return BitExtractControl(0x1078, 0x00000040, 6);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe1Amplifier2En() not defined for this board version");
       };
    };
-   unsigned int SetFe1Amplifier2En(unsigned int value)
+   void SetFe1Amplifier2En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13919,7 +13950,7 @@ public:
          case 9:
             return SetRegMask(0x1078, 0x00000040, 6, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe1Amplifier2En() not defined for this board version");
       };
    };
    unsigned int GetFe1Amplifier2EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13932,7 +13963,7 @@ public:
             if(BitOfs) *BitOfs = 6;
             return 0x1078;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe1Amplifier2EnLoc() not defined for this board version");
       };
    };
 
@@ -13945,10 +13976,10 @@ public:
          case 9:
             return BitExtractControl(0x1078, 0x0000000C, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe1Attenuation() not defined for this board version");
       };
    };
-   unsigned int SetFe1Attenuation(unsigned int value)
+   void SetFe1Attenuation(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13956,7 +13987,7 @@ public:
          case 9:
             return SetRegMask(0x1078, 0x0000000C, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe1Attenuation() not defined for this board version");
       };
    };
    unsigned int GetFe1AttenuationLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -13969,7 +14000,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1078;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe1AttenuationLoc() not defined for this board version");
       };
    };
 
@@ -13982,10 +14013,10 @@ public:
          case 9:
             return BitExtractControl(0x1078, 0x00000003, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe1Mux() not defined for this board version");
       };
    };
-   unsigned int SetFe1Mux(unsigned int value)
+   void SetFe1Mux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -13993,7 +14024,7 @@ public:
          case 9:
             return SetRegMask(0x1078, 0x00000003, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe1Mux() not defined for this board version");
       };
    };
    unsigned int GetFe1MuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14006,7 +14037,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1078;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe1MuxLoc() not defined for this board version");
       };
    };
 
@@ -14019,10 +14050,10 @@ public:
          case 9:
             return BitExtractControl(0x1078, 0x00000100, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe1PzcEn() not defined for this board version");
       };
    };
-   unsigned int SetFe1PzcEn(unsigned int value)
+   void SetFe1PzcEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14030,7 +14061,7 @@ public:
          case 9:
             return SetRegMask(0x1078, 0x00000100, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe1PzcEn() not defined for this board version");
       };
    };
    unsigned int GetFe1PzcEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14043,7 +14074,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1078;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe1PzcEnLoc() not defined for this board version");
       };
    };
 
@@ -14056,10 +14087,10 @@ public:
          case 9:
             return BitExtractControl(0x107C, 0x00200000, 21);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe2Amplifier1CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe2Amplifier1CompEn(unsigned int value)
+   void SetFe2Amplifier1CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14067,7 +14098,7 @@ public:
          case 9:
             return SetRegMask(0x107C, 0x00200000, 21, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe2Amplifier1CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe2Amplifier1CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14080,7 +14111,7 @@ public:
             if(BitOfs) *BitOfs = 21;
             return 0x107C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe2Amplifier1CompEnLoc() not defined for this board version");
       };
    };
 
@@ -14093,10 +14124,10 @@ public:
          case 9:
             return BitExtractControl(0x107C, 0x00100000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe2Amplifier1En() not defined for this board version");
       };
    };
-   unsigned int SetFe2Amplifier1En(unsigned int value)
+   void SetFe2Amplifier1En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14104,7 +14135,7 @@ public:
          case 9:
             return SetRegMask(0x107C, 0x00100000, 20, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe2Amplifier1En() not defined for this board version");
       };
    };
    unsigned int GetFe2Amplifier1EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14117,7 +14148,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x107C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe2Amplifier1EnLoc() not defined for this board version");
       };
    };
 
@@ -14130,10 +14161,10 @@ public:
          case 9:
             return BitExtractControl(0x107C, 0x00800000, 23);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe2Amplifier2CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe2Amplifier2CompEn(unsigned int value)
+   void SetFe2Amplifier2CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14141,7 +14172,7 @@ public:
          case 9:
             return SetRegMask(0x107C, 0x00800000, 23, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe2Amplifier2CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe2Amplifier2CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14154,7 +14185,7 @@ public:
             if(BitOfs) *BitOfs = 23;
             return 0x107C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe2Amplifier2CompEnLoc() not defined for this board version");
       };
    };
 
@@ -14167,10 +14198,10 @@ public:
          case 9:
             return BitExtractControl(0x107C, 0x00400000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe2Amplifier2En() not defined for this board version");
       };
    };
-   unsigned int SetFe2Amplifier2En(unsigned int value)
+   void SetFe2Amplifier2En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14178,7 +14209,7 @@ public:
          case 9:
             return SetRegMask(0x107C, 0x00400000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe2Amplifier2En() not defined for this board version");
       };
    };
    unsigned int GetFe2Amplifier2EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14191,7 +14222,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x107C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe2Amplifier2EnLoc() not defined for this board version");
       };
    };
 
@@ -14204,10 +14235,10 @@ public:
          case 9:
             return BitExtractControl(0x107C, 0x000C0000, 18);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe2Attenuation() not defined for this board version");
       };
    };
-   unsigned int SetFe2Attenuation(unsigned int value)
+   void SetFe2Attenuation(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14215,7 +14246,7 @@ public:
          case 9:
             return SetRegMask(0x107C, 0x000C0000, 18, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe2Attenuation() not defined for this board version");
       };
    };
    unsigned int GetFe2AttenuationLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14228,7 +14259,7 @@ public:
             if(BitOfs) *BitOfs = 18;
             return 0x107C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe2AttenuationLoc() not defined for this board version");
       };
    };
 
@@ -14241,10 +14272,10 @@ public:
          case 9:
             return BitExtractControl(0x107C, 0x00030000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe2Mux() not defined for this board version");
       };
    };
-   unsigned int SetFe2Mux(unsigned int value)
+   void SetFe2Mux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14252,7 +14283,7 @@ public:
          case 9:
             return SetRegMask(0x107C, 0x00030000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe2Mux() not defined for this board version");
       };
    };
    unsigned int GetFe2MuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14265,7 +14296,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x107C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe2MuxLoc() not defined for this board version");
       };
    };
 
@@ -14278,10 +14309,10 @@ public:
          case 9:
             return BitExtractControl(0x107C, 0x01000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe2PzcEn() not defined for this board version");
       };
    };
-   unsigned int SetFe2PzcEn(unsigned int value)
+   void SetFe2PzcEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14289,7 +14320,7 @@ public:
          case 9:
             return SetRegMask(0x107C, 0x01000000, 24, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe2PzcEn() not defined for this board version");
       };
    };
    unsigned int GetFe2PzcEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14302,7 +14333,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x107C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe2PzcEnLoc() not defined for this board version");
       };
    };
 
@@ -14315,10 +14346,10 @@ public:
          case 9:
             return BitExtractControl(0x107C, 0x00000020, 5);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe3Amplifier1CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe3Amplifier1CompEn(unsigned int value)
+   void SetFe3Amplifier1CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14326,7 +14357,7 @@ public:
          case 9:
             return SetRegMask(0x107C, 0x00000020, 5, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe3Amplifier1CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe3Amplifier1CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14339,7 +14370,7 @@ public:
             if(BitOfs) *BitOfs = 5;
             return 0x107C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe3Amplifier1CompEnLoc() not defined for this board version");
       };
    };
 
@@ -14352,10 +14383,10 @@ public:
          case 9:
             return BitExtractControl(0x107C, 0x00000010, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe3Amplifier1En() not defined for this board version");
       };
    };
-   unsigned int SetFe3Amplifier1En(unsigned int value)
+   void SetFe3Amplifier1En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14363,7 +14394,7 @@ public:
          case 9:
             return SetRegMask(0x107C, 0x00000010, 4, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe3Amplifier1En() not defined for this board version");
       };
    };
    unsigned int GetFe3Amplifier1EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14376,7 +14407,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x107C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe3Amplifier1EnLoc() not defined for this board version");
       };
    };
 
@@ -14389,10 +14420,10 @@ public:
          case 9:
             return BitExtractControl(0x107C, 0x00000080, 7);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe3Amplifier2CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe3Amplifier2CompEn(unsigned int value)
+   void SetFe3Amplifier2CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14400,7 +14431,7 @@ public:
          case 9:
             return SetRegMask(0x107C, 0x00000080, 7, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe3Amplifier2CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe3Amplifier2CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14413,7 +14444,7 @@ public:
             if(BitOfs) *BitOfs = 7;
             return 0x107C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe3Amplifier2CompEnLoc() not defined for this board version");
       };
    };
 
@@ -14426,10 +14457,10 @@ public:
          case 9:
             return BitExtractControl(0x107C, 0x00000040, 6);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe3Amplifier2En() not defined for this board version");
       };
    };
-   unsigned int SetFe3Amplifier2En(unsigned int value)
+   void SetFe3Amplifier2En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14437,7 +14468,7 @@ public:
          case 9:
             return SetRegMask(0x107C, 0x00000040, 6, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe3Amplifier2En() not defined for this board version");
       };
    };
    unsigned int GetFe3Amplifier2EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14450,7 +14481,7 @@ public:
             if(BitOfs) *BitOfs = 6;
             return 0x107C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe3Amplifier2EnLoc() not defined for this board version");
       };
    };
 
@@ -14463,10 +14494,10 @@ public:
          case 9:
             return BitExtractControl(0x107C, 0x0000000C, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe3Attenuation() not defined for this board version");
       };
    };
-   unsigned int SetFe3Attenuation(unsigned int value)
+   void SetFe3Attenuation(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14474,7 +14505,7 @@ public:
          case 9:
             return SetRegMask(0x107C, 0x0000000C, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe3Attenuation() not defined for this board version");
       };
    };
    unsigned int GetFe3AttenuationLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14487,7 +14518,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x107C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe3AttenuationLoc() not defined for this board version");
       };
    };
 
@@ -14500,10 +14531,10 @@ public:
          case 9:
             return BitExtractControl(0x107C, 0x00000003, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe3Mux() not defined for this board version");
       };
    };
-   unsigned int SetFe3Mux(unsigned int value)
+   void SetFe3Mux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14511,7 +14542,7 @@ public:
          case 9:
             return SetRegMask(0x107C, 0x00000003, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe3Mux() not defined for this board version");
       };
    };
    unsigned int GetFe3MuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14524,7 +14555,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x107C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe3MuxLoc() not defined for this board version");
       };
    };
 
@@ -14537,10 +14568,10 @@ public:
          case 9:
             return BitExtractControl(0x107C, 0x00000100, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe3PzcEn() not defined for this board version");
       };
    };
-   unsigned int SetFe3PzcEn(unsigned int value)
+   void SetFe3PzcEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14548,7 +14579,7 @@ public:
          case 9:
             return SetRegMask(0x107C, 0x00000100, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe3PzcEn() not defined for this board version");
       };
    };
    unsigned int GetFe3PzcEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14561,7 +14592,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x107C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe3PzcEnLoc() not defined for this board version");
       };
    };
 
@@ -14574,10 +14605,10 @@ public:
          case 9:
             return BitExtractControl(0x1080, 0x00200000, 21);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe4Amplifier1CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe4Amplifier1CompEn(unsigned int value)
+   void SetFe4Amplifier1CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14585,7 +14616,7 @@ public:
          case 9:
             return SetRegMask(0x1080, 0x00200000, 21, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe4Amplifier1CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe4Amplifier1CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14598,7 +14629,7 @@ public:
             if(BitOfs) *BitOfs = 21;
             return 0x1080;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe4Amplifier1CompEnLoc() not defined for this board version");
       };
    };
 
@@ -14611,10 +14642,10 @@ public:
          case 9:
             return BitExtractControl(0x1080, 0x00100000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe4Amplifier1En() not defined for this board version");
       };
    };
-   unsigned int SetFe4Amplifier1En(unsigned int value)
+   void SetFe4Amplifier1En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14622,7 +14653,7 @@ public:
          case 9:
             return SetRegMask(0x1080, 0x00100000, 20, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe4Amplifier1En() not defined for this board version");
       };
    };
    unsigned int GetFe4Amplifier1EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14635,7 +14666,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x1080;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe4Amplifier1EnLoc() not defined for this board version");
       };
    };
 
@@ -14648,10 +14679,10 @@ public:
          case 9:
             return BitExtractControl(0x1080, 0x00800000, 23);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe4Amplifier2CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe4Amplifier2CompEn(unsigned int value)
+   void SetFe4Amplifier2CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14659,7 +14690,7 @@ public:
          case 9:
             return SetRegMask(0x1080, 0x00800000, 23, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe4Amplifier2CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe4Amplifier2CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14672,7 +14703,7 @@ public:
             if(BitOfs) *BitOfs = 23;
             return 0x1080;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe4Amplifier2CompEnLoc() not defined for this board version");
       };
    };
 
@@ -14685,10 +14716,10 @@ public:
          case 9:
             return BitExtractControl(0x1080, 0x00400000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe4Amplifier2En() not defined for this board version");
       };
    };
-   unsigned int SetFe4Amplifier2En(unsigned int value)
+   void SetFe4Amplifier2En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14696,7 +14727,7 @@ public:
          case 9:
             return SetRegMask(0x1080, 0x00400000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe4Amplifier2En() not defined for this board version");
       };
    };
    unsigned int GetFe4Amplifier2EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14709,7 +14740,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x1080;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe4Amplifier2EnLoc() not defined for this board version");
       };
    };
 
@@ -14722,10 +14753,10 @@ public:
          case 9:
             return BitExtractControl(0x1080, 0x000C0000, 18);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe4Attenuation() not defined for this board version");
       };
    };
-   unsigned int SetFe4Attenuation(unsigned int value)
+   void SetFe4Attenuation(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14733,7 +14764,7 @@ public:
          case 9:
             return SetRegMask(0x1080, 0x000C0000, 18, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe4Attenuation() not defined for this board version");
       };
    };
    unsigned int GetFe4AttenuationLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14746,7 +14777,7 @@ public:
             if(BitOfs) *BitOfs = 18;
             return 0x1080;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe4AttenuationLoc() not defined for this board version");
       };
    };
 
@@ -14759,10 +14790,10 @@ public:
          case 9:
             return BitExtractControl(0x1080, 0x00030000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe4Mux() not defined for this board version");
       };
    };
-   unsigned int SetFe4Mux(unsigned int value)
+   void SetFe4Mux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14770,7 +14801,7 @@ public:
          case 9:
             return SetRegMask(0x1080, 0x00030000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe4Mux() not defined for this board version");
       };
    };
    unsigned int GetFe4MuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14783,7 +14814,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1080;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe4MuxLoc() not defined for this board version");
       };
    };
 
@@ -14796,10 +14827,10 @@ public:
          case 9:
             return BitExtractControl(0x1080, 0x01000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe4PzcEn() not defined for this board version");
       };
    };
-   unsigned int SetFe4PzcEn(unsigned int value)
+   void SetFe4PzcEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14807,7 +14838,7 @@ public:
          case 9:
             return SetRegMask(0x1080, 0x01000000, 24, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe4PzcEn() not defined for this board version");
       };
    };
    unsigned int GetFe4PzcEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14820,7 +14851,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x1080;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe4PzcEnLoc() not defined for this board version");
       };
    };
 
@@ -14833,10 +14864,10 @@ public:
          case 9:
             return BitExtractControl(0x1080, 0x00000020, 5);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe5Amplifier1CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe5Amplifier1CompEn(unsigned int value)
+   void SetFe5Amplifier1CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14844,7 +14875,7 @@ public:
          case 9:
             return SetRegMask(0x1080, 0x00000020, 5, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe5Amplifier1CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe5Amplifier1CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14857,7 +14888,7 @@ public:
             if(BitOfs) *BitOfs = 5;
             return 0x1080;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe5Amplifier1CompEnLoc() not defined for this board version");
       };
    };
 
@@ -14870,10 +14901,10 @@ public:
          case 9:
             return BitExtractControl(0x1080, 0x00000010, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe5Amplifier1En() not defined for this board version");
       };
    };
-   unsigned int SetFe5Amplifier1En(unsigned int value)
+   void SetFe5Amplifier1En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14881,7 +14912,7 @@ public:
          case 9:
             return SetRegMask(0x1080, 0x00000010, 4, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe5Amplifier1En() not defined for this board version");
       };
    };
    unsigned int GetFe5Amplifier1EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14894,7 +14925,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x1080;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe5Amplifier1EnLoc() not defined for this board version");
       };
    };
 
@@ -14907,10 +14938,10 @@ public:
          case 9:
             return BitExtractControl(0x1080, 0x00000080, 7);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe5Amplifier2CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe5Amplifier2CompEn(unsigned int value)
+   void SetFe5Amplifier2CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14918,7 +14949,7 @@ public:
          case 9:
             return SetRegMask(0x1080, 0x00000080, 7, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe5Amplifier2CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe5Amplifier2CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14931,7 +14962,7 @@ public:
             if(BitOfs) *BitOfs = 7;
             return 0x1080;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe5Amplifier2CompEnLoc() not defined for this board version");
       };
    };
 
@@ -14944,10 +14975,10 @@ public:
          case 9:
             return BitExtractControl(0x1080, 0x00000040, 6);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe5Amplifier2En() not defined for this board version");
       };
    };
-   unsigned int SetFe5Amplifier2En(unsigned int value)
+   void SetFe5Amplifier2En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14955,7 +14986,7 @@ public:
          case 9:
             return SetRegMask(0x1080, 0x00000040, 6, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe5Amplifier2En() not defined for this board version");
       };
    };
    unsigned int GetFe5Amplifier2EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -14968,7 +14999,7 @@ public:
             if(BitOfs) *BitOfs = 6;
             return 0x1080;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe5Amplifier2EnLoc() not defined for this board version");
       };
    };
 
@@ -14981,10 +15012,10 @@ public:
          case 9:
             return BitExtractControl(0x1080, 0x0000000C, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe5Attenuation() not defined for this board version");
       };
    };
-   unsigned int SetFe5Attenuation(unsigned int value)
+   void SetFe5Attenuation(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -14992,7 +15023,7 @@ public:
          case 9:
             return SetRegMask(0x1080, 0x0000000C, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe5Attenuation() not defined for this board version");
       };
    };
    unsigned int GetFe5AttenuationLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15005,7 +15036,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1080;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe5AttenuationLoc() not defined for this board version");
       };
    };
 
@@ -15018,10 +15049,10 @@ public:
          case 9:
             return BitExtractControl(0x1080, 0x00000003, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe5Mux() not defined for this board version");
       };
    };
-   unsigned int SetFe5Mux(unsigned int value)
+   void SetFe5Mux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15029,7 +15060,7 @@ public:
          case 9:
             return SetRegMask(0x1080, 0x00000003, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe5Mux() not defined for this board version");
       };
    };
    unsigned int GetFe5MuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15042,7 +15073,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1080;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe5MuxLoc() not defined for this board version");
       };
    };
 
@@ -15055,10 +15086,10 @@ public:
          case 9:
             return BitExtractControl(0x1080, 0x00000100, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe5PzcEn() not defined for this board version");
       };
    };
-   unsigned int SetFe5PzcEn(unsigned int value)
+   void SetFe5PzcEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15066,7 +15097,7 @@ public:
          case 9:
             return SetRegMask(0x1080, 0x00000100, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe5PzcEn() not defined for this board version");
       };
    };
    unsigned int GetFe5PzcEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15079,7 +15110,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1080;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe5PzcEnLoc() not defined for this board version");
       };
    };
 
@@ -15092,10 +15123,10 @@ public:
          case 9:
             return BitExtractControl(0x1084, 0x00200000, 21);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe6Amplifier1CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe6Amplifier1CompEn(unsigned int value)
+   void SetFe6Amplifier1CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15103,7 +15134,7 @@ public:
          case 9:
             return SetRegMask(0x1084, 0x00200000, 21, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe6Amplifier1CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe6Amplifier1CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15116,7 +15147,7 @@ public:
             if(BitOfs) *BitOfs = 21;
             return 0x1084;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe6Amplifier1CompEnLoc() not defined for this board version");
       };
    };
 
@@ -15129,10 +15160,10 @@ public:
          case 9:
             return BitExtractControl(0x1084, 0x00100000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe6Amplifier1En() not defined for this board version");
       };
    };
-   unsigned int SetFe6Amplifier1En(unsigned int value)
+   void SetFe6Amplifier1En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15140,7 +15171,7 @@ public:
          case 9:
             return SetRegMask(0x1084, 0x00100000, 20, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe6Amplifier1En() not defined for this board version");
       };
    };
    unsigned int GetFe6Amplifier1EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15153,7 +15184,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x1084;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe6Amplifier1EnLoc() not defined for this board version");
       };
    };
 
@@ -15166,10 +15197,10 @@ public:
          case 9:
             return BitExtractControl(0x1084, 0x00800000, 23);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe6Amplifier2CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe6Amplifier2CompEn(unsigned int value)
+   void SetFe6Amplifier2CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15177,7 +15208,7 @@ public:
          case 9:
             return SetRegMask(0x1084, 0x00800000, 23, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe6Amplifier2CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe6Amplifier2CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15190,7 +15221,7 @@ public:
             if(BitOfs) *BitOfs = 23;
             return 0x1084;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe6Amplifier2CompEnLoc() not defined for this board version");
       };
    };
 
@@ -15203,10 +15234,10 @@ public:
          case 9:
             return BitExtractControl(0x1084, 0x00400000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe6Amplifier2En() not defined for this board version");
       };
    };
-   unsigned int SetFe6Amplifier2En(unsigned int value)
+   void SetFe6Amplifier2En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15214,7 +15245,7 @@ public:
          case 9:
             return SetRegMask(0x1084, 0x00400000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe6Amplifier2En() not defined for this board version");
       };
    };
    unsigned int GetFe6Amplifier2EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15227,7 +15258,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x1084;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe6Amplifier2EnLoc() not defined for this board version");
       };
    };
 
@@ -15240,10 +15271,10 @@ public:
          case 9:
             return BitExtractControl(0x1084, 0x000C0000, 18);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe6Attenuation() not defined for this board version");
       };
    };
-   unsigned int SetFe6Attenuation(unsigned int value)
+   void SetFe6Attenuation(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15251,7 +15282,7 @@ public:
          case 9:
             return SetRegMask(0x1084, 0x000C0000, 18, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe6Attenuation() not defined for this board version");
       };
    };
    unsigned int GetFe6AttenuationLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15264,7 +15295,7 @@ public:
             if(BitOfs) *BitOfs = 18;
             return 0x1084;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe6AttenuationLoc() not defined for this board version");
       };
    };
 
@@ -15277,10 +15308,10 @@ public:
          case 9:
             return BitExtractControl(0x1084, 0x00030000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe6Mux() not defined for this board version");
       };
    };
-   unsigned int SetFe6Mux(unsigned int value)
+   void SetFe6Mux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15288,7 +15319,7 @@ public:
          case 9:
             return SetRegMask(0x1084, 0x00030000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe6Mux() not defined for this board version");
       };
    };
    unsigned int GetFe6MuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15301,7 +15332,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1084;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe6MuxLoc() not defined for this board version");
       };
    };
 
@@ -15314,10 +15345,10 @@ public:
          case 9:
             return BitExtractControl(0x1084, 0x01000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe6PzcEn() not defined for this board version");
       };
    };
-   unsigned int SetFe6PzcEn(unsigned int value)
+   void SetFe6PzcEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15325,7 +15356,7 @@ public:
          case 9:
             return SetRegMask(0x1084, 0x01000000, 24, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe6PzcEn() not defined for this board version");
       };
    };
    unsigned int GetFe6PzcEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15338,7 +15369,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x1084;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe6PzcEnLoc() not defined for this board version");
       };
    };
 
@@ -15351,10 +15382,10 @@ public:
          case 9:
             return BitExtractControl(0x1084, 0x00000020, 5);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe7Amplifier1CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe7Amplifier1CompEn(unsigned int value)
+   void SetFe7Amplifier1CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15362,7 +15393,7 @@ public:
          case 9:
             return SetRegMask(0x1084, 0x00000020, 5, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe7Amplifier1CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe7Amplifier1CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15375,7 +15406,7 @@ public:
             if(BitOfs) *BitOfs = 5;
             return 0x1084;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe7Amplifier1CompEnLoc() not defined for this board version");
       };
    };
 
@@ -15388,10 +15419,10 @@ public:
          case 9:
             return BitExtractControl(0x1084, 0x00000010, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe7Amplifier1En() not defined for this board version");
       };
    };
-   unsigned int SetFe7Amplifier1En(unsigned int value)
+   void SetFe7Amplifier1En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15399,7 +15430,7 @@ public:
          case 9:
             return SetRegMask(0x1084, 0x00000010, 4, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe7Amplifier1En() not defined for this board version");
       };
    };
    unsigned int GetFe7Amplifier1EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15412,7 +15443,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x1084;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe7Amplifier1EnLoc() not defined for this board version");
       };
    };
 
@@ -15425,10 +15456,10 @@ public:
          case 9:
             return BitExtractControl(0x1084, 0x00000080, 7);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe7Amplifier2CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe7Amplifier2CompEn(unsigned int value)
+   void SetFe7Amplifier2CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15436,7 +15467,7 @@ public:
          case 9:
             return SetRegMask(0x1084, 0x00000080, 7, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe7Amplifier2CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe7Amplifier2CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15449,7 +15480,7 @@ public:
             if(BitOfs) *BitOfs = 7;
             return 0x1084;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe7Amplifier2CompEnLoc() not defined for this board version");
       };
    };
 
@@ -15462,10 +15493,10 @@ public:
          case 9:
             return BitExtractControl(0x1084, 0x00000040, 6);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe7Amplifier2En() not defined for this board version");
       };
    };
-   unsigned int SetFe7Amplifier2En(unsigned int value)
+   void SetFe7Amplifier2En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15473,7 +15504,7 @@ public:
          case 9:
             return SetRegMask(0x1084, 0x00000040, 6, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe7Amplifier2En() not defined for this board version");
       };
    };
    unsigned int GetFe7Amplifier2EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15486,7 +15517,7 @@ public:
             if(BitOfs) *BitOfs = 6;
             return 0x1084;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe7Amplifier2EnLoc() not defined for this board version");
       };
    };
 
@@ -15499,10 +15530,10 @@ public:
          case 9:
             return BitExtractControl(0x1084, 0x0000000C, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe7Attenuation() not defined for this board version");
       };
    };
-   unsigned int SetFe7Attenuation(unsigned int value)
+   void SetFe7Attenuation(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15510,7 +15541,7 @@ public:
          case 9:
             return SetRegMask(0x1084, 0x0000000C, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe7Attenuation() not defined for this board version");
       };
    };
    unsigned int GetFe7AttenuationLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15523,7 +15554,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1084;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe7AttenuationLoc() not defined for this board version");
       };
    };
 
@@ -15536,10 +15567,10 @@ public:
          case 9:
             return BitExtractControl(0x1084, 0x00000003, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe7Mux() not defined for this board version");
       };
    };
-   unsigned int SetFe7Mux(unsigned int value)
+   void SetFe7Mux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15547,7 +15578,7 @@ public:
          case 9:
             return SetRegMask(0x1084, 0x00000003, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe7Mux() not defined for this board version");
       };
    };
    unsigned int GetFe7MuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15560,7 +15591,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1084;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe7MuxLoc() not defined for this board version");
       };
    };
 
@@ -15573,10 +15604,10 @@ public:
          case 9:
             return BitExtractControl(0x1084, 0x00000100, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe7PzcEn() not defined for this board version");
       };
    };
-   unsigned int SetFe7PzcEn(unsigned int value)
+   void SetFe7PzcEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15584,7 +15615,7 @@ public:
          case 9:
             return SetRegMask(0x1084, 0x00000100, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe7PzcEn() not defined for this board version");
       };
    };
    unsigned int GetFe7PzcEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15597,7 +15628,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1084;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe7PzcEnLoc() not defined for this board version");
       };
    };
 
@@ -15610,10 +15641,10 @@ public:
          case 9:
             return BitExtractControl(0x1088, 0x00200000, 21);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe8Amplifier1CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe8Amplifier1CompEn(unsigned int value)
+   void SetFe8Amplifier1CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15621,7 +15652,7 @@ public:
          case 9:
             return SetRegMask(0x1088, 0x00200000, 21, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe8Amplifier1CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe8Amplifier1CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15634,7 +15665,7 @@ public:
             if(BitOfs) *BitOfs = 21;
             return 0x1088;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe8Amplifier1CompEnLoc() not defined for this board version");
       };
    };
 
@@ -15647,10 +15678,10 @@ public:
          case 9:
             return BitExtractControl(0x1088, 0x00100000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe8Amplifier1En() not defined for this board version");
       };
    };
-   unsigned int SetFe8Amplifier1En(unsigned int value)
+   void SetFe8Amplifier1En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15658,7 +15689,7 @@ public:
          case 9:
             return SetRegMask(0x1088, 0x00100000, 20, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe8Amplifier1En() not defined for this board version");
       };
    };
    unsigned int GetFe8Amplifier1EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15671,7 +15702,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x1088;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe8Amplifier1EnLoc() not defined for this board version");
       };
    };
 
@@ -15684,10 +15715,10 @@ public:
          case 9:
             return BitExtractControl(0x1088, 0x00800000, 23);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe8Amplifier2CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe8Amplifier2CompEn(unsigned int value)
+   void SetFe8Amplifier2CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15695,7 +15726,7 @@ public:
          case 9:
             return SetRegMask(0x1088, 0x00800000, 23, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe8Amplifier2CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe8Amplifier2CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15708,7 +15739,7 @@ public:
             if(BitOfs) *BitOfs = 23;
             return 0x1088;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe8Amplifier2CompEnLoc() not defined for this board version");
       };
    };
 
@@ -15721,10 +15752,10 @@ public:
          case 9:
             return BitExtractControl(0x1088, 0x00400000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe8Amplifier2En() not defined for this board version");
       };
    };
-   unsigned int SetFe8Amplifier2En(unsigned int value)
+   void SetFe8Amplifier2En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15732,7 +15763,7 @@ public:
          case 9:
             return SetRegMask(0x1088, 0x00400000, 22, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe8Amplifier2En() not defined for this board version");
       };
    };
    unsigned int GetFe8Amplifier2EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15745,7 +15776,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x1088;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe8Amplifier2EnLoc() not defined for this board version");
       };
    };
 
@@ -15758,10 +15789,10 @@ public:
          case 9:
             return BitExtractControl(0x1088, 0x000C0000, 18);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe8Attenuation() not defined for this board version");
       };
    };
-   unsigned int SetFe8Attenuation(unsigned int value)
+   void SetFe8Attenuation(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15769,7 +15800,7 @@ public:
          case 9:
             return SetRegMask(0x1088, 0x000C0000, 18, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe8Attenuation() not defined for this board version");
       };
    };
    unsigned int GetFe8AttenuationLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15782,7 +15813,7 @@ public:
             if(BitOfs) *BitOfs = 18;
             return 0x1088;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe8AttenuationLoc() not defined for this board version");
       };
    };
 
@@ -15795,10 +15826,10 @@ public:
          case 9:
             return BitExtractControl(0x1088, 0x00030000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe8Mux() not defined for this board version");
       };
    };
-   unsigned int SetFe8Mux(unsigned int value)
+   void SetFe8Mux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15806,7 +15837,7 @@ public:
          case 9:
             return SetRegMask(0x1088, 0x00030000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe8Mux() not defined for this board version");
       };
    };
    unsigned int GetFe8MuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15819,7 +15850,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1088;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe8MuxLoc() not defined for this board version");
       };
    };
 
@@ -15832,10 +15863,10 @@ public:
          case 9:
             return BitExtractControl(0x1088, 0x01000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe8PzcEn() not defined for this board version");
       };
    };
-   unsigned int SetFe8PzcEn(unsigned int value)
+   void SetFe8PzcEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15843,7 +15874,7 @@ public:
          case 9:
             return SetRegMask(0x1088, 0x01000000, 24, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe8PzcEn() not defined for this board version");
       };
    };
    unsigned int GetFe8PzcEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15856,7 +15887,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x1088;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe8PzcEnLoc() not defined for this board version");
       };
    };
 
@@ -15869,10 +15900,10 @@ public:
          case 9:
             return BitExtractControl(0x1088, 0x00000020, 5);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe9Amplifier1CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe9Amplifier1CompEn(unsigned int value)
+   void SetFe9Amplifier1CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15880,7 +15911,7 @@ public:
          case 9:
             return SetRegMask(0x1088, 0x00000020, 5, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe9Amplifier1CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe9Amplifier1CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15893,7 +15924,7 @@ public:
             if(BitOfs) *BitOfs = 5;
             return 0x1088;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe9Amplifier1CompEnLoc() not defined for this board version");
       };
    };
 
@@ -15906,10 +15937,10 @@ public:
          case 9:
             return BitExtractControl(0x1088, 0x00000010, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe9Amplifier1En() not defined for this board version");
       };
    };
-   unsigned int SetFe9Amplifier1En(unsigned int value)
+   void SetFe9Amplifier1En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15917,7 +15948,7 @@ public:
          case 9:
             return SetRegMask(0x1088, 0x00000010, 4, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe9Amplifier1En() not defined for this board version");
       };
    };
    unsigned int GetFe9Amplifier1EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15930,7 +15961,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x1088;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe9Amplifier1EnLoc() not defined for this board version");
       };
    };
 
@@ -15943,10 +15974,10 @@ public:
          case 9:
             return BitExtractControl(0x1088, 0x00000080, 7);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe9Amplifier2CompEn() not defined for this board version");
       };
    };
-   unsigned int SetFe9Amplifier2CompEn(unsigned int value)
+   void SetFe9Amplifier2CompEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15954,7 +15985,7 @@ public:
          case 9:
             return SetRegMask(0x1088, 0x00000080, 7, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe9Amplifier2CompEn() not defined for this board version");
       };
    };
    unsigned int GetFe9Amplifier2CompEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -15967,7 +15998,7 @@ public:
             if(BitOfs) *BitOfs = 7;
             return 0x1088;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe9Amplifier2CompEnLoc() not defined for this board version");
       };
    };
 
@@ -15980,10 +16011,10 @@ public:
          case 9:
             return BitExtractControl(0x1088, 0x00000040, 6);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe9Amplifier2En() not defined for this board version");
       };
    };
-   unsigned int SetFe9Amplifier2En(unsigned int value)
+   void SetFe9Amplifier2En(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -15991,7 +16022,7 @@ public:
          case 9:
             return SetRegMask(0x1088, 0x00000040, 6, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe9Amplifier2En() not defined for this board version");
       };
    };
    unsigned int GetFe9Amplifier2EnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16004,7 +16035,7 @@ public:
             if(BitOfs) *BitOfs = 6;
             return 0x1088;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe9Amplifier2EnLoc() not defined for this board version");
       };
    };
 
@@ -16017,10 +16048,10 @@ public:
          case 9:
             return BitExtractControl(0x1088, 0x0000000C, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe9Attenuation() not defined for this board version");
       };
    };
-   unsigned int SetFe9Attenuation(unsigned int value)
+   void SetFe9Attenuation(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -16028,7 +16059,7 @@ public:
          case 9:
             return SetRegMask(0x1088, 0x0000000C, 2, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe9Attenuation() not defined for this board version");
       };
    };
    unsigned int GetFe9AttenuationLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16041,7 +16072,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x1088;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe9AttenuationLoc() not defined for this board version");
       };
    };
 
@@ -16054,10 +16085,10 @@ public:
          case 9:
             return BitExtractControl(0x1088, 0x00000003, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe9Mux() not defined for this board version");
       };
    };
-   unsigned int SetFe9Mux(unsigned int value)
+   void SetFe9Mux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -16065,7 +16096,7 @@ public:
          case 9:
             return SetRegMask(0x1088, 0x00000003, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe9Mux() not defined for this board version");
       };
    };
    unsigned int GetFe9MuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16078,7 +16109,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1088;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe9MuxLoc() not defined for this board version");
       };
    };
 
@@ -16091,10 +16122,10 @@ public:
          case 9:
             return BitExtractControl(0x1088, 0x00000100, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe9PzcEn() not defined for this board version");
       };
    };
-   unsigned int SetFe9PzcEn(unsigned int value)
+   void SetFe9PzcEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -16102,7 +16133,7 @@ public:
          case 9:
             return SetRegMask(0x1088, 0x00000100, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFe9PzcEn() not defined for this board version");
       };
    };
    unsigned int GetFe9PzcEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16115,7 +16146,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1088;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe9PzcEnLoc() not defined for this board version");
       };
    };
 
@@ -16129,7 +16160,7 @@ public:
          case 9:
             return BitExtractStatus(0x014C, 0xC0000000, 30);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe0Mod() not defined for this board version");
       };
    };
    unsigned int GetFe0ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16145,7 +16176,7 @@ public:
             if(BitOfs) *BitOfs = 30;
             return 0x014C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe0ModLoc() not defined for this board version");
       };
    };
 
@@ -16159,7 +16190,7 @@ public:
          case 9:
             return BitExtractStatus(0x014C, 0x00000C00, 10);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe10Mod() not defined for this board version");
       };
    };
    unsigned int GetFe10ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16175,7 +16206,7 @@ public:
             if(BitOfs) *BitOfs = 10;
             return 0x014C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe10ModLoc() not defined for this board version");
       };
    };
 
@@ -16189,7 +16220,7 @@ public:
          case 9:
             return BitExtractStatus(0x014C, 0x00000300, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe11Mod() not defined for this board version");
       };
    };
    unsigned int GetFe11ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16205,7 +16236,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x014C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe11ModLoc() not defined for this board version");
       };
    };
 
@@ -16219,7 +16250,7 @@ public:
          case 9:
             return BitExtractStatus(0x014C, 0x000000C0, 6);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe12Mod() not defined for this board version");
       };
    };
    unsigned int GetFe12ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16235,7 +16266,7 @@ public:
             if(BitOfs) *BitOfs = 6;
             return 0x014C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe12ModLoc() not defined for this board version");
       };
    };
 
@@ -16249,7 +16280,7 @@ public:
          case 9:
             return BitExtractStatus(0x014C, 0x00000030, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe13Mod() not defined for this board version");
       };
    };
    unsigned int GetFe13ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16265,7 +16296,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x014C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe13ModLoc() not defined for this board version");
       };
    };
 
@@ -16279,7 +16310,7 @@ public:
          case 9:
             return BitExtractStatus(0x014C, 0x0000000C, 2);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe14Mod() not defined for this board version");
       };
    };
    unsigned int GetFe14ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16295,7 +16326,7 @@ public:
             if(BitOfs) *BitOfs = 2;
             return 0x014C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe14ModLoc() not defined for this board version");
       };
    };
 
@@ -16309,7 +16340,7 @@ public:
          case 9:
             return BitExtractStatus(0x014C, 0x00000003, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe15Mod() not defined for this board version");
       };
    };
    unsigned int GetFe15ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16325,7 +16356,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x014C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe15ModLoc() not defined for this board version");
       };
    };
 
@@ -16339,7 +16370,7 @@ public:
          case 9:
             return BitExtractStatus(0x014C, 0x30000000, 28);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe1Mod() not defined for this board version");
       };
    };
    unsigned int GetFe1ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16355,7 +16386,7 @@ public:
             if(BitOfs) *BitOfs = 28;
             return 0x014C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe1ModLoc() not defined for this board version");
       };
    };
 
@@ -16369,7 +16400,7 @@ public:
          case 9:
             return BitExtractStatus(0x014C, 0x0C000000, 26);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe2Mod() not defined for this board version");
       };
    };
    unsigned int GetFe2ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16385,7 +16416,7 @@ public:
             if(BitOfs) *BitOfs = 26;
             return 0x014C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe2ModLoc() not defined for this board version");
       };
    };
 
@@ -16399,7 +16430,7 @@ public:
          case 9:
             return BitExtractStatus(0x014C, 0x03000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe3Mod() not defined for this board version");
       };
    };
    unsigned int GetFe3ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16415,7 +16446,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x014C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe3ModLoc() not defined for this board version");
       };
    };
 
@@ -16429,7 +16460,7 @@ public:
          case 9:
             return BitExtractStatus(0x014C, 0x00C00000, 22);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe4Mod() not defined for this board version");
       };
    };
    unsigned int GetFe4ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16445,7 +16476,7 @@ public:
             if(BitOfs) *BitOfs = 22;
             return 0x014C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe4ModLoc() not defined for this board version");
       };
    };
 
@@ -16459,7 +16490,7 @@ public:
          case 9:
             return BitExtractStatus(0x014C, 0x00300000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe5Mod() not defined for this board version");
       };
    };
    unsigned int GetFe5ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16475,7 +16506,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x014C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe5ModLoc() not defined for this board version");
       };
    };
 
@@ -16489,7 +16520,7 @@ public:
          case 9:
             return BitExtractStatus(0x014C, 0x000C0000, 18);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe6Mod() not defined for this board version");
       };
    };
    unsigned int GetFe6ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16505,7 +16536,7 @@ public:
             if(BitOfs) *BitOfs = 18;
             return 0x014C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe6ModLoc() not defined for this board version");
       };
    };
 
@@ -16519,7 +16550,7 @@ public:
          case 9:
             return BitExtractStatus(0x014C, 0x00030000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe7Mod() not defined for this board version");
       };
    };
    unsigned int GetFe7ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16535,7 +16566,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x014C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe7ModLoc() not defined for this board version");
       };
    };
 
@@ -16549,7 +16580,7 @@ public:
          case 9:
             return BitExtractStatus(0x014C, 0x0000C000, 14);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe8Mod() not defined for this board version");
       };
    };
    unsigned int GetFe8ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16565,7 +16596,7 @@ public:
             if(BitOfs) *BitOfs = 14;
             return 0x014C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe8ModLoc() not defined for this board version");
       };
    };
 
@@ -16579,7 +16610,7 @@ public:
          case 9:
             return BitExtractStatus(0x014C, 0x00003000, 12);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe9Mod() not defined for this board version");
       };
    };
    unsigned int GetFe9ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16595,7 +16626,7 @@ public:
             if(BitOfs) *BitOfs = 12;
             return 0x014C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFe9ModLoc() not defined for this board version");
       };
    };
 
@@ -16607,17 +16638,17 @@ public:
          case 9:
             return BitExtractControl(0x1004, 0x00000800, 11);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFePower() not defined for this board version");
       };
    };
-   unsigned int SetFePower(unsigned int value)
+   void SetFePower(unsigned int value)
    {
       switch(this->mVersion)
       {
          case 9:
             return SetRegMask(0x1004, 0x00000800, 11, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFePower() not defined for this board version");
       };
    };
    unsigned int GetFePowerLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16629,7 +16660,7 @@ public:
             if(BitOfs) *BitOfs = 11;
             return 0x1004;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFePowerLoc() not defined for this board version");
       };
    };
 
@@ -16642,10 +16673,10 @@ public:
          case 9:
             return BitExtractControl(0x1018, 0xFFFC0000, 18);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFirstPkgDly() not defined for this board version");
       };
    };
-   unsigned int SetFirstPkgDly(unsigned int value)
+   void SetFirstPkgDly(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -16653,7 +16684,7 @@ public:
          case 9:
             return SetRegMask(0x1018, 0xFFFC0000, 18, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetFirstPkgDly() not defined for this board version");
       };
    };
    unsigned int GetFirstPkgDlyLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16666,7 +16697,7 @@ public:
             if(BitOfs) *BitOfs = 18;
             return 0x1018;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFirstPkgDlyLoc() not defined for this board version");
       };
    };
 
@@ -16678,7 +16709,7 @@ public:
          case 8:
             return BitExtractStatus(0x0028, 0x00000200, 9);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFlashSel() not defined for this board version");
       };
    };
    unsigned int GetFlashSelLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16690,7 +16721,7 @@ public:
             if(BitOfs) *BitOfs = 9;
             return 0x0028;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFlashSelLoc() not defined for this board version");
       };
    };
 
@@ -16703,7 +16734,7 @@ public:
          case 9:
             return BitExtractStatus(0x0008, 0x000000FF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFwBuildDay() not defined for this board version");
       };
    };
    unsigned int GetFwBuildDayLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16716,7 +16747,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0008;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFwBuildDayLoc() not defined for this board version");
       };
    };
 
@@ -16729,7 +16760,7 @@ public:
          case 9:
             return BitExtractStatus(0x000C, 0x00FF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFwBuildHour() not defined for this board version");
       };
    };
    unsigned int GetFwBuildHourLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16742,7 +16773,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x000C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFwBuildHourLoc() not defined for this board version");
       };
    };
 
@@ -16755,7 +16786,7 @@ public:
          case 9:
             return BitExtractStatus(0x000C, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFwBuildMinute() not defined for this board version");
       };
    };
    unsigned int GetFwBuildMinuteLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16768,7 +16799,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x000C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFwBuildMinuteLoc() not defined for this board version");
       };
    };
 
@@ -16781,7 +16812,7 @@ public:
          case 9:
             return BitExtractStatus(0x0008, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFwBuildMonth() not defined for this board version");
       };
    };
    unsigned int GetFwBuildMonthLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16794,7 +16825,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x0008;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFwBuildMonthLoc() not defined for this board version");
       };
    };
 
@@ -16807,7 +16838,7 @@ public:
          case 9:
             return BitExtractStatus(0x000C, 0x000000FF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFwBuildSecond() not defined for this board version");
       };
    };
    unsigned int GetFwBuildSecondLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16820,7 +16851,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x000C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFwBuildSecondLoc() not defined for this board version");
       };
    };
 
@@ -16833,7 +16864,7 @@ public:
          case 9:
             return BitExtractStatus(0x0008, 0xFFFF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFwBuildYear() not defined for this board version");
       };
    };
    unsigned int GetFwBuildYearLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16846,7 +16877,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x0008;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFwBuildYearLoc() not defined for this board version");
       };
    };
 
@@ -16859,7 +16890,7 @@ public:
          case 9:
             return BitExtractStatus(0x000C, 0xFF000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFwCompatLevel() not defined for this board version");
       };
    };
    unsigned int GetFwCompatLevelLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16872,7 +16903,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x000C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFwCompatLevelLoc() not defined for this board version");
       };
    };
 
@@ -16885,7 +16916,7 @@ public:
          case 9:
             return BitExtractStatus(0x0018, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFwGitHashTag() not defined for this board version");
       };
    };
    unsigned int GetFwGitHashTagLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16898,7 +16929,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0018;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFwGitHashTagLoc() not defined for this board version");
       };
    };
 
@@ -16911,7 +16942,7 @@ public:
          case 9:
             return BitExtractStatus(0x0028, 0x00000002, 1);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvBoardPlugged() not defined for this board version");
       };
    };
    unsigned int GetHvBoardPluggedLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16924,7 +16955,7 @@ public:
             if(BitOfs) *BitOfs = 1;
             return 0x0028;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvBoardPluggedLoc() not defined for this board version");
       };
    };
 
@@ -16938,7 +16969,7 @@ public:
          case 9:
             return BitExtractStatus(0x0048, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas0() not defined for this board version");
       };
    };
    unsigned int GetHvIMeas0Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16954,7 +16985,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0048;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas0Loc() not defined for this board version");
       };
    };
 
@@ -16968,7 +16999,7 @@ public:
          case 9:
             return BitExtractStatus(0x004C, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas1() not defined for this board version");
       };
    };
    unsigned int GetHvIMeas1Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -16984,7 +17015,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x004C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas1Loc() not defined for this board version");
       };
    };
 
@@ -16998,7 +17029,7 @@ public:
          case 9:
             return BitExtractStatus(0x0070, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas10() not defined for this board version");
       };
    };
    unsigned int GetHvIMeas10Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17014,7 +17045,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0070;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas10Loc() not defined for this board version");
       };
    };
 
@@ -17028,7 +17059,7 @@ public:
          case 9:
             return BitExtractStatus(0x0074, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas11() not defined for this board version");
       };
    };
    unsigned int GetHvIMeas11Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17044,7 +17075,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0074;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas11Loc() not defined for this board version");
       };
    };
 
@@ -17058,7 +17089,7 @@ public:
          case 9:
             return BitExtractStatus(0x0078, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas12() not defined for this board version");
       };
    };
    unsigned int GetHvIMeas12Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17074,7 +17105,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0078;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas12Loc() not defined for this board version");
       };
    };
 
@@ -17088,7 +17119,7 @@ public:
          case 9:
             return BitExtractStatus(0x007C, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas13() not defined for this board version");
       };
    };
    unsigned int GetHvIMeas13Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17104,7 +17135,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x007C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas13Loc() not defined for this board version");
       };
    };
 
@@ -17118,7 +17149,7 @@ public:
          case 9:
             return BitExtractStatus(0x0080, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas14() not defined for this board version");
       };
    };
    unsigned int GetHvIMeas14Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17134,7 +17165,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0080;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas14Loc() not defined for this board version");
       };
    };
 
@@ -17148,7 +17179,7 @@ public:
          case 9:
             return BitExtractStatus(0x0084, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas15() not defined for this board version");
       };
    };
    unsigned int GetHvIMeas15Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17164,7 +17195,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0084;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas15Loc() not defined for this board version");
       };
    };
 
@@ -17178,7 +17209,7 @@ public:
          case 9:
             return BitExtractStatus(0x0050, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas2() not defined for this board version");
       };
    };
    unsigned int GetHvIMeas2Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17194,7 +17225,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0050;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas2Loc() not defined for this board version");
       };
    };
 
@@ -17208,7 +17239,7 @@ public:
          case 9:
             return BitExtractStatus(0x0054, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas3() not defined for this board version");
       };
    };
    unsigned int GetHvIMeas3Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17224,7 +17255,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0054;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas3Loc() not defined for this board version");
       };
    };
 
@@ -17238,7 +17269,7 @@ public:
          case 9:
             return BitExtractStatus(0x0058, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas4() not defined for this board version");
       };
    };
    unsigned int GetHvIMeas4Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17254,7 +17285,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0058;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas4Loc() not defined for this board version");
       };
    };
 
@@ -17268,7 +17299,7 @@ public:
          case 9:
             return BitExtractStatus(0x005C, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas5() not defined for this board version");
       };
    };
    unsigned int GetHvIMeas5Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17284,7 +17315,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x005C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas5Loc() not defined for this board version");
       };
    };
 
@@ -17298,7 +17329,7 @@ public:
          case 9:
             return BitExtractStatus(0x0060, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas6() not defined for this board version");
       };
    };
    unsigned int GetHvIMeas6Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17314,7 +17345,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0060;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas6Loc() not defined for this board version");
       };
    };
 
@@ -17328,7 +17359,7 @@ public:
          case 9:
             return BitExtractStatus(0x0064, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas7() not defined for this board version");
       };
    };
    unsigned int GetHvIMeas7Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17344,7 +17375,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0064;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas7Loc() not defined for this board version");
       };
    };
 
@@ -17358,7 +17389,7 @@ public:
          case 9:
             return BitExtractStatus(0x0068, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas8() not defined for this board version");
       };
    };
    unsigned int GetHvIMeas8Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17374,7 +17405,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0068;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas8Loc() not defined for this board version");
       };
    };
 
@@ -17388,7 +17419,7 @@ public:
          case 9:
             return BitExtractStatus(0x006C, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas9() not defined for this board version");
       };
    };
    unsigned int GetHvIMeas9Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17404,7 +17435,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x006C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeas9Loc() not defined for this board version");
       };
    };
 
@@ -17417,10 +17448,10 @@ public:
          case 9:
             return BitExtractControl(0x10D8, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvRShunt() not defined for this board version");
       };
    };
-   unsigned int SetHvRShunt(unsigned int value)
+   void SetHvRShunt(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -17428,7 +17459,7 @@ public:
          case 9:
             return SetRegMask(0x10D8, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetHvRShunt() not defined for this board version");
       };
    };
    unsigned int GetHvRShuntLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17441,7 +17472,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x10D8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvRShuntLoc() not defined for this board version");
       };
    };
 
@@ -17455,7 +17486,7 @@ public:
          case 9:
             return BitExtractStatus(0x0158, 0x0000000F, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvRShuntMod() not defined for this board version");
       };
    };
    unsigned int GetHvRShuntModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17471,7 +17502,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0158;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvRShuntModLoc() not defined for this board version");
       };
    };
 
@@ -17485,7 +17516,7 @@ public:
          case 9:
             return BitExtractStatus(0x008C, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvTemp0() not defined for this board version");
       };
    };
    unsigned int GetHvTemp0Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17501,7 +17532,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x008C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvTemp0Loc() not defined for this board version");
       };
    };
 
@@ -17515,7 +17546,7 @@ public:
          case 9:
             return BitExtractStatus(0x0090, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvTemp1() not defined for this board version");
       };
    };
    unsigned int GetHvTemp1Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17531,7 +17562,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0090;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvTemp1Loc() not defined for this board version");
       };
    };
 
@@ -17545,7 +17576,7 @@ public:
          case 9:
             return BitExtractStatus(0x0094, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvTemp2() not defined for this board version");
       };
    };
    unsigned int GetHvTemp2Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17561,7 +17592,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0094;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvTemp2Loc() not defined for this board version");
       };
    };
 
@@ -17575,7 +17606,7 @@ public:
          case 9:
             return BitExtractStatus(0x0098, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvTemp3() not defined for this board version");
       };
    };
    unsigned int GetHvTemp3Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17591,7 +17622,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0098;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvTemp3Loc() not defined for this board version");
       };
    };
 
@@ -17605,7 +17636,7 @@ public:
          case 9:
             return BitExtractStatus(0x0088, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUBaseMeas() not defined for this board version");
       };
    };
    unsigned int GetHvUBaseMeasLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17621,7 +17652,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0088;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUBaseMeasLoc() not defined for this board version");
       };
    };
 
@@ -17634,10 +17665,10 @@ public:
          case 9:
             return BitExtractControl(0x1098, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget0() not defined for this board version");
       };
    };
-   unsigned int SetHvUTarget0(unsigned int value)
+   void SetHvUTarget0(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -17645,7 +17676,7 @@ public:
          case 9:
             return SetRegMask(0x1098, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetHvUTarget0() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget0Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17658,7 +17689,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1098;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget0Loc() not defined for this board version");
       };
    };
 
@@ -17672,7 +17703,7 @@ public:
          case 9:
             return BitExtractStatus(0x0150, 0xF0000000, 28);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget0Mod() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget0ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17688,7 +17719,7 @@ public:
             if(BitOfs) *BitOfs = 28;
             return 0x0150;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget0ModLoc() not defined for this board version");
       };
    };
 
@@ -17701,10 +17732,10 @@ public:
          case 9:
             return BitExtractControl(0x109C, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget1() not defined for this board version");
       };
    };
-   unsigned int SetHvUTarget1(unsigned int value)
+   void SetHvUTarget1(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -17712,7 +17743,7 @@ public:
          case 9:
             return SetRegMask(0x109C, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetHvUTarget1() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget1Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17725,7 +17756,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x109C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget1Loc() not defined for this board version");
       };
    };
 
@@ -17738,10 +17769,10 @@ public:
          case 9:
             return BitExtractControl(0x10C0, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget10() not defined for this board version");
       };
    };
-   unsigned int SetHvUTarget10(unsigned int value)
+   void SetHvUTarget10(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -17749,7 +17780,7 @@ public:
          case 9:
             return SetRegMask(0x10C0, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetHvUTarget10() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget10Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17762,7 +17793,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x10C0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget10Loc() not defined for this board version");
       };
    };
 
@@ -17776,7 +17807,7 @@ public:
          case 9:
             return BitExtractStatus(0x0154, 0x00F00000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget10Mod() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget10ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17792,7 +17823,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x0154;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget10ModLoc() not defined for this board version");
       };
    };
 
@@ -17805,10 +17836,10 @@ public:
          case 9:
             return BitExtractControl(0x10C4, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget11() not defined for this board version");
       };
    };
-   unsigned int SetHvUTarget11(unsigned int value)
+   void SetHvUTarget11(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -17816,7 +17847,7 @@ public:
          case 9:
             return SetRegMask(0x10C4, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetHvUTarget11() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget11Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17829,7 +17860,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x10C4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget11Loc() not defined for this board version");
       };
    };
 
@@ -17843,7 +17874,7 @@ public:
          case 9:
             return BitExtractStatus(0x0154, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget11Mod() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget11ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17859,7 +17890,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x0154;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget11ModLoc() not defined for this board version");
       };
    };
 
@@ -17872,10 +17903,10 @@ public:
          case 9:
             return BitExtractControl(0x10C8, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget12() not defined for this board version");
       };
    };
-   unsigned int SetHvUTarget12(unsigned int value)
+   void SetHvUTarget12(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -17883,7 +17914,7 @@ public:
          case 9:
             return SetRegMask(0x10C8, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetHvUTarget12() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget12Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17896,7 +17927,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x10C8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget12Loc() not defined for this board version");
       };
    };
 
@@ -17910,7 +17941,7 @@ public:
          case 9:
             return BitExtractStatus(0x0154, 0x0000F000, 12);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget12Mod() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget12ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17926,7 +17957,7 @@ public:
             if(BitOfs) *BitOfs = 12;
             return 0x0154;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget12ModLoc() not defined for this board version");
       };
    };
 
@@ -17939,10 +17970,10 @@ public:
          case 9:
             return BitExtractControl(0x10CC, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget13() not defined for this board version");
       };
    };
-   unsigned int SetHvUTarget13(unsigned int value)
+   void SetHvUTarget13(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -17950,7 +17981,7 @@ public:
          case 9:
             return SetRegMask(0x10CC, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetHvUTarget13() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget13Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17963,7 +17994,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x10CC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget13Loc() not defined for this board version");
       };
    };
 
@@ -17977,7 +18008,7 @@ public:
          case 9:
             return BitExtractStatus(0x0154, 0x00000F00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget13Mod() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget13ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -17993,7 +18024,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x0154;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget13ModLoc() not defined for this board version");
       };
    };
 
@@ -18006,10 +18037,10 @@ public:
          case 9:
             return BitExtractControl(0x10D0, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget14() not defined for this board version");
       };
    };
-   unsigned int SetHvUTarget14(unsigned int value)
+   void SetHvUTarget14(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -18017,7 +18048,7 @@ public:
          case 9:
             return SetRegMask(0x10D0, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetHvUTarget14() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget14Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18030,7 +18061,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x10D0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget14Loc() not defined for this board version");
       };
    };
 
@@ -18044,7 +18075,7 @@ public:
          case 9:
             return BitExtractStatus(0x0154, 0x000000F0, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget14Mod() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget14ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18060,7 +18091,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x0154;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget14ModLoc() not defined for this board version");
       };
    };
 
@@ -18073,10 +18104,10 @@ public:
          case 9:
             return BitExtractControl(0x10D4, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget15() not defined for this board version");
       };
    };
-   unsigned int SetHvUTarget15(unsigned int value)
+   void SetHvUTarget15(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -18084,7 +18115,7 @@ public:
          case 9:
             return SetRegMask(0x10D4, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetHvUTarget15() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget15Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18097,7 +18128,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x10D4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget15Loc() not defined for this board version");
       };
    };
 
@@ -18111,7 +18142,7 @@ public:
          case 9:
             return BitExtractStatus(0x0154, 0x0000000F, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget15Mod() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget15ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18127,7 +18158,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0154;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget15ModLoc() not defined for this board version");
       };
    };
 
@@ -18141,7 +18172,7 @@ public:
          case 9:
             return BitExtractStatus(0x0150, 0x0F000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget1Mod() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget1ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18157,7 +18188,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x0150;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget1ModLoc() not defined for this board version");
       };
    };
 
@@ -18170,10 +18201,10 @@ public:
          case 9:
             return BitExtractControl(0x10A0, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget2() not defined for this board version");
       };
    };
-   unsigned int SetHvUTarget2(unsigned int value)
+   void SetHvUTarget2(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -18181,7 +18212,7 @@ public:
          case 9:
             return SetRegMask(0x10A0, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetHvUTarget2() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget2Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18194,7 +18225,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x10A0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget2Loc() not defined for this board version");
       };
    };
 
@@ -18208,7 +18239,7 @@ public:
          case 9:
             return BitExtractStatus(0x0150, 0x00F00000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget2Mod() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget2ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18224,7 +18255,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x0150;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget2ModLoc() not defined for this board version");
       };
    };
 
@@ -18237,10 +18268,10 @@ public:
          case 9:
             return BitExtractControl(0x10A4, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget3() not defined for this board version");
       };
    };
-   unsigned int SetHvUTarget3(unsigned int value)
+   void SetHvUTarget3(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -18248,7 +18279,7 @@ public:
          case 9:
             return SetRegMask(0x10A4, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetHvUTarget3() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget3Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18261,7 +18292,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x10A4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget3Loc() not defined for this board version");
       };
    };
 
@@ -18275,7 +18306,7 @@ public:
          case 9:
             return BitExtractStatus(0x0150, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget3Mod() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget3ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18291,7 +18322,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x0150;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget3ModLoc() not defined for this board version");
       };
    };
 
@@ -18304,10 +18335,10 @@ public:
          case 9:
             return BitExtractControl(0x10A8, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget4() not defined for this board version");
       };
    };
-   unsigned int SetHvUTarget4(unsigned int value)
+   void SetHvUTarget4(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -18315,7 +18346,7 @@ public:
          case 9:
             return SetRegMask(0x10A8, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetHvUTarget4() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget4Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18328,7 +18359,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x10A8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget4Loc() not defined for this board version");
       };
    };
 
@@ -18342,7 +18373,7 @@ public:
          case 9:
             return BitExtractStatus(0x0150, 0x0000F000, 12);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget4Mod() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget4ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18358,7 +18389,7 @@ public:
             if(BitOfs) *BitOfs = 12;
             return 0x0150;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget4ModLoc() not defined for this board version");
       };
    };
 
@@ -18371,10 +18402,10 @@ public:
          case 9:
             return BitExtractControl(0x10AC, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget5() not defined for this board version");
       };
    };
-   unsigned int SetHvUTarget5(unsigned int value)
+   void SetHvUTarget5(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -18382,7 +18413,7 @@ public:
          case 9:
             return SetRegMask(0x10AC, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetHvUTarget5() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget5Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18395,7 +18426,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x10AC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget5Loc() not defined for this board version");
       };
    };
 
@@ -18409,7 +18440,7 @@ public:
          case 9:
             return BitExtractStatus(0x0150, 0x00000F00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget5Mod() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget5ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18425,7 +18456,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x0150;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget5ModLoc() not defined for this board version");
       };
    };
 
@@ -18438,10 +18469,10 @@ public:
          case 9:
             return BitExtractControl(0x10B0, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget6() not defined for this board version");
       };
    };
-   unsigned int SetHvUTarget6(unsigned int value)
+   void SetHvUTarget6(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -18449,7 +18480,7 @@ public:
          case 9:
             return SetRegMask(0x10B0, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetHvUTarget6() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget6Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18462,7 +18493,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x10B0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget6Loc() not defined for this board version");
       };
    };
 
@@ -18476,7 +18507,7 @@ public:
          case 9:
             return BitExtractStatus(0x0150, 0x000000F0, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget6Mod() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget6ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18492,7 +18523,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x0150;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget6ModLoc() not defined for this board version");
       };
    };
 
@@ -18505,10 +18536,10 @@ public:
          case 9:
             return BitExtractControl(0x10B4, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget7() not defined for this board version");
       };
    };
-   unsigned int SetHvUTarget7(unsigned int value)
+   void SetHvUTarget7(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -18516,7 +18547,7 @@ public:
          case 9:
             return SetRegMask(0x10B4, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetHvUTarget7() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget7Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18529,7 +18560,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x10B4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget7Loc() not defined for this board version");
       };
    };
 
@@ -18543,7 +18574,7 @@ public:
          case 9:
             return BitExtractStatus(0x0150, 0x0000000F, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget7Mod() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget7ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18559,7 +18590,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0150;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget7ModLoc() not defined for this board version");
       };
    };
 
@@ -18572,10 +18603,10 @@ public:
          case 9:
             return BitExtractControl(0x10B8, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget8() not defined for this board version");
       };
    };
-   unsigned int SetHvUTarget8(unsigned int value)
+   void SetHvUTarget8(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -18583,7 +18614,7 @@ public:
          case 9:
             return SetRegMask(0x10B8, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetHvUTarget8() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget8Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18596,7 +18627,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x10B8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget8Loc() not defined for this board version");
       };
    };
 
@@ -18610,7 +18641,7 @@ public:
          case 9:
             return BitExtractStatus(0x0154, 0xF0000000, 28);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget8Mod() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget8ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18626,7 +18657,7 @@ public:
             if(BitOfs) *BitOfs = 28;
             return 0x0154;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget8ModLoc() not defined for this board version");
       };
    };
 
@@ -18639,10 +18670,10 @@ public:
          case 9:
             return BitExtractControl(0x10BC, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget9() not defined for this board version");
       };
    };
-   unsigned int SetHvUTarget9(unsigned int value)
+   void SetHvUTarget9(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -18650,7 +18681,7 @@ public:
          case 9:
             return SetRegMask(0x10BC, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetHvUTarget9() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget9Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18663,7 +18694,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x10BC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget9Loc() not defined for this board version");
       };
    };
 
@@ -18677,7 +18708,7 @@ public:
          case 9:
             return BitExtractStatus(0x0154, 0x0F000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget9Mod() not defined for this board version");
       };
    };
    unsigned int GetHvUTarget9ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18693,7 +18724,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x0154;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTarget9ModLoc() not defined for this board version");
       };
    };
 
@@ -18707,7 +18738,7 @@ public:
          case 9:
             return BitExtractStatus(0x0044, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvVer() not defined for this board version");
       };
    };
    unsigned int GetHvVerLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18723,7 +18754,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0044;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvVerLoc() not defined for this board version");
       };
    };
 
@@ -18736,10 +18767,10 @@ public:
          case 9:
             return BitExtractControl(0x1014, 0x00FFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetInterPkgDelay() not defined for this board version");
       };
    };
-   unsigned int SetInterPkgDelay(unsigned int value)
+   void SetInterPkgDelay(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -18747,7 +18778,7 @@ public:
          case 9:
             return SetRegMask(0x1014, 0x00FFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetInterPkgDelay() not defined for this board version");
       };
    };
    unsigned int GetInterPkgDelayLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18760,7 +18791,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1014;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetInterPkgDelayLoc() not defined for this board version");
       };
    };
 
@@ -18773,7 +18804,7 @@ public:
          case 9:
             return BitExtractStatus(0x002C, 0x00000010, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetIserdesPllLock0() not defined for this board version");
       };
    };
    unsigned int GetIserdesPllLock0Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18786,7 +18817,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x002C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetIserdesPllLock0Loc() not defined for this board version");
       };
    };
 
@@ -18799,7 +18830,7 @@ public:
          case 9:
             return BitExtractStatus(0x002C, 0x00000008, 3);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetIserdesPllLock1() not defined for this board version");
       };
    };
    unsigned int GetIserdesPllLock1Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18812,7 +18843,7 @@ public:
             if(BitOfs) *BitOfs = 3;
             return 0x002C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetIserdesPllLock1Loc() not defined for this board version");
       };
    };
 
@@ -18826,10 +18857,10 @@ public:
          case 9:
             return BitExtractControl(0x1124, 0x00010000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLeadTrailEdgeSel() not defined for this board version");
       };
    };
-   unsigned int SetLeadTrailEdgeSel(unsigned int value)
+   void SetLeadTrailEdgeSel(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -18838,7 +18869,7 @@ public:
          case 9:
             return SetRegMask(0x1124, 0x00010000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLeadTrailEdgeSel() not defined for this board version");
       };
    };
    unsigned int GetLeadTrailEdgeSelLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18854,7 +18885,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1124;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLeadTrailEdgeSelLoc() not defined for this board version");
       };
    };
 
@@ -18867,10 +18898,10 @@ public:
          case 9:
             return BitExtractControl(0x10DC, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk0ClkoutDiv() not defined for this board version");
       };
    };
-   unsigned int SetLmk0ClkoutDiv(unsigned int value)
+   void SetLmk0ClkoutDiv(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -18878,7 +18909,7 @@ public:
          case 9:
             return SetRegMask(0x10DC, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk0ClkoutDiv() not defined for this board version");
       };
    };
    unsigned int GetLmk0ClkoutDivLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18891,7 +18922,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x10DC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk0ClkoutDivLoc() not defined for this board version");
       };
    };
 
@@ -18904,10 +18935,10 @@ public:
          case 9:
             return BitExtractControl(0x10DC, 0x000000F0, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk0ClkoutDly() not defined for this board version");
       };
    };
-   unsigned int SetLmk0ClkoutDly(unsigned int value)
+   void SetLmk0ClkoutDly(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -18915,7 +18946,7 @@ public:
          case 9:
             return SetRegMask(0x10DC, 0x000000F0, 4, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk0ClkoutDly() not defined for this board version");
       };
    };
    unsigned int GetLmk0ClkoutDlyLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18928,7 +18959,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x10DC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk0ClkoutDlyLoc() not defined for this board version");
       };
    };
 
@@ -18941,10 +18972,10 @@ public:
          case 9:
             return BitExtractControl(0x10DC, 0x00010000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk0ClkoutEn() not defined for this board version");
       };
    };
-   unsigned int SetLmk0ClkoutEn(unsigned int value)
+   void SetLmk0ClkoutEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -18952,7 +18983,7 @@ public:
          case 9:
             return SetRegMask(0x10DC, 0x00010000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk0ClkoutEn() not defined for this board version");
       };
    };
    unsigned int GetLmk0ClkoutEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -18965,7 +18996,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x10DC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk0ClkoutEnLoc() not defined for this board version");
       };
    };
 
@@ -18978,10 +19009,10 @@ public:
          case 9:
             return BitExtractControl(0x10DC, 0x00060000, 17);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk0ClkoutMux() not defined for this board version");
       };
    };
-   unsigned int SetLmk0ClkoutMux(unsigned int value)
+   void SetLmk0ClkoutMux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -18989,7 +19020,7 @@ public:
          case 9:
             return SetRegMask(0x10DC, 0x00060000, 17, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk0ClkoutMux() not defined for this board version");
       };
    };
    unsigned int GetLmk0ClkoutMuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19002,7 +19033,7 @@ public:
             if(BitOfs) *BitOfs = 17;
             return 0x10DC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk0ClkoutMuxLoc() not defined for this board version");
       };
    };
 
@@ -19015,10 +19046,10 @@ public:
          case 9:
             return BitExtractControl(0x10DC, 0x80000000, 31);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk0Reset() not defined for this board version");
       };
    };
-   unsigned int SetLmk0Reset(unsigned int value)
+   void SetLmk0Reset(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19026,7 +19057,7 @@ public:
          case 9:
             return SetRegMask(0x10DC, 0x80000000, 31, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk0Reset() not defined for this board version");
       };
    };
    unsigned int GetLmk0ResetLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19039,7 +19070,7 @@ public:
             if(BitOfs) *BitOfs = 31;
             return 0x10DC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk0ResetLoc() not defined for this board version");
       };
    };
 
@@ -19052,10 +19083,10 @@ public:
          case 9:
             return BitExtractControl(0x1104, 0x00008000, 15);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk11Div4() not defined for this board version");
       };
    };
-   unsigned int SetLmk11Div4(unsigned int value)
+   void SetLmk11Div4(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19063,7 +19094,7 @@ public:
          case 9:
             return SetRegMask(0x1104, 0x00008000, 15, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk11Div4() not defined for this board version");
       };
    };
    unsigned int GetLmk11Div4Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19076,7 +19107,7 @@ public:
             if(BitOfs) *BitOfs = 15;
             return 0x1104;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk11Div4Loc() not defined for this board version");
       };
    };
 
@@ -19089,10 +19120,10 @@ public:
          case 9:
             return BitExtractControl(0x1108, 0x003FC000, 14);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk13OscinFreq() not defined for this board version");
       };
    };
-   unsigned int SetLmk13OscinFreq(unsigned int value)
+   void SetLmk13OscinFreq(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19100,7 +19131,7 @@ public:
          case 9:
             return SetRegMask(0x1108, 0x003FC000, 14, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk13OscinFreq() not defined for this board version");
       };
    };
    unsigned int GetLmk13OscinFreqLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19113,7 +19144,7 @@ public:
             if(BitOfs) *BitOfs = 14;
             return 0x1108;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk13OscinFreqLoc() not defined for this board version");
       };
    };
 
@@ -19126,10 +19157,10 @@ public:
          case 9:
             return BitExtractControl(0x1108, 0x000000F0, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk13VcoC3C4Lf() not defined for this board version");
       };
    };
-   unsigned int SetLmk13VcoC3C4Lf(unsigned int value)
+   void SetLmk13VcoC3C4Lf(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19137,7 +19168,7 @@ public:
          case 9:
             return SetRegMask(0x1108, 0x000000F0, 4, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk13VcoC3C4Lf() not defined for this board version");
       };
    };
    unsigned int GetLmk13VcoC3C4LfLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19150,7 +19181,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x1108;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk13VcoC3C4LfLoc() not defined for this board version");
       };
    };
 
@@ -19163,10 +19194,10 @@ public:
          case 9:
             return BitExtractControl(0x1108, 0x00000700, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk13VcoR3Lf() not defined for this board version");
       };
    };
-   unsigned int SetLmk13VcoR3Lf(unsigned int value)
+   void SetLmk13VcoR3Lf(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19174,7 +19205,7 @@ public:
          case 9:
             return SetRegMask(0x1108, 0x00000700, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk13VcoR3Lf() not defined for this board version");
       };
    };
    unsigned int GetLmk13VcoR3LfLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19187,7 +19218,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1108;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk13VcoR3LfLoc() not defined for this board version");
       };
    };
 
@@ -19200,10 +19231,10 @@ public:
          case 9:
             return BitExtractControl(0x1108, 0x00003800, 11);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk13VcoR4Lf() not defined for this board version");
       };
    };
-   unsigned int SetLmk13VcoR4Lf(unsigned int value)
+   void SetLmk13VcoR4Lf(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19211,7 +19242,7 @@ public:
          case 9:
             return SetRegMask(0x1108, 0x00003800, 11, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk13VcoR4Lf() not defined for this board version");
       };
    };
    unsigned int GetLmk13VcoR4LfLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19224,7 +19255,7 @@ public:
             if(BitOfs) *BitOfs = 11;
             return 0x1108;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk13VcoR4LfLoc() not defined for this board version");
       };
    };
 
@@ -19237,10 +19268,10 @@ public:
          case 9:
             return BitExtractControl(0x110C, 0x08000000, 27);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk14EnClkoutGlobal() not defined for this board version");
       };
    };
-   unsigned int SetLmk14EnClkoutGlobal(unsigned int value)
+   void SetLmk14EnClkoutGlobal(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19248,7 +19279,7 @@ public:
          case 9:
             return SetRegMask(0x110C, 0x08000000, 27, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk14EnClkoutGlobal() not defined for this board version");
       };
    };
    unsigned int GetLmk14EnClkoutGlobalLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19261,7 +19292,7 @@ public:
             if(BitOfs) *BitOfs = 27;
             return 0x110C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk14EnClkoutGlobalLoc() not defined for this board version");
       };
    };
 
@@ -19274,10 +19305,10 @@ public:
          case 9:
             return BitExtractControl(0x110C, 0x10000000, 28);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk14EnFout() not defined for this board version");
       };
    };
-   unsigned int SetLmk14EnFout(unsigned int value)
+   void SetLmk14EnFout(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19285,7 +19316,7 @@ public:
          case 9:
             return SetRegMask(0x110C, 0x10000000, 28, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk14EnFout() not defined for this board version");
       };
    };
    unsigned int GetLmk14EnFoutLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19298,7 +19329,7 @@ public:
             if(BitOfs) *BitOfs = 28;
             return 0x110C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk14EnFoutLoc() not defined for this board version");
       };
    };
 
@@ -19311,10 +19342,10 @@ public:
          case 9:
             return BitExtractControl(0x110C, 0x00F00000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk14PllMux() not defined for this board version");
       };
    };
-   unsigned int SetLmk14PllMux(unsigned int value)
+   void SetLmk14PllMux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19322,7 +19353,7 @@ public:
          case 9:
             return SetRegMask(0x110C, 0x00F00000, 20, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk14PllMux() not defined for this board version");
       };
    };
    unsigned int GetLmk14PllMuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19335,7 +19366,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x110C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk14PllMuxLoc() not defined for this board version");
       };
    };
 
@@ -19348,10 +19379,10 @@ public:
          case 9:
             return BitExtractControl(0x110C, 0x000FFF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk14PllR() not defined for this board version");
       };
    };
-   unsigned int SetLmk14PllR(unsigned int value)
+   void SetLmk14PllR(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19359,7 +19390,7 @@ public:
          case 9:
             return SetRegMask(0x110C, 0x000FFF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk14PllR() not defined for this board version");
       };
    };
    unsigned int GetLmk14PllRLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19372,7 +19403,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x110C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk14PllRLoc() not defined for this board version");
       };
    };
 
@@ -19385,10 +19416,10 @@ public:
          case 9:
             return BitExtractControl(0x110C, 0x04000000, 26);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk14Powerdown() not defined for this board version");
       };
    };
-   unsigned int SetLmk14Powerdown(unsigned int value)
+   void SetLmk14Powerdown(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19396,7 +19427,7 @@ public:
          case 9:
             return SetRegMask(0x110C, 0x04000000, 26, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk14Powerdown() not defined for this board version");
       };
    };
    unsigned int GetLmk14PowerdownLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19409,7 +19440,7 @@ public:
             if(BitOfs) *BitOfs = 26;
             return 0x110C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk14PowerdownLoc() not defined for this board version");
       };
    };
 
@@ -19422,10 +19453,10 @@ public:
          case 9:
             return BitExtractControl(0x1110, 0xC0000000, 30);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk15PllCpGain() not defined for this board version");
       };
    };
-   unsigned int SetLmk15PllCpGain(unsigned int value)
+   void SetLmk15PllCpGain(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19433,7 +19464,7 @@ public:
          case 9:
             return SetRegMask(0x1110, 0xC0000000, 30, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk15PllCpGain() not defined for this board version");
       };
    };
    unsigned int GetLmk15PllCpGainLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19446,7 +19477,7 @@ public:
             if(BitOfs) *BitOfs = 30;
             return 0x1110;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk15PllCpGainLoc() not defined for this board version");
       };
    };
 
@@ -19459,10 +19490,10 @@ public:
          case 9:
             return BitExtractControl(0x1110, 0x03FFFF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk15PllN() not defined for this board version");
       };
    };
-   unsigned int SetLmk15PllN(unsigned int value)
+   void SetLmk15PllN(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19470,7 +19501,7 @@ public:
          case 9:
             return SetRegMask(0x1110, 0x03FFFF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk15PllN() not defined for this board version");
       };
    };
    unsigned int GetLmk15PllNLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19483,7 +19514,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1110;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk15PllNLoc() not defined for this board version");
       };
    };
 
@@ -19496,10 +19527,10 @@ public:
          case 9:
             return BitExtractControl(0x1110, 0x3C000000, 26);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk15VcoDiv() not defined for this board version");
       };
    };
-   unsigned int SetLmk15VcoDiv(unsigned int value)
+   void SetLmk15VcoDiv(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19507,7 +19538,7 @@ public:
          case 9:
             return SetRegMask(0x1110, 0x3C000000, 26, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk15VcoDiv() not defined for this board version");
       };
    };
    unsigned int GetLmk15VcoDivLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19520,7 +19551,7 @@ public:
             if(BitOfs) *BitOfs = 26;
             return 0x1110;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk15VcoDivLoc() not defined for this board version");
       };
    };
 
@@ -19533,10 +19564,10 @@ public:
          case 9:
             return BitExtractControl(0x10E0, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk1ClkoutDiv() not defined for this board version");
       };
    };
-   unsigned int SetLmk1ClkoutDiv(unsigned int value)
+   void SetLmk1ClkoutDiv(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19544,7 +19575,7 @@ public:
          case 9:
             return SetRegMask(0x10E0, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk1ClkoutDiv() not defined for this board version");
       };
    };
    unsigned int GetLmk1ClkoutDivLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19557,7 +19588,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x10E0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk1ClkoutDivLoc() not defined for this board version");
       };
    };
 
@@ -19570,10 +19601,10 @@ public:
          case 9:
             return BitExtractControl(0x10E0, 0x000000F0, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk1ClkoutDly() not defined for this board version");
       };
    };
-   unsigned int SetLmk1ClkoutDly(unsigned int value)
+   void SetLmk1ClkoutDly(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19581,7 +19612,7 @@ public:
          case 9:
             return SetRegMask(0x10E0, 0x000000F0, 4, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk1ClkoutDly() not defined for this board version");
       };
    };
    unsigned int GetLmk1ClkoutDlyLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19594,7 +19625,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x10E0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk1ClkoutDlyLoc() not defined for this board version");
       };
    };
 
@@ -19607,10 +19638,10 @@ public:
          case 9:
             return BitExtractControl(0x10E0, 0x00010000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk1ClkoutEn() not defined for this board version");
       };
    };
-   unsigned int SetLmk1ClkoutEn(unsigned int value)
+   void SetLmk1ClkoutEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19618,7 +19649,7 @@ public:
          case 9:
             return SetRegMask(0x10E0, 0x00010000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk1ClkoutEn() not defined for this board version");
       };
    };
    unsigned int GetLmk1ClkoutEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19631,7 +19662,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x10E0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk1ClkoutEnLoc() not defined for this board version");
       };
    };
 
@@ -19644,10 +19675,10 @@ public:
          case 9:
             return BitExtractControl(0x10E0, 0x00060000, 17);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk1ClkoutMux() not defined for this board version");
       };
    };
-   unsigned int SetLmk1ClkoutMux(unsigned int value)
+   void SetLmk1ClkoutMux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19655,7 +19686,7 @@ public:
          case 9:
             return SetRegMask(0x10E0, 0x00060000, 17, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk1ClkoutMux() not defined for this board version");
       };
    };
    unsigned int GetLmk1ClkoutMuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19668,7 +19699,7 @@ public:
             if(BitOfs) *BitOfs = 17;
             return 0x10E0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk1ClkoutMuxLoc() not defined for this board version");
       };
    };
 
@@ -19681,10 +19712,10 @@ public:
          case 9:
             return BitExtractControl(0x10E4, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk2ClkoutDiv() not defined for this board version");
       };
    };
-   unsigned int SetLmk2ClkoutDiv(unsigned int value)
+   void SetLmk2ClkoutDiv(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19692,7 +19723,7 @@ public:
          case 9:
             return SetRegMask(0x10E4, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk2ClkoutDiv() not defined for this board version");
       };
    };
    unsigned int GetLmk2ClkoutDivLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19705,7 +19736,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x10E4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk2ClkoutDivLoc() not defined for this board version");
       };
    };
 
@@ -19718,10 +19749,10 @@ public:
          case 9:
             return BitExtractControl(0x10E4, 0x000000F0, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk2ClkoutDly() not defined for this board version");
       };
    };
-   unsigned int SetLmk2ClkoutDly(unsigned int value)
+   void SetLmk2ClkoutDly(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19729,7 +19760,7 @@ public:
          case 9:
             return SetRegMask(0x10E4, 0x000000F0, 4, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk2ClkoutDly() not defined for this board version");
       };
    };
    unsigned int GetLmk2ClkoutDlyLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19742,7 +19773,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x10E4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk2ClkoutDlyLoc() not defined for this board version");
       };
    };
 
@@ -19755,10 +19786,10 @@ public:
          case 9:
             return BitExtractControl(0x10E4, 0x00010000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk2ClkoutEn() not defined for this board version");
       };
    };
-   unsigned int SetLmk2ClkoutEn(unsigned int value)
+   void SetLmk2ClkoutEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19766,7 +19797,7 @@ public:
          case 9:
             return SetRegMask(0x10E4, 0x00010000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk2ClkoutEn() not defined for this board version");
       };
    };
    unsigned int GetLmk2ClkoutEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19779,7 +19810,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x10E4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk2ClkoutEnLoc() not defined for this board version");
       };
    };
 
@@ -19792,10 +19823,10 @@ public:
          case 9:
             return BitExtractControl(0x10E4, 0x00060000, 17);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk2ClkoutMux() not defined for this board version");
       };
    };
-   unsigned int SetLmk2ClkoutMux(unsigned int value)
+   void SetLmk2ClkoutMux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19803,7 +19834,7 @@ public:
          case 9:
             return SetRegMask(0x10E4, 0x00060000, 17, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk2ClkoutMux() not defined for this board version");
       };
    };
    unsigned int GetLmk2ClkoutMuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19816,7 +19847,7 @@ public:
             if(BitOfs) *BitOfs = 17;
             return 0x10E4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk2ClkoutMuxLoc() not defined for this board version");
       };
    };
 
@@ -19829,10 +19860,10 @@ public:
          case 9:
             return BitExtractControl(0x10E8, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk3ClkoutDiv() not defined for this board version");
       };
    };
-   unsigned int SetLmk3ClkoutDiv(unsigned int value)
+   void SetLmk3ClkoutDiv(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19840,7 +19871,7 @@ public:
          case 9:
             return SetRegMask(0x10E8, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk3ClkoutDiv() not defined for this board version");
       };
    };
    unsigned int GetLmk3ClkoutDivLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19853,7 +19884,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x10E8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk3ClkoutDivLoc() not defined for this board version");
       };
    };
 
@@ -19866,10 +19897,10 @@ public:
          case 9:
             return BitExtractControl(0x10E8, 0x000000F0, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk3ClkoutDly() not defined for this board version");
       };
    };
-   unsigned int SetLmk3ClkoutDly(unsigned int value)
+   void SetLmk3ClkoutDly(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19877,7 +19908,7 @@ public:
          case 9:
             return SetRegMask(0x10E8, 0x000000F0, 4, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk3ClkoutDly() not defined for this board version");
       };
    };
    unsigned int GetLmk3ClkoutDlyLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19890,7 +19921,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x10E8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk3ClkoutDlyLoc() not defined for this board version");
       };
    };
 
@@ -19903,10 +19934,10 @@ public:
          case 9:
             return BitExtractControl(0x10E8, 0x00010000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk3ClkoutEn() not defined for this board version");
       };
    };
-   unsigned int SetLmk3ClkoutEn(unsigned int value)
+   void SetLmk3ClkoutEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19914,7 +19945,7 @@ public:
          case 9:
             return SetRegMask(0x10E8, 0x00010000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk3ClkoutEn() not defined for this board version");
       };
    };
    unsigned int GetLmk3ClkoutEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19927,7 +19958,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x10E8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk3ClkoutEnLoc() not defined for this board version");
       };
    };
 
@@ -19940,10 +19971,10 @@ public:
          case 9:
             return BitExtractControl(0x10E8, 0x00060000, 17);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk3ClkoutMux() not defined for this board version");
       };
    };
-   unsigned int SetLmk3ClkoutMux(unsigned int value)
+   void SetLmk3ClkoutMux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19951,7 +19982,7 @@ public:
          case 9:
             return SetRegMask(0x10E8, 0x00060000, 17, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk3ClkoutMux() not defined for this board version");
       };
    };
    unsigned int GetLmk3ClkoutMuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -19964,7 +19995,7 @@ public:
             if(BitOfs) *BitOfs = 17;
             return 0x10E8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk3ClkoutMuxLoc() not defined for this board version");
       };
    };
 
@@ -19977,10 +20008,10 @@ public:
          case 9:
             return BitExtractControl(0x10EC, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk4ClkoutDiv() not defined for this board version");
       };
    };
-   unsigned int SetLmk4ClkoutDiv(unsigned int value)
+   void SetLmk4ClkoutDiv(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -19988,7 +20019,7 @@ public:
          case 9:
             return SetRegMask(0x10EC, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk4ClkoutDiv() not defined for this board version");
       };
    };
    unsigned int GetLmk4ClkoutDivLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20001,7 +20032,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x10EC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk4ClkoutDivLoc() not defined for this board version");
       };
    };
 
@@ -20014,10 +20045,10 @@ public:
          case 9:
             return BitExtractControl(0x10EC, 0x000000F0, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk4ClkoutDly() not defined for this board version");
       };
    };
-   unsigned int SetLmk4ClkoutDly(unsigned int value)
+   void SetLmk4ClkoutDly(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -20025,7 +20056,7 @@ public:
          case 9:
             return SetRegMask(0x10EC, 0x000000F0, 4, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk4ClkoutDly() not defined for this board version");
       };
    };
    unsigned int GetLmk4ClkoutDlyLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20038,7 +20069,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x10EC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk4ClkoutDlyLoc() not defined for this board version");
       };
    };
 
@@ -20051,10 +20082,10 @@ public:
          case 9:
             return BitExtractControl(0x10EC, 0x00010000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk4ClkoutEn() not defined for this board version");
       };
    };
-   unsigned int SetLmk4ClkoutEn(unsigned int value)
+   void SetLmk4ClkoutEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -20062,7 +20093,7 @@ public:
          case 9:
             return SetRegMask(0x10EC, 0x00010000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk4ClkoutEn() not defined for this board version");
       };
    };
    unsigned int GetLmk4ClkoutEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20075,7 +20106,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x10EC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk4ClkoutEnLoc() not defined for this board version");
       };
    };
 
@@ -20088,10 +20119,10 @@ public:
          case 9:
             return BitExtractControl(0x10EC, 0x00060000, 17);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk4ClkoutMux() not defined for this board version");
       };
    };
-   unsigned int SetLmk4ClkoutMux(unsigned int value)
+   void SetLmk4ClkoutMux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -20099,7 +20130,7 @@ public:
          case 9:
             return SetRegMask(0x10EC, 0x00060000, 17, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk4ClkoutMux() not defined for this board version");
       };
    };
    unsigned int GetLmk4ClkoutMuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20112,7 +20143,7 @@ public:
             if(BitOfs) *BitOfs = 17;
             return 0x10EC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk4ClkoutMuxLoc() not defined for this board version");
       };
    };
 
@@ -20125,10 +20156,10 @@ public:
          case 9:
             return BitExtractControl(0x10F0, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk5ClkoutDiv() not defined for this board version");
       };
    };
-   unsigned int SetLmk5ClkoutDiv(unsigned int value)
+   void SetLmk5ClkoutDiv(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -20136,7 +20167,7 @@ public:
          case 9:
             return SetRegMask(0x10F0, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk5ClkoutDiv() not defined for this board version");
       };
    };
    unsigned int GetLmk5ClkoutDivLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20149,7 +20180,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x10F0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk5ClkoutDivLoc() not defined for this board version");
       };
    };
 
@@ -20162,10 +20193,10 @@ public:
          case 9:
             return BitExtractControl(0x10F0, 0x000000F0, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk5ClkoutDly() not defined for this board version");
       };
    };
-   unsigned int SetLmk5ClkoutDly(unsigned int value)
+   void SetLmk5ClkoutDly(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -20173,7 +20204,7 @@ public:
          case 9:
             return SetRegMask(0x10F0, 0x000000F0, 4, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk5ClkoutDly() not defined for this board version");
       };
    };
    unsigned int GetLmk5ClkoutDlyLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20186,7 +20217,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x10F0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk5ClkoutDlyLoc() not defined for this board version");
       };
    };
 
@@ -20199,10 +20230,10 @@ public:
          case 9:
             return BitExtractControl(0x10F0, 0x00010000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk5ClkoutEn() not defined for this board version");
       };
    };
-   unsigned int SetLmk5ClkoutEn(unsigned int value)
+   void SetLmk5ClkoutEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -20210,7 +20241,7 @@ public:
          case 9:
             return SetRegMask(0x10F0, 0x00010000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk5ClkoutEn() not defined for this board version");
       };
    };
    unsigned int GetLmk5ClkoutEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20223,7 +20254,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x10F0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk5ClkoutEnLoc() not defined for this board version");
       };
    };
 
@@ -20236,10 +20267,10 @@ public:
          case 9:
             return BitExtractControl(0x10F0, 0x00060000, 17);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk5ClkoutMux() not defined for this board version");
       };
    };
-   unsigned int SetLmk5ClkoutMux(unsigned int value)
+   void SetLmk5ClkoutMux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -20247,7 +20278,7 @@ public:
          case 9:
             return SetRegMask(0x10F0, 0x00060000, 17, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk5ClkoutMux() not defined for this board version");
       };
    };
    unsigned int GetLmk5ClkoutMuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20260,7 +20291,7 @@ public:
             if(BitOfs) *BitOfs = 17;
             return 0x10F0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk5ClkoutMuxLoc() not defined for this board version");
       };
    };
 
@@ -20273,10 +20304,10 @@ public:
          case 9:
             return BitExtractControl(0x10F4, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk6ClkoutDiv() not defined for this board version");
       };
    };
-   unsigned int SetLmk6ClkoutDiv(unsigned int value)
+   void SetLmk6ClkoutDiv(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -20284,7 +20315,7 @@ public:
          case 9:
             return SetRegMask(0x10F4, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk6ClkoutDiv() not defined for this board version");
       };
    };
    unsigned int GetLmk6ClkoutDivLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20297,7 +20328,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x10F4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk6ClkoutDivLoc() not defined for this board version");
       };
    };
 
@@ -20310,10 +20341,10 @@ public:
          case 9:
             return BitExtractControl(0x10F4, 0x000000F0, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk6ClkoutDly() not defined for this board version");
       };
    };
-   unsigned int SetLmk6ClkoutDly(unsigned int value)
+   void SetLmk6ClkoutDly(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -20321,7 +20352,7 @@ public:
          case 9:
             return SetRegMask(0x10F4, 0x000000F0, 4, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk6ClkoutDly() not defined for this board version");
       };
    };
    unsigned int GetLmk6ClkoutDlyLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20334,7 +20365,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x10F4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk6ClkoutDlyLoc() not defined for this board version");
       };
    };
 
@@ -20347,10 +20378,10 @@ public:
          case 9:
             return BitExtractControl(0x10F4, 0x00010000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk6ClkoutEn() not defined for this board version");
       };
    };
-   unsigned int SetLmk6ClkoutEn(unsigned int value)
+   void SetLmk6ClkoutEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -20358,7 +20389,7 @@ public:
          case 9:
             return SetRegMask(0x10F4, 0x00010000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk6ClkoutEn() not defined for this board version");
       };
    };
    unsigned int GetLmk6ClkoutEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20371,7 +20402,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x10F4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk6ClkoutEnLoc() not defined for this board version");
       };
    };
 
@@ -20384,10 +20415,10 @@ public:
          case 9:
             return BitExtractControl(0x10F4, 0x00060000, 17);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk6ClkoutMux() not defined for this board version");
       };
    };
-   unsigned int SetLmk6ClkoutMux(unsigned int value)
+   void SetLmk6ClkoutMux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -20395,7 +20426,7 @@ public:
          case 9:
             return SetRegMask(0x10F4, 0x00060000, 17, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk6ClkoutMux() not defined for this board version");
       };
    };
    unsigned int GetLmk6ClkoutMuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20408,7 +20439,7 @@ public:
             if(BitOfs) *BitOfs = 17;
             return 0x10F4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk6ClkoutMuxLoc() not defined for this board version");
       };
    };
 
@@ -20421,10 +20452,10 @@ public:
          case 9:
             return BitExtractControl(0x10F8, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk7ClkoutDiv() not defined for this board version");
       };
    };
-   unsigned int SetLmk7ClkoutDiv(unsigned int value)
+   void SetLmk7ClkoutDiv(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -20432,7 +20463,7 @@ public:
          case 9:
             return SetRegMask(0x10F8, 0x0000FF00, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk7ClkoutDiv() not defined for this board version");
       };
    };
    unsigned int GetLmk7ClkoutDivLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20445,7 +20476,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x10F8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk7ClkoutDivLoc() not defined for this board version");
       };
    };
 
@@ -20458,10 +20489,10 @@ public:
          case 9:
             return BitExtractControl(0x10F8, 0x000000F0, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk7ClkoutDly() not defined for this board version");
       };
    };
-   unsigned int SetLmk7ClkoutDly(unsigned int value)
+   void SetLmk7ClkoutDly(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -20469,7 +20500,7 @@ public:
          case 9:
             return SetRegMask(0x10F8, 0x000000F0, 4, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk7ClkoutDly() not defined for this board version");
       };
    };
    unsigned int GetLmk7ClkoutDlyLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20482,7 +20513,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x10F8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk7ClkoutDlyLoc() not defined for this board version");
       };
    };
 
@@ -20495,10 +20526,10 @@ public:
          case 9:
             return BitExtractControl(0x10F8, 0x00010000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk7ClkoutEn() not defined for this board version");
       };
    };
-   unsigned int SetLmk7ClkoutEn(unsigned int value)
+   void SetLmk7ClkoutEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -20506,7 +20537,7 @@ public:
          case 9:
             return SetRegMask(0x10F8, 0x00010000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk7ClkoutEn() not defined for this board version");
       };
    };
    unsigned int GetLmk7ClkoutEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20519,7 +20550,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x10F8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk7ClkoutEnLoc() not defined for this board version");
       };
    };
 
@@ -20532,10 +20563,10 @@ public:
          case 9:
             return BitExtractControl(0x10F8, 0x00060000, 17);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk7ClkoutMux() not defined for this board version");
       };
    };
-   unsigned int SetLmk7ClkoutMux(unsigned int value)
+   void SetLmk7ClkoutMux(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -20543,7 +20574,7 @@ public:
          case 9:
             return SetRegMask(0x10F8, 0x00060000, 17, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk7ClkoutMux() not defined for this board version");
       };
    };
    unsigned int GetLmk7ClkoutMuxLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20556,7 +20587,7 @@ public:
             if(BitOfs) *BitOfs = 17;
             return 0x10F8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk7ClkoutMuxLoc() not defined for this board version");
       };
    };
 
@@ -20569,10 +20600,10 @@ public:
          case 9:
             return BitExtractControl(0x10FC, 0xFFFFFFF0, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk8PhaseNoiseOpt() not defined for this board version");
       };
    };
-   unsigned int SetLmk8PhaseNoiseOpt(unsigned int value)
+   void SetLmk8PhaseNoiseOpt(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -20580,7 +20611,7 @@ public:
          case 9:
             return SetRegMask(0x10FC, 0xFFFFFFF0, 4, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk8PhaseNoiseOpt() not defined for this board version");
       };
    };
    unsigned int GetLmk8PhaseNoiseOptLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20593,7 +20624,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x10FC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk8PhaseNoiseOptLoc() not defined for this board version");
       };
    };
 
@@ -20606,10 +20637,10 @@ public:
          case 9:
             return BitExtractControl(0x1100, 0x00010000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk9Vboost() not defined for this board version");
       };
    };
-   unsigned int SetLmk9Vboost(unsigned int value)
+   void SetLmk9Vboost(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -20617,7 +20648,7 @@ public:
          case 9:
             return SetRegMask(0x1100, 0x00010000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmk9Vboost() not defined for this board version");
       };
    };
    unsigned int GetLmk9VboostLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20630,7 +20661,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1100;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk9VboostLoc() not defined for this board version");
       };
    };
 
@@ -20644,7 +20675,7 @@ public:
          case 9:
             return BitExtractStatus(0x015C, 0xF0000000, 28);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk0Mod() not defined for this board version");
       };
    };
    unsigned int GetLmk0ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20660,7 +20691,7 @@ public:
             if(BitOfs) *BitOfs = 28;
             return 0x015C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk0ModLoc() not defined for this board version");
       };
    };
 
@@ -20674,7 +20705,7 @@ public:
          case 9:
             return BitExtractStatus(0x0160, 0x0000F000, 12);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk11Mod() not defined for this board version");
       };
    };
    unsigned int GetLmk11ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20690,7 +20721,7 @@ public:
             if(BitOfs) *BitOfs = 12;
             return 0x0160;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk11ModLoc() not defined for this board version");
       };
    };
 
@@ -20704,7 +20735,7 @@ public:
          case 9:
             return BitExtractStatus(0x0160, 0x00000F00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk13Mod() not defined for this board version");
       };
    };
    unsigned int GetLmk13ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20720,7 +20751,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x0160;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk13ModLoc() not defined for this board version");
       };
    };
 
@@ -20734,7 +20765,7 @@ public:
          case 9:
             return BitExtractStatus(0x0160, 0x000000F0, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk14Mod() not defined for this board version");
       };
    };
    unsigned int GetLmk14ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20750,7 +20781,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x0160;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk14ModLoc() not defined for this board version");
       };
    };
 
@@ -20764,7 +20795,7 @@ public:
          case 9:
             return BitExtractStatus(0x0160, 0x0000000F, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk15Mod() not defined for this board version");
       };
    };
    unsigned int GetLmk15ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20780,7 +20811,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0160;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk15ModLoc() not defined for this board version");
       };
    };
 
@@ -20794,7 +20825,7 @@ public:
          case 9:
             return BitExtractStatus(0x015C, 0x0F000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk1Mod() not defined for this board version");
       };
    };
    unsigned int GetLmk1ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20810,7 +20841,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x015C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk1ModLoc() not defined for this board version");
       };
    };
 
@@ -20824,7 +20855,7 @@ public:
          case 9:
             return BitExtractStatus(0x015C, 0x00F00000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk2Mod() not defined for this board version");
       };
    };
    unsigned int GetLmk2ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20840,7 +20871,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x015C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk2ModLoc() not defined for this board version");
       };
    };
 
@@ -20854,7 +20885,7 @@ public:
          case 9:
             return BitExtractStatus(0x015C, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk3Mod() not defined for this board version");
       };
    };
    unsigned int GetLmk3ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20870,7 +20901,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x015C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk3ModLoc() not defined for this board version");
       };
    };
 
@@ -20884,7 +20915,7 @@ public:
          case 9:
             return BitExtractStatus(0x015C, 0x0000F000, 12);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk4Mod() not defined for this board version");
       };
    };
    unsigned int GetLmk4ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20900,7 +20931,7 @@ public:
             if(BitOfs) *BitOfs = 12;
             return 0x015C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk4ModLoc() not defined for this board version");
       };
    };
 
@@ -20914,7 +20945,7 @@ public:
          case 9:
             return BitExtractStatus(0x015C, 0x00000F00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk5Mod() not defined for this board version");
       };
    };
    unsigned int GetLmk5ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20930,7 +20961,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x015C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk5ModLoc() not defined for this board version");
       };
    };
 
@@ -20944,7 +20975,7 @@ public:
          case 9:
             return BitExtractStatus(0x015C, 0x000000F0, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk6Mod() not defined for this board version");
       };
    };
    unsigned int GetLmk6ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20960,7 +20991,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x015C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk6ModLoc() not defined for this board version");
       };
    };
 
@@ -20974,7 +21005,7 @@ public:
          case 9:
             return BitExtractStatus(0x015C, 0x0000000F, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk7Mod() not defined for this board version");
       };
    };
    unsigned int GetLmk7ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -20990,7 +21021,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x015C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk7ModLoc() not defined for this board version");
       };
    };
 
@@ -21004,7 +21035,7 @@ public:
          case 9:
             return BitExtractStatus(0x0160, 0x00F00000, 20);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk8Mod() not defined for this board version");
       };
    };
    unsigned int GetLmk8ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21020,7 +21051,7 @@ public:
             if(BitOfs) *BitOfs = 20;
             return 0x0160;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk8ModLoc() not defined for this board version");
       };
    };
 
@@ -21034,7 +21065,7 @@ public:
          case 9:
             return BitExtractStatus(0x0160, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk9Mod() not defined for this board version");
       };
    };
    unsigned int GetLmk9ModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21050,7 +21081,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x0160;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmk9ModLoc() not defined for this board version");
       };
    };
 
@@ -21063,7 +21094,7 @@ public:
          case 9:
             return BitExtractStatus(0x002C, 0x00000001, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmkPllLock() not defined for this board version");
       };
    };
    unsigned int GetLmkPllLockLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21076,7 +21107,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x002C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmkPllLockLoc() not defined for this board version");
       };
    };
 
@@ -21089,10 +21120,10 @@ public:
          case 9:
             return BitExtractControl(0x1040, 0x00000080, 7);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmkSyncLocal() not defined for this board version");
       };
    };
-   unsigned int SetLmkSyncLocal(unsigned int value)
+   void SetLmkSyncLocal(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -21100,7 +21131,7 @@ public:
          case 9:
             return SetRegMask(0x1040, 0x00000080, 7, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLmkSyncLocal() not defined for this board version");
       };
    };
    unsigned int GetLmkSyncLocalLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21113,7 +21144,7 @@ public:
             if(BitOfs) *BitOfs = 7;
             return 0x1040;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmkSyncLocalLoc() not defined for this board version");
       };
    };
 
@@ -21126,10 +21157,10 @@ public:
          case 9:
             return BitExtractControl(0x100C, 0x000000FF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLocalClkFreq() not defined for this board version");
       };
    };
-   unsigned int SetLocalClkFreq(unsigned int value)
+   void SetLocalClkFreq(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -21137,7 +21168,7 @@ public:
          case 9:
             return SetRegMask(0x100C, 0x000000FF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetLocalClkFreq() not defined for this board version");
       };
    };
    unsigned int GetLocalClkFreqLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21150,7 +21181,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x100C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLocalClkFreqLoc() not defined for this board version");
       };
    };
 
@@ -21164,7 +21195,7 @@ public:
          case 9:
             return BitExtractStatus(0x0134, 0x00000001, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLocalClkFreqMod() not defined for this board version");
       };
    };
    unsigned int GetLocalClkFreqModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21180,7 +21211,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0134;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLocalClkFreqModLoc() not defined for this board version");
       };
    };
 
@@ -21194,7 +21225,7 @@ public:
          case 9:
             return BitExtractStatus(0x0124, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetMaxDrsAdcPktSamples() not defined for this board version");
       };
    };
    unsigned int GetMaxDrsAdcPktSamplesLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21210,7 +21241,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0124;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetMaxDrsAdcPktSamplesLoc() not defined for this board version");
       };
    };
 
@@ -21224,7 +21255,7 @@ public:
          case 9:
             return BitExtractStatus(0x0130, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetMaxSclPktSamples() not defined for this board version");
       };
    };
    unsigned int GetMaxSclPktSamplesLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21240,7 +21271,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0130;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetMaxSclPktSamplesLoc() not defined for this board version");
       };
    };
 
@@ -21254,7 +21285,7 @@ public:
          case 9:
             return BitExtractStatus(0x0128, 0x0003FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetMaxTdcPktSamples() not defined for this board version");
       };
    };
    unsigned int GetMaxTdcPktSamplesLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21270,7 +21301,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0128;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetMaxTdcPktSamplesLoc() not defined for this board version");
       };
    };
 
@@ -21284,7 +21315,7 @@ public:
          case 9:
             return BitExtractStatus(0x012C, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetMaxTrgPktSamples() not defined for this board version");
       };
    };
    unsigned int GetMaxTrgPktSamplesLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21300,7 +21331,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x012C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetMaxTrgPktSamplesLoc() not defined for this board version");
       };
    };
 
@@ -21314,10 +21345,10 @@ public:
          case 9:
             return BitExtractControl(0x1224, 0x0000000F, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetMcxRxSigSel() not defined for this board version");
       };
    };
-   unsigned int SetMcxRxSigSel(unsigned int value)
+   void SetMcxRxSigSel(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -21326,7 +21357,7 @@ public:
          case 9:
             return SetRegMask(0x1224, 0x0000000F, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetMcxRxSigSel() not defined for this board version");
       };
    };
    unsigned int GetMcxRxSigSelLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21342,7 +21373,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1224;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetMcxRxSigSelLoc() not defined for this board version");
       };
    };
 
@@ -21356,10 +21387,10 @@ public:
          case 9:
             return BitExtractControl(0x1224, 0x000F0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetMcxTxSigSel() not defined for this board version");
       };
    };
-   unsigned int SetMcxTxSigSel(unsigned int value)
+   void SetMcxTxSigSel(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -21368,7 +21399,7 @@ public:
          case 9:
             return SetRegMask(0x1224, 0x000F0000, 16, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetMcxTxSigSel() not defined for this board version");
       };
    };
    unsigned int GetMcxTxSigSelLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21384,7 +21415,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x1224;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetMcxTxSigSelLoc() not defined for this board version");
       };
    };
 
@@ -21397,7 +21428,7 @@ public:
          case 9:
             return BitExtractStatus(0x002C, 0x00000040, 6);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetOserdesPllLockDcb() not defined for this board version");
       };
    };
    unsigned int GetOserdesPllLockDcbLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21410,7 +21441,7 @@ public:
             if(BitOfs) *BitOfs = 6;
             return 0x002C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetOserdesPllLockDcbLoc() not defined for this board version");
       };
    };
 
@@ -21423,7 +21454,7 @@ public:
          case 9:
             return BitExtractStatus(0x002C, 0x00000020, 5);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetOserdesPllLockTcb() not defined for this board version");
       };
    };
    unsigned int GetOserdesPllLockTcbLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21436,7 +21467,7 @@ public:
             if(BitOfs) *BitOfs = 5;
             return 0x002C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetOserdesPllLockTcbLoc() not defined for this board version");
       };
    };
 
@@ -21448,7 +21479,7 @@ public:
          case 9:
             return BitExtractStatus(0x0028, 0x00008000, 15);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetOvertemp() not defined for this board version");
       };
    };
    unsigned int GetOvertempLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21460,7 +21491,7 @@ public:
             if(BitOfs) *BitOfs = 15;
             return 0x0028;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetOvertempLoc() not defined for this board version");
       };
    };
 
@@ -21473,7 +21504,7 @@ public:
          case 9:
             return BitExtractStatus(0x0028, 0x00000040, 6);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetPackagerBusy() not defined for this board version");
       };
    };
    unsigned int GetPackagerBusyLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21486,7 +21517,7 @@ public:
             if(BitOfs) *BitOfs = 6;
             return 0x0028;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetPackagerBusyLoc() not defined for this board version");
       };
    };
 
@@ -21500,10 +21531,10 @@ public:
          case 9:
             return BitExtractControl(0x1124, 0x00001000, 12);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetPatternTriggerEn() not defined for this board version");
       };
    };
-   unsigned int SetPatternTriggerEn(unsigned int value)
+   void SetPatternTriggerEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -21512,7 +21543,7 @@ public:
          case 9:
             return SetRegMask(0x1124, 0x00001000, 12, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetPatternTriggerEn() not defined for this board version");
       };
    };
    unsigned int GetPatternTriggerEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21528,7 +21559,7 @@ public:
             if(BitOfs) *BitOfs = 12;
             return 0x1124;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetPatternTriggerEnLoc() not defined for this board version");
       };
    };
 
@@ -21541,7 +21572,7 @@ public:
          case 9:
             return BitExtractStatus(0x0020, 0x000000FF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetProtocolVersion() not defined for this board version");
       };
    };
    unsigned int GetProtocolVersionLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21554,7 +21585,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0020;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetProtocolVersionLoc() not defined for this board version");
       };
    };
 
@@ -21567,10 +21598,10 @@ public:
          case 9:
             return BitExtractControl(0x1040, 0x00000001, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetReconfigureFpga() not defined for this board version");
       };
    };
-   unsigned int SetReconfigureFpga(unsigned int value)
+   void SetReconfigureFpga(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -21578,7 +21609,7 @@ public:
          case 9:
             return SetRegMask(0x1040, 0x00000001, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetReconfigureFpga() not defined for this board version");
       };
    };
    unsigned int GetReconfigureFpgaLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21591,7 +21622,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1040;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetReconfigureFpgaLoc() not defined for this board version");
       };
    };
 
@@ -21604,7 +21635,7 @@ public:
          case 9:
             return BitExtractStatus(0x0004, 0xFFFF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetRegLayoutCompLevel() not defined for this board version");
       };
    };
    unsigned int GetRegLayoutCompLevelLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21617,7 +21648,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x0004;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetRegLayoutCompLevelLoc() not defined for this board version");
       };
    };
 
@@ -21630,7 +21661,7 @@ public:
          case 9:
             return BitExtractStatus(0x0004, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetRegLayoutVersion() not defined for this board version");
       };
    };
    unsigned int GetRegLayoutVersionLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21643,7 +21674,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0004;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetRegLayoutVersionLoc() not defined for this board version");
       };
    };
 
@@ -21657,7 +21688,7 @@ public:
          case 9:
             return BitExtractStatus(0x009C, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler0() not defined for this board version");
       };
    };
    unsigned int GetScaler0Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21673,7 +21704,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x009C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler0Loc() not defined for this board version");
       };
    };
 
@@ -21687,7 +21718,7 @@ public:
          case 9:
             return BitExtractStatus(0x00A0, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler1() not defined for this board version");
       };
    };
    unsigned int GetScaler1Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21703,7 +21734,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00A0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler1Loc() not defined for this board version");
       };
    };
 
@@ -21717,7 +21748,7 @@ public:
          case 9:
             return BitExtractStatus(0x00C4, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler10() not defined for this board version");
       };
    };
    unsigned int GetScaler10Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21733,7 +21764,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00C4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler10Loc() not defined for this board version");
       };
    };
 
@@ -21747,7 +21778,7 @@ public:
          case 9:
             return BitExtractStatus(0x00C8, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler11() not defined for this board version");
       };
    };
    unsigned int GetScaler11Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21763,7 +21794,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00C8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler11Loc() not defined for this board version");
       };
    };
 
@@ -21777,7 +21808,7 @@ public:
          case 9:
             return BitExtractStatus(0x00CC, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler12() not defined for this board version");
       };
    };
    unsigned int GetScaler12Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21793,7 +21824,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00CC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler12Loc() not defined for this board version");
       };
    };
 
@@ -21807,7 +21838,7 @@ public:
          case 9:
             return BitExtractStatus(0x00D0, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler13() not defined for this board version");
       };
    };
    unsigned int GetScaler13Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21823,7 +21854,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00D0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler13Loc() not defined for this board version");
       };
    };
 
@@ -21837,7 +21868,7 @@ public:
          case 9:
             return BitExtractStatus(0x00D4, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler14() not defined for this board version");
       };
    };
    unsigned int GetScaler14Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21853,7 +21884,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00D4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler14Loc() not defined for this board version");
       };
    };
 
@@ -21867,7 +21898,7 @@ public:
          case 9:
             return BitExtractStatus(0x00D8, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler15() not defined for this board version");
       };
    };
    unsigned int GetScaler15Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21883,7 +21914,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00D8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler15Loc() not defined for this board version");
       };
    };
 
@@ -21897,7 +21928,7 @@ public:
          case 9:
             return BitExtractStatus(0x00A4, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler2() not defined for this board version");
       };
    };
    unsigned int GetScaler2Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21913,7 +21944,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00A4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler2Loc() not defined for this board version");
       };
    };
 
@@ -21927,7 +21958,7 @@ public:
          case 9:
             return BitExtractStatus(0x00A8, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler3() not defined for this board version");
       };
    };
    unsigned int GetScaler3Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21943,7 +21974,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00A8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler3Loc() not defined for this board version");
       };
    };
 
@@ -21957,7 +21988,7 @@ public:
          case 9:
             return BitExtractStatus(0x00AC, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler4() not defined for this board version");
       };
    };
    unsigned int GetScaler4Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -21973,7 +22004,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00AC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler4Loc() not defined for this board version");
       };
    };
 
@@ -21987,7 +22018,7 @@ public:
          case 9:
             return BitExtractStatus(0x00B0, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler5() not defined for this board version");
       };
    };
    unsigned int GetScaler5Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22003,7 +22034,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00B0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler5Loc() not defined for this board version");
       };
    };
 
@@ -22017,7 +22048,7 @@ public:
          case 9:
             return BitExtractStatus(0x00B4, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler6() not defined for this board version");
       };
    };
    unsigned int GetScaler6Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22033,7 +22064,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00B4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler6Loc() not defined for this board version");
       };
    };
 
@@ -22047,7 +22078,7 @@ public:
          case 9:
             return BitExtractStatus(0x00B8, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler7() not defined for this board version");
       };
    };
    unsigned int GetScaler7Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22063,7 +22094,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00B8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler7Loc() not defined for this board version");
       };
    };
 
@@ -22077,7 +22108,7 @@ public:
          case 9:
             return BitExtractStatus(0x00BC, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler8() not defined for this board version");
       };
    };
    unsigned int GetScaler8Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22093,7 +22124,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00BC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler8Loc() not defined for this board version");
       };
    };
 
@@ -22107,7 +22138,7 @@ public:
          case 9:
             return BitExtractStatus(0x00C0, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler9() not defined for this board version");
       };
    };
    unsigned int GetScaler9Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22123,7 +22154,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00C0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScaler9Loc() not defined for this board version");
       };
    };
 
@@ -22137,7 +22168,7 @@ public:
          case 9:
             return BitExtractStatus(0x00E4, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScalerExtClk() not defined for this board version");
       };
    };
    unsigned int GetScalerExtClkLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22153,7 +22184,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00E4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScalerExtClkLoc() not defined for this board version");
       };
    };
 
@@ -22167,7 +22198,7 @@ public:
          case 9:
             return BitExtractStatus(0x00E0, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScalerExtTrg() not defined for this board version");
       };
    };
    unsigned int GetScalerExtTrgLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22183,7 +22214,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00E0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScalerExtTrgLoc() not defined for this board version");
       };
    };
 
@@ -22197,7 +22228,7 @@ public:
          case 9:
             return BitExtractStatus(0x00DC, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScalerPtrnTrg() not defined for this board version");
       };
    };
    unsigned int GetScalerPtrnTrgLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22213,7 +22244,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00DC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScalerPtrnTrgLoc() not defined for this board version");
       };
    };
 
@@ -22226,10 +22257,10 @@ public:
          case 9:
             return BitExtractControl(0x1040, 0x00000200, 9);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScalerRst() not defined for this board version");
       };
    };
-   unsigned int SetScalerRst(unsigned int value)
+   void SetScalerRst(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -22237,7 +22268,7 @@ public:
          case 9:
             return SetRegMask(0x1040, 0x00000200, 9, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetScalerRst() not defined for this board version");
       };
    };
    unsigned int GetScalerRstLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22250,7 +22281,7 @@ public:
             if(BitOfs) *BitOfs = 9;
             return 0x1040;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScalerRstLoc() not defined for this board version");
       };
    };
 
@@ -22264,7 +22295,7 @@ public:
          case 9:
             return BitExtractStatus(0x00E8, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScalerTimeStampLsb() not defined for this board version");
       };
    };
    unsigned int GetScalerTimeStampLsbLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22280,7 +22311,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00E8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScalerTimeStampLsbLoc() not defined for this board version");
       };
    };
 
@@ -22294,7 +22325,7 @@ public:
          case 9:
             return BitExtractStatus(0x00EC, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScalerTimeStampMsb() not defined for this board version");
       };
    };
    unsigned int GetScalerTimeStampMsbLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22310,7 +22341,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00EC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScalerTimeStampMsbLoc() not defined for this board version");
       };
    };
 
@@ -22323,10 +22354,10 @@ public:
          case 9:
             return BitExtractControl(0x1014, 0x04000000, 26);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSclTxEn() not defined for this board version");
       };
    };
-   unsigned int SetSclTxEn(unsigned int value)
+   void SetSclTxEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -22334,7 +22365,7 @@ public:
          case 9:
             return SetRegMask(0x1014, 0x04000000, 26, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetSclTxEn() not defined for this board version");
       };
    };
    unsigned int GetSclTxEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22347,7 +22378,7 @@ public:
             if(BitOfs) *BitOfs = 26;
             return 0x1014;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSclTxEnLoc() not defined for this board version");
       };
    };
 
@@ -22360,10 +22391,10 @@ public:
          case 9:
             return BitExtractControl(0x1014, 0x02000000, 25);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSerdesComEn() not defined for this board version");
       };
    };
-   unsigned int SetSerdesComEn(unsigned int value)
+   void SetSerdesComEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -22371,7 +22402,7 @@ public:
          case 9:
             return SetRegMask(0x1014, 0x02000000, 25, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetSerdesComEn() not defined for this board version");
       };
    };
    unsigned int GetSerdesComEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22384,7 +22415,7 @@ public:
             if(BitOfs) *BitOfs = 25;
             return 0x1014;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSerdesComEnLoc() not defined for this board version");
       };
    };
 
@@ -22397,7 +22428,7 @@ public:
          case 9:
             return BitExtractStatus(0x0028, 0x00000080, 7);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSerialBusy() not defined for this board version");
       };
    };
    unsigned int GetSerialBusyLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22410,7 +22441,7 @@ public:
             if(BitOfs) *BitOfs = 7;
             return 0x0028;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSerialBusyLoc() not defined for this board version");
       };
    };
 
@@ -22423,7 +22454,7 @@ public:
          case 9:
             return BitExtractStatus(0x0024, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSerialNumber() not defined for this board version");
       };
    };
    unsigned int GetSerialNumberLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22436,7 +22467,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0024;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSerialNumberLoc() not defined for this board version");
       };
    };
 
@@ -22450,10 +22481,10 @@ public:
          case 9:
             return BitExtractControl(0x121C, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSetTimeLsb() not defined for this board version");
       };
    };
-   unsigned int SetSetTimeLsb(unsigned int value)
+   void SetSetTimeLsb(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -22462,7 +22493,7 @@ public:
          case 9:
             return SetRegMask(0x121C, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetSetTimeLsb() not defined for this board version");
       };
    };
    unsigned int GetSetTimeLsbLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22478,7 +22509,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x121C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSetTimeLsbLoc() not defined for this board version");
       };
    };
 
@@ -22492,10 +22523,10 @@ public:
          case 9:
             return BitExtractControl(0x1220, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSetTimeMsb() not defined for this board version");
       };
    };
-   unsigned int SetSetTimeMsb(unsigned int value)
+   void SetSetTimeMsb(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -22504,7 +22535,7 @@ public:
          case 9:
             return SetRegMask(0x1220, 0xFFFFFFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetSetTimeMsb() not defined for this board version");
       };
    };
    unsigned int GetSetTimeMsbLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22520,7 +22551,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1220;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSetTimeMsbLoc() not defined for this board version");
       };
    };
 
@@ -22533,10 +22564,10 @@ public:
          case 9:
             return BitExtractControl(0x1000, 0x000000FF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSlotId() not defined for this board version");
       };
    };
-   unsigned int SetSlotId(unsigned int value)
+   void SetSlotId(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -22544,7 +22575,7 @@ public:
          case 9:
             return SetRegMask(0x1000, 0x000000FF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetSlotId() not defined for this board version");
       };
    };
    unsigned int GetSlotIdLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22557,7 +22588,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1000;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSlotIdLoc() not defined for this board version");
       };
    };
 
@@ -22570,7 +22601,7 @@ public:
          case 9:
             return BitExtractStatus(0x0010, 0x000000FF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSwBuildDay() not defined for this board version");
       };
    };
    unsigned int GetSwBuildDayLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22583,7 +22614,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0010;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSwBuildDayLoc() not defined for this board version");
       };
    };
 
@@ -22596,7 +22627,7 @@ public:
          case 9:
             return BitExtractStatus(0x0014, 0x00FF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSwBuildHour() not defined for this board version");
       };
    };
    unsigned int GetSwBuildHourLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22609,7 +22640,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x0014;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSwBuildHourLoc() not defined for this board version");
       };
    };
 
@@ -22622,7 +22653,7 @@ public:
          case 9:
             return BitExtractStatus(0x0014, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSwBuildMinute() not defined for this board version");
       };
    };
    unsigned int GetSwBuildMinuteLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22635,7 +22666,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x0014;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSwBuildMinuteLoc() not defined for this board version");
       };
    };
 
@@ -22648,7 +22679,7 @@ public:
          case 9:
             return BitExtractStatus(0x0010, 0x0000FF00, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSwBuildMonth() not defined for this board version");
       };
    };
    unsigned int GetSwBuildMonthLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22661,7 +22692,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x0010;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSwBuildMonthLoc() not defined for this board version");
       };
    };
 
@@ -22674,7 +22705,7 @@ public:
          case 9:
             return BitExtractStatus(0x0014, 0x000000FF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSwBuildSecond() not defined for this board version");
       };
    };
    unsigned int GetSwBuildSecondLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22687,7 +22718,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0014;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSwBuildSecondLoc() not defined for this board version");
       };
    };
 
@@ -22700,7 +22731,7 @@ public:
          case 9:
             return BitExtractStatus(0x0010, 0xFFFF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSwBuildYear() not defined for this board version");
       };
    };
    unsigned int GetSwBuildYearLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22713,7 +22744,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x0010;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSwBuildYearLoc() not defined for this board version");
       };
    };
 
@@ -22726,7 +22757,7 @@ public:
          case 9:
             return BitExtractStatus(0x001C, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSwGitHashTag() not defined for this board version");
       };
    };
    unsigned int GetSwGitHashTagLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22739,7 +22770,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x001C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSwGitHashTagLoc() not defined for this board version");
       };
    };
 
@@ -22752,7 +22783,7 @@ public:
          case 9:
             return BitExtractStatus(0x0028, 0x00000010, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSysBusy() not defined for this board version");
       };
    };
    unsigned int GetSysBusyLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22765,7 +22796,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x0028;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSysBusyLoc() not defined for this board version");
       };
    };
 
@@ -22778,7 +22809,7 @@ public:
          case 9:
             return BitExtractStatus(0x002C, 0x00000100, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSysDcmLock() not defined for this board version");
       };
    };
    unsigned int GetSysDcmLockLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22791,7 +22822,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x002C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetSysDcmLockLoc() not defined for this board version");
       };
    };
 
@@ -22804,10 +22835,10 @@ public:
          case 9:
             return BitExtractControl(0x1040, 0x00000400, 10);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTcbOserdesIfRst() not defined for this board version");
       };
    };
-   unsigned int SetTcbOserdesIfRst(unsigned int value)
+   void SetTcbOserdesIfRst(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -22815,7 +22846,7 @@ public:
          case 9:
             return SetRegMask(0x1040, 0x00000400, 10, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTcbOserdesIfRst() not defined for this board version");
       };
    };
    unsigned int GetTcbOserdesIfRstLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22828,7 +22859,7 @@ public:
             if(BitOfs) *BitOfs = 10;
             return 0x1040;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTcbOserdesIfRstLoc() not defined for this board version");
       };
    };
 
@@ -22841,10 +22872,10 @@ public:
          case 9:
             return BitExtractControl(0x1040, 0x00001000, 12);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTcbOserdesPllRst() not defined for this board version");
       };
    };
-   unsigned int SetTcbOserdesPllRst(unsigned int value)
+   void SetTcbOserdesPllRst(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -22852,7 +22883,7 @@ public:
          case 9:
             return SetRegMask(0x1040, 0x00001000, 12, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTcbOserdesPllRst() not defined for this board version");
       };
    };
    unsigned int GetTcbOserdesPllRstLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22865,7 +22896,7 @@ public:
             if(BitOfs) *BitOfs = 12;
             return 0x1040;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTcbOserdesPllRstLoc() not defined for this board version");
       };
    };
 
@@ -22878,10 +22909,10 @@ public:
          case 9:
             return BitExtractControl(0x1014, 0x40000000, 30);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTcbSerdesTrain() not defined for this board version");
       };
    };
-   unsigned int SetTcbSerdesTrain(unsigned int value)
+   void SetTcbSerdesTrain(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -22889,7 +22920,7 @@ public:
          case 9:
             return SetRegMask(0x1014, 0x40000000, 30, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTcbSerdesTrain() not defined for this board version");
       };
    };
    unsigned int GetTcbSerdesTrainLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22902,7 +22933,7 @@ public:
             if(BitOfs) *BitOfs = 30;
             return 0x1014;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTcbSerdesTrainLoc() not defined for this board version");
       };
    };
 
@@ -22915,10 +22946,10 @@ public:
          case 9:
             return BitExtractControl(0x1024, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTdcChTxEn() not defined for this board version");
       };
    };
-   unsigned int SetTdcChTxEn(unsigned int value)
+   void SetTdcChTxEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -22926,7 +22957,7 @@ public:
          case 9:
             return SetRegMask(0x1024, 0x0000FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTdcChTxEn() not defined for this board version");
       };
    };
    unsigned int GetTdcChTxEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22939,7 +22970,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1024;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTdcChTxEnLoc() not defined for this board version");
       };
    };
 
@@ -22952,7 +22983,7 @@ public:
          case 9:
             return BitExtractStatus(0x0040, 0x00FFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTdcSampleFreq() not defined for this board version");
       };
    };
    unsigned int GetTdcSampleFreqLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -22965,7 +22996,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0040;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTdcSampleFreqLoc() not defined for this board version");
       };
    };
 
@@ -22978,10 +23009,10 @@ public:
          case 9:
             return BitExtractControl(0x1030, 0x00001FFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTdcTxSamples() not defined for this board version");
       };
    };
-   unsigned int SetTdcTxSamples(unsigned int value)
+   void SetTdcTxSamples(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -22989,7 +23020,7 @@ public:
          case 9:
             return SetRegMask(0x1030, 0x00001FFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTdcTxSamples() not defined for this board version");
       };
    };
    unsigned int GetTdcTxSamplesLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23002,7 +23033,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1030;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTdcTxSamplesLoc() not defined for this board version");
       };
    };
 
@@ -23015,7 +23046,7 @@ public:
          case 9:
             return BitExtractStatus(0x0028, 0xFFFF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTemperature() not defined for this board version");
       };
    };
    unsigned int GetTemperatureLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23028,7 +23059,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x0028;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTemperatureLoc() not defined for this board version");
       };
    };
 
@@ -23042,7 +23073,7 @@ public:
          case 9:
             return BitExtractStatus(0x00F0, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTimeLsb() not defined for this board version");
       };
    };
    unsigned int GetTimeLsbLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23058,7 +23089,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00F0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTimeLsbLoc() not defined for this board version");
       };
    };
 
@@ -23072,7 +23103,7 @@ public:
          case 9:
             return BitExtractStatus(0x00F4, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTimeMsb() not defined for this board version");
       };
    };
    unsigned int GetTimeMsbLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23088,7 +23119,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x00F4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTimeMsbLoc() not defined for this board version");
       };
    };
 
@@ -23101,10 +23132,10 @@ public:
          case 9:
             return BitExtractControl(0x1008, 0x00000001, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTimingCalibSignalEn() not defined for this board version");
       };
    };
-   unsigned int SetTimingCalibSignalEn(unsigned int value)
+   void SetTimingCalibSignalEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -23112,7 +23143,7 @@ public:
          case 9:
             return SetRegMask(0x1008, 0x00000001, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTimingCalibSignalEn() not defined for this board version");
       };
    };
    unsigned int GetTimingCalibSignalEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23125,7 +23156,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1008;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTimingCalibSignalEnLoc() not defined for this board version");
       };
    };
 
@@ -23139,7 +23170,7 @@ public:
          case 9:
             return BitExtractStatus(0x0104, 0x80000000, 31);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrbFlagNew() not defined for this board version");
       };
    };
    unsigned int GetTrbFlagNewLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23155,7 +23186,7 @@ public:
             if(BitOfs) *BitOfs = 31;
             return 0x0104;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrbFlagNewLoc() not defined for this board version");
       };
    };
 
@@ -23169,7 +23200,7 @@ public:
          case 9:
             return BitExtractStatus(0x0104, 0x40000000, 30);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrbFlagParityError() not defined for this board version");
       };
    };
    unsigned int GetTrbFlagParityErrorLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23185,7 +23216,7 @@ public:
             if(BitOfs) *BitOfs = 30;
             return 0x0104;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrbFlagParityErrorLoc() not defined for this board version");
       };
    };
 
@@ -23199,7 +23230,7 @@ public:
          case 9:
             return BitExtractStatus(0x0108, 0xFFFFFFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrbInfoLsb() not defined for this board version");
       };
    };
    unsigned int GetTrbInfoLsbLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23215,7 +23246,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0108;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrbInfoLsbLoc() not defined for this board version");
       };
    };
 
@@ -23229,7 +23260,7 @@ public:
          case 9:
             return BitExtractStatus(0x010C, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrbInfoMsb() not defined for this board version");
       };
    };
    unsigned int GetTrbInfoMsbLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23245,7 +23276,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x010C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrbInfoMsbLoc() not defined for this board version");
       };
    };
 
@@ -23259,7 +23290,7 @@ public:
          case 9:
             return BitExtractStatus(0x0104, 0x0000FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrbParityErrorCount() not defined for this board version");
       };
    };
    unsigned int GetTrbParityErrorCountLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23275,7 +23306,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x0104;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrbParityErrorCountLoc() not defined for this board version");
       };
    };
 
@@ -23288,10 +23319,10 @@ public:
          case 9:
             return BitExtractControl(0x1040, 0x00000100, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrbParityErrorCountRst() not defined for this board version");
       };
    };
-   unsigned int SetTrbParityErrorCountRst(unsigned int value)
+   void SetTrbParityErrorCountRst(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -23299,7 +23330,7 @@ public:
          case 9:
             return SetRegMask(0x1040, 0x00000100, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrbParityErrorCountRst() not defined for this board version");
       };
    };
    unsigned int GetTrbParityErrorCountRstLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23312,7 +23343,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1040;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrbParityErrorCountRstLoc() not defined for this board version");
       };
    };
 
@@ -23326,10 +23357,10 @@ public:
          case 9:
             return BitExtractControl(0x1130, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgPtrnEn() not defined for this board version");
       };
    };
-   unsigned int SetTrgPtrnEn(unsigned int value)
+   void SetTrgPtrnEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -23338,7 +23369,7 @@ public:
          case 9:
             return SetRegMask(0x1130, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgPtrnEn() not defined for this board version");
       };
    };
    unsigned int GetTrgPtrnEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23354,7 +23385,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1130;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgPtrnEnLoc() not defined for this board version");
       };
    };
 
@@ -23368,10 +23399,10 @@ public:
          case 9:
             return BitExtractControl(0x1134, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn0() not defined for this board version");
       };
    };
-   unsigned int SetTrgSrcEnPtrn0(unsigned int value)
+   void SetTrgSrcEnPtrn0(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -23380,7 +23411,7 @@ public:
          case 9:
             return SetRegMask(0x1134, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgSrcEnPtrn0() not defined for this board version");
       };
    };
    unsigned int GetTrgSrcEnPtrn0Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23396,7 +23427,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1134;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn0Loc() not defined for this board version");
       };
    };
 
@@ -23410,10 +23441,10 @@ public:
          case 9:
             return BitExtractControl(0x113C, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn1() not defined for this board version");
       };
    };
-   unsigned int SetTrgSrcEnPtrn1(unsigned int value)
+   void SetTrgSrcEnPtrn1(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -23422,7 +23453,7 @@ public:
          case 9:
             return SetRegMask(0x113C, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgSrcEnPtrn1() not defined for this board version");
       };
    };
    unsigned int GetTrgSrcEnPtrn1Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23438,7 +23469,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x113C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn1Loc() not defined for this board version");
       };
    };
 
@@ -23452,10 +23483,10 @@ public:
          case 9:
             return BitExtractControl(0x1184, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn10() not defined for this board version");
       };
    };
-   unsigned int SetTrgSrcEnPtrn10(unsigned int value)
+   void SetTrgSrcEnPtrn10(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -23464,7 +23495,7 @@ public:
          case 9:
             return SetRegMask(0x1184, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgSrcEnPtrn10() not defined for this board version");
       };
    };
    unsigned int GetTrgSrcEnPtrn10Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23480,7 +23511,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1184;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn10Loc() not defined for this board version");
       };
    };
 
@@ -23494,10 +23525,10 @@ public:
          case 9:
             return BitExtractControl(0x118C, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn11() not defined for this board version");
       };
    };
-   unsigned int SetTrgSrcEnPtrn11(unsigned int value)
+   void SetTrgSrcEnPtrn11(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -23506,7 +23537,7 @@ public:
          case 9:
             return SetRegMask(0x118C, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgSrcEnPtrn11() not defined for this board version");
       };
    };
    unsigned int GetTrgSrcEnPtrn11Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23522,7 +23553,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x118C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn11Loc() not defined for this board version");
       };
    };
 
@@ -23536,10 +23567,10 @@ public:
          case 9:
             return BitExtractControl(0x1194, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn12() not defined for this board version");
       };
    };
-   unsigned int SetTrgSrcEnPtrn12(unsigned int value)
+   void SetTrgSrcEnPtrn12(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -23548,7 +23579,7 @@ public:
          case 9:
             return SetRegMask(0x1194, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgSrcEnPtrn12() not defined for this board version");
       };
    };
    unsigned int GetTrgSrcEnPtrn12Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23564,7 +23595,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1194;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn12Loc() not defined for this board version");
       };
    };
 
@@ -23578,10 +23609,10 @@ public:
          case 9:
             return BitExtractControl(0x119C, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn13() not defined for this board version");
       };
    };
-   unsigned int SetTrgSrcEnPtrn13(unsigned int value)
+   void SetTrgSrcEnPtrn13(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -23590,7 +23621,7 @@ public:
          case 9:
             return SetRegMask(0x119C, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgSrcEnPtrn13() not defined for this board version");
       };
    };
    unsigned int GetTrgSrcEnPtrn13Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23606,7 +23637,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x119C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn13Loc() not defined for this board version");
       };
    };
 
@@ -23620,10 +23651,10 @@ public:
          case 9:
             return BitExtractControl(0x11A4, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn14() not defined for this board version");
       };
    };
-   unsigned int SetTrgSrcEnPtrn14(unsigned int value)
+   void SetTrgSrcEnPtrn14(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -23632,7 +23663,7 @@ public:
          case 9:
             return SetRegMask(0x11A4, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgSrcEnPtrn14() not defined for this board version");
       };
    };
    unsigned int GetTrgSrcEnPtrn14Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23648,7 +23679,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11A4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn14Loc() not defined for this board version");
       };
    };
 
@@ -23662,10 +23693,10 @@ public:
          case 9:
             return BitExtractControl(0x11AC, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn15() not defined for this board version");
       };
    };
-   unsigned int SetTrgSrcEnPtrn15(unsigned int value)
+   void SetTrgSrcEnPtrn15(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -23674,7 +23705,7 @@ public:
          case 9:
             return SetRegMask(0x11AC, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgSrcEnPtrn15() not defined for this board version");
       };
    };
    unsigned int GetTrgSrcEnPtrn15Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23690,7 +23721,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11AC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn15Loc() not defined for this board version");
       };
    };
 
@@ -23704,10 +23735,10 @@ public:
          case 9:
             return BitExtractControl(0x11B4, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn16() not defined for this board version");
       };
    };
-   unsigned int SetTrgSrcEnPtrn16(unsigned int value)
+   void SetTrgSrcEnPtrn16(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -23716,7 +23747,7 @@ public:
          case 9:
             return SetRegMask(0x11B4, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgSrcEnPtrn16() not defined for this board version");
       };
    };
    unsigned int GetTrgSrcEnPtrn16Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23732,7 +23763,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11B4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn16Loc() not defined for this board version");
       };
    };
 
@@ -23746,10 +23777,10 @@ public:
          case 9:
             return BitExtractControl(0x11BC, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn17() not defined for this board version");
       };
    };
-   unsigned int SetTrgSrcEnPtrn17(unsigned int value)
+   void SetTrgSrcEnPtrn17(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -23758,7 +23789,7 @@ public:
          case 9:
             return SetRegMask(0x11BC, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgSrcEnPtrn17() not defined for this board version");
       };
    };
    unsigned int GetTrgSrcEnPtrn17Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23774,7 +23805,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11BC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn17Loc() not defined for this board version");
       };
    };
 
@@ -23788,10 +23819,10 @@ public:
          case 9:
             return BitExtractControl(0x11C4, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn18() not defined for this board version");
       };
    };
-   unsigned int SetTrgSrcEnPtrn18(unsigned int value)
+   void SetTrgSrcEnPtrn18(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -23800,7 +23831,7 @@ public:
          case 9:
             return SetRegMask(0x11C4, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgSrcEnPtrn18() not defined for this board version");
       };
    };
    unsigned int GetTrgSrcEnPtrn18Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23816,7 +23847,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11C4;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn18Loc() not defined for this board version");
       };
    };
 
@@ -23830,10 +23861,10 @@ public:
          case 9:
             return BitExtractControl(0x1144, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn2() not defined for this board version");
       };
    };
-   unsigned int SetTrgSrcEnPtrn2(unsigned int value)
+   void SetTrgSrcEnPtrn2(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -23842,7 +23873,7 @@ public:
          case 9:
             return SetRegMask(0x1144, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgSrcEnPtrn2() not defined for this board version");
       };
    };
    unsigned int GetTrgSrcEnPtrn2Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23858,7 +23889,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1144;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn2Loc() not defined for this board version");
       };
    };
 
@@ -23872,10 +23903,10 @@ public:
          case 9:
             return BitExtractControl(0x114C, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn3() not defined for this board version");
       };
    };
-   unsigned int SetTrgSrcEnPtrn3(unsigned int value)
+   void SetTrgSrcEnPtrn3(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -23884,7 +23915,7 @@ public:
          case 9:
             return SetRegMask(0x114C, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgSrcEnPtrn3() not defined for this board version");
       };
    };
    unsigned int GetTrgSrcEnPtrn3Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23900,7 +23931,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x114C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn3Loc() not defined for this board version");
       };
    };
 
@@ -23914,10 +23945,10 @@ public:
          case 9:
             return BitExtractControl(0x1154, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn4() not defined for this board version");
       };
    };
-   unsigned int SetTrgSrcEnPtrn4(unsigned int value)
+   void SetTrgSrcEnPtrn4(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -23926,7 +23957,7 @@ public:
          case 9:
             return SetRegMask(0x1154, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgSrcEnPtrn4() not defined for this board version");
       };
    };
    unsigned int GetTrgSrcEnPtrn4Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23942,7 +23973,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1154;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn4Loc() not defined for this board version");
       };
    };
 
@@ -23956,10 +23987,10 @@ public:
          case 9:
             return BitExtractControl(0x115C, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn5() not defined for this board version");
       };
    };
-   unsigned int SetTrgSrcEnPtrn5(unsigned int value)
+   void SetTrgSrcEnPtrn5(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -23968,7 +23999,7 @@ public:
          case 9:
             return SetRegMask(0x115C, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgSrcEnPtrn5() not defined for this board version");
       };
    };
    unsigned int GetTrgSrcEnPtrn5Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -23984,7 +24015,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x115C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn5Loc() not defined for this board version");
       };
    };
 
@@ -23998,10 +24029,10 @@ public:
          case 9:
             return BitExtractControl(0x1164, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn6() not defined for this board version");
       };
    };
-   unsigned int SetTrgSrcEnPtrn6(unsigned int value)
+   void SetTrgSrcEnPtrn6(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24010,7 +24041,7 @@ public:
          case 9:
             return SetRegMask(0x1164, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgSrcEnPtrn6() not defined for this board version");
       };
    };
    unsigned int GetTrgSrcEnPtrn6Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24026,7 +24057,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1164;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn6Loc() not defined for this board version");
       };
    };
 
@@ -24040,10 +24071,10 @@ public:
          case 9:
             return BitExtractControl(0x116C, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn7() not defined for this board version");
       };
    };
-   unsigned int SetTrgSrcEnPtrn7(unsigned int value)
+   void SetTrgSrcEnPtrn7(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24052,7 +24083,7 @@ public:
          case 9:
             return SetRegMask(0x116C, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgSrcEnPtrn7() not defined for this board version");
       };
    };
    unsigned int GetTrgSrcEnPtrn7Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24068,7 +24099,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x116C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn7Loc() not defined for this board version");
       };
    };
 
@@ -24082,10 +24113,10 @@ public:
          case 9:
             return BitExtractControl(0x1174, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn8() not defined for this board version");
       };
    };
-   unsigned int SetTrgSrcEnPtrn8(unsigned int value)
+   void SetTrgSrcEnPtrn8(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24094,7 +24125,7 @@ public:
          case 9:
             return SetRegMask(0x1174, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgSrcEnPtrn8() not defined for this board version");
       };
    };
    unsigned int GetTrgSrcEnPtrn8Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24110,7 +24141,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1174;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn8Loc() not defined for this board version");
       };
    };
 
@@ -24124,10 +24155,10 @@ public:
          case 9:
             return BitExtractControl(0x117C, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn9() not defined for this board version");
       };
    };
-   unsigned int SetTrgSrcEnPtrn9(unsigned int value)
+   void SetTrgSrcEnPtrn9(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24136,7 +24167,7 @@ public:
          case 9:
             return SetRegMask(0x117C, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgSrcEnPtrn9() not defined for this board version");
       };
    };
    unsigned int GetTrgSrcEnPtrn9Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24152,7 +24183,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x117C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcEnPtrn9Loc() not defined for this board version");
       };
    };
 
@@ -24166,10 +24197,10 @@ public:
          case 9:
             return BitExtractControl(0x1128, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcPolarity() not defined for this board version");
       };
    };
-   unsigned int SetTrgSrcPolarity(unsigned int value)
+   void SetTrgSrcPolarity(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24178,7 +24209,7 @@ public:
          case 9:
             return SetRegMask(0x1128, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgSrcPolarity() not defined for this board version");
       };
    };
    unsigned int GetTrgSrcPolarityLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24194,7 +24225,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1128;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgSrcPolarityLoc() not defined for this board version");
       };
    };
 
@@ -24208,10 +24239,10 @@ public:
          case 9:
             return BitExtractControl(0x1138, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn0() not defined for this board version");
       };
    };
-   unsigned int SetTrgStatePtrn0(unsigned int value)
+   void SetTrgStatePtrn0(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24220,7 +24251,7 @@ public:
          case 9:
             return SetRegMask(0x1138, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgStatePtrn0() not defined for this board version");
       };
    };
    unsigned int GetTrgStatePtrn0Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24236,7 +24267,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1138;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn0Loc() not defined for this board version");
       };
    };
 
@@ -24250,10 +24281,10 @@ public:
          case 9:
             return BitExtractControl(0x1140, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn1() not defined for this board version");
       };
    };
-   unsigned int SetTrgStatePtrn1(unsigned int value)
+   void SetTrgStatePtrn1(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24262,7 +24293,7 @@ public:
          case 9:
             return SetRegMask(0x1140, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgStatePtrn1() not defined for this board version");
       };
    };
    unsigned int GetTrgStatePtrn1Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24278,7 +24309,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1140;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn1Loc() not defined for this board version");
       };
    };
 
@@ -24292,10 +24323,10 @@ public:
          case 9:
             return BitExtractControl(0x1188, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn10() not defined for this board version");
       };
    };
-   unsigned int SetTrgStatePtrn10(unsigned int value)
+   void SetTrgStatePtrn10(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24304,7 +24335,7 @@ public:
          case 9:
             return SetRegMask(0x1188, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgStatePtrn10() not defined for this board version");
       };
    };
    unsigned int GetTrgStatePtrn10Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24320,7 +24351,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1188;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn10Loc() not defined for this board version");
       };
    };
 
@@ -24334,10 +24365,10 @@ public:
          case 9:
             return BitExtractControl(0x1190, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn11() not defined for this board version");
       };
    };
-   unsigned int SetTrgStatePtrn11(unsigned int value)
+   void SetTrgStatePtrn11(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24346,7 +24377,7 @@ public:
          case 9:
             return SetRegMask(0x1190, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgStatePtrn11() not defined for this board version");
       };
    };
    unsigned int GetTrgStatePtrn11Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24362,7 +24393,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1190;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn11Loc() not defined for this board version");
       };
    };
 
@@ -24376,10 +24407,10 @@ public:
          case 9:
             return BitExtractControl(0x1198, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn12() not defined for this board version");
       };
    };
-   unsigned int SetTrgStatePtrn12(unsigned int value)
+   void SetTrgStatePtrn12(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24388,7 +24419,7 @@ public:
          case 9:
             return SetRegMask(0x1198, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgStatePtrn12() not defined for this board version");
       };
    };
    unsigned int GetTrgStatePtrn12Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24404,7 +24435,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1198;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn12Loc() not defined for this board version");
       };
    };
 
@@ -24418,10 +24449,10 @@ public:
          case 9:
             return BitExtractControl(0x11A0, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn13() not defined for this board version");
       };
    };
-   unsigned int SetTrgStatePtrn13(unsigned int value)
+   void SetTrgStatePtrn13(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24430,7 +24461,7 @@ public:
          case 9:
             return SetRegMask(0x11A0, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgStatePtrn13() not defined for this board version");
       };
    };
    unsigned int GetTrgStatePtrn13Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24446,7 +24477,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11A0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn13Loc() not defined for this board version");
       };
    };
 
@@ -24460,10 +24491,10 @@ public:
          case 9:
             return BitExtractControl(0x11A8, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn14() not defined for this board version");
       };
    };
-   unsigned int SetTrgStatePtrn14(unsigned int value)
+   void SetTrgStatePtrn14(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24472,7 +24503,7 @@ public:
          case 9:
             return SetRegMask(0x11A8, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgStatePtrn14() not defined for this board version");
       };
    };
    unsigned int GetTrgStatePtrn14Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24488,7 +24519,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11A8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn14Loc() not defined for this board version");
       };
    };
 
@@ -24502,10 +24533,10 @@ public:
          case 9:
             return BitExtractControl(0x11B0, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn15() not defined for this board version");
       };
    };
-   unsigned int SetTrgStatePtrn15(unsigned int value)
+   void SetTrgStatePtrn15(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24514,7 +24545,7 @@ public:
          case 9:
             return SetRegMask(0x11B0, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgStatePtrn15() not defined for this board version");
       };
    };
    unsigned int GetTrgStatePtrn15Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24530,7 +24561,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11B0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn15Loc() not defined for this board version");
       };
    };
 
@@ -24544,10 +24575,10 @@ public:
          case 9:
             return BitExtractControl(0x11B8, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn16() not defined for this board version");
       };
    };
-   unsigned int SetTrgStatePtrn16(unsigned int value)
+   void SetTrgStatePtrn16(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24556,7 +24587,7 @@ public:
          case 9:
             return SetRegMask(0x11B8, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgStatePtrn16() not defined for this board version");
       };
    };
    unsigned int GetTrgStatePtrn16Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24572,7 +24603,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11B8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn16Loc() not defined for this board version");
       };
    };
 
@@ -24586,10 +24617,10 @@ public:
          case 9:
             return BitExtractControl(0x11C0, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn17() not defined for this board version");
       };
    };
-   unsigned int SetTrgStatePtrn17(unsigned int value)
+   void SetTrgStatePtrn17(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24598,7 +24629,7 @@ public:
          case 9:
             return SetRegMask(0x11C0, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgStatePtrn17() not defined for this board version");
       };
    };
    unsigned int GetTrgStatePtrn17Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24614,7 +24645,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11C0;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn17Loc() not defined for this board version");
       };
    };
 
@@ -24628,10 +24659,10 @@ public:
          case 9:
             return BitExtractControl(0x11C8, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn18() not defined for this board version");
       };
    };
-   unsigned int SetTrgStatePtrn18(unsigned int value)
+   void SetTrgStatePtrn18(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24640,7 +24671,7 @@ public:
          case 9:
             return SetRegMask(0x11C8, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgStatePtrn18() not defined for this board version");
       };
    };
    unsigned int GetTrgStatePtrn18Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24656,7 +24687,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x11C8;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn18Loc() not defined for this board version");
       };
    };
 
@@ -24670,10 +24701,10 @@ public:
          case 9:
             return BitExtractControl(0x1148, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn2() not defined for this board version");
       };
    };
-   unsigned int SetTrgStatePtrn2(unsigned int value)
+   void SetTrgStatePtrn2(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24682,7 +24713,7 @@ public:
          case 9:
             return SetRegMask(0x1148, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgStatePtrn2() not defined for this board version");
       };
    };
    unsigned int GetTrgStatePtrn2Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24698,7 +24729,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1148;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn2Loc() not defined for this board version");
       };
    };
 
@@ -24712,10 +24743,10 @@ public:
          case 9:
             return BitExtractControl(0x1150, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn3() not defined for this board version");
       };
    };
-   unsigned int SetTrgStatePtrn3(unsigned int value)
+   void SetTrgStatePtrn3(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24724,7 +24755,7 @@ public:
          case 9:
             return SetRegMask(0x1150, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgStatePtrn3() not defined for this board version");
       };
    };
    unsigned int GetTrgStatePtrn3Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24740,7 +24771,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1150;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn3Loc() not defined for this board version");
       };
    };
 
@@ -24754,10 +24785,10 @@ public:
          case 9:
             return BitExtractControl(0x1158, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn4() not defined for this board version");
       };
    };
-   unsigned int SetTrgStatePtrn4(unsigned int value)
+   void SetTrgStatePtrn4(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24766,7 +24797,7 @@ public:
          case 9:
             return SetRegMask(0x1158, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgStatePtrn4() not defined for this board version");
       };
    };
    unsigned int GetTrgStatePtrn4Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24782,7 +24813,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1158;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn4Loc() not defined for this board version");
       };
    };
 
@@ -24796,10 +24827,10 @@ public:
          case 9:
             return BitExtractControl(0x1160, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn5() not defined for this board version");
       };
    };
-   unsigned int SetTrgStatePtrn5(unsigned int value)
+   void SetTrgStatePtrn5(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24808,7 +24839,7 @@ public:
          case 9:
             return SetRegMask(0x1160, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgStatePtrn5() not defined for this board version");
       };
    };
    unsigned int GetTrgStatePtrn5Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24824,7 +24855,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1160;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn5Loc() not defined for this board version");
       };
    };
 
@@ -24838,10 +24869,10 @@ public:
          case 9:
             return BitExtractControl(0x1168, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn6() not defined for this board version");
       };
    };
-   unsigned int SetTrgStatePtrn6(unsigned int value)
+   void SetTrgStatePtrn6(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24850,7 +24881,7 @@ public:
          case 9:
             return SetRegMask(0x1168, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgStatePtrn6() not defined for this board version");
       };
    };
    unsigned int GetTrgStatePtrn6Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24866,7 +24897,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1168;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn6Loc() not defined for this board version");
       };
    };
 
@@ -24880,10 +24911,10 @@ public:
          case 9:
             return BitExtractControl(0x1170, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn7() not defined for this board version");
       };
    };
-   unsigned int SetTrgStatePtrn7(unsigned int value)
+   void SetTrgStatePtrn7(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24892,7 +24923,7 @@ public:
          case 9:
             return SetRegMask(0x1170, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgStatePtrn7() not defined for this board version");
       };
    };
    unsigned int GetTrgStatePtrn7Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24908,7 +24939,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1170;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn7Loc() not defined for this board version");
       };
    };
 
@@ -24922,10 +24953,10 @@ public:
          case 9:
             return BitExtractControl(0x1178, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn8() not defined for this board version");
       };
    };
-   unsigned int SetTrgStatePtrn8(unsigned int value)
+   void SetTrgStatePtrn8(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24934,7 +24965,7 @@ public:
          case 9:
             return SetRegMask(0x1178, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgStatePtrn8() not defined for this board version");
       };
    };
    unsigned int GetTrgStatePtrn8Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24950,7 +24981,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1178;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn8Loc() not defined for this board version");
       };
    };
 
@@ -24964,10 +24995,10 @@ public:
          case 9:
             return BitExtractControl(0x1180, 0x0007FFFF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn9() not defined for this board version");
       };
    };
-   unsigned int SetTrgStatePtrn9(unsigned int value)
+   void SetTrgStatePtrn9(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -24976,7 +25007,7 @@ public:
          case 9:
             return SetRegMask(0x1180, 0x0007FFFF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgStatePtrn9() not defined for this board version");
       };
    };
    unsigned int GetTrgStatePtrn9Loc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -24992,7 +25023,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1180;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgStatePtrn9Loc() not defined for this board version");
       };
    };
 
@@ -25005,10 +25036,10 @@ public:
          case 9:
             return BitExtractControl(0x1014, 0x08000000, 27);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgTxEn() not defined for this board version");
       };
    };
-   unsigned int SetTrgTxEn(unsigned int value)
+   void SetTrgTxEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -25016,7 +25047,7 @@ public:
          case 9:
             return SetRegMask(0x1014, 0x08000000, 27, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgTxEn() not defined for this board version");
       };
    };
    unsigned int GetTrgTxEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -25029,7 +25060,7 @@ public:
             if(BitOfs) *BitOfs = 27;
             return 0x1014;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgTxEnLoc() not defined for this board version");
       };
    };
 
@@ -25042,10 +25073,10 @@ public:
          case 9:
             return BitExtractControl(0x1034, 0x000003FF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgTxSamples() not defined for this board version");
       };
    };
-   unsigned int SetTrgTxSamples(unsigned int value)
+   void SetTrgTxSamples(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -25053,7 +25084,7 @@ public:
          case 9:
             return SetRegMask(0x1034, 0x000003FF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrgTxSamples() not defined for this board version");
       };
    };
    unsigned int GetTrgTxSamplesLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -25066,7 +25097,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1034;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrgTxSamplesLoc() not defined for this board version");
       };
    };
 
@@ -25080,7 +25111,7 @@ public:
          case 9:
             return BitExtractStatus(0x0134, 0x00000010, 4);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTriggerDaqClkCalMod() not defined for this board version");
       };
    };
    unsigned int GetTriggerDaqClkCalModLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -25096,7 +25127,7 @@ public:
             if(BitOfs) *BitOfs = 4;
             return 0x0134;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTriggerDaqClkCalModLoc() not defined for this board version");
       };
    };
 
@@ -25110,10 +25141,10 @@ public:
          case 9:
             return BitExtractControl(0x1124, 0x000000FF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTriggerDelay() not defined for this board version");
       };
    };
-   unsigned int SetTriggerDelay(unsigned int value)
+   void SetTriggerDelay(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -25122,7 +25153,7 @@ public:
          case 9:
             return SetRegMask(0x1124, 0x000000FF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTriggerDelay() not defined for this board version");
       };
    };
    unsigned int GetTriggerDelayLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -25138,7 +25169,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x1124;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTriggerDelayLoc() not defined for this board version");
       };
    };
 
@@ -25152,10 +25183,10 @@ public:
          case 9:
             return BitExtractControl(0x1124, 0x00000700, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTriggerOutPulseLength() not defined for this board version");
       };
    };
-   unsigned int SetTriggerOutPulseLength(unsigned int value)
+   void SetTriggerOutPulseLength(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -25164,7 +25195,7 @@ public:
          case 9:
             return SetRegMask(0x1124, 0x00000700, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTriggerOutPulseLength() not defined for this board version");
       };
    };
    unsigned int GetTriggerOutPulseLengthLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -25180,7 +25211,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x1124;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTriggerOutPulseLengthLoc() not defined for this board version");
       };
    };
 
@@ -25193,10 +25224,10 @@ public:
          case 9:
             return BitExtractControl(0x100C, 0x01000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrigDaqClkCalChk() not defined for this board version");
       };
    };
-   unsigned int SetTrigDaqClkCalChk(unsigned int value)
+   void SetTrigDaqClkCalChk(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -25204,7 +25235,7 @@ public:
          case 9:
             return SetRegMask(0x100C, 0x01000000, 24, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetTrigDaqClkCalChk() not defined for this board version");
       };
    };
    unsigned int GetTrigDaqClkCalChkLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -25217,7 +25248,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x100C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTrigDaqClkCalChkLoc() not defined for this board version");
       };
    };
 
@@ -25230,10 +25261,10 @@ public:
          case 9:
             return BitExtractControl(0x1004, 0x3F000000, 24);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetValidDelayAdc() not defined for this board version");
       };
    };
-   unsigned int SetValidDelayAdc(unsigned int value)
+   void SetValidDelayAdc(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -25241,7 +25272,7 @@ public:
          case 9:
             return SetRegMask(0x1004, 0x3F000000, 24, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetValidDelayAdc() not defined for this board version");
       };
    };
    unsigned int GetValidDelayAdcLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -25254,7 +25285,7 @@ public:
             if(BitOfs) *BitOfs = 24;
             return 0x1004;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetValidDelayAdcLoc() not defined for this board version");
       };
    };
 
@@ -25267,7 +25298,7 @@ public:
          case 9:
             return BitExtractStatus(0x0000, 0x00FF0000, 16);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetVendorId() not defined for this board version");
       };
    };
    unsigned int GetVendorIdLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -25280,7 +25311,7 @@ public:
             if(BitOfs) *BitOfs = 16;
             return 0x0000;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetVendorIdLoc() not defined for this board version");
       };
    };
 
@@ -25293,10 +25324,10 @@ public:
          case 9:
             return BitExtractControl(0x1040, 0x00000008, 3);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetWdPkgrRst() not defined for this board version");
       };
    };
-   unsigned int SetWdPkgrRst(unsigned int value)
+   void SetWdPkgrRst(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -25304,7 +25335,7 @@ public:
          case 9:
             return SetRegMask(0x1040, 0x00000008, 3, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetWdPkgrRst() not defined for this board version");
       };
    };
    unsigned int GetWdPkgrRstLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -25317,7 +25348,7 @@ public:
             if(BitOfs) *BitOfs = 3;
             return 0x1040;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetWdPkgrRstLoc() not defined for this board version");
       };
    };
 
@@ -25330,10 +25361,10 @@ public:
          case 9:
             return BitExtractControl(0x103C, 0x00000100, 8);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetZeroSuprEn() not defined for this board version");
       };
    };
-   unsigned int SetZeroSuprEn(unsigned int value)
+   void SetZeroSuprEn(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -25341,7 +25372,7 @@ public:
          case 9:
             return SetRegMask(0x103C, 0x00000100, 8, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetZeroSuprEn() not defined for this board version");
       };
    };
    unsigned int GetZeroSuprEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -25354,7 +25385,7 @@ public:
             if(BitOfs) *BitOfs = 8;
             return 0x103C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetZeroSuprEnLoc() not defined for this board version");
       };
    };
 
@@ -25367,10 +25398,10 @@ public:
          case 9:
             return BitExtractControl(0x103C, 0x000000FF, 0);
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetZeroSuprWindow() not defined for this board version");
       };
    };
-   unsigned int SetZeroSuprWindow(unsigned int value)
+   void SetZeroSuprWindow(unsigned int value)
    {
       switch(this->mVersion)
       {
@@ -25378,7 +25409,7 @@ public:
          case 9:
             return SetRegMask(0x103C, 0x000000FF, 0, value);
          default:
-            throw 20;
+            throw std::invalid_argument("Function SetZeroSuprWindow() not defined for this board version");
       };
    };
    unsigned int GetZeroSuprWindowLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
@@ -25391,7 +25422,7 @@ public:
             if(BitOfs) *BitOfs = 0;
             return 0x103C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetZeroSuprWindowLoc() not defined for this board version");
       };
    };
 
@@ -25411,7 +25442,7 @@ public:
             if(GrpLen) *GrpLen = 4;
             return 0x1114;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdcGroupParam() not defined for this board version");
       };
    };
 
@@ -25427,7 +25458,7 @@ public:
             if(GrpLen) *GrpLen = 20;
             return 0x11CC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgCtrlGroupParam() not defined for this board version");
       };
    };
 
@@ -25443,7 +25474,7 @@ public:
             if(GrpLen) *GrpLen = 5;
             return 0x0110;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetAdvTrgStatGroupParam() not defined for this board version");
       };
    };
 
@@ -25457,7 +25488,7 @@ public:
             if(GrpLen) *GrpLen = 12;
             return 0x1048;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetDacGroupParam() not defined for this board version");
       };
    };
 
@@ -25471,7 +25502,7 @@ public:
             if(GrpLen) *GrpLen = 8;
             return 0x1078;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetFeCfgGroupParam() not defined for this board version");
       };
    };
 
@@ -25487,7 +25518,7 @@ public:
             if(GrpLen) *GrpLen = 4;
             return 0x008C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHfTempGroupParam() not defined for this board version");
       };
    };
 
@@ -25503,7 +25534,7 @@ public:
             if(GrpLen) *GrpLen = 16;
             return 0x0048;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvIMeasGroupParam() not defined for this board version");
       };
    };
 
@@ -25517,7 +25548,7 @@ public:
             if(GrpLen) *GrpLen = 16;
             return 0x1098;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetHvUTargetGroupParam() not defined for this board version");
       };
    };
 
@@ -25531,7 +25562,7 @@ public:
             if(GrpLen) *GrpLen = 14;
             return 0x10DC;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetLmkGroupParam() not defined for this board version");
       };
    };
 
@@ -25547,7 +25578,7 @@ public:
             if(GrpLen) *GrpLen = 19;
             return 0x009C;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetScalerGroupParam() not defined for this board version");
       };
    };
 
@@ -25563,7 +25594,7 @@ public:
             if(GrpLen) *GrpLen = 42;
             return 0x1124;
          default:
-            throw 20;
+            throw std::invalid_argument("Function GetTriggerGroupParam() not defined for this board version");
       };
    };
 
