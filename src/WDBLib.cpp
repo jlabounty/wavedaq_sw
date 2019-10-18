@@ -43,7 +43,6 @@
 #endif
 
 #include "WDBLib.h"
-#include "register_map_wd2.h"
 #include "WDBReg.h"
 
 #define WD2_USE_UDP_BIN
@@ -76,7 +75,7 @@ T access_as(U *p) {
 
 //--------------------------------------------------------------------
 
-WDB::WDB(std::string name, bool verbose) {
+WDB::WDB(std::string name, bool verbose) : WDBREG() {
    mWDBName = name;
    mPrompt = "";
    mVerbose = verbose;
@@ -87,19 +86,19 @@ WDB::WDB(std::string name, bool verbose) {
    mTimingReferenceSignal = cTimingReferenceOff;
 
    if (mDemoMode) {
-      for (auto i = 0; i < REG_NR_OF_CTRL_REGS; i++)
-         this->creg[i] = ctrl_reg_default[i];
-      for (auto i = 0; i < REG_NR_OF_STAT_REGS; i++)
+      for (auto i = 0; i < GetNrOfCtrlRegs(); i++)
+         this->creg[i] = 0;
+      for (auto i = 0; i < GetNrOfStatRegs(); i++)
          this->sreg[i] = 0;
       // set some meaningful values in demo mode to make wds happy
-      this->sreg[(WD2_DRS_SAMPLE_FREQ_REG & 0x0FFF) / 4] = 5120;
-      this->sreg[(WD2_ADC_SAMPLE_FREQ_REG & 0x0FFF) / 4] = 80;
+      this->sreg[(GetDrsSampleFreqLoc() & 0x0FFF) / 4] = 5120;
+      this->sreg[(GetAdcSampleFreqLoc() & 0x0FFF) / 4] = 80;
    }
 }
 
 //--------------------------------------------------------------------
 
-WDB::WDB(std::string name, int slot, bool verbose) {
+WDB::WDB(std::string name, int slot, bool verbose) : WDBREG() {
    mWDBName = "";
    mDCBName = name;
    mPrompt = "";
@@ -528,10 +527,10 @@ void WDB::Connect() {
    SendUDP("dbglvl none");
 
    // check firmware compatibility level
-   ReceiveStatusRegister(WD2_BOARD_REVISION_REG);
-   ReceiveStatusRegister(WD2_FW_COMPAT_LEVEL_REG);
-   ReceiveStatusRegister(WD2_REG_LAYOUT_COMP_LEVEL_REG);
-   ReceiveStatusRegister(WD2_REG_PROT_VER);
+   ReceiveStatusRegister(GetBoardRevisionLoc());
+   ReceiveStatusRegister(GetFwCompatLevelLoc());
+   ReceiveStatusRegister(GetRegLayoutCompLevelLoc());
+   ReceiveStatusRegister(GetProtocolVersionLoc());
 
    if (GetBoardRevision() + 'A' == 'E' || GetBoardRevision() + 'A' == 'F') {
       if (GetFwCompatLevel() < cRequiredFwCompatLevel2F) {
@@ -652,7 +651,7 @@ void WDB::ReceiveControlRegisters(unsigned int index, unsigned int nReg) {
    }
 
 #ifdef WD2_USE_UDP_BIN
-   std::vector<unsigned int> result = ReadUDP(WD2_REG_WDB_LOC + index * 4, nReg);
+   std::vector<unsigned int> result = ReadUDP(GetSlotIdLoc() + index * 4, nReg);
    assert(result.size() == nReg);
    for (unsigned int i = 0; i < nReg; i++)
       this->creg[index + i] = result[i];
@@ -683,7 +682,7 @@ void WDB::ReceiveStatusRegisters(unsigned int index, unsigned int nReg) {
    }
 
 #ifdef WD2_USE_UDP_BIN
-   std::vector<unsigned int> result = ReadUDP(WD2_STAT_REG_BASE_OFS + index * 4, nReg);
+   std::vector<unsigned int> result = ReadUDP(GetBoardMagicLoc() + index * 4, nReg);
    assert(result.size() == nReg);
    for (unsigned int i = 0; i < nReg; i++)
       this->sreg[index + i] = result[i];
@@ -753,17 +752,20 @@ void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, uns
 }
 
 void WDB::SendControlRegisters() {
+
+   std::cout << "Test me !!!!!!! " << std::endl;
+
    // first half until HV
    std::vector<unsigned int> v;
-   for (int i = 0; i < (WD2_HV_U_TARGET_0_REG - WD2_CTRL_REG_BASE_OFS) / 4; i++)
+   for (int i = 0; i < (GetHvUTarget0Loc() - GetBoardMagicLoc()) / 4; i++)
       v.push_back(this->creg[i]);
-   WriteUDP(WD2_CTRL_REG_BASE_OFS, v);
+   WriteUDP(GetBoardMagicLoc(), v);
 
    // second half after HV
    v.clear();
-   for (int i = (WD2_REG_LMK_0 - WD2_CTRL_REG_BASE_OFS) / 4; i < REG_NR_OF_CTRL_REGS; i++)
+   for (int i = (GetLmk0ResetLoc() - GetBoardMagicLoc()) / 4; i < GetNrOfCtrlRegs(); i++)
       v.push_back(this->creg[i]);
-   WriteUDP(WD2_REG_LMK_0, v);
+   WriteUDP(GetLmk0ResetLoc(), v);
 }
 
 //-- Status registers ------------------------------------------------
@@ -844,7 +846,7 @@ float WDB::GetTemperatureDegree(bool refresh)
       return 37.5;
 
    if (refresh)
-      ReceiveStatusRegister(WD2_TEMPERATURE_REG);
+      ReceiveStatusRegister(GetTemperatureLoc());
    float temp = GetTemperature() * 0.0625;
    temp = std::roundf(temp * 10) / 10.0f;
    return temp;
@@ -856,29 +858,22 @@ unsigned int WDB::GetPllLock(bool refresh)
    if (mDemoMode)
       return 0x1FF;
 
-   if (refresh)
-      ReceiveStatusRegister(WD2_SYS_DCM_LOCK_REG);
-   unsigned int mask =
-           GetSysDcmLock() << WD2_SYS_DCM_LOCK_OFS |
-           GetDaqPllLock() << WD2_DAQ_PLL_LOCK_OFS |
-           GetOserdesPllLockDcb() << WD2_OSERDES_PLL_LOCK_DCB_OFS |
-           GetOserdesPllLockTcb() << WD2_OSERDES_PLL_LOCK_TCB_OFS |
-           GetIserdesPllLock0() << WD2_ISERDES_PLL_LOCK_0_OFS |
-           GetIserdesPllLock1() << WD2_ISERDES_PLL_LOCK_1_OFS |
-           GetDrsPllLock0() << WD2_DRS_PLL_LOCK_0_OFS |
-           GetDrsPllLock1() << WD2_DRS_PLL_LOCK_1_OFS |
-           GetLmkPllLock() << WD2_LMK_PLL_LOCK_OFS;
+   std::cout << "Test me !!!!!!" << std::endl;
 
-   return mask;
+   if (refresh)
+      ReceiveStatusRegister(GetSysDcmLockLoc());
+
+   return this->sreg[GetSysDcmLockLoc()];
 }
 
 void WDB::SetDrsSampleFreq(unsigned int f)
 // sampling frequency in MHz
 {
    if (mDemoMode) {
-      int index = (WD2_DRS_SAMPLE_FREQ_REG & 0x0FFF) / 4;
+      unsigned int mask, ofs;
+      int index = (GetDrsSampleFreqLoc(&mask, &ofs) & 0x0FFF) / 4;
       unsigned int r = this->creg[index];
-      bitReplace(r, WD2_DRS_SAMPLE_FREQ_MASK, WD2_DRS_SAMPLE_FREQ_OFS, f);
+      bitReplace(r, mask, ofs, f);
       this->sreg[index] = r;
       return;
    }
@@ -901,18 +896,18 @@ void WDB::SetDrsSampleFreq(unsigned int f)
    SetAdcIfRst(0);
 
    // read back new sampling frquency in status register
-   ReceiveStatusRegister(WD2_DRS_SAMPLE_FREQ_REG);
+   ReceiveStatusRegister(GetDrsSampleFreqLoc());
 }
 
 void WDB::GetScalers(std::vector<unsigned long long> &scaler, bool refresh) {
    if (refresh)
-      ReceiveStatusRegisters((WD2_SCALER_0_REG & 0x0FFF) / 4, 19);
+      ReceiveStatusRegisters(GetScaler0Loc() / 4, 19);
 
    // decode scalers according to their bit width
    int adr = 0;
    unsigned long long v;
    for (unsigned int i = 0; i < 19 ; i++) {
-      v = this->sreg[WD2_SCALER_0_REG / 4 + i];
+      v = this->sreg[GetScaler0Loc() / 4 + i];
 
       if (scaler.size() < i + 1)
          scaler.push_back(v);
@@ -923,25 +918,25 @@ void WDB::GetScalers(std::vector<unsigned long long> &scaler, bool refresh) {
 
 void WDB::GetHVCurrents(std::vector<float> &current, bool refresh) {
    if (refresh)
-      ReceiveStatusRegisters((WD2_HV_I_MEAS_0_REG & 0x0FFF) / 4, 21);
+      ReceiveStatusRegisters((GetHvIMeas0Loc()) / 4, 21);
 
    for (unsigned int i = 0; i < 16; i++)
-      current.push_back(access_as<float>(&this->sreg[(WD2_HV_I_MEAS_0_REG & 0x0FFF) / 4 + i]));
+      current.push_back(access_as<float>(&this->sreg[GetHvIMeas0Loc() / 4 + i]));
 }
 
 void WDB::GetHVBaseVoltage(float &voltage, bool refresh) {
    if (refresh)
-      ReceiveStatusRegisters((WD2_HV_U_BASE_MEAS_REG & 0x0FFFF) / 4, 1);
+      ReceiveStatusRegisters(GetHvUBaseMeasLoc() / 4, 1);
 
-   voltage = access_as<float>(&this->sreg[(WD2_HV_U_BASE_MEAS_REG & 0x0FFFF) / 4]);
+   voltage = access_as<float>(&this->sreg[GetHvUBaseMeasLoc() / 4]);
 }
 
 void WDB::Get1wireTemperatures(std::vector<float> &temp, bool refresh) {
    if (refresh)
-      ReceiveStatusRegisters((WD2_HV_TEMP_0_REG & 0x0FFF) / 4, 4);
+      ReceiveStatusRegisters(GetHvTemp0Loc() / 4, 4);
 
    for (unsigned int i = 0; i < 4; i++)
-      temp.push_back(access_as<float>(&this->sreg[(WD2_HV_TEMP_0_REG & 0x0FFF) / 4 + i]));
+      temp.push_back(access_as<float>(&this->sreg[GetHvTemp0Loc() / 4 + i]));
 }
 
 
@@ -1224,15 +1219,6 @@ void WDB::SetDacBiasV(float v) {
    SetDac0ChH(d);
 }
 
-void WDB::SetLeadTrailEdgeSel(unsigned int value) {
-   // 0: leading edge, 1: trailing edge
-   SetRegMask(WD2_LEAD_TRAIL_EDGE_SEL_REG, WD2_LEAD_TRAIL_EDGE_SEL_MASK, WD2_LEAD_TRAIL_EDGE_SEL_OFS, value);
-}
-
-unsigned int WDB::GetLeadTrailEdgeSel() {
-   return BitExtractControl(WD2_LEAD_TRAIL_EDGE_SEL_REG, WD2_LEAD_TRAIL_EDGE_SEL_MASK, WD2_LEAD_TRAIL_EDGE_SEL_OFS);
-}
-
 float WDB::GetDacTriggerLevelV(int chn) {
    unsigned int d;
 
@@ -1240,10 +1226,13 @@ float WDB::GetDacTriggerLevelV(int chn) {
       return 0;
 
    assert(chn < 16);
+
+   unsigned int reg, mask, ofs;
    if (chn % 2 == 0)
-      d = BitExtractControl(WD2_DAC1_CH_A_REG + (chn / 2) * 4, WD2_DAC1_CH_A_MASK, WD2_DAC1_CH_A_OFS);
+      reg = GetDac1ChALoc(&mask, &ofs);
    else
-      d = BitExtractControl(WD2_DAC1_CH_A_REG + (chn / 2) * 4, WD2_DAC1_CH_B_MASK, WD2_DAC1_CH_B_OFS);
+      reg = GetDac1ChBLoc(&mask, &ofs);
+   d = BitExtractControl(reg + (chn / 2) * 4, mask, ofs);
 
    // convert to Volts taking WDB comparator offset into account
    float v = ((d / 65535.0 * 2500) - 900) / 500.0;
@@ -1260,22 +1249,24 @@ void WDB::SetDacTriggerLevelV(int chn, float v) {
    assert(chn < 16);
    if (chn == -1) {
       std::vector<unsigned int> regs;
+      unsigned int reg, mask, ofs;
       bool blocked = GetSendBlock();
       if (!blocked)
          SetSendBlock(true);
       for (chn = 0; chn < 16; chn++) {
          if (chn % 2 == 0)
-            SetRegMask(WD2_DAC1_CH_A_REG + (chn / 2) * 4, WD2_DAC1_CH_A_MASK, WD2_DAC1_CH_A_OFS, d);
+            reg = GetDac1ChALoc(&mask, &ofs);
          else
-            SetRegMask(WD2_DAC1_CH_A_REG + (chn / 2) * 4, WD2_DAC1_CH_B_MASK, WD2_DAC1_CH_B_OFS, d);
+            reg = GetDac1ChBLoc(&mask, &ofs);
       }
+      SetRegMask(reg + (chn / 2) * 4, mask, ofs, d);
       if (!blocked)
          SetSendBlock(false);
       for (chn = 0; chn < 8; chn++)
-         regs.push_back(creg[(WD2_DAC1_CH_A_REG & 0x0FFF) / 4 + chn]);
+         regs.push_back(creg[GetDac1ChALoc() / 4 + chn]);
 #ifdef WD2_USE_UDP_BIN
       if (!mDemoMode && !mSendBlocked)
-         WriteUDP(WD2_DAC1_CH_A_REG, regs);
+         WriteUDP(GetDac1ChALoc(), regs);
 #else
       for (chn=0 ; chn<8 ; chn++) {
          std::ostringstream req;
@@ -1286,10 +1277,12 @@ void WDB::SetDacTriggerLevelV(int chn, float v) {
 #endif
 
    } else {
+      unsigned int reg, mask, ofs;
       if (chn % 2 == 0)
-         SetRegMask(WD2_DAC1_CH_A_REG + (chn / 2) * 4, WD2_DAC1_CH_A_MASK, WD2_DAC1_CH_A_OFS, d);
+         GetDac1ChALoc();
       else
-         SetRegMask(WD2_DAC1_CH_A_REG + (chn / 2) * 4, WD2_DAC1_CH_B_MASK, WD2_DAC1_CH_B_OFS, d);
+         GetDac1ChBLoc();
+      SetRegMask(reg + chn/2 * 4, mask, ofs);
    }
 }
 
