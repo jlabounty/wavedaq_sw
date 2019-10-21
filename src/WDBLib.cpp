@@ -526,6 +526,13 @@ void WDB::Connect() {
    // set dbglevel none
    SendUDP("dbglvl none");
 
+   // check register layout
+   auto result = ReadUDP(0x0004, 1);
+   unsigned int version = (result[0] & 0xFFFF);
+   SetVersion(version);
+   this->sreg.resize(GetNrOfStatRegs());
+   this->creg.resize(GetNrOfCtrlRegs());
+
    // check firmware compatibility level
    ReceiveStatusRegister(GetBoardRevisionLoc());
    ReceiveStatusRegister(GetFwCompatLevelLoc());
@@ -644,9 +651,11 @@ void WDB::bitReplace(unsigned int &reg, unsigned int mask, unsigned int ofs, uns
 //--------------------------------------------------------------------
 
 void WDB::ReceiveControlRegisters(unsigned int index, unsigned int nReg) {
+   if (nReg == 0)
+      nReg = GetNrOfCtrlRegs();
    if (mDemoMode) {
-      //for (auto i=index ; i<index+nReg ; i++)
-      //   this->creg[i] = ctrl_reg_default[i];
+      for (auto i=index ; i<index+nReg ; i++)
+         this->creg[i] = 0;
       return;
    }
 
@@ -675,9 +684,11 @@ void WDB::ReceiveControlRegisters(unsigned int index, unsigned int nReg) {
 }
 
 void WDB::ReceiveStatusRegisters(unsigned int index, unsigned int nReg) {
+   if (nReg == 0)
+      nReg = GetNrOfStatRegs();
    if (mDemoMode) {
-      //for (auto i=index ; i<index+nReg ; i++)
-      //   this->sreg[i] = 0;
+      for (auto i=index ; i<index+nReg ; i++)
+         this->sreg[i] = 0;
       return;
    }
 
@@ -1279,10 +1290,10 @@ void WDB::SetDacTriggerLevelV(int chn, float v) {
    } else {
       unsigned int reg, mask, ofs;
       if (chn % 2 == 0)
-         GetDac1ChALoc();
+         GetDac1ChALoc(&mask, &ofs);
       else
-         GetDac1ChBLoc();
-      SetRegMask(reg + chn/2 * 4, mask, ofs);
+         GetDac1ChBLoc(&mask, &ofs);
+      SetRegMask(reg + chn/2 * 4, mask, ofs, d);
    }
 }
 
@@ -1290,9 +1301,9 @@ bool WDB::GetFePzc(int chn)
 // pole-zero canellation
 {
    assert(chn < 16);
-   auto rofs = WD2_FE0_PZC_EN_REG + (chn / 2) * 4;
-   auto mask = (chn % 2 == 0) ? WD2_FE0_PZC_EN_MASK : WD2_FE1_PZC_EN_MASK;
-   auto ofs = (chn % 2 == 0) ? WD2_FE0_PZC_EN_OFS : WD2_FE1_PZC_EN_OFS;
+   unsigned int mask, ofs;
+   auto rofs = GetFe0PzcEnLoc() + (chn / 2) * 4;
+   if (chn % 2 == 0) GetFe0PzcEnLoc(&mask, &ofs); else GetFe1PzcEnLoc(&mask, &ofs);
    return BitExtractControl(rofs, mask, ofs) > 0;
 }
 
@@ -1303,9 +1314,9 @@ void WDB::SetFePzc(int chn, bool v) {
       return;
    }
    assert(chn < 16);
-   auto rofs = WD2_FE0_PZC_EN_REG + (chn / 2) * 4;
-   auto mask = (chn % 2 == 0) ? WD2_FE0_PZC_EN_MASK : WD2_FE1_PZC_EN_MASK;
-   auto ofs = (chn % 2 == 0) ? WD2_FE0_PZC_EN_OFS : WD2_FE1_PZC_EN_OFS;
+   unsigned int mask, ofs;
+   auto rofs = GetFe0PzcEnLoc() + (chn / 2) * 4;
+   if (chn % 2 == 0) GetFe0PzcEnLoc(&mask, &ofs); else GetFe1PzcEnLoc(&mask, &ofs);
    SetRegMask(rofs, mask, ofs, v ? 1 : 0);
 }
 
@@ -1313,17 +1324,17 @@ unsigned int WDB::GetFeAmp2Comp(int chn)
 // amplifier 2 compensation enable
 {
    assert(chn < 16);
-   auto rofs = WD2_FE0_AMPLIFIER2_COMP_EN_REG + (chn / 2) * 4;
-   auto mask = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER2_COMP_EN_MASK : WD2_FE1_AMPLIFIER2_COMP_EN_MASK;
-   auto ofs = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER2_COMP_EN_OFS : WD2_FE1_AMPLIFIER2_COMP_EN_OFS;
+   unsigned int mask, ofs;
+   auto rofs = GetFe0Amplifier1CompEnLoc() + (chn / 2) * 4;
+   if (chn % 2 == 0) GetFe0Amplifier1CompEnLoc(&mask, &ofs); else GetFe1Amplifier1CompEnLoc(&mask, &ofs);
    return BitExtractControl(rofs, mask, ofs);
 }
 
 void WDB::SetFeAmp2Comp(int chn, unsigned int v) {
    assert(chn < 16);
-   auto rofs = WD2_FE0_AMPLIFIER2_COMP_EN_REG + (chn / 2) * 4;
-   auto mask = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER2_COMP_EN_MASK : WD2_FE1_AMPLIFIER2_COMP_EN_MASK;
-   auto ofs = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER2_COMP_EN_OFS : WD2_FE1_AMPLIFIER2_COMP_EN_OFS;
+   unsigned int mask, ofs;
+   auto rofs = GetFe0Amplifier2CompEnLoc() + (chn / 2) * 4;
+   if (chn % 2 == 0) GetFe0Amplifier2CompEnLoc(&mask, &ofs); else GetFe1Amplifier2CompEnLoc(&mask, &ofs);
    SetRegMask(rofs, mask, ofs, v);
 }
 
@@ -1331,17 +1342,17 @@ unsigned int WDB::GetFeAmp2Enable(int chn)
 // amplifier 2 enable (gain 10)
 {
    assert(chn < 16);
-   auto rofs = WD2_FE0_AMPLIFIER2_EN_REG + (chn / 2) * 4;
-   auto mask = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER2_EN_MASK : WD2_FE1_AMPLIFIER2_EN_MASK;
-   auto ofs = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER2_EN_OFS : WD2_FE1_AMPLIFIER2_EN_OFS;
+   unsigned int mask, ofs;
+   auto rofs = GetFe0Amplifier2EnLoc() + (chn / 2) * 4;
+   if (chn % 2 == 0) GetFe0Amplifier2EnLoc(&mask, &ofs); else GetFe1Amplifier2EnLoc(&mask, &ofs);
    return BitExtractControl(rofs, mask, ofs);
 }
 
 void WDB::SetFeAmp2Enable(int chn, unsigned int v) {
    assert(chn < 16);
-   auto rofs = WD2_FE0_AMPLIFIER2_EN_REG + (chn / 2) * 4;
-   auto mask = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER2_EN_MASK : WD2_FE1_AMPLIFIER2_EN_MASK;
-   auto ofs = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER2_EN_OFS : WD2_FE1_AMPLIFIER2_EN_OFS;
+   unsigned int mask, ofs;
+   auto rofs = GetFe0Amplifier2EnLoc() + (chn / 2) * 4;
+   if (chn % 2 == 0) GetFe0Amplifier2EnLoc(&mask, &ofs); else GetFe1Amplifier2EnLoc(&mask, &ofs);
    SetRegMask(rofs, mask, ofs, v);
 }
 
@@ -1349,17 +1360,17 @@ unsigned int WDB::GetFeAmp1Comp(int chn)
 // amplifier 1 compensation enable
 {
    assert(chn < 16);
-   auto rofs = WD2_FE0_AMPLIFIER1_COMP_EN_REG + (chn / 2) * 4;
-   auto mask = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER1_COMP_EN_MASK : WD2_FE1_AMPLIFIER1_COMP_EN_MASK;
-   auto ofs = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER1_COMP_EN_OFS : WD2_FE1_AMPLIFIER1_COMP_EN_OFS;
+   unsigned int mask, ofs;
+   auto rofs = GetFe0Amplifier1CompEnLoc() + (chn / 2) * 4;
+   if (chn % 2 == 0) GetFe0Amplifier1CompEnLoc(&mask, &ofs); else GetFe1Amplifier1CompEnLoc(&mask, &ofs);
    return BitExtractControl(rofs, mask, ofs);
 }
 
 void WDB::SetFeAmp1Comp(int chn, unsigned int v) {
    assert(chn < 16);
-   auto rofs = WD2_FE0_AMPLIFIER1_COMP_EN_REG + (chn / 2) * 4;
-   auto mask = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER1_COMP_EN_MASK : WD2_FE1_AMPLIFIER1_COMP_EN_MASK;
-   auto ofs = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER1_COMP_EN_OFS : WD2_FE1_AMPLIFIER1_COMP_EN_OFS;
+   unsigned int mask, ofs;
+   auto rofs = GetFe0Amplifier1CompEnLoc() + (chn / 2) * 4;
+   if (chn % 2 == 0) GetFe0Amplifier1CompEnLoc(&mask, &ofs); else GetFe1Amplifier1CompEnLoc(&mask, &ofs);
    SetRegMask(rofs, mask, ofs, v);
 }
 
@@ -1367,17 +1378,17 @@ unsigned int WDB::GetFeAmp1Enable(int chn)
 // amplifier 1 enable (gain 10)
 {
    assert(chn < 16);
-   auto rofs = WD2_FE0_AMPLIFIER1_EN_REG + (chn / 2) * 4;
-   auto mask = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER1_EN_MASK : WD2_FE1_AMPLIFIER1_EN_MASK;
-   auto ofs = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER1_EN_OFS : WD2_FE1_AMPLIFIER1_EN_OFS;
+   unsigned int mask, ofs;
+   auto rofs = GetFe0Amplifier1EnLoc() + (chn / 2) * 4;
+   if (chn % 2 == 0) GetFe0Amplifier1EnLoc(&mask, &ofs); else GetFe1Amplifier1EnLoc(&mask, &ofs);
    return BitExtractControl(rofs, mask, ofs);
 }
 
 void WDB::SetFeAmp1Enable(int chn, unsigned int v) {
    assert(chn < 16);
-   auto rofs = WD2_FE0_AMPLIFIER1_EN_REG + (chn / 2) * 4;
-   auto mask = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER1_EN_MASK : WD2_FE1_AMPLIFIER1_EN_MASK;
-   auto ofs = (chn % 2 == 0) ? WD2_FE0_AMPLIFIER1_EN_OFS : WD2_FE1_AMPLIFIER1_EN_OFS;
+   unsigned int mask, ofs;
+   auto rofs = GetFe0Amplifier1EnLoc() + (chn / 2) * 4;
+   if (chn % 2 == 0) GetFe0Amplifier1EnLoc(&mask, &ofs); else GetFe1Amplifier1EnLoc(&mask, &ofs);
    SetRegMask(rofs, mask, ofs, v);
 }
 
@@ -1385,17 +1396,17 @@ unsigned int WDB::GetFeAttenuation(int chn)
 // attenuation: 0 = 0dB / 1 = 6dB / 2 = 12dB / 8 = 18dB
 {
    assert(chn < 16);
-   auto rofs = WD2_FE0_ATTENUATION_REG + (chn / 2) * 4;
-   auto mask = (chn % 2 == 0) ? WD2_FE0_ATTENUATION_MASK : WD2_FE1_ATTENUATION_MASK;
-   auto ofs = (chn % 2 == 0) ? WD2_FE0_ATTENUATION_OFS : WD2_FE1_ATTENUATION_OFS;
+   unsigned int mask, ofs;
+   auto rofs = GetFe0AttenuationLoc() + (chn / 2) * 4;
+   if (chn % 2 == 0) GetFe0AttenuationLoc(&mask, &ofs); else GetFe1AttenuationLoc(&mask, &ofs);
    return BitExtractControl(rofs, mask, ofs);
 }
 
 void WDB::SetFeAttenuation(int chn, unsigned int v) {
    assert(chn < 16);
-   auto rofs = WD2_FE0_ATTENUATION_REG + (chn / 2) * 4;
-   auto mask = (chn % 2 == 0) ? WD2_FE0_ATTENUATION_MASK : WD2_FE1_ATTENUATION_MASK;
-   auto ofs = (chn % 2 == 0) ? WD2_FE0_ATTENUATION_OFS : WD2_FE1_ATTENUATION_OFS;
+   unsigned int mask, ofs;
+   auto rofs = GetFe0AttenuationLoc() + (chn / 2) * 4;
+   if (chn % 2 == 0) GetFe0AttenuationLoc(&mask, &ofs); else GetFe1AttenuationLoc(&mask, &ofs);
    SetRegMask(rofs, mask, ofs, v);
 }
 
@@ -1467,9 +1478,9 @@ unsigned int WDB::GetFeMux(int chn)
 // multiplexer: 0 = next channel / 1 = previous channel / 2 = input / 3 = cal source
 {
    assert(chn < 16);
-   auto rofs = WD2_FE0_MUX_REG + (chn / 2) * 4;
-   auto mask = (chn % 2 == 0) ? WD2_FE0_MUX_MASK : WD2_FE1_MUX_MASK;
-   auto ofs = (chn % 2 == 0) ? WD2_FE0_MUX_OFS : WD2_FE1_MUX_OFS;
+   unsigned int mask, ofs;
+   auto rofs = GetFe0MuxLoc() + (chn / 2) * 4;
+   if (chn % 2 == 0) GetFe0MuxLoc(&mask, &ofs); else GetFe1MuxLoc(&mask, &ofs);
    return BitExtractControl(rofs, mask, ofs);
 }
 
@@ -1478,16 +1489,16 @@ void WDB::SetFeMux(int chn, unsigned int v) {
    if (chn == -1) {
       std::vector<unsigned int> regs;
       for (chn = 0; chn < 16; chn++) {
-         auto rofs = WD2_FE0_MUX_REG + (chn / 2) * 4;
-         auto mask = (chn % 2 == 0) ? WD2_FE0_MUX_MASK : WD2_FE1_MUX_MASK;
-         auto ofs = (chn % 2 == 0) ? WD2_FE0_MUX_OFS : WD2_FE1_MUX_OFS;
+         unsigned int mask, ofs;
+         auto rofs = GetFe0MuxLoc() + (chn / 2) * 4;
+         if (chn % 2 == 0) GetFe0MuxLoc(&mask, &ofs); else GetFe1MuxLoc(&mask, &ofs);
          SetRegMask(rofs, mask, ofs, v);
       }
       for (chn = 0; chn < 8; chn++)
-         regs.push_back(creg[(WD2_FE0_MUX_REG & 0x0FFF) / 4 + chn]);
+         regs.push_back(creg[(GetFe0MuxLoc() & 0x0FFF) / 4 + chn]);
 #ifdef WD2_USE_UDP_BIN
       if (!mDemoMode && !mSendBlocked)
-         WriteUDP(WD2_FE0_MUX_REG, regs);
+         WriteUDP(GetFe0MuxLoc(), regs);
 #else
       for (chn=0 ; chn<8 ; chn++) {
          std::ostringstream req;
@@ -1497,56 +1508,65 @@ void WDB::SetFeMux(int chn, unsigned int v) {
       }
 #endif
    } else {
-      auto rofs = WD2_FE0_MUX_REG + (chn / 2) * 4;
-      auto mask = (chn % 2 == 0) ? WD2_FE0_MUX_MASK : WD2_FE1_MUX_MASK;
-      auto ofs = (chn % 2 == 0) ? WD2_FE0_MUX_OFS : WD2_FE1_MUX_OFS;
+      unsigned int mask, ofs;
+      auto rofs = GetFe0MuxLoc() + (chn / 2) * 4;
+      if (chn % 2 == 0) GetFe0MuxLoc(&mask, &ofs); else GetFe1MuxLoc(&mask, &ofs);
       SetRegMask(rofs, mask, ofs, v);
    }
 }
 
 void WDB::SetHVTarget(int chn, float v) {
    assert(chn < 16);
-   SetRegMask(WD2_HV_U_TARGET_0_REG + chn * 4, WD2_HV_U_TARGET_0_MASK, WD2_HV_U_TARGET_0_OFS,
-              access_as<unsigned int>(&v));
+   unsigned int reg, mask, ofs;
+   reg = GetHvUTarget0Loc(&mask, &ofs);
+   SetRegMask(reg + chn * 4, mask, ofs, access_as<unsigned int>(&v));
 }
 
 void WDB::GetHVTarget(std::vector<float> &hv) {
-   ReceiveControlRegisters((WD2_HV_U_TARGET_0_REG & 0x0FFF) / 4, 16);
+   ReceiveControlRegisters((GetHvUTarget0Loc() & 0x0FFF) / 4, 16);
    for (unsigned int i = 0; i < 16; i++) {
       float f;
-      memcpy(&f, &this->creg[(WD2_HV_U_TARGET_0_REG & 0x0FFF) / 4 + i], sizeof(float));
+      memcpy(&f, &this->creg[(GetHvUTarget0Loc() & 0x0FFF) / 4 + i], sizeof(float));
       hv.push_back(f);
    }
 }
 
 unsigned int WDB::GetLmk(int reg) {
    assert(reg < 16);
-   return creg[WD2_LMK0_RESET_REG / 4 + reg];
+   return creg[GetLmk0ResetLoc() / 4 + reg];
 }
 
 void WDB::SetLmk(int reg, unsigned int v) {
    assert(reg < 16);
-   SetRegMask(WD2_LMK0_RESET_REG + reg * 4, 0xFFFFFFFF, 0, v);
+   SetRegMask(GetLmk0ResetLoc() + reg * 4, 0xFFFFFFFF, 0, v);
 }
 
 //--------------------------------------------------------------------
 
 unsigned int WDB::GetTrgSrcEnPtrn(int i) {
    assert(i >= 0 && i < 18);
-   return BitExtractControl(WD2_TRG_SRC_EN_PTRN0_REG + i * 4 * 2, WD2_TRG_SRC_EN_PTRN0_MASK, WD2_TRG_SRC_EN_PTRN0_OFS);
+   unsigned int reg, mask, ofs;
+   reg = GetTrgSrcEnPtrn0Loc(&mask, &ofs);
+   return BitExtractControl(reg + i * 4 * 2, mask, ofs);
 };
 
 void WDB::SetTrgSrcEnPtrn(int i, unsigned int value) {
-   SetRegMask(WD2_TRG_SRC_EN_PTRN0_REG + i * 4 * 2, WD2_TRG_SRC_EN_PTRN0_MASK, WD2_TRG_SRC_EN_PTRN0_OFS, value);
+   unsigned int reg, mask, ofs;
+   reg = GetTrgSrcEnPtrn0Loc(&mask, &ofs);
+   SetRegMask(reg + i * 4 * 2, mask, ofs, value);
 };
 
 unsigned int WDB::GetTrgStatePtrn(int i) {
    assert(i >= 0 && i < 18);
-   return BitExtractControl(WD2_TRG_STATE_PTRN0_REG + i * 4 * 2, WD2_TRG_STATE_PTRN0_MASK, WD2_TRG_STATE_PTRN0_OFS);
+   unsigned int reg, mask, ofs;
+   reg = GetTrgStatePtrn0Loc(&mask, &ofs);
+   return BitExtractControl(reg + i * 4 * 2, mask, ofs);
 };
 
 void WDB::SetTrgStatePtrn(int i, unsigned int value) {
-   SetRegMask(WD2_TRG_STATE_PTRN0_REG + i * 4 * 2, WD2_TRG_STATE_PTRN0_MASK, WD2_TRG_STATE_PTRN0_OFS, value);
+   unsigned int reg, mask, ofs;
+   reg = GetTrgStatePtrn0Loc(&mask, &ofs);
+   SetRegMask(reg + i * 4 * 2, mask, ofs, value);
 };
 
 unsigned int WDB::GetTriggerDelayNs() {

@@ -547,8 +547,8 @@ class WDB: public WDBREG {
    
    int              mCalibClkFreq;
 
-   unsigned int     *creg;
-   unsigned int     *sreg;
+   std::vector<unsigned int> creg;
+   std::vector<unsigned int> sreg;
    
    static int       gASCIISocket;
    static int       gBinSocket;
@@ -732,9 +732,6 @@ public:
 
    unsigned int GetTrgStatePtrn(int i);
    void SetTrgStatePtrn(int i, unsigned int value);
-
-   unsigned int GetLeadTrailEdgeSel();
-   void SetLeadTrailEdgeSel(unsigned int value);
 
    // high level methods ----------
    unsigned int GetTriggerDelayNs();
