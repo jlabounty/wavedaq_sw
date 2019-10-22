@@ -654,7 +654,7 @@ void WDB::ReceiveControlRegisters(unsigned int index, unsigned int nReg) {
    if (nReg == 0)
       nReg = GetNrOfCtrlRegs();
    if (mDemoMode) {
-      for (auto i=index ; i<index+nReg ; i++)
+      for (auto i = index; i < index + nReg; i++)
          this->creg[i] = 0;
       return;
    }
@@ -687,7 +687,7 @@ void WDB::ReceiveStatusRegisters(unsigned int index, unsigned int nReg) {
    if (nReg == 0)
       nReg = GetNrOfStatRegs();
    if (mDemoMode) {
-      for (auto i=index ; i<index+nReg ; i++)
+      for (auto i = index; i < index + nReg; i++)
          this->sreg[i] = 0;
       return;
    }
@@ -724,7 +724,7 @@ void WDB::ReceiveStatusRegister(int rofs) {
    int index = (rofs & 0x0FFF) / 4;
 
    if (mDemoMode) {
-      //this->sreg[index] = 0;
+      this->sreg[index] = 0;
       return;
    }
 
@@ -869,12 +869,10 @@ unsigned int WDB::GetPllLock(bool refresh)
    if (mDemoMode)
       return 0x1FF;
 
-   std::cout << "Test me !!!!!!" << std::endl;
-
    if (refresh)
       ReceiveStatusRegister(GetSysDcmLockLoc());
 
-   return this->sreg[GetSysDcmLockLoc()];
+   return this->sreg[GetSysDcmLockLoc() / 4];
 }
 
 void WDB::SetDrsSampleFreq(unsigned int f)
@@ -917,7 +915,7 @@ void WDB::GetScalers(std::vector<unsigned long long> &scaler, bool refresh) {
    // decode scalers according to their bit width
    int adr = 0;
    unsigned long long v;
-   for (unsigned int i = 0; i < 19 ; i++) {
+   for (unsigned int i = 0; i < 19; i++) {
       v = this->sreg[GetScaler0Loc() / 4 + i];
 
       if (scaler.size() < i + 1)
@@ -1293,7 +1291,7 @@ void WDB::SetDacTriggerLevelV(int chn, float v) {
          GetDac1ChALoc(&mask, &ofs);
       else
          GetDac1ChBLoc(&mask, &ofs);
-      SetRegMask(reg + chn/2 * 4, mask, ofs, d);
+      SetRegMask(reg + chn / 2 * 4, mask, ofs, d);
    }
 }
 
