@@ -81,7 +81,7 @@ int main(int argc, char** argv)
          // Sync LMK
          wdb->SetApplySettingsLmk(1);
          wdb->LmkSyncLocal();
-         wdb->ReceiveStatusRegister(WD2_DRS_SAMPLE_FREQ_OFS);
+         wdb->ReceiveStatusRegister(wdb->GetDrsSampleFreqLoc());
 
          // Reset DRS FSM
          wdb->ResetDrsControlFsm();
