@@ -5,7 +5,7 @@
  *  Project :  MEGII - DCB
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  17.09.2019 13:02:21
+ *  Created :  23.10.2019 16:29:34
  *
  *  Description :  Register map definitions.
  *
@@ -330,6 +330,11 @@
 #define DCB_SYNC_DELAY_REG                            DCB_REG_CTRL
 #define DCB_SYNC_DELAY_MASK                             0x001F0000
 #define DCB_SYNC_DELAY_OFS                                      16
+
+/* ENABLE_BPL_SPI_DRIVER - Disable Backplane SPI Driver: 0=driver disabled, 1=driver enabled */
+#define DCB_ENABLE_BPL_SPI_DRIVER_REG                 DCB_REG_CTRL
+#define DCB_ENABLE_BPL_SPI_DRIVER_MASK                  0x00000002
+#define DCB_ENABLE_BPL_SPI_DRIVER_OFS                            1
 
 /* DAQ_SOFT_TRIGGER - config 0 */
 #define DCB_DAQ_SOFT_TRIGGER_REG                      DCB_REG_CTRL
@@ -981,8 +986,8 @@ extern const dcb_bit_group_entry_type  dcb_bit_group_list[];
 extern const unsigned char reg_restore[];
 extern const unsigned int reg_default[];
 
-#define DCB_WRITABLE_REG   0
-#define DCB_READONLY_REG   1
+#define DCB_WRITABLE_REG     0
+#define DCB_READONLY_REG     1
 
 #define DCB_DONT_TOUCH_REG   0
 #define DCB_RESTORE_REG      1

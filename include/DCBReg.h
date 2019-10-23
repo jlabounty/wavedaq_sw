@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  17.09.2019 13:02:21
+// Created :  23.10.2019 16:29:34
 //
 
 
@@ -24,7 +24,7 @@ private:
    virtual void SetRegMask(unsigned int reg, unsigned int mask, unsigned int ofs, unsigned int v) = 0;
 
 public:
-   
+
    // constructor
    DCBREG(){};
 
@@ -185,6 +185,10 @@ public:
    // 0x001F0000: SYNC_DELAY - Output delay of SYNC output to backplane
    unsigned int GetSyncDelay() { return BitExtract(DCB_SYNC_DELAY_REG, DCB_SYNC_DELAY_MASK, DCB_SYNC_DELAY_OFS); };
    void         SetSyncDelay(unsigned int value) { SetRegMask(DCB_SYNC_DELAY_REG, DCB_SYNC_DELAY_MASK, DCB_SYNC_DELAY_OFS, value); };
+
+   // 0x00000002: ENABLE_BPL_SPI_DRIVER - Disable Backplane SPI Driver: 0=driver disabled, 1=driver enabled
+   unsigned int GetEnableBplSpiDriver() { return BitExtract(DCB_ENABLE_BPL_SPI_DRIVER_REG, DCB_ENABLE_BPL_SPI_DRIVER_MASK, DCB_ENABLE_BPL_SPI_DRIVER_OFS); };
+   void         SetEnableBplSpiDriver(unsigned int value) { SetRegMask(DCB_ENABLE_BPL_SPI_DRIVER_REG, DCB_ENABLE_BPL_SPI_DRIVER_MASK, DCB_ENABLE_BPL_SPI_DRIVER_OFS, value); };
 
    // 0x00000001: DAQ_SOFT_TRIGGER - config 0
    unsigned int GetDaqSoftTrigger() { return BitExtract(DCB_DAQ_SOFT_TRIGGER_REG, DCB_DAQ_SOFT_TRIGGER_MASK, DCB_DAQ_SOFT_TRIGGER_OFS); };
