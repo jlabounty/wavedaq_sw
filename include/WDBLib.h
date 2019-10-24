@@ -547,8 +547,8 @@ class WDB: public WDBREG {
    
    int              mCalibClkFreq;
 
-   unsigned int     creg[REG_NR_OF_CTRL_REGS];
-   unsigned int     sreg[REG_NR_OF_STAT_REGS];
+   std::vector<unsigned int> creg;
+   std::vector<unsigned int> sreg;
    
    static int       gASCIISocket;
    static int       gBinSocket;
@@ -633,8 +633,8 @@ public:
    void SetLogFile(std::string logfile) { mLogfile = logfile; }
    void Connect();
    void SetDestinationPort(int port);
-   void ReceiveControlRegisters(unsigned int index=0, unsigned int nReg=REG_NR_OF_CTRL_REGS);
-   void ReceiveStatusRegisters(unsigned int index=0, unsigned int nReg=REG_NR_OF_STAT_REGS);
+   void ReceiveControlRegisters(unsigned int index=0, unsigned int nReg=0);
+   void ReceiveStatusRegisters(unsigned int index=0, unsigned int nReg=0);
    void ReceiveStatusRegister(int ofs);
    void SendControlRegisters();
    unsigned int bcd2dec(const unsigned int bcd);
@@ -732,9 +732,6 @@ public:
 
    unsigned int GetTrgStatePtrn(int i);
    void SetTrgStatePtrn(int i, unsigned int value);
-
-   unsigned int GetLeadTrailEdgeSel();
-   void SetLeadTrailEdgeSel(unsigned int value);
 
    // high level methods ----------
    unsigned int GetTriggerDelayNs();

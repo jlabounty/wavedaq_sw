@@ -38,8 +38,11 @@ public:
      this->mVersion = 0;
    };
 
+   void SetVersion(unsigned int version) {
+      mVersion = version;
+   }
+
    unsigned int GetVersion() {
-      this->mVersion = BitExtractStatus(mVersionReg, mVersionMask, mVersionOffs);
       return mVersion;
    }
 

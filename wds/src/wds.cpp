@@ -1121,7 +1121,7 @@ int main(int argc, const char *argv[]) {
             }
 
             // check PLL locked status
-            if (!b->GetPllLock(false)) {
+            if (b->GetPllLock(false) != 0x1FF) {
                std::ostringstream str;
                str << "PLL not locked on board " << b->GetName() << ". Mask = 0x" << std::hex << b->GetPllLock(false);
                throw std::runtime_error(str.str());

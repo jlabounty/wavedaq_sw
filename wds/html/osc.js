@@ -794,7 +794,7 @@ Oscilloscope.prototype.printScalers = function (ctx) {
    if (OSC.wdb !== undefined && OSC.disp.scaler && OSC.wdb[OSC.curBoard].scaler) {
       var scaler = OSC.wdb[OSC.curBoard].scaler;
 
-      for (var c = 0; c < 18; c++) {
+      for (var c = 0; c < 19; c++) {
          ctx.fillStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
          ctx.strokeStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
          ctx.font = '14px sans-serif';
@@ -805,6 +805,8 @@ Oscilloscope.prototype.printScalers = function (ctx) {
             ctx.fillText("T", 20, 4 + c * 20);
          else if (c === 17)
             ctx.fillText("E", 20, 4 + c * 20);
+         else if (c === 18)
+            ctx.fillText("C", 20, 4 + c * 20);
          else
             ctx.fillText(c.toString(), 20, 4 + c * 20);
 
