@@ -28,6 +28,11 @@
 #include "sw_state.h"
 #include "drv_qspi_flash.h"
 #include "dcb_flash_memory_map.h"
+#else
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <ctype.h>
 #endif
 
 /******************************************************************************/
@@ -813,5 +818,42 @@ void print_sys_info(void)
   xfs_printf("-- Board Revision:      %c\r\n", 0x41 + board_revision); /* 0x41 = ASCII "A" */
   xfs_printf("-- Board Variant:       0x%02X\r\n", board_variant);
 }
+
+/******************************************************************************/
+
+#ifndef LINUX_COMPILE
+int get_serial_number()
+{
+  int sn;
+  char *cp;
+
+  if ((cp = fw_getenv(SYSPTR(env), "sn")))
+  {
+    sn = xfs_atoi(cp);
+    return sn;
+  }
+  return 0;
+}
+#else
+int get_serial_number()
+{
+  char hostname[1024];
+  gethostname(hostname, 1024);
+  int sn;
+  int i;
+
+  for( i=0 ; i<strlen(hostname) ; i++ )
+  {
+    hostname[i] = tolower(hostname[i]);
+  }
+
+  if(strncmp(hostname, "dcb", 3) == 0)
+  {
+    sn = atoi(&hostname[3]);
+  }
+
+  return sn;
+}
+#endif /* LINUX_COMPILE */
 
 /******************************************************************************/

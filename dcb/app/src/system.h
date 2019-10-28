@@ -114,5 +114,6 @@ void init_settings(int snr);
 void init_env_settings(int snr);
 void init_reg_settings(int snr);
 void print_sys_info(void);
+int get_serial_number();
 
 #endif /* __SYSTEM_H__ */

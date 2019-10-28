@@ -211,7 +211,7 @@ void reg_bank_load()
 {
   unsigned int reg_buffer[NR_OF_REGS];
   unsigned int checksum;
-  int snr;
+  int sn;
   char *cp;
 
   /* read register contents from SPI flash */
@@ -239,16 +239,15 @@ void reg_bank_load()
       xfs_printf("         From flash: 0x%08X\r\n", reg_buffer[NR_OF_REGS-1]);
     }
 
-#if 0
-    if ((cp = fw_getenv(SYSPTR(env), "sn")))
+    sn = get_serial_number();
+    if(sn)
     {
-      snr = xfs_atoi(cp);
       if(DBG_WARN)
       {
         xfs_printf("         Valid serial number found.\r\n");
-        xfs_printf("         Board is being re-initialized with \"init %d\".\r\n\r\n", snr);
+        xfs_printf("         Board is being re-initialized with \"init %d\".\r\n\r\n", sn);
       }
-      init_settings(snr);
+      init_settings(sn);
     }
     else
     {
@@ -258,7 +257,6 @@ void reg_bank_load()
         xfs_printf("         Register contents are not updated.\r\n\r\n");
       }
     }
-#endif
   }
 }
 
