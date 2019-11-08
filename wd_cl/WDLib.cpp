@@ -1050,7 +1050,7 @@ void WDWDB::SetInCrate(){
       SetReceiveTimeoutMs(3*cDefaultReceiveTimeoutMs);
       LmkSyncLocal();
       SetReceiveTimeoutMs(old_timeout);
-      ReceiveStatusRegister(WD2_DRS_SAMPLE_FREQ_REG);
+      ReceiveStatusRegister(GetDrsSampleFreqLoc());
 
       //Reset everything
       ResetAllPll();

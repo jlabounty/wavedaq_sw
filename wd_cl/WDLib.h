@@ -5,7 +5,7 @@
 #include <map>
 #include "mscb.h"
 #include "WDBLib.h"
-#include "register_map_wd2.h"
+#include "WDBReg.h"
 #include "TCBLib.h"
 #include "Properties.h"
 
