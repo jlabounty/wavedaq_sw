@@ -768,13 +768,13 @@ void WDB::SendControlRegisters() {
 
    // first half until HV
    std::vector<unsigned int> v;
-   for (int i = 0; i < (GetHvUTarget0Loc() - GetBoardMagicLoc()) / 4; i++)
+   for (int i = 0; i < (GetHvUTarget0Loc() - GetSlotIdLoc()) / 4; i++)
       v.push_back(this->creg[i]);
    WriteUDP(GetBoardMagicLoc(), v);
 
    // second half after HV
    v.clear();
-   for (int i = (GetLmk0ResetLoc() - GetBoardMagicLoc()) / 4; i < GetNrOfCtrlRegs(); i++)
+   for (int i = (GetLmk0ResetLoc() - GetSlotIdLoc()) / 4; i < GetNrOfCtrlRegs(); i++)
       v.push_back(this->creg[i]);
    WriteUDP(GetLmk0ResetLoc(), v);
 }
