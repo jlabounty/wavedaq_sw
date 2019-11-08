@@ -1034,15 +1034,15 @@ void WDWDB::SetInCrate(){
    //switch to backplane clock
    if(GetExtClkInSel() != 0 || GetDaqClkSrcSel() != 0 || GetLmkInputFreq() != 80){
 
-      SetSendBlock(true);
+      //SetSendBlock(true);
       SetExtClkInSel(0);
       SetDaqClkSrcSel(0);
       SetLmkInputFreq(80);
-      SetSendBlock(false);
+      //SetSendBlock(false);
 
       int old_timeout = GetReceiveTimeoutMs(); 
-      SetReceiveTimeoutMs(15*cDefaultReceiveTimeoutMs);
-      SendControlRegisters();
+      //SetReceiveTimeoutMs(15*cDefaultReceiveTimeoutMs);
+      //SendControlRegisters();
 
       SetReceiveTimeoutMs(3*cDefaultReceiveTimeoutMs);
       SetApplySettingsLmk(1);
