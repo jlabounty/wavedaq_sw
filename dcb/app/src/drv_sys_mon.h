@@ -19,7 +19,7 @@
 #ifndef LINUX_COMPILE
 #include "xspips.h"
 #endif
-#include "drv_spi_ps.h"
+#include "drv_spi_if.h"
 
 #define SYSMON_ADR_TEMP                         0x00
 #define SYSMON_ADR_VDD                          0x01
@@ -124,7 +124,7 @@
 
 
 
-typedef spi_ps_type sysmon_ctrl_type;
+typedef spi_if_type sysmon_ctrl_type;
 
 #ifdef LINUX_COMPILE
 void sysmon_init(sysmon_ctrl_type *self, unsigned char device_nr, unsigned char slave_nr);

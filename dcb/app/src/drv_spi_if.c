@@ -14,7 +14,7 @@
  */
 
 
-#include "drv_spi_ps.h"
+#include "drv_spi_if.h"
 #include "dbg.h"
 #ifdef LINUX_COMPILE
 #include <string.h>
@@ -30,7 +30,7 @@
 
 #ifdef LINUX_COMPILE
 
-int spi_ps_init(spi_ps_type* self, unsigned char device_nr, unsigned char slave_nr, unsigned char lsb, unsigned char bits, unsigned int speed, unsigned char mode)
+int spi_if_init(spi_if_type* self, unsigned char device_nr, unsigned char slave_nr, unsigned char lsb, unsigned char bits, unsigned int speed, unsigned char mode)
 {
   /* possible modes: SPI_LOOP, SPI_CPHA, SPI_CPOL, SPI_LSB_FIRST, SPI_CS_HIGH, SPI_3WIRE, SPI_NO_CS, SPI_READY */
   int file;
@@ -39,9 +39,9 @@ int spi_ps_init(spi_ps_type* self, unsigned char device_nr, unsigned char slave_
   /* self->xfer.tx_buf = (unsigned long)buf; */
   /* self->xfer.len = ; */ /* Length of  command to write*/
   self->xfer.cs_change = 0; /* Keep CS activated */
-  self->xfer.delay_usecs = 0, /* delay in us */
-  self->xfer.speed_hz = speed, /* speed */
-  self->xfer.bits_per_word = bits, /* bites per word */
+  self->xfer.delay_usecs = 0; /* delay in us */
+  self->xfer.speed_hz = speed; /* speed */
+  self->xfer.bits_per_word = bits; /* bits per word */
 
   sprintf(filename, "/dev/spidev%d.%d", device_nr, slave_nr);
 
@@ -105,11 +105,12 @@ int spi_ps_init(spi_ps_type* self, unsigned char device_nr, unsigned char slave_
   return file;
 }
 
-char* spi_ps_transfer(spi_ps_type* self, char* tx_buf, char* rx_buf, unsigned int len)
+char* spi_if_transfer(spi_if_type* self, char* tx_buf, char* rx_buf, unsigned int len)
 {
   int file;
   char filename[40];
   int status;
+  int i;
 
   sprintf(filename, "/dev/spidev%d.%d", self->device_nr, self->slave_nr);
   if ((file = open(filename,O_RDWR)) < 0)
@@ -129,7 +130,7 @@ char* spi_ps_transfer(spi_ps_type* self, char* tx_buf, char* rx_buf, unsigned in
   self->xfer.tx_buf = (unsigned long)tx_buf;
   self->xfer.len = len; /* Length of Data to read */
 
-//  printf("doing transfer\r\n");
+  //printf("doing transfer @ %d Hz\r\n", self->xfer.speed_hz);
   status = ioctl(file, SPI_IOC_MESSAGE(1), &(self->xfer));
   if (status < 0)
   {
@@ -145,7 +146,7 @@ char* spi_ps_transfer(spi_ps_type* self, char* tx_buf, char* rx_buf, unsigned in
 
 #else /* LINUX_COMPILE */
 
-char* spi_ps_transfer(spi_ps_type* self, char* tx_buf, char* rx_buf, unsigned int len)
+char* spi_if_transfer(spi_if_type* self, char* tx_buf, char* rx_buf, unsigned int len)
 {
   XSpiPs_SetSlaveSelect(self->spi_if_ptr, self->slave_nr);
   XSpiPs_PolledTransfer(self->spi_if_ptr, tx_buf, rx_buf, len);

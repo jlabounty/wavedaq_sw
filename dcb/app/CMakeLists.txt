@@ -30,15 +30,10 @@ set(SRC
    src/cmd_processor.c
    src/wd2_config.c
    src/sc_io.c
-   src/spi_bpl.c
-   src/xspi.c
-   src/xspi_g.c
-   src/xspi_options.c
-   src/xspi_selftest.c
-   src/xspi_sinit.c
+   src/drv_bpl.c
    src/register_map_dcb.c
    src/drv_axi_dcb_reg_bank.c
-   src/drv_spi_ps.c
+   src/drv_spi_if.c
    src/drv_lmk.c
    src/drv_si5324.c
    src/drv_sys_mon.c
@@ -58,8 +53,8 @@ add_executable(dcbc src/dcbc.c ${SRC})
 add_executable(wdbc src/wdbc.c ${SRC})
 add_executable(dcbs src/dcbs.c ${SRC})
 
-target_include_directories(dcbs PRIVATE 
-   ${PROJECT_SOURCE_DIR}/../../include 
+target_include_directories(dcbs PRIVATE
+   ${PROJECT_SOURCE_DIR}/../../include
    ${PROJECT_SOURCE_DIR}/../../../)
 
 target_compile_definitions(dcbi PRIVATE LINUX_COMPILE)

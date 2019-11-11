@@ -38,7 +38,7 @@ void lmk03000_send(lmk_ctrl_type *self, unsigned int tx_data)
     tx_data = tx_data >> 8;
   }
 
-  spi_ps_transfer((spi_ps_type*)self, tx_buffer, NULL, 4);
+  spi_if_transfer((spi_if_type*)self, tx_buffer, NULL, 4);
 }
 
 /******************************************************************************/
@@ -46,7 +46,7 @@ void lmk03000_send(lmk_ctrl_type *self, unsigned int tx_data)
 #ifdef LINUX_COMPILE
 void lmk03000_init(lmk_ctrl_type *self, unsigned char device_nr, unsigned char slave_nr)
 {
-  spi_ps_init((spi_ps_type*)self, device_nr, slave_nr, 0, 8, 1000000, 0);
+  spi_if_init((spi_if_type*)self, device_nr, slave_nr, 0, 8, 1000000, 0);
 
   lmk03000_send(self, DCB_LMK0_RESET_MASK);
 

@@ -17,13 +17,13 @@
 /* see hello world app */
 
 #include "system.h"
-#include "xparameters.h"
 #include "xfs_printf.h"
 #include "dbg.h"
 #include "xstatus.h"
 #include "sc_io.h"
 #include "register_map_dcb.h"
 #include "../../../../git-revision.h"
+#include "xparameters.h"
 #ifndef LINUX_COMPILE
 #include "sw_state.h"
 #include "drv_qspi_flash.h"
@@ -54,11 +54,12 @@ const char system_sw_build_time[] = __TIME__;
 const char *system_month_str[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
 #ifdef LINUX_COMPILE
-static int sys_mon_initialized  = 0;
-static int lmk03000_initialized = 0;
-static int si5324_initialized   = 0;
-static int reg_bank_initialized = 0;
-static int gpio_initialized     = 0;
+static int spi_bpl_initialized[17] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+static int sys_mon_initialized     = 0;
+static int lmk03000_initialized    = 0;
+static int si5324_initialized      = 0;
+static int reg_bank_initialized    = 0;
+static int gpio_initialized        = 0;
 #endif /* LINUX_COMPILE */
 
 /******************************************************************************/
@@ -303,6 +304,7 @@ int init_spi_eclk_lmk_adc()
 
 /******************************************************************************/
 
+#ifndef LINUX_COMPILE
 int init_spi_bpl()
 {
   XSpi_Config *spi_cfg;
@@ -347,6 +349,7 @@ int init_spi_bpl()
 
   return XST_SUCCESS;
 }
+#endif
 
 /******************************************************************************/
 
@@ -528,6 +531,36 @@ char default_env[] = "sn=0\0"
 
 /******************************************************************************/
 
+#ifdef LINUX_COMPILE
+void init_spi_bpl(unsigned char slot_nr)
+{
+  int i;
+
+  if(spi_bpl_initialized[slot_nr])
+  {
+    return;
+  }
+  else
+  {
+    if( slot_nr>16 )
+    {
+      for(i=0;i<17;i++)
+      {
+        spi_bpl_initialized[i] = 1;
+        bpl_spi_init(SYSPTR(spi_bpl), SPI_DEV_BPL, i);
+      }
+    }
+    else
+    {
+      spi_bpl_initialized[slot_nr] = 1;
+      bpl_spi_init(SYSPTR(spi_bpl), SPI_DEV_BPL, slot_nr);
+    }
+  }
+}
+#endif /* LINUX_COMPILE */
+
+/******************************************************************************/
+
 void init_lmk03000()
 {
 #ifdef LINUX_COMPILE
@@ -602,7 +635,7 @@ int init_system()
 
   emio_flash_sw_state(BIT_IDX_EMIO_CTRL_SW_STATE_DCB_ACCESS_PIN);
 
-  init_spi_bpl();
+  init_spi_bpl(0xFF);
 
 #ifndef LINUX_COMPILE
   /* Environment initialization */

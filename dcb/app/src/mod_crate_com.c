@@ -13,7 +13,7 @@
  *-------------------------------------------------------------------------------------
  */
 
-#include "spi_bpl.h"
+#include "drv_bpl.h"
 #include "dbg.h"
 #include "xfs_printf.h"
 #include "utilities.h"

@@ -13,11 +13,19 @@
  *-------------------------------------------------------------------------------------
  */
 
-#ifndef __SPI_BPL__
-#define __SPI_BPL__
+#ifndef __DRV_BPL__
+#define __DRV_BPL__
 
+#include "drv_spi_if.h"
+
+typedef struct
+{
+  spi_if_type slot[17];
+} bpl_spi_type;
+
+void bpl_spi_init(bpl_spi_type *self, unsigned char device_nr, unsigned char slot_nr);
 void spi_ascii_cmd(char* buff, unsigned char slot_nr);
 void spi_binary_cmd(char* tx_buff, char* rx_buff, unsigned char slot_nr, unsigned int len);
 void spi_flash_id_cmd(unsigned char slot_nr);
 
-#endif /* __SPI_BPL__ */
+#endif /* __DRV_BPL__ */

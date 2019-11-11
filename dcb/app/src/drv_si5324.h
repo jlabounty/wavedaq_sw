@@ -19,9 +19,9 @@
 #ifndef LINUX_COMPILE
 #include "xspips.h"
 #endif
-#include "drv_spi_ps.h"
+#include "drv_spi_if.h"
 
-typedef spi_ps_type si5324_ctrl_type;
+typedef spi_if_type si5324_ctrl_type;
 
 typedef struct
 {

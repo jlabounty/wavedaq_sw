@@ -20,9 +20,9 @@
 #ifndef LINUX_COMPILE
 #include "xspips.h"
 #endif /* LINUX_COMPILE */
-#include "drv_spi_ps.h"
+#include "drv_spi_if.h"
 
-typedef spi_ps_type lmk_ctrl_type;
+typedef spi_if_type lmk_ctrl_type;
 
 #ifdef LINUX_COMPILE
 void lmk03000_init(lmk_ctrl_type *self, unsigned char device_nr, unsigned char slave_nr);

@@ -16,11 +16,11 @@
 #ifndef __SYSTEM_H__
 #define __SYSTEM_H__
 
-#include "xspi.h"
 #include "drv_axi_dcb_reg_bank.h"
 #include "drv_lmk.h"
 #include "drv_sys_mon.h"
 #include "drv_si5324.h"
+#include "drv_bpl.h"
 
 #ifndef LINUX_COMPILE
 #include "term_cmd_input.h"
@@ -49,6 +49,7 @@
 /* Max. for Finisar FCLF8521-3 is 100kHz */
 
 /* SPI Devices */
+#define SPI_DEV_BPL                          1
 #define SPI_DEV_ECLK_LMK_ADC                 2
 
 /* SPI Slaves */
@@ -82,7 +83,8 @@ typedef struct
 
 typedef struct
 {
-  XSpi                       spi_bpl;      /* SPI connection to backplane (WDB, TCB) */
+  //XSpi                       spi_bpl;      /* SPI connection to backplane (WDB, TCB) */
+  bpl_spi_type               spi_bpl;      /* SPI connection to backplane (WDB, TCB) */
   axi_dcb_register_bank      reg_bank;
   lmk_ctrl_type              lmk;
   sysmon_ctrl_type           sys_mon;
@@ -104,7 +106,7 @@ typedef struct
 extern system_type system_hw;
 
 int init_system();
-int init_spi_bpl();
+void init_spi_bpl(unsigned char slot_nr);
 void init_reg_bank();
 void init_lmk03000();
 void init_si5324();

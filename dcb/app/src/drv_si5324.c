@@ -83,7 +83,7 @@ const si5324_reg_type si5324_reg_init[SI5324_NR_OF_CTRL_REGS] = {
 #ifdef LINUX_COMPILE
 void si5324_init(si5324_ctrl_type *self, unsigned char device_nr, unsigned char slave_nr)
 {
-  spi_ps_init((spi_ps_type*)self, device_nr, slave_nr, 0, 8, 1000000, 0);
+  spi_if_init((spi_if_type*)self, device_nr, slave_nr, 0, 8, 1000000, 0);
 
   for(unsigned int i=0;i<SI5324_NR_OF_CTRL_REGS;i++)
   {
@@ -116,7 +116,7 @@ void si5324_transfer(si5324_ctrl_type *self, char* tx_buf, char* rx_buf, unsigne
   init_si5324();
 #endif
 
-  spi_ps_transfer((spi_ps_type*)self, tx_buf, rx_buf, len);
+  spi_if_transfer((spi_if_type*)self, tx_buf, rx_buf, len);
 }
 
 /******************************************************************************/

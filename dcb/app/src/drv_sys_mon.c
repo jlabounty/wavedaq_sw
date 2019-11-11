@@ -65,7 +65,7 @@ void sysmon_init(sysmon_ctrl_type *self, unsigned char device_nr, unsigned char 
                               SYSMON_BIT_SETUP_AUTOSCAN |
                               SYSMON_BIT_SETUP_REF_MODE_EXT;
 
-  spi_ps_init((spi_ps_type*)self, device_nr, slave_nr, 0, 8, 1000000, 0);
+  spi_if_init((spi_if_type*)self, device_nr, slave_nr, 0, 8, 1000000, 0);
 
   sysmon_write_channel_config(self, SYSMON_ADR_TEMP, SYSMON_MASTER_BIP_UPPER_THRESH, SYSMON_MASTER_BIP_LOWER_THRESH, ch_cfg);
   sysmon_write_channel_config(self, SYSMON_ADR_VDD,  SYSMON_MASTER_UNI_UPPER_THRESH, SYSMON_MASTER_UNI_LOWER_THRESH, ch_cfg);
@@ -124,7 +124,7 @@ void sysmon_transfer(sysmon_ctrl_type* self, char* tx_buf, char* rx_buf, unsigne
   init_sysmon();
 #endif
 
-  spi_ps_transfer((spi_ps_type*)self, tx_buf, rx_buf, len);
+  spi_if_transfer((spi_if_type*)self, tx_buf, rx_buf, len);
 }
 
 /******************************************************************************/
