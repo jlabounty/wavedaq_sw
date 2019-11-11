@@ -75,12 +75,12 @@ target_link_libraries(wds wdb ${CMAKE_THREAD_LIBS_INIT})
 add_dependencies(wds register_map_wd2 register_map_dcb git_revision_h)
 add_dependencies(wdb register_map_wd2 register_map_dcb)
 
-#add_executable(test
-#   src/test.cpp
-#   mxml/mxml.cxx
-#   mxml/strlcpy.cxx)
-#target_include_directories(test PUBLIC include mxml ../)
-#target_link_libraries(test wdb ${CMAKE_THREAD_LIBS_INIT})
+add_executable(test
+   src/test.cpp
+   mxml/mxml.cxx
+   mxml/strlcpy.cxx)
+target_include_directories(test PUBLIC include mxml ../)
+target_link_libraries(test wdb ${CMAKE_THREAD_LIBS_INIT})
 
 install(TARGETS wds DESTINATION bin)
 install(TARGETS wdb
