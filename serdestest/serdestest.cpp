@@ -15,10 +15,6 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-#include "mscb.h"
-#include "mxml.h"
-#include "WDBLib.h"
-#include "TCBLib.h"
 
 #include <iostream>
 #include <exception>
@@ -26,6 +22,11 @@
 #include <set>
 #include <vector>
 #include <map>
+
+#include "mscb.h"
+#include "mxml.h"
+#include "WDBLib.h"
+#include "TCBLib.h"
 
 #define TESTVALUE0 0xA5A5A5A5
 //#define TESTVALUE0 0xDEADBEEF
