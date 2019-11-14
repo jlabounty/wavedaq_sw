@@ -25,6 +25,7 @@
 #include <ifaddrs.h>
 #include <netdb.h>
 #include <assert.h>
+#include <stdio.h>
 #include <errno.h>
 #include <time.h>
 #include <fcntl.h>
@@ -36,10 +37,8 @@
 #include <pthread.h>
 #endif
 #ifdef __APPLE__
-
 #include <net/if_dl.h>
 #include <pthread.h>
-
 #endif
 
 #include "WDBLib.h"
@@ -4048,6 +4047,10 @@ void WP::StartWaveformSaving(std::string fileName, int format, bool all, int boa
          close(li.fh);
 
       li.fh = open(li.fileName.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0644);
+      if (li.fh < 0) {
+         std::string s = "Cannot write to file \"" + li.fileName + "\": ";
+         perror(s.c_str());
+      }
       assert(li.fh > 0);
    }
 

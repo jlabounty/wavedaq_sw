@@ -418,7 +418,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
             gl->wp->StopLogging();
          else if (item != "") {
             auto args = split(value, '\n');
-            gl->wp->StartWaveformSaving("html/" + args[0],
+            gl->wp->StartWaveformSaving(args[0],
                                         args[1] == "bin" ? WP::cLiFormatBinary : WP::cLiFormatXML,
                                         args[2] == "all",
                                         args[2] == "all" ? -1 : std::stoi(args[2]),
