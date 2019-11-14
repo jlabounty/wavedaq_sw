@@ -56,6 +56,7 @@ typedef struct {
    bool updatePeriodic;
    int dbgRx;
    int dbgTx;
+   std::string wdsDir;
 } GLOBALS;
 
 unsigned int demoDrsSampleFreq = 5016;
@@ -418,7 +419,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
             gl->wp->StopLogging();
          else if (item != "") {
             auto args = split(value, '\n');
-            gl->wp->StartWaveformSaving(args[0],
+            gl->wp->StartWaveformSaving(std::string(s_http_server_opts.document_root) + "/" + args[0],
                                         args[1] == "bin" ? WP::cLiFormatBinary : WP::cLiFormatXML,
                                         args[2] == "all",
                                         args[2] == "all" ? -1 : std::stoi(args[2]),
@@ -970,6 +971,29 @@ int main(int argc, const char *argv[]) {
    gl.triggerSelfArm = false;
    gl.updatePeriodic = false;
    gl.dbgRx = gl.dbgTx = 0;
+   gl.wdsDir = "";
+
+   // find wds directory
+   char tmp[256];
+   getcwd(tmp, sizeof(tmp));
+   std::string dir(tmp);
+   std::ifstream f1(dir + "/html/index.html");
+   if (f1.good()) {
+      gl.wdsDir = dir;
+   } else {
+      if (getenv("WDBSYS")) {
+         std::ifstream f3(std::string(getenv("WDBSYS")) + "/software/wds/html/index.html");
+         if (f3.good()) {
+            gl.wdsDir = std::string(getenv("WDBSYS")) + "/software/wds";
+         } else {
+            std::cerr << "Cannot find 'html' directory. Please run from the root of the wds directory." << std::endl;
+            return 1;
+         }
+      } else {
+         std::cerr << "Cannot find 'WDBSYS' environment variable. Please set it to the wavedaq directory." << std::endl;
+         return 1;
+      }
+   }
 
    // parse command line parameters
    if (argc < 2) {
@@ -1098,8 +1122,8 @@ int main(int argc, const char *argv[]) {
             }
 
             // load calibration data for board
-            b->LoadVoltageCalibration(b->GetDrsSampleFreqMhz());
-            b->LoadTimeCalibration(b->GetDrsSampleFreqMhz());
+            b->LoadVoltageCalibration(b->GetDrsSampleFreqMhz(), gl.wdsDir);
+            b->LoadTimeCalibration(b->GetDrsSampleFreqMhz(), gl.wdsDir);
 
             // debug output
             if (gl.dbgRx > 0)
@@ -1211,35 +1235,9 @@ int main(int argc, const char *argv[]) {
    s_http_server_opts.dav_auth_file = "-";     // Allow access via WebDav
    s_http_server_opts.enable_directory_listing = "yes";
 
-   // find index.html to set document_root properly
-   char tmp[256];
-   getcwd(tmp, sizeof(tmp));
-   std::string dir(tmp);
-   std::ifstream f1(dir + "/html/index.html");
-   if (f1.good()) {
-      s_http_server_opts.document_root = "html";
-   } else {
-      dir = dir.substr(0, dir.find_last_of("/\\"));
-      std::ifstream f2(dir + "/html/index.html");
-      if (f2.good()) {
-         dir += "/html";
-         s_http_server_opts.document_root = dir.c_str();
-      } else {
-         if (getenv("WDBSYS")) {
-            std::ifstream f3(dir + "/software/wds/html/index.html");
-            if (f3.good()) {
-               dir += "/software/wds/html";
-               s_http_server_opts.document_root = dir.c_str();
-            } else {
-               std::cerr << "Cannot find 'html' directory. Please run from the root of the wds directory." << std::endl;
-               return 1;
-            }
-         } else {
-            std::cerr << "Cannot find 'WDBSYS' environment variable. Please set it to the wavedaq directory." << std::endl;
-            return 1;
-         }
-      }
-   }
+   // set document_root
+   std::string d(gl.wdsDir + "/html");
+   s_http_server_opts.document_root = d.c_str();
 
    std::cout << "GIT revision: " << GIT_REVISION << std::endl;
    std::cout << "Starting HTTP server at port " << gl.serverPort << std::endl;
