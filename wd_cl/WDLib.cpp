@@ -1026,6 +1026,7 @@ void WDWDB::ConfigureSamplingFrequency(Property &property) {
 
 // Set configurations to be used in a crate
 void WDWDB::SetInCrate(){
+
    //switch to backplane trigger
    SetPatternTriggerEn(0);
    SetExtAsyncTriggerEn(1);
@@ -1034,14 +1035,16 @@ void WDWDB::SetInCrate(){
    //switch to backplane clock
    if(GetExtClkInSel() != 0 || GetDaqClkSrcSel() != 0 || GetLmkInputFreq() != 80){
 
+      int old_timeout = GetReceiveTimeoutMs(); 
+      SetReceiveTimeoutMs(15*cDefaultReceiveTimeoutMs);
       //SetSendBlock(true);
       SetExtClkInSel(0);
+
       SetDaqClkSrcSel(0);
+
       SetLmkInputFreq(80);
       //SetSendBlock(false);
 
-      int old_timeout = GetReceiveTimeoutMs(); 
-      //SetReceiveTimeoutMs(15*cDefaultReceiveTimeoutMs);
       //SendControlRegisters();
 
       SetReceiveTimeoutMs(3*cDefaultReceiveTimeoutMs);
