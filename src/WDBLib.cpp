@@ -1254,7 +1254,6 @@ void WDB::SetDacTriggerLevelV(int chn, float v) {
 
    assert(chn < 16);
    if (chn == -1) {
-      std::vector<unsigned int> regs;
       unsigned int reg, mask, ofs;
       bool blocked = GetSendBlock();
       if (!blocked)
@@ -1264,12 +1263,13 @@ void WDB::SetDacTriggerLevelV(int chn, float v) {
             reg = GetDac1ChALoc(&mask, &ofs);
          else
             reg = GetDac1ChBLoc(&mask, &ofs);
+         SetRegMask(reg + (chn / 2) * 4, mask, ofs, d);
       }
-      SetRegMask(reg + (chn / 2) * 4, mask, ofs, d);
       if (!blocked)
          SetSendBlock(false);
+      std::vector<unsigned int> regs;
       for (chn = 0; chn < 8; chn++)
-         regs.push_back(creg[GetDac1ChALoc() / 4 + chn]);
+         regs.push_back(creg[(GetDac1ChALoc() & 0xFFF) / 4 + chn]);
 #ifdef WD2_USE_UDP_BIN
       if (!mDemoMode && !mSendBlocked)
          WriteUDP(GetDac1ChALoc(), regs);
@@ -1285,9 +1285,9 @@ void WDB::SetDacTriggerLevelV(int chn, float v) {
    } else {
       unsigned int reg, mask, ofs;
       if (chn % 2 == 0)
-         GetDac1ChALoc(&mask, &ofs);
+         reg = GetDac1ChALoc(&mask, &ofs);
       else
-         GetDac1ChBLoc(&mask, &ofs);
+         reg = GetDac1ChBLoc(&mask, &ofs);
       SetRegMask(reg + chn / 2 * 4, mask, ofs, d);
    }
 }
@@ -1528,7 +1528,7 @@ void WDB::GetHVTarget(std::vector<float> &hv) {
 
 unsigned int WDB::GetLmk(int reg) {
    assert(reg < 16);
-   return creg[GetLmk0ResetLoc() / 4 + reg];
+   return creg[(GetLmk0ResetLoc() & 0xFFF)/ 4 + reg];
 }
 
 void WDB::SetLmk(int reg, unsigned int v) {
