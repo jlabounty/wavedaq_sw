@@ -762,14 +762,12 @@ void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, uns
 }
 
 void WDB::SendControlRegisters() {
-
-   std::cout << "Test me !!!!!!! " << std::endl;
-
    // first half until HV
    std::vector<unsigned int> v;
    for (int i = 0; i < (GetHvUTarget0Loc() - GetSlotIdLoc()) / 4; i++)
       v.push_back(this->creg[i]);
-   WriteUDP(GetBoardMagicLoc(), v);
+   WriteUDP(GetSlotIdLoc(), v);
+   sleep_ms(1000); // Reconfig of LMK takes some time...
 
    // second half after HV
    v.clear();
