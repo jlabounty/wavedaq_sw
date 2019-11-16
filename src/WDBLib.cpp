@@ -176,6 +176,8 @@ std::string WDB::SendReceiveUDP(std::string str) {
 
          if (retry == 0) // reduce timeout on first retry (ARP problem)
             ms = 100;
+         else if (retry == 5)
+            ms = 1000; // increase timeout after five retries
          else
             ms = mReceiveTimeoutMs;
          timeout.tv_sec = ms / 1000;
@@ -212,7 +214,8 @@ std::string WDB::SendReceiveUDP(std::string str) {
          break;
 
       if (this->mVerbose)
-         std::cout << mWDBName << " retry " << retry + 1 << std::endl;
+         std::cout << mWDBName << " retry " << retry + 1 << " with " << ms << " ms" << std::endl;
+
       result.clear();
    }
 
@@ -314,6 +317,8 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data) {
          FD_SET(gBinSocket, &readfds);
 
          ms = mReceiveTimeoutMs;
+         if (retry == 5) // increase timeout after a few retries
+            ms = 1000;
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
 
@@ -339,7 +344,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data) {
 
 
       if (this->mVerbose)
-         std::cout << mWDBName << " retry " << retry + 1 << std::endl;
+         std::cout << mWDBName << " retry " << retry + 1 << " with " << ms << " ms" << std::endl;
    }
 
    if (this->mVerbose && retry > 0) {
@@ -431,6 +436,8 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg) {
          FD_SET(gBinSocket, &readfds);
 
          ms = mReceiveTimeoutMs;
+         if (retry == 5) // increase timeout after a few retries
+            ms = 1000;
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
 
@@ -467,7 +474,7 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg) {
 
 
       if (this->mVerbose)
-         std::cout << mWDBName << " retry " << retry + 1 << std::endl;
+         std::cout << mWDBName << " retry " << retry + 1 << " with " << ms << " ms" << std::endl;
    }
 
    if (!bSuccess)
