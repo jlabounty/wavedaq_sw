@@ -132,10 +132,12 @@ std::string DCB::SendReceiveUDP(std::string str)
          FD_ZERO(&readfds);
          FD_SET(gASCIISocket, &readfds);
 
-         if (retry == 0) // reduce timeout on first retry (ARP problem)
-            ms = 100;
-         else
+
+         if (retry == 0)
             ms = mReceiveTimeoutMs;
+         else
+            ms *= 1.3;   // increase timeout after each retry
+
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
 
@@ -267,7 +269,11 @@ void DCB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data) {
          FD_ZERO(&readfds);
          FD_SET(gBinSocket, &readfds);
 
-         ms = mReceiveTimeoutMs;
+         if (retry == 0)
+            ms = mReceiveTimeoutMs;
+         else
+            ms *= 1.3;   // increase timeout after each retry
+
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
 
@@ -383,7 +389,11 @@ std::vector<unsigned int> DCB::ReadUDP(unsigned int ofs, unsigned int nReg) {
          FD_ZERO(&readfds);
          FD_SET(gBinSocket, &readfds);
 
-         ms = mReceiveTimeoutMs;
+         if (retry == 0)
+            ms = mReceiveTimeoutMs;
+         else
+            ms *= 1.3;   // increase timeout after each retry
+
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
 
