@@ -33,6 +33,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdio.h>
+#include <sys/stat.h>
 #endif
 
 /******************************************************************************/
@@ -888,5 +890,33 @@ int get_serial_number()
   return sn;
 }
 #endif /* LINUX_COMPILE */
+
+/******************************************************************************/
+
+int is_dir(char* path)
+{
+    struct stat sb;
+
+    if (stat(path, &sb) == 0 && S_ISDIR(sb.st_mode)) {
+      return 1;
+    } else
+    {
+      return 0;
+    }
+}
+
+/******************************************************************************/
+
+int is_file(char* path)
+{
+    struct stat sb;
+
+    if (stat(path, &sb) == 0 && !S_ISDIR(sb.st_mode)) {
+      return 1;
+    } else
+    {
+      return 0;
+    }
+}
 
 /******************************************************************************/

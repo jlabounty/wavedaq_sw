@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <string.h>
 #include "system.h"
 #include "sc_io.h"
 
@@ -37,25 +38,32 @@
 
 /******************************************************************************/
 
-void init_gpio_pin(unsigned int pin, unsigned int direction)
+void init_gpio_pin(unsigned int pin, unsigned int target_direction)
 {
   int fd;
   int len;
   int gpio_nr;
+  char path[50];
   char data_str[50];
+  char current_direction[4];
+  int test;
 
   gpio_nr = ZYNQ_GPIO_OFFS + pin;
 
-  /* export gpio */
-  fd = open("/sys/class/gpio/export", O_WRONLY);
-  if (fd < 0)
+  sprintf(path, "/sys/class/gpio/gpio%d", gpio_nr);
+  if(!is_dir(path))
   {
-      printf("Cannot open GPIO to export for pin %d\n", pin);
-      exit(1);
+    /* export gpio */
+    fd = open("/sys/class/gpio/export", O_WRONLY);
+    if (fd < 0)
+    {
+        printf("Cannot open GPIO to export for pin %d\n", pin);
+        exit(1);
+    }
+    len = sprintf(data_str, "%d", gpio_nr);
+    write(fd, data_str, len);
+    close(fd);
   }
-  len = sprintf(data_str, "%d", gpio_nr);
-  write(fd, data_str, len);
-  close(fd);
 
   /* set direction */
   sprintf(data_str, "/sys/class/gpio/gpio%d/direction", gpio_nr);
@@ -65,8 +73,23 @@ void init_gpio_pin(unsigned int pin, unsigned int direction)
       printf("Cannot open GPIO direction for pin %d\n", pin);
       exit(1);
   }
-  if(direction == INPUT) write(fd, "in",  3);
-  else                   write(fd, "out", 4);
+  read(fd, current_direction, 3);
+  if(target_direction == INPUT)
+  {
+    if(strncmp(current_direction, "out", 3) == 0)
+    {
+      printf("setting %s as input\n", data_str);
+      write(fd, "in", 2);
+    }
+  }
+  else if(target_direction == OUTPUT)
+  {
+    if(strncmp(current_direction, "in", 2) == 0)
+    {
+      printf("setting %s as output\n", data_str);
+      write(fd, "out", 3);
+    }
+  }
   close(fd);
 }
 

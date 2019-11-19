@@ -15,6 +15,8 @@
 
 #include "drv_bpl.h"
 #include "system.h"
+#include "drv_axi_dcb_reg_bank.h"
+#include "register_map_dcb.h"
 #include "sc_io.h"
 #include "xfs_printf.h"
 #include "dbg.h"
@@ -41,6 +43,22 @@
 void bpl_spi_init(bpl_spi_type *self, unsigned char device_nr, unsigned char slot_nr)
 {
   spi_if_init(&(self->slot[slot_nr]), device_nr, slot_nr, 0, 8, 5000000, 0);
+}
+
+/******************************************************************************/
+
+void bpl_spi_drive_en(int enable)
+{
+  unsigned int reg_val = DCB_ENABLE_BPL_SPI_DRIVER_MASK;
+
+  if(enable)
+  {
+    reg_bank_write(DCB_REG_SET_CTRL, &reg_val, 1);
+  }
+  else
+  {
+    reg_bank_write(DCB_REG_CLR_CTRL, &reg_val, 1);
+  }
 }
 
 /******************************************************************************/
@@ -87,6 +105,8 @@ void spi_ascii_cmd(char* buff, unsigned char slot_nr)
   /* Add End of Line */
   tx_buff[count+1] = 0x0D;
 
+  /* Enable SPI driver */
+  bpl_spi_drive_en(1);
   /* Transmit command */
   Status = spi_transfer(SYSPTR(spi_bpl), slot_nr, tx_buff, NULL, count+2);
   if (!Status)
@@ -107,6 +127,9 @@ void spi_ascii_cmd(char* buff, unsigned char slot_nr)
     if (rxc>= 10) xfs_printf("%c",rxc);
   } while ((rxc != 0x03) && (++count < 10000));
 
+  /* Disable SPI driver (wait for CS pullup first) */
+  usleep(2000);
+  bpl_spi_drive_en(0);
 //  XSpi_SetSlaveSelectReg(SYSPTR(spi_bpl), 0xFFFFFFFF);
 }
 
@@ -126,6 +149,8 @@ void spi_binary_cmd(char* tx_buff, char* rx_buff, unsigned char slot_nr, unsigne
 
 //  XSpi_SetSlaveSelectReg(SYSPTR(spi_bpl), spi_slave_select[slot_nr]);
 
+  /* Enable SPI driver */
+  bpl_spi_drive_en(1);
   /* Send Command */
   Status = spi_transfer(SYSPTR(spi_bpl), slot_nr, tx_buff, rx_buff, len);
   if (!Status)
@@ -133,6 +158,9 @@ void spi_binary_cmd(char* tx_buff, char* rx_buff, unsigned char slot_nr, unsigne
     if(DBG_ERR) xfs_printf("SPI Backplane Error: transmission error buffer\r\n");
   }
 
+  /* Disable SPI driver (wait for CS pullup first) */
+  usleep(2000);
+  bpl_spi_drive_en(0);
 //  XSpi_SetSlaveSelectReg(SYSPTR(spi_bpl), 0xFFFFFFFF);
 }
 
@@ -150,8 +178,10 @@ void spi_flash_id_cmd(unsigned char slot_nr)
 
   if (slot_nr > 16) return;
 
+  /* Enable SPI driver */
+  bpl_spi_drive_en(1);
   set_gpio(BIT_IDX_EMIO_CTRL_FLASH_SEL_PIN, 1);
-  //emio_set_pin(SYSPTR(gpio_mio), BIT_IDX_EMIO_CTRL_INIT_PIN, 1);
+  set_gpio(BIT_IDX_EMIO_CTRL_INIT_PIN, 1);
   usleep(1000);
 //  XSpi_SetSlaveSelectReg(SYSPTR(spi_bpl), spi_slave_select[slot_nr]);
 //  XSpi_SetSlaveSelect(SYSPTR(spi_bpl), ~spi_slave_select[slot_nr]);
@@ -160,9 +190,12 @@ void spi_flash_id_cmd(unsigned char slot_nr)
   {
     if(DBG_ERR) xfs_printf("Read Flash ID Error\r\n");
   }
-  usleep(1000);
 //  XSpi_SetSlaveSelectReg(SYSPTR(spi_bpl), 0xFFFFFFFF);
+  set_gpio(BIT_IDX_EMIO_CTRL_INIT_PIN, 0);
   set_gpio(BIT_IDX_EMIO_CTRL_FLASH_SEL_PIN, 0);
+  /* Disable SPI driver (wait for CS pullup first) */
+  usleep(2000);
+  bpl_spi_drive_en(0);
   //emio_set_pin(SYSPTR(gpio_mio), BIT_IDX_EMIO_CTRL_INIT_PIN, 0);
   xfs_printf("Flash ID (0x%02X) 0x%02X 0x%02X 0x%02X\r\n", rx_buf[0], rx_buf[1], rx_buf[2], rx_buf[3]);
 }
