@@ -53,18 +53,23 @@
 #define SPI_DEV_ECLK_LMK_ADC                 2
 
 /* SPI Slaves */
+/* Device 1 */
+#define SPI_SLAVE_SLOT_FPGA                  0
+#define SPI_SLAVE_SLOT_FLASH                 1
+/* Device 2 */
 #define SPI_SLAVE_NR_SI3524                  0
 #define SPI_SLAVE_NR_LMK                     1
 #define SPI_SLAVE_NR_SYS_MON                 2
 
 #ifdef LINUX_COMPILE
 /* Flash MTDs */
-#define MTD_QSPI_FLASH_HEADER                "/dev/mtd0"
-#define MTD_QSPI_FLASH_REGCONTENT            "/dev/mtd1"
-#define MTD_QSPI_FLASH_FSBL                  "/dev/mtd2"
-#define MTD_QSPI_FLASH_BITSTREAM             "/dev/mtd3"
-#define MTD_QSPI_FLASH_RESERVED              "/dev/mtd4"
-#define MTD_QSPI_FLASH_ENV                   "/dev/mtd5"
+#define MTD_CREATE_SLOT_FLASH                "/dev/mtd0"
+#define MTD_QSPI_FLASH_HEADER                "/dev/mtd1"
+#define MTD_QSPI_FLASH_REGCONTENT            "/dev/mtd2"
+#define MTD_QSPI_FLASH_FSBL                  "/dev/mtd3"
+#define MTD_QSPI_FLASH_BITSTREAM             "/dev/mtd4"
+#define MTD_QSPI_FLASH_RESERVED              "/dev/mtd5"
+#define MTD_QSPI_FLASH_ENV                   "/dev/mtd6"
 #endif
 
 /******************************************************************************/
@@ -106,7 +111,7 @@ typedef struct
 extern system_type system_hw;
 
 int init_system();
-void init_spi_bpl(unsigned char slot_nr);
+void init_spi_bpl();
 void init_reg_bank();
 void init_lmk03000();
 void init_si5324();

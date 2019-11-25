@@ -40,13 +40,6 @@
 /******************************************************************************/
 /******************************************************************************/
 
-void bpl_spi_init(bpl_spi_type *self, unsigned char device_nr, unsigned char slot_nr)
-{
-  spi_if_init(&(self->slot[slot_nr]), device_nr, slot_nr, 0, 8, 5000000, 0);
-}
-
-/******************************************************************************/
-
 void bpl_spi_drive_en(int enable)
 {
   unsigned int reg_val = DCB_ENABLE_BPL_SPI_DRIVER_MASK;
@@ -63,9 +56,39 @@ void bpl_spi_drive_en(int enable)
 
 /******************************************************************************/
 
+void bpl_spi_slot_select(unsigned int slot_nr)
+{
+  if (slot_nr > 16) return;
+
+  set_gpio(BOARD_SEL_OFFSET+slot_nr, 1);
+}
+
+/******************************************************************************/
+
+void bpl_spi_deselect()
+{
+  int i;
+
+  for(i=0;i<17;i++)
+  {
+    set_gpio(BOARD_SEL_OFFSET+i, 0);
+  }
+}
+
+/******************************************************************************/
+
+void bpl_spi_init(bpl_spi_type *self, unsigned char device_nr)
+{
+  spi_if_init(&(self->slot_fpga), device_nr, SPI_SLAVE_SLOT_FPGA, 0, 8, 5000000, 0);
+  //spi_if_init(&(self->slot_flash), device_nr, SPI_SLAVE_SLOT_FLASH, 0, 8, 5000000, 0);
+  bpl_spi_deselect();
+}
+
+/******************************************************************************/
+
 int spi_transfer(bpl_spi_type *self, unsigned char slot_nr, char *SendBufPtr, char *RecvBufPtr, unsigned int ByteCount)
 {
-  spi_if_transfer(&(self->slot[slot_nr]), SendBufPtr, RecvBufPtr, ByteCount);
+  spi_if_transfer(&(self->slot_fpga), SendBufPtr, RecvBufPtr, ByteCount);
   return 1;
 }
 
@@ -81,16 +104,15 @@ void spi_ascii_cmd(char* buff, unsigned char slot_nr)
   int i;
 
   if (!buff) return;
-  if (slot_nr > 16) return;
 
 #ifdef LINUX_COMPILE
-  init_spi_bpl(slot_nr);
+  init_spi_bpl();
 #endif
 
-  // count bytes to send...
+  /* count bytes to send... */
   while ( (buff[count]!=0x00) && (buff[count]!=0x0a) && (buff[count]!=0x0d) ) count++;
 
-//  XSpi_SetSlaveSelectReg(SYSPTR(spi_bpl), spi_slave_select[slot_nr]);
+  bpl_spi_slot_select(slot_nr);
 
   if(count > SPI_ASCII_TX_BUF_SIZE-2)
   {
@@ -128,9 +150,9 @@ void spi_ascii_cmd(char* buff, unsigned char slot_nr)
   } while ((rxc != 0x03) && (++count < 10000));
 
   /* Disable SPI driver (wait for CS pullup first) */
+  bpl_spi_deselect();
   usleep(2000);
   bpl_spi_drive_en(0);
-//  XSpi_SetSlaveSelectReg(SYSPTR(spi_bpl), 0xFFFFFFFF);
 }
 
 /******************************************************************************/
@@ -144,10 +166,10 @@ void spi_binary_cmd(char* tx_buff, char* rx_buff, unsigned char slot_nr, unsigne
   if (slot_nr > 16) return;
 
 #ifdef LINUX_COMPILE
-  init_spi_bpl(slot_nr);
+  init_spi_bpl();
 #endif
 
-//  XSpi_SetSlaveSelectReg(SYSPTR(spi_bpl), spi_slave_select[slot_nr]);
+  bpl_spi_slot_select(slot_nr);
 
   /* Enable SPI driver */
   bpl_spi_drive_en(1);
@@ -159,9 +181,9 @@ void spi_binary_cmd(char* tx_buff, char* rx_buff, unsigned char slot_nr, unsigne
   }
 
   /* Disable SPI driver (wait for CS pullup first) */
+  bpl_spi_deselect();
   usleep(2000);
   bpl_spi_drive_en(0);
-//  XSpi_SetSlaveSelectReg(SYSPTR(spi_bpl), 0xFFFFFFFF);
 }
 
 /******************************************************************************/
@@ -173,7 +195,7 @@ void spi_flash_id_cmd(unsigned char slot_nr)
   int Status;
 
 #ifdef LINUX_COMPILE
-  init_spi_bpl(slot_nr);
+  init_spi_bpl();
 #endif
 
   if (slot_nr > 16) return;

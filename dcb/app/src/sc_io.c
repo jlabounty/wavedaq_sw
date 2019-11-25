@@ -78,7 +78,7 @@ void init_gpio_pin(unsigned int pin, unsigned int target_direction)
   {
     if(strncmp(current_direction, "out", 3) == 0)
     {
-      printf("setting %s as input\n", data_str);
+      /* printf("setting %s as input\n", data_str); */
       write(fd, "in", 2);
     }
   }
@@ -86,7 +86,7 @@ void init_gpio_pin(unsigned int pin, unsigned int target_direction)
   {
     if(strncmp(current_direction, "in", 2) == 0)
     {
-      printf("setting %s as output\n", data_str);
+      /* printf("setting %s as output\n", data_str); */
       write(fd, "out", 3);
     }
   }
@@ -103,7 +103,7 @@ void gpio_init()
 
   for(i=0;i<NR_OF_EMIOS;i++)
   {
-    if(i<32)
+    if(i<EMIO_STAT_OFFSET)
     {
       /* init control outputs */
       init_gpio_pin(EMIO_PIN_OFFSET+i, OUTPUT);
