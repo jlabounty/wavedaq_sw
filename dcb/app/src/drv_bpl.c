@@ -34,7 +34,8 @@
 #ifdef LINUX_COMPILE
 #undef Xil_AssertNonvoid
 #define Xil_AssertNonvoid   assert
-#define SPI_ASCII_TX_BUF_SIZE   512
+#define SPI_ASCII_TX_BUF_SIZE     512
+#define SPI_ASCII_RX_BURST_LEN     32 /* Must be smaller than SPI_ASCII_TX_BUF_SIZE */
 #endif
 
 /******************************************************************************/
@@ -97,8 +98,8 @@ int spi_transfer(bpl_spi_type *self, unsigned char slot_nr, char *SendBufPtr, ch
 void spi_ascii_cmd(char* buff, unsigned char slot_nr)
 {
   unsigned char tx_buff[SPI_ASCII_TX_BUF_SIZE];
-  unsigned char txc;
-  unsigned char rxc;
+  unsigned char rx_buff[SPI_ASCII_RX_BURST_LEN];
+  int eot = 0;
   int count = 0;
   int Status;
   int i;
@@ -136,18 +137,24 @@ void spi_ascii_cmd(char* buff, unsigned char slot_nr)
     if(DBG_ERR) xfs_printf("SPI Backplane Error: transmission error EOL\r\n");
   }
 
-  txc = 0x00;
+  memset(tx_buff, 0, SPI_ASCII_RX_BURST_LEN);
   count = 0;
   do
   {
-    Status = spi_transfer(SYSPTR(spi_bpl), slot_nr, &txc, &rxc, 1);
+    memset(rx_buff, 0, SPI_ASCII_RX_BURST_LEN);
+    Status = spi_transfer(SYSPTR(spi_bpl), slot_nr, tx_buff, rx_buff, SPI_ASCII_RX_BURST_LEN);
     if (!Status)
     {
       if(DBG_ERR) xfs_printf("SPI Backplane Error: receive error in loop\r\n");
     }
     usleep(100);
-    if (rxc>= 10) xfs_printf("%c",rxc);
-  } while ((rxc != 0x03) && (++count < 10000));
+    i = 0;
+    while( (i < SPI_ASCII_RX_BURST_LEN) && (rx_buff[i] != 0x03) )
+    {
+      if (rx_buff[i]>= 10) xfs_printf("%c",rx_buff[i]);
+      i++;
+    }
+  } while ((rx_buff[i] != 0x03) && (++count < 1000));
 
   /* Disable SPI driver (wait for CS pullup first) */
   bpl_spi_deselect();
