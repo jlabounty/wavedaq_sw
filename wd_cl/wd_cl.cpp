@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
       printf("[11]: spawn daq            \t \t  [12]: stop daq             \n");
       printf("[13]: sync dly scan        \t \t  [14]: attach debug thread  \n");
       printf("[15]: draw system          \t \t  [16]: print firmware version\n");
-      printf("[17]: update firmware      \t \t  [  ]:                      \n");
+      printf("[17]: update firmware      \t \t  [18]: clean buffer         \n");
       do {
          char opline[256];
          printf("give an option: ");
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
          if(option == 3)
          {
             printf("starting system...\n");
-            sys->GoRun();
+	    sys->GoRun();
          }
          if(option == 4)
          {
@@ -427,6 +427,12 @@ int main(int argc, char *argv[])
                         printf("Upload failed!");
                      }
                   }
+         }
+         if(option == 18)
+         {
+            sys->fPacketBuffer->Clean();
+            sys->fCalibratedBuffer->Clean();
+            sys->fEventBuffer->Clean();
          }
       } while ( option == 0 ) ;
       /* end of the main loop on the options*/

@@ -376,6 +376,12 @@ void WDSystem::StopRun(){
    if(fWorkerThread) fWorkerThread->StopRun();
    for(auto t: fTCBReaderThreads) t->StopRun();
 
+   if(fCollectorThread) while(fCollectorThread->IsRunning()) std::this_thread::yield();
+   if(fBuilderThread) while(fBuilderThread->IsRunning()) std::this_thread::yield();
+   if(fWriterThread) while(fWriterThread->IsRunning()) std::this_thread::yield();
+   if(fWorkerThread) while(fWorkerThread->IsRunning()) std::this_thread::yield();
+   for(auto t: fTCBReaderThreads) while(t->IsRunning()) std::this_thread::yield();
+
    //clean all buffers 
    if(fPacketBuffer) fPacketBuffer->Clean();
    if(fCalibratedBuffer) fCalibratedBuffer->Clean();

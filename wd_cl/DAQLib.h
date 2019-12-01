@@ -52,10 +52,22 @@ template <class T> class DAQBuffer {
          //check size
          if(fEvents.size() == 0){
             //no data, wait
-            std::cv_status status = fHasData.wait_for(lock,std::chrono::milliseconds(100));
+            /*std::cv_status status = fHasData.wait_for(lock,std::chrono::milliseconds(100), GetSize());
             if(status == std::cv_status::timeout) {
                lock.unlock();
                return false;
+            }*/
+
+            if(fHasData.wait_for(lock, std::chrono::milliseconds(100), [&]{return fEvents.size()!=0; }))
+            {
+               ptr = fEvents.front();
+               fEvents.pop();
+               lock.unlock();
+               return true;
+            } else {
+               lock.unlock();
+               return false;
+
             }
          }
          ptr = fEvents.front();
@@ -104,7 +116,7 @@ class DAQThread{
       std::chrono::high_resolution_clock::duration fLastLoopDuration; //for monitoring
       volatile bool fStop;
       volatile bool fRunning;
-      bool fRunning_old;
+      volatile bool fRunning_old;
 
       //reserved Methods
       void ThreadMain(){
@@ -163,7 +175,10 @@ class DAQThread{
       }
 
       bool IsRunning(){
-         return fRunning;
+         //if(fRunning_old==false) printf("thread not running\n");
+         //else printf("still running\n");
+         
+         return fRunning_old;
       }
 
       std::chrono::microseconds GetLastLoopDuration(){
@@ -215,9 +230,12 @@ class DAQServerThread : public DAQThread{
 	 printf("allocating %d bytes\n", fBufferSize);      
 
 	 getsockopt(fDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeGet, &sockOptSize);
+    printf("initial %d\n", rcvBufferSizeGet);
+
 	 if (rcvBufferSizeGet < 2*rcvBufferSizeSet) {
 	   setsockopt(fDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeSet, sizeof(rcvBufferSizeSet));
 	   getsockopt(fDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeGet, &sockOptSize);
+      printf("final %d\n", rcvBufferSizeGet);
 	 } else {
             throw std::runtime_error(std::string("Cannot allocate enough memory for kernel buffer"));
 	 }
