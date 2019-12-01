@@ -50,7 +50,7 @@ int spi_if_init(spi_if_type* self, unsigned char device_nr, unsigned char slave_
     if(DBG_ERR) printf("Failed to open the bus.");
     /* ERROR HANDLING; you can check errno to see what went wrong */
     //com_serial=0;
-    exit(1);
+    return -1;
   }
 
   /* Verifications */

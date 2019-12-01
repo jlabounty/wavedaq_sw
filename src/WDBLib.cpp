@@ -174,12 +174,11 @@ std::string WDB::SendReceiveUDP(std::string str) {
          FD_ZERO(&readfds);
          FD_SET(gASCIISocket, &readfds);
 
-         if (retry == 0) // reduce timeout on first retry (ARP problem)
-            ms = 100;
-         else if (retry == 5)
-            ms = 1000; // increase timeout after five retries
-         else
+         if (retry == 0)
             ms = mReceiveTimeoutMs;
+         else
+            ms *= 1.3;   // increase timeout after each retry
+
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
 
@@ -316,9 +315,11 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data) {
          FD_ZERO(&readfds);
          FD_SET(gBinSocket, &readfds);
 
-         ms = mReceiveTimeoutMs;
-         if (retry == 5) // increase timeout after a few retries
-            ms = 1000;
+         if (retry == 0)
+            ms = mReceiveTimeoutMs;
+         else
+            ms *= 1.3;   // increase timeout after each retry
+
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
 
@@ -435,9 +436,11 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg) {
          FD_ZERO(&readfds);
          FD_SET(gBinSocket, &readfds);
 
-         ms = mReceiveTimeoutMs;
-         if (retry == 5) // increase timeout after a few retries
-            ms = 1000;
+         if (retry == 0)
+            ms = mReceiveTimeoutMs;
+         else
+            ms *= 1.3;   // increase timeout after each retry
+
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
 
@@ -1846,18 +1849,19 @@ WP::WP(std::vector<WDB *> w, int verbose, std::string logfile, bool demo) {
       assert(WP::gDataSocket);
 
       // increase receive buffer size
-      int rcvBufferSizeSet = 4 * 1024 * 1024; // 4 MB
+      int rcvBufferSizeSet = 8 * 1024 * 1024; // 8 MB
+      int rcvBufferSizeGetOrig;
       int rcvBufferSizeGet;
-      socklen_t sockOptSize = sizeof(rcvBufferSizeGet);
+      socklen_t sockOptSize = sizeof(rcvBufferSizeGetOrig);
 
-      getsockopt(WP::gDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeGet, &sockOptSize);
-      //std::cout << "Initial rcvBufferSizeGet " << rcvBufferSizeGet/1024 << " kB" << std::endl;
-      if (rcvBufferSizeGet < 2 * rcvBufferSizeSet) {
-         setsockopt(WP::gDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeSet, sizeof(rcvBufferSizeSet));
+      getsockopt(WP::gDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeGetOrig, &sockOptSize);
+      if (rcvBufferSizeGetOrig < rcvBufferSizeSet) {
+         int status = setsockopt(WP::gDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeSet, sizeof(rcvBufferSizeSet));
          getsockopt(WP::gDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeGet, &sockOptSize);
-         //std::cout << "Modified rcvBufferSizeGet " << rcvBufferSizeGet/1024 << " kb" << std::endl;
 
          if (rcvBufferSizeGet < rcvBufferSizeSet) {
+            std::cout << "Initial rcvBufferSizeGet  : " << rcvBufferSizeGetOrig/1024 << " kB" << std::endl;
+            std::cout << "Modified rcvBufferSizeGet : " << rcvBufferSizeGet/1024 << " kB" << std::endl;
             std::cout << "Warning: Receive Buffer Size quite small, consider:" << std::endl << std::endl
                       #ifdef __linux__
                       << "$ sudo sysctl -w net.core.rmem_max=" << rcvBufferSizeSet << std::endl << std::endl
@@ -1866,7 +1870,7 @@ WP::WP(std::vector<WDB *> w, int verbose, std::string logfile, bool demo) {
                       #endif
                       #ifdef __APPLE__
                       << "$ sudo sysctl net.inet.udp.recvspace=" << rcvBufferSizeSet << std::endl << std::endl
-                      << "or insert to /etc/sysctl.conf for permanent settings" << std::endl;
+                      << "or insert this into /etc/sysctl.conf to make it permanent" << std::endl;
 #endif
          }
       }

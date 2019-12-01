@@ -20,10 +20,10 @@
 
 typedef struct
 {
-  spi_if_type slot[17];
+  spi_if_type slot_fpga;
 } bpl_spi_type;
 
-void bpl_spi_init(bpl_spi_type *self, unsigned char device_nr, unsigned char slot_nr);
+void bpl_spi_init(bpl_spi_type *self, unsigned char device_nr);
 void spi_ascii_cmd(char* buff, unsigned char slot_nr);
 void spi_binary_cmd(char* tx_buff, char* rx_buff, unsigned char slot_nr, unsigned int len);
 void spi_flash_id_cmd(unsigned char slot_nr);

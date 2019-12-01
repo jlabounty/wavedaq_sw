@@ -33,6 +33,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdio.h>
+#include <sys/stat.h>
 #endif
 
 /******************************************************************************/
@@ -54,7 +56,7 @@ const char system_sw_build_time[] = __TIME__;
 const char *system_month_str[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
 #ifdef LINUX_COMPILE
-static int spi_bpl_initialized[17] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+static int spi_bpl_initialized     = 0;
 static int sys_mon_initialized     = 0;
 static int lmk03000_initialized    = 0;
 static int si5324_initialized      = 0;
@@ -532,29 +534,18 @@ char default_env[] = "sn=0\0"
 /******************************************************************************/
 
 #ifdef LINUX_COMPILE
-void init_spi_bpl(unsigned char slot_nr)
+void init_spi_bpl()
 {
   int i;
 
-  if(spi_bpl_initialized[slot_nr])
+  if(spi_bpl_initialized)
   {
     return;
   }
   else
   {
-    if( slot_nr>16 )
-    {
-      for(i=0;i<17;i++)
-      {
-        spi_bpl_initialized[i] = 1;
-        bpl_spi_init(SYSPTR(spi_bpl), SPI_DEV_BPL, i);
-      }
-    }
-    else
-    {
-      spi_bpl_initialized[slot_nr] = 1;
-      bpl_spi_init(SYSPTR(spi_bpl), SPI_DEV_BPL, slot_nr);
-    }
+    spi_bpl_initialized = 1;
+    bpl_spi_init(SYSPTR(spi_bpl), SPI_DEV_BPL);
   }
 }
 #endif /* LINUX_COMPILE */
@@ -888,5 +879,33 @@ int get_serial_number()
   return sn;
 }
 #endif /* LINUX_COMPILE */
+
+/******************************************************************************/
+
+int is_dir(char* path)
+{
+    struct stat sb;
+
+    if (stat(path, &sb) == 0 && S_ISDIR(sb.st_mode)) {
+      return 1;
+    } else
+    {
+      return 0;
+    }
+}
+
+/******************************************************************************/
+
+int is_file(char* path)
+{
+    struct stat sb;
+
+    if (stat(path, &sb) == 0 && !S_ISDIR(sb.st_mode)) {
+      return 1;
+    } else
+    {
+      return 0;
+    }
+}
 
 /******************************************************************************/
