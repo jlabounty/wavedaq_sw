@@ -1248,13 +1248,30 @@ float WDB::GetDacTriggerLevelV(int chn) {
    d = BitExtractControl(reg + (chn / 2) * 4, mask, ofs);
 
    // convert to Volts taking WDB comparator offset into account
-   float v = ((d / 65535.0 * 2500) - 900) / 500.0;
+   float v=-1;
+   switch(GetVersion())
+   {
+   case 8:
+      v = ((d / 65535.0 * 2500) - 900) / 500.0;
+      break;
+   case 9:
+      v = ((d / 65535.0 * 2500) - 900) / 1000.0;
+      break;
+   };
    return (int) (v * 1000 + 0.5) / 1000.0;
 }
 
 void WDB::SetDacTriggerLevelV(int chn, float v) {
    // convert to mV taking WDB comparator offset into account
-   v = v * 500 + 900;
+  switch(GetVersion())
+    {
+    case 8:
+      v = v * 500 + 900;
+      break;
+    case 9:
+      v = v * 1000 + 900;
+      break;
+    };
 
    // convert from mV to DAC bits
    auto d = (unsigned int) (v / 2500.0 * 65535 + 0.5);
