@@ -24,7 +24,7 @@
 #include "mxml.h"
 
 #define WD_N_CHANNELS 18
-#define WD_N_SCALER 18
+#define WD_N_SCALER 19
 #define SUCCESS        1
 
 class WDB;

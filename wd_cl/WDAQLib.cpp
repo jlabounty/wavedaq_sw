@@ -175,6 +175,7 @@ void WDAQScaPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    //Should check e->mBoardType is WDB 
    WDAQWdbEvent *wdb_e = static_cast<WDAQWdbEvent*>(e);
 
+   wdb_e->mTimeStamp = mTimeStamp;
    for(int i=0; i<WD_N_SCALER; i++){
       wdb_e->mScaler[i] = data[i];
    }
@@ -534,7 +535,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
       // decode waveform data
       auto pd = (unsigned long*)(data+1);
       for (int i=0 ; i<WD_N_SCALER ; i++) {//Ch 0->16, Trigger, External Clock
-         packet->data[i] = SWAP_UINT64(pd[17-i]);
+         packet->data[i] = SWAP_UINT64(pd[i]);
       }
 
       PushPacket(packet);

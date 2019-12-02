@@ -164,7 +164,7 @@ public:
 //WDAQ Scaler Packet Data -  derived packet class to host scaler
 class WDAQScaPacketData : public WDAQWdbPacketData{
 public:
-   unsigned long data[18];
+  unsigned long data[WD_N_SCALER];
 
    //Add packet info to given Board Event
    void AddDataToBoardEvent(WDAQBoardEvent *e);
@@ -247,7 +247,7 @@ public:
    unsigned short   mAdcU[WD_N_CHANNELS-2][2048];
    unsigned char    mTdc[WD_N_CHANNELS-2][512];
    unsigned long    mTrg[512];
-   unsigned long    mScaler[WD_N_CHANNELS];
+   unsigned long    mScaler[WD_N_SCALER];
 
    //event status
    bool             mVCalibrated;
