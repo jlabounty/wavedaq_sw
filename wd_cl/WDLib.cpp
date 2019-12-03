@@ -360,7 +360,13 @@ void WDSystem::GoRun(){
    if(fWriterThread) fWriterThread->GoRun();
    if(fWorkerThread) fWorkerThread->GoRun();
    for(auto t: fTCBReaderThreads) t->GoRun();
-   sleep(1);
+
+   if(fCollectorThread) while(!fCollectorThread->IsRunning()) std::this_thread::yield();
+   if(fBuilderThread) while(!fBuilderThread->IsRunning()) std::this_thread::yield();
+   if(fWriterThread) while(!fWriterThread->IsRunning()) std::this_thread::yield();
+   if(fWorkerThread) while(!fWorkerThread->IsRunning()) std::this_thread::yield();
+   for(auto t: fTCBReaderThreads) while(!t->IsRunning()) std::this_thread::yield();
+
    GetTriggerBoard()->GoRun();
 }
 
