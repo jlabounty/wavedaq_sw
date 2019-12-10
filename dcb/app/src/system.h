@@ -55,7 +55,8 @@
 /* SPI Slaves */
 /* Device 1 */
 #define SPI_SLAVE_SLOT_FPGA                  0
-#define SPI_SLAVE_SLOT_FLASH                 1
+#define SPI_SLAVE_SLOT_WDB_FLASH             1
+#define SPI_SLAVE_SLOT_TCB_FLASH             2
 /* Device 2 */
 #define SPI_SLAVE_NR_SI3524                  0
 #define SPI_SLAVE_NR_LMK                     1
@@ -63,13 +64,16 @@
 
 #ifdef LINUX_COMPILE
 /* Flash MTDs */
-#define MTD_CREATE_SLOT_FLASH                "/dev/mtd0"
-#define MTD_QSPI_FLASH_HEADER                "/dev/mtd1"
-#define MTD_QSPI_FLASH_REGCONTENT            "/dev/mtd2"
-#define MTD_QSPI_FLASH_FSBL                  "/dev/mtd3"
-#define MTD_QSPI_FLASH_BITSTREAM             "/dev/mtd4"
-#define MTD_QSPI_FLASH_RESERVED              "/dev/mtd5"
-#define MTD_QSPI_FLASH_ENV                   "/dev/mtd6"
+#define MTD_WDB_FLASH_BITSTREA               "/dev/mtd0"
+#define MTD_WDB_FLASH_SOFTWARE               "/dev/mtd1"
+#define MTD_WDB_FLASH_RESERVED               "/dev/mtd2"
+#define MTD_TCB_FLASH_BITSTREA               "/dev/mtd3"
+#define MTD_QSPI_FLASH_HEADER                "/dev/mtd4"
+#define MTD_QSPI_FLASH_REGCONTENT            "/dev/mtd5"
+#define MTD_QSPI_FLASH_FSBL                  "/dev/mtd6"
+#define MTD_QSPI_FLASH_BITSTREAM             "/dev/mtd7"
+#define MTD_QSPI_FLASH_RESERVED              "/dev/mtd8"
+#define MTD_QSPI_FLASH_ENV                   "/dev/mtd9"
 #endif
 
 /******************************************************************************/
@@ -109,6 +113,16 @@ typedef struct
 } system_type;
 
 extern system_type system_hw;
+
+extern const char wdb_rf_default_path[];
+extern const char wdb_rg_default_path[];
+extern const char tcb_t1_default_path[];
+extern const char tcb_t2_default_path[];
+extern const char tcb_t3_default_path[];
+
+extern const char wdb_fw_default_file[];
+extern const char wdb_sw_default_file[];
+extern const char tcb_fw_default_file[];
 
 int init_system();
 void init_spi_bpl();

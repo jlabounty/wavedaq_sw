@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
   {
     if(argc>1) cmd_process(argc-1, &argv[1]);
   }
-  else if(strstr(argv[0], "wdb"))
+  else if(strstr(argv[0], "slt"))
   {
     if(argc>2) cmd_process(argc, argv);
   }

@@ -21,11 +21,19 @@
 typedef struct
 {
   spi_if_type slot_fpga;
+  //spi_if_type slot_wdb_flash;
+  //spi_if_type slot_tcb_flash;
 } bpl_spi_type;
+
+typedef struct
+{
+  unsigned char op_en[17];
+} slot_op_en_type;
 
 void bpl_spi_init(bpl_spi_type *self, unsigned char device_nr);
 void spi_ascii_cmd(char* buff, unsigned char slot_nr);
 void spi_binary_cmd(char* tx_buff, char* rx_buff, unsigned char slot_nr, unsigned int len);
+void bpl_upload_fw_sw(slot_op_en_type *slot, char *fwp, char *swp);
 void spi_flash_id_cmd(unsigned char slot_nr);
 
 #endif /* __DRV_BPL__ */

@@ -55,6 +55,16 @@ const char system_sw_build_date[] = __DATE__;
 const char system_sw_build_time[] = __TIME__;
 const char *system_month_str[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
+const char wdb_rf_default_path[] = "/firmware/wdb/prod/rev_f/\0";
+const char wdb_rg_default_path[] = "/firmware/wdb/prod/rev_g/\0";
+const char tcb_t1_default_path[] = "/firmware/tcb/prod/type_1/\0";
+const char tcb_t2_default_path[] = "/firmware/tcb/prod/type_2/\0";
+const char tcb_t3_default_path[] = "/firmware/tcb/prod/type_3/\0";
+
+const char wdb_fw_default_file[] = "download.bit\0";
+const char wdb_sw_default_file[] = "app_sys_ctrl.srec\0";
+const char tcb_fw_default_file[] = "TCB_TOP.bit\0";
+
 #ifdef LINUX_COMPILE
 static int spi_bpl_initialized     = 0;
 static int sys_mon_initialized     = 0;

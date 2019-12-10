@@ -201,7 +201,7 @@ int cmd_process(int argc, char *argv[])
       if( fstrcmp(argv[0], cmd_ptr->cmd_name) )
       {
         /* 0 means no limit, i.e. set to MAX */
-        arg_limit = 3;//cmd_ptr->arg_limit ? cmd_ptr->arg_limit : MAX_ARG_COUNT;
+        arg_limit = cmd_ptr->arg_limit ? cmd_ptr->arg_limit : MAX_ARG_COUNT;
 
         if( argc > arg_limit )
         {

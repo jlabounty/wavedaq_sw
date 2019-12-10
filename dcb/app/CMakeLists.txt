@@ -50,8 +50,9 @@ set(SRC
 
 add_executable(dcbi src/dcbi.c ${SRC})
 add_executable(dcbc src/dcbc.c ${SRC})
-add_executable(wdbc src/wdbc.c ${SRC})
+add_executable(sltc src/sltc.c ${SRC})
 add_executable(dcbs src/dcbs.c ${SRC})
+add_executable(upload src/upload.c ${SRC})
 
 target_include_directories(dcbs PRIVATE
    ${PROJECT_SOURCE_DIR}/../../include
@@ -59,17 +60,19 @@ target_include_directories(dcbs PRIVATE
 
 target_compile_definitions(dcbi PRIVATE LINUX_COMPILE)
 target_compile_definitions(dcbc PRIVATE LINUX_COMPILE)
-target_compile_definitions(wdbc PRIVATE LINUX_COMPILE)
+target_compile_definitions(sltc PRIVATE LINUX_COMPILE)
 target_compile_definitions(dcbs PRIVATE LINUX_COMPILE)
+target_compile_definitions(upload PRIVATE LINUX_COMPILE)
 
 #
 # libraries
 #
 target_link_libraries(dcbi readline)
 target_link_libraries(dcbc readline)
-target_link_libraries(wdbc readline)
+target_link_libraries(sltc readline)
+target_link_libraries(upload readline)
 
 add_dependencies(dcbs git_revision_h)
 add_dependencies(dcbi git_revision_h)
 
-install(TARGETS dcbi dcbc wdbc dcbs DESTINATION bin)
+install(TARGETS dcbi dcbc sltc dcbs upload DESTINATION bin)
