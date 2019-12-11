@@ -191,7 +191,7 @@ std::string DCB::SendReceiveUDP(std::string str)
 
 //--------------------------------------------------------------------
 
-void DCB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data) {
+void DCB::WriteUDP(unsigned int slot, unsigned int ofs, std::vector<unsigned int> data) {
    size_t i;
    fd_set readfds;
    struct timeval timeout;
@@ -206,7 +206,7 @@ void DCB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data) {
    std::vector<unsigned char> readBuf(1600);
 
    writeBuf[0] = 0x14; // Write32 command
-   writeBuf[1] = 0;
+   writeBuf[1] = slot;
    writeBuf[2] = udpSequenceNumber >> 8u;
    writeBuf[3] = udpSequenceNumber & 0xFFu;
 
@@ -317,7 +317,7 @@ void DCB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data) {
 
 //--------------------------------------------------------------------
 
-std::vector<unsigned int> DCB::ReadUDP(unsigned int ofs, unsigned int nReg) {
+std::vector<unsigned int> DCB::ReadUDP(unsigned int slot, unsigned int ofs, unsigned int nReg) {
    size_t i;
    fd_set readfds;
    struct timeval timeout;
@@ -334,7 +334,7 @@ std::vector<unsigned int> DCB::ReadUDP(unsigned int ofs, unsigned int nReg) {
    std::vector<unsigned char> readBuf(1600);
 
    writeBuf[0]  = 0x24; // Read32 command
-   writeBuf[1]  = 0;
+   writeBuf[1]  = slot;
    writeBuf[2]  = udpSequenceNumber >> 8;
    writeBuf[3]  = udpSequenceNumber & 0xFF;
 
@@ -534,7 +534,7 @@ void DCB::bitReplace(unsigned int &reg, unsigned int mask, unsigned int ofs, uns
 //--------------------------------------------------------------------
 
 void DCB::ReceiveRegisters(unsigned int adr, unsigned int nReg) {
-   std::vector<unsigned int> result = ReadUDP(adr, nReg);
+   std::vector<unsigned int> result = ReadUDP(SLOT_DCB, adr, nReg);
    assert(result.size() == nReg);
    for (unsigned int i = 0; i < nReg; i++)
       this->reg[adr / 4 + i] = result[i];
@@ -548,7 +548,7 @@ void DCB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, uns
    bitReplace(r, mask, ofs, v);
 
    if (!mSendBlocked) {
-      WriteUDP(rofs, std::vector<unsigned int>{r});
+      WriteUDP(SLOT_DCB, rofs, std::vector<unsigned int>{r});
    }
 
    this->reg[index] = r;
@@ -558,7 +558,7 @@ void DCB::SendRegisters(unsigned int index, unsigned int nReg) {
    std::vector<unsigned int> v;
    for (int i = 0; i < nReg; i++)
       v.push_back(this->reg[index + i]);
-   WriteUDP(index * 4, v);
+   WriteUDP(SLOT_DCB, index * 4, v);
 }
 
 //-- Status registers ------------------------------------------------

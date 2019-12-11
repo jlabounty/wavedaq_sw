@@ -14,6 +14,7 @@
 #define __wdblib_h__
 
 #include "WDBReg.h"
+#include "DCBLib.h"
 
 #include <thread>
 #include <queue>
@@ -532,8 +533,9 @@ public:
 // WaveDREAM board class. Interface functions to all WDB registers
 class WDB: public WDBREG {
    std::string      mWDBName;
-   std::string      mDCBName;
    std::string      mPrompt;
+   DCB*             mDCB;
+   unsigned int     mSlot;
    unsigned char    mEthAddrAscii[16];
    unsigned char    mEthAddrBin[16];
    bool             mVerbose;
@@ -565,7 +567,7 @@ public:
    
    // constructor
    WDB(std::string name, bool verbose = false);
-   WDB(std::string name, int slot, bool verbose = false);
+   WDB(DCB *dcb, int slot, bool verbose = false);
 
    const unsigned int cRequiredRegLayoutCompatLevel2F = 8;
    const unsigned int cRequiredFwCompatLevel2F = 4;

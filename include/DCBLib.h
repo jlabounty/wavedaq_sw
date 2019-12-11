@@ -23,6 +23,9 @@
 
 #define SUCCESS        1
 
+#define SLOT_DCB      16
+#define SLOT_TCB      17
+
 //--------------------------------------------------------------------
 
 // Data Concentrator Board class. Interface functions to all WDB registers
@@ -45,13 +48,13 @@ class DCB: public DCBREG {
    std::string SendReceiveUDP(std::string str);
    void SendUDP(std::string str);
 
-   void             WriteUDP(unsigned int ofs, std::vector<unsigned int> data);
-   std::vector<unsigned int> ReadUDP(unsigned int ofs, unsigned int len);
-
 public:
    
    // constructor
    DCB(const std::string &name, bool verbose = false);
+
+   void             WriteUDP(unsigned int slot, unsigned int ofs, std::vector<unsigned int> data);
+   std::vector<unsigned int> ReadUDP(unsigned int slot, unsigned int ofs, unsigned int len);
 
    const unsigned int cRequiredRegLayoutCompatLevel = 0;
    const unsigned int cRequiredFwCompatLevel = 0;

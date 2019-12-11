@@ -36,8 +36,11 @@ int main(int argc, const char *argv[])
    dcb->SetDistributorClkSrcSel(0);
    dcb->SetDistributorClkSrcSel(1);
 
-   wdb.push_back(new WDB("WD134"));
-   // wdb.push_back(new WDB("WD162"));
+   wdb.push_back(new WDB(dcb, 8));
+   wdb.push_back(new WDB(dcb, 12));
+
+   //wdb.push_back(new WDB("WD134"));
+   //wdb.push_back(new WDB("WD162"));
 
    // connect to all WDB and retrieve registers
    for (auto &b: wdb) {
