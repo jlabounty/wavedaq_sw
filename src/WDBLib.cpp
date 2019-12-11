@@ -76,6 +76,8 @@ T access_as(U *p) {
 
 WDB::WDB(std::string name, bool verbose) : WDBREG() {
    mWDBName = name;
+   mDCB = nullptr;
+   mSlot = 0;
    mPrompt = "";
    mVerbose = verbose;
    mLogfile = "";
@@ -97,9 +99,10 @@ WDB::WDB(std::string name, bool verbose) : WDBREG() {
 
 //--------------------------------------------------------------------
 
-WDB::WDB(std::string name, int slot, bool verbose) : WDBREG() {
-   mWDBName = "";
-   mDCBName = name;
+WDB::WDB(DCB *dcb, int slot, bool verbose) : WDBREG() {
+   mWDBName = dcb->GetName() + ":" + std::to_string(slot);
+   mDCB = dcb;
+   mSlot = slot;
    mPrompt = "";
    mVerbose = verbose;
    mLogfile = "";
@@ -245,6 +248,9 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data) {
    if (mDemoMode)
       return;
 
+   if (mDCB)
+      return mDCB->WriteUDP(mSlot, ofs, data);
+
    udpSequenceNumber++;
    std::memcpy(&client_addr, mEthAddrBin, sizeof(client_addr));
 
@@ -372,6 +378,10 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg) {
    struct sockaddr_in client_addr;
    bool bSuccess = false;
    std::vector<unsigned int> result;
+
+   if (mDCB) {
+      return mDCB->ReadUDP(mSlot, ofs, nReg);
+   }
 
    udpSequenceNumber++;
    auto len = nReg * sizeof(unsigned int);
@@ -502,38 +512,40 @@ void WDB::Connect() {
    }
 #endif
 
-   // create UDP socket for ASCII command interpreter
-   if (gASCIISocket == 0)
-      gASCIISocket = socket(AF_INET, SOCK_DGRAM, 0);
-   assert(gASCIISocket);
+   if (!mDCB ) {
+      // create UDP socket for ASCII command interpreter
+      if (gASCIISocket == 0)
+         gASCIISocket = socket(AF_INET, SOCK_DGRAM, 0);
+      assert(gASCIISocket);
 
-   // create UDP socket for binary commands
-   if (gBinSocket == 0)
-      gBinSocket = socket(AF_INET, SOCK_DGRAM, 0);
-   assert(gBinSocket);
+      // create UDP socket for binary commands
+      if (gBinSocket == 0)
+         gBinSocket = socket(AF_INET, SOCK_DGRAM, 0);
+      assert(gBinSocket);
 
-   // retrieve Ethernet address of board
-   phe = gethostbyname(mWDBName.c_str());
-   if (phe == NULL)
-      throw std::runtime_error(std::string("Cannot resolve host name ") + mWDBName + ".");
+      // retrieve Ethernet address of board
+      phe = gethostbyname(mWDBName.c_str());
+      if (phe == NULL)
+         throw std::runtime_error(std::string("Cannot resolve host name ") + mWDBName + ".");
 
-   std::memcpy((char *) &client_addr.sin_addr, phe->h_addr, phe->h_length);
-   client_addr.sin_family = AF_INET;
-   client_addr.sin_port = htons(WD2_CMD_PORT_ASCII);
-   std::memcpy(mEthAddrAscii, &client_addr, sizeof(client_addr));
+      std::memcpy((char *) &client_addr.sin_addr, phe->h_addr, phe->h_length);
+      client_addr.sin_family = AF_INET;
+      client_addr.sin_port = htons(WD2_CMD_PORT_ASCII);
+      std::memcpy(mEthAddrAscii, &client_addr, sizeof(client_addr));
 
-   client_addr.sin_port = htons(WD2_CMD_PORT_BIN);
-   std::memcpy(mEthAddrBin, &client_addr, sizeof(client_addr));
+      client_addr.sin_port = htons(WD2_CMD_PORT_BIN);
+      std::memcpy(mEthAddrBin, &client_addr, sizeof(client_addr));
 
-   // check if board is alive
-   try {
-      WDB::SendUDP("");
-   } catch (...) {
-      throw std::runtime_error(std::string("Cannot connect to board ") + mWDBName + ".");
+      // check if board is alive
+      try {
+         WDB::SendUDP("");
+      } catch (...) {
+         throw std::runtime_error(std::string("Cannot connect to board ") + mWDBName + ".");
+      }
+
+      // set dbglevel none
+      SendUDP("dbglvl none");
    }
-
-   // set dbglevel none
-   SendUDP("dbglvl none");
 
    // check register layout
    auto result = ReadUDP(0x0004, 1);
