@@ -24,6 +24,7 @@
 #include "drv_axi_dcb_reg_bank.h"
 #include "register_map_dcb.h"
 #include "update_config.h"
+#include "drv_bpl.h"
 
 // port to start the UDP servers on
 #define SERVER_PORT_ASC 3000
@@ -98,8 +99,6 @@ int main(int argc, char *argv[]) {
    struct sockaddr_in client_address;
    socklen_t client_address_len = sizeof(client_address);
 
-   printf("DCB binary server listening on %s ports %d,%d\n", hostname, SERVER_PORT_BIN, SERVER_PORT_ASC);
-
    // socket address used for the server
    memset(&server_address, 0, sizeof(server_address));
    server_address.sin_family = AF_INET;
@@ -128,7 +127,7 @@ int main(int argc, char *argv[]) {
    // socket address used to store client address
    client_address_len = sizeof(client_address);
 
-   printf("DCB ASCII server listening on port %d\n", SERVER_PORT_ASC);
+   printf("DCB binary and ASCII servers listening on %s ports %d,%d\n", hostname, SERVER_PORT_BIN, SERVER_PORT_ASC);
 
    if (daemon) {
       printf("DCB server becoming a daemon...\n");
@@ -163,6 +162,7 @@ int main(int argc, char *argv[]) {
 
       if (FD_ISSET(sock_bin, &fds)) {
          // read content into buffer from an incoming client
+         memset(buffer, 0, sizeof(buffer));
          int len = recvfrom(sock_bin, buffer, sizeof(buffer), 0, (struct sockaddr *) &client_address,
                             &client_address_len);
 
@@ -176,23 +176,35 @@ int main(int argc, char *argv[]) {
 
          // interpret packet
          unsigned int cmd = buffer[0];
+         unsigned int slot = buffer[1];
          unsigned int seq = (buffer[2] <<  8 )| (buffer[3] <<  0);
          unsigned int adr = (buffer[4] << 24) | (buffer[5] << 16) | (buffer[6] << 8) | (buffer[7] << 0);
 
          if (cmd == CMD_WRITE32) {
+            unsigned char rbuffer[1600];
             unsigned n = (len - 8) / 4;
 
             if (verbose) {
-               printf("Write to 0x%04X, seq %d:\n", adr, seq);
+               printf("Write to slot %d at 0x%04X, seq %d:\n", slot, adr, seq);
                print_buffer(buffer+8, n * 4);
             }
 
             unsigned int *p = (unsigned int *) (&buffer[8]);
             unsigned int d;
 
-            for (int i = 0; i < n; i++, p++) {
-               d = SWAP_UINT32(*p);
-               reg_bank_write(adr + i * 4, &d, 1);
+            if (slot == 16) { // DCB
+               for (int i = 0; i < n; i++, p++) {
+                  d = SWAP_UINT32(*p);
+                  reg_bank_write(adr + i * 4, &d, 1);
+               }
+            } else {
+                  p = (unsigned int *) (&buffer[8]);
+                  for (int i = 0; i < n; i++, p++) {
+                     d = SWAP_UINT32(*p);
+                     *p = d;
+                  }
+               buffer[3] = CMD_WRITE32;
+               spi_binary_cmd(&buffer[3], rbuffer, slot, (len-8)+5); // 1 cmd, 4 adr. bytes + data
             }
 
             // send acknowledge back to client
@@ -208,18 +220,29 @@ int main(int argc, char *argv[]) {
             n = n > 1024 ? 1024 : n;
 
             if (verbose)
-               printf("Read %d bytes from 0x%08X, seq %d:\n", n, adr, seq);
+               printf("Read %d bytes from slot %d at 0x%08X, seq %d:\n", n, slot, adr, seq);
 
-            rbuffer[0] = 0x24;
+            rbuffer[0] = CMD_READ32;
             rbuffer[1] = 0x01;
             rbuffer[2] = buffer[2];
             rbuffer[3] = buffer[3];
 
             unsigned int *p = (unsigned int *) (&rbuffer[4]);
             unsigned int d;
-            for (int i = 0; i < n / 4 && i < 1024 / 4; i++, p++) {
-               reg_bank_read(adr + i * 4, &d, 1);
-               *p = SWAP_UINT32(d);
+
+            if (slot == 16) { // DCB
+               for (int i = 0; i < n / 4 && i < 1024 / 4; i++, p++) {
+                  reg_bank_read(adr + i * 4, &d, 1);
+                  *p = SWAP_UINT32(d);
+               }
+            } else {
+
+               buffer[3] = CMD_READ32;
+               buffer[8] = 0; // dummy byte
+
+               spi_binary_cmd(&buffer[3], &rbuffer[4], slot, n+6); // 1 cmd, 4 adr. bytes, 1 dummy + data
+
+               memmove(&rbuffer[4], &rbuffer[10], n);
             }
 
             if (verbose)
