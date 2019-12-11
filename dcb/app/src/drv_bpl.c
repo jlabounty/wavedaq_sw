@@ -90,9 +90,17 @@ void bpl_spi_drive_en(int enable)
 
 void select_slot(unsigned int slot_nr)
 {
-  if (slot_nr > 16) return;
+  if ( (slot_nr > 17) || (slot_nr == 16) ) return;
 
-  set_gpio(BOARD_SEL_OFFSET+slot_nr, 1);
+  if ( slot_nr == 17 )
+  {
+    /* special case TCB slot select */
+    set_gpio(BOARD_SEL_OFFSET+16, 1);
+  }
+  else
+  {
+    set_gpio(BOARD_SEL_OFFSET+slot_nr, 1);
+  }
 }
 
 /******************************************************************************/
