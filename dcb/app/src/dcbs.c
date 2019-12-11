@@ -213,6 +213,7 @@ int main(int argc, char *argv[]) {
 
          } else if (cmd == CMD_READ32) {
             unsigned char rbuffer[1600];
+            memset(rbuffer, 0, sizeof(rbuffer));
 
             unsigned int n = (buffer[8] << 24) | (buffer[9] << 16) | (buffer[10] << 8) | (buffer[11] << 0);
 
