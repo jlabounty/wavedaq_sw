@@ -13,6 +13,7 @@
 #ifndef __dcblib_h__
 #define __dcblib_h__
 
+#include "WDBLib.h"
 #include "DCBReg.h"
 
 #include <thread>
@@ -25,6 +26,8 @@
 
 #define SLOT_DCB      16
 #define SLOT_TCB      17
+
+class WDB;
 
 //--------------------------------------------------------------------
 
@@ -87,6 +90,9 @@ public:
    std::string GetHwVersion();
    float GetTemperatureDegree(bool refresh = true);
    unsigned int GetPllLock(bool refresh = true);
+
+   // WDB functions
+   std::vector<WDB *> ScanWDB();
 };
 
 //--------------------------------------------------------------------

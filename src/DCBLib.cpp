@@ -44,6 +44,7 @@
 
 #endif
 
+#include "WDBLib.h"
 #include "DCBLib.h"
 #include "register_map_dcb.h"
 #include "DCBReg.h"
@@ -655,4 +656,21 @@ unsigned int DCB::GetPllLock(bool refresh)
            GetLmkPllLock() << DCB_LMK_PLL_LOCK_OFS;
 
    return mask;
+}
+
+//--------------------------------------------------------------------
+
+std::vector<WDB *> DCB::ScanWDB()
+{
+   std::vector<WDB *> wdb;
+
+   for (auto slot=0 ; slot<16 ; slot++) {
+      auto result = ReadUDP(slot, 0x0000, 1);
+      if (result[0] == 0xAC010213 ||
+          result[0] == 0xAC01021B) {
+         wdb.push_back(new WDB(this, slot));
+      }
+   }
+
+   return wdb;
 }
