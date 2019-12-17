@@ -52,7 +52,6 @@
 #define WD2_UDP_PROTOCOL_VERSION  7
 
 int WP::gDataSocket = 0;
-int WP::gServerPort = 0;
 int WDB::gASCIISocket = 0;
 int WDB::gBinSocket = 0;
 
@@ -1920,10 +1919,11 @@ WP::WP(std::vector<WDB *> w, int verbose, std::string logfile, bool demo) {
       }
       auto size = sizeof(server_addr);
       getsockname(WP::gDataSocket, (struct sockaddr *) &server_addr, (socklen_t *) &size);
-      WP::gServerPort = ntohs(server_addr.sin_port);
+      WP::mServerPort = ntohs(server_addr.sin_port);
+      inet_ntop(AF_INET, &(server_addr.sin_addr), WP::mServerAddr, sizeof(WP::mServerAddr));
 
       if (this->mVerbose)
-         std::cout << std::endl << "Listening on data port " << WP::gServerPort << "." << std::endl;
+         std::cout << std::endl << "Listening on data port " << WP::mServerPort << "." << std::endl;
    }
 
    // allocated event buffer and requests for all WDB

@@ -342,7 +342,8 @@ class WP {
    };
 
    static int        gDataSocket;
-   static int        gServerPort;
+   int               mServerPort;
+   char              mServerAddr[32];
 
    int               mVerbose;
    std::string       mLogfile;
@@ -431,7 +432,7 @@ public:
    
    // setter & getter
    int GetDataSocket() { return gDataSocket; }
-   int GetServerPort() { return gServerPort; }
+   int GetServerPort() { return mServerPort; }
    bool IsVerbose() { return mVerbose; }
    bool IsDemoMode() { return mDemoMode; }
    bool IsRotateWaveform() { return mRotateWaveform;}
