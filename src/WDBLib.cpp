@@ -129,6 +129,9 @@ std::string WDB::SendReceiveUDP(std::string str) {
    char rx_buffer[1600];
    std::string result;
 
+   if (mDCB) {
+      return mDCB->SendReceiveUDP(std::to_string(mSlot) + " " + str);
+   }
    std::memcpy(&client_addr, mEthAddrAscii, sizeof(client_addr));
 
    if (str.back() != '\n')
@@ -545,6 +548,16 @@ void WDB::Connect() {
 
       // set dbglevel none
       SendUDP("dbglvl none");
+   } else {
+      // check if board is alive
+      try {
+         auto result = ReadUDP(0x0000, 1);
+         auto magic  = (result[0] & 0xFF000000) >> 24;
+         if (magic != 0xAC)
+            throw std::runtime_error(std::string("Cannot connect to board ") + mWDBName + ".");
+      } catch (...) {
+         throw std::runtime_error(std::string("Cannot connect to board ") + mWDBName + ".");
+      }
    }
 
    // check register layout
@@ -648,8 +661,17 @@ void WDB::SetDestinationPort(int port) {
    if (mDemoMode)
       return;
 
-   // set destinantion port in WD board, MAC and IP is used automaticlly form UDP packet
-   SendUDP(std::string("cfgdst ") + std::to_string(port));
+   if (mDCB) {
+      std::string str;
+      str = std::to_string(mSlot) + " ";
+      str += "cfgdst ";
+      str += std::to_string(port) + " ";
+      str += "129.129.96.122 ";
+      str += "a8:60:b6:0e:28:ee";
+      mDCB->SendReceiveUDP(str);
+   } else
+      // set destinantion port in WD board, MAC and IP is used automaticlly form UDP packet
+      SendUDP(std::string("cfgdst ") + std::to_string(port));
 }
 
 //--------------------------------------------------------------------

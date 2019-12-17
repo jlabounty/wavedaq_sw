@@ -48,16 +48,16 @@ class DCB: public DCBREG {
    static int       gBinSocket;
    static unsigned short udpSequenceNumber;
 
-   std::string SendReceiveUDP(std::string str);
-   void SendUDP(std::string str);
-
 public:
    
    // constructor
    DCB(const std::string &name, bool verbose = false);
 
-   void             WriteUDP(unsigned int slot, unsigned int ofs, std::vector<unsigned int> data);
+   void WriteUDP(unsigned int slot, unsigned int ofs, std::vector<unsigned int> data);
    std::vector<unsigned int> ReadUDP(unsigned int slot, unsigned int ofs, unsigned int len);
+
+   std::string SendReceiveUDP(std::string str);
+   void SendUDP(std::string str);
 
    const unsigned int cRequiredRegLayoutCompatLevel = 0;
    const unsigned int cRequiredFwCompatLevel = 0;
