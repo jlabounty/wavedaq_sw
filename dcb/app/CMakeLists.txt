@@ -60,7 +60,7 @@ set(PROGS
 add_library(dcblib STATIC ${LIBSRC})
 target_include_directories(dcblib PUBLIC
       ${PROJECT_SOURCE_DIR}/../../../include
-      ${PROJECT_SOURCE_DIR}/../../../../)
+      ${PROJECT_SOURCE_DIR}/../../../)
 target_compile_definitions(dcblib PUBLIC LINUX_COMPILE)
 add_dependencies(dcblib git_revision_h)
 
