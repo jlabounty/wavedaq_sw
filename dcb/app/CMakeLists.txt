@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-set(CMAKE_INSTALL_PREFIX /)
+set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR})
 
 #
 # generate git-revision.h
@@ -19,13 +19,13 @@ add_custom_target(git_revision_h
    COMMAND ${CMAKE_COMMAND} -E echo \\\" >> ${GIT_REVISION_TMP}
    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GIT_REVISION_TMP} ${GIT_REVISION}
    COMMAND ${CMAKE_COMMAND} -E remove ${GIT_REVISION_TMP}
-   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../../../
+   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 )
 
 #
-# source files for executables
+# source files for all executable to be put in library
 #
-set(SRC
+set(LIBSRC
    src/system.c
    src/cmd_processor.c
    src/wd2_config.c
@@ -48,31 +48,26 @@ set(SRC
    src/update_config.c
 )
 
-add_executable(dcbi src/dcbi.c ${SRC})
-add_executable(dcbc src/dcbc.c ${SRC})
-add_executable(sltc src/sltc.c ${SRC})
-add_executable(dcbs src/dcbs.c ${SRC})
-add_executable(upload src/upload.c ${SRC})
+set(PROGS
+   dcbi
+   dcbc
+   sltc
+   dcbs
+   upload
+)
 
-target_include_directories(dcbs PRIVATE
-   ${PROJECT_SOURCE_DIR}/../../include
-   ${PROJECT_SOURCE_DIR}/../../../)
+# libray
+add_library(dcblib STATIC ${LIBSRC})
+target_include_directories(dcblib PUBLIC
+      ${PROJECT_SOURCE_DIR}/../../../include
+      ${PROJECT_SOURCE_DIR}/../../../../)
+target_compile_definitions(dcblib PUBLIC LINUX_COMPILE)
+add_dependencies(dcblib git_revision_h)
 
-target_compile_definitions(dcbi PRIVATE LINUX_COMPILE)
-target_compile_definitions(dcbc PRIVATE LINUX_COMPILE)
-target_compile_definitions(sltc PRIVATE LINUX_COMPILE)
-target_compile_definitions(dcbs PRIVATE LINUX_COMPILE)
-target_compile_definitions(upload PRIVATE LINUX_COMPILE)
+# executables
+foreach(PROG ${PROGS})
+   add_executable(${PROG} src/${PROG})
+   target_link_libraries(${PROG} dcblib readline)   
+endforeach()
 
-#
-# libraries
-#
-target_link_libraries(dcbi readline)
-target_link_libraries(dcbc readline)
-target_link_libraries(sltc readline)
-target_link_libraries(upload readline)
-
-add_dependencies(dcbs git_revision_h)
-add_dependencies(dcbi git_revision_h)
-
-install(TARGETS dcbi dcbc sltc dcbs upload DESTINATION bin)
+install(TARGETS ${PROGS} DESTINATION bin)

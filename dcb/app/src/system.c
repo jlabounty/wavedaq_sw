@@ -22,7 +22,7 @@
 #include "xstatus.h"
 #include "sc_io.h"
 #include "register_map_dcb.h"
-#include "../../../../git-revision.h"
+#include "git-revision.h"
 #include "xparameters.h"
 #ifndef LINUX_COMPILE
 #include "sw_state.h"
