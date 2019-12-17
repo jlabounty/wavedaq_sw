@@ -184,7 +184,7 @@ int spi_transfer(bpl_spi_type *self, unsigned char slot_nr, char *SendBufPtr, ch
 
 /******************************************************************************/
 
-void spi_ascii_cmd(char* buff, unsigned char slot_nr)
+void spi_ascii_cmd(char* txbuff, char *rxbuff, unsigned int rxsize, unsigned char slot_nr)
 {
   unsigned char tx_buff[SPI_ASCII_TX_BUF_SIZE];
   unsigned char rx_buff[SPI_ASCII_RX_BURST_LEN];
@@ -193,14 +193,14 @@ void spi_ascii_cmd(char* buff, unsigned char slot_nr)
   int Status;
   int i;
 
-  if (!buff) return;
+  if (!txbuff) return;
 
 #ifdef LINUX_COMPILE
   init_spi_bpl();
 #endif
 
   /* count bytes to send... */
-  while ( (buff[count]!=0x00) && (buff[count]!=0x0a) && (buff[count]!=0x0d) ) count++;
+  while ( (txbuff[count]!=0x00) && (txbuff[count]!=0x0a) && (txbuff[count]!=0x0d) ) count++;
 
   if(count > SPI_ASCII_TX_BUF_SIZE-2)
   {
@@ -211,9 +211,12 @@ void spi_ascii_cmd(char* buff, unsigned char slot_nr)
   /* Add Start of Text */
   tx_buff[0] = 0x02;
   /* Copy Command */
-  memcpy(&tx_buff[1], buff, count);
+  memcpy(&tx_buff[1], txbuff, count);
   /* Add End of Line */
   tx_buff[count+1] = 0x0D;
+
+  /* clear return buffer */
+  memset(rxbuff, 0, rxsize);
 
   if(connect_fpga(slot_nr))
   {
@@ -238,10 +241,13 @@ void spi_ascii_cmd(char* buff, unsigned char slot_nr)
       i = 0;
       while( (i < SPI_ASCII_RX_BURST_LEN) && (rx_buff[i] != 0x03) )
       {
-        if (rx_buff[i]>= 10) xfs_printf("%c",rx_buff[i]);
+        if (count < rxsize && rx_buff[i]>=10)
+           rxbuff[count++] = rx_buff[i];
         i++;
       }
-    } while ((rx_buff[i] != 0x03) && (++count < 1000));
+      if (count < rxsize)
+         rxbuff[count] = 0;
+    } while ((rx_buff[i] != 0x03) && (count < rxsize));
   }
 
   disconnect();

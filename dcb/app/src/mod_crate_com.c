@@ -134,8 +134,10 @@ int slot_fpga_com(int argc, char **argv)
   }
   else /* ascii command */
   {
+    char buffer[1600];
     xfs_printf("Processing ASCII command\r\n");
-    spi_ascii_cmd(argv[2], slot);
+    spi_ascii_cmd(argv[2], buffer, sizeof(buffer), slot);
+    xfs_printf("%s\n", buffer);
   }
 
   return 0;

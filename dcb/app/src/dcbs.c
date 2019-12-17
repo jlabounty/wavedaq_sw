@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #include "git-revision.h"
 
@@ -283,8 +284,30 @@ int main(int argc, char *argv[]) {
          unsigned char rbuffer[1600];
          rbuffer[0] = 0;
 
-         if (buffer[0] == 'h') {
-            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "List of available commands:\n\n");
+         if (isdigit(buffer[0])) {
+            unsigned int slot = atoi(buffer);
+
+            if (verbose)
+               printf("WDB command found for slot %d\n", slot);
+
+            char *p = strchr(buffer, ' ');
+            if (p == NULL)
+               p = buffer;
+            else
+               p++;
+
+            if (verbose)
+               printf("TX: %s\n", p);
+
+            spi_ascii_cmd(p, rbuffer, sizeof(rbuffer), slot);
+
+            if (verbose)
+               printf("RX: %s\n\n", rbuffer);
+
+         } else if (buffer[0] == 'h') {
+            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "WDB commands:\n\n");
+            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "<slot> <command>\n\n");
+            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "DCB commands (no <slot>):\n\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "clkint      Switch bus clock to quartz\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "clkext      Switch bus clock to FCI input\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "delay <n>   Set SYNC delay\n");
