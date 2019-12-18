@@ -199,17 +199,14 @@ int main(int argc, char *argv[]) {
                   reg_bank_write(adr + i * 4, &d, 1);
                }
             } else {
-                  p = (unsigned int *) (&buffer[8]);
-                  for (int i = 0; i < n; i++, p++) {
-                     d = SWAP_UINT32(*p);
-                     *p = d;
-                  }
                buffer[3] = CMD_WRITE32;
                spi_binary_cmd(&buffer[3], rbuffer, slot, (len-8)+5); // 1 cmd, 4 adr. bytes + data
             }
 
             // send acknowledge back to client
             buffer[1] = 0x01;
+            buffer[2] = (seq >> 8) & 0xFF;
+            buffer[3] = seq & 0xFF;
             sendto(sock_bin, buffer, 4, 0, (struct sockaddr *) &client_address, sizeof(client_address));
 
          } else if (cmd == CMD_READ32) {
@@ -265,8 +262,8 @@ int main(int argc, char *argv[]) {
             sendto(sock_bin, str, strlen(str), 0, (struct sockaddr *) &client_address, sizeof(client_address));
 
          }
-      } // binary
 
+      } // binary
 
       if (FD_ISSET(sock_asc, &fds)) {
          // read content into buffer from an incoming client
