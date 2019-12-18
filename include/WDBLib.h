@@ -538,6 +538,7 @@ public:
 // WaveDREAM board class. Interface functions to all WDB registers
 class WDB: public WDBREG {
    std::string      mWDBName;
+   std::string      mWDBAddr;
    std::string      mPrompt;
    DCB*             mDCB;
    unsigned int     mSlot;
@@ -653,6 +654,7 @@ public:
 
    // setter & getter ----------
    std::string GetName() { return mWDBName; }
+   std::string GetAddr() { return mWDBAddr; }
    int GetReceiveTimeoutMs() { return mReceiveTimeoutMs; };
    void SetReceiveTimeoutMs(int to) { mReceiveTimeoutMs = to; };
 

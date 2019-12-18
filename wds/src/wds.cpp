@@ -48,6 +48,7 @@ typedef struct {
    std::string logFileName;
    bool reset;
    std::vector<WDB *> wdb;
+   std::vector<DCB *> dcb;
    WP *wp;
    TRIGGERMODE triggerMode;
    int triggerSelfArm;
@@ -521,6 +522,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
 
          mg_printf_http_chunk(nc, "    {\n");
          mg_printf_http_chunk(nc, "      \"name\": \"%s\",\n", w->GetName().c_str());
+         mg_printf_http_chunk(nc, "      \"address\": \"%s\",\n", w->GetAddr().c_str());
          mg_printf_http_chunk(nc, "      \"temperature\": %1.1lf,\n", w->GetTemperatureDegree(false));
          mg_printf_http_chunk(nc, "      \"sysBusy\": %s,\n", w->GetSysBusy() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"drsctrlBusy\": %s,\n", w->GetDrsCtrlBusy() ? "true" : "false");
@@ -1041,7 +1043,7 @@ int main(int argc, const char *argv[]) {
             return 0;
          }
          std::string b = argv[i + 1];
-         if (isdigit(b.c_str()[0]) && b.find('.') == std::string::npos) {
+         if (isdigit(b.at(0)) && b.find('.') == std::string::npos) {
             if (b.find('-') != std::string::npos) {
                int i1 = std::stoi(b);
                int i2 = std::stoi(b.substr(b.find('-') + 1));
@@ -1066,8 +1068,25 @@ int main(int argc, const char *argv[]) {
                   continue;
                }
             }
-         } else
-            gl.wdb.push_back(new WDB(b));
+         } else {
+            std::for_each(b.begin(), b.end(), [](char &c) {
+               c = ::toupper(c);
+            });
+            if (b.substr(0, 3) == "DCB") {
+               DCB *dcb = new DCB(b);
+               dcb->Connect();
+               if (gl.verbose) {
+                  std::cout << std::endl << "========== DCB Info ==========" << std::endl;
+                  dcb->PrintVersion();
+               }
+
+               gl.dcb.push_back(dcb);
+               std::vector<WDB *> wdbs = dcb->ScanWDB();
+               for (auto & w: wdbs)
+                  gl.wdb.push_back(w); // add all WDBs in crate
+            } else
+               gl.wdb.push_back(new WDB(b));
+         }
          i++;
 
       } else if (arg == "-d") {
@@ -1108,7 +1127,7 @@ int main(int argc, const char *argv[]) {
 
    // connect to all WDB and retrieve registers
    for (auto &b: gl.wdb) {
-      std::cout << "Connect to " << b->GetName() << " ... " << std::flush;
+      std::cout << "Connect to " << b->GetAddr() << " ... " << std::flush;
       try {
          if (!gl.demoMode) {
             b->SetVerbose(gl.verbose);
@@ -1117,7 +1136,7 @@ int main(int argc, const char *argv[]) {
             b->ReceiveStatusRegisters();
             b->ReceiveControlRegisters();
             if (gl.verbose) {
-               std::cout << std::endl << "========== Board Info ==========" << std::endl;
+               std::cout << std::endl << "========== WDB Info ==========" << std::endl;
                b->PrintVersion();
             }
 
@@ -1147,7 +1166,7 @@ int main(int argc, const char *argv[]) {
             // check PLL locked status
             if (b->GetPllLock(false) != 0x1FF) {
                std::ostringstream str;
-               str << "PLL not locked on board " << b->GetName() << ". Mask = 0x" << std::hex << b->GetPllLock(false);
+               str << "PLL not locked on board " << b->GetAddr() << ". Mask = 0x" << std::hex << b->GetPllLock(false);
                throw std::runtime_error(str.str());
             }
 
@@ -1205,7 +1224,7 @@ int main(int argc, const char *argv[]) {
 
    // set destination port after WP has been initialized
    for (auto &b: gl.wdb)
-      b->SetDestinationPort(gl.wp->GetServerPort());
+      b->SetDestinationPort(gl.wp->GetServerPort(), gl.wp->GetServerAddr(), gl.wp->GetServerMac());
 
    // switch boards to normal mode to send events
    if (gl.triggerSelfArm)
