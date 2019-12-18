@@ -1072,18 +1072,31 @@ int main(int argc, const char *argv[]) {
             std::for_each(b.begin(), b.end(), [](char &c) {
                c = ::toupper(c);
             });
-            if (b.substr(0, 3) == "DCB") {
-               DCB *dcb = new DCB(b);
-               dcb->Connect();
-               if (gl.verbose) {
-                  std::cout << std::endl << "========== DCB Info ==========" << std::endl;
-                  dcb->PrintVersion();
-               }
 
-               gl.dcb.push_back(dcb);
-               std::vector<WDB *> wdbs = dcb->ScanWDB();
-               for (auto & w: wdbs)
-                  gl.wdb.push_back(w); // add all WDBs in crate
+            if (b.substr(0, 3) == "DCB") {
+               std::cout << "Connect to " << b << " ... " << std::flush;
+               try {
+                  DCB *dcb = new DCB(b, gl.verbose);
+                  dcb->Connect();
+                  if (gl.verbose) {
+                     std::cout << std::endl << "========== DCB Info ==========" << std::endl;
+                     dcb->PrintVersion();
+                  }
+
+                  gl.dcb.push_back(dcb);
+                  std::vector<WDB *> wdbs = dcb->ScanWDB();
+                  for (auto &w: wdbs)
+                     gl.wdb.push_back(w); // add all WDBs in crate
+               } catch (std::runtime_error &e) {
+                  std::cout << std::endl;
+                  std::cout << e.what() << std::endl;
+                  std::cout << "Aborting." << std::endl;
+                  return 1;
+               }
+               std::cout << "OK" << std::endl;
+               if (gl.verbose)
+                  std::cout << std::endl << std::endl;
+
             } else
                gl.wdb.push_back(new WDB(b));
          }

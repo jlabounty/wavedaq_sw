@@ -172,7 +172,8 @@ std::string DCB::SendReceiveUDP(std::string str)
          break;
 
       if (this->mVerbose)
-         std::cout << mDCBName << " retry " << retry+1 << std::endl;
+         std::cout << mDCBName << " retry " << retry + 1 << " with " << ms << " ms" << std::endl;
+
       result.clear();
    }
 

@@ -22,8 +22,9 @@
 int main(int argc, const char *argv[])
 {
    std::vector<WDB *> wdb;
+   DCB *dcb;
 
-   DCB *dcb = new DCB("DCB01");
+   dcb = new DCB("dcb01");
    dcb->Connect();
    dcb->PrintVersion();
 
@@ -33,8 +34,8 @@ int main(int argc, const char *argv[])
    d = dcb->GetSyncDelay();
    */
 
-   dcb->SetDistributorClkSrcSel(0);
-   dcb->SetDistributorClkSrcSel(1);
+   //dcb->SetDistributorClkSrcSel(0);
+   //dcb->SetDistributorClkSrcSel(1);
 
    wdb = dcb->ScanWDB();
 
@@ -43,6 +44,7 @@ int main(int argc, const char *argv[])
 
    //wdb.push_back(new WDB("WD134"));
    //wdb.push_back(new WDB("WD162"));
+
 
    // connect to all WDB and retrieve registers
    for (auto &b: wdb) {
@@ -53,7 +55,6 @@ int main(int argc, const char *argv[])
             b->ReceiveControlRegisters();
             std::cout << std::endl << "========== Board Info ==========" << std::endl;
             b->PrintVersion();
-
       } catch (std::runtime_error &e) {
          std::cout << std::endl;
          std::cout << e.what() << std::endl;
@@ -62,6 +63,12 @@ int main(int argc, const char *argv[])
       }
       std::cout << "OK" << std::endl;
       std::cout << std::endl << std::endl;
+   }
+
+   WP *wp = new WP(wdb, true);
+
+   for (auto &b: wdb) {
+      b->SetDestinationPort(wp->GetServerPort(), wp->GetServerAddr(), wp->GetServerMac());
    }
 
    return 0;
