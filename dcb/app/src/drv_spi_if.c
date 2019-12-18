@@ -125,7 +125,8 @@ char* spi_if_transfer(spi_if_type* self, char* tx_buf, char* rx_buf, unsigned in
   {
     memset(rx_buf, 0, len);
     self->xfer.rx_buf = (unsigned long)rx_buf;
-  }
+  } else
+    self->xfer.rx_buf = 0;
 
   self->xfer.tx_buf = (unsigned long)tx_buf;
   self->xfer.len = len; /* Length of Data to read */
