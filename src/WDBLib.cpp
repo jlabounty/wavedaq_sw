@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <time.h>
 #include <fcntl.h>
+#include <net/if.h>
 
 #ifdef __linux__
 #include <linux/sockios.h>
@@ -39,6 +40,7 @@
 #ifdef __APPLE__
 #include <net/if_dl.h>
 #include <pthread.h>
+
 #endif
 
 #include "WDBLib.h"
@@ -656,7 +658,7 @@ void WDB::Connect() {
 
 //--------------------------------------------------------------------
 
-void WDB::SetDestinationPort(int port) {
+void WDB::SetDestinationPort(int port, char *ip, char *mac) {
    if (mDemoMode)
       return;
 
@@ -665,8 +667,8 @@ void WDB::SetDestinationPort(int port) {
       str = std::to_string(mSlot) + " ";
       str += "cfgdst ";
       str += std::to_string(port) + " ";
-      str += "129.129.96.122 ";
-      str += "a8:60:b6:0e:28:ee";
+      str += std::string(ip) + " ";
+      str += mac;
       mDCB->SendReceiveUDP(str);
    } else
       // set destinantion port in WD board, MAC and IP is used automaticlly form UDP packet
@@ -1920,10 +1922,41 @@ WP::WP(std::vector<WDB *> w, int verbose, std::string logfile, bool demo) {
       auto size = sizeof(server_addr);
       getsockname(WP::gDataSocket, (struct sockaddr *) &server_addr, (socklen_t *) &size);
       WP::mServerPort = ntohs(server_addr.sin_port);
-      inet_ntop(AF_INET, &(server_addr.sin_addr), WP::mServerAddr, sizeof(WP::mServerAddr));
 
-      if (this->mVerbose)
-         std::cout << std::endl << "Listening on data port " << WP::mServerPort << "." << std::endl;
+      // obtain IP address and interface name to which socket is bound
+      struct ifaddrs *ifap, *ifa;
+      getifaddrs(&ifap);
+      for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
+         // search first interface which is not a loopback
+         if (ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_INET && (ifa->ifa_flags & IFF_LOOPBACK) == 0) {
+            struct sockaddr_in *sa = (struct sockaddr_in *) ifa->ifa_addr;
+            strlcpy(WP::mServerAddr, inet_ntoa(sa->sin_addr), sizeof(WP::mServerAddr));
+            strlcpy(WP::mServerInterface, ifa->ifa_name, sizeof(WP::mServerInterface));
+            break;
+         }
+      }
+      freeifaddrs(ifap);
+
+      // obtain MAC address of interface
+      getifaddrs(&ifap);
+      for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
+         if (ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_LINK && strcmp(ifa->ifa_name, WP::mServerInterface) == 0) {
+
+            unsigned char *p = (unsigned char *)LLADDR((struct sockaddr_dl *)(ifa)->ifa_addr);
+            int i;
+            int len = 0;
+            char str[32];
+            for(i = 0; i < 6; i++)
+               len+=sprintf(str+len,"%02X%s",p[i],i < 5 ? ":":"");
+            strlcpy(WP::mServerMac, str, sizeof(WP::mServerMac));
+         }
+      }
+      freeifaddrs(ifap);
+
+      if (this->mVerbose) {
+         std::cout << std::endl << "Listening on PORT " << WP::mServerPort <<
+                   " IP " << WP::mServerAddr << " MAC " << WP::mServerMac << std::endl;
+      }
    }
 
    // allocated event buffer and requests for all WDB

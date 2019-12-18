@@ -192,7 +192,7 @@ typedef struct {
 
 class WDEvent {
 public:
-   
+
    bool             mEventValid;
    std::map<int,bool> mTypeValid;
    unsigned short   mBoardId;
@@ -217,14 +217,14 @@ public:
 
    int              mTDCChannelPresent[WD_N_CHANNELS];
    unsigned char    mWfTDC[WD_N_CHANNELS][512];
-   
+
    unsigned long    mTrgData[512];
 
    unsigned long    mScaler[WD_N_SCALER];
 
    bool             mVCalibrated;
    bool             mTCalibrated;
-   
+
    WDEvent(int boardId) { mBoardId = boardId; };
 
    void             ClearEvent();
@@ -238,14 +238,14 @@ template <class T> class tqueue {
    std::mutex mutex;
    std::condition_variable full, empty;
    std::queue<T> queue;
-   
+
    int mSize;
    bool mWait;
-   
+
 public:
    tqueue(int size, bool wait=true) { mSize = size; mWait = wait; };
    ~tqueue() {};
-   
+
    void push(T e) {
       std::unique_lock<std::mutex> lock(mutex);
       if (!mWait && queue.size() >= mSize) {
@@ -311,7 +311,7 @@ public:
    int              mDroppedPackets;
 
    WDEventRequest(int boardId);
-   
+
    int              GetBoardId() { return mBoardId; }
    void             SetBoardRequested(bool flag) { mBoardRequested = flag; }
    bool             IsBoardRequested() { return mBoardRequested; }
@@ -343,12 +343,14 @@ class WP {
 
    static int        gDataSocket;
    int               mServerPort;
+   char              mServerInterface[32];
    char              mServerAddr[32];
+   char              mServerMac[32];
 
    int               mVerbose;
    std::string       mLogfile;
    bool              mDemoMode;
-  
+
    std::vector<WDB*> mWdb;
    std::map<int, WDB*> mWdbMap;
 
@@ -361,16 +363,16 @@ class WP {
    bool              mTimeCalib1;
    bool              mTimeCalib2;
    bool              mTimeCalib3;
-   
+
    int               mPacketsReceived;
    int               mCurrentEvent;
-   
+
    std::thread       mThreadCollector;
    void Collector();
    std::thread SpawnCollectorThread() {
       return std::thread([=] { Collector(); });
    };
-   
+
    std::map<int, WDEventRequest *> mEventRequest;
    std::map<int, WDEvent *> mEvent;
    std::map<int, WDEvent *> mEventLast;
@@ -389,9 +391,9 @@ class WP {
    void              UnrotateWaveforms();
    void              RemoveSpikes(int tc, float wf[][1024]);
    std::chrono::time_point<std::chrono::high_resolution_clock> mEventStartTime;
-   
+
    CALIB_PROGRESS    calibProg;
-   
+
    struct {
       std::string    fileName;
       int            fh;
@@ -402,7 +404,7 @@ class WP {
       int            nRequest;
       int            nLogged;
    } li;
-   
+
    float             mOldRange;
    int               mOldMaskDrs;
    int               mOldMaskAdc;
@@ -414,12 +416,12 @@ class WP {
    int               mOldExtAsyncTriggerEn;
    int               mOldPatternTriggerEn;
    int               mOldTriggerHoldoff;
-   
+
    int               AnalyzePeriod(WDEvent *, WDB *);
    void              AnalyzeTimeOffset(WDEvent *, WDB *);
    void              CalibrateLocal(WDEvent *, WDB *);
    void              CalibrateGlobal(WDEvent *, WDB *);
-   
+
    unsigned int      mWDReceivedEvents;
    unsigned int      mWDDroppedEvents;
    unsigned int      mLastEventNumber;
@@ -429,10 +431,12 @@ public:
 
    // constructor
    WP(std::vector<WDB*> w, int verbose = 0, std::string logfile = "", bool demo = false);
-   
+
    // setter & getter
    int GetDataSocket() { return gDataSocket; }
    int GetServerPort() { return mServerPort; }
+   char *GetServerAddr() { return mServerAddr; }
+   char *GetServerMac() { return mServerMac; }
    bool IsVerbose() { return mVerbose; }
    bool IsDemoMode() { return mDemoMode; }
    bool IsRotateWaveform() { return mRotateWaveform;}
@@ -458,12 +462,12 @@ public:
       mOfsCalib1 = f; mOfsCalib2 = f; mGainCalib = f; mRangeCalib = f;
       mTimeCalib1 = f; mTimeCalib2 = f; mTimeCalib3 = f;
    }
-   
+
    bool IsVcalibActive() { return calibProg.mode == cCmVoltage; }
    bool IsTcalibActive() { return calibProg.mode == cCmTime; }
    bool IsTcalibError() { return calibProg.mode == cCmTimeError; }
    void ClearTcalibError() { calibProg.mode = cCmNone; }
-   
+
    int  GetVcalibBoard() { return calibProg.iBoard; }
    float GetVcalibProgress() { return calibProg.progress; }
 
@@ -477,12 +481,12 @@ public:
    void SetRequestedSegments(int s);
    WDB* GetBoard(int board_id);
    unsigned int GetEventRequestMask(int board_id);
-   
+
    bool WaitNewEvent(int timeout);
    bool GetLastEvent(WDB* b, int timeout, WDEvent& event);
    bool GetLastEvent(int timeout, std::vector<WDEvent *> event);
    bool RequestEvent(WDB* b, int timeout, WDEvent& event);
-   
+
    void CalibrateWaveforms(WDEvent* event);
    void CalibrateWaveforms(std::map<int, WDEvent *> event);
 
@@ -498,12 +502,12 @@ public:
       calibProg.state = cCsFirstBoard; };
    void DoVoltageCalibrationStep();
    void DoTimeCalibrationStep();
-   
+
    void StartWaveformSaving(std::string fileName, int format, bool bAll, int board, int nEvents);
    void StopLogging();
    unsigned int GetNLogged() { return li.nLogged; }
    void SaveWaveforms();
-   
+
    void ResetStatistics() { mLastEventNumber = mWDReceivedEvents = mWDDroppedEvents = 0; }
    int GetWDReceivedEvents() { return mWDReceivedEvents; }
    int GetWDDroppedEvents() { return mWDDroppedEvents; }
@@ -525,7 +529,7 @@ class WDBS {
    int mTimingReferenceSignal;
    int mExtAsyncTriggerEn;
    int mPatternTriggerEn;
-   
+
 public:
    void Save(WDB *b);
    void Restore(WDB *b);
@@ -547,12 +551,12 @@ class WDB: public WDBREG {
    unsigned int     mChnTxEn;
    int              mTriggerHoldoff;
    int              mTimingReferenceSignal;
-   
+
    int              mCalibClkFreq;
 
    std::vector<unsigned int> creg;
    std::vector<unsigned int> sreg;
-   
+
    static int       gASCIISocket;
    static int       gBinSocket;
    static unsigned short udpSequenceNumber;
@@ -565,7 +569,7 @@ class WDB: public WDBREG {
 
    WDBS             mSave;
 public:
-   
+
    // constructor
    WDB(std::string name, bool verbose = false);
    WDB(DCB *dcb, int slot, bool verbose = false);
@@ -583,7 +587,7 @@ public:
       cReadoutSrcAdc           = 0x02,
       cReadoutSrcTdc           = 0x04
    };
-   
+
    enum {
       cFeMuxNextChannel        = 0,
       cFeMuxPreviousChannel    = 1,
@@ -602,7 +606,7 @@ public:
       cTimingReferenceSine     = 1,
       cTimingReferenceSquare   = 2
    };
-   
+
    enum {
       cDbgUart                 = 0x0,
       cDbgTrigger              = 0x1,
@@ -623,19 +627,21 @@ public:
    // calibrations
    VCALIB           mVCalib;
    TCALIB           mTCalib;
-   
+
    // register functions, overload pure virtual functions from WDBREG
    void bitReplace(unsigned int &reg, unsigned int mask, unsigned int ofs, unsigned int value);
    void SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v);
    unsigned int BitExtractStatus(unsigned int rofs, unsigned int mask, unsigned int ofs);
    unsigned int BitExtractControl(unsigned int rofs, unsigned int mask, unsigned int ofs);
-   
+
    // interface functions
    void SetVerbose(int verbose) { mVerbose = verbose; }
    int IsVerbose() { return mVerbose; }
    void SetLogFile(std::string logfile) { mLogfile = logfile; }
    void Connect();
-   void SetDestinationPort(int port);
+
+   void SetDestinationPort(int port, char *ip = nullptr, char *mac = nullptr);
+
    void ReceiveControlRegisters(unsigned int index=0, unsigned int nReg=0);
    void ReceiveStatusRegisters(unsigned int index=0, unsigned int nReg=0);
    void ReceiveStatusRegister(int ofs);
@@ -649,7 +655,7 @@ public:
    std::string GetName() { return mWDBName; }
    int GetReceiveTimeoutMs() { return mReceiveTimeoutMs; };
    void SetReceiveTimeoutMs(int to) { mReceiveTimeoutMs = to; };
-   
+
    // high level status registers
    std::string GetFwBuild();
    std::string GetHwVersion();
@@ -663,7 +669,7 @@ public:
 
    void Save() { mSave.Save(this); };
    void Restore() { mSave.Restore(this); };
-   
+
    // high level control registers
    void SetDrsSampleFreq(unsigned int f);
    void SetLmkInputFreq(unsigned int f);
@@ -688,7 +694,7 @@ public:
    void ResetEventCounter();
    void ResetDrsControlFsm();
    void ReconfigureFpga();
-   
+
    float GetDacRofsV();
    void SetDacRofsV(float v);
    float GetDacOfsV();
@@ -726,7 +732,7 @@ public:
 
    void GetHVTarget(std::vector<float> &hv);
    void SetHVTarget(int chn, float v);
-   
+
    unsigned int GetLmk(int reg);
    void SetLmk(int reg, unsigned int v);
 
@@ -739,21 +745,21 @@ public:
    // high level methods ----------
    unsigned int GetTriggerDelayNs();
    void SetTriggerDelayNs(unsigned int ns);
-   
+
    void SetRange(float r);
    float GetRange();
-   
+
    void TriggerSoftEvent();
-   
+
    unsigned int GetDrsSampleFreqMhz();
    void SaveVoltageCalibration(int freq);
    bool LoadVoltageCalibration(int freq, std::string path="");
    void SaveTimeCalibration(int freq);
    bool LoadTimeCalibration(int freq, std::string path="");
-   
+
    unsigned int GetChnTxEn() { return mChnTxEn; };
    void SetChnTxEn(int mask) { mChnTxEn = mask; };
-   
+
    void SetTriggerHoldoff(int holdoff) { mTriggerHoldoff = holdoff; }
    int GetTriggerHoldoff() { return mTriggerHoldoff; }
 };
