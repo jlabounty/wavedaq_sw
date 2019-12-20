@@ -484,7 +484,7 @@ void wr_sw(char *sw_file, flash_memory_map_type *flash_mem_map, const char *flas
 
 /******************************************************************************/
 
-void bpl_upload_fw_sw(slot_op_en_type *slot, char *fw_spec_p, char *sw_spec_p)
+void bpl_upload_fw_sw(slot_op_en_type *slot, char *fw_spec_p, char *sw_spec_p, char *board_type, char *board_rev)
 {
   int i;
   char fw_def_path[250];
@@ -494,6 +494,7 @@ void bpl_upload_fw_sw(slot_op_en_type *slot, char *fw_spec_p, char *sw_spec_p)
   int use_default_files;
 #ifdef LINUX_COMPILE
   flash_memory_map_type *flash_mem_map = NULL;
+  flash_memory_map_type *flash_mem_map_force = NULL;
 
   init_spi_bpl();
 #endif
@@ -528,14 +529,14 @@ void bpl_upload_fw_sw(slot_op_en_type *slot, char *fw_spec_p, char *sw_spec_p)
             strcpy(&fwp[strlen(flash_mem_map->default_fw_path)], wdb_fw_default_file);
             /* upload firmware */
             printf("-> Uploading WDB firmware %s\n", fwp);
-            wr_fw(fwp, flash_mem_map, "spi-wdb-fw");
+            wr_fw(fwp, flash_mem_map, "fw");
 
             /* Copy directory and filename to sw_def_path */
             strcpy(swp, flash_mem_map->default_fw_path);
             strcpy(&swp[strlen(flash_mem_map->default_fw_path)], wdb_sw_default_file);
             /* upload sofware */
             printf("-> Uploading WDB software %s\n", swp);
-            wr_sw(swp, flash_mem_map, "spi-wdb-sw");
+            wr_sw(swp, flash_mem_map, "sw");
           }
           else if(strstr(flash_mem_map->default_fw_path, "/tcb/"))
           {
@@ -544,7 +545,7 @@ void bpl_upload_fw_sw(slot_op_en_type *slot, char *fw_spec_p, char *sw_spec_p)
             strcpy(&fwp[strlen(flash_mem_map->default_fw_path)], tcb_fw_default_file);
             /* upload firmware */
             printf("-> Uploading TCB firmware %s\n", fwp);
-            wr_fw(fwp, flash_mem_map, "spi-tcb-fw");
+            wr_fw(fwp, flash_mem_map, "fw");
           }
         }
         else
@@ -554,31 +555,33 @@ void bpl_upload_fw_sw(slot_op_en_type *slot, char *fw_spec_p, char *sw_spec_p)
       }
       else
       {
-//        if(flash_mem_map = connect_flash(i, 1))
-//        {
-//          if(fwp)
-//          {
-//            /* tbd insert check if flash_mem_map is not NULL */
-//            /* check flash_mem_map vs bitfile */
-//
-//            /* find map and partition */
-//
-//            /* upload firmware */
-//            printf("-> Uploading firmware %s (forced)\n", fwp);
-//            wr_fw(fwp, flash_mem_map, "?");
-//          }
-//          if(swp)
-//          {
-//            /* tbd insert check if flash_mem_map is not NULL */
-//            /* check flash_mem_map vs bitfile */
-//
-//            /* find map and partition */
-//
-//            /* upload firmware */
-//            printf("-> Uploading software %s (forced)\n", swp);
-//            wr_sw(swp, flash_mem_map, "?");
-//          }
-//        }
+        if((board_type==NULL) || (board_rev==NULL))
+        {
+          printf("Error: board type (-t) and revision (-r) needed for forced upload\n");
+          return;
+        }
+        flash_mem_map_force = get_flash_mem_map(board_type, board_rev);
+        if(flash_mem_map = connect_flash(i, 1))
+        {
+          if(flash_mem_map!=flash_mem_map_force)
+          {
+            printf("Error: present board in slot does not match type and revision\n");
+            disconnect();
+            return;
+          }
+        }
+        if(fwp)
+        {
+          /* upload firmware */
+          printf("-> Uploading firmware %s (forced)\n", fwp);
+          wr_fw(fwp, flash_mem_map_force, "fw");
+        }
+        if(swp)
+        {
+          /* upload firmware */
+          printf("-> Uploading software %s (forced)\n", swp);
+          wr_sw(swp, flash_mem_map_force, "sw");
+        }
       }
 
       disconnect();
@@ -676,7 +679,7 @@ flash_memory_map_type* set_bpl_spi_scheme(unsigned int slot_nr)
     if( (hw_rev_val&HW_VERS_REV_MASK) <= HW_VERS_WDB_REV_F_VAL)
     {
       if(DBG_SPAM) xfs_printf("Scheme 0 selected for slot %d\r\n", slot_nr);
-      return get_flash_mem_map(BOARD_TYPE_ID_WDB, BOARD_REV_ID_F);
+      return get_flash_mem_map("wdb", "f");
     }
   }
   /* Add TCB case */
@@ -690,7 +693,7 @@ flash_memory_map_type* set_bpl_spi_scheme(unsigned int slot_nr)
     if( (hw_rev_val&HW_VERS_REV_MASK) >= HW_VERS_WDB_REV_G_VAL)
     {
       if(DBG_SPAM) xfs_printf("Scheme 1 selected for slot %d\r\n", slot_nr);
-      return get_flash_mem_map(BOARD_TYPE_ID_WDB, BOARD_REV_ID_G);
+      return get_flash_mem_map("wdb", "g");
     }
   }
 

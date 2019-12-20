@@ -152,19 +152,23 @@ int slot_upload_fw_sw(int argc, char **argv)
   int opt;
   char *fwp = NULL;
   char *swp = NULL;
+  char *board_type = NULL;
+  char *board_rev = NULL;
 
-  CMD_HELP("[slot] [-f <firmware path>] [-s <software path>]",
+  CMD_HELP("[slot] [-b <firmware path>] [-s <software path>] [-t <board type>] [-r <board revision>]",
             "upload new firm- or software to WDB/TCB via backplane. If no files are specified,\r\n"
             "the standard firmware/software is taken from the /firmware/.../prod/... directory.\r\n",
             "  [slot] : WDB/TCB slot, optional, multiple entries possible separated by spaces.\r\n"
             "           Ranges (e.g. 4-7) can also be specified.\r\n"
-            "  [-f <firmware path>] : WDB/TCB firmware file (optional).\r\n"
-            "  [-s <software path>] : WDB software file (optional).\r\n"
+            "  [-b <firmware path>]  : WDB/TCB firmware file (optional).\r\n"
+            "  [-s <software path>]  : WDB software file (optional).\r\n"
+            "  [-t <board type>]     : wdb or tcb (needed for \"force\" option).\r\n"
+            "  [-r <board revision>] : f, g etc for wdb 1, 2 etc for tcb (needed for \"force\" option).\r\n"
           );
 
   offset = parse_slot_selection(argc-1, &argv[1], &slot);
 
-  while((opt = getopt(argc, argv, ":f:s:")) != -1)
+  while((opt = getopt(argc, argv, ":f:s:t:r:")) != -1)
   {
     switch(opt)
     {
@@ -178,6 +182,14 @@ int slot_upload_fw_sw(int argc, char **argv)
         if(is_file(optarg)) swp = optarg;
         else printf("software file %s not found", optarg);
         break;
+      case 't':
+        /* printf("board type: %s\n", optarg); */
+        board_type = optarg;
+        break;
+      case 'r':
+        /* printf("board revision: %s\n", optarg); */
+        board_rev = optarg;
+        break;
       case ':':
         printf("option needs a value\n");
         break;
@@ -186,7 +198,7 @@ int slot_upload_fw_sw(int argc, char **argv)
         break;
     }
   }
-  bpl_upload_fw_sw(&slot, fwp, swp);
+  bpl_upload_fw_sw(&slot, fwp, swp, board_type, board_rev);
 }
 
 /************************************************************/
