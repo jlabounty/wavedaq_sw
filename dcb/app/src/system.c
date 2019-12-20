@@ -45,6 +45,8 @@
  #define UART_BAUD 9600
 #endif
 
+#define PROG_BAR_ITEMS   25
+
 /******************************************************************************/
 /* global vars                                                                */
 /******************************************************************************/
@@ -916,6 +918,40 @@ int is_file(char* path)
     {
       return 0;
     }
+}
+
+/******************************************************************************/
+
+void byte_swap_uint32(unsigned int* src, unsigned int* dst, unsigned int len)
+{
+  /* swappes the bytes of integer values */
+  /* usually used to convert endianness */
+  int i;
+
+  for(i=0;i<len;i++)
+  {
+    dst[i] = (((src[i]) >> 24) | \
+             (((src[i]) & 0x00FF0000) >> 8) | \
+             (((src[i]) & 0x0000FF00) << 8) | \
+             ( (src[i]) << 24));
+  }
+}
+
+/******************************************************************************/
+
+void display_progress(char* prefix, xfs_u32 percent)
+{
+  int i;
+
+  printf("%c", 0x0D); /* Send carriage return without newline */
+  if(prefix) printf("%s", prefix);
+  printf("[");
+  for(i=0;i<PROG_BAR_ITEMS;i++)
+  {
+    if( (i*(100/PROG_BAR_ITEMS)) <= percent ) printf("=");
+    else                                    printf(" ");
+  }
+  printf("] %d%%", percent);
 }
 
 /******************************************************************************/

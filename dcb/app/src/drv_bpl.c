@@ -18,6 +18,9 @@
 #include "drv_axi_dcb_reg_bank.h"
 #include "register_map_dcb.h"
 #include "sc_io.h"
+#include "xilinx_cfg.h"
+#include "drv_qspi_flash.h"
+#include "flash_memory_maps.h"
 #include "xfs_printf.h"
 #include "dbg.h"
 #ifndef LINUX_COMPILE
@@ -27,6 +30,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <assert.h>
+//#include<sys/types.h>
+#include<sys/stat.h>
+#include <fcntl.h>
 #endif
 
 /******************************************************************************/
@@ -65,10 +71,12 @@
 #define HW_VERS_WDB_REV_G_VAL     0x00000018
 #define HW_VERS_WDB_COMMON_VAL    (HW_VERS_WDB_MAGIC_VAL | HW_VERS_WDB_VENDOR_VAL | HW_VERS_WDB_TYPE_VAL)
 
+#define FLASH_BUF_SIZE            8192 /* 8k */
+
 /******************************************************************************/
 /******************************************************************************/
 
-char* set_bpl_spi_scheme(unsigned int slot_nr);
+flash_memory_map_type* set_bpl_spi_scheme(unsigned int slot_nr);
 
 /******************************************************************************/
 
@@ -136,13 +144,15 @@ int connect_fpga(unsigned int slot_nr)
 
 /******************************************************************************/
 
-char* connect_flash(unsigned int slot_nr)
+flash_memory_map_type* connect_flash(unsigned int slot_nr, int force)
 {
   /* Add user space mutex to make sure only one board is selected at a time */
-    /* Return 1 if connection established successfully else 0 */
-  char *default_fw_sw_path;
+  /* Return 1 if connection established successfully else 0 */
+  flash_memory_map_type *flash_mem_map;
 
-  if( default_fw_sw_path = set_bpl_spi_scheme(slot_nr) )
+  flash_mem_map = set_bpl_spi_scheme(slot_nr);
+
+  if( flash_mem_map || force )
   {
     /* Configure for board in slot */
     bpl_spi_drive_en(1);
@@ -150,7 +160,7 @@ char* connect_flash(unsigned int slot_nr)
     BPL_INIT(1);
     select_slot(slot_nr);
   }
-  return default_fw_sw_path;
+  return flash_mem_map;
 }
 
 /******************************************************************************/
@@ -282,6 +292,198 @@ void spi_binary_cmd(char* tx_buff, char* rx_buff, unsigned char slot_nr, unsigne
 
 /******************************************************************************/
 
+void wr_fw(char *fw_file, flash_memory_map_type *flash_mem_map, const char *flash_partition_name)
+{
+  int header_len;
+  unsigned int len;
+  bitfile_info_type bit_inf;
+  bitfile_info_type bit_inf_swapped;
+  flash_partition_type *mtd_ptr = NULL;
+  int fd;
+  unsigned int   flash_offs;
+  unsigned int   flash_len;
+  unsigned char* flash_buff;
+  unsigned char  buff[FLASH_BUF_SIZE];
+  int i;
+
+  /* open bitfile */
+  fd = open(fw_file, O_RDONLY);
+
+  /* return if no valid file */
+  if(!fd) return;
+
+
+  /* check flash partition */
+  if( !(mtd_ptr = get_flash_partition(flash_mem_map, flash_partition_name)) )
+  {
+    printf("Error: partition %s not found\n", flash_partition_name);
+    return;
+  }
+
+  /* parse header for flash */
+  len = read(fd, buff, 1024);
+  header_len = parse_bitfile(buff, len, &bit_inf);
+
+  /* Check FPGA (local header) */
+  if (header_len > 0)
+  {
+    /* got valid header */
+    for (i=0; i<4; i++)
+    {
+//      if( DBG_INF4 ) printf("field %d  : %s \r\n", i, buff + bit_inf.field[i]);
+      printf("field %d  : %s \r\n", i, buff + bit_inf.field[i]);
+    }
+//    if( DBG_INF4 ) printf("size = %d\r\n", bit_inf.info.data_len);
+    printf("size = %d\r\n", bit_inf.info.data_len);
+    byte_swap_uint32(bit_inf.field, bit_inf_swapped.field, sizeof(bit_inf)/sizeof(unsigned int));
+
+    /* check fpga type */
+    if(flash_mem_map->fpga_type)
+    {
+      len = bit_inf.info.date_offs - bit_inf.info.fpga_offs;
+      if (strncmp(flash_mem_map->fpga_type, (const char*) buff + bit_inf.info.fpga_offs, len) != 0)
+      {
+        if (DBG_WARN) printf("Warning: Bitfile for wrong FPGA type: %s  expected: %s\r\n", buff + bit_inf.info.fpga_offs, flash_mem_map->fpga_type);
+        return;
+      }
+    }
+
+    /* check fpga uid */
+/*
+    if (flash_mem_map->fpga_uid)
+    {
+      len = bit_inf.info.date_offs - bit_inf.info.fpga_offs;
+      if (strncmp(flash_mem_map->fpga_type, (const char*) buff + bit_inf.info.fpga_offs, len) != 0)
+      {
+        if (DBG_WARN) xfs_local_printf("Warning: Bitfile for wrong FPGA type: %s  expected: %s\r\n", buff + bit_inf.info.fpga_offs, flash_mem_map->fpga_type);
+      }
+    }
+ */
+    /* Erase partition */
+    printf("deleting partition...");
+    qspi_flash_erase_partition(mtd_ptr->mtd_partition);
+    printf("done\n");
+
+    /* write header */
+    printf("writing header...");
+    lseek(fd, 0, SEEK_SET); /* go back to start of file */
+    flash_offs = mtd_ptr->header_offset;
+    flash_len  = sizeof(bitfile_info_type);
+    flash_buff = (unsigned char*) &bit_inf_swapped;
+    qspi_flash_write(mtd_ptr->mtd_partition, flash_offs, flash_len, flash_buff);
+
+    flash_offs += flash_len;
+    flash_len   = header_len;
+    flash_buff  = buff;
+    read(fd, flash_buff, flash_len);
+    qspi_flash_write(mtd_ptr->mtd_partition, flash_offs, flash_len, flash_buff);
+    printf("done\n");
+
+    /* write bitfile excluding header */
+    flash_len  = FLASH_BUF_SIZE;
+    flash_offs = 0;
+    while(flash_len == FLASH_BUF_SIZE)
+    {
+      flash_len = read(fd, flash_buff, FLASH_BUF_SIZE);
+      qspi_flash_write(mtd_ptr->mtd_partition, flash_offs, flash_len, flash_buff);
+      flash_offs += flash_len;
+      display_progress("writing bitstream ", 100*flash_offs/bit_inf.info.data_len);
+    }
+    printf("\n");
+  }
+  fsync(fd); /* flush caches to make sure operation completes before desecting board */
+  if(close(fd) < 0) printf("Error closing file\n");
+}
+
+/******************************************************************************/
+
+void wr_sw(char *sw_file, flash_memory_map_type *flash_mem_map, const char *flash_partition_name)
+{
+  int header_len;
+  unsigned int len;
+  sw_file_info_type sw_info;
+  flash_partition_type *mtd_ptr = NULL;
+  int fd;
+  unsigned int   flash_offs;
+  unsigned int   flash_len;
+  unsigned char* flash_buff;
+  unsigned char  buff[FLASH_BUF_SIZE];
+  unsigned char sr_header_buf[SREC_MAX_BYTES];
+  struct stat file_stat;
+  int i;
+
+  /* open bitfile */
+  fd = open(sw_file, O_RDONLY);
+
+  /* return if no valid file */
+  if(!fd) return;
+  stat(sw_file, &file_stat);
+
+  /* check flash partition */
+  if( !(mtd_ptr = get_flash_partition(flash_mem_map, flash_partition_name)) )
+  {
+    printf("Error: partition %s not found\n", flash_partition_name);
+    return;
+  }
+
+  /* parse header for flash */
+  len = read(fd, buff, SREC_MAX_BYTES);
+  header_len = parse_srec(buff, sr_header_buf);
+
+  /* Check FPGA (local header) */
+  if (header_len > 0)
+  {
+    /* got valid header */
+    if( DBG_INF0 ) printf("SREC header: %s \r\n", sr_header_buf);
+//par->fw_comp_lvl = get_sw_fcl((char*)sr_header_buf);
+//par->reg_layout_comp_lvl = get_sw_rcl((char*)sr_header_buf);
+
+    /* Erase partition */
+    printf("deleting partition...");
+    qspi_flash_erase_partition(mtd_ptr->mtd_partition);
+    printf("done\n");
+
+    /* write header part 2 (filename) */
+    printf("writing header (filename)...");
+    lseek(fd, 0, SEEK_SET); /* go back to start of file */
+    flash_offs = mtd_ptr->header_offset + sizeof(sw_file_info_type);
+    flash_len  = header_len+1;
+    flash_buff = sr_header_buf;
+    qspi_flash_write(mtd_ptr->mtd_partition, flash_offs, flash_len, flash_buff);
+    printf("done\n");
+
+    /* write bitfile excluding header */
+    flash_len  = FLASH_BUF_SIZE;
+    flash_offs = 0;
+    while(flash_len == FLASH_BUF_SIZE)
+    {
+      flash_len = read(fd, flash_buff, FLASH_BUF_SIZE);
+      qspi_flash_write(mtd_ptr->mtd_partition, flash_offs, flash_len, flash_buff);
+      flash_offs += flash_len;
+      display_progress("writing software  ", 100*flash_offs/file_stat.st_size);
+    }
+    printf("\n");
+
+    /* write header part 1 (info) */
+    printf("writing header (info)...");
+    sw_info.info.name_offs = sizeof(sw_file_info_type);
+    sw_info.info.data_len  = file_stat.st_size;
+    sw_info.info.head_len  = header_len;
+    sw_info.info.checksum  = sw_file_info_checksum(&sw_info);
+
+    flash_offs = mtd_ptr->header_offset;
+    flash_len  = sizeof(sw_file_info_type);
+    flash_buff = (unsigned char*) &sw_info;
+
+    qspi_flash_write(mtd_ptr->mtd_partition, flash_offs, flash_len, flash_buff);
+    printf("done\n");
+  }
+  fsync(fd); /* flush caches to make sure operation completes before desecting board */
+  if(close(fd) < 0) printf("Error closing file\n");
+}
+
+/******************************************************************************/
+
 void bpl_upload_fw_sw(slot_op_en_type *slot, char *fw_spec_p, char *sw_spec_p)
 {
   int i;
@@ -290,9 +492,9 @@ void bpl_upload_fw_sw(slot_op_en_type *slot, char *fw_spec_p, char *sw_spec_p)
   char *fwp;
   char *swp;
   int use_default_files;
-  char *default_fw_sw_path = NULL;
-
 #ifdef LINUX_COMPILE
+  flash_memory_map_type *flash_mem_map = NULL;
+
   init_spi_bpl();
 #endif
 
@@ -313,65 +515,70 @@ void bpl_upload_fw_sw(slot_op_en_type *slot, char *fw_spec_p, char *sw_spec_p)
   {
     if(slot->op_en[i])
     {
-      if( default_fw_sw_path = connect_flash(i) )
+      printf("\nSlot %d:\n", i);
+      if( use_default_files )
       {
-        if( use_default_files )
+        if(flash_mem_map = connect_flash(i, 0))
         {
-          printf("default path: %s\n", default_fw_sw_path);
-          if(strstr(default_fw_sw_path, "/wdb/"))
+          printf("default path: %s\n", flash_mem_map->default_fw_path);
+          if(strstr(flash_mem_map->default_fw_path, "/wdb/"))
           {
             /* Copy directory and filename to fw_def_path */
-            strcpy(fwp, default_fw_sw_path);
-            strcpy(&fwp[strlen(default_fw_sw_path)], wdb_fw_default_file);
-            printf("slot %d: uploading WDB firmware %s ... ", i, fwp);
-            /* Generate Header for flash */
-            /* Check FPGA (local header) */
-            /* Erase block */
-            /* Transfer bitfile */
-            /* Transfer header */
-            printf("done\n");
+            strcpy(fwp, flash_mem_map->default_fw_path);
+            strcpy(&fwp[strlen(flash_mem_map->default_fw_path)], wdb_fw_default_file);
+            /* upload firmware */
+            printf("-> Uploading WDB firmware %s\n", fwp);
+            wr_fw(fwp, flash_mem_map, "spi-wdb-fw");
+
             /* Copy directory and filename to sw_def_path */
-            strcpy(swp, default_fw_sw_path);
-            strcpy(&swp[strlen(default_fw_sw_path)], wdb_sw_default_file);
-            printf("slot %d: uploading WDB software %s ... ", i, fwp);
-            /* Generate Header for flash */
-            /* Check FPGA (local header) */
-            /* Erase block */
-            /* Transfer srec file */
-            /* Transfer header */
-            printf("done\n");
+            strcpy(swp, flash_mem_map->default_fw_path);
+            strcpy(&swp[strlen(flash_mem_map->default_fw_path)], wdb_sw_default_file);
+            /* upload sofware */
+            printf("-> Uploading WDB software %s\n", swp);
+            wr_sw(swp, flash_mem_map, "spi-wdb-sw");
           }
-          if(strstr(default_fw_sw_path, "/tcb/"))
+          else if(strstr(flash_mem_map->default_fw_path, "/tcb/"))
           {
             /* Copy directory and filename to fw_def_path */
-            strcpy(fwp, default_fw_sw_path);
-            strcpy(&fwp[strlen(default_fw_sw_path)], tcb_fw_default_file);
-            printf("slot %d: uploading TCB firmware %s ... ", i, fwp);
-            /* Generate Header for flash */
-            /* Check FPGA (local header) */
-            /* Erase block */
-            /* Transfer bitfile */
-            /* Transfer header */
-            printf("done\n");
+            strcpy(fwp, flash_mem_map->default_fw_path);
+            strcpy(&fwp[strlen(flash_mem_map->default_fw_path)], tcb_fw_default_file);
+            /* upload firmware */
+            printf("-> Uploading TCB firmware %s\n", fwp);
+            wr_fw(fwp, flash_mem_map, "spi-tcb-fw");
           }
         }
         else
         {
-          if(fwp)
-          {
-            printf("slot %d: uploading firmware %s ... ", i, fwp);
-            printf("done\n");
-          }
-          if(swp)
-          {
-            printf("slot %d: uploading software %s ... ", i, swp);
-            printf("done\n");
-          }
+          printf("Error: unable to connect to slot %d\n", i);
         }
       }
       else
       {
-        printf("Error: unable to connect to slot %d\n", i);
+//        if(flash_mem_map = connect_flash(i, 1))
+//        {
+//          if(fwp)
+//          {
+//            /* tbd insert check if flash_mem_map is not NULL */
+//            /* check flash_mem_map vs bitfile */
+//
+//            /* find map and partition */
+//
+//            /* upload firmware */
+//            printf("-> Uploading firmware %s (forced)\n", fwp);
+//            wr_fw(fwp, flash_mem_map, "?");
+//          }
+//          if(swp)
+//          {
+//            /* tbd insert check if flash_mem_map is not NULL */
+//            /* check flash_mem_map vs bitfile */
+//
+//            /* find map and partition */
+//
+//            /* upload firmware */
+//            printf("-> Uploading software %s (forced)\n", swp);
+//            wr_sw(swp, flash_mem_map, "?");
+//          }
+//        }
       }
 
       disconnect();
@@ -455,7 +662,7 @@ unsigned int spi_get_ref_reg(unsigned char slot_nr)
 
 /******************************************************************************/
 
-char* set_bpl_spi_scheme(unsigned int slot_nr)
+flash_memory_map_type* set_bpl_spi_scheme(unsigned int slot_nr)
 {
   /* Returns pointer to default fw/sw path if successfull else NULL pointer */
   unsigned int hw_rev_val;
@@ -469,7 +676,7 @@ char* set_bpl_spi_scheme(unsigned int slot_nr)
     if( (hw_rev_val&HW_VERS_REV_MASK) <= HW_VERS_WDB_REV_F_VAL)
     {
       if(DBG_SPAM) xfs_printf("Scheme 0 selected for slot %d\r\n", slot_nr);
-      return (char*)wdb_rf_default_path;
+      return get_flash_mem_map(BOARD_TYPE_ID_WDB, BOARD_REV_ID_F);
     }
   }
   /* Add TCB case */
@@ -483,7 +690,7 @@ char* set_bpl_spi_scheme(unsigned int slot_nr)
     if( (hw_rev_val&HW_VERS_REV_MASK) >= HW_VERS_WDB_REV_G_VAL)
     {
       if(DBG_SPAM) xfs_printf("Scheme 1 selected for slot %d\r\n", slot_nr);
-      return (char*)wdb_rg_default_path;
+      return get_flash_mem_map(BOARD_TYPE_ID_WDB, BOARD_REV_ID_G);
     }
   }
 

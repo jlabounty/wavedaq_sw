@@ -38,10 +38,13 @@ set(LIBSRC
    src/drv_si5324.c
    src/drv_sys_mon.c
    src/drv_qspi_flash.c
+   src/flash_memory_maps.c
    src/mod_crate_com.c
    src/mod_reg_access.c
    src/mod_status.c
    src/mod_system_management.c
+   src/xilinx_cfg.c
+   src/srec.c
    src/crc32.c
    src/dbg.c
    src/utilities.c
@@ -67,9 +70,9 @@ add_dependencies(dcblib git_revision_h)
 # executables
 foreach(PROG ${PROGS})
    add_executable(${PROG} src/${PROG})
-   target_link_libraries(${PROG} dcblib readline)   
+   target_link_libraries(${PROG} dcblib readline)
 endforeach()
 
-install(TARGETS ${PROGS} 
+install(TARGETS ${PROGS}
    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE SETUID
    DESTINATION bin)

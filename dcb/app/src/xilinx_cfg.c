@@ -54,16 +54,16 @@ int parse_bitfile(unsigned char *buf, unsigned int len, bitfile_info_type *biptr
 
     if (field == XCFG_FIELD_DATA_LEN)
     {
-        if (len < (pos + 4)) return -1;
-        if (biptr)
-        {
-          biptr->field[XCFG_FIELD_DATA_LEN] = (buf[pos]   << 24) + (buf[pos+1] << 16) +
-                                              (buf[pos+2] <<  8) +  buf[pos+3] ;
-          biptr->field[XCFG_FIELD_HEAD_LEN] = pos + 4;
-          biptr->field[XCFG_FIELD_HEAD_ID]  = BITFILE_HEADER_ID;
-          biptr->field[XCFG_FIELD_CHECKSUM] = bitfile_info_checksum(biptr);
-        }
-        return pos + 4;
+      if (len < (pos + 4)) return -1;
+      if (biptr)
+      {
+        biptr->field[XCFG_FIELD_DATA_LEN] = (buf[pos]   << 24) + (buf[pos+1] << 16) +
+                                            (buf[pos+2] <<  8) +  buf[pos+3] ;
+        biptr->field[XCFG_FIELD_HEAD_LEN] = pos + 4;
+        biptr->field[XCFG_FIELD_HEAD_ID]  = BITFILE_HEADER_ID;
+        biptr->field[XCFG_FIELD_CHECKSUM] = bitfile_info_checksum(biptr);
+      }
+      return pos + 4;
     }
 
     /* get field length */

@@ -64,16 +64,16 @@
 
 #ifdef LINUX_COMPILE
 /* Flash MTDs */
-#define MTD_WDB_FLASH_BITSTREA               "/dev/mtd0"
-#define MTD_WDB_FLASH_SOFTWARE               "/dev/mtd1"
-#define MTD_WDB_FLASH_RESERVED               "/dev/mtd2"
-#define MTD_TCB_FLASH_BITSTREA               "/dev/mtd3"
-#define MTD_QSPI_FLASH_HEADER                "/dev/mtd4"
-#define MTD_QSPI_FLASH_REGCONTENT            "/dev/mtd5"
-#define MTD_QSPI_FLASH_FSBL                  "/dev/mtd6"
-#define MTD_QSPI_FLASH_BITSTREAM             "/dev/mtd7"
-#define MTD_QSPI_FLASH_RESERVED              "/dev/mtd8"
-#define MTD_QSPI_FLASH_ENV                   "/dev/mtd9"
+#define MTD_WDB_FLASH_BITSTREAM   "/dev/mtd0"
+#define MTD_WDB_FLASH_SOFTWARE    "/dev/mtd1"
+#define MTD_WDB_FLASH_RESERVED    "/dev/mtd2"
+#define MTD_TCB_FLASH_BITSTREAM   "/dev/mtd3"
+#define MTD_QSPI_FLASH_HEADER     "/dev/mtd4"
+#define MTD_QSPI_FLASH_REGCONTENT "/dev/mtd5"
+#define MTD_QSPI_FLASH_FSBL       "/dev/mtd6"
+#define MTD_QSPI_FLASH_BITSTREAM  "/dev/mtd7"
+#define MTD_QSPI_FLASH_RESERVED   "/dev/mtd8"
+#define MTD_QSPI_FLASH_ENV        "/dev/mtdf"
 #endif
 
 /******************************************************************************/
@@ -138,5 +138,7 @@ void print_sys_info(void);
 int get_serial_number();
 int is_dir(char* path);
 int is_file(char* path);
+void byte_swap_uint32(unsigned int* src, unsigned int* dst, unsigned int len);
+void display_progress(char* prefix, xfs_u32 percent);
 
 #endif /* __SYSTEM_H__ */
