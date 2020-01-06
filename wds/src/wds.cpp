@@ -15,6 +15,7 @@
 #include <random>
 #include <execinfo.h>
 #include <fstream>
+#include <algorithm>
 
 #include "WDBLib.h"
 #include "DCBLib.h"
@@ -1076,17 +1077,25 @@ int main(int argc, const char *argv[]) {
             if (b.substr(0, 3) == "DCB") {
                std::cout << "Connect to " << b << " ... " << std::flush;
                try {
-                  DCB *dcb = new DCB(b, gl.verbose);
+                  DCB *dcb;
+                  if (b.find(':')) {
+                     dcb = new DCB(b.substr(0, b.find(':')), gl.verbose);
+                  } else
+                     dcb = new DCB(b, gl.verbose);
                   dcb->Connect();
                   if (gl.verbose) {
                      std::cout << std::endl << "========== DCB Info ==========" << std::endl;
                      dcb->PrintVersion();
                   }
-
                   gl.dcb.push_back(dcb);
-                  std::vector<WDB *> wdbs = dcb->ScanWDB();
-                  for (auto &w: wdbs)
-                     gl.wdb.push_back(w); // add all WDBs in crate
+
+                  if (b.find(':')) {
+                     gl.wdb.push_back(new WDB(dcb, std::stoi(b.substr(b.find(':')+1)), gl.verbose));
+                  } else {
+                     std::vector<WDB *> wdbs = dcb->ScanWDB();
+                     for (auto &w: wdbs)
+                        gl.wdb.push_back(w); // add all WDBs in crate
+                  }
                } catch (std::runtime_error &e) {
                   std::cout << std::endl;
                   std::cout << e.what() << std::endl;
