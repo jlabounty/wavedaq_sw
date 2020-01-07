@@ -33,7 +33,7 @@ flash_partition_type dcb_flash_partitions[] =
 
 flash_partition_type wdb_flash_partitions[] =
 {
-  /* Name            , Size      , Base Offs , Head Offs , MTD Part. Nr. */
+  /* Name    , Size      , Base Offs , Head Offs , MTD Part. Nr. */
   {"fw"      , 0x00420000, 0x00000000, 0x0041F000, MTD_WDB_FLASH_BITSTREAM},
   {"sw"      , 0x00200000, 0x00000000, 0x001FF000, MTD_WDB_FLASH_SOFTWARE},
   {"reserved", 0x009e0000, 0x00000000, 0x00000000, MTD_WDB_FLASH_RESERVED},
@@ -42,7 +42,7 @@ flash_partition_type wdb_flash_partitions[] =
 
 flash_partition_type tcb_flash_partitions[] =
 {
-  /* Name      , Size      , Base Offs , Head Offs , MTD Part. Nr. */
+  /* Name, Size    , Base Offs , Head Offs , MTD Part. Nr. */
   {"fw", 0x01000000, 0x00000000, 0x00000000, MTD_TCB_FLASH_BITSTREAM},
   {NULL, 0, 0, 0, 0}
 };
