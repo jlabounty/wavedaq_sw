@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <time.h>
 
 #include "git-revision.h"
 
@@ -42,6 +43,17 @@
 int _server_abort = 0;
 
 void print_buffer(const unsigned char *buffer, int len);
+
+/*------------------------------------------------------------------*/
+
+double clock_us() {
+   struct timespec now;
+
+   clock_gettime(CLOCK_MONOTONIC, &now);
+   return now.tv_sec * 1e6 + now.tv_nsec / 1000.0;
+}
+
+/*------------------------------------------------------------------*/
 
 int main(int argc, char *argv[]) {
 
@@ -199,8 +211,13 @@ int main(int argc, char *argv[]) {
                   reg_bank_write(adr + i * 4, &d, 1);
                }
             } else {
+               double start = clock_us();
+
                buffer[3] = CMD_WRITE32;
                spi_binary_cmd(&buffer[3], rbuffer, slot, (len-8)+5); // 1 cmd, 4 adr. bytes + data
+
+               if (verbose)
+                  printf("SPI took %5.3lf ms\n\n", (clock_us() - start)/1e3);
             }
 
             // send acknowledge back to client
@@ -374,7 +391,6 @@ int main(int argc, char *argv[]) {
          sendto(sock_asc, rbuffer, strlen(rbuffer)+1, 0, (struct sockaddr *) &client_address, sizeof(client_address));
 
       } // ASCII
-
 
    }
 
