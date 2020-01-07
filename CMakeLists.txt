@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR})
 
 # suppress warnings due to compiler bug on ARM targets
-if (${CMAKE_SYSTEM_NAME} MATCHES "ARM")
+if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
    set(CMAKE_CXX_FLAGS "-Wno-psabi")
 endif()
 
