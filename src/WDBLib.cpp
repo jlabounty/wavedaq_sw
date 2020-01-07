@@ -1667,12 +1667,10 @@ void WDB::SetTriggerDelayNs(unsigned int ns) {
 
 void WDB::TriggerSoftEvent() {
    SetDaqSingle(true);  // start DRS domino wave
-   SetDaqSingle(false);
 
    sleep_ms(mTriggerHoldoff);
 
    SetDaqSoftTrigger(true);
-   SetDaqSoftTrigger(false);
 }
 
 //--------------------------------------------------------------------
