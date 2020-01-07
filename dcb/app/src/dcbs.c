@@ -55,11 +55,63 @@ double clock_us() {
 
 /*------------------------------------------------------------------*/
 
+/*
+
+Parse ARP table stored under /proc/net/arp and has the form
+
+IP address       HW type     Flags       HW address            Mask     Device
+129.129.196.1    0x1         0x2         8c:60:4f:0e:6e:c1     *        eth0
+129.129.196.166  0x1         0x2         00:50:c2:46:d4:86     *        eth0
+129.129.196.122  0x1         0x2         a8:60:b6:0e:28:ee     *        eth0
+
+*/
+
+#define xstr(s) str(s)
+#define str(s) #s
+
+#define ARP_CACHE       "/proc/net/arp"
+#define ARP_STRING_LEN  1023
+#define ARP_BUFFER_LEN  (ARP_STRING_LEN + 1)
+
+/* Format for fscanf() to read the 1st, 4th, and 6th space-delimited fields */
+#define ARP_LINE_FORMAT "%" xstr(ARP_STRING_LEN) "s %*s %*s " \
+                        "%" xstr(ARP_STRING_LEN) "s %*s " \
+                        "%" xstr(ARP_STRING_LEN) "s"
+
+int parse_arp_table(char *ipAddrPacket, char *hwAddrPacket) {
+   FILE *arpCache = fopen(ARP_CACHE, "r");
+   if (!arpCache) {
+      perror("Arp Cache: Failed to open file \"" ARP_CACHE "\"");
+      return 0;
+   }
+
+   /* Ignore the first line, which contains the header */
+   char header[ARP_BUFFER_LEN];
+   if (!fgets(header, sizeof(header), arpCache)) {
+      fclose(arpCache);
+      return 0;
+   }
+
+   char ipAddr[ARP_BUFFER_LEN], hwAddr[ARP_BUFFER_LEN], device[ARP_BUFFER_LEN];
+   while (fscanf(arpCache, ARP_LINE_FORMAT, ipAddr, hwAddr, device) == 3) {
+      // printf("Mac Address of [%s] on [%s] is \"%s\"\n", ipAddr, device, hwAddr);
+      if (strcmp(ipAddr, ipAddrPacket) == 0) {
+         strncpy(hwAddrPacket, hwAddr, 256);
+         fclose(arpCache);
+         return 1;
+      }
+   }
+   fclose(arpCache);
+   return 0;
+}
+
+/*------------------------------------------------------------------*/
+
 int main(int argc, char *argv[]) {
 
    int verbose = 0;
    int daemon = 0;
-   char hostname[256];
+   char hostname[256], mac[256];
 
    /* parse command line parameters */
    for (int i = 1; i < argc; i++) {
@@ -182,8 +234,10 @@ int main(int argc, char *argv[]) {
          // inet_ntoa prints user friendly representation of the
          // ip address
          if (verbose) {
+            char mac[256];
+            parse_arp_table(inet_ntoa(client_address.sin_addr), mac);
+            printf("Binary request received: %d bytes from client IP %s MAC %s\n", len, inet_ntoa(client_address.sin_addr), mac);
             buffer[len] = '\0';
-            printf("Binary request received: %d bytes from client %s\n", len, inet_ntoa(client_address.sin_addr));
             print_buffer(buffer, len);
          }
 
