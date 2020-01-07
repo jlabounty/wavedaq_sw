@@ -68,7 +68,7 @@ int main(int argc, const char *argv[])
    WP *wp = new WP(wdb, true);
 
    for (auto &b: wdb) {
-      b->SetDestinationPort(wp->GetServerPort(), wp->GetServerAddr(), wp->GetServerMac());
+      b->SetDestinationPort(wp->GetServerPort());
    }
 
    return 0;

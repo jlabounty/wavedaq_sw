@@ -116,14 +116,14 @@ WDB::WDB(DCB *dcb, int slot, bool verbose) : WDBREG() {
 
 //--------------------------------------------------------------------
 
-void WDB::SendUDP(std::string str) {
+void WDB::SendUDP(std::string str, unsigned char *ethAddr) {
    std::string result;
-   result = SendReceiveUDP(str);
+   result = SendReceiveUDP(str, ethAddr);
 }
 
 //--------------------------------------------------------------------
 
-std::string WDB::SendReceiveUDP(std::string str) {
+std::string WDB::SendReceiveUDP(std::string str, unsigned char *ethAddr) {
    size_t i;
    fd_set readfds;
    struct timeval timeout;
@@ -132,10 +132,12 @@ std::string WDB::SendReceiveUDP(std::string str) {
    char rx_buffer[1600];
    std::string result;
 
-   if (mDCB) {
+   if (ethAddr)
+      std::memcpy(&client_addr, ethAddr, sizeof(client_addr));
+   else if (mDCB) {
       return mDCB->SendReceiveUDP(std::to_string(mSlot) + " " + str);
-   }
-   std::memcpy(&client_addr, mEthAddrAscii, sizeof(client_addr));
+   } else
+      std::memcpy(&client_addr, mEthAddrAscii, sizeof(client_addr));
 
    if (str.back() != '\n')
       str += '\n';
@@ -534,6 +536,7 @@ void WDB::Connect() {
       if (phe == NULL)
          throw std::runtime_error(std::string("Cannot resolve host name ") + mWDBAddr + ".");
 
+      std::memset((char *) &client_addr, 0, sizeof(client_addr));
       std::memcpy((char *) &client_addr.sin_addr, phe->h_addr, phe->h_length);
       client_addr.sin_family = AF_INET;
       client_addr.sin_port = htons(WD2_CMD_PORT_ASCII);
@@ -552,6 +555,11 @@ void WDB::Connect() {
       // set dbglevel none
       SendUDP("dbglvl none");
    } else {
+      // create UDP socket for ASCII command interpreter (needed for "cfgdst")
+      if (gASCIISocket == 0)
+         gASCIISocket = socket(AF_INET, SOCK_DGRAM, 0);
+      assert(gASCIISocket);
+
       // check if board is alive
       try {
          auto result = ReadUDP(0x0000, 1);
@@ -662,20 +670,31 @@ void WDB::Connect() {
 
 //--------------------------------------------------------------------
 
-void WDB::SetDestinationPort(int port, char *ip, char *mac) {
+void WDB::SetDestinationPort(int port) {
    if (mDemoMode)
       return;
 
    if (mDCB) {
-      std::string str;
-      str = std::to_string(mSlot) + " ";
-      str += "cfgdst ";
-      str += std::to_string(port) + " ";
-      str += std::string(ip) + " ";
-      str += mac;
-      mDCB->SendReceiveUDP(str);
+      unsigned char ethAddr[16];
+      struct sockaddr_in client_addr;
+      struct hostent *phe;
+
+      // retrieve Ethernet address of board
+      phe = gethostbyname(mWDBName.c_str());
+      if (phe == NULL)
+         throw std::runtime_error(std::string("Cannot resolve host name ") + mWDBAddr + ".");
+
+      std::memset((char *) &client_addr, 0, sizeof(client_addr));
+      std::memcpy((char *) &client_addr.sin_addr, phe->h_addr, phe->h_length);
+      client_addr.sin_family = AF_INET;
+      client_addr.sin_port = htons(WD2_CMD_PORT_ASCII);
+      std::memcpy(ethAddr, &client_addr, sizeof(client_addr));
+
+      // set destination port in WD board, MAC and IP is used automatically form UDP packet
+      SendUDP(std::string("cfgdst ") + std::to_string(port), ethAddr);
+
    } else
-      // set destinantion port in WD board, MAC and IP is used automaticlly form UDP packet
+      // set destination port in WD board, MAC and IP is used automatically form UDP packet
       SendUDP(std::string("cfgdst ") + std::to_string(port));
 }
 
@@ -1927,39 +1946,8 @@ WP::WP(std::vector<WDB *> w, int verbose, std::string logfile, bool demo) {
       getsockname(WP::gDataSocket, (struct sockaddr *) &server_addr, (socklen_t *) &size);
       WP::mServerPort = ntohs(server_addr.sin_port);
 
-      // obtain IP address and interface name to which socket is bound
-      struct ifaddrs *ifap, *ifa;
-      getifaddrs(&ifap);
-      for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
-         // search first interface which is not a loopback
-         if (ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_INET && (ifa->ifa_flags & IFF_LOOPBACK) == 0) {
-            struct sockaddr_in *sa = (struct sockaddr_in *) ifa->ifa_addr;
-            strlcpy(WP::mServerAddr, inet_ntoa(sa->sin_addr), sizeof(WP::mServerAddr));
-            strlcpy(WP::mServerInterface, ifa->ifa_name, sizeof(WP::mServerInterface));
-            break;
-         }
-      }
-      freeifaddrs(ifap);
-
-      // obtain MAC address of interface
-      getifaddrs(&ifap);
-      for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
-         if (ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_LINK && strcmp(ifa->ifa_name, WP::mServerInterface) == 0) {
-
-            unsigned char *p = (unsigned char *)LLADDR((struct sockaddr_dl *)(ifa)->ifa_addr);
-            int i;
-            int len = 0;
-            char str[32];
-            for(i = 0; i < 6; i++)
-               len+=sprintf(str+len,"%02X%s",p[i],i < 5 ? ":":"");
-            strlcpy(WP::mServerMac, str, sizeof(WP::mServerMac));
-         }
-      }
-      freeifaddrs(ifap);
-
       if (this->mVerbose) {
-         std::cout << std::endl << "Listening on PORT " << WP::mServerPort <<
-                   " IP " << WP::mServerAddr << " MAC " << WP::mServerMac << std::endl;
+         std::cout << std::endl << "Listening on PORT " << WP::mServerPort << std::endl;
       }
    }
 

@@ -343,9 +343,6 @@ class WP {
 
    static int        gDataSocket;
    int               mServerPort;
-   char              mServerInterface[32];
-   char              mServerAddr[32];
-   char              mServerMac[32];
 
    int               mVerbose;
    std::string       mLogfile;
@@ -435,8 +432,6 @@ public:
    // setter & getter
    int GetDataSocket() { return gDataSocket; }
    int GetServerPort() { return mServerPort; }
-   char *GetServerAddr() { return mServerAddr; }
-   char *GetServerMac() { return mServerMac; }
    bool IsVerbose() { return mVerbose; }
    bool IsDemoMode() { return mDemoMode; }
    bool IsRotateWaveform() { return mRotateWaveform;}
@@ -562,8 +557,8 @@ class WDB: public WDBREG {
    static int       gBinSocket;
    static unsigned short udpSequenceNumber;
 
-   std::string      SendReceiveUDP(std::string str);
-   void             SendUDP(std::string str);
+   std::string      SendReceiveUDP(std::string str, unsigned char *ethAddr = NULL);
+   void             SendUDP(std::string str, unsigned char *ethAddr = NULL);
 
    void             WriteUDP(unsigned int ofs, std::vector<unsigned int> data);
    std::vector<unsigned int> ReadUDP(unsigned int ofs, unsigned int len);
@@ -641,7 +636,7 @@ public:
    void SetLogFile(std::string logfile) { mLogfile = logfile; }
    void Connect();
 
-   void SetDestinationPort(int port, char *ip = nullptr, char *mac = nullptr);
+   void SetDestinationPort(int port);
 
    void ReceiveControlRegisters(unsigned int index=0, unsigned int nReg=0);
    void ReceiveStatusRegisters(unsigned int index=0, unsigned int nReg=0);
