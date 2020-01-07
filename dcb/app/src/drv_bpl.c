@@ -204,6 +204,7 @@ void spi_ascii_cmd(char* txbuff, char *rxbuff, unsigned int rxsize, unsigned cha
   int i;
 
   if (!txbuff) return;
+  if ( (slot_nr > 17) || (slot_nr == 16) ) return;
 
 #ifdef LINUX_COMPILE
   init_spi_bpl();
@@ -271,7 +272,7 @@ void spi_binary_cmd(char* tx_buff, char* rx_buff, unsigned char slot_nr, unsigne
 
   if (!tx_buff) return;
   if (len==0) return;
-  if (slot_nr > 16) return;
+  if ( (slot_nr > 17) || (slot_nr == 16) ) return;
 
 #ifdef LINUX_COMPILE
   init_spi_bpl();
@@ -365,19 +366,25 @@ void wr_fw(char *fw_file, flash_memory_map_type *flash_mem_map, const char *flas
     printf("done\n");
 
     /* write header */
-    printf("writing header...");
     lseek(fd, 0, SEEK_SET); /* go back to start of file */
-    flash_offs = mtd_ptr->header_offset;
-    flash_len  = sizeof(bitfile_info_type);
-    flash_buff = (unsigned char*) &bit_inf_swapped;
-    qspi_flash_write(mtd_ptr->mtd_partition, flash_offs, flash_len, flash_buff);
+    if(mtd_ptr->header_offset) /* no header to be written */
+    {
+      printf("writing header...");
+      flash_offs = mtd_ptr->header_offset;
+      flash_len  = sizeof(bitfile_info_type);
+      flash_buff = (unsigned char*) &bit_inf_swapped;
+      qspi_flash_write(mtd_ptr->mtd_partition, flash_offs, flash_len, flash_buff);
+    }
 
     flash_offs += flash_len;
     flash_len   = header_len;
     flash_buff  = buff;
     read(fd, flash_buff, flash_len);
-    qspi_flash_write(mtd_ptr->mtd_partition, flash_offs, flash_len, flash_buff);
-    printf("done\n");
+    if(mtd_ptr->header_offset) /* no header to be written */
+    {
+      qspi_flash_write(mtd_ptr->mtd_partition, flash_offs, flash_len, flash_buff);
+      printf("done\n");
+    }
 
     /* write bitfile excluding header */
     flash_len  = FLASH_BUF_SIZE;
@@ -484,103 +491,104 @@ void wr_sw(char *sw_file, flash_memory_map_type *flash_mem_map, const char *flas
 
 /******************************************************************************/
 
-void bpl_upload_fw_sw(slot_op_en_type *slot, char *fw_spec_p, char *sw_spec_p, char *board_type, char *board_rev)
+void bpl_upload_fw_sw(slot_op_en_type *slot, int load_fw, char *fw_spec_p, int load_sw, char *sw_spec_p, char *board_type, char *board_rev)
 {
   int i;
   char fw_def_path[250];
   char sw_def_path[250];
   char *fwp;
   char *swp;
-  int use_default_files;
 #ifdef LINUX_COMPILE
   flash_memory_map_type *flash_mem_map = NULL;
-  flash_memory_map_type *flash_mem_map_force = NULL;
+  flash_memory_map_type *flash_mem_map_check = NULL;
 
   init_spi_bpl();
 #endif
 
-  if( (fw_spec_p==NULL) && (sw_spec_p==NULL) )
-  {
-    use_default_files = 1;
-    fwp = fw_def_path;
-    swp = sw_def_path;
-  }
-  else
-  {
-    use_default_files = 0;
-    fwp = fw_spec_p;
-    swp = sw_spec_p;
-  }
+  if(fw_spec_p) fwp = fw_spec_p;
+  else          fwp = fw_def_path;
 
-  for(i=0;i<17;i++)
+  if(sw_spec_p) swp = sw_spec_p;
+  else          swp = sw_def_path;
+
+  for(i=0;i<18;i++)
   {
-    if(slot->op_en[i])
+    if( (slot->op_en[i]) && (i!=16) ) /* don't do DCB slot (16) */
     {
       printf("\nSlot %d:\n", i);
-      if( use_default_files )
+      if((board_type!=NULL) && (board_rev!=NULL))
       {
-        if(flash_mem_map = connect_flash(i, 0))
+        /* get forced upload information */
+        printf("FORCED upload\n");
+        flash_mem_map = get_flash_mem_map(board_type, board_rev);
+        if(flash_mem_map_check = connect_flash(i, 1))
         {
-          printf("default path: %s\n", flash_mem_map->default_fw_path);
-          if(strstr(flash_mem_map->default_fw_path, "/wdb/"))
-          {
-            /* Copy directory and filename to fw_def_path */
-            strcpy(fwp, flash_mem_map->default_fw_path);
-            strcpy(&fwp[strlen(flash_mem_map->default_fw_path)], wdb_fw_default_file);
-            /* upload firmware */
-            printf("-> Uploading WDB firmware %s\n", fwp);
-            wr_fw(fwp, flash_mem_map, "fw");
-
-            /* Copy directory and filename to sw_def_path */
-            strcpy(swp, flash_mem_map->default_fw_path);
-            strcpy(&swp[strlen(flash_mem_map->default_fw_path)], wdb_sw_default_file);
-            /* upload sofware */
-            printf("-> Uploading WDB software %s\n", swp);
-            wr_sw(swp, flash_mem_map, "sw");
-          }
-          else if(strstr(flash_mem_map->default_fw_path, "/tcb/"))
-          {
-            /* Copy directory and filename to fw_def_path */
-            strcpy(fwp, flash_mem_map->default_fw_path);
-            strcpy(&fwp[strlen(flash_mem_map->default_fw_path)], tcb_fw_default_file);
-            /* upload firmware */
-            printf("-> Uploading TCB firmware %s\n", fwp);
-            wr_fw(fwp, flash_mem_map, "fw");
-          }
-        }
-        else
-        {
-          printf("Error: unable to connect to slot %d\n", i);
-        }
-      }
-      else
-      {
-        if((board_type==NULL) || (board_rev==NULL))
-        {
-          printf("Error: board type (-t) and revision (-r) needed for forced upload\n");
-          return;
-        }
-        flash_mem_map_force = get_flash_mem_map(board_type, board_rev);
-        if(flash_mem_map = connect_flash(i, 1))
-        {
-          if(flash_mem_map!=flash_mem_map_force)
+          if(flash_mem_map!=flash_mem_map_check)
           {
             printf("Error: present board in slot does not match type and revision\n");
             disconnect();
             return;
           }
         }
-        if(fwp)
+      }
+      else
+      {
+        /* get standard upload information */
+        printf("Standard upload\n");
+        if(flash_mem_map = connect_flash(i, 0))
         {
-          /* upload firmware */
-          printf("-> Uploading firmware %s (forced)\n", fwp);
-          wr_fw(fwp, flash_mem_map_force, "fw");
+          printf("default path: %s\n", flash_mem_map->default_fw_path);
         }
-        if(swp)
+        else
         {
+          printf("Error: unable to connect to slot %d\n", i);
+          disconnect();
+          return;
+        }
+      }
+
+      if(strstr(flash_mem_map->default_fw_path, "/wdb/"))
+      {
+        /* WDB */
+        if(load_fw)
+        {
+          if(!fw_spec_p)
+          {
+            /* set default path according to type and revision */
+            strcpy(fwp, flash_mem_map->default_fw_path);
+            strcpy(&fwp[strlen(flash_mem_map->default_fw_path)], wdb_fw_default_file);
+          }
           /* upload firmware */
-          printf("-> Uploading software %s (forced)\n", swp);
-          wr_sw(swp, flash_mem_map_force, "sw");
+          printf("-> Uploading WDB firmware %s\n", fwp);
+          wr_fw(fwp, flash_mem_map, "fw");
+        }
+        if(load_sw)
+        {
+          if(!sw_spec_p)
+          {
+            /* set default path according to type and revision */
+            strcpy(swp, flash_mem_map->default_fw_path);
+            strcpy(&swp[strlen(flash_mem_map->default_fw_path)], wdb_sw_default_file);
+          }
+          /* upload sofware */
+          printf("-> Uploading WDB software %s\n", swp);
+          wr_sw(swp, flash_mem_map, "sw");
+        }
+      }
+      else if(strstr(flash_mem_map->default_fw_path, "/tcb/"))
+      {
+        /* TCB */
+        if(load_fw)
+        {
+          if(!fw_spec_p)
+          {
+            /* set default path according to type and revision */
+            strcpy(fwp, flash_mem_map->default_fw_path);
+            strcpy(&fwp[strlen(flash_mem_map->default_fw_path)], tcb_fw_default_file);
+          }
+          /* upload firmware */
+          printf("-> Uploading TCB firmware %s\n", fwp);
+          wr_fw(fwp, flash_mem_map, "fw");
         }
       }
 
@@ -636,7 +644,8 @@ unsigned int spi_get_ref_reg(unsigned char slot_nr)
   int Status;
   int i;
 
-  if (slot_nr > 16) return 0;
+  if (slot_nr > 17) return 0;
+  if (slot_nr ==16) return 0;
 
   /* Enable SPI driver */
   bpl_spi_drive_en(1);

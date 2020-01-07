@@ -38,12 +38,13 @@ int parse_slot_selection(int argc, char **argv, slot_op_en_type *slot)
   int i;
 
   /* initialize operation enable for each slot */
-  for(i=0;i<17;i++) slot->op_en[i]=0;
+  for(i=0;i<18;i++) slot->op_en[i]=0;
 
   if( (argc == 0) || !isdigit(argv[0][0]) )
   {
     /* set all */
-    for(i=0;i<17;i++) slot->op_en[i] = 1;
+    for(i=0;i<18;i++) slot->op_en[i] = 1;
+    slot->op_en[16] = 0; /* DCB slot */
     if( fstrpcmp("all", argv[0]) )
     {
       return 1;
@@ -54,18 +55,19 @@ int parse_slot_selection(int argc, char **argv, slot_op_en_type *slot)
   while( (offset < argc) && isdigit(argv[offset][0]) )
   {
     from = (int)strtol(argv[offset], NULL, 10);
-    if( from>16 ) from = 16;
+    if( from>17 ) from = 17;
     to   = 0;
     dashp = strstr(argv[offset],"-");
     if(dashp)
     {
       to = (int)strtol(dashp+1, NULL, 10);
-      if( to>16 ) to = 16;
+      if( to>17 ) to = 17;
     }
 
     do
     {
-      slot->op_en[from++] = 1;
+      /* don't enable DCB slot (16) */
+      if(from!=16)slot->op_en[from++] = 1;
     }
     while( from<=to );
 
@@ -89,7 +91,7 @@ int slot_fpga_com(int argc, char **argv)
 
   CMD_HELP("<slot> <cmd>",
             "communicate to WDB/TCB via backplane SPI ASCII command.\r\n",
-            "  <slot> : WDB/TCB slot (0..15)\r\n"
+            "  <slot> : WDB/TCB slot (0..17 except 16 (DCB slot))\r\n"
             "  <cmd>  : command to send to WDB/TCB\r\n"
           );
 
@@ -150,37 +152,47 @@ int slot_upload_fw_sw(int argc, char **argv)
   slot_op_en_type slot;
   int offset;
   int opt;
+  int load_fw = 0;
+  int load_sw = 0;
   char *fwp = NULL;
   char *swp = NULL;
   char *board_type = NULL;
   char *board_rev = NULL;
 
-  CMD_HELP("[slot] [-b <firmware path>] [-s <software path>] [-t <board type>] [-r <board revision>]",
+  CMD_HELP("[slot] [-f[firmware path]] [-s[software path]] [-t<board type> -r<board revision>]",
             "upload new firm- or software to WDB/TCB via backplane. If no files are specified,\r\n"
             "the standard firmware/software is taken from the /firmware/.../prod/... directory.\r\n",
             "  [slot] : WDB/TCB slot, optional, multiple entries possible separated by spaces.\r\n"
             "           Ranges (e.g. 4-7) can also be specified.\r\n"
-            "  [-b <firmware path>]  : WDB/TCB firmware file (optional).\r\n"
-            "  [-s <software path>]  : WDB software file (optional).\r\n"
-            "  [-t <board type>]     : wdb or tcb (needed for \"force\" option).\r\n"
-            "  [-r <board revision>] : f, g etc for wdb 1, 2 etc for tcb (needed for \"force\" option).\r\n"
+            "  [-f[firmware path]]  : WDB/TCB firmware file (optional).\r\n"
+            "  [-s[software path]]  : WDB software file (optional).\r\n"
+            "  [-t<board type>]     : wdb or tcb (needed to \"force\" upload).\r\n"
+            "  [-r<board revision>] : f, g etc for wdb 1, 2 etc for tcb (needed to \"force\" upload).\r\n"
           );
 
   offset = parse_slot_selection(argc-1, &argv[1], &slot);
 
-  while((opt = getopt(argc, argv, ":f:s:t:r:")) != -1)
+  while((opt = getopt(argc, argv, ":f::s::t:r:")) != -1)
   {
     switch(opt)
     {
       case 'f':
+        load_fw = 1;
         /* printf("firmware filename: %s\n", optarg); */
-        if(is_file(optarg)) fwp = optarg;
-        else printf("firmware file %s not found", optarg);
+        if(optarg)
+        {
+          if(is_file(optarg)) fwp = optarg;
+          else printf("firmware file %s not found\n", optarg);
+        }
         break;
       case 's':
+        load_sw = 1;
         /* printf("software filename: %s\n", optarg); */
-        if(is_file(optarg)) swp = optarg;
-        else printf("software file %s not found", optarg);
+        if(optarg)
+        {
+          if(is_file(optarg)) swp = optarg;
+          else printf("software file %s not found\n", optarg);
+        }
         break;
       case 't':
         /* printf("board type: %s\n", optarg); */
@@ -198,7 +210,12 @@ int slot_upload_fw_sw(int argc, char **argv)
         break;
     }
   }
-  bpl_upload_fw_sw(&slot, fwp, swp, board_type, board_rev);
+  if(load_fw==0 && load_sw==0)
+  {
+    load_fw = 1;
+    load_sw = 1;
+  }
+  bpl_upload_fw_sw(&slot, load_fw, fwp, load_sw, swp, board_type, board_rev);
 }
 
 /************************************************************/

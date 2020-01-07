@@ -27,13 +27,13 @@ typedef struct
 
 typedef struct
 {
-  unsigned char op_en[17];
+  unsigned char op_en[18];
 } slot_op_en_type;
 
 void bpl_spi_init(bpl_spi_type *self, unsigned char device_nr);
 void spi_ascii_cmd(char* txbuff, char *rxbuf, unsigned int rxsize, unsigned char slot_nr);
 void spi_binary_cmd(char* tx_buff, char* rx_buff, unsigned char slot_nr, unsigned int len);
-void bpl_upload_fw_sw(slot_op_en_type *slot, char *fwp, char *swp, char *board_type, char *board_rev);
+void bpl_upload_fw_sw(slot_op_en_type *slot, int load_fw, char *fw_spec_p, int load_sw, char *sw_spec_p, char *board_type, char *board_rev);
 void spi_flash_id_cmd(unsigned char slot_nr);
 
 #endif /* __DRV_BPL__ */
