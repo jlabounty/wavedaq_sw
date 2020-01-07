@@ -380,7 +380,6 @@ class WP {
    bool              mEventNew;
    bool              mEventEmpty;
 
-   unsigned int      usSince(std::chrono::time_point<std::chrono::high_resolution_clock> start);
    void              StartNewEvent();
    void              LogEvent(WDAQ_FRAME_HEADER *pdaqh, WD_FRAME_HEADER   *ph);
    int               ReceiveWfPacket();
@@ -428,6 +427,10 @@ public:
 
    // constructor
    WP(std::vector<WDB*> w, int verbose = 0, std::string logfile = "", bool demo = false);
+
+   // duration calculator
+   static std::chrono::time_point<std::chrono::high_resolution_clock> usStart();
+   static unsigned int usSince(std::chrono::time_point<std::chrono::high_resolution_clock> start);
 
    // setter & getter
    int GetDataSocket() { return gDataSocket; }

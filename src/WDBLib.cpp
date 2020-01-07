@@ -282,7 +282,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data) {
       writeBuf.push_back((d >> 0) & 0xFF);
    }
 
-   auto startTime = std::chrono::high_resolution_clock::now();
+   auto startTime = WP::usStart();
 
    // retry max ten times
    for (retry = 0; retry < 10; retry++) {
@@ -363,9 +363,8 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data) {
    }
 
    if (this->mVerbose && retry > 0) {
-      auto elapsed = std::chrono::high_resolution_clock::now() - startTime;
       std::cout << "Communication to " << mWDBName << " took " <<
-                std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() <<
+                WP::usSince(startTime)/1000.0 <<
                 " ms" << std::endl;
 
    }
@@ -2077,7 +2076,7 @@ bool WP::GetLastEvent(int timeout, std::vector<WDEvent *> event) {
       }
    }
 
-   auto startTime = std::chrono::high_resolution_clock::now();
+   auto startTime = usStart();
 
    {
       std::lock_guard<std::mutex> lock(mEventAccessMutex);
@@ -2286,7 +2285,7 @@ int WP::ReceiveWfPacket() {
    }
 
    if (mPacketsReceived == 0)
-      mEventStartTime = std::chrono::high_resolution_clock::now();
+      mEventStartTime = usStart();
 
    mPacketsReceived++;
 
@@ -2358,7 +2357,7 @@ int WP::ReceiveWfPacket() {
 
       StartNewEvent();
       mPacketsReceived = 1;
-      mEventStartTime = std::chrono::high_resolution_clock::now();
+      mEventStartTime = usStart();
       mCurrentEvent = -1;
    }
 
@@ -3168,6 +3167,11 @@ void WP::SaveWaveforms() {
 }
 
 //--------------------------------------------------------------------
+
+std::chrono::time_point<std::chrono::high_resolution_clock> WP::usStart()
+{
+   return std::chrono::high_resolution_clock::now();
+}
 
 unsigned int WP::usSince(std::chrono::time_point<std::chrono::high_resolution_clock> start) {
    auto elapsed = std::chrono::high_resolution_clock::now() - start;
