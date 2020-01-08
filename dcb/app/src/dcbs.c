@@ -30,6 +30,9 @@
 #include "register_map_dcb.h"
 #include "update_config.h"
 #include "drv_bpl.h"
+#include "dbg.h"
+#include "system.h"
+#include "sc_io.h"
 
 // port to start the UDP servers on
 #define SERVER_PORT_ASC 3000
@@ -83,6 +86,21 @@ int main(int argc, char *argv[]) {
          return 0;
       }
    }
+
+   /*---- initialize system ----*/
+
+   // set default debug level
+   set_dbg_level(verbose ? DBG_LEVEL_SPAM : DBG_LEVEL_ERR);
+
+   init_system();
+
+   // set SW state ready to turn LED green
+   emio_set_sw_state(BIT_IDX_EMIO_CTRL_SW_STATE_SW_READY_PIN);
+
+   if (verbose)
+      print_sys_info();
+
+   /*---- initialize network ----*/
 
    gethostname(hostname, sizeof(hostname));
 

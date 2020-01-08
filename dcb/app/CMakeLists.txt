@@ -52,7 +52,6 @@ set(LIBSRC
 )
 
 set(PROGS
-   dcbi
    dcbc
    sltc
    dcbs
