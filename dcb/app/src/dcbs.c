@@ -13,6 +13,9 @@
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <netinet/ip.h>
+#include <netinet/if_ether.h>
+#include <netinet/udp.h>
 #include <unistd.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -55,63 +58,12 @@ double clock_us() {
 
 /*------------------------------------------------------------------*/
 
-/*
-
-Parse ARP table stored under /proc/net/arp and has the form
-
-IP address       HW type     Flags       HW address            Mask     Device
-129.129.196.1    0x1         0x2         8c:60:4f:0e:6e:c1     *        eth0
-129.129.196.166  0x1         0x2         00:50:c2:46:d4:86     *        eth0
-129.129.196.122  0x1         0x2         a8:60:b6:0e:28:ee     *        eth0
-
-*/
-
-#define xstr(s) str(s)
-#define str(s) #s
-
-#define ARP_CACHE       "/proc/net/arp"
-#define ARP_STRING_LEN  1023
-#define ARP_BUFFER_LEN  (ARP_STRING_LEN + 1)
-
-/* Format for fscanf() to read the 1st, 4th, and 6th space-delimited fields */
-#define ARP_LINE_FORMAT "%" xstr(ARP_STRING_LEN) "s %*s %*s " \
-                        "%" xstr(ARP_STRING_LEN) "s %*s " \
-                        "%" xstr(ARP_STRING_LEN) "s"
-
-int parse_arp_table(char *ipAddrPacket, char *hwAddrPacket) {
-   FILE *arpCache = fopen(ARP_CACHE, "r");
-   if (!arpCache) {
-      perror("Arp Cache: Failed to open file \"" ARP_CACHE "\"");
-      return 0;
-   }
-
-   /* Ignore the first line, which contains the header */
-   char header[ARP_BUFFER_LEN];
-   if (!fgets(header, sizeof(header), arpCache)) {
-      fclose(arpCache);
-      return 0;
-   }
-
-   char ipAddr[ARP_BUFFER_LEN], hwAddr[ARP_BUFFER_LEN], device[ARP_BUFFER_LEN];
-   while (fscanf(arpCache, ARP_LINE_FORMAT, ipAddr, hwAddr, device) == 3) {
-      // printf("Mac Address of [%s] on [%s] is \"%s\"\n", ipAddr, device, hwAddr);
-      if (strcmp(ipAddr, ipAddrPacket) == 0) {
-         strncpy(hwAddrPacket, hwAddr, 256);
-         fclose(arpCache);
-         return 1;
-      }
-   }
-   fclose(arpCache);
-   return 0;
-}
-
-/*------------------------------------------------------------------*/
-
 int main(int argc, char *argv[]) {
 
    int verbose = 0;
    int daemon = 0;
    char hostname[256], mac[256];
+   int sock_bin, sock_asc, sock_raw;
 
    /* parse command line parameters */
    for (int i = 1; i < argc; i++) {
@@ -134,6 +86,14 @@ int main(int argc, char *argv[]) {
 
    gethostname(hostname, sizeof(hostname));
 
+   // create raw socket
+   sock_raw = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_IP));
+   if (sock_raw == -1) {
+      //socket creation failed, may be because of non-root privileges
+      perror("Failed to create socket, please start program as root");
+      return 1;
+   }
+
    // socket address used for the server
    struct sockaddr_in server_address;
    memset(&server_address, 0, sizeof(server_address));
@@ -147,9 +107,8 @@ int main(int argc, char *argv[]) {
    server_address.sin_addr.s_addr = htonl(INADDR_ANY);
 
    // create a UDP socket, creation returns -1 on failure
-   int sock_bin;
    if ((sock_bin = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
-      printf("Could not create socket\n");
+      perror("Could not create socket\n");
       return 1;
    }
 
@@ -176,7 +135,6 @@ int main(int argc, char *argv[]) {
    server_address.sin_addr.s_addr = htonl(INADDR_ANY);
 
    // create a UDP socket, creation returns -1 on failure
-   int sock_asc;
    if ((sock_asc = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
       printf("Could not create socket\n");
       return 1;
@@ -210,7 +168,7 @@ int main(int argc, char *argv[]) {
 
    // run indefinitely
    while (!_server_abort) {
-      unsigned char buffer[1600];
+      unsigned char buffer[65536];
       fd_set fds;
 
       // periodically propagate new register contents to hardware
@@ -220,10 +178,42 @@ int main(int argc, char *argv[]) {
       FD_ZERO(&fds);
       FD_SET(sock_bin, &fds);
       FD_SET(sock_asc, &fds);
+      FD_SET(sock_raw, &fds);
 
       struct timeval tv = {0, 10000}; // 10 ms
       if (select(FD_SETSIZE, &fds, NULL, NULL, &tv) < 0)
          perror("select");
+
+      if (FD_ISSET(sock_raw, &fds)) {
+         memset(buffer, 0, sizeof(buffer));
+         int len = recvfrom(sock_raw, buffer, 65536, 0, NULL, NULL);
+         if (len == -1) {
+            perror("Failed to receive raw packet");
+            exit(1);
+         }
+
+         struct ethhdr *eth = (struct ethhdr *) buffer;
+         struct iphdr  *ip  = (struct iphdr *) (buffer + sizeof(struct ethhdr));
+         struct udphdr *udp = (struct udphdr *) (buffer + sizeof(struct ethhdr) + ip->ihl*4);
+
+         if (ip->protocol == IPPROTO_UDP && ntohs(udp->dest) == SERVER_PORT_BIN) {
+            memset(&client_address, 0, sizeof(client_address));
+            client_address.sin_addr.s_addr = ip->saddr;
+
+            if (verbose) {
+               printf("\n---- RAW UDP Packet ---------------------\n");
+               printf("IP source         %s\n", inet_ntoa(client_address.sin_addr));
+               printf("MAC source        %02x:%02x:%02x:%02x:%02x:%02x\n",
+                      eth->h_source[0], eth->h_source[1], eth->h_source[2],
+                      eth->h_source[3], eth->h_source[4], eth->h_source[5]);
+
+               printf("Source port       %d\n", ntohs(udp->source));
+               printf("Destination port  %d\n", ntohs(udp->dest));
+               printf("Data Length       %d\n", ntohs(udp->len) - sizeof(struct udphdr));
+               printf("-----------------------------------------\n");
+            }
+         }
+      }
 
       if (FD_ISSET(sock_bin, &fds)) {
          // read content into buffer from an incoming client
@@ -235,8 +225,7 @@ int main(int argc, char *argv[]) {
          // ip address
          if (verbose) {
             char mac[256];
-            parse_arp_table(inet_ntoa(client_address.sin_addr), mac);
-            printf("Binary request received: %d bytes from client IP %s MAC %s\n", len, inet_ntoa(client_address.sin_addr), mac);
+            printf("Binary request received: %d bytes from client %s\n", len, inet_ntoa(client_address.sin_addr));
             buffer[len] = '\0';
             print_buffer(buffer, len);
          }
