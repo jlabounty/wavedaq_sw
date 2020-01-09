@@ -48,10 +48,6 @@ add_subdirectory(read_binary)
 
 add_definitions(-DWD2_DONT_INCLUDE_REG_ACCESS_VARS -DDCB_DONT_INCLUDE_REG_ACCESS_VARS -DDCB_DONT_INCLUDE_VARS)
 
-add_custom_target(register_map_dcb
-   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/../firmware/DCB/dcb_xsdk_workspace/dcb_app_sw/app_dcb_ctrl/src/register_map_dcb.h ${CMAKE_SOURCE_DIR}/include/register_map_dcb.h
-   )
-
 add_library(wdb
    src/WDBLib.cpp
    src/DCBLib.cpp
@@ -67,8 +63,7 @@ add_executable(wds
 
 target_include_directories(wds PUBLIC wds/src include mxml ../)
 target_link_libraries(wds wdb ${CMAKE_THREAD_LIBS_INIT})
-add_dependencies(wds register_map_dcb git_revision_h)
-add_dependencies(wdb register_map_dcb)
+add_dependencies(wds git_revision_h)
 
 add_executable(test
    src/test.cpp
