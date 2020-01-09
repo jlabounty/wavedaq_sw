@@ -215,18 +215,21 @@ void reg_bank_load()
   int sn;
   char *cp;
 #ifdef LINUX_COMPILE
+  qspi_flash_partition flash_partition;
   flash_partition_type *mtd_ptr;
 
   /* read register contents from SPI flash */
-  mtd_ptr = get_flash_partition(get_flash_mem_map(BRD_TYPE_ID_DCB, DCB_BRD_REV_ID_B), "qspi-regcontent");
-  if(mtd_ptr)
-  {
-    qspi_flash_read(mtd_ptr->mtd_partition, 0, sizeof(reg_buffer), (unsigned char*)reg_buffer);
-  }
-  else
+  if( !(mtd_ptr = get_flash_partition(get_flash_mem_map(BRD_TYPE_ID_DCB, DCB_BRD_REV_ID_B), "qspi-regcontent")) )
   {
     if(DBG_ERR) xfs_printf("Error: flash partitions for register content not found");
+    return;
   }
+  if( !(qspi_flash_init(&flash_partition, mtd_ptr->mtd_partition)) )
+  {
+    if(DBG_ERR) printf("Error: register value flash partition accesse failed\n");
+    return;
+  }
+  qspi_flash_read(&flash_partition, 0, sizeof(reg_buffer), (unsigned char*)reg_buffer);
 #else
   qspi_flash_read(SYSPTR(spi_flash), QSPI_FLASH_REG_CONTENTS_ADDR, NR_OF_REGS*4, QSFL_QUAD_READ_CMD, (unsigned char*)(reg_buffer));
 #endif
@@ -278,6 +281,7 @@ void reg_bank_store()
   unsigned int reg_buffer[NR_OF_REGS];
   unsigned int checksum;
 #ifdef LINUX_COMPILE
+  qspi_flash_partition flash_partition;
   flash_partition_type *mtd_ptr;
 #endif
 
@@ -290,16 +294,18 @@ void reg_bank_store()
   reg_buffer[NR_OF_REGS-1] = checksum;
 
 #ifdef LINUX_COMPILE
-  mtd_ptr = get_flash_partition(get_flash_mem_map(BRD_TYPE_ID_DCB, DCB_BRD_REV_ID_B), "qspi-regcontent");
-  if(mtd_ptr)
-  {
-    qspi_flash_erase_partition(mtd_ptr->mtd_partition);
-    qspi_flash_write(mtd_ptr->mtd_partition, 0, sizeof(reg_buffer), (unsigned char*)reg_buffer);
-  }
-  else
+  if( !(mtd_ptr = get_flash_partition(get_flash_mem_map(BRD_TYPE_ID_DCB, DCB_BRD_REV_ID_B), "qspi-regcontent")) )
   {
     if(DBG_ERR) xfs_printf("Error: flash partitions for register content not found");
+    return;
   }
+  if( !(qspi_flash_init(&flash_partition, mtd_ptr->mtd_partition)) )
+  {
+    if(DBG_ERR) printf("Error: register value flash partition accesse failed\n");
+    return;
+  }
+  qspi_flash_erase_partition(&flash_partition);
+  qspi_flash_write(&flash_partition, 0, sizeof(reg_buffer), (unsigned char*)reg_buffer);
 #else
   /* erase SPI flash sector */
   qspi_flash_parameter_erase(SYSPTR(spi_flash), QSPI_FLASH_REG_CONTENTS_ADDR);

@@ -294,11 +294,11 @@ void wr_fw(char *fw_file, flash_memory_map_type *flash_mem_map, const char *flas
   unsigned int len;
   bitfile_info_type bit_inf;
   bitfile_info_type bit_inf_swapped;
+  qspi_flash_partition flash_partition;
   flash_partition_type *mtd_ptr = NULL;
   int fd;
   unsigned int   ers_size;
   unsigned int   tot_ers_size;
-  unsigned int   flash_part_size;
   unsigned int   flash_offs;
   unsigned int   flash_len;
   unsigned char  buff[FLASH_BUF_SIZE];
@@ -317,6 +317,12 @@ void wr_fw(char *fw_file, flash_memory_map_type *flash_mem_map, const char *flas
     return;
   }
 
+  if( !(qspi_flash_init(&flash_partition, mtd_ptr->mtd_partition)) )
+  {
+    printf("Error: flash partition %s accesse failed\n", flash_partition_name);
+    return;
+  }
+
   /* parse header for flash */
   len = read(fd, buff, 1024);
   header_len = parse_bitfile(buff, len, &bit_inf);
@@ -325,13 +331,15 @@ void wr_fw(char *fw_file, flash_memory_map_type *flash_mem_map, const char *flas
   if (header_len > 0)
   {
     /* got valid header */
+    printf("Bit file header:");
     for (i=0; i<4; i++)
     {
 //      if( DBG_INF4 ) printf("field %d  : %s \r\n", i, buff + bit_inf.field[i]);
-      printf("field %d  : %s \r\n", i, buff + bit_inf.field[i]);
+//      printf("field %d  : %s \r\n", i, buff + bit_inf.field[i]);
+      printf("%-10s : %s Bytes\r\n", info_field_name[i], buff + bit_inf.field[i]);
     }
 //    if( DBG_INF4 ) printf("size = %d\r\n", bit_inf.info.data_len);
-    printf("size = %d\r\n", bit_inf.info.data_len);
+    printf("Image size : %d\r\n", bit_inf.info.data_len);
     byte_swap_uint32(bit_inf.field, bit_inf_swapped.field, sizeof(bit_inf)/sizeof(unsigned int));
 
     /* check fpga type */
@@ -358,15 +366,21 @@ void wr_fw(char *fw_file, flash_memory_map_type *flash_mem_map, const char *flas
  */
 
     /* Erase partition */
-    /* qspi_flash_erase_partition(mtd_ptr->mtd_partition); */
-    flash_part_size = qspi_flash_get_partition_size(mtd_ptr->mtd_partition);
+    /* qspi_flash_erase_partition(&flash_partition); */
+    /* Erase header only */
+    printf("deleting header...");
+    fflush(stdout);
+    qspi_flash_erase_sector(&flash_partition, mtd_ptr->header_offset);
+    printf("done\n");
+    /* Erase bitfile only */
     ers_size = 0;
     tot_ers_size=0;
-    while(tot_ers_size<flash_part_size)
+    while(tot_ers_size<bit_inf.info.data_len)
     {
-      ers_size = qspi_flash_erase_sector(mtd_ptr->mtd_partition, tot_ers_size);
+      ers_size = qspi_flash_erase_sector(&flash_partition, tot_ers_size);
       tot_ers_size += ers_size;
-      display_progress("deleting partition ", 100*tot_ers_size/flash_part_size, ' ', '-');
+      if(tot_ers_size>bit_inf.info.data_len) tot_ers_size = bit_inf.info.data_len; /* Keep progress bar <= 100% */
+      display_progress("deleting partition ", 100*tot_ers_size/bit_inf.info.data_len, ' ', '-');
       fflush(stdout);
     }
 
@@ -377,9 +391,9 @@ void wr_fw(char *fw_file, flash_memory_map_type *flash_mem_map, const char *flas
     while(flash_len == FLASH_BUF_SIZE)
     {
       flash_len = read(fd, buff, FLASH_BUF_SIZE);
-      qspi_flash_write(mtd_ptr->mtd_partition, flash_offs, flash_len, buff);
+      qspi_flash_write(&flash_partition, flash_offs, flash_len, buff);
       flash_offs += flash_len;
-      display_progress("writing bitstream ", 100*flash_offs/bit_inf.info.data_len, '-', '#');
+      display_progress("writing bitstream   ", 100*flash_offs/bit_inf.info.data_len, '-', '#');
       fflush(stdout);
     }
     printf("\n");
@@ -392,11 +406,11 @@ void wr_fw(char *fw_file, flash_memory_map_type *flash_mem_map, const char *flas
       fflush(stdout);
       flash_offs = mtd_ptr->header_offset;
       flash_len  = sizeof(bitfile_info_type);
-      qspi_flash_write(mtd_ptr->mtd_partition, flash_offs, flash_len, (unsigned char*) &bit_inf_swapped);
+      qspi_flash_write(&flash_partition, flash_offs, flash_len, (unsigned char*) &bit_inf_swapped);
       flash_offs += flash_len;
       flash_len   = header_len;
       read(fd, buff, flash_len);
-      qspi_flash_write(mtd_ptr->mtd_partition, flash_offs, flash_len, buff);
+      qspi_flash_write(&flash_partition, flash_offs, flash_len, buff);
       printf("done\n");
     }
   }
@@ -412,11 +426,11 @@ void wr_sw(char *sw_file, flash_memory_map_type *flash_mem_map, const char *flas
   int header_len;
   unsigned int len;
   sw_file_info_type sw_info;
+  qspi_flash_partition flash_partition;
   flash_partition_type *mtd_ptr = NULL;
   int fd;
   unsigned int   ers_size;
   unsigned int   tot_ers_size;
-  unsigned int   flash_part_size;
   unsigned int   flash_offs;
   unsigned int   flash_len;
   unsigned char  buff[FLASH_BUF_SIZE];
@@ -438,6 +452,12 @@ void wr_sw(char *sw_file, flash_memory_map_type *flash_mem_map, const char *flas
     return;
   }
 
+  if( !(qspi_flash_init(&flash_partition, mtd_ptr->mtd_partition)) )
+  {
+    printf("Error: flash partition %s accesse failed\n", flash_partition_name);
+    return;
+  }
+
   /* parse header for flash */
   len = read(fd, buff, SREC_MAX_BYTES);
   header_len = parse_srec(buff, sr_header_buf);
@@ -451,15 +471,14 @@ void wr_sw(char *sw_file, flash_memory_map_type *flash_mem_map, const char *flas
 //par->reg_layout_comp_lvl = get_sw_rcl((char*)sr_header_buf);
 
     /* Erase partition */
-   /* qspi_flash_erase_partition(mtd_ptr->mtd_partition); */
-    flash_part_size = qspi_flash_get_partition_size(mtd_ptr->mtd_partition);
+   /* qspi_flash_erase_partition(&flash_partition); */
     ers_size = 0;
     tot_ers_size=0;
-    while(tot_ers_size<flash_part_size)
+    while(tot_ers_size<flash_partition.mtd_info.size)
     {
-      ers_size = qspi_flash_erase_sector(mtd_ptr->mtd_partition, tot_ers_size);
+      ers_size = qspi_flash_erase_sector(&flash_partition, tot_ers_size);
       tot_ers_size += ers_size;
-      display_progress("deleting partition ", 100*tot_ers_size/flash_part_size, ' ', '-');
+      display_progress("deleting partition ", 100*tot_ers_size/flash_partition.mtd_info.size, ' ', '-');
       fflush(stdout);
     }
 
@@ -470,7 +489,7 @@ void wr_sw(char *sw_file, flash_memory_map_type *flash_mem_map, const char *flas
     while(flash_len == FLASH_BUF_SIZE)
     {
       flash_len = read(fd, buff, FLASH_BUF_SIZE);
-      qspi_flash_write(mtd_ptr->mtd_partition, flash_offs, flash_len, buff);
+      qspi_flash_write(&flash_partition, flash_offs, flash_len, buff);
       flash_offs += flash_len;
       display_progress("writing software   ", 100*flash_offs/file_stat.st_size, '-', '#');
       fflush(stdout);
@@ -486,16 +505,17 @@ void wr_sw(char *sw_file, flash_memory_map_type *flash_mem_map, const char *flas
     sw_info.info.checksum  = sw_file_info_checksum(&sw_info);
     flash_offs = mtd_ptr->header_offset;
     flash_len  = sizeof(sw_file_info_type);
-    qspi_flash_write(mtd_ptr->mtd_partition, flash_offs, flash_len, (unsigned char*) &sw_info);
+    qspi_flash_write(&flash_partition, flash_offs, flash_len, (unsigned char*) &sw_info);
     printf("done\n");
     /* write header part 2 (filename) */
     printf("writing header (filename)...");
     fflush(stdout);
     flash_offs = mtd_ptr->header_offset + sizeof(sw_file_info_type);
     flash_len  = header_len+1;
-    qspi_flash_write(mtd_ptr->mtd_partition, flash_offs, flash_len, sr_header_buf);
+    qspi_flash_write(&flash_partition, flash_offs, flash_len, sr_header_buf);
     printf("done\n");
   }
+
   fsync(fd); /* flush caches to make sure operation completes before desecting board */
   if(close(fd) < 0) printf("Error closing file\n");
 }

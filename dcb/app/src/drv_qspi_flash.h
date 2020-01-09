@@ -16,10 +16,18 @@
 #ifndef __DRV_QSPI_FLASH_H__
 #define __DRV_QSPI_FLASH_H__
 
-void qspi_flash_write(const char *mtd_path, unsigned int offset, unsigned int byte_count, unsigned char *wr_buffer_ptr);
-void qspi_flash_read(const char *mtd_path, unsigned int offset, unsigned int byte_count, unsigned char *rd_buffer_ptr);
-void qspi_flash_erase_partition(const char *mtd_path);
-unsigned int qspi_flash_erase_sector(const char *mtd_path, unsigned int ers_start);
-unsigned int qspi_flash_get_partition_size(const char *mtd_path);
+#include <mtd/mtd-user.h>
+
+typedef struct
+{
+  char* mtd_path;
+  mtd_info_t mtd_info;
+} qspi_flash_partition;
+
+int qspi_flash_init(qspi_flash_partition *self, const char *mtd_path);
+int qspi_flash_write(qspi_flash_partition *self, unsigned int offset, unsigned int byte_count, unsigned char *wr_buffer_ptr);
+int qspi_flash_read(qspi_flash_partition *self, unsigned int offset, unsigned int byte_count, unsigned char *rd_buffer_ptr);
+int qspi_flash_erase_partition(qspi_flash_partition *self);
+unsigned int qspi_flash_erase_sector(qspi_flash_partition *self, unsigned int ers_start);
 
 #endif /* __DRV_QSPI_FLASH_H__ */
