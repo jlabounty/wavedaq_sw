@@ -336,10 +336,10 @@ void wr_fw(char *fw_file, flash_memory_map_type *flash_mem_map, const char *flas
     {
 //      if( DBG_INF4 ) printf("field %d  : %s \r\n", i, buff + bit_inf.field[i]);
 //      printf("field %d  : %s \r\n", i, buff + bit_inf.field[i]);
-      printf("%-10s : %s Bytes\r\n", info_field_name[i], buff + bit_inf.field[i]);
+      printf("%-10s : %s\r\n", info_field_name[i], buff + bit_inf.field[i]);
     }
 //    if( DBG_INF4 ) printf("size = %d\r\n", bit_inf.info.data_len);
-    printf("Image size : %d\r\n", bit_inf.info.data_len);
+    printf("Image size : %d Bytes\r\n", bit_inf.info.data_len);
     byte_swap_uint32(bit_inf.field, bit_inf_swapped.field, sizeof(bit_inf)/sizeof(unsigned int));
 
     /* check fpga type */
@@ -762,7 +762,7 @@ int get_slot_board_info(unsigned int slot_nr, unsigned int *board_type_id, unsig
     return 1;
   }
 
-  if(DBG_ERR) xfs_printf("Error: board identification failed for slot %d\r\n", slot_nr);
+  if(DBG_WARN) xfs_printf("Warning: board identification failed for slot %d\r\n", slot_nr);
   return 0;
 }
 
