@@ -75,3 +75,35 @@ void qspi_flash_erase_partition(const char *mtd_path)
 
   close(fd);
 }
+
+unsigned int qspi_flash_erase_sector(const char *mtd_path, unsigned int ers_start)
+{
+  mtd_info_t mtd_info;
+  erase_info_t ers_info;
+  int fd;
+
+  fd = open(mtd_path, O_RDWR);
+  ioctl(fd, MEMGETINFO, &mtd_info);
+
+  ers_info.start  = (ers_start/mtd_info.erasesize)*mtd_info.erasesize;
+  ers_info.length = mtd_info.erasesize;
+  ioctl(fd, MEMUNLOCK, &ers_info);
+  ioctl(fd, MEMERASE, &ers_info);
+
+  close(fd);
+
+  return ers_info.length;
+}
+
+unsigned int qspi_flash_get_partition_size(const char *mtd_path)
+{
+  mtd_info_t mtd_info;
+  int fd;
+
+  fd = open(mtd_path, O_RDWR);
+  ioctl(fd, MEMGETINFO, &mtd_info);
+
+  close(fd);
+
+  return mtd_info.size;
+}

@@ -19,5 +19,7 @@
 void qspi_flash_write(const char *mtd_path, unsigned int offset, unsigned int byte_count, unsigned char *wr_buffer_ptr);
 void qspi_flash_read(const char *mtd_path, unsigned int offset, unsigned int byte_count, unsigned char *rd_buffer_ptr);
 void qspi_flash_erase_partition(const char *mtd_path);
+unsigned int qspi_flash_erase_sector(const char *mtd_path, unsigned int ers_start);
+unsigned int qspi_flash_get_partition_size(const char *mtd_path);
 
 #endif /* __DRV_QSPI_FLASH_H__ */

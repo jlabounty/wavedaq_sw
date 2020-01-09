@@ -79,13 +79,15 @@ int parse_slot_selection(int argc, char **argv, slot_op_en_type *slot)
 
 /************************************************************/
 
-int slot_fpga_com(int argc, char **argv)
+int crate_slot_fpga_com(int argc, char **argv)
 {
   unsigned int slot;
   unsigned int idx;
   unsigned char bin_val;
   unsigned int len;
   unsigned int i;
+  unsigned int board_type;
+  unsigned int board_rev;
   unsigned char tx_buff[BIN_BUF_SIZE];
   unsigned char rx_buff[BIN_BUF_SIZE];
 
@@ -103,6 +105,8 @@ int slot_fpga_com(int argc, char **argv)
   }
 
   slot = strtoul(argv[1], NULL, 0);
+
+  if(!get_slot_board_info(slot, &board_type, &board_rev)) return 0;
 
   if(fstrpcmp("0x", argv[2]) || fstrpcmp("0X", argv[2])) /* binary command */
   {
@@ -124,7 +128,7 @@ int slot_fpga_com(int argc, char **argv)
     }
 
     /* transmit */
-    spi_binary_cmd(tx_buff, rx_buff, slot, len);
+    spi_binary_cmd(tx_buff, rx_buff, len, slot, board_type, board_rev);
 
     /* report transmission results */
     xfs_printf("      TX byte   RX byte\r\n");
@@ -138,7 +142,7 @@ int slot_fpga_com(int argc, char **argv)
   {
     char buffer[1600];
     xfs_printf("Processing ASCII command\r\n");
-    spi_ascii_cmd(argv[2], buffer, sizeof(buffer), slot);
+    spi_ascii_cmd(argv[2], buffer, sizeof(buffer), slot, board_type, board_rev);
     xfs_printf("%s\n", buffer);
   }
 
@@ -147,7 +151,7 @@ int slot_fpga_com(int argc, char **argv)
 
 /************************************************************/
 
-int slot_upload_fw_sw(int argc, char **argv)
+int crate_slot_upload_fw_sw(int argc, char **argv)
 {
   slot_op_en_type slot;
   int offset;
@@ -156,8 +160,10 @@ int slot_upload_fw_sw(int argc, char **argv)
   int load_sw = 0;
   char *fwp = NULL;
   char *swp = NULL;
-  char *board_type = NULL;
-  char *board_rev = NULL;
+  unsigned int board_type = 0;
+  unsigned int board_rev = 0;
+  unsigned int t_force = 0;
+  unsigned int r_force = 0;
 
   CMD_HELP("[slot] [-f[firmware path]] [-s[software path]] [-t<board type> -r<board revision>]",
             "upload new firm- or software to WDB/TCB via backplane. If no files are specified,\r\n"
@@ -181,8 +187,15 @@ int slot_upload_fw_sw(int argc, char **argv)
         /* printf("firmware filename: %s\n", optarg); */
         if(optarg)
         {
-          if(is_file(optarg)) fwp = optarg;
-          else printf("firmware file %s not found\n", optarg);
+          if(is_file(optarg))
+          {
+            fwp = optarg;
+          }
+          else
+          {
+            printf("firmware file %s not found\n", optarg);
+            return -1;
+          }
         }
         break;
       case 's':
@@ -190,17 +203,56 @@ int slot_upload_fw_sw(int argc, char **argv)
         /* printf("software filename: %s\n", optarg); */
         if(optarg)
         {
-          if(is_file(optarg)) swp = optarg;
-          else printf("software file %s not found\n", optarg);
+          if(is_file(optarg))
+          {
+            swp = optarg;
+          }
+          else
+          {
+            printf("software file %s not found\n", optarg);
+            return -1;
+          }
         }
         break;
       case 't':
         /* printf("board type: %s\n", optarg); */
-        board_type = optarg;
+        t_force = 1;
+        if( !strcmp(optarg, "wdb") )
+        {
+          board_type = BRD_TYPE_ID_WDB;
+        }
+        else if( !strcmp(optarg, "tcb") )
+        {
+          board_type = BRD_TYPE_ID_TCB;
+        }
+        else
+        {
+          printf("Error: unknown board type: %s\n", optarg);
+          t_force = 0;
+          return -1;
+        }
         break;
       case 'r':
         /* printf("board revision: %s\n", optarg); */
-        board_rev = optarg;
+        r_force = 1;
+        if( optarg[0]>='0' && optarg[0]<='9' )
+        {
+          board_rev = strtoul(optarg, NULL, 0);
+        }
+        else if( optarg[0]>='a' && optarg[0]<='z' )
+        {
+          board_rev = optarg[0] - 'a';
+        }
+        else if( optarg[0]>='A' && optarg[0]<='Z' )
+        {
+          board_rev = optarg[0] - 'A';
+        }
+        else
+        {
+          printf("Error: invalid board revision: %s\n", optarg);
+          r_force = 0;
+          return -1;
+        }
         break;
       case ':':
         printf("option needs a value\n");
@@ -215,7 +267,18 @@ int slot_upload_fw_sw(int argc, char **argv)
     load_fw = 1;
     load_sw = 1;
   }
-  bpl_upload_fw_sw(&slot, load_fw, fwp, load_sw, swp, board_type, board_rev);
+  if(t_force && r_force)
+  {
+    /* forced upload */
+    crate_upload_fw_sw(&slot, load_fw, fwp, load_sw, swp, board_type, board_rev, 1);
+  }
+  else
+  {
+    /* standard upload */
+    crate_upload_fw_sw(&slot, load_fw, fwp, load_sw, swp, board_type, board_rev, 0);
+  }
+
+  return 0;
 }
 
 /************************************************************/
@@ -237,8 +300,8 @@ int module_crate_com_help(int argc, char **argv)
 cmd_table_entry_type crate_com_cmd_table[] =
 {
   {0, "crt_com", module_crate_com_help},
-  {3, "sltc", slot_fpga_com},
-  {0, "upload", slot_upload_fw_sw},
+  {3, "sltc", crate_slot_fpga_com},
+  {0, "upload", crate_slot_upload_fw_sw},
   {0, NULL, NULL}
 };
 

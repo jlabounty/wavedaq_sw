@@ -27,8 +27,8 @@ typedef struct
 
 typedef struct
 {
-  const char *board_type;
-const char *board_rev;
+  const unsigned int board_type;
+  const unsigned int board_rev;
   const char *fpga_type;
   const char *default_fw_path;
   flash_partition_type *partition_table;
@@ -40,7 +40,7 @@ extern flash_partition_type    dcb_flash_partitions[];
 extern flash_partition_type    wdb_flash_partitions[];
 extern flash_partition_type    tcb_flash_partitions[];
 
-flash_memory_map_type* get_flash_mem_map(const char *board_type, const char *board_rev);
+flash_memory_map_type* get_flash_mem_map(unsigned int board_type, unsigned int board_rev);
 flash_partition_type* get_flash_partition(flash_memory_map_type *flash_ptr, const char* partition_name);
 
 /******************************************************************************/

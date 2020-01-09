@@ -218,7 +218,7 @@ void reg_bank_load()
   flash_partition_type *mtd_ptr;
 
   /* read register contents from SPI flash */
-  mtd_ptr = get_flash_partition(get_flash_mem_map("dcb", "b"), "qspi-regcontent");
+  mtd_ptr = get_flash_partition(get_flash_mem_map(BRD_TYPE_ID_DCB, DCB_BRD_REV_ID_B), "qspi-regcontent");
   if(mtd_ptr)
   {
     qspi_flash_read(mtd_ptr->mtd_partition, 0, sizeof(reg_buffer), (unsigned char*)reg_buffer);
@@ -290,7 +290,7 @@ void reg_bank_store()
   reg_buffer[NR_OF_REGS-1] = checksum;
 
 #ifdef LINUX_COMPILE
-  mtd_ptr = get_flash_partition(get_flash_mem_map("dcb", "b"), "qspi-regcontent");
+  mtd_ptr = get_flash_partition(get_flash_mem_map(BRD_TYPE_ID_DCB, DCB_BRD_REV_ID_B), "qspi-regcontent");
   if(mtd_ptr)
   {
     qspi_flash_erase_partition(mtd_ptr->mtd_partition);

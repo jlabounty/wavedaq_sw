@@ -249,7 +249,7 @@ int reg_read_cmd(int argc, char **argv)
     else if (sel == REGDIFF_CMP_STORED)
     {
 #ifdef LINUX_COMPILE
-      mtd_ptr = get_flash_partition(get_flash_mem_map("dcb", "b"), "qspi-regcontent");
+      mtd_ptr = get_flash_partition(get_flash_mem_map(BRD_TYPE_ID_DCB, DCB_BRD_REV_ID_B), "qspi-regcontent");
       if(mtd_ptr)
       {
         qspi_flash_read(mtd_ptr->mtd_partition, reg, sizeof(flash_reg), flash_reg);

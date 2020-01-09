@@ -43,37 +43,34 @@ flash_partition_type wdb_flash_partitions[] =
 flash_partition_type tcb_flash_partitions[] =
 {
   /* Name, Size    , Base Offs , Head Offs , MTD Part. Nr. */
-  {"fw", 0x01000000, 0x00000000, 0x00000000, MTD_TCB_FLASH_BITSTREAM},
+  {"fw", 0x01000000, 0x00000000, 0x00FF0000, MTD_TCB_FLASH_BITSTREAM},
   {NULL, 0, 0, 0, 0}
 };
 
 flash_memory_map_type flash_memories[] =
 {
-  {"dcb", "b", "7z030fbg676"  , NULL               , dcb_flash_partitions},
-  {"wdb", "f", "6slx100fgg484", wdb_rf_default_path, wdb_flash_partitions},
-  {"wdb", "g", "6slx150fgg484", wdb_rg_default_path, wdb_flash_partitions},
-  {"tcb", "1", "7k325tffg900" , tcb_t1_default_path, tcb_flash_partitions},
-  {"tcb", "2", "7k325tffg900" , tcb_t2_default_path, tcb_flash_partitions},
-  {"tcb", "3", "7k325tffg900" , tcb_t3_default_path, tcb_flash_partitions},
-  {NULL, NULL, NULL, NULL, NULL}
+  {BRD_TYPE_ID_DCB, DCB_BRD_REV_ID_B, "7z030fbg676"  , NULL               , dcb_flash_partitions},
+  {BRD_TYPE_ID_WDB, WDB_BRD_REV_ID_E, "6slx100fgg484", wdb_rf_default_path, wdb_flash_partitions},
+  {BRD_TYPE_ID_WDB, WDB_BRD_REV_ID_F, "6slx100fgg484", wdb_rf_default_path, wdb_flash_partitions},
+  {BRD_TYPE_ID_WDB, WDB_BRD_REV_ID_G, "6slx150fgg484", wdb_rg_default_path, wdb_flash_partitions},
+  {BRD_TYPE_ID_TCB, TCB_BRD_REV_ID_1, "7k325tffg900" , tcb_t1_default_path, tcb_flash_partitions},
+  {BRD_TYPE_ID_TCB, TCB_BRD_REV_ID_2, "7k325tffg900" , tcb_t2_default_path, tcb_flash_partitions},
+  {BRD_TYPE_ID_TCB, TCB_BRD_REV_ID_3, "7k325tffg900" , tcb_t3_default_path, tcb_flash_partitions},
+  {0, 0, NULL, NULL, NULL}
 };
 
 /******************************************************************************/
 
-flash_memory_map_type* get_flash_mem_map(const char *board_type, const char *board_rev)
+flash_memory_map_type* get_flash_mem_map(unsigned int board_type, unsigned int board_rev)
 {
   flash_memory_map_type *flash_ptr;
 
-//  printf("=> looking for board %s, rev %s:\n", board_type, board_rev);
-  for(flash_ptr = flash_memories; flash_ptr->board_type ; flash_ptr++)
+  for(flash_ptr = flash_memories; flash_ptr->fpga_type ; flash_ptr++)
   {
-//    printf("  board %s, rev %s", flash_ptr->board_type, flash_ptr->board_rev);
-    if( !strcmp(flash_ptr->board_type, board_type) && !strcmp(flash_ptr->board_rev, board_rev) )
+    if( (flash_ptr->board_type == board_type) && (flash_ptr->board_rev == board_rev) )
     {
-//      printf(" -> Flash Memory Map Match\n");
       return flash_ptr;
     }
-//    else printf(" -> NO\n");
   }
   return NULL;
 }

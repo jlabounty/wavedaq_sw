@@ -67,6 +67,11 @@ const char wdb_fw_default_file[] = "download.bit\0";
 const char wdb_sw_default_file[] = "app_sys_ctrl.srec\0";
 const char tcb_fw_default_file[] = "TCB_TOP.bit\0";
 
+/*                            WDB Revision:   A  B  C  D  E  F  G  H*/
+/*                            TCB Revision:   0  1  2  3  4  5  6  7*/
+const unsigned int bpl_spi_scheme[2][8] =  { {0, 0, 0, 0, 0, 0, 1, 1},   /* WDB */
+                                             {0, 0, 0, 0, 0, 0, 0, 0} }; /* TCB */
+
 #ifdef LINUX_COMPILE
 static int spi_bpl_initialized     = 0;
 static int sys_mon_initialized     = 0;
@@ -939,7 +944,7 @@ void byte_swap_uint32(unsigned int* src, unsigned int* dst, unsigned int len)
 
 /******************************************************************************/
 
-void display_progress(char* prefix, xfs_u32 percent)
+void display_progress(char* prefix, xfs_u32 percent, char idle_char, char prog_char)
 {
   int i;
 
@@ -948,10 +953,10 @@ void display_progress(char* prefix, xfs_u32 percent)
   printf("[");
   for(i=0;i<PROG_BAR_ITEMS;i++)
   {
-    if( (i*(100/PROG_BAR_ITEMS)) <= percent ) printf("=");
-    else                                    printf(" ");
+    if( (i*(100/PROG_BAR_ITEMS)) <= percent ) printf("%c", prog_char);
+    else                                      printf("%c", idle_char);
   }
-  printf("] %d%%", percent);
+  printf("] %d%%  ", percent);
 }
 
 /******************************************************************************/
