@@ -331,7 +331,7 @@ void wr_fw(char *fw_file, flash_memory_map_type *flash_mem_map, const char *flas
   if (header_len > 0)
   {
     /* got valid header */
-    printf("Bit file header:");
+    printf("Bit file header:\n");
     for (i=0; i<4; i++)
     {
 //      if( DBG_INF4 ) printf("field %d  : %s \r\n", i, buff + bit_inf.field[i]);
@@ -380,7 +380,7 @@ void wr_fw(char *fw_file, flash_memory_map_type *flash_mem_map, const char *flas
       ers_size = qspi_flash_erase_sector(&flash_partition, tot_ers_size);
       tot_ers_size += ers_size;
       if(tot_ers_size>bit_inf.info.data_len) tot_ers_size = bit_inf.info.data_len; /* Keep progress bar <= 100% */
-      display_progress("deleting partition ", 100*tot_ers_size/bit_inf.info.data_len, ' ', '-');
+      display_progress("deleting bitstream ", 100*tot_ers_size/bit_inf.info.data_len, ' ', '-');
       fflush(stdout);
     }
 
@@ -393,7 +393,7 @@ void wr_fw(char *fw_file, flash_memory_map_type *flash_mem_map, const char *flas
       flash_len = read(fd, buff, FLASH_BUF_SIZE);
       qspi_flash_write(&flash_partition, flash_offs, flash_len, buff);
       flash_offs += flash_len;
-      display_progress("writing bitstream   ", 100*flash_offs/bit_inf.info.data_len, '-', '#');
+      display_progress("writing bitstream  ", 100*flash_offs/bit_inf.info.data_len, '-', '#');
       fflush(stdout);
     }
     printf("\n");
@@ -466,7 +466,7 @@ void wr_sw(char *sw_file, flash_memory_map_type *flash_mem_map, const char *flas
   if (header_len > 0)
   {
     /* got valid header */
-    if( DBG_INF0 ) printf("SREC header: %s \r\n", sr_header_buf);
+    if( DBG_INF0 ) printf("SREC header:\n%s \r\n", sr_header_buf);
 //par->fw_comp_lvl = get_sw_fcl((char*)sr_header_buf);
 //par->reg_layout_comp_lvl = get_sw_rcl((char*)sr_header_buf);
 
@@ -478,7 +478,7 @@ void wr_sw(char *sw_file, flash_memory_map_type *flash_mem_map, const char *flas
     {
       ers_size = qspi_flash_erase_sector(&flash_partition, tot_ers_size);
       tot_ers_size += ers_size;
-      display_progress("deleting partition ", 100*tot_ers_size/flash_partition.mtd_info.size, ' ', '-');
+      display_progress("deleting software  ", 100*tot_ers_size/flash_partition.mtd_info.size, ' ', '-');
       fflush(stdout);
     }
 
@@ -735,6 +735,49 @@ unsigned int spi_get_ref_reg(unsigned char slot_nr)
 
 /******************************************************************************/
 
+/* Remove when TCB is modified to instantly reply on SPI read */
+unsigned int spi_get_ref_reg_tcb(unsigned char slot_nr)
+{
+  char tx_buff[11] = {BIN_CMD_READ32, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00};
+  char rx_buff[11] = {0};
+  unsigned int hw_rev_val;
+  int Status;
+  int i;
+
+  if (slot_nr > 17) return 0;
+  if (slot_nr ==16) return 0;
+
+#ifdef LINUX_COMPILE
+  init_spi_bpl();
+#endif
+
+  /* Enable SPI driver */
+  bpl_spi_drive_en(1);
+  select_slot(slot_nr);
+
+  /* Send Command */
+  Status = spi_transfer(SYSPTR(spi_bpl), slot_nr, tx_buff, rx_buff, sizeof(tx_buff));
+  if (!Status)
+  {
+    if(DBG_ERR) xfs_printf("SPI Backplane Error: transmission error when reading reference register\r\n");
+    return 0;
+  }
+
+  for(i=7;i<11;i++)
+  {
+    hw_rev_val <<= 8;
+    hw_rev_val |= (0xFF & (unsigned int)(rx_buff[i]));
+  }
+
+  /* Disable SPI driver (wait for CS pullup first) */
+  deselect_all_slots();
+  usleep(2000);
+  bpl_spi_drive_en(0);
+  return hw_rev_val;
+}
+
+/******************************************************************************/
+
 int get_slot_board_info(unsigned int slot_nr, unsigned int *board_type_id, unsigned int *board_rev_id)
 {
   unsigned int hw_rev_val;
@@ -744,12 +787,29 @@ int get_slot_board_info(unsigned int slot_nr, unsigned int *board_type_id, unsig
   /* Check connection */
   hw_rev_val = spi_get_ref_reg(slot_nr);
   if( (hw_rev_val&HW_VERS_WDB_COMMON_MASK) == HW_VERS_WDB_COMMON_VAL)
-  {
+  { /* WDB */
     *board_type_id = BRD_TYPE_ID_WDB;
     *board_rev_id  = (hw_rev_val&HW_VERS_REV_MASK)>>HW_VERS_REV_OFFS;
     return 1;
   }
-  /* Add TCB case */
+  //else
+  //{
+  //  printf("Scheme 0 unrecognized HW revision      : 0x%08X\n", hw_rev_val);
+  //}
+  /* TBD: remove else cases and replace constants by defines */
+  hw_rev_val = spi_get_ref_reg_tcb(slot_nr);
+  if( ((hw_rev_val&0xFF000000) == 0x01000000) ||
+      ((hw_rev_val&0xFF000000) == 0x02000000) ||
+      ((hw_rev_val&0xFF000000) == 0x03000000) )
+  { /* TCB */
+    *board_type_id = BRD_TYPE_ID_TCB;
+    *board_rev_id  = (hw_rev_val&0xFF000000)>>24;
+    return 1;
+  }
+  //else
+  //{
+  //  printf("Scheme 0 unrecognized HW revision (tcb): 0x%08X\n", hw_rev_val);
+  //}
 
   /* Set scheme 1 */
   BPL_SPI_SCHEME(1);
