@@ -1986,7 +1986,14 @@ void WP::RequestSingleBoard(WDB *b) {
    // without mutex since we only change it when the board configuration changes.
 
    bool boardEnable = RequestTypes(b);
-   mEventRequest[b->GetSerialNumber()]->mBoardRequested = boardEnable;
+
+   for (auto &er: mEventRequest) {
+      if (er.first == b->GetSerialNumber())
+         er.second->mBoardRequested = boardEnable;
+      else
+         er.second->mBoardRequested = false;
+   }
+
    if (mVerbose >= 3)
       printf("Board %d is %s\n", b->GetSerialNumber(), (boardEnable) ? "enabled" : "disabled");
 }
