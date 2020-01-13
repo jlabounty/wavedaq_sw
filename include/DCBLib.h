@@ -48,6 +48,11 @@ class DCB: public DCBREG {
    static int       gBinSocket;
    static unsigned short udpSequenceNumber;
 
+   struct {
+      char type_id;
+      char rev_id;
+   } board[18];
+
 public:
    
    // constructor
@@ -73,10 +78,12 @@ public:
    int IsVerbose() { return mVerbose; }
    void SetLogFile(std::string logfile) { mLogfile = logfile; }
    void Connect();
+   void ScanCrate();
    void ReceiveRegisters(unsigned int index=0, unsigned int nReg=NR_OF_REGS);
    void SendRegisters(unsigned int index, unsigned int nReg);
    unsigned int bcd2dec(const unsigned int bcd);
    void PrintVersion();
+   void PrintCrate();
    bool GetSendBlock() { return mSendBlocked; }
    void SetSendBlock(bool flag) { mSendBlocked = flag; }
 

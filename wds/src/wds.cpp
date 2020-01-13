@@ -1075,17 +1075,23 @@ int main(int argc, const char *argv[]) {
             });
 
             if (b.substr(0, 3) == "DCB") {
-               std::cout << "Connect to " << b << " ... " << std::flush;
                try {
                   DCB *dcb;
                   if (b.find(':')) {
+                     std::cout << "Connect to " << b.substr(0, b.find(':')) << " ... " << std::flush;
                      dcb = new DCB(b.substr(0, b.find(':')), gl.verbose);
-                  } else
+                  } else {
+                     std::cout << "Connect to " << b << " ... " << std::flush;
                      dcb = new DCB(b, gl.verbose);
+                  }
                   dcb->Connect();
+                  dcb->ScanCrate();
                   if (gl.verbose) {
                      std::cout << std::endl << "========== DCB Info ==========" << std::endl;
                      dcb->PrintVersion();
+                     std::cout << std::endl << "Board scan:" << std::endl;
+                     dcb->PrintCrate();
+                     std::cout << std::endl;
                   }
                   gl.dcb.push_back(dcb);
 
@@ -1104,7 +1110,7 @@ int main(int argc, const char *argv[]) {
                }
                std::cout << "OK" << std::endl;
                if (gl.verbose)
-                  std::cout << std::endl << std::endl;
+                  std::cout << std::endl;
 
             } else
                gl.wdb.push_back(new WDB(b));
@@ -1223,7 +1229,7 @@ int main(int argc, const char *argv[]) {
       }
       std::cout << "OK" << std::endl;
       if (gl.verbose)
-         std::cout << std::endl << std::endl;
+         std::cout << std::endl;
    }
 
    if (gl.reset) {

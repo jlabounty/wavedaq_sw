@@ -522,6 +522,116 @@ void DCB::Connect() {
 
 //--------------------------------------------------------------------
 
+void DCB::ScanCrate() {
+   size_t i;
+   fd_set readfds;
+   struct timeval timeout;
+   int status, ms;
+   struct sockaddr_in client_addr;
+   bool bSuccess = false;
+   std::vector<unsigned int> result;
+
+   udpSequenceNumber++;
+   std::memcpy(&client_addr, mEthAddrBin, sizeof(client_addr));
+
+   std::vector<unsigned char> writeBuf(4);
+   std::vector<unsigned char> readBuf(1600);
+
+   writeBuf[0]  = 0x01; // Scan command
+   writeBuf[1]  = 0x00;
+   writeBuf[2]  = udpSequenceNumber >> 8;
+   writeBuf[3]  = udpSequenceNumber & 0xFF;
+
+   // retry max ten times
+   for (int retry = 0; retry < 10; retry++) {
+
+      // clear input queue
+      do {
+         FD_ZERO(&readfds);
+         FD_SET(gBinSocket, &readfds);
+
+         timeout.tv_sec = 0;
+         timeout.tv_usec = 0;
+         do {
+            status = select(FD_SETSIZE, &readfds, nullptr, nullptr, &timeout);
+         } while (status == -1); // don't return on interrupt
+
+         if (!FD_ISSET(gBinSocket, &readfds))
+            break;
+
+         i = recv(gBinSocket, &readBuf[0], readBuf.size(), 0);
+      } while (true);
+
+      // send request
+      i = sendto(gBinSocket,
+                 &writeBuf[0],
+                 writeBuf.size(),
+                 0,
+                 (struct sockaddr *) &client_addr,
+                 sizeof(client_addr));
+
+      if (i != writeBuf.size()) {
+         if (this->mVerbose)
+            std::cout << mDCBName << " send retry " << retry + 1 << std::endl;
+         continue;
+      }
+
+      // retrieve reply until acknowledge is found
+      do {
+         std::fill(readBuf.begin(), readBuf.end(), 0);
+
+         FD_ZERO(&readfds);
+         FD_SET(gBinSocket, &readfds);
+
+         if (retry == 0)
+            ms = mReceiveTimeoutMs;
+         else
+            ms *= 1.3;   // increase timeout after each retry
+
+         timeout.tv_sec = ms / 1000;
+         timeout.tv_usec = (ms % 1000) * 1000;
+
+         do {
+            status = select(FD_SETSIZE, &readfds, nullptr, nullptr, &timeout);
+         } while (status == -1);        /* dont return if an alarm signal was cought */
+
+         if (!FD_ISSET(gBinSocket, &readfds))
+            break;
+
+         i = recv(gBinSocket, &readBuf[0], readBuf.size(), 0);
+         assert(i > 0);
+
+         // check for acknowledge
+         bSuccess = readBuf[0] == 0x01 &&
+                    readBuf[1] == 0x01 &&
+                    readBuf[2] == ((udpSequenceNumber >> 8) & 0xFF) &&
+                    readBuf[3] == (udpSequenceNumber & 0xFF);
+
+         // check for data length (limited to one UDP frame at the moment)
+         bSuccess = bSuccess && (i == 18*2 + 4);
+
+         if (bSuccess) {
+            // copy data
+            for (unsigned int i = 0; i < 18; i++) {
+               board[i].type_id = readBuf[i*2+4];
+               board[i].rev_id  = readBuf[i*2+5];
+            }
+            return;
+         }
+
+      } while (1);
+
+
+      if (this->mVerbose)
+         std::cout << mDCBName << " retry " << retry + 1 << std::endl;
+   }
+
+   if (!bSuccess)
+      throw std::runtime_error(std::string("Error scanning crate at " + mDCBName + "."));
+}
+
+//--------------------------------------------------------------------
+
 unsigned int DCB::BitExtract(unsigned int rofs, unsigned int mask, unsigned int ofs) {
    return (reg[(rofs & 0x0FFF) / 4] & mask) >> ofs;
 }
@@ -563,13 +673,28 @@ void DCB::SendRegisters(unsigned int index, unsigned int nReg) {
    WriteUDP(SLOT_DCB, index * 4, v);
 }
 
-//-- Status registers ------------------------------------------------
+//--------------------------------------------------------------------
 
 void DCB::PrintVersion() {
    std::cout << GetFwBuild() << std::endl;
    std::cout << GetHwVersion() << std::endl;
    std::cout << "Protocol version:    " << GetProtocolVersion() << std::endl;
    std::cout << "Serial number:       " << GetSerialNumber() << std::endl;
+}
+
+const char *board_type_name[] = {
+        "WDB",
+        "TCB",
+        "DCB"
+};
+
+void DCB::PrintCrate() {
+   for (int i=0 ; i<18 ; i++) {
+      if (board[i].type_id >= 0 && board[i].type_id < 3) {
+         std::cout << "Slot " << std::setw(2) << i << ": Found " << board_type_name[board[i].type_id] <<
+         ", Revision " << (char)('A'+board[i].rev_id) << std::endl;
+      }
+   }
 }
 
 unsigned int DCB::bcd2dec(const unsigned int bcd) {
