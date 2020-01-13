@@ -313,13 +313,13 @@ void wr_fw(char *fw_file, flash_memory_map_type *flash_mem_map, const char *flas
   /* check flash partition */
   if( !(mtd_ptr = get_flash_partition(flash_mem_map, flash_partition_name)) )
   {
-    printf("Error: partition %s not found\n", flash_partition_name);
+    if(DBG_ERR) printf("Error: partition %s not found\n", flash_partition_name);
     return;
   }
 
   if( !(qspi_flash_init(&flash_partition, mtd_ptr->mtd_partition)) )
   {
-    printf("Error: flash partition %s accesse failed\n", flash_partition_name);
+    if(DBG_ERR) printf("Error: flash partition %s accesse failed\n", flash_partition_name);
     return;
   }
 
@@ -331,15 +331,15 @@ void wr_fw(char *fw_file, flash_memory_map_type *flash_mem_map, const char *flas
   if (header_len > 0)
   {
     /* got valid header */
-    printf("Bit file header:\n");
-    for (i=0; i<4; i++)
+    if(DBG_INF0)
     {
-//      if( DBG_INF4 ) printf("field %d  : %s \r\n", i, buff + bit_inf.field[i]);
-//      printf("field %d  : %s \r\n", i, buff + bit_inf.field[i]);
-      printf("%-10s : %s\r\n", info_field_name[i], buff + bit_inf.field[i]);
+      printf("Bit file header:\n");
+      for (i=0; i<4; i++)
+      {
+        printf("%-10s : %s\r\n", info_field_name[i], buff + bit_inf.field[i]);
+      }
+      printf("Image size : %d Bytes\r\n", bit_inf.info.data_len);
     }
-//    if( DBG_INF4 ) printf("size = %d\r\n", bit_inf.info.data_len);
-    printf("Image size : %d Bytes\r\n", bit_inf.info.data_len);
     byte_swap_uint32(bit_inf.field, bit_inf_swapped.field, sizeof(bit_inf)/sizeof(unsigned int));
 
     /* check fpga type */
@@ -368,10 +368,10 @@ void wr_fw(char *fw_file, flash_memory_map_type *flash_mem_map, const char *flas
     /* Erase partition */
     /* qspi_flash_erase_partition(&flash_partition); */
     /* Erase header only */
-    printf("deleting header...");
+    if(DBG_INF0) printf("deleting header...");
     fflush(stdout);
     qspi_flash_erase_sector(&flash_partition, mtd_ptr->header_offset);
-    printf("done\n");
+    if(DBG_INF0) printf("done\n");
     /* Erase bitfile only */
     ers_size = 0;
     tot_ers_size=0;
@@ -396,13 +396,13 @@ void wr_fw(char *fw_file, flash_memory_map_type *flash_mem_map, const char *flas
       display_progress("writing bitstream  ", 100*flash_offs/bit_inf.info.data_len, '-', '#');
       fflush(stdout);
     }
-    printf("\n");
+    if(DBG_INF0) printf("\n");
 
     /* write header */
     lseek(fd, 0, SEEK_SET); /* go back to start of file */
     if(mtd_ptr->header_offset) /* check if header has to be written */
     {
-      printf("writing header...");
+      if(DBG_INF0) printf("writing header...");
       fflush(stdout);
       flash_offs = mtd_ptr->header_offset;
       flash_len  = sizeof(bitfile_info_type);
@@ -411,12 +411,12 @@ void wr_fw(char *fw_file, flash_memory_map_type *flash_mem_map, const char *flas
       flash_len   = header_len;
       read(fd, buff, flash_len);
       qspi_flash_write(&flash_partition, flash_offs, flash_len, buff);
-      printf("done\n");
+      if(DBG_INF0) printf("done\n");
     }
   }
 
   fsync(fd); /* flush caches to make sure operation completes before desecting board */
-  if(close(fd) < 0) printf("Error closing file\n");
+  if(close(fd) < 0) if(DBG_INF0) printf("Error closing file\n");
 }
 
 /******************************************************************************/
@@ -448,13 +448,13 @@ void wr_sw(char *sw_file, flash_memory_map_type *flash_mem_map, const char *flas
   /* check flash partition */
   if( !(mtd_ptr = get_flash_partition(flash_mem_map, flash_partition_name)) )
   {
-    printf("Error: partition %s not found\n", flash_partition_name);
+    if(DBG_ERR) printf("Error: partition %s not found\n", flash_partition_name);
     return;
   }
 
   if( !(qspi_flash_init(&flash_partition, mtd_ptr->mtd_partition)) )
   {
-    printf("Error: flash partition %s accesse failed\n", flash_partition_name);
+    if(DBG_ERR) printf("Error: flash partition %s accesse failed\n", flash_partition_name);
     return;
   }
 
@@ -494,10 +494,10 @@ void wr_sw(char *sw_file, flash_memory_map_type *flash_mem_map, const char *flas
       display_progress("writing software   ", 100*flash_offs/file_stat.st_size, '-', '#');
       fflush(stdout);
     }
-    printf("\n");
+    if(DBG_INF0) printf("\n");
 
     /* write header part 1 (info) */
-    printf("writing header (info)...");
+    if(DBG_INF0) printf("writing header (info)...");
     fflush(stdout);
     sw_info.info.name_offs = sizeof(sw_file_info_type);
     sw_info.info.data_len  = file_stat.st_size;
@@ -506,18 +506,18 @@ void wr_sw(char *sw_file, flash_memory_map_type *flash_mem_map, const char *flas
     flash_offs = mtd_ptr->header_offset;
     flash_len  = sizeof(sw_file_info_type);
     qspi_flash_write(&flash_partition, flash_offs, flash_len, (unsigned char*) &sw_info);
-    printf("done\n");
+    if(DBG_INF0) printf("done\n");
     /* write header part 2 (filename) */
-    printf("writing header (filename)...");
+    if(DBG_INF0) printf("writing header (filename)...");
     fflush(stdout);
     flash_offs = mtd_ptr->header_offset + sizeof(sw_file_info_type);
     flash_len  = header_len+1;
     qspi_flash_write(&flash_partition, flash_offs, flash_len, sr_header_buf);
-    printf("done\n");
+    if(DBG_INF0) printf("done\n");
   }
 
   fsync(fd); /* flush caches to make sure operation completes before desecting board */
-  if(close(fd) < 0) printf("Error closing file\n");
+  if(close(fd) < 0) if(DBG_INF0) printf("Error closing file\n");
 }
 
 /******************************************************************************/
@@ -540,15 +540,15 @@ void slot_upload_fw_sw(unsigned int slot_nr, int load_fw, char *fw_spec_p, int l
   if(sw_spec_p) swp = sw_spec_p;
   else          swp = sw_def_path;
 
-  printf("\nSlot %d:\n", slot_nr);
+  if(DBG_INF0) printf("\nSlot %d:\n", slot_nr);
 
   if(flash_mem_map = connect_flash(slot_nr, board_type, board_rev))
   {
-    printf("default path: %s\n", flash_mem_map->default_fw_path);
+    if(DBG_INF0) printf("default path: %s\n", flash_mem_map->default_fw_path);
   }
   else
   {
-    printf("Error: flash memory map not found (type %d, revision %d)\n", board_type, board_rev);
+    if(DBG_ERR) printf("Error: flash memory map not found (type %d, revision %d)\n", board_type, board_rev);
     return;
   }
 
@@ -564,7 +564,7 @@ void slot_upload_fw_sw(unsigned int slot_nr, int load_fw, char *fw_spec_p, int l
         strcpy(&fwp[strlen(flash_mem_map->default_fw_path)], wdb_fw_default_file);
       }
       /* upload firmware */
-      printf("-> Uploading WDB firmware %s\n", fwp);
+      if(DBG_INF0) printf("-> Uploading WDB firmware %s\n", fwp);
       wr_fw(fwp, flash_mem_map, "fw");
     }
     if(load_sw)
@@ -576,7 +576,7 @@ void slot_upload_fw_sw(unsigned int slot_nr, int load_fw, char *fw_spec_p, int l
         strcpy(&swp[strlen(flash_mem_map->default_fw_path)], wdb_sw_default_file);
       }
       /* upload sofware */
-      printf("-> Uploading WDB software %s\n", swp);
+      if(DBG_INF0) printf("-> Uploading WDB software %s\n", swp);
       wr_sw(swp, flash_mem_map, "sw");
     }
   }
@@ -592,14 +592,14 @@ void slot_upload_fw_sw(unsigned int slot_nr, int load_fw, char *fw_spec_p, int l
         strcpy(&fwp[strlen(flash_mem_map->default_fw_path)], tcb_fw_default_file);
       }
       /* upload firmware */
-      printf("-> Uploading TCB firmware %s\n", fwp);
+      if(DBG_INF0) printf("-> Uploading TCB firmware %s\n", fwp);
       wr_fw(fwp, flash_mem_map, "fw");
     }
   }
 
   disconnect();
 
-  printf("\n");
+  if(DBG_INF0) printf("\n");
 }
 
 /******************************************************************************/
@@ -623,16 +623,16 @@ void crate_upload_fw_sw(slot_op_en_type *slot, int load_fw, char *fw_spec_p, int
         if(force)
         {
           /* get forced upload information */
-          printf("FORCED upload\n");
+          if(DBG_INF0) printf("FORCED upload\n");
           if( (board_type != slot_board_type) || (board_rev != slot_board_rev) )
           {
-            printf("Error: present board in slot %d does not match type and revision\n", i);
+            if(DBG_ERR) printf("Error: present board in slot %d does not match type and revision\n", i);
             continue;
           }
         }
         else
         {
-          printf("Standard upload\n");
+          if(DBG_INF0) printf("Standard upload\n");
         }
       }
       else
@@ -645,7 +645,7 @@ void crate_upload_fw_sw(slot_op_en_type *slot, int load_fw, char *fw_spec_p, int
         else
         {
           /* no slot board information for standard upload */
-          printf("Error: board information for slot %d could not be read\n", i);
+          if(DBG_ERR) printf("Error: board information for slot %d could not be read\n", i);
           return;
         }
       }

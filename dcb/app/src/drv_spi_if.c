@@ -97,7 +97,7 @@ int spi_if_init(spi_if_type* self, unsigned char device_nr, unsigned char slave_
     return -1;
   }
 
-  if(DBG_INF0) printf("%s: spi mode %d, %d bits %sper word, %d Hz max\n",filename, mode, bits, lsb ? "(lsb first) " : "", speed);
+  if(DBG_INF4) printf("%s: spi mode %d, %d bits %sper word, %d Hz max\n",filename, mode, bits, lsb ? "(lsb first) " : "", speed);
 
   self->device_nr = device_nr;
   self->slave_nr  = slave_nr;
