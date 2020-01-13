@@ -431,8 +431,11 @@ std::vector<unsigned int> DCB::ReadUDP(unsigned int slot, unsigned int ofs, unsi
       } while (1);
 
 
-      if (this->mVerbose)
+      if (this->mVerbose) {
+         if (retry == 0)
+            std::cout << std::endl;
          std::cout << mDCBName << " retry " << retry + 1 << std::endl;
+      }
    }
 
    if (!bSuccess)

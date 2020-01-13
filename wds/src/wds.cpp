@@ -1095,12 +1095,12 @@ int main(int argc, const char *argv[]) {
                   }
                   gl.dcb.push_back(dcb);
 
-                  if (b.find(':')) {
-                     gl.wdb.push_back(new WDB(dcb, std::stoi(b.substr(b.find(':')+1)), gl.verbose));
-                  } else {
+                  if (b.find(':') == std::string::npos) {
                      std::vector<WDB *> wdbs = dcb->ScanWDB();
                      for (auto &w: wdbs)
                         gl.wdb.push_back(w); // add all WDBs in crate
+                  } else {
+                     gl.wdb.push_back(new WDB(dcb, std::stoi(b.substr(b.find(':')+1)), gl.verbose));
                   }
                } catch (std::runtime_error &e) {
                   std::cout << std::endl;
