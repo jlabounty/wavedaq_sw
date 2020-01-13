@@ -273,6 +273,17 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
       } else if (item == "dacPzcLevel") {
          assert(iBoard != -1);
          gl->wdb[iBoard]->SetDacPzcLevelN(std::stoi(value) - 1);
+      } else if (item == "fePower") {
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetFePower(std::stof(value));
+         else {
+            try {
+               gl->wdb[iBoard]->SetFePower(value == "true");
+            } catch(std::invalid_argument) {
+
+            }
+         }
       } else if (item == "range") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
@@ -583,6 +594,12 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
          for (int i = 0; i < 15; i++)
             mg_printf_http_chunk(nc, "        %d,\n", w->GetFeMux(i));
          mg_printf_http_chunk(nc, "        %d ],\n", w->GetFeMux(15));
+
+         try {
+            mg_printf_http_chunk(nc, "      \"fePower\": %d,\n", w->GetFePower());
+         } catch(std::invalid_argument &e) {
+            mg_printf_http_chunk(nc, "      \"fePower\": -1,\n");
+         }
 
          mg_printf_http_chunk(nc, "      \"triggerMode\": %d,\n", gl->triggerMode);
          mg_printf_http_chunk(nc, "      \"triggerHoldoff\": %d,\n", w->GetTriggerHoldoff());

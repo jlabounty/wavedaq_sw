@@ -279,6 +279,15 @@ function populateControls(init) {
    document.getElementById("selGain").value = OSC.wdb[OSC.curBoard].feGain[0];
    document.getElementById("selPzcLevel").value = OSC.wdb[OSC.curBoard].dacPzcLevel;
 
+   if (OSC.wdb[OSC.curBoard].fePower == -1) {
+      document.getElementById("fePower").disabled = true;
+      document.getElementById("fePower").checked = false;
+   } else {
+      document.getElementById("fePower").disabled = false;
+      document.getElementById("fePower").checked = (OSC.wdb[OSC.curBoard].fePower == 1)
+      ;
+   }
+
    document.getElementById("inputReadoutSrcDRS").checked = (OSC.wdb[OSC.curBoard].readoutSrcSel == 1);
    document.getElementById("inputReadoutSrcADC").checked = (OSC.wdb[OSC.curBoard].readoutSrcSel == 2);
    document.getElementById("inputReadoutSrcTDC").checked = (OSC.wdb[OSC.curBoard].readoutSrcSel == 3);
@@ -472,6 +481,7 @@ function readWdb(b, init) {
                "fePzc": new Array(16).fill(false),
                "feGain": new Array(16).fill(0),
                "feMux": new Array(16).fill(0),
+               "fePower": false,
                "triggerMode": 2,
                "triggerLeadTrailEdgeSel": 0,
                "triggerExtTriggerOutEnable": false,
