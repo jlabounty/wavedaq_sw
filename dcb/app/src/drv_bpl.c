@@ -823,6 +823,8 @@ int get_slot_board_info(unsigned int slot_nr, unsigned int *board_type_id, unsig
   }
 
   if(DBG_WARN) xfs_printf("Warning: board identification failed for slot %d\r\n", slot_nr);
+  *board_type_id = -1; // indicate no board
+  *board_rev_id = -1;
   return 0;
 }
 
