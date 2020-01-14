@@ -851,10 +851,11 @@ void WDB::SendControlRegisters() {
 //-- Status registers ------------------------------------------------
 
 void WDB::PrintVersion() {
-   std::cout << GetFwBuild() << std::endl;
-   std::cout << GetHwVersion() << std::endl;
-   std::cout << "Protocol version:    " << GetProtocolVersion() << std::endl;
+   std::cout << "Name:                " << GetName() << std::endl;
    std::cout << "Serial number:       " << GetSerialNumber() << std::endl;
+   std::cout << "Protocol version:    " << GetProtocolVersion() << std::endl;
+   std::cout << GetHwVersion() << std::endl;
+   std::cout << GetFwBuild() << std::endl;
 }
 
 unsigned int WDB::bcd2dec(const unsigned int bcd) {

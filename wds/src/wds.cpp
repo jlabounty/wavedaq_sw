@@ -1118,9 +1118,11 @@ int main(int argc, const char *argv[]) {
                   gl.dcb.push_back(dcb);
 
                   if (b.find(':') == std::string::npos || b.find('*') != std::string::npos) {
-                     std::vector<WDB *> wdbs = dcb->ScanWDB();
-                     for (auto &w: wdbs)
-                        gl.wdb.push_back(w); // add all WDBs in crate
+                     for (int j=0 ; j<16 ; j++) {
+                        if (dcb->GetBoardId(j)->type_id == BRD_TYPE_ID_WDB) {
+                           gl.wdb.push_back(new WDB(dcb, j, gl.verbose));
+                        }
+                     }
                   } else {
                      gl.wdb.push_back(new WDB(dcb, std::stoi(b.substr(b.find(':')+1)), gl.verbose));
                   }
