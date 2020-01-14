@@ -273,6 +273,17 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
       } else if (item == "dacPzcLevel") {
          assert(iBoard != -1);
          gl->wdb[iBoard]->SetDacPzcLevelN(std::stoi(value) - 1);
+      } else if (item == "fePower") {
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetFePower(std::stof(value));
+         else {
+            try {
+               gl->wdb[iBoard]->SetFePower(value == "true");
+            } catch(std::invalid_argument) {
+
+            }
+         }
       } else if (item == "range") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
@@ -583,6 +594,12 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
          for (int i = 0; i < 15; i++)
             mg_printf_http_chunk(nc, "        %d,\n", w->GetFeMux(i));
          mg_printf_http_chunk(nc, "        %d ],\n", w->GetFeMux(15));
+
+         try {
+            mg_printf_http_chunk(nc, "      \"fePower\": %d,\n", w->GetFePower());
+         } catch(std::invalid_argument &e) {
+            mg_printf_http_chunk(nc, "      \"fePower\": -1,\n");
+         }
 
          mg_printf_http_chunk(nc, "      \"triggerMode\": %d,\n", gl->triggerMode);
          mg_printf_http_chunk(nc, "      \"triggerHoldoff\": %d,\n", w->GetTriggerHoldoff());
@@ -931,19 +948,24 @@ void showUsage(std::string name) {
 
    std::cerr << "usage: " << name << " [options] [-w <address> [-w <address> ...]]" << std::endl;
    std::cerr << "valid options:" << std::endl;
-   std::cerr << "  -h              Show this help" << std::endl;
-   std::cerr << "  -d <address>    Internet address of DCB board" << std::endl;
    std::cerr << "  -demo           Demo mode" << std::endl;
    std::cerr << "  -g rx tx        Debug output at RX/TX ports" << std::endl;
+   std::cerr << "  -h              Show this help" << std::endl;
    std::cerr << "  -l <logfile>    Log file for debugging" << std::endl;
    std::cerr << "  -p              HTTP server port (default is 8080)" << std::endl;
    std::cerr << "  -r              Reset all PLLs" << std::endl;
    std::cerr << "  -s              Run WDB in self-arm mode (use with caution!)" << std::endl;
-   std::cerr << "  -u              Retrieve WDB registers once per second to capture changes by other control programs"
+   std::cerr << "  -u              Retrieve WDB regs once per second to capture changes by other control programs"
              << std::endl;
-   std::cerr << "  -w <address>    Internet address(es) of WaveDREAM board(s)" << std::endl;
    std::cerr << "  -v 1            Print extra information (verbose)" << std::endl;
    std::cerr << "  -v 2            Print each received waveform packet header" << std::endl;
+   std::cerr << "  -w <address>    Address(es) of WaveDREAM board(s) in the form" << std::endl;
+   std::cerr << "     wd<nnn>      IP address of board wd<nnn>" << std::endl;
+   std::cerr << "     nnn          Number of board wd<nnn>" << std::endl;
+   std::cerr << "     dcb<nn>:<mm> Board in slot <mm> controlled by dcb<nn>" << std::endl;
+   std::cerr << "     dcb<nn>:*    All boards controlled by dcb<nn>" << std::endl;
+   std::cerr << "     dcb<nn>      All boards controlled by dcb<nn>" << std::endl;
+   std::cerr << "                  multiple -w <> -w <> flags are possible" << std::endl;
 }
 
 void handler(int sig) {
@@ -1095,7 +1117,7 @@ int main(int argc, const char *argv[]) {
                   }
                   gl.dcb.push_back(dcb);
 
-                  if (b.find(':') == std::string::npos) {
+                  if (b.find(':') == std::string::npos || b.find('*') != std::string::npos) {
                      std::vector<WDB *> wdbs = dcb->ScanWDB();
                      for (auto &w: wdbs)
                         gl.wdb.push_back(w); // add all WDBs in crate
@@ -1217,6 +1239,8 @@ int main(int argc, const char *argv[]) {
             b->SetSclTxEn(0);
 
          } else {
+            b->Connect();
+
             // turn all channels on in demo mode
             b->SetDrsChTxEn(0xFFFF);
             b->SetChnTxEn(0xFFFF);

@@ -87,16 +87,6 @@ WDB::WDB(std::string name, bool verbose) : WDBREG() {
    mSendBlocked = false;
    mReceiveTimeoutMs = cDefaultReceiveTimeoutMs;
    mTimingReferenceSignal = cTimingReferenceOff;
-
-   if (mDemoMode) {
-      for (auto i = 0; i < GetNrOfCtrlRegs(); i++)
-         this->creg[i] = 0;
-      for (auto i = 0; i < GetNrOfStatRegs(); i++)
-         this->sreg[i] = 0;
-      // set some meaningful values in demo mode to make wds happy
-      this->sreg[(GetDrsSampleFreqLoc() & 0x0FFF) / 4] = 5120;
-      this->sreg[(GetAdcSampleFreqLoc() & 0x0FFF) / 4] = 80;
-   }
 }
 
 //--------------------------------------------------------------------
@@ -518,6 +508,21 @@ void WDB::Connect() {
       return -1;
    }
 #endif
+
+   if (mDemoMode) {
+      SetVersion(8);
+      this->sreg.resize(GetNrOfStatRegs());
+      this->creg.resize(GetNrOfCtrlRegs());
+
+      for (auto i = 0; i < GetNrOfCtrlRegs(); i++)
+         this->creg[i] = 0;
+      for (auto i = 0; i < GetNrOfStatRegs(); i++)
+         this->sreg[i] = 0;
+      // set some meaningful values in demo mode to make wds happy
+      this->sreg[(GetDrsSampleFreqLoc() & 0x0FFF) / 4] = 5120;
+      this->sreg[(GetAdcSampleFreqLoc() & 0x0FFF) / 4] = 80;
+      return;
+   }
 
    if (!mDCB ) {
       // create UDP socket for ASCII command interpreter
@@ -1981,7 +1986,14 @@ void WP::RequestSingleBoard(WDB *b) {
    // without mutex since we only change it when the board configuration changes.
 
    bool boardEnable = RequestTypes(b);
-   mEventRequest[b->GetSerialNumber()]->mBoardRequested = boardEnable;
+
+   for (auto &er: mEventRequest) {
+      if (er.first == b->GetSerialNumber())
+         er.second->mBoardRequested = boardEnable;
+      else
+         er.second->mBoardRequested = false;
+   }
+
    if (mVerbose >= 3)
       printf("Board %d is %s\n", b->GetSerialNumber(), (boardEnable) ? "enabled" : "disabled");
 }
