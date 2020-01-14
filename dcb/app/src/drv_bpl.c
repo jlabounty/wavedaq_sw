@@ -54,6 +54,8 @@
 #define BIN_CMD_READ16    0x22
 #define BIN_CMD_READ32    0x24
 
+//#define BPL_SPI_DRIVE_EN(x)   (set_gpio(BIT_IDX_EMIO_CTRL_MASTER_SPI_DE_PIN, x))
+#define BPL_SPI_DRIVE_EN(x)   (bpl_spi_drive_en_reg(x))
 #define BPL_SPI_SCHEME(x)     (set_gpio(BIT_IDX_EMIO_CTRL_BPL_SPI_SCHEME_PIN, x))
 #define BPL_FLASH_SEL(x)      (set_gpio(BIT_IDX_EMIO_CTRL_FLASH_SEL_PIN, x))
 #define BPL_INIT(x)           (set_gpio(BIT_IDX_EMIO_CTRL_INIT_PIN, x))
@@ -81,7 +83,7 @@ int get_slot_board_info(unsigned int slot_nr, unsigned int *board_type_id, unsig
 
 /******************************************************************************/
 
-void bpl_spi_drive_en(int enable)
+void bpl_spi_drive_en_reg(int enable)
 {
   unsigned int reg_val = DCB_ENABLE_BPL_SPI_DRIVER_MASK;
 
@@ -131,7 +133,7 @@ int connect_fpga(unsigned int slot_nr, unsigned int board_type, unsigned int boa
   /* Add user space mutex to make sure only one board is selected at a time */
   /* Configure for board in slot */
   BPL_SPI_SCHEME(bpl_spi_scheme[board_type][board_rev]);
-  bpl_spi_drive_en(1);
+  BPL_SPI_DRIVE_EN(1);
   select_slot(slot_nr);
   return 1;
 }
@@ -150,7 +152,7 @@ flash_memory_map_type* connect_flash(unsigned int slot_nr, unsigned int board_ty
   {
     /* Configure for board in slot */
     BPL_SPI_SCHEME(bpl_spi_scheme[board_type][board_rev]);
-    bpl_spi_drive_en(1);
+    BPL_SPI_DRIVE_EN(1);
     BPL_FLASH_SEL(1);
     BPL_INIT(1);
     select_slot(slot_nr);
@@ -163,10 +165,10 @@ flash_memory_map_type* connect_flash(unsigned int slot_nr, unsigned int board_ty
 void disconnect()
 {
   deselect_all_slots();
-  usleep(2000);
+  usleep(50);
   BPL_FLASH_SEL(0);
   BPL_INIT(0);
-  bpl_spi_drive_en(0);
+  BPL_SPI_DRIVE_EN(0);
 }
 
 /******************************************************************************/
@@ -243,7 +245,7 @@ void spi_ascii_cmd(char* txbuff, char *rxbuff, unsigned int rxsize, unsigned cha
       {
         if(DBG_ERR) xfs_printf("SPI Backplane Error: receive error in loop\r\n");
       }
-      usleep(100);
+      usleep(10);
       i = 0;
       while( (i < SPI_ASCII_RX_BURST_LEN) && (rx_buff[i] != 0x03) )
       {
@@ -670,10 +672,10 @@ void spi_flash_id_cmd(unsigned char slot_nr)
   if (slot_nr > 16) return;
 
   /* Enable SPI driver */
-  bpl_spi_drive_en(1);
+  BPL_SPI_DRIVE_EN(1);
   BPL_FLASH_SEL(1);
   BPL_INIT(1);
-  usleep(1000);
+  usleep(50);
 //  XSpi_SetSlaveSelectReg(SYSPTR(spi_bpl), spi_slave_select[slot_nr]);
 //  XSpi_SetSlaveSelect(SYSPTR(spi_bpl), ~spi_slave_select[slot_nr]);
   Status = spi_transfer(SYSPTR(spi_bpl), slot_nr, tx_buf, rx_buf, 4);
@@ -685,8 +687,8 @@ void spi_flash_id_cmd(unsigned char slot_nr)
   BPL_INIT(0);
   BPL_FLASH_SEL(0);
   /* Disable SPI driver (wait for CS pullup first) */
-  usleep(2000);
-  bpl_spi_drive_en(0);
+  usleep(50);
+  BPL_SPI_DRIVE_EN(0);
   //emio_set_pin(SYSPTR(gpio_mio), BIT_IDX_EMIO_CTRL_INIT_PIN, 0);
   xfs_printf("Flash ID (0x%02X) 0x%02X 0x%02X 0x%02X\r\n", rx_buf[0], rx_buf[1], rx_buf[2], rx_buf[3]);
 }
@@ -709,7 +711,7 @@ unsigned int spi_get_ref_reg(unsigned char slot_nr)
 #endif
 
   /* Enable SPI driver */
-  bpl_spi_drive_en(1);
+  BPL_SPI_DRIVE_EN(1);
   select_slot(slot_nr);
 
   /* Send Command */
@@ -728,8 +730,8 @@ unsigned int spi_get_ref_reg(unsigned char slot_nr)
 
   /* Disable SPI driver (wait for CS pullup first) */
   deselect_all_slots();
-  usleep(2000);
-  bpl_spi_drive_en(0);
+  usleep(50);
+  BPL_SPI_DRIVE_EN(0);
   return hw_rev_val;
 }
 
@@ -752,7 +754,7 @@ unsigned int spi_get_ref_reg_tcb(unsigned char slot_nr)
 #endif
 
   /* Enable SPI driver */
-  bpl_spi_drive_en(1);
+  BPL_SPI_DRIVE_EN(1);
   select_slot(slot_nr);
 
   /* Send Command */
@@ -771,8 +773,8 @@ unsigned int spi_get_ref_reg_tcb(unsigned char slot_nr)
 
   /* Disable SPI driver (wait for CS pullup first) */
   deselect_all_slots();
-  usleep(2000);
-  bpl_spi_drive_en(0);
+  usleep(50);
+  BPL_SPI_DRIVE_EN(0);
   return hw_rev_val;
 }
 
@@ -792,10 +794,10 @@ int get_slot_board_info(unsigned int slot_nr, unsigned int *board_type_id, unsig
     *board_rev_id  = (hw_rev_val&HW_VERS_REV_MASK)>>HW_VERS_REV_OFFS;
     return 1;
   }
-  //else
-  //{
-  //  printf("Scheme 0 unrecognized HW revision      : 0x%08X\n", hw_rev_val);
-  //}
+//  else
+//  {
+//    printf("Scheme 0 unrecognized HW revision      : 0x%08X\n", hw_rev_val);
+//  }
   /* TBD: remove else cases and replace constants by defines */
   hw_rev_val = spi_get_ref_reg_tcb(slot_nr);
   if( ((hw_rev_val&0xFF000000) == 0x01000000) ||
@@ -806,10 +808,10 @@ int get_slot_board_info(unsigned int slot_nr, unsigned int *board_type_id, unsig
     *board_rev_id  = (hw_rev_val&0xFF000000)>>24;
     return 1;
   }
-  //else
-  //{
-  //  printf("Scheme 0 unrecognized HW revision (tcb): 0x%08X\n", hw_rev_val);
-  //}
+//  else
+//  {
+//    printf("Scheme 0 unrecognized HW revision (tcb): 0x%08X\n", hw_rev_val);
+//  }
 
   /* Set scheme 1 */
   BPL_SPI_SCHEME(1);
@@ -821,6 +823,10 @@ int get_slot_board_info(unsigned int slot_nr, unsigned int *board_type_id, unsig
     *board_rev_id  = (hw_rev_val&HW_VERS_REV_MASK)>>HW_VERS_REV_OFFS;
     return 1;
   }
+//  else
+//  {
+//    printf("Scheme 1 unrecognized HW revision      : 0x%08X\n", hw_rev_val);
+//  }
 
   if(DBG_WARN) xfs_printf("Warning: board identification failed for slot %d\r\n", slot_nr);
   *board_type_id = -1; // indicate no board
