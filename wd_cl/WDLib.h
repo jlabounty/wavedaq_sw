@@ -273,6 +273,7 @@ class WDWDB : public WDB, public WDBoard{
       }
 
       bool IsBusy(){
+         //TODO update register
          return GetDrsCtrlBusy(); 
       }
 
@@ -404,11 +405,13 @@ class WDDCB : public DCB, public WDBoard {
       }
 
       bool IsBusy(){
-         return false;
+         //TODO update register
+         return GetDcbBusy();
       }
 
       //Configuration handlers
       void ConfigureProperty(const std::string &name, Property &property);
+      void ConfigureSyncDelay(Property &property);
       void ConfigurationStarted();
       void ConfigurationEnded();
 

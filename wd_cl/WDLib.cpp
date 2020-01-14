@@ -1991,16 +1991,47 @@ WDDCB::WDDCB(WDCrate *crate, int slot, std::string name, std::string netname, bo
             }
          }
       }
+
+      //then enable clock distributor for all slots
+      SetDistributorClkOutEn(0xFFFFC);
    }
 
 }
 
 // WDBoard derived methods
 void WDDCB::Connect(){
-   //TODO: write CrateId into the board 
+   //Scan Crate to get actual board map 
    ScanCrate();
 
-   //reset stuff
+   //retrieve crate pointer
+   WDCrate *crate = GetCrate();
+
+   //Set SlotId
+   SetSlotId(GetSlot());
+
+   long crateNumber = crate->GetCrateNumber();
+   if(crateNumber >= 0){
+      //Set CrateId
+      SetCrateId(crateNumber);
+   } else {
+      //WDCrate not in a WDSystem
+      //could work if only a WDCrate is used
+      printf("Board %s in a crate not belonging to any system, cannot set CrateId\n", GetBoardName().c_str());
+   }
+
+   //build crate slot mask
+   unsigned int clkmask = 0x00004; //DCB FPGA
+   for(int i=0; i<16; i++)
+      if(crate->HasBoardIn(i))
+         clkmask |= (0x10<<i);
+   if(crate->HasBoardIn(17))
+      clkmask |= 0x8;
+
+   //printf("setting clock mask to %x\n", clkmask);
+   SetDistributorClkOutEn(clkmask);
+
+
+   //reset any stuff
 
    printf("DCB number %d\n", GetSerialNumber());
 }
@@ -2013,8 +2044,8 @@ bool WDDCB::IsSerdesTraining(){
 }
 
 void WDDCB::ConfigureProperty(const std::string &name, Property &property) { 
-   if(name=="Test"){
-      printf("WDDCB Test property\n");
+   if(name=="SyncDelay"){
+      ConfigureSyncDelay(property);
    } else {
       printf("Unknown property %s in WDDCB\n", name.c_str());
    }
@@ -2024,4 +2055,11 @@ void WDDCB::ConfigurationStarted(){
 }
 
 void WDDCB::ConfigurationEnded(){
+}
+
+void WDDCB::ConfigureSyncDelay(Property &property){
+   unsigned int syncdelay;
+   syncdelay = property.GetUHex();
+
+   SetSyncDelay(syncdelay);
 }
