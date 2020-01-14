@@ -382,8 +382,9 @@ class WDTCB : public TCB, public WDBoard {
       void ConfigureNgenHighThreshold(Property &property);
       void ConfigureNgenLowThreshold(Property &property);
 
-      WDTCB(WDCrate *crate, int slot, std::string name="TCBXXX", int verbose = 0) : TCB(crate->GetMscbName().c_str(), 20, slot, verbose), WDBoard(crate, slot, name) {
-         fh = crate->GetMscbHandle();
+      WDTCB(WDCrate *crate, int slot, std::string name="TCBXXX", int verbose = 0) : TCB(verbose), WDBoard(crate, slot, name) {
+         int hdle = crate->GetMscbHandle();
+         SetMscbHandle(hdle, slot);
 
          //try to connect only if the crate is powered
          if(crate->IsPowered()){

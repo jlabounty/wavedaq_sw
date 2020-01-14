@@ -14,10 +14,6 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-#include "mscb.h"
-#include "mxml.h"
-#include "WDBLib.h"
-#include "TCBLib.h"
 
 #include <iostream>
 #include <exception>
@@ -26,6 +22,10 @@
 #include <vector>
 #include <map>
 
+#include "mscb.h"
+#include "mxml.h"
+#include "WDBLib.h"
+#include "TCBLib.h"
 #define VERBOSITY 0
 #define FREQUENCY_CHANGE
 //#define FREQUENCY 1200
@@ -89,7 +89,6 @@ int main(int argc, char** argv)
       wdb[name] = new WDB(name, 3);
    // open mscb connection
    tcb = new TCB(tcb_list, 20, 17, 1);
-   tcb->fh = mscb_init(tcb_list, 0, "", 0);
    tcb->SetIDCode();
    if(tcb->fnserdes!=16) {
       printf("Problem in communication with TCB....\n");
@@ -123,7 +122,7 @@ int main(int argc, char** argv)
       b->SetDaqAuto(false);
       b->SetDaqNormal(false);
       
-      b->SetSendBlocked(true); // update all control register together
+      b->SetSendBlock(true); // update all control register together
       
       // general board settings
       //b->SetInterPkgDelay(0x60000);//default interpacket delay for 6 crate
@@ -163,7 +162,7 @@ int main(int argc, char** argv)
       b->SetAdvTrgCtrl(0x00000431);
       
       // now send all changed registers in one packet
-      b->SetSendBlocked(false);
+      b->SetSendBlock(false);
       b->SendControlRegisters();
       
       // Sync LMK
@@ -177,7 +176,7 @@ int main(int argc, char** argv)
        b->SetDrsSampleFreq(FREQUENCY);
 #endif
 
-      b->ReceiveStatusRegister(WD2_DRS_SAMPLE_FREQ_REG);
+      b->ReceiveStatusRegister(b->GetDrsSampleFreqLoc());
       
       // Reset PLLs
       b->ResetAllPll();

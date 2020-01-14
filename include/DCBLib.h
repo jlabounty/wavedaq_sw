@@ -13,7 +13,7 @@
 #ifndef __dcblib_h__
 #define __dcblib_h__
 
-#include "WDBLib.h"
+//#include "WDBLib.h"
 #include "DCBReg.h"
 
 #include <thread>
@@ -99,7 +99,7 @@ public:
    unsigned int GetPllLock(bool refresh = true);
 
    // WDB functions
-   std::vector<WDB *> ScanWDB();
+   //std::vector<WDB *> ScanWDB();
 };
 
 //--------------------------------------------------------------------

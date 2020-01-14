@@ -135,20 +135,12 @@
 #include "strlcpy.h"
 #include <vector>
 
+#include <stdexcept>
+#include "DCBLib.h"
+
 #ifndef TCBLIB_H
 #define TCBLIB_H
 
-
-typedef struct {
-    unsigned short     trgindly;
-    unsigned short     syncindly;
-    unsigned short     sprindly;
-    unsigned short     trgoutdly;
-    unsigned short     syncoutdly;
-    unsigned short     sproutdly;
-    unsigned short     algsel;
-    unsigned int       serdesmask;
-} TCB_SETTINGS;
 
 enum PACKETIZER_COMMAND {STOP, COPY, BLOCK_COPY, DIRECT_WRITE, JUMP, JUMP_IF};
 
@@ -162,17 +154,16 @@ typedef struct {
 
 class TCB {
 private:
-   int            InitType1(TCB_SETTINGS *ts);
-   int            InitType2(TCB_SETTINGS *ts);
-   int            InitType3(TCB_SETTINGS *ts);
+   //internal mscb connections
+   int            fmscb_addr;        // MSCB address of CMB
+   int            fh;                // MSCB handle
+   //internal DCB
+   DCB*           fDCB;              // DCB interface
 
 public:
    // board info
    u_int32_t      fidcode;           // reg id
    u_int32_t      fslot;             // slot
-   char           fmscb_device[256]; // MSCBxxx node name
-   int            fmscb_addr;        // MSCB address of CMB
-   int            fh;                // MSCB handle
    int            fntrg;             // number of available trigger
    int            fverbose;          // verbosity level
    int            fnserdes;          // number of available trigger
@@ -180,19 +171,57 @@ public:
    u_int32_t      GetIDCode() { return fidcode; }
    u_int32_t      GetSlotNum() { return fslot; }
    
-   // Constructor
+   // Constructors
+   TCB(int verbose = 0) {
+      fh = -1;
+      fDCB = nullptr;
+   };
+
    TCB(const char *mscb_device, int mscb_addr, int slot, int verbose = 0) {
+      //open mscb connection
+      char fmscb_device[128];
       strlcpy(fmscb_device, mscb_device, sizeof(fmscb_device));
+      fh = mscb_init(fmscb_device, 0, "", 0);
       fmscb_addr = mscb_addr;
+
       fslot = slot;
+
+      //dummy stuff
+      fDCB = nullptr;
       fidcode = 0xffff;
       fntrg = 0x0;
       fverbose = verbose;
       fnserdes= 0;
-   }
+   };
 
-   int InitBoard(TCB_SETTINGS *ts, int iType);
-   
+   TCB(const std::string &dcb_name, int slot, int verbose = 0) {
+      //open mscb connection
+      fh = -1;
+      fDCB = new DCB(dcb_name, verbose);
+      fDCB->Connect();
+
+      fslot = slot;
+
+      //dummy stuff
+      fidcode = 0xffff;
+      fntrg = 0x0;
+      fverbose = verbose;
+      fnserdes= 0;
+   };
+
+
+   //set mscb/Dcb access
+   void SetMscbHandle(int handle, int slot, int addr=20){
+      fh = handle;
+      fmscb_addr = addr;
+      fslot = slot;
+   };
+
+   void SetDcbInterface(DCB* dcb, int slot){
+      fDCB = dcb;
+      fslot = slot;
+   };
+
    //general write register function
    void WriteReg(u_int32_t, u_int32_t*);
    //general write block transfert function

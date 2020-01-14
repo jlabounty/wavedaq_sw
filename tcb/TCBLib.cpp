@@ -13,226 +13,85 @@
 #include "math.h"
 #include <unistd.h>
 
-int TCB::InitType1(TCB_SETTINGS *ts){
-   if (fverbose)
-      printf("configuring TCB_1_X\n");
-   
-   u_int32_t fadcmode = 1;
-   u_int32_t enable_trgbus = 1;
-   u_int32_t testtxmode = 0;
-   u_int32_t trgbusmask = 0x7; // TRG | SYNC | BUSY
-   u_int32_t dbgserdes = 0;
-
-   // load RRUN register
-   u_int32_t rrundata = (dbgserdes<<8) | (enable_trgbus<<4) | (fadcmode<<2) | (trgbusmask<<13) | (testtxmode <<5);
-   SetRRUN(&rrundata);
-   u_int32_t ralgsel = (ts->algsel);
-   SetRALGSEL(&ralgsel);
-
-   // serdes setup
-   //crate 181
-   //u_int32_t sdly[5]={0x0F0B0D0C,0x0B020613,0x1704080C,0x0B121310,0x08080808};
-   //int bitslip[20]={4,4,4,4,4,3,3,3,3,3,3,4,4,4,4,4,1,1,1,1};
-   //crate 186
-   /*u_int32_t sdly[5]={0x0F0D0F0A,0x07050511,0x1017080B,0x0B0E0F14,0x08080808};
-   int bitslip[20]={4,4,4,4,4,3,3,3,3,3,4,4,4,4,4,4,1,1,1,1};
-   SerdesReset();
-   SetSerdesDelay(sdly);
-   SetBitslip(bitslip);
-   */
-   u_int32_t serdesmaskreg = ts->serdesmask;
-   SetSerdesMask(&serdesmaskreg);
-
-   //Input TRGBUS
-   SetTRGBusIDLY((u_int32_t*) &ts->syncindly, (u_int32_t*) &ts->trgindly, (u_int32_t*) &ts->sprindly);
-
-   RemoveBusy();
-   GoRun();   
-
-   return 1;
-}
-
-int TCB::InitType2(TCB_SETTINGS *ts){
-   if (fverbose)
-      printf("configuring TCB_2_X\n");
-   
-   u_int32_t fadcmode = 1;
-   u_int32_t enable_trgbus = 1;
-   u_int32_t testtxmode = 0;
-   u_int32_t trgbusmask = 0x7; // TRG | SYNC | BUSY
-   u_int32_t dbgserdes = 0;
-
-   // load RRUN register
-   u_int32_t rrundata = (dbgserdes<<8) | (enable_trgbus<<4) | (fadcmode<<2) | (trgbusmask<<13) | (testtxmode <<5);
-   SetRRUN(&rrundata);
-   u_int32_t ralgsel = (ts->algsel);
-   SetRALGSEL(&ralgsel);
-
-   // serdes setup
-   /*u_int32_t sdly[5]={0x140F110F,0x0B0E0816,0x19070A0D,0x11141514,0x07070707};
-   int bitslip[20]={3,3,3,3,3,2,2,2,2,2,2,3,3,3,3,3,1,1,1,1};
-   SerdesReset();
-   SetSerdesDelay(sdly);
-   SetBitslip(bitslip);
-*/
-   u_int32_t serdesmaskreg = ts->serdesmask;
-   SetSerdesMask(&serdesmaskreg);
-
-   //Input TRGBUS
-   SetTRGBusIDLY((u_int32_t*) &ts->syncindly, (u_int32_t*) &ts->trgindly, (u_int32_t*) &ts->sprindly);
-
-   RemoveBusy();
-   GoRun();   
-
-   return 1;
-}
-
-int TCB::InitType3(TCB_SETTINGS *ts){
-   if (fverbose)
-      printf("configuring TCB_3_X\n");
-
-   u_int32_t fadcmode = 1;
-   u_int32_t enable_trgbus = 1;
-   u_int32_t testtxmode = 0;
-   u_int32_t trgbusmask = 0x7; // TRG | SYNC | BUSY
-
-   // set the number of available trigger 
-   SetNTRG();
-   // load RRUN register
-   u_int32_t rrundata = (enable_trgbus<<4) | (fadcmode<<2) | (trgbusmask<<13) | (testtxmode <<5);
-   SetRRUN(&rrundata);
-   // read the number of trigger available
-   
-   // load RENA register
-   /*u_int32_t trgenable = 0;
-   int nword = fntrg/32 + 1;
-   for(int iword = 0; iword <nword; iword++){
-     for (int itrg=0; itrg<32; itrg++){
-       trgenable |= ts->triggerenable[itrg+iword*32]<<itrg;
-     }
-     SetRENA(&trgenable,iword);
-   }*/
-   
-   // serdes setup
-/*   u_int32_t sdly[5]={0x16121211,0x100A0716,0x14080910,0x14151717,0xFFFFFFFF};
-   int bitslip[20]={0,0,0,0,0,7,7,7,7,7,7,0,0,0,0,0,0,0,0,0};
-   SerdesReset();
-   SetSerdesDelay(sdly);
-   SetBitslip(bitslip);
-*/
-   u_int32_t serdesmaskreg = ts->serdesmask;
-   SetSerdesMask(&serdesmaskreg);
-
-   //set serdes delay
-   SetTRGBusIDLY((u_int32_t*) &ts->syncindly, (u_int32_t*) &ts->trgindly, (u_int32_t*) &ts->sprindly);
-   SetTRGBusODLY((u_int32_t*) &ts->syncoutdly, (u_int32_t*) &ts->trgoutdly, (u_int32_t*) &ts->sproutdly);
-   
-   //set prescaling
-   //SetPrescaling((u_int32_t*)ts->prescaling);
-  
-   //remove the busy
-   RemoveBusy();
-   // give a SW Sync
-   SWSync();
-   // give a SW stop to go idle
-   SWStop();
-
-   return 1;
-}
-
-int TCB::InitBoard(TCB_SETTINGS *ts, int iType)
-{
-   // open MSCB connecttion
-   fh = mscb_init(fmscb_device, 0, "", 0);
-   if (fh < 0) //there is not MSCB connection
-      return 0;
-
-   //make sure bus is assegned to SPI
-   SetPacketizerBus(false);
-   AbortPacketizer();
-   ResetBufferLogic();
-
-   // check the board ID
-   SetIDCode();
-   if((fidcode == 0xffff) || (fidcode == 0x0000)) 
-     return 0; // there is no TCB in the crate
-
-   if((fidcode>>12)!=(u_int32_t) iType){//check TCB type
-      //cm_msg(MERROR, "wd_fe","Wrong TCB Type, read %X, required %X", fidcode>>12, iType);
-      printf("Wrong TCB Type, read %X, required %X\n", fidcode>>12, iType);
-     return 0;
-   }
-        
-   if ((fidcode>>12)==1){
-   //TCB_1
-     return InitType1(ts);
-   }else if((fidcode>>12)==2) {
-   //TCB_2
-     return InitType2(ts); 
-   } else if((fidcode>>12)==3){
-   //TCB_3
-     return InitType3(ts);
-   } else{
-      //unknow TCB
-      //cm_msg(MERROR, "wd_fe","Unknown TCB Type");
-      printf("Unknown TCB Type\n");
-      return 0;
-   }
-}
-
 // general write register function
 void TCB::WriteReg(u_int32_t addr, u_int32_t *data)
 {
-   int status;
+   if(fDCB != nullptr) {
+      std::vector<unsigned int> vec(data, data+1);
+      fDCB->WriteUDP(fslot, addr, vec);
 
-   // before than writing we have to perform a byteswap
-   u_int32_t wdata = ((*data&0xff)<<24) | ((*data&0xff00)<<8) | ((*data&0xff0000)>>8) | ((*data&0xff000000)>>24);
-   status = mscb_write_mem(fh, fmscb_addr, fslot, addr, &wdata, sizeof(wdata));
-   // print something only in case of error
-   if (status != 1)
-      printf("Error: status = %d\n", status);
+   } else if( fh!=-1 ){
+      int status;
+
+      // before than writing we have to perform a byteswap
+      u_int32_t wdata = ((*data&0xff)<<24) | ((*data&0xff00)<<8) | ((*data&0xff0000)>>8) | ((*data&0xff000000)>>24);
+      status = mscb_write_mem(fh, fmscb_addr, fslot, addr, &wdata, sizeof(wdata));
+      // print something only in case of error
+      if (status != 1)
+         printf("Error: status = %d\n", status);
+   }
 }
 
 // general read register function
 void TCB::ReadReg(u_int32_t addr, u_int32_t *data)
 {
-   char dbuf[1024];
-   
-   *data = 0;
-   mscb_read_mem(fh, fmscb_addr, fslot, addr, &dbuf, 4);
-   for (int i=0 ; i<4 ; i++)
-      *data |= ((u_int32_t) dbuf[3-i]&0xff)<<(i*8); //"(i*8)" as a byte swap
+   if(fDCB != nullptr) {
+      std::vector<unsigned int> vec = fDCB->ReadUDP(fslot, addr, 1);
+      data[0] = vec[0];
+
+   } else if( fh!=-1 ){
+      char dbuf[1024];
+
+      *data = 0;
+      mscb_read_mem(fh, fmscb_addr, fslot, addr, &dbuf, 4);
+      for (int i=0 ; i<4 ; i++)
+         *data |= ((u_int32_t) dbuf[3-i]&0xff)<<(i*8); //"(i*8)" as a byte swap
+   }
 }
 
 // general read register function
 void TCB::ReadBLT(u_int32_t addr, u_int32_t *data, int nword)
 {
-   char dbuf[1024];
-   
-   mscb_read_mem(fh, fmscb_addr, fslot, addr, &dbuf, nword*4); //4*nword: it is in number of bytes
-   for (int iword=0 ; iword<nword ; iword++)  {
-      data[iword] = 0;
-      for(int ibyte = 0; ibyte<4; ibyte++)
-         data[iword] |= ((u_int32_t) dbuf[(iword*4+3)-ibyte]&0xff)<<(ibyte*8); //"(i*8)" as a byte swap
+   if(fDCB != nullptr) {
+      std::vector<unsigned int> vec = fDCB->ReadUDP(fslot, addr, nword);
+      printf("---- %d word BLT read\n", vec.size());
+      std::copy(vec.begin(), vec.end(), data);
+
+   } else if( fh!=-1 ){
+      char dbuf[1024];
+
+      mscb_read_mem(fh, fmscb_addr, fslot, addr, &dbuf, nword*4); //4*nword: it is in number of bytes
+      for (int iword=0 ; iword<nword ; iword++)  {
+         data[iword] = 0;
+         for(int ibyte = 0; ibyte<4; ibyte++)
+            data[iword] |= ((u_int32_t) dbuf[(iword*4+3)-ibyte]&0xff)<<(ibyte*8); //"(i*8)" as a byte swap
+      }
    }
 }
 
 // general write register function
 void TCB::WriteBLT(u_int32_t addr, u_int32_t *data, int nword)
 {
-   int status;
-   
-   // before than writing we have to perform a byteswap
-   u_int32_t wdata[1024];
+   if(fDCB != nullptr) {
+      std::vector<unsigned int> vec(data, data+nword);
+      printf("---- %d word BLT write\n", vec.size());
+      fDCB->WriteUDP(fslot, addr, vec);
 
-   for(int iWord=0; iWord<(nword&0xFF); iWord++){
-       wdata[iWord] = ((data[iWord]&0xff)<<24) | ((data[iWord]&0xff00)<<8) | ((data[iWord]&0xff0000)>>8) | ((data[iWord]&0xff000000)>>24);
-       //printf("[%3i] %08x %08x\n", iWord, data[iWord], wdata[iWord]);
+   } else if( fh!=-1 ){
+      int status;
+      
+      // before than writing we have to perform a byteswap
+      u_int32_t wdata[1024];
+
+      for(int iWord=0; iWord<(nword&0xFF); iWord++){
+          wdata[iWord] = ((data[iWord]&0xff)<<24) | ((data[iWord]&0xff00)<<8) | ((data[iWord]&0xff0000)>>8) | ((data[iWord]&0xff000000)>>24);
+          //printf("[%3i] %08x %08x\n", iWord, data[iWord], wdata[iWord]);
+      }
+      status = mscb_write_mem(fh, fmscb_addr, fslot, addr, wdata, 4*nword);
+      // print something only in case of error
+      if (status != 1)
+         printf("Error: status = %d\n", status);
    }
-   status = mscb_write_mem(fh, fmscb_addr, fslot, addr, wdata, 4*nword);
-   // print something only in case of error
-   if (status != 1)
-      printf("Error: status = %d\n", status);
 }
 // prescaling values setting
 void TCB::SetPrescaling(u_int32_t *presca)
