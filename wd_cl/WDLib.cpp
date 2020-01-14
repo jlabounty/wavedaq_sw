@@ -1998,6 +1998,7 @@ WDDCB::WDDCB(WDCrate *crate, int slot, std::string name, std::string netname, bo
 // WDBoard derived methods
 void WDDCB::Connect(){
    //TODO: write CrateId into the board 
+   ScanCrate();
 
    //reset stuff
 
