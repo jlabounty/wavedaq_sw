@@ -340,11 +340,7 @@ int main(int argc, char *argv[])
             fscanf(filin,"%x\n",wdata+irow);
          }
          fclose(filin);
-         auto start = std::chrono::system_clock::now();
          TCBBoard.WriteSERDESMem(ichannel,imem,wdata);
-         auto end = std::chrono::system_clock::now();
-         std::chrono::duration<double> elapsed_seconds = end-start;
-         printf("duration %lf sec.\n", elapsed_seconds.count());
       }
       if(option == 18) {
          printf(" opt 18 = Dump SERDES memory ... \n");
@@ -354,11 +350,7 @@ int main(int argc, char *argv[])
          scanf("%d",&ichannel);
          printf(" which memory? (0 = LSB, 1 = MSB) \n");
          scanf("%d",&imem);
-         auto start = std::chrono::system_clock::now();
          TCBBoard.ReadSERDESMem(ichannel,imem,rdata);
-         auto end = std::chrono::system_clock::now();
-         std::chrono::duration<double> elapsed_seconds = end-start;
-         printf("duration %lf sec.\n", elapsed_seconds.count());
          filout = fopen("readserdesram.dat","write");
          for(int irow = 0; irow<MEMDIM; irow++) {
             fprintf(filout,"%08x\n",rdata[irow]);

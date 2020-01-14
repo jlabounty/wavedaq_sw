@@ -7,6 +7,7 @@
 #include "WDBLib.h"
 #include "WDBReg.h"
 #include "TCBLib.h"
+#include "DCBLib.h"
 #include "Properties.h"
 
 class WDBoard;
@@ -14,6 +15,7 @@ class WDCrate;
 class WDSystem;
 class WDWDB;
 class WDTCB;
+class WDDCB;
 
 #ifndef WDLIB_H
 #define WDLIB_H
@@ -189,6 +191,7 @@ class WDSystem {
       void StopRun();
       void PowerOn();
       void PowerOff();
+      void Connect();
       void Configure();
       void SetSerdesTraining(bool state);
       void TrainSerdes();
@@ -306,12 +309,7 @@ class WDWDB : public WDB, public WDBoard{
 
 
       WDWDB(std::string name="WDXXX", std::string netname="WDXXX", bool verbose = false) :  WDB(netname, verbose), WDBoard(name) { };
-      WDWDB(WDCrate *crate, int slot, std::string name="WDXXX", std::string netname="WDXXX", bool verbose = false) : WDB(netname, verbose), WDBoard(crate, slot, name) {
-         //try to connect only if the crate is powered
-         if(crate->IsPowered()){
-            Connect();
-         }
-      };
+      WDWDB(WDCrate *crate, int slot, std::string name="WDXXX", std::string netname="WDXXX", bool verbose = false);
 
       ~WDWDB() { };
 };
@@ -382,16 +380,40 @@ class WDTCB : public TCB, public WDBoard {
       void ConfigureNgenHighThreshold(Property &property);
       void ConfigureNgenLowThreshold(Property &property);
 
-      WDTCB(WDCrate *crate, int slot, std::string name="TCBXXX", int verbose = 0) : TCB(verbose), WDBoard(crate, slot, name) {
-         int hdle = crate->GetMscbHandle();
-         SetMscbHandle(hdle, slot);
-
-         //try to connect only if the crate is powered
-         if(crate->IsPowered()){
-            Connect();
-         }
-      };
+      WDTCB(WDCrate *crate, int slot, std::string name="TCBXXX", int verbose = 0);
       ~WDTCB() { };
+};
+
+// --- WaveDAQ DCB --- wrapper class for DCB
+class WDDCB : public DCB, public WDBoard {
+   
+   public:
+      void Connect();//DCB connection are made in constructor, this only set CrateId and applies resets
+
+      void SetSerdesTraining(bool state);
+      bool IsSerdesTraining();
+      void TrainSerdes(){}
+
+      void Sync(){
+      }
+
+      void GoRun(){
+      }
+
+      void StopRun(){
+      }
+
+      bool IsBusy(){
+         return false;
+      }
+
+      //Configuration handlers
+      void ConfigureProperty(const std::string &name, Property &property);
+      void ConfigurationStarted();
+      void ConfigurationEnded();
+
+      WDDCB(WDCrate *crate, int slot, std::string name="DCBXX", std::string netname="DCBXX", bool verbose = false);
+      ~WDDCB() { };
 };
 #endif
 

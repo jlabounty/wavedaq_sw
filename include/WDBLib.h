@@ -573,6 +573,9 @@ public:
    WDB(std::string name, bool verbose = false);
    WDB(DCB *dcb, int slot, bool verbose = false);
 
+   // setter to add DCB interface to an already constructed WDB 
+   void SetDcbInterface(DCB* dcb, int slot);
+
    const unsigned int cRequiredRegLayoutCompatLevel2F = 8;
    const unsigned int cRequiredFwCompatLevel2F = 4;
    const unsigned int cRequiredRegLayoutCompatLevel2G = 9;

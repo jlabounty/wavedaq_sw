@@ -54,7 +54,6 @@ void TCB::ReadBLT(u_int32_t addr, u_int32_t *data, int nword)
 {
    if(fDCB != nullptr) {
       std::vector<unsigned int> vec = fDCB->ReadUDP(fslot, addr, nword);
-      printf("---- %d word BLT read\n", vec.size());
       std::copy(vec.begin(), vec.end(), data);
 
    } else if( fh!=-1 ){
@@ -74,7 +73,6 @@ void TCB::WriteBLT(u_int32_t addr, u_int32_t *data, int nword)
 {
    if(fDCB != nullptr) {
       std::vector<unsigned int> vec(data, data+nword);
-      printf("---- %d word BLT write\n", vec.size());
       fDCB->WriteUDP(fslot, addr, vec);
 
    } else if( fh!=-1 ){

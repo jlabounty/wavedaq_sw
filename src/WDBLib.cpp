@@ -106,6 +106,14 @@ WDB::WDB(DCB *dcb, int slot, bool verbose) : WDBREG() {
 
 //--------------------------------------------------------------------
 
+void WDB::SetDcbInterface(DCB *dcb, int slot) {
+   mWDBAddr = dcb->GetName() + ":" + std::to_string(slot);
+   mDCB = dcb;
+   mSlot = slot;
+}
+
+//--------------------------------------------------------------------
+
 void WDB::SendUDP(std::string str, unsigned char *ethAddr) {
    std::string result;
    result = SendReceiveUDP(str, ethAddr);
