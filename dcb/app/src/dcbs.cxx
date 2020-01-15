@@ -128,13 +128,18 @@ int main(int argc, char *argv[]) {
       printf("\nBoards found:\n");
       printf("-------------\n");
    }
+   int n_boards = 0;
    for (int i = 0; i < 18; i++) {
       int status = get_slot_board_info(i, &board[i].type_id, &board[i].rev_id);
       if (verbose)
-         if (status && board[i].type_id < 3)
+         if (status && board[i].type_id < 3) {
             printf("Slot %2d: Found %s, Revision %c\n", i, board_type_name[board[i].type_id], 'A' + board[i].rev_id);
+            n_boards++;
+         }
    }
    if (verbose) {
+      if (n_boards == 0)
+         printf("No boards found\n");
       printf("\n");
       set_dbg_level(DBG_LEVEL_SPAM);
    }
