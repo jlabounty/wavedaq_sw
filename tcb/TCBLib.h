@@ -5,14 +5,15 @@
 //  Created by Luca Galli on 12/12/2015
 //
 
-#define RRUN               0x00       // run control
-#define RBUSDLY            0x01       // trigger bus delay
-#define RNTRG              0x02       // trigger enable bits
-#define RALGSEL            0x03       // algorithm select on TCB1/2_0
-#define RPLLRES            0x04       // Reset PLLs
-#define RUDPHEA            0x05       // UDP Header info register
-#define PRESCADC           0x06       // ADC readout prescaling
-#define RSYNCWFM           0x07       // SYNC Waveform from serdes
+#define RHW                0x00       // hardware version information required by WaveDAQ
+#define RRUN               0x01       // run control
+#define RBUSDLY            0x02       // trigger bus delay
+#define RNTRG              0x03       // trigger enable bits
+#define RALGSEL            0x04       // algorithm select on TCB1/2_0
+#define RPLLRES            0x05       // Reset PLLs
+#define RUDPHEA            0x06       // UDP Header info register
+#define PRESCADC           0x07       // ADC readout prescaling
+#define RSYNCWFM           0x08       // SYNC Waveform from serdes
 #define USR_ACCESS         0x0F       // FW compilaiton date
 #define RENA               0x20       // trigger enable (first address)
 #define RTRIPATT           0x30       // trigger pattern (first address)
