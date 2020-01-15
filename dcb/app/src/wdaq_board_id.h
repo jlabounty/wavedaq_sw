@@ -19,3 +19,11 @@
 #define TCB_BRD_REV_ID_1    1
 #define TCB_BRD_REV_ID_2    2
 #define TCB_BRD_REV_ID_3    3
+
+#define BRD_TYPE_NAME const char *brd_type_name[] = { \
+  "NONE0", \
+  "NONE1", \
+  "WDB",   \
+  "DCB",   \
+  "TCB"    \
+}
