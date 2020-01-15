@@ -53,7 +53,11 @@ add_library(wdb
    src/DCBLib.cpp
    src/averager.cpp)
 
-target_include_directories(wdb PRIVATE wds/src include mxml)
+target_include_directories(wdb PUBLIC 
+   dcb/app/src/
+   wds/src 
+   include 
+   mxml)
 
 add_executable(wds
    wds/src/mongoose.c

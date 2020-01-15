@@ -21,7 +21,12 @@ add_library(serdestestlib
    ../src/DCBLib.cpp
    ../src/averager.cpp)
 
-target_include_directories(serdestestlib PRIVATE ../include ../mxml ../tcb $ENV{MSCBSYS}/include)
+target_include_directories(serdestestlib PUBLIC 
+   ../include 
+   ../mxml 
+   ../tcb 
+   ../dcb/app/src/
+   $ENV{MSCBSYS}/include)
 
 add_executable(serdestest
    ../mxml/mxml.cxx
