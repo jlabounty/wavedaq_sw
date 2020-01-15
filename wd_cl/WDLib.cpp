@@ -6,6 +6,7 @@
 void WDBoard::AddProperty(std::string name, std::string val){
    fProperties[name].SetStringValue(val);
 }
+
 Property& WDBoard::GetProperty(std::string name){
    try{
       return fProperties.at(name);
@@ -27,10 +28,11 @@ Property& WDBoard::GetProperty(std::string name){
    }
 
 }
-// Getters
+
 void WDBoard::SetProperties(const PropertyGroup &properties){
    fProperties = properties;
 }
+
 // Configure
 void WDBoard::Configure(){
    //printf("configuring board %s\n", GetBoardName().c_str());
@@ -261,6 +263,34 @@ void WDSystem::CreateFromXml(std::string filepath){
                //parse remaining tags as properties
                CreatePropertiesFromXml(b, board_xml);
             }
+            else if(board_node_name == "DCB"){
+               //create a new board
+               
+               char* slotstring = mxml_get_attribute(board_xml, "Slot");
+               char* namestring = mxml_get_attribute(board_xml, "Name");
+               if(slotstring == NULL || namestring==NULL) {
+                  printf("error parsing XML: DCB needs a Slot and a Name attributes\n");
+                  return;
+               }
+
+               //try to get a Node (ip), if not given use Name attribute
+               char* mscbnodestring = mxml_get_attribute(board_xml, "MscbNode");
+               if(mscbnodestring == NULL) {
+                  printf("warning parsing XML: DCB Name used as MscbNode name\n");
+                  mscbnodestring = namestring;
+               }
+
+               WDDCB *b = new WDDCB(c, atoi(slotstring), std::string(namestring),  std::string(mscbnodestring));
+
+               //board property group is optional
+               char* groupstring = mxml_get_attribute(board_xml, "Group");
+               if(groupstring!=NULL){
+                  b->SetGroup(groupstring);
+               }
+
+               //parse remaining tags as properties
+               CreatePropertiesFromXml(b, board_xml);
+            }
             else if(board_node_name == "Trigger") triggerFlag = true;
          }
 
@@ -310,6 +340,19 @@ void WDSystem::CreateFromXml(std::string filepath){
    mxml_free_tree(root_xml);
 }
 
+//Connect to all board in the system
+void WDSystem::Connect(){
+   for(auto &c : fCrate){
+      printf("connecting to crate %s\n", c->GetMscbName().c_str());
+      for(int i=0; i<18; i++){
+         if(c->HasBoardIn(i)) 
+            c->GetBoardAt(i)->Connect();
+      }
+   }
+
+}
+
+
 //Configure all board in the system
 void WDSystem::Configure(){
    for(auto &c : fCrate){
@@ -329,13 +372,13 @@ void WDSystem::PowerOn(){
    for(auto &c : fCrate){
       c->PowerOn();
    }
-   std::this_thread::sleep_for(std::chrono::seconds(10));
+   /*std::this_thread::sleep_for(std::chrono::seconds(10));
    for(auto &c : fCrate){
       for(auto &b : *c){
          if(b)
             b->Connect();
       }
-   }
+   }*/
    
 }
 
@@ -545,6 +588,21 @@ WDPosition &WDSystem::FindBoard(std::string name){
 }
 
 // --- WDWDB ---
+// Constructor
+WDWDB::WDWDB(WDCrate *crate, int slot, std::string name, std::string netname, bool verbose) : WDB(netname, verbose), WDBoard(crate, slot, name){
+   if(crate->HasBoardIn(16)){
+      //Get board in slot 16 (DCB slot)
+      WDBoard *b = crate->GetBoardAt(16);
+
+      if(dynamic_cast<WDDCB*>(b)!=nullptr){
+         //crate has a DCB in slot 16, switch to it
+         SetDcbInterface(static_cast<WDDCB*>(b), slot);
+      }
+   } else {
+      // no DCB (yet?)
+   }
+}
+
 // WDBoard derived methods
 
 //connect to the board
@@ -1075,10 +1133,31 @@ void WDWDB::SetInCrate(){
 }
 
 // --- WDTCB ---
+// Constructor
+WDTCB::WDTCB(WDCrate *crate, int slot, std::string name, int verbose) : TCB(verbose), WDBoard(crate, slot, name){
+
+   //Get Mscb handle from crate
+   int hdle = crate->GetMscbHandle();
+   SetMscbHandle(hdle, slot);
+
+   if(crate->HasBoardIn(16)){
+      //Get board in slot 16 (DCB slot)
+      WDBoard *b = crate->GetBoardAt(16);
+
+      if(dynamic_cast<WDDCB*>(b)!=nullptr){
+         //crate has a DCB in slot 16, switch to it
+         SetDcbInterface(static_cast<WDDCB*>(b), slot);
+      }
+   } else {
+      // no DCB (yet?)
+   }
+}
+
 // WDBoard derived methods
 void WDTCB::Connect(){
    SetIDCode();
    SetNTRG();
+   fverbose= true;
 
    //TODO: write CrateId and SlotId into the board 
 
@@ -1880,4 +1959,107 @@ void WDTCB::ConfigureNgenLowThreshold(Property &property){
    ngenlow = property.GetUHex();
 
    SetNGENLowThreshold(&ngenlow);
+}
+
+// --- WDDCB ---
+// constructor
+WDDCB::WDDCB(WDCrate *crate, int slot, std::string name, std::string netname, bool verbose) : DCB(netname, verbose), WDBoard(crate, slot, name) {
+   //connect to the board, if crate is on 
+   if(crate->IsPowered()){
+      DCB::Connect();
+      ReceiveRegisters();
+   } else 
+      printf("WARNING, cannot connect to %s because crate %s is off\n", name.c_str(), crate->GetCrateName().c_str());
+
+   //if DCB is in slot 16
+   if(slot==16){
+
+      //loop on all boards in the crate
+      for(int i=0; i<18; i++){
+         if(crate->HasBoardIn(i)){
+            WDBoard* b = crate->GetBoardAt(i);
+
+            //switch WDB and TCB to use DCB for readout
+            if(dynamic_cast<WDWDB*>(b) != nullptr){
+               static_cast<WDWDB*>(b)->SetDcbInterface(this, i);
+
+            } else if(dynamic_cast<WDTCB*>(b) != nullptr){
+               static_cast<WDTCB*>(b)->SetDcbInterface(this, i);
+
+            } else {
+               //unsupported board (DCB or other)
+            }
+         }
+      }
+
+      //then enable clock distributor for all slots
+      SetDistributorClkOutEn(0xFFFFC);
+   }
+
+}
+
+// WDBoard derived methods
+void WDDCB::Connect(){
+   //Scan Crate to get actual board map 
+   ScanCrate();
+
+   //retrieve crate pointer
+   WDCrate *crate = GetCrate();
+
+   //Set SlotId
+   SetSlotId(GetSlot());
+
+   long crateNumber = crate->GetCrateNumber();
+   if(crateNumber >= 0){
+      //Set CrateId
+      SetCrateId(crateNumber);
+   } else {
+      //WDCrate not in a WDSystem
+      //could work if only a WDCrate is used
+      printf("Board %s in a crate not belonging to any system, cannot set CrateId\n", GetBoardName().c_str());
+   }
+
+   //build crate slot mask
+   unsigned int clkmask = 0x00004; //DCB FPGA
+   for(int i=0; i<16; i++)
+      if(crate->HasBoardIn(i))
+         clkmask |= (0x10<<i);
+   if(crate->HasBoardIn(17))
+      clkmask |= 0x8;
+
+   //printf("setting clock mask to %x\n", clkmask);
+   SetDistributorClkOutEn(clkmask);
+
+
+   //reset any stuff
+
+   printf("DCB number %d\n", GetSerialNumber());
+}
+
+void WDDCB::SetSerdesTraining(bool state){
+}
+
+bool WDDCB::IsSerdesTraining(){
+   return false;
+}
+
+void WDDCB::ConfigureProperty(const std::string &name, Property &property) { 
+   if(name=="SyncDelay"){
+      ConfigureSyncDelay(property);
+   } else {
+      printf("Unknown property %s in WDDCB\n", name.c_str());
+   }
+};
+
+void WDDCB::ConfigurationStarted(){
+}
+
+void WDDCB::ConfigurationEnded(){
+}
+
+void WDDCB::ConfigureSyncDelay(Property &property){
+   unsigned int syncdelay;
+   syncdelay = property.GetUHex();
+
+   SetSyncDelay(syncdelay);
 }

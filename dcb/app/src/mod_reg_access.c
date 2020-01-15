@@ -23,6 +23,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include "drv_qspi_flash.h"
+#include "flash_memory_maps.h"
 
 #ifndef LINUX_COMPILE
 #include "dcb_flash_memory_map.h"
@@ -237,6 +238,10 @@ int reg_read_cmd(int argc, char **argv)
   {
     unsigned int val;
     unsigned char flash_reg[4];
+#ifdef LINUX_COMPILE
+    qspi_flash_partition flash_partition;
+    flash_partition_type *mtd_ptr;
+#endif
 
     if (sel == REGDIFF_CMP_INITIAL)
     {
@@ -245,7 +250,16 @@ int reg_read_cmd(int argc, char **argv)
     else if (sel == REGDIFF_CMP_STORED)
     {
 #ifdef LINUX_COMPILE
-      qspi_flash_read(MTD_QSPI_FLASH_REGCONTENT, reg, sizeof(flash_reg), flash_reg);
+      if( !(mtd_ptr = get_flash_partition(get_flash_mem_map(BRD_TYPE_ID_DCB, DCB_BRD_REV_ID_B), "qspi-regcontent")) )
+      {
+        if(DBG_ERR) xfs_printf("Error: flash partitions for register content not found");
+      }
+      if( !(qspi_flash_init(&flash_partition, mtd_ptr->mtd_partition)) )
+      {
+        if(DBG_ERR) printf("Error: register value flash partition accesse failed\n");
+        return 0;
+      }
+      qspi_flash_read(&flash_partition, reg, sizeof(flash_reg), flash_reg);
 #else
       qspi_flash_read(SYSPTR(spi_flash), QSPI_FLASH_REG_CONTENTS_ADDR+reg, 4, QSFL_QUAD_READ_CMD, flash_reg);
 #endif

@@ -89,6 +89,7 @@ int main(int argc, char *argv[])
 
    sys = new WDSystem();
    sys->CreateFromXml(std::string(argv[1]));
+   sys->Connect();
 
    /* main loop on the options */
    do {

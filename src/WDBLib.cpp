@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <time.h>
 #include <fcntl.h>
+#include <net/if.h>
 
 #ifdef __linux__
 #include <linux/sockios.h>
@@ -39,6 +40,7 @@
 #ifdef __APPLE__
 #include <net/if_dl.h>
 #include <pthread.h>
+
 #endif
 
 #include "WDBLib.h"
@@ -52,7 +54,6 @@
 #define WD2_UDP_PROTOCOL_VERSION  7
 
 int WP::gDataSocket = 0;
-int WP::gServerPort = 0;
 int WDB::gASCIISocket = 0;
 int WDB::gBinSocket = 0;
 
@@ -76,6 +77,7 @@ T access_as(U *p) {
 
 WDB::WDB(std::string name, bool verbose) : WDBREG() {
    mWDBName = name;
+   mWDBAddr = name;
    mDCB = nullptr;
    mSlot = 0;
    mPrompt = "";
@@ -85,22 +87,13 @@ WDB::WDB(std::string name, bool verbose) : WDBREG() {
    mSendBlocked = false;
    mReceiveTimeoutMs = cDefaultReceiveTimeoutMs;
    mTimingReferenceSignal = cTimingReferenceOff;
-
-   if (mDemoMode) {
-      for (auto i = 0; i < GetNrOfCtrlRegs(); i++)
-         this->creg[i] = 0;
-      for (auto i = 0; i < GetNrOfStatRegs(); i++)
-         this->sreg[i] = 0;
-      // set some meaningful values in demo mode to make wds happy
-      this->sreg[(GetDrsSampleFreqLoc() & 0x0FFF) / 4] = 5120;
-      this->sreg[(GetAdcSampleFreqLoc() & 0x0FFF) / 4] = 80;
-   }
 }
 
 //--------------------------------------------------------------------
 
 WDB::WDB(DCB *dcb, int slot, bool verbose) : WDBREG() {
-   mWDBName = dcb->GetName() + ":" + std::to_string(slot);
+   mWDBName = "wdb";
+   mWDBAddr = dcb->GetName() + ":" + std::to_string(slot);
    mDCB = dcb;
    mSlot = slot;
    mPrompt = "";
@@ -113,14 +106,22 @@ WDB::WDB(DCB *dcb, int slot, bool verbose) : WDBREG() {
 
 //--------------------------------------------------------------------
 
-void WDB::SendUDP(std::string str) {
-   std::string result;
-   result = SendReceiveUDP(str);
+void WDB::SetDcbInterface(DCB *dcb, int slot) {
+   mWDBAddr = dcb->GetName() + ":" + std::to_string(slot);
+   mDCB = dcb;
+   mSlot = slot;
 }
 
 //--------------------------------------------------------------------
 
-std::string WDB::SendReceiveUDP(std::string str) {
+void WDB::SendUDP(std::string str, unsigned char *ethAddr) {
+   std::string result;
+   result = SendReceiveUDP(str, ethAddr);
+}
+
+//--------------------------------------------------------------------
+
+std::string WDB::SendReceiveUDP(std::string str, unsigned char *ethAddr) {
    size_t i;
    fd_set readfds;
    struct timeval timeout;
@@ -129,7 +130,12 @@ std::string WDB::SendReceiveUDP(std::string str) {
    char rx_buffer[1600];
    std::string result;
 
-   std::memcpy(&client_addr, mEthAddrAscii, sizeof(client_addr));
+   if (ethAddr)
+      std::memcpy(&client_addr, ethAddr, sizeof(client_addr));
+   else if (mDCB) {
+      return mDCB->SendReceiveUDP(std::to_string(mSlot) + " " + str);
+   } else
+      std::memcpy(&client_addr, mEthAddrAscii, sizeof(client_addr));
 
    if (str.back() != '\n')
       str += '\n';
@@ -274,7 +280,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data) {
       writeBuf.push_back((d >> 0) & 0xFF);
    }
 
-   auto startTime = std::chrono::high_resolution_clock::now();
+   auto startTime = WP::usStart();
 
    // retry max ten times
    for (retry = 0; retry < 10; retry++) {
@@ -355,9 +361,8 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data) {
    }
 
    if (this->mVerbose && retry > 0) {
-      auto elapsed = std::chrono::high_resolution_clock::now() - startTime;
       std::cout << "Communication to " << mWDBName << " took " <<
-                std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() <<
+                WP::usSince(startTime)/1000.0 <<
                 " ms" << std::endl;
 
    }
@@ -512,6 +517,21 @@ void WDB::Connect() {
    }
 #endif
 
+   if (mDemoMode) {
+      SetVersion(8);
+      this->sreg.resize(GetNrOfStatRegs());
+      this->creg.resize(GetNrOfCtrlRegs());
+
+      for (auto i = 0; i < GetNrOfCtrlRegs(); i++)
+         this->creg[i] = 0;
+      for (auto i = 0; i < GetNrOfStatRegs(); i++)
+         this->sreg[i] = 0;
+      // set some meaningful values in demo mode to make wds happy
+      this->sreg[(GetDrsSampleFreqLoc() & 0x0FFF) / 4] = 5120;
+      this->sreg[(GetAdcSampleFreqLoc() & 0x0FFF) / 4] = 80;
+      return;
+   }
+
    if (!mDCB ) {
       // create UDP socket for ASCII command interpreter
       if (gASCIISocket == 0)
@@ -524,10 +544,11 @@ void WDB::Connect() {
       assert(gBinSocket);
 
       // retrieve Ethernet address of board
-      phe = gethostbyname(mWDBName.c_str());
+      phe = gethostbyname(mWDBAddr.c_str());
       if (phe == NULL)
-         throw std::runtime_error(std::string("Cannot resolve host name ") + mWDBName + ".");
+         throw std::runtime_error(std::string("Cannot resolve host name ") + mWDBAddr + ".");
 
+      std::memset((char *) &client_addr, 0, sizeof(client_addr));
       std::memcpy((char *) &client_addr.sin_addr, phe->h_addr, phe->h_length);
       client_addr.sin_family = AF_INET;
       client_addr.sin_port = htons(WD2_CMD_PORT_ASCII);
@@ -540,11 +561,26 @@ void WDB::Connect() {
       try {
          WDB::SendUDP("");
       } catch (...) {
-         throw std::runtime_error(std::string("Cannot connect to board ") + mWDBName + ".");
+         throw std::runtime_error(std::string("Cannot connect to board ") + mWDBAddr + ".");
       }
 
       // set dbglevel none
       SendUDP("dbglvl none");
+   } else {
+      // create UDP socket for ASCII command interpreter (needed for "cfgdst")
+      if (gASCIISocket == 0)
+         gASCIISocket = socket(AF_INET, SOCK_DGRAM, 0);
+      assert(gASCIISocket);
+
+      // check if board is alive
+      try {
+         auto result = ReadUDP(0x0000, 1);
+         auto magic  = (result[0] & 0xFF000000) >> 24;
+         if (magic != 0xAC)
+            throw std::runtime_error(std::string("Cannot connect to board ") + mWDBAddr + ".");
+      } catch (...) {
+         throw std::runtime_error(std::string("Cannot connect to board ") + mWDBAddr + ".");
+      }
    }
 
    // check register layout
@@ -555,22 +591,19 @@ void WDB::Connect() {
    this->creg.resize(GetNrOfCtrlRegs());
 
    // check firmware compatibility level
-   ReceiveStatusRegister(GetBoardRevisionLoc());
-   ReceiveStatusRegister(GetFwCompatLevelLoc());
-   ReceiveStatusRegister(GetRegLayoutCompLevelLoc());
-   ReceiveStatusRegister(GetProtocolVersionLoc());
+   ReceiveStatusRegisters(0x0000, 10);
 
    if (GetBoardRevision() + 'A' == 'E' || GetBoardRevision() + 'A' == 'F') {
       if (GetFwCompatLevel() < cRequiredFwCompatLevel2F) {
          std::string str("Board ");
-         str += mWDBName + " has incompatible firmware, please upgrade (Board compatibility level: " +
+         str += mWDBAddr + " has incompatible firmware, please upgrade (Board compatibility level: " +
                 std::to_string(GetFwCompatLevel()) + ", Software compatibility level: " +
                 std::to_string(cRequiredFwCompatLevel2F) + ")";
          throw std::runtime_error(str);
       }
       if (cRequiredFwCompatLevel2F < GetFwCompatLevel()) {
          std::string str("Board ");
-         str += mWDBName +
+         str += mWDBAddr +
                 " has newer incompatible firmware, please update WD library (Firmware compatibility level: " +
                 std::to_string(GetFwCompatLevel()) + ", Software compatibility level: " +
                 std::to_string(cRequiredFwCompatLevel2F) + ")";
@@ -579,14 +612,14 @@ void WDB::Connect() {
       // check register layout compatibility level
       if (GetRegLayoutCompLevel() < cRequiredRegLayoutCompatLevel2F) {
          std::string str("Board ");
-         str += mWDBName + " has incompatible register layout, please upgrade (Board compatibility level: " +
+         str += mWDBAddr + " has incompatible register layout, please upgrade (Board compatibility level: " +
                 std::to_string(GetRegLayoutCompLevel()) + ", Software compatibility level: " +
                 std::to_string(cRequiredRegLayoutCompatLevel2F) + ")";
          throw std::runtime_error(str);
       }
       if (cRequiredRegLayoutCompatLevel2F < GetRegLayoutCompLevel()) {
          std::string str("Board ");
-         str += mWDBName + " has newer register layout, please update WD library (Board compatibility level: " +
+         str += mWDBAddr + " has newer register layout, please update WD library (Board compatibility level: " +
                 std::to_string(GetRegLayoutCompLevel()) + ", Software compatibility level: " +
                 std::to_string(cRequiredRegLayoutCompatLevel2F) + ")";
          throw std::runtime_error(str);
@@ -596,14 +629,14 @@ void WDB::Connect() {
    if (GetBoardRevision() + 'A' == 'G') {
       if (GetFwCompatLevel() < cRequiredFwCompatLevel2G) {
          std::string str("Board ");
-         str += mWDBName + " has incompatible firmware, please upgrade (Board compatibility level: " +
+         str += mWDBAddr + " has incompatible firmware, please upgrade (Board compatibility level: " +
                 std::to_string(GetFwCompatLevel()) + ", Software compatibility level: " +
                 std::to_string(cRequiredFwCompatLevel2G) + ")";
          throw std::runtime_error(str);
       }
       if (cRequiredFwCompatLevel2G < GetFwCompatLevel()) {
          std::string str("Board ");
-         str += mWDBName +
+         str += mWDBAddr +
                 " has newer incompatible firmware, please update WD library (Firmware compatibility level: " +
                 std::to_string(GetFwCompatLevel()) + ", Software compatibility level: " +
                 std::to_string(cRequiredFwCompatLevel2G) + ")";
@@ -612,14 +645,14 @@ void WDB::Connect() {
       // check register layout compatibility level
       if (GetRegLayoutCompLevel() < cRequiredRegLayoutCompatLevel2G) {
          std::string str("Board ");
-         str += mWDBName + " has incompatible register layout, please upgrade (Board compatibility level: " +
+         str += mWDBAddr + " has incompatible register layout, please upgrade (Board compatibility level: " +
                 std::to_string(GetRegLayoutCompLevel()) + ", Software compatibility level: " +
                 std::to_string(cRequiredRegLayoutCompatLevel2G) + ")";
          throw std::runtime_error(str);
       }
       if (cRequiredRegLayoutCompatLevel2G < GetRegLayoutCompLevel()) {
          std::string str("Board ");
-         str += mWDBName + " has newer register layout, please update WD library (Board compatibility level: " +
+         str += mWDBAddr + " has newer register layout, please update WD library (Board compatibility level: " +
                 std::to_string(GetRegLayoutCompLevel()) + ", Software compatibility level: " +
                 std::to_string(cRequiredRegLayoutCompatLevel2G) + ")";
          throw std::runtime_error(str);
@@ -628,18 +661,23 @@ void WDB::Connect() {
 
    if (GetProtocolVersion() > WD2_UDP_PROTOCOL_VERSION) {
       std::string str("Board ");
-      str += mWDBName + " has protocol version " + std::to_string(GetProtocolVersion()) +
+      str += mWDBAddr + " has protocol version " + std::to_string(GetProtocolVersion()) +
              ", WDBLib library has version " + std::to_string(WD2_UDP_PROTOCOL_VERSION) +
              ". Please update WDBLib library.";
       throw std::runtime_error(str);
    }
    if (GetProtocolVersion() < WD2_UDP_PROTOCOL_VERSION) {
       std::string str("Board ");
-      str += mWDBName + " has protocol version " + std::to_string(GetProtocolVersion()) +
+      str += mWDBAddr + " has protocol version " + std::to_string(GetProtocolVersion()) +
              ", WDBLib library has version " + std::to_string(WD2_UDP_PROTOCOL_VERSION) +
              ". Please upgrade WDB firmware.";
       throw std::runtime_error(str);
    }
+
+   // retrieve name from serial number
+   char str[32];
+   sprintf(str, "wd%03d", GetSerialNumber());
+   mWDBName = std::string(str);
 }
 
 //--------------------------------------------------------------------
@@ -648,8 +686,28 @@ void WDB::SetDestinationPort(int port) {
    if (mDemoMode)
       return;
 
-   // set destinantion port in WD board, MAC and IP is used automaticlly form UDP packet
-   SendUDP(std::string("cfgdst ") + std::to_string(port));
+   if (mDCB) {
+      unsigned char ethAddr[16];
+      struct sockaddr_in client_addr;
+      struct hostent *phe;
+
+      // retrieve Ethernet address of board
+      phe = gethostbyname(mWDBName.c_str());
+      if (phe == NULL)
+         throw std::runtime_error(std::string("Cannot resolve host name ") + mWDBAddr + ".");
+
+      std::memset((char *) &client_addr, 0, sizeof(client_addr));
+      std::memcpy((char *) &client_addr.sin_addr, phe->h_addr, phe->h_length);
+      client_addr.sin_family = AF_INET;
+      client_addr.sin_port = htons(WD2_CMD_PORT_ASCII);
+      std::memcpy(ethAddr, &client_addr, sizeof(client_addr));
+
+      // set destination port in WD board, MAC and IP is used automatically form UDP packet
+      SendUDP(std::string("cfgdst ") + std::to_string(port), ethAddr);
+
+   } else
+      // set destination port in WD board, MAC and IP is used automatically form UDP packet
+      SendUDP(std::string("cfgdst ") + std::to_string(port));
 }
 
 //--------------------------------------------------------------------
@@ -801,10 +859,11 @@ void WDB::SendControlRegisters() {
 //-- Status registers ------------------------------------------------
 
 void WDB::PrintVersion() {
-   std::cout << GetFwBuild() << std::endl;
-   std::cout << GetHwVersion() << std::endl;
-   std::cout << "Protocol version:    " << GetProtocolVersion() << std::endl;
+   std::cout << "Name:                " << GetName() << std::endl;
    std::cout << "Serial number:       " << GetSerialNumber() << std::endl;
+   std::cout << "Protocol version:    " << GetProtocolVersion() << std::endl;
+   std::cout << GetHwVersion() << std::endl;
+   std::cout << GetFwBuild() << std::endl;
 }
 
 unsigned int WDB::bcd2dec(const unsigned int bcd) {
@@ -1621,12 +1680,10 @@ void WDB::SetTriggerDelayNs(unsigned int ns) {
 
 void WDB::TriggerSoftEvent() {
    SetDaqSingle(true);  // start DRS domino wave
-   SetDaqSingle(false);
 
    sleep_ms(mTriggerHoldoff);
 
    SetDaqSoftTrigger(true);
-   SetDaqSoftTrigger(false);
 }
 
 //--------------------------------------------------------------------
@@ -1898,10 +1955,11 @@ WP::WP(std::vector<WDB *> w, int verbose, std::string logfile, bool demo) {
       }
       auto size = sizeof(server_addr);
       getsockname(WP::gDataSocket, (struct sockaddr *) &server_addr, (socklen_t *) &size);
-      WP::gServerPort = ntohs(server_addr.sin_port);
+      WP::mServerPort = ntohs(server_addr.sin_port);
 
-      if (this->mVerbose)
-         std::cout << std::endl << "Listening on data port " << WP::gServerPort << "." << std::endl;
+      if (this->mVerbose) {
+         std::cout << std::endl << "Listening on PORT " << WP::mServerPort << std::endl;
+      }
    }
 
    // allocated event buffer and requests for all WDB
@@ -1937,7 +1995,14 @@ void WP::RequestSingleBoard(WDB *b) {
    // without mutex since we only change it when the board configuration changes.
 
    bool boardEnable = RequestTypes(b);
-   mEventRequest[b->GetSerialNumber()]->mBoardRequested = boardEnable;
+
+   for (auto &er: mEventRequest) {
+      if (er.first == b->GetSerialNumber())
+         er.second->mBoardRequested = boardEnable;
+      else
+         er.second->mBoardRequested = false;
+   }
+
    if (mVerbose >= 3)
       printf("Board %d is %s\n", b->GetSerialNumber(), (boardEnable) ? "enabled" : "disabled");
 }
@@ -2032,7 +2097,7 @@ bool WP::GetLastEvent(int timeout, std::vector<WDEvent *> event) {
       }
    }
 
-   auto startTime = std::chrono::high_resolution_clock::now();
+   auto startTime = usStart();
 
    {
       std::lock_guard<std::mutex> lock(mEventAccessMutex);
@@ -2241,7 +2306,7 @@ int WP::ReceiveWfPacket() {
    }
 
    if (mPacketsReceived == 0)
-      mEventStartTime = std::chrono::high_resolution_clock::now();
+      mEventStartTime = usStart();
 
    mPacketsReceived++;
 
@@ -2313,7 +2378,7 @@ int WP::ReceiveWfPacket() {
 
       StartNewEvent();
       mPacketsReceived = 1;
-      mEventStartTime = std::chrono::high_resolution_clock::now();
+      mEventStartTime = usStart();
       mCurrentEvent = -1;
    }
 
@@ -3123,6 +3188,11 @@ void WP::SaveWaveforms() {
 }
 
 //--------------------------------------------------------------------
+
+std::chrono::time_point<std::chrono::high_resolution_clock> WP::usStart()
+{
+   return std::chrono::high_resolution_clock::now();
+}
 
 unsigned int WP::usSince(std::chrono::time_point<std::chrono::high_resolution_clock> start) {
    auto elapsed = std::chrono::high_resolution_clock::now() - start;

@@ -50,27 +50,38 @@ void MemoryRewind(int ich, u_int32_t last, u_int32_t *mem, u_int32_t *outmem) {
 
 int main(int argc, char *argv[])
 {
-   int handle,option;
+   int option;
+   int handle = -1;
+   DCB* DCBBoard = nullptr;
    char opline[256];
    u_int32_t data, scanfdata;
    u_int32_t trgtype, tpattern;
    FILE *filin, *filout, *filpresca, *filtrgdly;
    u_int32_t presca[128], counters[128], trgdly[128];
    //  clock_t t_before, t_after;
-   if(argc != 3) {
-      printf("Please indicate the mscb connection ID and node...\n");
+   if(argc < 2) {
+      printf("Please indicate the mscb connection ID and (optionally) the slot...\n");
       return 0;
    }
 
    printf("interfacing with TCB_X_0 at %s:%s slot 17....\n", argv[1], argv[2]);
 
-   // open mscb connection
-   handle = mscb_init(argv[1], 0, "", 0);
    // create TCB Board
+   TCB TCBBoard;
 
-   TCB TCBBoard(argv[1],atoi(argv[2]),17);
-   //  TCBBoard.fh = mscb_init(TCBBoard.fmscb_device, 0, "", 0);
-   TCBBoard.fh = mscb_init(TCBBoard.fmscb_device, 0, "", 0);
+   if(strncmp(argv[1], "dcb", 3)==0 || strncmp(argv[1], "DCB", 3)==0){
+      printf("using DCB interface!\n");
+      std::string s(argv[1]);
+      DCBBoard = new DCB(s);
+      DCBBoard->Connect();
+      TCBBoard.SetDcbInterface(DCBBoard, atoi(argv[2]));
+   } else {
+      // open mscb connection
+      handle = mscb_init(argv[1], 0, "", 0);
+      TCBBoard.SetMscbHandle(handle, atoi(argv[2]));
+   }
+
+
    TCBBoard.SetIDCode();
    TCBBoard.SetNTRG();
    TCBBoard.fverbose=1;
@@ -199,23 +210,7 @@ int main(int argc, char *argv[])
       //
       if(option == 8) {
          printf(" opt = 8 : configuring board ... \n");
-         TCB_SETTINGS t;
-
-         //temporarly hardcoded
-         t.trgindly = 0;
-         t.syncindly = 0;
-         t.sprindly = 0;
-         t.trgoutdly = 0;
-         t.syncoutdly = 0;
-         t.sproutdly = 0;
-         /*for(int iTRG =0; iTRG<TCBBoard.fntrg; iTRG++){
-            t.triggerenable[iTRG] = 0;
-            t.prescaling[iTRG] = 1;
-         }*/
-         t.serdesmask = 0x000FFFFF;
-         t.algsel = 0;
-
-         TCBBoard.InitBoard(&t, (TCBBoard.GetIDCode()>>12));
+         printf(" not supported anymore!!!\n");
       }
       if(option ==  9) {
          printf(" opt = 9 : Get TotalTime ... \n");
@@ -272,16 +267,35 @@ int main(int argc, char *argv[])
         int crate,slot;
         char cratestring[256];
         printf(" opt = 15 : goto board, give crate number and slot ... \n");
-        printf("Crate number?\n");
-        scanf("%d",&crate);
-        sprintf(cratestring,"mscb%d",crate);
-        printf("Slot?\n");
-        scanf("%d",&slot);
-        //close current mscb connection and create a new one
-        mscb_exit(TCBBoard.fh);
-        handle = mscb_init(cratestring, 0, "", 0);
-        strlcpy(TCBBoard.fmscb_device, cratestring, sizeof(TCBBoard.fmscb_device));
-        TCBBoard.fslot = slot;
+        
+        if(handle != -1){
+           printf("Crate number?\n");
+           scanf("%d",&crate);
+           sprintf(cratestring,"mscb%d",crate);
+           printf("Slot?\n");
+           scanf("%d",&slot);
+
+           //close current mscb connection and create a new one
+           mscb_exit(handle);
+           handle = mscb_init(cratestring, 0, "", 0);
+
+           TCBBoard.SetMscbHandle(handle, slot);
+        } else if(DCBBoard != nullptr){
+           printf("DCB Name?\n");
+           scanf("%s", cratestring);
+           printf("Slot?\n");
+           scanf("%d",&slot);
+
+           //close current DCB connection and create a new one
+           delete DCBBoard;
+           std::string s(cratestring);
+           DCBBoard = new DCB(s);
+           DCBBoard->Connect();
+
+           TCBBoard.SetDcbInterface(DCBBoard, slot);
+         
+        }
+
         TCBBoard.SetIDCode();
       }
       if(option == 16) {
@@ -365,7 +379,7 @@ int main(int argc, char *argv[])
          printf("How many usec each point? \n");
          scanf("%d",&howlong);
          FILE *fout = fopen("tres.dat","w");
-         fprintf(fout,"%s %d\n", TCBBoard.fmscb_device, TCBBoard.fnserdes);
+         fprintf(fout,"MSCBXXX %d\n", TCBBoard.fnserdes);
 
 
          for(int idly =0; idly<32; idly++){
@@ -840,7 +854,8 @@ int main(int argc, char *argv[])
 
    //
    // close mscb connection
-   mscb_exit(TCBBoard.fh);
+   if(handle != -1) mscb_exit(handle);
+   if(DCBBoard != nullptr) delete DCBBoard;
    return 0;
 }
 

@@ -22,7 +22,7 @@
 #include "xstatus.h"
 #include "sc_io.h"
 #include "register_map_dcb.h"
-#include "../../../../git-revision.h"
+#include "git-revision.h"
 #include "xparameters.h"
 #ifndef LINUX_COMPILE
 #include "sw_state.h"
@@ -45,6 +45,8 @@
  #define UART_BAUD 9600
 #endif
 
+#define PROG_BAR_ITEMS   25
+
 /******************************************************************************/
 /* global vars                                                                */
 /******************************************************************************/
@@ -64,6 +66,11 @@ const char tcb_t3_default_path[] = "/firmware/tcb/prod/type_3/\0";
 const char wdb_fw_default_file[] = "download.bit\0";
 const char wdb_sw_default_file[] = "app_sys_ctrl.srec\0";
 const char tcb_fw_default_file[] = "TCB_TOP.bit\0";
+
+/*                            WDB Revision:   A  B  C  D  E  F  G  H*/
+/*                            TCB Revision:   0  1  2  3  4  5  6  7*/
+const unsigned int bpl_spi_scheme[2][8] =  { {0, 0, 0, 0, 0, 0, 1, 1},   /* WDB */
+                                             {0, 0, 0, 0, 0, 0, 0, 0} }; /* TCB */
 
 #ifdef LINUX_COMPILE
 static int spi_bpl_initialized     = 0;
@@ -916,6 +923,40 @@ int is_file(char* path)
     {
       return 0;
     }
+}
+
+/******************************************************************************/
+
+void byte_swap_uint32(unsigned int* src, unsigned int* dst, unsigned int len)
+{
+  /* swappes the bytes of integer values */
+  /* usually used to convert endianness */
+  int i;
+
+  for(i=0;i<len;i++)
+  {
+    dst[i] = (((src[i]) >> 24) | \
+             (((src[i]) & 0x00FF0000) >> 8) | \
+             (((src[i]) & 0x0000FF00) << 8) | \
+             ( (src[i]) << 24));
+  }
+}
+
+/******************************************************************************/
+
+void display_progress(char* prefix, xfs_u32 percent, char idle_char, char prog_char)
+{
+  int i;
+
+  printf("%c", 0x0D); /* Send carriage return without newline */
+  if(prefix) printf("%s", prefix);
+  printf("[");
+  for(i=0;i<PROG_BAR_ITEMS;i++)
+  {
+    if( (i*(100/PROG_BAR_ITEMS)) <= percent ) printf("%c", prog_char);
+    else                                      printf("%c", idle_char);
+  }
+  printf("] %d%%  ", percent);
 }
 
 /******************************************************************************/

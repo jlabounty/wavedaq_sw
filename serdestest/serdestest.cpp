@@ -105,7 +105,6 @@ int main(int argc, char** argv)
          printf("TCB as source (node=%s slot=%d)\n", nodename, slotnum);
 
          tcb_tx = new TCB(nodename, 20, slotnum, 1);
-         tcb_tx->fh = mscb_init(nodename, 0, "", 0);
          tcb_tx->SetIDCode();
          tcb_tx->fverbose = 1;
          tcb_tx->SetCheckWord(TESTVALUE0, TESTVALUE1);
@@ -125,7 +124,6 @@ int main(int argc, char** argv)
 
    // open mscb connection
    tcb_rx = new TCB(nodename, 20, slotnum,1);
-   tcb_rx->fh = mscb_init(nodename, 0, "", 0);
    tcb_rx->SetIDCode();
    //if(tcb_rx->fnserdes!=16) {
    //   printf("Problem in communication with TCB....\n");

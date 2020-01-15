@@ -97,7 +97,7 @@ int spi_if_init(spi_if_type* self, unsigned char device_nr, unsigned char slave_
     return -1;
   }
 
-  if(DBG_INF0) printf("%s: spi mode %d, %d bits %sper word, %d Hz max\n",filename, mode, bits, lsb ? "(lsb first) " : "", speed);
+  if(DBG_INF4) printf("%s: spi mode %d, %d bits %sper word, %d Hz max\n",filename, mode, bits, lsb ? "(lsb first) " : "", speed);
 
   self->device_nr = device_nr;
   self->slave_nr  = slave_nr;
@@ -125,7 +125,8 @@ char* spi_if_transfer(spi_if_type* self, char* tx_buf, char* rx_buf, unsigned in
   {
     memset(rx_buf, 0, len);
     self->xfer.rx_buf = (unsigned long)rx_buf;
-  }
+  } else
+    self->xfer.rx_buf = 0;
 
   self->xfer.tx_buf = (unsigned long)tx_buf;
   self->xfer.len = len; /* Length of Data to read */

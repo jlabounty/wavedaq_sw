@@ -13,23 +13,36 @@
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <netinet/ip.h>
+#include <netinet/if_ether.h>
+#include <netinet/udp.h>
 #include <unistd.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
+#include <time.h>
 
 #include "git-revision.h"
+
+extern "C" { // make all library functions callable from C++
 
 #include "drv_axi_dcb_reg_bank.h"
 #include "register_map_dcb.h"
 #include "update_config.h"
 #include "drv_bpl.h"
+#include "dbg.h"
+#include "system.h"
+#include "sc_io.h"
+
+}
 
 // port to start the UDP servers on
 #define SERVER_PORT_ASC 3000
 #define SERVER_PORT_BIN 4000
 
+#define CMD_SCAN        0x01
 #define CMD_WRITE32     0x14
 #define CMD_READ32      0x24
 
@@ -40,13 +53,42 @@
 
 int _server_abort = 0;
 
-void print_buffer(const unsigned char *buffer, int len);
+typedef struct {
+   unsigned int type_id;
+   unsigned int rev_id;
+} BOARD;
+
+const char *board_type_name[] = {
+   "WDB",
+   "TCB",
+   "DCB"
+};
+
+/*------------------------------------------------------------------*/
+
+void print_buffer(const char *buffer, int len);
+
+/*------------------------------------------------------------------*/
+
+double clock_us() {
+   struct timespec now;
+
+   clock_gettime(CLOCK_MONOTONIC, &now);
+   return now.tv_sec * 1e6 + now.tv_nsec / 1000.0;
+}
+
+/*------------------------------------------------------------------*/
 
 int main(int argc, char *argv[]) {
 
    int verbose = 0;
    int daemon = 0;
-   char hostname[256];
+   char hostname[256], mac[256];
+   int sock_bin, sock_asc, sock_raw;
+   int board_type = 0;
+   int board_revision = 0;
+
+   BOARD board[18];
 
    /* parse command line parameters */
    for (int i = 1; i < argc; i++) {
@@ -67,7 +109,52 @@ int main(int argc, char *argv[]) {
       }
    }
 
+   /*---- initialize system ----*/
+
+   // set default debug level
+   set_dbg_level(verbose ? DBG_LEVEL_SPAM : DBG_LEVEL_ERR);
+
+   init_system();
+
+   // set SW state ready to turn LED green
+   emio_set_sw_state(BIT_IDX_EMIO_CTRL_SW_STATE_SW_READY_PIN);
+
+   if (verbose)
+      print_sys_info();
+
+   memset(board, 0, sizeof(board));
+   if (verbose) {
+      set_dbg_level(DBG_LEVEL_ERR);
+      printf("\nBoards found:\n");
+      printf("-------------\n");
+   }
+   int n_boards = 0;
+   for (int i = 0; i < 18; i++) {
+      int status = get_slot_board_info(i, &board[i].type_id, &board[i].rev_id);
+      if (verbose)
+         if (status && board[i].type_id < 3) {
+            printf("Slot %2d: Found %s, Revision %c\n", i, board_type_name[board[i].type_id], 'A' + board[i].rev_id);
+            n_boards++;
+         }
+   }
+   if (verbose) {
+      if (n_boards == 0)
+         printf("No boards found\n");
+      printf("\n");
+      set_dbg_level(DBG_LEVEL_SPAM);
+   }
+
+   /*---- initialize network ----*/
+
    gethostname(hostname, sizeof(hostname));
+
+   // create raw socket
+   sock_raw = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_IP));
+   if (sock_raw == -1) {
+      //socket creation failed, may be because of non-root privileges
+      perror("Failed to create socket, please start program as root");
+      return 1;
+   }
 
    // socket address used for the server
    struct sockaddr_in server_address;
@@ -82,9 +169,8 @@ int main(int argc, char *argv[]) {
    server_address.sin_addr.s_addr = htonl(INADDR_ANY);
 
    // create a UDP socket, creation returns -1 on failure
-   int sock_bin;
    if ((sock_bin = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
-      printf("Could not create socket\n");
+      perror("Could not create socket\n");
       return 1;
    }
 
@@ -111,7 +197,6 @@ int main(int argc, char *argv[]) {
    server_address.sin_addr.s_addr = htonl(INADDR_ANY);
 
    // create a UDP socket, creation returns -1 on failure
-   int sock_asc;
    if ((sock_asc = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
       printf("Could not create socket\n");
       return 1;
@@ -145,7 +230,7 @@ int main(int argc, char *argv[]) {
 
    // run indefinitely
    while (!_server_abort) {
-      unsigned char buffer[1600];
+      char buffer[65536];
       fd_set fds;
 
       // periodically propagate new register contents to hardware
@@ -155,10 +240,42 @@ int main(int argc, char *argv[]) {
       FD_ZERO(&fds);
       FD_SET(sock_bin, &fds);
       FD_SET(sock_asc, &fds);
+      FD_SET(sock_raw, &fds);
 
       struct timeval tv = {0, 10000}; // 10 ms
       if (select(FD_SETSIZE, &fds, NULL, NULL, &tv) < 0)
          perror("select");
+
+      if (FD_ISSET(sock_raw, &fds)) {
+         memset(buffer, 0, sizeof(buffer));
+         int len = recvfrom(sock_raw, buffer, 65536, 0, NULL, NULL);
+         if (len == -1) {
+            perror("Failed to receive raw packet");
+            exit(1);
+         }
+
+         struct ethhdr *eth = (struct ethhdr *) buffer;
+         struct iphdr  *ip  = (struct iphdr *) (buffer + sizeof(struct ethhdr));
+         struct udphdr *udp = (struct udphdr *) (buffer + sizeof(struct ethhdr) + ip->ihl*4);
+
+         if (ip->protocol == IPPROTO_UDP && ntohs(udp->dest) == SERVER_PORT_BIN) {
+            memset(&client_address, 0, sizeof(client_address));
+            client_address.sin_addr.s_addr = ip->saddr;
+
+            if (verbose) {
+               printf("\n---- RAW UDP Packet ---------------------\n");
+               printf("IP source         %s\n", inet_ntoa(client_address.sin_addr));
+               printf("MAC source        %02x:%02x:%02x:%02x:%02x:%02x\n",
+                      eth->h_source[0], eth->h_source[1], eth->h_source[2],
+                      eth->h_source[3], eth->h_source[4], eth->h_source[5]);
+
+               printf("Source port       %d\n", ntohs(udp->source));
+               printf("Destination port  %d\n", ntohs(udp->dest));
+               printf("Data Length       %d\n", ntohs(udp->len) - sizeof(struct udphdr));
+               printf("-----------------------------------------\n");
+            }
+         }
+      }
 
       if (FD_ISSET(sock_bin, &fds)) {
          // read content into buffer from an incoming client
@@ -169,8 +286,9 @@ int main(int argc, char *argv[]) {
          // inet_ntoa prints user friendly representation of the
          // ip address
          if (verbose) {
-            buffer[len] = '\0';
+            char mac[256];
             printf("Binary request received: %d bytes from client %s\n", len, inet_ntoa(client_address.sin_addr));
+            buffer[len] = '\0';
             print_buffer(buffer, len);
          }
 
@@ -180,8 +298,32 @@ int main(int argc, char *argv[]) {
          unsigned int seq = (buffer[2] <<  8 )| (buffer[3] <<  0);
          unsigned int adr = (buffer[4] << 24) | (buffer[5] << 16) | (buffer[6] << 8) | (buffer[7] << 0);
 
-         if (cmd == CMD_WRITE32) {
-            unsigned char rbuffer[1600];
+         if (cmd == CMD_SCAN) {
+            char rbuffer[1600];
+            rbuffer[0] = CMD_SCAN;
+
+            if (verbose)
+               printf("Board scan:\n");
+
+            for (int i = 0; i < 18; i++) {
+               int status = get_slot_board_info(i, &board[i].type_id, &board[i].rev_id);
+               rbuffer[i*2+4] = board[i].type_id;
+               rbuffer[i*2+5] = board[i].rev_id;
+               if (verbose)
+                  if (status && board[i].type_id < 3)
+                     printf("Slot %2d: Found %s, Revision %c\n", i, board_type_name[board[i].type_id], 'A' + board[i].rev_id);
+            }
+
+            // send acknowledge back to client
+            rbuffer[0] = CMD_SCAN;
+            rbuffer[1] = 0x01;
+            rbuffer[2] = buffer[2];
+            rbuffer[3] = buffer[3];
+
+            sendto(sock_bin, rbuffer, 4+18*2, 0, (struct sockaddr *) &client_address, sizeof(client_address));
+
+         } else if (cmd == CMD_WRITE32) {
+            char rbuffer[1600];
             unsigned n = (len - 8) / 4;
 
             if (verbose) {
@@ -198,21 +340,24 @@ int main(int argc, char *argv[]) {
                   reg_bank_write(adr + i * 4, &d, 1);
                }
             } else {
-                  p = (unsigned int *) (&buffer[8]);
-                  for (int i = 0; i < n; i++, p++) {
-                     d = SWAP_UINT32(*p);
-                     *p = d;
-                  }
+               double start = clock_us();
+
                buffer[3] = CMD_WRITE32;
-               spi_binary_cmd(&buffer[3], rbuffer, slot, (len-8)+5); // 1 cmd, 4 adr. bytes + data
+               spi_binary_cmd((char*)&buffer[3], (char*)rbuffer, (len-8)+5, slot,
+                       board[slot].type_id, board[slot].rev_id); // 1 cmd, 4 adr. bytes + data
+
+               if (verbose)
+                  printf("SPI took %5.3lf ms\n\n", (clock_us() - start)/1e3);
             }
 
             // send acknowledge back to client
             buffer[1] = 0x01;
+            buffer[2] = (seq >> 8) & 0xFF;
+            buffer[3] = seq & 0xFF;
             sendto(sock_bin, buffer, 4, 0, (struct sockaddr *) &client_address, sizeof(client_address));
 
          } else if (cmd == CMD_READ32) {
-            unsigned char rbuffer[1600];
+            char rbuffer[1600];
             memset(rbuffer, 0, sizeof(rbuffer));
 
             unsigned int n = (buffer[8] << 24) | (buffer[9] << 16) | (buffer[10] << 8) | (buffer[11] << 0);
@@ -241,7 +386,8 @@ int main(int argc, char *argv[]) {
                buffer[3] = CMD_READ32;
                buffer[8] = 0; // dummy byte
 
-               spi_binary_cmd(&buffer[3], &rbuffer[4], slot, n+6); // 1 cmd, 4 adr. bytes, 1 dummy + data
+               spi_binary_cmd((char*)&buffer[3], (char*)&rbuffer[4], n+6, slot,
+                              board[slot].type_id, board[slot].rev_id); // 1 cmd, 4 adr. bytes, 1 dummy + data
 
                memmove(&rbuffer[4], &rbuffer[10], n);
             }
@@ -264,8 +410,8 @@ int main(int argc, char *argv[]) {
             sendto(sock_bin, str, strlen(str), 0, (struct sockaddr *) &client_address, sizeof(client_address));
 
          }
-      } // binary
 
+      } // binary
 
       if (FD_ISSET(sock_asc, &fds)) {
          // read content into buffer from an incoming client
@@ -280,11 +426,34 @@ int main(int argc, char *argv[]) {
             print_buffer(buffer, len);
          }
 
-         unsigned char rbuffer[1600];
+         char rbuffer[1600];
          rbuffer[0] = 0;
 
-         if (buffer[0] == 'h') {
-            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "List of available commands:\n\n");
+         if (isdigit(buffer[0])) {
+            unsigned int slot = atoi(buffer);
+
+            if (verbose)
+               printf("WDB command found for slot %d\n", slot);
+
+            char *p = strchr(buffer, ' ');
+            if (p == NULL)
+               p = buffer;
+            else
+               p++;
+
+            if (verbose)
+               printf("TX: %s\n", p);
+
+            spi_ascii_cmd(p, (char*)rbuffer, sizeof(rbuffer), slot,
+                          board[slot].type_id, board[slot].rev_id);
+
+            if (verbose)
+               printf("RX: %s\n\n", rbuffer);
+
+         } else if (buffer[0] == 'h') {
+            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "WDB commands:\n\n");
+            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "<slot> <command>\n\n");
+            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "DCB commands (no <slot>):\n\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "clkint      Switch bus clock to quartz\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "clkext      Switch bus clock to FCI input\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "delay <n>   Set SYNC delay\n");
@@ -355,13 +524,12 @@ int main(int argc, char *argv[]) {
 
       } // ASCII
 
-
    }
 
    return 0;
 }
 
-void print_buffer(const unsigned char *buffer, int len) {
+void print_buffer(const char *buffer, int len) {
    for (int i = 0; i < len; i++) {
       if (i % 16 == 0)
          printf("%04X  ", i);

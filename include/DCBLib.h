@@ -13,7 +13,6 @@
 #ifndef __dcblib_h__
 #define __dcblib_h__
 
-#include "WDBLib.h"
 #include "DCBReg.h"
 
 #include <thread>
@@ -27,7 +26,32 @@
 #define SLOT_DCB      16
 #define SLOT_TCB      17
 
+/* Board Type IDs */
+#define BRD_TYPE_ID_WDB    0
+#define BRD_TYPE_ID_TCB    1
+#define BRD_TYPE_ID_DCB    2
+
+/* DCB Board Revision IDs */
+#define DCB_BRD_REV_ID_A   0
+#define DCB_BRD_REV_ID_B   1
+/* WDB Board Revision IDs */
+#define WDB_BRD_REV_ID_C   2
+#define WDB_BRD_REV_ID_D   3
+#define WDB_BRD_REV_ID_E   4
+#define WDB_BRD_REV_ID_F   5
+#define WDB_BRD_REV_ID_G   6
+#define WDB_BRD_REV_ID_H   7
+/* TCB Board Revision IDs */
+#define TCB_BRD_REV_ID_1   1
+#define TCB_BRD_REV_ID_2   2
+#define TCB_BRD_REV_ID_3   3
+
 class WDB;
+
+typedef struct {
+   int type_id;
+   int rev_id;
+} BOARDID;
 
 //--------------------------------------------------------------------
 
@@ -48,16 +72,18 @@ class DCB: public DCBREG {
    static int       gBinSocket;
    static unsigned short udpSequenceNumber;
 
-   std::string SendReceiveUDP(std::string str);
-   void SendUDP(std::string str);
+   BOARDID          board[18];
 
 public:
    
    // constructor
    DCB(const std::string &name, bool verbose = false);
 
-   void             WriteUDP(unsigned int slot, unsigned int ofs, std::vector<unsigned int> data);
+   void WriteUDP(unsigned int slot, unsigned int ofs, std::vector<unsigned int> data);
    std::vector<unsigned int> ReadUDP(unsigned int slot, unsigned int ofs, unsigned int len);
+
+   std::string SendReceiveUDP(std::string str);
+   void SendUDP(std::string str);
 
    const unsigned int cRequiredRegLayoutCompatLevel = 0;
    const unsigned int cRequiredFwCompatLevel = 0;
@@ -73,12 +99,15 @@ public:
    int IsVerbose() { return mVerbose; }
    void SetLogFile(std::string logfile) { mLogfile = logfile; }
    void Connect();
+   void ScanCrate();
    void ReceiveRegisters(unsigned int index=0, unsigned int nReg=NR_OF_REGS);
    void SendRegisters(unsigned int index, unsigned int nReg);
    unsigned int bcd2dec(const unsigned int bcd);
    void PrintVersion();
+   void PrintCrate();
    bool GetSendBlock() { return mSendBlocked; }
    void SetSendBlock(bool flag) { mSendBlocked = flag; }
+   BOARDID *GetBoardId(int slot) { return &board[slot]; }
 
    // setter & getter ----------
    std::string GetName() { return mDCBName; }
@@ -90,9 +119,6 @@ public:
    std::string GetHwVersion();
    float GetTemperatureDegree(bool refresh = true);
    unsigned int GetPllLock(bool refresh = true);
-
-   // WDB functions
-   std::vector<WDB *> ScanWDB();
 };
 
 //--------------------------------------------------------------------

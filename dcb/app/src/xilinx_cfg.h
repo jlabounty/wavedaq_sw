@@ -26,7 +26,7 @@
 #define XCFG_FIELD_NAME_OFFS     0
 #define XCFG_FIELD_FPGA_OFFS     1
 #define XCFG_FIELD_DATE_OFFS     2
-#define XCFG_FIELD_TIME_OFFS     3 
+#define XCFG_FIELD_TIME_OFFS     3
 #define XCFG_FIELD_DATA_LEN      4
 #define XCFG_FIELD_HEAD_LEN      5
 #define XCFG_FIELD_HEAD_ID       6
@@ -57,8 +57,8 @@ typedef struct
 {
   unsigned int name_offs;
   unsigned int fpga_offs;
-  unsigned int date_offs;     
-  unsigned int time_offs; 
+  unsigned int date_offs;
+  unsigned int time_offs;
   unsigned int data_len;     /* Binary Len in byte */
   unsigned int head_len;     /* Header len in byte */
   unsigned int head_id;      /* 0xBF8EADE9 */
@@ -66,7 +66,7 @@ typedef struct
 } bitfile_struct_type;
 
 
-typedef union 
+typedef union
 {
    unsigned int field[sizeof(bitfile_struct_type)/sizeof(unsigned int)];
    bitfile_struct_type info;
@@ -82,13 +82,13 @@ typedef struct
 } sw_file_struct_type;
 
 
-typedef union 
+typedef union
 {
    unsigned int field[sizeof(sw_file_struct_type)/sizeof(unsigned int)];
    sw_file_struct_type info;
 } sw_file_info_type;
 
-
+extern const char* info_field_name[];
 unsigned int bitfile_info_checksum(bitfile_info_type *biptr);
 int parse_bitfile(unsigned char *buf, unsigned int len, bitfile_info_type *biptr);
 unsigned int sw_file_info_checksum(sw_file_info_type *siptr);

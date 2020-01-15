@@ -25,6 +25,10 @@ LIBS          =  -lrt -lbsd
 endif
 
 FLAGS         += -I$(MSCB_DIR)/include 
+FLAGS         += -I../include 
+FLAGS         += -D DCB_DONT_INCLUDE_REG_ACCESS_VARS
+FLAGS         += -std=c++11
+
 LIBS          += -lm -lutil -lpthread
 
 # system objects
@@ -34,7 +38,8 @@ MSCB_OBJ      = mscb.o mscbrpc.o strlcpy.o
 # Drivers needed by the frontend program
 #                 
 DRV_OBJ       = TCBLib.o 
-OBJECTS       = $(MSCB_OBJ) $(DRV_OBJ) 
+DCB_OBJ       = DCBLib.o 
+OBJECTS       = $(MSCB_OBJ) $(DRV_OBJ) $(DCB_OBJ) 
 OUTNAME       = tcb_cl
 
 all: $(OUTNAME)
@@ -45,11 +50,14 @@ $(OUTNAME): $(OBJECTS)
 $(DRV_OBJ): %.o: %.cpp
 	$(CPP) $(FLAGS) -MMD -MP -MF $(@:.o=.d) -MT $@ -c $<
 
+$(DCB_OBJ): %.o: ../src/%.cpp
+	$(CPP) $(FLAGS) -MMD -MP -MF $(@:.o=.d) -MT $@ -c $<
+
 $(MSCB_OBJ): %.o: $(MSCB_DIR)/src/%.cxx
 	$(CPP) $(FLAGS) -MMD -MP -MF $(@:.o=.d) -MT $@ -c $<
 
-tcb_cl: tcb_cl.o TCBLib.o $(MXML_OBJ) $(MSCB_OBJ) 
-	$(CPP)  $(FLAGS) $(MXML_OBJ) $(MSCB_OBJ) TCBLib.o tcb_cl.o  -o tcb_cl $(LIBS)
+tcb_cl: tcb_cl.o $(OBJECTS)
+	$(CPP)  $(FLAGS) $(OBJECTS) tcb_cl.o -o tcb_cl $(LIBS)
 
 tcb_cl.o: tcb_cl.cpp
 	$(CPP) $(FLAGS) -MMD -MP -MF $(@:.o=.d) -MT $@ -c $<
