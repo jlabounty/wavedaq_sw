@@ -35,6 +35,7 @@ extern "C" { // make all library functions callable from C++
 #include "dbg.h"
 #include "system.h"
 #include "sc_io.h"
+#include "wdaq_board_id.h"
 
 }
 
@@ -58,11 +59,7 @@ typedef struct {
    unsigned int rev_id;
 } BOARD;
 
-const char *board_type_name[] = {
-   "WDB",
-   "TCB",
-   "DCB"
-};
+BRD_TYPE_NAME; // define strings for board type names
 
 /*------------------------------------------------------------------*/
 
@@ -133,7 +130,7 @@ int main(int argc, char *argv[]) {
       int status = get_slot_board_info(i, &board[i].type_id, &board[i].rev_id);
       if (verbose)
          if (status && board[i].type_id < 3) {
-            printf("Slot %2d: Found %s, Revision %c\n", i, board_type_name[board[i].type_id], 'A' + board[i].rev_id);
+            printf("Slot %2d: Found %s, Revision %c\n", i, brd_type_name[board[i].type_id], 'A' + board[i].rev_id);
             n_boards++;
          }
    }
@@ -311,7 +308,7 @@ int main(int argc, char *argv[]) {
                rbuffer[i*2+5] = board[i].rev_id;
                if (verbose)
                   if (status && board[i].type_id < 3)
-                     printf("Slot %2d: Found %s, Revision %c\n", i, board_type_name[board[i].type_id], 'A' + board[i].rev_id);
+                     printf("Slot %2d: Found %s, Revision %c\n", i, brd_type_name[board[i].type_id], 'A' + board[i].rev_id);
             }
 
             // send acknowledge back to client

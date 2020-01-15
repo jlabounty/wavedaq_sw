@@ -53,7 +53,11 @@ add_library(wdb
    src/DCBLib.cpp
    src/averager.cpp)
 
-target_include_directories(wdb PRIVATE wds/src include mxml)
+target_include_directories(wdb PUBLIC 
+   dcb/app/src/
+   wds/src 
+   include 
+   mxml)
 
 add_executable(wds
    wds/src/mongoose.c
@@ -64,13 +68,6 @@ add_executable(wds
 target_include_directories(wds PUBLIC wds/src include mxml ../)
 target_link_libraries(wds wdb ${CMAKE_THREAD_LIBS_INIT})
 add_dependencies(wds git_revision_h)
-
-add_executable(test
-   src/test.cpp
-   mxml/mxml.cxx
-   mxml/strlcpy.cxx)
-target_include_directories(test PUBLIC include mxml ../)
-target_link_libraries(test wdb ${CMAKE_THREAD_LIBS_INIT})
 
 install(TARGETS wds DESTINATION bin)
 install(TARGETS wdb

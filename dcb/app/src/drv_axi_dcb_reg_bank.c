@@ -17,6 +17,7 @@
 
 #include "drv_axi_dcb_reg_bank.h"
 #include "system.h"
+#include "wdaq_board_id.h"
 #include "xfs_printf.h"
 #include "dbg.h"
 #include "utilities.h"

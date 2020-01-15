@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  23.10.2019 16:29:34
+// Created :  15.01.2020 11:16:30
 //
 
 
@@ -30,9 +30,9 @@ public:
 
 
 
-   ////// ------ Register 0 [0x0000]: HW_VER - Hardware version information of the PCB (Default: 0xFF010307) ------ //////
+   ////// ------ Register 0 [0x0000]: HW_VER - Hardware version information of the PCB (Default: 0xAC010307) ------ //////
 
-   // 0xFF000000: BOARD_MAGIC - 0xFF, Magic number for board identification
+   // 0xFF000000: BOARD_MAGIC - 0xAC, Magic number for board identification
    unsigned int GetBoardMagic() { return BitExtract(DCB_BOARD_MAGIC_REG, DCB_BOARD_MAGIC_MASK, DCB_BOARD_MAGIC_OFS); };
    // 0x00FF0000: VENDOR_ID - ID of the board vendor (0x01 for PSI)
    unsigned int GetVendorId() { return BitExtract(DCB_VENDOR_ID_REG, DCB_VENDOR_ID_MASK, DCB_VENDOR_ID_OFS); };
@@ -146,7 +146,7 @@ public:
    unsigned int GetSerialBusy() { return BitExtract(DCB_SERIAL_BUSY_REG, DCB_SERIAL_BUSY_MASK, DCB_SERIAL_BUSY_OFS); };
    // 0x00000002: DCB_BUSY - "1" while dcb is busy
    unsigned int GetDcbBusy() { return BitExtract(DCB_DCB_BUSY_REG, DCB_DCB_BUSY_MASK, DCB_DCB_BUSY_OFS); };
-   // 0x00000001: SYS_BUSY - Inverted busy signal from backplane (high active, not available until hardware revision G)
+   // 0x00000001: SYS_BUSY - Inverted busy signal from backplane (active low)
    unsigned int GetSysBusy() { return BitExtract(DCB_SYS_BUSY_REG, DCB_SYS_BUSY_MASK, DCB_SYS_BUSY_OFS); };
 
 
@@ -185,10 +185,6 @@ public:
    // 0x001F0000: SYNC_DELAY - Output delay of SYNC output to backplane
    unsigned int GetSyncDelay() { return BitExtract(DCB_SYNC_DELAY_REG, DCB_SYNC_DELAY_MASK, DCB_SYNC_DELAY_OFS); };
    void         SetSyncDelay(unsigned int value) { SetRegMask(DCB_SYNC_DELAY_REG, DCB_SYNC_DELAY_MASK, DCB_SYNC_DELAY_OFS, value); };
-
-   // 0x00000002: ENABLE_BPL_SPI_DRIVER - Disable Backplane SPI Driver: 0=driver disabled, 1=driver enabled
-   unsigned int GetEnableBplSpiDriver() { return BitExtract(DCB_ENABLE_BPL_SPI_DRIVER_REG, DCB_ENABLE_BPL_SPI_DRIVER_MASK, DCB_ENABLE_BPL_SPI_DRIVER_OFS); };
-   void         SetEnableBplSpiDriver(unsigned int value) { SetRegMask(DCB_ENABLE_BPL_SPI_DRIVER_REG, DCB_ENABLE_BPL_SPI_DRIVER_MASK, DCB_ENABLE_BPL_SPI_DRIVER_OFS, value); };
 
    // 0x00000001: DAQ_SOFT_TRIGGER - config 0
    unsigned int GetDaqSoftTrigger() { return BitExtract(DCB_DAQ_SOFT_TRIGGER_REG, DCB_DAQ_SOFT_TRIGGER_MASK, DCB_DAQ_SOFT_TRIGGER_OFS); };

@@ -19,6 +19,7 @@
 #include "xfs_printf.h"
 #include "utilities.h"
 #include "system.h"
+#include "wdaq_board_id.h"
 #include "cmd_processor.h"
 #include <ctype.h>
 #include <stdlib.h>

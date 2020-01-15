@@ -5,7 +5,7 @@
 #  Project :  MEGII - DCB
 #
 #  Author  :  schmid_e (Author of generation script)
-#  Created :  23.10.2019 16:29:34
+#  Created :  15.01.2020 11:16:30
 #
 #  Description :  Register map definitions.
 #
@@ -79,13 +79,13 @@ DCB_REG_CRC32_REG_BANK                = 0x00CC
 #
 # Bit Positions
 #
-# ****** Register 0 [0x0000]: HW_VER - Hardware version information of the PCB (Default: 0xFF010307) ******
+# ****** Register 0 [0x0000]: HW_VER - Hardware version information of the PCB (Default: 0xAC010307) ******
 
-# BOARD_MAGIC - 0xFF, Magic number for board identification
+# BOARD_MAGIC - 0xAC, Magic number for board identification
 DCB_BOARD_MAGIC_REG                =          DCB_REG_HW_VER
 DCB_BOARD_MAGIC_MASK               =                0xFF000000
 DCB_BOARD_MAGIC_OFS                =                        24
-DCB_BOARD_MAGIC_CONST                                   0xFF
+DCB_BOARD_MAGIC_CONST                                   0xAC
 
 # VENDOR_ID - ID of the board vendor (0x01 for PSI)
 DCB_VENDOR_ID_REG                  =          DCB_REG_HW_VER
@@ -269,7 +269,7 @@ DCB_DCB_BUSY_REG                   =          DCB_REG_STATUS
 DCB_DCB_BUSY_MASK                  =                0x00000002
 DCB_DCB_BUSY_OFS                   =                         1
 
-# SYS_BUSY - Inverted busy signal from backplane (high active, not available until hardware revision G)
+# SYS_BUSY - Inverted busy signal from backplane (active low)
 DCB_SYS_BUSY_REG                   =          DCB_REG_STATUS
 DCB_SYS_BUSY_MASK                  =                0x00000001
 DCB_SYS_BUSY_OFS                   =                         0
@@ -324,11 +324,6 @@ DCB_SLOT_ID_OFS                    =                         0
 DCB_SYNC_DELAY_REG                 =            DCB_REG_CTRL
 DCB_SYNC_DELAY_MASK                =                0x001F0000
 DCB_SYNC_DELAY_OFS                 =                        16
-
-# ENABLE_BPL_SPI_DRIVER - Disable Backplane SPI Driver: 0=driver disabled, 1=driver enabled
-DCB_ENABLE_BPL_SPI_DRIVER_REG      =            DCB_REG_CTRL
-DCB_ENABLE_BPL_SPI_DRIVER_MASK     =                0x00000002
-DCB_ENABLE_BPL_SPI_DRIVER_OFS      =                         1
 
 # DAQ_SOFT_TRIGGER - config 0
 DCB_DAQ_SOFT_TRIGGER_REG           =            DCB_REG_CTRL
@@ -1047,7 +1042,6 @@ dcb_bit_group_list = (
   ( "CRATE_ID"                , DCB_CRATE_ID_REG                , DCB_CRATE_ID_MASK                , DCB_CRATE_ID_OFS                ),
   ( "SLOT_ID"                 , DCB_SLOT_ID_REG                 , DCB_SLOT_ID_MASK                 , DCB_SLOT_ID_OFS                 ),
   ( "SYNC_DELAY"              , DCB_SYNC_DELAY_REG              , DCB_SYNC_DELAY_MASK              , DCB_SYNC_DELAY_OFS              ),
-  ( "ENABLE_BPL_SPI_DRIVER"   , DCB_ENABLE_BPL_SPI_DRIVER_REG   , DCB_ENABLE_BPL_SPI_DRIVER_MASK   , DCB_ENABLE_BPL_SPI_DRIVER_OFS   ),
   ( "DAQ_SOFT_TRIGGER"        , DCB_DAQ_SOFT_TRIGGER_REG        , DCB_DAQ_SOFT_TRIGGER_MASK        , DCB_DAQ_SOFT_TRIGGER_OFS        ),
   ( "SET_BIT_CTRL"            , DCB_SET_BIT_CTRL_REG            , DCB_SET_BIT_CTRL_MASK            , DCB_SET_BIT_CTRL_OFS            ),
   ( "CLR_BIT_CTRL"            , DCB_CLR_BIT_CTRL_REG            , DCB_CLR_BIT_CTRL_MASK            , DCB_CLR_BIT_CTRL_OFS            ),
@@ -1210,7 +1204,7 @@ reg_restore = (DCB_DONT_TOUCH_REG,   # Offset 0x0000
 # Register Defaults
 #
 
-ctrl_reg_default = (0xFF010307,   # Offset 0x0000 
+ctrl_reg_default = (0xAC010307,   # Offset 0x0000 
                     0x00000000,   # Offset 0x0004 
                     0x00000000,   # Offset 0x0008 
                     0x00000000,   # Offset 0x000C 

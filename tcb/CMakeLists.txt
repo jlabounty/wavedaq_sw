@@ -9,16 +9,23 @@ endif()
 
 link_directories($ENV{MSCBSYS}/lib/)
 
+add_definitions(-DDCB_DONT_INCLUDE_VARS -DDCB_DONT_INCLUDE_REG_ACCESS_VARS)
+
 add_library(tcb
    TCBLib.cpp)
 
-target_include_directories(tcb PRIVATE $ENV{MSCBSYS}/include)
+target_include_directories(tcb PUBLIC 
+   $ENV{MSCBSYS}/include 
+   ../include
+   ../dcb/app/src/
+)
 
 add_executable(tcb_cl
-   tcb_cl.cpp)
+   tcb_cl.cpp
+   ../src/DCBLib.cpp
+)
 
 target_include_directories(tcb_cl PUBLIC $ENV{MSCBSYS}/include)
-
 
 target_link_libraries(tcb_cl tcb mscb)
 

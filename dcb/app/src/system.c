@@ -17,6 +17,7 @@
 /* see hello world app */
 
 #include "system.h"
+#include "wdaq_board_id.h"
 #include "xfs_printf.h"
 #include "dbg.h"
 #include "xstatus.h"
@@ -69,7 +70,10 @@ const char tcb_fw_default_file[] = "TCB_TOP.bit\0";
 
 /*                            WDB Revision:   A  B  C  D  E  F  G  H*/
 /*                            TCB Revision:   0  1  2  3  4  5  6  7*/
-const unsigned int bpl_spi_scheme[2][8] =  { {0, 0, 0, 0, 0, 0, 1, 1},   /* WDB */
+const unsigned int bpl_spi_scheme[5][8] =  { {0, 0, 0, 0, 0, 0, 0, 0},   /* NONE0 */
+                                             {0, 0, 0, 0, 0, 0, 0, 0},   /* NONE1 */
+                                             {0, 0, 0, 0, 0, 0, 1, 1},   /* WDB */
+                                             {0, 0, 0, 0, 0, 0, 0, 0},   /* DCB */
                                              {0, 0, 0, 0, 0, 0, 0, 0} }; /* TCB */
 
 #ifdef LINUX_COMPILE

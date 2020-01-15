@@ -14,6 +14,7 @@
 #define __dcblib_h__
 
 #include "DCBReg.h"
+#include "wdaq_board_id.h"
 
 #include <thread>
 #include <queue>
@@ -25,26 +26,6 @@
 
 #define SLOT_DCB      16
 #define SLOT_TCB      17
-
-/* Board Type IDs */
-#define BRD_TYPE_ID_WDB    0
-#define BRD_TYPE_ID_TCB    1
-#define BRD_TYPE_ID_DCB    2
-
-/* DCB Board Revision IDs */
-#define DCB_BRD_REV_ID_A   0
-#define DCB_BRD_REV_ID_B   1
-/* WDB Board Revision IDs */
-#define WDB_BRD_REV_ID_C   2
-#define WDB_BRD_REV_ID_D   3
-#define WDB_BRD_REV_ID_E   4
-#define WDB_BRD_REV_ID_F   5
-#define WDB_BRD_REV_ID_G   6
-#define WDB_BRD_REV_ID_H   7
-/* TCB Board Revision IDs */
-#define TCB_BRD_REV_ID_1   1
-#define TCB_BRD_REV_ID_2   2
-#define TCB_BRD_REV_ID_3   3
 
 class WDB;
 
