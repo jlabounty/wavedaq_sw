@@ -202,9 +202,9 @@
 #define BIT_IDX_EMIO_CTRL_BPL_SPI_SCHEME_MASK        0x00000004
 #define BIT_IDX_EMIO_CTRL_BPL_SPI_SCHEME_OFFSET               2
 #define BIT_IDX_EMIO_CTRL_BPL_SPI_SCHEME_PIN                 56
-/*#define BIT_IDX_EMIO_CTRL_RESERVED_MASK              0x00000008 */
-/*#define BIT_IDX_EMIO_CTRL_RESERVED_OFFSET                     3 */
-/*#define BIT_IDX_EMIO_CTRL_RESERVED_PIN                       57 */
+#define BIT_IDX_EMIO_CTRL_MASTER_SPI_DE_MASK         0x00000008
+#define BIT_IDX_EMIO_CTRL_MASTER_SPI_DE_OFFSET                3
+#define BIT_IDX_EMIO_CTRL_MASTER_SPI_DE_PIN                  57
 /*#define BIT_IDX_EMIO_CTRL_RESERVED_MASK              0x00000010 */
 /*#define BIT_IDX_EMIO_CTRL_RESERVED_OFFSET                     4 */
 /*#define BIT_IDX_EMIO_CTRL_RESERVED_PIN                       58*/

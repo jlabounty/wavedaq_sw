@@ -54,8 +54,7 @@
 #define BIN_CMD_READ16    0x22
 #define BIN_CMD_READ32    0x24
 
-//#define BPL_SPI_DRIVE_EN(x)   (set_gpio(BIT_IDX_EMIO_CTRL_MASTER_SPI_DE_PIN, x))
-#define BPL_SPI_DRIVE_EN(x)   (bpl_spi_drive_en_reg(x))
+#define BPL_SPI_DRIVE_EN(x)   (set_gpio(BIT_IDX_EMIO_CTRL_MASTER_SPI_DE_PIN, x))
 #define BPL_SPI_SCHEME(x)     (set_gpio(BIT_IDX_EMIO_CTRL_BPL_SPI_SCHEME_PIN, x))
 #define BPL_FLASH_SEL(x)      (set_gpio(BIT_IDX_EMIO_CTRL_FLASH_SEL_PIN, x))
 #define BPL_INIT(x)           (set_gpio(BIT_IDX_EMIO_CTRL_INIT_PIN, x))
@@ -80,22 +79,6 @@
 /******************************************************************************/
 
 int get_slot_board_info(unsigned int slot_nr, unsigned int *board_type_id, unsigned int *board_rev_id);
-
-/******************************************************************************/
-
-void bpl_spi_drive_en_reg(int enable)
-{
-  unsigned int reg_val = DCB_ENABLE_BPL_SPI_DRIVER_MASK;
-
-  if(enable)
-  {
-    reg_bank_write(DCB_REG_SET_CTRL, &reg_val, 1);
-  }
-  else
-  {
-    reg_bank_write(DCB_REG_CLR_CTRL, &reg_val, 1);
-  }
-}
 
 /******************************************************************************/
 
