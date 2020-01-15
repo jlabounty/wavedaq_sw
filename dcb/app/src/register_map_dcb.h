@@ -5,7 +5,7 @@
  *  Project :  MEGII - DCB
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  23.10.2019 16:29:34
+ *  Created :  15.01.2020 11:16:30
  *
  *  Description :  Register map definitions.
  *
@@ -85,13 +85,13 @@
  * Bit Positions
  */
 
-/* ****** Register 0 [0x0000]: HW_VER - Hardware version information of the PCB (Default: 0xFF010307) ****** */
+/* ****** Register 0 [0x0000]: HW_VER - Hardware version information of the PCB (Default: 0xAC010307) ****** */
 
-/* BOARD_MAGIC - 0xFF, Magic number for board identification */
+/* BOARD_MAGIC - 0xAC, Magic number for board identification */
 #define DCB_BOARD_MAGIC_REG                         DCB_REG_HW_VER
 #define DCB_BOARD_MAGIC_MASK                            0xFF000000
 #define DCB_BOARD_MAGIC_OFS                                     24
-#define DCB_BOARD_MAGIC_CONST                                 0xFF
+#define DCB_BOARD_MAGIC_CONST                                 0xAC
 
 /* VENDOR_ID - ID of the board vendor (0x01 for PSI) */
 #define DCB_VENDOR_ID_REG                           DCB_REG_HW_VER
@@ -275,7 +275,7 @@
 #define DCB_DCB_BUSY_MASK                               0x00000002
 #define DCB_DCB_BUSY_OFS                                         1
 
-/* SYS_BUSY - Inverted busy signal from backplane (high active, not available until hardware revision G) */
+/* SYS_BUSY - Inverted busy signal from backplane (active low) */
 #define DCB_SYS_BUSY_REG                            DCB_REG_STATUS
 #define DCB_SYS_BUSY_MASK                               0x00000001
 #define DCB_SYS_BUSY_OFS                                         0
@@ -330,11 +330,6 @@
 #define DCB_SYNC_DELAY_REG                            DCB_REG_CTRL
 #define DCB_SYNC_DELAY_MASK                             0x001F0000
 #define DCB_SYNC_DELAY_OFS                                      16
-
-/* ENABLE_BPL_SPI_DRIVER - Disable Backplane SPI Driver: 0=driver disabled, 1=driver enabled */
-#define DCB_ENABLE_BPL_SPI_DRIVER_REG                 DCB_REG_CTRL
-#define DCB_ENABLE_BPL_SPI_DRIVER_MASK                  0x00000002
-#define DCB_ENABLE_BPL_SPI_DRIVER_OFS                            1
 
 /* DAQ_SOFT_TRIGGER - config 0 */
 #define DCB_DAQ_SOFT_TRIGGER_REG                      DCB_REG_CTRL

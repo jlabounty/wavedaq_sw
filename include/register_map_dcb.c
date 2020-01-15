@@ -5,7 +5,7 @@
  *  Project :  MEGII - DCB
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  23.10.2019 16:29:34
+ *  Created :  15.01.2020 11:16:30
  *
  *  Description :  Register map definitions.
  *
@@ -178,7 +178,6 @@ const dcb_bit_group_entry_type  dcb_bit_group_list[] = {
   { "CRATE_ID"                , DCB_CRATE_ID_REG                , DCB_CRATE_ID_MASK                , DCB_CRATE_ID_OFS                },
   { "SLOT_ID"                 , DCB_SLOT_ID_REG                 , DCB_SLOT_ID_MASK                 , DCB_SLOT_ID_OFS                 },
   { "SYNC_DELAY"              , DCB_SYNC_DELAY_REG              , DCB_SYNC_DELAY_MASK              , DCB_SYNC_DELAY_OFS              },
-  { "ENABLE_BPL_SPI_DRIVER"   , DCB_ENABLE_BPL_SPI_DRIVER_REG   , DCB_ENABLE_BPL_SPI_DRIVER_MASK   , DCB_ENABLE_BPL_SPI_DRIVER_OFS   },
   { "DAQ_SOFT_TRIGGER"        , DCB_DAQ_SOFT_TRIGGER_REG        , DCB_DAQ_SOFT_TRIGGER_MASK        , DCB_DAQ_SOFT_TRIGGER_OFS        },
   { "SET_BIT_CTRL"            , DCB_SET_BIT_CTRL_REG            , DCB_SET_BIT_CTRL_MASK            , DCB_SET_BIT_CTRL_OFS            },
   { "CLR_BIT_CTRL"            , DCB_CLR_BIT_CTRL_REG            , DCB_CLR_BIT_CTRL_MASK            , DCB_CLR_BIT_CTRL_OFS            },
@@ -339,7 +338,7 @@ const unsigned char reg_restore[] = {
 /******************************************************************************/
 
 const unsigned int reg_default[] = {
-  0xFF010307,   /* Offset 0x0000 */
+  0xAC010307,   /* Offset 0x0000 */
   0x00000000,   /* Offset 0x0004 */
   0x00000000,   /* Offset 0x0008 */
   0x00000000,   /* Offset 0x000C */
