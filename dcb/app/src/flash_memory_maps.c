@@ -14,6 +14,7 @@
  */
 
 #include "system.h"
+#include "wdaq_board_id.h"
 #include "flash_memory_maps.h"
 #include <stdio.h>
 #include <string.h>

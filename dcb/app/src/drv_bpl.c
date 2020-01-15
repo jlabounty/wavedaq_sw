@@ -15,7 +15,7 @@
 
 #include "drv_bpl.h"
 #include "system.h"
-#include "drv_axi_dcb_reg_bank.h"
+#include "wdaq_board_id.h"
 #include "register_map_dcb.h"
 #include "sc_io.h"
 #include "xilinx_cfg.h"
