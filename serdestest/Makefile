@@ -30,7 +30,7 @@ endif
 FLAGS         += -D WD2_DONT_INCLUDE_REG_ACCESS_VARS
 FLAGS         += -D DCB_DONT_INCLUDE_REG_ACCESS_VARS
 
-FLAGS         += -I$(MSCB_DIR)/include -Iinclude -I$(WDB_DIR)/include -I$(TCB_DIR) -I$(FW_DIR) -I$(MXML_DIR)
+FLAGS         += -I$(MSCB_DIR)/include -Iinclude -I$(WDB_DIR)/include -I$(WDB_DIR)/dcb/app/src -I$(TCB_DIR) -I$(FW_DIR) -I$(MXML_DIR)
 LIBS          += -lm -lutil -lpthread
 
 # system objects

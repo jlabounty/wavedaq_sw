@@ -26,6 +26,7 @@ endif
 
 FLAGS         += -I$(MSCB_DIR)/include 
 FLAGS         += -I../include 
+FLAGS         += -I../dcb/app/src
 FLAGS         += -D DCB_DONT_INCLUDE_REG_ACCESS_VARS
 FLAGS         += -std=c++11
 
