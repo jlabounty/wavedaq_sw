@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
    }
    int n_boards = 0;
    for (int i = 0; i < 18; i++) {
-      int status = get_slot_board_info(i, &board[i].vendor_id, &board[i].type_id, &board[i].rev_id, &board[i].variant_id);
+      int status = get_slot_board_info(i, &board[i]);
       if (verbose)
          if (status && board[i].type_id <= BRD_TYPE_ID_MAX &&
                        board[i].vendor_id <= BRD_VENDOR_ID_MAX) {
@@ -304,7 +304,7 @@ int main(int argc, char *argv[]) {
                printf("Board scan:\n");
 
             for (int i = 0; i < 18; i++) {
-               int status = get_slot_board_info(i, &board[i].vendor_id, &board[i].type_id, &board[i].rev_id, &board[i].variant_id);
+               int status = get_slot_board_info(i, &board[i]);
                if (status) {
                   rbuffer[i*4+4] = board[i].vendor_id;
                   rbuffer[i*4+5] = board[i].type_id;
@@ -528,7 +528,7 @@ int main(int argc, char *argv[]) {
             int n_boards = 0;
             rbuffer[0] = 0;
             for (int i = 0; i < 18; i++) {
-               int status = get_slot_board_info(i, &board[i].vendor_id, &board[i].type_id, &board[i].rev_id, &board[i].variant_id);
+               int status = get_slot_board_info(i, &board[i]);
                if (status && board[i].type_id <= BRD_TYPE_ID_MAX &&
                    board[i].vendor_id <= BRD_VENDOR_ID_MAX) {
                   snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer),
