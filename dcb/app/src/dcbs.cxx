@@ -305,10 +305,17 @@ int main(int argc, char *argv[]) {
 
             for (int i = 0; i < 18; i++) {
                int status = get_slot_board_info(i, &board[i].vendor_id, &board[i].type_id, &board[i].rev_id, &board[i].variant_id);
-               rbuffer[i*4+4] = board[i].vendor_id;
-               rbuffer[i*4+5] = board[i].type_id;
-               rbuffer[i*4+6] = board[i].rev_id;
-               rbuffer[i*4+7] = board[i].variant_id;
+               if (status) {
+                  rbuffer[i*4+4] = board[i].vendor_id;
+                  rbuffer[i*4+5] = board[i].type_id;
+                  rbuffer[i*4+6] = board[i].rev_id;
+                  rbuffer[i*4+7] = board[i].variant_id;
+               } else {
+                  rbuffer[i*4+4] = 0xFF;
+                  rbuffer[i*4+5] = 0xFF;
+                  rbuffer[i*4+6] = 0xFF;
+                  rbuffer[i*4+7] = 0xFF;
+               }
                if (verbose)
                   if (status && board[i].type_id <= BRD_TYPE_ID_MAX &&
                       board[i].vendor_id <= BRD_VENDOR_ID_MAX) {
@@ -326,7 +333,7 @@ int main(int argc, char *argv[]) {
             rbuffer[2] = buffer[2];
             rbuffer[3] = buffer[3];
 
-            sendto(sock_bin, rbuffer, 4+18*2, 0, (struct sockaddr *) &client_address, sizeof(client_address));
+            sendto(sock_bin, rbuffer, 4+18*4, 0, (struct sockaddr *) &client_address, sizeof(client_address));
 
          } else if (cmd == CMD_WRITE32) {
             char rbuffer[1600];
@@ -465,7 +472,8 @@ int main(int argc, char *argv[]) {
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "delay <n>   Set SYNC delay\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "help        This help page\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "info        Show system information\n");
-            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "reset       Reboot DCB\n\n");
+            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "reset       Reboot DCB\n");
+            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "scan        Scan crate for boards\n\n");
 
          } else if (strncmp(buffer, "clkint", 6) == 0) {
 
@@ -514,6 +522,26 @@ int main(int argc, char *argv[]) {
             sendto(sock_asc, rbuffer, strlen(rbuffer)+1, 0, (struct sockaddr *) &client_address, sizeof(client_address));
             system("reboot");
             exit(0);
+
+         } else if (strncmp(buffer, "scan", 4) == 0) {
+
+            int n_boards = 0;
+            rbuffer[0] = 0;
+            for (int i = 0; i < 18; i++) {
+               int status = get_slot_board_info(i, &board[i].vendor_id, &board[i].type_id, &board[i].rev_id, &board[i].variant_id);
+               if (status && board[i].type_id <= BRD_TYPE_ID_MAX &&
+                   board[i].vendor_id <= BRD_VENDOR_ID_MAX) {
+                  snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer),
+                          "Slot %2d: Found board \"%s\", Revision %c, Variant %d, Vendor \"%s\"\n", i,
+                         wdaq_brd_type_name[board[i].type_id],
+                         'A' + board[i].rev_id,
+                         board[i].variant_id,
+                         wdaq_brd_vendor_name[board[i].vendor_id]);
+                  n_boards++;
+               }
+            }
+            if (n_boards == 0)
+               snprintf(rbuffer, sizeof(rbuffer), "No boards found\n");
 
          } else if (buffer[0] == '\n') {
             // just ignore <CR>
