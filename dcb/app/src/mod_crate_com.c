@@ -107,7 +107,7 @@ int crate_slot_fpga_com(int argc, char **argv)
 
   slot = strtoul(argv[1], NULL, 0);
 
-  if(!get_slot_board_info(slot, &board_type, &board_rev)) return 0;
+  if(!get_slot_board_info(slot, NULL, &board_type, &board_rev, NULL)) return 0;
 
   if(fstrpcmp("0x", argv[2]) || fstrpcmp("0X", argv[2])) /* binary command */
   {

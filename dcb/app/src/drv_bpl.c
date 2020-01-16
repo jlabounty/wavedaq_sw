@@ -82,10 +82,6 @@
 /******************************************************************************/
 /******************************************************************************/
 
-int get_slot_board_info(unsigned int slot_nr, unsigned int *board_type_id, unsigned int *board_rev_id);
-
-/******************************************************************************/
-
 void select_slot(unsigned int slot_nr)
 {
   if ( (slot_nr > 17) || (slot_nr == 16) ) return;
@@ -607,7 +603,7 @@ void crate_upload_fw_sw(slot_op_en_type *slot, int load_fw, char *fw_spec_p, int
   {
     if( (slot->op_en[i]) && (i!=16) ) /* don't do DCB slot (16) */
     {
-      if(get_slot_board_info(i, &slot_board_type, &slot_board_rev))
+      if(get_slot_board_info(i, NULL, &slot_board_type, &slot_board_rev, NULL))
       {
         if(force)
         {
@@ -724,7 +720,7 @@ unsigned int spi_get_ref_reg(unsigned char slot_nr)
 
 /******************************************************************************/
 
-int get_slot_board_info(unsigned int slot_nr, unsigned int *board_type_id, unsigned int *board_rev_id)
+int get_slot_board_info(unsigned int slot_nr, unsigned int *board_vendor_id, unsigned int *board_type_id, unsigned int *board_revision_id, unsigned int *board_variant_id)
 {
   unsigned int hw_rev_val;
   int i;
@@ -737,10 +733,27 @@ int get_slot_board_info(unsigned int slot_nr, unsigned int *board_type_id, unsig
     hw_rev_val = spi_get_ref_reg(slot_nr);
     if( (hw_rev_val&HW_VERS_MAGIC_MASK) == HW_VERS_MAGIC_VAL )
     {
-      *board_type_id = (hw_rev_val&HW_VERS_TYPE_MASK)>>HW_VERS_TYPE_OFFS;
-      *board_rev_id  = (hw_rev_val&HW_VERS_REV_MASK)>>HW_VERS_REV_OFFS;
+      if(board_vendor_id)
+      {
+        *board_vendor_id   = (hw_rev_val&HW_VERS_VENDOR_MASK)>>HW_VERS_VENDOR_OFFS;
+      }
+      if(board_type_id)
+      {
+        *board_type_id     = (hw_rev_val&HW_VERS_TYPE_MASK)>>HW_VERS_TYPE_OFFS;
+        if( *board_type_id>BRD_TYPE_ID_MAX ) *board_type_id = 0;
+      }
+      if(board_revision_id)
+      {
+        *board_revision_id = (hw_rev_val&HW_VERS_REV_MASK)>>HW_VERS_REV_OFFS;
+        if( *board_revision_id>BRD_REV_ID_MAX ) *board_revision_id = 0;
+      }
+      if(board_variant_id)
+      {
+        *board_variant_id  = (hw_rev_val&HW_VERS_VAR_MASK)>>HW_VERS_VAR_OFFS;
+      }
       return 1;
     }
+
 //    else
 //    {
 //      printf("Scheme %d unrecognized HW revision      : 0x%08X\n", i, hw_rev_val);
@@ -748,8 +761,10 @@ int get_slot_board_info(unsigned int slot_nr, unsigned int *board_type_id, unsig
   }
 
   if(DBG_WARN) xfs_printf("Warning: board identification failed for slot %d\r\n", slot_nr);
-  *board_type_id = 0; // indicate no board
-  *board_rev_id = 0;
+  if(board_vendor_id)   *board_vendor_id   = 0;
+  if(board_type_id)     *board_type_id     = 0; // indicate no board
+  if(board_revision_id) *board_revision_id = 0;
+  if(board_variant_id)  *board_variant_id  = 0;
   return 0;
 }
 

@@ -1,3 +1,7 @@
+/* Limits */
+#define BRD_TYPE_ID_MAX     4
+#define BRD_REV_ID_MAX      7
+
 /* Board Type IDs */
 #define BRD_TYPE_ID_NONE0   0
 #define BRD_TYPE_ID_NONE1   1
