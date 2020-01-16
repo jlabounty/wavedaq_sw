@@ -611,13 +611,15 @@ void DCB::ScanCrate() {
                     readBuf[3] == (udpSequenceNumber & 0xFF);
 
          // check for data length (limited to one UDP frame at the moment)
-         bSuccess = bSuccess && (i == 18*2 + 4);
+         bSuccess = bSuccess && (i == 18*4 + 4);
 
          if (bSuccess) {
             // copy data
             for (unsigned int i = 0; i < 18; i++) {
-               board[i].type_id = readBuf[i*2+4];
-               board[i].rev_id  = readBuf[i*2+5];
+               board[i].vendor_id  = readBuf[i*4+4];
+               board[i].type_id    = readBuf[i*4+5];
+               board[i].rev_id     = readBuf[i*4+6];
+               board[i].variant_id = readBuf[i*4+7];
             }
             return;
          }
@@ -685,17 +687,21 @@ void DCB::PrintVersion() {
    std::cout << "Serial number:       " << GetSerialNumber() << std::endl;
 }
 
-const char *board_type_name[] = {
-        "WDB",
-        "TCB",
-        "DCB"
-};
+/* names from wdaq_board_id.h */
+WDAQ_BRD_VENDOR_NAME;
+WDAQ_BRD_TYPE_NAME;
 
 void DCB::PrintCrate() {
    for (int i=0 ; i<18 ; i++) {
-      if (board[i].type_id >= 0 && board[i].type_id < 3) {
-         std::cout << "Slot " << std::setw(2) << i << ": Found " << board_type_name[board[i].type_id] <<
-         ", Revision " << (char)('A'+board[i].rev_id) << std::endl;
+         if (board[i].type_id < BRD_TYPE_ID_MAX &&
+             board[i].vendor_id <= BRD_VENDOR_ID_MAX) {
+         std::cout << "Slot " << std::setw(2) << i << ": Found board \""
+            << wdaq_brd_type_name[board[i].type_id]
+            << "\", Revision " << (char)('A'+board[i].rev_id)
+            << ", Variant " << board[i].variant_id
+            << ", Vendor \""
+            << wdaq_brd_vendor_name[board[i].vendor_id]
+            << "\"" << std::endl;
       }
    }
 }

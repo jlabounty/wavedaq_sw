@@ -29,11 +29,6 @@
 
 class WDB;
 
-typedef struct {
-   int type_id;
-   int rev_id;
-} BOARDID;
-
 //--------------------------------------------------------------------
 
 // Data Concentrator Board class. Interface functions to all WDB registers
@@ -53,7 +48,7 @@ class DCB: public DCBREG {
    static int       gBinSocket;
    static unsigned short udpSequenceNumber;
 
-   BOARDID          board[18];
+   WDAQ_BRD         board[18];
 
 public:
    
@@ -88,7 +83,7 @@ public:
    void PrintCrate();
    bool GetSendBlock() { return mSendBlocked; }
    void SetSendBlock(bool flag) { mSendBlocked = flag; }
-   BOARDID *GetBoardId(int slot) { return &board[slot]; }
+   WDAQ_BRD *GetBoardId(int slot) { return &board[slot]; }
 
    // setter & getter ----------
    std::string GetName() { return mDCBName; }
