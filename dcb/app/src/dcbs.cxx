@@ -54,12 +54,8 @@ extern "C" { // make all library functions callable from C++
 
 int _server_abort = 0;
 
-typedef struct {
-   unsigned int type_id;
-   unsigned int rev_id;
-} BOARD;
-
-BRD_TYPE_NAME; // define strings for board type names
+WDAQ_BRD_VENDOR_NAME; // define strings for board vendor names
+WDAQ_BRD_TYPE_NAME;   // define strings for board type names
 
 /*------------------------------------------------------------------*/
 
@@ -85,7 +81,7 @@ int main(int argc, char *argv[]) {
    int board_type = 0;
    int board_revision = 0;
 
-   BOARD board[18];
+   WDAQ_BRD board[18];
 
    /* parse command line parameters */
    for (int i = 1; i < argc; i++) {
@@ -127,10 +123,15 @@ int main(int argc, char *argv[]) {
    }
    int n_boards = 0;
    for (int i = 0; i < 18; i++) {
-      int status = get_slot_board_info(i, &board[i].type_id, &board[i].rev_id);
+      int status = get_slot_board_info(i, &board[i].vendor_id, &board[i].type_id, &board[i].rev_id, &board[i].variant_id);
       if (verbose)
-         if (status && board[i].type_id < 3) {
-            printf("Slot %2d: Found %s, Revision %c\n", i, brd_type_name[board[i].type_id], 'A' + board[i].rev_id);
+         if (status && board[i].type_id <= BRD_TYPE_ID_MAX &&
+                       board[i].vendor_id <= BRD_VENDOR_ID_MAX) {
+            printf("Slot %2d: Found board \"%s\", Revision %c, Variant %d, Vendor \"%s\"\n", i,
+                    wdaq_brd_type_name[board[i].type_id],
+                    'A' + board[i].rev_id,
+                    board[i].variant_id,
+                    wdaq_brd_vendor_name[board[i].vendor_id]);
             n_boards++;
          }
    }
@@ -303,12 +304,20 @@ int main(int argc, char *argv[]) {
                printf("Board scan:\n");
 
             for (int i = 0; i < 18; i++) {
-               int status = get_slot_board_info(i, &board[i].type_id, &board[i].rev_id);
-               rbuffer[i*2+4] = board[i].type_id;
-               rbuffer[i*2+5] = board[i].rev_id;
+               int status = get_slot_board_info(i, &board[i].vendor_id, &board[i].type_id, &board[i].rev_id, &board[i].variant_id);
+               rbuffer[i*4+4] = board[i].vendor_id;
+               rbuffer[i*4+5] = board[i].type_id;
+               rbuffer[i*4+6] = board[i].rev_id;
+               rbuffer[i*4+7] = board[i].variant_id;
                if (verbose)
-                  if (status && board[i].type_id < 3)
-                     printf("Slot %2d: Found %s, Revision %c\n", i, brd_type_name[board[i].type_id], 'A' + board[i].rev_id);
+                  if (status && board[i].type_id <= BRD_TYPE_ID_MAX &&
+                      board[i].vendor_id <= BRD_VENDOR_ID_MAX) {
+                     printf("Slot %2d: Found board \"%s\", Revision %c, Variant %d, Vendor \"%s\"\n", i,
+                            wdaq_brd_type_name[board[i].type_id],
+                            'A' + board[i].rev_id,
+                            board[i].variant_id,
+                            wdaq_brd_vendor_name[board[i].vendor_id]);
+                  }
             }
 
             // send acknowledge back to client
