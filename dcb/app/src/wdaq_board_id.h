@@ -3,6 +3,9 @@
  * given by the first status register at 0x0000 of each WDAQ board
  */
 
+#ifndef __WDAQ_BOARD_ID__
+#define __WDAQ_BOARD_ID__
+
 /* Limits */
 #define BRD_VENDOR_ID_MAX     2
 #define BRD_TYPE_ID_MAX       4
@@ -57,3 +60,5 @@ typedef struct {
   "DCB",   \
   "TCB"    \
 }
+
+#endif /* __WDAQ_BOARD_ID__ */

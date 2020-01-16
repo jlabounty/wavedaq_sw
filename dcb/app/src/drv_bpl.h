@@ -16,6 +16,7 @@
 #ifndef __DRV_BPL__
 #define __DRV_BPL__
 
+#include "wdaq_board_id.h"
 #include "drv_spi_if.h"
 
 typedef struct
@@ -36,6 +37,6 @@ void spi_binary_cmd(char* tx_buff, char* rx_buff, unsigned int len, unsigned cha
 void slot_upload_fw_sw(unsigned int slot_nr, int load_fw, char *fw_spec_p, int load_sw, char *sw_spec_p, unsigned int board_type, unsigned int board_rev);
 void crate_upload_fw_sw(slot_op_en_type *slot, int load_fw, char *fw_spec_p, int load_sw, char *sw_spec_p, unsigned int board_type, unsigned int board_rev, unsigned int force);
 void spi_flash_id_cmd(unsigned char slot_nr);
-int get_slot_board_info(unsigned int slot_nr, unsigned int *board_vendor_id, unsigned int *board_type_id, unsigned int *board_revision_id, unsigned int *board_variant_id);
+int get_slot_board_info(unsigned int slot_nr, WDAQ_BRD *wdaq_board_info_ptr);
 
 #endif /* __DRV_BPL__ */

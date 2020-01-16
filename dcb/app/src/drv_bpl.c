@@ -15,7 +15,6 @@
 
 #include "drv_bpl.h"
 #include "system.h"
-#include "wdaq_board_id.h"
 #include "register_map_dcb.h"
 #include "sc_io.h"
 #include "xilinx_cfg.h"
@@ -592,8 +591,7 @@ void slot_upload_fw_sw(unsigned int slot_nr, int load_fw, char *fw_spec_p, int l
 void crate_upload_fw_sw(slot_op_en_type *slot, int load_fw, char *fw_spec_p, int load_sw, char *sw_spec_p, unsigned int board_type, unsigned int board_rev, unsigned int force)
 {
   int i;
-  unsigned int slot_board_type;
-  unsigned int slot_board_rev;
+  WDAQ_BRD slot_board_info;
 
 #ifdef LINUX_COMPILE
   init_spi_bpl();
@@ -603,13 +601,13 @@ void crate_upload_fw_sw(slot_op_en_type *slot, int load_fw, char *fw_spec_p, int
   {
     if( (slot->op_en[i]) && (i!=16) ) /* don't do DCB slot (16) */
     {
-      if(get_slot_board_info(i, NULL, &slot_board_type, &slot_board_rev, NULL))
+      if(get_slot_board_info(i, &slot_board_info))
       {
         if(force)
         {
           /* get forced upload information */
           if(DBG_INF0) printf("FORCED upload\n");
-          if( (board_type != slot_board_type) || (board_rev != slot_board_rev) )
+          if( (board_type != slot_board_info.type_id) || (board_rev != slot_board_info.rev_id) )
           {
             if(DBG_ERR) printf("Error: present board in slot %d does not match type and revision\n", i);
             continue;
@@ -624,8 +622,8 @@ void crate_upload_fw_sw(slot_op_en_type *slot, int load_fw, char *fw_spec_p, int
       {
         if(force)
         {
-          slot_board_type = board_type;
-          slot_board_rev  = board_rev;
+          slot_board_info.type_id = board_type;
+          slot_board_info.rev_id  = board_rev;
         }
         else
         {
@@ -635,7 +633,7 @@ void crate_upload_fw_sw(slot_op_en_type *slot, int load_fw, char *fw_spec_p, int
         }
       }
 
-      slot_upload_fw_sw(i, load_fw, fw_spec_p, load_sw, sw_spec_p, slot_board_type, slot_board_rev);
+      slot_upload_fw_sw(i, load_fw, fw_spec_p, load_sw, sw_spec_p, slot_board_info.type_id, slot_board_info.rev_id);
     }
   }
 }
@@ -720,7 +718,7 @@ unsigned int spi_get_ref_reg(unsigned char slot_nr)
 
 /******************************************************************************/
 
-int get_slot_board_info(unsigned int slot_nr, unsigned int *board_vendor_id, unsigned int *board_type_id, unsigned int *board_revision_id, unsigned int *board_variant_id)
+int get_slot_board_info(unsigned int slot_nr, WDAQ_BRD *wdaq_board_info_ptr)
 {
   unsigned int hw_rev_val;
   int i;
@@ -733,24 +731,12 @@ int get_slot_board_info(unsigned int slot_nr, unsigned int *board_vendor_id, uns
     hw_rev_val = spi_get_ref_reg(slot_nr);
     if( (hw_rev_val&HW_VERS_MAGIC_MASK) == HW_VERS_MAGIC_VAL )
     {
-      if(board_vendor_id)
-      {
-        *board_vendor_id   = (hw_rev_val&HW_VERS_VENDOR_MASK)>>HW_VERS_VENDOR_OFFS;
-      }
-      if(board_type_id)
-      {
-        *board_type_id     = (hw_rev_val&HW_VERS_TYPE_MASK)>>HW_VERS_TYPE_OFFS;
-        if( *board_type_id>BRD_TYPE_ID_MAX ) *board_type_id = 0;
-      }
-      if(board_revision_id)
-      {
-        *board_revision_id = (hw_rev_val&HW_VERS_REV_MASK)>>HW_VERS_REV_OFFS;
-        if( *board_revision_id>BRD_REV_ID_MAX ) *board_revision_id = 0;
-      }
-      if(board_variant_id)
-      {
-        *board_variant_id  = (hw_rev_val&HW_VERS_VAR_MASK)>>HW_VERS_VAR_OFFS;
-      }
+      wdaq_board_info_ptr->vendor_id  = (hw_rev_val&HW_VERS_VENDOR_MASK)>>HW_VERS_VENDOR_OFFS;
+      wdaq_board_info_ptr->type_id    = (hw_rev_val&HW_VERS_TYPE_MASK)>>HW_VERS_TYPE_OFFS;
+      wdaq_board_info_ptr->rev_id     = (hw_rev_val&HW_VERS_REV_MASK)>>HW_VERS_REV_OFFS;
+      wdaq_board_info_ptr->variant_id = (hw_rev_val&HW_VERS_VAR_MASK)>>HW_VERS_VAR_OFFS;
+      if( wdaq_board_info_ptr->type_id>BRD_TYPE_ID_MAX ) wdaq_board_info_ptr->type_id = 0;
+      if( wdaq_board_info_ptr->rev_id>BRD_REV_ID_MAX )   wdaq_board_info_ptr->rev_id = 0;
       return 1;
     }
 
@@ -761,10 +747,10 @@ int get_slot_board_info(unsigned int slot_nr, unsigned int *board_vendor_id, uns
   }
 
   if(DBG_WARN) xfs_printf("Warning: board identification failed for slot %d\r\n", slot_nr);
-  if(board_vendor_id)   *board_vendor_id   = 0;
-  if(board_type_id)     *board_type_id     = 0; // indicate no board
-  if(board_revision_id) *board_revision_id = 0;
-  if(board_variant_id)  *board_variant_id  = 0;
+  wdaq_board_info_ptr->vendor_id  = 0;
+  wdaq_board_info_ptr->type_id    = 0; // indicate no board
+  wdaq_board_info_ptr->rev_id     = 0;
+  wdaq_board_info_ptr->variant_id = 0;
   return 0;
 }
 

@@ -87,8 +87,7 @@ int crate_slot_fpga_com(int argc, char **argv)
   unsigned char bin_val;
   unsigned int len;
   unsigned int i;
-  unsigned int board_type;
-  unsigned int board_rev;
+  WDAQ_BRD board_info;
   unsigned char tx_buff[BIN_BUF_SIZE];
   unsigned char rx_buff[BIN_BUF_SIZE];
 
@@ -107,7 +106,7 @@ int crate_slot_fpga_com(int argc, char **argv)
 
   slot = strtoul(argv[1], NULL, 0);
 
-  if(!get_slot_board_info(slot, NULL, &board_type, &board_rev, NULL)) return 0;
+  if(!get_slot_board_info(slot, &board_info)) return 0;
 
   if(fstrpcmp("0x", argv[2]) || fstrpcmp("0X", argv[2])) /* binary command */
   {
@@ -129,7 +128,7 @@ int crate_slot_fpga_com(int argc, char **argv)
     }
 
     /* transmit */
-    spi_binary_cmd(tx_buff, rx_buff, len, slot, board_type, board_rev);
+    spi_binary_cmd(tx_buff, rx_buff, len, slot, board_info.type_id, board_info.rev_id);
 
     /* report transmission results */
     xfs_printf("      TX byte   RX byte\r\n");
@@ -143,7 +142,7 @@ int crate_slot_fpga_com(int argc, char **argv)
   {
     char buffer[1600];
     xfs_printf("Processing ASCII command\r\n");
-    spi_ascii_cmd(argv[2], buffer, sizeof(buffer), slot, board_type, board_rev);
+    spi_ascii_cmd(argv[2], buffer, sizeof(buffer), slot, board_info.type_id, board_info.rev_id);
     xfs_printf("%s\n", buffer);
   }
 
@@ -161,6 +160,7 @@ int crate_slot_upload_fw_sw(int argc, char **argv)
   int load_sw = 0;
   char *fwp = NULL;
   char *swp = NULL;
+  WDAQ_BRD board_info;
   unsigned int board_type = 0;
   unsigned int board_rev = 0;
   unsigned int t_force = 0;
