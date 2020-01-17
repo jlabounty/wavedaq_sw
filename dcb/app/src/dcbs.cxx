@@ -47,6 +47,8 @@ extern "C" { // make all library functions callable from C++
 #define CMD_WRITE32     0x14
 #define CMD_READ32      0x24
 
+#define WDAQ_N_SLOTS      18
+
 #define SWAP_UINT32(x) (((x) >> 24) | \
                        (((x) & 0x00FF0000) >> 8) | \
                        (((x) & 0x0000FF00) << 8) | \
@@ -56,6 +58,8 @@ int _server_abort = 0;
 
 WDAQ_BRD_VENDOR_NAME; // define strings for board vendor names
 WDAQ_BRD_TYPE_NAME;   // define strings for board type names
+
+WDAQ_BRD board[WDAQ_N_SLOTS];
 
 /*------------------------------------------------------------------*/
 
@@ -72,6 +76,50 @@ double clock_us() {
 
 /*------------------------------------------------------------------*/
 
+void printf_crate_scan(char *b, int size) {
+   int n_boards = 0;
+   b[0] = 0;
+   for (int slot = 0; slot < WDAQ_N_SLOTS; slot++) {
+      int status = get_slot_board_info(slot, &board[slot]);
+      if (status && board[slot].type_id <= BRD_TYPE_ID_MAX &&
+          board[slot].vendor_id <= BRD_VENDOR_ID_MAX) {
+
+         char name[32];
+         if (board[slot].type_id == BRD_TYPE_ID_WDB) {
+
+            char buffer[10];
+            char rbuffer[10];
+
+            memset(buffer, 0, sizeof(buffer));
+            buffer[0] = CMD_READ32;
+            buffer[1] = 0;
+            buffer[2] = 0;
+            buffer[3] = 0;
+            buffer[4] = 0x24; // Status register SN
+            buffer[5] = 0; // dummy
+
+            spi_binary_cmd(buffer, rbuffer, 6+4, slot, board[slot].type_id, board[slot].rev_id);
+
+            unsigned int sn = (rbuffer[8] << 8) | rbuffer[9];
+            snprintf(name, sizeof(name), "WD%03d", sn);
+         } else
+            snprintf(name, sizeof(name), "%s", wdaq_brd_type_name[board[slot].type_id]);
+
+         snprintf(b+strlen(b), size,
+                  "Slot %2d: Found board \"%s\", Revision %c, Variant %d, Vendor \"%s\"\n", slot,
+                  name,
+                  'A' + board[slot].rev_id,
+                  board[slot].variant_id,
+                  wdaq_brd_vendor_name[board[slot].vendor_id]);
+         n_boards++;
+      }
+   }
+   if (n_boards == 0)
+      snprintf(b, size, "No boards found\n");
+}
+
+/*------------------------------------------------------------------*/
+
 int main(int argc, char *argv[]) {
 
    int verbose = 0;
@@ -80,8 +128,6 @@ int main(int argc, char *argv[]) {
    int sock_bin, sock_asc, sock_raw;
    int board_type = 0;
    int board_revision = 0;
-
-   WDAQ_BRD board[18];
 
    /* parse command line parameters */
    for (int i = 1; i < argc; i++) {
@@ -121,24 +167,13 @@ int main(int argc, char *argv[]) {
       printf("\nBoards found:\n");
       printf("-------------\n");
    }
-   int n_boards = 0;
-   for (int i = 0; i < 18; i++) {
+   for (int i = 0; i < WDAQ_N_SLOTS; i++)
       int status = get_slot_board_info(i, &board[i]);
-      if (verbose)
-         if (status && board[i].type_id <= BRD_TYPE_ID_MAX &&
-                       board[i].vendor_id <= BRD_VENDOR_ID_MAX) {
-            printf("Slot %2d: Found board \"%s\", Revision %c, Variant %d, Vendor \"%s\"\n", i,
-                    wdaq_brd_type_name[board[i].type_id],
-                    'A' + board[i].rev_id,
-                    board[i].variant_id,
-                    wdaq_brd_vendor_name[board[i].vendor_id]);
-            n_boards++;
-         }
-   }
+
    if (verbose) {
-      if (n_boards == 0)
-         printf("No boards found\n");
-      printf("\n");
+      char b[1500];
+      printf_crate_scan(b, sizeof(b));
+      printf("%s\n", b);
       set_dbg_level(DBG_LEVEL_SPAM);
    }
 
@@ -303,7 +338,7 @@ int main(int argc, char *argv[]) {
             if (verbose)
                printf("Board scan:\n");
 
-            for (int i = 0; i < 18; i++) {
+            for (int i = 0; i < WDAQ_N_SLOTS; i++) {
                int status = get_slot_board_info(i, &board[i]);
                if (status) {
                   rbuffer[i*4+4] = board[i].vendor_id;
@@ -316,15 +351,6 @@ int main(int argc, char *argv[]) {
                   rbuffer[i*4+6] = 0xFF;
                   rbuffer[i*4+7] = 0xFF;
                }
-               if (verbose)
-                  if (status && board[i].type_id <= BRD_TYPE_ID_MAX &&
-                      board[i].vendor_id <= BRD_VENDOR_ID_MAX) {
-                     printf("Slot %2d: Found board \"%s\", Revision %c, Variant %d, Vendor \"%s\"\n", i,
-                            wdaq_brd_type_name[board[i].type_id],
-                            'A' + board[i].rev_id,
-                            board[i].variant_id,
-                            wdaq_brd_vendor_name[board[i].vendor_id]);
-                  }
             }
 
             // send acknowledge back to client
@@ -333,7 +359,7 @@ int main(int argc, char *argv[]) {
             rbuffer[2] = buffer[2];
             rbuffer[3] = buffer[3];
 
-            sendto(sock_bin, rbuffer, 4+18*4, 0, (struct sockaddr *) &client_address, sizeof(client_address));
+            sendto(sock_bin, rbuffer, 4+WDAQ_N_SLOTS*4, 0, (struct sockaddr *) &client_address, sizeof(client_address));
 
          } else if (cmd == CMD_WRITE32) {
             char rbuffer[1600];
@@ -525,23 +551,7 @@ int main(int argc, char *argv[]) {
 
          } else if (strncmp(buffer, "scan", 4) == 0) {
 
-            int n_boards = 0;
-            rbuffer[0] = 0;
-            for (int i = 0; i < 18; i++) {
-               int status = get_slot_board_info(i, &board[i]);
-               if (status && board[i].type_id <= BRD_TYPE_ID_MAX &&
-                   board[i].vendor_id <= BRD_VENDOR_ID_MAX) {
-                  snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer),
-                          "Slot %2d: Found board \"%s\", Revision %c, Variant %d, Vendor \"%s\"\n", i,
-                         wdaq_brd_type_name[board[i].type_id],
-                         'A' + board[i].rev_id,
-                         board[i].variant_id,
-                         wdaq_brd_vendor_name[board[i].vendor_id]);
-                  n_boards++;
-               }
-            }
-            if (n_boards == 0)
-               snprintf(rbuffer, sizeof(rbuffer), "No boards found\n");
+            printf_crate_scan(rbuffer, sizeof(rbuffer));
 
          } else if (buffer[0] == '\n') {
             // just ignore <CR>
