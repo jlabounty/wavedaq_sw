@@ -27,6 +27,7 @@ endif
 
 FLAGS         += -I$(MSCB_DIR)/include 
 FLAGS         += -I$(WDAQ_DIR)/software/include 
+FLAGS         += -I$(WDAQ_DIR)/software/dcb/app/src
 FLAGS         += -I$(WDAQ_DIR)/firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/common/src/
 FLAGS         += -D WD2_DONT_INCLUDE_REG_ACCESS_VARS
 FLAGS         += -D DCB_DONT_INCLUDE_REG_ACCESS_VARS
