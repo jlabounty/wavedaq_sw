@@ -22,8 +22,6 @@
 
 #include "mongoose.h"
 
-#include "git-revision.h"
-
 /*-- Globals -------------------------------------------------------*/
 
 std::vector<std::string> wdbName = {"wd094"};
@@ -1312,7 +1310,7 @@ int main(int argc, const char *argv[]) {
    std::string d(gl.wdsDir + "/html");
    s_http_server_opts.document_root = d.c_str();
 
-   std::cout << "GIT revision: " << GIT_REVISION << std::endl;
+   std::cout << "GIT revision: " << getWdbLibRevision() << std::endl;
    std::cout << "Starting HTTP server at port " << gl.serverPort << std::endl;
 
    if (gl.demoMode)

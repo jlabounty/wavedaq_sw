@@ -31,6 +31,8 @@ add_custom_target(git_revision_h
    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../
 )
 
+
+#
 # Check for mxml
 #
 if (NOT EXISTS ${PROJECT_SOURCE_DIR}/mxml/.git)
@@ -38,6 +40,7 @@ if (NOT EXISTS ${PROJECT_SOURCE_DIR}/mxml/.git)
                        "generation aborted\n\n")
 endif()
 
+#
 # Check for mscb
 #
 if (EXISTS ${PROJECT_SOURCE_DIR}/mscb/.git)
@@ -54,7 +57,9 @@ endif()
 # definitions to remove hardware access in WDBReg.h and DCBReg.h
 add_definitions(-DWD2_DONT_INCLUDE_REG_ACCESS_VARS -DDCB_DONT_INCLUDE_REG_ACCESS_VARS -DDCB_DONT_INCLUDE_VARS)
 
-#MXML Library
+#
+# MXML Library
+#
 add_library(mxml
   mxml/mxml.cxx
   mxml/strlcpy.cxx)
@@ -66,7 +71,9 @@ install(TARGETS mxml
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
 
-#DCB Library
+#
+# DCB Library
+#
 add_library(dcb
    src/DCBLib.cpp)
 
@@ -82,16 +89,21 @@ install(TARGETS dcb
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
 
-#WDB Library
+#
+# WDB Library
+#
 add_library(wdb
    src/WDBLib.cpp
    src/averager.cpp)
+
+add_dependencies(wdb git_revision_h)
 
 target_compile_definitions(wdb
    PUBLIC -DWD2_DONT_INCLUDE_REG_ACCESS_VARS)
 
 target_include_directories(wdb PUBLIC 
-   wds/src 
+   ../
+   wds/src
    include)
 
 target_link_libraries(wdb
@@ -102,7 +114,9 @@ install(TARGETS wdb
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
 
-#TCB Library
+#
+# TCB Library
+#
 add_library(tcb
    src/TCBLib.cpp
    src/averager.cpp)
@@ -119,12 +133,14 @@ install(TARGETS tcb
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
 
-#WDAQ Library
+#
+# WDAQ Library
+#
 add_library(wdaq
    src/WDLib.cpp
    src/WDAQLib.cpp)
 
-target_include_directories(wdaq PUBLIC 
+target_include_directories(wdaq PUBLIC
    include)
 
 target_link_libraries(wdaq
@@ -138,7 +154,9 @@ install(TARGETS wdaq
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
 
-#executables
+#
+# subdirectories
+#
 add_subdirectory(wds)
 
 add_subdirectory(tcb)
@@ -149,7 +167,7 @@ add_subdirectory(serdestest)
 
 add_subdirectory(wdbdiscr)
 
-#disable targets that requires libmscb
+# disable targets that requires libmscb
 if(NOT TARGET mscb)
    set_target_properties(tcb wdaq tcb_cl wd_cl serdestest PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
 endif()

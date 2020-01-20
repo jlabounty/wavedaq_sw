@@ -43,6 +43,7 @@
 
 #endif
 
+#include "git-revision.h"
 #include "WDBLib.h"
 #include "WDBReg.h"
 
@@ -72,6 +73,14 @@ T access_as(U *p) {
    return d;
 }
 
+
+//--------------------------------------------------------------------
+
+std::string getWdbLibRevision()
+{
+   std::string r(GIT_REVISION);
+   return r;
+}
 
 //--------------------------------------------------------------------
 
