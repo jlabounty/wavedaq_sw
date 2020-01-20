@@ -44,7 +44,6 @@
 
 #endif
 
-#include "WDBLib.h"
 #include "DCBLib.h"
 #include "register_map_dcb.h"
 #include "DCBReg.h"
