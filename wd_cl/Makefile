@@ -8,7 +8,7 @@
 #####################################################################
 
 # directories
-MSCB_DIR      = ../../../mscb
+MSCB_DIR      = ../mscb
 WDAQ_DIR      = ../../
 
 # compiler, flags and libs
@@ -29,7 +29,7 @@ FLAGS         += -I$(MSCB_DIR)/include
 FLAGS         += -I$(WDAQ_DIR)/software/include 
 FLAGS         += -I$(WDAQ_DIR)/software/tcb 
 FLAGS         += -I$(WDAQ_DIR)/software/dcb/app/src
-FLAGS         += -I$(WDAQ_DIR)/firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/common/src/
+
 FLAGS         += -D WD2_DONT_INCLUDE_REG_ACCESS_VARS
 FLAGS         += -D DCB_DONT_INCLUDE_REG_ACCESS_VARS
 LIBS          += -lm -lutil -lpthread
@@ -38,9 +38,10 @@ LIBS          += -lm -lutil -lpthread
 MSCB_OBJ      = mscb.o mscbrpc.o strlcpy.o mxml.o
 
 LIB_OBJ       = WDLib.o WDAQLib.o 
-WDB_DRV_OBJ   = WDBLib.o DCBLib.o averager.o 
+DCB_DRV_OBJ   = DCBLib.o
+WDB_DRV_OBJ   = WDBLib.o averager.o 
 TCB_DRV_OBJ   = TCBLib.o 
-OBJECTS       = $(MSCB_OBJ) $(WDB_DRV_OBJ) $(TCB_DRV_OBJ) $(LIB_OBJ)
+OBJECTS       = $(MSCB_OBJ) $(WDB_DRV_OBJ) $(DCB_DRV_OBJ) $(TCB_DRV_OBJ) $(LIB_OBJ)
 OUTNAME       = wd_cl
 
 all: $(OUTNAME)
@@ -51,13 +52,16 @@ $(OUTNAME): $(OBJECTS) wd_cl.o
 $(WDB_DRV_OBJ): %.o: $(WDAQ_DIR)/software/src/%.cpp
 	$(CPP) $(FLAGS) $(CPPFLAGS) -MMD -MP -MF $(@:.o=.d) -MT $@ -c $<
 
-$(TCB_DRV_OBJ): %.o: $(WDAQ_DIR)/software/tcb/%.cpp
+$(TCB_DRV_OBJ): %.o: $(WDAQ_DIR)/software/src/%.cpp
+	$(CPP) $(FLAGS) $(CPPFLAGS) -MMD -MP -MF $(@:.o=.d) -MT $@ -c $<
+
+$(DCB_DRV_OBJ): %.o: $(WDAQ_DIR)/software/src/%.cpp
 	$(CPP) $(FLAGS) $(CPPFLAGS) -MMD -MP -MF $(@:.o=.d) -MT $@ -c $<
 
 $(MSCB_OBJ): %.o: $(MSCB_DIR)/src/%.cxx
 	$(CC) $(FLAGS) -MMD -MP -MF $(@:.o=.d) -MT $@ -c $<
 
-$(LIB_OBJ): %.o: %.cpp
+$(LIB_OBJ): %.o: $(WDAQ_DIR)/software/src/%.cpp
 	$(CPP) $(FLAGS) $(CPPFLAGS) -MMD -MP -MF $(@:.o=.d) -MT $@ -c $<
 
 wd_cl.o: wd_cl.cpp

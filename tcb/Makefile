@@ -8,10 +8,9 @@
 #####################################################################
 
 # directories
-MSCB_DIR      = ../../../mscb
+MSCB_DIR      = ../mscb
 
 # compiler, flags and libs
-CC            = cc
 CPP           = g++
 FLAGS         = -g -DOS_LINUX -Wall
 
@@ -48,7 +47,7 @@ all: $(OUTNAME)
 $(OUTNAME): $(OBJECTS)
 	$(CPP) $(FLAGS) $(OBJECTS) -o $(OUTNAME) $(LIBS)
 
-$(DRV_OBJ): %.o: %.cpp
+$(DRV_OBJ): %.o: ../src/%.cpp
 	$(CPP) $(FLAGS) -MMD -MP -MF $(@:.o=.d) -MT $@ -c $<
 
 $(DCB_OBJ): %.o: ../src/%.cpp

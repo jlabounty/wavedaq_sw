@@ -9,13 +9,10 @@
 
 # directories
 MXML_DIR      = ../mxml/
-MSCB_DIR      = ../../../mscb
-WDB_DIR       = ../
-TCB_DIR       = ../tcb
-FW_DIR        = ../../firmware/WD2/wd2_sys_ctrl/wd2_xsdk_workspace/wd2_app_sw/common/src/
+MSCB_DIR      = ../mscb
+SW_DIR       = ../
 
 # compiler, flags and libs
-CC            = cc
 CPP           = g++
 FLAGS         = -g -DOS_LINUX -Wall -O3
 FLAGS         += -std=c++11
@@ -30,7 +27,7 @@ endif
 FLAGS         += -D WD2_DONT_INCLUDE_REG_ACCESS_VARS
 FLAGS         += -D DCB_DONT_INCLUDE_REG_ACCESS_VARS
 
-FLAGS         += -I$(MSCB_DIR)/include -Iinclude -I$(WDB_DIR)/include -I$(WDB_DIR)/dcb/app/src -I$(TCB_DIR) -I$(FW_DIR) -I$(MXML_DIR)
+FLAGS         += -I$(MSCB_DIR)/include -I$(SW_DIR)/include -I$(SW_DIR)/dcb/app/src -I$(MXML_DIR)
 LIBS          += -lm -lutil -lpthread
 
 # system objects
@@ -41,9 +38,10 @@ MXML_OBJ      = mxml.o strlcpy.o
 # Drivers needed by the frontend program
 #                 
 TCB_OBJ       = TCBLib.o
-WDB_OBJ       = WDBLib.o DCBLib.o averager.o
+DCB_OBJ       = DCBLib.o
+WDB_OBJ       = WDBLib.o averager.o
 
-OBJECTS       = serdestest.o $(MXML_OBJ) $(WDB_OBJ) $(MSCB_OBJ) $(TCB_OBJ) 
+OBJECTS       = serdestest.o $(MXML_OBJ) $(WDB_OBJ) $(DCB_OBJ) $(MSCB_OBJ) $(TCB_OBJ) 
 OUTNAME       = serdestest
 
 all: $(OUTNAME)
@@ -51,10 +49,13 @@ all: $(OUTNAME)
 $(OUTNAME): $(OBJECTS)
 	$(CPP) $(FLAGS) $(OBJECTS) -o $(OUTNAME) $(LIBS)
 
-$(TCB_OBJ): %.o: $(TCB_DIR)/%.cpp
+$(TCB_OBJ): %.o: $(SW_DIR)/src/%.cpp
 	$(CPP) $(FLAGS) -o $@ -c $<
 
-$(WDB_OBJ): %.o: $(WDB_DIR)/src/%.cpp
+$(WDB_OBJ): %.o: $(SW_DIR)/src/%.cpp
+	$(CPP) $(FLAGS) -o $@ -c $<
+
+$(DCB_OBJ): %.o: $(SW_DIR)/src/%.cpp
 	$(CPP) $(FLAGS) -o $@ -c $<
 
 serdestest.o: serdestest.cpp

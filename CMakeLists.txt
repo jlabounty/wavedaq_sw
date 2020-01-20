@@ -31,46 +31,126 @@ add_custom_target(git_revision_h
    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../
 )
 
+# Check for mxml
+#
+if (NOT EXISTS ${PROJECT_SOURCE_DIR}/mxml/.git)
+   message(FATAL_ERROR "mxml files not found, please make sure git submodules are downloaded.\n"
+                       "generation aborted\n\n")
+endif()
+
 # Check for mscb
 #
-if (EXISTS $ENV{MSCBSYS}/src/mscb.cxx)
-   # add tcb folder
-   add_subdirectory(tcb)
-   add_subdirectory(serdestest)
+if (EXISTS ${PROJECT_SOURCE_DIR}/mscb/.git)
+   add_subdirectory(mscb)
+   set(HAVE_MSCB on)
+else()
+   message(WARNING "mscb files not found, please make sure git submodules are downloaded.\n"
+                   "generation of TCB and other libs inhibited\n\n")
+   set(HAVE_MSCB off)
 endif()
 
-if (NOT EXISTS $ENV{MSCBSYS}/src/mscb.cxx)
-      message("\nWarning: 'MSCBSYS' environment variable not found.\n"
-      "Please install mscb and set MSCBSYS to compile TCB library, tcb_cl and serdestest.\n\n")
-endif()
+   #add_subdirectory(read_binary)
 
-add_subdirectory(read_binary)
-
+# definitions to remove hardware access in WDBReg.h and DCBReg.h
 add_definitions(-DWD2_DONT_INCLUDE_REG_ACCESS_VARS -DDCB_DONT_INCLUDE_REG_ACCESS_VARS -DDCB_DONT_INCLUDE_VARS)
 
-add_library(wdb
-   src/WDBLib.cpp
-   src/DCBLib.cpp
-   src/averager.cpp)
+#MXML Library
+add_library(mxml
+  mxml/mxml.cxx
+  mxml/strlcpy.cxx)
 
-target_include_directories(wdb PUBLIC 
-   dcb/app/src/
-   wds/src 
-   include 
+target_include_directories(mxml PUBLIC 
    mxml)
 
-add_executable(wds
-   wds/src/mongoose.c
-   mxml/mxml.cxx
-   mxml/strlcpy.cxx
-   wds/src/wds.cpp)
+install(TARGETS mxml
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
 
-target_include_directories(wds PUBLIC wds/src include mxml ../)
-target_link_libraries(wds wdb ${CMAKE_THREAD_LIBS_INIT})
-add_dependencies(wds git_revision_h)
+#DCB Library
+add_library(dcb
+   src/DCBLib.cpp)
 
-install(TARGETS wds DESTINATION bin)
+target_compile_definitions(dcb
+   PUBLIC -DDCB_DONT_INCLUDE_REG_ACCESS_VAR
+   PUBLIC -DDCB_DONT_INCLUDE_VARS)
+
+target_include_directories(dcb PUBLIC 
+   dcb/app/src/
+   include)
+
+install(TARGETS dcb
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
+
+#WDB Library
+add_library(wdb
+   src/WDBLib.cpp
+   src/averager.cpp)
+
+target_compile_definitions(wdb
+   PUBLIC -DWD2_DONT_INCLUDE_REG_ACCESS_VARS)
+
+target_include_directories(wdb PUBLIC 
+   wds/src 
+   include)
+
+target_link_libraries(wdb
+   mxml
+   dcb)
+
 install(TARGETS wdb
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
+
+#TCB Library
+add_library(tcb
+   src/TCBLib.cpp
+   src/averager.cpp)
+
+target_include_directories(tcb PUBLIC 
+   include)
+
+target_link_libraries(tcb
+   mscb
+   mxml
+   dcb)
+
+install(TARGETS tcb
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
+
+#WDAQ Library
+add_library(wdaq
+   src/WDLib.cpp
+   src/WDAQLib.cpp)
+
+target_include_directories(wdaq PUBLIC 
+   include)
+
+target_link_libraries(wdaq
+   mxml
+   mscb
+   wdb
+   tcb
+   dcb)
+
+install(TARGETS wdaq
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
+
+#executables
+add_subdirectory(wds)
+
+add_subdirectory(tcb)
+
+add_subdirectory(wd_cl)
+
+add_subdirectory(serdestest)
+
+add_subdirectory(wdbdiscr)
+
+#disable targets that requires libmscb
+if(NOT TARGET mscb)
+   set_target_properties(tcb wdaq tcb_cl wd_cl serdestest PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
+endif()
 
