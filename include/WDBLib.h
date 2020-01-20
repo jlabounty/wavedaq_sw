@@ -30,6 +30,8 @@
 
 class WDB;
 
+std::string getWdbLibRevision();
+
 //--------------------------------------------------------------------
 
 #pragma pack(1) // byte-level alignement for frame header
