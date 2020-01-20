@@ -5,6 +5,12 @@
 #include <iostream>
 #include <fstream>
 
+#ifndef WDAQLIB_H
+#define WDAQLIB_H
+
+#include "WDLib.h"
+
+//classes in this file
 class WDAQPacketData;
 class WDAQWdbPacketData;
 class WDAQDRSPacketData;
@@ -27,11 +33,8 @@ class WDAQEventBuilder;
 class WDAQWorker;
 class WDAQEventWriter;
 
-
-#ifndef WDAQLIB_H
-#define WDAQLIB_H
-
-#include "WDLib.h"
+//forward declarations
+class WDTCB;
 
 #define EOE 1
 #define SOE 2

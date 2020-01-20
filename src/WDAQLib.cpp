@@ -1,3 +1,4 @@
+#include "WDLib.h"
 #include "WDAQLib.h"
 
 //WDAQ Packet Data - class for UDP DAQ packets 

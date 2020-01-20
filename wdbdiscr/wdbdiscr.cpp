@@ -139,7 +139,7 @@ int main(int argc, char** argv)
    const float down = -0.035;
    const float up = 0.020;
 
-   printf("piedistalling %d WDBs\n", sizeof(wdbs)/sizeof(std::string*));
+   printf("piedistalling %lu WDBs\n", sizeof(wdbs)/sizeof(std::string*));
 
    for(int b=0; b<sizeof(wdbs)/sizeof(std::string*); b++){
       printf("%s\n", wdbs[b].c_str());

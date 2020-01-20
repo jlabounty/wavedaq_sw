@@ -10,6 +10,11 @@
 #include "DCBLib.h"
 #include "Properties.h"
 
+#ifndef WDLIB_H
+#define WDLIB_H
+#include "WDAQLib.h"
+
+//classes in this file
 class WDBoard;
 class WDCrate;
 class WDSystem;
@@ -17,10 +22,15 @@ class WDWDB;
 class WDTCB;
 class WDDCB;
 
-#ifndef WDLIB_H
-#define WDLIB_H
-#include "WDAQLib.h"
+//forward declarations
+class WDAQPacketData;
+class WDAQEvent;
 
+class WDAQPacketCollector;
+class WDAQTCBReader;
+class WDAQEventBuilder;
+class WDAQWorker;
+class WDAQEventWriter;
 
 // --- WaveDAQ board --- basic wrapper class for wavedaq board
 class WDBoard {

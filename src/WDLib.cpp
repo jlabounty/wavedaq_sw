@@ -1,4 +1,5 @@
 #include "WDLib.h"
+#include "WDAQLib.h"
 #include "mxml.h"
 
 // --- WDBoard --- 
