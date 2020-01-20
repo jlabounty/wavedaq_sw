@@ -27,6 +27,7 @@ endif
 
 FLAGS         += -I$(MSCB_DIR)/include 
 FLAGS         += -I$(WDAQ_DIR)/software/include 
+FLAGS         += -I$(WDAQ_DIR)/
 FLAGS         += -I$(WDAQ_DIR)/software/tcb 
 FLAGS         += -I$(WDAQ_DIR)/software/dcb/app/src
 

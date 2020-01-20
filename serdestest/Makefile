@@ -27,7 +27,7 @@ endif
 FLAGS         += -D WD2_DONT_INCLUDE_REG_ACCESS_VARS
 FLAGS         += -D DCB_DONT_INCLUDE_REG_ACCESS_VARS
 
-FLAGS         += -I$(MSCB_DIR)/include -I$(SW_DIR)/include -I$(SW_DIR)/dcb/app/src -I$(MXML_DIR)
+FLAGS         += -I$(MSCB_DIR)/include -I$(SW_DIR)/include -I$(SW_DIR)/dcb/app/src -I$(SW_DIR)/.. -I$(MXML_DIR)
 LIBS          += -lm -lutil -lpthread
 
 # system objects
