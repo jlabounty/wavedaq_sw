@@ -11,6 +11,10 @@
  *
  */
 
+#include <iostream>
+#include <string>
+#include <map>
+
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
@@ -48,6 +52,7 @@ extern "C" { // make all library functions callable from C++
 #define CMD_READ32      0x24
 
 #define WDAQ_N_SLOTS      18
+#define WDAQ_SLOT_DCB     16
 
 #define SWAP_UINT32(x) (((x) >> 24) | \
                        (((x) & 0x00FF0000) >> 8) | \
@@ -77,46 +82,56 @@ double clock_us() {
 /*------------------------------------------------------------------*/
 
 void printf_crate_scan(char *b, int size) {
-   int n_boards = 0;
    b[0] = 0;
    for (int slot = 0; slot < WDAQ_N_SLOTS; slot++) {
-      int status = get_slot_board_info(slot, &board[slot]);
-      if (status && board[slot].type_id <= BRD_TYPE_ID_MAX &&
-          board[slot].vendor_id <= BRD_VENDOR_ID_MAX) {
-
-         char name[32];
-         if (board[slot].type_id == BRD_TYPE_ID_WDB) {
-
-            char buffer[10];
-            char rbuffer[10];
-
-            memset(buffer, 0, sizeof(buffer));
-            buffer[0] = CMD_READ32;
-            buffer[1] = 0;
-            buffer[2] = 0;
-            buffer[3] = 0;
-            buffer[4] = 0x24; // Status register SN
-            buffer[5] = 0; // dummy
-
-            spi_binary_cmd(buffer, rbuffer, 6+4, slot, board[slot].type_id, board[slot].rev_id);
-
-            unsigned int sn = (rbuffer[8] << 8) | rbuffer[9];
-            snprintf(name, sizeof(name), "WD%03d", sn);
-         } else
-            snprintf(name, sizeof(name), "%s", wdaq_brd_type_name[board[slot].type_id]);
-
-         snprintf(b+strlen(b), size,
+      if (slot == WDAQ_SLOT_DCB) {
+         snprintf(b + strlen(b), size,
                   "Slot %2d: Found board \"%s\", Revision %c, Variant %d, Vendor \"%s\"\n", slot,
-                  name,
-                  'A' + board[slot].rev_id,
-                  board[slot].variant_id,
-                  wdaq_brd_vendor_name[board[slot].vendor_id]);
-         n_boards++;
+                  "DCB",
+                  'A',
+                  0,
+                  "PSI");
+      } else {
+         int status = get_slot_board_info(slot, &board[slot]);
+         if (status && board[slot].type_id <= BRD_TYPE_ID_MAX &&
+             board[slot].vendor_id <= BRD_VENDOR_ID_MAX) {
+
+            char name[32];
+            if (board[slot].type_id == BRD_TYPE_ID_WDB) {
+
+               char buffer[10];
+               char rbuffer[10];
+
+               memset(buffer, 0, sizeof(buffer));
+               buffer[0] = CMD_READ32;
+               buffer[1] = 0;
+               buffer[2] = 0;
+               buffer[3] = 0;
+               buffer[4] = 0x24; // Status register SN
+               buffer[5] = 0; // dummy
+
+               spi_binary_cmd(buffer, rbuffer, 6 + 4, slot, board[slot].type_id, board[slot].rev_id);
+
+               unsigned int sn = (rbuffer[8] << 8) | rbuffer[9];
+               snprintf(name, sizeof(name), "WD%03d", sn);
+            } else
+               snprintf(name, sizeof(name), "%s", wdaq_brd_type_name[board[slot].type_id]);
+
+            snprintf(b + strlen(b), size,
+                     "Slot %2d: Found board \"%s\", Revision %c, Variant %d, Vendor \"%s\"\n", slot,
+                     name,
+                     'A' + board[slot].rev_id,
+                     board[slot].variant_id,
+                     wdaq_brd_vendor_name[board[slot].vendor_id]);
+         }
       }
    }
-   if (n_boards == 0)
-      snprintf(b, size, "No boards found\n");
 }
+
+typedef struct {
+   int    slot;
+   time_t last;
+} UDP_CONN;
 
 /*------------------------------------------------------------------*/
 
@@ -128,6 +143,7 @@ int main(int argc, char *argv[]) {
    int sock_bin, sock_asc, sock_raw;
    int board_type = 0;
    int board_revision = 0;
+   std::map<std::string, UDP_CONN> connection;
 
    /* parse command line parameters */
    for (int i = 1; i < argc; i++) {
@@ -320,7 +336,8 @@ int main(int argc, char *argv[]) {
          // ip address
          if (verbose) {
             char mac[256];
-            printf("Binary request received: %d bytes from client %s\n", len, inet_ntoa(client_address.sin_addr));
+            printf("Binary request received: %d bytes from client %s, port %d\n", len,
+                    inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port));
             buffer[len] = '\0';
             print_buffer(buffer, len);
          }
@@ -373,7 +390,7 @@ int main(int argc, char *argv[]) {
             unsigned int *p = (unsigned int *) (&buffer[8]);
             unsigned int d;
 
-            if (slot == 16) { // DCB
+            if (slot == WDAQ_SLOT_DCB) {
                for (int i = 0; i < n; i++, p++) {
                   d = SWAP_UINT32(*p);
                   reg_bank_write(adr + i * 4, &d, 1);
@@ -415,7 +432,7 @@ int main(int argc, char *argv[]) {
             unsigned int *p = (unsigned int *) (&rbuffer[4]);
             unsigned int d;
 
-            if (slot == 16) { // DCB
+            if (slot == WDAQ_SLOT_DCB) {
                for (int i = 0; i < n / 4 && i < 1024 / 4; i++, p++) {
                   reg_bank_read(adr + i * 4, &d, 1);
                   *p = SWAP_UINT32(d);
@@ -457,22 +474,57 @@ int main(int argc, char *argv[]) {
          int len = recvfrom(sock_asc, buffer, sizeof(buffer), 0, (struct sockaddr *) &client_address,
                             &client_address_len);
 
-         // inet_ntoa prints user friendly representation of the
-         // ip address
+         // retrieve address as IP:port
+         std::string addr = std::string(inet_ntoa(client_address.sin_addr)) + ":" +
+                            std::to_string(ntohs(client_address.sin_port));
+
+         // store address and corresponding slot in connection map
+         if (connection.find(addr) == connection.end())
+            connection[addr].slot = WDAQ_SLOT_DCB; // Default is DCB slot
+         connection[addr].last = time(0);
+
+         // clean up connection map
+         for (auto &c: connection) {
+            if (time(0) > c.second.last + 10) {
+               connection.erase(c.first);
+               break;
+            }
+         }
+
+         // inet_ntoa prints user friendly representation of the ip address
          if (verbose) {
             buffer[len] = '\0';
-            printf("ASCII request received: %d bytes from client %s\n", len, inet_ntoa(client_address.sin_addr));
+            printf("ASCII request received: %d bytes from client %s\n", len, addr.c_str());
             print_buffer(buffer, len);
          }
 
          char rbuffer[1600];
          rbuffer[0] = 0;
 
-         if (isdigit(buffer[0])) {
-            unsigned int slot = atoi(buffer);
+         if (strncmp(buffer, "slot", 4) == 0) {
+
+            int slot = atoi(buffer + 4);
+
+            if (slot == WDAQ_SLOT_DCB) {
+               connection[addr].slot = slot;
+            } else {
+               int status = get_slot_board_info(slot, &board[slot]);
+               if (status && board[slot].type_id <= BRD_TYPE_ID_MAX &&
+                   board[slot].vendor_id <= BRD_VENDOR_ID_MAX) {
+                  connection[addr].slot = slot;
+                  if (verbose)
+                     printf("Switched to slot #%d\n", connection[addr].slot);
+               } else {
+                  snprintf(rbuffer, sizeof(rbuffer), "No board present in slot %d\n", slot);
+               }
+            }
+
+         } else if (connection[addr].slot != WDAQ_SLOT_DCB) {
+
+            // send ASCII command to WDB via SPI
 
             if (verbose)
-               printf("WDB command found for slot %d\n", slot);
+               printf("WDB command found for slot %d\n", connection[addr].slot);
 
             char *p = strchr(buffer, ' ');
             if (p == NULL)
@@ -483,13 +535,14 @@ int main(int argc, char *argv[]) {
             if (verbose)
                printf("TX: %s\n", p);
 
-            spi_ascii_cmd(p, (char*)rbuffer, sizeof(rbuffer), slot,
-                          board[slot].type_id, board[slot].rev_id);
+            spi_ascii_cmd(p, (char*)rbuffer, sizeof(rbuffer), connection[addr].slot,
+                          board[connection[addr].slot].type_id, board[connection[addr].slot].rev_id);
 
             if (verbose)
                printf("RX: %s\n\n", rbuffer);
 
          } else if (buffer[0] == 'h') {
+
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "WDB commands:\n\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "<slot> <command>\n\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "DCB commands (no <slot>):\n\n");
@@ -499,6 +552,7 @@ int main(int argc, char *argv[]) {
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "help        This help page\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "info        Show system information\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "reset       Reboot DCB\n");
+            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "slot <n>    Seclect slot (%d=DCB)\n", WDAQ_SLOT_DCB);
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "scan        Scan crate for boards\n\n");
 
          } else if (strncmp(buffer, "clkint", 6) == 0) {
@@ -529,6 +583,7 @@ int main(int argc, char *argv[]) {
             }
 
          } else if (strncmp(buffer, "info", 4) == 0) {
+
             snprintf(rbuffer, sizeof(rbuffer), "Version Information of DCB:\n\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "-- SW GIT Revision:       %s\n\n", GIT_REVISION);
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "-- Board Type:            WaveDAQ DCB\n");
@@ -561,7 +616,10 @@ int main(int argc, char *argv[]) {
          }
 
          // interpret packet
-         snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "%s> ", hostname);
+         if (connection[addr].slot == WDAQ_SLOT_DCB)
+            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "%s> ", hostname);
+         else
+            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "%s:%02d> ", hostname, connection[addr].slot);
 
          // send data to client
          sendto(sock_asc, rbuffer, strlen(rbuffer)+1, 0, (struct sockaddr *) &client_address, sizeof(client_address));
