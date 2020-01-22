@@ -14,6 +14,7 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <algorithm>
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -40,6 +41,8 @@ extern "C" { // make all library functions callable from C++
 #include "system.h"
 #include "sc_io.h"
 #include "wdaq_board_id.h"
+#include "drv_qspi_flash.h"
+#include "flash_memory_maps.h"
 
 }
 
@@ -69,6 +72,8 @@ WDAQ_BRD board[WDAQ_N_SLOTS];
 /*------------------------------------------------------------------*/
 
 void print_buffer(const char *buffer, int len);
+void process_dcb_command(char *buffer, char *rbuffer, int rbsize);
+void reg_diff_cmd(int argc, char **argv, char *rbuffer, int rbsize);
 
 /*------------------------------------------------------------------*/
 
@@ -93,7 +98,7 @@ void printf_crate_scan(const char *hostname, char *b, int size) {
          unsigned int var = (d & DCB_BOARD_VARIANT_MASK) >> DCB_BOARD_VARIANT_OFS;
 
          snprintf(b + strlen(b), size,
-                  "Slot %2d: Found board \"DCB%02d\", Revision %c, Variant %d, Vendor \"%s\"\n", slot,
+                  "Slot %2d: Found board \"DCB%02d\", Revision \"%c\", Variant \"0x%02X\", Vendor \"%s\"\n", slot,
                   atoi(hostname+3),
                   'A'+rev,
                   var,
@@ -125,7 +130,7 @@ void printf_crate_scan(const char *hostname, char *b, int size) {
                snprintf(name, sizeof(name), "%s", wdaq_brd_type_name[board[slot].type_id]);
 
             snprintf(b + strlen(b), size,
-                     "Slot %2d: Found board \"%s\", Revision %c, Variant %d, Vendor \"%s\"\n", slot,
+                     "Slot %2d: Found board \"%s\", Revision \"%c\", Variant \"0x%02X\", Vendor \"%s\"\n", slot,
                      name,
                      'A' + board[slot].rev_id,
                      board[slot].variant_id,
@@ -140,7 +145,7 @@ typedef struct {
    time_t last;
 } UDP_CONN;
 
-/*------------------------------------------------------------------*/
+//-------------------------------------------------------------------
 
 int main(int argc, char *argv[]) {
 
@@ -183,8 +188,10 @@ int main(int argc, char *argv[]) {
    // set SW state ready to turn LED green
    emio_set_sw_state(BIT_IDX_EMIO_CTRL_SW_STATE_SW_READY_PIN);
 
-   if (verbose)
+   if (verbose) {
+      printf("\n");
       print_sys_info();
+   }
 
    memset(board, 0, sizeof(board));
    if (verbose) {
@@ -478,6 +485,7 @@ int main(int argc, char *argv[]) {
 
       if (FD_ISSET(sock_asc, &fds)) {
          // read content into buffer from an incoming client
+         memset(buffer, 0, sizeof(buffer));
          int len = recvfrom(sock_asc, buffer, sizeof(buffer), 0, (struct sockaddr *) &client_address,
                             &client_address_len);
 
@@ -498,6 +506,12 @@ int main(int argc, char *argv[]) {
             }
          }
 
+         // strip trailing \r\n from buffer
+         if (strchr(buffer, '\n'))
+            *strchr(buffer, '\n') = 0;
+         if (strchr(buffer, '\r'))
+            *strchr(buffer, '\r') = 0;
+
          // inet_ntoa prints user friendly representation of the ip address
          if (verbose) {
             buffer[len] = '\0';
@@ -505,7 +519,7 @@ int main(int argc, char *argv[]) {
             print_buffer(buffer, len);
          }
 
-         char rbuffer[1600];
+         char rbuffer[10000];
          rbuffer[0] = 0;
 
          if (strncmp(buffer, "slot", 4) == 0) {
@@ -530,106 +544,46 @@ int main(int argc, char *argv[]) {
 
             printf_crate_scan(hostname, rbuffer, sizeof(rbuffer));
 
-         } else if (connection[addr].slot != WDAQ_SLOT_DCB) { //----Send to slot via SPI ------------
+         } else if (connection[addr].slot != WDAQ_SLOT_DCB) { //---- Send to slot via SPI -----------
 
             // send ASCII command to WDB via SPI
 
             if (verbose)
                printf("WDB command found for slot %d\n", connection[addr].slot);
 
-            char *p = strchr(buffer, ' ');
-            if (p == NULL)
-               p = buffer;
-            else
-               p++;
-
             if (verbose)
-               printf("TX: %s\n", p);
+               printf("TX: %s\n", buffer);
 
-            spi_ascii_cmd(p, (char*)rbuffer, sizeof(rbuffer), connection[addr].slot,
+            spi_ascii_cmd(buffer, (char *) rbuffer, sizeof(rbuffer), connection[addr].slot,
                           board[connection[addr].slot].type_id, board[connection[addr].slot].rev_id);
 
             if (verbose)
                printf("RX: %s\n\n", rbuffer);
 
-         } else if (buffer[0] == 'h') {  //---- Process locally on DCB ------------------------------
-
-            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "WDB commands:\n\n");
-            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "<slot> <command>\n\n");
-            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "DCB commands (no <slot>):\n\n");
-            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "clkint      Switch bus clock to quartz\n");
-            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "clkext      Switch bus clock to FCI input\n");
-            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "delay <n>   Set SYNC delay\n");
-            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "help        This help page\n");
-            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "info        Show system information\n");
-            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "reset       Reboot DCB\n");
-            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "slot <n>    Seclect slot (%d=DCB)\n", WDAQ_SLOT_DCB);
-            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "scan        Scan crate for boards\n\n");
-
-         } else if (strncmp(buffer, "clkint", 6) == 0) {
-
-            unsigned int data = (1 << DCB_DISTRIBUTOR_CLK_SRC_SEL_OFS);
-            unsigned int mask = DCB_DISTRIBUTOR_CLK_SRC_SEL_MASK;
-            reg_bank_mask_write(DCB_DISTRIBUTOR_CLK_SRC_SEL_REG, &data, &mask, 1);
-            snprintf(rbuffer, sizeof(rbuffer), "Set bus clock to internal 80 MHz quartz\n");
-
-         } else if (strncmp(buffer, "clkext", 6) == 0) {
-
-            unsigned int data = (0 << DCB_DISTRIBUTOR_CLK_SRC_SEL_OFS);
-            unsigned int mask = DCB_DISTRIBUTOR_CLK_SRC_SEL_MASK;
-            reg_bank_mask_write(DCB_DISTRIBUTOR_CLK_SRC_SEL_REG, &data, &mask, 1);
-            snprintf(rbuffer, sizeof(rbuffer), "Set bus clock to external FCI connector input\n");
-
-         } else if (strncmp(buffer, "delay", 5) == 0) {
-
-            char *p = strchr(buffer, ' ');
-            if (p == NULL) {
-               snprintf(rbuffer, sizeof(rbuffer), "Please specify delay value\n");
-            } else {
-               unsigned int d = atoi(p);
-               unsigned int data = (d << DCB_SYNC_DELAY_OFS);
-               unsigned int mask = DCB_SYNC_DELAY_MASK;
-               reg_bank_mask_write(DCB_SYNC_DELAY_REG, &data, &mask, 1);
-               snprintf(rbuffer, sizeof(rbuffer), "Set delay to %d\n", d);
-            }
-
-         } else if (strncmp(buffer, "info", 4) == 0) {
-
-            snprintf(rbuffer, sizeof(rbuffer), "Version Information of DCB:\n\n");
-            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "-- SW GIT Revision:       %s\n\n", GIT_REVISION);
-            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "-- Board Type:            WaveDAQ DCB\n");
-
-            unsigned int d;
-            reg_bank_read(DCB_BOARD_REVISION_REG, &d, 1);
-            d = (d & DCB_BOARD_REVISION_MASK) >> DCB_BOARD_REVISION_OFS;
-            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "-- Board Revision:        %c\n", 'A'+d);
-
-            reg_bank_read(DCB_BOARD_VARIANT_REG, &d, 1);
-            d = (d & DCB_BOARD_VARIANT_MASK) >> DCB_BOARD_VARIANT_OFS;
-            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "-- Board Variant:         0x%02X\n\n", d);
-
-         } else if (strncmp(buffer, "reset", 5) == 0) {
+         } else if (strncmp(buffer, "reset", 5) == 0) { //---- Process command locally --------------
 
             snprintf(rbuffer, sizeof(rbuffer), "Rebooting...\n\n");
-            sendto(sock_asc, rbuffer, strlen(rbuffer)+1, 0, (struct sockaddr *) &client_address, sizeof(client_address));
+            sendto(sock_asc, rbuffer, strlen(rbuffer) + 1, 0, (struct sockaddr *) &client_address,
+                   sizeof(client_address));
             system("reboot");
             exit(0);
 
-         } else if (buffer[0] == '\n') {
-            // just ignore <CR>
+         } else
+            // process DCB command locally
+            process_dcb_command(buffer, rbuffer, sizeof(rbuffer));
 
-         } else {
-            snprintf(rbuffer, sizeof(rbuffer), "Unknown command: %s\n", buffer);
-         }
-
-         // interpret packet
+         // add prompt
          if (connection[addr].slot == WDAQ_SLOT_DCB)
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "%s> ", hostname);
          else
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "%s:%02d> ", hostname, connection[addr].slot);
 
-         // send data to client
-         sendto(sock_asc, rbuffer, strlen(rbuffer)+1, 0, (struct sockaddr *) &client_address, sizeof(client_address));
+         // send data to client in chunks of 1000 bytes
+         int n = strlen(rbuffer) + 1;
+         int i;
+         for (char *p=rbuffer ; n > 0; n -= i, p += i)
+            i = sendto(sock_asc, p, std::min(1000, n), 0, (struct sockaddr *) &client_address,
+                       sizeof(client_address));
 
       } // ASCII
 
@@ -637,6 +591,8 @@ int main(int argc, char *argv[]) {
 
    return 0;
 }
+
+//-------------------------------------------------------------------
 
 void print_buffer(const char *buffer, int len) {
    for (int i = 0; i < len; i++) {
@@ -665,4 +621,333 @@ void print_buffer(const char *buffer, int len) {
       printf("|\n");
    }
    printf("\n");
+}
+
+//-------------------------------------------------------------------
+
+void process_dcb_command(char *buffer, char *rbuffer, int rbsize) {
+
+   // split string into parameter
+   char *param[10];
+   int n_param = 0;
+   memset(param, 0, sizeof(param));
+   char *p = strtok(buffer, " ");
+   for (; p != NULL && n_param < 10; n_param++) {
+      param[n_param] = p;
+      p = strtok(NULL, " ");
+   }
+
+   if (param[0] == NULL) // ignore single \n
+      return;
+
+   if (param[0][0] == 'h') {  //---- Process locally on DCB ------------------------------
+
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "\nCrate commands:\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "---------------\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "scan                 Scan crate for boards\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "slot <n>             Seclect slot (%d=DCB)\n",
+               WDAQ_SLOT_DCB);
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "   - all further commands will then be sent to slot <n>\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "   - switch back to DCB with \"slot 16\"\n\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "DCB commands:\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "-------------\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "clkint               Switch bus clock to quartz\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "clkext               Switch bus clock to FCI input\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "delay <n>            Set SYNC delay\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "help                 This help page\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "info                 Show system information\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "reset                Reboot DCB\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "rr/regrd <ofs> <n>   Read register\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "rw/regwr <ofs> <d>   Write register\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "rs/regset <ofs> <d>  Set bits of register\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "rc/regclr <ofs> <d>  Clear bits of register\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "regstore             Store registers in QSPI flash\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "regload              Load registers from QSPI flash\n");
+
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "regdiff [-a][-r] [i|s|c [i|s|c]] [<ofs> [<n>]]\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "                     Compare control registers\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "      -a : show all registers, even when equal\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "      -r : show read-only registers when not equal\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "       i : initial register\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "       s : stored  register, default for left column\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "       c : current register, default for right column\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "   <ofs> : starting register, default: first ctrl reg\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "     <n> : number of registers, default 1 if <ofs> is specified, otherwise all\n\n");
+
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "sysmon               Print system monitor info\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "\n");
+
+   } else if (strncmp(param[0], "clkint", 6) == 0) {
+
+      unsigned int data = (1 << DCB_DISTRIBUTOR_CLK_SRC_SEL_OFS);
+      unsigned int mask = DCB_DISTRIBUTOR_CLK_SRC_SEL_MASK;
+      reg_bank_mask_write(DCB_DISTRIBUTOR_CLK_SRC_SEL_REG, &data, &mask, 1);
+      snprintf(rbuffer, rbsize, "Set bus clock to internal 80 MHz quartz\n");
+
+   } else if (strncmp(param[0], "clkext", 6) == 0) {
+
+      unsigned int data = (0 << DCB_DISTRIBUTOR_CLK_SRC_SEL_OFS);
+      unsigned int mask = DCB_DISTRIBUTOR_CLK_SRC_SEL_MASK;
+      reg_bank_mask_write(DCB_DISTRIBUTOR_CLK_SRC_SEL_REG, &data, &mask, 1);
+      snprintf(rbuffer, rbsize, "Set bus clock to external FCI connector input\n");
+
+   } else if (strncmp(param[0], "delay", 5) == 0) {
+
+      if (n_param < 2) {
+         snprintf(rbuffer, rbsize, "Please specify delay value\n");
+      } else {
+         unsigned int d = atoi(param[1]);
+         unsigned int data = (d << DCB_SYNC_DELAY_OFS);
+         unsigned int mask = DCB_SYNC_DELAY_MASK;
+         reg_bank_mask_write(DCB_SYNC_DELAY_REG, &data, &mask, 1);
+         snprintf(rbuffer, rbsize, "Set delay to %d\n", d);
+      }
+
+   } else if (strncmp(param[0], "info", 4) == 0) {
+
+      snprintf(rbuffer, rbsize, "Version Information of DCB:\n\n");
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "-- SW GIT Revision:       %s\n", GIT_REVISION);
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "-- SW Build:              %s %s (UTC)\n\n",
+               __DATE__, __TIME__);
+
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "-- Board Type:            DCB\n");
+
+      unsigned int d;
+      reg_bank_read(DCB_BOARD_REVISION_REG, &d, 1);
+      d = (d & DCB_BOARD_REVISION_MASK) >> DCB_BOARD_REVISION_OFS;
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "-- Board Revision:        %c\n", 'A' + d);
+
+      reg_bank_read(DCB_BOARD_VARIANT_REG, &d, 1);
+      d = (d & DCB_BOARD_VARIANT_MASK) >> DCB_BOARD_VARIANT_OFS;
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "-- Board Variant:         0x%02X\n\n", d);
+
+   } else if (strncmp(param[0], "rr", 2) == 0 || strncmp(param[0], "regrd", 5) == 0) {
+
+      if (n_param < 2) {
+         snprintf(rbuffer, rbsize, "Error: please specify register offset\n");
+         return;
+      }
+
+      int offset = strtoul(param[1], NULL, 0);
+      int nr_of_regs = 1;
+
+      if (n_param > 2)
+         nr_of_regs = strtoul(param[2], NULL, 0);
+
+      for (unsigned int i = 0; i < nr_of_regs; i++) {
+         unsigned int data;
+         reg_bank_read(offset + i * 4, &data, 1);
+         snprintf(rbuffer + strlen(rbuffer), rbsize, "[0x%04X]: 0x%08X\r\n", offset + i * 4, data);
+      }
+
+   } else if (strncmp(param[0], "rw", 2) == 0 || strncmp(param[0], "regwr", 5) == 0) {
+
+      if (n_param < 3) {
+         snprintf(rbuffer, rbsize, "Error: please specify register offset and data\n");
+         return;
+      }
+
+      unsigned int offset = strtoul(param[1], NULL, 0);
+      unsigned int data   = strtoul(param[2], NULL, 0);
+
+      reg_bank_write(offset, &data, 1);
+      snprintf(rbuffer, rbsize, "[0x%04X]<=0x%08X\r\n", offset, data);
+
+   } else if (strncmp(param[0], "rs", 2) == 0 || strncmp(param[0], "regset", 6) == 0) {
+
+      if (n_param < 3) {
+         snprintf(rbuffer, rbsize, "Error: please specify register offset and data\n");
+         return;
+      }
+
+      unsigned int offset = strtoul(param[1], NULL, 0);
+      unsigned int data   = strtoul(param[2], NULL, 0);
+
+      reg_bank_set(offset, &data, 1);
+      reg_bank_read(offset, &data, 1);
+      snprintf(rbuffer, rbsize, "[0x%04X]<=0x%08X\r\n", offset, data);
+
+   } else if (strncmp(param[0], "rc", 2) == 0 || strncmp(param[0], "regclr", 6) == 0) {
+
+      if (n_param < 3) {
+         snprintf(rbuffer, rbsize, "Error: please specify register offset and data\n");
+         return;
+      }
+
+      unsigned int offset = strtoul(param[1], NULL, 0);
+      unsigned int data   = strtoul(param[2], NULL, 0);
+
+      reg_bank_clr(offset, &data, 1);
+      reg_bank_read(offset, &data, 1);
+      snprintf(rbuffer, rbsize, "[0x%04X]<=0x%08X\r\n", offset, data);
+
+   } else if (strncmp(param[0], "regstore", 8) == 0) {
+
+      reg_bank_store();
+      snprintf(rbuffer, rbsize, "Registers stored in QSPI flash\n");
+
+   } else if (strncmp(param[0], "regload", 8) == 0) {
+
+      reg_bank_load();
+      snprintf(rbuffer, rbsize, "Registers loaded from QSPI flash\n");
+
+   } else if (strncmp(param[0], "regdiff", 7) == 0) {
+
+      reg_diff_cmd(n_param, param, rbuffer, rbsize);
+
+   } else if (strncmp(param[0], "sysmon", 5) == 0) {
+
+      auto temp = sysmon_get_temp_mdeg(SYSPTR(sys_mon));
+      auto vdd = sysmon_get_vdd_mv(SYSPTR(sys_mon));
+      auto i_tot = (int) (1000.0 * sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN0) * 0.5);
+      auto v_5_0 = (int) (1000.0 * sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN1) * 2.5);
+      auto v_3_3 = (int) (1000.0 * sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN2) * 5.0 / 3.0);
+      auto v_2_5 = (int) (1000.0 * sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN3) * 1.22);
+      auto v_2_0 = sysmon_get_voltage_mv(SYSPTR(sys_mon), SYSMON_ADR_AIN4);
+      auto v_1_8 = sysmon_get_voltage_mv(SYSPTR(sys_mon), SYSMON_ADR_AIN5);
+      auto v_1_5 = sysmon_get_voltage_mv(SYSPTR(sys_mon), SYSMON_ADR_AIN6);
+      auto v_1_0 = sysmon_get_voltage_mv(SYSPTR(sys_mon), SYSMON_ADR_AIN7);
+
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "Temperature      T: %4d.%03d deg C\r\n", temp / 1000,
+               temp % 1000);
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "System Monitor Vdd: %4d.%03d V\r\n", vdd / 1000,
+               vdd % 1000);
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "Main Current     I: %4d.%03d A\r\n", i_tot / 1000,
+               i_tot % 1000);
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "Voltage    V(5.0V): %4d.%03d V\r\n", v_5_0 / 1000,
+               v_5_0 % 1000);
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "Voltage    V(3.3V): %4d.%03d V\r\n", v_3_3 / 1000,
+               v_3_3 % 1000);
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "Voltage    V(2.5V): %4d.%03d V\r\n", v_2_5 / 1000,
+               v_2_5 % 1000);
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "Voltage    V(2.0V): %4d.%03d V\r\n", v_2_0 / 1000,
+               v_2_0 % 1000);
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "Voltage    V(1.8V): %4d.%03d V\r\n", v_1_8 / 1000,
+               v_1_8 % 1000);
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "Voltage    V(1.5V): %4d.%03d V\r\n", v_1_5 / 1000,
+               v_1_5 % 1000);
+      snprintf(rbuffer + strlen(rbuffer), rbsize, "Voltage    V(1.0V): %4d.%03d V\r\n", v_1_0 / 1000,
+               v_1_0 % 1000);
+
+   } else {
+      snprintf(rbuffer, rbsize, "Unknown command: %s\n", buffer);
+   }
+
+}
+
+//-------------------------------------------------------------------
+
+#define REGDIFF_CMP_INITIAL  0
+#define REGDIFF_CMP_STORED   1
+#define REGDIFF_CMP_CURRENT  2
+
+#define REGDIFF_POS_A  24
+#define REGDIFF_POS_B  45
+
+#define REG_START   0x0000
+#define REG_END     (REG_START + ((NR_OF_REGS-2)*4))
+
+unsigned int regdiff_getreg(unsigned int reg, int sel) {
+   unsigned int val;
+   unsigned char flash_reg[4];
+   qspi_flash_partition flash_partition;
+   flash_partition_type *mtd_ptr;
+
+   if (sel == REGDIFF_CMP_INITIAL) {
+      val = reg_default[reg / 4];
+   } else if (sel == REGDIFF_CMP_STORED) {
+      if (!(mtd_ptr = get_flash_partition(get_flash_mem_map(BRD_TYPE_ID_DCB, DCB_BRD_REV_ID_B), "qspi-regcontent"))) {
+         if (DBG_ERR)
+            printf("Error: flash partitions for register content not found");
+      }
+      if (!(qspi_flash_init(&flash_partition, mtd_ptr->mtd_partition))) {
+         if (DBG_ERR)
+            printf("Error: register value flash partition accesse failed\n");
+         return 0;
+      }
+      qspi_flash_read(&flash_partition, reg, sizeof(flash_reg), flash_reg);
+      val = 0;
+      for (int i = 3; i >= 0; i--) {
+         val = val << 8;
+         val |= flash_reg[i];
+      }
+   } else /* REGDIFF_CMP_CURRENT */
+   {
+      reg_bank_read(reg, &val, 1);
+   }
+
+   return val;
+}
+
+void reg_diff_cmd(int argc, char **argv, char *rbuffer, int rbsize) {
+   int ac = 0;
+   int show_all = 0;
+   int show_readonly = 0;
+   int regcmp[2] = {REGDIFF_CMP_STORED, REGDIFF_CMP_CURRENT};
+   int rc = 0;
+   const char *rc_names[3] = {"initial", "stored", "current"};
+   unsigned int reg_sel[2] = {REG_START, REG_END};
+   unsigned int max_regs;
+   unsigned int mask, reg, val_a, val_b;
+   unsigned int rs = 0;
+   int i, changed;
+   char diff_line[REGDIFF_POS_B + 11];
+
+   while (++ac < argc) {
+      if (fstrcmp(argv[ac], "-a"))
+         show_all = 1;
+      else if (fstrcmp(argv[ac], "-r"))
+         show_readonly = 1;
+      else if (fstrcmp(argv[ac], "i") || fstrcmp(argv[ac], rc_names[REGDIFF_CMP_INITIAL]))
+         regcmp[rc++ & 1] = REGDIFF_CMP_INITIAL;
+      else if (fstrcmp(argv[ac], "s") || fstrcmp(argv[ac], rc_names[REGDIFF_CMP_STORED]))
+         regcmp[rc++ & 1] = REGDIFF_CMP_STORED;
+      else if (fstrcmp(argv[ac], "c") || fstrcmp(argv[ac], rc_names[REGDIFF_CMP_CURRENT]))
+         regcmp[rc++ & 1] = REGDIFF_CMP_CURRENT;
+      else if (isdigit(argv[ac][0]))
+         reg_sel[rs++ & 1] = strtol(argv[ac], 0, 0);
+   }
+
+   /* check boundaries */
+   if (reg_sel[0] < REG_START)
+      reg_sel[0] = REG_START;
+   if (reg_sel[0] > REG_END)
+      reg_sel[0] = REG_END;
+   if (rs == 1)
+      reg_sel[1] = 1;
+   else {
+      max_regs = (((REG_END - reg_sel[0]) / 4) + 1);
+      if (reg_sel[1] > max_regs) reg_sel[1] = max_regs;
+   }
+
+   for (i = 0; i < (REGDIFF_POS_B + 8); i++) diff_line[i] = ' ';
+   diff_line[REGDIFF_POS_B + 8] = '\r';
+   diff_line[REGDIFF_POS_B + 9] = '\n';
+   diff_line[REGDIFF_POS_B + 10] = '\0';
+
+   reg = reg_sel[0];
+   for (rs = 0; rs < reg_sel[1]; rs++) {
+      val_a = regdiff_getreg(reg, regcmp[0]);
+      val_b = regdiff_getreg(reg, regcmp[1]);
+      changed = (val_a != val_b);
+      if ((changed && (!dcb_reg_list[reg / 4].read_only || show_readonly)) || show_all) {
+         snprintf(rbuffer+strlen(rbuffer), rbsize, "reg[0x%04x]  %7s: 0x%08x  %7s: 0x%08x  %s\r\n", reg, rc_names[regcmp[0]], val_a, rc_names[regcmp[1]],
+                val_b, (changed && show_all) ? "!!!" : "");
+         if (changed) {
+            for (i = 0; i < 8; i++) {
+               mask = 0xf0000000 >> (4 * i);
+
+               if ((val_a & mask) == (val_b & mask)) {
+                  diff_line[REGDIFF_POS_A + i] = '=';
+                  diff_line[REGDIFF_POS_B + i] = '=';
+               } else {
+                  diff_line[REGDIFF_POS_A + i] = '^';
+                  diff_line[REGDIFF_POS_B + i] = '^';
+               }
+            }
+            snprintf(rbuffer+strlen(rbuffer), rbsize, diff_line);
+         }
+      }
+      reg += 4;
+   }
 }

@@ -851,7 +851,7 @@ void print_sys_info(void)
 //  xfs_printf("-- Compatibility Level: %d\r\n\r\n", compat_level);
 ////  xfs_printf("-- FW GIT Revision:     0x%07X\r\n", git_rev_fw);
 //
-  xfs_printf("-- SW GIT Revision:     0x%08X\r\n\r\n", git_rev_sw);
+  xfs_printf("-- SW GIT Revision:     %s\r\n", GIT_REVISION);
 ////  xfs_printf("-- FW Build:            %s %2d %04d  %02d:%02d:%02d\r\n", system_month_str[(month-1)%12], day, year, hour, minute, second);
 
   xfs_printf("-- SW Build:            %s  %s (UTC)\r\n\r\n",system_sw_build_date,system_sw_build_time);
