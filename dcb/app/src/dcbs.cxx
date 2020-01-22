@@ -81,15 +81,22 @@ double clock_us() {
 
 /*------------------------------------------------------------------*/
 
-void printf_crate_scan(char *b, int size) {
+void printf_crate_scan(const char *hostname, char *b, int size) {
    b[0] = 0;
    for (int slot = 0; slot < WDAQ_N_SLOTS; slot++) {
       if (slot == WDAQ_SLOT_DCB) {
+
+         unsigned int d;
+         reg_bank_read(DCB_BOARD_REVISION_REG, &d, 1);
+         unsigned int rev = (d & DCB_BOARD_REVISION_MASK) >> DCB_BOARD_REVISION_OFS;
+         reg_bank_read(DCB_BOARD_VARIANT_REG, &d, 1);
+         unsigned int var = (d & DCB_BOARD_VARIANT_MASK) >> DCB_BOARD_VARIANT_OFS;
+
          snprintf(b + strlen(b), size,
-                  "Slot %2d: Found board \"%s\", Revision %c, Variant %d, Vendor \"%s\"\n", slot,
-                  "DCB",
-                  'A',
-                  0,
+                  "Slot %2d: Found board \"DCB%02d\", Revision %c, Variant %d, Vendor \"%s\"\n", slot,
+                  atoi(hostname+3),
+                  'A'+rev,
+                  var,
                   "PSI");
       } else {
          int status = get_slot_board_info(slot, &board[slot]);
@@ -171,6 +178,8 @@ int main(int argc, char *argv[]) {
 
    init_system();
 
+   gethostname(hostname, sizeof(hostname));
+
    // set SW state ready to turn LED green
    emio_set_sw_state(BIT_IDX_EMIO_CTRL_SW_STATE_SW_READY_PIN);
 
@@ -188,14 +197,12 @@ int main(int argc, char *argv[]) {
 
    if (verbose) {
       char b[1500];
-      printf_crate_scan(b, sizeof(b));
+      printf_crate_scan(hostname, b, sizeof(b));
       printf("%s\n", b);
       set_dbg_level(DBG_LEVEL_SPAM);
    }
 
    /*---- initialize network ----*/
-
-   gethostname(hostname, sizeof(hostname));
 
    // create raw socket
    sock_raw = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_IP));
@@ -519,7 +526,11 @@ int main(int argc, char *argv[]) {
                }
             }
 
-         } else if (connection[addr].slot != WDAQ_SLOT_DCB) {
+         } else if (strncmp(buffer, "scan", 4) == 0) {
+
+            printf_crate_scan(hostname, rbuffer, sizeof(rbuffer));
+
+         } else if (connection[addr].slot != WDAQ_SLOT_DCB) { //----Send to slot via SPI ------------
 
             // send ASCII command to WDB via SPI
 
@@ -541,7 +552,7 @@ int main(int argc, char *argv[]) {
             if (verbose)
                printf("RX: %s\n\n", rbuffer);
 
-         } else if (buffer[0] == 'h') {
+         } else if (buffer[0] == 'h') {  //---- Process locally on DCB ------------------------------
 
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "WDB commands:\n\n");
             snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "<slot> <command>\n\n");
@@ -603,10 +614,6 @@ int main(int argc, char *argv[]) {
             sendto(sock_asc, rbuffer, strlen(rbuffer)+1, 0, (struct sockaddr *) &client_address, sizeof(client_address));
             system("reboot");
             exit(0);
-
-         } else if (strncmp(buffer, "scan", 4) == 0) {
-
-            printf_crate_scan(rbuffer, sizeof(rbuffer));
 
          } else if (buffer[0] == '\n') {
             // just ignore <CR>
