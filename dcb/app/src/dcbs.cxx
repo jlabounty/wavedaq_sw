@@ -15,6 +15,8 @@
 #include <string>
 #include <map>
 #include <algorithm>
+#include <memory>
+#include <stdexcept>
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -24,6 +26,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -72,8 +75,8 @@ WDAQ_BRD board[WDAQ_N_SLOTS];
 /*------------------------------------------------------------------*/
 
 void print_buffer(const char *buffer, int len);
-void process_dcb_command(char *buffer, char *rbuffer, int rbsize);
-void reg_diff_cmd(int argc, char **argv, char *rbuffer, int rbsize);
+void process_dcb_command(char *buffer, std::string &rbuffer);
+void reg_diff_cmd(int argc, char **argv, std::string &rbuffer);
 
 /*------------------------------------------------------------------*/
 
@@ -86,7 +89,24 @@ double clock_us() {
 
 /*------------------------------------------------------------------*/
 
-void printf_crate_scan(const char *hostname, char *b, int size) {
+std::string stringf(const char *fmt, ...)
+{
+   char *ret;
+   va_list ap;
+
+   va_start(ap, fmt);
+   vasprintf(&ret, fmt, ap);
+   va_end(ap);
+
+   std::string str(ret);
+   free(ret);
+
+   return str;
+}
+
+/*------------------------------------------------------------------*/
+
+void printf_crate_scan(const char *hostname, std::string &b) {
    b[0] = 0;
    for (int slot = 0; slot < WDAQ_N_SLOTS; slot++) {
       if (slot == WDAQ_SLOT_DCB) {
@@ -97,12 +117,12 @@ void printf_crate_scan(const char *hostname, char *b, int size) {
          reg_bank_read(DCB_BOARD_VARIANT_REG, &d, 1);
          unsigned int var = (d & DCB_BOARD_VARIANT_MASK) >> DCB_BOARD_VARIANT_OFS;
 
-         snprintf(b + strlen(b), size,
-                  "Slot %2d: Found board \"DCB%02d\", Revision \"%c\", Variant \"0x%02X\", Vendor \"%s\"\n", slot,
-                  atoi(hostname+3),
-                  'A'+rev,
-                  var,
-                  "PSI");
+         b += stringf("Slot %2d: Found board \"DCB%02d\", Revision \"%c\", Variant \"0x%02X\", Vendor \"%s\"\n",
+                 slot,
+                 atoi(hostname+3),
+                 'A'+rev,
+                 var,
+                 "PSI");
       } else {
          int status = get_slot_board_info(slot, &board[slot]);
          if (status && board[slot].type_id <= BRD_TYPE_ID_MAX &&
@@ -129,12 +149,12 @@ void printf_crate_scan(const char *hostname, char *b, int size) {
             } else
                snprintf(name, sizeof(name), "%s", wdaq_brd_type_name[board[slot].type_id]);
 
-            snprintf(b + strlen(b), size,
-                     "Slot %2d: Found board \"%s\", Revision \"%c\", Variant \"0x%02X\", Vendor \"%s\"\n", slot,
-                     name,
-                     'A' + board[slot].rev_id,
-                     board[slot].variant_id,
-                     wdaq_brd_vendor_name[board[slot].vendor_id]);
+            b += stringf("Slot %2d: Found board \"%s\", Revision \"%c\", Variant \"0x%02X\", Vendor \"%s\"\n",
+                    slot,
+                    name,
+                    'A' + board[slot].rev_id,
+                    board[slot].variant_id,
+                    wdaq_brd_vendor_name[board[slot].vendor_id]);
          }
       }
    }
@@ -203,9 +223,9 @@ int main(int argc, char *argv[]) {
       int status = get_slot_board_info(i, &board[i]);
 
    if (verbose) {
-      char b[1500];
-      printf_crate_scan(hostname, b, sizeof(b));
-      printf("%s\n", b);
+      std::string str;
+      printf_crate_scan(hostname, str);
+      std::cout << str << std::endl;
       set_dbg_level(DBG_LEVEL_SPAM);
    }
 
@@ -519,12 +539,13 @@ int main(int argc, char *argv[]) {
             print_buffer(buffer, len);
          }
 
-         char rbuffer[10000];
-         rbuffer[0] = 0;
+         std::string rbuffer;
 
-         if (strncmp(buffer, "slot", 4) == 0) {
+         if (strncmp(buffer, "slot", 4) == 0  || strncmp(buffer, "s ", 2) == 0 || strcmp(buffer, "s") == 0) {
 
-            int slot = atoi(buffer + 4);
+            int slot = WDAQ_SLOT_DCB;
+            if (strchr(buffer, ' '))
+               slot = strtol(strchr(buffer, ' '), 0, 0);
 
             if (slot == WDAQ_SLOT_DCB) {
                connection[addr].slot = slot;
@@ -536,13 +557,13 @@ int main(int argc, char *argv[]) {
                   if (verbose)
                      printf("Switched to slot #%d\n", connection[addr].slot);
                } else {
-                  snprintf(rbuffer, sizeof(rbuffer), "No board present in slot %d\n", slot);
+                  rbuffer += stringf("No board present in slot %d\n", slot);
                }
             }
 
          } else if (strncmp(buffer, "scan", 4) == 0) {
 
-            printf_crate_scan(hostname, rbuffer, sizeof(rbuffer));
+            printf_crate_scan(hostname, rbuffer);
 
          } else if (connection[addr].slot != WDAQ_SLOT_DCB) { //---- Send to slot via SPI -----------
 
@@ -554,34 +575,38 @@ int main(int argc, char *argv[]) {
             if (verbose)
                printf("TX: %s\n", buffer);
 
-            spi_ascii_cmd(buffer, (char *) rbuffer, sizeof(rbuffer), connection[addr].slot,
+            char rb[10000];
+            spi_ascii_cmd(buffer, rb, sizeof(rb), connection[addr].slot,
                           board[connection[addr].slot].type_id, board[connection[addr].slot].rev_id);
 
             if (verbose)
-               printf("RX: %s\n\n", rbuffer);
+               printf("RX: %s\n\n", rb);
+
+            rbuffer += std::string(rb);
 
          } else if (strncmp(buffer, "reset", 5) == 0) { //---- Process command locally --------------
 
-            snprintf(rbuffer, sizeof(rbuffer), "Rebooting...\n\n");
-            sendto(sock_asc, rbuffer, strlen(rbuffer) + 1, 0, (struct sockaddr *) &client_address,
+            const char *str = "Rebooting...\n\n";
+            sendto(sock_asc, str, strlen(str) + 1, 0, (struct sockaddr *) &client_address,
                    sizeof(client_address));
             system("reboot");
             exit(0);
 
          } else
             // process DCB command locally
-            process_dcb_command(buffer, rbuffer, sizeof(rbuffer));
+            process_dcb_command(buffer, rbuffer);
 
          // add prompt
          if (connection[addr].slot == WDAQ_SLOT_DCB)
-            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "%s> ", hostname);
+            rbuffer += stringf("%s> ", hostname);
          else
-            snprintf(rbuffer+strlen(rbuffer), sizeof(rbuffer), "%s:%02d> ", hostname, connection[addr].slot);
+            rbuffer += stringf("%s:%02d> ", hostname, connection[addr].slot);
+
 
          // send data to client in chunks of 1000 bytes
-         int n = strlen(rbuffer) + 1;
+         int n = rbuffer.length() + 1;
          int i;
-         for (char *p=rbuffer ; n > 0; n -= i, p += i)
+         for (const char *p=rbuffer.c_str() ; n > 0; n -= i, p += i)
             i = sendto(sock_asc, p, std::min(1000, n), 0, (struct sockaddr *) &client_address,
                        sizeof(client_address));
 
@@ -625,7 +650,7 @@ void print_buffer(const char *buffer, int len) {
 
 //-------------------------------------------------------------------
 
-void process_dcb_command(char *buffer, char *rbuffer, int rbsize) {
+void process_dcb_command(char *buffer, std::string &rbuffer) {
 
    // split string into parameter
    char *param[10];
@@ -642,89 +667,88 @@ void process_dcb_command(char *buffer, char *rbuffer, int rbsize) {
 
    if (param[0][0] == 'h') {  //---- Process locally on DCB ------------------------------
 
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "\nCrate commands:\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "---------------\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "scan                 Scan crate for boards\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "slot <n>             Seclect slot (%d=DCB)\n",
-               WDAQ_SLOT_DCB);
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "   - all further commands will then be sent to slot <n>\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "   - switch back to DCB with \"slot 16\"\n\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "DCB commands:\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "-------------\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "clkint               Switch bus clock to quartz\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "clkext               Switch bus clock to FCI input\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "delay <n>            Set SYNC delay\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "help                 This help page\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "info                 Show system information\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "reset                Reboot DCB\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "rr/regrd <ofs> <n>   Read register\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "rw/regwr <ofs> <d>   Write register\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "rs/regset <ofs> <d>  Set bits of register\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "rc/regclr <ofs> <d>  Clear bits of register\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "regstore             Store registers in QSPI flash\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "regload              Load registers from QSPI flash\n");
+      rbuffer += stringf("\nCrate commands:\n");
+      rbuffer += stringf("---------------\n");
+      rbuffer += stringf("scan                 Scan crate for boards\n");
+      rbuffer += stringf("slot|s <n>           Seclect slot (%d=DCB)\n", WDAQ_SLOT_DCB);
+      rbuffer += stringf("   - all further commands will then be sent to slot <n>\n");
+      rbuffer += stringf("   - switch back to DCB with \"slot 16\"\n\n");
+      rbuffer += stringf("DCB commands:\n");
+      rbuffer += stringf("-------------\n");
+      rbuffer += stringf("clkint               Switch bus clock to quartz\n");
+      rbuffer += stringf("clkext               Switch bus clock to FCI input\n");
+      rbuffer += stringf("delay <n>            Set SYNC delay\n");
+      rbuffer += stringf("help                 This help page\n");
+      rbuffer += stringf("info                 Show system information\n");
+      rbuffer += stringf("reset                Reboot DCB\n");
+      rbuffer += stringf("rr|regrd <ofs> [<n>] Read register\n");
+      rbuffer += stringf("rw|regwr <ofs> <d>   Write register\n");
+      rbuffer += stringf("rs|regset <ofs> <d>  Set bits of register\n");
+      rbuffer += stringf("rc|regclr <ofs> <d>  Clear bits of register\n");
+      rbuffer += stringf("regstore             Store registers in QSPI flash\n");
+      rbuffer += stringf("regload              Load registers from QSPI flash\n");
 
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "regdiff [-a][-r] [i|s|c [i|s|c]] [<ofs> [<n>]]\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "                     Compare control registers\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "      -a : show all registers, even when equal\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "      -r : show read-only registers when not equal\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "       i : initial register\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "       s : stored  register, default for left column\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "       c : current register, default for right column\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "   <ofs> : starting register, default: first ctrl reg\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "     <n> : number of registers, default 1 if <ofs> is specified, otherwise all\n\n");
+      rbuffer += stringf("regdiff [-a][-r] [i|s|c [i|s|c]] [<ofs> [<n>]]\n");
+      rbuffer += stringf("                     Compare control registers\n");
+      rbuffer += stringf("      -a : show all registers, even when equal\n");
+      rbuffer += stringf("      -r : show read-only registers when not equal\n");
+      rbuffer += stringf("       i : initial register\n");
+      rbuffer += stringf("       s : stored  register, default for left column\n");
+      rbuffer += stringf("       c : current register, default for right column\n");
+      rbuffer += stringf("   <ofs> : starting register, default: first ctrl reg\n");
+      rbuffer += stringf("     <n> : number of registers, default 1 if <ofs> is specified, otherwise all\n\n");
 
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "sysmon               Print system monitor info\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "\n");
+      rbuffer += stringf("sysmon               Print system monitor info\n");
+      rbuffer += stringf("\n");
 
    } else if (strncmp(param[0], "clkint", 6) == 0) {
 
       unsigned int data = (1 << DCB_DISTRIBUTOR_CLK_SRC_SEL_OFS);
       unsigned int mask = DCB_DISTRIBUTOR_CLK_SRC_SEL_MASK;
       reg_bank_mask_write(DCB_DISTRIBUTOR_CLK_SRC_SEL_REG, &data, &mask, 1);
-      snprintf(rbuffer, rbsize, "Set bus clock to internal 80 MHz quartz\n");
+      rbuffer += stringf("Set bus clock to internal 80 MHz quartz\n");
 
    } else if (strncmp(param[0], "clkext", 6) == 0) {
 
       unsigned int data = (0 << DCB_DISTRIBUTOR_CLK_SRC_SEL_OFS);
       unsigned int mask = DCB_DISTRIBUTOR_CLK_SRC_SEL_MASK;
       reg_bank_mask_write(DCB_DISTRIBUTOR_CLK_SRC_SEL_REG, &data, &mask, 1);
-      snprintf(rbuffer, rbsize, "Set bus clock to external FCI connector input\n");
+      rbuffer += stringf("Set bus clock to external FCI connector input\n");
 
    } else if (strncmp(param[0], "delay", 5) == 0) {
 
       if (n_param < 2) {
-         snprintf(rbuffer, rbsize, "Please specify delay value\n");
+         rbuffer += stringf("Please specify delay value\n");
       } else {
          unsigned int d = atoi(param[1]);
          unsigned int data = (d << DCB_SYNC_DELAY_OFS);
          unsigned int mask = DCB_SYNC_DELAY_MASK;
          reg_bank_mask_write(DCB_SYNC_DELAY_REG, &data, &mask, 1);
-         snprintf(rbuffer, rbsize, "Set delay to %d\n", d);
+         rbuffer += stringf("Set delay to %d\n", d);
       }
 
    } else if (strncmp(param[0], "info", 4) == 0) {
 
-      snprintf(rbuffer, rbsize, "Version Information of DCB:\n\n");
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "-- SW GIT Revision:       %s\n", GIT_REVISION);
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "-- SW Build:              %s %s (UTC)\n\n",
+      rbuffer += stringf("Version Information of DCB:\n\n");
+      rbuffer += stringf("-- SW GIT Revision:       %s\n", GIT_REVISION);
+      rbuffer += stringf("-- SW Build:              %s %s (UTC)\n\n",
                __DATE__, __TIME__);
 
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "-- Board Type:            DCB\n");
+      rbuffer += stringf("-- Board Type:            DCB\n");
 
       unsigned int d;
       reg_bank_read(DCB_BOARD_REVISION_REG, &d, 1);
       d = (d & DCB_BOARD_REVISION_MASK) >> DCB_BOARD_REVISION_OFS;
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "-- Board Revision:        %c\n", 'A' + d);
+      rbuffer += stringf("-- Board Revision:        %c\n", 'A' + d);
 
       reg_bank_read(DCB_BOARD_VARIANT_REG, &d, 1);
       d = (d & DCB_BOARD_VARIANT_MASK) >> DCB_BOARD_VARIANT_OFS;
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "-- Board Variant:         0x%02X\n\n", d);
+      rbuffer += stringf("-- Board Variant:         0x%02X\n\n", d);
 
    } else if (strncmp(param[0], "rr", 2) == 0 || strncmp(param[0], "regrd", 5) == 0) {
 
       if (n_param < 2) {
-         snprintf(rbuffer, rbsize, "Error: please specify register offset\n");
+         rbuffer += stringf("Error: please specify register offset\n");
          return;
       }
 
@@ -737,13 +761,13 @@ void process_dcb_command(char *buffer, char *rbuffer, int rbsize) {
       for (unsigned int i = 0; i < nr_of_regs; i++) {
          unsigned int data;
          reg_bank_read(offset + i * 4, &data, 1);
-         snprintf(rbuffer + strlen(rbuffer), rbsize, "[0x%04X]: 0x%08X\r\n", offset + i * 4, data);
+         rbuffer += stringf("[0x%04X]: 0x%08X\r\n", offset + i * 4, data);
       }
 
    } else if (strncmp(param[0], "rw", 2) == 0 || strncmp(param[0], "regwr", 5) == 0) {
 
       if (n_param < 3) {
-         snprintf(rbuffer, rbsize, "Error: please specify register offset and data\n");
+         rbuffer += stringf("Error: please specify register offset and data\n");
          return;
       }
 
@@ -751,12 +775,12 @@ void process_dcb_command(char *buffer, char *rbuffer, int rbsize) {
       unsigned int data   = strtoul(param[2], NULL, 0);
 
       reg_bank_write(offset, &data, 1);
-      snprintf(rbuffer, rbsize, "[0x%04X]<=0x%08X\r\n", offset, data);
+      rbuffer += stringf("[0x%04X]<=0x%08X\r\n", offset, data);
 
    } else if (strncmp(param[0], "rs", 2) == 0 || strncmp(param[0], "regset", 6) == 0) {
 
       if (n_param < 3) {
-         snprintf(rbuffer, rbsize, "Error: please specify register offset and data\n");
+         rbuffer += stringf("Error: please specify register offset and data\n");
          return;
       }
 
@@ -765,12 +789,12 @@ void process_dcb_command(char *buffer, char *rbuffer, int rbsize) {
 
       reg_bank_set(offset, &data, 1);
       reg_bank_read(offset, &data, 1);
-      snprintf(rbuffer, rbsize, "[0x%04X]<=0x%08X\r\n", offset, data);
+      rbuffer += stringf("[0x%04X]<=0x%08X\r\n", offset, data);
 
    } else if (strncmp(param[0], "rc", 2) == 0 || strncmp(param[0], "regclr", 6) == 0) {
 
       if (n_param < 3) {
-         snprintf(rbuffer, rbsize, "Error: please specify register offset and data\n");
+         rbuffer += stringf("Error: please specify register offset and data\n");
          return;
       }
 
@@ -779,58 +803,47 @@ void process_dcb_command(char *buffer, char *rbuffer, int rbsize) {
 
       reg_bank_clr(offset, &data, 1);
       reg_bank_read(offset, &data, 1);
-      snprintf(rbuffer, rbsize, "[0x%04X]<=0x%08X\r\n", offset, data);
+      rbuffer += stringf("[0x%04X]<=0x%08X\r\n", offset, data);
 
    } else if (strncmp(param[0], "regstore", 8) == 0) {
 
       reg_bank_store();
-      snprintf(rbuffer, rbsize, "Registers stored in QSPI flash\n");
+      rbuffer += stringf("Registers stored in QSPI flash\n");
 
    } else if (strncmp(param[0], "regload", 8) == 0) {
 
       reg_bank_load();
-      snprintf(rbuffer, rbsize, "Registers loaded from QSPI flash\n");
+      rbuffer += stringf("Registers loaded from QSPI flash\n");
 
    } else if (strncmp(param[0], "regdiff", 7) == 0) {
 
-      reg_diff_cmd(n_param, param, rbuffer, rbsize);
+      reg_diff_cmd(n_param, param, rbuffer);
 
    } else if (strncmp(param[0], "sysmon", 5) == 0) {
 
-      auto temp = sysmon_get_temp_mdeg(SYSPTR(sys_mon));
-      auto vdd = sysmon_get_vdd_mv(SYSPTR(sys_mon));
-      auto i_tot = (int) (1000.0 * sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN0) * 0.5);
-      auto v_5_0 = (int) (1000.0 * sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN1) * 2.5);
-      auto v_3_3 = (int) (1000.0 * sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN2) * 5.0 / 3.0);
-      auto v_2_5 = (int) (1000.0 * sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN3) * 1.22);
-      auto v_2_0 = sysmon_get_voltage_mv(SYSPTR(sys_mon), SYSMON_ADR_AIN4);
-      auto v_1_8 = sysmon_get_voltage_mv(SYSPTR(sys_mon), SYSMON_ADR_AIN5);
-      auto v_1_5 = sysmon_get_voltage_mv(SYSPTR(sys_mon), SYSMON_ADR_AIN6);
-      auto v_1_0 = sysmon_get_voltage_mv(SYSPTR(sys_mon), SYSMON_ADR_AIN7);
-
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "Temperature      T: %4d.%03d deg C\r\n", temp / 1000,
-               temp % 1000);
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "System Monitor Vdd: %4d.%03d V\r\n", vdd / 1000,
-               vdd % 1000);
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "Main Current     I: %4d.%03d A\r\n", i_tot / 1000,
-               i_tot % 1000);
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "Voltage    V(5.0V): %4d.%03d V\r\n", v_5_0 / 1000,
-               v_5_0 % 1000);
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "Voltage    V(3.3V): %4d.%03d V\r\n", v_3_3 / 1000,
-               v_3_3 % 1000);
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "Voltage    V(2.5V): %4d.%03d V\r\n", v_2_5 / 1000,
-               v_2_5 % 1000);
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "Voltage    V(2.0V): %4d.%03d V\r\n", v_2_0 / 1000,
-               v_2_0 % 1000);
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "Voltage    V(1.8V): %4d.%03d V\r\n", v_1_8 / 1000,
-               v_1_8 % 1000);
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "Voltage    V(1.5V): %4d.%03d V\r\n", v_1_5 / 1000,
-               v_1_5 % 1000);
-      snprintf(rbuffer + strlen(rbuffer), rbsize, "Voltage    V(1.0V): %4d.%03d V\r\n", v_1_0 / 1000,
-               v_1_0 % 1000);
+      rbuffer += stringf("Temperature      T: %6.1lf   deg C\r\n",
+                               sysmon_get_temp_mdeg(SYSPTR(sys_mon)) / 1000.0);
+      rbuffer += stringf("System Monitor Vdd: %8.3lf V\r\n",
+                               sysmon_get_vdd_mv(SYSPTR(sys_mon)) / 1000.0);
+      rbuffer += stringf("Main Current     I: %8.3lf A\r\n",
+                               sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN0) * 0.5);
+      rbuffer += stringf("Voltage    V(5.0V): %8.3lf V\r\n",
+                               sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN1) * 2.5);
+      rbuffer += stringf("Voltage    V(3.3V): %8.3lf V\r\n",
+                               sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN2) * 5.0 / 3.0);
+      rbuffer += stringf("Voltage    V(2.5V): %8.3lf V\r\n",
+                               sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN3) * 1.22);
+      rbuffer += stringf("Voltage    V(2.0V): %8.3lf V\r\n",
+                               sysmon_get_voltage_mv(SYSPTR(sys_mon), SYSMON_ADR_AIN4) / 1000.0);
+      rbuffer += stringf("Voltage    V(1.8V): %8.3lf V\r\n",
+                               sysmon_get_voltage_mv(SYSPTR(sys_mon), SYSMON_ADR_AIN5) / 1000.0);
+      rbuffer += stringf("Voltage    V(1.5V): %8.3lf V\r\n",
+                               sysmon_get_voltage_mv(SYSPTR(sys_mon), SYSMON_ADR_AIN6) / 1000.0);
+      rbuffer += stringf("Voltage    V(1.0V): %8.3lf V\r\n",
+                               sysmon_get_voltage_mv(SYSPTR(sys_mon), SYSMON_ADR_AIN7) / 1000.0);
 
    } else {
-      snprintf(rbuffer, rbsize, "Unknown command: %s\n", buffer);
+      rbuffer += stringf("Unknown command: %s\n", buffer);
    }
 
 }
@@ -879,7 +892,7 @@ unsigned int regdiff_getreg(unsigned int reg, int sel) {
    return val;
 }
 
-void reg_diff_cmd(int argc, char **argv, char *rbuffer, int rbsize) {
+void reg_diff_cmd(int argc, char **argv, std::string &rbuffer) {
    int ac = 0;
    int show_all = 0;
    int show_readonly = 0;
@@ -931,7 +944,7 @@ void reg_diff_cmd(int argc, char **argv, char *rbuffer, int rbsize) {
       val_b = regdiff_getreg(reg, regcmp[1]);
       changed = (val_a != val_b);
       if ((changed && (!dcb_reg_list[reg / 4].read_only || show_readonly)) || show_all) {
-         snprintf(rbuffer+strlen(rbuffer), rbsize, "reg[0x%04x]  %7s: 0x%08x  %7s: 0x%08x  %s\r\n", reg, rc_names[regcmp[0]], val_a, rc_names[regcmp[1]],
+         rbuffer += stringf("reg[0x%04x]  %7s: 0x%08x  %7s: 0x%08x  %s\r\n", reg, rc_names[regcmp[0]], val_a, rc_names[regcmp[1]],
                 val_b, (changed && show_all) ? "!!!" : "");
          if (changed) {
             for (i = 0; i < 8; i++) {
@@ -945,7 +958,7 @@ void reg_diff_cmd(int argc, char **argv, char *rbuffer, int rbsize) {
                   diff_line[REGDIFF_POS_B + i] = '^';
                }
             }
-            snprintf(rbuffer+strlen(rbuffer), rbsize, diff_line);
+            rbuffer += std::string(diff_line);
          }
       }
       reg += 4;
