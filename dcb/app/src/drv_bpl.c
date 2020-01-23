@@ -601,21 +601,21 @@ void crate_upload_fw_sw(slot_op_en_type *slot, int load_fw, char *fw_spec_p, int
   {
     if( (slot->op_en[i]) && (i!=16) ) /* don't do DCB slot (16) */
     {
+      if(DBG_INF0)
+      {
+        if(force) printf("FORCED upload\n");
+        else      printf("Standard upload\n");
+      }
       if(get_slot_board_info(i, &slot_board_info))
       {
         if(force)
         {
           /* get forced upload information */
-          if(DBG_INF0) printf("FORCED upload\n");
           if( (board_type != slot_board_info.type_id) || (board_rev != slot_board_info.rev_id) )
           {
             if(DBG_ERR) printf("Error: present board in slot %d does not match type and revision\n", i);
             continue;
           }
-        }
-        else
-        {
-          if(DBG_INF0) printf("Standard upload\n");
         }
       }
       else
