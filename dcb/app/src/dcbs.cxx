@@ -72,13 +72,17 @@ WDAQ_BRD_TYPE_NAME;   // define strings for board type names
 
 WDAQ_BRD board[WDAQ_N_SLOTS];
 
-/*------------------------------------------------------------------*/
+//-------------------------------------------------------------------
 
 void print_buffer(const char *buffer, int len);
-void process_dcb_command(char *buffer, std::string &rbuffer);
-void reg_diff_cmd(int argc, char **argv, std::string &rbuffer);
 
-/*------------------------------------------------------------------*/
+void process_dcb_command(char *buffer, std::string &rbuffer);
+
+void reg_diff_cmd(int argc, const char **argv, std::string &rbuffer);
+
+void upload(int argc, const char **param, std::string &rbuffer);
+
+//-------------------------------------------------------------------
 
 double clock_us() {
    struct timespec now;
@@ -87,10 +91,9 @@ double clock_us() {
    return now.tv_sec * 1e6 + now.tv_nsec / 1000.0;
 }
 
-/*------------------------------------------------------------------*/
+//-------------------------------------------------------------------
 
-std::string stringf(const char *fmt, ...)
-{
+std::string stringf(const char *fmt, ...) {
    char *ret;
    va_list ap;
 
@@ -104,7 +107,7 @@ std::string stringf(const char *fmt, ...)
    return str;
 }
 
-/*------------------------------------------------------------------*/
+//-------------------------------------------------------------------
 
 void printf_crate_scan(const char *hostname, std::string &b) {
    b[0] = 0;
@@ -118,11 +121,11 @@ void printf_crate_scan(const char *hostname, std::string &b) {
          unsigned int var = (d & DCB_BOARD_VARIANT_MASK) >> DCB_BOARD_VARIANT_OFS;
 
          b += stringf("Slot %2d: Found board \"DCB%02d\", Revision \"%c\", Variant \"0x%02X\", Vendor \"%s\"\n",
-                 slot,
-                 atoi(hostname+3),
-                 'A'+rev,
-                 var,
-                 "PSI");
+                      slot,
+                      atoi(hostname + 3),
+                      'A' + rev,
+                      var,
+                      "PSI");
       } else {
          int status = get_slot_board_info(slot, &board[slot]);
          if (status && board[slot].type_id <= BRD_TYPE_ID_MAX &&
@@ -150,22 +153,22 @@ void printf_crate_scan(const char *hostname, std::string &b) {
                snprintf(name, sizeof(name), "%s", wdaq_brd_type_name[board[slot].type_id]);
 
             b += stringf("Slot %2d: Found board \"%s\", Revision \"%c\", Variant \"0x%02X\", Vendor \"%s\"\n",
-                    slot,
-                    name,
-                    'A' + board[slot].rev_id,
-                    board[slot].variant_id,
-                    wdaq_brd_vendor_name[board[slot].vendor_id]);
+                         slot,
+                         name,
+                         'A' + board[slot].rev_id,
+                         board[slot].variant_id,
+                         wdaq_brd_vendor_name[board[slot].vendor_id]);
          }
       }
    }
 }
 
+//-------------------------------------------------------------------
+
 typedef struct {
-   int    slot;
+   int slot;
    time_t last;
 } UDP_CONN;
-
-//-------------------------------------------------------------------
 
 int main(int argc, char *argv[]) {
 
@@ -175,7 +178,7 @@ int main(int argc, char *argv[]) {
    int sock_bin, sock_asc, sock_raw;
    int board_type = 0;
    int board_revision = 0;
-   std::map<std::string, UDP_CONN> connection;
+   std::map <std::string, UDP_CONN> connection;
 
    /* parse command line parameters */
    for (int i = 1; i < argc; i++) {
@@ -338,8 +341,8 @@ int main(int argc, char *argv[]) {
          }
 
          struct ethhdr *eth = (struct ethhdr *) buffer;
-         struct iphdr  *ip  = (struct iphdr *) (buffer + sizeof(struct ethhdr));
-         struct udphdr *udp = (struct udphdr *) (buffer + sizeof(struct ethhdr) + ip->ihl*4);
+         struct iphdr *ip = (struct iphdr *) (buffer + sizeof(struct ethhdr));
+         struct udphdr *udp = (struct udphdr *) (buffer + sizeof(struct ethhdr) + ip->ihl * 4);
 
          if (ip->protocol == IPPROTO_UDP && ntohs(udp->dest) == SERVER_PORT_BIN) {
             memset(&client_address, 0, sizeof(client_address));
@@ -371,7 +374,7 @@ int main(int argc, char *argv[]) {
          if (verbose) {
             char mac[256];
             printf("Binary request received: %d bytes from client %s, port %d\n", len,
-                    inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port));
+                   inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port));
             buffer[len] = '\0';
             print_buffer(buffer, len);
          }
@@ -379,7 +382,7 @@ int main(int argc, char *argv[]) {
          // interpret packet
          unsigned int cmd = buffer[0];
          unsigned int slot = buffer[1];
-         unsigned int seq = (buffer[2] <<  8 )| (buffer[3] <<  0);
+         unsigned int seq = (buffer[2] << 8) | (buffer[3] << 0);
          unsigned int adr = (buffer[4] << 24) | (buffer[5] << 16) | (buffer[6] << 8) | (buffer[7] << 0);
 
          if (cmd == CMD_SCAN) {
@@ -392,15 +395,15 @@ int main(int argc, char *argv[]) {
             for (int i = 0; i < WDAQ_N_SLOTS; i++) {
                int status = get_slot_board_info(i, &board[i]);
                if (status) {
-                  rbuffer[i*4+4] = board[i].vendor_id;
-                  rbuffer[i*4+5] = board[i].type_id;
-                  rbuffer[i*4+6] = board[i].rev_id;
-                  rbuffer[i*4+7] = board[i].variant_id;
+                  rbuffer[i * 4 + 4] = board[i].vendor_id;
+                  rbuffer[i * 4 + 5] = board[i].type_id;
+                  rbuffer[i * 4 + 6] = board[i].rev_id;
+                  rbuffer[i * 4 + 7] = board[i].variant_id;
                } else {
-                  rbuffer[i*4+4] = 0xFF;
-                  rbuffer[i*4+5] = 0xFF;
-                  rbuffer[i*4+6] = 0xFF;
-                  rbuffer[i*4+7] = 0xFF;
+                  rbuffer[i * 4 + 4] = 0xFF;
+                  rbuffer[i * 4 + 5] = 0xFF;
+                  rbuffer[i * 4 + 6] = 0xFF;
+                  rbuffer[i * 4 + 7] = 0xFF;
                }
             }
 
@@ -410,7 +413,8 @@ int main(int argc, char *argv[]) {
             rbuffer[2] = buffer[2];
             rbuffer[3] = buffer[3];
 
-            sendto(sock_bin, rbuffer, 4+WDAQ_N_SLOTS*4, 0, (struct sockaddr *) &client_address, sizeof(client_address));
+            sendto(sock_bin, rbuffer, 4 + WDAQ_N_SLOTS * 4, 0, (struct sockaddr *) &client_address,
+                   sizeof(client_address));
 
          } else if (cmd == CMD_WRITE32) {
             char rbuffer[1600];
@@ -418,7 +422,7 @@ int main(int argc, char *argv[]) {
 
             if (verbose) {
                printf("Write to slot %d at 0x%04X, seq %d:\n", slot, adr, seq);
-               print_buffer(buffer+8, n * 4);
+               print_buffer(buffer + 8, n * 4);
             }
 
             unsigned int *p = (unsigned int *) (&buffer[8]);
@@ -433,11 +437,11 @@ int main(int argc, char *argv[]) {
                double start = clock_us();
 
                buffer[3] = CMD_WRITE32;
-               spi_binary_cmd((char*)&buffer[3], (char*)rbuffer, (len-8)+5, slot,
-                       board[slot].type_id, board[slot].rev_id); // 1 cmd, 4 adr. bytes + data
+               spi_binary_cmd((char *) &buffer[3], (char *) rbuffer, (len - 8) + 5, slot,
+                              board[slot].type_id, board[slot].rev_id); // 1 cmd, 4 adr. bytes + data
 
                if (verbose)
-                  printf("SPI took %5.3lf ms\n\n", (clock_us() - start)/1e3);
+                  printf("SPI took %5.3lf ms\n\n", (clock_us() - start) / 1e3);
             }
 
             // send acknowledge back to client
@@ -476,7 +480,7 @@ int main(int argc, char *argv[]) {
                buffer[3] = CMD_READ32;
                buffer[8] = 0; // dummy byte
 
-               spi_binary_cmd((char*)&buffer[3], (char*)&rbuffer[4], n+6, slot,
+               spi_binary_cmd((char *) &buffer[3], (char *) &rbuffer[4], n + 6, slot,
                               board[slot].type_id, board[slot].rev_id); // 1 cmd, 4 adr. bytes, 1 dummy + data
 
                memmove(&rbuffer[4], &rbuffer[10], n);
@@ -541,7 +545,7 @@ int main(int argc, char *argv[]) {
 
          std::string rbuffer;
 
-         if (strncmp(buffer, "slot", 4) == 0  || strncmp(buffer, "s ", 2) == 0 || strcmp(buffer, "s") == 0) {
+         if (strncmp(buffer, "slot", 4) == 0 || strncmp(buffer, "s ", 2) == 0 || strcmp(buffer, "s") == 0) {
 
             int slot = WDAQ_SLOT_DCB;
             if (strchr(buffer, ' '))
@@ -606,7 +610,7 @@ int main(int argc, char *argv[]) {
          // send data to client in chunks of 1000 bytes
          int n = rbuffer.length() + 1;
          int i;
-         for (const char *p=rbuffer.c_str() ; n > 0; n -= i, p += i)
+         for (const char *p = rbuffer.c_str(); n > 0; n -= i, p += i)
             i = sendto(sock_asc, p, std::min(1000, n), 0, (struct sockaddr *) &client_address,
                        sizeof(client_address));
 
@@ -698,24 +702,33 @@ void process_dcb_command(char *buffer, std::string &rbuffer) {
       rbuffer += stringf("   <ofs> : starting register, default: first ctrl reg\n");
       rbuffer += stringf("     <n> : number of registers, default 1 if <ofs> is specified, otherwise all\n\n");
 
-      rbuffer += stringf("sysmon               Print system monitor info\n");
+      rbuffer += stringf("sysmon               Print system monitor info\n\n");
+
+      rbuffer += stringf("upload <slot> [-f <path>] [-s <path>] [-t <type>] [-r <rev>]\n");
+      rbuffer += stringf("  <slot>    : WDB/TCP slot, multiple slots possible separated by spaces,\n");
+      rbuffer += stringf("                use \"*\" to upload all slots\n");
+      rbuffer += stringf("  -f <path> : WDB/TCB firmware file (optional)\n");
+      rbuffer += stringf("  -s <path> : WDB software file (optional)\n");
+      rbuffer += stringf("  -t <type> : Board type \"wdb\" or \"tcb\", forces upload\n");
+      rbuffer += stringf("  -r <rev>  : Board revision, \"f\", \"g\" for wdb, \"1\", \"2\" for tcb, forced upload\n");
+
       rbuffer += stringf("\n");
 
-   } else if (strncmp(param[0], "clkint", 6) == 0) {
+   } else if (strcmp(param[0], "clkint") == 0) {
 
       unsigned int data = (1 << DCB_DISTRIBUTOR_CLK_SRC_SEL_OFS);
       unsigned int mask = DCB_DISTRIBUTOR_CLK_SRC_SEL_MASK;
       reg_bank_mask_write(DCB_DISTRIBUTOR_CLK_SRC_SEL_REG, &data, &mask, 1);
       rbuffer += stringf("Set bus clock to internal 80 MHz quartz\n");
 
-   } else if (strncmp(param[0], "clkext", 6) == 0) {
+   } else if (strcmp(param[0], "clkext") == 0) {
 
       unsigned int data = (0 << DCB_DISTRIBUTOR_CLK_SRC_SEL_OFS);
       unsigned int mask = DCB_DISTRIBUTOR_CLK_SRC_SEL_MASK;
       reg_bank_mask_write(DCB_DISTRIBUTOR_CLK_SRC_SEL_REG, &data, &mask, 1);
       rbuffer += stringf("Set bus clock to external FCI connector input\n");
 
-   } else if (strncmp(param[0], "delay", 5) == 0) {
+   } else if (strcmp(param[0], "delay") == 0) {
 
       if (n_param < 2) {
          rbuffer += stringf("Please specify delay value\n");
@@ -727,12 +740,12 @@ void process_dcb_command(char *buffer, std::string &rbuffer) {
          rbuffer += stringf("Set delay to %d\n", d);
       }
 
-   } else if (strncmp(param[0], "info", 4) == 0) {
+   } else if (strcmp(param[0], "info") == 0) {
 
       rbuffer += stringf("Version Information of DCB:\n\n");
       rbuffer += stringf("-- SW GIT Revision:       %s\n", GIT_REVISION);
       rbuffer += stringf("-- SW Build:              %s %s (UTC)\n\n",
-               __DATE__, __TIME__);
+                         __DATE__, __TIME__);
 
       rbuffer += stringf("-- Board Type:            DCB\n");
 
@@ -745,7 +758,7 @@ void process_dcb_command(char *buffer, std::string &rbuffer) {
       d = (d & DCB_BOARD_VARIANT_MASK) >> DCB_BOARD_VARIANT_OFS;
       rbuffer += stringf("-- Board Variant:         0x%02X\n\n", d);
 
-   } else if (strncmp(param[0], "rr", 2) == 0 || strncmp(param[0], "regrd", 5) == 0) {
+   } else if (strcmp(param[0], "rr") == 0 || strcmp(param[0], "regrd") == 0) {
 
       if (n_param < 2) {
          rbuffer += stringf("Error: please specify register offset\n");
@@ -764,7 +777,7 @@ void process_dcb_command(char *buffer, std::string &rbuffer) {
          rbuffer += stringf("[0x%04X]: 0x%08X\r\n", offset + i * 4, data);
       }
 
-   } else if (strncmp(param[0], "rw", 2) == 0 || strncmp(param[0], "regwr", 5) == 0) {
+   } else if (strcmp(param[0], "rw") == 0 || strcmp(param[0], "regwr") == 0) {
 
       if (n_param < 3) {
          rbuffer += stringf("Error: please specify register offset and data\n");
@@ -772,12 +785,12 @@ void process_dcb_command(char *buffer, std::string &rbuffer) {
       }
 
       unsigned int offset = strtoul(param[1], NULL, 0);
-      unsigned int data   = strtoul(param[2], NULL, 0);
+      unsigned int data = strtoul(param[2], NULL, 0);
 
       reg_bank_write(offset, &data, 1);
       rbuffer += stringf("[0x%04X]<=0x%08X\r\n", offset, data);
 
-   } else if (strncmp(param[0], "rs", 2) == 0 || strncmp(param[0], "regset", 6) == 0) {
+   } else if (strcmp(param[0], "rs") == 0 || strcmp(param[0], "regset") == 0) {
 
       if (n_param < 3) {
          rbuffer += stringf("Error: please specify register offset and data\n");
@@ -785,13 +798,13 @@ void process_dcb_command(char *buffer, std::string &rbuffer) {
       }
 
       unsigned int offset = strtoul(param[1], NULL, 0);
-      unsigned int data   = strtoul(param[2], NULL, 0);
+      unsigned int data = strtoul(param[2], NULL, 0);
 
       reg_bank_set(offset, &data, 1);
       reg_bank_read(offset, &data, 1);
       rbuffer += stringf("[0x%04X]<=0x%08X\r\n", offset, data);
 
-   } else if (strncmp(param[0], "rc", 2) == 0 || strncmp(param[0], "regclr", 6) == 0) {
+   } else if (strcmp(param[0], "rc") == 0 || strcmp(param[0], "regclr") == 0) {
 
       if (n_param < 3) {
          rbuffer += stringf("Error: please specify register offset and data\n");
@@ -799,48 +812,52 @@ void process_dcb_command(char *buffer, std::string &rbuffer) {
       }
 
       unsigned int offset = strtoul(param[1], NULL, 0);
-      unsigned int data   = strtoul(param[2], NULL, 0);
+      unsigned int data = strtoul(param[2], NULL, 0);
 
       reg_bank_clr(offset, &data, 1);
       reg_bank_read(offset, &data, 1);
       rbuffer += stringf("[0x%04X]<=0x%08X\r\n", offset, data);
 
-   } else if (strncmp(param[0], "regstore", 8) == 0) {
+   } else if (strcmp(param[0], "regstore") == 0) {
 
       reg_bank_store();
       rbuffer += stringf("Registers stored in QSPI flash\n");
 
-   } else if (strncmp(param[0], "regload", 8) == 0) {
+   } else if (strcmp(param[0], "regload") == 0) {
 
       reg_bank_load();
       rbuffer += stringf("Registers loaded from QSPI flash\n");
 
-   } else if (strncmp(param[0], "regdiff", 7) == 0) {
+   } else if (strcmp(param[0], "regdiff") == 0) {
 
-      reg_diff_cmd(n_param, param, rbuffer);
+      reg_diff_cmd(n_param, (const char **) param, rbuffer);
 
-   } else if (strncmp(param[0], "sysmon", 5) == 0) {
+   } else if (strcmp(param[0], "sysmon") == 0) {
 
       rbuffer += stringf("Temperature      T: %6.1lf   deg C\r\n",
-                               sysmon_get_temp_mdeg(SYSPTR(sys_mon)) / 1000.0);
+                         sysmon_get_temp_mdeg(SYSPTR(sys_mon)) / 1000.0);
       rbuffer += stringf("System Monitor Vdd: %8.3lf V\r\n",
-                               sysmon_get_vdd_mv(SYSPTR(sys_mon)) / 1000.0);
+                         sysmon_get_vdd_mv(SYSPTR(sys_mon)) / 1000.0);
       rbuffer += stringf("Main Current     I: %8.3lf A\r\n",
-                               sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN0) * 0.5);
+                         sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN0) * 0.5);
       rbuffer += stringf("Voltage    V(5.0V): %8.3lf V\r\n",
-                               sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN1) * 2.5);
+                         sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN1) * 2.5);
       rbuffer += stringf("Voltage    V(3.3V): %8.3lf V\r\n",
-                               sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN2) * 5.0 / 3.0);
+                         sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN2) * 5.0 / 3.0);
       rbuffer += stringf("Voltage    V(2.5V): %8.3lf V\r\n",
-                               sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN3) * 1.22);
+                         sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN3) * 1.22);
       rbuffer += stringf("Voltage    V(2.0V): %8.3lf V\r\n",
-                               sysmon_get_voltage_mv(SYSPTR(sys_mon), SYSMON_ADR_AIN4) / 1000.0);
+                         sysmon_get_voltage_mv(SYSPTR(sys_mon), SYSMON_ADR_AIN4) / 1000.0);
       rbuffer += stringf("Voltage    V(1.8V): %8.3lf V\r\n",
-                               sysmon_get_voltage_mv(SYSPTR(sys_mon), SYSMON_ADR_AIN5) / 1000.0);
+                         sysmon_get_voltage_mv(SYSPTR(sys_mon), SYSMON_ADR_AIN5) / 1000.0);
       rbuffer += stringf("Voltage    V(1.5V): %8.3lf V\r\n",
-                               sysmon_get_voltage_mv(SYSPTR(sys_mon), SYSMON_ADR_AIN6) / 1000.0);
+                         sysmon_get_voltage_mv(SYSPTR(sys_mon), SYSMON_ADR_AIN6) / 1000.0);
       rbuffer += stringf("Voltage    V(1.0V): %8.3lf V\r\n",
-                               sysmon_get_voltage_mv(SYSPTR(sys_mon), SYSMON_ADR_AIN7) / 1000.0);
+                         sysmon_get_voltage_mv(SYSPTR(sys_mon), SYSMON_ADR_AIN7) / 1000.0);
+
+   } else if (strcmp(param[0], "upload") == 0) {
+
+      upload(n_param, (const char **) param, rbuffer);
 
    } else {
       rbuffer += stringf("Unknown command: %s\n", buffer);
@@ -892,7 +909,7 @@ unsigned int regdiff_getreg(unsigned int reg, int sel) {
    return val;
 }
 
-void reg_diff_cmd(int argc, char **argv, std::string &rbuffer) {
+void reg_diff_cmd(int argc, const char **argv, std::string &rbuffer) {
    int ac = 0;
    int show_all = 0;
    int show_readonly = 0;
@@ -944,8 +961,9 @@ void reg_diff_cmd(int argc, char **argv, std::string &rbuffer) {
       val_b = regdiff_getreg(reg, regcmp[1]);
       changed = (val_a != val_b);
       if ((changed && (!dcb_reg_list[reg / 4].read_only || show_readonly)) || show_all) {
-         rbuffer += stringf("reg[0x%04x]  %7s: 0x%08x  %7s: 0x%08x  %s\r\n", reg, rc_names[regcmp[0]], val_a, rc_names[regcmp[1]],
-                val_b, (changed && show_all) ? "!!!" : "");
+         rbuffer += stringf("reg[0x%04x]  %7s: 0x%08x  %7s: 0x%08x  %s\r\n", reg, rc_names[regcmp[0]], val_a,
+                            rc_names[regcmp[1]],
+                            val_b, (changed && show_all) ? "!!!" : "");
          if (changed) {
             for (i = 0; i < 8; i++) {
                mask = 0xf0000000 >> (4 * i);
@@ -963,4 +981,252 @@ void reg_diff_cmd(int argc, char **argv, std::string &rbuffer) {
       }
       reg += 4;
    }
+}
+
+//-------------------------------------------------------------------
+
+extern "C" { // make all library functions callable from C++
+
+   // functions defined in drv_bpl.c
+   extern flash_memory_map_type *connect_flash(unsigned int slot_nr, unsigned int board_type, unsigned int board_rev);
+   extern void disconnect();
+   extern void wr_fw(char *fw_file, flash_memory_map_type *flash_mem_map, const char *flash_partition_name);
+   extern void wr_sw(char *sw_file, flash_memory_map_type *flash_mem_map, const char *flash_partition_name);
+
+}
+
+void slot_upload(unsigned int slot_nr, int load_fw, char *fw_spec_p, int load_sw, char *sw_spec_p,
+                       unsigned int board_type, unsigned int board_rev) {
+   char fw_def_path[250];
+   char sw_def_path[250];
+   char *fwp;
+   char *swp;
+
+   flash_memory_map_type *flash_mem_map = NULL;
+
+   if (fw_spec_p)
+      fwp = fw_spec_p;
+   else
+      fwp = fw_def_path;
+
+   if (sw_spec_p)
+      swp = sw_spec_p;
+   else
+      swp = sw_def_path;
+
+   if (DBG_INF0)
+      printf("\nSlot %d:\n", slot_nr);
+
+   if (flash_mem_map = connect_flash(slot_nr, board_type, board_rev)) {
+      if (DBG_INF0)
+         printf("default path: %s\n", flash_mem_map->default_fw_path);
+   } else {
+      if (DBG_ERR)
+         printf("Error: flash memory map not found (type %d, revision %d)\n", board_type, board_rev);
+      return;
+   }
+
+   if (strstr(flash_mem_map->default_fw_path, "/wdb/")) {
+      /* WDB */
+      if (load_fw) {
+         if (!fw_spec_p) {
+            /* set default path according to type and revision */
+            strcpy(fwp, flash_mem_map->default_fw_path);
+            strcpy(&fwp[strlen(flash_mem_map->default_fw_path)], wdb_fw_default_file);
+         }
+         /* upload firmware */
+         if (DBG_INF0) printf("-> Uploading WDB firmware %s\n", fwp);
+         wr_fw(fwp, flash_mem_map, "fw");
+      }
+      if (load_sw) {
+         if (!sw_spec_p) {
+            /* set default path according to type and revision */
+            strcpy(swp, flash_mem_map->default_fw_path);
+            strcpy(&swp[strlen(flash_mem_map->default_fw_path)], wdb_sw_default_file);
+         }
+         /* upload sofware */
+         if (DBG_INF0) printf("-> Uploading WDB software %s\n", swp);
+         wr_sw(swp, flash_mem_map, "sw");
+      }
+   } else if (strstr(flash_mem_map->default_fw_path, "/tcb/")) {
+      /* TCB */
+      if (load_fw) {
+         if (!fw_spec_p) {
+            /* set default path according to type and revision */
+            strcpy(fwp, flash_mem_map->default_fw_path);
+            strcpy(&fwp[strlen(flash_mem_map->default_fw_path)], tcb_fw_default_file);
+         }
+         /* upload firmware */
+         if (DBG_INF0) printf("-> Uploading TCB firmware %s\n", fwp);
+         wr_fw(fwp, flash_mem_map, "fw");
+      }
+   }
+
+   disconnect();
+
+   if (DBG_INF0) printf("\n");
+}
+
+//-------------------------------------------------------------------
+
+void crate_upload(int slot[WDAQ_N_SLOTS], int load_fw, char *fw_spec_p, int load_sw, char *sw_spec_p,
+                        unsigned int board_type, unsigned int board_rev, unsigned int force) {
+   int i;
+   WDAQ_BRD slot_board_info;
+
+   for (i = 0; i < WDAQ_N_SLOTS;  i++) {
+      if (slot[i] && i != WDAQ_SLOT_DCB) {
+         if (DBG_INF0) {
+            if (force)
+               printf("FORCED upload\n");
+            else
+               printf("Standard upload\n");
+         }
+         if (get_slot_board_info(i, &slot_board_info)) {
+            if (force) {
+               /* get forced upload information */
+               if ((board_type != slot_board_info.type_id) || (board_rev != slot_board_info.rev_id)) {
+                  if (DBG_ERR)
+                     printf("Error: present board in slot %d does not match type and revision\n", i);
+                  continue;
+               }
+            }
+         } else {
+            if (force) {
+               slot_board_info.type_id = board_type;
+               slot_board_info.rev_id = board_rev;
+            } else {
+               /* no slot board information for standard upload */
+               if (DBG_ERR)
+                  printf("Error: board information for slot %d could not be read\n", i);
+               return;
+            }
+         }
+
+         slot_upload(i, load_fw, fw_spec_p, load_sw, sw_spec_p, slot_board_info.type_id, slot_board_info.rev_id);
+      }
+   }
+}
+
+//-------------------------------------------------------------------
+
+void upload(int n_param, const char **param, std::string &rbuffer) {
+   int slot_sel[18];
+   int load_fw = 0;
+   int load_sw = 0;
+   char fwp[256];
+   char swp[256];
+   WDAQ_BRD board_info;
+   unsigned int board_type = 0;
+   unsigned int board_rev = 0;
+   unsigned int t_force = 0;
+   unsigned int r_force = 0;
+
+   // decode slots
+   for (int i = 0; i < WDAQ_N_SLOTS; i++)
+      slot_sel[i] = 0;
+   for (int i = 1; i < n_param; i++) {
+      if (isdigit(param[i][0])) {
+         if (strchr(param[i], '-')) {
+            int s1 = atoi(param[i]);
+            int s2 = atoi(strchr(param[i], '-') + 1);
+            for (int s = s1; s <= s2; s++)
+               if (s >= 0 && s < WDAQ_N_SLOTS)
+                  slot_sel[s] = 1;
+         } else {
+            int s = atoi(param[i]);
+            if (s >= 0 && s < WDAQ_N_SLOTS)
+               slot_sel[s] = 1;
+         }
+      } else if (param[i][0] == '*') {
+         for (int s = 0; s < WDAQ_N_SLOTS; s++)
+            slot_sel[s] = 1;
+      }
+   }
+
+   // decode flags
+   for (int i = 1; i < n_param; i++) {
+
+      if (param[i][0] == '-' && param[i][1] == 'f') {
+         if (++i < n_param) {
+            rbuffer = "Missing firmware file with \"-f\" option\n";
+            return;
+         }
+         if (!is_file(param[i])) {
+            rbuffer = stringf("Firmware file \"%s\" not found\n", param[i]);
+            return;
+         } else {
+            strncpy(fwp, param[i], sizeof(fwp));
+         }
+         load_fw = 1;
+      }
+
+      else if (param[i][0] == '-' && param[i][1] == 's') {
+         if (++i < n_param) {
+            rbuffer = "Missing software file with \"-s\" option\n";
+            return;
+         }
+         if (!is_file(param[i])) {
+            rbuffer = stringf("Software file \"%s\" not found\n", param[i]);
+            return;
+         } else {
+            strncpy(swp, param[i], sizeof(swp));
+         }
+         load_sw = 1;
+      }
+
+      else if (param[i][0] == '-' && param[i][1] == 't') {
+         if (++i < n_param) {
+            rbuffer = "Missing board type with \"-t\" option\n";
+            return;
+         }
+         if (strcmp(param[i], "wdb") == 0) {
+            board_type = BRD_TYPE_ID_WDB;
+         } else if (strcmp(param[i], "tcb") == 0) {
+            board_type = BRD_TYPE_ID_TCB;
+         } else {
+            rbuffer = "Unknown board type with \"-t\" option, must be \"wdb\" or \"tcb\"\n";
+            return;
+         }
+         t_force = 1;
+      }
+
+      else if (param[i][0] == '-' && param[i][1] == 'r') {
+         if (++i < n_param) {
+            rbuffer = "Missing board revision with \"-r\" option\n";
+            return;
+         }
+         if (param[i][0] >= '0' && param[i][0] <= '9') {
+            board_rev = strtoul(param[i], NULL, 0);
+         } else if (param[i][0] >= 'a' && param[i][0] <= 'z') {
+            board_rev = param[i][0] - 'a';
+         } else if (param[i][0] >= 'A' && param[i][0] <= 'Z') {
+            board_rev = param[i][0] - 'A';
+         } else {
+            rbuffer = "Invalid board revision, must be 0-9 or a-z\n";
+            return;
+         }
+         r_force = 1;
+      }
+
+      else {
+         rbuffer = stringf("Invalid option \"%s\"\n\n", param[i]);
+         return;
+      }
+   }
+
+   if (load_fw == 0 && load_sw == 0) {
+      load_fw = 1;
+      load_sw = 1;
+   }
+
+   if (t_force && r_force) {
+      /* forced upload */
+      crate_upload(slot_sel, load_fw, fwp, load_sw, swp, board_type, board_rev, 1);
+   } else {
+      /* standard upload */
+      crate_upload(slot_sel, load_fw, fwp, load_sw, swp, board_type, board_rev, 0);
+   }
+
+   return;
 }
