@@ -138,8 +138,8 @@ void init_env_settings(int snr);
 void init_reg_settings(int snr);
 void print_sys_info(void);
 int get_serial_number();
-int is_dir(char* path);
-int is_file(char* path);
+int is_dir(const char* path);
+int is_file(const char* path);
 void byte_swap_uint32(unsigned int* src, unsigned int* dst, unsigned int len);
 void display_progress(char* prefix, xfs_u32 percent, char idle_char, char prog_char);
 
