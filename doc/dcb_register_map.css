@@ -1,0 +1,79 @@
+/* Created :   15.01.2020 11:16:30 */
+table {
+  border-collapse: collapse;
+  border: none;
+}
+
+th, td {
+  padding-top: 3px;
+  padding-bottom: 3px;
+  padding-left: 10px;
+  padding-right: 10px;
+  border: 1px solid black;
+}
+
+tr.reg_header {
+  font-weight: bold;
+  background: rgb(150,180,215);
+  border: 3px solid black;
+}
+
+tr.reg_name {
+  font-weight: bold;
+  background: rgb(150,180,215);
+  border: 3px solid black;
+}
+
+td.reg_table_title, tr.reg_table_title {
+  background: rgb(255,255,255);
+  padding: 0px;
+  border: none;
+}
+
+td.back_to_overview, tr.back_to_overview {
+  background: rgb(255,255,255);
+  padding: 0px;
+  border: none;
+  border-top: 3px solid black;
+}
+
+tbody tr.reg_list:nth-child(even) {
+  background: rgb(185,205,230);
+  border-left:  3px solid black;
+  border-right: 3px solid black;
+}
+
+tbody tr.reg_list:nth-child(odd) {
+  background: rgb(150,180,215);
+  border-left:  3px solid black;
+  border-right: 3px solid black;
+}
+
+tbody tr.reg_content:nth-child(even) {
+  background: rgb(170,255,255);
+  border-left:  3px solid black;
+  border-right: 3px solid black;
+}
+
+tbody tr.reg_content:nth-child(odd) {
+  background: rgb(220,255,255);
+  border-left:  3px solid black;
+  border-right: 3px solid black;
+}
+
+a:link {
+  color: rgb(0,0,0);
+  text-decoration: none;
+}
+
+a:visited {
+  color: rgb(20,20,20);
+}
+
+a:hover {
+  color: rgb(235,235,235);
+}
+
+a:active {
+  color: rgb(255,255,0);
+}
