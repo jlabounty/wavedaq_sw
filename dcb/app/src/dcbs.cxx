@@ -1020,7 +1020,7 @@ extern "C" { // make all library functions callable from C++
 }
 
 #define FLASH_BUF_SIZE   8192 /* 8k */
-#define PROG_BAR_ITEMS     60
+#define PROG_BAR_ITEMS     50
 
 //-------------------------------------------------------------------
 
@@ -1044,7 +1044,8 @@ void show_progress(udp_connection &c, const char* prefix, xfs_u32 percent, char 
 
 //-------------------------------------------------------------------
 
-void write_fw(udp_connection &c, char *fw_file, flash_memory_map_type *flash_mem_map, const char *flash_partition_name)
+void write_fw(udp_connection &c, int slot, char *fw_file, 
+              flash_memory_map_type *flash_mem_map, const char *flash_partition_name)
 {
    int header_len;
    unsigned int len;
@@ -1117,25 +1118,30 @@ void write_fw(udp_connection &c, char *fw_file, flash_memory_map_type *flash_mem
          c.sprintf("done\n");
       c.flush();
 
+      c.sprintf("\e[?25l"); // hide cursor
+      
       /* Erase bitfile only */
       ers_size = 0;
       tot_ers_size=0;
+      char str[80];
+      sprintf(str, "Slot %2d: Deleting firmware ", slot);
       while(tot_ers_size<bit_inf.info.data_len) {
          ers_size = qspi_flash_erase_sector(&flash_partition, tot_ers_size);
          tot_ers_size += ers_size;
          if(tot_ers_size>bit_inf.info.data_len) tot_ers_size = bit_inf.info.data_len; /* Keep progress bar <= 100% */
-         show_progress(c, "Deleting bitstream ", 100*tot_ers_size/bit_inf.info.data_len, ' ', '-');
+         show_progress(c, str, 100*tot_ers_size/bit_inf.info.data_len, ' ', '-');
       }
 
       /* write bitfile excluding header */
       lseek(fd, header_len, SEEK_SET); /* go back to start of file */
       flash_offs = 0;
       flash_len  = FLASH_BUF_SIZE;
+      sprintf(str, "Slot %2d: Writing firmware  ", slot);
       while(flash_len == FLASH_BUF_SIZE) {
          flash_len = read(fd, buff, FLASH_BUF_SIZE);
          qspi_flash_write(&flash_partition, flash_offs, flash_len, buff);
          flash_offs += flash_len;
-         show_progress(c, "Writing bitstream  ", 100*flash_offs/bit_inf.info.data_len, '-', '#');
+         show_progress(c, str, 100*flash_offs/bit_inf.info.data_len, '-', '#');
       }
       c.sprintf("\n");
       c.flush();
@@ -1160,6 +1166,8 @@ void write_fw(udp_connection &c, char *fw_file, flash_memory_map_type *flash_mem
       }
    }
 
+   c.sprintf("\e[?25h"); // show cursor
+
    fsync(fd); // flush caches to make sure operation completes before de-selecting board
    if(close(fd) < 0)
       c.sprintf("Error closing file\n");
@@ -1167,7 +1175,8 @@ void write_fw(udp_connection &c, char *fw_file, flash_memory_map_type *flash_mem
 
 //-------------------------------------------------------------------
 
-void write_sw(udp_connection &c, char *sw_file, flash_memory_map_type *flash_mem_map, const char *flash_partition_name)
+void write_sw(udp_connection &c, int slot, char *sw_file, 
+              flash_memory_map_type *flash_mem_map, const char *flash_partition_name)
 {
    int header_len;
    unsigned int len;
@@ -1217,27 +1226,34 @@ void write_sw(udp_connection &c, char *sw_file, flash_memory_map_type *flash_mem
          c.sprintf("SREC header: %s\n", sr_header_buf);
       c.flush();
 
+      c.sprintf("\e[?25l"); // hide cursor
+
       /* Erase partition */
       ers_size = 0;
       tot_ers_size = 0;
+      char str[80];
+      sprintf(str, "Slot %2d: Deleting software ", slot);
       while (tot_ers_size < flash_partition.mtd_info.size) {
          ers_size = qspi_flash_erase_sector(&flash_partition, tot_ers_size);
          tot_ers_size += ers_size;
-         show_progress(c, "Deleting software  ", 100 * tot_ers_size / flash_partition.mtd_info.size, ' ', '-');
+         show_progress(c, str, 100 * tot_ers_size / flash_partition.mtd_info.size, ' ', '-');
       }
 
       /* write bitfile excluding header */
       lseek(fd, 0, SEEK_SET); /* go back to start of file */
       flash_len = FLASH_BUF_SIZE;
       flash_offs = 0;
+      sprintf(str, "Slot %2d: Writing software  ", slot);
       while (flash_len == FLASH_BUF_SIZE) {
          flash_len = read(fd, buff, FLASH_BUF_SIZE);
          qspi_flash_write(&flash_partition, flash_offs, flash_len, buff);
          flash_offs += flash_len;
-         show_progress(c, "Writing software   ", 100 * flash_offs / file_stat.st_size, '-', '#');
+         show_progress(c, str, 100 * flash_offs / file_stat.st_size, '-', '#');
       }
       c.sprintf("\n");
       c.flush();
+
+      c.sprintf("\e[?25h"); // show cursor
 
       /* write header part 1 (info) */
       if (c.verbose)
@@ -1302,9 +1318,9 @@ void slot_upload(udp_connection &c, unsigned int slot_nr, int load_fw, char *fwp
             strcat(fw_path, wdb_fw_default_file);
          }
          /* upload firmware */
-         c.sprintf("Uploading WDB firmware %s to slot %d\n", fw_path, c.slot);
+         c.sprintf("Uploading WDB firmware %s\n", fw_path);
          c.flush();
-         write_fw(c, fw_path, flash_mem_map, "fw");
+         write_fw(c, slot_nr, fw_path, flash_mem_map, "fw");
       }
       if (load_sw) {
          if (!sw_path[0]) {
@@ -1313,9 +1329,9 @@ void slot_upload(udp_connection &c, unsigned int slot_nr, int load_fw, char *fwp
             strcat(sw_path, wdb_sw_default_file);
          }
          /* upload sofware */
-         c.sprintf("Uploading WDB software %s to slot %d\n", sw_path, c.slot);
+         c.sprintf("Uploading WDB software %s\n", sw_path);
          c.flush();
-         write_sw(c, sw_path, flash_mem_map, "sw");
+         write_sw(c, slot_nr, sw_path, flash_mem_map, "sw");
       }
    } else if (strstr(flash_mem_map->default_fw_path, "/tcb/")) {
       /* TCB */
@@ -1328,7 +1344,7 @@ void slot_upload(udp_connection &c, unsigned int slot_nr, int load_fw, char *fwp
          /* upload firmware */
          c.sprintf("Uploading TCB firmware %s\n", fw_path);
          c.flush();
-         write_fw(c, fw_path, flash_mem_map, "fw");
+         write_fw(c, slot_nr, fw_path, flash_mem_map, "fw");
       }
    }
 
