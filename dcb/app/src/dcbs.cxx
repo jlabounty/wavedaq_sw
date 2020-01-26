@@ -193,14 +193,12 @@ void printf_crate_scan(const char *hostname, std::string &b) {
                unsigned int sn = (rbuffer[8] << 8) | rbuffer[9];
                snprintf(name, sizeof(name), "WD%03d", sn);
             } else
-               snprintf(name, sizeof(name), "%s", wdaq_brd_type_name[board[slot].type_id]);
-
-            b += stringf("Slot %2d: Found board \"%s\", Revision \"%c\", Variant \"0x%02X\", Vendor \"%s\"\n",
-                         slot,
-                         name,
-                         'A' + board[slot].rev_id,
-                         board[slot].variant_id,
-                         wdaq_brd_vendor_name[board[slot].vendor_id]);
+               b += stringf("Slot %2d: Found board \"%s\", Revision \"%c\", Variant \"0x%02X\", Vendor \"%s\"\n",
+                            slot,
+                            wdaq_brd_type_name[board[slot].type_id],
+                            'A' + board[slot].rev_id,
+                            board[slot].variant_id,
+                            wdaq_brd_vendor_name[board[slot].vendor_id]);
          }
       }
    }
@@ -1019,12 +1017,16 @@ extern "C" { // make all library functions callable from C++
 
 }
 
-#define FLASH_BUF_SIZE   8192 /* 8k */
-#define PROG_BAR_ITEMS     50
+#define FLASH_BUF_SIZE      8192 // 8k 
+#define PROG_BAR_ITEMS        50
+#define PROG_BAR_DEL_CHAR  "\033[43m \033[0m"  // yellow background
+#define PROG_BAR_FW_CHAR   "\033[45m \033[0m"  // magenta background
+#define PROG_BAR_SW_CHAR   "\033[46m \033[0m"  // cyan background
 
 //-------------------------------------------------------------------
 
-void show_progress(udp_connection &c, const char* prefix, xfs_u32 percent, char idle_char, char prog_char)
+void show_progress(udp_connection &c, const char* prefix, double percent, 
+                   const char *idle_char, const char *prog_char)
 {
    int i;
 
@@ -1034,11 +1036,11 @@ void show_progress(udp_connection &c, const char* prefix, xfs_u32 percent, char 
    c.sprintf("[");
    for (i = 0; i < PROG_BAR_ITEMS; i++) {
       if ((i * (100.0 / PROG_BAR_ITEMS)) <= percent)
-         c.sprintf("%c", prog_char);
+         c.sprintf("%s", prog_char);
       else
-         c.sprintf("%c", idle_char);
+         c.sprintf("%s", idle_char);
    }
-   c.sprintf("] %d%%  ", percent);
+   c.sprintf("] %5.1lf%%  ", percent);
    c.flush();
 }
 
@@ -1129,7 +1131,8 @@ void write_fw(udp_connection &c, int slot, char *fw_file,
          ers_size = qspi_flash_erase_sector(&flash_partition, tot_ers_size);
          tot_ers_size += ers_size;
          if(tot_ers_size>bit_inf.info.data_len) tot_ers_size = bit_inf.info.data_len; /* Keep progress bar <= 100% */
-         show_progress(c, str, 100*tot_ers_size/bit_inf.info.data_len, ' ', '-');
+         show_progress(c, str, 100.0 * tot_ers_size/bit_inf.info.data_len, 
+                       " ", PROG_BAR_DEL_CHAR);
       }
 
       /* write bitfile excluding header */
@@ -1141,7 +1144,8 @@ void write_fw(udp_connection &c, int slot, char *fw_file,
          flash_len = read(fd, buff, FLASH_BUF_SIZE);
          qspi_flash_write(&flash_partition, flash_offs, flash_len, buff);
          flash_offs += flash_len;
-         show_progress(c, str, 100*flash_offs/bit_inf.info.data_len, '-', '#');
+         show_progress(c, str, 100.0 * flash_offs/bit_inf.info.data_len, 
+                       PROG_BAR_DEL_CHAR, PROG_BAR_FW_CHAR);
       }
       c.sprintf("\n");
       c.flush();
@@ -1236,7 +1240,8 @@ void write_sw(udp_connection &c, int slot, char *sw_file,
       while (tot_ers_size < flash_partition.mtd_info.size) {
          ers_size = qspi_flash_erase_sector(&flash_partition, tot_ers_size);
          tot_ers_size += ers_size;
-         show_progress(c, str, 100 * tot_ers_size / flash_partition.mtd_info.size, ' ', '-');
+         show_progress(c, str, 100.0 * tot_ers_size / flash_partition.mtd_info.size, 
+           " ", PROG_BAR_DEL_CHAR);
       }
 
       /* write bitfile excluding header */
@@ -1248,7 +1253,8 @@ void write_sw(udp_connection &c, int slot, char *sw_file,
          flash_len = read(fd, buff, FLASH_BUF_SIZE);
          qspi_flash_write(&flash_partition, flash_offs, flash_len, buff);
          flash_offs += flash_len;
-         show_progress(c, str, 100 * flash_offs / file_stat.st_size, '-', '#');
+         show_progress(c, str, 100.0 * flash_offs / file_stat.st_size, 
+                       PROG_BAR_DEL_CHAR, PROG_BAR_SW_CHAR);
       }
       c.sprintf("\n");
       c.flush();
@@ -1415,10 +1421,49 @@ void upload(udp_connection &c, int n_param, const char **param) {
                slot_sel[s] = 1;
          }
       } else if (param[i][0] == '*') {
-         for (int s = 0; s < WDAQ_N_SLOTS; s++)
-            slot_sel[s] = 1;
+         for (int s = 0; s < WDAQ_N_SLOTS; s++) {
+            if (get_slot_board_info(s, &board_info)) {
+               slot_sel[s] = 1;
+
+               if (c.verbose) {
+
+                  char name[32];
+                  if (board_info.type_id == BRD_TYPE_ID_WDB) {
+
+                     char buffer[10];
+                     char rbuffer[10];
+
+                     memset(buffer, 0, sizeof(buffer));
+                     buffer[0] = CMD_READ32;
+                     buffer[1] = 0;
+                     buffer[2] = 0;
+                     buffer[3] = 0;
+                     buffer[4] = 0x24; // Status register SN
+                     buffer[5] = 0; // dummy
+
+                     spi_binary_cmd(buffer, rbuffer, 6 + 4, s, board_info.type_id, board_info.rev_id);
+
+                     unsigned int sn = (rbuffer[8] << 8) | rbuffer[9];
+                     snprintf(name, sizeof(name), "WD%03d", sn);
+                  } else
+                     snprintf(name, sizeof(name), "%s", wdaq_brd_type_name[board_info.type_id]);
+
+
+                  c.sprintf("Slot %2d: Found board \"%s\", Revision \"%c\", Variant \"0x%02X\", Vendor \"%s\"\n",
+                            s,
+                            name,
+                            'A' + board_info.rev_id,
+                            board_info.variant_id,
+                            wdaq_brd_vendor_name[board_info.vendor_id]);
+               }
+            }
+         }
       }
    }
+   
+   if (c.verbose)
+      c.sprintf("\n");
+
    int i;
    for (i = 0; i < WDAQ_N_SLOTS; i++)
       if (slot_sel[i])
