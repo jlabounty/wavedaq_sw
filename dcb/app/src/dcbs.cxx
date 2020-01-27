@@ -193,12 +193,14 @@ void printf_crate_scan(const char *hostname, std::string &b) {
                unsigned int sn = (rbuffer[8] << 8) | rbuffer[9];
                snprintf(name, sizeof(name), "WD%03d", sn);
             } else
-               b += stringf("Slot %2d: Found board \"%s\", Revision \"%c\", Variant \"0x%02X\", Vendor \"%s\"\n",
-                            slot,
-                            wdaq_brd_type_name[board[slot].type_id],
-                            'A' + board[slot].rev_id,
-                            board[slot].variant_id,
-                            wdaq_brd_vendor_name[board[slot].vendor_id]);
+               snprintf(name, sizeof(name), "%s", wdaq_brd_type_name[board[slot].type_id]);
+
+            b += stringf("Slot %2d: Found board \"%s\", Revision \"%c\", Variant \"0x%02X\", Vendor \"%s\"\n",
+                         slot,
+                         name,
+                         'A' + board[slot].rev_id,
+                         board[slot].variant_id,
+                         wdaq_brd_vendor_name[board[slot].vendor_id]);
          }
       }
    }
@@ -1018,7 +1020,7 @@ extern "C" { // make all library functions callable from C++
 }
 
 #define FLASH_BUF_SIZE      8192 // 8k 
-#define PROG_BAR_ITEMS        50
+#define PROG_BAR_ITEMS        40
 #define PROG_BAR_DEL_CHAR  "\033[43m \033[0m"  // yellow background
 #define PROG_BAR_FW_CHAR   "\033[45m \033[0m"  // magenta background
 #define PROG_BAR_SW_CHAR   "\033[46m \033[0m"  // cyan background
