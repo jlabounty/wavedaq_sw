@@ -81,11 +81,12 @@ public:
    int sock;
    int slot;
    int verbose;
+   int show_default;
    time_t last;
    struct sockaddr client_address;
    std::string rb;
 
-   udp_connection(int so, int sl) { sock = so; slot = sl; verbose = 1; }
+   udp_connection(int so, int sl) { sock = so; slot = sl; verbose = 0; show_default = 0; }
    void clear() { rb = ""; }
    void send(std::string s) { rb += s; }
    void sprintf(const char *fmt, ...);
@@ -740,13 +741,15 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("sysmon               Print system monitor info\n\n");
 
       c.sprintf("upload <slot> [-f <path>] [-s <path>] [-t <type>] [-r <rev>]\n");
-      c.sprintf("  <slot>    : WDB/TCP slot, multiple slots possible separated by spaces,\n");
-      c.sprintf("                use \"*\" to upload all slots\n");
+      c.sprintf("  <slot>    : WDB slot, multiple slots possible separated by spaces,\n");
+      c.sprintf("                use \"*\" to upload all slots 0-15 (if boards are present)\n");
+      c.sprintf("                use \"17\" to upload firmware for TCB\n");
       c.sprintf("  -f <path> : WDB/TCB firmware file (optional)\n");
       c.sprintf("  -s <path> : WDB software file (optional)\n");
       c.sprintf("  -t <type> : Board type \"wdb\" or \"tcb\", forces upload\n");
       c.sprintf("  -r <rev>  : Board revision, \"f\", \"g\" for wdb, \"1\", \"2\" for tcb, forced upload\n");
-      c.sprintf("        -v  : Verbose output\n");
+      c.sprintf("         -d : Show default firmware and software files\n");
+      c.sprintf("         -v : Verbose output\n");
 
       c.sprintf("\n");
 
@@ -1325,10 +1328,14 @@ void slot_upload(udp_connection &c, unsigned int slot_nr, int load_fw, char *fwp
             strcpy(fw_path, flash_mem_map->default_fw_path);
             strcat(fw_path, wdb_fw_default_file);
          }
-         /* upload firmware */
-         c.sprintf("Uploading WDB firmware %s\n", fw_path);
-         c.flush();
-         write_fw(c, slot_nr, fw_path, flash_mem_map, "fw");
+         if (c.show_default) {
+            c.sprintf("Slot %2d firmware: %s\n", slot_nr, fw_path);
+         } else {
+            /* upload firmware */
+            c.sprintf("Uploading WDB firmware %s\n", fw_path);
+            c.flush();
+            write_fw(c, slot_nr, fw_path, flash_mem_map, "fw");
+         }
       }
       if (load_sw) {
          if (!sw_path[0]) {
@@ -1336,10 +1343,14 @@ void slot_upload(udp_connection &c, unsigned int slot_nr, int load_fw, char *fwp
             strcpy(sw_path, flash_mem_map->default_fw_path);
             strcat(sw_path, wdb_sw_default_file);
          }
-         /* upload sofware */
-         c.sprintf("Uploading WDB software %s\n", sw_path);
-         c.flush();
-         write_sw(c, slot_nr, sw_path, flash_mem_map, "sw");
+         if (c.show_default) {
+            c.sprintf("Slot %2d software: %s\n", slot_nr, sw_path);
+         } else {
+            /* upload sofware */
+            c.sprintf("Uploading WDB software %s\n", sw_path);
+            c.flush();
+            write_sw(c, slot_nr, sw_path, flash_mem_map, "sw");
+         }
       }
    } else if (strstr(flash_mem_map->default_fw_path, "/tcb/")) {
       /* TCB */
@@ -1349,10 +1360,14 @@ void slot_upload(udp_connection &c, unsigned int slot_nr, int load_fw, char *fwp
             strcpy(fw_path, flash_mem_map->default_fw_path);
             strcat(fw_path, tcb_fw_default_file);
          }
-         /* upload firmware */
-         c.sprintf("Uploading TCB firmware %s\n", fw_path);
-         c.flush();
-         write_fw(c, slot_nr, fw_path, flash_mem_map, "fw");
+         if (c.show_default) {
+            c.sprintf("Slot %2d firmware: %s\n", slot_nr, fw_path);
+         } else {
+            /* upload firmware */
+            c.sprintf("Uploading TCB firmware %s\n", fw_path);
+            c.flush();
+            write_fw(c, slot_nr, fw_path, flash_mem_map, "fw");
+         }
       }
    }
 
@@ -1423,7 +1438,7 @@ void upload(udp_connection &c, int n_param, const char **param) {
                slot_sel[s] = 1;
          }
       } else if (param[i][0] == '*') {
-         for (int s = 0; s < WDAQ_N_SLOTS; s++) {
+         for (int s = 0; s < 16; s++) {
             if (get_slot_board_info(s, &board_info)) {
                slot_sel[s] = 1;
 
@@ -1463,9 +1478,6 @@ void upload(udp_connection &c, int n_param, const char **param) {
       }
    }
    
-   if (c.verbose)
-      c.sprintf("\n");
-
    int i;
    for (i = 0; i < WDAQ_N_SLOTS; i++)
       if (slot_sel[i])
@@ -1479,10 +1491,11 @@ void upload(udp_connection &c, int n_param, const char **param) {
    fwp[0] = 0;
    swp[0] = 0;
    c.verbose = 0;
+   c.show_default = 0;
    for (int i = 1; i < n_param; i++) {
 
       if (param[i][0] == '-' && param[i][1] == 'f') {
-         if (++i < n_param) {
+         if (++i >= n_param) {
             c.sprintf("Missing firmware file with \"-f\" option\n");
             return;
          }
@@ -1496,7 +1509,7 @@ void upload(udp_connection &c, int n_param, const char **param) {
       }
 
       else if (param[i][0] == '-' && param[i][1] == 's') {
-         if (++i < n_param) {
+         if (++i >= n_param) {
             c.sprintf("Missing software file with \"-s\" option\n");
             return;
          }
@@ -1510,7 +1523,7 @@ void upload(udp_connection &c, int n_param, const char **param) {
       }
 
       else if (param[i][0] == '-' && param[i][1] == 't') {
-         if (++i < n_param) {
+         if (++i >= n_param) {
             c.sprintf("Missing board type with \"-t\" option\n");
             return;
          }
@@ -1526,21 +1539,26 @@ void upload(udp_connection &c, int n_param, const char **param) {
       }
 
       else if (param[i][0] == '-' && param[i][1] == 'r') {
-         if (++i < n_param) {
+         if (++i >= n_param) {
             c.sprintf("Missing board revision with \"-r\" option\n");
             return;
          }
-         if (param[i][0] >= '0' && param[i][0] <= '9') {
+         if (param[i][0] >= '1' && param[i][0] <= '2') {
             board_rev = strtoul(param[i], NULL, 0);
-         } else if (param[i][0] >= 'a' && param[i][0] <= 'z') {
+         } else if (param[i][0] >= 'e' && param[i][0] <= 'g') {
             board_rev = param[i][0] - 'a';
-         } else if (param[i][0] >= 'A' && param[i][0] <= 'Z') {
+         } else if (param[i][0] >= 'F' && param[i][0] <= 'g') {
             board_rev = param[i][0] - 'A';
          } else {
-            c.sprintf("Invalid board revision, must be 0-9 or a-z\n");
+            c.sprintf("Invalid board revision, must be \"1\" or \"2\" or \"e\" or \"g\"\n");
             return;
          }
          r_force = 1;
+      }
+
+      else if (param[i][0] == '-' && param[i][1] == 'd') {
+         c.sprintf("Default firmware files:\n");
+         c.show_default = 1;
       }
 
       else if (param[i][0] == '-' && param[i][1] == 'v') {
@@ -1559,6 +1577,9 @@ void upload(udp_connection &c, int n_param, const char **param) {
       load_fw = 1;
       load_sw = 1;
    }
+
+   if (c.verbose)
+      c.sprintf("\n");
 
    if (t_force && r_force) {
       /* forced upload */
