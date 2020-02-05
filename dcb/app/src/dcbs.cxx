@@ -43,6 +43,7 @@ extern "C" { // make all library functions callable from C++
 #include "register_map_dcb.h"
 #include "update_config.h"
 #include "drv_bpl.h"
+#include "drv_tcb.h"
 #include "dbg.h"
 #include "system.h"
 #include "sc_io.h"
@@ -652,6 +653,14 @@ int main(int argc, char *argv[]) {
 
       } // ASCII
 
+      //check for TCB data
+      for (int slot = 0; slot < WDAQ_N_SLOTS; slot++) {
+         if(board[slot].type_id==BRD_TYPE_ID_TCB){
+            if(hasData(slot, board + slot))
+               processData(slot, board + slot);
+         }
+      }
+
    }
 
    return 0;
@@ -887,6 +896,29 @@ void process_dcb_command(udp_connection &c, char *buffer) {
    } else if (strcmp(param[0], "upload") == 0) {
 
       upload(c, n_param, (const char **) param);
+
+   } else if (strcmp(param[0], "cfgdst") == 0) {
+      char* new_addr;
+      int new_port;
+
+      if(n_param == 2){
+         //get ip addr from udp packet
+         new_port = atoi(param[1]);
+         sockaddr_in* ptr = (sockaddr_in*)&c.client_address;
+         new_addr = inet_ntoa(ptr->sin_addr);
+      } else if(n_param > 2){
+         //ip addr given
+         new_port = atoi(param[1]);
+         new_addr = param[2];
+      } else {
+         c.sprintf("please use this format \"cfgdst <port number> [<ip>]\"\n");
+         return;
+      }
+
+      c.sprintf("setting data destination to %s port %d\n", new_addr, new_port);
+
+      //notify tcb readout driver of the new port and ip
+      setTcbDataDestination(new_addr, new_port);
 
    } else {
       c.sprintf("Unknown command: %s\n", buffer);

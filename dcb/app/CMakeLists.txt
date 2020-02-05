@@ -31,6 +31,7 @@ set(LIBSRC
    src/wd2_config.c
    src/sc_io.c
    src/drv_bpl.c
+   src/drv_tcb.c
    src/register_map_dcb.c
    src/drv_axi_dcb_reg_bank.c
    src/drv_spi_if.c
