@@ -84,6 +84,7 @@ public:
    bool GetSendBlock() { return mSendBlocked; }
    void SetSendBlock(bool flag) { mSendBlocked = flag; }
    WDAQ_BRD *GetBoardId(int slot) { return &board[slot]; }
+   void SetDestinationPort(int port);
 
    // setter & getter ----------
    std::string GetName() { return mDCBName; }

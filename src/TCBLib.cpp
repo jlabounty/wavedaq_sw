@@ -1440,10 +1440,10 @@ u_int32_t TCB::GetBufferHeadSPI(int *nBanks, u_int32_t *evecou, u_int32_t* total
 bool TCB::HasBufferBankSPI(u_int32_t ptr, char *bankName, int *length){
    u_int32_t data[2];
    ReadBuffer(data, 2, ptr);
-   bankName[0] = data[0]&0xFF;
-   bankName[1] = (data[0]>>8)&0xFF;
-   bankName[2] = (data[0]>>16)&0xFF;
-   bankName[3] = (data[0]>>24)&0xFF;
+   bankName[3] = data[0]&0xFF;
+   bankName[2] = (data[0]>>8)&0xFF;
+   bankName[1] = (data[0]>>16)&0xFF;
+   bankName[0] = (data[0]>>24)&0xFF;
 
    *length = data[1];
 

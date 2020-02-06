@@ -18,10 +18,15 @@
 
 #include "wdaq_board_id.h"
 
+#define WDAQ_UDP_PROTOCOL_VERSION 7
+
 #define EOE 1
 #define SOE 2
 #define EOT 4
 #define SOT 8
+
+#define DATA_TYPE_DUMMY 5
+#define DATA_TYPE_TCB 8
 
 //typedefs
 #pragma pack(1) // byte-level alignement
@@ -57,21 +62,26 @@ typedef struct {
    char           bank_name[4];
    unsigned int   time_stamp;
    unsigned int   event_number;
-   unsigned char  trigger_information[8];
+   unsigned int   trigger_information1;
+   unsigned int   trigger_information0;
    unsigned short temperature;
    unsigned short reserved;
 } TcbUdpPacketHeader;
 
 //register I/O through SPI
 unsigned int readReg(int slot, WDAQ_BRD *board, unsigned int addr);
-void readBlock(int slot, WDAQ_BRD* board, unsigned int addr, unsigned short size, unsigned int *data);
+void readBlock(int slot, WDAQ_BRD* board, unsigned int addr, unsigned short size, unsigned int *data, int correctEndianness);//correctEndianness must be 1 to use data on ARM
 void writeReg(int slot, WDAQ_BRD *board, unsigned int addr, unsigned int val);
 
 //packet sender
 void sendPacket(unsigned int pkgnum, unsigned int npkg, TcbSpiBufferHeader* bufferhead, TcbSpiBankHeader* bankhead, unsigned int *data);
 
+//endianess correction before sending
+void correctEndianness(WdaqUdpPacketHeader* wdaqheader, TcbUdpPacketHeader* tcbheader);
+
 //high level interface funcitons
-void setTcbDataDestination(char *ip_address, int port);
+void setTcbDataDestination(char *ip_address, int port);//use negative port to invalid destination
+int hasTcbDataDestination();
 int hasData(int slot, WDAQ_BRD *board);
 void processData(int slot, WDAQ_BRD *board);
 

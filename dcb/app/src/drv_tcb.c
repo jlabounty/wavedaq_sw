@@ -65,7 +65,7 @@ unsigned int readReg(int slot, WDAQ_BRD* board, unsigned int addr){
 
 /******************************************************************************/
 
-void readBlock(int slot, WDAQ_BRD* board, unsigned int addr, unsigned short size, unsigned int *data){
+void readBlock(int slot, WDAQ_BRD* board, unsigned int addr, unsigned short size, unsigned int *data, int correctEndianness){
    char* txbuffer = (char*)malloc(sizeof(unsigned int)*size + sizeof(char)*6);
    char* rxbuffer = (char*)malloc(sizeof(unsigned int)*size + sizeof(char)*6);
 
@@ -83,7 +83,10 @@ void readBlock(int slot, WDAQ_BRD* board, unsigned int addr, unsigned short size
 
    //correct endianess
    for(int i=0; i<size; i++){
-      data[i] = bswap_32(outptr[i]);
+      if(correctEndianness){
+         data[i] = bswap_32(outptr[i]);
+      } else
+         memmove(data, outptr, size*sizeof(unsigned int));
    }
 
    free(txbuffer);
@@ -124,24 +127,37 @@ int hasData(int slot, WDAQ_BRD* board){
 
 void processData(int slot, WDAQ_BRD* board){
    TcbSpiBufferHeader headerdata;
+   unsigned int data[4096];//UPDATE THIS FOR LARGER FILE TRANSFERS
 
-   readBlock(slot, board, BUFFERBASE, 5, (unsigned int*)&headerdata);
+   readBlock(slot, board, BUFFERBASE, 5, (unsigned int*)&headerdata, 1);
 
    //printf("processing data from TCB of slot %d: %08lx\n", slot, headerdata.nBanks);
 
    unsigned int address = BUFFERBASE + 5;
    unsigned int pkgnum = 0;
+   
    for(unsigned int iBank=0; iBank < headerdata.nBanks; iBank++){
+
+      //read bank header
       TcbSpiBankHeader bankhead;
-
-      readBlock(slot, board, address, 2, (unsigned int*)&bankhead);
+      readBlock(slot, board, address, 2, (unsigned int*)&bankhead, 1);
       //printf("Got bank %c%c%c%c size %08lx\n", bankhead.name[3], bankhead.name[2], bankhead.name[1], bankhead.name[0], bankhead.size);
-      unsigned int data = 0xA5A5A5A5;
+      
+      //check for buffer overrun
+      unsigned int realsize = bankhead.size;
+      if(realsize*sizeof(unsigned int) > sizeof(data)){
+         bankhead.size = sizeof(data)/sizeof(unsigned int);
+      }
 
-      sendPacket(pkgnum, headerdata.nBanks, &headerdata, &bankhead, &data);
+      //read data
+      readBlock(slot, board, address+2, bankhead.size, data, 0);//NOTE: no endianness corrections for speed, data content should not be used
 
+      //send packet
+      sendPacket(pkgnum, headerdata.nBanks, &headerdata, &bankhead, data);
+
+      //next
       pkgnum++;
-      address += bankhead.size+2;
+      address += realsize+2;
    }
 
    //sends dummy packet if no data was sent
@@ -177,16 +193,16 @@ void sendPacket(unsigned int pkgnum, unsigned int npkg, TcbSpiBufferHeader* buff
    //allocate packet header
    WdaqUdpPacketHeader udpwdaqhead;
 
+   udpwdaqhead.protocol_version = WDAQ_UDP_PROTOCOL_VERSION;
    udpwdaqhead.board_type_revision = 1<<4; //TCB board
    udpwdaqhead.serial_number = (crate_id << 8) | slot_id; //unique board identifier
    udpwdaqhead.crate_id = crate_id;
    udpwdaqhead.slot_id = slot_id;
    udpwdaqhead.packet_number = pkgnum;
    udpwdaqhead.data_chunk_offset = 0;
-   udpwdaqhead.payload_length = 0;
    udpwdaqhead.wdaq_flags = EOT | SOT;
    if(pkgnum == 0) udpwdaqhead.wdaq_flags |= SOE; // begin of event
-   else if(pkgnum == (npkg-1)) udpwdaqhead.wdaq_flags |= EOE; //end of event
+   if(pkgnum == (npkg-1)) udpwdaqhead.wdaq_flags |= EOE; //end of event
 
    //prepare message structure
    struct iovec iov[3];
@@ -202,14 +218,15 @@ void sendPacket(unsigned int pkgnum, unsigned int npkg, TcbSpiBufferHeader* buff
 
    //check if tcb bank is given
    if(bankhead!=0){
-      udpwdaqhead.payload_length = bankhead->size * 4;
+      udpwdaqhead.payload_length = bankhead->size * sizeof(unsigned int);
+      udpwdaqhead.data_type = DATA_TYPE_TCB;
 
-      //TCB Packet header TODO: swap with dummy if no banks
-      for(int i=0; i<4; i++) udptcbhead.bank_name[i] = bankhead->name[i];
+      //TCB Packet header
+      for(int i=0; i<4; i++) udptcbhead.bank_name[i] = bankhead->name[3-i];//correct endianess swap in readreg
       udptcbhead.time_stamp = bufferhead->totalTime;
       udptcbhead.event_number = bufferhead->eventCounter;
-      *(unsigned int*) udptcbhead.trigger_information = bufferhead->triggerCounter; 
-      *(unsigned int*)(udptcbhead.trigger_information+4) = bufferhead->triggerType;
+      udptcbhead.trigger_information0 = bufferhead->triggerCounter; 
+      udptcbhead.trigger_information1 = bufferhead->triggerType;
       //udptcbhead.temperature = 0;
       //udptcbhead.reserved = 0;
 
@@ -219,22 +236,54 @@ void sendPacket(unsigned int pkgnum, unsigned int npkg, TcbSpiBufferHeader* buff
       iov[1].iov_base = &udptcbhead;
       iov[1].iov_len = sizeof(TcbUdpPacketHeader);
       iov[2].iov_base = data;
-      iov[2].iov_len = sizeof(unsigned int);
+      iov[2].iov_len = bankhead->size*sizeof(unsigned int);
       message.msg_iovlen=3;
 
    } else {
+      udpwdaqhead.payload_length = 0;
+      udpwdaqhead.data_type = DATA_TYPE_TCB;
+
       //no bank given: prepare DUMMY packet
+      udptcbhead.bank_name[0]=0;
+      udptcbhead.bank_name[1]=0;
+      udptcbhead.bank_name[2]=0;
+      udptcbhead.bank_name[3]=0;
+      udptcbhead.time_stamp = bufferhead->totalTime;
+      udptcbhead.event_number = bufferhead->eventCounter;
+      udptcbhead.trigger_information0 = bufferhead->triggerCounter; 
+      udptcbhead.trigger_information1 = bufferhead->triggerType;
+
+      //prepare scatter-gather
       iov[0].iov_base = &udpwdaqhead;
       iov[0].iov_len = sizeof(WdaqUdpPacketHeader);
-      message.msg_iovlen=1;
+      iov[1].iov_base = &udptcbhead;
+      iov[1].iov_len = sizeof(TcbUdpPacketHeader);
+      message.msg_iovlen=2;
    }
 
    //send
+   correctEndianness(&udpwdaqhead, &udptcbhead);
    if (sendmsg(fd,&message,0)==-1) {
       printf("error sending TCB data: %s\n",strerror(errno));
    }
 
    close(fd);
+
+}
+
+/******************************************************************************/
+
+void correctEndianness(WdaqUdpPacketHeader* wdaqheader, TcbUdpPacketHeader* tcbheader){
+   wdaqheader->serial_number = bswap_16(wdaqheader->serial_number);
+   wdaqheader->packet_number = bswap_16(wdaqheader->packet_number);
+   wdaqheader->payload_length = bswap_16(wdaqheader->payload_length);
+   wdaqheader->data_chunk_offset = bswap_16(wdaqheader->data_chunk_offset);
+
+   tcbheader->time_stamp = bswap_32(tcbheader->time_stamp);
+   tcbheader->event_number = bswap_32(tcbheader->event_number);
+   tcbheader->trigger_information0 = bswap_32(tcbheader->trigger_information0);
+   tcbheader->trigger_information1 = bswap_32(tcbheader->trigger_information1);
+   tcbheader->temperature = bswap_32(tcbheader->temperature);
 
 }
 
@@ -249,7 +298,18 @@ void setTcbDataDestination(char *ip_address, int port){
    inet_aton(ip_address, &tcb_destination_addr.sin_addr);
 
    //flags it as valid
-   tcb_destination_valid = 1;
+   if (port <= 0) 
+      tcb_destination_valid = 0;
+   else
+      tcb_destination_valid = 1;
+
+}
+
+/******************************************************************************/
+
+int hasTcbDataDestination(){
+   
+   return tcb_destination_valid;
 
 }
 

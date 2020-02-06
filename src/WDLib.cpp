@@ -459,32 +459,37 @@ void WDSystem::SpawnDAQ(){
 
    //compute number of WDBs and expected number of packets
    int nWDBs=0;
+   int nTCBs=0;
    for(auto &c : fCrate){
       for(auto &b : *c){
          if(b) if(dynamic_cast<WDWDB*>(b) != nullptr) nWDBs++;
+         if(b) if(dynamic_cast<WDTCB*>(b) != nullptr) nTCBs++;
       }
    }
 
-   printf("spawning DAQ for %d WDBs...\n", nWDBs);
+   printf("spawning DAQ for %d WDBs and %d TCBs...\n", nWDBs, nTCBs);
 
    //create buffers
-   fPacketBuffer= new DAQBuffer<WDAQPacketData>(nWDBs*128*number_of_buffers, "PACKETBUFFER");
+   fPacketBuffer= new DAQBuffer<WDAQPacketData>(nWDBs*128*number_of_buffers+nTCBs*4*number_of_buffers, "PACKETBUFFER");
    fEventBuffer= new DAQBuffer<WDAQEvent>(number_of_calibrated_buffers, "BUILDBUFFER");
    fCalibratedBuffer= new DAQBuffer<WDAQEvent>(number_of_calibrated_buffers, "EVENTBUFFER");
 
-   // create the TCBReadrer thread
-
-   int nTCBs=0;
+   // counts TCB transmitting data, create the TCBReadrer thread if needed
+   nTCBs=0;
    for(auto &c : fCrate){
       for(auto &b : *c){
          if(b) if(dynamic_cast<WDTCB*>(b) != nullptr){
             std::string readEnable;
             try{
                readEnable = b->GetProperty("Banks").GetStringValue();
-               WDAQTCBReader* tcbreaderthread = new WDAQTCBReader(fPacketBuffer,static_cast<WDTCB*>(b));
-	       tcbreaderthread->SetMinLoopDuration(std::chrono::milliseconds(10));
-               tcbreaderthread->Start();
-               fTCBReaderThreads.push_back(tcbreaderthread);
+               
+               //if there is no DCB try trough CMB
+               if(! static_cast<WDTCB*>(b)->HasDcbInterface()){
+                  WDAQTCBReader* tcbreaderthread = new WDAQTCBReader(fPacketBuffer,static_cast<WDTCB*>(b));
+                  tcbreaderthread->SetMinLoopDuration(std::chrono::milliseconds(10));
+                  tcbreaderthread->Start();
+                  fTCBReaderThreads.push_back(tcbreaderthread);
+               }
                nTCBs++;
 
             } catch (const std::runtime_error& ex){
@@ -494,10 +499,10 @@ void WDSystem::SpawnDAQ(){
       }
    }
    if(fTCBReaderThreads.size())
-      printf("including %d TCBs...\n", nTCBs);
+      printf("including %d TCB reader...\n", nTCBs);
 
    //spawn threads
-   fCollectorThread = new WDAQPacketCollector(fPacketBuffer, nWDBs);
+   fCollectorThread = new WDAQPacketCollector(fPacketBuffer, nWDBs+nTCBs);
    fCollectorThread->Start();
    fBuilderThread = new WDAQEventBuilder(fPacketBuffer, fEventBuffer, nWDBs+nTCBs);
    fBuilderThread->Start();
@@ -1080,8 +1085,8 @@ void WDWDB::ConfigureSamplingFrequency(Property &property) {
       WDSystem * sys= c->GetSystem();
       if(sys!=nullptr){
          try{
-	    calibpath = sys->GetDaqProperty("CalibPath").GetStringValue();
-	 } catch (const std::out_of_range& ex){
+       calibpath = sys->GetDaqProperty("CalibPath").GetStringValue();
+    } catch (const std::out_of_range& ex){
          }
       }
    }
@@ -1278,6 +1283,7 @@ void WDTCB::ConfigurationStarted(){
    SetPacketizerCommandAt(0, ::STOP, 0, 0);
    SetPacketizerAutostart(true);
    SetPacketizerEnable(true);
+   SetPacketizerBus(true);
 }
 
 void WDTCB::ConfigurationEnded(){
@@ -1368,394 +1374,310 @@ void WDTCB::ConfigureParameters(Property &property){
 }
 
 void WDTCB::ConfigurePacketizer(Property &property){
-   //bool readEnable;
-   //readEnable = property.GetBool();
    std::string list = property.GetStringValue();
 
-   //if(readEnable){
-      std::vector<PacketInstruction> instVec;
-      PacketInstruction inst;
+   std::vector<PacketInstruction> instVec;
+   PacketInstruction inst;
 
-      //to be changed: waiting for deserialization
-      inst.offset = 0;
-      inst.cmd = ::BLOCK_COPY;
-      inst.arg0 = MEMBASEADDR;
-      inst.arg1 = BUFFERBASE+10;
-      inst.arg2 = 1024;
-      instVec.push_back(inst);
-      inst.arg2 = 0;
+   //to be changed: waiting for deserialization
+   inst.offset = 0;
+   inst.cmd = ::BLOCK_COPY;
+   inst.arg0 = MEMBASEADDR;
+   inst.arg1 = BUFFERBASE+10;
+   inst.arg2 = 1024;
+   instVec.push_back(inst);
+   inst.arg2 = 0;
 
-      inst.offset += 1;
-      inst.cmd = ::BLOCK_COPY;
-      inst.arg0 = MEMBASEADDR;
-      inst.arg1 = BUFFERBASE+10;
-      inst.arg2 = 1024;
-      instVec.push_back(inst);
-      inst.arg2 = 0;
+   inst.offset += 1;
+   inst.cmd = ::BLOCK_COPY;
+   inst.arg0 = MEMBASEADDR;
+   inst.arg1 = BUFFERBASE+10;
+   inst.arg2 = 1024;
+   instVec.push_back(inst);
+   inst.arg2 = 0;
 
-      //fill header
-      inst.offset += 1;
-      inst.cmd = ::COPY;
-      inst.arg0 = REVECOU;
-      inst.arg1 = BUFFERBASE+1;
-      instVec.push_back(inst);
+   //fill header
+   inst.offset += 1;
+   inst.cmd = ::COPY;
+   inst.arg0 = REVECOU;
+   inst.arg1 = BUFFERBASE+1;
+   instVec.push_back(inst);
 
-      inst.offset += 1;
-      inst.cmd = ::COPY;
-      inst.arg0 = RTOTTIME;
-      inst.arg1 = BUFFERBASE+2;
-      instVec.push_back(inst);
+   inst.offset += 1;
+   inst.cmd = ::COPY;
+   inst.arg0 = RTOTTIME;
+   inst.arg1 = BUFFERBASE+2;
+   instVec.push_back(inst);
 
-      inst.offset += 1;
-      inst.cmd = ::COPY;
-      inst.arg0 = RSYSTRITYPE;
-      inst.arg1 = BUFFERBASE+3;
-      instVec.push_back(inst);
+   inst.offset += 1;
+   inst.cmd = ::COPY;
+   inst.arg0 = RSYSTRITYPE;
+   inst.arg1 = BUFFERBASE+3;
+   instVec.push_back(inst);
 
-      inst.offset += 1;
-      inst.cmd = ::COPY;
-      inst.arg0 = RSYSEVECOU;
-      inst.arg1 = BUFFERBASE+4;
-      instVec.push_back(inst);
+   inst.offset += 1;
+   inst.cmd = ::COPY;
+   inst.arg0 = RSYSEVECOU;
+   inst.arg1 = BUFFERBASE+4;
+   instVec.push_back(inst);
 
-      int bufptr = BUFFERBASE+5;
-      int nbank = 0;
+   int bufptr = BUFFERBASE+5;
+   int nbank = 0;
 
-      if(list.find("TRGI")!=std::string::npos){
-	      inst.offset += 1;
-	      inst.cmd = ::DIRECT_WRITE;
-	      inst.arg0 = 0x54524749;//TRGI
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::DIRECT_WRITE;
-	      inst.arg0 = 7;
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::COPY;
-	      inst.arg0 = RTRITYPE;
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::BLOCK_COPY;
-	      inst.arg0 = RTRIPATT;
-	      inst.arg1 = bufptr;
-	      inst.arg2 = 2;
-	      instVec.push_back(inst);
-	      inst.arg2 = 0;
-
-	      bufptr += 2;
-
-	      inst.offset += 1;
-	      inst.cmd = ::COPY;
-	      inst.arg0 = RTOTTIME;
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::COPY;
-	      inst.arg0 = RLIVETIME;
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::COPY;
-	      inst.arg0 = REVECOU;
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::COPY;
-	      inst.arg0 = RPCURR;
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      nbank++;
-      }
-      if(list.find("TRGC")!=std::string::npos){
-	      inst.offset += 1;
-	      inst.cmd = ::DIRECT_WRITE;
-	      inst.arg0 = 0x54524743;//TRGC
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::DIRECT_WRITE;
-	      inst.arg0 = 64;
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::BLOCK_COPY;
-	      inst.arg0 = RTRGCOU;
-	      inst.arg1 = bufptr;
-	      inst.arg2 = 64;
-	      instVec.push_back(inst);
-	      inst.arg2 = 0;
-
-	      bufptr += 64;
-
-	      nbank++;
-      }
-      if(list.find("TGEN")!=std::string::npos){
-	      inst.offset += 1;
-	      inst.cmd = ::DIRECT_WRITE;
-	      inst.arg0 = 0x5447454e;//TGEN
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::DIRECT_WRITE;
-	      inst.arg0 = 2*GENTDIM+1;
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::COPY;
-	      inst.arg0 = RMEMADDR;
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::BLOCK_COPY;
-	      inst.arg0 = GENTMEMBASE;
-	      inst.arg1 = bufptr;
-	      inst.arg2 = 2*GENTDIM;
-	      instVec.push_back(inst);
-	      inst.arg2 = 0;
-
-	      bufptr += 2*GENTDIM;
-	      nbank++;
-      }
-      if(list.find("BGO")!=std::string::npos){
-	      inst.offset += 1;
-	      inst.cmd = ::DIRECT_WRITE;
-	      inst.arg0 = 0x5442474F;//TBGO
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::DIRECT_WRITE;
-	      inst.arg0 = MEMDIM+1;
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::COPY;
-	      inst.arg0 = RMEMADDR;
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::BLOCK_COPY;
-	      inst.arg0 = BGOMEMBASE;
-	      inst.arg1 = bufptr;
-	      inst.arg2 = MEMDIM;
-	      instVec.push_back(inst);
-	      inst.arg2 = 0;
-
-	      bufptr += MEMDIM;
-	      nbank++;
-      }
-      if(list.find("RDC")!=std::string::npos){
-	      inst.offset += 1;
-	      inst.cmd = ::DIRECT_WRITE;
-	      inst.arg0 = 0x54524443;//TRDC
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::DIRECT_WRITE;
-	      inst.arg0 = 2*MEMDIM+1;
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::COPY;
-	      inst.arg0 = RMEMADDR;
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::BLOCK_COPY;
-	      inst.arg0 = RDCMEMBASE;
-	      inst.arg1 = bufptr;
-	      inst.arg2 = 2*MEMDIM;
-	      instVec.push_back(inst);
-	      inst.arg2 = 0;
-
-	      bufptr += 2*MEMDIM;
-	      nbank++;
-      }
-      if(list.find("ALFA")!=std::string::npos){
-	      inst.offset += 1;
-	      inst.cmd = ::DIRECT_WRITE;
-	      inst.arg0 = 0x54414c46;//TALF
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::DIRECT_WRITE;
-	      inst.arg0 = 2*MEMDIM+1;
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::COPY;
-	      inst.arg0 = RALGCLKMEMADDR;
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::BLOCK_COPY;
-	      inst.arg0 = ALFAMEMBASE;
-	      inst.arg1 = bufptr;
-	      inst.arg2 = 2*MEMDIM;
-	      instVec.push_back(inst);
-	      inst.arg2 = 0;
-
-	      bufptr += 2*MEMDIM;
-	      nbank++;
-      }
-      if(list.find("XEC")!=std::string::npos){
-	      inst.offset += 1;
-	      inst.cmd = ::DIRECT_WRITE;
-	      inst.arg0 = 0x54584543;//TXEC
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::DIRECT_WRITE;
-	      inst.arg0 = 2*MEMDIM+1;
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::COPY;
-	      inst.arg0 = RMEMADDR;
-	      inst.arg1 = bufptr++;
-	      instVec.push_back(inst);
-
-	      inst.offset += 1;
-	      inst.cmd = ::BLOCK_COPY;
-	      inst.arg0 = XECMEMBASE;
-	      inst.arg1 = bufptr;
-	      inst.arg2 = 2*MEMDIM;
-	      instVec.push_back(inst);
-	      inst.arg2 = 0;
-
-	      bufptr += 2*MEMDIM;
-	      nbank++;
-      }
-
-      /*inst.offset += 1;
-      inst.cmd = ::DIRECT_WRITE;
-      inst.arg0 = 0x494E3035;//IN05
-      inst.arg1 = BUFFERBASE+5;
-      instVec.push_back(inst);
-
+   if(list.find("TRGI")!=std::string::npos){
       inst.offset += 1;
       inst.cmd = ::DIRECT_WRITE;
-      inst.arg0 = 2*MEMDIM+1;
-      inst.arg1 = BUFFERBASE+6;
-      instVec.push_back(inst);
-
-      inst.offset += 1;
-      inst.cmd = ::COPY;
-      inst.arg0 = RMEMADDR;
-      inst.arg1 = BUFFERBASE+7;
-      instVec.push_back(inst);
-
-      inst.offset += 1;
-      inst.cmd = ::BLOCK_COPY;
-      inst.arg0 = MEMBASEADDR+5*(MEMDIM*2);
-      inst.arg1 = BUFFERBASE+8;
-      inst.arg2 = 2*MEMDIM;
-      instVec.push_back(inst);
-      inst.arg2 = 0;
-
-      inst.offset += 1;
-      inst.cmd = ::DIRECT_WRITE;
-      inst.arg0 = 0x494E3038;//IN08
-      inst.arg1 = BUFFERBASE+8+(2*MEMDIM);
-      instVec.push_back(inst);
-
-      inst.offset += 1;
-      inst.cmd = ::DIRECT_WRITE;
-      inst.arg0 = 2*MEMDIM+1;
-      inst.arg1 = BUFFERBASE+8+(2*MEMDIM)+1;
-      instVec.push_back(inst);
-
-      inst.offset += 1;
-      inst.cmd = ::COPY;
-      inst.arg0 = RMEMADDR;
-      inst.arg1 = BUFFERBASE+8+(2*MEMDIM)+2;
-      instVec.push_back(inst);
-
-      inst.offset += 1;
-      inst.cmd = ::BLOCK_COPY;
-      inst.arg0 = MEMBASEADDR+8*(MEMDIM*2);
-      inst.arg1 = BUFFERBASE+8+(2*MEMDIM)+3;
-      inst.arg2 = 2*MEMDIM;
-      instVec.push_back(inst);
-      inst.arg2 = 0;
-
-      inst.offset += 1;
-      inst.cmd = ::DIRECT_WRITE;
-      inst.arg0 = 0x47454e54;//GENT
-      inst.arg1 = BUFFERBASE+8+(2*MEMDIM)+3+(2*MEMDIM);
-      instVec.push_back(inst);
-
-      inst.offset += 1;
-      inst.cmd = ::DIRECT_WRITE;
-      inst.arg0 = 2*GENTDIM+1;
-      inst.arg1 = BUFFERBASE+8+(2*MEMDIM)+3+(2*MEMDIM)+1;
-      instVec.push_back(inst);
-
-      inst.offset += 1;
-      inst.cmd = ::COPY;
-      inst.arg0 = RMEMADDR;
-      inst.arg1 = BUFFERBASE+8+(2*MEMDIM)+3+(2*MEMDIM)+2;
-      instVec.push_back(inst);
-
-      inst.offset += 1;
-      inst.cmd = ::BLOCK_COPY;
-      inst.arg0 = GENTMEMBASE;
-      inst.arg1 = BUFFERBASE+8+(2*MEMDIM)+3+(2*MEMDIM)+3;
-      inst.arg2 = 2*GENTDIM;
-      instVec.push_back(inst);
-      inst.arg2 = 0;*/
-
-      inst.offset += 1;
-      inst.cmd = ::DIRECT_WRITE;
-      inst.arg0 = 0;
+      inst.arg0 = 0x54524749;//TRGI
       inst.arg1 = bufptr++;
       instVec.push_back(inst);
 
       inst.offset += 1;
       inst.cmd = ::DIRECT_WRITE;
-      inst.arg0 = nbank;//nbanks
-      inst.arg1 = BUFFERBASE;
+      inst.arg0 = 7;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RTRITYPE;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::BLOCK_COPY;
+      inst.arg0 = RTRIPATT;
+      inst.arg1 = bufptr;
+      inst.arg2 = 2;
+      instVec.push_back(inst);
+      inst.arg2 = 0;
+
+      bufptr += 2;
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RTOTTIME;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RLIVETIME;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = REVECOU;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RPCURR;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      nbank++;
+   }
+   if(list.find("TRGC")!=std::string::npos){
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 0x54524743;//TRGC
+      inst.arg1 = bufptr++;
       instVec.push_back(inst);
 
       inst.offset += 1;
       inst.cmd = ::DIRECT_WRITE;
-      inst.arg0 = 1;
-      inst.arg1 = PACK_NEXT_BUFFER;
+      inst.arg0 = 64;
+      inst.arg1 = bufptr++;
       instVec.push_back(inst);
 
       inst.offset += 1;
-      inst.cmd = ::STOP;
+      inst.cmd = ::BLOCK_COPY;
+      inst.arg0 = RTRGCOU;
+      inst.arg1 = bufptr;
+      inst.arg2 = 64;
+      instVec.push_back(inst);
+      inst.arg2 = 0;
+
+      bufptr += 64;
+
+      nbank++;
+   }
+   if(list.find("TGEN")!=std::string::npos){
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 0x5447454e;//TGEN
+      inst.arg1 = bufptr++;
       instVec.push_back(inst);
 
-      WritePacketizerProgram(instVec);
-   //} else {
-   //   SetPacketizerCommandAt(0, STOP, 0, 0);
-   //}
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 2*GENTDIM+1;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RMEMADDR;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::BLOCK_COPY;
+      inst.arg0 = GENTMEMBASE;
+      inst.arg1 = bufptr;
+      inst.arg2 = 2*GENTDIM;
+      instVec.push_back(inst);
+      inst.arg2 = 0;
+
+      bufptr += 2*GENTDIM;
+      nbank++;
+   }
+   if(list.find("BGO")!=std::string::npos){
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 0x5442474F;//TBGO
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = MEMDIM+1;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RMEMADDR;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::BLOCK_COPY;
+      inst.arg0 = BGOMEMBASE;
+      inst.arg1 = bufptr;
+      inst.arg2 = MEMDIM;
+      instVec.push_back(inst);
+      inst.arg2 = 0;
+
+      bufptr += MEMDIM;
+      nbank++;
+   }
+   if(list.find("RDC")!=std::string::npos){
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 0x54524443;//TRDC
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 2*MEMDIM+1;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RMEMADDR;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::BLOCK_COPY;
+      inst.arg0 = RDCMEMBASE;
+      inst.arg1 = bufptr;
+      inst.arg2 = 2*MEMDIM;
+      instVec.push_back(inst);
+      inst.arg2 = 0;
+
+      bufptr += 2*MEMDIM;
+      nbank++;
+   }
+   if(list.find("ALFA")!=std::string::npos){
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 0x54414c46;//TALF
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 2*MEMDIM+1;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RALGCLKMEMADDR;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::BLOCK_COPY;
+      inst.arg0 = ALFAMEMBASE;
+      inst.arg1 = bufptr;
+      inst.arg2 = 2*MEMDIM;
+      instVec.push_back(inst);
+      inst.arg2 = 0;
+
+      bufptr += 2*MEMDIM;
+      nbank++;
+   }
+   if(list.find("XEC")!=std::string::npos){
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 0x54584543;//TXEC
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 2*MEMDIM+1;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RMEMADDR;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::BLOCK_COPY;
+      inst.arg0 = XECMEMBASE;
+      inst.arg1 = bufptr;
+      inst.arg2 = 2*MEMDIM;
+      instVec.push_back(inst);
+      inst.arg2 = 0;
+
+      bufptr += 2*MEMDIM;
+      nbank++;
+   }
+
+   inst.offset += 1;
+   inst.cmd = ::DIRECT_WRITE;
+   inst.arg0 = 0;
+   inst.arg1 = bufptr++;
+   instVec.push_back(inst);
+
+   inst.offset += 1;
+   inst.cmd = ::DIRECT_WRITE;
+   inst.arg0 = nbank;//nbanks
+   inst.arg1 = BUFFERBASE;
+   instVec.push_back(inst);
+
+   inst.offset += 1;
+   inst.cmd = ::DIRECT_WRITE;
+   inst.arg0 = 1;
+   inst.arg1 = PACK_NEXT_BUFFER;
+   instVec.push_back(inst);
+
+   inst.offset += 1;
+   inst.cmd = ::STOP;
+   instVec.push_back(inst);
+
+   WritePacketizerProgram(instVec);
 }
 
 void WDTCB::ConfigureExtDAQ(Property &property){
@@ -2053,6 +1975,7 @@ void WDDCB::ConfigureProperty(const std::string &name, Property &property) {
 };
 
 void WDDCB::ConfigurationStarted(){
+   SetDestinationPort(GetCrate()->GetSystem()->GetDAQServerPort());
 }
 
 void WDDCB::ConfigurationEnded(){

@@ -654,10 +654,12 @@ int main(int argc, char *argv[]) {
       } // ASCII
 
       //check for TCB data
-      for (int slot = 0; slot < WDAQ_N_SLOTS; slot++) {
-         if(board[slot].type_id==BRD_TYPE_ID_TCB){
-            if(hasData(slot, board + slot))
-               processData(slot, board + slot);
+      if(hasTcbDataDestination()){
+         for (int slot = 0; slot < WDAQ_N_SLOTS; slot++) {
+            if(board[slot].type_id==BRD_TYPE_ID_TCB){
+               if(hasData(slot, board + slot))
+                  processData(slot, board + slot);
+            }
          }
       }
 

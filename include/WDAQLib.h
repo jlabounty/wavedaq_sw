@@ -325,7 +325,7 @@ public:
 
 //---------- THREAD implementation -------
 //Packet Collector - Thread to collect packets
-#define WD2_UDP_PROTOCOL_VERSION  7
+#define WDAQ_UDP_PROTOCOL_VERSION  7
 
 class WDAQPacketCollector: public DAQServerThread{
    DAQBuffer<WDAQPacketData> *fBuf;
@@ -342,7 +342,7 @@ class WDAQPacketCollector: public DAQServerThread{
    void End();
 
    public:
-   WDAQPacketCollector(DAQBuffer<WDAQPacketData> *buf, int nWDB=-1): DAQServerThread(nWDB*4*1024*1024){ //  4*1MB/WDB
+   WDAQPacketCollector(DAQBuffer<WDAQPacketData> *buf, int nBoards=-1): DAQServerThread(nBoards*4*1024*1024){ //  4*1MB/Board
       fBuf = buf;
       fNPackets = 0;
       fDroppedPackets = 0;

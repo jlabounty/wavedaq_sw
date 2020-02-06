@@ -445,6 +445,13 @@ std::vector<unsigned int> DCB::ReadUDP(unsigned int slot, unsigned int ofs, unsi
 
 //--------------------------------------------------------------------
 
+void DCB::SetDestinationPort(int port) {
+   // set destination port in DCB board, IP is used automatically form UDP packet
+   SendUDP(std::string("cfgdst ") + std::to_string(port));
+}
+
+//--------------------------------------------------------------------
+
 void DCB::Connect() {
    struct sockaddr_in client_addr;
    struct hostent *phe;

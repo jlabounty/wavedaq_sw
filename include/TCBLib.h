@@ -223,6 +223,14 @@ public:
       fslot = slot;
    };
 
+   bool HasDcbInterface(){
+      return fDCB != nullptr;
+   }
+
+   bool HasMscbInterface(){
+      return fh != -1;
+   }
+
    //general write register function
    void WriteReg(u_int32_t, u_int32_t*);
    //general write block transfert function
