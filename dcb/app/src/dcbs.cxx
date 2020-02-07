@@ -726,6 +726,7 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("   - switch back to DCB with \"slot 16\"\n\n");
       c.sprintf("DCB commands:\n");
       c.sprintf("-------------\n");
+      c.sprintf("cfgdst <port> [<ip>] Configure destination address for UDP packets\n");
       c.sprintf("clkint               Switch bus clock to quartz\n");
       c.sprintf("clkext               Switch bus clock to FCI input\n");
       c.sprintf("delay <n>            Set SYNC delay\n");
@@ -900,27 +901,27 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       upload(c, n_param, (const char **) param);
 
    } else if (strcmp(param[0], "cfgdst") == 0) {
-      char* new_addr;
-      int new_port;
+      char *dest_addr;
+      int dest_port;
 
-      if(n_param == 2){
-         //get ip addr from udp packet
-         new_port = atoi(param[1]);
-         sockaddr_in* ptr = (sockaddr_in*)&c.client_address;
-         new_addr = inet_ntoa(ptr->sin_addr);
-      } else if(n_param > 2){
-         //ip addr given
-         new_port = atoi(param[1]);
-         new_addr = param[2];
+      if (n_param == 2) {
+         // get ip addr from udp packet
+         dest_port = atoi(param[1]);
+         sockaddr_in *ptr = (sockaddr_in *) &c.client_address;
+         dest_addr = inet_ntoa(ptr->sin_addr);
+      } else if (n_param > 2) {
+         // ip addr given
+         dest_port = atoi(param[1]);
+         dest_addr = param[2];
       } else {
-         c.sprintf("please use this format \"cfgdst <port number> [<ip>]\"\n");
+         c.sprintf("Please use this format \"cfgdst <port number> [<ip>]\"\n");
          return;
       }
 
-      c.sprintf("setting data destination to %s port %d\n", new_addr, new_port);
+      c.sprintf("Setting data destination to %s port %d\n", dest_addr, dest_port);
 
-      //notify tcb readout driver of the new port and ip
-      setTcbDataDestination(new_addr, new_port);
+      // notify tcb readout driver of the new port and ip
+      setTcbDataDestination(dest_addr, dest_port);
 
    } else {
       c.sprintf("Unknown command: %s\n", buffer);
