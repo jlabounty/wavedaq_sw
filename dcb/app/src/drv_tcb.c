@@ -153,7 +153,7 @@ void processData(int slot, WDAQ_BRD* board){
       readBlock(slot, board, address+2, bankhead.size, data, 0);//NOTE: no endianness corrections for speed, data content should not be used
 
       //send packet
-      sendPacket(pkgnum, headerdata.nBanks, &headerdata, &bankhead, data);
+      sendPacket(slot, pkgnum, headerdata.nBanks, &headerdata, &bankhead, data);
 
       //next
       pkgnum++;
@@ -162,7 +162,7 @@ void processData(int slot, WDAQ_BRD* board){
 
    //sends dummy packet if no data was sent
    if(pkgnum == 0){
-      sendPacket(0, 1, &headerdata, 0, 0);
+      sendPacket(slot, 0, 1, &headerdata, 0, 0);
    }
 
    //done, move to next buffer
@@ -171,7 +171,7 @@ void processData(int slot, WDAQ_BRD* board){
 
 /******************************************************************************/
 
-void sendPacket(unsigned int pkgnum, unsigned int npkg, TcbSpiBufferHeader* bufferhead, TcbSpiBankHeader* bankhead, unsigned int* data){
+void sendPacket(unsigned int slot, unsigned int pkgnum, unsigned int npkg, TcbSpiBufferHeader* bufferhead, TcbSpiBankHeader* bankhead, unsigned int* data){
    if(tcb_destination_valid==0){
       printf("cannot send TCB data: destination not configured! send a cfgdst command!\n");
       return;
@@ -188,16 +188,16 @@ void sendPacket(unsigned int pkgnum, unsigned int npkg, TcbSpiBufferHeader* buff
    unsigned int loc;
    reg_bank_read(DCB_REG_DCB_LOC, &loc, 1);
    unsigned int crate_id = (loc & DCB_CRATE_ID_MASK) >> DCB_CRATE_ID_OFS;
-   unsigned int slot_id = (loc & DCB_SLOT_ID_MASK) >> DCB_SLOT_ID_OFS;
+   //unsigned int slot = (loc & DCB_SLOT_ID_MASK) >> DCB_SLOT_ID_OFS;
 
    //allocate packet header
    WdaqUdpPacketHeader udpwdaqhead;
 
    udpwdaqhead.protocol_version = WDAQ_UDP_PROTOCOL_VERSION;
    udpwdaqhead.board_type_revision = 1<<4; //TCB board
-   udpwdaqhead.serial_number = (crate_id << 8) | slot_id; //unique board identifier
+   udpwdaqhead.serial_number = (crate_id << 8) | slot; //unique board identifier
    udpwdaqhead.crate_id = crate_id;
-   udpwdaqhead.slot_id = slot_id;
+   udpwdaqhead.slot_id = slot;
    udpwdaqhead.packet_number = pkgnum;
    udpwdaqhead.data_chunk_offset = 0;
    udpwdaqhead.wdaq_flags = EOT | SOT;

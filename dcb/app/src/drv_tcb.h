@@ -74,7 +74,7 @@ void readBlock(int slot, WDAQ_BRD* board, unsigned int addr, unsigned short size
 void writeReg(int slot, WDAQ_BRD *board, unsigned int addr, unsigned int val);
 
 //packet sender
-void sendPacket(unsigned int pkgnum, unsigned int npkg, TcbSpiBufferHeader* bufferhead, TcbSpiBankHeader* bankhead, unsigned int *data);
+void sendPacket(unsigned int slot, unsigned int pkgnum, unsigned int npkg, TcbSpiBufferHeader* bufferhead, TcbSpiBankHeader* bankhead, unsigned int *data);
 
 //endianess correction before sending
 void correctEndianness(WdaqUdpPacketHeader* wdaqheader, TcbUdpPacketHeader* tcbheader);
