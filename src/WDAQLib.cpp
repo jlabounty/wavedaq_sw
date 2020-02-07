@@ -193,13 +193,12 @@ void WDAQDummyPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
 //WDAQ TCB Packet Data - class for TCB UDP DAQ packets 
 //Set properties according to UDP event header
 void WDAQTcbPacketData::SetTcbHeaderInfo(TCB_FRAME_HEADER *ph){
-   //NOTE: inversion of endianess: please check again with DCBs
 
    //propertis from WDAPacketData
    mEventNumber = ph->event_number; 
-   mTriggerNumber = ph->trigger_information[0] | (ph->trigger_information[1] << 8);
-   mTriggerType = ph->trigger_information[4] | (ph->trigger_information[5] << 8);
-   mSerialTriggerData = ph->trigger_information[2] | (ph->trigger_information[3] << 8);
+   mTriggerNumber = ph->trigger_information[7] | (ph->trigger_information[6] << 8);
+   mTriggerType = ph->trigger_information[3] | (ph->trigger_information[2] << 8);
+   mSerialTriggerData = ph->trigger_information[5] | (ph->trigger_information[4] << 8);
 
    //others
    mBankName[3] = ph->bank_name[3];
@@ -207,6 +206,7 @@ void WDAQTcbPacketData::SetTcbHeaderInfo(TCB_FRAME_HEADER *ph){
    mBankName[1] = ph->bank_name[1];
    mBankName[0] = ph->bank_name[0];
    mTimeStamp = 0.;
+
 }
 //Add packet info to given Board Event
 void WDAQTcbPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
@@ -654,7 +654,12 @@ void WDAQTCBReader::Loop(){
      int iBank=0;
      int length;
 
-     u_int32_t ptr= fBoard->GetBufferHeadSPI(&nBanks, &ph.event_number, &ph.time_stamp, (unsigned int*)&ph.trigger_information[4], (unsigned int*)&ph.trigger_information[0]);
+     unsigned int trg_info0;
+     unsigned int trg_info1;
+     u_int32_t ptr= fBoard->GetBufferHeadSPI(&nBanks, &ph.event_number, &ph.time_stamp, &trg_info0, &trg_info1);
+     *(unsigned int*) ph.trigger_information = SWAP_UINT32(trg_info0);
+     *(unsigned int*) (ph.trigger_information + 4) = SWAP_UINT32(trg_info1);
+
      //printf("%d banks, %08x %08x %0x%0x %0x%0x\n", nBanks, ph.event_number, ph.time_stamp, ph.trigger_information[4], ph.trigger_information[3], ph.trigger_information[1], ph.trigger_information[0]);
 
      while(fBoard->HasBufferBankSPI(ptr, ph.bank_name, &length) && iBank<nBanks){
@@ -693,10 +698,10 @@ void WDAQTCBReader::Loop(){
         daqdata.wdaq_flags = SOE | EOT | SOT | EOE;
         daqdata.payload_length = 0;
         packet->SetEventHeaderInfo(&daqdata); 
-	packet->mEventNumber=ph.event_number;
-	packet->mTriggerNumber = ph.trigger_information[0] | (ph.trigger_information[1] << 8);
-	packet->mTriggerType = ph.trigger_information[4] | (ph.trigger_information[5] << 8);
-	packet->mSerialTriggerData = ph.trigger_information[2] | (ph.trigger_information[3] << 8);
+        packet->mTriggerNumber = ph.trigger_information[7] | (ph.trigger_information[6] << 8);
+        packet->mTriggerType = ph.trigger_information[3] | (ph.trigger_information[2] << 8);
+        packet->mSerialTriggerData = ph.trigger_information[5] | (ph.trigger_information[4] << 8);
+        packet->mEventNumber=ph.event_number;
 
         daqdata.packet_number++;//prepare for next packet
 

@@ -126,6 +126,7 @@ void print_buffer(const char *buffer, int len);
 void process_dcb_command(udp_connection &c, char *buffer);
 void reg_diff_cmd(udp_connection &c, int argc, const char **argv);
 void upload(udp_connection &c, int argc, const char **param);
+void init_reg_settings(udp_connection &c, int snr);
 
 //-------------------------------------------------------------------
 
@@ -726,11 +727,15 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("   - switch back to DCB with \"slot 16\"\n\n");
       c.sprintf("DCB commands:\n");
       c.sprintf("-------------\n");
+      c.sprintf("cfgdst <port> [<ip>] Configure destination address for UDP packets\n");
       c.sprintf("clkint               Switch bus clock to quartz\n");
       c.sprintf("clkext               Switch bus clock to FCI input\n");
       c.sprintf("delay <n>            Set SYNC delay\n");
       c.sprintf("help                 This help page\n");
       c.sprintf("info                 Show system information\n");
+      c.sprintf("init <serial>        Initialize environment variables\n");
+      c.sprintf("mark                 Mark board by letting led blink magenta\n");
+      c.sprintf("unmark               Remove marking\n");
       c.sprintf("reset                Reboot DCB\n");
       c.sprintf("rr|regrd <ofs> [<n>] Read register\n");
       c.sprintf("rw|regwr <ofs> <d>   Write register\n");
@@ -807,6 +812,27 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       reg_bank_read(DCB_BOARD_VARIANT_REG, &d, 1);
       d = (d & DCB_BOARD_VARIANT_MASK) >> DCB_BOARD_VARIANT_OFS;
       c.sprintf("-- Board Variant:         0x%02X\n\n", d);
+
+   } else if (strcmp(param[0], "init") == 0) {
+
+      if (n_param < 2) {
+         c.sprintf("Error: please specify serial number\n");
+         return;
+      }
+
+      int serial = atoi(param[1]);
+      init_reg_settings(c, serial);
+      c.sprintf("\nInitialization of DCB%02d complete\n", serial);
+
+   } else if (strcmp(param[0], "mark") == 0) {
+
+      emio_set_sw_state(BIT_IDX_EMIO_CTRL_SW_STATE_MARKER_PIN);
+      c.sprintf("Turned LED blinking on\n");
+
+   } else if (strcmp(param[0], "unmark") == 0) {
+
+      emio_clr_sw_state(BIT_IDX_EMIO_CTRL_SW_STATE_MARKER_PIN);
+      c.sprintf("Turned LED blinking off\n");
 
    } else if (strcmp(param[0], "rr") == 0 || strcmp(param[0], "regrd") == 0) {
 
@@ -900,27 +926,27 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       upload(c, n_param, (const char **) param);
 
    } else if (strcmp(param[0], "cfgdst") == 0) {
-      char* new_addr;
-      int new_port;
+      char *dest_addr;
+      int dest_port;
 
-      if(n_param == 2){
-         //get ip addr from udp packet
-         new_port = atoi(param[1]);
-         sockaddr_in* ptr = (sockaddr_in*)&c.client_address;
-         new_addr = inet_ntoa(ptr->sin_addr);
-      } else if(n_param > 2){
-         //ip addr given
-         new_port = atoi(param[1]);
-         new_addr = param[2];
+      if (n_param == 2) {
+         // get ip addr from udp packet
+         dest_port = atoi(param[1]);
+         sockaddr_in *ptr = (sockaddr_in *) &c.client_address;
+         dest_addr = inet_ntoa(ptr->sin_addr);
+      } else if (n_param > 2) {
+         // ip addr given
+         dest_port = atoi(param[1]);
+         dest_addr = param[2];
       } else {
-         c.sprintf("please use this format \"cfgdst <port number> [<ip>]\"\n");
+         c.sprintf("Please use this format \"cfgdst <port number> [<ip>]\"\n");
          return;
       }
 
-      c.sprintf("setting data destination to %s port %d\n", new_addr, new_port);
+      c.sprintf("Setting data destination to %s port %d\n", dest_addr, dest_port);
 
-      //notify tcb readout driver of the new port and ip
-      setTcbDataDestination(new_addr, new_port);
+      // notify tcb readout driver of the new port and ip
+      setTcbDataDestination(dest_addr, dest_port);
 
    } else {
       c.sprintf("Unknown command: %s\n", buffer);
@@ -1624,4 +1650,38 @@ void upload(udp_connection &c, int n_param, const char **param) {
    }
 
    return;
+}
+
+//-------------------------------------------------------------------
+
+void init_reg_settings(udp_connection &c, int snr)
+{
+   unsigned int reg_val;
+
+   c.sprintf("\r\nInitializing Control Register:\r\n");
+   for(unsigned int i=0;i<NR_OF_REGS-1;i++) // Last register is the checksum
+   {
+      if(!dcb_reg_list[i].read_only)
+         c.sprintf("[0x%08X]: 0x%08X\r\n", i*4, reg_default[i]);
+      reg_bank_write(i*4, (unsigned int*)(&reg_default[i]), 1);
+   }
+
+   reg_bank_write(DCB_SERIAL_NUMBER_REG, (unsigned int*)(&snr), 1);
+
+   // write software build date to status register
+   reg_val = reg_sw_build_date();
+   reg_bank_write(DCB_REG_SW_BUILD_DATE, &reg_val, 1);
+
+   // write software build time to status register
+   reg_val = reg_sw_build_time();
+   reg_bank_write(DCB_REG_SW_BUILD_TIME, &reg_val, 1);
+
+   // write software GIT hashtag to status register
+   reg_val = get_sw_git_hash();
+   reg_bank_write(DCB_REG_SW_GIT_HASH_TAG, &reg_val, 1);
+
+   c.sprintf("\r\nStoring register bank contents in SPI flash\r\n");
+   c.flush();
+   
+   reg_bank_store();
 }

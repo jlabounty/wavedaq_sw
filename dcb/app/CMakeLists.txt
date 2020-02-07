@@ -53,10 +53,7 @@ set(LIBSRC
 )
 
 set(PROGS
-   dcbc
-   sltc
    dcbs
-   upload
 )
 
 # libray
