@@ -143,4 +143,8 @@ int is_file(const char* path);
 void byte_swap_uint32(unsigned int* src, unsigned int* dst, unsigned int len);
 void display_progress(char* prefix, xfs_u32 percent, char idle_char, char prog_char);
 
+unsigned int reg_sw_build_date();
+unsigned int reg_sw_build_time();
+unsigned int get_sw_git_hash();
+
 #endif /* __SYSTEM_H__ */
