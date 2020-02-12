@@ -196,6 +196,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
             gl->wdb[iBoard]->SetDacTriggerLevelV(iChannel, std::stof(value));
       } else if (item == "triggerMode") {
          gl->triggerMode = (TRIGGERMODE) std::stoi(value);
+         gl->wdb[iBoard]->SetDaqSoftTrigger(false);
       } else if (item == "triggerHoldoff") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
@@ -474,8 +475,6 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
 
    // boards
    if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/wdb") == 0) {
-      if (gl->verbose)
-         std::cout << "Sending /wdb to browser" << std::endl;
       mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
       int b1, b2;
       if (str[0]) {
