@@ -15,7 +15,7 @@ find_package(Threads)
 # generate git-revision.h
 #
 find_package(Git)
-set(GIT_REVISION ${PROJECT_SOURCE_DIR}/../git-revision.h)
+set(GIT_REVISION ${PROJECT_SOURCE_DIR}/git-revision.h)
 set(GIT_REVISION_TMP ${GIT_REVISION}.tmp)
 
 add_custom_target(git_revision_h
@@ -28,7 +28,6 @@ add_custom_target(git_revision_h
    COMMAND ${CMAKE_COMMAND} -E echo \\\" >> ${GIT_REVISION_TMP}
    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GIT_REVISION_TMP} ${GIT_REVISION}
    COMMAND ${CMAKE_COMMAND} -E remove ${GIT_REVISION_TMP}
-   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../
 )
 
 
@@ -102,7 +101,7 @@ target_compile_definitions(wdb
    PUBLIC -DWD2_DONT_INCLUDE_REG_ACCESS_VARS)
 
 target_include_directories(wdb PUBLIC 
-   ../
+   ./
    wds/src
    include)
 
