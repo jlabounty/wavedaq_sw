@@ -332,8 +332,7 @@ function populateControls(init) {
    document.getElementById("tcalib3").checked = OSC.wp.timeCalib3;
 
    document.getElementById("clksource").checked = (OSC.wdb[OSC.curBoard].daqClkSrcSel == 1);
-   //document.getElementById("clksource").checked = true;
-   //document.getElementById("clksource").disabled = true;
+   document.getElementById("clksource").disabled = OSC.wdb[OSC.curBoard].scaler[18] < 79000000;
 
    // channels dialog box with FE gain and HV
    if (document.getElementById("inpDacTriggerLevel0") !== null) {
