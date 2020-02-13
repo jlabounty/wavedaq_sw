@@ -173,7 +173,7 @@ int main(int argc, const char * argv[])
             
             // read channel header
             fread(&ch, sizeof(ch), 1, f);
-            if (ch.c[0] != 'C') {
+            if (ch.c[0] == 'E') {
                // event header found
                fseek(f, -4, SEEK_CUR);
                break;
