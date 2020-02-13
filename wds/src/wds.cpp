@@ -274,13 +274,30 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
          gl->wdb[iBoard]->SetDacPzcLevelN(std::stoi(value) - 1);
       } else if (item == "fePower") {
          if (iBoard == -1)
-            for (auto &b: gl->wdb)
-               b->SetFePower(std::stof(value));
+            for (auto &b: gl->wdb) {
+               try {
+                  b->SetFePower(value == "true");
+                  if (std::stoi(value) == 1) {
+                     for (int i = 0; i < 16; i++) {
+                        b->SetFeAmp1Comp(i, 0);
+                        b->SetFeAmp2Comp(i, 0);
+                     }
+                  }
+               } catch(std::invalid_argument) {
+                  // E board has not SetFePower
+               }
+            }
          else {
             try {
                gl->wdb[iBoard]->SetFePower(value == "true");
+               if (value == "true") {
+                  for (int i = 0; i < 16; i++) {
+                     gl->wdb[iBoard]->SetFeAmp1Comp(i, 0);
+                     gl->wdb[iBoard]->SetFeAmp2Comp(i, 0);
+                  }
+               }
             } catch(std::invalid_argument) {
-
+               // E board has not SetFePower
             }
          }
       } else if (item == "range") {
