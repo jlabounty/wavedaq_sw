@@ -1922,7 +1922,11 @@ WP::WP(std::vector<WDB *> w, int verbose, std::string logfile, bool demo) {
       assert(WP::gDataSocket);
 
       // increase receive buffer size
+#ifdef __linux__
       int rcvBufferSizeSet = 8 * 1024 * 1024; // 8 MB
+#else
+      int rcvBufferSizeSet = 4 * 1024 * 1024; // 4 MB
+#endif
       int rcvBufferSizeGetOrig;
       int rcvBufferSizeGet;
       socklen_t sockOptSize = sizeof(rcvBufferSizeGetOrig);
