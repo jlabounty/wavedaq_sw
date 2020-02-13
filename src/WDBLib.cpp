@@ -1689,12 +1689,16 @@ unsigned int WDB::GetDrsSampleFreqMhz() {
 
 //--------------------------------------------------------------------
 
-void WDB::SaveVoltageCalibration(int freq) {
-   mkdir("calib", 0755);
-   auto fn("calib/" + mWDBName + "-" + std::to_string(freq) + ".vcal");
-
+void WDB::SaveVoltageCalibration(int freq, std::string path) {
+   auto p(path);
+   if (p.length() > 0 && p.back() != '/')
+      p += "/";
+   p += "calib/";
+   auto fn(p + mWDBName + "-" + std::to_string(freq) + ".vcal");
    if (mVerbose)
-      std::cout << "Saving voltage calibration " + fn << std::endl;
+      std::cout << "Saving voltage calibration to " + fn + " for " << freq / 1000.0 << " GSPS" << std::endl;
+
+   mkdir(p.c_str(), 0755);
 
    mVCalib.save(this, fn);
 }
@@ -1707,7 +1711,7 @@ bool WDB::LoadVoltageCalibration(int freq, std::string path) {
       p += "/";
    auto fn(p + "calib/" + mWDBName + "-" + std::to_string(freq) + ".vcal");
    if (mVerbose)
-      std::cout << "Loading voltage calibration  " + fn + " for " << freq / 1000.0 << " GSPS ... ";
+      std::cout << "Loading voltage calibration " + fn + " for " << freq / 1000.0 << " GSPS ... ";
 
    mVCalib.load(this, fn);
    if (mVerbose)
@@ -1717,12 +1721,16 @@ bool WDB::LoadVoltageCalibration(int freq, std::string path) {
 
 //--------------------------------------------------------------------
 
-void WDB::SaveTimeCalibration(int freq) {
-   mkdir("calib", 0755);
-   auto fn("calib/" + mWDBName + "-" + std::to_string(freq) + ".tcal");
-
+void WDB::SaveTimeCalibration(int freq, std::string path) {
+   auto p(path);
+   if (p.length() > 0 && p.back() != '/')
+      p += "/";
+   p += "calib/";
+   auto fn(p + mWDBName + "-" + std::to_string(freq) + ".tcal");
    if (mVerbose)
-      std::cout << "Saving time calibration     " + fn << std::endl;
+      std::cout << "Saving voltage calibration to " + fn + " for " << freq / 1000.0 << " GSPS" << std::endl;
+
+   mkdir(p.c_str(), 0755);
 
    mTCalib.save(this, fn);
 }
@@ -1735,7 +1743,7 @@ bool WDB::LoadTimeCalibration(int freq, std::string path) {
       p += "/";
    auto fn(p + "calib/" + mWDBName + "-" + std::to_string(freq) + ".tcal");
    if (mVerbose)
-      std::cout << "Loading time calibration     " + fn + " for " << freq / 1000.0 << " GSPS ... ";
+      std::cout << "Loading time calibration    " + fn + " for " << freq / 1000.0 << " GSPS ... ";
 
    mTCalib.load(this, fn);
    if (mVerbose)
@@ -1887,11 +1895,12 @@ bool WDEventRequest::IsEventValid() {
 
 //--------------------------------------------------------------------
 
-WP::WP(std::vector<WDB *> w, int verbose, std::string logfile, bool demo) {
+WP::WP(std::vector<WDB *> w, int verbose, std::string wdsDir, std::string logfile, bool demo) {
    struct sockaddr_in server_addr;
 
    mVerbose = verbose;
    mLogfile = logfile;
+   mWdsDir = wdsDir;
    mDemoMode = demo;
    mWdb = w;
 
@@ -3685,7 +3694,7 @@ void WP::DoVoltageCalibrationStep() {
    calibProg.ave = NULL;
 
    // save calibration
-   b->SaveVoltageCalibration(b->GetDrsSampleFreqMhz());
+   b->SaveVoltageCalibration(b->GetDrsSampleFreqMhz(), mWdsDir);
 
    // switch to next board
    calibProg.iBoard++;

@@ -344,6 +344,8 @@ class WP {
    static int        gDataSocket;
    int               mServerPort;
 
+   std::string       mWdsDir;
+
    int               mVerbose;
    std::string       mLogfile;
    bool              mDemoMode;
@@ -425,7 +427,7 @@ public:
    enum { cLiFormatBinary = 1, cLiFormatXML = 2};
 
    // constructor
-   WP(std::vector<WDB*> w, int verbose = 0, std::string logfile = "", bool demo = false);
+   WP(std::vector<WDB*> w, int verbose = 0, std::string wdsDir = "", std::string logfile = "", bool demo = false);
 
    // duration calculator
    static std::chrono::time_point<std::chrono::high_resolution_clock> usStart();
@@ -754,9 +756,9 @@ public:
    void TriggerSoftEvent();
 
    unsigned int GetDrsSampleFreqMhz();
-   void SaveVoltageCalibration(int freq);
+   void SaveVoltageCalibration(int freq, std::string path="");
    bool LoadVoltageCalibration(int freq, std::string path="");
-   void SaveTimeCalibration(int freq);
+   void SaveTimeCalibration(int freq, std::string path="");
    bool LoadTimeCalibration(int freq, std::string path="");
 
    unsigned int GetChnTxEn() { return mChnTxEn; };

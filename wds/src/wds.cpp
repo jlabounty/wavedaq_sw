@@ -1281,7 +1281,7 @@ int main(int argc, const char *argv[]) {
       return 0;
    }
    // instantiate waveform processor
-   gl.wp = new WP(gl.wdb, gl.verbose, gl.logFileName, gl.demoMode);
+   gl.wp = new WP(gl.wdb, gl.verbose, gl.wdsDir, gl.logFileName, gl.demoMode);
    if (gl.wdb[0]->mVCalib.IsValid()) {
       gl.wp->SetOfsCalib1(true);
       gl.wp->SetOfsCalib2(true);
