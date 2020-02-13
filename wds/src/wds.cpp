@@ -1234,6 +1234,10 @@ int main(int argc, const char *argv[]) {
                gl.readoutMode = cReadoutModeDRS;
             }
 
+            // enable internal trigger if external trigger is not enabled
+            if (!b->GetExtAsyncTriggerEn())
+               b->SetPatternTriggerEn(1);
+
             // disable scaler readout
             b->SetSclTxEn(0);
 
