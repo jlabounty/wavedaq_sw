@@ -1004,9 +1004,9 @@ int main(int argc, const char *argv[]) {
       gl.wdsDir = dir;
    } else {
       if (getenv("WDBSYS")) {
-         std::ifstream f3(std::string(getenv("WDBSYS")) + "/software/wds/html/index.html");
+         std::ifstream f3(std::string(getenv("WDBSYS")) + "/sw/wds/html/index.html");
          if (f3.good()) {
-            gl.wdsDir = std::string(getenv("WDBSYS")) + "/software/wds";
+            gl.wdsDir = std::string(getenv("WDBSYS")) + "/sw/wds";
          } else {
             std::cerr << "Cannot find 'html' directory. Please run from the root of the wds directory." << std::endl;
             return 1;
