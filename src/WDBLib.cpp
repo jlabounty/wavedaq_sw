@@ -152,6 +152,7 @@ std::string WDB::SendReceiveUDP(std::string str, unsigned char *ethAddr) {
    result.clear();
 
    // retry max ten times
+   ms = mReceiveTimeoutMs;
    for (int retry = 0; retry < 10; retry++) {
 
       // clear input queue
@@ -168,7 +169,7 @@ std::string WDB::SendReceiveUDP(std::string str, unsigned char *ethAddr) {
          if (!FD_ISSET(gASCIISocket, &readfds))
             break;
 
-         i = recv(gASCIISocket, rx_buffer, sizeof(rx_buffer), 0);
+         recv(gASCIISocket, rx_buffer, sizeof(rx_buffer), 0);
       } while (true);
 
       // send request
@@ -192,9 +193,7 @@ std::string WDB::SendReceiveUDP(std::string str, unsigned char *ethAddr) {
          FD_ZERO(&readfds);
          FD_SET(gASCIISocket, &readfds);
 
-         if (retry == 0)
-            ms = mReceiveTimeoutMs;
-         else
+         if (retry > 0)
             ms *= 1.3;   // increase timeout after each retry
 
          timeout.tv_sec = ms / 1000;
@@ -209,9 +208,6 @@ std::string WDB::SendReceiveUDP(std::string str, unsigned char *ethAddr) {
 
          i = recv(gASCIISocket, rx_buffer, sizeof(rx_buffer), 0);
          assert(i > 0);
-
-         if (rx_buffer[i - 1] == 0) // don't count trailing zero
-            i--;
 
          result += rx_buffer;
 
@@ -240,7 +236,6 @@ std::string WDB::SendReceiveUDP(std::string str, unsigned char *ethAddr) {
       if (str.back() == '\n')
          str = str.substr(0, str.size() - 1);
       throw std::runtime_error(std::string("Error sending \"") + str + "\" to " + mWDBName + ".");
-      return result;
    }
 
    // chop off prompt
@@ -258,7 +253,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data) {
    struct timeval timeout;
    int status, ms, retry;
    struct sockaddr_in client_addr;
-   bool bSuccess = false;
+   bool bSuccess;
 
    if (mDemoMode)
       return;
@@ -292,6 +287,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data) {
    auto startTime = WP::usStart();
 
    // retry max ten times
+   ms = mReceiveTimeoutMs;
    for (retry = 0; retry < 10; retry++) {
 
       // clear input queue
@@ -308,7 +304,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data) {
          if (!FD_ISSET(gBinSocket, &readfds))
             break;
 
-         i = recv(gBinSocket, &readBuf[0], readBuf.size(), 0);
+         recv(gBinSocket, &readBuf[0], readBuf.size(), 0);
       } while (true);
 
       // send request
@@ -336,9 +332,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data) {
          FD_ZERO(&readfds);
          FD_SET(gBinSocket, &readfds);
 
-         if (retry == 0)
-            ms = mReceiveTimeoutMs;
-         else
+         if (retry > 0)
             ms *= 1.3;   // increase timeout after each retry
 
          timeout.tv_sec = ms / 1000;
@@ -346,7 +340,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data) {
 
          do {
             status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
-         } while (status == -1);        /* dont return if an alarm signal was cought */
+         } while (status == -1);        /* dont return if an alarm signal was caught */
 
          if (!FD_ISSET(gBinSocket, &readfds))
             break;
@@ -376,10 +370,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data) {
 
    }
 
-   if (!bSuccess) {
-      throw std::runtime_error(std::string("Error writing binary UDP data to " + mWDBName + "."));
-      return;
-   }
+   throw std::runtime_error(std::string("Error writing binary UDP data to " + mWDBName + "."));
 }
 
 //--------------------------------------------------------------------
@@ -390,7 +381,7 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg) {
    struct timeval timeout;
    int status, ms;
    struct sockaddr_in client_addr;
-   bool bSuccess = false;
+   bool bSuccess;
    std::vector<unsigned int> result;
 
    if (mDCB) {
@@ -420,6 +411,8 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg) {
    writeBuf[11] = (len >> 0) & 0xFF;
 
    // retry max ten times
+   ms = mReceiveTimeoutMs;
+
    for (int retry = 0; retry < 10; retry++) {
 
       // clear input queue
@@ -436,7 +429,7 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg) {
          if (!FD_ISSET(gBinSocket, &readfds))
             break;
 
-         i = recv(gBinSocket, &readBuf[0], readBuf.size(), 0);
+         recv(gBinSocket, &readBuf[0], readBuf.size(), 0);
       } while (true);
 
       // send request
@@ -460,9 +453,7 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg) {
          FD_ZERO(&readfds);
          FD_SET(gBinSocket, &readfds);
 
-         if (retry == 0)
-            ms = mReceiveTimeoutMs;
-         else
+         if (retry > 0)
             ms *= 1.3;   // increase timeout after each retry
 
          timeout.tv_sec = ms / 1000;
@@ -489,25 +480,21 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg) {
 
          if (bSuccess) {
             // copy data
-            for (unsigned int i = 0; i < len / 4; i++)
-               result.push_back(readBuf[i * 4 + 4] << 24 |
-                                readBuf[i * 4 + 5] << 16 |
-                                readBuf[i * 4 + 6] << 8 |
-                                readBuf[i * 4 + 7]);
+            for (unsigned int ii = 0; ii < len / 4; ii++)
+               result.push_back(readBuf[ii * 4 + 4] << 24 |
+                                readBuf[ii * 4 + 5] << 16 |
+                                readBuf[ii * 4 + 6] << 8 |
+                                readBuf[ii * 4 + 7]);
             return result;
          }
 
       } while (1);
 
-
       if (this->mVerbose)
          std::cout << mWDBName << " retry " << retry + 1 << " with " << ms << " ms" << std::endl;
    }
 
-   if (!bSuccess)
-      throw std::runtime_error(std::string("Error reading binary UDP data from " + mWDBName + "."));
-
-   return result;
+   throw std::runtime_error(std::string("Error reading binary UDP data from " + mWDBName + "."));
 }
 
 //--------------------------------------------------------------------
@@ -1000,7 +987,6 @@ void WDB::GetScalers(std::vector<unsigned long long> &scaler, bool refresh) {
       ReceiveStatusRegisters(GetScaler0Loc() / 4, 19);
 
    // decode scalers according to their bit width
-   int adr = 0;
    unsigned long long v;
    for (unsigned int i = 0; i < 19; i++) {
       v = this->sreg[GetScaler0Loc() / 4 + i];
@@ -1340,7 +1326,7 @@ float WDB::GetDacTriggerLevelV(int chn) {
    case 9:
       v = ((d / 65535.0 * 2500) - 900) / 1000.0;
       break;
-   };
+   }
    return (int) (v * 1000 + 0.5) / 1000.0;
 }
 
@@ -1354,7 +1340,7 @@ void WDB::SetDacTriggerLevelV(int chn, float v) {
     case 9:
       v = v * 1000 + 900;
       break;
-    };
+    }
 
    // convert from mV to DAC bits
    auto d = (unsigned int) (v / 2500.0 * 65535 + 0.5);
@@ -1650,26 +1636,26 @@ unsigned int WDB::GetTrgSrcEnPtrn(int i) {
    unsigned int reg, mask, ofs;
    reg = GetTrgSrcEnPtrn0Loc(&mask, &ofs);
    return BitExtractControl(reg + i * 4 * 2, mask, ofs);
-};
+}
 
 void WDB::SetTrgSrcEnPtrn(int i, unsigned int value) {
    unsigned int reg, mask, ofs;
    reg = GetTrgSrcEnPtrn0Loc(&mask, &ofs);
    SetRegMask(reg + i * 4 * 2, mask, ofs, value);
-};
+}
 
 unsigned int WDB::GetTrgStatePtrn(int i) {
    assert(i >= 0 && i < 18);
    unsigned int reg, mask, ofs;
    reg = GetTrgStatePtrn0Loc(&mask, &ofs);
    return BitExtractControl(reg + i * 4 * 2, mask, ofs);
-};
+}
 
 void WDB::SetTrgStatePtrn(int i, unsigned int value) {
    unsigned int reg, mask, ofs;
    reg = GetTrgStatePtrn0Loc(&mask, &ofs);
    SetRegMask(reg + i * 4 * 2, mask, ofs, value);
-};
+}
 
 unsigned int WDB::GetTriggerDelayNs() {
    auto v = GetTriggerDelay();
@@ -1705,20 +1691,25 @@ unsigned int WDB::GetDrsSampleFreqMhz() {
 
 void WDB::SaveVoltageCalibration(int freq) {
    mkdir("calib", 0755);
-   mVCalib.save(this, "calib/" + mWDBName + "-" + std::to_string(freq) + ".vcal");
+   auto fn("calib/" + mWDBName + "-" + std::to_string(freq) + ".vcal");
+
+   if (mVerbose)
+      std::cout << "Saving voltage calibration " + fn << std::endl;
+
+   mVCalib.save(this, fn);
 }
 
 //--------------------------------------------------------------------
 
 bool WDB::LoadVoltageCalibration(int freq, std::string path) {
-   if (mVerbose)
-      std::cout << "Loading voltage calibration for " + mWDBName + " for " << freq / 1000.0 << " GSPS ... ";
-
    auto p(path);
    if (p.length() > 0 && p.back() != '/')
       p += "/";
+   auto fn(p + "calib/" + mWDBName + "-" + std::to_string(freq) + ".vcal");
+   if (mVerbose)
+      std::cout << "Loading voltage calibration  " + fn + " for " << freq / 1000.0 << " GSPS ... ";
 
-   mVCalib.load(this, p + "calib/" + mWDBName + "-" + std::to_string(freq) + ".vcal");
+   mVCalib.load(this, fn);
    if (mVerbose)
       std::cout << (mVCalib.IsValid() ? "ok" : "failure") << std::endl;
    return mVCalib.IsValid();
@@ -1728,23 +1719,27 @@ bool WDB::LoadVoltageCalibration(int freq, std::string path) {
 
 void WDB::SaveTimeCalibration(int freq) {
    mkdir("calib", 0755);
-   mTCalib.save(this, "calib/" + mWDBName + "-" + std::to_string(freq) + ".tcal");
+   auto fn("calib/" + mWDBName + "-" + std::to_string(freq) + ".tcal");
+
+   if (mVerbose)
+      std::cout << "Saving time calibration     " + fn << std::endl;
+
+   mTCalib.save(this, fn);
 }
 
 //--------------------------------------------------------------------
 
 bool WDB::LoadTimeCalibration(int freq, std::string path) {
-   if (mVerbose)
-      std::cout << "Loading time calibration for " + mWDBName + " for " << freq / 1000.0 << " GSPS ... ";
-
    auto p(path);
    if (p.length() > 0 && p.back() != '/')
       p += "/";
-
-   mTCalib.load(this, p + "calib/" + mWDBName + "-" + std::to_string(freq) + ".tcal");
-
+   auto fn(p + "calib/" + mWDBName + "-" + std::to_string(freq) + ".tcal");
    if (mVerbose)
-      std::cout << (mVCalib.IsValid() ? "ok" : "failure") << std::endl;
+      std::cout << "Loading time calibration     " + fn + " for " << freq / 1000.0 << " GSPS ... ";
+
+   mTCalib.load(this, fn);
+   if (mVerbose)
+      std::cout << (mTCalib.IsValid() ? "ok" : "failure") << std::endl;
    return mTCalib.IsValid();
 }
 
@@ -1821,7 +1816,7 @@ void WDEvent::SetWDEventHeaderInfo(WDAQ_FRAME_HEADER *pdaqh, WD_FRAME_HEADER *ph
    mTemperature = std::round(ph->temperature * 0.0625 * 10) / 10.0f;
 }
 
-//--------------------------------------------------------------------
+//------------------------------------------------``--------------------
 
 WDEventRequest::WDEventRequest(int boardId) {
    mBoardId = boardId;
@@ -1934,7 +1929,7 @@ WP::WP(std::vector<WDB *> w, int verbose, std::string logfile, bool demo) {
 
       getsockopt(WP::gDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeGetOrig, &sockOptSize);
       if (rcvBufferSizeGetOrig < rcvBufferSizeSet) {
-         int status = setsockopt(WP::gDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeSet, sizeof(rcvBufferSizeSet));
+         setsockopt(WP::gDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeSet, sizeof(rcvBufferSizeSet));
          getsockopt(WP::gDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeGet, &sockOptSize);
 
          if (rcvBufferSizeGet < rcvBufferSizeSet) {
@@ -2258,6 +2253,13 @@ void WP::LogEvent(WDAQ_FRAME_HEADER *pdaqh, WD_FRAME_HEADER *ph) {
 
       if (mVerbose >= 3)
          std::cout << line;
+
+      if (mVerbose >= 4) {
+         unsigned char *p = (unsigned char *)(ph+1);
+         for (int i = 0; i < 16; i++)
+            std::cout << std::showbase << std::internal << std::setfill('0') << std::hex << std::setw(4) << (unsigned int)(*p++) << " ";
+         std::cout << std::endl << std::endl;
+      }
    }
 }
 
@@ -2360,7 +2362,7 @@ int WP::ReceiveWfPacket() {
       return 0;
    }
 
-   // find event belonging to this baord
+   // find event belonging to this board
    if (mEvent.find(pdaqh->serial_number) == mEvent.end()) {
       std::cerr << "Received unexpected packet from board #" << pdaqh->serial_number << std::endl;
       return 0;
@@ -2683,7 +2685,7 @@ void WP::CalibrateWaveforms(WDEvent *ev) {
             f << "DRS cell calibrated for board " << wdb->GetName() << " (time = " << usSince(mEventStartTime) << "us)"
               << std::endl;
          }
-      };
+      }
 
       // start-to-end offset calibration
       if (mOfsCalib2 && bValid) {
@@ -2696,7 +2698,7 @@ void WP::CalibrateWaveforms(WDEvent *ev) {
             f << "DRS start to end calibrated for board " << wdb->GetName() << " (time = " << usSince(mEventStartTime)
               << "us)" << std::endl;
          }
-      };
+      }
 
       // gain calibration
       if (mGainCalib && bValid) {
@@ -2725,7 +2727,7 @@ void WP::CalibrateWaveforms(WDEvent *ev) {
             f << "DRS gain calibrated for board " << wdb->GetName() << " (time = " << usSince(mEventStartTime) << "us)"
               << std::endl;
          }
-      };
+      }
 
       // range calibration
       if (mRangeCalib && bValid) {
@@ -2749,7 +2751,7 @@ void WP::CalibrateWaveforms(WDEvent *ev) {
             f << "DRS range calibrated for board " << wdb->GetName() << " (time = " << usSince(mEventStartTime) << "us)"
               << std::endl;
          }
-      };
+      }
 
       // calculate calibrated time for each event
       bValid = (ev->mSamplingFrequency == wdb->mTCalib.GetSamplingFrequency() &&
@@ -2783,8 +2785,8 @@ void WP::CalibrateWaveforms(WDEvent *ev) {
          // align cell#0 of all channels inside chip1 to chip0
          tc = mRotateWaveform ? ev->mTriggerCellDrs1 : 0;
          for (int ch = 8; ch < 16; ch++) {
-            float t2 = ev->mWfTDRS[ch][(1024 - tc) % 1024];
-            float dt = t1 - t2;
+            t2 = ev->mWfTDRS[ch][(1024 - tc) % 1024];
+            dt = t1 - t2;
             for (int i = 0; i < 1024; i++)
                ev->mWfTDRS[ch][i] += dt;
          }
@@ -2969,10 +2971,10 @@ void WP::SaveWaveforms() {
                mxml_write_element(li.xml, "Trigger_Cell", str);
 
                unsigned long long s = 0;
-               for (auto &b: mWdb)
-                  if (b->GetSerialNumber() == ev->mBoardId) {
+               for (auto &bi: mWdb)
+                  if (bi->GetSerialNumber() == ev->mBoardId) {
                      std::vector<unsigned long long> sc;
-                     b->GetScalers(sc, false);
+                     bi->GetScalers(sc, false);
                      s = sc[i];
                      break;
                   }
@@ -3178,7 +3180,7 @@ void WP::SaveWaveforms() {
       }
 
       int size = p - buffer;
-      int n = write(li.fh, buffer, size);
+      n = write(li.fh, buffer, size);
       assert(n == size);
       assert(size <= buffer_size);
    }
@@ -3778,7 +3780,7 @@ int WP::AnalyzePeriod(WDEvent *event, WDB *b) {
 
 /*-----------------------------------------------------------------------------------------*/
 
-void WP::AnalyzeTimeOffset(WDEvent *event, WDB *b) {
+void WP::AnalyzeTimeOffset(WDEvent *event) {
 
    // find rising edge in channel #0
    for (int i = 10; i < 1024 - 10; i++) {
@@ -3808,7 +3810,7 @@ void WP::AnalyzeTimeOffset(WDEvent *event, WDB *b) {
 /*-----------------------------------------------------------------------------------------*/
 
 void WP::CalibrateLocal(WDEvent *event, WDB *b) {
-   float u1, u2, llim, ulim, av;
+   float u1, u2, llim, ulim;
 
    llim = -0.35f;
    ulim = 0.35f;
@@ -3820,7 +3822,6 @@ void WP::CalibrateLocal(WDEvent *event, WDB *b) {
 
          u1 = event->mWfUDRS[ch][i % 1024];
          u2 = event->mWfUDRS[ch][(i + 1) % 1024];
-         av = (u1 + u2) / 2;
 
          // check if samples inside the limits
          if (u1 < llim || u1 > ulim || u2 < llim || u2 > ulim)
@@ -4120,7 +4121,7 @@ void WP::DoTimeCalibrationStep() {
       WDEvent event(b->GetSerialNumber());
       while (!RequestEvent(b, CALIB_TIMEOUT, event));
 
-      AnalyzeTimeOffset(&event, b);
+      AnalyzeTimeOffset(&event);
 
       calibProg.progress = (double) (calibProg.iIter1 + calibProg.iIter2 + calibProg.iIter3) /
                            (calibProg.nIter1 + calibProg.nIter2 + calibProg.nIter3);

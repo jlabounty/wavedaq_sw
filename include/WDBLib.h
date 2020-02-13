@@ -72,8 +72,6 @@ typedef struct {
 
 #pragma pack() // reset alignment to default value
 
-#define WD_N_DATA_TYPES 9
-
 enum Type {
    cDataTypeDRS                  = 0,
    cDataTypeADC                  = 1,
@@ -387,7 +385,6 @@ class WP {
    int               ReceiveWfPacket();
    bool              IsEventValid();
    void              UnrotateWaveforms();
-   void              RemoveSpikes(int tc, float wf[][1024]);
    std::chrono::time_point<std::chrono::high_resolution_clock> mEventStartTime;
 
    CALIB_PROGRESS    calibProg;
@@ -415,10 +412,10 @@ class WP {
    int               mOldPatternTriggerEn;
    int               mOldTriggerHoldoff;
 
-   int               AnalyzePeriod(WDEvent *, WDB *);
-   void              AnalyzeTimeOffset(WDEvent *, WDB *);
+   static int        AnalyzePeriod(WDEvent *, WDB *);
+   void              AnalyzeTimeOffset(WDEvent *);
    void              CalibrateLocal(WDEvent *, WDB *);
-   void              CalibrateGlobal(WDEvent *, WDB *);
+   static void       CalibrateGlobal(WDEvent *, WDB *);
 
    unsigned int      mWDReceivedEvents;
    unsigned int      mWDDroppedEvents;
@@ -435,7 +432,7 @@ public:
    static unsigned int usSince(std::chrono::time_point<std::chrono::high_resolution_clock> start);
 
    // setter & getter
-   int GetDataSocket() { return gDataSocket; }
+   static int GetDataSocket() { return gDataSocket; }
    int GetServerPort() { return mServerPort; }
    bool IsVerbose() { return mVerbose; }
    bool IsDemoMode() { return mDemoMode; }
@@ -478,9 +475,7 @@ public:
    void RequestAllBoards();
    void RequestSingleBoard(WDB* b);
    bool RequestTypes(WDB *b);
-   void SetRequestedSegments(int s);
    WDB* GetBoard(int board_id);
-   unsigned int GetEventRequestMask(int board_id);
 
    bool WaitNewEvent(int timeout);
    bool GetLastEvent(WDB* b, int timeout, WDEvent& event);
@@ -575,6 +570,10 @@ public:
    WDB(std::string name, bool verbose = false);
    WDB(DCB *dcb, int slot, bool verbose = false);
 
+   // static functions
+   static unsigned int bcd2dec(const unsigned int bcd);
+   static void bitReplace(unsigned int &reg, unsigned int mask, unsigned int ofs, unsigned int value);
+
    // setter to add DCB interface to an already constructed WDB 
    void SetDcbInterface(DCB* dcb, int slot);
 
@@ -633,7 +632,6 @@ public:
    TCALIB           mTCalib;
 
    // register functions, overload pure virtual functions from WDBREG
-   void bitReplace(unsigned int &reg, unsigned int mask, unsigned int ofs, unsigned int value);
    void SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, unsigned int v);
    unsigned int BitExtractStatus(unsigned int rofs, unsigned int mask, unsigned int ofs);
    unsigned int BitExtractControl(unsigned int rofs, unsigned int mask, unsigned int ofs);
@@ -650,7 +648,6 @@ public:
    void ReceiveStatusRegisters(unsigned int index=0, unsigned int nReg=0);
    void ReceiveStatusRegister(int ofs);
    void SendControlRegisters();
-   unsigned int bcd2dec(const unsigned int bcd);
    void PrintVersion();
    bool GetSendBlock() { return mSendBlocked; }
    void SetSendBlock(bool flag) { mSendBlocked = flag; }
