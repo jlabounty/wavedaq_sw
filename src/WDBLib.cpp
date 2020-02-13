@@ -1728,7 +1728,7 @@ void WDB::SaveTimeCalibration(int freq, std::string path) {
    p += "calib/";
    auto fn(p + mWDBName + "-" + std::to_string(freq) + ".tcal");
    if (mVerbose)
-      std::cout << "Saving voltage calibration to " + fn + " for " << freq / 1000.0 << " GSPS" << std::endl;
+      std::cout << "Saving time calibration to " + fn + " for " << freq / 1000.0 << " GSPS" << std::endl;
 
    mkdir(p.c_str(), 0755);
 
@@ -4151,7 +4151,7 @@ void WP::DoTimeCalibrationStep() {
    delete calibProg.ave;
    calibProg.ave = NULL;
 
-   b->SaveTimeCalibration(b->GetDrsSampleFreqMhz());
+   b->SaveTimeCalibration(b->GetDrsSampleFreqMhz(), mWdsDir);
 
    // switch to next board
    calibProg.iBoard++;
@@ -4246,8 +4246,13 @@ void VCALIB::save(WDB *b, std::string filename) {
    mCalib.temperature = b->GetTemperatureDegree();
 
    int fh = open(filename.c_str(), O_WRONLY | O_CREAT, 0644);
-   assert(fh > 0);
-   assert(write(fh, &mCalib, sizeof(VCALIB_DATA)) == sizeof(VCALIB_DATA));
+   if (fh < 0)
+      throw std::runtime_error(std::string("Cannot creat file " + filename));
+
+   int i = write(fh, &mCalib, sizeof(VCALIB_DATA));
+   if (i != sizeof(VCALIB_DATA))
+      throw std::runtime_error(std::string("Cannot write to file " + filename));
+
    close(fh);
 }
 
@@ -4259,12 +4264,12 @@ void VCALIB::load(WDB *b, std::string filename) {
       close(fh);
 
       if (size != sizeof(VCALIB_DATA)) {
-         std::cerr << "Invalid voltage calibration file size in " << filename << ". Aborting." << std::endl;
+         std::cerr << "Invalid voltage calibration file size in " << filename << std::endl;
          return;
       }
 
       if (memcmp(mCalib.version_id, "CAL2", 4) != 0) {
-         std::cerr << "Invalid voltage calibration file format in " << filename << ". Aborting." << std::endl;
+         std::cerr << "Invalid voltage calibration file format in " << filename << std::endl;
          return;
       }
 
@@ -4298,8 +4303,13 @@ void TCALIB::save(WDB *b, std::string filename) {
    mCalib.temperature = b->GetTemperatureDegree();
 
    int fh = open(filename.c_str(), O_WRONLY | O_CREAT, 0644);
-   assert(fh > 0);
-   assert(write(fh, &mCalib, sizeof(TCALIB_DATA)) == sizeof(TCALIB_DATA));
+   if (fh < 0)
+      throw std::runtime_error(std::string("Cannot creat file " + filename));
+
+   int i = write(fh, &mCalib, sizeof(TCALIB_DATA));
+   if (i != sizeof(TCALIB_DATA))
+      throw std::runtime_error(std::string("Cannot write to file " + filename));
+
    close(fh);
 }
 
@@ -4311,12 +4321,12 @@ void TCALIB::load(WDB *b, std::string filename) {
       close(fh);
 
       if (size != sizeof(TCALIB_DATA)) {
-         std::cerr << "Invalid time calibration file size in " << filename << ". Aborting." << std::endl;
+         std::cerr << "Invalid time calibration file size in " << filename <<  std::endl;
          return;
       }
 
       if (memcmp(mCalib.version_id, "CAL2", 4) != 0) {
-         std::cerr << "Invalid time calibration file format in " << filename << ". Aborting." << std::endl;
+         std::cerr << "Invalid time calibration file format in " << filename << std::endl;
          return;
       }
 

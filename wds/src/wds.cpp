@@ -939,7 +939,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
          int t = 0;
          mg_send_http_chunk(nc, (const char *) &t, 4);
          mg_send_http_chunk(nc, (const char *) &b, 4);
-         printf("Idle\n");
+         if (gl->verbose)
+            printf("Idle\n");
       }
 
       mg_send_http_chunk(nc, "", 0);
