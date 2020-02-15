@@ -11,7 +11,6 @@
 #include <iomanip>
 #include <string>
 #include <vector>
-#include <thread>
 #include <random>
 #include <execinfo.h>
 #include <fstream>
@@ -24,8 +23,6 @@
 
 /*-- Globals -------------------------------------------------------*/
 
-std::vector<std::string> wdbName = {"wd094"};
-
 enum TRIGGERMODE {
    cTriggerModeNormal = 1,
    cTriggerModeAuto = 2
@@ -36,9 +33,6 @@ enum READOUTMODE {
    cReadoutModeADC = 2,
    cReadoutModeTDC = 3
 };
-
-#define LI_FORMAT_BIN  1
-#define LI_FORMAT_XML  2
 
 typedef struct {
    bool demoMode;
@@ -88,14 +82,14 @@ std::vector<std::string> split(const std::string &input, char separator) {
 static struct mg_serve_http_opts s_http_server_opts;
 
 // This function will be called by mongoose on every new request
-static void wds_handler(struct mg_connection *nc, int event, void *p) {
+static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
    struct http_message *hm = (struct http_message *) p;
    char str[256];
    static std::default_random_engine randomGenerator;
 
    GLOBALS *gl = (GLOBALS *) nc->mgr->user_data;
 
-   if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->method, "PUT") == 0) {
+   if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->method, "PUT") == 0) {
       std::string uri, value, item;
       std::vector<std::string> args;
       int iBoard = -1, iChannel = -1;
@@ -447,12 +441,12 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
          if (value == "stop")
             gl->wp->StopLogging();
          else if (item != "") {
-            auto args = split(value, '\n');
-            gl->wp->StartWaveformSaving(std::string(s_http_server_opts.document_root) + "/" + args[0],
-                                        args[1] == "bin" ? WP::cLiFormatBinary : WP::cLiFormatXML,
-                                        args[2] == "all",
-                                        args[2] == "all" ? -1 : std::stoi(args[2]),
-                                        std::stoi(args[3]));
+            auto a = split(value, '\n');
+            gl->wp->StartWaveformSaving(std::string(s_http_server_opts.document_root) + "/" + a[0],
+                                        a[1] == "bin" ? WP::cLiFormatBinary : WP::cLiFormatXML,
+                                        a[2] == "all",
+                                        a[2] == "all" ? -1 : std::stoi(a[2]),
+                                        std::stoi(a[3]));
          }
       } else {
          std::cout << "Invalid command \"" << item << "\" received. Aborting." << std::endl;
@@ -463,7 +457,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
    }
 
    // gloabls
-   if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/gl") == 0) {
+   if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/gl") == 0) {
       if (gl->verbose)
          std::cout << "Sending /gl to browser" << std::endl;
 
@@ -491,7 +485,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
    }
 
    // boards
-   if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/wdb") == 0) {
+   if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/wdb") == 0) {
       mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
       int b1, b2;
       if (str[0]) {
@@ -684,7 +678,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
    }
 
    // software build
-   if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/build") == 0) {
+   if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/build") == 0) {
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
       mg_printf_http_chunk(nc, "{\n");
       mg_printf_http_chunk(nc, "   \"build\": \"%s\"\n", __DATE__);
@@ -694,10 +688,10 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
    }
 
    // binary encoded waveforms
-   if (event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/wf") == 0) {
+   if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/wf") == 0) {
 
       mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
-      int b = atoi(str);
+      int brd = atoi(str);
 
       mg_get_http_var(&hm->query_string, "c", str, sizeof(str));
       int chn = atoi(str);
@@ -709,8 +703,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
          int t = 10;    // array type
          mg_send_http_chunk(nc, (const char *) &t, 4);
 
-         int b = gl->wp->GetVcalibBoard();
-         mg_send_http_chunk(nc, (const char *) &b, 4);
+         int vcb = gl->wp->GetVcalibBoard();
+         mg_send_http_chunk(nc, (const char *) &vcb, 4);
 
          float f = gl->wp->GetVcalibProgress();
          mg_send_http_chunk(nc, (const char *) &f, 4);
@@ -726,8 +720,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
          int t = 12;    // array type indicating error
          mg_send_http_chunk(nc, (const char *) &t, 4);
 
-         int b = gl->wp->GetTcalibBoard();
-         mg_send_http_chunk(nc, (const char *) &b, 4);
+         int tcb = gl->wp->GetTcalibBoard();
+         mg_send_http_chunk(nc, (const char *) &tcb, 4);
 
          mg_send_http_chunk(nc, "", 0);
          return;
@@ -739,8 +733,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
          int t = 11;    // array type
          mg_send_http_chunk(nc, (const char *) &t, 4);
 
-         int b = gl->wp->GetTcalibBoard();
-         mg_send_http_chunk(nc, (const char *) &b, 4);
+         int tcb = gl->wp->GetTcalibBoard();
+         mg_send_http_chunk(nc, (const char *) &tcb, 4);
 
          float f = gl->wp->GetTcalibProgress();
          mg_send_http_chunk(nc, (const char *) &f, 4);
@@ -751,7 +745,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
                mg_send_http_chunk(nc, (const char *) &c, 4);
                mg_send_http_chunk(nc, (const char *) &n, 4);
 
-               mg_send_http_chunk(nc, (const char *) gl->wdb[b]->mTCalib.mCalib.period[c], sizeof(float) * n);
+               mg_send_http_chunk(nc, (const char *) gl->wdb[brd]->mTCalib.mCalib.period[c], sizeof(float) * n);
             }
 
          mg_send_http_chunk(nc, "", 0);
@@ -759,11 +753,11 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
       }
 
       // avoid invalid board index
-      if (b < 0 || b >= gl->wdb.size())
-         b = 0;
+      if (brd < 0 || brd >= gl->wdb.size())
+         brd = 0;
 
-      WDEvent event(gl->wdb[b]->GetSerialNumber());
-      bool bNewEvent = false;
+      WDEvent event(gl->wdb[brd]->GetSerialNumber());
+      bool bNewEvent;
 
       if (gl->demoMode) {
          bNewEvent = true;
@@ -797,7 +791,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
       } else {
 
          // request single event
-         if (b == -1) {
+         if (brd == -1) {
             // all boards
             gl->wp->RequestAllBoards();
 
@@ -809,28 +803,28 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
             }
          } else {
             // only current board
-            gl->wp->RequestSingleBoard(gl->wdb[b]);
+            gl->wp->RequestSingleBoard(gl->wdb[brd]);
 
             if (gl->triggerMode == cTriggerModeAuto)
-               gl->wdb[b]->TriggerSoftEvent();
+               gl->wdb[brd]->TriggerSoftEvent();
             else if (gl->triggerMode == cTriggerModeNormal) {
                if (!gl->triggerSelfArm) {
-                  sleep_ms(gl->wdb[b]->GetTriggerHoldoff());
-                  gl->wdb[b]->SetDaqSingle(1);
+                  sleep_ms(gl->wdb[brd]->GetTriggerHoldoff());
+                  gl->wdb[brd]->SetDaqSingle(1);
                }
             }
          }
 
          // read waveforms
-         bNewEvent = gl->wp->GetLastEvent(gl->wdb[b], 500, event);
+         bNewEvent = gl->wp->GetLastEvent(gl->wdb[brd], 500, event);
       }
 
       if (gl->demoMode)
-         b = 0xFF; // signals demo data
+         brd = 0xFF; // signals demo data
 
       if (bNewEvent) {
          if (event.mTypeValid[cDataTypeADC] && gl->readoutMode == cReadoutModeADC) { //---- ADC waveforms
-            int t = 1;                    // array type
+            int t;                        // array type
             int n = 1024;                 // number of elements
             int vc = event.mVCalibrated;  // voltage calibrated
             int tc = event.mTCalibrated;  // time calibrated
@@ -839,7 +833,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
                if (chn & (1 << c)) {
                   t = 1; // time array
                   mg_send_http_chunk(nc, (const char *) &t, 4);
-                  mg_send_http_chunk(nc, (const char *) &b, 4);
+                  mg_send_http_chunk(nc, (const char *) &brd, 4);
                   mg_send_http_chunk(nc, (const char *) &tc, 4);
                   mg_send_http_chunk(nc, (const char *) &l, 4);
                   mg_send_http_chunk(nc, (const char *) &c, 4);
@@ -852,7 +846,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
                if (chn & (1 << c)) {
                   t = 2; // voltage array
                   mg_send_http_chunk(nc, (const char *) &t, 4);
-                  mg_send_http_chunk(nc, (const char *) &b, 4);
+                  mg_send_http_chunk(nc, (const char *) &brd, 4);
                   mg_send_http_chunk(nc, (const char *) &vc, 4);
                   mg_send_http_chunk(nc, (const char *) &l, 4);
                   mg_send_http_chunk(nc, (const char *) &c, 4);
@@ -861,8 +855,8 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
                }
             }
          } else if (event.mTypeValid[cDataTypeTDC] && gl->readoutMode == cReadoutModeTDC) { //---- TDC waveforms
-            int t = 1;                    // array type
-            int n = 512 * 8;                 // number of elements
+            int t;                        // array type
+            int n = 512 * 8;              // number of elements
             int vc = event.mVCalibrated;  // voltage calibrated
             int tc = event.mTCalibrated;  // time calibrated
             int l = gl->wp->GetNLogged(); // number of logged events
@@ -874,7 +868,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
                if (chn & (1 << c)) {
                   t = 1; // time array
                   mg_send_http_chunk(nc, (const char *) &t, 4);
-                  mg_send_http_chunk(nc, (const char *) &b, 4);
+                  mg_send_http_chunk(nc, (const char *) &brd, 4);
                   mg_send_http_chunk(nc, (const char *) &tc, 4);
                   mg_send_http_chunk(nc, (const char *) &l, 4);
                   mg_send_http_chunk(nc, (const char *) &c, 4);
@@ -886,7 +880,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
                if (chn & (1 << c)) {
                   t = 3; // bit value array
                   mg_send_http_chunk(nc, (const char *) &t, 4);
-                  mg_send_http_chunk(nc, (const char *) &b, 4);
+                  mg_send_http_chunk(nc, (const char *) &brd, 4);
                   mg_send_http_chunk(nc, (const char *) &vc, 4);
                   mg_send_http_chunk(nc, (const char *) &l, 4);
                   mg_send_http_chunk(nc, (const char *) &c, 4);
@@ -902,7 +896,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
                }
             }
          } else if (event.mTypeValid[cDataTypeDRS] && gl->readoutMode == cReadoutModeDRS) { //---- DRS waveforms
-            int t = 1;                    // array type
+            int t;                        // array type
             int n = 1024;                 // number of elements
             int vc = event.mVCalibrated;  // voltage calibrated
             int tc = event.mTCalibrated;  // time calibrated
@@ -911,7 +905,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
                if (chn & (1 << c)) {
                   t = 1; // time array
                   mg_send_http_chunk(nc, (const char *) &t, 4);
-                  mg_send_http_chunk(nc, (const char *) &b, 4);
+                  mg_send_http_chunk(nc, (const char *) &brd, 4);
                   mg_send_http_chunk(nc, (const char *) &tc, 4);
                   mg_send_http_chunk(nc, (const char *) &l, 4);
                   mg_send_http_chunk(nc, (const char *) &c, 4);
@@ -924,7 +918,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
                if (chn & (1 << c)) {
                   t = 2; // voltage array
                   mg_send_http_chunk(nc, (const char *) &t, 4);
-                  mg_send_http_chunk(nc, (const char *) &b, 4);
+                  mg_send_http_chunk(nc, (const char *) &brd, 4);
                   mg_send_http_chunk(nc, (const char *) &vc, 4);
                   mg_send_http_chunk(nc, (const char *) &l, 4);
                   mg_send_http_chunk(nc, (const char *) &c, 4);
@@ -938,7 +932,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
          // just return idle message
          int t = 0;
          mg_send_http_chunk(nc, (const char *) &t, 4);
-         mg_send_http_chunk(nc, (const char *) &b, 4);
+         mg_send_http_chunk(nc, (const char *) &brd, 4);
          if (gl->verbose)
             printf("Idle\n");
       }
@@ -949,7 +943,7 @@ static void wds_handler(struct mg_connection *nc, int event, void *p) {
    }
 
    // file serving
-   if (event == MG_EV_HTTP_REQUEST) {
+   if (http_event == MG_EV_HTTP_REQUEST) {
       mg_serve_http(nc, hm, s_http_server_opts);
    }
 
