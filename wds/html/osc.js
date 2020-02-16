@@ -321,7 +321,13 @@ Oscilloscope.prototype.mouseEvent = function (e) {
          e.type == "mousedown") {
          this.histo.dragRightHandle = true;
       }
-   }
+
+      // cursor
+      this.histo.cursorValid = true;
+      this.histo.cursorX = e.clientX;
+      this.histo.cursorY = e.clientY;
+   } else
+      this.histo.cursorValid = false;
 
    // process time cursor
    if (this.timeCursor.on && e.target == this.canvas) {
@@ -545,6 +551,7 @@ Oscilloscope.prototype.mouseEvent = function (e) {
    }
 
    document.getElementById('scope').style.cursor = cursor;
+   this.redraw();
 };
 
 Oscilloscope.prototype.resizeCanvas = function () {
@@ -1413,9 +1420,11 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
             oflow = (oflow == 0 ? 0 : Math.log(oflow));
          }
          ctx.beginPath();
-         var x, y;
-         var x_old = 0;
-         var y_old = 0;
+         let x, y;
+         let x_old = 0;
+         let y_old = 0;
+         let dist_min = 1E6;
+         this.histo.drawCursor = false;
          for (i = 0; i < nBins; i++) {
             x = this.x1 + Math.floor(i / nBins * (this.hiWidth));
             var h = this.histo.logY ? (histo[i] == 0 ? 0 : Math.log(histo[i])) : histo[i];
@@ -1427,6 +1436,20 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
                ctx.lineTo(x, y_old);
                ctx.lineTo(x, y);
             }
+
+            // test if cursor is close to center of bin
+            if (this.histo.cursorValid) {
+               let x_center = Math.floor(x + 0.5 / nBins * (this.hiWidth));
+               let dist = (this.histo.cursorX - x_center) * (this.histo.cursorX - x_center) +
+                  (this.histo.cursorY - y) * (this.histo.cursorY - y);
+               if (dist < dist_min) {
+                  dist_min = dist;
+                  this.histo.cursorXbin = x_center;
+                  this.histo.cursorYbin = y;
+                  this.histo.cursorN = histo[i];
+               }
+            }
+
             x_old = x;
             y_old = y;
          }
@@ -1457,6 +1480,11 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
             ctx.fillRect(this.x2 - 3 * (oflowBin + 1), y, 3, this.hiy2 - y);
             oflowBin++;
          }
+
+         // draw cursor
+         if (this.histo.cursorValid && dist_min < 500) {
+            this.histo.drawCursor = true;
+         }
       }
    }
 
@@ -1467,6 +1495,49 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
    if (nMeas > 0)
       this.drawHAxis(ctx, this.x1, this.hiy2, this.hiWidth, 5, 7, 9, 10, 0, this.histo.axisMin, this.histo.axisMax);
 
+   if (this.histo.drawCursor) {
+
+      ctx.strokeStyle = "#808080";
+      ctx.drawLine(this.histo.cursorX, this.hiy1, this.histo.cursorX, this.hiy2);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+      ctx.fillStyle = "white";
+      ctx.fillText(this.histo.cursorN, this.histo.cursorXbin, this.histo.cursorYbin);
+
+      let v = (this.histo.cursorX - this.x1) / this.hiWidth *
+         (this.histo.axisMax - this.histo.axisMin) + this.histo.axisMin;
+      let str = v.toPrecision(4);
+
+      let w = ctx.measureText(str).width + 10;
+      let h = ctx.measureText("M").width * 1.2 + 8;
+      let x = this.histo.cursorX - w / 2;
+      let y = this.hiy2 + 5;
+      if (x <= this.x1)
+         x = this.x1;
+      if (x + w >= this.x2)
+         x = this.x2 - w;
+
+      if (this.disp.invert) {
+         ctx.strokeStyle = "black";
+         ctx.fillStyle = "#808080";
+      } else {
+         ctx.strokeStyle = "white";
+         ctx.fillStyle = "#808080";
+      }
+
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeRect(x, y, w, h);
+
+      if (this.disp.invert)
+         ctx.fillStyle = "black";
+      else
+         ctx.fillStyle = "white";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+
+      ctx.fillText(str, x + 5, y + h / 2 + 2);
+   }
+
    // draw drag handles
    ctx.save();
 
@@ -1474,6 +1545,8 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
       // draw drag line
       ctx.drawLine(this.histo.dragX, this.hiy1, this.histo.dragX, this.hiy2);
    else {
+      ctx.fillStyle = "#808080";
+      ctx.strokeStyle = "#808080";
       ctx.beginPath();
       ctx.moveTo(this.x1, this.hiy1 + this.hiHeight / 2 - 15);
       ctx.lineTo(this.x1 + 5, this.hiy1 + this.hiHeight / 2 - 15);
@@ -1492,7 +1565,7 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
    }
 
    if (this.histo.dragRightHandle)
-   // drag line
+      // drag line
       ctx.drawLine(this.histo.dragX, this.hiy1, this.histo.dragX, this.hiy2);
    else {
 
