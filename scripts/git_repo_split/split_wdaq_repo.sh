@@ -147,10 +147,10 @@ git remote add origin ${dst_url}
 printf "\n*** Active GIT remotes:\n"
 git remote -v
 
-#printf "\n*** Push ${split_dir} to ${dst_url} [n]? "
-#read clearence
-#if [ "$clearence" == "y" ] || [ "$clearence" == "yes" ]
-if (false)
+printf "\n*** Push ${split_dir} to ${dst_url} [n]? "
+read clearence
+if [ "$clearence" == "y" ] || [ "$clearence" == "yes" ]
+#if (false)
 then
 
   printf "\n*** Pushing Content to ${dst_url}...\n"

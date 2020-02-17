@@ -14,14 +14,23 @@ folders_to_split=(
 )
 
 split_repo_remotes=(
-#  git@bitbucket.org:twavedaq/wavedaq_hw_draft.git
-  git@bitbucket.org:twavedaq/wavedaq_sw_draft.git
-  git@bitbucket.org:twavedaq/wavedaq_doc_draft.git
-  git@bitbucket.org:twavedaq/wavedaq_fw_cmb_draft.git
-  git@bitbucket.org:twavedaq/wavedaq_fw_dcb_draft.git
-  git@bitbucket.org:twavedaq/wavedaq_fw_tcb_draft.git
-  git@bitbucket.org:twavedaq/wavedaq_fw_wdb_draft.git
+#  git@bitbucket.org:twavedaq/wavedaq_hw.git
+  git@bitbucket.org:twavedaq/wavedaq_sw.git
+  git@bitbucket.org:twavedaq/wavedaq_doc.git
+  git@bitbucket.org:twavedaq/wavedaq_fw_cmb.git
+  git@bitbucket.org:twavedaq/wavedaq_fw_dcb.git
+  git@bitbucket.org:twavedaq/wavedaq_fw_tcb.git
+  git@bitbucket.org:twavedaq/wavedaq_fw_wdb.git
 )
+#split_repo_remotes=(
+##  git@bitbucket.org:twavedaq/wavedaq_hw_draft.git
+#  git@bitbucket.org:twavedaq/wavedaq_sw_draft.git
+#  git@bitbucket.org:twavedaq/wavedaq_doc_draft.git
+#  git@bitbucket.org:twavedaq/wavedaq_fw_cmb_draft.git
+#  git@bitbucket.org:twavedaq/wavedaq_fw_dcb_draft.git
+#  git@bitbucket.org:twavedaq/wavedaq_fw_tcb_draft.git
+#  git@bitbucket.org:twavedaq/wavedaq_fw_wdb_draft.git
+#)
 
 clean_scripts=(
 #  clean_branch_tag_hw.sh
@@ -32,16 +41,6 @@ clean_scripts=(
   clean_branch_tag_fw_tcb.sh
   clean_branch_tag_fw_wdb.sh
 )
-
-#split_repo_remotes=(
-#  git@git.psi.ch:sandbox/wavedaq_doc.git
-#  git@git.psi.ch:sandbox/wavedaq_fw_cmb.git
-#  git@git.psi.ch:sandbox/wavedaq_fw_dcb.git
-#  git@git.psi.ch:sandbox/wavedaq_fw_tcb.git
-#  git@git.psi.ch:sandbox/wavedaq_fw_wdb.git
-##  git@git.psi.ch:sandbox/wavedaq_hw.git
-#  git@git.psi.ch:sandbox/wavedaq_sw.git
-#)
 
 NR_OF_SRS=${#split_repo_remotes[@]}
 for ((i=0;i<$NR_OF_SRS;i++))
