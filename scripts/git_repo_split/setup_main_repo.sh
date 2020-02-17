@@ -1,7 +1,7 @@
 #!/bin/bash
 
-main_repo_url=git@bitbucket.org:twavedaq/wavedaq_main_draft.git
-#main_repo_url=git@bitbucket.org:twavedaq/wavedaq_main.git
+#main_repo_url=git@bitbucket.org:twavedaq/wavedaq_main_draft.git
+main_repo_url=git@bitbucket.org:twavedaq/wavedaq_main.git
 
 submodule_branch=master
 
@@ -16,23 +16,22 @@ submodule_dirs=(
 )
 
 submodule_remotes=(
-  git@bitbucket.org:twavedaq/wavedaq_doc_draft.git
-  git@bitbucket.org:twavedaq/wavedaq_fw_cmb_draft.git
-  git@bitbucket.org:twavedaq/wavedaq_fw_dcb_draft.git
-  git@bitbucket.org:twavedaq/wavedaq_fw_tcb_draft.git
-  git@bitbucket.org:twavedaq/wavedaq_fw_wdb_draft.git
-  git@bitbucket.org:twavedaq/wavedaq_hw_draft.git
-  git@bitbucket.org:twavedaq/wavedaq_sw_draft.git
+  https://bitbucket.org/twavedaq/wavedaq_doc.git
+  https://bitbucket.org/twavedaq/wavedaq_fw_cmb.git
+  https://bitbucket.org/twavedaq/wavedaq_fw_dcb.git
+  https://bitbucket.org/twavedaq/wavedaq_fw_tcb.git
+  https://bitbucket.org/twavedaq/wavedaq_fw_wdb.git
+  https://bitbucket.org/twavedaq/wavedaq_hw.git
+  https://bitbucket.org/twavedaq/wavedaq_sw.git
 )
-
 #submodule_remotes=(
-#  git@bitbucket.org:twavedaq/wavedaq_doc.git
-#  git@bitbucket.org:twavedaq/wavedaq_fw_cmb.git
-#  git@bitbucket.org:twavedaq/wavedaq_fw_dcb.git
-#  git@bitbucket.org:twavedaq/wavedaq_fw_tcb.git
-#  git@bitbucket.org:twavedaq/wavedaq_fw_wdb.git
-#  git@bitbucket.org:twavedaq/wavedaq_hw.git
-#  git@bitbucket.org:twavedaq/wavedaq_sw.git
+#  https://bitbucket.org/twavedaq/wavedaq_doc_draft.git
+#  https://bitbucket.org/twavedaq/wavedaq_fw_cmb_draft.git
+#  https://bitbucket.org/twavedaq/wavedaq_fw_dcb_draft.git
+#  https://bitbucket.org/twavedaq/wavedaq_fw_tcb_draft.git
+#  https://bitbucket.org/twavedaq/wavedaq_fw_wdb_draft.git
+#  https://bitbucket.org/twavedaq/wavedaq_hw_draft.git
+#  https://bitbucket.org/twavedaq/wavedaq_sw_draft.git
 #)
 
 # Check if repository exists
