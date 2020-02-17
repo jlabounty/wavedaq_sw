@@ -1344,6 +1344,7 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
    var uflowBin = 0;
    var oflowBin = 0;
    this.histo.hitInROI = false;
+   this.histo.drawCursor = false;
 
    this.histo.xMax = 0;
    for (var idx = 0; idx < this.measList.childNodes.length; idx++) {
@@ -1439,14 +1440,12 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
 
             // test if cursor is close to center of bin
             if (this.histo.cursorValid) {
-               let x_center = Math.floor(x + 0.5 / nBins * (this.hiWidth));
-               let dist = (this.histo.cursorX - x_center) * (this.histo.cursorX - x_center) +
-                  (this.histo.cursorY - y) * (this.histo.cursorY - y);
-               if (dist < dist_min) {
-                  dist_min = dist;
-                  this.histo.cursorXbin = x_center;
+               if (this.histo.cursorX > x && this.histo.cursorX <= x + 1 / nBins * this.hiWidth &&
+                   this.histo.cursorY > y) {
+                  this.histo.cursorXbin = Math.floor(x + 0.5 / nBins * this.hiWidth);;
                   this.histo.cursorYbin = y;
                   this.histo.cursorN = histo[i];
+                  this.histo.drawCursor = true;
                }
             }
 
@@ -1481,10 +1480,6 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
             oflowBin++;
          }
 
-         // draw cursor
-         if (this.histo.cursorValid && dist_min < 500) {
-            this.histo.drawCursor = true;
-         }
       }
    }
 
@@ -1493,7 +1488,8 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
 
    // draw horizontal axis
    if (nMeas > 0)
-      this.drawHAxis(ctx, this.x1, this.hiy2, this.hiWidth, 5, 7, 9, 10, 0, this.histo.axisMin, this.histo.axisMax);
+      this.drawHAxis(ctx, this.x1, this.hiy2, this.hiWidth, 5, 7, 9, 10, 0,
+         this.histo.axisMin, this.histo.axisMax);
 
    if (this.histo.drawCursor) {
 
@@ -1506,7 +1502,12 @@ Oscilloscope.prototype.drawHisto = function (ctx) {
 
       let v = (this.histo.cursorX - this.x1) / this.hiWidth *
          (this.histo.axisMax - this.histo.axisMin) + this.histo.axisMin;
-      let str = v.toPrecision(4);
+
+      let nsig = Math.log(Math.abs(v)) / LN10 -
+         Math.log((this.histo.axisMax - this.histo.axisMin) / 3000) / LN10;
+      nsig = Math.floor(nsig);
+
+      let str = v.toPrecision(nsig);
 
       let w = ctx.measureText(str).width + 10;
       let h = ctx.measureText("M").width * 1.2 + 8;
