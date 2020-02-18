@@ -733,7 +733,7 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("delay <n>            Set SYNC delay\n");
       c.sprintf("help                 This help page\n");
       c.sprintf("info                 Show system information\n");
-      c.sprintf("init <serial>        Initialize environment variables\n");
+      c.sprintf("init <serial>        Initialize DCB environment variables\n");
       c.sprintf("mark                 Mark board by letting led blink magenta\n");
       c.sprintf("unmark               Remove marking\n");
       c.sprintf("reset                Reboot DCB\n");
@@ -754,6 +754,7 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("   <ofs> : starting register, default: first ctrl reg\n");
       c.sprintf("     <n> : number of registers, default 1 if <ofs> is specified, otherwise all\n\n");
 
+      c.sprintf("sinit  <slot>        Send init to WDB/TCB via backplane\n\n");
       c.sprintf("sysmon               Print system monitor info\n\n");
 
       c.sprintf("upload <slot> [-f <path>] [-s <path>] [-t <type>] [-r <rev>]\n");
@@ -907,6 +908,20 @@ void process_dcb_command(udp_connection &c, char *buffer) {
    } else if (strcmp(param[0], "regdiff") == 0) {
 
       reg_diff_cmd(c, n_param, (const char **) param);
+
+   } else if (strcmp(param[0], "sinit") == 0) {
+
+      if (n_param < 2) {
+         c.sprintf("Error: please specify slot number\n");
+         return;
+      }
+
+      int slot = atoi(param[1]);
+      if (slot >= 0 && slot <= 17 && slot != 16) {
+         init_slot(slot, 1);
+         c.sprintf("INIT sent to slot %d\n", slot);
+      } else
+         c.sprintf("Invalid slot number %d\n", slot);
 
    } else if (strcmp(param[0], "sysmon") == 0) {
 
@@ -1432,6 +1447,14 @@ void slot_upload(udp_connection &c, unsigned int slot_nr, int load_fw, char *fwp
    }
 
    disconnect();
+
+   // WDB2E,F: need init after upload
+   if (board_type == BRD_TYPE_ID_WDB && board_rev < 5) {
+      c.sprintf("Wait for WDB2%c board in slot %d to boot\n", 'A' + board_rev, slot_nr);
+      c.flush();
+      usleep(6000000); // wait 5 sec
+   }
+
 }
 
 //-------------------------------------------------------------------
@@ -1524,7 +1547,6 @@ void upload(udp_connection &c, int n_param, const char **param) {
                      snprintf(name, sizeof(name), "WD%03d", sn);
                   } else
                      snprintf(name, sizeof(name), "%s", wdaq_brd_type_name[board_info.type_id]);
-
 
                   c.sprintf("Slot %2d: Found board \"%s\", Revision \"%c\", Variant \"0x%02X\", Vendor \"%s\"\n",
                             s,
