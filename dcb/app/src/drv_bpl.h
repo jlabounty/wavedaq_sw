@@ -32,6 +32,7 @@ typedef struct
 } slot_op_en_type;
 
 void bpl_spi_init(bpl_spi_type *self, unsigned char device_nr);
+void init_slot(unsigned int slot_nr, unsigned int len_us);
 void spi_ascii_cmd(char* txbuff, char *rxbuf, unsigned int rxsize, unsigned char slot_nr, unsigned int board_type, unsigned int board_revision);
 void spi_binary_cmd(char* tx_buff, char* rx_buff, unsigned int len, unsigned char slot_nr, unsigned int board_type, unsigned int board_revision);
 void slot_upload_fw_sw(unsigned int slot_nr, int load_fw, char *fw_spec_p, int load_sw, char *sw_spec_p, unsigned int board_type, unsigned int board_rev);

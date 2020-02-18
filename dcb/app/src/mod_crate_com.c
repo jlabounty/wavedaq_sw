@@ -284,6 +284,23 @@ int crate_slot_upload_fw_sw(int argc, char **argv)
 
 /************************************************************/
 
+int crate_slot_init(int argc, char **argv)
+{
+  unsigned int slot;
+
+  CMD_HELP("<slot>",
+            "send init to WDB/TCB via backplane.\r\n",
+            "  <slot> : WDB/TCB slot (0..17 except 16 (DCB slot))\r\n"
+          );
+
+  slot = strtoul(argv[1], NULL, 0);
+  init_slot(slot, 1);
+
+  return 0;
+}
+
+/************************************************************/
+
 int module_crate_com_help(int argc, char **argv)
 {
   CMD_HELP("",
@@ -303,6 +320,7 @@ cmd_table_entry_type crate_com_cmd_table[] =
   {0, "crt_com", module_crate_com_help},
   {3, "sltc", crate_slot_fpga_com},
   {0, "upload", crate_slot_upload_fw_sw},
+  {0, "sltrst", crate_slot_init},
   {0, NULL, NULL}
 };
 

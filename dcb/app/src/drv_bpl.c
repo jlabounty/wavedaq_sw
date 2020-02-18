@@ -146,10 +146,11 @@ flash_memory_map_type* connect_flash(unsigned int slot_nr, unsigned int board_ty
 
 void disconnect()
 {
-  deselect_all_slots();
-  usleep(50);
   BPL_FLASH_SEL(0);
   BPL_INIT(0);
+  usleep(10);
+  deselect_all_slots();
+  usleep(10);
   BPL_SPI_DRIVE_EN(0);
 }
 
@@ -169,6 +170,24 @@ int spi_transfer(bpl_spi_type *self, unsigned char slot_nr, char *SendBufPtr, ch
 {
   spi_if_transfer(&(self->slot_fpga), SendBufPtr, RecvBufPtr, ByteCount);
   return 1;
+}
+
+/******************************************************************************/
+
+void init_slot(unsigned int slot_nr, unsigned int len_us)
+{
+  BPL_SPI_SCHEME(1);
+  BPL_FLASH_SEL(0);
+  BPL_INIT(0);
+  BPL_SPI_DRIVE_EN(1);
+  select_slot(slot_nr);
+  BPL_INIT(1);
+  usleep(len_us);
+  BPL_INIT(0);
+  usleep(1);
+  deselect_all_slots();
+  usleep(1);
+  BPL_SPI_DRIVE_EN(0);
 }
 
 /******************************************************************************/
@@ -582,6 +601,9 @@ void slot_upload_fw_sw(unsigned int slot_nr, int load_fw, char *fw_spec_p, int l
   }
 
   disconnect();
+
+  /* Apply init pulse to boards with old SPI scheme */
+  if(bpl_spi_scheme[board_type][board_rev] == 0) init_slot(slot_nr, 1);
 
   if(DBG_INF0) printf("\n");
 }
