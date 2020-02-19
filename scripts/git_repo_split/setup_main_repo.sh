@@ -13,6 +13,8 @@ submodule_dirs=(
   fw/wdb
   hw
   sw
+  linux/yocto_build_env
+  linux/yocto_layer
 )
 
 submodule_remotes=(
@@ -23,6 +25,8 @@ submodule_remotes=(
   https://bitbucket.org/twavedaq/wavedaq_fw_wdb.git
   https://bitbucket.org/twavedaq/wavedaq_hw.git
   https://bitbucket.org/twavedaq/wavedaq_sw.git
+  https://bitbucket.org/twavedaq/wavedaq_yocto_build_env.git
+  https://bitbucket.org/twavedaq/wavedaq_yocto_layer.git
 )
 #submodule_remotes=(
 #  https://bitbucket.org/twavedaq/wavedaq_doc_draft.git
@@ -57,17 +61,8 @@ cd ${local_dir}
 
 # Create folders
 printf "\n*** Creating folders in ${local_dir}\n"
-#mkdir doc
 mkdir fw
-#mkdir hw
-#mkdir sw
-
-# Create subfolders
-#printf "*** Creating subfolders in ${local_dir}\n"
-#mkdir fw/cmb
-#mkdir fw/dcb
-#mkdir fw/tcb
-#mkdir fw/wdb
+mkdir linux
 
 # Add submodules
 printf "\n*** Adding submodules\n"
