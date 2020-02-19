@@ -3185,8 +3185,8 @@ void WP::SaveWaveforms() {
             sprintf((char *) p, "TRGD");
             p += 4;
             for (int j = 0; j < 512; j++) {
-               *(unsigned long *) p = ev->mTrgData[j];
-               p += sizeof(unsigned long);
+               *(unsigned long long *) p = ev->mTrgData[j];
+               p += sizeof(unsigned long long);
             }
          }
 

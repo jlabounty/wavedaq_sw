@@ -553,7 +553,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
          packet->SetWdbHeaderInfo(data);
 
          // decode waveform data
-         auto pd = (unsigned long*)(data+1);
+         auto pd = (unsigned long long*)(data+1);
          int numberBins = (int) packet->mPayloadLength/8;
          for (int i=0 ; i<numberBins ; i++) {
             packet->data[i] = SWAP_UINT64(pd[i]);
@@ -568,7 +568,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
          packet->SetWdbHeaderInfo(data);
 
          // decode waveform data
-         auto pd = (unsigned long*)(data+1);
+         auto pd = (unsigned long long*)(data+1);
          for (int i=0 ; i<WD_N_SCALER ; i++) {//Ch 0->16, Trigger, External Clock
             packet->data[i] = SWAP_UINT64(pd[i]);
          }
@@ -1054,7 +1054,7 @@ void WDAQEventWriter::Loop(){
             fFile.write(chn_header.c_str(), 4);
 
             for(int bin=0; bin<512; bin++){
-               unsigned long val = board->mTrg[bin];
+               unsigned long long val = board->mTrg[bin];
                fFile.write((const char *)&val, 8);
             }
 
@@ -1064,11 +1064,11 @@ void WDAQEventWriter::Loop(){
             fFile.write(chn_header.c_str(), 4);
             // first write 18 integral scaler values as received
             for(int bin=0; bin<WD_N_SCALER; bin++){
-               unsigned long val = board->mScaler[bin];
+               unsigned long long val = board->mScaler[bin];
                fFile.write((const char *)&val, 8);
             }
             // then the board time counter @80MHz
-            unsigned long lval = board->mTimeStamp;
+            unsigned long long lval = board->mTimeStamp;
             fFile.write((const char *)&lval, 8);
 
          }// end if there are scaler data

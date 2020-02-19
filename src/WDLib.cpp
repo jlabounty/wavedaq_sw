@@ -623,7 +623,7 @@ void WDWDB::Connect(){
       //Set SlotId
       SetSlotId(GetSlot());
 
-      long crateNumber = crate->GetCrateNumber();
+      long long crateNumber = crate->GetCrateNumber();
       if(crateNumber >= 0){
          //Set CrateId
          SetCrateId(crateNumber);
@@ -746,7 +746,7 @@ void WDWDB::ConfigureFPD(Property &property) {
 }
 
 void WDWDB::ConfigureFrontendGain(Property &property) {
-   long arraySize = 0;
+   long long arraySize = 0;
    const float* gain;
    gain = property.GetFloatVector(&arraySize);
    
@@ -767,7 +767,7 @@ void WDWDB::ConfigureFrontendGain(Property &property) {
 }
 
 void WDWDB::ConfigureFrontendPzc(Property &property) {
-   long arraySize = 0;
+   long long arraySize = 0;
    const int* pzc;
    pzc = property.GetIntVector(&arraySize);
    
@@ -799,7 +799,7 @@ void WDWDB::ConfigureFrontendPzcLevel(Property &property) {
 }
 
 void WDWDB::ConfigureTriggerLevel(Property &property) {
-   long arraySize = 0;
+   long long arraySize = 0;
    const float* trigger_level;
    trigger_level = property.GetFloatVector(&arraySize);
    
@@ -828,7 +828,7 @@ void WDWDB::ConfigureChannelPolarity(Property &property) {
 }
 
 void WDWDB::ConfigureChannelHV(Property &property) {
-   long arraySize = 0;
+   long long arraySize = 0;
    const float* demand;
    demand = property.GetFloatVector(&arraySize);
    
@@ -910,7 +910,7 @@ void WDWDB::ConfigureTriggerAlgorithm(Property &property) {
 }
 
 void WDWDB::ConfigureTriggerGain(Property &property) {
-   long arraySize = 0;
+   long long arraySize = 0;
    const int* trigger_gain;
    trigger_gain = property.GetIntVector(&arraySize);
 
@@ -956,7 +956,7 @@ void WDWDB::ConfigureTriggerTdcMask(Property &property) {
 }
 
 void WDWDB::ConfigureTriggerTdcOffset(Property &property) {
-   long arraySize = 0;
+   long long arraySize = 0;
    const int* tdc_offset;
    tdc_offset = property.GetIntVector(&arraySize);
 
@@ -1292,7 +1292,7 @@ void WDTCB::ConfigurationEnded(){
 }
 
 void WDTCB::ConfigureTriggerEnable(Property &property){
-   long arraySize = 0;
+   long long arraySize = 0;
    const unsigned int* trigger_enable;
    trigger_enable = GetProperty("TriggerEnable").GetUIntVector(&arraySize);
 
@@ -1306,11 +1306,11 @@ void WDTCB::ConfigureTriggerEnable(Property &property){
 }
 
 void WDTCB::ConfigureTriggerPrescaling(Property &property){
-   long arraySize = 0;
+   long long arraySize = 0;
    const unsigned int* trigger_prescaling;
    trigger_prescaling = property.GetUIntVector(&arraySize);
 
-   long arraySizeEnable = 0;
+   long long arraySizeEnable = 0;
    const unsigned int* trigger_enable;
    try{
       trigger_enable = GetProperty("TriggerEnable").GetUIntVector(&arraySizeEnable);
@@ -1331,11 +1331,11 @@ void WDTCB::ConfigureTriggerPrescaling(Property &property){
 }
 
 void WDTCB::ConfigureTriggerDelay(Property &property){
-   long arraySize = 0;
+   long long arraySize = 0;
    const unsigned int* trigger_delay;
    trigger_delay = property.GetUIntVector(&arraySize);
 
-   long arraySizeEnable = 0;
+   long long arraySizeEnable = 0;
    const unsigned int* trigger_enable;
    try{
       trigger_enable = GetProperty("TriggerEnable").GetUIntVector(&arraySizeEnable);
@@ -1363,7 +1363,7 @@ void WDTCB::ConfigureTriggerAlgorithm(Property &property){
 }
 
 void WDTCB::ConfigureParameters(Property &property){
-   long arraySize = 0;
+   long long arraySize = 0;
    const unsigned int* parameters;
 
    parameters = property.GetUHexVector(&arraySize);
@@ -1761,7 +1761,7 @@ void WDTCB::ConfigureXecMovingAverage(Property &property){
 }
 
 void WDTCB::ConfigureTcMask(Property &property){
-   long arraySize = 0;
+   long long arraySize = 0;
    const unsigned int* masks;
 
    masks = property.GetUHexVector(&arraySize);
@@ -1779,7 +1779,7 @@ void WDTCB::ConfigureTcMultiplicityThreshold(Property &property){
 }
 
 void WDTCB::ConfigureTcCrateMergeThreshold(Property &property){
-   long arraySize = 0;
+   long long arraySize = 0;
    const unsigned int* thresholds;
 
    thresholds = property.GetUHexVector(&arraySize);
@@ -1790,7 +1790,7 @@ void WDTCB::ConfigureTcCrateMergeThreshold(Property &property){
 }
 
 void WDTCB::ConfigureTcSectorMergeThreshold(Property &property){
-   long arraySize = 0;
+   long long arraySize = 0;
    const unsigned int* thresholds;
 
    thresholds = property.GetUHexVector(&arraySize);
@@ -1932,7 +1932,7 @@ void WDDCB::Connect(){
    //Set SlotId
    SetSlotId(GetSlot());
 
-   long crateNumber = crate->GetCrateNumber();
+   long long crateNumber = crate->GetCrateNumber();
    if(crateNumber >= 0){
       //Set CrateId
       SetCrateId(crateNumber);
