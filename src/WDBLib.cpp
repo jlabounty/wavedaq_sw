@@ -982,12 +982,12 @@ void WDB::SetDrsSampleFreq(unsigned int f)
    ReceiveStatusRegister(GetDrsSampleFreqLoc());
 }
 
-void WDB::GetScalers(std::vector<unsigned long long> &scaler, bool refresh) {
+void WDB::GetScalers(std::vector<uint64_t> &scaler, bool refresh) {
    if (refresh)
       ReceiveStatusRegisters(GetScaler0Loc() / 4, 19);
 
    // decode scalers according to their bit width
-   unsigned long long v;
+   uint64_t v;
    for (unsigned int i = 0; i < 19; i++) {
       v = this->sreg[GetScaler0Loc() / 4 + i];
 
@@ -2554,7 +2554,7 @@ int WP::ReceiveWfPacket() {
 
    // decode advanced trigger data
    if (pdaqh->data_type == cDataTypeTrg) {
-      auto pd = (unsigned long long *) (ph + 1);
+      auto pd = (uint64_t *) (ph + 1);
       //assure data are transmitted in 64-bit blocks
       assert(pdaqh->payload_length % 8 == 0);
       assert(pdaqh->data_chunk_offset % 8 == 0);
@@ -2565,7 +2565,7 @@ int WP::ReceiveWfPacket() {
 
    // decode scaler data
    if (pdaqh->data_type == cDataTypeScaler) {
-      auto pd = (unsigned long long *) (ph + 1);
+      auto pd = (uint64_t *) (ph + 1);
       assert(pdaqh->payload_length <= sizeof(event->mScaler));
       for (int i = 0; i < WD_N_SCALER; i++)
          event->mScaler[i] = SWAP_UINT64(pd[17 - i]);
@@ -2984,10 +2984,10 @@ void WP::SaveWaveforms() {
                sprintf(str, "%d", ev->mTriggerCell[i]);
                mxml_write_element(li.xml, "Trigger_Cell", str);
 
-               unsigned long long s = 0;
+               uint64_t s = 0;
                for (auto &bi: mWdb)
                   if (bi->GetSerialNumber() == ev->mBoardId) {
-                     std::vector<unsigned long long> sc;
+                     std::vector<uint64_t> sc;
                      bi->GetScalers(sc, false);
                      s = sc[i];
                      break;
@@ -3103,7 +3103,7 @@ void WP::SaveWaveforms() {
          assert(wdb);
 
          //Get Scalers
-         std::vector<unsigned long long> sc;
+         std::vector<uint64_t> sc;
          wdb->GetScalers(sc, false);
 
          if (ev->mTypeValid[cDataTypeDRS]) {
@@ -3114,7 +3114,7 @@ void WP::SaveWaveforms() {
                   p += 4;
 
                   // write scaler
-                  unsigned long long s = sc[i];
+                  uint64_t s = sc[i];
                   memcpy(p, &s, sizeof(unsigned int));
                   p += sizeof(int);
 
@@ -3185,8 +3185,8 @@ void WP::SaveWaveforms() {
             sprintf((char *) p, "TRGD");
             p += 4;
             for (int j = 0; j < 512; j++) {
-               *(unsigned long long *) p = ev->mTrgData[j];
-               p += sizeof(unsigned long long);
+               *(uint64_t *) p = ev->mTrgData[j];
+               p += sizeof(uint64_t);
             }
          }
 

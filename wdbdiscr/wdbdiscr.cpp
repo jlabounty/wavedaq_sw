@@ -146,7 +146,7 @@ int main(int argc, char** argv)
       WDB* wdb= new WDB(wdbs[b].c_str());
       wdb->Connect();
       //wdb->SetFeGain(-1, gain);
-      std::vector<unsigned long long> s;
+      std::vector<uint64_t> s;
       wdb->GetScalers(s);
 
       char buf[100];

@@ -61,7 +61,7 @@ typedef struct {
    unsigned int   tx_enable;
    unsigned short drs_trigger_cell;
    unsigned char  trigger_information[6];
-   unsigned long long  time_stamp;
+   uint64_t       time_stamp;
    unsigned char  reserved[4];
    unsigned int   event_number;
    unsigned short temperature;
@@ -218,9 +218,9 @@ public:
    int              mTDCChannelPresent[WD_N_CHANNELS];
    unsigned char    mWfTDC[WD_N_CHANNELS][512];
 
-   unsigned long long mTrgData[512];
+   uint64_t         mTrgData[512];
 
-   unsigned long long mScaler[WD_N_SCALER];
+   uint64_t         mScaler[WD_N_SCALER];
 
    bool             mVCalibrated;
    bool             mTCalibrated;
@@ -665,7 +665,7 @@ public:
    std::string GetHwVersion();
    float GetTemperatureDegree(bool refresh = true);
    unsigned int GetPllLock(bool refresh = true);
-   void GetScalers(std::vector<unsigned long long> &s, bool refresh = true);
+   void GetScalers(std::vector<uint64_t> &s, bool refresh = true);
    void GetHVCurrents(std::vector<float> &c, bool refresh = true);
    void GetHVBaseVoltage(float &voltage, bool refresh = true);
    void Get1wireTemperatures(std::vector<float> &c, bool refresh = true);

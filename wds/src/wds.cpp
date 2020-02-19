@@ -507,7 +507,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
          auto w = gl->wdb[b];
 
          // simulate gaussian distributed scalers in demo mode
-         std::vector<unsigned long long> scaler;
+         std::vector<uint64_t> scaler;
          if (gl->demoMode) {
             std::poisson_distribution<int> dist(1000);
 

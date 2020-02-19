@@ -302,7 +302,7 @@ void decode(const char *filename) {
                if(bankName[0]=='I' && bankName[1]=='N'){
                   int serdesNumber = (bankName[2]-'0')*10+(bankName[3]-'0');
                   for(int i=0; i<128; i++){
-                     unsigned long long val = temp[129+(i+temp[0])%128];
+                     uint64_t val = temp[129+(i+temp[0])%128];
                      val = val <<32;
                      val |= temp[1+(i+temp[0])%128];
                      this_data.in_waveform[serdesNumber][i] = val;
@@ -310,7 +310,7 @@ void decode(const char *filename) {
                   }
                } else if (bankName[0]=='G' && bankName[1]=='E' && bankName[2]=='N' && bankName[3]=='T'){
                   for(int i=0; i<32; i++){
-                     unsigned long long val = temp[33+(i+temp[0])%32];
+                     uint64_t val = temp[33+(i+temp[0])%32];
                      val = val <<32;
                      val |= temp[1+(i+temp[0])%32];
                      //printf("%016llx %08x %08x\n", val, temp[33+(i+temp[0])%32],  temp[1+(i+temp[0])%32]);

@@ -81,7 +81,7 @@ class Property{
          fHexConverted = false;
       }
 
-      const int* GetIntVector(long long *size){
+      const int* GetIntVector(int64_t *size){
          if(! fIntConverted) {
             ConvertInt();
          }
@@ -90,7 +90,7 @@ class Property{
       }
 
       int GetInt(){
-         long long size;
+         int64_t size;
          const int *v = GetIntVector(&size);
          if(size) return v[0];
          else return -1;
@@ -102,7 +102,7 @@ class Property{
          fIntConverted = false;
       }
 
-      const int* GetHexVector(long long *size){
+      const int* GetHexVector(int64_t *size){
          if(! fHexConverted) {
             ConvertHex();
          }
@@ -111,7 +111,7 @@ class Property{
       }
 
       int GetHex(){
-         long long size;
+         int64_t size;
          const int *v = GetHexVector(&size);
          if(size) return v[0];
          else return -1;
@@ -123,7 +123,7 @@ class Property{
          fUHexConverted = false;
       }
 
-      const unsigned int* GetUIntVector(long long *size){
+      const unsigned int* GetUIntVector(int64_t *size){
          if(! fUIntConverted) {
             ConvertUInt();
          }
@@ -132,7 +132,7 @@ class Property{
       }
 
       int GetUInt(){
-         long long size;
+         int64_t size;
          const unsigned int *v = GetUIntVector(&size);
          if(size) return v[0];
          else return -1;
@@ -144,7 +144,7 @@ class Property{
          fUIntConverted = false;
       }
 
-      const unsigned int* GetUHexVector(long long *size){
+      const unsigned int* GetUHexVector(int64_t *size){
          if(! fUHexConverted) {
             ConvertUHex();
          }
@@ -153,7 +153,7 @@ class Property{
       }
 
       unsigned int GetUHex(){
-         long long size;
+         int64_t size;
          const unsigned int *v = GetUHexVector(&size);
          if(size) return v[0];
          else return -1;
@@ -176,7 +176,7 @@ class Property{
          fFloatConverted = true;
       }
 
-      const float* GetFloatVector(long long *size){
+      const float* GetFloatVector(int64_t *size){
          if(! fFloatConverted) {
             ConvertFloat();
          }
@@ -185,7 +185,7 @@ class Property{
       }
 
       float GetFloat(){
-         long long size;
+         int64_t size;
          const float *v = GetFloatVector(&size);
          if(size) return v[0];
          else return -1;

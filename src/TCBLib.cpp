@@ -1365,15 +1365,15 @@ void TCB::WritePacketizerProgram(std::vector<PacketInstruction> &list){
    u_int32_t pack_mem_0[PACKAGERSIZE];
    u_int32_t pack_mem_1[PACKAGERSIZE];
    u_int32_t pack_mem_2[PACKAGERSIZE];
-   for(unsigned long long i=0; i<PACKAGERSIZE; i++){
+   for(uint64_t i=0; i<PACKAGERSIZE; i++){
       pack_mem_0[i] = 0;
       pack_mem_1[i] = 0;
       pack_mem_2[i] = 0;
    }
 
-   long long max_offset = 0;
+   uint64_t max_offset = 0;
 
-   for(unsigned long long i=0; i<list.size(); i++){
+   for(uint64_t i=0; i<list.size(); i++){
       if(list[i].offset >= PACKAGERSIZE){
          printf("Packager script out of bundaries!\n");
          return;
