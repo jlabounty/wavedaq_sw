@@ -34,7 +34,7 @@ std::string getWdbLibRevision();
 
 //--------------------------------------------------------------------
 
-#pragma pack(1) // byte-level alignement for frame header
+#pragma pack(1) // byte-level alignment for frame header
 
 typedef struct {
    unsigned char  protocol_version;
@@ -61,7 +61,7 @@ typedef struct {
    unsigned int   tx_enable;
    unsigned short drs_trigger_cell;
    unsigned char  trigger_information[6];
-   unsigned long  time_stamp;
+   unsigned long long  time_stamp;
    unsigned char  reserved[4];
    unsigned int   event_number;
    unsigned short temperature;
@@ -218,9 +218,9 @@ public:
    int              mTDCChannelPresent[WD_N_CHANNELS];
    unsigned char    mWfTDC[WD_N_CHANNELS][512];
 
-   unsigned long    mTrgData[512];
+   unsigned long long mTrgData[512];
 
-   unsigned long    mScaler[WD_N_SCALER];
+   unsigned long long mScaler[WD_N_SCALER];
 
    bool             mVCalibrated;
    bool             mTCalibrated;
