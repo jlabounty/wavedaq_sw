@@ -1813,9 +1813,10 @@ void WDEvent::SetWDEventHeaderInfo(WDAQ_FRAME_HEADER *pdaqh, WD_FRAME_HEADER *ph
       mSamplingFrequency = (unsigned int) (ph->sampling_frequency / 1000.0 + 0.5);  // convert kHz to MHz
       mTriggerCell[channel] = ph->drs_trigger_cell;
    }
-   if (pdaqh->data_type == cDataTypeADC)
+   if (pdaqh->data_type == cDataTypeADC) {
       mADCChannelPresent[channel] = true;
-   if (pdaqh->data_type == cDataTypeTDC)
+      mSamplingFrequency = (unsigned int) (ph->sampling_frequency / 1000.0 + 0.5);  // convert kHz to MHz
+   } if (pdaqh->data_type == cDataTypeTDC)
       mTDCChannelPresent[channel] = true;
 
    mEventNumber = ph->event_number;
