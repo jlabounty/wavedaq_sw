@@ -126,9 +126,6 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
          if (iBoard == -1)
             for (auto &b: gl->wdb) {
                b->SetChnTxEn(mask);
-               auto adcEnable = b->GetAdcChTxEn();
-               auto tdcEnable = b->GetTdcChTxEn();
-               auto drsEnable = b->GetDrsChTxEn();
                if (b->GetAdcChTxEn() != 0 || gl->readoutMode == cReadoutModeADC) b->SetAdcChTxEn(mask);
                if (b->GetTdcChTxEn() != 0 || gl->readoutMode == cReadoutModeTDC) b->SetTdcChTxEn(mask);
                if (b->GetDrsChTxEn() != 0 || gl->readoutMode == cReadoutModeDRS) b->SetDrsChTxEn(mask);
@@ -1020,11 +1017,12 @@ int main(int argc, const char *argv[]) {
          if (f3.good()) {
             gl.wdsDir = std::string(getenv("WDBSYS")) + "/sw/wds";
          } else {
-            std::cerr << "Cannot find 'html' directory. Please run from the root of the wds directory." << std::endl;
+            std::cerr << "Cannot find 'html' directory. Please corret 'WDBSYS' environment variable." << std::endl;
+            std::cerr << "WDBSYS currently points to '" << getenv("WDBSYS") << "'" <<std::endl;
             return 1;
          }
       } else {
-         std::cerr << "Cannot find 'WDBSYS' environment variable. Please set it to the wavedaq directory." << std::endl;
+         std::cerr << "Cannot find 'WDBSYS' environment variable. Please set it to the wavedaq_main directory." << std::endl;
          return 1;
       }
    }
