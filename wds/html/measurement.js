@@ -47,10 +47,10 @@ var measList = [
       param: [
          {name: "WD", type: "WD", value: 0},
          {name: "CH", type: "CH", value: 0},
-         {name: "T1Baseline", type: "tcursor", value: 100},
-         {name: "T2Baseline", type: "tcursor", value: 200},
-         {name: "T1Int", type: "tcursor", value: 300},
-         {name: "T2Int", type: "tcursor", value: 400}
+         {name: "T1Baseline", type: "tcursor", value: 10},
+         {name: "T2Baseline", type: "tcursor", value: 20},
+         {name: "T1Int", type: "tcursor", value: 150},
+         {name: "T2Int", type: "tcursor", value: 180}
       ]
    },
    {
@@ -134,10 +134,10 @@ var measList = [
       param: [
          {name: "WD1", type: "WD", value: 0},
          {name: "CH1", type: "CH", value: 0},
-         {name: "Thr1", type: "ucursor", value: 0},
+         {name: "Thr1", type: "ucursor", value: -10},
          {name: "WD2", type: "WD", value: 0},
          {name: "CH2", type: "CH", value: 0},
-         {name: "Thr2", type: "ucursor", value: 0}
+         {name: "Thr2", type: "ucursor", value: -10}
       ]
    },
    {
@@ -149,8 +149,8 @@ var measList = [
          {name: "WD", type: "WD", value: 0},
          {name: "CH", type: "CH", value: 0},
          {name: "Level", type: "ucursor", value: 100},
-         {name: "T1", type: "tcursor", value: 100},
-         {name: "T2", type: "tcursor", value: 200}
+         {name: "T1", type: "tcursor", value: 50},
+         {name: "T2", type: "tcursor", value: 150}
       ]
    },
 ];
