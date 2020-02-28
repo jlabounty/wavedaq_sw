@@ -1800,13 +1800,13 @@ void WDEvent::ClearEvent() {
    }
 }
 
-void WDEvent::SetEventHeaderInfo(WDAQ_FRAME_HEADER *pdaqh) {
+void WDEvent::SetEventHeaderInfo(FRAME_WDAQ_HEADER *pdaqh) {
    mBoardId = pdaqh->serial_number;
    mCrateId = pdaqh->crate_id;
    mSlotId = pdaqh->slot_id;
 }
 
-void WDEvent::SetWDEventHeaderInfo(WDAQ_FRAME_HEADER *pdaqh, WDB_HEADER *ph) {
+void WDEvent::SetWDEventHeaderInfo(FRAME_WDAQ_HEADER *pdaqh, FRAME_WDB_HEADER *ph) {
    int channel = ph->channel_info & 0x1F;
    if (pdaqh->data_type == cDataTypeDRS) {
       mDRSChannelPresent[channel] = true;
@@ -1849,7 +1849,7 @@ void WDEventRequest::ClearRequest() {
    mDroppedPackets = 0;
 }
 
-void WDEventRequest::ProcessPacket(WDAQ_FRAME_HEADER *pdaqh) {
+void WDEventRequest::ProcessPacket(FRAME_WDAQ_HEADER *pdaqh) {
    // on first packet for type, set BOT
    if (pdaqh->wdaq_flags & (1 << cWDAQFlagStartOfType)) {
       mRequest[pdaqh->data_type]->mBOTReceived = true;
@@ -2187,7 +2187,7 @@ bool WP::IsEventValid() {
    return valid;
 }
 
-void WP::LogEvent(WDAQ_FRAME_HEADER *pdaqh, WDB_HEADER *ph) {
+void WP::LogEvent(FRAME_WDAQ_HEADER *pdaqh, FRAME_WDB_HEADER *ph) {
    if (mLogfile != "" || mVerbose >= 3) {
       std::ofstream f;
       char line[256];
@@ -2309,13 +2309,13 @@ int WP::ReceiveWfPacket() {
    int n = (int) recvfrom(WP::gDataSocket, (char *) buffer, sizeof(buffer), 0,
                           (struct sockaddr *) &remote_addr, (socklen_t *) &len);
 
-   WDAQ_FRAME_HEADER *pwdaq_header = (WDAQ_FRAME_HEADER *) buffer;
-   WDB_HEADER *pwdb_header = (WDB_HEADER *) (((WDAQ_FRAME_HEADER *) buffer) + 1);
+   FRAME_WDAQ_HEADER *pwdaq_header = (FRAME_WDAQ_HEADER *) buffer;
+   FRAME_WDB_HEADER *pwdb_header = (FRAME_WDB_HEADER *) (((FRAME_WDAQ_HEADER *) buffer) + 1);
    WDEventRequest *event_request = nullptr;
    WDEvent *event = nullptr;
 
    // return if invalid header
-   if (n < (int) sizeof(WDAQ_FRAME_HEADER))
+   if (n < (int) sizeof(FRAME_WDAQ_HEADER))
       return 0;
 
    // check protocol version

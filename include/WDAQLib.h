@@ -74,7 +74,7 @@ class WDAQPacketData{
    unsigned char    mTriggerType;
    unsigned short   mSerialTriggerData;  
    //Set properties according to UDP event header
-   void SetEventHeaderInfo(WDAQ_FRAME_HEADER *);
+   void SetEventHeaderInfo(FRAME_WDAQ_HEADER *);
 
    //idea to how to handle board event merging across different board types
    void AddToBoardEvent(WDAQBoardEvent *e) {
@@ -112,7 +112,7 @@ class WDAQWdbPacketData: public WDAQPacketData{
    unsigned short   mFrontendSettings;
    
    //Set properties according to UDP event header
-   void SetWdbHeaderInfo(WDB_HEADER *);
+   void SetWdbHeaderInfo(FRAME_WDB_HEADER *);
 
    //merge this packet information in given board event, to be implemented according to data
    virtual void AddDataToBoardEvent(WDAQBoardEvent *e) { };

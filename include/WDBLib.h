@@ -49,7 +49,7 @@ typedef struct {
    uint32_t       event_number;
    uint16_t       payload_length;
    uint16_t       data_chunk_offset;
-} WDAQ_FRAME_HEADER;
+} FRAME_WDAQ_HEADER;
 
 typedef struct {
    uint8_t        channel_info;
@@ -68,7 +68,7 @@ typedef struct {
    uint16_t       dac_rofs;
    uint16_t       frontend_settings;
    uint64_t       time_stamp;
-} WDB_HEADER;
+} FRAME_WDB_HEADER;
 
 #pragma pack() // reset alignment to default value
 
@@ -228,8 +228,8 @@ public:
    WDEvent(int boardId) { mBoardId = boardId; };
 
    void             ClearEvent();
-   void             SetEventHeaderInfo(WDAQ_FRAME_HEADER *);
-   void             SetWDEventHeaderInfo(WDAQ_FRAME_HEADER *, WDB_HEADER *);
+   void             SetEventHeaderInfo(FRAME_WDAQ_HEADER *);
+   void             SetWDEventHeaderInfo(FRAME_WDAQ_HEADER *, FRAME_WDB_HEADER *);
 };
 
 //--------------------------------------------------------------------
@@ -317,7 +317,7 @@ public:
    bool             IsBoardRequested() { return mBoardRequested; }
    void             RequestEventType(int type, bool flag);
    void             ClearRequest();
-   void             ProcessPacket(WDAQ_FRAME_HEADER *pdaqh);
+   void             ProcessPacket(FRAME_WDAQ_HEADER *pdaqh);
    bool             IsEventValid();
 };
 
@@ -383,7 +383,7 @@ class WP {
    bool              mEventEmpty;
 
    void              StartNewEvent();
-   void              LogEvent(WDAQ_FRAME_HEADER *pdaqh, WDB_HEADER   *ph);
+   void              LogEvent(FRAME_WDAQ_HEADER *pdaqh, FRAME_WDB_HEADER   *ph);
    int               ReceiveWfPacket();
    bool              IsEventValid();
    void              UnrotateWaveforms();

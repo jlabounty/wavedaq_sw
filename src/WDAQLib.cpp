@@ -3,7 +3,7 @@
 
 //WDAQ Packet Data - class for UDP DAQ packets 
 //Set properties according to UDP event header
-void WDAQPacketData::SetEventHeaderInfo(WDAQ_FRAME_HEADER *pdaqh){
+void WDAQPacketData::SetEventHeaderInfo(FRAME_WDAQ_HEADER *pdaqh){
    mProtocolVersion =  pdaqh->protocol_version;
    mBoardType = pdaqh->board_type_revision >> 4;
    mBoardRevision = pdaqh->board_type_revision & 0xF;
@@ -35,7 +35,7 @@ void WDAQPacketData::HeaderToBoardEvent(WDAQBoardEvent *e){
 
 //WDAQ WDB Packet Data - class for WDB UDP DAQ packets 
 //Set properties according to UDP event header
-void WDAQWdbPacketData::SetWdbHeaderInfo(WDB_HEADER *ph){
+void WDAQWdbPacketData::SetWdbHeaderInfo(FRAME_WDB_HEADER *ph){
    //propertis from WDAPacketData
   //mEventNumber = ph->event_number;
   //mTriggerNumber = ph->trigger_information[5] | (ph->trigger_information[4] << 8);
@@ -386,13 +386,13 @@ void WDAQPacketCollector::PushPacket(WDAQPacketData* packet){
 void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
 
    //check size of received datagram
-  if(size < (int)sizeof(WDAQ_FRAME_HEADER)) {
+  if(size < (int)sizeof(FRAME_WDAQ_HEADER)) {
     printf("Problem with size\n");
     return;
   }
 
    //first link to the WDAQ_FRAME_HEADER
-   WDAQ_FRAME_HEADER* daqdata = (WDAQ_FRAME_HEADER*)dataptr;
+   FRAME_WDAQ_HEADER* daqdata = (FRAME_WDAQ_HEADER*)dataptr;
 
    
    // check protocol version
@@ -449,7 +449,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
    //from WDB
    if(daqdata->board_type_revision>>4 == WD2_BOARD_ID){
       //then do the WD_FRAME_HEADER
-      WDB_HEADER* data = (WDB_HEADER*) (dataptr + sizeof(WDAQ_FRAME_HEADER));
+      FRAME_WDB_HEADER* data = (FRAME_WDB_HEADER*) (dataptr + sizeof(FRAME_WDAQ_HEADER));
 
       //correct endianess
       data->tx_enable                      = SWAP_UINT32(data->tx_enable);
@@ -588,7 +588,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
    }else if(daqdata->board_type_revision>>4 == TCB_BOARD_ID) {
       //TCB board
       //then do the TCB_FRAME_HEADER
-      TCB_FRAME_HEADER* tcbdata = (TCB_FRAME_HEADER*) (dataptr + sizeof(WDAQ_FRAME_HEADER));
+      TCB_FRAME_HEADER* tcbdata = (TCB_FRAME_HEADER*) (dataptr + sizeof(FRAME_WDAQ_HEADER));
 
       tcbdata->time_stamp       = SWAP_UINT32(tcbdata->time_stamp);
       tcbdata->event_number     = SWAP_UINT32(tcbdata->event_number);
@@ -639,7 +639,7 @@ void WDAQTCBReader::Begin(){
 void WDAQTCBReader::Loop(){
   // polling on the buffer status searching for an event
   if(fBoard->GetBufferState() != 0) { 
-     WDAQ_FRAME_HEADER daqdata;
+     FRAME_WDAQ_HEADER daqdata;
      daqdata.board_type_revision = TCB_BOARD_ID<<4;
      std::hash<std::string> hashFunc;
      daqdata.serial_number = hashFunc(fBoard->GetBoardName());

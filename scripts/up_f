@@ -1,8 +1,0 @@
-#!/bin/bash
-
-wdb=$1
-wdbaddr=`echo $wdb | cut -c3-5`
-
-$MSCBSYS/bin/msc -d $wdb -a $wdbaddr -c "up ../../fw/wdb/wd2_sys_ctrl/wd2_xps_hw/rev_f/implementation/download.bit"
-$MSCBSYS/bin/msc -d $wdb -a $wdbaddr -c "up ../../fw/wdb/wd2_sys_ctrl/wd2_xsdk_sw/rev_f_workspace/wd2_app_sw/app_sys_ctrl/Debug/app_sys_ctrl.srec"
-
