@@ -35,12 +35,12 @@ void WDAQPacketData::HeaderToBoardEvent(WDAQBoardEvent *e){
 
 //WDAQ WDB Packet Data - class for WDB UDP DAQ packets 
 //Set properties according to UDP event header
-void WDAQWdbPacketData::SetWdbHeaderInfo(WD_FRAME_HEADER *ph){
+void WDAQWdbPacketData::SetWdbHeaderInfo(WDB_HEADER *ph){
    //propertis from WDAPacketData
-  mEventNumber = ph->event_number; 
-  mTriggerNumber = ph->trigger_information[5] | (ph->trigger_information[4] << 8);
-  mTriggerType = ph->trigger_information[1] | (ph->trigger_information[0] << 8);   
-  mSerialTriggerData = ph->trigger_information[3] | (ph->trigger_information[2] << 8);   
+  //mEventNumber = ph->event_number;
+  //mTriggerNumber = ph->trigger_information[5] | (ph->trigger_information[4] << 8);
+  //mTriggerType = ph->trigger_information[1] | (ph->trigger_information[0] << 8);
+  //mSerialTriggerData = ph->trigger_information[3] | (ph->trigger_information[2] << 8);
 
    //others
   mTemperature = std::round(ph->temperature*0.0625 * 10 + 0.5) / 10.0f;
@@ -53,7 +53,7 @@ void WDAQWdbPacketData::SetWdbHeaderInfo(WD_FRAME_HEADER *ph){
   mBitsPerSample = ph->bits_per_sample;
   mSamplesPerEventPerChannel = ph->samples_per_event_per_channel;
   mTimeStamp = ph->time_stamp;
-  mEventNumber = ph->event_number;
+  //mEventNumber = ph->event_number;
   mTriggerCell = ph->drs_trigger_cell;
   mSamplingFrequency = ph->sampling_frequency;
   mDacOFS = ph->dac_ofs;
@@ -449,13 +449,13 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
    //from WDB
    if(daqdata->board_type_revision>>4 == WD2_BOARD_ID){
       //then do the WD_FRAME_HEADER
-      WD_FRAME_HEADER* data = (WD_FRAME_HEADER*) (dataptr + sizeof(WDAQ_FRAME_HEADER));
+      WDB_HEADER* data = (WDB_HEADER*) (dataptr + sizeof(WDAQ_FRAME_HEADER));
 
       //correct endianess
       data->tx_enable                      = SWAP_UINT32(data->tx_enable);
       data->zero_suppression_mask          = SWAP_UINT16(data->zero_suppression_mask);
       data->samples_per_event_per_channel  = SWAP_UINT16(data->samples_per_event_per_channel);
-      data->event_number                   = SWAP_UINT32(data->event_number);
+      //data->event_number                   = SWAP_UINT32(data->event_number);
       data->drs_trigger_cell               = SWAP_UINT16(data->drs_trigger_cell);
       data->sampling_frequency             = SWAP_UINT32(data->sampling_frequency);
       data->temperature                    = SWAP_UINT16(data->temperature);

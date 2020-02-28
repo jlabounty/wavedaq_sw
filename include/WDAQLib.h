@@ -112,7 +112,7 @@ class WDAQWdbPacketData: public WDAQPacketData{
    unsigned short   mFrontendSettings;
    
    //Set properties according to UDP event header
-   void SetWdbHeaderInfo(WD_FRAME_HEADER *);
+   void SetWdbHeaderInfo(WDB_HEADER *);
 
    //merge this packet information in given board event, to be implemented according to data
    virtual void AddDataToBoardEvent(WDAQBoardEvent *e) { };

@@ -37,38 +37,38 @@ std::string getWdbLibRevision();
 #pragma pack(1) // byte-level alignment for frame header
 
 typedef struct {
-   unsigned char  protocol_version;
-   unsigned char  board_type_revision;
-   unsigned short reserved1;
-   unsigned short serial_number;
-   unsigned char  crate_id;
-   unsigned char  slot_id;
-   unsigned short packet_number;
-   unsigned char  data_type;
-   unsigned char  wdaq_flags;
-   unsigned short payload_length;
-   unsigned short data_chunk_offset;
+   uint8_t        protocol_version;
+   uint8_t        board_type_revision;
+   uint16_t       serial_number;
+   uint8_t        crate_id;
+   uint8_t        slot_id;
+   uint16_t       packet_number;
+   uint8_t        data_type;
+   uint8_t        wdaq_flags;
+   uint8_t        trigger_information[6];
+   uint32_t       event_number;
+   uint16_t       payload_length;
+   uint16_t       data_chunk_offset;
 } WDAQ_FRAME_HEADER;
 
 typedef struct {
-   unsigned char  channel_info;
-   unsigned char  wd_flags;
-   unsigned short samples_per_event_per_channel;
-   unsigned int   sampling_frequency;
-   unsigned char  bits_per_sample;
-   unsigned char  trigger_source;
-   unsigned short zero_suppression_mask;
-   unsigned int   tx_enable;
-   unsigned short drs_trigger_cell;
-   unsigned char  trigger_information[6];
+   uint8_t        channel_info;
+   uint8_t        wd_flags;
+   uint16_t       samples_per_event_per_channel;
+   uint32_t       sampling_frequency;
+   uint8_t        bits_per_sample;
+   uint8_t        trigger_source;
+   uint16_t       zero_suppression_mask;
+   uint32_t       tx_enable;
+   uint16_t       drs_trigger_cell;
+   uint32_t       reserved;
+   uint16_t       temperature;
+   uint16_t       dac_pzc;
+   uint16_t       dac_ofs;
+   uint16_t       dac_rofs;
+   uint16_t       frontend_settings;
    uint64_t       time_stamp;
-   unsigned char  reserved[4];
-   unsigned int   event_number;
-   unsigned short temperature;
-   unsigned short dac_ofs;
-   unsigned short dac_rofs;
-   unsigned short frontend_settings;
-} WD_FRAME_HEADER;
+} WDB_HEADER;
 
 #pragma pack() // reset alignment to default value
 
@@ -113,7 +113,7 @@ enum {
 typedef struct {
    char             version_id[4];
    unsigned int     crc;
-   unsigned short   sampling_frequency;
+   uint16_t        sampling_frequency;
    float            temperature;
    float            wf_offset1[18][1024];
    float            wf_offset2[18][1024];
@@ -229,7 +229,7 @@ public:
 
    void             ClearEvent();
    void             SetEventHeaderInfo(WDAQ_FRAME_HEADER *);
-   void             SetWDEventHeaderInfo(WDAQ_FRAME_HEADER *, WD_FRAME_HEADER *);
+   void             SetWDEventHeaderInfo(WDAQ_FRAME_HEADER *, WDB_HEADER *);
 };
 
 //--------------------------------------------------------------------
@@ -383,7 +383,7 @@ class WP {
    bool              mEventEmpty;
 
    void              StartNewEvent();
-   void              LogEvent(WDAQ_FRAME_HEADER *pdaqh, WD_FRAME_HEADER   *ph);
+   void              LogEvent(WDAQ_FRAME_HEADER *pdaqh, WDB_HEADER   *ph);
    int               ReceiveWfPacket();
    bool              IsEventValid();
    void              UnrotateWaveforms();
