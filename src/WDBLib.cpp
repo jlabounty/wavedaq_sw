@@ -1413,8 +1413,8 @@ unsigned int WDB::GetFeAmp2Comp(int chn)
 {
    assert(chn < 16);
    unsigned int mask, ofs;
-   auto rofs = GetFe0Amplifier1CompEnLoc() + (chn / 2) * 4;
-   if (chn % 2 == 0) GetFe0Amplifier1CompEnLoc(&mask, &ofs); else GetFe1Amplifier1CompEnLoc(&mask, &ofs);
+   auto rofs = GetFe0Amplifier2CompEnLoc() + (chn / 2) * 4;
+   if (chn % 2 == 0) GetFe0Amplifier2CompEnLoc(&mask, &ofs); else GetFe1Amplifier2CompEnLoc(&mask, &ofs);
    return BitExtractControl(rofs, mask, ofs);
 }
 
