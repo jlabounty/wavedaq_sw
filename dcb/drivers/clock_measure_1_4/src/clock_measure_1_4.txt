@@ -1,0 +1,44 @@
+PSI clock measure core Device Tree Bindings
+-------------------------------------------
+
+Required properties:
+- compatible: Should be "xlnx,clock-measure-1.4"
+
+- reg: Physical base address and size of clock frequency registers.
+
+- #address-cells: Must be 1.
+
+- #size-cells: Must be 0.
+
+- clocks: Phandle of the core clock. Note that this has to be the clock
+  the core is opearted with. It is no reference to the measured clocks.
+
+- clock-names: Clock name, one for each phandle in clocks.
+
+- Child nodes:
+  - label: name of the corresponding clock
+
+  - reg: index of the corresponding clock at the core input
+
+Note:
+In order for a measured clock frequency to appear in the output of the driver,
+a child not must be present. I.e. if all measerued clocks should be displayed,
+I childnode has to be added for each one of them.
+
+Example:
+  clock_measure@43c00000 {
+    clock-names = "s00_axi_aclk";
+    clocks = <&misc_clk_0>;
+    compatible = "xlnx,clock-measure-1.4";
+    #address-cells = <1>;
+    #size-cells = <0>;
+    reg = <0x43c00000 0x10000>;
+    clk_meas0@0 {
+      label = "my_clock0_name";
+      reg = <0>;
+    };
+    clk_meas1@1 {
+      label = "my_clock1_name";
+      reg = <1>;
+    };
+  };

@@ -1,0 +1,15 @@
+#
+# PSI Clock Measurement IP
+#
+
+config CLOCK_MEASURE_1_4
+  tristate "PSI clock measurement IP"
+  default m
+  help
+    This driver supports the PSI clock measure IP v1.4 available at
+    https://github.com/paulscherrerinstitute/vivadoIP_clock_measure
+
+    The IP can be used to measure multiple clock frequencies in the
+    programmable logic (PL) of a Xilinx ZYNQ SoC. With the help of
+    this driver, the measurement results are made accessible from
+    user space (e.g. under /dev/clk_meas0).
