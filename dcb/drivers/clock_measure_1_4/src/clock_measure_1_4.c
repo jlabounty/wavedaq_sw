@@ -45,8 +45,7 @@ struct clk_meas_item {
 struct clk_meas_set {
         struct device *dev;
         unsigned int minor;
-        unsigned int base_addr;
-        unsigned int size;
+        void __iomem *base_addr;
         int n_meas;
         struct clk_meas_item *clk_meas;
 };
@@ -58,9 +57,9 @@ static struct clk_meas_set * clk_meas_get_pdata(struct platform_device *pdev)
         struct clk_meas_item *clk_meas;
         unsigned int i;
         int count = -1;
-        int res;
+        int status;
+        struct resource *res;
         u32 reg;
-        u32 regarr[2];
 
         parent = pdev->dev.fwnode;
 
@@ -76,12 +75,10 @@ static struct clk_meas_set * clk_meas_get_pdata(struct platform_device *pdev)
         if (!pdata)
                 return ERR_PTR(-ENOMEM);
 
-        res = fwnode_property_read_u32_array(parent, "reg", regarr, 2);
-        if (res != 0)
-                return ERR_PTR(res);
-
-        pdata->base_addr = regarr[0];
-        pdata->size = regarr[1];
+        res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+        pdata->base_addr = devm_ioremap_resource(&pdev->dev, res);
+        if (IS_ERR(pdata->base_addr))
+                return pdata->base_addr;
 
         /* Check for available clock measurements */
         i = 0;
@@ -89,12 +86,12 @@ static struct clk_meas_set * clk_meas_get_pdata(struct platform_device *pdev)
         {
                 const char *label;
 
-                res = fwnode_property_read_u32(child, "reg", &reg);
-                if (res != 0)
-                        return ERR_PTR(res);
+                status = fwnode_property_read_u32(child, "reg", &reg);
+                if (status != 0)
+                        return ERR_PTR(status);
 
-                res = fwnode_property_read_string(child, "label", &label);
-                if ((res != 0) && is_of_node(child))
+                status = fwnode_property_read_string(child, "label", &label);
+                if ((status != 0) && is_of_node(child))
                         label = to_of_node(child)->name;
 
                 clk_meas[i].label = label;
@@ -126,7 +123,6 @@ static ssize_t clk_meas_read(struct file *file, char __user *buf, size_t count, 
         int len;
         unsigned int val;
         char str[256];
-        void __iomem *io = ioremap(data->base_addr, data->size);
         int i;
         size_t lbl_size, max_lbl_size;
 
@@ -144,7 +140,7 @@ static ssize_t clk_meas_read(struct file *file, char __user *buf, size_t count, 
         len = 0;
         for(i=0;i<data->n_meas;i++)
         {
-                val = ioread32((const volatile void __iomem *)(io + data->clk_meas[i].offset));
+                val = ioread32(data->base_addr + data->clk_meas[i].offset);
                 len += snprintf(&str[len], sizeof(str)-len, "%-*s %10d\n", max_lbl_size, data->clk_meas[i].label, val);
         }
 
