@@ -1,0 +1,14 @@
+#
+# PSI WaveDAQ DMA packet scheduler
+#
+
+config DMA_PACKET_SCHEDULER_V1_0
+  tristate "WDAQ DMA packet scheduler IP"
+  default m
+  help
+    This driver supports the WaveDAQ DMA packet scheduler IP v1.0 available in
+    https://github.com/paulscherrerinstitute/vivadoIP_clock_measure
+
+    The IP stores packets received from several external sources into
+    memory using DMA.
+    ...
