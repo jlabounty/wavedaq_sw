@@ -18,6 +18,8 @@
 #include <linux/fs.h>
 #include <linux/ioctl.h>
 #include <linux/io.h>
+#include <linux/dma-mapping.h>
+#include <linux/dmapool.h>
 #include "dma_packet_scheduler_v1_0.h"
 
 /// @cond
@@ -70,6 +72,9 @@ struct dma_pkt_sched_info {
         unsigned int minor;
         void __iomem *base_addr;
         unsigned int slots;
+        dma_addr_t dma_handle;
+        char *dma_vaddr;
+        struct dma_pool *pool;
 };
 
 void reg_set(void __iomem *addr, u32 mask)
@@ -116,6 +121,16 @@ static struct dma_pkt_sched_info * clk_meas_get_pdata(struct platform_device *pd
         if (status != 0)
                 return ERR_PTR(status);
         pdata->slots = dt_val;
+
+        /* TBD: check for alignment and boundary requirements */
+        pdata->pool = dma_pool_create("dma_pkt_sched_pool", &pdev->dev, (pdata->slots)*windows*win_size, 128, 0);
+        if (!pdata->pool)
+                return  ERR_PTR(-ENOMEM);
+        pdata->dma_vaddr = dma_pool_alloc(pdata->pool, GFP_KERNEL, &pdata->dma_handle);
+        if (!pdata->dma_vaddr)
+                return  ERR_PTR(-ENOMEM);
+
+        pr_info("DMA physical addr 0x%08X   virtual address 0x%08X\n", (unsigned int)(pdata->dma_handle), (unsigned int)(pdata->dma_vaddr));
 
         return pdata;
 }
@@ -214,6 +229,10 @@ static int dma_pkt_sched_remove(struct platform_device *pdev)
 //        pr_debug("xlnx,dma-pkt-sched-axi-1.0: removed\n");
         pr_info("xlnx,dma-pkt-sched-axi-1.0: removed\n");
 
+        /* free allocated dma memory */
+        dma_pool_free(dma_pkt_sched_info->pool, dma_pkt_sched_info->dma_vaddr, dma_pkt_sched_info->dma_handle);
+
+        /* remove device */
         device_del(dma_pkt_sched_info->dev);
         /* kfree(dma_pkt_sched_info); not needed, cleanup done in platform_device.c */
 
