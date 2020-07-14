@@ -118,11 +118,17 @@ static struct dma_pkt_sched_info * clk_meas_get_pdata(struct platform_device *pd
                 return pdata->base_addr;
 
         status = fwnode_property_read_u32(pdev->dev.fwnode, "xlnx,#slots", &dt_val);
-        if (status != 0)
+        if (status)
                 return ERR_PTR(status);
         pdata->slots = dt_val;
 
-        /* TBD: check for alignment and boundary requirements */
+        /* DMA mask on full address region the system supports */
+        /* Adapt dma_mask if PL IP is not capable of covering the entire adress range */
+//        dma_mask = dma_get_required_mask(&pdev->dev);
+        status = dma_set_mask_and_coherent(&pdev->dev, 0xFFFFFFFF);
+        if (status)
+                return ERR_PTR(status);
+
         pdata->pool = dma_pool_create("dma_pkt_sched_pool", &pdev->dev, (pdata->slots)*windows*win_size, 128, 0);
         if (!pdata->pool)
                 return  ERR_PTR(-ENOMEM);
@@ -231,6 +237,7 @@ static int dma_pkt_sched_remove(struct platform_device *pdev)
 
         /* free allocated dma memory */
         dma_pool_free(dma_pkt_sched_info->pool, dma_pkt_sched_info->dma_vaddr, dma_pkt_sched_info->dma_handle);
+        dma_pool_destroy(dma_pkt_sched_info->pool);
 
         /* remove device */
         device_del(dma_pkt_sched_info->dev);
