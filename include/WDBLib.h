@@ -230,6 +230,7 @@ public:
    void             ClearEvent();
    void             SetEventHeaderInfo(FRAME_WDAQ_HEADER *);
    void             SetWDEventHeaderInfo(FRAME_WDAQ_HEADER *, FRAME_WDB_HEADER *);
+   bool             IsValid();
 };
 
 //--------------------------------------------------------------------
@@ -287,13 +288,13 @@ class WDEventTypeRequest {
 public:
    bool             mRequested;
    bool             mValid;
-   bool             mBOTReceived;
+   bool             mSOTReceived;
    bool             mEOTReceived;
 
    WDEventTypeRequest() {
       mRequested = false;
       mValid = false;
-      mBOTReceived = false;
+      mSOTReceived = false;
       mEOTReceived = false;
    }
 };
@@ -302,20 +303,23 @@ class WDEventRequest {
 public:
    unsigned short   mBoardId;
    bool             mBoardRequested;
-   std::map<int, WDEventTypeRequest *> mRequest;
+   //std::map<int, WDEventTypeRequest *> mRequest;
 
-   bool             mBOEReceived;
+   bool             mEventValid;
+   bool             mSOEReceived;
    bool             mEOEReceived;
-   unsigned short   mLastPacket;
-   int              mReceivedPackets;
-   int              mDroppedPackets;
+   uint32_t         mFirstPacketNumber;
+   uint32_t         mLastPacketNumber;
+   uint32_t         mReceivedPackets;
+   uint32_t         mDroppedPackets;
 
    WDEventRequest(int boardId);
 
    int              GetBoardId() { return mBoardId; }
    void             SetBoardRequested(bool flag) { mBoardRequested = flag; }
    bool             IsBoardRequested() { return mBoardRequested; }
-   void             RequestEventType(int type, bool flag);
+
+   __unused void             RequestEventType(int type, bool flag);
    void             ClearRequest();
    void             ProcessPacket(FRAME_WDAQ_HEADER *pdaqh);
    bool             IsEventValid();
@@ -476,7 +480,6 @@ public:
    // functions
    void RequestAllBoards();
    void RequestSingleBoard(WDB* b);
-   bool RequestTypes(WDB *b);
    WDB* GetBoard(int board_id);
 
    bool WaitNewEvent(int timeout);

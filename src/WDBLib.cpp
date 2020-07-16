@@ -29,7 +29,6 @@
 #include <errno.h>
 #include <time.h>
 #include <fcntl.h>
-#include <net/if.h>
 
 #ifdef __linux__
 #include <linux/sockios.h>
@@ -38,9 +37,6 @@
 #include <pthread.h>
 #endif
 #ifdef __APPLE__
-#include <net/if_dl.h>
-#include <pthread.h>
-
 #endif
 
 #include "git-revision.h"
@@ -1174,17 +1170,17 @@ void WDB::LmkSyncLocal() {
    SetLmkSyncLocal(0);
 }
 
-void WDB::ResetAdcIf() {
+__unused void WDB::ResetAdcIf() {
    SetAdcIfRst(1);
    SetAdcIfRst(0);
 }
 
-void WDB::ResetDataLinkIf() {
+__unused void WDB::ResetDataLinkIf() {
    SetDataLinkIfRst(1);
    SetDataLinkIfRst(0);
 }
 
-void WDB::ResetPackager() {
+__unused void WDB::ResetPackager() {
    SetWdPkgrRst(1);
    SetWdPkgrRst(0);
 }
@@ -1205,7 +1201,7 @@ void WDB::ReconfigureFpga() {
    sleep_ms(1000);
 }
 
-float WDB::GetDacRofsV() {
+__unused float WDB::GetDacRofsV() {
    auto d = GetDac0ChA();
    return d / 65535.0 * 2.5;
 }
@@ -1619,7 +1615,7 @@ void WDB::GetHVTarget(std::vector<float> &hv) {
    }
 }
 
-unsigned int WDB::GetLmk(int reg) {
+__unused unsigned int WDB::GetLmk(int reg) {
    assert(reg < 16);
    return creg[(GetLmk0ResetLoc() & 0xFFF)/ 4 + reg];
 }
@@ -1825,6 +1821,10 @@ void WDEvent::SetWDEventHeaderInfo(FRAME_WDAQ_HEADER *pdaqh, FRAME_WDB_HEADER *p
    mTemperature = std::round(ph->temperature * 0.0625 * 10) / 10.0f;
 }
 
+bool WDEvent::IsValid() {
+   return mEventValid;
+}
+
 //------------------------------------------------``--------------------
 
 WDEventRequest::WDEventRequest(int boardId) {
@@ -1832,55 +1832,40 @@ WDEventRequest::WDEventRequest(int boardId) {
    mBoardRequested = false;
 }
 
-void WDEventRequest::RequestEventType(int type, bool flag) {
-   mRequest[type]->mRequested = flag;
-}
-
 void WDEventRequest::ClearRequest() {
-   for (auto const &r : mRequest) {
-      r.second->mValid = false;
-      r.second->mBOTReceived = false;
-      r.second->mEOTReceived = false;
-   }
-   mBOEReceived = false;
+   mEventValid = false;
+   mSOEReceived = false;
    mEOEReceived = false;
-   mLastPacket = 0;
+   mFirstPacketNumber = 0;
+   mLastPacketNumber = 0;
    mReceivedPackets = 0;
    mDroppedPackets = 0;
 }
 
 void WDEventRequest::ProcessPacket(FRAME_WDAQ_HEADER *pdaqh) {
-   // on first packet for type, set BOT
-   if (pdaqh->wdaq_flags & (1 << cWDAQFlagStartOfType)) {
-      mRequest[pdaqh->data_type]->mBOTReceived = true;
-   }
+   mReceivedPackets++;
 
-   // check if any packets have been dropped
    if (pdaqh->wdaq_flags & (1 << cWDAQFlagStartOfEvent)) {
-      mBOEReceived = true;
-      mLastPacket = pdaqh->packet_number;
+      mSOEReceived = true;
+      mFirstPacketNumber = pdaqh->packet_number;
    } else {
-      if (pdaqh->packet_number != (unsigned short) (mLastPacket + 1)) {
-         mDroppedPackets += (pdaqh->packet_number - mLastPacket) - 1;
+      // check if any packets have been dropped
+      if (pdaqh->packet_number != (unsigned short) (mLastPacketNumber + 1)) {
+         mDroppedPackets += (pdaqh->packet_number - mLastPacketNumber) - 1;
       }
-      mLastPacket = pdaqh->packet_number;
-   }
-
-   // on last packet for type, set type valid if no packets dropped
-   if (pdaqh->wdaq_flags & (1 << cWDAQFlagEndOfType)) {
-      mRequest[pdaqh->data_type]->mEOTReceived = true;
-      if (mRequest[pdaqh->data_type]->mBOTReceived && mDroppedPackets == 0)
-         mRequest[pdaqh->data_type]->mValid = true;
+      mLastPacketNumber = pdaqh->packet_number;
+      if (mLastPacketNumber < mFirstPacketNumber)
+         mLastPacketNumber += 65536; // fix 16-bit overflow
    }
 
    if (pdaqh->wdaq_flags & (1 << cWDAQFlagEndOfEvent)) {
       mEOEReceived = true;
+      mEventValid = (mSOEReceived && mLastPacketNumber - mFirstPacketNumber + 1 == mReceivedPackets);
    }
-
-   mReceivedPackets++;
 }
 
 bool WDEventRequest::IsEventValid() {
+   /*
    bool valid = true;
    for (auto const &r : mRequest) {
       if (r.second->mRequested) {
@@ -1890,8 +1875,8 @@ bool WDEventRequest::IsEventValid() {
          }
       }
    }
-
-   return valid;
+   */
+   return mEventValid;
 }
 
 //--------------------------------------------------------------------
@@ -1981,12 +1966,8 @@ WP::WP(std::vector<WDB *> w, int verbose, std::string wdsDir, std::string logfil
    }
 
    // allocated event buffer and requests for all WDB
-   for (unsigned int i = 0; i < mWdb.size(); i++) {
+   for (unsigned int i = 0; i < mWdb.size(); i++)
       mEventRequest[mWdb[i]->GetSerialNumber()] = new WDEventRequest(mWdb[i]->GetSerialNumber());
-      for (auto t: DataTypeAll)
-         if (mEventRequest[mWdb[i]->GetSerialNumber()]->mRequest[t] == NULL)
-            mEventRequest[mWdb[i]->GetSerialNumber()]->mRequest[t] = new WDEventTypeRequest();
-   }
    for (unsigned int i = 0; i < mWdb.size(); i++)
       mEvent[mWdb[i]->GetSerialNumber()] = new WDEvent(mWdb[i]->GetSerialNumber());
    for (unsigned int i = 0; i < mWdb.size(); i++)
@@ -2012,7 +1993,12 @@ void WP::RequestSingleBoard(WDB *b) {
    // Caution: mEventRequest is accessed by the collector thread. We can only access it here
    // without mutex since we only change it when the board configuration changes.
 
-   bool boardEnable = RequestTypes(b);
+   bool drsEnable = (b->GetDrsChTxEn() > 0);
+   bool adcEnable = (b->GetAdcChTxEn() > 0);
+   bool tdcEnable = (b->GetTdcChTxEn() > 0);
+   bool trgEnable = b->GetTrgTxEn();
+   bool sclEnable = b->GetSclTxEn();
+   bool boardEnable = drsEnable || adcEnable || tdcEnable || trgEnable || sclEnable;
 
    for (auto &er: mEventRequest) {
       if (er.first == b->GetSerialNumber())
@@ -2028,32 +2014,6 @@ void WP::RequestSingleBoard(WDB *b) {
 void WP::RequestAllBoards() {
    for (auto &b: mWdb)
       RequestSingleBoard(b);
-}
-
-bool WP::RequestTypes(WDB *b) {
-   // set active data types in event request
-   bool drsEnable = (b->GetDrsChTxEn() > 0);
-   bool adcEnable = (b->GetAdcChTxEn() > 0);
-   bool tdcEnable = (b->GetTdcChTxEn() > 0);
-   bool trgEnable = b->GetTrgTxEn();
-   bool sclEnable = b->GetSclTxEn();
-   mEventRequest[b->GetSerialNumber()]->mRequest[cDataTypeDRS]->mRequested = drsEnable;
-   mEventRequest[b->GetSerialNumber()]->mRequest[cDataTypeADC]->mRequested = adcEnable;
-   mEventRequest[b->GetSerialNumber()]->mRequest[cDataTypeTDC]->mRequested = tdcEnable;
-   mEventRequest[b->GetSerialNumber()]->mRequest[cDataTypeTrg]->mRequested = trgEnable;
-   mEventRequest[b->GetSerialNumber()]->mRequest[cDataTypeScaler]->mRequested = sclEnable;
-
-   if (mVerbose >= 3)
-      printf("Requesting board %3d DRS=%d/ADC=%d/TDC=%d/TRG=%d/Scaler=%d\n",
-             b->GetSerialNumber(),
-             drsEnable ? 1 : 0,
-             adcEnable ? 1 : 0,
-             tdcEnable ? 1 : 0,
-             trgEnable ? 1 : 0,
-             sclEnable ? 1 : 0
-      );
-
-   return drsEnable || adcEnable || tdcEnable || trgEnable || sclEnable;
 }
 
 //--------------------------------------------------------------------
@@ -2123,7 +2083,7 @@ bool WP::GetLastEvent(int timeout, std::vector<WDEvent *> event) {
 
       for (auto ed: event) {
          WDEvent *es = mEventLast[ed->mBoardId];
-         if (es->mEventValid) {
+         if (es->IsValid()) {
             *ed = *es;
             copied++;
          } else {
@@ -2213,7 +2173,7 @@ void WP::LogEvent(FRAME_WDAQ_HEADER *pdaqh, FRAME_WDB_HEADER *ph) {
       if (flags.back() == ',')
          flags.pop_back();
 
-      snprintf(line, sizeof(line), "%06dus #%04d from WD%03d, P#=%5d T=%s QF=%15s PL=%4d OF=%5d, ",
+      snprintf(line, sizeof(line), "%06dus #%04d from WD%03d, P#=%5d T=%s F=%15s PL=%4d OF=%5d, ",
                usSince(mEventStartTime),
                mPacketsReceived - 1,
                pdaqh->serial_number,
@@ -2247,9 +2207,9 @@ void WP::LogEvent(FRAME_WDAQ_HEADER *pdaqh, FRAME_WDB_HEADER *ph) {
          if (ph->wd_flags & (1 << cWDFlagTriggerInfoParityError))
             flags += "TPE,";
          if (ph->wd_flags & (1 << cWDFlagZeroSuppEnable))
-            flags += "ZDE,";
+            flags += "ZSE,";
          if (ph->wd_flags & (1 << cWDFalgZeroSuppInhibit))
-            flags += "ZDE,";
+            flags += "ZSI,";
          if (flags.back() == ',')
             flags.pop_back();
 
@@ -2417,8 +2377,8 @@ int WP::ReceiveWfPacket() {
    // mark valid package type in event request
    event_request->ProcessPacket(pwdaq_header);
 
-   // copy valid flags to event
-   event->mTypeValid[pwdaq_header->data_type] = event_request->mRequest[pwdaq_header->data_type]->mValid;
+   // set valid flag according to data type
+   event->mTypeValid[pwdaq_header->data_type] = true;
 
    // mark event valid if all requested types have been received
    if (event_request->IsEventValid())
@@ -2603,7 +2563,7 @@ void WP::UnrotateWaveforms() {
 
 void WP::CalibrateWaveforms(std::map<int, WDEvent *> event) {
    for (auto &ev: event) {
-      if (ev.second->mEventValid)
+      if (ev.second->IsValid())
          CalibrateWaveforms(ev.second);
    }
 }
