@@ -284,26 +284,10 @@ public:
 
 //--------------------------------------------------------------------
 
-class WDEventTypeRequest {
-public:
-   bool             mRequested;
-   bool             mValid;
-   bool             mSOTReceived;
-   bool             mEOTReceived;
-
-   WDEventTypeRequest() {
-      mRequested = false;
-      mValid = false;
-      mSOTReceived = false;
-      mEOTReceived = false;
-   }
-};
-
 class WDEventRequest {
 public:
    unsigned short   mBoardId;
    bool             mBoardRequested;
-   //std::map<int, WDEventTypeRequest *> mRequest;
 
    bool             mEventValid;
    bool             mSOEReceived;
@@ -319,7 +303,6 @@ public:
    void             SetBoardRequested(bool flag) { mBoardRequested = flag; }
    bool             IsBoardRequested() { return mBoardRequested; }
 
-   __unused void             RequestEventType(int type, bool flag);
    void             ClearRequest();
    void             ProcessPacket(FRAME_WDAQ_HEADER *pdaqh);
    bool             IsEventValid();
