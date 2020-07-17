@@ -92,7 +92,9 @@ public:
    void SetReceiveTimeoutMs(int to) { mReceiveTimeoutMs = to; };
    
    // high level status registers
+   std::string GetFullBuild();
    std::string GetFwBuild();
+   std::string GetSwBuild();
    std::string GetHwVersion();
    float GetTemperatureDegree(bool refresh = true);
    unsigned int GetPllLock(bool refresh = true);

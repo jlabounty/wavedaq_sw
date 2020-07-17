@@ -403,6 +403,61 @@ function populateControls(init) {
    }
 }
 
+function populateInfo() {
+   document.getElementById("infoName").innerHTML = OSC.wdb[OSC.curBoard].name;
+   document.getElementById("infoRevision").innerHTML = OSC.wdb[OSC.curBoard].revision;
+   document.getElementById("infoFwRevision").innerHTML = OSC.wdb[OSC.curBoard].fwRevision;
+   document.getElementById("infoFwBuild").innerHTML = OSC.wdb[OSC.curBoard].fwBuild;
+   document.getElementById("infoSwRevision").innerHTML = OSC.wdb[OSC.curBoard].swRevision;
+   document.getElementById("infoSwBuild").innerHTML = OSC.wdb[OSC.curBoard].swBuild;
+
+   document.getElementById("infoAddress").innerHTML = OSC.wdb[OSC.curBoard].address;
+
+   document.getElementById("infoBackplanePlugged").innerHTML = OSC.wdb[OSC.curBoard].backplanePlugged;
+   document.getElementById("infoCrateID").innerHTML = OSC.wdb[OSC.curBoard].crateId;
+   document.getElementById("infoSlotID").innerHTML = OSC.wdb[OSC.curBoard].slotId;
+
+   document.getElementById("infoHVBoardPlugged").innerHTML = OSC.wdb[OSC.curBoard].hvBoardPlugged;
+   document.getElementById("infoHVVersion").innerHTML = OSC.wdb[OSC.curBoard].hvVersion;
+   document.getElementById("infoHVBaseVoltage").innerHTML = OSC.wdb[OSC.curBoard].hv.baseVoltage.toFixed(3);
+
+   document.getElementById("infoTemp").innerHTML = OSC.wdb[OSC.curBoard].temperature;
+   document.getElementById("info1WireTemp").innerHTML =
+      OSC.wdb[OSC.curBoard].hv.temperature1Wire[0] + " / " +
+      OSC.wdb[OSC.curBoard].hv.temperature1Wire[1] + " / " +
+      OSC.wdb[OSC.curBoard].hv.temperature1Wire[2] + " / " +
+      OSC.wdb[OSC.curBoard].hv.temperature1Wire[3];
+
+   let s = "";
+   for (i = 8; i >= 0; i--) {
+      if ((OSC.wdb[OSC.curBoard].pllLck & (1 << 8)) > 0)
+         s += "1";
+      else
+         s += "0";
+   }
+   document.getElementById("infoPLL").innerHTML = s;
+
+   document.getElementById("infoDRSSampleFreq").innerHTML = OSC.wdb[OSC.curBoard].drsSampleFreq;
+   document.getElementById("infoADCSampleFreq").innerHTML = OSC.wdb[OSC.curBoard].adcSampleFreq;
+   document.getElementById("infoTDCSampleFreq").innerHTML = OSC.wdb[OSC.curBoard].tdcSampleFreq;
+
+   document.getElementById("infoTRGParityErrors").innerHTML = OSC.wdb[OSC.curBoard].triggerBusParityErrorCount;
+
+   s = "";
+   for (i = 0; i < 16; i++) {
+      if ((OSC.wdb[OSC.curBoard].compChannelStatus & (1 << 8)) > 0)
+         s += "1";
+      else
+         s += "0";
+      if (i % 4 == 3)
+         s += " ";
+   }
+   document.getElementById("infoCompStatus").innerHTML = s;
+
+   document.getElementById("lastEventNumber").innerHTML = OSC.wdb[OSC.curBoard].lastEventNumber;
+   document.getElementById("WPS").innerHTML = OSC.wdb[OSC.curBoard].eventTxRate;
+}
+
 function loadGl(init) {
    if (OSC.demoMode) {
       OSC.gl = { demoMode: true, nWdb: 1, updatePeriodic: 0 };
@@ -443,15 +498,22 @@ function readWdb(b, init) {
             OSC.wdb = [];
             OSC.wdb[0] = {
                "name": "demo",
+               "revision": "G",
+               "fwRevision": "N/A",
+               "fwBuild": "N/A",
+               "swRevision": "N/A",
+               "swBuild": "N/A",
                "temperature": 37.5,
                "sysBusy": false,
                "drsctrlBusy": false,
                "packagerBusy": false,
                "hvBoardPlugged": false,
-               "hvBackplanePlugged": false,
+               "hvVersion": "80 V / 10 uA",
+               "backplanePlugged": false,
                "pllLck": 511,
                "drsSampleFreq": 5016,
                "adcSampleFreq": 80,
+               "tdcSampleFreq": 640,
                "compChannelStatus": 0,
                "lastEventNumber": 0,
                "triggerBusParityErrorCount": 0,
@@ -496,7 +558,7 @@ function readWdb(b, init) {
                "hv": {
                   "target": new Array(16).fill(0),
                   "current": new Array(16).fill(0),
-                  "temperature": new Array(4).fill(37.5),
+                  "temperature1Wire": new Array(4).fill(37.5),
                   "baseVoltage": 0
                }
             }
@@ -508,6 +570,7 @@ function readWdb(b, init) {
          }
 
          populateAllControls(init);
+         populateInfo();
          OSC.connected = true;
          resolve();
       });
@@ -538,6 +601,7 @@ function readWdb(b, init) {
             }
 
             populateAllControls(init);
+            populateInfo();
             OSC.connected = true;
             resolve(req);
 

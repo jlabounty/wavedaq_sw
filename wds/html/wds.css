@@ -334,6 +334,30 @@ input[type=text] {
    background-color: #DDDDDD;
 }
 
-.tableHelp tr:nth-child(event) {
+.tableHelp tr:nth-child(even) {
+   background-color: #EEEEEE;
+}
+
+.tableInfo {
+   border-collapse: collapse;
+   width: 100%;
+}
+
+.tableInfo td {
+   border: 1px solid #808080;
+   padding: 4px;
+   text-align: left;
+}
+
+.tableInfo td:nth-child(1) {
+   text-align: right;
+   color: #606060;
+}
+
+.tableInfo tr:nth-child(odd) {
+   background-color: #DDDDDD;
+}
+
+.tableInfo tr:nth-child(even) {
    background-color: #EEEEEE;
 }

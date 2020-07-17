@@ -687,7 +687,7 @@ void DCB::SendRegisters(unsigned int index, unsigned int nReg) {
 //--------------------------------------------------------------------
 
 void DCB::PrintVersion() {
-   std::cout << GetFwBuild() << std::endl;
+   std::cout << GetFullBuild() << std::endl;
    std::cout << GetHwVersion() << std::endl;
    std::cout << "Protocol version:    " << GetProtocolVersion() << std::endl;
    std::cout << "Serial number:       " << GetSerialNumber() << std::endl;
@@ -724,14 +724,6 @@ std::string DCB::GetFwBuild() {
    if (GetFwBuildMonth() == 0 || GetSwBuildMonth() == 0)
       return "Invalid date";
 
-   s << "FW. Compat. Level:   ";
-   s << GetFwCompatLevel() << std::endl;
-   s << "Reg. Compat. Level:  ";
-   s << GetRegLayoutCompLevel() << std::endl;
-   s << "FW GIT Revision:     ";
-   s << "0x" << std::hex << std::uppercase << GetFwGitHashTag() << std::endl;
-
-   s << "FW Build:            ";
    s << std::dec << std::setw(2) << std::setfill('0');
    s << monthName[bcd2dec(GetFwBuildMonth() - 1)] << ' ';
    s << bcd2dec(GetFwBuildDay()) << ' ';
@@ -740,10 +732,14 @@ std::string DCB::GetFwBuild() {
    s << std::setfill('0') << std::setw(2) << bcd2dec(GetFwBuildMinute()) << ':';
    s << std::setfill('0') << std::setw(2) << bcd2dec(GetFwBuildSecond()) << std::endl;
 
-   s << "SW GIT Revision:     ";
-   s << "0x" << std::hex << std::uppercase << GetSwGitHashTag() << std::endl;
+   return s.str();
+}
 
-   s << "SW Build:            ";
+std::string DCB::GetSwBuild() {
+   std::ostringstream s;
+   std::vector<std::string> monthName = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov",
+                                         "Dec"};
+
    s << std::dec << std::setw(2) << std::setfill('0');
    s << monthName[bcd2dec(GetSwBuildMonth()) - 1] << ' ';
    s << bcd2dec(GetSwBuildDay()) << ' ';
@@ -751,6 +747,33 @@ std::string DCB::GetFwBuild() {
    s << std::setfill('0') << std::setw(2) << bcd2dec(GetSwBuildHour()) << ':';
    s << std::setfill('0') << std::setw(2) << bcd2dec(GetSwBuildMinute()) << ':';
    s << std::setfill('0') << std::setw(2) << bcd2dec(GetSwBuildSecond()) << std::endl;
+
+   return s.str();
+}
+
+std::string DCB::GetFullBuild() {
+   std::ostringstream s;
+   std::vector<std::string> monthName = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov",
+                                         "Dec"};
+
+   if (GetFwBuildMonth() == 0 || GetSwBuildMonth() == 0)
+      return "Invalid date";
+
+   s << "FW. Compat. Level:   ";
+   s << GetFwCompatLevel() << std::endl;
+   s << "Reg. Compat. Level:  ";
+   s << GetRegLayoutCompLevel() << std::endl;
+   s << "FW GIT Revision:     ";
+   s << "0x" << std::hex << std::uppercase << GetFwGitHashTag() << std::endl;
+
+   s << "FW Build:            ";
+   s << GetFwBuild();
+
+   s << "SW GIT Revision:     ";
+   s << "0x" << std::hex << std::uppercase << GetSwGitHashTag() << std::endl;
+
+   s << "SW Build:            ";
+   s << GetSwBuild();
 
    return s.str();
 }

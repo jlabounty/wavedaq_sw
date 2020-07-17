@@ -549,6 +549,8 @@ void WDB::Connect() {
       client_addr.sin_port = htons(WD2_CMD_PORT_BIN);
       std::memcpy(mEthAddrBin, &client_addr, sizeof(client_addr));
 
+      inet_ntop(AF_INET, &client_addr.sin_addr, mEthAddrStr, sizeof(mEthAddrStr));
+
       // check if board is alive
       try {
          WDB::SendUDP("");
@@ -855,7 +857,7 @@ void WDB::PrintVersion() {
    std::cout << "Serial number:       " << GetSerialNumber() << std::endl;
    std::cout << "Protocol version:    " << GetProtocolVersion() << std::endl;
    std::cout << GetHwVersion() << std::endl;
-   std::cout << GetFwBuild() << std::endl;
+   std::cout << GetFullBuild() << std::endl;
 }
 
 unsigned int WDB::bcd2dec(const unsigned int bcd) {
@@ -867,34 +869,63 @@ std::string WDB::GetFwBuild() {
    std::vector<std::string> monthName = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov",
                                          "Dec"};
 
-   s << "FW. Compat. Level:   ";
-   s << GetFwCompatLevel() << std::endl;
-   s << "Reg. Compat. Level:  ";
-   s << GetRegLayoutCompLevel() << std::endl;
-   s << "FW GIT Revision:     ";
-   s << "0x" << std::hex << std::uppercase << GetFwGitHashTag() << std::endl;
-
-   s << "FW Build:            ";
    s << std::dec << std::setw(2) << std::setfill('0');
    s << monthName[bcd2dec(GetFwBuildMonth()) - 1] << ' ';
    s << bcd2dec(GetFwBuildDay()) << ' ';
    s << bcd2dec(GetFwBuildYear()) << "  ";
    s << std::setfill('0') << std::setw(2) << bcd2dec(GetFwBuildHour()) << ':';
    s << std::setfill('0') << std::setw(2) << bcd2dec(GetFwBuildMinute()) << ':';
-   s << std::setfill('0') << std::setw(2) << bcd2dec(GetFwBuildSecond()) << std::endl;
+   s << std::setfill('0') << std::setw(2) << bcd2dec(GetFwBuildSecond());
 
-   s << "SW GIT Revision:     ";
-   s << "0x" << std::hex << std::uppercase << GetSwGitHashTag() << std::endl;
+   return s.str();
+}
 
-   s << "SW Build:            ";
+std::string WDB::GetSwBuild() {
+   std::ostringstream s;
+   std::vector<std::string> monthName = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov",
+                                         "Dec"};
+
    s << std::dec << std::setw(2) << std::setfill('0');
    s << monthName[bcd2dec(GetSwBuildMonth()) - 1] << ' ';
    s << bcd2dec(GetSwBuildDay()) << ' ';
    s << bcd2dec(GetSwBuildYear()) << "  ";
    s << std::setfill('0') << std::setw(2) << bcd2dec(GetSwBuildHour()) << ':';
    s << std::setfill('0') << std::setw(2) << bcd2dec(GetSwBuildMinute()) << ':';
-   s << std::setfill('0') << std::setw(2) << bcd2dec(GetSwBuildSecond()) << std::endl;
+   s << std::setfill('0') << std::setw(2) << bcd2dec(GetSwBuildSecond());
 
+   return s.str();
+}
+
+std::string WDB::GetFullBuild() {
+   std::ostringstream s;
+   std::vector<std::string> monthName = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov",
+                                         "Dec"};
+
+   s << "FW. Compat. Level:   ";
+   s << GetFwCompatLevel() << std::endl;
+   s << "Reg. Compat. Level:  ";
+   s << GetRegLayoutCompLevel() << std::endl;
+   s << "FW GIT Revision:     ";
+   s << GetFwGitHashStr() << std::endl;
+   s << "FW Build:            ";
+   s << GetFwBuild() << std::endl;
+   s << "SW GIT Revision:     ";
+   s << GetSwGitHashStr() << std::endl;
+   s << "SW Build:            ";
+   s << GetSwBuild() << std::endl;
+
+   return s.str();
+}
+
+std::string WDB::GetFwGitHashStr() {
+   std::ostringstream s;
+   s << "0x" << std::hex << std::setw(7) << std::setfill('0') << std::uppercase << GetFwGitHashTag();
+   return s.str();
+}
+
+std::string WDB::GetSwGitHashStr() {
+   std::ostringstream s;
+   s << "0x" << std::hex << std::setw(7) << std::setfill('0') << std::uppercase << GetSwGitHashTag();
    return s.str();
 }
 
@@ -1604,6 +1635,12 @@ void WDB::SetHVTarget(int chn, float v) {
    unsigned int reg, mask, ofs;
    reg = GetHvUTarget0Loc(&mask, &ofs);
    SetRegMask(reg + chn * 4, mask, ofs, access_as<unsigned int>(&v));
+}
+
+std::string WDB::GetHvVersion() {
+   std::ostringstream s;
+   s << (GetHvVer() >> 16) << " V / " << (GetHvVer() & 0xFFFF) << " mA";
+   return s.str();
 }
 
 void WDB::GetHVTarget(std::vector<float> &hv) {

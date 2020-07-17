@@ -539,18 +539,26 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
 
          mg_printf_http_chunk(nc, "    {\n");
          mg_printf_http_chunk(nc, "      \"name\": \"%s\",\n", w->GetName().c_str());
-         mg_printf_http_chunk(nc, "      \"address\": \"%s\",\n", w->GetAddr().c_str());
+         mg_printf_http_chunk(nc, "      \"address\": \"%s\",\n", w->GetEthAddrStr().c_str());
+         mg_printf_http_chunk(nc, "      \"revision\": \"%c\",\n", 'A' + w->GetBoardRevision());
+         mg_printf_http_chunk(nc, "      \"fwRevision\": \"%s\",\n", w->GetFwGitHashStr().c_str());
+         mg_printf_http_chunk(nc, "      \"fwBuild\": \"%s\",\n", gl->demoMode ? "N/A" : w->GetFwBuild().c_str());
+         mg_printf_http_chunk(nc, "      \"swRevision\": \"%s\",\n", w->GetSwGitHashStr().c_str());
+         mg_printf_http_chunk(nc, "      \"swBuild\": \"%s\",\n", gl->demoMode ? "N/A" : w->GetSwBuild().c_str());
          mg_printf_http_chunk(nc, "      \"temperature\": %1.1lf,\n", w->GetTemperatureDegree(false));
          mg_printf_http_chunk(nc, "      \"sysBusy\": %s,\n", w->GetSysBusy() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"drsctrlBusy\": %s,\n", w->GetDrsCtrlBusy() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"packagerBusy\": %s,\n", w->GetPackagerBusy() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"hvBoardPlugged\": %s,\n", w->GetHvBoardPlugged() ? "true" : "false");
-         mg_printf_http_chunk(nc, "      \"hvBackplanePlugged\": %s,\n", w->GetBackplanePlugged() ? "true" : "false");
+         mg_printf_http_chunk(nc, "      \"hvVersion\": \"%s\",\n", w->GetHvVersion().c_str());
+         mg_printf_http_chunk(nc, "      \"backplanePlugged\": %s,\n", w->GetBackplanePlugged() ? "true" : "false");
          mg_printf_http_chunk(nc, "      \"pllLck\": %d,\n", w->GetPllLock(false));
          mg_printf_http_chunk(nc, "      \"drsSampleFreq\": %d,\n", gl->demoMode ?
                                                                     demoDrsSampleFreq : w->GetDrsSampleFreqMhz());
          mg_printf_http_chunk(nc, "      \"adcSampleFreq\": %d,\n", w->GetAdcSampleFreq() / 1000);
+         mg_printf_http_chunk(nc, "      \"tdcSampleFreq\": %d,\n", w->GetTdcSampleFreq() / 1000);
          mg_printf_http_chunk(nc, "      \"compChannelStatus\": %d,\n", w->GetCompChStat());
+         mg_printf_http_chunk(nc, "      \"eventTxRate\": %d,\n", w->GetEventTxRate());
          mg_printf_http_chunk(nc, "      \"lastEventNumber\": %d,\n", w->GetEventNumber());
          mg_printf_http_chunk(nc, "      \"triggerBusParityErrorCount\": %d,\n", w->GetTrbParityErrorCount());
          mg_printf_http_chunk(nc, "      \"triggerBusType\": %d,\n", w->GetTrbInfoLsb() & 0xFF); // ??
@@ -652,7 +660,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             else
                mg_printf_http_chunk(nc, "            %g],\n", s);
          }
-         mg_printf_http_chunk(nc, "        \"temperature\": [\n");
+         mg_printf_http_chunk(nc, "        \"temperature1Wire\": [\n");
          for (auto &s: hv_temp) {
             if (&s != &hv_temp.back())
                mg_printf_http_chunk(nc, "            %g,\n", s);

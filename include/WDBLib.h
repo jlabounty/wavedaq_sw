@@ -527,6 +527,7 @@ class WDB: public WDBREG {
    unsigned int     mSlot;
    unsigned char    mEthAddrAscii[16];
    unsigned char    mEthAddrBin[16];
+   char             mEthAddrStr[16];
    bool             mVerbose;
    std::string      mLogfile;
    bool             mDemoMode;
@@ -643,12 +644,18 @@ public:
    // setter & getter ----------
    std::string GetName() { return mWDBName; }
    std::string GetAddr() { return mWDBAddr; }
+   std::string GetEthAddrStr() { return mEthAddrStr; }
    int GetReceiveTimeoutMs() { return mReceiveTimeoutMs; };
    void SetReceiveTimeoutMs(int to) { mReceiveTimeoutMs = to; };
 
    // high level status registers
+   std::string GetFullBuild();
+   std::string GetFwGitHashStr();
    std::string GetFwBuild();
+   std::string GetSwGitHashStr();
+   std::string GetSwBuild();
    std::string GetHwVersion();
+   std::string GetHvVersion();
    float GetTemperatureDegree(bool refresh = true);
    unsigned int GetPllLock(bool refresh = true);
    void GetScalers(std::vector<uint64_t> &s, bool refresh = true);

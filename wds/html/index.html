@@ -123,7 +123,7 @@
       <button class="wideButton" id="btnChannels" type="button" onClick="dlgShow('dlgChannels')">Channels</button>
       <button class="wideButton" id="btnSave" type="button" onClick="btnSave()">Save</button>
       <button class="wideButton" id="btnHelp" type="button" onClick="dlgShow('dlgHelp')">Help</button>
-      <button class="wideButton" id="btnAbout" type="button" onClick="dlgShow('dlgAbout')">About</button>
+      <button class="wideButton" id="btnInfo" type="button" onClick="dlgShow('dlgInfo')">Info</button>
 
    </div>
 
@@ -453,21 +453,120 @@
       </div>
    </div>
 
-   <!-- about dialog -->
-   <div id="dlgAbout" class="dlgFrame">
+   <!-- info dialog -->
+   <div id="dlgInfo" class="dlgFrame">
 
-      <div class="dlgTitlebar">About</div>
+      <div class="dlgTitlebar">Info</div>
 
-      <div class="dlgPanel">
-         <div style="font-size:16pt">WaveDAQ Oscilloscope</div>
-         <div id="build" style="font-size:12pt"></div>
-         <hr/>
-         <div>Events per second: <span id="EPS">N/A</span></div>
-         <div>Frames per second: <span id="FPS">N/A</span></div>
-         <hr/>
-         <div style="font-size:8pt">Stefan Ritt</div>
-         <div style="font-size:8pt">Paul Scherrer Institute</div>
-         <button class="wideButton" style="background-color:#F8F8F8" type="button" onClick="dlgHide('dlgAbout')">Close
+      <div class="dlgPanel" style="padding:4px">
+         <table class="tableInfo">
+            <tr>
+               <td>WDB</td>
+               <td id="infoName"></td>
+            </tr>
+            <tr>
+               <td>Board Revision</td>
+               <td id="infoRevision"></td>
+            </tr>
+            <tr>
+               <td>Firmware Revision</td>
+               <td id="infoFwRevision"></td>
+            </tr>
+            <tr>
+               <td>Firmware Build</td>
+               <td id="infoFwBuild"></td>
+            </tr>
+            <tr>
+               <td>Software Revision</td>
+               <td id="infoSwRevision"></td>
+            </tr>
+            <tr>
+               <td>Software Build</td>
+               <td id="infoSwBuild"></td>
+            </tr>
+            <tr>
+               <td>Address</td>
+               <td id="infoAddress"></td>
+            </tr>
+            <tr>
+               <td>In crate</td>
+               <td id="infoBackplanePlugged"></td>
+            </tr>
+            <tr>
+               <td>Crate ID</td>
+               <td id="infoCrateID"></td>
+            </tr>
+            <tr>
+               <td>Slot ID</td>
+               <td id="infoSlotID"></td>
+            </tr>
+            <tr>
+               <td>HV board</td>
+               <td id="infoHVBoardPlugged"></td>
+            </tr>
+            <tr>
+               <td>HV version</td>
+               <td id="infoHVVersion"></td>
+            </tr>
+            <tr>
+               <td>HV base voltage</td>
+               <td id="infoHVBaseVoltage"></td>
+            </tr>
+            <tr>
+               <td>WDB Temperature [C]</td>
+               <td id="infoTemp"></td>
+            </tr>
+            <tr>
+               <td>1-wire Temperatures [C]</td>
+               <td id="info1WireTemp"></td>
+            </tr>
+            <tr>
+               <td>PLL locked</td>
+               <td id="infoPLL"></td>
+            </tr>
+            <tr>
+               <td>DRS sampling freq [MHz]</td>
+               <td id="infoDRSSampleFreq"></td>
+            </tr>
+            <tr>
+               <td>ADC sampling freq [MHz]</td>
+               <td id="infoADCSampleFreq"></td>
+            </tr>
+            <tr>
+               <td>TDC sampling freq [MHz]</td>
+               <td id="infoTDCSampleFreq"></td>
+            </tr>
+            <tr>
+               <td>TRG parity errors</td>
+               <td id="infoTRGParityErrors"></td>
+            </tr>
+            <tr>
+               <td>Comparator status [0...15]</td>
+               <td id="infoCompStatus"></td>
+            </tr>
+
+            <tr style="border-top: 3px solid #808080">
+               <td>Last event number</td>
+               <td id="lastEventNumber"></td>
+            </tr>
+            <tr>
+               <td>WDB Events/sec.</td>
+               <td id="WPS"></td>
+            </tr>
+            <tr>
+               <td>wds Events/sec.</td>
+               <td id="EPS"></td>
+            </tr>
+            <tr>
+               <td>Frames/sec.</td>
+               <td id="FPS"></td>
+            </tr>
+         </table>
+         <div>WaveDAQ Oscilloscope,
+         <span id="build"></span>
+         </div>
+         <div style="font-size:8pt">Stefan Ritt, Paul Scherrer Institute</div>
+         <button class="wideButton" style="background-color:#F8F8F8" type="button" onClick="dlgHide('dlgInfo')">Close
          </button>
       </div>
    </div>
