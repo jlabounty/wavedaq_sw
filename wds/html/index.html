@@ -461,8 +461,12 @@
       <div class="dlgPanel" style="padding:4px">
          <table class="tableInfo">
             <tr>
-               <td>WDB</td>
-               <td id="infoName"></td>
+               <td>
+                  <button onclick="wdbReboot()">&nbsp;Reboot WDB&nbsp;</button>
+                  &nbsp;WDB
+               </td>
+               <td id="infoName">
+               </td>
             </tr>
             <tr>
                <td>Board Revision</td>
@@ -485,7 +489,7 @@
                <td id="infoSwBuild"></td>
             </tr>
             <tr>
-               <td>Address</td>
+               <td>IP / MAC Address</td>
                <td id="infoAddress"></td>
             </tr>
             <tr>
@@ -493,19 +497,11 @@
                <td id="infoBackplanePlugged"></td>
             </tr>
             <tr>
-               <td>Crate ID</td>
-               <td id="infoCrateID"></td>
-            </tr>
-            <tr>
-               <td>Slot ID</td>
-               <td id="infoSlotID"></td>
+               <td>Crate / Slot ID</td>
+               <td id="infoCrateSlotID"></td>
             </tr>
             <tr>
                <td>HV board</td>
-               <td id="infoHVBoardPlugged"></td>
-            </tr>
-            <tr>
-               <td>HV version</td>
                <td id="infoHVVersion"></td>
             </tr>
             <tr>
@@ -525,16 +521,8 @@
                <td id="infoPLL"></td>
             </tr>
             <tr>
-               <td>DRS sampling freq [MHz]</td>
-               <td id="infoDRSSampleFreq"></td>
-            </tr>
-            <tr>
-               <td>ADC sampling freq [MHz]</td>
-               <td id="infoADCSampleFreq"></td>
-            </tr>
-            <tr>
-               <td>TDC sampling freq [MHz]</td>
-               <td id="infoTDCSampleFreq"></td>
+               <td>DRS / System busy</td>
+               <td id="infoBusy"></td>
             </tr>
             <tr>
                <td>TRG parity errors</td>

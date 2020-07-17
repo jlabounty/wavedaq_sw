@@ -411,14 +411,16 @@ function populateInfo() {
    document.getElementById("infoSwRevision").innerHTML = OSC.wdb[OSC.curBoard].swRevision;
    document.getElementById("infoSwBuild").innerHTML = OSC.wdb[OSC.curBoard].swBuild;
 
-   document.getElementById("infoAddress").innerHTML = OSC.wdb[OSC.curBoard].address;
+   let i = parseInt(OSC.wdb[OSC.curBoard].name.substr(2));
+   let mac = "00-50-c2-46-d4-" + i.toString(16);
+   document.getElementById("infoAddress").innerHTML = OSC.wdb[OSC.curBoard].address + " / " + mac;
 
    document.getElementById("infoBackplanePlugged").innerHTML = OSC.wdb[OSC.curBoard].backplanePlugged;
-   document.getElementById("infoCrateID").innerHTML = OSC.wdb[OSC.curBoard].crateId;
-   document.getElementById("infoSlotID").innerHTML = OSC.wdb[OSC.curBoard].slotId;
+   document.getElementById("infoCrateSlotID").innerHTML = OSC.wdb[OSC.curBoard].crateId + " / " +
+      OSC.wdb[OSC.curBoard].slotId;
 
-   document.getElementById("infoHVBoardPlugged").innerHTML = OSC.wdb[OSC.curBoard].hvBoardPlugged;
-   document.getElementById("infoHVVersion").innerHTML = OSC.wdb[OSC.curBoard].hvVersion;
+   document.getElementById("infoHVVersion").innerHTML = !OSC.wdb[OSC.curBoard].hvBoardPlugged ?
+      OSC.wdb[OSC.curBoard].hvVersion : "none";
    document.getElementById("infoHVBaseVoltage").innerHTML = OSC.wdb[OSC.curBoard].hv.baseVoltage.toFixed(3);
 
    document.getElementById("infoTemp").innerHTML = OSC.wdb[OSC.curBoard].temperature;
@@ -437,10 +439,8 @@ function populateInfo() {
    }
    document.getElementById("infoPLL").innerHTML = s;
 
-   document.getElementById("infoDRSSampleFreq").innerHTML = OSC.wdb[OSC.curBoard].drsSampleFreq;
-   document.getElementById("infoADCSampleFreq").innerHTML = OSC.wdb[OSC.curBoard].adcSampleFreq;
-   document.getElementById("infoTDCSampleFreq").innerHTML = OSC.wdb[OSC.curBoard].tdcSampleFreq;
-
+   document.getElementById("infoBusy").innerHTML = OSC.wdb[OSC.curBoard].drsctrlBusy + " / " +
+      OSC.wdb[OSC.curBoard].sysBusy;
    document.getElementById("infoTRGParityErrors").innerHTML = OSC.wdb[OSC.curBoard].triggerBusParityErrorCount;
 
    s = "";
@@ -456,6 +456,32 @@ function populateInfo() {
 
    document.getElementById("lastEventNumber").innerHTML = OSC.wdb[OSC.curBoard].lastEventNumber;
    document.getElementById("WPS").innerHTML = OSC.wdb[OSC.curBoard].eventTxRate;
+}
+
+function wdbReboot() {
+   dlgConfirm("Are you sure?", wdbDoReboot);
+}
+
+function wdbDoReboot(flag) {
+   if (flag) {
+      // send AJAX request
+      var req = new XMLHttpRequest();
+      req.onreadystatechange = function () {
+         if (req.readyState == 4 && req.status == 200) {
+            readWdb(-1, init); // daisy-chain for loading all WDBs
+         } else if (req.readyState == 4 && req.status == 0) {
+            connectionBroken();
+         }
+      };
+
+      req.open("PUT", "reboot/" + OSC.curBoard + "&" + Math.random(), true); // avoid cached results
+
+      try {
+         req.send();
+      } catch (e) {
+         connectionBroken();
+      }
+   }
 }
 
 function loadGl(init) {

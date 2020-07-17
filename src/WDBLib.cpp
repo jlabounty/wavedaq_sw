@@ -197,7 +197,7 @@ std::string WDB::SendReceiveUDP(std::string str, unsigned char *ethAddr) {
 
          do {
             status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
-         } while (status == -1);        /* dont return if an alarm signal was cought */
+         } while (status == -1 && errno == EINTR);        /* dont return if an alarm signal was cought */
 
          if (!FD_ISSET(gASCIISocket, &readfds))
             break;
@@ -457,7 +457,10 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg) {
 
          do {
             status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
-         } while (status == -1);        /* dont return if an alarm signal was cought */
+         } while (status == -1 && errno == EINTR);        /* dont return if an alarm signal was cought */
+
+         if (status == -1)
+            break;
 
          if (!FD_ISSET(gBinSocket, &readfds))
             break;
