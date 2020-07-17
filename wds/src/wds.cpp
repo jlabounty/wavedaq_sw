@@ -404,13 +404,13 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
          if (iBoard == -1)
             for (auto &b: gl->wdb) {
                b->SetDrsSampleFreq(std::stoi(value));
-               b->LoadVoltageCalibration(b->GetDrsSampleFreqMhz());
-               b->LoadTimeCalibration(b->GetDrsSampleFreqMhz());
+               b->LoadVoltageCalibration(b->GetDrsSampleFreqMhz(), gl->wdsDir);
+               b->LoadTimeCalibration(b->GetDrsSampleFreqMhz(), gl->wdsDir);
             }
          else {
             gl->wdb[iBoard]->SetDrsSampleFreq(std::stoi(value));
-            gl->wdb[iBoard]->LoadVoltageCalibration(gl->wdb[iBoard]->GetDrsSampleFreqMhz());
-            gl->wdb[iBoard]->LoadTimeCalibration(gl->wdb[iBoard]->GetDrsSampleFreqMhz());
+            gl->wdb[iBoard]->LoadVoltageCalibration(gl->wdb[iBoard]->GetDrsSampleFreqMhz(), gl->wdsDir);
+            gl->wdb[iBoard]->LoadTimeCalibration(gl->wdb[iBoard]->GetDrsSampleFreqMhz(), gl->wdsDir);
          }
          demoDrsSampleFreq = std::stoi(value);
       } else if (item == "dacCalDc") {
