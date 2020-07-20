@@ -406,11 +406,34 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
                b->SetDrsSampleFreq(std::stoi(value));
                b->LoadVoltageCalibration(b->GetDrsSampleFreqMhz(), gl->wdsDir);
                b->LoadTimeCalibration(b->GetDrsSampleFreqMhz(), gl->wdsDir);
+               if (b->mVCalib.IsValid()) {
+                  gl->wp->SetOfsCalib1(true);
+                  gl->wp->SetOfsCalib2(true);
+                  gl->wp->SetGainCalib(true);
+                  gl->wp->SetRangeCalib(true);
+               }
+               if (b->mTCalib.IsValid()) {
+                  gl->wp->SetTimeCalib1(true);
+                  gl->wp->SetTimeCalib2(true);
+                  gl->wp->SetTimeCalib3(true);
+               }
             }
          else {
             gl->wdb[iBoard]->SetDrsSampleFreq(std::stoi(value));
             gl->wdb[iBoard]->LoadVoltageCalibration(gl->wdb[iBoard]->GetDrsSampleFreqMhz(), gl->wdsDir);
             gl->wdb[iBoard]->LoadTimeCalibration(gl->wdb[iBoard]->GetDrsSampleFreqMhz(), gl->wdsDir);
+
+            if (gl->wdb[iBoard]->mVCalib.IsValid()) {
+               gl->wp->SetOfsCalib1(true);
+               gl->wp->SetOfsCalib2(true);
+               gl->wp->SetGainCalib(true);
+               gl->wp->SetRangeCalib(true);
+            }
+            if (gl->wdb[iBoard]->mTCalib.IsValid()) {
+               gl->wp->SetTimeCalib1(true);
+               gl->wp->SetTimeCalib2(true);
+               gl->wp->SetTimeCalib3(true);
+            }
          }
          demoDrsSampleFreq = std::stoi(value);
       } else if (item == "dacCalDc") {
