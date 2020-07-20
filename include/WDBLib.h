@@ -490,6 +490,7 @@ public:
    void StopLogging();
    unsigned int GetNLogged() { return li.nLogged; }
    void SaveWaveforms();
+   bool IsXMLLogging();
 
    void ResetStatistics() { mLastEventNumber = mWDReceivedEvents = mWDDroppedEvents = 0; }
    int GetWDReceivedEvents() { return mWDReceivedEvents; }

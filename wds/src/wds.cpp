@@ -869,7 +869,11 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
          }
 
          // read waveforms
-         bNewEvent = gl->wp->GetLastEvent(gl->wdb[brd], 500, event);
+         if (gl->wp->IsXMLLogging())
+            // increase timeout for slow XML logging
+            bNewEvent = gl->wp->GetLastEvent(gl->wdb[brd], 5000, event);
+         else
+            bNewEvent = gl->wp->GetLastEvent(gl->wdb[brd], 500, event);
       }
 
       if (gl->demoMode)

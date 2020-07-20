@@ -4209,6 +4209,10 @@ void WP::StartWaveformSaving(std::string fileName, int format, bool all, int boa
 
 //--------------------------------------------------------------------
 
+bool WP::IsXMLLogging() {
+   return li.xml != NULL;
+}
+
 void WP::StopLogging() {
    li.nRequest = li.nLogged;
    if (li.fh) {
