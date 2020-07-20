@@ -450,8 +450,24 @@ function wdbReboot() {
    dlgConfirm("Are you sure?", wdbDoReboot);
 }
 
+let progress;
+
+function updateProgress() {
+   progress += 0.1;
+   d = document.getElementById("progressWait");
+   d.set(progress / 15);
+   if (progress >= 15)
+      dlgHide("dlgWait");
+   else
+      window.setTimeout(updateProgress, 100);
+}
+
 function wdbDoReboot(flag) {
    if (flag) {
+      progress = 0;
+      dlgShow("dlgWait", true);
+      window.setTimeout(updateProgress, 100);
+
       // send AJAX request
       let req = new XMLHttpRequest();
       req.onreadystatechange = function () {

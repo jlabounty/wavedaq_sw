@@ -459,8 +459,10 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg) {
             status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
          } while (status == -1 && errno == EINTR);        /* dont return if an alarm signal was cought */
 
-         if (status == -1)
+         if (status == -1) {
+            perror("ReadUDP");
             break;
+         }
 
          if (!FD_ISSET(gBinSocket, &readfds))
             break;
@@ -1230,9 +1232,10 @@ void WDB::ResetDrsControlFsm() {
 }
 
 void WDB::ReconfigureFpga() {
+   int to = mReceiveTimeoutMs;
    mReceiveTimeoutMs = -1;
    SetReconfigureFpga(1);
-   sleep_ms(1000);
+   mReceiveTimeoutMs = to;
 }
 
 __unused float WDB::GetDacRofsV() {

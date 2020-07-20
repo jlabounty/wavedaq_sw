@@ -472,40 +472,26 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
          std::cout << "Reboot " << gl->wdb[iBoard]->GetName() << std::endl;
          auto b = gl->wdb[iBoard];
          b->ReconfigureFpga();
-         sleep_ms(14000);
+         sleep_ms(15000);
          std::cout << "Finished" << std::endl;
 
          b->Connect();
-         b->SendControlRegisters();
+         b->ReceiveControlRegisters();
          b->ReceiveStatusRegisters();
-         if (gl->verbose) {
-            std::cout << std::endl << "========== WDB Info ==========" << std::endl;
-            b->PrintVersion();
-         }
          b->LoadVoltageCalibration(b->GetDrsSampleFreqMhz(), gl->wdsDir);
          b->LoadTimeCalibration(b->GetDrsSampleFreqMhz(), gl->wdsDir);
-         if (b->GetDrsChTxEn() > 0) {
-            gl->readoutMode = cReadoutModeDRS;
-            b->SetChnTxEn(b->GetDrsChTxEn());
-         } else if (b->GetAdcChTxEn() > 0) {
-            gl->readoutMode = cReadoutModeADC;
-            b->SetChnTxEn(b->GetAdcChTxEn());
-         } else if (b->GetTdcChTxEn() > 0) {
-            gl->readoutMode = cReadoutModeTDC;
-            b->SetChnTxEn(b->GetTdcChTxEn());
-         } else {
-            b->SetDrsChTxEn(0xFFFF);
-            b->SetChnTxEn(0xFFFF);
-            gl->readoutMode = cReadoutModeDRS;
-         }
+
+         b->SetDrsChTxEn(0xFFFF);
+         b->SetChnTxEn(0xFFFF);
+         gl->readoutMode = cReadoutModeDRS;
 
          // enable internal trigger if external trigger is not enabled
          if (!b->GetExtAsyncTriggerEn())
             b->SetPatternTriggerEn(1);
 
-         // disable scaler readout
-         b->SetSclTxEn(0);
-
+         // set destination port and set DAQ to "normal"
+         b->SetDestinationPort(gl->wp->GetServerPort());
+         b->SetDaqNormal(false);
 
       } else {
          std::cout << "Invalid command \"" << item << "\" received. Aborting." << std::endl;
