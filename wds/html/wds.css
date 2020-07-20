@@ -38,6 +38,7 @@ body {
    color: black;
    background-color: white;
    font-family: verdana,tahoma,sans-serif;
+   overflow: hidden; /* prevent scroll bars */
 }
 
 /* standard link colors and decorations */
@@ -60,11 +61,10 @@ a:focus { color:#0000FF; text-decoration:underline }
 }
 
 #controls {
-   overflow: scroll;
+   overflow: auto;
    position: absolute;
    top: 0;
    left: 0;
-   max-width: 205px;
    width: 205px;
    background-color: white;
    text-align: center;
@@ -72,14 +72,11 @@ a:focus { color:#0000FF; text-decoration:underline }
 }
 
 #config {
-   overflow: scroll;
-   border-left: 1px solid black;
+   overflow: auto;
    position: absolute;
    top: 0;
    left: 0;
-   max-width: 300px;
-   width: 300px;
-   height: 5000px;
+   width: 320px;
    background-color: white;
    text-align: left;
    opacity: 0; /* pre-hidden */

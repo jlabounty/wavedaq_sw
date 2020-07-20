@@ -621,8 +621,8 @@ function readWdb(b, init) {
 
             // remember which input channel is active (needed for trigger level display)
             OSC.wdb[OSC.curBoard].triggerChannelActive = new Array(16).fill(false);
-            for (i=0 ; i<16 ; i++) {
-               for (j=0 ; j<18 ; j++) {
+            for (let i=0 ; i<16 ; i++) {
+               for (let j=0 ; j<18 ; j++) {
                   if ((OSC.wdb[OSC.curBoard].triggerSrcEnPtrn[j] & (1 << i)) > 0) {
                      OSC.wdb[OSC.curBoard].triggerChannelActive[i] = true;
                      break;
@@ -668,11 +668,6 @@ function setReferenceSignal(e) {
       c.checked = true;
       setParam(c);
    }
-}
-
-function setDrsSamplFreq(e) {
-   setParam(e);
-   loadGl(false);
 }
 
 function setParam(e, channel) {
@@ -945,7 +940,7 @@ function loadWF() {
                for (let f = 0; f < 1; f += 0.2, j++)
                   if (j >= 0 && j < 1024)
                      wf.U[c][j] += s * f;
-               for (f = 1; f > 0; f -= 0.2, j++)
+               for (let f = 1; f > 0; f -= 0.2, j++)
                   if (j >= 0 && j < 1024)
                      wf.U[c][j] += s * f;
             }
@@ -1010,9 +1005,9 @@ function receiveWF() {
       let intArray = new Uint32Array(OSC.req.response);
       let charArray = new Uint8Array(OSC.req.response);
       let floatArray = new Float32Array(OSC.req.response);
-      let responsetype;
+      let responseType;
 
-      for (i = 0; i < intArray.length;) {
+      for (let i = 0; i < intArray.length;) {
          responseType = intArray[i];
 
          if (responseType === 0) {        // idle message
@@ -1186,7 +1181,7 @@ function calcMathWF(wf)
       let c = e.options[e.selectedIndex].value;
 
 
-      for (i = 1; i < 1024; i++)
+      for (let i = 1; i < 1024; i++)
          w[i] = wf.U[c][i];
 
       /*
@@ -1226,40 +1221,43 @@ function calcMathWF(wf)
 function resize()
 // called when screen got resized
 {
-   let ctls = document.getElementById("controls");
+   let ctrls = document.getElementById("controls");
    let config = document.getElementById("config");
 
-   if (ctls.hidden === true) {
+   if (ctrls.hidden === true) {
       // hide panels
-      ctls.style.display = "none";
+      ctrls.style.display = "none";
       config.style.display = "none";
       OSC.resize(document.documentElement.clientWidth,
          document.documentElement.clientHeight);
    } else {
-      ctls.style.display = "block";
-      ctls.style.opacity = 1; // make it visible again (pre-hidden in CSS)
 
-      if (config.slider > 0)
-         config.style.display = "block";
-      else
-         config.style.display = "none";
-      config.style.opacity = 1;
+      ctrls.style.display = "block";
+      ctrls.style.opacity = "1"; // make it visible again (pre-hidden in CSS)
 
-      OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth -
-         config.offsetWidth * config.slider -
-         document.documentElement.clientHeight);
+      config.style.display = config.visible ? "block" : "none";
+      config.style.opacity = "1";
 
-      // config full visible (configSlider = 1), hidden (configSlider = 0)
-      ctls.style.left = (document.documentElement.clientWidth - ctls.offsetWidth -
-         config.offsetWidth * config.slider + "px");
-      ctls.style.height = document.documentElement.clientHeight + "px";
-
-      config.style.left = (document.documentElement.clientWidth -
-         config.offsetWidth * config.slider) + "px";
+      // first set height which turns scroll bar on or off
       config.style.height = document.documentElement.clientHeight + "px";
 
-      OSC.resize(document.documentElement.clientWidth - ctls.offsetWidth -
-         config.offsetWidth * config.slider,
+      // increase with if scroll bar is on
+      let configSbWidth = config.offsetWidth - config.clientWidth;
+      config.style.width = (320 + configSbWidth) + "px";
+      config.style.left = (document.documentElement.clientWidth -
+         (config.visible ? config.offsetWidth : 0)) + "px";
+
+      // first set height which turns scroll bar on or off
+      ctrls.style.height = document.documentElement.clientHeight + "px";
+
+      // increase with if scroll bar is on
+      let ctrlsSbWidth = ctrls.offsetWidth - ctrls.clientWidth;
+      ctrls.style.width = (205 + ctrlsSbWidth) + "px";
+      ctrls.style.left = (document.documentElement.clientWidth - ctrls.offsetWidth -
+         (config.visible ? config.offsetWidth : 0)) + "px";
+
+      OSC.resize(document.documentElement.clientWidth - ctrls.offsetWidth -
+         (config.visible ? config.offsetWidth : 0),
          document.documentElement.clientHeight);
    }
 }
@@ -1688,7 +1686,7 @@ function btnConfig() {
    let config = document.getElementById("config");
    config.visible = !config.visible;
    config.t = 0;
-   window.setTimeout(configSlide, 20);
+   resize();
 }
 
 function btnSave() {
@@ -1798,24 +1796,6 @@ function downloadFile(filename) {
    link.click();
    document.body.removeChild(link);
    window.URL.revokeObjectURL(filename);
-}
-
-function configSlide() {
-   let config = document.getElementById("config");
-
-   //config.t += 1;
-   config.t += 10;
-
-   if (config.visible) {
-      config.slider = 1 - (1 - config.t / 10) * (1 - config.t / 10);
-   } else {
-      config.slider = (1 - config.t / 10) * (1 - config.t / 10);
-   }
-
-   resize();
-
-   if (config.t < 10)
-      window.setTimeout(configSlide, 20);
 }
 
 function measRem() {
