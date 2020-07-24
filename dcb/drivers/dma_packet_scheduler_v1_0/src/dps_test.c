@@ -8,6 +8,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/mman.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
@@ -16,6 +17,7 @@
 #define PC_IP           (inet_addr("129.129.193.185"))
 #define EMS_RH7_LC_IP   (inet_addr("129.129.188.245"))
 #define MAXLINE         1024
+#define BUF_SIZE        4096
 
 void usage(char *name)
 {
@@ -29,27 +31,27 @@ int main(int argc, char *argv[])
   unsigned int len;
   FILE *f;
   int fd;
-  struct dma_buf buffer[64];
+  char buffer[256];
   int sockfd;
   struct sockaddr_in servaddr;
-  int i, j;
+  int i;
   char *data;
 //  char *payload_data;
 //  const char pld_1[10] = {0xF0, 0x0D, 0xC0, 0xDE, 0xDE, 0xAD, 0xBE, 0xEF, 0xAF, 0xFE};
 //  payload_data = (char*)pld_1;
 
-  if (argc < 2) {
-    usage(argv[0]);
-    return -1;
-  }
+//  if (argc < 2) {
+//    usage(argv[0]);
+//    return -1;
+//  }
 
-  len = 1;
-  len = (unsigned int)strtol(argv[1], NULL, 0);
-  if(len>64)
-  {
-    printf("Reduced size to the maximum of 64\n");
-    len = 64;
-  }
+  len = 0;
+//  len = (unsigned int)strtol(argv[1], NULL, 0);
+//  if(len>64)
+//  {
+//    printf("Reduced size to the maximum of 64\n");
+//    len = 64;
+//  }
 
 #ifdef DO_UDP_SEND
   // Creating socket file descriptor
@@ -70,36 +72,51 @@ int main(int argc, char *argv[])
   /* open device file */
   fd = open("/dev/dma_pkt_sched0", O_RDONLY);
 
-  ret = read(fd, buffer, len);
-  printf("%d buffers available...\n", ret);
+  len = ioctl(fd, DPS_IOCQ_BUFSIZE);
+  printf("buffer size %d bytes\n", len);
 
+  ret = read(fd, buffer, len);
+  printf("User Reading File (%d bytes):\n", ret);
   for(i=0;i<ret;i++)
   {
-    printf("Buffer Information %d: slot %d   win %d   virt_addr 0x%08X   size %d\n", i, buffer[i].slot, buffer[i].win, (unsigned int)(buffer[i].data), buffer[i].len);
-//    data = buffer[i].data;
-//    for(j = 0; j<buffer[i].len; j++)
-//    {
-//      if( (j%16)==0 ) printf("\n");
-//      printf(" %02X", data[j]);
-//    }
-//    printf("\n");
+    if( (i%16)==0 ) printf("\n");
+    printf(" %02X", buffer[i]);
+  }
+  if(ret == 0) printf("No data");
+  printf("\n");
+
+  data = mmap(NULL, BUF_SIZE, PROT_READ, MAP_SHARED, fd, 0);
+  if(data != MAP_FAILED)
+  {
+    for(i = 0; i<len; i++)
+    {
+      if( (i%16)==0 ) printf("\n");
+      printf(" %02X", data[i]);
+    }
+    printf("\n");
+
 #ifdef DO_UDP_SEND
     printf("Sending via UDP...\n");
-    sendto(sockfd, buffer[i].data, buffer[i].len,
-           MSG_CONFIRM, (const struct sockaddr *) &servaddr,
-           sizeof(servaddr));
-//    sendto(sockfd, (const char *)payload_data, 10,
-//        MSG_CONFIRM, (const struct sockaddr *) &servaddr,
-//            sizeof(servaddr));
+    sendto(sockfd, data, len,
+          MSG_CONFIRM, (const struct sockaddr *) &servaddr,
+          sizeof(servaddr));
+    close(sockfd);
 #endif
+
+    if(munmap(data, BUF_SIZE) == -1)
+    {
+      printf("Unmap failed");
+      //errExit("unmap failed");
+    }
+
+    //ret = fsync(fd);
+    //ret = lseek(fd, 1, SEEK_SET);
+    if( !ioctl(fd, DPS_IOCT_FREE_BUF) ) printf("current window buffer released\n");
+  }
+  else
+  {
+    printf("No data available\n");
   }
 
-#ifdef DO_UDP_SEND
-  close(sockfd);
-#endif
-
-  ret = lseek(fd, ret, SEEK_SET);
-  printf("%d window buffers released\n", ret);
-
-  return 0;
+  return close(fd);
 }
