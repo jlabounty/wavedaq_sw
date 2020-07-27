@@ -62,6 +62,7 @@ static unsigned int win_size = 0x1000;
 static unsigned int stream_offset = 2*0x08;
 
 static DECLARE_WAIT_QUEUE_HEAD(dps_waitqueue);
+static unsigned int read_wait_queue_length = 0;
 
 module_param(windows,  int, 0444); /* write permission for user (root), read permissions for all */
 MODULE_PARM_DESC(windows, "Integer number of buffer-windows per slot");
@@ -480,10 +481,11 @@ static __poll_t dps_poll(struct file *file, poll_table *wait)
         __poll_t retval;
 
         poll_wait(file, &dps_waitqueue, wait);
+        read_wait_queue_length++;
 
         retval = 0;
         mutex_lock(&info->dps_mutex);
-        if( list_empty(&info->queue_head) )
+        if( !list_empty(&info->queue_head) )
                 retval = EPOLLIN | EPOLLRDNORM;
         mutex_unlock(&info->dps_mutex);
 
@@ -510,7 +512,6 @@ static irqreturn_t dma_packet_sched_irq_handler(int irq, void *dev_id)
 {
         struct dps_info *info = (struct dps_info*)dev_id;
 
-        pr_info("DMA packet scheduler interrupt received (top half)\n");
         info->irq_vec = get_irqvec(info);
         clr_irqvec(info, 0xFFFFFFFF);
 
@@ -525,7 +526,6 @@ static irqreturn_t dma_packet_sched_irq_thread_handler(int irq, void *dev_id)
         unsigned char slot;
         u32 wincnt;
 
-        pr_info("DMA packet scheduler interrupt received (bottom half)\n");
         /* Check slots for interrupts and fill queue */
         for(slot=0; slot<info->slots; slot++)
         {
@@ -544,11 +544,15 @@ static irqreturn_t dma_packet_sched_irq_thread_handler(int irq, void *dev_id)
                                         break;
                                 }
                                 mutex_lock(&info->dps_mutex);
-                                pr_info("Adding slot %d win %d to list\n", slot, win);
                                 info->slot_buf[slot].win_buf[win].len = PKT_LEN(wincnt);
                                 list_add_tail(&info->slot_buf[slot].win_buf[win].lhead, &info->queue_head);
                                 info->slot_buf->last_proc_win = win;
                                 mutex_unlock(&info->dps_mutex);
+                                if( read_wait_queue_length )
+                                {
+                                        wake_up(&dps_waitqueue);
+                                        read_wait_queue_length = 0;
+                                }
                         }
                         while (win != last_win);
                 }

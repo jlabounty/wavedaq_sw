@@ -9,6 +9,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/mman.h>
+#include <sys/time.h>
+#include <sys/select.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
@@ -36,22 +38,11 @@ int main(int argc, char *argv[])
   struct sockaddr_in servaddr;
   int i;
   char *data;
-//  char *payload_data;
-//  const char pld_1[10] = {0xF0, 0x0D, 0xC0, 0xDE, 0xDE, 0xAD, 0xBE, 0xEF, 0xAF, 0xFE};
-//  payload_data = (char*)pld_1;
-
-//  if (argc < 2) {
-//    usage(argv[0]);
-//    return -1;
-//  }
+  fd_set readfds;
+  int nfds;
+  int ready;
 
   len = 0;
-//  len = (unsigned int)strtol(argv[1], NULL, 0);
-//  if(len>64)
-//  {
-//    printf("Reduced size to the maximum of 64\n");
-//    len = 64;
-//  }
 
 #ifdef DO_UDP_SEND
   // Creating socket file descriptor
@@ -69,8 +60,18 @@ int main(int argc, char *argv[])
   servaddr.sin_addr.s_addr = PC_IP;
 #endif
 
+  printf("Waiting for data...\n");
+
   /* open device file */
   fd = open("/dev/dma_pkt_sched0", O_RDONLY);
+
+  FD_ZERO(&readfds);
+  FD_SET(fd, &readfds);
+  nfds = fd+1;
+
+  ready = select(nfds, &readfds, NULL, NULL, NULL);
+
+  printf("ready %d\n", ready);
 
   len = ioctl(fd, DPS_IOCQ_BUFSIZE);
   printf("buffer size %d bytes\n", len);
