@@ -386,7 +386,7 @@ static ssize_t dps_read(struct file *file, char __user *buf, size_t count, loff_
                         {
                                 len = len-*ppos;
                                 if(count<len) len = count;
-                                if( copy_to_user(buf, (const char*)buffer, len) )
+                                if( copy_to_user(buf, (const char*)(&buffer[*ppos]), len) )
                                         len = -EFAULT;
                                 *ppos += len;
                                 retval = len;
@@ -432,25 +432,6 @@ static int dps_mmap(struct file *file, struct vm_area_struct *vma)
 
         return retval;
 }
-
-/*
-static int dps_flush(struct file *file, fl_owner_t id)
-{
-        pr_info("flush captured (0x%08X, 0x%08X)", (int)id, (int)THIS_MODULE);
-        return 0;
-}
-*/
-
-/*
-static ssize_t dps_fsync(struct file *file, loff_t start, loff_t end, int datasync)
-{
-        struct dps_info *info = file->private_data;
-
-        pr_info("fsync captured (0x%08X, 0x%08X, 0x%08X)", (int)start, (int)end, datasync);
-        return (loff_t)dps_rm_from_queue(info, 1);
-        return 0;
-}
-*/
 
 static loff_t dps_llseek(struct file *file, loff_t offset, int whence)
 {
@@ -499,9 +480,6 @@ static const struct file_operations dps_fops = {
         .read    = dps_read,
         .poll    = dps_poll,
         .mmap    = dps_mmap,
-//        .flush   = dps_flush,
-//        .fsync   = dps_fsync,
-//        .release = dps_release,
         .unlocked_ioctl = dps_ioctl,
 #ifdef CONFIG_COMPAT
         .compat_ioctl   = dps_ioctl,
@@ -512,9 +490,13 @@ static irqreturn_t dma_packet_sched_irq_handler(int irq, void *dev_id)
 {
         struct dps_info *info = (struct dps_info*)dev_id;
 
+        /* Disable IP interrupts */
+        reg_clr(info, DPS_REG_GCFG, DPS_REG_GCFG_BIT_IRQENA);
+        /* Save and clear interrupt vector */
         info->irq_vec = get_irqvec(info);
         clr_irqvec(info, 0xFFFFFFFF);
 
+        /* proceed to threaded interrupt handler */
         return IRQ_WAKE_THREAD;
 }
 
@@ -557,6 +539,8 @@ static irqreturn_t dma_packet_sched_irq_thread_handler(int irq, void *dev_id)
                         while (win != last_win);
                 }
         }
+        /* Re-enable Interrupts */
+        reg_set(info, DPS_REG_GCFG, DPS_REG_GCFG_BIT_IRQENA);
 
         return IRQ_HANDLED;
 }

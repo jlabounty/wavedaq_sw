@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
   unsigned int len;
   FILE *f;
   int fd;
-  char buffer[256];
+  char buffer[BUF_SIZE];
   int sockfd;
   struct sockaddr_in servaddr;
   int i;
@@ -41,6 +41,8 @@ int main(int argc, char *argv[])
   fd_set readfds;
   int nfds;
   int ready;
+  int read_len;
+  int fpos;
 
   len = 0;
 
@@ -71,21 +73,31 @@ int main(int argc, char *argv[])
 
   ready = select(nfds, &readfds, NULL, NULL, NULL);
 
-  printf("ready %d\n", ready);
-
   len = ioctl(fd, DPS_IOCQ_BUFSIZE);
-  printf("buffer size %d bytes\n", len);
+  printf("\nFile size %d bytes\n", len);
 
-  ret = read(fd, buffer, len);
-  printf("User Reading File (%d bytes):\n", ret);
-  for(i=0;i<ret;i++)
+  /* Test read and lseek */
+  printf("\nUser Reading File (%d bytes):\n", len);
+  read_len = len/4;
+  if( read_len>16 ) read_len = 16;
+  else if ( read_len = 0 ) read_len = 1;
+  ret = read(fd, buffer, read_len);
+  if(ret == 0)
   {
-    if( (i%16)==0 ) printf("\n");
-    printf(" %02X", buffer[i]);
+    printf("No data");
   }
-  if(ret == 0) printf("No data");
+  else
+  {
+    for(i=0;i<ret;i++) printf(" %02X", buffer[i]);
+    printf("\n .\n .\n");
+    fpos = lseek(fd, -read_len, SEEK_END);
+    ret = read(fd, buffer, read_len);
+    for(i=0;i<ret;i++) printf(" %02X", buffer[i]);
+  }
   printf("\n");
 
+  /* Test mmap */
+  printf("\nUser Reading Memory Mapped Data:");
   data = mmap(NULL, BUF_SIZE, PROT_READ, MAP_SHARED, fd, 0);
   if(data != MAP_FAILED)
   {
@@ -107,12 +119,9 @@ int main(int argc, char *argv[])
     if(munmap(data, BUF_SIZE) == -1)
     {
       printf("Unmap failed");
-      //errExit("unmap failed");
     }
 
-    //ret = fsync(fd);
-    //ret = lseek(fd, 1, SEEK_SET);
-    if( !ioctl(fd, DPS_IOCT_FREE_BUF) ) printf("current window buffer released\n");
+    if( !ioctl(fd, DPS_IOCT_FREE_BUF) ) printf("\nCurrent window buffer released\n");
   }
   else
   {
