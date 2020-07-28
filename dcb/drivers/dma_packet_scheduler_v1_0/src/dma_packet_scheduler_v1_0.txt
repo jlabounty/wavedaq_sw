@@ -1,0 +1,20 @@
+PSI WaveDAQ DMA packet scheduler IP Device Tree Bindings
+--------------------------------------------------------
+
+Required properties:
+- compatible: Should be "xlnx,dma-pkt-sched-axi-1.0"
+
+- reg: Physical base address and size of IP configuration registers.
+- xlnx,#slots: Number of slots connected to IP.
+
+Example:
+  dma_pkt_sched_axi_0: dma_pkt_sched_axi@43c10000 {
+    clock-names = "S_Axi_Aclk", "M_Axi_Aclk";
+    clocks = <&clkc 15>, <&clkc 17>;
+    compatible = "xlnx,dma-pkt-sched-axi-1.0";
+    interrupt-names = "Irq";
+    interrupt-parent = <&intc>;
+    interrupts = <0 30 4>;
+    reg = <0x43c10000 0x10000>;
+    xlnx,#slots = <1>;   /* Number of slots to manage */
+  };
