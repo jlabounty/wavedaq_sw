@@ -110,6 +110,13 @@ struct win_buf_info {
         unsigned int  len;
 };
 
+/** reg_set - register bit set operation
+ * @info:       pointer to local data struct of this driver containing the register base address
+ * @reg_offs:   register offset in bytes
+ * @mask:       mask of the bits to be set (1 = set bit)
+ *
+ * Sets the bits defined by mask in the register at reg_offs.
+ */
 void reg_set(struct dps_info *info, unsigned int reg_offs, u32 mask)
 {
         u32 value;
@@ -121,6 +128,13 @@ void reg_set(struct dps_info *info, unsigned int reg_offs, u32 mask)
         wmb();
 }
 
+/** reg_clr - register bit clear operation
+ * @info:       pointer to local data struct of this driver containing the register base address
+ * @reg_offs:   register offset in bytes
+ * @mask:       mask of the bits to be cleared (1 = clear bit)
+ *
+ * Clears the bits defined by mask in the register at reg_offs.
+ */
 void reg_clr(struct dps_info *info, unsigned int reg_offs, u32 mask)
 {
         u32 value;
@@ -132,12 +146,21 @@ void reg_clr(struct dps_info *info, unsigned int reg_offs, u32 mask)
         wmb();
 }
 
+/** reg_write - register write operation
+ * @info:       pointer to local data struct of this driver containing the register base address
+ * @reg_offs:   register offset in bytes
+ * @value:      data to be written to the register
+ */
 void reg_write(struct dps_info *info, unsigned int reg_offs, u32 value)
 {
         iowrite32(value, info->base_addr+reg_offs);
         wmb();
 }
 
+/** reg_read - register read operation
+ * @info:       pointer to local data struct of this driver containing the register base address
+ * @reg_offs:   register offset in bytes
+ */
 u32 reg_read(struct dps_info *info, unsigned int reg_offs)
 {
         u32 value;
@@ -147,11 +170,18 @@ u32 reg_read(struct dps_info *info, unsigned int reg_offs)
         return value;
 }
 
+/** get_irqvec - reads the interrupt vector register
+ * @info:       pointer to local data struct of this driver containing the register base address
+ */
 u32 get_irqvec(struct dps_info *info)
 {
         return reg_read(info, DPS_REG_IRQVEC);
 }
 
+/** clr_irqvec - bits in the interrupt vector register
+ * @info:       pointer to local data struct of this driver containing the register base address
+ * @mask:       mask of the bits to be cleared (1 = clear bit)
+ */
 void clr_irqvec(struct dps_info *info, u32 mask)
 {
         reg_write(info, DPS_REG_IRQVEC, mask);
@@ -164,7 +194,6 @@ void clr_irqvec(struct dps_info *info, u32 mask)
  *
  * Returns the number of list items that were removed.
  *
- * Descripton:
  * Removes items from the buffer queue head and clears the corresponding registers
  * in order to tell the IP device that the corresponding window buffer available again
  * for writing through DMA.
@@ -202,6 +231,17 @@ static int dps_rm_from_queue(struct dps_info *info, int entries)
         return len;
 }
 
+/**
+ * dma_packet_sched_get_pdata - read parameters and initialize
+ * @pdev:   pointer to platform device struct
+ *
+ * Returns a pointer to a dps_info struct containing all information for the driver to work.
+ *
+ * Reads information from the device tree, allocates a dps_info structure that contains relevant
+ * information to operate the driver. Further more the dma buffers and an array
+ * for managing buffer information are allocated and initialized. The items of the array are used
+ * for the processing queue of the buffers. All necessary register settings are initialized.
+ */
 static struct dps_info * dma_packet_sched_get_pdata(struct platform_device *pdev)
 {
         struct dps_info *pdata;
@@ -218,7 +258,7 @@ static struct dps_info * dma_packet_sched_get_pdata(struct platform_device *pdev
         if(windows>32)
         {
                 windows = 32;
-                pr_warn("Nuumber of windows set to max. 32");
+                pr_warn("Number of windows set to max. 32");
         }
         stream_offset = roundup_pow_of_two(windows)*0x08;
 
@@ -294,6 +334,9 @@ static struct dps_info * dma_packet_sched_get_pdata(struct platform_device *pdev
         return pdata;
 }
 
+/**
+ * dps_ioctl - ioctl() system call processing
+ */
 static long dps_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
         struct dps_info *info = file->private_data;
@@ -351,6 +394,9 @@ static long dps_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
         return retval;
 }
 
+/**
+ * dps_open - open() system call processing
+ */
 static int dps_open(struct inode *inode, struct file *file)
 {
         int minor = iminor(inode);
@@ -361,6 +407,9 @@ static int dps_open(struct inode *inode, struct file *file)
         return generic_file_open(inode, file);
 }
 
+/**
+ * dps_read - read() system call processing
+ */
 static ssize_t dps_read(struct file *file, char __user *buf, size_t count, loff_t * ppos)
 {
         struct dps_info *info = file->private_data;
@@ -407,6 +456,9 @@ static ssize_t dps_read(struct file *file, char __user *buf, size_t count, loff_
         return retval;
 }
 
+/**
+ * dps_mmap - mmap() system call processing
+ */
 static int dps_mmap(struct file *file, struct vm_area_struct *vma)
 {
         struct dps_info *info = file->private_data;
@@ -433,6 +485,9 @@ static int dps_mmap(struct file *file, struct vm_area_struct *vma)
         return retval;
 }
 
+/**
+ * dps_llseek - lseek() system call processing
+ */
 static loff_t dps_llseek(struct file *file, loff_t offset, int whence)
 {
         struct dps_info *info = file->private_data;
@@ -456,6 +511,9 @@ static loff_t dps_llseek(struct file *file, loff_t offset, int whence)
         return retval;
 }
 
+/**
+ * dps_poll - poll()/select() system call processing
+ */
 static __poll_t dps_poll(struct file *file, poll_table *wait)
 {
         struct dps_info *info = file->private_data;
@@ -594,9 +652,10 @@ static int dps_probe(struct platform_device *pdev)
         REGISTER_DMA_PKT_SCHED(dps_info->minor, dps_info); /* register "minor" device instance */
         /* /dev/ creation done */
 
-        /* enable interrupts */
-        reg_set(dps_info, DPS_REG_IRQENA, 0xFFFFFFFF);
-        reg_set(dps_info, DPS_REG_GCFG, DPS_REG_GCFG_BIT_IRQENA);
+        /* enable interrupts and IP (slots and overall)*/
+        reg_write(dps_info, DPS_REG_IRQENA, 0xFFFFFFFF);
+        reg_write(dps_info, DPS_REG_SLTENA, 0xFFFFFFFF);
+        reg_set(dps_info, DPS_REG_GCFG, DPS_REG_GCFG_BIT_ENA | DPS_REG_GCFG_BIT_IRQENA);
 
         return 0;
 }
@@ -606,7 +665,10 @@ static int dps_remove(struct platform_device *pdev)
         struct dps_info *dps_info = platform_get_drvdata(pdev);
         int slot;
 
-        /* TBD: disable everything !!! */
+        /* disable IP and interrupts (slots and overall)*/
+        reg_clr(dps_info, DPS_REG_GCFG, DPS_REG_GCFG_BIT_ENA | DPS_REG_GCFG_BIT_IRQENA);
+        reg_write(dps_info, DPS_REG_IRQENA, 0x00000000);
+        reg_write(dps_info, DPS_REG_SLTENA, 0x00000000);
 
 //        pr_debug("xlnx,dma-pkt-sched-axi-1.0: removed\n");
         pr_info("xlnx,dma-pkt-sched-axi-1.0: removed\n");
