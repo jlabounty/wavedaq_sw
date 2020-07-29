@@ -26,6 +26,12 @@
 #include <linux/interrupt.h>
 #include <linux/poll.h>
 #include <asm/uaccess.h>
+#include <linux/net.h>
+#include <linux/inet.h>
+#include <linux/in.h>
+
+//#include <linux/netpoll.h>
+//#include <linux/ip.h>
 #include "dma_packet_scheduler_v1_0.h"
 
 /* ACQCONF Registers - General */
@@ -57,9 +63,13 @@
 
 #define MAP_FAILED   (-1)
 
+#define UDP_PORT            8081
+#define UDP_PC_IP           (unsigned long int)0x8181C1B9 /* 129.129.193.185 */
+
 static unsigned int windows = 2;
 static unsigned int win_size = 0x1000;
 static unsigned int stream_offset = 2*0x08;
+//static char mode[] = "queue";
 
 static DECLARE_WAIT_QUEUE_HEAD(dps_waitqueue);
 static unsigned int read_wait_queue_length = 0;
@@ -68,6 +78,8 @@ module_param(windows,  int, 0444); /* write permission for user (root), read per
 MODULE_PARM_DESC(windows, "Integer number of buffer-windows per slot");
 module_param(win_size, int, 0444); /* write permission for user (root), read permissions for all */
 MODULE_PARM_DESC(win_size, "Buffer-window size in bytes");
+//module_param(mode, charp, 0444); /* write permission for user (root), read permissions for all */
+//MODULE_PARM_DESC(mode, "Operation mode: 'udp_direct' to directly send buffer, 'queue' to queue up buffer");
 
 static struct dps_framework {
         struct class *class; /* class needed for /dev/ entry */
@@ -92,6 +104,8 @@ struct dps_info {
         struct dma_pool *pool;
         struct slot_buf_info *slot_buf;
         struct list_head queue_head;
+        struct socket *udp_socket;
+        struct sockaddr_in udp_dst_addr;
 };
 
 struct slot_buf_info {
@@ -185,6 +199,61 @@ u32 get_irqvec(struct dps_info *info)
 void clr_irqvec(struct dps_info *info, u32 mask)
 {
         reg_write(info, DPS_REG_IRQVEC, mask);
+}
+
+static int udp_socket_send(struct dps_info *info, unsigned char slot, unsigned char win)
+{
+        struct msghdr msg;
+        struct iovec iov;
+        mm_segment_t oldfs;
+        int size = 0;
+
+        if (info->udp_socket->sk==NULL)
+                return 0;
+
+        iov.iov_base = info->slot_buf[slot].win_buf[win].dma_vaddr;
+        iov.iov_len = info->slot_buf[slot].win_buf[win].len;
+
+        msg.msg_flags = 0;
+        msg.msg_name = &info->udp_dst_addr;
+        msg.msg_namelen  = sizeof(struct sockaddr_in);
+        msg.msg_control = NULL;
+        msg.msg_controllen = 0;
+        iov_iter_init(&msg.msg_iter, READ, &iov, 1, info->slot_buf[slot].win_buf[win].len);
+
+        oldfs = get_fs();
+        set_fs(KERNEL_DS);
+        size = sock_sendmsg(info->udp_socket, &msg);
+        set_fs(oldfs);
+
+        return size;
+}
+
+static int udp_socket_init(struct dps_info *info)
+{
+        int retval;
+
+        /* create a socket */
+        retval = sock_create(AF_INET, SOCK_DGRAM, IPPROTO_UDP, &info->udp_socket);
+        if(retval < 0)
+                return -ENXIO;
+
+        memset(&info->udp_dst_addr, 0, sizeof(struct sockaddr));
+        info->udp_dst_addr.sin_family      = AF_INET;
+        info->udp_dst_addr.sin_addr.s_addr = htonl(UDP_PC_IP);
+        info->udp_dst_addr.sin_port        = htons(UDP_PORT);
+
+        return 0;
+}
+
+static void udp_socket_free(struct dps_info *info)
+{
+        /* free allocated resources before exit */
+        if (info->udp_socket != NULL)
+        {
+                sock_release(info->udp_socket);
+                info->udp_socket = NULL;
+        }
 }
 
 /**
@@ -593,6 +662,7 @@ static irqreturn_t dma_packet_sched_irq_thread_handler(int irq, void *dev_id)
                                         wake_up(&dps_waitqueue);
                                         read_wait_queue_length = 0;
                                 }
+                                udp_socket_send(info, slot, win);
                         }
                         while (win != last_win);
                 }
@@ -609,9 +679,8 @@ static int dps_probe(struct platform_device *pdev)
         int major;
         int status;
 
-//        pr_debug("xlnx,dma-pkt-sched-axi-1.0: probed\n");
-        pr_info("xlnx,dma-pkt-sched-axi-1.0: probed\n");
-        pr_info("Buffer size per slot: %d windows, %d bytes/window \n", windows, win_size);
+        pr_debug("xlnx,dma-pkt-sched-axi-1.0: probed\n");
+        pr_debug("Buffer size per slot: %d windows, %d bytes/window \n", windows, win_size);
 
         /* create and populate device info structure */
         dps_info = dma_packet_sched_get_pdata(pdev);
@@ -652,6 +721,9 @@ static int dps_probe(struct platform_device *pdev)
         REGISTER_DMA_PKT_SCHED(dps_info->minor, dps_info); /* register "minor" device instance */
         /* /dev/ creation done */
 
+        /* initialize UDP socket */
+        udp_socket_init(dps_info);
+
         /* enable interrupts and IP (slots and overall)*/
         reg_write(dps_info, DPS_REG_IRQENA, 0xFFFFFFFF);
         reg_write(dps_info, DPS_REG_SLTENA, 0xFFFFFFFF);
@@ -670,8 +742,10 @@ static int dps_remove(struct platform_device *pdev)
         reg_write(dps_info, DPS_REG_IRQENA, 0x00000000);
         reg_write(dps_info, DPS_REG_SLTENA, 0x00000000);
 
-//        pr_debug("xlnx,dma-pkt-sched-axi-1.0: removed\n");
-        pr_info("xlnx,dma-pkt-sched-axi-1.0: removed\n");
+        /* Destroy UDP socket */
+        udp_socket_free(dps_info);
+
+        pr_debug("xlnx,dma-pkt-sched-axi-1.0: removed\n");
 
         devm_free_irq(&pdev->dev, dps_info->irq, &pdev->dev);
 
