@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  18.10.2019 12:55:30
+// Created :  30.07.2020 15:13:23
 //
 // Register Layout Versions :  8, 9
 //
@@ -30,6 +30,7 @@ private:
    virtual unsigned int BitExtractStatus(unsigned int reg, unsigned int mask, unsigned int ofs) = 0;
    virtual unsigned int BitExtractControl(unsigned int reg, unsigned int mask, unsigned int ofs) = 0;
    virtual void SetRegMask(unsigned int reg, unsigned int mask, unsigned int ofs, unsigned int v) = 0;
+   virtual std::vector<unsigned int> ReadUDP(unsigned int ofs, unsigned int nReg) = 0;
 
 public:
 
@@ -43,7 +44,9 @@ public:
    }
 
    unsigned int GetVersion() {
-      return mVersion;
+      auto result = ReadUDP(mVersionReg, 1);
+      this->mVersion = (result[0] & mVersionMask);
+      return this->mVersion;
    }
 
    // Number of Control Registers
@@ -9146,7 +9149,7 @@ public:
       {
          case 8:
          case 9:
-            // Board revision (A=0x00, C=0x02, D=0x03, E=0x04)
+            // Board revision (A=0x00, C=0x02, D=0x03, E=0x04, F=0x05, G=0x06)
             return BitExtractStatus(0x0000, 0x000000FC, 2);
          default:
             throw std::invalid_argument("Function GetBoardRevision() not defined for this board version");
@@ -9158,7 +9161,7 @@ public:
       {
          case 8:
          case 9:
-            // Board revision (A=0x00, C=0x02, D=0x03, E=0x04)
+            // Board revision (A=0x00, C=0x02, D=0x03, E=0x04, F=0x05, G=0x06)
             if(BitMask) *BitMask = 0x000000FC;
             if(BitOfs) *BitOfs = 2;
             return 0x0000;
