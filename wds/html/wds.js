@@ -407,7 +407,7 @@ function populateInfo() {
    document.getElementById("infoCrateSlotID").innerHTML = OSC.wdb[OSC.curBoard].crateId + " / " +
       OSC.wdb[OSC.curBoard].slotId;
 
-   document.getElementById("infoHVVersion").innerHTML = !OSC.wdb[OSC.curBoard].hvBoardPlugged ?
+   document.getElementById("infoHVVersion").innerHTML = OSC.wdb[OSC.curBoard].hvBoardPlugged ?
       OSC.wdb[OSC.curBoard].hvVersion : "none";
    document.getElementById("infoHVBaseVoltage").innerHTML = OSC.wdb[OSC.curBoard].hv.baseVoltage.toFixed(3);
 
