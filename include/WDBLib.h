@@ -13,9 +13,7 @@
 #ifndef __wdblib_h__
 #define __wdblib_h__
 
-#include "WDBReg.h"
-#include "DCBLib.h"
-
+#include <vector>
 #include <thread>
 #include <queue>
 #include <mutex>
@@ -23,6 +21,9 @@
 #include <map>
 #include "averager.h"
 #include "mxml.h"
+
+#include "WDBReg.h"
+#include "DCBLib.h"
 
 #define WD_N_CHANNELS 18
 #define WD_N_SCALER 19
