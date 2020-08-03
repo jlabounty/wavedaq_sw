@@ -214,6 +214,12 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
                b->SetTriggerDelayNs(std::stoi(value));
          else
             gl->wdb[iBoard]->SetTriggerDelayNs(std::stoi(value));
+      } else if (item == "triggerOutPulseLength") {
+         if (iBoard == -1)
+            for (auto &b: gl->wdb)
+               b->SetTriggerOutPulseLength(std::stoi(value));
+         else
+            gl->wdb[iBoard]->SetTriggerOutPulseLength(std::stoi(value));
       } else if (item == "triggerLeadTrailEdgeSel") {
          if (iBoard == -1)
             for (auto &b: gl->wdb)
