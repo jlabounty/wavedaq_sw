@@ -214,7 +214,6 @@ static int dps_rm_from_queue(struct dps_info *info, int entries)
         while(pos != &(info->queue_head) && (entries == 0 || len != entries) )
         {
                 curr_wb_info = list_entry(pos, struct win_buf_info, lhead);
-//                pr_info("Releasing buffer %d: slot %d   win %d   virt_addr 0x%08X   size %d\n", len, curr_wb_info->slot, curr_wb_info->win, (unsigned int)(curr_wb_info->dma_vaddr), curr_wb_info->len);
                 /* update list pointer to next (current will be removed from list) */
                 pos = pos->next;
                 /* delete list entry */
@@ -254,7 +253,7 @@ static struct dps_info * dma_packet_sched_get_pdata(struct platform_device *pdev
 
         /* adjust window number and winsize */
         win_size = roundup_pow_of_two(win_size);
-        pr_info("Window size %d\n", win_size);
+        pr_debug("Window size %d\n", win_size);
         if(windows>32)
         {
                 windows = 32;
@@ -277,7 +276,6 @@ static struct dps_info * dma_packet_sched_get_pdata(struct platform_device *pdev
                 return pdata->base_addr;
 
         pdata->irq = platform_get_irq(pdev, 0);
-        pr_info("Interrupt: %d \n", pdata->irq);
         if (pdata->irq<0)
                 return ERR_PTR(-ENODEV);
 
@@ -317,7 +315,7 @@ static struct dps_info * dma_packet_sched_get_pdata(struct platform_device *pdev
                 pdata->slot_buf[slot].win_buf = devm_kmalloc_array(&pdev->dev, windows, sizeof(struct win_buf_info), GFP_KERNEL);
                 if (!pdata->slot_buf[slot].win_buf)
                         return ERR_PTR(-ENOMEM);
-                pr_info("SLOT %d: virt addr 0x%08X   phys addr 0x%08X\n", slot, (unsigned int)dma_vaddr, (unsigned int)dma_handle);
+                pr_debug("SLOT %d: virt addr 0x%08X   phys addr 0x%08X\n", slot, (unsigned int)dma_vaddr, (unsigned int)dma_handle);
                 for(win=0; win<windows; win++)
                 {
                         /* initialize window buffer information */
@@ -327,7 +325,7 @@ static struct dps_info * dma_packet_sched_get_pdata(struct platform_device *pdev
                         pdata->slot_buf[slot].win_buf[win].win  = win;
                         pdata->slot_buf[slot].win_buf[win].len  = 0;
                         reg_write(pdata, DPS_WIN_WINCNT(slot, win, stream_offset), 0x00000000);
-                        pr_info("DMA WIN %d: virt addr 0x%08X   phys addr 0x%08X\n", win, (unsigned int)(pdata->slot_buf[slot].win_buf[win].dma_vaddr), (unsigned int)(pdata->slot_buf[slot].win_buf[win].dma_paddr));
+                        pr_debug("DMA WIN %d: virt addr 0x%08X   phys addr 0x%08X\n", win, (unsigned int)(pdata->slot_buf[slot].win_buf[win].dma_vaddr), (unsigned int)(pdata->slot_buf[slot].win_buf[win].dma_paddr));
                 }
         }
 
@@ -609,9 +607,8 @@ static int dps_probe(struct platform_device *pdev)
         int major;
         int status;
 
-//        pr_debug("xlnx,dma-pkt-sched-axi-1.0: probed\n");
-        pr_info("xlnx,dma-pkt-sched-axi-1.0: probed\n");
-        pr_info("Buffer size per slot: %d windows, %d bytes/window \n", windows, win_size);
+        pr_debug("xlnx,dma-pkt-sched-axi-1.0: probed\n");
+        pr_debug("Buffer size per slot: %d windows, %d bytes/window \n", windows, win_size);
 
         /* create and populate device info structure */
         dps_info = dma_packet_sched_get_pdata(pdev);
@@ -670,8 +667,7 @@ static int dps_remove(struct platform_device *pdev)
         reg_write(dps_info, DPS_REG_IRQENA, 0x00000000);
         reg_write(dps_info, DPS_REG_SLTENA, 0x00000000);
 
-//        pr_debug("xlnx,dma-pkt-sched-axi-1.0: removed\n");
-        pr_info("xlnx,dma-pkt-sched-axi-1.0: removed\n");
+        pr_debug("xlnx,dma-pkt-sched-axi-1.0: removed\n");
 
         devm_free_irq(&pdev->dev, dps_info->irq, &pdev->dev);
 

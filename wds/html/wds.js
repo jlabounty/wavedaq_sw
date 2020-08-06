@@ -237,6 +237,10 @@ function populateControls(init) {
       document.getElementById("sldTriggerDelay").set(1 - OSC.wdb[OSC.curBoard].triggerDelay / 1600);
       document.getElementById("inpTriggerDelay").value = Math.round(OSC.wdb[OSC.curBoard].triggerDelay);
    }
+   if (document.getElementById("inpTriggerShaping") !== document.activeElement) {
+      document.getElementById("sldTriggerShaping").set(OSC.wdb[OSC.curBoard].triggerOutPulseLength / 7);
+      document.getElementById("inpTriggerShaping").value = (OSC.wdb[OSC.curBoard].triggerOutPulseLength + 1) * 12.5;
+   }
    if (OSC.wdb[OSC.curBoard].triggerMode === 1) {
       document.getElementById("rbTriggerModeNormal").checked = true;
       document.getElementById("rbTriggerModeAuto").checked = false;
@@ -407,7 +411,7 @@ function populateInfo() {
    document.getElementById("infoCrateSlotID").innerHTML = OSC.wdb[OSC.curBoard].crateId + " / " +
       OSC.wdb[OSC.curBoard].slotId;
 
-   document.getElementById("infoHVVersion").innerHTML = !OSC.wdb[OSC.curBoard].hvBoardPlugged ?
+   document.getElementById("infoHVVersion").innerHTML = OSC.wdb[OSC.curBoard].hvBoardPlugged ?
       OSC.wdb[OSC.curBoard].hvVersion : "none";
    document.getElementById("infoHVBaseVoltage").innerHTML = OSC.wdb[OSC.curBoard].hv.baseVoltage.toFixed(3);
 
@@ -579,6 +583,7 @@ function readWdb(b, init) {
                "triggerSource": 220152992,
                "triggerOutPulseLength": 0,
                "triggerDelay": 0,
+               "triggerOutPulseLength": 0,
                "triggerSrcPolarity": 0,
                "triggerAutoTriggerPeriod": 0,
                "triggerPtrnEn": 0,
@@ -733,6 +738,8 @@ function setParam(e, channel) {
       value = e.checked;
    } else if (e.name === "dacTriggerLevel") {
       value = parseInt(e.value) / 1000;
+   } else if (e.name === "triggerOutPulseLength") {
+      value = (parseFloat(e.value) / 12.5) - 1;
    } else if (e.name === "dacCalDc") {
       value = parseInt(e.value) / 1000;
    } else if (e.name === "drsSampleFreq") {
@@ -818,6 +825,15 @@ function validateParam(input, channel) {
       if (input.value > 1600)
          input.value = 1600;
       document.getElementById("sldTriggerDelay").set(1 - input.value / 1600);
+   }
+
+   if (input.id === "inpTriggerShaping") {
+      if (input.value < 12.5)
+         input.value = 12.5;
+      if (input.value > 100)
+         input.value = 100;
+      input.value = Math.floor(input.value / 12.5) * 12.5;
+      document.getElementById("sldTriggerShaping").set((input.value - 12.5) / 87.5);
    }
 
    if (input.id === "drsSampleFreq") {
@@ -1558,6 +1574,20 @@ function sldTriggerDelay(value) {
    let e = {};
    e.name = "triggerDelay";
    e.value = del;
+   setParam(e);
+   clearStat();
+}
+
+function sldTriggerShaping(value) {
+   if (OSC.demoMode)
+      return;
+   let shaping = (Math.round(value * 7) + 1) * 12.5;
+
+   OSC.wdb[OSC.curBoard].triggerOutPulseLength = Math.round(value * 7);
+   document.getElementById("inpTriggerShaping").value = shaping;
+   let e = {};
+   e.name = "triggerOutPulseLength";
+   e.value = shaping;
    setParam(e);
    clearStat();
 }

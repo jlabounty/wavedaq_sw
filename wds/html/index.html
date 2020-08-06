@@ -140,8 +140,9 @@
          <div class="groupTitle">Trigger</div>
          <div class="group">
             <div class="vMiddleBox vSpacer5">
+               <div class="vMiddleElement">Level:&nbsp;</div>
                <button name="ctrlHSlider" id="sldDacTriggerLevel" class="hSlider vMiddleElement" type="button"
-                       data-update="sldDacTriggerLevel()" style="width:180px;"></button>
+                       data-update="sldDacTriggerLevel()" style="width:130px;"></button>
                <span class="hSpacer5 vMiddleElement"></span>
                <input name="dacTriggerLevel" class="vMiddleElement"
                       type="text" id="inpDacTriggerLevel"
@@ -158,6 +159,16 @@
                <span class="hSpacer5"></span>
                <input name="triggerDelay" class="vMiddleElement" type="text"
                       id="inpTriggerDelay" onkeypress="keyParam(event,this)" value="0"><span
+                    class="vMiddleElement">&nbsp;ns
+               </span>
+            </div>
+            <div class="vMiddleBox vSpacer5">
+               <div class="vMiddleElement">Shaping:&nbsp;</div>
+               <button name="ctrlHSlider" id="sldTriggerShaping" class="hSlider vMiddleElement" type="button"
+                       data-update="sldTriggerShaping()" style="width:130px;"></button>
+               <span class="hSpacer5"></span>
+               <input name="triggerOutPulseLength" class="vMiddleElement" type="text"
+                      id="inpTriggerShaping" onkeypress="keyParam(event,this)" value="0"><span
                     class="vMiddleElement">&nbsp;ns
                </span>
             </div>

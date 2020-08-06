@@ -3,12 +3,15 @@
 #
 
 config DMA_PACKET_SCHEDULER_V1_0
-  tristate "WDAQ DMA packet scheduler IP"
-  default m
-  help
-    This driver supports the WaveDAQ DMA packet scheduler IP v1.0 available in
-    https://github.com/paulscherrerinstitute/vivadoIP_clock_measure
+        tristate "PSI WDAQ DMA packet scheduler IP"
+        default m
+        help
+          This driver supports the custom PSI WaveDAQ DMA packet scheduler Vivado IP v1.0.
 
-    The IP stores packets received from several external sources into
-    memory using DMA.
-    ...
+          The IP stores packets received from several external sources into
+          memory using DMA.
+
+          The driver receives interrupts from the IP core and puts the buffers
+          containing the data written via DMA into a queue so they can be processed
+          in the order they arrived. The buffer representing the head of the queue
+          can be accessed through /dev/dma_pkt_sched0 file.

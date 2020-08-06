@@ -1206,17 +1206,17 @@ void WDB::LmkSyncLocal() {
    SetLmkSyncLocal(0);
 }
 
-__unused void WDB::ResetAdcIf() {
+void WDB::ResetAdcIf() {
    SetAdcIfRst(1);
    SetAdcIfRst(0);
 }
 
-__unused void WDB::ResetDataLinkIf() {
+void WDB::ResetDataLinkIf() {
    SetDataLinkIfRst(1);
    SetDataLinkIfRst(0);
 }
 
-__unused void WDB::ResetPackager() {
+void WDB::ResetPackager() {
    SetWdPkgrRst(1);
    SetWdPkgrRst(0);
 }
@@ -1238,7 +1238,7 @@ void WDB::ReconfigureFpga() {
    mReceiveTimeoutMs = to;
 }
 
-__unused float WDB::GetDacRofsV() {
+float WDB::GetDacRofsV() {
    auto d = GetDac0ChA();
    return d / 65535.0 * 2.5;
 }
@@ -1658,7 +1658,7 @@ void WDB::GetHVTarget(std::vector<float> &hv) {
    }
 }
 
-__unused unsigned int WDB::GetLmk(int reg) {
+unsigned int WDB::GetLmk(int reg) {
    assert(reg < 16);
    return creg[(GetLmk0ResetLoc() & 0xFFF)/ 4 + reg];
 }

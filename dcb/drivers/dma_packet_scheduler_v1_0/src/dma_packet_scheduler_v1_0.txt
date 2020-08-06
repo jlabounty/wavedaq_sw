@@ -1,0 +1,190 @@
+PSI WaveDAQ DMA packet scheduler
+--------------------------------
+
+:Author: Elmar Schmid, Paul Scherrer Institute (PSI)
+:Email: elmar.schmid@psi.ch
+
+Contents:
+=========
+
+1 Introduction
+
+2 Integration
+  2.1 Device Tree Entry
+  2.2 Driver Module Parameters
+
+3 Usage
+  3.1 Control with IOCTLs
+  3.2 Data Access
+
+
+1 Introduction
+==============
+
+The PSI WaveDAQ DMA packet scheduler IP is designed for the MEGII experiment at PSI.
+It is used on a ZYNQ 7000 FPGA sitting on the Data Concentrator Board (DCB) which is
+the master card in a crate with with up to 17 slave cards. Besides controlling the
+the slave cards, the DCB has to collect the measurement data arriving from all slave
+cards. In this manual as well as in the driver, the slave cards are referred to as
+slots.
+
+Data are transmitted from the slots the DCB in packets. The DMA packet scheduler als
+works packet based. When there is a full packet available from a slots, it transferres
+it to the DCBs DDR memory through DMA.
+
+Data storage in the DDR memory is organized in memory regions per slot (slot buffer)
+each containing several window buffers. One window buffer holds exactly one data
+packet. The number of windows is a module parameter and corresponds to the number
+of packets that can be stored per slot. The window size is also a module parameter
+and has to be bigger than the maximum packet size. In case of a MEGII crate, the
+maximum packet size on a WaveDREAM2 (slave/slot) board is specified in register
+holding the maximum payload size.
+
+The DMA packet scheduler module organizes the available data packets in a queue.
+When packets arrive, they are added to the tail of the queue. The file for accessing
+the data always shows the packet content of the queue head. Once the data of the head
+packet is completely processed or copied, the application can call an IOCTL to
+proceed to the next packet in the queue. The driver will then configure the former
+head buffer to be available again for writing through DMA by the IP core.
+
+Accessing the data is done with ordanary file access functions (read, mmap, lseek
+poll/select) to the corresponding device file under /dev (e.g. /dev/dma_pkt_sched0).
+
+
+2 Integration
+=============
+
+2.1 Device Tree Entry
+---------------------
+
+Required properties:
+- compatible: "xlnx,dma-pkt-sched-axi-1.0"
+- reg: Physical base address and size of IP configuration registers.
+- xlnx,#slots: Number of slots connected to IP.
+
+Example:
+  dma_pkt_sched_axi_0: dma_pkt_sched_axi@43c10000 {
+    clock-names = "S_Axi_Aclk", "M_Axi_Aclk";
+    clocks = <&clkc 15>, <&clkc 17>;
+    compatible = "xlnx,dma-pkt-sched-axi-1.0";
+    interrupt-names = "Irq";
+    interrupt-parent = <&intc>;
+    interrupts = <0 30 4>;
+    reg = <0x43c10000 0x10000>;
+    xlnx,#slots = <1>;   /* Number of slots to manage */
+  };
+
+
+2.2 Driver Module Parameters
+----------------------------
+
+- windows:    defines the number of windows per slot. A window corresponds to a buffer
+              storing one full packet. The default is 2.
+- win_size:   size of the window buffer in bytes. The value will be rounded up to the
+              next power of 2. A value equal or greater than the page size is recommended.
+              The default is 4096 Bytes.
+
+
+3 Usage
+=======
+
+While a bunch of IOCTLs is defined for controlling certain parameters, reading data is
+done with file operations.
+
+
+3.1 Control with IOCTLs
+-----------------------
+
+Include dma_packet_scheduler_v1_0.h to use the IOCTLs to control the IP core.
+The following IOCTLs are defined:
+
+- DPS_IOCT_EN
+
+  Call:
+  ioctl(fd, DPS_IOCT_EN, en)
+  fd = file descriptor from opening /dev/dma_pkt_sched0
+  en = integer (1 enables, 0 disables the core)
+
+  Description:
+  This is the master switch to enable or disable the IP core.
+
+- DPS_IOCT_SLOT_EN
+
+  Call:
+  ioctl(fd, DPS_IOCT_SLOT_EN, slot_mask)
+  fd = file descriptor from opening /dev/dma_pkt_sched0
+  slot_mask = integer (for each bit 1 enables, 0 disables the corresponding slot)
+
+  Description:
+  This IOCTL allows for enabling/disabling specific slots defined by the slot_mask
+  where the LSB corresponds to slot 0.
+
+- DPS_IOCT_FREE_BUF
+
+  Call:
+  ioctl(fd, DPS_IOCT_FREE_BUF)
+  fd = file descriptor from opening /dev/dma_pkt_sched0
+
+  Description:
+  Tells the driver to proceed to the next buffer in the queue releasing the current
+  buffer for rewriting by the IP core.
+  Once this is called, the data of the current buffer is no more accessible, so make
+  sure processing or copying of the data is complete before calling this IOCTL.
+
+- DPS_IOCQ_WINSIZE
+
+  Call:
+  ioctl(fd, DPS_IOCQ_WINSIZE)
+  fd = file descriptor from opening /dev/dma_pkt_sched0
+
+  Description:
+  Returns the window buffer size configured with the corresponding module parameter.
+
+- DPS_IOCQ_NOWINDOWS
+
+  Call:
+  ioctl(fd, DPS_IOCQ_NOWINDOWS)
+  fd = file descriptor from opening /dev/dma_pkt_sched0
+
+  Description:
+  Returns the number of window per slot configured with the corresponding module parameter.
+
+- DPS_IOCQ_BUFSIZE
+
+  Call:
+  ioctl(fd, DPS_IOCQ_BUFSIZE)
+  fd = file descriptor from opening /dev/dma_pkt_sched0
+
+  Description:
+  Returns the number of bytes stored in the current buffer.
+
+
+3.2 Data Access
+---------------
+
+Accessing the data is done by file operations on the corresponding device file under /dev
+(e.g. /dev/dma_pkt_sched0).
+The following file access functions are defined:
+
+- open()
+  Opening the file has to be done to optain a file descriptor needed to call the other
+  functions for accessing the file.
+
+- read()
+  Read access to the current buffer (same as any file read).
+
+- lseek()
+  Update cursor position corrent buffer (same as lseek on files).
+
+- mmap()
+  Memory map the current buffer to user space virtual memory in order to directly access
+  the data through the corresponding virtual address.
+  Note that in this case the length of the current buffer might have to be requested using
+  the DPS_IOCQ_BUFSIZE IOCTL.
+
+- poll() / select()
+  Wait for data to arrive. As soon as a buffer is available for reading, this function will be
+  woken up by the driver.
+
+- close()
+  Has to be called to properly finish the file access and free all recources.

@@ -20,12 +20,3 @@
 #define DPS_IOCQ_BUFSIZE     _IOR(DPS_IOC_MAGIC, 5, u_int32_t)
 
 #define DPS_IOC_MAXNR   7
-
-/*
-struct dma_buf{
-        char *data;
-        unsigned int len;
-        unsigned char slot;
-        unsigned char win;
-};
-*/
