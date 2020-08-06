@@ -15,6 +15,11 @@ void WDAQPacketData::SetEventHeaderInfo(FRAME_WDAQ_HEADER *pdaqh){
    mWDAQFlags = pdaqh->wdaq_flags;
    mPayloadLength = pdaqh->payload_length;
    mDataOffset = pdaqh->data_chunk_offset;
+   mEventNumber = pdaqh->event_number;
+   mTriggerNumber = pdaqh->trigger_information[5] | (pdaqh->trigger_information[4] << 8);
+   mTriggerType = pdaqh->trigger_information[1] | (pdaqh->trigger_information[0] << 8);
+   mSerialTriggerData = pdaqh->trigger_information[3] | (pdaqh->trigger_information[2] << 8);
+   mEventNumber = pdaqh->event_number;
 }
 //Set WDAQBoardEvent header from Packet Data
 void WDAQPacketData::HeaderToBoardEvent(WDAQBoardEvent *e){
@@ -36,13 +41,7 @@ void WDAQPacketData::HeaderToBoardEvent(WDAQBoardEvent *e){
 //WDAQ WDB Packet Data - class for WDB UDP DAQ packets 
 //Set properties according to UDP event header
 void WDAQWdbPacketData::SetWdbHeaderInfo(FRAME_WDB_HEADER *ph){
-   //propertis from WDAPacketData
-  //mEventNumber = ph->event_number;
-  //mTriggerNumber = ph->trigger_information[5] | (ph->trigger_information[4] << 8);
-  //mTriggerType = ph->trigger_information[1] | (ph->trigger_information[0] << 8);
-  //mSerialTriggerData = ph->trigger_information[3] | (ph->trigger_information[2] << 8);
 
-   //others
   mTemperature = std::round(ph->temperature*0.0625 * 10 + 0.5) / 10.0f;
   mChannel = (ph->channel_info &0x1F); 
   mADC = (ph->channel_info >> 7) & 0x01; //which ADC sampled the data
@@ -53,7 +52,6 @@ void WDAQWdbPacketData::SetWdbHeaderInfo(FRAME_WDB_HEADER *ph){
   mBitsPerSample = ph->bits_per_sample;
   mSamplesPerEventPerChannel = ph->samples_per_event_per_channel;
   mTimeStamp = ph->time_stamp;
-  //mEventNumber = ph->event_number;
   mTriggerCell = ph->drs_trigger_cell;
   mSamplingFrequency = ph->sampling_frequency;
   mDacOFS = ph->dac_ofs;
@@ -192,15 +190,8 @@ void WDAQDummyPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
 
 //WDAQ TCB Packet Data - class for TCB UDP DAQ packets 
 //Set properties according to UDP event header
-void WDAQTcbPacketData::SetTcbHeaderInfo(TCB_FRAME_HEADER *ph){
+void WDAQTcbPacketData::SetTcbHeaderInfo(FRAME_TCB_HEADER *ph){
 
-   //propertis from WDAPacketData
-   mEventNumber = ph->event_number; 
-   mTriggerNumber = ph->trigger_information[7] | (ph->trigger_information[6] << 8);
-   mTriggerType = ph->trigger_information[3] | (ph->trigger_information[2] << 8);
-   mSerialTriggerData = ph->trigger_information[5] | (ph->trigger_information[4] << 8);
-
-   //others
    mBankName[3] = ph->bank_name[3];
    mBankName[2] = ph->bank_name[2];
    mBankName[1] = ph->bank_name[1];
@@ -405,6 +396,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
    daqdata->payload_length              = SWAP_UINT16(daqdata->payload_length);
    daqdata->packet_number               = SWAP_UINT16(daqdata->packet_number);
    daqdata->data_chunk_offset           = SWAP_UINT16(daqdata->data_chunk_offset);
+   daqdata->event_number                = SWAP_UINT32(daqdata->event_number);
 
    //#define DEBUGGOT 
 
@@ -444,6 +436,8 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
       printf("                 \t TCB!\n");
 
    printf("\n");
+   printf("event number     \t %d\n", daqdata->event_number);
+   printf("trigger event    \t %d\n", daqdata->trigger_information[5] | (daqdata->trigger_information[4] << 8));
    #endif
 
    //from WDB
@@ -455,7 +449,6 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
       data->tx_enable                      = SWAP_UINT32(data->tx_enable);
       data->zero_suppression_mask          = SWAP_UINT16(data->zero_suppression_mask);
       data->samples_per_event_per_channel  = SWAP_UINT16(data->samples_per_event_per_channel);
-      //data->event_number                   = SWAP_UINT32(data->event_number);
       data->drs_trigger_cell               = SWAP_UINT16(data->drs_trigger_cell);
       data->sampling_frequency             = SWAP_UINT32(data->sampling_frequency);
       data->temperature                    = SWAP_UINT16(data->temperature);
@@ -469,7 +462,6 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
       printf("tx enable        \t 0x%x\n", data->tx_enable);
       printf("zero supp mask   \t 0x%d\n", data->zero_suppression_mask);
       printf("sampl  ev cha    \t %d\n", data->samples_per_event_per_channel);
-      printf("event number     \t %d\n", data->event_number);
       printf("drs trig cell    \t %d\n", data->drs_trigger_cell);
       printf("sampl freq       \t %d\n", data->sampling_frequency);
       printf("temperature      \t %d\n", data->temperature);
@@ -477,7 +469,6 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
       printf("daq rofs         \t %x\n", data->dac_rofs);
       printf("frontend sets    \t %x\n", data->frontend_settings);
       printf("flags            \t %x\n", data->wd_flags);
-      printf("trigger event    \t %d\n", data->trigger_information[5] | (data->trigger_information[4] << 8));
       printf("\n");
       printf("\n");
       #endif
@@ -587,19 +578,16 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
 
    }else if(daqdata->board_type_revision>>4 == TCB_BOARD_ID) {
       //TCB board
-      //then do the TCB_FRAME_HEADER
-      TCB_FRAME_HEADER* tcbdata = (TCB_FRAME_HEADER*) (dataptr + sizeof(FRAME_WDAQ_HEADER));
+      //then do the FRAME_TCB_HEADER
+      FRAME_TCB_HEADER* tcbdata = (FRAME_TCB_HEADER*) (dataptr + sizeof(FRAME_WDAQ_HEADER));
 
       tcbdata->time_stamp       = SWAP_UINT32(tcbdata->time_stamp);
-      tcbdata->event_number     = SWAP_UINT32(tcbdata->event_number);
       tcbdata->temperature      = SWAP_UINT32(tcbdata->temperature);
 
       #ifdef DEBUGGOT
       printf("bank name        \t %c%c%c%c\n", tcbdata->bank_name[0], tcbdata->bank_name[1], tcbdata->bank_name[2], tcbdata->bank_name[3]);
       printf("timestamp        \t 0x%x\n", tcbdata->time_stamp);
-      printf("event number     \t %d\n", tcbdata->event_number);
       printf("temperature      \t %d\n", tcbdata->temperature);
-      printf("trigger event    \t %d\n", tcbdata->trigger_information[5] | (tcbdata->trigger_information[4] << 8));
       printf("\n");
       printf("\n");
       #endif
@@ -648,7 +636,7 @@ void WDAQTCBReader::Loop(){
      daqdata.packet_number = 0;
      daqdata.data_chunk_offset = 0;
 
-     TCB_FRAME_HEADER ph;
+     FRAME_TCB_HEADER ph;
 
      int nBanks=0;
      int iBank=0;
@@ -656,9 +644,13 @@ void WDAQTCBReader::Loop(){
 
      unsigned int trg_info0;
      unsigned int trg_info1;
-     u_int32_t ptr= fBoard->GetBufferHeadSPI(&nBanks, &ph.event_number, &ph.time_stamp, &trg_info0, &trg_info1);
-     *(unsigned int*) ph.trigger_information = SWAP_UINT32(trg_info0);
-     *(unsigned int*) (ph.trigger_information + 4) = SWAP_UINT32(trg_info1);
+     u_int32_t ptr= fBoard->GetBufferHeadSPI(&nBanks, &daqdata.event_number, &ph.time_stamp, &trg_info0, &trg_info1);
+     daqdata.trigger_information[5] = trg_info1 & 0xFF;
+     daqdata.trigger_information[4] = (trg_info1 >>8) & 0xFF;
+     daqdata.trigger_information[3] = (trg_info1 >>16) & 0xFF;
+     daqdata.trigger_information[2] = (trg_info1 >>24) & 0xFF;
+     daqdata.trigger_information[1] = trg_info0 & 0xFF;
+     daqdata.trigger_information[0] = (trg_info0 >>8) & 0xFF;
 
      //printf("%d banks, %08x %08x %0x%0x %0x%0x\n", nBanks, ph.event_number, ph.time_stamp, ph.trigger_information[4], ph.trigger_information[3], ph.trigger_information[1], ph.trigger_information[0]);
 
@@ -698,10 +690,10 @@ void WDAQTCBReader::Loop(){
         daqdata.wdaq_flags = SOE | EOT | SOT | EOE;
         daqdata.payload_length = 0;
         packet->SetEventHeaderInfo(&daqdata); 
-        packet->mTriggerNumber = ph.trigger_information[7] | (ph.trigger_information[6] << 8);
-        packet->mTriggerType = ph.trigger_information[3] | (ph.trigger_information[2] << 8);
-        packet->mSerialTriggerData = ph.trigger_information[5] | (ph.trigger_information[4] << 8);
-        packet->mEventNumber=ph.event_number;
+        packet->mTriggerNumber = daqdata.trigger_information[5] | (daqdata.trigger_information[4] << 8);
+        packet->mTriggerType = daqdata.trigger_information[1] | (daqdata.trigger_information[0] << 8);
+        packet->mSerialTriggerData = daqdata.trigger_information[3] | (daqdata.trigger_information[2] << 8);
+        packet->mEventNumber=daqdata.event_number;
 
         daqdata.packet_number++;//prepare for next packet
 

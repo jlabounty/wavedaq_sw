@@ -9,6 +9,7 @@
 #define WDAQLIB_H
 
 #include "WDLib.h"
+#include "wdaq_board_id.h"
 
 //classes in this file
 class WDAQPacketData;
@@ -47,11 +48,9 @@ class WDTCB;
 typedef struct {
    char           bank_name[4];
    unsigned int   time_stamp;
-   unsigned int   event_number;
-   unsigned char  trigger_information[8];
    unsigned short temperature;
-   unsigned short reserved;
-} TCB_FRAME_HEADER;
+   unsigned char reserved[6];
+} FRAME_TCB_HEADER;
 
 //WDAQ Packet Data - class for UDP DAQ packets 
 class WDAQPacketData{
@@ -68,7 +67,6 @@ class WDAQPacketData{
    unsigned char    mWDAQFlags;
    unsigned short   mPayloadLength;
    unsigned short   mDataOffset; 
-   //informations from board specific headers
    unsigned int     mEventNumber;
    unsigned short   mTriggerNumber;
    unsigned char    mTriggerType;
@@ -195,7 +193,7 @@ class WDAQTcbPacketData: public WDAQPacketData{
    
    unsigned int     data[1024];//update this to match max event size
    //Set properties according to UDP event header
-   void SetTcbHeaderInfo(TCB_FRAME_HEADER *);
+   void SetTcbHeaderInfo(FRAME_TCB_HEADER *);
 
    //merge this packet information in given board event, to be implemented according to data
    void AddDataToBoardEvent(WDAQBoardEvent *e);
@@ -325,7 +323,7 @@ public:
 
 //---------- THREAD implementation -------
 //Packet Collector - Thread to collect packets
-#define WDAQ_UDP_PROTOCOL_VERSION  7
+#define WDAQ_UDP_PROTOCOL_VERSION  8
 
 class WDAQPacketCollector: public DAQServerThread{
    DAQBuffer<WDAQPacketData> *fBuf;

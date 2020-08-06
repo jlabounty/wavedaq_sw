@@ -94,33 +94,40 @@ bool WDCrate::HasBoardIn(int slot){
 
 //Power On
 void WDCrate::PowerOn(){
-   char val = 1;
-   int status = mscb_write(fMscbHandle, 20, 0, &val, sizeof(val));
-   // print something only in case of error
-   if (status != MSCB_SUCCESS)
-      printf("Error: status = %d\n", status);
-   
+   if(fMscbHandle){
+      char val = 1;
+      int status = mscb_write(fMscbHandle, 20, 0, &val, sizeof(val));
+      // print something only in case of error
+      if (status != MSCB_SUCCESS)
+         printf("Error: status = %d\n", status);
+   } 
 }
 
 //Power Off
 void WDCrate::PowerOff(){
-   char val = 0;
-   int status = mscb_write(fMscbHandle, 20, 0, &val, sizeof(val));
-   // print something only in case of error
-   if (status != MSCB_SUCCESS)
-      printf("Error: status = %d\n", status);
+   if(fMscbHandle){
+      char val = 0;
+      int status = mscb_write(fMscbHandle, 20, 0, &val, sizeof(val));
+      // print something only in case of error
+      if (status != MSCB_SUCCESS)
+         printf("Error: status = %d\n", status);
+   } 
 }
 
 //Check Power state
 bool WDCrate::IsPowered(){
-   char val = 0;
-   int size = 1;
-   int status = mscb_read(fMscbHandle, 20, 0, &val, &size);
-   // print something only in case of error
-   if (status != MSCB_SUCCESS)
-      printf("Error: status = %d\n", status);
+   if(fMscbHandle){
+      char val = 0;
+      int size = 1;
+      int status = mscb_read(fMscbHandle, 20, 0, &val, &size);
+      // print something only in case of error
+      if (status != MSCB_SUCCESS)
+         printf("Error: status = %d\n", status);
 
-   return (val==1)? true: false;
+      return (val==1)? true: false;
+   } else {
+      return true;
+   }
 }
 
 // Board Getter
@@ -1890,7 +1897,6 @@ WDDCB::WDDCB(WDCrate *crate, int slot, std::string name, std::string netname, bo
    //connect to the board, if crate is on 
    if(crate->IsPowered()){
       DCB::Connect();
-      ReceiveRegisters();
    } else 
       printf("WARNING, cannot connect to %s because crate %s is off\n", name.c_str(), crate->GetCrateName().c_str());
 
@@ -1930,7 +1936,9 @@ void WDDCB::Connect(){
    WDCrate *crate = GetCrate();
 
    //Set SlotId
+   SetSendBlock(true);
    SetSlotId(GetSlot());
+   SetSendBlock(false);
 
    int64_t crateNumber = crate->GetCrateNumber();
    if(crateNumber >= 0){

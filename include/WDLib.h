@@ -139,6 +139,8 @@ class WDCrate {
             if(fMscbHandle < 0) {
                throw std::runtime_error("mscb exception");
             }
+         } else {
+            fMscbHandle = 0;
          }
       }
 
