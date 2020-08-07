@@ -18,7 +18,7 @@
 
 #include "wdaq_board_id.h"
 
-#define WDAQ_UDP_PROTOCOL_VERSION 7
+#define WDAQ_UDP_PROTOCOL_VERSION 8
 
 #define EOE 1
 #define SOE 2
@@ -47,13 +47,15 @@ typedef struct {
 typedef struct {
    unsigned char  protocol_version;
    unsigned char  board_type_revision;
-   unsigned short reserved1;
    unsigned short serial_number;
    unsigned char  crate_id;
    unsigned char  slot_id;
    unsigned short packet_number;
    unsigned char  data_type;
    unsigned char  wdaq_flags;
+   unsigned short trigger_information1;
+   unsigned int   trigger_information0;
+   unsigned int   event_number;
    unsigned short payload_length;
    unsigned short data_chunk_offset;
 } WdaqUdpPacketHeader;
@@ -61,11 +63,8 @@ typedef struct {
 typedef struct {
    char           bank_name[4];
    unsigned int   time_stamp;
-   unsigned int   event_number;
-   unsigned int   trigger_information1;
-   unsigned int   trigger_information0;
    unsigned short temperature;
-   unsigned short reserved;
+   char           reserved[5];
 } TcbUdpPacketHeader;
 
 //register I/O through SPI

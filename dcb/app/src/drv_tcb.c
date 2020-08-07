@@ -198,6 +198,9 @@ void sendPacket(unsigned int slot, unsigned int pkgnum, unsigned int npkg, TcbSp
    udpwdaqhead.serial_number = (crate_id << 8) | slot; //unique board identifier
    udpwdaqhead.crate_id = crate_id;
    udpwdaqhead.slot_id = slot;
+   udpwdaqhead.event_number = bufferhead->eventCounter;
+   udpwdaqhead.trigger_information0 = bufferhead->triggerCounter; 
+   udpwdaqhead.trigger_information1 = bufferhead->triggerType & 0xFFFF;
    udpwdaqhead.packet_number = pkgnum;
    udpwdaqhead.data_chunk_offset = 0;
    udpwdaqhead.wdaq_flags = EOT | SOT;
@@ -224,11 +227,7 @@ void sendPacket(unsigned int slot, unsigned int pkgnum, unsigned int npkg, TcbSp
       //TCB Packet header
       for(int i=0; i<4; i++) udptcbhead.bank_name[i] = bankhead->name[3-i];//correct endianess swap in readreg
       udptcbhead.time_stamp = bufferhead->totalTime;
-      udptcbhead.event_number = bufferhead->eventCounter;
-      udptcbhead.trigger_information0 = bufferhead->triggerCounter; 
-      udptcbhead.trigger_information1 = bufferhead->triggerType;
       //udptcbhead.temperature = 0;
-      //udptcbhead.reserved = 0;
 
       //prepare scatter-gather
       iov[0].iov_base = &udpwdaqhead;
@@ -249,9 +248,6 @@ void sendPacket(unsigned int slot, unsigned int pkgnum, unsigned int npkg, TcbSp
       udptcbhead.bank_name[2]=0;
       udptcbhead.bank_name[3]=0;
       udptcbhead.time_stamp = bufferhead->totalTime;
-      udptcbhead.event_number = bufferhead->eventCounter;
-      udptcbhead.trigger_information0 = bufferhead->triggerCounter; 
-      udptcbhead.trigger_information1 = bufferhead->triggerType;
 
       //prepare scatter-gather
       iov[0].iov_base = &udpwdaqhead;
@@ -278,11 +274,11 @@ void correctEndianness(WdaqUdpPacketHeader* wdaqheader, TcbUdpPacketHeader* tcbh
    wdaqheader->packet_number = bswap_16(wdaqheader->packet_number);
    wdaqheader->payload_length = bswap_16(wdaqheader->payload_length);
    wdaqheader->data_chunk_offset = bswap_16(wdaqheader->data_chunk_offset);
+   wdaqheader->event_number = bswap_32(wdaqheader->event_number);
+   wdaqheader->trigger_information0 = bswap_32(wdaqheader->trigger_information0);
+   wdaqheader->trigger_information1 = bswap_16(wdaqheader->trigger_information1);
 
    tcbheader->time_stamp = bswap_32(tcbheader->time_stamp);
-   tcbheader->event_number = bswap_32(tcbheader->event_number);
-   tcbheader->trigger_information0 = bswap_32(tcbheader->trigger_information0);
-   tcbheader->trigger_information1 = bswap_32(tcbheader->trigger_information1);
    tcbheader->temperature = bswap_32(tcbheader->temperature);
 
 }
