@@ -567,6 +567,10 @@ public:
 
    // setter to add DCB interface to an already constructed WDB 
    void SetDcbInterface(DCB* dcb, int slot);
+   // getter of Dcb interface
+   DCB* GetDcbInterface(){ return mDCB; };
+   // check if is using DCB interface
+   bool IsDcbInterface(){ return mDCB != nullptr; };
 
    const unsigned int cRequiredRegLayoutCompatLevel2F = 8;
    const unsigned int cRequiredFwCompatLevel2F = 4;

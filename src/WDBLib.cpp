@@ -566,11 +566,6 @@ void WDB::Connect() {
       // set dbglevel none
       SendUDP("dbglvl none");
    } else {
-      // create UDP socket for ASCII command interpreter (needed for "cfgdst")
-      if (gASCIISocket == 0)
-         gASCIISocket = socket(AF_INET, SOCK_DGRAM, 0);
-      assert(gASCIISocket);
-
       // check if board is alive
       try {
          auto result = ReadUDP(0x0000, 1);
@@ -685,26 +680,8 @@ void WDB::SetDestinationPort(int port) {
    if (mDemoMode)
       return;
 
-   if (mDCB) {
-      unsigned char ethAddr[16];
-      struct sockaddr_in client_addr;
-      struct hostent *phe;
-
-      // retrieve Ethernet address of board
-      phe = gethostbyname(mWDBName.c_str());
-      if (phe == NULL)
-         throw std::runtime_error(std::string("Cannot resolve host name ") + mWDBAddr + ".");
-
-      std::memset((char *) &client_addr, 0, sizeof(client_addr));
-      std::memcpy((char *) &client_addr.sin_addr, phe->h_addr, phe->h_length);
-      client_addr.sin_family = AF_INET;
-      client_addr.sin_port = htons(WD2_CMD_PORT_ASCII);
-      std::memcpy(ethAddr, &client_addr, sizeof(client_addr));
-
-      // set destination port in WD board, MAC and IP is used automatically form UDP packet
-      SendUDP(std::string("cfgdst ") + std::to_string(port), ethAddr);
-
-   } else
+   //need to configure only if standalone, with DCB destination port is automatic
+   if (!mDCB)
       // set destination port in WD board, MAC and IP is used automatically form UDP packet
       SendUDP(std::string("cfgdst ") + std::to_string(port));
 }

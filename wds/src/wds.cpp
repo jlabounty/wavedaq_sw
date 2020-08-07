@@ -496,7 +496,13 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             b->SetPatternTriggerEn(1);
 
          // set destination port and set DAQ to "normal"
-         b->SetDestinationPort(gl->wp->GetServerPort());
+         if(b->IsDcbInterface()){
+            //reconfigure full crate through DCB
+            b->GetDcbInterface()->SetDestinationPort(gl->wp->GetServerPort());
+         } else  {
+            b->SetDestinationPort(gl->wp->GetServerPort());
+         }
+
          b->SetDaqNormal(false);
 
       } else {
@@ -1354,8 +1360,10 @@ int main(int argc, const char *argv[]) {
    }
 
    // set destination port after WP has been initialized
-   for (auto &b: gl.wdb)
+   for (auto &b: gl.dcb)
       b->SetDestinationPort(gl.wp->GetServerPort());
+   for (auto &b: gl.wdb)
+      if(!b->IsDcbInterface()) b->SetDestinationPort(gl.wp->GetServerPort());
 
    // switch boards to normal mode to send events
    if (gl.triggerSelfArm)
