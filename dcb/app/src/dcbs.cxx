@@ -85,6 +85,7 @@ public:
    int show_default;
    time_t last;
    struct sockaddr client_address;
+   unsigned char client_macaddr[6];
    std::string rb;
 
    udp_connection(int so, int sl) { sock = so; slot = sl; verbose = 0; show_default = 0; }
@@ -312,6 +313,9 @@ int main(int argc, char *argv[]) {
    struct sockaddr_in client_address;
    socklen_t client_address_len = sizeof(client_address);
 
+   //array to store client mac address
+   unsigned char client_macaddr[6];
+
    // socket address used for the server
    memset(&server_address, 0, sizeof(server_address));
    server_address.sin_family = AF_INET;
@@ -385,9 +389,11 @@ int main(int argc, char *argv[]) {
          struct iphdr *ip = (struct iphdr *) (buffer + sizeof(struct ethhdr));
          struct udphdr *udp = (struct udphdr *) (buffer + sizeof(struct ethhdr) + ip->ihl * 4);
 
-         if (ip->protocol == IPPROTO_UDP && ntohs(udp->dest) == SERVER_PORT_BIN) {
+         if (ip->protocol == IPPROTO_UDP && (ntohs(udp->dest) == SERVER_PORT_BIN || ntohs(udp->dest) == SERVER_PORT_ASC)) {
             memset(&client_address, 0, sizeof(client_address));
             client_address.sin_addr.s_addr = ip->saddr;
+            for(int i=0; i<6; i++) client_macaddr[i] = eth->h_source[i];
+            memcpy(&client_macaddr, &eth->h_source, sizeof(client_macaddr));
 
             if (verbose) {
                printf("\n---- RAW UDP Packet ---------------------\n");
@@ -565,6 +571,7 @@ int main(int argc, char *argv[]) {
 
          // store connection specific parameters
          memcpy(&connection[addr]->client_address, &client_address, sizeof(client_address));
+         memcpy(&connection[addr]->client_macaddr, &client_macaddr, sizeof(client_macaddr));
          connection[addr]->rb   = "";
 
          // clean up connection map
@@ -962,6 +969,20 @@ void process_dcb_command(udp_connection &c, char *buffer) {
 
       // notify tcb readout driver of the new port and ip
       setTcbDataDestination(dest_addr, dest_port);
+
+      //TEMPORARY!!!!
+      //configure destination of all WDBs
+      char cmdbuf[64];
+      sprintf(cmdbuf, "cfgdst %d %s %02X:%02X:%02X:%02X:%02X:%02X\n", dest_port, dest_addr,
+              c.client_macaddr[0], c.client_macaddr[1], c.client_macaddr[2],
+              c.client_macaddr[3], c.client_macaddr[4], c.client_macaddr[5]);
+
+      for (int slot = 0; slot < WDAQ_N_SLOTS; slot++) {
+         if(board[slot].type_id == BRD_TYPE_ID_WDB){
+            spi_ascii_cmd(cmdbuf, 0, 0, slot,
+                          board[slot].type_id, board[slot].rev_id);
+         }
+      }
 
    } else {
       c.sprintf("Unknown command: %s\n", buffer);
