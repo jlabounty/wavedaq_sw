@@ -42,8 +42,8 @@ class WDTCB;
 #define EOT 4
 #define SOT 8
 
-#define WD2_BOARD_ID 0
-#define TCB_BOARD_ID 1
+//#define WD2_BOARD_ID 0
+//#define TCB_BOARD_ID 1
 
 typedef struct {
    char           bank_name[4];
