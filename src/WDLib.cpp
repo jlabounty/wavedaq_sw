@@ -418,7 +418,6 @@ void WDSystem::Sync(){
       GetDistributionBoard()->Sync();
    } catch (const std::runtime_error& ex){
       //no DCB, try with TCB
-      printf("other sync!\n");
       GetTriggerBoard()->Sync();
    }
 }
