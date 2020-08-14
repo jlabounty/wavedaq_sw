@@ -1290,6 +1290,7 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureNgenHighThreshold(property);
    } else if(name=="NgenLowThreshold"){
       ConfigureNgenLowThreshold(property);
+   } else if(name=="NoLocalTrigger"){
    } else {
       printf("Unknown property %s in WDTCB\n", name.c_str());
    }
@@ -1297,6 +1298,30 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
 
 void WDTCB::ConfigurationStarted(){
    u_int32_t rrun_config = 0x0000E014;  //masktrg, masksync, maskbusy, fadcmode, enable trg_bus
+
+   //get crate and system
+   WDSystem *sys = GetCrate()->GetSystem();
+   if(GetCrate()->GetCrateNumber()==sys->GetTriggerCrateId() && GetSlot()==17){
+      //TCB is system Master
+      if(sys->GetTriggerCrateId() == sys->GetDistributionCrateId()){
+         //Distribution within same crate -> can use Local trigger
+         bool cableOnly;
+         try{
+            //check for cable being requested
+            cableOnly = GetProperty("NoLocalTrigger").GetBool();
+         }catch (const std::runtime_error& ex){
+            // enabled if nothig specified
+            cableOnly = false;
+         }
+         if(!cableOnly){
+            printf("Enabling local trigger: make sure FCI cable is not connected\n");
+            rrun_config |= 0x00000800; //LOCAL_TRG enable
+         } else {
+            printf("Local trigger manually disabled: using FCI cable instead\n");
+         }
+      }
+   }
+
    SetRRUN(&rrun_config);
    u_int32_t syncdly=0x1F;
    u_int32_t trgdly=0x1F;
