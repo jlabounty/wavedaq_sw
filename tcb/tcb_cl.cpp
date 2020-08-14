@@ -133,11 +133,14 @@ int main(int argc, char *argv[])
           scanf("%x",&scanfdata);
           data |= scanfdata<<8;
         }
-        if( !( (TCBBoard.fidcode&0xf000)>>12==3 && (TCBBoard.fidcode&0xf00)>>8==0xB ) ) {
-          printf("\nENABLE_TRGBUS?\n If 0 then the TRGBus from backplane is not used but internal signals \n if 1 then the backplane signals are used\n");
-          scanf("%x",&scanfdata);
-        }
+        printf("\nENABLE_TRGBUS?\n If 0 then the TRGBus from backplane is not used but internal signals \n if 1 then the backplane signals are used\n");
+        scanf("%x",&scanfdata);
         data |= scanfdata<<4;
+        if(((TCBBoard.fidcode&0xf000)>>12)==3) {
+          printf("\nENABLE_LOCALTRG?\n if 1 a copy of the FCI triggerbus is sent to the DCB through backplane\n");
+          scanf("%x",&scanfdata);
+          data |= scanfdata<<11;
+        }
         printf("\nMASKS? (hex) \n bit 0 is the EXBUSY \n bit 1 for the SYNC\n bit 2 for the TRG\n");
         scanf("%x",&scanfdata);
         data |= scanfdata<<13; 

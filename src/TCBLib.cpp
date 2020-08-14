@@ -1360,6 +1360,19 @@ void TCB::SetFMask(bool trgmask, bool busymask){
    // write the reg
    WriteReg(RRUN, &data);
 }
+//Enables Local trigger
+void TCB::SetLocalTrigger(bool ena){
+   u_int32_t data;
+   // first read the register
+   ReadReg(RRUN, &data);
+   // mask fmasks
+   data &= 0xFFFFF7FF;
+   // set trigger mask if required
+   if(ena)
+     data |= 1<<11;
+   // write the reg
+   WriteReg(RRUN, &data);
+}
 //write full Packetizer program
 void TCB::WritePacketizerProgram(std::vector<PacketInstruction> &list){
    u_int32_t pack_mem_0[PACKAGERSIZE];

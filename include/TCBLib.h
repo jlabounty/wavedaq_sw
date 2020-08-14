@@ -415,6 +415,7 @@ public:
    void SetSingleCrateTriggerOr(int nChn, int* chn, short shape);
    void SetSingleCrateTriggerAnd(int nChn, int* chn, short shape);
    void SetFMask(bool, bool);
+   void SetLocalTrigger(bool ena);
    //write full Packetizer program
    void WritePacketizerProgram(std::vector<PacketInstruction> &list);
    //read buffer head, return buffer read pointer

@@ -493,7 +493,7 @@ void WDSystem::SpawnDAQ(){
                //if there is no DCB try trough CMB
                if(! static_cast<WDTCB*>(b)->HasDcbInterface()){
                   WDAQTCBReader* tcbreaderthread = new WDAQTCBReader(fPacketBuffer,static_cast<WDTCB*>(b));
-                  tcbreaderthread->SetMinLoopDuration(std::chrono::milliseconds(10));
+                  tcbreaderthread->SetIdleLoopDuration(std::chrono::milliseconds(10));
                   tcbreaderthread->Start();
                   fTCBReaderThreads.push_back(tcbreaderthread);
                }
