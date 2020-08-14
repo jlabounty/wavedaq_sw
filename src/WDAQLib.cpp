@@ -398,7 +398,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
    daqdata->data_chunk_offset           = SWAP_UINT16(daqdata->data_chunk_offset);
    daqdata->event_number                = SWAP_UINT32(daqdata->event_number);
 
-   #define DEBUGGOT 
+   //#define DEBUGGOT 
 
    #ifdef DEBUGGOT
    printf("---------------------------------\n");
