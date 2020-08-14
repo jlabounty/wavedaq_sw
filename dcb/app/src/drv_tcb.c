@@ -194,7 +194,7 @@ void sendPacket(unsigned int slot, unsigned int pkgnum, unsigned int npkg, TcbSp
    WdaqUdpPacketHeader udpwdaqhead;
 
    udpwdaqhead.protocol_version = WDAQ_UDP_PROTOCOL_VERSION;
-   udpwdaqhead.board_type_revision = 1<<4; //TCB board
+   udpwdaqhead.board_type_revision = BRD_TYPE_ID_TCB<<4; //TCB board
    udpwdaqhead.serial_number = (crate_id << 8) | slot; //unique board identifier
    udpwdaqhead.crate_id = crate_id;
    udpwdaqhead.slot_id = slot;

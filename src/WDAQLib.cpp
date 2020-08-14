@@ -309,10 +309,10 @@ void WDAQEvent::AddPacket(WDAQPacketData* pkt){
       boardEvent = fBoard.at(type).at(id);
    } catch (const std::out_of_range&){
       //no event, allocate a new one according to Board Type
-      if(type == WD2_BOARD_ID){
+      if(type == BRD_TYPE_ID_WDB){
          boardEvent = new WDAQWdbEvent(pkt);
          //printf("Event %d: Created WDB board event for board %d-%d\n", mEventNumber, type, id);
-      } else if(type == TCB_BOARD_ID) {
+      } else if(type == BRD_TYPE_ID_TCB) {
          boardEvent = new WDAQTcbEvent(pkt);
          //printf("Event %d: Created TCB board event for board %d-%d\n", mEventNumber, type, id);
       } else {
@@ -405,9 +405,9 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
    printf("---------------------------------\n");
    printf("serial number    \t %d\n", daqdata->serial_number);
    printf("board type & rev \t 0x%x\n", daqdata->board_type_revision);
-   if(daqdata->board_type_revision>>4 == WD2_BOARD_ID) 
+   if(daqdata->board_type_revision>>4 == BRD_TYPE_ID_WDB) 
       printf("                 \t WDB!\n");
-   else if(daqdata->board_type_revision>>4 == TCB_BOARD_ID) 
+   else if(daqdata->board_type_revision>>4 == BRD_TYPE_ID_TCB) 
       printf("                 \t TCB!\n");
 
    printf("packet num       \t %d\n", daqdata->packet_number);
@@ -441,7 +441,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
    #endif
 
    //from WDB
-   if(daqdata->board_type_revision>>4 == WD2_BOARD_ID){
+   if(daqdata->board_type_revision>>4 == BRD_TYPE_ID_WDB){
       //then do the WD_FRAME_HEADER
       FRAME_WDB_HEADER* data = (FRAME_WDB_HEADER*) (dataptr + sizeof(FRAME_WDAQ_HEADER));
 
@@ -576,7 +576,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
          
       }// end if data is dummy (completely zero suppressed)
 
-   }else if(daqdata->board_type_revision>>4 == TCB_BOARD_ID) {
+   }else if(daqdata->board_type_revision>>4 == BRD_TYPE_ID_TCB) {
       //TCB board
       //then do the FRAME_TCB_HEADER
       FRAME_TCB_HEADER* tcbdata = (FRAME_TCB_HEADER*) (dataptr + sizeof(FRAME_WDAQ_HEADER));
@@ -628,7 +628,7 @@ void WDAQTCBReader::Loop(){
   // polling on the buffer status searching for an event
   if(fBoard->GetBufferState() != 0) { 
      FRAME_WDAQ_HEADER daqdata;
-     daqdata.board_type_revision = TCB_BOARD_ID<<4;
+     daqdata.board_type_revision = BRD_TYPE_ID_TCB<<4;
      std::hash<std::string> hashFunc;
      daqdata.serial_number = hashFunc(fBoard->GetBoardName());
      daqdata.crate_id = fBoard->GetCrate()->GetCrateNumber();
@@ -705,6 +705,9 @@ void WDAQTCBReader::Loop(){
 
      fBoard->IncrementBufferPointer();
   }
+
+  //slow down
+  std::this_thread::sleep_for(fIdleLoopDuration);
 }
 
 void WDAQTCBReader::End(){
@@ -799,7 +802,7 @@ void WDAQEventBuilder::Loop(){
 
          //debug printf
          /*printf("dropping event %d constaining %d boards\n", ev->first, ev->second->IsComplete());
-         for(auto& boardEvent : ev->second->fBoard[WD2_BOARD_ID])
+         for(auto& boardEvent : ev->second->fBoard[BRD_TYPE_ID_WDB])
             printf("board %d (%d)\n", boardEvent.first, boardEvent.second->IsComplete());*/
 
          delete ev->second;
@@ -882,7 +885,7 @@ void WDAQWorker::Loop(){
    WDAQEvent *ptr = nullptr;
    if(fSource->Try_pop(ptr)){
       //new event to calibrate
-      for(auto& boardEvent : ptr->fBoard[WD2_BOARD_ID])
+      for(auto& boardEvent : ptr->fBoard[BRD_TYPE_ID_WDB])
          calibrateBoard(static_cast<WDAQWdbEvent*>(boardEvent.second));
 
       //statistics
@@ -975,7 +978,7 @@ void WDAQEventWriter::Loop(){
       fFile.write((const char *)&temp, 1);
       
       //write WDB data
-      for(auto &keyval : ptr->fBoard[WD2_BOARD_ID]){
+      for(auto &keyval : ptr->fBoard[BRD_TYPE_ID_WDB]){
          WDAQWdbEvent* board= static_cast<WDAQWdbEvent*>(keyval.second);
          // write board Id
          const char board_head[] = "B#";
@@ -1065,7 +1068,7 @@ void WDAQEventWriter::Loop(){
 
          }// end if there are scaler data
       }
-      for(auto &keyval : ptr->fBoard[TCB_BOARD_ID]){
+      for(auto &keyval : ptr->fBoard[BRD_TYPE_ID_TCB]){
          WDAQTcbEvent* board= static_cast<WDAQTcbEvent*>(keyval.second);
          // write board Id
          const char board_head[] = "T#";
