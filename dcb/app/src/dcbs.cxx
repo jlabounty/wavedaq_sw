@@ -1286,6 +1286,7 @@ void write_sw(udp_connection &c, int slot, char *sw_file,
    int header_len;
    unsigned int len;
    sw_file_info_type sw_info;
+   sw_file_info_type sw_info_swapped;
    qspi_flash_partition flash_partition;
    flash_partition_type *mtd_ptr = NULL;
    int fd;
@@ -1370,9 +1371,10 @@ void write_sw(udp_connection &c, int slot, char *sw_file,
       sw_info.info.data_len = file_stat.st_size;
       sw_info.info.head_len = header_len;
       sw_info.info.checksum = sw_file_info_checksum(&sw_info);
+      byte_swap_uint32(sw_info.field, sw_info_swapped.field, sizeof(sw_info)/sizeof(unsigned int));
       flash_offs = mtd_ptr->header_offset;
       flash_len = sizeof(sw_file_info_type);
-      qspi_flash_write(&flash_partition, flash_offs, flash_len, (unsigned char *) &sw_info);
+      qspi_flash_write(&flash_partition, flash_offs, flash_len, (unsigned char *) &sw_info_swapped);
       if (c.verbose)
          c.sprintf("done\n");
       c.flush();
@@ -1468,6 +1470,9 @@ void slot_upload(udp_connection &c, unsigned int slot_nr, int load_fw, char *fwp
    }
 
    disconnect();
+
+   /* Apply init pulse to boards with old SPI scheme */
+   if(bpl_spi_scheme[board_type][board_rev] == 0) init_slot(slot_nr, 1);
 
    // WDB2E,F: need init after upload
    if (board_type == BRD_TYPE_ID_WDB && board_rev < 5) {
