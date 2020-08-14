@@ -705,6 +705,9 @@ void WDAQTCBReader::Loop(){
 
      fBoard->IncrementBufferPointer();
   }
+
+  //slow down
+  std::this_thread::sleep_for(fIdleLoopDuration);
 }
 
 void WDAQTCBReader::End(){
