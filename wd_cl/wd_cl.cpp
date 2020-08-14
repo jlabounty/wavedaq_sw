@@ -165,8 +165,8 @@ int main(int argc, char *argv[])
          if(option == 6)
          {
             printf("generating SYNC...\n");
+            sys->Sync();
             WDBoard *triggerb = sys->GetTriggerBoard();
-            triggerb->Sync();
             printf("SYNC generated from board %s\n", triggerb->GetBoardName().c_str());
             for(auto c : *sys)
                for(auto b :*c)
@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
             for(dly=0; dly<32; dly++){
                printf("testing dly %u\n", dly);
                dynamic_cast<WDTCB*>(sys->GetTriggerBoard())->SetTRGBusODLY(&dly, &dly, &dly);
-               sys->GetTriggerBoard()->Sync();
+               sys->Sync();
                sys->TrainSerdes();
                std::this_thread::sleep_for(std::chrono::seconds(3));
                for(auto c : *sys)

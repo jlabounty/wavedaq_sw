@@ -144,6 +144,10 @@ void WDSystem::AddCrate(WDCrate *crate){
    if(fTrgCrateId < 0) {
       fTrgCrateId = fCrate.size() - 1;
    }
+   //if no distribution crate new crate is defined so
+   if(fDistributionCrateId < 0) {
+      fDistributionCrateId = fCrate.size() - 1;
+   }
 
    crate->fSystem = this;
    crate->fCrateNumber = fCrate.size() - 1;
@@ -201,6 +205,7 @@ void WDSystem::CreateFromXml(std::string filepath){
          AddCrate(c);
 
          bool triggerFlag = false;
+         bool distributionFlag = false;
          //loop on Boards
          for(int i=0; i<mxml_get_number_of_children(crate_xml); i++){
             MXML_NODE *board_xml= mxml_subnode(crate_xml, i);
@@ -300,10 +305,14 @@ void WDSystem::CreateFromXml(std::string filepath){
                CreatePropertiesFromXml(b, board_xml);
             }
             else if(board_node_name == "Trigger") triggerFlag = true;
+            else if(board_node_name == "Distribution") distributionFlag = true;
          }
 
          if(triggerFlag){
             SetTriggerCrateId(GetCrateSize()-1);
+         }
+         if(distributionFlag){
+            SetDistributionCrateId(GetCrateSize()-1);
          }
       } else if (crate_node_name == "Group"){
          //create a new property group
@@ -403,9 +412,20 @@ void WDSystem::SetSerdesTraining(bool state){
    }
 }
 
+//System Sync
+void WDSystem::Sync(){
+   try{
+      GetDistributionBoard()->Sync();
+   } catch (const std::runtime_error& ex){
+      //no DCB, try with TCB
+      printf("other sync!\n");
+      GetTriggerBoard()->Sync();
+   }
+}
+
 //Go Run
 void WDSystem::GoRun(){
-   GetTriggerBoard()->Sync();
+   Sync();
    if(fCollectorThread) fCollectorThread->GoRun();
    if(fBuilderThread) fBuilderThread->GoRun();
    if(fWriterThread) fWriterThread->GoRun();
@@ -447,7 +467,7 @@ void WDSystem::StopRun(){
 }
 //train serial links
 void WDSystem::TrainSerdes(){
-   GetTriggerBoard()->Sync();
+   Sync();
 
    for(auto &c : fCrate){
       for(auto &b : *c){

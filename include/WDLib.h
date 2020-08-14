@@ -176,7 +176,8 @@ class WDSystem {
 
    private:
       std::vector<WDCrate *> fCrate;
-      int fTrgCrateId;
+      long fTrgCrateId;
+      long fDistributionCrateId;
       std::map<std::string,PropertyGroup> fGroupProperties;
       PropertyGroup fDaqProperties;
       int fDAQServerPort;
@@ -199,6 +200,7 @@ class WDSystem {
       //Methods
       void AddCrate(WDCrate *crate);
       void CreateFromXml(std::string filepath);
+      void Sync();
       void GoRun();
       void StopRun();
       void PowerOn();
@@ -220,14 +222,18 @@ class WDSystem {
       WDCrate *GetCrateAt(int crateid) { return fCrate.at(crateid); }
       WDCrate *GetTriggerCrate(){ return fCrate.at(fTrgCrateId); }
       WDBoard *GetTriggerBoard(){ return GetTriggerCrate()->GetBoardAt(17); }
+      WDCrate *GetDistributionCrate(){ return fCrate.at(fDistributionCrateId); }
+      WDBoard *GetDistributionBoard(){ return GetDistributionCrate()->GetBoardAt(16); }
       WDBoard *GetBoardAt(WDPosition &p) {return fCrate[p.fCrate]->GetBoardAt(p.fSlot);}
-      int GetTriggerCrateId(){ return fTrgCrateId; }
+      long GetTriggerCrateId(){ return fTrgCrateId; }
+      long GetDistributionCrateId(){ return fDistributionCrateId; }
       unsigned long GetCrateSize() { return fCrate.size(); }
       PropertyGroup &GetGroupProperties(std::string groupname){ return fGroupProperties.at(groupname); }
       int GetDAQServerPort(){ return fDAQServerPort; }
 
       //Setters
-      void SetTriggerCrateId(int triggercrateid){ fTrgCrateId = triggercrateid; }
+      void SetTriggerCrateId(long crateid){ fTrgCrateId = crateid; }
+      void SetDistributionCrateId(long crateid){ fDistributionCrateId = crateid; }
       void SetGroupProperties(std::string groupname, PropertyGroup &properties){ fGroupProperties[groupname] = properties; }
       void SetDaqProperties(PropertyGroup &properties){ fDaqProperties = properties; }
       void SetDaqProperty(std::string propertyname, std::string val){ fDaqProperties[propertyname].SetStringValue(val); }
@@ -236,6 +242,7 @@ class WDSystem {
       //Constructor
       WDSystem(){
          fTrgCrateId = -1;
+         fDistributionCrateId = -1;
          fDaqProperties.clear();
          fPacketBuffer = nullptr;
          fCalibratedBuffer = nullptr;
@@ -408,6 +415,7 @@ class WDDCB : public DCB, public WDBoard {
       void TrainSerdes(){}
 
       void Sync(){
+         SetTrSyncBpl(1);
       }
 
       void GoRun(){
