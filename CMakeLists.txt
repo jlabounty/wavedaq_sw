@@ -11,6 +11,14 @@ endif()
 
 find_package(Threads)
 
+if(NOT CMAKE_BUILD_TYPE)
+   set(CMAKE_BUILD_TYPE Release)
+endif()
+
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+#message(STATUS "CXX FLAGS: ${CMAKE_CXX_FLAGS}")
+#message(STATUS "CXX FLAGS release: ${CMAKE_CXX_FLAGS_RELEASE}")
+
 #
 # generate git-revision.h
 #
