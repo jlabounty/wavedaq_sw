@@ -45,7 +45,24 @@
     and 'Ok' button. The callback is called with the first parameter either
     true (if Ok has been clicked) or false (if Cancel has been clicked) and
     the second parameter a copy of 'param' passed to dlgConfirm().
- 
+
+ dlgQuery(message, value, callback, param)
+    Replacement of prompt() dialog. Shows a dialog box ith a 'Cancel', 'Ok'
+    button and a field to enter a value. 'message' is shown before the
+    input filed and can contain a string like 'Please enter value:'. If
+    'cancel' is pressed, the 'callback' function is called with the first
+    parameter equal 'false'. If 'Ok' is pressed, 'callback' is called with
+    the first parameter being the value of the input field. 'param' is just
+    passed to the callback function as an optional second parameter. So a
+    typical callback function can look like
+
+    function cb(value, param) {
+       if (value !== false)
+          alert('Value is '+value+', param is '+param);
+    }
+
+    where 'param' can also be ommitted.
+    
  dlgMessage(title, message, modal, error, callback, param)
     Similar to dlgAlert, but with the option to set a custom title which
     gets a red background if error is true. After the 'Ok' button is pressed,
@@ -729,6 +746,29 @@ function dlgConfirm(string, confirmCallback, param) {
       "<br /><br />" +
       "<button class=\"dlgButton\" id=\"dlgMessageButton\" type=\"button\" " +
       " onClick=\"let d=this.parentElement.parentElement;d.callback(true,d.callbackParam);dlgMessageDestroy(this);\">OK</button>" +
+      "<button class=\"dlgButton\" id=\"dlgMessageButton\" type=\"button\" " +
+      " onClick=\"let d=this.parentElement.parentElement;d.callback(false,d.callbackParam);dlgMessageDestroy(this);\">Cancel</button>" +
+      "</div>";
+
+   document.body.appendChild(d);
+
+   dlgShow(d, true);
+   return d;
+}
+
+function dlgQuery(string, value, queryCallback, param) {
+   let d = document.createElement("div");
+   d.className = "dlgFrame";
+   d.style.zIndex = "21";
+   d.callback = queryCallback;
+   d.callbackParam = param;
+
+   d.innerHTML = "<div class=\"dlgTitlebar\" id=\"dlgMessageTitle\">Please confirm</div>" +
+      "<div class=\"dlgPanel\" style=\"padding: 20px;\">" +
+      "<div id=\"dlgMessageString\">" + string + "&nbsp;&nbsp;<input type='text' size='30' id='dlgQueryInput' value='" + value + "'></input></div>" +
+      "<br /><br />" +
+      "<button class=\"dlgButton\" id=\"dlgMessageButton\" type=\"button\" " +
+      " onClick=\"let d=this.parentElement.parentElement;d.callback(document.getElementById('dlgQueryInput').value,d.callbackParam);dlgMessageDestroy(this);\">OK</button>" +
       "<button class=\"dlgButton\" id=\"dlgMessageButton\" type=\"button\" " +
       " onClick=\"let d=this.parentElement.parentElement;d.callback(false,d.callbackParam);dlgMessageDestroy(this);\">Cancel</button>" +
       "</div>";
