@@ -77,6 +77,30 @@ class EventDebug : public DAQThread{
 };
 
 
+#define BARSIZE 80 
+void drawBar(const char* name, float value, float valueMax, bool printData = false){
+   float v = value * 1./valueMax;
+   bool overscale = false;
+   if(v>1) {
+      overscale=true;
+      v = 1;
+      printf("\e[1;31m");//all make red
+   }
+   printf("%10s (%5.1f\%):", name, v*100);
+
+   if(v>=0.9) printf("\e[1;31m");//red
+   else if(v>=0.7) printf("\e[1;33m");//yellow
+   else printf("\e[1;32m");//green
+
+   for(int i=0; i< BARSIZE; i++) if(i*1./BARSIZE < v) putchar('-'); else putchar(' ');
+   printf("\e[0m|");//reset color
+   if(printData){
+      //print values
+      printf("%f:%f|", value, valueMax);
+   }
+   printf("\n");
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -103,6 +127,7 @@ int main(int argc, char *argv[])
       printf("[13]: sync dly scan        \t \t  [14]: attach debug thread  \n");
       printf("[15]: draw system          \t \t  [16]: print firmware version\n");
       printf("[17]: update firmware      \t \t  [18]: clean buffer         \n");
+      printf("[19]: show DAQ status      \t \t  [--]:                      \n");
       do {
          char opline[256];
          printf("give an option: ");
@@ -434,6 +459,129 @@ int main(int argc, char *argv[])
             sys->fPacketBuffer->Clean();
             sys->fCalibratedBuffer->Clean();
             sys->fEventBuffer->Clean();
+         }
+         if(option == 19)
+         {
+            bool done = false;
+            int i =0;
+            long OldCollectorNPackets=sys->fCollectorThread->GetReceivedPackets();
+            long OldCollectorDroppedPackets=sys->fCollectorThread->GetDroppedPackets();
+            long OldBuilderBuildedEvent=sys->fBuilderThread->GetBuildedEvents();
+            long OldBuilderDroppedEvent=sys->fBuilderThread->GetDroppedEvents();
+            long OldBuilderOldEvent=sys->fBuilderThread->GetOldEvents();
+
+            long AvgCollectorNPackets = 0;
+            long AvgCollectorDroppedPackets = 0;
+            long AvgBuilderBuildedEvent = 0;
+            long AvgBuilderDroppedEvent = 0;
+            long AvgBuilderOldEvent = 0;
+            int nAvg = 0;
+
+            long MaxCollectorNPackets = 0;
+            long MaxCollectorDroppedPackets = 0;
+            long MaxBuilderBuildedEvent = 0;
+            long MaxBuilderDroppedEvent = 0;
+            long MaxBuilderOldEvent = 0;
+
+            //long OldWorkerNEvent;
+            //long OldWorkerDropped;
+            sleep(1);//wait to get events
+            while(!done){
+               //gather statistics
+               long collectorNPackets = sys->fCollectorThread->GetReceivedPackets();
+               long collectorDroppedPackets = sys->fCollectorThread->GetDroppedPackets();
+               long builderEventsInQueue = sys->fBuilderThread->GetEventsInQueue();
+               long builderBuildedEvent = sys->fBuilderThread->GetBuildedEvents();
+               long builderDroppedEvent =  sys->fBuilderThread->GetDroppedEvents();
+               long builderOldEvent = sys->fBuilderThread->GetOldEvents();
+               bool builderNotBuilding = sys->fBuilderThread->GetIsNotBuilding();
+               bool builderDropping = sys->fBuilderThread->GetIsDropping();
+
+               //sys->fWorkerThread->fNEvent;
+               //sys->fWorkerThread->fDropped;
+               printf("\033[2J\nprinting monitoring data: press \'q<ENTER>\' to exit\n");
+               printf("average being calculated on last %d seconds\n", nAvg);
+               printf("----------------------------------------------------------------------------------------------------\n");
+               printf("Buffers:\n");
+               drawBar("Pkts", sys->fPacketBuffer->GetOccupancy(), 1);
+               drawBar("BuildEvts", builderEventsInQueue, 20, true);
+               drawBar("Evts", sys->fEventBuffer->GetOccupancy(), 1);
+               drawBar("Cals", sys->fCalibratedBuffer->GetOccupancy(), 1);
+               printf("----------------------------------------------------------------------------------------------------\n");
+               printf("Threads:\n");
+
+               long DeltaCollectorNPackets = collectorNPackets-OldCollectorNPackets;
+               long DeltaCollectorDroppedPackets = collectorDroppedPackets-OldCollectorDroppedPackets;
+               long DeltaBuilderBuildedEvent = builderBuildedEvent-OldBuilderBuildedEvent;
+               long DeltaBuilderDroppedEvent = builderDroppedEvent-OldBuilderDroppedEvent;
+               long DeltaBuilderOldEvent = builderOldEvent-OldBuilderOldEvent;
+
+               drawBar("Pkts/s", DeltaCollectorNPackets, 1000000, true);
+               drawBar("DropPkts/s", DeltaCollectorDroppedPackets, 1000000, true);
+               if(builderNotBuilding) printf("builder is not building\n");
+               else printf("builder is building\n");
+               if(builderDropping) printf("builder is dropping\n");
+               else printf("builder is not dropping\n");
+               drawBar("BuiltEvt/s", DeltaBuilderBuildedEvent, 2000, true);
+               drawBar("DropEvt/s", DeltaBuilderDroppedEvent, 2000, true);
+               drawBar("OldEvt/s", DeltaBuilderOldEvent, 2000, true);
+
+               //update
+               OldCollectorNPackets = collectorNPackets;
+               OldCollectorDroppedPackets = collectorDroppedPackets;
+               OldBuilderBuildedEvent = builderBuildedEvent;
+               OldBuilderDroppedEvent = builderDroppedEvent;
+               OldBuilderOldEvent = builderOldEvent;
+
+               //update max
+               if(MaxCollectorNPackets < DeltaCollectorNPackets) MaxCollectorNPackets = DeltaCollectorNPackets;
+               if(MaxCollectorDroppedPackets < DeltaCollectorDroppedPackets) MaxCollectorDroppedPackets = DeltaCollectorDroppedPackets;
+               if(MaxBuilderBuildedEvent < DeltaBuilderBuildedEvent) MaxBuilderBuildedEvent = DeltaBuilderBuildedEvent;
+               if(MaxBuilderDroppedEvent < DeltaBuilderDroppedEvent) MaxBuilderDroppedEvent = DeltaBuilderDroppedEvent;
+               if(MaxBuilderOldEvent < DeltaBuilderOldEvent) MaxBuilderOldEvent = DeltaBuilderOldEvent;
+               
+               //update avgs
+               AvgCollectorNPackets = AvgCollectorNPackets + (DeltaCollectorNPackets-AvgCollectorNPackets)*1./(nAvg+1);
+               AvgCollectorDroppedPackets = AvgCollectorDroppedPackets + (DeltaCollectorDroppedPackets-AvgCollectorDroppedPackets)*1./(nAvg+1);
+               AvgBuilderBuildedEvent = AvgBuilderBuildedEvent + (DeltaBuilderBuildedEvent-AvgBuilderBuildedEvent)*1./(nAvg+1);
+               AvgBuilderDroppedEvent = AvgBuilderDroppedEvent + (DeltaBuilderDroppedEvent-AvgBuilderDroppedEvent)*1./(nAvg+1);
+               AvgBuilderOldEvent = AvgBuilderOldEvent + (DeltaBuilderOldEvent-AvgBuilderOldEvent)*1./(nAvg+1);
+               nAvg++;
+
+               fd_set fds;
+               struct timeval tv;
+               int retval;
+
+               FD_ZERO(&fds);
+               FD_SET(0, &fds);//stdin
+
+               tv.tv_sec = 1;
+               tv.tv_usec = 0;
+
+               retval = select(1, &fds, NULL, NULL, &tv);
+               if (retval == -1){
+                  printf("error with select()\n");
+                  exit(EXIT_FAILURE);
+               } else if (retval){
+                  //stdin commands
+                  char c = getchar();
+                  if(c=='q') done = true;
+               }
+               else{
+                  // timeout
+               }
+
+            }
+
+            //print averages and max
+            printf("averages on %d seconds\n", nAvg);
+            printf("Collected packets/s %lu avg %lu max\n", AvgCollectorNPackets, MaxCollectorNPackets);
+            printf("Dropped packets/s %lu avg %lu max\n", AvgCollectorDroppedPackets, MaxCollectorDroppedPackets);
+            printf("Received Events/s %lu avg %lu max\n", AvgBuilderBuildedEvent, MaxBuilderBuildedEvent);
+            printf("Dropped Events/s %lu avg %lu max\n", AvgBuilderDroppedEvent, MaxBuilderDroppedEvent);
+            printf("Old Events/s %lu avg %lu max\n", AvgBuilderOldEvent, MaxBuilderOldEvent);
+
+
          }
       } while ( option == 0 ) ;
       /* end of the main loop on the options*/

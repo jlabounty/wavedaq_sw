@@ -345,6 +345,10 @@ class WDAQPacketCollector: public DAQServerThread{
       fNPackets = 0;
       fDroppedPackets = 0;
    }
+
+   //Statistics getters
+   unsigned long GetReceivedPackets() const { return fNPackets; }
+   unsigned long GetDroppedPackets() const { return fDroppedPackets; }
 };
 
 // temporary thread to read TCB
@@ -372,11 +376,13 @@ class WDAQEventBuilder : public DAQThread{
    //structure to group together packets belonging to same event
    std::map<int, WDAQEvent*> fEvents;
 
+   //number of boards to wait
+   int           fNBoards;
+
    //statistics
    unsigned long fBuildedEvent;
    unsigned long fDroppedEvent;
    unsigned long fOldEvent;
-   int           fNBoards;
    //flags
    bool          fNotBuilding;
    bool          fDropping;
@@ -403,6 +409,12 @@ class WDAQEventBuilder : public DAQThread{
    //building state getters
    bool GetIsNotBuilding() const { return fNotBuilding; }
    bool GetIsDropping() const { return fDropping; }
+
+   //Statistics getters
+   unsigned long GetBuildedEvents() const { return fBuildedEvent; }
+   unsigned long GetDroppedEvents() const { return fDroppedEvent; }
+   unsigned long GetOldEvents() const { return fOldEvent; }
+   unsigned long GetEventsInQueue() const { return fEvents.size(); }
 };
 
 //Event worker - Thread that calibrate events
