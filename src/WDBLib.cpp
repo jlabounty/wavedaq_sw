@@ -679,7 +679,7 @@ void WDB::SetDestinationPort(int port) {
    if (mDemoMode)
       return;
 
-   //need to configure only if standalone, with DCB destination port is automatic
+   // need to configure only if standalone, with DCB destination port is done via DCB cfgdst command
    if (!mDCB)
       // set destination port in WD board, MAC and IP is used automatically form UDP packet
       SendUDP(std::string("cfgdst ") + std::to_string(port));
@@ -1856,7 +1856,7 @@ void WDEventRequest::ClearRequest() {
    mSOEReceived = false;
    mEOEReceived = false;
    mFirstPacketNumber = 0;
-   mLastPacketNumber = 0;
+   mLastPacketNumber = -1;
    mReceivedPackets = 0;
    mDroppedPackets = 0;
 }
@@ -1869,7 +1869,7 @@ void WDEventRequest::ProcessPacket(FRAME_WDAQ_HEADER *pdaqh) {
       mFirstPacketNumber = pdaqh->packet_number;
    } else {
       // check if any packets have been dropped
-      if (pdaqh->packet_number != (unsigned short) (mLastPacketNumber + 1)) {
+      if (mLastPacketNumber != -1 && pdaqh->packet_number != (unsigned short) (mLastPacketNumber + 1)) {
          mDroppedPackets += (pdaqh->packet_number - mLastPacketNumber) - 1;
       }
       mLastPacketNumber = pdaqh->packet_number;
@@ -2337,10 +2337,10 @@ int WP::ReceiveWfPacket() {
    }
 
    // use following code to artificially dop packages for testing
-   //if ((double)rand()/RAND_MAX < 0.01) {
-   //   std::cout << "Packet artificially dropped" << std::endl;
-   //   return SUCCESS;
-   //}
+//   if ((double)rand()/RAND_MAX < 0.001) {
+//      std::cout << "Packet artificially dropped" << std::endl;
+//      return SUCCESS;
+//   }
 
    // check that we have a request for that board
    if (mEventRequest.count(pwdaq_header->serial_number) > 0) {
