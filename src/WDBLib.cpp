@@ -22,7 +22,6 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <arpa/inet.h>
-#include <ifaddrs.h>
 #include <netdb.h>
 #include <assert.h>
 #include <stdio.h>
@@ -1837,7 +1836,7 @@ void WDEvent::SetWDEventHeaderInfo(FRAME_WDAQ_HEADER *pdaqh, FRAME_WDB_HEADER *p
 
    mEventNumber = pdaqh->event_number;
    mTriggerNumber = pdaqh->trigger_information[5] | (pdaqh->trigger_information[4] << 8);
-   mTriggerType = pdaqh->trigger_information[1] | ((pdaqh->trigger_information[0] << 8) & 0x3F);
+   mTriggerType = pdaqh->trigger_information[1] | (pdaqh->trigger_information[0] << 8);
    mTemperature = std::round(ph->temperature * 0.0625 * 10) / 10.0f;
 }
 
@@ -2357,7 +2356,7 @@ int WP::ReceiveWfPacket() {
       return 0;
    }
 
-   // find event belonging to this baord
+   // find event belonging to this board
    if (mEvent.find(pwdaq_header->serial_number) == mEvent.end()) {
       std::cerr << "Received unexpected packet from board #" << pwdaq_header->serial_number << std::endl;
       return 0;
