@@ -207,7 +207,7 @@ class DAQThread{
 };
 
 // --- DAQ Network Thread --- thread with socket functionalities
-#define MAXUDPSIZE 1800
+#define MAXUDPSIZE 9000
 #define MAXMSG 200
 class DAQServerThread : public DAQThread{
    private:

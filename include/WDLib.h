@@ -303,6 +303,7 @@ class WDWDB : public WDB, public WDBoard{
 
       void ConfigureFPD(Property &property);
       void ConfigureIPD(Property &property);
+      void ConfigureMTU(Property &property);
       void ConfigureFrontendGain(Property &property);
       void ConfigureFrontendPzc(Property &property);
       void ConfigureFrontendPzcLevel(Property &property);

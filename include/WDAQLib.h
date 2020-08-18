@@ -132,7 +132,7 @@ public:
 //WDAQ ADC Packet Data -  derived packet class to host ADC data
 class WDAQADCPacketData : public WDAQWdbPacketData{
 public:
-   unsigned short data[1024];
+   unsigned short data[2048];
 
    //Add packet info to given Board Event
    void AddDataToBoardEvent(WDAQBoardEvent *e);

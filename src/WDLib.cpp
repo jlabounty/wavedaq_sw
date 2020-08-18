@@ -684,6 +684,8 @@ void WDWDB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureIPD(property);
    } else if(name=="FPD"){
       ConfigureFPD(property);
+   } else if(name=="MTU"){
+      ConfigureMTU(property);
    } else if(name=="FrontendGain"){
       ConfigureFrontendGain(property);
    } else if(name=="FrontendPzc"){
@@ -768,6 +770,15 @@ void WDWDB::ConfigureFPD(Property &property) {
    firstpacket_delay = property.GetUHex(); 
    if(firstpacket_delay != 0){
       SetFirstPkgDly(firstpacket_delay);
+   }
+}
+
+void WDWDB::ConfigureMTU(Property &property) {
+   unsigned int com_pld_size;
+   com_pld_size = property.GetUHex(); 
+   if(com_pld_size != 0){
+      com_pld_size = (com_pld_size / 6) * 6;
+      SetComPldSize(com_pld_size);
    }
 }
 
