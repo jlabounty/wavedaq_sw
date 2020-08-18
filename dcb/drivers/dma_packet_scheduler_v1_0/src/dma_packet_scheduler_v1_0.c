@@ -413,6 +413,14 @@ static long dps_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
         return retval;
 }
 
+/**
+ * dps_sysfs - sysfs control and configuration processing
+ */
+/** sysfs dps_config number of slots
+ *
+ * Description:
+ * Reading "slots" returns the number of slots connected to the DMA buffer.
+ */
 static ssize_t slots_show(struct device *dev, struct device_attribute *attr, char *buffer)
 {
         struct dps_info *info = dev_get_drvdata(dev);
@@ -421,12 +429,23 @@ static ssize_t slots_show(struct device *dev, struct device_attribute *attr, cha
 }
 static DEVICE_ATTR_RO(slots);
 
+/** sysfs dps_config number of windows
+ *
+ * Description:
+ * Reading "windows" returns the number of window buffers available for each slot
+ * of the DMA buffer.
+ */
 static ssize_t windows_show(struct device *dev, struct device_attribute *attr, char *buffer)
 {
         return sprintf(buffer, "%d\n", windows);
 }
 static DEVICE_ATTR_RO(windows);
 
+/** sysfs dps_config window size
+ *
+ * Description:
+ * Reading "window_size" returns the window size (max. packet size) of a window buffer.
+ */
 static ssize_t win_size_show(struct device *dev, struct device_attribute *attr, char *buffer)
 {
         return sprintf(buffer, "%d\n", win_size);
@@ -445,6 +464,12 @@ static struct attribute_group dps_config_group = {
     .attrs = dps_config_attrs,
 };
 
+/** sysfs dps_ctrl enable
+ *
+ * Description:
+ * Writing "enable" enables (1) or disables (0) the global DMA buffer.
+ * Reading returns the status of the global DMA buffer enable.
+ */
 static ssize_t enable_show(struct device *dev, struct device_attribute *attr, char *buffer)
 {
         struct dps_info *info = dev_get_drvdata(dev);
@@ -469,20 +494,27 @@ static ssize_t enable_store(struct device *dev, struct device_attribute *attr, c
         if( kstrtol(buffer, 0, &enable) )
                 return -EINVAL;
 
-        if(enable == DPS_IP_ENABLE)
+        if(enable == 1)
         {
                 reg_set(info, DPS_REG_GCFG, DPS_REG_GCFG_BIT_ENA);
-                return 0;
+                return count;
         }
-        else if (enable == DPS_IP_DISABLE)
+        else if (enable == 0)
         {
                 reg_clr(info, DPS_REG_GCFG, DPS_REG_GCFG_BIT_ENA);
-                return 0;
+                return count;
         }
         return -EINVAL;
 }
 static DEVICE_ATTR_RW(enable);
 
+/** sysfs dps_ctrl slot enable
+ *
+ * Description:
+ * Writing "slot_enable" enables (1) or disables (0) the corresponding slot.
+ * Each bit represents a slot. The LSB corresponds to slot 0.
+ * Reading returns the current value of the DMA buffer slot_enable.
+ */
 static ssize_t slot_enable_show(struct device *dev, struct device_attribute *attr, char *buffer)
 {
         struct dps_info *info = dev_get_drvdata(dev);
@@ -500,13 +532,21 @@ static ssize_t slot_enable_store(struct device *dev, struct device_attribute *at
 
         retval = kstrtol(buffer, 0, &slot_en);
         if(retval)
-                return retval;
+                return -EINVAL;
 
         reg_write(info, DPS_REG_SLTENA, slot_en);
-        return 0;
+        return count;
 }
 static DEVICE_ATTR_RW(slot_enable);
 
+/** sysfs dps_ctrl next_buffer
+ *
+ * Description:
+ * Reading "next_buffer" returns the number of window buffers that are currently in the queue for
+ * readout.
+ * Writing a value to "next_buffer" removes the corresponding number of window buffers from the
+ * head of the read queue.
+ */
 static ssize_t next_buffer_show(struct device *dev, struct device_attribute *attr, char *buffer)
 {
         struct dps_info *info = dev_get_drvdata(dev);
@@ -518,16 +558,26 @@ static ssize_t next_buffer_store(struct device *dev, struct device_attribute *at
 {
         struct dps_info *info = dev_get_drvdata(dev);
         int retval = 0;
-        long items;
+        long target_items;
+        int real_items;
 
-        retval = kstrtol(buffer, 0, &items);
+        retval = kstrtol(buffer, 0, &target_items);
         if(retval)
-                return 0;
+                return -EINVAL;
 
-        return dps_rm_from_queue(info, items);
+        real_items = dps_rm_from_queue(info, target_items);
+        if((long)real_items != target_items)
+                pr_warn("Warning: removed %d of %d packets\n", real_items, (int)target_items);
+        return count;
 }
 static DEVICE_ATTR_RW(next_buffer);
 
+/** sysfs dps_ctrl data_bytes
+ *
+ * Description:
+ * Reading "data_bytes" returns the number of bytes stored in the window buffer that is
+ * currently available for readout (head of the reoudout queue).
+ */
 static ssize_t data_bytes_show(struct device *dev, struct device_attribute *attr, char *buffer)
 {
         struct dps_info *info = dev_get_drvdata(dev);
