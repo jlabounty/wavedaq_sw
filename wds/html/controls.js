@@ -143,7 +143,7 @@ document.write("<style>" +
    "   border-top-left-radius: 6px;" +
    "   border-top-right-radius: 6px;" +
    "   font-size: 12pt;" +
-   "   padding: 10px;" +
+   "   padding: 2px;" +
    "}\n" +
    ".dlgTitlebar:hover {" +
    "   cursor: pointer;" +
@@ -162,7 +162,7 @@ document.write("<style>" +
    ".dlgPanel {" +
    "   background-color: #F0F0F0;" +
    "   text-align: center;" +
-   "   padding: 5px;" +
+   "   padding: 4px;" +
    "   border-bottom-left-radius: 6px;" +
    "   border-bottom-right-radius: 6px;" +
    "}\n" +
