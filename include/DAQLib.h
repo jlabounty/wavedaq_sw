@@ -211,6 +211,23 @@ class DAQThread{
 #define MAXMSG 200
 class DAQServerThread : public DAQThread{
    private:
+
+      //define missing stuff for replacing recvmmsg on apple systems
+#if CMAKE_SYSTEM_NAME==DARWIN
+      struct mmsghdr {
+         struct msghdr msg_hdr;  /* Message header */
+         unsigned int  msg_len;  /* Number of received bytes for header */
+      };
+
+#define MSG_WAITFORONE 0
+      int recvmmsg(int sockfd, struct mmsghdr *msgvec, unsigned int vlen,
+                   unsigned int flags, struct timespec *timeout){
+         msgvec[0].msg_len = recvmsg(sockfd, &msgvec[0].msg_hdr, 0);
+
+         return 1;
+      }
+#endif
+
       int fDataSocket;
       volatile int fServerPort;
       unsigned char fDatagramBuffer[MAXMSG][MAXUDPSIZE];
