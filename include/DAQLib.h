@@ -213,7 +213,7 @@ class DAQServerThread : public DAQThread{
    private:
 
       //define missing stuff for replacing recvmmsg on apple systems
-#if CMAKE_SYSTEM_NAME==DARWIN
+#if __APPLE__
       struct mmsghdr {
          struct msghdr msg_hdr;  /* Message header */
          unsigned int  msg_len;  /* Number of received bytes for header */
