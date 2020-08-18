@@ -556,6 +556,10 @@ function dlgShow(dlg, modal) {
       dlgs[i].style.zIndex = "10";
    d.style.zIndex = "11";
 
+   // enable scrolling if dialog bog goes beyond screen
+   d.oldScroll = document.body.style.overflow;
+   document.body.style.overflow = "scroll";
+
    if (d.modal) {
       let b = document.getElementById("dlgBlackout");
       if (b === undefined || b === null) {
@@ -723,6 +727,10 @@ function dlgHide(dlg) {
       }
    }
    dlg.style.display = "none";
+   if (dlg.oldScroll === "")
+      document.body.style.overflow = "hidden";
+   else
+      document.body.style.overflow = dlg.oldScroll;
 }
 
 function dlgMessageDestroy(b) {
