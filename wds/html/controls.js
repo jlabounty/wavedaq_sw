@@ -557,7 +557,7 @@ function dlgShow(dlg, modal) {
    d.style.zIndex = "11";
 
    // enable scrolling if dialog bog goes beyond screen
-   d.oldScroll = document.body.style.overflow;
+   d.oldScroll = window.getComputedStyle(document.body).overflow;
    document.body.style.overflow = "scroll";
 
    if (d.modal) {
@@ -727,9 +727,7 @@ function dlgHide(dlg) {
       }
    }
    dlg.style.display = "none";
-   if (dlg.oldScroll === "")
-      document.body.style.overflow = "hidden";
-   else
+   if (dlg.oldScroll !== "")
       document.body.style.overflow = dlg.oldScroll;
 }
 
