@@ -486,6 +486,28 @@ function dlgLoad(url) {
    });
 }
 
+function drawCloseButton(c, mark) {
+   let ctx = c.getContext("2d");
+   ctx.clearRect(0, 0, c.width, c.height);
+   ctx.lineWidth = 0.5;
+   ctx.beginPath();
+   ctx.arc(c.width/2, c.height/2, c.width/2-1, 0, 2*Math.PI);
+   ctx.fillStyle = '#FD5E59';
+   ctx.fill();
+   ctx.strokeStyle = '#DF2020';
+   ctx.stroke();
+   if (mark) {
+      ctx.strokeStyle = '#000000';
+      ctx.beginPath();
+      ctx.lineWidth = 1;
+      ctx.moveTo(c.width/2-3, c.height/2-3);
+      ctx.lineTo(c.width/2+3, c.height/2+3);
+      ctx.moveTo(c.width/2+3, c.height/2-3);
+      ctx.lineTo(c.width/2-3, c.height/2+3);
+      ctx.stroke();
+   }
+}
+
 function dlgShow(dlg, modal) {
    let d;
    if (typeof dlg === "string")
@@ -496,6 +518,20 @@ function dlgShow(dlg, modal) {
    if (d === null) {
       dlgAlert("Dialog '" + dlg + "' does not exist");
       return;
+   }
+
+   // put "close" icon into title bar
+   if (d.childNodes[1].className === "dlgTitlebar") {
+      let t = d.childNodes[1];
+      let ttext = t.innerHTML;
+      if (ttext.search('dlgHide') === -1) {
+         t.innerHTML = "<div style=\"position: absolute;left: 6px;top: 3px;\" " +
+            "onclick=\"dlgHide(this.parentNode.parentNode.id);\">" +
+            "<canvas id=\"cvsClose\" width=\"14px\" height=\"14px\"></canvas>" +
+            "</div>" + ttext;
+      }
+      let c = d.childNodes[1].childNodes[0].childNodes[0];
+      drawCloseButton(c, false);
    }
 
    d.dlgAx = 0;
@@ -566,6 +602,10 @@ function dlgShow(dlg, modal) {
    d.dlgMouseMove = function (e) {
       if (d.style.display === "none")
          return;
+
+      // draw close button with "x" if mouse cursor is inside
+      let c = d.childNodes[1].childNodes[0].childNodes[0];
+      drawCloseButton(c, e.target === c);
 
       if (this.Ax > 0 && this.Ay > 0) {
          e.preventDefault();
