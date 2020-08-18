@@ -208,12 +208,17 @@ class DAQThread{
 
 // --- DAQ Network Thread --- thread with socket functionalities
 #define MAXUDPSIZE 1800
+#define MAXMSG 200
 class DAQServerThread : public DAQThread{
    private:
       int fDataSocket;
       volatile int fServerPort;
-      unsigned char fDatagramBuffer[MAXUDPSIZE];
-      int fDatagramSize;
+      unsigned char fDatagramBuffer[MAXMSG][MAXUDPSIZE];
+      struct mmsghdr fMsgs[MAXMSG];
+      struct iovec fIoVecs[MAXMSG];
+      int fRecvMsg;
+      struct timespec fTimeout;
+
       int fBufferSize;
       std::chrono::microseconds fDataWaitDuration;
 
@@ -263,36 +268,42 @@ class DAQServerThread : public DAQThread{
          getsockname(fDataSocket, (struct sockaddr *) &server_addr, (socklen_t *) &size);
          fServerPort = ntohs(server_addr.sin_port);
 
+         //setup iovecs
+         memset(fMsgs, 0, sizeof(fMsgs));
+         for (int i = 0; i < MAXMSG; i++) {
+            fIoVecs[i].iov_base         = fDatagramBuffer[i];
+            fIoVecs[i].iov_len          = MAXUDPSIZE;
+            fMsgs[i].msg_hdr.msg_iov    = &fIoVecs[i];
+            fMsgs[i].msg_hdr.msg_iovlen = 1;
+         }
+
       }
 
       void Loop(){
-
          fd_set rfds;
-         struct timeval tv;
          int retval;
+
+         fTimeout.tv_sec = fDataWaitDuration.count() / 1000;
+         fTimeout.tv_nsec = (fDataWaitDuration.count() % 1000) * 1000;
 
          FD_ZERO(&rfds);
          FD_SET(fDataSocket, &rfds);
 
-         tv.tv_sec = fDataWaitDuration.count() / 1000;
-         tv.tv_usec = fDataWaitDuration.count() % 1000;
-
-         retval = select(FD_SETSIZE, &rfds, NULL, NULL, &tv);
+         retval = pselect(FD_SETSIZE, &rfds, NULL, NULL, &fTimeout, NULL);
 
          if (retval == -1)
             throw std::runtime_error(std::string("Cannot select"));
          else if (retval){
-            struct sockaddr_in client_addr;
-            socklen_t sockaddr_in_len = sizeof(client_addr);
 
-            fDatagramSize = (int) recvfrom(fDataSocket, (char*) fDatagramBuffer, sizeof(fDatagramBuffer), 0, 
-                                           (struct sockaddr *)&client_addr, (socklen_t *)&sockaddr_in_len);
+            fRecvMsg =  recvmmsg(fDataSocket, fMsgs, MAXMSG, MSG_WAITFORONE, &fTimeout);
 
-            if(fDatagramSize<0){
-               throw std::runtime_error(std::string("Cannot recvfrom"));
-            } else if(fDatagramSize>0){
+            if(fRecvMsg<0){
+               throw std::runtime_error(std::string("Cannot recvmmsg"));
+            } else if(fRecvMsg>0){
                //produce
-               GotData(fDatagramSize, fDatagramBuffer);
+               for(int i=0; i<fRecvMsg; i++){
+                  GotData(fMsgs[i].msg_len, fDatagramBuffer[i]);
+               }
             }
          } else {
             //timeout: nothing to read
@@ -318,17 +329,23 @@ class DAQServerThread : public DAQThread{
 
       //Getter
       int GetServerPort(){ return fServerPort; }
+      int GetReceivedMessages(){ return fRecvMsg; }
 
       //Constructor
       DAQServerThread(int buffersize=-1){
          fDataSocket = -1;
          fServerPort = -1;
-         fDatagramSize = 0;
+         fRecvMsg = 0;
          if(buffersize>0) fBufferSize = buffersize;
          else fBufferSize = 4*1024*1024; //default
 
-         fDataWaitDuration = std::chrono::microseconds(100);
+         SetDataWaitDuration(std::chrono::microseconds(100));
       }
+
+      void SetDataWaitDuration(std::chrono::microseconds d){
+         fDataWaitDuration = d;
+      }
+
 
       //Destructor
       virtual ~DAQServerThread(){

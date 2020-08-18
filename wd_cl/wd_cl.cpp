@@ -490,6 +490,7 @@ int main(int argc, char *argv[])
                //gather statistics
                long collectorNPackets = sys->fCollectorThread->GetReceivedPackets();
                long collectorDroppedPackets = sys->fCollectorThread->GetDroppedPackets();
+               int  collectorReceivedMessages = sys->fCollectorThread->GetReceivedMessages();
                long builderEventsInQueue = sys->fBuilderThread->GetEventsInQueue();
                long builderBuildedEvent = sys->fBuilderThread->GetBuildedEvents();
                long builderDroppedEvent =  sys->fBuilderThread->GetDroppedEvents();
@@ -516,6 +517,7 @@ int main(int argc, char *argv[])
                long DeltaBuilderDroppedEvent = builderDroppedEvent-OldBuilderDroppedEvent;
                long DeltaBuilderOldEvent = builderOldEvent-OldBuilderOldEvent;
 
+               drawBar("Msgs/s", collectorReceivedMessages, 200, true);
                drawBar("Pkts/s", DeltaCollectorNPackets, 1000000, true);
                drawBar("DropPkts/s", DeltaCollectorDroppedPackets, 1000000, true);
                if(builderNotBuilding) printf("builder is not building\n");
