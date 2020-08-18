@@ -537,6 +537,10 @@ function dlgShow(dlg, modal) {
       if (d.style.display === "none")
          return;
 
+      // ignore right mouse clicks
+      if (e.button !== 0)
+         return;
+
       if ((e.target === this || e.target.parentNode === this) &&
          e.target.className === "dlgTitlebar") {
          e.preventDefault();
