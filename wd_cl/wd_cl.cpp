@@ -86,7 +86,7 @@ void drawBar(const char* name, float value, float valueMax, bool printData = fal
       v = 1;
       printf("\e[1;31m");//all make red
    }
-   printf("%10s (%5.1f\%):", name, v*100);
+   printf("%10s (%5.1f%%):", name, v*100);
 
    if(v>=0.9) printf("\e[1;31m");//red
    else if(v>=0.7) printf("\e[1;33m");//yellow

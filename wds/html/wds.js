@@ -1257,7 +1257,7 @@ function resize()
       // first set height which turns scroll bar on or off
       config.style.height = document.documentElement.clientHeight + "px";
 
-      // increase with if scroll bar is on
+      // increase width if scroll bar is on
       let configSbWidth = config.offsetWidth - config.clientWidth;
       config.style.width = (320 + configSbWidth) + "px";
       config.style.left = (document.documentElement.clientWidth -
@@ -1266,7 +1266,7 @@ function resize()
       // first set height which turns scroll bar on or off
       ctrls.style.height = document.documentElement.clientHeight + "px";
 
-      // increase with if scroll bar is on
+      // increase width if scroll bar is on
       let ctrlsSbWidth = ctrls.offsetWidth - ctrls.clientWidth;
       ctrls.style.width = (205 + ctrlsSbWidth) + "px";
       ctrls.style.left = (document.documentElement.clientWidth - ctrls.offsetWidth -

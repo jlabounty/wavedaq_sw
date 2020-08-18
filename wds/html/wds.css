@@ -322,9 +322,9 @@ input[type=text] {
 
 .tableHelp th {
    border: 1px solid #808080;
-   background-color: #808080;
+   background-color: #B0B0B0;
    color: white;
-   padding: 10px;
+   padding: 4px;
 }
 
 .tableHelp tr:nth-child(odd) {
