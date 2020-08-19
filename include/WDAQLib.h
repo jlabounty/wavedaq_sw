@@ -211,13 +211,15 @@ public:
    unsigned short   mWDAQFlags;
 
    //event status
+   bool             mComplete;
    bool             mEndFlagReceived;
    bool             mStartFlagReceived;
    int              mPacketsReceived;
    int              mFirstPacket;
    int              mLastPacket;
 
-   bool IsComplete();
+   bool IsComplete() { return mComplete; }
+   void UpdateIsComplete();
    WDAQBoardEvent(WDAQPacketData* pkt);
 };
 
@@ -306,12 +308,14 @@ public:
    unsigned short   mTriggerNumber;
    unsigned short   mTriggerType;
    unsigned short   mSerialTriggerData;
+   int              mCompletedBoards;
 
    //map (BoardType -> map(BoardSerial -> Board))
    std::map<unsigned char, std::map<unsigned short, WDAQBoardEvent *>> fBoard;
    
    void AddPacket(WDAQPacketData* pkt);
-   int IsComplete();
+   void UpdateIsComplete();
+   int IsComplete() { return mCompletedBoards; }
    
    //constructor
    WDAQEvent(WDAQPacketData* pkt);
