@@ -487,6 +487,8 @@ function dlgLoad(url) {
 }
 
 function drawCloseButton(c, mark) {
+   if (!c.getContext)
+      return;
    let ctx = c.getContext("2d");
    ctx.clearRect(0, 0, c.width, c.height);
    ctx.lineWidth = 0.5;
@@ -521,17 +523,21 @@ function dlgShow(dlg, modal) {
    }
 
    // put "close" icon into title bar
-   if (d.childNodes[1].className === "dlgTitlebar") {
-      let t = d.childNodes[1];
+   let t;
+   if (d.childNodes[0].className === "dlgTitlebar")
+      t = d.childNodes[0];
+   if (d.childNodes[1].className === "dlgTitlebar")
+      t = d.childNodes[1];
+   if (t !== undefined) {
       let ttext = t.innerHTML;
       if (ttext.search('dlgHide') === -1) {
          t.innerHTML = "<div style=\"position: absolute;left: 6px;top: 3px;\" " +
-            "onclick=\"dlgHide(this.parentNode.parentNode.id);\">" +
+            "onclick=\"dlgClose(this);\">" +
             "<canvas id=\"cvsClose\" width=\"14px\" height=\"14px\"></canvas>" +
             "</div>" + ttext;
       }
-      let c = d.childNodes[1].childNodes[0].childNodes[0];
-      drawCloseButton(c, false);
+      d.canvas = t.childNodes[0].childNodes[0];
+      drawCloseButton(d.canvas, false);
    }
 
    d.dlgAx = 0;
@@ -608,8 +614,7 @@ function dlgShow(dlg, modal) {
          return;
 
       // draw close button with "x" if mouse cursor is inside
-      let c = d.childNodes[1].childNodes[0].childNodes[0];
-      drawCloseButton(c, e.target === c);
+      drawCloseButton(d.canvas, e.target === d.canvas);
 
       if (this.Ax > 0 && this.Ay > 0) {
          e.preventDefault();
@@ -704,6 +709,14 @@ function dlgShow(dlg, modal) {
    window.addEventListener("touchcancel", d.dlgTouchCancel.bind(d), true);
 }
 
+function dlgClose(div) {
+   let dlg = div.parentNode.parentNode;
+   if (dlg.shouldDestroy)
+      dlgMessageDestroy(div);
+   else if (dlg.id !== undefined)
+      dlgHide(dlg.id);
+}
+
 function dlgHide(dlg) {
    if (typeof dlg === "string")
       dlg = document.getElementById(dlg);
@@ -759,6 +772,7 @@ function dlgMessage(title, string, modal, error, callback, param) {
    d.style.zIndex = modal ? "21" : "20";
    d.callback = callback;
    d.callbackParam = param;
+   d.shouldDestroy = true;
 
    d.innerHTML = "<div class=\"dlgTitlebar\" id=\"dlgMessageTitle\">" + title + "</div>" +
       "<div class=\"dlgPanel\" style=\"padding: 30px;\">" +
@@ -789,6 +803,7 @@ function dlgConfirm(string, confirmCallback, param) {
    d.style.zIndex = "21";
    d.callback = confirmCallback;
    d.callbackParam = param;
+   d.shouldDestroy = true;
 
    d.innerHTML = "<div class=\"dlgTitlebar\" id=\"dlgMessageTitle\">Please confirm</div>" +
       "<div class=\"dlgPanel\" style=\"padding: 30px;\">" +
@@ -812,6 +827,7 @@ function dlgQuery(string, value, queryCallback, param) {
    d.style.zIndex = "21";
    d.callback = queryCallback;
    d.callbackParam = param;
+   d.shouldDestroy = true;
 
    d.innerHTML = "<div class=\"dlgTitlebar\" id=\"dlgMessageTitle\">Please confirm</div>" +
       "<div class=\"dlgPanel\" style=\"padding: 20px;\">" +
