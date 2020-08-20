@@ -741,6 +741,10 @@ function setCursorsOff() {
 }
 
 Oscilloscope.prototype.drawCursors = function (ctx) {
+   let d = document.getElementById('dlgMeasure');
+   if (d.style.display === "none")
+      return;
+
    if (this.timeCursor.on) {
       this.timeCursor.time = this.timeCursor.input.value*1E-9;
       this.timeCursor.x = this.timeToX(this.timeCursor.time);

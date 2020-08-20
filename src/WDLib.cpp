@@ -144,6 +144,10 @@ void WDSystem::AddCrate(WDCrate *crate){
    if(fTrgCrateId < 0) {
       fTrgCrateId = fCrate.size() - 1;
    }
+   //if no distribution crate new crate is defined so
+   if(fDistributionCrateId < 0) {
+      fDistributionCrateId = fCrate.size() - 1;
+   }
 
    crate->fSystem = this;
    crate->fCrateNumber = fCrate.size() - 1;
@@ -201,6 +205,7 @@ void WDSystem::CreateFromXml(std::string filepath){
          AddCrate(c);
 
          bool triggerFlag = false;
+         bool distributionFlag = false;
          //loop on Boards
          for(int i=0; i<mxml_get_number_of_children(crate_xml); i++){
             MXML_NODE *board_xml= mxml_subnode(crate_xml, i);
@@ -300,10 +305,14 @@ void WDSystem::CreateFromXml(std::string filepath){
                CreatePropertiesFromXml(b, board_xml);
             }
             else if(board_node_name == "Trigger") triggerFlag = true;
+            else if(board_node_name == "Distribution") distributionFlag = true;
          }
 
          if(triggerFlag){
             SetTriggerCrateId(GetCrateSize()-1);
+         }
+         if(distributionFlag){
+            SetDistributionCrateId(GetCrateSize()-1);
          }
       } else if (crate_node_name == "Group"){
          //create a new property group
@@ -403,9 +412,19 @@ void WDSystem::SetSerdesTraining(bool state){
    }
 }
 
+//System Sync
+void WDSystem::Sync(){
+   try{
+      GetDistributionBoard()->Sync();
+   } catch (const std::runtime_error& ex){
+      //no DCB, try with TCB
+      GetTriggerBoard()->Sync();
+   }
+}
+
 //Go Run
 void WDSystem::GoRun(){
-   GetTriggerBoard()->Sync();
+   Sync();
    if(fCollectorThread) fCollectorThread->GoRun();
    if(fBuilderThread) fBuilderThread->GoRun();
    if(fWriterThread) fWriterThread->GoRun();
@@ -447,7 +466,7 @@ void WDSystem::StopRun(){
 }
 //train serial links
 void WDSystem::TrainSerdes(){
-   GetTriggerBoard()->Sync();
+   Sync();
 
    for(auto &c : fCrate){
       for(auto &b : *c){
@@ -460,7 +479,7 @@ void WDSystem::TrainSerdes(){
 void WDSystem::SpawnDAQ(){
    //number of buffer at each buffer stage
    const int number_of_buffers = 50;
-   const int number_of_calibrated_buffers = 100000;
+   const int number_of_calibrated_buffers = 100;
 
    printf("starting all threads\n");
 
@@ -665,6 +684,8 @@ void WDWDB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureIPD(property);
    } else if(name=="FPD"){
       ConfigureFPD(property);
+   } else if(name=="MTU"){
+      ConfigureMTU(property);
    } else if(name=="FrontendGain"){
       ConfigureFrontendGain(property);
    } else if(name=="FrontendPzc"){
@@ -749,6 +770,15 @@ void WDWDB::ConfigureFPD(Property &property) {
    firstpacket_delay = property.GetUHex(); 
    if(firstpacket_delay != 0){
       SetFirstPkgDly(firstpacket_delay);
+   }
+}
+
+void WDWDB::ConfigureMTU(Property &property) {
+   unsigned int com_pld_size;
+   com_pld_size = property.GetUHex(); 
+   if(com_pld_size != 0){
+      com_pld_size = (com_pld_size / 6) * 6;
+      SetComPldSize(com_pld_size);
    }
 }
 
@@ -1271,6 +1301,7 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureNgenHighThreshold(property);
    } else if(name=="NgenLowThreshold"){
       ConfigureNgenLowThreshold(property);
+   } else if(name=="NoLocalTrigger"){
    } else {
       printf("Unknown property %s in WDTCB\n", name.c_str());
    }
@@ -1278,6 +1309,30 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
 
 void WDTCB::ConfigurationStarted(){
    u_int32_t rrun_config = 0x0000E014;  //masktrg, masksync, maskbusy, fadcmode, enable trg_bus
+
+   //get crate and system
+   WDSystem *sys = GetCrate()->GetSystem();
+   if(GetCrate()->GetCrateNumber()==sys->GetTriggerCrateId() && GetSlot()==17){
+      //TCB is system Master
+      if(sys->GetTriggerCrateId() == sys->GetDistributionCrateId()){
+         //Distribution within same crate -> can use Local trigger
+         bool cableOnly;
+         try{
+            //check for cable being requested
+            cableOnly = GetProperty("NoLocalTrigger").GetBool();
+         }catch (const std::runtime_error& ex){
+            // enabled if nothig specified
+            cableOnly = false;
+         }
+         if(!cableOnly){
+            printf("Enabling local trigger: make sure FCI cable is not connected\n");
+            rrun_config |= 0x00000800; //LOCAL_TRG enable
+         } else {
+            printf("Local trigger manually disabled: using FCI cable instead\n");
+         }
+      }
+   }
+
    SetRRUN(&rrun_config);
    u_int32_t syncdly=0x1F;
    u_int32_t trgdly=0x1F;

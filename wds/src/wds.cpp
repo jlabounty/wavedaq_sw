@@ -1360,10 +1360,11 @@ int main(int argc, const char *argv[]) {
    }
 
    // set destination port after WP has been initialized
-   for (auto &b: gl.dcb)
-      b->SetDestinationPort(gl.wp->GetServerPort());
+   for (auto &d: gl.dcb)
+      d->SetDestinationPort(gl.wp->GetServerPort());
    for (auto &b: gl.wdb)
-      if(!b->IsDcbInterface()) b->SetDestinationPort(gl.wp->GetServerPort());
+      if(!b->IsDcbInterface())
+         b->SetDestinationPort(gl.wp->GetServerPort());
 
    // switch boards to normal mode to send events
    if (gl.triggerSelfArm)

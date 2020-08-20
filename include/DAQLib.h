@@ -4,6 +4,8 @@
 #include <queue>
 #include <thread>
 #include <condition_variable>
+#include <atomic>
+
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -118,6 +120,8 @@ class DAQThread{
    protected:
       std::chrono::high_resolution_clock::duration fIdleLoopDuration; //allows to avoid polling too much
       std::chrono::high_resolution_clock::duration fLastLoopDuration; //for monitoring
+      unsigned int fThreadId;
+      static std::atomic<unsigned int> fThreadCount;
    private:
       std::thread fThread;
       volatile bool fStop;
@@ -125,31 +129,7 @@ class DAQThread{
       volatile bool fRunning_old;
 
       //reserved Methods
-      void ThreadMain(){
-         Setup();
-
-         while(fStop != true){
-
-            bool shouldEnd = false;
-            //checks and run begin of run
-            if(fRunning && !fRunning_old) Begin();
-            //checks end of run
-            if(!fRunning && fRunning_old) shouldEnd = true;
-            fRunning_old = fRunning;
-
-            //timed loop
-            std::chrono::high_resolution_clock::time_point loopStart = std::chrono::high_resolution_clock::now();
-            if(fRunning && fRunning_old) Loop();
-            else std::this_thread::sleep_for(fIdleLoopDuration);
-            std::chrono::high_resolution_clock::time_point loopEnd = std::chrono::high_resolution_clock::now();
-
-            //run end of run
-            if(shouldEnd) End();
-
-         }
-
-         Close();
-      }
+      void ThreadMain();
 
       //to be implemented in derived class to setup functionalities
       virtual void Setup(){;} //called before thread Loop
@@ -160,29 +140,15 @@ class DAQThread{
 
    public:
       //Methods
-      void Start(){ 
-         fThread = std::thread([=] { ThreadMain(); });
-         fThread.detach();
-      }
-      void Stop(){
-         fStop = true;
-      }
+      void Start();
+      void Stop();
 
-      void GoRun(){
-         fRunning = true;
-      }
-
-      void StopRun(){
-         fRunning = false;
-      }
+      void GoRun();
+      void StopRun();
 
       bool IsRunning(){
-         //if(fRunning_old==false) printf("thread not running\n");
-         //else printf("still running\n");
-         
          return fRunning_old;
       }
-
       std::chrono::microseconds GetLastLoopDuration(){
          return std::chrono::duration_cast<std::chrono::microseconds>(fLastLoopDuration);
       }
@@ -191,14 +157,7 @@ class DAQThread{
       void SetIdleLoopDuration(std::chrono::microseconds d){fIdleLoopDuration = std::chrono::duration_cast<std::chrono::high_resolution_clock::duration>(d); }
 
       //Constructor
-      DAQThread(){
-         fStop = false;
-         fRunning = false;
-         fRunning_old = false;
-         //fMinLoopDuration = std::chrono::high_resolution_clock::duration::zero();
-         fIdleLoopDuration = std::chrono::duration_cast<std::chrono::high_resolution_clock::duration>(std::chrono::microseconds(100)); 
-         fLastLoopDuration = std::chrono::high_resolution_clock::duration::zero();
-      }
+      DAQThread();
 
       //Destructor
       virtual ~DAQThread(){
@@ -207,99 +166,42 @@ class DAQThread{
 };
 
 // --- DAQ Network Thread --- thread with socket functionalities
-#define MAXUDPSIZE 1800
+#define MAXUDPSIZE 9000
+#define MAXMSG 200
 class DAQServerThread : public DAQThread{
    private:
+
+      //define missing stuff for replacing recvmmsg on apple systems
+#if __APPLE__
+      struct mmsghdr {
+         struct msghdr msg_hdr;  /* Message header */
+         unsigned int  msg_len;  /* Number of received bytes for header */
+      };
+
+#define MSG_WAITFORONE 0
+      int recvmmsg(int sockfd, struct mmsghdr *msgvec, unsigned int vlen,
+                   unsigned int flags, struct timespec *timeout){
+         msgvec[0].msg_len = recvmsg(sockfd, &msgvec[0].msg_hdr, 0);
+
+         return 1;
+      }
+#endif
+
       int fDataSocket;
       volatile int fServerPort;
-      unsigned char fDatagramBuffer[MAXUDPSIZE];
-      int fDatagramSize;
+      unsigned char fDatagramBuffer[MAXMSG][MAXUDPSIZE];
+      struct mmsghdr fMsgs[MAXMSG];
+      struct iovec fIoVecs[MAXMSG];
+      int fRecvMsg;
+      struct timespec fTimeout;
+
       int fBufferSize;
       std::chrono::microseconds fDataWaitDuration;
 
       //reserved Methods
-      void Setup(){
-         //create socket
-         struct sockaddr_in server_addr;
-         fDataSocket = socket(AF_INET, SOCK_DGRAM, 0);
-         if(fDataSocket == 0){
-            throw std::runtime_error(std::string("Cannot create socket"));
-         }
-      
-         // increase receive buffer size
-         int rcvBufferSizeSet = fBufferSize;
-         int rcvBufferSizeGet;
-         socklen_t sockOptSize = sizeof(rcvBufferSizeGet);
+      void Setup();
 
-         printf("allocating %d bytes\n", fBufferSize);      
-
-         getsockopt(fDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeGet, &sockOptSize);
-         printf("initial %d\n", rcvBufferSizeGet);
-
-         if (rcvBufferSizeGet < 2*rcvBufferSizeSet) {
-            setsockopt(fDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeSet, sizeof(rcvBufferSizeSet));
-            getsockopt(fDataSocket, SOL_SOCKET, SO_RCVBUF, &rcvBufferSizeGet, &sockOptSize);
-            printf("final %d\n", rcvBufferSizeGet);
-         } else {
-            throw std::runtime_error(std::string("Cannot allocate enough memory for kernel buffer"));
-         }
-  
-
-         //int flags = fcntl(fDataSocket, F_GETFL, 0);
-         //fcntl(fDataSocket, F_SETFL, flags | O_NONBLOCK);
-
-         //bind
-         memset((char*)&server_addr, 0, sizeof(server_addr));
-         server_addr.sin_family = AF_INET;
-         server_addr.sin_port = htons(0); // let OS choose port
-         server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-         if (::bind(fDataSocket, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
-            perror("bind");
-            throw std::runtime_error(std::string("Cannot bind socket"));
-         }
-
-         //retrieve port
-         auto size = sizeof(server_addr);
-         getsockname(fDataSocket, (struct sockaddr *) &server_addr, (socklen_t *) &size);
-         fServerPort = ntohs(server_addr.sin_port);
-
-      }
-
-      void Loop(){
-
-         fd_set rfds;
-         struct timeval tv;
-         int retval;
-
-         FD_ZERO(&rfds);
-         FD_SET(fDataSocket, &rfds);
-
-         tv.tv_sec = fDataWaitDuration.count() / 1000;
-         tv.tv_usec = fDataWaitDuration.count() % 1000;
-
-         retval = select(FD_SETSIZE, &rfds, NULL, NULL, &tv);
-
-         if (retval == -1)
-            throw std::runtime_error(std::string("Cannot select"));
-         else if (retval){
-            struct sockaddr_in client_addr;
-            socklen_t sockaddr_in_len = sizeof(client_addr);
-
-            fDatagramSize = (int) recvfrom(fDataSocket, (char*) fDatagramBuffer, sizeof(fDatagramBuffer), 0, 
-                                           (struct sockaddr *)&client_addr, (socklen_t *)&sockaddr_in_len);
-
-            if(fDatagramSize<0){
-               throw std::runtime_error(std::string("Cannot recvfrom"));
-            } else if(fDatagramSize>0){
-               //produce
-               GotData(fDatagramSize, fDatagramBuffer);
-            }
-         } else {
-            //timeout: nothing to read
-
-         }
-
-      }
+      void Loop();
 
 
       void Close(){
@@ -315,20 +217,17 @@ class DAQServerThread : public DAQThread{
          //TODO: clean fDataSocket kernel buffer
       }
 
-
       //Getter
       int GetServerPort(){ return fServerPort; }
+      int GetReceivedMessages(){ return fRecvMsg; }
 
       //Constructor
-      DAQServerThread(int buffersize=-1){
-         fDataSocket = -1;
-         fServerPort = -1;
-         fDatagramSize = 0;
-         if(buffersize>0) fBufferSize = buffersize;
-         else fBufferSize = 4*1024*1024; //default
+      DAQServerThread(int buffersize=-1);
 
-         fDataWaitDuration = std::chrono::microseconds(100);
+      void SetDataWaitDuration(std::chrono::microseconds d){
+         fDataWaitDuration = d;
       }
+
 
       //Destructor
       virtual ~DAQServerThread(){

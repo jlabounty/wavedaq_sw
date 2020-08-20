@@ -45,7 +45,24 @@
     and 'Ok' button. The callback is called with the first parameter either
     true (if Ok has been clicked) or false (if Cancel has been clicked) and
     the second parameter a copy of 'param' passed to dlgConfirm().
- 
+
+ dlgQuery(message, value, callback, param)
+    Replacement of prompt() dialog. Shows a dialog box ith a 'Cancel', 'Ok'
+    button and a field to enter a value. 'message' is shown before the
+    input filed and can contain a string like 'Please enter value:'. If
+    'cancel' is pressed, the 'callback' function is called with the first
+    parameter equal 'false'. If 'Ok' is pressed, 'callback' is called with
+    the first parameter being the value of the input field. 'param' is just
+    passed to the callback function as an optional second parameter. So a
+    typical callback function can look like
+
+    function cb(value, param) {
+       if (value !== false)
+          alert('Value is '+value+', param is '+param);
+    }
+
+    where 'param' can also be ommitted.
+    
  dlgMessage(title, message, modal, error, callback, param)
     Similar to dlgAlert, but with the option to set a custom title which
     gets a red background if error is true. After the 'Ok' button is pressed,
@@ -126,7 +143,7 @@ document.write("<style>" +
    "   border-top-left-radius: 6px;" +
    "   border-top-right-radius: 6px;" +
    "   font-size: 12pt;" +
-   "   padding: 10px;" +
+   "   padding: 2px;" +
    "}\n" +
    ".dlgTitlebar:hover {" +
    "   cursor: pointer;" +
@@ -145,7 +162,7 @@ document.write("<style>" +
    ".dlgPanel {" +
    "   background-color: #F0F0F0;" +
    "   text-align: center;" +
-   "   padding: 5px;" +
+   "   padding: 4px;" +
    "   border-bottom-left-radius: 6px;" +
    "   border-bottom-right-radius: 6px;" +
    "}\n" +
@@ -469,6 +486,30 @@ function dlgLoad(url) {
    });
 }
 
+function drawCloseButton(c, mark) {
+   if (!c.getContext)
+      return;
+   let ctx = c.getContext("2d");
+   ctx.clearRect(0, 0, c.width, c.height);
+   ctx.lineWidth = 0.5;
+   ctx.beginPath();
+   ctx.arc(c.width/2, c.height/2, c.width/2-1, 0, 2*Math.PI);
+   ctx.fillStyle = '#FD5E59';
+   ctx.fill();
+   ctx.strokeStyle = '#DF2020';
+   ctx.stroke();
+   if (mark) {
+      ctx.strokeStyle = '#000000';
+      ctx.beginPath();
+      ctx.lineWidth = 1;
+      ctx.moveTo(c.width/2-3, c.height/2-3);
+      ctx.lineTo(c.width/2+3, c.height/2+3);
+      ctx.moveTo(c.width/2+3, c.height/2-3);
+      ctx.lineTo(c.width/2-3, c.height/2+3);
+      ctx.stroke();
+   }
+}
+
 function dlgShow(dlg, modal) {
    let d;
    if (typeof dlg === "string")
@@ -479,6 +520,24 @@ function dlgShow(dlg, modal) {
    if (d === null) {
       dlgAlert("Dialog '" + dlg + "' does not exist");
       return;
+   }
+
+   // put "close" icon into title bar
+   let t;
+   if (d.childNodes[0].className === "dlgTitlebar")
+      t = d.childNodes[0];
+   if (d.childNodes[1].className === "dlgTitlebar")
+      t = d.childNodes[1];
+   if (t !== undefined) {
+      let ttext = t.innerHTML;
+      if (ttext.search('dlgHide') === -1) {
+         t.innerHTML = "<div style=\"position: absolute;left: 6px;top: 3px;\" " +
+            "onclick=\"dlgClose(this);\">" +
+            "<canvas id=\"cvsClose\" width=\"14px\" height=\"14px\"></canvas>" +
+            "</div>" + ttext;
+      }
+      d.canvas = t.childNodes[0].childNodes[0];
+      drawCloseButton(d.canvas, false);
    }
 
    d.dlgAx = 0;
@@ -503,6 +562,10 @@ function dlgShow(dlg, modal) {
       dlgs[i].style.zIndex = "10";
    d.style.zIndex = "11";
 
+   // enable scrolling if dialog bog goes beyond screen
+   d.oldScroll = window.getComputedStyle(document.body).overflow;
+   document.body.style.overflow = "scroll";
+
    if (d.modal) {
       let b = document.getElementById("dlgBlackout");
       if (b === undefined || b === null) {
@@ -518,6 +581,10 @@ function dlgShow(dlg, modal) {
 
    d.dlgMouseDown = function (e) {
       if (d.style.display === "none")
+         return;
+
+      // ignore right mouse clicks
+      if (e.button !== 0)
          return;
 
       if ((e.target === this || e.target.parentNode === this) &&
@@ -545,6 +612,9 @@ function dlgShow(dlg, modal) {
    d.dlgMouseMove = function (e) {
       if (d.style.display === "none")
          return;
+
+      // draw close button with "x" if mouse cursor is inside
+      drawCloseButton(d.canvas, e.target === d.canvas);
 
       if (this.Ax > 0 && this.Ay > 0) {
          e.preventDefault();
@@ -639,6 +709,14 @@ function dlgShow(dlg, modal) {
    window.addEventListener("touchcancel", d.dlgTouchCancel.bind(d), true);
 }
 
+function dlgClose(div) {
+   let dlg = div.parentNode.parentNode;
+   if (dlg.shouldDestroy)
+      dlgMessageDestroy(div);
+   else if (dlg.id !== undefined)
+      dlgHide(dlg.id);
+}
+
 function dlgHide(dlg) {
    if (typeof dlg === "string")
       dlg = document.getElementById(dlg);
@@ -662,6 +740,8 @@ function dlgHide(dlg) {
       }
    }
    dlg.style.display = "none";
+   if (dlg.oldScroll !== "")
+      document.body.style.overflow = dlg.oldScroll;
 }
 
 function dlgMessageDestroy(b) {
@@ -692,6 +772,7 @@ function dlgMessage(title, string, modal, error, callback, param) {
    d.style.zIndex = modal ? "21" : "20";
    d.callback = callback;
    d.callbackParam = param;
+   d.shouldDestroy = true;
 
    d.innerHTML = "<div class=\"dlgTitlebar\" id=\"dlgMessageTitle\">" + title + "</div>" +
       "<div class=\"dlgPanel\" style=\"padding: 30px;\">" +
@@ -722,6 +803,7 @@ function dlgConfirm(string, confirmCallback, param) {
    d.style.zIndex = "21";
    d.callback = confirmCallback;
    d.callbackParam = param;
+   d.shouldDestroy = true;
 
    d.innerHTML = "<div class=\"dlgTitlebar\" id=\"dlgMessageTitle\">Please confirm</div>" +
       "<div class=\"dlgPanel\" style=\"padding: 30px;\">" +
@@ -729,6 +811,30 @@ function dlgConfirm(string, confirmCallback, param) {
       "<br /><br />" +
       "<button class=\"dlgButton\" id=\"dlgMessageButton\" type=\"button\" " +
       " onClick=\"let d=this.parentElement.parentElement;d.callback(true,d.callbackParam);dlgMessageDestroy(this);\">OK</button>" +
+      "<button class=\"dlgButton\" id=\"dlgMessageButton\" type=\"button\" " +
+      " onClick=\"let d=this.parentElement.parentElement;d.callback(false,d.callbackParam);dlgMessageDestroy(this);\">Cancel</button>" +
+      "</div>";
+
+   document.body.appendChild(d);
+
+   dlgShow(d, true);
+   return d;
+}
+
+function dlgQuery(string, value, queryCallback, param) {
+   let d = document.createElement("div");
+   d.className = "dlgFrame";
+   d.style.zIndex = "21";
+   d.callback = queryCallback;
+   d.callbackParam = param;
+   d.shouldDestroy = true;
+
+   d.innerHTML = "<div class=\"dlgTitlebar\" id=\"dlgMessageTitle\">Please confirm</div>" +
+      "<div class=\"dlgPanel\" style=\"padding: 20px;\">" +
+      "<div id=\"dlgMessageString\">" + string + "&nbsp;&nbsp;<input type='text' size='30' id='dlgQueryInput' value='" + value + "'></input></div>" +
+      "<br /><br />" +
+      "<button class=\"dlgButton\" id=\"dlgMessageButton\" type=\"button\" " +
+      " onClick=\"let d=this.parentElement.parentElement;d.callback(document.getElementById('dlgQueryInput').value,d.callbackParam);dlgMessageDestroy(this);\">OK</button>" +
       "<button class=\"dlgButton\" id=\"dlgMessageButton\" type=\"button\" " +
       " onClick=\"let d=this.parentElement.parentElement;d.callback(false,d.callbackParam);dlgMessageDestroy(this);\">Cancel</button>" +
       "</div>";

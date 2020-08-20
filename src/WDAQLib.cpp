@@ -233,29 +233,28 @@ WDAQBoardEvent::WDAQBoardEvent(WDAQPacketData* pkt){
    mCrateId = pkt->mCrateId;
    mSlotId = pkt->mSlotId;
 
+   mComplete = false;
    mStartFlagReceived = false;
    mEndFlagReceived = false;
    mPacketsReceived = 0;
 }
 
 //check complete
-bool WDAQBoardEvent::IsComplete(){
+void WDAQBoardEvent::UpdateIsComplete(){
    // check that all the packets are received:
    // start of the event is received
    // end of the event is received
    // check if last packet is smaller than first, in case sum to last 2^16
 
-  bool ret = false;
   if(mEndFlagReceived && mStartFlagReceived) {
     
     if(mLastPacket<mFirstPacket)
       mLastPacket += 65536;
     
     if(mLastPacket-mFirstPacket+1 == mPacketsReceived)
-      ret = true;
+       mComplete = true;
 
   }
-  return ret;
    
 }
 
@@ -297,6 +296,8 @@ WDAQEvent::WDAQEvent(WDAQPacketData* pkt){
    mTriggerType = pkt->mTriggerType&0x3F;
    mSerialTriggerData = pkt->mSerialTriggerData;
 
+   //reset event building informations
+   mCompletedBoards = 0;
 }
 
 //add packet to event
@@ -325,10 +326,15 @@ void WDAQEvent::AddPacket(WDAQPacketData* pkt){
 
    //process packet content
    pkt->AddToBoardEvent(boardEvent);
+   boardEvent->UpdateIsComplete();
+
+   if(boardEvent->IsComplete()){
+      UpdateIsComplete();
+   } 
 }
 
 //check event complete
-int WDAQEvent::IsComplete(){
+void WDAQEvent::UpdateIsComplete(){
    int nboards = 0;
 
    for(auto &e1 :fBoard){
@@ -339,7 +345,7 @@ int WDAQEvent::IsComplete(){
       }
    }
 
-   return nboards;
+   mCompletedBoards = nboards;
 }
 
 
