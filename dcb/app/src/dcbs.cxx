@@ -82,6 +82,7 @@ public:
    int sock;
    int slot;
    int verbose;
+   int percent;
    int show_default;
    time_t last;
    struct sockaddr client_address;
@@ -773,6 +774,7 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("  -t <type> : Board type \"wdb\" or \"tcb\", forces upload\n");
       c.sprintf("  -r <rev>  : Board revision, \"f\", \"g\" for wdb, \"1\", \"2\" for tcb, forced upload\n");
       c.sprintf("         -d : Show default firmware and software files\n");
+      c.sprintf("         -p : Show only percent value of upload\n");
       c.sprintf("         -v : Verbose output\n");
 
       c.sprintf("\n");
@@ -970,8 +972,8 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       // notify tcb readout driver of the new port and ip
       setTcbDataDestination(dest_addr, dest_port);
 
-      //TEMPORARY!!!!
-      //configure destination of all WDBs
+      // TEMPORARY until serial links work
+      // configure destination of all WDBs
       char cmdbuf[64];
       sprintf(cmdbuf, "cfgdst %d %s %02X:%02X:%02X:%02X:%02X:%02X\n", dest_port, dest_addr,
               c.client_macaddr[0], c.client_macaddr[1], c.client_macaddr[2],
@@ -1123,26 +1125,34 @@ extern "C" { // make all library functions callable from C++
 #define PROG_BAR_DEL_CHAR  "\033[43m \033[0m"  // yellow background
 #define PROG_BAR_FW_CHAR   "\033[45m \033[0m"  // magenta background
 #define PROG_BAR_SW_CHAR   "\033[46m \033[0m"  // cyan background
+#define PROG_BAR_REB_CHAR  "\033[47m \033[0m"  // white background
 
 //-------------------------------------------------------------------
 
-void show_progress(udp_connection &c, const char* prefix, double percent, 
+void show_progress(udp_connection &c, int item, const char* prefix, double percent,
                    const char *idle_char, const char *prog_char)
 {
    int i;
+   double titem[] = { 0, 0.50, 0.83, 0.83, 0.88, 1};
 
-   c.sprintf("\r"); // Send carriage return without newline
-   if (prefix)
-      c.sprintf("%s", prefix);
-   c.sprintf("[");
-   for (i = 0; i < PROG_BAR_ITEMS; i++) {
-      if ((i * (100.0 / PROG_BAR_ITEMS)) <= percent)
-         c.sprintf("%s", prog_char);
-      else
-         c.sprintf("%s", idle_char);
+   if (c.percent) {
+      percent = titem[item]*100 + (titem[item+1]-titem[item]) * percent;
+      c.sprintf("%5.1lf\n", percent);
+      c.flush();
+   } else {
+      c.sprintf("\r"); // Send carriage return without newline
+      if (prefix)
+         c.sprintf("%s", prefix);
+      c.sprintf("[");
+      for (i = 0; i < PROG_BAR_ITEMS; i++) {
+         if ((i * (100.0 / PROG_BAR_ITEMS)) <= percent)
+            c.sprintf("%s", prog_char);
+         else
+            c.sprintf("%s", idle_char);
+      }
+      c.sprintf("] %5.1lf%%  ", percent);
+      c.flush();
    }
-   c.sprintf("] %5.1lf%%  ", percent);
-   c.flush();
 }
 
 //-------------------------------------------------------------------
@@ -1221,8 +1231,6 @@ void write_fw(udp_connection &c, int slot, char *fw_file,
          c.sprintf("done\n");
       c.flush();
 
-      c.sprintf("\e[?25l"); // hide cursor
-      
       /* Erase bitfile only */
       ers_size = 0;
       tot_ers_size=0;
@@ -1232,7 +1240,7 @@ void write_fw(udp_connection &c, int slot, char *fw_file,
          ers_size = qspi_flash_erase_sector(&flash_partition, tot_ers_size);
          tot_ers_size += ers_size;
          if(tot_ers_size>bit_inf.info.data_len) tot_ers_size = bit_inf.info.data_len; /* Keep progress bar <= 100% */
-         show_progress(c, str, 100.0 * tot_ers_size/bit_inf.info.data_len, 
+         show_progress(c, 0, str, 100.0 * tot_ers_size/bit_inf.info.data_len,
                        " ", PROG_BAR_DEL_CHAR);
       }
 
@@ -1245,11 +1253,13 @@ void write_fw(udp_connection &c, int slot, char *fw_file,
          flash_len = read(fd, buff, FLASH_BUF_SIZE);
          qspi_flash_write(&flash_partition, flash_offs, flash_len, buff);
          flash_offs += flash_len;
-         show_progress(c, str, 100.0 * flash_offs/bit_inf.info.data_len, 
+         show_progress(c, 1, str, 100.0 * flash_offs/bit_inf.info.data_len,
                        PROG_BAR_DEL_CHAR, PROG_BAR_FW_CHAR);
       }
-      c.sprintf("\n");
-      c.flush();
+      if (!c.percent) {
+         c.sprintf("\n");
+         c.flush();
+      }
 
       /* write header */
       lseek(fd, 0, SEEK_SET); // go back to start of file
@@ -1270,8 +1280,6 @@ void write_fw(udp_connection &c, int slot, char *fw_file,
          c.flush();
       }
    }
-
-   c.sprintf("\e[?25h"); // show cursor
 
    fsync(fd); // flush caches to make sure operation completes before de-selecting board
    if(close(fd) < 0)
@@ -1328,11 +1336,11 @@ void write_sw(udp_connection &c, int slot, char *sw_file,
    /* Check FPGA (local header) */
    if (header_len > 0) {
       /* got valid header */
-      if (c.verbose)
-         c.sprintf("SREC header: %s\n", sr_header_buf);
-      c.flush();
-
-      c.sprintf("\e[?25l"); // hide cursor
+      if (!c.percent) {
+         if (c.verbose)
+            c.sprintf("SREC header: %s\n", sr_header_buf);
+         c.flush();
+      }
 
       /* Erase partition */
       ers_size = 0;
@@ -1342,7 +1350,7 @@ void write_sw(udp_connection &c, int slot, char *sw_file,
       while (tot_ers_size < flash_partition.mtd_info.size) {
          ers_size = qspi_flash_erase_sector(&flash_partition, tot_ers_size);
          tot_ers_size += ers_size;
-         show_progress(c, str, 100.0 * tot_ers_size / flash_partition.mtd_info.size, 
+         show_progress(c, 2, str, 100.0 * tot_ers_size / flash_partition.mtd_info.size,
            " ", PROG_BAR_DEL_CHAR);
       }
 
@@ -1355,13 +1363,13 @@ void write_sw(udp_connection &c, int slot, char *sw_file,
          flash_len = read(fd, buff, FLASH_BUF_SIZE);
          qspi_flash_write(&flash_partition, flash_offs, flash_len, buff);
          flash_offs += flash_len;
-         show_progress(c, str, 100.0 * flash_offs / file_stat.st_size, 
+         show_progress(c, 3, str, 100.0 * flash_offs / file_stat.st_size,
                        PROG_BAR_DEL_CHAR, PROG_BAR_SW_CHAR);
       }
-      c.sprintf("\n");
-      c.flush();
-
-      c.sprintf("\e[?25h"); // show cursor
+      if (!c.percent) {
+         c.sprintf("\n");
+         c.flush();
+      }
 
       /* write header part 1 (info) */
       if (c.verbose)
@@ -1430,8 +1438,10 @@ void slot_upload(udp_connection &c, unsigned int slot_nr, int load_fw, char *fwp
             c.sprintf("Slot %2d firmware: %s\n", slot_nr, fw_path);
          } else {
             /* upload firmware */
-            c.sprintf("Uploading WDB firmware %s\n", fw_path);
-            c.flush();
+            if (!c.percent) {
+               c.sprintf("Uploading WDB firmware %s\n", fw_path);
+               c.flush();
+            }
             write_fw(c, slot_nr, fw_path, flash_mem_map, "fw");
          }
       }
@@ -1445,8 +1455,10 @@ void slot_upload(udp_connection &c, unsigned int slot_nr, int load_fw, char *fwp
             c.sprintf("Slot %2d software: %s\n", slot_nr, sw_path);
          } else {
             /* upload sofware */
-            c.sprintf("Uploading WDB software %s\n", sw_path);
-            c.flush();
+            if (!c.percent) {
+               c.sprintf("Uploading WDB software %s\n", sw_path);
+               c.flush();
+            }
             write_sw(c, slot_nr, sw_path, flash_mem_map, "sw");
          }
       }
@@ -1462,8 +1474,10 @@ void slot_upload(udp_connection &c, unsigned int slot_nr, int load_fw, char *fwp
             c.sprintf("Slot %2d firmware: %s\n", slot_nr, fw_path);
          } else {
             /* upload firmware */
-            c.sprintf("Uploading TCB firmware %s\n", fw_path);
-            c.flush();
+            if (!c.percent) {
+               c.sprintf("Uploading TCB firmware %s\n", fw_path);
+               c.flush();
+            }
             write_fw(c, slot_nr, fw_path, flash_mem_map, "fw");
          }
       }
@@ -1472,15 +1486,20 @@ void slot_upload(udp_connection &c, unsigned int slot_nr, int load_fw, char *fwp
    disconnect();
 
    /* Apply init pulse to boards with old SPI scheme */
-   if(bpl_spi_scheme[board_type][board_rev] == 0) init_slot(slot_nr, 1);
+   if (bpl_spi_scheme[board_type][board_rev] == 0)
+      init_slot(slot_nr, 1);
 
-   // WDB2E,F: need init after upload
-   if (board_type == BRD_TYPE_ID_WDB && board_rev < 5) {
-      c.sprintf("Wait for WDB2%c board in slot %d to boot\n", 'A' + board_rev, slot_nr);
-      c.flush();
-      usleep(6000000); // wait 5 sec
+
+
+   // Wait 5 sec for board to boot
+   for (int i=0 ; i<=50 ; i++) {
+      char str[256];
+      sprintf(str, "Slot %2d: Booting board     ", slot_nr);
+      show_progress(c, 4, str, i/50.0*100, " ", PROG_BAR_REB_CHAR);
+      usleep(100000);
    }
-
+   if (!c.percent)
+      c.sprintf("\n");
 }
 
 //-------------------------------------------------------------------
@@ -1489,6 +1508,9 @@ void crate_upload(udp_connection &c, int slot[WDAQ_N_SLOTS], int load_fw, char *
                   unsigned int board_type, unsigned int board_rev, unsigned int force) {
    int i;
    WDAQ_BRD slot_board_info;
+
+   if (!c.percent)
+      c.sprintf("\e[?25l"); // hide cursor
 
    for (i = 0; i < WDAQ_N_SLOTS;  i++) {
       if (slot[i] && i != WDAQ_SLOT_DCB) {
@@ -1513,6 +1535,11 @@ void crate_upload(udp_connection &c, int slot[WDAQ_N_SLOTS], int load_fw, char *
 
          slot_upload(c, i, load_fw, fwp, load_sw, swp, slot_board_info.type_id, slot_board_info.rev_id);
       }
+   }
+
+   if (!c.percent) {
+      c.sprintf("\e[?25l"); // show cursor
+      c.flush();
    }
 }
 
@@ -1599,6 +1626,7 @@ void upload(udp_connection &c, int n_param, const char **param) {
    fwp[0] = 0;
    swp[0] = 0;
    c.verbose = 0;
+   c.percent = 0;
    c.show_default = 0;
    for (int i = 1; i < n_param; i++) {
 
@@ -1671,6 +1699,10 @@ void upload(udp_connection &c, int n_param, const char **param) {
 
       else if (param[i][0] == '-' && param[i][1] == 'v') {
          c.verbose = 1;
+      }
+
+      else if (param[i][0] == '-' && param[i][1] == 'p') {
+         c.percent = 1;
       }
 
       else if (isdigit(param[i][0]) || param[i][0] == '*') {
