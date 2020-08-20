@@ -7,7 +7,7 @@ std::atomic<unsigned int> DAQThread::fThreadCount(0);
 // thread loop
 void DAQThread::ThreadMain(){
    //if pthread is enabled lock the threads to CPU cores
-#ifdef PTHREAD_SCOPE_SYSTEM
+#ifndef __APPLE__
    pthread_t thread = pthread_self();
    cpu_set_t cpuset;
 
