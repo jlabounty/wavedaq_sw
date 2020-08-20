@@ -144,6 +144,7 @@ install(TARGETS tcb
 # WDAQ Library
 #
 add_library(wdaq
+   src/DAQLib.cpp
    src/WDLib.cpp
    src/WDAQLib.cpp)
 

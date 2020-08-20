@@ -11,6 +11,7 @@ class PacketDebug : public DAQThread{
    void Loop(){
       WDAQWdbPacketData *ptr = nullptr;
       if(fSource->Try_pop(ptr)){
+#if 0
          printf("received packet\n");
          printf("\t Board:%d\n", ptr->mBoardId);
          printf("\t Crate:%d\n", ptr->mCrateId);
@@ -36,6 +37,7 @@ class PacketDebug : public DAQThread{
          printf("\t DacOFS:%d\n", ptr->mDacOFS);
          printf("\t DacROFS:%d\n", ptr->mDacROFS);
          printf("\t FrontendSettings:%x\n", ptr->mFrontendSettings);
+#endif
 
          delete ptr;
       }
@@ -63,7 +65,9 @@ class EventDebug : public DAQThread{
    void Loop(){
       WDAQEvent *ptr = nullptr;
       if(fSource->Try_pop(ptr)){
+#if 0
          printf("Got Event %d\n", ptr->mTriggerNumber);
+#endif
 
          delete ptr;
       }

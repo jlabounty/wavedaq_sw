@@ -479,7 +479,7 @@ void WDSystem::TrainSerdes(){
 void WDSystem::SpawnDAQ(){
    //number of buffer at each buffer stage
    const int number_of_buffers = 50;
-   const int number_of_calibrated_buffers = 100000;
+   const int number_of_calibrated_buffers = 100;
 
    printf("starting all threads\n");
 
