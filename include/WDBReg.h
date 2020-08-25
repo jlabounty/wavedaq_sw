@@ -44,8 +44,6 @@ public:
    }
 
    unsigned int GetVersion() {
-      auto result = ReadUDP(mVersionReg, 1);
-      this->mVersion = (result[0] & mVersionMask);
       return this->mVersion;
    }
 
