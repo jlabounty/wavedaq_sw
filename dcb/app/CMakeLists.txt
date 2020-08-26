@@ -70,5 +70,5 @@ foreach(PROG ${PROGS})
    target_link_libraries(${PROG} dcblib readline)
 endforeach()
 
-install(TARGETS ${PROGS}
-   DESTINATION bin)
+install(TARGETS ${PROGS} DESTINATION /fw_sw/dcb/prod/)
+install(PROGRAMS dcbs.sh DESTINATION /etc/init.d/ RENAME dcbs)
