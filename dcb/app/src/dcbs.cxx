@@ -1485,19 +1485,20 @@ void slot_upload(udp_connection &c, unsigned int slot_nr, int load_fw, char *fwp
 
    disconnect();
 
-   /* Apply init pulse to boards with old SPI scheme */
-   if (bpl_spi_scheme[board_type][board_rev] == 0)
-      init_slot(slot_nr, 1);
+   if (!c.show_default) {
+      /* Apply init pulse to boards with old SPI scheme */
+      if (bpl_spi_scheme[board_type][board_rev] == 0)
+         init_slot(slot_nr, 1);
 
-
-
-   // Wait 5 sec for board to boot
-   for (int i=0 ; i<=50 ; i++) {
-      char str[256];
-      sprintf(str, "Slot %2d: Booting board     ", slot_nr);
-      show_progress(c, 4, str, i/50.0*100, " ", PROG_BAR_REB_CHAR);
-      usleep(100000);
+      // Wait 5 sec for board to boot
+      for (int i=0 ; i<=50 ; i++) {
+         char str[256];
+         sprintf(str, "Slot %2d: Booting board     ", slot_nr);
+         show_progress(c, 4, str, i/50.0*100, " ", PROG_BAR_REB_CHAR);
+         usleep(100000);
+      }
    }
+
    if (!c.percent)
       c.sprintf("\n");
 }
@@ -1509,7 +1510,7 @@ void crate_upload(udp_connection &c, int slot[WDAQ_N_SLOTS], int load_fw, char *
    int i;
    WDAQ_BRD slot_board_info;
 
-   if (!c.percent)
+   if (!c.percent && !c.show_default)
       c.sprintf("\e[?25l"); // hide cursor
 
    for (i = 0; i < WDAQ_N_SLOTS;  i++) {
@@ -1537,10 +1538,8 @@ void crate_upload(udp_connection &c, int slot[WDAQ_N_SLOTS], int load_fw, char *
       }
    }
 
-   if (!c.percent) {
-      c.sprintf("\e[?25l"); // show cursor
-      c.flush();
-   }
+   c.sprintf("\e[?25h"); // show cursor
+   c.flush();
 }
 
 //-------------------------------------------------------------------

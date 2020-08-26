@@ -58,15 +58,15 @@ const char system_sw_build_date[] = __DATE__;
 const char system_sw_build_time[] = __TIME__;
 const char *system_month_str[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
-const char wdb_rf_default_path[] = "/firmware/wdb/prod/rev_f/\0";
-const char wdb_rg_default_path[] = "/firmware/wdb/prod/rev_g/\0";
-const char tcb_t1_default_path[] = "/firmware/tcb/prod/type_1/\0";
-const char tcb_t2_default_path[] = "/firmware/tcb/prod/type_2/\0";
-const char tcb_t3_default_path[] = "/firmware/tcb/prod/type_3/\0";
+const char wdb_rf_default_path[] = "/fw_sw/wdb/prod/rev_f/";
+const char wdb_rg_default_path[] = "/fw_sw/wdb/prod/rev_g/";
+const char tcb_t1_default_path[] = "/fw_sw/tcb/prod/type_1/";
+const char tcb_t2_default_path[] = "/fw_sw/tcb/prod/type_2/";
+const char tcb_t3_default_path[] = "/fw_sw/tcb/prod/type_3/";
 
-const char wdb_fw_default_file[] = "download.bit\0";
-const char wdb_sw_default_file[] = "app_sys_ctrl.srec\0";
-const char tcb_fw_default_file[] = "TCB_TOP.bit\0";
+const char wdb_fw_default_file[] = "download.bit";
+const char wdb_sw_default_file[] = "app_sys_ctrl.srec";
+const char tcb_fw_default_file[] = "TCB_TOP.bit";
 
 /*                            WDB Revision:   A  B  C  D  E  F  G  H*/
 /*                            TCB Revision:   0  1  2  3  4  5  6  7*/

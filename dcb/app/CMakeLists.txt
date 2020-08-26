@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
+project(dcbs)
 
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR})
 
@@ -71,4 +72,5 @@ foreach(PROG ${PROGS})
 endforeach()
 
 install(TARGETS ${PROGS} DESTINATION /fw_sw/dcb/prod/)
-install(PROGRAMS dcbs.sh DESTINATION /etc/init.d/ RENAME dcbs)
+install(PROGRAMS dcbs.sh DESTINATION /etc/init.d/)
+install(CODE "execute_process(COMMAND /etc/init.d/dcbs.sh restart TIMEOUT 3)")
