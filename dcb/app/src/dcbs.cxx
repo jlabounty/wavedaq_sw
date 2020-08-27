@@ -1129,10 +1129,12 @@ extern "C" { // make all library functions callable from C++
 
 #define FLASH_BUF_SIZE      8192 // 8k 
 #define PROG_BAR_ITEMS        40
-#define PROG_BAR_DEL_CHAR  "\033[43m \033[0m"  // yellow background
-#define PROG_BAR_FW_CHAR   "\033[45m \033[0m"  // magenta background
-#define PROG_BAR_SW_CHAR   "\033[46m \033[0m"  // cyan background
-#define PROG_BAR_REB_CHAR  "\033[47m \033[0m"  // white background
+
+// block chars, see https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit
+#define PROG_BAR_DEL_CHAR  "\033[48;5;7m \033[0m"  // grey
+#define PROG_BAR_FW_CHAR   "\033[48;5;2m \033[0m"  // green
+#define PROG_BAR_SW_CHAR   "\033[48;5;2m \033[0m"  // green
+#define PROG_BAR_REB_CHAR  "\033[48;5;8m \033[0m"  // dark grey
 
 //-------------------------------------------------------------------
 
