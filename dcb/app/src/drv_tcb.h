@@ -29,7 +29,7 @@
 #define DATA_TYPE_TCB 8
 
 //typedefs
-#pragma pack(1) // byte-level alignement
+#pragma pack(push, 1) // byte-level alignment
 
 typedef struct {
       unsigned int nBanks;
@@ -66,6 +66,8 @@ typedef struct {
    unsigned short temperature;
    char           reserved[5];
 } TcbUdpPacketHeader;
+
+#pragma pack(pop) // restore original alignment
 
 //register I/O through SPI
 unsigned int readReg(int slot, WDAQ_BRD *board, unsigned int addr);

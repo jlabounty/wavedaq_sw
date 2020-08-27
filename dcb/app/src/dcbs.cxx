@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <memory>
 #include <stdexcept>
+#include <cstddef>
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -222,6 +223,12 @@ int main(int argc, char *argv[]) {
    int board_type = 0;
    int board_revision = 0;
    std::map <std::string, udp_connection *> connection;
+
+   // check structure packing
+   if (sizeof(qspi_flash_partition) != 40) {
+      printf("Error: structure packing is wrong, please remove \"#pragma pack\" in any header file\n");
+      exit(0);
+   }
 
    /* parse command line parameters */
    for (int i = 1; i < argc; i++) {
@@ -1133,7 +1140,7 @@ void show_progress(udp_connection &c, int item, const char* prefix, double perce
                    const char *idle_char, const char *prog_char)
 {
    int i;
-   double titem[] = { 0, 0.50, 0.83, 0.83, 0.88, 1};
+   double titem[] = { 0, 0.38, 0.62, 0.85, 0.92, 1};
 
    if (c.percent) {
       percent = titem[item]*100 + (titem[item+1]-titem[item]) * percent;
