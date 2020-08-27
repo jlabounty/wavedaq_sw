@@ -952,7 +952,7 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("Voltage    V(1.5V): %8.3lf V\r\n", sysmon_get_voltage_mv(SYSPTR(sys_mon), SYSMON_ADR_AIN6) / 1000.0);
       c.sprintf("Voltage    V(1.0V): %8.3lf V\r\n", sysmon_get_voltage_mv(SYSPTR(sys_mon), SYSMON_ADR_AIN7) / 1000.0);
 
-   } else if (strcmp(param[0], "upload") == 0) {
+   } else if (strcmp(param[0], "upload") == 0 || strcmp(param[0], "up") == 0) {
 
       upload(c, n_param, (const char **) param);
 
