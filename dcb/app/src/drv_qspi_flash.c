@@ -23,6 +23,8 @@ int qspi_flash_init(qspi_flash_partition *self, const char *mtd_path)
 {
   int fd;
 
+  self->mtd_path = NULL;
+
   fd = open(mtd_path, O_RDWR);
   if(fd == -1) return 0;
 
@@ -32,9 +34,15 @@ int qspi_flash_init(qspi_flash_partition *self, const char *mtd_path)
   if(DBG_SPAM) printf("MTD erase size : %u bytes\n", self->mtd_info.erasesize);
   close(fd);
 
-  self->mtd_path = (char*)mtd_path;
-
-  return 1;
+  if(self->mtd_info.type == MTD_ABSENT)
+  {
+    return 0;
+  }
+  else
+  {
+    self->mtd_path = (char*)mtd_path;
+    return 1;
+  }
 }
 
 int qspi_flash_write(qspi_flash_partition *self, unsigned int offset, unsigned int byte_count, unsigned char *wr_buffer_ptr)

@@ -664,6 +664,41 @@ void crate_upload_fw_sw(slot_op_en_type *slot, int load_fw, char *fw_spec_p, int
 
 /******************************************************************************/
 
+int is_flash_available(unsigned char slot_nr, unsigned int board_type, unsigned int board_rev)
+{
+  qspi_flash_partition flash_partition;
+  flash_partition_type *mtd_ptr = NULL;
+  flash_memory_map_type *flash_mem_map = NULL;
+
+  init_spi_bpl();
+
+  if( !(flash_mem_map = connect_flash(slot_nr, board_type, board_rev)) )
+  {
+    if(DBG_ERR) printf("Error: flash memory map not found (type %d, revision %d)\n", board_type, board_rev);
+    disconnect();
+    return 0;
+  }
+
+  if( !(mtd_ptr = get_flash_partition(flash_mem_map, "fw")) )
+  {
+    if(DBG_ERR) printf("Error: partition fw not found\n");
+    disconnect();
+    return 0;
+  }
+
+  if( !(qspi_flash_init(&flash_partition, mtd_ptr->mtd_partition)) )
+  {
+    if(DBG_ERR) printf("Error: flash accesse failed\n");
+    disconnect();
+    return 0;
+  }
+
+  disconnect();
+  return 1;
+}
+
+/******************************************************************************/
+
 void spi_flash_id_cmd(unsigned char slot_nr)
 {
   unsigned char tx_buf[4] = {0x9F, 0x00, 0x00, 0x00};
