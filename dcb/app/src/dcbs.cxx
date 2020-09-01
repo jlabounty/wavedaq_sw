@@ -160,13 +160,6 @@ std::string stringf(const char *fmt, ...) {
 
 void printf_crate_scan(const char *hostname, std::string &b) {
    b[0] = 0;
-
-   // code to test is_flash_available
-   for (int slot = 0; slot < WDAQ_N_SLOTS; slot++) {
-      int status = is_flash_available(slot, BRD_TYPE_ID_WDB, WDB_BRD_REV_ID_G);
-      b += stringf("Slot %2d: status = %d\n", slot, status);
-   }
-
    for (int slot = 0; slot < WDAQ_N_SLOTS; slot++) {
 
       if (slot == WDAQ_SLOT_DCB) {
@@ -217,7 +210,7 @@ void printf_crate_scan(const char *hostname, std::string &b) {
                          wdaq_brd_vendor_name[board[slot].vendor_id]);
          } else {
             // check for empty board
-            status = is_flash_available(slot, 0, 0);
+            status = is_flash_available(slot);
             if (status == 1) {
                b += stringf("Slot %2d: Found un-programmed board\n", slot);
             }
