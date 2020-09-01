@@ -37,8 +37,7 @@ void spi_ascii_cmd(char* txbuff, char *rxbuf, unsigned int rxsize, unsigned char
 void spi_binary_cmd(char* tx_buff, char* rx_buff, unsigned int len, unsigned char slot_nr, unsigned int board_type, unsigned int board_revision);
 void slot_upload_fw_sw(unsigned int slot_nr, int load_fw, char *fw_spec_p, int load_sw, char *sw_spec_p, unsigned int board_type, unsigned int board_rev);
 void crate_upload_fw_sw(slot_op_en_type *slot, int load_fw, char *fw_spec_p, int load_sw, char *sw_spec_p, unsigned int board_type, unsigned int board_rev, unsigned int force);
-int is_flash_available(unsigned char slot_nr, unsigned int board_type, unsigned int board_rev);
-void spi_flash_id_cmd(unsigned char slot_nr);
+int is_flash_available(unsigned char slot_nr);
 int get_slot_board_info(unsigned int slot_nr, WDAQ_BRD *wdaq_board_info_ptr);
 
 #endif /* __DRV_BPL__ */

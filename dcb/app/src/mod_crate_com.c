@@ -151,6 +151,38 @@ int crate_slot_fpga_com(int argc, char **argv)
 
 /************************************************************/
 
+int crate_slot_board_avail(int argc, char **argv)
+{
+  unsigned int slot;
+
+  CMD_HELP("<slot>",
+            "check connection to WDB/TCB flash via backplane to tell if board is available.\r\n",
+            "  <slot> : WDB/TCB slot (0..17 except 16 (DCB slot))\r\n"
+          );
+
+  /* Check for minimum number of arguments */
+  if(argc < 2)
+  {
+    xfs_printf("E%02X: Too few arguments\r\n", ERR_TOO_FEW_ARGS);
+    return 0;
+  }
+
+  slot = (unsigned char)strtoul(argv[1], NULL, 0);
+
+  if( is_flash_available(slot) )
+  {
+    xfs_printf("Slot %d: board is available\r\n", slot);
+  }
+  else
+  {
+    xfs_printf("Slot %d: EMPTY\r\n", slot);
+  }
+
+  return 0;
+}
+
+/************************************************************/
+
 int crate_slot_upload_fw_sw(int argc, char **argv)
 {
   slot_op_en_type slot;
@@ -320,6 +352,7 @@ cmd_table_entry_type crate_com_cmd_table[] =
   {0, "crt_com", module_crate_com_help},
   {3, "sltc", crate_slot_fpga_com},
   {0, "upload", crate_slot_upload_fw_sw},
+  {0, "sltchk", crate_slot_board_avail},
   {0, "sltrst", crate_slot_init},
   {0, NULL, NULL}
 };

@@ -78,6 +78,7 @@
 
 #define FLASH_BUF_SIZE            8192 /* 8k */
 
+#define SPI_FLASH_CMD_READ_ID    0x9F
 /******************************************************************************/
 /******************************************************************************/
 
@@ -664,73 +665,34 @@ void crate_upload_fw_sw(slot_op_en_type *slot, int load_fw, char *fw_spec_p, int
 
 /******************************************************************************/
 
-int is_flash_available(unsigned char slot_nr, unsigned int board_type, unsigned int board_rev)
+int is_flash_available(unsigned char slot_nr)
 {
-  qspi_flash_partition flash_partition;
-  flash_partition_type *mtd_ptr = NULL;
-  flash_memory_map_type *flash_mem_map = NULL;
-
-  init_spi_bpl();
-
-  if( !(flash_mem_map = connect_flash(slot_nr, board_type, board_rev)) )
-  {
-    if(DBG_ERR) printf("Error: flash memory map not found (type %d, revision %d)\n", board_type, board_rev);
-    disconnect();
-    return 0;
-  }
-
-  if( !(mtd_ptr = get_flash_partition(flash_mem_map, "fw")) )
-  {
-    if(DBG_ERR) printf("Error: partition fw not found\n");
-    disconnect();
-    return 0;
-  }
-
-  if( !(qspi_flash_init(&flash_partition, mtd_ptr->mtd_partition)) )
-  {
-    if(DBG_ERR) printf("Error: flash accesse failed\n");
-    disconnect();
-    return 0;
-  }
-
-  disconnect();
-  return 1;
-}
-
-/******************************************************************************/
-
-void spi_flash_id_cmd(unsigned char slot_nr)
-{
-  unsigned char tx_buf[4] = {0x9F, 0x00, 0x00, 0x00};
+  unsigned char tx_buf[4] = {SPI_FLASH_CMD_READ_ID, 0x00, 0x00, 0x00};
   unsigned char rx_buf[4] = {0x00, 0x00, 0x00, 0x00};
+  unsigned int id;
   int Status;
 
-#ifdef LINUX_COMPILE
   init_spi_bpl();
-#endif
 
-  if (slot_nr > 16) return;
+  connect_flash(slot_nr, BRD_TYPE_ID_WDB, WDB_BRD_REV_ID_G);
 
-  /* Enable SPI driver */
-  BPL_SPI_DRIVE_EN(1);
-  BPL_FLASH_SEL(1);
-  BPL_INIT(1);
-  usleep(50);
-//  XSpi_SetSlaveSelectReg(SYSPTR(spi_bpl), spi_slave_select[slot_nr]);
-//  XSpi_SetSlaveSelect(SYSPTR(spi_bpl), ~spi_slave_select[slot_nr]);
   Status = spi_transfer(SYSPTR(spi_bpl), slot_nr, tx_buf, rx_buf, 4);
   if (!Status)
   {
     if(DBG_ERR) xfs_printf("Read Flash ID Error\r\n");
   }
-//  XSpi_SetSlaveSelectReg(SYSPTR(spi_bpl), 0xFFFFFFFF);
-  BPL_INIT(0);
-  BPL_FLASH_SEL(0);
-  /* Disable SPI driver (wait for CS pullup first) */
-  usleep(50);
-  BPL_SPI_DRIVE_EN(0);
-  //emio_set_pin(SYSPTR(gpio_mio), BIT_IDX_EMIO_CTRL_INIT_PIN, 0);
-  xfs_printf("Flash ID (0x%02X) 0x%02X 0x%02X 0x%02X\r\n", rx_buf[0], rx_buf[1], rx_buf[2], rx_buf[3]);
+
+  disconnect();
+
+  id = ((unsigned int)rx_buf[0]<<24) |
+       ((unsigned int)rx_buf[1]<<16) |
+       ((unsigned int)rx_buf[2]<<8)  |
+        (unsigned int)rx_buf[3];
+
+  if( (id == 0x00000000) || (id == 0xFFFFFFFF) ) return 0;
+
+  if(DBG_INFO) xfs_printf("Flash ID 0x%08X\r\n", id);
+  return 1;
 }
 
 /******************************************************************************/
