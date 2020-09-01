@@ -84,6 +84,7 @@ public:
    int slot;
    int verbose;
    int percent;
+   int erase;
    int show_default;
    time_t last;
    struct sockaddr client_address;
@@ -789,6 +790,7 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("  -r <rev>  : Board revision, \"f\", \"g\" for wdb, \"1\", \"2\" for tcb, forced upload\n");
       c.sprintf("         -d : Show default firmware and software files\n");
       c.sprintf("         -p : Show only percent value of upload\n");
+      c.sprintf("         -e : Only erase flash, do not program\n");
       c.sprintf("         -v : Verbose output\n");
 
       c.sprintf("\n");
@@ -1260,40 +1262,42 @@ void write_fw(udp_connection &c, int slot, char *fw_file,
                        " ", PROG_BAR_DEL_CHAR);
       }
 
-      /* write bitfile excluding header */
-      lseek(fd, header_len, SEEK_SET); /* go back to start of file */
-      flash_offs = 0;
-      flash_len  = FLASH_BUF_SIZE;
-      sprintf(str, "Slot %2d: Writing firmware  ", slot);
-      while(flash_len == FLASH_BUF_SIZE) {
-         flash_len = read(fd, buff, FLASH_BUF_SIZE);
-         qspi_flash_write(&flash_partition, flash_offs, flash_len, buff);
-         flash_offs += flash_len;
-         show_progress(c, 1, str, 100.0 * flash_offs/bit_inf.info.data_len,
-                       PROG_BAR_DEL_CHAR, PROG_BAR_FW_CHAR);
-      }
-      if (!c.percent) {
-         c.sprintf("\n");
-         c.flush();
-      }
+      if (!c.erase) {
+         /* write bitfile excluding header */
+         lseek(fd, header_len, SEEK_SET); /* go back to start of file */
+         flash_offs = 0;
+         flash_len  = FLASH_BUF_SIZE;
+         sprintf(str, "Slot %2d: Writing firmware  ", slot);
+         while(flash_len == FLASH_BUF_SIZE) {
+            flash_len = read(fd, buff, FLASH_BUF_SIZE);
+            qspi_flash_write(&flash_partition, flash_offs, flash_len, buff);
+            flash_offs += flash_len;
+            show_progress(c, 1, str, 100.0 * flash_offs/bit_inf.info.data_len,
+                          PROG_BAR_DEL_CHAR, PROG_BAR_FW_CHAR);
+         }
+         if (!c.percent) {
+            c.sprintf("\n");
+            c.flush();
+         }
 
-      /* write header */
-      lseek(fd, 0, SEEK_SET); // go back to start of file
+         /* write header */
+         lseek(fd, 0, SEEK_SET); // go back to start of file
 
-      if(mtd_ptr->header_offset) { // check if header has to be written
-         if(c.verbose)
-            c.sprintf("Writing header ... ");
-         c.flush();
-         flash_offs = mtd_ptr->header_offset;
-         flash_len  = sizeof(bitfile_info_type);
-         qspi_flash_write(&flash_partition, flash_offs, flash_len, (unsigned char*) &bit_inf_swapped);
-         flash_offs += flash_len;
-         flash_len   = header_len;
-         read(fd, buff, flash_len);
-         qspi_flash_write(&flash_partition, flash_offs, flash_len, buff);
-         if(c.verbose)
-            c.sprintf("done\n");
-         c.flush();
+         if(mtd_ptr->header_offset) { // check if header has to be written
+            if(c.verbose)
+               c.sprintf("Writing header ... ");
+            c.flush();
+            flash_offs = mtd_ptr->header_offset;
+            flash_len  = sizeof(bitfile_info_type);
+            qspi_flash_write(&flash_partition, flash_offs, flash_len, (unsigned char*) &bit_inf_swapped);
+            flash_offs += flash_len;
+            flash_len   = header_len;
+            read(fd, buff, flash_len);
+            qspi_flash_write(&flash_partition, flash_offs, flash_len, buff);
+            if(c.verbose)
+               c.sprintf("done\n");
+            c.flush();
+         }
       }
    }
 
@@ -1370,49 +1374,51 @@ void write_sw(udp_connection &c, int slot, char *sw_file,
            " ", PROG_BAR_DEL_CHAR);
       }
 
-      /* write bitfile excluding header */
-      lseek(fd, 0, SEEK_SET); /* go back to start of file */
-      flash_len = FLASH_BUF_SIZE;
-      flash_offs = 0;
-      sprintf(str, "Slot %2d: Writing software  ", slot);
-      while (flash_len == FLASH_BUF_SIZE) {
-         flash_len = read(fd, buff, FLASH_BUF_SIZE);
-         qspi_flash_write(&flash_partition, flash_offs, flash_len, buff);
-         flash_offs += flash_len;
-         show_progress(c, 3, str, 100.0 * flash_offs / file_stat.st_size,
-                       PROG_BAR_DEL_CHAR, PROG_BAR_SW_CHAR);
-      }
-      if (!c.percent) {
-         c.sprintf("\n");
+      if (!c.erase) {
+         /* write bitfile excluding header */
+         lseek(fd, 0, SEEK_SET); /* go back to start of file */
+         flash_len = FLASH_BUF_SIZE;
+         flash_offs = 0;
+         sprintf(str, "Slot %2d: Writing software  ", slot);
+         while (flash_len == FLASH_BUF_SIZE) {
+            flash_len = read(fd, buff, FLASH_BUF_SIZE);
+            qspi_flash_write(&flash_partition, flash_offs, flash_len, buff);
+            flash_offs += flash_len;
+            show_progress(c, 3, str, 100.0 * flash_offs / file_stat.st_size,
+                          PROG_BAR_DEL_CHAR, PROG_BAR_SW_CHAR);
+         }
+         if (!c.percent) {
+            c.sprintf("\n");
+            c.flush();
+         }
+
+         /* write header part 1 (info) */
+         if (c.verbose)
+            c.sprintf("Writing header info ... ");
+         c.flush();
+         sw_info.info.name_offs = sizeof(sw_file_info_type);
+         sw_info.info.data_len = file_stat.st_size;
+         sw_info.info.head_len = header_len;
+         sw_info.info.checksum = sw_file_info_checksum(&sw_info);
+         byte_swap_uint32(sw_info.field, sw_info_swapped.field, sizeof(sw_info)/sizeof(unsigned int));
+         flash_offs = mtd_ptr->header_offset;
+         flash_len = sizeof(sw_file_info_type);
+         qspi_flash_write(&flash_partition, flash_offs, flash_len, (unsigned char *) &sw_info_swapped);
+         if (c.verbose)
+            c.sprintf("done\n");
+         c.flush();
+
+         /* write header part 2 (filename) */
+         if (c.verbose)
+            c.sprintf("writing header filename ... ");
+         c.flush();
+         flash_offs = mtd_ptr->header_offset + sizeof(sw_file_info_type);
+         flash_len = header_len + 1;
+         qspi_flash_write(&flash_partition, flash_offs, flash_len, sr_header_buf);
+         if (c.verbose)
+            c.sprintf("done\n");
          c.flush();
       }
-
-      /* write header part 1 (info) */
-      if (c.verbose)
-         c.sprintf("Writing header info ... ");
-      c.flush();
-      sw_info.info.name_offs = sizeof(sw_file_info_type);
-      sw_info.info.data_len = file_stat.st_size;
-      sw_info.info.head_len = header_len;
-      sw_info.info.checksum = sw_file_info_checksum(&sw_info);
-      byte_swap_uint32(sw_info.field, sw_info_swapped.field, sizeof(sw_info)/sizeof(unsigned int));
-      flash_offs = mtd_ptr->header_offset;
-      flash_len = sizeof(sw_file_info_type);
-      qspi_flash_write(&flash_partition, flash_offs, flash_len, (unsigned char *) &sw_info_swapped);
-      if (c.verbose)
-         c.sprintf("done\n");
-      c.flush();
-
-      /* write header part 2 (filename) */
-      if (c.verbose)
-         c.sprintf("writing header filename ... ");
-      c.flush();
-      flash_offs = mtd_ptr->header_offset + sizeof(sw_file_info_type);
-      flash_len = header_len + 1;
-      qspi_flash_write(&flash_partition, flash_offs, flash_len, sr_header_buf);
-      if (c.verbose)
-         c.sprintf("done\n");
-      c.flush();
    }
 
    fsync(fd); /* flush caches to make sure operation completes before desecting board */
@@ -1454,7 +1460,7 @@ void slot_upload(udp_connection &c, unsigned int slot_nr, int load_fw, char *fwp
             c.sprintf("Slot %2d firmware: %s\n", slot_nr, fw_path);
          } else {
             /* upload firmware */
-            if (!c.percent) {
+            if (!c.percent && !c.erase) {
                c.sprintf("Uploading WDB firmware %s\n", fw_path);
                c.flush();
             }
@@ -1471,7 +1477,7 @@ void slot_upload(udp_connection &c, unsigned int slot_nr, int load_fw, char *fwp
             c.sprintf("Slot %2d software: %s\n", slot_nr, sw_path);
          } else {
             /* upload sofware */
-            if (!c.percent) {
+            if (!c.percent && !c.erase) {
                c.sprintf("Uploading WDB software %s\n", sw_path);
                c.flush();
             }
@@ -1546,6 +1552,7 @@ void crate_upload(udp_connection &c, int slot[WDAQ_N_SLOTS], int load_fw, char *
             } else {
                // no slot board information for standard upload
                c.sprintf("Error: board information for slot %d could not be read or no board present\n", i);
+               c.sprintf("\e[?25h"); // show cursor
                return;
             }
          }
@@ -1642,6 +1649,7 @@ void upload(udp_connection &c, int n_param, const char **param) {
    swp[0] = 0;
    c.verbose = 0;
    c.percent = 0;
+   c.erase   = 0;
    c.show_default = 0;
    for (int i = 1; i < n_param; i++) {
 
@@ -1718,6 +1726,10 @@ void upload(udp_connection &c, int n_param, const char **param) {
 
       else if (param[i][0] == '-' && param[i][1] == 'p') {
          c.percent = 1;
+      }
+
+      else if (param[i][0] == '-' && param[i][1] == 'e') {
+         c.erase = 1;
       }
 
       else if (isdigit(param[i][0]) || param[i][0] == '*') {
