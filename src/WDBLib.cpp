@@ -141,6 +141,9 @@ std::string WDB::SendReceiveUDP(std::string str, unsigned char *ethAddr) {
    } else
       std::memcpy(&client_addr, mEthAddrAscii, sizeof(client_addr));
 
+   if (str.empty())
+      str = "\n";
+
    if (str.back() != '\n')
       str += '\n';
 
@@ -557,7 +560,7 @@ void WDB::Connect() {
 
       // check if board is alive
       try {
-         WDB::SendUDP("");
+         WDB::SendUDP("\n");
       } catch (...) {
          throw std::runtime_error(std::string("Cannot connect to board ") + mWDBAddr + ".");
       }

@@ -86,6 +86,9 @@ std::string DCB::SendReceiveUDP(std::string str)
 
    std::memcpy(&client_addr, mEthAddrAscii, sizeof(client_addr));
 
+   if (str.empty())
+      str = "\n";
+
    if (str.back() != '\n')
       str += '\n';
 
@@ -491,7 +494,7 @@ void DCB::Connect() {
 
    // check if board is alive
    try {
-      DCB::SendUDP("");
+      DCB::SendUDP("\n");
    } catch (...) {
       throw std::runtime_error(std::string("Cannot connect to board ") + mDCBName + ".");
    }
