@@ -1702,14 +1702,14 @@ void upload(udp_connection &c, int n_param, const char **param) {
             c.sprintf("Missing board revision with \"-r\" option\n");
             return;
          }
-         if (param[i][0] >= '1' && param[i][0] <= '2') {
+         if (param[i][0] >= '1' && param[i][0] <= '3') {
             board_rev = strtoul(param[i], NULL, 0);
          } else if (param[i][0] >= 'e' && param[i][0] <= 'g') {
             board_rev = param[i][0] - 'a';
          } else if (param[i][0] >= 'F' && param[i][0] <= 'g') {
             board_rev = param[i][0] - 'A';
          } else {
-            c.sprintf("Invalid board revision, must be \"1\" or \"2\" or \"e\" or \"g\"\n");
+            c.sprintf("Invalid board revision, must be \"1\" or \"2\" or \"3\" or \"e\" or \"g\"\n");
             return;
          }
          r_force = 1;
