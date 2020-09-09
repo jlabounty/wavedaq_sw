@@ -204,12 +204,18 @@ void printf_crate_scan(const char *hostname, std::string &b) {
             } else
                snprintf(name, sizeof(name), "%s", wdaq_brd_type_name[board[slot].type_id]);
 
-            b += stringf("Slot %2d: Found board \"%5s\", Revision \"%c\", Variant \"0x%02X\", Vendor \"%s\"\n",
-                         slot,
-                         name,
-                         'A' + board[slot].rev_id,
-                         board[slot].variant_id,
-                         wdaq_brd_vendor_name[board[slot].vendor_id]);
+            if (board[slot].type_id == BRD_TYPE_ID_TCB)
+               b += stringf("Slot %2d: Found board \"TCB\", Type \"%d\", Vendor \"%s\"\n",
+                            slot,
+                            board[slot].rev_id,
+                            wdaq_brd_vendor_name[board[slot].vendor_id]);
+            else
+               b += stringf("Slot %2d: Found board \"%s\", Revision \"%c\", Variant \"0x%02X\", Vendor \"%s\"\n",
+                            slot,
+                            name,
+                            'A' + board[slot].rev_id,
+                            board[slot].variant_id,
+                            wdaq_brd_vendor_name[board[slot].vendor_id]);
          } else {
             // check for empty board
             status = is_flash_available(slot);
