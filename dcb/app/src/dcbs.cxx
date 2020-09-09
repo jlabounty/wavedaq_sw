@@ -65,6 +65,7 @@ extern "C" { // make all library functions callable from C++
 
 #define WDAQ_N_SLOTS      18
 #define WDAQ_SLOT_DCB     16
+#define WDAQ_SLOT_TCB     17
 
 #define SWAP_UINT32(x) (((x) >> 24) | \
                        (((x) & 0x00FF0000) >> 8) | \
@@ -203,7 +204,7 @@ void printf_crate_scan(const char *hostname, std::string &b) {
             } else
                snprintf(name, sizeof(name), "%s", wdaq_brd_type_name[board[slot].type_id]);
 
-            b += stringf("Slot %2d: Found board \"%s\", Revision \"%c\", Variant \"0x%02X\", Vendor \"%s\"\n",
+            b += stringf("Slot %2d: Found board \"%5s\", Revision \"%c\", Variant \"0x%02X\", Vendor \"%s\"\n",
                          slot,
                          name,
                          'A' + board[slot].rev_id,
@@ -787,7 +788,7 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("  -f <path> : WDB/TCB firmware file (optional)\n");
       c.sprintf("  -s <path> : WDB software file (optional)\n");
       c.sprintf("  -t <type> : Board type \"wdb\" or \"tcb\", forces upload\n");
-      c.sprintf("  -r <rev>  : Board revision, \"f\", \"g\" for wdb, \"1\", \"2\" for tcb, forced upload\n");
+      c.sprintf("  -r <rev>  : Board revision, \"f\", \"g\" for wdb, \"1\", \"2\" \"3\" for tcb, forced upload\n");
       c.sprintf("         -d : Show default firmware and software files\n");
       c.sprintf("         -p : Show only percent value of upload\n");
       c.sprintf("         -e : Only erase flash, do not program\n");
@@ -1557,7 +1558,11 @@ void crate_upload(udp_connection &c, int slot[WDAQ_N_SLOTS], int load_fw, char *
             }
          }
 
-         slot_upload(c, i, load_fw, fwp, load_sw, swp, slot_board_info.type_id, slot_board_info.rev_id);
+         if (i == WDAQ_SLOT_TCB && board_rev > 0)
+            // allow change of type1/type2/type3 for TCB
+            slot_upload(c, i, load_fw, fwp, load_sw, swp, slot_board_info.type_id, board_rev);
+         else
+            slot_upload(c, i, load_fw, fwp, load_sw, swp, slot_board_info.type_id, slot_board_info.rev_id);
       }
    }
 
@@ -1582,59 +1587,58 @@ void upload(udp_connection &c, int n_param, const char **param) {
    // decode slots
    for (int i = 0; i < WDAQ_N_SLOTS; i++)
       slot_sel[i] = 0;
-   for (int i = 1; i < n_param; i++) {
-      if (isdigit(param[i][0])) {
-         if (strchr(param[i], '-')) {
-            int s1 = atoi(param[i]);
-            int s2 = atoi(strchr(param[i], '-') + 1);
-            for (int s = s1; s <= s2; s++)
-               if (s >= 0 && s < WDAQ_N_SLOTS)
-                  slot_sel[s] = 1;
-         } else {
-            int s = atoi(param[i]);
+
+   if (isdigit(param[1][0])) {
+      if (strchr(param[1], '-')) {
+         int s1 = atoi(param[1]);
+         int s2 = atoi(strchr(param[1], '-') + 1);
+         for (int s = s1; s <= s2; s++)
             if (s >= 0 && s < WDAQ_N_SLOTS)
                slot_sel[s] = 1;
-         }
-      } else if (param[i][0] == '*') {
-         for (int s = 0; s < 16; s++) {
-            if (get_slot_board_info(s, &board_info)) {
-               slot_sel[s] = 1;
+      } else {
+         int s = atoi(param[1]);
+         if (s >= 0 && s < WDAQ_N_SLOTS)
+            slot_sel[s] = 1;
+      }
+   } else if (param[1][0] == '*') {
+      for (int s = 0; s < 16; s++) {
+         if (get_slot_board_info(s, &board_info)) {
+            slot_sel[s] = 1;
 
-               if (c.verbose) {
+            if (c.verbose) {
 
-                  char name[32];
-                  if (board_info.type_id == BRD_TYPE_ID_WDB) {
+               char name[32];
+               if (board_info.type_id == BRD_TYPE_ID_WDB) {
 
-                     char buffer[10];
-                     char rbuffer[10];
+                  char buffer[10];
+                  char rbuffer[10];
 
-                     memset(buffer, 0, sizeof(buffer));
-                     buffer[0] = CMD_READ32;
-                     buffer[1] = 0;
-                     buffer[2] = 0;
-                     buffer[3] = 0;
-                     buffer[4] = 0x24; // Status register SN
-                     buffer[5] = 0; // dummy
+                  memset(buffer, 0, sizeof(buffer));
+                  buffer[0] = CMD_READ32;
+                  buffer[1] = 0;
+                  buffer[2] = 0;
+                  buffer[3] = 0;
+                  buffer[4] = 0x24; // Status register SN
+                  buffer[5] = 0; // dummy
 
-                     spi_binary_cmd(buffer, rbuffer, 6 + 4, s, board_info.type_id, board_info.rev_id);
+                  spi_binary_cmd(buffer, rbuffer, 6 + 4, s, board_info.type_id, board_info.rev_id);
 
-                     unsigned int sn = (rbuffer[8] << 8) | rbuffer[9];
-                     snprintf(name, sizeof(name), "WD%03d", sn);
-                  } else
-                     snprintf(name, sizeof(name), "%s", wdaq_brd_type_name[board_info.type_id]);
+                  unsigned int sn = (rbuffer[8] << 8) | rbuffer[9];
+                  snprintf(name, sizeof(name), "WD%03d", sn);
+               } else
+                  snprintf(name, sizeof(name), "%s", wdaq_brd_type_name[board_info.type_id]);
 
-                  c.sprintf("Slot %2d: Found board \"%s\", Revision \"%c\", Variant \"0x%02X\", Vendor \"%s\"\n",
-                            s,
-                            name,
-                            'A' + board_info.rev_id,
-                            board_info.variant_id,
-                            wdaq_brd_vendor_name[board_info.vendor_id]);
-               }
+               c.sprintf("Slot %2d: Found board \"%s\", Revision \"%c\", Variant \"0x%02X\", Vendor \"%s\"\n",
+                         s,
+                         name,
+                         'A' + board_info.rev_id,
+                         board_info.variant_id,
+                         wdaq_brd_vendor_name[board_info.vendor_id]);
             }
          }
       }
    }
-   
+
    int i;
    for (i = 0; i < WDAQ_N_SLOTS; i++)
       if (slot_sel[i])
@@ -1651,7 +1655,7 @@ void upload(udp_connection &c, int n_param, const char **param) {
    c.percent = 0;
    c.erase   = 0;
    c.show_default = 0;
-   for (int i = 1; i < n_param; i++) {
+   for (int i = 2; i < n_param; i++) {
 
       if (param[i][0] == '-' && param[i][1] == 'f') {
          if (++i >= n_param) {
@@ -1732,9 +1736,7 @@ void upload(udp_connection &c, int n_param, const char **param) {
          c.erase = 1;
       }
 
-      else if (isdigit(param[i][0]) || param[i][0] == '*') {
-         // parameter selects slot and is ignored here
-      } else {
+      else {
          c.sprintf("Invalid option \"%s\"\n\n", param[i]);
          return;
       }
