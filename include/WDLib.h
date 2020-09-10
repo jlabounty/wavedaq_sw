@@ -193,7 +193,7 @@ class WDSystem {
       DAQBuffer<WDAQEvent> *fCalibratedBuffer;
       WDAQPacketCollector *fCollectorThread;
       WDAQEventBuilder *fBuilderThread;
-      WDAQWorker *fWorkerThread;
+      std::vector<WDAQWorker*> fWorkerThreads;
       WDAQEventWriter *fWriterThread;
       std::vector<WDAQTCBReader*> fTCBReaderThreads;
 
@@ -249,6 +249,7 @@ class WDSystem {
          fEventBuffer = nullptr;
          fCollectorThread = nullptr;
          fBuilderThread = nullptr;
+         fWorkerThreads.clear();
          fWriterThread = nullptr;
          fTCBReaderThreads.clear();
       }
@@ -260,7 +261,7 @@ class WDSystem {
          if(fCalibratedBuffer != nullptr) delete fCalibratedBuffer;
          if(fCollectorThread != nullptr) delete fCollectorThread;
          if(fBuilderThread != nullptr) delete fBuilderThread;
-         if(fWorkerThread != nullptr) delete fWorkerThread;
+         for(auto t: fWorkerThreads) delete t;
          if(fWriterThread != nullptr) delete fWriterThread;
          for(auto t: fTCBReaderThreads) delete t;
       }

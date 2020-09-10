@@ -427,14 +427,14 @@ void WDSystem::GoRun(){
    Sync();
    if(fCollectorThread) fCollectorThread->GoRun();
    if(fBuilderThread) fBuilderThread->GoRun();
+   for(auto t: fWorkerThreads) t->GoRun();
    if(fWriterThread) fWriterThread->GoRun();
-   if(fWorkerThread) fWorkerThread->GoRun();
    for(auto t: fTCBReaderThreads) t->GoRun();
 
    if(fCollectorThread) while(!fCollectorThread->IsRunning()) std::this_thread::yield();
    if(fBuilderThread) while(!fBuilderThread->IsRunning()) std::this_thread::yield();
+   for(auto t: fWorkerThreads) while(!t->IsRunning()) std::this_thread::yield();
    if(fWriterThread) while(!fWriterThread->IsRunning()) std::this_thread::yield();
-   if(fWorkerThread) while(!fWorkerThread->IsRunning()) std::this_thread::yield();
    for(auto t: fTCBReaderThreads) while(!t->IsRunning()) std::this_thread::yield();
 
    GetTriggerBoard()->GoRun();
@@ -448,14 +448,14 @@ void WDSystem::StopRun(){
    //stop all threads
    if(fCollectorThread) fCollectorThread->StopRun();
    if(fBuilderThread) fBuilderThread->StopRun();
+   for(auto t: fWorkerThreads) t->StopRun();
    if(fWriterThread) fWriterThread->StopRun();
-   if(fWorkerThread) fWorkerThread->StopRun();
    for(auto t: fTCBReaderThreads) t->StopRun();
 
    if(fCollectorThread) while(fCollectorThread->IsRunning()) std::this_thread::yield();
    if(fBuilderThread) while(fBuilderThread->IsRunning()) std::this_thread::yield();
+   for(auto t: fWorkerThreads) while(t->IsRunning()) std::this_thread::yield();
    if(fWriterThread) while(fWriterThread->IsRunning()) std::this_thread::yield();
-   if(fWorkerThread) while(fWorkerThread->IsRunning()) std::this_thread::yield();
    for(auto t: fTCBReaderThreads) while(t->IsRunning()) std::this_thread::yield();
 
    //clean all buffers 
@@ -532,17 +532,28 @@ void WDSystem::SpawnDAQ(){
    fCollectorThread->Start();
    fBuilderThread = new WDAQEventBuilder(fPacketBuffer, fEventBuffer, nWDBs+nTCBs);
    fBuilderThread->Start();
-   fWorkerThread = new WDAQWorker(fEventBuffer, fCalibratedBuffer);
-   for(auto &c : fCrate){
-      for(auto &b : *c){
-         if(b) {
-            if(dynamic_cast<WDWDB*>(b) != nullptr){
-                fWorkerThread->AddVoltageCalibration(static_cast<WDWDB*>(b)->GetSerialNumber(), &(static_cast<WDWDB*>(b)->mVCalib));
+
+   int nWorkers;
+   try{
+      nWorkers = GetDaqProperty("Workers").GetInt();
+   } catch (const std::out_of_range& ex){
+      nWorkers = 1;
+   }
+
+   for(int i=0; i<nWorkers; i++){
+      WDAQWorker* workerThread = new WDAQWorker(fEventBuffer, fCalibratedBuffer);
+      for(auto &c : fCrate){
+         for(auto &b : *c){
+            if(b) {
+               if(dynamic_cast<WDWDB*>(b) != nullptr){
+                   workerThread->AddVoltageCalibration(static_cast<WDWDB*>(b)->GetSerialNumber(), &(static_cast<WDWDB*>(b)->mVCalib));
+               }
             }
          }
       }
+      workerThread->Start();
+      fWorkerThreads.push_back(workerThread);
    }
-   fWorkerThread->Start();
 
    std::string noWriter;
    try{
@@ -600,19 +611,22 @@ void WDSystem::SpawnDAQ(){
 }
 
 void WDSystem::StopDAQ(){
-   fCollectorThread->Stop();
-   fBuilderThread->Stop();
-   fWorkerThread->Stop();
-   fWriterThread->Stop();
+   if(fCollectorThread != nullptr) fCollectorThread->Stop();
+   if(fBuilderThread != nullptr) fBuilderThread->Stop();
+   for(auto t: fWorkerThreads) t->Stop();
+   if(fWriterThread != nullptr) fWriterThread->Stop();
+   for(auto t: fTCBReaderThreads) t->Stop();
 
    std::this_thread::sleep_for(std::chrono::seconds(10));
-   delete fPacketBuffer;
-   delete fEventBuffer;
-   delete fCalibratedBuffer;
-   delete fCollectorThread;
-   delete fBuilderThread;
-   delete fWorkerThread;
-   delete fWriterThread;
+   if(fCollectorThread != nullptr) delete fCollectorThread;
+   if(fBuilderThread != nullptr) delete fBuilderThread;
+   for(auto t: fWorkerThreads) delete t;
+   if(fWriterThread != nullptr) delete fWriterThread;
+   for(auto t: fTCBReaderThreads) delete t;
+
+   if(fPacketBuffer != nullptr) delete fPacketBuffer;
+   if(fEventBuffer != nullptr) delete fEventBuffer;
+   if(fCalibratedBuffer != nullptr) delete fCalibratedBuffer;
 }
 
 WDPosition &WDSystem::FindBoard(std::string name){
