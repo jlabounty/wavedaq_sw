@@ -344,7 +344,7 @@ class WDAQPacketCollector: public DAQServerThread{
    void End();
 
    public:
-   WDAQPacketCollector(DAQBuffer<WDAQPacketData> *buf, int nBoards=-1): DAQServerThread(nBoards*4*1024*1024){ //  4*1MB/Board
+   WDAQPacketCollector(DAQBuffer<WDAQPacketData> *buf, int nBoards=1, DAQSystem* parent=nullptr): DAQServerThread(nBoards*4*1024*1024, parent){ //  4*1MB/Board
       fBuf = buf;
       fNPackets = 0;
       fDroppedPackets = 0;
@@ -367,7 +367,7 @@ class WDAQTCBReader: public DAQThread{
    void End();
 
    public:
-   WDAQTCBReader(DAQBuffer<WDAQPacketData> *buf, WDTCB *board){
+   WDAQTCBReader(DAQBuffer<WDAQPacketData> *buf, WDTCB *board, DAQSystem* parent=nullptr) : DAQThread(parent) {
       fBuf = buf;
       fBoard = board;
    }
@@ -398,7 +398,7 @@ class WDAQEventBuilder : public DAQThread{
    void End();
 
    public:
-   WDAQEventBuilder(DAQBuffer<WDAQPacketData> *source, DAQBuffer<WDAQEvent> *destination, int nNBoards){
+   WDAQEventBuilder(DAQBuffer<WDAQPacketData> *source, DAQBuffer<WDAQEvent> *destination, int nNBoards, DAQSystem* parent = nullptr): DAQThread(parent){
       fSource = source;
       fDestination = destination;
       fNBoards = nNBoards;
@@ -447,7 +447,7 @@ class WDAQWorker : public DAQThread{
          fVCalib[id] = calib;
    }
 
-   WDAQWorker(DAQBuffer<WDAQEvent> *source, DAQBuffer<WDAQEvent> *destination){
+   WDAQWorker(DAQBuffer<WDAQEvent> *source, DAQBuffer<WDAQEvent> *destination, DAQSystem* parent = nullptr): DAQThread(parent){
       fSource = source;
       fDestination = destination;
    }
@@ -500,7 +500,7 @@ class WDAQEventWriter : public DAQThread{
          fTCBList.push_back(id);
    }
 
-   WDAQEventWriter(DAQBuffer<WDAQEvent> *source, std::string file, unsigned int eventsPerFile = 0, unsigned int startRunNumber = 0){
+   WDAQEventWriter(DAQBuffer<WDAQEvent> *source, std::string file, unsigned int eventsPerFile = 0, unsigned int startRunNumber = 0, DAQSystem* parent = nullptr) : DAQThread(parent){
       fSource = source;
       fFileName = file;
       fEventsPerFile = eventsPerFile;

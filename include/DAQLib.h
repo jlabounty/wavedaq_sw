@@ -12,20 +12,36 @@
 #include <netinet/in.h>
 #include <fcntl.h>
 
+class DAQBufferBase;
 template <class T> class DAQBuffer;
 class DAQThread;
 class DAQServerThread;
+class DAQSystem;
 
 #ifndef DAQLIB_H
 #define DAQLIB_H
 
-// --- DAQ Buffer --- thread safe queue with max size
+// --- DAQ Buffer Base --- virtual class for buffer interface functions
+class DAQBufferBase {
+   private:
+      std::string fName;
+   public:
+      std::string  GetName(){ return fName; }
 
-template <class T> class DAQBuffer {
+      virtual unsigned int GetSize() = 0;
+      virtual void Clean() = 0;
+      virtual unsigned int GetMaxSize() = 0;
+      virtual float GetOccupancy() = 0;
+
+      DAQBufferBase(DAQSystem* parent, std::string name);
+};
+
+
+// --- DAQ Buffer --- thread safe queue with max size
+template <class T> class DAQBuffer : public DAQBufferBase {
    private:
       std::queue<T*> fEvents;
       unsigned int fMaxSize;
-      std::string fName;
       std::mutex fAccess;
       std::condition_variable fHasData;
       std::chrono::microseconds fLockWaitDuration;
@@ -103,9 +119,8 @@ template <class T> class DAQBuffer {
       float GetOccupancy(){ return fEvents.size() *1./fMaxSize; }//NOTE: only for monitoring
 
       //Constructor  
-      DAQBuffer(unsigned int maxsize = 0, std::string name = "NEWBUFFER"){ 
+      DAQBuffer(unsigned int maxsize = 0, std::string name = "NEWBUFFER", DAQSystem* parent = nullptr): DAQBufferBase(parent, name){ 
          fMaxSize = maxsize;
-         fName = name;
          fLockWaitDuration = std::chrono::microseconds(100);
       }
 
@@ -124,6 +139,7 @@ class DAQThread{
       static std::atomic<unsigned int> fThreadCount;
    private:
       std::thread fThread;
+      volatile bool fStarted;
       volatile bool fStop;
       volatile bool fRunning;
       volatile bool fRunning_old;
@@ -146,6 +162,10 @@ class DAQThread{
       void GoRun();
       void StopRun();
 
+      bool IsStarted(){
+         return fStarted;
+      }
+
       bool IsRunning(){
          return fRunning_old;
       }
@@ -157,7 +177,7 @@ class DAQThread{
       void SetIdleLoopDuration(std::chrono::microseconds d){fIdleLoopDuration = std::chrono::duration_cast<std::chrono::high_resolution_clock::duration>(d); }
 
       //Constructor
-      DAQThread();
+      DAQThread(DAQSystem* parent = nullptr);
 
       //Destructor
       virtual ~DAQThread(){
@@ -217,21 +237,50 @@ class DAQServerThread : public DAQThread{
          //TODO: clean fDataSocket kernel buffer
       }
 
+      void SetDataWaitDuration(std::chrono::microseconds d){
+         fDataWaitDuration = d;
+      }
+
       //Getter
       int GetServerPort(){ return fServerPort; }
       int GetReceivedMessages(){ return fRecvMsg; }
 
       //Constructor
-      DAQServerThread(int buffersize=-1);
-
-      void SetDataWaitDuration(std::chrono::microseconds d){
-         fDataWaitDuration = d;
-      }
-
+      DAQServerThread(int buffersize=-1, DAQSystem* parent=nullptr);
 
       //Destructor
       virtual ~DAQServerThread(){
       }
+};
+
+// --- DAQ System --- grouping of threads and buffers
+class DAQSystem {
+   std::vector<DAQBufferBase*> fBuffers;
+   std::vector<DAQThread*> fThreads;
+
+   public:
+      //Methods
+      void Start();
+      void Stop();
+
+      void WaitRunStarted();
+      void WaitRunStopped();
+      void WaitStopped();
+
+      void GoRun();
+      void StopRun();
+
+      void CleanBuffers();
+
+      void AddThread(DAQThread* thread);
+      void AddBuffer(DAQBufferBase* buffer);
+
+      //Constructor
+      DAQSystem();
+
+      //Destructor
+      ~DAQSystem();
+      
 };
 
 #endif

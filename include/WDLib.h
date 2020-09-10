@@ -182,12 +182,15 @@ class WDSystem {
       PropertyGroup fDaqProperties;
       int fDAQServerPort;
 
+      //DAQ System
+      DAQSystem *fDaqSystem;
+
       //reserved Methods
       void CreatePropertiesFromXml(WDBoard *board, MXML_NODE *board_node);
 
    public:
       std::map<std::string,WDPosition> fBoardMap;
-      //DAQ stuff
+      //DAQ stuff TODO: remove in future
       DAQBuffer<WDAQPacketData> *fPacketBuffer;
       DAQBuffer<WDAQEvent> *fEventBuffer;
       DAQBuffer<WDAQEvent> *fCalibratedBuffer;
@@ -230,6 +233,7 @@ class WDSystem {
       unsigned long GetCrateSize() { return fCrate.size(); }
       PropertyGroup &GetGroupProperties(std::string groupname){ return fGroupProperties.at(groupname); }
       int GetDAQServerPort(){ return fDAQServerPort; }
+      DAQSystem* GetDAQSystem(){ return fDaqSystem; }
 
       //Setters
       void SetTriggerCrateId(long crateid){ fTrgCrateId = crateid; }
@@ -244,26 +248,13 @@ class WDSystem {
          fTrgCrateId = -1;
          fDistributionCrateId = -1;
          fDaqProperties.clear();
-         fPacketBuffer = nullptr;
-         fCalibratedBuffer = nullptr;
-         fEventBuffer = nullptr;
-         fCollectorThread = nullptr;
-         fBuilderThread = nullptr;
-         fWorkerThreads.clear();
-         fWriterThread = nullptr;
-         fTCBReaderThreads.clear();
+
+         fDaqSystem = new DAQSystem();
       }
 
       //Destructor
       ~WDSystem(){
-         if(fPacketBuffer != nullptr) delete fPacketBuffer;
-         if(fEventBuffer != nullptr) delete fEventBuffer;
-         if(fCalibratedBuffer != nullptr) delete fCalibratedBuffer;
-         if(fCollectorThread != nullptr) delete fCollectorThread;
-         if(fBuilderThread != nullptr) delete fBuilderThread;
-         for(auto t: fWorkerThreads) delete t;
-         if(fWriterThread != nullptr) delete fWriterThread;
-         for(auto t: fTCBReaderThreads) delete t;
+         delete fDaqSystem;
       }
    
 };

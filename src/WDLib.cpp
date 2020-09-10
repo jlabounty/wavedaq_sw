@@ -425,43 +425,26 @@ void WDSystem::Sync(){
 //Go Run
 void WDSystem::GoRun(){
    Sync();
-   if(fCollectorThread) fCollectorThread->GoRun();
-   if(fBuilderThread) fBuilderThread->GoRun();
-   for(auto t: fWorkerThreads) t->GoRun();
-   if(fWriterThread) fWriterThread->GoRun();
-   for(auto t: fTCBReaderThreads) t->GoRun();
 
-   if(fCollectorThread) while(!fCollectorThread->IsRunning()) std::this_thread::yield();
-   if(fBuilderThread) while(!fBuilderThread->IsRunning()) std::this_thread::yield();
-   for(auto t: fWorkerThreads) while(!t->IsRunning()) std::this_thread::yield();
-   if(fWriterThread) while(!fWriterThread->IsRunning()) std::this_thread::yield();
-   for(auto t: fTCBReaderThreads) while(!t->IsRunning()) std::this_thread::yield();
+   //start DAQ system run
+   fDaqSystem->GoRun();
+   fDaqSystem->WaitRunStarted();
 
+   //start master trigger board
    GetTriggerBoard()->GoRun();
 }
 
 //Stop Run
 void WDSystem::StopRun(){
-   //Stop master trigger board
+   //stop master trigger board
    GetTriggerBoard()->StopRun();
 
-   //stop all threads
-   if(fCollectorThread) fCollectorThread->StopRun();
-   if(fBuilderThread) fBuilderThread->StopRun();
-   for(auto t: fWorkerThreads) t->StopRun();
-   if(fWriterThread) fWriterThread->StopRun();
-   for(auto t: fTCBReaderThreads) t->StopRun();
+   //stop DAQ system run
+   fDaqSystem->StopRun();
+   fDaqSystem->WaitRunStopped();
 
-   if(fCollectorThread) while(fCollectorThread->IsRunning()) std::this_thread::yield();
-   if(fBuilderThread) while(fBuilderThread->IsRunning()) std::this_thread::yield();
-   for(auto t: fWorkerThreads) while(t->IsRunning()) std::this_thread::yield();
-   if(fWriterThread) while(fWriterThread->IsRunning()) std::this_thread::yield();
-   for(auto t: fTCBReaderThreads) while(t->IsRunning()) std::this_thread::yield();
-
-   //clean all buffers 
-   if(fPacketBuffer) fPacketBuffer->Clean();
-   if(fCalibratedBuffer) fCalibratedBuffer->Clean();
-   if(fEventBuffer) fEventBuffer->Clean();
+   //clean all DAQ buffers 
+   fDaqSystem->CleanBuffers();
 
 }
 //train serial links
@@ -496,9 +479,9 @@ void WDSystem::SpawnDAQ(){
    printf("spawning DAQ for %d WDBs and %d TCBs...\n", nWDBs, nTCBs);
 
    //create buffers
-   fPacketBuffer= new DAQBuffer<WDAQPacketData>(nWDBs*128*number_of_buffers+nTCBs*4*number_of_buffers, "PACKETBUFFER");
-   fEventBuffer= new DAQBuffer<WDAQEvent>(number_of_calibrated_buffers, "BUILDBUFFER");
-   fCalibratedBuffer= new DAQBuffer<WDAQEvent>(number_of_calibrated_buffers, "EVENTBUFFER");
+   fPacketBuffer= new DAQBuffer<WDAQPacketData>(nWDBs*128*number_of_buffers+nTCBs*4*number_of_buffers, "PACKETBUFFER", fDaqSystem);
+   fEventBuffer= new DAQBuffer<WDAQEvent>(number_of_calibrated_buffers, "BUILDBUFFER", fDaqSystem);
+   fCalibratedBuffer= new DAQBuffer<WDAQEvent>(number_of_calibrated_buffers, "EVENTBUFFER", fDaqSystem);
 
    // counts TCB transmitting data, create the TCBReadrer thread if needed
    nTCBs=0;
@@ -511,9 +494,8 @@ void WDSystem::SpawnDAQ(){
                
                //if there is no DCB try trough CMB
                if(! static_cast<WDTCB*>(b)->HasDcbInterface()){
-                  WDAQTCBReader* tcbreaderthread = new WDAQTCBReader(fPacketBuffer,static_cast<WDTCB*>(b));
+                  WDAQTCBReader* tcbreaderthread = new WDAQTCBReader(fPacketBuffer,static_cast<WDTCB*>(b), fDaqSystem);
                   tcbreaderthread->SetIdleLoopDuration(std::chrono::milliseconds(10));
-                  tcbreaderthread->Start();
                   fTCBReaderThreads.push_back(tcbreaderthread);
                }
                nTCBs++;
@@ -528,10 +510,8 @@ void WDSystem::SpawnDAQ(){
       printf("including %d TCB reader...\n", nTCBs);
 
    //spawn threads
-   fCollectorThread = new WDAQPacketCollector(fPacketBuffer, nWDBs+nTCBs);
-   fCollectorThread->Start();
-   fBuilderThread = new WDAQEventBuilder(fPacketBuffer, fEventBuffer, nWDBs+nTCBs);
-   fBuilderThread->Start();
+   fCollectorThread = new WDAQPacketCollector(fPacketBuffer, nWDBs+nTCBs, fDaqSystem);
+   fBuilderThread = new WDAQEventBuilder(fPacketBuffer, fEventBuffer, nWDBs+nTCBs, fDaqSystem);
 
    int nWorkers;
    try{
@@ -541,7 +521,7 @@ void WDSystem::SpawnDAQ(){
    }
 
    for(int i=0; i<nWorkers; i++){
-      WDAQWorker* workerThread = new WDAQWorker(fEventBuffer, fCalibratedBuffer);
+      WDAQWorker* workerThread = new WDAQWorker(fEventBuffer, fCalibratedBuffer, fDaqSystem);
       for(auto &c : fCrate){
          for(auto &b : *c){
             if(b) {
@@ -551,7 +531,6 @@ void WDSystem::SpawnDAQ(){
             }
          }
       }
-      workerThread->Start();
       fWorkerThreads.push_back(workerThread);
    }
 
@@ -580,8 +559,8 @@ void WDSystem::SpawnDAQ(){
       } catch (const std::out_of_range& ex){
          startRunNumber = 0;
       }
-      fWriterThread = new WDAQEventWriter(fCalibratedBuffer, filename, eventsPerFile, startRunNumber);
-      //fWriterThread = new WDAQEventWriter(fEventBuffer, filename);
+      fWriterThread = new WDAQEventWriter(fCalibratedBuffer, filename, eventsPerFile, startRunNumber, fDaqSystem);
+      //fWriterThread = new WDAQEventWriter(fEventBuffer, filename, eventsPerFile, StartRunNumber, fDaqSystem);
       //pass time calibrations to Event Writer
       for(auto &c : fCrate){
          for(auto &b : *c){
@@ -596,13 +575,14 @@ void WDSystem::SpawnDAQ(){
 
          }
       }
-      fWriterThread->Start();
    } else {
       printf("No writer thread running\n");
    }
 
+   fDaqSystem->Start();
+
    //wait for server port
-   while(fCollectorThread->GetServerPort() == -1){  };
+   while(fCollectorThread->GetServerPort() == -1) std::this_thread::yield;
    printf("started on port %d\n", fCollectorThread->GetServerPort());
 
    //assign server port
@@ -611,22 +591,18 @@ void WDSystem::SpawnDAQ(){
 }
 
 void WDSystem::StopDAQ(){
-   if(fCollectorThread != nullptr) fCollectorThread->Stop();
-   if(fBuilderThread != nullptr) fBuilderThread->Stop();
-   for(auto t: fWorkerThreads) t->Stop();
-   if(fWriterThread != nullptr) fWriterThread->Stop();
-   for(auto t: fTCBReaderThreads) t->Stop();
+   delete fDaqSystem;
+   fDaqSystem = new DAQSystem();
 
-   std::this_thread::sleep_for(std::chrono::seconds(10));
-   if(fCollectorThread != nullptr) delete fCollectorThread;
-   if(fBuilderThread != nullptr) delete fBuilderThread;
-   for(auto t: fWorkerThreads) delete t;
-   if(fWriterThread != nullptr) delete fWriterThread;
-   for(auto t: fTCBReaderThreads) delete t;
-
-   if(fPacketBuffer != nullptr) delete fPacketBuffer;
-   if(fEventBuffer != nullptr) delete fEventBuffer;
-   if(fCalibratedBuffer != nullptr) delete fCalibratedBuffer;
+   //also invalidate local pointers to threads
+   fPacketBuffer = nullptr;
+   fEventBuffer = nullptr;
+   fCalibratedBuffer = nullptr;
+   fCollectorThread = nullptr;
+   fBuilderThread = nullptr;
+   fWorkerThreads.clear();
+   fWriterThread = nullptr;
+   fTCBReaderThreads.clear();
 }
 
 WDPosition &WDSystem::FindBoard(std::string name){

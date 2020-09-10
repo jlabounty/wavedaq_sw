@@ -460,9 +460,7 @@ int main(int argc, char *argv[])
          }
          if(option == 18)
          {
-            sys->fPacketBuffer->Clean();
-            sys->fCalibratedBuffer->Clean();
-            sys->fEventBuffer->Clean();
+            sys->GetDAQSystem()->CleanBuffers();
          }
          if(option == 19)
          {

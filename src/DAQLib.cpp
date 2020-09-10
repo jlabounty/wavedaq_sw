@@ -1,5 +1,11 @@
 #include "DAQLib.h"
 
+// --- DAQ Buffer Base --- virtual class for buffer interface functions
+DAQBufferBase::DAQBufferBase(DAQSystem* parent, std::string name){
+   fName = name;
+   if(parent != nullptr) parent->AddBuffer(this);
+}
+
 // --- DAQ Thread --- basic thread wrapper
 //static variable to assign unique thread id
 std::atomic<unsigned int> DAQThread::fThreadCount(0);
@@ -39,10 +45,15 @@ void DAQThread::ThreadMain(){
    }
 
    Close();
+
+   //acknowledge thread stop
+   fStarted = false;
 }
 
 //thread start
 void DAQThread::Start(){ 
+   //TODO: check thread is not already started
+   fStarted = true;
    fThread = std::thread([=] { ThreadMain(); });
    fThread.detach();
 }
@@ -63,7 +74,8 @@ void DAQThread::StopRun(){
 }
 
 //constructor
-DAQThread::DAQThread(){
+DAQThread::DAQThread(DAQSystem* parent){
+   fStarted = false;
    fStop = false;
    fRunning = false;
    fRunning_old = false;
@@ -71,6 +83,7 @@ DAQThread::DAQThread(){
    fLastLoopDuration = std::chrono::high_resolution_clock::duration::zero();
 
    fThreadId = fThreadCount++;
+   if(parent != nullptr) parent->AddThread(this);
 }
 
 // --- DAQ Network Thread --- thread with socket functionalities
@@ -158,7 +171,7 @@ void DAQServerThread::Loop(){
    }
 }
 
-DAQServerThread::DAQServerThread(int buffersize){
+DAQServerThread::DAQServerThread(int buffersize, DAQSystem* parent): DAQThread(parent){
    fDataSocket = -1;
    fServerPort = -1;
    fRecvMsg = 0;
@@ -166,4 +179,82 @@ DAQServerThread::DAQServerThread(int buffersize){
    else fBufferSize = 4*1024*1024; //default 4MB
 
    SetDataWaitDuration(std::chrono::microseconds(100));
+}
+
+// --- DAQ System --- grouping of threads and buffers
+// starts all threads
+void DAQSystem::Start(){
+   for(auto t: fThreads) t->Start();
+}
+
+// stop all threads
+void DAQSystem::Stop(){
+   for(auto t: fThreads) t->Stop();
+}
+
+// wait all threads acknoowledged start run
+void DAQSystem::WaitRunStarted(){
+   for(auto t: fThreads){
+      while(!t->IsRunning())
+         std::this_thread::yield();
+   }
+}
+
+// wait all threads acknoowledged stop run
+void DAQSystem::WaitRunStopped(){
+   for(auto t: fThreads){
+      while(t->IsRunning())
+         std::this_thread::yield();
+   }
+}
+
+// wait all threads acknoowledged stop
+void DAQSystem::WaitStopped(){
+   for(auto t: fThreads){
+      while(t->IsStarted())
+         std::this_thread::yield();
+   }
+}
+
+// start run
+void DAQSystem::GoRun(){
+   for(auto t: fThreads) t->GoRun();
+}
+
+// stop run
+void DAQSystem::StopRun(){
+   for(auto t: fThreads) t->StopRun();
+}
+
+// clean all buffers
+void DAQSystem::CleanBuffers(){
+   for(auto b: fBuffers) b->Clean();
+}
+
+// add thread to vector
+void DAQSystem::AddThread(DAQThread* thread){
+   fThreads.push_back(thread);
+}
+
+// add buffer to vector
+void DAQSystem::AddBuffer(DAQBufferBase* buffer){
+   fBuffers.push_back(buffer);
+}
+
+DAQSystem::DAQSystem(){
+   fBuffers.clear();
+   fThreads.clear();
+}
+
+DAQSystem::~DAQSystem(){
+   //make sure threads are stopped
+   Stop();
+   WaitStopped();
+
+   //delete threads and buffers
+   for(auto b: fBuffers) delete b;
+   for(auto t: fThreads) delete t;
+
+   fBuffers.clear();
+   fThreads.clear();
 }
