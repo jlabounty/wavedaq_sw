@@ -511,6 +511,11 @@ void WDSystem::SpawnDAQ(){
 
    //spawn threads
    fCollectorThread = new WDAQPacketCollector(fPacketBuffer, nWDBs+nTCBs, fDaqSystem);
+   try{
+      int daqport = GetDaqProperty("Port").GetInt();
+      fCollectorThread->SetServerPort(daqport);
+   } catch (const std::out_of_range& ex){
+   }
    fBuilderThread = new WDAQEventBuilder(fPacketBuffer, fEventBuffer, nWDBs+nTCBs, fDaqSystem);
 
    int nWorkers;
@@ -582,7 +587,7 @@ void WDSystem::SpawnDAQ(){
    fDaqSystem->Start();
 
    //wait for server port
-   while(fCollectorThread->GetServerPort() == -1) std::this_thread::yield();
+   while(fCollectorThread->GetServerPort() == 0) std::this_thread::yield();
    printf("started on port %d\n", fCollectorThread->GetServerPort());
 
    //assign server port

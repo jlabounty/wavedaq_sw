@@ -226,6 +226,7 @@ class DAQServerThread : public DAQThread{
 
       void Close(){
          close(fDataSocket);
+         fServerPort = 0;
       }
 
       //to be implemented in derived class to setup functionalities
@@ -235,6 +236,10 @@ class DAQServerThread : public DAQThread{
       //Methods
       void Clean(){
          //TODO: clean fDataSocket kernel buffer
+      }
+
+      void SetServerPort(int port){
+         if(fServerPort==0) fServerPort = port;
       }
 
       void SetDataWaitDuration(std::chrono::microseconds d){

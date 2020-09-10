@@ -117,7 +117,7 @@ void DAQServerThread::Setup(){
    //bind
    memset((char*)&server_addr, 0, sizeof(server_addr));
    server_addr.sin_family = AF_INET;
-   server_addr.sin_port = htons(0); // let OS choose port
+   server_addr.sin_port = htons(fServerPort);
    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
    if (::bind(fDataSocket, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
       perror("bind");
@@ -173,7 +173,7 @@ void DAQServerThread::Loop(){
 
 DAQServerThread::DAQServerThread(int buffersize, DAQSystem* parent): DAQThread(parent){
    fDataSocket = -1;
-   fServerPort = -1;
+   fServerPort = 0; //by default let OS choose server port
    fRecvMsg = 0;
    if(buffersize>0) fBufferSize = buffersize;
    else fBufferSize = 4*1024*1024; //default 4MB
