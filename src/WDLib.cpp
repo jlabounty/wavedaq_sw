@@ -582,7 +582,7 @@ void WDSystem::SpawnDAQ(){
    fDaqSystem->Start();
 
    //wait for server port
-   while(fCollectorThread->GetServerPort() == -1) std::this_thread::yield;
+   while(fCollectorThread->GetServerPort() == -1) std::this_thread::yield();
    printf("started on port %d\n", fCollectorThread->GetServerPort());
 
    //assign server port

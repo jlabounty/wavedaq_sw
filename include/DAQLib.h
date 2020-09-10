@@ -34,6 +34,7 @@ class DAQBufferBase {
       virtual float GetOccupancy() = 0;
 
       DAQBufferBase(DAQSystem* parent, std::string name);
+      virtual ~DAQBufferBase(){};
 };
 
 
@@ -115,7 +116,6 @@ template <class T> class DAQBuffer : public DAQBufferBase {
 
       //Getters
       unsigned int GetMaxSize(){ return fMaxSize; }
-      std::string  GetName(){ return fName; }
       float GetOccupancy(){ return fEvents.size() *1./fMaxSize; }//NOTE: only for monitoring
 
       //Constructor  
