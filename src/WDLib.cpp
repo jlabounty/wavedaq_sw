@@ -510,14 +510,30 @@ void WDSystem::SpawnDAQ(){
       printf("including %d TCB reader...\n", nTCBs);
 
    //spawn threads
-   fCollectorThread = new WDAQPacketCollector(fPacketBuffer, nWDBs+nTCBs, fDaqSystem);
+   //Collectors
+   int nCollectors;
    try{
-      int daqport = GetDaqProperty("Port").GetInt();
-      fCollectorThread->SetServerPort(daqport);
+      nCollectors = GetDaqProperty("Collectors").GetInt();
+      if(nCollectors < 1) nCollectors = 1; //make sure at least a collector is running
    } catch (const std::out_of_range& ex){
+      nCollectors = 1;
    }
+
+   for(int i=0; i<nCollectors; i++){
+      WDAQPacketCollector* collector = new WDAQPacketCollector(fPacketBuffer, nWDBs+nTCBs, fDaqSystem);
+      try{
+         int daqport = GetDaqProperty("Port").GetInt();
+         collector->SetServerPort(daqport);
+      } catch (const std::out_of_range& ex){
+      }
+
+      fCollectorThreads.push_back(collector);
+   }
+
+   //Builder
    fBuilderThread = new WDAQEventBuilder(fPacketBuffer, fEventBuffer, nWDBs+nTCBs, fDaqSystem);
 
+   //Workers
    int nWorkers;
    try{
       nWorkers = GetDaqProperty("Workers").GetInt();
@@ -539,6 +555,7 @@ void WDSystem::SpawnDAQ(){
       fWorkerThreads.push_back(workerThread);
    }
 
+   //Writer
    std::string noWriter;
    try{
       noWriter = GetDaqProperty("NoWriter").GetStringValue();
@@ -587,11 +604,14 @@ void WDSystem::SpawnDAQ(){
    fDaqSystem->Start();
 
    //wait for server port
-   while(fCollectorThread->GetServerPort() == 0) std::this_thread::yield();
-   printf("started on port %d\n", fCollectorThread->GetServerPort());
+   for(auto t: fCollectorThreads) {
+      while(t->GetServerPort() == 0) std::this_thread::yield();
+      printf("started on port %d\n", t->GetServerPort());
+   }
 
    //assign server port
-   fDAQServerPort = fCollectorThread->GetServerPort();
+   //TODO: without a port number being forced we get more than one DAQ port, should use an array here
+   fDAQServerPort = fCollectorThreads[0]->GetServerPort();
 
 }
 
@@ -603,7 +623,7 @@ void WDSystem::StopDAQ(){
    fPacketBuffer = nullptr;
    fEventBuffer = nullptr;
    fCalibratedBuffer = nullptr;
-   fCollectorThread = nullptr;
+   fCollectorThreads.clear();
    fBuilderThread = nullptr;
    fWorkerThreads.clear();
    fWriterThread = nullptr;

@@ -466,8 +466,12 @@ int main(int argc, char *argv[])
          {
             bool done = false;
             int i =0;
-            long OldCollectorNPackets=sys->fCollectorThread->GetReceivedPackets();
-            long OldCollectorDroppedPackets=sys->fCollectorThread->GetDroppedPackets();
+            long OldCollectorNPackets=0;
+            for (auto t : sys->fCollectorThreads) 
+               OldCollectorNPackets+= t->GetReceivedPackets();
+            long OldCollectorDroppedPackets=0;
+            for(auto t : sys->fCollectorThreads)
+               OldCollectorDroppedPackets += t->GetDroppedPackets();
             long OldBuilderBuildedEvent=sys->fBuilderThread->GetBuildedEvents();
             long OldBuilderDroppedEvent=sys->fBuilderThread->GetDroppedEvents();
             long OldBuilderOldEvent=sys->fBuilderThread->GetOldEvents();
@@ -490,9 +494,17 @@ int main(int argc, char *argv[])
             sleep(1);//wait to get events
             while(!done){
                //gather statistics
-               long collectorNPackets = sys->fCollectorThread->GetReceivedPackets();
-               long collectorDroppedPackets = sys->fCollectorThread->GetDroppedPackets();
-               int  collectorReceivedMessages = sys->fCollectorThread->GetReceivedMessages();
+               long collectorNPackets = 0;
+               for (auto t: sys->fCollectorThreads)
+                  collectorNPackets += t->GetReceivedPackets();
+               long collectorDroppedPackets = 0;
+               for (auto t: sys->fCollectorThreads)
+                  collectorDroppedPackets += t->GetDroppedPackets();
+               int  collectorReceivedMessages = 0;
+               for(auto t : sys->fCollectorThreads)
+                   collectorReceivedMessages += t->GetReceivedMessages();
+               collectorReceivedMessages /= sys->fCollectorThreads.size();
+
                long builderEventsInQueue = sys->fBuilderThread->GetEventsInQueue();
                long builderBuildedEvent = sys->fBuilderThread->GetBuildedEvents();
                long builderDroppedEvent =  sys->fBuilderThread->GetDroppedEvents();

@@ -91,10 +91,29 @@ DAQThread::DAQThread(DAQSystem* parent){
 void DAQServerThread::Setup(){
    //create socket
    struct sockaddr_in server_addr;
-   fDataSocket = socket(AF_INET, SOCK_DGRAM, 0);
+   fDataSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
    if(fDataSocket == 0){
       throw std::runtime_error(std::string("Cannot create socket"));
    }
+
+   //set SO_REUSEADDR
+   int ret;
+   int one = 1;
+#ifdef SO_REUSEADDR
+	ret = setsockopt(fDataSocket, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one));
+   if(ret < 0) {
+      throw std::runtime_error(std::string("Cannot set SO_REUSEADDR"));
+   }
+#endif
+
+   //set SO_REUSEPORT
+#ifdef SO_REUSEPORT
+   one = 1;
+	ret = setsockopt(fDataSocket, SOL_SOCKET, SO_REUSEPORT, (char *)&one, sizeof(one));
+   if(ret < 0) {
+      throw std::runtime_error(std::string("Cannot set SO_REUSEADDR"));
+   }
+#endif
 
    // increase receive buffer size
    int rcvBufferSizeSet = fBufferSize;

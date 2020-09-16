@@ -194,7 +194,7 @@ class WDSystem {
       DAQBuffer<WDAQPacketData> *fPacketBuffer;
       DAQBuffer<WDAQEvent> *fEventBuffer;
       DAQBuffer<WDAQEvent> *fCalibratedBuffer;
-      WDAQPacketCollector *fCollectorThread;
+      std::vector<WDAQPacketCollector*> fCollectorThreads;
       WDAQEventBuilder *fBuilderThread;
       std::vector<WDAQWorker*> fWorkerThreads;
       WDAQEventWriter *fWriterThread;
