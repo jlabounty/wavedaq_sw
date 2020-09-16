@@ -1336,7 +1336,9 @@ void WDTCB::ConfigurationStarted(){
    syncdly=0x10;
    trgdly=0x10;
    sprdly=0x10;
-   SetTRGBusODLY(&syncdly, &trgdly, &sprdly);
+   if((fidcode >>12) == 3) {
+     SetTRGBusODLY(&syncdly, &trgdly, &sprdly);
+   }
    SetPacketizerCommandAt(0, ::STOP, 0, 0);
    SetPacketizerAutostart(true);
    SetPacketizerEnable(true);
