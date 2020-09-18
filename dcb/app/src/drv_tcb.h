@@ -64,7 +64,7 @@ typedef struct {
    char           bank_name[4];
    unsigned int   time_stamp;
    unsigned short temperature;
-   char           reserved[5];
+   char           reserved[6];
 } TcbUdpPacketHeader;
 
 #pragma pack(pop) // restore original alignment

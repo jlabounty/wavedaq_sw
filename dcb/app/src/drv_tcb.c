@@ -82,12 +82,12 @@ void readBlock(int slot, WDAQ_BRD* board, unsigned int addr, unsigned short size
    unsigned int* outptr = (unsigned int*)(rxbuffer + 6);
 
    //correct endianess
-   for(int i=0; i<size; i++){
-      if(correctEndianness){
+   if(correctEndianness){
+      for(int i=0; i<size; i++){
          data[i] = bswap_32(outptr[i]);
-      } else
-         memmove(data, outptr, size*sizeof(unsigned int));
-   }
+      }
+   } else
+      memmove(data, outptr, size*sizeof(unsigned int));
 
    free(txbuffer);
    free(rxbuffer);
@@ -141,7 +141,7 @@ void processData(int slot, WDAQ_BRD* board){
       //read bank header
       TcbSpiBankHeader bankhead;
       readBlock(slot, board, address, 2, (unsigned int*)&bankhead, 1);
-      //printf("Got bank %c%c%c%c size %08lx\n", bankhead.name[3], bankhead.name[2], bankhead.name[1], bankhead.name[0], bankhead.size);
+      printf("Got bank %c%c%c%c size %08lx\n", bankhead.name[3], bankhead.name[2], bankhead.name[1], bankhead.name[0], bankhead.size);
       
       //check for buffer overrun
       unsigned int realsize = bankhead.size;
