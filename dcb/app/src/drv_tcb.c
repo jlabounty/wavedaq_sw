@@ -141,7 +141,7 @@ void processData(int slot, WDAQ_BRD* board){
       //read bank header
       TcbSpiBankHeader bankhead;
       readBlock(slot, board, address, 2, (unsigned int*)&bankhead, 1);
-      printf("Got bank %c%c%c%c size %08lx\n", bankhead.name[3], bankhead.name[2], bankhead.name[1], bankhead.name[0], bankhead.size);
+      //printf("Got bank %c%c%c%c size %08lx\n", bankhead.name[3], bankhead.name[2], bankhead.name[1], bankhead.name[0], bankhead.size);
       
       //check for buffer overrun
       unsigned int realsize = bankhead.size;
