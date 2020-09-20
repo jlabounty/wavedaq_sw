@@ -204,7 +204,7 @@ void WDAQTcbPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    //Should check e->mBoardType is TCB 
    WDAQTcbEvent *tcb_e = static_cast<WDAQTcbEvent*>(e);
    
-   //printf("additing event %c%c%c%c flags:%x size:%d\n", mBankName[0], mBankName[1], mBankName[2], mBankName[3], mWDAQFlags, mPayloadLength);
+   //printf("additing event %c%c%c%c flags:%x size:%d offset:%d\n", mBankName[0], mBankName[1], mBankName[2], mBankName[3], mWDAQFlags, mPayloadLength, mDataOffset);
 
    int numberBins = (int) mPayloadLength/4;
    int firstBin = mDataOffset/4;
@@ -213,13 +213,13 @@ void WDAQTcbPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    try{
       bank = tcb_e->mBanks.at(mBankName);
    }catch (const std::out_of_range&){
-      bank = new WDAQTcbBank(mBankName, numberBins);
+      bank = new WDAQTcbBank(mBankName);
       tcb_e->mBanks[mBankName] = bank;
    }
 
-   for(int i=0; i<numberBins; i++){
-      bank->data[firstBin+i] = data[i];
-   }
+   bank->SetValues(firstBin, numberBins, data);
+
+   //tcb_e->UpdateIsComplete();
    //printf("TCB event is complete %d: %d %d %d %d\n", tcb_e->IsComplete(), tcb_e->mStartFlagReceived, tcb_e->mEndFlagReceived, tcb_e->mLastPacket-tcb_e->mFirstPacket+1, tcb_e->mPacketsReceived);
 }
 

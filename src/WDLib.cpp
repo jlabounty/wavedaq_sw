@@ -1741,6 +1741,12 @@ void WDTCB::ConfigurePacketizer(Property &property){
       instVec.push_back(inst);
 
       inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 44;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
       inst.cmd = ::BLOCK_COPY;
       inst.arg0 = RFIBCOUNTER;
       inst.arg1 = bufptr;
@@ -1753,12 +1759,6 @@ void WDTCB::ConfigurePacketizer(Property &property){
       inst.offset += 1;
       inst.cmd = ::COPY;
       inst.arg0 = RTOTTIME;
-      inst.arg1 = bufptr++;
-      instVec.push_back(inst);
-
-      inst.offset += 1;
-      inst.cmd = ::DIRECT_WRITE;
-      inst.arg0 = 7;
       inst.arg1 = bufptr++;
       instVec.push_back(inst);
 
