@@ -225,7 +225,7 @@ void sendPacket(unsigned int slot, unsigned int *pkgnum, unsigned int ibank, uns
       //set remaining header infos
       udpwdaqhead.data_chunk_offset = nwords * sizeof(unsigned int);
       udpwdaqhead.packet_number = *pkgnum;
-      data += nwords;
+      unsigned int *dataptr = data + nwords;
 
       unsigned int remaining_words = bankhead->size - nwords;
       if(remaining_words <= MAXWORDSINPACKET ){
@@ -246,7 +246,7 @@ void sendPacket(unsigned int slot, unsigned int *pkgnum, unsigned int ibank, uns
       iov[1].iov_base = &udptcbhead;
       iov[1].iov_len = sizeof(TcbUdpPacketHeader);
       if(udpwdaqhead.payload_length != 0){
-         iov[2].iov_base = data;
+         iov[2].iov_base = dataptr;
          iov[2].iov_len = udpwdaqhead.payload_length;
          message.msg_iovlen=3;
       } else {
@@ -256,7 +256,7 @@ void sendPacket(unsigned int slot, unsigned int *pkgnum, unsigned int ibank, uns
       //debug
       //printf("sending packet with size %u and offset %u, flags 0x%01x\n", udpwdaqhead.payload_length, udpwdaqhead.data_chunk_offset, udpwdaqhead.wdaq_flags);
       //for(int i=0; i< udpwdaqhead.payload_length; i+=4)
-      //   printf("%d: %08x\n", i/4, bswap_32(data[i/4]));
+      //   printf("%d: %08x\n", i/4, bswap_32(dataptr[i/4]));
       
       //send packet
       correctEndianness(&udpwdaqhead, &udptcbhead);
