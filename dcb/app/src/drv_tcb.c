@@ -127,7 +127,7 @@ int hasData(int slot, WDAQ_BRD* board){
 
 void processData(int slot, WDAQ_BRD* board){
    TcbSpiBufferHeader headerdata;
-   unsigned int data[4096];//UPDATE THIS FOR LARGER FILE TRANSFERS
+   unsigned int data[1024];//UPDATE THIS FOR LARGER FILE TRANSFERS
 
    readBlock(slot, board, BUFFERBASE, 5, (unsigned int*)&headerdata, 1);
 
@@ -151,6 +151,10 @@ void processData(int slot, WDAQ_BRD* board){
 
       //read data
       readBlock(slot, board, address+2, bankhead.size, data, 0);//NOTE: no endianness corrections for speed, data content should not be used
+
+      //print to console for debug
+      //for(int i=0; i< bankhead.size; i++)
+      //   printf("%3d: %08x\n", i, bswap_32(data[i]));
 
       //send packet
       sendPacket(slot, &pkgnum, iBank, headerdata.nBanks, &headerdata, &bankhead, data);
@@ -221,6 +225,7 @@ void sendPacket(unsigned int slot, unsigned int *pkgnum, unsigned int ibank, uns
       //set remaining header infos
       udpwdaqhead.data_chunk_offset = nwords * sizeof(unsigned int);
       udpwdaqhead.packet_number = *pkgnum;
+      data += nwords;
 
       unsigned int remaining_words = bankhead->size - nwords;
       if(remaining_words <= MAXWORDSINPACKET ){
@@ -241,14 +246,17 @@ void sendPacket(unsigned int slot, unsigned int *pkgnum, unsigned int ibank, uns
       iov[1].iov_base = &udptcbhead;
       iov[1].iov_len = sizeof(TcbUdpPacketHeader);
       if(udpwdaqhead.payload_length != 0){
-         iov[2].iov_base = data + nwords;
+         iov[2].iov_base = data;
          iov[2].iov_len = udpwdaqhead.payload_length;
          message.msg_iovlen=3;
       } else {
          message.msg_iovlen=2;
       }
 
-      //printf("sending packet with size %u, flags 0x%01x\n", udpwdaqhead.payload_length, udpwdaqhead.wdaq_flags);
+      //debug
+      //printf("sending packet with size %u and offset %u, flags 0x%01x\n", udpwdaqhead.payload_length, udpwdaqhead.data_chunk_offset, udpwdaqhead.wdaq_flags);
+      //for(int i=0; i< udpwdaqhead.payload_length; i+=4)
+      //   printf("%d: %08x\n", i/4, bswap_32(data[i/4]));
       
       //send packet
       correctEndianness(&udpwdaqhead, &udptcbhead);
