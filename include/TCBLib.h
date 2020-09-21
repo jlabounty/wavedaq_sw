@@ -102,6 +102,8 @@
 #define TCMEMBASE     0x15000                   // TC memories base address (2 memories)
 #define ALFAMEMBASE   0x16000                   // ALFA memories base address (2 memories)
 
+#define SCIFICOINCBASE     0x00800000           //SCIFI fiber coincidence base address (441)
+
 #define PACKAGERBASE       0x01000000 //base address for packager memories
 #define RARBITER           0x01001000 //Bus Arbiter register and packager controller
 #define BUFFERBASE         0x02000000 //Buffer base address

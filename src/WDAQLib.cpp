@@ -218,6 +218,8 @@ void WDAQTcbPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    }
 
    bank->SetValues(firstBin, numberBins, data);
+   //for(int i=0; i<bank->data.size(); i++)
+   //   printf("%d: %08x\n", i, bank->data[i]);
 
    //tcb_e->UpdateIsComplete();
    //printf("TCB event is complete %d: %d %d %d %d\n", tcb_e->IsComplete(), tcb_e->mStartFlagReceived, tcb_e->mEndFlagReceived, tcb_e->mLastPacket-tcb_e->mFirstPacket+1, tcb_e->mPacketsReceived);
@@ -605,6 +607,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
          auto pd = (unsigned int*)(tcbdata+1);
          int numberBins = (int) packet->mPayloadLength/4;
          for (int i=0 ; i<numberBins ; i++) {
+            //printf("%d: %08x\n", i, SWAP_UINT32(pd[i]));
             packet->data[i] = SWAP_UINT32(pd[i]);
          }
 
@@ -1063,7 +1066,7 @@ void WDAQEventWriter::Loop(){
          if(board->mScalerHasData){
             std::string chn_header = "SCAL";
             fFile.write(chn_header.c_str(), 4);
-            // first write 18 integral scaler values as received
+            // first write 19 integral scaler values as received
             for(int bin=0; bin<WD_N_SCALER; bin++){
                uint64_t val = board->mScaler[bin];
                fFile.write((const char *)&val, 8);
