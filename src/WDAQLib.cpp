@@ -84,6 +84,7 @@ void WDAQDRSPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    wdb_e->mDacOFS = mDacOFS;
    wdb_e->mDacROFS = mDacROFS;
    wdb_e->mTemperature = mTemperature;
+   wdb_e->mWDBFlags = mWDBFlags;
 
    //check all data received
    wdb_e->mDrsByteNumber[channel] += mPayloadLength*8;
