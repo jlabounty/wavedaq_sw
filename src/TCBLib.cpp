@@ -118,6 +118,36 @@ void TCB::GetPrescaling(u_int32_t *presca)
     ReadBLT(addr+(iblt*BLTSIZE),presca+(iblt*BLTSIZE), BLTSIZE);
   }
 }
+// read LXe Patch LUT                                              
+void TCB::GetLXePatchLUT(u_int32_t *data)
+{
+  //read loop on prescaling registers   
+  int NBLT = 1024/BLTSIZE+1;
+  int addr = RLXEPATCHLUT;
+  printf("%d %x\n ",NBLT,addr);
+  if ((fidcode>>12)!=3) { 
+    printf("getting LXe Patch LUT on TCB %4x!!!!! skipped\n", fidcode); 
+    return; 
+  }   // now loop to read prescaling values    
+  for (int iblt = 0; iblt<NBLT; iblt++) {    
+    ReadBLT(addr+(iblt*BLTSIZE),data+(iblt*BLTSIZE), BLTSIZE);
+  }                                       
+} 
+// write LXe Patch LUT                                              
+void TCB::SetLXePatchLUT(u_int32_t *data)
+{
+  //read loop on prescaling registers   
+  int NBLT = 1024/BLTSIZE+1;
+  int addr = RLXEPATCHLUT;
+  printf("%d %x\n ",NBLT,addr);
+  if ((fidcode>>12)!=3) { 
+    printf("getting LXe Patch LUT on TCB %4x!!!!! skipped\n", fidcode); 
+    return; 
+  }   // now loop to read prescaling values    
+  for (int iblt = 0; iblt<NBLT; iblt++) {    
+    WriteBLT(addr+(iblt*BLTSIZE),data+(iblt*BLTSIZE), BLTSIZE);
+  }                                       
+} 
 
 //Set IDCode by accessing to rrun register
 void TCB::SetIDCode()

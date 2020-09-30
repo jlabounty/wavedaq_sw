@@ -89,6 +89,7 @@
 #define RSERDESCOU         0x900      // serdes error counter (first address)
 #define RSERDESTIME        0x980      // serdes test time
 #define RDCBSERDESCOU      0x981      // serdes error counter dcb
+#define RLXEPATCHLUT       0x20000    // LXe patch LUT base address
 
 #define RALGCLKMEMADDR     0x0FFFE    // counter stop position for ALGCLK memories
 #define RMEMADDR           0x0FFFF    // counter stop position
@@ -243,6 +244,10 @@ public:
    void SetPrescaling(u_int32_t*);
    // read prescaling values
    void GetPrescaling(u_int32_t*);
+   // read LXePatch LUT
+   void GetLXePatchLUT(u_int32_t*);
+   // write LXePatch LUT
+   void SetLXePatchLUT(u_int32_t*);
    // set the IDCode
    void SetIDCode();
    // set fntrg
