@@ -2036,14 +2036,14 @@ void WDTCB::ConfigureNgenLowThreshold(Property &property){
 
 void WDTCB::ConfigureFHitShaper(Property &property){
    unsigned int hitshaper;
-   hitshaper = property.GetUHex();
+   hitshaper = property.GetUInt();
 
    SetFHitShaper(&hitshaper);
 }
 
 void WDTCB::ConfigureFVetoShaper(Property &property){
    unsigned int vetoshaper;
-   vetoshaper = property.GetUHex();
+   vetoshaper = property.GetUInt();
 
    SetFVetoShaper(&vetoshaper);
 }
