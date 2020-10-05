@@ -81,6 +81,10 @@
 #define RBGOHITDLY         0x61B      // Delay of BGO and Preshower hit
 #define RCRCHITMASK        0x61C      // Masking bit for CRC counters (7:0)
 #define RCRCPAIRENA        0x61D      // Enable bits for CRC top-bottom coincidences
+#define RMAJORITYVALUE     0x61E      // Majority trigger parameters
+#define RTOFXMASKS         0x61F      // Tof X-view masks
+#define RTOFYMASKS         0x621      // Tof Y-view masks
+#define RINTERSPILLDLY     0x623      // Interspill delay value
 #define RFIBCOUNTER        0x700      // SCIFI fiber event counter address (42 values)
 #define RSINGLECRATECFG    0x800      // configurations for single crate trigger logic
 #define RSINGLEISVETO      0x801      // veto set for input channels in single crate logic
@@ -472,6 +476,16 @@ public:
    void GetPCurr(u_int32_t *);
    //Get SciFi counters
    void GetSciFICou(u_int32_t *);
+  // FOOT stuffs
+  void SetFHitShaper(u_int32_t *);
+  void SetFVetoShaper(u_int32_t *);
+  void SetMargaritaMajVal(u_int32_t *);
+  void SetMargaritaMask(u_int32_t *);
+  void SetTofBarHitLogic(u_int32_t *);
+  void SetTofHitLogic(u_int32_t *);
+  void SetTofXMask(u_int32_t *);
+  void SetTofYMask(u_int32_t *);
+  void SetInterspillDly(u_int32_t *);
 
 };
 

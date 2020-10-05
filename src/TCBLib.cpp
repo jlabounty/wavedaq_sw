@@ -1644,4 +1644,95 @@ void TCB::GetSciFICou(u_int32_t *data)
   for(int icycle = 0; icycle<ncycle; icycle++)
     ReadBLT(RFIBCOUNTER+icycle*BLTSIZE,data+icycle*BLTSIZE,BLTSIZE);
 }
-
+// set FOOT hit shaper values
+void TCB::SetFHitShaper(u_int32_t *data){
+  if ((fidcode>>12)!=3) printf("setting FHitShaper delay on TCB %4x!!!!!\n", fidcode);
+  // read the register value
+  u_int32_t rdata;
+  ReadReg(RSINGLECRATECFG,&rdata);
+  // mask needed values
+  rdata &= 0xFFFFFFE0;
+  // add requested value
+  rdata |= (*data)&0x1F;
+   WriteReg(RSINGLECRATECFG,&rdata);
+}
+// set FOOT veto shaper values
+void TCB::SetFVetoShaper(u_int32_t *data){
+  if ((fidcode>>12)!=3) printf("setting FVetoShaper delay on TCB %4x!!!!!\n", fidcode);
+  // read the register value
+  u_int32_t rdata;
+  ReadReg(RSINGLECRATECFG,&rdata);
+  // mask needed values
+  rdata &= 0xFFFFE0FF;
+  // add requested value
+  rdata |= ((*data)&0x1F)<<8;
+   WriteReg(RSINGLECRATECFG,&rdata);
+}
+// set Margarita Majority
+void TCB::SetMargaritaMajVal(u_int32_t *data){
+  if ((fidcode>>12)!=3) printf("setting Margarita Majority delay on TCB %4x!!!!!\n", fidcode);
+  // read the register value
+  u_int32_t rdata;
+  ReadReg(RMAJORITYVALUE,&rdata);
+  // mask needed values
+  rdata &= 0xFFFFFFF0;
+  // add requested value
+  rdata |= (*data)&0xF;
+   WriteReg(RMAJORITYVALUE,&rdata);
+}
+// set Margarita Masks
+void TCB::SetMargaritaMask(u_int32_t *data){
+  if ((fidcode>>12)!=3) printf("setting Margarita Mask delay on TCB %4x!!!!!\n", fidcode);
+  // read the register value
+  u_int32_t rdata;
+  ReadReg(RMAJORITYVALUE,&rdata);
+  // mask needed values
+  rdata &= 0xFF00FFFF;
+  // add requested value
+  rdata |= ((*data)&0xFF)<<16;
+   WriteReg(RMAJORITYVALUE,&rdata);
+}
+// set Tof Bar hit logic
+void TCB::SetTofBarHitLogic(u_int32_t *data){
+  if ((fidcode>>12)!=3) printf("setting Tof hit bar Logic delay on TCB %4x!!!!!\n", fidcode);
+  // read the register value
+  u_int32_t rdata;
+  ReadReg(RMAJORITYVALUE,&rdata);
+  // mask needed values
+  rdata &= 0xBFFFFFFF;
+  // add requested value
+  rdata |= ((*data)&0x1)<<30;
+   WriteReg(RMAJORITYVALUE,&rdata);
+}
+// set Tof Bar hit logic
+void TCB::SetTofHitLogic(u_int32_t *data){
+  if ((fidcode>>12)!=3) printf("setting Tof bar Logic delay on TCB %4x!!!!!\n", fidcode);
+  // read the register value
+  u_int32_t rdata;
+  ReadReg(RMAJORITYVALUE,&rdata);
+  // mask needed values
+  rdata &= 0x7FFFFFFF;
+  // add requested value
+  rdata |= ((*data)&0x1)<<31;
+   WriteReg(RMAJORITYVALUE,&rdata);
+}
+// Tof X Masks
+void TCB::SetTofXMask(u_int32_t *data)
+{
+   if ((fidcode>>12)!=3) printf("setting Tof X Masks on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RTOFXMASKS,data);
+   WriteReg(RTOFXMASKS+1,data+1);
+}
+// Tof Y Masks
+void TCB::SetTofYMask(u_int32_t *data)
+{
+   if ((fidcode>>12)!=3) printf("setting Tof Y Masks on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RTOFYMASKS,data);
+   WriteReg(RTOFYMASKS+1,data+1);
+}
+// Interspill delay
+void TCB::SetInterspillDly(u_int32_t *data)
+{
+   if ((fidcode>>12)!=3) printf("setting Interspill Dly on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RINTERSPILLDLY,data);
+}

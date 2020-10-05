@@ -392,7 +392,17 @@ class WDTCB : public TCB, public WDBoard {
       void ConfigureNgenWidth(Property &property);
       void ConfigureNgenHighThreshold(Property &property);
       void ConfigureNgenLowThreshold(Property &property);
+      void ConfigureFHitShaper(Property &property);
+      void ConfigureFVetoShaper(Property &property);
+      void ConfigureMargaritaMajVal(Property &property);
+      void ConfigureMargaritaMask(Property &property);
+      void ConfigureTofBarHitLogic(Property &property);
+      void ConfigureTofHitLogic(Property &property);
+      void ConfigureTofXMask(Property &property);
+      void ConfigureTofYMask(Property &property);
+      void ConfigureInterspillDly(Property &property);
 
+  
       WDTCB(WDCrate *crate, int slot, std::string name="TCBXXX", int verbose = 0);
       ~WDTCB() { };
 };
