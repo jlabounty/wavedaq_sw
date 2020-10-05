@@ -276,10 +276,24 @@ public:
    std::vector<unsigned int> data;
    std::array<char,4> fName;
 
-   WDAQTcbBank(std::array<char,4> name, unsigned long length){
+   WDAQTcbBank(std::array<char,4> name){
       fName = name;
+      data.clear();
       data.reserve(1000);//should be the max bank size to be matched with WDAQTcbPacket
-      data.resize(length);
+   }
+
+   void SetValues(unsigned long pos, unsigned long len, unsigned int *vals){
+      //extends values if needed;
+      if(pos+len >= data.size()) {
+         //printf("from size %d to size %d\n", data.size(), pos+len+1);
+         data.resize(pos+len);
+      }
+      for(int i=0; i<len; i++)
+         data[pos+i] = vals[i];
+   }
+
+   unsigned long GetSize(){
+      return data.size();
    }
 };
 

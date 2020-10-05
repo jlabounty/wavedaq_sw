@@ -430,6 +430,8 @@ void WDSystem::GoRun(){
    fDaqSystem->GoRun();
    fDaqSystem->WaitRunStarted();
 
+   usleep(500000);//wait sync is applied
+
    //start master trigger board
    GetTriggerBoard()->GoRun();
 }
@@ -1163,24 +1165,17 @@ void WDWDB::SetInCrate(){
    //switch to backplane clock
    if(GetExtClkInSel() != 0 || GetDaqClkSrcSel() != 0 || GetLmkInputFreq() != 80){
 
-      int old_timeout = GetReceiveTimeoutMs(); 
-      SetReceiveTimeoutMs(15*cDefaultReceiveTimeoutMs);
-      //SetSendBlock(true);
+      SetSendBlock(true);
       SetExtClkInSel(0);
 
       SetDaqClkSrcSel(0);
 
       SetLmkInputFreq(80);
-      //SetSendBlock(false);
+      SetSendBlock(false);
 
-      //SendControlRegisters();
+      SendControlRegisters();
 
-      SetReceiveTimeoutMs(3*cDefaultReceiveTimeoutMs);
-      SetApplySettingsLmk(1);
-
-      SetReceiveTimeoutMs(3*cDefaultReceiveTimeoutMs);
       LmkSyncLocal();
-      SetReceiveTimeoutMs(old_timeout);
       ReceiveStatusRegister(GetDrsSampleFreqLoc());
 
       //Reset everything
@@ -1312,11 +1307,25 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureNgenDelay(property);
    } else if(name=="NgenWidth"){
       ConfigureNgenWidth(property);
-   } else if(name=="NgenHighThreshold"){
-      ConfigureNgenHighThreshold(property);
-   } else if(name=="NgenLowThreshold"){
-      ConfigureNgenLowThreshold(property);
-   } else if(name=="NoLocalTrigger"){
+   } else if(name=="FHitShaper"){ 
+      ConfigureFHitShaper(property);
+   } else if(name=="FVetoShaper"){ 
+      ConfigureFVetoShaper(property);
+   } else if(name=="MargaritaMajVal"){ 
+      ConfigureMargaritaMajVal(property);
+   } else if(name=="MargaritaMask"){ 
+      ConfigureMargaritaMask(property);
+   } else if(name=="TofBarHitLogic"){ 
+      ConfigureTofBarHitLogic(property);
+   } else if(name=="TofHitLogic"){ 
+      ConfigureTofHitLogic(property);
+   } else if(name=="TofXMask"){ 
+      ConfigureTofXMask(property);
+   } else if(name=="TofYMask"){ 
+      ConfigureTofYMask(property);
+   } else if(name=="InterspillDly"){ 
+      ConfigureInterspillDly(property);
+   } else if(name=="NoLocalTrigger"){  
    } else {
       printf("Unknown property %s in WDTCB\n", name.c_str());
    }
@@ -1741,6 +1750,12 @@ void WDTCB::ConfigurePacketizer(Property &property){
       instVec.push_back(inst);
 
       inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 44;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
       inst.cmd = ::BLOCK_COPY;
       inst.arg0 = RFIBCOUNTER;
       inst.arg1 = bufptr;
@@ -1756,9 +1771,34 @@ void WDTCB::ConfigurePacketizer(Property &property){
       inst.arg1 = bufptr++;
       instVec.push_back(inst);
 
+      nbank++;
+   }
+   if(list.find("SCIFI")!=std::string::npos){
       inst.offset += 1;
       inst.cmd = ::DIRECT_WRITE;
-      inst.arg0 = 7;
+      inst.arg0 = 0x54534643;//TSFC
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 442;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::BLOCK_COPY;
+      inst.arg0 = SCIFICOINCBASE;
+      inst.arg1 = bufptr;
+      inst.arg2 = 441;
+      instVec.push_back(inst);
+      inst.arg2 = 0;
+      
+      bufptr += 441;
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RTOTTIME;
       inst.arg1 = bufptr++;
       instVec.push_back(inst);
 
@@ -1992,6 +2032,77 @@ void WDTCB::ConfigureNgenLowThreshold(Property &property){
    ngenlow = property.GetUHex();
 
    SetNGENLowThreshold(&ngenlow);
+}
+
+void WDTCB::ConfigureFHitShaper(Property &property){
+   unsigned int hitshaper;
+   hitshaper = property.GetUHex();
+
+   SetFHitShaper(&hitshaper);
+}
+
+void WDTCB::ConfigureFVetoShaper(Property &property){
+   unsigned int vetoshaper;
+   vetoshaper = property.GetUHex();
+
+   SetFVetoShaper(&vetoshaper);
+}
+
+void WDTCB::ConfigureMargaritaMajVal(Property &property){
+   unsigned int majval;
+   majval = property.GetUInt();
+
+   SetMargaritaMajVal(&majval);
+}
+
+void WDTCB::ConfigureMargaritaMask(Property &property){
+   unsigned int mask;
+   mask = property.GetUHex();
+
+   SetMargaritaMask(&mask);
+}
+
+void WDTCB::ConfigureTofBarHitLogic(Property &property){
+   unsigned int logic;
+   logic = property.GetUHex();
+
+   SetTofBarHitLogic(&logic);
+}
+
+void WDTCB::ConfigureTofHitLogic(Property &property){
+   unsigned int logic;
+   logic = property.GetUHex();
+
+   SetTofHitLogic(&logic);
+}
+
+void WDTCB::ConfigureTofXMask(Property &property){
+   int64_t arraySize = 0;
+   const unsigned int* masks;
+
+   masks = property.GetUHexVector(&arraySize);
+   if(arraySize == 2){
+      SetTofXMask((unsigned int*)masks);
+   } else
+      throw std::runtime_error("TofXMask size should be 2 values");
+}
+
+void WDTCB::ConfigureTofYMask(Property &property){
+   int64_t arraySize = 0;
+   const unsigned int* masks;
+
+   masks = property.GetUHexVector(&arraySize);
+   if(arraySize == 2){
+      SetTofYMask((unsigned int*)masks);
+   } else
+      throw std::runtime_error("TofYMask size should be 2 values");
+}
+
+void WDTCB::ConfigureInterspillDly(Property &property){
+   unsigned int dly;
+   dly = property.GetUInt();
+
+   SetInterspillDly(&dly);
 }
 
 // --- WDDCB ---

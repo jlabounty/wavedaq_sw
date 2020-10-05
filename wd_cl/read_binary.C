@@ -274,7 +274,7 @@ void decode(const char *filename) {
                } else if(ch.c[0] == 'S') {
                   //Scaler
                   WDBDATA &this_data =  data[bh.board_serial_number];
-                  fread(scaler_data, sizeof(long), 18, f);
+                  fread(scaler_data, sizeof(long), 19, f);
                   fread(&scaler_time, sizeof(long), 1, f);
                   for (int i=0 ; i<18 ; i++) {
                      this_data.scaler[i] = (Double_t) (scaler_data[i]-scaler_data_old[i])/(scaler_time-scaler_time_old)/12.5e-9;
@@ -299,6 +299,9 @@ void decode(const char *filename) {
                printf("tcb %d: got bank %c%c%c%c size:%u\n", bh.board_serial_number, bankName[0], bankName[1], bankName[2], bankName[3], bankSize);
                unsigned int temp[1000];
                fread(&temp, sizeof(unsigned int), bankSize, f);
+               for(int i=0; i<bankSize; i++)
+                  printf("%4d: %08x\n", i, temp[i]);
+
                if(bankName[0]=='I' && bankName[1]=='N'){
                   int serdesNumber = (bankName[2]-'0')*10+(bankName[3]-'0');
                   for(int i=0; i<128; i++){
