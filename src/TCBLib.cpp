@@ -1746,6 +1746,18 @@ void TCB::SetTofHitLogic(u_int32_t *data){
   rdata |= ((*data)&0x1)<<31;
    WriteReg(RMAJORITYVALUE,&rdata);
 }
+// set Tof Bar hit logic
+void TCB::SetTofHitLogicAlternative(u_int32_t *data){
+  if ((fidcode>>12)!=3) printf("setting Tof bar Logic delay on TCB %4x!!!!!\n", fidcode);
+  // read the register value
+  u_int32_t rdata;
+  ReadReg(RMAJORITYVALUE,&rdata);
+  // mask needed values
+  rdata &= 0xDFFFFFFF;
+  // add requested value
+  rdata |= ((*data)&0x1)<<29;
+   WriteReg(RMAJORITYVALUE,&rdata);
+}
 // Tof X Masks
 void TCB::SetTofXMask(u_int32_t *data)
 {
@@ -1759,6 +1771,21 @@ void TCB::SetTofYMask(u_int32_t *data)
    if ((fidcode>>12)!=3) printf("setting Tof Y Masks on TCB %4x!!!!!\n", fidcode);
    WriteReg(RTOFYMASKS,data);
    WriteReg(RTOFYMASKS+1,data+1);
+}
+// FOOT Calo Masks
+void TCB::SetFCaloMask(u_int32_t *data)
+{
+   if ((fidcode>>12)!=3) printf("setting FCalo Masks on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RFCALOMASKS,data);
+
+}
+// Tof Y Masks
+void TCB::SetMatrixMask(u_int32_t *data)
+{
+   if ((fidcode>>12)!=3) printf("setting Tof Y Masks on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RMATRIXMASKS0,data);
+   WriteReg(RMATRIXMASKS1,data+1);
+   WriteReg(RMATRIXMASKS2,data+2);
 }
 // Interspill delay
 void TCB::SetInterspillDly(u_int32_t *data)

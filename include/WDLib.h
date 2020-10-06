@@ -398,8 +398,11 @@ class WDTCB : public TCB, public WDBoard {
       void ConfigureMargaritaMask(Property &property);
       void ConfigureTofBarHitLogic(Property &property);
       void ConfigureTofHitLogic(Property &property);
+      void ConfigureTofHitLogicAlternative(Property &property);
       void ConfigureTofXMask(Property &property);
       void ConfigureTofYMask(Property &property);
+      void ConfigureFCaloMask(Property &property);
+      void ConfigureMatrixMask(Property &property);
       void ConfigureInterspillDly(Property &property);
 
   

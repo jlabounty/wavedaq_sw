@@ -1319,10 +1319,16 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureTofBarHitLogic(property);
    } else if(name=="TofHitLogic"){ 
       ConfigureTofHitLogic(property);
+   } else if(name=="TofHitLogicAlternative"){ 
+      ConfigureTofHitLogicAlternative(property);
    } else if(name=="TofXMask"){ 
-      ConfigureTofXMask(property);
+      ConfigureTofXMask(property); 
    } else if(name=="TofYMask"){ 
       ConfigureTofYMask(property);
+   } else if(name=="FCaloMask"){ 
+      ConfigureFCaloMask(property);
+   } else if(name=="MatrixMask"){ 
+      ConfigureMatrixMask(property);
    } else if(name=="InterspillDly"){ 
       ConfigureInterspillDly(property);
    } else if(name=="NoLocalTrigger"){  
@@ -2076,6 +2082,13 @@ void WDTCB::ConfigureTofHitLogic(Property &property){
    SetTofHitLogic(&logic);
 }
 
+void WDTCB::ConfigureTofHitLogicAlternative(Property &property){
+   unsigned int logic;
+   logic = property.GetUHex();
+
+   SetTofHitLogicAlternative(&logic);
+}
+
 void WDTCB::ConfigureTofXMask(Property &property){
    int64_t arraySize = 0;
    const unsigned int* masks;
@@ -2094,6 +2107,23 @@ void WDTCB::ConfigureTofYMask(Property &property){
    masks = property.GetUHexVector(&arraySize);
    if(arraySize == 2){
       SetTofYMask((unsigned int*)masks);
+   } else
+      throw std::runtime_error("TofYMask size should be 2 values");
+}
+
+void WDTCB::ConfigureFCaloMask(Property &property){
+   unsigned int mask;
+   mask = property.GetUHex();
+   SetFCaloMask(&mask);
+}
+
+void WDTCB::ConfigureMatrixMask(Property &property){
+   int64_t arraySize = 0;
+   const unsigned int* masks;
+
+   masks = property.GetUHexVector(&arraySize);
+   if(arraySize == 3){
+      SetMatrixMask((unsigned int*)masks);
    } else
       throw std::runtime_error("TofYMask size should be 2 values");
 }

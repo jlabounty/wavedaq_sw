@@ -85,6 +85,10 @@
 #define RTOFXMASKS         0x61F      // Tof X-view masks
 #define RTOFYMASKS         0x621      // Tof Y-view masks
 #define RINTERSPILLDLY     0x623      // Interspill delay value
+#define RMATRIXMASKS0      0x624      // Mask Matrix
+#define RMATRIXMASKS1      0x625      // Mask Matrix
+#define RMATRIXMASKS2      0x626      // Mask Matrix
+#define RFCALOMASKS        0x627      // Mask for FOOT calorimenter inputs
 #define RFIBCOUNTER        0x700      // SCIFI fiber event counter address (42 values)
 #define RSINGLECRATECFG    0x800      // configurations for single crate trigger logic
 #define RSINGLEISVETO      0x801      // veto set for input channels in single crate logic
@@ -488,8 +492,11 @@ public:
   void SetMargaritaMask(u_int32_t *);
   void SetTofBarHitLogic(u_int32_t *);
   void SetTofHitLogic(u_int32_t *);
+  void SetTofHitLogicAlternative(u_int32_t *);
   void SetTofXMask(u_int32_t *);
   void SetTofYMask(u_int32_t *);
+  void SetFCaloMask(u_int32_t *);
+  void SetMatrixMask(u_int32_t *);
   void SetInterspillDly(u_int32_t *);
 
 };
