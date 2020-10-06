@@ -395,6 +395,7 @@ class WDTCB : public TCB, public WDBoard {
       void ConfigureFHitShaper(Property &property);
       void ConfigureFVetoShaper(Property &property);
       void ConfigureMargaritaMajVal(Property &property);
+      void ConfigureMargaritaTrgDly(Property &property);
       void ConfigureMargaritaMask(Property &property);
       void ConfigureTofBarHitLogic(Property &property);
       void ConfigureTofHitLogic(Property &property);

@@ -1313,6 +1313,8 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureFVetoShaper(property);
    } else if(name=="MargaritaMajVal"){ 
       ConfigureMargaritaMajVal(property);
+   } else if(name=="MargaritaTrgDly"){ 
+      ConfigureMargaritaTrgDly(property);
    } else if(name=="MargaritaMask"){ 
       ConfigureMargaritaMask(property);
    } else if(name=="TofBarHitLogic"){ 
@@ -2059,6 +2061,13 @@ void WDTCB::ConfigureMargaritaMajVal(Property &property){
    majval = property.GetUInt();
 
    SetMargaritaMajVal(&majval);
+}
+
+void WDTCB::ConfigureMargaritaTrgDly(Property &property){
+   unsigned int majtrgdly;
+   majtrgdly = property.GetUInt();
+
+   SetMargaritaTrgDly(&majtrgdly);
 }
 
 void WDTCB::ConfigureMargaritaMask(Property &property){

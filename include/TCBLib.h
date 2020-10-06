@@ -487,8 +487,9 @@ public:
    void GetSciFICou(u_int32_t *);
   // FOOT stuffs
   void SetFHitShaper(u_int32_t *);
-  void SetFVetoShaper(u_int32_t *);
+  void SetFVetoShaper(u_int32_t *);  
   void SetMargaritaMajVal(u_int32_t *);
+  void SetMargaritaTrgDly(u_int32_t *);
   void SetMargaritaMask(u_int32_t *);
   void SetTofBarHitLogic(u_int32_t *);
   void SetTofHitLogic(u_int32_t *);

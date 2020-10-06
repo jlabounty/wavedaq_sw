@@ -1700,7 +1700,7 @@ void TCB::SetFVetoShaper(u_int32_t *data){
 }
 // set Margarita Majority
 void TCB::SetMargaritaMajVal(u_int32_t *data){
-  if ((fidcode>>12)!=3) printf("setting Margarita Majority delay on TCB %4x!!!!!\n", fidcode);
+  if ((fidcode>>12)!=3) printf("setting Margarita Majority on TCB %4x!!!!!\n", fidcode);
   // read the register value
   u_int32_t rdata;
   ReadReg(RMAJORITYVALUE,&rdata);
@@ -1710,9 +1710,21 @@ void TCB::SetMargaritaMajVal(u_int32_t *data){
   rdata |= (*data)&0xF;
    WriteReg(RMAJORITYVALUE,&rdata);
 }
+// set Margarita Majority
+void TCB::SetMargaritaTrgDly(u_int32_t *data){
+  if ((fidcode>>12)!=3) printf("setting Margarita trigger delay on TCB %4x!!!!!\n", fidcode);
+  // read the register value
+  u_int32_t rdata;
+  ReadReg(RMAJORITYVALUE,&rdata);
+  // mask needed values
+  rdata &= 0xFFFFFE0F;
+  // add requested value
+  rdata |= ((*data)&0x1F)<<4;
+   WriteReg(RMAJORITYVALUE,&rdata);
+}
 // set Margarita Masks
 void TCB::SetMargaritaMask(u_int32_t *data){
-  if ((fidcode>>12)!=3) printf("setting Margarita Mask delay on TCB %4x!!!!!\n", fidcode);
+  if ((fidcode>>12)!=3) printf("setting Margarita Mask on TCB %4x!!!!!\n", fidcode);
   // read the register value
   u_int32_t rdata;
   ReadReg(RMAJORITYVALUE,&rdata);
@@ -1724,7 +1736,7 @@ void TCB::SetMargaritaMask(u_int32_t *data){
 }
 // set Tof Bar hit logic
 void TCB::SetTofBarHitLogic(u_int32_t *data){
-  if ((fidcode>>12)!=3) printf("setting Tof hit bar Logic delay on TCB %4x!!!!!\n", fidcode);
+  if ((fidcode>>12)!=3) printf("setting Tof hit bar Logic on TCB %4x!!!!!\n", fidcode);
   // read the register value
   u_int32_t rdata;
   ReadReg(RMAJORITYVALUE,&rdata);
@@ -1736,7 +1748,7 @@ void TCB::SetTofBarHitLogic(u_int32_t *data){
 }
 // set Tof Bar hit logic
 void TCB::SetTofHitLogic(u_int32_t *data){
-  if ((fidcode>>12)!=3) printf("setting Tof bar Logic delay on TCB %4x!!!!!\n", fidcode);
+  if ((fidcode>>12)!=3) printf("setting Tof bar Logic on TCB %4x!!!!!\n", fidcode);
   // read the register value
   u_int32_t rdata;
   ReadReg(RMAJORITYVALUE,&rdata);
@@ -1748,7 +1760,7 @@ void TCB::SetTofHitLogic(u_int32_t *data){
 }
 // set Tof Bar hit logic
 void TCB::SetTofHitLogicAlternative(u_int32_t *data){
-  if ((fidcode>>12)!=3) printf("setting Tof bar Logic delay on TCB %4x!!!!!\n", fidcode);
+  if ((fidcode>>12)!=3) printf("setting Tof bar Logic on TCB %4x!!!!!\n", fidcode);
   // read the register value
   u_int32_t rdata;
   ReadReg(RMAJORITYVALUE,&rdata);
