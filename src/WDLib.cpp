@@ -1307,11 +1307,33 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureNgenDelay(property);
    } else if(name=="NgenWidth"){
       ConfigureNgenWidth(property);
-   } else if(name=="NgenHighThreshold"){
-      ConfigureNgenHighThreshold(property);
-   } else if(name=="NgenLowThreshold"){
-      ConfigureNgenLowThreshold(property);
-   } else if(name=="NoLocalTrigger"){
+   } else if(name=="FHitShaper"){ 
+      ConfigureFHitShaper(property);
+   } else if(name=="FVetoShaper"){ 
+      ConfigureFVetoShaper(property);
+   } else if(name=="MargaritaMajVal"){ 
+      ConfigureMargaritaMajVal(property);
+   } else if(name=="MargaritaTrgDly"){ 
+      ConfigureMargaritaTrgDly(property);
+   } else if(name=="MargaritaMask"){ 
+      ConfigureMargaritaMask(property);
+   } else if(name=="TofBarHitLogic"){ 
+      ConfigureTofBarHitLogic(property);
+   } else if(name=="TofHitLogic"){ 
+      ConfigureTofHitLogic(property);
+   } else if(name=="TofHitLogicAlternative"){ 
+      ConfigureTofHitLogicAlternative(property);
+   } else if(name=="TofXMask"){ 
+      ConfigureTofXMask(property); 
+   } else if(name=="TofYMask"){ 
+      ConfigureTofYMask(property);
+   } else if(name=="FCaloMask"){ 
+      ConfigureFCaloMask(property);
+   } else if(name=="MatrixMask"){ 
+      ConfigureMatrixMask(property);
+   } else if(name=="InterspillDly"){ 
+      ConfigureInterspillDly(property);
+   } else if(name=="NoLocalTrigger"){  
    } else {
       printf("Unknown property %s in WDTCB\n", name.c_str());
    }
@@ -2048,6 +2070,108 @@ void WDTCB::ConfigureNgenLowThreshold(Property &property){
    ngenlow = property.GetUHex();
 
    SetNGENLowThreshold(&ngenlow);
+}
+
+void WDTCB::ConfigureFHitShaper(Property &property){
+   unsigned int hitshaper;
+   hitshaper = property.GetUInt();
+
+   SetFHitShaper(&hitshaper);
+}
+
+void WDTCB::ConfigureFVetoShaper(Property &property){
+   unsigned int vetoshaper;
+   vetoshaper = property.GetUInt();
+
+   SetFVetoShaper(&vetoshaper);
+}
+
+void WDTCB::ConfigureMargaritaMajVal(Property &property){
+   unsigned int majval;
+   majval = property.GetUInt();
+
+   SetMargaritaMajVal(&majval);
+}
+
+void WDTCB::ConfigureMargaritaTrgDly(Property &property){
+   unsigned int majtrgdly;
+   majtrgdly = property.GetUInt();
+
+   SetMargaritaTrgDly(&majtrgdly);
+}
+
+void WDTCB::ConfigureMargaritaMask(Property &property){
+   unsigned int mask;
+   mask = property.GetUHex();
+
+   SetMargaritaMask(&mask);
+}
+
+void WDTCB::ConfigureTofBarHitLogic(Property &property){
+   unsigned int logic;
+   logic = property.GetUHex();
+
+   SetTofBarHitLogic(&logic);
+}
+
+void WDTCB::ConfigureTofHitLogic(Property &property){
+   unsigned int logic;
+   logic = property.GetUHex();
+
+   SetTofHitLogic(&logic);
+}
+
+void WDTCB::ConfigureTofHitLogicAlternative(Property &property){
+   unsigned int logic;
+   logic = property.GetUHex();
+
+   SetTofHitLogicAlternative(&logic);
+}
+
+void WDTCB::ConfigureTofXMask(Property &property){
+   int64_t arraySize = 0;
+   const unsigned int* masks;
+
+   masks = property.GetUHexVector(&arraySize);
+   if(arraySize == 2){
+      SetTofXMask((unsigned int*)masks);
+   } else
+      throw std::runtime_error("TofXMask size should be 2 values");
+}
+
+void WDTCB::ConfigureTofYMask(Property &property){
+   int64_t arraySize = 0;
+   const unsigned int* masks;
+
+   masks = property.GetUHexVector(&arraySize);
+   if(arraySize == 2){
+      SetTofYMask((unsigned int*)masks);
+   } else
+      throw std::runtime_error("TofYMask size should be 2 values");
+}
+
+void WDTCB::ConfigureFCaloMask(Property &property){
+   unsigned int mask;
+   mask = property.GetUHex();
+   SetFCaloMask(&mask);
+}
+
+void WDTCB::ConfigureMatrixMask(Property &property){
+   int64_t arraySize = 0;
+   const unsigned int* masks;
+
+   masks = property.GetUHexVector(&arraySize);
+   if(arraySize == 3){
+      SetMatrixMask((unsigned int*)masks);
+   } else
+      throw std::runtime_error("TofYMask size should be 2 values");
+}
+
+void WDTCB::ConfigureInterspillDly(Property &property){
+   unsigned int dly;
+   dly = property.GetUInt();
+
+   SetInterspillDly(&dly);
 }
 
 // --- WDDCB ---
