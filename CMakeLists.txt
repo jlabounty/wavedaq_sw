@@ -43,8 +43,9 @@ add_custom_target(git_revision_h
 # Check for mxml
 #
 if (NOT EXISTS ${PROJECT_SOURCE_DIR}/mxml/.git)
-   message(FATAL_ERROR "mxml files not found, please make sure git submodules are downloaded.\n"
-                       "generation aborted\n\n")
+   message(FATAL_ERROR "mxml files not found, please install via\n"
+                       "'git submodule update --init'\n"
+                       "in 'sw' main directory\n")
 endif()
 
 #
