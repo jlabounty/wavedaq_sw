@@ -89,6 +89,7 @@
 #define RMATRIXMASKS1      0x625      // Mask Matrix
 #define RMATRIXMASKS2      0x626      // Mask Matrix
 #define RFCALOMASKS        0x627      // Mask for FOOT calorimenter inputs
+#define RFNEUTRONMASKS     0x628      // Mask for FOOT neutron detector inputs
 #define RFIBCOUNTER        0x700      // SCIFI fiber event counter address (42 values)
 #define RSINGLECRATECFG    0x800      // configurations for single crate trigger logic
 #define RSINGLEISVETO      0x801      // veto set for input channels in single crate logic
@@ -497,6 +498,7 @@ public:
   void SetTofXMask(u_int32_t *);
   void SetTofYMask(u_int32_t *);
   void SetFCaloMask(u_int32_t *);
+  void SetFNeutronMask(u_int32_t *);
   void SetMatrixMask(u_int32_t *);
   void SetInterspillDly(u_int32_t *);
 

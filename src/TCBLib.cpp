@@ -1791,6 +1791,13 @@ void TCB::SetFCaloMask(u_int32_t *data)
    WriteReg(RFCALOMASKS,data);
 
 }
+// FOOT Nutron Masks
+void TCB::SetFNeutronMask(u_int32_t *data)
+{
+   if ((fidcode>>12)!=3) printf("setting FNeutron Masks on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RFNEUTRONMASKS,data);
+
+}
 // Tof Y Masks
 void TCB::SetMatrixMask(u_int32_t *data)
 {

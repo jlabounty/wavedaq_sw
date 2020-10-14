@@ -1329,6 +1329,8 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureTofYMask(property);
    } else if(name=="FCaloMask"){ 
       ConfigureFCaloMask(property);
+   } else if(name=="FNeutronMask"){ 
+      ConfigureFNeutronMask(property);
    } else if(name=="MatrixMask"){ 
       ConfigureMatrixMask(property);
    } else if(name=="InterspillDly"){ 
@@ -2154,6 +2156,12 @@ void WDTCB::ConfigureFCaloMask(Property &property){
    unsigned int mask;
    mask = property.GetUHex();
    SetFCaloMask(&mask);
+}
+
+void WDTCB::ConfigureFNeutronMask(Property &property){
+   unsigned int mask;
+   mask = property.GetUHex();
+   SetFNeutronMask(&mask);
 }
 
 void WDTCB::ConfigureMatrixMask(Property &property){
