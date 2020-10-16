@@ -1273,6 +1273,10 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureXecVetoThreshold(property);
    } else if(name=="XecPatchId"){
       ConfigureXecPatchId(property);
+   } else if(name=="XecPatchThreshold"){
+      ConfigureXecPatchThreshold(property);
+   } else if(name=="XecPatchDelay"){
+      ConfigureXecPatchDelay(property);
    } else if(name=="XecAlfaThreshold"){
       ConfigureXecAlfaThreshold(property);
    } else if(name=="XecAlfaScale"){
@@ -1303,6 +1307,10 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureCrcHitMask(property);
    } else if(name=="CrcPairMask"){
       ConfigureCrcPairMask(property);
+   } else if(name=="NgenHighThreshold"){
+      ConfigureNgenHighThreshold(property);
+   } else if(name=="NgenLowThreshold"){
+      ConfigureNgenLowThreshold(property);
    } else if(name=="NgenDelay"){
       ConfigureNgenDelay(property);
    } else if(name=="NgenWidth"){
@@ -1919,7 +1927,21 @@ void WDTCB::ConfigureXecPatchId(Property &property){
    unsigned int xecpatchid;
    xecpatchid = property.GetUHex();
 
-   SetSumPatch(&xecpatchid);
+   SetPatch(&xecpatchid);
+}
+
+void WDTCB::ConfigureXecPatchThreshold(Property &property){
+   unsigned int xecpatchthreshold;
+   xecpatchthreshold = property.GetUHex();
+
+   SetPatchThreshold(&xecpatchthreshold);
+}
+
+void WDTCB::ConfigureXecPatchDelay(Property &property){
+   unsigned int xecpatchdelay;
+   xecpatchdelay = property.GetUHex();
+
+   SetPatchDelay(&xecpatchdelay);
 }
 
 void WDTCB::ConfigureXecAlfaThreshold(Property &property){

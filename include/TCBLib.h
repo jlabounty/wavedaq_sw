@@ -60,7 +60,7 @@
 #define RTILEMSK3          0x604      // tile mask 3
 #define RQLTHR             0x606      // sum threshold low
 #define RQCTHR             0x607      // sum threshold cosmic
-#define RLXePATCH          0x608      // LXe sum patch 
+#define RLXePATCHID        0x608      // LXe patch request
 #define RTIMEN             0x60A      // Time Difference threshold Narrow
 #define RTIMEW             0x60B      // Time Difference threshold Wide
 #define RTCMERGEH          0x60C      // TC high threshold for hit merge
@@ -90,6 +90,8 @@
 #define RMATRIXMASKS2      0x626      // Mask Matrix
 #define RFCALOMASKS        0x627      // Mask for FOOT calorimenter inputs
 #define RFNEUTRONMASKS     0x628      // Mask for FOOT neutron detector inputs
+#define RLXeHITTHR         0x629      // Minimum number of hits in a XEC patch
+#define RLXePATCHDLY       0x62A      // Delay of XEC patch algorithm
 #define RFIBCOUNTER        0x700      // SCIFI fiber event counter address (42 values)
 #define RSINGLECRATECFG    0x800      // configurations for single crate trigger logic
 #define RSINGLEISVETO      0x801      // veto set for input channels in single crate logic
@@ -452,7 +454,10 @@ public:
    void SetSumHighThreshold(u_int32_t*);
    void SetSumLowThreshold(u_int32_t*);
    void SetSumVetoThreshold(u_int32_t*);
-   void SetSumPatch(u_int32_t*);
+   //Xenon patch position selection
+   void SetPatch(u_int32_t*);
+   void SetPatchThreshold(u_int32_t*);
+   void SetPatchDelay(u_int32_t*);
    //time thresholds
    void SetTimeNarrow(u_int32_t*);
    void SetTimeWide(u_int32_t*);

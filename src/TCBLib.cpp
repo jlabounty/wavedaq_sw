@@ -1531,10 +1531,20 @@ void TCB::SetSumVetoThreshold(u_int32_t *data)
    if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
    WriteReg(RQCTHR,data);
 }
-void TCB::SetSumPatch(u_int32_t *data)
+void TCB::SetPatch(u_int32_t *data)
 {
    if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
-   WriteReg(RLXePATCH,data);
+   WriteReg(RLXePATCHID,data);
+}
+void TCB::SetPatchThreshold(u_int32_t *data)
+{
+   if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RLXeHITTHR,data);
+}
+void TCB::SetPatchDelay(u_int32_t *data)
+{
+   if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RLXePATCHDLY,data);
 }
 // time windows
 void TCB::SetTimeNarrow(u_int32_t *data){

@@ -373,6 +373,8 @@ class WDTCB : public TCB, public WDBoard {
       void ConfigureXecLowThreshold(Property &property);
       void ConfigureXecVetoThreshold(Property &property);
       void ConfigureXecPatchId(Property &property);
+      void ConfigureXecPatchThreshold(Property &property);
+      void ConfigureXecPatchDelay(Property &property);
       void ConfigureXecAlfaThreshold(Property &property);
       void ConfigureXecAlfaScale(Property &property);
       void ConfigureXecMovingAverage(Property &property);
