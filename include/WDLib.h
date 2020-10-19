@@ -62,6 +62,7 @@ class WDBoard {
       virtual void GoRun() { };    //start the board
       virtual void StopRun() { };  //stop the board
       virtual bool IsBusy() { return false; };   //check busy state
+      virtual unsigned char GetSerialNumber() { return 0; }; //returns serial number used in data stream;
 
       //Setters
       void SetProperties(const PropertyGroup &properties);
@@ -288,6 +289,10 @@ class WDWDB : public WDB, public WDBoard{
          return GetDrsCtrlBusy(); 
       }
 
+      unsigned char GetSerialNumber() {
+        return WDB::GetSerialNumber();    
+      }
+
       //Configuration handlers
       void ConfigureProperty(const std::string &name, Property &property);
       void ConfigurationStarted();
@@ -353,6 +358,10 @@ class WDTCB : public TCB, public WDBoard {
 
       bool IsBusy(){
          return TCB::IsBusy();
+      }
+
+      unsigned char GetSerialNumber() {
+        return GetCrate()->GetCrateNumber()<<5 | GetSlot();    
       }
 
       //Configuration handlers
@@ -437,6 +446,10 @@ class WDDCB : public DCB, public WDBoard {
       bool IsBusy(){
          //TODO update register
          return GetDcbBusy();
+      }
+
+      unsigned char GetSerialNumber() {
+        return DCB::GetSerialNumber();    
       }
 
       //Configuration handlers
