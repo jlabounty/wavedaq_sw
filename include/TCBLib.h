@@ -176,6 +176,7 @@ private:
 public:
    // board info
    u_int32_t      fidcode;           // reg id
+   u_int32_t      fexpid;            // reg experiment id
    u_int32_t      fslot;             // slot
    int            fntrg;             // number of available trigger
    int            fverbose;          // verbosity level
