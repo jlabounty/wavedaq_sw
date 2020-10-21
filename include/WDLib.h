@@ -62,6 +62,7 @@ class WDBoard {
       virtual void GoRun() { };    //start the board
       virtual void StopRun() { };  //stop the board
       virtual bool IsBusy() { return false; };   //check busy state
+      virtual unsigned short GetSerialNumber() { return 0; }; //returns serial number used in data stream;
 
       //Setters
       void SetProperties(const PropertyGroup &properties);
@@ -288,6 +289,10 @@ class WDWDB : public WDB, public WDBoard{
          return GetDrsCtrlBusy(); 
       }
 
+      unsigned short GetSerialNumber() {
+        return WDB::GetSerialNumber();    
+      }
+
       //Configuration handlers
       void ConfigureProperty(const std::string &name, Property &property);
       void ConfigurationStarted();
@@ -355,6 +360,10 @@ class WDTCB : public TCB, public WDBoard {
          return TCB::IsBusy();
       }
 
+      unsigned short GetSerialNumber() {
+        return (GetCrate()->GetCrateNumber() << 8) | GetSlot();    
+      }
+
       //Configuration handlers
       void ConfigureProperty(const std::string &name, Property &property);
       void ConfigurationStarted();
@@ -373,6 +382,8 @@ class WDTCB : public TCB, public WDBoard {
       void ConfigureXecLowThreshold(Property &property);
       void ConfigureXecVetoThreshold(Property &property);
       void ConfigureXecPatchId(Property &property);
+      void ConfigureXecPatchThreshold(Property &property);
+      void ConfigureXecPatchDelay(Property &property);
       void ConfigureXecAlfaThreshold(Property &property);
       void ConfigureXecAlfaScale(Property &property);
       void ConfigureXecMovingAverage(Property &property);
@@ -435,6 +446,10 @@ class WDDCB : public DCB, public WDBoard {
       bool IsBusy(){
          //TODO update register
          return GetDcbBusy();
+      }
+
+      unsigned short GetSerialNumber() {
+        return DCB::GetSerialNumber();    
       }
 
       //Configuration handlers
