@@ -41,7 +41,6 @@ int tcb_destination_valid = 0;
 
 //socket
 int tcb_data_socket = -1;
-int crate_id = -1;
 
 /******************************************************************************/
 /******************************************************************************/
@@ -178,6 +177,11 @@ void sendPacket(unsigned int slot, unsigned int *pkgnum, unsigned int ibank, uns
       printf("cannot send TCB data: destination not configured! send a cfgdst command!\n");
       return;
    }
+
+   //get crate and slot id
+   unsigned int loc;
+   reg_bank_read(DCB_REG_DCB_LOC, &loc, 1);
+   unsigned short crate_id = (loc & DCB_CRATE_ID_MASK) >> DCB_CRATE_ID_OFS;
 
    //allocate packet header
    WdaqUdpPacketHeader udpwdaqhead;
@@ -316,11 +320,6 @@ void initTcbDriver(){
       printf("cannot open socket for TCB data: %s\n",strerror(errno));
       return;
    }
-
-   //get crate and slot id
-   unsigned int loc;
-   reg_bank_read(DCB_REG_DCB_LOC, &loc, 1);
-   crate_id = (loc & DCB_CRATE_ID_MASK) >> DCB_CRATE_ID_OFS;
 
 }
 
