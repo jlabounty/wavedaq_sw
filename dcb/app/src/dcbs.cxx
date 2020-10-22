@@ -399,7 +399,7 @@ int main(int argc, char *argv[]) {
       FD_SET(sock_asc, &fds);
       FD_SET(sock_raw, &fds);
 
-      struct timeval tv = {0, 10000}; // 10 ms
+      struct timeval tv = {0, 3000}; // 3 ms
       if (select(FD_SETSIZE, &fds, NULL, NULL, &tv) < 0)
          perror("select");
 
