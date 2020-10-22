@@ -87,5 +87,6 @@ void setTcbDataDestination(char *ip_address, int port);//use negative port to in
 int hasTcbDataDestination();
 int hasData(int slot, WDAQ_BRD *board);
 void processData(int slot, WDAQ_BRD *board);
+void initTcbDriver();
 
 #endif /* __DRV_TCB__ */

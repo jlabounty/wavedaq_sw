@@ -39,6 +39,9 @@
 struct sockaddr_in tcb_destination_addr;
 int tcb_destination_valid = 0;
 
+//socket
+int tcb_data_socket = -1;
+
 /******************************************************************************/
 /******************************************************************************/
 
@@ -175,18 +178,10 @@ void sendPacket(unsigned int slot, unsigned int *pkgnum, unsigned int ibank, uns
       return;
    }
 
-   //open socket
-   int fd=socket(AF_INET,SOCK_DGRAM,0);
-   if (fd==-1) {
-      printf("cannot open socket for TCB data: %s\n",strerror(errno));
-      return;
-   }
-
    //get crate and slot id
    unsigned int loc;
    reg_bank_read(DCB_REG_DCB_LOC, &loc, 1);
-   unsigned int crate_id = (loc & DCB_CRATE_ID_MASK) >> DCB_CRATE_ID_OFS;
-   //unsigned int slot = (loc & DCB_SLOT_ID_MASK) >> DCB_SLOT_ID_OFS;
+   unsigned short crate_id = (loc & DCB_CRATE_ID_MASK) >> DCB_CRATE_ID_OFS;
 
    //allocate packet header
    WdaqUdpPacketHeader udpwdaqhead;
@@ -260,7 +255,7 @@ void sendPacket(unsigned int slot, unsigned int *pkgnum, unsigned int ibank, uns
       
       //send packet
       correctEndianness(&udpwdaqhead, &udptcbhead);
-      if (sendmsg(fd,&message,0)==-1) {
+      if (sendmsg(tcb_data_socket,&message,0)==-1) {
          printf("error sending TCB data: %s\n",strerror(errno));
       }
       correctEndianness(&udpwdaqhead, &udptcbhead);
@@ -271,7 +266,6 @@ void sendPacket(unsigned int slot, unsigned int *pkgnum, unsigned int ibank, uns
    } while (nwords < bankhead->size); 
 
 
-   close(fd);
 
 }
 
@@ -318,4 +312,16 @@ int hasTcbDataDestination(){
 }
 
 /******************************************************************************/
+
+void initTcbDriver(){
+   //open socket
+   tcb_data_socket = socket(AF_INET,SOCK_DGRAM,0);
+   if (tcb_data_socket == -1) {
+      printf("cannot open socket for TCB data: %s\n",strerror(errno));
+      return;
+   }
+
+}
+
+
 /******************************************************************************/

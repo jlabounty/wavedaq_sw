@@ -162,7 +162,10 @@ void TCB::SetIDCode()
    fidcode = ((data&0xffff0000)>>16);
    if((fidcode>>12)==1) fnserdes = 16;
    else if((fidcode>>12)==2) fnserdes = 4;
-   else if((fidcode>>12)==3) fnserdes = 16;
+   else if((fidcode>>12)==3) {
+     fnserdes = 16;
+     fexpid = fidcode&0xF;
+   }
 }
 
 //Set NTRG by accessing to rntrg register
@@ -1518,41 +1521,49 @@ void TCB::ResetSyncWaveformSerdes(){
 // waveform sum threshold
 void TCB::SetSumHighThreshold(u_int32_t *data)
 {
-   if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
+   if ((fidcode>>12)!=3) printf("setting QSUM High Threshold on TCB %4x!!!!!\n", fidcode);
+   else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
    WriteReg(RQHTHR,data);
 }
 void TCB::SetSumLowThreshold(u_int32_t *data)
 {
-   if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
+   if ((fidcode>>12)!=3) printf("setting QSUM Low Threshold on TCB %4x!!!!!\n", fidcode);
+   else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
    WriteReg(RQLTHR,data);
 }
 void TCB::SetSumVetoThreshold(u_int32_t *data)
 {
-   if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
+  if ((fidcode>>12)!=3) printf("setting QSUM Veto Threshold on TCB %4x!!!!!\n", fidcode);
+   else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
    WriteReg(RQCTHR,data);
 }
 void TCB::SetPatch(u_int32_t *data)
 {
-   if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
+   if ((fidcode>>12)!=3) printf("setting LXe Pacth Value on TCB %4x!!!!!\n", fidcode);
+   else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
    WriteReg(RLXePATCHID,data);
 }
 void TCB::SetPatchThreshold(u_int32_t *data)
 {
-   if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
-   WriteReg(RLXeHITTHR,data);
+  if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
+  else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
+  WriteReg(RLXeHITTHR,data);
 }
 void TCB::SetPatchDelay(u_int32_t *data)
 {
-   if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
-   WriteReg(RLXePATCHDLY,data);
+  if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
+  else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
+  WriteReg(RLXePATCHDLY,data);
 }
 // time windows
 void TCB::SetTimeNarrow(u_int32_t *data){
-   if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
+   if ((fidcode>>12)!=3) printf("setting Narrow Time Threshold on TCB %4x!!!!!\n", fidcode);
+   else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
    WriteReg(RTIMEN,data);
 }
 void TCB::SetTimeWide(u_int32_t *data){
-   if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
+   if ((fidcode>>12)!=3) printf("setting Wide Time Threshold on TCB %4x!!!!!\n", fidcode);
+   else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
    WriteReg(RTIMEW,data);
 }
 //Alpha configuration
@@ -1572,6 +1583,7 @@ void TCB::SetAlphaPeakScale(float value)
 void TCB::SetQsumSelect(u_int32_t *data)
 {
    if ((fidcode>>12)!=3) printf("setting QSUM select on TCB %4x!!!!!\n", fidcode);
+   else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
    WriteReg(RQSUMSEL,data);
 }
 // TC Masks
@@ -1586,7 +1598,8 @@ void TCB::SetTCMasks(u_int32_t *data)
 // TC Multiplicity
 void TCB::SetTCMultiplicityThreshold(u_int32_t *data)
 {
-   if ((fidcode>>12)!=3) printf("setting Tile Masks on TCB %4x!!!!!\n", fidcode);
+   if ((fidcode>>12)!=3) printf("setting TC Multiplicity on TCB %4x!!!!!\n", fidcode);
+   else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
    WriteReg(RTCMULTITHR,data);
 }
 // TC Crate Hit Merge
@@ -1690,6 +1703,10 @@ void TCB::GetSciFICou(u_int32_t *data)
 // set FOOT hit shaper values
 void TCB::SetFHitShaper(u_int32_t *data){
   if ((fidcode>>12)!=3) printf("setting FHitShaper delay on TCB %4x!!!!!\n", fidcode);
+  else if ((fexpid&0x3)!= 0x2) {
+    printf("TCB not compiled for FOOT !!!!!\n") ;
+    throw std::runtime_error("Error in TCB board configuration");
+  }
   // read the register value
   u_int32_t rdata;
   ReadReg(RSINGLECRATECFG,&rdata);
@@ -1702,6 +1719,10 @@ void TCB::SetFHitShaper(u_int32_t *data){
 // set FOOT veto shaper values
 void TCB::SetFVetoShaper(u_int32_t *data){
   if ((fidcode>>12)!=3) printf("setting FVetoShaper delay on TCB %4x!!!!!\n", fidcode);
+  else if ((fexpid&0x3)!= 0x2) {
+    printf("TCB not compiled for FOOT !!!!!\n");
+    throw std::runtime_error("Error in TCB board configuration");
+  }
   // read the register value
   u_int32_t rdata;
   ReadReg(RSINGLECRATECFG,&rdata);
@@ -1714,6 +1735,10 @@ void TCB::SetFVetoShaper(u_int32_t *data){
 // set Margarita Majority
 void TCB::SetMargaritaMajVal(u_int32_t *data){
   if ((fidcode>>12)!=3) printf("setting Margarita Majority on TCB %4x!!!!!\n", fidcode);
+  else if ((fexpid&0x3)!= 0x2) {
+    printf("TCB not compiled for FOOT !!!!!\n");
+    throw std::runtime_error("Error in TCB board configuration");
+  };
   // read the register value
   u_int32_t rdata;
   ReadReg(RMAJORITYVALUE,&rdata);
@@ -1726,6 +1751,10 @@ void TCB::SetMargaritaMajVal(u_int32_t *data){
 // set Margarita Majority
 void TCB::SetMargaritaTrgDly(u_int32_t *data){
   if ((fidcode>>12)!=3) printf("setting Margarita trigger delay on TCB %4x!!!!!\n", fidcode);
+  else if ((fexpid&0x3)!= 0x2) {
+    printf("TCB not compiled for FOOT !!!!!\n");
+    throw std::runtime_error("Error in TCB board configuration");  
+  }
   // read the register value
   u_int32_t rdata;
   ReadReg(RMAJORITYVALUE,&rdata);
@@ -1738,6 +1767,10 @@ void TCB::SetMargaritaTrgDly(u_int32_t *data){
 // set Margarita Masks
 void TCB::SetMargaritaMask(u_int32_t *data){
   if ((fidcode>>12)!=3) printf("setting Margarita Mask on TCB %4x!!!!!\n", fidcode);
+  else if ((fexpid&0x3)!= 0x2) {
+    printf("TCB not compiled for FOOT !!!!!\n");
+    throw std::runtime_error("Error in TCB board configuration");	
+  }
   // read the register value
   u_int32_t rdata;
   ReadReg(RMAJORITYVALUE,&rdata);
@@ -1750,6 +1783,10 @@ void TCB::SetMargaritaMask(u_int32_t *data){
 // set Tof Bar hit logic
 void TCB::SetTofBarHitLogic(u_int32_t *data){
   if ((fidcode>>12)!=3) printf("setting Tof hit bar Logic on TCB %4x!!!!!\n", fidcode);
+  else if ((fexpid&0x3)!= 0x2) {
+    printf("TCB not compiled for FOOT !!!!!\n");
+    throw std::runtime_error("Error in TCB board configuration");	
+  }
   // read the register value
   u_int32_t rdata;
   ReadReg(RMAJORITYVALUE,&rdata);
@@ -1762,6 +1799,10 @@ void TCB::SetTofBarHitLogic(u_int32_t *data){
 // set Tof Bar hit logic
 void TCB::SetTofHitLogic(u_int32_t *data){
   if ((fidcode>>12)!=3) printf("setting Tof bar Logic on TCB %4x!!!!!\n", fidcode);
+  else if ((fexpid&0x3)!= 0x2) {
+    printf("TCB not compiled for FOOT !!!!!\n");
+    throw std::runtime_error("Error in TCB board configuration");	
+  }
   // read the register value
   u_int32_t rdata;
   ReadReg(RMAJORITYVALUE,&rdata);
@@ -1774,6 +1815,10 @@ void TCB::SetTofHitLogic(u_int32_t *data){
 // set Tof Bar hit logic
 void TCB::SetTofHitLogicAlternative(u_int32_t *data){
   if ((fidcode>>12)!=3) printf("setting Tof bar Logic on TCB %4x!!!!!\n", fidcode);
+   else if ((fexpid&0x3)!= 0x2) {
+    printf("TCB not compiled for FOOT !!!!!\n");
+    throw std::runtime_error("Error in TCB board configuration");
+  }
   // read the register value
   u_int32_t rdata;
   ReadReg(RMAJORITYVALUE,&rdata);
@@ -1787,6 +1832,10 @@ void TCB::SetTofHitLogicAlternative(u_int32_t *data){
 void TCB::SetTofXMask(u_int32_t *data)
 {
    if ((fidcode>>12)!=3) printf("setting Tof X Masks on TCB %4x!!!!!\n", fidcode);
+   else if ((fexpid&0x3)!= 0x2) {
+     printf("TCB not compiled for FOOT !!!!!\n");
+     throw std::runtime_error("Error in TCB board configuration");
+   }
    WriteReg(RTOFXMASKS,data);
    WriteReg(RTOFXMASKS+1,data+1);
 }
@@ -1794,6 +1843,10 @@ void TCB::SetTofXMask(u_int32_t *data)
 void TCB::SetTofYMask(u_int32_t *data)
 {
    if ((fidcode>>12)!=3) printf("setting Tof Y Masks on TCB %4x!!!!!\n", fidcode);
+   else if ((fexpid&0x3)!= 0x2) {
+     printf("TCB not compiled for FOOT !!!!!\n");
+     throw std::runtime_error("Error in TCB board configuration");
+   }
    WriteReg(RTOFYMASKS,data);
    WriteReg(RTOFYMASKS+1,data+1);
 }
@@ -1801,6 +1854,10 @@ void TCB::SetTofYMask(u_int32_t *data)
 void TCB::SetFCaloMask(u_int32_t *data)
 {
    if ((fidcode>>12)!=3) printf("setting FCalo Masks on TCB %4x!!!!!\n", fidcode);
+   else if ((fexpid&0x3)!= 0x2) {
+     printf("TCB not compiled for FOOT !!!!!\n");
+     throw std::runtime_error("Error in TCB board configuration");
+   }
    WriteReg(RFCALOMASKS,data);
 
 }
@@ -1808,20 +1865,32 @@ void TCB::SetFCaloMask(u_int32_t *data)
 void TCB::SetFNeutronMask(u_int32_t *data)
 {
    if ((fidcode>>12)!=3) printf("setting FNeutron Masks on TCB %4x!!!!!\n", fidcode);
+   else if ((fexpid&0x3)!= 0x2) {
+     printf("TCB not compiled for FOOT !!!!!\n");
+     throw std::runtime_error("Error in TCB board configuration");
+   }
    WriteReg(RFNEUTRONMASKS,data);
 
 }
 // Tof Y Masks
 void TCB::SetMatrixMask(u_int32_t *data)
 {
-   if ((fidcode>>12)!=3) printf("setting Tof Y Masks on TCB %4x!!!!!\n", fidcode);
-   WriteReg(RMATRIXMASKS0,data);
-   WriteReg(RMATRIXMASKS1,data+1);
-   WriteReg(RMATRIXMASKS2,data+2);
+  if ((fidcode>>12)!=3) printf("setting Tof Y Masks on TCB %4x!!!!!\n", fidcode);
+  else if ((fexpid&0x3)!= 0x2) {
+    printf("TCB not compiled for FOOT !!!!!\n");
+    throw std::runtime_error("Error in TCB board configuration");
+  }
+  WriteReg(RMATRIXMASKS0,data);
+  WriteReg(RMATRIXMASKS1,data+1);
+  WriteReg(RMATRIXMASKS2,data+2);
 }
 // Interspill delay
 void TCB::SetInterspillDly(u_int32_t *data)
 {
-   if ((fidcode>>12)!=3) printf("setting Interspill Dly on TCB %4x!!!!!\n", fidcode);
-   WriteReg(RINTERSPILLDLY,data);
+  if ((fidcode>>12)!=3) printf("setting Interspill Dly on TCB %4x!!!!!\n", fidcode);
+  else if ((fexpid&0x3)!= 0x2) {
+    printf("TCB not compiled for FOOT !!!!!\n");
+    throw std::runtime_error("Error in TCB board configuration");
+  }
+  WriteReg(RINTERSPILLDLY,data);
 }
