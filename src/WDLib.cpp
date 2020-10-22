@@ -2027,10 +2027,14 @@ void WDTCB::ConfigureBgoVetoThreshold(Property &property){
 }
 
 void WDTCB::ConfigureBgoHitDelay(Property &property){
-   unsigned int bgohitdelay;
-   bgohitdelay = property.GetUInt();
+   int64_t arraySize = 0;
+   
+   const unsigned int *bgohitdelay = property.GetUIntVector(&arraySize);
 
-   SetBGOHitDelay(&bgohitdelay);
+   if(arraySize == 2)
+      SetBGOHitDelay(bgohitdelay[0], bgohitdelay[1]);
+   else
+      throw std::runtime_error("BgoHitDelay size should be 2 values");
 }
 
 void WDTCB::ConfigureBgoTriggerMask(Property &property){

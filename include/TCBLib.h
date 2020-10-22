@@ -475,7 +475,7 @@ public:
    void SetBGOThreshold(u_int32_t *);
    void SetBGOVetoThreshold(u_int32_t *);
    void SetBGOTriggerMask(u_int32_t *);
-   void SetBGOHitDelay(u_int32_t *);
+   void SetBGOHitDelay(u_int32_t, u_int32_t);
    //Set RDC Stuff
    void SetRDCThreshold(u_int32_t *);
    void SetRDCTriggerMask(u_int32_t *);
