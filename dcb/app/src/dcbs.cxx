@@ -366,6 +366,9 @@ int main(int argc, char *argv[]) {
    // socket address used to store client address
    client_address_len = sizeof(client_address);
 
+   //init drivers
+   initTcbDriver();
+
    printf("DCB binary and ASCII servers listening on %s ports %d,%d\n", hostname, SERVER_PORT_BIN, SERVER_PORT_ASC);
 
    if (daemon) {
