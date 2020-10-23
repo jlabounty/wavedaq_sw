@@ -5,7 +5,11 @@
  *  Project :  MEGII - DCB
  *
  *  Author  :  schmid_e (Author of generation script)
+<<<<<<< Updated upstream
  *  Created :  25.09.2020 14:38:00
+=======
+ *  Created :  23.10.2020 09:16:10
+>>>>>>> Stashed changes
  *
  *  Description :  Register map definitions.
  *
@@ -41,6 +45,7 @@ const dcb_reg_func_type  dcb_reg_func_list[] = {
   { dcb_hw_reg , 0 },   /* register 19 [0x004C]: CLR_CLK_CTRL */
   { dcb_hw_reg , 0 },   /* register 20 [0x0050]: COM_CTRL */
   { dcb_hw_reg , 0 },   /* register 21 [0x0054]: RST */
+<<<<<<< Updated upstream
   { dcb_hw_reg , 0 },   /* register 22 [0x0058]: SERDES_STATUS_00_04 */
   { dcb_hw_reg , 0 },   /* register 23 [0x005C]: SERDES_ERR_CNT_00 */
   { dcb_hw_reg , 0 },   /* register 24 [0x0060]: APLY_CFG */
@@ -73,6 +78,58 @@ const dcb_reg_func_type  dcb_reg_func_list[] = {
   { dcb_hw_reg , 0 },   /* register 51 [0x00CC]: TRB_INFO_MSB */
   { dcb_hw_reg , 0 },   /* register 52 [0x00D0]: LMK_MOD_FLAG */
   { dcb_hw_reg , 0 }    /* register 53 [0x00D4]: CRC32_REG_BANK */
+=======
+  { dcb_hw_reg , 0 },   /* register 22 [0x0058]: SERDES_STATUS_00_07 */
+  { dcb_hw_reg , 0 },   /* register 23 [0x005C]: SERDES_STATUS_08_15 */
+  { dcb_hw_reg , 0 },   /* register 24 [0x0060]: SERDES_STATUS_17 */
+  { dcb_hw_reg , 0 },   /* register 25 [0x0064]: SERDES_ERR_CNT_00 */
+  { dcb_hw_reg , 0 },   /* register 26 [0x0068]: SERDES_ERR_CNT_01 */
+  { dcb_hw_reg , 0 },   /* register 27 [0x006C]: SERDES_ERR_CNT_02 */
+  { dcb_hw_reg , 0 },   /* register 28 [0x0070]: SERDES_ERR_CNT_03 */
+  { dcb_hw_reg , 0 },   /* register 29 [0x0074]: SERDES_ERR_CNT_04 */
+  { dcb_hw_reg , 0 },   /* register 30 [0x0078]: SERDES_ERR_CNT_05 */
+  { dcb_hw_reg , 0 },   /* register 31 [0x007C]: SERDES_ERR_CNT_06 */
+  { dcb_hw_reg , 0 },   /* register 32 [0x0080]: SERDES_ERR_CNT_07 */
+  { dcb_hw_reg , 0 },   /* register 33 [0x0084]: SERDES_ERR_CNT_08 */
+  { dcb_hw_reg , 0 },   /* register 34 [0x0088]: SERDES_ERR_CNT_09 */
+  { dcb_hw_reg , 0 },   /* register 35 [0x008C]: SERDES_ERR_CNT_10 */
+  { dcb_hw_reg , 0 },   /* register 36 [0x0090]: SERDES_ERR_CNT_11 */
+  { dcb_hw_reg , 0 },   /* register 37 [0x0094]: SERDES_ERR_CNT_12 */
+  { dcb_hw_reg , 0 },   /* register 38 [0x0098]: SERDES_ERR_CNT_13 */
+  { dcb_hw_reg , 0 },   /* register 39 [0x009C]: SERDES_ERR_CNT_14 */
+  { dcb_hw_reg , 0 },   /* register 40 [0x00A0]: SERDES_ERR_CNT_15 */
+  { dcb_hw_reg , 0 },   /* register 41 [0x00A4]: SERDES_ERR_CNT_17 */
+  { dcb_hw_reg , 0 },   /* register 42 [0x00A8]: APLY_CFG */
+  { dcb_hw_reg , 0 },   /* register 43 [0x00AC]: LMK_0 */
+  { dcb_hw_reg , 0 },   /* register 44 [0x00B0]: LMK_1 */
+  { dcb_hw_reg , 0 },   /* register 45 [0x00B4]: LMK_2 */
+  { dcb_hw_reg , 0 },   /* register 46 [0x00B8]: LMK_3 */
+  { dcb_hw_reg , 0 },   /* register 47 [0x00BC]: LMK_4 */
+  { dcb_hw_reg , 0 },   /* register 48 [0x00C0]: LMK_5 */
+  { dcb_hw_reg , 0 },   /* register 49 [0x00C4]: LMK_6 */
+  { dcb_hw_reg , 0 },   /* register 50 [0x00C8]: LMK_7 */
+  { dcb_hw_reg , 0 },   /* register 51 [0x00CC]: LMK_8 */
+  { dcb_hw_reg , 0 },   /* register 52 [0x00D0]: LMK_9 */
+  { dcb_hw_reg , 0 },   /* register 53 [0x00D4]: LMK_11 */
+  { dcb_hw_reg , 0 },   /* register 54 [0x00D8]: LMK_13 */
+  { dcb_hw_reg , 0 },   /* register 55 [0x00DC]: LMK_14 */
+  { dcb_hw_reg , 0 },   /* register 56 [0x00E0]: LMK_15 */
+  { dcb_hw_reg , 0 },   /* register 57 [0x00E4]: TIME_LSB */
+  { dcb_hw_reg , 0 },   /* register 58 [0x00E8]: TIME_MSB */
+  { dcb_hw_reg , 0 },   /* register 59 [0x00EC]: TIME_LSB_SET */
+  { dcb_hw_reg , 0 },   /* register 60 [0x00F0]: TIME_MSB_SET */
+  { dcb_hw_reg , 0 },   /* register 61 [0x00F4]: EVENT_TX_RATE */
+  { dcb_hw_reg , 0 },   /* register 62 [0x00F8]: EVENT_NR */
+  { dcb_hw_reg , 0 },   /* register 63 [0x00FC]: TRG_CFG */
+  { dcb_hw_reg , 0 },   /* register 64 [0x0100]: SET_TRG_CFG */
+  { dcb_hw_reg , 0 },   /* register 65 [0x0104]: CLR_TRG_CFG */
+  { dcb_hw_reg , 0 },   /* register 66 [0x0108]: TRG_AUTO_PERIOD */
+  { dcb_hw_reg , 0 },   /* register 67 [0x010C]: TRB_INFO_STAT */
+  { dcb_hw_reg , 0 },   /* register 68 [0x0110]: TRB_INFO_LSB */
+  { dcb_hw_reg , 0 },   /* register 69 [0x0114]: TRB_INFO_MSB */
+  { dcb_hw_reg , 0 },   /* register 70 [0x0118]: LMK_MOD_FLAG */
+  { dcb_hw_reg , 0 }    /* register 71 [0x011C]: CRC32_REG_BANK */
+>>>>>>> Stashed changes
 };
 
 #endif /* DCB_DONT_INCLUDE_REG_ACCESS_VARS */
@@ -106,8 +163,31 @@ const dcb_reg_entry_type  dcb_reg_list[] = {
   { "CLR_CLK_CTRL"        , DCB_REG_CLR_CLK_CTRL       , DCB_WRITABLE_REG },
   { "COM_CTRL"            , DCB_REG_COM_CTRL           , DCB_WRITABLE_REG },
   { "RST"                 , DCB_REG_RST                , DCB_WRITABLE_REG },
+<<<<<<< Updated upstream
   { "SERDES_STATUS_00_04" , DCB_REG_SERDES_STATUS_00_04, DCB_READONLY_REG },
   { "SERDES_ERR_CNT_00"   , DCB_REG_SERDES_ERR_CNT_00  , DCB_READONLY_REG },
+=======
+  { "SERDES_STATUS_00_07" , DCB_REG_SERDES_STATUS_00_07, DCB_READONLY_REG },
+  { "SERDES_STATUS_08_15" , DCB_REG_SERDES_STATUS_08_15, DCB_READONLY_REG },
+  { "SERDES_STATUS_17"    , DCB_REG_SERDES_STATUS_17   , DCB_READONLY_REG },
+  { "SERDES_ERR_CNT_00"   , DCB_REG_SERDES_ERR_CNT_00  , DCB_READONLY_REG },
+  { "SERDES_ERR_CNT_01"   , DCB_REG_SERDES_ERR_CNT_01  , DCB_READONLY_REG },
+  { "SERDES_ERR_CNT_02"   , DCB_REG_SERDES_ERR_CNT_02  , DCB_READONLY_REG },
+  { "SERDES_ERR_CNT_03"   , DCB_REG_SERDES_ERR_CNT_03  , DCB_READONLY_REG },
+  { "SERDES_ERR_CNT_04"   , DCB_REG_SERDES_ERR_CNT_04  , DCB_READONLY_REG },
+  { "SERDES_ERR_CNT_05"   , DCB_REG_SERDES_ERR_CNT_05  , DCB_READONLY_REG },
+  { "SERDES_ERR_CNT_06"   , DCB_REG_SERDES_ERR_CNT_06  , DCB_READONLY_REG },
+  { "SERDES_ERR_CNT_07"   , DCB_REG_SERDES_ERR_CNT_07  , DCB_READONLY_REG },
+  { "SERDES_ERR_CNT_08"   , DCB_REG_SERDES_ERR_CNT_08  , DCB_READONLY_REG },
+  { "SERDES_ERR_CNT_09"   , DCB_REG_SERDES_ERR_CNT_09  , DCB_READONLY_REG },
+  { "SERDES_ERR_CNT_10"   , DCB_REG_SERDES_ERR_CNT_10  , DCB_READONLY_REG },
+  { "SERDES_ERR_CNT_11"   , DCB_REG_SERDES_ERR_CNT_11  , DCB_READONLY_REG },
+  { "SERDES_ERR_CNT_12"   , DCB_REG_SERDES_ERR_CNT_12  , DCB_READONLY_REG },
+  { "SERDES_ERR_CNT_13"   , DCB_REG_SERDES_ERR_CNT_13  , DCB_READONLY_REG },
+  { "SERDES_ERR_CNT_14"   , DCB_REG_SERDES_ERR_CNT_14  , DCB_READONLY_REG },
+  { "SERDES_ERR_CNT_15"   , DCB_REG_SERDES_ERR_CNT_15  , DCB_READONLY_REG },
+  { "SERDES_ERR_CNT_17"   , DCB_REG_SERDES_ERR_CNT_17  , DCB_READONLY_REG },
+>>>>>>> Stashed changes
   { "APLY_CFG"            , DCB_REG_APLY_CFG           , DCB_WRITABLE_REG },
   { "LMK_0"               , DCB_REG_LMK_0              , DCB_WRITABLE_REG },
   { "LMK_1"               , DCB_REG_LMK_1              , DCB_WRITABLE_REG },
@@ -203,13 +283,134 @@ const dcb_bit_group_entry_type  dcb_bit_group_list[] = {
   { "ISERDES_RECEIVER_RESYNC"      , DCB_ISERDES_RECEIVER_RESYNC_REG      , DCB_ISERDES_RECEIVER_RESYNC_MASK      , DCB_ISERDES_RECEIVER_RESYNC_OFS      },
   { "ISERDES_RECEIVER_RST"         , DCB_ISERDES_RECEIVER_RST_REG         , DCB_ISERDES_RECEIVER_RST_MASK         , DCB_ISERDES_RECEIVER_RST_OFS         },
   { "RECONFIGURE_FPGA"             , DCB_RECONFIGURE_FPGA_REG             , DCB_RECONFIGURE_FPGA_MASK             , DCB_RECONFIGURE_FPGA_OFS             },
+<<<<<<< Updated upstream
   { "IDLE_PATTERN_DETECT_00"       , DCB_IDLE_PATTERN_DETECT_00_REG       , DCB_IDLE_PATTERN_DETECT_00_MASK       , DCB_IDLE_PATTERN_DETECT_00_OFS       },
   { "DELAY_SYNC_DONE_00"           , DCB_DELAY_SYNC_DONE_00_REG           , DCB_DELAY_SYNC_DONE_00_MASK           , DCB_DELAY_SYNC_DONE_00_OFS           },
   { "SYNC_DONE_00"                 , DCB_SYNC_DONE_00_REG                 , DCB_SYNC_DONE_00_MASK                 , DCB_SYNC_DONE_00_OFS                 },
+=======
+  { "IDLE_PATTERN_DETECT_07"       , DCB_IDLE_PATTERN_DETECT_07_REG       , DCB_IDLE_PATTERN_DETECT_07_MASK       , DCB_IDLE_PATTERN_DETECT_07_OFS       },
+  { "DELAY_SYNC_DONE_07"           , DCB_DELAY_SYNC_DONE_07_REG           , DCB_DELAY_SYNC_DONE_07_MASK           , DCB_DELAY_SYNC_DONE_07_OFS           },
+  { "SYNC_DONE_07"                 , DCB_SYNC_DONE_07_REG                 , DCB_SYNC_DONE_07_MASK                 , DCB_SYNC_DONE_07_OFS                 },
+  { "IDLE_PATTERN_DETECT_06"       , DCB_IDLE_PATTERN_DETECT_06_REG       , DCB_IDLE_PATTERN_DETECT_06_MASK       , DCB_IDLE_PATTERN_DETECT_06_OFS       },
+  { "DELAY_SYNC_DONE_06"           , DCB_DELAY_SYNC_DONE_06_REG           , DCB_DELAY_SYNC_DONE_06_MASK           , DCB_DELAY_SYNC_DONE_06_OFS           },
+  { "SYNC_DONE_06"                 , DCB_SYNC_DONE_06_REG                 , DCB_SYNC_DONE_06_MASK                 , DCB_SYNC_DONE_06_OFS                 },
+  { "IDLE_PATTERN_DETECT_05"       , DCB_IDLE_PATTERN_DETECT_05_REG       , DCB_IDLE_PATTERN_DETECT_05_MASK       , DCB_IDLE_PATTERN_DETECT_05_OFS       },
+  { "DELAY_SYNC_DONE_05"           , DCB_DELAY_SYNC_DONE_05_REG           , DCB_DELAY_SYNC_DONE_05_MASK           , DCB_DELAY_SYNC_DONE_05_OFS           },
+  { "SYNC_DONE_05"                 , DCB_SYNC_DONE_05_REG                 , DCB_SYNC_DONE_05_MASK                 , DCB_SYNC_DONE_05_OFS                 },
+  { "IDLE_PATTERN_DETECT_04"       , DCB_IDLE_PATTERN_DETECT_04_REG       , DCB_IDLE_PATTERN_DETECT_04_MASK       , DCB_IDLE_PATTERN_DETECT_04_OFS       },
+  { "DELAY_SYNC_DONE_04"           , DCB_DELAY_SYNC_DONE_04_REG           , DCB_DELAY_SYNC_DONE_04_MASK           , DCB_DELAY_SYNC_DONE_04_OFS           },
+  { "SYNC_DONE_04"                 , DCB_SYNC_DONE_04_REG                 , DCB_SYNC_DONE_04_MASK                 , DCB_SYNC_DONE_04_OFS                 },
+  { "IDLE_PATTERN_DETECT_03"       , DCB_IDLE_PATTERN_DETECT_03_REG       , DCB_IDLE_PATTERN_DETECT_03_MASK       , DCB_IDLE_PATTERN_DETECT_03_OFS       },
+  { "DELAY_SYNC_DONE_03"           , DCB_DELAY_SYNC_DONE_03_REG           , DCB_DELAY_SYNC_DONE_03_MASK           , DCB_DELAY_SYNC_DONE_03_OFS           },
+  { "SYNC_DONE_03"                 , DCB_SYNC_DONE_03_REG                 , DCB_SYNC_DONE_03_MASK                 , DCB_SYNC_DONE_03_OFS                 },
+  { "IDLE_PATTERN_DETECT_02"       , DCB_IDLE_PATTERN_DETECT_02_REG       , DCB_IDLE_PATTERN_DETECT_02_MASK       , DCB_IDLE_PATTERN_DETECT_02_OFS       },
+  { "DELAY_SYNC_DONE_02"           , DCB_DELAY_SYNC_DONE_02_REG           , DCB_DELAY_SYNC_DONE_02_MASK           , DCB_DELAY_SYNC_DONE_02_OFS           },
+  { "SYNC_DONE_02"                 , DCB_SYNC_DONE_02_REG                 , DCB_SYNC_DONE_02_MASK                 , DCB_SYNC_DONE_02_OFS                 },
+  { "IDLE_PATTERN_DETECT_01"       , DCB_IDLE_PATTERN_DETECT_01_REG       , DCB_IDLE_PATTERN_DETECT_01_MASK       , DCB_IDLE_PATTERN_DETECT_01_OFS       },
+  { "DELAY_SYNC_DONE_01"           , DCB_DELAY_SYNC_DONE_01_REG           , DCB_DELAY_SYNC_DONE_01_MASK           , DCB_DELAY_SYNC_DONE_01_OFS           },
+  { "SYNC_DONE_01"                 , DCB_SYNC_DONE_01_REG                 , DCB_SYNC_DONE_01_MASK                 , DCB_SYNC_DONE_01_OFS                 },
+  { "IDLE_PATTERN_DETECT_00"       , DCB_IDLE_PATTERN_DETECT_00_REG       , DCB_IDLE_PATTERN_DETECT_00_MASK       , DCB_IDLE_PATTERN_DETECT_00_OFS       },
+  { "DELAY_SYNC_DONE_00"           , DCB_DELAY_SYNC_DONE_00_REG           , DCB_DELAY_SYNC_DONE_00_MASK           , DCB_DELAY_SYNC_DONE_00_OFS           },
+  { "SYNC_DONE_00"                 , DCB_SYNC_DONE_00_REG                 , DCB_SYNC_DONE_00_MASK                 , DCB_SYNC_DONE_00_OFS                 },
+  { "IDLE_PATTERN_DETECT_15"       , DCB_IDLE_PATTERN_DETECT_15_REG       , DCB_IDLE_PATTERN_DETECT_15_MASK       , DCB_IDLE_PATTERN_DETECT_15_OFS       },
+  { "DELAY_SYNC_DONE_15"           , DCB_DELAY_SYNC_DONE_15_REG           , DCB_DELAY_SYNC_DONE_15_MASK           , DCB_DELAY_SYNC_DONE_15_OFS           },
+  { "SYNC_DONE_15"                 , DCB_SYNC_DONE_15_REG                 , DCB_SYNC_DONE_15_MASK                 , DCB_SYNC_DONE_15_OFS                 },
+  { "IDLE_PATTERN_DETECT_14"       , DCB_IDLE_PATTERN_DETECT_14_REG       , DCB_IDLE_PATTERN_DETECT_14_MASK       , DCB_IDLE_PATTERN_DETECT_14_OFS       },
+  { "DELAY_SYNC_DONE_14"           , DCB_DELAY_SYNC_DONE_14_REG           , DCB_DELAY_SYNC_DONE_14_MASK           , DCB_DELAY_SYNC_DONE_14_OFS           },
+  { "SYNC_DONE_14"                 , DCB_SYNC_DONE_14_REG                 , DCB_SYNC_DONE_14_MASK                 , DCB_SYNC_DONE_14_OFS                 },
+  { "IDLE_PATTERN_DETECT_13"       , DCB_IDLE_PATTERN_DETECT_13_REG       , DCB_IDLE_PATTERN_DETECT_13_MASK       , DCB_IDLE_PATTERN_DETECT_13_OFS       },
+  { "DELAY_SYNC_DONE_13"           , DCB_DELAY_SYNC_DONE_13_REG           , DCB_DELAY_SYNC_DONE_13_MASK           , DCB_DELAY_SYNC_DONE_13_OFS           },
+  { "SYNC_DONE_13"                 , DCB_SYNC_DONE_13_REG                 , DCB_SYNC_DONE_13_MASK                 , DCB_SYNC_DONE_13_OFS                 },
+  { "IDLE_PATTERN_DETECT_12"       , DCB_IDLE_PATTERN_DETECT_12_REG       , DCB_IDLE_PATTERN_DETECT_12_MASK       , DCB_IDLE_PATTERN_DETECT_12_OFS       },
+  { "DELAY_SYNC_DONE_12"           , DCB_DELAY_SYNC_DONE_12_REG           , DCB_DELAY_SYNC_DONE_12_MASK           , DCB_DELAY_SYNC_DONE_12_OFS           },
+  { "SYNC_DONE_12"                 , DCB_SYNC_DONE_12_REG                 , DCB_SYNC_DONE_12_MASK                 , DCB_SYNC_DONE_12_OFS                 },
+  { "IDLE_PATTERN_DETECT_11"       , DCB_IDLE_PATTERN_DETECT_11_REG       , DCB_IDLE_PATTERN_DETECT_11_MASK       , DCB_IDLE_PATTERN_DETECT_11_OFS       },
+  { "DELAY_SYNC_DONE_11"           , DCB_DELAY_SYNC_DONE_11_REG           , DCB_DELAY_SYNC_DONE_11_MASK           , DCB_DELAY_SYNC_DONE_11_OFS           },
+  { "SYNC_DONE_11"                 , DCB_SYNC_DONE_11_REG                 , DCB_SYNC_DONE_11_MASK                 , DCB_SYNC_DONE_11_OFS                 },
+  { "IDLE_PATTERN_DETECT_10"       , DCB_IDLE_PATTERN_DETECT_10_REG       , DCB_IDLE_PATTERN_DETECT_10_MASK       , DCB_IDLE_PATTERN_DETECT_10_OFS       },
+  { "DELAY_SYNC_DONE_10"           , DCB_DELAY_SYNC_DONE_10_REG           , DCB_DELAY_SYNC_DONE_10_MASK           , DCB_DELAY_SYNC_DONE_10_OFS           },
+  { "SYNC_DONE_10"                 , DCB_SYNC_DONE_10_REG                 , DCB_SYNC_DONE_10_MASK                 , DCB_SYNC_DONE_10_OFS                 },
+  { "IDLE_PATTERN_DETECT_09"       , DCB_IDLE_PATTERN_DETECT_09_REG       , DCB_IDLE_PATTERN_DETECT_09_MASK       , DCB_IDLE_PATTERN_DETECT_09_OFS       },
+  { "DELAY_SYNC_DONE_09"           , DCB_DELAY_SYNC_DONE_09_REG           , DCB_DELAY_SYNC_DONE_09_MASK           , DCB_DELAY_SYNC_DONE_09_OFS           },
+  { "SYNC_DONE_09"                 , DCB_SYNC_DONE_09_REG                 , DCB_SYNC_DONE_09_MASK                 , DCB_SYNC_DONE_09_OFS                 },
+  { "IDLE_PATTERN_DETECT_08"       , DCB_IDLE_PATTERN_DETECT_08_REG       , DCB_IDLE_PATTERN_DETECT_08_MASK       , DCB_IDLE_PATTERN_DETECT_08_OFS       },
+  { "DELAY_SYNC_DONE_08"           , DCB_DELAY_SYNC_DONE_08_REG           , DCB_DELAY_SYNC_DONE_08_MASK           , DCB_DELAY_SYNC_DONE_08_OFS           },
+  { "SYNC_DONE_08"                 , DCB_SYNC_DONE_08_REG                 , DCB_SYNC_DONE_08_MASK                 , DCB_SYNC_DONE_08_OFS                 },
+  { "IDLE_PATTERN_DETECT_17"       , DCB_IDLE_PATTERN_DETECT_17_REG       , DCB_IDLE_PATTERN_DETECT_17_MASK       , DCB_IDLE_PATTERN_DETECT_17_OFS       },
+  { "DELAY_SYNC_DONE_17"           , DCB_DELAY_SYNC_DONE_17_REG           , DCB_DELAY_SYNC_DONE_17_MASK           , DCB_DELAY_SYNC_DONE_17_OFS           },
+  { "SYNC_DONE_17"                 , DCB_SYNC_DONE_17_REG                 , DCB_SYNC_DONE_17_MASK                 , DCB_SYNC_DONE_17_OFS                 },
+>>>>>>> Stashed changes
   { "CRC_ERRORS_00"                , DCB_CRC_ERRORS_00_REG                , DCB_CRC_ERRORS_00_MASK                , DCB_CRC_ERRORS_00_OFS                },
   { "FRAME_ERRORS_00"              , DCB_FRAME_ERRORS_00_REG              , DCB_FRAME_ERRORS_00_MASK              , DCB_FRAME_ERRORS_00_OFS              },
   { "DATAGRAM_ERRORS_00"           , DCB_DATAGRAM_ERRORS_00_REG           , DCB_DATAGRAM_ERRORS_00_MASK           , DCB_DATAGRAM_ERRORS_00_OFS           },
   { "SYNC_ERRORS_00"               , DCB_SYNC_ERRORS_00_REG               , DCB_SYNC_ERRORS_00_MASK               , DCB_SYNC_ERRORS_00_OFS               },
+<<<<<<< Updated upstream
+=======
+  { "CRC_ERRORS_01"                , DCB_CRC_ERRORS_01_REG                , DCB_CRC_ERRORS_01_MASK                , DCB_CRC_ERRORS_01_OFS                },
+  { "FRAME_ERRORS_01"              , DCB_FRAME_ERRORS_01_REG              , DCB_FRAME_ERRORS_01_MASK              , DCB_FRAME_ERRORS_01_OFS              },
+  { "DATAGRAM_ERRORS_01"           , DCB_DATAGRAM_ERRORS_01_REG           , DCB_DATAGRAM_ERRORS_01_MASK           , DCB_DATAGRAM_ERRORS_01_OFS           },
+  { "SYNC_ERRORS_01"               , DCB_SYNC_ERRORS_01_REG               , DCB_SYNC_ERRORS_01_MASK               , DCB_SYNC_ERRORS_01_OFS               },
+  { "CRC_ERRORS_02"                , DCB_CRC_ERRORS_02_REG                , DCB_CRC_ERRORS_02_MASK                , DCB_CRC_ERRORS_02_OFS                },
+  { "FRAME_ERRORS_02"              , DCB_FRAME_ERRORS_02_REG              , DCB_FRAME_ERRORS_02_MASK              , DCB_FRAME_ERRORS_02_OFS              },
+  { "DATAGRAM_ERRORS_02"           , DCB_DATAGRAM_ERRORS_02_REG           , DCB_DATAGRAM_ERRORS_02_MASK           , DCB_DATAGRAM_ERRORS_02_OFS           },
+  { "SYNC_ERRORS_02"               , DCB_SYNC_ERRORS_02_REG               , DCB_SYNC_ERRORS_02_MASK               , DCB_SYNC_ERRORS_02_OFS               },
+  { "CRC_ERRORS_03"                , DCB_CRC_ERRORS_03_REG                , DCB_CRC_ERRORS_03_MASK                , DCB_CRC_ERRORS_03_OFS                },
+  { "FRAME_ERRORS_03"              , DCB_FRAME_ERRORS_03_REG              , DCB_FRAME_ERRORS_03_MASK              , DCB_FRAME_ERRORS_03_OFS              },
+  { "DATAGRAM_ERRORS_03"           , DCB_DATAGRAM_ERRORS_03_REG           , DCB_DATAGRAM_ERRORS_03_MASK           , DCB_DATAGRAM_ERRORS_03_OFS           },
+  { "SYNC_ERRORS_03"               , DCB_SYNC_ERRORS_03_REG               , DCB_SYNC_ERRORS_03_MASK               , DCB_SYNC_ERRORS_03_OFS               },
+  { "CRC_ERRORS_04"                , DCB_CRC_ERRORS_04_REG                , DCB_CRC_ERRORS_04_MASK                , DCB_CRC_ERRORS_04_OFS                },
+  { "FRAME_ERRORS_04"              , DCB_FRAME_ERRORS_04_REG              , DCB_FRAME_ERRORS_04_MASK              , DCB_FRAME_ERRORS_04_OFS              },
+  { "DATAGRAM_ERRORS_04"           , DCB_DATAGRAM_ERRORS_04_REG           , DCB_DATAGRAM_ERRORS_04_MASK           , DCB_DATAGRAM_ERRORS_04_OFS           },
+  { "SYNC_ERRORS_04"               , DCB_SYNC_ERRORS_04_REG               , DCB_SYNC_ERRORS_04_MASK               , DCB_SYNC_ERRORS_04_OFS               },
+  { "CRC_ERRORS_05"                , DCB_CRC_ERRORS_05_REG                , DCB_CRC_ERRORS_05_MASK                , DCB_CRC_ERRORS_05_OFS                },
+  { "FRAME_ERRORS_05"              , DCB_FRAME_ERRORS_05_REG              , DCB_FRAME_ERRORS_05_MASK              , DCB_FRAME_ERRORS_05_OFS              },
+  { "DATAGRAM_ERRORS_05"           , DCB_DATAGRAM_ERRORS_05_REG           , DCB_DATAGRAM_ERRORS_05_MASK           , DCB_DATAGRAM_ERRORS_05_OFS           },
+  { "SYNC_ERRORS_05"               , DCB_SYNC_ERRORS_05_REG               , DCB_SYNC_ERRORS_05_MASK               , DCB_SYNC_ERRORS_05_OFS               },
+  { "CRC_ERRORS_06"                , DCB_CRC_ERRORS_06_REG                , DCB_CRC_ERRORS_06_MASK                , DCB_CRC_ERRORS_06_OFS                },
+  { "FRAME_ERRORS_06"              , DCB_FRAME_ERRORS_06_REG              , DCB_FRAME_ERRORS_06_MASK              , DCB_FRAME_ERRORS_06_OFS              },
+  { "DATAGRAM_ERRORS_06"           , DCB_DATAGRAM_ERRORS_06_REG           , DCB_DATAGRAM_ERRORS_06_MASK           , DCB_DATAGRAM_ERRORS_06_OFS           },
+  { "SYNC_ERRORS_06"               , DCB_SYNC_ERRORS_06_REG               , DCB_SYNC_ERRORS_06_MASK               , DCB_SYNC_ERRORS_06_OFS               },
+  { "CRC_ERRORS_07"                , DCB_CRC_ERRORS_07_REG                , DCB_CRC_ERRORS_07_MASK                , DCB_CRC_ERRORS_07_OFS                },
+  { "FRAME_ERRORS_07"              , DCB_FRAME_ERRORS_07_REG              , DCB_FRAME_ERRORS_07_MASK              , DCB_FRAME_ERRORS_07_OFS              },
+  { "DATAGRAM_ERRORS_07"           , DCB_DATAGRAM_ERRORS_07_REG           , DCB_DATAGRAM_ERRORS_07_MASK           , DCB_DATAGRAM_ERRORS_07_OFS           },
+  { "SYNC_ERRORS_07"               , DCB_SYNC_ERRORS_07_REG               , DCB_SYNC_ERRORS_07_MASK               , DCB_SYNC_ERRORS_07_OFS               },
+  { "CRC_ERRORS_08"                , DCB_CRC_ERRORS_08_REG                , DCB_CRC_ERRORS_08_MASK                , DCB_CRC_ERRORS_08_OFS                },
+  { "FRAME_ERRORS_08"              , DCB_FRAME_ERRORS_08_REG              , DCB_FRAME_ERRORS_08_MASK              , DCB_FRAME_ERRORS_08_OFS              },
+  { "DATAGRAM_ERRORS_08"           , DCB_DATAGRAM_ERRORS_08_REG           , DCB_DATAGRAM_ERRORS_08_MASK           , DCB_DATAGRAM_ERRORS_08_OFS           },
+  { "SYNC_ERRORS_08"               , DCB_SYNC_ERRORS_08_REG               , DCB_SYNC_ERRORS_08_MASK               , DCB_SYNC_ERRORS_08_OFS               },
+  { "CRC_ERRORS_09"                , DCB_CRC_ERRORS_09_REG                , DCB_CRC_ERRORS_09_MASK                , DCB_CRC_ERRORS_09_OFS                },
+  { "FRAME_ERRORS_09"              , DCB_FRAME_ERRORS_09_REG              , DCB_FRAME_ERRORS_09_MASK              , DCB_FRAME_ERRORS_09_OFS              },
+  { "DATAGRAM_ERRORS_09"           , DCB_DATAGRAM_ERRORS_09_REG           , DCB_DATAGRAM_ERRORS_09_MASK           , DCB_DATAGRAM_ERRORS_09_OFS           },
+  { "SYNC_ERRORS_09"               , DCB_SYNC_ERRORS_09_REG               , DCB_SYNC_ERRORS_09_MASK               , DCB_SYNC_ERRORS_09_OFS               },
+  { "CRC_ERRORS_10"                , DCB_CRC_ERRORS_10_REG                , DCB_CRC_ERRORS_10_MASK                , DCB_CRC_ERRORS_10_OFS                },
+  { "FRAME_ERRORS_10"              , DCB_FRAME_ERRORS_10_REG              , DCB_FRAME_ERRORS_10_MASK              , DCB_FRAME_ERRORS_10_OFS              },
+  { "DATAGRAM_ERRORS_10"           , DCB_DATAGRAM_ERRORS_10_REG           , DCB_DATAGRAM_ERRORS_10_MASK           , DCB_DATAGRAM_ERRORS_10_OFS           },
+  { "SYNC_ERRORS_10"               , DCB_SYNC_ERRORS_10_REG               , DCB_SYNC_ERRORS_10_MASK               , DCB_SYNC_ERRORS_10_OFS               },
+  { "CRC_ERRORS_11"                , DCB_CRC_ERRORS_11_REG                , DCB_CRC_ERRORS_11_MASK                , DCB_CRC_ERRORS_11_OFS                },
+  { "FRAME_ERRORS_11"              , DCB_FRAME_ERRORS_11_REG              , DCB_FRAME_ERRORS_11_MASK              , DCB_FRAME_ERRORS_11_OFS              },
+  { "DATAGRAM_ERRORS_11"           , DCB_DATAGRAM_ERRORS_11_REG           , DCB_DATAGRAM_ERRORS_11_MASK           , DCB_DATAGRAM_ERRORS_11_OFS           },
+  { "SYNC_ERRORS_11"               , DCB_SYNC_ERRORS_11_REG               , DCB_SYNC_ERRORS_11_MASK               , DCB_SYNC_ERRORS_11_OFS               },
+  { "CRC_ERRORS_12"                , DCB_CRC_ERRORS_12_REG                , DCB_CRC_ERRORS_12_MASK                , DCB_CRC_ERRORS_12_OFS                },
+  { "FRAME_ERRORS_12"              , DCB_FRAME_ERRORS_12_REG              , DCB_FRAME_ERRORS_12_MASK              , DCB_FRAME_ERRORS_12_OFS              },
+  { "DATAGRAM_ERRORS_12"           , DCB_DATAGRAM_ERRORS_12_REG           , DCB_DATAGRAM_ERRORS_12_MASK           , DCB_DATAGRAM_ERRORS_12_OFS           },
+  { "SYNC_ERRORS_12"               , DCB_SYNC_ERRORS_12_REG               , DCB_SYNC_ERRORS_12_MASK               , DCB_SYNC_ERRORS_12_OFS               },
+  { "CRC_ERRORS_13"                , DCB_CRC_ERRORS_13_REG                , DCB_CRC_ERRORS_13_MASK                , DCB_CRC_ERRORS_13_OFS                },
+  { "FRAME_ERRORS_13"              , DCB_FRAME_ERRORS_13_REG              , DCB_FRAME_ERRORS_13_MASK              , DCB_FRAME_ERRORS_13_OFS              },
+  { "DATAGRAM_ERRORS_13"           , DCB_DATAGRAM_ERRORS_13_REG           , DCB_DATAGRAM_ERRORS_13_MASK           , DCB_DATAGRAM_ERRORS_13_OFS           },
+  { "SYNC_ERRORS_13"               , DCB_SYNC_ERRORS_13_REG               , DCB_SYNC_ERRORS_13_MASK               , DCB_SYNC_ERRORS_13_OFS               },
+  { "CRC_ERRORS_14"                , DCB_CRC_ERRORS_14_REG                , DCB_CRC_ERRORS_14_MASK                , DCB_CRC_ERRORS_14_OFS                },
+  { "FRAME_ERRORS_14"              , DCB_FRAME_ERRORS_14_REG              , DCB_FRAME_ERRORS_14_MASK              , DCB_FRAME_ERRORS_14_OFS              },
+  { "DATAGRAM_ERRORS_14"           , DCB_DATAGRAM_ERRORS_14_REG           , DCB_DATAGRAM_ERRORS_14_MASK           , DCB_DATAGRAM_ERRORS_14_OFS           },
+  { "SYNC_ERRORS_14"               , DCB_SYNC_ERRORS_14_REG               , DCB_SYNC_ERRORS_14_MASK               , DCB_SYNC_ERRORS_14_OFS               },
+  { "CRC_ERRORS_15"                , DCB_CRC_ERRORS_15_REG                , DCB_CRC_ERRORS_15_MASK                , DCB_CRC_ERRORS_15_OFS                },
+  { "FRAME_ERRORS_15"              , DCB_FRAME_ERRORS_15_REG              , DCB_FRAME_ERRORS_15_MASK              , DCB_FRAME_ERRORS_15_OFS              },
+  { "DATAGRAM_ERRORS_15"           , DCB_DATAGRAM_ERRORS_15_REG           , DCB_DATAGRAM_ERRORS_15_MASK           , DCB_DATAGRAM_ERRORS_15_OFS           },
+  { "SYNC_ERRORS_15"               , DCB_SYNC_ERRORS_15_REG               , DCB_SYNC_ERRORS_15_MASK               , DCB_SYNC_ERRORS_15_OFS               },
+  { "CRC_ERRORS_17"                , DCB_CRC_ERRORS_17_REG                , DCB_CRC_ERRORS_17_MASK                , DCB_CRC_ERRORS_17_OFS                },
+  { "FRAME_ERRORS_17"              , DCB_FRAME_ERRORS_17_REG              , DCB_FRAME_ERRORS_17_MASK              , DCB_FRAME_ERRORS_17_OFS              },
+  { "DATAGRAM_ERRORS_17"           , DCB_DATAGRAM_ERRORS_17_REG           , DCB_DATAGRAM_ERRORS_17_MASK           , DCB_DATAGRAM_ERRORS_17_OFS           },
+  { "SYNC_ERRORS_17"               , DCB_SYNC_ERRORS_17_REG               , DCB_SYNC_ERRORS_17_MASK               , DCB_SYNC_ERRORS_17_OFS               },
+>>>>>>> Stashed changes
   { "APPLY_SETTINGS_LMK"           , DCB_APPLY_SETTINGS_LMK_REG           , DCB_APPLY_SETTINGS_LMK_MASK           , DCB_APPLY_SETTINGS_LMK_OFS           },
   { "LMK0_RESET"                   , DCB_LMK0_RESET_REG                   , DCB_LMK0_RESET_MASK                   , DCB_LMK0_RESET_OFS                   },
   { "LMK0_CLKOUT_MUX"              , DCB_LMK0_CLKOUT_MUX_REG              , DCB_LMK0_CLKOUT_MUX_MASK              , DCB_LMK0_CLKOUT_MUX_OFS              },
@@ -318,6 +519,7 @@ const unsigned char reg_restore[] = {
   DCB_DONT_TOUCH_REG,   /* Offset 0x0058 */
   DCB_DONT_TOUCH_REG,   /* Offset 0x005C */
   DCB_DONT_TOUCH_REG,   /* Offset 0x0060 */
+<<<<<<< Updated upstream
   DCB_RESTORE_REG   ,   /* Offset 0x0064 */
   DCB_RESTORE_REG   ,   /* Offset 0x0068 */
   DCB_RESTORE_REG   ,   /* Offset 0x006C */
@@ -332,10 +534,27 @@ const unsigned char reg_restore[] = {
   DCB_RESTORE_REG   ,   /* Offset 0x0090 */
   DCB_RESTORE_REG   ,   /* Offset 0x0094 */
   DCB_RESTORE_REG   ,   /* Offset 0x0098 */
+=======
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0064 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0068 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x006C */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0070 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0074 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0078 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x007C */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0080 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0084 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0088 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x008C */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0090 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0094 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0098 */
+>>>>>>> Stashed changes
   DCB_DONT_TOUCH_REG,   /* Offset 0x009C */
   DCB_DONT_TOUCH_REG,   /* Offset 0x00A0 */
   DCB_DONT_TOUCH_REG,   /* Offset 0x00A4 */
   DCB_DONT_TOUCH_REG,   /* Offset 0x00A8 */
+<<<<<<< Updated upstream
   DCB_DONT_TOUCH_REG,   /* Offset 0x00AC */
   DCB_DONT_TOUCH_REG,   /* Offset 0x00B0 */
   DCB_RESTORE_REG   ,   /* Offset 0x00B4 */
@@ -347,6 +566,37 @@ const unsigned char reg_restore[] = {
   DCB_DONT_TOUCH_REG,   /* Offset 0x00CC */
   DCB_DONT_TOUCH_REG,   /* Offset 0x00D0 */
   DCB_DONT_TOUCH_REG    /* Offset 0x00D4 */
+=======
+  DCB_RESTORE_REG   ,   /* Offset 0x00AC */
+  DCB_RESTORE_REG   ,   /* Offset 0x00B0 */
+  DCB_RESTORE_REG   ,   /* Offset 0x00B4 */
+  DCB_RESTORE_REG   ,   /* Offset 0x00B8 */
+  DCB_RESTORE_REG   ,   /* Offset 0x00BC */
+  DCB_RESTORE_REG   ,   /* Offset 0x00C0 */
+  DCB_RESTORE_REG   ,   /* Offset 0x00C4 */
+  DCB_RESTORE_REG   ,   /* Offset 0x00C8 */
+  DCB_RESTORE_REG   ,   /* Offset 0x00CC */
+  DCB_RESTORE_REG   ,   /* Offset 0x00D0 */
+  DCB_RESTORE_REG   ,   /* Offset 0x00D4 */
+  DCB_RESTORE_REG   ,   /* Offset 0x00D8 */
+  DCB_RESTORE_REG   ,   /* Offset 0x00DC */
+  DCB_RESTORE_REG   ,   /* Offset 0x00E0 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x00E4 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x00E8 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x00EC */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x00F0 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x00F4 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x00F8 */
+  DCB_RESTORE_REG   ,   /* Offset 0x00FC */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0100 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0104 */
+  DCB_RESTORE_REG   ,   /* Offset 0x0108 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x010C */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0110 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0114 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0118 */
+  DCB_DONT_TOUCH_REG    /* Offset 0x011C */
+>>>>>>> Stashed changes
 };
 
 
@@ -380,6 +630,7 @@ const unsigned int reg_default[] = {
   0x00000000,   /* Offset 0x0058 */
   0x00000000,   /* Offset 0x005C */
   0x00000000,   /* Offset 0x0060 */
+<<<<<<< Updated upstream
   0x00020100,   /* Offset 0x0064 */
   0x00030101,   /* Offset 0x0068 */
   0x00020102,   /* Offset 0x006C */
@@ -394,10 +645,27 @@ const unsigned int reg_default[] = {
   0x029400AD,   /* Offset 0x0090 */
   0x0830140E,   /* Offset 0x0094 */
   0xE000280F,   /* Offset 0x0098 */
+=======
+  0x00000000,   /* Offset 0x0064 */
+  0x00000000,   /* Offset 0x0068 */
+  0x00000000,   /* Offset 0x006C */
+  0x00000000,   /* Offset 0x0070 */
+  0x00000000,   /* Offset 0x0074 */
+  0x00000000,   /* Offset 0x0078 */
+  0x00000000,   /* Offset 0x007C */
+  0x00000000,   /* Offset 0x0080 */
+  0x00000000,   /* Offset 0x0084 */
+  0x00000000,   /* Offset 0x0088 */
+  0x00000000,   /* Offset 0x008C */
+  0x00000000,   /* Offset 0x0090 */
+  0x00000000,   /* Offset 0x0094 */
+  0x00000000,   /* Offset 0x0098 */
+>>>>>>> Stashed changes
   0x00000000,   /* Offset 0x009C */
   0x00000000,   /* Offset 0x00A0 */
   0x00000000,   /* Offset 0x00A4 */
   0x00000000,   /* Offset 0x00A8 */
+<<<<<<< Updated upstream
   0x00000000,   /* Offset 0x00AC */
   0x00000000,   /* Offset 0x00B0 */
   0x00000000,   /* Offset 0x00B4 */
@@ -408,6 +676,36 @@ const unsigned int reg_default[] = {
   0x00000000,   /* Offset 0x00C8 */
   0x00000000,   /* Offset 0x00CC */
   0x00000000    /* Offset 0x00D0 */
+=======
+  0x00020100,   /* Offset 0x00AC */
+  0x00030101,   /* Offset 0x00B0 */
+  0x00020102,   /* Offset 0x00B4 */
+  0x00020103,   /* Offset 0x00B8 */
+  0x00000104,   /* Offset 0x00BC */
+  0x00000105,   /* Offset 0x00C0 */
+  0x00000106,   /* Offset 0x00C4 */
+  0x00000107,   /* Offset 0x00C8 */
+  0x10000908,   /* Offset 0x00CC */
+  0xA0022A09,   /* Offset 0x00D0 */
+  0x0082000B,   /* Offset 0x00D4 */
+  0x029400AD,   /* Offset 0x00D8 */
+  0x0830140E,   /* Offset 0x00DC */
+  0xE000280F,   /* Offset 0x00E0 */
+  0x00000000,   /* Offset 0x00E4 */
+  0x00000000,   /* Offset 0x00E8 */
+  0x00000000,   /* Offset 0x00EC */
+  0x00000000,   /* Offset 0x00F0 */
+  0x00000000,   /* Offset 0x00F4 */
+  0x00000000,   /* Offset 0x00F8 */
+  0x00000000,   /* Offset 0x00FC */
+  0x00000000,   /* Offset 0x0100 */
+  0x00000000,   /* Offset 0x0104 */
+  0x04C4B400,   /* Offset 0x0108 */
+  0x00000000,   /* Offset 0x010C */
+  0x00000000,   /* Offset 0x0110 */
+  0x00000000,   /* Offset 0x0114 */
+  0x00000000    /* Offset 0x0118 */
+>>>>>>> Stashed changes
 };
 
 #endif /* DCB_DONT_INCLUDE_VARS */
