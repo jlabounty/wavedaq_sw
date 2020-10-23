@@ -5,11 +5,7 @@
 #  Project :  MEGII - DCB
 #
 #  Author  :  schmid_e (Author of generation script)
-<<<<<<< Updated upstream
-#  Created :  25.09.2020 14:38:00
-=======
 #  Created :  23.10.2020 09:16:10
->>>>>>> Stashed changes
 #
 #  Description :  Register map definitions.
 #
@@ -46,40 +42,6 @@ DCB_REG_SET_CLK_CTRL                      = 0x0048
 DCB_REG_CLR_CLK_CTRL                      = 0x004C
 DCB_REG_COM_CTRL                          = 0x0050
 DCB_REG_RST                               = 0x0054
-<<<<<<< Updated upstream
-DCB_REG_SERDES_STATUS_00_04               = 0x0058
-DCB_REG_SERDES_ERR_CNT_00                 = 0x005C
-DCB_REG_APLY_CFG                          = 0x0060
-DCB_REG_LMK_0                             = 0x0064
-DCB_REG_LMK_1                             = 0x0068
-DCB_REG_LMK_2                             = 0x006C
-DCB_REG_LMK_3                             = 0x0070
-DCB_REG_LMK_4                             = 0x0074
-DCB_REG_LMK_5                             = 0x0078
-DCB_REG_LMK_6                             = 0x007C
-DCB_REG_LMK_7                             = 0x0080
-DCB_REG_LMK_8                             = 0x0084
-DCB_REG_LMK_9                             = 0x0088
-DCB_REG_LMK_11                            = 0x008C
-DCB_REG_LMK_13                            = 0x0090
-DCB_REG_LMK_14                            = 0x0094
-DCB_REG_LMK_15                            = 0x0098
-DCB_REG_TIME_LSB                          = 0x009C
-DCB_REG_TIME_MSB                          = 0x00A0
-DCB_REG_TIME_LSB_SET                      = 0x00A4
-DCB_REG_TIME_MSB_SET                      = 0x00A8
-DCB_REG_EVENT_TX_RATE                     = 0x00AC
-DCB_REG_EVENT_NR                          = 0x00B0
-DCB_REG_TRG_CFG                           = 0x00B4
-DCB_REG_SET_TRG_CFG                       = 0x00B8
-DCB_REG_CLR_TRG_CFG                       = 0x00BC
-DCB_REG_TRG_AUTO_PERIOD                   = 0x00C0
-DCB_REG_TRB_INFO_STAT                     = 0x00C4
-DCB_REG_TRB_INFO_LSB                      = 0x00C8
-DCB_REG_TRB_INFO_MSB                      = 0x00CC
-DCB_REG_LMK_MOD_FLAG                      = 0x00D0
-DCB_REG_CRC32_REG_BANK                    = 0x00D4
-=======
 DCB_REG_SERDES_STATUS_00_07               = 0x0058
 DCB_REG_SERDES_STATUS_08_15               = 0x005C
 DCB_REG_SERDES_STATUS_17                  = 0x0060
@@ -130,7 +92,6 @@ DCB_REG_TRB_INFO_LSB                      = 0x0110
 DCB_REG_TRB_INFO_MSB                      = 0x0114
 DCB_REG_LMK_MOD_FLAG                      = 0x0118
 DCB_REG_CRC32_REG_BANK                    = 0x011C
->>>>>>> Stashed changes
 
 #
 # Bit Positions
@@ -472,11 +433,7 @@ DCB_INTER_PKG_DELAY_OFS                 =                              0
 
 # ****** Register 21 [0x0054]: RST - Reset bits for specific firmwar units (Default: 0x00000000) ******
 
-<<<<<<< Updated upstream
-# WDB_SERDES_CLK_MGR_RST - Reset for clock manager deriving serdes clocks from the WDB clock
-=======
 # WDB_SERDES_CLK_MGR_RST - Reset for clock manager deriving clocks from the WDB clock (e.g. refclk for SYNC output delay)
->>>>>>> Stashed changes
 DCB_WDB_SERDES_CLK_MGR_RST_REG          =                 DCB_REG_RST
 DCB_WDB_SERDES_CLK_MGR_RST_MASK         =                     0x00000100
 DCB_WDB_SERDES_CLK_MGR_RST_OFS          =                              8
@@ -523,12 +480,6 @@ DCB_RECONFIGURE_FPGA_OFS                =                              0
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 22 [0x0058]: SERDES_STATUS_00_04 - Input Serdes status for slot 0 to 4 (Default: 0x00000000) ******
-
-# IDLE_PATTERN_DETECT_00 - Idle pattern detected on slot 0
-DCB_IDLE_PATTERN_DETECT_00_REG          = DCB_REG_SERDES_STATUS_00_04
-=======
 # ****** Register 22 [0x0058]: SERDES_STATUS_00_07 - Input Serdes status for slot 0 to 7 (Default: 0x00000000) ******
 
 # IDLE_PATTERN_DETECT_07 - Idle pattern detected on slot 7
@@ -638,33 +589,21 @@ DCB_SYNC_DONE_01_OFS                    =                              4
 
 # IDLE_PATTERN_DETECT_00 - Idle pattern detected on slot 0
 DCB_IDLE_PATTERN_DETECT_00_REG          = DCB_REG_SERDES_STATUS_00_07
->>>>>>> Stashed changes
 DCB_IDLE_PATTERN_DETECT_00_MASK         =                     0x00000004
 DCB_IDLE_PATTERN_DETECT_00_OFS          =                              2
 
 # DELAY_SYNC_DONE_00 - Delay syncronization procedure completed for slot 0
-<<<<<<< Updated upstream
-DCB_DELAY_SYNC_DONE_00_REG              = DCB_REG_SERDES_STATUS_00_04
-=======
 DCB_DELAY_SYNC_DONE_00_REG              = DCB_REG_SERDES_STATUS_00_07
->>>>>>> Stashed changes
 DCB_DELAY_SYNC_DONE_00_MASK             =                     0x00000002
 DCB_DELAY_SYNC_DONE_00_OFS              =                              1
 
 # SYNC_DONE_00 - Overall syncronization procedure completed for slot 0
-<<<<<<< Updated upstream
-DCB_SYNC_DONE_00_REG                    = DCB_REG_SERDES_STATUS_00_04
-=======
 DCB_SYNC_DONE_00_REG                    = DCB_REG_SERDES_STATUS_00_07
->>>>>>> Stashed changes
 DCB_SYNC_DONE_00_MASK                   =                     0x00000001
 DCB_SYNC_DONE_00_OFS                    =                              0
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 23 [0x005C]: SERDES_ERR_CNT_00 - Input Serdes error count for slot 0 (Default: 0x00000000) ******
-=======
 # ****** Register 23 [0x005C]: SERDES_STATUS_08_15 - Input Serdes status for slot 8 to 15 (Default: 0x00000000) ******
 
 # IDLE_PATTERN_DETECT_15 - Idle pattern detected on slot 15
@@ -809,7 +748,6 @@ DCB_SYNC_DONE_17_OFS                    =                              0
 
 
 # ****** Register 25 [0x0064]: SERDES_ERR_CNT_00 - Input Serdes error count for slot 0 (Default: 0x00000000) ******
->>>>>>> Stashed changes
 
 # CRC_ERRORS_00 - CRC error count of input serdes on slot 0 (255 = overflow)
 DCB_CRC_ERRORS_00_REG                   =   DCB_REG_SERDES_ERR_CNT_00
@@ -833,9 +771,6 @@ DCB_SYNC_ERRORS_00_OFS                  =                              0
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 24 [0x0060]: APLY_CFG - Apply settings from regsiter bank to hardware units (Default: 0x00000000) ******
-=======
 # ****** Register 26 [0x0068]: SERDES_ERR_CNT_01 - Input Serdes error count for slot 1 (Default: 0x00000000) ******
 
 # CRC_ERRORS_01 - CRC error count of input serdes on slot 1 (255 = overflow)
@@ -1221,7 +1156,6 @@ DCB_SYNC_ERRORS_17_OFS                  =                              0
 
 
 # ****** Register 42 [0x00A8]: APLY_CFG - Apply settings from regsiter bank to hardware units (Default: 0x00000000) ******
->>>>>>> Stashed changes
 
 # APPLY_SETTINGS_LMK - Apply configuration from regsiter bank to LMK
 DCB_APPLY_SETTINGS_LMK_REG              =            DCB_REG_APLY_CFG
@@ -1230,11 +1164,7 @@ DCB_APPLY_SETTINGS_LMK_OFS              =                              0
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 25 [0x0064]: LMK_0 - LMK Register 0 (Default: 0x00020100) ******
-=======
 # ****** Register 43 [0x00AC]: LMK_0 - LMK Register 0 (Default: 0x00020100) ******
->>>>>>> Stashed changes
 
 # LMK0_RESET - Resets LMK Registers to Their Power-On State
 DCB_LMK0_RESET_REG                      =               DCB_REG_LMK_0
@@ -1263,11 +1193,7 @@ DCB_LMK0_CLKOUT_DLY_OFS                 =                              4
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 26 [0x0068]: LMK_1 - LMK Register 1 (Default: 0x00030101) ******
-=======
 # ****** Register 44 [0x00B0]: LMK_1 - LMK Register 1 (Default: 0x00030101) ******
->>>>>>> Stashed changes
 
 # LMK1_CLKOUT_MUX - Channel 1 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed)
 DCB_LMK1_CLKOUT_MUX_REG                 =               DCB_REG_LMK_1
@@ -1291,11 +1217,7 @@ DCB_LMK1_CLKOUT_DLY_OFS                 =                              4
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 27 [0x006C]: LMK_2 - LMK Register 2 (Default: 0x00020102) ******
-=======
 # ****** Register 45 [0x00B4]: LMK_2 - LMK Register 2 (Default: 0x00020102) ******
->>>>>>> Stashed changes
 
 # LMK2_CLKOUT_MUX - Channel 2 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed)
 DCB_LMK2_CLKOUT_MUX_REG                 =               DCB_REG_LMK_2
@@ -1319,11 +1241,7 @@ DCB_LMK2_CLKOUT_DLY_OFS                 =                              4
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 28 [0x0070]: LMK_3 - LMK Register 3 (Default: 0x00020103) ******
-=======
 # ****** Register 46 [0x00B8]: LMK_3 - LMK Register 3 (Default: 0x00020103) ******
->>>>>>> Stashed changes
 
 # LMK3_CLKOUT_MUX - Channel 3 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed)
 DCB_LMK3_CLKOUT_MUX_REG                 =               DCB_REG_LMK_3
@@ -1347,11 +1265,7 @@ DCB_LMK3_CLKOUT_DLY_OFS                 =                              4
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 29 [0x0074]: LMK_4 - LMK Register 4 (Default: 0x00000104) ******
-=======
 # ****** Register 47 [0x00BC]: LMK_4 - LMK Register 4 (Default: 0x00000104) ******
->>>>>>> Stashed changes
 
 # LMK4_CLKOUT_MUX - Channel 4 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed)
 DCB_LMK4_CLKOUT_MUX_REG                 =               DCB_REG_LMK_4
@@ -1375,11 +1289,7 @@ DCB_LMK4_CLKOUT_DLY_OFS                 =                              4
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 30 [0x0078]: LMK_5 - LMK Register 5 (Default: 0x00000105) ******
-=======
 # ****** Register 48 [0x00C0]: LMK_5 - LMK Register 5 (Default: 0x00000105) ******
->>>>>>> Stashed changes
 
 # LMK5_CLKOUT_MUX - Channel 5 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed)
 DCB_LMK5_CLKOUT_MUX_REG                 =               DCB_REG_LMK_5
@@ -1403,11 +1313,7 @@ DCB_LMK5_CLKOUT_DLY_OFS                 =                              4
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 31 [0x007C]: LMK_6 - LMK Register 6 (Default: 0x00000106) ******
-=======
 # ****** Register 49 [0x00C4]: LMK_6 - LMK Register 6 (Default: 0x00000106) ******
->>>>>>> Stashed changes
 
 # LMK6_CLKOUT_MUX - Channel 6 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed)
 DCB_LMK6_CLKOUT_MUX_REG                 =               DCB_REG_LMK_6
@@ -1431,11 +1337,7 @@ DCB_LMK6_CLKOUT_DLY_OFS                 =                              4
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 32 [0x0080]: LMK_7 - LMK Register 7 (Default: 0x00000107) ******
-=======
 # ****** Register 50 [0x00C8]: LMK_7 - LMK Register 7 (Default: 0x00000107) ******
->>>>>>> Stashed changes
 
 # LMK7_CLKOUT_MUX - Channel 7 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed)
 DCB_LMK7_CLKOUT_MUX_REG                 =               DCB_REG_LMK_7
@@ -1459,11 +1361,7 @@ DCB_LMK7_CLKOUT_DLY_OFS                 =                              4
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 33 [0x0084]: LMK_8 - LMK Register 8 (Default: 0x10000908) ******
-=======
 # ****** Register 51 [0x00CC]: LMK_8 - LMK Register 8 (Default: 0x10000908) ******
->>>>>>> Stashed changes
 
 # LMK8_PHASE_NOISE_OPT - Set LMK Register 8 (Phase Noise Optimization)
 DCB_LMK8_PHASE_NOISE_OPT_REG            =               DCB_REG_LMK_8
@@ -1472,11 +1370,7 @@ DCB_LMK8_PHASE_NOISE_OPT_OFS            =                              4
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 34 [0x0088]: LMK_9 - LMK Register 9 (Default: 0xA0022A09) ******
-=======
 # ****** Register 52 [0x00D0]: LMK_9 - LMK Register 9 (Default: 0xA0022A09) ******
->>>>>>> Stashed changes
 
 # LMK9_VBOOST - Voltage Level Boost for Clock Outputs
 DCB_LMK9_VBOOST_REG                     =               DCB_REG_LMK_9
@@ -1485,11 +1379,7 @@ DCB_LMK9_VBOOST_OFS                     =                             16
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 35 [0x008C]: LMK_11 - LMK Register 11 (Default: 0x0082000B) ******
-=======
 # ****** Register 53 [0x00D4]: LMK_11 - LMK Register 11 (Default: 0x0082000B) ******
->>>>>>> Stashed changes
 
 # LMK11_DIV4 - Divider Enable for Digital Lock Detect Circuit
 DCB_LMK11_DIV4_REG                      =              DCB_REG_LMK_11
@@ -1498,11 +1388,7 @@ DCB_LMK11_DIV4_OFS                      =                             15
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 36 [0x0090]: LMK_13 - LMK Register 13 (Default: 0x029400AD) ******
-=======
 # ****** Register 54 [0x00D8]: LMK_13 - LMK Register 13 (Default: 0x029400AD) ******
->>>>>>> Stashed changes
 
 # LMK13_OSCIN_FREQ - Oscillator Input Calibration Adjustment in MHz (1..200)
 DCB_LMK13_OSCIN_FREQ_REG                =              DCB_REG_LMK_13
@@ -1526,11 +1412,7 @@ DCB_LMK13_VCO_C3_C4_LF_OFS              =                              4
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 37 [0x0094]: LMK_14 - LMK Register 14 (Default: 0x0830140E) ******
-=======
 # ****** Register 55 [0x00DC]: LMK_14 - LMK Register 14 (Default: 0x0830140E) ******
->>>>>>> Stashed changes
 
 # LMK14_EN_FOUT - Enable for the Fout Pin (0 = Disabled, 1 = Enabled)
 DCB_LMK14_EN_FOUT_REG                   =              DCB_REG_LMK_14
@@ -1559,11 +1441,7 @@ DCB_LMK14_PLL_R_OFS                     =                              8
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 38 [0x0098]: LMK_15 - LMK Register 15 (Default: 0xE000280F) ******
-=======
 # ****** Register 56 [0x00E0]: LMK_15 - LMK Register 15 (Default: 0xE000280F) ******
->>>>>>> Stashed changes
 
 # LMK15_PLL_CP_GAIN - PLL Charge Pump Gain (see datasheet) (0..4)
 DCB_LMK15_PLL_CP_GAIN_REG               =              DCB_REG_LMK_15
@@ -1582,11 +1460,7 @@ DCB_LMK15_PLL_N_OFS                     =                              8
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 39 [0x009C]: TIME_LSB - Current System Time (Default: 0x00000000) ******
-=======
 # ****** Register 57 [0x00E4]: TIME_LSB - Current System Time (Default: 0x00000000) ******
->>>>>>> Stashed changes
 
 # TIME_LSB - LSBs of 64bit system time counter (MSBs are latched upon read of LSB register)
 DCB_TIME_LSB_REG                        =            DCB_REG_TIME_LSB
@@ -1595,11 +1469,7 @@ DCB_TIME_LSB_OFS                        =                              0
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 40 [0x00A0]: TIME_MSB - Current System Time (Default: 0x00000000) ******
-=======
 # ****** Register 58 [0x00E8]: TIME_MSB - Current System Time (Default: 0x00000000) ******
->>>>>>> Stashed changes
 
 # TIME_MSB - MSBs of 64bit system time counter (latched upon read of LSB register)
 DCB_TIME_MSB_REG                        =            DCB_REG_TIME_MSB
@@ -1608,11 +1478,7 @@ DCB_TIME_MSB_OFS                        =                              0
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 41 [0x00A4]: TIME_LSB_SET - Set System Time (Default: 0x00000000) ******
-=======
 # ****** Register 59 [0x00EC]: TIME_LSB_SET - Set System Time (Default: 0x00000000) ******
->>>>>>> Stashed changes
 
 # TIME_LSB_SET - LSBs of 64bit system time counter set value  (time is updated when MSBs are written)
 DCB_TIME_LSB_SET_REG                    =        DCB_REG_TIME_LSB_SET
@@ -1621,11 +1487,7 @@ DCB_TIME_LSB_SET_OFS                    =                              0
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 42 [0x00A8]: TIME_MSB_SET - Set System Time (Default: 0x00000000) ******
-=======
 # ****** Register 60 [0x00F0]: TIME_MSB_SET - Set System Time (Default: 0x00000000) ******
->>>>>>> Stashed changes
 
 # TIME_MSB_SET - MSBs of 64bit system time counter set value  (time is updated when MSBs are written)
 DCB_TIME_MSB_SET_REG                    =        DCB_REG_TIME_MSB_SET
@@ -1634,11 +1496,7 @@ DCB_TIME_MSB_SET_OFS                    =                              0
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 43 [0x00AC]: EVENT_TX_RATE - Event Transmission Rate (Default: 0x00000000) ******
-=======
 # ****** Register 61 [0x00F4]: EVENT_TX_RATE - Event Transmission Rate (Default: 0x00000000) ******
->>>>>>> Stashed changes
 
 # EVENT_TX_RATE - Number of events transmitted per second
 DCB_EVENT_TX_RATE_REG                   =       DCB_REG_EVENT_TX_RATE
@@ -1647,11 +1505,7 @@ DCB_EVENT_TX_RATE_OFS                   =                              0
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 44 [0x00B0]: EVENT_NR - Number of latest event (Default: 0x00000000) ******
-=======
 # ****** Register 62 [0x00F8]: EVENT_NR - Number of latest event (Default: 0x00000000) ******
->>>>>>> Stashed changes
 
 # EVENT_NUMBER - Number of latest event
 DCB_EVENT_NUMBER_REG                    =            DCB_REG_EVENT_NR
@@ -1660,11 +1514,7 @@ DCB_EVENT_NUMBER_OFS                    =                              0
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 45 [0x00B4]: TRG_CFG - Trigger Configuration (Default: 0x00000000) ******
-=======
 # ****** Register 63 [0x00FC]: TRG_CFG - Trigger Configuration (Default: 0x00000000) ******
->>>>>>> Stashed changes
 
 # EXT_TRIGGER_OUT_ENABLE - Enable output of trigger signal to MCX connector
 DCB_EXT_TRIGGER_OUT_ENABLE_REG          =             DCB_REG_TRG_CFG
@@ -1683,11 +1533,7 @@ DCB_MANUAL_TRIGGER_OFS                  =                              0
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 46 [0x00B8]: SET_TRG_CFG - SET bit register for Trigger configuration register (Default: 0x00000000) ******
-=======
 # ****** Register 64 [0x0100]: SET_TRG_CFG - SET bit register for Trigger configuration register (Default: 0x00000000) ******
->>>>>>> Stashed changes
 
 # SET_BIT_TRG_CFG - See TRG_CFG register
 DCB_SET_BIT_TRG_CFG_REG                 =         DCB_REG_SET_TRG_CFG
@@ -1696,11 +1542,7 @@ DCB_SET_BIT_TRG_CFG_OFS                 =                              0
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 47 [0x00BC]: CLR_TRG_CFG - CLR bit register for Trigger configuration register (Default: 0x00000000) ******
-=======
 # ****** Register 65 [0x0104]: CLR_TRG_CFG - CLR bit register for Trigger configuration register (Default: 0x00000000) ******
->>>>>>> Stashed changes
 
 # CLR_BIT_TRG_CFG - See TRG_CFG register
 DCB_CLR_BIT_TRG_CFG_REG                 =         DCB_REG_CLR_TRG_CFG
@@ -1709,11 +1551,7 @@ DCB_CLR_BIT_TRG_CFG_OFS                 =                              0
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 48 [0x00C0]: TRG_AUTO_PERIOD - Automatic Trigger Period (Default: 0x04C4B400) ******
-=======
 # ****** Register 66 [0x0108]: TRG_AUTO_PERIOD - Automatic Trigger Period (Default: 0x04C4B400) ******
->>>>>>> Stashed changes
 
 # AUTO_TRIGGER_PERIOD - Period of automatic trigger in ticks of the DAQ clock
 DCB_AUTO_TRIGGER_PERIOD_REG             =     DCB_REG_TRG_AUTO_PERIOD
@@ -1722,11 +1560,7 @@ DCB_AUTO_TRIGGER_PERIOD_OFS             =                              0
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 49 [0x00C4]: TRB_INFO_STAT - Trigger Information via Serial Trigger Bus Status (Default: 0x00000000) ******
-=======
 # ****** Register 67 [0x010C]: TRB_INFO_STAT - Trigger Information via Serial Trigger Bus Status (Default: 0x00000000) ******
->>>>>>> Stashed changes
 
 # TRB_FLAG_NEW - Flag signalling that the current trigger information belongs to the latest trigger received
 DCB_TRB_FLAG_NEW_REG                    =       DCB_REG_TRB_INFO_STAT
@@ -1745,11 +1579,7 @@ DCB_TRB_PARITY_ERROR_COUNT_OFS          =                              0
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 50 [0x00C8]: TRB_INFO_LSB - Trigger Information via Serial Trigger Bus LSBs (Default: 0x00000000) ******
-=======
 # ****** Register 68 [0x0110]: TRB_INFO_LSB - Trigger Information via Serial Trigger Bus LSBs (Default: 0x00000000) ******
->>>>>>> Stashed changes
 
 # TRB_INFO_LSB - Trigger information LSBs
 DCB_TRB_INFO_LSB_REG                    =        DCB_REG_TRB_INFO_LSB
@@ -1758,11 +1588,7 @@ DCB_TRB_INFO_LSB_OFS                    =                              0
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 51 [0x00CC]: TRB_INFO_MSB - Trigger Information via Serial Trigger Bus MSBs (Default: 0x00000000) ******
-=======
 # ****** Register 69 [0x0114]: TRB_INFO_MSB - Trigger Information via Serial Trigger Bus MSBs (Default: 0x00000000) ******
->>>>>>> Stashed changes
 
 # TRB_INFO_MSB - Trigger information MSBs
 DCB_TRB_INFO_MSB_REG                    =        DCB_REG_TRB_INFO_MSB
@@ -1771,11 +1597,7 @@ DCB_TRB_INFO_MSB_OFS                    =                              0
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 52 [0x00D0]: LMK_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ******
-=======
 # ****** Register 70 [0x0118]: LMK_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ******
->>>>>>> Stashed changes
 
 # LMK_7_MOD - LMK channel 7 register modified flags
 DCB_LMK_7_MOD_REG                       =        DCB_REG_LMK_MOD_FLAG
@@ -1819,11 +1641,7 @@ DCB_LMK_0_MOD_OFS                       =                              0
 
 
 
-<<<<<<< Updated upstream
-# ****** Register 53 [0x00D4]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: 0x00000000) ******
-=======
 # ****** Register 71 [0x011C]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: 0x00000000) ******
->>>>>>> Stashed changes
 
 # CRC32_REG_BANK - Keep at the end of the register bank
 DCB_CRC32_REG_BANK_REG                  =      DCB_REG_CRC32_REG_BANK
@@ -1834,11 +1652,7 @@ DCB_CRC32_REG_BANK_OFS                  =                              0
 
 # Number of Registers
 
-<<<<<<< Updated upstream
-REG_NR_OF_REGS          = 54
-=======
 REG_NR_OF_REGS          = 72
->>>>>>> Stashed changes
 
 
 
@@ -1870,10 +1684,6 @@ dcb_reg_list = (
   ( "CLR_CLK_CTRL"        , DCB_REG_CLR_CLK_CTRL       , DCB_WRITABLE_REG ),
   ( "COM_CTRL"            , DCB_REG_COM_CTRL           , DCB_WRITABLE_REG ),
   ( "RST"                 , DCB_REG_RST                , DCB_WRITABLE_REG ),
-<<<<<<< Updated upstream
-  ( "SERDES_STATUS_00_04" , DCB_REG_SERDES_STATUS_00_04, DCB_READONLY_REG ),
-  ( "SERDES_ERR_CNT_00"   , DCB_REG_SERDES_ERR_CNT_00  , DCB_READONLY_REG ),
-=======
   ( "SERDES_STATUS_00_07" , DCB_REG_SERDES_STATUS_00_07, DCB_READONLY_REG ),
   ( "SERDES_STATUS_08_15" , DCB_REG_SERDES_STATUS_08_15, DCB_READONLY_REG ),
   ( "SERDES_STATUS_17"    , DCB_REG_SERDES_STATUS_17   , DCB_READONLY_REG ),
@@ -1894,7 +1704,6 @@ dcb_reg_list = (
   ( "SERDES_ERR_CNT_14"   , DCB_REG_SERDES_ERR_CNT_14  , DCB_READONLY_REG ),
   ( "SERDES_ERR_CNT_15"   , DCB_REG_SERDES_ERR_CNT_15  , DCB_READONLY_REG ),
   ( "SERDES_ERR_CNT_17"   , DCB_REG_SERDES_ERR_CNT_17  , DCB_READONLY_REG ),
->>>>>>> Stashed changes
   ( "APLY_CFG"            , DCB_REG_APLY_CFG           , DCB_WRITABLE_REG ),
   ( "LMK_0"               , DCB_REG_LMK_0              , DCB_WRITABLE_REG ),
   ( "LMK_1"               , DCB_REG_LMK_1              , DCB_WRITABLE_REG ),
@@ -1989,11 +1798,6 @@ dcb_bit_group_list = (
   ( "ISERDES_RECEIVER_RESYNC"      , DCB_ISERDES_RECEIVER_RESYNC_REG      , DCB_ISERDES_RECEIVER_RESYNC_MASK      , DCB_ISERDES_RECEIVER_RESYNC_OFS      ),
   ( "ISERDES_RECEIVER_RST"         , DCB_ISERDES_RECEIVER_RST_REG         , DCB_ISERDES_RECEIVER_RST_MASK         , DCB_ISERDES_RECEIVER_RST_OFS         ),
   ( "RECONFIGURE_FPGA"             , DCB_RECONFIGURE_FPGA_REG             , DCB_RECONFIGURE_FPGA_MASK             , DCB_RECONFIGURE_FPGA_OFS             ),
-<<<<<<< Updated upstream
-  ( "IDLE_PATTERN_DETECT_00"       , DCB_IDLE_PATTERN_DETECT_00_REG       , DCB_IDLE_PATTERN_DETECT_00_MASK       , DCB_IDLE_PATTERN_DETECT_00_OFS       ),
-  ( "DELAY_SYNC_DONE_00"           , DCB_DELAY_SYNC_DONE_00_REG           , DCB_DELAY_SYNC_DONE_00_MASK           , DCB_DELAY_SYNC_DONE_00_OFS           ),
-  ( "SYNC_DONE_00"                 , DCB_SYNC_DONE_00_REG                 , DCB_SYNC_DONE_00_MASK                 , DCB_SYNC_DONE_00_OFS                 ),
-=======
   ( "IDLE_PATTERN_DETECT_07"       , DCB_IDLE_PATTERN_DETECT_07_REG       , DCB_IDLE_PATTERN_DETECT_07_MASK       , DCB_IDLE_PATTERN_DETECT_07_OFS       ),
   ( "DELAY_SYNC_DONE_07"           , DCB_DELAY_SYNC_DONE_07_REG           , DCB_DELAY_SYNC_DONE_07_MASK           , DCB_DELAY_SYNC_DONE_07_OFS           ),
   ( "SYNC_DONE_07"                 , DCB_SYNC_DONE_07_REG                 , DCB_SYNC_DONE_07_MASK                 , DCB_SYNC_DONE_07_OFS                 ),
@@ -2045,13 +1849,10 @@ dcb_bit_group_list = (
   ( "IDLE_PATTERN_DETECT_17"       , DCB_IDLE_PATTERN_DETECT_17_REG       , DCB_IDLE_PATTERN_DETECT_17_MASK       , DCB_IDLE_PATTERN_DETECT_17_OFS       ),
   ( "DELAY_SYNC_DONE_17"           , DCB_DELAY_SYNC_DONE_17_REG           , DCB_DELAY_SYNC_DONE_17_MASK           , DCB_DELAY_SYNC_DONE_17_OFS           ),
   ( "SYNC_DONE_17"                 , DCB_SYNC_DONE_17_REG                 , DCB_SYNC_DONE_17_MASK                 , DCB_SYNC_DONE_17_OFS                 ),
->>>>>>> Stashed changes
   ( "CRC_ERRORS_00"                , DCB_CRC_ERRORS_00_REG                , DCB_CRC_ERRORS_00_MASK                , DCB_CRC_ERRORS_00_OFS                ),
   ( "FRAME_ERRORS_00"              , DCB_FRAME_ERRORS_00_REG              , DCB_FRAME_ERRORS_00_MASK              , DCB_FRAME_ERRORS_00_OFS              ),
   ( "DATAGRAM_ERRORS_00"           , DCB_DATAGRAM_ERRORS_00_REG           , DCB_DATAGRAM_ERRORS_00_MASK           , DCB_DATAGRAM_ERRORS_00_OFS           ),
   ( "SYNC_ERRORS_00"               , DCB_SYNC_ERRORS_00_REG               , DCB_SYNC_ERRORS_00_MASK               , DCB_SYNC_ERRORS_00_OFS               ),
-<<<<<<< Updated upstream
-=======
   ( "CRC_ERRORS_01"                , DCB_CRC_ERRORS_01_REG                , DCB_CRC_ERRORS_01_MASK                , DCB_CRC_ERRORS_01_OFS                ),
   ( "FRAME_ERRORS_01"              , DCB_FRAME_ERRORS_01_REG              , DCB_FRAME_ERRORS_01_MASK              , DCB_FRAME_ERRORS_01_OFS              ),
   ( "DATAGRAM_ERRORS_01"           , DCB_DATAGRAM_ERRORS_01_REG           , DCB_DATAGRAM_ERRORS_01_MASK           , DCB_DATAGRAM_ERRORS_01_OFS           ),
@@ -2116,7 +1917,6 @@ dcb_bit_group_list = (
   ( "FRAME_ERRORS_17"              , DCB_FRAME_ERRORS_17_REG              , DCB_FRAME_ERRORS_17_MASK              , DCB_FRAME_ERRORS_17_OFS              ),
   ( "DATAGRAM_ERRORS_17"           , DCB_DATAGRAM_ERRORS_17_REG           , DCB_DATAGRAM_ERRORS_17_MASK           , DCB_DATAGRAM_ERRORS_17_OFS           ),
   ( "SYNC_ERRORS_17"               , DCB_SYNC_ERRORS_17_REG               , DCB_SYNC_ERRORS_17_MASK               , DCB_SYNC_ERRORS_17_OFS               ),
->>>>>>> Stashed changes
   ( "APPLY_SETTINGS_LMK"           , DCB_APPLY_SETTINGS_LMK_REG           , DCB_APPLY_SETTINGS_LMK_MASK           , DCB_APPLY_SETTINGS_LMK_OFS           ),
   ( "LMK0_RESET"                   , DCB_LMK0_RESET_REG                   , DCB_LMK0_RESET_MASK                   , DCB_LMK0_RESET_OFS                   ),
   ( "LMK0_CLKOUT_MUX"              , DCB_LMK0_CLKOUT_MUX_REG              , DCB_LMK0_CLKOUT_MUX_MASK              , DCB_LMK0_CLKOUT_MUX_OFS              ),
@@ -2228,22 +2028,6 @@ reg_restore = (DCB_DONT_TOUCH_REG,   # Offset 0x0000
                DCB_DONT_TOUCH_REG,   # Offset 0x0058 
                DCB_DONT_TOUCH_REG,   # Offset 0x005C 
                DCB_DONT_TOUCH_REG,   # Offset 0x0060 
-<<<<<<< Updated upstream
-               DCB_RESTORE_REG   ,   # Offset 0x0064 
-               DCB_RESTORE_REG   ,   # Offset 0x0068 
-               DCB_RESTORE_REG   ,   # Offset 0x006C 
-               DCB_RESTORE_REG   ,   # Offset 0x0070 
-               DCB_RESTORE_REG   ,   # Offset 0x0074 
-               DCB_RESTORE_REG   ,   # Offset 0x0078 
-               DCB_RESTORE_REG   ,   # Offset 0x007C 
-               DCB_RESTORE_REG   ,   # Offset 0x0080 
-               DCB_RESTORE_REG   ,   # Offset 0x0084 
-               DCB_RESTORE_REG   ,   # Offset 0x0088 
-               DCB_RESTORE_REG   ,   # Offset 0x008C 
-               DCB_RESTORE_REG   ,   # Offset 0x0090 
-               DCB_RESTORE_REG   ,   # Offset 0x0094 
-               DCB_RESTORE_REG   ,   # Offset 0x0098 
-=======
                DCB_DONT_TOUCH_REG,   # Offset 0x0064 
                DCB_DONT_TOUCH_REG,   # Offset 0x0068 
                DCB_DONT_TOUCH_REG,   # Offset 0x006C 
@@ -2258,24 +2042,10 @@ reg_restore = (DCB_DONT_TOUCH_REG,   # Offset 0x0000
                DCB_DONT_TOUCH_REG,   # Offset 0x0090 
                DCB_DONT_TOUCH_REG,   # Offset 0x0094 
                DCB_DONT_TOUCH_REG,   # Offset 0x0098 
->>>>>>> Stashed changes
                DCB_DONT_TOUCH_REG,   # Offset 0x009C 
                DCB_DONT_TOUCH_REG,   # Offset 0x00A0 
                DCB_DONT_TOUCH_REG,   # Offset 0x00A4 
                DCB_DONT_TOUCH_REG,   # Offset 0x00A8 
-<<<<<<< Updated upstream
-               DCB_DONT_TOUCH_REG,   # Offset 0x00AC 
-               DCB_DONT_TOUCH_REG,   # Offset 0x00B0 
-               DCB_RESTORE_REG   ,   # Offset 0x00B4 
-               DCB_DONT_TOUCH_REG,   # Offset 0x00B8 
-               DCB_DONT_TOUCH_REG,   # Offset 0x00BC 
-               DCB_RESTORE_REG   ,   # Offset 0x00C0 
-               DCB_DONT_TOUCH_REG,   # Offset 0x00C4 
-               DCB_DONT_TOUCH_REG,   # Offset 0x00C8 
-               DCB_DONT_TOUCH_REG,   # Offset 0x00CC 
-               DCB_DONT_TOUCH_REG,   # Offset 0x00D0 
-               DCB_DONT_TOUCH_REG)   # Offset 0x00D4 
-=======
                DCB_RESTORE_REG   ,   # Offset 0x00AC 
                DCB_RESTORE_REG   ,   # Offset 0x00B0 
                DCB_RESTORE_REG   ,   # Offset 0x00B4 
@@ -2305,7 +2075,6 @@ reg_restore = (DCB_DONT_TOUCH_REG,   # Offset 0x0000
                DCB_DONT_TOUCH_REG,   # Offset 0x0114 
                DCB_DONT_TOUCH_REG,   # Offset 0x0118 
                DCB_DONT_TOUCH_REG)   # Offset 0x011C 
->>>>>>> Stashed changes
 
 
 
@@ -2338,22 +2107,6 @@ ctrl_reg_default = (0xAC010307,   # Offset 0x0000
                     0x00000000,   # Offset 0x0058 
                     0x00000000,   # Offset 0x005C 
                     0x00000000,   # Offset 0x0060 
-<<<<<<< Updated upstream
-                    0x00020100,   # Offset 0x0064 
-                    0x00030101,   # Offset 0x0068 
-                    0x00020102,   # Offset 0x006C 
-                    0x00020103,   # Offset 0x0070 
-                    0x00000104,   # Offset 0x0074 
-                    0x00000105,   # Offset 0x0078 
-                    0x00000106,   # Offset 0x007C 
-                    0x00000107,   # Offset 0x0080 
-                    0x10000908,   # Offset 0x0084 
-                    0xA0022A09,   # Offset 0x0088 
-                    0x0082000B,   # Offset 0x008C 
-                    0x029400AD,   # Offset 0x0090 
-                    0x0830140E,   # Offset 0x0094 
-                    0xE000280F,   # Offset 0x0098 
-=======
                     0x00000000,   # Offset 0x0064 
                     0x00000000,   # Offset 0x0068 
                     0x00000000,   # Offset 0x006C 
@@ -2368,23 +2121,10 @@ ctrl_reg_default = (0xAC010307,   # Offset 0x0000
                     0x00000000,   # Offset 0x0090 
                     0x00000000,   # Offset 0x0094 
                     0x00000000,   # Offset 0x0098 
->>>>>>> Stashed changes
                     0x00000000,   # Offset 0x009C 
                     0x00000000,   # Offset 0x00A0 
                     0x00000000,   # Offset 0x00A4 
                     0x00000000,   # Offset 0x00A8 
-<<<<<<< Updated upstream
-                    0x00000000,   # Offset 0x00AC 
-                    0x00000000,   # Offset 0x00B0 
-                    0x00000000,   # Offset 0x00B4 
-                    0x00000000,   # Offset 0x00B8 
-                    0x00000000,   # Offset 0x00BC 
-                    0x04C4B400,   # Offset 0x00C0 
-                    0x00000000,   # Offset 0x00C4 
-                    0x00000000,   # Offset 0x00C8 
-                    0x00000000,   # Offset 0x00CC 
-                    0x00000000)   # Offset 0x00D0 
-=======
                     0x00020100,   # Offset 0x00AC 
                     0x00030101,   # Offset 0x00B0 
                     0x00020102,   # Offset 0x00B4 
@@ -2413,7 +2153,6 @@ ctrl_reg_default = (0xAC010307,   # Offset 0x0000
                     0x00000000,   # Offset 0x0110 
                     0x00000000,   # Offset 0x0114 
                     0x00000000)   # Offset 0x0118 
->>>>>>> Stashed changes
 
 
 # #############################################################################
