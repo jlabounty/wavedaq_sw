@@ -221,6 +221,8 @@ public:
    bool IsComplete() { return mComplete; }
    void UpdateIsComplete();
    WDAQBoardEvent(WDAQPacketData* pkt);
+
+   virtual ~WDAQBoardEvent(){};
 };
 
 //WDB board event - WDB Board Event class
@@ -308,7 +310,7 @@ public:
    std::map<std::array<char,4>,WDAQTcbBank*>     mBanks;
 
    WDAQTcbEvent(WDAQPacketData* pkt);
-   ~WDAQTcbEvent(){
+   virtual ~WDAQTcbEvent(){
       for(auto i: mBanks)
          delete i.second;
       mBanks.clear();
