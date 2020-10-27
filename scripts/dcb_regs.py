@@ -5,7 +5,7 @@
 #  Project :  MEGII - DCB
 #
 #  Author  :  schmid_e (Author of generation script)
-#  Created :  23.10.2020 09:16:10
+#  Created :  27.10.2020 14:28:39
 #
 #  Description :  Register map definitions.
 #
@@ -435,28 +435,33 @@ DCB_INTER_PKG_DELAY_OFS                 =                              0
 
 # WDB_SERDES_CLK_MGR_RST - Reset for clock manager deriving clocks from the WDB clock (e.g. refclk for SYNC output delay)
 DCB_WDB_SERDES_CLK_MGR_RST_REG          =                 DCB_REG_RST
-DCB_WDB_SERDES_CLK_MGR_RST_MASK         =                     0x00000100
-DCB_WDB_SERDES_CLK_MGR_RST_OFS          =                              8
+DCB_WDB_SERDES_CLK_MGR_RST_MASK         =                     0x00000200
+DCB_WDB_SERDES_CLK_MGR_RST_OFS          =                              9
 
 # WDB_REFCLK_MGR_RST - Reset for clock manager deriving clocks from the WDB clock (e.g. refclk for SYNC output delay)
 DCB_WDB_REFCLK_MGR_RST_REG              =                 DCB_REG_RST
-DCB_WDB_REFCLK_MGR_RST_MASK             =                     0x00000080
-DCB_WDB_REFCLK_MGR_RST_OFS              =                              7
+DCB_WDB_REFCLK_MGR_RST_MASK             =                     0x00000100
+DCB_WDB_REFCLK_MGR_RST_OFS              =                              8
 
 # TRIGGER_MGR_RST - Trigger manager reset
 DCB_TRIGGER_MGR_RST_REG                 =                 DCB_REG_RST
-DCB_TRIGGER_MGR_RST_MASK                =                     0x00000040
-DCB_TRIGGER_MGR_RST_OFS                 =                              6
+DCB_TRIGGER_MGR_RST_MASK                =                     0x00000080
+DCB_TRIGGER_MGR_RST_OFS                 =                              7
 
 # TR_SYNC_BPL - Trigger SYNC signal on the backplane
 DCB_TR_SYNC_BPL_REG                     =                 DCB_REG_RST
-DCB_TR_SYNC_BPL_MASK                    =                     0x00000020
-DCB_TR_SYNC_BPL_OFS                     =                              5
+DCB_TR_SYNC_BPL_MASK                    =                     0x00000040
+DCB_TR_SYNC_BPL_OFS                     =                              6
 
 # LMK_SYNC_DCB - Trigger SYNC signal of the LMK on the DCB
 DCB_LMK_SYNC_DCB_REG                    =                 DCB_REG_RST
-DCB_LMK_SYNC_DCB_MASK                   =                     0x00000010
-DCB_LMK_SYNC_DCB_OFS                    =                              4
+DCB_LMK_SYNC_DCB_MASK                   =                     0x00000020
+DCB_LMK_SYNC_DCB_OFS                    =                              5
+
+# DMA_PKT_SCHED_RST - Reset of the DMA packet scheduler
+DCB_DMA_PKT_SCHED_RST_REG               =                 DCB_REG_RST
+DCB_DMA_PKT_SCHED_RST_MASK              =                     0x00000010
+DCB_DMA_PKT_SCHED_RST_OFS               =                              4
 
 # ISERDES_RCVR_ERROR_COUNT_RST - Reset of the input SERDES packet receiver
 DCB_ISERDES_RCVR_ERROR_COUNT_RST_REG    =                 DCB_REG_RST
@@ -1794,6 +1799,7 @@ dcb_bit_group_list = (
   ( "TRIGGER_MGR_RST"              , DCB_TRIGGER_MGR_RST_REG              , DCB_TRIGGER_MGR_RST_MASK              , DCB_TRIGGER_MGR_RST_OFS              ),
   ( "TR_SYNC_BPL"                  , DCB_TR_SYNC_BPL_REG                  , DCB_TR_SYNC_BPL_MASK                  , DCB_TR_SYNC_BPL_OFS                  ),
   ( "LMK_SYNC_DCB"                 , DCB_LMK_SYNC_DCB_REG                 , DCB_LMK_SYNC_DCB_MASK                 , DCB_LMK_SYNC_DCB_OFS                 ),
+  ( "DMA_PKT_SCHED_RST"            , DCB_DMA_PKT_SCHED_RST_REG            , DCB_DMA_PKT_SCHED_RST_MASK            , DCB_DMA_PKT_SCHED_RST_OFS            ),
   ( "ISERDES_RCVR_ERROR_COUNT_RST" , DCB_ISERDES_RCVR_ERROR_COUNT_RST_REG , DCB_ISERDES_RCVR_ERROR_COUNT_RST_MASK , DCB_ISERDES_RCVR_ERROR_COUNT_RST_OFS ),
   ( "ISERDES_RECEIVER_RESYNC"      , DCB_ISERDES_RECEIVER_RESYNC_REG      , DCB_ISERDES_RECEIVER_RESYNC_MASK      , DCB_ISERDES_RECEIVER_RESYNC_OFS      ),
   ( "ISERDES_RECEIVER_RST"         , DCB_ISERDES_RECEIVER_RST_REG         , DCB_ISERDES_RECEIVER_RST_MASK         , DCB_ISERDES_RECEIVER_RST_OFS         ),
