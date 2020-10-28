@@ -970,10 +970,10 @@ void WDWDB::ConfigureTriggerGain(Property &property) {
 
    int trg_gain[16];
    if(arraySize ==1){
-      for(int i=0; i<15; i++) trg_gain[i] = trigger_gain[0];
+      for(int i=0; i<16; i++) trg_gain[i] = trigger_gain[0];
       arraySize = 16;
    } else if(arraySize ==16) {
-      for(int i=0; i<15; i++) trg_gain[i] =  trigger_gain[i];
+      for(int i=0; i<16; i++) trg_gain[i] =  trigger_gain[i];
    } else
       throw std::runtime_error("TriggerGain size should be 1 or 16 values");
 
