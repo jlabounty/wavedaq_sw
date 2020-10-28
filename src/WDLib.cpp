@@ -1016,10 +1016,10 @@ void WDWDB::ConfigureTriggerTdcOffset(Property &property) {
 
    int trg_offset[16];
    if(arraySize ==1){
-      for(int i=0; i<15; i++) trg_offset[i] = tdc_offset[0];
+      for(int i=0; i<16; i++) trg_offset[i] = tdc_offset[0];
       arraySize = 16;
    } else if(arraySize ==16) {
-      for(int i=0; i<15; i++) trg_offset[i] =  tdc_offset[i];
+      for(int i=0; i<16; i++) trg_offset[i] =  tdc_offset[i];
    } else
       throw std::runtime_error("TriggerTdcOffset size should be 1 or 16 values");
 
