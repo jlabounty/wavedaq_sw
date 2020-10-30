@@ -1,13 +1,16 @@
 #include <sstream>
+#include "TH1D.h"
+#include "TCanvas.h"
 
 void makeThr(string dirname="2020-10-12/"){
    int noped=0;
    const double fallbackThr = -0.035;//in case no pedestal is found
-   const double absoluteThr = -0.010;//offset WRT observed threshold
+   const double absoluteThr = 0.005;//offset WRT observed threshold
 
    TSystemDirectory dir(dirname.c_str(),dirname.c_str());
    TList *files = dir.GetListOfFiles();
    ofstream outfile("output.xml");
+   TFile *outroot = new TFile("output.root", "recreate");
    if (files){
       TSystemFile *file; TString fname; TIter next(files);
       while ((file=(TSystemFile*)next())) {
@@ -37,8 +40,36 @@ void makeThr(string dirname="2020-10-12/"){
 
             outfile << fname.Data() << std::endl;
             outfile << "<TriggerLevel>";
+            //TCanvas* c=new TCanvas();
+            TF1 *fgau= new TF1("fgau", "gaus", thrs.front(), thrs.back());
             for(int i=0; i<16; i++){
-               peds[i] = -100;
+
+               //fit WD2G
+               TH1F *h = new TH1F(Form("%s-%d", fname.Data(), i), Form("%s-%d", fname.Data(), i), thrs.size()-1, thrs.data());
+               for(int j=0; j<scals[i].size(); j++){
+                  h->SetBinContent(j+1, scals[i][j]);
+               }
+
+               h->Fit(fgau, "Q");
+               if(fgau->GetParameter(2) > 0.0007){
+                  noped++;
+                  printf("!!");
+               }
+
+               printf("%2d: %lf %lf\n", i,  fgau->GetParameter(1), fgau->GetParameter(2));
+               outfile << fgau->GetParameter(1) +0.00025 + absoluteThr; //0.00025 is bin size
+
+
+               h->Write(Form("%s-%d", fname.Data(), i));
+
+               //h->Draw();
+               //c->Update();
+               //c->WaitPrimitive();
+               //delete h;
+
+
+               //edge for WD2F
+               /*peds[i] = -100;
 
                for(int j=0; j<scals[i].size(); j++){
                   if (peds[i] == -100 && scals[i][j]>2){
@@ -54,6 +85,7 @@ void makeThr(string dirname="2020-10-12/"){
                   outfile << fallbackThr;
                   noped++;
                }
+               */
                if(i!=15)
                   outfile << ", ";
             }
@@ -63,5 +95,6 @@ void makeThr(string dirname="2020-10-12/"){
       cout << noped << " boards without pedestal\n";
    }
    outfile.close();
+   outroot->Close();
 
 }

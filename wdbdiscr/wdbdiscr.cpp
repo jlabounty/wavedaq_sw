@@ -13,46 +13,72 @@
 using namespace std;
 
 std::string wdbs[]={
-   "wd100",
-   "wd101",
-   "wd102",
-   "wd103",
-   "wd104",
-   "wd105",
-   "wd106",
-   "wd107",
-   "wd108",
-   "wd109",
-   "wd079",
-   "wd110",
-   "wd111",
-   "wd112",
-   "wd113",
-   "wd114",
-   "wd122",
-   "wd123",
-   "wd124",
-   "wd125",
-   "wd115",
-   "wd117",
-   "wd126",
-   "wd127",
-   "wd069",
-   "wd128",
-   "wd129",
-   "wd130",
-   "wd080",
-   "wd081",
-   "wd082",
-   "wd083"
+   //MPPC08
+   //"wd100",
+   //"wd101",
+   //"wd102",
+   //"wd103",
+   //"wd104",
+   //"wd105",
+   //"wd106",
+   //"wd107",
+   //"wd108",
+   //"wd109",
+   //"wd079",
+   //"wd110",
+   //"wd111",
+   //"wd112",
+   //"wd113",
+   //"wd114",
+   //MPPC09
+   //"wd122",
+   //"wd123",
+   //"wd124",
+   //"wd125",
+   //"wd115",
+   //"wd117",
+   //"wd126",
+   //"wd127",
+   //"wd069",
+   //"wd128",
+   //"wd129",
+   //"wd130",
+   //"wd080",
+   //"wd081",
+   //"wd082",
+   //"wd083"
+   //DCUS0
+   //"wd198",
+   //"wd199",
+   //"wd211",
+   //"wd204",
+   //"wd205",
+   //"wd206",
+   //"wd207",
+   //"wd208",
+   //DCDS0
+   //"wd192",
+   //"wd193",
+   //"wd194",
+   "wd195",
+   "wd196",
+   //"wd200",
+   //"wd201",
+   "wd202"
 };
 
 int main(int argc, char** argv)
 {
-   const int n = 120;
-   const float down = -0.040;
-   const float up = 0.020;
-   const float gain = 2.5;
+   //WD2F
+   //const int n = 120;
+   //const float down = -0.040;
+   //const float up = 0.020;
+   //const float gain = 2.5;
+   //WD2ADiff
+   const int n = 40;
+   const float down = -0.005;
+   const float up = 0.015;
+   const float gain = 1;
 
    printf("piedistalling %lu WDBs\n", sizeof(wdbs)/sizeof(std::string*));
 
