@@ -48,22 +48,22 @@ std::string wdbs[]={
    //"wd082",
    //"wd083"
    //DCUS0
-   //"wd198",
-   //"wd199",
-   //"wd211",
-   //"wd204",
-   //"wd205",
-   //"wd206",
-   //"wd207",
-   //"wd208",
+   "wd198",
+   "wd199",
+   "wd211",
+   "wd204",
+   "wd205",
+   "wd206",
+   "wd207",
+   "wd208",
    //DCDS0
-   //"wd192",
-   //"wd193",
-   //"wd194",
+   "wd192",
+   "wd193",
+   "wd194",
    "wd195",
    "wd196",
-   //"wd200",
-   //"wd201",
+   "wd200",
+   "wd201",
    "wd202"
 };
 
@@ -75,9 +75,9 @@ int main(int argc, char** argv)
    //const float up = 0.020;
    //const float gain = 2.5;
    //WD2ADiff
-   const int n = 40;
-   const float down = -0.005;
-   const float up = 0.015;
+   const int n = 90;
+   const float down = -0.045;
+   const float up = 0.045;
    const float gain = 1;
 
    printf("piedistalling %lu WDBs\n", sizeof(wdbs)/sizeof(std::string*));
@@ -86,7 +86,10 @@ int main(int argc, char** argv)
       printf("%s\n", wdbs[b].c_str());
       WDB* wdb= new WDB(wdbs[b].c_str());
       wdb->Connect();
+      wdb->ReceiveStatusRegisters();
+      wdb->ReceiveControlRegisters();
       if(gain > 0) wdb->SetFeGain(-1, gain);
+      printf("board revision %c\n", 'A'+ wdb->GetBoardRevision());
       sleep(3);
       std::vector<uint64_t> s;
       wdb->GetScalers(s);

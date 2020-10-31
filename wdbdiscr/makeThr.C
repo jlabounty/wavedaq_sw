@@ -56,8 +56,8 @@ void makeThr(string dirname="2020-10-12/"){
                   printf("!!");
                }
 
-               printf("%2d: %lf %lf\n", i,  fgau->GetParameter(1), fgau->GetParameter(2));
-               outfile << fgau->GetParameter(1) +0.00025 + absoluteThr; //0.00025 is bin size
+               printf("%2d: %lf %lf -> %lf\n", i,  fgau->GetParameter(1), fgau->GetParameter(2), fgau->GetParameter(1) +0.0005 + 5*fgau->GetParameter(2));
+               outfile << fgau->GetParameter(1) +0.0005 + 5*fgau->GetParameter(2); //0.0005 is bin size
 
 
                h->Write(Form("%s-%d", fname.Data(), i));
