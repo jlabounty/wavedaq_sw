@@ -1454,11 +1454,13 @@ function btnChn(event, c)
 function btnOn()
 // turn current channel(s) on and off
 {
+   let bt;
+   let cb;
    for (let i = 0; i < 16; i++) {
       if (!OSC.chOnSelected[i])
          continue;
-      let cb = document.getElementById("ch" + i);
-      let bt = document.getElementById("chOn");
+      cb = document.getElementById("ch" + i);
+      bt = document.getElementById("chOn");
       if (bt.innerHTML === "On") {
          OSC.chOn[i] = true;
          cb.style.backgroundColor = OSC.chnColors[i];
@@ -1478,7 +1480,8 @@ function btnOn()
 function btnScale(inc)
 // change vertical scale, update label
 {
-   for (let i = 0; i < 19; i++)
+   let i;
+   for (i = 0; i < 19; i++)
       if (OSC.chOnSelected[i])
          break;
    if (i === 19)
@@ -2182,13 +2185,14 @@ function triggerClearAll() {
 }
 
 function triggerOrAll() {
-   for (let i = 0; i < 16; i++) {
+   let i;
+   for (i = 0; i < 16; i++) {
       let p = document.getElementById(i<10?'P0'+i:'P'+i);
       p.enabled = true;
       p.style.backgroundColor = 'darkgreen';
       p.style.color = 'white';
    }
-   for (let i = 16; i < 18; i++) {
+   for (i = 16; i < 18; i++) {
       let p = document.getElementById(i<10?'P0'+i:'P'+i);
       p.enabled = false;
       p.style.backgroundColor = '#DDDDDD';
