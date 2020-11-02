@@ -7,6 +7,8 @@ void makeThr(string dirname="2020-10-12/"){
    const double fallbackThr = -0.035;//in case no pedestal is found
    const double absoluteThr = 0.005;//offset WRT observed threshold
 
+   const double nsigma = 10.;
+
    TSystemDirectory dir(dirname.c_str(),dirname.c_str());
    TList *files = dir.GetListOfFiles();
    ofstream outfile("output.xml");
@@ -41,6 +43,7 @@ void makeThr(string dirname="2020-10-12/"){
             outfile << fname.Data() << std::endl;
             outfile << "<TriggerLevel>";
             //TCanvas* c=new TCanvas();
+            //c->SetLogy();
             TF1 *fgau= new TF1("fgau", "gaus", thrs.front(), thrs.back());
             for(int i=0; i<16; i++){
 
@@ -56,16 +59,20 @@ void makeThr(string dirname="2020-10-12/"){
                   printf("!!");
                }
 
-               printf("%2d: %lf %lf -> %lf\n", i,  fgau->GetParameter(1), fgau->GetParameter(2), fgau->GetParameter(1) +0.0005 + 5*fgau->GetParameter(2));
-               outfile << fgau->GetParameter(1) +0.0005 + 5*fgau->GetParameter(2); //0.0005 is bin size
+               printf("%2d: %lf %lf -> %lf\n", i,  fgau->GetParameter(1), fgau->GetParameter(2), fgau->GetParameter(1) +0.0005 + nsigma*fgau->GetParameter(2));
+               outfile << fgau->GetParameter(1) +0.0005 + nsigma*fgau->GetParameter(2); //0.0005 is bin size
 
 
                h->Write(Form("%s-%d", fname.Data(), i));
 
-               //h->Draw();
-               //c->Update();
-               //c->WaitPrimitive();
-               //delete h;
+               /*h->Draw();
+               TLine *l=new TLine(fgau->GetParameter(1) +0.0005 + nsigma*fgau->GetParameter(2),c->GetUymin(),fgau->GetParameter(1) +0.0005 + nsigma*fgau->GetParameter(2),c->GetUymax());
+               l->SetLineColor(kRed);
+               l->Draw();
+               
+               c->Update();
+               c->WaitPrimitive();
+               delete h;*/
 
 
                //edge for WD2F
