@@ -51,8 +51,9 @@
 /* WNDW Window w for Stream n */
 #define DPS_WIN_WINCNT(n, w, so)           (0x4000+(so)*(n)+0x08*(w))
 #define DPS_WIN_WINCNT_LSB_CNT              0
-#define DPS_WIN_WINCNT_MSB_CNT             30
-#define DPS_WIN_WINCNT_MASK                0x7FFFFFFF
+#define DPS_WIN_WINCNT_MSB_CNT             29
+#define DPS_WIN_WINCNT_MASK                0x3FFFFFFF
+#define DPS_WIN_WINCNT_BIT_EOE_MASK        0x40000000
 #define DPS_WIN_WINCNT_BIT_PKTCMPLT_MASK   0x80000000
 
 #define MAP_FAILED   (-1)
