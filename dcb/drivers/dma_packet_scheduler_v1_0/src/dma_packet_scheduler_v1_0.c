@@ -11,6 +11,7 @@
  * 2020 Elmar Schmid <elmar.schmid@psi.ch>
  */
 
+#include <linux/kernel.h>
 #include <linux/slab.h>
 #include <linux/module.h>
 #include <linux/property.h>
@@ -232,6 +233,26 @@ static int dps_rm_from_queue(struct dps_info *info, int entries)
 }
 
 /**
+ * dps_list_len - evaluat number of items in list
+ * @pdev:   pointer to platform device struct
+ *
+ * Returns the number of items that are currently in the list.
+ *
+ * Goes throug the buffer queue and counts the number of items.
+ */
+static int dps_list_len(struct dps_info *info)
+{
+        struct list_head *pos;
+        int items = 0;
+
+        mutex_lock(&info->dps_mutex);
+        list_for_each(pos, &info->queue_head) items++;
+        mutex_unlock(&info->dps_mutex);
+
+        return items;
+}
+
+/**
  * dma_packet_sched_get_pdata - read parameters and initialize
  * @pdev:   pointer to platform device struct
  *
@@ -392,6 +413,213 @@ static long dps_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 
         return retval;
 }
+
+/**
+ * dps_sysfs - sysfs control and configuration processing
+ */
+/** sysfs dps_config number of slots
+ *
+ * Description:
+ * Reading "slots" returns the number of slots connected to the DMA buffer.
+ */
+static ssize_t slots_show(struct device *dev, struct device_attribute *attr, char *buffer)
+{
+        struct dps_info *info = dev_get_drvdata(dev);
+
+        return sprintf(buffer, "%d\n", info->slots);
+}
+static DEVICE_ATTR_RO(slots);
+
+/** sysfs dps_config number of windows
+ *
+ * Description:
+ * Reading "windows" returns the number of window buffers available for each slot
+ * of the DMA buffer.
+ */
+static ssize_t windows_show(struct device *dev, struct device_attribute *attr, char *buffer)
+{
+        return sprintf(buffer, "%d\n", windows);
+}
+static DEVICE_ATTR_RO(windows);
+
+/** sysfs dps_config window size
+ *
+ * Description:
+ * Reading "window_size" returns the window size (max. packet size) of a window buffer.
+ */
+static ssize_t win_size_show(struct device *dev, struct device_attribute *attr, char *buffer)
+{
+        return sprintf(buffer, "%d\n", win_size);
+}
+static DEVICE_ATTR_RO(win_size);
+
+static struct attribute *dps_config_attrs[] = {
+    &dev_attr_slots.attr,
+    &dev_attr_windows.attr,
+    &dev_attr_win_size.attr,
+    NULL
+};
+
+static struct attribute_group dps_config_group = {
+    .name = "dps_config",
+    .attrs = dps_config_attrs,
+};
+
+/** sysfs dps_ctrl enable
+ *
+ * Description:
+ * Writing "enable" enables (1) or disables (0) the global DMA buffer.
+ * Reading returns the status of the global DMA buffer enable.
+ */
+static ssize_t enable_show(struct device *dev, struct device_attribute *attr, char *buffer)
+{
+        struct dps_info *info = dev_get_drvdata(dev);
+        u32 reg_val;
+
+        reg_val = reg_read(info, DPS_REG_GCFG);
+        if(reg_val & DPS_REG_GCFG_BIT_ENA)
+        {
+                return sprintf(buffer, "%d\n", 1);
+        }
+        else
+        {
+                return sprintf(buffer, "%d\n", 0);
+        }
+}
+
+static ssize_t enable_store(struct device *dev, struct device_attribute *attr, const char *buffer, size_t count)
+{
+        struct dps_info *info = dev_get_drvdata(dev);
+        long enable;
+
+        if( kstrtol(buffer, 0, &enable) )
+                return -EINVAL;
+
+        if(enable == 1)
+        {
+                reg_set(info, DPS_REG_GCFG, DPS_REG_GCFG_BIT_ENA);
+                return count;
+        }
+        else if (enable == 0)
+        {
+                reg_clr(info, DPS_REG_GCFG, DPS_REG_GCFG_BIT_ENA);
+                return count;
+        }
+        return -EINVAL;
+}
+static DEVICE_ATTR_RW(enable);
+
+/** sysfs dps_ctrl slot enable
+ *
+ * Description:
+ * Writing "slot_enable" enables (1) or disables (0) the corresponding slot.
+ * Each bit represents a slot. The LSB corresponds to slot 0.
+ * Reading returns the current value of the DMA buffer slot_enable.
+ */
+static ssize_t slot_enable_show(struct device *dev, struct device_attribute *attr, char *buffer)
+{
+        struct dps_info *info = dev_get_drvdata(dev);
+        u32 reg_val;
+
+        reg_val = reg_read(info, DPS_REG_SLTENA);
+        return sprintf(buffer, "0x%08X\n", reg_val);
+}
+
+static ssize_t slot_enable_store(struct device *dev, struct device_attribute *attr, const char *buffer, size_t count)
+{
+        struct dps_info *info = dev_get_drvdata(dev);
+        int retval;
+        long slot_en;
+
+        retval = kstrtol(buffer, 0, &slot_en);
+        if(retval)
+                return -EINVAL;
+
+        reg_write(info, DPS_REG_SLTENA, slot_en);
+        return count;
+}
+static DEVICE_ATTR_RW(slot_enable);
+
+/** sysfs dps_ctrl next_buffer
+ *
+ * Description:
+ * Reading "next_buffer" returns the number of window buffers that are currently in the queue for
+ * readout.
+ * Writing a value to "next_buffer" removes the corresponding number of window buffers from the
+ * head of the read queue.
+ */
+static ssize_t next_buffer_show(struct device *dev, struct device_attribute *attr, char *buffer)
+{
+        struct dps_info *info = dev_get_drvdata(dev);
+
+        return sprintf(buffer, "%d\n", dps_list_len(info));
+}
+
+static ssize_t next_buffer_store(struct device *dev, struct device_attribute *attr, const char *buffer, size_t count)
+{
+        struct dps_info *info = dev_get_drvdata(dev);
+        int retval = 0;
+        long target_items;
+        int real_items;
+
+        retval = kstrtol(buffer, 0, &target_items);
+        if(retval)
+                return -EINVAL;
+
+        real_items = dps_rm_from_queue(info, target_items);
+        if((long)real_items != target_items)
+                pr_warn("Warning: removed %d of %d packets\n", real_items, (int)target_items);
+        return count;
+}
+static DEVICE_ATTR_RW(next_buffer);
+
+/** sysfs dps_ctrl data_bytes
+ *
+ * Description:
+ * Reading "data_bytes" returns the number of bytes stored in the window buffer that is
+ * currently available for readout (head of the reoudout queue).
+ */
+static ssize_t data_bytes_show(struct device *dev, struct device_attribute *attr, char *buffer)
+{
+        struct dps_info *info = dev_get_drvdata(dev);
+        struct win_buf_info *curr_wb_info;
+        int retval = 0;
+
+        mutex_lock(&info->dps_mutex);
+        curr_wb_info = list_first_entry_or_null(&(info->queue_head), struct win_buf_info, lhead);
+        if(curr_wb_info == NULL)
+                retval = sprintf(buffer, "%d\n", 0);
+        else
+                retval = sprintf(buffer, "%d\n", curr_wb_info->len);
+        mutex_unlock(&info->dps_mutex);
+
+        return retval;
+}
+static DEVICE_ATTR_RO(data_bytes);
+
+static struct attribute *dps_ctrl_attrs[] = {
+    &dev_attr_enable.attr,
+    &dev_attr_slot_enable.attr,
+    &dev_attr_next_buffer.attr,
+    &dev_attr_data_bytes.attr,
+    NULL
+};
+
+static struct attribute_group dps_ctrl_group = {
+    .name = "dps_ctrl",
+    .attrs = dps_ctrl_attrs,
+};
+
+/* Only used when groups are assigned with
+ * pdev->dev.groups = dps_groups;
+ * in probe() function
+ */
+static const struct attribute_group *dps_groups[] = {
+    &dps_config_group,
+    &dps_ctrl_group,
+    NULL
+};
+
 
 /**
  * dps_open - open() system call processing
@@ -642,13 +870,25 @@ static int dps_probe(struct platform_device *pdev)
         dps_info->minor = 0;
 
         dps_info->dev = device_create(dma_pkt_sched.class, NULL,
-                                                MKDEV(dma_pkt_sched.major, dps_info->minor),
-                                                dps_info, "dma_pkt_sched%d", dps_info->minor);
+                                      MKDEV(dma_pkt_sched.major, dps_info->minor),
+                                      dps_info, "dma_pkt_sched%d", dps_info->minor);
         if (IS_ERR(dps_info->dev))
                 return PTR_ERR(dps_info->dev);
 
         REGISTER_DMA_PKT_SCHED(dps_info->minor, dps_info); /* register "minor" device instance */
         /* /dev/ creation done */
+
+        /* Create a sysfs file on the client device node */
+        status = sysfs_create_groups(&pdev->dev.kobj, dps_groups);
+        if (status)
+        {
+                pr_err("sysfs creation failed\n");
+                return status;
+        }
+        /* recommended here instead of sysfs_create_group & sysfs_remove_group
+         * to avoid race conditions but did not work:
+         *pdev->dev.groups = dps_groups;
+         */
 
         /* enable interrupts and IP (slots and overall)*/
         reg_write(dps_info, DPS_REG_IRQENA, 0xFFFFFFFF);
@@ -668,7 +908,7 @@ static int dps_remove(struct platform_device *pdev)
         reg_write(dps_info, DPS_REG_IRQENA, 0x00000000);
         reg_write(dps_info, DPS_REG_SLTENA, 0x00000000);
 
-        pr_debug("xlnx,dma-pkt-sched-axi-1.0: removed\n");
+        sysfs_remove_groups(&pdev->dev.kobj, dps_groups);
 
         devm_free_irq(&pdev->dev, dps_info->irq, &pdev->dev);
 
@@ -686,6 +926,8 @@ static int dps_remove(struct platform_device *pdev)
         /* Framework cleanup. */
         unregister_chrdev(dma_pkt_sched.major, "dma_pkt_sched");
         class_destroy(dma_pkt_sched.class);
+
+        pr_debug("xlnx,dma-pkt-sched-axi-1.0: removed\n");
 
         return 0;
 }
