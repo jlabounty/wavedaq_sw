@@ -7,21 +7,21 @@
 
 void usage(char *name)
 {
-  printf("Usage: no arguments\n", name);
+  printf("Usage: <slot enable vector>\n", name);
 }
 
 int main(int argc, char *argv[])
 {
   int ret;
-  unsigned int slot_enable = 0x01;
+  unsigned int slot_enable = 0x1FFFF;
   char opt;
   FILE *f;
   int fd;
 
-//  if (argc < 2) {
-//    usage(argv[0]);
-//    return -1;
-//  }
+  if (argc == 2) {
+    slot_enable = 0x1FFFF & (unsigned int)strtol(argv[1], NULL, 0);
+    printf("target slots: 0x%08X\n", slot_enable);
+  }
 
   opt = argv[1][0];
 
