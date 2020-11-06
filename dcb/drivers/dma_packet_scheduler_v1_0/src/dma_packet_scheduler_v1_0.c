@@ -27,6 +27,8 @@
 #include <linux/interrupt.h>
 #include <linux/poll.h>
 #include <asm/uaccess.h>
+#include <linux/net.h>
+#include <linux/inet.h>
 #include "dma_packet_scheduler_v1_0.h"
 
 /* ACQCONF Registers - General */
@@ -94,6 +96,7 @@ struct dps_info {
         struct dma_pool *pool;
         struct slot_buf_info *slot_buf;
         struct list_head queue_head;
+        struct sockaddr_in udp_dst_addr;
 };
 
 struct slot_buf_info {
@@ -597,11 +600,77 @@ static ssize_t data_bytes_show(struct device *dev, struct device_attribute *attr
 }
 static DEVICE_ATTR_RO(data_bytes);
 
+/** sysfs dps_ctrl udp_dst_ip_addr
+ *
+ * Description:
+ * Writing "udp_dst_ip_addr" with the format ip.ip.ip.ip configures the UDP socket to send
+ * data to the destination ip specified.
+ * Reading returns the configured destinattion IP address (IPv4).
+ */
+static ssize_t udp_dst_ip_addr_show(struct device *dev, struct device_attribute *attr, char *buffer)
+{
+        struct dps_info *info = dev_get_drvdata(dev);
+        unsigned int ip_addr;
+
+        ip_addr = ntohl(info->udp_dst_addr.sin_addr.s_addr);
+
+        return sprintf(buffer, "%d.%d.%d.%d\n", 0xFF&(ip_addr>>24), 0xFF&(ip_addr>>16), 0xFF&(ip_addr>>8), 0xFF&ip_addr);
+}
+
+static ssize_t udp_dst_ip_addr_store(struct device *dev, struct device_attribute *attr, const char *buffer, size_t count)
+{
+        struct dps_info *info = dev_get_drvdata(dev);
+        int ip_addr;
+
+        ip_addr = in_aton(buffer);
+
+        info->udp_dst_addr.sin_addr.s_addr = ip_addr;
+
+        // clear socket
+        // create socket with new values
+        return count;
+}
+static DEVICE_ATTR_RW(udp_dst_ip_addr);
+
+/** sysfs dps_ctrl udp_dst_port
+ *
+ * Description:
+ * Writing "udp_dst_port" by writing the corresponding value.
+ * Reading returns the configured destination port.
+ */
+static ssize_t udp_dst_port_show(struct device *dev, struct device_attribute *attr, char *buffer)
+{
+        struct dps_info *info = dev_get_drvdata(dev);
+        unsigned int port;
+
+        port = ntohs(info->udp_dst_addr.sin_port);
+
+        return sprintf(buffer, "%d\n", port);
+}
+
+static ssize_t udp_dst_port_store(struct device *dev, struct device_attribute *attr, const char *buffer, size_t count)
+{
+        struct dps_info *info = dev_get_drvdata(dev);
+        long port;
+
+        if( kstrtol(buffer, 0, &port) )
+                return -EINVAL;
+
+        info->udp_dst_addr.sin_port = htons((unsigned int)port);
+
+        // clear socket
+        // create socket with new values
+        return count;
+}
+static DEVICE_ATTR_RW(udp_dst_port);
+
 static struct attribute *dps_ctrl_attrs[] = {
     &dev_attr_enable.attr,
     &dev_attr_slot_enable.attr,
     &dev_attr_next_buffer.attr,
     &dev_attr_data_bytes.attr,
+    &dev_attr_udp_dst_ip_addr.attr,
+    &dev_attr_udp_dst_port.attr,
     NULL
 };
 
@@ -877,6 +946,10 @@ static int dps_probe(struct platform_device *pdev)
 
         REGISTER_DMA_PKT_SCHED(dps_info->minor, dps_info); /* register "minor" device instance */
         /* /dev/ creation done */
+
+        dps_info->udp_dst_addr.sin_family      = AF_INET;
+        dps_info->udp_dst_addr.sin_addr.s_addr = htonl((unsigned long int)0x7F000001); /* default = localhost 127.0.0.1 */
+        dps_info->udp_dst_addr.sin_port        = htons(5232);
 
         /* Create a sysfs file on the client device node */
         status = sysfs_create_groups(&pdev->dev.kobj, dps_groups);
