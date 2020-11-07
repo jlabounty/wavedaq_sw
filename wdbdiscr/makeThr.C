@@ -5,7 +5,10 @@
 void makeThr(string dirname="2020-10-12/"){
    int noped=0;
    const double fallbackThr = -0.035;//in case no pedestal is found
-   const double absoluteThr = 0.005;//offset WRT observed threshold
+   //XEC MPPC
+   const double absoluteThr = -0.010;//offset WRT observed threshold
+   //CDCH
+   //const double absoluteThr = 0.005;//offset WRT observed threshold
 
    const double nsigma = 10.;
 
@@ -26,14 +29,19 @@ void makeThr(string dirname="2020-10-12/"){
             std::array<std::vector<int>, 16> scals;
             std::vector<float> thrs;
             while ( getline (myfile,line) ){
-               stringstream myss(line);
-               float thr;
-               myss >> thr;
-               thrs.push_back(thr);
-               for(int i=0; i<16; i++) {
-                  int scal;
-                  myss >> scal;
-                  scals[i].push_back(scal);
+               if(line.front() == '#'){
+                  //comments
+               }
+               else {
+                  stringstream myss(line);
+                  float thr;
+                  myss >> thr;
+                  thrs.push_back(thr);
+                  for(int i=0; i<16; i++) {
+                     int scal;
+                     myss >> scal;
+                     scals[i].push_back(scal);
+                  }
                }
             }
             myfile.close();
@@ -48,7 +56,7 @@ void makeThr(string dirname="2020-10-12/"){
             for(int i=0; i<16; i++){
 
                //fit WD2G
-               TH1F *h = new TH1F(Form("%s-%d", fname.Data(), i), Form("%s-%d", fname.Data(), i), thrs.size()-1, thrs.data());
+              /* TH1F *h = new TH1F(Form("%s-%d", fname.Data(), i), Form("%s-%d", fname.Data(), i), thrs.size()-1, thrs.data());
                for(int j=0; j<scals[i].size(); j++){
                   h->SetBinContent(j+1, scals[i][j]);
                }
@@ -63,7 +71,7 @@ void makeThr(string dirname="2020-10-12/"){
                outfile << fgau->GetParameter(1) +0.0005 + nsigma*fgau->GetParameter(2); //0.0005 is bin size
 
 
-               h->Write(Form("%s-%d", fname.Data(), i));
+               h->Write(Form("%s-%d", fname.Data(), i));*/
 
                /*h->Draw();
                TLine *l=new TLine(fgau->GetParameter(1) +0.0005 + nsigma*fgau->GetParameter(2),c->GetUymin(),fgau->GetParameter(1) +0.0005 + nsigma*fgau->GetParameter(2),c->GetUymax());
@@ -76,10 +84,13 @@ void makeThr(string dirname="2020-10-12/"){
 
 
                //edge for WD2F
-               /*peds[i] = -100;
+               peds[i] = -100;
+               TH1F *h = new TH1F(Form("%s-%d", fname.Data(), i), Form("%s-%d", fname.Data(), i), thrs.size()-1, thrs.data());
+               h->Write(Form("%s-%d", fname.Data(), i));
+               delete h;
 
                for(int j=0; j<scals[i].size(); j++){
-                  if (peds[i] == -100 && scals[i][j]>2){
+                  if (peds[i] == -100 && scals[i][j]>200){
                      peds[i] = thrs[j];
                   }
                }
@@ -92,7 +103,8 @@ void makeThr(string dirname="2020-10-12/"){
                   outfile << fallbackThr;
                   noped++;
                }
-               */
+               
+               //next board
                if(i!=15)
                   outfile << ", ";
             }
