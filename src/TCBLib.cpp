@@ -1640,7 +1640,7 @@ void TCB::SetBGOHitDelay(u_int32_t data, u_int32_t veto_data)
    if ((fidcode>>12)!=1) printf("setting BGO Hit delay on TCB %4x!!!!!\n", fidcode);
 
    u_int32_t val = data & 0x1F;
-   data |= (veto_data & 0x1F) << 8;
+   val |= (veto_data & 0x1F) << 8;
    WriteReg(RBGOHITDLY,&val);
 }
 // RDC QSUM Threshold
