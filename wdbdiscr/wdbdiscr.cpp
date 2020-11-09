@@ -13,54 +13,54 @@
 using namespace std;
 
 std::string wdbs[]={
-   //MPPC08
-   "wd100",
-   "wd101",
-   "wd102",
-   "wd103",
-   "wd104",
-   "wd105",
-   "wd106",
-   "wd107",
-   "wd108",
-   "wd109",
-   "wd079",
-   "wd110",
-   "wd111",
-   "wd112",
-   "wd113",
-   "wd114",
-   //MPPC09
-   "wd122",
-   "wd123",
-   "wd124",
-   "wd125",
-   "wd115",
-   "wd117",
-   "wd126",
-   "wd127",
-   "wd069",
-   "wd062",
-   "wd063",
-   "wd064",
-   "wd080",
-   "wd081",
-   "wd082",
-   "wd083",
+   ////MPPC08
+   ////"wd100",
+   //"wd101",
+   //"wd102",
+   //"wd103",
+   //"wd104",
+   //"wd105",
+   //"wd106",
+   //"wd107",
+   //"wd108",
+   //"wd109",
+   //"wd079",
+   //"wd110",
+   //"wd111",
+   //"wd112",
+   //"wd113",
+   //"wd114",
+   ////MPPC09
+   //"wd122",
+   //"wd123",
+   //"wd124",
+   //"wd125",
+   //"wd115",
+   //"wd117",
+   //"wd126",
+   //"wd127",
+   //"wd069",
+   //"wd062",
+   //"wd063",
+   //"wd064",
+   //"wd080",
+   //"wd081",
+   //"wd082",
+   //"wd083",
    //MPPC11
-   "wd088",
-   "wd089",
-   "wd085",
-   "wd086",
-   "wd087",
-   "wd118",
-   "wd119",
-   "wd120",
-   "wd121",
-   "wd068",
-   "wd091",
-   "wd092",
-   "wd065"
+   //"wd088",
+   //"wd089",
+   //"wd085",
+   //"wd086",
+   //"wd087",
+   //"wd118",
+   //"wd119",
+   //"wd120",
+   //"wd121",
+   //"wd068",
+   //"wd091",
+   //"wd092",
+   //"wd065",
    //DCUS0
    //"wd198",
    //"wd199",
@@ -78,17 +78,23 @@ std::string wdbs[]={
    //"wd196",
    //"wd200",
    //"wd201",
-   //"wd202"
+   //"wd202",
+   //AUX
+   "wd128",
+   "wd129",
+   "wd130",
+   "wd131",
+   "wd116"
 };
 
 int main(int argc, char** argv)
 {
    //WD2F
-   //const int n = 120;
    const int n = 60;
    const float down = -0.040;
    const float up = 0.020;
-   const float gain = 2.5;
+   //const float gain = 2.5;
+   const float gain = 1;
    //WD2ADiff
    //const int n = 90;
    //const float down = -0.045;

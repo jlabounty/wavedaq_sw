@@ -90,7 +90,7 @@ void makeThr(string dirname="2020-10-12/"){
                delete h;
 
                for(int j=0; j<scals[i].size(); j++){
-                  if (peds[i] == -100 && scals[i][j]>200){
+                  if (peds[i] == -100 && scals[i][j]>2000){
                      peds[i] = thrs[j];
                   }
                }
