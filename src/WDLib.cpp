@@ -1301,6 +1301,10 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureBgoTriggerMask(property);
    } else if(name=="RdcThreshold"){
       ConfigureRdcThreshold(property);
+   } else if(name=="RdcVetoThreshold"){
+      ConfigureRdcVetoThreshold(property);
+   } else if(name=="RdcHitDelay"){
+      ConfigureRdcHitDelay(property);
    } else if(name=="RdcTriggerMask"){
       ConfigureRdcTriggerMask(property);
    } else if(name=="CrcHitMask"){
@@ -2049,6 +2053,20 @@ void WDTCB::ConfigureRdcThreshold(Property &property){
    rdcthreshold = property.GetUHex();
 
    SetRDCThreshold(&rdcthreshold);
+}
+
+void WDTCB::ConfigureRdcVetoThreshold(Property &property){
+   unsigned int rdcvetothreshold;
+   rdcvetothreshold = property.GetUHex();
+
+   SetRDCVetoThreshold(&rdcvetothreshold);
+}
+
+void WDTCB::ConfigureRdcHitDelay(Property &property){
+   unsigned int rdchitdelay;
+   rdchitdelay = property.GetUHex();
+
+   SetRDCHitDelay(&rdchitdelay);
 }
 
 void WDTCB::ConfigureRdcTriggerMask(Property &property){

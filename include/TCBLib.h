@@ -92,6 +92,8 @@
 #define RFNEUTRONMASKS     0x628      // Mask for FOOT neutron detector inputs
 #define RLXeHITTHR         0x629      // Minimum number of hits in a XEC patch
 #define RLXePATCHDLY       0x62A      // Delay of XEC patch algorithm
+#define RRDCVETOTHR        0x62B      // Veto for RDC signals
+#define RRDCHITDLY         0x62C      // Delay of RDC Hits
 #define RFIBCOUNTER        0x700      // SCIFI fiber event counter address (42 values)
 #define RSINGLECRATECFG    0x800      // configurations for single crate trigger logic
 #define RSINGLEISVETO      0x801      // veto set for input channels in single crate logic
@@ -479,6 +481,8 @@ public:
    void SetBGOHitDelay(u_int32_t, u_int32_t);
    //Set RDC Stuff
    void SetRDCThreshold(u_int32_t *);
+   void SetRDCVetoThreshold(u_int32_t *);
+   void SetRDCHitDelay(u_int32_t *);
    void SetRDCTriggerMask(u_int32_t *);
    //Set CRC Stuff
    void SetCRCHitMask(u_int32_t *);

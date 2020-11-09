@@ -1649,6 +1649,18 @@ void TCB::SetRDCThreshold(u_int32_t *data)
    if ((fidcode>>12)!=1) printf("setting RDC Threshold on TCB %4x!!!!!\n", fidcode);
    WriteReg(RRDCLYSOTHR,data);
 }
+// RDC QSUM Veto Threshold
+void TCB::SetRDCVetoThreshold(u_int32_t *data)
+{
+   if ((fidcode>>12)!=1) printf("setting RDC Veto Threshold on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RRDCVETOTHR,data);
+}
+// RDC Hit Delay
+void TCB::SetRDCHitDelay(u_int32_t *data)
+{
+   if ((fidcode>>12)!=1) printf("setting RDC Hit Delay on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RRDCHITDLY,data);
+}
 // Trigger mask enable for RDC  trigger definition
 void TCB::SetRDCTriggerMask(u_int32_t *data)
 {
