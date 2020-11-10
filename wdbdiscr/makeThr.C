@@ -6,7 +6,9 @@ void makeThr(string dirname="2020-10-12/"){
    int noped=0;
    const double fallbackThr = -0.035;//in case no pedestal is found
    //XEC MPPC
-   const double absoluteThr = -0.010;//offset WRT observed threshold
+   //const double absoluteThr = -0.010;//offset WRT observed threshold
+   //RDC LYSO
+   const double absoluteThr = -0.005;//offset WRT observed threshold
    //CDCH
    //const double absoluteThr = 0.005;//offset WRT observed threshold
 
