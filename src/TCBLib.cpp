@@ -1661,6 +1661,14 @@ void TCB::SetRDCHitDelay(u_int32_t *data)
    if ((fidcode>>12)!=1) printf("setting RDC Hit Delay on TCB %4x!!!!!\n", fidcode);
    WriteReg(RRDCHITDLY,data);
 }
+// RDC Hit Mask
+void TCB::SetRDCHitMask(u_int32_t *data)
+{
+   if ((fidcode>>12)!=1) printf("setting RDC Hit Mask on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RRDCHITMASK0,data);
+   WriteReg(RRDCHITMASK1,data+1);
+   WriteReg(RRDCHITMASK2,data+2);
+}
 // Trigger mask enable for RDC  trigger definition
 void TCB::SetRDCTriggerMask(u_int32_t *data)
 {

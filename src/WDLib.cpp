@@ -1305,6 +1305,8 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureRdcVetoThreshold(property);
    } else if(name=="RdcHitDelay"){
       ConfigureRdcHitDelay(property);
+   } else if(name=="RdcHitMask"){
+      ConfigureRdcHitMask(property);
    } else if(name=="RdcTriggerMask"){
       ConfigureRdcTriggerMask(property);
    } else if(name=="CrcHitMask"){
@@ -2067,6 +2069,17 @@ void WDTCB::ConfigureRdcHitDelay(Property &property){
    rdchitdelay = property.GetUHex();
 
    SetRDCHitDelay(&rdchitdelay);
+}
+
+void WDTCB::ConfigureRdcHitMask(Property &property){
+   int64_t arraySize = 0;
+   
+   const unsigned int *rdchitmask = property.GetUHexVector(&arraySize);
+
+   if(arraySize == 3)
+      SetRDCHitMask((unsigned int*)rdchitmask);
+   else
+      throw std::runtime_error("RdcHitMask size should be 3 values");
 }
 
 void WDTCB::ConfigureRdcTriggerMask(Property &property){

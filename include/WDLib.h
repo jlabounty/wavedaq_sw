@@ -398,6 +398,7 @@ class WDTCB : public TCB, public WDBoard {
       void ConfigureRdcThreshold(Property &property);
       void ConfigureRdcVetoThreshold(Property &property);
       void ConfigureRdcHitDelay(Property &property);
+      void ConfigureRdcHitMask(Property &property);
       void ConfigureRdcTriggerMask(Property &property);
       void ConfigureCrcHitMask(Property &property);
       void ConfigureCrcPairMask(Property &property);

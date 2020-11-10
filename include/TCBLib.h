@@ -94,6 +94,9 @@
 #define RLXePATCHDLY       0x62A      // Delay of XEC patch algorithm
 #define RRDCVETOTHR        0x62B      // Veto for RDC signals
 #define RRDCHITDLY         0x62C      // Delay of RDC Hits
+#define RRDCHITMASK0       0x62D      // RDC Hit masks (3 values)
+#define RRDCHITMASK1       0x62E      // RDC Hit masks (3 values)
+#define RRDCHITMASK2       0x62F      // RDC Hit masks (3 values)
 #define RFIBCOUNTER        0x700      // SCIFI fiber event counter address (42 values)
 #define RSINGLECRATECFG    0x800      // configurations for single crate trigger logic
 #define RSINGLEISVETO      0x801      // veto set for input channels in single crate logic
@@ -483,6 +486,7 @@ public:
    void SetRDCThreshold(u_int32_t *);
    void SetRDCVetoThreshold(u_int32_t *);
    void SetRDCHitDelay(u_int32_t *);
+   void SetRDCHitMask(u_int32_t *);
    void SetRDCTriggerMask(u_int32_t *);
    //Set CRC Stuff
    void SetCRCHitMask(u_int32_t *);
