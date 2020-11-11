@@ -40,7 +40,7 @@
 #define DPS_REG_IRQENA                0x014
 #define DPS_REG_SLTENA                0x020
 /* ACQCONF Registers - Per Stream */
-#define DPS_REG_LASTWIN(n)            (0x200+0x04*(n))
+#define DPS_REG_LASTWIN(n)            (0x200+0x10*(n))
 /* CTXMEM for Stream n */
 #define DPS_CTX_SCFG(n)               (0x1000+0x20*(n))
 #define DPS_CTX_SCFG_LSB_WINCNT       16
@@ -82,8 +82,8 @@ static struct dps_framework {
 #define DPS_DATA(minor) dma_pkt_sched.drvdata[(minor)]
 #define REGISTER_DMA_PKT_SCHED(minor, private) DPS_DATA((minor)) = (private)
 
-#define PKT_IS_COMPLETE(win_cnt)   (DPS_WIN_WINCNT_BIT_EOE_MASK & win_cnt)
-#define PKT_IS_EOE(win_cnt)        (DPS_WIN_WINCNT_BIT_PKTCMPLT_MASK & win_cnt)
+#define PKT_IS_COMPLETE(win_cnt)   (DPS_WIN_WINCNT_BIT_PKTCMPLT_MASK & win_cnt)
+#define PKT_IS_EOE(win_cnt)        (DPS_WIN_WINCNT_BIT_EOE_MASK & win_cnt)
 #define PKT_LEN(win_cnt)           (DPS_WIN_WINCNT_MASK & win_cnt)
 
 struct dps_info {
@@ -871,34 +871,45 @@ static irqreturn_t dma_packet_sched_irq_thread_handler(int irq, void *dev_id)
         u32 wincnt;
 
         /* Check slots for interrupts and fill queue */
-        for (slot = 0; slot < info->slots; slot++)
+        while (info->irq_vec > 0)
         {
-                slot_mask = (1 << slot);
-                if (info->irq_vec & slot_mask)
+                //pr_info("Entering IRQ slot loop: irq_vec = 0x%08X\n", info->irq_vec);
+                for (slot = 0; slot < info->slots; slot++)
                 {
-                        win = info->slot_buf[slot].last_proc_win;
-                        do
+                        slot_mask = (1 << slot);
+                        if (info->irq_vec & slot_mask)
                         {
-                                clr_irqvec(info, slot_mask); /* maybe another packet arrived, we're reading all, so clear again */
-                                last_win = reg_read(info, DPS_REG_LASTWIN(slot));
-                                win = (win + 1) % windows;
-                                wincnt = reg_read(info, DPS_WIN_WINCNT(slot, win, stream_offset));
-                                if ((PKT_IS_COMPLETE(wincnt) == 0) || (info->slot_buf[slot].win_buf[win].len != 0))
+                                win = info->slot_buf[slot].last_proc_win;
+                                do
                                 {
-                                        break;
+                                        clr_irqvec(info, slot_mask); /* maybe another packet arrived, we're reading all, so clear again */
+                                        last_win = reg_read(info, DPS_REG_LASTWIN(slot));
+                                        win = (win + 1) % windows;
+                                        wincnt = reg_read(info, DPS_WIN_WINCNT(slot, win, stream_offset));
+                                        //pr_info("Handling slot %d: last_win = %d, win = %d, wincnt = 0x%08X\n", slot, last_win, win, wincnt);
+                                        if ((PKT_IS_COMPLETE(wincnt) == 0) || (info->slot_buf[slot].win_buf[win].len != 0))
+                                        {
+                                                break;
+                                        }
+                                        mutex_lock(&info->dps_mutex);
+                                        info->slot_buf[slot].win_buf[win].len = PKT_LEN(wincnt);
+                                        list_add_tail(&info->slot_buf[slot].win_buf[win].lhead, &info->queue_head);
+                                        info->slot_buf[slot].last_proc_win = win;
+                                        mutex_unlock(&info->dps_mutex);
+                                        if (read_wait_queue_length > 0)
+                                        {
+                                                wake_up(&dps_waitqueue);
+                                                read_wait_queue_length = 0;
+                                        }
                                 }
-                                mutex_lock(&info->dps_mutex);
-                                info->slot_buf[slot].win_buf[win].len = PKT_LEN(wincnt);
-                                list_add_tail(&info->slot_buf[slot].win_buf[win].lhead, &info->queue_head);
-                                info->slot_buf[slot].last_proc_win = win;
-                                mutex_unlock(&info->dps_mutex);
-                                if (read_wait_queue_length > 0)
+                                while ((win != last_win) && (PKT_IS_EOE(wincnt) == 0));
+
+                                /* Do not reschedule processing slot if all windows are processed*/
+                                if (win == last_win)
                                 {
-                                        wake_up(&dps_waitqueue);
-                                        read_wait_queue_length = 0;
+                                        info->irq_vec &= ~slot_mask;
                                 }
                         }
-                        while (win != last_win);
                 }
         }
         /* Re-enable Interrupts */
