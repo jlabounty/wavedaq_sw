@@ -82,7 +82,8 @@ static struct dps_framework {
 #define DPS_DATA(minor) dma_pkt_sched.drvdata[(minor)]
 #define REGISTER_DMA_PKT_SCHED(minor, private) DPS_DATA((minor)) = (private)
 
-#define PKT_IS_COMPLETE(win_cnt)   (DPS_WIN_WINCNT_BIT_PKTCMPLT_MASK & win_cnt)
+#define PKT_IS_COMPLETE(win_cnt)   (DPS_WIN_WINCNT_BIT_EOE_MASK & win_cnt)
+#define PKT_IS_EOE(win_cnt)        (DPS_WIN_WINCNT_BIT_PKTCMPLT_MASK & win_cnt)
 #define PKT_LEN(win_cnt)           (DPS_WIN_WINCNT_MASK & win_cnt)
 
 struct dps_info {
@@ -387,20 +388,25 @@ static long dps_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
                         {
                                 reg_set(info, DPS_REG_GCFG, DPS_REG_GCFG_BIT_ENA);
                         }
-                        break;
+                break;
+
                 case DPS_IOCT_SLOT_EN:
                         reg_write(info, DPS_REG_SLTENA, (u32)arg);
-                        break;
+                break;
+
                 case DPS_IOCT_FREE_BUF:
                         if(!dps_rm_from_queue(info, 1))
                                 return -EFAULT;
-                        break;
+                break;
+
                 case DPS_IOCQ_WINSIZE:
                         return win_size;
-                        break;
+                break;
+
                 case DPS_IOCQ_NOWINDOWS:
                         return windows;
-                        break;
+                break;
+
                 case DPS_IOCQ_BUFSIZE:
                         mutex_lock(&info->dps_mutex);
                         curr_wb_info = list_first_entry_or_null(&(info->queue_head), struct win_buf_info, lhead);
@@ -409,7 +415,8 @@ static long dps_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
                         else
                                 retval = curr_wb_info->len;
                         mutex_unlock(&info->dps_mutex);
-                        break;
+                break;
+
                 default:
                         return -ENOTTY;
         }
@@ -840,15 +847,15 @@ static const struct file_operations dps_fops = {
 #endif
 };
 
-static irqreturn_t dma_packet_sched_irq_handler(int irq, void *dev_id)
+static irqreturn_t dma_packet_sched_irq_handler(int irq, void * dev_id)
 {
-        struct dps_info *info = (struct dps_info*)dev_id;
+        struct dps_info * info = (struct dps_info *)dev_id;
 
         /* Disable IP interrupts */
         reg_clr(info, DPS_REG_GCFG, DPS_REG_GCFG_BIT_IRQENA);
         /* Save and clear interrupt vector */
         info->irq_vec = get_irqvec(info);
-        clr_irqvec(info, 0xFFFFFFFF);
+        clr_irqvec(info, info->irq_vec);
 
         /* proceed to threaded interrupt handler */
         return IRQ_WAKE_THREAD;
@@ -856,33 +863,34 @@ static irqreturn_t dma_packet_sched_irq_handler(int irq, void *dev_id)
 
 static irqreturn_t dma_packet_sched_irq_thread_handler(int irq, void *dev_id)
 {
-        struct dps_info *info = (struct dps_info*)dev_id;
+        struct dps_info * info = (struct dps_info *)dev_id;
         unsigned int slot_mask;
-        unsigned char win, last_win;
+        unsigned char win;
+        unsigned char last_win;
         unsigned char slot;
         u32 wincnt;
 
         /* Check slots for interrupts and fill queue */
         for(slot=0; slot<info->slots; slot++)
         {
-                slot_mask = (1<<slot);
+                slot_mask = (1 << slot);
                 if(info->irq_vec & slot_mask)
                 {
-                        win = info->slot_buf->last_proc_win;
+                        win = info->slot_buf[slot].last_proc_win;
                         do
                         {
                                 clr_irqvec(info, slot_mask); /* maybe another packet arrived, we're reading all, so clear again */
                                 last_win = reg_read(info, DPS_REG_LASTWIN(slot));
-                                win = (win+1)%windows;
+                                win = (win + 1) % windows;
                                 wincnt = reg_read(info, DPS_WIN_WINCNT(slot, win, stream_offset));
-                                if( PKT_IS_COMPLETE(wincnt) == 0 || info->slot_buf[slot].win_buf[win].len != 0)
+                                if((PKT_IS_COMPLETE(wincnt) == 0) || (info->slot_buf[slot].win_buf[win].len != 0))
                                 {
                                         break;
                                 }
                                 mutex_lock(&info->dps_mutex);
                                 info->slot_buf[slot].win_buf[win].len = PKT_LEN(wincnt);
                                 list_add_tail(&info->slot_buf[slot].win_buf[win].lhead, &info->queue_head);
-                                info->slot_buf->last_proc_win = win;
+                                info->slot_buf[slot].last_proc_win = win;
                                 mutex_unlock(&info->dps_mutex);
                                 if( read_wait_queue_length )
                                 {
