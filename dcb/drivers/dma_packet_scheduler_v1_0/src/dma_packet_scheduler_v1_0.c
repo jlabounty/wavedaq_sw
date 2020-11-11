@@ -871,10 +871,10 @@ static irqreturn_t dma_packet_sched_irq_thread_handler(int irq, void *dev_id)
         u32 wincnt;
 
         /* Check slots for interrupts and fill queue */
-        for(slot=0; slot<info->slots; slot++)
+        for (slot = 0; slot < info->slots; slot++)
         {
                 slot_mask = (1 << slot);
-                if(info->irq_vec & slot_mask)
+                if (info->irq_vec & slot_mask)
                 {
                         win = info->slot_buf[slot].last_proc_win;
                         do
@@ -883,7 +883,7 @@ static irqreturn_t dma_packet_sched_irq_thread_handler(int irq, void *dev_id)
                                 last_win = reg_read(info, DPS_REG_LASTWIN(slot));
                                 win = (win + 1) % windows;
                                 wincnt = reg_read(info, DPS_WIN_WINCNT(slot, win, stream_offset));
-                                if((PKT_IS_COMPLETE(wincnt) == 0) || (info->slot_buf[slot].win_buf[win].len != 0))
+                                if ((PKT_IS_COMPLETE(wincnt) == 0) || (info->slot_buf[slot].win_buf[win].len != 0))
                                 {
                                         break;
                                 }
@@ -892,7 +892,7 @@ static irqreturn_t dma_packet_sched_irq_thread_handler(int irq, void *dev_id)
                                 list_add_tail(&info->slot_buf[slot].win_buf[win].lhead, &info->queue_head);
                                 info->slot_buf[slot].last_proc_win = win;
                                 mutex_unlock(&info->dps_mutex);
-                                if( read_wait_queue_length )
+                                if (read_wait_queue_length > 0)
                                 {
                                         wake_up(&dps_waitqueue);
                                         read_wait_queue_length = 0;
