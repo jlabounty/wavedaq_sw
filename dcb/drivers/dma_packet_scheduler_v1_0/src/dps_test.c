@@ -26,8 +26,53 @@ void usage(char *name)
   printf("Usage: %s <nr of windows>\n", name);
 }
 
+int get_bufsize_ioctl (int fd)
+{
+  return ioctl(fd, DPS_IOCQ_BUFSIZE);
+}
 
-int main(int argc, char *argv[])
+int get_bufsize_sysfs (void)
+{
+  char buffer[32];
+  int ret;
+  int fd;
+
+  fd = open("/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_ctrl/data_bytes", O_RDONLY);
+  if (fd < 0)
+  {
+    perror("/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_ctrl/data_bytes");
+    return fd;
+  }
+  ret = read(fd, buffer, sizeof(buffer));
+  close(fd);
+  buffer[ret] = 0;
+  return strtol(buffer, NULL, 0);
+}
+
+int release_buffer_ioctl (int fd)
+{
+  return ioctl(fd, DPS_IOCT_FREE_BUF);
+}
+
+int release_buffer_sysfs (int n_buffers)
+{
+  char buffer[32];
+  int ret;
+  int fd;
+
+  fd = open("/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_ctrl/next_buffer", O_RDWR);
+  if (fd < 0)
+  {
+    perror("/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_ctrl/next_buffer");
+    return fd;
+  }
+  ret = sprintf(buffer, "%d\n\0", n_buffers);
+  write(fd, buffer, ret);
+  close(fd);
+  return 0;
+}
+
+int read_data (void)
 {
   int ret;
   unsigned int len;
@@ -62,8 +107,6 @@ int main(int argc, char *argv[])
   servaddr.sin_addr.s_addr = PC_IP;
 #endif
 
-  printf("Waiting for data...\n");
-
   /* open device file */
   fd = open("/dev/dma_pkt_sched0", O_RDONLY);
 
@@ -73,7 +116,10 @@ int main(int argc, char *argv[])
 
   ready = select(nfds, &readfds, NULL, NULL, NULL);
 
-  len = ioctl(fd, DPS_IOCQ_BUFSIZE);
+  // TODO: Report system time !!!
+
+  //len = get_bufsize_ioctl(fd);
+  len = get_bufsize_sysfs();
   printf("\nFile size %d bytes\n", len);
 
   /* Test read and lseek */
@@ -96,6 +142,7 @@ int main(int argc, char *argv[])
   }
   printf("\n");
 
+#if 0
   /* Test mmap */
   printf("\nUser Reading Memory Mapped Data:");
   data = mmap(NULL, BUF_SIZE, PROT_READ, MAP_SHARED, fd, 0);
@@ -107,6 +154,7 @@ int main(int argc, char *argv[])
       printf(" %02X", data[i]);
     }
     printf("\n");
+#endif
 
 #ifdef DO_UDP_SEND
     printf("Sending via UDP...\n");
@@ -121,7 +169,11 @@ int main(int argc, char *argv[])
       printf("Unmap failed");
     }
 
-    if( !ioctl(fd, DPS_IOCT_FREE_BUF) ) printf("\nCurrent window buffer released\n");
+//    if (release_buffer_ioctl(fd) == 0)
+    if (release_buffer_sysfs(1) == 0)
+    {
+      printf("\nCurrent window buffer released\n");
+    }
   }
   else
   {
@@ -129,4 +181,18 @@ int main(int argc, char *argv[])
   }
 
   return close(fd);
+}
+
+int main (int argc, char *argv[])
+{
+  int ret;
+
+  printf("Waiting for data...\n");
+
+  for (;;)
+  {
+    ret = read_data();
+  }
+
+  return ret;
 }
