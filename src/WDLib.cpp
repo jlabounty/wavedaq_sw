@@ -1261,6 +1261,8 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigurePacketizer(property);
    } else if(name=="ExtDAQBusyMask"){
       ConfigureExtDAQ(property);
+   } else if(name=="DetectorDelay"){
+      ConfigureDetectorDelay(property);
    } else if(name=="TimeNarrowThreshold"){
       ConfigureTimeNarrowThreshold(property);
    } else if(name=="TimeWideThreshold"){
@@ -1889,6 +1891,29 @@ void WDTCB::ConfigureExtDAQ(Property &property){
    extdaqbmask = property.GetBool();
 
    SetFMask(false, extdaqbmask);
+}
+
+void WDTCB::ConfigureDetectorDelay(Property &property){
+   int64_t arraySize = 0;
+   const unsigned int* dlys;
+
+   dlys = property.GetUIntVector(&arraySize);
+   if(arraySize == 6){
+      bool enable[6];
+      u_int32_t val[6];
+      for(int i=0; i<6; i++){
+         if(dlys[i] == 0){
+            enable[i] = false;
+            val[i] = 0;
+         } else {
+            enable[i] = true;
+            val[i] = dlys[i]-1;
+         }
+      }
+      SetDetectorDelay(enable, val);
+   } else
+      throw std::runtime_error("DetectorDelay size should be 6 values");
+   
 }
 
 void WDTCB::ConfigureTimeNarrowThreshold(Property &property){

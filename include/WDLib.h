@@ -376,6 +376,7 @@ class WDTCB : public TCB, public WDBoard {
       void ConfigureParameters(Property &property);
       void ConfigurePacketizer(Property &property);
       void ConfigureExtDAQ(Property &property);
+      void ConfigureDetectorDelay(Property &property);
       void ConfigureTimeNarrowThreshold(Property &property);
       void ConfigureTimeWideThreshold(Property &property);
       void ConfigureXecHighThreshold(Property &property);

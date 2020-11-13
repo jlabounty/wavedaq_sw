@@ -97,6 +97,8 @@
 #define RRDCHITMASK0       0x62D      // RDC Hit masks (3 values)
 #define RRDCHITMASK1       0x62E      // RDC Hit masks (3 values)
 #define RRDCHITMASK2       0x62F      // RDC Hit masks (3 values)
+#define RDETECTORDLY0      0x630      // Detector delays: XEC bit [7:0], TC bit [15:8], CDCH [23:16], BGO [31:24] (2 values)
+#define RDETECTORDLY1      0x631      // Detector delays: RDC bit [7:0], CRC bit [15:8] (2 values)
 #define RFIBCOUNTER        0x700      // SCIFI fiber event counter address (42 values)
 #define RSINGLECRATECFG    0x800      // configurations for single crate trigger logic
 #define RSINGLEISVETO      0x801      // veto set for input channels in single crate logic
@@ -456,6 +458,7 @@ public:
    void ResetSyncWaveformSerdes();
 
    //trigger-specific calls
+   void SetDetectorDelay(bool *enable, u_int32_t* value);
    // Set waveform sum trigger threshold
    void SetSumHighThreshold(u_int32_t*);
    void SetSumLowThreshold(u_int32_t*);

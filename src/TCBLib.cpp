@@ -1518,6 +1518,26 @@ void TCB::ResetSyncWaveformSerdes(){
    WriteReg(RSYNCWFM, &data); 
 }
 
+// detector delays
+void TCB::SetDetectorDelay(bool *enable, u_int32_t* value){
+   if ((fidcode>>12)!=3) printf("setting Detector delays on TCB %4x!!!!!\n", fidcode);
+   else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
+   
+   u_int32_t dly0 = 0;
+   u_int32_t dly1 = 0;
+   for(int iDly=0; iDly<6; iDly++){
+      if(iDly <= 3){
+         dly0 |= (value[iDly] & 0x1F) << (8*iDly);
+         if(enable[iDly]) dly0 |= 0x1 << (8*iDly+5);
+      } else {
+         dly1 |= (value[iDly] & 0x1F) << (8*(iDly-4));
+         if(enable[iDly]) dly1 |= 0x1 << (8*(iDly-4)+5);
+      }
+   }
+   WriteReg(RDETECTORDLY0, &dly0);
+   WriteReg(RDETECTORDLY1, &dly1);
+}
+
 // waveform sum threshold
 void TCB::SetSumHighThreshold(u_int32_t *data)
 {
