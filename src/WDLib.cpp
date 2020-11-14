@@ -1457,15 +1457,23 @@ void WDTCB::ConfigureTriggerDelay(Property &property){
       throw std::runtime_error("Cannot set TriggerDelay: TriggerEnable should be also defined");
    }
    unsigned int trg_delay[64];
-   for(int i=0; i<64; i++) trg_delay[i] = 0;
+   bool trg_delay_enable[64];
+   for(int i=0; i<64; i++) {
+      trg_delay[i] = 0;
+      trg_delay_enable[i] = false;
+   }
    if(arraySizeEnable != arraySize)
       throw std::runtime_error("Cannot set TriggerDelay: TriggerEnable has a different array length");
    else {
       for(long i=0; i<arraySize; i++)
-         if(trigger_enable[i] < 64)
-            trg_delay[trigger_enable[i]] = trigger_delay[i];
+         if(trigger_enable[i] < 64){
+            if(trigger_delay[i] > 0){
+               trg_delay_enable[trigger_enable[i]] = true;
+               trg_delay[trigger_enable[i]] = trigger_delay[i]-1;
+            }
+         }
 
-      SetTRGDLY(trg_delay);
+      SetTRGDLY(trg_delay_enable, trg_delay);
    }
 }
 
@@ -1970,9 +1978,18 @@ void WDTCB::ConfigureXecPatchThreshold(Property &property){
 
 void WDTCB::ConfigureXecPatchDelay(Property &property){
    unsigned int xecpatchdelay;
-   xecpatchdelay = property.GetUHex();
+   xecpatchdelay = property.GetUInt();
 
-   SetPatchDelay(&xecpatchdelay);
+   bool enable;
+   if(xecpatchdelay > 0){
+      enable = true;
+      xecpatchdelay -= 1;
+   } else {
+      enable = false;
+      xecpatchdelay = 0;
+   }
+
+   SetPatchDelay(enable, xecpatchdelay);
 }
 
 void WDTCB::ConfigureXecAlfaThreshold(Property &property){
@@ -2091,7 +2108,7 @@ void WDTCB::ConfigureRdcVetoThreshold(Property &property){
 
 void WDTCB::ConfigureRdcHitDelay(Property &property){
    unsigned int rdchitdelay;
-   rdchitdelay = property.GetUHex();
+   rdchitdelay = property.GetUInt();
 
    SetRDCHitDelay(&rdchitdelay);
 }

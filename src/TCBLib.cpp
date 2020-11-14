@@ -1247,13 +1247,20 @@ void TCB::ResetPLLUnlockCou(){
    WriteReg(RPLLRES, &data);
 }
 // set trigger delay
-void TCB::SetTRGDLY(u_int32_t *dly){
+void TCB::SetTRGDLY(bool* enable, u_int32_t *dly){
   int NBLT = (fntrg-1)/BLTSIZE+1;
   int addr = RTRGDLY;
   if ((fidcode>>12)!=3) {
      printf("setting trigger delays on TCB %4x!!!!! skipped\n", fidcode);
      return;
   }   // now loop to write trigger delay values
+
+  //populate the enable bit
+  for(int itrg=0; itrg<fntrg; itrg++){
+      if(enable[itrg])
+         dly[itrg] |= 0x20;
+  }
+
   for (int iblt = 0; iblt<NBLT; iblt++) {
     WriteBLT(addr+(iblt*BLTSIZE),dly+(iblt*BLTSIZE), BLTSIZE);
   }
@@ -1569,11 +1576,16 @@ void TCB::SetPatchThreshold(u_int32_t *data)
   else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
   WriteReg(RLXeHITTHR,data);
 }
-void TCB::SetPatchDelay(u_int32_t *data)
+void TCB::SetPatchDelay(bool enable, u_int32_t data)
 {
   if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
   else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
-  WriteReg(RLXePATCHDLY,data);
+
+  u_int32_t val = data & 0x1F;
+  if(enable){
+     val |= 0x20;
+  }
+  WriteReg(RLXePATCHDLY,&val);
 }
 // time windows
 void TCB::SetTimeNarrow(u_int32_t *data){

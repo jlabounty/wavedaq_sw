@@ -418,7 +418,7 @@ public:
    //Get adc prescaling readout value
    void GetPrescAdc(u_int32_t *);
    //Set trigger delay
-   void SetTRGDLY(u_int32_t *);
+   void SetTRGDLY(bool *, u_int32_t *);
    //Get trigger delay
    void GetTRGDLY(u_int32_t *);
    //Start AutoLock
@@ -466,7 +466,7 @@ public:
    //Xenon patch position selection
    void SetPatch(u_int32_t*);
    void SetPatchThreshold(u_int32_t*);
-   void SetPatchDelay(u_int32_t*);
+   void SetPatchDelay(bool, u_int32_t);
    //time thresholds
    void SetTimeNarrow(u_int32_t*);
    void SetTimeWide(u_int32_t*);
