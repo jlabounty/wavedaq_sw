@@ -1043,7 +1043,7 @@ static int dps_probe(struct platform_device *pdev)
         struct dps_info *dps_info;
         int major;
         int status;
-        /* TODO: add core reset */
+
         pr_debug("xlnx,dma-pkt-sched-axi-1.0: probed\n");
         pr_debug("Buffer size per slot: %d windows, %d bytes/window \n", windows, win_size);
 
@@ -1051,6 +1051,9 @@ static int dps_probe(struct platform_device *pdev)
         dps_info = dma_packet_sched_get_pdata(pdev);
         if(IS_ERR(dps_info))
                 return PTR_ERR(dps_info);
+
+        reg_set(dps_info, DPS_REG_GCFG, DPS_REG_GCFG_BIT_RESET);
+        reg_clr(dps_info, DPS_REG_GCFG, DPS_REG_GCFG_BIT_RESET);
 
         platform_set_drvdata(pdev, dps_info);
 
