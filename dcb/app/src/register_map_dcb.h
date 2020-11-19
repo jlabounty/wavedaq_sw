@@ -5,7 +5,7 @@
  *  Project :  MEGII - DCB
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  27.10.2020 14:28:39
+ *  Created :  19.11.2020 08:58:12
  *
  *  Description :  Register map definitions.
  *
@@ -356,7 +356,7 @@
 #define DCB_SYNC_DELAY_MASK                                      0x001F0000
 #define DCB_SYNC_DELAY_OFS                                               16
 
-/* DAQ_SOFT_TRIGGER - config 0 */
+/* DAQ_SOFT_TRIGGER - Send trigger pulse to all slots via the backplane */
 #define DCB_DAQ_SOFT_TRIGGER_REG                               DCB_REG_CTRL
 #define DCB_DAQ_SOFT_TRIGGER_MASK                                0x00000001
 #define DCB_DAQ_SOFT_TRIGGER_OFS                                          0
@@ -441,33 +441,28 @@
 
 /* WDB_SERDES_CLK_MGR_RST - Reset for clock manager deriving clocks from the WDB clock (e.g. refclk for SYNC output delay) */
 #define DCB_WDB_SERDES_CLK_MGR_RST_REG                          DCB_REG_RST
-#define DCB_WDB_SERDES_CLK_MGR_RST_MASK                          0x00000200
-#define DCB_WDB_SERDES_CLK_MGR_RST_OFS                                    9
+#define DCB_WDB_SERDES_CLK_MGR_RST_MASK                          0x00000100
+#define DCB_WDB_SERDES_CLK_MGR_RST_OFS                                    8
 
 /* WDB_REFCLK_MGR_RST - Reset for clock manager deriving clocks from the WDB clock (e.g. refclk for SYNC output delay) */
 #define DCB_WDB_REFCLK_MGR_RST_REG                              DCB_REG_RST
-#define DCB_WDB_REFCLK_MGR_RST_MASK                              0x00000100
-#define DCB_WDB_REFCLK_MGR_RST_OFS                                        8
+#define DCB_WDB_REFCLK_MGR_RST_MASK                              0x00000080
+#define DCB_WDB_REFCLK_MGR_RST_OFS                                        7
 
 /* TRIGGER_MGR_RST - Trigger manager reset */
 #define DCB_TRIGGER_MGR_RST_REG                                 DCB_REG_RST
-#define DCB_TRIGGER_MGR_RST_MASK                                 0x00000080
-#define DCB_TRIGGER_MGR_RST_OFS                                           7
+#define DCB_TRIGGER_MGR_RST_MASK                                 0x00000040
+#define DCB_TRIGGER_MGR_RST_OFS                                           6
 
 /* TR_SYNC_BPL - Trigger SYNC signal on the backplane */
 #define DCB_TR_SYNC_BPL_REG                                     DCB_REG_RST
-#define DCB_TR_SYNC_BPL_MASK                                     0x00000040
-#define DCB_TR_SYNC_BPL_OFS                                               6
+#define DCB_TR_SYNC_BPL_MASK                                     0x00000020
+#define DCB_TR_SYNC_BPL_OFS                                               5
 
 /* LMK_SYNC_DCB - Trigger SYNC signal of the LMK on the DCB */
 #define DCB_LMK_SYNC_DCB_REG                                    DCB_REG_RST
-#define DCB_LMK_SYNC_DCB_MASK                                    0x00000020
-#define DCB_LMK_SYNC_DCB_OFS                                              5
-
-/* DMA_PKT_SCHED_RST - Reset of the DMA packet scheduler */
-#define DCB_DMA_PKT_SCHED_RST_REG                               DCB_REG_RST
-#define DCB_DMA_PKT_SCHED_RST_MASK                               0x00000010
-#define DCB_DMA_PKT_SCHED_RST_OFS                                         4
+#define DCB_LMK_SYNC_DCB_MASK                                    0x00000010
+#define DCB_LMK_SYNC_DCB_OFS                                              4
 
 /* ISERDES_RCVR_ERROR_COUNT_RST - Reset of the input SERDES packet receiver */
 #define DCB_ISERDES_RCVR_ERROR_COUNT_RST_REG                    DCB_REG_RST

@@ -35,6 +35,8 @@
 #define DPS_REG_GCFG                  0x000
 #define DPS_REG_GCFG_BIT_ENA          BIT(0)
 #define DPS_REG_GCFG_BIT_IRQENA       BIT(8)
+#define DPS_REG_GCFG_BIT_EVENTMODE    BIT(16)
+#define DPS_REG_GCFG_BIT_RESET        BIT(31)
 #define DPS_REG_GSTAT                 0x004
 #define DPS_REG_IRQVEC                0x010
 #define DPS_REG_IRQENA                0x014
@@ -275,7 +277,8 @@ static struct dps_info * dma_packet_sched_get_pdata(struct platform_device *pdev
         char *dma_vaddr;
         int status;
         unsigned int dt_val;
-        unsigned int slot, win;
+        unsigned int slot;
+        unsigned int win;
 
         /* adjust window number and winsize */
         win_size = roundup_pow_of_two(win_size);
@@ -519,6 +522,121 @@ static ssize_t enable_store(struct device *dev, struct device_attribute *attr, c
 }
 static DEVICE_ATTR_RW(enable);
 
+/** sysfs dps_ctrl event_mode
+ *
+ * Description:
+ * Writing "event_mode" configures the way, events are synchronized in the core and in the driver.
+ * With event_mode 0, packets are transceived with a round robin selection of the slots in the core.
+ * With event_mode 1, a slot prcessing an end of event (EOE) flag in the packet header
+ * will block further data packets.Once the EOE flag was received on all slots that are enabled,
+ * the blocking is reset and all slots are enabled again for transmission.
+ * Reading returns the status of the global DMA buffer enable.
+ */
+static ssize_t event_mode_show(struct device *dev, struct device_attribute *attr, char *buffer)
+{
+        struct dps_info *info = dev_get_drvdata(dev);
+        u32 reg_val;
+
+        reg_val = reg_read(info, DPS_REG_GCFG);
+        if (reg_val & DPS_REG_GCFG_BIT_EVENTMODE)
+        {
+                return sprintf(buffer, "%d\n", 1);
+        }
+        else
+        {
+                return sprintf(buffer, "%d\n", 0);
+        }
+}
+
+static ssize_t event_mode_store(struct device *dev, struct device_attribute *attr, const char *buffer, size_t count)
+{
+        struct dps_info *info = dev_get_drvdata(dev);
+        long event_mode;
+
+        if (kstrtol(buffer, 0, &event_mode))
+                return -EINVAL;
+
+        if (event_mode == 1)
+        {
+                reg_set(info, DPS_REG_GCFG, DPS_REG_GCFG_BIT_EVENTMODE);
+                return count;
+        }
+        else if (event_mode == 0)
+        {
+                reg_clr(info, DPS_REG_GCFG, DPS_REG_GCFG_BIT_EVENTMODE);
+                return count;
+        }
+        return -EINVAL;
+}
+static DEVICE_ATTR_RW(event_mode);
+
+/** sysfs dps_ctrl reset
+ *
+ * Description:
+ * Writing "reset" re-initializes the driver and applies a reset to the IP core.
+ * Reading returns the status of the global DMA buffer enable.
+ * Note that this is a write only value, i.e. it will always read 0.
+ */
+static ssize_t reset_show(struct device *dev, struct device_attribute *attr, char *buffer)
+{
+        struct dps_info *info = dev_get_drvdata(dev);
+        u32 reg_val;
+
+        reg_val = reg_read(info, DPS_REG_GCFG);
+        if (reg_val & DPS_REG_GCFG_BIT_RESET)
+        {
+                return sprintf(buffer, "%d\n", 1);
+        }
+        else
+        {
+                return sprintf(buffer, "%d\n", 0);
+        }
+}
+
+static ssize_t reset_store(struct device *dev, struct device_attribute *attr, const char *buffer, size_t count)
+{
+        struct dps_info *info = dev_get_drvdata(dev);
+        unsigned int slot;
+        unsigned int win;
+        long reset;
+
+        if (kstrtol(buffer, 0, &reset))
+                return -EINVAL;
+
+        if (reset == 1)
+        {
+                reg_set(info, DPS_REG_GCFG, DPS_REG_GCFG_BIT_RESET);
+                /* keep reset active to avoid packets arriving while structures are being cleared */
+
+                /* flush queue (cleares WINCNT registers) */
+                dps_rm_from_queue(info, info->slots*windows);
+
+                /* buffer processing locations and buffer lengths */
+                for (slot = 0; slot < info->slots; slot++)
+                {
+                        info->slot_buf[slot].last_proc_win = windows-1;
+                        for(win = 0; win < windows; win++)
+                        {
+                                info->slot_buf[slot].win_buf[win].len  = 0;
+                        }
+                }
+
+                /* clear interrupts*/
+                clr_irqvec(info, 0xFFFFFFFF);
+
+                /* everything is cleared, reset can be removed */
+                reg_clr(info, DPS_REG_GCFG, DPS_REG_GCFG_BIT_RESET);
+                return count;
+        }
+        else if (reset == 0)
+        {
+                reg_clr(info, DPS_REG_GCFG, DPS_REG_GCFG_BIT_RESET);
+                return count;
+        }
+        return -EINVAL;
+}
+static DEVICE_ATTR_RW(reset);
+
 /** sysfs dps_ctrl slot enable
  *
  * Description:
@@ -673,6 +791,8 @@ static DEVICE_ATTR_RW(udp_dst_port);
 
 static struct attribute *dps_ctrl_attrs[] = {
     &dev_attr_enable.attr,
+    &dev_attr_event_mode.attr,
+    &dev_attr_reset.attr,
     &dev_attr_slot_enable.attr,
     &dev_attr_next_buffer.attr,
     &dev_attr_data_bytes.attr,
@@ -923,7 +1043,7 @@ static int dps_probe(struct platform_device *pdev)
         struct dps_info *dps_info;
         int major;
         int status;
-
+        /* TODO: add core reset */
         pr_debug("xlnx,dma-pkt-sched-axi-1.0: probed\n");
         pr_debug("Buffer size per slot: %d windows, %d bytes/window \n", windows, win_size);
 

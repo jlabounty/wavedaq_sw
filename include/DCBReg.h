@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  27.10.2020 14:28:39
+// Created :  19.11.2020 08:58:12
 //
 
 
@@ -188,7 +188,7 @@ public:
    unsigned int GetSyncDelay() { return BitExtract(DCB_SYNC_DELAY_REG, DCB_SYNC_DELAY_MASK, DCB_SYNC_DELAY_OFS); };
    void         SetSyncDelay(unsigned int value) { SetRegMask(DCB_SYNC_DELAY_REG, DCB_SYNC_DELAY_MASK, DCB_SYNC_DELAY_OFS, value); };
 
-   // 0x00000001: DAQ_SOFT_TRIGGER - config 0
+   // 0x00000001: DAQ_SOFT_TRIGGER - Send trigger pulse to all slots via the backplane
    unsigned int GetDaqSoftTrigger() { return BitExtract(DCB_DAQ_SOFT_TRIGGER_REG, DCB_DAQ_SOFT_TRIGGER_MASK, DCB_DAQ_SOFT_TRIGGER_OFS); };
    void         SetDaqSoftTrigger(unsigned int value) { SetRegMask(DCB_DAQ_SOFT_TRIGGER_REG, DCB_DAQ_SOFT_TRIGGER_MASK, DCB_DAQ_SOFT_TRIGGER_OFS, value); };
 
@@ -260,29 +260,25 @@ public:
 
    ////// ------ Register 21 [0x0054]: RST - Reset bits for specific firmwar units (Default: 0x00000000) ------ //////
 
-   // 0x00000200: WDB_SERDES_CLK_MGR_RST - Reset for clock manager deriving clocks from the WDB clock (e.g. refclk for SYNC output delay)
+   // 0x00000100: WDB_SERDES_CLK_MGR_RST - Reset for clock manager deriving clocks from the WDB clock (e.g. refclk for SYNC output delay)
    unsigned int GetWdbSerdesClkMgrRst() { return BitExtract(DCB_WDB_SERDES_CLK_MGR_RST_REG, DCB_WDB_SERDES_CLK_MGR_RST_MASK, DCB_WDB_SERDES_CLK_MGR_RST_OFS); };
    void         SetWdbSerdesClkMgrRst(unsigned int value) { SetRegMask(DCB_WDB_SERDES_CLK_MGR_RST_REG, DCB_WDB_SERDES_CLK_MGR_RST_MASK, DCB_WDB_SERDES_CLK_MGR_RST_OFS, value); };
 
-   // 0x00000100: WDB_REFCLK_MGR_RST - Reset for clock manager deriving clocks from the WDB clock (e.g. refclk for SYNC output delay)
+   // 0x00000080: WDB_REFCLK_MGR_RST - Reset for clock manager deriving clocks from the WDB clock (e.g. refclk for SYNC output delay)
    unsigned int GetWdbRefclkMgrRst() { return BitExtract(DCB_WDB_REFCLK_MGR_RST_REG, DCB_WDB_REFCLK_MGR_RST_MASK, DCB_WDB_REFCLK_MGR_RST_OFS); };
    void         SetWdbRefclkMgrRst(unsigned int value) { SetRegMask(DCB_WDB_REFCLK_MGR_RST_REG, DCB_WDB_REFCLK_MGR_RST_MASK, DCB_WDB_REFCLK_MGR_RST_OFS, value); };
 
-   // 0x00000080: TRIGGER_MGR_RST - Trigger manager reset
+   // 0x00000040: TRIGGER_MGR_RST - Trigger manager reset
    unsigned int GetTriggerMgrRst() { return BitExtract(DCB_TRIGGER_MGR_RST_REG, DCB_TRIGGER_MGR_RST_MASK, DCB_TRIGGER_MGR_RST_OFS); };
    void         SetTriggerMgrRst(unsigned int value) { SetRegMask(DCB_TRIGGER_MGR_RST_REG, DCB_TRIGGER_MGR_RST_MASK, DCB_TRIGGER_MGR_RST_OFS, value); };
 
-   // 0x00000040: TR_SYNC_BPL - Trigger SYNC signal on the backplane
+   // 0x00000020: TR_SYNC_BPL - Trigger SYNC signal on the backplane
    unsigned int GetTrSyncBpl() { return BitExtract(DCB_TR_SYNC_BPL_REG, DCB_TR_SYNC_BPL_MASK, DCB_TR_SYNC_BPL_OFS); };
    void         SetTrSyncBpl(unsigned int value) { SetRegMask(DCB_TR_SYNC_BPL_REG, DCB_TR_SYNC_BPL_MASK, DCB_TR_SYNC_BPL_OFS, value); };
 
-   // 0x00000020: LMK_SYNC_DCB - Trigger SYNC signal of the LMK on the DCB
+   // 0x00000010: LMK_SYNC_DCB - Trigger SYNC signal of the LMK on the DCB
    unsigned int GetLmkSyncDcb() { return BitExtract(DCB_LMK_SYNC_DCB_REG, DCB_LMK_SYNC_DCB_MASK, DCB_LMK_SYNC_DCB_OFS); };
    void         SetLmkSyncDcb(unsigned int value) { SetRegMask(DCB_LMK_SYNC_DCB_REG, DCB_LMK_SYNC_DCB_MASK, DCB_LMK_SYNC_DCB_OFS, value); };
-
-   // 0x00000010: DMA_PKT_SCHED_RST - Reset of the DMA packet scheduler
-   unsigned int GetDmaPktSchedRst() { return BitExtract(DCB_DMA_PKT_SCHED_RST_REG, DCB_DMA_PKT_SCHED_RST_MASK, DCB_DMA_PKT_SCHED_RST_OFS); };
-   void         SetDmaPktSchedRst(unsigned int value) { SetRegMask(DCB_DMA_PKT_SCHED_RST_REG, DCB_DMA_PKT_SCHED_RST_MASK, DCB_DMA_PKT_SCHED_RST_OFS, value); };
 
    // 0x00000008: ISERDES_RCVR_ERROR_COUNT_RST - Reset of the input SERDES packet receiver
    unsigned int GetIserdesRcvrErrorCountRst() { return BitExtract(DCB_ISERDES_RCVR_ERROR_COUNT_RST_REG, DCB_ISERDES_RCVR_ERROR_COUNT_RST_MASK, DCB_ISERDES_RCVR_ERROR_COUNT_RST_OFS); };
