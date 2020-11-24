@@ -29,6 +29,7 @@
 #include <asm/uaccess.h>
 #include <linux/net.h>
 #include <linux/inet.h>
+
 #include "dma_packet_scheduler_v1_0.h"
 
 /* ACQCONF Registers - General */
@@ -63,9 +64,13 @@
 
 #define MAP_FAILED   (-1)
 
+#define DEFAULT_UDP_DST_PORT         5232
+#define DEFAULT_UDP_DST_IP           ((unsigned long int)0x7F000001) /* localhost 127.0.0.1 */
+
 static unsigned int windows = 2;
 static unsigned int win_size = 0x1000;
 static unsigned int stream_offset = 2*0x08;
+//static char mode[] = "queue";
 
 static DECLARE_WAIT_QUEUE_HEAD(dps_waitqueue);
 static unsigned int read_wait_queue_length = 0;
@@ -74,6 +79,8 @@ module_param(windows,  int, 0444); /* write permission for user (root), read per
 MODULE_PARM_DESC(windows, "Integer number of buffer-windows per slot");
 module_param(win_size, int, 0444); /* write permission for user (root), read permissions for all */
 MODULE_PARM_DESC(win_size, "Buffer-window size in bytes");
+//module_param(mode, charp, 0444); /* write permission for user (root), read permissions for all */
+//MODULE_PARM_DESC(mode, "Operation mode: 'udp_direct' to directly send buffer, 'queue' to queue up buffer");
 
 static struct dps_framework {
         struct class *class; /* class needed for /dev/ entry */
@@ -99,6 +106,7 @@ struct dps_info {
         struct dma_pool *pool;
         struct slot_buf_info *slot_buf;
         struct list_head queue_head;
+        struct socket *udp_socket;
         struct sockaddr_in udp_dst_addr;
 };
 
@@ -193,6 +201,69 @@ u32 get_irqvec(struct dps_info *info)
 void clr_irqvec(struct dps_info *info, u32 mask)
 {
         reg_write(info, DPS_REG_IRQVEC, mask);
+}
+
+static int udp_socket_send(struct dps_info *info, unsigned char slot, unsigned char win)
+{
+        struct msghdr msg;
+        struct iovec iov;
+        mm_segment_t oldfs;
+        unsigned int len;
+        int size = 0;
+
+        if (info->udp_socket->sk==NULL)
+                return 0;
+
+        mutex_lock(&info->dps_mutex);
+        len = info->slot_buf[slot].win_buf[win].len;
+
+        iov.iov_base = info->slot_buf[slot].win_buf[win].dma_vaddr;
+        mutex_unlock(&info->dps_mutex);
+
+        iov.iov_len = len;
+
+        msg.msg_flags = 0;
+        msg.msg_name = &info->udp_dst_addr;
+        msg.msg_namelen  = sizeof(struct sockaddr_in);
+        msg.msg_control = NULL;
+        msg.msg_controllen = 0;
+        iov_iter_init(&msg.msg_iter, READ, &iov, 1, len);
+
+        oldfs = get_fs();
+        set_fs(KERNEL_DS);
+        size = sock_sendmsg(info->udp_socket, &msg);
+        set_fs(oldfs);
+
+        /* clear IP wincnt register so IP knows that window is free */
+        mutex_lock(&info->dps_mutex);
+        reg_write(info, DPS_WIN_WINCNT(slot, win, stream_offset), 0);
+        /* clear sidedata in driver */
+        info->slot_buf[slot].win_buf[win].len = 0;
+        mutex_unlock(&info->dps_mutex);
+
+        return size;
+}
+
+static int udp_socket_init(struct dps_info *info)
+{
+        int retval;
+
+        /* create a socket */
+        retval = sock_create(AF_INET, SOCK_DGRAM, IPPROTO_UDP, &info->udp_socket);
+        if(retval < 0)
+                return -ENXIO;
+
+        return 0;
+}
+
+static void udp_socket_free(struct dps_info *info)
+{
+        /* free allocated resources */
+        if (info->udp_socket != NULL)
+        {
+                sock_release(info->udp_socket);
+                info->udp_socket = NULL;
+        }
 }
 
 /**
@@ -751,8 +822,10 @@ static ssize_t udp_dst_ip_addr_store(struct device *dev, struct device_attribute
 
         info->udp_dst_addr.sin_addr.s_addr = ip_addr;
 
-        // clear socket
-        // create socket with new values
+        /* Re-initialize socket with new parameters */
+        udp_socket_free(info);
+        udp_socket_init(info);
+
         return count;
 }
 static DEVICE_ATTR_RW(udp_dst_ip_addr);
@@ -783,8 +856,10 @@ static ssize_t udp_dst_port_store(struct device *dev, struct device_attribute *a
 
         info->udp_dst_addr.sin_port = htons((unsigned int)port);
 
-        // clear socket
-        // create socket with new values
+        /* Re-initialize socket with new parameters */
+        udp_socket_free(info);
+        udp_socket_init(info);
+
         return count;
 }
 static DEVICE_ATTR_RW(udp_dst_port);
@@ -1006,21 +1081,26 @@ static irqreturn_t dma_packet_sched_irq_thread_handler(int irq, void *dev_id)
                                         last_win = reg_read(info, DPS_REG_LASTWIN(slot));
                                         win = (win + 1) % windows;
                                         wincnt = reg_read(info, DPS_WIN_WINCNT(slot, win, stream_offset));
-                                        //pr_info("Handling slot %d: last_win = %d, win = %d, wincnt = 0x%08X\n", slot, last_win, win, wincnt);
+                                        /* pr_info("Handling slot %d: last_win = %d, win = %d, wincnt = 0x%08X\n", slot, last_win, win, wincnt); */
                                         if ((PKT_IS_COMPLETE(wincnt) == 0) || (info->slot_buf[slot].win_buf[win].len != 0))
                                         {
                                                 break;
                                         }
                                         mutex_lock(&info->dps_mutex);
                                         info->slot_buf[slot].win_buf[win].len = PKT_LEN(wincnt);
+#if 0
                                         list_add_tail(&info->slot_buf[slot].win_buf[win].lhead, &info->queue_head);
+#endif
                                         info->slot_buf[slot].last_proc_win = win;
                                         mutex_unlock(&info->dps_mutex);
+#if 0
                                         if (read_wait_queue_length > 0)
                                         {
                                                 wake_up(&dps_waitqueue);
                                                 read_wait_queue_length = 0;
                                         }
+#endif
+                                        udp_socket_send(info, slot, win);
                                 }
                                 while ((win != last_win) && (PKT_IS_EOE(wincnt) == 0));
 
@@ -1089,9 +1169,12 @@ static int dps_probe(struct platform_device *pdev)
         REGISTER_DMA_PKT_SCHED(dps_info->minor, dps_info); /* register "minor" device instance */
         /* /dev/ creation done */
 
+        /* initialize UDP socket */
+        memset(&dps_info->udp_dst_addr, 0, sizeof(struct sockaddr));
         dps_info->udp_dst_addr.sin_family      = AF_INET;
-        dps_info->udp_dst_addr.sin_addr.s_addr = htonl((unsigned long int)0x7F000001); /* default = localhost 127.0.0.1 */
-        dps_info->udp_dst_addr.sin_port        = htons(5232);
+        dps_info->udp_dst_addr.sin_addr.s_addr = htonl(DEFAULT_UDP_DST_IP);
+        dps_info->udp_dst_addr.sin_port        = htons(DEFAULT_UDP_DST_PORT);
+        udp_socket_init(dps_info);
 
         /* Create a sysfs file on the client device node */
         status = sysfs_create_groups(&pdev->dev.kobj, dps_groups);
@@ -1124,6 +1207,9 @@ static int dps_remove(struct platform_device *pdev)
         reg_write(dps_info, DPS_REG_SLTENA, 0x00000000);
 
         sysfs_remove_groups(&pdev->dev.kobj, dps_groups);
+
+        /* Destroy UDP socket */
+        udp_socket_free(dps_info);
 
         devm_free_irq(&pdev->dev, dps_info->irq, &pdev->dev);
 

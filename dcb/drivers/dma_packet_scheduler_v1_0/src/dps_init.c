@@ -5,6 +5,9 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
+static const char udp_dst_ip_addr[16] = "129.129.193.185\0";
+static unsigned int udp_dst_port = 5232;
+
 void usage(char *name)
 {
   printf("Usage: <slot enable vector>\n", name);
@@ -37,6 +40,32 @@ int main(int argc, char *argv[])
     return fd;
   }
   ret = sprintf(buffer, "0x%08X\n", slot_enable);
+  write(fd, buffer, ret);
+  close(fd);
+
+  /* Configure UDP Destination IP Address */
+  printf("setting UDP destination ip address %s\n", udp_dst_ip_addr);
+  /* open device file */
+  fd = open("/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_ctrl/udp_dst_ip_addr", O_RDWR);
+  if(fd < 0)
+  {
+    perror("/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_ctrl/udp_dst_ip_addr");
+    return fd;
+  }
+  ret = sprintf(buffer, "%s\n", udp_dst_ip_addr);
+  write(fd, buffer, ret);
+  close(fd);
+
+  /* Configure UDP Destination Port */
+  printf("setting UDP destination port %d\n", udp_dst_port);
+  /* open device file */
+  fd = open("/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_ctrl/udp_dst_port", O_RDWR);
+  if(fd < 0)
+  {
+    perror("/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_ctrl/udp_dst_port");
+    return fd;
+  }
+  ret = sprintf(buffer, "%d\n", udp_dst_port);
   write(fd, buffer, ret);
   close(fd);
 
