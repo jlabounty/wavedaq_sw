@@ -1,11 +1,9 @@
-#include "dma_packet_scheduler_v1_0.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
+#include "../../../app/src/drv_dma_pkt_sched.h"
 
-static const char udp_dst_ip_addr[16] = "129.129.193.185\0";
+//static const char udp_dst_ip_addr[16] = "129.129.193.185\0";
+static const char udp_dst_ip_addr[4] = {129,129,193,185};
 static unsigned int udp_dst_port = 5232;
 
 void usage(char *name)
@@ -17,11 +15,12 @@ int main(int argc, char *argv[])
 {
   int ret;
   int val;
+  struct udev *udev;
+  struct udev_device *dev;
   unsigned int slot_enable = 0x1FFFF;
   char opt;
-  FILE *f;
-  int fd;
   char buffer[32];
+  dps_dev_t dps_dev;
 
   if (argc == 2) {
     slot_enable = 0x1FFFF & (unsigned int)strtol(argv[1], NULL, 0);
@@ -29,126 +28,48 @@ int main(int argc, char *argv[])
 
   opt = argv[1][0];
 
-  printf("Setting IP Controls:\n\n");
-  /* Configure Slot Enables */
-  printf("enabling slots (0x%08X)\n", slot_enable);
-  /* open device file */
-  fd = open("/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_ctrl/slot_enable", O_RDWR);
-  if(fd < 0)
-  {
-    perror("/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_ctrl/slot_enable");
-    return fd;
-  }
-  ret = sprintf(buffer, "0x%08X\n", slot_enable);
-  write(fd, buffer, ret);
-  close(fd);
+  dps_dev_init(&dps_dev, "/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi");
 
-  /* Configure UDP Destination IP Address */
-  printf("setting UDP destination ip address %s\n", udp_dst_ip_addr);
-  /* open device file */
-  fd = open("/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_ctrl/udp_dst_ip_addr", O_RDWR);
-  if(fd < 0)
-  {
-    perror("/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_ctrl/udp_dst_ip_addr");
-    return fd;
-  }
-  ret = sprintf(buffer, "%s\n", udp_dst_ip_addr);
-  write(fd, buffer, ret);
-  close(fd);
+  printf("IP Controls:\n\n");
 
-  /* Configure UDP Destination Port */
-  printf("setting UDP destination port %d\n", udp_dst_port);
-  /* open device file */
-  fd = open("/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_ctrl/udp_dst_port", O_RDWR);
-  if(fd < 0)
-  {
-    perror("/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_ctrl/udp_dst_port");
-    return fd;
-  }
-  ret = sprintf(buffer, "%d\n", udp_dst_port);
-  write(fd, buffer, ret);
-  close(fd);
+  dps_set_slot_enable (&dps_dev, slot_enable);
+  printf("enabled slots 0x%08X\n", dps_get_slot_enable(&dps_dev));
 
-  /* Configure Core Enable */
-  printf("enabling IP\n");
-  /* open device file */
-  fd = open("/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_ctrl/enable", O_RDWR);
-  if(fd < 0)
-  {
-    perror("/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_ctrl/enable");
-    return fd;
-  }
-  ret = sprintf(buffer, "1\n");
-  write(fd, buffer, ret);
-  close(fd);
+  dps_set_udp_dst_ip_addr(&dps_dev, udp_dst_ip_addr);
+  printf("UDP destination ip address %s\n", dps_get_udp_dst_ip_addr(&dps_dev));
 
-  printf("\n\nReading IP Configuration:\n\n");
+  dps_set_udp_dst_port(&dps_dev, udp_dst_port);
+  printf("UDP destination port %d\n", dps_get_udp_dst_port(&dps_dev));
+
+  dps_set_event_mode(&dps_dev, DPS_EVENT_MODE_FREERUN); /* DPS_EVENT_MODE_COMMON, DPS_EVENT_MODE_FREERUN */
+  printf("event mode %d\n", dps_get_event_mode(&dps_dev));
+
+  printf("enabling IP... ");
+  dps_enable(&dps_dev);
+  if (dps_is_enabled(&dps_dev))
+  {
+    printf("enabled\n");
+  }
+  else
+  {
+    printf("still disabled\n");
+  }
+
+  printf("\n\nIP Configuration:\n\n");
 
   printf("Device-Tree Settings:\n");
-  /* open device file */
-  fd = open("/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_config/slots", O_RDONLY);
-  if(fd < 0)
-  {
-    perror("/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_config/slots");
-    return fd;
-  }
-  ret = read(fd, buffer, sizeof(buffer));
-  buffer[ret] = 0;
-  printf("#slots = %s\n", buffer);
-  close(fd);
+  printf("#slots: %d\n", dps_get_slots(&dps_dev));
 
   printf("Driver module parameters:\n");
-  /* open device file */
-  fd = open("/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_config/windows", O_RDONLY);
-  if(fd < 0)
-  {
-    perror("/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_config/windows");
-    return fd;
-  }
-  ret = read(fd, buffer, sizeof(buffer));
-  buffer[ret] = 0;
-  val = strtol(buffer, NULL, 0);
+
+  val = dps_get_windows(&dps_dev);
   printf("#windows = 0x%08X (%d)\n", val, val);
-  close(fd);
-  /* open device file */
-  fd = open("/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_config/win_size", O_RDONLY);
-  if(fd < 0)
-  {
-    perror("/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_config/win_size");
-    return fd;
-  }
-  ret = read(fd, buffer, sizeof(buffer));
-  buffer[ret] = 0;
-  val = strtol(buffer, NULL, 0);
+
+  val = dps_get_win_size(&dps_dev);
   printf("window size = 0x%08X (%d)\n", val, val);
-  close(fd);
 
-#if 0
-  /* open device file */
-  fd = open("/dev/dma_pkt_sched0", O_RDONLY);
-
-  printf("enabling slots (0x%08X)\n", slot_enable);
-  ret = ioctl(fd, DPS_IOCT_SLOT_EN, slot_enable);
-  if(ret < 0)
-    return ret;
-
-  printf("enabling IP\n");
-  ret = ioctl(fd, DPS_IOCT_EN, 1);
-  if(ret < 0)
-    return ret;
-
-  ret = ioctl(fd, DPS_IOCQ_WINSIZE);
-  if(ret < 0)
-    return ret;
-  printf("window size = 0x%08X (%d)\n", ret, ret);
-
-  ret = ioctl(fd, DPS_IOCQ_NOWINDOWS);
-  if(ret < 0)
-    return ret;
-  printf("#windows = %d\n", ret);
-
-  close(fd);
-#endif
+  printf("\n\nResetting IP\n");
+  dps_reset(&dps_dev);
 
   return 0;
 }
