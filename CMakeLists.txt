@@ -43,8 +43,9 @@ add_custom_target(git_revision_h
 # Check for mxml
 #
 if (NOT EXISTS ${PROJECT_SOURCE_DIR}/mxml/.git)
-   message(FATAL_ERROR "mxml files not found, please make sure git submodules are downloaded.\n"
-                       "generation aborted\n\n")
+   message(FATAL_ERROR "mxml files not found, please install via\n"
+                       "'git submodule update --init'\n"
+                       "in 'sw' main directory\n")
 endif()
 
 #
@@ -171,12 +172,10 @@ add_subdirectory(tcb)
 
 add_subdirectory(wd_cl)
 
-add_subdirectory(serdestest)
-
 add_subdirectory(wdbdiscr)
 
 # disable targets that requires libmscb
 if(NOT TARGET mscb)
-   set_target_properties(tcb wdaq tcb_cl wd_cl serdestest PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
+   set_target_properties(tcb wdaq tcb_cl wd_cl PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
 endif()
 

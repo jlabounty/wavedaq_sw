@@ -13,131 +13,93 @@
 using namespace std;
 
 std::string wdbs[]={
-   "wd100",
-   "wd101",
-   "wd102",
-   "wd103",
-   "wd104",
-   "wd105",
-   "wd106",
-   "wd107",
-   "wd108",
-   "wd109",
-   "wd026",
-   "wd110",
-   "wd111",
-   "wd112",
-   "wd113",
-   "wd114",
-   "wd122",
-   "wd123",
-   "wd124",
-   "wd125",
-   "wd115",
-   "wd117",
-   "wd126",
-   "wd127",
-   "wd069",
+   ////MPPC08
+   ////"wd100",
+   //"wd101",
+   //"wd102",
+   //"wd103",
+   //"wd104",
+   //"wd105",
+   //"wd106",
+   //"wd107",
+   //"wd108",
+   //"wd109",
+   //"wd079",
+   //"wd110",
+   //"wd111",
+   //"wd112",
+   //"wd113",
+   //"wd114",
+   ////MPPC09
+   //"wd122",
+   //"wd123",
+   //"wd124",
+   //"wd125",
+   //"wd115",
+   //"wd117",
+   //"wd126",
+   //"wd127",
+   //"wd069",
+   //"wd062",
+   //"wd063",
+   //"wd064",
+   //"wd080",
+   //"wd081",
+   //"wd082",
+   //"wd083",
+   //MPPC11
+   //"wd088",
+   //"wd089",
+   //"wd085",
+   //"wd086",
+   //"wd087",
+   //"wd118",
+   //"wd119",
+   //"wd120",
+   //"wd121",
+   //"wd068",
+   //"wd091",
+   //"wd092",
+   //"wd065",
+   //DCUS0
+   //"wd198",
+   //"wd199",
+   //"wd211",
+   //"wd204",
+   //"wd205",
+   //"wd206",
+   //"wd207",
+   //"wd208",
+   //DCDS0
+   //"wd192",
+   //"wd193",
+   //"wd194",
+   //"wd195",
+   //"wd196",
+   //"wd200",
+   //"wd201",
+   //"wd202",
+   //AUX
    "wd128",
    "wd129",
    "wd130",
-   "wd048",
-   "wd049",
-   "wd050",
-   "wd051",
-   "wd042",
-   "wd043",
-   "wd044",
-   "wd045",
-   "wd072",
-   "wd073",
-   "wd074",
-   "wd075",
-   "wd118",
-   "wd119",
-   "wd120",
-   "wd121",
-   "wd068",
-   "wd091",
-   "wd092",
    "wd131",
-   "wd030",
-   "wd031",
-   "wd032",
-   "wd033",
-   "wd034",
-   "wd035",
-   "wd070",
-   "wd071",
-   "wd036",
-   "wd037",
-   "wd038",
-   "wd039",
-   "wd040",
-   "wd041",
-   "wd076",
-   "wd077",
-   "wd078",
-   "wd079",
-   "wd080",
-   "wd081",
-   "wd082",
-   "wd083",
-   "wd090",
-   "wd046",
-   "wd116",
-   "wd093",
-   "wd052",
-   "wd053",
-   "wd054",
-   "wd055",
-   "wd056",
-   "wd057",
-   "wd058",
-   "wd059",
-   "wd060",
-   "wd061",
-   "wd084",
-   "wd085",
-   "wd086",
-   "wd087",
-   "wd088",
-   "wd089",
-   "wd157",
-   "wd158",
-   "wd159",
-   "wd160",
-   "wd161",
-   "wd163",
-   "wd164",
-   "wd165",
-   "wd166",
-   "wd167",
-   "wd168",
-   "wd169",
-   "wd170",
-   "wd172",
-   "wd173",
-   "wd174",
-   "wd192",
-   "wd195",
-   "wd194",
-   "wd196",
-   "wd197",
-   "wd198",
-   "wd209",
-   "wd210",
-   "wd201",
-   "wd202",
-   "wd205",
-   "wd207"
+   "wd116"
 };
 
 int main(int argc, char** argv)
 {
-   const int n = 55;
-   const float down = -0.035;
+   //WD2F
+   const int n = 60;
+   const float down = -0.040;
    const float up = 0.020;
+   //const float gain = 2.5;
+   const float gain = 1;
+   //WD2ADiff
+   //const int n = 90;
+   //const float down = -0.045;
+   //const float up = 0.045;
+   //const float gain = 1;
 
    printf("piedistalling %lu WDBs\n", sizeof(wdbs)/sizeof(std::string*));
 
@@ -145,13 +107,22 @@ int main(int argc, char** argv)
       printf("%s\n", wdbs[b].c_str());
       WDB* wdb= new WDB(wdbs[b].c_str());
       wdb->Connect();
-      //wdb->SetFeGain(-1, gain);
+      wdb->ReceiveStatusRegisters();
+      wdb->ReceiveControlRegisters();
+      if(gain > 0) wdb->SetFeGain(-1, gain);
+      printf("board revision %c\n", 'A'+ wdb->GetBoardRevision());
+      sleep(3);
       std::vector<uint64_t> s;
       wdb->GetScalers(s);
 
       char buf[100];
-      sprintf(buf, "modifiedbyus/out-%s.dat", wdbs[b].c_str());
+      sprintf(buf, "out-%s.dat", wdbs[b].c_str());
       FILE *f= fopen(buf, "w");
+      fprintf(f, "# WDB: %s\n", wdbs[b].c_str());
+      fprintf(f, "# Gain: %f\n", gain);
+      fprintf(f, "# Down: %f\n", down);
+      fprintf(f, "# Up: %f\n", up);
+      fprintf(f, "# N: %d\n", n);
 
       for(int i=0; i<n; i++) {
          float v = down + (up-down)*i/n;
@@ -166,8 +137,8 @@ int main(int argc, char** argv)
          for(int j=0; j<16; j++) fprintf(f,"%lld ", s[j]);
          fprintf(f, "\n");
 
-         printf("%f: ", readv);
-         for(auto sca:s) printf("%lld ", sca);
+         printf("%+5.4f: ", v);
+         for(auto sca:s) printf("%6lld ", sca);
          printf("\n");
       }
 

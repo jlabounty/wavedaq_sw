@@ -60,7 +60,7 @@
 #define RTILEMSK3          0x604      // tile mask 3
 #define RQLTHR             0x606      // sum threshold low
 #define RQCTHR             0x607      // sum threshold cosmic
-#define RLXePATCH          0x608      // LXe sum patch 
+#define RLXePATCHID        0x608      // LXe patch request
 #define RTIMEN             0x60A      // Time Difference threshold Narrow
 #define RTIMEW             0x60B      // Time Difference threshold Wide
 #define RTCMERGEH          0x60C      // TC high threshold for hit merge
@@ -81,6 +81,24 @@
 #define RBGOHITDLY         0x61B      // Delay of BGO and Preshower hit
 #define RCRCHITMASK        0x61C      // Masking bit for CRC counters (7:0)
 #define RCRCPAIRENA        0x61D      // Enable bits for CRC top-bottom coincidences
+#define RMAJORITYVALUE     0x61E      // Majority trigger parameters
+#define RTOFXMASKS         0x61F      // Tof X-view masks
+#define RTOFYMASKS         0x621      // Tof Y-view masks
+#define RINTERSPILLDLY     0x623      // Interspill delay value
+#define RMATRIXMASKS0      0x624      // Mask Matrix
+#define RMATRIXMASKS1      0x625      // Mask Matrix
+#define RMATRIXMASKS2      0x626      // Mask Matrix
+#define RFCALOMASKS        0x627      // Mask for FOOT calorimenter inputs
+#define RFNEUTRONMASKS     0x628      // Mask for FOOT neutron detector inputs
+#define RLXeHITTHR         0x629      // Minimum number of hits in a XEC patch
+#define RLXePATCHDLY       0x62A      // Delay of XEC patch algorithm
+#define RRDCVETOTHR        0x62B      // Veto for RDC signals
+#define RRDCHITDLY         0x62C      // Delay of RDC Hits
+#define RRDCHITMASK0       0x62D      // RDC Hit masks (3 values)
+#define RRDCHITMASK1       0x62E      // RDC Hit masks (3 values)
+#define RRDCHITMASK2       0x62F      // RDC Hit masks (3 values)
+#define RDETECTORDLY0      0x630      // Detector delays: XEC bit [7:0], TC bit [15:8], CDCH [23:16], BGO [31:24] (2 values)
+#define RDETECTORDLY1      0x631      // Detector delays: RDC bit [7:0], CRC bit [15:8] (2 values)
 #define RFIBCOUNTER        0x700      // SCIFI fiber event counter address (42 values)
 #define RSINGLECRATECFG    0x800      // configurations for single crate trigger logic
 #define RSINGLEISVETO      0x801      // veto set for input channels in single crate logic
@@ -89,6 +107,7 @@
 #define RSERDESCOU         0x900      // serdes error counter (first address)
 #define RSERDESTIME        0x980      // serdes test time
 #define RDCBSERDESCOU      0x981      // serdes error counter dcb
+#define RLXEPATCHLUT       0x20000    // LXe patch LUT base address
 
 #define RALGCLKMEMADDR     0x0FFFE    // counter stop position for ALGCLK memories
 #define RMEMADDR           0x0FFFF    // counter stop position
@@ -101,6 +120,8 @@
 #define RDCMEMBASE    0x14000                   // RDC memories base address (2 memories)
 #define TCMEMBASE     0x15000                   // TC memories base address (2 memories)
 #define ALFAMEMBASE   0x16000                   // ALFA memories base address (2 memories)
+
+#define SCIFICOINCBASE     0x00800000           //SCIFI fiber coincidence base address (441)
 
 #define PACKAGERBASE       0x01000000 //base address for packager memories
 #define RARBITER           0x01001000 //Bus Arbiter register and packager controller
@@ -164,6 +185,7 @@ private:
 public:
    // board info
    u_int32_t      fidcode;           // reg id
+   u_int32_t      fexpid;            // reg experiment id
    u_int32_t      fslot;             // slot
    int            fntrg;             // number of available trigger
    int            fverbose;          // verbosity level
@@ -243,6 +265,10 @@ public:
    void SetPrescaling(u_int32_t*);
    // read prescaling values
    void GetPrescaling(u_int32_t*);
+   // read LXePatch LUT
+   void GetLXePatchLUT(u_int32_t*);
+   // write LXePatch LUT
+   void SetLXePatchLUT(u_int32_t*);
    // set the IDCode
    void SetIDCode();
    // set fntrg
@@ -392,7 +418,7 @@ public:
    //Get adc prescaling readout value
    void GetPrescAdc(u_int32_t *);
    //Set trigger delay
-   void SetTRGDLY(u_int32_t *);
+   void SetTRGDLY(bool *, u_int32_t *);
    //Get trigger delay
    void GetTRGDLY(u_int32_t *);
    //Start AutoLock
@@ -432,11 +458,15 @@ public:
    void ResetSyncWaveformSerdes();
 
    //trigger-specific calls
+   void SetDetectorDelay(bool *enable, u_int32_t* value);
    // Set waveform sum trigger threshold
    void SetSumHighThreshold(u_int32_t*);
    void SetSumLowThreshold(u_int32_t*);
    void SetSumVetoThreshold(u_int32_t*);
-   void SetSumPatch(u_int32_t*);
+   //Xenon patch position selection
+   void SetPatch(u_int32_t*);
+   void SetPatchThreshold(u_int32_t*);
+   void SetPatchDelay(bool, u_int32_t);
    //time thresholds
    void SetTimeNarrow(u_int32_t*);
    void SetTimeWide(u_int32_t*);
@@ -454,9 +484,12 @@ public:
    void SetBGOThreshold(u_int32_t *);
    void SetBGOVetoThreshold(u_int32_t *);
    void SetBGOTriggerMask(u_int32_t *);
-   void SetBGOHitDelay(u_int32_t *);
+   void SetBGOHitDelay(u_int32_t, u_int32_t);
    //Set RDC Stuff
    void SetRDCThreshold(u_int32_t *);
+   void SetRDCVetoThreshold(u_int32_t *);
+   void SetRDCHitDelay(u_int32_t *);
+   void SetRDCHitMask(u_int32_t *);
    void SetRDCTriggerMask(u_int32_t *);
    //Set CRC Stuff
    void SetCRCHitMask(u_int32_t *);
@@ -470,6 +503,21 @@ public:
    void GetPCurr(u_int32_t *);
    //Get SciFi counters
    void GetSciFICou(u_int32_t *);
+  // FOOT stuffs
+  void SetFHitShaper(u_int32_t *);
+  void SetFVetoShaper(u_int32_t *);  
+  void SetMargaritaMajVal(u_int32_t *);
+  void SetMargaritaTrgDly(u_int32_t *);
+  void SetMargaritaMask(u_int32_t *);
+  void SetTofBarHitLogic(u_int32_t *);
+  void SetTofHitLogic(u_int32_t *);
+  void SetTofHitLogicAlternative(u_int32_t *);
+  void SetTofXMask(u_int32_t *);
+  void SetTofYMask(u_int32_t *);
+  void SetFCaloMask(u_int32_t *);
+  void SetFNeutronMask(u_int32_t *);
+  void SetMatrixMask(u_int32_t *);
+  void SetInterspillDly(u_int32_t *);
 
 };
 

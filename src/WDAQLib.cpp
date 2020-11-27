@@ -84,6 +84,7 @@ void WDAQDRSPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    wdb_e->mDacOFS = mDacOFS;
    wdb_e->mDacROFS = mDacROFS;
    wdb_e->mTemperature = mTemperature;
+   wdb_e->mWDBFlags = mWDBFlags;
 
    //check all data received
    wdb_e->mDrsByteNumber[channel] += mPayloadLength*8;
@@ -204,7 +205,7 @@ void WDAQTcbPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    //Should check e->mBoardType is TCB 
    WDAQTcbEvent *tcb_e = static_cast<WDAQTcbEvent*>(e);
    
-   //printf("additing event %c%c%c%c flags:%x size:%d\n", mBankName[0], mBankName[1], mBankName[2], mBankName[3], mWDAQFlags, mPayloadLength);
+   //printf("additing event %c%c%c%c flags:%x size:%d offset:%d\n", mBankName[0], mBankName[1], mBankName[2], mBankName[3], mWDAQFlags, mPayloadLength, mDataOffset);
 
    int numberBins = (int) mPayloadLength/4;
    int firstBin = mDataOffset/4;
@@ -213,13 +214,15 @@ void WDAQTcbPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    try{
       bank = tcb_e->mBanks.at(mBankName);
    }catch (const std::out_of_range&){
-      bank = new WDAQTcbBank(mBankName, numberBins);
+      bank = new WDAQTcbBank(mBankName);
       tcb_e->mBanks[mBankName] = bank;
    }
 
-   for(int i=0; i<numberBins; i++){
-      bank->data[firstBin+i] = data[i];
-   }
+   bank->SetValues(firstBin, numberBins, data);
+   //for(int i=0; i<bank->data.size(); i++)
+   //   printf("%d: %08x\n", i, bank->data[i]);
+
+   //tcb_e->UpdateIsComplete();
    //printf("TCB event is complete %d: %d %d %d %d\n", tcb_e->IsComplete(), tcb_e->mStartFlagReceived, tcb_e->mEndFlagReceived, tcb_e->mLastPacket-tcb_e->mFirstPacket+1, tcb_e->mPacketsReceived);
 }
 
@@ -605,6 +608,7 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
          auto pd = (unsigned int*)(tcbdata+1);
          int numberBins = (int) packet->mPayloadLength/4;
          for (int i=0 ; i<numberBins ; i++) {
+            //printf("%d: %08x\n", i, SWAP_UINT32(pd[i]));
             packet->data[i] = SWAP_UINT32(pd[i]);
          }
 
@@ -1063,7 +1067,7 @@ void WDAQEventWriter::Loop(){
          if(board->mScalerHasData){
             std::string chn_header = "SCAL";
             fFile.write(chn_header.c_str(), 4);
-            // first write 18 integral scaler values as received
+            // first write 19 integral scaler values as received
             for(int bin=0; bin<WD_N_SCALER; bin++){
                uint64_t val = board->mScaler[bin];
                fFile.write((const char *)&val, 8);

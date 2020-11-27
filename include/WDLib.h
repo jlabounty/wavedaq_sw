@@ -62,6 +62,7 @@ class WDBoard {
       virtual void GoRun() { };    //start the board
       virtual void StopRun() { };  //stop the board
       virtual bool IsBusy() { return false; };   //check busy state
+      virtual unsigned short GetSerialNumber() { return 0; }; //returns serial number used in data stream;
 
       //Setters
       void SetProperties(const PropertyGroup &properties);
@@ -288,6 +289,10 @@ class WDWDB : public WDB, public WDBoard{
          return GetDrsCtrlBusy(); 
       }
 
+      unsigned short GetSerialNumber() {
+        return WDB::GetSerialNumber();    
+      }
+
       //Configuration handlers
       void ConfigureProperty(const std::string &name, Property &property);
       void ConfigurationStarted();
@@ -355,6 +360,10 @@ class WDTCB : public TCB, public WDBoard {
          return TCB::IsBusy();
       }
 
+      unsigned short GetSerialNumber() {
+        return (GetCrate()->GetCrateNumber() << 8) | GetSlot();    
+      }
+
       //Configuration handlers
       void ConfigureProperty(const std::string &name, Property &property);
       void ConfigurationStarted();
@@ -367,12 +376,15 @@ class WDTCB : public TCB, public WDBoard {
       void ConfigureParameters(Property &property);
       void ConfigurePacketizer(Property &property);
       void ConfigureExtDAQ(Property &property);
+      void ConfigureDetectorDelay(Property &property);
       void ConfigureTimeNarrowThreshold(Property &property);
       void ConfigureTimeWideThreshold(Property &property);
       void ConfigureXecHighThreshold(Property &property);
       void ConfigureXecLowThreshold(Property &property);
       void ConfigureXecVetoThreshold(Property &property);
       void ConfigureXecPatchId(Property &property);
+      void ConfigureXecPatchThreshold(Property &property);
+      void ConfigureXecPatchDelay(Property &property);
       void ConfigureXecAlfaThreshold(Property &property);
       void ConfigureXecAlfaScale(Property &property);
       void ConfigureXecMovingAverage(Property &property);
@@ -385,6 +397,9 @@ class WDTCB : public TCB, public WDBoard {
       void ConfigureBgoHitDelay(Property &property);
       void ConfigureBgoTriggerMask(Property &property);
       void ConfigureRdcThreshold(Property &property);
+      void ConfigureRdcVetoThreshold(Property &property);
+      void ConfigureRdcHitDelay(Property &property);
+      void ConfigureRdcHitMask(Property &property);
       void ConfigureRdcTriggerMask(Property &property);
       void ConfigureCrcHitMask(Property &property);
       void ConfigureCrcPairMask(Property &property);
@@ -392,7 +407,22 @@ class WDTCB : public TCB, public WDBoard {
       void ConfigureNgenWidth(Property &property);
       void ConfigureNgenHighThreshold(Property &property);
       void ConfigureNgenLowThreshold(Property &property);
+      void ConfigureFHitShaper(Property &property);
+      void ConfigureFVetoShaper(Property &property);
+      void ConfigureMargaritaMajVal(Property &property);
+      void ConfigureMargaritaTrgDly(Property &property);
+      void ConfigureMargaritaMask(Property &property);
+      void ConfigureTofBarHitLogic(Property &property);
+      void ConfigureTofHitLogic(Property &property);
+      void ConfigureTofHitLogicAlternative(Property &property);
+      void ConfigureTofXMask(Property &property);
+      void ConfigureTofYMask(Property &property);
+      void ConfigureFCaloMask(Property &property);
+      void ConfigureFNeutronMask(Property &property);
+      void ConfigureMatrixMask(Property &property);
+      void ConfigureInterspillDly(Property &property);
 
+  
       WDTCB(WDCrate *crate, int slot, std::string name="TCBXXX", int verbose = 0);
       ~WDTCB() { };
 };
@@ -420,6 +450,10 @@ class WDDCB : public DCB, public WDBoard {
       bool IsBusy(){
          //TODO update register
          return GetDcbBusy();
+      }
+
+      unsigned short GetSerialNumber() {
+        return DCB::GetSerialNumber();    
       }
 
       //Configuration handlers

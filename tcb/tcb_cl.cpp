@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
    u_int32_t trgtype, tpattern;
    FILE *filin, *filout, *filpresca, *filtrgdly;
    u_int32_t presca[128], counters[128], trgdly[128];
+   bool trgdly_enable[128];
    //  clock_t t_before, t_after;
    if(argc < 2) {
       printf("Please indicate the mscb connection ID and (optionally) the slot...\n");
@@ -714,8 +715,16 @@ int main(int argc, char *argv[])
       if(option == 37) {
         printf(" opt = 37 : Set trigger delay values (from trgdly.dat file) ... \n");
         filtrgdly = fopen("trgdly.dat", "read");
-        for(int irow = 0; irow<TCBBoard.fntrg; irow++) fscanf(filtrgdly,"%x\n",trgdly+irow);
-        TCBBoard.SetTRGDLY(trgdly);
+        for(int irow = 0; irow<TCBBoard.fntrg; irow++) {
+           fscanf(filtrgdly,"%x\n",trgdly+irow);
+           if(trgdly[irow]>0){
+               trgdly_enable[irow] = true;
+               trgdly[irow] -= 1;
+           } else {
+               trgdly_enable[irow] = false;
+           }
+        }
+        TCBBoard.SetTRGDLY(trgdly_enable, trgdly);
       }
       //
       if(option == 38) {

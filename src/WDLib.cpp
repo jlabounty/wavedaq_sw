@@ -430,6 +430,8 @@ void WDSystem::GoRun(){
    fDaqSystem->GoRun();
    fDaqSystem->WaitRunStarted();
 
+   usleep(500000);//wait sync is applied
+
    //start master trigger board
    GetTriggerBoard()->GoRun();
 }
@@ -968,10 +970,10 @@ void WDWDB::ConfigureTriggerGain(Property &property) {
 
    int trg_gain[16];
    if(arraySize ==1){
-      for(int i=0; i<15; i++) trg_gain[i] = trigger_gain[0];
+      for(int i=0; i<16; i++) trg_gain[i] = trigger_gain[0];
       arraySize = 16;
    } else if(arraySize ==16) {
-      for(int i=0; i<15; i++) trg_gain[i] =  trigger_gain[i];
+      for(int i=0; i<16; i++) trg_gain[i] =  trigger_gain[i];
    } else
       throw std::runtime_error("TriggerGain size should be 1 or 16 values");
 
@@ -1014,10 +1016,10 @@ void WDWDB::ConfigureTriggerTdcOffset(Property &property) {
 
    int trg_offset[16];
    if(arraySize ==1){
-      for(int i=0; i<15; i++) trg_offset[i] = tdc_offset[0];
+      for(int i=0; i<16; i++) trg_offset[i] = tdc_offset[0];
       arraySize = 16;
    } else if(arraySize ==16) {
-      for(int i=0; i<15; i++) trg_offset[i] =  tdc_offset[i];
+      for(int i=0; i<16; i++) trg_offset[i] =  tdc_offset[i];
    } else
       throw std::runtime_error("TriggerTdcOffset size should be 1 or 16 values");
 
@@ -1163,24 +1165,17 @@ void WDWDB::SetInCrate(){
    //switch to backplane clock
    if(GetExtClkInSel() != 0 || GetDaqClkSrcSel() != 0 || GetLmkInputFreq() != 80){
 
-      int old_timeout = GetReceiveTimeoutMs(); 
-      SetReceiveTimeoutMs(15*cDefaultReceiveTimeoutMs);
-      //SetSendBlock(true);
+      SetSendBlock(true);
       SetExtClkInSel(0);
 
       SetDaqClkSrcSel(0);
 
       SetLmkInputFreq(80);
-      //SetSendBlock(false);
+      SetSendBlock(false);
 
-      //SendControlRegisters();
+      SendControlRegisters();
 
-      SetReceiveTimeoutMs(3*cDefaultReceiveTimeoutMs);
-      SetApplySettingsLmk(1);
-
-      SetReceiveTimeoutMs(3*cDefaultReceiveTimeoutMs);
       LmkSyncLocal();
-      SetReceiveTimeoutMs(old_timeout);
       ReceiveStatusRegister(GetDrsSampleFreqLoc());
 
       //Reset everything
@@ -1266,6 +1261,8 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigurePacketizer(property);
    } else if(name=="ExtDAQBusyMask"){
       ConfigureExtDAQ(property);
+   } else if(name=="DetectorDelay"){
+      ConfigureDetectorDelay(property);
    } else if(name=="TimeNarrowThreshold"){
       ConfigureTimeNarrowThreshold(property);
    } else if(name=="TimeWideThreshold"){
@@ -1278,6 +1275,10 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureXecVetoThreshold(property);
    } else if(name=="XecPatchId"){
       ConfigureXecPatchId(property);
+   } else if(name=="XecPatchThreshold"){
+      ConfigureXecPatchThreshold(property);
+   } else if(name=="XecPatchDelay"){
+      ConfigureXecPatchDelay(property);
    } else if(name=="XecAlfaThreshold"){
       ConfigureXecAlfaThreshold(property);
    } else if(name=="XecAlfaScale"){
@@ -1302,21 +1303,55 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureBgoTriggerMask(property);
    } else if(name=="RdcThreshold"){
       ConfigureRdcThreshold(property);
+   } else if(name=="RdcVetoThreshold"){
+      ConfigureRdcVetoThreshold(property);
+   } else if(name=="RdcHitDelay"){
+      ConfigureRdcHitDelay(property);
+   } else if(name=="RdcHitMask"){
+      ConfigureRdcHitMask(property);
    } else if(name=="RdcTriggerMask"){
       ConfigureRdcTriggerMask(property);
    } else if(name=="CrcHitMask"){
       ConfigureCrcHitMask(property);
    } else if(name=="CrcPairMask"){
       ConfigureCrcPairMask(property);
-   } else if(name=="NgenDelay"){
-      ConfigureNgenDelay(property);
-   } else if(name=="NgenWidth"){
-      ConfigureNgenWidth(property);
    } else if(name=="NgenHighThreshold"){
       ConfigureNgenHighThreshold(property);
    } else if(name=="NgenLowThreshold"){
       ConfigureNgenLowThreshold(property);
-   } else if(name=="NoLocalTrigger"){
+   } else if(name=="NgenDelay"){
+      ConfigureNgenDelay(property);
+   } else if(name=="NgenWidth"){
+      ConfigureNgenWidth(property);
+   } else if(name=="FHitShaper"){ 
+      ConfigureFHitShaper(property);
+   } else if(name=="FVetoShaper"){ 
+      ConfigureFVetoShaper(property);
+   } else if(name=="MargaritaMajVal"){ 
+      ConfigureMargaritaMajVal(property);
+   } else if(name=="MargaritaTrgDly"){ 
+      ConfigureMargaritaTrgDly(property);
+   } else if(name=="MargaritaMask"){ 
+      ConfigureMargaritaMask(property);
+   } else if(name=="TofBarHitLogic"){ 
+      ConfigureTofBarHitLogic(property);
+   } else if(name=="TofHitLogic"){ 
+      ConfigureTofHitLogic(property);
+   } else if(name=="TofHitLogicAlternative"){ 
+      ConfigureTofHitLogicAlternative(property);
+   } else if(name=="TofXMask"){ 
+      ConfigureTofXMask(property); 
+   } else if(name=="TofYMask"){ 
+      ConfigureTofYMask(property);
+   } else if(name=="FCaloMask"){ 
+      ConfigureFCaloMask(property);
+   } else if(name=="FNeutronMask"){ 
+      ConfigureFNeutronMask(property);
+   } else if(name=="MatrixMask"){ 
+      ConfigureMatrixMask(property);
+   } else if(name=="InterspillDly"){ 
+      ConfigureInterspillDly(property);
+   } else if(name=="NoLocalTrigger"){  
    } else {
       printf("Unknown property %s in WDTCB\n", name.c_str());
    }
@@ -1356,7 +1391,9 @@ void WDTCB::ConfigurationStarted(){
    syncdly=0x10;
    trgdly=0x10;
    sprdly=0x10;
-   SetTRGBusODLY(&syncdly, &trgdly, &sprdly);
+   if((fidcode >>12) == 3) {
+     SetTRGBusODLY(&syncdly, &trgdly, &sprdly);
+   }
    SetPacketizerCommandAt(0, ::STOP, 0, 0);
    SetPacketizerAutostart(true);
    SetPacketizerEnable(true);
@@ -1420,15 +1457,23 @@ void WDTCB::ConfigureTriggerDelay(Property &property){
       throw std::runtime_error("Cannot set TriggerDelay: TriggerEnable should be also defined");
    }
    unsigned int trg_delay[64];
-   for(int i=0; i<64; i++) trg_delay[i] = 0;
+   bool trg_delay_enable[64];
+   for(int i=0; i<64; i++) {
+      trg_delay[i] = 0;
+      trg_delay_enable[i] = false;
+   }
    if(arraySizeEnable != arraySize)
       throw std::runtime_error("Cannot set TriggerDelay: TriggerEnable has a different array length");
    else {
       for(long i=0; i<arraySize; i++)
-         if(trigger_enable[i] < 64)
-            trg_delay[trigger_enable[i]] = trigger_delay[i];
+         if(trigger_enable[i] < 64){
+            if(trigger_delay[i] > 0){
+               trg_delay_enable[trigger_enable[i]] = true;
+               trg_delay[trigger_enable[i]] = trigger_delay[i]-1;
+            }
+         }
 
-      SetTRGDLY(trg_delay);
+      SetTRGDLY(trg_delay_enable, trg_delay);
    }
 }
 
@@ -1731,6 +1776,98 @@ void WDTCB::ConfigurePacketizer(Property &property){
       bufptr += 2*MEMDIM;
       nbank++;
    }
+   if(list.find("SPX")!=std::string::npos){
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 0x54535058;//TSPX
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 2*MEMDIM+1;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RMEMADDR;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::BLOCK_COPY;
+      inst.arg0 = TCMEMBASE;
+      inst.arg1 = bufptr;
+      inst.arg2 = 2*MEMDIM;
+      instVec.push_back(inst);
+      inst.arg2 = 0;
+
+      bufptr += 2*MEMDIM;
+      nbank++;
+   }
+   if(list.find("SCIFI")!=std::string::npos){
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 0x54534346;//TSCF
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 44;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::BLOCK_COPY;
+      inst.arg0 = RFIBCOUNTER;
+      inst.arg1 = bufptr;
+      inst.arg2 = 43;
+      instVec.push_back(inst);
+      inst.arg2 = 0;
+      
+      bufptr += 43;
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RTOTTIME;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      nbank++;
+   }
+   if(list.find("SCIFI")!=std::string::npos){
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 0x54534643;//TSFC
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 442;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::BLOCK_COPY;
+      inst.arg0 = SCIFICOINCBASE;
+      inst.arg1 = bufptr;
+      inst.arg2 = 441;
+      instVec.push_back(inst);
+      inst.arg2 = 0;
+      
+      bufptr += 441;
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RTOTTIME;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      nbank++;
+   }
 
    inst.offset += 1;
    inst.cmd = ::DIRECT_WRITE;
@@ -1762,6 +1899,29 @@ void WDTCB::ConfigureExtDAQ(Property &property){
    extdaqbmask = property.GetBool();
 
    SetFMask(false, extdaqbmask);
+}
+
+void WDTCB::ConfigureDetectorDelay(Property &property){
+   int64_t arraySize = 0;
+   const unsigned int* dlys;
+
+   dlys = property.GetUIntVector(&arraySize);
+   if(arraySize == 6){
+      bool enable[6];
+      u_int32_t val[6];
+      for(int i=0; i<6; i++){
+         if(dlys[i] == 0){
+            enable[i] = false;
+            val[i] = 0;
+         } else {
+            enable[i] = true;
+            val[i] = dlys[i]-1;
+         }
+      }
+      SetDetectorDelay(enable, val);
+   } else
+      throw std::runtime_error("DetectorDelay size should be 6 values");
+   
 }
 
 void WDTCB::ConfigureTimeNarrowThreshold(Property &property){
@@ -1806,7 +1966,30 @@ void WDTCB::ConfigureXecPatchId(Property &property){
    unsigned int xecpatchid;
    xecpatchid = property.GetUHex();
 
-   SetSumPatch(&xecpatchid);
+   SetPatch(&xecpatchid);
+}
+
+void WDTCB::ConfigureXecPatchThreshold(Property &property){
+   unsigned int xecpatchthreshold;
+   xecpatchthreshold = property.GetUHex();
+
+   SetPatchThreshold(&xecpatchthreshold);
+}
+
+void WDTCB::ConfigureXecPatchDelay(Property &property){
+   unsigned int xecpatchdelay;
+   xecpatchdelay = property.GetUInt();
+
+   bool enable;
+   if(xecpatchdelay > 0){
+      enable = true;
+      xecpatchdelay -= 1;
+   } else {
+      enable = false;
+      xecpatchdelay = 0;
+   }
+
+   SetPatchDelay(enable, xecpatchdelay);
 }
 
 void WDTCB::ConfigureXecAlfaThreshold(Property &property){
@@ -1892,10 +2075,14 @@ void WDTCB::ConfigureBgoVetoThreshold(Property &property){
 }
 
 void WDTCB::ConfigureBgoHitDelay(Property &property){
-   unsigned int bgohitdelay;
-   bgohitdelay = property.GetUInt();
+   int64_t arraySize = 0;
+   
+   const unsigned int *bgohitdelay = property.GetUIntVector(&arraySize);
 
-   SetBGOHitDelay(&bgohitdelay);
+   if(arraySize == 2)
+      SetBGOHitDelay(bgohitdelay[0], bgohitdelay[1]);
+   else
+      throw std::runtime_error("BgoHitDelay size should be 2 values");
 }
 
 void WDTCB::ConfigureBgoTriggerMask(Property &property){
@@ -1910,6 +2097,31 @@ void WDTCB::ConfigureRdcThreshold(Property &property){
    rdcthreshold = property.GetUHex();
 
    SetRDCThreshold(&rdcthreshold);
+}
+
+void WDTCB::ConfigureRdcVetoThreshold(Property &property){
+   unsigned int rdcvetothreshold;
+   rdcvetothreshold = property.GetUHex();
+
+   SetRDCVetoThreshold(&rdcvetothreshold);
+}
+
+void WDTCB::ConfigureRdcHitDelay(Property &property){
+   unsigned int rdchitdelay;
+   rdchitdelay = property.GetUInt();
+
+   SetRDCHitDelay(&rdchitdelay);
+}
+
+void WDTCB::ConfigureRdcHitMask(Property &property){
+   int64_t arraySize = 0;
+   
+   const unsigned int *rdchitmask = property.GetUHexVector(&arraySize);
+
+   if(arraySize == 3)
+      SetRDCHitMask((unsigned int*)rdchitmask);
+   else
+      throw std::runtime_error("RdcHitMask size should be 3 values");
 }
 
 void WDTCB::ConfigureRdcTriggerMask(Property &property){
@@ -1959,6 +2171,114 @@ void WDTCB::ConfigureNgenLowThreshold(Property &property){
    ngenlow = property.GetUHex();
 
    SetNGENLowThreshold(&ngenlow);
+}
+
+void WDTCB::ConfigureFHitShaper(Property &property){
+   unsigned int hitshaper;
+   hitshaper = property.GetUInt();
+
+   SetFHitShaper(&hitshaper);
+}
+
+void WDTCB::ConfigureFVetoShaper(Property &property){
+   unsigned int vetoshaper;
+   vetoshaper = property.GetUInt();
+
+   SetFVetoShaper(&vetoshaper);
+}
+
+void WDTCB::ConfigureMargaritaMajVal(Property &property){
+   unsigned int majval;
+   majval = property.GetUInt();
+
+   SetMargaritaMajVal(&majval);
+}
+
+void WDTCB::ConfigureMargaritaTrgDly(Property &property){
+   unsigned int majtrgdly;
+   majtrgdly = property.GetUInt();
+
+   SetMargaritaTrgDly(&majtrgdly);
+}
+
+void WDTCB::ConfigureMargaritaMask(Property &property){
+   unsigned int mask;
+   mask = property.GetUHex();
+
+   SetMargaritaMask(&mask);
+}
+
+void WDTCB::ConfigureTofBarHitLogic(Property &property){
+   unsigned int logic;
+   logic = property.GetUHex();
+
+   SetTofBarHitLogic(&logic);
+}
+
+void WDTCB::ConfigureTofHitLogic(Property &property){
+   unsigned int logic;
+   logic = property.GetUHex();
+
+   SetTofHitLogic(&logic);
+}
+
+void WDTCB::ConfigureTofHitLogicAlternative(Property &property){
+   unsigned int logic;
+   logic = property.GetUHex();
+
+   SetTofHitLogicAlternative(&logic);
+}
+
+void WDTCB::ConfigureTofXMask(Property &property){
+   int64_t arraySize = 0;
+   const unsigned int* masks;
+
+   masks = property.GetUHexVector(&arraySize);
+   if(arraySize == 2){
+      SetTofXMask((unsigned int*)masks);
+   } else
+      throw std::runtime_error("TofXMask size should be 2 values");
+}
+
+void WDTCB::ConfigureTofYMask(Property &property){
+   int64_t arraySize = 0;
+   const unsigned int* masks;
+
+   masks = property.GetUHexVector(&arraySize);
+   if(arraySize == 2){
+      SetTofYMask((unsigned int*)masks);
+   } else
+      throw std::runtime_error("TofYMask size should be 2 values");
+}
+
+void WDTCB::ConfigureFCaloMask(Property &property){
+   unsigned int mask;
+   mask = property.GetUHex();
+   SetFCaloMask(&mask);
+}
+
+void WDTCB::ConfigureFNeutronMask(Property &property){
+   unsigned int mask;
+   mask = property.GetUHex();
+   SetFNeutronMask(&mask);
+}
+
+void WDTCB::ConfigureMatrixMask(Property &property){
+   int64_t arraySize = 0;
+   const unsigned int* masks;
+
+   masks = property.GetUHexVector(&arraySize);
+   if(arraySize == 3){
+      SetMatrixMask((unsigned int*)masks);
+   } else
+      throw std::runtime_error("TofYMask size should be 2 values");
+}
+
+void WDTCB::ConfigureInterspillDly(Property &property){
+   unsigned int dly;
+   dly = property.GetUInt();
+
+   SetInterspillDly(&dly);
 }
 
 // --- WDDCB ---
