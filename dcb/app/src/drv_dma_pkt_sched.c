@@ -255,16 +255,29 @@ int dps_reset (dps_dev_t * p_dps_dev)
  * @brief Set dma_packet_scheduler kernel driver UDP destination IP address attribute
  *
  * @param p_dps_dev pointer to the dps_dev instance to be accessed
- * @param p_ip_addr pointer to an unsigned string array containing the IP address
+ * @param p_ip_addr pointer to an unsigned char array containing the IP address
  *                  (address format addr[0].addr[1].addr[2].addr[3])
  * @return int greater or equal 0 on success, negative error code on failure
  */
-int dps_set_udp_dst_ip_addr (dps_dev_t * p_dps_dev, const unsigned char * p_ip_addr)
+int dps_set_udp_dst_ip_addr_charr (dps_dev_t * p_dps_dev, const unsigned char * p_ip_addr)
 {
   char buffer[32];
 
   sprintf(buffer, "%d.%d.%d.%d\0", p_ip_addr[0], p_ip_addr[1], p_ip_addr[2], p_ip_addr[3]);
   return udev_device_set_sysattr_value(p_dps_dev->dev, DPS_UDP_DST_IP_ADDR_ATTR, buffer);
+}
+
+/**
+ * @brief Set dma_packet_scheduler kernel driver UDP destination IP address attribute
+ *
+ * @param p_dps_dev pointer to the dps_dev instance to be accessed
+ * @param p_ip_addr pointer to a string containing the IP address (format n.n.n.n)
+ *                  (address format addr[0].addr[1].addr[2].addr[3])
+ * @return int greater or equal 0 on success, negative error code on failure
+ */
+int dps_set_udp_dst_ip_addr_str (dps_dev_t * p_dps_dev, char * p_ip_addr)
+{
+  return udev_device_set_sysattr_value(p_dps_dev->dev, DPS_UDP_DST_IP_ADDR_ATTR, p_ip_addr);
 }
 
 /**

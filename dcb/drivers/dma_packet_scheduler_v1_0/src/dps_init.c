@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include "../../../app/src/drv_dma_pkt_sched.h"
 
-//static const char udp_dst_ip_addr[16] = "129.129.193.185\0";
-static const char udp_dst_ip_addr[4] = {129,129,193,185};
-static unsigned int udp_dst_port = 5232;
+static char g_udp_dst_ip_addr[16] = "129.129.193.185\0";
+//static const char g_udp_dst_ip_addr[4] = {129,129,193,185};
+static unsigned int g_udp_dst_port = 5232;
 
 void usage(char *name)
 {
@@ -35,10 +35,10 @@ int main(int argc, char *argv[])
   dps_set_slot_enable (&dps_dev, slot_enable);
   printf("enabled slots 0x%08X\n", dps_get_slot_enable(&dps_dev));
 
-  dps_set_udp_dst_ip_addr(&dps_dev, udp_dst_ip_addr);
+  dps_set_udp_dst_ip_addr_str(&dps_dev, g_udp_dst_ip_addr);
   printf("UDP destination ip address %s\n", dps_get_udp_dst_ip_addr(&dps_dev));
 
-  dps_set_udp_dst_port(&dps_dev, udp_dst_port);
+  dps_set_udp_dst_port(&dps_dev, g_udp_dst_port);
   printf("UDP destination port %d\n", dps_get_udp_dst_port(&dps_dev));
 
   dps_set_event_mode(&dps_dev, DPS_EVENT_MODE_FREERUN); /* DPS_EVENT_MODE_COMMON, DPS_EVENT_MODE_FREERUN */
