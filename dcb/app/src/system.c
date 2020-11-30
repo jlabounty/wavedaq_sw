@@ -262,6 +262,19 @@ void init_gpio_mio()
   }
 }
 #endif
+/******************************************************************************/
+
+#ifndef LINUX_COMPILE
+int init_dma_pkt_sched()
+{
+  return dps_dev_init (SYSPTR(dma_pkt_sched), SYSFS_DPS_PATH);
+}
+#else
+int init_dma_pkt_sched()
+{
+  return -1;
+}
+#endif
 
 /******************************************************************************/
 
@@ -686,6 +699,7 @@ int init_system()
   /* init_si5324(); */ /* done by fsbl, not needed in application */
   init_lmk03000();
   init_sysmon();
+  init_dma_pkt_sched();
 
   return XST_SUCCESS;
 }

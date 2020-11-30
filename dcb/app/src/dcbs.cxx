@@ -45,6 +45,7 @@ extern "C" { // make all library functions callable from C++
 #include "update_config.h"
 #include "drv_bpl.h"
 #include "drv_tcb.h"
+#include "drv_dma_pkt_sched.h"
 #include "dbg.h"
 #include "system.h"
 #include "sc_io.h"
@@ -998,6 +999,12 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       // notify tcb readout driver of the new port and ip
       setTcbDataDestination(dest_addr, dest_port);
 
+      // TODO: Enable slots
+      // set UDP destination parameters in DMA packet scheduler (dps) driver
+      dps_set_udp_dst_ip_addr_str(&dps_dev, dest_addr);
+      dps_set_udp_dst_port(&dps_dev, dest_port);
+
+#if 0
       // TEMPORARY until serial links work
       // configure destination of all WDBs
       char cmdbuf[64];
@@ -1011,6 +1018,7 @@ void process_dcb_command(udp_connection &c, char *buffer) {
                           board[slot].type_id, board[slot].rev_id);
          }
       }
+#endif
 
    } else {
       c.sprintf("Unknown command: %s\n", buffer);
@@ -1146,7 +1154,7 @@ extern "C" { // make all library functions callable from C++
 
 }
 
-#define FLASH_BUF_SIZE      8192 // 8k 
+#define FLASH_BUF_SIZE      8192 // 8k
 #define PROG_BAR_ITEMS        40
 
 // block chars, see https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit
@@ -1185,7 +1193,7 @@ void show_progress(udp_connection &c, int item, const char* prefix, double perce
 
 //-------------------------------------------------------------------
 
-void write_fw(udp_connection &c, int slot, char *fw_file, 
+void write_fw(udp_connection &c, int slot, char *fw_file,
               flash_memory_map_type *flash_mem_map, const char *flash_partition_name)
 {
    int header_len;
@@ -1318,7 +1326,7 @@ void write_fw(udp_connection &c, int slot, char *fw_file,
 
 //-------------------------------------------------------------------
 
-void write_sw(udp_connection &c, int slot, char *sw_file, 
+void write_sw(udp_connection &c, int slot, char *sw_file,
               flash_memory_map_type *flash_mem_map, const char *flash_partition_name)
 {
    int header_len;
@@ -1800,6 +1808,6 @@ void init_reg_settings(udp_connection &c, int snr)
 
    c.sprintf("\r\nStoring register bank contents in SPI flash\r\n");
    c.flush();
-   
+
    reg_bank_store();
 }
