@@ -1001,8 +1001,8 @@ void process_dcb_command(udp_connection &c, char *buffer) {
 
       // TODO: Enable slots
       // set UDP destination parameters in DMA packet scheduler (dps) driver
-      dps_set_udp_dst_ip_addr_str(&dps_dev, dest_addr);
-      dps_set_udp_dst_port(&dps_dev, dest_port);
+      dps_set_udp_dst_ip_addr_str(SYSPTR(dma_pkt_sched), dest_addr);
+      dps_set_udp_dst_port(SYSPTR(dma_pkt_sched), dest_port);
 
 #if 0
       // TEMPORARY until serial links work

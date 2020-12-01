@@ -267,14 +267,44 @@ void init_gpio_mio()
 #ifndef LINUX_COMPILE
 int init_dma_pkt_sched()
 {
-  return dps_dev_init (SYSPTR(dma_pkt_sched), SYSFS_DPS_PATH);
+  return -1;
 }
 #else
 int init_dma_pkt_sched()
 {
-  return -1;
+  int ret;
+
+  ret = dps_dev_init(SYSPTR(dma_pkt_sched), SYSFS_DPS_PATH);
+  if (0 == ret)
+  {
+    dps_set_event_mode(SYSPTR(dma_pkt_sched), DPS_EVENT_MODE_FREERUN); /* DPS_EVENT_MODE_COMMON, DPS_EVENT_MODE_FREERUN */
+    dps_enable(SYSPTR(dma_pkt_sched));
+  }
+  else
+  {
+    if(DBG_ERR) xfs_printf("DMA Packet Scheduler Error: device initialization failed\r\n");
+  }
+
+  return ret;
 }
 #endif
+
+/******************************************************************************/
+
+int init_serdes_rcvr()
+{
+  unsigned int reg_val;
+
+  /* Reset SERDES receiver */
+  reg_val = DCB_ISERDES_RECEIVER_RST_MASK;
+  reg_bank_write(DCB_ISERDES_RECEIVER_RST_REG, &reg_val, 1);
+
+  /* Clear SERDES receiver error counters */
+  reg_val = DCB_ISERDES_RCVR_ERROR_COUNT_RST_MASK;
+  reg_bank_write(DCB_ISERDES_RCVR_ERROR_COUNT_RST_REG, &reg_val, 1);
+
+  return -1;
+}
 
 /******************************************************************************/
 
@@ -700,6 +730,7 @@ int init_system()
   init_lmk03000();
   init_sysmon();
   init_dma_pkt_sched();
+  init_serdes_rcvr();
 
   return XST_SUCCESS;
 }
