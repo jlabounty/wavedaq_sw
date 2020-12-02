@@ -541,6 +541,34 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       return;
    }
 
+   // crate
+   static int slotHvOn = 0;
+   if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/cr") == 0) {
+      if (gl->verbose)
+         std::cout << "Sending /cr to browser" << std::endl;
+
+      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+
+      mg_printf_http_chunk(nc, "{\n");
+      mg_printf_http_chunk(nc, "   \"CMB\": \"%s\",\n", "MSCB123");
+      mg_printf_http_chunk(nc, "   \"slot\": [\n");
+      for (int i=0 ; i<16 ; i++) {
+         mg_printf_http_chunk(nc, "      {\n");
+         mg_printf_http_chunk(nc, "        \"type\": \"%s\",\n", "WDB");
+         mg_printf_http_chunk(nc, "        \"serial\": %d,\n", i);
+         mg_printf_http_chunk(nc, "        \"hvOn\": %d\n", i == slotHvOn);
+         if (i == 15)
+            mg_printf_http_chunk(nc, "      }\n");
+         else
+            mg_printf_http_chunk(nc, "      },\n");
+      }
+      slotHvOn = (slotHvOn + 1) % 16;
+      mg_printf_http_chunk(nc, "   ]\n");
+      mg_printf_http_chunk(nc, "}\n");
+      mg_send_http_chunk(nc, "", 0); // end of response
+      return;
+   }
+
    // boards
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/wdb") == 0) {
       mg_get_http_var(&hm->query_string, "b", str, sizeof(str));

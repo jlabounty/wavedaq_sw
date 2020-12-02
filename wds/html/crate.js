@@ -5,7 +5,7 @@
 //  Created by Stefan Ritt on 02/12/2020.
 //
 
-var CRATE; // global crate object
+let CRATE; // global crate object
 
 // extend 2d canvas object
 CanvasRenderingContext2D.prototype.drawLine = function (x1, y1, x2, y2) {
@@ -36,24 +36,19 @@ function init() {
    // create Scope object
    CRATE = new Crate(document.getElementById("crate"));
 
-   // create 16 WDB
-   CRATE.wdb = [];
-   for (let i=0 ; i<16 ; i++) {
-      CRATE.wdb[i] = new WDB();
-      CRATE.wdb[i].slot = i;
-   }
-   CRATE.wdb[3].hvOn = true;
-
    // draw crate
    resize();
 
    // add resize event handler
    window.addEventListener("resize", resize);
 
+   // schedule loadCrate()
+   CRATE.timer = {};
+   CRATE.timer.loadCrate = window.setTimeout(loadCrate, 10);
+
    // load spinning wheel image
    CRATE.spinningWheel = new Image();
    CRATE.spinningWheel.src = "spinning-wheel-wds.gif";
-
 }
 
 function resize() {
@@ -61,18 +56,12 @@ function resize() {
       document.documentElement.clientHeight);
 }
 
-function WDB() {
-  this.slot = 0;
-  this.status = 0;
-  this.hvOn = false;
-}
-
 function Crate(div) { // constructor
    this.canvas = document.createElement("canvas");
    div.appendChild(this.canvas);
 }
 
-Crate.prototype.resize = function (width, height) {
+Crate.prototype.resize = function (width) {
    this.canvas.width = width;
    this.canvas.height = width / 1000 * 270;
    this.draw();
@@ -82,6 +71,7 @@ Crate.prototype.draw = function () {
    let ctx = this.canvas.getContext("2d");
 
    // scale canvas such that a 1000x270 px rectangle fills the whole window
+   ctx.save();
    ctx.scale(this.canvas.width / 1000, this.canvas.width / 1000);
 
    ctx.fillStyle = "#E0E0E0";
@@ -94,17 +84,19 @@ Crate.prototype.draw = function () {
    ctx.fillRect(15, 35, 30, 200);
    ctx.fillRect(955, 35, 30, 200);
 
-   // CMB
+   //---- draw CMB
    ctx.save();
    ctx.translate(807.5, 7.5);
    ctx.fillStyle = "#E0E0E0";
    ctx.fillRect(0, 0, 130, 255);
 
-   ctx.textAlign = "center";
-   ctx.textBaseline = "middle";
-   ctx.fillStyle = "#000000";
-   ctx.font = "14px Sans-Serif"
-   ctx.fillText("MSCBXXX", 65, 10);
+   if (CRATE.crate !== undefined) {
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "#000000";
+      ctx.font = "14px Sans-Serif"
+      ctx.fillText(CRATE.crate.CMB, 65, 10);
+   }
 
    ctx.fillStyle = "#A0A0A0";
    ctx.fillRect(45, 18.5, 30, 6);
@@ -116,11 +108,11 @@ Crate.prototype.draw = function () {
    ctx.fillText("CMB", 80, 247);
 
    // screws
-   ctx.fillStyle = "#928775";
+   ctx.fillStyle = "#928776";
    ctx.beginPath();
    ctx.arc(12, 28, 5, 0, 2*Math.PI);
    ctx.fill();
-   ctx.fillStyle = "#D3D5C5";
+   ctx.fillStyle = "#D3D5C6";
    ctx.beginPath();
    ctx.arc(12, 28, 2, 0, 2*Math.PI);
    ctx.fill();
@@ -226,7 +218,13 @@ Crate.prototype.draw = function () {
 
    ctx.restore();
 
-   // WDB
+   //---- draw slots
+
+   if (CRATE.crate === undefined) {
+      ctx.restore();
+      return;
+   }
+
    for (let slot=0 ; slot<16 ; slot++) {
       ctx.save();
 
@@ -298,7 +296,7 @@ Crate.prototype.draw = function () {
       ctx.fill();
 
       // HV LED
-      if (this.wdb[slot].hvOn)
+      if (this.crate.slot[slot].hvOn)
          ctx.fillStyle = "#FF2020";
       else
          ctx.fillStyle = "#57241A";
@@ -345,8 +343,64 @@ Crate.prototype.draw = function () {
       ctx.fillRect(4, 234, 33, 18);
       ctx.fillStyle = "#000000";
       ctx.font = "8px Sans-Serif"
-      ctx.fillText("WDXXX", 20, 243);
+      ctx.fillText("WD" + this.crate.slot[slot].serial, 20, 243);
 
       ctx.restore();
    }
+
+   ctx.restore();
+}
+
+function loadCrate() {
+   // send AJAX request
+   CRATE.req = new XMLHttpRequest();
+   CRATE.req.onreadystatechange = receiveCrate;
+   CRATE.req.open("GET", "cr?&r=" + Math.random(), true); // avoid cached results
+
+   try {
+      CRATE.req.send();
+   } catch (e) {
+      connectionBroken();
+   }
+}
+
+function receiveCrate() {
+   if (CRATE.req.readyState === 4 && CRATE.req.status === 200) {
+      CRATE.crate = JSON.parse(CRATE.req.responseText);
+      CRATE.draw();
+      CRATE.timer.loadCrate = window.setTimeout(loadCrate, 1000);
+   } else if (CRATE.req.readyState === 4 && CRATE.req.status === 0) {
+      connectionBroken();
+   }
+}
+
+function connectionBroken() {
+   if (CRATE.connected) {
+      CRATE.dlgReconnect = dlgMessage("Error", "Connection to server broken.<br>Trying to reconnect ..." +
+         "<br /><br /><br /><img alt=\"Please wait\" src=\"spinning-wheel-wds.gif\">", true, true);
+      let b = document.getElementById("dlgMessageButton");
+      b.innerHTML = "Cancel";
+      CRATE.connected = false;
+      CRATE.timer.reconnect = window.setTimeout(reconnect, 1000);
+   }
+
+   if (CRATE.timer.loadCrate !== undefined)
+      clearTimeout(OSC.timer.loadCrate);
+}
+
+function reconnect() {
+   if (CRATE.dlgReconnect.parentElement === undefined)
+      return;
+   let req = new XMLHttpRequest();
+   req.onreadystatechange = function () {
+      if (req.readyState === 4 && req.status === 200) {
+         // reload page
+         location.reload();
+      } else if (req.readyState === 4) {
+         CRATE.timer.reconnect = window.setTimeout(reconnect, 1000);
+      }
+   };
+
+   req.open("GET", "build", true);
+   req.send();
 }
