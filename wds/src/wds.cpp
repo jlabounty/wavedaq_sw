@@ -553,7 +553,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
 
       if (gl->dcb.size() == 0) {
          // indicate we are not connected via DCB
-         mg_printf_http_chunk(nc, "   \"DCB\": \"0\",\n");
+         mg_printf_http_chunk(nc, "   \"DCB\": 0\n");
          mg_printf_http_chunk(nc, "}\n");
          mg_send_http_chunk(nc, "", 0); // end of response
          return;
