@@ -625,10 +625,10 @@ void DCB::ScanCrate() {
          if (bSuccess) {
             // copy data
             for (unsigned int i = 0; i < 18; i++) {
-               board[i].vendor_id  = readBuf[i*4+4];
-               board[i].type_id    = readBuf[i*4+5];
-               board[i].rev_id     = readBuf[i*4+6];
-               board[i].variant_id = readBuf[i*4+7];
+               mWDAQBoard[i].vendor_id  = readBuf[i*4+4];
+               mWDAQBoard[i].type_id    = readBuf[i*4+5];
+               mWDAQBoard[i].rev_id     = readBuf[i*4+6];
+               mWDAQBoard[i].variant_id = readBuf[i*4+7];
             }
             return;
          }
@@ -702,14 +702,14 @@ WDAQ_BRD_TYPE_NAME;
 
 void DCB::PrintCrate() {
    for (int i=0 ; i<18 ; i++) {
-         if (board[i].type_id < BRD_TYPE_ID_MAX &&
-             board[i].vendor_id <= BRD_VENDOR_ID_MAX) {
+         if (mWDAQBoard[i].type_id < BRD_TYPE_ID_MAX &&
+                 mWDAQBoard[i].vendor_id <= BRD_VENDOR_ID_MAX) {
          std::cout << "Slot " << std::setw(2) << i << ": Found board \""
-            << wdaq_brd_type_name[board[i].type_id]
-            << "\", Revision " << (char)('A'+board[i].rev_id)
-            << ", Variant " << board[i].variant_id
+            << wdaq_brd_type_name[mWDAQBoard[i].type_id]
+            << "\", Revision " << (char)('A'+mWDAQBoard[i].rev_id)
+            << ", Variant " << mWDAQBoard[i].variant_id
             << ", Vendor \""
-            << wdaq_brd_vendor_name[board[i].vendor_id]
+            << wdaq_brd_vendor_name[mWDAQBoard[i].vendor_id]
             << "\"" << std::endl;
       }
    }

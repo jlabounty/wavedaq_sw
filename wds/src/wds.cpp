@@ -544,8 +544,8 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
    // crate
    static int slotHvOn = 0;
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/cr") == 0) {
-      if (gl->verbose)
-         std::cout << "Sending /cr to browser" << std::endl;
+//      if (gl->verbose)
+//         std::cout << "Sending /cr to browser" << std::endl;
 
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
 
@@ -1101,9 +1101,7 @@ void showUsage(std::string name) {
    std::cerr << "  -w <address>    Address(es) of WaveDREAM board(s) in the form" << std::endl;
    std::cerr << "     wd<nnn>      IP address of board wd<nnn>" << std::endl;
    std::cerr << "     nnn          Number of board wd<nnn>" << std::endl;
-   std::cerr << "     dcb<nn>:<mm> Board in slot <mm> controlled by dcb<nn>" << std::endl;
-   std::cerr << "     dcb<nn>:*    All boards controlled by dcb<nn>" << std::endl;
-   std::cerr << "     dcb<nn>      All boards controlled by dcb<nn>" << std::endl;
+   std::cerr << "     dcb<nn>      All boards in crate of dcb<nn>" << std::endl;
    std::cerr << "                  multiple -w <> -w <> flags are possible" << std::endl;
 }
 
@@ -1118,6 +1116,84 @@ void handler(int sig) {
    fprintf(stderr, "Error: signal %d:\n", sig);
    backtrace_symbols_fd(array, size, STDERR_FILENO);
    exit(1);
+}
+
+void connectWDB(GLOBALS &gl, WDB *b) {
+
+   std::cout << "Connect to " << b->GetAddr() << " ... " << std::flush;
+   try {
+
+      b->SetVerbose(gl.verbose);
+      b->SetLogFile(gl.logFileName);
+      b->Connect();
+      b->ReceiveStatusRegisters();
+      b->ReceiveControlRegisters();
+      if (gl.verbose) {
+         std::cout << std::endl << "========== WDB Info ==========" << std::endl;
+         b->PrintVersion();
+      }
+
+      // load calibration data for board
+      b->LoadVoltageCalibration(b->GetDrsSampleFreqMhz(), gl.wdsDir);
+      b->LoadTimeCalibration(b->GetDrsSampleFreqMhz(), gl.wdsDir);
+
+      // debug output
+      if (gl.dbgRx > 0)
+         b->SetMcxRxSigSel(gl.dbgRx);
+      if (gl.dbgTx > 0)
+         b->SetMcxTxSigSel(gl.dbgTx);
+
+      // reset PLLs
+      if (gl.reset) {
+         b->ResetAllPll();
+         auto f = b->GetDrsSampleFreqMhz();
+         if (f > 5120)
+            f = 5120;
+         if (f < 700)
+            f = 700;
+         b->SetDrsSampleFreq(f);
+         sleep_ms(10);
+         b->GetPllLock(true);
+      }
+
+      // check PLL locked status
+      if (b->GetPllLock(false) != 0x1FF) {
+         std::ostringstream str;
+         str << "PLL not locked on board " << b->GetAddr() << ". Mask = 0x" << std::hex << b->GetPllLock(false);
+         throw std::runtime_error(str.str());
+      }
+
+      if (b->GetDrsChTxEn() > 0) {
+         gl.readoutMode = cReadoutModeDRS;
+         b->SetChnTxEn(b->GetDrsChTxEn());
+      } else if (b->GetAdcChTxEn() > 0) {
+         gl.readoutMode = cReadoutModeADC;
+         b->SetChnTxEn(b->GetAdcChTxEn());
+      } else if (b->GetTdcChTxEn() > 0) {
+         gl.readoutMode = cReadoutModeTDC;
+         b->SetChnTxEn(b->GetTdcChTxEn());
+      } else {
+         b->SetDrsChTxEn(0xFFFF);
+         b->SetChnTxEn(0xFFFF);
+         gl.readoutMode = cReadoutModeDRS;
+      }
+
+      // enable internal trigger if external trigger is not enabled
+      if (!b->GetExtAsyncTriggerEn())
+         b->SetPatternTriggerEn(1);
+
+      // disable scaler readout
+      b->SetSclTxEn(0);
+
+   } catch (std::runtime_error &e) {
+      std::cout << std::endl;
+      std::cout << e.what() << std::endl;
+      std::cout << "Aborting." << std::endl;
+      return;
+   }
+   std::cout << "OK" << std::endl;
+   if (gl.verbose)
+      std::cout << std::endl;
 }
 
 int main(int argc, const char *argv[]) {
@@ -1238,14 +1314,7 @@ int main(int argc, const char *argv[]) {
 
             if (b.substr(0, 3) == "DCB") {
                try {
-                  DCB *dcb;
-                  if (b.find(':')) {
-                     std::cout << "Connect to " << b.substr(0, b.find(':')) << " ... " << std::flush;
-                     dcb = new DCB(b.substr(0, b.find(':')), gl.verbose);
-                  } else {
-                     std::cout << "Connect to " << b << " ... " << std::flush;
-                     dcb = new DCB(b, gl.verbose);
-                  }
+                  DCB *dcb = new DCB(b, gl.verbose);
                   dcb->Connect();
                   dcb->ScanCrate();
                   if (gl.verbose) {
@@ -1257,14 +1326,13 @@ int main(int argc, const char *argv[]) {
                   }
                   gl.dcb.push_back(dcb);
 
-                  if (b.find(':') == std::string::npos || b.find('*') != std::string::npos) {
-                     for (int j=0 ; j<16 ; j++) {
-                        if (dcb->GetBoardId(j)->type_id == BRD_TYPE_ID_WDB) {
-                           gl.wdb.push_back(new WDB(dcb, j, gl.verbose));
-                        }
+                  for (int j=0 ; j<16 ; j++) {
+                     if (dcb->GetBoardId(j)->type_id == BRD_TYPE_ID_WDB) {
+                        WDB *wdb = new WDB(dcb, j, gl.verbose);
+                        connectWDB(gl, wdb);
+                        dcb->SetWDB(j, wdb);
+                        gl.wdb.push_back(wdb);
                      }
-                  } else {
-                     gl.wdb.push_back(new WDB(dcb, std::stoi(b.substr(b.find(':')+1)), gl.verbose));
                   }
                } catch (std::runtime_error &e) {
                   std::cout << std::endl;
@@ -1315,91 +1383,6 @@ int main(int argc, const char *argv[]) {
    if (gl.wdb.empty()) {
       std::cerr << "You have to specify at least one WaveDREAM board via the \"-w\" or the \"-d\" option." << std::endl;
       return 1;
-   }
-
-   // connect to all WDB and retrieve registers
-   for (auto &b: gl.wdb) {
-      std::cout << "Connect to " << b->GetAddr() << " ... " << std::flush;
-      try {
-         if (!gl.demoMode) {
-            b->SetVerbose(gl.verbose);
-            b->SetLogFile(gl.logFileName);
-            b->Connect();
-            b->ReceiveStatusRegisters();
-            b->ReceiveControlRegisters();
-            if (gl.verbose) {
-               std::cout << std::endl << "========== WDB Info ==========" << std::endl;
-               b->PrintVersion();
-            }
-
-            // load calibration data for board
-            b->LoadVoltageCalibration(b->GetDrsSampleFreqMhz(), gl.wdsDir);
-            b->LoadTimeCalibration(b->GetDrsSampleFreqMhz(), gl.wdsDir);
-
-            // debug output
-            if (gl.dbgRx > 0)
-               b->SetMcxRxSigSel(gl.dbgRx);
-            if (gl.dbgTx > 0)
-               b->SetMcxTxSigSel(gl.dbgTx);
-
-            // reset PLLs
-            if (gl.reset) {
-               b->ResetAllPll();
-               auto f = b->GetDrsSampleFreqMhz();
-               if (f > 5120)
-                  f = 5120;
-               if (f < 700)
-                  f = 700;
-               b->SetDrsSampleFreq(f);
-               sleep_ms(10);
-               b->GetPllLock(true);
-            }
-
-            // check PLL locked status
-            if (b->GetPllLock(false) != 0x1FF) {
-               std::ostringstream str;
-               str << "PLL not locked on board " << b->GetAddr() << ". Mask = 0x" << std::hex << b->GetPllLock(false);
-               throw std::runtime_error(str.str());
-            }
-
-            if (b->GetDrsChTxEn() > 0) {
-               gl.readoutMode = cReadoutModeDRS;
-               b->SetChnTxEn(b->GetDrsChTxEn());
-            } else if (b->GetAdcChTxEn() > 0) {
-               gl.readoutMode = cReadoutModeADC;
-               b->SetChnTxEn(b->GetAdcChTxEn());
-            } else if (b->GetTdcChTxEn() > 0) {
-               gl.readoutMode = cReadoutModeTDC;
-               b->SetChnTxEn(b->GetTdcChTxEn());
-            } else {
-               b->SetDrsChTxEn(0xFFFF);
-               b->SetChnTxEn(0xFFFF);
-               gl.readoutMode = cReadoutModeDRS;
-            }
-
-            // enable internal trigger if external trigger is not enabled
-            if (!b->GetExtAsyncTriggerEn())
-               b->SetPatternTriggerEn(1);
-
-            // disable scaler readout
-            b->SetSclTxEn(0);
-
-         } else {
-            b->Connect();
-
-            // turn all channels on in demo mode
-            b->SetDrsChTxEn(0xFFFF);
-            b->SetChnTxEn(0xFFFF);
-         }
-      } catch (std::runtime_error &e) {
-         std::cout << std::endl;
-         std::cout << e.what() << std::endl;
-         std::cout << "Aborting." << std::endl;
-         return 1;
-      }
-      std::cout << "OK" << std::endl;
-      if (gl.verbose)
-         std::cout << std::endl;
    }
 
    if (gl.reset) {

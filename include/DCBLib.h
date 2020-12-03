@@ -48,7 +48,8 @@ class DCB: public DCBREG {
    static int       gBinSocket;
    static unsigned short udpSequenceNumber;
 
-   WDAQ_BRD         board[18];
+   WDAQ_BRD         mWDAQBoard[18];
+   WDB              *mWDB[16];
 
 public:
    
@@ -83,13 +84,15 @@ public:
    void PrintCrate();
    bool GetSendBlock() { return mSendBlocked; }
    void SetSendBlock(bool flag) { mSendBlocked = flag; }
-   WDAQ_BRD *GetBoardId(int slot) { return &board[slot]; }
+   WDAQ_BRD *GetBoardId(int slot) { return &mWDAQBoard[slot]; }
    void SetDestinationPort(int port);
 
    // setter & getter ----------
    std::string GetName() { return mDCBName; }
    int GetReceiveTimeoutMs() { return mReceiveTimeoutMs; };
    void SetReceiveTimeoutMs(int to) { mReceiveTimeoutMs = to; };
+
+   void SetWDB(int slot, WDB *wdb) { mWDB[slot] = wdb; }
    
    // high level status registers
    std::string GetFullBuild();

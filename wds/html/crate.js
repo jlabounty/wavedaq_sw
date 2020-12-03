@@ -104,10 +104,17 @@ Crate.prototype.draw = function () {
       return;
    }
 
+   //---- draw DCB
+   ctx.save();
+   ctx.translate(62.5 + 8 * 41.4, 7.5);
+   drawDCB(ctx);
+   ctx.restore();
+
    //---- draw slots
    for (let slot=0 ; slot<16 ; slot++) {
-      if (true || this.crate.slot[slot].vendor_id === BRD_VENDOR_ID_PSI &&
-          this.crate.slot[slot].type_id === BRD_TYPE_ID_WDB) {
+      if (CRATE.crate.slot !== undefined &&
+          CRATE.crate.slot[slot].vendor_id === BRD_VENDOR_ID_PSI &&
+          CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_WDB) {
          ctx.save();
 
          if (slot < 8)
@@ -120,12 +127,6 @@ Crate.prototype.draw = function () {
          ctx.restore();
       }
    }
-
-   //---- draw DCB
-   ctx.save();
-   ctx.translate(62.5 + 8 * 41.4, 7.5);
-   drawDCB(ctx);
-   ctx.restore();
 
    //---- draw TCB
    ctx.save();
@@ -148,7 +149,7 @@ function drawCMB(ctx) {
       ctx.textBaseline = "middle";
       ctx.fillStyle = "#000000";
       ctx.font = "14px Sans-Serif"
-      ctx.fillText(CRATE.crate.CMB, 65, 10);
+      ctx.fillText("MSCBXXX", 65, 10);
    }
 
    ctx.fillStyle = "#A0A0A0";
@@ -362,9 +363,9 @@ function drawWDB(ctx, slot) {
    ctx.fillStyle = "#B5CFBB";
    ctx.font = "4px Sans-Serif";
    ctx.rotate(Math.PI / 2);
-   ctx.fillText("RDY", 62, -22);
+   ctx.fillText("RDY", 61, -22);
    ctx.fillText("HV-ON", 126, -22);
-   ctx.fillText("RX", 141, -22);
+   ctx.fillText("RX", 140, -22);
    ctx.fillText("TX", 154, -22);
    ctx.fillText("TEMP", 168, -22);
    for (let c=0 ; c<16 ; c++)
