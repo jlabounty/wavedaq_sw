@@ -550,13 +550,46 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
 
       mg_printf_http_chunk(nc, "{\n");
-      mg_printf_http_chunk(nc, "   \"CMB\": \"%s\",\n", "MSCB123");
+
+      if (gl->dcb.size() == 0) {
+         // indicate we are not connected via DCB
+         mg_printf_http_chunk(nc, "   \"DCB\": \"0\",\n");
+         mg_printf_http_chunk(nc, "}\n");
+         mg_send_http_chunk(nc, "", 0); // end of response
+         return;
+      }
+
+      DCB *dcb = gl->dcb[0];
+      dcb->ScanCrate();
+      mg_printf_http_chunk(nc, "   \"DCB\": \"%s\",\n", dcb->GetName().c_str());
+      mg_printf_http_chunk(nc, "   \"CMB\": \"%s\",\n", "MSCBXXX");
       mg_printf_http_chunk(nc, "   \"slot\": [\n");
       for (int i=0 ; i<16 ; i++) {
          mg_printf_http_chunk(nc, "      {\n");
-         mg_printf_http_chunk(nc, "        \"type\": \"%s\",\n", "WDB");
-         mg_printf_http_chunk(nc, "        \"serial\": %d,\n", i);
-         mg_printf_http_chunk(nc, "        \"hvOn\": %d\n", i == slotHvOn);
+         mg_printf_http_chunk(nc, "        \"vendor_id\": %d,\n", dcb->GetBoardId(i)->vendor_id);
+         mg_printf_http_chunk(nc, "        \"type_id\": %d,\n", dcb->GetBoardId(i)->type_id);
+         mg_printf_http_chunk(nc, "        \"rev_id\": %d,\n", dcb->GetBoardId(i)->rev_id);
+         mg_printf_http_chunk(nc, "        \"variant_id\": %d,\n", dcb->GetBoardId(i)->variant_id);
+
+         // WDB specific items
+         if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
+            mg_printf_http_chunk(nc, "        \"variant_id\": %d,\n", dcb->GetBoardId(i)->variant_id);
+
+            // search board in WDB list
+            int j;
+            for (j=0 ; j<gl->wdb.size() ; j++)
+               if (gl->wdb[j]->GetDcbInterface() == dcb && gl->wdb[j]->GetSlotNumber() == i)
+                  break;
+            if (j < gl->wdb.size()) {
+               mg_printf_http_chunk(nc, "        \"serial\": %d,\n", gl->wdb[j]->GetSerialNumber());
+               float hv = 0;
+               gl->wdb[j]->GetHVBaseVoltage(hv);
+               mg_printf_http_chunk(nc, "        \"hv_on\": %d\n", hv > 10 ? 1:0);
+            }
+         } else {
+            mg_printf_http_chunk(nc, "        \"variant_id\": %d\n", dcb->GetBoardId(i)->variant_id);
+         }
+
          if (i == 15)
             mg_printf_http_chunk(nc, "      }\n");
          else

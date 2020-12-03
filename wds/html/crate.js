@@ -7,6 +7,18 @@
 
 let CRATE; // global crate object
 
+// Board vendor IDs
+const BRD_VENDOR_ID_UNKNOWN = 0;
+const BRD_VENDOR_ID_PSI     = 1;
+const BRD_VENDOR_ID_PISA    = 2;
+
+// Board type IDs
+const BRD_TYPE_ID_NONE0     = 0;
+const BRD_TYPE_ID_NONE1     = 1;
+const BRD_TYPE_ID_WDB       = 2;
+const BRD_TYPE_ID_DCB       = 3;
+const BRD_TYPE_ID_TCB       = 4;
+
 // extend 2d canvas object
 CanvasRenderingContext2D.prototype.drawLine = function (x1, y1, x2, y2) {
    this.beginPath();
@@ -226,126 +238,129 @@ Crate.prototype.draw = function () {
    }
 
    for (let slot=0 ; slot<16 ; slot++) {
-      ctx.save();
+      if (this.crate.slot[slot].vendor_id === BRD_VENDOR_ID_PSI &&
+          this.crate.slot[slot].type_id === BRD_TYPE_ID_WDB) {
+         ctx.save();
 
-      if (slot < 8)
-         ctx.translate(62.5+slot*41.4, 7.5);
-      else
-         ctx.translate(62.5+(slot+2)*41.4, 7.5);
+         if (slot < 8)
+            ctx.translate(62.5 + slot * 41.4, 7.5);
+         else
+            ctx.translate(62.5 + (slot + 2) * 41.4, 7.5);
 
-      ctx.fillStyle = "#2D674A";
-      ctx.fillRect(0, 0, 40, 255);
+         ctx.fillStyle = "#2D674A";
+         ctx.fillRect(0, 0, 40, 255);
 
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.font = "5px Sans-Serif"
-      ctx.fillStyle = "#B5CFBB";
-      ctx.fillText("WaveDREAM2", 20, 10);
+         ctx.textAlign = "center";
+         ctx.textBaseline = "middle";
+         ctx.font = "5px Sans-Serif"
+         ctx.fillStyle = "#B5CFBB";
+         ctx.fillText("WaveDREAM2", 20, 10);
 
-      // screw
-      ctx.fillStyle = "#928775";
-      ctx.beginPath();
-      ctx.arc(12, 28, 5, 0, 2*Math.PI);
-      ctx.fill();
-      ctx.fillStyle = "#D3D5C5";
-      ctx.beginPath();
-      ctx.arc(12, 28, 2, 0, 2*Math.PI);
-      ctx.fill();
-
-      // logo
-      ctx.fillStyle = "#5F826D";
-      ctx.fillRect(3, 37, 20, 3);
-      ctx.font = "7px Sans-Serif"
-      ctx.fillStyle = "#B5CFBB";
-      ctx.fillText("PSI", 13, 38.5);
-
-      // holes
-      ctx.fillStyle = "#202020";
-      ctx.fillRect(26, 22, 11, 24);
-      ctx.fillRect(26, 67, 11, 24);
-      ctx.fillRect(26, 94, 11, 24);
-      ctx.fillRect(26, 176, 11, 24);
-
-      // input MCX
-      ctx.fillStyle = "#BBA76E";
-      ctx.fillRect(5, 45, 12, 167);
-      for (let c=0 ; c<16 ; c++) {
-         ctx.fillStyle = "#7E5A21";
-         ctx.strokeStyle = "#E1C591";
+         // screw
+         ctx.fillStyle = "#928775";
          ctx.beginPath();
-         ctx.arc(11, 50+c*10.4, 4, 0, 2*Math.PI);
+         ctx.arc(12, 28, 5, 0, 2 * Math.PI);
          ctx.fill();
-         ctx.stroke();
-
-         ctx.fillStyle = "#7E5A21";
-         ctx.strokeStyle = "#E1C591";
+         ctx.fillStyle = "#D3D5C5";
          ctx.beginPath();
-         ctx.arc(11, 50+c*10.4, 1, 0, 2*Math.PI);
+         ctx.arc(12, 28, 2, 0, 2 * Math.PI);
          ctx.fill();
-         ctx.stroke();
+
+         // logo
+         ctx.fillStyle = "#5F826D";
+         ctx.fillRect(3, 37, 20, 3);
+         ctx.font = "7px Sans-Serif"
+         ctx.fillStyle = "#B5CFBB";
+         ctx.fillText("PSI", 13, 38.5);
+
+         // holes
+         ctx.fillStyle = "#202020";
+         ctx.fillRect(26, 22, 11, 24);
+         ctx.fillRect(26, 67, 11, 24);
+         ctx.fillRect(26, 94, 11, 24);
+         ctx.fillRect(26, 176, 11, 24);
+
+         // input MCX
+         ctx.fillStyle = "#BBA76E";
+         ctx.fillRect(5, 45, 12, 167);
+         for (let c = 0; c < 16; c++) {
+            ctx.fillStyle = "#7E5A21";
+            ctx.strokeStyle = "#E1C591";
+            ctx.beginPath();
+            ctx.arc(11, 50 + c * 10.4, 4, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#7E5A21";
+            ctx.strokeStyle = "#E1C591";
+            ctx.beginPath();
+            ctx.arc(11, 50 + c * 10.4, 1, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+         }
+         ctx.font = "5px Sans-Serif"
+         ctx.fillStyle = "#B5CFBB";
+         ctx.fillText("CH0", 24, 50);
+         ctx.fillText("CH15", 25, 207);
+
+         // Status LED
+         ctx.fillStyle = "#5EE5AA";
+         ctx.beginPath();
+         ctx.arc(30, 61, 4, 0, 2 * Math.PI);
+         ctx.fill();
+
+         // HV LED
+         if (this.crate.slot[slot].hv_on)
+            ctx.fillStyle = "#FF2020";
+         else
+            ctx.fillStyle = "#57241A";
+         ctx.beginPath();
+         ctx.arc(30, 127, 4, 0, 2 * Math.PI);
+         ctx.fill();
+
+         for (let c = 0; c < 3; c++) {
+            ctx.fillStyle = "#7E5A21";
+            ctx.strokeStyle = "#E1C591";
+            ctx.beginPath();
+            ctx.arc(32, 140 + c * 14, 4, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#7E5A21";
+            ctx.strokeStyle = "#E1C591";
+            ctx.beginPath();
+            ctx.arc(32, 140 + c * 14, 1, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+         }
+
+         ctx.save();
+         ctx.fillStyle = "#B5CFBB";
+         ctx.rotate(Math.PI / 2);
+         ctx.fillText("RDY", 62, -22);
+         ctx.fillText("HV ON", 126, -22);
+         ctx.fillText("CK", 141, -22);
+         ctx.fillText("TR", 154, -22);
+         ctx.fillText("TMP", 168, -22);
+         ctx.restore();
+
+         // lower handle
+         ctx.fillStyle = "#404040";
+         ctx.fillRect(1, 212, 38, 44);
+         ctx.fillStyle = "#A83737";
+         ctx.fillRect(12, 212, 17, 10);
+         ctx.fillStyle = "#A39C8D";
+         ctx.fillRect(1, 222, 38, 6);
+
+         // label
+         ctx.fillStyle = "#FFFFFF";
+         ctx.fillRect(4, 234, 33, 18);
+         ctx.fillStyle = "#000000";
+         ctx.font = "8px Sans-Serif"
+         ctx.fillText("WD" + this.crate.slot[slot].serial, 20, 243);
+
+         ctx.restore();
       }
-      ctx.font = "5px Sans-Serif"
-      ctx.fillStyle = "#B5CFBB";
-      ctx.fillText("CH0", 24, 50);
-      ctx.fillText("CH15", 25, 207);
-
-      // Status LED
-      ctx.fillStyle = "#5EE5AA";
-      ctx.beginPath();
-      ctx.arc(30, 61, 4, 0, 2*Math.PI);
-      ctx.fill();
-
-      // HV LED
-      if (this.crate.slot[slot].hvOn)
-         ctx.fillStyle = "#FF2020";
-      else
-         ctx.fillStyle = "#57241A";
-      ctx.beginPath();
-      ctx.arc(30, 127, 4, 0, 2*Math.PI);
-      ctx.fill();
-
-      for (let c=0 ; c<3 ; c++) {
-         ctx.fillStyle = "#7E5A21";
-         ctx.strokeStyle = "#E1C591";
-         ctx.beginPath();
-         ctx.arc(32, 140+c*14, 4, 0, 2*Math.PI);
-         ctx.fill();
-         ctx.stroke();
-
-         ctx.fillStyle = "#7E5A21";
-         ctx.strokeStyle = "#E1C591";
-         ctx.beginPath();
-         ctx.arc(32, 140+c*14, 1, 0, 2*Math.PI);
-         ctx.fill();
-         ctx.stroke();
-      }
-
-      ctx.save();
-      ctx.fillStyle = "#B5CFBB";
-      ctx.rotate(Math.PI/2);
-      ctx.fillText("RDY", 62, -22);
-      ctx.fillText("HV ON", 126, -22);
-      ctx.fillText("CK", 141, -22);
-      ctx.fillText("TR", 154, -22);
-      ctx.fillText("TMP", 168, -22);
-      ctx.restore();
-
-      // lower handle
-      ctx.fillStyle = "#404040";
-      ctx.fillRect(1, 212, 38, 44);
-      ctx.fillStyle = "#A83737";
-      ctx.fillRect(12, 212, 17, 10);
-      ctx.fillStyle = "#A39C8D";
-      ctx.fillRect(1, 222, 38, 6);
-
-      // label
-      ctx.fillStyle = "#FFFFFF";
-      ctx.fillRect(4, 234, 33, 18);
-      ctx.fillStyle = "#000000";
-      ctx.font = "8px Sans-Serif"
-      ctx.fillText("WD" + this.crate.slot[slot].serial, 20, 243);
-
-      ctx.restore();
    }
 
    ctx.restore();
@@ -368,7 +383,8 @@ function receiveCrate() {
    if (CRATE.req.readyState === 4 && CRATE.req.status === 200) {
       CRATE.crate = JSON.parse(CRATE.req.responseText);
       CRATE.draw();
-      CRATE.timer.loadCrate = window.setTimeout(loadCrate, 1000);
+      CRATE.connected = true;
+      CRATE.timer.loadCrate = window.setTimeout(loadCrate, 100);
    } else if (CRATE.req.readyState === 4 && CRATE.req.status === 0) {
       connectionBroken();
    }
@@ -385,7 +401,7 @@ function connectionBroken() {
    }
 
    if (CRATE.timer.loadCrate !== undefined)
-      clearTimeout(OSC.timer.loadCrate);
+      clearTimeout(CRATE.timer.loadCrate);
 }
 
 function reconnect() {
