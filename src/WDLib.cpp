@@ -2162,6 +2162,7 @@ void WDTCB::ConfigureNgenWidth(Property &property){
 void WDTCB::ConfigureNgenHighThreshold(Property &property){
    unsigned int ngenhigh;
    ngenhigh = property.GetUHex();
+   ngenhigh /= 8;
 
    SetNGENHighThreshold(&ngenhigh);
 }
@@ -2169,6 +2170,7 @@ void WDTCB::ConfigureNgenHighThreshold(Property &property){
 void WDTCB::ConfigureNgenLowThreshold(Property &property){
    unsigned int ngenlow;
    ngenlow = property.GetUHex();
+   ngenlow /= 8;
 
    SetNGENLowThreshold(&ngenlow);
 }
