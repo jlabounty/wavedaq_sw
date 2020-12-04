@@ -5,7 +5,7 @@
  *  Project :  MEGII - DCB
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  19.11.2020 08:58:12
+ *  Created :  03.12.2020 16:39:53
  *
  *  Description :  Register map definitions.
  *
@@ -19,78 +19,79 @@
 
 
 const dcb_reg_func_type  dcb_reg_func_list[] = {
-  { dcb_hw_reg , 0 },   /* register 0 [0x0000]: HW_VER */
-  { dcb_hw_reg , 0 },   /* register 1 [0x0004]: REG_LAYOUT_VER */
-  { dcb_hw_reg , 0 },   /* register 2 [0x0008]: FW_BUILD_DATE */
-  { dcb_hw_reg , 0 },   /* register 3 [0x000C]: FW_BUILD_TIME */
-  { dcb_hw_reg , 0 },   /* register 4 [0x0010]: SW_BUILD_DATE */
-  { dcb_hw_reg , 0 },   /* register 5 [0x0014]: SW_BUILD_TIME */
-  { dcb_hw_reg , 0 },   /* register 6 [0x0018]: FW_GIT_HASH_TAG */
-  { dcb_hw_reg , 0 },   /* register 7 [0x001C]: SW_GIT_HASH_TAG */
-  { dcb_hw_reg , 0 },   /* register 8 [0x0020]: PROT_VER */
-  { dcb_hw_reg , 0 },   /* register 9 [0x0024]: SN */
-  { dcb_hw_reg , 0 },   /* register 10 [0x0028]: STATUS */
-  { dcb_hw_reg , 0 },   /* register 11 [0x002C]: TEMP */
-  { dcb_hw_reg , 0 },   /* register 12 [0x0030]: PLL_LOCK */
-  { dcb_hw_reg , 0 },   /* register 13 [0x0034]: DCB_LOC */
-  { dcb_hw_reg , 0 },   /* register 14 [0x0038]: CTRL */
-  { dcb_hw_reg , 0 },   /* register 15 [0x003C]: SET_CTRL */
-  { dcb_hw_reg , 0 },   /* register 16 [0x0040]: CLR_CTRL */
-  { dcb_hw_reg , 0 },   /* register 17 [0x0044]: CLK_CTRL */
-  { dcb_hw_reg , 0 },   /* register 18 [0x0048]: SET_CLK_CTRL */
-  { dcb_hw_reg , 0 },   /* register 19 [0x004C]: CLR_CLK_CTRL */
-  { dcb_hw_reg , 0 },   /* register 20 [0x0050]: COM_CTRL */
-  { dcb_hw_reg , 0 },   /* register 21 [0x0054]: RST */
-  { dcb_hw_reg , 0 },   /* register 22 [0x0058]: SERDES_STATUS_00_07 */
-  { dcb_hw_reg , 0 },   /* register 23 [0x005C]: SERDES_STATUS_08_15 */
-  { dcb_hw_reg , 0 },   /* register 24 [0x0060]: SERDES_STATUS_17 */
-  { dcb_hw_reg , 0 },   /* register 25 [0x0064]: SERDES_ERR_CNT_00 */
-  { dcb_hw_reg , 0 },   /* register 26 [0x0068]: SERDES_ERR_CNT_01 */
-  { dcb_hw_reg , 0 },   /* register 27 [0x006C]: SERDES_ERR_CNT_02 */
-  { dcb_hw_reg , 0 },   /* register 28 [0x0070]: SERDES_ERR_CNT_03 */
-  { dcb_hw_reg , 0 },   /* register 29 [0x0074]: SERDES_ERR_CNT_04 */
-  { dcb_hw_reg , 0 },   /* register 30 [0x0078]: SERDES_ERR_CNT_05 */
-  { dcb_hw_reg , 0 },   /* register 31 [0x007C]: SERDES_ERR_CNT_06 */
-  { dcb_hw_reg , 0 },   /* register 32 [0x0080]: SERDES_ERR_CNT_07 */
-  { dcb_hw_reg , 0 },   /* register 33 [0x0084]: SERDES_ERR_CNT_08 */
-  { dcb_hw_reg , 0 },   /* register 34 [0x0088]: SERDES_ERR_CNT_09 */
-  { dcb_hw_reg , 0 },   /* register 35 [0x008C]: SERDES_ERR_CNT_10 */
-  { dcb_hw_reg , 0 },   /* register 36 [0x0090]: SERDES_ERR_CNT_11 */
-  { dcb_hw_reg , 0 },   /* register 37 [0x0094]: SERDES_ERR_CNT_12 */
-  { dcb_hw_reg , 0 },   /* register 38 [0x0098]: SERDES_ERR_CNT_13 */
-  { dcb_hw_reg , 0 },   /* register 39 [0x009C]: SERDES_ERR_CNT_14 */
-  { dcb_hw_reg , 0 },   /* register 40 [0x00A0]: SERDES_ERR_CNT_15 */
-  { dcb_hw_reg , 0 },   /* register 41 [0x00A4]: SERDES_ERR_CNT_17 */
-  { dcb_hw_reg , 0 },   /* register 42 [0x00A8]: APLY_CFG */
-  { dcb_hw_reg , 0 },   /* register 43 [0x00AC]: LMK_0 */
-  { dcb_hw_reg , 0 },   /* register 44 [0x00B0]: LMK_1 */
-  { dcb_hw_reg , 0 },   /* register 45 [0x00B4]: LMK_2 */
-  { dcb_hw_reg , 0 },   /* register 46 [0x00B8]: LMK_3 */
-  { dcb_hw_reg , 0 },   /* register 47 [0x00BC]: LMK_4 */
-  { dcb_hw_reg , 0 },   /* register 48 [0x00C0]: LMK_5 */
-  { dcb_hw_reg , 0 },   /* register 49 [0x00C4]: LMK_6 */
-  { dcb_hw_reg , 0 },   /* register 50 [0x00C8]: LMK_7 */
-  { dcb_hw_reg , 0 },   /* register 51 [0x00CC]: LMK_8 */
-  { dcb_hw_reg , 0 },   /* register 52 [0x00D0]: LMK_9 */
-  { dcb_hw_reg , 0 },   /* register 53 [0x00D4]: LMK_11 */
-  { dcb_hw_reg , 0 },   /* register 54 [0x00D8]: LMK_13 */
-  { dcb_hw_reg , 0 },   /* register 55 [0x00DC]: LMK_14 */
-  { dcb_hw_reg , 0 },   /* register 56 [0x00E0]: LMK_15 */
-  { dcb_hw_reg , 0 },   /* register 57 [0x00E4]: TIME_LSB */
-  { dcb_hw_reg , 0 },   /* register 58 [0x00E8]: TIME_MSB */
-  { dcb_hw_reg , 0 },   /* register 59 [0x00EC]: TIME_LSB_SET */
-  { dcb_hw_reg , 0 },   /* register 60 [0x00F0]: TIME_MSB_SET */
-  { dcb_hw_reg , 0 },   /* register 61 [0x00F4]: EVENT_TX_RATE */
-  { dcb_hw_reg , 0 },   /* register 62 [0x00F8]: EVENT_NR */
-  { dcb_hw_reg , 0 },   /* register 63 [0x00FC]: TRG_CFG */
-  { dcb_hw_reg , 0 },   /* register 64 [0x0100]: SET_TRG_CFG */
-  { dcb_hw_reg , 0 },   /* register 65 [0x0104]: CLR_TRG_CFG */
-  { dcb_hw_reg , 0 },   /* register 66 [0x0108]: TRG_AUTO_PERIOD */
-  { dcb_hw_reg , 0 },   /* register 67 [0x010C]: TRB_INFO_STAT */
-  { dcb_hw_reg , 0 },   /* register 68 [0x0110]: TRB_INFO_LSB */
-  { dcb_hw_reg , 0 },   /* register 69 [0x0114]: TRB_INFO_MSB */
-  { dcb_hw_reg , 0 },   /* register 70 [0x0118]: LMK_MOD_FLAG */
-  { dcb_hw_reg , 0 }    /* register 71 [0x011C]: CRC32_REG_BANK */
+  { dcb_hw_reg         , 0 },   /* register 0 [0x0000]: HW_VER */
+  { dcb_hw_reg         , 0 },   /* register 1 [0x0004]: REG_LAYOUT_VER */
+  { dcb_hw_reg         , 0 },   /* register 2 [0x0008]: FW_BUILD_DATE */
+  { dcb_hw_reg         , 0 },   /* register 3 [0x000C]: FW_BUILD_TIME */
+  { dcb_hw_reg         , 0 },   /* register 4 [0x0010]: SW_BUILD_DATE */
+  { dcb_hw_reg         , 0 },   /* register 5 [0x0014]: SW_BUILD_TIME */
+  { dcb_hw_reg         , 0 },   /* register 6 [0x0018]: FW_GIT_HASH_TAG */
+  { dcb_hw_reg         , 0 },   /* register 7 [0x001C]: SW_GIT_HASH_TAG */
+  { dcb_hw_reg         , 0 },   /* register 8 [0x0020]: PROT_VER */
+  { dcb_hw_reg         , 0 },   /* register 9 [0x0024]: SN */
+  { dcb_hw_reg         , 0 },   /* register 10 [0x0028]: STATUS */
+  { dcb_hw_reg         , 0 },   /* register 11 [0x002C]: TEMP */
+  { dcb_hw_reg         , 0 },   /* register 12 [0x0030]: PLL_LOCK */
+  { dcb_hw_reg         , 0 },   /* register 13 [0x0034]: DCB_LOC */
+  { dcb_hw_reg         , 0 },   /* register 14 [0x0038]: CTRL */
+  { dcb_hw_reg         , 0 },   /* register 15 [0x003C]: SET_CTRL */
+  { dcb_hw_reg         , 0 },   /* register 16 [0x0040]: CLR_CTRL */
+  { dcb_hw_reg         , 0 },   /* register 17 [0x0044]: CLK_CTRL */
+  { dcb_hw_reg         , 0 },   /* register 18 [0x0048]: SET_CLK_CTRL */
+  { dcb_hw_reg         , 0 },   /* register 19 [0x004C]: CLR_CLK_CTRL */
+  { dcb_hw_reg         , 0 },   /* register 20 [0x0050]: COM_CTRL */
+  { dcb_sw_slot_en_reg , 0 },   /* register 21 [0x0054]: SLOT_DATA_TX_EN */
+  { dcb_hw_reg         , 0 },   /* register 22 [0x0058]: RST */
+  { dcb_hw_reg         , 0 },   /* register 23 [0x005C]: SERDES_STATUS_00_07 */
+  { dcb_hw_reg         , 0 },   /* register 24 [0x0060]: SERDES_STATUS_08_15 */
+  { dcb_hw_reg         , 0 },   /* register 25 [0x0064]: SERDES_STATUS_17 */
+  { dcb_hw_reg         , 0 },   /* register 26 [0x0068]: SERDES_ERR_CNT_00 */
+  { dcb_hw_reg         , 0 },   /* register 27 [0x006C]: SERDES_ERR_CNT_01 */
+  { dcb_hw_reg         , 0 },   /* register 28 [0x0070]: SERDES_ERR_CNT_02 */
+  { dcb_hw_reg         , 0 },   /* register 29 [0x0074]: SERDES_ERR_CNT_03 */
+  { dcb_hw_reg         , 0 },   /* register 30 [0x0078]: SERDES_ERR_CNT_04 */
+  { dcb_hw_reg         , 0 },   /* register 31 [0x007C]: SERDES_ERR_CNT_05 */
+  { dcb_hw_reg         , 0 },   /* register 32 [0x0080]: SERDES_ERR_CNT_06 */
+  { dcb_hw_reg         , 0 },   /* register 33 [0x0084]: SERDES_ERR_CNT_07 */
+  { dcb_hw_reg         , 0 },   /* register 34 [0x0088]: SERDES_ERR_CNT_08 */
+  { dcb_hw_reg         , 0 },   /* register 35 [0x008C]: SERDES_ERR_CNT_09 */
+  { dcb_hw_reg         , 0 },   /* register 36 [0x0090]: SERDES_ERR_CNT_10 */
+  { dcb_hw_reg         , 0 },   /* register 37 [0x0094]: SERDES_ERR_CNT_11 */
+  { dcb_hw_reg         , 0 },   /* register 38 [0x0098]: SERDES_ERR_CNT_12 */
+  { dcb_hw_reg         , 0 },   /* register 39 [0x009C]: SERDES_ERR_CNT_13 */
+  { dcb_hw_reg         , 0 },   /* register 40 [0x00A0]: SERDES_ERR_CNT_14 */
+  { dcb_hw_reg         , 0 },   /* register 41 [0x00A4]: SERDES_ERR_CNT_15 */
+  { dcb_hw_reg         , 0 },   /* register 42 [0x00A8]: SERDES_ERR_CNT_17 */
+  { dcb_hw_reg         , 0 },   /* register 43 [0x00AC]: APLY_CFG */
+  { dcb_hw_reg         , 0 },   /* register 44 [0x00B0]: LMK_0 */
+  { dcb_hw_reg         , 0 },   /* register 45 [0x00B4]: LMK_1 */
+  { dcb_hw_reg         , 0 },   /* register 46 [0x00B8]: LMK_2 */
+  { dcb_hw_reg         , 0 },   /* register 47 [0x00BC]: LMK_3 */
+  { dcb_hw_reg         , 0 },   /* register 48 [0x00C0]: LMK_4 */
+  { dcb_hw_reg         , 0 },   /* register 49 [0x00C4]: LMK_5 */
+  { dcb_hw_reg         , 0 },   /* register 50 [0x00C8]: LMK_6 */
+  { dcb_hw_reg         , 0 },   /* register 51 [0x00CC]: LMK_7 */
+  { dcb_hw_reg         , 0 },   /* register 52 [0x00D0]: LMK_8 */
+  { dcb_hw_reg         , 0 },   /* register 53 [0x00D4]: LMK_9 */
+  { dcb_hw_reg         , 0 },   /* register 54 [0x00D8]: LMK_11 */
+  { dcb_hw_reg         , 0 },   /* register 55 [0x00DC]: LMK_13 */
+  { dcb_hw_reg         , 0 },   /* register 56 [0x00E0]: LMK_14 */
+  { dcb_hw_reg         , 0 },   /* register 57 [0x00E4]: LMK_15 */
+  { dcb_hw_reg         , 0 },   /* register 58 [0x00E8]: TIME_LSB */
+  { dcb_hw_reg         , 0 },   /* register 59 [0x00EC]: TIME_MSB */
+  { dcb_hw_reg         , 0 },   /* register 60 [0x00F0]: TIME_LSB_SET */
+  { dcb_hw_reg         , 0 },   /* register 61 [0x00F4]: TIME_MSB_SET */
+  { dcb_hw_reg         , 0 },   /* register 62 [0x00F8]: EVENT_TX_RATE */
+  { dcb_hw_reg         , 0 },   /* register 63 [0x00FC]: EVENT_NR */
+  { dcb_hw_reg         , 0 },   /* register 64 [0x0100]: TRG_CFG */
+  { dcb_hw_reg         , 0 },   /* register 65 [0x0104]: SET_TRG_CFG */
+  { dcb_hw_reg         , 0 },   /* register 66 [0x0108]: CLR_TRG_CFG */
+  { dcb_hw_reg         , 0 },   /* register 67 [0x010C]: TRG_AUTO_PERIOD */
+  { dcb_hw_reg         , 0 },   /* register 68 [0x0110]: TRB_INFO_STAT */
+  { dcb_hw_reg         , 0 },   /* register 69 [0x0114]: TRB_INFO_LSB */
+  { dcb_hw_reg         , 0 },   /* register 70 [0x0118]: TRB_INFO_MSB */
+  { dcb_hw_reg         , 0 },   /* register 71 [0x011C]: LMK_MOD_FLAG */
+  { dcb_hw_reg         , 0 }    /* register 72 [0x0120]: CRC32_REG_BANK */
 };
 
 #endif /* DCB_DONT_INCLUDE_REG_ACCESS_VARS */
@@ -123,6 +124,7 @@ const dcb_reg_entry_type  dcb_reg_list[] = {
   { "SET_CLK_CTRL"        , DCB_REG_SET_CLK_CTRL       , DCB_WRITABLE_REG },
   { "CLR_CLK_CTRL"        , DCB_REG_CLR_CLK_CTRL       , DCB_WRITABLE_REG },
   { "COM_CTRL"            , DCB_REG_COM_CTRL           , DCB_WRITABLE_REG },
+  { "SLOT_DATA_TX_EN"     , DCB_REG_SLOT_DATA_TX_EN    , DCB_WRITABLE_REG },
   { "RST"                 , DCB_REG_RST                , DCB_WRITABLE_REG },
   { "SERDES_STATUS_00_07" , DCB_REG_SERDES_STATUS_00_07, DCB_READONLY_REG },
   { "SERDES_STATUS_08_15" , DCB_REG_SERDES_STATUS_08_15, DCB_READONLY_REG },
@@ -220,6 +222,9 @@ const dcb_bit_group_entry_type  dcb_bit_group_list[] = {
   { "SLOT_ID"                      , DCB_SLOT_ID_REG                      , DCB_SLOT_ID_MASK                      , DCB_SLOT_ID_OFS                      },
   { "SYNC_DELAY"                   , DCB_SYNC_DELAY_REG                   , DCB_SYNC_DELAY_MASK                   , DCB_SYNC_DELAY_OFS                   },
   { "DAQ_SOFT_TRIGGER"             , DCB_DAQ_SOFT_TRIGGER_REG             , DCB_DAQ_SOFT_TRIGGER_MASK             , DCB_DAQ_SOFT_TRIGGER_OFS             },
+  { "DAQ_AUTO"                     , DCB_DAQ_AUTO_REG                     , DCB_DAQ_AUTO_MASK                     , DCB_DAQ_AUTO_OFS                     },
+  { "DAQ_NORMAL"                   , DCB_DAQ_NORMAL_REG                   , DCB_DAQ_NORMAL_MASK                   , DCB_DAQ_NORMAL_OFS                   },
+  { "DAQ_SINGLE"                   , DCB_DAQ_SINGLE_REG                   , DCB_DAQ_SINGLE_MASK                   , DCB_DAQ_SINGLE_OFS                   },
   { "SET_BIT_CTRL"                 , DCB_SET_BIT_CTRL_REG                 , DCB_SET_BIT_CTRL_MASK                 , DCB_SET_BIT_CTRL_OFS                 },
   { "CLR_BIT_CTRL"                 , DCB_CLR_BIT_CTRL_REG                 , DCB_CLR_BIT_CTRL_MASK                 , DCB_CLR_BIT_CTRL_OFS                 },
   { "DISTRIBUTOR_CLK_OUT_EN"       , DCB_DISTRIBUTOR_CLK_OUT_EN_REG       , DCB_DISTRIBUTOR_CLK_OUT_EN_MASK       , DCB_DISTRIBUTOR_CLK_OUT_EN_OFS       },
@@ -230,6 +235,7 @@ const dcb_bit_group_entry_type  dcb_bit_group_list[] = {
   { "SET_BIT_CLK_CTRL"             , DCB_SET_BIT_CLK_CTRL_REG             , DCB_SET_BIT_CLK_CTRL_MASK             , DCB_SET_BIT_CLK_CTRL_OFS             },
   { "CLR_BIT_CLK_CTRL"             , DCB_CLR_BIT_CLK_CTRL_REG             , DCB_CLR_BIT_CLK_CTRL_MASK             , DCB_CLR_BIT_CLK_CTRL_OFS             },
   { "INTER_PKG_DELAY"              , DCB_INTER_PKG_DELAY_REG              , DCB_INTER_PKG_DELAY_MASK              , DCB_INTER_PKG_DELAY_OFS              },
+  { "SLOT_DATA_TX_EN"              , DCB_SLOT_DATA_TX_EN_REG              , DCB_SLOT_DATA_TX_EN_MASK              , DCB_SLOT_DATA_TX_EN_OFS              },
   { "WDB_SERDES_CLK_MGR_RST"       , DCB_WDB_SERDES_CLK_MGR_RST_REG       , DCB_WDB_SERDES_CLK_MGR_RST_MASK       , DCB_WDB_SERDES_CLK_MGR_RST_OFS       },
   { "WDB_REFCLK_MGR_RST"           , DCB_WDB_REFCLK_MGR_RST_REG           , DCB_WDB_REFCLK_MGR_RST_MASK           , DCB_WDB_REFCLK_MGR_RST_OFS           },
   { "TRIGGER_MGR_RST"              , DCB_TRIGGER_MGR_RST_REG              , DCB_TRIGGER_MGR_RST_MASK              , DCB_TRIGGER_MGR_RST_OFS              },
@@ -414,8 +420,6 @@ const dcb_bit_group_entry_type  dcb_bit_group_list[] = {
   { "EVENT_TX_RATE"                , DCB_EVENT_TX_RATE_REG                , DCB_EVENT_TX_RATE_MASK                , DCB_EVENT_TX_RATE_OFS                },
   { "EVENT_NUMBER"                 , DCB_EVENT_NUMBER_REG                 , DCB_EVENT_NUMBER_MASK                 , DCB_EVENT_NUMBER_OFS                 },
   { "EXT_TRIGGER_OUT_ENABLE"       , DCB_EXT_TRIGGER_OUT_ENABLE_REG       , DCB_EXT_TRIGGER_OUT_ENABLE_MASK       , DCB_EXT_TRIGGER_OUT_ENABLE_OFS       },
-  { "ENABLE_AUTO_TRIGGER"          , DCB_ENABLE_AUTO_TRIGGER_REG          , DCB_ENABLE_AUTO_TRIGGER_MASK          , DCB_ENABLE_AUTO_TRIGGER_OFS          },
-  { "MANUAL_TRIGGER"               , DCB_MANUAL_TRIGGER_REG               , DCB_MANUAL_TRIGGER_MASK               , DCB_MANUAL_TRIGGER_OFS               },
   { "SET_BIT_TRG_CFG"              , DCB_SET_BIT_TRG_CFG_REG              , DCB_SET_BIT_TRG_CFG_MASK              , DCB_SET_BIT_TRG_CFG_OFS              },
   { "CLR_BIT_TRG_CFG"              , DCB_CLR_BIT_TRG_CFG_REG              , DCB_CLR_BIT_TRG_CFG_MASK              , DCB_CLR_BIT_TRG_CFG_OFS              },
   { "AUTO_TRIGGER_PERIOD"          , DCB_AUTO_TRIGGER_PERIOD_REG          , DCB_AUTO_TRIGGER_PERIOD_MASK          , DCB_AUTO_TRIGGER_PERIOD_OFS          },
@@ -462,7 +466,7 @@ const unsigned char reg_restore[] = {
   DCB_DONT_TOUCH_REG,   /* Offset 0x0048 */
   DCB_DONT_TOUCH_REG,   /* Offset 0x004C */
   DCB_RESTORE_REG   ,   /* Offset 0x0050 */
-  DCB_DONT_TOUCH_REG,   /* Offset 0x0054 */
+  DCB_RESTORE_REG   ,   /* Offset 0x0054 */
   DCB_DONT_TOUCH_REG,   /* Offset 0x0058 */
   DCB_DONT_TOUCH_REG,   /* Offset 0x005C */
   DCB_DONT_TOUCH_REG,   /* Offset 0x0060 */
@@ -484,7 +488,7 @@ const unsigned char reg_restore[] = {
   DCB_DONT_TOUCH_REG,   /* Offset 0x00A0 */
   DCB_DONT_TOUCH_REG,   /* Offset 0x00A4 */
   DCB_DONT_TOUCH_REG,   /* Offset 0x00A8 */
-  DCB_RESTORE_REG   ,   /* Offset 0x00AC */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x00AC */
   DCB_RESTORE_REG   ,   /* Offset 0x00B0 */
   DCB_RESTORE_REG   ,   /* Offset 0x00B4 */
   DCB_RESTORE_REG   ,   /* Offset 0x00B8 */
@@ -498,21 +502,22 @@ const unsigned char reg_restore[] = {
   DCB_RESTORE_REG   ,   /* Offset 0x00D8 */
   DCB_RESTORE_REG   ,   /* Offset 0x00DC */
   DCB_RESTORE_REG   ,   /* Offset 0x00E0 */
-  DCB_DONT_TOUCH_REG,   /* Offset 0x00E4 */
+  DCB_RESTORE_REG   ,   /* Offset 0x00E4 */
   DCB_DONT_TOUCH_REG,   /* Offset 0x00E8 */
   DCB_DONT_TOUCH_REG,   /* Offset 0x00EC */
   DCB_DONT_TOUCH_REG,   /* Offset 0x00F0 */
   DCB_DONT_TOUCH_REG,   /* Offset 0x00F4 */
   DCB_DONT_TOUCH_REG,   /* Offset 0x00F8 */
-  DCB_RESTORE_REG   ,   /* Offset 0x00FC */
-  DCB_DONT_TOUCH_REG,   /* Offset 0x0100 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x00FC */
+  DCB_RESTORE_REG   ,   /* Offset 0x0100 */
   DCB_DONT_TOUCH_REG,   /* Offset 0x0104 */
-  DCB_RESTORE_REG   ,   /* Offset 0x0108 */
-  DCB_DONT_TOUCH_REG,   /* Offset 0x010C */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0108 */
+  DCB_RESTORE_REG   ,   /* Offset 0x010C */
   DCB_DONT_TOUCH_REG,   /* Offset 0x0110 */
   DCB_DONT_TOUCH_REG,   /* Offset 0x0114 */
   DCB_DONT_TOUCH_REG,   /* Offset 0x0118 */
-  DCB_DONT_TOUCH_REG    /* Offset 0x011C */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x011C */
+  DCB_DONT_TOUCH_REG    /* Offset 0x0120 */
 };
 
 
@@ -564,21 +569,21 @@ const unsigned int reg_default[] = {
   0x00000000,   /* Offset 0x00A0 */
   0x00000000,   /* Offset 0x00A4 */
   0x00000000,   /* Offset 0x00A8 */
-  0x00020100,   /* Offset 0x00AC */
-  0x00030101,   /* Offset 0x00B0 */
-  0x00020102,   /* Offset 0x00B4 */
-  0x00020103,   /* Offset 0x00B8 */
-  0x00000104,   /* Offset 0x00BC */
-  0x00000105,   /* Offset 0x00C0 */
-  0x00000106,   /* Offset 0x00C4 */
-  0x00000107,   /* Offset 0x00C8 */
-  0x10000908,   /* Offset 0x00CC */
-  0xA0022A09,   /* Offset 0x00D0 */
-  0x0082000B,   /* Offset 0x00D4 */
-  0x029400AD,   /* Offset 0x00D8 */
-  0x0830140E,   /* Offset 0x00DC */
-  0xE000280F,   /* Offset 0x00E0 */
-  0x00000000,   /* Offset 0x00E4 */
+  0x00000000,   /* Offset 0x00AC */
+  0x00020100,   /* Offset 0x00B0 */
+  0x00030101,   /* Offset 0x00B4 */
+  0x00020102,   /* Offset 0x00B8 */
+  0x00020103,   /* Offset 0x00BC */
+  0x00000104,   /* Offset 0x00C0 */
+  0x00000105,   /* Offset 0x00C4 */
+  0x00000106,   /* Offset 0x00C8 */
+  0x00000107,   /* Offset 0x00CC */
+  0x10000908,   /* Offset 0x00D0 */
+  0xA0022A09,   /* Offset 0x00D4 */
+  0x0082000B,   /* Offset 0x00D8 */
+  0x029400AD,   /* Offset 0x00DC */
+  0x0830140E,   /* Offset 0x00E0 */
+  0xE000280F,   /* Offset 0x00E4 */
   0x00000000,   /* Offset 0x00E8 */
   0x00000000,   /* Offset 0x00EC */
   0x00000000,   /* Offset 0x00F0 */
@@ -587,11 +592,12 @@ const unsigned int reg_default[] = {
   0x00000000,   /* Offset 0x00FC */
   0x00000000,   /* Offset 0x0100 */
   0x00000000,   /* Offset 0x0104 */
-  0x04C4B400,   /* Offset 0x0108 */
-  0x00000000,   /* Offset 0x010C */
+  0x00000000,   /* Offset 0x0108 */
+  0x04C4B400,   /* Offset 0x010C */
   0x00000000,   /* Offset 0x0110 */
   0x00000000,   /* Offset 0x0114 */
-  0x00000000    /* Offset 0x0118 */
+  0x00000000,   /* Offset 0x0118 */
+  0x00000000    /* Offset 0x011C */
 };
 
 #endif /* DCB_DONT_INCLUDE_VARS */

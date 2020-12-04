@@ -5,7 +5,7 @@
  *  Project :  MEGII - DCB
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  19.11.2020 08:58:12
+ *  Created :  03.12.2020 16:39:53
  *
  *  Description :  Register map definitions.
  *
@@ -49,57 +49,58 @@
 #define DCB_REG_SET_CLK_CTRL                      0x0048
 #define DCB_REG_CLR_CLK_CTRL                      0x004C
 #define DCB_REG_COM_CTRL                          0x0050
-#define DCB_REG_RST                               0x0054
-#define DCB_REG_SERDES_STATUS_00_07               0x0058
-#define DCB_REG_SERDES_STATUS_08_15               0x005C
-#define DCB_REG_SERDES_STATUS_17                  0x0060
-#define DCB_REG_SERDES_ERR_CNT_00                 0x0064
-#define DCB_REG_SERDES_ERR_CNT_01                 0x0068
-#define DCB_REG_SERDES_ERR_CNT_02                 0x006C
-#define DCB_REG_SERDES_ERR_CNT_03                 0x0070
-#define DCB_REG_SERDES_ERR_CNT_04                 0x0074
-#define DCB_REG_SERDES_ERR_CNT_05                 0x0078
-#define DCB_REG_SERDES_ERR_CNT_06                 0x007C
-#define DCB_REG_SERDES_ERR_CNT_07                 0x0080
-#define DCB_REG_SERDES_ERR_CNT_08                 0x0084
-#define DCB_REG_SERDES_ERR_CNT_09                 0x0088
-#define DCB_REG_SERDES_ERR_CNT_10                 0x008C
-#define DCB_REG_SERDES_ERR_CNT_11                 0x0090
-#define DCB_REG_SERDES_ERR_CNT_12                 0x0094
-#define DCB_REG_SERDES_ERR_CNT_13                 0x0098
-#define DCB_REG_SERDES_ERR_CNT_14                 0x009C
-#define DCB_REG_SERDES_ERR_CNT_15                 0x00A0
-#define DCB_REG_SERDES_ERR_CNT_17                 0x00A4
-#define DCB_REG_APLY_CFG                          0x00A8
-#define DCB_REG_LMK_0                             0x00AC
-#define DCB_REG_LMK_1                             0x00B0
-#define DCB_REG_LMK_2                             0x00B4
-#define DCB_REG_LMK_3                             0x00B8
-#define DCB_REG_LMK_4                             0x00BC
-#define DCB_REG_LMK_5                             0x00C0
-#define DCB_REG_LMK_6                             0x00C4
-#define DCB_REG_LMK_7                             0x00C8
-#define DCB_REG_LMK_8                             0x00CC
-#define DCB_REG_LMK_9                             0x00D0
-#define DCB_REG_LMK_11                            0x00D4
-#define DCB_REG_LMK_13                            0x00D8
-#define DCB_REG_LMK_14                            0x00DC
-#define DCB_REG_LMK_15                            0x00E0
-#define DCB_REG_TIME_LSB                          0x00E4
-#define DCB_REG_TIME_MSB                          0x00E8
-#define DCB_REG_TIME_LSB_SET                      0x00EC
-#define DCB_REG_TIME_MSB_SET                      0x00F0
-#define DCB_REG_EVENT_TX_RATE                     0x00F4
-#define DCB_REG_EVENT_NR                          0x00F8
-#define DCB_REG_TRG_CFG                           0x00FC
-#define DCB_REG_SET_TRG_CFG                       0x0100
-#define DCB_REG_CLR_TRG_CFG                       0x0104
-#define DCB_REG_TRG_AUTO_PERIOD                   0x0108
-#define DCB_REG_TRB_INFO_STAT                     0x010C
-#define DCB_REG_TRB_INFO_LSB                      0x0110
-#define DCB_REG_TRB_INFO_MSB                      0x0114
-#define DCB_REG_LMK_MOD_FLAG                      0x0118
-#define DCB_REG_CRC32_REG_BANK                    0x011C
+#define DCB_REG_SLOT_DATA_TX_EN                   0x0054
+#define DCB_REG_RST                               0x0058
+#define DCB_REG_SERDES_STATUS_00_07               0x005C
+#define DCB_REG_SERDES_STATUS_08_15               0x0060
+#define DCB_REG_SERDES_STATUS_17                  0x0064
+#define DCB_REG_SERDES_ERR_CNT_00                 0x0068
+#define DCB_REG_SERDES_ERR_CNT_01                 0x006C
+#define DCB_REG_SERDES_ERR_CNT_02                 0x0070
+#define DCB_REG_SERDES_ERR_CNT_03                 0x0074
+#define DCB_REG_SERDES_ERR_CNT_04                 0x0078
+#define DCB_REG_SERDES_ERR_CNT_05                 0x007C
+#define DCB_REG_SERDES_ERR_CNT_06                 0x0080
+#define DCB_REG_SERDES_ERR_CNT_07                 0x0084
+#define DCB_REG_SERDES_ERR_CNT_08                 0x0088
+#define DCB_REG_SERDES_ERR_CNT_09                 0x008C
+#define DCB_REG_SERDES_ERR_CNT_10                 0x0090
+#define DCB_REG_SERDES_ERR_CNT_11                 0x0094
+#define DCB_REG_SERDES_ERR_CNT_12                 0x0098
+#define DCB_REG_SERDES_ERR_CNT_13                 0x009C
+#define DCB_REG_SERDES_ERR_CNT_14                 0x00A0
+#define DCB_REG_SERDES_ERR_CNT_15                 0x00A4
+#define DCB_REG_SERDES_ERR_CNT_17                 0x00A8
+#define DCB_REG_APLY_CFG                          0x00AC
+#define DCB_REG_LMK_0                             0x00B0
+#define DCB_REG_LMK_1                             0x00B4
+#define DCB_REG_LMK_2                             0x00B8
+#define DCB_REG_LMK_3                             0x00BC
+#define DCB_REG_LMK_4                             0x00C0
+#define DCB_REG_LMK_5                             0x00C4
+#define DCB_REG_LMK_6                             0x00C8
+#define DCB_REG_LMK_7                             0x00CC
+#define DCB_REG_LMK_8                             0x00D0
+#define DCB_REG_LMK_9                             0x00D4
+#define DCB_REG_LMK_11                            0x00D8
+#define DCB_REG_LMK_13                            0x00DC
+#define DCB_REG_LMK_14                            0x00E0
+#define DCB_REG_LMK_15                            0x00E4
+#define DCB_REG_TIME_LSB                          0x00E8
+#define DCB_REG_TIME_MSB                          0x00EC
+#define DCB_REG_TIME_LSB_SET                      0x00F0
+#define DCB_REG_TIME_MSB_SET                      0x00F4
+#define DCB_REG_EVENT_TX_RATE                     0x00F8
+#define DCB_REG_EVENT_NR                          0x00FC
+#define DCB_REG_TRG_CFG                           0x0100
+#define DCB_REG_SET_TRG_CFG                       0x0104
+#define DCB_REG_CLR_TRG_CFG                       0x0108
+#define DCB_REG_TRG_AUTO_PERIOD                   0x010C
+#define DCB_REG_TRB_INFO_STAT                     0x0110
+#define DCB_REG_TRB_INFO_LSB                      0x0114
+#define DCB_REG_TRB_INFO_MSB                      0x0118
+#define DCB_REG_LMK_MOD_FLAG                      0x011C
+#define DCB_REG_CRC32_REG_BANK                    0x0120
 
 /*
  * Bit Positions
@@ -358,8 +359,23 @@
 
 /* DAQ_SOFT_TRIGGER - Send trigger pulse to all slots via the backplane */
 #define DCB_DAQ_SOFT_TRIGGER_REG                               DCB_REG_CTRL
-#define DCB_DAQ_SOFT_TRIGGER_MASK                                0x00000001
-#define DCB_DAQ_SOFT_TRIGGER_OFS                                          0
+#define DCB_DAQ_SOFT_TRIGGER_MASK                                0x00000020
+#define DCB_DAQ_SOFT_TRIGGER_OFS                                          5
+
+/* DAQ_AUTO - Auto-Trigger readout state machine every 0.5s if no other trigger (like "auto" acquisition on scope) */
+#define DCB_DAQ_AUTO_REG                                       DCB_REG_CTRL
+#define DCB_DAQ_AUTO_MASK                                        0x00000004
+#define DCB_DAQ_AUTO_OFS                                                  2
+
+/* DAQ_NORMAL - Continuous data acquisition input trigger if system is not busy (like "normal" acquisition on scope) */
+#define DCB_DAQ_NORMAL_REG                                     DCB_REG_CTRL
+#define DCB_DAQ_NORMAL_MASK                                      0x00000002
+#define DCB_DAQ_NORMAL_OFS                                                1
+
+/* DAQ_SINGLE - Single data acquisiton on input trigger (like "single" acquisition on scope) */
+#define DCB_DAQ_SINGLE_REG                                     DCB_REG_CTRL
+#define DCB_DAQ_SINGLE_MASK                                      0x00000001
+#define DCB_DAQ_SINGLE_OFS                                                0
 
 
 
@@ -437,7 +453,16 @@
 
 
 
-/* ****** Register 21 [0x0054]: RST - Reset bits for specific firmwar units (Default: 0x00000000) ****** */
+/* ****** Register 21 [0x0054]: SLOT_DATA_TX_EN - Slot Data Transmission Enable (Default: 0x00000000) ****** */
+
+/* SLOT_DATA_TX_EN - Data transmission enable bits for the crate slots (DCB slot = 16, TCB slot =17) */
+#define DCB_SLOT_DATA_TX_EN_REG                     DCB_REG_SLOT_DATA_TX_EN
+#define DCB_SLOT_DATA_TX_EN_MASK                                 0x0003FFFF
+#define DCB_SLOT_DATA_TX_EN_OFS                                           0
+
+
+
+/* ****** Register 22 [0x0058]: RST - Reset bits for specific firmwar units (Default: 0x00000000) ****** */
 
 /* WDB_SERDES_CLK_MGR_RST - Reset for clock manager deriving clocks from the WDB clock (e.g. refclk for SYNC output delay) */
 #define DCB_WDB_SERDES_CLK_MGR_RST_REG                          DCB_REG_RST
@@ -486,7 +511,7 @@
 
 
 
-/* ****** Register 22 [0x0058]: SERDES_STATUS_00_07 - Input Serdes status for slot 0 to 7 (Default: 0x00000000) ****** */
+/* ****** Register 23 [0x005C]: SERDES_STATUS_00_07 - Input Serdes status for slot 0 to 7 (Default: 0x00000000) ****** */
 
 /* IDLE_PATTERN_DETECT_07 - Idle pattern detected on slot 7 */
 #define DCB_IDLE_PATTERN_DETECT_07_REG          DCB_REG_SERDES_STATUS_00_07
@@ -610,7 +635,7 @@
 
 
 
-/* ****** Register 23 [0x005C]: SERDES_STATUS_08_15 - Input Serdes status for slot 8 to 15 (Default: 0x00000000) ****** */
+/* ****** Register 24 [0x0060]: SERDES_STATUS_08_15 - Input Serdes status for slot 8 to 15 (Default: 0x00000000) ****** */
 
 /* IDLE_PATTERN_DETECT_15 - Idle pattern detected on slot 15 */
 #define DCB_IDLE_PATTERN_DETECT_15_REG          DCB_REG_SERDES_STATUS_08_15
@@ -734,7 +759,7 @@
 
 
 
-/* ****** Register 24 [0x0060]: SERDES_STATUS_17 - Input Serdes status for slot 17 (TCB slot) (Default: 0x00000000) ****** */
+/* ****** Register 25 [0x0064]: SERDES_STATUS_17 - Input Serdes status for slot 17 (TCB slot) (Default: 0x00000000) ****** */
 
 /* IDLE_PATTERN_DETECT_17 - Idle pattern detected on slot 17 */
 #define DCB_IDLE_PATTERN_DETECT_17_REG             DCB_REG_SERDES_STATUS_17
@@ -753,7 +778,7 @@
 
 
 
-/* ****** Register 25 [0x0064]: SERDES_ERR_CNT_00 - Input Serdes error count for slot 0 (Default: 0x00000000) ****** */
+/* ****** Register 26 [0x0068]: SERDES_ERR_CNT_00 - Input Serdes error count for slot 0 (Default: 0x00000000) ****** */
 
 /* CRC_ERRORS_00 - CRC error count of input serdes on slot 0 (255 = overflow) */
 #define DCB_CRC_ERRORS_00_REG                     DCB_REG_SERDES_ERR_CNT_00
@@ -777,7 +802,7 @@
 
 
 
-/* ****** Register 26 [0x0068]: SERDES_ERR_CNT_01 - Input Serdes error count for slot 1 (Default: 0x00000000) ****** */
+/* ****** Register 27 [0x006C]: SERDES_ERR_CNT_01 - Input Serdes error count for slot 1 (Default: 0x00000000) ****** */
 
 /* CRC_ERRORS_01 - CRC error count of input serdes on slot 1 (255 = overflow) */
 #define DCB_CRC_ERRORS_01_REG                     DCB_REG_SERDES_ERR_CNT_01
@@ -801,7 +826,7 @@
 
 
 
-/* ****** Register 27 [0x006C]: SERDES_ERR_CNT_02 - Input Serdes error count for slot 2 (Default: 0x00000000) ****** */
+/* ****** Register 28 [0x0070]: SERDES_ERR_CNT_02 - Input Serdes error count for slot 2 (Default: 0x00000000) ****** */
 
 /* CRC_ERRORS_02 - CRC error count of input serdes on slot 2 (255 = overflow) */
 #define DCB_CRC_ERRORS_02_REG                     DCB_REG_SERDES_ERR_CNT_02
@@ -825,7 +850,7 @@
 
 
 
-/* ****** Register 28 [0x0070]: SERDES_ERR_CNT_03 - Input Serdes error count for slot 3 (Default: 0x00000000) ****** */
+/* ****** Register 29 [0x0074]: SERDES_ERR_CNT_03 - Input Serdes error count for slot 3 (Default: 0x00000000) ****** */
 
 /* CRC_ERRORS_03 - CRC error count of input serdes on slot 3 (255 = overflow) */
 #define DCB_CRC_ERRORS_03_REG                     DCB_REG_SERDES_ERR_CNT_03
@@ -849,7 +874,7 @@
 
 
 
-/* ****** Register 29 [0x0074]: SERDES_ERR_CNT_04 - Input Serdes error count for slot 4 (Default: 0x00000000) ****** */
+/* ****** Register 30 [0x0078]: SERDES_ERR_CNT_04 - Input Serdes error count for slot 4 (Default: 0x00000000) ****** */
 
 /* CRC_ERRORS_04 - CRC error count of input serdes on slot 4 (255 = overflow) */
 #define DCB_CRC_ERRORS_04_REG                     DCB_REG_SERDES_ERR_CNT_04
@@ -873,7 +898,7 @@
 
 
 
-/* ****** Register 30 [0x0078]: SERDES_ERR_CNT_05 - Input Serdes error count for slot 5 (Default: 0x00000000) ****** */
+/* ****** Register 31 [0x007C]: SERDES_ERR_CNT_05 - Input Serdes error count for slot 5 (Default: 0x00000000) ****** */
 
 /* CRC_ERRORS_05 - CRC error count of input serdes on slot 5 (255 = overflow) */
 #define DCB_CRC_ERRORS_05_REG                     DCB_REG_SERDES_ERR_CNT_05
@@ -897,7 +922,7 @@
 
 
 
-/* ****** Register 31 [0x007C]: SERDES_ERR_CNT_06 - Input Serdes error count for slot 6 (Default: 0x00000000) ****** */
+/* ****** Register 32 [0x0080]: SERDES_ERR_CNT_06 - Input Serdes error count for slot 6 (Default: 0x00000000) ****** */
 
 /* CRC_ERRORS_06 - CRC error count of input serdes on slot 6 (255 = overflow) */
 #define DCB_CRC_ERRORS_06_REG                     DCB_REG_SERDES_ERR_CNT_06
@@ -921,7 +946,7 @@
 
 
 
-/* ****** Register 32 [0x0080]: SERDES_ERR_CNT_07 - Input Serdes error count for slot 7 (Default: 0x00000000) ****** */
+/* ****** Register 33 [0x0084]: SERDES_ERR_CNT_07 - Input Serdes error count for slot 7 (Default: 0x00000000) ****** */
 
 /* CRC_ERRORS_07 - CRC error count of input serdes on slot 7 (255 = overflow) */
 #define DCB_CRC_ERRORS_07_REG                     DCB_REG_SERDES_ERR_CNT_07
@@ -945,7 +970,7 @@
 
 
 
-/* ****** Register 33 [0x0084]: SERDES_ERR_CNT_08 - Input Serdes error count for slot 8 (Default: 0x00000000) ****** */
+/* ****** Register 34 [0x0088]: SERDES_ERR_CNT_08 - Input Serdes error count for slot 8 (Default: 0x00000000) ****** */
 
 /* CRC_ERRORS_08 - CRC error count of input serdes on slot 8 (255 = overflow) */
 #define DCB_CRC_ERRORS_08_REG                     DCB_REG_SERDES_ERR_CNT_08
@@ -969,7 +994,7 @@
 
 
 
-/* ****** Register 34 [0x0088]: SERDES_ERR_CNT_09 - Input Serdes error count for slot 9 (Default: 0x00000000) ****** */
+/* ****** Register 35 [0x008C]: SERDES_ERR_CNT_09 - Input Serdes error count for slot 9 (Default: 0x00000000) ****** */
 
 /* CRC_ERRORS_09 - CRC error count of input serdes on slot 9 (255 = overflow) */
 #define DCB_CRC_ERRORS_09_REG                     DCB_REG_SERDES_ERR_CNT_09
@@ -993,7 +1018,7 @@
 
 
 
-/* ****** Register 35 [0x008C]: SERDES_ERR_CNT_10 - Input Serdes error count for slot 10 (Default: 0x00000000) ****** */
+/* ****** Register 36 [0x0090]: SERDES_ERR_CNT_10 - Input Serdes error count for slot 10 (Default: 0x00000000) ****** */
 
 /* CRC_ERRORS_10 - CRC error count of input serdes on slot 10 (255 = overflow) */
 #define DCB_CRC_ERRORS_10_REG                     DCB_REG_SERDES_ERR_CNT_10
@@ -1017,7 +1042,7 @@
 
 
 
-/* ****** Register 36 [0x0090]: SERDES_ERR_CNT_11 - Input Serdes error count for slot 11 (Default: 0x00000000) ****** */
+/* ****** Register 37 [0x0094]: SERDES_ERR_CNT_11 - Input Serdes error count for slot 11 (Default: 0x00000000) ****** */
 
 /* CRC_ERRORS_11 - CRC error count of input serdes on slot 11 (255 = overflow) */
 #define DCB_CRC_ERRORS_11_REG                     DCB_REG_SERDES_ERR_CNT_11
@@ -1041,7 +1066,7 @@
 
 
 
-/* ****** Register 37 [0x0094]: SERDES_ERR_CNT_12 - Input Serdes error count for slot 12 (Default: 0x00000000) ****** */
+/* ****** Register 38 [0x0098]: SERDES_ERR_CNT_12 - Input Serdes error count for slot 12 (Default: 0x00000000) ****** */
 
 /* CRC_ERRORS_12 - CRC error count of input serdes on slot 12 (255 = overflow) */
 #define DCB_CRC_ERRORS_12_REG                     DCB_REG_SERDES_ERR_CNT_12
@@ -1065,7 +1090,7 @@
 
 
 
-/* ****** Register 38 [0x0098]: SERDES_ERR_CNT_13 - Input Serdes error count for slot 13 (Default: 0x00000000) ****** */
+/* ****** Register 39 [0x009C]: SERDES_ERR_CNT_13 - Input Serdes error count for slot 13 (Default: 0x00000000) ****** */
 
 /* CRC_ERRORS_13 - CRC error count of input serdes on slot 13 (255 = overflow) */
 #define DCB_CRC_ERRORS_13_REG                     DCB_REG_SERDES_ERR_CNT_13
@@ -1089,7 +1114,7 @@
 
 
 
-/* ****** Register 39 [0x009C]: SERDES_ERR_CNT_14 - Input Serdes error count for slot 14 (Default: 0x00000000) ****** */
+/* ****** Register 40 [0x00A0]: SERDES_ERR_CNT_14 - Input Serdes error count for slot 14 (Default: 0x00000000) ****** */
 
 /* CRC_ERRORS_14 - CRC error count of input serdes on slot 14 (255 = overflow) */
 #define DCB_CRC_ERRORS_14_REG                     DCB_REG_SERDES_ERR_CNT_14
@@ -1113,7 +1138,7 @@
 
 
 
-/* ****** Register 40 [0x00A0]: SERDES_ERR_CNT_15 - Input Serdes error count for slot 15 (Default: 0x00000000) ****** */
+/* ****** Register 41 [0x00A4]: SERDES_ERR_CNT_15 - Input Serdes error count for slot 15 (Default: 0x00000000) ****** */
 
 /* CRC_ERRORS_15 - CRC error count of input serdes on slot 15 (255 = overflow) */
 #define DCB_CRC_ERRORS_15_REG                     DCB_REG_SERDES_ERR_CNT_15
@@ -1137,7 +1162,7 @@
 
 
 
-/* ****** Register 41 [0x00A4]: SERDES_ERR_CNT_17 - Input Serdes error count for slot 17 (TCB slot) (Default: 0x00000000) ****** */
+/* ****** Register 42 [0x00A8]: SERDES_ERR_CNT_17 - Input Serdes error count for slot 17 (TCB slot) (Default: 0x00000000) ****** */
 
 /* CRC_ERRORS_17 - CRC error count of input serdes on slot 17 (255 = overflow) */
 #define DCB_CRC_ERRORS_17_REG                     DCB_REG_SERDES_ERR_CNT_17
@@ -1161,7 +1186,7 @@
 
 
 
-/* ****** Register 42 [0x00A8]: APLY_CFG - Apply settings from regsiter bank to hardware units (Default: 0x00000000) ****** */
+/* ****** Register 43 [0x00AC]: APLY_CFG - Apply settings from regsiter bank to hardware units (Default: 0x00000000) ****** */
 
 /* APPLY_SETTINGS_LMK - Apply configuration from regsiter bank to LMK */
 #define DCB_APPLY_SETTINGS_LMK_REG                         DCB_REG_APLY_CFG
@@ -1170,7 +1195,7 @@
 
 
 
-/* ****** Register 43 [0x00AC]: LMK_0 - LMK Register 0 (Default: 0x00020100) ****** */
+/* ****** Register 44 [0x00B0]: LMK_0 - LMK Register 0 (Default: 0x00020100) ****** */
 
 /* LMK0_RESET - Resets LMK Registers to Their Power-On State */
 #define DCB_LMK0_RESET_REG                                    DCB_REG_LMK_0
@@ -1199,7 +1224,7 @@
 
 
 
-/* ****** Register 44 [0x00B0]: LMK_1 - LMK Register 1 (Default: 0x00030101) ****** */
+/* ****** Register 45 [0x00B4]: LMK_1 - LMK Register 1 (Default: 0x00030101) ****** */
 
 /* LMK1_CLKOUT_MUX - Channel 1 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed) */
 #define DCB_LMK1_CLKOUT_MUX_REG                               DCB_REG_LMK_1
@@ -1223,7 +1248,7 @@
 
 
 
-/* ****** Register 45 [0x00B4]: LMK_2 - LMK Register 2 (Default: 0x00020102) ****** */
+/* ****** Register 46 [0x00B8]: LMK_2 - LMK Register 2 (Default: 0x00020102) ****** */
 
 /* LMK2_CLKOUT_MUX - Channel 2 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed) */
 #define DCB_LMK2_CLKOUT_MUX_REG                               DCB_REG_LMK_2
@@ -1247,7 +1272,7 @@
 
 
 
-/* ****** Register 46 [0x00B8]: LMK_3 - LMK Register 3 (Default: 0x00020103) ****** */
+/* ****** Register 47 [0x00BC]: LMK_3 - LMK Register 3 (Default: 0x00020103) ****** */
 
 /* LMK3_CLKOUT_MUX - Channel 3 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed) */
 #define DCB_LMK3_CLKOUT_MUX_REG                               DCB_REG_LMK_3
@@ -1271,7 +1296,7 @@
 
 
 
-/* ****** Register 47 [0x00BC]: LMK_4 - LMK Register 4 (Default: 0x00000104) ****** */
+/* ****** Register 48 [0x00C0]: LMK_4 - LMK Register 4 (Default: 0x00000104) ****** */
 
 /* LMK4_CLKOUT_MUX - Channel 4 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed) */
 #define DCB_LMK4_CLKOUT_MUX_REG                               DCB_REG_LMK_4
@@ -1295,7 +1320,7 @@
 
 
 
-/* ****** Register 48 [0x00C0]: LMK_5 - LMK Register 5 (Default: 0x00000105) ****** */
+/* ****** Register 49 [0x00C4]: LMK_5 - LMK Register 5 (Default: 0x00000105) ****** */
 
 /* LMK5_CLKOUT_MUX - Channel 5 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed) */
 #define DCB_LMK5_CLKOUT_MUX_REG                               DCB_REG_LMK_5
@@ -1319,7 +1344,7 @@
 
 
 
-/* ****** Register 49 [0x00C4]: LMK_6 - LMK Register 6 (Default: 0x00000106) ****** */
+/* ****** Register 50 [0x00C8]: LMK_6 - LMK Register 6 (Default: 0x00000106) ****** */
 
 /* LMK6_CLKOUT_MUX - Channel 6 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed) */
 #define DCB_LMK6_CLKOUT_MUX_REG                               DCB_REG_LMK_6
@@ -1343,7 +1368,7 @@
 
 
 
-/* ****** Register 50 [0x00C8]: LMK_7 - LMK Register 7 (Default: 0x00000107) ****** */
+/* ****** Register 51 [0x00CC]: LMK_7 - LMK Register 7 (Default: 0x00000107) ****** */
 
 /* LMK7_CLKOUT_MUX - Channel 7 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed) */
 #define DCB_LMK7_CLKOUT_MUX_REG                               DCB_REG_LMK_7
@@ -1367,7 +1392,7 @@
 
 
 
-/* ****** Register 51 [0x00CC]: LMK_8 - LMK Register 8 (Default: 0x10000908) ****** */
+/* ****** Register 52 [0x00D0]: LMK_8 - LMK Register 8 (Default: 0x10000908) ****** */
 
 /* LMK8_PHASE_NOISE_OPT - Set LMK Register 8 (Phase Noise Optimization) */
 #define DCB_LMK8_PHASE_NOISE_OPT_REG                          DCB_REG_LMK_8
@@ -1376,7 +1401,7 @@
 
 
 
-/* ****** Register 52 [0x00D0]: LMK_9 - LMK Register 9 (Default: 0xA0022A09) ****** */
+/* ****** Register 53 [0x00D4]: LMK_9 - LMK Register 9 (Default: 0xA0022A09) ****** */
 
 /* LMK9_VBOOST - Voltage Level Boost for Clock Outputs */
 #define DCB_LMK9_VBOOST_REG                                   DCB_REG_LMK_9
@@ -1385,7 +1410,7 @@
 
 
 
-/* ****** Register 53 [0x00D4]: LMK_11 - LMK Register 11 (Default: 0x0082000B) ****** */
+/* ****** Register 54 [0x00D8]: LMK_11 - LMK Register 11 (Default: 0x0082000B) ****** */
 
 /* LMK11_DIV4 - Divider Enable for Digital Lock Detect Circuit */
 #define DCB_LMK11_DIV4_REG                                   DCB_REG_LMK_11
@@ -1394,7 +1419,7 @@
 
 
 
-/* ****** Register 54 [0x00D8]: LMK_13 - LMK Register 13 (Default: 0x029400AD) ****** */
+/* ****** Register 55 [0x00DC]: LMK_13 - LMK Register 13 (Default: 0x029400AD) ****** */
 
 /* LMK13_OSCIN_FREQ - Oscillator Input Calibration Adjustment in MHz (1..200) */
 #define DCB_LMK13_OSCIN_FREQ_REG                             DCB_REG_LMK_13
@@ -1418,7 +1443,7 @@
 
 
 
-/* ****** Register 55 [0x00DC]: LMK_14 - LMK Register 14 (Default: 0x0830140E) ****** */
+/* ****** Register 56 [0x00E0]: LMK_14 - LMK Register 14 (Default: 0x0830140E) ****** */
 
 /* LMK14_EN_FOUT - Enable for the Fout Pin (0 = Disabled, 1 = Enabled) */
 #define DCB_LMK14_EN_FOUT_REG                                DCB_REG_LMK_14
@@ -1447,7 +1472,7 @@
 
 
 
-/* ****** Register 56 [0x00E0]: LMK_15 - LMK Register 15 (Default: 0xE000280F) ****** */
+/* ****** Register 57 [0x00E4]: LMK_15 - LMK Register 15 (Default: 0xE000280F) ****** */
 
 /* LMK15_PLL_CP_GAIN - PLL Charge Pump Gain (see datasheet) (0..4) */
 #define DCB_LMK15_PLL_CP_GAIN_REG                            DCB_REG_LMK_15
@@ -1466,7 +1491,7 @@
 
 
 
-/* ****** Register 57 [0x00E4]: TIME_LSB - Current System Time (Default: 0x00000000) ****** */
+/* ****** Register 58 [0x00E8]: TIME_LSB - Current System Time (Default: 0x00000000) ****** */
 
 /* TIME_LSB - LSBs of 64bit system time counter (MSBs are latched upon read of LSB register) */
 #define DCB_TIME_LSB_REG                                   DCB_REG_TIME_LSB
@@ -1475,7 +1500,7 @@
 
 
 
-/* ****** Register 58 [0x00E8]: TIME_MSB - Current System Time (Default: 0x00000000) ****** */
+/* ****** Register 59 [0x00EC]: TIME_MSB - Current System Time (Default: 0x00000000) ****** */
 
 /* TIME_MSB - MSBs of 64bit system time counter (latched upon read of LSB register) */
 #define DCB_TIME_MSB_REG                                   DCB_REG_TIME_MSB
@@ -1484,7 +1509,7 @@
 
 
 
-/* ****** Register 59 [0x00EC]: TIME_LSB_SET - Set System Time (Default: 0x00000000) ****** */
+/* ****** Register 60 [0x00F0]: TIME_LSB_SET - Set System Time (Default: 0x00000000) ****** */
 
 /* TIME_LSB_SET - LSBs of 64bit system time counter set value  (time is updated when MSBs are written) */
 #define DCB_TIME_LSB_SET_REG                           DCB_REG_TIME_LSB_SET
@@ -1493,7 +1518,7 @@
 
 
 
-/* ****** Register 60 [0x00F0]: TIME_MSB_SET - Set System Time (Default: 0x00000000) ****** */
+/* ****** Register 61 [0x00F4]: TIME_MSB_SET - Set System Time (Default: 0x00000000) ****** */
 
 /* TIME_MSB_SET - MSBs of 64bit system time counter set value  (time is updated when MSBs are written) */
 #define DCB_TIME_MSB_SET_REG                           DCB_REG_TIME_MSB_SET
@@ -1502,7 +1527,7 @@
 
 
 
-/* ****** Register 61 [0x00F4]: EVENT_TX_RATE - Event Transmission Rate (Default: 0x00000000) ****** */
+/* ****** Register 62 [0x00F8]: EVENT_TX_RATE - Event Transmission Rate (Default: 0x00000000) ****** */
 
 /* EVENT_TX_RATE - Number of events transmitted per second */
 #define DCB_EVENT_TX_RATE_REG                         DCB_REG_EVENT_TX_RATE
@@ -1511,7 +1536,7 @@
 
 
 
-/* ****** Register 62 [0x00F8]: EVENT_NR - Number of latest event (Default: 0x00000000) ****** */
+/* ****** Register 63 [0x00FC]: EVENT_NR - Number of latest event (Default: 0x00000000) ****** */
 
 /* EVENT_NUMBER - Number of latest event */
 #define DCB_EVENT_NUMBER_REG                               DCB_REG_EVENT_NR
@@ -1520,26 +1545,16 @@
 
 
 
-/* ****** Register 63 [0x00FC]: TRG_CFG - Trigger Configuration (Default: 0x00000000) ****** */
+/* ****** Register 64 [0x0100]: TRG_CFG - Trigger Configuration (Default: 0x00000000) ****** */
 
 /* EXT_TRIGGER_OUT_ENABLE - Enable output of trigger signal to MCX connector */
 #define DCB_EXT_TRIGGER_OUT_ENABLE_REG                      DCB_REG_TRG_CFG
-#define DCB_EXT_TRIGGER_OUT_ENABLE_MASK                          0x00000004
-#define DCB_EXT_TRIGGER_OUT_ENABLE_OFS                                    2
-
-/* ENABLE_AUTO_TRIGGER - Enable generation of automatic periodic trigger to backplane */
-#define DCB_ENABLE_AUTO_TRIGGER_REG                         DCB_REG_TRG_CFG
-#define DCB_ENABLE_AUTO_TRIGGER_MASK                             0x00000002
-#define DCB_ENABLE_AUTO_TRIGGER_OFS                                       1
-
-/* MANUAL_TRIGGER - Generate trigger pulse on backplane */
-#define DCB_MANUAL_TRIGGER_REG                              DCB_REG_TRG_CFG
-#define DCB_MANUAL_TRIGGER_MASK                                  0x00000001
-#define DCB_MANUAL_TRIGGER_OFS                                            0
+#define DCB_EXT_TRIGGER_OUT_ENABLE_MASK                          0x00000001
+#define DCB_EXT_TRIGGER_OUT_ENABLE_OFS                                    0
 
 
 
-/* ****** Register 64 [0x0100]: SET_TRG_CFG - SET bit register for Trigger configuration register (Default: 0x00000000) ****** */
+/* ****** Register 65 [0x0104]: SET_TRG_CFG - SET bit register for Trigger configuration register (Default: 0x00000000) ****** */
 
 /* SET_BIT_TRG_CFG - See TRG_CFG register */
 #define DCB_SET_BIT_TRG_CFG_REG                         DCB_REG_SET_TRG_CFG
@@ -1548,7 +1563,7 @@
 
 
 
-/* ****** Register 65 [0x0104]: CLR_TRG_CFG - CLR bit register for Trigger configuration register (Default: 0x00000000) ****** */
+/* ****** Register 66 [0x0108]: CLR_TRG_CFG - CLR bit register for Trigger configuration register (Default: 0x00000000) ****** */
 
 /* CLR_BIT_TRG_CFG - See TRG_CFG register */
 #define DCB_CLR_BIT_TRG_CFG_REG                         DCB_REG_CLR_TRG_CFG
@@ -1557,7 +1572,7 @@
 
 
 
-/* ****** Register 66 [0x0108]: TRG_AUTO_PERIOD - Automatic Trigger Period (Default: 0x04C4B400) ****** */
+/* ****** Register 67 [0x010C]: TRG_AUTO_PERIOD - Automatic Trigger Period (Default: 0x04C4B400) ****** */
 
 /* AUTO_TRIGGER_PERIOD - Period of automatic trigger in ticks of the DAQ clock */
 #define DCB_AUTO_TRIGGER_PERIOD_REG                 DCB_REG_TRG_AUTO_PERIOD
@@ -1566,7 +1581,7 @@
 
 
 
-/* ****** Register 67 [0x010C]: TRB_INFO_STAT - Trigger Information via Serial Trigger Bus Status (Default: 0x00000000) ****** */
+/* ****** Register 68 [0x0110]: TRB_INFO_STAT - Trigger Information via Serial Trigger Bus Status (Default: 0x00000000) ****** */
 
 /* TRB_FLAG_NEW - Flag signalling that the current trigger information belongs to the latest trigger received */
 #define DCB_TRB_FLAG_NEW_REG                          DCB_REG_TRB_INFO_STAT
@@ -1585,7 +1600,7 @@
 
 
 
-/* ****** Register 68 [0x0110]: TRB_INFO_LSB - Trigger Information via Serial Trigger Bus LSBs (Default: 0x00000000) ****** */
+/* ****** Register 69 [0x0114]: TRB_INFO_LSB - Trigger Information via Serial Trigger Bus LSBs (Default: 0x00000000) ****** */
 
 /* TRB_INFO_LSB - Trigger information LSBs */
 #define DCB_TRB_INFO_LSB_REG                           DCB_REG_TRB_INFO_LSB
@@ -1594,7 +1609,7 @@
 
 
 
-/* ****** Register 69 [0x0114]: TRB_INFO_MSB - Trigger Information via Serial Trigger Bus MSBs (Default: 0x00000000) ****** */
+/* ****** Register 70 [0x0118]: TRB_INFO_MSB - Trigger Information via Serial Trigger Bus MSBs (Default: 0x00000000) ****** */
 
 /* TRB_INFO_MSB - Trigger information MSBs */
 #define DCB_TRB_INFO_MSB_REG                           DCB_REG_TRB_INFO_MSB
@@ -1603,7 +1618,7 @@
 
 
 
-/* ****** Register 70 [0x0118]: LMK_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ****** */
+/* ****** Register 71 [0x011C]: LMK_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ****** */
 
 /* LMK_7_MOD - LMK channel 7 register modified flags */
 #define DCB_LMK_7_MOD_REG                              DCB_REG_LMK_MOD_FLAG
@@ -1647,7 +1662,7 @@
 
 
 
-/* ****** Register 71 [0x011C]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: 0x00000000) ****** */
+/* ****** Register 72 [0x0120]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: 0x00000000) ****** */
 
 /* CRC32_REG_BANK - Keep at the end of the register bank */
 #define DCB_CRC32_REG_BANK_REG                       DCB_REG_CRC32_REG_BANK
@@ -1659,7 +1674,7 @@
  * Number of Registers
  */
 
-#define NR_OF_REGS          72
+#define NR_OF_REGS          73
 
 #ifndef DCB_DONT_INCLUDE_REG_ACCESS_VARS
 

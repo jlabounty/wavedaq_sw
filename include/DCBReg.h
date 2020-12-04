@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  19.11.2020 08:58:12
+// Created :  03.12.2020 16:39:53
 //
 
 
@@ -188,9 +188,21 @@ public:
    unsigned int GetSyncDelay() { return BitExtract(DCB_SYNC_DELAY_REG, DCB_SYNC_DELAY_MASK, DCB_SYNC_DELAY_OFS); };
    void         SetSyncDelay(unsigned int value) { SetRegMask(DCB_SYNC_DELAY_REG, DCB_SYNC_DELAY_MASK, DCB_SYNC_DELAY_OFS, value); };
 
-   // 0x00000001: DAQ_SOFT_TRIGGER - Send trigger pulse to all slots via the backplane
+   // 0x00000020: DAQ_SOFT_TRIGGER - Send trigger pulse to all slots via the backplane
    unsigned int GetDaqSoftTrigger() { return BitExtract(DCB_DAQ_SOFT_TRIGGER_REG, DCB_DAQ_SOFT_TRIGGER_MASK, DCB_DAQ_SOFT_TRIGGER_OFS); };
    void         SetDaqSoftTrigger(unsigned int value) { SetRegMask(DCB_DAQ_SOFT_TRIGGER_REG, DCB_DAQ_SOFT_TRIGGER_MASK, DCB_DAQ_SOFT_TRIGGER_OFS, value); };
+
+   // 0x00000004: DAQ_AUTO - Auto-Trigger readout state machine every 0.5s if no other trigger (like "auto" acquisition on scope)
+   unsigned int GetDaqAuto() { return BitExtract(DCB_DAQ_AUTO_REG, DCB_DAQ_AUTO_MASK, DCB_DAQ_AUTO_OFS); };
+   void         SetDaqAuto(unsigned int value) { SetRegMask(DCB_DAQ_AUTO_REG, DCB_DAQ_AUTO_MASK, DCB_DAQ_AUTO_OFS, value); };
+
+   // 0x00000002: DAQ_NORMAL - Continuous data acquisition input trigger if system is not busy (like "normal" acquisition on scope)
+   unsigned int GetDaqNormal() { return BitExtract(DCB_DAQ_NORMAL_REG, DCB_DAQ_NORMAL_MASK, DCB_DAQ_NORMAL_OFS); };
+   void         SetDaqNormal(unsigned int value) { SetRegMask(DCB_DAQ_NORMAL_REG, DCB_DAQ_NORMAL_MASK, DCB_DAQ_NORMAL_OFS, value); };
+
+   // 0x00000001: DAQ_SINGLE - Single data acquisiton on input trigger (like "single" acquisition on scope)
+   unsigned int GetDaqSingle() { return BitExtract(DCB_DAQ_SINGLE_REG, DCB_DAQ_SINGLE_MASK, DCB_DAQ_SINGLE_OFS); };
+   void         SetDaqSingle(unsigned int value) { SetRegMask(DCB_DAQ_SINGLE_REG, DCB_DAQ_SINGLE_MASK, DCB_DAQ_SINGLE_OFS, value); };
 
 
 
@@ -258,7 +270,15 @@ public:
 
 
 
-   ////// ------ Register 21 [0x0054]: RST - Reset bits for specific firmwar units (Default: 0x00000000) ------ //////
+   ////// ------ Register 21 [0x0054]: SLOT_DATA_TX_EN - Slot Data Transmission Enable (Default: 0x00000000) ------ //////
+
+   // 0x0003FFFF: SLOT_DATA_TX_EN - Data transmission enable bits for the crate slots (DCB slot = 16, TCB slot =17)
+   unsigned int GetSlotDataTxEn() { return BitExtract(DCB_SLOT_DATA_TX_EN_REG, DCB_SLOT_DATA_TX_EN_MASK, DCB_SLOT_DATA_TX_EN_OFS); };
+   void         SetSlotDataTxEn(unsigned int value) { SetRegMask(DCB_SLOT_DATA_TX_EN_REG, DCB_SLOT_DATA_TX_EN_MASK, DCB_SLOT_DATA_TX_EN_OFS, value); };
+
+
+
+   ////// ------ Register 22 [0x0058]: RST - Reset bits for specific firmwar units (Default: 0x00000000) ------ //////
 
    // 0x00000100: WDB_SERDES_CLK_MGR_RST - Reset for clock manager deriving clocks from the WDB clock (e.g. refclk for SYNC output delay)
    unsigned int GetWdbSerdesClkMgrRst() { return BitExtract(DCB_WDB_SERDES_CLK_MGR_RST_REG, DCB_WDB_SERDES_CLK_MGR_RST_MASK, DCB_WDB_SERDES_CLK_MGR_RST_OFS); };
@@ -298,7 +318,7 @@ public:
 
 
 
-   ////// ------ Register 22 [0x0058]: SERDES_STATUS_00_07 - Input Serdes status for slot 0 to 7 (Default: 0x00000000) ------ //////
+   ////// ------ Register 23 [0x005C]: SERDES_STATUS_00_07 - Input Serdes status for slot 0 to 7 (Default: 0x00000000) ------ //////
 
    // 0x40000000: IDLE_PATTERN_DETECT_07 - Idle pattern detected on slot 7
    unsigned int GetIdlePatternDetect07() { return BitExtract(DCB_IDLE_PATTERN_DETECT_07_REG, DCB_IDLE_PATTERN_DETECT_07_MASK, DCB_IDLE_PATTERN_DETECT_07_OFS); };
@@ -350,7 +370,7 @@ public:
    unsigned int GetSyncDone00() { return BitExtract(DCB_SYNC_DONE_00_REG, DCB_SYNC_DONE_00_MASK, DCB_SYNC_DONE_00_OFS); };
 
 
-   ////// ------ Register 23 [0x005C]: SERDES_STATUS_08_15 - Input Serdes status for slot 8 to 15 (Default: 0x00000000) ------ //////
+   ////// ------ Register 24 [0x0060]: SERDES_STATUS_08_15 - Input Serdes status for slot 8 to 15 (Default: 0x00000000) ------ //////
 
    // 0x40000000: IDLE_PATTERN_DETECT_15 - Idle pattern detected on slot 15
    unsigned int GetIdlePatternDetect15() { return BitExtract(DCB_IDLE_PATTERN_DETECT_15_REG, DCB_IDLE_PATTERN_DETECT_15_MASK, DCB_IDLE_PATTERN_DETECT_15_OFS); };
@@ -402,7 +422,7 @@ public:
    unsigned int GetSyncDone08() { return BitExtract(DCB_SYNC_DONE_08_REG, DCB_SYNC_DONE_08_MASK, DCB_SYNC_DONE_08_OFS); };
 
 
-   ////// ------ Register 24 [0x0060]: SERDES_STATUS_17 - Input Serdes status for slot 17 (TCB slot) (Default: 0x00000000) ------ //////
+   ////// ------ Register 25 [0x0064]: SERDES_STATUS_17 - Input Serdes status for slot 17 (TCB slot) (Default: 0x00000000) ------ //////
 
    // 0x00000004: IDLE_PATTERN_DETECT_17 - Idle pattern detected on slot 17
    unsigned int GetIdlePatternDetect17() { return BitExtract(DCB_IDLE_PATTERN_DETECT_17_REG, DCB_IDLE_PATTERN_DETECT_17_MASK, DCB_IDLE_PATTERN_DETECT_17_OFS); };
@@ -412,7 +432,7 @@ public:
    unsigned int GetSyncDone17() { return BitExtract(DCB_SYNC_DONE_17_REG, DCB_SYNC_DONE_17_MASK, DCB_SYNC_DONE_17_OFS); };
 
 
-   ////// ------ Register 25 [0x0064]: SERDES_ERR_CNT_00 - Input Serdes error count for slot 0 (Default: 0x00000000) ------ //////
+   ////// ------ Register 26 [0x0068]: SERDES_ERR_CNT_00 - Input Serdes error count for slot 0 (Default: 0x00000000) ------ //////
 
    // 0xFF000000: CRC_ERRORS_00 - CRC error count of input serdes on slot 0 (255 = overflow)
    unsigned int GetCrcErrors00() { return BitExtract(DCB_CRC_ERRORS_00_REG, DCB_CRC_ERRORS_00_MASK, DCB_CRC_ERRORS_00_OFS); };
@@ -424,7 +444,7 @@ public:
    unsigned int GetSyncErrors00() { return BitExtract(DCB_SYNC_ERRORS_00_REG, DCB_SYNC_ERRORS_00_MASK, DCB_SYNC_ERRORS_00_OFS); };
 
 
-   ////// ------ Register 26 [0x0068]: SERDES_ERR_CNT_01 - Input Serdes error count for slot 1 (Default: 0x00000000) ------ //////
+   ////// ------ Register 27 [0x006C]: SERDES_ERR_CNT_01 - Input Serdes error count for slot 1 (Default: 0x00000000) ------ //////
 
    // 0xFF000000: CRC_ERRORS_01 - CRC error count of input serdes on slot 1 (255 = overflow)
    unsigned int GetCrcErrors01() { return BitExtract(DCB_CRC_ERRORS_01_REG, DCB_CRC_ERRORS_01_MASK, DCB_CRC_ERRORS_01_OFS); };
@@ -436,7 +456,7 @@ public:
    unsigned int GetSyncErrors01() { return BitExtract(DCB_SYNC_ERRORS_01_REG, DCB_SYNC_ERRORS_01_MASK, DCB_SYNC_ERRORS_01_OFS); };
 
 
-   ////// ------ Register 27 [0x006C]: SERDES_ERR_CNT_02 - Input Serdes error count for slot 2 (Default: 0x00000000) ------ //////
+   ////// ------ Register 28 [0x0070]: SERDES_ERR_CNT_02 - Input Serdes error count for slot 2 (Default: 0x00000000) ------ //////
 
    // 0xFF000000: CRC_ERRORS_02 - CRC error count of input serdes on slot 2 (255 = overflow)
    unsigned int GetCrcErrors02() { return BitExtract(DCB_CRC_ERRORS_02_REG, DCB_CRC_ERRORS_02_MASK, DCB_CRC_ERRORS_02_OFS); };
@@ -448,7 +468,7 @@ public:
    unsigned int GetSyncErrors02() { return BitExtract(DCB_SYNC_ERRORS_02_REG, DCB_SYNC_ERRORS_02_MASK, DCB_SYNC_ERRORS_02_OFS); };
 
 
-   ////// ------ Register 28 [0x0070]: SERDES_ERR_CNT_03 - Input Serdes error count for slot 3 (Default: 0x00000000) ------ //////
+   ////// ------ Register 29 [0x0074]: SERDES_ERR_CNT_03 - Input Serdes error count for slot 3 (Default: 0x00000000) ------ //////
 
    // 0xFF000000: CRC_ERRORS_03 - CRC error count of input serdes on slot 3 (255 = overflow)
    unsigned int GetCrcErrors03() { return BitExtract(DCB_CRC_ERRORS_03_REG, DCB_CRC_ERRORS_03_MASK, DCB_CRC_ERRORS_03_OFS); };
@@ -460,7 +480,7 @@ public:
    unsigned int GetSyncErrors03() { return BitExtract(DCB_SYNC_ERRORS_03_REG, DCB_SYNC_ERRORS_03_MASK, DCB_SYNC_ERRORS_03_OFS); };
 
 
-   ////// ------ Register 29 [0x0074]: SERDES_ERR_CNT_04 - Input Serdes error count for slot 4 (Default: 0x00000000) ------ //////
+   ////// ------ Register 30 [0x0078]: SERDES_ERR_CNT_04 - Input Serdes error count for slot 4 (Default: 0x00000000) ------ //////
 
    // 0xFF000000: CRC_ERRORS_04 - CRC error count of input serdes on slot 4 (255 = overflow)
    unsigned int GetCrcErrors04() { return BitExtract(DCB_CRC_ERRORS_04_REG, DCB_CRC_ERRORS_04_MASK, DCB_CRC_ERRORS_04_OFS); };
@@ -472,7 +492,7 @@ public:
    unsigned int GetSyncErrors04() { return BitExtract(DCB_SYNC_ERRORS_04_REG, DCB_SYNC_ERRORS_04_MASK, DCB_SYNC_ERRORS_04_OFS); };
 
 
-   ////// ------ Register 30 [0x0078]: SERDES_ERR_CNT_05 - Input Serdes error count for slot 5 (Default: 0x00000000) ------ //////
+   ////// ------ Register 31 [0x007C]: SERDES_ERR_CNT_05 - Input Serdes error count for slot 5 (Default: 0x00000000) ------ //////
 
    // 0xFF000000: CRC_ERRORS_05 - CRC error count of input serdes on slot 5 (255 = overflow)
    unsigned int GetCrcErrors05() { return BitExtract(DCB_CRC_ERRORS_05_REG, DCB_CRC_ERRORS_05_MASK, DCB_CRC_ERRORS_05_OFS); };
@@ -484,7 +504,7 @@ public:
    unsigned int GetSyncErrors05() { return BitExtract(DCB_SYNC_ERRORS_05_REG, DCB_SYNC_ERRORS_05_MASK, DCB_SYNC_ERRORS_05_OFS); };
 
 
-   ////// ------ Register 31 [0x007C]: SERDES_ERR_CNT_06 - Input Serdes error count for slot 6 (Default: 0x00000000) ------ //////
+   ////// ------ Register 32 [0x0080]: SERDES_ERR_CNT_06 - Input Serdes error count for slot 6 (Default: 0x00000000) ------ //////
 
    // 0xFF000000: CRC_ERRORS_06 - CRC error count of input serdes on slot 6 (255 = overflow)
    unsigned int GetCrcErrors06() { return BitExtract(DCB_CRC_ERRORS_06_REG, DCB_CRC_ERRORS_06_MASK, DCB_CRC_ERRORS_06_OFS); };
@@ -496,7 +516,7 @@ public:
    unsigned int GetSyncErrors06() { return BitExtract(DCB_SYNC_ERRORS_06_REG, DCB_SYNC_ERRORS_06_MASK, DCB_SYNC_ERRORS_06_OFS); };
 
 
-   ////// ------ Register 32 [0x0080]: SERDES_ERR_CNT_07 - Input Serdes error count for slot 7 (Default: 0x00000000) ------ //////
+   ////// ------ Register 33 [0x0084]: SERDES_ERR_CNT_07 - Input Serdes error count for slot 7 (Default: 0x00000000) ------ //////
 
    // 0xFF000000: CRC_ERRORS_07 - CRC error count of input serdes on slot 7 (255 = overflow)
    unsigned int GetCrcErrors07() { return BitExtract(DCB_CRC_ERRORS_07_REG, DCB_CRC_ERRORS_07_MASK, DCB_CRC_ERRORS_07_OFS); };
@@ -508,7 +528,7 @@ public:
    unsigned int GetSyncErrors07() { return BitExtract(DCB_SYNC_ERRORS_07_REG, DCB_SYNC_ERRORS_07_MASK, DCB_SYNC_ERRORS_07_OFS); };
 
 
-   ////// ------ Register 33 [0x0084]: SERDES_ERR_CNT_08 - Input Serdes error count for slot 8 (Default: 0x00000000) ------ //////
+   ////// ------ Register 34 [0x0088]: SERDES_ERR_CNT_08 - Input Serdes error count for slot 8 (Default: 0x00000000) ------ //////
 
    // 0xFF000000: CRC_ERRORS_08 - CRC error count of input serdes on slot 8 (255 = overflow)
    unsigned int GetCrcErrors08() { return BitExtract(DCB_CRC_ERRORS_08_REG, DCB_CRC_ERRORS_08_MASK, DCB_CRC_ERRORS_08_OFS); };
@@ -520,7 +540,7 @@ public:
    unsigned int GetSyncErrors08() { return BitExtract(DCB_SYNC_ERRORS_08_REG, DCB_SYNC_ERRORS_08_MASK, DCB_SYNC_ERRORS_08_OFS); };
 
 
-   ////// ------ Register 34 [0x0088]: SERDES_ERR_CNT_09 - Input Serdes error count for slot 9 (Default: 0x00000000) ------ //////
+   ////// ------ Register 35 [0x008C]: SERDES_ERR_CNT_09 - Input Serdes error count for slot 9 (Default: 0x00000000) ------ //////
 
    // 0xFF000000: CRC_ERRORS_09 - CRC error count of input serdes on slot 9 (255 = overflow)
    unsigned int GetCrcErrors09() { return BitExtract(DCB_CRC_ERRORS_09_REG, DCB_CRC_ERRORS_09_MASK, DCB_CRC_ERRORS_09_OFS); };
@@ -532,7 +552,7 @@ public:
    unsigned int GetSyncErrors09() { return BitExtract(DCB_SYNC_ERRORS_09_REG, DCB_SYNC_ERRORS_09_MASK, DCB_SYNC_ERRORS_09_OFS); };
 
 
-   ////// ------ Register 35 [0x008C]: SERDES_ERR_CNT_10 - Input Serdes error count for slot 10 (Default: 0x00000000) ------ //////
+   ////// ------ Register 36 [0x0090]: SERDES_ERR_CNT_10 - Input Serdes error count for slot 10 (Default: 0x00000000) ------ //////
 
    // 0xFF000000: CRC_ERRORS_10 - CRC error count of input serdes on slot 10 (255 = overflow)
    unsigned int GetCrcErrors10() { return BitExtract(DCB_CRC_ERRORS_10_REG, DCB_CRC_ERRORS_10_MASK, DCB_CRC_ERRORS_10_OFS); };
@@ -544,7 +564,7 @@ public:
    unsigned int GetSyncErrors10() { return BitExtract(DCB_SYNC_ERRORS_10_REG, DCB_SYNC_ERRORS_10_MASK, DCB_SYNC_ERRORS_10_OFS); };
 
 
-   ////// ------ Register 36 [0x0090]: SERDES_ERR_CNT_11 - Input Serdes error count for slot 11 (Default: 0x00000000) ------ //////
+   ////// ------ Register 37 [0x0094]: SERDES_ERR_CNT_11 - Input Serdes error count for slot 11 (Default: 0x00000000) ------ //////
 
    // 0xFF000000: CRC_ERRORS_11 - CRC error count of input serdes on slot 11 (255 = overflow)
    unsigned int GetCrcErrors11() { return BitExtract(DCB_CRC_ERRORS_11_REG, DCB_CRC_ERRORS_11_MASK, DCB_CRC_ERRORS_11_OFS); };
@@ -556,7 +576,7 @@ public:
    unsigned int GetSyncErrors11() { return BitExtract(DCB_SYNC_ERRORS_11_REG, DCB_SYNC_ERRORS_11_MASK, DCB_SYNC_ERRORS_11_OFS); };
 
 
-   ////// ------ Register 37 [0x0094]: SERDES_ERR_CNT_12 - Input Serdes error count for slot 12 (Default: 0x00000000) ------ //////
+   ////// ------ Register 38 [0x0098]: SERDES_ERR_CNT_12 - Input Serdes error count for slot 12 (Default: 0x00000000) ------ //////
 
    // 0xFF000000: CRC_ERRORS_12 - CRC error count of input serdes on slot 12 (255 = overflow)
    unsigned int GetCrcErrors12() { return BitExtract(DCB_CRC_ERRORS_12_REG, DCB_CRC_ERRORS_12_MASK, DCB_CRC_ERRORS_12_OFS); };
@@ -568,7 +588,7 @@ public:
    unsigned int GetSyncErrors12() { return BitExtract(DCB_SYNC_ERRORS_12_REG, DCB_SYNC_ERRORS_12_MASK, DCB_SYNC_ERRORS_12_OFS); };
 
 
-   ////// ------ Register 38 [0x0098]: SERDES_ERR_CNT_13 - Input Serdes error count for slot 13 (Default: 0x00000000) ------ //////
+   ////// ------ Register 39 [0x009C]: SERDES_ERR_CNT_13 - Input Serdes error count for slot 13 (Default: 0x00000000) ------ //////
 
    // 0xFF000000: CRC_ERRORS_13 - CRC error count of input serdes on slot 13 (255 = overflow)
    unsigned int GetCrcErrors13() { return BitExtract(DCB_CRC_ERRORS_13_REG, DCB_CRC_ERRORS_13_MASK, DCB_CRC_ERRORS_13_OFS); };
@@ -580,7 +600,7 @@ public:
    unsigned int GetSyncErrors13() { return BitExtract(DCB_SYNC_ERRORS_13_REG, DCB_SYNC_ERRORS_13_MASK, DCB_SYNC_ERRORS_13_OFS); };
 
 
-   ////// ------ Register 39 [0x009C]: SERDES_ERR_CNT_14 - Input Serdes error count for slot 14 (Default: 0x00000000) ------ //////
+   ////// ------ Register 40 [0x00A0]: SERDES_ERR_CNT_14 - Input Serdes error count for slot 14 (Default: 0x00000000) ------ //////
 
    // 0xFF000000: CRC_ERRORS_14 - CRC error count of input serdes on slot 14 (255 = overflow)
    unsigned int GetCrcErrors14() { return BitExtract(DCB_CRC_ERRORS_14_REG, DCB_CRC_ERRORS_14_MASK, DCB_CRC_ERRORS_14_OFS); };
@@ -592,7 +612,7 @@ public:
    unsigned int GetSyncErrors14() { return BitExtract(DCB_SYNC_ERRORS_14_REG, DCB_SYNC_ERRORS_14_MASK, DCB_SYNC_ERRORS_14_OFS); };
 
 
-   ////// ------ Register 40 [0x00A0]: SERDES_ERR_CNT_15 - Input Serdes error count for slot 15 (Default: 0x00000000) ------ //////
+   ////// ------ Register 41 [0x00A4]: SERDES_ERR_CNT_15 - Input Serdes error count for slot 15 (Default: 0x00000000) ------ //////
 
    // 0xFF000000: CRC_ERRORS_15 - CRC error count of input serdes on slot 15 (255 = overflow)
    unsigned int GetCrcErrors15() { return BitExtract(DCB_CRC_ERRORS_15_REG, DCB_CRC_ERRORS_15_MASK, DCB_CRC_ERRORS_15_OFS); };
@@ -604,7 +624,7 @@ public:
    unsigned int GetSyncErrors15() { return BitExtract(DCB_SYNC_ERRORS_15_REG, DCB_SYNC_ERRORS_15_MASK, DCB_SYNC_ERRORS_15_OFS); };
 
 
-   ////// ------ Register 41 [0x00A4]: SERDES_ERR_CNT_17 - Input Serdes error count for slot 17 (TCB slot) (Default: 0x00000000) ------ //////
+   ////// ------ Register 42 [0x00A8]: SERDES_ERR_CNT_17 - Input Serdes error count for slot 17 (TCB slot) (Default: 0x00000000) ------ //////
 
    // 0xFF000000: CRC_ERRORS_17 - CRC error count of input serdes on slot 17 (255 = overflow)
    unsigned int GetCrcErrors17() { return BitExtract(DCB_CRC_ERRORS_17_REG, DCB_CRC_ERRORS_17_MASK, DCB_CRC_ERRORS_17_OFS); };
@@ -616,7 +636,7 @@ public:
    unsigned int GetSyncErrors17() { return BitExtract(DCB_SYNC_ERRORS_17_REG, DCB_SYNC_ERRORS_17_MASK, DCB_SYNC_ERRORS_17_OFS); };
 
 
-   ////// ------ Register 42 [0x00A8]: APLY_CFG - Apply settings from regsiter bank to hardware units (Default: 0x00000000) ------ //////
+   ////// ------ Register 43 [0x00AC]: APLY_CFG - Apply settings from regsiter bank to hardware units (Default: 0x00000000) ------ //////
 
    // 0x00000001: APPLY_SETTINGS_LMK - Apply configuration from regsiter bank to LMK
    unsigned int GetApplySettingsLmk() { return BitExtract(DCB_APPLY_SETTINGS_LMK_REG, DCB_APPLY_SETTINGS_LMK_MASK, DCB_APPLY_SETTINGS_LMK_OFS); };
@@ -624,7 +644,7 @@ public:
 
 
 
-   ////// ------ Register 43 [0x00AC]: LMK_0 - LMK Register 0 (Default: 0x00020100) ------ //////
+   ////// ------ Register 44 [0x00B0]: LMK_0 - LMK Register 0 (Default: 0x00020100) ------ //////
 
    // 0x80000000: LMK0_RESET - Resets LMK Registers to Their Power-On State
    unsigned int GetLmk0Reset() { return BitExtract(DCB_LMK0_RESET_REG, DCB_LMK0_RESET_MASK, DCB_LMK0_RESET_OFS); };
@@ -648,7 +668,7 @@ public:
 
 
 
-   ////// ------ Register 44 [0x00B0]: LMK_1 - LMK Register 1 (Default: 0x00030101) ------ //////
+   ////// ------ Register 45 [0x00B4]: LMK_1 - LMK Register 1 (Default: 0x00030101) ------ //////
 
    // 0x00060000: LMK1_CLKOUT_MUX - Channel 1 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed)
    unsigned int GetLmk1ClkoutMux() { return BitExtract(DCB_LMK1_CLKOUT_MUX_REG, DCB_LMK1_CLKOUT_MUX_MASK, DCB_LMK1_CLKOUT_MUX_OFS); };
@@ -668,7 +688,7 @@ public:
 
 
 
-   ////// ------ Register 45 [0x00B4]: LMK_2 - LMK Register 2 (Default: 0x00020102) ------ //////
+   ////// ------ Register 46 [0x00B8]: LMK_2 - LMK Register 2 (Default: 0x00020102) ------ //////
 
    // 0x00060000: LMK2_CLKOUT_MUX - Channel 2 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed)
    unsigned int GetLmk2ClkoutMux() { return BitExtract(DCB_LMK2_CLKOUT_MUX_REG, DCB_LMK2_CLKOUT_MUX_MASK, DCB_LMK2_CLKOUT_MUX_OFS); };
@@ -688,7 +708,7 @@ public:
 
 
 
-   ////// ------ Register 46 [0x00B8]: LMK_3 - LMK Register 3 (Default: 0x00020103) ------ //////
+   ////// ------ Register 47 [0x00BC]: LMK_3 - LMK Register 3 (Default: 0x00020103) ------ //////
 
    // 0x00060000: LMK3_CLKOUT_MUX - Channel 3 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed)
    unsigned int GetLmk3ClkoutMux() { return BitExtract(DCB_LMK3_CLKOUT_MUX_REG, DCB_LMK3_CLKOUT_MUX_MASK, DCB_LMK3_CLKOUT_MUX_OFS); };
@@ -708,7 +728,7 @@ public:
 
 
 
-   ////// ------ Register 47 [0x00BC]: LMK_4 - LMK Register 4 (Default: 0x00000104) ------ //////
+   ////// ------ Register 48 [0x00C0]: LMK_4 - LMK Register 4 (Default: 0x00000104) ------ //////
 
    // 0x00060000: LMK4_CLKOUT_MUX - Channel 4 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed)
    unsigned int GetLmk4ClkoutMux() { return BitExtract(DCB_LMK4_CLKOUT_MUX_REG, DCB_LMK4_CLKOUT_MUX_MASK, DCB_LMK4_CLKOUT_MUX_OFS); };
@@ -728,7 +748,7 @@ public:
 
 
 
-   ////// ------ Register 48 [0x00C0]: LMK_5 - LMK Register 5 (Default: 0x00000105) ------ //////
+   ////// ------ Register 49 [0x00C4]: LMK_5 - LMK Register 5 (Default: 0x00000105) ------ //////
 
    // 0x00060000: LMK5_CLKOUT_MUX - Channel 5 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed)
    unsigned int GetLmk5ClkoutMux() { return BitExtract(DCB_LMK5_CLKOUT_MUX_REG, DCB_LMK5_CLKOUT_MUX_MASK, DCB_LMK5_CLKOUT_MUX_OFS); };
@@ -748,7 +768,7 @@ public:
 
 
 
-   ////// ------ Register 49 [0x00C4]: LMK_6 - LMK Register 6 (Default: 0x00000106) ------ //////
+   ////// ------ Register 50 [0x00C8]: LMK_6 - LMK Register 6 (Default: 0x00000106) ------ //////
 
    // 0x00060000: LMK6_CLKOUT_MUX - Channel 6 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed)
    unsigned int GetLmk6ClkoutMux() { return BitExtract(DCB_LMK6_CLKOUT_MUX_REG, DCB_LMK6_CLKOUT_MUX_MASK, DCB_LMK6_CLKOUT_MUX_OFS); };
@@ -768,7 +788,7 @@ public:
 
 
 
-   ////// ------ Register 50 [0x00C8]: LMK_7 - LMK Register 7 (Default: 0x00000107) ------ //////
+   ////// ------ Register 51 [0x00CC]: LMK_7 - LMK Register 7 (Default: 0x00000107) ------ //////
 
    // 0x00060000: LMK7_CLKOUT_MUX - Channel 7 Clock Output Multiplexer (0=bypass, 1=divided, 2=delayed, 3=divided&delayed)
    unsigned int GetLmk7ClkoutMux() { return BitExtract(DCB_LMK7_CLKOUT_MUX_REG, DCB_LMK7_CLKOUT_MUX_MASK, DCB_LMK7_CLKOUT_MUX_OFS); };
@@ -788,7 +808,7 @@ public:
 
 
 
-   ////// ------ Register 51 [0x00CC]: LMK_8 - LMK Register 8 (Default: 0x10000908) ------ //////
+   ////// ------ Register 52 [0x00D0]: LMK_8 - LMK Register 8 (Default: 0x10000908) ------ //////
 
    // 0xFFFFFFF0: LMK8_PHASE_NOISE_OPT - Set LMK Register 8 (Phase Noise Optimization)
    unsigned int GetLmk8PhaseNoiseOpt() { return BitExtract(DCB_LMK8_PHASE_NOISE_OPT_REG, DCB_LMK8_PHASE_NOISE_OPT_MASK, DCB_LMK8_PHASE_NOISE_OPT_OFS); };
@@ -796,7 +816,7 @@ public:
 
 
 
-   ////// ------ Register 52 [0x00D0]: LMK_9 - LMK Register 9 (Default: 0xA0022A09) ------ //////
+   ////// ------ Register 53 [0x00D4]: LMK_9 - LMK Register 9 (Default: 0xA0022A09) ------ //////
 
    // 0x00010000: LMK9_VBOOST - Voltage Level Boost for Clock Outputs
    unsigned int GetLmk9Vboost() { return BitExtract(DCB_LMK9_VBOOST_REG, DCB_LMK9_VBOOST_MASK, DCB_LMK9_VBOOST_OFS); };
@@ -804,7 +824,7 @@ public:
 
 
 
-   ////// ------ Register 53 [0x00D4]: LMK_11 - LMK Register 11 (Default: 0x0082000B) ------ //////
+   ////// ------ Register 54 [0x00D8]: LMK_11 - LMK Register 11 (Default: 0x0082000B) ------ //////
 
    // 0x00008000: LMK11_DIV4 - Divider Enable for Digital Lock Detect Circuit
    unsigned int GetLmk11Div4() { return BitExtract(DCB_LMK11_DIV4_REG, DCB_LMK11_DIV4_MASK, DCB_LMK11_DIV4_OFS); };
@@ -812,7 +832,7 @@ public:
 
 
 
-   ////// ------ Register 54 [0x00D8]: LMK_13 - LMK Register 13 (Default: 0x029400AD) ------ //////
+   ////// ------ Register 55 [0x00DC]: LMK_13 - LMK Register 13 (Default: 0x029400AD) ------ //////
 
    // 0x003FC000: LMK13_OSCIN_FREQ - Oscillator Input Calibration Adjustment in MHz (1..200)
    unsigned int GetLmk13OscinFreq() { return BitExtract(DCB_LMK13_OSCIN_FREQ_REG, DCB_LMK13_OSCIN_FREQ_MASK, DCB_LMK13_OSCIN_FREQ_OFS); };
@@ -832,7 +852,7 @@ public:
 
 
 
-   ////// ------ Register 55 [0x00DC]: LMK_14 - LMK Register 14 (Default: 0x0830140E) ------ //////
+   ////// ------ Register 56 [0x00E0]: LMK_14 - LMK Register 14 (Default: 0x0830140E) ------ //////
 
    // 0x10000000: LMK14_EN_FOUT - Enable for the Fout Pin (0 = Disabled, 1 = Enabled)
    unsigned int GetLmk14EnFout() { return BitExtract(DCB_LMK14_EN_FOUT_REG, DCB_LMK14_EN_FOUT_MASK, DCB_LMK14_EN_FOUT_OFS); };
@@ -856,7 +876,7 @@ public:
 
 
 
-   ////// ------ Register 56 [0x00E0]: LMK_15 - LMK Register 15 (Default: 0xE000280F) ------ //////
+   ////// ------ Register 57 [0x00E4]: LMK_15 - LMK Register 15 (Default: 0xE000280F) ------ //////
 
    // 0xC0000000: LMK15_PLL_CP_GAIN - PLL Charge Pump Gain (see datasheet) (0..4)
    unsigned int GetLmk15PllCpGain() { return BitExtract(DCB_LMK15_PLL_CP_GAIN_REG, DCB_LMK15_PLL_CP_GAIN_MASK, DCB_LMK15_PLL_CP_GAIN_OFS); };
@@ -872,19 +892,19 @@ public:
 
 
 
-   ////// ------ Register 57 [0x00E4]: TIME_LSB - Current System Time (Default: 0x00000000) ------ //////
+   ////// ------ Register 58 [0x00E8]: TIME_LSB - Current System Time (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: TIME_LSB - LSBs of 64bit system time counter (MSBs are latched upon read of LSB register)
    unsigned int GetTimeLsb() { return BitExtract(DCB_TIME_LSB_REG, DCB_TIME_LSB_MASK, DCB_TIME_LSB_OFS); };
 
 
-   ////// ------ Register 58 [0x00E8]: TIME_MSB - Current System Time (Default: 0x00000000) ------ //////
+   ////// ------ Register 59 [0x00EC]: TIME_MSB - Current System Time (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: TIME_MSB - MSBs of 64bit system time counter (latched upon read of LSB register)
    unsigned int GetTimeMsb() { return BitExtract(DCB_TIME_MSB_REG, DCB_TIME_MSB_MASK, DCB_TIME_MSB_OFS); };
 
 
-   ////// ------ Register 59 [0x00EC]: TIME_LSB_SET - Set System Time (Default: 0x00000000) ------ //////
+   ////// ------ Register 60 [0x00F0]: TIME_LSB_SET - Set System Time (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: TIME_LSB_SET - LSBs of 64bit system time counter set value  (time is updated when MSBs are written)
    unsigned int GetTimeLsbSet() { return BitExtract(DCB_TIME_LSB_SET_REG, DCB_TIME_LSB_SET_MASK, DCB_TIME_LSB_SET_OFS); };
@@ -892,7 +912,7 @@ public:
 
 
 
-   ////// ------ Register 60 [0x00F0]: TIME_MSB_SET - Set System Time (Default: 0x00000000) ------ //////
+   ////// ------ Register 61 [0x00F4]: TIME_MSB_SET - Set System Time (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: TIME_MSB_SET - MSBs of 64bit system time counter set value  (time is updated when MSBs are written)
    unsigned int GetTimeMsbSet() { return BitExtract(DCB_TIME_MSB_SET_REG, DCB_TIME_MSB_SET_MASK, DCB_TIME_MSB_SET_OFS); };
@@ -900,35 +920,27 @@ public:
 
 
 
-   ////// ------ Register 61 [0x00F4]: EVENT_TX_RATE - Event Transmission Rate (Default: 0x00000000) ------ //////
+   ////// ------ Register 62 [0x00F8]: EVENT_TX_RATE - Event Transmission Rate (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: EVENT_TX_RATE - Number of events transmitted per second
    unsigned int GetEventTxRate() { return BitExtract(DCB_EVENT_TX_RATE_REG, DCB_EVENT_TX_RATE_MASK, DCB_EVENT_TX_RATE_OFS); };
 
 
-   ////// ------ Register 62 [0x00F8]: EVENT_NR - Number of latest event (Default: 0x00000000) ------ //////
+   ////// ------ Register 63 [0x00FC]: EVENT_NR - Number of latest event (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: EVENT_NUMBER - Number of latest event
    unsigned int GetEventNumber() { return BitExtract(DCB_EVENT_NUMBER_REG, DCB_EVENT_NUMBER_MASK, DCB_EVENT_NUMBER_OFS); };
 
 
-   ////// ------ Register 63 [0x00FC]: TRG_CFG - Trigger Configuration (Default: 0x00000000) ------ //////
+   ////// ------ Register 64 [0x0100]: TRG_CFG - Trigger Configuration (Default: 0x00000000) ------ //////
 
-   // 0x00000004: EXT_TRIGGER_OUT_ENABLE - Enable output of trigger signal to MCX connector
+   // 0x00000001: EXT_TRIGGER_OUT_ENABLE - Enable output of trigger signal to MCX connector
    unsigned int GetExtTriggerOutEnable() { return BitExtract(DCB_EXT_TRIGGER_OUT_ENABLE_REG, DCB_EXT_TRIGGER_OUT_ENABLE_MASK, DCB_EXT_TRIGGER_OUT_ENABLE_OFS); };
    void         SetExtTriggerOutEnable(unsigned int value) { SetRegMask(DCB_EXT_TRIGGER_OUT_ENABLE_REG, DCB_EXT_TRIGGER_OUT_ENABLE_MASK, DCB_EXT_TRIGGER_OUT_ENABLE_OFS, value); };
 
-   // 0x00000002: ENABLE_AUTO_TRIGGER - Enable generation of automatic periodic trigger to backplane
-   unsigned int GetEnableAutoTrigger() { return BitExtract(DCB_ENABLE_AUTO_TRIGGER_REG, DCB_ENABLE_AUTO_TRIGGER_MASK, DCB_ENABLE_AUTO_TRIGGER_OFS); };
-   void         SetEnableAutoTrigger(unsigned int value) { SetRegMask(DCB_ENABLE_AUTO_TRIGGER_REG, DCB_ENABLE_AUTO_TRIGGER_MASK, DCB_ENABLE_AUTO_TRIGGER_OFS, value); };
-
-   // 0x00000001: MANUAL_TRIGGER - Generate trigger pulse on backplane
-   unsigned int GetManualTrigger() { return BitExtract(DCB_MANUAL_TRIGGER_REG, DCB_MANUAL_TRIGGER_MASK, DCB_MANUAL_TRIGGER_OFS); };
-   void         SetManualTrigger(unsigned int value) { SetRegMask(DCB_MANUAL_TRIGGER_REG, DCB_MANUAL_TRIGGER_MASK, DCB_MANUAL_TRIGGER_OFS, value); };
 
 
-
-   ////// ------ Register 64 [0x0100]: SET_TRG_CFG - SET bit register for Trigger configuration register (Default: 0x00000000) ------ //////
+   ////// ------ Register 65 [0x0104]: SET_TRG_CFG - SET bit register for Trigger configuration register (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: SET_BIT_TRG_CFG - See TRG_CFG register
    unsigned int GetSetBitTrgCfg() { return BitExtract(DCB_SET_BIT_TRG_CFG_REG, DCB_SET_BIT_TRG_CFG_MASK, DCB_SET_BIT_TRG_CFG_OFS); };
@@ -936,7 +948,7 @@ public:
 
 
 
-   ////// ------ Register 65 [0x0104]: CLR_TRG_CFG - CLR bit register for Trigger configuration register (Default: 0x00000000) ------ //////
+   ////// ------ Register 66 [0x0108]: CLR_TRG_CFG - CLR bit register for Trigger configuration register (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: CLR_BIT_TRG_CFG - See TRG_CFG register
    unsigned int GetClrBitTrgCfg() { return BitExtract(DCB_CLR_BIT_TRG_CFG_REG, DCB_CLR_BIT_TRG_CFG_MASK, DCB_CLR_BIT_TRG_CFG_OFS); };
@@ -944,7 +956,7 @@ public:
 
 
 
-   ////// ------ Register 66 [0x0108]: TRG_AUTO_PERIOD - Automatic Trigger Period (Default: 0x04C4B400) ------ //////
+   ////// ------ Register 67 [0x010C]: TRG_AUTO_PERIOD - Automatic Trigger Period (Default: 0x04C4B400) ------ //////
 
    // 0xFFFFFFFF: AUTO_TRIGGER_PERIOD - Period of automatic trigger in ticks of the DAQ clock
    unsigned int GetAutoTriggerPeriod() { return BitExtract(DCB_AUTO_TRIGGER_PERIOD_REG, DCB_AUTO_TRIGGER_PERIOD_MASK, DCB_AUTO_TRIGGER_PERIOD_OFS); };
@@ -952,7 +964,7 @@ public:
 
 
 
-   ////// ------ Register 67 [0x010C]: TRB_INFO_STAT - Trigger Information via Serial Trigger Bus Status (Default: 0x00000000) ------ //////
+   ////// ------ Register 68 [0x0110]: TRB_INFO_STAT - Trigger Information via Serial Trigger Bus Status (Default: 0x00000000) ------ //////
 
    // 0x80000000: TRB_FLAG_NEW - Flag signalling that the current trigger information belongs to the latest trigger received
    unsigned int GetTrbFlagNew() { return BitExtract(DCB_TRB_FLAG_NEW_REG, DCB_TRB_FLAG_NEW_MASK, DCB_TRB_FLAG_NEW_OFS); };
@@ -962,19 +974,19 @@ public:
    unsigned int GetTrbParityErrorCount() { return BitExtract(DCB_TRB_PARITY_ERROR_COUNT_REG, DCB_TRB_PARITY_ERROR_COUNT_MASK, DCB_TRB_PARITY_ERROR_COUNT_OFS); };
 
 
-   ////// ------ Register 68 [0x0110]: TRB_INFO_LSB - Trigger Information via Serial Trigger Bus LSBs (Default: 0x00000000) ------ //////
+   ////// ------ Register 69 [0x0114]: TRB_INFO_LSB - Trigger Information via Serial Trigger Bus LSBs (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: TRB_INFO_LSB - Trigger information LSBs
    unsigned int GetTrbInfoLsb() { return BitExtract(DCB_TRB_INFO_LSB_REG, DCB_TRB_INFO_LSB_MASK, DCB_TRB_INFO_LSB_OFS); };
 
 
-   ////// ------ Register 69 [0x0114]: TRB_INFO_MSB - Trigger Information via Serial Trigger Bus MSBs (Default: 0x00000000) ------ //////
+   ////// ------ Register 70 [0x0118]: TRB_INFO_MSB - Trigger Information via Serial Trigger Bus MSBs (Default: 0x00000000) ------ //////
 
    // 0x0000FFFF: TRB_INFO_MSB - Trigger information MSBs
    unsigned int GetTrbInfoMsb() { return BitExtract(DCB_TRB_INFO_MSB_REG, DCB_TRB_INFO_MSB_MASK, DCB_TRB_INFO_MSB_OFS); };
 
 
-   ////// ------ Register 70 [0x0118]: LMK_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ------ //////
+   ////// ------ Register 71 [0x011C]: LMK_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ------ //////
 
    // 0x00000080: LMK_7_MOD - LMK channel 7 register modified flags
    unsigned int GetLmk7Mod() { return BitExtract(DCB_LMK_7_MOD_REG, DCB_LMK_7_MOD_MASK, DCB_LMK_7_MOD_OFS); };
@@ -994,7 +1006,7 @@ public:
    unsigned int GetLmk0Mod() { return BitExtract(DCB_LMK_0_MOD_REG, DCB_LMK_0_MOD_MASK, DCB_LMK_0_MOD_OFS); };
 
 
-   ////// ------ Register 71 [0x011C]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: 0x00000000) ------ //////
+   ////// ------ Register 72 [0x0120]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: CRC32_REG_BANK - Keep at the end of the register bank
    unsigned int GetCrc32RegBank() { return BitExtract(DCB_CRC32_REG_BANK_REG, DCB_CRC32_REG_BANK_MASK, DCB_CRC32_REG_BANK_OFS); };
