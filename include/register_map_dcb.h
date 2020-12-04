@@ -5,7 +5,7 @@
  *  Project :  MEGII - DCB
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  03.12.2020 16:39:53
+ *  Created :  04.12.2020 11:07:11
  *
  *  Description :  Register map definitions.
  *
@@ -49,7 +49,7 @@
 #define DCB_REG_SET_CLK_CTRL                      0x0048
 #define DCB_REG_CLR_CLK_CTRL                      0x004C
 #define DCB_REG_COM_CTRL                          0x0050
-#define DCB_REG_SLOT_DATA_TX_EN                   0x0054
+#define DCB_REG_DPS_CTRL                          0x0054
 #define DCB_REG_RST                               0x0058
 #define DCB_REG_SERDES_STATUS_00_07               0x005C
 #define DCB_REG_SERDES_STATUS_08_15               0x0060
@@ -453,12 +453,17 @@
 
 
 
-/* ****** Register 21 [0x0054]: SLOT_DATA_TX_EN - Slot Data Transmission Enable (Default: 0x00000000) ****** */
+/* ****** Register 21 [0x0054]: DPS_CTRL - DMA Packet Scheduler Control (Default: 0x0001FFFF) ****** */
 
-/* SLOT_DATA_TX_EN - Data transmission enable bits for the crate slots (DCB slot = 16, TCB slot =17) */
-#define DCB_SLOT_DATA_TX_EN_REG                     DCB_REG_SLOT_DATA_TX_EN
-#define DCB_SLOT_DATA_TX_EN_MASK                                 0x0003FFFF
-#define DCB_SLOT_DATA_TX_EN_OFS                                           0
+/* DPS_EVENT_MODE - Event Mode of the DMA packet scheduler: 0 = Freerun, 1 = Coordinate Events on Slots */
+#define DCB_DPS_EVENT_MODE_REG                             DCB_REG_DPS_CTRL
+#define DCB_DPS_EVENT_MODE_MASK                                  0x00100000
+#define DCB_DPS_EVENT_MODE_OFS                                           20
+
+/* DPS_SLOT_ENABLE - Data transmission enable bits for the crate slots (TCB slot = 16) */
+#define DCB_DPS_SLOT_ENABLE_REG                            DCB_REG_DPS_CTRL
+#define DCB_DPS_SLOT_ENABLE_MASK                                 0x0001FFFF
+#define DCB_DPS_SLOT_ENABLE_OFS                                           0
 
 
 

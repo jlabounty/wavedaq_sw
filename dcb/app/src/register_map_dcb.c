@@ -5,7 +5,7 @@
  *  Project :  MEGII - DCB
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  03.12.2020 16:39:53
+ *  Created :  04.12.2020 11:07:11
  *
  *  Description :  Register map definitions.
  *
@@ -40,7 +40,7 @@ const dcb_reg_func_type  dcb_reg_func_list[] = {
   { dcb_hw_reg         , 0 },   /* register 18 [0x0048]: SET_CLK_CTRL */
   { dcb_hw_reg         , 0 },   /* register 19 [0x004C]: CLR_CLK_CTRL */
   { dcb_hw_reg         , 0 },   /* register 20 [0x0050]: COM_CTRL */
-  { dcb_sw_slot_en_reg , 0 },   /* register 21 [0x0054]: SLOT_DATA_TX_EN */
+  { dcb_sw_slot_en_reg , 0 },   /* register 21 [0x0054]: DPS_CTRL */
   { dcb_hw_reg         , 0 },   /* register 22 [0x0058]: RST */
   { dcb_hw_reg         , 0 },   /* register 23 [0x005C]: SERDES_STATUS_00_07 */
   { dcb_hw_reg         , 0 },   /* register 24 [0x0060]: SERDES_STATUS_08_15 */
@@ -124,7 +124,7 @@ const dcb_reg_entry_type  dcb_reg_list[] = {
   { "SET_CLK_CTRL"        , DCB_REG_SET_CLK_CTRL       , DCB_WRITABLE_REG },
   { "CLR_CLK_CTRL"        , DCB_REG_CLR_CLK_CTRL       , DCB_WRITABLE_REG },
   { "COM_CTRL"            , DCB_REG_COM_CTRL           , DCB_WRITABLE_REG },
-  { "SLOT_DATA_TX_EN"     , DCB_REG_SLOT_DATA_TX_EN    , DCB_WRITABLE_REG },
+  { "DPS_CTRL"            , DCB_REG_DPS_CTRL           , DCB_WRITABLE_REG },
   { "RST"                 , DCB_REG_RST                , DCB_WRITABLE_REG },
   { "SERDES_STATUS_00_07" , DCB_REG_SERDES_STATUS_00_07, DCB_READONLY_REG },
   { "SERDES_STATUS_08_15" , DCB_REG_SERDES_STATUS_08_15, DCB_READONLY_REG },
@@ -235,7 +235,8 @@ const dcb_bit_group_entry_type  dcb_bit_group_list[] = {
   { "SET_BIT_CLK_CTRL"             , DCB_SET_BIT_CLK_CTRL_REG             , DCB_SET_BIT_CLK_CTRL_MASK             , DCB_SET_BIT_CLK_CTRL_OFS             },
   { "CLR_BIT_CLK_CTRL"             , DCB_CLR_BIT_CLK_CTRL_REG             , DCB_CLR_BIT_CLK_CTRL_MASK             , DCB_CLR_BIT_CLK_CTRL_OFS             },
   { "INTER_PKG_DELAY"              , DCB_INTER_PKG_DELAY_REG              , DCB_INTER_PKG_DELAY_MASK              , DCB_INTER_PKG_DELAY_OFS              },
-  { "SLOT_DATA_TX_EN"              , DCB_SLOT_DATA_TX_EN_REG              , DCB_SLOT_DATA_TX_EN_MASK              , DCB_SLOT_DATA_TX_EN_OFS              },
+  { "DPS_EVENT_MODE"               , DCB_DPS_EVENT_MODE_REG               , DCB_DPS_EVENT_MODE_MASK               , DCB_DPS_EVENT_MODE_OFS               },
+  { "DPS_SLOT_ENABLE"              , DCB_DPS_SLOT_ENABLE_REG              , DCB_DPS_SLOT_ENABLE_MASK              , DCB_DPS_SLOT_ENABLE_OFS              },
   { "WDB_SERDES_CLK_MGR_RST"       , DCB_WDB_SERDES_CLK_MGR_RST_REG       , DCB_WDB_SERDES_CLK_MGR_RST_MASK       , DCB_WDB_SERDES_CLK_MGR_RST_OFS       },
   { "WDB_REFCLK_MGR_RST"           , DCB_WDB_REFCLK_MGR_RST_REG           , DCB_WDB_REFCLK_MGR_RST_MASK           , DCB_WDB_REFCLK_MGR_RST_OFS           },
   { "TRIGGER_MGR_RST"              , DCB_TRIGGER_MGR_RST_REG              , DCB_TRIGGER_MGR_RST_MASK              , DCB_TRIGGER_MGR_RST_OFS              },
@@ -547,7 +548,7 @@ const unsigned int reg_default[] = {
   0x00000000,   /* Offset 0x0048 */
   0x00000000,   /* Offset 0x004C */
   0x00000753,   /* Offset 0x0050 */
-  0x00000000,   /* Offset 0x0054 */
+  0x0001FFFF,   /* Offset 0x0054 */
   0x00000000,   /* Offset 0x0058 */
   0x00000000,   /* Offset 0x005C */
   0x00000000,   /* Offset 0x0060 */

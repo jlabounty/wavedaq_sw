@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Created :   03.12.2020 16:39:53 -->
+<!-- Created :   04.12.2020 11:07:11 -->
 <html>
 
 <head>
@@ -9,7 +9,7 @@
 
 <body>
   <h1>DCB Register Map</h1>
-  Generated : 03.12.2020 16:39:53<br><br>
+  Generated : 04.12.2020 11:07:11<br><br>
   <table>
     <tbody>
       <tr class="reg_header">
@@ -238,9 +238,9 @@
         <td style="text-align:center"><a href="#register_21">SW</a></td>
         <td style="text-align:center"><a href="#register_21"></a></td>
         <td style="text-align:center"><a href="#register_21">X</a></td>
-        <td style="text-align:right" ><a href="#register_21">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#register_21">SLOT_DATA_TX_EN</a></td>
-        <td style="text-align:left"  ><a href="#register_21">Slot Data Transmission Enable</a></td>
+        <td style="text-align:right" ><a href="#register_21">0x0001FFFF</a></td>
+        <td style="text-align:left"  ><a href="#register_21">DPS_CTRL</a></td>
+        <td style="text-align:left"  ><a href="#register_21">DMA Packet Scheduler Control</a></td>
       </tr>
       <tr class="reg_list">
         <td style="text-align:right" ><a href="#register_22" id="reg_list_22">22</a></td>
@@ -2305,7 +2305,7 @@
         <td class="back_to_overview" colspan="7"><a href="#reg_list_20">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="register_21"><h3>Register 21: SLOT_DATA_TX_EN</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="register_21"><h3>Register 21: DPS_CTRL</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -2329,9 +2329,9 @@
         <td style="text-align:center"></td>
         <td style="text-align:center"></td>
         <td style="text-align:center"></td>
-        <td style="text-align:right" >0x00000000</td>
-        <td style="text-align:left"  >SLOT_DATA_TX_EN</td>
-        <td style="text-align:left"  >Slot Data Transmission Enable</td>
+        <td style="text-align:right" >0x0001FFFF</td>
+        <td style="text-align:left"  >DPS_CTRL</td>
+        <td style="text-align:left"  >DMA Packet Scheduler Control</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -2341,7 +2341,7 @@
         <td style="text-align:center"></td>
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
-        <td style="text-align:center">31:20</td>
+        <td style="text-align:center">31:24</td>
         <td style="text-align:right" >0</td>
         <td style="text-align:left"  >RESERVED</td>
         <td style="text-align:left"  ></td>
@@ -2354,7 +2354,7 @@
         <td style="text-align:center"></td>
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
-        <td style="text-align:center">19:18</td>
+        <td style="text-align:center">23:21</td>
         <td style="text-align:right" >0</td>
         <td style="text-align:left"  >RESERVED</td>
         <td style="text-align:left"  ></td>
@@ -2367,10 +2367,36 @@
         <td style="text-align:center"></td>
         <td style="text-align:center"  >RW</td>
         <td style="text-align:center"  ></td>
-        <td style="text-align:center">17:0</td>
-        <td style="text-align:right" >0b000000000000000000</td>
-        <td style="text-align:left"  >SLOT_DATA_TX_EN</td>
-        <td style="text-align:left"  >Data transmission enable bits for the crate slots (DCB slot = 16, TCB slot =17)</td>
+        <td style="text-align:center">20</td>
+        <td style="text-align:right" >0b0</td>
+        <td style="text-align:left"  >DPS_EVENT_MODE</td>
+        <td style="text-align:left"  >Event Mode of the DMA packet scheduler: 0 = Freerun, 1 = Coordinate Events on Slots</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
+        <td style="text-align:center">19:17</td>
+        <td style="text-align:right" >0</td>
+        <td style="text-align:left"  >RESERVED</td>
+        <td style="text-align:left"  ></td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >RW</td>
+        <td style="text-align:center"  ></td>
+        <td style="text-align:center">16:0</td>
+        <td style="text-align:right" >0b11111111111111111</td>
+        <td style="text-align:left"  >DPS_SLOT_ENABLE</td>
+        <td style="text-align:left"  >Data transmission enable bits for the crate slots (TCB slot = 16)</td>
       </tr>
       <tr class="back_to_overview">
         <td class="back_to_overview" colspan="7"><a href="#reg_list_21">Register Overview</a></td>
@@ -7393,7 +7419,7 @@
   </table>
 
   <br>
-  Generated :   03.12.2020 16:39:54
+  Generated :   04.12.2020 11:07:11
 
 </body>
 

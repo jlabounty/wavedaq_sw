@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  03.12.2020 16:39:53
+// Created :  04.12.2020 11:07:11
 //
 
 
@@ -270,11 +270,15 @@ public:
 
 
 
-   ////// ------ Register 21 [0x0054]: SLOT_DATA_TX_EN - Slot Data Transmission Enable (Default: 0x00000000) ------ //////
+   ////// ------ Register 21 [0x0054]: DPS_CTRL - DMA Packet Scheduler Control (Default: 0x0001FFFF) ------ //////
 
-   // 0x0003FFFF: SLOT_DATA_TX_EN - Data transmission enable bits for the crate slots (DCB slot = 16, TCB slot =17)
-   unsigned int GetSlotDataTxEn() { return BitExtract(DCB_SLOT_DATA_TX_EN_REG, DCB_SLOT_DATA_TX_EN_MASK, DCB_SLOT_DATA_TX_EN_OFS); };
-   void         SetSlotDataTxEn(unsigned int value) { SetRegMask(DCB_SLOT_DATA_TX_EN_REG, DCB_SLOT_DATA_TX_EN_MASK, DCB_SLOT_DATA_TX_EN_OFS, value); };
+   // 0x00100000: DPS_EVENT_MODE - Event Mode of the DMA packet scheduler: 0 = Freerun, 1 = Coordinate Events on Slots
+   unsigned int GetDpsEventMode() { return BitExtract(DCB_DPS_EVENT_MODE_REG, DCB_DPS_EVENT_MODE_MASK, DCB_DPS_EVENT_MODE_OFS); };
+   void         SetDpsEventMode(unsigned int value) { SetRegMask(DCB_DPS_EVENT_MODE_REG, DCB_DPS_EVENT_MODE_MASK, DCB_DPS_EVENT_MODE_OFS, value); };
+
+   // 0x0001FFFF: DPS_SLOT_ENABLE - Data transmission enable bits for the crate slots (TCB slot = 16)
+   unsigned int GetDpsSlotEnable() { return BitExtract(DCB_DPS_SLOT_ENABLE_REG, DCB_DPS_SLOT_ENABLE_MASK, DCB_DPS_SLOT_ENABLE_OFS); };
+   void         SetDpsSlotEnable(unsigned int value) { SetRegMask(DCB_DPS_SLOT_ENABLE_REG, DCB_DPS_SLOT_ENABLE_MASK, DCB_DPS_SLOT_ENABLE_OFS, value); };
 
 
 
