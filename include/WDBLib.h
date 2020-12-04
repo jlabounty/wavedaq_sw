@@ -653,6 +653,7 @@ public:
    std::string GetEthAddrStr() { return mEthAddrStr; }
    int GetReceiveTimeoutMs() { return mReceiveTimeoutMs; };
    void SetReceiveTimeoutMs(int to) { mReceiveTimeoutMs = to; };
+   int GetSlotNumber() { return mSlot; }
 
    // high level status registers
    std::string GetFullBuild();
