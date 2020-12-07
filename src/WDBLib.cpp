@@ -1903,18 +1903,13 @@ bool WDEventRequest::IsEventValid() {
 
 //--------------------------------------------------------------------
 
-WP::WP(std::vector<WDB *> w, int verbose, std::string wdsDir, std::string logfile, bool demo) {
+WP::WP(int verbose, std::string wdsDir, std::string logfile, bool demo) {
    struct sockaddr_in server_addr;
 
    mVerbose = verbose;
    mLogfile = logfile;
    mWdsDir = wdsDir;
    mDemoMode = demo;
-   mWdb = w;
-
-   // build mapping WDB id -> wdb
-   for (auto &b: mWdb)
-      mWdbMap[b->GetSerialNumber()] = b;
 
    mRotateWaveform = true;
    mCalibrateWaveform = true;
@@ -2006,6 +2001,19 @@ WP::WP(std::vector<WDB *> w, int verbose, std::string wdsDir, std::string logfil
 }
 
 //--------------------------------------------------------------------
+
+void WP::SetWDB(std::vector<WDB *> wdb) {
+   mWdb.clear();
+   mWdbMap.clear();
+
+   for (auto &b: wdb) {
+      mWdb.push_back(b);
+
+      // build mapping WDB id -> wdb
+      mWdbMap[b->GetSerialNumber()] = b;
+   }
+
+}
 
 WDB *WP::GetBoard(int board_id) {
    return mWdbMap.at(board_id);

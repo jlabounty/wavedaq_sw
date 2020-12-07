@@ -415,13 +415,14 @@ public:
    enum { cLiFormatBinary = 1, cLiFormatXML = 2};
 
    // constructor
-   WP(std::vector<WDB*> w, int verbose = 0, std::string wdsDir = "", std::string logfile = "", bool demo = false);
+   WP(int verbose = 0, std::string wdsDir = "", std::string logfile = "", bool demo = false);
 
    // duration calculator
    static std::chrono::time_point<std::chrono::high_resolution_clock> usStart();
    static unsigned int usSince(std::chrono::time_point<std::chrono::high_resolution_clock> start);
 
    // setter & getter
+   void SetWDB(std::vector<WDB *> w);
    static int GetDataSocket() { return gDataSocket; }
    int GetServerPort() { return mServerPort; }
    bool IsVerbose() { return mVerbose; }

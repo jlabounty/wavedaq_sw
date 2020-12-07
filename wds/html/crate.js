@@ -661,7 +661,7 @@ function loadCrate() {
    // send AJAX request
    CRATE.req = new XMLHttpRequest();
    CRATE.req.onreadystatechange = receiveCrate;
-   CRATE.req.open("GET", "cr?&r=" + Math.random(), true); // avoid cached results
+   CRATE.req.open("GET", "crate?&r=" + Math.random(), true); // avoid cached results
 
    try {
       CRATE.req.send();
