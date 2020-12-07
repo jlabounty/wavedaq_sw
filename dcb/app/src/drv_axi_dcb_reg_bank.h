@@ -51,14 +51,9 @@ void reg_bank_store();
 unsigned int dcb_hw_reg(unsigned int cmd, unsigned int par, unsigned int offs, unsigned int data);
 
 #ifndef DCB_DONT_IMPLEMENT_SW_REGISTERS
-/*
- * See wd2 implementations as template for software registers
- */
-/*
- * unsigned int dcb_reg_adc_glob(unsigned int cmd, unsigned int par, unsigned int offs, unsigned int data);
- * unsigned int dcb_reg_adc0_ch(unsigned int cmd, unsigned int par, unsigned int offs, unsigned int data);
- * unsigned int dcb_reg_adc1_ch(unsigned int cmd, unsigned int par, unsigned int offs, unsigned int data);
- */
+
+unsigned int dcb_sw_slot_en_reg(unsigned int cmd, unsigned int par, unsigned int offs, unsigned int data);
+
 #endif /* DCB_DONT_IMPLEMENT_SW_REGISTERS */
 
 #endif /** __DRV_AXI_DCB_REG_BANK_H__ */

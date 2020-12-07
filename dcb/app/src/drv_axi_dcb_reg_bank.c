@@ -36,7 +36,7 @@
 
 #ifndef DCB_DONT_IMPLEMENT_SW_REGISTERS
 
-/* #include "drv_soft_spi_adc.h" see wd2*/
+#include "drv_dma_pkt_sched.h"
 
 #endif /* DCB_DONT_IMPLEMENT_SW_REGISTERS */
 
@@ -369,12 +369,33 @@ unsigned int dcb_hw_reg(unsigned int cmd, unsigned int par, unsigned int offs, u
 
 /***************************************************************************/
 
-/* See wd2 functions as template for software registers
- *
- * unsigned int dcb_reg_adc_glob(unsigned int cmd, unsigned int par, unsigned int offs, unsigned int data)
- * {
- * }
- */
+unsigned int dcb_sw_slot_en_reg(unsigned int cmd, unsigned int par, unsigned int offs, unsigned int data)
+{
+  unsigned int rd_data;
+
+  rd_data = 0;
+
+  if (cmd == DCB_REG_WRITE)
+  {
+    dps_set_slot_enable(SYSPTR(dma_pkt_sched), data & DCB_DPS_SLOT_ENABLE_MASK);
+    if (data & DCB_DPS_EVENT_MODE_MASK)
+    {
+      dps_set_event_mode(SYSPTR(dma_pkt_sched), 1);
+    }
+    else
+    {
+      dps_set_event_mode(SYSPTR(dma_pkt_sched), 0);
+    }
+  }
+  else if (cmd == DCB_REG_READ)
+  {
+    rd_data  = (dps_get_slot_enable(SYSPTR(dma_pkt_sched)) << DCB_DPS_SLOT_ENABLE_OFS);
+    rd_data |= (dps_get_event_mode(SYSPTR(dma_pkt_sched))  << DCB_DPS_EVENT_MODE_OFS);
+  }
+
+  return rd_data;
+}
+
 #endif /* DCB_DONT_IMPLEMENT_SW_REGISTERS */
 
 /***************************************************************************/

@@ -270,6 +270,7 @@ int init_dma_pkt_sched()
   return -1;
 }
 #else
+/* To be called before registers are loaded because slot enable is loaded from registers */
 int init_dma_pkt_sched()
 {
   int ret;
@@ -692,6 +693,8 @@ int init_system()
 
   init_spi_bpl(0xFF);
 
+  init_dma_pkt_sched();
+
 #ifndef LINUX_COMPILE
   /* Environment initialization */
   system_hw.env_storage_description[0].storage_ptr     = SYSPTR(spi_flash);
@@ -729,7 +732,6 @@ int init_system()
   /* init_si5324(); */ /* done by fsbl, not needed in application */
   init_lmk03000();
   init_sysmon();
-  init_dma_pkt_sched();
   init_serdes_rcvr();
 
   return XST_SUCCESS;
