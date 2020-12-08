@@ -139,8 +139,8 @@ function Oscilloscope(div) { // constructor
       this.wfOffset[i] = 0;
    }
 
-   // current board
-   this.curBoard = 0;
+   // WDB address
+   this.wdbAddress = "";
 
    // schedule FPS calculator
    var f = this.calcFPS.bind(this);
@@ -503,8 +503,8 @@ Oscilloscope.prototype.mouseEvent = function (e) {
       var dMin = 1E6;
       var cMin = undefined;
       for (var c = 0; c < 16; c++) {
-         if (this.chOn[c] && OSC.wdb[OSC.curBoard].triggerChannelActive[c]) {
-            y = (OSC.wdb[OSC.curBoard].dacTriggerLevel[c]) * this.wfUS[c] + this.wfUO[c];
+         if (this.chOn[c] && OSC.wdb.triggerChannelActive[c]) {
+            y = (OSC.wdb.dacTriggerLevel[c]) * this.wfUS[c] + this.wfUO[c];
 
             d = Math.abs(y - e.clientY);
             if (d < dMin) {
@@ -522,7 +522,7 @@ Oscilloscope.prototype.mouseEvent = function (e) {
       if (e.type === "mousemove" && this.triggerCursor.drag) {
          cursor = "ns-resize";
          this.triggerCursor.dragY = e.clientY;
-         var u = (this.YToVolt(e.clientY, this.triggerCursor.channel) * 1000).toFixed(1);
+         let u = (this.YToVolt(e.clientY, this.triggerCursor.channel) * 1000).toFixed(1);
          if (u > 500)
             u = 500;
          if (u < -500)
@@ -530,10 +530,10 @@ Oscilloscope.prototype.mouseEvent = function (e) {
          this.triggerCursor.y = e.clientY;
          this.triggerCursor.voltage = u;
          console.log(u);
-         OSC.wdb[OSC.curBoard].dacTriggerLevel[this.triggerCursor.channel] = u / 1000;
-         var d = new Date();
+         OSC.wdb.dacTriggerLevel[this.triggerCursor.channel] = u / 1000;
+         let d = new Date();
          this.lastTriggerLevelChange = d.getTime();
-         var e = {};
+         let e = {};
          e.name = "dacTriggerLevel";
          e.value = u;
          setParam(e, this.triggerCursor.channel);
@@ -686,7 +686,7 @@ Oscilloscope.prototype.printTemperature = function (ctx) {
    ctx.textBaseline = "top";
 
    if (OSC.wdb !== undefined && !this.chOn[19]) { // hide when FFT on
-      var t = OSC.wdb[OSC.curBoard].temperature;
+      let t = OSC.wdb.temperature;
       ctx.fillText("T = " + t.toFixed(1) + "\xB0C", this.x1 + 12, this.y2 - 24);
    }
 };
@@ -765,13 +765,13 @@ Oscilloscope.prototype.drawCursors = function (ctx) {
 
 Oscilloscope.prototype.printStatus = function (ctx) {
    if (OSC.wdb !== undefined) {
-      if (OSC.wdb[OSC.curBoard].pllLck !== 0x1FF) {
+      if (OSC.wdb.pllLck !== 0x1FF) {
          ctx.fillStyle = 'red';
          ctx.strokeStyle = 'red';
          ctx.font = '48px sans-serif';
          ctx.textAlign = "center";
          ctx.textBaseline = "middle";
-         ctx.fillText("PLL not locked! (m=0x"+OSC.wdb[OSC.curBoard].pllLck.toString(16)+")", (this.x1 + this.x2) / 2, (this.y1 + this.y2) / 2);
+         ctx.fillText("PLL not locked! (m=0x"+OSC.wdb.pllLck.toString(16)+")", (this.x1 + this.x2) / 2, (this.y1 + this.y2) / 2);
       }
       
       if (!OSC.vCalibrated) {
@@ -780,7 +780,7 @@ Oscilloscope.prototype.printStatus = function (ctx) {
          ctx.font = '18px sans-serif';
          ctx.textAlign = "left";
          ctx.textBaseline = "top";
-         var t = "Voltage calibrated";
+         let t = "Voltage calibrated";
          ctx.fillText(t, this.x1 + 12, this.y2 - 55);
          ctx.drawLine(this.x1+10, this.y2-57, this.x1+14+ctx.measureText(t).width, this.y2-46+14);
          ctx.drawLine(this.x1+10, this.y2-46+14, this.x1+14+ctx.measureText(t).width, this.y2-57);
@@ -802,8 +802,8 @@ Oscilloscope.prototype.printStatus = function (ctx) {
 };
 
 Oscilloscope.prototype.printScalers = function (ctx) {
-   if (OSC.wdb !== undefined && OSC.disp.scaler && OSC.wdb[OSC.curBoard].scaler) {
-      var scaler = OSC.wdb[OSC.curBoard].scaler;
+   if (OSC.wdb !== undefined && OSC.disp.scaler && OSC.wdb.scaler) {
+      var scaler = OSC.wdb.scaler;
 
       for (var c = 0; c < 19; c++) {
          ctx.fillStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
@@ -989,7 +989,7 @@ Oscilloscope.prototype.drawWF = function (ctx) {
       ctx.beginPath();
       ctx.rect(this.x1, this.y1, this.w, this.h);
       ctx.clip();
-      var spacing = this.wfTS / (OSC.wdb[OSC.curBoard].drsSampleFreq * 1E6);
+      var spacing = this.wfTS / (OSC.wdb.drsSampleFreq * 1E6);
       for (var c = 0; c < 20; c++) {
          if (this.chOn[c]) {
             ctx.beginPath();
@@ -1000,8 +1000,8 @@ Oscilloscope.prototype.drawWF = function (ctx) {
             for (var i = 0; i < this.wf.U[c].length ; i++) {
                var x, y;
                if (c === 19) { // FFT
-                  var min = -6;
-                  var max = 6;
+                  let min = -6;
+                  let max = 6;
                   x = this.x1 + (this.x2 - this.x1) / 512.0 * i;
                   y = this.y2 - (this.wf.U[c][i]-min)/(max-min) * (this.y2-this.y1);
                } else {
@@ -1149,14 +1149,14 @@ Oscilloscope.prototype.drawWF = function (ctx) {
       }
       for (i=1 ; i<10 ; i++) {
          var freqMax;
-         if (OSC.wdb[OSC.curBoard].readoutSrcSel == 1)
-            freqMax = OSC.wdb[OSC.curBoard].drsSampleFreq / 2;
-         else if (OSC.wdb[OSC.curBoard].readoutSrcSel == 2)
-            freqMax = OSC.wdb[OSC.curBoard].adcSampleFreq / 2;
-         else if (OSC.wdb[OSC.curBoard].readoutSrcSel == 3)
-            freqMax = OSC.wdb[OSC.curBoard].adcSampleFreq * 8 / 2;
+         if (OSC.wdb.readoutSrcSel === 1)
+            freqMax = OSC.wdb.drsSampleFreq / 2;
+         else if (OSC.wdb.readoutSrcSel === 2)
+            freqMax = OSC.wdb.adcSampleFreq / 2;
+         else if (OSC.wdb.readoutSrcSel === 3)
+            freqMax = OSC.wdb.adcSampleFreq * 8 / 2;
          else
-            freqMax = OSC.wdb[OSC.curBoard].adcSampleFreq / 2
+            freqMax = OSC.wdb.adcSampleFreq / 2
          var f = i/10.0*freqMax;
 
          ctx.font = '14px sans-serif';
@@ -1198,11 +1198,11 @@ Oscilloscope.prototype.drawMarker = function (ctx) {
 
    // Trigger levels
    for (c = 15; c >= 0; c--) {
-      if (this.chOn[c] && OSC.wdb[OSC.curBoard].triggerChannelActive[c]) {
+      if (this.chOn[c] && OSC.wdb.triggerChannelActive[c]) {
          ctx.fillStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
          ctx.strokeStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
 
-         y = (OSC.wdb[OSC.curBoard].dacTriggerLevel[c]) * this.wfUS[c] + this.wfUO[c];
+         y = (OSC.wdb.dacTriggerLevel[c]) * this.wfUS[c] + this.wfUO[c];
 
          ctx.beginPath();
          ctx.moveTo(this.x2 - 2, y - 5);
@@ -1227,12 +1227,12 @@ Oscilloscope.prototype.drawMarker = function (ctx) {
    ctx.fillStyle = 'white';
    ctx.strokeStyle = 'white';
 
-   var t = 1024 / OSC.wdb[OSC.curBoard].drsSampleFreq * 1E-6;
-   t -= OSC.wdb[OSC.curBoard].triggerDelay * 1E-9;
+   let t = 1024 / OSC.wdb.drsSampleFreq * 1E-6;
+   t -= OSC.wdb.triggerDelay * 1E-9;
    // internal offset
-   var iofs = 95 - (OSC.wdb[OSC.curBoard].drsSampleFreq/1000 - 1)*5;
+   let iofs = 95 - (OSC.wdb.drsSampleFreq/1000 - 1)*5;
    t -= iofs * 1E-9;
-   var xt = this.timeToX(t);
+   let xt = this.timeToX(t);
 
    ctx.beginPath();
    ctx.moveTo(xt - 4, this.y1 + 2);
@@ -1284,7 +1284,7 @@ Oscilloscope.prototype.drawDT = function (ctx) {
    ctx.rect(this.x1, this.y1, this.w, this.h);
    ctx.clip();
 
-   var period = 1 / this.wdb[this.curBoard].calibClkFreq*1000; // period of calibration clock in ns
+   let period = 1 / this.wdb.calibClkFreq*1000; // period of calibration clock in ns
 
    for (c = 0; c < 18; c++) {
       if (this.chOn[c]) {
@@ -1295,7 +1295,7 @@ Oscilloscope.prototype.drawDT = function (ctx) {
             var x = this.x1 + i / 1024.0 * this.w;
             y = (period - this.wf.T[c][i] * 1E9) * this.h + this.wfUO[c]; // 100 ps per division
 
-            if (this.wf.T[c][i] * 1E9 != 0)
+            if (this.wf.T[c][i] * 1E9 !== 0)
                ctx.fillRect(x, y, 3, 3);
          }
          ctx.stroke();

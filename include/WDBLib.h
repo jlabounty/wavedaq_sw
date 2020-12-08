@@ -194,13 +194,12 @@ typedef struct {
 class WDEvent {
 public:
 
-   bool             mEventValid;
-   std::map<int,bool> mTypeValid;
    unsigned short   mBoardId;
    unsigned short   mCrateId;
    unsigned short   mSlotId;
    unsigned int     mEventNumber;
-   unsigned int     mSamplingFrequency;
+   unsigned int     mDRSSamplingFrequency;
+   unsigned int     mADCSamplingFrequency;
    unsigned short   mTriggerNumber;
    int              mTriggerCell[WD_N_CHANNELS];
    int              mTriggerCellDrs0;
@@ -226,12 +225,29 @@ public:
    bool             mVCalibrated;
    bool             mTCalibrated;
 
+   // statistics
+   bool             mHasADCData;
+   bool             mHasDRSData;
+   bool             mHasTDCData;
+   bool             mHasTRGData;
+   bool             mHasScalerData;
+
+   bool             mSOEReceived;
+   bool             mEOEReceived;
+   uint32_t         mFirstPacketNumber;
+   uint32_t         mLastPacketNumber;
+   uint32_t         mReceivedPackets;
+   uint32_t         mDroppedPackets;
+
+   bool             mEventValid;
+
    WDEvent(int boardId) { mBoardId = boardId; };
 
    void             ClearEvent();
    void             SetEventHeaderInfo(FRAME_WDAQ_HEADER *);
    void             SetWDEventHeaderInfo(FRAME_WDAQ_HEADER *, FRAME_WDB_HEADER *);
-   bool             IsValid();
+   void             ProcessPacket(FRAME_WDAQ_HEADER *pdaqh);
+   bool             IsEventValid();
 };
 
 //--------------------------------------------------------------------
@@ -285,32 +301,6 @@ public:
 
 //--------------------------------------------------------------------
 
-class WDEventRequest {
-public:
-   unsigned short   mBoardId;
-   bool             mBoardRequested;
-
-   bool             mEventValid;
-   bool             mSOEReceived;
-   bool             mEOEReceived;
-   uint32_t         mFirstPacketNumber;
-   uint32_t         mLastPacketNumber;
-   uint32_t         mReceivedPackets;
-   uint32_t         mDroppedPackets;
-
-   WDEventRequest(int boardId);
-
-   int              GetBoardId() { return mBoardId; }
-   void             SetBoardRequested(bool flag) { mBoardRequested = flag; }
-   bool             IsBoardRequested() { return mBoardRequested; }
-
-   void             ClearRequest();
-   void             ProcessPacket(FRAME_WDAQ_HEADER *pdaqh);
-   bool             IsEventValid();
-};
-
-//--------------------------------------------------------------------
-
 // waveform processor (waveform decoding, calibration, saving, ...
 class WP {
    // calibration states
@@ -351,7 +341,7 @@ class WP {
    bool              mTimeCalib2;
    bool              mTimeCalib3;
 
-   int               mPacketsReceived;
+   int               mReceivedPackets;
    int               mCurrentEvent;
 
    std::thread       mThreadCollector;
@@ -360,7 +350,6 @@ class WP {
       return std::thread([=] { Collector(); });
    };
 
-   std::map<int, WDEventRequest *> mEventRequest;
    std::map<int, WDEvent *> mEvent;
    std::map<int, WDEvent *> mEventLast;
 
@@ -422,7 +411,7 @@ public:
    static unsigned int usSince(std::chrono::time_point<std::chrono::high_resolution_clock> start);
 
    // setter & getter
-   void SetWDB(std::vector<WDB *> w);
+   void SetWDBList(std::vector<WDB *> w);
    static int GetDataSocket() { return gDataSocket; }
    int GetServerPort() { return mServerPort; }
    bool IsVerbose() { return mVerbose; }
