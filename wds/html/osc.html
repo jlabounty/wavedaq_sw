@@ -403,7 +403,7 @@
             <button class="executeButton" id="btnVCalib" type="button" onClick="btnVcalib()">Execute Voltage
                Calibration
             </button>
-            <div name="ctrlProgress" style="width:250px;" id="progressIndVcalib"></div>
+            <div name="ctrlProgress" style="width:290px;" id="progressIndVcalib"></div>
          </div>
 
          <div class="groupTitle">Timing Calibration</div>
@@ -433,7 +433,7 @@
             <button class="executeButton" id="btnTCalib" type="button" onClick="btnTcalib()">Execute Time Calibration
             </button>
 
-            <div name="ctrlProgress" style="width:250px;" id="progressIndTcalib"></div>
+            <div name="ctrlProgress" style="width:290px;" id="progressIndTcalib"></div>
          </div>
 
       </form>
@@ -669,43 +669,6 @@
          </div>
       </div>
 
-   </div>
-
-   <!-- calibrate single/all boards dialog -->
-   <div id="dlgVCalib" class="dlgFrame">
-      <div class="dlgTitlebar">Please select which boards to calibrate
-      </div>
-      <div class="dlgPanel">
-         <div>
-            <button style="width:200px;padding:6px" type="button" onClick="doVCalib(false)">Calibrate current board
-            </button>
-            <br/><br/>
-            <button style="width:200px;padding:6px" type="button" onClick="doVCalib(true)">Calibrate all boards</button>
-            <br/>
-         </div>
-         <hr/>
-         <div style="text-align:center">
-            <button class="wideButton" type="button" onClick="dlgHide('dlgVCalib')">Cancel</button>
-         </div>
-      </div>
-   </div>
-
-   <div id="dlgTCalib" class="dlgFrame">
-      <div class="dlgTitlebar">Please select which boards to calibrate
-      </div>
-      <div class="dlgPanel">
-         <div>
-            <button style="width:200px;padding:6px" type="button" onClick="doTCalib(false)">Calibrate current board
-            </button>
-            <br/><br/>
-            <button style="width:200px;padding:6px" type="button" onClick="doTCalib(true)">Calibrate all boards</button>
-            <br/>
-         </div>
-         <hr/>
-         <div style="text-align:center">
-            <button class="wideButton" type="button" onClick="dlgHide('dlgTCalib')">Cancel</button>
-         </div>
-      </div>
    </div>
 
    <!-- extra buttons -->

@@ -949,6 +949,16 @@ float WDB::GetTemperatureDegree(bool refresh)
    return temp;
 }
 
+float WDB::GetVCalibTemperature()
+{
+   return mVCalib.GetTemperature();
+}
+
+float WDB::GetTCalibTemperature()
+{
+   return mTCalib.GetTemperature();
+}
+
 unsigned int WDB::GetPllLock(bool refresh)
 // all PLLs (DRS, LMK, FPGA DAQ, ISERDES, OSERDES)
 {
@@ -1907,13 +1917,13 @@ WP::WP(int verbose, std::string wdsDir, std::string logfile, bool demo) {
 
    mRotateWaveform = true;
    mCalibrateWaveform = true;
-   mOfsCalib1 = false;
-   mOfsCalib2 = false;
-   mGainCalib = false;
-   mRangeCalib = false;
-   mTimeCalib1 = false;
-   mTimeCalib2 = false;
-   mTimeCalib3 = false;
+   mOfsCalib1 = true;
+   mOfsCalib2 = true;
+   mGainCalib = true;
+   mRangeCalib = true;
+   mTimeCalib1 = true;
+   mTimeCalib2 = true;
+   mTimeCalib3 = true;
 
    mWDReceivedPackets = 0;
    mWDDroppedPackets = 0;
@@ -3987,6 +3997,7 @@ void WP::DoTimeCalibrationStep() {
 
       // get one event from board
       WDEvent event(b->GetSerialNumber());
+      while (!RequestEvent(b, CALIB_TIMEOUT, event));
       while (!RequestEvent(b, CALIB_TIMEOUT, event));
 
       if (AnalyzePeriod(&event, b) == -1) {

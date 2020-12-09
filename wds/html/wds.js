@@ -11,7 +11,6 @@ var demoMode = false;
 var OSC; // global scope object
 
 var progressInd = 0;
-var progressOldBoard = 0;
 
 function init() {
    // prevent mouse events to go up to the browser
@@ -204,22 +203,6 @@ function reconnect() {
 
    req.open("GET", "build", true);
    req.send();
-}
-
-function populateAllControls(init) {
-   // populate board list
-   let sel = document.getElementById("wdSelect");
-   for (let i = 0; i < OSC.wdb.length; i++) {
-      let opt = document.createElement('option');
-      opt.innerHTML = OSC.wdb[i].name;
-      opt.value = OSC.wdb[i].name;
-      if (sel.childNodes[i + 1] === undefined)
-         sel.appendChild(opt);
-      else if (sel.childNodes[i + 1].innerHTML !== opt.innerHTML)
-         sel.replaceChild(opt, sel.childNodes[i + 1]);
-   }
-
-   populateControls(init);
 }
 
 function populateControls(init) {
@@ -602,7 +585,7 @@ function readWdb(init) {
          for (let i = 0; i < 18; i++)
             OSC.wdb.scaler[i] = ((Math.random() + Math.random() + Math.random() + Math.random()) * 500).toFixed(0);
 
-         populateAllControls(init);
+         populateControls(init);
          populateInfo();
          OSC.connected = true;
          resolve();
@@ -633,7 +616,7 @@ function readWdb(init) {
                }
             }
 
-            populateAllControls(init);
+            populateControls(init);
             populateInfo();
             OSC.connected = true;
 
@@ -865,34 +848,24 @@ function validateParam(input, channel) {
 }
 
 function doVCalib(all) {
-   dlgHide("dlgVCalib");
    if (OSC.demoMode) {
       alert("Not available in demo mode");
       return;
    }
-   progressOldBoard = OSC.wdbAddress;
 
    let req = new XMLHttpRequest();
-   if (all)
-      req.open("PUT", "vcalib/ALL");
-   else
-      req.open("PUT", "vcalib/" + OSC.wdbAddress);
+   req.open("PUT", "vcalib/" + OSC.wdbAddress);
    req.send();
 }
 
 function doTCalib(all) {
-   dlgHide("dlgTCalib");
    if (OSC.demoMode) {
       alert("Not available in demo mode");
       return;
    }
-   progressOldBoard = OSC.wdbAddress;
 
    let req = new XMLHttpRequest();
-   if (all)
-      req.open("PUT", "tcalib/ALL");
-   else
-      req.open("PUT", "tcalib/" + OSC.wdbAddress);
+   req.open("PUT", "tcalib/" + OSC.wdbAddress);
    req.send();
 }
 
@@ -1061,12 +1034,8 @@ function receiveWF() {
 
                OSC.clearPersistency();
 
-               document.getElementById("wdSelect").selectedIndex = progressOldBoard;
-               document.getElementById("btnVCalib").innerHTML = "Execute Voltage Calibration";
                document.getElementById("btnVCalib").disabled = false;
-               document.getElementById("btnTCalib").innerHTML = "Execute Time Calibration";
                document.getElementById("btnTCalib").disabled = false;
-               OSC.wdbAddress = progressOldBoard;
 
                OSC.timer.loadGl = window.setTimeout(loadGl, 10);
             }
@@ -1105,8 +1074,6 @@ function receiveWF() {
             e = document.getElementById("progressIndVcalib");
             e.set(progressInd);
 
-            document.getElementById("wdSelect").selectedIndex = b;
-            document.getElementById("btnVCalib").innerHTML = document.getElementById("wdSelect").value;
             document.getElementById("btnVCalib").disabled = true;
 
             OSC.timer.loadWF = window.setTimeout(loadWF, 250);
@@ -1122,8 +1089,6 @@ function receiveWF() {
             e = document.getElementById("progressIndTcalib");
             e.set(progressInd);
 
-            document.getElementById("wdSelect").selectedIndex = b;
-            document.getElementById("btnTCalib").innerHTML = document.getElementById("wdSelect").value;
             document.getElementById("btnTCalib").disabled = true;
 
             while (i < intArray.length) {

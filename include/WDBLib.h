@@ -114,7 +114,7 @@ enum {
 typedef struct {
    char             version_id[4];
    unsigned int     crc;
-   uint16_t        sampling_frequency;
+   uint16_t         sampling_frequency;
    float            temperature;
    float            wf_offset1[18][1024];
    float            wf_offset2[18][1024];
@@ -137,6 +137,7 @@ public:
    void SetValid(bool f) { bValid = f; }
    bool IsValid() { return bValid; }
    unsigned int GetSamplingFrequency() { return mCalib.sampling_frequency; }
+   float GetTemperature() { return mCalib.temperature; }
    void save(WDB *b, std::string filename);
    void load(WDB *b, std::string filename);
 };
@@ -162,6 +163,7 @@ public:
    void SetValid(bool f) { bValid = f; }
    bool IsValid() { return bValid; }
    unsigned int GetSamplingFrequency() { return mCalib.sampling_frequency; }
+   float GetTemperature() { return mCalib.temperature; }
    void save(WDB *b, std::string filename);
    void load(WDB *b, std::string filename);
 };
@@ -653,6 +655,8 @@ public:
    std::string GetHwVersion();
    std::string GetHvVersion();
    float GetTemperatureDegree(bool refresh = true);
+   float GetVCalibTemperature();
+   float GetTCalibTemperature();
    unsigned int GetPllLock(bool refresh = true);
    void GetScalers(std::vector<uint64_t> &s, bool refresh = true);
    void GetHVCurrents(std::vector<float> &c, bool refresh = true);

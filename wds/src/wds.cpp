@@ -395,6 +395,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       }
 
       mg_printf(nc, "HTTP/1.1 204 No Content\r\n");
+      return;
    }
 
    // globals
@@ -463,7 +464,6 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
 
       mg_send_http_chunk(nc, "", 0);
       return;
-
    }
 
    // crate
@@ -603,6 +603,8 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       mg_printf_http_chunk(nc, "    \"swRevision\": \"%s\",\n", b->GetSwGitHashStr().c_str());
       mg_printf_http_chunk(nc, "    \"swBuild\": \"%s\",\n", gl->demoMode ? "N/A" : b->GetSwBuild().c_str());
       mg_printf_http_chunk(nc, "    \"temperature\": %1.1lf,\n", b->GetTemperatureDegree(false));
+      mg_printf_http_chunk(nc, "    \"tempVCalib\": %1.1lf,\n", b->GetVCalibTemperature());
+      mg_printf_http_chunk(nc, "    \"tempTCalib\": %1.1lf,\n", b->GetVCalibTemperature());
       mg_printf_http_chunk(nc, "    \"sysBusy\": %s,\n", b->GetSysBusy() ? "true" : "false");
       mg_printf_http_chunk(nc, "    \"drsctrlBusy\": %s,\n", b->GetDrsCtrlBusy() ? "true" : "false");
       mg_printf_http_chunk(nc, "    \"packagerBusy\": %s,\n", b->GetPackagerBusy() ? "true" : "false");
@@ -640,6 +642,8 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       mg_printf_http_chunk(nc, "    \"localClkFreq\": %d,\n", b->GetLocalClkFreq());
       mg_printf_http_chunk(nc, "    \"calibClkFreq\": %d,\n", b->GetCalibClkFreq());
       mg_printf_http_chunk(nc, "    \"chnTxEn\": %d,\n", b->GetChnTxEn());
+
+      mg_printf_http_chunk(nc, "    \"packetEfficiency\": %lf,\n", gl->wp->GetWDPacketEfficiency());
 
       mg_printf_http_chunk(nc, "    \"dacOfs\": %1.3f,\n", b->GetDacOfsV());
       mg_printf_http_chunk(nc, "    \"dacCalDc\": %1.3f,\n", b->GetDacCalDcV());
@@ -725,10 +729,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       }
       mg_printf_http_chunk(nc, "      \"baseVoltage\": %g\n\n", hv_base);
 
-      mg_printf_http_chunk(nc, "    },\n");
-
-      mg_printf_http_chunk(nc, "    \"packetEfficiency\": %lf\n", gl->wp->GetWDPacketEfficiency());
-
+      mg_printf_http_chunk(nc, "    }\n");
       mg_printf_http_chunk(nc, "  }\n");
       mg_printf_http_chunk(nc, "}\n");
       mg_send_http_chunk(nc, "", 0);

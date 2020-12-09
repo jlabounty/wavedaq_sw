@@ -780,25 +780,57 @@ Oscilloscope.prototype.printStatus = function (ctx) {
       if (!OSC.vCalibrated) {
          ctx.fillStyle = 'red';
          ctx.strokeStyle = 'red';
-         ctx.font = '18px sans-serif';
+         ctx.font = 'bold 14px sans-serif';
          ctx.textAlign = "left";
          ctx.textBaseline = "top";
          let t = "Voltage calibrated";
-         ctx.fillText(t, this.x1 + 12, this.y2 - 55);
-         ctx.drawLine(this.x1+10, this.y2-57, this.x1+14+ctx.measureText(t).width, this.y2-46+14);
-         ctx.drawLine(this.x1+10, this.y2-46+14, this.x1+14+ctx.measureText(t).width, this.y2-57);
+         ctx.fillText(t, this.x1 + 12, this.y2 - 72);
+         ctx.drawLine(this.x1+10, this.y2-72, this.x1+14+ctx.measureText(t).width, this.y2-72+14);
+         ctx.drawLine(this.x1+10, this.y2-72+14, this.x1+14+ctx.measureText(t).width, this.y2-72);
+      } else {
+         if (Math.abs(OSC.wdb.tempVCalib - OSC.wdb.temperature) > 5) {
+            if (this.disp.invert) {
+               ctx.fillStyle = 'black';
+               ctx.strokeStyle = 'black';
+            } else {
+               ctx.fillStyle = 'yellow';
+               ctx.strokeStyle = 'yellow';
+            }
+            ctx.font = '14px sans-serif';
+            ctx.textAlign = "left";
+            ctx.textBaseline = "top";
+
+            let t = "Tv = " + OSC.wdb.tempVCalib + "\xB0C";
+            ctx.fillText(t, this.x1 + 12, this.y2 - 72);
+         }
       }
       
       if (!OSC.tCalibrated) {
          ctx.fillStyle = 'red';
          ctx.strokeStyle = 'red';
-         ctx.font = '18px sans-serif';
+         ctx.font = 'bold 14px sans-serif';
          ctx.textAlign = "left";
          ctx.textBaseline = "top";
          var t = "Time calibrated";
-         ctx.fillText(t, this.x1 + 12, this.y2 - 85);
-         ctx.drawLine(this.x1+10, this.y2-87, this.x1+14+ctx.measureText(t).width, this.y2-76+14);
-         ctx.drawLine(this.x1+10, this.y2-76+14, this.x1+14+ctx.measureText(t).width, this.y2-87);
+         ctx.fillText(t, this.x1 + 12, this.y2 - 48);
+         ctx.drawLine(this.x1+10, this.y2-48, this.x1+14+ctx.measureText(t).width, this.y2-48+14);
+         ctx.drawLine(this.x1+10, this.y2-48+14, this.x1+14+ctx.measureText(t).width, this.y2-48);
+      } else {
+         if (Math.abs(OSC.wdb.tempTCalib - OSC.wdb.temperature) > 5) {
+            if (this.disp.invert) {
+               ctx.fillStyle = 'black';
+               ctx.strokeStyle = 'black';
+            } else {
+               ctx.fillStyle = 'yellow';
+               ctx.strokeStyle = 'yellow';
+            }
+            ctx.font = '14px sans-serif';
+            ctx.textAlign = "left";
+            ctx.textBaseline = "top";
+
+            let t = "Tt = " + OSC.wdb.tempTCalib + "\xB0C";
+            ctx.fillText(t, this.x1 + 12, this.y2 - 48);
+         }
       }
 
    }
