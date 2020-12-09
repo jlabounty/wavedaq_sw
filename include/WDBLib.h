@@ -237,7 +237,6 @@ public:
    uint32_t         mFirstPacketNumber;
    uint32_t         mLastPacketNumber;
    uint32_t         mReceivedPackets;
-   uint32_t         mDroppedPackets;
 
    bool             mEventValid;
 
@@ -341,7 +340,7 @@ class WP {
    bool              mTimeCalib2;
    bool              mTimeCalib3;
 
-   int               mReceivedPackets;
+   int               mReceivedPacketsThisEvent;
    int               mCurrentEvent;
 
    std::thread       mThreadCollector;
@@ -396,9 +395,11 @@ class WP {
    void              CalibrateLocal(WDEvent *, WDB *);
    static void       CalibrateGlobal(WDEvent *, WDB *);
 
-   unsigned int      mWDReceivedEvents;
-   unsigned int      mWDDroppedEvents;
+   time_t            mStartStatistics;
+   unsigned int      mWDReceivedPackets;
+   unsigned int      mWDDroppedPackets;
    unsigned int      mLastEventNumber;
+   double            mPacketEfficiency;
 
 public:
    enum { cLiFormatBinary = 1, cLiFormatXML = 2};
@@ -483,9 +484,7 @@ public:
    void SaveWaveforms();
    bool IsXMLLogging();
 
-   void ResetStatistics() { mLastEventNumber = mWDReceivedEvents = mWDDroppedEvents = 0; }
-   int GetWDReceivedEvents() { return mWDReceivedEvents; }
-   int GetWDDroppedEvents() { return mWDDroppedEvents; }
+   double GetWDPacketEfficiency() { return mPacketEfficiency; }
 };
 
 //--------------------------------------------------------------------

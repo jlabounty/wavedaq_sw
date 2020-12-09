@@ -1824,7 +1824,6 @@ void WDEvent::ClearEvent() {
    mFirstPacketNumber = 0;
    mLastPacketNumber = 0;
    mReceivedPackets = 0;
-   mDroppedPackets = 0;
 
    for (int i = 0; i < WD_N_CHANNELS; i++) {
       mDRSChannelPresent[i] = false;
@@ -1869,10 +1868,6 @@ void WDEvent::ProcessPacket(FRAME_WDAQ_HEADER *pdaqh) {
       mSOEReceived = true;
       mFirstPacketNumber = pdaqh->packet_number;
    } else {
-      // check if any packets have been dropped
-      if (mLastPacketNumber != -1 && pdaqh->packet_number != (unsigned short) (mLastPacketNumber + 1)) {
-         mDroppedPackets += (pdaqh->packet_number - mLastPacketNumber) - 1;
-      }
       mLastPacketNumber = pdaqh->packet_number;
       if (mLastPacketNumber < mFirstPacketNumber)
          mLastPacketNumber += 65536; // fix 16-bit overflow
@@ -1881,6 +1876,22 @@ void WDEvent::ProcessPacket(FRAME_WDAQ_HEADER *pdaqh) {
    if (pdaqh->wdaq_flags & (1 << cWDAQFlagEndOfEvent)) {
       mEOEReceived = true;
       mEventValid = (mSOEReceived && mLastPacketNumber - mFirstPacketNumber + 1 == mReceivedPackets);
+   }
+
+   // set data type flags from packet
+   if (pdaqh->data_type == cDataTypeDRS)
+      this->mHasDRSData = true;
+   else if (pdaqh->data_type == cDataTypeADC)
+      this->mHasADCData = true;
+   else if (pdaqh->data_type == cDataTypeTDC)
+      this->mHasTDCData = true;
+   else if (pdaqh->data_type == cDataTypeTrg)
+      this->mHasTRGData = true;
+   else if (pdaqh->data_type == cDataTypeScaler)
+      this->mHasScalerData = true;
+   else if (pdaqh->data_type != cDataTypeDummy &&
+            pdaqh->data_type != cDataTypeTCB) {
+      std::cerr << "Package with unknown data type " << pdaqh->data_type << " received" << std::endl;
    }
 }
 
@@ -1904,9 +1915,12 @@ WP::WP(int verbose, std::string wdsDir, std::string logfile, bool demo) {
    mTimeCalib2 = false;
    mTimeCalib3 = false;
 
-   mWDReceivedEvents = 0;
-   mWDDroppedEvents = 0;
-   mReceivedPackets = 0;
+   mWDReceivedPackets = 0;
+   mWDDroppedPackets = 0;
+   mReceivedPacketsThisEvent = 0;
+   mLastEventNumber = 0;
+   mPacketEfficiency = -1;
+   mStartStatistics = 0;
 
    li.fh = 0;
    li.xml = NULL;
@@ -2026,6 +2040,9 @@ bool WP::GetLastEvent(WDB *b, int timeout, WDEvent &event) {
    {
       std::lock_guard<std::mutex> lock(mEventAccessMutex);
 
+      if (mEventLast.size() == 0)
+         return false;
+
       event = *mEventLast[b->GetSerialNumber()];
       mEventNew = false;
       return true;
@@ -2083,7 +2100,7 @@ void WP::StartNewEvent() {
       e.second->ClearEvent();
    }
 
-   mReceivedPackets = 0;
+   mReceivedPacketsThisEvent = 0;
    mCurrentEvent = -1;
 }
 
@@ -2125,7 +2142,7 @@ void WP::LogEvent(FRAME_WDAQ_HEADER *pdaqh, FRAME_WDB_HEADER *ph) {
 
       snprintf(line, sizeof(line), "%06dus #%04d from WD%03d, P#=%5d T=%s F=%15s PL=%4d OF=%5d, ",
                usSince(mEventStartTime),
-               mReceivedPackets - 1,
+               mReceivedPacketsThisEvent - 1,
                pdaqh->serial_number,
                pdaqh->packet_number,
                pdaqh->data_type == cDataTypeDRS ? "DRS" :
@@ -2221,7 +2238,6 @@ int WP::ReceiveWfPacket() {
 
    FRAME_WDAQ_HEADER *pwdaq_header = (FRAME_WDAQ_HEADER *) buffer;
    FRAME_WDB_HEADER *pwdb_header = (FRAME_WDB_HEADER *) (((FRAME_WDAQ_HEADER *) buffer) + 1);
-   WDEvent *event = nullptr;
 
    // return if invalid header
    if (n < (int) sizeof(FRAME_WDAQ_HEADER))
@@ -2239,10 +2255,11 @@ int WP::ReceiveWfPacket() {
       return 0;
    }
 
-   if (mReceivedPackets == 0)
+   if (mReceivedPacketsThisEvent == 0)
       mEventStartTime = usStart();
 
-   mReceivedPackets++;
+   mReceivedPacketsThisEvent++;
+   mWDReceivedPackets++;
 
    // correct endianness of header data
    pwdaq_header->serial_number = SWAP_UINT16(pwdaq_header->serial_number);
@@ -2278,7 +2295,7 @@ int WP::ReceiveWfPacket() {
       mEvent[pwdaq_header->serial_number] = new WDEvent(pwdaq_header->serial_number);
       mEventLast[pwdaq_header->serial_number] = new WDEvent(pwdaq_header->serial_number);
    }
-   event = mEvent[pwdaq_header->serial_number];
+   WDEvent *event = mEvent[pwdaq_header->serial_number];
 
    // on first packet for event, start new event if previous event not fully received
    if ((pwdaq_header->wdaq_flags & (1 << cWDAQFlagStartOfEvent)) &&
@@ -2287,43 +2304,40 @@ int WP::ReceiveWfPacket() {
       if (!IsEventValid() && event->mReceivedPackets > 1) {
          if (mVerbose)
             std::cerr << "Partially received event dropped, board id=" << pwdaq_header->serial_number
-                      << ", efficiency=" << (double) mWDReceivedEvents / (mWDReceivedEvents + mWDDroppedEvents)
-                      << std::endl;
+                      << ", efficiency=" << GetWDPacketEfficiency() << std::endl;
 
          if (mLogfile != "") {
             std::ofstream f;
             f.open(mLogfile, std::ios_base::app);
             f << "Partially received event dropped, board id=" << pwdaq_header->serial_number << std::endl;
          }
-         mWDDroppedEvents++;
+
+         if (event->mFirstPacketNumber > 0)
+            mWDDroppedPackets += event->mLastPacketNumber - event->mFirstPacketNumber + 1 - event->mReceivedPackets;
       }
 
       StartNewEvent();
-      mReceivedPackets = 1;
+      mReceivedPacketsThisEvent = 1;
       mEventStartTime = usStart();
-      mCurrentEvent = -1;
    }
 
-   // log general event header
+   // log and display general event header
    LogEvent(pwdaq_header, pwdb_header);
 
-   // obtain general event header from packet
+   // set general event header from packet
    event->SetEventHeaderInfo(pwdaq_header);
 
-   // evaluate SOE / EOE etc.
+   // evaluate SOE / EOE, packet type etc.
    event->ProcessPacket(pwdaq_header);
 
-   // set data type flags from packet
-   if (pwdaq_header->data_type == cDataTypeADC)
-      event->mHasADCData = true;
-   if (pwdaq_header->data_type == cDataTypeDRS)
-      event->mHasDRSData = true;
-   if (pwdaq_header->data_type == cDataTypeTDC)
-      event->mHasTDCData = true;
-   if (pwdaq_header->data_type == cDataTypeTrg)
-      event->mHasTRGData = true;
-   if (pwdaq_header->data_type == cDataTypeScaler)
-      event->mHasScalerData = true;
+   // calculate packet efficiency every ten seconds
+   time_t now;
+   time(&now);
+   if (now > mStartStatistics + 3) {
+      mPacketEfficiency = (double) mWDReceivedPackets / (mWDReceivedPackets + mWDDroppedPackets);
+      mWDReceivedPackets = mWDDroppedPackets = 0;
+      mStartStatistics = now;
+   }
 
    // check package consistency for DRS and ADC events
    if (pwdaq_header->data_type == cDataTypeDRS || pwdaq_header->data_type == cDataTypeADC) {
@@ -3169,9 +3183,6 @@ void WP::Collector() {
 
       // if all packets have been received process the event
       if (status == SUCCESS) {
-
-         // update statistics
-         mWDReceivedEvents++;
 
          // do various calibrations
          if (!mRotateWaveform)
