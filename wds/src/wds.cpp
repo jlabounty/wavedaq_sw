@@ -47,6 +47,7 @@ typedef struct {
    READOUTMODE readoutMode;
    bool updatePeriodic;
    std::string wdsDir;
+   std::map<std::string, time_t> recent;
 } GLOBALS;
 
 unsigned int demoDrsSampleFreq = 5016;
@@ -427,40 +428,59 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
    }
 
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/connect") == 0) {
-      char adr[256];
-      mg_get_http_var(&hm->query_string, "adr", adr, sizeof(adr));
+      char str[256];
+      mg_get_http_var(&hm->query_string, "adr", str, sizeof(str));
+      auto adr = std::string(str);
+      for (auto &c: adr) c = toupper(c);
 
       if (gl->verbose)
          std::cout << "Trying to connect to " << adr << std::endl;
 
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
 
-      if (adr[0] == 'w' || adr[0] == 'W') {
+      if (adr[0] == 'W') {
          WDB *wdb = NULL;
-         for (auto &b: gl->wdb)
+         int i = 0;
+         for (auto &b: gl->wdb) {
             // check if we are already connected
             if (std::string(adr) == b->GetAddr()) {
                wdb = b;
-               if (gl->verbose)
-                  std::cout << "OK" << std::endl;
+               if (wdb->Ping()) {
+                  if (gl->verbose)
+                     std::cout << "OK" << std::endl;
+                  gl->recent[b->GetAddr()] = std::time(nullptr);
+                  mg_printf_http_chunk(nc, "OK\n");
+               } else {
+                  // delete board from gl->wdb
+                  gl->wdb.erase(gl->wdb.begin()+i);
+                  std::string s = std::string("Cannot connect to board ") + adr;
+                  mg_printf_http_chunk(nc, "%s\n", s.c_str());
+               }
                break;
             }
+            i++;
+         }
+
          if (wdb == NULL) {
+            // create new board
             WDB *b = new WDB(adr);
             try {
+               std::cout << "Connect to " << b->GetAddr() << " ... " << std::flush;
                connectWDB(gl, b);
                gl->wdb.push_back(b);
                gl->wp->SetWDBList(gl->wdb);
+               mg_printf_http_chunk(nc, "OK\n");
+               std::cout << "OK" << std::endl;
             } catch (std::runtime_error &e) {
+               std::cout << "Failure" << std::endl;
                mg_printf_http_chunk(nc, "%s\n", e.what());
                delete b;
             }
          }
-         mg_printf_http_chunk(nc, "OK\n");
-      } else if (adr[0] == 'd' || adr[0] == 'D') {
+      } else if (adr[0] == 'D') {
          mg_printf_http_chunk(nc, "OK\n");
       } else
-         mg_printf_http_chunk(nc, "Invalid address \"%s\"\n", adr);
+         mg_printf_http_chunk(nc, "Invalid address \"%s\"\n", adr.c_str());
 
       mg_send_http_chunk(nc, "", 0);
       return;
@@ -470,7 +490,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
    static int slotHvOn = 0;
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/crate") == 0) {
       if (gl->verbose)
-         std::cout << "Sending /cr to browser" << std::endl;
+         std::cout << "Sending /crate to browser" << std::endl;
 
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
 
@@ -548,10 +568,13 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       if (b == NULL) {
          b = new WDB(adr);
          try {
+            std::cout << "Connect to " << b->GetAddr() << " ... " << std::flush;
             connectWDB(gl, b);
             gl->wdb.push_back(b);
             gl->wp->SetWDBList(gl->wdb);
+            std::cout << "OK" << std::endl;
          } catch (std::runtime_error &e) {
+            std::cout << "Failure" << std::endl;
             mg_printf_http_chunk(nc, "{\n");
             mg_printf_http_chunk(nc, "  \"error\": \"%s\"\n", e.what());
             mg_printf_http_chunk(nc, "}\n");
@@ -738,10 +761,42 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
 
    // software build
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/build") == 0) {
+      if (gl->verbose)
+         std::cout << "Sending /build to browser" << std::endl;
+
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
       mg_printf_http_chunk(nc, "{\n");
       mg_printf_http_chunk(nc, "   \"build\": \"%s\",\n", __DATE__);
       mg_printf_http_chunk(nc, "   \"git revision\": \"%s\"\n", getWdbLibRevision().c_str());
+      mg_printf_http_chunk(nc, "}\n");
+      mg_send_http_chunk(nc, "", 0);
+      return;
+   }
+
+   // return list of recent boards
+   if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/recent") == 0) {
+      if (gl->verbose)
+         std::cout << "Sending /recent to browser" << std::endl;
+
+      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+      mg_printf_http_chunk(nc, "{\n");
+      mg_printf_http_chunk(nc, "   \"recent\": [\n");
+
+      // rs contains recent boards sorted by time in reverse order
+      std::map<time_t,std::string,std::greater<time_t>> rs;
+      for (auto e: gl->recent)
+         rs[e.second] = e.first;
+      std::vector<std::string> v;
+      for (auto e: rs)
+         v.push_back(e.second);
+      for (auto &s: v) {
+         if (&s != &v.back())
+            mg_printf_http_chunk(nc, "      \"%s\",\n", s.c_str());
+         else
+            mg_printf_http_chunk(nc, "      \"%s\"\n", s.c_str());
+      }
+
+      mg_printf_http_chunk(nc, "   ]\n");
       mg_printf_http_chunk(nc, "}\n");
       mg_send_http_chunk(nc, "", 0);
       return;
@@ -1053,8 +1108,6 @@ void handler(int sig) {
 
 void connectWDB(GLOBALS *gl, WDB *b) {
 
-   std::cout << "Connect to " << b->GetAddr() << " ... " << std::flush;
-
    b->SetVerbose(gl->verbose);
    b->SetLogFile(gl->logFileName);
    b->Connect();
@@ -1064,6 +1117,19 @@ void connectWDB(GLOBALS *gl, WDB *b) {
       std::cout << std::endl << "========== WDB Info ==========" << std::endl;
       b->PrintVersion();
    }
+
+   // remember board in recent list
+   gl->recent[b->GetAddr()] = std::time(nullptr);
+
+   // write recent.txt file
+   std::map<time_t,std::string> rs;
+   for (auto e: gl->recent)
+      rs[e.second] = e.first;
+   std::ofstream f;
+   f.open(gl->wdsDir + "/recent.txt");
+   for (auto e: rs)
+      f << e.second << " " << e.first << std::endl;
+   f.close();
 
    // load calibration data for board
    b->LoadVoltageCalibration(b->GetDrsSampleFreqMhz(), gl->wdsDir);
@@ -1103,10 +1169,6 @@ void connectWDB(GLOBALS *gl, WDB *b) {
 
    // set DAQ mode
    b->SetDaqNormal(false);
-
-   std::cout << "OK" << std::endl;
-   if (gl->verbose)
-      std::cout << std::endl;
 }
 
 int main(int argc, const char *argv[]) {
@@ -1147,11 +1209,24 @@ int main(int argc, const char *argv[]) {
       }
    }
 
-   // parse command line parameters
-   if (argc < 2) {
-      showUsage(argv[0]);
-      return 1;
+   // read recent.txt file
+   std::ifstream f;
+   std::string line;
+   f.open(gl.wdsDir + "/recent.txt");
+   if (f.is_open()) {
+      while (std::getline(f, line)) {
+         std::istringstream s(line);
+         std::string w;
+         time_t t;
+         s >> w >> t;
+         // discard if more than one month old
+         if (std::time(nullptr) - t < 3600*24*30)
+            gl.recent[w] = t;
+      }
+      f.close();
    }
+
+   // parse command line parameters
 
    for (int i = 1; i < argc; i++) {
       std::string arg = argv[i];
@@ -1344,8 +1419,17 @@ int main(int argc, const char *argv[]) {
 
          if (now > last) {
             // update every second all status registers
-            for (auto &b: gl.wdb)
-               b->ReceiveStatusRegisters();
+            int i=0;
+            for (auto &b: gl.wdb) {
+               try {
+                  b->ReceiveStatusRegisters();
+               } catch (...) {
+                  gl.wdb.erase(gl.wdb.begin()+i);
+                  std::cout << "Disconnected from " << b->GetAddr() << std::endl;
+                  delete b;
+               }
+               i++;
+            }
             // update all control registers if requested
             if (gl.updatePeriodic) {
                for (auto &b: gl.wdb)

@@ -58,16 +58,32 @@
             if (req.readyState === 4 && req.status === 200) {
                let b = JSON.parse(req.responseText);
                document.getElementById('build').innerHTML = "wdb build: " + b.build;
+
+               req.onreadystatechange = function () {
+                  if (req.readyState === 4 && req.status === 200) {
+                     let r = JSON.parse(req.responseText);
+                     let options = "";
+                     for (let i = 0; i < r.recent.length; i++)
+                        options += '<option value="' + r.recent[i] + '">' + r.recent[i] + '</option>\n';
+                     document.getElementById("recent").innerHTML = options;
+                  }
+               }
+               req.open("GET", "recent?r=" + Math.random(), true);
+               req.send();
             }
          }
          req.open("GET", "build?r=" + Math.random(), true); // avoid cached results
          req.send();
       }
 
+      let dlgTimer;
+
       function mysubmit() {
          let req = new XMLHttpRequest();
          req.onreadystatechange = function () {
             if (req.readyState === 4 && req.status === 200) {
+               if (dlgTimer !== undefined)
+                  window.clearTimeout(dlgTimer);
                hideWaitDialog();
                if (req.responseText !== "OK\n")
                   dlgAlert(req.responseText);
@@ -76,7 +92,7 @@
                }
             }
          }
-         showWaitDialog();
+         dlgTimer = window.setTimeout(showWaitDialog, 500);
          req.open("GET", "connect?adr=" + document.getElementById('address').value +
             "&r=" + Math.random(), true); // avoid cached results
          req.send();
@@ -93,7 +109,8 @@
       }
 
       function hideWaitDialog() {
-         dlgHide(DLG);
+         if (DLG !== undefined)
+            dlgHide(DLG);
       }
 
    </script>
@@ -122,12 +139,9 @@
       </tr>
       <tr>
          <td>
-            <label for="address">Address:</label>
-            <input type="text" size="20" id="address" list="adrlist" autofocus>
-            <datalist id="adrlist">
-               <option value="WD099">
-               <option value="WD123">
-               <option value="DCB01">
+            <label for="recent">Address:</label>
+            <input type="text" size="20" id="address" list="recent" autofocus>
+            <datalist id="recent">
             </datalist>
          </td>
       </tr>

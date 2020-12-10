@@ -234,7 +234,7 @@ std::string WDB::SendReceiveUDP(std::string str, unsigned char *ethAddr) {
    if (result.size() == 0) {
       if (str.back() == '\n')
          str = str.substr(0, str.size() - 1);
-      throw std::runtime_error(std::string("Error sending \"") + str + "\" to " + mWDBName + ".");
+      throw std::runtime_error(std::string("Error sending \"") + str + "\" to " + mWDBName);
    }
 
    // chop off prompt
@@ -369,7 +369,7 @@ void WDB::WriteUDP(unsigned int ofs, std::vector<unsigned int> data) {
 
    }
 
-   throw std::runtime_error(std::string("Error writing binary UDP data to " + mWDBName + "."));
+   throw std::runtime_error(std::string("Error writing binary UDP data to " + mWDBName));
 }
 
 //--------------------------------------------------------------------
@@ -498,7 +498,7 @@ std::vector<unsigned int> WDB::ReadUDP(unsigned int ofs, unsigned int nReg) {
          std::cout << mWDBName << " retry " << retry + 1 << " with " << ms << " ms" << std::endl;
    }
 
-   throw std::runtime_error(std::string("Error reading binary UDP data from " + mWDBName + "."));
+   throw std::runtime_error(std::string("Error reading binary UDP data from " + mWDBName));
 }
 
 //--------------------------------------------------------------------
@@ -546,7 +546,7 @@ void WDB::Connect() {
       // retrieve Ethernet address of board
       phe = gethostbyname(mWDBAddr.c_str());
       if (phe == NULL)
-         throw std::runtime_error(std::string("Cannot resolve host name ") + mWDBAddr + ".");
+         throw std::runtime_error(std::string("Cannot resolve host name ") + mWDBAddr);
 
       std::memset((char *) &client_addr, 0, sizeof(client_addr));
       std::memcpy((char *) &client_addr.sin_addr, phe->h_addr, phe->h_length);
@@ -563,7 +563,7 @@ void WDB::Connect() {
       try {
          WDB::SendUDP("\n");
       } catch (...) {
-         throw std::runtime_error(std::string("Cannot connect to board ") + mWDBAddr + ".");
+         throw std::runtime_error(std::string("Cannot connect to board ") + mWDBAddr);
       }
 
       // set dbglevel none
@@ -574,9 +574,9 @@ void WDB::Connect() {
          auto result = ReadUDP(0x0000, 1);
          auto magic  = (result[0] & 0xFF000000) >> 24;
          if (magic != 0xAC)
-            throw std::runtime_error(std::string("Cannot connect to board ") + mWDBAddr + ".");
+            throw std::runtime_error(std::string("Cannot connect to board ") + mWDBAddr);
       } catch (...) {
-         throw std::runtime_error(std::string("Cannot connect to board ") + mWDBAddr + ".");
+         throw std::runtime_error(std::string("Cannot connect to board ") + mWDBAddr);
       }
    }
 
@@ -675,6 +675,15 @@ void WDB::Connect() {
    char str[32];
    sprintf(str, "wd%03d", GetSerialNumber());
    mWDBName = std::string(str);
+}
+
+bool WDB::Ping() {
+   try {
+      ReadUDP(0, 1);
+   } catch (...) {
+      return false;
+   }
+   return true;
 }
 
 //--------------------------------------------------------------------

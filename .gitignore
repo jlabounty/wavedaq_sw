@@ -6,3 +6,4 @@ lib
 cmake-build-debug
 camke-build-release
 git-revision.h
+recent.txt

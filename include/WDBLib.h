@@ -627,6 +627,7 @@ public:
    int IsVerbose() { return mVerbose; }
    void SetLogFile(std::string logfile) { mLogfile = logfile; }
    void Connect();
+   bool Ping();
 
    void SetDestinationPort(int port);
 
