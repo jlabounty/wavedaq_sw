@@ -97,7 +97,7 @@ WDB::WDB(std::string name, bool verbose) : WDBREG() {
 //--------------------------------------------------------------------
 
 WDB::WDB(DCB *dcb, int slot, bool verbose) : WDBREG() {
-   mWDBName = "wdb";
+   mWDBName = "WDxxx";
    mWDBAddr = dcb->GetName() + ":" + std::to_string(slot);
    mDCB = dcb;
    mSlot = slot;
@@ -673,13 +673,17 @@ void WDB::Connect() {
 
    // retrieve name from serial number
    char str[32];
-   sprintf(str, "wd%03d", GetSerialNumber());
+   sprintf(str, "WD%03d", GetSerialNumber());
    mWDBName = std::string(str);
 }
 
 bool WDB::Ping() {
    try {
-      ReadUDP(0, 1);
+      // read magic number
+      std::vector<unsigned int> result = ReadUDP(0, 1);
+      if ((result[0] & 0xFF000000) == 0xAC000000)
+         return true;
+      return false;
    } catch (...) {
       return false;
    }
@@ -880,7 +884,10 @@ std::string WDB::GetSwBuild() {
                                          "Dec"};
 
    s << std::dec << std::setw(2) << std::setfill('0');
-   s << monthName[bcd2dec(GetSwBuildMonth()) - 1] << ' ';
+   if (GetSwBuildMonth() == 0)
+      s << "Invalid Month ";
+   else
+     s << monthName[bcd2dec(GetSwBuildMonth()) - 1] << ' ';
    s << bcd2dec(GetSwBuildDay()) << ' ';
    s << bcd2dec(GetSwBuildYear()) << "  ";
    s << std::setfill('0') << std::setw(2) << bcd2dec(GetSwBuildHour()) << ':';

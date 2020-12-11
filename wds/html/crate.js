@@ -28,25 +28,17 @@ CanvasRenderingContext2D.prototype.drawLine = function (x1, y1, x2, y2) {
 };
 
 function init() {
-   // prevent mouse events to go up to the browser
-   let c = document.getElementById("controls");
-   c.addEventListener("click", function (e) {
-      e.preventDefault()
-   });
-   c.addEventListener("mousemove", function (e) {
-      e.preventDefault()
-   });
-
-   c = document.getElementById("crate");
-   c.addEventListener("click", function (e) {
-      e.preventDefault()
-   });
-   c.addEventListener("mousemove", function (e) {
-      e.preventDefault()
-   });
-
-   // create Scope object
+   // create Crate object
    CRATE = new Crate(document.getElementById("crate"));
+
+   // obtain DCB address from URL
+   let url = new URL(window.location.href);
+   CRATE.dcbAddress = url.searchParams.get("adr");
+
+   if (CRATE.dcbAddress === null) {
+      dlgAlert("Missing parameter \"adr\" in URL");
+      return;
+   }
 
    // draw crate
    resize();
@@ -54,9 +46,16 @@ function init() {
    // add resize event handler
    window.addEventListener("resize", resize);
 
+   // mouse event handlers
+   window.addEventListener("mousedown", CRATE.mouseEvent.bind(CRATE), true);
+   window.addEventListener("mousemove", CRATE.mouseEvent.bind(CRATE), true);
+   window.addEventListener("mouseup", CRATE.mouseEvent.bind(CRATE), true);
+   window.addEventListener("touchstart", CRATE.mouseEvent.bind(CRATE), true);
+   window.addEventListener("touchmove", CRATE.mouseEvent.bind(CRATE), true);
+
    // schedule loadCrate()
    CRATE.timer = {};
-   CRATE.timer.loadCrate = window.setTimeout(loadCrate, 10);
+   CRATE.timer.loadCrate = window.setTimeout(loadCrate, 10, true);
 
    // load spinning wheel image
    CRATE.spinningWheel = new Image();
@@ -77,6 +76,53 @@ Crate.prototype.resize = function (width) {
    this.canvas.width = width;
    this.canvas.height = width / 1000 * 270;
    this.draw();
+}
+
+Crate.prototype.mouseEvent = function (e) {
+
+   // fix buttons for IE
+   if (!e.which && e.button) {
+      if ((e.button & 1) > 0) e.which = 1;      // Left
+      else if ((e.button & 4) > 0) e.which = 2; // Middle
+      else if ((e.button & 2) > 0) e.which = 3; // Right
+   }
+
+   // set default cursor to be changed below
+   let cursor = "default";
+
+   if (e.type === "mousemove" || e.type === "mousedown"
+      && e.target === this.canvas) {
+      let x = e.clientX - this.canvas.offsetLeft;
+      let y = e.clientY - this.canvas.offsetTop;
+      let scale = this.canvas.width / 1000;
+
+      if (y/scale > 7.5 && y/scale < 255+7.5) {
+         let slot = Math.floor((x/scale - 62.5) / 41.4);
+         if (slot < 0)
+            slot = undefined;
+         else if (slot < 8)
+            slot += 0;
+         else if (slot === 8)
+            slot = 16;
+         else if (slot === 9)
+            slot = 17;
+         else if (slot > 8 && slot < 18)
+            slot -= 2;
+         else
+            slot = undefined;
+
+         if (slot >= 0 && slot < 17) {
+            cursor = "pointer";
+         }
+
+         if (e.type === "mousedown" && slot < 16 &&
+            CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_WDB) {
+            window.location.href = "osc.html?adr=" + CRATE.dcbAddress + ":" + slot;
+         }
+      }
+   }
+
+   document.getElementById('crate').style.cursor = cursor;
 }
 
 Crate.prototype.draw = function () {
@@ -657,11 +703,16 @@ function drawTCB(ctx, slot) {
    ctx.restore();
 }
 
-function loadCrate() {
+function loadCrate(flag) {
    // send AJAX request
    CRATE.req = new XMLHttpRequest();
    CRATE.req.onreadystatechange = receiveCrate;
-   CRATE.req.open("GET", "crate?&r=" + Math.random(), true); // avoid cached results
+   if (flag === true)
+      CRATE.req.open("GET", "crate?adr=" + CRATE.dcbAddress +
+         "&fl=1" + "&r=" + Math.random(), true); // avoid cached results
+   else
+      CRATE.req.open("GET", "crate?adr=" + CRATE.dcbAddress +
+         "&fl=0" + "&r=" + Math.random(), true); // avoid cached results
 
    try {
       CRATE.req.send();

@@ -54,6 +54,7 @@ unsigned int demoDrsSampleFreq = 5016;
 
 std::vector<std::string> split(const std::string &input, char separator);
 void connectWDB(GLOBALS *gl, WDB *b);
+void connectDCB(GLOBALS *gl, DCB *d);
 
 /*------------------------------------------------------------------*/
 
@@ -439,7 +440,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
 
       if (adr[0] == 'W') {
-         WDB *wdb = NULL;
+         WDB *wdb = nullptr;
          int i = 0;
          for (auto &b: gl->wdb) {
             // check if we are already connected
@@ -448,7 +449,6 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
                if (wdb->Ping()) {
                   if (gl->verbose)
                      std::cout << "OK" << std::endl;
-                  gl->recent[b->GetAddr()] = std::time(nullptr);
                   mg_printf_http_chunk(nc, "OK\n");
                } else {
                   // delete board from gl->wdb
@@ -461,26 +461,92 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             i++;
          }
 
-         if (wdb == NULL) {
+         if (wdb == nullptr) {
             // create new board
-            WDB *b = new WDB(adr);
+            wdb = new WDB(adr, gl->verbose);
             try {
-               std::cout << "Connect to " << b->GetAddr() << " ... " << std::flush;
-               connectWDB(gl, b);
-               gl->wdb.push_back(b);
+               std::cout << "Connect to " << wdb->GetAddr() << " ... " << std::flush;
+               connectWDB(gl, wdb);
+               gl->wdb.push_back(wdb);
                gl->wp->SetWDBList(gl->wdb);
                mg_printf_http_chunk(nc, "OK\n");
                std::cout << "OK" << std::endl;
             } catch (std::runtime_error &e) {
                std::cout << "Failure" << std::endl;
                mg_printf_http_chunk(nc, "%s\n", e.what());
-               delete b;
+               delete wdb;
+               wdb = nullptr;
             }
          }
+
+         if (wdb != nullptr)
+            gl->recent[wdb->GetName()] = std::time(nullptr);
+
       } else if (adr[0] == 'D') {
-         mg_printf_http_chunk(nc, "OK\n");
+         DCB *dcb = nullptr;
+         int i = 0;
+         for (auto &d: gl->dcb) {
+            // check if we are already connected
+            if (std::string(adr) == d->GetName()) {
+               dcb = d;
+               if (dcb->Ping()) {
+                  if (gl->verbose)
+                     std::cout << "OK" << std::endl;
+                  mg_printf_http_chunk(nc, "OK\n");
+               } else {
+                  // delete board from gl->dcb
+                  gl->dcb.erase(gl->dcb.begin()+i);
+                  std::string s = std::string("Cannot connect to board ") + adr;
+                  mg_printf_http_chunk(nc, "%s\n", s.c_str());
+               }
+               break;
+            }
+            i++;
+         }
+         if (dcb == nullptr) {
+            // create new board
+            dcb = new DCB(adr, gl->verbose);
+            try {
+               std::cout << "Connect to " << dcb->GetName() << " ... " << std::flush;
+               dcb->Connect();
+               dcb->ScanCrate();
+               std::cout << "OK" << std::endl;
+               if (gl->verbose) {
+                  std::cout << std::endl << "========== DCB Info ==========" << std::endl;
+                  dcb->PrintVersion();
+                  std::cout << std::endl << "Board scan:" << std::endl;
+                  dcb->PrintCrate();
+                  std::cout << std::endl;
+               }
+               gl->dcb.push_back(dcb);
+               mg_printf_http_chunk(nc, "OK\n");
+
+               connectDCB(gl, dcb);
+
+            } catch (std::runtime_error &e) {
+               std::cout << "Failure" << std::endl;
+               mg_printf_http_chunk(nc, "%s\n", e.what());
+               delete dcb;
+               dcb = nullptr;
+            }
+         }
+
+         if (dcb != nullptr)
+            gl->recent[dcb->GetName()] = std::time(nullptr);
+
       } else
          mg_printf_http_chunk(nc, "Invalid address \"%s\"\n", adr.c_str());
+
+      // write recent list to file
+      std::map<time_t,std::string> rs;
+      for (auto e: gl->recent)
+         rs[e.second] = e.first;
+      std::ofstream f;
+      f.open(gl->wdsDir + "/recent.txt");
+      for (auto e: rs)
+         f << e.second << " " << e.first << std::endl;
+      f.close();
+
 
       mg_send_http_chunk(nc, "", 0);
       return;
@@ -492,45 +558,85 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       if (gl->verbose)
          std::cout << "Sending /crate to browser" << std::endl;
 
-      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+      char str[256];
+      mg_get_http_var(&hm->query_string, "adr", str, sizeof(str));
+      auto adr = std::string(str);
+      for (auto &c: adr) c = toupper(c);
 
-      mg_printf_http_chunk(nc, "{\n");
+      mg_get_http_var(&hm->query_string, "fl", str, sizeof(str));
+      bool flag = atoi(str);
 
-      if (gl->dcb.size() == 0) {
-         // indicate we are not connected via DCB
-         mg_printf_http_chunk(nc, "   \"DCB\": 0\n");
-         mg_printf_http_chunk(nc, "}\n");
-         mg_send_http_chunk(nc, "", 0); // end of response
-         return;
+      DCB *dcb = nullptr;
+      for (auto &d : gl->dcb) {
+         if (d->GetName() == std::string(adr)) {
+            dcb = d;
+            break;
+         }
       }
 
-      DCB *dcb = gl->dcb[0];
-      dcb->ScanCrate();
+      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+
+      // if not connected, try to connect
+      if (dcb == nullptr) {
+         dcb = new DCB(adr);
+         try {
+            std::cout << "Connect to " << dcb->GetName() << " ... " << std::flush;
+            dcb->Connect();
+            gl->dcb.push_back(dcb);
+            std::cout << "OK" << std::endl;
+
+            if (gl->verbose) {
+               std::cout << std::endl << "========== DCB Info ==========" << std::endl;
+               dcb->PrintVersion();
+               std::cout << std::endl << "Board scan:" << std::endl;
+               dcb->ScanCrate();
+               dcb->PrintCrate();
+               std::cout << std::endl;
+            }
+
+         } catch (std::runtime_error &e) {
+            std::cout << "Failure" << std::endl;
+            mg_printf_http_chunk(nc, "{\n");
+            mg_printf_http_chunk(nc, "  \"error\": \"%s\"\n", e.what());
+            mg_printf_http_chunk(nc, "}\n");
+            mg_send_http_chunk(nc, "", 0);
+            delete dcb;
+            return;
+         }
+      }
+
+      if (flag) {
+         dcb->ScanCrate();
+         dcb->PrintCrate();
+         std::cout << std::endl;
+         connectDCB(gl, dcb);
+      }
+
+      mg_printf_http_chunk(nc, "{\n");
       mg_printf_http_chunk(nc, "   \"DCB\": \"%s\",\n", dcb->GetName().c_str());
       mg_printf_http_chunk(nc, "   \"CMB\": \"%s\",\n", "MSCBXXX");
       mg_printf_http_chunk(nc, "   \"slot\": [\n");
       for (int i=0 ; i<16 ; i++) {
+         if (dcb->GetWDB(i) != nullptr && !dcb->GetWDB(i)->Ping()) {
+            std::cout << "Disconnected from " << dcb->GetWDB(i)->GetAddr() << std::endl;
+            delete dcb->GetWDB(i);
+            dcb->SetWDB(i, nullptr);
+            dcb->ClearBoardId(i);
+         }
+
          mg_printf_http_chunk(nc, "      {\n");
          mg_printf_http_chunk(nc, "        \"vendor_id\": %d,\n", dcb->GetBoardId(i)->vendor_id);
          mg_printf_http_chunk(nc, "        \"type_id\": %d,\n", dcb->GetBoardId(i)->type_id);
          mg_printf_http_chunk(nc, "        \"rev_id\": %d,\n", dcb->GetBoardId(i)->rev_id);
-         mg_printf_http_chunk(nc, "        \"variant_id\": %d,\n", dcb->GetBoardId(i)->variant_id);
 
          // WDB specific items
          if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
             mg_printf_http_chunk(nc, "        \"variant_id\": %d,\n", dcb->GetBoardId(i)->variant_id);
 
-            // search board in WDB list
-            int j;
-            for (j=0 ; j<gl->wdb.size() ; j++)
-               if (gl->wdb[j]->GetDcbInterface() == dcb && gl->wdb[j]->GetSlotNumber() == i)
-                  break;
-            if (j < gl->wdb.size()) {
-               mg_printf_http_chunk(nc, "        \"serial\": %d,\n", gl->wdb[j]->GetSerialNumber());
-               float hv = 0;
-               gl->wdb[j]->GetHVBaseVoltage(hv);
-               mg_printf_http_chunk(nc, "        \"hv_on\": %d\n", hv > 10 ? 1:0);
-            }
+            mg_printf_http_chunk(nc, "        \"serial\": %d,\n", dcb->GetWDB(i)->GetSerialNumber());
+            float hv = 0;
+            dcb->GetWDB(i)->GetHVBaseVoltage(hv);
+            mg_printf_http_chunk(nc, "        \"hv_on\": %d\n", hv > 10 ? 1:0);
          } else {
             mg_printf_http_chunk(nc, "        \"variant_id\": %d\n", dcb->GetBoardId(i)->variant_id);
          }
@@ -554,18 +660,59 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       auto adr = std::string(str);
       for (auto &c: adr) c = toupper(c);
 
-      WDB *b = NULL;
-      for (auto &wdb : gl->wdb) {
-         if (wdb->GetAddr() == std::string(adr)) {
-            b = wdb;
-            break;
+      WDB *b = nullptr;
+      if (adr[0] == 'D') {
+         std::string dcbName = adr.substr(0, adr.find(":"));
+         int slot = std::stoi(adr.substr(adr.find(":")+1));
+
+         DCB *dcb = nullptr;
+         for (auto &d : gl->dcb) {
+            if (d->GetName() == dcbName) {
+               dcb = d;
+               break;
+            }
+         }
+         if (dcb == nullptr) {
+            // create new board
+            dcb = new DCB(dcbName, gl->verbose);
+            try {
+               std::cout << "Connect to " << dcbName << " ... " << std::flush;
+               dcb->Connect();
+               dcb->ScanCrate();
+               std::cout << "OK" << std::endl;
+               if (gl->verbose) {
+                  std::cout << std::endl << "========== DCB Info ==========" << std::endl;
+                  dcb->PrintVersion();
+                  std::cout << std::endl << "Board scan:" << std::endl;
+                  dcb->PrintCrate();
+                  std::cout << std::endl;
+               }
+               gl->dcb.push_back(dcb);
+
+               connectDCB(gl, dcb);
+
+            } catch (std::runtime_error &e) {
+               std::cout << "Failure" << std::endl;
+               mg_printf_http_chunk(nc, "%s\n", e.what());
+               delete dcb;
+            }
+         }
+
+         b = dcb->GetWDB(slot);
+
+      } else {
+         for (auto &wdb : gl->wdb) {
+            if (wdb->GetAddr() == std::string(adr)) {
+               b = wdb;
+               break;
+            }
          }
       }
 
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
 
       // if not connected, try to connect
-      if (b == NULL) {
+      if (b == nullptr) {
          b = new WDB(adr);
          try {
             std::cout << "Connect to " << b->GetAddr() << " ... " << std::flush;
@@ -805,11 +952,40 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
    // binary encoded waveforms
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/wf") == 0) {
 
-      mg_get_http_var(&hm->query_string, "b", str, sizeof(str));
-      int brd = atoi(str);
+      mg_get_http_var(&hm->query_string, "adr", str, sizeof(str));
+      auto adr = std::string(str);
+      for (auto &c: adr) c = toupper(c);
 
-      mg_get_http_var(&hm->query_string, "c", str, sizeof(str));
+      mg_get_http_var(&hm->query_string, "chn", str, sizeof(str));
       int chn = atoi(str);
+
+      WDB *wdb = nullptr;
+      if (adr[0] == 'D') {
+         std::string dcbName = adr.substr(0, adr.find(":"));
+         int slot = std::stoi(adr.substr(adr.find(":")+1));
+
+         DCB *dcb = nullptr;
+         for (auto &d : gl->dcb) {
+            if (d->GetName() == dcbName) {
+               dcb = d;
+               break;
+            }
+         }
+         wdb = dcb->GetWDB(slot);
+
+      } else {
+         for (auto &b : gl->wdb) {
+            if (b->GetAddr() == std::string(adr)) {
+               wdb = b;
+               break;
+            }
+         }
+      }
+      if (wdb == nullptr) {
+         mg_printf_http_chunk(nc, "Board %s not found", adr.c_str());
+         mg_send_http_chunk(nc, "", 0);
+         return;
+      }
 
       mg_send_response_line(nc, 200, "Content-Type: application/octet-stream\r\nTransfer-Encoding: chunked\r\n");
 
@@ -859,18 +1035,14 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
                mg_send_http_chunk(nc, (const char *) &c, 4);
                mg_send_http_chunk(nc, (const char *) &n, 4);
 
-               mg_send_http_chunk(nc, (const char *) gl->wdb[brd]->mTCalib.mCalib.period[c], sizeof(float) * n);
+               mg_send_http_chunk(nc, (const char *) wdb->mTCalib.mCalib.period[c], sizeof(float) * n);
             }
 
          mg_send_http_chunk(nc, "", 0);
          return;
       }
 
-      // avoid invalid board index
-      if (brd < 0 || brd >= gl->wdb.size())
-         brd = 0;
-
-      WDEvent event(gl->wdb[brd]->GetSerialNumber());
+      WDEvent event(wdb->GetSerialNumber());
       bool bNewEvent;
 
       if (gl->demoMode) {
@@ -904,41 +1076,31 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
          }
       } else {
 
-         // request single event
-         if (brd == -1) {
-            // all boards
-            for (auto &b: gl->wdb) {
-               if (gl->triggerMode == cTriggerModeAuto)
-                  b->TriggerSoftEvent();
-               else if (gl->triggerMode == cTriggerModeNormal)
-                  b->SetDaqSingle(1);
-            }
-         } else {
-            // only current board
-            if (gl->triggerMode == cTriggerModeAuto)
-               gl->wdb[brd]->TriggerSoftEvent();
-            else if (gl->triggerMode == cTriggerModeNormal) {
-               if (!gl->triggerSelfArm) {
-                  sleep_ms(gl->wdb[brd]->GetTriggerHoldoff());
-                  gl->wdb[brd]->SetDaqSingle(1);
-               }
+         // only current board
+         if (gl->triggerMode == cTriggerModeAuto)
+            wdb->TriggerSoftEvent();
+         else if (gl->triggerMode == cTriggerModeNormal) {
+            if (!gl->triggerSelfArm) {
+               sleep_ms(wdb->GetTriggerHoldoff());
+               wdb->SetDaqSingle(1);
             }
          }
 
          // read waveforms
          if (gl->wp->IsXMLLogging())
             // increase timeout for slow XML logging
-            bNewEvent = gl->wp->GetLastEvent(gl->wdb[brd], 5000, event);
+            bNewEvent = gl->wp->GetLastEvent(wdb, 5000, event);
          else
-            bNewEvent = gl->wp->GetLastEvent(gl->wdb[brd], 500, event);
+            bNewEvent = gl->wp->GetLastEvent(wdb, 500, event);
       }
 
       if (gl->demoMode)
-         brd = 0xFF; // signals demo data
+         wdb = nullptr; // signals demo data
 
       if (bNewEvent) {
          if (event.mHasADCData && gl->readoutMode == cReadoutModeADC) { //---- ADC waveforms
             int t;                        // array type
+            int brd = 0;                  // board index
             int n = 1024;                 // number of elements
             int vc = event.mVCalibrated;  // voltage calibrated
             int tc = event.mTCalibrated;  // time calibrated
@@ -970,6 +1132,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             }
          } else if (event.mHasTDCData && gl->readoutMode == cReadoutModeTDC) { //---- TDC waveforms
             int t;                        // array type
+            int brd = 0;                  // board index
             int n = 512 * 8;              // number of elements
             int vc = event.mVCalibrated;  // voltage calibrated
             int tc = event.mTCalibrated;  // time calibrated
@@ -1011,6 +1174,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             }
          } else if (event.mHasDRSData && gl->readoutMode == cReadoutModeDRS) { //---- DRS waveforms
             int t;                        // array type
+            int brd = 0;                  // board index
             int n = 1024;                 // number of elements
             int vc = event.mVCalibrated;  // voltage calibrated
             int tc = event.mTCalibrated;  // time calibrated
@@ -1045,6 +1209,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       } else {
          // just return idle message
          int t = 0;
+         int brd = 0;                  // board index
          mg_send_http_chunk(nc, (const char *) &t, 4);
          mg_send_http_chunk(nc, (const char *) &brd, 4);
          if (gl->verbose)
@@ -1111,36 +1276,30 @@ void connectWDB(GLOBALS *gl, WDB *b) {
    b->SetVerbose(gl->verbose);
    b->SetLogFile(gl->logFileName);
    b->Connect();
-   b->ReceiveStatusRegisters();
+
+   do {
+      b->ReceiveStatusRegisters();
+      int s = b->GetSerialNumber();
+      if (s == 0) {
+         sleep_ms(100);
+         std::cout << "Wait for serial" << std::endl;
+      } else
+         break;
+   } while (true);
+
    b->ReceiveControlRegisters();
    if (gl->verbose) {
       std::cout << std::endl << "========== WDB Info ==========" << std::endl;
       b->PrintVersion();
    }
 
-   // remember board in recent list
-   gl->recent[b->GetAddr()] = std::time(nullptr);
-
-   // write recent.txt file
-   std::map<time_t,std::string> rs;
-   for (auto e: gl->recent)
-      rs[e.second] = e.first;
-   std::ofstream f;
-   f.open(gl->wdsDir + "/recent.txt");
-   for (auto e: rs)
-      f << e.second << " " << e.first << std::endl;
-   f.close();
-
    // load calibration data for board
    b->LoadVoltageCalibration(b->GetDrsSampleFreqMhz(), gl->wdsDir);
    b->LoadTimeCalibration(b->GetDrsSampleFreqMhz(), gl->wdsDir);
 
    // check PLL locked status
-   if (b->GetPllLock(false) != 0x1FF) {
-      std::ostringstream str;
-      str << "PLL not locked on board " << b->GetAddr() << ". Mask = 0x" << std::hex << b->GetPllLock(false);
-      throw std::runtime_error(str.str());
-   }
+   if (b->GetPllLock(false) != 0x1FF)
+      std::cout << "PLL not locked on board " << b->GetAddr() << ". Mask = 0x" << std::hex << b->GetPllLock(false) << std::endl;
 
    if (b->GetDrsChTxEn() > 0) {
       gl->readoutMode = cReadoutModeDRS;
@@ -1169,6 +1328,25 @@ void connectWDB(GLOBALS *gl, WDB *b) {
 
    // set DAQ mode
    b->SetDaqNormal(false);
+}
+
+void connectDCB(GLOBALS *gl, DCB *dcb) {
+   for (int i=0 ; i<16 ; i++) {
+      if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
+         if (dcb->GetWDB(i) == nullptr) {
+            WDB *wdb = new WDB(dcb, i, gl->verbose);
+            std::cout << "Connect to " << wdb->GetAddr() << " ... " << std::flush;
+            connectWDB(gl, wdb);
+            std::cout << "OK" << std::endl;
+            dcb->SetWDB(i, wdb);
+         }
+      } else if (dcb->GetWDB(i) != nullptr) {
+         std::cout << "Disconnected from " << dcb->GetWDB(i)->GetAddr() << std::endl;
+         delete dcb->GetWDB(i);
+         dcb->SetWDB(i, nullptr);
+      }
+
+   }
 }
 
 int main(int argc, const char *argv[]) {

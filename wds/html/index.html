@@ -88,7 +88,11 @@
                if (req.responseText !== "OK\n")
                   dlgAlert(req.responseText);
                else {
-                  window.location = "osc.html?adr=" + document.getElementById('address').value;
+                  let a = document.getElementById('address').value;
+                  if (a[0] === 'w' || a[0] === 'W')
+                     window.location = "osc.html?adr=" + a;
+                  else
+                     window.location = "crate.html?adr=" + a;
                }
             }
          }

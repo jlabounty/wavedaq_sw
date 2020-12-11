@@ -158,6 +158,13 @@ function init() {
    OSC.spinningWheel.src = "spinning-wheel-wds.gif";
 }
 
+function selBoard() {
+   if (OSC.wdbAddress[0] === 'D')
+      window.location.href='crate.html?adr=' + OSC.wdbAddress.split(':')[0];
+   else
+      window.location.href='index.html';
+}
+
 function loadWdb() {
    let now = new Date()/1000;
 

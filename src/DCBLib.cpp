@@ -62,6 +62,8 @@ DCB::DCB(const std::string &name, bool verbose) {
    mPrompt = "";
    mVerbose = verbose;
    mReceiveTimeoutMs = cDefaultReceiveTimeoutMs;
+   for (int i=0 ; i<16 ; i++)
+      mWDB[i] = nullptr;
 }
 
 //--------------------------------------------------------------------
@@ -70,6 +72,19 @@ void DCB::SendUDP(std::string str)
 {
    std::string result;
    result = SendReceiveUDP(str);
+}
+
+//--------------------------------------------------------------------
+
+bool DCB::Ping()
+{
+   try {
+      SendUDP("\n");
+   } catch (...) {
+      return false;
+   }
+
+   return true;
 }
 
 //--------------------------------------------------------------------
@@ -624,11 +639,11 @@ void DCB::ScanCrate() {
 
          if (bSuccess) {
             // copy data
-            for (unsigned int i = 0; i < 18; i++) {
-               mWDAQBoard[i].vendor_id  = readBuf[i*4+4];
-               mWDAQBoard[i].type_id    = readBuf[i*4+5];
-               mWDAQBoard[i].rev_id     = readBuf[i*4+6];
-               mWDAQBoard[i].variant_id = readBuf[i*4+7];
+            for (unsigned int j = 0; j < 18; j++) {
+               mWDAQBoard[j].vendor_id  = readBuf[j*4+4];
+               mWDAQBoard[j].type_id    = readBuf[j*4+5];
+               mWDAQBoard[j].rev_id     = readBuf[j*4+6];
+               mWDAQBoard[j].variant_id = readBuf[j*4+7];
             }
             return;
          }
@@ -702,15 +717,20 @@ WDAQ_BRD_TYPE_NAME;
 
 void DCB::PrintCrate() {
    for (int i=0 ; i<18 ; i++) {
-         if (mWDAQBoard[i].type_id < BRD_TYPE_ID_MAX &&
-                 mWDAQBoard[i].vendor_id <= BRD_VENDOR_ID_MAX) {
+
+      if (mWDAQBoard[i].type_id < BRD_TYPE_ID_MAX &&
+          mWDAQBoard[i].vendor_id <= BRD_VENDOR_ID_MAX) {
          std::cout << "Slot " << std::setw(2) << i << ": Found board \""
-            << wdaq_brd_type_name[mWDAQBoard[i].type_id]
-            << "\", Revision " << (char)('A'+mWDAQBoard[i].rev_id)
-            << ", Variant " << mWDAQBoard[i].variant_id
-            << ", Vendor \""
-            << wdaq_brd_vendor_name[mWDAQBoard[i].vendor_id]
-            << "\"" << std::endl;
+                   << wdaq_brd_type_name[mWDAQBoard[i].type_id]
+                   << "\", Revision " << (char)('A'+mWDAQBoard[i].rev_id)
+                   << ", Variant " << mWDAQBoard[i].variant_id
+                   << ", Vendor \""
+                   << wdaq_brd_vendor_name[mWDAQBoard[i].vendor_id]
+                   << "\"" << std::endl;
+      }
+
+      if (mWDAQBoard[i].type_id == 0xFE) {
+         std::cout << "Slot " << std::setw(2) << i << ": Found un-programmed board" << std::endl;
       }
    }
 }

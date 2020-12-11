@@ -356,3 +356,12 @@ input[type=text] {
 .tableInfo tr:nth-child(even) {
    background-color: #EEEEEE;
 }
+
+/*---- crate.html ---- */
+
+.crateBtn {
+   margin: 5px;
+   width: 180px;
+}
+
+

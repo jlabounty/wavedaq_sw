@@ -61,6 +61,7 @@ public:
 
    std::string SendReceiveUDP(std::string str);
    void SendUDP(std::string str);
+   bool Ping();
 
    const unsigned int cRequiredRegLayoutCompatLevel = 0;
    const unsigned int cRequiredFwCompatLevel = 0;
@@ -85,6 +86,12 @@ public:
    bool GetSendBlock() { return mSendBlocked; }
    void SetSendBlock(bool flag) { mSendBlocked = flag; }
    WDAQ_BRD *GetBoardId(int slot) { return &mWDAQBoard[slot]; }
+   void ClearBoardId(int slot) {
+      mWDAQBoard[slot].vendor_id = 0xFF;
+      mWDAQBoard[slot].type_id = 0xFF;
+      mWDAQBoard[slot].rev_id = 0xFF;
+      mWDAQBoard[slot].variant_id = 0xFF;
+   }
    void SetDestinationPort(int port);
 
    // setter & getter ----------
@@ -93,7 +100,8 @@ public:
    void SetReceiveTimeoutMs(int to) { mReceiveTimeoutMs = to; };
 
    void SetWDB(int slot, WDB *wdb) { mWDB[slot] = wdb; }
-   
+   WDB *GetWDB(int slot) { return mWDB[slot]; }
+
    // high level status registers
    std::string GetFullBuild();
    std::string GetFwBuild();
