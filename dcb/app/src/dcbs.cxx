@@ -473,10 +473,18 @@ int main(int argc, char *argv[]) {
                   rbuffer[i * 4 + 6] = board[i].rev_id;
                   rbuffer[i * 4 + 7] = board[i].variant_id;
                } else {
-                  rbuffer[i * 4 + 4] = 0xFF;
-                  rbuffer[i * 4 + 5] = 0xFF;
-                  rbuffer[i * 4 + 6] = 0xFF;
-                  rbuffer[i * 4 + 7] = 0xFF;
+                  status = is_flash_available(i);
+                  if (status == 1) {
+                     rbuffer[i * 4 + 4] = 0xFE; // indicate un-programmed board
+                     rbuffer[i * 4 + 5] = 0xFE;
+                     rbuffer[i * 4 + 6] = 0xFE;
+                     rbuffer[i * 4 + 7] = 0xFE;
+                  } else {
+                     rbuffer[i * 4 + 4] = 0xFF; // indicate empty slot
+                     rbuffer[i * 4 + 5] = 0xFF;
+                     rbuffer[i * 4 + 6] = 0xFF;
+                     rbuffer[i * 4 + 7] = 0xFF;
+                  }
                }
             }
 
