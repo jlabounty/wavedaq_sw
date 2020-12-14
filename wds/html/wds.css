@@ -38,7 +38,6 @@ body {
    color: black;
    background-color: white;
    font-family: verdana,tahoma,sans-serif;
-   overflow: hidden; /* prevent scroll bars */
 }
 
 /* standard link colors and decorations */
@@ -360,8 +359,13 @@ input[type=text] {
 /*---- crate.html ---- */
 
 .crateBtn {
-   margin: 5px;
-   width: 180px;
+   margin: 1px;
+   margin-top: 5px;
+   padding: 3px;
+   position: absolute;
+   top: 0;
 }
 
-
+.dlgInfo {
+  display: none;
+}

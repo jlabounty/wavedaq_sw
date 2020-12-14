@@ -18,6 +18,8 @@ const BRD_TYPE_ID_NONE1     = 1;
 const BRD_TYPE_ID_WDB       = 2;
 const BRD_TYPE_ID_DCB       = 3;
 const BRD_TYPE_ID_TCB       = 4;
+const BRD_TYPE_ID_BLANK     = 254;
+const BRD_TYPE_ID_EMPTY     = 255;
 
 // extend 2d canvas object
 CanvasRenderingContext2D.prototype.drawLine = function (x1, y1, x2, y2) {
@@ -50,12 +52,14 @@ function init() {
    window.addEventListener("mousedown", CRATE.mouseEvent.bind(CRATE), true);
    window.addEventListener("mousemove", CRATE.mouseEvent.bind(CRATE), true);
    window.addEventListener("mouseup", CRATE.mouseEvent.bind(CRATE), true);
+   window.addEventListener("dblclick", CRATE.mouseEvent.bind(CRATE), true);
    window.addEventListener("touchstart", CRATE.mouseEvent.bind(CRATE), true);
    window.addEventListener("touchmove", CRATE.mouseEvent.bind(CRATE), true);
 
    // schedule loadCrate()
    CRATE.timer = {};
    CRATE.timer.loadCrate = window.setTimeout(loadCrate, 10, true);
+   CRATE.timer.loadWDB = window.setTimeout(loadWDB, 1000, true);
 
    // load spinning wheel image
    CRATE.spinningWheel = new Image();
@@ -70,6 +74,15 @@ function resize() {
 function Crate(div) { // constructor
    this.canvas = document.createElement("canvas");
    div.appendChild(this.canvas);
+
+   // initialize member variables
+   this.selectedWDB = undefined;
+   this.selectedDCB = false;
+   this.selectedTCB = false;
+
+   this.wdb = [];
+   this.dcb = {};
+   this.tcb = {};
 }
 
 Crate.prototype.resize = function (width) {
@@ -90,14 +103,14 @@ Crate.prototype.mouseEvent = function (e) {
    // set default cursor to be changed below
    let cursor = "default";
 
-   if (e.type === "mousemove" || e.type === "mousedown"
+   if (e.type === "mousemove" || e.type === "mousedown" || e.type === "dblclick"
       && e.target === this.canvas) {
       let x = e.clientX - this.canvas.offsetLeft;
       let y = e.clientY - this.canvas.offsetTop;
       let scale = this.canvas.width / 1000;
 
       if (y/scale > 7.5 && y/scale < 255+7.5) {
-         let slot = Math.floor((x/scale - 62.5) / 41.4);
+         let slot = Math.floor((x / scale - 62.5) / 41.4);
          if (slot < 0)
             slot = undefined;
          else if (slot < 8)
@@ -111,13 +124,48 @@ Crate.prototype.mouseEvent = function (e) {
          else
             slot = undefined;
 
-         if (slot >= 0 && slot < 17) {
+         if (slot == 16 || slot == 17 ||
+            (slot >= 0 && slot < 16 &&
+               (CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_WDB ||
+                  CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_BLANK))) {
             cursor = "pointer";
          }
 
-         if (e.type === "mousedown" && slot < 16 &&
+         if (e.type === "dblclick" && slot < 16 &&
             CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_WDB) {
             window.location.href = "osc.html?adr=" + CRATE.dcbAddress + ":" + slot;
+         }
+
+         if (e.type === "mousedown") {
+            if (slot === 17) {
+               CRATE.selectedWDB = undefined;
+               CRATE.selectedDCB = false;
+               CRATE.selectedTCB = true;
+               document.getElementById('dlgInfoWDB').style.display = 'none';
+               document.getElementById('dlgInfoDCB').style.display = 'none';
+               document.getElementById('dlgInfoTCB').style.display = 'revert';
+               CRATE.draw();
+            } else if (slot === 16) {
+               CRATE.selectedWDB = undefined;
+               CRATE.selectedDCB = true;
+               CRATE.selectedTCB = false;
+               document.getElementById('dlgInfoWDB').style.display = 'none';
+               document.getElementById('dlgInfoDCB').style.display = 'revert';
+               document.getElementById('dlgInfoTCB').style.display = 'none';
+               CRATE.draw();
+            } else if (slot < 16) {
+               CRATE.selectedWDB = slot;
+               CRATE.selectedDCB = false;
+               CRATE.selectedTCB = false;
+               if (CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_WDB)
+                  document.getElementById('dlgInfoWDB').style.display = 'revert';
+               else
+                  document.getElementById('dlgInfoWDB').style.display = 'none';
+               document.getElementById('dlgInfoDCB').style.display = 'none';
+               document.getElementById('dlgInfoTCB').style.display = 'none';
+               CRATE.draw();
+               loadWDB();
+            }
          }
       }
    }
@@ -162,14 +210,29 @@ Crate.prototype.draw = function () {
           CRATE.crate.slot[slot].vendor_id === BRD_VENDOR_ID_PSI &&
           CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_WDB) {
          ctx.save();
-
          if (slot < 8)
             ctx.translate(62.5 + slot * 41.4, 7.5);
          else
             ctx.translate(62.5 + (slot + 2) * 41.4, 7.5);
-
          drawWDB(ctx, slot);
-
+         ctx.restore();
+      } else if (CRATE.crate.slot !== undefined &&
+                 CRATE.crate.slot[slot].vendor_id === BRD_TYPE_ID_BLANK &&
+                 CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_BLANK) {
+         ctx.save();
+         if (slot < 8)
+            ctx.translate(62.5 + slot * 41.4, 7.5);
+         else
+            ctx.translate(62.5 + (slot + 2) * 41.4, 7.5);
+         drawWDBEmpty(ctx, slot);
+         ctx.restore();
+      } else {
+         ctx.save();
+         if (slot < 8)
+            ctx.translate(62.5 + slot * 41.4, 7.5);
+         else
+            ctx.translate(62.5 + (slot + 2) * 41.4, 7.5);
+         drawEmptySlot(ctx, slot);
          ctx.restore();
       }
    }
@@ -319,10 +382,26 @@ function drawCMB(ctx) {
    ctx.restore();
 }
 
+function drawEmptySlot(ctx, slot) {
+   ctx.fillStyle = "#808080";
+   ctx.fillRect(0, 0, 40, 255);
+   ctx.fillStyle = "#404040";
+   ctx.fillRect(2, 2, 36, 251);
+
+   ctx.textAlign = "center";
+   ctx.textBaseline = "middle";
+   ctx.font = "8px Sans-Serif"
+   ctx.fillStyle = "#E0E0E0";
+   ctx.fillText(slot, 20, 240);
+}
+
 function drawWDB(ctx, slot) {
    ctx.save();
 
-   ctx.fillStyle = "#2D674A";
+   if (CRATE.selectedWDB == slot)
+      ctx.fillStyle = "#4DA76A";
+   else
+      ctx.fillStyle = "#2D674A";
    ctx.fillRect(0, 0, 40, 255);
 
    ctx.textAlign = "center";
@@ -439,10 +518,39 @@ function drawWDB(ctx, slot) {
    ctx.restore();
 }
 
+function drawWDBEmpty(ctx, slot) {
+   ctx.save();
+
+   ctx.fillStyle = "#C0C0C0";
+   ctx.fillRect(0, 0, 40, 255);
+
+   // lower handle
+   ctx.fillStyle = "#404040";
+   ctx.fillRect(1, 212, 38, 44);
+   ctx.fillStyle = "#A83737";
+   ctx.fillRect(12, 212, 17, 10);
+   ctx.fillStyle = "#A39C8D";
+   ctx.fillRect(1, 222, 38, 6);
+
+   // label
+   ctx.fillStyle = "#FFFFFF";
+   ctx.fillRect(4, 234, 33, 18);
+   ctx.fillStyle = "#000000";
+   ctx.textAlign = "center";
+   ctx.textBaseline = "middle";
+   ctx.font = "8px Sans-Serif"
+   ctx.fillText("WDXXX", 20, 243);
+
+   ctx.restore();
+}
+
 function drawDCB(ctx, slot) {
    ctx.save();
 
-   ctx.fillStyle = "#2D674A";
+   if (CRATE.selectedDCB)
+      ctx.fillStyle = "#4DA76A";
+   else
+      ctx.fillStyle = "#2D674A";
    ctx.fillRect(0, 0, 40, 255);
 
    ctx.textAlign = "center";
@@ -590,8 +698,11 @@ function drawDCB(ctx, slot) {
    ctx.fillStyle = "#FFFFFF";
    ctx.fillRect(4, 234, 33, 18);
    ctx.fillStyle = "#000000";
-   ctx.font = "8px Sans-Serif"
-   ctx.fillText("DCBXX", 20, 243);
+   ctx.font = "8px Sans-Serif";
+   if (CRATE.crate.DCB !== undefined)
+      ctx.fillText(CRATE.crate.DCB, 20, 243);
+   else
+      ctx.fillText("DCBXX", 20, 243);
 
    ctx.restore();
 }
@@ -599,7 +710,10 @@ function drawDCB(ctx, slot) {
 function drawTCB(ctx, slot) {
    ctx.save();
 
-   ctx.fillStyle = "#1F5889";
+   if (CRATE.selectedTCB)
+      ctx.fillStyle = "#3F78A9";
+   else
+      ctx.fillStyle = "#1F5889";
    ctx.fillRect(0, 0, 40, 255);
 
    ctx.textAlign = "center";
@@ -707,6 +821,7 @@ function loadCrate(flag) {
    // send AJAX request
    CRATE.req = new XMLHttpRequest();
    CRATE.req.onreadystatechange = receiveCrate;
+   flag = true; // always do full scan, 1s seems enough for WDB to boot
    if (flag === true)
       CRATE.req.open("GET", "crate?adr=" + CRATE.dcbAddress +
          "&fl=1" + "&r=" + Math.random(), true); // avoid cached results
@@ -721,12 +836,92 @@ function loadCrate(flag) {
    }
 }
 
+function loadWDB() {
+   window.clearTimeout(CRATE.timer.loadWDB);
+   if (CRATE.selectedWDB >= 0 && CRATE.selectedWDB < 16) {
+      // send AJAX request
+      CRATE.req = new XMLHttpRequest();
+      CRATE.req.onreadystatechange = receiveWDB;
+      CRATE.req.open("GET", "wdb?adr=" + CRATE.dcbAddress + ":" + CRATE.selectedWDB +
+         "&fl=1" + "&r=" + Math.random(), true);
+
+      try {
+         CRATE.req.send();
+      } catch (e) {
+         connectionBroken();
+      }
+   } else {
+      CRATE.timer.loadWDB = window.setTimeout(loadWDB, 1000);
+   }
+}
+
 function receiveCrate() {
    if (CRATE.req.readyState === 4 && CRATE.req.status === 200) {
       CRATE.crate = JSON.parse(CRATE.req.responseText);
       CRATE.draw();
       CRATE.connected = true;
-      CRATE.timer.loadCrate = window.setTimeout(loadCrate, 100);
+      CRATE.timer.loadCrate = window.setTimeout(loadCrate, 1000);
+   } else if (CRATE.req.readyState === 4 && CRATE.req.status === 0) {
+      connectionBroken();
+   }
+}
+
+function setItem(id, str)
+{
+   let i = document.getElementById(id);
+   if (typeof str !== 'string')
+      str = str.toString();
+   if (i !== undefined)
+      if (i.innerHTML != str)
+         i.innerHTML = str;
+}
+
+function receiveWDB() {
+   if (CRATE.req.readyState === 4 && CRATE.req.status === 200) {
+      let wdb = JSON.parse(CRATE.req.responseText).wdb;
+      CRATE.wdb[CRATE.selectedWDB] = wdb;
+
+      CRATE.draw();
+      setItem("infoWDBName", wdb.name);
+      setItem("infoWDBCrateSlotID", wdb.crateId + " / " +wdb.slotId);
+      setItem("infoWDBRevision", wdb.revision);
+      setItem("infoWDBFwRevision", wdb.fwRevision);
+      setItem("infoWDBFwBuild", wdb.fwBuild);
+      setItem("infoWDBSwRevision", wdb.swRevision);
+      setItem("infoWDBSwBuild", wdb.swBuild);
+      setItem("infoWDBHVVersion", wdb.hvBoardPlugged ? wdb.hvVersion : "none");
+      setItem("infoWDBHVBaseVoltage", wdb.hv.baseVoltage);
+      setItem("infoWDBTemp", wdb.temperature);
+      setItem("infoWDB1WireTemp", wdb.hv.temperature1Wire[0] + " / " +
+         wdb.hv.temperature1Wire[1] + " / " +
+         wdb.hv.temperature1Wire[2] + " / " +
+         wdb.hv.temperature1Wire[3]);
+      setItem("infoWDBTemp", wdb.temperature);
+
+      let s = "";
+      for (i = 8; i >= 0; i--) {
+         if ((wdb.pllLck & (1 << 8)) > 0)
+            s += "1";
+         else
+            s += "0";
+      }
+      setItem("infoWDBPLL", s);
+
+      setItem("infoWDBBusy", wdb.drsctrlBusy + " / " + wdb.sysBusy);
+      setItem("infoWDBTRGParityErrors", wdb.triggerBusParityErrorCount);
+
+      s = "";
+      for (i = 0; i < 16; i++) {
+         if ((wdb.compChannelStatus & (1 << 8)) > 0)
+            s += "1";
+         else
+            s += "0";
+         if (i % 4 === 3)
+            s += " ";
+      }
+      setItem("infoWDBCompStatus", s);
+
+      CRATE.timer.loadWDB = window.setTimeout(loadWDB, 1000);
    } else if (CRATE.req.readyState === 4 && CRATE.req.status === 0) {
       connectionBroken();
    }

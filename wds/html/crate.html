@@ -20,13 +20,151 @@
    </div>
 
    <div id="crateControls">
-      <button class="crateBtn" onclick="loadCrate(true);">Rescan Crate
-      </button>
       <button class="crateBtn" onclick="window.location.href='index.html'">Select Crate
       </button>
    </div>
 
+   <!-- WDB info dialog -->
+   <div id="dlgInfoWDB" class="dlgInfo">
+
+      <table class="tableInfo">
+         <tr>
+            <td style="width: 250px;">
+               &nbsp;Board
+            </td>
+            <td id="infoWDBName">
+            </td>
+         </tr>
+         <tr>
+            <td>Crate / Slot</td>
+            <td id="infoWDBCrateSlotID"></td>
+         </tr>
+         <tr>
+            <td>Board Revision</td>
+            <td id="infoWDBRevision"></td>
+         </tr>
+         <tr>
+            <td>Firmware Revision</td>
+            <td id="infoWDBFwRevision"></td>
+         </tr>
+         <tr>
+            <td>Firmware Build</td>
+            <td id="infoWDBFwBuild"></td>
+         </tr>
+         <tr>
+            <td>Software Revision</td>
+            <td id="infoWDBSwRevision"></td>
+         </tr>
+         <tr>
+            <td>Software Build</td>
+            <td id="infoWDBSwBuild"></td>
+         </tr>
+         <tr>
+            <td>HV board</td>
+            <td id="infoWDBHVVersion"></td>
+         </tr>
+         <tr>
+            <td>HV base voltage</td>
+            <td id="infoWDBHVBaseVoltage"></td>
+         </tr>
+         <tr>
+            <td>WDB Temperature [C]</td>
+            <td id="infoWDBTemp"></td>
+         </tr>
+         <tr>
+            <td>1-wire Temperatures [C]</td>
+            <td id="infoWDB1WireTemp"></td>
+         </tr>
+         <tr>
+            <td>PLL locked</td>
+            <td id="infoWDBPLL"></td>
+         </tr>
+         <tr>
+            <td>DRS / System busy</td>
+            <td id="infoWDBBusy"></td>
+         </tr>
+         <tr>
+            <td>TRG parity errors</td>
+            <td id="infoWDBTRGParityErrors"></td>
+         </tr>
+         <tr>
+            <td>Comparator status [0...15]</td>
+            <td id="infoWDBCompStatus"></td>
+         </tr>
+
+      </table>
+   </div>
+
+   <!-- DCB info dialog -->
+   <div id="dlgInfoDCB" class="dlgInfo">
+
+      <table class="tableInfo">
+         <tr>
+            <td style="width: 250px;">
+               &nbsp;Board
+            </td>
+            <td id="infoDCBName">DCB01
+            </td>
+         </tr>
+         <tr>
+            <td>Board Revision</td>
+            <td id="infoDCBRevision"></td>
+         </tr>
+         <tr>
+            <td>Firmware Revision</td>
+            <td id="infoDCBFwRevision"></td>
+         </tr>
+         <tr>
+            <td>Firmware Build</td>
+            <td id="infoDCBFwBuild"></td>
+         </tr>
+         <tr>
+            <td>Software Revision</td>
+            <td id="infoDCBSwRevision"></td>
+         </tr>
+         <tr>
+            <td>Software Build</td>
+            <td id="infoDCBSwBuild"></td>
+         </tr>
+      </table>
+   </div>
+
+   <!-- TCB info dialog -->
+   <div id="dlgInfoTCB" class="dlgInfo">
+
+      <table class="tableInfo">
+         <tr>
+            <td style="width: 250px;">
+               &nbsp;Board
+            </td>
+            <td id="infoTCBName">TCBXX
+            </td>
+         </tr>
+         <tr>
+            <td>Board Revision</td>
+            <td id="infoTCBRevision"></td>
+         </tr>
+         <tr>
+            <td>Firmware Revision</td>
+            <td id="infoTCBFwRevision"></td>
+         </tr>
+         <tr>
+            <td>Firmware Build</td>
+            <td id="infoTCBFwBuild"></td>
+         </tr>
+         <tr>
+            <td>Software Revision</td>
+            <td id="infoTCBSwRevision"></td>
+         </tr>
+         <tr>
+            <td>Software Build</td>
+            <td id="infoTCBSwBuild"></td>
+         </tr>
+      </table>
+   </div>
+
 </div> <!-- container -->
+
 
 </body>
 </html>

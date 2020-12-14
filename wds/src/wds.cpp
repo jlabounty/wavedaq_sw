@@ -555,8 +555,8 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
    // crate
    static int slotHvOn = 0;
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/crate") == 0) {
-      if (gl->verbose)
-         std::cout << "Sending /crate to browser" << std::endl;
+//      if (gl->verbose)
+//         std::cout << "Sending /crate to browser" << std::endl;
 
       char str[256];
       mg_get_http_var(&hm->query_string, "adr", str, sizeof(str));
@@ -607,8 +607,8 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
 
       if (flag) {
          dcb->ScanCrate();
-         dcb->PrintCrate();
-         std::cout << std::endl;
+//         dcb->PrintCrate();
+//         std::cout << std::endl;
          connectDCB(gl, dcb);
       }
 
