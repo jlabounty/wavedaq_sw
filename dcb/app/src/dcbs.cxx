@@ -857,6 +857,30 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       d = (d & DCB_BOARD_VARIANT_MASK) >> DCB_BOARD_VARIANT_OFS;
       c.sprintf("-- Board Variant:         0x%02X\n\n", d);
 
+   } else if (strcmp(param[0], "jinfo") == 0) {
+
+      char hostname[256];
+      gethostname(hostname, sizeof(hostname));
+      for (int i=0 ; i<strlen(hostname) ; i++)
+         hostname[i] = toupper(hostname[i]);
+
+      c.sprintf("{\n");
+      unsigned int d;
+      reg_bank_read(DCB_BOARD_REVISION_REG, &d, 1);
+      d = (d & DCB_BOARD_REVISION_MASK) >> DCB_BOARD_REVISION_OFS;
+
+      c.sprintf("  \"name\" : \"%s\",\n", hostname);
+      c.sprintf("  \"revision\" : \"%c\",\n", 'A' + d);
+      c.sprintf("  \"fwRevision\" : \"%s\",\n", GIT_REVISION);
+      c.sprintf("  \"swBuild\" : \"%s %s\",\n", __DATE__, __TIME__);
+      c.sprintf("  \"temperature\": \"%1.1lf deg C\",\n", sysmon_get_temp_mdeg(SYSPTR(sys_mon)) / 1000.0);
+      c.sprintf("  \"vdd\": \"%1.3lf V\",\n", sysmon_get_vdd_mv(SYSPTR(sys_mon)) / 1000.0);
+      c.sprintf("  \"current\": \"%1.3lf A\",\n", sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN0) * 0.5);
+      c.sprintf("  \"v5_0\": \"%1.3lf V\",\n", sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN1) * 2.5);
+      c.sprintf("  \"v3_3\": \"%1.3lf V\",\n", sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN2) * 5.0 / 3.0);
+      c.sprintf("  \"v2_5\": \"%1.3lf V\"\n", sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN3) * 1.22);
+      c.sprintf("}\n");
+
    } else if (strcmp(param[0], "init") == 0) {
 
       if (n_param < 2) {

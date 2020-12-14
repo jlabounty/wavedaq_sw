@@ -125,7 +125,8 @@ Crate.prototype.mouseEvent = function (e) {
             slot = undefined;
 
          if (slot == 16 || slot == 17 ||
-            (slot >= 0 && slot < 16 &&
+            (CRATE.crate !== undefined &&
+               slot >= 0 && slot < 16 &&
                (CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_WDB ||
                   CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_BLANK))) {
             cursor = "pointer";
@@ -153,6 +154,7 @@ Crate.prototype.mouseEvent = function (e) {
                document.getElementById('dlgInfoDCB').style.display = 'revert';
                document.getElementById('dlgInfoTCB').style.display = 'none';
                CRATE.draw();
+               loadDCB();
             } else if (slot < 16) {
                CRATE.selectedWDB = slot;
                CRATE.selectedDCB = false;
@@ -855,6 +857,22 @@ function loadWDB() {
    }
 }
 
+function loadDCB() {
+   window.clearTimeout(CRATE.timer.loadDCB);
+   if (CRATE.selectedDCB) {
+      // send AJAX request
+      CRATE.req = new XMLHttpRequest();
+      CRATE.req.onreadystatechange = receiveDCB;
+      CRATE.req.open("GET", "dcb" + "?adr=" + CRATE.dcbAddress + "&r=" + Math.random(), true);
+      try {
+         CRATE.req.send();
+      } catch (e) {
+         connectionBroken();
+      }
+   } else
+      CRATE.timer.loadDCB = window.setTimeout(CRATE.timer.loadDCB, 1000);
+}
+
 function receiveCrate() {
    if (CRATE.req.readyState === 4 && CRATE.req.status === 200) {
       CRATE.crate = JSON.parse(CRATE.req.responseText);
@@ -922,6 +940,28 @@ function receiveWDB() {
       setItem("infoWDBCompStatus", s);
 
       CRATE.timer.loadWDB = window.setTimeout(loadWDB, 1000);
+   } else if (CRATE.req.readyState === 4 && CRATE.req.status === 0) {
+      connectionBroken();
+   }
+}
+
+function receiveDCB() {
+   if (CRATE.req.readyState === 4 && CRATE.req.status === 200) {
+      let dcb = JSON.parse(CRATE.req.responseText);
+      CRATE.dcb = dcb;
+
+      setItem("infoDCBName", dcb.name);
+      setItem("infoDCBRevision", dcb.revision);
+      setItem("infoDCBFwRevision", dcb.fwRevision);
+      setItem("infoDCBSwBuild", dcb.swBuild);
+      setItem("infoDCBTemp", dcb.temperature);
+      setItem("infoDCBVDD", dcb.vdd);
+      setItem("infoDCBCurrent", dcb.current);
+      setItem("infoDCBV5_0", dcb.v5_0);
+      setItem("infoDCBV3_3", dcb.v3_3);
+      setItem("infoDCBV2_5", dcb.v2_5);
+
+      CRATE.timer.loadDCB = window.setTimeout(loadDCB, 500);
    } else if (CRATE.req.readyState === 4 && CRATE.req.status === 0) {
       connectionBroken();
    }

@@ -653,6 +653,32 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       return;
    }
 
+   // DCB
+   if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/dcb") == 0) {
+      char str[256];
+      mg_get_http_var(&hm->query_string, "adr", str, sizeof(str));
+      auto adr = std::string(str);
+      for (auto &c: adr) c = toupper(c);
+
+      DCB *dcb = nullptr;
+      for (auto &d : gl->dcb) {
+         if (d->GetName() == std::string(adr)) {
+            dcb = d;
+            break;
+         }
+      }
+
+      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+
+      if (dcb != nullptr) {
+         auto str = dcb->SendReceiveUDP("jinfo");
+         mg_printf_http_chunk(nc, "%s", str.c_str());
+      }
+
+      mg_send_http_chunk(nc, "", 0); // end of response
+      return;
+   }
+
    // boards
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/wdb") == 0) {
       char str[256];
