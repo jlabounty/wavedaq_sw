@@ -80,6 +80,25 @@ std::vector<std::string> split(const std::string &input, char separator) {
 
 /*------------------------------------------------------------------*/
 
+DCB *get_dcb_from_query(const struct mg_str *buf, GLOBALS *gl) {
+   char str[256];
+   mg_get_http_var(buf, "adr", str, sizeof(str));
+   auto adr = std::string(str);
+   for (auto &c: adr) c = toupper(c);
+
+   DCB *dcb = nullptr;
+   for (auto &d : gl->dcb) {
+      if (d->GetName() == std::string(adr)) {
+         dcb = d;
+         break;
+      }
+   }
+
+   return dcb;
+}
+
+/*------------------------------------------------------------------*/
+
 static struct mg_serve_http_opts s_http_server_opts;
 
 // This function will be called by mongoose on every new request
@@ -555,9 +574,6 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
    // crate
    static int slotHvOn = 0;
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/crate") == 0) {
-//      if (gl->verbose)
-//         std::cout << "Sending /crate to browser" << std::endl;
-
       char str[256];
       mg_get_http_var(&hm->query_string, "adr", str, sizeof(str));
       auto adr = std::string(str);
@@ -565,6 +581,9 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
 
       mg_get_http_var(&hm->query_string, "fl", str, sizeof(str));
       bool flag = atoi(str);
+
+      if (gl->verbose)
+         std::cout << "Doing " << (flag ? "full " : " ") << "scrate scan" << std::endl;
 
       DCB *dcb = nullptr;
       for (auto &d : gl->dcb) {
@@ -655,27 +674,34 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
 
    // DCB
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/dcb") == 0) {
-      char str[256];
-      mg_get_http_var(&hm->query_string, "adr", str, sizeof(str));
-      auto adr = std::string(str);
-      for (auto &c: adr) c = toupper(c);
-
-      DCB *dcb = nullptr;
-      for (auto &d : gl->dcb) {
-         if (d->GetName() == std::string(adr)) {
-            dcb = d;
-            break;
-         }
-      }
+      DCB *dcb = get_dcb_from_query(&hm->query_string, gl);
 
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
-
       if (dcb != nullptr) {
          auto str = dcb->SendReceiveUDP("jinfo");
          mg_printf_http_chunk(nc, "%s", str.c_str());
       }
-
       mg_send_http_chunk(nc, "", 0); // end of response
+      return;
+   }
+
+   // mark
+   if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/mark") == 0) {
+      DCB *dcb = get_dcb_from_query(&hm->query_string, gl);
+      mg_get_http_var(&hm->query_string, "fl", str, sizeof(str));
+      bool flag = atoi(str);
+
+      if (gl->verbose)
+         std::cout << "Received \"mark " << (flag ? "on" : "off") << "\" command" << std::endl;
+
+      if (dcb != nullptr)
+         dcb->SendReceiveUDP(flag ? "mark" : "unmark");
+
+      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+      mg_printf_http_chunk(nc, "{\n");
+      mg_printf_http_chunk(nc, "   \"status\": \"1\",\n");
+      mg_printf_http_chunk(nc, "}\n");
+      mg_send_http_chunk(nc, "", 0);
       return;
    }
 

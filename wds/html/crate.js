@@ -820,6 +820,9 @@ function drawTCB(ctx, slot) {
 }
 
 function loadCrate(flag) {
+   if (CRATE.timer.loadCrate !== undefined)
+      window.clearTimeout(CRATE.timer.loadCrate);
+
    // send AJAX request
    CRATE.req = new XMLHttpRequest();
    CRATE.req.onreadystatechange = receiveCrate;
@@ -836,10 +839,13 @@ function loadCrate(flag) {
    } catch (e) {
       connectionBroken();
    }
+
+   CRATE.timer.loadCrate = window.setTimeout(loadCrate, 1000);
 }
 
 function loadWDB() {
-   window.clearTimeout(CRATE.timer.loadWDB);
+   if (CRATE.timer.loadWDB !== undefined)
+      window.clearTimeout(CRATE.timer.loadWDB);
    if (CRATE.selectedWDB >= 0 && CRATE.selectedWDB < 16) {
       // send AJAX request
       CRATE.req = new XMLHttpRequest();
@@ -852,13 +858,14 @@ function loadWDB() {
       } catch (e) {
          connectionBroken();
       }
-   } else {
-      CRATE.timer.loadWDB = window.setTimeout(loadWDB, 1000);
    }
+
+   CRATE.timer.loadWDB = window.setTimeout(loadWDB, 1000);
 }
 
 function loadDCB() {
-   window.clearTimeout(CRATE.timer.loadDCB);
+   if (CRATE.timer.loadDCB !== undefined)
+      window.clearTimeout(CRATE.timer.loadDCB);
    if (CRATE.selectedDCB) {
       // send AJAX request
       CRATE.req = new XMLHttpRequest();
@@ -869,8 +876,10 @@ function loadDCB() {
       } catch (e) {
          connectionBroken();
       }
-   } else
-      CRATE.timer.loadDCB = window.setTimeout(CRATE.timer.loadDCB, 1000);
+   }
+
+   console.log("Start DCB timer");
+   CRATE.timer.loadDCB = window.setTimeout(CRATE.timer.loadDCB, 1000);
 }
 
 function receiveCrate() {
@@ -878,6 +887,9 @@ function receiveCrate() {
       CRATE.crate = JSON.parse(CRATE.req.responseText);
       CRATE.draw();
       CRATE.connected = true;
+
+      if (CRATE.timer.loadCrate !== undefined)
+         window.clearTimeout(CRATE.timer.loadCrate)
       CRATE.timer.loadCrate = window.setTimeout(loadCrate, 1000);
    } else if (CRATE.req.readyState === 4 && CRATE.req.status === 0) {
       connectionBroken();
@@ -979,6 +991,8 @@ function connectionBroken() {
 
    if (CRATE.timer.loadCrate !== undefined)
       clearTimeout(CRATE.timer.loadCrate);
+   if (CRATE.timer.loadWDB !== undefined)
+      clearTimeout(CRATE.timer.loadWDB);
 }
 
 function reconnect() {
@@ -996,4 +1010,19 @@ function reconnect() {
 
    req.open("GET", "build", true);
    req.send();
+}
+
+function markDCB() {
+   if (CRATE.markDCB) {
+      CRATE.markDCB = false;
+      document.getElementById('btnDCBMark').innerText = 'Mark';
+   } else {
+      CRATE.markDCB = true;
+      document.getElementById('btnDCBMark').innerText = 'Unmark';
+   }
+
+   let req = new XMLHttpRequest();
+   req.open("GET", "mark?adr=" + CRATE.dcbAddress + "&fl=" + (CRATE.markDCB ? "1" : "0"), true);
+   req.send();
+
 }
