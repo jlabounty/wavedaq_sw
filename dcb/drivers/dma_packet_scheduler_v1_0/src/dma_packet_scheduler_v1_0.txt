@@ -92,7 +92,66 @@ While a bunch of IOCTLs is defined for controlling certain parameters, reading d
 done with file operations.
 
 
-3.1 Control with IOCTLs
+3.1 Control with SysFS
+----------------------
+
+In the corresponding SysFS directory, e.g. /sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/
+there are two subdirectories containing files to control and configure the DMA packet scheduler:
+  .
+  .
+  .
+  |--dps_ctrl
+  |  |
+  |  |-- enable
+  |  |-- slot_enable
+  |  |-- data_bytes
+  |  |-- next_buffer
+  |
+  |-- dps_config
+      |
+      |-- slots
+      |-- windows
+      |-- window_size
+
+- dps_ctrl/enable (RW)
+
+  Master enable(1)/disable(0) of the DMA packet scheduler.
+
+- dps_ctrl/slot_enable (RW)
+
+  Slot enable vector enabling(1) or disabling(0) the DMA packet scheduler slots.
+  The LSB of the vecotor corresponds to slot 0.
+
+- dps_ctrl/data_bytes (R)
+
+  Number of data bytes (i.e. packet size) stored in the window buffer that's currently
+  selected for readout (head of the read queue).
+
+- dps_ctrl/next_buffer (RW)
+
+  Reading this file returns the number of window buffers currently available for readout.
+  Writing an integer to the file removes the corresponding number of window buffers from
+  the head of the queue, releasing the window buffers for rewriting by the IP core.
+  Note that once a window buffer is removed, the corresponding data can not be accessed
+  anymore.
+
+- dps_config/slots (R)
+
+  Number of slots connected to the DMA packet scheduler. This value is given by the PL
+  firmware and made available to the driver via the corrsponding device tree entry.
+
+- dps_config/windows (R)
+
+  Number of window buffers per slot. This value is a driver parameter, i.e. it can be
+  set when inserting the driver module.
+
+- dps_config/window_size (R)
+
+  Size of a window buffer.  This value is a driver parameter, i.e. it can be
+  set when inserting the driver module.
+
+
+3.2 Control with IOCTLs
 -----------------------
 
 Include dma_packet_scheduler_v1_0.h to use the IOCTLs to control the IP core.
@@ -159,7 +218,7 @@ The following IOCTLs are defined:
   Returns the number of bytes stored in the current buffer.
 
 
-3.2 Data Access
+3.3 Data Access
 ---------------
 
 Accessing the data is done by file operations on the corresponding device file under /dev

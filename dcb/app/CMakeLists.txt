@@ -35,6 +35,7 @@ set(LIBSRC
    src/drv_tcb.c
    src/register_map_dcb.c
    src/drv_axi_dcb_reg_bank.c
+   src/drv_dma_pkt_sched.c
    src/drv_spi_if.c
    src/drv_lmk.c
    src/drv_si5324.c
@@ -68,7 +69,7 @@ add_dependencies(dcblib git_revision_h)
 # executables
 foreach(PROG ${PROGS})
    add_executable(${PROG} src/${PROG})
-   target_link_libraries(${PROG} dcblib readline)
+   target_link_libraries(${PROG} dcblib readline udev)
 endforeach()
 
 install(TARGETS ${PROGS} DESTINATION /fw_sw/dcb/prod/)

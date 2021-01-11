@@ -1,52 +1,75 @@
-#include "dma_packet_scheduler_v1_0.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
+#include "../../../app/src/drv_dma_pkt_sched.h"
+
+static char g_udp_dst_ip_addr[16] = "129.129.193.185\0";
+//static const char g_udp_dst_ip_addr[4] = {129,129,193,185};
+static unsigned int g_udp_dst_port = 5232;
 
 void usage(char *name)
 {
-  printf("Usage: no arguments\n", name);
+  printf("Usage: <slot enable vector>\n", name);
 }
 
 int main(int argc, char *argv[])
 {
   int ret;
-  unsigned int slot_enable = 0x01;
+  int val;
+  struct udev *udev;
+  struct udev_device *dev;
+  unsigned int slot_enable = 0x1FFFF;
   char opt;
-  FILE *f;
-  int fd;
+  char buffer[32];
+  dps_dev_t dps_dev;
 
-//  if (argc < 2) {
-//    usage(argv[0]);
-//    return -1;
-//  }
+  if (argc == 2) {
+    slot_enable = 0x1FFFF & (unsigned int)strtol(argv[1], NULL, 0);
+  }
 
   opt = argv[1][0];
 
-  /* open device file */
-  fd = open("/dev/dma_pkt_sched0", O_RDONLY);
+  dps_dev_init(&dps_dev, "/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi");
 
-  printf("enabling slots (0x%08X)\n", slot_enable);
-  ret = ioctl(fd, DPS_IOCT_SLOT_EN, slot_enable);
-  if(ret < 0)
-    return ret;
+  printf("IP Controls:\n\n");
 
-  printf("enabling IP\n");
-  ret = ioctl(fd, DPS_IOCT_EN, 1);
-  if(ret < 0)
-    return ret;
+  dps_set_slot_enable (&dps_dev, slot_enable);
+  printf("enabled slots 0x%08X\n", dps_get_slot_enable(&dps_dev));
 
-  ret = ioctl(fd, DPS_IOCQ_WINSIZE);
-  if(ret < 0)
-    return ret;
-  printf("window size = 0x%08X (%d)\n", ret, ret);
+  dps_set_udp_dst_ip_addr_str(&dps_dev, g_udp_dst_ip_addr);
+  printf("UDP destination ip address %s\n", dps_get_udp_dst_ip_addr(&dps_dev));
 
-  ret = ioctl(fd, DPS_IOCQ_NOWINDOWS);
-  if(ret < 0)
-    return ret;
-  printf("#windows = %d\n", ret);
+  dps_set_udp_dst_port(&dps_dev, g_udp_dst_port);
+  printf("UDP destination port %d\n", dps_get_udp_dst_port(&dps_dev));
+
+  dps_set_event_mode(&dps_dev, DPS_EVENT_MODE_FREERUN); /* DPS_EVENT_MODE_COMMON, DPS_EVENT_MODE_FREERUN */
+  printf("event mode %d\n", dps_get_event_mode(&dps_dev));
+
+  printf("enabling IP... ");
+  dps_enable(&dps_dev);
+  if (dps_is_enabled(&dps_dev))
+  {
+    printf("enabled\n");
+  }
+  else
+  {
+    printf("still disabled\n");
+  }
+
+  printf("\n\nIP Configuration:\n\n");
+
+  printf("Device-Tree Settings:\n");
+  printf("#slots: %d\n", dps_get_slots(&dps_dev));
+
+  printf("Driver module parameters:\n");
+
+  val = dps_get_windows(&dps_dev);
+  printf("#windows = 0x%08X (%d)\n", val, val);
+
+  val = dps_get_win_size(&dps_dev);
+  printf("window size = 0x%08X (%d)\n", val, val);
+
+  printf("\n\nResetting IP\n");
+  dps_reset(&dps_dev);
 
   return 0;
 }

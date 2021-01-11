@@ -21,6 +21,7 @@
 #include "drv_sys_mon.h"
 #include "drv_si5324.h"
 #include "drv_bpl.h"
+#include "drv_dma_pkt_sched.h"
 
 #ifndef LINUX_COMPILE
 #include "term_cmd_input.h"
@@ -74,6 +75,8 @@
 #define MTD_QSPI_FLASH_BITSTREAM  "/dev/mtd7"
 #define MTD_QSPI_FLASH_RESERVED   "/dev/mtd8"
 #define MTD_QSPI_FLASH_ENV        "/dev/mtdf"
+/* SysFS DMA packet scheduler path */
+#define SYSFS_DPS_PATH            "/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi"
 #endif
 
 /******************************************************************************/
@@ -98,6 +101,7 @@ typedef struct
   lmk_ctrl_type              lmk;
   sysmon_ctrl_type           sys_mon;
   si5324_ctrl_type           si5324;
+  dps_dev_t                  dma_pkt_sched;
 #ifndef LINUX_COMPILE
   term_cmd_input_type        term_stdin;   /* Std input terminal */
   XEmacPs                    emac_0;       /* ETH0 MAC */
