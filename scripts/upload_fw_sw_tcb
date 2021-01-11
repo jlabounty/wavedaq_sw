@@ -1,0 +1,9 @@
+#!/bin/bash -x
+
+dcb=$1
+
+scp ../../fw/tcb/TCB_1_0/TCB_1_0.runs/impl_1/TCB_TOP.bit root@$dcb:/fw_sw/tcb/prod/type_1/
+scp ../../fw/tcb/TCB_2_0/TCB_2_0.runs/impl_1/TCB_TOP.bit root@$dcb:/fw_sw/tcb/prod/type_2/
+scp ../../fw/tcb/TCB_3_0/TCB_3_0.runs/impl_1/TCB_TOP.bit root@$dcb:/fw_sw/tcb/prod/type_3/
+
+

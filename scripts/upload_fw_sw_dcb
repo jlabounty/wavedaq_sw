@@ -1,0 +1,9 @@
+#!/bin/bash -x
+
+dcb=$1
+
+scp ../../fw/wdb/wd2_sys_ctrl/wd2_xps_hw/rev_g/implementation/download.bit root@$dcb:/fw_sw/wdb/prod/rev_g/
+scp ../../fw/wdb/wd2_sys_ctrl/wd2_xsdk_sw/rev_g_workspace/wd2_app_sw/app_sys_ctrl/Debug/app_sys_ctrl.srec root@$dcb:/fw_sw/wdb/prod/rev_g/
+
+scp ../../fw/wdb/wd2_sys_ctrl/wd2_xps_hw/rev_f/implementation/download.bit root@$dcb:/fw_sw/wdb/prod/rev_f/
+scp ../../fw/wdb/wd2_sys_ctrl/wd2_xsdk_sw/rev_f_workspace/wd2_app_sw/app_sys_ctrl/Debug/app_sys_ctrl.srec root@$dcb:/fw_sw/wdb/prod/rev_f/
