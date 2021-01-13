@@ -29,15 +29,15 @@ There is a high level driver drv_dma_pkt_sched.c/h for the DMA core. In C or C++
       - the proper daq mode (single, normal, auto) in register __CTRL__ (0x1004)
       - the proper trigger configuration in register __TRG_CFG__ (0x1124) ff
    5. `regstore` to save the settings for subsequent boots/resets
-   6. If necessary, turn off DHCP
-      `setenv ethdhcp 0`
-      `saveenv` to store the setting
+   6. If necessary, use
+      - `setenv ethdhcp 0` to turn off DHCP
+      - `saveenv` to store the setting
    7. The WDB LED should be blue
 2. Configure the destination for the UDP packets.
    This can be done in two ways:
    1. Using the cfgdst command on the data receiver specifying just the port (also done by WDS)
-      E.g. `cfgdst 5232` if done on the data receiver
-      E.g. `cfgdst 5232 129.129.188.245` if done on on any machine on dcbs
+      - E.g. `cfgdst 5232` if done on the data receiver
+      - E.g. `cfgdst 5232 129.129.188.245` if done on on any machine on dcbs
    2. Using the Linux shell (as root)
       E.g. `echo 127.0.0.1 > /sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_ctrl/udp_dst_ip_addr`
       E.g. `echo 5232 >/sys/devices/soc0/amba_pl/43c10000.dma_pkt_sched_axi/dps_ctrl/udp_dst_port`
@@ -50,43 +50,43 @@ There is a high level driver drv_dma_pkt_sched.c/h for the DMA core. In C or C++
    The following DCB registers control the SERDES receiver (commands for dcbs)
    1. Resets
       Register __RST__ (0x58)
-      Bit 3 __iserdes_rcvr_error_count_rst__ : Resets the error counters
-      Bit 2 __iserdes_receiver_resync__ : Resynchronizes all SERDES receivers
-      Bit 1 __iserdes_receiver_rst__ : Fully resets all SERDES receivers
-      - `rw 0x58 0x8` (on dcbs) resets the receivers
-      - `rw 0x58 0x2` (on dcbs) resets the error counters
+      - Bit 3 __iserdes_rcvr_error_count_rst__ : Resets the error counters
+      - Bit 2 __iserdes_receiver_resync__ : Resynchronizes all SERDES receivers
+      - Bit 1 __iserdes_receiver_rst__ : Fully resets all SERDES receivers
+      - E.g. `rw 0x58 0x2` (on dcbs) resets the receivers
+      - E.g. `rw 0x58 0x8` (on dcbs) resets the error counters
    2. Status
-      `rr 0x58 20` can be done on dcbs to check all checked registers at once
-      - Receiver Status
-      Register __SERDES_STATUS_00_07__ (0x5C) : Status for slot 7 (Bits 30:28) down to 0 (Bits 2:0)
-      Register __SERDES_STATUS_08_15__ (0x60) : Status for slot 15 (Bits 30:28) down to 8 (Bits 2:0)
-      Register __SERDES_STATUS_17__ (0x64) : Status for slot 17 (Bits 2:0)
-      For each set
-      MSB:    __idle_pattern_detect_nn__ : An idle pattern is currently detected on slot nn
-      Middle: __delay_sync_done__ : Delay sync calibration completed on slot nn
-      LSB: __sync_done_nn__ : Sync calibration (delay and bitslip) completed on slot nn
-      - Error Counts (0xFF (255) corresponds to a counter overflow)
-      Register __SERDES_ERR_CNT_00__ (0x68) to __SERDES_ERR_CNT_17__ (0xA8) : Error counts of the corresponding slot
-      Bits 31:24 __crc_errors_nn__ : CRC Errors on slot nn
-      Bits 23:16 __frame_errors_nn__ : Frame Errors on slot nn (Corrupt SOF or buffer overflow)
-      Bits 15:8 __datagram_errors_nn__ : Datagram Errors on slot nn (Inconsistencies with SOE, EOE and Event Number)
-      Bits 7:0 __sync_errors_nn__ : Sync Errors on slot nn (No idle pattern received when link should be idle)
+      `rr 0x5C 20` can be done on dcbs to check all checked registers at once
+      1. Receiver Status
+         - Register __SERDES_STATUS_00_07__ (0x5C) : Status for slot 7 (Bits 30:28) down to 0 (Bits 2:0)
+         - Register __SERDES_STATUS_08_15__ (0x60) : Status for slot 15 (Bits 30:28) down to 8 (Bits 2:0)
+         - Register __SERDES_STATUS_17__ (0x64) : Status for slot 17 (Bits 2:0)
+         For each set
+         - MSB:    __idle_pattern_detect_nn__ : An idle pattern is currently detected on slot nn
+         - Middle: __delay_sync_done__ : Delay sync calibration completed on slot nn
+         - LSB: __sync_done_nn__ : Sync calibration (delay and bitslip) completed on slot nn
+      2. Error Counts (0xFF (255) corresponds to a counter overflow)
+         - Register __SERDES_ERR_CNT_00__ (0x68) to __SERDES_ERR_CNT_17__ (0xA8) : Error counts of the corresponding slot
+         - Bits 31:24 __crc_errors_nn__ : CRC Errors on slot nn
+         - Bits 23:16 __frame_errors_nn__ : Frame Errors on slot nn (Corrupt SOF or buffer overflow)
+         - Bits 15:8 __datagram_errors_nn__ : Datagram Errors on slot nn (Inconsistencies with SOE, EOE and Event Number)
+         - Bits 7:0 __sync_errors_nn__ : Sync Errors on slot nn (No idle pattern received when link should be idle)
 5. Start triggering and observe arriving packets ...
 
 ## Prerequisites
 The driver for the DMA packet scheduler has to be loaded before dcbs is started.
-As a preliminary solution -i.e. as long as it's not integrated in the kernel-, this can be done by calling the script https://bitbucket.org/twavedaq/wavedaq_sw/src/master/scripts/dps_drv.sh.
+As a preliminary solution -i.e. as long as it's not integrated in the kernel-, this can be done by calling the script https://bitbucket.org/twavedaq/wavedaq_sw/src/develop/scripts/dps_drv.sh.
 
 ### To automatically load the driver
 To add the script to the initialization sequence, do the following:
 1. Copy the script from the repository to /etc/init.d
 2. Add it to the boot sequence
-   `chkconfig --add dps_drv.sh`
-   `chkconfig --level 2345 dps_drv.sh on`
+   - `chkconfig --add dps_drv.sh`
+   - `chkconfig --level 2345 dps_drv.sh on`
 3. You might have to remove the dcbs and add it agait to make sure it's started after the driver is loaded
-   `chkconfig --del dcbs.sh`
-   `chkconfig --add dcbs.sh`
-   `chkconfig --level 2345 dcbs.sh on`
+   - `chkconfig --del dcbs.sh`
+   - `chkconfig --add dcbs.sh`
+   - `chkconfig --level 2345 dcbs.sh on`
 
 ### To manually load the driver
 The driver can also be loaded from the shell
