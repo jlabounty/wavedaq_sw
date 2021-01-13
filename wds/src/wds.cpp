@@ -133,9 +133,27 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       // search board in list
       for (auto &c: wdbAddress) c = toupper(c);
       std::vector<WDB *> wdbList;
-      for (auto &wdb: gl->wdb) {
-         if (wdbAddress == std::string("ALL") || wdb->GetAddr() == wdbAddress) {
-            wdbList.push_back(wdb);
+
+      if (wdbAddress[0] == 'D') {
+         std::string dcbName = wdbAddress.substr(0, wdbAddress.find(":"));
+         int slot = std::stoi(wdbAddress.substr(wdbAddress.find(":")+1));
+
+         DCB *dcb = nullptr;
+         for (auto &d : gl->dcb) {
+            if (d->GetName() == dcbName) {
+               dcb = d;
+               break;
+            }
+         }
+         assert(dcb != nullptr);
+
+         wdbList.push_back(dcb->GetWDB(slot));
+
+      } else {
+         for (auto &wdb : gl->wdb) {
+            if (wdbAddress == std::string("ALL") || wdb->GetAddr() == wdbAddress) {
+               wdbList.push_back(wdb);
+            }
          }
       }
 
@@ -415,7 +433,8 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
          assert(0);
       }
 
-      mg_printf(nc, "HTTP/1.1 204 No Content\r\n");
+      mg_printf(nc, "%s", "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
+      mg_send_http_chunk(nc, "", 0); // end of response
       return;
    }
 
@@ -571,19 +590,23 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       return;
    }
 
-   // crate
+   // crate ------------------------------
    static int slotHvOn = 0;
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/crate") == 0) {
       char str[256];
+      static time_t lastFullScan = 0;
       mg_get_http_var(&hm->query_string, "adr", str, sizeof(str));
       auto adr = std::string(str);
       for (auto &c: adr) c = toupper(c);
 
-      mg_get_http_var(&hm->query_string, "fl", str, sizeof(str));
-      bool flag = atoi(str);
+      bool flag = false;
+      if (std::time(nullptr) > lastFullScan + 10) {
+         flag = true;
+         lastFullScan = std::time(nullptr);
+      }
 
       if (gl->verbose)
-         std::cout << "Doing " << (flag ? "full " : " ") << "scrate scan" << std::endl;
+         std::cout << "Doing " << (flag ? "full" : "quick") << " scrate scan" << std::endl;
 
       DCB *dcb = nullptr;
       for (auto &d : gl->dcb) {
@@ -626,13 +649,14 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
 
       if (flag) {
          dcb->ScanCrate();
-//         dcb->PrintCrate();
-//         std::cout << std::endl;
          connectDCB(gl, dcb);
       }
 
+      auto dcbinfo = dcb->SendReceiveUDP("jinfo");
+
       mg_printf_http_chunk(nc, "{\n");
-      mg_printf_http_chunk(nc, "   \"DCB\": \"%s\",\n", dcb->GetName().c_str());
+      mg_printf_http_chunk(nc, "   \"DCB\":\n");
+      mg_printf_http_chunk(nc, "%s,\n", dcbinfo.c_str());
       mg_printf_http_chunk(nc, "   \"CMB\": \"%s\",\n", "MSCBXXX");
       mg_printf_http_chunk(nc, "   \"slot\": [\n");
       for (int i=0 ; i<16 ; i++) {
@@ -672,20 +696,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       return;
    }
 
-   // DCB
-   if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/dcb") == 0) {
-      DCB *dcb = get_dcb_from_query(&hm->query_string, gl);
-
-      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
-      if (dcb != nullptr) {
-         auto str = dcb->SendReceiveUDP("jinfo");
-         mg_printf_http_chunk(nc, "%s", str.c_str());
-      }
-      mg_send_http_chunk(nc, "", 0); // end of response
-      return;
-   }
-
-   // mark
+   // mark ------------------------------
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/mark") == 0) {
       DCB *dcb = get_dcb_from_query(&hm->query_string, gl);
       mg_get_http_var(&hm->query_string, "fl", str, sizeof(str));
@@ -705,7 +716,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       return;
    }
 
-   // boards
+   // boards ------------------------------
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/wdb") == 0) {
       char str[256];
       mg_get_http_var(&hm->query_string, "adr", str, sizeof(str));
@@ -958,7 +969,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       return;
    }
 
-   // software build
+   // software build ------------------------------
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/build") == 0) {
       if (gl->verbose)
          std::cout << "Sending /build to browser" << std::endl;
@@ -972,7 +983,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       return;
    }
 
-   // return list of recent boards
+   // return list of recent boards ------------------------------
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/recent") == 0) {
       if (gl->verbose)
          std::cout << "Sending /recent to browser" << std::endl;
@@ -1001,7 +1012,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       return;
    }
 
-   // binary encoded waveforms
+   // binary encoded waveforms ------------------------------
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/wf") == 0) {
 
       mg_get_http_var(&hm->query_string, "adr", str, sizeof(str));
@@ -1273,7 +1284,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       return;
    }
 
-   // file serving
+   // file serving ------------------------------
    if (http_event == MG_EV_HTTP_REQUEST) {
 
       if (gl->verbose) {

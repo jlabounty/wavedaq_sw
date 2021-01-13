@@ -33,6 +33,7 @@
                &nbsp;Commands
             </td>
             <td id="infoWDBCommands">
+               <button id="btnWDBReboot" class="cmdBtn" onclick="WDBrebootQuery()">Reboot</button>
             </td>
          </tr>
          <tr>
@@ -111,7 +112,7 @@
                &nbsp;Commands
             </td>
             <td>
-               <button id="btnDCBMark" class="cmdBtn" onclick="markDCB()">Mark</button>
+               <button id="btnDCBMark" class="cmdBtn" onclick="DCBmark()">Mark</button>
             </td>
          </tr>
          <tr>
@@ -193,6 +194,18 @@
             <td id="infoTCBSwBuild"></td>
          </tr>
       </table>
+   </div>
+
+   <!-- wait dialog -->
+   <div id="dlgWait" class="dlgFrame">
+
+      <div class="dlgTitlebar">Please wait ...</div>
+
+      <div class="dlgPanel">
+
+         <div name="ctrlProgress" style="width:250px;" id="progressWait"></div>
+
+      </div>
    </div>
 
 </div> <!-- container -->

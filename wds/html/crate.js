@@ -103,7 +103,7 @@ Crate.prototype.mouseEvent = function (e) {
    // set default cursor to be changed below
    let cursor = "default";
 
-   if (e.type === "mousemove" || e.type === "mousedown" || e.type === "dblclick"
+   if ((e.type === "mousemove" || e.type === "mousedown" || e.type === "dblclick")
       && e.target === this.canvas) {
       let x = e.clientX - this.canvas.offsetLeft;
       let y = e.clientY - this.canvas.offsetTop;
@@ -124,7 +124,7 @@ Crate.prototype.mouseEvent = function (e) {
          else
             slot = undefined;
 
-         if (slot == 16 || slot == 17 ||
+         if (slot === 16 || slot === 17 ||
             (CRATE.crate !== undefined &&
                slot >= 0 && slot < 16 &&
                (CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_WDB ||
@@ -154,9 +154,11 @@ Crate.prototype.mouseEvent = function (e) {
                document.getElementById('dlgInfoDCB').style.display = 'revert';
                document.getElementById('dlgInfoTCB').style.display = 'none';
                CRATE.draw();
-               loadDCB();
             } else if (slot < 16) {
-               CRATE.selectedWDB = slot;
+               if (CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_WDB)
+                  CRATE.selectedWDB = slot;
+               else
+                  CRATE.selectedWDB = undefined;
                CRATE.selectedDCB = false;
                CRATE.selectedTCB = false;
                if (CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_WDB)
@@ -400,7 +402,7 @@ function drawEmptySlot(ctx, slot) {
 function drawWDB(ctx, slot) {
    ctx.save();
 
-   if (CRATE.selectedWDB == slot)
+   if (CRATE.selectedWDB === slot)
       ctx.fillStyle = "#4DA76A";
    else
       ctx.fillStyle = "#2D674A";
@@ -701,8 +703,8 @@ function drawDCB(ctx, slot) {
    ctx.fillRect(4, 234, 33, 18);
    ctx.fillStyle = "#000000";
    ctx.font = "8px Sans-Serif";
-   if (CRATE.crate.DCB !== undefined)
-      ctx.fillText(CRATE.crate.DCB, 20, 243);
+   if (CRATE.crate.DCB.name !== undefined)
+      ctx.fillText(CRATE.crate.DCB.name, 20, 243);
    else
       ctx.fillText("DCBXX", 20, 243);
 
@@ -819,20 +821,15 @@ function drawTCB(ctx, slot) {
    ctx.restore();
 }
 
-function loadCrate(flag) {
+function loadCrate() {
    if (CRATE.timer.loadCrate !== undefined)
       window.clearTimeout(CRATE.timer.loadCrate);
 
    // send AJAX request
    CRATE.req = new XMLHttpRequest();
    CRATE.req.onreadystatechange = receiveCrate;
-   flag = true; // always do full scan, 1s seems enough for WDB to boot
-   if (flag === true)
-      CRATE.req.open("GET", "crate?adr=" + CRATE.dcbAddress +
-         "&fl=1" + "&r=" + Math.random(), true); // avoid cached results
-   else
-      CRATE.req.open("GET", "crate?adr=" + CRATE.dcbAddress +
-         "&fl=0" + "&r=" + Math.random(), true); // avoid cached results
+   CRATE.req.open("GET", "crate?adr=" + CRATE.dcbAddress +
+         "&r=" + Math.random(), true); // avoid cached results
 
    try {
       CRATE.req.send();
@@ -846,6 +843,7 @@ function loadCrate(flag) {
 function loadWDB() {
    if (CRATE.timer.loadWDB !== undefined)
       window.clearTimeout(CRATE.timer.loadWDB);
+
    if (CRATE.selectedWDB >= 0 && CRATE.selectedWDB < 16) {
       // send AJAX request
       CRATE.req = new XMLHttpRequest();
@@ -859,27 +857,6 @@ function loadWDB() {
          connectionBroken();
       }
    }
-
-   CRATE.timer.loadWDB = window.setTimeout(loadWDB, 1000);
-}
-
-function loadDCB() {
-   if (CRATE.timer.loadDCB !== undefined)
-      window.clearTimeout(CRATE.timer.loadDCB);
-   if (CRATE.selectedDCB) {
-      // send AJAX request
-      CRATE.req = new XMLHttpRequest();
-      CRATE.req.onreadystatechange = receiveDCB;
-      CRATE.req.open("GET", "dcb" + "?adr=" + CRATE.dcbAddress + "&r=" + Math.random(), true);
-      try {
-         CRATE.req.send();
-      } catch (e) {
-         connectionBroken();
-      }
-   }
-
-   console.log("Start DCB timer");
-   CRATE.timer.loadDCB = window.setTimeout(CRATE.timer.loadDCB, 1000);
 }
 
 function receiveCrate() {
@@ -887,6 +864,18 @@ function receiveCrate() {
       CRATE.crate = JSON.parse(CRATE.req.responseText);
       CRATE.draw();
       CRATE.connected = true;
+
+      let dcb = CRATE.crate.DCB;
+      setItem("infoDCBName", dcb.name);
+      setItem("infoDCBRevision", dcb.revision);
+      setItem("infoDCBFwRevision", dcb.fwRevision);
+      setItem("infoDCBSwBuild", dcb.swBuild);
+      setItem("infoDCBTemp", dcb.temperature);
+      setItem("infoDCBVDD", dcb.vdd);
+      setItem("infoDCBCurrent", dcb.current);
+      setItem("infoDCBV5_0", dcb.v5_0);
+      setItem("infoDCBV3_3", dcb.v3_3);
+      setItem("infoDCBV2_5", dcb.v2_5);
 
       if (CRATE.timer.loadCrate !== undefined)
          window.clearTimeout(CRATE.timer.loadCrate)
@@ -902,7 +891,7 @@ function setItem(id, str)
    if (typeof str !== 'string')
       str = str.toString();
    if (i !== undefined)
-      if (i.innerHTML != str)
+      if (i.innerHTML !== str)
          i.innerHTML = str;
 }
 
@@ -957,28 +946,6 @@ function receiveWDB() {
    }
 }
 
-function receiveDCB() {
-   if (CRATE.req.readyState === 4 && CRATE.req.status === 200) {
-      let dcb = JSON.parse(CRATE.req.responseText);
-      CRATE.dcb = dcb;
-
-      setItem("infoDCBName", dcb.name);
-      setItem("infoDCBRevision", dcb.revision);
-      setItem("infoDCBFwRevision", dcb.fwRevision);
-      setItem("infoDCBSwBuild", dcb.swBuild);
-      setItem("infoDCBTemp", dcb.temperature);
-      setItem("infoDCBVDD", dcb.vdd);
-      setItem("infoDCBCurrent", dcb.current);
-      setItem("infoDCBV5_0", dcb.v5_0);
-      setItem("infoDCBV3_3", dcb.v3_3);
-      setItem("infoDCBV2_5", dcb.v2_5);
-
-      CRATE.timer.loadDCB = window.setTimeout(loadDCB, 500);
-   } else if (CRATE.req.readyState === 4 && CRATE.req.status === 0) {
-      connectionBroken();
-   }
-}
-
 function connectionBroken() {
    if (CRATE.connected) {
       CRATE.dlgReconnect = dlgMessage("Error", "Connection to server broken.<br>Trying to reconnect ..." +
@@ -1012,7 +979,7 @@ function reconnect() {
    req.send();
 }
 
-function markDCB() {
+function DCBmark() {
    if (CRATE.markDCB) {
       CRATE.markDCB = false;
       document.getElementById('btnDCBMark').innerText = 'Mark';
@@ -1025,4 +992,54 @@ function markDCB() {
    req.open("GET", "mark?adr=" + CRATE.dcbAddress + "&fl=" + (CRATE.markDCB ? "1" : "0"), true);
    req.send();
 
+}
+
+let progress;
+
+function updateProgress() {
+   progress += 0.1;
+   d = document.getElementById("progressWait");
+   d.set(progress / 15);
+   if (progress >= 15) {
+      dlgHide("dlgWait");
+   } else
+      window.setTimeout(updateProgress, 100);
+}
+
+function WDBrebootQuery() {
+   dlgConfirm("Are you sure?", WDBreboot);
+}
+
+function WDBreboot(flag) {
+   if (flag) {
+      progress = 0;
+      dlgShow("dlgWait", true);
+      window.setTimeout(updateProgress, 100);
+
+      // kill update times
+      if (CRATE.timer.loadCrate !== undefined)
+         window.clearTimeout(CRATE.timer.loadCrate);
+      if (CRATE.timer.loadWDB !== undefined)
+         window.clearTimeout(CRATE.timer.loadWDB);
+
+      // send AJAX request
+      let req = new XMLHttpRequest();
+      req.onreadystatechange = function () {
+         if (req.readyState === 4 && req.status === 200) {
+            dlgHide("dlgWait");
+            loadCrate(); // restart crate-scan
+            loadWDB(); // restart wdb loading
+         } else if (req.readyState === 4 && req.status === 0) {
+            connectionBroken();
+         }
+      };
+
+      req.open("PUT", "reboot/" + CRATE.dcbAddress + ":" + CRATE.selectedWDB, true); // avoid cached results
+
+      try {
+         req.send();
+      } catch (e) {
+         connectionBroken();
+      }
+   }
 }
