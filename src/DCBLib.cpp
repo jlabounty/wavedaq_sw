@@ -804,7 +804,7 @@ std::string DCB::GetFullBuild() {
 std::string DCB::GetHwVersion() {
    std::ostringstream s;
 
-   assert(GetBoardMagic() == 0xFF);
+   assert(GetBoardMagic() == 0xAC);
 
    s << "Board Vendor:        ";
    if (GetVendorId() == 0x01)
