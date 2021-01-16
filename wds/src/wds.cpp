@@ -674,11 +674,40 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
 
          // WDB specific items
          if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
+            WDB *b = dcb->GetWDB(i);
+            mg_printf_http_chunk(nc, "        \"name\": \"%s\",\n", b->GetName().c_str());
             mg_printf_http_chunk(nc, "        \"variant_id\": %d,\n", dcb->GetBoardId(i)->variant_id);
 
-            mg_printf_http_chunk(nc, "        \"serial\": %d,\n", dcb->GetWDB(i)->GetSerialNumber());
+            mg_printf_http_chunk(nc, "        \"serial\": %d,\n", b->GetSerialNumber());
+            mg_printf_http_chunk(nc, "        \"crateId\": %d,\n", b->GetCrateId());
+            mg_printf_http_chunk(nc, "        \"slotId\": %d,\n", b->GetSlotId());
+            mg_printf_http_chunk(nc, "        \"revision\": \"%c\",\n", 'A' + b->GetBoardRevision());
+            mg_printf_http_chunk(nc, "        \"fwRevision\": \"%s\",\n", b->GetFwGitHashStr().c_str());
+            mg_printf_http_chunk(nc, "        \"fwBuild\": \"%s\",\n", gl->demoMode ? "N/A" : b->GetFwBuild().c_str());
+            mg_printf_http_chunk(nc, "        \"swRevision\": \"%s\",\n", b->GetSwGitHashStr().c_str());
+            mg_printf_http_chunk(nc, "        \"swBuild\": \"%s\",\n", gl->demoMode ? "N/A" : b->GetSwBuild().c_str());
+            mg_printf_http_chunk(nc, "        \"hvBoardPlugged\": %s,\n", b->GetHvBoardPlugged() ? "true" : "false");
+            mg_printf_http_chunk(nc, "        \"hvVersion\": \"%s\",\n", b->GetHvVersion().c_str());
+            float hv_base;
+            b->GetHVBaseVoltage(hv_base);
+            mg_printf_http_chunk(nc, "        \"hvBaseVoltage\": %g,\n", hv_base);
+            mg_printf_http_chunk(nc, "        \"temperature\": %1.1lf,\n", b->GetTemperatureDegree(true));
+            mg_printf_http_chunk(nc, "        \"temperature1Wire\": [\n");
+            std::vector<float> hv_temp;
+            b->Get1wireTemperatures(hv_temp);
+            for (auto &s: hv_temp) {
+               if (&s != &hv_temp.back())
+                  mg_printf_http_chunk(nc, "          %g,\n", s);
+               else
+                  mg_printf_http_chunk(nc, "          %g],\n", s);
+            }
+            mg_printf_http_chunk(nc, "        \"pllLck\": %d,\n", b->GetPllLock(false));
+            mg_printf_http_chunk(nc, "        \"sysBusy\": %s,\n", b->GetSysBusy() ? "true" : "false");
+            mg_printf_http_chunk(nc, "        \"drsctrlBusy\": %s,\n", b->GetDrsCtrlBusy() ? "true" : "false");
+            mg_printf_http_chunk(nc, "        \"triggerBusParityErrorCount\": %d,\n", b->GetTrbParityErrorCount());
+            mg_printf_http_chunk(nc, "        \"compChannelStatus\": %d,\n", b->GetCompChStat());
             float hv = 0;
-            dcb->GetWDB(i)->GetHVBaseVoltage(hv);
+            b->GetHVBaseVoltage(hv);
             mg_printf_http_chunk(nc, "        \"hv_on\": %d\n", hv > 10 ? 1:0);
          } else {
             mg_printf_http_chunk(nc, "        \"variant_id\": %d\n", dcb->GetBoardId(i)->variant_id);

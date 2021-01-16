@@ -59,7 +59,6 @@ function init() {
    // schedule loadCrate()
    CRATE.timer = {};
    CRATE.timer.loadCrate = window.setTimeout(loadCrate, 10, true);
-   CRATE.timer.loadWDB = window.setTimeout(loadWDB, 1000, true);
 
    // load spinning wheel image
    CRATE.spinningWheel = new Image();
@@ -145,7 +144,6 @@ Crate.prototype.mouseEvent = function (e) {
                document.getElementById('dlgInfoWDB').style.display = 'none';
                document.getElementById('dlgInfoDCB').style.display = 'none';
                document.getElementById('dlgInfoTCB').style.display = 'revert';
-               CRATE.draw();
             } else if (slot === 16) {
                CRATE.selectedWDB = undefined;
                CRATE.selectedDCB = true;
@@ -153,7 +151,6 @@ Crate.prototype.mouseEvent = function (e) {
                document.getElementById('dlgInfoWDB').style.display = 'none';
                document.getElementById('dlgInfoDCB').style.display = 'revert';
                document.getElementById('dlgInfoTCB').style.display = 'none';
-               CRATE.draw();
             } else if (slot < 16) {
                if (CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_WDB)
                   CRATE.selectedWDB = slot;
@@ -167,9 +164,9 @@ Crate.prototype.mouseEvent = function (e) {
                   document.getElementById('dlgInfoWDB').style.display = 'none';
                document.getElementById('dlgInfoDCB').style.display = 'none';
                document.getElementById('dlgInfoTCB').style.display = 'none';
-               CRATE.draw();
-               loadWDB();
             }
+            CRATE.draw();
+            loadCrate();
          }
       }
    }
@@ -836,27 +833,6 @@ function loadCrate() {
    } catch (e) {
       connectionBroken();
    }
-
-   CRATE.timer.loadCrate = window.setTimeout(loadCrate, 1000);
-}
-
-function loadWDB() {
-   if (CRATE.timer.loadWDB !== undefined)
-      window.clearTimeout(CRATE.timer.loadWDB);
-
-   if (CRATE.selectedWDB >= 0 && CRATE.selectedWDB < 16) {
-      // send AJAX request
-      CRATE.req = new XMLHttpRequest();
-      CRATE.req.onreadystatechange = receiveWDB;
-      CRATE.req.open("GET", "wdb?adr=" + CRATE.dcbAddress + ":" + CRATE.selectedWDB +
-         "&fl=1" + "&r=" + Math.random(), true);
-
-      try {
-         CRATE.req.send();
-      } catch (e) {
-         connectionBroken();
-      }
-   }
 }
 
 function receiveCrate() {
@@ -877,8 +853,49 @@ function receiveCrate() {
       setItem("infoDCBV3_3", dcb.v3_3);
       setItem("infoDCBV2_5", dcb.v2_5);
 
-      if (CRATE.timer.loadCrate !== undefined)
-         window.clearTimeout(CRATE.timer.loadCrate)
+      if (CRATE.selectedWDB !== undefined) {
+         let wdb = CRATE.crate.slot[CRATE.selectedWDB];
+
+         setItem("infoWDBName", wdb.name);
+         setItem("infoWDBCrateSlotID", wdb.crateId + " / " +wdb.slotId);
+         setItem("infoWDBRevision", wdb.revision);
+         setItem("infoWDBFwRevision", wdb.fwRevision);
+         setItem("infoWDBFwBuild", wdb.fwBuild);
+         setItem("infoWDBSwRevision", wdb.swRevision);
+         setItem("infoWDBSwBuild", wdb.swBuild);
+         setItem("infoWDBHVVersion", wdb.hvBoardPlugged ? wdb.hvVersion : "none");
+         setItem("infoWDBHVBaseVoltage", wdb.hvBaseVoltage);
+         setItem("infoWDBTemp", wdb.temperature);
+         setItem("infoWDB1WireTemp", wdb.temperature1Wire[0] + " / " +
+            wdb.temperature1Wire[1] + " / " +
+            wdb.temperature1Wire[2] + " / " +
+            wdb.temperature1Wire[3]);
+         setItem("infoWDBTemp", wdb.temperature);
+
+         let s = "";
+         for (i = 8; i >= 0; i--) {
+            if ((wdb.pllLck & (1 << 8)) > 0)
+               s += "1";
+            else
+               s += "0";
+         }
+         setItem("infoWDBPLL", s);
+
+         setItem("infoWDBBusy", wdb.drsctrlBusy + " / " + wdb.sysBusy);
+         setItem("infoWDBTRGParityErrors", wdb.triggerBusParityErrorCount);
+
+         s = "";
+         for (i = 0; i < 16; i++) {
+            if ((wdb.compChannelStatus & (1 << 8)) > 0)
+               s += "1";
+            else
+               s += "0";
+            if (i % 4 === 3)
+               s += " ";
+         }
+         setItem("infoWDBCompStatus", s);
+      }
+
       CRATE.timer.loadCrate = window.setTimeout(loadCrate, 1000);
    } else if (CRATE.req.readyState === 4 && CRATE.req.status === 0) {
       connectionBroken();
@@ -895,57 +912,6 @@ function setItem(id, str)
          i.innerHTML = str;
 }
 
-function receiveWDB() {
-   if (CRATE.req.readyState === 4 && CRATE.req.status === 200) {
-      let wdb = JSON.parse(CRATE.req.responseText).wdb;
-      CRATE.wdb[CRATE.selectedWDB] = wdb;
-
-      CRATE.draw();
-      setItem("infoWDBName", wdb.name);
-      setItem("infoWDBCrateSlotID", wdb.crateId + " / " +wdb.slotId);
-      setItem("infoWDBRevision", wdb.revision);
-      setItem("infoWDBFwRevision", wdb.fwRevision);
-      setItem("infoWDBFwBuild", wdb.fwBuild);
-      setItem("infoWDBSwRevision", wdb.swRevision);
-      setItem("infoWDBSwBuild", wdb.swBuild);
-      setItem("infoWDBHVVersion", wdb.hvBoardPlugged ? wdb.hvVersion : "none");
-      setItem("infoWDBHVBaseVoltage", wdb.hv.baseVoltage);
-      setItem("infoWDBTemp", wdb.temperature);
-      setItem("infoWDB1WireTemp", wdb.hv.temperature1Wire[0] + " / " +
-         wdb.hv.temperature1Wire[1] + " / " +
-         wdb.hv.temperature1Wire[2] + " / " +
-         wdb.hv.temperature1Wire[3]);
-      setItem("infoWDBTemp", wdb.temperature);
-
-      let s = "";
-      for (i = 8; i >= 0; i--) {
-         if ((wdb.pllLck & (1 << 8)) > 0)
-            s += "1";
-         else
-            s += "0";
-      }
-      setItem("infoWDBPLL", s);
-
-      setItem("infoWDBBusy", wdb.drsctrlBusy + " / " + wdb.sysBusy);
-      setItem("infoWDBTRGParityErrors", wdb.triggerBusParityErrorCount);
-
-      s = "";
-      for (i = 0; i < 16; i++) {
-         if ((wdb.compChannelStatus & (1 << 8)) > 0)
-            s += "1";
-         else
-            s += "0";
-         if (i % 4 === 3)
-            s += " ";
-      }
-      setItem("infoWDBCompStatus", s);
-
-      CRATE.timer.loadWDB = window.setTimeout(loadWDB, 1000);
-   } else if (CRATE.req.readyState === 4 && CRATE.req.status === 0) {
-      connectionBroken();
-   }
-}
-
 function connectionBroken() {
    if (CRATE.connected) {
       CRATE.dlgReconnect = dlgMessage("Error", "Connection to server broken.<br>Trying to reconnect ..." +
@@ -958,8 +924,6 @@ function connectionBroken() {
 
    if (CRATE.timer.loadCrate !== undefined)
       clearTimeout(CRATE.timer.loadCrate);
-   if (CRATE.timer.loadWDB !== undefined)
-      clearTimeout(CRATE.timer.loadWDB);
 }
 
 function reconnect() {
@@ -1019,8 +983,6 @@ function WDBreboot(flag) {
       // kill update times
       if (CRATE.timer.loadCrate !== undefined)
          window.clearTimeout(CRATE.timer.loadCrate);
-      if (CRATE.timer.loadWDB !== undefined)
-         window.clearTimeout(CRATE.timer.loadWDB);
 
       // send AJAX request
       let req = new XMLHttpRequest();
@@ -1028,7 +990,6 @@ function WDBreboot(flag) {
          if (req.readyState === 4 && req.status === 200) {
             dlgHide("dlgWait");
             loadCrate(); // restart crate-scan
-            loadWDB(); // restart wdb loading
          } else if (req.readyState === 4 && req.status === 0) {
             connectionBroken();
          }
