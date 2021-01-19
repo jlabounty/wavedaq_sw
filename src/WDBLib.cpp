@@ -696,8 +696,10 @@ void WDB::SetDestinationPort(int port) {
    if (mDemoMode)
       return;
 
-   // need to configure only if standalone, with DCB destination port is done via DCB cfgdst command
-   if (!mDCB)
+   if (mDCB)
+      // set destination port in DCB, MAC and IP is used automatically form UDP packet
+      mDCB->SendUDP(std::string("cfgdst ") + std::to_string(port));
+   else
       // set destination port in WD board, MAC and IP is used automatically form UDP packet
       SendUDP(std::string("cfgdst ") + std::to_string(port));
 }

@@ -1420,6 +1420,13 @@ void connectWDB(GLOBALS *gl, WDB *b) {
 
    // set DAQ mode
    b->SetDaqNormal(false);
+
+   // Enable serdes if WDB is in crate
+   if (b->IsDcbInterface()) {
+      b->SetDaqClkSrcSel(0); // set clock select to backplane
+      b->SetExtClkFreq(80);  // 80 MHz
+      b->SetSerdesComEn(2);  // disable ethernet, enable serdes
+   }
 }
 
 void connectDCB(GLOBALS *gl, DCB *dcb) {
