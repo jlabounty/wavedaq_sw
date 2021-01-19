@@ -980,7 +980,7 @@ function loadWF() {
    // send AJAX request
    OSC.req = new XMLHttpRequest();
    OSC.req.onreadystatechange = receiveWF;
-   OSC.req.open("GET", "wf?adr=" + OSC.wdbAddress + "&c=" + chn + "&r=" + Math.random(), true); // avoid cached results
+   OSC.req.open("GET", "wf?adr=" + OSC.wdbAddress + "&chn=" + chn + "&r=" + Math.random(), true); // avoid cached results
    OSC.req.responseType = "arraybuffer";
 
    try {
