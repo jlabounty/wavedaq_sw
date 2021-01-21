@@ -1410,7 +1410,13 @@ void connectWDB(GLOBALS *gl, WDB *b) {
    if (b->IsDcbInterface()) {
       b->SetDaqClkSrcSel(0); // set clock select to backplane
       b->SetExtClkFreq(80);  // 80 MHz
-      b->SetSerdesComEn(2);  // disable ethernet, enable serdes
+      b->SetEthComEn(0);     // disable ethernet
+      b->SetSerdesComEn(1);  // enable serdes
+   } else {
+      b->SetDaqClkSrcSel(1); // set clock select to internal clock
+      b->SetExtClkFreq(80);  // 80 MHz
+      b->SetEthComEn(1);     // enable ethernet
+      b->SetSerdesComEn(0);  // disable serdes
    }
 }
 
