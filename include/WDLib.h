@@ -324,6 +324,7 @@ class WDWDB : public WDB, public WDBoard{
       void ConfigureTriggerPedestalAddersel(Property &property);
       void ConfigureDebugSignal(int port, Property &property);
       void ConfigureSamplingFrequency(Property &property);
+      void ConfigureForceEthernet(Property &property);
 
 
       WDWDB(std::string name="WDXXX", std::string netname="WDXXX", bool verbose = false) :  WDB(netname, verbose), WDBoard(name) { };

@@ -682,6 +682,11 @@ void WDWDB::Connect(){
    }
 
    printf("WD number %d\n", GetSerialNumber());
+
+   if(IsDcbInterface()){
+      SetEthComEn(0);
+      SetSerdesComEn(1);
+   }
 }
 
 void WDWDB::SetSerdesTraining(bool state){
@@ -751,6 +756,8 @@ void WDWDB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureDebugSignal(1, property);
    } else if(name=="SamplingFrequency"){
       ConfigureSamplingFrequency(property);
+   } else if(name=="ForceEthernet"){
+      ConfigureForceEthernet(property);
    } else {
       printf("Unknown property %s in WDWDB\n", name.c_str());
    }
@@ -758,7 +765,10 @@ void WDWDB::ConfigureProperty(const std::string &name, Property &property) {
 
 void WDWDB::ConfigurationStarted(){
    //SetSendBlock(true);
-   SetDestinationPort(GetCrate()->GetSystem()->GetDAQServerPort());
+   // in case no DCB is used
+   if(!IsDcbInterface())
+      SetDestinationPort(GetCrate()->GetSystem()->GetDAQServerPort());
+
    SetFeMux(-1, WDB::cFeMuxInput);
    SetTriggerOutPulseLength(4); // 4 clock shaping
    //SetAdvTrgPedCfg(0x0124000A); // default pedestal subtraction config
@@ -1074,6 +1084,16 @@ void WDWDB::ConfigureTriggerPedestalAddersel(Property &property){
    SetAdvTrgPedCfg(pedconf);
 }
 
+void WDWDB::ConfigureForceEthernet(Property &property){
+   bool forceEth = property.GetBool();
+   if(forceEth){
+      SetEthComEn(1);
+      SetSerdesComEn(0);
+   } else {
+      SetEthComEn(0);
+      SetSerdesComEn(1);
+   }
+}
 
 void WDWDB::ConfigureDebugSignal(int port, Property &property) {
    std::string confString;
