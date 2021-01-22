@@ -168,6 +168,18 @@ void TCB::SetIDCode()
    }
 }
 
+//Set IDCode by accessing to rrun register
+void TCB::SetCrateSlot(u_int32_t crateid, u_int32_t slotid)
+{
+   u_int32_t data = 0;
+   data |= (crateid & 0xFF) << 24;
+   data |= (slotid & 0xFF) << 16;
+   data |= (crateid & 0xFF) << 8;
+   data |= (slotid & 0xFF) << 0;
+
+   WriteReg(RBOARDID, &data);
+}
+
 //Set NTRG by accessing to rntrg register
 void TCB::SetNTRG()
 {
@@ -791,9 +803,9 @@ void TCB::ResetIDLYCTRL(){
 void TCB::ResetTransmitter(){
    u_int32_t val;
    ReadReg(RSERDESTX, &val);
-   val |= 0x000000FF;
+   val |= 0x000100FF;
    WriteReg(RSERDESTX, &val);
-   val &= 0xFFFFFF00;
+   val &= 0xFFFEFF00;
    WriteReg(RSERDESTX, &val);
 }
 //check errors on serdes
@@ -1100,7 +1112,7 @@ void TCB::SetPacketizerEnable(bool state){
    }
 }
 
-//Enable Packetizer
+//Autostart Packetizer
 void TCB::SetPacketizerAutostart(bool state){
    u_int32_t data;
    ReadReg(RARBITER, &data);
@@ -1179,6 +1191,24 @@ void TCB::SetPacketizerCommandAt(int offset, PACKETIZER_COMMAND cmd, u_int32_t a
          WriteReg(PACKAGERBASE+offset+2*PACKAGERSIZE, &arg1);
         break; 
    }
+}
+
+//Enable ReadoutFSM
+void TCB::SetReadoutEnable(bool state){
+   u_int32_t data;
+   ReadReg(RARBITER, &data);
+
+   if(state){
+      data |= 0x00000020;
+      WriteReg(RARBITER, &data);
+   } else {
+      data &= 0xFFFFFFDF;
+      WriteReg(RARBITER, &data);
+   }
+}
+
+void TCB::SetMaxPayload(u_int32_t *data){
+   WriteReg(RPAYLOADMAX, data);
 }
 
 //Read current buffer
