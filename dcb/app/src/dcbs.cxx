@@ -368,7 +368,7 @@ int main(int argc, char *argv[]) {
    client_address_len = sizeof(client_address);
 
    //init drivers
-   initTcbDriver();
+   //initTcbDriver();
 
    printf("DCB binary and ASCII servers listening on %s ports %d,%d\n", hostname, SERVER_PORT_BIN, SERVER_PORT_ASC);
 
@@ -697,14 +697,14 @@ int main(int argc, char *argv[]) {
       } // ASCII
 
       //check for TCB data
-      if(hasTcbDataDestination()){
+      /*if(hasTcbDataDestination()){
          for (int slot = 0; slot < WDAQ_N_SLOTS; slot++) {
             if(board[slot].type_id==BRD_TYPE_ID_TCB){
                if(hasData(slot, board + slot))
                   processData(slot, board + slot);
             }
          }
-      }
+      }*/
 
    }
 
@@ -1029,15 +1029,13 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("Setting data destination to %s port %d\n", dest_addr, dest_port);
 
       // notify tcb readout driver of the new port and ip
-      setTcbDataDestination(dest_addr, dest_port);
+      //setTcbDataDestination(dest_addr, dest_port);
 
       // TODO: Enable slots
       // set UDP destination parameters in DMA packet scheduler (dps) driver
       dps_set_udp_dst_ip_addr_str(SYSPTR(dma_pkt_sched), dest_addr);
       dps_set_udp_dst_port(SYSPTR(dma_pkt_sched), dest_port);
 
-#if 0
-      // TEMPORARY until serial links work
       // configure destination of all WDBs
       char cmdbuf[64];
       sprintf(cmdbuf, "cfgdst %d %s %02X:%02X:%02X:%02X:%02X:%02X\n", dest_port, dest_addr,
@@ -1050,7 +1048,6 @@ void process_dcb_command(udp_connection &c, char *buffer) {
                           board[slot].type_id, board[slot].rev_id);
          }
       }
-#endif
 
    } else {
       c.sprintf("Unknown command: %s\n", buffer);
