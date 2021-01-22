@@ -541,7 +541,7 @@ int main(int argc, char *argv[])
         printf("[ 1]: Enable Packetizer    \t \t  [ 2]: Start Packetizer     \n");
         printf("[ 3]: Set Autostart        \t \t  [ 4]: Assign bus \n");  
         printf("[ 5]: Abort Packetizer     \t \t  [ 6]: Set Packetizer Command\n");
-        printf("[ 7]: Load Program         \t \t  [  ]:                       \n");
+        printf("[ 7]: Load Program         \t \t  [ 8]: Enable ReadoutFSM\n");
         int sel;
         do {
           printf("Give an option: ");
@@ -637,6 +637,11 @@ int main(int argc, char *argv[])
             fclose(fileIn);
             }
             break; 
+          case 8:
+            printf("enable [0/1]? ");
+            scanf("%d", &ans);
+            TCBBoard.SetReadoutEnable(ans == 1);
+            break;
           default: break;
         }
       }
