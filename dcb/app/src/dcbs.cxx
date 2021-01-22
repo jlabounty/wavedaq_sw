@@ -769,6 +769,7 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("   - switch back to DCB with \"slot 16\"\n\n");
       c.sprintf("DCB commands:\n");
       c.sprintf("-------------\n");
+      c.sprintf("cfgdst               Show destination address for UDP packets\n");
       c.sprintf("cfgdst <port> [<ip>] Configure destination address for UDP packets\n");
       c.sprintf("clkint               Switch bus clock to quartz\n");
       c.sprintf("clkext               Switch bus clock to FCI input\n");
@@ -1022,7 +1023,10 @@ void process_dcb_command(udp_connection &c, char *buffer) {
          dest_port = atoi(param[1]);
          dest_addr = param[2];
       } else {
-         c.sprintf("Please use this format \"cfgdst <port number> [<ip>]\"\n");
+         const char *addr = dps_get_udp_dst_ip_addr(SYSPTR(dma_pkt_sched));
+         dest_port = dps_get_udp_dst_port(SYSPTR(dma_pkt_sched));
+
+         c.sprintf("Destination address is %s port %d\n", addr, dest_port);
          return;
       }
 
