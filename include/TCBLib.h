@@ -11,9 +11,10 @@
 #define RNTRG              0x03       // trigger enable bits
 #define RALGSEL            0x04       // algorithm select on TCB1/2_0
 #define RPLLRES            0x05       // Reset PLLs
-#define RUDPHEA            0x06       // UDP Header info register
+#define RBOARDID           0x06       // UDP Header info register
 #define PRESCADC           0x07       // ADC readout prescaling
 #define RSYNCWFM           0x08       // SYNC Waveform from serdes
+#define RPAYLOADMAX        0x09       // Max Packet payload
 #define USR_ACCESS         0x0F       // FW compilaiton date
 #define RENA               0x20       // trigger enable (first address)
 #define RTRIPATT           0x30       // trigger pattern (first address)
@@ -271,6 +272,8 @@ public:
    void SetLXePatchLUT(u_int32_t*);
    // set the IDCode
    void SetIDCode();
+   // set the CrateID and Slot
+   void SetCrateSlot(u_int32_t crateid, u_int32_t slotid);
    // set fntrg
    void SetNTRG();
    // write a memory
@@ -395,6 +398,10 @@ public:
    void AbortPacketizer();
    //write Command to packetizer memories
    void SetPacketizerCommandAt(int offset, PACKETIZER_COMMAND cmd, u_int32_t arg0, u_int32_t arg1, u_int32_t opt=0);
+   //Set ReadoutFSM enable
+   void SetReadoutEnable(bool);
+   //Set Max Payload Size
+   void SetMaxPayload(u_int32_t*);
    //read current Buffer content
    void ReadBuffer(u_int32_t* ptr, int size = (BUFFERSIZE-1), int offset = 0);
    //increment Buffer pointer

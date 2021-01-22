@@ -308,6 +308,7 @@ void WDAQEvent::AddPacket(WDAQPacketData* pkt){
    unsigned char type = pkt->mBoardType;
    unsigned short id = pkt->mBoardId;
    WDAQBoardEvent *boardEvent;
+   //printf("Got Packet for event %d board type %d-%d\n", mEventNumber, type, id);
 
    try {
       boardEvent = fBoard.at(type).at(id);
@@ -332,6 +333,7 @@ void WDAQEvent::AddPacket(WDAQPacketData* pkt){
    boardEvent->UpdateIsComplete();
 
    if(boardEvent->IsComplete()){
+      //printf("event %d of board %d-%d is completed\n", mEventNumber, type, id);
       UpdateIsComplete();
    } 
 }
@@ -447,6 +449,8 @@ void WDAQPacketCollector::GotData(int size, unsigned char* dataptr){
    printf("\n");
    printf("event number     \t %d\n", daqdata->event_number);
    printf("trigger event    \t %d\n", daqdata->trigger_information[5] | (daqdata->trigger_information[4] << 8));
+   printf("trigger data     \t %d\n", daqdata->trigger_information[3] | (daqdata->trigger_information[2] << 8));
+   printf("trigger type     \t %d\n", daqdata->trigger_information[1] | (daqdata->trigger_information[0] << 8));
    #endif
 
    //from WDB
@@ -813,6 +817,8 @@ void WDAQEventBuilder::Loop(){
          //debug printf
          /*printf("dropping event %d constaining %d boards\n", ev->first, ev->second->IsComplete());
          for(auto& boardEvent : ev->second->fBoard[BRD_TYPE_ID_WDB])
+            printf("board %d (%d)\n", boardEvent.first, boardEvent.second->IsComplete());
+         for(auto& boardEvent : ev->second->fBoard[BRD_TYPE_ID_TCB])
             printf("board %d (%d)\n", boardEvent.first, boardEvent.second->IsComplete());*/
 
          delete ev->second;
