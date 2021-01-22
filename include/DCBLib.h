@@ -93,6 +93,7 @@ public:
       mWDAQBoard[slot].variant_id = 0xFF;
    }
    void SetDestinationPort(int port);
+   void ResetSerdes();
 
    // setter & getter ----------
    std::string GetName() { return mDCBName; }
