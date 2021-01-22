@@ -2033,7 +2033,22 @@ WDB *WP::GetBoard(int board_id) {
 
 //--------------------------------------------------------------------
 
+void WP::SetRequestedBoard(std::vector<WDB *>wdb) {
+   mWdbRequested.clear();
+   for (auto &b: wdb) {
+      mWdbRequested.push_back(b);
+   }
+}
+
+void WP::SetRequestedBoard(WDB *b) {
+   mWdbRequested.clear();
+   mWdbRequested.push_back(b);
+}
+
+//--------------------------------------------------------------------
+
 bool WP::RequestEvent(WDB *b, int timeout, WDEvent &event) {
+   WP::SetRequestedBoard(b);
    b->TriggerSoftEvent();
    return GetLastEvent(b, timeout, event);
 }
@@ -2131,9 +2146,15 @@ void WP::StartNewEvent() {
 //--------------------------------------------------------------------
 
 bool WP::IsEventValid() {
-   for (auto &e: mEvent)
-      if (!e.second->IsEventValid())
+
+   for (auto &e: mWdbRequested) {
+      auto boardId = e->GetSerialNumber();
+      auto it = mEvent.find(boardId);
+      if (it == mEvent.end())
          return false;
+      if (!it->second->IsEventValid())
+         return false;
+   }
 
    return true;
 }
