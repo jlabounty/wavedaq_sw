@@ -435,7 +435,7 @@ class WDDCB : public DCB, public WDBoard {
 
       void SetSerdesTraining(bool state);
       bool IsSerdesTraining();
-      void TrainSerdes(){}
+      void TrainSerdes();
 
       void Sync(){
          SetTrSyncBpl(1);

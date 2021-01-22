@@ -1212,7 +1212,17 @@ void WDTCB::Connect(){
    SetNTRG();
    fverbose= true;
 
-   //TODO: write CrateId and SlotId into the board 
+   //Set SlotId and CrateId
+   WDCrate *crate = GetCrate();
+   if(crate != nullptr){
+      int64_t crateNumber = crate->GetCrateNumber();
+
+      SetCrateSlot(crateNumber, GetSlot());
+   } else {
+      //WDBoard not in a WDCrate
+      //ok for standalone cards
+      printf("Board %s not in a crate, cannot set SlotId and CrateId\n", GetBoardName().c_str());
+   }
 
    printf("connected to TCB with IDCode = %04x\n", fidcode);
 
@@ -1398,6 +1408,7 @@ void WDTCB::ConfigurationStarted(){
    SetPacketizerAutostart(true);
    SetPacketizerEnable(true);
    SetPacketizerBus(true);
+   SetReadoutEnable(true);
 }
 
 void WDTCB::ConfigurationEnded(){
@@ -2364,6 +2375,11 @@ void WDDCB::SetSerdesTraining(bool state){
 
 bool WDDCB::IsSerdesTraining(){
    return false;
+}
+
+void WDDCB::TrainSerdes(){
+   SetIserdesReceiverRst(1);
+   SetIserdesRcvrErrorCountRst(1);
 }
 
 void WDDCB::ConfigureProperty(const std::string &name, Property &property) { 
