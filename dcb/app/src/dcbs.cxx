@@ -797,6 +797,9 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("   <ofs> : starting register, default: first ctrl reg\n");
       c.sprintf("     <n> : number of registers, default 1 if <ofs> is specified, otherwise all\n\n");
 
+      c.sprintf("sdstat               Show SERDES status\n");
+      c.sprintf("sdreset [error|sync|full]  Reset SERDES error/sync/full reset\n\n");
+
       c.sprintf("sinit  <slot>        Send init to WDB/TCB via backplane\n\n");
       c.sprintf("sysmon               Print system monitor info\n\n");
 
@@ -1050,6 +1053,56 @@ void process_dcb_command(udp_connection &c, char *buffer) {
          if(board[slot].type_id == BRD_TYPE_ID_WDB){
             spi_ascii_cmd(cmdbuf, 0, 0, slot,
                           board[slot].type_id, board[slot].rev_id);
+         }
+      }
+
+   } else if (strcmp(param[0], "sdstat") == 0) {
+
+      c.sprintf("Slot Idle Delay Sync ECRC EFrame EDgram ESync\n");
+      c.sprintf("=============================================\n");
+
+      unsigned int stat[21];
+      reg_bank_read(0x005C, stat, 21);
+
+      unsigned char sstat[18];
+      for (int i=0 ; i<8 ; i++)
+         sstat[i] = ((stat[0] >> (i*4)) & 0x07);
+      for (int i=0 ; i<8 ; i++)
+         sstat[8+i] = ((stat[1] >> (i*4)) & 0x07);
+      sstat[16] = (stat[2] & 0x07);
+
+      for (int s=0; s<17 ; s++) {
+         if (s < 16)
+            c.sprintf(" %02d    ", s);
+         else
+            c.sprintf("TCB    ", s);
+         c.sprintf("%d    ", (sstat[s] & 0x04) ? 1 : 0);
+         c.sprintf("%d    ", (sstat[s] & 0x02) ? 1 : 0);
+         c.sprintf("%d    ", (sstat[s] & 0x01) ? 1 : 0);
+
+         c.sprintf("%3d   ", (stat[3+s] >> 24) & 0xFF);
+         c.sprintf("%3d   ", (stat[3+s] >> 16) & 0xFF);
+         c.sprintf("%3d   ", (stat[3+s] >>  8) & 0xFF);
+         c.sprintf("%3d   ", (stat[3+s] >>  0) & 0xFF);
+
+         c.sprintf("\n");
+      }
+
+   } else if (strcmp(param[0], "sdreset") == 0) {
+
+      if (n_param < 2) {
+         c.sprintf("Please specify 'error', 'sync' or 'full'\n");
+      } else {
+         unsigned int data;
+         if (param[1][0] == 'e') {
+            data = 0x08;
+            reg_bank_write(0x58, &data, 1);
+         } else if (param[1][0] == 's') {
+            data = 0x04;
+            reg_bank_write(0x58, &data, 1);
+         } else if (param[1][0] == 'f') {
+            data = 0x02;
+            reg_bank_write(0x58, &data, 1);
          }
       }
 
