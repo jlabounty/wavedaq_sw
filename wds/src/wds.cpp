@@ -1427,6 +1427,8 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
             WDB *wdb = new WDB(dcb, i, gl->verbose);
             std::cout << "Connect to " << wdb->GetAddr() << " ... " << std::flush;
             connectWDB(gl, wdb);
+            gl->wdb.push_back(wdb);
+            gl->wp->SetWDBList(gl->wdb);
             std::cout << "OK" << std::endl;
             dcb->SetWDB(i, wdb);
          }
@@ -1581,6 +1583,7 @@ int main(int argc, const char *argv[]) {
                         connectWDB(&gl, wdb);
                         dcb->SetWDB(j, wdb);
                         gl.wdb.push_back(wdb);
+                        gl.wp->SetWDBList(gl.wdb);
                      }
                   }
                } catch (std::runtime_error &e) {
