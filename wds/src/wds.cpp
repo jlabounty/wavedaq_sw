@@ -1153,6 +1153,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       } else {
 
          // only current board
+         gl->wp->SetRequestedBoard(wdb);
          if (gl->triggerMode == cTriggerModeAuto)
             wdb->TriggerSoftEvent();
          else if (gl->triggerMode == cTriggerModeNormal) {

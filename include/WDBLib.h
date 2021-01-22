@@ -331,6 +331,7 @@ class WP {
 
    std::vector<WDB*> mWdb;
    std::map<int, WDB*> mWdbMap;
+   std::vector<WDB*> mWdbRequested;
 
    bool              mRotateWaveform;
    bool              mCalibrateWaveform;
@@ -455,8 +456,8 @@ public:
    float GetTcalibProgress() { return calibProg.progress; }
 
    // functions
-   void RequestAllBoards();
-   void RequestSingleBoard(WDB* b);
+   void SetRequestedBoard(WDB* b);
+   void SetRequestedBoard(std::vector<WDB *>wdb);
    WDB* GetBoard(int board_id);
 
    bool WaitNewEvent(int timeout);
