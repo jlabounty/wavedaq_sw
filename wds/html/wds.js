@@ -473,7 +473,7 @@ function wdbDoReboot(flag) {
          }
       };
 
-      req.open("PUT", "reboot?adr=" + OSC.wdbAddress + "&" + Math.random(), true); // avoid cached results
+      req.open("PUT", "reboot/" + OSC.wdbAddress, true); // avoid cached results
 
       try {
          req.send();

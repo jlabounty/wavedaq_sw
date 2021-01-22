@@ -72,6 +72,8 @@ void DCB::SendUDP(std::string str)
 {
    std::string result;
    result = SendReceiveUDP(str);
+   if (mVerbose)
+      std::cout << mDCBName << ": " << result << std::endl;
 }
 
 //--------------------------------------------------------------------

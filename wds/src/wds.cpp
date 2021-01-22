@@ -403,29 +403,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             sleep_ms(15000);
             std::cout << "Finished" << std::endl;
 
-            b->Connect();
-            b->ReceiveControlRegisters();
-            b->ReceiveStatusRegisters();
-            b->LoadVoltageCalibration(b->GetDrsSampleFreqMhz(), gl->wdsDir);
-            b->LoadTimeCalibration(b->GetDrsSampleFreqMhz(), gl->wdsDir);
-
-            b->SetDrsChTxEn(0xFFFF);
-            b->SetChnTxEn(0xFFFF);
-            gl->readoutMode = cReadoutModeDRS;
-
-            // enable internal trigger if external trigger is not enabled
-            if (!b->GetExtAsyncTriggerEn())
-               b->SetPatternTriggerEn(1);
-
-            // set destination port and set DAQ to "normal"
-            if (b->IsDcbInterface()) {
-               //reconfigure full crate through DCB
-               b->GetDcbInterface()->SetDestinationPort(gl->wp->GetServerPort());
-            } else {
-               b->SetDestinationPort(gl->wp->GetServerPort());
-            }
-
-            b->SetDaqNormal(false);
+            connectWDB(gl, b);
          }
 
       } else {
@@ -548,6 +526,8 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
                std::cout << "Connect to " << dcb->GetName() << " ... " << std::flush;
                dcb->Connect();
                dcb->ScanCrate();
+               // set destination port for DCB, MAC and IP is used automatically from UDP packet
+               dcb->SetDestinationPort(gl->wp->GetServerPort());
                std::cout << "OK" << std::endl;
                if (gl->verbose) {
                   std::cout << std::endl << "========== DCB Info ==========" << std::endl;
@@ -624,6 +604,8 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
          try {
             std::cout << "Connect to " << dcb->GetName() << " ... " << std::flush;
             dcb->Connect();
+            // set destination port for DCB, MAC and IP is used automatically from UDP packet
+            dcb->SetDestinationPort(gl->wp->GetServerPort());
             gl->dcb.push_back(dcb);
             std::cout << "OK" << std::endl;
 
@@ -771,6 +753,8 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
                std::cout << "Connect to " << dcbName << " ... " << std::flush;
                dcb->Connect();
                dcb->ScanCrate();
+               // set destination port for DCB, MAC and IP is used automatically from UDP packet
+               dcb->SetDestinationPort(gl->wp->GetServerPort());
                std::cout << "OK" << std::endl;
                if (gl->verbose) {
                   std::cout << std::endl << "========== DCB Info ==========" << std::endl;
@@ -1415,8 +1399,9 @@ void connectWDB(GLOBALS *gl, WDB *b) {
    // disable scaler readout
    b->SetSclTxEn(0);
 
-   // set destination
-   b->SetDestinationPort(gl->wp->GetServerPort());
+   // set destination if connected via Ethernet
+   if (!b->IsDcbInterface())
+      b->SetDestinationPort(gl->wp->GetServerPort());
 
    // set DAQ mode
    b->SetDaqNormal(false);
@@ -1425,7 +1410,13 @@ void connectWDB(GLOBALS *gl, WDB *b) {
    if (b->IsDcbInterface()) {
       b->SetDaqClkSrcSel(0); // set clock select to backplane
       b->SetExtClkFreq(80);  // 80 MHz
-      b->SetSerdesComEn(2);  // disable ethernet, enable serdes
+      b->SetEthComEn(0);     // disable ethernet
+      b->SetSerdesComEn(1);  // enable serdes
+   } else {
+      b->SetDaqClkSrcSel(1); // set clock select to internal clock
+      b->SetExtClkFreq(80);  // 80 MHz
+      b->SetEthComEn(1);     // enable ethernet
+      b->SetSerdesComEn(0);  // disable serdes
    }
 }
 
@@ -1436,6 +1427,8 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
             WDB *wdb = new WDB(dcb, i, gl->verbose);
             std::cout << "Connect to " << wdb->GetAddr() << " ... " << std::flush;
             connectWDB(gl, wdb);
+            gl->wdb.push_back(wdb);
+            gl->wp->SetWDBList(gl->wdb);
             std::cout << "OK" << std::endl;
             dcb->SetWDB(i, wdb);
          }
@@ -1573,6 +1566,8 @@ int main(int argc, const char *argv[]) {
                   DCB *dcb = new DCB(b, gl.verbose);
                   dcb->Connect();
                   dcb->ScanCrate();
+                  // set destination port for DCB, MAC and IP is used automatically from UDP packet
+                  dcb->SetDestinationPort(gl.wp->GetServerPort());
                   if (gl.verbose) {
                      std::cout << std::endl << "========== DCB Info ==========" << std::endl;
                      dcb->PrintVersion();
@@ -1588,6 +1583,7 @@ int main(int argc, const char *argv[]) {
                         connectWDB(&gl, wdb);
                         dcb->SetWDB(j, wdb);
                         gl.wdb.push_back(wdb);
+                        gl.wp->SetWDBList(gl.wdb);
                      }
                   }
                } catch (std::runtime_error &e) {
