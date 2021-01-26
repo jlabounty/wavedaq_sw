@@ -2,7 +2,7 @@
 
 ### BEGIN INIT INFO
 # Provides:        dcbs
-# Required-Start:  $network $remote_fs $syslog
+# Required-Start:  $network $remote_fs $syslog dma_packet_scheduler_v1_0
 # Required-Stop:   $network $remote_fs $syslog
 # Default-Start:   2 3 4 5
 # Default-Stop:
