@@ -1409,8 +1409,10 @@ void connectWDB(GLOBALS *gl, WDB *b) {
 
    // Enable serdes if WDB is in crate
    if (b->IsDcbInterface()) {
+      b->SetExtClkFreq(80);  // 80 MHz external clock
+      sleep_ms(2000);
       b->SetDaqClkSrcSel(0); // set clock select to backplane
-      b->SetExtClkFreq(80);  // 80 MHz
+      sleep_ms(2000);
       b->SetEthComEn(0);     // disable ethernet
       b->SetSerdesComEn(1);  // enable serdes
    } else {
@@ -1438,8 +1440,9 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
          delete dcb->GetWDB(i);
          dcb->SetWDB(i, nullptr);
       }
-
    }
+
+   dcb->ResetSerdes();
 }
 
 int main(int argc, const char *argv[]) {

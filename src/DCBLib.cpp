@@ -472,6 +472,13 @@ void DCB::SetDestinationPort(int port) {
 
 //--------------------------------------------------------------------
 
+void DCB::ResetSerdes() {
+   // reset SERDES receivers on DCB
+   SendUDP("sdreset full");
+}
+
+//--------------------------------------------------------------------
+
 void DCB::Connect() {
    struct sockaddr_in client_addr;
    struct hostent *phe;
