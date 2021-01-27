@@ -1090,6 +1090,16 @@ void process_dcb_command(udp_connection &c, char *buffer) {
 
    } else if (strcmp(param[0], "sdreset") == 0) {
 
+      // rescan crate
+      for (int s = 0 ; s < WDAQ_N_SLOTS ; s++) {
+         if (s == WDAQ_SLOT_DCB)
+            continue;
+         int status = get_slot_board_info(s, &board[s]);
+         if (!status)
+            board[s].type_id = 0xFF;
+      }
+
+      // issue reset
       if (n_param < 2) {
          c.sprintf("Please specify 'error', 'sync' or 'full'\n");
       } else {
@@ -1105,6 +1115,39 @@ void process_dcb_command(udp_connection &c, char *buffer) {
             reg_bank_write(DCB_ISERDES_RECEIVER_RST_REG, &data, 1);
          }
       }
+
+      // check for status bits
+      bool ready;
+      int n, b;
+      for (n=0 ; n<100 ; n++) {
+         // wait for status bits
+         unsigned int stat[3];
+         reg_bank_read(DCB_REG_SERDES_STATUS_00_07, stat, 3);
+
+         unsigned char sstat[18];
+         for (int i=0 ; i<8 ; i++)
+            sstat[i] = ((stat[0] >> (i*4)) & 0x07);
+         for (int i=0 ; i<8 ; i++)
+            sstat[8+i] = ((stat[1] >> (i*4)) & 0x07);
+         sstat[16] = (stat[2] & 0x07);
+
+         ready = true;
+         for (int s=0 ; s < 16 ; s++) {
+            if (board[s].type_id == BRD_TYPE_ID_WDB &&
+                (sstat[s] & 0x07) != 0x07) {
+               ready = false;
+               b = s;
+            }
+         }
+         if (ready)
+            break;
+      }
+
+      if (n == 100)
+         c.sprintf("Serdes link for WDB in slot %d did not sync\n", b); 
+      else
+         c.sprintf("Ok\n");
+      
 
    } else {
       c.sprintf("Unknown command: %s\n", buffer);
