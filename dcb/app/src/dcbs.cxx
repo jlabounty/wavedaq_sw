@@ -1063,7 +1063,7 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("=============================================\n");
 
       unsigned int stat[21];
-      reg_bank_read(0x005C, stat, 21);
+      reg_bank_read(DCB_REG_SERDES_STATUS_00_07, stat, 21);
 
       unsigned char sstat[18];
       for (int i=0 ; i<8 ; i++)
@@ -1096,14 +1096,14 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       } else {
          unsigned int data;
          if (param[1][0] == 'e') {
-            data = 0x08;
-            reg_bank_write(0x58, &data, 1);
+            data = DCB_ISERDES_RCVR_ERROR_COUNT_RST_MASK;
+            reg_bank_write(DCB_ISERDES_RCVR_ERROR_COUNT_RST_REG, &data, 1);
          } else if (param[1][0] == 's') {
-            data = 0x04;
-            reg_bank_write(0x58, &data, 1);
+            data = DCB_ISERDES_RECEIVER_RESYNC_MASK;
+            reg_bank_write(DCB_ISERDES_RECEIVER_RESYNC_REG, &data, 1);
          } else if (param[1][0] == 'f') {
-            data = 0x02;
-            reg_bank_write(0x58, &data, 1);
+            data = DCB_ISERDES_RECEIVER_RST_MASK;
+            reg_bank_write(DCB_ISERDES_RECEIVER_RST_REG, &data, 1);
          }
       }
 

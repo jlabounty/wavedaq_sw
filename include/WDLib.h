@@ -285,8 +285,8 @@ class WDWDB : public WDB, public WDBoard{
       }
 
       bool IsBusy(){
-         //TODO update register
-         return GetDrsCtrlBusy(); 
+         ReceiveStatusRegister(GetPackagerBusyLoc());
+         return GetPackagerBusy() | GetDrsCtrlBusy();
       }
 
       unsigned short GetSerialNumber() {

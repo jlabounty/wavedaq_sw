@@ -169,13 +169,12 @@ void TCB::SetIDCode()
 }
 
 //Set IDCode by accessing to rrun register
-void TCB::SetCrateSlot(u_int32_t crateid, u_int32_t slotid)
+void TCB::SetBoardId(u_int32_t boardid, u_int32_t crateid, u_int32_t slotid)
 {
    u_int32_t data = 0;
    data |= (crateid & 0xFF) << 24;
    data |= (slotid & 0xFF) << 16;
-   data |= (crateid & 0xFF) << 8;
-   data |= (slotid & 0xFF) << 0;
+   data |= (boardid & 0xFFFF) << 0;
 
    WriteReg(RBOARDID, &data);
 }

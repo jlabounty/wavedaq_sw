@@ -133,7 +133,7 @@ bool WDCrate::IsPowered(){
 // Board Getter
 WDBoard* WDCrate::GetBoardAt(int slot){
    if(fBoard[slot]) return fBoard[slot];
-   else throw std::runtime_error("no board in slot");
+   else return nullptr;
 }
 
 // --- WDSystem --- 
@@ -414,11 +414,17 @@ void WDSystem::SetSerdesTraining(bool state){
 
 //System Sync
 void WDSystem::Sync(){
-   try{
-      GetDistributionBoard()->Sync();
-   } catch (const std::runtime_error& ex){
-      //no DCB, try with TCB
-      GetTriggerBoard()->Sync();
+   WDBoard *syncBoard = GetDistributionBoard();
+
+   if(! syncBoard){
+      syncBoard = GetTriggerBoard();
+   }
+
+   //SYNC!
+   if(syncBoard){
+      syncBoard->Sync();
+   } else {
+      throw std::runtime_error("no board to generate sync");
    }
 }
 
@@ -433,13 +439,23 @@ void WDSystem::GoRun(){
    usleep(500000);//wait sync is applied
 
    //start master trigger board
-   GetTriggerBoard()->GoRun();
+   WDBoard* triggerBoard = GetTriggerBoard();
+   if(triggerBoard) {
+      triggerBoard->GoRun();
+   } else {
+      throw std::runtime_error("no trigger board");
+   }
 }
 
 //Stop Run
 void WDSystem::StopRun(){
    //stop master trigger board
-   GetTriggerBoard()->StopRun();
+   WDBoard* triggerBoard = GetTriggerBoard();
+   if(triggerBoard) {
+      triggerBoard->StopRun();
+   } else {
+      throw std::runtime_error("no trigger board");
+   }
 
    //stop DAQ system run
    fDaqSystem->StopRun();
@@ -549,7 +565,7 @@ void WDSystem::SpawnDAQ(){
          for(auto &b : *c){
             if(b) {
                if(dynamic_cast<WDWDB*>(b) != nullptr){
-                   workerThread->AddVoltageCalibration(static_cast<WDWDB*>(b)->GetSerialNumber(), &(static_cast<WDWDB*>(b)->mVCalib));
+                   workerThread->AddVoltageCalibration(b->GetSerialNumber(), &(static_cast<WDWDB*>(b)->mVCalib));
                }
             }
          }
@@ -590,10 +606,9 @@ void WDSystem::SpawnDAQ(){
          for(auto &b : *c){
             if(b) {
                if(dynamic_cast<WDWDB*>(b) != nullptr){
-                  fWriterThread->AddTimeCalibration(dynamic_cast<WDWDB*>(b)->GetSerialNumber(), &(dynamic_cast<WDWDB*>(b)->mTCalib));
+                  fWriterThread->AddTimeCalibration(b->GetSerialNumber(), &(static_cast<WDWDB*>(b)->mTCalib));
                } else if (dynamic_cast<WDTCB*>(b) != nullptr){
-                     std::hash<std::string> hashFunc;
-                     fWriterThread->AddTcbName(hashFunc(b->GetBoardName()));
+                     fWriterThread->AddTcbName(b->GetSerialNumber());
                }
             }
 
@@ -1237,7 +1252,7 @@ void WDTCB::Connect(){
    if(crate != nullptr){
       int64_t crateNumber = crate->GetCrateNumber();
 
-      SetCrateSlot(crateNumber, GetSlot());
+      SetBoardId(GetSerialNumber(), crateNumber, GetSlot());
    } else {
       //WDBoard not in a WDCrate
       //ok for standalone cards
