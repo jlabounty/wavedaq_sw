@@ -776,4 +776,16 @@ int get_slot_board_info(unsigned int slot_nr, WDAQ_BRD *wdaq_board_info_ptr)
 }
 
 /******************************************************************************/
+
+void bpl_sync()
+{
+  unsigned int data = (1 << DCB_LMK_SYNC_DCB_OFS);
+  unsigned int mask = DCB_LMK_SYNC_DCB_MASK;
+  reg_bank_mask_write(DCB_LMK_SYNC_DCB_REG, &data, &mask, 1);
+  data = (1 << DCB_TR_SYNC_BPL_OFS);
+  mask = DCB_TR_SYNC_BPL_MASK;
+  reg_bank_mask_write(DCB_TR_SYNC_BPL_REG, &data, &mask, 1);
+}
+
+/******************************************************************************/
 /******************************************************************************/
