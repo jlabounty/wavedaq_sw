@@ -734,6 +734,10 @@ int init_system()
   init_sysmon();
   init_serdes_rcvr();
 
+  /* DPS reset only works after LMK is initialized */
+  /* It's even recommended to put it after SERDES initialization */
+  dps_reset(SYSPTR(dma_pkt_sched));
+
   return XST_SUCCESS;
 }
 
