@@ -801,6 +801,7 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("sdreset [error|sync|full]  Reset SERDES error/sync/full reset\n\n");
 
       c.sprintf("sinit  <slot>        Send init to WDB/TCB via backplane\n\n");
+      c.sprintf("sync                 Generate a SYNC on backplane\n");
       c.sprintf("sysmon               Print system monitor info\n\n");
 
       c.sprintf("upload <slot> [-f <path>] [-s <path>] [-t <type>] [-r <rev>]\n");
@@ -1062,7 +1063,7 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("=============================================\n");
 
       unsigned int stat[21];
-      reg_bank_read(0x005C, stat, 21);
+      reg_bank_read(DCB_REG_SERDES_STATUS_00_07, stat, 21);
 
       unsigned char sstat[18];
       for (int i=0 ; i<8 ; i++)
@@ -1090,21 +1091,67 @@ void process_dcb_command(udp_connection &c, char *buffer) {
 
    } else if (strcmp(param[0], "sdreset") == 0) {
 
+      // rescan crate
+      for (int s = 0 ; s < WDAQ_N_SLOTS ; s++) {
+         if (s == WDAQ_SLOT_DCB)
+            continue;
+         int status = get_slot_board_info(s, &board[s]);
+         if (!status)
+            board[s].type_id = 0xFF;
+      }
+
+      // issue reset
       if (n_param < 2) {
          c.sprintf("Please specify 'error', 'sync' or 'full'\n");
       } else {
          unsigned int data;
          if (param[1][0] == 'e') {
-            data = 0x08;
-            reg_bank_write(0x58, &data, 1);
+            data = DCB_ISERDES_RCVR_ERROR_COUNT_RST_MASK;
+            reg_bank_write(DCB_ISERDES_RCVR_ERROR_COUNT_RST_REG, &data, 1);
          } else if (param[1][0] == 's') {
-            data = 0x04;
-            reg_bank_write(0x58, &data, 1);
+            data = DCB_ISERDES_RECEIVER_RESYNC_MASK;
+            reg_bank_write(DCB_ISERDES_RECEIVER_RESYNC_REG, &data, 1);
          } else if (param[1][0] == 'f') {
-            data = 0x02;
-            reg_bank_write(0x58, &data, 1);
+            data = DCB_ISERDES_RECEIVER_RST_MASK;
+            reg_bank_write(DCB_ISERDES_RECEIVER_RST_REG, &data, 1);
          }
       }
+
+      // check for status bits
+      bool ready;
+      int n, b;
+      for (n=0 ; n<100 ; n++) {
+         // wait for status bits
+         unsigned int stat[3];
+         reg_bank_read(DCB_REG_SERDES_STATUS_00_07, stat, 3);
+
+         unsigned char sstat[18];
+         for (int i=0 ; i<8 ; i++)
+            sstat[i] = ((stat[0] >> (i*4)) & 0x07);
+         for (int i=0 ; i<8 ; i++)
+            sstat[8+i] = ((stat[1] >> (i*4)) & 0x07);
+         sstat[16] = (stat[2] & 0x07);
+
+         ready = true;
+         for (int s=0 ; s < 16 ; s++) {
+            if (board[s].type_id == BRD_TYPE_ID_WDB &&
+                (sstat[s] & 0x07) != 0x07) {
+               ready = false;
+               b = s;
+            }
+         }
+         if (ready)
+            break;
+      }
+
+      if (n == 100)
+         c.sprintf("Serdes link for WDB in slot %d did not sync\n", b); 
+      else
+         c.sprintf("Ok\n");
+      
+   } else if (strcmp(param[0], "sync") == 0) {
+
+      bpl_sync();
 
    } else {
       c.sprintf("Unknown command: %s\n", buffer);
