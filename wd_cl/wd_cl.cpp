@@ -161,27 +161,27 @@ int main(int argc, char *argv[])
          if(option == 4)
          {
             WDBoard *triggerb = sys->GetTriggerBoard();
-            if(triggerb->IsBusy()){
-               printf("System is Busy\n");
-            } else {
-               printf("System is Not Busy\n");
+            if(triggerb){
+               if(triggerb->IsBusy()){
+                  printf("System is Busy\n");
+               } else {
+                  printf("System is Not Busy\n");
+               }
             }
+
             for(auto c : *sys)
                for(auto b :*c)
                   if(b){
                      if(dynamic_cast<WDTCB*>(b) != nullptr){
-                        unsigned int r;
-                        dynamic_cast<WDTCB*>(b)->GetRRUN(&r);
-
-                        if(r & 0x2)
-                           printf("TCB %s is busy\n", c->GetMscbName().c_str());
+                        if(b->IsBusy())
+                           printf("TCB %s is busy\n", b->GetBoardName().c_str());
                         else
-                           printf("TCB %s is not busy\n", c->GetMscbName().c_str());
+                           printf("TCB %s is not busy\n", b->GetBoardName().c_str());
                      } else if(dynamic_cast<WDWDB*>(b) != nullptr){
                         if(b->IsBusy())
-                           printf("WDB %s is busy\n", dynamic_cast<WDWDB*>(b)->GetName().c_str());
+                           printf("WDB %s is busy\n", b->GetBoardName().c_str());
                         else
-                           printf("WDB %s is not busy\n", dynamic_cast<WDWDB*>(b)->GetName().c_str());
+                           printf("WDB %s is not busy\n", b->GetBoardName().c_str());
 
                      }
                   }
@@ -195,32 +195,13 @@ int main(int argc, char *argv[])
          {
             printf("generating SYNC...\n");
             sys->Sync();
-            WDBoard *triggerb = sys->GetTriggerBoard();
-            printf("SYNC generated from board %s\n", triggerb->GetBoardName().c_str());
+
             for(auto c : *sys)
                for(auto b :*c)
                   if(b){
                      if(dynamic_cast<WDTCB*>(b) != nullptr){
                         u_int32_t val = 0;
                          dynamic_cast<WDTCB*>(b)->GetSyncWaveform(&val);
-                         /*val =  val >>8;
-                         if(val&0x80){
-                            val = 0;
-                         } else if(val&0x40){
-                            val = 1;
-                         } else if(val&0x20){
-                            val = 2;
-                         } else if(val&0x10){
-                            val = 3;
-                         } else if(val&0x8){
-                            val = 4;
-                         } else if(val&0x4){
-                            val = 5;
-                         } else if(val&0x2){
-                            val = 6;
-                         } else if(val&0x1){
-                            val = 7;
-                         }*/
                          printf("%s %d %04x\n", c->GetMscbName().c_str(), b->GetSlot(), val);
                      }
                   }
@@ -268,7 +249,7 @@ int main(int argc, char *argv[])
          }
          if(option == 13)
          {
-            sys->SetSerdesTraining(true);
+            /*sys->SetSerdesTraining(true);
             unsigned int dly = 0x08;
             dynamic_cast<WDTCB*>(sys->GetTriggerBoard())->SetTRGBusIDLY(&dly, &dly, &dly);
             for(dly=0; dly<32; dly++){
@@ -296,7 +277,7 @@ int main(int argc, char *argv[])
                            printf("\n");
                         }
                      }
-            }
+            }*/
          }
          if(option == 14)
          {

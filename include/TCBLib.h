@@ -272,8 +272,8 @@ public:
    void SetLXePatchLUT(u_int32_t*);
    // set the IDCode
    void SetIDCode();
-   // set the CrateID and Slot
-   void SetCrateSlot(u_int32_t crateid, u_int32_t slotid);
+   // set the BoardID, CrateID and Slot
+   void SetBoardId(u_int32_t boardid, u_int32_t crateid, u_int32_t slotid);
    // set fntrg
    void SetNTRG();
    // write a memory
