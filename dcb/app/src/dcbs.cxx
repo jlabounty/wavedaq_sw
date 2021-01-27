@@ -801,6 +801,7 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("sdreset [error|sync|full]  Reset SERDES error/sync/full reset\n\n");
 
       c.sprintf("sinit  <slot>        Send init to WDB/TCB via backplane\n\n");
+      c.sprintf("sync                 Generate a SYNC on backplane\n");
       c.sprintf("sysmon               Print system monitor info\n\n");
 
       c.sprintf("upload <slot> [-f <path>] [-s <path>] [-t <type>] [-r <rev>]\n");
@@ -1148,6 +1149,9 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       else
          c.sprintf("Ok\n");
       
+   } else if (strcmp(param[0], "sync") == 0) {
+
+      bpl_sync();
 
    } else {
       c.sprintf("Unknown command: %s\n", buffer);
