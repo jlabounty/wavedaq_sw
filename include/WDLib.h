@@ -347,6 +347,8 @@ class WDTCB : public TCB, public WDBoard {
 
       void Sync(){
          SWSync();
+
+         usleep(500000);//wait sync is applied
       }
 
       void GoRun(){
@@ -439,7 +441,10 @@ class WDDCB : public DCB, public WDBoard {
       void TrainSerdes();
 
       void Sync(){
+         //SetLmkSyncDcb(1);
          SetTrSyncBpl(1);
+
+         usleep(500000);//wait sync is applied
       }
 
       void GoRun(){

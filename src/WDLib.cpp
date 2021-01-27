@@ -436,8 +436,6 @@ void WDSystem::GoRun(){
    fDaqSystem->GoRun();
    fDaqSystem->WaitRunStarted();
 
-   usleep(500000);//wait sync is applied
-
    //start master trigger board
    WDBoard* triggerBoard = GetTriggerBoard();
    if(triggerBoard) {
