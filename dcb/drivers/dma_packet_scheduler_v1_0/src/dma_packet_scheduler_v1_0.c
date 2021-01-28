@@ -689,6 +689,7 @@ static ssize_t reset_store(struct device *dev, struct device_attribute *attr, co
                         for(win = 0; win < windows; win++)
                         {
                                 info->slot_buf[slot].win_buf[win].len  = 0;
+                                reg_write(info, DPS_WIN_WINCNT(slot, win, stream_offset), 0x00000000); /* needed here because there is no queue in the udp implementation */
                         }
                 }
 
@@ -1081,7 +1082,7 @@ static irqreturn_t dma_packet_sched_irq_thread_handler(int irq, void *dev_id)
                                         last_win = reg_read(info, DPS_REG_LASTWIN(slot));
                                         win = (win + 1) % windows;
                                         wincnt = reg_read(info, DPS_WIN_WINCNT(slot, win, stream_offset));
-                                        /* pr_info("Handling slot %d: last_win = %d, win = %d, wincnt = 0x%08X\n", slot, last_win, win, wincnt); */
+                                        //pr_info("Handling slot %d: last_win = %d, win = %d, wincnt = 0x%08X\n", slot, last_win, win, wincnt);
                                         if ((PKT_IS_COMPLETE(wincnt) == 0) || (info->slot_buf[slot].win_buf[win].len != 0))
                                         {
                                                 break;
