@@ -844,7 +844,13 @@ void WDAQWorker::Begin(){
 
 //single board calibration
 void WDAQWorker::calibrateBoard(WDAQWdbEvent *ev){
-   VCALIB *calib = fVCalib.at(ev->mBoardId);
+   VCALIB* calib;
+   try{
+      calib = fVCalib.at(ev->mBoardId);
+   } catch(...){
+      printf("event with WDB board %d\n", ev->mBoardId);
+      return;
+   }
 
    // CLK channels masked with the presence of at least one associated channels in the event
    ev->mDrsHasData[16] &= ev->mDrsHasData[0]|ev->mDrsHasData[1]|ev->mDrsHasData[2]|ev->mDrsHasData[3]|ev->mDrsHasData[4]|ev->mDrsHasData[5]|ev->mDrsHasData[6]|ev->mDrsHasData[7];
