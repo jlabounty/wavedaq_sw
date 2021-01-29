@@ -97,6 +97,33 @@ DCB *get_dcb_from_query(const struct mg_str *buf, GLOBALS *gl) {
    return dcb;
 }
 
+WDB* findBoard(std::vector<DCB *> vdcb, std::vector<WDB *> vwdb, std::string adr) {
+   for (auto &c: adr) c = toupper(c);
+
+   WDB *wdb = nullptr;
+   if (adr[0] == 'D') {
+      std::string dcbName = adr.substr(0, adr.find(":"));
+      int slot = std::stoi(adr.substr(adr.find(":") + 1));
+
+      DCB *dcb = nullptr;
+      for (auto &d : vdcb) {
+         if (d->GetName() == dcbName) {
+            dcb = d;
+            break;
+         }
+      }
+      wdb = dcb->GetWDB(slot);
+   } else {
+      for (auto &b : vwdb) {
+         if (b->GetAddr() == adr) {
+            wdb = b;
+            break;
+         }
+      }
+   }
+   return wdb;
+}
+
 /*------------------------------------------------------------------*/
 
 static struct mg_serve_http_opts s_http_server_opts;
@@ -379,11 +406,15 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
 
       //---------- commands ----------
       else if (item == "vcalib") {
-         if (!gl->demoMode)
-            gl->wp->StartCalibrationVoltage(0);
+         if (!gl->demoMode) {
+            auto wdb = findBoard(gl->dcb, gl->wdb, wdbAddress);
+            gl->wp->StartCalibrationVoltage(wdb);
+         }
       } else if (item == "tcalib") {
-         if (!gl->demoMode)
-            gl->wp->StartCalibrationTime(0);
+         if (!gl->demoMode) {
+            auto wdb = findBoard(gl->dcb, gl->wdb, wdbAddress);
+            gl->wp->StartCalibrationTime(wdb);
+         }
       } else if (item == "save") {
          if (value == "stop")
             gl->wp->StopLogging();
@@ -600,7 +631,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
 
       // if not connected, try to connect
       if (dcb == nullptr) {
-         dcb = new DCB(adr);
+         dcb = new DCB(adr, gl->verbose);
          try {
             std::cout << "Connect to " << dcb->GetName() << " ... " << std::flush;
             dcb->Connect();
@@ -1029,39 +1060,16 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/wf") == 0) {
 
       mg_get_http_var(&hm->query_string, "adr", str, sizeof(str));
-      auto adr = std::string(str);
-      for (auto &c: adr) c = toupper(c);
+      auto wdb = findBoard(gl->dcb, gl->wdb, str);
+      if (wdb == nullptr) {
+         mg_printf_http_chunk(nc, "Board %s not found", str);
+         mg_send_http_chunk(nc, "", 0);
+         return;
+      }
 
       mg_get_http_var(&hm->query_string, "chn", str, sizeof(str));
       int chn = atoi(str);
 
-      WDB *wdb = nullptr;
-      if (adr[0] == 'D') {
-         std::string dcbName = adr.substr(0, adr.find(":"));
-         int slot = std::stoi(adr.substr(adr.find(":")+1));
-
-         DCB *dcb = nullptr;
-         for (auto &d : gl->dcb) {
-            if (d->GetName() == dcbName) {
-               dcb = d;
-               break;
-            }
-         }
-         wdb = dcb->GetWDB(slot);
-
-      } else {
-         for (auto &b : gl->wdb) {
-            if (b->GetAddr() == std::string(adr)) {
-               wdb = b;
-               break;
-            }
-         }
-      }
-      if (wdb == nullptr) {
-         mg_printf_http_chunk(nc, "Board %s not found", adr.c_str());
-         mg_send_http_chunk(nc, "", 0);
-         return;
-      }
 
       mg_send_response_line(nc, 200, "Content-Type: application/octet-stream\r\nTransfer-Encoding: chunked\r\n");
 
@@ -1410,9 +1418,9 @@ void connectWDB(GLOBALS *gl, WDB *b) {
    // Enable serdes if WDB is in crate
    if (b->IsDcbInterface()) {
       b->SetExtClkFreq(80);  // 80 MHz external clock
-      sleep_ms(2000);
+      //sleep_ms(2000);
       b->SetDaqClkSrcSel(0); // set clock select to backplane
-      sleep_ms(2000);
+      //sleep_ms(2000);
       b->SetEthComEn(0);     // disable ethernet
       b->SetSerdesComEn(1);  // enable serdes
    } else {
@@ -1424,6 +1432,7 @@ void connectWDB(GLOBALS *gl, WDB *b) {
 }
 
 void connectDCB(GLOBALS *gl, DCB *dcb) {
+   bool newBoard = false;
    for (int i=0 ; i<16 ; i++) {
       if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
          if (dcb->GetWDB(i) == nullptr) {
@@ -1434,6 +1443,7 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
             gl->wp->SetWDBList(gl->wdb);
             std::cout << "OK" << std::endl;
             dcb->SetWDB(i, wdb);
+            newBoard = true;
          }
       } else if (dcb->GetWDB(i) != nullptr) {
          std::cout << "Disconnected from " << dcb->GetWDB(i)->GetAddr() << std::endl;
@@ -1442,7 +1452,10 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
       }
    }
 
-   dcb->ResetSerdes();
+   if (newBoard) {
+      sleep_ms(2000); // Let LMKs of WDBs lock
+      dcb->ResetSerdes();
+   }
 }
 
 int main(int argc, const char *argv[]) {

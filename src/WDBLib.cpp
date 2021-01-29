@@ -2559,6 +2559,38 @@ void WP::UnrotateWaveforms() {
 
 //--------------------------------------------------------------------
 
+void WP::StartCalibrationVoltage(WDB *wdb) {
+   int i;
+   if (wdb != nullptr) {
+      for (i = 0; i < mWdb.size(); i++)
+         if (mWdb[i]->GetSerialNumber() == wdb->GetSerialNumber())
+            break;
+   }
+
+   calibProg.mode = cCmVoltage;
+   calibProg.nBoard = (wdb == nullptr) ? mWdb.size() : 1;
+   calibProg.iBoard = (wdb == nullptr) ? 0 : i;
+   calibProg.state = cCsFirstBoard;
+}
+
+//--------------------------------------------------------------------
+
+void WP::StartCalibrationTime(WDB *wdb) {
+   int i;
+   if (wdb != nullptr) {
+      for (i = 0; i < mWdb.size(); i++)
+         if (mWdb[i]->GetSerialNumber() == wdb->GetSerialNumber())
+            break;
+   }
+
+   calibProg.mode = cCmTime;
+   calibProg.nBoard = (wdb == nullptr) ? mWdb.size() : 1;
+   calibProg.iBoard = (wdb == nullptr) ? 0 : i;
+   calibProg.state = cCsFirstBoard;
+};
+
+//--------------------------------------------------------------------
+
 void WP::CalibrateWaveforms(std::map<int, WDEvent *> event) {
    for (auto &ev: event) {
       if (ev.second->IsEventValid())

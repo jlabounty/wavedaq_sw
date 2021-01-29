@@ -72,8 +72,12 @@ void DCB::SendUDP(std::string str)
 {
    std::string result;
    result = SendReceiveUDP(str);
-   if (mVerbose)
-      std::cout << mDCBName << ": " << result << std::endl;
+   if (mVerbose) {
+      if (result != "")
+         std::cout << "Send '" << str << "' to " << mDCBName << ": " << result << std::endl;
+      else
+         std::cout << "Send '" << str << "' to " << mDCBName << std::endl;
+   }
 }
 
 //--------------------------------------------------------------------
@@ -151,7 +155,6 @@ std::string DCB::SendReceiveUDP(std::string str)
 
          FD_ZERO(&readfds);
          FD_SET(gASCIISocket, &readfds);
-
 
          if (retry == 0)
             ms = mReceiveTimeoutMs;
@@ -473,8 +476,15 @@ void DCB::SetDestinationPort(int port) {
 //--------------------------------------------------------------------
 
 void DCB::ResetSerdes() {
+   std::string result;
+
    // reset SERDES receivers on DCB
-   SendUDP("sdreset full");
+   auto oldTimeout = mReceiveTimeoutMs;
+   mReceiveTimeoutMs = 500; // increase timeout for this command
+   result = SendReceiveUDP("sdreset full");
+   mReceiveTimeoutMs = oldTimeout;
+   if (mVerbose)
+      std::cout << mDCBName << " 'sdreset full': " << result << std::endl;
 }
 
 //--------------------------------------------------------------------

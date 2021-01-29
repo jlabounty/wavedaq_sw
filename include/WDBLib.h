@@ -468,16 +468,8 @@ public:
    void CalibrateWaveforms(WDEvent* event);
    void CalibrateWaveforms(std::map<int, WDEvent *> event);
 
-   void StartCalibrationVoltage(int b) {
-      calibProg.mode = cCmVoltage;
-      calibProg.nBoard = (b == -1) ? mWdb.size() : b+1;
-      calibProg.iBoard = (b == -1) ? 0 : b;
-      calibProg.state = cCsFirstBoard; }
-   void StartCalibrationTime(int b) {
-      calibProg.mode = cCmTime;
-      calibProg.nBoard = (b == -1) ? mWdb.size() : b+1;
-      calibProg.iBoard = (b == -1) ? 0 : b;
-      calibProg.state = cCsFirstBoard; };
+   void StartCalibrationVoltage(WDB *wdb);
+   void StartCalibrationTime(WDB *wdb);
    void DoVoltageCalibrationStep();
    void DoTimeCalibrationStep();
 
