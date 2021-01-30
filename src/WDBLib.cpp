@@ -2568,7 +2568,7 @@ void WP::StartCalibrationVoltage(WDB *wdb) {
    }
 
    calibProg.mode = cCmVoltage;
-   calibProg.nBoard = (wdb == nullptr) ? mWdb.size() : 1;
+   calibProg.lastBoard = (wdb == nullptr) ? mWdb.size() : i+1;
    calibProg.iBoard = (wdb == nullptr) ? 0 : i;
    calibProg.state = cCsFirstBoard;
 }
@@ -2584,7 +2584,7 @@ void WP::StartCalibrationTime(WDB *wdb) {
    }
 
    calibProg.mode = cCmTime;
-   calibProg.nBoard = (wdb == nullptr) ? mWdb.size() : 1;
+   calibProg.lastBoard = (wdb == nullptr) ? mWdb.size() : i+1;
    calibProg.iBoard = (wdb == nullptr) ? 0 : i;
    calibProg.state = cCsFirstBoard;
 };
@@ -3693,7 +3693,7 @@ void WP::DoVoltageCalibrationStep() {
    // switch back to old board settings
    b->Restore();
 
-   if (calibProg.iBoard == calibProg.nBoard) {
+   if (calibProg.iBoard == calibProg.lastBoard) {
       calibProg.state = cCsInactive;
       calibProg.mode = cCmNone;
 
@@ -4151,7 +4151,7 @@ void WP::DoTimeCalibrationStep() {
    // switch back to old board settings
    b->Restore();
 
-   if (calibProg.iBoard == calibProg.nBoard) {
+   if (calibProg.iBoard == calibProg.lastBoard) {
       calibProg.state = cCsInactive;
       calibProg.mode = cCmNone;
 

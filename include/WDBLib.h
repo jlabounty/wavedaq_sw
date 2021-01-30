@@ -174,7 +174,7 @@ typedef struct {
    int            mode;
    int            state;
    double         progress;
-   int            nBoard;
+   int            lastBoard;
    int            iBoard;
    int            nIter1;
    int            iIter1;
