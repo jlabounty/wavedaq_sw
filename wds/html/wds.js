@@ -213,6 +213,10 @@ function reconnect() {
 }
 
 function populateControls(init) {
+
+   // set WDB name in board select button
+   document.getElementById('wdSelect').innerHTML = OSC.wdbAddress;
+
    // populate channel buttons
    for (let i = 0; i < 18; i++)
       OSC.chOn[i] = (OSC.wdb.chnTxEn & (1 << i)) > 0;
