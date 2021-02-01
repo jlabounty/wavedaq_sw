@@ -953,15 +953,15 @@ function DCBmark() {
    }
 
    let req = new XMLHttpRequest();
-   req.open("GET", "mark?adr=" + CRATE.dcbAddress + "&fl=" + (CRATE.markDCB ? "1" : "0"), true);
+   req.open("GET", "mark?adr=" + CRATE.dcbAddress + "&fl=" + (CRATE.markDCB ? "1" : "0") +
+      "&r=" + Math.random(), true);
    req.send();
 }
 
 function DCBSdreset() {
    let req = new XMLHttpRequest();
-   req.open("GET", "sdreset?adr=" + CRATE.dcbAddress, true);
+   req.open("GET", "sdreset?adr=" + CRATE.dcbAddress + "&r=" + Math.random(), true);
    req.send();
-
 }
 
 let progress;
