@@ -1298,7 +1298,7 @@ extern "C" { // make all library functions callable from C++
 
 //-------------------------------------------------------------------
 
-void show_progress(udp_connection &c, int item, const char* prefix, double percent,
+void show_progress(udp_connection &c, int slot, int item, const char* prefix, double percent,
                    const char *idle_char, const char *prog_char)
 {
    int i;
@@ -1306,7 +1306,7 @@ void show_progress(udp_connection &c, int item, const char* prefix, double perce
 
    if (c.percent) {
       percent = titem[item]*100 + (titem[item+1]-titem[item]) * percent;
-      c.sprintf("%5.1lf\n", percent);
+      c.sprintf("%d %5.1lf\n", slot, percent);
       c.flush();
    } else {
       c.sprintf("\r"); // Send carriage return without newline
@@ -1409,7 +1409,7 @@ void write_fw(udp_connection &c, int slot, char *fw_file,
          ers_size = qspi_flash_erase_sector(&flash_partition, tot_ers_size);
          tot_ers_size += ers_size;
          if(tot_ers_size>bit_inf.info.data_len) tot_ers_size = bit_inf.info.data_len; /* Keep progress bar <= 100% */
-         show_progress(c, 0, str, 100.0 * tot_ers_size/bit_inf.info.data_len,
+         show_progress(c, slot, 0, str, 100.0 * tot_ers_size/bit_inf.info.data_len,
                        " ", PROG_BAR_DEL_CHAR);
       }
 
@@ -1423,7 +1423,7 @@ void write_fw(udp_connection &c, int slot, char *fw_file,
             flash_len = read(fd, buff, FLASH_BUF_SIZE);
             qspi_flash_write(&flash_partition, flash_offs, flash_len, buff);
             flash_offs += flash_len;
-            show_progress(c, 1, str, 100.0 * flash_offs/bit_inf.info.data_len,
+            show_progress(c, slot, 1, str, 100.0 * flash_offs/bit_inf.info.data_len,
                           PROG_BAR_DEL_CHAR, PROG_BAR_FW_CHAR);
          }
          if (!c.percent) {
@@ -1521,7 +1521,7 @@ void write_sw(udp_connection &c, int slot, char *sw_file,
       while (tot_ers_size < flash_partition.mtd_info.size) {
          ers_size = qspi_flash_erase_sector(&flash_partition, tot_ers_size);
          tot_ers_size += ers_size;
-         show_progress(c, 2, str, 100.0 * tot_ers_size / flash_partition.mtd_info.size,
+         show_progress(c, slot, 2, str, 100.0 * tot_ers_size / flash_partition.mtd_info.size,
            " ", PROG_BAR_DEL_CHAR);
       }
 
@@ -1535,7 +1535,7 @@ void write_sw(udp_connection &c, int slot, char *sw_file,
             flash_len = read(fd, buff, FLASH_BUF_SIZE);
             qspi_flash_write(&flash_partition, flash_offs, flash_len, buff);
             flash_offs += flash_len;
-            show_progress(c, 3, str, 100.0 * flash_offs / file_stat.st_size,
+            show_progress(c, slot, 3, str, 100.0 * flash_offs / file_stat.st_size,
                           PROG_BAR_DEL_CHAR, PROG_BAR_SW_CHAR);
          }
          if (!c.percent) {
@@ -1667,7 +1667,7 @@ void slot_upload(udp_connection &c, unsigned int slot_nr, int load_fw, char *fwp
       for (int i=0 ; i<=50 ; i++) {
          char str[256];
          sprintf(str, "Slot %2d: Booting board     ", slot_nr);
-         show_progress(c, 4, str, i/50.0*100, " ", PROG_BAR_REB_CHAR);
+         show_progress(c, slot_nr, 4, str, i/50.0*100, " ", PROG_BAR_REB_CHAR);
          usleep(100000);
       }
    }
@@ -1716,7 +1716,8 @@ void crate_upload(udp_connection &c, int slot[WDAQ_N_SLOTS], int load_fw, char *
       }
    }
 
-   c.sprintf("\e[?25h"); // show cursor
+   if (!c.percent)
+      c.sprintf("\e[?25h"); // show cursor
    c.flush();
 }
 
@@ -1899,6 +1900,10 @@ void upload(udp_connection &c, int n_param, const char **param) {
 
    if (c.verbose)
       c.sprintf("\n");
+
+   if (c.percent)
+      c.sprintf("OK\n");
+   c.flush();
 
    if (t_force && r_force) {
       /* forced upload */
