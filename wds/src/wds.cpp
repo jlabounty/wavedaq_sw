@@ -758,6 +758,24 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       return;
    }
 
+   // SERDES reset ------------------------------
+   if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/sdreset") == 0) {
+      DCB *dcb = get_dcb_from_query(&hm->query_string, gl);
+
+      if (gl->verbose)
+         std::cout << "Received \"sdreset\" command" << std::endl;
+
+      if (dcb != nullptr)
+         dcb->SendReceiveUDP("sdreset full");
+
+      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+      mg_printf_http_chunk(nc, "{\n");
+      mg_printf_http_chunk(nc, "   \"status\": \"1\",\n");
+      mg_printf_http_chunk(nc, "}\n");
+      mg_send_http_chunk(nc, "", 0);
+      return;
+   }
+
    // boards ------------------------------
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/wdb") == 0) {
       char str[256];

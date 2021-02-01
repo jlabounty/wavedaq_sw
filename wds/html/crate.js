@@ -955,6 +955,12 @@ function DCBmark() {
    let req = new XMLHttpRequest();
    req.open("GET", "mark?adr=" + CRATE.dcbAddress + "&fl=" + (CRATE.markDCB ? "1" : "0"), true);
    req.send();
+}
+
+function DCBSdreset() {
+   let req = new XMLHttpRequest();
+   req.open("GET", "sdreset?adr=" + CRATE.dcbAddress, true);
+   req.send();
 
 }
 
