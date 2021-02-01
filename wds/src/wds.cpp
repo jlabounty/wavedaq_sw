@@ -55,6 +55,7 @@ unsigned int demoDrsSampleFreq = 5016;
 std::vector<std::string> split(const std::string &input, char separator);
 void connectWDB(GLOBALS *gl, WDB *b);
 void connectDCB(GLOBALS *gl, DCB *d);
+void disconnectWDB(GLOBALS *gl, WDB *b);
 
 /*------------------------------------------------------------------*/
 
@@ -673,12 +674,9 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       mg_printf_http_chunk(nc, "   \"CMB\": \"%s\",\n", "MSCBXXX");
       mg_printf_http_chunk(nc, "   \"slot\": [\n");
       for (int i=0 ; i<16 ; i++) {
-         if (dcb->GetWDB(i) != nullptr && !dcb->GetWDB(i)->Ping()) {
-            std::cout << "Disconnected from " << dcb->GetWDB(i)->GetAddr() << std::endl;
-            delete dcb->GetWDB(i);
-            dcb->SetWDB(i, nullptr);
-            dcb->ClearBoardId(i);
-         }
+         auto b = dcb->GetWDB(i);
+         if (b != nullptr && !b->Ping())
+            disconnectWDB(gl, b);
 
          mg_printf_http_chunk(nc, "      {\n");
          mg_printf_http_chunk(nc, "        \"vendor_id\": %d,\n", dcb->GetBoardId(i)->vendor_id);
@@ -763,10 +761,10 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       DCB *dcb = get_dcb_from_query(&hm->query_string, gl);
 
       if (gl->verbose)
-         std::cout << "Received \"sdreset\" command" << std::endl;
+         std::cout << "Received \"serdes reset\" command" << std::endl;
 
       if (dcb != nullptr)
-         dcb->SendReceiveUDP("sdreset full");
+         dcb->ResetSerdes();
 
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
       mg_printf_http_chunk(nc, "{\n");
@@ -1464,9 +1462,7 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
             newBoard = true;
          }
       } else if (dcb->GetWDB(i) != nullptr) {
-         std::cout << "Disconnected from " << dcb->GetWDB(i)->GetAddr() << std::endl;
-         delete dcb->GetWDB(i);
-         dcb->SetWDB(i, nullptr);
+         disconnectWDB(gl, dcb->GetWDB(i));
       }
    }
 
@@ -1474,6 +1470,19 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
       sleep_ms(2000); // Let LMKs of WDBs lock
       dcb->ResetSerdes();
    }
+}
+
+void disconnectWDB(GLOBALS *gl, WDB *b) {
+   std::cout << "Disconnected from " << b->GetAddr() << std::endl;
+   for (auto &dcb: gl->dcb) {
+      for (int i=0 ; i<16 ; i++)
+         if (dcb->GetWDB(i) == b) {
+            dcb->SetWDB(i, nullptr);
+            dcb->ClearBoardId(i);
+         }
+   }
+   gl->wdb.erase(std::remove(gl->wdb.begin(), gl->wdb.end(), b), gl->wdb.end());
+   delete b;
 }
 
 int main(int argc, const char *argv[]) {
@@ -1727,16 +1736,12 @@ int main(int argc, const char *argv[]) {
 
          if (now > last) {
             // update every second all status registers
-            int i=0;
             for (auto &b: gl.wdb) {
                try {
                   b->ReceiveStatusRegisters();
                } catch (...) {
-                  gl.wdb.erase(gl.wdb.begin()+i);
-                  std::cout << "Disconnected from " << b->GetAddr() << std::endl;
-                  delete b;
+                  disconnectWDB(&gl, b);
                }
-               i++;
             }
             // update all control registers if requested
             if (gl.updatePeriodic) {

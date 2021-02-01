@@ -866,7 +866,11 @@ std::string WDB::GetFwBuild() {
                                          "Dec"};
 
    s << std::dec << std::setw(2) << std::setfill('0');
-   s << monthName[bcd2dec(GetFwBuildMonth()) - 1] << ' ';
+   int m = bcd2dec(GetFwBuildMonth()) - 1;
+   if (m >= 0 && m < 12)
+      s << monthName[bcd2dec(GetFwBuildMonth()) - 1] << ' ';
+   else
+      s << "unknown ";
    s << bcd2dec(GetFwBuildDay()) << ' ';
    s << bcd2dec(GetFwBuildYear()) << "  ";
    s << std::setfill('0') << std::setw(2) << bcd2dec(GetFwBuildHour()) << ':';
