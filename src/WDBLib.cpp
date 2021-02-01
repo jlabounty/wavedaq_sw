@@ -1009,8 +1009,6 @@ void WDB::SetDrsSampleFreq(unsigned int f)
    SetLmk5ClkoutMux(1);
    SetLmk5ClkoutDly(0);
 
-   SetApplySettingsLmk(1);
-
    LmkSyncLocal();
    SetAdcIfRst(0);
 
