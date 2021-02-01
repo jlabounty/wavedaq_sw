@@ -48,6 +48,7 @@ typedef struct {
    bool updatePeriodic;
    std::string wdsDir;
    std::map<std::string, time_t> recent;
+   bool upload;
 } GLOBALS;
 
 unsigned int demoDrsSampleFreq = 5016;
@@ -162,10 +163,10 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       for (auto &c: wdbAddress) c = toupper(c);
       std::vector<WDB *> wdbList;
       DCB *dcb = nullptr;
+      int slot = -1;
 
       if (wdbAddress[0] == 'D') {
          std::string dcbName = wdbAddress.substr(0, wdbAddress.find(":"));
-         int slot = -1;
          if (wdbAddress.find(":") != std::string::npos)
             slot = std::stoi(wdbAddress.substr(wdbAddress.find(":")+1));
 
@@ -175,7 +176,9 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
                break;
             }
          }
-         assert(dcb != nullptr);
+         if (dcb == nullptr)
+            return;
+
          if (slot != -1)
             wdbList.push_back(dcb->GetWDB(slot));
 
@@ -451,14 +454,22 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
 
       } else if (item == "sdreset") { // SERDES reset ------------------------------
 
-         if (gl->verbose)
-            std::cout << "Received \"serdes reset\" command" << std::endl;
          if (dcb != nullptr)
             dcb->ResetSerdes();
 
+      } else if (item == "upload") { // upload ------------------------------
+
+         if (dcb != nullptr) {
+            gl->upload = true;
+            auto result = dcb->UploadStart(slot);
+            mg_printf(nc, "%s", "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
+            mg_printf_http_chunk(nc, "%s", result.c_str());
+            mg_send_http_chunk(nc, "", 0); // end of response
+            return;
+         }
+
       } else {
          std::cout << "Invalid command \"" << item << "\" received. Aborting." << std::endl;
-         assert(0);
       }
 
       mg_printf(nc, "%s", "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
@@ -623,6 +634,10 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
    // crate ------------------------------
    static int slotHvOn = 0;
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/crate") == 0) {
+
+      if (gl->upload)
+         return;
+
       char str[256];
       static time_t lastFullScan = 0;
       mg_get_http_var(&hm->query_string, "adr", str, sizeof(str));
@@ -1049,6 +1064,50 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       mg_printf_http_chunk(nc, "   ]\n");
       mg_printf_http_chunk(nc, "}\n");
       mg_send_http_chunk(nc, "", 0);
+      return;
+   }
+
+   // upload progress ------------------------------
+   if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/uploadProg") == 0) {
+      char str[256];
+      mg_get_http_var(&hm->query_string, "adr", str, sizeof(str));
+      auto adr = std::string(str);
+      for (auto &c: adr) c = toupper(c);
+
+      if (adr[0] == 'D') {
+         DCB *dcb = nullptr;
+         for (auto &d : gl->dcb) {
+            if (d->GetName() == adr) {
+               dcb = d;
+               break;
+            }
+         }
+         if (dcb != nullptr) {
+            auto str = dcb->UploadProgress();
+
+            if (str.find(">") != std::string::npos) {
+               std::cout << "Upload finished" << std::endl;
+               gl->upload = false;
+            } else if (str.size() > 3) {
+               int slot = std::stoi(str);
+               double progress = std::stod(str.substr(str.find(" ") + 1));
+
+               mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+               mg_printf_http_chunk(nc, "{\n");
+               mg_printf_http_chunk(nc, "   \"slot\": %d,\n", slot);
+               mg_printf_http_chunk(nc, "   \"progress\" : %1.1lf\n", progress);
+               mg_printf_http_chunk(nc, "}\n");
+               mg_send_http_chunk(nc, "", 0);
+
+               if (gl->verbose)
+                  std::cout << "Return upload slot " << slot << " progress " << progress << std::endl;
+            } else {
+               mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+               mg_printf_http_chunk(nc, "{}\n");
+               mg_send_http_chunk(nc, "", 0);
+            }
+         }
+      }
       return;
    }
 
@@ -1479,6 +1538,7 @@ int main(int argc, const char *argv[]) {
    gl.triggerSelfArm = false;
    gl.updatePeriodic = false;
    gl.wdsDir = "";
+   gl.upload = false;
 
    // find wds directory
    char tmp[256];
@@ -1685,6 +1745,7 @@ int main(int argc, const char *argv[]) {
 
    std::cout << "GIT revision: " << getWdbLibRevision() << std::endl;
    std::cout << "Starting HTTP server at port " << gl.serverPort << std::endl;
+   std::cout << "Starting packet receiver at port " << gl.wp->GetServerPort() << std::endl;
 
    if (gl.demoMode)
       std::cout << "Starting in DEMO mode." << std::endl;
@@ -1714,7 +1775,7 @@ int main(int argc, const char *argv[]) {
          // read board temperatures and lock status periodically
          time(&now);
 
-         if (now > last) {
+         if (!gl.upload && now > last) {
             // update every second all status registers
             for (auto &b: gl.wdb) {
                try {

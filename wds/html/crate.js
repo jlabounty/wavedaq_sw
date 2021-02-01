@@ -153,7 +153,7 @@ Crate.prototype.mouseEvent = function (e) {
                document.getElementById('dlgInfoTCB').style.display = 'none';
             } else if (slot < 16) {
                if (CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_WDB ||
-                   CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_NONE0)
+                   CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_BLANK)
                   CRATE.selectedWDB = slot;
                else
                   CRATE.selectedWDB = undefined;
@@ -856,7 +856,8 @@ function receiveCrate() {
       setItem("infoDCBV3_3", dcb.v3_3);
       setItem("infoDCBV2_5", dcb.v2_5);
 
-      if (CRATE.selectedWDB !== undefined) {
+      if (CRATE.selectedWDB !== undefined &&
+          CRATE.crate.slot[CRATE.selectedWDB].type_id !== BRD_TYPE_ID_BLANK) {
          let wdb = CRATE.crate.slot[CRATE.selectedWDB];
 
          setItem("infoWDBName", wdb.name);
@@ -930,7 +931,7 @@ function connectionBroken() {
 }
 
 function reconnect() {
-   if (CRATE.dlgReconnect.parentElement === undefined)
+   if (CRATE.dlgReconnect.parentElement === null)
       return;
    let req = new XMLHttpRequest();
    req.onreadystatechange = function () {
@@ -966,16 +967,16 @@ function DCBSdreset() {
    req.send();
 }
 
-let progress;
+let rebootProgress;
 
-function updateProgress() {
-   progress += 0.1;
-   d = document.getElementById("progressWait");
-   d.set(progress / 15);
-   if (progress >= 15) {
+function updateRebootProgress() {
+   rebootProgress += 0.1;
+   let d = document.getElementById("progressWait");
+   d.set(rebootProgress / 15);
+   if (rebootProgress >= 15) {
       dlgHide("dlgWait");
    } else
-      window.setTimeout(updateProgress, 100);
+      window.setTimeout(updateRebootProgress, 100);
 }
 
 function WDBrebootQuery() {
@@ -984,11 +985,11 @@ function WDBrebootQuery() {
 
 function WDBreboot(flag) {
    if (flag) {
-      progress = 0;
+      rebootProgress = 0;
       dlgShow("dlgWait", true);
-      window.setTimeout(updateProgress, 100);
+      window.setTimeout(updateRebootProgress, 100);
 
-      // kill update times
+      // kill update timer
       if (CRATE.timer.loadCrate !== undefined)
          window.clearTimeout(CRATE.timer.loadCrate);
 
@@ -1012,3 +1013,50 @@ function WDBreboot(flag) {
       }
    }
 }
+
+function upload() {
+
+   // kill update timer
+   if (CRATE.timer.loadCrate !== undefined)
+      window.clearTimeout(CRATE.timer.loadCrate);
+
+   let req = new XMLHttpRequest();
+   req.onreadystatechange = function () {
+      if (req.readyState === 4 && req.status === 200) {
+         if (req.responseText !== "OK\n")
+            dlgAlert(req.responseText);
+         else {
+            dlgShow("dlgWait", true);
+            document.getElementById("progressWait").set(0);
+            window.setTimeout(uploadProgress, 100);
+         }
+      }
+   };
+
+   req.open("PUT", "upload/" + CRATE.dcbAddress + ":" + CRATE.selectedWDB, true);
+   req.send();
+}
+
+function uploadProgress() {
+   let req = new XMLHttpRequest();
+   req.onreadystatechange = function () {
+      if (req.readyState === 4 && req.status === 200) {
+         let r = JSON.parse(req.responseText);
+         if (r.progress !== undefined) {
+            document.getElementById("progressComment").innerHTML = "Uploading slot " + r.slot;
+            let d = document.getElementById("progressWait");
+            d.set(r.progress / 100);
+            if (r.progress === 100) {
+               dlgHide("dlgWait");
+               loadCrate(); // restart crate-scan
+            }
+         }
+         window.setTimeout(uploadProgress, 300);
+      }
+   }
+
+   req.open("GET", "uploadProg?adr=" + CRATE.dcbAddress + "&r=" + Math.random(), true);
+   req.send();
+}
+
+

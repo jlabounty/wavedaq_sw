@@ -196,7 +196,7 @@ function connectionBroken() {
 }
 
 function reconnect() {
-   if (OSC.dlgReconnect.parentElement === undefined)
+   if (OSC.dlgReconnect.parentElement === null)
       return;
    let req = new XMLHttpRequest();
    req.onreadystatechange = function () {

@@ -95,7 +95,7 @@ bool DCB::Ping()
 
 //--------------------------------------------------------------------
 
-std::string DCB::SendReceiveUDP(std::string str)
+std::string DCB::SendReceiveUDP(std::string str, bool waitPrompt)
 {
    size_t i;
    fd_set readfds;
@@ -183,8 +183,12 @@ std::string DCB::SendReceiveUDP(std::string str)
          if (mPrompt == "")
             mPrompt = result;
 
+         if (!waitPrompt)
+            return result;
+
          // check for prompt
-         if (result.substr(result.size()-mPrompt.size()) == mPrompt)
+         if (result.size() >= mPrompt.size() &&
+             result.substr(result.size()-mPrompt.size()) == mPrompt)
             break;
 
       } while (1);
@@ -211,6 +215,30 @@ std::string DCB::SendReceiveUDP(std::string str)
       result = result.substr(0, result.size()-mPrompt.size());
 
    return result;
+}
+
+//--------------------------------------------------------------------
+
+std::string DCB::ReceiveUDP()
+{
+   fd_set readfds;
+   struct timeval timeout;
+   int    status;
+   char   rx_buffer[1600];
+
+   FD_ZERO(&readfds);
+   FD_SET(gASCIISocket, &readfds);
+   memset(rx_buffer, 0, sizeof(rx_buffer));
+
+   timeout.tv_sec = 0;
+   timeout.tv_usec = 0;
+   do {
+      status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
+   } while (status == -1); // don't return on interrupt
+
+   if (FD_ISSET(gASCIISocket, &readfds))
+      recv(gASCIISocket, rx_buffer, sizeof(rx_buffer), 0);
+   return std::string(rx_buffer);
 }
 
 //--------------------------------------------------------------------
@@ -476,15 +504,35 @@ void DCB::SetDestinationPort(int port) {
 //--------------------------------------------------------------------
 
 void DCB::ResetSerdes() {
-   std::string result;
-
    // reset SERDES receivers on DCB
    auto oldTimeout = mReceiveTimeoutMs;
    mReceiveTimeoutMs = 500; // increase timeout for this command
-   result = SendReceiveUDP("sdreset full");
+   auto result = SendReceiveUDP("sdreset full");
    mReceiveTimeoutMs = oldTimeout;
    if (mVerbose)
       std::cout << mDCBName << " 'sdreset full': " << result << std::endl;
+}
+
+//--------------------------------------------------------------------
+
+std::string DCB::UploadStart(int slot) {
+   auto result = SendReceiveUDP("upload " + std::to_string(slot) + " -t wdb -r g -p", false);
+   if (mVerbose)
+      std::cout << mDCBName << " upload slot " << slot << ": " << result << std::endl;
+   return result;
+}
+
+std::string DCB::UploadProgress() {
+   std::string res;
+   do {
+      auto r = ReceiveUDP();
+      if (r == "")
+         break;
+      if (r.find(">") != std::string::npos)
+         return r;
+      res = r;
+   } while (true);
+   return res;
 }
 
 //--------------------------------------------------------------------

@@ -34,6 +34,7 @@
             </td>
             <td id="infoWDBCommands">
                <button id="btnWDBReboot" class="cmdBtn" onclick="WDBrebootQuery()">Reboot</button>
+               <button id="btnWDBUpload" class="cmdBtn" onclick="upload()">Upload firmware</button>
             </td>
          </tr>
          <tr>
@@ -206,7 +207,7 @@
                &nbsp;Commands
             </td>
             <td>
-               <button id="btnEmptyUpload" class="cmdBtn" onclick="EmptyUpload()">Upload WDB firmware</button>
+               <button id="btnEmptyUpload" class="cmdBtn" onclick="upload()">Upload WDB firmware</button>
             </td>
          </tr>
          <tr>
@@ -226,6 +227,7 @@
 
       <div class="dlgPanel">
 
+         <div id="progressComment"></div>
          <div name="ctrlProgress" style="width:250px;" id="progressWait"></div>
 
       </div>

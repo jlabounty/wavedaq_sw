@@ -59,8 +59,9 @@ public:
    void WriteUDP(unsigned int slot, unsigned int ofs, std::vector<unsigned int> data);
    std::vector<unsigned int> ReadUDP(unsigned int slot, unsigned int ofs, unsigned int len);
 
-   std::string SendReceiveUDP(std::string str);
+   std::string SendReceiveUDP(std::string str, bool waitPrompt = true);
    void SendUDP(std::string str);
+   std::string ReceiveUDP();
    bool Ping();
 
    const unsigned int cRequiredRegLayoutCompatLevel = 0;
@@ -94,6 +95,8 @@ public:
    }
    void SetDestinationPort(int port);
    void ResetSerdes();
+   std::string UploadStart(int slot);
+   std::string UploadProgress();
 
    // setter & getter ----------
    std::string GetName() { return mDCBName; }
