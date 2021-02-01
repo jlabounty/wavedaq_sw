@@ -161,12 +161,14 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       // search board in list
       for (auto &c: wdbAddress) c = toupper(c);
       std::vector<WDB *> wdbList;
+      DCB *dcb = nullptr;
 
       if (wdbAddress[0] == 'D') {
          std::string dcbName = wdbAddress.substr(0, wdbAddress.find(":"));
-         int slot = std::stoi(wdbAddress.substr(wdbAddress.find(":")+1));
+         int slot = -1;
+         if (wdbAddress.find(":") != std::string::npos)
+            slot = std::stoi(wdbAddress.substr(wdbAddress.find(":")+1));
 
-         DCB *dcb = nullptr;
          for (auto &d : gl->dcb) {
             if (d->GetName() == dcbName) {
                dcb = d;
@@ -174,8 +176,8 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             }
          }
          assert(dcb != nullptr);
-
-         wdbList.push_back(dcb->GetWDB(slot));
+         if (slot != -1)
+            wdbList.push_back(dcb->GetWDB(slot));
 
       } else {
          for (auto &wdb : gl->wdb) {
@@ -185,7 +187,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
          }
       }
 
-      if (wdbList.size() == 0) {
+      if (wdbList.size() == 0 && dcb == nullptr) {
          std::cout << "Received item " << item
                    << ", value " << value
                    << ", channel " << iChannel
@@ -437,6 +439,22 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
 
             connectWDB(gl, b);
          }
+
+      } else if (item == "mark") { // mark ------------------------------
+
+         bool flag = (value[0] == '1');
+         if (gl->verbose)
+            std::cout << "Received \"mark " << (flag ? "on" : "off") << "\" command" << std::endl;
+         if (dcb != nullptr)
+            dcb->SendReceiveUDP(flag ? "mark" : "unmark");
+
+
+      } else if (item == "sdreset") { // SERDES reset ------------------------------
+
+         if (gl->verbose)
+            std::cout << "Received \"serdes reset\" command" << std::endl;
+         if (dcb != nullptr)
+            dcb->ResetSerdes();
 
       } else {
          std::cout << "Invalid command \"" << item << "\" received. Aborting." << std::endl;
@@ -733,44 +751,6 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       mg_printf_http_chunk(nc, "   ]\n");
       mg_printf_http_chunk(nc, "}\n");
       mg_send_http_chunk(nc, "", 0); // end of response
-      return;
-   }
-
-   // mark ------------------------------
-   if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/mark") == 0) {
-      DCB *dcb = get_dcb_from_query(&hm->query_string, gl);
-      mg_get_http_var(&hm->query_string, "fl", str, sizeof(str));
-      bool flag = atoi(str);
-
-      if (gl->verbose)
-         std::cout << "Received \"mark " << (flag ? "on" : "off") << "\" command" << std::endl;
-
-      if (dcb != nullptr)
-         dcb->SendReceiveUDP(flag ? "mark" : "unmark");
-
-      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
-      mg_printf_http_chunk(nc, "{\n");
-      mg_printf_http_chunk(nc, "   \"status\": \"1\",\n");
-      mg_printf_http_chunk(nc, "}\n");
-      mg_send_http_chunk(nc, "", 0);
-      return;
-   }
-
-   // SERDES reset ------------------------------
-   if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/sdreset") == 0) {
-      DCB *dcb = get_dcb_from_query(&hm->query_string, gl);
-
-      if (gl->verbose)
-         std::cout << "Received \"serdes reset\" command" << std::endl;
-
-      if (dcb != nullptr)
-         dcb->ResetSerdes();
-
-      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
-      mg_printf_http_chunk(nc, "{\n");
-      mg_printf_http_chunk(nc, "   \"status\": \"1\",\n");
-      mg_printf_http_chunk(nc, "}\n");
-      mg_send_http_chunk(nc, "", 0);
       return;
    }
 

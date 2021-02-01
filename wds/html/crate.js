@@ -152,18 +152,21 @@ Crate.prototype.mouseEvent = function (e) {
                document.getElementById('dlgInfoDCB').style.display = 'revert';
                document.getElementById('dlgInfoTCB').style.display = 'none';
             } else if (slot < 16) {
-               if (CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_WDB)
+               if (CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_WDB ||
+                   CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_NONE0)
                   CRATE.selectedWDB = slot;
                else
                   CRATE.selectedWDB = undefined;
                CRATE.selectedDCB = false;
                CRATE.selectedTCB = false;
-               if (CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_WDB)
-                  document.getElementById('dlgInfoWDB').style.display = 'revert';
-               else
-                  document.getElementById('dlgInfoWDB').style.display = 'none';
+               document.getElementById('dlgInfoEmpty').style.display = 'none';
+               document.getElementById('dlgInfoWDB').style.display = 'none';
                document.getElementById('dlgInfoDCB').style.display = 'none';
                document.getElementById('dlgInfoTCB').style.display = 'none';
+               if (CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_WDB)
+                  document.getElementById('dlgInfoWDB').style.display = 'revert';
+               else if (CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_BLANK)
+                  document.getElementById('dlgInfoEmpty').style.display = 'revert';
             }
             CRATE.draw();
             loadCrate();
@@ -953,14 +956,13 @@ function DCBmark() {
    }
 
    let req = new XMLHttpRequest();
-   req.open("GET", "mark?adr=" + CRATE.dcbAddress + "&fl=" + (CRATE.markDCB ? "1" : "0") +
-      "&r=" + Math.random(), true);
-   req.send();
+   req.open("PUT", "mark/" + CRATE.dcbAddress, true);
+   req.send((CRATE.markDCB ? "1" : "0"));
 }
 
 function DCBSdreset() {
    let req = new XMLHttpRequest();
-   req.open("GET", "sdreset?adr=" + CRATE.dcbAddress + "&r=" + Math.random(), true);
+   req.open("PUT", "sdreset/" + CRATE.dcbAddress, true);
    req.send();
 }
 
@@ -1001,7 +1003,7 @@ function WDBreboot(flag) {
          }
       };
 
-      req.open("PUT", "reboot/" + CRATE.dcbAddress + ":" + CRATE.selectedWDB, true); // avoid cached results
+      req.open("PUT", "reboot/" + CRATE.dcbAddress + ":" + CRATE.selectedWDB, true);
 
       try {
          req.send();
