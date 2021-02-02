@@ -288,8 +288,9 @@ int main(int argc, char *argv[]) {
       printf("\nBoards found:\n");
       printf("-------------\n");
    }
-   for (int i = 0; i < WDAQ_N_SLOTS; i++)
+   for (int i = 0; i < WDAQ_N_SLOTS; i++) {
       int status = get_slot_board_info(i, &board[i]);
+   }
 
    if (verbose) {
       std::string str;
@@ -633,8 +634,14 @@ int main(int argc, char *argv[]) {
          if (strncmp(buffer, "slot", 4) == 0 || strncmp(buffer, "s ", 2) == 0 || strcmp(buffer, "s") == 0) {
 
             int slot = WDAQ_SLOT_DCB;
-            if (strchr(buffer, ' '))
-               slot = strtol(strchr(buffer, ' '), 0, 0);
+            char *p = NULL;
+            if (strchr(buffer, ' ')) {
+               p = strchr(buffer, ' ')+1;
+               slot = strtol(p, 0, 0);
+               p = strchr(p, ' ');
+               if (p != NULL)
+                  p++;
+            }
 
             if (slot == WDAQ_SLOT_DCB) {
                connection[addr]->slot = slot;
@@ -643,11 +650,24 @@ int main(int argc, char *argv[]) {
                if (status && board[slot].type_id <= BRD_TYPE_ID_MAX &&
                    board[slot].vendor_id <= BRD_VENDOR_ID_MAX) {
                   connection[addr]->slot = slot;
-                  if (verbose)
+                  if (verbose && p == NULL)
                      printf("Switched to slot #%d\n", connection[addr]->slot);
                } else {
                   connection[addr]->sprintf("No board present in slot %d\n", slot);
+                  p = NULL;
                }
+            }
+
+            if (p != NULL) {
+               if (verbose)
+                  printf("Send \"%s\" to slot %d\n", p, slot);
+               char rb[10000];
+               spi_ascii_cmd(p, rb, sizeof(rb), slot, board[slot].type_id, board[slot].rev_id);
+               connection[addr]->slot = WDAQ_SLOT_DCB;
+               if (verbose)
+                  printf("Received \"%s\" from slot %d\n", rb, slot);
+
+               connection[addr]->sprintf("%s", rb);
             }
 
          } else if (strncmp(buffer, "scan", 4) == 0) {
@@ -764,7 +784,8 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("\nCrate commands:\n");
       c.sprintf("---------------\n");
       c.sprintf("scan                 Scan crate for boards\n");
-      c.sprintf("slot|s <n>           Seclect slot (%d=DCB)\n", WDAQ_SLOT_DCB);
+      c.sprintf("slot|s <n> [<cmd>]   Seclect slot (%d=DCB)\n", WDAQ_SLOT_DCB);
+      c.sprintf("                     or send <cmd> directly to slot\n");
       c.sprintf("   - all further commands will then be sent to slot <n>\n");
       c.sprintf("   - switch back to DCB with \"slot 16\"\n\n");
       c.sprintf("DCB commands:\n");
