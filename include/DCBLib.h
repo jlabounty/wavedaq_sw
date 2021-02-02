@@ -97,6 +97,7 @@ public:
    void ResetSerdes();
    std::string UploadStart(int slot);
    std::string UploadProgress();
+   std::string SendToSlot(std::string str, int slot);
 
    // setter & getter ----------
    std::string GetName() { return mDCBName; }

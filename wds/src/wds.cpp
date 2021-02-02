@@ -412,16 +412,21 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
 
       //---------- commands ----------
       else if (item == "vcalib") {
+
          if (!gl->demoMode) {
             auto wdb = findBoard(gl->dcb, gl->wdb, wdbAddress);
             gl->wp->StartCalibrationVoltage(wdb);
          }
+
       } else if (item == "tcalib") {
+
          if (!gl->demoMode) {
             auto wdb = findBoard(gl->dcb, gl->wdb, wdbAddress);
             gl->wp->StartCalibrationTime(wdb);
          }
+
       } else if (item == "save") {
+
          if (value == "stop")
             gl->wp->StopLogging();
          else if (item != "") {
@@ -432,12 +437,14 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
                                         a[2] == "all" ? -1 : std::stoi(a[2]),
                                         std::stoi(a[3]));
          }
+
       } else if (item == "reboot") {
+
          for (auto &b: wdbList) {
             std::cout << "Reboot " << b->GetAddr() << std::endl;
 
             b->ReconfigureFpga();
-            sleep_ms(15000);
+            sleep_ms(5000);
             std::cout << "Finished" << std::endl;
 
             connectWDB(gl, b);
@@ -451,7 +458,6 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
          if (dcb != nullptr)
             dcb->SendReceiveUDP(flag ? "mark" : "unmark");
 
-
       } else if (item == "sdreset") { // SERDES reset ------------------------------
 
          if (dcb != nullptr)
@@ -464,6 +470,26 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             auto result = dcb->UploadStart(slot);
             mg_printf(nc, "%s", "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
             mg_printf_http_chunk(nc, "%s", result.c_str());
+            mg_send_http_chunk(nc, "", 0); // end of response
+            return;
+         }
+
+      } else if (item == "init") { // init ------------------------------
+
+         if (dcb != nullptr) {
+            if (args.size() < 4)
+               return;
+
+            // send ASCII command to WDB
+            dcb->SendToSlot("info", slot); // dummy command because of SPI bug
+            auto result = dcb->SendToSlot("init " + args[3], slot);
+
+            gl->upload = false;
+
+            dcb->ScanCrate();
+            connectDCB(gl, dcb);
+
+            mg_printf(nc, "%s", "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
             mg_send_http_chunk(nc, "", 0); // end of response
             return;
          }
@@ -625,7 +651,6 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       for (auto e: rs)
          f << e.second << " " << e.first << std::endl;
       f.close();
-
 
       mg_send_http_chunk(nc, "", 0);
       return;
@@ -1364,15 +1389,29 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
    // file serving ------------------------------
    if (http_event == MG_EV_HTTP_REQUEST) {
 
+      auto uri = std::string(hm->uri.p);
+      if (uri.find(" HTTP") != std::string::npos)
+         uri = uri.substr(0, uri.find(" HTTP"));
+
       if (gl->verbose) {
-         auto uri = std::string(hm->uri.p);
-         if (uri.find(" HTTP") != std::string::npos)
-            uri = uri.substr(0, uri.find(" HTTP"));
          std::cout << "File request: " << uri
                    << std::endl;
       }
 
-      mg_serve_http(nc, hm, s_http_server_opts);
+      if (uri == "/") {
+         char host[256];
+         gethostname(host, sizeof(host));
+
+         // redirect to DCB if running on DCB
+         if (strncmp(host, "dcb", 3) == 0 || strncmp(host, "DCB", 3) == 0) {
+            mg_printf(nc, "HTTP/1.1 301 Moved\r\nLocation: %s\r\n"
+                          "Content-Length: 0\r\n\r\n", "/crate.html?adr=DCB01");
+         } else {
+            mg_serve_http(nc, hm, s_http_server_opts);
+         }
+
+      } else
+         mg_serve_http(nc, hm, s_http_server_opts);
    }
 
 }
@@ -1437,10 +1476,6 @@ void connectWDB(GLOBALS *gl, WDB *b) {
    b->LoadVoltageCalibration(b->GetDrsSampleFreqMhz(), gl->wdsDir);
    b->LoadTimeCalibration(b->GetDrsSampleFreqMhz(), gl->wdsDir);
 
-   // check PLL locked status
-   if (b->GetPllLock(false) != 0x1FF)
-      std::cout << "PLL not locked on board " << b->GetAddr() << ". Mask = 0x" << std::hex << b->GetPllLock(false) << std::endl;
-
    if (b->GetDrsChTxEn() > 0) {
       gl->readoutMode = cReadoutModeDRS;
       b->SetChnTxEn(b->GetDrsChTxEn());
@@ -1473,9 +1508,7 @@ void connectWDB(GLOBALS *gl, WDB *b) {
    // Enable serdes if WDB is in crate
    if (b->IsDcbInterface()) {
       b->SetExtClkFreq(80);  // 80 MHz external clock
-      //sleep_ms(2000);
       b->SetDaqClkSrcSel(0); // set clock select to backplane
-      //sleep_ms(2000);
       b->SetEthComEn(0);     // disable ethernet
       b->SetSerdesComEn(1);  // enable serdes
    } else {
@@ -1484,6 +1517,10 @@ void connectWDB(GLOBALS *gl, WDB *b) {
       b->SetEthComEn(1);     // enable ethernet
       b->SetSerdesComEn(0);  // disable serdes
    }
+
+   // check PLL locked status
+   if (b->GetPllLock(false) != 0x1FF)
+      std::cout << "PLL not locked on board " << b->GetAddr() << ". Mask = 0x" << std::hex << b->GetPllLock(false) << std::endl;
 }
 
 void connectDCB(GLOBALS *gl, DCB *dcb) {
@@ -1505,8 +1542,26 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
       }
    }
 
+   // wait until PLL of all WDB have locked
+   for (int i=0 ; i<16 ; i++) {
+      if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
+         WDB *b = dcb->GetWDB(i);
+         for (int j=0 ; j<20 ; j++) {
+            int l = b->GetPllLock(true);
+           if (l == 0x1FF)
+               break;
+            if (gl->verbose)
+               std::cout << std::dec << j*100 << "ms: " << b->GetAddr() << " PLL Lock=0x" << std::hex << l << std::endl;
+
+            sleep_ms(100);
+            if (j == 19)
+               std::cout << "PLL of board " << b->GetAddr() << " not locked" << std::endl;
+         }
+      }
+   }
+
    if (newBoard) {
-      sleep_ms(2000); // Let LMKs of WDBs lock
+      sleep_ms(1000);
       dcb->ResetSerdes();
    }
 }

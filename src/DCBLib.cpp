@@ -515,6 +515,16 @@ void DCB::ResetSerdes() {
 
 //--------------------------------------------------------------------
 
+std::string DCB::SendToSlot(std::string str, int slot) {
+   auto oldTimeout = mReceiveTimeoutMs;
+   mReceiveTimeoutMs = 1000; // increase timeout for this command
+   auto result = SendReceiveUDP("slot " + std::to_string(slot) + " " + str);
+   mReceiveTimeoutMs = oldTimeout;
+   return result;
+}
+
+//--------------------------------------------------------------------
+
 std::string DCB::UploadStart(int slot) {
    auto result = SendReceiveUDP("upload " + std::to_string(slot) + " -t wdb -r g -p", false);
    if (mVerbose)

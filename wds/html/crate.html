@@ -34,7 +34,7 @@
             </td>
             <td id="infoWDBCommands">
                <button id="btnWDBReboot" class="cmdBtn" onclick="WDBrebootQuery()">Reboot</button>
-               <button id="btnWDBUpload" class="cmdBtn" onclick="upload()">Upload firmware</button>
+               <button id="btnWDBUpload" class="cmdBtn" onclick="uploadShow()">Upload firmware</button>
             </td>
          </tr>
          <tr>
@@ -207,7 +207,7 @@
                &nbsp;Commands
             </td>
             <td>
-               <button id="btnEmptyUpload" class="cmdBtn" onclick="upload()">Upload WDB firmware</button>
+               <button id="btnEmptyUpload" class="cmdBtn" onclick="uploadShow()">Upload WDB firmware</button>
             </td>
          </tr>
          <tr>
@@ -232,6 +232,29 @@
 
       </div>
    </div>
+
+   <!-- firmware upload dialog -->
+   <div id="dlgUpload" class="dlgFrame">
+
+      <div class="dlgTitlebar">Upload Firmware</div>
+
+      <div class="dlgPanel">
+         <table style="padding: 10px;border-spacing: 10px">
+            <tr>
+               <td style="text-align: right">
+                  Serial:&nbsp;
+                  <input type="text" name="serial" id="serial" style="width: 50px;text-align: left">
+               </td>
+            </tr>
+         </table>
+         <br/>
+         <div style="text-align:center">
+            <button id="btnSaveDialog" class="wideButton" type="button" onClick="upload();">Upload</button>
+            <button class="wideButton" type="button" onClick="dlgHide('dlgUpload')">Cancel</button>
+         </div>
+      </div>
+   </div>
+
 
 </div> <!-- container -->
 

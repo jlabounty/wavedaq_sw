@@ -525,7 +525,10 @@ function drawWDB(ctx, slot) {
 function drawWDBEmpty(ctx, slot) {
    ctx.save();
 
-   ctx.fillStyle = "#C0C0C0";
+   if (CRATE.selectedWDB === slot)
+      ctx.fillStyle = "#E0E0E0";
+   else
+      ctx.fillStyle = "#C0C0C0";
    ctx.fillRect(0, 0, 40, 255);
 
    // lower handle
@@ -972,8 +975,8 @@ let rebootProgress;
 function updateRebootProgress() {
    rebootProgress += 0.1;
    let d = document.getElementById("progressWait");
-   d.set(rebootProgress / 15);
-   if (rebootProgress >= 15) {
+   d.set(rebootProgress / 5);
+   if (rebootProgress >= 5) {
       dlgHide("dlgWait");
    } else
       window.setTimeout(updateRebootProgress, 100);
@@ -1014,6 +1017,15 @@ function WDBreboot(flag) {
    }
 }
 
+function uploadShow() {
+   if (CRATE.crate.slot[CRATE.selectedWDB].type_id === BRD_TYPE_ID_WDB) {
+      let wdb = CRATE.crate.slot[CRATE.selectedWDB];
+      document.getElementById("serial").value = wdb.serial;
+   }
+
+   dlgShow("dlgUpload");
+}
+
 function upload() {
 
    // kill update timer
@@ -1026,6 +1038,7 @@ function upload() {
          if (req.responseText !== "OK\n")
             dlgAlert(req.responseText);
          else {
+            dlgHide("dlgUpload");
             dlgShow("dlgWait", true);
             document.getElementById("progressWait").set(0);
             window.setTimeout(uploadProgress, 100);
@@ -1048,7 +1061,7 @@ function uploadProgress() {
             d.set(r.progress / 100);
             if (r.progress === 100) {
                dlgHide("dlgWait");
-               loadCrate(); // restart crate-scan
+               initWDB(CRATE.selectedWDB, document.getElementById("serial").value);
             }
          }
          window.setTimeout(uploadProgress, 300);
@@ -1059,4 +1072,19 @@ function uploadProgress() {
    req.send();
 }
 
+function initWDB(slot, serial) {
+   let req = new XMLHttpRequest();
+   req.onreadystatechange = function () {
+      if (req.readyState === 4 && req.status === 200) {
+         CRATE.timer.loadCrate = window.setTimeout(loadCrate, 100, true); // restart CERATE scan
 
+         // switch to WDB info panel
+         document.getElementById('dlgInfoWDB').style.display = 'revert';
+         document.getElementById('dlgInfoEmpty').style.display = 'none';
+      }
+   }
+
+   req.open("PUT", "init/" + CRATE.dcbAddress + ":" + slot + "/" + serial, true);
+   req.send();
+
+}
