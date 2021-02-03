@@ -1699,7 +1699,6 @@ void TCB::SetBGOVetoThreshold(u_int32_t *data)
 void TCB::SetBGOHitDelay(u_int32_t data, u_int32_t veto_data)
 {
    if ((fidcode>>12)!=1) printf("setting BGO Hit delay on TCB %4x!!!!!\n", fidcode);
-
    u_int32_t val = data & 0x1F;
    val |= (veto_data & 0x1F) << 8;
    WriteReg(RBGOHITDLY,&val);
@@ -1767,6 +1766,37 @@ void TCB::SetNGENHighThreshold(u_int32_t *data){
 void TCB::SetNGENLowThreshold(u_int32_t *data){
    if ((fidcode>>12)!=3) printf("setting NGEN delay on TCB %4x!!!!!\n", fidcode);
    WriteReg(RLXeNGENQL,data);
+}
+// set CDCH wire masks
+void TCB::SetCDCHMasks(u_int32_t *data){
+   if ((fidcode>>12)!=1) printf("setting CDCH masks on TCB %4x!!!!!\n", fidcode);
+   for(int iMask = 0; iMask<8; iMask++) {
+     WriteReg(RCDCHMASKS0+iMask,data+iMask);
+   }
+}
+// set CDCH US hits multiplicity threshold
+void TCB::SetCDCHUSMultThr(u_int32_t *data){
+   if ((fidcode>>12)!=3) printf("setting CDCH masks on TCB %4x!!!!!\n", fidcode);
+  // read the register value
+  u_int32_t rdata;
+  ReadReg(RCDCHMULTTHR,&rdata);
+  // mask needed values
+  rdata &= 0xFFFF0000;
+  // add requested value
+  rdata |= (*data)&0xFF;
+  WriteReg(RCDCHMULTTHR,&rdata);
+}
+// set CDCH DS hits multiplicity threshold
+void TCB::SetCDCHDSMultThr(u_int32_t *data){
+   if ((fidcode>>12)!=3) printf("setting CDCH masks on TCB %4x!!!!!\n", fidcode);
+  // read the register value
+  u_int32_t rdata;
+  ReadReg(RCDCHMULTTHR,&rdata);
+  // mask needed values
+  rdata &= 0xFFFF;
+  // add requested value
+  rdata |= (((*data)&0xFF)<<16);
+  WriteReg(RCDCHMULTTHR,&rdata);
 }
 // Get proton current
 void TCB::GetPCurr(u_int32_t *data)

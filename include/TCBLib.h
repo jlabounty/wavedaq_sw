@@ -99,7 +99,16 @@
 #define RRDCHITMASK1       0x62E      // RDC Hit masks (3 values)
 #define RRDCHITMASK2       0x62F      // RDC Hit masks (3 values)
 #define RDETECTORDLY0      0x630      // Detector delays: XEC bit [7:0], TC bit [15:8], CDCH [23:16], BGO [31:24] (2 values)
-#define RDETECTORDLY1      0x631      // Detector delays: RDC bit [7:0], CRC bit [15:8] (2 values)
+#define RDETECTORDLY1      0x631      // Detector delays: RDC bit [7:0], CRC bit [15:8] (2 values)#
+#define RCDCHMASKS0        0x632      // CDCH WIRE MASKS ON TCB1
+#define RCDCHMASKS1        0x633      // CDCH WIRE MASKS ON TCB1
+#define RCDCHMASKS2        0x634      // CDCH WIRE MASKS ON TCB1
+#define RCDCHMASKS3        0x635      // CDCH WIRE MASKS ON TCB1
+#define RCDCHMASKS4        0x636      // CDCH WIRE MASKS ON TCB1
+#define RCDCHMASKS5        0x637      // CDCH WIRE MASKS ON TCB1
+#define RCDCHMASKS6        0x638      // CDCH WIRE MASKS ON TCB1
+#define RCDCHMASKS7        0x639      // CDCH WIRE MASKS ON TCB1
+#define RCDCHMULTTHR       0x640      // CDCH HIT MULTIPLICITY THRESHOLD
 #define RFIBCOUNTER        0x700      // SCIFI fiber event counter address (42 values)
 #define RSINGLECRATECFG    0x800      // configurations for single crate trigger logic
 #define RSINGLEISVETO      0x801      // veto set for input channels in single crate logic
@@ -506,7 +515,11 @@ public:
    void SetNGENWidth(u_int32_t *);
    void SetNGENHighThreshold(u_int32_t *);
    void SetNGENLowThreshold(u_int32_t *);
-   //Get proton current
+  // Set CDCH Stuff
+  void SetCDCHMasks(u_int32_t *);
+  void SetCDCHUSMultThr(u_int32_t *);
+  void SetCDCHDSMultThr(u_int32_t *);
+  //Get proton current
    void GetPCurr(u_int32_t *);
    //Get SciFi counters
    void GetSciFICou(u_int32_t *);
