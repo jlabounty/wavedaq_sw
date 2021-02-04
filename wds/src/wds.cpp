@@ -58,7 +58,7 @@ void connectWDB(GLOBALS *gl, WDB *b);
 void connectDCB(GLOBALS *gl, DCB *d);
 void disconnectWDB(GLOBALS *gl, WDB *b);
 void disconnectDCB(GLOBALS *gl, DCB *d);
-void resetSerdesAdc(GLOBALS *gl, DCB *dcb);
+void switchDaqClock(GLOBALS *gl, DCB *dcb);
 
 /*------------------------------------------------------------------*/
 
@@ -453,7 +453,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
          }
 
          if (dcb != nullptr)
-            resetSerdesAdc(gl, dcb);
+            switchDaqClock(gl, dcb);
 
       } else if (item == "mark") { // mark ------------------------------
 
@@ -466,7 +466,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       } else if (item == "sdreset") { // SERDES reset ------------------------------
 
          if (dcb != nullptr)
-            resetSerdesAdc(gl, dcb);
+            dcb->ResetSerdes();
 
       } else if (item == "upload") { // upload ------------------------------
 
@@ -1554,18 +1554,9 @@ void connectWDB(GLOBALS *gl, WDB *b) {
 
    // Enable serdes if WDB is in crate
    if (b->IsDcbInterface()) {
-      auto c = b->GetDaqClkSrcSel();
-      if (c == 1) {
-         if (gl->verbose)
-            std::cout << "Switch clock of " << b->GetName() << " to backplane" << std::endl;
-         b->SetExtClkFreq(80);  // 80 MHz external clock
-         b->SetDaqClkSrcSel(0); // set clock select to backplane
-      }
       b->SetEthComEn(0);     // disable ethernet
       b->SetSerdesComEn(1);  // enable serdes
    } else {
-      b->SetDaqClkSrcSel(1); // set clock select to internal clock
-      b->SetExtClkFreq(80);  // 80 MHz
       b->SetEthComEn(1);     // enable ethernet
       b->SetSerdesComEn(0);  // disable serdes
    }
@@ -1588,6 +1579,25 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
          }
       } else if (dcb->GetWDB(i) != nullptr) {
          disconnectWDB(gl, dcb->GetWDB(i));
+      }
+   }
+
+   switchDaqClock(gl, dcb);
+}
+
+void switchDaqClock(GLOBALS *gl, DCB *dcb) {
+
+   // switch all internal clocks to external
+   for (int i = 0; i < 16; i++) {
+      if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
+         WDB *b = dcb->GetWDB(i);
+         auto c = b->GetDaqClkSrcSel();
+         if (c == 1) {
+            if (gl->verbose)
+               std::cout << "Switch clock of " << b->GetName() << " to backplane" << std::endl;
+            b->SetExtClkFreq(80);  // 80 MHz external clock
+            b->SetDaqClkSrcSel(0); // set clock select to backplane
+         }
       }
    }
 
@@ -1620,13 +1630,8 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
       }
    }
 
-   if (newBoard)
-      resetSerdesAdc(gl, dcb);
-}
-
-void resetSerdesAdc(GLOBALS *gl, DCB *dcb) {
    if (gl->verbose)
-      std::cout << "Reset serded of " << dcb->GetName() << " and all WDB ADCs" << std::endl;
+      std::cout << "Reset serdes of " << dcb->GetName() << " and all WDB ADCs" << std::endl;
 
    dcb->ResetSerdes();
 
