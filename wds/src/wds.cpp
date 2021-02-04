@@ -817,11 +817,25 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             mg_printf_http_chunk(nc, "        \"variant_id\": %d\n", dcb->GetBoardId(i)->variant_id);
          }
 
-         if (i == 15)
-            mg_printf_http_chunk(nc, "      }\n");
-         else
-            mg_printf_http_chunk(nc, "      },\n");
+         mg_printf_http_chunk(nc, "      },\n");
       }
+
+      // slot 16
+      mg_printf_http_chunk(nc, "      {\n");
+      mg_printf_http_chunk(nc, "        \"vendor_id\": %d,\n", dcb->GetVendorId());
+      mg_printf_http_chunk(nc, "        \"type_id\": %d,\n", dcb->GetBoardType());
+      mg_printf_http_chunk(nc, "        \"rev_id\": %d,\n", dcb->GetBoardRevision());
+      mg_printf_http_chunk(nc, "        \"variant_id\": %d\n", dcb->GetBoardVariant());
+      mg_printf_http_chunk(nc, "      },\n");
+
+      // slot 17
+      mg_printf_http_chunk(nc, "      {\n");
+      mg_printf_http_chunk(nc, "        \"vendor_id\": %d,\n", dcb->GetBoardId(17)->vendor_id);
+      mg_printf_http_chunk(nc, "        \"type_id\": %d,\n", dcb->GetBoardId(17)->type_id);
+      mg_printf_http_chunk(nc, "        \"rev_id\": %d,\n", dcb->GetBoardId(17)->rev_id);
+      mg_printf_http_chunk(nc, "        \"variant_id\": %d\n", dcb->GetBoardId(17)->variant_id);
+      mg_printf_http_chunk(nc, "      }\n");
+
       slotHvOn = (slotHvOn + 1) % 16;
       mg_printf_http_chunk(nc, "   ]\n");
       mg_printf_http_chunk(nc, "}\n");

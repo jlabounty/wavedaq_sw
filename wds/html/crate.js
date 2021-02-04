@@ -202,14 +202,8 @@ Crate.prototype.draw = function () {
       return;
    }
 
-   //---- draw DCB
-   ctx.save();
-   ctx.translate(62.5 + 8 * 41.4, 7.5);
-   drawDCB(ctx);
-   ctx.restore();
-
    //---- draw slots
-   for (let slot=0 ; slot<16 ; slot++) {
+   for (let slot=0 ; slot<18 ; slot++) {
       if (CRATE.crate.slot !== undefined &&
           CRATE.crate.slot[slot].vendor_id === BRD_VENDOR_ID_PSI &&
           CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_WDB) {
@@ -230,22 +224,34 @@ Crate.prototype.draw = function () {
             ctx.translate(62.5 + (slot + 2) * 41.4, 7.5);
          drawWDBEmpty(ctx, slot);
          ctx.restore();
-      } else {
+      } else if (CRATE.crate.slot !== undefined &&
+         CRATE.crate.slot[slot].vendor_id === BRD_VENDOR_ID_PISA &&
+         CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_TCB) {
          ctx.save();
          if (slot < 8)
             ctx.translate(62.5 + slot * 41.4, 7.5);
          else
             ctx.translate(62.5 + (slot + 2) * 41.4, 7.5);
+         drawTCB(ctx, slot);
+         ctx.restore();
+      } else if (slot == 16) {
+         //---- draw DCB
+         ctx.save();
+         ctx.translate(62.5 + 8 * 41.4, 7.5);
+         drawDCB(ctx);
+         ctx.restore();
+      } else {
+         ctx.save();
+         if (slot < 8)
+            ctx.translate(62.5 + slot * 41.4, 7.5);
+         else if (slot < 16)
+            ctx.translate(62.5 + (slot + 2) * 41.4, 7.5);
+         else
+            ctx.translate(62.5 + (slot - 8) * 41.4, 7.5);
          drawEmptySlot(ctx, slot);
          ctx.restore();
       }
    }
-
-   //---- draw TCB
-   ctx.save();
-   ctx.translate(62.5 + 9 * 41.4, 7.5);
-   drawTCB(ctx, 17);
-   ctx.restore();
 
    ctx.restore();
 }
