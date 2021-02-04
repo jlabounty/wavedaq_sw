@@ -57,6 +57,7 @@ std::vector<std::string> split(const std::string &input, char separator);
 void connectWDB(GLOBALS *gl, WDB *b);
 void connectDCB(GLOBALS *gl, DCB *d);
 void disconnectWDB(GLOBALS *gl, WDB *b);
+void disconnectDCB(GLOBALS *gl, DCB *d);
 
 /*------------------------------------------------------------------*/
 
@@ -450,6 +451,12 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             connectWDB(gl, b);
          }
 
+         if (dcb != nullptr) {
+            sleep_ms(2000);
+            std::cout << "Reset DCB serdes" << std::endl;
+            dcb->ResetSerdes();
+         }
+
       } else if (item == "mark") { // mark ------------------------------
 
          bool flag = (value[0] == '1');
@@ -479,6 +486,9 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
          if (dcb != nullptr) {
             if (args.size() < 4)
                return;
+
+            if (dcb->GetWDB(slot) != nullptr)
+               disconnectWDB(gl, dcb->GetWDB(slot));
 
             // send ASCII command to WDB
             dcb->SendToSlot("info", slot); // dummy command because of SPI bug
@@ -711,7 +721,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
          } catch (std::runtime_error &e) {
             std::cout << "Failure" << std::endl;
             mg_printf_http_chunk(nc, "{\n");
-            mg_printf_http_chunk(nc, "  \"error\": \"%s\"\n", e.what());
+            mg_printf_http_chunk(nc, "  \"error\": \"Failed to connect to %s\"\n", adr.c_str());
             mg_printf_http_chunk(nc, "}\n");
             mg_send_http_chunk(nc, "", 0);
             delete dcb;
@@ -719,12 +729,24 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
          }
       }
 
-      if (flag) {
-         dcb->ScanCrate();
-         connectDCB(gl, dcb);
-      }
+      std::string dcbinfo;
+      try {
+         if (flag) {
+            dcb->ScanCrate();
+            connectDCB(gl, dcb);
+         }
 
-      auto dcbinfo = dcb->SendReceiveUDP("jinfo");
+         dcbinfo = dcb->SendReceiveUDP("jinfo");
+
+      } catch (std::runtime_error &e) {
+         std::cout << e.what() << std::endl;
+         mg_printf_http_chunk(nc, "{\n");
+         mg_printf_http_chunk(nc, "   \"error\": \"Communication failure with %s\"\n", dcb->GetName().c_str());
+         mg_printf_http_chunk(nc, "}\n");
+         mg_send_http_chunk(nc, "", 0);
+         disconnectDCB(gl, dcb);
+         return;
+      }
 
       mg_printf_http_chunk(nc, "{\n");
       mg_printf_http_chunk(nc, "   \"DCB\":\n");
@@ -1518,9 +1540,6 @@ void connectWDB(GLOBALS *gl, WDB *b) {
       b->SetSerdesComEn(0);  // disable serdes
    }
 
-   // check PLL locked status
-   if (b->GetPllLock(false) != 0x1FF)
-      std::cout << "PLL not locked on board " << b->GetAddr() << ". Mask = 0x" << std::hex << b->GetPllLock(false) << std::endl;
 }
 
 void connectDCB(GLOBALS *gl, DCB *dcb) {
@@ -1543,6 +1562,7 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
    }
 
    // wait until PLL of all WDB have locked
+   /*
    for (int i=0 ; i<16 ; i++) {
       if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
          WDB *b = dcb->GetWDB(i);
@@ -1559,9 +1579,10 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
          }
       }
    }
+   */
 
    if (newBoard) {
-      sleep_ms(1000);
+      sleep_ms(2000);
       dcb->ResetSerdes();
    }
 }
@@ -1577,6 +1598,12 @@ void disconnectWDB(GLOBALS *gl, WDB *b) {
    }
    gl->wdb.erase(std::remove(gl->wdb.begin(), gl->wdb.end(), b), gl->wdb.end());
    delete b;
+}
+
+void disconnectDCB(GLOBALS *gl, DCB *d) {
+   std::cout << "Disconnected from " << d->GetName() << std::endl;
+   gl->dcb.erase(std::remove(gl->dcb.begin(), gl->dcb.end(), d), gl->dcb.end());
+   delete d;
 }
 
 int main(int argc, const char *argv[]) {
@@ -1841,8 +1868,13 @@ int main(int argc, const char *argv[]) {
             }
             // update all control registers if requested
             if (gl.updatePeriodic) {
-               for (auto &b: gl.wdb)
-                  b->ReceiveControlRegisters();
+               for (auto &b: gl.wdb) {
+                  try {
+                     b->ReceiveControlRegisters();
+                  } catch (...) {
+                     disconnectWDB(&gl, b);
+                  }
+               }
             }
 
             // cycle phase of sine wave

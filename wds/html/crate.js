@@ -844,6 +844,12 @@ function loadCrate() {
 function receiveCrate() {
    if (CRATE.req.readyState === 4 && CRATE.req.status === 200) {
       CRATE.crate = JSON.parse(CRATE.req.responseText);
+      if (CRATE.crate.error !== undefined) {
+         dlgAlert(CRATE.crate.error);
+         window.setTimeout(function() { window.location.href = "index.html" }, 5000);
+         return;
+      }
+
       CRATE.draw();
       CRATE.connected = true;
 
@@ -971,12 +977,13 @@ function DCBSdreset() {
 }
 
 let rebootProgress;
+let rebootTime;
 
 function updateRebootProgress() {
    rebootProgress += 0.1;
    let d = document.getElementById("progressWait");
-   d.set(rebootProgress / 5);
-   if (rebootProgress >= 5) {
+   d.set(rebootProgress / rebootTime);
+   if (rebootProgress >= rebootTime) {
       dlgHide("dlgWait");
    } else
       window.setTimeout(updateRebootProgress, 100);
@@ -989,6 +996,7 @@ function WDBrebootQuery() {
 function WDBreboot(flag) {
    if (flag) {
       rebootProgress = 0;
+      rebootTime = 7;
       dlgShow("dlgWait", true);
       window.setTimeout(updateRebootProgress, 100);
 
@@ -1027,6 +1035,12 @@ function uploadShow() {
 }
 
 function upload() {
+
+   // check for serial number
+   if (isNaN(parseInt(document.getElementById("serial").value))) {
+      dlgAlert("Please enter a valid serial number");
+      return;
+   }
 
    // kill update timer
    if (CRATE.timer.loadCrate !== undefined)
