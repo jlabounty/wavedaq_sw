@@ -1618,13 +1618,13 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
    }
 
    if (newBoard) {
-      sleep_ms(1000);
+      sleep_ms(2000);
       dcb->ResetSerdes();
 
       for (int i = 0; i < 16; i++) {
          if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
             WDB *b = dcb->GetWDB(i);
-            b->ResetAdcIf();
+            b->ResetAdc();
          }
       }
    }

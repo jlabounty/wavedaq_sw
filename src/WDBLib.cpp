@@ -1225,6 +1225,11 @@ void WDB::ResetAdcIf() {
    SetAdcIfRst(0);
 }
 
+void WDB::ResetAdc() {
+   SetAdcRst(1);
+   SetAdcRst(0);
+}
+
 void WDB::ResetDataLinkIf() {
    SetDataLinkIfRst(1);
    SetDataLinkIfRst(0);

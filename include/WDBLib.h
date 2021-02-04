@@ -681,6 +681,7 @@ public:
    void ResetTriggerParityErrorCounter();
    void LmkSyncLocal();
    void ResetAdcIf();
+   void ResetAdc();
    void ResetDataLinkIf();
    void ResetPackager();
    void ResetEventCounter();
