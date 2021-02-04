@@ -652,6 +652,7 @@ public:
    float GetVCalibTemperature();
    float GetTCalibTemperature();
    unsigned int GetPllLock(bool refresh = true);
+   unsigned int GetExtClkActive(bool refresh);
    void GetScalers(std::vector<uint64_t> &s, bool refresh = true);
    void GetHVCurrents(std::vector<float> &c, bool refresh = true);
    void GetHVBaseVoltage(float &voltage, bool refresh = true);

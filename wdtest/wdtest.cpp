@@ -44,29 +44,19 @@ int main(int argc, const char *argv[]) {
    b->SetExtClkFreq(80);
    b->SetDaqClkSrcSel(0);
 
-   //sleep_ms(100);
-
-   // wait for PLL to lock
-//   std::cout << "Checking PLL of WDB:" << std::endl;
-//   for (int j=0 ; j<20 ; j++) {
-//      int l = b->GetPllLock(true);
-//      std::cout << std::dec << j*100 << "ms: " << b->GetAddr() << " PLL Lock=0x" << std::hex << l << std::endl;
-//      if (l == 0x1FF)
-//         break;
-//
-//      sleep_ms(100);
-//   }
+   // wait for clock switch to be finished
    for (int j=0 ; j<20 ; j++) {
-      int l = b->GetExtClkActive();
-      std::cout << std::dec << j*100 << "ms: " << b->GetAddr() << " Ext_Clk_Active=" << std::dec << l << std::endl;
+      int l = b->GetExtClkActive(true);
+      std::cout << j*100 << "ms: " << b->GetAddr() << " Ext_Clk_Active=" << l << std::endl;
       if (l > 0)
          break;
 
       sleep_ms(100);
    }
 
-   // Following sleep is necessary for SERDES reset to work
-   //sleep_ms(2000);
+   // check for PLL lock
+   int l = b->GetPllLock(true);
+   std::cout << "PLL Lock=0x" << std::hex << l << std::endl;
 
    // reset SERDES on DCB
    std::cout << "Reset SERDES" << std::endl;
@@ -74,7 +64,7 @@ int main(int argc, const char *argv[]) {
 
    // print SERDES status
    auto s = dcb->SendReceiveUDP("sdstat");
-   std::cout << s << std::endl;
+   std::cout << std::endl << s << std::endl;
 
    return 0;
 }

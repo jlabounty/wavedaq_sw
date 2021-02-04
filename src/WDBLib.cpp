@@ -989,6 +989,14 @@ unsigned int WDB::GetPllLock(bool refresh)
    return this->sreg[GetSysDcmLockLoc() / 4];
 }
 
+unsigned int WDB::GetExtClkActive(bool refresh)
+{
+   if (refresh)
+      ReceiveStatusRegister(GetExtClkActiveLoc());
+
+   return WDBREG::GetExtClkActive();
+}
+
 void WDB::SetDrsSampleFreq(unsigned int f)
 // sampling frequency in MHz
 {
