@@ -1556,8 +1556,13 @@ void connectWDB(GLOBALS *gl, WDB *b) {
 
    // Enable serdes if WDB is in crate
    if (b->IsDcbInterface()) {
-      b->SetExtClkFreq(80);  // 80 MHz external clock
-      b->SetDaqClkSrcSel(0); // set clock select to backplane
+      auto c = b->GetDaqClkSrcSel();
+      if (c == 1) {
+         if (gl->verbose)
+            std::cout << "Switch clock of " << b->GetName() << " to backplane" << std::endl;
+         b->SetExtClkFreq(80);  // 80 MHz external clock
+         b->SetDaqClkSrcSel(0); // set clock select to backplane
+      }
       b->SetEthComEn(0);     // disable ethernet
       b->SetSerdesComEn(1);  // enable serdes
    } else {
@@ -1618,7 +1623,6 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
    }
 
    if (newBoard) {
-      sleep_ms(2000);
       dcb->ResetSerdes();
 
       for (int i = 0; i < 16; i++) {

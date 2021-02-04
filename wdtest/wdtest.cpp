@@ -28,10 +28,10 @@ int main(int argc, const char *argv[]) {
    b->Connect();
 
    // reboot WDB board
-   std::cout << "Rebooting WDB in slot " << slot << " ..." << std::flush;
-   b->ReconfigureFpga();
-   sleep_ms(10000);
-   std::cout << " ok" << std::endl;
+//   std::cout << "Rebooting WDB in slot " << slot << " ..." << std::flush;
+//   b->ReconfigureFpga();
+//   sleep_ms(10000);
+//   std::cout << " ok" << std::endl;
 
    b->ReceiveStatusRegisters();
    b->ReceiveControlRegisters();
