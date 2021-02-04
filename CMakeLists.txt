@@ -174,6 +174,8 @@ add_subdirectory(wd_cl)
 
 add_subdirectory(wdbdiscr)
 
+add_subdirectory(wdtest)
+
 # disable targets that requires libmscb
 if(NOT TARGET mscb)
    set_target_properties(tcb wdaq tcb_cl wd_cl PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)

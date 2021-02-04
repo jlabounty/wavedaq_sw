@@ -1,0 +1,72 @@
+//
+//  wdtest.cpp
+//  Test program to demonstrate error of SERDES reset
+//
+//  Stefan Ritt 04 Feb 2021
+//
+
+
+#include <iostream>
+#include <string>
+
+#include "WDBLib.h"
+#include "DCBLib.h"
+
+int main(int argc, const char *argv[]) {
+
+   if (argc != 3) {
+      std::cout << "Usage: wdtest <dcb> <slot>" << std::endl;
+      return 0;
+   }
+
+   int slot = std::stod(argv[2]);
+
+   DCB *dcb = new DCB(argv[1], false);
+   dcb->Connect();
+
+   WDB *b = new WDB(dcb, slot, false);
+   b->Connect();
+
+   // reboot WDB board
+   std::cout << "Rebooting WDB in slot " << slot << " ..." << std::flush;
+   b->ReconfigureFpga();
+   sleep_ms(10000);
+   std::cout << " ok" << std::endl;
+
+   b->ReceiveStatusRegisters();
+   b->ReceiveControlRegisters();
+
+   // enable SERDES
+   b->SetEthComEn(0);
+   b->SetSerdesComEn(1);
+
+   // set clock select to backplane
+   b->SetExtClkFreq(80);
+   b->SetDaqClkSrcSel(0);
+
+   sleep_ms(100);
+
+   // wait for PLL to lock
+   std::cout << "Checking PLL of WDB:" << std::endl;
+   for (int j=0 ; j<20 ; j++) {
+      int l = b->GetPllLock(true);
+      std::cout << std::dec << j*100 << "ms: " << b->GetAddr() << " PLL Lock=0x" << std::hex << l << std::endl;
+      if (l == 0x1FF)
+         break;
+
+      sleep_ms(100);
+   }
+
+   // Following sleep is necessary for SERDES reset to work
+   //sleep_ms(2000);
+
+   // reset SERDES on DCB
+   std::cout << "Reset SERDES" << std::endl;
+   dcb->ResetSerdes();
+
+   // print SERDES status
+   auto s = dcb->SendReceiveUDP("sdstat");
+   std::cout << s << std::endl;
+
+   return 0;
+}
