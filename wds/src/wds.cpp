@@ -1,6 +1,6 @@
 //
-//  wdbtest.cpp
-//  Test program for WDBLib.cpp
+//  wds.cpp
+//  WaveDream Server Program
 //
 //  Stefan Ritt 31 Jan 2017
 //
