@@ -5,7 +5,7 @@
 #  Project :  WaveDream2
 #
 #  Author  :  schmid_e (Author of generation script)
-#  Created :  18.10.2019 13:02:16
+#  Created :  03.02.2021 11:27:04
 #
 #  Register Layout Version :  9
 #
@@ -421,7 +421,7 @@ WD2_DRS_WCR_OFS                          =                                 0
 
 
 
-# ****** Control Register 5 [0x1014]: COM_CTRL - Communication Control Register (Default: 0x01000753) ******
+# ****** Control Register 5 [0x1014]: COM_CTRL - Communication Control Register (Default: 0x02000753) ******
 
 # DCB_SERDES_TRAIN - Enable training pattern for DCB SERDES connection
 WD2_DCB_SERDES_TRAIN_REG                 =                  WD2_REG_COM_CTRL
@@ -2871,7 +2871,7 @@ WD2_BOARD_TYPE_MASK                      =                        0x0000FF00
 WD2_BOARD_TYPE_OFS                       =                                 8
 WD2_BOARD_TYPE_CONST                     =                              0x02
 
-# BOARD_REVISION - Board revision (A=0x00, C=0x02, D=0x03, E=0x04)
+# BOARD_REVISION - Board revision (A=0x00, C=0x02, D=0x03, E=0x04, F=0x05, G=0x06)
 WD2_BOARD_REVISION_REG                   =                    WD2_REG_HW_VER
 WD2_BOARD_REVISION_MASK                  =                        0x000000FC
 WD2_BOARD_REVISION_OFS                   =                                 2
@@ -4846,7 +4846,7 @@ wd2_bit_group_list = [
   [ "BOARD_MAGIC"                   , WD2_BOARD_MAGIC_REG                   , WD2_BOARD_MAGIC_MASK                   , WD2_BOARD_MAGIC_OFS                  , "0xAC, Magic number for DRS board identification" ],
   [ "VENDOR_ID"                     , WD2_VENDOR_ID_REG                     , WD2_VENDOR_ID_MASK                     , WD2_VENDOR_ID_OFS                    , "ID of the board vendor (0x01 for PSI)" ],
   [ "BOARD_TYPE"                    , WD2_BOARD_TYPE_REG                    , WD2_BOARD_TYPE_MASK                    , WD2_BOARD_TYPE_OFS                   , "WaveDream Number (0x02 for WD2)" ],
-  [ "BOARD_REVISION"                , WD2_BOARD_REVISION_REG                , WD2_BOARD_REVISION_MASK                , WD2_BOARD_REVISION_OFS               , "Board revision (A=0x00, C=0x02, D=0x03, E=0x04)" ],
+  [ "BOARD_REVISION"                , WD2_BOARD_REVISION_REG                , WD2_BOARD_REVISION_MASK                , WD2_BOARD_REVISION_OFS               , "Board revision (A=0x00, C=0x02, D=0x03, E=0x04, F=0x05, G=0x06)" ],
   [ "BOARD_VARIANT"                 , WD2_BOARD_VARIANT_REG                 , WD2_BOARD_VARIANT_MASK                 , WD2_BOARD_VARIANT_OFS                , "Version indicator pins reflecting the variant of the board (Y15,Y10)" ],
   [ "REG_LAYOUT_COMP_LEVEL"         , WD2_REG_LAYOUT_COMP_LEVEL_REG         , WD2_REG_LAYOUT_COMP_LEVEL_MASK         , WD2_REG_LAYOUT_COMP_LEVEL_OFS        , "Register map layout compatibility level" ],
   [ "REG_LAYOUT_VERSION"            , WD2_REG_LAYOUT_VERSION_REG            , WD2_REG_LAYOUT_VERSION_MASK            , WD2_REG_LAYOUT_VERSION_OFS           , "Register map layout version" ],
@@ -5049,7 +5049,7 @@ ctrl_reg_default = [0xFFFFFFFF,   # Offset 0x1000
                     0x00000000,   # Offset 0x1008 
                     0x00025050,   # Offset 0x100C 
                     0x00FFFFFF,   # Offset 0x1010 
-                    0x01000753,   # Offset 0x1014 
+                    0x02000753,   # Offset 0x1014 
                     0x000005C0,   # Offset 0x1018 
                     0x0000FFFF,   # Offset 0x101C 
                     0x00000000,   # Offset 0x1020 

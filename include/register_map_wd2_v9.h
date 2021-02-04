@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  18.02.2020 16:42:30
+ *  Created :  03.02.2021 11:27:04
  *
  *  Register Layout Version :  9
  *
@@ -433,7 +433,7 @@
 
 
 
-/* ****** Control Register 5 [0x1014]: COM_CTRL - Communication Control Register (Default: 0x01000753) ****** */
+/* ****** Control Register 5 [0x1014]: COM_CTRL - Communication Control Register (Default: 0x02000753) ****** */
 
 /* DCB_SERDES_TRAIN - Enable training pattern for DCB SERDES connection */
 #define WD2_DCB_SERDES_TRAIN_REG                                  WD2_REG_COM_CTRL

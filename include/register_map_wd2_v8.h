@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  18.02.2020 16:40:25
+ *  Created :  03.02.2021 11:26:56
  *
  *  Register Layout Version :  8
  *
@@ -394,7 +394,7 @@
 
 
 
-/* ****** Control Register 3 [0x100C]: CLK_CTRL - Clock Control (Default: 0x00026464) ****** */
+/* ****** Control Register 3 [0x100C]: CLK_CTRL - Clock Control (Default: 0x00025064) ****** */
 
 /* TRIG_DAQ_CLK_CAL_CHK - Trigger DAQ clock calibration check */
 #define WD2_TRIG_DAQ_CLK_CAL_CHK_REG                              WD2_REG_CLK_CTRL
@@ -452,7 +452,7 @@
 
 
 
-/* ****** Control Register 5 [0x1014]: COM_CTRL - Communication Control Register (Default: 0x01000753) ****** */
+/* ****** Control Register 5 [0x1014]: COM_CTRL - Communication Control Register (Default: 0x02000753) ****** */
 
 /* DCB_SERDES_TRAIN - Enable training pattern for DCB SERDES connection */
 #define WD2_DCB_SERDES_TRAIN_REG                                  WD2_REG_COM_CTRL
