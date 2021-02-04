@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  03.02.2021 11:27:24
+// Created :  04.02.2021 14:01:06
 //
 // Register Layout Versions :  8, 9
 //
@@ -11392,11 +11392,9 @@ public:
       switch(this->mVersion)
       {
          case 8:
-            // DAQ clock default phase setting is checked
-            return BitExtractStatus(0x0028, 0x00001000, 12);
          case 9:
             // DAQ clock default phase setting is checked
-            return BitExtractStatus(0x0028, 0x00000800, 11);
+            return BitExtractStatus(0x0028, 0x00001000, 12);
          default:
             throw std::invalid_argument("Function GetDaqClkDefPhaseChkd() not defined for this board version");
       };
@@ -11406,14 +11404,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+         case 9:
             // DAQ clock default phase setting is checked
             if(BitMask) *BitMask = 0x00001000;
             if(BitOfs) *BitOfs = 12;
-            return 0x0028;
-         case 9:
-            // DAQ clock default phase setting is checked
-            if(BitMask) *BitMask = 0x00000800;
-            if(BitOfs) *BitOfs = 11;
             return 0x0028;
          default:
             throw std::invalid_argument("Function GetDaqClkDefPhaseChkdLoc() not defined for this board version");
@@ -11426,11 +11420,9 @@ public:
       switch(this->mVersion)
       {
          case 8:
-            // DAQ clock default phase setting is valid
-            return BitExtractStatus(0x0028, 0x00002000, 13);
          case 9:
             // DAQ clock default phase setting is valid
-            return BitExtractStatus(0x0028, 0x00001000, 12);
+            return BitExtractStatus(0x0028, 0x00002000, 13);
          default:
             throw std::invalid_argument("Function GetDaqClkDefPhaseOk() not defined for this board version");
       };
@@ -11440,14 +11432,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+         case 9:
             // DAQ clock default phase setting is valid
             if(BitMask) *BitMask = 0x00002000;
             if(BitOfs) *BitOfs = 13;
-            return 0x0028;
-         case 9:
-            // DAQ clock default phase setting is valid
-            if(BitMask) *BitMask = 0x00001000;
-            if(BitOfs) *BitOfs = 12;
             return 0x0028;
          default:
             throw std::invalid_argument("Function GetDaqClkDefPhaseOkLoc() not defined for this board version");
@@ -12088,11 +12076,9 @@ public:
       switch(this->mVersion)
       {
          case 8:
-            // DRS configuration done
-            return BitExtractStatus(0x0028, 0x00000400, 10);
          case 9:
             // DRS configuration done
-            return BitExtractStatus(0x0028, 0x00000200, 9);
+            return BitExtractStatus(0x0028, 0x00000400, 10);
          default:
             throw std::invalid_argument("Function GetDrsConfigDone() not defined for this board version");
       };
@@ -12102,14 +12088,10 @@ public:
       switch(this->mVersion)
       {
          case 8:
+         case 9:
             // DRS configuration done
             if(BitMask) *BitMask = 0x00000400;
             if(BitOfs) *BitOfs = 10;
-            return 0x0028;
-         case 9:
-            // DRS configuration done
-            if(BitMask) *BitMask = 0x00000200;
-            if(BitOfs) *BitOfs = 9;
             return 0x0028;
          default:
             throw std::invalid_argument("Function GetDrsConfigDoneLoc() not defined for this board version");
@@ -12995,6 +12977,34 @@ public:
             return 0x1124;
          default:
             throw std::invalid_argument("Function GetExtAsyncTriggerEnLoc() not defined for this board version");
+      };
+   };
+
+   // Bit(s) EXT_CLK_ACTIVE
+   unsigned int GetExtClkActive()
+   {
+      switch(this->mVersion)
+      {
+         case 8:
+         case 9:
+            // Configuration for external clock for DAQ completed
+            return BitExtractStatus(0x0028, 0x00004000, 14);
+         default:
+            throw std::invalid_argument("Function GetExtClkActive() not defined for this board version");
+      };
+   };
+   unsigned int GetExtClkActiveLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
+   {
+      switch(this->mVersion)
+      {
+         case 8:
+         case 9:
+            // Configuration for external clock for DAQ completed
+            if(BitMask) *BitMask = 0x00004000;
+            if(BitOfs) *BitOfs = 14;
+            return 0x0028;
+         default:
+            throw std::invalid_argument("Function GetExtClkActiveLoc() not defined for this board version");
       };
    };
 

@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  03.02.2021 11:27:04
+ *  Created :  04.02.2021 14:00:46
  *
  *  Register Layout Version :  9
  *
@@ -3043,20 +3043,25 @@
 #define WD2_OVERTEMP_MASK                                               0x00008000
 #define WD2_OVERTEMP_OFS                                                        15
 
+/* EXT_CLK_ACTIVE - Configuration for external clock for DAQ completed */
+#define WD2_EXT_CLK_ACTIVE_REG                                      WD2_REG_STATUS
+#define WD2_EXT_CLK_ACTIVE_MASK                                         0x00004000
+#define WD2_EXT_CLK_ACTIVE_OFS                                                  14
+
 /* DAQ_CLK_DEF_PHASE_OK - DAQ clock default phase setting is valid */
 #define WD2_DAQ_CLK_DEF_PHASE_OK_REG                                WD2_REG_STATUS
-#define WD2_DAQ_CLK_DEF_PHASE_OK_MASK                                   0x00001000
-#define WD2_DAQ_CLK_DEF_PHASE_OK_OFS                                            12
+#define WD2_DAQ_CLK_DEF_PHASE_OK_MASK                                   0x00002000
+#define WD2_DAQ_CLK_DEF_PHASE_OK_OFS                                            13
 
 /* DAQ_CLK_DEF_PHASE_CHKD - DAQ clock default phase setting is checked */
 #define WD2_DAQ_CLK_DEF_PHASE_CHKD_REG                              WD2_REG_STATUS
-#define WD2_DAQ_CLK_DEF_PHASE_CHKD_MASK                                 0x00000800
-#define WD2_DAQ_CLK_DEF_PHASE_CHKD_OFS                                          11
+#define WD2_DAQ_CLK_DEF_PHASE_CHKD_MASK                                 0x00001000
+#define WD2_DAQ_CLK_DEF_PHASE_CHKD_OFS                                          12
 
 /* DRS_CONFIG_DONE - DRS configuration done */
 #define WD2_DRS_CONFIG_DONE_REG                                     WD2_REG_STATUS
-#define WD2_DRS_CONFIG_DONE_MASK                                        0x00000200
-#define WD2_DRS_CONFIG_DONE_OFS                                                  9
+#define WD2_DRS_CONFIG_DONE_MASK                                        0x00000400
+#define WD2_DRS_CONFIG_DONE_OFS                                                 10
 
 /* BOARD_SEL - Board select from backplane (inverted = high active) */
 #define WD2_BOARD_SEL_REG                                           WD2_REG_STATUS

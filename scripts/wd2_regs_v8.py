@@ -5,7 +5,7 @@
 #  Project :  WaveDream2
 #
 #  Author  :  schmid_e (Author of generation script)
-#  Created :  03.02.2021 11:26:56
+#  Created :  04.02.2021 14:00:37
 #
 #  Register Layout Version :  8
 #
@@ -3492,6 +3492,11 @@ WD2_TEMPERATURE_REG                      =                    WD2_REG_STATUS
 WD2_TEMPERATURE_MASK                     =                        0xFFFF0000
 WD2_TEMPERATURE_OFS                      =                                16
 
+# EXT_CLK_ACTIVE - Configuration for external clock for DAQ completed
+WD2_EXT_CLK_ACTIVE_REG                   =                    WD2_REG_STATUS
+WD2_EXT_CLK_ACTIVE_MASK                  =                        0x00004000
+WD2_EXT_CLK_ACTIVE_OFS                   =                                14
+
 # DAQ_CLK_DEF_PHASE_OK - DAQ clock default phase setting is valid
 WD2_DAQ_CLK_DEF_PHASE_OK_REG             =                    WD2_REG_STATUS
 WD2_DAQ_CLK_DEF_PHASE_OK_MASK            =                        0x00002000
@@ -5452,6 +5457,7 @@ wd2_bit_group_list = [
   [ "PROTOCOL_VERSION"              , WD2_PROTOCOL_VERSION_REG              , WD2_PROTOCOL_VERSION_MASK              , WD2_PROTOCOL_VERSION_OFS             , "Version of the WaveDream2 protocol" ],
   [ "SERIAL_NUMBER"                 , WD2_SERIAL_NUMBER_REG                 , WD2_SERIAL_NUMBER_MASK                 , WD2_SERIAL_NUMBER_OFS                , "Serial Number of the WD2 Board (Board ID)" ],
   [ "TEMPERATURE"                   , WD2_TEMPERATURE_REG                   , WD2_TEMPERATURE_MASK                   , WD2_TEMPERATURE_OFS                  , "temperature in 0.0625 deg. C units" ],
+  [ "EXT_CLK_ACTIVE"                , WD2_EXT_CLK_ACTIVE_REG                , WD2_EXT_CLK_ACTIVE_MASK                , WD2_EXT_CLK_ACTIVE_OFS               , "Configuration for external clock for DAQ completed" ],
   [ "DAQ_CLK_DEF_PHASE_OK"          , WD2_DAQ_CLK_DEF_PHASE_OK_REG          , WD2_DAQ_CLK_DEF_PHASE_OK_MASK          , WD2_DAQ_CLK_DEF_PHASE_OK_OFS         , "DAQ clock default phase setting is valid" ],
   [ "DAQ_CLK_DEF_PHASE_CHKD"        , WD2_DAQ_CLK_DEF_PHASE_CHKD_REG        , WD2_DAQ_CLK_DEF_PHASE_CHKD_MASK        , WD2_DAQ_CLK_DEF_PHASE_CHKD_OFS       , "DAQ clock default phase setting is checked" ],
   [ "DRS_CONFIG_DONE"               , WD2_DRS_CONFIG_DONE_REG               , WD2_DRS_CONFIG_DONE_MASK               , WD2_DRS_CONFIG_DONE_OFS              , "DRS configuration done" ],

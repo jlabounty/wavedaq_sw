@@ -5,7 +5,7 @@
 #  Project :  WaveDream2
 #
 #  Author  :  schmid_e (Author of generation script)
-#  Created :  03.02.2021 11:27:04
+#  Created :  04.02.2021 14:00:46
 #
 #  Register Layout Version :  9
 #
@@ -3031,20 +3031,25 @@ WD2_OVERTEMP_REG                         =                    WD2_REG_STATUS
 WD2_OVERTEMP_MASK                        =                        0x00008000
 WD2_OVERTEMP_OFS                         =                                15
 
+# EXT_CLK_ACTIVE - Configuration for external clock for DAQ completed
+WD2_EXT_CLK_ACTIVE_REG                   =                    WD2_REG_STATUS
+WD2_EXT_CLK_ACTIVE_MASK                  =                        0x00004000
+WD2_EXT_CLK_ACTIVE_OFS                   =                                14
+
 # DAQ_CLK_DEF_PHASE_OK - DAQ clock default phase setting is valid
 WD2_DAQ_CLK_DEF_PHASE_OK_REG             =                    WD2_REG_STATUS
-WD2_DAQ_CLK_DEF_PHASE_OK_MASK            =                        0x00001000
-WD2_DAQ_CLK_DEF_PHASE_OK_OFS             =                                12
+WD2_DAQ_CLK_DEF_PHASE_OK_MASK            =                        0x00002000
+WD2_DAQ_CLK_DEF_PHASE_OK_OFS             =                                13
 
 # DAQ_CLK_DEF_PHASE_CHKD - DAQ clock default phase setting is checked
 WD2_DAQ_CLK_DEF_PHASE_CHKD_REG           =                    WD2_REG_STATUS
-WD2_DAQ_CLK_DEF_PHASE_CHKD_MASK          =                        0x00000800
-WD2_DAQ_CLK_DEF_PHASE_CHKD_OFS           =                                11
+WD2_DAQ_CLK_DEF_PHASE_CHKD_MASK          =                        0x00001000
+WD2_DAQ_CLK_DEF_PHASE_CHKD_OFS           =                                12
 
 # DRS_CONFIG_DONE - DRS configuration done
 WD2_DRS_CONFIG_DONE_REG                  =                    WD2_REG_STATUS
-WD2_DRS_CONFIG_DONE_MASK                 =                        0x00000200
-WD2_DRS_CONFIG_DONE_OFS                  =                                 9
+WD2_DRS_CONFIG_DONE_MASK                 =                        0x00000400
+WD2_DRS_CONFIG_DONE_OFS                  =                                10
 
 # BOARD_SEL - Board select from backplane (inverted = high active)
 WD2_BOARD_SEL_REG                        =                    WD2_REG_STATUS
@@ -4869,6 +4874,7 @@ wd2_bit_group_list = [
   [ "SERIAL_NUMBER"                 , WD2_SERIAL_NUMBER_REG                 , WD2_SERIAL_NUMBER_MASK                 , WD2_SERIAL_NUMBER_OFS                , "Serial Number of the WD2 Board (Board ID)" ],
   [ "TEMPERATURE"                   , WD2_TEMPERATURE_REG                   , WD2_TEMPERATURE_MASK                   , WD2_TEMPERATURE_OFS                  , "temperature in 0.0625 deg. C units" ],
   [ "OVERTEMP"                      , WD2_OVERTEMP_REG                      , WD2_OVERTEMP_MASK                      , WD2_OVERTEMP_OFS                     , "Overtemperature from external sensor" ],
+  [ "EXT_CLK_ACTIVE"                , WD2_EXT_CLK_ACTIVE_REG                , WD2_EXT_CLK_ACTIVE_MASK                , WD2_EXT_CLK_ACTIVE_OFS               , "Configuration for external clock for DAQ completed" ],
   [ "DAQ_CLK_DEF_PHASE_OK"          , WD2_DAQ_CLK_DEF_PHASE_OK_REG          , WD2_DAQ_CLK_DEF_PHASE_OK_MASK          , WD2_DAQ_CLK_DEF_PHASE_OK_OFS         , "DAQ clock default phase setting is valid" ],
   [ "DAQ_CLK_DEF_PHASE_CHKD"        , WD2_DAQ_CLK_DEF_PHASE_CHKD_REG        , WD2_DAQ_CLK_DEF_PHASE_CHKD_MASK        , WD2_DAQ_CLK_DEF_PHASE_CHKD_OFS       , "DAQ clock default phase setting is checked" ],
   [ "DRS_CONFIG_DONE"               , WD2_DRS_CONFIG_DONE_REG               , WD2_DRS_CONFIG_DONE_MASK               , WD2_DRS_CONFIG_DONE_OFS              , "DRS configuration done" ],

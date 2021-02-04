@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  03.02.2021 11:26:56
+ *  Created :  04.02.2021 14:00:37
  *
  *  Register Layout Version :  8
  *
@@ -3503,6 +3503,11 @@
 #define WD2_TEMPERATURE_REG                                         WD2_REG_STATUS
 #define WD2_TEMPERATURE_MASK                                            0xFFFF0000
 #define WD2_TEMPERATURE_OFS                                                     16
+
+/* EXT_CLK_ACTIVE - Configuration for external clock for DAQ completed */
+#define WD2_EXT_CLK_ACTIVE_REG                                      WD2_REG_STATUS
+#define WD2_EXT_CLK_ACTIVE_MASK                                         0x00004000
+#define WD2_EXT_CLK_ACTIVE_OFS                                                  14
 
 /* DAQ_CLK_DEF_PHASE_OK - DAQ clock default phase setting is valid */
 #define WD2_DAQ_CLK_DEF_PHASE_OK_REG                                WD2_REG_STATUS

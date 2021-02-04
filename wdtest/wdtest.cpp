@@ -44,14 +44,22 @@ int main(int argc, const char *argv[]) {
    b->SetExtClkFreq(80);
    b->SetDaqClkSrcSel(0);
 
-   sleep_ms(100);
+   //sleep_ms(100);
 
    // wait for PLL to lock
-   std::cout << "Checking PLL of WDB:" << std::endl;
+//   std::cout << "Checking PLL of WDB:" << std::endl;
+//   for (int j=0 ; j<20 ; j++) {
+//      int l = b->GetPllLock(true);
+//      std::cout << std::dec << j*100 << "ms: " << b->GetAddr() << " PLL Lock=0x" << std::hex << l << std::endl;
+//      if (l == 0x1FF)
+//         break;
+//
+//      sleep_ms(100);
+//   }
    for (int j=0 ; j<20 ; j++) {
-      int l = b->GetPllLock(true);
-      std::cout << std::dec << j*100 << "ms: " << b->GetAddr() << " PLL Lock=0x" << std::hex << l << std::endl;
-      if (l == 0x1FF)
+      int l = b->GetExtClkActive();
+      std::cout << std::dec << j*100 << "ms: " << b->GetAddr() << " Ext_Clk_Active=" << std::dec << l << std::endl;
+      if (l > 0)
          break;
 
       sleep_ms(100);
