@@ -525,8 +525,19 @@ std::string DCB::SendToSlot(std::string str, int slot) {
 
 //--------------------------------------------------------------------
 
-std::string DCB::UploadStart(int slot) {
-   auto result = SendReceiveUDP("upload " + std::to_string(slot) + " -t wdb -r g -p", false);
+std::string DCB::UploadStart(int slot, int revision) {
+   std::string str;
+
+   if (revision == 4)
+      str = "upload " + std::to_string(slot) + " -t wdb -r e -p";
+   if (revision == 5)
+      str = "upload " + std::to_string(slot) + " -t wdb -r f -p";
+   else if (revision == 6)
+      str = "upload " + std::to_string(slot) + " -t wdb -r g -p";
+   else
+      str = "upload " + std::to_string(slot) + " -p"; // auto-detect
+
+   auto result = SendReceiveUDP(str, false);
    if (mVerbose)
       std::cout << mDCBName << " upload slot " << slot << ": " << result << std::endl;
    return result;

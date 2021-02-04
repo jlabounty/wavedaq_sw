@@ -472,14 +472,27 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
 
       } else if (item == "upload") { // upload ------------------------------
 
+         std::string result;
          if (dcb != nullptr) {
             gl->upload = true;
-            auto result = dcb->UploadStart(slot);
-            mg_printf(nc, "%s", "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
-            mg_printf_http_chunk(nc, "%s", result.c_str());
-            mg_send_http_chunk(nc, "", 0); // end of response
-            return;
+
+            if (slot != -1) {
+               auto b = dcb->GetWDB(slot);
+               if (b != nullptr && b->GetBoardRevision() == 4) // Rev. E
+                  result = dcb->UploadStart(slot, 4);
+               else if (b != nullptr && b->GetBoardRevision() == 5) // Rev. F
+                  result = dcb->UploadStart(slot, 5);
+               else if (b != nullptr && b->GetBoardRevision() == 6) // Rev. G
+                  result = dcb->UploadStart(slot, 6);
+               else
+                  result = dcb->UploadStart(slot, 6); // use G for empty board
+            }
          }
+
+         mg_printf(nc, "%s", "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
+         mg_printf_http_chunk(nc, "%s", result.c_str());
+         mg_send_http_chunk(nc, "", 0); // end of response
+         return;
 
       } else if (item == "init") { // init ------------------------------
 
