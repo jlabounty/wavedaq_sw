@@ -1588,28 +1588,36 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
       }
    }
 
-   // wait until PLL of all WDB have locked
-   /*
+   // wait until clocks of all WDB have been switched to the backplane
    for (int i=0 ; i<16 ; i++) {
       if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
          WDB *b = dcb->GetWDB(i);
+
+         // wait until clock switched is finished
          for (int j=0 ; j<20 ; j++) {
-            int l = b->GetPllLock(true);
-           if (l == 0x1FF)
-               break;
+            int l = b->GetExtClkActive(true);
             if (gl->verbose)
-               std::cout << std::dec << j*100 << "ms: " << b->GetAddr() << " PLL Lock=0x" << std::hex << l << std::endl;
+               std::cout << j*100 << "ms: " << b->GetAddr() << " ExtClkActive=" << l << std::endl;
+            if (l == 1)
+               break;
 
             sleep_ms(100);
-            if (j == 19)
-               std::cout << "PLL of board " << b->GetAddr() << " not locked" << std::endl;
+         }
+
+         // wait until PLLs have locked
+         for (int j=0 ; j<20 ; j++) {
+            int l = b->GetPllLock();
+            if (gl->verbose)
+               std::cout << j*100 << "ms: " << b->GetAddr() << " PLLLock=" << std::hex << l << std::dec << std::endl;
+            if (l == 0x1FF)
+               break;
+
+            sleep_ms(100);
          }
       }
    }
-   */
 
    if (newBoard) {
-      sleep_ms(2000);
       dcb->ResetSerdes();
    }
 }
