@@ -58,6 +58,7 @@ void connectWDB(GLOBALS *gl, WDB *b);
 void connectDCB(GLOBALS *gl, DCB *d);
 void disconnectWDB(GLOBALS *gl, WDB *b);
 void disconnectDCB(GLOBALS *gl, DCB *d);
+void resetSerdesAdc(GLOBALS *gl, DCB *dcb);
 
 /*------------------------------------------------------------------*/
 
@@ -451,11 +452,8 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             connectWDB(gl, b);
          }
 
-         if (dcb != nullptr) {
-            sleep_ms(2000);
-            std::cout << "Reset DCB serdes" << std::endl;
-            dcb->ResetSerdes();
-         }
+         if (dcb != nullptr)
+            resetSerdesAdc(gl, dcb);
 
       } else if (item == "mark") { // mark ------------------------------
 
@@ -468,7 +466,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       } else if (item == "sdreset") { // SERDES reset ------------------------------
 
          if (dcb != nullptr)
-            dcb->ResetSerdes();
+            resetSerdesAdc(gl, dcb);
 
       } else if (item == "upload") { // upload ------------------------------
 
@@ -1622,14 +1620,20 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
       }
    }
 
-   if (newBoard) {
-      dcb->ResetSerdes();
+   if (newBoard)
+      resetSerdesAdc(gl, dcb);
+}
 
-      for (int i = 0; i < 16; i++) {
-         if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
-            WDB *b = dcb->GetWDB(i);
-            b->ResetAdc();
-         }
+void resetSerdesAdc(GLOBALS *gl, DCB *dcb) {
+   if (gl->verbose)
+      std::cout << "Reset serded of " << dcb->GetName() << " and all WDB ADCs" << std::endl;
+
+   dcb->ResetSerdes();
+
+   for (int i = 0; i < 16; i++) {
+      if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
+         WDB *b = dcb->GetWDB(i);
+         b->ResetAdc();
       }
    }
 }
