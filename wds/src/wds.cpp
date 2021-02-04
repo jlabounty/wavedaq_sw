@@ -1606,7 +1606,7 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
 
          // wait until PLLs have locked
          for (int j=0 ; j<20 ; j++) {
-            int l = b->GetPllLock();
+            int l = b->GetPllLock(true);
             if (gl->verbose)
                std::cout << j*100 << "ms: " << b->GetAddr() << " PLLLock=" << std::hex << l << std::dec << std::endl;
             if (l == 0x1FF)
@@ -1618,6 +1618,7 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
    }
 
    if (newBoard) {
+      sleep_ms(1000);
       dcb->ResetSerdes();
    }
 }
