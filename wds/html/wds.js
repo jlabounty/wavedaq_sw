@@ -215,7 +215,10 @@ function reconnect() {
 function populateControls(init) {
 
    // set WDB name in board select button
-   document.getElementById('wdSelect').innerHTML = OSC.wdbAddress;
+   if (OSC.wdbAddress[0] == "D")
+      document.getElementById('wdSelect').innerHTML = OSC.wdbAddress + " - " + OSC.wdb.name;
+   else
+      document.getElementById('wdSelect').innerHTML = OSC.wdbAddress;
 
    // populate channel buttons
    for (let i = 0; i < 18; i++)
