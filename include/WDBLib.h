@@ -26,8 +26,9 @@
 #include "DCBLib.h"
 
 #define WD_N_CHANNELS 18
-#define WD_N_SCALER 19
+#define WD_N_SCALER   19
 #define SUCCESS        1
+#define TIMEOUT        2
 
 class WDB;
 

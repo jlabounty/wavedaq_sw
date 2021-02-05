@@ -2285,7 +2285,7 @@ int WP::ReceiveWfPacket() {
       perror("select");
 
    if (!FD_ISSET(WP::gDataSocket, &readfds)) {
-      return 0;
+      return TIMEOUT;
    }
 
    // packet is available, so receive it
@@ -3245,7 +3245,7 @@ void WP::Collector() {
       do {
 
          status = ReceiveWfPacket();
-         if (status != SUCCESS) {
+         if (status != SUCCESS && status != TIMEOUT) {
             if (mVerbose >= 2)
                std::cout << "Abort collecting event, status = " << status << ". (time = " << usSince(mEventStartTime)
                          << "us)" << std::endl;
