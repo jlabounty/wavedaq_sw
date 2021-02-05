@@ -35,6 +35,7 @@ enum READOUTMODE {
 };
 
 typedef struct {
+   bool daemonMode;
    bool demoMode;
    int serverPort;
    int verbose;
@@ -1480,6 +1481,7 @@ void showUsage(std::string name) {
 
    std::cerr << "usage: " << name << " [options]" << std::endl;
    std::cerr << "valid options:" << std::endl;
+   std::cerr << "  -D              Become a daemon" << std::endl;
    std::cerr << "  -demo           Demo mode" << std::endl;
    std::cerr << "  -g rx tx        Debug output at RX/TX ports" << std::endl;
    std::cerr << "  -h              Show this help" << std::endl;
@@ -1679,6 +1681,7 @@ int main(int argc, const char *argv[]) {
    signal(SIGSEGV, handler);
 
    // default values
+   gl.daemonMode = false;
    gl.serverPort = 8080;
    gl.verbose = 0;
    gl.logFileName = "";
@@ -1752,7 +1755,12 @@ int main(int argc, const char *argv[]) {
       if (arg == "-h" || arg == "-help" || arg == "--help") {
          showUsage(argv[0]);
          return 0;
-      } else if (arg == "-demo")
+      }
+
+      else if (arg == "-D")
+         gl.daemonMode = true;
+
+      else if (arg == "-demo")
          gl.demoMode = true;
 
       else if (arg == "-p")
@@ -1916,6 +1924,20 @@ int main(int argc, const char *argv[]) {
 
    if (gl.demoMode)
       std::cout << "Starting in DEMO mode." << std::endl;
+
+   if (gl.daemonMode) {
+      std::cout << "wds becoming a daemon..." << std::endl;
+      int fd, pid;
+
+      if ((pid = fork()) < 0)
+         return 1;
+      else if (pid != 0)
+         exit(0);  // parent finished
+
+      /* child continues here */
+
+      setsid(); // become session leader
+   }
 
    time_t last = 0, now;
 
