@@ -1773,6 +1773,8 @@ int main(int argc, const char *argv[]) {
             gl.verbose = std::stoi(argv[++i]);
       }
 
+      else if (arg == "-W") { i++; }
+
       else if (arg == "-w") {
 
          if (i + 1 == argc) {
