@@ -410,6 +410,11 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             b->SetMcxRxSigSel(1);
             b->SetMcxTxSigSel(1);
          }
+      } else if (item == "zeroSuppression") {
+         // set zero suppression flag
+         for (auto &b: wdbList) {
+            b->SetZeroSuprEn(value == "true");
+         }
       }
 
       //---------- commands ----------

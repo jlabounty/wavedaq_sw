@@ -174,7 +174,17 @@
             </div>
 
             <div class="vMiddleBox vSpacer5">
-            Holdoff:&nbsp;<input type="text" id="triggerHoldoff" name="triggerHoldoff" value="0" onkeypress="keyParam(event,this)">&nbsp;ms
+            Holdoff:&nbsp;<input type="text" id="triggerHoldoff" name="triggerHoldoff" value="0"
+                                 onkeypress="keyParam(event,this)">&nbsp;ms
+            </div>
+
+            <div class="vMiddleBox vSpacer5">
+
+               <div class="vSpacer5">
+                  <input type="checkbox" id="zeroSuppression" name="zeroSuppression"
+                         onClick="setParam(this)">
+                  Enable zero suppression
+               </div>
             </div>
 
             <table>
@@ -183,7 +193,8 @@
                      Type:&nbsp;&nbsp;
                      <input type="radio" id="rbTriggerModeNormal" name="triggerMode" value="1" checked
                             onClick="setParam(this)">normal
-                     <input type="radio" id="rbTriggerModeAuto" name="triggerMode" value="2" onClick="setParam(this)">auto
+                     <input type="radio" id="rbTriggerModeAuto" name="triggerMode" value="2"
+                            onClick="setParam(this)">auto
                   </td>
                   <td rowspan=2>
                      &nbsp;&nbsp;
