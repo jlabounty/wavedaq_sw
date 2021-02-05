@@ -1491,6 +1491,7 @@ void showUsage(std::string name) {
              << std::endl;
    std::cerr << "  -v 1            Print extra information (verbose)" << std::endl;
    std::cerr << "  -v 2            Print each received waveform packet header" << std::endl;
+   std::cerr << "  -W <dir>        Specify directory in which \"html\" resides" << std::endl;
 }
 
 void handler(int sig) {
@@ -1687,10 +1688,22 @@ int main(int argc, const char *argv[]) {
    gl.wdsDir = "";
    gl.upload = false;
 
+   // extract wds directory from command line parameters
+   std::string dir;
+   for (int i = 1; i < argc; i++) {
+      std::string arg = argv[i];
+      if (arg == "-W" && argc > i + 1) {
+         dir = std::string(argv[i + 1]);
+         break;
+      }
+   }
+
    // find wds directory
-   char tmp[256];
-   getcwd(tmp, sizeof(tmp));
-   std::string dir(tmp);
+   if (dir == "") {
+      char tmp[256];
+      getcwd(tmp, sizeof(tmp));
+      dir = tmp;
+   }
    std::ifstream f1(dir + "/html/index.html");
    if (f1.good()) {
       gl.wdsDir = dir;
