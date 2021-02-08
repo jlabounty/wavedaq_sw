@@ -710,7 +710,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       }
 
       if (gl->verbose)
-         std::cout << "Doing " << (flag ? "full" : "quick") << " scrate scan" << std::endl;
+         std::cout << "Doing " << (flag ? "full" : "quick") << " crate scan" << std::endl;
 
       DCB *dcb = nullptr;
       for (auto &d : gl->dcb) {
@@ -1638,10 +1638,6 @@ void switchDaqClock(GLOBALS *gl, DCB *dcb) {
       }
    }
 
-   dcb->ResetSerdes();
-   if (gl->verbose)
-      std::cout << "Reset serdes of " << dcb->GetName() << std::endl;
-
    for (int i = 0; i < 16; i++) {
       if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
          WDB *b = dcb->GetWDB(i);
@@ -1650,6 +1646,13 @@ void switchDaqClock(GLOBALS *gl, DCB *dcb) {
             std::cout << "Reset ADC of " << b->GetName() << std::endl;
       }
    }
+
+   dcb->ResetSerdes();
+   if (gl->verbose)
+      std::cout << "Reset serdes of " << dcb->GetName() << std::endl;
+
+   //auto s = dcb->SendReceiveUDP("sdstat");
+   //std::cout << s;
 }
 
 void disconnectWDB(GLOBALS *gl, WDB *b) {
