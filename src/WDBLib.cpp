@@ -2460,8 +2460,12 @@ int WP::ReceiveWfPacket() {
    // decode DRS waveform data ----------
    if (pwdaq_header->data_type == cDataTypeDRS) {
 
-      assert(pwdaq_header->payload_length % 3 == 0);
-      assert(pwdaq_header->data_chunk_offset % 3 == 0);
+      // return on invalid header
+      if (pwdaq_header->payload_length % 3 != 0)
+         return 0;
+      if (pwdaq_header->data_chunk_offset % 3 != 0)
+         return 0;
+
       int numberBins = (int) pwdaq_header->payload_length / 1.5;
       int firstBin = pwdaq_header->data_chunk_offset / 1.5;
       int channel_number = (pwdb_header->channel_info) & 0x1f;
@@ -2515,8 +2519,12 @@ int WP::ReceiveWfPacket() {
    // decode ADC waveform data ----------
    if (pwdaq_header->data_type == cDataTypeADC) {
 
-      assert(pwdaq_header->payload_length % 3 == 0);
-      assert(pwdaq_header->data_chunk_offset % 3 == 0);
+      // return on invalid header
+      if (pwdaq_header->payload_length % 3 != 0)
+         return 0;
+      if (pwdaq_header->data_chunk_offset % 3 != 0)
+         return 0;
+
       int numberBins = (int) pwdaq_header->payload_length / 1.5;
       int firstBin = pwdaq_header->data_chunk_offset / 1.5;
       int channel_number = (pwdb_header->channel_info) & 0x1f;
@@ -2560,8 +2568,10 @@ int WP::ReceiveWfPacket() {
    if (pwdaq_header->data_type == cDataTypeTrg) {
       auto pd = (unsigned long long *) (pwdb_header + 1);
       //assure data are transmitted in 64-bit blocks
-      assert(pwdaq_header->payload_length % 8 == 0);
-      assert(pwdaq_header->data_chunk_offset % 8 == 0);
+      if (pwdaq_header->payload_length % 8 != 0)
+         return 0;
+      if (pwdaq_header->data_chunk_offset % 8 != 0)
+         return 0;
       for (int i = 0; i < pwdaq_header->payload_length / 8; i++) {
          event->mTrgData[pwdaq_header->data_chunk_offset / 8 + i] = SWAP_UINT64(pd[i]);
       }
@@ -2570,7 +2580,8 @@ int WP::ReceiveWfPacket() {
    // decode scaler data
    if (pwdaq_header->data_type == cDataTypeScaler) {
       auto pd = (unsigned long long *) (pwdb_header + 1);
-      assert(pwdaq_header->payload_length <= sizeof(event->mScaler));
+      if (pwdaq_header->payload_length > sizeof(event->mScaler))
+         return 0;
       for (int i = 0; i < WD_N_SCALER; i++)
          event->mScaler[i] = SWAP_UINT64(pd[17 - i]);
    }
