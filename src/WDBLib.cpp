@@ -1739,6 +1739,14 @@ void WDB::TriggerSoftEvent() {
    SetDaqSoftTrigger(true);
 }
 
+void WDB::SetDaqSoftNormal(int value) {
+   SetRegMask(0x1004, 0x00000008, 3, value);
+}
+
+int WDB::GetDaqSoftNormal() {
+   return BitExtractControl(0x1004, 0x00000008, 3);
+}
+
 //--------------------------------------------------------------------
 
 unsigned int WDB::GetDrsSampleFreqMhz() {
@@ -1825,6 +1833,7 @@ void WDBS::Save(WDB *b) {
    mTimingReferenceSignal = b->GetTimingReferenceSignal();
    mExtAsyncTriggerEn = b->GetExtAsyncTriggerEn();
    mPatternTriggerEn = b->GetPatternTriggerEn();
+   mZeroSuprEn = b->GetZeroSuprEn();
 }
 
 void WDBS::Restore(WDB *b) {
@@ -1841,6 +1850,7 @@ void WDBS::Restore(WDB *b) {
    b->SetTimingReferenceSignal(mTimingReferenceSignal);
    b->SetExtAsyncTriggerEn(mExtAsyncTriggerEn);
    b->SetPatternTriggerEn(mPatternTriggerEn);
+   b->SetZeroSuprEn(mZeroSuprEn);
 }
 
 //====================================================================
@@ -1880,12 +1890,10 @@ void WDEvent::SetEventHeaderInfo(FRAME_WDAQ_HEADER *pdaqh) {
 void WDEvent::SetWDEventHeaderInfo(FRAME_WDAQ_HEADER *pdaqh, FRAME_WDB_HEADER *ph) {
    int channel = ph->channel_info & 0x1F;
    if (pdaqh->data_type == cDataTypeDRS) {
-      mDRSChannelPresent[channel] = true;
       mDRSSamplingFrequency = (unsigned int) (ph->sampling_frequency / 1000.0 + 0.5);  // convert kHz to MHz
       mTriggerCell[channel] = ph->drs_trigger_cell;
    }
    if (pdaqh->data_type == cDataTypeADC) {
-      mADCChannelPresent[channel] = true;
       mADCSamplingFrequency = (unsigned int) (ph->sampling_frequency / 1000.0 + 0.5);  // convert kHz to MHz
    } if (pdaqh->data_type == cDataTypeTDC)
       mTDCChannelPresent[channel] = true;
@@ -3392,6 +3400,9 @@ void WP::DoVoltageCalibrationStep() {
       b->SetDrsChTxEn(0x3FFFF);
       b->SetAdcChTxEn(0);
 
+      // turn off zero suppression
+      b->SetZeroSuprEn(false);
+
       // range -0.5 ... + 0.5V
       b->SetRange(0);
 
@@ -4057,6 +4068,9 @@ void WP::DoTimeCalibrationStep() {
 
       // enable all channels
       b->SetDrsChTxEn(0x3FFFF);
+
+      // turn off zero suppression
+      b->SetZeroSuprEn(false);
 
       // set holdoff to minimum
       b->SetTriggerHoldoff(0);

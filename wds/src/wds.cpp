@@ -251,8 +251,10 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             b->SetDacTriggerLevelV(iChannel, std::stof(value));
       } else if (item == "triggerMode") {
          gl->triggerMode = (TRIGGERMODE) std::stoi(value);
-         for (auto &b: wdbList)
+         for (auto &b: wdbList) {
             b->SetDaqSoftTrigger(false);
+            b->SetDaqSoftNormal(gl->triggerMode == cTriggerModeNormal ? 1 : 0);
+         }
       } else if (item == "triggerHoldoff") {
          for (auto &b: wdbList)
             b->SetTriggerHoldoff(std::stof(value));
@@ -1201,10 +1203,6 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
          return;
       }
 
-      mg_get_http_var(&hm->query_string, "chn", str, sizeof(str));
-      int chn = atoi(str);
-
-
       mg_send_response_line(nc, 200, "Content-Type: application/octet-stream\r\nTransfer-Encoding: chunked\r\n");
 
       // return progress if in voltage calibration mode
@@ -1247,14 +1245,13 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
          float f = gl->wp->GetTcalibProgress();
          mg_send_http_chunk(nc, (const char *) &f, 4);
 
-         for (int c = 0; c < WD_N_CHANNELS; c++)
-            if (chn & (1 << c)) {
-               int n = 1024;
-               mg_send_http_chunk(nc, (const char *) &c, 4);
-               mg_send_http_chunk(nc, (const char *) &n, 4);
+         for (int c = 0; c < WD_N_CHANNELS; c++) {
+            int n = 1024;
+            mg_send_http_chunk(nc, (const char *) &c, 4);
+            mg_send_http_chunk(nc, (const char *) &n, 4);
 
-               mg_send_http_chunk(nc, (const char *) wdb->mTCalib.mCalib.period[c], sizeof(float) * n);
-            }
+            mg_send_http_chunk(nc, (const char *) wdb->mTCalib.mCalib.period[c], sizeof(float) * n);
+         }
 
          mg_send_http_chunk(nc, "", 0);
          return;
@@ -1325,7 +1322,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             int tc = event.mTCalibrated;  // time calibrated
             int l = gl->wp->GetNLogged(); // number of logged events
             for (int c = 0; c < WD_N_CHANNELS; c++) {
-               if (chn & (1 << c)) {
+               if (event.mADCChannelPresent[c]) {
                   t = 1; // time array
                   mg_send_http_chunk(nc, (const char *) &t, 4);
                   mg_send_http_chunk(nc, (const char *) &brd, 4);
@@ -1338,7 +1335,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             }
 
             for (int c = 0; c < WD_N_CHANNELS; c++) {
-               if (chn & (1 << c)) {
+               if (event.mADCChannelPresent[c]) {
                   t = 2; // voltage array
                   mg_send_http_chunk(nc, (const char *) &t, 4);
                   mg_send_http_chunk(nc, (const char *) &brd, 4);
@@ -1361,7 +1358,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
                time[i] = i * 1.56e-9;
             }
             for (int c = 0; c < WD_N_CHANNELS; c++) {
-               if (chn & (1 << c)) {
+               if (event.mTDCChannelPresent[c]) {
                   t = 1; // time array
                   mg_send_http_chunk(nc, (const char *) &t, 4);
                   mg_send_http_chunk(nc, (const char *) &brd, 4);
@@ -1373,7 +1370,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
                }
             }
             for (int c = 0; c < WD_N_CHANNELS; c++) {
-               if (chn & (1 << c)) {
+               if (event.mTDCChannelPresent[c]) {
                   t = 3; // bit value array
                   mg_send_http_chunk(nc, (const char *) &t, 4);
                   mg_send_http_chunk(nc, (const char *) &brd, 4);
@@ -1399,7 +1396,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             int tc = event.mTCalibrated;  // time calibrated
             int l = gl->wp->GetNLogged(); // number of logged events
             for (int c = 0; c < WD_N_CHANNELS; c++) {
-               if (chn & (1 << c)) {
+               if (event.mDRSChannelPresent[c]) {
                   t = 1; // time array
                   mg_send_http_chunk(nc, (const char *) &t, 4);
                   mg_send_http_chunk(nc, (const char *) &brd, 4);
@@ -1412,7 +1409,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             }
 
             for (int c = 0; c < WD_N_CHANNELS; c++) {
-               if (chn & (1 << c)) {
+               if (event.mDRSChannelPresent[c]) {
                   t = 2; // voltage array
                   mg_send_http_chunk(nc, (const char *) &t, 4);
                   mg_send_http_chunk(nc, (const char *) &brd, 4);
@@ -1562,7 +1559,6 @@ void connectWDB(GLOBALS *gl, WDB *b) {
    if (!b->IsDcbInterface())
       b->SetDestinationPort(gl->wp->GetServerPort());
 
-   // set DAQ mode
    b->SetDaqNormal(false);
 
    // Enable serdes if WDB is in crate
@@ -1574,6 +1570,8 @@ void connectWDB(GLOBALS *gl, WDB *b) {
       b->SetSerdesComEn(0);  // disable serdes
    }
 
+   // obtain soft auto trigger mode from board
+   gl->triggerMode = b->GetDaqSoftNormal() ? cTriggerModeNormal : cTriggerModeAuto;
 }
 
 void connectDCB(GLOBALS *gl, DCB *dcb) {

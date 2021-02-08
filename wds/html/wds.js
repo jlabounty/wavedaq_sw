@@ -968,11 +968,6 @@ function loadWF() {
       return;
    }
 
-   // build mask with active channels
-   for (chn = 0, c = 0; c < 18; c++)
-      if (OSC.chOn[c])
-         chn |= (1 << c);
-
    for (i = 0; i < OSC.measList.childNodes.length; i++)
       if (OSC.measList.childNodes[i].measurement) {
          for (let p = 0; p < OSC.measList.childNodes[i].measurement.param.length; p++) {
@@ -989,7 +984,7 @@ function loadWF() {
    // send AJAX request
    OSC.req = new XMLHttpRequest();
    OSC.req.onreadystatechange = receiveWF;
-   OSC.req.open("GET", "wf?adr=" + OSC.wdbAddress + "&chn=" + chn + "&r=" + Math.random(), true); // avoid cached results
+   OSC.req.open("GET", "wf?adr=" + OSC.wdbAddress + "&r=" + Math.random(), true); // avoid cached results
    OSC.req.responseType = "arraybuffer";
 
    try {

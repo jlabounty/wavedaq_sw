@@ -499,6 +499,7 @@ class WDBS {
    int mTimingReferenceSignal;
    int mExtAsyncTriggerEn;
    int mPatternTriggerEn;
+   int mZeroSuprEn;
 
 public:
    void Save(WDB *b);
@@ -744,6 +745,8 @@ public:
    float GetRange();
 
    void TriggerSoftEvent();
+   void SetDaqSoftNormal(int value);
+   int GetDaqSoftNormal();
 
    unsigned int GetDrsSampleFreqMhz();
    void SaveVoltageCalibration(int freq, std::string path="");
