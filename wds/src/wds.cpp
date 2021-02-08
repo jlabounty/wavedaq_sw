@@ -1042,6 +1042,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       }
 
       mg_printf_http_chunk(nc, "    \"triggerMode\": %d,\n", gl->triggerMode);
+      mg_printf_http_chunk(nc, "    \"zeroSuppression\": %d,\n", b->GetZeroSuprEn());
       mg_printf_http_chunk(nc, "    \"triggerHoldoff\": %d,\n", b->GetTriggerHoldoff());
       mg_printf_http_chunk(nc, "    \"triggerLeadTrailEdgeSel\": %d,\n", b->GetLeadTrailEdgeSel());
       mg_printf_http_chunk(nc, "    \"triggerExtTriggerOutEnable\": %s,\n", b->GetExtTriggerOutEnable() ? "true" : "false");

@@ -246,6 +246,7 @@ function populateControls(init) {
       document.getElementById("rbTriggerModeNormal").checked = false;
       document.getElementById("rbTriggerModeAuto").checked = true;
    }
+   document.getElementById("zeroSuppression").checked = (OSC.wdb.zeroSuppression === 1);
    if (document.getElementById("triggerHoldoff") !== document.activeElement) {
       document.getElementById("triggerHoldoff").value = OSC.wdb.triggerHoldoff;
    }
@@ -575,6 +576,7 @@ function readWdb(init) {
                "feMux": new Array(16).fill(0),
                "fePower": false,
                "triggerMode": 2,
+               "zeroSuppression": false,
                "triggerLeadTrailEdgeSel": 0,
                "triggerExtTriggerOutEnable": false,
                "triggerSource": 220152992,
