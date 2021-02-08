@@ -989,6 +989,22 @@ unsigned int WDB::GetPllLock(bool refresh)
    return this->sreg[GetSysDcmLockLoc() / 4];
 }
 
+bool WDB::WaitPllLock(int timeout)
+// wait until all PLLs have locked with timeout
+{
+   for (int i=0 ; i<timeout ; i++) {
+      auto l = GetPllLock(true);
+      if (l == 0x1FF) {
+         if (i > 0)
+            std::cout << "PLL locked after " << i*10 << " ms" << std::endl;
+         return true;
+      }
+      sleep_ms(10);
+   }
+
+   return false;
+}
+
 unsigned int WDB::GetExtClkActive(bool refresh)
 {
    if (refresh)
@@ -1021,11 +1037,15 @@ void WDB::SetDrsSampleFreq(unsigned int f)
    SetLmk5ClkoutMux(1);
    SetLmk5ClkoutDly(0);
 
-   LmkSyncLocal();
-   SetAdcIfRst(0);
-
    // read back new sampling frquency in status register
    ReceiveStatusRegister(GetDrsSampleFreqLoc());
+
+   LmkSyncLocal();
+   if (!WaitPllLock())
+      std::cout << "PLLs on " << GetName() << " did not lock after 1s, mask=0x" <<
+                std::hex << GetPllLock(false) << std::dec << std::endl;
+
+   SetAdcIfRst(0);
 }
 
 void WDB::GetScalers(std::vector<uint64_t> &scaler, bool refresh) {

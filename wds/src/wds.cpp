@@ -372,6 +372,11 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       } else if (item == "drsSampleFreq") {
          for (auto &b: wdbList) {
             b->SetDrsSampleFreq(std::stoi(value));
+
+            // serses links might have dropped during LMK reprogramming, so issue reset
+            if (b->IsDcbInterface())
+               b->GetDcbInterface()->ResetSerdes();
+
             b->LoadVoltageCalibration(b->GetDrsSampleFreqMhz(), gl->wdsDir);
             b->LoadTimeCalibration(b->GetDrsSampleFreqMhz(), gl->wdsDir);
             if (b->mVCalib.IsValid()) {
@@ -1620,36 +1625,29 @@ void switchDaqClock(GLOBALS *gl, DCB *dcb) {
          // wait until clock switched is finished
          for (int j=0 ; j<20 ; j++) {
             int l = b->GetExtClkActive(true);
-            if (gl->verbose)
-               std::cout << j*100 << "ms: " << b->GetAddr() << " ExtClkActive=" << l << std::endl;
             if (l == 1)
                break;
 
+            if (gl->verbose)
+               std::cout << j*100 << "ms: " << b->GetAddr() << " ExtClkActive=" << l << std::endl;
             sleep_ms(100);
          }
 
          // wait until PLLs have locked
-         for (int j=0 ; j<20 ; j++) {
-            int l = b->GetPllLock(true);
-            if (gl->verbose)
-               std::cout << j*100 << "ms: " << b->GetAddr() << " PLLLock=" << std::hex << l << std::dec << std::endl;
-            if (l == 0x1FF)
-               break;
-
-            sleep_ms(100);
-         }
+         b->WaitPllLock();
       }
    }
 
-   if (gl->verbose)
-      std::cout << "Reset serdes of " << dcb->GetName() << " and all WDB ADCs" << std::endl;
-
    dcb->ResetSerdes();
+   if (gl->verbose)
+      std::cout << "Reset serdes of " << dcb->GetName() << std::endl;
 
    for (int i = 0; i < 16; i++) {
       if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
          WDB *b = dcb->GetWDB(i);
          b->ResetAdc();
+         if (gl->verbose)
+            std::cout << "Reset ADC of " << b->GetName() << std::endl;
       }
    }
 }

@@ -654,6 +654,7 @@ public:
    float GetVCalibTemperature();
    float GetTCalibTemperature();
    unsigned int GetPllLock(bool refresh = true);
+   bool WaitPllLock(int timeout = 100);
    unsigned int GetExtClkActive(bool refresh);
    void GetScalers(std::vector<uint64_t> &s, bool refresh = true);
    void GetHVCurrents(std::vector<float> &c, bool refresh = true);
