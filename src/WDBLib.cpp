@@ -1041,11 +1041,11 @@ void WDB::SetDrsSampleFreq(unsigned int f)
    ReceiveStatusRegister(GetDrsSampleFreqLoc());
 
    LmkSyncLocal();
+   SetAdcIfRst(0);
+
    if (!WaitPllLock())
       std::cout << "PLLs on " << GetName() << " did not lock after 1s, mask=0x" <<
                 std::hex << GetPllLock(false) << std::dec << std::endl;
-
-   SetAdcIfRst(0);
 }
 
 void WDB::GetScalers(std::vector<uint64_t> &scaler, bool refresh) {
