@@ -1043,6 +1043,8 @@ void WDB::SetDrsSampleFreq(unsigned int f)
    LmkSyncLocal();
    SetAdcIfRst(0);
 
+   ResetAdc();
+
    if (!WaitPllLock())
       std::cout << "PLLs on " << GetName() << " did not lock after 1s, mask=0x" <<
                 std::hex << GetPllLock(false) << std::dec << std::endl;

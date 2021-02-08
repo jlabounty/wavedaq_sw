@@ -510,7 +510,7 @@ void DCB::ResetSerdes() {
    auto result = SendReceiveUDP("sdreset full");
    mReceiveTimeoutMs = oldTimeout;
    if (mVerbose)
-      std::cout << mDCBName << " 'sdreset full': " << result << std::endl;
+      std::cout << mDCBName << " 'sdreset full': " << result;
 }
 
 //--------------------------------------------------------------------
