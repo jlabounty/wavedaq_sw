@@ -86,7 +86,7 @@ function Crate(div) { // constructor
 
 Crate.prototype.resize = function (width) {
    this.canvas.width = width;
-   this.canvas.height = width / 1000 * 270;
+   this.canvas.height = width / 1000 * 280;
    this.draw();
 }
 
@@ -180,12 +180,12 @@ Crate.prototype.mouseEvent = function (e) {
 Crate.prototype.draw = function () {
    let ctx = this.canvas.getContext("2d");
 
-   // scale canvas such that a 1000x270 px rectangle fills the whole window
+   // scale canvas such that a 1000x280 px rectangle fills the whole window
    ctx.save();
    ctx.scale(this.canvas.width / 1000, this.canvas.width / 1000);
 
    ctx.fillStyle = "#E0E0E0";
-   ctx.fillRect(0, 0, 1000, 270);
+   ctx.fillRect(0, 0, 1000, 280);
    ctx.fillStyle = "#808080";
    ctx.fillRect(60, 5, 880, 260);
 
@@ -193,6 +193,23 @@ Crate.prototype.draw = function () {
    ctx.fillStyle = "#A0A0A0";
    ctx.fillRect(15, 35, 30, 200);
    ctx.fillRect(955, 35, 30, 200);
+
+   // slot numbers
+   ctx.textAlign = "center";
+   ctx.textBaseline = "middle";
+   ctx.fillStyle = "#404040";
+   for (let slot=0 ; slot<18 ; slot++) {
+      if (slot > 15) {
+         ctx.font = "Bold 10px Sans-Serif"
+         ctx.fillText(slot, 83.2 + (slot - 8) * 41.4, 273);
+      } else if (slot < 8) {
+         ctx.font = "10px Sans-Serif"
+         ctx.fillText(slot, 83.2 + slot * 41.4, 273);
+      } else {
+         ctx.font = "10px Sans-Serif"
+         ctx.fillText(slot, 83.2 + (slot + 2) * 41.4, 273);
+      }
+   }
 
    //---- draw CMB
    drawCMB(ctx);
@@ -397,12 +414,6 @@ function drawEmptySlot(ctx, slot) {
    ctx.fillRect(0, 0, 40, 255);
    ctx.fillStyle = "#404040";
    ctx.fillRect(2, 2, 36, 251);
-
-   ctx.textAlign = "center";
-   ctx.textBaseline = "middle";
-   ctx.font = "8px Sans-Serif"
-   ctx.fillStyle = "#E0E0E0";
-   ctx.fillText(slot, 20, 240);
 }
 
 function drawWDB(ctx, slot) {
