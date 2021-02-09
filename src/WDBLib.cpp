@@ -995,7 +995,7 @@ bool WDB::WaitPllLock(int timeout)
    for (int i=0 ; i<timeout ; i++) {
       auto l = GetPllLock(true);
       if (l == 0x1FF) {
-         if (i > 0)
+         if (mVerbose && i > 0)
             std::cout << "PLL locked after " << i*10 << " ms" << std::endl;
          return true;
       }
@@ -1045,7 +1045,7 @@ void WDB::SetDrsSampleFreq(unsigned int f)
 
    ResetAdc();
 
-   if (!WaitPllLock())
+   if (mVerbose && !WaitPllLock())
       std::cout << "PLLs on " << GetName() << " did not lock after 1s, mask=0x" <<
                 std::hex << GetPllLock(false) << std::dec << std::endl;
 }

@@ -456,11 +456,13 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       } else if (item == "reboot") {
 
          for (auto &b: wdbList) {
-            std::cout << "Reboot " << b->GetAddr() << std::endl;
+            if (gl->verbose)
+               std::cout << "Reboot " << b->GetAddr() << std::endl;
 
             b->ReconfigureFpga();
             sleep_ms(5000);
-            std::cout << "Finished" << std::endl;
+            if (gl->verbose)
+               std::cout << "Finished" << std::endl;
 
             connectWDB(gl, b);
          }
@@ -603,14 +605,17 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             // create new board
             wdb = new WDB(adr, gl->verbose);
             try {
-               std::cout << "Connect to " << wdb->GetAddr() << " ... " << std::flush;
+               if (gl->verbose)
+                  std::cout << "Connect to " << wdb->GetAddr() << " ... " << std::flush;
                connectWDB(gl, wdb);
                gl->wdb.push_back(wdb);
                gl->wp->SetWDBList(gl->wdb);
                mg_printf_http_chunk(nc, "OK\n");
-               std::cout << "OK" << std::endl;
+               if (gl->verbose)
+                  std::cout << "OK" << std::endl;
             } catch (std::runtime_error &e) {
-               std::cout << "Failure" << std::endl;
+               if (gl->verbose)
+                  std::cout << "Failure" << std::endl;
                mg_printf_http_chunk(nc, "%s\n", e.what());
                delete wdb;
                wdb = nullptr;
@@ -649,12 +654,14 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             // create new board
             dcb = new DCB(adr, gl->verbose);
             try {
-               std::cout << "Connect to " << dcb->GetName() << " ... " << std::flush;
+               if (gl->verbose)
+                  std::cout << "Connect to " << dcb->GetName() << " ... " << std::flush;
                dcb->Connect();
                dcb->ScanCrate();
                // set destination port for DCB, MAC and IP is used automatically from UDP packet
                dcb->SetDestinationPort(gl->wp->GetServerPort());
-               std::cout << "OK" << std::endl;
+               if (gl->verbose)
+                  std::cout << "OK" << std::endl;
                if (gl->verbose) {
                   std::cout << std::endl << "========== DCB Info ==========" << std::endl;
                   dcb->PrintVersion();
@@ -668,7 +675,8 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
                connectDCB(gl, dcb);
 
             } catch (std::runtime_error &e) {
-               std::cout << "Failure" << std::endl;
+               if (gl->verbose)
+                  std::cout << "Failure" << std::endl;
                mg_printf_http_chunk(nc, "%s\n", e.what());
                delete dcb;
                dcb = nullptr;
@@ -731,12 +739,14 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       if (dcb == nullptr) {
          dcb = new DCB(adr, gl->verbose);
          try {
-            std::cout << "Connect to " << dcb->GetName() << " ... " << std::flush;
+            if (gl->verbose)
+               std::cout << "Connect to " << dcb->GetName() << " ... " << std::flush;
             dcb->Connect();
             // set destination port for DCB, MAC and IP is used automatically from UDP packet
             dcb->SetDestinationPort(gl->wp->GetServerPort());
             gl->dcb.push_back(dcb);
-            std::cout << "OK" << std::endl;
+            if (gl->verbose)
+               std::cout << "OK" << std::endl;
 
             if (gl->verbose) {
                std::cout << std::endl << "========== DCB Info ==========" << std::endl;
@@ -748,7 +758,8 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             }
 
          } catch (std::runtime_error &e) {
-            std::cout << "Failure" << std::endl;
+            if (gl->verbose)
+               std::cout << "Failure" << std::endl;
             mg_printf_http_chunk(nc, "{\n");
             mg_printf_http_chunk(nc, "  \"error\": \"Failed to connect to %s\"\n", adr.c_str());
             mg_printf_http_chunk(nc, "}\n");
@@ -768,7 +779,8 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
          dcbinfo = dcb->SendReceiveUDP("jinfo");
 
       } catch (std::runtime_error &e) {
-         std::cout << e.what() << std::endl;
+         if (gl->verbose)
+            std::cout << e.what() << std::endl;
          mg_printf_http_chunk(nc, "{\n");
          mg_printf_http_chunk(nc, "   \"error\": \"Communication failure with %s\"\n", dcb->GetName().c_str());
          mg_printf_http_chunk(nc, "}\n");
@@ -882,12 +894,14 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             // create new board
             dcb = new DCB(dcbName, gl->verbose);
             try {
-               std::cout << "Connect to " << dcbName << " ... " << std::flush;
+               if (gl->verbose)
+                  std::cout << "Connect to " << dcbName << " ... " << std::flush;
                dcb->Connect();
                dcb->ScanCrate();
                // set destination port for DCB, MAC and IP is used automatically from UDP packet
                dcb->SetDestinationPort(gl->wp->GetServerPort());
-               std::cout << "OK" << std::endl;
+               if (gl->verbose)
+                  std::cout << "OK" << std::endl;
                if (gl->verbose) {
                   std::cout << std::endl << "========== DCB Info ==========" << std::endl;
                   dcb->PrintVersion();
@@ -900,7 +914,8 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
                connectDCB(gl, dcb);
 
             } catch (std::runtime_error &e) {
-               std::cout << "Failure" << std::endl;
+               if (gl->verbose)
+                  std::cout << "Failure" << std::endl;
                mg_printf_http_chunk(nc, "%s\n", e.what());
                delete dcb;
             }
@@ -923,13 +938,16 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       if (b == nullptr) {
          b = new WDB(adr);
          try {
-            std::cout << "Connect to " << b->GetAddr() << " ... " << std::flush;
+            if (gl->verbose)
+               std::cout << "Connect to " << b->GetAddr() << " ... " << std::flush;
             connectWDB(gl, b);
             gl->wdb.push_back(b);
             gl->wp->SetWDBList(gl->wdb);
-            std::cout << "OK" << std::endl;
+            if (gl->verbose)
+               std::cout << "OK" << std::endl;
          } catch (std::runtime_error &e) {
-            std::cout << "Failure" << std::endl;
+            if (gl->verbose)
+               std::cout << "Failure" << std::endl;
             mg_printf_http_chunk(nc, "{\n");
             mg_printf_http_chunk(nc, "  \"error\": \"%s\"\n", e.what());
             mg_printf_http_chunk(nc, "}\n");
@@ -1177,7 +1195,8 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             auto str = dcb->UploadProgress();
 
             if (str.find(">") != std::string::npos) {
-               std::cout << "Upload finished" << std::endl;
+               if (gl->verbose)
+                  std::cout << "Upload finished" << std::endl;
                gl->upload = false;
             } else if (str.size() > 3) {
                int slot = std::stoi(str);
@@ -1590,11 +1609,13 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
       if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
          if (dcb->GetWDB(i) == nullptr) {
             WDB *wdb = new WDB(dcb, i, gl->verbose);
-            std::cout << "Connect to " << wdb->GetAddr() << " ... " << std::flush;
+            if (gl->verbose)
+               std::cout << "Connect to " << wdb->GetAddr() << " ... " << std::flush;
             connectWDB(gl, wdb);
             gl->wdb.push_back(wdb);
             gl->wp->SetWDBList(gl->wdb);
-            std::cout << "OK" << std::endl;
+            if (gl->verbose)
+               std::cout << "OK" << std::endl;
             dcb->SetWDB(i, wdb);
             newBoard = true;
          }
@@ -1672,7 +1693,8 @@ void switchDaqClock(GLOBALS *gl, DCB *dcb) {
 }
 
 void disconnectWDB(GLOBALS *gl, WDB *b) {
-   std::cout << "Disconnected from " << b->GetAddr() << std::endl;
+   if (gl->verbose)
+      std::cout << "Disconnected from " << b->GetAddr() << std::endl;
    for (auto &dcb: gl->dcb) {
       for (int i=0 ; i<16 ; i++)
          if (dcb->GetWDB(i) == b) {
@@ -1685,7 +1707,8 @@ void disconnectWDB(GLOBALS *gl, WDB *b) {
 }
 
 void disconnectDCB(GLOBALS *gl, DCB *d) {
-   std::cout << "Disconnected from " << d->GetName() << std::endl;
+   if (gl->verbose)
+      std::cout << "Disconnected from " << d->GetName() << std::endl;
    gl->dcb.erase(std::remove(gl->dcb.begin(), gl->dcb.end(), d), gl->dcb.end());
    delete d;
 }
@@ -1867,9 +1890,8 @@ int main(int argc, const char *argv[]) {
                   std::cout << "Aborting." << std::endl;
                   return 1;
                }
-               std::cout << "OK" << std::endl;
                if (gl.verbose)
-                  std::cout << std::endl;
+                  std::cout << "OK" << std::endl;
 
             } else
                gl.wdb.push_back(new WDB(b));
