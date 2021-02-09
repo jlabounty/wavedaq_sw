@@ -1643,6 +1643,10 @@ void switchDaqClock(GLOBALS *gl, DCB *dcb) {
       }
    }
 
+   // issue SYNC pulse on backplane
+   dcb->SendReceiveUDP("sync");
+
+   // reset all ADCs
    for (int i = 0; i < 16; i++) {
       if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
          WDB *b = dcb->GetWDB(i);
@@ -1652,6 +1656,7 @@ void switchDaqClock(GLOBALS *gl, DCB *dcb) {
       }
    }
 
+   // reset serdes in DCB
    dcb->ResetSerdes();
    if (gl->verbose)
       std::cout << "Reset serdes of " << dcb->GetName() << std::endl;
