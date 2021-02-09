@@ -504,6 +504,9 @@ void DCB::SetDestinationPort(int port) {
 //--------------------------------------------------------------------
 
 void DCB::ResetSerdes() {
+   // temporary wait, to be removed
+   sleep_ms(2000);
+
    // reset SERDES receivers on DCB
    auto oldTimeout = mReceiveTimeoutMs;
    mReceiveTimeoutMs = 500; // increase timeout for this command
