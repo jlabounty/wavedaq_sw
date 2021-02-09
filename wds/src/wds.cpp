@@ -576,7 +576,8 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
 
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
 
-      if (adr[0] == 'W') {
+      // treat numeric IP address as WDB board
+      if (adr[0] == 'W' || isdigit(adr[0])) {
          WDB *wdb = nullptr;
          int i = 0;
          for (auto &b: gl->wdb) {
@@ -616,8 +617,12 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             }
          }
 
-         if (wdb != nullptr)
-            gl->recent[wdb->GetName()] = std::time(nullptr);
+         if (wdb != nullptr) {
+            if (isdigit(adr[0]))
+               gl->recent[adr] = std::time(nullptr);
+            else
+               gl->recent[wdb->GetName()] = std::time(nullptr);
+         }
 
       } else if (adr[0] == 'D') {
          DCB *dcb = nullptr;

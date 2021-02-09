@@ -89,10 +89,10 @@
                   dlgAlert(req.responseText);
                else {
                   let a = document.getElementById('address').value;
-                  if (a[0] === 'w' || a[0] === 'W')
-                     window.location = "osc.html?adr=" + a;
-                  else
+                  if (a[0] === 'd' || a[0] === 'D')
                      window.location = "crate.html?adr=" + a;
+                  else
+                     window.location = "osc.html?adr=" + a;
                }
             }
          }
