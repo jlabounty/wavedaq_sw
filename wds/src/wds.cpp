@@ -1608,6 +1608,8 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
 
 void switchDaqClock(GLOBALS *gl, DCB *dcb) {
 
+   bool switched = false;
+
    // switch all internal clocks to external
    for (int i = 0; i < 16; i++) {
       if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
@@ -1618,9 +1620,14 @@ void switchDaqClock(GLOBALS *gl, DCB *dcb) {
                std::cout << "Switch clock of " << b->GetName() << " to backplane" << std::endl;
             b->SetExtClkFreq(80);  // 80 MHz external clock
             b->SetDaqClkSrcSel(0); // set clock select to backplane
+            switched = true;
          }
       }
    }
+
+   // only continue if at least one board has been switched
+   if (!switched)
+      return;
 
    // wait until clocks of all WDB have been switched to the backplane
    for (int i=0 ; i<16 ; i++) {
