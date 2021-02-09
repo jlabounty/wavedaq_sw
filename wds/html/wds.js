@@ -159,7 +159,7 @@ function init() {
 }
 
 function selBoard() {
-   if (OSC.wdbAddress[0] === 'D')
+   if (OSC.wdbAddress[0] === 'D' || OSC.wdbAddress[0] === 'd')
       window.location.href='crate.html?adr=' + OSC.wdbAddress.split(':')[0];
    else
       window.location.href='index.html';

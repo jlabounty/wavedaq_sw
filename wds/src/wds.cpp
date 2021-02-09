@@ -1661,8 +1661,7 @@ void switchDaqClock(GLOBALS *gl, DCB *dcb) {
    if (gl->verbose)
       std::cout << "Reset serdes of " << dcb->GetName() << std::endl;
 
-   //auto s = dcb->SendReceiveUDP("sdstat");
-   //std::cout << s;
+   //std::cout << dcb->SendReceiveUDP("sdstat");
 }
 
 void disconnectWDB(GLOBALS *gl, WDB *b) {
