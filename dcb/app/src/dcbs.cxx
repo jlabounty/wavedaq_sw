@@ -905,7 +905,42 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("  \"current\": \"%1.3lf A\",\n", sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN0) * 0.5);
       c.sprintf("  \"v5_0\": \"%1.3lf V\",\n", sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN1) * 2.5);
       c.sprintf("  \"v3_3\": \"%1.3lf V\",\n", sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN2) * 5.0 / 3.0);
-      c.sprintf("  \"v2_5\": \"%1.3lf V\"\n", sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN3) * 1.22);
+      c.sprintf("  \"v2_5\": \"%1.3lf V\",\n", sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN3) * 1.22);
+
+      c.sprintf("  \"serdes\": [\n");
+
+      unsigned int stat[21];
+      reg_bank_read(DCB_REG_SERDES_STATUS_00_07, stat, 21);
+
+      unsigned char sstat[18];
+      for (int i=0 ; i<8 ; i++)
+         sstat[i] = ((stat[0] >> (i*4)) & 0x07);
+      for (int i=0 ; i<8 ; i++)
+         sstat[8+i] = ((stat[1] >> (i*4)) & 0x07);
+      sstat[16] = (stat[2] & 0x07);
+
+      for (int s=0; s<17 ; s++) {
+         c.sprintf("     [");
+         if (s == 16)
+            c.sprintf("%d,", 17);
+         else
+            c.sprintf("%d,", s);
+         c.sprintf("%d,", (sstat[s] & 0x04) ? 1 : 0);
+         c.sprintf("%d,", (sstat[s] & 0x02) ? 1 : 0);
+         c.sprintf("%d,", (sstat[s] & 0x01) ? 1 : 0);
+
+         c.sprintf("%d,", (stat[3+s] >> 24) & 0xFF);
+         c.sprintf("%d,", (stat[3+s] >> 16) & 0xFF);
+         c.sprintf("%d,", (stat[3+s] >>  8) & 0xFF);
+         c.sprintf("%d]", (stat[3+s] >>  0) & 0xFF);
+
+         if (s < 16)
+            c.sprintf(",\n");
+         else
+            c.sprintf("\n");
+      }
+
+      c.sprintf("   ]\n");
       c.sprintf("}\n");
 
    } else if (strcmp(param[0], "init") == 0) {
