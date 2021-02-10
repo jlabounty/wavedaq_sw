@@ -1,0 +1,11 @@
+#!/bin/bash
+
+HN=`hostname | cut -c1-3`
+
+if [ "$HN" != "dcb" ]; then
+   echo This command can only be executed on a DCB
+   exit 1
+fi
+
+cp -v ../../fw/dcb/dcb_boot/BOOT.bin /boot/prod/BOOT.bin 
+cp -v ../../fw/dcb/dcb_boot/BOOT.bin /run/media/mmcblk0p1
