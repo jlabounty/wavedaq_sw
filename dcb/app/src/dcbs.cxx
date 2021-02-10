@@ -907,6 +907,34 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("  \"v3_3\": \"%1.3lf V\",\n", sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN2) * 5.0 / 3.0);
       c.sprintf("  \"v2_5\": \"%1.3lf V\",\n", sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN3) * 1.22);
 
+      c.sprintf("  \"ping\": [ ");
+
+      for (int s = 0; s < 16; s++) {
+         if (board[s].type_id == BRD_TYPE_ID_WDB) {
+            char buffer[10];
+            char rbuffer[10];
+
+            memset(buffer, 0, sizeof(buffer));
+            buffer[0] = CMD_READ32;
+            buffer[1] = 0;
+            buffer[2] = 0;
+            buffer[3] = 0;
+            buffer[4] = 0; // HW_VER register
+            buffer[5] = 0; // dummy
+
+            spi_binary_cmd(buffer, rbuffer, 6 + 4, s, board[s].type_id, board[s].rev_id);
+
+            c.sprintf("%d", rbuffer[6] == 0xAC ? 1 : 0);
+            if (s < 15)
+               c.sprintf(",");
+         } else {
+            c.sprintf("0");
+            if (s < 15)
+               c.sprintf(",");
+         }
+      }
+      c.sprintf(" ],\n");
+
       c.sprintf("  \"serdes\": [\n");
 
       unsigned int stat[21];
