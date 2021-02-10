@@ -45,7 +45,7 @@ int main(int argc, const char *argv[]) {
    b->SetDaqClkSrcSel(0);
 
    // wait for clock switch to be finished
-   for (int j=0 ; j<20 ; j++) {
+   for (int j=0 ; j<40 ; j++) {
       int l = b->GetExtClkActive(true);
       std::cout << j*100 << "ms: " << b->GetAddr() << " Ext_Clk_Active=" << l << std::endl;
       if (l > 0)
@@ -54,17 +54,34 @@ int main(int argc, const char *argv[]) {
       sleep_ms(100);
    }
 
-   // check for PLL lock
-   int l = b->GetPllLock(true);
-   std::cout << "PLL Lock=0x" << std::hex << l << std::endl;
+   // wait until PLLs have locked
+   b->WaitPllLock();
 
-   // reset SERDES on DCB
-   std::cout << "Reset SERDES" << std::endl;
+   // issue SYNC pulse on backplane
+   dcb->SendReceiveUDP("sync");
+
+   b->ResetAdc();
+   std::cout << "Reset ADC of " << b->GetName() << std::endl;
+
+   // reset serdes in DCB
    dcb->ResetSerdes();
+   std::cout << "Reset serdes of " << dcb->GetName() << std::endl;
 
-   // print SERDES status
-   auto s = dcb->SendReceiveUDP("sdstat");
-   std::cout << std::endl << s << std::endl;
+   std::cout << dcb->SendReceiveUDP("sdstat");
+   sleep_ms(1000);
+   std::cout << dcb->SendReceiveUDP("sdstat");
+
+//   // check for PLL lock
+//   int l = b->GetPllLock(true);
+//   std::cout << "PLL Lock=0x" << std::hex << l << std::endl;
+//
+//   // reset SERDES on DCB
+//   std::cout << "Reset SERDES" << std::endl;
+//   dcb->ResetSerdes();
+//
+//   // print SERDES status
+//   auto s = dcb->SendReceiveUDP("sdstat");
+//   std::cout << std::endl << s << std::endl;
 
    return 0;
 }
