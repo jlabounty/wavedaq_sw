@@ -1,0 +1,14 @@
+#!/bin/bash
+
+HN=`hostname | cut -c1-3`
+
+if [ "$HN" != "dcb" ]; then
+   echo This command can only be executed on a DCB
+   exit 1
+fi
+
+cp -v ../../fw/wdb/wd2_sys_ctrl/wd2_xps_hw/rev_g/implementation/download.bit /fw_sw/wdb/prod/rev_g/
+cp -v ../../fw/wdb/wd2_sys_ctrl/wd2_xsdk_sw/rev_g_workspace/wd2_app_sw/app_sys_ctrl/Debug/app_sys_ctrl.srec /fw_sw/wdb/prod/rev_g/
+
+cp -v ../../fw/wdb/wd2_sys_ctrl/wd2_xps_hw/rev_f/implementation/download.bit /fw_sw/wdb/prod/rev_f/
+cp -v ../../fw/wdb/wd2_sys_ctrl/wd2_xsdk_sw/rev_f_workspace/wd2_app_sw/app_sys_ctrl/Debug/app_sys_ctrl.srec /fw_sw/wdb/prod/rev_f/
