@@ -141,24 +141,208 @@
             <td id="infoDCBTemp"></td>
          </tr>
          <tr>
-            <td>VDD</td>
-            <td id="infoDCBVDD"></td>
+            <td>Voltages</td>
+            <td style="padding: 0">
+               <table>
+                  <tr>
+                     <td style="background-color: #EEEEEE; color:black;">VDD=<span id="infoDCBVDD"></span></td>
+                     <td style="background-color: #EEEEEE;">V(5.0V)=<span id="infoDCBV5_0"></span></td>
+                     <td style="background-color: #EEEEEE;">V(3.3V)=<span id="infoDCBV3_3"></span></td>
+                     <td style="background-color: #EEEEEE;">V(2.5V)=<span id="infoDCBV2_5"></span></td>
+                  </tr>
+               </table>
+            </td>
          </tr>
          <tr>
             <td>Current [A]</td>
             <td id="infoDCBCurrent"></td>
          </tr>
          <tr>
-            <td>V(5.0V)</td>
-            <td id="infoDCBV5_0"></td>
-         </tr>
-         <tr>
-            <td>V3.3V)</td>
-            <td id="infoDCBV3_3"></td>
-         </tr>
-         <tr>
-            <td>V2.5V)</td>
-            <td id="infoDCBV2_5"></td>
+            <td>SERDES</td>
+            <td>
+               <table id="infoDCBSerdes" style="border-spacing: 0; border-collapse: collapse;">
+                  <tr>
+                     <th>&nbsp;Slot&nbsp;</th>
+                     <th>&nbsp;Idle&nbsp;</th>
+                     <th>&nbsp;Delay&nbsp;</th>
+                     <th>&nbsp;Sync&nbsp;</th>
+                     <th>&nbsp;CRC Err&nbsp;</th>
+                     <th>&nbsp;Frame Err&nbsp;</th>
+                     <th>&nbsp;DGram Err&nbsp;</th>
+                     <th>&nbsp;Sync Err&nbsp;</th>
+                  </tr>
+                  <tr>
+                     <td style="color: black;text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                  </tr>
+                  <tr>
+                     <td style="color: black;text-align: center;">1</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                  </tr>
+                  <tr>
+                     <td style="color: black;text-align: center;">2</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                  </tr>
+                  <tr>
+                     <td style="color: black;text-align: center;">3</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                  </tr>
+                  <tr>
+                     <td style="color: black;text-align: center;">4</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                  </tr>
+                  <tr>
+                     <td style="color: black;text-align: center;">5</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                  </tr>
+                  <tr>
+                     <td style="color: black;text-align: center;">6</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                  </tr>
+                  <tr>
+                     <td style="color: black;text-align: center;">7</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                  </tr>
+                  <tr>
+                     <td style="color: black;text-align: center;">8</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                  </tr>
+                  <tr>
+                     <td style="color: black;text-align: center;">9</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                  </tr>
+                  <tr>
+                     <td style="color: black;text-align: center;">10</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                  </tr>
+                  <tr>
+                     <td style="color: black;text-align: center;">11</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                  </tr>
+                  <tr>
+                     <td style="color: black;text-align: center;">12</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                  </tr>
+                  <tr>
+                     <td style="color: black;text-align: center;">13</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                  </tr>
+                  <tr>
+                     <td style="color: black;text-align: center;">14</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                  </tr>
+                  <tr>
+                     <td style="color: black;text-align: center;">15</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                  </tr>
+                  <tr>
+                     <td style="color: black;text-align: center;">TCB</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                     <td style="text-align: center;">0</td>
+                  </tr>
+               </table>
+            </td>
          </tr>
 
       </table>

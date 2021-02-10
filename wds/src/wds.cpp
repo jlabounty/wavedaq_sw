@@ -794,6 +794,9 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       mg_printf_http_chunk(nc, "%s,\n", dcbinfo.c_str());
       mg_printf_http_chunk(nc, "   \"CMB\": \"%s\",\n", "MSCBXXX");
       mg_printf_http_chunk(nc, "   \"slot\": [\n");
+
+      bool refresh = true;
+
       for (int i=0 ; i<16 ; i++) {
          auto b = dcb->GetWDB(i);
          if (b != nullptr && !b->Ping())
@@ -821,25 +824,25 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             mg_printf_http_chunk(nc, "        \"hvBoardPlugged\": %s,\n", b->GetHvBoardPlugged() ? "true" : "false");
             mg_printf_http_chunk(nc, "        \"hvVersion\": \"%s\",\n", b->GetHvVersion().c_str());
             float hv_base;
-            b->GetHVBaseVoltage(hv_base);
+            b->GetHVBaseVoltage(hv_base, false);
             mg_printf_http_chunk(nc, "        \"hvBaseVoltage\": %g,\n", hv_base);
-            mg_printf_http_chunk(nc, "        \"temperature\": %1.1lf,\n", b->GetTemperatureDegree(true));
+            mg_printf_http_chunk(nc, "        \"temperature\": %1.1lf,\n", b->GetTemperatureDegree(refresh));
             mg_printf_http_chunk(nc, "        \"temperature1Wire\": [\n");
             std::vector<float> hv_temp;
-            b->Get1wireTemperatures(hv_temp);
+            b->Get1wireTemperatures(hv_temp, refresh);
             for (auto &s: hv_temp) {
                if (&s != &hv_temp.back())
                   mg_printf_http_chunk(nc, "          %g,\n", s);
                else
                   mg_printf_http_chunk(nc, "          %g],\n", s);
             }
-            mg_printf_http_chunk(nc, "        \"pllLck\": %d,\n", b->GetPllLock(false));
+            mg_printf_http_chunk(nc, "        \"pllLck\": %d,\n", b->GetPllLock(refresh));
             mg_printf_http_chunk(nc, "        \"sysBusy\": %s,\n", b->GetSysBusy() ? "true" : "false");
             mg_printf_http_chunk(nc, "        \"drsctrlBusy\": %s,\n", b->GetDrsCtrlBusy() ? "true" : "false");
             mg_printf_http_chunk(nc, "        \"triggerBusParityErrorCount\": %d,\n", b->GetTrbParityErrorCount());
             mg_printf_http_chunk(nc, "        \"compChannelStatus\": %d,\n", b->GetCompChStat());
             float hv = 0;
-            b->GetHVBaseVoltage(hv);
+            b->GetHVBaseVoltage(hv, refresh);
             mg_printf_http_chunk(nc, "        \"hv_on\": %d\n", hv > 10 ? 1:0);
          } else {
             mg_printf_http_chunk(nc, "        \"variant_id\": %d\n", dcb->GetBoardId(i)->variant_id);

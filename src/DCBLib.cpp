@@ -161,6 +161,9 @@ std::string DCB::SendReceiveUDP(std::string str, bool waitPrompt)
          else
             ms *= 1.3;   // increase timeout after each retry
 
+         if (retry > 0 && this->mVerbose)
+            std::cout << mDCBName << " retry " << retry + 1 << " with " << ms << " ms timeout" << std::endl;
+
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
 
@@ -196,9 +199,6 @@ std::string DCB::SendReceiveUDP(std::string str, bool waitPrompt)
       // check for prompt
       if (mPrompt.size() > 0 && result.size() >= mPrompt.size() && result.substr(result.size()-mPrompt.size()) == mPrompt)
          break;
-
-      if (this->mVerbose)
-         std::cout << mDCBName << " retry " << retry + 1 << " with " << ms << " ms" << std::endl;
 
       result.clear();
    }
@@ -326,6 +326,9 @@ void DCB::WriteUDP(unsigned int slot, unsigned int ofs, std::vector<unsigned int
          else
             ms *= 1.3;   // increase timeout after each retry
 
+         if (retry > 0 && this->mVerbose)
+            std::cout << mDCBName << " retry " << retry + 1 << " with " << ms << " ms timeout" << std::endl;
+
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
 
@@ -348,9 +351,6 @@ void DCB::WriteUDP(unsigned int slot, unsigned int ofs, std::vector<unsigned int
             return;
 
       } while (1);
-
-      if (this->mVerbose)
-         std::cout << mDCBName << " retry " << retry + 1 << std::endl;
    }
 
    if (this->mVerbose && retry > 0) {

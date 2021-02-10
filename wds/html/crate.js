@@ -882,6 +882,33 @@ function receiveCrate() {
       setItem("infoDCBV3_3", dcb.v3_3);
       setItem("infoDCBV2_5", dcb.v2_5);
 
+      let t = document.getElementById("infoDCBSerdes");
+      for (let r=0 ; r<17 ; r++) {
+         for (let c=1 ; c<8 ; c++) {
+            let s = r;
+            if (r === 16)
+               s = 17;
+            let present = (CRATE.crate.slot[s].type_id !== 255);
+            if (c < 4) {
+               let v = (dcb.serdes[r][c] === 1) ? "&bull;" : "&times;";
+               if (present)
+                  t.rows[1 + r].cells[c].style.color = (dcb.serdes[r][c] === 1) ? "green" : "red";
+               else
+                  t.rows[1 + r].cells[c].style.color = "#A0A0A0";
+               if (t.rows[1 + r].cells[c].innerHTML !== v)
+                  t.rows[1 + r].cells[c].innerHTML = v;
+            } else {
+               let v = dcb.serdes[r][c];
+               if (t.rows[1 + r].cells[c].innerHTML !== v)
+                  t.rows[1 + r].cells[c].innerHTML = v;
+               if (present)
+                  t.rows[1 + r].cells[c].style.color = "#000000";
+               else
+                  t.rows[1 + r].cells[c].style.color = "#A0A0A0";
+            }
+         }
+      }
+
       if (CRATE.selectedWDB !== undefined &&
           CRATE.crate.slot[CRATE.selectedWDB].type_id !== BRD_TYPE_ID_BLANK) {
          let wdb = CRATE.crate.slot[CRATE.selectedWDB];
@@ -926,7 +953,7 @@ function receiveCrate() {
          setItem("infoWDBCompStatus", s);
       }
 
-      CRATE.timer.loadCrate = window.setTimeout(loadCrate, 1000);
+      CRATE.timer.loadCrate = window.setTimeout(loadCrate, 100);
    } else if (CRATE.req.readyState === 4 && CRATE.req.status === 0) {
       connectionBroken();
    }
