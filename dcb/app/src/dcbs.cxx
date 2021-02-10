@@ -818,7 +818,7 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("   <ofs> : starting register, default: first ctrl reg\n");
       c.sprintf("     <n> : number of registers, default 1 if <ofs> is specified, otherwise all\n\n");
 
-      c.sprintf("sdstat               Show SERDES status\n");
+      c.sprintf("sdstat [-n]          Show SERDES status\n");
       c.sprintf("sdreset [error|sync|full]  Reset SERDES error/sync/full reset\n\n");
 
       c.sprintf("sinit  <slot>        Send init to WDB/TCB via backplane\n\n");
@@ -1080,8 +1080,10 @@ void process_dcb_command(udp_connection &c, char *buffer) {
 
    } else if (strcmp(param[0], "sdstat") == 0) {
 
-      c.sprintf("Slot Idle Delay Sync ECRC EFrame EDgram ESync\n");
-      c.sprintf("=============================================\n");
+      if (n_param == 1) {
+         c.sprintf("Slot Idle Delay Sync ECRC EFrame EDgram ESync\n");
+         c.sprintf("=============================================\n");
+      }
 
       unsigned int stat[21];
       reg_bank_read(DCB_REG_SERDES_STATUS_00_07, stat, 21);
@@ -1093,21 +1095,32 @@ void process_dcb_command(udp_connection &c, char *buffer) {
          sstat[8+i] = ((stat[1] >> (i*4)) & 0x07);
       sstat[16] = (stat[2] & 0x07);
 
-      for (int s=0; s<17 ; s++) {
-         if (s < 16)
-            c.sprintf(" %02d    ", s);
-         else
-            c.sprintf("TCB    ", s);
-         c.sprintf("%d    ", (sstat[s] & 0x04) ? 1 : 0);
-         c.sprintf("%d    ", (sstat[s] & 0x02) ? 1 : 0);
-         c.sprintf("%d    ", (sstat[s] & 0x01) ? 1 : 0);
+      if (n_param == 2) {
+         for (int s=0; s<17 ; s++) {
+            c.sprintf("%d ", s);
+            c.sprintf("%d ", sstat[s] & 0x07);
+            c.sprintf("%d ", (stat[3+s] >> 24) & 0xFF);
+            c.sprintf("%d ", (stat[3+s] >> 16) & 0xFF);
+            c.sprintf("%d ", (stat[3+s] >>  8) & 0xFF);
+            c.sprintf("%d\n", (stat[3+s] >>  0) & 0xFF);
+         }
+      } else {
+         for (int s=0; s<17 ; s++) {
+            if (s < 16)
+               c.sprintf(" %02d    ", s);
+            else
+               c.sprintf("TCB    ", s);
+            c.sprintf("%d    ", (sstat[s] & 0x04) ? 1 : 0);
+            c.sprintf("%d    ", (sstat[s] & 0x02) ? 1 : 0);
+            c.sprintf("%d    ", (sstat[s] & 0x01) ? 1 : 0);
 
-         c.sprintf("%3d   ", (stat[3+s] >> 24) & 0xFF);
-         c.sprintf("%3d   ", (stat[3+s] >> 16) & 0xFF);
-         c.sprintf("%3d   ", (stat[3+s] >>  8) & 0xFF);
-         c.sprintf("%3d   ", (stat[3+s] >>  0) & 0xFF);
+            c.sprintf("%3d   ", (stat[3+s] >> 24) & 0xFF);
+            c.sprintf("%3d   ", (stat[3+s] >> 16) & 0xFF);
+            c.sprintf("%3d   ", (stat[3+s] >>  8) & 0xFF);
+            c.sprintf("%3d   ", (stat[3+s] >>  0) & 0xFF);
 
-         c.sprintf("\n");
+            c.sprintf("\n");
+         }
       }
 
    } else if (strcmp(param[0], "sdreset") == 0) {
