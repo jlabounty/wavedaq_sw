@@ -170,6 +170,7 @@ Crate.prototype.mouseEvent = function (e) {
             }
             CRATE.draw();
             loadCrate();
+            e.preventDefault();
          }
       }
    }
