@@ -162,7 +162,7 @@ std::string DCB::SendReceiveUDP(std::string str, bool waitPrompt)
             ms *= 1.3;   // increase timeout after each retry
 
          if (retry > 0 && this->mVerbose)
-            std::cout << mDCBName << " retry " << retry + 1 << " with " << ms << " ms timeout" << std::endl;
+            std::cout << mDCBName << " retry " << retry << " with " << ms << " ms timeout" << std::endl;
 
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
@@ -306,7 +306,7 @@ void DCB::WriteUDP(unsigned int slot, unsigned int ofs, std::vector<unsigned int
 
       if (i != writeBuf.size()) {
          if (this->mVerbose)
-            std::cout << mDCBName << " send retry " << retry + 1 << std::endl;
+            std::cout << mDCBName << " send retry " << retry << std::endl;
          continue;
       }
 
@@ -327,7 +327,7 @@ void DCB::WriteUDP(unsigned int slot, unsigned int ofs, std::vector<unsigned int
             ms *= 1.3;   // increase timeout after each retry
 
          if (retry > 0 && this->mVerbose)
-            std::cout << mDCBName << " retry " << retry + 1 << " with " << ms << " ms timeout" << std::endl;
+            std::cout << mDCBName << " retry " << retry << " with " << ms << " ms timeout" << std::endl;
 
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
@@ -430,7 +430,7 @@ std::vector<unsigned int> DCB::ReadUDP(unsigned int slot, unsigned int ofs, unsi
 
       if (i != writeBuf.size()) {
          if (this->mVerbose)
-            std::cout << mDCBName << " send retry " << retry + 1 << std::endl;
+            std::cout << mDCBName << " send retry " << retry << std::endl;
          continue;
       }
 
@@ -442,9 +442,12 @@ std::vector<unsigned int> DCB::ReadUDP(unsigned int slot, unsigned int ofs, unsi
          FD_SET(gBinSocket, &readfds);
 
          if (retry == 0)
-            ms = mReceiveTimeoutMs;
+            ms = nReg > 10 ? mReceiveTimeoutMs * 3 : mReceiveTimeoutMs;
          else
             ms *= 1.3;   // increase timeout after each retry
+
+         if (retry > 0 && this->mVerbose)
+            std::cout << mDCBName << " retry " << retry << " with " << ms << " ms timeout" << std::endl;
 
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
@@ -479,13 +482,6 @@ std::vector<unsigned int> DCB::ReadUDP(unsigned int slot, unsigned int ofs, unsi
          }
 
       } while (1);
-
-
-      if (this->mVerbose) {
-         if (retry == 0)
-            std::cout << std::endl;
-         std::cout << mDCBName << " retry " << retry + 1 << std::endl;
-      }
    }
 
    if (!bSuccess)
@@ -503,14 +499,19 @@ void DCB::SetDestinationPort(int port) {
 
 //--------------------------------------------------------------------
 
-void DCB::ResetSerdes() {
+void DCB::ResetSerdes(int flag) {
    // temporary wait, to be removed
-   sleep_ms(2000);
+   if (flag == 0)
+      sleep_ms(2000);
 
    // reset SERDES receivers on DCB
    auto oldTimeout = mReceiveTimeoutMs;
    mReceiveTimeoutMs = 500; // increase timeout for this command
-   auto result = SendReceiveUDP("sdreset full");
+   std::string result;
+   if (flag == 0)
+      result = SendReceiveUDP("sdreset full");
+   else
+      result = SendReceiveUDP("sdreset error");
    mReceiveTimeoutMs = oldTimeout;
    if (mVerbose)
       std::cout << mDCBName << " 'sdreset full': " << result;
@@ -690,7 +691,7 @@ void DCB::ScanCrate() {
 
       if (i != writeBuf.size()) {
          if (this->mVerbose)
-            std::cout << mDCBName << " send retry " << retry + 1 << std::endl;
+            std::cout << mDCBName << " send retry " << retry << std::endl;
          continue;
       }
 
@@ -705,6 +706,9 @@ void DCB::ScanCrate() {
             ms = mReceiveTimeoutMs;
          else
             ms *= 1.3;   // increase timeout after each retry
+
+         if (retry > 0 && this->mVerbose)
+            std::cout << mDCBName << " retry " << retry << " with " << ms << " ms timeout" << std::endl;
 
          timeout.tv_sec = ms / 1000;
          timeout.tv_usec = (ms % 1000) * 1000;
@@ -740,10 +744,6 @@ void DCB::ScanCrate() {
          }
 
       } while (1);
-
-
-      if (this->mVerbose)
-         std::cout << mDCBName << " retry " << retry + 1 << std::endl;
    }
 
    if (!bSuccess)

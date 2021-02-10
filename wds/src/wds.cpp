@@ -375,7 +375,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
 
             // serses links might have dropped during LMK reprogramming, so issue reset
             if (b->IsDcbInterface())
-               b->GetDcbInterface()->ResetSerdes();
+               b->GetDcbInterface()->ResetSerdes(0);
 
             b->LoadVoltageCalibration(b->GetDrsSampleFreqMhz(), gl->wdsDir);
             b->LoadTimeCalibration(b->GetDrsSampleFreqMhz(), gl->wdsDir);
@@ -480,8 +480,12 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
 
       } else if (item == "sdreset") { // SERDES reset ------------------------------
 
-         if (dcb != nullptr)
-            dcb->ResetSerdes();
+         if (dcb != nullptr) {
+            if (iChannel == 0)
+               dcb->ResetSerdes(0);
+            else
+               dcb->ResetSerdes(1);
+         }
 
       } else if (item == "upload") { // upload ------------------------------
 
@@ -715,6 +719,10 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       mg_get_http_var(&hm->query_string, "adr", str, sizeof(str));
       auto adr = std::string(str);
       for (auto &c: adr) c = toupper(c);
+      mg_get_http_var(&hm->query_string, "slot", str, sizeof(str));
+      int slot = -1;
+      if (str[0])
+         slot = atoi(str);
 
       bool flag = false;
       if (std::time(nullptr) > lastFullScan + 10) {
@@ -795,12 +803,17 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       mg_printf_http_chunk(nc, "   \"CMB\": \"%s\",\n", "MSCBXXX");
       mg_printf_http_chunk(nc, "   \"slot\": [\n");
 
-      bool refresh = true;
-
+      // check for removed WDB boards
+      auto p = dcbinfo.substr(dcbinfo.find("\"ping\": ") + 10);
+      p = p.substr(0, p.find(" "));
+      auto ap = split(p, ',');
       for (int i=0 ; i<16 ; i++) {
          auto b = dcb->GetWDB(i);
-         if (b != nullptr && !b->Ping())
+         if (b != nullptr && std::stod(ap[i]) == 0)
             disconnectWDB(gl, b);
+      }
+
+      for (int i=0 ; i<16 ; i++) {
 
          mg_printf_http_chunk(nc, "      {\n");
          mg_printf_http_chunk(nc, "        \"vendor_id\": %d,\n", dcb->GetBoardId(i)->vendor_id);
@@ -810,6 +823,9 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
          // WDB specific items
          if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
             WDB *b = dcb->GetWDB(i);
+            if (i == slot)
+               b->ReceiveStatusRegisters();
+
             mg_printf_http_chunk(nc, "        \"name\": \"%s\",\n", b->GetName().c_str());
             mg_printf_http_chunk(nc, "        \"variant_id\": %d,\n", dcb->GetBoardId(i)->variant_id);
 
@@ -826,23 +842,23 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             float hv_base;
             b->GetHVBaseVoltage(hv_base, false);
             mg_printf_http_chunk(nc, "        \"hvBaseVoltage\": %g,\n", hv_base);
-            mg_printf_http_chunk(nc, "        \"temperature\": %1.1lf,\n", b->GetTemperatureDegree(refresh));
+            mg_printf_http_chunk(nc, "        \"temperature\": %1.1lf,\n", b->GetTemperatureDegree(false));
             mg_printf_http_chunk(nc, "        \"temperature1Wire\": [\n");
             std::vector<float> hv_temp;
-            b->Get1wireTemperatures(hv_temp, refresh);
+            b->Get1wireTemperatures(hv_temp, false);
             for (auto &s: hv_temp) {
                if (&s != &hv_temp.back())
                   mg_printf_http_chunk(nc, "          %g,\n", s);
                else
                   mg_printf_http_chunk(nc, "          %g],\n", s);
             }
-            mg_printf_http_chunk(nc, "        \"pllLck\": %d,\n", b->GetPllLock(refresh));
+            mg_printf_http_chunk(nc, "        \"pllLck\": %d,\n", b->GetPllLock(false));
             mg_printf_http_chunk(nc, "        \"sysBusy\": %s,\n", b->GetSysBusy() ? "true" : "false");
             mg_printf_http_chunk(nc, "        \"drsctrlBusy\": %s,\n", b->GetDrsCtrlBusy() ? "true" : "false");
             mg_printf_http_chunk(nc, "        \"triggerBusParityErrorCount\": %d,\n", b->GetTrbParityErrorCount());
             mg_printf_http_chunk(nc, "        \"compChannelStatus\": %d,\n", b->GetCompChStat());
             float hv = 0;
-            b->GetHVBaseVoltage(hv, refresh);
+            b->GetHVBaseVoltage(hv, false);
             mg_printf_http_chunk(nc, "        \"hv_on\": %d\n", hv > 10 ? 1:0);
          } else {
             mg_printf_http_chunk(nc, "        \"variant_id\": %d\n", dcb->GetBoardId(i)->variant_id);
@@ -1678,7 +1694,11 @@ void switchDaqClock(GLOBALS *gl, DCB *dcb) {
    dcb->SendReceiveUDP("sync");
 
    // reset serdes in DCB
-   dcb->ResetSerdes();
+   dcb->ResetSerdes(0);
+
+   // reset serdes error counters in DCB
+   dcb->ResetSerdes(1);
+
    if (gl->verbose) {
       std::cout << "Reset serdes of " << dcb->GetName() << std::endl;
       std::cout << dcb->SendReceiveUDP("sdstat");

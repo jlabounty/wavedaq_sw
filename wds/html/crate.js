@@ -848,7 +848,13 @@ function loadCrate() {
    // send AJAX request
    CRATE.req = new XMLHttpRequest();
    CRATE.req.onreadystatechange = receiveCrate;
-   CRATE.req.open("GET", "crate?adr=" + CRATE.dcbAddress +
+
+   if (CRATE.selectedWDB !== undefined)
+      CRATE.req.open("GET", "crate?adr=" + CRATE.dcbAddress +
+         "&slot=" + CRATE.selectedWDB +
+         "&r=" + Math.random(), true); // avoid cached results
+   else
+      CRATE.req.open("GET", "crate?adr=" + CRATE.dcbAddress +
          "&r=" + Math.random(), true); // avoid cached results
 
    try {
@@ -1014,9 +1020,20 @@ function DCBmark() {
    req.send((CRATE.markDCB ? "1" : "0"));
 }
 
-function DCBSdreset() {
+function DCBSdreset(flag) {
+   // kill update timer
+   if (CRATE.timer.loadCrate !== undefined)
+      window.clearTimeout(CRATE.timer.loadCrate);
+
    let req = new XMLHttpRequest();
-   req.open("PUT", "sdreset/" + CRATE.dcbAddress, true);
+   req.onreadystatechange = function () {
+      if (req.readyState === 4 && req.status === 200) {
+         // restart crate loading
+         CRATE.timer.loadCrate = window.setTimeout(loadCrate, 100);
+      }
+   };
+
+   req.open("PUT", "sdreset/" + CRATE.dcbAddress + "/" + flag, true);
    req.send();
 }
 
