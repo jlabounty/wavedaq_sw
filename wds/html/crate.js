@@ -1036,21 +1036,11 @@ function DCBSdreset(flag) {
       }
    };
 
+   if (flag === 0)
+      dlgWait(2, "Reset in progress");
+
    req.open("PUT", "sdreset/" + CRATE.dcbAddress + "/" + flag, true);
    req.send();
-}
-
-let rebootProgress;
-let rebootTime;
-
-function updateRebootProgress() {
-   rebootProgress += 0.1;
-   let d = document.getElementById("progressWait");
-   d.set(rebootProgress / rebootTime);
-   if (rebootProgress >= rebootTime) {
-      dlgHide("dlgWait");
-   } else
-      window.setTimeout(updateRebootProgress, 100);
 }
 
 function WDBrebootQuery() {
@@ -1059,10 +1049,7 @@ function WDBrebootQuery() {
 
 function WDBreboot(flag) {
    if (flag) {
-      rebootProgress = 0;
-      rebootTime = 7;
-      dlgShow("dlgWait", true);
-      window.setTimeout(updateRebootProgress, 100);
+      dlgWait(7, "Board is rebooting");
 
       // kill update timer
       if (CRATE.timer.loadCrate !== undefined)
