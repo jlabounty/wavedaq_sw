@@ -246,7 +246,9 @@ Crate.prototype.draw = function () {
          CRATE.crate.slot[slot].vendor_id === BRD_VENDOR_ID_PISA &&
          CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_TCB) {
          ctx.save();
-         if (slot < 8)
+         if (slot == 17)
+            ctx.translate(62.5 + 9 * 41.4, 7.5);
+         else if (slot < 8)
             ctx.translate(62.5 + slot * 41.4, 7.5);
          else
             ctx.translate(62.5 + (slot + 2) * 41.4, 7.5);
