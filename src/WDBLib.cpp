@@ -4336,12 +4336,6 @@ void VCALIB::load(WDB *b, std::string filename) {
                    << b->GetDrsSampleFreqMhz() / 1000.0 << " GSPS" << std::endl;
       }
 
-      if (fabs(mCalib.temperature - b->GetTemperatureDegree()) > 5) {
-         std::cerr << "Warning: Voltage calibration data in " << filename << " is for "
-                   << mCalib.temperature
-                   << " deg. C, running now at "
-                   << b->GetTemperatureDegree() << " deg. C" << std::endl;
-      }
       bValid = true;
    }
 }
@@ -4394,12 +4388,6 @@ void TCALIB::load(WDB *b, std::string filename) {
          return;
       }
 
-      if (fabs(mCalib.temperature - b->GetTemperatureDegree()) > 5) {
-         std::cerr << "Warning: Time calibration data in " << filename << " is for "
-                   << mCalib.temperature
-                   << " deg. C, running now at "
-                   << b->GetTemperatureDegree() << " deg. C" << std::endl;
-      }
       bValid = true;
    }
 }

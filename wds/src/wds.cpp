@@ -1987,8 +1987,6 @@ int main(int argc, const char *argv[]) {
       gl.readoutMode = cReadoutModeDRS;
    }
 
-   // instantiate waveform processor
-   gl.wp = new WP(gl.verbose, gl.wdsDir, gl.logFileName, gl.demoMode);
 
    // remember trigger mode
    if (gl.triggerSelfArm)
@@ -2016,7 +2014,6 @@ int main(int argc, const char *argv[]) {
 
    std::cout << "GIT revision: " << getWdbLibRevision() << std::endl;
    std::cout << "Starting HTTP server at port " << gl.serverPort << std::endl;
-   std::cout << "Starting packet receiver at port " << gl.wp->GetServerPort() << std::endl;
 
    if (gl.demoMode)
       std::cout << "Starting in DEMO mode." << std::endl;
@@ -2034,6 +2031,12 @@ int main(int argc, const char *argv[]) {
 
       setsid(); // become session leader
    }
+
+   // instantiate waveform processor
+   gl.wp = new WP(gl.verbose, gl.wdsDir, gl.logFileName, gl.demoMode);
+
+   if (gl.verbose)
+      std::cout << "Starting packet receiver at port " << gl.wp->GetServerPort() << std::endl;
 
    time_t last = 0, now;
 
