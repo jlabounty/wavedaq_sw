@@ -115,8 +115,8 @@ std::string DCB::SendReceiveUDP(std::string str, bool waitPrompt)
 
    result.clear();
 
-   // retry max ten times
-   for (int retry=0 ; retry < 10 ; retry++) {
+   // retry max five times
+   for (int retry=0 ; retry < 5 ; retry++) {
 
       // clear input queue
       do {
@@ -276,8 +276,8 @@ void DCB::WriteUDP(unsigned int slot, unsigned int ofs, std::vector<unsigned int
 
    auto startTime = std::chrono::high_resolution_clock::now();
 
-   // retry max ten times
-   for (retry = 0; retry < 10; retry++) {
+   // retry max five times
+   for (retry = 0; retry < 5; retry++) {
 
       // clear input queue
       do {
@@ -400,8 +400,8 @@ std::vector<unsigned int> DCB::ReadUDP(unsigned int slot, unsigned int ofs, unsi
    writeBuf[10] = (len >>  8) & 0xFF;
    writeBuf[11] = (len >>  0) & 0xFF;
 
-   // retry max ten times
-   for (int retry = 0; retry < 10; retry++) {
+   // retry max five times
+   for (int retry = 0; retry < 5; retry++) {
 
       // clear input queue
       do {
@@ -506,7 +506,7 @@ void DCB::ResetSerdes(int flag) {
 
    // reset SERDES receivers on DCB
    auto oldTimeout = mReceiveTimeoutMs;
-   mReceiveTimeoutMs = 500; // increase timeout for this command
+   mReceiveTimeoutMs = cIncreasedReceiveTimeoutMs; // increase timeout for this command
    std::string result;
    if (flag == 0)
       result = SendReceiveUDP("sdreset full");
@@ -521,7 +521,7 @@ void DCB::ResetSerdes(int flag) {
 
 std::string DCB::SendToSlot(std::string str, int slot) {
    auto oldTimeout = mReceiveTimeoutMs;
-   mReceiveTimeoutMs = 1000; // increase timeout for this command
+   mReceiveTimeoutMs = cIncreasedReceiveTimeoutMs; // increase timeout for this command
    auto result = SendReceiveUDP("slot " + std::to_string(slot) + " " + str);
    mReceiveTimeoutMs = oldTimeout;
    return result;
@@ -532,16 +532,22 @@ std::string DCB::SendToSlot(std::string str, int slot) {
 std::string DCB::UploadStart(int slot, int revision) {
    std::string str;
 
-   if (revision == 4)
+   if (slot == -1)
+      str = "upload * -p";
+   else if (revision == 4)
       str = "upload " + std::to_string(slot) + " -t wdb -r e -p";
-   if (revision == 5)
+   else if (revision == 5)
       str = "upload " + std::to_string(slot) + " -t wdb -r f -p";
    else if (revision == 6)
       str = "upload " + std::to_string(slot) + " -t wdb -r g -p";
    else
       str = "upload " + std::to_string(slot) + " -p"; // auto-detect
 
+   auto oldTimeout = mReceiveTimeoutMs;
+   mReceiveTimeoutMs = cIncreasedReceiveTimeoutMs; // increase timeout for this command
    auto result = SendReceiveUDP(str, false);
+   mReceiveTimeoutMs = oldTimeout;
+
    if (mVerbose)
       std::cout << mDCBName << " upload slot " << slot << ": " << result << std::endl;
    return result;
@@ -661,8 +667,8 @@ void DCB::ScanCrate() {
    writeBuf[2]  = udpSequenceNumber >> 8;
    writeBuf[3]  = udpSequenceNumber & 0xFF;
 
-   // retry max ten times
-   for (int retry = 0; retry < 10; retry++) {
+   // retry max five times
+   for (int retry = 0; retry < 5; retry++) {
 
       // clear input queue
       do {

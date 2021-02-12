@@ -35,6 +35,7 @@
             <td id="infoWDBCommands">
                <button id="btnWDBReboot" class="cmdBtn" onclick="WDBrebootQuery()">Reboot</button>
                <button id="btnWDBUpload" class="cmdBtn" onclick="uploadShow()">Upload firmware</button>
+               <button id="btnWDBInit" class="cmdBtn" onclick="initShow()">Init</button>
             </td>
          </tr>
          <tr>
@@ -116,7 +117,7 @@
                <button id="btnDCBMark" class="cmdBtn" onclick="DCBmark()">Mark</button>
                <button class="cmdBtn" onclick="DCBSdreset(0)">SERDES reset</button>
                <button class="cmdBtn" onclick="DCBSdreset(1)">SERDES error reset</button>
-               <button class="cmdBtn" onclick="DCBUploadAll(1)">Upload all WDB</button>
+               <button class="cmdBtn" onclick="uploadShow()">Upload all WDB</button>
             </td>
          </tr>
          <tr>
@@ -428,7 +429,7 @@
          <table style="padding: 10px;border-spacing: 10px">
             <tr>
                <td style="text-align: right">
-                  Serial:&nbsp;
+                  <span id="uploadSerial">Serial:</span>&nbsp;
                   <input type="text" name="serial" id="serial" style="width: 50px;text-align: left">
                </td>
             </tr>
@@ -436,11 +437,32 @@
          <br/>
          <div style="text-align:center">
             <button id="btnUploadDialog" class="wideButton" type="button" onClick="upload();">Upload</button>
-            <button class="wideButton" type="button" onClick="dlgHide('dlgUpload')">Cancel</button>
+            <button class="wideButton" type="button" onClick="dlgHide('dlgUpload');loadCrate();">Cancel</button>
          </div>
       </div>
    </div>
 
+   <!-- firmware init dialog -->
+   <div id="dlgInit" class="dlgFrame">
+
+      <div class="dlgTitlebar">Init Board</div>
+
+      <div class="dlgPanel">
+         <table style="padding: 10px;border-spacing: 10px">
+            <tr>
+               <td style="text-align: right">
+                  <span>Serial:</span>&nbsp;
+                  <input type="text" name="serial" id="initSerial" style="width: 50px;text-align: left">
+               </td>
+            </tr>
+         </table>
+         <br/>
+         <div style="text-align:center">
+            <button id="btnInitDialog" class="wideButton" type="button" onClick="initCheck();">Init</button>
+            <button class="wideButton" type="button" onClick="dlgHide('dlgInit');loadCrate();">Cancel</button>
+         </div>
+      </div>
+   </div>
 
 </div> <!-- container -->
 

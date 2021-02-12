@@ -170,8 +170,13 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
 
       if (wdbAddress[0] == 'D') {
          std::string dcbName = wdbAddress.substr(0, wdbAddress.find(":"));
-         if (wdbAddress.find(":") != std::string::npos)
-            slot = std::stoi(wdbAddress.substr(wdbAddress.find(":")+1));
+         if (wdbAddress.find(":") != std::string::npos) {
+            auto s = wdbAddress.substr(wdbAddress.find(":") + 1);
+            if (s == "*")
+               slot = -1;
+            else
+               slot = std::stoi(s);
+         }
 
          for (auto &d : gl->dcb) {
             if (d->GetName() == dcbName) {
@@ -493,6 +498,9 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
          if (dcb != nullptr) {
             gl->upload = true;
 
+            if (slot == -1) {
+               result = dcb->UploadStart(-1, 0);
+            }
             if (slot != -1) {
                auto b = dcb->GetWDB(slot);
                if (b != nullptr && b->GetBoardRevision() == 4) // Rev. E
@@ -517,12 +525,32 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             if (args.size() < 4)
                return;
 
-            if (dcb->GetWDB(slot) != nullptr)
-               disconnectWDB(gl, dcb->GetWDB(slot));
+            if (slot == -1) {
+               int serial = std::stod(args[3]);
+               dcb->ScanCrate();
 
-            // send ASCII command to WDB
-            dcb->SendToSlot("info", slot); // dummy command because of SPI bug
-            auto result = dcb->SendToSlot("init " + args[3], slot);
+               for (int i=0 ; i<16 ; i++) {
+                  if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
+                     if (gl->verbose)
+                        std::cout << "Init board in slot " << i << " with serial " << serial << std::endl;
+                     // send ASCII command to WDB
+                     dcb->SendToSlot("info", i); // dummy command because of SPI bug
+                     auto result = dcb->SendToSlot("init " + std::to_string(serial), i);
+                     serial++;
+                  }
+
+                  if (dcb->GetWDB(i) != nullptr)
+                     disconnectWDB(gl, dcb->GetWDB(i));
+               }
+
+            } else {
+               if (dcb->GetWDB(slot) != nullptr)
+                  disconnectWDB(gl, dcb->GetWDB(slot));
+
+               // send ASCII command to WDB
+               dcb->SendToSlot("info", slot); // dummy command because of SPI bug
+               auto result = dcb->SendToSlot("init " + args[3], slot);
+            }
 
             gl->upload = false;
 
@@ -1217,6 +1245,12 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
                if (gl->verbose)
                   std::cout << "Upload finished" << std::endl;
                gl->upload = false;
+               mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+               mg_printf_http_chunk(nc, "{\n");
+               mg_printf_http_chunk(nc, "   \"progress\" : \"finished\"\n");
+               mg_printf_http_chunk(nc, "}\n");
+               mg_send_http_chunk(nc, "", 0);
+
             } else if (str.size() > 3) {
                int slot = std::stoi(str);
                double progress = std::stod(str.substr(str.find(" ") + 1));
@@ -1563,10 +1597,10 @@ void connectWDB(GLOBALS *gl, WDB *b) {
 
    do {
       b->ReceiveStatusRegisters();
-      int s = b->GetSerialNumber();
-      if (s == 0) {
+      int s = b->GetBoardMagic();
+      if (s != 0xAC) {
          sleep_ms(100);
-         std::cout << "Wait for serial" << std::endl;
+         std::cout << "Wait for board magic number" << std::endl;
       } else
          break;
    } while (true);

@@ -22,6 +22,9 @@
 #define BRD_TYPE_ID_WDB       2
 #define BRD_TYPE_ID_DCB       3
 #define BRD_TYPE_ID_TCB       4
+#define BRD_TYPE_ID_BLANK   254
+#define BRD_TYPE_ID_EMPTY   255
+
 
 /* DCB Board Revision IDs */
 #define DCB_BRD_REV_ID_A      0

@@ -1059,7 +1059,6 @@ function WDBreboot(flag) {
       let req = new XMLHttpRequest();
       req.onreadystatechange = function () {
          if (req.readyState === 4 && req.status === 200) {
-            dlgHide("dlgWait");
             loadCrate(); // restart crate-scan
          } else if (req.readyState === 4 && req.status === 0) {
             connectionBroken();
@@ -1077,12 +1076,46 @@ function WDBreboot(flag) {
 }
 
 function uploadShow() {
-   if (CRATE.crate.slot[CRATE.selectedWDB].type_id === BRD_TYPE_ID_WDB) {
+   // kill update timer
+   if (CRATE.timer.loadCrate !== undefined)
+      window.clearTimeout(CRATE.timer.loadCrate);
+
+   if (CRATE.selectedWDB !== undefined) {
       let wdb = CRATE.crate.slot[CRATE.selectedWDB];
       document.getElementById("serial").value = wdb.serial;
+      document.getElementById('uploadSerial').innerHTML = "Serial:";
+   } else {
+      document.getElementById('uploadSerial').innerHTML = "First serial:";
+      document.getElementById("serial").value = "";
    }
 
    dlgShow("dlgUpload");
+}
+
+function initShow() {
+   // kill update timer
+   if (CRATE.timer.loadCrate !== undefined)
+      window.clearTimeout(CRATE.timer.loadCrate);
+
+   let wdb = CRATE.crate.slot[CRATE.selectedWDB];
+   document.getElementById("serial").value = wdb.serial;
+   document.getElementById('uploadSerial').innerHTML = "Serial:";
+
+   dlgShow("dlgInit");
+}
+
+function initCheck() {
+
+   // check for serial number
+   if (isNaN(parseInt(document.getElementById("initSerial").value))) {
+      dlgAlert("Please enter a valid serial number");
+      return;
+   }
+
+   dlgHide("dlgInit");
+   dlgWait(6, "Init in progress");
+
+   initWDB(CRATE.selectedWDB, document.getElementById("initSerial").value);
 }
 
 function upload() {
@@ -1092,10 +1125,6 @@ function upload() {
       dlgAlert("Please enter a valid serial number");
       return;
    }
-
-   // kill update timer
-   if (CRATE.timer.loadCrate !== undefined)
-      window.clearTimeout(CRATE.timer.loadCrate);
 
    let req = new XMLHttpRequest();
    req.onreadystatechange = function () {
@@ -1111,7 +1140,10 @@ function upload() {
       }
    };
 
-   req.open("PUT", "upload/" + CRATE.dcbAddress + ":" + CRATE.selectedWDB, true);
+   if (CRATE.selectedWDB !== undefined)
+      req.open("PUT", "upload/" + CRATE.dcbAddress + ":" + CRATE.selectedWDB, true);
+   else
+      req.open("PUT", "upload/" + CRATE.dcbAddress + ":*", true);
    req.send();
 }
 
@@ -1121,12 +1153,15 @@ function uploadProgress() {
       if (req.readyState === 4 && req.status === 200) {
          let r = JSON.parse(req.responseText);
          if (r.progress !== undefined) {
-            document.getElementById("progressComment").innerHTML = "Uploading slot " + r.slot;
-            let d = document.getElementById("progressWait");
-            d.set(r.progress / 100);
-            if (r.progress === 100) {
+            if (r.progress === "finished") {
                dlgHide("dlgWait");
+               dlgWait(6, "Init in progress");
+
                initWDB(CRATE.selectedWDB, document.getElementById("serial").value);
+            } else {
+               document.getElementById("progressComment").innerHTML = "Uploading slot " + r.slot;
+               let d = document.getElementById("progressWait");
+               d.set(r.progress / 100);
             }
          }
          window.setTimeout(uploadProgress, 300);
@@ -1144,12 +1179,17 @@ function initWDB(slot, serial) {
          CRATE.timer.loadCrate = window.setTimeout(loadCrate, 100, true); // restart CERATE scan
 
          // switch to WDB info panel
-         document.getElementById('dlgInfoWDB').style.display = 'revert';
-         document.getElementById('dlgInfoEmpty').style.display = 'none';
+         if (CRATE.selectedWDB !== undefined) {
+            document.getElementById('dlgInfoWDB').style.display = 'revert';
+            document.getElementById('dlgInfoEmpty').style.display = 'none';
+         }
       }
    }
 
-   req.open("PUT", "init/" + CRATE.dcbAddress + ":" + slot + "/" + serial, true);
+   if (slot === undefined)
+      req.open("PUT", "init/" + CRATE.dcbAddress + ":*/" + serial, true);
+   else
+      req.open("PUT", "init/" + CRATE.dcbAddress + ":" + slot + "/" + serial, true);
    req.send();
 
 }
