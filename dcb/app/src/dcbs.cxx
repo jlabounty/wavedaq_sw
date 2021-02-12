@@ -1889,7 +1889,8 @@ void upload(udp_connection &c, int n_param, const char **param) {
             }
          } else if (is_flash_available(s)) {
             slot_sel[s] = 1;
-            c.sprintf("Slot %2d: Found un-programmed board\n", s);
+            if (c.verbose)
+               c.sprintf("Slot %2d: Found un-programmed board\n", s);
          }
       }
    }
