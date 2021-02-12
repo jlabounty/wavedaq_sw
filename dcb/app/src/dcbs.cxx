@@ -1797,6 +1797,10 @@ void crate_upload(udp_connection &c, int slot[WDAQ_N_SLOTS], int load_fw, char *
             if (force) {
                slot_board_info.type_id = board_type;
                slot_board_info.rev_id = board_rev;
+            } else if (is_flash_available(i)) {
+               // treat empty board as WDB Rev. G
+               slot_board_info.type_id = BRD_TYPE_ID_WDB;
+               slot_board_info.rev_id = 'g' - 'a';
             } else {
                // no slot board information for standard upload
                c.sprintf("Error: board information for slot %d could not be read or no board present\n", i);
@@ -1883,6 +1887,9 @@ void upload(udp_connection &c, int n_param, const char **param) {
                          board_info.variant_id,
                          wdaq_brd_vendor_name[board_info.vendor_id]);
             }
+         } else if (is_flash_available(s)) {
+            slot_sel[s] = 1;
+            c.sprintf("Slot %2d: Found un-programmed board\n", s);
          }
       }
    }
