@@ -14,14 +14,14 @@
 
 case "$1" in
   start)
-     /fw_sw/dcb/prod/wds -W /fw_sw/dcb/prod -D
+     /fw_sw/dcb/prod/wds -p 80 -W /fw_sw/dcb/prod -D
      ;;
   stop)
      killall wds
      ;;
   restart)
      killall -w -v wds
-     /fw_sw/dcb/prod/wds -W /fw_sw/dcb/prod -D
+     /fw_sw/dcb/prod/wds -p 80 -W /fw_sw/dcb/prod -D
      ;;
   *)
      echo "Usage: wds { start | stop | restart }" >&2
