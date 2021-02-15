@@ -42,8 +42,9 @@
 #ifdef LINUX_COMPILE
 #undef Xil_AssertNonvoid
 #define Xil_AssertNonvoid   assert
-#define SPI_ASCII_TX_BUF_SIZE     512
-#define SPI_ASCII_RX_BURST_LEN     32 /* Must be smaller than SPI_ASCII_TX_BUF_SIZE */
+#define SPI_ASCII_TX_BUF_SIZE        512
+#define SPI_ASCII_RX_BURST_LEN        32 /* Must be smaller than SPI_ASCII_TX_BUF_SIZE */
+#define SPI_ASCII_RX_TIMEOUT       30000
 #endif
 
 /******************************************************************************/
@@ -159,8 +160,7 @@ void bpl_spi_init(bpl_spi_type *self, unsigned char device_nr) {
 
 /******************************************************************************/
 
-int
-spi_transfer(bpl_spi_type *self, unsigned char slot_nr, char *SendBufPtr, char *RecvBufPtr, unsigned int ByteCount) {
+int spi_transfer(bpl_spi_type *self, unsigned char slot_nr, char *SendBufPtr, char *RecvBufPtr, unsigned int ByteCount) {
    spi_if_transfer(&(self->slot_fpga), SendBufPtr, RecvBufPtr, ByteCount);
    return 1;
 }
@@ -190,6 +190,7 @@ void spi_ascii_cmd(char *txbuff, char *rxbuff, unsigned int rxsize, unsigned cha
    unsigned char rx_buff[SPI_ASCII_RX_BURST_LEN];
    int eot = 0;
    int count = 0;
+   int timeout_count;
    int Status;
    int i;
 
@@ -228,6 +229,7 @@ void spi_ascii_cmd(char *txbuff, char *rxbuff, unsigned int rxsize, unsigned cha
 
       memset(tx_buff, 0, SPI_ASCII_RX_BURST_LEN);
       count = 0;
+      timeout_count = 0;
       do {
          memset(rx_buff, 0, SPI_ASCII_RX_BURST_LEN);
          Status = spi_transfer(SYSPTR(spi_bpl), slot_nr, tx_buff, rx_buff, SPI_ASCII_RX_BURST_LEN);
@@ -238,12 +240,23 @@ void spi_ascii_cmd(char *txbuff, char *rxbuff, unsigned int rxsize, unsigned cha
          i = 0;
          while ((i < SPI_ASCII_RX_BURST_LEN) && (rx_buff[i] != 0x03)) {
             if (count < rxsize && rx_buff[i] >= 10)
+            {
                rxbuff[count++] = rx_buff[i];
+               timeout_count = 0;
+            }
             i++;
          }
          if (count < rxsize)
+         {
             rxbuff[count] = 0;
-      } while ((rx_buff[i] != 0x03) && (count < rxsize));
+         }
+         timeout_count++;
+      } while ((rx_buff[i] != 0x03) && (count < rxsize) && (timeout_count < SPI_ASCII_RX_TIMEOUT));
+
+      if(timeout_count >= SPI_ASCII_RX_TIMEOUT)
+      {
+         if (DBG_ERR) xfs_printf("SPI Backplane Error: timeout when waiting for WDB response\r\n");
+      }
    }
 
    disconnect();
