@@ -375,12 +375,17 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
          for (auto &b: wdbList)
             b->SetFeMux(iChannel, value == "true" ? WDB::cFeMuxCalSource : WDB::cFeMuxInput);
       } else if (item == "drsSampleFreq") {
+         std::vector<DCB *> dcbList;
+
          for (auto &b: wdbList) {
             b->SetDrsSampleFreq(std::stoi(value));
 
-            // serses links might have dropped during LMK reprogramming, so issue reset
-            if (b->IsDcbInterface())
-               b->GetDcbInterface()->ResetSerdes(0);
+            // build list of all DCBs
+            if (b->IsDcbInterface()) {
+               auto d = b->GetDcbInterface();
+               if (std::find(dcbList.begin(), dcbList.end(), d) == dcbList.end())
+                  dcbList.push_back(d);
+            }
 
             b->LoadVoltageCalibration(b->GetDrsSampleFreqMhz(), gl->wdsDir);
             b->LoadTimeCalibration(b->GetDrsSampleFreqMhz(), gl->wdsDir);
@@ -396,6 +401,11 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
                gl->wp->SetTimeCalib3(true);
             }
          }
+
+         // serdes links might have dropped during LMK reprogramming, so issue reset
+         for (auto &d: dcbList)
+            d->ResetSerdes(0);
+
          demoDrsSampleFreq = std::stoi(value);
       } else if (item == "dacCalDc") {
          for (auto &b: wdbList)
