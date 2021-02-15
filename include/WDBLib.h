@@ -127,6 +127,7 @@ typedef struct {
    float            adc_offset_range0[16];
    float            adc_offset_range1[16];
    float            adc_offset_range2[16];
+   float            wf_calibrated[18][1024];
 } VCALIB_DATA;
 
 class VCALIB {

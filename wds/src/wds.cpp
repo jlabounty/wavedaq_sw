@@ -1308,6 +1308,14 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
          float f = gl->wp->GetVcalibProgress();
          mg_send_http_chunk(nc, (const char *) &f, 4);
 
+         for (int c = 0; c < WD_N_CHANNELS; c++) {
+            int n = 1024;
+            mg_send_http_chunk(nc, (const char *) &c, 4);
+            mg_send_http_chunk(nc, (const char *) &n, 4);
+
+            mg_send_http_chunk(nc, (const char *) wdb->mVCalib.mCalib.wf_calibrated[c], sizeof(float) * n);
+         }
+
          mg_send_http_chunk(nc, "", 0);
          return;
       }

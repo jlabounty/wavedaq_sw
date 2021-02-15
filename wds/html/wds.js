@@ -1082,21 +1082,28 @@ function receiveWF() {
          } else if (responseType === 10) { // vcalib progress data
             let b = intArray[1];
             progressInd = floatArray[2];
+            i += 3;
+
+            wf.type = 2; // indicate calibrated waveform
 
             e = document.getElementById("progressIndVcalib");
             e.set(progressInd);
 
             document.getElementById("btnVCalib").disabled = true;
 
-            OSC.timer.loadWF = window.setTimeout(loadWF, 100);
-            return;
+            while (i < intArray.length) {
+               c = intArray[i++];
+               n = intArray[i++];
+               for (j = 0; j < n; j++)
+                  wf.U[c][j] = floatArray[i++];
+            }
 
          } else if (responseType === 11) { // tcalib progress data
             let b = intArray[1];
             progressInd = floatArray[2];
             i += 3;
 
-            wf.type = 2; // indicate delta-T array
+            wf.type = 3; // indicate delta-T array
 
             e = document.getElementById("progressIndTcalib");
             e.set(progressInd);
@@ -1122,7 +1129,7 @@ function receiveWF() {
       // calculate sum and FFT waveforms
       calcMathWF(wf);
 
-      if (responseType === 11) {
+      if (responseType === 10 || responseType === 11) {
          OSC.timer.loadWF = window.setTimeout(loadWF, 100);
          OSC.sendWaveforms(wf);
       } else {
