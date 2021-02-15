@@ -1311,10 +1311,6 @@ Oscilloscope.prototype.drawDT = function (ctx) {
       }
    }
 
-   ctx.save();
-   ctx.rect(this.x1, this.y1, this.w, this.h);
-   ctx.clip();
-
    let period = 1 / this.wdb.calibClkFreq*1000; // period of calibration clock in ns
 
    for (c = 0; c < 18; c++) {
@@ -1332,8 +1328,6 @@ Oscilloscope.prototype.drawDT = function (ctx) {
          ctx.stroke();
       }
    }
-
-   ctx.restore(); // remove clipping
 };
 
 Oscilloscope.prototype.drawHisto = function (ctx) {

@@ -3388,11 +3388,11 @@ void WP::DoVoltageCalibrationStep() {
    if (calibProg.state == cCsFirstBoard) {
       calibProg.state = cCsFirstSample;
       calibProg.progress = 0;
-      calibProg.nIter1 = 100; // primary
-      calibProg.nIter2 = 100; // secondary
-      calibProg.nIter3 = 100; // positive gain
-      calibProg.nIter4 = 100; // negative gain
-      calibProg.nIter5 = 100; // timing channels
+      calibProg.nIter1 = 50; // primary
+      calibProg.nIter2 = 50; // secondary
+      calibProg.nIter3 = 50; // positive gain
+      calibProg.nIter4 = 50; // negative gain
+      calibProg.nIter5 = 50; // timing channels
 
       calibProg.nIterTotal = calibProg.nIter1 + calibProg.nIter2 +
                              calibProg.nIter3 + calibProg.nIter4 + calibProg.nIter5 + 4;
@@ -3446,7 +3446,7 @@ void WP::DoVoltageCalibrationStep() {
       b->SetDacCalDcV(0);
 
       // set holdoff to meet target DAQ rate
-      b->SetTriggerHoldoff(30);
+      b->SetTriggerHoldoff(10);
 
       // disable external trigger
       b->SetExtAsyncTriggerEn(0);
@@ -4042,7 +4042,7 @@ void WP::DoTimeCalibrationStep() {
    if (calibProg.state == cCsFirstBoard) {
 
       calibProg.state = cCsFirstSample;
-      calibProg.nIter1 = 2000; // local calibration
+      calibProg.nIter1 = 500;  // local calibration
       calibProg.nIter2 = 500;  // global calibration
       calibProg.nIter3 = 30;   // offset calibration
       calibProg.nIter4 = 0;
