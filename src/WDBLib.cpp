@@ -4126,7 +4126,8 @@ void WP::DoTimeCalibrationStep() {
 
       // get one event from board
       WDEvent event(b->GetSerialNumber());
-      while (!RequestEvent(b, CALIB_TIMEOUT, event));
+      if (calibProg.iIter1 == 1) // skip one event until clock is available
+         while (!RequestEvent(b, CALIB_TIMEOUT, event));
       while (!RequestEvent(b, CALIB_TIMEOUT, event));
 
       if (AnalyzePeriod(&event, b) == -1) {

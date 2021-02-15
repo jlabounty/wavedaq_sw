@@ -12,6 +12,18 @@ var OSC; // global scope object
 
 var progressInd = 0;
 
+function profile(flag) {
+   if (flag === true || flag === undefined) {
+      console.log("");
+      profile.startTime = new Date().getTime();
+      return;
+   }
+
+   let now = new Date().getTime();
+   console.log("Profile: " + flag + ": " + (now-profile.startTime) + "ms");
+   profile.startTime = new Date().getTime();
+}
+
 function init() {
    // prevent mouse events to go up to the browser
    let c = document.getElementById("controls");
@@ -384,9 +396,9 @@ function populateControls(init) {
 
    if (init) {
       // set scale according to sampling frequency
-      if (OSC.wdb.drsSampleFreq < 2000)
+      if (OSC.wdb.drsSampleFreq < 2000-10)
          OSC.wfTScaleIndex = 6; // 100 ns
-      else if (OSC.wdb.drsSampleFreq < 4000)
+      else if (OSC.wdb.drsSampleFreq < 3000-10)
          OSC.wfTScaleIndex = 5; // 50 ns
       else
          OSC.wfTScaleIndex = 4; // 20 ns
@@ -970,19 +982,6 @@ function loadWF() {
       return;
    }
 
-   for (i = 0; i < OSC.measList.childNodes.length; i++)
-      if (OSC.measList.childNodes[i].measurement) {
-         for (let p = 0; p < OSC.measList.childNodes[i].measurement.param.length; p++) {
-            if (OSC.measList.childNodes[i].measurement.param[p].type === "CH")
-               chn |= (1 << OSC.measList.childNodes[i].measurement.param[p].value);
-         }
-      }
-
-   if (chn === 0 && OSC.running) {
-      OSC.timer.loadWF = window.setTimeout(loadWF, 0); // schedule next waveform read
-      return;
-   }
-
    // send AJAX request
    OSC.req = new XMLHttpRequest();
    OSC.req.onreadystatechange = receiveWF;
@@ -1089,7 +1088,7 @@ function receiveWF() {
 
             document.getElementById("btnVCalib").disabled = true;
 
-            OSC.timer.loadWF = window.setTimeout(loadWF, 250);
+            OSC.timer.loadWF = window.setTimeout(loadWF, 100);
             return;
 
          } else if (responseType === 11) { // tcalib progress data
@@ -1124,9 +1123,8 @@ function receiveWF() {
       calcMathWF(wf);
 
       if (responseType === 11) {
-         OSC.timer.loadWF = window.setTimeout(loadWF, 250);
+         OSC.timer.loadWF = window.setTimeout(loadWF, 100);
          OSC.sendWaveforms(wf);
-
       } else {
          // schedule next waveform read
          if (OSC.running)

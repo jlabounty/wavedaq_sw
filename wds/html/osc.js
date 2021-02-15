@@ -102,9 +102,6 @@ function Oscilloscope(div) { // constructor
    this.wfOffset = [];     // -0.5 .. +0.5
    this.wfTOffset = 0;     // seconds
 
-   this.wfTScaleIndex = 4;
-   this.wfTScale = this.TScaleTable[this.wfTScaleIndex][0];
-
    this.wfUO = [];         // offset and scale optimized
    this.wfUS = [];
 
@@ -150,8 +147,7 @@ function Oscilloscope(div) { // constructor
    this.lastTriggerLevelChange = 0;
 
    // used to suppress updates after a parameter change
-   this.lastParamSet = new Date() / 1000
-   ;
+   this.lastParamSet = new Date() / 1000;
 
    // histogram settings
    this.histo = {
