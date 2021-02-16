@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  04.02.2021 14:00:46
+ *  Created :  16.02.2021 14:30:28
  *
  *  Register Layout Version :  9
  *
@@ -1837,7 +1837,7 @@
 
 
 
-/* ****** Control Register 66 [0x1108]: LMK_13 - LMK Register 13 (Default: 0x029900AD) ****** */
+/* ****** Control Register 66 [0x1108]: LMK_13 - LMK Register 13 (Default: 0x029400AD) ****** */
 
 /* LMK13_OSCIN_FREQ - Oscillator Input Calibration Adjustment in MHz (1..200) */
 #define WD2_LMK13_OSCIN_FREQ_REG                                    WD2_REG_LMK_13
@@ -1861,7 +1861,7 @@
 
 
 
-/* ****** Control Register 67 [0x110C]: LMK_14 - LMK Register 14 (Default: 0x0830140E) ****** */
+/* ****** Control Register 67 [0x110C]: LMK_14 - LMK Register 14 (Default: 0x0830100E) ****** */
 
 /* LMK14_EN_FOUT - Enable for the Fout Pin (0 = Disabled, 1 = Enabled) */
 #define WD2_LMK14_EN_FOUT_REG                                       WD2_REG_LMK_14

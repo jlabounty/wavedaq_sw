@@ -5,7 +5,7 @@
 #  Project :  WaveDream2
 #
 #  Author  :  schmid_e (Author of generation script)
-#  Created :  04.02.2021 14:00:46
+#  Created :  16.02.2021 14:30:28
 #
 #  Register Layout Version :  9
 #
@@ -1825,7 +1825,7 @@ WD2_LMK11_DIV4_OFS                       =                                15
 
 
 
-# ****** Control Register 66 [0x1108]: LMK_13 - LMK Register 13 (Default: 0x029900AD) ******
+# ****** Control Register 66 [0x1108]: LMK_13 - LMK Register 13 (Default: 0x029400AD) ******
 
 # LMK13_OSCIN_FREQ - Oscillator Input Calibration Adjustment in MHz (1..200)
 WD2_LMK13_OSCIN_FREQ_REG                 =                    WD2_REG_LMK_13
@@ -1849,7 +1849,7 @@ WD2_LMK13_VCO_C3_C4_LF_OFS               =                                 4
 
 
 
-# ****** Control Register 67 [0x110C]: LMK_14 - LMK Register 14 (Default: 0x0830140E) ******
+# ****** Control Register 67 [0x110C]: LMK_14 - LMK Register 14 (Default: 0x0830100E) ******
 
 # LMK14_EN_FOUT - Enable for the Fout Pin (0 = Disabled, 1 = Enabled)
 WD2_LMK14_EN_FOUT_REG                    =                    WD2_REG_LMK_14
@@ -5116,8 +5116,8 @@ ctrl_reg_default = [0xFFFFFFFF,   # Offset 0x1000
                     0x10000908,   # Offset 0x10FC 
                     0xA0022A09,   # Offset 0x1100 
                     0x0082000B,   # Offset 0x1104 
-                    0x029900AD,   # Offset 0x1108 
-                    0x0830140E,   # Offset 0x110C 
+                    0x029400AD,   # Offset 0x1108 
+                    0x0830100E,   # Offset 0x110C 
                     0xE000200F,   # Offset 0x1110 
                     0x00A63F00,   # Offset 0x1114 
                     0x00A63F00,   # Offset 0x1118 
