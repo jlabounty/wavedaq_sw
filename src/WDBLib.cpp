@@ -3482,15 +3482,22 @@ void WP::DoVoltageCalibrationStep() {
       WDEvent event(b->GetSerialNumber());
       while (!RequestEvent(b, CALIB_TIMEOUT, event));
 
-      for (int ch = 0; ch < WD_N_CHANNELS - 2; ch++)
-         for (int bin = 0; bin < 1024; bin++)
-            calibProg.ave->Add(0, ch, bin, event.mWfUDRS[ch][bin]);
-
       for (int ch = 0; ch < WD_N_CHANNELS - 2; ch++) {
+         int tc = event.mTriggerCell[ch];
+         for (int bin = 0; bin < 1024; bin++) {
+            // drop bins +-20 cells around trigger cell
+            int dist = abs(bin - tc);
+            if (dist > 1024 - 20)
+               dist -= 1024;
+            if (dist > 20)
+               calibProg.ave->Add(0, ch, bin, event.mWfUDRS[ch][bin]);
+         }
+      }
+
+      for (int ch = 0; ch < WD_N_CHANNELS - 2; ch++)
          for (int bin = 0; bin < 1024; bin++)
             b->mVCalib.mCalib.wf_calibrated[ch][bin] =
                     event.mWfUDRS[ch][bin] - b->mVCalib.mCalib.wf_offset1[ch][bin];
-      }
 
       for (int ch = 0; ch < WD_N_CHANNELS - 2; ch++)
          for (int bin = 0; bin < 1024; bin++)
