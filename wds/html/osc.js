@@ -1338,36 +1338,16 @@ Oscilloscope.prototype.drawDU = function (ctx) {
    if (!OSC.connected)
       return;
 
-   for (var c = 15; c >= 0; c--) {
-      if (this.chOn[c]) {
-         var y = this.wfUO[c];
-         ctx.fillStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
-         ctx.strokeStyle = "#E0E0E0";
-         ctx.beginPath();
-         ctx.arc(8, y, 8, 0, 2 * Math.PI);
-         ctx.fill();
-         ctx.stroke();
-         ctx.strokeStyle = "#000000";
-         ctx.fillStyle = "#000000";
-         ctx.textAlign = "center";
-         ctx.textBaseline = "middle";
-         ctx.font = '10px sans-serif';
-         ctx.fillText(c.toString(), 8, y);
-      }
-   }
-
    for (c = 0; c < 18; c++) {
-      if (this.chOn[c]) {
-         ctx.beginPath();
-         ctx.fillStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
-         ctx.strokeStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
-         for (var i = 0; i < 1024; i++) {
-            var x = this.x1 + i / 1024.0 * this.w;
-            y = (this.wf.U[c][i] * 1E3 / 10 / 10) * this.h + this.wfUO[c]; // 10 mV per division
-            ctx.fillRect(x, y, 3, 3);
-         }
-         ctx.stroke();
+      ctx.beginPath();
+      ctx.fillStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
+      ctx.strokeStyle = this.disp.invert ? this.chnColorsInverted[c] : this.chnColors[c];
+      for (var i = 0; i < 1024; i++) {
+         var x = this.x1 + i / 1024.0 * this.w;
+         y = (this.wf.U[c][i] * 1E3 / 10 / 10) * this.h + this.wfUO[c]; // 10 mV per division
+         ctx.fillRect(x, y, 3, 3);
       }
+      ctx.stroke();
    }
 };
 

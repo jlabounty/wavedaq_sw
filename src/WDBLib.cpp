@@ -3496,6 +3496,10 @@ void WP::DoVoltageCalibrationStep() {
          for (int bin = 0; bin < 1024; bin++)
             b->mVCalib.mCalib.wf_offset1[ch][bin] = (float) calibProg.ave->Median(0, ch, bin);
 
+      for (int ch = 16; ch < WD_N_CHANNELS ; ch++)
+         for (int bin = 0; bin < 1024; bin++)
+            b->mVCalib.mCalib.wf_calibrated[ch][bin] = 1;
+
       // calibration finished
       if (calibProg.iIter1 == calibProg.nIter1) {
          // calibProg.ave->SaveNormalizedDistribution("wf.csv", 0);
@@ -3527,12 +3531,9 @@ void WP::DoVoltageCalibrationStep() {
             calibProg.ave->Add(0, ch, bin, event.mWfUDRS[ch][bin]);
 
       for (int ch = 0; ch < WD_N_CHANNELS - 2; ch++)
-         for (int bin = 0; bin < 1024; bin++) {
-            int tc = event.mTriggerCell[ch];
+         for (int bin = 0; bin < 1024; bin++)
             b->mVCalib.mCalib.wf_calibrated[ch][bin] =
-                    event.mWfUDRS[ch][bin] - b->mVCalib.mCalib.wf_offset1[ch][(bin + tc) % 1024] /*-
-                    b->mVCalib.mCalib.wf_offset2[ch][bin]*/;
-         }
+                    event.mWfUDRS[ch][bin] - b->mVCalib.mCalib.wf_offset2[ch][bin];
 
       for (int ch = 0; ch < WD_N_CHANNELS - 2; ch++)
          for (int bin = 0; bin < 1024; bin++)
@@ -3568,14 +3569,20 @@ void WP::DoVoltageCalibrationStep() {
          for (int bin = 0; bin < 1024; bin++)
             calibProg.ave->Add(0, ch, bin, event.mWfUDRS[ch][bin]);
 
-      // calibration finished
-      if (calibProg.iIter3 == calibProg.nIter3) {
-         for (int ch = 0; ch < WD_N_CHANNELS - 2; ch++) // exclude clock channels
-            for (int bin = 0; bin < 1024; bin++)
-               b->mVCalib.mCalib.wf_gain1[ch][bin] = (float) (calibProg.ave->Median(0, ch, bin) / 0.45);
-
-         calibProg.ave->Reset();
+      for (int ch = 0; ch < WD_N_CHANNELS - 2; ch++) {
+         int tc = event.mTriggerCell[ch];
+         for (int bin = 0; bin < 1024; bin++)
+            b->mVCalib.mCalib.wf_calibrated[ch][bin] =
+                    event.mWfUDRS[ch][bin] / b->mVCalib.mCalib.wf_gain1[ch][(bin + tc) % 1024] - 0.48;
       }
+
+      for (int ch = 0; ch < WD_N_CHANNELS - 2; ch++) // exclude clock channels
+         for (int bin = 0; bin < 1024; bin++)
+            b->mVCalib.mCalib.wf_gain1[ch][bin] = (float) (calibProg.ave->Median(0, ch, bin) / 0.45);
+
+      // calibration finished
+      if (calibProg.iIter3 == calibProg.nIter3)
+         calibProg.ave->Reset();
 
       return;
    }
@@ -3599,14 +3606,20 @@ void WP::DoVoltageCalibrationStep() {
          for (int bin = 0; bin < 1024; bin++)
             calibProg.ave->Add(0, ch, bin, event.mWfUDRS[ch][bin]);
 
-      // calibration finished
-      if (calibProg.iIter4 == calibProg.nIter4) {
-         for (int ch = 0; ch < WD_N_CHANNELS - 2; ch++) // exclude clock channels
-            for (int bin = 0; bin < 1024; bin++)
-               b->mVCalib.mCalib.wf_gain2[ch][bin] = (float) (calibProg.ave->Median(0, ch, bin) / -0.45);
-
-         calibProg.ave->Reset();
+      for (int ch = 0; ch < WD_N_CHANNELS - 2; ch++) {
+         int tc = event.mTriggerCell[ch];
+         for (int bin = 0; bin < 1024; bin++)
+            b->mVCalib.mCalib.wf_calibrated[ch][bin] =
+                    event.mWfUDRS[ch][bin] / b->mVCalib.mCalib.wf_gain2[ch][(bin + tc) % 1024] + 0.48;
       }
+
+      for (int ch = 0; ch < WD_N_CHANNELS - 2; ch++) // exclude clock channels
+         for (int bin = 0; bin < 1024; bin++)
+            b->mVCalib.mCalib.wf_gain2[ch][bin] = (float) (calibProg.ave->Median(0, ch, bin) / -0.45);
+
+      // calibration finished
+      if (calibProg.iIter4 == calibProg.nIter4)
+         calibProg.ave->Reset();
 
       return;
    }
@@ -3640,12 +3653,21 @@ void WP::DoVoltageCalibrationStep() {
          for (int bin = 0; bin < 1024; bin++)
             calibProg.ave->Add(0, ch, bin, event.mWfUDRS[ch][bin]);
 
+      for (int ch = 0; ch < WD_N_CHANNELS-1 ; ch++)
+         for (int bin = 0; bin < 1024; bin++)
+            b->mVCalib.mCalib.wf_calibrated[ch][bin] = 1;
+
+      for (int ch = 16; ch < WD_N_CHANNELS ; ch++)
+         for (int bin = 0; bin < 1024; bin++)
+            b->mVCalib.mCalib.wf_calibrated[ch][bin] =
+                    event.mWfUDRS[ch][bin] - b->mVCalib.mCalib.wf_offset1[ch][bin];
+
+      for (int ch = 16; ch < WD_N_CHANNELS; ch++) // only clock channels
+         for (int bin = 0; bin < 1024; bin++)
+            b->mVCalib.mCalib.wf_offset1[ch][bin] = (float) calibProg.ave->Median(0, ch, bin);
+
       // calibration finished
       if (calibProg.iIter5 == calibProg.nIter5) {
-         for (int ch = 16; ch < WD_N_CHANNELS; ch++) // only clock channels
-            for (int bin = 0; bin < 1024; bin++)
-               b->mVCalib.mCalib.wf_offset1[ch][bin] = (float) calibProg.ave->Median(0, ch, bin);
-
          delete calibProg.ave;
          calibProg.ave = NULL;
       }
