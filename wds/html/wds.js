@@ -877,17 +877,6 @@ function validateParam(input, channel) {
    setParam(input, channel);
 }
 
-function doVCalib(all) {
-   if (OSC.demoMode) {
-      alert("Not available in demo mode");
-      return;
-   }
-
-   let req = new XMLHttpRequest();
-   req.open("PUT", "vcalib/" + OSC.wdbAddress);
-   req.send();
-}
-
 function doTCalib(all) {
    if (OSC.demoMode) {
       alert("Not available in demo mode");
@@ -1794,10 +1783,17 @@ function btnStart() {
 }
 
 function btnVcalib() {
-   if (OSC.wdb.length > 1)
-      dlgShow('dlgVCalib');
+   if (OSC.demoMode) {
+      alert("Not available in demo mode");
+      return;
+   }
+
+   let req = new XMLHttpRequest();
+   if (OSC.applyAll)
+      req.open("PUT", "vcalib/ALL");
    else
-      doVCalib(false);
+      req.open("PUT", "vcalib/" + OSC.wdbAddress);
+   req.send();
 }
 
 function btnTcalib() {

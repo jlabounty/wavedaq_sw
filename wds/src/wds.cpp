@@ -444,8 +444,12 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       else if (item == "vcalib") {
 
          if (!gl->demoMode) {
-            auto wdb = findBoard(gl->dcb, gl->wdb, wdbAddress);
-            gl->wp->StartCalibrationVoltage(wdb);
+            if (wdbAddress == "ALL")
+               gl->wp->StartCalibrationVoltage(nullptr);
+            else {
+               auto wdb = findBoard(gl->dcb, gl->wdb, wdbAddress);
+               gl->wp->StartCalibrationVoltage(wdb);
+            }
          }
 
       } else if (item == "tcalib") {
