@@ -35,7 +35,7 @@ function init() {
 
    // obtain DCB address from URL
    let url = new URL(window.location.href);
-   CRATE.dcbAddress = url.searchParams.get("adr");
+   CRATE.dcbAddress = url.searchParams.get("adr").toUpperCase();
 
    if (CRATE.dcbAddress === null) {
       dlgAlert("Missing parameter \"adr\" in URL");

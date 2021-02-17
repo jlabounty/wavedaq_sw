@@ -227,7 +227,7 @@ function reconnect() {
 function populateControls(init) {
 
    // set WDB name in board select button
-   if (OSC.wdbAddress[0] == "D")
+   if (OSC.wdbAddress[0] === "D" || OSC.wdbAddress[0] === "d")
       document.getElementById('wdSelect').innerHTML = OSC.wdbAddress + " - " + OSC.wdb.name;
    else
       document.getElementById('wdSelect').innerHTML = OSC.wdbAddress;
