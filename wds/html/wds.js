@@ -227,10 +227,14 @@ function reconnect() {
 function populateControls(init) {
 
    // set WDB name in board select button
-   if (OSC.wdbAddress[0] === "D" || OSC.wdbAddress[0] === "d")
-      document.getElementById('wdSelect').innerHTML = OSC.wdbAddress + " - " + OSC.wdb.name;
+   let str;
+   if (OSC.wdb.address[0] === "D" || OSC.wdbAddress[0] === "d")
+      str = OSC.wdb.address + " - " + OSC.wdb.name;
    else
-      document.getElementById('wdSelect').innerHTML = OSC.wdbAddress;
+      str = OSC.wdb.address;
+
+   if (str !== document.getElementById('wdSelect').innerHTML)
+      document.getElementById('wdSelect').innerHTML = str;
 
    // populate channel buttons
    for (let i = 0; i < 18; i++)
@@ -596,7 +600,6 @@ function readWdb(init) {
                "triggerSource": 220152992,
                "triggerOutPulseLength": 0,
                "triggerDelay": 0,
-               "triggerOutPulseLength": 0,
                "triggerSrcPolarity": 0,
                "triggerAutoTriggerPeriod": 0,
                "triggerPtrnEn": 0,
@@ -877,17 +880,6 @@ function validateParam(input, channel) {
    setParam(input, channel);
 }
 
-function doTCalib(all) {
-   if (OSC.demoMode) {
-      alert("Not available in demo mode");
-      return;
-   }
-
-   let req = new XMLHttpRequest();
-   req.open("PUT", "tcalib/" + OSC.wdbAddress);
-   req.send();
-}
-
 function loadBuild() {
    if (OSC.demoMode) {
       let e = document.getElementById("build");
@@ -974,7 +966,7 @@ function loadWF() {
    // send AJAX request
    OSC.req = new XMLHttpRequest();
    OSC.req.onreadystatechange = receiveWF;
-   OSC.req.open("GET", "wf?adr=" + OSC.wdbAddress + "&r=" + Math.random(), true); // avoid cached results
+   OSC.req.open("GET", "wf?adr=" + OSC.wdb.address + "&r=" + Math.random(), true); // avoid cached results
    OSC.req.responseType = "arraybuffer";
 
    try {
@@ -1797,10 +1789,17 @@ function btnVcalib() {
 }
 
 function btnTcalib() {
-   if (OSC.wdb.length > 1)
-      dlgShow('dlgTCalib');
+   if (OSC.demoMode) {
+      alert("Not available in demo mode");
+      return;
+   }
+
+   let req = new XMLHttpRequest();
+   if (OSC.applyAll)
+      req.open("PUT", "tcalib/ALL");
    else
-      doTCalib(false);
+      req.open("PUT", "tcalib/" + OSC.wdbAddress);
+   req.send();
 }
 
 function downloadFile(filename) {

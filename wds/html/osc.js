@@ -1345,7 +1345,10 @@ Oscilloscope.prototype.drawDU = function (ctx) {
       for (var i = 0; i < 1024; i++) {
          var x = this.x1 + i / 1024.0 * this.w;
          y = (this.wf.U[c][i] * 1E3 / 10 / 10) * this.h + this.wfUO[c]; // 10 mV per division
-         ctx.fillRect(x, y, 3, 3);
+         if (i === 0)
+            ctx.moveTo(x, y);
+         else
+            ctx.lineTo(x, y);
       }
       ctx.stroke();
    }

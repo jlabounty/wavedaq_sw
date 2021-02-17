@@ -417,6 +417,7 @@ public:
    static unsigned int usSince(std::chrono::time_point<std::chrono::high_resolution_clock> start);
 
    // setter & getter
+   WDB *GetWDB(int i) { return mWdb[i]; }
    void SetWDBList(std::vector<WDB *> w);
    static int GetDataSocket() { return gDataSocket; }
    int GetServerPort() { return mServerPort; }

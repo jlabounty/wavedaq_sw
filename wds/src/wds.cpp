@@ -455,8 +455,12 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       } else if (item == "tcalib") {
 
          if (!gl->demoMode) {
-            auto wdb = findBoard(gl->dcb, gl->wdb, wdbAddress);
-            gl->wp->StartCalibrationTime(wdb);
+            if (wdbAddress == "ALL")
+               gl->wp->StartCalibrationTime(nullptr);
+            else {
+               auto wdb = findBoard(gl->dcb, gl->wdb, wdbAddress);
+               gl->wp->StartCalibrationTime(wdb);
+            }
          }
 
       } else if (item == "save") {
@@ -939,6 +943,9 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       auto adr = std::string(str);
       for (auto &c: adr) c = toupper(c);
 
+      if (gl->wp->IsVcalibActive() || gl->wp->IsTcalibActive())
+         adr = gl->wp->GetWDB(gl->wp->GetVcalibBoard())->GetAddr();
+
       WDB *b = nullptr;
       if (adr[0] == 'D') {
          std::string dcbName = adr.substr(0, adr.find(":"));
@@ -1053,7 +1060,10 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
       }
 
       mg_printf_http_chunk(nc, "    \"name\": \"%s\",\n", b->GetName().c_str());
-      mg_printf_http_chunk(nc, "    \"address\": \"%s\",\n", b->GetEthAddrStr().c_str());
+      if (b->IsDcbInterface())
+         mg_printf_http_chunk(nc, "    \"address\": \"%s\",\n", b->GetAddr().c_str());
+      else
+         mg_printf_http_chunk(nc, "    \"address\": \"%s\",\n", b->GetEthAddrStr().c_str());
       mg_printf_http_chunk(nc, "    \"revision\": \"%c\",\n", 'A' + b->GetBoardRevision());
       mg_printf_http_chunk(nc, "    \"fwRevision\": \"%s\",\n", b->GetFwGitHashStr().c_str());
       mg_printf_http_chunk(nc, "    \"fwBuild\": \"%s\",\n", gl->demoMode ? "N/A" : b->GetFwBuild().c_str());
