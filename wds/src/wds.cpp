@@ -134,9 +134,8 @@ WDB* findBoard(std::vector<DCB *> vdcb, std::vector<WDB *> vwdb, std::string adr
 static struct mg_serve_http_opts s_http_server_opts;
 
 // This function will be called by mongoose on every new request
-static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
-   struct http_message *hm = (struct http_message *) p;
-   char str[256];
+static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
+   struct http_message *hm = (struct http_message *) pmsg;
    static std::default_random_engine randomGenerator;
 
    GLOBALS *gl = (GLOBALS *) nc->mgr->user_data;
@@ -544,17 +543,26 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
                return;
 
             if (slot == -1) {
-               int serial = std::stod(args[3]);
+               int serial = iChannel;
                dcb->ScanCrate();
 
                for (int i=0 ; i<16 ; i++) {
                   if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
-                     if (gl->verbose)
-                        std::cout << "Init board in slot " << i << " with serial " << serial << std::endl;
-                     // send ASCII command to WDB
-                     dcb->SendToSlot("info", i); // dummy command because of SPI bug
-                     auto result = dcb->SendToSlot("init " + std::to_string(serial), i);
-                     serial++;
+                     if (dcb->GetWDB(i) == nullptr) {
+                        if (gl->verbose)
+                           std::cout << "Init new board in slot " << i << " with serial " << serial << std::endl;
+
+                        // send ASCII command to WDB
+                        auto result = dcb->SendToSlot("init " + std::to_string(serial), i);
+                        serial++;
+                     } else {
+                        int s = dcb->GetWDB(i)->GetSerialNumber();
+                        if (gl->verbose)
+                           std::cout << "Init board in slot " << i << " with serial " << s << std::endl;
+
+                        // send ASCII command to WDB
+                        auto result = dcb->SendToSlot("init " + std::to_string(s), i);
+                     }
                   }
 
                   if (dcb->GetWDB(i) != nullptr)
@@ -562,12 +570,18 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
                }
 
             } else {
-               if (dcb->GetWDB(slot) != nullptr)
-                  disconnectWDB(gl, dcb->GetWDB(slot));
+               int serial = iChannel;
+               if (serial == -1)
+                  serial = dcb->GetWDB(slot)->GetSerialNumber();
+
+               if (gl->verbose)
+                  std::cout << "Init board in slot " << slot << " with serial " << serial << std::endl;
 
                // send ASCII command to WDB
-               dcb->SendToSlot("info", slot); // dummy command because of SPI bug
-               auto result = dcb->SendToSlot("init " + args[3], slot);
+               auto result = dcb->SendToSlot("init " + std::to_string(serial), slot);
+
+               if (dcb->GetWDB(slot) != nullptr)
+                  disconnectWDB(gl, dcb->GetWDB(slot));
             }
 
             gl->upload = false;
@@ -1263,9 +1277,9 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
             }
          }
          if (dcb != nullptr) {
-            auto str = dcb->UploadProgress();
+            auto s = dcb->UploadProgress();
 
-            if (str.find(">") != std::string::npos) {
+            if (s.find(">") != std::string::npos) {
                if (gl->verbose)
                   std::cout << "Upload finished" << std::endl;
                gl->upload = false;
@@ -1275,9 +1289,9 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
                mg_printf_http_chunk(nc, "}\n");
                mg_send_http_chunk(nc, "", 0);
 
-            } else if (str.size() > 3) {
-               int slot = std::stoi(str);
-               double progress = std::stod(str.substr(str.find(" ") + 1));
+            } else if (s.size() > 3) {
+               int slot = std::stoi(s);
+               double progress = std::stod(s.substr(s.find(" ") + 1));
 
                mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
                mg_printf_http_chunk(nc, "{\n");
@@ -1300,7 +1314,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *p) {
 
    // binary encoded waveforms ------------------------------
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/wf") == 0) {
-
+      char str[256];
       mg_get_http_var(&hm->query_string, "adr", str, sizeof(str));
       auto wdb = findBoard(gl->dcb, gl->wdb, str);
       if (wdb == nullptr) {
@@ -1783,7 +1797,7 @@ void switchDaqClock(GLOBALS *gl, DCB *dcb) {
 
 void disconnectWDB(GLOBALS *gl, WDB *b) {
    if (gl->verbose)
-      std::cout << "Disconnected from " << b->GetAddr() << std::endl;
+      std::cout << "Disconnect from " << b->GetAddr() << std::endl;
    for (auto &dcb: gl->dcb) {
       for (int i=0 ; i<16 ; i++)
          if (dcb->GetWDB(i) == b) {
@@ -1796,8 +1810,11 @@ void disconnectWDB(GLOBALS *gl, WDB *b) {
 }
 
 void disconnectDCB(GLOBALS *gl, DCB *d) {
+   for (int i=0 ; i<16 ; i++)
+      if (d->GetWDB(i) != nullptr)
+         disconnectWDB(gl, d->GetWDB(i));
    if (gl->verbose)
-      std::cout << "Disconnected from " << d->GetName() << std::endl;
+      std::cout << "Disconnect from " << d->GetName() << std::endl;
    gl->dcb.erase(std::remove(gl->dcb.begin(), gl->dcb.end(), d), gl->dcb.end());
    delete d;
 }

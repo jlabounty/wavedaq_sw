@@ -897,7 +897,7 @@ function receiveCrate() {
             let s = r;
             if (r === 16)
                s = 17;
-            let present = (CRATE.crate.slot[s].type_id !== 255);
+            let present = (CRATE.crate.slot[s].type_id !== BRD_TYPE_ID_EMPTY);
             if (c < 4) {
                let v = (dcb.serdes[r][c] === 1) ? "&bull;" : "&times;";
                if (present)
@@ -1080,16 +1080,66 @@ function uploadShow() {
    if (CRATE.timer.loadCrate !== undefined)
       window.clearTimeout(CRATE.timer.loadCrate);
 
-   if (CRATE.selectedWDB !== undefined) {
-      let wdb = CRATE.crate.slot[CRATE.selectedWDB];
-      document.getElementById("serial").value = wdb.serial;
-      document.getElementById('uploadSerial').innerHTML = "Serial:";
+   // check if empty board in crate
+   let askForSerial = false;
+   if (CRATE.selectedWDB === undefined) {
+      let i;
+      for (i = 0; i < 16; i++)
+         if (CRATE.crate.slot[i].type_id === BRD_TYPE_ID_BLANK)
+            break;
+      if (i < 16)
+         askForSerial = true;
    } else {
-      document.getElementById('uploadSerial').innerHTML = "First serial:";
-      document.getElementById("serial").value = "";
+      if (CRATE.crate.slot[CRATE.selectedWDB].type_id === BRD_TYPE_ID_BLANK)
+         askForSerial = true;
    }
 
-   dlgShow("dlgUpload");
+   if (askForSerial) {
+      if (CRATE.selectedWDB !== undefined) {
+         let wdb = CRATE.crate.slot[CRATE.selectedWDB];
+         if (wdb.serial === undefined)
+            document.getElementById("serial").value = "";
+         else
+            document.getElementById("serial").value = wdb.serial;
+         document.getElementById('uploadSerial').innerHTML = "Serial:";
+      } else {
+         document.getElementById('uploadSerial').innerHTML = "First serial:";
+         document.getElementById("serial").value = "";
+      }
+
+      dlgShow("dlgUpload");
+   } else {
+      dlgConfirm("Are you sure?", uploadCurrent);
+   }
+}
+
+function uploadCurrent(flag) {
+   if (!flag) {
+      // cancel pressed, restart crate scan
+      loadCrate();
+      return;
+   }
+
+   let req = new XMLHttpRequest();
+   req.onreadystatechange = function () {
+      if (req.readyState === 4 && req.status === 200) {
+         if (req.responseText !== "OK\n")
+            dlgAlert(req.responseText);
+         else {
+            document.getElementById("progressComment").innerHTML = "Uploading slot ";
+            document.getElementById("progressWait").set(0);
+            dlgShow("dlgWait", true);
+            window.setTimeout(uploadProgress, 100);
+         }
+      }
+   };
+
+   document.getElementById("serial").value = ""; // use current serial
+   if (CRATE.selectedWDB !== undefined)
+      req.open("PUT", "upload/" + CRATE.dcbAddress + ":" + CRATE.selectedWDB, true);
+   else
+      req.open("PUT", "upload/" + CRATE.dcbAddress + ":*", true);
+   req.send();
 }
 
 function initShow() {
@@ -1133,8 +1183,9 @@ function upload() {
             dlgAlert(req.responseText);
          else {
             dlgHide("dlgUpload");
-            dlgShow("dlgWait", true);
+            document.getElementById("progressComment").innerHTML = "Uploading slot ";
             document.getElementById("progressWait").set(0);
+            dlgShow("dlgWait", true);
             window.setTimeout(uploadProgress, 100);
          }
       }
@@ -1185,11 +1236,12 @@ function initWDB(slot, serial) {
          }
       }
    }
+   if (serial === "")
+      serial = -1;
 
    if (slot === undefined)
       req.open("PUT", "init/" + CRATE.dcbAddress + ":*/" + serial, true);
    else
       req.open("PUT", "init/" + CRATE.dcbAddress + ":" + slot + "/" + serial, true);
    req.send();
-
 }
