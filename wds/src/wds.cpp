@@ -1014,6 +1014,14 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
          }
 
          b = dcb->GetWDB(slot);
+         if (b == nullptr) {
+            mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+            mg_printf_http_chunk(nc, "{\n");
+            mg_printf_http_chunk(nc, "  \"error\": \"Board %s does not respond\"\n", adr.c_str());
+            mg_printf_http_chunk(nc, "}\n");
+            mg_send_http_chunk(nc, "", 0);
+            return;
+         }
 
       } else {
          for (auto &wdb : gl->wdb) {
@@ -1047,6 +1055,17 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
             delete b;
             return;
          }
+      }
+
+      // ping board if still alive
+      if (!b->Ping()) {
+         mg_printf_http_chunk(nc, "{\n");
+         mg_printf_http_chunk(nc, "  \"error\": \"Board %s stopped to respond\"\n", b->GetAddr().c_str());
+         mg_printf_http_chunk(nc, "}\n");
+         mg_send_http_chunk(nc, "", 0);
+         disconnectWDB(gl, b);
+         gl->wp->SetRequestedBoard(gl->wdb);
+         return;
       }
 
       mg_printf_http_chunk(nc, "{\n");

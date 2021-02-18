@@ -797,8 +797,8 @@ function dlgMessage(title, string, modal, error, callback, param) {
    return d;
 }
 
-function dlgAlert(s) {
-   dlgMessage('Message', s, true, false);
+function dlgAlert(s, callback) {
+   dlgMessage('Message', s, true, false, callback);
 }
 
 function dlgConfirm(string, confirmCallback, param) {

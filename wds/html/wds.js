@@ -634,7 +634,7 @@ function readWdb(init) {
             if (r.wdb !== undefined)
                OSC.wdb = r.wdb;
             else {
-               dlgAlert(r.error);
+               dlgAlert(r.error, selBoard);
                return;
             }
 
