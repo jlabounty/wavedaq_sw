@@ -2411,7 +2411,7 @@ bool WDDCB::IsSerdesTraining(){
 }
 
 void WDDCB::TrainSerdes(){
-   ResetSerdes(0);
+   ResetSerdes(0, true);
 }
 
 void WDDCB::ConfigureProperty(const std::string &name, Property &property) { 

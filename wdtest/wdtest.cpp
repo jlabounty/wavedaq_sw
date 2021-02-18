@@ -64,7 +64,7 @@ int main(int argc, const char *argv[]) {
    std::cout << "Reset ADC of " << b->GetName() << std::endl;
 
    // reset serdes in DCB
-   dcb->ResetSerdes(0);
+   dcb->ResetSerdes(0, true);
    std::cout << "Reset serdes of " << dcb->GetName() << std::endl;
 
    std::cout << dcb->SendReceiveUDP("sdstat");

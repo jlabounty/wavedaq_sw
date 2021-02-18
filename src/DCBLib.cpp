@@ -499,9 +499,9 @@ void DCB::SetDestinationPort(int port) {
 
 //--------------------------------------------------------------------
 
-void DCB::ResetSerdes(int flag) {
+void DCB::ResetSerdes(int flag, bool wait) {
    // temporary wait, to be removed
-   if (flag == 0)
+   if (wait)
       sleep_ms(2000);
 
    // reset SERDES receivers on DCB

@@ -95,7 +95,7 @@ public:
       mWDAQBoard[slot].variant_id = 0xFF;
    }
    void SetDestinationPort(int port);
-   void ResetSerdes(int flag);
+   void ResetSerdes(int flag, bool wait);
    std::string UploadStart(int slot, int revision=0);
    std::string UploadProgress();
    std::string SendToSlot(std::string str, int slot);

@@ -403,7 +403,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
 
          // serdes links might have dropped during LMK reprogramming, so issue reset
          for (auto &d: dcbList)
-            d->ResetSerdes(0);
+            d->ResetSerdes(0, true);
 
          demoDrsSampleFreq = std::stoi(value);
       } else if (item == "dacCalDc") {
@@ -441,6 +441,12 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
 
       //---------- commands ----------
       else if (item == "vcalib") {
+
+         // prophylactially issue a SERDES reset
+         for (auto &d : gl->dcb) {
+            d->ResetSerdes(0, false);
+            d->ResetSerdes(1, false);
+         }
 
          if (!gl->demoMode) {
             if (wdbAddress == "ALL")
@@ -504,9 +510,9 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
 
          if (dcb != nullptr) {
             if (iChannel == 0)
-               dcb->ResetSerdes(0);
+               dcb->ResetSerdes(0, false);
             else
-               dcb->ResetSerdes(1);
+               dcb->ResetSerdes(1, false);
          }
 
       } else if (item == "upload") { // upload ------------------------------
@@ -738,6 +744,9 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
 
                connectDCB(gl, dcb);
 
+               dcb->ResetSerdes(0, true);
+               dcb->ResetSerdes(1, false);
+
             } catch (std::runtime_error &e) {
                if (gl->verbose)
                   std::cout << "Failure" << std::endl;
@@ -840,6 +849,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       std::string dcbinfo;
       try {
          if (flag) {
+            // do full crate scan, look for new board
             dcb->ScanCrate();
             connectDCB(gl, dcb);
          }
@@ -1774,10 +1784,10 @@ void switchDaqClock(GLOBALS *gl, DCB *dcb) {
    dcb->SendReceiveUDP("sync");
 
    // reset serdes in DCB
-   dcb->ResetSerdes(0);
+   dcb->ResetSerdes(0, true);
 
    // reset serdes error counters in DCB
-   dcb->ResetSerdes(1);
+   dcb->ResetSerdes(1, false);
 
    if (gl->verbose) {
       std::cout << "Reset serdes of " << dcb->GetName() << std::endl;
