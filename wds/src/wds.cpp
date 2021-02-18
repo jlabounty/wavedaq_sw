@@ -860,7 +860,8 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
          if (gl->verbose)
             std::cout << e.what() << std::endl;
          mg_printf_http_chunk(nc, "{\n");
-         mg_printf_http_chunk(nc, "   \"error\": \"Communication failure with %s\"\n", dcb->GetName().c_str());
+         mg_printf_http_chunk(nc, "   \"error\": \"Communication failure with %s: %s\"\n",
+                              dcb->GetName().c_str(), e.what());
          mg_printf_http_chunk(nc, "}\n");
          mg_send_http_chunk(nc, "", 0);
          disconnectDCB(gl, dcb);
@@ -1670,7 +1671,7 @@ void connectWDB(GLOBALS *gl, WDB *b) {
    b->SetLogFile(gl->logFileName);
    b->Connect();
 
-   do {
+   for (int i=0 ; i<50 ; i++) {
       b->ReceiveStatusRegisters();
       int s = b->GetBoardMagic();
       if (s != 0xAC) {
@@ -1678,7 +1679,9 @@ void connectWDB(GLOBALS *gl, WDB *b) {
          std::cout << "Wait for board magic number" << std::endl;
       } else
          break;
-   } while (true);
+      if (i == 49)
+         throw std::runtime_error(std::string("Error reading magic number from " + b->GetName()));
+   };
 
    b->ReceiveControlRegisters();
    if (gl->verbose) {
