@@ -675,6 +675,13 @@ void WDB::Connect() {
    char str[32];
    sprintf(str, "WD%03d", GetSerialNumber());
    mWDBName = std::string(str);
+
+   // set internal slot register
+   if (mDCB) {
+      SetSlotId(mSlot);
+      auto s = mDCB->GetName().substr(3);
+      SetCrateId(std::stod(s));
+   }
 }
 
 bool WDB::Ping() {
