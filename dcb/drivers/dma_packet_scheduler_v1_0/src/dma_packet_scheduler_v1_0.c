@@ -206,7 +206,7 @@ void clr_irqvec(struct dps_info *info, u32 mask)
 static int udp_socket_send(struct dps_info *info, unsigned char slot, unsigned char win)
 {
         struct msghdr msg;
-        struct iovec iov;
+        struct kvec vec;
         mm_segment_t oldfs;
         unsigned int len;
         int size = 0;
@@ -217,21 +217,20 @@ static int udp_socket_send(struct dps_info *info, unsigned char slot, unsigned c
         mutex_lock(&info->dps_mutex);
         len = info->slot_buf[slot].win_buf[win].len;
 
-        iov.iov_base = info->slot_buf[slot].win_buf[win].dma_vaddr;
+        vec.iov_base = info->slot_buf[slot].win_buf[win].dma_vaddr;
         mutex_unlock(&info->dps_mutex);
 
-        iov.iov_len = len;
+        vec.iov_len = len;
 
         msg.msg_flags = 0;
         msg.msg_name = &info->udp_dst_addr;
         msg.msg_namelen  = sizeof(struct sockaddr_in);
         msg.msg_control = NULL;
         msg.msg_controllen = 0;
-        iov_iter_init(&msg.msg_iter, READ, &iov, 1, len);
 
         oldfs = get_fs();
         set_fs(KERNEL_DS);
-        size = sock_sendmsg(info->udp_socket, &msg);
+        size = kernel_sendmsg(info->udp_socket, &msg, &vec, 1, vec.iov_len);
         set_fs(oldfs);
 
         /* clear IP wincnt register so IP knows that window is free */
