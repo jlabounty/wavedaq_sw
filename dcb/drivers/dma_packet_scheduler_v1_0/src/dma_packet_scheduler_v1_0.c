@@ -249,7 +249,7 @@ static int udp_socket_init(struct dps_info *info)
         int retval;
 
         /* create a socket */
-        retval = sock_create(AF_INET, SOCK_DGRAM, IPPROTO_UDP, &info->udp_socket);
+        retval = sock_create_kern(&init_net, AF_INET, SOCK_DGRAM, IPPROTO_UDP, &info->udp_socket);
         if(retval < 0)
                 return -ENXIO;
 
