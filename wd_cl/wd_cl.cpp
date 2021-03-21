@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
                      if(dynamic_cast<WDTCB*>(b) != nullptr){
                         u_int32_t val = 0;
                          dynamic_cast<WDTCB*>(b)->GetSyncWaveform(&val);
-                         printf("%s %d %04x\n", c->GetMscbName().c_str(), b->GetSlot(), val);
+                         printf("%s %d %04x\n", b->GetBoardName().c_str(), b->GetSlot(), val);
                      }
                   }
          }
@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
                for(auto b :*c)
                   if(b){
                      if(dynamic_cast<WDTCB*>(b) != nullptr){
-                        printf("TCB %s\n", c->GetMscbName().c_str());
+                        printf("TCB %s\n", b->GetBoardName().c_str());
                         unsigned int val;
                         dynamic_cast<WDTCB*>(b)->GetAutoCalibrateBusy(&val);
                         printf("busy: %08x\n", val);
