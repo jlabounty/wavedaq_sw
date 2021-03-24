@@ -2388,14 +2388,21 @@ void WDDCB::Connect(){
 
    //build crate slot mask
    unsigned int clkmask = 0x00004; //DCB FPGA
+   unsigned int packetmask = 0x00000;
    for(int i=0; i<16; i++)
-      if(crate->HasBoardIn(i))
+      if(crate->HasBoardIn(i)){
          clkmask |= (0x10<<i);
-   if(crate->HasBoardIn(17))
+         packetmask |= (0x1<<i);
+      }
+   if(crate->HasBoardIn(17)){
       clkmask |= 0x8;
+      packetmask |= (0x10000);
+   }
 
    //printf("setting clock mask to %x\n", clkmask);
    SetDistributorClkOutEn(clkmask);
+   //printf("setting packet mask to %x\n", packetmask);
+   SetDpsSlotEnable(packetmask);
 
 
    //reset any stuff
