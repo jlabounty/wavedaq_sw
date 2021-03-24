@@ -59,6 +59,7 @@ class WDBoard {
       //virtual bool IsSerdesTraining();//check serdes training pattern status
       virtual void TrainSerdes() { };//called to train serdes
       virtual void WaitSerdesTrainingFinish() { };//lock until serdes calibration is finished
+      virtual bool IsSerdesGood() { return true; }; //checks that current serdes are compatible with expected
       virtual void Sync() { };     //send a synchronization pulse
       virtual void GoRun() { };    //start the board
       virtual void StopRun() { };  //stop the board
@@ -215,6 +216,7 @@ class WDSystem {
       void SetSerdesTraining(bool state);
       void TrainSerdes();
       void WaitSerdesTrainingFinish();
+      bool IsSerdesGood();
       void SpawnDAQ();
       void StopDAQ();
       WDPosition &FindBoard(std::string name);
@@ -274,6 +276,7 @@ class WDWDB : public WDB, public WDBoard{
       bool IsSerdesTraining();
       void TrainSerdes(){ } //No Serdes to train
       void WaitSerdesTrainingFinish() { };//No Serdes to train
+      bool IsSerdesGood() { return true; }; //No Serdes to check
 
       void Sync(){
          LmkSyncLocal();
@@ -348,6 +351,7 @@ class WDTCB : public TCB, public WDBoard {
          AutoCalibrateSerdes();
       }
       void WaitSerdesTrainingFinish();
+      bool IsSerdesGood();
 
       void Sync(){
          SWSync();
@@ -444,6 +448,7 @@ class WDDCB : public DCB, public WDBoard {
       bool IsSerdesTraining();
       void TrainSerdes();
       void WaitSerdesTrainingFinish();
+      bool IsSerdesGood();
 
       void Sync(){
          //SetLmkSyncDcb(1);

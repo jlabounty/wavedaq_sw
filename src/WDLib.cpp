@@ -483,6 +483,19 @@ void WDSystem::WaitSerdesTrainingFinish(){
    }
 }
 
+//check all serdes lines are good
+bool WDSystem::IsSerdesGood(){
+   for(auto &c : fCrate){
+      for(auto &b : *c){
+         if(b)
+            if(!b->IsSerdesGood())
+               return false;
+      }
+   }
+
+   return true;
+}
+
 //allocate buffers and spawn DAQ threads
 void WDSystem::SpawnDAQ(){
    //number of buffer at each buffer stage
@@ -1305,6 +1318,36 @@ void WDTCB::WaitSerdesTrainingFinish(){
       if(val != 0)
          usleep(1000);
    } while(val != 0);
+}
+
+//check serdes is good (like expected ones)
+bool WDTCB::IsSerdesGood(){
+   unsigned int val=0;
+
+   //temporarely skip 
+   if((GetIDCode() >> 12) == 2){
+      return true;
+   }
+
+   GetAutoCalibrateFail(&val);
+
+   //check all slots
+   for(int i=0; i<16; i++){
+      if(GetCrate()->HasBoardIn(i)){
+         if((val >> i) & 0x1){
+            printf("Failed slot %d in board %s\n", i, GetBoardName().c_str());
+            return false;
+         }
+      }
+   }
+
+   //check serdes align fsm
+   if ((val>>31) & 0x1){
+      printf("Failed serdes alignment in board %s, value=0x%08x\n", GetBoardName().c_str(), val);
+      return false;
+   }
+
+   return true;
 }
 
 void WDTCB::ConfigureProperty(const std::string &name, Property &property) { 
@@ -2467,6 +2510,30 @@ void WDDCB::WaitSerdesTrainingFinish(){
    } while(!done);
 }
 
+//check serdes is good (like expected ones)
+bool WDDCB::IsSerdesGood(){
+   ReceiveRegisters(DCB_REG_SERDES_STATUS_00_07, 3);
+
+   bool ok = (GetCrate()->HasBoardIn(0))? GetSyncDone00() : true;
+   ok &= (GetCrate()->HasBoardIn(1))? GetSyncDone01() : true;
+   ok &= (GetCrate()->HasBoardIn(2))? GetSyncDone02() : true;
+   ok &= (GetCrate()->HasBoardIn(3))? GetSyncDone03() : true;
+   ok &= (GetCrate()->HasBoardIn(4))? GetSyncDone04() : true;
+   ok &= (GetCrate()->HasBoardIn(5))? GetSyncDone05() : true;
+   ok &= (GetCrate()->HasBoardIn(6))? GetSyncDone06() : true;
+   ok &= (GetCrate()->HasBoardIn(7))? GetSyncDone07() : true;
+   ok &= (GetCrate()->HasBoardIn(8))? GetSyncDone08() : true;
+   ok &= (GetCrate()->HasBoardIn(9))? GetSyncDone09() : true;
+   ok &= (GetCrate()->HasBoardIn(10))? GetSyncDone10() : true;
+   ok &= (GetCrate()->HasBoardIn(11))? GetSyncDone11() : true;
+   ok &= (GetCrate()->HasBoardIn(12))? GetSyncDone12() : true;
+   ok &= (GetCrate()->HasBoardIn(13))? GetSyncDone13() : true;
+   ok &= (GetCrate()->HasBoardIn(14))? GetSyncDone14() : true;
+   ok &= (GetCrate()->HasBoardIn(15))? GetSyncDone15() : true;
+   ok &= (GetCrate()->HasBoardIn(17))? GetSyncDone17() : true;
+
+   return ok;
+}
 
 void WDDCB::ConfigureProperty(const std::string &name, Property &property) { 
    if(name=="SyncDelay"){

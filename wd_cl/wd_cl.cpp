@@ -152,7 +152,13 @@ int main(int argc, char *argv[])
             sys->TrainSerdes();
             printf("Serdes Train started\n");
             sys->WaitSerdesTrainingFinish();
-            printf("Serdes Trained\n");
+            printf("Serdes State: ");
+            if(sys->IsSerdesGood()){
+               printf("OK!\n");
+            } else {
+               printf("***BAD***!\n");
+            }
+            printf("Serdes Trained, configuring system\n");
             sys->Configure();
          }
          if(option == 3)
@@ -220,6 +226,13 @@ int main(int argc, char *argv[])
          {
             sys->SetSerdesTraining(true);
             sys->TrainSerdes();
+            sys->WaitSerdesTrainingFinish();
+            printf("Serdes State: ");
+            if(sys->IsSerdesGood()){
+               printf("OK!\n");
+            } else {
+               printf("***BAD***!\n");
+            }
          }
          if(option == 10)
          {
