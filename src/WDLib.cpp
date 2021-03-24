@@ -463,6 +463,7 @@ void WDSystem::StopRun(){
    fDaqSystem->CleanBuffers();
 
 }
+
 //train serial links
 void WDSystem::TrainSerdes(){
    Sync();
@@ -473,6 +474,15 @@ void WDSystem::TrainSerdes(){
       }
    }
 } 
+
+//block until all boards serdes were trained
+void WDSystem::WaitSerdesTrainingFinish(){
+   for(auto &c : fCrate){
+      for(auto &b : *c){
+         if(b) b->WaitSerdesTrainingFinish();
+      }
+   }
+}
 
 //allocate buffers and spawn DAQ threads
 void WDSystem::SpawnDAQ(){
@@ -1286,7 +1296,16 @@ bool WDTCB::IsSerdesTraining(){
    unsigned int val=0;
    GetRRUN( &val );
    return (val >> 9) & 0x1;
+}
 
+void WDTCB::WaitSerdesTrainingFinish(){
+   unsigned int val=0xFFFF;
+   do{
+      GetAutoCalibrateBusy(&val);
+
+      if(val != 0)
+         usleep(1000);
+   } while(val != 0);
 }
 
 void WDTCB::ConfigureProperty(const std::string &name, Property &property) { 
@@ -2418,8 +2437,37 @@ bool WDDCB::IsSerdesTraining(){
 }
 
 void WDDCB::TrainSerdes(){
-   ResetSerdes(0, true);
+   ResetSerdes(0, false);
 }
+
+void WDDCB::WaitSerdesTrainingFinish(){
+
+   bool done=false;
+   do{
+      ReceiveRegisters(DCB_REG_SERDES_STATUS_00_07, 3);
+      done = (GetDelaySyncDone00() == 1);
+      done &= (GetDelaySyncDone01() == 1);
+      done &= (GetDelaySyncDone02() == 1);
+      done &= (GetDelaySyncDone03() == 1);
+      done &= (GetDelaySyncDone04() == 1);
+      done &= (GetDelaySyncDone05() == 1);
+      done &= (GetDelaySyncDone06() == 1);
+      done &= (GetDelaySyncDone07() == 1);
+      done &= (GetDelaySyncDone08() == 1);
+      done &= (GetDelaySyncDone09() == 1);
+      done &= (GetDelaySyncDone10() == 1);
+      done &= (GetDelaySyncDone11() == 1);
+      done &= (GetDelaySyncDone12() == 1);
+      done &= (GetDelaySyncDone13() == 1);
+      done &= (GetDelaySyncDone14() == 1);
+      done &= (GetDelaySyncDone15() == 1);
+      done &= (GetDelaySyncDone17() == 1);
+
+      if(!done)
+         usleep(1000);
+   } while(!done);
+}
+
 
 void WDDCB::ConfigureProperty(const std::string &name, Property &property) { 
    if(name=="SyncDelay"){

@@ -148,9 +148,11 @@ int main(int argc, char *argv[])
             printf("prepare for the run... ");
             sys->SpawnDAQ();
             sys->SetSerdesTraining(true);
-            usleep(50000);
+            printf("Serdes pattern configured\n");
             sys->TrainSerdes();
-            usleep(1000000);
+            printf("Serdes Train started\n");
+            sys->WaitSerdesTrainingFinish();
+            printf("Serdes Trained\n");
             sys->Configure();
          }
          if(option == 3)
