@@ -237,14 +237,13 @@ void WDSystem::CreateFromXml(std::string filepath){
                   return;
                }
 
-               //try to get a Node (ip), if not given use Name attribute
-               char* mscbnodestring = mxml_get_attribute(board_xml, "MscbNode");
-               if(mscbnodestring == NULL) {
-                  printf("warning parsing XML: WDB Name used as MscbNode name\n");
-                  mscbnodestring = namestring;
+               //try to get a HostName (ip), if not given use Name attribute
+               char* hostnamestring = mxml_get_attribute(board_xml, "HostName");
+               if(hostnamestring == NULL) {
+                  hostnamestring = namestring;
                }
 
-               WDWDB *b = new WDWDB(c, atoi(slotstring), std::string(namestring), std::string(mscbnodestring));
+               WDWDB *b = new WDWDB(c, atoi(slotstring), std::string(namestring), std::string(hostnamestring));
 
                //board property group is optional
                char* groupstring = mxml_get_attribute(board_xml, "Group");
@@ -286,14 +285,14 @@ void WDSystem::CreateFromXml(std::string filepath){
                   return;
                }
 
-               //try to get a Node (ip), if not given use Name attribute
-               char* mscbnodestring = mxml_get_attribute(board_xml, "MscbNode");
-               if(mscbnodestring == NULL) {
+               //try to get a HostName (ip), if not given use Name attribute
+               char* hostnamestring = mxml_get_attribute(board_xml, "HostName");
+               if(hostnamestring == NULL) {
                   printf("warning parsing XML: DCB Name used as MscbNode name\n");
-                  mscbnodestring = namestring;
+                  hostnamestring = hostnamestring;
                }
 
-               WDDCB *b = new WDDCB(c, atoi(slotstring), std::string(namestring),  std::string(mscbnodestring));
+               WDDCB *b = new WDDCB(c, atoi(slotstring), std::string(namestring),  std::string(hostnamestring));
 
                //board property group is optional
                char* groupstring = mxml_get_attribute(board_xml, "Group");
