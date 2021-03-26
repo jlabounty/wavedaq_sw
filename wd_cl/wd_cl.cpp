@@ -249,6 +249,10 @@ int main(int argc, char *argv[])
                         dynamic_cast<WDTCB*>(b)->GetAutoAlignDlys(&val);
                         printf("dlys: %08x\n", val);
                      }
+                     if(dynamic_cast<WDDCB*>(b) != nullptr){
+                        printf("DCB %s\n", b->GetBoardName().c_str());
+                        std::cout << dynamic_cast<WDDCB*>(b)->SendReceiveUDP("sdstat");
+                     }
                   }
          }
          if(option == 11)
