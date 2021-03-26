@@ -767,26 +767,7 @@ void WDWDB::WaitReady(){
 
    ReceiveStatusRegisters();
 
-   std::string calibpath = "."; 
-   WDCrate* c = GetCrate();
-   if(c!=nullptr){
-      WDSystem * sys= c->GetSystem();
-      if(sys!=nullptr){
-         try{
-       calibpath = sys->GetDaqProperty("CalibPath").GetStringValue();
-    } catch (const std::out_of_range& ex){
-         }
-      }
-   }
-
-   if (!LoadVoltageCalibration(GetDrsSampleFreqMhz(), calibpath.c_str())) {
-      printf("WDB %s: missing voltage calibration file\n", GetBoardName().c_str());
-   }
-   if (!LoadTimeCalibration(GetDrsSampleFreqMhz(), calibpath.c_str())) {
-      printf("WDB %s: missing time calibration file\n", GetBoardName().c_str());
-   }
-
-
+   LoadCalibrationFiles();
 }
 
 //Properties
@@ -1242,7 +1223,16 @@ void WDWDB::ConfigureSamplingFrequency(Property &property) {
    unsigned int freq;
    freq = property.GetUInt();
 
-   SetDrsSampleFreq(freq, false);
+   if(GetSendBlock()){
+      //called within WDSystem::Configure()
+      SetDrsSampleFreq(freq, false);
+   } else  {
+      //called when SamplingFrequency Property is changed
+      SetDrsSampleFreq(freq);
+      LoadCalibrationFiles();
+   }
+
+
 }
 
 // Set configurations to be used in a crate
@@ -1271,6 +1261,28 @@ void WDWDB::SetInCrate(){
 //      ResetAllPll();
 //      ResetTcbOserdesIf();
 //      ResetDrsControlFsm();
+   }
+}
+
+//Helper function to calibration files
+void WDWDB::LoadCalibrationFiles(){
+   std::string calibpath = "."; 
+   WDCrate* c = GetCrate();
+   if(c!=nullptr){
+      WDSystem * sys= c->GetSystem();
+      if(sys!=nullptr){
+         try{
+       calibpath = sys->GetDaqProperty("CalibPath").GetStringValue();
+    } catch (const std::out_of_range& ex){
+         }
+      }
+   }
+
+   if (!LoadVoltageCalibration(GetDrsSampleFreqMhz(), calibpath.c_str())) {
+      printf("WDB %s: missing voltage calibration file\n", GetBoardName().c_str());
+   }
+   if (!LoadTimeCalibration(GetDrsSampleFreqMhz(), calibpath.c_str())) {
+      printf("WDB %s: missing time calibration file\n", GetBoardName().c_str());
    }
 }
 

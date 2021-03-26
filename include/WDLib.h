@@ -270,7 +270,7 @@ class WDSystem {
 class WDWDB : public WDB, public WDBoard{
    private:
       void SetInCrate();
-
+      void LoadCalibrationFiles();
    
    public:
       void Connect();
