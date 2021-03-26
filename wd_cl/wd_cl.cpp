@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
             sys->SpawnDAQ();
             sys->SetSerdesTraining(true);
             printf("Serdes pattern configured\n");
-            sys->TrainSerdes();
+            sys->TrainSerdes(false); // do not wait here, insert print in the middle
             printf("Serdes Train started\n");
             sys->WaitSerdesTrainingFinish();
             printf("Serdes State: ");
@@ -160,6 +160,7 @@ int main(int argc, char *argv[])
             }
             printf("Serdes Trained, configuring system\n");
             sys->Configure();
+            printf("Boards configured and ready\n");
          }
          if(option == 3)
          {
@@ -225,8 +226,7 @@ int main(int argc, char *argv[])
          if(option == 9)
          {
             sys->SetSerdesTraining(true);
-            sys->TrainSerdes();
-            sys->WaitSerdesTrainingFinish();
+            sys->TrainSerdes(true);
             printf("Serdes State: ");
             if(sys->IsSerdesGood()){
                printf("OK!\n");

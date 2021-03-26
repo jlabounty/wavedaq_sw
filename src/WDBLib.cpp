@@ -1021,7 +1021,7 @@ unsigned int WDB::GetExtClkActive(bool refresh)
    return WDBREG::GetExtClkActive();
 }
 
-void WDB::SetDrsSampleFreq(unsigned int f)
+void WDB::SetDrsSampleFreq(unsigned int f, bool wait)
 // sampling frequency in MHz
 {
    if (mDemoMode) {
@@ -1036,7 +1036,9 @@ void WDB::SetDrsSampleFreq(unsigned int f)
    auto divider = (int) (160.0 / f * 2048 + 0.5);
    divider /= 2; // LMK multiplies divider by 2
 
-   SetAdcIfRst(1);
+   //keep ADC Interface reset in the meanwhile (only if waiting)
+   if (wait) SetAdcIfRst(1);
+
    SetLmk0ClkoutDiv(divider);
 
    // CH5: mirror output to FPGA
@@ -1045,17 +1047,20 @@ void WDB::SetDrsSampleFreq(unsigned int f)
    SetLmk5ClkoutMux(1);
    SetLmk5ClkoutDly(0);
 
-   // read back new sampling frquency in status register
-   ReceiveStatusRegister(GetDrsSampleFreqLoc());
+   if (wait) {
+      // read back new sampling frquency in status register
+      ReceiveStatusRegister(GetDrsSampleFreqLoc());
 
-   LmkSyncLocal();
-   SetAdcIfRst(0);
+      LmkSyncLocal();
+      SetAdcIfRst(0);
 
-   ResetAdc();
+      ResetAdc();
 
-   if (mVerbose && !WaitPllLock())
-      std::cout << "PLLs on " << GetName() << " did not lock after 1s, mask=0x" <<
-                std::hex << GetPllLock(false) << std::dec << std::endl;
+      if (mVerbose && !WaitPllLock())
+         std::cout << "PLLs on " << GetName() << " did not lock after 1s, mask=0x" <<
+                   std::hex << GetPllLock(false) << std::dec << std::endl;
+   }
+
 }
 
 void WDB::GetScalers(std::vector<uint64_t> &scaler, bool refresh) {
@@ -1316,7 +1321,7 @@ float WDB::GetDacCalDcV() {
    return v;
 }
 
-void WDB::SetDacCalDcV(float v) {
+void WDB::SetDacCalDcV(float v, bool wait) {
    v = v + 0.68;
    if (v < 0)
       v = 0;
@@ -1328,7 +1333,7 @@ void WDB::SetDacCalDcV(float v) {
 
    // we have to wait until the uBlaze picked up and programmed the new DAC value
    // otherwise we get problems in the calibration routine where we quickly switch ranges
-   sleep_ms(200);
+   if(wait) sleep_ms(200);
 }
 
 float WDB::GetRange() {
@@ -1337,8 +1342,8 @@ float WDB::GetRange() {
    return r;
 }
 
-void WDB::SetRange(float r) {
-   SetDacCalDcV(-r);
+void WDB::SetRange(float r, bool wait) {
+   SetDacCalDcV(-r, wait);
 }
 
 float WDB::GetDacPulseAmpV() {

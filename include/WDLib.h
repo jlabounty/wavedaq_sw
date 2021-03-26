@@ -65,6 +65,7 @@ class WDBoard {
       virtual void StopRun() { };  //stop the board
       virtual bool IsBusy() { return false; };   //check busy state
       virtual unsigned short GetSerialNumber() { return 0; }; //returns serial number used in data stream;
+      virtual void WaitReady() { };
 
       //Setters
       void SetProperties(const PropertyGroup &properties);
@@ -212,9 +213,10 @@ class WDSystem {
       void PowerOn();
       void PowerOff();
       void Connect();
-      void Configure();
+      void Configure(bool wait = true);
+      void WaitReady();
       void SetSerdesTraining(bool state);
-      void TrainSerdes();
+      void TrainSerdes(bool wait = true);
       void WaitSerdesTrainingFinish();
       bool IsSerdesGood();
       void SpawnDAQ();
@@ -277,6 +279,7 @@ class WDWDB : public WDB, public WDBoard{
       void TrainSerdes(){ } //No Serdes to train
       void WaitSerdesTrainingFinish() { };//No Serdes to train
       bool IsSerdesGood() { return true; }; //No Serdes to check
+      void WaitReady();
 
       void Sync(){
          LmkSyncLocal();
@@ -352,6 +355,7 @@ class WDTCB : public TCB, public WDBoard {
       }
       void WaitSerdesTrainingFinish();
       bool IsSerdesGood();
+      void WaitReady();
 
       void Sync(){
          SWSync();
@@ -449,6 +453,7 @@ class WDDCB : public DCB, public WDBoard {
       void TrainSerdes();
       void WaitSerdesTrainingFinish();
       bool IsSerdesGood();
+      void WaitReady();
 
       void Sync(){
          //SetLmkSyncDcb(1);

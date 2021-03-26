@@ -360,7 +360,7 @@ class WDAQPacketCollector: public DAQServerThread{
    void End();
 
    public:
-   WDAQPacketCollector(DAQBuffer<WDAQPacketData> *buf, int nBoards=1, DAQSystem* parent=nullptr): DAQServerThread(nBoards*4*1024*1024, parent){ //  4*1MB/Board
+   WDAQPacketCollector(DAQBuffer<WDAQPacketData> *buf, int nBoards=1, DAQSystem* parent=nullptr): DAQServerThread(nBoards*1*1024*1024, parent){ //  1*1MB/Board
       fBuf = buf;
       fNPackets = 0;
       fDroppedPackets = 0;

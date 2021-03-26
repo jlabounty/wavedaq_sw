@@ -668,7 +668,7 @@ public:
    void Restore() { mSave.Restore(this); };
 
    // high level control registers
-   void SetDrsSampleFreq(unsigned int f);
+   void SetDrsSampleFreq(unsigned int f, bool wait = true);
    void SetLmkInputFreq(unsigned int f);
    unsigned int GetLmkInputFreq();
 
@@ -698,7 +698,7 @@ public:
    float GetDacOfsV();
    void SetDacOfsV(float v);
    float GetDacCalDcV();
-   void SetDacCalDcV(float v);
+   void SetDacCalDcV(float v, bool wait = true);
    float GetDacPulseAmpV();
    void SetDacPulseAmpV(float v);
    float GetDacPzcLevelV();
@@ -744,7 +744,7 @@ public:
    unsigned int GetTriggerDelayNs();
    void SetTriggerDelayNs(unsigned int ns);
 
-   void SetRange(float r);
+   void SetRange(float r, bool wait = true);
    float GetRange();
 
    void TriggerSoftEvent();
