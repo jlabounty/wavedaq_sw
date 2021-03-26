@@ -838,13 +838,14 @@ void WDB::SetRegMask(unsigned int rofs, unsigned int mask, unsigned int ofs, uns
    this->creg[index] = r;
 }
 
-void WDB::SendControlRegisters() {
+void WDB::SendControlRegisters(bool wait) {
    // first half until HV
    std::vector<unsigned int> v;
    for (int i = 0; i < (GetHvUTarget0Loc() - GetSlotIdLoc()) / 4; i++)
       v.push_back(this->creg[i]);
    WriteUDP(GetSlotIdLoc(), v);
-   sleep_ms(1000); // Reconfig of LMK takes some time...
+   if (wait)
+      sleep_ms(1000); // Reconfig of LMK takes some time...
 
    // second half after HV
    v.clear();

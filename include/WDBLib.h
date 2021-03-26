@@ -631,7 +631,7 @@ public:
    void ReceiveControlRegisters(unsigned int index=0, unsigned int nReg=0);
    void ReceiveStatusRegisters(unsigned int index=0, unsigned int nReg=0);
    void ReceiveStatusRegister(int ofs);
-   void SendControlRegisters();
+   void SendControlRegisters(bool wait=true);
    void PrintVersion();
    bool GetSendBlock() { return mSendBlocked; }
    void SetSendBlock(bool flag) { mSendBlocked = flag; }
