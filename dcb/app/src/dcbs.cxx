@@ -820,6 +820,7 @@ void process_dcb_command(udp_connection &c, char *buffer) {
 
       c.sprintf("sdstat [-n]          Show SERDES status\n");
       c.sprintf("sdreset [error|sync|full]  Reset SERDES error/sync/full reset\n\n");
+      c.sprintf("dpsreset  Reset DMA Packet Scheduler kernel module\n\n");
 
       c.sprintf("sinit  <slot>        Send init to WDB/TCB via backplane\n\n");
       c.sprintf("sync                 Generate a SYNC on backplane\n");
@@ -1245,6 +1246,9 @@ void process_dcb_command(udp_connection &c, char *buffer) {
          c.sprintf("Serdes link for WDB in slot %d did not sync\n", b); 
       else
          c.sprintf("Ok\n");
+   } else if (strcmp(param[0], "dpsreset") == 0) {
+      c.sprintf("Resetting DMA Packet Scheduler...\n"); 
+      dps_reset(SYSPTR(dma_pkt_sched));
       
    } else if (strcmp(param[0], "sync") == 0) {
 
