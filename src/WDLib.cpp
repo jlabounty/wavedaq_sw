@@ -466,11 +466,11 @@ void WDSystem::StopRun(){
 
 //train serial links
 void WDSystem::TrainSerdes(bool wait){
-   WaitReady();
+   WaitClockLock();
 
    Sync();
 
-   WaitReady();
+   WaitClockLock();
 
    for(auto &c : fCrate){
       for(auto &b : *c){
@@ -490,7 +490,16 @@ void WDSystem::WaitSerdesTrainingFinish(){
    }
 }
 
-//block until all boards are not ready
+//block until all boards PLLs are locked
+void WDSystem::WaitClockLock(){
+   for(auto &c : fCrate){
+      for(auto &b : *c){
+         if(b) b->WaitClockLock();
+      }
+   }
+}
+
+//block until all boards are ready
 void WDSystem::WaitReady(){
    for(auto &c : fCrate){
       for(auto &b : *c){
@@ -751,7 +760,8 @@ bool WDWDB::IsSerdesTraining(){
 
 }
 
-void WDWDB::WaitReady(){
+void WDWDB::WaitClockLock(){
+   //Check clock and backplane clock source
    bool done=false;
    int count=30;
 
@@ -766,6 +776,32 @@ void WDWDB::WaitReady(){
       done &= (GetSysDcmLock() == 1);
 
       done &= (GetExtClkActive(true) == 1);
+
+      if(!done) {
+         usleep(100000);
+         count--;
+         if(count == 0){
+            printf("check %s!\n", GetBoardName().c_str());
+            throw std::runtime_error("WDB clock is not locked");
+         }
+      }
+   } while(!done);
+}
+
+void WDWDB::WaitReady(){
+   //check only clock lock
+   bool done=false;
+   int count=30;
+
+   do{
+      ReceiveStatusRegister(GetDaqPllLockLoc());
+      done = (GetDaqPllLock() == 1);
+      done &= (GetLmkPllLock() == 1);
+      done &= (GetDrsPllLock0() == 1);
+      done &= (GetDrsPllLock1() == 1);
+      done &= (GetOserdesPllLockDcb() == 1);
+      done &= (GetOserdesPllLockTcb() == 1);
+      done &= (GetSysDcmLock() == 1);
 
       if(!done) {
          usleep(100000);
@@ -1430,16 +1466,21 @@ bool WDTCB::IsSerdesGood(){
    return true;
 }
 
-void WDTCB::WaitReady(){
+void WDTCB::WaitClockLock(){
    //unsigned int val=0xFFFF;
    //do{
       //GetAutoCalibrateBusy(&val);
-//
+
       //if(val != 0)
          //usleep(1000);
    //} while(val != 0);
-   //Should check PLL state when on register
 
+   //Should check PLL state when on register
+}
+
+void WDTCB::WaitReady(){
+   WaitClockLock();
+   //Should check something else??
 }
 
 void WDTCB::ConfigureProperty(const std::string &name, Property &property) { 
@@ -2561,7 +2602,7 @@ void WDDCB::Connect(){
 
 
    //reset any stuff
-   SendUDP("dpsreset"); 
+   ResetDps();
 
    printf("Connected to DCB%02d\n", GetSerialNumber());
 }
@@ -2640,7 +2681,7 @@ bool WDDCB::IsSerdesGood(){
    return ok;
 }
 
-void WDDCB::WaitReady(){
+void WDDCB::WaitClockLock(){
    bool done=false;
    int count=30;
    do{
@@ -2655,12 +2696,21 @@ void WDDCB::WaitReady(){
          count--;
          if(count == 0){
             printf("check %s!\n", GetBoardName().c_str());
-            throw std::runtime_error("DCB is not ready");
+            throw std::runtime_error("DCB clock is not locked");
          }
       }
    } while(!done);
 
-   SendUDP("dpsreset"); 
+}
+
+void WDDCB::WaitReady(){
+   //Wait Clock locked
+   WaitClockLock();
+
+   //Should wait some kind of initialization?
+
+   //Then reset DPS for good measure
+   ResetDps();
 }
 
 void WDDCB::ConfigureProperty(const std::string &name, Property &property) { 

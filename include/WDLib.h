@@ -57,6 +57,7 @@ class WDBoard {
       virtual void ConfigureProperty(const std::string &name, Property &property) { }; //called to configure a setting to a property
       virtual void SetSerdesTraining(bool state) { };//called to enable/disable serdes training pattern
       //virtual bool IsSerdesTraining();//check serdes training pattern status
+      virtual void WaitClockLock() { };//lock until clock is locked
       virtual void TrainSerdes() { };//called to train serdes
       virtual void WaitSerdesTrainingFinish() { };//lock until serdes calibration is finished
       virtual bool IsSerdesGood() { return true; }; //checks that current serdes are compatible with expected
@@ -214,6 +215,7 @@ class WDSystem {
       void PowerOff();
       void Connect();
       void Configure(bool wait = true);
+      void WaitClockLock();
       void WaitReady();
       void SetSerdesTraining(bool state);
       void TrainSerdes(bool wait = true);
@@ -279,6 +281,7 @@ class WDWDB : public WDB, public WDBoard{
       void TrainSerdes(){ } //No Serdes to train
       void WaitSerdesTrainingFinish() { };//No Serdes to train
       bool IsSerdesGood() { return true; }; //No Serdes to check
+      void WaitClockLock();
       void WaitReady();
 
       void Sync(){
@@ -355,6 +358,7 @@ class WDTCB : public TCB, public WDBoard {
       }
       void WaitSerdesTrainingFinish();
       bool IsSerdesGood();
+      void WaitClockLock();
       void WaitReady();
 
       void Sync(){
@@ -453,12 +457,13 @@ class WDDCB : public DCB, public WDBoard {
       void TrainSerdes();
       void WaitSerdesTrainingFinish();
       bool IsSerdesGood();
+      void WaitClockLock();
       void WaitReady();
 
       void Sync(){
          //SetLmkSyncDcb(1);
          //SetTrSyncBpl(1);
-         SendReceiveUDP("sync");
+         SendUDP("sync");
 
          usleep(500000);//wait sync is applied
       }

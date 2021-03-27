@@ -519,6 +519,12 @@ void DCB::ResetSerdes(int flag, bool wait) {
 
 //--------------------------------------------------------------------
 
+void DCB::ResetDps() {
+   SendUDP("dpsreset");
+}
+
+//--------------------------------------------------------------------
+
 std::string DCB::SendToSlot(std::string str, int slot) {
    auto oldTimeout = mReceiveTimeoutMs;
    mReceiveTimeoutMs = cIncreasedReceiveTimeoutMs; // increase timeout for this command
