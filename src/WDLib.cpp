@@ -466,7 +466,11 @@ void WDSystem::StopRun(){
 
 //train serial links
 void WDSystem::TrainSerdes(bool wait){
+   WaitReady();
+
    Sync();
+
+   WaitReady();
 
    for(auto &c : fCrate){
       for(auto &b : *c){
@@ -749,6 +753,8 @@ bool WDWDB::IsSerdesTraining(){
 
 void WDWDB::WaitReady(){
    bool done=false;
+   int count=30;
+
    do{
       ReceiveStatusRegister(GetDaqPllLockLoc());
       done = (GetDaqPllLock() == 1);
@@ -759,9 +765,15 @@ void WDWDB::WaitReady(){
       done &= (GetOserdesPllLockTcb() == 1);
       done &= (GetSysDcmLock() == 1);
 
+      done &= (GetExtClkActive(true) == 1);
+
       if(!done) {
-         usleep(1000);
-         printf("check %s!", GetBoardName().c_str());
+         usleep(100000);
+         count--;
+         if(count == 0){
+            printf("check %s!\n", GetBoardName().c_str());
+            throw std::runtime_error("WDB is not ready");
+         }
       }
    } while(!done);
 
@@ -1258,23 +1270,14 @@ void WDWDB::SetInCrate(){
 
       SendControlRegisters(false);
 
-
-      for (int j=0 ; j<20 ; j++) {
-         int l = GetExtClkActive(true);
-         if (l == 1)
-            break;
-
-         sleep_ms(100);
-      }
-
-      WaitPllLock();
-
       // left temporary to check if needed
       //Reset everything
-//      ResetAllPll();
 //      ResetTcbOserdesIf();
 //      ResetDrsControlFsm();
    }
+   
+   //Reset anyway
+   ResetAllPll();
 }
 
 //Helper function to calibration files
@@ -1323,6 +1326,14 @@ WDTCB::WDTCB(WDCrate *crate, int slot, std::string name, int verbose) : TCB(verb
 // WDBoard derived methods
 void WDTCB::Connect(){
    SetIDCode();
+
+   if(fidcode == 0){
+      printf("try again in TCB connection...\n");
+      sleep(2);
+      SetIDCode();
+
+   }
+
    SetNTRG();
    fverbose= true;
 
@@ -1374,11 +1385,18 @@ bool WDTCB::IsSerdesTraining(){
 
 void WDTCB::WaitSerdesTrainingFinish(){
    unsigned int val=0xFFFF;
+   int count=10;
    do{
       GetAutoCalibrateBusy(&val);
 
-      if(val != 0)
-         usleep(1000);
+      if(val != 0) {
+         usleep(10000);
+         count--;
+         if(count == 0){
+            printf("check %s!\n", GetBoardName().c_str());
+            throw std::runtime_error("Cannot lock TCB serdes");
+         }
+      }
    } while(val != 0);
 }
 
@@ -2494,8 +2512,9 @@ WDDCB::WDDCB(WDCrate *crate, int slot, std::string name, std::string netname, bo
          }
       }
 
-      //then enable clock distributor for all slots
+      //then enable clock distributor and dps for all slots
       SetDistributorClkOutEn(0xFFFFC);
+      SetDpsSlotEnable(0x1FFFF);
    }
 
    //Scan Crate to get actual board map 
@@ -2542,6 +2561,7 @@ void WDDCB::Connect(){
 
 
    //reset any stuff
+   SendUDP("dpsreset"); 
 
    printf("Connected to DCB%02d\n", GetSerialNumber());
 }
@@ -2558,8 +2578,9 @@ void WDDCB::TrainSerdes(){
 }
 
 void WDDCB::WaitSerdesTrainingFinish(){
-
    bool done=false;
+   int count=10;
+
    do{
       ReceiveRegisters(DCB_REG_SERDES_STATUS_00_07, 3);
       done = (GetDelaySyncDone00() == 1);
@@ -2580,11 +2601,18 @@ void WDDCB::WaitSerdesTrainingFinish(){
       done &= (GetDelaySyncDone15() == 1);
       done &= (GetDelaySyncDone17() == 1);
 
-      if(!done)
-         usleep(1000);
+      if(!done) {
+         usleep(10000);
+         count--;
+         if(count == 0){
+            printf("check %s!\n", GetBoardName().c_str());
+            throw std::runtime_error("Cannot lock DCB serdes");
+         }
+      }
    } while(!done);
 
    ResetSerdes(1, false);
+   //SendUDP("dpsreset"); 
 }
 
 //check serdes is good (like expected ones)
@@ -2614,6 +2642,7 @@ bool WDDCB::IsSerdesGood(){
 
 void WDDCB::WaitReady(){
    bool done=false;
+   int count=30;
    do{
       ReceiveRegisters(DCB_REG_PLL_LOCK);
       done = (GetLmkPllLock() == 1);
@@ -2622,11 +2651,16 @@ void WDDCB::WaitReady(){
       done &= (GetSerdesClkMgrLock() == 1);
 
       if(!done) {
-         usleep(1000);
-         printf("check %s!", GetBoardName().c_str());
+         usleep(100000);
+         count--;
+         if(count == 0){
+            printf("check %s!\n", GetBoardName().c_str());
+            throw std::runtime_error("DCB is not ready");
+         }
       }
    } while(!done);
 
+   SendUDP("dpsreset"); 
 }
 
 void WDDCB::ConfigureProperty(const std::string &name, Property &property) { 

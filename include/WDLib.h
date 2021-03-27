@@ -457,7 +457,8 @@ class WDDCB : public DCB, public WDBoard {
 
       void Sync(){
          //SetLmkSyncDcb(1);
-         SetTrSyncBpl(1);
+         //SetTrSyncBpl(1);
+         SendReceiveUDP("sync");
 
          usleep(500000);//wait sync is applied
       }
