@@ -368,15 +368,21 @@ int main(int argc, char *argv[])
                   if(b){
                      if(dynamic_cast<WDWDB*>(b) != nullptr){
                         WDWDB* wdb = static_cast<WDWDB*>(b);
-                        printf("WDB %s: %08x %08x\n", wdb->GetBoardName().c_str(), wdb->GetFwGitHashTag(), wdb->GetSwGitHashTag());
+                        printf("WDB %s: %08x %08x", wdb->GetBoardName().c_str(), wdb->GetFwGitHashTag(), wdb->GetSwGitHashTag());
                         if(wdbFwHash){
-                           if(wdbFwHash != wdb->GetFwGitHashTag())
+                           if(wdbFwHash != wdb->GetFwGitHashTag()){
                               difference = true;
+                              printf("******");
+                           }
                         } else wdbFwHash = wdb->GetFwGitHashTag();
                         if(wdbSwHash){
-                           if(wdbSwHash != wdb->GetFwGitHashTag())
+                           if(wdbSwHash != wdb->GetSwGitHashTag()){
                               difference = true;
+                              printf("******");
+                           }
                         } else wdbSwHash = wdb->GetSwGitHashTag();
+
+                        printf("\n");
                      }
                      if(dynamic_cast<WDTCB*>(b) != nullptr){
                         WDTCB* tcb = static_cast<WDTCB*>(b);
@@ -386,25 +392,30 @@ int main(int argc, char *argv[])
                         unsigned int *p;
                         switch(tcb->GetIDCode()>>12){
                         case 1:
-                           printf("TCB1 %s: %08x\n", tcb->GetBoardName().c_str(), val);
+                           printf("TCB1 %s: %08x", tcb->GetBoardName().c_str(), val);
                            p = &tcb1Date;
                            break;
                         case 2:
-                           printf("TCB2 %s: %08x\n", tcb->GetBoardName().c_str(), val);
+                           printf("TCB2 %s: %08x", tcb->GetBoardName().c_str(), val);
                            p = &tcb2Date;
                            break;
                         case 3:
                         default:
-                           printf("TCB3 %s: %08x\n", tcb->GetBoardName().c_str(), val);
+                           printf("TCB3 %s: %08x", tcb->GetBoardName().c_str(), val);
                            p = &tcb3Date;
                            break;
                         }
 
                         if(*p){
-                           if(*p != val)
+                           if(*p != val){
                               difference = true;
-                        } else
+                              printf("******");
+                           }
+                        } else {
                            *p = val;
+                        }
+
+                        printf("\n");
                      }
                   }
 
