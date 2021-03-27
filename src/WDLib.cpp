@@ -750,7 +750,7 @@ bool WDWDB::IsSerdesTraining(){
 void WDWDB::WaitReady(){
    bool done=false;
    do{
-      ReceiveStatusRegisters(GetDaqPllLockLoc());
+      ReceiveStatusRegister(GetDaqPllLockLoc());
       done = (GetDaqPllLock() == 1);
       done &= (GetLmkPllLock() == 1);
       done &= (GetDrsPllLock0() == 1);
@@ -1246,6 +1246,8 @@ void WDWDB::SetInCrate(){
    //switch to backplane clock
    if(GetExtClkInSel() != 0 || GetDaqClkSrcSel() != 0 || GetLmkInputFreq() != 80){
 
+      printf("switching clock for %s\n", GetBoardName().c_str());
+
       SetSendBlock(true);
       SetExtClkInSel(0);
 
@@ -1255,6 +1257,17 @@ void WDWDB::SetInCrate(){
       SetSendBlock(false);
 
       SendControlRegisters(false);
+
+
+      for (int j=0 ; j<20 ; j++) {
+         int l = GetExtClkActive(true);
+         if (l == 1)
+            break;
+
+         sleep_ms(100);
+      }
+
+      WaitPllLock();
 
       // left temporary to check if needed
       //Reset everything
@@ -2485,13 +2498,12 @@ WDDCB::WDDCB(WDCrate *crate, int slot, std::string name, std::string netname, bo
       SetDistributorClkOutEn(0xFFFFC);
    }
 
+   //Scan Crate to get actual board map 
+   ScanCrate();
 }
 
 // WDBoard derived methods
 void WDDCB::Connect(){
-   //Scan Crate to get actual board map 
-   ScanCrate();
-
    //retrieve crate pointer
    WDCrate *crate = GetCrate();
 
@@ -2571,6 +2583,8 @@ void WDDCB::WaitSerdesTrainingFinish(){
       if(!done)
          usleep(1000);
    } while(!done);
+
+   ResetSerdes(1, false);
 }
 
 //check serdes is good (like expected ones)
