@@ -1421,7 +1421,7 @@ bool WDTCB::IsSerdesTraining(){
 
 void WDTCB::WaitSerdesTrainingFinish(){
    unsigned int val=0xFFFF;
-   int count=10;
+   int count=100;
    do{
       GetAutoCalibrateBusy(&val);
 
