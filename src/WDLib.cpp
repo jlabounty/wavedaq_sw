@@ -769,8 +769,10 @@ void WDWDB::WaitClockLock(){
       ReceiveStatusRegister(GetDaqPllLockLoc());
       done = (GetDaqPllLock() == 1);
       done &= (GetLmkPllLock() == 1);
-      done &= (GetDrsPllLock0() == 1);
-      done &= (GetDrsPllLock1() == 1);
+      if(GetDrsChTxEn()){
+         done &= (GetDrsPllLock0() == 1);
+         done &= (GetDrsPllLock1() == 1);
+      }
       done &= (GetOserdesPllLockDcb() == 1);
       done &= (GetOserdesPllLockTcb() == 1);
       done &= (GetSysDcmLock() == 1);
@@ -797,8 +799,10 @@ void WDWDB::WaitReady(){
       ReceiveStatusRegister(GetDaqPllLockLoc());
       done = (GetDaqPllLock() == 1);
       done &= (GetLmkPllLock() == 1);
-      done &= (GetDrsPllLock0() == 1);
-      done &= (GetDrsPllLock1() == 1);
+      if(GetDrsChTxEn()){
+         done &= (GetDrsPllLock0() == 1);
+         done &= (GetDrsPllLock1() == 1);
+      }
       done &= (GetOserdesPllLockDcb() == 1);
       done &= (GetOserdesPllLockTcb() == 1);
       done &= (GetSysDcmLock() == 1);
