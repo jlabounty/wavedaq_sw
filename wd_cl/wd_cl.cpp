@@ -117,6 +117,36 @@ int main(int argc, char *argv[])
 
    sys = new WDSystem();
    sys->CreateFromXml(std::string(argv[1]));
+
+   //check any crate is off
+   bool crateOff = false;
+   for(auto &c: *sys){
+      if(! c->IsPowered())
+         crateOff = true;
+   }
+
+   //if off ask to switch on
+   if(crateOff){
+      char choice;
+      printf("A crate is off, power on? [y/n] ");
+      scanf(" %c", &choice);
+      if(choice == 'y'){
+         printf("powering on...");
+         sys->PowerOn();
+         printf("OK!\n");
+         int sec = 120;
+         do{
+            printf("waiting %3d s\r", sec);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            sec --;
+         } while(sec > 0);
+         printf("\n");
+      }
+   } else {
+      printf("All crates on, proceeding...\n");
+   }
+
+   //connect to boards
    sys->Connect();
 
    /* main loop on the options */
@@ -183,12 +213,12 @@ int main(int argc, char *argv[])
                   if(b){
                      if(dynamic_cast<WDTCB*>(b) != nullptr){
                         if(b->IsBusy())
-                           printf("TCB %s is busy\n", b->GetBoardName().c_str());
+                           printf("TCB %s is busy***********\n", b->GetBoardName().c_str());
                         else
                            printf("TCB %s is not busy\n", b->GetBoardName().c_str());
                      } else if(dynamic_cast<WDWDB*>(b) != nullptr){
                         if(b->IsBusy())
-                           printf("WDB %s is busy\n", b->GetBoardName().c_str());
+                           printf("WDB %s is busy***********\n", b->GetBoardName().c_str());
                         else
                            printf("WDB %s is not busy\n", b->GetBoardName().c_str());
 
