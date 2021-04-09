@@ -346,7 +346,7 @@ public:
 #define WDAQ_UDP_PROTOCOL_VERSION  8
 
 class WDAQPacketCollector: public DAQServerThread{
-   DAQBuffer<WDAQPacketData> *fBuf;
+   DAQFanoutBuffer<WDAQPacketData> *fBuf;
 
    //statistics
    unsigned long fNPackets;
@@ -360,7 +360,7 @@ class WDAQPacketCollector: public DAQServerThread{
    void End();
 
    public:
-   WDAQPacketCollector(DAQBuffer<WDAQPacketData> *buf, int nBoards=1, DAQSystem* parent=nullptr): DAQServerThread(nBoards*1*1024*1024, parent){ //  1*1MB/Board
+   WDAQPacketCollector(DAQFanoutBuffer<WDAQPacketData> *buf, int nBoards=1, DAQSystem* parent=nullptr): DAQServerThread(nBoards*1*1024*1024, parent){ //  1*1MB/Board
       fBuf = buf;
       fNPackets = 0;
       fDroppedPackets = 0;
@@ -373,7 +373,7 @@ class WDAQPacketCollector: public DAQServerThread{
 
 // temporary thread to read TCB
 class WDAQTCBReader: public DAQThread{
-   DAQBuffer<WDAQPacketData> *fBuf;
+   DAQFanoutBuffer<WDAQPacketData> *fBuf;
    WDTCB *fBoard;
 
    void Begin();
@@ -383,7 +383,7 @@ class WDAQTCBReader: public DAQThread{
    void End();
 
    public:
-   WDAQTCBReader(DAQBuffer<WDAQPacketData> *buf, WDTCB *board, DAQSystem* parent=nullptr) : DAQThread(parent) {
+   WDAQTCBReader(DAQFanoutBuffer<WDAQPacketData> *buf, WDTCB *board, DAQSystem* parent=nullptr) : DAQThread(parent) {
       fBuf = buf;
       fBoard = board;
    }

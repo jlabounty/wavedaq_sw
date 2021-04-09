@@ -360,7 +360,14 @@ void WDSystem::CreateFromXml(std::string filepath){
 void WDSystem::Connect(){
    for(auto &c : fCrate){
       printf("Connecting to crate %s:\n", c->GetCrateName().c_str());
-      for(int i=0; i<18; i++){
+      //Connect to central slots
+      if(c->HasBoardIn(16)) 
+         c->GetBoardAt(16)->Connect();
+      if(c->HasBoardIn(17)) 
+         c->GetBoardAt(17)->Connect();
+
+      //Connect to other slots
+      for(int i=0; i<16; i++){
          if(c->HasBoardIn(i)) 
             c->GetBoardAt(i)->Connect();
       }
@@ -384,19 +391,13 @@ void WDSystem::Configure(bool wait){
 
 //Power On
 void WDSystem::PowerOn(){
-   //first switch on trigger crate
+   //first switch on distribution and trigger crate
+   GetDistributionCrate()->PowerOn();
    GetTriggerCrate()->PowerOn();
    for(auto &c : fCrate){
       c->PowerOn();
    }
-   /*std::this_thread::sleep_for(std::chrono::seconds(10));
-   for(auto &c : fCrate){
-      for(auto &b : *c){
-         if(b)
-            b->Connect();
-      }
-   }*/
-   
+   //std::this_thread::sleep_for(std::chrono::seconds(10));
 }
 
 //Power Off
@@ -542,7 +543,14 @@ void WDSystem::SpawnDAQ(){
    printf("spawning DAQ for %d WDBs and %d TCBs...\n", nWDBs, nTCBs);
 
    //create buffers
-   fPacketBuffer= new DAQBuffer<WDAQPacketData>(nWDBs*128*number_of_buffers+nTCBs*4*number_of_buffers, "PACKETBUFFER", fDaqSystem);
+   int nBuilders;
+   try{
+      nBuilders = GetDaqProperty("Builders").GetInt();
+      if(nBuilders < 1) nBuilders = 1; //make sure at least a builder is running
+   } catch (const std::out_of_range& ex){
+      nBuilders = 1;
+   }
+   fPacketBuffer= new DAQFanoutBuffer<WDAQPacketData>(nBuilders,nWDBs*128*number_of_buffers+nTCBs*4*number_of_buffers, "PACKETBUFFER", fDaqSystem);
    fEventBuffer= new DAQBuffer<WDAQEvent>(number_of_calibrated_buffers, "BUILDBUFFER", fDaqSystem);
    fCalibratedBuffer= new DAQBuffer<WDAQEvent>(number_of_calibrated_buffers, "EVENTBUFFER", fDaqSystem);
 
@@ -594,7 +602,10 @@ void WDSystem::SpawnDAQ(){
    }
 
    //Builder
-   fBuilderThread = new WDAQEventBuilder(fPacketBuffer, fEventBuffer, nWDBs+nTCBs, fDaqSystem);
+   for(int i=0; i<nBuilders; i++){
+      WDAQEventBuilder* builder = new WDAQEventBuilder(fPacketBuffer->GetBufferAt(i), fEventBuffer, nWDBs+nTCBs, fDaqSystem);
+      fBuilderThreads.push_back(builder);
+   }
 
    //Workers
    int nWorkers;
@@ -686,7 +697,7 @@ void WDSystem::StopDAQ(){
    fEventBuffer = nullptr;
    fCalibratedBuffer = nullptr;
    fCollectorThreads.clear();
-   fBuilderThread = nullptr;
+   fBuilderThreads.clear();
    fWorkerThreads.clear();
    fWriterThread = nullptr;
    fTCBReaderThreads.clear();
@@ -769,8 +780,10 @@ void WDWDB::WaitClockLock(){
       ReceiveStatusRegister(GetDaqPllLockLoc());
       done = (GetDaqPllLock() == 1);
       done &= (GetLmkPllLock() == 1);
-      done &= (GetDrsPllLock0() == 1);
-      done &= (GetDrsPllLock1() == 1);
+      if(GetDrsChTxEn()){
+         done &= (GetDrsPllLock0() == 1);
+         done &= (GetDrsPllLock1() == 1);
+      }
       done &= (GetOserdesPllLockDcb() == 1);
       done &= (GetOserdesPllLockTcb() == 1);
       done &= (GetSysDcmLock() == 1);
@@ -797,8 +810,10 @@ void WDWDB::WaitReady(){
       ReceiveStatusRegister(GetDaqPllLockLoc());
       done = (GetDaqPllLock() == 1);
       done &= (GetLmkPllLock() == 1);
-      done &= (GetDrsPllLock0() == 1);
-      done &= (GetDrsPllLock1() == 1);
+      if(GetDrsChTxEn()){
+         done &= (GetDrsPllLock0() == 1);
+         done &= (GetDrsPllLock1() == 1);
+      }
       done &= (GetOserdesPllLockDcb() == 1);
       done &= (GetOserdesPllLockTcb() == 1);
       done &= (GetSysDcmLock() == 1);
@@ -2562,12 +2577,6 @@ void WDTCB::ConfigureInterspillDly(Property &property){
 // --- WDDCB ---
 // constructor
 WDDCB::WDDCB(WDCrate *crate, int slot, std::string name, std::string netname, bool verbose) : DCB(netname, verbose), WDBoard(crate, slot, name) {
-   //connect to the board, if crate is on 
-   if(crate->IsPowered()){
-      DCB::Connect();
-   } else 
-      printf("WARNING, cannot connect to %s because crate %s is off\n", name.c_str(), crate->GetCrateName().c_str());
-
    //if DCB is in slot 16
    if(slot==16){
 
@@ -2589,17 +2598,20 @@ WDDCB::WDDCB(WDCrate *crate, int slot, std::string name, std::string netname, bo
          }
       }
 
-      //then enable clock distributor and dps for all slots
-      SetDistributorClkOutEn(0xFFFFC);
-      SetDpsSlotEnable(0x1FFFF);
    }
-
-   //Scan Crate to get actual board map 
-   ScanCrate();
 }
 
 // WDBoard derived methods
 void WDDCB::Connect(){
+   DCB::Connect();
+
+   //then enable clock distributor and dps for all slots
+   SetDistributorClkOutEn(0xFFFFC);
+   SetDpsSlotEnable(0x1FFFF);
+
+   //Scan Crate to get actual board map 
+   ScanCrate();
+
    //retrieve crate pointer
    WDCrate *crate = GetCrate();
 

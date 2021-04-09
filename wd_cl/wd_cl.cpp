@@ -117,6 +117,36 @@ int main(int argc, char *argv[])
 
    sys = new WDSystem();
    sys->CreateFromXml(std::string(argv[1]));
+
+   //check any crate is off
+   bool crateOff = false;
+   for(auto &c: *sys){
+      if(! c->IsPowered())
+         crateOff = true;
+   }
+
+   //if off ask to switch on
+   if(crateOff){
+      char choice;
+      printf("A crate is off, power on? [y/n] ");
+      scanf(" %c", &choice);
+      if(choice == 'y'){
+         printf("powering on...");
+         sys->PowerOn();
+         printf("OK!\n");
+         int sec = 120;
+         do{
+            printf("waiting %3d s\r", sec);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            sec --;
+         } while(sec > 0);
+         printf("\n");
+      }
+   } else {
+      printf("All crates on, proceeding...\n");
+   }
+
+   //connect to boards
    sys->Connect();
 
    /* main loop on the options */
@@ -183,12 +213,12 @@ int main(int argc, char *argv[])
                   if(b){
                      if(dynamic_cast<WDTCB*>(b) != nullptr){
                         if(b->IsBusy())
-                           printf("TCB %s is busy\n", b->GetBoardName().c_str());
+                           printf("TCB %s is busy***********\n", b->GetBoardName().c_str());
                         else
                            printf("TCB %s is not busy\n", b->GetBoardName().c_str());
                      } else if(dynamic_cast<WDWDB*>(b) != nullptr){
                         if(b->IsBusy())
-                           printf("WDB %s is busy\n", b->GetBoardName().c_str());
+                           printf("WDB %s is busy***********\n", b->GetBoardName().c_str());
                         else
                            printf("WDB %s is not busy\n", b->GetBoardName().c_str());
 
@@ -483,9 +513,15 @@ int main(int argc, char *argv[])
             long OldCollectorDroppedPackets=0;
             for(auto t : sys->fCollectorThreads)
                OldCollectorDroppedPackets += t->GetDroppedPackets();
-            long OldBuilderBuildedEvent=sys->fBuilderThread->GetBuildedEvents();
-            long OldBuilderDroppedEvent=sys->fBuilderThread->GetDroppedEvents();
-            long OldBuilderOldEvent=sys->fBuilderThread->GetOldEvents();
+            long OldBuilderBuildedEvent=0;
+            for(auto t : sys->fBuilderThreads)
+               OldBuilderBuildedEvent += t->GetBuildedEvents();
+            long OldBuilderDroppedEvent=0;
+            for(auto t : sys->fBuilderThreads)
+               OldBuilderDroppedEvent += t->GetDroppedEvents();
+            long OldBuilderOldEvent=0;
+            for(auto t : sys->fBuilderThreads)
+               OldBuilderOldEvent += t->GetOldEvents();
 
             long AvgCollectorNPackets = 0;
             long AvgCollectorDroppedPackets = 0;
@@ -516,12 +552,24 @@ int main(int argc, char *argv[])
                    collectorReceivedMessages += t->GetReceivedMessages();
                collectorReceivedMessages /= sys->fCollectorThreads.size();
 
-               long builderEventsInQueue = sys->fBuilderThread->GetEventsInQueue();
-               long builderBuildedEvent = sys->fBuilderThread->GetBuildedEvents();
-               long builderDroppedEvent =  sys->fBuilderThread->GetDroppedEvents();
-               long builderOldEvent = sys->fBuilderThread->GetOldEvents();
-               bool builderNotBuilding = sys->fBuilderThread->GetIsNotBuilding();
-               bool builderDropping = sys->fBuilderThread->GetIsDropping();
+               long builderEventsInQueue = 0;
+               for(auto t : sys->fBuilderThreads)
+                  builderEventsInQueue += t->GetEventsInQueue();
+               long builderBuildedEvent = 0;
+               for(auto t : sys->fBuilderThreads)
+                  builderBuildedEvent += t->GetBuildedEvents();
+               long builderDroppedEvent = 0;
+               for(auto t : sys->fBuilderThreads)
+                  builderDroppedEvent += t->GetDroppedEvents();
+               long builderOldEvent = 0;
+               for(auto t : sys->fBuilderThreads)
+                  builderOldEvent += t->GetOldEvents();
+               bool builderNotBuilding = false;
+               for(auto t : sys->fBuilderThreads)
+                  builderNotBuilding |= t->GetIsNotBuilding();
+               bool builderDropping = false;
+               for(auto t : sys->fBuilderThreads)
+                  builderDropping |= t->GetIsDropping();
 
                //sys->fWorkerThread->fNEvent;
                //sys->fWorkerThread->fDropped;
@@ -530,7 +578,7 @@ int main(int argc, char *argv[])
                printf("----------------------------------------------------------------------------------------------------\n");
                printf("Buffers:\n");
                drawBar("Pkts", sys->fPacketBuffer->GetOccupancy(), 1);
-               drawBar("BuildEvts", builderEventsInQueue, 20, true);
+               drawBar("BuildEvts", builderEventsInQueue, 20*sys->fBuilderThreads.size(), true);
                drawBar("Evts", sys->fEventBuffer->GetOccupancy(), 1);
                drawBar("Cals", sys->fCalibratedBuffer->GetOccupancy(), 1);
                printf("----------------------------------------------------------------------------------------------------\n");
