@@ -680,12 +680,9 @@ void WDSystem::SpawnDAQ(){
    for(auto t: fCollectorThreads) {
       while(t->GetServerPort() == 0) std::this_thread::yield();
       printf("started on port %d\n", t->GetServerPort());
+      //assign server port
+      AddDAQServerPort(t->GetServerPort());
    }
-
-   //assign server port
-   //TODO: without a port number being forced we get more than one DAQ port, should use an array here
-   fDAQServerPort = fCollectorThreads[0]->GetServerPort();
-
 }
 
 void WDSystem::StopDAQ(){

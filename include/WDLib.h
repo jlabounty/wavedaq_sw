@@ -185,7 +185,7 @@ class WDSystem {
       long fDistributionCrateId;
       std::map<std::string,PropertyGroup> fGroupProperties;
       PropertyGroup fDaqProperties;
-      int fDAQServerPort;
+      std::vector<int> fDAQServerPorts;
 
       //DAQ System
       DAQSystem *fDaqSystem;
@@ -241,7 +241,10 @@ class WDSystem {
       long GetDistributionCrateId(){ return fDistributionCrateId; }
       unsigned long GetCrateSize() { return fCrate.size(); }
       PropertyGroup &GetGroupProperties(std::string groupname){ return fGroupProperties.at(groupname); }
-      int GetDAQServerPort(){ return fDAQServerPort; }
+      int GetDAQServerPort(){
+         static int distrib = 0;
+         return fDAQServerPorts[(distrib++)%fDAQServerPorts.size()];
+      }
       DAQSystem* GetDAQSystem(){ return fDaqSystem; }
 
       //Setters
@@ -250,7 +253,7 @@ class WDSystem {
       void SetGroupProperties(std::string groupname, PropertyGroup &properties){ fGroupProperties[groupname] = properties; }
       void SetDaqProperties(PropertyGroup &properties){ fDaqProperties = properties; }
       void SetDaqProperty(std::string propertyname, std::string val){ fDaqProperties[propertyname].SetStringValue(val); }
-      void SetDAQServerPort(int port){ fDAQServerPort = port; }
+      void AddDAQServerPort(int port){ fDAQServerPorts.push_back(port); }
 
       //Constructor
       WDSystem(){
