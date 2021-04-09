@@ -1504,7 +1504,7 @@ void TCB::WritePacketizerProgram(std::vector<PacketInstruction> &list){
       case JUMP_IF:
          pack_mem_0[list[i].offset] = (0x50000000 | (list[i].arg2 & 0xFFFF));
          pack_mem_1[list[i].offset] = list[i].arg0;
-         pack_mem_2[list[i].offset] = list[i].arg0;
+         pack_mem_2[list[i].offset] = list[i].arg1;
          break; 
       }
    }

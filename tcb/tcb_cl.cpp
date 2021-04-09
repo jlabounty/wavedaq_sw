@@ -714,7 +714,7 @@ int main(int argc, char *argv[])
       if(option == 36) {
         printf(" opt = 36 : Get precaling values (from presca.dat file) ... \n");
         TCBBoard.GetPrescaling(presca);
-        for(int irow = 0; irow<TCBBoard.fntrg; irow++) printf("%x\n", presca[irow]);
+        for(int irow = 0; irow<TCBBoard.fntrg; irow++) printf("trg%d: %x\n", irow, presca[irow]);
       }
       //
       if(option == 37) {
@@ -735,7 +735,7 @@ int main(int argc, char *argv[])
       if(option == 38) {
         printf(" opt = 38 : Get trigger delay values (from trgdly.dat file) ... \n");
         TCBBoard.GetTRGDLY(trgdly);
-        for(int irow = 0; irow<TCBBoard.fntrg; irow++) printf("%x\n", trgdly[irow]);
+        for(int irow = 0; irow<TCBBoard.fntrg; irow++) printf("trg%d: %x\n", irow, trgdly[irow]);
       }
       //
       if(option == 39) {
