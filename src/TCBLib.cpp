@@ -377,6 +377,21 @@ void TCB::GetRRUN(u_int32_t *data)
          printf("** Board configured to drive the trigger bus to the backplane **\n");
          printf("****************************************************************\n\n");
       }
+      //check expid
+      switch(fexpid){
+      case 0: printf("NO EXPERIMENT ENABLED\n\n");
+	break;
+      case 1: printf("Board compiled for MEG\n\n");
+	break;
+      case 2:  printf("Board compiled for FOOT\n\n");
+	break;
+      case 4:  printf("Board compiled for SCIFI\n\n");
+	break;
+      case 8:  printf("Board compiled for LOLX\n\n");
+	break;
+      defaut: printf("expid = %d\n WARNING multiple experiment enabled while compiling the FW!\n\n",fexpid);
+      }
+      
       printf(" RUNMODE status %x \n",*data&0x1);
       printf(" FADCMODE status %x \n",(*data&0x4)>>2);
       printf(" TESTTXMODE status %x \n",(*data&0x20)>>5);
@@ -1489,7 +1504,7 @@ void TCB::WritePacketizerProgram(std::vector<PacketInstruction> &list){
       case JUMP_IF:
          pack_mem_0[list[i].offset] = (0x50000000 | (list[i].arg2 & 0xFFFF));
          pack_mem_1[list[i].offset] = list[i].arg0;
-         pack_mem_2[list[i].offset] = list[i].arg0;
+         pack_mem_2[list[i].offset] = list[i].arg1;
          break; 
       }
    }

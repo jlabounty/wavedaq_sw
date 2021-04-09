@@ -1031,6 +1031,11 @@ void WDWDB::ConfigureChannelHV(Property &property) {
    const float* demand;
    demand = property.GetFloatVector(&arraySize);
    
+   // Make Sure HV is written if SendBlock
+   bool prevBlock = GetSendBlock();
+   if(prevBlock){
+      SetSendBlock(false);
+   }
    if(arraySize == 1){
       for(int i=0; i<16; i++){
          SetHVTarget(i, demand[0]);
@@ -1041,6 +1046,8 @@ void WDWDB::ConfigureChannelHV(Property &property) {
       }
    } else
       throw std::runtime_error("ChannelHV size should be 1 or 16 values");
+
+      SetSendBlock(prevBlock);
 }
 
 void WDWDB::ConfigureBaselineShift(Property &property) {
@@ -1799,59 +1806,88 @@ void WDTCB::ConfigurePacketizer(Property &property){
    int nbank = 0;
 
    if(list.find("TRGI")!=std::string::npos){
-      inst.offset += 1;
-      inst.cmd = ::DIRECT_WRITE;
-      inst.arg0 = 0x54524749;//TRGI
-      inst.arg1 = bufptr++;
-      instVec.push_back(inst);
-
-      inst.offset += 1;
-      inst.cmd = ::DIRECT_WRITE;
-      inst.arg0 = 7;
-      inst.arg1 = bufptr++;
-      instVec.push_back(inst);
-
-      inst.offset += 1;
-      inst.cmd = ::COPY;
-      inst.arg0 = RTRITYPE;
-      inst.arg1 = bufptr++;
-      instVec.push_back(inst);
-
-      inst.offset += 1;
-      inst.cmd = ::BLOCK_COPY;
-      inst.arg0 = RTRIPATT;
-      inst.arg1 = bufptr;
-      inst.arg2 = 2;
-      instVec.push_back(inst);
-      inst.arg2 = 0;
-
-      bufptr += 2;
-
-      inst.offset += 1;
-      inst.cmd = ::COPY;
-      inst.arg0 = RTOTTIME;
-      inst.arg1 = bufptr++;
-      instVec.push_back(inst);
-
-      inst.offset += 1;
-      inst.cmd = ::COPY;
-      inst.arg0 = RLIVETIME;
-      inst.arg1 = bufptr++;
-      instVec.push_back(inst);
-
-      inst.offset += 1;
-      inst.cmd = ::COPY;
-      inst.arg0 = REVECOU;
-      inst.arg1 = bufptr++;
-      instVec.push_back(inst);
-
-      inst.offset += 1;
-      inst.cmd = ::COPY;
-      inst.arg0 = RPCURR;
-      inst.arg1 = bufptr++;
-      instVec.push_back(inst);
-
-      nbank++;
+     // bank name
+     inst.offset += 1;
+     inst.cmd = ::DIRECT_WRITE;
+     inst.arg0 = 0x54524749;//TRGI
+     inst.arg1 = bufptr++;
+     instVec.push_back(inst);
+     // bank size
+     inst.offset += 1;
+     inst.cmd = ::DIRECT_WRITE;
+     inst.arg0 = 7;
+     inst.arg1 = bufptr++;
+     instVec.push_back(inst);
+     // trigger type
+     inst.offset += 1;
+     inst.cmd = ::COPY;
+     inst.arg0 = RTRITYPE;
+     inst.arg1 = bufptr++;
+     instVec.push_back(inst);
+     // trigger pattern (2 words)
+     inst.offset += 1;
+     inst.cmd = ::BLOCK_COPY;
+     inst.arg0 = RTRIPATT;
+     inst.arg1 = bufptr;
+     inst.arg2 = 2;
+     instVec.push_back(inst);
+     // this is to RESET arg2 for next instructions!
+     inst.arg2 = 0;
+     bufptr += 2;
+     // total time
+     inst.offset += 1;
+     inst.cmd = ::COPY;
+     inst.arg0 = RTOTTIME;
+     inst.arg1 = bufptr++;
+     instVec.push_back(inst);
+     // live time
+     inst.offset += 1;
+     inst.cmd = ::COPY;
+     inst.arg0 = RLIVETIME;
+     inst.arg1 = bufptr++;
+     instVec.push_back(inst);
+     // event counter
+     inst.offset += 1;
+     inst.cmd = ::COPY;
+     inst.arg0 = REVECOU;
+     inst.arg1 = bufptr++;
+     instVec.push_back(inst);
+     // LOGIC BELOW: IF FOOT JUMPS TO THE END --> BCO COUNTER
+     // IN ALL OTHER CASES WRITE PCURR AND JUMPS AFTER BCO
+     // DIFFERENT BEHAVIOUR FOR LOLX SCIFI TO BE IMPLEMENTED IN THE FUTURE
+     // JUMP_IF FOOT
+     inst.offset += 1;
+     inst.cmd = ::JUMP_IF;
+     inst.arg0 = RRUN;
+     inst.arg1 = 0x2<<16; // bit on RRUN reg if compiled for FOOT
+     inst.arg2 = inst.offset+3; // this is the address to jump into if condition is true, i.e. skip the copy
+     instVec.push_back(inst);
+     // this is to RESET arg2 for next instructions!
+     inst.arg2 = 0;
+     //if above true this is jumped
+     inst.offset += 1;
+     inst.cmd = ::COPY;
+     inst.arg0 = RPCURR;
+     inst.arg1 = bufptr;
+     instVec.push_back(inst);
+     // JUMP --> after BCO!
+     inst.offset += 1;
+     inst.cmd = ::JUMP;
+     inst.arg0 = 0;
+     inst.arg1 = 0; // bit on RRUN reg if compiled for FOOT
+     inst.arg2 = inst.offset+2; // this is the address to jump into if condition is true, i.e. skip the copy
+     instVec.push_back(inst);
+     // this is to RESET arg2 for next instructions!
+     inst.arg2 = 0;
+     //if above true this is jumped
+     inst.offset += 1;
+     inst.cmd = ::COPY;  
+     inst.arg0 = RFSTIME;
+     inst.arg1 = bufptr;
+     instVec.push_back(inst);
+     bufptr++;
+     
+     nbank++;
    }
    if(list.find("TRGC")!=std::string::npos){
       inst.offset += 1;

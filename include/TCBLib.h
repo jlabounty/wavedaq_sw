@@ -27,7 +27,8 @@
 #define RTRITYPE           0x203      // trigger type
 #define RSYSEVECOU         0x204      // system (trgbus) event counter
 #define RSYSTRITYPE        0x205      // system (trgbus) trigger type
-#define RPCURR             0x206      //proton current
+#define RPCURR             0x206      // proton current
+#define RFSTIME            0x207      // time counter from external oscillator
 #define RSERDESCONF        0x300      // serdes configuration and reset
 #define RDCBSERDESCONF     0x320      // serdes configuration and reset for dcb
 #define RSERDESTX          0x321      // tx serdes configuration and delay load
