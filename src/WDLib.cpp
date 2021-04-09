@@ -543,7 +543,14 @@ void WDSystem::SpawnDAQ(){
    printf("spawning DAQ for %d WDBs and %d TCBs...\n", nWDBs, nTCBs);
 
    //create buffers
-   fPacketBuffer= new DAQBuffer<WDAQPacketData>(nWDBs*128*number_of_buffers+nTCBs*4*number_of_buffers, "PACKETBUFFER", fDaqSystem);
+   int nBuilders;
+   try{
+      nBuilders = GetDaqProperty("Builders").GetInt();
+      if(nBuilders < 1) nBuilders = 1; //make sure at least a builder is running
+   } catch (const std::out_of_range& ex){
+      nBuilders = 1;
+   }
+   fPacketBuffer= new DAQFanoutBuffer<WDAQPacketData>(nBuilders,nWDBs*128*number_of_buffers+nTCBs*4*number_of_buffers, "PACKETBUFFER", fDaqSystem);
    fEventBuffer= new DAQBuffer<WDAQEvent>(number_of_calibrated_buffers, "BUILDBUFFER", fDaqSystem);
    fCalibratedBuffer= new DAQBuffer<WDAQEvent>(number_of_calibrated_buffers, "EVENTBUFFER", fDaqSystem);
 
@@ -595,7 +602,10 @@ void WDSystem::SpawnDAQ(){
    }
 
    //Builder
-   fBuilderThread = new WDAQEventBuilder(fPacketBuffer, fEventBuffer, nWDBs+nTCBs, fDaqSystem);
+   for(int i=0; i<nBuilders; i++){
+      WDAQEventBuilder* builder = new WDAQEventBuilder(fPacketBuffer->GetBufferAt(i), fEventBuffer, nWDBs+nTCBs, fDaqSystem);
+      fBuilderThreads.push_back(builder);
+   }
 
    //Workers
    int nWorkers;
@@ -687,7 +697,7 @@ void WDSystem::StopDAQ(){
    fEventBuffer = nullptr;
    fCalibratedBuffer = nullptr;
    fCollectorThreads.clear();
-   fBuilderThread = nullptr;
+   fBuilderThreads.clear();
    fWorkerThreads.clear();
    fWriterThread = nullptr;
    fTCBReaderThreads.clear();

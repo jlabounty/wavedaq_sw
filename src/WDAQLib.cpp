@@ -376,7 +376,7 @@ void WDAQPacketCollector::PushPacket(WDAQPacketData* packet){
    fNPackets++;
 
    //push to buffer
-   if(!fBuf->Try_push(packet)){
+   if(!fBuf->Try_push(packet, packet->mTriggerNumber)){
       //could not push packet to buffer
       //printf("overflow pk\n");
       fDroppedPackets++;
@@ -692,7 +692,7 @@ void WDAQTCBReader::Loop(){
         daqdata.packet_number++;//prepare for next packet
         iBank++;
 
-        if(!fBuf->Try_push(packet)){
+        if(!fBuf->Try_push(packet, packet->mTriggerNumber)){
            delete packet;
         }
      }
@@ -710,7 +710,7 @@ void WDAQTCBReader::Loop(){
 
         daqdata.packet_number++;//prepare for next packet
 
-        if(!fBuf->Try_push(packet)){
+        if(!fBuf->Try_push(packet, packet->mTriggerNumber)){
            delete packet;
         }
 

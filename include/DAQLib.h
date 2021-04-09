@@ -130,6 +130,73 @@ template <class T> class DAQBuffer : public DAQBufferBase {
 
 };
 
+// --- DAQ Fanout Buffer --- Buffer with one input and multiple outputs
+template <class T> class DAQFanoutBuffer : public DAQBufferBase {
+private:
+   std::vector<DAQBuffer<T>*> buffers;
+
+public:
+   //Methods
+   //directly into buffer
+   bool Try_push_into(T* data, unsigned int buffer){
+      return buffers[buffer]->Try_push(data);
+   }
+   bool Try_pop_from(T* &ptr, unsigned int buffer){
+      return buffers[buffer]->Try_pop(ptr);
+   }
+   //using a key
+   bool Try_push(T* data, unsigned int key=0){
+      int buffer = key % buffers.size();
+      return buffers[buffer]->Try_push(data);
+   }
+   bool Try_pop(T* &ptr, unsigned int key=0){
+      int buffer = key % buffers.size();
+      return buffers[buffer]->Try_pop(ptr);
+   }
+
+   unsigned int GetSize(){
+      return buffers[0]->GetSize();
+      unsigned int size = 0;
+      for(auto b: buffers)
+         size += b->GetSize();
+      return size;
+   }
+   void Clean(){
+      for(auto b: buffers){
+         b->Clean();
+      }
+   }
+
+   //Getters
+   unsigned int GetMaxSize(){ 
+      unsigned int maxSize = 0;
+      for(auto b: buffers)
+         maxSize += b->GetMaxSize();
+      return maxSize;
+   }
+   float GetOccupancy(){
+      float occupancy = 1.;
+      for(auto b: buffers)
+         occupancy *= b->GetOccupancy();
+      return occupancy;
+   }//NOTE: only for monitoring
+   DAQBuffer<T>* GetBufferAt(unsigned int i){ return buffers[i]; }
+
+   //Constructor  
+   DAQFanoutBuffer(unsigned int N=1, unsigned int maxsize = 0, std::string name = "NEWBUFFER", DAQSystem* parent = nullptr): DAQBufferBase(parent, name){ 
+      for(size_t i=0; i<N; i++){
+         buffers.push_back(new DAQBuffer<T>(maxsize, name, nullptr)); // do not expose this buffer to the main DAQSystem
+      }
+   }
+
+   //Destructor
+   ~DAQFanoutBuffer(){
+      for(auto p: buffers){
+         delete p;
+      }
+   }
+};
+
 // --- DAQ Thread --- basic thread wrapper
 class DAQThread{
    protected:

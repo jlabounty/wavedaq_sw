@@ -196,11 +196,11 @@ class WDSystem {
    public:
       std::map<std::string,WDPosition> fBoardMap;
       //DAQ stuff TODO: remove in future
-      DAQBuffer<WDAQPacketData> *fPacketBuffer;
+      DAQFanoutBuffer<WDAQPacketData> *fPacketBuffer;
       DAQBuffer<WDAQEvent> *fEventBuffer;
       DAQBuffer<WDAQEvent> *fCalibratedBuffer;
       std::vector<WDAQPacketCollector*> fCollectorThreads;
-      WDAQEventBuilder *fBuilderThread;
+      std::vector<WDAQEventBuilder*> fBuilderThreads;
       std::vector<WDAQWorker*> fWorkerThreads;
       WDAQEventWriter *fWriterThread;
       std::vector<WDAQTCBReader*> fTCBReaderThreads;
