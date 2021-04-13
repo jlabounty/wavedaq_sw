@@ -525,8 +525,8 @@ bool WDSystem::IsSerdesGood(){
 //allocate buffers and spawn DAQ threads
 void WDSystem::SpawnDAQ(){
    //number of buffer at each buffer stage
-   const int number_of_buffers = 50;
-   const int number_of_calibrated_buffers = 100;
+   const int number_of_buffers = 10;
+   const int number_of_calibrated_buffers = 10;
 
    printf("starting all threads\n");
 
@@ -542,6 +542,20 @@ void WDSystem::SpawnDAQ(){
 
    printf("spawning DAQ for %d WDBs and %d TCBs...\n", nWDBs, nTCBs);
 
+   //preallocate Memory pool objects
+   DAQMemoryPool<WDAQDRSPacketData>::GetInstance().PreAllocate(2*18*number_of_buffers*nWDBs);
+   DAQMemoryPool<WDAQADCPacketData>::GetInstance().PreAllocate(4*16*number_of_buffers*nWDBs);
+   DAQMemoryPool<WDAQTDCPacketData>::GetInstance().PreAllocate(16*number_of_buffers*nWDBs);
+   DAQMemoryPool<WDAQTRGPacketData>::GetInstance().PreAllocate(4*number_of_buffers*nWDBs);
+   DAQMemoryPool<WDAQScaPacketData>::GetInstance().PreAllocate(number_of_buffers*nWDBs);
+   DAQMemoryPool<WDAQDummyPacketData>::GetInstance().PreAllocate(number_of_buffers*nWDBs);
+   DAQMemoryPool<WDAQTcbPacketData>::GetInstance().PreAllocate(5*number_of_buffers*nTCBs);
+   DAQMemoryPool<WDAQWdbEvent>::GetInstance().PreAllocate(number_of_buffers*nWDBs);
+   DAQMemoryPool<WDAQTcbBank>::GetInstance().PreAllocate(5*number_of_calibrated_buffers*nTCBs*4);
+   DAQMemoryPool<WDAQTcbEvent>::GetInstance().PreAllocate(number_of_calibrated_buffers*nTCBs*4);
+   DAQMemoryPool<WDAQEvent>::GetInstance().PreAllocate(number_of_calibrated_buffers*4);
+
+
    //create buffers
    int nBuilders;
    try{
@@ -550,7 +564,7 @@ void WDSystem::SpawnDAQ(){
    } catch (const std::out_of_range& ex){
       nBuilders = 1;
    }
-   fPacketBuffer= new DAQFanoutBuffer<WDAQPacketData>(nBuilders,nWDBs*128*number_of_buffers+nTCBs*4*number_of_buffers, "PACKETBUFFER", fDaqSystem);
+   fPacketBuffer= new DAQFanoutBuffer<WDAQPacketData>(nBuilders,nWDBs*128*number_of_buffers+nTCBs*5*number_of_buffers, "PACKETBUFFER", fDaqSystem);
    fEventBuffer= new DAQBuffer<WDAQEvent>(number_of_calibrated_buffers, "BUILDBUFFER", fDaqSystem);
    fCalibratedBuffer= new DAQBuffer<WDAQEvent>(number_of_calibrated_buffers, "EVENTBUFFER", fDaqSystem);
 
