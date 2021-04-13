@@ -29,17 +29,15 @@ class DAQSystem;
 // class myclass {
 //
 //   void* operator new(size_t size){
-//      auto mp = DAQMemoryPool<myclass>::GetInstance();
-//      return mp->Allocate();
+//      auto &mp = DAQMemoryPool<myclass>::GetInstance();
+//      return mp.Allocate();
 //   }
 //
 //   void operator delete(void* ptr){
-//      auto mp = DAQMemoryPool<myclass>::GetInstance();
-//      mp->Deallocate(ptr);
+//      auto &mp = DAQMemoryPool<myclass>::GetInstance();
+//      mp.Deallocate(ptr);
 //   }
 // };
-// //This is required for c++11 and below to have singleton:
-// template<> DAQMemoryPool<myclass> *DAQMemoryPool<myclass>::gMemPool = nullptr;
 //
 template <class T> class DAQMemoryPool{
    private:
@@ -104,7 +102,7 @@ template <class T> class DAQMemoryPool{
          } else {
             //from outside the pool
             guard.unlock();
-            //printf("allocated element %d of type %s\n", fElement++, typeid(T).name());
+            printf("allocated element %d of type %s\n", (int)fNElements, typeid(T).name());
             p = AllocateElement();
          }
          return p;
