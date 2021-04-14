@@ -386,6 +386,8 @@ void WDSystem::Configure(bool wait){
       }
    }
 
+   Sync();//this is to assure everything is loaded
+
    if(wait) WaitReady();
 }
 
@@ -411,6 +413,7 @@ void WDSystem::SetSerdesTraining(bool state){
          if(b) b->SetSerdesTraining(state);
       }
    }
+   sleep(5);
 }
 
 //System Sync
@@ -467,7 +470,7 @@ void WDSystem::StopRun(){
 
 //train serial links
 void WDSystem::TrainSerdes(bool wait){
-   WaitClockLock();
+   //WaitClockLock();
 
    Sync();
 
@@ -1346,7 +1349,7 @@ void WDWDB::SetInCrate(){
    }
    
    //Reset anyway
-   ResetAllPll();
+   //ResetAllPll();
 }
 
 //Helper function to calibration files
