@@ -5,6 +5,7 @@
 #include <thread>
 #include <condition_variable>
 #include <atomic>
+#include <stack>
 
 #include <unistd.h>
 #include <sys/types.h>
@@ -12,6 +13,7 @@
 #include <netinet/in.h>
 #include <fcntl.h>
 
+template <class T> class DAQMemoryPool;
 class DAQBufferBase;
 template <class T> class DAQBuffer;
 class DAQThread;
@@ -20,6 +22,98 @@ class DAQSystem;
 
 #ifndef DAQLIB_H
 #define DAQLIB_H
+
+// --- DAQ Memory Pool --- Template memory pool singleton implementation
+// Usage by overriding new/delete operators in class:
+// Pay Attantion with derived classes
+// class myclass {
+//
+//   void* operator new(size_t size){
+//      auto &mp = DAQMemoryPool<myclass>::GetInstance();
+//      return mp.Allocate();
+//   }
+//
+//   void operator delete(void* ptr){
+//      auto &mp = DAQMemoryPool<myclass>::GetInstance();
+//      mp.Deallocate(ptr);
+//   }
+// };
+//
+template <class T> class DAQMemoryPool{
+   private:
+      // c++17: avoid the additional singleton requirements by inlining the satic pointer here:
+      //inline static DAQMemoryPool<T> *gMemPool = nullptr;
+      std::atomic<int> fNElements;
+      std::mutex fAllocMutex;
+      std::stack<void*> fPool;
+
+      //reserved Methods
+
+      //singleton constructor
+      DAQMemoryPool(){
+         fNElements = 0;
+         //printf("mempool created\n"); 
+      }
+      DAQMemoryPool(const DAQMemoryPool&)= delete;
+      DAQMemoryPool& operator=(const DAQMemoryPool&)= delete;
+
+      //allocate one additional element
+      void *AllocateElement(){
+         fNElements++;
+         return ::operator new(sizeof(T));
+      }
+
+   public:
+      //Methods
+      static DAQMemoryPool<T>& GetInstance() {
+         static DAQMemoryPool<T> gMemPool;
+
+         return gMemPool;
+      }
+
+      //preallocate elements
+      void PreAllocate(size_t n){
+         std::lock_guard<std::mutex> guard(fAllocMutex);
+         int curSize = fPool.size();
+         for(int i=curSize; i<n; i++){
+            fPool.push(AllocateElement());
+         }
+      }
+
+      //remove all elements
+      void Clean(){
+         std::lock_guard<std::mutex> guard(fAllocMutex);
+         while(!fPool.empty()){
+            void* p = fPool.top();
+            ::operator delete(p);
+            fPool.pop();
+         }
+         fNElements = 0;
+      }
+
+      //get a pointer
+      void* Allocate(){
+         std::unique_lock<std::mutex> guard(fAllocMutex);
+         void * p;
+         if(!fPool.empty()){
+            //from the pool
+            p = fPool.top();
+            fPool.pop();
+         } else {
+            //from outside the pool
+            guard.unlock();
+            printf("allocated element %d of type %s\n", (int)fNElements, typeid(T).name());
+            p = AllocateElement();
+         }
+         return p;
+      }
+
+      //return a pointer to the pool
+      void Deallocate(void* p){
+         std::lock_guard<std::mutex> guard(fAllocMutex);
+         fPool.push(p);
+      }
+};
 
 // --- DAQ Buffer Base --- virtual class for buffer interface functions
 class DAQBufferBase {

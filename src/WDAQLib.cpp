@@ -1,6 +1,24 @@
 #include "WDLib.h"
 #include "WDAQLib.h"
 
+#ifdef USEMEMORYPOOL
+//Memory pool template specializations
+template class DAQMemoryPool<WDAQPacketData>;
+template class DAQMemoryPool<WDAQWdbPacketData>;
+template class DAQMemoryPool<WDAQDRSPacketData>;
+template class DAQMemoryPool<WDAQADCPacketData>;
+template class DAQMemoryPool<WDAQTDCPacketData>;
+template class DAQMemoryPool<WDAQTRGPacketData>;
+template class DAQMemoryPool<WDAQScaPacketData>;
+template class DAQMemoryPool<WDAQDummyPacketData>;
+template class DAQMemoryPool<WDAQTcbPacketData>;
+template class DAQMemoryPool<WDAQBoardEvent>;
+template class DAQMemoryPool<WDAQWdbEvent>;
+template class DAQMemoryPool<WDAQTcbBank>;
+template class DAQMemoryPool<WDAQTcbEvent>;
+template class DAQMemoryPool<WDAQEvent>;
+#endif
+
 //WDAQ Packet Data - class for UDP DAQ packets 
 //Set properties according to UDP event header
 void WDAQPacketData::SetEventHeaderInfo(FRAME_WDAQ_HEADER *pdaqh){
@@ -38,6 +56,19 @@ void WDAQPacketData::HeaderToBoardEvent(WDAQBoardEvent *e){
    e->mPacketsReceived++;
 }
 
+#ifdef USEMEMORYPOOL
+//memory pool operators
+void* WDAQPacketData::operator new(size_t size){
+   auto& mp = DAQMemoryPool<WDAQPacketData>::GetInstance();
+   return mp.Allocate();
+}
+
+void WDAQPacketData::operator delete(void* ptr){
+   auto& mp = DAQMemoryPool<WDAQPacketData>::GetInstance();
+   mp.Deallocate(ptr);
+}
+#endif
+
 //WDAQ WDB Packet Data - class for WDB UDP DAQ packets 
 //Set properties according to UDP event header
 void WDAQWdbPacketData::SetWdbHeaderInfo(FRAME_WDB_HEADER *ph){
@@ -58,6 +89,19 @@ void WDAQWdbPacketData::SetWdbHeaderInfo(FRAME_WDB_HEADER *ph){
   mDacROFS = ph->dac_rofs;
   mFrontendSettings = ph->frontend_settings;
 }
+
+#ifdef USEMEMORYPOOL
+//memory pool operators
+void* WDAQWdbPacketData::operator new(size_t size){
+   auto& mp = DAQMemoryPool<WDAQWdbPacketData>::GetInstance();
+   return mp.Allocate();
+}
+
+void WDAQWdbPacketData::operator delete(void* ptr){
+   auto& mp = DAQMemoryPool<WDAQWdbPacketData>::GetInstance();
+   mp.Deallocate(ptr);
+}
+#endif
 
 //WDAQ DRS Packet Data -  derived packet class to host DRS data
 //Add packet info to given Board Event
@@ -95,6 +139,19 @@ void WDAQDRSPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
 
 }
 
+#ifdef USEMEMORYPOOL
+//memory pool operators
+void* WDAQDRSPacketData::operator new(size_t size){
+   auto& mp = DAQMemoryPool<WDAQDRSPacketData>::GetInstance();
+   return mp.Allocate();
+}
+
+void WDAQDRSPacketData::operator delete(void* ptr){
+   auto& mp = DAQMemoryPool<WDAQDRSPacketData>::GetInstance();
+   mp.Deallocate(ptr);
+}
+#endif
+
 //WDAQ ADC Packet Data -  derived packet class to host ADC data
 //Add packet info to given Board Event
 void WDAQADCPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
@@ -121,6 +178,19 @@ void WDAQADCPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
 
 }
 
+#ifdef USEMEMORYPOOL
+//memory pool operators
+void* WDAQADCPacketData::operator new(size_t size){
+   auto& mp = DAQMemoryPool<WDAQADCPacketData>::GetInstance();
+   return mp.Allocate();
+}
+
+void WDAQADCPacketData::operator delete(void* ptr){
+   auto& mp = DAQMemoryPool<WDAQADCPacketData>::GetInstance();
+   mp.Deallocate(ptr);
+}
+#endif
+
 //WDAQ TDC Packet Data -  derived packet class to host TDC data
 //Add packet info to given Board Event
 void WDAQTDCPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
@@ -146,6 +216,19 @@ void WDAQTDCPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    }
 }
 
+#ifdef USEMEMORYPOOL
+//memory pool operators
+void* WDAQTDCPacketData::operator new(size_t size){
+   auto& mp = DAQMemoryPool<WDAQTDCPacketData>::GetInstance();
+   return mp.Allocate();
+}
+
+void WDAQTDCPacketData::operator delete(void* ptr){
+   auto& mp = DAQMemoryPool<WDAQTDCPacketData>::GetInstance();
+   mp.Deallocate(ptr);
+}
+#endif
+
 //WDAQ TRG Packet Data -  derived packet class to host TRG data
 //Add packet info to given Board Event
 void WDAQTRGPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
@@ -169,6 +252,19 @@ void WDAQTRGPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    }
 }
 
+#ifdef USEMEMORYPOOL
+//memory pool operators
+void* WDAQTRGPacketData::operator new(size_t size){
+   auto& mp = DAQMemoryPool<WDAQTRGPacketData>::GetInstance();
+   return mp.Allocate();
+}
+
+void WDAQTRGPacketData::operator delete(void* ptr){
+   auto& mp = DAQMemoryPool<WDAQTRGPacketData>::GetInstance();
+   mp.Deallocate(ptr);
+}
+#endif
+
 //WDAQ Scaler Packet Data -  derived packet class to host Scaler data
 //Add packet info to given Board Event
 void WDAQScaPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
@@ -183,11 +279,37 @@ void WDAQScaPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    wdb_e->mScalerHasData = true; 
 }
 
-//WDAQ Scaler Packet Data -  derived packet class to host Scaler data
+#ifdef USEMEMORYPOOL
+//memory pool operators
+void* WDAQScaPacketData::operator new(size_t size){
+   auto& mp = DAQMemoryPool<WDAQScaPacketData>::GetInstance();
+   return mp.Allocate();
+}
+
+void WDAQScaPacketData::operator delete(void* ptr){
+   auto& mp = DAQMemoryPool<WDAQScaPacketData>::GetInstance();
+   mp.Deallocate(ptr);
+}
+#endif
+
+//WDAQ Dummy Packet Data -  derived packet class to host zero-suppressed data
 //Add packet info to given Board Event: this packet is EMPTY
 // this board has been fully zero suppressed
 void WDAQDummyPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
 }
+
+#ifdef USEMEMORYPOOL
+//memory pool operators
+void* WDAQDummyPacketData::operator new(size_t size){
+   auto& mp = DAQMemoryPool<WDAQDummyPacketData>::GetInstance();
+   return mp.Allocate();
+}
+
+void WDAQDummyPacketData::operator delete(void* ptr){
+   auto& mp = DAQMemoryPool<WDAQDummyPacketData>::GetInstance();
+   mp.Deallocate(ptr);
+}
+#endif
 
 //WDAQ TCB Packet Data - class for TCB UDP DAQ packets 
 //Set properties according to UDP event header
@@ -226,6 +348,19 @@ void WDAQTcbPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    //printf("TCB event is complete %d: %d %d %d %d\n", tcb_e->IsComplete(), tcb_e->mStartFlagReceived, tcb_e->mEndFlagReceived, tcb_e->mLastPacket-tcb_e->mFirstPacket+1, tcb_e->mPacketsReceived);
 }
 
+#ifdef USEMEMORYPOOL
+//memory pool operators
+void* WDAQTcbPacketData::operator new(size_t size){
+   auto& mp = DAQMemoryPool<WDAQTcbPacketData>::GetInstance();
+   return mp.Allocate();
+}
+
+void WDAQTcbPacketData::operator delete(void* ptr){
+   auto& mp = DAQMemoryPool<WDAQTcbPacketData>::GetInstance();
+   mp.Deallocate(ptr);
+}
+#endif
+
 //WDAQ Board Event - single board DAQ event
 //Constructor, init from packet data
 WDAQBoardEvent::WDAQBoardEvent(WDAQPacketData* pkt){
@@ -258,8 +393,20 @@ void WDAQBoardEvent::UpdateIsComplete(){
        mComplete = true;
 
   }
-   
 }
+
+#ifdef USEMEMORYPOOL
+//memory pool operators
+void* WDAQBoardEvent::operator new(size_t size){
+   auto& mp = DAQMemoryPool<WDAQBoardEvent>::GetInstance();
+   return mp.Allocate();
+}
+
+void WDAQBoardEvent::operator delete(void* ptr){
+   auto& mp = DAQMemoryPool<WDAQBoardEvent>::GetInstance();
+   mp.Deallocate(ptr);
+}
+#endif
 
 //WDAQ Wdb Event - single Wdb DAQ event
 //Constructor, init from packet data
@@ -283,11 +430,51 @@ WDAQWdbEvent::WDAQWdbEvent(WDAQPacketData* pkt): WDAQBoardEvent(pkt){
    mTrgByteNumber = 0;
 }
 
-//WDAQ Wdb Event - single Wdb DAQ event
+#ifdef USEMEMORYPOOL
+//memory pool operators
+void* WDAQWdbEvent::operator new(size_t size){
+   auto& mp = DAQMemoryPool<WDAQWdbEvent>::GetInstance();
+   return mp.Allocate();
+}
+
+void WDAQWdbEvent::operator delete(void* ptr){
+   auto& mp = DAQMemoryPool<WDAQWdbEvent>::GetInstance();
+   mp.Deallocate(ptr);
+}
+#endif
+
+//WDAQ Tcb Bank - single Tcb DAQ data bank
+#ifdef USEMEMORYPOOL
+//memory pool operators
+void* WDAQTcbBank::operator new(size_t size){
+   auto& mp = DAQMemoryPool<WDAQTcbBank>::GetInstance();
+   return mp.Allocate();
+}
+
+void WDAQTcbBank::operator delete(void* ptr){
+   auto& mp = DAQMemoryPool<WDAQTcbBank>::GetInstance();
+   mp.Deallocate(ptr);
+}
+#endif
+
+//WDAQ Tcb Event - single Tcb DAQ event
 //Constructor, init from packet data
 WDAQTcbEvent::WDAQTcbEvent(WDAQPacketData* pkt): WDAQBoardEvent(pkt){
    //should reset
 }
+
+#ifdef USEMEMORYPOOL
+//memory pool operators
+void* WDAQTcbEvent::operator new(size_t size){
+   auto& mp = DAQMemoryPool<WDAQTcbEvent>::GetInstance();
+   return mp.Allocate();
+}
+
+void WDAQTcbEvent::operator delete(void* ptr){
+   auto& mp = DAQMemoryPool<WDAQTcbEvent>::GetInstance();
+   mp.Deallocate(ptr);
+}
+#endif
 
 //WDAQ Event - global DAQ event
 //constructor, copies data from given packet
@@ -360,6 +547,20 @@ WDAQEvent::~WDAQEvent(){
       for(auto &e2 :e1.second)
          delete e2.second;
 }
+
+#ifdef USEMEMORYPOOL
+//memory pool operators
+void* WDAQEvent::operator new(size_t size){
+   auto& mp = DAQMemoryPool<WDAQEvent>::GetInstance();
+   return mp.Allocate();
+}
+
+void WDAQEvent::operator delete(void* ptr){
+   auto& mp = DAQMemoryPool<WDAQEvent>::GetInstance();
+   mp.Deallocate(ptr);
+}
+#endif
+
 
 //---------- THREAD implementation -------
 

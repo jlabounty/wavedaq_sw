@@ -5,6 +5,8 @@
 #include <iostream>
 #include <fstream>
 
+#define USEMEMORYPOOL
+
 #ifndef WDAQLIB_H
 #define WDAQLIB_H
 
@@ -24,6 +26,7 @@ class WDAQTcbPacketData;
 
 class WDAQBoardEvent;
 class WDAQWdbEvent;
+class WDAQTcbBank;
 class WDAQTcbEvent;
 
 class WDAQEvent;
@@ -82,9 +85,16 @@ class WDAQPacketData{
 
    virtual ~WDAQPacketData() { };
 
+#ifdef USEMEMORYPOOL
+   //memory pool operators
+   void* operator new(size_t size);
+   void operator delete(void* ptr);
+#endif
+
    protected:
    //Set WDAQBoardEvent Header
    void HeaderToBoardEvent(WDAQBoardEvent *e);
+
    //To be overwritten by derived classes
    virtual void AddDataToBoardEvent(WDAQBoardEvent *e) { };
 };
@@ -115,6 +125,12 @@ class WDAQWdbPacketData: public WDAQPacketData{
    //merge this packet information in given board event, to be implemented according to data
    virtual void AddDataToBoardEvent(WDAQBoardEvent *e) { };
 
+#ifdef USEMEMORYPOOL
+   //memory pool operators
+   void* operator new(size_t size);
+   void operator delete(void* ptr);
+#endif
+
    virtual ~WDAQWdbPacketData() { };
 };
 
@@ -126,7 +142,13 @@ public:
    //Add packet info to given Board Event
    void AddDataToBoardEvent(WDAQBoardEvent *e);
 
-   ~WDAQDRSPacketData() { };
+#ifdef USEMEMORYPOOL
+   //memory pool operators
+   void* operator new(size_t size);
+   void operator delete(void* ptr);
+#endif
+
+   virtual ~WDAQDRSPacketData() { };
 };
 
 //WDAQ ADC Packet Data -  derived packet class to host ADC data
@@ -137,7 +159,13 @@ public:
    //Add packet info to given Board Event
    void AddDataToBoardEvent(WDAQBoardEvent *e);
 
-   ~WDAQADCPacketData() { };
+#ifdef USEMEMORYPOOL
+   //memory pool operators
+   void* operator new(size_t size);
+   void operator delete(void* ptr);
+#endif
+
+   virtual ~WDAQADCPacketData() { };
 };
 
 //WDAQ TDC Packet Data -  derived packet class to host TDC data
@@ -148,7 +176,13 @@ public:
    //Add packet info to given Board Event
    void AddDataToBoardEvent(WDAQBoardEvent *e);
 
-   ~WDAQTDCPacketData() { };
+#ifdef USEMEMORYPOOL
+   //memory pool operators
+   void* operator new(size_t size);
+   void operator delete(void* ptr);
+#endif
+
+   virtual ~WDAQTDCPacketData() { };
 };
 
 //WDAQ TRG Packet Data -  derived packet class to host TRG data
@@ -159,7 +193,13 @@ public:
    //Add packet info to given Board Event
    void AddDataToBoardEvent(WDAQBoardEvent *e);
 
-   ~WDAQTRGPacketData() { };
+#ifdef USEMEMORYPOOL
+   //memory pool operators
+   void* operator new(size_t size);
+   void operator delete(void* ptr);
+#endif
+
+   virtual ~WDAQTRGPacketData() { };
 };
 
 //WDAQ Scaler Packet Data -  derived packet class to host scaler
@@ -170,7 +210,13 @@ public:
    //Add packet info to given Board Event
    void AddDataToBoardEvent(WDAQBoardEvent *e);
 
-   ~WDAQScaPacketData() { };
+#ifdef USEMEMORYPOOL
+   //memory pool operators
+   void* operator new(size_t size);
+   void operator delete(void* ptr);
+#endif
+
+   virtual ~WDAQScaPacketData() { };
 };
 
 //WDAQ Dummy Packet Data -  derived packet class for fully zero suppressed board
@@ -180,7 +226,13 @@ public:
    //Add packet info to given Board Event
    void AddDataToBoardEvent(WDAQBoardEvent *e);
 
-   ~WDAQDummyPacketData() { };
+#ifdef USEMEMORYPOOL
+   //memory pool operators
+   void* operator new(size_t size);
+   void operator delete(void* ptr);
+#endif
+
+   virtual ~WDAQDummyPacketData() { };
 };
 
 //WDAQ TCB Packet Data - class for TCB UDP DAQ packets 
@@ -197,6 +249,14 @@ class WDAQTcbPacketData: public WDAQPacketData{
 
    //merge this packet information in given board event, to be implemented according to data
    void AddDataToBoardEvent(WDAQBoardEvent *e);
+
+#ifdef USEMEMORYPOOL
+   //memory pool operators
+   void* operator new(size_t size);
+   void operator delete(void* ptr);
+#endif
+
+   virtual ~WDAQTcbPacketData(){};
 };
 
 //WDAQ board event - Board Event class
@@ -221,6 +281,12 @@ public:
    bool IsComplete() { return mComplete; }
    void UpdateIsComplete();
    WDAQBoardEvent(WDAQPacketData* pkt);
+
+#ifdef USEMEMORYPOOL
+   //memory pool operators
+   void* operator new(size_t size);
+   void operator delete(void* ptr);
+#endif
 
    virtual ~WDAQBoardEvent(){};
 };
@@ -271,6 +337,14 @@ public:
    };
    
    WDAQWdbEvent(WDAQPacketData* pkt);
+
+#ifdef USEMEMORYPOOL
+   //memory pool operators
+   void* operator new(size_t size);
+   void operator delete(void* ptr);
+#endif
+
+   virtual ~WDAQWdbEvent(){};
 };
 
 class WDAQTcbBank {
@@ -297,6 +371,12 @@ public:
    unsigned long GetSize(){
       return data.size();
    }
+
+#ifdef USEMEMORYPOOL
+   //memory pool operators
+   void* operator new(size_t size);
+   void operator delete(void* ptr);
+#endif
 };
 
 //TCB board event - TCB Board Event class
@@ -310,11 +390,18 @@ public:
    std::map<std::array<char,4>,WDAQTcbBank*>     mBanks;
 
    WDAQTcbEvent(WDAQPacketData* pkt);
+
    virtual ~WDAQTcbEvent(){
       for(auto i: mBanks)
          delete i.second;
       mBanks.clear();
    }
+
+#ifdef USEMEMORYPOOL
+   //memory pool operators
+   void* operator new(size_t size);
+   void operator delete(void* ptr);
+#endif
 };
 
 //WDAQ Event - global DAQ event
@@ -339,6 +426,11 @@ public:
    //destructor
    ~WDAQEvent();
 
+#ifdef USEMEMORYPOOL
+   //memory pool operators
+   void* operator new(size_t size);
+   void operator delete(void* ptr);
+#endif
 }; 
 
 //---------- THREAD implementation -------
