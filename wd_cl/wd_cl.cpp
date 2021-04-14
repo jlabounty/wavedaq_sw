@@ -581,7 +581,10 @@ int main(int argc, char *argv[])
                printf("average being calculated on last %d seconds\n", nAvg);
                printf("----------------------------------------------------------------------------------------------------\n");
                printf("Buffers:\n");
-               drawBar("Pkts", sys->fPacketBuffer->GetOccupancy(), 1);
+               for(int i=0; i<sys->fPacketBuffer->GetNBuffers(); i++){
+                  auto buff = sys->fPacketBuffer->GetBufferAt(i);
+                  drawBar("Pkts", buff->GetOccupancy(), 1);
+               }
                drawBar("BuildEvts", builderEventsInQueue, 20*sys->fBuilderThreads.size(), true);
                drawBar("Evts", sys->fEventBuffer->GetOccupancy(), 1);
                drawBar("Cals", sys->fCalibratedBuffer->GetOccupancy(), 1);

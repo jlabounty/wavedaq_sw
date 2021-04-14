@@ -269,11 +269,14 @@ public:
       return maxSize;
    }
    float GetOccupancy(){
-      float occupancy = 1.;
+      float occupancy = 0.;
       for(auto b: buffers)
-         occupancy *= b->GetOccupancy();
-      return occupancy;
+         occupancy += b->GetOccupancy();
+      return occupancy/buffers.size();
    }//NOTE: only for monitoring
+   unsigned int GetNBuffers(){
+      return buffers.size();
+   }
    DAQBuffer<T>* GetBufferAt(unsigned int i){ return buffers[i]; }
 
    //Constructor  
