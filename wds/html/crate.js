@@ -1042,6 +1042,21 @@ function DCBSdreset(flag) {
    req.open("PUT", "sdreset/" + CRATE.dcbAddress + "/" + flag, true);
    req.send();
 }
+function DCBSync() {
+   // kill update timer
+   if (CRATE.timer.loadCrate !== undefined)
+      window.clearTimeout(CRATE.timer.loadCrate);
+
+    let req = new XMLHttpRequest();
+   req.onreadystatechange = function () {
+      if (req.readyState === 4 && req.status === 200) {
+         // restart crate loading
+         CRATE.timer.loadCrate = window.setTimeout(loadCrate, 100);
+      }
+   };
+   req.open("PUT", "sync/" + CRATE.dcbAddress, true);
+   req.send();
+}
 
 function WDBrebootQuery() {
    dlgConfirm("Are you sure?", WDBreboot);
