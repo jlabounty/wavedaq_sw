@@ -218,10 +218,14 @@ int main(int argc, char *argv[])
                            printf("TCB %s is not busy\n", b->GetBoardName().c_str());
                      } else if(dynamic_cast<WDWDB*>(b) != nullptr){
                         if(b->IsBusy())
-                           printf("WDB %s is busy***********\n", b->GetBoardName().c_str());
+                           printf("WDB %s (WD%03u) is busy***********\n", b->GetBoardName().c_str(), b->GetSerialNumber());
                         else
-                           printf("WDB %s is not busy\n", b->GetBoardName().c_str());
-
+                           printf("WDB %s (WD%03u) is not busy\n", b->GetBoardName().c_str(), b->GetSerialNumber());
+                     } else if(dynamic_cast<WDDCB*>(b) != nullptr){
+                        if(b->IsBusy())
+                           printf("DCB %s (DCB%02u) is busy***********\n", b->GetBoardName().c_str(), b->GetSerialNumber());
+                        else
+                           printf("DCB %s (DCB%02u) is not busy\n", b->GetBoardName().c_str(), b->GetSerialNumber());
                      }
                   }
          }
