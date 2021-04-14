@@ -550,7 +550,7 @@ void WDSystem::SpawnDAQ(){
    DAQMemoryPool<WDAQScaPacketData>::GetInstance().PreAllocate(number_of_buffers*nWDBs);
    DAQMemoryPool<WDAQDummyPacketData>::GetInstance().PreAllocate(number_of_buffers*nWDBs);
    DAQMemoryPool<WDAQTcbPacketData>::GetInstance().PreAllocate(5*number_of_buffers*nTCBs);
-   DAQMemoryPool<WDAQWdbEvent>::GetInstance().PreAllocate(number_of_buffers*nWDBs);
+   DAQMemoryPool<WDAQWdbEvent>::GetInstance().PreAllocate(number_of_calibrated_buffers*nWDBs*4);
    DAQMemoryPool<WDAQTcbBank>::GetInstance().PreAllocate(5*number_of_calibrated_buffers*nTCBs*4);
    DAQMemoryPool<WDAQTcbEvent>::GetInstance().PreAllocate(number_of_calibrated_buffers*nTCBs*4);
    DAQMemoryPool<WDAQEvent>::GetInstance().PreAllocate(number_of_calibrated_buffers*4);
@@ -564,7 +564,7 @@ void WDSystem::SpawnDAQ(){
    } catch (const std::out_of_range& ex){
       nBuilders = 1;
    }
-   fPacketBuffer= new DAQFanoutBuffer<WDAQPacketData>(nBuilders,nWDBs*128*number_of_buffers+nTCBs*5*number_of_buffers, "PACKETBUFFER", fDaqSystem);
+   fPacketBuffer= new DAQFanoutBuffer<WDAQPacketData>(nBuilders,(nWDBs*128+nTCBs*5)*number_of_buffers*(1./nBuilders), "PACKETBUFFER", fDaqSystem);
    fEventBuffer= new DAQBuffer<WDAQEvent>(number_of_calibrated_buffers, "BUILDBUFFER", fDaqSystem);
    fCalibratedBuffer= new DAQBuffer<WDAQEvent>(number_of_calibrated_buffers, "EVENTBUFFER", fDaqSystem);
 
