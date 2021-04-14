@@ -505,6 +505,9 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
             std::cout << "Received \"mark " << (flag ? "on" : "off") << "\" command" << std::endl;
          if (dcb != nullptr)
             dcb->SendReceiveUDP(flag ? "mark" : "unmark");
+      } else if (item == "sync") { // sync ------------------------------
+
+	dcb->SendReceiveUDP("sync");
 
       } else if (item == "sdreset") { // SERDES reset ------------------------------
 
