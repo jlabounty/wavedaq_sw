@@ -20,6 +20,7 @@ void DAQThread::ThreadMain(){
    CPU_ZERO(&cpuset);
    CPU_SET(fThreadId % std::thread::hardware_concurrency(), &cpuset);
    pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset);
+   pthread_setname_np(thread, fThreadName.c_str());
 #endif
 
    Setup();
@@ -34,10 +35,10 @@ void DAQThread::ThreadMain(){
       fRunning_old = fRunning;
 
       //timed loop
-      std::chrono::high_resolution_clock::time_point loopStart = std::chrono::high_resolution_clock::now();
+      //std::chrono::high_resolution_clock::time_point loopStart = std::chrono::high_resolution_clock::now();
       if(fRunning && fRunning_old) Loop();
       else std::this_thread::sleep_for(fIdleLoopDuration);
-      std::chrono::high_resolution_clock::time_point loopEnd = std::chrono::high_resolution_clock::now();
+      //std::chrono::high_resolution_clock::time_point loopEnd = std::chrono::high_resolution_clock::now();
 
       //run end of run
       if(shouldEnd) End();
@@ -74,13 +75,14 @@ void DAQThread::StopRun(){
 }
 
 //constructor
-DAQThread::DAQThread(DAQSystem* parent){
+DAQThread::DAQThread(DAQSystem* parent, std::string name){
    fStarted = false;
    fStop = false;
    fRunning = false;
    fRunning_old = false;
    fIdleLoopDuration = std::chrono::duration_cast<std::chrono::high_resolution_clock::duration>(std::chrono::microseconds(100)); 
    fLastLoopDuration = std::chrono::high_resolution_clock::duration::zero();
+   fThreadName = name;
 
    fThreadId = fThreadCount++;
    if(parent != nullptr) parent->AddThread(this);
@@ -190,7 +192,7 @@ void DAQServerThread::Loop(){
    }
 }
 
-DAQServerThread::DAQServerThread(int buffersize, DAQSystem* parent): DAQThread(parent){
+DAQServerThread::DAQServerThread(int buffersize, DAQSystem* parent, std::string name): DAQThread(parent, name){
    fDataSocket = -1;
    fServerPort = 0; //by default let OS choose server port
    fRecvMsg = 0;
