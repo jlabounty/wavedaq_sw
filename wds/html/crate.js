@@ -226,7 +226,9 @@ Crate.prototype.draw = function () {
           CRATE.crate.slot[slot].vendor_id === BRD_VENDOR_ID_PSI &&
           CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_WDB) {
          ctx.save();
-         if (slot < 8)
+         if (slot === 17)
+            ctx.translate(62.5 + 9 * 41.4, 7.5);
+         else if (slot < 8)
             ctx.translate(62.5 + slot * 41.4, 7.5);
          else
             ctx.translate(62.5 + (slot + 2) * 41.4, 7.5);
@@ -236,7 +238,9 @@ Crate.prototype.draw = function () {
                  CRATE.crate.slot[slot].vendor_id === BRD_TYPE_ID_BLANK &&
                  CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_BLANK) {
          ctx.save();
-         if (slot < 8)
+         if (slot === 17)
+            ctx.translate(62.5 + 9 * 41.4, 7.5);
+         else if (slot < 8)
             ctx.translate(62.5 + slot * 41.4, 7.5);
          else
             ctx.translate(62.5 + (slot + 2) * 41.4, 7.5);
@@ -246,7 +250,7 @@ Crate.prototype.draw = function () {
          CRATE.crate.slot[slot].vendor_id === BRD_VENDOR_ID_PISA &&
          CRATE.crate.slot[slot].type_id === BRD_TYPE_ID_TCB) {
          ctx.save();
-         if (slot == 17)
+         if (slot === 17)
             ctx.translate(62.5 + 9 * 41.4, 7.5);
          else if (slot < 8)
             ctx.translate(62.5 + slot * 41.4, 7.5);
@@ -478,7 +482,10 @@ function drawWDB(ctx, slot) {
    }
 
    // Status LED
-   ctx.fillStyle = "#5EE5AA";
+   if (CRATE.crate.slot !== undefined && CRATE.crate.slot[slot].pllLck != 511)
+      ctx.fillStyle = "#FF2020";
+   else
+      ctx.fillStyle = "#5EE5AA";
    ctx.beginPath();
    ctx.arc(30, 61, 4, 0, 2 * Math.PI);
    ctx.fill();
@@ -940,7 +947,7 @@ function receiveCrate() {
 
          let s = "";
          for (i = 8; i >= 0; i--) {
-            if ((wdb.pllLck & (1 << 8)) > 0)
+            if ((wdb.pllLck & (1 << i)) > 0)
                s += "1";
             else
                s += "0";
@@ -1042,6 +1049,7 @@ function DCBSdreset(flag) {
    req.open("PUT", "sdreset/" + CRATE.dcbAddress + "/" + flag, true);
    req.send();
 }
+
 function DCBSync() {
    // kill update timer
    if (CRATE.timer.loadCrate !== undefined)
