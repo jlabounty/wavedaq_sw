@@ -818,11 +818,11 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("   <ofs> : starting register, default: first ctrl reg\n");
       c.sprintf("     <n> : number of registers, default 1 if <ofs> is specified, otherwise all\n\n");
 
-      c.sprintf("sdstat [-n]          Show SERDES status\n");
-      c.sprintf("sdreset [error|sync|full]  Reset SERDES error/sync/full reset\n\n");
-      c.sprintf("dpsreset  Reset DMA Packet Scheduler kernel module\n\n");
+      c.sprintf("sdstat               Show SERDES status\n");
+      c.sprintf("sdreset [error|sync|full]  Reset SERDES error/sync/full\n");
+      c.sprintf("dpsreset             Reset DMA Packet Scheduler kernel module\n\n");
 
-      c.sprintf("sinit  <slot>        Send init to WDB/TCB via backplane\n\n");
+      c.sprintf("sinit <slot>         Send init to WDB/TCB via backplane\n\n");
       c.sprintf("sync                 Generate a SYNC on backplane\n");
       c.sprintf("sysmon               Print system monitor info\n\n");
 
