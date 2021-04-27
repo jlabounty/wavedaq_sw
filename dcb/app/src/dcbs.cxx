@@ -230,6 +230,36 @@ void printf_crate_scan(const char *hostname, std::string &b) {
 
 //-------------------------------------------------------------------
 
+void set_crate_slot_id() {
+
+   char hostname[256];
+   gethostname(hostname, sizeof(hostname));
+   int crate = atoi(hostname + 3);
+
+   for (int slot = 0; slot < 16; slot++) {
+      int status = get_slot_board_info(slot, &board[slot]);
+      if (status && board[slot].type_id == BRD_TYPE_ID_WDB) {
+         char buffer[10];
+         char rbuffer[10];
+
+         memset(buffer, 0, sizeof(buffer));
+         buffer[0] = CMD_WRITE32;
+         buffer[1] = 0;
+         buffer[2] = 0;
+         buffer[3] = 0x10; // WDB_LOC register
+         buffer[4] = 0x00;
+         buffer[5] = 0xFF;
+         buffer[6] = crate;
+         buffer[7] = 0xFF;
+         buffer[8] = slot;
+
+         spi_binary_cmd(buffer, rbuffer,9, slot, board[slot].type_id, board[slot].rev_id);
+      }
+   }
+}
+
+//-------------------------------------------------------------------
+
 int main(int argc, char *argv[]) {
 
    int verbose = 0;
@@ -291,6 +321,9 @@ int main(int argc, char *argv[]) {
    for (int i = 0; i < WDAQ_N_SLOTS; i++) {
       int status = get_slot_board_info(i, &board[i]);
    }
+
+   // set Crate and Slot ID register of all WDB
+   set_crate_slot_id();
 
    if (verbose) {
       std::string str;
