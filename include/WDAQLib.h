@@ -452,7 +452,7 @@ class WDAQPacketCollector: public DAQServerThread{
    void End();
 
    public:
-   WDAQPacketCollector(DAQFanoutBuffer<WDAQPacketData> *buf, int nBoards=1, DAQSystem* parent=nullptr): DAQServerThread(nBoards*1*1024*1024, parent){ //  1*1MB/Board
+   WDAQPacketCollector(DAQFanoutBuffer<WDAQPacketData> *buf, int nBoards=1, DAQSystem* parent=nullptr): DAQServerThread(nBoards*1*1024*1024, parent, "PacketCollector"){ //  1*1MB/Board
       fBuf = buf;
       fNPackets = 0;
       fDroppedPackets = 0;
@@ -475,7 +475,7 @@ class WDAQTCBReader: public DAQThread{
    void End();
 
    public:
-   WDAQTCBReader(DAQFanoutBuffer<WDAQPacketData> *buf, WDTCB *board, DAQSystem* parent=nullptr) : DAQThread(parent) {
+   WDAQTCBReader(DAQFanoutBuffer<WDAQPacketData> *buf, WDTCB *board, DAQSystem* parent=nullptr) : DAQThread(parent, "TcbReader") {
       fBuf = buf;
       fBoard = board;
    }
@@ -506,7 +506,7 @@ class WDAQEventBuilder : public DAQThread{
    void End();
 
    public:
-   WDAQEventBuilder(DAQBuffer<WDAQPacketData> *source, DAQBuffer<WDAQEvent> *destination, int nNBoards, DAQSystem* parent = nullptr): DAQThread(parent){
+   WDAQEventBuilder(DAQBuffer<WDAQPacketData> *source, DAQBuffer<WDAQEvent> *destination, int nNBoards, DAQSystem* parent = nullptr): DAQThread(parent, "EventBuilder"){
       fSource = source;
       fDestination = destination;
       fNBoards = nNBoards;
@@ -555,7 +555,7 @@ class WDAQWorker : public DAQThread{
          fVCalib[id] = calib;
    }
 
-   WDAQWorker(DAQBuffer<WDAQEvent> *source, DAQBuffer<WDAQEvent> *destination, DAQSystem* parent = nullptr): DAQThread(parent){
+   WDAQWorker(DAQBuffer<WDAQEvent> *source, DAQBuffer<WDAQEvent> *destination, DAQSystem* parent = nullptr): DAQThread(parent, "Worker"){
       fSource = source;
       fDestination = destination;
    }
@@ -608,7 +608,7 @@ class WDAQEventWriter : public DAQThread{
          fTCBList.push_back(id);
    }
 
-   WDAQEventWriter(DAQBuffer<WDAQEvent> *source, std::string file, unsigned int eventsPerFile = 0, unsigned int startRunNumber = 0, DAQSystem* parent = nullptr) : DAQThread(parent){
+   WDAQEventWriter(DAQBuffer<WDAQEvent> *source, std::string file, unsigned int eventsPerFile = 0, unsigned int startRunNumber = 0, DAQSystem* parent = nullptr) : DAQThread(parent, "EventWriter"){
       fSource = source;
       fFileName = file;
       fEventsPerFile = eventsPerFile;

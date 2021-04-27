@@ -386,6 +386,8 @@ void WDSystem::Configure(bool wait){
       }
    }
 
+   Sync();//this is to assure everything is loaded
+
    if(wait) WaitReady();
 }
 
@@ -411,6 +413,7 @@ void WDSystem::SetSerdesTraining(bool state){
          if(b) b->SetSerdesTraining(state);
       }
    }
+   sleep(5);
 }
 
 //System Sync
@@ -467,7 +470,7 @@ void WDSystem::StopRun(){
 
 //train serial links
 void WDSystem::TrainSerdes(bool wait){
-   WaitClockLock();
+   //WaitClockLock();
 
    Sync();
 
@@ -550,7 +553,7 @@ void WDSystem::SpawnDAQ(){
    DAQMemoryPool<WDAQScaPacketData>::GetInstance().PreAllocate(number_of_buffers*nWDBs);
    DAQMemoryPool<WDAQDummyPacketData>::GetInstance().PreAllocate(number_of_buffers*nWDBs);
    DAQMemoryPool<WDAQTcbPacketData>::GetInstance().PreAllocate(5*number_of_buffers*nTCBs);
-   DAQMemoryPool<WDAQWdbEvent>::GetInstance().PreAllocate(number_of_buffers*nWDBs);
+   DAQMemoryPool<WDAQWdbEvent>::GetInstance().PreAllocate(number_of_calibrated_buffers*nWDBs*4);
    DAQMemoryPool<WDAQTcbBank>::GetInstance().PreAllocate(5*number_of_calibrated_buffers*nTCBs*4);
    DAQMemoryPool<WDAQTcbEvent>::GetInstance().PreAllocate(number_of_calibrated_buffers*nTCBs*4);
    DAQMemoryPool<WDAQEvent>::GetInstance().PreAllocate(number_of_calibrated_buffers*4);
@@ -564,7 +567,7 @@ void WDSystem::SpawnDAQ(){
    } catch (const std::out_of_range& ex){
       nBuilders = 1;
    }
-   fPacketBuffer= new DAQFanoutBuffer<WDAQPacketData>(nBuilders,nWDBs*128*number_of_buffers+nTCBs*5*number_of_buffers, "PACKETBUFFER", fDaqSystem);
+   fPacketBuffer= new DAQFanoutBuffer<WDAQPacketData>(nBuilders,(nWDBs*128+nTCBs*5)*number_of_buffers*(1./nBuilders), "PACKETBUFFER", fDaqSystem);
    fEventBuffer= new DAQBuffer<WDAQEvent>(number_of_calibrated_buffers, "BUILDBUFFER", fDaqSystem);
    fCalibratedBuffer= new DAQBuffer<WDAQEvent>(number_of_calibrated_buffers, "EVENTBUFFER", fDaqSystem);
 
@@ -1346,7 +1349,7 @@ void WDWDB::SetInCrate(){
    }
    
    //Reset anyway
-   ResetAllPll();
+   //ResetAllPll();
 }
 
 //Helper function to calibration files
@@ -1627,6 +1630,14 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureMatrixMask(property);
    } else if(name=="InterspillDly"){ 
       ConfigureInterspillDly(property);
+   } else if(name=="LoLXMask"){ 
+      ConfigureLoLXMask(property);
+   } else if(name=="LoLXMajValScin"){ 
+      ConfigureLoLXMajScinVal(property);
+   } else if(name=="LoLXMajValCher"){ 
+      ConfigureLoLXMajCherVal(property);
+   } else if(name=="LoLXMajValBare"){ 
+      ConfigureLoLXMajBareVal(property);
    } else if(name=="NoLocalTrigger"){  
    } else {
       printf("Unknown property %s in WDTCB\n", name.c_str());
@@ -2337,6 +2348,34 @@ void WDTCB::ConfigureTcMask(Property &property){
       SetTCMasks((unsigned int*)masks);
    } else
       throw std::runtime_error("TcMask size should be 4 values");
+}
+
+void WDTCB::ConfigureLoLXMask(Property &property){
+   unsigned int lolxmask;
+   lolxmask = property.GetUHex();
+
+   SetLoLXMasks(&lolxmask);
+}
+
+void WDTCB::ConfigureLoLXMajScinVal(Property &property){
+   unsigned int majval;
+   majval = property.GetUHex();
+
+   SetLoLXMajScinVal(&majval);
+}
+
+void WDTCB::ConfigureLoLXMajCherVal(Property &property){
+   unsigned int majval;
+   majval = property.GetUHex();
+
+   SetLoLXMajCherVal(&majval);
+}
+
+void WDTCB::ConfigureLoLXMajBareVal(Property &property){
+   unsigned int majval;
+   majval = property.GetUHex();
+
+   SetLoLXMajBareVal(&majval);
 }
 
 void WDTCB::ConfigureTcMultiplicityThreshold(Property &property){

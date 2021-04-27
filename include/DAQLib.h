@@ -101,8 +101,8 @@ template <class T> class DAQMemoryPool{
             fPool.pop();
          } else {
             //from outside the pool
+            //printf("allocated element %d of type %s\n", (int)fNElements, typeid(T).name());
             guard.unlock();
-            printf("allocated element %d of type %s\n", (int)fNElements, typeid(T).name());
             p = AllocateElement();
          }
          return p;
@@ -269,11 +269,14 @@ public:
       return maxSize;
    }
    float GetOccupancy(){
-      float occupancy = 1.;
+      float occupancy = 0.;
       for(auto b: buffers)
-         occupancy *= b->GetOccupancy();
-      return occupancy;
+         occupancy += b->GetOccupancy();
+      return occupancy/buffers.size();
    }//NOTE: only for monitoring
+   unsigned int GetNBuffers(){
+      return buffers.size();
+   }
    DAQBuffer<T>* GetBufferAt(unsigned int i){ return buffers[i]; }
 
    //Constructor  
@@ -297,6 +300,7 @@ class DAQThread{
       std::chrono::high_resolution_clock::duration fIdleLoopDuration; //allows to avoid polling too much
       std::chrono::high_resolution_clock::duration fLastLoopDuration; //for monitoring
       unsigned int fThreadId;
+      std::string fThreadName;
       static std::atomic<unsigned int> fThreadCount;
    private:
       std::thread fThread;
@@ -330,15 +334,18 @@ class DAQThread{
       bool IsRunning(){
          return fRunning_old;
       }
-      std::chrono::microseconds GetLastLoopDuration(){
+      /*std::chrono::microseconds GetLastLoopDuration(){
          return std::chrono::duration_cast<std::chrono::microseconds>(fLastLoopDuration);
+      }*/
+      const std::string GetThreadName(){
+         return fThreadName;
       }
 
       //setter
       void SetIdleLoopDuration(std::chrono::microseconds d){fIdleLoopDuration = std::chrono::duration_cast<std::chrono::high_resolution_clock::duration>(d); }
 
       //Constructor
-      DAQThread(DAQSystem* parent = nullptr);
+      DAQThread(DAQSystem* parent = nullptr, std::string name = "NEWTHREAD");
 
       //Destructor
       virtual ~DAQThread(){
@@ -412,7 +419,7 @@ class DAQServerThread : public DAQThread{
       int GetReceivedMessages(){ return fRecvMsg; }
 
       //Constructor
-      DAQServerThread(int buffersize=-1, DAQSystem* parent=nullptr);
+      DAQServerThread(int buffersize=-1, DAQSystem* parent=nullptr, std::string name="SERVERTHREAD");
 
       //Destructor
       virtual ~DAQServerThread(){

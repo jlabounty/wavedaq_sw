@@ -110,6 +110,8 @@
 #define RCDCHMASKS6        0x638      // CDCH WIRE MASKS ON TCB1
 #define RCDCHMASKS7        0x639      // CDCH WIRE MASKS ON TCB1
 #define RCDCHMULTTHR       0x640      // CDCH HIT MULTIPLICITY THRESHOLD
+#define RLOLXMASK          0x641      // LoLX HIT MASKS
+#define RLOLXMAJVAL        0x642      // LoLX MAJORITY VALUES
 #define RFIBCOUNTER        0x700      // SCIFI fiber event counter address (42 values)
 #define RSINGLECRATECFG    0x800      // configurations for single crate trigger logic
 #define RSINGLEISVETO      0x801      // veto set for input channels in single crate logic
@@ -520,10 +522,15 @@ public:
   void SetCDCHMasks(u_int32_t *);
   void SetCDCHUSMultThr(u_int32_t *);
   void SetCDCHDSMultThr(u_int32_t *);
+  // Set LoLX Stuff
+  void SetLoLXMasks(u_int32_t *);
+  void SetLoLXMajScinVal(u_int32_t *);
+  void SetLoLXMajCherVal(u_int32_t *); 
+  void SetLoLXMajBareVal(u_int32_t *);
   //Get proton current
-   void GetPCurr(u_int32_t *);
-   //Get SciFi counters
-   void GetSciFICou(u_int32_t *);
+  void GetPCurr(u_int32_t *);
+  //Get SciFi counters
+  void GetSciFICou(u_int32_t *);
   // FOOT stuffs
   void SetFHitShaper(u_int32_t *);
   void SetFVetoShaper(u_int32_t *);  

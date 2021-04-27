@@ -446,6 +446,10 @@ class WDTCB : public TCB, public WDBoard {
       void ConfigureFNeutronMask(Property &property);
       void ConfigureMatrixMask(Property &property);
       void ConfigureInterspillDly(Property &property);
+      void ConfigureLoLXMask(Property &property);
+      void ConfigureLoLXMajScinVal(Property &property);
+      void ConfigureLoLXMajCherVal(Property &property);
+      void ConfigureLoLXMajBareVal(Property &property);
 
   
       WDTCB(WDCrate *crate, int slot, std::string name="TCBXXX", int verbose = 0);
