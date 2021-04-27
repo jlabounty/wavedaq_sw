@@ -1563,6 +1563,12 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureTcCrateMergeThreshold(property);
    } else if(name=="TcSectorMergeThreshold"){
       ConfigureTcSectorMergeThreshold(property);
+   } else if(name=="CdchMask"){
+      ConfigureCdchMask(property);
+   } else if(name=="CdchUSMultiplicityThreshold"){
+      ConfigureCdchUSMultiplicityThreshold(property);
+   } else if(name=="CdchDSMultiplicityThreshold"){
+     ConfigureCdchDSMultiplicityThreshold(property);
    } else if(name=="BgoThreshold"){
       ConfigureBgoThreshold(property);
    } else if(name=="BgoVetoThreshold"){
@@ -2360,6 +2366,31 @@ void WDTCB::ConfigureTcSectorMergeThreshold(Property &property){
       SetTCSectorMergeThreshold((unsigned int*)thresholds, (unsigned int*)thresholds+1);
    } else
       throw std::runtime_error("TcSectorMergeThreshold size should be 2 values");
+}
+
+void WDTCB::ConfigureCdchMask(Property &property){
+   int64_t arraySize = 0;
+   const unsigned int* masks;
+
+   masks = property.GetUHexVector(&arraySize);
+   if(arraySize == 8){
+     SetCDCHMasks((unsigned int*) masks);
+   } else
+      throw std::runtime_error("CdchMask size should be 8 values");
+}
+
+void WDTCB::ConfigureCdchUSMultiplicityThreshold(Property &property){
+   unsigned int threshold;
+   threshold = property.GetUHex();
+
+   SetCDCHUSMultThr(&threshold);
+}
+
+void WDTCB::ConfigureCdchDSMultiplicityThreshold(Property &property){
+   unsigned int threshold;
+   threshold = property.GetUHex();
+
+   SetCDCHDSMultThr(&threshold);
 }
 
 void WDTCB::ConfigureBgoThreshold(Property &property){

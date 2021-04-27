@@ -414,7 +414,10 @@ class WDTCB : public TCB, public WDBoard {
       void ConfigureTcMultiplicityThreshold(Property &property);
       void ConfigureTcCrateMergeThreshold(Property &property);
       void ConfigureTcSectorMergeThreshold(Property &property);
-      void ConfigureBgoThreshold(Property &property);
+      void ConfigureCdchMask(Property &property);
+      void ConfigureCdchUSMultiplicityThreshold(Property &property);
+      void ConfigureCdchDSMultiplicityThreshold(Property &property);
+       void ConfigureBgoThreshold(Property &property);
       void ConfigureBgoVetoThreshold(Property &property);
       void ConfigureBgoHitDelay(Property &property);
       void ConfigureBgoTriggerMask(Property &property);
