@@ -1813,6 +1813,64 @@ void TCB::SetCDCHDSMultThr(u_int32_t *data){
   rdata |= (((*data)&0xFF)<<16);
   WriteReg(RCDCHMULTTHR,&rdata);
 }
+// set LoLX hit masks
+void TCB::SetLoLXMasks(u_int32_t *data){
+  if ((fidcode>>12)!=3) printf("setting FVetoShaper delay on TCB %4x!!!!!\n", fidcode);
+  else if ((fexpid&0xf)!= 0x8) {
+    printf("TCB not compiled for LoLX !!!!!\n");
+    throw std::runtime_error("Error in TCB board configuration");
+  }
+  // write register
+  WriteReg(RLOLXMASK,data);
+}
+// set LoLX Scint Maj Val
+void TCB::SetLoLXMajScinVal(u_int32_t *data){
+  if ((fidcode>>12)!=3) printf("setting FVetoShaper delay on TCB %4x!!!!!\n", fidcode);
+  else if ((fexpid&0xf)!= 0x8) {
+    printf("TCB not compiled for LoLX !!!!!\n");
+    throw std::runtime_error("Error in TCB board configuration");
+  }
+  // read the register value
+  u_int32_t rdata;
+  ReadReg(RLOLXMAJVAL,&rdata);
+  // mask needed values
+  rdata &= 0xFFFFFF00;
+  // add requested value
+  rdata |= (((*data)&0xFF));
+  WriteReg(RLOLXMAJVAL,&rdata);
+}
+// set LoLX Scint Maj Val
+void TCB::SetLoLXMajCherVal(u_int32_t *data){
+  if ((fidcode>>12)!=3) printf("setting FVetoShaper delay on TCB %4x!!!!!\n", fidcode);
+  else if ((fexpid&0xf)!= 0x8) {
+    printf("TCB not compiled for LoLX !!!!!\n");
+    throw std::runtime_error("Error in TCB board configuration");
+  }
+  // read the register value
+  u_int32_t rdata;
+  ReadReg(RLOLXMAJVAL,&rdata);
+  // mask needed values
+  rdata &= 0xFFFF00FF;
+  // add requested value
+  rdata |= (((*data)&0xFF)<<8);
+  WriteReg(RLOLXMAJVAL,&rdata);
+}
+// set LoLX Scint Maj Val
+void TCB::SetLoLXMajBareVal(u_int32_t *data){
+  if ((fidcode>>12)!=3) printf("setting FVetoShaper delay on TCB %4x!!!!!\n", fidcode);
+  else if ((fexpid&0xf)!= 0x8) {
+    printf("TCB not compiled for LoLX !!!!!\n");
+    throw std::runtime_error("Error in TCB board configuration");
+  }
+  // read the register value
+  u_int32_t rdata;
+  ReadReg(RLOLXMAJVAL,&rdata);
+  // mask needed values
+  rdata &= 0xFF00FFFF;
+  // add requested value
+  rdata |= (((*data)&0xFF)<<16);
+  WriteReg(RLOLXMAJVAL,&rdata);
+}
 // Get proton current
 void TCB::GetPCurr(u_int32_t *data)
 {

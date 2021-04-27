@@ -1624,6 +1624,14 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureMatrixMask(property);
    } else if(name=="InterspillDly"){ 
       ConfigureInterspillDly(property);
+   } else if(name=="LoLXMask"){ 
+      ConfigureLoLXMask(property);
+   } else if(name=="LoLXMajValScin"){ 
+      ConfigureLoLXMajScinVal(property);
+   } else if(name=="LoLXMajValCher"){ 
+      ConfigureLoLXMajCherVal(property);
+   } else if(name=="LoLXMajValBare"){ 
+      ConfigureLoLXMajBareVal(property);
    } else if(name=="NoLocalTrigger"){  
    } else {
       printf("Unknown property %s in WDTCB\n", name.c_str());
@@ -2334,6 +2342,34 @@ void WDTCB::ConfigureTcMask(Property &property){
       SetTCMasks((unsigned int*)masks);
    } else
       throw std::runtime_error("TcMask size should be 4 values");
+}
+
+void WDTCB::ConfigureLoLXMask(Property &property){
+   unsigned int lolxmask;
+   lolxmask = property.GetUHex();
+
+   SetLoLXMasks(&lolxmask);
+}
+
+void WDTCB::ConfigureLoLXMajScinVal(Property &property){
+   unsigned int majval;
+   majval = property.GetUHex();
+
+   SetLoLXMajScinVal(&majval);
+}
+
+void WDTCB::ConfigureLoLXMajCherVal(Property &property){
+   unsigned int majval;
+   majval = property.GetUHex();
+
+   SetLoLXMajCherVal(&majval);
+}
+
+void WDTCB::ConfigureLoLXMajBareVal(Property &property){
+   unsigned int majval;
+   majval = property.GetUHex();
+
+   SetLoLXMajBareVal(&majval);
 }
 
 void WDTCB::ConfigureTcMultiplicityThreshold(Property &property){
