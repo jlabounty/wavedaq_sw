@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  16.02.2021 14:30:58
+// Created :  19.04.2021 13:49:33
 //
 // Register Layout Versions :  8, 9
 //
@@ -27692,10 +27692,10 @@ public:
       {
          case 8:
             // Length of the trigger output pulse in cycles
-            return BitExtractControl(0x1180, 0x00000700, 8);
+            return BitExtractControl(0x1180, 0x1F000000, 24);
          case 9:
             // Length of the trigger output pulse in cycles
-            return BitExtractControl(0x1124, 0x00000700, 8);
+            return BitExtractControl(0x1124, 0x1F000000, 24);
          default:
             throw std::invalid_argument("Function GetTriggerOutPulseLength() not defined for this board version");
       };
@@ -27706,10 +27706,10 @@ public:
       {
          case 8:
             // Length of the trigger output pulse in cycles
-            return SetRegMask(0x1180, 0x00000700, 8, value);
+            return SetRegMask(0x1180, 0x1F000000, 24, value);
          case 9:
             // Length of the trigger output pulse in cycles
-            return SetRegMask(0x1124, 0x00000700, 8, value);
+            return SetRegMask(0x1124, 0x1F000000, 24, value);
          default:
             throw std::invalid_argument("Function SetTriggerOutPulseLength() not defined for this board version");
       };
@@ -27720,13 +27720,13 @@ public:
       {
          case 8:
             // Length of the trigger output pulse in cycles
-            if(BitMask) *BitMask = 0x00000700;
-            if(BitOfs) *BitOfs = 8;
+            if(BitMask) *BitMask = 0x1F000000;
+            if(BitOfs) *BitOfs = 24;
             return 0x1180;
          case 9:
             // Length of the trigger output pulse in cycles
-            if(BitMask) *BitMask = 0x00000700;
-            if(BitOfs) *BitOfs = 8;
+            if(BitMask) *BitMask = 0x1F000000;
+            if(BitOfs) *BitOfs = 24;
             return 0x1124;
          default:
             throw std::invalid_argument("Function GetTriggerOutPulseLengthLoc() not defined for this board version");
