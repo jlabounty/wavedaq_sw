@@ -87,6 +87,7 @@ public:
    int verbose;
    int percent;
    int erase;
+   int soft_only;
    int show_default;
    time_t last;
    struct sockaddr client_address;
@@ -494,6 +495,9 @@ int main(int argc, char *argv[]) {
          unsigned int adr = (buffer[4] << 24) | (buffer[5] << 16) | (buffer[6] << 8) | (buffer[7] << 0);
 
          if (cmd == CMD_SCAN) {
+
+            set_crate_slot_id();
+
             char rbuffer[1600];
             rbuffer[0] = CMD_SCAN;
 
@@ -705,6 +709,7 @@ int main(int argc, char *argv[]) {
 
          } else if (strncmp(buffer, "scan", 4) == 0) {
 
+            set_crate_slot_id();
             printf_crate_scan(hostname, connection[addr]->rb);
 
          } else if (connection[addr]->slot != WDAQ_SLOT_DCB) { //---- Send to slot via SPI -----------
@@ -870,6 +875,7 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("         -d : Show default firmware and software files\n");
       c.sprintf("         -p : Show only percent value of upload\n");
       c.sprintf("         -e : Only erase flash, do not program\n");
+      c.sprintf("         -n : Upload only software, no firmware\n");
       c.sprintf("         -v : Verbose output\n");
 
       c.sprintf("\n");
@@ -1947,6 +1953,7 @@ void upload(udp_connection &c, int n_param, const char **param) {
    c.verbose = 0;
    c.percent = 0;
    c.erase   = 0;
+   c.soft_only = 0;
    c.show_default = 0;
    for (int i = 2; i < n_param; i++) {
 
@@ -2029,6 +2036,10 @@ void upload(udp_connection &c, int n_param, const char **param) {
          c.erase = 1;
       }
 
+      else if (param[i][0] == '-' && param[i][1] == 'n') {
+         c.soft_only = 1;
+      }
+
       else {
          c.sprintf("Invalid option \"%s\"\n\n", param[i]);
          return;
@@ -2039,6 +2050,9 @@ void upload(udp_connection &c, int n_param, const char **param) {
       load_fw = 1;
       load_sw = 1;
    }
+
+   if (c.soft_only)
+      load_fw = 0;
 
    if (c.verbose)
       c.sprintf("\n");
