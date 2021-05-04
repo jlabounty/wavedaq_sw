@@ -177,9 +177,12 @@ void WDSystem::CreatePropertiesFromXml(WDBoard *board, MXML_NODE *board_node){
 // Create from XML
 void WDSystem::CreateFromXml(std::string filepath){
 
-   char* error = nullptr;
+   char error[100];
    int line;
    MXML_NODE *root_xml = mxml_parse_file(filepath.c_str(), error, sizeof(error), &line);
+   if(root_xml == NULL){
+      throw std::runtime_error(error);
+   }
    //mxml_debug_tree(root_xml, 0);
    MXML_NODE *system_xml = mxml_subnode(root_xml, 0);
 
