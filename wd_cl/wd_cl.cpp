@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
       printf("[13]: sync dly scan        \t \t  [14]: attach debug thread  \n");
       printf("[15]: draw system          \t \t  [16]: print firmware version\n");
       printf("[17]: update firmware      \t \t  [18]: clean buffer         \n");
-      printf("[19]: show DAQ status      \t \t  [--]:                      \n");
+      printf("[19]: show DAQ status      \t \t  [20]: reboot CMBs          \n");
       do {
          char opline[256];
          printf("give an option: ");
@@ -663,6 +663,17 @@ int main(int argc, char *argv[])
             printf("Dropped Events/s %lu avg %lu max\n", AvgBuilderDroppedEvent, MaxBuilderDroppedEvent);
             printf("Old Events/s %lu avg %lu max\n", AvgBuilderOldEvent, MaxBuilderOldEvent);
 
+         }
+         if(option == 20)
+         {
+            for(auto c : *sys){
+               int mscbhandle = c->GetMscbHandle();
+               int status = mscb_reboot(mscbhandle, 20, 0, 0);
+               // print something only in case of error
+               if (status != MSCB_SUCCESS)
+                  printf("Error: status = %d\n", status);
+
+            }
 
          }
       } while ( option == 0 ) ;
