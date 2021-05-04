@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  04.02.2021 14:00:37
+ *  Created :  19.04.2021 13:48:59
  *
  *  Register Layout Version :  8
  *
@@ -950,11 +950,11 @@ const wd2_bit_group_entry_type  wd2_bit_group_list[] = {
   { "ADC_TM_OUT_1_FCO"              , WD2_ADC_TM_OUT_1_FCO_REG              , WD2_ADC_TM_OUT_1_FCO_MASK              , WD2_ADC_TM_OUT_1_FCO_OFS              },
   { "ADC_OFFS_ADJ_1_FCO"            , WD2_ADC_OFFS_ADJ_1_FCO_REG            , WD2_ADC_OFFS_ADJ_1_FCO_MASK            , WD2_ADC_OFFS_ADJ_1_FCO_OFS            },
   { "ADC_OM_OUT_INVERT_1_FCO"       , WD2_ADC_OM_OUT_INVERT_1_FCO_REG       , WD2_ADC_OM_OUT_INVERT_1_FCO_MASK       , WD2_ADC_OM_OUT_INVERT_1_FCO_OFS       },
+  { "TRIGGER_OUT_PULSE_LENGTH"      , WD2_TRIGGER_OUT_PULSE_LENGTH_REG      , WD2_TRIGGER_OUT_PULSE_LENGTH_MASK      , WD2_TRIGGER_OUT_PULSE_LENGTH_OFS      },
   { "LEAD_TRAIL_EDGE_SEL"           , WD2_LEAD_TRAIL_EDGE_SEL_REG           , WD2_LEAD_TRAIL_EDGE_SEL_MASK           , WD2_LEAD_TRAIL_EDGE_SEL_OFS           },
   { "EXT_TRIGGER_OUT_ENABLE"        , WD2_EXT_TRIGGER_OUT_ENABLE_REG        , WD2_EXT_TRIGGER_OUT_ENABLE_MASK        , WD2_EXT_TRIGGER_OUT_ENABLE_OFS        },
   { "EXT_ASYNC_TRIGGER_EN"          , WD2_EXT_ASYNC_TRIGGER_EN_REG          , WD2_EXT_ASYNC_TRIGGER_EN_MASK          , WD2_EXT_ASYNC_TRIGGER_EN_OFS          },
   { "PATTERN_TRIGGER_EN"            , WD2_PATTERN_TRIGGER_EN_REG            , WD2_PATTERN_TRIGGER_EN_MASK            , WD2_PATTERN_TRIGGER_EN_OFS            },
-  { "TRIGGER_OUT_PULSE_LENGTH"      , WD2_TRIGGER_OUT_PULSE_LENGTH_REG      , WD2_TRIGGER_OUT_PULSE_LENGTH_MASK      , WD2_TRIGGER_OUT_PULSE_LENGTH_OFS      },
   { "TRIGGER_DELAY"                 , WD2_TRIGGER_DELAY_REG                 , WD2_TRIGGER_DELAY_MASK                 , WD2_TRIGGER_DELAY_OFS                 },
   { "TRG_SRC_POLARITY"              , WD2_TRG_SRC_POLARITY_REG              , WD2_TRG_SRC_POLARITY_MASK              , WD2_TRG_SRC_POLARITY_OFS              },
   { "AUTO_TRIGGER_PERIOD"           , WD2_AUTO_TRIGGER_PERIOD_REG           , WD2_AUTO_TRIGGER_PERIOD_MASK           , WD2_AUTO_TRIGGER_PERIOD_OFS           },

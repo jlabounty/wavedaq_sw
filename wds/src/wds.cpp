@@ -1619,7 +1619,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
          if (strncmp(host, "dcb", 3) == 0 || strncmp(host, "DCB", 3) == 0) {
             if (strchr(host, '.'))
                *strchr(host, '.') = 0; // strip domain
-            std::string url = "HTTP/1.1 301 Moved\r\nLocation: /crate.html?adr=";
+            std::string url = "HTTP/1.1 301 Moved\r\nLocation: crate.html?adr=";
             url += host;
             url += "\r\nContent-Length: 0\r\n\r\n";
             mg_printf(nc, "%s", url.c_str());

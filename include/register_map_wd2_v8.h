@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  04.02.2021 14:00:37
+ *  Created :  19.04.2021 13:48:59
  *
  *  Register Layout Version :  8
  *
@@ -2693,6 +2693,11 @@
 
 /* ****** Control Register 96 [0x1180]: TRG_CFG - Trigger Configuration (Default: 0x00000000) ****** */
 
+/* TRIGGER_OUT_PULSE_LENGTH - Length of the trigger output pulse in cycles */
+#define WD2_TRIGGER_OUT_PULSE_LENGTH_REG                           WD2_REG_TRG_CFG
+#define WD2_TRIGGER_OUT_PULSE_LENGTH_MASK                               0x1F000000
+#define WD2_TRIGGER_OUT_PULSE_LENGTH_OFS                                        24
+
 /* LEAD_TRAIL_EDGE_SEL - 0 = trigger on leading edge, 1 = trigger on trailing edge */
 #define WD2_LEAD_TRAIL_EDGE_SEL_REG                                WD2_REG_TRG_CFG
 #define WD2_LEAD_TRAIL_EDGE_SEL_MASK                                    0x00010000
@@ -2712,11 +2717,6 @@
 #define WD2_PATTERN_TRIGGER_EN_REG                                 WD2_REG_TRG_CFG
 #define WD2_PATTERN_TRIGGER_EN_MASK                                     0x00001000
 #define WD2_PATTERN_TRIGGER_EN_OFS                                              12
-
-/* TRIGGER_OUT_PULSE_LENGTH - Length of the trigger output pulse in cycles */
-#define WD2_TRIGGER_OUT_PULSE_LENGTH_REG                           WD2_REG_TRG_CFG
-#define WD2_TRIGGER_OUT_PULSE_LENGTH_MASK                               0x00000700
-#define WD2_TRIGGER_OUT_PULSE_LENGTH_OFS                                         8
 
 /* TRIGGER_DELAY - trigger delay in ticks of 6.25 ns */
 #define WD2_TRIGGER_DELAY_REG                                      WD2_REG_TRG_CFG
