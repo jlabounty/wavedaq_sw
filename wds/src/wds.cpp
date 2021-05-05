@@ -608,7 +608,8 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
          std::cout << "Invalid command \"" << item << "\" received. Aborting." << std::endl;
       }
 
-      mg_printf(nc, "%s", "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
+      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+      mg_printf_http_chunk(nc, "%s", "OK\r\n");
       mg_send_http_chunk(nc, "", 0); // end of response
       return;
    }
@@ -2072,10 +2073,53 @@ int main(int argc, const char *argv[]) {
       gl.readoutMode = cReadoutModeDRS;
    }
 
-
    // remember trigger mode
    if (gl.triggerSelfArm)
       gl.triggerMode = cTriggerModeNormal;
+
+   // instantiate waveform processor
+   gl.wp = new WP(gl.verbose, gl.wdsDir, gl.logFileName, gl.demoMode);
+
+   // if running on DCB, directly connect to local crate
+   char host[256];
+   gethostname(host, sizeof(host));
+   strcpy(host, "DCB01");
+   if (strncmp(host, "dcb", 3) == 0 || strncmp(host, "DCB", 3) == 0) {
+      if (strchr(host, '.'))
+         *strchr(host, '.') = 0; // strip domain
+      std::string adr = host;
+
+      // create new board
+      DCB *dcb = new DCB(adr, gl.verbose);
+      try {
+         if (gl.verbose)
+            std::cout << "Connect to " << dcb->GetName() << " ... " << std::flush;
+         dcb->Connect();
+         dcb->ScanCrate();
+         // set destination port for DCB, MAC and IP is used automatically from UDP packet
+         dcb->SetDestinationPort(gl.wp->GetServerPort());
+         if (gl.verbose)
+            std::cout << "OK" << std::endl;
+         if (gl.verbose) {
+            std::cout << std::endl << "========== DCB Info ==========" << std::endl;
+            dcb->PrintVersion();
+            std::cout << std::endl << "Board scan:" << std::endl;
+            dcb->PrintCrate();
+            std::cout << std::endl;
+         }
+         gl.dcb.push_back(dcb);
+         connectDCB(&gl, dcb);
+
+         dcb->ResetSerdes(0, true);
+         dcb->ResetSerdes(1, false);
+
+      } catch (std::runtime_error &e) {
+         if (gl.verbose)
+            std::cout << "Failure" << std::endl;
+         delete dcb;
+         dcb = nullptr;
+      }
+   }
 
    // initialize web server
    struct mg_mgr mgr;
@@ -2116,9 +2160,6 @@ int main(int argc, const char *argv[]) {
 
       setsid(); // become session leader
    }
-
-   // instantiate waveform processor
-   gl.wp = new WP(gl.verbose, gl.wdsDir, gl.logFileName, gl.demoMode);
 
    if (gl.verbose)
       std::cout << "Starting packet receiver at port " << gl.wp->GetServerPort() << std::endl;

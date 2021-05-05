@@ -55,7 +55,7 @@ int WDB::gBinSocket = 0;
 
 unsigned short WDB::udpSequenceNumber = 0; // sequence number to identify related send/acknowledge packets
 
-#define CALIB_TIMEOUT 10
+#define CALIB_TIMEOUT 1000
 
 //--------------------------------------------------------------------
 
@@ -3493,12 +3493,12 @@ void WP::DoVoltageCalibrationStep() {
    //---- Primary Calibration ----
 
    if (calibProg.iIter1 < calibProg.nIter1) {
-
-      calibProg.iIter1++;
-
       // get one event from board
       WDEvent event(b->GetSerialNumber());
-      while (!RequestEvent(b, CALIB_TIMEOUT, event));
+      if (!RequestEvent(b, CALIB_TIMEOUT, event))
+         return;
+
+      calibProg.iIter1++;
 
       for (int ch = 0; ch < WD_N_CHANNELS - 2; ch++) {
          int tc = event.mTriggerCell[ch];
@@ -3547,11 +3547,12 @@ void WP::DoVoltageCalibrationStep() {
          b->mVCalib.SetValid(true);
       }
 
-      calibProg.iIter2++;
-
       // get one event from board
       WDEvent event(b->GetSerialNumber());
-      while (!RequestEvent(b, CALIB_TIMEOUT, event));
+      if (!RequestEvent(b, CALIB_TIMEOUT, event))
+         return;
+
+      calibProg.iIter2++;
 
       for (int ch = 0; ch < WD_N_CHANNELS - 2; ch++)
          for (int bin = 0; bin < 1024; bin++)
@@ -3587,11 +3588,12 @@ void WP::DoVoltageCalibrationStep() {
          b->SetDacCalDcV(0.45);
       }
 
-      calibProg.iIter3++;
-
       // get one event from board
       WDEvent event(b->GetSerialNumber());
-      while (!RequestEvent(b, CALIB_TIMEOUT, event));
+      if (!RequestEvent(b, CALIB_TIMEOUT, event))
+         return;
+
+      calibProg.iIter3++;
 
       for (int ch = 0; ch < WD_N_CHANNELS - 2; ch++)
          for (int bin = 0; bin < 1024; bin++)
@@ -3626,11 +3628,12 @@ void WP::DoVoltageCalibrationStep() {
          b->SetDacCalDcV(-0.45);
       }
 
-      calibProg.iIter4++;
-
       // get one event from board
       WDEvent event(b->GetSerialNumber());
-      while (!RequestEvent(b, CALIB_TIMEOUT, event));
+      if (!RequestEvent(b, CALIB_TIMEOUT, event))
+         return;
+
+      calibProg.iIter4++;
 
       for (int ch = 0; ch < WD_N_CHANNELS - 2; ch++)
          for (int bin = 0; bin < 1024; bin++)
@@ -3675,11 +3678,12 @@ void WP::DoVoltageCalibrationStep() {
          mRangeCalib = false;
       }
 
-      calibProg.iIter5++;
-
       // get one event from board
       WDEvent event(b->GetSerialNumber());
-      while (!RequestEvent(b, CALIB_TIMEOUT, event));
+      if (!RequestEvent(b, CALIB_TIMEOUT, event))
+         return;
+
+      calibProg.iIter5++;
 
       for (int ch = 16; ch < WD_N_CHANNELS; ch++)
          for (int bin = 0; bin < 1024; bin++)
@@ -3733,7 +3737,8 @@ void WP::DoVoltageCalibrationStep() {
    b->SetAdcChTxEn(0);
    WDEvent event(b->GetSerialNumber());
    RequestEvent(b, CALIB_TIMEOUT, event);
-   while (!RequestEvent(b, CALIB_TIMEOUT, event));
+   if (!RequestEvent(b, CALIB_TIMEOUT, event))
+      return;
 
    for (int ch = 0; ch < WD_N_CHANNELS - 2; ch++) {
       float sum = 0;
@@ -3746,7 +3751,8 @@ void WP::DoVoltageCalibrationStep() {
    b->SetDrsChTxEn(0);
    b->SetAdcChTxEn(0xFFFF);
    RequestEvent(b, CALIB_TIMEOUT, event);
-   while (!RequestEvent(b, CALIB_TIMEOUT, event));
+   if (!RequestEvent(b, CALIB_TIMEOUT, event))
+      return;
 
    for (int ch = 0; ch < WD_N_CHANNELS - 2; ch++) {
       float sum = 0;
@@ -3762,7 +3768,8 @@ void WP::DoVoltageCalibrationStep() {
    b->SetDrsChTxEn(0x3FFFF);
    b->SetAdcChTxEn(0);
    RequestEvent(b, CALIB_TIMEOUT, event);
-   while (!RequestEvent(b, CALIB_TIMEOUT, event));
+   if (!RequestEvent(b, CALIB_TIMEOUT, event))
+      return;
 
    for (int ch = 0; ch < WD_N_CHANNELS - 2; ch++) {
       float sum = 0;
@@ -3775,7 +3782,8 @@ void WP::DoVoltageCalibrationStep() {
    b->SetDrsChTxEn(0);
    b->SetAdcChTxEn(0xFFFF);
    RequestEvent(b, CALIB_TIMEOUT, event);
-   while (!RequestEvent(b, CALIB_TIMEOUT, event));
+   if (!RequestEvent(b, CALIB_TIMEOUT, event))
+      return;
 
    for (int ch = 0; ch < WD_N_CHANNELS - 2; ch++) {
       float sum = 0;
@@ -3791,7 +3799,8 @@ void WP::DoVoltageCalibrationStep() {
    b->SetDrsChTxEn(0x3FFFF);
    b->SetAdcChTxEn(0);
    RequestEvent(b, CALIB_TIMEOUT, event);
-   while (!RequestEvent(b, CALIB_TIMEOUT, event));
+   if (!RequestEvent(b, CALIB_TIMEOUT, event))
+      return;
 
    for (int ch = 0; ch < WD_N_CHANNELS - 2; ch++) {
       float sum = 0;
@@ -3804,7 +3813,8 @@ void WP::DoVoltageCalibrationStep() {
    b->SetDrsChTxEn(0);
    b->SetAdcChTxEn(0xFFFF);
    RequestEvent(b, CALIB_TIMEOUT, event);
-   while (!RequestEvent(b, CALIB_TIMEOUT, event));
+   if (!RequestEvent(b, CALIB_TIMEOUT, event))
+      return;
 
    for (int ch = 0; ch < WD_N_CHANNELS - 2; ch++) {
       float sum = 0;
@@ -4197,13 +4207,14 @@ void WP::DoTimeCalibrationStep() {
 
    if (calibProg.iIter1 < calibProg.nIter1) {
 
-      calibProg.iIter1++;
-
       // get one event from board
       WDEvent event(b->GetSerialNumber());
-      if (calibProg.iIter1 == 1) // skip one event until clock is available
-         while (!RequestEvent(b, CALIB_TIMEOUT, event));
-      while (!RequestEvent(b, CALIB_TIMEOUT, event));
+      if (calibProg.iIter1 == 0) // skip one event until clock is available
+         RequestEvent(b, CALIB_TIMEOUT, event);
+      if (!RequestEvent(b, CALIB_TIMEOUT, event))
+         return;
+
+      calibProg.iIter1++;
 
       if (AnalyzePeriod(&event, b) == -1) {
          b->Restore();
@@ -4229,11 +4240,12 @@ void WP::DoTimeCalibrationStep() {
 
    if (calibProg.iIter2 < calibProg.nIter2) {
 
-      calibProg.iIter2++;
-
       // get one event from board
       WDEvent event(b->GetSerialNumber());
-      while (!RequestEvent(b, CALIB_TIMEOUT, event));
+      if (!RequestEvent(b, CALIB_TIMEOUT, event))
+         return;
+
+      calibProg.iIter2++;
 
       AnalyzePeriod(&event, b);
       CalibrateGlobal(&event, b);
@@ -4256,11 +4268,12 @@ void WP::DoTimeCalibrationStep() {
 
    if (calibProg.iIter3 < calibProg.nIter3) {
 
-      calibProg.iIter3++;
-
       // get one event from board
       WDEvent event(b->GetSerialNumber());
-      while (!RequestEvent(b, CALIB_TIMEOUT, event));
+      if (!RequestEvent(b, CALIB_TIMEOUT, event))
+         return;
+
+      calibProg.iIter3++;
 
       AnalyzeTimeOffset(&event);
 
