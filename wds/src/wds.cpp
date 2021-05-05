@@ -1354,11 +1354,11 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       if (gl->wp->IsVcalibActive()) {
          std::string adr = gl->wp->GetWDB(gl->wp->GetVcalibBoard())->GetAddr();
          float f = gl->wp->GetVcalibProgress();
-         mg_printf_http_chunk(nc, "V %s %1.1lf\n", adr.c_str(), f);
+         mg_printf_http_chunk(nc, "V %s %1.0lf %%\n", adr.c_str(), f*100);
       } else if (gl->wp->IsTcalibActive()) {
          std::string adr = gl->wp->GetWDB(gl->wp->GetTcalibBoard())->GetAddr();
          float f = gl->wp->GetTcalibProgress();
-         mg_printf_http_chunk(nc, "T %s %1.1lf\n", adr.c_str(), f);
+         mg_printf_http_chunk(nc, "T %s %1.0lf %%\n", adr.c_str(), f*100);
       } else
          mg_printf_http_chunk(nc, "%s", "Calibration finished\n");
 
