@@ -117,6 +117,11 @@
 #define RSINGLEISVETO      0x801      // veto set for input channels in single crate logic
 #define RSINGLEMASK        0x809      // mask for input channels in single crate logic
 #define RSINGLELOGIC       0x811      // first stage configuration in single crate logic
+#define RTRGCOUSPI         0x900      // trigger counters for spi access (first address)
+#define RTOTTIMESPI        0x940      // total time for spi access
+#define RLIVETIMESPI       0x941      // live time for spi access
+#define RLATCHCOUSPI       0x942      // latch for spi access counters
+// IS THIS STILL USED??
 #define RSERDESCOU         0x900      // serdes error counter (first address)
 #define RSERDESTIME        0x980      // serdes test time
 #define RDCBSERDESCOU      0x981      // serdes error counter dcb
@@ -322,8 +327,12 @@ public:
    void GetRALGSEL(u_int32_t*);
    // read total time
    void GetTotalTime(u_int32_t*);
+   // read total time through SPI
+   void GetTotalTimeSPI(u_int32_t*);
    // read live time
    void GetLiveTime(u_int32_t*);
+   // read live time through SPI
+   void GetLiveTimeSPI(u_int32_t*);
    // read event counter
    void GetEventCounter(u_int32_t*);
    // read trigger type
@@ -336,6 +345,8 @@ public:
    bool GetSystemTriggerType(u_int32_t*, u_int32_t*, u_int32_t*);
    // read trigger counters
    void GetTriggerCounters(u_int32_t*);
+   // read trigger counters through SPI
+   void GetTriggerCountersSPI(u_int32_t*);
    // read memory address
    void GetMemoryAddress(u_int32_t*);
    // check if the system is busy
@@ -546,7 +557,7 @@ public:
   void SetFNeutronMask(u_int32_t *);
   void SetMatrixMask(u_int32_t *);
   void SetInterspillDly(u_int32_t *);
-
+  void FReadCounters(u_int32_t *);
 };
 
 #endif

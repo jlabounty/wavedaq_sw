@@ -431,11 +431,29 @@ void TCB::GetTotalTime(u_int32_t *data)
    ReadReg(addr,data);
 }
 
+// read total time through SPI
+void TCB::GetTotalTimeSPI(u_int32_t *data)
+{
+  u_int32_t latch = 1;
+  WriteReg(RLATCHCOUSPI,&latch);
+  u_int32_t addr = RTOTTIMESPI;
+  ReadReg(addr,data);
+}
+
 // read live time
 void TCB::GetLiveTime(u_int32_t *data)
 {
    u_int32_t addr = RLIVETIME;
    ReadReg(addr,data);
+}
+
+// read live time through SPI
+void TCB::GetLiveTimeSPI(u_int32_t *data)
+{
+  u_int32_t latch = 1;
+  WriteReg(RLATCHCOUSPI,&latch);
+  u_int32_t addr = RLIVETIMESPI;
+  ReadReg(addr,data);
 }
 
 // read event counter
@@ -486,7 +504,30 @@ void TCB::GetTriggerCounters(u_int32_t *data)
     for(int icycle = 0; icycle<ncycle; icycle++)
       ReadBLT(RTRGCOU+icycle*BLTSIZE,data+icycle*BLTSIZE,BLTSIZE);
 }
+// read trigger counters trhough SPI
+void TCB::GetTriggerCountersSPI(u_int32_t *data)
+{
+  u_int32_t latch = 1;
+  WriteReg(RLATCHCOUSPI,&latch);
+  int ncycle = (fntrg-1)/BLTSIZE + 1;
+  for(int icycle = 0; icycle<ncycle; icycle++)
+    ReadBLT(RTRGCOUSPI+icycle*BLTSIZE,data+icycle*BLTSIZE,BLTSIZE);
+}
+// read trigger counters, total time and live time through SPI
+void TCB::FReadCounters(u_int32_t *data)
+{
+  u_int32_t latch = 1;
+  WriteReg(RLATCHCOUSPI,&latch);
+  int ncycle = (fntrg-1)/BLTSIZE + 1;
+  for(int icycle = 0; icycle<ncycle; icycle++)
+    ReadBLT(RTRGCOUSPI+icycle*BLTSIZE,data+icycle*BLTSIZE,BLTSIZE);
+  // then totaltime
+    u_int32_t addr = RLIVETIMESPI;
+  ReadReg(RTOTTIMESPI,data+64);
+  // finally livetime
+  ReadReg(RLIVETIMESPI,data+65);
 
+}
 // read memory address
 void TCB::GetMemoryAddress(u_int32_t *data)
 {

@@ -219,12 +219,17 @@ int main(int argc, char *argv[])
       if(option ==  9) {
          printf(" opt = 9 : Get TotalTime ... \n");
          TCBBoard.GetTotalTime(&data);
-         printf("\n   Total Time = %f sec\n",(float)data/1e6);
+         printf("\n   Total Time latched by runmode for DAQ readout = %f sec\n",(float)data/1e6);
+         TCBBoard.GetTotalTimeSPI(&data);
+         printf("\n   Total Time free runnign through SPI= %f sec\n",(float)data/1e6);
       }
       if(option == 10) {
          printf(" opt = 10 : Get LiveTime ... \n");
          TCBBoard.GetLiveTime(&data);
-         printf("\n   Live Time = %f sec\n",(float)data/1e6);
+         printf("\n   Live Time latched by runmode for DAQ readout = %f sec\n",(float)data/1e6);
+         TCBBoard.GetLiveTimeSPI(&data);
+         printf("\n   Total Time free runnign through SPI= %f sec\n",(float)data/1e6);
+
       }
       if(option == 11) {
          printf(" opt = 11 : Get Event Counter ... \n");
@@ -257,9 +262,15 @@ int main(int argc, char *argv[])
       }
       if(option == 13) {
          printf(" opt = 13 : Get Trigger Counters ... \n");
-         TCBBoard.GetTriggerCounters(counters);
-         for(int icou = 0; icou<TCBBoard.fntrg; icou++)
-            printf("\n   Trigger Counter %d = %d\n",icou,counters[icou]);
+	 // registers for packetiser
+	 TCBBoard.GetTriggerCounters(counters);
+	 for(int icou = 0; icou<TCBBoard.fntrg; icou++)
+	   printf("\n   Trigger Counter %d = %d\n",icou,counters[icou]);
+	 // registers for SPI
+	 u_int32_t temp[66];
+	 TCBBoard.GetTriggerCountersSPI(counters);
+	 for(int icou = 0; icou<TCBBoard.fntrg; icou++)
+	   printf("\n   Trigger Counter through SPI %d = %d\n",icou,counters[icou]);
       }
       if(option == 14) {
          printf(" opt = 14 : Get Memory address ... \n");
