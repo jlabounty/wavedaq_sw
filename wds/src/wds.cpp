@@ -609,7 +609,6 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       }
 
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
-      mg_printf_http_chunk(nc, "%s", "OK\r\n");
       mg_send_http_chunk(nc, "", 0); // end of response
       return;
    }
@@ -1347,12 +1346,33 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       return;
    }
 
+   // upload progress ------------------------------
+   if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/calibProgress") == 0) {
+
+      mg_send_response_line(nc, 200, "Content-Type: application/octet-stream\r\nTransfer-Encoding: chunked\r\n");
+
+      if (gl->wp->IsVcalibActive()) {
+         std::string adr = gl->wp->GetWDB(gl->wp->GetVcalibBoard())->GetAddr();
+         float f = gl->wp->GetVcalibProgress();
+         mg_printf_http_chunk(nc, "V %s %1.1lf\n", adr.c_str(), f);
+      } else if (gl->wp->IsTcalibActive()) {
+         std::string adr = gl->wp->GetWDB(gl->wp->GetTcalibBoard())->GetAddr();
+         float f = gl->wp->GetTcalibProgress();
+         mg_printf_http_chunk(nc, "T %s %1.1lf\n", adr.c_str(), f);
+      } else
+         mg_printf_http_chunk(nc, "%s", "Calibration finished\n");
+
+      mg_send_http_chunk(nc, "", 0);
+      return;
+   }
+
    // binary encoded waveforms ------------------------------
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/wf") == 0) {
       char str[256];
       mg_get_http_var(&hm->query_string, "adr", str, sizeof(str));
       auto wdb = findBoard(gl->dcb, gl->wdb, str);
       if (wdb == nullptr) {
+         mg_send_response_line(nc, 200, "Content-Type: application/octet-stream\r\nTransfer-Encoding: chunked\r\n");
          mg_printf_http_chunk(nc, "Board %s not found", str);
          mg_send_http_chunk(nc, "", 0);
          return;
