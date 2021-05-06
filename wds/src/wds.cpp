@@ -1062,8 +1062,11 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
          }
       }
 
-      // ping board if still alive
-      if (!b->Ping()) {
+      // receive current board status registers
+      try {
+         b->ReceiveStatusRegisters();
+         b->ReceiveControlRegisters(); // if modified by other program
+      } catch (...) {
          mg_printf_http_chunk(nc, "{\n");
          mg_printf_http_chunk(nc, "  \"error\": \"Board %s stopped to respond\"\n", b->GetAddr().c_str());
          mg_printf_http_chunk(nc, "}\n");
@@ -2206,37 +2209,11 @@ int main(int argc, const char *argv[]) {
             // Yield to server, 10ms timeout
             mg_mgr_poll(&mgr, 10);
 
-         // read board temperatures and lock status periodically
-         time(&now);
-
-         if (!gl.upload && now > last) {
-            // update every second all status registers
-            for (auto &b: gl.wdb) {
-               try {
-                  b->ReceiveStatusRegisters();
-               } catch (...) {
-                  disconnectWDB(&gl, b);
-               }
-            }
-            // update all control registers if requested
-            if (gl.updatePeriodic) {
-               for (auto &b: gl.wdb) {
-                  try {
-                     b->ReceiveControlRegisters();
-                  } catch (...) {
-                     disconnectWDB(&gl, b);
-                  }
-               }
-            }
-
-            // cycle phase of sine wave
-            //static int delay = 0;
-            //for (auto &b: gl.wdb)
-            //   b->SetSineWaveDelay(delay);
-            //delay = (delay == 16) ? -16 : delay + 1;
-
-            last = now;
-         }
+         // cycle phase of sine wave
+         //static int delay = 0;
+         //for (auto &b: gl.wdb)
+         //   b->SetSineWaveDelay(delay);
+         //delay = (delay == 16) ? -16 : delay + 1;
 
       }
    } catch (std::runtime_error &e) {
