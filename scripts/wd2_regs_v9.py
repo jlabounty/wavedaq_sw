@@ -5,7 +5,7 @@
 #  Project :  WaveDream2
 #
 #  Author  :  schmid_e (Author of generation script)
-#  Created :  19.04.2021 13:49:16
+#  Created :  07.05.2021 10:31:22
 #
 #  Register Layout Version :  9
 #
@@ -1897,7 +1897,7 @@ WD2_LMK15_PLL_N_OFS                      =                                 8
 
 
 
-# ****** Control Register 69 [0x1114]: ADC_0_CFG_1458 - ADC 0 (A) Chip Configuration for channels 1, 4, 5 and 8 (Default: 0x00A63F00) ******
+# ****** Control Register 69 [0x1114]: ADC_0_CFG_1458 - ADC 0 (A) Chip Configuration for channels 1, 4, 5 and 8 (Default: 0x00F63F00) ******
 
 # ADC_0_1458_DCSOFF - Clock Duty Cycle Stabilizer (0=ON, 1=OFF)
 WD2_ADC_0_1458_DCSOFF_REG                =            WD2_REG_ADC_0_CFG_1458
@@ -1939,7 +1939,7 @@ WD2_ADC_0_1_NAP_MODE_REG                 =            WD2_REG_ADC_0_CFG_1458
 WD2_ADC_0_1_NAP_MODE_MASK                =                        0x01000000
 WD2_ADC_0_1_NAP_MODE_OFS                 =                                24
 
-# ADC_0_1458_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
+# ADC_0_1458_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet)
 WD2_ADC_0_1458_ILVDS_REG                 =            WD2_REG_ADC_0_CFG_1458
 WD2_ADC_0_1458_ILVDS_MASK                =                        0x00E00000
 WD2_ADC_0_1458_ILVDS_OFS                 =                                21
@@ -1976,7 +1976,7 @@ WD2_ADC_0_1458_TP_LSBS_OFS               =                                 0
 
 
 
-# ****** Control Register 70 [0x1118]: ADC_0_CFG_2367 - ADC 0 (A) Chip Configuration for channels 2, 3, 6 and 7 (Default: 0x00A63F00) ******
+# ****** Control Register 70 [0x1118]: ADC_0_CFG_2367 - ADC 0 (A) Chip Configuration for channels 2, 3, 6 and 7 (Default: 0x00F63F00) ******
 
 # ADC_0_2367_DCSOFF - Clock Duty Cycle Stabilizer (0=ON, 1=OFF)
 WD2_ADC_0_2367_DCSOFF_REG                =            WD2_REG_ADC_0_CFG_2367
@@ -2018,7 +2018,7 @@ WD2_ADC_0_2_NAP_MODE_REG                 =            WD2_REG_ADC_0_CFG_2367
 WD2_ADC_0_2_NAP_MODE_MASK                =                        0x01000000
 WD2_ADC_0_2_NAP_MODE_OFS                 =                                24
 
-# ADC_0_2367_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
+# ADC_0_2367_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet)
 WD2_ADC_0_2367_ILVDS_REG                 =            WD2_REG_ADC_0_CFG_2367
 WD2_ADC_0_2367_ILVDS_MASK                =                        0x00E00000
 WD2_ADC_0_2367_ILVDS_OFS                 =                                21
@@ -2055,7 +2055,7 @@ WD2_ADC_0_2367_TP_LSBS_OFS               =                                 0
 
 
 
-# ****** Control Register 71 [0x111C]: ADC_1_CFG_1458 - ADC 1 (B) Chip Configuration for channels 1, 4, 5 and 8 (Default: 0x00A63F00) ******
+# ****** Control Register 71 [0x111C]: ADC_1_CFG_1458 - ADC 1 (B) Chip Configuration for channels 1, 4, 5 and 8 (Default: 0x00F63F00) ******
 
 # ADC_1_1458_DCSOFF - Clock Duty Cycle Stabilizer (0=ON, 1=OFF)
 WD2_ADC_1_1458_DCSOFF_REG                =            WD2_REG_ADC_1_CFG_1458
@@ -2097,7 +2097,7 @@ WD2_ADC_1_1_NAP_MODE_REG                 =            WD2_REG_ADC_1_CFG_1458
 WD2_ADC_1_1_NAP_MODE_MASK                =                        0x01000000
 WD2_ADC_1_1_NAP_MODE_OFS                 =                                24
 
-# ADC_1_1458_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
+# ADC_1_1458_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet)
 WD2_ADC_1_1458_ILVDS_REG                 =            WD2_REG_ADC_1_CFG_1458
 WD2_ADC_1_1458_ILVDS_MASK                =                        0x00E00000
 WD2_ADC_1_1458_ILVDS_OFS                 =                                21
@@ -2134,7 +2134,7 @@ WD2_ADC_1_1458_TP_LSBS_OFS               =                                 0
 
 
 
-# ****** Control Register 72 [0x1120]: ADC_1_CFG_2367 - ADC 1 (B) Chip Configuration for channels 2, 3, 6 and 7 (Default: 0x00A63F00) ******
+# ****** Control Register 72 [0x1120]: ADC_1_CFG_2367 - ADC 1 (B) Chip Configuration for channels 2, 3, 6 and 7 (Default: 0x00F63F00) ******
 
 # ADC_1_2367_DCSOFF - Clock Duty Cycle Stabilizer (0=ON, 1=OFF)
 WD2_ADC_1_2367_DCSOFF_REG                =            WD2_REG_ADC_1_CFG_2367
@@ -2176,7 +2176,7 @@ WD2_ADC_1_2_NAP_MODE_REG                 =            WD2_REG_ADC_1_CFG_2367
 WD2_ADC_1_2_NAP_MODE_MASK                =                        0x01000000
 WD2_ADC_1_2_NAP_MODE_OFS                 =                                24
 
-# ADC_1_2367_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
+# ADC_1_2367_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet)
 WD2_ADC_1_2367_ILVDS_REG                 =            WD2_REG_ADC_1_CFG_2367
 WD2_ADC_1_2367_ILVDS_MASK                =                        0x00E00000
 WD2_ADC_1_2367_ILVDS_OFS                 =                                21
@@ -4724,7 +4724,7 @@ wd2_bit_group_list = [
   [ "ADC_0_5_NAP_MODE"              , WD2_ADC_0_5_NAP_MODE_REG              , WD2_ADC_0_5_NAP_MODE_MASK              , WD2_ADC_0_5_NAP_MODE_OFS             , "Channel 5 Nap Mode (0=OFF, 1=ON)" ],
   [ "ADC_0_4_NAP_MODE"              , WD2_ADC_0_4_NAP_MODE_REG              , WD2_ADC_0_4_NAP_MODE_MASK              , WD2_ADC_0_4_NAP_MODE_OFS             , "Channel 4 Nap Mode (0=OFF, 1=ON)" ],
   [ "ADC_0_1_NAP_MODE"              , WD2_ADC_0_1_NAP_MODE_REG              , WD2_ADC_0_1_NAP_MODE_MASK              , WD2_ADC_0_1_NAP_MODE_OFS             , "Channel 1 Nap Mode (0=OFF, 1=ON)" ],
-  [ "ADC_0_1458_ILVDS"              , WD2_ADC_0_1458_ILVDS_REG              , WD2_ADC_0_1458_ILVDS_MASK              , WD2_ADC_0_1458_ILVDS_OFS             , "LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)" ],
+  [ "ADC_0_1458_ILVDS"              , WD2_ADC_0_1458_ILVDS_REG              , WD2_ADC_0_1458_ILVDS_MASK              , WD2_ADC_0_1458_ILVDS_OFS             , "LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet)" ],
   [ "ADC_0_1458_TERMON"             , WD2_ADC_0_1458_TERMON_REG             , WD2_ADC_0_1458_TERMON_MASK             , WD2_ADC_0_1458_TERMON_OFS            , "LVDS Internal Termination Bit (0=OFF, 1=ON)" ],
   [ "ADC_0_1458_OUTOFF"             , WD2_ADC_0_1458_OUTOFF_REG             , WD2_ADC_0_1458_OUTOFF_MASK             , WD2_ADC_0_1458_OUTOFF_OFS            , "Digital Output Disable Bit (0=Enabled, 1=Disabled)" ],
   [ "ADC_0_1458_OUTMODE"            , WD2_ADC_0_1458_OUTMODE_REG            , WD2_ADC_0_1458_OUTMODE_MASK            , WD2_ADC_0_1458_OUTMODE_OFS           , "Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet) " ],
@@ -4739,7 +4739,7 @@ wd2_bit_group_list = [
   [ "ADC_0_6_NAP_MODE"              , WD2_ADC_0_6_NAP_MODE_REG              , WD2_ADC_0_6_NAP_MODE_MASK              , WD2_ADC_0_6_NAP_MODE_OFS             , "Channel 6 Nap Mode (0=OFF, 1=ON)" ],
   [ "ADC_0_3_NAP_MODE"              , WD2_ADC_0_3_NAP_MODE_REG              , WD2_ADC_0_3_NAP_MODE_MASK              , WD2_ADC_0_3_NAP_MODE_OFS             , "Channel 3 Nap Mode (0=OFF, 1=ON)" ],
   [ "ADC_0_2_NAP_MODE"              , WD2_ADC_0_2_NAP_MODE_REG              , WD2_ADC_0_2_NAP_MODE_MASK              , WD2_ADC_0_2_NAP_MODE_OFS             , "Channel 2 Nap Mode (0=OFF, 1=ON)" ],
-  [ "ADC_0_2367_ILVDS"              , WD2_ADC_0_2367_ILVDS_REG              , WD2_ADC_0_2367_ILVDS_MASK              , WD2_ADC_0_2367_ILVDS_OFS             , "LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)" ],
+  [ "ADC_0_2367_ILVDS"              , WD2_ADC_0_2367_ILVDS_REG              , WD2_ADC_0_2367_ILVDS_MASK              , WD2_ADC_0_2367_ILVDS_OFS             , "LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet)" ],
   [ "ADC_0_2367_TERMON"             , WD2_ADC_0_2367_TERMON_REG             , WD2_ADC_0_2367_TERMON_MASK             , WD2_ADC_0_2367_TERMON_OFS            , "LVDS Internal Termination Bit (0=OFF, 1=ON)" ],
   [ "ADC_0_2367_OUTOFF"             , WD2_ADC_0_2367_OUTOFF_REG             , WD2_ADC_0_2367_OUTOFF_MASK             , WD2_ADC_0_2367_OUTOFF_OFS            , "Digital Output Disable Bit (0=Enabled, 1=Disabled)" ],
   [ "ADC_0_2367_OUTMODE"            , WD2_ADC_0_2367_OUTMODE_REG            , WD2_ADC_0_2367_OUTMODE_MASK            , WD2_ADC_0_2367_OUTMODE_OFS           , "Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet) " ],
@@ -4754,7 +4754,7 @@ wd2_bit_group_list = [
   [ "ADC_1_5_NAP_MODE"              , WD2_ADC_1_5_NAP_MODE_REG              , WD2_ADC_1_5_NAP_MODE_MASK              , WD2_ADC_1_5_NAP_MODE_OFS             , "Channel 5 Nap Mode (0=OFF, 1=ON)" ],
   [ "ADC_1_4_NAP_MODE"              , WD2_ADC_1_4_NAP_MODE_REG              , WD2_ADC_1_4_NAP_MODE_MASK              , WD2_ADC_1_4_NAP_MODE_OFS             , "Channel 4 Nap Mode (0=OFF, 1=ON)" ],
   [ "ADC_1_1_NAP_MODE"              , WD2_ADC_1_1_NAP_MODE_REG              , WD2_ADC_1_1_NAP_MODE_MASK              , WD2_ADC_1_1_NAP_MODE_OFS             , "Channel 1 Nap Mode (0=OFF, 1=ON)" ],
-  [ "ADC_1_1458_ILVDS"              , WD2_ADC_1_1458_ILVDS_REG              , WD2_ADC_1_1458_ILVDS_MASK              , WD2_ADC_1_1458_ILVDS_OFS             , "LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)" ],
+  [ "ADC_1_1458_ILVDS"              , WD2_ADC_1_1458_ILVDS_REG              , WD2_ADC_1_1458_ILVDS_MASK              , WD2_ADC_1_1458_ILVDS_OFS             , "LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet)" ],
   [ "ADC_1_1458_TERMON"             , WD2_ADC_1_1458_TERMON_REG             , WD2_ADC_1_1458_TERMON_MASK             , WD2_ADC_1_1458_TERMON_OFS            , "LVDS Internal Termination Bit (0=OFF, 1=ON)" ],
   [ "ADC_1_1458_OUTOFF"             , WD2_ADC_1_1458_OUTOFF_REG             , WD2_ADC_1_1458_OUTOFF_MASK             , WD2_ADC_1_1458_OUTOFF_OFS            , "Digital Output Disable Bit (0=Enabled, 1=Disabled)" ],
   [ "ADC_1_1458_OUTMODE"            , WD2_ADC_1_1458_OUTMODE_REG            , WD2_ADC_1_1458_OUTMODE_MASK            , WD2_ADC_1_1458_OUTMODE_OFS           , "Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet) " ],
@@ -4769,7 +4769,7 @@ wd2_bit_group_list = [
   [ "ADC_1_6_NAP_MODE"              , WD2_ADC_1_6_NAP_MODE_REG              , WD2_ADC_1_6_NAP_MODE_MASK              , WD2_ADC_1_6_NAP_MODE_OFS             , "Channel 6 Nap Mode (0=OFF, 1=ON)" ],
   [ "ADC_1_3_NAP_MODE"              , WD2_ADC_1_3_NAP_MODE_REG              , WD2_ADC_1_3_NAP_MODE_MASK              , WD2_ADC_1_3_NAP_MODE_OFS             , "Channel 3 Nap Mode (0=OFF, 1=ON)" ],
   [ "ADC_1_2_NAP_MODE"              , WD2_ADC_1_2_NAP_MODE_REG              , WD2_ADC_1_2_NAP_MODE_MASK              , WD2_ADC_1_2_NAP_MODE_OFS             , "Channel 2 Nap Mode (0=OFF, 1=ON)" ],
-  [ "ADC_1_2367_ILVDS"              , WD2_ADC_1_2367_ILVDS_REG              , WD2_ADC_1_2367_ILVDS_MASK              , WD2_ADC_1_2367_ILVDS_OFS             , "LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)" ],
+  [ "ADC_1_2367_ILVDS"              , WD2_ADC_1_2367_ILVDS_REG              , WD2_ADC_1_2367_ILVDS_MASK              , WD2_ADC_1_2367_ILVDS_OFS             , "LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet)" ],
   [ "ADC_1_2367_TERMON"             , WD2_ADC_1_2367_TERMON_REG             , WD2_ADC_1_2367_TERMON_MASK             , WD2_ADC_1_2367_TERMON_OFS            , "LVDS Internal Termination Bit (0=OFF, 1=ON)" ],
   [ "ADC_1_2367_OUTOFF"             , WD2_ADC_1_2367_OUTOFF_REG             , WD2_ADC_1_2367_OUTOFF_MASK             , WD2_ADC_1_2367_OUTOFF_OFS            , "Digital Output Disable Bit (0=Enabled, 1=Disabled)" ],
   [ "ADC_1_2367_OUTMODE"            , WD2_ADC_1_2367_OUTMODE_REG            , WD2_ADC_1_2367_OUTMODE_MASK            , WD2_ADC_1_2367_OUTMODE_OFS           , "Digital Output Mode Control Bits (0b110 = 12 Bit, 1 Lane) (see datasheet) " ],
@@ -5119,10 +5119,10 @@ ctrl_reg_default = [0xFFFFFFFF,   # Offset 0x1000
                     0x029400AD,   # Offset 0x1108 
                     0x0830100E,   # Offset 0x110C 
                     0xE000200F,   # Offset 0x1110 
-                    0x00A63F00,   # Offset 0x1114 
-                    0x00A63F00,   # Offset 0x1118 
-                    0x00A63F00,   # Offset 0x111C 
-                    0x00A63F00,   # Offset 0x1120 
+                    0x00F63F00,   # Offset 0x1114 
+                    0x00F63F00,   # Offset 0x1118 
+                    0x00F63F00,   # Offset 0x111C 
+                    0x00F63F00,   # Offset 0x1120 
                     0x00000000,   # Offset 0x1124 
                     0x00000000,   # Offset 0x1128 
                     0x04C4B400,   # Offset 0x112C 

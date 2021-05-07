@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  19.04.2021 13:49:16
+ *  Created :  07.05.2021 10:31:22
  *
  *  Register Layout Version :  9
  *
@@ -1177,10 +1177,10 @@ const unsigned int ctrl_reg_default[] = {
   0x029400AD,   /* Offset 0x1108 */
   0x0830100E,   /* Offset 0x110C */
   0xE000200F,   /* Offset 0x1110 */
-  0x00A63F00,   /* Offset 0x1114 */
-  0x00A63F00,   /* Offset 0x1118 */
-  0x00A63F00,   /* Offset 0x111C */
-  0x00A63F00,   /* Offset 0x1120 */
+  0x00F63F00,   /* Offset 0x1114 */
+  0x00F63F00,   /* Offset 0x1118 */
+  0x00F63F00,   /* Offset 0x111C */
+  0x00F63F00,   /* Offset 0x1120 */
   0x00000000,   /* Offset 0x1124 */
   0x00000000,   /* Offset 0x1128 */
   0x04C4B400,   /* Offset 0x112C */

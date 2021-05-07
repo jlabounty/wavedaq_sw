@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  19.04.2021 13:49:16
+ *  Created :  07.05.2021 10:31:22
  *
  *  Register Layout Version :  9
  *
@@ -1909,7 +1909,7 @@
 
 
 
-/* ****** Control Register 69 [0x1114]: ADC_0_CFG_1458 - ADC 0 (A) Chip Configuration for channels 1, 4, 5 and 8 (Default: 0x00A63F00) ****** */
+/* ****** Control Register 69 [0x1114]: ADC_0_CFG_1458 - ADC 0 (A) Chip Configuration for channels 1, 4, 5 and 8 (Default: 0x00F63F00) ****** */
 
 /* ADC_0_1458_DCSOFF - Clock Duty Cycle Stabilizer (0=ON, 1=OFF) */
 #define WD2_ADC_0_1458_DCSOFF_REG                           WD2_REG_ADC_0_CFG_1458
@@ -1951,7 +1951,7 @@
 #define WD2_ADC_0_1_NAP_MODE_MASK                                       0x01000000
 #define WD2_ADC_0_1_NAP_MODE_OFS                                                24
 
-/* ADC_0_1458_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet) */
+/* ADC_0_1458_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet) */
 #define WD2_ADC_0_1458_ILVDS_REG                            WD2_REG_ADC_0_CFG_1458
 #define WD2_ADC_0_1458_ILVDS_MASK                                       0x00E00000
 #define WD2_ADC_0_1458_ILVDS_OFS                                                21
@@ -1988,7 +1988,7 @@
 
 
 
-/* ****** Control Register 70 [0x1118]: ADC_0_CFG_2367 - ADC 0 (A) Chip Configuration for channels 2, 3, 6 and 7 (Default: 0x00A63F00) ****** */
+/* ****** Control Register 70 [0x1118]: ADC_0_CFG_2367 - ADC 0 (A) Chip Configuration for channels 2, 3, 6 and 7 (Default: 0x00F63F00) ****** */
 
 /* ADC_0_2367_DCSOFF - Clock Duty Cycle Stabilizer (0=ON, 1=OFF) */
 #define WD2_ADC_0_2367_DCSOFF_REG                           WD2_REG_ADC_0_CFG_2367
@@ -2030,7 +2030,7 @@
 #define WD2_ADC_0_2_NAP_MODE_MASK                                       0x01000000
 #define WD2_ADC_0_2_NAP_MODE_OFS                                                24
 
-/* ADC_0_2367_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet) */
+/* ADC_0_2367_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet) */
 #define WD2_ADC_0_2367_ILVDS_REG                            WD2_REG_ADC_0_CFG_2367
 #define WD2_ADC_0_2367_ILVDS_MASK                                       0x00E00000
 #define WD2_ADC_0_2367_ILVDS_OFS                                                21
@@ -2067,7 +2067,7 @@
 
 
 
-/* ****** Control Register 71 [0x111C]: ADC_1_CFG_1458 - ADC 1 (B) Chip Configuration for channels 1, 4, 5 and 8 (Default: 0x00A63F00) ****** */
+/* ****** Control Register 71 [0x111C]: ADC_1_CFG_1458 - ADC 1 (B) Chip Configuration for channels 1, 4, 5 and 8 (Default: 0x00F63F00) ****** */
 
 /* ADC_1_1458_DCSOFF - Clock Duty Cycle Stabilizer (0=ON, 1=OFF) */
 #define WD2_ADC_1_1458_DCSOFF_REG                           WD2_REG_ADC_1_CFG_1458
@@ -2109,7 +2109,7 @@
 #define WD2_ADC_1_1_NAP_MODE_MASK                                       0x01000000
 #define WD2_ADC_1_1_NAP_MODE_OFS                                                24
 
-/* ADC_1_1458_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet) */
+/* ADC_1_1458_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet) */
 #define WD2_ADC_1_1458_ILVDS_REG                            WD2_REG_ADC_1_CFG_1458
 #define WD2_ADC_1_1458_ILVDS_MASK                                       0x00E00000
 #define WD2_ADC_1_1458_ILVDS_OFS                                                21
@@ -2146,7 +2146,7 @@
 
 
 
-/* ****** Control Register 72 [0x1120]: ADC_1_CFG_2367 - ADC 1 (B) Chip Configuration for channels 2, 3, 6 and 7 (Default: 0x00A63F00) ****** */
+/* ****** Control Register 72 [0x1120]: ADC_1_CFG_2367 - ADC 1 (B) Chip Configuration for channels 2, 3, 6 and 7 (Default: 0x00F63F00) ****** */
 
 /* ADC_1_2367_DCSOFF - Clock Duty Cycle Stabilizer (0=ON, 1=OFF) */
 #define WD2_ADC_1_2367_DCSOFF_REG                           WD2_REG_ADC_1_CFG_2367
@@ -2188,7 +2188,7 @@
 #define WD2_ADC_1_2_NAP_MODE_MASK                                       0x01000000
 #define WD2_ADC_1_2_NAP_MODE_OFS                                                24
 
-/* ADC_1_2367_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet) */
+/* ADC_1_2367_ILVDS - LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet) */
 #define WD2_ADC_1_2367_ILVDS_REG                            WD2_REG_ADC_1_CFG_2367
 #define WD2_ADC_1_2367_ILVDS_MASK                                       0x00E00000
 #define WD2_ADC_1_2367_ILVDS_OFS                                                21

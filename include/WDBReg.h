@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  19.04.2021 13:49:33
+// Created :  07.05.2021 10:31:48
 //
 // Register Layout Versions :  8, 9
 //
@@ -122,7 +122,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
-            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet)
             return BitExtractControl(0x1114, 0x00E00000, 21);
          default:
             throw std::invalid_argument("Function GetAdc01458Ilvds() not defined for this board version");
@@ -133,7 +133,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
-            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet)
             return SetRegMask(0x1114, 0x00E00000, 21, value);
          default:
             throw std::invalid_argument("Function SetAdc01458Ilvds() not defined for this board version");
@@ -144,7 +144,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
-            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet)
             if(BitMask) *BitMask = 0x00E00000;
             if(BitOfs) *BitOfs = 21;
             return 0x1114;
@@ -566,7 +566,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
-            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet)
             return BitExtractControl(0x1118, 0x00E00000, 21);
          default:
             throw std::invalid_argument("Function GetAdc02367Ilvds() not defined for this board version");
@@ -577,7 +577,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
-            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet)
             return SetRegMask(0x1118, 0x00E00000, 21, value);
          default:
             throw std::invalid_argument("Function SetAdc02367Ilvds() not defined for this board version");
@@ -588,7 +588,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
-            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet)
             if(BitMask) *BitMask = 0x00E00000;
             if(BitOfs) *BitOfs = 21;
             return 0x1118;
@@ -1284,7 +1284,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
-            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet)
             return BitExtractControl(0x111C, 0x00E00000, 21);
          default:
             throw std::invalid_argument("Function GetAdc11458Ilvds() not defined for this board version");
@@ -1295,7 +1295,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
-            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet)
             return SetRegMask(0x111C, 0x00E00000, 21, value);
          default:
             throw std::invalid_argument("Function SetAdc11458Ilvds() not defined for this board version");
@@ -1306,7 +1306,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
-            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet)
             if(BitMask) *BitMask = 0x00E00000;
             if(BitOfs) *BitOfs = 21;
             return 0x111C;
@@ -1728,7 +1728,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
-            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet)
             return BitExtractControl(0x1120, 0x00E00000, 21);
          default:
             throw std::invalid_argument("Function GetAdc12367Ilvds() not defined for this board version");
@@ -1739,7 +1739,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
-            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet)
             return SetRegMask(0x1120, 0x00E00000, 21, value);
          default:
             throw std::invalid_argument("Function SetAdc12367Ilvds() not defined for this board version");
@@ -1750,7 +1750,7 @@ public:
       switch(this->mVersion)
       {
          case 9:
-            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b101 = 2.5mA) (see datasheet)
+            // LVDS Output Current Bits (1.75mA - 4.5mA, 0b111 = 2x1.75mA = 3.5mA) (see datasheet)
             if(BitMask) *BitMask = 0x00E00000;
             if(BitOfs) *BitOfs = 21;
             return 0x1120;
