@@ -1390,6 +1390,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
 
          int vcb = gl->wp->GetVcalibBoard();
          mg_send_http_chunk(nc, (const char *) &vcb, 4);
+         wdb =  gl->wp->GetWDB(vcb);
 
          float f = gl->wp->GetVcalibProgress();
          mg_send_http_chunk(nc, (const char *) &f, 4);
@@ -1427,6 +1428,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
 
          int tcb = gl->wp->GetTcalibBoard();
          mg_send_http_chunk(nc, (const char *) &tcb, 4);
+         wdb =  gl->wp->GetWDB(tcb);
 
          float f = gl->wp->GetTcalibProgress();
          mg_send_http_chunk(nc, (const char *) &f, 4);
