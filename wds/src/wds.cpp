@@ -83,25 +83,6 @@ std::vector<std::string> split(const std::string &input, char separator) {
    return output;
 }
 
-/*------------------------------------------------------------------*/
-
-DCB *get_dcb_from_query(const struct mg_str *buf, GLOBALS *gl) {
-   char str[256];
-   mg_get_http_var(buf, "adr", str, sizeof(str));
-   auto adr = std::string(str);
-   for (auto &c: adr) c = toupper(c);
-
-   DCB *dcb = nullptr;
-   for (auto &d : gl->dcb) {
-      if (d->GetName() == std::string(adr)) {
-         dcb = d;
-         break;
-      }
-   }
-
-   return dcb;
-}
-
 WDB* findBoard(std::vector<DCB *> vdcb, std::vector<WDB *> vwdb, std::string adr) {
    for (auto &c: adr) c = toupper(c);
 
@@ -1711,7 +1692,7 @@ void connectWDB(GLOBALS *gl, WDB *b) {
          break;
       if (i == 49)
          throw std::runtime_error(std::string("Error reading magic number from " + b->GetName()));
-   };
+   }
 
    b->ReceiveControlRegisters();
    if (gl->verbose) {
@@ -2187,8 +2168,8 @@ int main(int argc, const char *argv[]) {
    gl.wp = new WP(gl.verbose, gl.wdsDir, gl.logFileName, gl.demoMode);
 
    // set destination port for DCB, MAC and IP is used automatically from UDP packet
-   for (auto &d : gl.dcb)
-      d->SetDestinationPort(gl.wp->GetServerPort());
+   for (auto &db : gl.dcb)
+      db->SetDestinationPort(gl.wp->GetServerPort());
 
    gl.wp->SetWDBList(gl.wdb);
 
