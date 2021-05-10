@@ -1772,7 +1772,8 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
                std::cout << "Connect to " << wdb->GetAddr() << " ... " << std::flush;
             connectWDB(gl, wdb);
             gl->wdb.push_back(wdb);
-            gl->wp->SetWDBList(gl->wdb);
+            if (gl->wp != nullptr)
+               gl->wp->SetWDBList(gl->wdb);
             if (gl->verbose)
                std::cout << "OK" << std::endl;
             dcb->SetWDB(i, wdb);
@@ -1895,6 +1896,7 @@ int main(int argc, const char *argv[]) {
    gl.updatePeriodic = false;
    gl.wdsDir = "";
    gl.upload = false;
+   gl.wp = nullptr;
 
    // extract wds directory from command line parameters
    std::string dir;
@@ -2100,8 +2102,25 @@ int main(int argc, const char *argv[]) {
    if (gl.triggerSelfArm)
       gl.triggerMode = cTriggerModeNormal;
 
-   // instantiate waveform processor
-   gl.wp = new WP(gl.verbose, gl.wdsDir, gl.logFileName, gl.demoMode);
+   // initialize web server
+   struct mg_mgr mgr;
+   struct mg_connection *con;
+
+   mg_mgr_init(&mgr, &gl);
+   con = mg_bind(&mgr, std::to_string(gl.serverPort).c_str(), wds_handler);
+   if (con == NULL) {
+      std::cerr << "Cannot bind to port " << gl.serverPort << ". Probably other server is already running."
+                << std::endl;
+      return 1;
+   }
+
+   mg_set_protocol_http_websocket(con);
+   s_http_server_opts.dav_auth_file = "-";     // Allow access via WebDav
+   s_http_server_opts.enable_directory_listing = "yes";
+
+   // set document_root
+   std::string d(gl.wdsDir + "/html");
+   s_http_server_opts.document_root = d.c_str();
 
    // if running on DCB, directly connect to local crate
    char host[256];
@@ -2119,8 +2138,6 @@ int main(int argc, const char *argv[]) {
             std::cout << "Connect to " << dcb->GetName() << " ... " << std::flush;
          dcb->Connect();
          dcb->ScanCrate();
-         // set destination port for DCB, MAC and IP is used automatically from UDP packet
-         dcb->SetDestinationPort(gl.wp->GetServerPort());
          if (gl.verbose)
             std::cout << "OK" << std::endl;
          if (gl.verbose) {
@@ -2144,26 +2161,6 @@ int main(int argc, const char *argv[]) {
       }
    }
 
-   // initialize web server
-   struct mg_mgr mgr;
-   struct mg_connection *con;
-
-   mg_mgr_init(&mgr, &gl);
-   con = mg_bind(&mgr, std::to_string(gl.serverPort).c_str(), wds_handler);
-   if (con == NULL) {
-      std::cerr << "Cannot bind to port " << gl.serverPort << ". Probably other server is already running."
-                << std::endl;
-      return 1;
-   }
-
-   mg_set_protocol_http_websocket(con);
-   s_http_server_opts.dav_auth_file = "-";     // Allow access via WebDav
-   s_http_server_opts.enable_directory_listing = "yes";
-
-   // set document_root
-   std::string d(gl.wdsDir + "/html");
-   s_http_server_opts.document_root = d.c_str();
-
    std::cout << "GIT revision: " << getWdbLibRevision() << std::endl;
    std::cout << "Starting HTTP server at port " << gl.serverPort << std::endl;
 
@@ -2184,8 +2181,14 @@ int main(int argc, const char *argv[]) {
       setsid(); // become session leader
    }
 
-   if (gl.verbose)
-      std::cout << "Starting packet receiver at port " << gl.wp->GetServerPort() << std::endl;
+   // instantiate waveform processor
+   gl.wp = new WP(gl.verbose, gl.wdsDir, gl.logFileName, gl.demoMode);
+
+   // set destination port for DCB, MAC and IP is used automatically from UDP packet
+   for (auto &d : gl.dcb)
+      d->SetDestinationPort(gl.wp->GetServerPort());
+
+   gl.wp->SetWDBList(gl.wdb);
 
    time_t last = 0, now;
 

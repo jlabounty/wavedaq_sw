@@ -2060,9 +2060,7 @@ WP::WP(int verbose, std::string wdsDir, std::string logfile, bool demo) {
       getsockname(WP::gDataSocket, (struct sockaddr *) &server_addr, (socklen_t *) &size);
       WP::mServerPort = ntohs(server_addr.sin_port);
 
-      if (this->mVerbose) {
-         std::cout << std::endl << "Listening on PORT " << WP::mServerPort << std::endl;
-      }
+      std::cout << "Listening on UDP port " << WP::mServerPort << std::endl;
    }
 
    // initialize event flags
@@ -3294,7 +3292,7 @@ void WP::Collector() {
    int status;
 
    if (mVerbose)
-      std::cout << std::endl << "Started waveform collector." << std::endl;
+      std::cout << "Started waveform collector thread" << std::endl;
 
    do {
 
