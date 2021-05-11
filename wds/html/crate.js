@@ -1226,23 +1226,26 @@ function uploadProgress() {
    req.onreadystatechange = function () {
       if (req.readyState === 4 && req.status === 200) {
          let r = JSON.parse(req.responseText);
-         if (r.progress !== undefined) {
-            if (r.progress === "finished") {
+         if (r.Mode !== undefined) {
+            if (r.Mode  === "Finished") {
                dlgHide("dlgWait");
                dlgWait(6, "Init in progress");
 
                initWDB(CRATE.selectedWDB, document.getElementById("serial").value);
             } else {
-               document.getElementById("progressComment").innerHTML = "Uploading slot " + r.slot;
-               let d = document.getElementById("progressWait");
-               d.set(r.progress / 100);
+               if (r.Board !== undefined && r.Progress !== undefined) {
+                  document.getElementById("progressComment").innerHTML = "Uploading board " + r.Board;
+                  let d = document.getElementById("progressWait");
+                  d.set(r.Progress / 100);
+               }
+               window.setTimeout(uploadProgress, 300);
             }
-         }
-         window.setTimeout(uploadProgress, 300);
+         } else
+            window.setTimeout(uploadProgress, 300);
       }
    }
 
-   req.open("GET", "uploadProg?adr=" + CRATE.dcbAddress + "&r=" + Math.random(), true);
+   req.open("GET", "progress?adr=" + CRATE.dcbAddress + "&r=" + Math.random(), true);
    req.send();
 }
 
@@ -1250,7 +1253,7 @@ function initWDB(slot, serial) {
    let req = new XMLHttpRequest();
    req.onreadystatechange = function () {
       if (req.readyState === 4 && req.status === 200) {
-         CRATE.timer.loadCrate = window.setTimeout(loadCrate, 100, true); // restart CERATE scan
+         CRATE.timer.loadCrate = window.setTimeout(loadCrate, 100, true); // restart crate scan
 
          // switch to WDB info panel
          if (CRATE.selectedWDB !== undefined) {
