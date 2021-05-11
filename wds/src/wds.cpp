@@ -2108,7 +2108,6 @@ int main(int argc, const char *argv[]) {
    // if running on DCB, directly connect to local crate
    char host[256];
    gethostname(host, sizeof(host));
-   strcpy(host, "DCB01");
    if (strncmp(host, "dcb", 3) == 0 || strncmp(host, "DCB", 3) == 0) {
       if (strchr(host, '.'))
          *strchr(host, '.') = 0; // strip domain
