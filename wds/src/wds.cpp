@@ -2144,6 +2144,7 @@ int main(int argc, const char *argv[]) {
       if (strchr(host, '.'))
          *strchr(host, '.') = 0; // strip domain
       std::string adr = host;
+      for (auto &c: adr) c = toupper(c);
 
       // create new board
       DCB *dcb = new DCB(adr, gl.verbose);
