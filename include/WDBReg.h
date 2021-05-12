@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  07.05.2021 10:31:48
+// Created :  11.05.2021 14:04:52
 //
 // Register Layout Versions :  8, 9
 //
@@ -20696,6 +20696,34 @@ public:
             return 0x1124;
          default:
             throw std::invalid_argument("Function GetLeadTrailEdgeSelLoc() not defined for this board version");
+      };
+   };
+
+   // Bit(s) LED_STATE
+   unsigned int GetLedState()
+   {
+      switch(this->mVersion)
+      {
+         case 8:
+         case 9:
+            // State of the front panel LED (on-beat-color RGB, off-beat-color RGB)
+            return BitExtractStatus(0x0024, 0x3F000000, 24);
+         default:
+            throw std::invalid_argument("Function GetLedState() not defined for this board version");
+      };
+   };
+   unsigned int GetLedStateLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
+   {
+      switch(this->mVersion)
+      {
+         case 8:
+         case 9:
+            // State of the front panel LED (on-beat-color RGB, off-beat-color RGB)
+            if(BitMask) *BitMask = 0x3F000000;
+            if(BitOfs) *BitOfs = 24;
+            return 0x0024;
+         default:
+            throw std::invalid_argument("Function GetLedStateLoc() not defined for this board version");
       };
    };
 

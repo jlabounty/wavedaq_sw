@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  07.05.2021 10:31:22
+ *  Created :  11.05.2021 14:04:48
  *
  *  Register Layout Version :  9
  *
@@ -927,6 +927,7 @@ const wd2_bit_group_entry_type  wd2_bit_group_list[] = {
   { "FW_GIT_HASH_TAG"               , WD2_FW_GIT_HASH_TAG_REG               , WD2_FW_GIT_HASH_TAG_MASK               , WD2_FW_GIT_HASH_TAG_OFS               },
   { "SW_GIT_HASH_TAG"               , WD2_SW_GIT_HASH_TAG_REG               , WD2_SW_GIT_HASH_TAG_MASK               , WD2_SW_GIT_HASH_TAG_OFS               },
   { "PROTOCOL_VERSION"              , WD2_PROTOCOL_VERSION_REG              , WD2_PROTOCOL_VERSION_MASK              , WD2_PROTOCOL_VERSION_OFS              },
+  { "LED_STATE"                     , WD2_LED_STATE_REG                     , WD2_LED_STATE_MASK                     , WD2_LED_STATE_OFS                     },
   { "SERIAL_NUMBER"                 , WD2_SERIAL_NUMBER_REG                 , WD2_SERIAL_NUMBER_MASK                 , WD2_SERIAL_NUMBER_OFS                 },
   { "TEMPERATURE"                   , WD2_TEMPERATURE_REG                   , WD2_TEMPERATURE_MASK                   , WD2_TEMPERATURE_OFS                   },
   { "OVERTEMP"                      , WD2_OVERTEMP_REG                      , WD2_OVERTEMP_MASK                      , WD2_OVERTEMP_OFS                      },
