@@ -196,7 +196,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
             }
          }
          if (dcb == nullptr) {
-            mg_send_response_line(nc, 200, "Content-Type: application/octet-stream\r\nTransfer-Encoding: chunked\r\n");
+            mg_send_response_line(nc, 200, "Content-Type: application/json\r\nTransfer-Encoding: chunked\r\n");
             mg_printf_http_chunk(nc, "{\n");
             mg_printf_http_chunk(nc, "  \"Error\": \"Not connected to %s\"\n", dcbName.c_str());
             mg_printf_http_chunk(nc, "}\n");
@@ -636,7 +636,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       if (gl->verbose)
          std::cout << "Sending /gl to browser" << std::endl;
 
-      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+      mg_send_response_line(nc, 200, "Content-Type: application/json\r\nTransfer-Encoding: chunked\r\n");
 
       mg_printf_http_chunk(nc, "{\n");
       mg_printf_http_chunk(nc, "   \"gl\": {\n");
@@ -832,7 +832,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
          }
       }
 
-      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+      mg_send_response_line(nc, 200, "Content-Type: application/json\r\nTransfer-Encoding: chunked\r\n");
 
       // if not connected, try to connect
       if (dcb == nullptr) {
@@ -1038,7 +1038,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
 
          b = dcb->GetWDB(slot);
          if (b == nullptr) {
-            mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+            mg_send_response_line(nc, 200, "Content-Type: application/json\r\nTransfer-Encoding: chunked\r\n");
             mg_printf_http_chunk(nc, "{\n");
             mg_printf_http_chunk(nc, "  \"error\": \"Board %s does not respond\"\n", adr.c_str());
             mg_printf_http_chunk(nc, "}\n");
@@ -1055,7 +1055,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
          }
       }
 
-      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+      mg_send_response_line(nc, 200, "Content-Type: application/json\r\nTransfer-Encoding: chunked\r\n");
 
       // if not connected, try to connect
       if (b == nullptr) {
@@ -1278,7 +1278,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       if (gl->verbose)
          std::cout << "Sending /build to browser" << std::endl;
 
-      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+      mg_send_response_line(nc, 200, "Content-Type: application/json\r\nTransfer-Encoding: chunked\r\n");
       mg_printf_http_chunk(nc, "{\n");
       mg_printf_http_chunk(nc, "   \"build\": \"%s\",\n", __DATE__);
       mg_printf_http_chunk(nc, "   \"git revision\": \"%s\"\n", getWdbLibRevision().c_str());
@@ -1292,7 +1292,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       if (gl->verbose)
          std::cout << "Sending /recent to browser" << std::endl;
 
-      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+      mg_send_response_line(nc, 200, "Content-Type: application/json\r\nTransfer-Encoding: chunked\r\n");
       mg_printf_http_chunk(nc, "{\n");
       mg_printf_http_chunk(nc, "   \"recent\": [\n");
 
@@ -1319,7 +1319,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
    //  progress for calibration and upload ------------------------------
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/progress") == 0) {
 
-      mg_send_response_line(nc, 200, "Content-Type: application/octet-stream\r\nTransfer-Encoding: chunked\r\n");
+      mg_send_response_line(nc, 200, "Content-Type: application/json\r\nTransfer-Encoding: chunked\r\n");
 
       if (gl->wp->IsVcalibActive()) {
 
