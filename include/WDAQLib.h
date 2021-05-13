@@ -303,6 +303,9 @@ public:
    unsigned short   mDacROFS;
    float            mTemperature;
 
+   //set by Worker if temperature is not in calibration range
+   bool             mTemperatureOk;
+
    //channel or data depenant
    unsigned short   mFrontendSettings[WD_N_CHANNELS];
    unsigned int     mTriggerCell[WD_N_CHANNELS];
