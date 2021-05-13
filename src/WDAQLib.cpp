@@ -413,6 +413,7 @@ void WDAQBoardEvent::operator delete(void* ptr){
 WDAQWdbEvent::WDAQWdbEvent(WDAQPacketData* pkt): WDAQBoardEvent(pkt){
    //reset status
    mVCalibrated = false;
+   mTemperatureOk = false;
    mDrsTxEnable = 0;
    mAdcTxEnable = 0;
    mTdcTxEnable = 0;
@@ -1056,6 +1057,14 @@ void WDAQWorker::calibrateBoard(WDAQWdbEvent *ev){
    // CLK channels masked with the presence of at least one associated channels in the event
    ev->mDrsHasData[16] &= ev->mDrsHasData[0]|ev->mDrsHasData[1]|ev->mDrsHasData[2]|ev->mDrsHasData[3]|ev->mDrsHasData[4]|ev->mDrsHasData[5]|ev->mDrsHasData[6]|ev->mDrsHasData[7];
    ev->mDrsHasData[17] &= ev->mDrsHasData[8]|ev->mDrsHasData[9]|ev->mDrsHasData[10]|ev->mDrsHasData[11]|ev->mDrsHasData[12]|ev->mDrsHasData[13]|ev->mDrsHasData[14]|ev->mDrsHasData[15];
+
+   //check temperature
+   if(calib->IsValid() && fabs(calib->GetTemperature() - ev->mTemperature) > 5){
+      ev->mTemperatureOk = false;
+      //printf("Board %d: temperature difference too big! %f %f\n", ev->mBoardId, calib->GetTemperature(), ev->mTemperature);
+   } else {
+      ev->mTemperatureOk = true;
+   }
 
    //amplitude e->mDrsU[ch][bin];
    //unrotate

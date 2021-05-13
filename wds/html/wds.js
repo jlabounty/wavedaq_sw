@@ -742,7 +742,7 @@ function setParam(e, channel) {
 
    let uri = e.name + "/";
    if (OSC.applyAll)
-      uri += "ALL";
+      uri += "*";
    else
       uri += OSC.wdbAddress + "";
    if (channel !== undefined)
@@ -1782,7 +1782,7 @@ function btnVcalib() {
 
    let req = new XMLHttpRequest();
    if (OSC.applyAll)
-      req.open("PUT", "vcalib/ALL");
+      req.open("PUT", "vcalib/*");
    else
       req.open("PUT", "vcalib/" + OSC.wdbAddress);
    req.send();
@@ -1796,7 +1796,7 @@ function btnTcalib() {
 
    let req = new XMLHttpRequest();
    if (OSC.applyAll)
-      req.open("PUT", "tcalib/ALL");
+      req.open("PUT", "tcalib/*");
    else
       req.open("PUT", "tcalib/" + OSC.wdbAddress);
    req.send();

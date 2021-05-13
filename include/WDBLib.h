@@ -537,13 +537,13 @@ class WDB: public WDBREG {
    static unsigned short udpSequenceNumber;
 
    std::string      SendReceiveUDP(std::string str, unsigned char *ethAddr = NULL);
-   void             SendUDP(std::string str, unsigned char *ethAddr = NULL);
 
    void             WriteUDP(unsigned int ofs, std::vector<unsigned int> data);
    std::vector<unsigned int> ReadUDP(unsigned int ofs, unsigned int len);
 
    WDBS             mSave;
 public:
+   void             SendUDP(std::string str, unsigned char *ethAddr = NULL);
 
    // constructor
    WDB(std::string name, bool verbose = false);

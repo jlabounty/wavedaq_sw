@@ -5,7 +5,7 @@
 #  Project :  WaveDream2
 #
 #  Author  :  schmid_e (Author of generation script)
-#  Created :  07.05.2021 10:31:22
+#  Created :  11.05.2021 14:04:48
 #
 #  Register Layout Version :  9
 #
@@ -3012,6 +3012,11 @@ WD2_PROTOCOL_VERSION_OFS                 =                                 0
 
 # ****** Status Register 9 [0x0024]: SN - Serial Number of the WD2 Board (Board ID) (Default: 0x00000000) ******
 
+# LED_STATE - State of the front panel LED (on-beat-color RGB, off-beat-color RGB)
+WD2_LED_STATE_REG                        =                        WD2_REG_SN
+WD2_LED_STATE_MASK                       =                        0x3F000000
+WD2_LED_STATE_OFS                        =                                24
+
 # SERIAL_NUMBER - Serial Number of the WD2 Board (Board ID)
 WD2_SERIAL_NUMBER_REG                    =                        WD2_REG_SN
 WD2_SERIAL_NUMBER_MASK                   =                        0x0000FFFF
@@ -4871,6 +4876,7 @@ wd2_bit_group_list = [
   [ "FW_GIT_HASH_TAG"               , WD2_FW_GIT_HASH_TAG_REG               , WD2_FW_GIT_HASH_TAG_MASK               , WD2_FW_GIT_HASH_TAG_OFS              , "Hash tag of the firmware commit in the GIT repository" ],
   [ "SW_GIT_HASH_TAG"               , WD2_SW_GIT_HASH_TAG_REG               , WD2_SW_GIT_HASH_TAG_MASK               , WD2_SW_GIT_HASH_TAG_OFS              , "Hash tag of the software commit in the GIT repository" ],
   [ "PROTOCOL_VERSION"              , WD2_PROTOCOL_VERSION_REG              , WD2_PROTOCOL_VERSION_MASK              , WD2_PROTOCOL_VERSION_OFS             , "Version of the WaveDream2 protocol" ],
+  [ "LED_STATE"                     , WD2_LED_STATE_REG                     , WD2_LED_STATE_MASK                     , WD2_LED_STATE_OFS                    , "State of the front panel LED (on-beat-color RGB, off-beat-color RGB)" ],
   [ "SERIAL_NUMBER"                 , WD2_SERIAL_NUMBER_REG                 , WD2_SERIAL_NUMBER_MASK                 , WD2_SERIAL_NUMBER_OFS                , "Serial Number of the WD2 Board (Board ID)" ],
   [ "TEMPERATURE"                   , WD2_TEMPERATURE_REG                   , WD2_TEMPERATURE_MASK                   , WD2_TEMPERATURE_OFS                  , "temperature in 0.0625 deg. C units" ],
   [ "OVERTEMP"                      , WD2_OVERTEMP_REG                      , WD2_OVERTEMP_MASK                      , WD2_OVERTEMP_OFS                     , "Overtemperature from external sensor" ],

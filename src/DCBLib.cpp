@@ -569,6 +569,10 @@ std::string DCB::UploadProgress() {
          return r;
       res = r;
    } while (true);
+
+   if(res == ""){
+      res = SendReceiveUDP("\n", false);
+   }
    return res;
 }
 

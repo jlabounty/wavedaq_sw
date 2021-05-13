@@ -5,6 +5,37 @@
 //  Stefan Ritt 31 Jan 2017
 //
 
+/*
+ * Commands directly from command line:
+ *
+ * - firmware upload slot x:
+ *   $ curl -X PUT -d "" http://host:port/upload/DCBnn:x
+ *
+ * - firmware upload all slots:
+ *   $ curl -X PUT -d "" http://host:port/upload/DCBnn:*
+ *
+ * - voltage calibration slot x
+ *   $ curl -X PUT -d "" http://host:port/vcalib/DCBnn:x
+ *
+ * - voltage calibration all slots
+ *   $ curl -X PUT -d "" http://host:port/vcalib/DCBnn:*
+ *
+ * - time calibration slot x
+ *   $ curl -X PUT -d "" http://host:port/tcalib/DCBnn:x
+ *
+ * - time calibration all slots
+ *   $ curl -X PUT -d "" http://host:port/tcalib/DCBnn:*
+ *
+ * - query progress:
+ *   $ curl http://host:port/progress
+ *   returns:
+ *   {
+ *     "Mode": "Voltage|Time|Upload|Finished",
+ *     "Board": "DCBnn:x",
+ *     "Progress": "12.4"  <-- in percent
+ *   }
+ *
+ */
 
 #include <iostream>
 #include <sstream>
@@ -81,25 +112,6 @@ std::vector<std::string> split(const std::string &input, char separator) {
    }
 
    return output;
-}
-
-/*------------------------------------------------------------------*/
-
-DCB *get_dcb_from_query(const struct mg_str *buf, GLOBALS *gl) {
-   char str[256];
-   mg_get_http_var(buf, "adr", str, sizeof(str));
-   auto adr = std::string(str);
-   for (auto &c: adr) c = toupper(c);
-
-   DCB *dcb = nullptr;
-   for (auto &d : gl->dcb) {
-      if (d->GetName() == std::string(adr)) {
-         dcb = d;
-         break;
-      }
-   }
-
-   return dcb;
 }
 
 WDB* findBoard(std::vector<DCB *> vdcb, std::vector<WDB *> vwdb, std::string adr) {
@@ -183,15 +195,21 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
                break;
             }
          }
-         if (dcb == nullptr)
+         if (dcb == nullptr) {
+            mg_send_response_line(nc, 200, "Content-Type: application/json\r\nTransfer-Encoding: chunked\r\n");
+            mg_printf_http_chunk(nc, "{\n");
+            mg_printf_http_chunk(nc, "  \"Error\": \"Not connected to %s\"\n", dcbName.c_str());
+            mg_printf_http_chunk(nc, "}\n");
+            mg_send_http_chunk(nc, "", 0);
             return;
+         }
 
          if (slot != -1)
             wdbList.push_back(dcb->GetWDB(slot));
 
       } else {
          for (auto &wdb : gl->wdb) {
-            if (wdbAddress == std::string("ALL") || wdb->GetAddr() == wdbAddress) {
+            if (wdbAddress == std::string("*") || wdb->GetAddr() == wdbAddress) {
                wdbList.push_back(wdb);
             }
          }
@@ -449,7 +467,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
          }
 
          if (!gl->demoMode) {
-            if (wdbAddress == "ALL")
+            if (wdbAddress == "*")
                gl->wp->StartCalibrationVoltage(nullptr);
             else {
                auto wdb = findBoard(gl->dcb, gl->wdb, wdbAddress);
@@ -460,7 +478,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       } else if (item == "tcalib") {
 
          if (!gl->demoMode) {
-            if (wdbAddress == "ALL")
+            if (wdbAddress == "*")
                gl->wp->StartCalibrationTime(nullptr);
             else {
                auto wdb = findBoard(gl->dcb, gl->wdb, wdbAddress);
@@ -618,7 +636,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       if (gl->verbose)
          std::cout << "Sending /gl to browser" << std::endl;
 
-      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+      mg_send_response_line(nc, 200, "Content-Type: application/json\r\nTransfer-Encoding: chunked\r\n");
 
       mg_printf_http_chunk(nc, "{\n");
       mg_printf_http_chunk(nc, "   \"gl\": {\n");
@@ -814,7 +832,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
          }
       }
 
-      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+      mg_send_response_line(nc, 200, "Content-Type: application/json\r\nTransfer-Encoding: chunked\r\n");
 
       // if not connected, try to connect
       if (dcb == nullptr) {
@@ -1020,7 +1038,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
 
          b = dcb->GetWDB(slot);
          if (b == nullptr) {
-            mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+            mg_send_response_line(nc, 200, "Content-Type: application/json\r\nTransfer-Encoding: chunked\r\n");
             mg_printf_http_chunk(nc, "{\n");
             mg_printf_http_chunk(nc, "  \"error\": \"Board %s does not respond\"\n", adr.c_str());
             mg_printf_http_chunk(nc, "}\n");
@@ -1037,7 +1055,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
          }
       }
 
-      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+      mg_send_response_line(nc, 200, "Content-Type: application/json\r\nTransfer-Encoding: chunked\r\n");
 
       // if not connected, try to connect
       if (b == nullptr) {
@@ -1260,7 +1278,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       if (gl->verbose)
          std::cout << "Sending /build to browser" << std::endl;
 
-      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+      mg_send_response_line(nc, 200, "Content-Type: application/json\r\nTransfer-Encoding: chunked\r\n");
       mg_printf_http_chunk(nc, "{\n");
       mg_printf_http_chunk(nc, "   \"build\": \"%s\",\n", __DATE__);
       mg_printf_http_chunk(nc, "   \"git revision\": \"%s\"\n", getWdbLibRevision().c_str());
@@ -1274,7 +1292,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       if (gl->verbose)
          std::cout << "Sending /recent to browser" << std::endl;
 
-      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
+      mg_send_response_line(nc, 200, "Content-Type: application/json\r\nTransfer-Encoding: chunked\r\n");
       mg_printf_http_chunk(nc, "{\n");
       mg_printf_http_chunk(nc, "   \"recent\": [\n");
 
@@ -1298,72 +1316,67 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       return;
    }
 
-   // upload progress ------------------------------
-   if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/uploadProg") == 0) {
-      char str[256];
-      mg_get_http_var(&hm->query_string, "adr", str, sizeof(str));
-      auto adr = std::string(str);
-      for (auto &c: adr) c = toupper(c);
+   //  progress for calibration and upload ------------------------------
+   if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/progress") == 0) {
 
-      if (adr[0] == 'D') {
-         DCB *dcb = nullptr;
-         for (auto &d : gl->dcb) {
-            if (d->GetName() == adr) {
-               dcb = d;
-               break;
-            }
-         }
+      mg_send_response_line(nc, 200, "Content-Type: application/json\r\nTransfer-Encoding: chunked\r\n");
+
+      if (gl->wp->IsVcalibActive()) {
+
+         std::string adr = gl->wp->GetWDB(gl->wp->GetVcalibBoard())->GetAddr();
+         float f = gl->wp->GetVcalibProgress();
+         mg_printf_http_chunk(nc, "{\n");
+         mg_printf_http_chunk(nc, "   \"Mode\": \"Voltage\",\n");
+         mg_printf_http_chunk(nc, "   \"Board\": \"%s\",\n", adr.c_str());
+         mg_printf_http_chunk(nc, "   \"Progress\": \"%1.1lf\"\n", f*100);
+         mg_printf_http_chunk(nc, "}\n");
+
+      } else if (gl->wp->IsTcalibActive()) {
+
+         std::string adr = gl->wp->GetWDB(gl->wp->GetTcalibBoard())->GetAddr();
+         float f = gl->wp->GetTcalibProgress();
+         mg_printf_http_chunk(nc, "{\n");
+         mg_printf_http_chunk(nc, "   \"Mode\": \"Time\",\n");
+         mg_printf_http_chunk(nc, "   \"Board\": \"%s\",\n", adr.c_str());
+         mg_printf_http_chunk(nc, "   \"Progress\": \"%1.1lf\"\n", f*100);
+         mg_printf_http_chunk(nc, "}\n");
+
+      } else if (gl->upload) {
+
+         auto dcb = gl->dcb[0];
          if (dcb != nullptr) {
             auto s = dcb->UploadProgress();
+            if (gl->verbose)
+               std::cout << "Upload progress " << s << std::endl;
 
             if (s.find(">") != std::string::npos) {
                if (gl->verbose)
                   std::cout << "Upload finished" << std::endl;
                gl->upload = false;
-               mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
                mg_printf_http_chunk(nc, "{\n");
-               mg_printf_http_chunk(nc, "   \"progress\" : \"finished\"\n");
+               mg_printf_http_chunk(nc, "   \"Mode\": \"Finished\"\n");
                mg_printf_http_chunk(nc, "}\n");
-               mg_send_http_chunk(nc, "", 0);
-
             } else if (s.size() > 3) {
                int slot = std::stoi(s);
                double progress = std::stod(s.substr(s.find(" ") + 1));
 
-               mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
                mg_printf_http_chunk(nc, "{\n");
-               mg_printf_http_chunk(nc, "   \"slot\": %d,\n", slot);
-               mg_printf_http_chunk(nc, "   \"progress\" : %1.1lf\n", progress);
+               mg_printf_http_chunk(nc, "   \"Mode\": \"Upload\",\n");
+               mg_printf_http_chunk(nc, "   \"Board\": \"%s:%d\",\n", dcb->GetName().c_str(), slot);
+               mg_printf_http_chunk(nc, "   \"Progress\": \"%1.1lf\"\n", progress);
                mg_printf_http_chunk(nc, "}\n");
-               mg_send_http_chunk(nc, "", 0);
 
                if (gl->verbose)
                   std::cout << "Return upload slot " << slot << " progress " << progress << std::endl;
             } else {
-               mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
                mg_printf_http_chunk(nc, "{}\n");
-               mg_send_http_chunk(nc, "", 0);
             }
          }
+      } else {
+         mg_printf_http_chunk(nc, "{\n");
+         mg_printf_http_chunk(nc, "   \"Mode\": \"Finished\"\n");
+         mg_printf_http_chunk(nc, "}\n");
       }
-      return;
-   }
-
-   // upload progress ------------------------------
-   if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/calibProgress") == 0) {
-
-      mg_send_response_line(nc, 200, "Content-Type: application/octet-stream\r\nTransfer-Encoding: chunked\r\n");
-
-      if (gl->wp->IsVcalibActive()) {
-         std::string adr = gl->wp->GetWDB(gl->wp->GetVcalibBoard())->GetAddr();
-         float f = gl->wp->GetVcalibProgress();
-         mg_printf_http_chunk(nc, "V %s %1.0lf %%\n", adr.c_str(), f*100);
-      } else if (gl->wp->IsTcalibActive()) {
-         std::string adr = gl->wp->GetWDB(gl->wp->GetTcalibBoard())->GetAddr();
-         float f = gl->wp->GetTcalibProgress();
-         mg_printf_http_chunk(nc, "T %s %1.0lf %%\n", adr.c_str(), f*100);
-      } else
-         mg_printf_http_chunk(nc, "%s", "Calibration finished\n");
 
       mg_send_http_chunk(nc, "", 0);
       return;
@@ -1390,6 +1403,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
 
          int vcb = gl->wp->GetVcalibBoard();
          mg_send_http_chunk(nc, (const char *) &vcb, 4);
+         wdb =  gl->wp->GetWDB(vcb);
 
          float f = gl->wp->GetVcalibProgress();
          mg_send_http_chunk(nc, (const char *) &f, 4);
@@ -1427,6 +1441,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
 
          int tcb = gl->wp->GetTcalibBoard();
          mg_send_http_chunk(nc, (const char *) &tcb, 4);
+         wdb =  gl->wp->GetWDB(tcb);
 
          float f = gl->wp->GetTcalibProgress();
          mg_send_http_chunk(nc, (const char *) &f, 4);
@@ -1709,7 +1724,7 @@ void connectWDB(GLOBALS *gl, WDB *b) {
          break;
       if (i == 49)
          throw std::runtime_error(std::string("Error reading magic number from " + b->GetName()));
-   };
+   }
 
    b->ReceiveControlRegisters();
    if (gl->verbose) {
@@ -1772,7 +1787,8 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
                std::cout << "Connect to " << wdb->GetAddr() << " ... " << std::flush;
             connectWDB(gl, wdb);
             gl->wdb.push_back(wdb);
-            gl->wp->SetWDBList(gl->wdb);
+            if (gl->wp != nullptr)
+               gl->wp->SetWDBList(gl->wdb);
             if (gl->verbose)
                std::cout << "OK" << std::endl;
             dcb->SetWDB(i, wdb);
@@ -1895,6 +1911,7 @@ int main(int argc, const char *argv[]) {
    gl.updatePeriodic = false;
    gl.wdsDir = "";
    gl.upload = false;
+   gl.wp = nullptr;
 
    // extract wds directory from command line parameters
    std::string dir;
@@ -2100,17 +2117,34 @@ int main(int argc, const char *argv[]) {
    if (gl.triggerSelfArm)
       gl.triggerMode = cTriggerModeNormal;
 
-   // instantiate waveform processor
-   gl.wp = new WP(gl.verbose, gl.wdsDir, gl.logFileName, gl.demoMode);
+   // initialize web server
+   struct mg_mgr mgr;
+   struct mg_connection *con;
+
+   mg_mgr_init(&mgr, &gl);
+   con = mg_bind(&mgr, std::to_string(gl.serverPort).c_str(), wds_handler);
+   if (con == NULL) {
+      std::cerr << "Cannot bind to port " << gl.serverPort << ". Probably other server is already running."
+                << std::endl;
+      return 1;
+   }
+
+   mg_set_protocol_http_websocket(con);
+   s_http_server_opts.dav_auth_file = "-";     // Allow access via WebDav
+   s_http_server_opts.enable_directory_listing = "yes";
+
+   // set document_root
+   std::string d(gl.wdsDir + "/html");
+   s_http_server_opts.document_root = d.c_str();
 
    // if running on DCB, directly connect to local crate
    char host[256];
    gethostname(host, sizeof(host));
-   strcpy(host, "DCB01");
    if (strncmp(host, "dcb", 3) == 0 || strncmp(host, "DCB", 3) == 0) {
       if (strchr(host, '.'))
          *strchr(host, '.') = 0; // strip domain
       std::string adr = host;
+      for (auto &c: adr) c = toupper(c);
 
       // create new board
       DCB *dcb = new DCB(adr, gl.verbose);
@@ -2119,8 +2153,6 @@ int main(int argc, const char *argv[]) {
             std::cout << "Connect to " << dcb->GetName() << " ... " << std::flush;
          dcb->Connect();
          dcb->ScanCrate();
-         // set destination port for DCB, MAC and IP is used automatically from UDP packet
-         dcb->SetDestinationPort(gl.wp->GetServerPort());
          if (gl.verbose)
             std::cout << "OK" << std::endl;
          if (gl.verbose) {
@@ -2144,26 +2176,6 @@ int main(int argc, const char *argv[]) {
       }
    }
 
-   // initialize web server
-   struct mg_mgr mgr;
-   struct mg_connection *con;
-
-   mg_mgr_init(&mgr, &gl);
-   con = mg_bind(&mgr, std::to_string(gl.serverPort).c_str(), wds_handler);
-   if (con == NULL) {
-      std::cerr << "Cannot bind to port " << gl.serverPort << ". Probably other server is already running."
-                << std::endl;
-      return 1;
-   }
-
-   mg_set_protocol_http_websocket(con);
-   s_http_server_opts.dav_auth_file = "-";     // Allow access via WebDav
-   s_http_server_opts.enable_directory_listing = "yes";
-
-   // set document_root
-   std::string d(gl.wdsDir + "/html");
-   s_http_server_opts.document_root = d.c_str();
-
    std::cout << "GIT revision: " << getWdbLibRevision() << std::endl;
    std::cout << "Starting HTTP server at port " << gl.serverPort << std::endl;
 
@@ -2184,8 +2196,14 @@ int main(int argc, const char *argv[]) {
       setsid(); // become session leader
    }
 
-   if (gl.verbose)
-      std::cout << "Starting packet receiver at port " << gl.wp->GetServerPort() << std::endl;
+   // instantiate waveform processor
+   gl.wp = new WP(gl.verbose, gl.wdsDir, gl.logFileName, gl.demoMode);
+
+   // set destination port for DCB, MAC and IP is used automatically from UDP packet
+   for (auto &db : gl.dcb)
+      db->SetDestinationPort(gl.wp->GetServerPort());
+
+   gl.wp->SetWDBList(gl.wdb);
 
    time_t last = 0, now;
 

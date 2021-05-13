@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  07.05.2021 10:31:22
+ *  Created :  11.05.2021 14:04:48
  *
  *  Register Layout Version :  9
  *
@@ -3023,6 +3023,11 @@
 
 
 /* ****** Status Register 9 [0x0024]: SN - Serial Number of the WD2 Board (Board ID) (Default: 0x00000000) ****** */
+
+/* LED_STATE - State of the front panel LED (on-beat-color RGB, off-beat-color RGB) */
+#define WD2_LED_STATE_REG                                               WD2_REG_SN
+#define WD2_LED_STATE_MASK                                              0x3F000000
+#define WD2_LED_STATE_OFS                                                       24
 
 /* SERIAL_NUMBER - Serial Number of the WD2 Board (Board ID) */
 #define WD2_SERIAL_NUMBER_REG                                           WD2_REG_SN
