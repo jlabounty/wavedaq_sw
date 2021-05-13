@@ -162,6 +162,7 @@ int main(int argc, char *argv[])
       printf("[15]: draw system          \t \t  [16]: print firmware version\n");
       printf("[17]: update firmware      \t \t  [18]: clean buffer         \n");
       printf("[19]: show DAQ status      \t \t  [20]: reboot CMBs          \n");
+      printf("[21]: Ascii command        \t \t  [  ]:                      \n");
       do {
          char opline[256];
          printf("give an option: ");
@@ -673,6 +674,42 @@ int main(int argc, char *argv[])
                if (status != MSCB_SUCCESS)
                   printf("Error: status = %d\n", status);
 
+            }
+
+         }
+         if(option == 21)
+         {
+            int board;
+            char cmd[128];
+
+            printf("\nInsert Ascii command:\n");
+            scanf("%s", cmd);
+
+            printf("\nLimit command execution\n0: WDB\n1: DCB\n2: Both\n");
+            scanf("%d", &board);
+
+
+            if(board>=0 && board <3){
+               printf("Executing command \"%s\"\n", cmd);
+
+               for(auto c : *sys){
+                  for(auto b :*c)
+                     if(b){
+                        if(dynamic_cast<WDWDB*>(b) != nullptr){
+                           if(board==0 || board ==2){
+                              printf("on board %s\n", b->GetBoardName().c_str());
+                              static_cast<WDWDB*>(b)->SendUDP(std::string(cmd));
+                           }
+                        }
+                        if(dynamic_cast<WDDCB*>(b) != nullptr){
+                           if(board==1 || board ==2){
+                              printf("on board %s\n", b->GetBoardName().c_str());
+                              static_cast<WDDCB*>(b)->SendUDP(std::string(cmd));
+                           }
+                        }
+                     }
+
+               }
             }
 
          }
