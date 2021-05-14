@@ -17,6 +17,15 @@
  * - firmware upload all slots:
  *   $ curl -X PUT -d "" http://host:port/upload/DCBnn:*
  *
+ * - issue "init" on WDB in slot x:
+ *   $ curl -X PUT -d "" http://host:port/init/DCBnn:x
+ *
+ * - issue "init" on WDB in slot x with different serial number y:
+ *   $ curl -X PUT -d "" http://host:port/init/DCBnn:x/y
+ *
+ * - issue "init" on WDB in all slots:
+ *   $ curl -X PUT -d "" http://host:port/init/DCBnn:*
+ *
  * - voltage calibration slot x
  *   $ curl -X PUT -d "" http://host:port/vcalib/DCBnn:x
  *
@@ -712,7 +721,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       } else if (item == "init") { // init ------------------------------
 
          if (dcb != nullptr) {
-            if (args.size() < 4)
+            if (args.size() < 2)
                return;
 
             if (slot == -1) {
@@ -760,7 +769,8 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
             dcb->ScanCrate();
             connectDCB(gl, dcb);
 
-            mg_printf(nc, "%s", "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
+            mg_send_response_line(nc, 200, "Content-Type: application/json\r\nTransfer-Encoding: chunked\r\n");
+            mg_printf_http_chunk(nc, "{\n   \"Status\": \"OK\"\n}\n");
             mg_send_http_chunk(nc, "", 0); // end of response
             return;
          }
