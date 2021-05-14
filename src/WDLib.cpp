@@ -531,8 +531,8 @@ bool WDSystem::IsSerdesGood(){
 //allocate buffers and spawn DAQ threads
 void WDSystem::SpawnDAQ(){
    //number of buffer at each buffer stage
-   const int number_of_buffers = 10;
-   const int number_of_calibrated_buffers = 10;
+  const int number_of_buffers = 10;
+  const int number_of_calibrated_buffers = 10;
 
    printf("starting all threads\n");
 
@@ -560,7 +560,6 @@ void WDSystem::SpawnDAQ(){
    DAQMemoryPool<WDAQTcbBank>::GetInstance().PreAllocate(5*number_of_calibrated_buffers*nTCBs*4);
    DAQMemoryPool<WDAQTcbEvent>::GetInstance().PreAllocate(number_of_calibrated_buffers*nTCBs*4);
    DAQMemoryPool<WDAQEvent>::GetInstance().PreAllocate(number_of_calibrated_buffers*4);
-
 
    //create buffers
    int nBuilders;
@@ -892,6 +891,8 @@ void WDWDB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureTriggerGain(property);
    } else if(name=="TriggerTdcMask"){
       ConfigureTriggerTdcMask(property);
+   } else if(name=="TriggerDelay"){
+      ConfigureTriggerDelay(property);
    } else if(name=="TriggerTdcOffset"){
       ConfigureTriggerTdcOffset(property);
    } else if(name=="TriggerPedestalThreshold"){
@@ -1179,6 +1180,30 @@ void WDWDB::ConfigureTriggerTdcMask(Property &property) {
 
    tdcmask &= 0xFFFF;
    SetAdvTrgTdcChMask(tdcmask);
+}
+
+void WDWDB::ConfigureTriggerDelay(Property &property) {
+   unsigned int delay;
+   delay = property.GetUInt();
+   // if delay = 0 then use the async trigger
+   if(delay == 0) { // this the same as SetInCrate
+     SetPatternTriggerEn(0);
+     SetExtAsyncTriggerEn(1);
+   }
+   // else: set trigger delay
+   // select PatternTriggerEn
+   // use ext trigger in the pattern logic
+   else {
+     SetPatternTriggerEn(1);
+     SetExtAsyncTriggerEn(0);
+     SetTriggerDelay(delay);
+     //enable pattern 1
+     SetTrgPtrnEn(1);
+     // enable ext trigger
+     SetTrgSrcEnPtrn(0,0x10000);
+     // ask it as an hit
+     SetTrgStatePtrn(0,0x10000);
+   }
 }
 
 void WDWDB::ConfigureTriggerTdcOffset(Property &property) {

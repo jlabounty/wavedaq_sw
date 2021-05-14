@@ -522,7 +522,6 @@ void TCB::FReadCounters(u_int32_t *data)
   for(int icycle = 0; icycle<ncycle; icycle++)
     ReadBLT(RTRGCOUSPI+icycle*BLTSIZE,data+icycle*BLTSIZE,BLTSIZE);
   // then totaltime
-    u_int32_t addr = RLIVETIMESPI;
   ReadReg(RTOTTIMESPI,data+64);
   // finally livetime
   ReadReg(RLIVETIMESPI,data+65);
