@@ -206,7 +206,7 @@ std::string DCB::SendReceiveUDP(std::string str, bool waitPrompt)
    if (result.size() == 0) {
       if (str.back() == '\n')
          str = str.substr(0, str.size()-1);
-      throw std::runtime_error(std::string("Error sending \"")+str+"\" to "+mDCBName+".");
+      throw std::runtime_error(std::string("Error sending \"")+str+"\" to "+mDCBName);
       return result;
    }
 
@@ -219,7 +219,7 @@ std::string DCB::SendReceiveUDP(std::string str, bool waitPrompt)
 
 //--------------------------------------------------------------------
 
-std::string DCB::ReceiveUDP()
+std::string DCB::ReceiveUDP(int timeoutMs)
 {
    fd_set readfds;
    struct timeval timeout;
@@ -230,14 +230,15 @@ std::string DCB::ReceiveUDP()
    FD_SET(gASCIISocket, &readfds);
    memset(rx_buffer, 0, sizeof(rx_buffer));
 
-   timeout.tv_sec = 0;
-   timeout.tv_usec = 0;
+   timeout.tv_sec = (time_t) (timeoutMs / 1000);
+   timeout.tv_usec = (timeoutMs % 1000) * 1000;
    do {
       status = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
    } while (status == -1); // don't return on interrupt
 
    if (FD_ISSET(gASCIISocket, &readfds))
-      recv(gASCIISocket, rx_buffer, sizeof(rx_buffer), 0);
+      status = recv(gASCIISocket, rx_buffer, sizeof(rx_buffer), 0);
+
    return std::string(rx_buffer);
 }
 
@@ -362,7 +363,7 @@ void DCB::WriteUDP(unsigned int slot, unsigned int ofs, std::vector<unsigned int
    }
 
    if (!bSuccess) {
-      throw std::runtime_error(std::string("Error writing binary UDP data to " + mDCBName + "."));
+      throw std::runtime_error(std::string("Error writing binary UDP data to " + mDCBName ));
       return;
    }
 }
@@ -485,7 +486,7 @@ std::vector<unsigned int> DCB::ReadUDP(unsigned int slot, unsigned int ofs, unsi
    }
 
    if (!bSuccess)
-      throw std::runtime_error(std::string("Error reading binary UDP data from " + mDCBName + "."));
+      throw std::runtime_error(std::string("Error reading binary UDP data from " + mDCBName));
 
    return result;
 }
@@ -561,18 +562,16 @@ std::string DCB::UploadStart(int slot, int revision) {
 
 std::string DCB::UploadProgress() {
    std::string res;
+   res = "";
    do {
-      auto r = ReceiveUDP();
-      if (r == "")
+      auto r = ReceiveUDP(0);
+      if (res != "" && r == "")
          break;
       if (r.find(">") != std::string::npos)
          return r;
       res = r;
    } while (true);
 
-   if(res == ""){
-      res = SendReceiveUDP("\n", false);
-   }
    return res;
 }
 
@@ -605,7 +604,7 @@ void DCB::Connect() {
    // retrieve Ethernet address of board
    phe = gethostbyname(mDCBName.c_str());
    if (phe == nullptr)
-      throw std::runtime_error(std::string("Cannot resolve host name ") + mDCBName + ".");
+      throw std::runtime_error(std::string("Cannot resolve host name ") + mDCBName);
 
    std::memcpy((char *) &client_addr.sin_addr, phe->h_addr, phe->h_length);
    client_addr.sin_family = AF_INET;
@@ -619,7 +618,7 @@ void DCB::Connect() {
    try {
       DCB::SendUDP("\n");
    } catch (...) {
-      throw std::runtime_error(std::string("Cannot connect to board ") + mDCBName + ".");
+      throw std::runtime_error(std::string("Cannot connect to board ") + mDCBName);
    }
 
    // check firmware compatibility level
@@ -763,7 +762,7 @@ void DCB::ScanCrate() {
    }
 
    if (!bSuccess)
-      throw std::runtime_error(std::string("Error scanning crate at " + mDCBName + "."));
+      throw std::runtime_error(std::string("Error scanning crate at " + mDCBName));
 }
 
 //--------------------------------------------------------------------

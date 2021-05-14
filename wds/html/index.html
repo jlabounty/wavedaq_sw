@@ -85,8 +85,9 @@
                if (dlgTimer !== undefined)
                   window.clearTimeout(dlgTimer);
                hideWaitDialog();
-               if (req.responseText !== "OK\n")
-                  dlgAlert(req.responseText);
+               r = JSON.parse(req.responseText);
+               if (r.Status !== "OK")
+                  dlgAlert(r.Status);
                else {
                   let a = document.getElementById('address').value;
                   if (a[0] === 'd' || a[0] === 'D')
@@ -97,8 +98,7 @@
             }
          }
          dlgTimer = window.setTimeout(showWaitDialog, 500);
-         req.open("GET", "connect?adr=" + document.getElementById('address').value +
-            "&r=" + Math.random(), true); // avoid cached results
+         req.open("PUT", "connect/" + document.getElementById('address').value);
          req.send();
          return false;
       }

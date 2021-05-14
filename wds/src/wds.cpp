@@ -8,6 +8,9 @@
 /*
  * Commands directly from command line:
  *
+ * - connect to DCB or WDB:
+ *   $ curl -X PUT -d "" http://host:port/connect/DCBnn
+ *
  * - firmware upload slot x:
  *   $ curl -X PUT -d "" http://host:port/upload/DCBnn:x
  *
@@ -80,7 +83,9 @@ typedef struct {
    bool updatePeriodic;
    std::string wdsDir;
    std::map<std::string, time_t> recent;
-   bool upload;
+   enum { upload, vcalib, tcalib, finished } progressMode;
+   std::string progressBoard;
+   double progressPercentage;
 } GLOBALS;
 
 unsigned int demoDrsSampleFreq = 5016;
@@ -195,7 +200,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
                break;
             }
          }
-         if (dcb == nullptr) {
+         if (dcb == nullptr && item != "connect") {
             mg_send_response_line(nc, 200, "Content-Type: application/json\r\nTransfer-Encoding: chunked\r\n");
             mg_printf_http_chunk(nc, "{\n");
             mg_printf_http_chunk(nc, "  \"Error\": \"Not connected to %s\"\n", dcbName.c_str());
@@ -215,6 +220,143 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
          }
       }
 
+      if (item == "connect") {
+         for (auto &c: wdbAddress) c = toupper(c);
+
+         if (gl->verbose)
+            std::cout << "Trying to connect to " << wdbAddress << std::endl;
+
+         mg_send_response_line(nc, 200, "Content-Type: application/json\r\nTransfer-Encoding: chunked\r\n");
+
+         // treat numeric IP address as WDB board
+         if (wdbAddress[0] == 'W' || isdigit(wdbAddress[0])) {
+            WDB *wdb = nullptr;
+            int i = 0;
+            for (auto &b: gl->wdb) {
+               // check if we are already connected
+               if (std::string(wdbAddress) == b->GetAddr()) {
+                  wdb = b;
+                  if (wdb->Ping()) {
+                     if (gl->verbose)
+                        std::cout << "OK" << std::endl;
+                     mg_printf_http_chunk(nc, "{\n   \"Status\": \"OK\"\n}\n");
+                  } else {
+                     // delete board from gl->wdb
+                     gl->wdb.erase(gl->wdb.begin()+i);
+                     std::string s = std::string("Cannot connect to board ") + wdbAddress;
+                     mg_printf_http_chunk(nc, "{\n   \"Status\": \"%s\"\n}\n", s.c_str());
+                  }
+                  break;
+               }
+               i++;
+            }
+
+            if (wdb == nullptr) {
+               // create new board
+               wdb = new WDB(wdbAddress, gl->verbose);
+               try {
+                  if (gl->verbose)
+                     std::cout << "Connect to " << wdb->GetAddr() << " ... " << std::flush;
+                  connectWDB(gl, wdb);
+                  gl->wdb.push_back(wdb);
+                  gl->wp->SetWDBList(gl->wdb);
+                  mg_printf_http_chunk(nc, "{\n   \"Status\": \"OK\"\n}\n");
+                  if (gl->verbose)
+                     std::cout << "OK" << std::endl;
+               } catch (std::runtime_error &e) {
+                  if (gl->verbose)
+                     std::cout << "Failure" << std::endl;
+                  mg_printf_http_chunk(nc, "{\n   \"Status\": \"%s\"\n}\n", e.what());
+                  delete wdb;
+                  wdb = nullptr;
+               }
+            }
+
+            if (wdb != nullptr) {
+               if (isdigit(wdbAddress[0]))
+                  gl->recent[wdbAddress] = std::time(nullptr);
+               else
+                  gl->recent[wdb->GetName()] = std::time(nullptr);
+            }
+
+         } else if (wdbAddress[0] == 'D') {
+            dcb = nullptr;
+            int i = 0;
+            for (auto &d: gl->dcb) {
+               // check if we are already connected
+               if (std::string(wdbAddress) == d->GetName()) {
+                  dcb = d;
+                  if (dcb->Ping()) {
+                     if (gl->verbose)
+                        std::cout << "OK" << std::endl;
+                     mg_printf_http_chunk(nc, "{\n   \"Status\": \"OK\"\n}\n");
+                  } else {
+                     // delete board from gl->dcb
+                     gl->dcb.erase(gl->dcb.begin()+i);
+                     std::string s = std::string("Cannot connect to board ") + wdbAddress;
+                     mg_printf_http_chunk(nc, "{\n   \"Status\": \"%s\"\n}\n", s.c_str());
+                  }
+                  break;
+               }
+               i++;
+            }
+            if (dcb == nullptr) {
+               // create new board
+               dcb = new DCB(wdbAddress, gl->verbose);
+               try {
+                  if (gl->verbose)
+                     std::cout << "Connect to " << dcb->GetName() << " ... " << std::flush;
+                  dcb->Connect();
+                  dcb->ScanCrate();
+                  // set destination port for DCB, MAC and IP is used automatically from UDP packet
+                  dcb->SetDestinationPort(gl->wp->GetServerPort());
+                  if (gl->verbose)
+                     std::cout << "OK" << std::endl;
+                  if (gl->verbose) {
+                     std::cout << std::endl << "========== DCB Info ==========" << std::endl;
+                     dcb->PrintVersion();
+                     std::cout << std::endl << "Board scan:" << std::endl;
+                     dcb->PrintCrate();
+                     std::cout << std::endl;
+                  }
+                  gl->dcb.push_back(dcb);
+                  mg_printf_http_chunk(nc, "{\n   \"Status\": \"OK\"\n}\n");
+
+                  connectDCB(gl, dcb);
+
+                  dcb->ResetSerdes(0, true);
+                  dcb->ResetSerdes(1, false);
+
+               } catch (std::runtime_error &e) {
+                  if (gl->verbose)
+                     std::cout << "Failure" << std::endl;
+                  mg_printf_http_chunk(nc, "{\n   \"Status\": \"%s\"\n}\n", e.what());
+                  delete dcb;
+                  dcb = nullptr;
+               }
+            }
+
+            if (dcb != nullptr)
+               gl->recent[dcb->GetName()] = std::time(nullptr);
+
+         } else
+            mg_printf_http_chunk(nc, "{\n   \"Status\": \"Invalid address %s\"\n}\n", wdbAddress.c_str());
+
+         // write recent list to file
+         std::map<time_t,std::string> rs;
+         for (auto e: gl->recent)
+            rs[e.second] = e.first;
+         std::ofstream f;
+         f.open(gl->wdsDir + "/recent.txt");
+         for (auto e: rs)
+            f << e.second << " " << e.first << std::endl;
+         f.close();
+
+         mg_send_http_chunk(nc, "", 0);
+         return;
+      }
+
+
       if (wdbList.size() == 0 && dcb == nullptr) {
          std::cout << "Received item " << item
                    << ", value " << value
@@ -230,6 +372,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
                    << "\", board \"" << wdbAddress
                    << "\", channel " << iChannel
                    << std::endl;
+
 
       if (item == "enableChannel") {
          // bits0-15 normal DRS channels bit16: clock0, bit17: clock1
@@ -541,7 +684,9 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
 
          std::string result;
          if (dcb != nullptr) {
-            gl->upload = true;
+            gl->progressMode = GLOBALS::upload;
+            gl->progressBoard = dcb->GetName() + ":" + std::to_string(slot);
+            gl->progressPercentage = 0;
 
             if (slot == -1) {
                result = dcb->UploadStart(-1, 0);
@@ -612,8 +757,6 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
                   disconnectWDB(gl, dcb->GetWDB(slot));
             }
 
-            gl->upload = false;
-
             dcb->ScanCrate();
             connectDCB(gl, dcb);
 
@@ -659,150 +802,11 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       return;
    }
 
-   if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/connect") == 0) {
-      char str[256];
-      mg_get_http_var(&hm->query_string, "adr", str, sizeof(str));
-      auto adr = std::string(str);
-      for (auto &c: adr) c = toupper(c);
-
-      if (gl->verbose)
-         std::cout << "Trying to connect to " << adr << std::endl;
-
-      mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
-
-      // treat numeric IP address as WDB board
-      if (adr[0] == 'W' || isdigit(adr[0])) {
-         WDB *wdb = nullptr;
-         int i = 0;
-         for (auto &b: gl->wdb) {
-            // check if we are already connected
-            if (std::string(adr) == b->GetAddr()) {
-               wdb = b;
-               if (wdb->Ping()) {
-                  if (gl->verbose)
-                     std::cout << "OK" << std::endl;
-                  mg_printf_http_chunk(nc, "OK\n");
-               } else {
-                  // delete board from gl->wdb
-                  gl->wdb.erase(gl->wdb.begin()+i);
-                  std::string s = std::string("Cannot connect to board ") + adr;
-                  mg_printf_http_chunk(nc, "%s\n", s.c_str());
-               }
-               break;
-            }
-            i++;
-         }
-
-         if (wdb == nullptr) {
-            // create new board
-            wdb = new WDB(adr, gl->verbose);
-            try {
-               if (gl->verbose)
-                  std::cout << "Connect to " << wdb->GetAddr() << " ... " << std::flush;
-               connectWDB(gl, wdb);
-               gl->wdb.push_back(wdb);
-               gl->wp->SetWDBList(gl->wdb);
-               mg_printf_http_chunk(nc, "OK\n");
-               if (gl->verbose)
-                  std::cout << "OK" << std::endl;
-            } catch (std::runtime_error &e) {
-               if (gl->verbose)
-                  std::cout << "Failure" << std::endl;
-               mg_printf_http_chunk(nc, "%s\n", e.what());
-               delete wdb;
-               wdb = nullptr;
-            }
-         }
-
-         if (wdb != nullptr) {
-            if (isdigit(adr[0]))
-               gl->recent[adr] = std::time(nullptr);
-            else
-               gl->recent[wdb->GetName()] = std::time(nullptr);
-         }
-
-      } else if (adr[0] == 'D') {
-         DCB *dcb = nullptr;
-         int i = 0;
-         for (auto &d: gl->dcb) {
-            // check if we are already connected
-            if (std::string(adr) == d->GetName()) {
-               dcb = d;
-               if (dcb->Ping()) {
-                  if (gl->verbose)
-                     std::cout << "OK" << std::endl;
-                  mg_printf_http_chunk(nc, "OK\n");
-               } else {
-                  // delete board from gl->dcb
-                  gl->dcb.erase(gl->dcb.begin()+i);
-                  std::string s = std::string("Cannot connect to board ") + adr;
-                  mg_printf_http_chunk(nc, "%s\n", s.c_str());
-               }
-               break;
-            }
-            i++;
-         }
-         if (dcb == nullptr) {
-            // create new board
-            dcb = new DCB(adr, gl->verbose);
-            try {
-               if (gl->verbose)
-                  std::cout << "Connect to " << dcb->GetName() << " ... " << std::flush;
-               dcb->Connect();
-               dcb->ScanCrate();
-               // set destination port for DCB, MAC and IP is used automatically from UDP packet
-               dcb->SetDestinationPort(gl->wp->GetServerPort());
-               if (gl->verbose)
-                  std::cout << "OK" << std::endl;
-               if (gl->verbose) {
-                  std::cout << std::endl << "========== DCB Info ==========" << std::endl;
-                  dcb->PrintVersion();
-                  std::cout << std::endl << "Board scan:" << std::endl;
-                  dcb->PrintCrate();
-                  std::cout << std::endl;
-               }
-               gl->dcb.push_back(dcb);
-               mg_printf_http_chunk(nc, "OK\n");
-
-               connectDCB(gl, dcb);
-
-               dcb->ResetSerdes(0, true);
-               dcb->ResetSerdes(1, false);
-
-            } catch (std::runtime_error &e) {
-               if (gl->verbose)
-                  std::cout << "Failure" << std::endl;
-               mg_printf_http_chunk(nc, "%s\n", e.what());
-               delete dcb;
-               dcb = nullptr;
-            }
-         }
-
-         if (dcb != nullptr)
-            gl->recent[dcb->GetName()] = std::time(nullptr);
-
-      } else
-         mg_printf_http_chunk(nc, "Invalid address \"%s\"\n", adr.c_str());
-
-      // write recent list to file
-      std::map<time_t,std::string> rs;
-      for (auto e: gl->recent)
-         rs[e.second] = e.first;
-      std::ofstream f;
-      f.open(gl->wdsDir + "/recent.txt");
-      for (auto e: rs)
-         f << e.second << " " << e.first << std::endl;
-      f.close();
-
-      mg_send_http_chunk(nc, "", 0);
-      return;
-   }
-
    // crate ------------------------------
    static int slotHvOn = 0;
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/crate") == 0) {
 
-      if (gl->upload)
+      if (gl->progressMode != GLOBALS::finished)
          return;
 
       char str[256];
@@ -1341,37 +1345,14 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
          mg_printf_http_chunk(nc, "   \"Progress\": \"%1.1lf\"\n", f*100);
          mg_printf_http_chunk(nc, "}\n");
 
-      } else if (gl->upload) {
+      } else if (gl->progressMode == GLOBALS::upload) {
 
-         auto dcb = gl->dcb[0];
-         if (dcb != nullptr) {
-            auto s = dcb->UploadProgress();
-            if (gl->verbose)
-               std::cout << "Upload progress " << s << std::endl;
+         mg_printf_http_chunk(nc, "{\n");
+         mg_printf_http_chunk(nc, "   \"Mode\": \"Upload\",\n");
+         mg_printf_http_chunk(nc, "   \"Board\": \"%s\",\n", gl->progressBoard.c_str());
+         mg_printf_http_chunk(nc, "   \"Progress\": \"%1.1lf\"\n", gl->progressPercentage);
+         mg_printf_http_chunk(nc, "}\n");
 
-            if (s.find(">") != std::string::npos) {
-               if (gl->verbose)
-                  std::cout << "Upload finished" << std::endl;
-               gl->upload = false;
-               mg_printf_http_chunk(nc, "{\n");
-               mg_printf_http_chunk(nc, "   \"Mode\": \"Finished\"\n");
-               mg_printf_http_chunk(nc, "}\n");
-            } else if (s.size() > 3) {
-               int slot = std::stoi(s);
-               double progress = std::stod(s.substr(s.find(" ") + 1));
-
-               mg_printf_http_chunk(nc, "{\n");
-               mg_printf_http_chunk(nc, "   \"Mode\": \"Upload\",\n");
-               mg_printf_http_chunk(nc, "   \"Board\": \"%s:%d\",\n", dcb->GetName().c_str(), slot);
-               mg_printf_http_chunk(nc, "   \"Progress\": \"%1.1lf\"\n", progress);
-               mg_printf_http_chunk(nc, "}\n");
-
-               if (gl->verbose)
-                  std::cout << "Return upload slot " << slot << " progress " << progress << std::endl;
-            } else {
-               mg_printf_http_chunk(nc, "{}\n");
-            }
-         }
       } else {
          mg_printf_http_chunk(nc, "{\n");
          mg_printf_http_chunk(nc, "   \"Mode\": \"Finished\"\n");
@@ -1910,7 +1891,9 @@ int main(int argc, const char *argv[]) {
    gl.triggerSelfArm = false;
    gl.updatePeriodic = false;
    gl.wdsDir = "";
-   gl.upload = false;
+   gl.progressMode  = GLOBALS::finished;
+   gl.progressBoard = "";
+   gl.progressPercentage = 0;
    gl.wp = nullptr;
 
    // extract wds directory from command line parameters
@@ -2222,6 +2205,28 @@ int main(int argc, const char *argv[]) {
 
             // Yield to server, no timeout
             mg_mgr_poll(&mgr, 0);
+
+         } else if (gl.progressMode == GLOBALS::upload) {
+
+            auto dcb = gl.dcb[0];
+            if (dcb != nullptr) {
+               auto s = dcb->UploadProgress();
+               if (s != "") {
+                  if (s.find(">") != std::string::npos) {
+                     if (gl.verbose)
+                        std::cout << "Upload finished" << std::endl;
+                     gl.progressMode = GLOBALS::finished;
+                  } else {
+                     if (gl.verbose)
+                        std::cout << "Upload progress returned \"" << s << "\"" << std::endl;
+                     gl.progressBoard = dcb->GetName() + ":" + std::to_string(std::stoi(s));
+                     gl.progressPercentage = std::stod(s.substr(s.find(" ") + 1));
+                  }
+               }
+            }
+
+            // Yield to server, 10ms timeout
+            mg_mgr_poll(&mgr, 10);
 
          } else
             // Yield to server, 10ms timeout

@@ -61,7 +61,7 @@ public:
 
    std::string SendReceiveUDP(std::string str, bool waitPrompt = true);
    void SendUDP(std::string str);
-   std::string ReceiveUDP();
+   std::string ReceiveUDP(int timeoutMs);
    bool Ping();
 
    const unsigned int cRequiredRegLayoutCompatLevel = 0;
