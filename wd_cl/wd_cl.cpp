@@ -105,6 +105,72 @@ void drawBar(const char* name, float value, float valueMax, bool printData = fal
    printf("\n");
 }
 
+std::map<short, FILE*> CreateScalerFiles(WDSystem* sys, int n, float down, float up){
+   std::map<short, FILE*> map;
+
+   for(auto c : *sys)
+      for(auto b :*c)
+         if(b){
+            WDWDB* wdb = dynamic_cast<WDWDB*>(b);
+            if(wdb != nullptr){
+               char buf[100];
+               sprintf(buf, "out-%s.dat", wdb->GetName().c_str());
+               FILE *f= fopen(buf, "w");
+               fprintf(f, "# WDB: %s\n", wdb->GetName().c_str());
+               fprintf(f, "# Gain0: %f\n", wdb->GetFeGain(0));
+               fprintf(f, "# Down: %f\n", down);
+               fprintf(f, "# Up: %f\n", up);
+               fprintf(f, "# N: %d\n", n);
+            
+               map[wdb->GetSerialNumber()] = f;
+            }
+         }
+
+   return map;
+}
+void SetThreshold(WDSystem* sys, float v){
+   for(auto c : *sys)
+      for(auto b :*c)
+         if(b){
+            WDWDB* wdb = dynamic_cast<WDWDB*>(b);
+            if(wdb != nullptr){
+               wdb->SetDacTriggerLevelV(-1,v);
+            }
+         }
+
+}
+
+void SaveScalers(WDSystem* sys, std::map<short, FILE*>& files, float v){
+   for(auto c : *sys)
+      for(auto b :*c)
+         if(b){
+            WDWDB* wdb = dynamic_cast<WDWDB*>(b);
+            if(wdb != nullptr){
+               wdb->SetScalerRst(1);
+               wdb->SetScalerRst(0);
+            }
+         }
+
+   sleep(3);
+   for(auto c : *sys)
+      for(auto b :*c)
+         if(b){
+            WDWDB* wdb = dynamic_cast<WDWDB*>(b);
+            if(wdb != nullptr){
+               FILE* f = files.at(wdb->GetSerialNumber());
+               std::vector<uint64_t> s;
+               wdb->GetScalers(s);
+               fprintf(f, "%f ", v);
+               for(int j=0; j<16; j++) fprintf(f,"%lld ", s[j]);
+               fprintf(f, "\n");
+            }
+         }
+}
+
+void CloseScalerFile(std::map<short, FILE*>& files){
+   for(auto f :files)
+      fclose(f.second);
+}
 
 int main(int argc, char *argv[])
 {
@@ -162,7 +228,7 @@ int main(int argc, char *argv[])
       printf("[15]: draw system          \t \t  [16]: print firmware version\n");
       printf("[17]: update firmware      \t \t  [18]: clean buffer         \n");
       printf("[19]: show DAQ status      \t \t  [20]: reboot CMBs          \n");
-      printf("[21]: Ascii command        \t \t  [  ]:                      \n");
+      printf("[21]: Ascii command        \t \t  [22]: Pedestal scan        \n");
       do {
          char opline[256];
          printf("give an option: ");
@@ -712,6 +778,30 @@ int main(int argc, char *argv[])
                }
             }
 
+         }
+         if(option == 22)
+         {
+            printf("Pedestal scan...\n");
+            int n = 60;
+            float down = -0.040;
+            float up = 0.020;
+
+            printf("number of points: ");
+            scanf("%d", &n);
+            printf("start threshold (V): ");
+            scanf("%f", &down);
+            printf("end threshold (V): ");
+            scanf("%f", &up);
+
+            std::map<short, FILE*> files = CreateScalerFiles(sys, n, down, up);
+            for(int i=0; i<n; i++) {
+               float v = down + (up-down)*i/n;
+               printf("%d/%d at %f V\n", i+1, n, v);
+               SetThreshold(sys, v);
+               SaveScalers(sys, files, v);
+            }
+            
+            CloseScalerFile(files);
          }
       } while ( option == 0 ) ;
       /* end of the main loop on the options*/
