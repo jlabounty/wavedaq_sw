@@ -864,13 +864,14 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("sync                 Generate a SYNC on backplane\n");
       c.sprintf("sysmon               Print system monitor info\n\n");
 
-      c.sprintf("upload <slot> [-f <path>] [-s <path>] [-t <type>] [-r <rev>]\n");
+      c.sprintf("upload <slot> [-f <path>] [-s <path>] [-t <type>] [-l <type>] [-r <rev>]\n");
       c.sprintf("  <slot>    : WDB slot, multiple slots possible separated by spaces,\n");
       c.sprintf("                use \"*\" to upload all slots 0-15 (if boards are present)\n");
       c.sprintf("                use \"17\" to upload firmware for TCB\n");
       c.sprintf("  -f <path> : WDB/TCB firmware file (optional)\n");
       c.sprintf("  -s <path> : WDB software file (optional)\n");
       c.sprintf("  -t <type> : Board type \"wdb\" or \"tcb\", forces upload\n");
+      c.sprintf("  -l <type> : Limits upload to \"wdb\" or \"tcb\" only\n");
       c.sprintf("  -r <rev>  : Board revision, \"f\", \"g\" for wdb, \"1\", \"2\" \"3\" for tcb, forced upload\n");
       c.sprintf("         -d : Show default firmware and software files\n");
       c.sprintf("         -p : Show only percent value of upload\n");
@@ -1875,6 +1876,7 @@ void upload(udp_connection &c, int n_param, const char **param) {
    char swp[256];
    WDAQ_BRD board_info;
    unsigned int board_type = 0;
+   unsigned int limit_type = 0;
    unsigned int board_rev = 0;
    unsigned int t_force = 0;
    unsigned int r_force = 0;
@@ -1999,6 +2001,33 @@ void upload(udp_connection &c, int n_param, const char **param) {
             return;
          }
          t_force = 1;
+      }
+
+      else if (param[i][0] == '-' && param[i][1] == 'l') {
+         if (++i >= n_param) {
+            c.sprintf("Missing board type with \"-l\" option\n");
+            return;
+         }
+         if (strcmp(param[i], "wdb") == 0) {
+            limit_type = BRD_TYPE_ID_WDB;
+         } else if (strcmp(param[i], "tcb") == 0) {
+            limit_type = BRD_TYPE_ID_TCB;
+         } else {
+            c.sprintf("Unknown board type with \"-l\" option, must be \"wdb\" or \"tcb\"\n");
+            return;
+         }
+         for (int s = 0; s < 16; s++) {
+            if (get_slot_board_info(s, &board_info)) {
+               if (limit_type == BRD_TYPE_ID_WDB && board_info.type_id != BRD_TYPE_ID_WDB) {
+                  slot_sel[s] = 0;
+                  c.sprintf("Slot %2d: Dropped board because it is not a WDB\n", s);
+               }
+               if (limit_type == BRD_TYPE_ID_TCB && board_info.type_id != BRD_TYPE_ID_TCB) {
+                  slot_sel[s] = 0;
+                  c.sprintf("Slot %2d: Dropped board because it is not a TCB\n", s);
+               }
+            }
+         }
       }
 
       else if (param[i][0] == '-' && param[i][1] == 'r') {

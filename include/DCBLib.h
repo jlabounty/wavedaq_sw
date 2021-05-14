@@ -97,7 +97,7 @@ public:
    void SetDestinationPort(int port);
    void ResetSerdes(int flag, bool wait);
    void ResetDps();
-   std::string UploadStart(int slot, int revision=0);
+   std::string UploadStart(int slot, int revision=0, std::string flags = "");
    std::string UploadProgress();
    std::string SendToSlot(std::string str, int slot);
 

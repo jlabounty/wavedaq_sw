@@ -536,7 +536,7 @@ std::string DCB::SendToSlot(std::string str, int slot) {
 
 //--------------------------------------------------------------------
 
-std::string DCB::UploadStart(int slot, int revision) {
+std::string DCB::UploadStart(int slot, int revision, std::string flags) {
    std::string str;
 
    if (slot == -1)
@@ -549,6 +549,9 @@ std::string DCB::UploadStart(int slot, int revision) {
       str = "upload " + std::to_string(slot) + " -t wdb -r g -p";
    else
       str = "upload " + std::to_string(slot) + " -p"; // auto-detect
+
+   if (flags.size() > 0)
+      str += " " + flags;
 
    auto oldTimeout = mReceiveTimeoutMs;
    mReceiveTimeoutMs = cIncreasedReceiveTimeoutMs; // increase timeout for this command

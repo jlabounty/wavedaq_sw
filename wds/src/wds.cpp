@@ -5,49 +5,53 @@
 //  Stefan Ritt 31 Jan 2017
 //
 
-/*
- * Commands directly from command line:
- *
- * - connect to DCB or WDB:
- *   $ curl -X PUT -d "" http://host:port/connect/DCBnn
- *
- * - firmware upload slot x:
- *   $ curl -X PUT -d "" http://host:port/upload/DCBnn:x
- *
- * - firmware upload all slots:
- *   $ curl -X PUT -d "" http://host:port/upload/DCBnn:*
- *
- * - issue "init" on WDB in slot x:
- *   $ curl -X PUT -d "" http://host:port/init/DCBnn:x
- *
- * - issue "init" on WDB in slot x with different serial number y:
- *   $ curl -X PUT -d "" http://host:port/init/DCBnn:x/y
- *
- * - issue "init" on WDB in all slots:
- *   $ curl -X PUT -d "" http://host:port/init/DCBnn:*
- *
- * - voltage calibration slot x
- *   $ curl -X PUT -d "" http://host:port/vcalib/DCBnn:x
- *
- * - voltage calibration all slots
- *   $ curl -X PUT -d "" http://host:port/vcalib/DCBnn:*
- *
- * - time calibration slot x
- *   $ curl -X PUT -d "" http://host:port/tcalib/DCBnn:x
- *
- * - time calibration all slots
- *   $ curl -X PUT -d "" http://host:port/tcalib/DCBnn:*
- *
- * - query progress:
- *   $ curl http://host:port/progress
- *   returns:
- *   {
- *     "Mode": "Voltage|Time|Upload|Finished",
- *     "Board": "DCBnn:x",
- *     "Progress": "12.4"  <-- in percent
- *   }
- *
- */
+//
+// Commands directly from command line:
+//
+// - connect to DCB or WDB:
+//   $ curl -X PUT -d "" http://host:port/connect/DCBnn
+//
+// - firmware upload slot x:
+//   $ curl -X PUT -d "" http://host:port/upload/DCBnn:x
+//
+// - firmware upload all slots:
+//   $ curl -X PUT -d "" http://host:port/upload/DCBnn:*
+//
+// - firmware upload all slots with limited type:
+//   $ curl -X PUT -d "" http://host:port/upload/DCBnn:*/lll
+//   with lll=tcb or lll=wdb to limit to that type
+//
+// - issue "init" on WDB in slot x:
+//   $ curl -X PUT -d "" http://host:port/init/DCBnn:x
+//
+// - issue "init" on WDB in slot x with different serial number y:
+//   $ curl -X PUT -d "" http://host:port/init/DCBnn:x/y
+//
+// - issue "init" on WDB in all slots:
+//   $ curl -X PUT -d "" http://host:port/init/DCBnn:*
+//
+// - voltage calibration slot x
+//   $ curl -X PUT -d "" http://host:port/vcalib/DCBnn:x
+//
+// - voltage calibration all slots
+//   $ curl -X PUT -d "" http://host:port/vcalib/DCBnn:*
+//
+// - time calibration slot x
+//   $ curl -X PUT -d "" http://host:port/tcalib/DCBnn:x
+//
+// - time calibration all slots
+//   $ curl -X PUT -d "" http://host:port/tcalib/DCBnn:*
+//
+// - query progress:
+//   $ curl http://host:port/progress
+//   returns:
+//   {
+//     "Mode": "Voltage|Time|Upload|Finished",
+//     "Board": "DCBnn:x",
+//     "Progress": "12.4"  <-- in percent
+//   }
+//
+//
 
 #include <iostream>
 #include <sstream>
@@ -181,7 +185,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
          if (args.size() > 2) {
             wdbAddress = std::string(args[2]);
          }
-         if (args.size() > 3)
+         if (args.size() > 3 && std::isdigit(args[3][0]))
             iChannel = std::stoi(args[3]);
       }
       if (hm->body.p)
@@ -697,19 +701,25 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
             gl->progressBoard = dcb->GetName() + ":" + std::to_string(slot);
             gl->progressPercentage = 0;
 
+            std::string flags("");
+            if (args.size() > 3 && args[3] == "tcb")
+               flags += "-l tcb";
+            if (args.size() > 3 && args[3] == "wdb")
+               flags += "-l wdb";
+
             if (slot == -1) {
-               result = dcb->UploadStart(-1, 0);
+               result = dcb->UploadStart(-1, 0, flags);
             }
             if (slot != -1) {
                auto b = dcb->GetWDB(slot);
                if (b != nullptr && b->GetBoardRevision() == 4) // Rev. E
-                  result = dcb->UploadStart(slot, 4);
+                  result = dcb->UploadStart(slot, 4, flags);
                else if (b != nullptr && b->GetBoardRevision() == 5) // Rev. F
-                  result = dcb->UploadStart(slot, 5);
+                  result = dcb->UploadStart(slot, 5, flags);
                else if (b != nullptr && b->GetBoardRevision() == 6) // Rev. G
-                  result = dcb->UploadStart(slot, 6);
+                  result = dcb->UploadStart(slot, 6, flags);
                else
-                  result = dcb->UploadStart(slot, 6); // use G for empty board
+                  result = dcb->UploadStart(slot, 6, flags); // use G for empty board
             }
          }
 
