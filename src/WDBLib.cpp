@@ -138,7 +138,7 @@ std::string WDB::SendReceiveUDP(std::string str, unsigned char *ethAddr) {
    if (ethAddr)
       std::memcpy(&client_addr, ethAddr, sizeof(client_addr));
    else if (mDCB) {
-      return mDCB->SendReceiveUDP(std::to_string(mSlot) + " " + str);
+      return mDCB->SendReceiveUDP(std::string("slot ") + std::to_string(mSlot) + " " + str);
    } else
       std::memcpy(&client_addr, mEthAddrAscii, sizeof(client_addr));
 
