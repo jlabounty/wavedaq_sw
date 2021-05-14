@@ -731,35 +731,6 @@ int main(int argc, char *argv[]) {
 
             connection[addr]->rb += std::string(rb);
 
-         } else if (isdigit(buffer[0])){ //---- if first word is a number forward the single command via SPI -------
-            int slot = WDAQ_SLOT_DCB;
-            char *p = NULL;
-
-            if (strchr(buffer, ' ')) {
-               p = strchr(buffer, ' ');
-               *p = '\0';
-               p++;
-               slot = strtol(buffer, 0, 0);
-            }
-
-            if (verbose)
-               printf("forward SPI \"%s\" to slot %d\n", p, slot);
-
-            int status = get_slot_board_info(slot, &board[slot]);
-            if (status && board[slot].type_id <= BRD_TYPE_ID_MAX &&
-                board[slot].vendor_id <= BRD_VENDOR_ID_MAX) {
-               char rb[10000];
-               spi_ascii_cmd(p, rb, sizeof(rb), slot, board[slot].type_id, board[slot].rev_id);
-               connection[addr]->slot = WDAQ_SLOT_DCB;
-               if (verbose)
-	          printf("Received \"%s\" from slot %d\n", rb, slot);
-
-               connection[addr]->sprintf("%s", rb);
-
-            } else {
-               connection[addr]->sprintf("No board present in slot %d\n", slot);
-            }
-
          } else if (strncmp(buffer, "reset", 5) == 0) { //---- Process command locally --------------
 
             const char *str = "Rebooting...\n\n";
