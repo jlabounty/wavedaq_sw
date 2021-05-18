@@ -1885,6 +1885,11 @@ void upload(udp_connection &c, int n_param, const char **param) {
    for (int i = 0; i < WDAQ_N_SLOTS; i++)
       slot_sel[i] = 0;
 
+   if (n_param < 2) {
+      c.sprintf("Please select slot(s) for upload or \"*\" for all slots\n");
+      return;
+   }
+
    if (isdigit(param[1][0])) {
       if (strchr(param[1], '-')) {
          int s1 = atoi(param[1]);
@@ -1938,16 +1943,17 @@ void upload(udp_connection &c, int n_param, const char **param) {
                c.sprintf("Slot %2d: Found un-programmed board\n", s);
          }
       }
+   } else {
+      c.sprintf("Please select slot(s) for upload or \"*\" for all slots\n");
+      return;
    }
 
    int i;
    for (i = 0; i < WDAQ_N_SLOTS; i++)
       if (slot_sel[i])
          break;
-   if (i == WDAQ_N_SLOTS) {
-      c.sprintf("Please select slot(s) for upload or \"*\" for all slots\n");
+   if (i == WDAQ_N_SLOTS)
       return;
-   }
 
    // decode flags
    fwp[0] = 0;
