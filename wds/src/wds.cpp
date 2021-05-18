@@ -2158,8 +2158,6 @@ int main(int argc, const char *argv[]) {
          std::cout << "WDS connect to " << dcb->GetName() << " ... " << std::flush;
          dcb->Connect();
          dcb->ScanCrate();
-         if (gl.verbose)
-            std::cout << "OK" << std::endl;
          if (gl.verbose) {
             std::cout << std::endl << "========== DCB Info ==========" << std::endl;
             dcb->PrintVersion();
@@ -2173,9 +2171,10 @@ int main(int argc, const char *argv[]) {
          dcb->ResetSerdes(0, true);
          dcb->ResetSerdes(1, false);
 
+         if (!gl.verbose)
+            std::cout << "OK" << std::endl;
       } catch (std::runtime_error &e) {
-         if (gl.verbose)
-            std::cout << "Failure" << std::endl;
+         std::cout << std::endl << "Error connecting to " << dcb->GetName() << ": " << e.what() << std::endl;
          delete dcb;
          dcb = nullptr;
       }
