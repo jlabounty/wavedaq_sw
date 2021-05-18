@@ -1899,6 +1899,9 @@ void disconnectDCB(GLOBALS *gl, DCB *d) {
 int main(int argc, const char *argv[]) {
    GLOBALS gl = {};
 
+   std::cout << "WDS starting" << std::endl;
+   std::cout << "WDS GIT revision: " << getWdbLibRevision() << std::endl;
+
    // install handle to show stack trace on segment violation
    signal(SIGSEGV, handler);
 
@@ -2179,7 +2182,6 @@ int main(int argc, const char *argv[]) {
       }
    }
 
-   std::cout << "GIT revision: " << getWdbLibRevision() << std::endl;
    std::cout << "Starting HTTP server at port " << gl.serverPort << std::endl;
 
    if (gl.demoMode)
