@@ -2155,8 +2155,7 @@ int main(int argc, const char *argv[]) {
       // create new board
       DCB *dcb = new DCB(adr, gl.verbose);
       try {
-         if (gl.verbose)
-            std::cout << "Connect to " << dcb->GetName() << " ... " << std::flush;
+         std::cout << "WDS connect to " << dcb->GetName() << " ... " << std::flush;
          dcb->Connect();
          dcb->ScanCrate();
          if (gl.verbose)
@@ -2182,7 +2181,7 @@ int main(int argc, const char *argv[]) {
       }
    }
 
-   std::cout << "Starting HTTP server at port " << gl.serverPort << std::endl;
+   std::cout << "WDS starting HTTP server at port " << gl.serverPort << std::endl;
 
    if (gl.demoMode)
       std::cout << "Starting in DEMO mode." << std::endl;
