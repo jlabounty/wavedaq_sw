@@ -976,6 +976,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
                   mg_printf_http_chunk(nc, "          %g],\n", s);
             }
             mg_printf_http_chunk(nc, "        \"pllLck\": %d,\n", b->GetPllLock(false));
+            mg_printf_http_chunk(nc, "        \"LEDstate\": %d,\n", b->GetLEDState(true));
             mg_printf_http_chunk(nc, "        \"sysBusy\": %s,\n", b->GetSysBusy() ? "true" : "false");
             mg_printf_http_chunk(nc, "        \"drsctrlBusy\": %s,\n", b->GetDrsCtrlBusy() ? "true" : "false");
             mg_printf_http_chunk(nc, "        \"triggerBusParityErrorCount\": %d,\n", b->GetTrbParityErrorCount());

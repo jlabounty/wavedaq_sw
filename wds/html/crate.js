@@ -482,10 +482,13 @@ function drawWDB(ctx, slot) {
    }
 
    // Status LED
-   if (CRATE.crate.slot !== undefined && CRATE.crate.slot[slot].pllLck != 511)
-      ctx.fillStyle = "#FF2020";
-   else
-      ctx.fillStyle = "#5EE5AA";
+   if (CRATE.crate.slot !== undefined) {
+      console.log(CRATE.crate.slot[slot].LEDstate);
+      if (CRATE.crate.slot[slot].LEDstate === 0x12)
+         ctx.fillStyle = "#60FFAA"; // green
+      else if (CRATE.crate.slot[slot].LEDstate === 0x09)
+         ctx.fillStyle = "#4080FF"; // blue
+   }
    ctx.beginPath();
    ctx.arc(30, 61, 4, 0, 2 * Math.PI);
    ctx.fill();

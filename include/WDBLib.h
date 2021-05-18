@@ -656,6 +656,7 @@ public:
    float GetVCalibTemperature();
    float GetTCalibTemperature();
    unsigned int GetPllLock(bool refresh = true);
+   unsigned int GetLEDState(bool refresh = true);
    bool WaitPllLock(int timeout = 100);
    unsigned int GetExtClkActive(bool refresh);
    void GetScalers(std::vector<uint64_t> &s, bool refresh = true);
