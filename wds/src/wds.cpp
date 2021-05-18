@@ -2183,10 +2183,10 @@ int main(int argc, const char *argv[]) {
    std::cout << "WDS starting HTTP server at port " << gl.serverPort << std::endl;
 
    if (gl.demoMode)
-      std::cout << "Starting in DEMO mode." << std::endl;
+      std::cout << "WDS starting in DEMO mode" << std::endl;
 
    if (gl.daemonMode) {
-      std::cout << "wds becoming a daemon..." << std::endl;
+      std::cout << "WDS becoming a daemon..." << std::endl;
       int fd, pid;
 
       if ((pid = fork()) < 0)
