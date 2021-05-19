@@ -749,7 +749,7 @@ int main(int argc, char *argv[])
             char cmd[128];
 
             printf("\nInsert Ascii command:\n");
-            scanf("%s", cmd);
+            scanf("\n%128[^\n]", cmd);
 
             printf("\nLimit command execution\n0: WDB\n1: DCB\n2: Both\n");
             scanf("%d", &board);
