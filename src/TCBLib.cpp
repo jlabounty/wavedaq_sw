@@ -1978,14 +1978,21 @@ void TCB::SetMargaritaTrgDly(u_int32_t *data){
   else if ((fexpid&0x3)!= 0x2) {
     printf("TCB not compiled for FOOT !!!!!\n");
     throw std::runtime_error("Error in TCB board configuration");  
+  } 
+  if(*data > 32) {
+   printf("Margarita delay values allowed [0-31], given %d\n", *data);
+    throw std::runtime_error("Error in TCB board configuration");  
   }
+  if(*data > 0)
+    *data += 32;
+  
   // read the register value
   u_int32_t rdata;
   ReadReg(RMAJORITYVALUE,&rdata);
   // mask needed values
-  rdata &= 0xFFFFFE0F;
+  rdata &= 0xFFFFFC0F;
   // add requested value
-  rdata |= ((*data)&0x1F)<<4;
+  rdata |= ((*data)&0x3F)<<4;
    WriteReg(RMAJORITYVALUE,&rdata);
 }
 // set Margarita Masks
