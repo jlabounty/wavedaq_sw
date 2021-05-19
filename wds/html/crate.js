@@ -423,6 +423,8 @@ function drawEmptySlot(ctx, slot) {
    ctx.fillRect(2, 2, 36, 251);
 }
 
+var drawCount = 0;
+
 function drawWDB(ctx, slot) {
    ctx.save();
 
@@ -483,11 +485,23 @@ function drawWDB(ctx, slot) {
 
    // Status LED
    if (CRATE.crate.slot !== undefined) {
-      console.log(CRATE.crate.slot[slot].LEDstate);
-      if (CRATE.crate.slot[slot].LEDstate === 0x12)
-         ctx.fillStyle = "#60FFAA"; // green
-      else if (CRATE.crate.slot[slot].LEDstate === 0x09)
-         ctx.fillStyle = "#4080FF"; // blue
+      // Blink test:
+      // CRATE.crate.slot[slot].LEDstate = 1 << 5 | 0 << 4 | 0 << 3 |
+      //                                  0 << 2 | 1 << 1 | 0 << 0;
+
+      let r, g, b;
+      if (drawCount == 0) {
+         r = ((CRATE.crate.slot[slot].LEDstate >> 5) & 0x01) * 255;
+         g = ((CRATE.crate.slot[slot].LEDstate >> 4) & 0x01) * 255;
+         b = ((CRATE.crate.slot[slot].LEDstate >> 3) & 0x01) * 255;
+      } else {
+         r = ((CRATE.crate.slot[slot].LEDstate >> 2) & 0x01) * 255;
+         g = ((CRATE.crate.slot[slot].LEDstate >> 1) & 0x01) * 255;
+         b = ((CRATE.crate.slot[slot].LEDstate >> 0) & 0x01) * 255;
+      }
+
+      ctx.fillStyle = "rgb(" + r.toString() + "," +  g.toString() + "," + b.toString() + ")";
+      drawCount = drawCount === 1 ? 0 : 1;
    }
    ctx.beginPath();
    ctx.arc(30, 61, 4, 0, 2 * Math.PI);
@@ -972,7 +986,7 @@ function receiveCrate() {
          setItem("infoWDBCompStatus", s);
       }
 
-      CRATE.timer.loadCrate = window.setTimeout(loadCrate, 100);
+      CRATE.timer.loadCrate = window.setTimeout(loadCrate, 300);
    } else if (CRATE.req.readyState === 4 && CRATE.req.status === 0) {
       connectionBroken();
    }
