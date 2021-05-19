@@ -18,6 +18,7 @@
 #include <memory>
 #include <stdexcept>
 #include <cstddef>
+#include <fstream>
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -402,9 +403,6 @@ int main(int argc, char *argv[]) {
    // socket address used to store client address
    client_address_len = sizeof(client_address);
 
-   //init drivers
-   //initTcbDriver();
-
    printf("DCB binary and ASCII servers listening on %s ports %d,%d\n", hostname, SERVER_PORT_BIN, SERVER_PORT_ASC);
 
    if (daemon) {
@@ -753,17 +751,6 @@ int main(int argc, char *argv[]) {
          connection[addr]->flush();
 
       } // ASCII
-
-      //check for TCB data
-      /*if(hasTcbDataDestination()){
-         for (int slot = 0; slot < WDAQ_N_SLOTS; slot++) {
-            if(board[slot].type_id==BRD_TYPE_ID_TCB){
-               if(hasData(slot, board + slot))
-                  processData(slot, board + slot);
-            }
-         }
-      }*/
-
    }
 
    return 0;
@@ -932,6 +919,13 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       for (int i=0 ; i<strlen(hostname) ; i++)
          hostname[i] = toupper(hostname[i]);
 
+      std::string cmb("mscbxxx");
+      std::ifstream f("/run/media/mmcblk0p4/fw_sw/cmb");
+      if (f.is_open()) {
+         f >> cmb;
+         f.close();
+      }
+
       c.sprintf("{\n");
       unsigned int d;
       reg_bank_read(DCB_BOARD_REVISION_REG, &d, 1);
@@ -947,6 +941,8 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("  \"v5_0\": \"%1.3lf V\",\n", sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN1) * 2.5);
       c.sprintf("  \"v3_3\": \"%1.3lf V\",\n", sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN2) * 5.0 / 3.0);
       c.sprintf("  \"v2_5\": \"%1.3lf V\",\n", sysmon_get_voltage(SYSPTR(sys_mon), SYSMON_ADR_AIN3) * 1.22);
+
+      c.sprintf("  \"cmb\" : \"%s\",\n", cmb.c_str());
 
       c.sprintf("  \"ping\": [ ");
 
@@ -1160,9 +1156,6 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       }
 
       c.sprintf("Setting data destination to %s port %d\n", dest_addr, dest_port);
-
-      // notify tcb readout driver of the new port and ip
-      //setTcbDataDestination(dest_addr, dest_port);
 
       // TODO: Enable slots
       // set UDP destination parameters in DMA packet scheduler (dps) driver
