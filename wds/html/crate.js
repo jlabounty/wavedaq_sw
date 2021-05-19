@@ -291,8 +291,8 @@ function drawCMB(ctx) {
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillStyle = "#000000";
-      ctx.font = "14px Sans-Serif"
-      ctx.fillText("MSCBXXX", 65, 10);
+      ctx.font = "14px Sans-Serif";
+      ctx.fillText(CRATE.crate.DCB.cmb.toUpperCase(), 65, 10);
    }
 
    ctx.fillStyle = "#A0A0A0";
@@ -863,7 +863,7 @@ function drawTCB(ctx, slot) {
    ctx.fillRect(4, 234, 33, 18);
    ctx.fillStyle = "#000000";
    ctx.font = "8px Sans-Serif"
-   ctx.fillText("TCBXX", 20, 243);
+   ctx.fillText("TCB", 20, 243);
 
    ctx.restore();
 }
@@ -943,7 +943,7 @@ function receiveCrate() {
       }
 
       if (CRATE.selectedWDB !== undefined &&
-          CRATE.crate.slot[CRATE.selectedWDB].type_id !== BRD_TYPE_ID_BLANK) {
+          CRATE.crate.slot[CRATE.selectedWDB].type_id === BRD_TYPE_ID_WDB) {
          let wdb = CRATE.crate.slot[CRATE.selectedWDB];
 
          setItem("infoWDBName", wdb.name);
@@ -986,6 +986,20 @@ function receiveCrate() {
          setItem("infoWDBCompStatus", s);
       }
 
+      if (CRATE.selectedTCB !== undefined &&
+         CRATE.crate.slot[17].type_id === BRD_TYPE_ID_TCB) {
+
+         let tcb = CRATE.crate.slot[17];
+
+         setItem("infoTCBName", "TCB Type " + tcb.firmwareId);
+         setItem("infoTCBCrateSlot", tcb.crateId + " / " + tcb.slotId);
+         setItem("infoTCBFwBuild", tcb.firmwareBuild);
+         setItem("infoTCBRunStatus", tcb.runStatus === 1 ? "Running" : "Stopped");
+         setItem("infoTCBBusy", (tcb.boardBusy === 1 ? "true" : "false") + " / " +
+            (tcb.crateBusy === 1 ? "true" : "false"));
+
+
+      }
       CRATE.timer.loadCrate = window.setTimeout(loadCrate, 300);
    } else if (CRATE.req.readyState === 4 && CRATE.req.status === 0) {
       connectionBroken();

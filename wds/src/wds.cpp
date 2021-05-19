@@ -679,6 +679,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
             std::cout << "Received \"mark " << (flag ? "on" : "off") << "\" command" << std::endl;
          if (dcb != nullptr)
             dcb->SendReceiveUDP(flag ? "mark" : "unmark");
+
       } else if (item == "sync") { // sync ------------------------------
 
          if (dcb != nullptr)
@@ -923,20 +924,19 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       mg_printf_http_chunk(nc, "{\n");
       mg_printf_http_chunk(nc, "   \"DCB\":\n");
       mg_printf_http_chunk(nc, "%s,\n", dcbinfo.c_str());
-      mg_printf_http_chunk(nc, "   \"CMB\": \"%s\",\n", "MSCBXXX");
       mg_printf_http_chunk(nc, "   \"slot\": [\n");
 
       // check for removed WDB boards
       auto p = dcbinfo.substr(dcbinfo.find("\"ping\": ") + 10);
       p = p.substr(0, p.find(" "));
       auto ap = split(p, ',');
-      for (int i=0 ; i<16 ; i++) {
+      for (int i = 0; i < 16; i++) {
          auto b = dcb->GetWDB(i);
          if (b != nullptr && std::stod(ap[i]) == 0)
             disconnectWDB(gl, b);
       }
 
-      for (int i=0 ; i<16 ; i++) {
+      for (int i = 0; i < 16; i++) {
 
          mg_printf_http_chunk(nc, "      {\n");
          mg_printf_http_chunk(nc, "        \"vendor_id\": %d,\n", dcb->GetBoardId(i)->vendor_id);
@@ -983,7 +983,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
             mg_printf_http_chunk(nc, "        \"compChannelStatus\": %d,\n", b->GetCompChStat());
             float hv = 0;
             b->GetHVBaseVoltage(hv, false);
-            mg_printf_http_chunk(nc, "        \"hv_on\": %d\n", hv > 10 ? 1:0);
+            mg_printf_http_chunk(nc, "        \"hv_on\": %d\n", hv > 10 ? 1 : 0);
          } else {
             mg_printf_http_chunk(nc, "        \"variant_id\": %d\n", dcb->GetBoardId(i)->variant_id);
          }
@@ -1004,7 +1004,36 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       mg_printf_http_chunk(nc, "        \"vendor_id\": %d,\n", dcb->GetBoardId(17)->vendor_id);
       mg_printf_http_chunk(nc, "        \"type_id\": %d,\n", dcb->GetBoardId(17)->type_id);
       mg_printf_http_chunk(nc, "        \"rev_id\": %d,\n", dcb->GetBoardId(17)->rev_id);
-      mg_printf_http_chunk(nc, "        \"variant_id\": %d\n", dcb->GetBoardId(17)->variant_id);
+
+      if (dcb->GetBoardId(17)->type_id == BRD_TYPE_ID_TCB) {
+         mg_printf_http_chunk(nc, "        \"variant_id\": %d,\n", dcb->GetBoardId(17)->variant_id);
+
+         auto reg = dcb->ReadUDP(17, 0, 16);
+         int crateId  = (reg[6] >> 24) & 0xFF;
+         int slotId   = (reg[6] >> 16) & 0xFF;
+         int boardId  = reg[6] & 0xFFFF;
+         int fwId     = (reg[0] >> 2) & 0x2F;
+         int runStatus = (reg[1] >> 0) & 0x01;
+         int boardBusy = (reg[1] >> 1) & 0x01;
+         int crateBusy = (reg[1] >> 3) & 0x01;
+
+         char fwBuild[256];
+         unsigned int d = reg[15];
+         sprintf(fwBuild, "%02d/%02d/20%02d %02d:%02d:%02d",
+            (d&0xF8000000)>>27, (d&0x7800000)>>23, (d&0x7e0000)>>17, (d&0x1F000)>>12, (d&0xFC0)>>6, (d&0x3F));
+
+         mg_printf_http_chunk(nc, "        \"crateId\": %d,\n", crateId);
+         mg_printf_http_chunk(nc, "        \"slotId\": %d,\n",  slotId);
+         mg_printf_http_chunk(nc, "        \"boardId\": %d,\n", boardId);
+         mg_printf_http_chunk(nc, "        \"firmwareId\": %d,\n", fwId);
+         mg_printf_http_chunk(nc, "        \"firmwareBuild\": \"%s\",\n", fwBuild);
+
+         mg_printf_http_chunk(nc, "        \"runStatus\": %d,\n", runStatus);
+         mg_printf_http_chunk(nc, "        \"boardBusy\": %d,\n", boardBusy);
+         mg_printf_http_chunk(nc, "        \"crateBusy\": %d\n", crateBusy);
+      } else
+         mg_printf_http_chunk(nc, "        \"variant_id\": %d\n", dcb->GetBoardId(17)->variant_id);
+
       mg_printf_http_chunk(nc, "      }\n");
 
       slotHvOn = (slotHvOn + 1) % 16;
