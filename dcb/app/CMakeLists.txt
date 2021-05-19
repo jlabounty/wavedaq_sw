@@ -74,4 +74,4 @@ endforeach()
 
 install(TARGETS ${PROGS} DESTINATION /fw_sw/dcb/prod/)
 install(PROGRAMS dcbs.sh DESTINATION /etc/init.d/)
-install(CODE "execute_process(COMMAND /etc/init.d/dcbs.sh restart TIMEOUT 3)")
+install(CODE "execute_process(COMMAND /etc/init.d/dcbs.sh restart TIMEOUT 10)")

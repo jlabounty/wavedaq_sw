@@ -556,6 +556,8 @@ std::string DCB::UploadStart(int slot, int revision, std::string flags) {
    auto oldTimeout = mReceiveTimeoutMs;
    mReceiveTimeoutMs = cIncreasedReceiveTimeoutMs; // increase timeout for this command
    auto result = SendReceiveUDP(str, false);
+   if (result.back() == '\n')
+      result.pop_back();
    mReceiveTimeoutMs = oldTimeout;
 
    if (mVerbose)

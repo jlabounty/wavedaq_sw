@@ -709,8 +709,14 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
 
             if (slot == -1) {
                result = dcb->UploadStart(-1, 0, flags);
-            }
-            if (slot != -1) {
+               if (result.find(">") != std::string::npos) {
+                  // immediate prompt: no board to upload
+                  if (gl->verbose)
+                     std::cout << "No board found to upload" << std::endl;
+                  gl->progressMode = GLOBALS::finished;
+                  result = "No board found to upload";
+               }
+            } else {
                auto b = dcb->GetWDB(slot);
                if (b != nullptr && b->GetBoardRevision() == 4) // Rev. E
                   result = dcb->UploadStart(slot, 4, flags);
@@ -724,7 +730,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
          }
 
          mg_printf(nc, "%s", "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
-         mg_printf_http_chunk(nc, "%s", result.c_str());
+         mg_printf_http_chunk(nc, "{\n   \"Status\": \"%s\"\n}\n", result.c_str());
          mg_send_http_chunk(nc, "", 0); // end of response
          return;
 
@@ -970,6 +976,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
                   mg_printf_http_chunk(nc, "          %g],\n", s);
             }
             mg_printf_http_chunk(nc, "        \"pllLck\": %d,\n", b->GetPllLock(false));
+            mg_printf_http_chunk(nc, "        \"LEDstate\": %d,\n", b->GetLEDState(true));
             mg_printf_http_chunk(nc, "        \"sysBusy\": %s,\n", b->GetSysBusy() ? "true" : "false");
             mg_printf_http_chunk(nc, "        \"drsctrlBusy\": %s,\n", b->GetDrsCtrlBusy() ? "true" : "false");
             mg_printf_http_chunk(nc, "        \"triggerBusParityErrorCount\": %d,\n", b->GetTrbParityErrorCount());

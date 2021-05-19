@@ -997,6 +997,18 @@ unsigned int WDB::GetPllLock(bool refresh)
    return this->sreg[GetSysDcmLockLoc() / 4];
 }
 
+unsigned int WDB::GetLEDState(bool refresh)
+// all PLLs (DRS, LMK, FPGA DAQ, ISERDES, OSERDES)
+{
+   if (mDemoMode)
+      return 0;
+
+   if (refresh)
+      ReceiveStatusRegister(GetLedStateLoc());
+
+   return this->GetLedState();
+}
+
 bool WDB::WaitPllLock(int timeout)
 // wait until all PLLs have locked with timeout
 {
