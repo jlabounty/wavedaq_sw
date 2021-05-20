@@ -9,7 +9,28 @@ typedef struct {
    int slot = 0;
    std::string crateName = "CRATE";
    float thr[16];
+   bool written = false;
 } boardData;
+
+//prints a tag fot the WDB in the output file
+void printBoard(ofstream &outfile, boardData &b){
+   cout << "Board "<< b.boardName << "\n";
+   outfile << "<WDB Name=\"" << b.boardName << "\" Slot=\""<< b.slot <<"\">"<< std::endl;
+   outfile << "<TriggerLevel>" << std::endl;
+   for(int i=0; i<16; i++){
+      cout << b.thr[i];
+      outfile << b.thr[i];
+
+      //next board
+      if(i!=15){
+         cout << ", ";
+         outfile << ", ";
+      }
+   }
+   outfile << std::endl << "</TriggerLevel>" << std::endl;
+   outfile << "</WDB>"<< std::endl;
+   cout << "\n";
+}
 
 void makeThr(string dirname="2020-10-12/"){
    int noped=0;
@@ -26,7 +47,6 @@ void makeThr(string dirname="2020-10-12/"){
    std::vector<boardData> boards;
 
    //open output file
-   ofstream outfile("output.xml");
    TFile *outroot = new TFile("output.root", "recreate");
 
    //list directory content
@@ -113,8 +133,6 @@ void makeThr(string dirname="2020-10-12/"){
 
             float peds[16] = {-100};
 
-            outfile << board.boardName << std::endl;
-            outfile << "<TriggerLevel>";
             //TCanvas* c=new TCanvas();
             //c->SetLogy();
             TF1 *fgau= new TF1("fgau", "gaus", thrs.front(), thrs.back());
@@ -134,7 +152,6 @@ void makeThr(string dirname="2020-10-12/"){
                   }
 
                   printf("%2d: %lf %lf -> %lf\n", i,  fgau->GetParameter(1), fgau->GetParameter(2), fgau->GetParameter(1) +0.0005 + nsigma*fgau->GetParameter(2));
-                  outfile << fgau->GetParameter(1) +0.0005 + nsigma*fgau->GetParameter(2); //0.0005 is bin size
                   board.thr[i] = fgau->GetParameter(1) +0.0005 + nsigma*fgau->GetParameter(2);
 
 
@@ -168,21 +185,15 @@ void makeThr(string dirname="2020-10-12/"){
 
                   if(peds[i] != -100){
                      printf("%2d: %lf\n", i,  peds[i]);
-                     outfile << peds[i] + absoluteThr;
                      board.thr[i] = peds[i] + absoluteThr;
                   }else {
                      printf("%2d: no ped\n", i);
-                     outfile << fallbackThr;
                      board.thr[i] = fallbackThr;
                      noped++;
                   }
                }
                
-               //next board
-               if(i!=15)
-                  outfile << ", ";
             }
-            outfile << "</TriggerLevel>" << std::endl;
 
             boards.push_back(board);
          }
@@ -190,14 +201,29 @@ void makeThr(string dirname="2020-10-12/"){
       cout << "\n\n FINAL STATUS:\n";
       cout << noped << " channels without or with bad pedestal\n";
 
-      for(auto b : boards){
-         cout << "Board "<< b.boardName << "\n";
-         for(int i=0; i<16; i++)
-            cout << b.thr[i]  << ", ";
-         cout << "\n";
+      ofstream outfile("output.xml");
+      outfile << "<System>" << std::endl;
+      for(auto it= boards.begin(); it<boards.end(); it++){
+         if(it->written == false){
+            //new board to be written
+            outfile << "<Crate Name=\"" << it->crateName << "\">"<< std::endl;
+            printBoard(outfile, *it);
+            it->written = true;
+
+            //write all other boards in crate
+            auto others = it;
+            for(auto others = it; others<boards.end(); others++){
+               if(others->written == false && others->crateName == it->crateName){
+                  printBoard(outfile, *others);
+                  others->written = true;
+               }
+            }
+            outfile << "</Crate>" << std::endl;
+         }
       }
+      outfile << "</System>" << std::endl;
+      outfile.close();
    }
-   outfile.close();
    outroot->Close();
 
 }
