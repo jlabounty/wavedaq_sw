@@ -172,8 +172,6 @@ add_subdirectory(tcb)
 
 add_subdirectory(wd_cl)
 
-add_subdirectory(wdbdiscr)
-
 add_subdirectory(wdtest)
 
 # disable targets that requires libmscb
