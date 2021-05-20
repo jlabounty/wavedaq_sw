@@ -5,7 +5,7 @@
  *  Project :  MEGII - DCB
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  04.12.2020 11:07:11
+ *  Created :  20.05.2021 11:27:05
  *
  *  Description :  Register map definitions.
  *
@@ -100,7 +100,25 @@
 #define DCB_REG_TRB_INFO_LSB                      0x0114
 #define DCB_REG_TRB_INFO_MSB                      0x0118
 #define DCB_REG_LMK_MOD_FLAG                      0x011C
-#define DCB_REG_CRC32_REG_BANK                    0x0120
+#define DCB_REG_CMB_MSCB_ADR                      0x0120
+#define DCB_REG_SD_PKT_CNT_0                      0x0124
+#define DCB_REG_SD_PKT_CNT_1                      0x0128
+#define DCB_REG_SD_PKT_CNT_2                      0x012C
+#define DCB_REG_SD_PKT_CNT_3                      0x0130
+#define DCB_REG_SD_PKT_CNT_4                      0x0134
+#define DCB_REG_SD_PKT_CNT_5                      0x0138
+#define DCB_REG_SD_PKT_CNT_6                      0x013C
+#define DCB_REG_SD_PKT_CNT_7                      0x0140
+#define DCB_REG_SD_PKT_CNT_8                      0x0144
+#define DCB_REG_SD_PKT_CNT_9                      0x0148
+#define DCB_REG_SD_PKT_CNT_10                     0x014C
+#define DCB_REG_SD_PKT_CNT_11                     0x0150
+#define DCB_REG_SD_PKT_CNT_12                     0x0154
+#define DCB_REG_SD_PKT_CNT_13                     0x0158
+#define DCB_REG_SD_PKT_CNT_14                     0x015C
+#define DCB_REG_SD_PKT_CNT_15                     0x0160
+#define DCB_REG_SD_PKT_CNT_17                     0x0164
+#define DCB_REG_CRC32_REG_BANK                    0x0168
 
 /*
  * Bit Positions
@@ -265,9 +283,9 @@
 
 
 
-/* ****** Register 9 [0x0024]: SN - Serial Number of the WD2 Board (Board ID) (Default: 0x00000000) ****** */
+/* ****** Register 9 [0x0024]: SN - Serial Number of the DCB Board (Board ID) (Default: 0x00000000) ****** */
 
-/* SERIAL_NUMBER - Serial Number of the WD2 Board (Board ID) */
+/* SERIAL_NUMBER - Serial Number of the Data Concentrator Board (Board ID) */
 #define DCB_SERIAL_NUMBER_REG                                    DCB_REG_SN
 #define DCB_SERIAL_NUMBER_MASK                                   0x0000FFFF
 #define DCB_SERIAL_NUMBER_OFS                                             0
@@ -1667,7 +1685,169 @@
 
 
 
-/* ****** Register 72 [0x0120]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: 0x00000000) ****** */
+/* ****** Register 72 [0x0120]: CMB_MSCB_ADR - MSCB Address of the CMB in the crate (Default: 0x00000000) ****** */
+
+/* CMB_MSCB_ADR - MSCB Address of the CMB in the crate */
+#define DCB_CMB_MSCB_ADR_REG                           DCB_REG_CMB_MSCB_ADR
+#define DCB_CMB_MSCB_ADR_MASK                                    0xFFFFFFFF
+#define DCB_CMB_MSCB_ADR_OFS                                              0
+
+
+
+/* ****** Register 73 [0x0124]: SD_PKT_CNT_0 - SERDES receiver packet count for slot 0 (Default: 0x00000000) ****** */
+
+/* SD_PKT_CNT_0 - SERDES receiver packet count for slot 0 */
+#define DCB_SD_PKT_CNT_0_REG                           DCB_REG_SD_PKT_CNT_0
+#define DCB_SD_PKT_CNT_0_MASK                                    0xFFFFFFFF
+#define DCB_SD_PKT_CNT_0_OFS                                              0
+
+
+
+/* ****** Register 74 [0x0128]: SD_PKT_CNT_1 - SERDES receiver packet count for slot 1 (Default: 0x00000000) ****** */
+
+/* SD_PKT_CNT_1 - SERDES receiver packet count for slot 1 */
+#define DCB_SD_PKT_CNT_1_REG                           DCB_REG_SD_PKT_CNT_1
+#define DCB_SD_PKT_CNT_1_MASK                                    0xFFFFFFFF
+#define DCB_SD_PKT_CNT_1_OFS                                              0
+
+
+
+/* ****** Register 75 [0x012C]: SD_PKT_CNT_2 - SERDES receiver packet count for slot 2 (Default: 0x00000000) ****** */
+
+/* SD_PKT_CNT_2 - SERDES receiver packet count for slot 2 */
+#define DCB_SD_PKT_CNT_2_REG                           DCB_REG_SD_PKT_CNT_2
+#define DCB_SD_PKT_CNT_2_MASK                                    0xFFFFFFFF
+#define DCB_SD_PKT_CNT_2_OFS                                              0
+
+
+
+/* ****** Register 76 [0x0130]: SD_PKT_CNT_3 - SERDES receiver packet count for slot 3 (Default: 0x00000000) ****** */
+
+/* SD_PKT_CNT_3 - SERDES receiver packet count for slot 3 */
+#define DCB_SD_PKT_CNT_3_REG                           DCB_REG_SD_PKT_CNT_3
+#define DCB_SD_PKT_CNT_3_MASK                                    0xFFFFFFFF
+#define DCB_SD_PKT_CNT_3_OFS                                              0
+
+
+
+/* ****** Register 77 [0x0134]: SD_PKT_CNT_4 - SERDES receiver packet count for slot 4 (Default: 0x00000000) ****** */
+
+/* SD_PKT_CNT_4 - SERDES receiver packet count for slot 4 */
+#define DCB_SD_PKT_CNT_4_REG                           DCB_REG_SD_PKT_CNT_4
+#define DCB_SD_PKT_CNT_4_MASK                                    0xFFFFFFFF
+#define DCB_SD_PKT_CNT_4_OFS                                              0
+
+
+
+/* ****** Register 78 [0x0138]: SD_PKT_CNT_5 - SERDES receiver packet count for slot 5 (Default: 0x00000000) ****** */
+
+/* SD_PKT_CNT_5 - SERDES receiver packet count for slot 5 */
+#define DCB_SD_PKT_CNT_5_REG                           DCB_REG_SD_PKT_CNT_5
+#define DCB_SD_PKT_CNT_5_MASK                                    0xFFFFFFFF
+#define DCB_SD_PKT_CNT_5_OFS                                              0
+
+
+
+/* ****** Register 79 [0x013C]: SD_PKT_CNT_6 - SERDES receiver packet count for slot 6 (Default: 0x00000000) ****** */
+
+/* SD_PKT_CNT_6 - SERDES receiver packet count for slot 6 */
+#define DCB_SD_PKT_CNT_6_REG                           DCB_REG_SD_PKT_CNT_6
+#define DCB_SD_PKT_CNT_6_MASK                                    0xFFFFFFFF
+#define DCB_SD_PKT_CNT_6_OFS                                              0
+
+
+
+/* ****** Register 80 [0x0140]: SD_PKT_CNT_7 - SERDES receiver packet count for slot 7 (Default: 0x00000000) ****** */
+
+/* SD_PKT_CNT_7 - SERDES receiver packet count for slot 7 */
+#define DCB_SD_PKT_CNT_7_REG                           DCB_REG_SD_PKT_CNT_7
+#define DCB_SD_PKT_CNT_7_MASK                                    0xFFFFFFFF
+#define DCB_SD_PKT_CNT_7_OFS                                              0
+
+
+
+/* ****** Register 81 [0x0144]: SD_PKT_CNT_8 - SERDES receiver packet count for slot 8 (Default: 0x00000000) ****** */
+
+/* SD_PKT_CNT_8 - SERDES receiver packet count for slot 8 */
+#define DCB_SD_PKT_CNT_8_REG                           DCB_REG_SD_PKT_CNT_8
+#define DCB_SD_PKT_CNT_8_MASK                                    0xFFFFFFFF
+#define DCB_SD_PKT_CNT_8_OFS                                              0
+
+
+
+/* ****** Register 82 [0x0148]: SD_PKT_CNT_9 - SERDES receiver packet count for slot 9 (Default: 0x00000000) ****** */
+
+/* SD_PKT_CNT_9 - SERDES receiver packet count for slot 9 */
+#define DCB_SD_PKT_CNT_9_REG                           DCB_REG_SD_PKT_CNT_9
+#define DCB_SD_PKT_CNT_9_MASK                                    0xFFFFFFFF
+#define DCB_SD_PKT_CNT_9_OFS                                              0
+
+
+
+/* ****** Register 83 [0x014C]: SD_PKT_CNT_10 - SERDES receiver packet count for slot 10 (Default: 0x00000000) ****** */
+
+/* SD_PKT_CNT_10 - SERDES receiver packet count for slot 10 */
+#define DCB_SD_PKT_CNT_10_REG                         DCB_REG_SD_PKT_CNT_10
+#define DCB_SD_PKT_CNT_10_MASK                                   0xFFFFFFFF
+#define DCB_SD_PKT_CNT_10_OFS                                             0
+
+
+
+/* ****** Register 84 [0x0150]: SD_PKT_CNT_11 - SERDES receiver packet count for slot 11 (Default: 0x00000000) ****** */
+
+/* SD_PKT_CNT_11 - SERDES receiver packet count for slot 11 */
+#define DCB_SD_PKT_CNT_11_REG                         DCB_REG_SD_PKT_CNT_11
+#define DCB_SD_PKT_CNT_11_MASK                                   0xFFFFFFFF
+#define DCB_SD_PKT_CNT_11_OFS                                             0
+
+
+
+/* ****** Register 85 [0x0154]: SD_PKT_CNT_12 - SERDES receiver packet count for slot 12 (Default: 0x00000000) ****** */
+
+/* SD_PKT_CNT_12 - SERDES receiver packet count for slot 12 */
+#define DCB_SD_PKT_CNT_12_REG                         DCB_REG_SD_PKT_CNT_12
+#define DCB_SD_PKT_CNT_12_MASK                                   0xFFFFFFFF
+#define DCB_SD_PKT_CNT_12_OFS                                             0
+
+
+
+/* ****** Register 86 [0x0158]: SD_PKT_CNT_13 - SERDES receiver packet count for slot 13 (Default: 0x00000000) ****** */
+
+/* SD_PKT_CNT_13 - SERDES receiver packet count for slot 13 */
+#define DCB_SD_PKT_CNT_13_REG                         DCB_REG_SD_PKT_CNT_13
+#define DCB_SD_PKT_CNT_13_MASK                                   0xFFFFFFFF
+#define DCB_SD_PKT_CNT_13_OFS                                             0
+
+
+
+/* ****** Register 87 [0x015C]: SD_PKT_CNT_14 - SERDES receiver packet count for slot 14 (Default: 0x00000000) ****** */
+
+/* SD_PKT_CNT_14 - SERDES receiver packet count for slot 14 */
+#define DCB_SD_PKT_CNT_14_REG                         DCB_REG_SD_PKT_CNT_14
+#define DCB_SD_PKT_CNT_14_MASK                                   0xFFFFFFFF
+#define DCB_SD_PKT_CNT_14_OFS                                             0
+
+
+
+/* ****** Register 88 [0x0160]: SD_PKT_CNT_15 - SERDES receiver packet count for slot 15 (Default: 0x00000000) ****** */
+
+/* SD_PKT_CNT_15 - SERDES receiver packet count for slot 15 */
+#define DCB_SD_PKT_CNT_15_REG                         DCB_REG_SD_PKT_CNT_15
+#define DCB_SD_PKT_CNT_15_MASK                                   0xFFFFFFFF
+#define DCB_SD_PKT_CNT_15_OFS                                             0
+
+
+
+/* ****** Register 89 [0x0164]: SD_PKT_CNT_17 - SERDES receiver packet count for slot 17 (TCB Slot) (Default: 0x00000000) ****** */
+
+/* SD_PKT_CNT_17 - SERDES receiver packet count for slot 17 (TCB Slot) */
+#define DCB_SD_PKT_CNT_17_REG                         DCB_REG_SD_PKT_CNT_17
+#define DCB_SD_PKT_CNT_17_MASK                                   0xFFFFFFFF
+#define DCB_SD_PKT_CNT_17_OFS                                             0
+
+
+
+/* ****** Register 90 [0x0168]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: 0x00000000) ****** */
 
 /* CRC32_REG_BANK - Keep at the end of the register bank */
 #define DCB_CRC32_REG_BANK_REG                       DCB_REG_CRC32_REG_BANK
@@ -1679,7 +1859,7 @@
  * Number of Registers
  */
 
-#define NR_OF_REGS          73
+#define NR_OF_REGS          91
 
 #ifndef DCB_DONT_INCLUDE_REG_ACCESS_VARS
 

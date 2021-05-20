@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  04.12.2020 11:07:11
+// Created :  20.05.2021 11:27:05
 //
 
 
@@ -128,9 +128,9 @@ public:
 
 
 
-   ////// ------ Register 9 [0x0024]: SN - Serial Number of the WD2 Board (Board ID) (Default: 0x00000000) ------ //////
+   ////// ------ Register 9 [0x0024]: SN - Serial Number of the DCB Board (Board ID) (Default: 0x00000000) ------ //////
 
-   // 0x0000FFFF: SERIAL_NUMBER - Serial Number of the WD2 Board (Board ID)
+   // 0x0000FFFF: SERIAL_NUMBER - Serial Number of the Data Concentrator Board (Board ID)
    unsigned int GetSerialNumber() { return BitExtract(DCB_SERIAL_NUMBER_REG, DCB_SERIAL_NUMBER_MASK, DCB_SERIAL_NUMBER_OFS); };
    void         SetSerialNumber(unsigned int value) { SetRegMask(DCB_SERIAL_NUMBER_REG, DCB_SERIAL_NUMBER_MASK, DCB_SERIAL_NUMBER_OFS, value); };
 
@@ -1010,7 +1010,117 @@ public:
    unsigned int GetLmk0Mod() { return BitExtract(DCB_LMK_0_MOD_REG, DCB_LMK_0_MOD_MASK, DCB_LMK_0_MOD_OFS); };
 
 
-   ////// ------ Register 72 [0x0120]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: 0x00000000) ------ //////
+   ////// ------ Register 72 [0x0120]: CMB_MSCB_ADR - MSCB Address of the CMB in the crate (Default: 0x00000000) ------ //////
+
+   // 0xFFFFFFFF: CMB_MSCB_ADR - MSCB Address of the CMB in the crate
+   unsigned int GetCmbMscbAdr() { return BitExtract(DCB_CMB_MSCB_ADR_REG, DCB_CMB_MSCB_ADR_MASK, DCB_CMB_MSCB_ADR_OFS); };
+   void         SetCmbMscbAdr(unsigned int value) { SetRegMask(DCB_CMB_MSCB_ADR_REG, DCB_CMB_MSCB_ADR_MASK, DCB_CMB_MSCB_ADR_OFS, value); };
+
+
+
+   ////// ------ Register 73 [0x0124]: SD_PKT_CNT_0 - SERDES receiver packet count for slot 0 (Default: 0x00000000) ------ //////
+
+   // 0xFFFFFFFF: SD_PKT_CNT_0 - SERDES receiver packet count for slot 0
+   unsigned int GetSdPktCnt0() { return BitExtract(DCB_SD_PKT_CNT_0_REG, DCB_SD_PKT_CNT_0_MASK, DCB_SD_PKT_CNT_0_OFS); };
+
+
+   ////// ------ Register 74 [0x0128]: SD_PKT_CNT_1 - SERDES receiver packet count for slot 1 (Default: 0x00000000) ------ //////
+
+   // 0xFFFFFFFF: SD_PKT_CNT_1 - SERDES receiver packet count for slot 1
+   unsigned int GetSdPktCnt1() { return BitExtract(DCB_SD_PKT_CNT_1_REG, DCB_SD_PKT_CNT_1_MASK, DCB_SD_PKT_CNT_1_OFS); };
+
+
+   ////// ------ Register 75 [0x012C]: SD_PKT_CNT_2 - SERDES receiver packet count for slot 2 (Default: 0x00000000) ------ //////
+
+   // 0xFFFFFFFF: SD_PKT_CNT_2 - SERDES receiver packet count for slot 2
+   unsigned int GetSdPktCnt2() { return BitExtract(DCB_SD_PKT_CNT_2_REG, DCB_SD_PKT_CNT_2_MASK, DCB_SD_PKT_CNT_2_OFS); };
+
+
+   ////// ------ Register 76 [0x0130]: SD_PKT_CNT_3 - SERDES receiver packet count for slot 3 (Default: 0x00000000) ------ //////
+
+   // 0xFFFFFFFF: SD_PKT_CNT_3 - SERDES receiver packet count for slot 3
+   unsigned int GetSdPktCnt3() { return BitExtract(DCB_SD_PKT_CNT_3_REG, DCB_SD_PKT_CNT_3_MASK, DCB_SD_PKT_CNT_3_OFS); };
+
+
+   ////// ------ Register 77 [0x0134]: SD_PKT_CNT_4 - SERDES receiver packet count for slot 4 (Default: 0x00000000) ------ //////
+
+   // 0xFFFFFFFF: SD_PKT_CNT_4 - SERDES receiver packet count for slot 4
+   unsigned int GetSdPktCnt4() { return BitExtract(DCB_SD_PKT_CNT_4_REG, DCB_SD_PKT_CNT_4_MASK, DCB_SD_PKT_CNT_4_OFS); };
+
+
+   ////// ------ Register 78 [0x0138]: SD_PKT_CNT_5 - SERDES receiver packet count for slot 5 (Default: 0x00000000) ------ //////
+
+   // 0xFFFFFFFF: SD_PKT_CNT_5 - SERDES receiver packet count for slot 5
+   unsigned int GetSdPktCnt5() { return BitExtract(DCB_SD_PKT_CNT_5_REG, DCB_SD_PKT_CNT_5_MASK, DCB_SD_PKT_CNT_5_OFS); };
+
+
+   ////// ------ Register 79 [0x013C]: SD_PKT_CNT_6 - SERDES receiver packet count for slot 6 (Default: 0x00000000) ------ //////
+
+   // 0xFFFFFFFF: SD_PKT_CNT_6 - SERDES receiver packet count for slot 6
+   unsigned int GetSdPktCnt6() { return BitExtract(DCB_SD_PKT_CNT_6_REG, DCB_SD_PKT_CNT_6_MASK, DCB_SD_PKT_CNT_6_OFS); };
+
+
+   ////// ------ Register 80 [0x0140]: SD_PKT_CNT_7 - SERDES receiver packet count for slot 7 (Default: 0x00000000) ------ //////
+
+   // 0xFFFFFFFF: SD_PKT_CNT_7 - SERDES receiver packet count for slot 7
+   unsigned int GetSdPktCnt7() { return BitExtract(DCB_SD_PKT_CNT_7_REG, DCB_SD_PKT_CNT_7_MASK, DCB_SD_PKT_CNT_7_OFS); };
+
+
+   ////// ------ Register 81 [0x0144]: SD_PKT_CNT_8 - SERDES receiver packet count for slot 8 (Default: 0x00000000) ------ //////
+
+   // 0xFFFFFFFF: SD_PKT_CNT_8 - SERDES receiver packet count for slot 8
+   unsigned int GetSdPktCnt8() { return BitExtract(DCB_SD_PKT_CNT_8_REG, DCB_SD_PKT_CNT_8_MASK, DCB_SD_PKT_CNT_8_OFS); };
+
+
+   ////// ------ Register 82 [0x0148]: SD_PKT_CNT_9 - SERDES receiver packet count for slot 9 (Default: 0x00000000) ------ //////
+
+   // 0xFFFFFFFF: SD_PKT_CNT_9 - SERDES receiver packet count for slot 9
+   unsigned int GetSdPktCnt9() { return BitExtract(DCB_SD_PKT_CNT_9_REG, DCB_SD_PKT_CNT_9_MASK, DCB_SD_PKT_CNT_9_OFS); };
+
+
+   ////// ------ Register 83 [0x014C]: SD_PKT_CNT_10 - SERDES receiver packet count for slot 10 (Default: 0x00000000) ------ //////
+
+   // 0xFFFFFFFF: SD_PKT_CNT_10 - SERDES receiver packet count for slot 10
+   unsigned int GetSdPktCnt10() { return BitExtract(DCB_SD_PKT_CNT_10_REG, DCB_SD_PKT_CNT_10_MASK, DCB_SD_PKT_CNT_10_OFS); };
+
+
+   ////// ------ Register 84 [0x0150]: SD_PKT_CNT_11 - SERDES receiver packet count for slot 11 (Default: 0x00000000) ------ //////
+
+   // 0xFFFFFFFF: SD_PKT_CNT_11 - SERDES receiver packet count for slot 11
+   unsigned int GetSdPktCnt11() { return BitExtract(DCB_SD_PKT_CNT_11_REG, DCB_SD_PKT_CNT_11_MASK, DCB_SD_PKT_CNT_11_OFS); };
+
+
+   ////// ------ Register 85 [0x0154]: SD_PKT_CNT_12 - SERDES receiver packet count for slot 12 (Default: 0x00000000) ------ //////
+
+   // 0xFFFFFFFF: SD_PKT_CNT_12 - SERDES receiver packet count for slot 12
+   unsigned int GetSdPktCnt12() { return BitExtract(DCB_SD_PKT_CNT_12_REG, DCB_SD_PKT_CNT_12_MASK, DCB_SD_PKT_CNT_12_OFS); };
+
+
+   ////// ------ Register 86 [0x0158]: SD_PKT_CNT_13 - SERDES receiver packet count for slot 13 (Default: 0x00000000) ------ //////
+
+   // 0xFFFFFFFF: SD_PKT_CNT_13 - SERDES receiver packet count for slot 13
+   unsigned int GetSdPktCnt13() { return BitExtract(DCB_SD_PKT_CNT_13_REG, DCB_SD_PKT_CNT_13_MASK, DCB_SD_PKT_CNT_13_OFS); };
+
+
+   ////// ------ Register 87 [0x015C]: SD_PKT_CNT_14 - SERDES receiver packet count for slot 14 (Default: 0x00000000) ------ //////
+
+   // 0xFFFFFFFF: SD_PKT_CNT_14 - SERDES receiver packet count for slot 14
+   unsigned int GetSdPktCnt14() { return BitExtract(DCB_SD_PKT_CNT_14_REG, DCB_SD_PKT_CNT_14_MASK, DCB_SD_PKT_CNT_14_OFS); };
+
+
+   ////// ------ Register 88 [0x0160]: SD_PKT_CNT_15 - SERDES receiver packet count for slot 15 (Default: 0x00000000) ------ //////
+
+   // 0xFFFFFFFF: SD_PKT_CNT_15 - SERDES receiver packet count for slot 15
+   unsigned int GetSdPktCnt15() { return BitExtract(DCB_SD_PKT_CNT_15_REG, DCB_SD_PKT_CNT_15_MASK, DCB_SD_PKT_CNT_15_OFS); };
+
+
+   ////// ------ Register 89 [0x0164]: SD_PKT_CNT_17 - SERDES receiver packet count for slot 17 (TCB Slot) (Default: 0x00000000) ------ //////
+
+   // 0xFFFFFFFF: SD_PKT_CNT_17 - SERDES receiver packet count for slot 17 (TCB Slot)
+   unsigned int GetSdPktCnt17() { return BitExtract(DCB_SD_PKT_CNT_17_REG, DCB_SD_PKT_CNT_17_MASK, DCB_SD_PKT_CNT_17_OFS); };
+
+
+   ////// ------ Register 90 [0x0168]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: CRC32_REG_BANK - Keep at the end of the register bank
    unsigned int GetCrc32RegBank() { return BitExtract(DCB_CRC32_REG_BANK_REG, DCB_CRC32_REG_BANK_MASK, DCB_CRC32_REG_BANK_OFS); };

@@ -5,7 +5,7 @@
 #  Project :  MEGII - DCB
 #
 #  Author  :  schmid_e (Author of generation script)
-#  Created :  04.12.2020 11:07:11
+#  Created :  20.05.2021 11:27:05
 #
 #  Description :  Register map definitions.
 #
@@ -92,7 +92,25 @@ DCB_REG_TRB_INFO_STAT                     = 0x0110
 DCB_REG_TRB_INFO_LSB                      = 0x0114
 DCB_REG_TRB_INFO_MSB                      = 0x0118
 DCB_REG_LMK_MOD_FLAG                      = 0x011C
-DCB_REG_CRC32_REG_BANK                    = 0x0120
+DCB_REG_CMB_MSCB_ADR                      = 0x0120
+DCB_REG_SD_PKT_CNT_0                      = 0x0124
+DCB_REG_SD_PKT_CNT_1                      = 0x0128
+DCB_REG_SD_PKT_CNT_2                      = 0x012C
+DCB_REG_SD_PKT_CNT_3                      = 0x0130
+DCB_REG_SD_PKT_CNT_4                      = 0x0134
+DCB_REG_SD_PKT_CNT_5                      = 0x0138
+DCB_REG_SD_PKT_CNT_6                      = 0x013C
+DCB_REG_SD_PKT_CNT_7                      = 0x0140
+DCB_REG_SD_PKT_CNT_8                      = 0x0144
+DCB_REG_SD_PKT_CNT_9                      = 0x0148
+DCB_REG_SD_PKT_CNT_10                     = 0x014C
+DCB_REG_SD_PKT_CNT_11                     = 0x0150
+DCB_REG_SD_PKT_CNT_12                     = 0x0154
+DCB_REG_SD_PKT_CNT_13                     = 0x0158
+DCB_REG_SD_PKT_CNT_14                     = 0x015C
+DCB_REG_SD_PKT_CNT_15                     = 0x0160
+DCB_REG_SD_PKT_CNT_17                     = 0x0164
+DCB_REG_CRC32_REG_BANK                    = 0x0168
 
 #
 # Bit Positions
@@ -259,9 +277,9 @@ DCB_PROTOCOL_VERSION_OFS                =                              0
 
 
 
-# ****** Register 9 [0x0024]: SN - Serial Number of the WD2 Board (Board ID) (Default: 0x00000000) ******
+# ****** Register 9 [0x0024]: SN - Serial Number of the DCB Board (Board ID) (Default: 0x00000000) ******
 
-# SERIAL_NUMBER - Serial Number of the WD2 Board (Board ID)
+# SERIAL_NUMBER - Serial Number of the Data Concentrator Board (Board ID)
 DCB_SERIAL_NUMBER_REG                   =                  DCB_REG_SN
 DCB_SERIAL_NUMBER_MASK                  =                     0x0000FFFF
 DCB_SERIAL_NUMBER_OFS                   =                              0
@@ -1661,7 +1679,169 @@ DCB_LMK_0_MOD_OFS                       =                              0
 
 
 
-# ****** Register 72 [0x0120]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: 0x00000000) ******
+# ****** Register 72 [0x0120]: CMB_MSCB_ADR - MSCB Address of the CMB in the crate (Default: 0x00000000) ******
+
+# CMB_MSCB_ADR - MSCB Address of the CMB in the crate
+DCB_CMB_MSCB_ADR_REG                    =        DCB_REG_CMB_MSCB_ADR
+DCB_CMB_MSCB_ADR_MASK                   =                     0xFFFFFFFF
+DCB_CMB_MSCB_ADR_OFS                    =                              0
+
+
+
+# ****** Register 73 [0x0124]: SD_PKT_CNT_0 - SERDES receiver packet count for slot 0 (Default: 0x00000000) ******
+
+# SD_PKT_CNT_0 - SERDES receiver packet count for slot 0
+DCB_SD_PKT_CNT_0_REG                    =        DCB_REG_SD_PKT_CNT_0
+DCB_SD_PKT_CNT_0_MASK                   =                     0xFFFFFFFF
+DCB_SD_PKT_CNT_0_OFS                    =                              0
+
+
+
+# ****** Register 74 [0x0128]: SD_PKT_CNT_1 - SERDES receiver packet count for slot 1 (Default: 0x00000000) ******
+
+# SD_PKT_CNT_1 - SERDES receiver packet count for slot 1
+DCB_SD_PKT_CNT_1_REG                    =        DCB_REG_SD_PKT_CNT_1
+DCB_SD_PKT_CNT_1_MASK                   =                     0xFFFFFFFF
+DCB_SD_PKT_CNT_1_OFS                    =                              0
+
+
+
+# ****** Register 75 [0x012C]: SD_PKT_CNT_2 - SERDES receiver packet count for slot 2 (Default: 0x00000000) ******
+
+# SD_PKT_CNT_2 - SERDES receiver packet count for slot 2
+DCB_SD_PKT_CNT_2_REG                    =        DCB_REG_SD_PKT_CNT_2
+DCB_SD_PKT_CNT_2_MASK                   =                     0xFFFFFFFF
+DCB_SD_PKT_CNT_2_OFS                    =                              0
+
+
+
+# ****** Register 76 [0x0130]: SD_PKT_CNT_3 - SERDES receiver packet count for slot 3 (Default: 0x00000000) ******
+
+# SD_PKT_CNT_3 - SERDES receiver packet count for slot 3
+DCB_SD_PKT_CNT_3_REG                    =        DCB_REG_SD_PKT_CNT_3
+DCB_SD_PKT_CNT_3_MASK                   =                     0xFFFFFFFF
+DCB_SD_PKT_CNT_3_OFS                    =                              0
+
+
+
+# ****** Register 77 [0x0134]: SD_PKT_CNT_4 - SERDES receiver packet count for slot 4 (Default: 0x00000000) ******
+
+# SD_PKT_CNT_4 - SERDES receiver packet count for slot 4
+DCB_SD_PKT_CNT_4_REG                    =        DCB_REG_SD_PKT_CNT_4
+DCB_SD_PKT_CNT_4_MASK                   =                     0xFFFFFFFF
+DCB_SD_PKT_CNT_4_OFS                    =                              0
+
+
+
+# ****** Register 78 [0x0138]: SD_PKT_CNT_5 - SERDES receiver packet count for slot 5 (Default: 0x00000000) ******
+
+# SD_PKT_CNT_5 - SERDES receiver packet count for slot 5
+DCB_SD_PKT_CNT_5_REG                    =        DCB_REG_SD_PKT_CNT_5
+DCB_SD_PKT_CNT_5_MASK                   =                     0xFFFFFFFF
+DCB_SD_PKT_CNT_5_OFS                    =                              0
+
+
+
+# ****** Register 79 [0x013C]: SD_PKT_CNT_6 - SERDES receiver packet count for slot 6 (Default: 0x00000000) ******
+
+# SD_PKT_CNT_6 - SERDES receiver packet count for slot 6
+DCB_SD_PKT_CNT_6_REG                    =        DCB_REG_SD_PKT_CNT_6
+DCB_SD_PKT_CNT_6_MASK                   =                     0xFFFFFFFF
+DCB_SD_PKT_CNT_6_OFS                    =                              0
+
+
+
+# ****** Register 80 [0x0140]: SD_PKT_CNT_7 - SERDES receiver packet count for slot 7 (Default: 0x00000000) ******
+
+# SD_PKT_CNT_7 - SERDES receiver packet count for slot 7
+DCB_SD_PKT_CNT_7_REG                    =        DCB_REG_SD_PKT_CNT_7
+DCB_SD_PKT_CNT_7_MASK                   =                     0xFFFFFFFF
+DCB_SD_PKT_CNT_7_OFS                    =                              0
+
+
+
+# ****** Register 81 [0x0144]: SD_PKT_CNT_8 - SERDES receiver packet count for slot 8 (Default: 0x00000000) ******
+
+# SD_PKT_CNT_8 - SERDES receiver packet count for slot 8
+DCB_SD_PKT_CNT_8_REG                    =        DCB_REG_SD_PKT_CNT_8
+DCB_SD_PKT_CNT_8_MASK                   =                     0xFFFFFFFF
+DCB_SD_PKT_CNT_8_OFS                    =                              0
+
+
+
+# ****** Register 82 [0x0148]: SD_PKT_CNT_9 - SERDES receiver packet count for slot 9 (Default: 0x00000000) ******
+
+# SD_PKT_CNT_9 - SERDES receiver packet count for slot 9
+DCB_SD_PKT_CNT_9_REG                    =        DCB_REG_SD_PKT_CNT_9
+DCB_SD_PKT_CNT_9_MASK                   =                     0xFFFFFFFF
+DCB_SD_PKT_CNT_9_OFS                    =                              0
+
+
+
+# ****** Register 83 [0x014C]: SD_PKT_CNT_10 - SERDES receiver packet count for slot 10 (Default: 0x00000000) ******
+
+# SD_PKT_CNT_10 - SERDES receiver packet count for slot 10
+DCB_SD_PKT_CNT_10_REG                   =       DCB_REG_SD_PKT_CNT_10
+DCB_SD_PKT_CNT_10_MASK                  =                     0xFFFFFFFF
+DCB_SD_PKT_CNT_10_OFS                   =                              0
+
+
+
+# ****** Register 84 [0x0150]: SD_PKT_CNT_11 - SERDES receiver packet count for slot 11 (Default: 0x00000000) ******
+
+# SD_PKT_CNT_11 - SERDES receiver packet count for slot 11
+DCB_SD_PKT_CNT_11_REG                   =       DCB_REG_SD_PKT_CNT_11
+DCB_SD_PKT_CNT_11_MASK                  =                     0xFFFFFFFF
+DCB_SD_PKT_CNT_11_OFS                   =                              0
+
+
+
+# ****** Register 85 [0x0154]: SD_PKT_CNT_12 - SERDES receiver packet count for slot 12 (Default: 0x00000000) ******
+
+# SD_PKT_CNT_12 - SERDES receiver packet count for slot 12
+DCB_SD_PKT_CNT_12_REG                   =       DCB_REG_SD_PKT_CNT_12
+DCB_SD_PKT_CNT_12_MASK                  =                     0xFFFFFFFF
+DCB_SD_PKT_CNT_12_OFS                   =                              0
+
+
+
+# ****** Register 86 [0x0158]: SD_PKT_CNT_13 - SERDES receiver packet count for slot 13 (Default: 0x00000000) ******
+
+# SD_PKT_CNT_13 - SERDES receiver packet count for slot 13
+DCB_SD_PKT_CNT_13_REG                   =       DCB_REG_SD_PKT_CNT_13
+DCB_SD_PKT_CNT_13_MASK                  =                     0xFFFFFFFF
+DCB_SD_PKT_CNT_13_OFS                   =                              0
+
+
+
+# ****** Register 87 [0x015C]: SD_PKT_CNT_14 - SERDES receiver packet count for slot 14 (Default: 0x00000000) ******
+
+# SD_PKT_CNT_14 - SERDES receiver packet count for slot 14
+DCB_SD_PKT_CNT_14_REG                   =       DCB_REG_SD_PKT_CNT_14
+DCB_SD_PKT_CNT_14_MASK                  =                     0xFFFFFFFF
+DCB_SD_PKT_CNT_14_OFS                   =                              0
+
+
+
+# ****** Register 88 [0x0160]: SD_PKT_CNT_15 - SERDES receiver packet count for slot 15 (Default: 0x00000000) ******
+
+# SD_PKT_CNT_15 - SERDES receiver packet count for slot 15
+DCB_SD_PKT_CNT_15_REG                   =       DCB_REG_SD_PKT_CNT_15
+DCB_SD_PKT_CNT_15_MASK                  =                     0xFFFFFFFF
+DCB_SD_PKT_CNT_15_OFS                   =                              0
+
+
+
+# ****** Register 89 [0x0164]: SD_PKT_CNT_17 - SERDES receiver packet count for slot 17 (TCB Slot) (Default: 0x00000000) ******
+
+# SD_PKT_CNT_17 - SERDES receiver packet count for slot 17 (TCB Slot)
+DCB_SD_PKT_CNT_17_REG                   =       DCB_REG_SD_PKT_CNT_17
+DCB_SD_PKT_CNT_17_MASK                  =                     0xFFFFFFFF
+DCB_SD_PKT_CNT_17_OFS                   =                              0
+
+
+
+# ****** Register 90 [0x0168]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: 0x00000000) ******
 
 # CRC32_REG_BANK - Keep at the end of the register bank
 DCB_CRC32_REG_BANK_REG                  =      DCB_REG_CRC32_REG_BANK
@@ -1672,7 +1852,7 @@ DCB_CRC32_REG_BANK_OFS                  =                              0
 
 # Number of Registers
 
-REG_NR_OF_REGS          = 73
+REG_NR_OF_REGS          = 91
 
 
 
@@ -1754,6 +1934,24 @@ dcb_reg_list = (
   ( "TRB_INFO_LSB"        , DCB_REG_TRB_INFO_LSB       , DCB_READONLY_REG ),
   ( "TRB_INFO_MSB"        , DCB_REG_TRB_INFO_MSB       , DCB_READONLY_REG ),
   ( "LMK_MOD_FLAG"        , DCB_REG_LMK_MOD_FLAG       , DCB_READONLY_REG ),
+  ( "CMB_MSCB_ADR"        , DCB_REG_CMB_MSCB_ADR       , DCB_WRITABLE_REG ),
+  ( "SD_PKT_CNT_0"        , DCB_REG_SD_PKT_CNT_0       , DCB_READONLY_REG ),
+  ( "SD_PKT_CNT_1"        , DCB_REG_SD_PKT_CNT_1       , DCB_READONLY_REG ),
+  ( "SD_PKT_CNT_2"        , DCB_REG_SD_PKT_CNT_2       , DCB_READONLY_REG ),
+  ( "SD_PKT_CNT_3"        , DCB_REG_SD_PKT_CNT_3       , DCB_READONLY_REG ),
+  ( "SD_PKT_CNT_4"        , DCB_REG_SD_PKT_CNT_4       , DCB_READONLY_REG ),
+  ( "SD_PKT_CNT_5"        , DCB_REG_SD_PKT_CNT_5       , DCB_READONLY_REG ),
+  ( "SD_PKT_CNT_6"        , DCB_REG_SD_PKT_CNT_6       , DCB_READONLY_REG ),
+  ( "SD_PKT_CNT_7"        , DCB_REG_SD_PKT_CNT_7       , DCB_READONLY_REG ),
+  ( "SD_PKT_CNT_8"        , DCB_REG_SD_PKT_CNT_8       , DCB_READONLY_REG ),
+  ( "SD_PKT_CNT_9"        , DCB_REG_SD_PKT_CNT_9       , DCB_READONLY_REG ),
+  ( "SD_PKT_CNT_10"       , DCB_REG_SD_PKT_CNT_10      , DCB_READONLY_REG ),
+  ( "SD_PKT_CNT_11"       , DCB_REG_SD_PKT_CNT_11      , DCB_READONLY_REG ),
+  ( "SD_PKT_CNT_12"       , DCB_REG_SD_PKT_CNT_12      , DCB_READONLY_REG ),
+  ( "SD_PKT_CNT_13"       , DCB_REG_SD_PKT_CNT_13      , DCB_READONLY_REG ),
+  ( "SD_PKT_CNT_14"       , DCB_REG_SD_PKT_CNT_14      , DCB_READONLY_REG ),
+  ( "SD_PKT_CNT_15"       , DCB_REG_SD_PKT_CNT_15      , DCB_READONLY_REG ),
+  ( "SD_PKT_CNT_17"       , DCB_REG_SD_PKT_CNT_17      , DCB_READONLY_REG ),
   ( "CRC32_REG_BANK"      , DCB_REG_CRC32_REG_BANK     , DCB_WRITABLE_REG ),
 )
 
@@ -2015,6 +2213,24 @@ dcb_bit_group_list = (
   ( "LMK_2_MOD"                    , DCB_LMK_2_MOD_REG                    , DCB_LMK_2_MOD_MASK                    , DCB_LMK_2_MOD_OFS                    ),
   ( "LMK_1_MOD"                    , DCB_LMK_1_MOD_REG                    , DCB_LMK_1_MOD_MASK                    , DCB_LMK_1_MOD_OFS                    ),
   ( "LMK_0_MOD"                    , DCB_LMK_0_MOD_REG                    , DCB_LMK_0_MOD_MASK                    , DCB_LMK_0_MOD_OFS                    ),
+  ( "CMB_MSCB_ADR"                 , DCB_CMB_MSCB_ADR_REG                 , DCB_CMB_MSCB_ADR_MASK                 , DCB_CMB_MSCB_ADR_OFS                 ),
+  ( "SD_PKT_CNT_0"                 , DCB_SD_PKT_CNT_0_REG                 , DCB_SD_PKT_CNT_0_MASK                 , DCB_SD_PKT_CNT_0_OFS                 ),
+  ( "SD_PKT_CNT_1"                 , DCB_SD_PKT_CNT_1_REG                 , DCB_SD_PKT_CNT_1_MASK                 , DCB_SD_PKT_CNT_1_OFS                 ),
+  ( "SD_PKT_CNT_2"                 , DCB_SD_PKT_CNT_2_REG                 , DCB_SD_PKT_CNT_2_MASK                 , DCB_SD_PKT_CNT_2_OFS                 ),
+  ( "SD_PKT_CNT_3"                 , DCB_SD_PKT_CNT_3_REG                 , DCB_SD_PKT_CNT_3_MASK                 , DCB_SD_PKT_CNT_3_OFS                 ),
+  ( "SD_PKT_CNT_4"                 , DCB_SD_PKT_CNT_4_REG                 , DCB_SD_PKT_CNT_4_MASK                 , DCB_SD_PKT_CNT_4_OFS                 ),
+  ( "SD_PKT_CNT_5"                 , DCB_SD_PKT_CNT_5_REG                 , DCB_SD_PKT_CNT_5_MASK                 , DCB_SD_PKT_CNT_5_OFS                 ),
+  ( "SD_PKT_CNT_6"                 , DCB_SD_PKT_CNT_6_REG                 , DCB_SD_PKT_CNT_6_MASK                 , DCB_SD_PKT_CNT_6_OFS                 ),
+  ( "SD_PKT_CNT_7"                 , DCB_SD_PKT_CNT_7_REG                 , DCB_SD_PKT_CNT_7_MASK                 , DCB_SD_PKT_CNT_7_OFS                 ),
+  ( "SD_PKT_CNT_8"                 , DCB_SD_PKT_CNT_8_REG                 , DCB_SD_PKT_CNT_8_MASK                 , DCB_SD_PKT_CNT_8_OFS                 ),
+  ( "SD_PKT_CNT_9"                 , DCB_SD_PKT_CNT_9_REG                 , DCB_SD_PKT_CNT_9_MASK                 , DCB_SD_PKT_CNT_9_OFS                 ),
+  ( "SD_PKT_CNT_10"                , DCB_SD_PKT_CNT_10_REG                , DCB_SD_PKT_CNT_10_MASK                , DCB_SD_PKT_CNT_10_OFS                ),
+  ( "SD_PKT_CNT_11"                , DCB_SD_PKT_CNT_11_REG                , DCB_SD_PKT_CNT_11_MASK                , DCB_SD_PKT_CNT_11_OFS                ),
+  ( "SD_PKT_CNT_12"                , DCB_SD_PKT_CNT_12_REG                , DCB_SD_PKT_CNT_12_MASK                , DCB_SD_PKT_CNT_12_OFS                ),
+  ( "SD_PKT_CNT_13"                , DCB_SD_PKT_CNT_13_REG                , DCB_SD_PKT_CNT_13_MASK                , DCB_SD_PKT_CNT_13_OFS                ),
+  ( "SD_PKT_CNT_14"                , DCB_SD_PKT_CNT_14_REG                , DCB_SD_PKT_CNT_14_MASK                , DCB_SD_PKT_CNT_14_OFS                ),
+  ( "SD_PKT_CNT_15"                , DCB_SD_PKT_CNT_15_REG                , DCB_SD_PKT_CNT_15_MASK                , DCB_SD_PKT_CNT_15_OFS                ),
+  ( "SD_PKT_CNT_17"                , DCB_SD_PKT_CNT_17_REG                , DCB_SD_PKT_CNT_17_MASK                , DCB_SD_PKT_CNT_17_OFS                ),
   ( "CRC32_REG_BANK"               , DCB_CRC32_REG_BANK_REG               , DCB_CRC32_REG_BANK_MASK               , DCB_CRC32_REG_BANK_OFS               ),
 )
 
@@ -2099,7 +2315,25 @@ reg_restore = (DCB_DONT_TOUCH_REG,   # Offset 0x0000
                DCB_DONT_TOUCH_REG,   # Offset 0x0114 
                DCB_DONT_TOUCH_REG,   # Offset 0x0118 
                DCB_DONT_TOUCH_REG,   # Offset 0x011C 
-               DCB_DONT_TOUCH_REG)   # Offset 0x0120 
+               DCB_RESTORE_REG   ,   # Offset 0x0120 
+               DCB_DONT_TOUCH_REG,   # Offset 0x0124 
+               DCB_DONT_TOUCH_REG,   # Offset 0x0128 
+               DCB_DONT_TOUCH_REG,   # Offset 0x012C 
+               DCB_DONT_TOUCH_REG,   # Offset 0x0130 
+               DCB_DONT_TOUCH_REG,   # Offset 0x0134 
+               DCB_DONT_TOUCH_REG,   # Offset 0x0138 
+               DCB_DONT_TOUCH_REG,   # Offset 0x013C 
+               DCB_DONT_TOUCH_REG,   # Offset 0x0140 
+               DCB_DONT_TOUCH_REG,   # Offset 0x0144 
+               DCB_DONT_TOUCH_REG,   # Offset 0x0148 
+               DCB_DONT_TOUCH_REG,   # Offset 0x014C 
+               DCB_DONT_TOUCH_REG,   # Offset 0x0150 
+               DCB_DONT_TOUCH_REG,   # Offset 0x0154 
+               DCB_DONT_TOUCH_REG,   # Offset 0x0158 
+               DCB_DONT_TOUCH_REG,   # Offset 0x015C 
+               DCB_DONT_TOUCH_REG,   # Offset 0x0160 
+               DCB_DONT_TOUCH_REG,   # Offset 0x0164 
+               DCB_DONT_TOUCH_REG)   # Offset 0x0168 
 
 
 
@@ -2178,7 +2412,25 @@ ctrl_reg_default = (0xAC010307,   # Offset 0x0000
                     0x00000000,   # Offset 0x0110 
                     0x00000000,   # Offset 0x0114 
                     0x00000000,   # Offset 0x0118 
-                    0x00000000)   # Offset 0x011C 
+                    0x00000000,   # Offset 0x011C 
+                    0x00000000,   # Offset 0x0120 
+                    0x00000000,   # Offset 0x0124 
+                    0x00000000,   # Offset 0x0128 
+                    0x00000000,   # Offset 0x012C 
+                    0x00000000,   # Offset 0x0130 
+                    0x00000000,   # Offset 0x0134 
+                    0x00000000,   # Offset 0x0138 
+                    0x00000000,   # Offset 0x013C 
+                    0x00000000,   # Offset 0x0140 
+                    0x00000000,   # Offset 0x0144 
+                    0x00000000,   # Offset 0x0148 
+                    0x00000000,   # Offset 0x014C 
+                    0x00000000,   # Offset 0x0150 
+                    0x00000000,   # Offset 0x0154 
+                    0x00000000,   # Offset 0x0158 
+                    0x00000000,   # Offset 0x015C 
+                    0x00000000,   # Offset 0x0160 
+                    0x00000000)   # Offset 0x0164 
 
 
 # #############################################################################

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Created :   04.12.2020 11:07:11 -->
+<!-- Created :   20.05.2021 11:27:05 -->
 <html>
 
 <head>
@@ -9,7 +9,7 @@
 
 <body>
   <h1>DCB Register Map</h1>
-  Generated : 04.12.2020 11:07:11<br><br>
+  Generated : 20.05.2021 11:27:05<br><br>
   <table>
     <tbody>
       <tr class="reg_header">
@@ -120,7 +120,7 @@
         <td style="text-align:center"><a href="#register_9">X</a></td>
         <td style="text-align:right" ><a href="#register_9">0x00000000</a></td>
         <td style="text-align:left"  ><a href="#register_9">SN</a></td>
-        <td style="text-align:left"  ><a href="#register_9">Serial Number of the WD2 Board (Board ID)</a></td>
+        <td style="text-align:left"  ><a href="#register_9">Serial Number of the DCB Board (Board ID)</a></td>
       </tr>
       <tr class="reg_list">
         <td style="text-align:right" ><a href="#register_10" id="reg_list_10">10</a></td>
@@ -745,12 +745,192 @@
       <tr class="reg_list">
         <td style="text-align:right" ><a href="#register_72" id="reg_list_72">72</a></td>
         <td style="text-align:right" ><a href="#register_72">0x0120</a></td>
-        <td style="text-align:center"><a href="#register_72">HW</a></td>
+        <td style="text-align:center"><a href="#register_72">SW</a></td>
         <td style="text-align:center"><a href="#register_72"></a></td>
-        <td style="text-align:center"><a href="#register_72"></a></td>
+        <td style="text-align:center"><a href="#register_72">X</a></td>
         <td style="text-align:right" ><a href="#register_72">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#register_72">CRC32_REG_BANK</a></td>
-        <td style="text-align:left"  ><a href="#register_72">CRC32 Checksum of Register Bank Content</a></td>
+        <td style="text-align:left"  ><a href="#register_72">CMB_MSCB_ADR</a></td>
+        <td style="text-align:left"  ><a href="#register_72">MSCB Address of the CMB in the crate</a></td>
+      </tr>
+      <tr class="reg_list">
+        <td style="text-align:right" ><a href="#register_73" id="reg_list_73">73</a></td>
+        <td style="text-align:right" ><a href="#register_73">0x0124</a></td>
+        <td style="text-align:center"><a href="#register_73">HW</a></td>
+        <td style="text-align:center"><a href="#register_73"></a></td>
+        <td style="text-align:center"><a href="#register_73"></a></td>
+        <td style="text-align:right" ><a href="#register_73">0x00000000</a></td>
+        <td style="text-align:left"  ><a href="#register_73">SD_PKT_CNT_0</a></td>
+        <td style="text-align:left"  ><a href="#register_73">SERDES receiver packet count for slot 0</a></td>
+      </tr>
+      <tr class="reg_list">
+        <td style="text-align:right" ><a href="#register_74" id="reg_list_74">74</a></td>
+        <td style="text-align:right" ><a href="#register_74">0x0128</a></td>
+        <td style="text-align:center"><a href="#register_74">HW</a></td>
+        <td style="text-align:center"><a href="#register_74"></a></td>
+        <td style="text-align:center"><a href="#register_74"></a></td>
+        <td style="text-align:right" ><a href="#register_74">0x00000000</a></td>
+        <td style="text-align:left"  ><a href="#register_74">SD_PKT_CNT_1</a></td>
+        <td style="text-align:left"  ><a href="#register_74">SERDES receiver packet count for slot 1</a></td>
+      </tr>
+      <tr class="reg_list">
+        <td style="text-align:right" ><a href="#register_75" id="reg_list_75">75</a></td>
+        <td style="text-align:right" ><a href="#register_75">0x012C</a></td>
+        <td style="text-align:center"><a href="#register_75">HW</a></td>
+        <td style="text-align:center"><a href="#register_75"></a></td>
+        <td style="text-align:center"><a href="#register_75"></a></td>
+        <td style="text-align:right" ><a href="#register_75">0x00000000</a></td>
+        <td style="text-align:left"  ><a href="#register_75">SD_PKT_CNT_2</a></td>
+        <td style="text-align:left"  ><a href="#register_75">SERDES receiver packet count for slot 2</a></td>
+      </tr>
+      <tr class="reg_list">
+        <td style="text-align:right" ><a href="#register_76" id="reg_list_76">76</a></td>
+        <td style="text-align:right" ><a href="#register_76">0x0130</a></td>
+        <td style="text-align:center"><a href="#register_76">HW</a></td>
+        <td style="text-align:center"><a href="#register_76"></a></td>
+        <td style="text-align:center"><a href="#register_76"></a></td>
+        <td style="text-align:right" ><a href="#register_76">0x00000000</a></td>
+        <td style="text-align:left"  ><a href="#register_76">SD_PKT_CNT_3</a></td>
+        <td style="text-align:left"  ><a href="#register_76">SERDES receiver packet count for slot 3</a></td>
+      </tr>
+      <tr class="reg_list">
+        <td style="text-align:right" ><a href="#register_77" id="reg_list_77">77</a></td>
+        <td style="text-align:right" ><a href="#register_77">0x0134</a></td>
+        <td style="text-align:center"><a href="#register_77">HW</a></td>
+        <td style="text-align:center"><a href="#register_77"></a></td>
+        <td style="text-align:center"><a href="#register_77"></a></td>
+        <td style="text-align:right" ><a href="#register_77">0x00000000</a></td>
+        <td style="text-align:left"  ><a href="#register_77">SD_PKT_CNT_4</a></td>
+        <td style="text-align:left"  ><a href="#register_77">SERDES receiver packet count for slot 4</a></td>
+      </tr>
+      <tr class="reg_list">
+        <td style="text-align:right" ><a href="#register_78" id="reg_list_78">78</a></td>
+        <td style="text-align:right" ><a href="#register_78">0x0138</a></td>
+        <td style="text-align:center"><a href="#register_78">HW</a></td>
+        <td style="text-align:center"><a href="#register_78"></a></td>
+        <td style="text-align:center"><a href="#register_78"></a></td>
+        <td style="text-align:right" ><a href="#register_78">0x00000000</a></td>
+        <td style="text-align:left"  ><a href="#register_78">SD_PKT_CNT_5</a></td>
+        <td style="text-align:left"  ><a href="#register_78">SERDES receiver packet count for slot 5</a></td>
+      </tr>
+      <tr class="reg_list">
+        <td style="text-align:right" ><a href="#register_79" id="reg_list_79">79</a></td>
+        <td style="text-align:right" ><a href="#register_79">0x013C</a></td>
+        <td style="text-align:center"><a href="#register_79">HW</a></td>
+        <td style="text-align:center"><a href="#register_79"></a></td>
+        <td style="text-align:center"><a href="#register_79"></a></td>
+        <td style="text-align:right" ><a href="#register_79">0x00000000</a></td>
+        <td style="text-align:left"  ><a href="#register_79">SD_PKT_CNT_6</a></td>
+        <td style="text-align:left"  ><a href="#register_79">SERDES receiver packet count for slot 6</a></td>
+      </tr>
+      <tr class="reg_list">
+        <td style="text-align:right" ><a href="#register_80" id="reg_list_80">80</a></td>
+        <td style="text-align:right" ><a href="#register_80">0x0140</a></td>
+        <td style="text-align:center"><a href="#register_80">HW</a></td>
+        <td style="text-align:center"><a href="#register_80"></a></td>
+        <td style="text-align:center"><a href="#register_80"></a></td>
+        <td style="text-align:right" ><a href="#register_80">0x00000000</a></td>
+        <td style="text-align:left"  ><a href="#register_80">SD_PKT_CNT_7</a></td>
+        <td style="text-align:left"  ><a href="#register_80">SERDES receiver packet count for slot 7</a></td>
+      </tr>
+      <tr class="reg_list">
+        <td style="text-align:right" ><a href="#register_81" id="reg_list_81">81</a></td>
+        <td style="text-align:right" ><a href="#register_81">0x0144</a></td>
+        <td style="text-align:center"><a href="#register_81">HW</a></td>
+        <td style="text-align:center"><a href="#register_81"></a></td>
+        <td style="text-align:center"><a href="#register_81"></a></td>
+        <td style="text-align:right" ><a href="#register_81">0x00000000</a></td>
+        <td style="text-align:left"  ><a href="#register_81">SD_PKT_CNT_8</a></td>
+        <td style="text-align:left"  ><a href="#register_81">SERDES receiver packet count for slot 8</a></td>
+      </tr>
+      <tr class="reg_list">
+        <td style="text-align:right" ><a href="#register_82" id="reg_list_82">82</a></td>
+        <td style="text-align:right" ><a href="#register_82">0x0148</a></td>
+        <td style="text-align:center"><a href="#register_82">HW</a></td>
+        <td style="text-align:center"><a href="#register_82"></a></td>
+        <td style="text-align:center"><a href="#register_82"></a></td>
+        <td style="text-align:right" ><a href="#register_82">0x00000000</a></td>
+        <td style="text-align:left"  ><a href="#register_82">SD_PKT_CNT_9</a></td>
+        <td style="text-align:left"  ><a href="#register_82">SERDES receiver packet count for slot 9</a></td>
+      </tr>
+      <tr class="reg_list">
+        <td style="text-align:right" ><a href="#register_83" id="reg_list_83">83</a></td>
+        <td style="text-align:right" ><a href="#register_83">0x014C</a></td>
+        <td style="text-align:center"><a href="#register_83">HW</a></td>
+        <td style="text-align:center"><a href="#register_83"></a></td>
+        <td style="text-align:center"><a href="#register_83"></a></td>
+        <td style="text-align:right" ><a href="#register_83">0x00000000</a></td>
+        <td style="text-align:left"  ><a href="#register_83">SD_PKT_CNT_10</a></td>
+        <td style="text-align:left"  ><a href="#register_83">SERDES receiver packet count for slot 10</a></td>
+      </tr>
+      <tr class="reg_list">
+        <td style="text-align:right" ><a href="#register_84" id="reg_list_84">84</a></td>
+        <td style="text-align:right" ><a href="#register_84">0x0150</a></td>
+        <td style="text-align:center"><a href="#register_84">HW</a></td>
+        <td style="text-align:center"><a href="#register_84"></a></td>
+        <td style="text-align:center"><a href="#register_84"></a></td>
+        <td style="text-align:right" ><a href="#register_84">0x00000000</a></td>
+        <td style="text-align:left"  ><a href="#register_84">SD_PKT_CNT_11</a></td>
+        <td style="text-align:left"  ><a href="#register_84">SERDES receiver packet count for slot 11</a></td>
+      </tr>
+      <tr class="reg_list">
+        <td style="text-align:right" ><a href="#register_85" id="reg_list_85">85</a></td>
+        <td style="text-align:right" ><a href="#register_85">0x0154</a></td>
+        <td style="text-align:center"><a href="#register_85">HW</a></td>
+        <td style="text-align:center"><a href="#register_85"></a></td>
+        <td style="text-align:center"><a href="#register_85"></a></td>
+        <td style="text-align:right" ><a href="#register_85">0x00000000</a></td>
+        <td style="text-align:left"  ><a href="#register_85">SD_PKT_CNT_12</a></td>
+        <td style="text-align:left"  ><a href="#register_85">SERDES receiver packet count for slot 12</a></td>
+      </tr>
+      <tr class="reg_list">
+        <td style="text-align:right" ><a href="#register_86" id="reg_list_86">86</a></td>
+        <td style="text-align:right" ><a href="#register_86">0x0158</a></td>
+        <td style="text-align:center"><a href="#register_86">HW</a></td>
+        <td style="text-align:center"><a href="#register_86"></a></td>
+        <td style="text-align:center"><a href="#register_86"></a></td>
+        <td style="text-align:right" ><a href="#register_86">0x00000000</a></td>
+        <td style="text-align:left"  ><a href="#register_86">SD_PKT_CNT_13</a></td>
+        <td style="text-align:left"  ><a href="#register_86">SERDES receiver packet count for slot 13</a></td>
+      </tr>
+      <tr class="reg_list">
+        <td style="text-align:right" ><a href="#register_87" id="reg_list_87">87</a></td>
+        <td style="text-align:right" ><a href="#register_87">0x015C</a></td>
+        <td style="text-align:center"><a href="#register_87">HW</a></td>
+        <td style="text-align:center"><a href="#register_87"></a></td>
+        <td style="text-align:center"><a href="#register_87"></a></td>
+        <td style="text-align:right" ><a href="#register_87">0x00000000</a></td>
+        <td style="text-align:left"  ><a href="#register_87">SD_PKT_CNT_14</a></td>
+        <td style="text-align:left"  ><a href="#register_87">SERDES receiver packet count for slot 14</a></td>
+      </tr>
+      <tr class="reg_list">
+        <td style="text-align:right" ><a href="#register_88" id="reg_list_88">88</a></td>
+        <td style="text-align:right" ><a href="#register_88">0x0160</a></td>
+        <td style="text-align:center"><a href="#register_88">HW</a></td>
+        <td style="text-align:center"><a href="#register_88"></a></td>
+        <td style="text-align:center"><a href="#register_88"></a></td>
+        <td style="text-align:right" ><a href="#register_88">0x00000000</a></td>
+        <td style="text-align:left"  ><a href="#register_88">SD_PKT_CNT_15</a></td>
+        <td style="text-align:left"  ><a href="#register_88">SERDES receiver packet count for slot 15</a></td>
+      </tr>
+      <tr class="reg_list">
+        <td style="text-align:right" ><a href="#register_89" id="reg_list_89">89</a></td>
+        <td style="text-align:right" ><a href="#register_89">0x0164</a></td>
+        <td style="text-align:center"><a href="#register_89">HW</a></td>
+        <td style="text-align:center"><a href="#register_89"></a></td>
+        <td style="text-align:center"><a href="#register_89"></a></td>
+        <td style="text-align:right" ><a href="#register_89">0x00000000</a></td>
+        <td style="text-align:left"  ><a href="#register_89">SD_PKT_CNT_17</a></td>
+        <td style="text-align:left"  ><a href="#register_89">SERDES receiver packet count for slot 17 (TCB Slot)</a></td>
+      </tr>
+      <tr class="reg_list">
+        <td style="text-align:right" ><a href="#register_90" id="reg_list_90">90</a></td>
+        <td style="text-align:right" ><a href="#register_90">0x0168</a></td>
+        <td style="text-align:center"><a href="#register_90">HW</a></td>
+        <td style="text-align:center"><a href="#register_90"></a></td>
+        <td style="text-align:center"><a href="#register_90"></a></td>
+        <td style="text-align:right" ><a href="#register_90">0x00000000</a></td>
+        <td style="text-align:left"  ><a href="#register_90">CRC32_REG_BANK</a></td>
+        <td style="text-align:left"  ><a href="#register_90">CRC32 Checksum of Register Bank Content</a></td>
       </tr>
       <tr class="back_to_overview">        <td class="back_to_overview" colspan="7"><a href="#register_overview">Registers Top</a></a></td>      </tr>
     </tbody>
@@ -1401,7 +1581,7 @@
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
         <td style="text-align:left"  >SN</td>
-        <td style="text-align:left"  >Serial Number of the WD2 Board (Board ID)</td>
+        <td style="text-align:left"  >Serial Number of the DCB Board (Board ID)</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -1427,7 +1607,7 @@
         <td style="text-align:center">15:0</td>
         <td style="text-align:right" >0x0000</td>
         <td style="text-align:left"  >SERIAL_NUMBER</td>
-        <td style="text-align:left"  >Serial Number of the WD2 Board (Board ID)</td>
+        <td style="text-align:left"  >Serial Number of the Data Concentrator Board (Board ID)</td>
       </tr>
       <tr class="back_to_overview">
         <td class="back_to_overview" colspan="7"><a href="#reg_list_9">Register Overview</a></td>
@@ -7369,7 +7549,7 @@
         <td class="back_to_overview" colspan="7"><a href="#reg_list_71">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="register_72"><h3>Register 72: CRC32_REG_BANK</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="register_72"><h3>Register 72: CMB_MSCB_ADR</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -7387,6 +7567,816 @@
       <tr class="reg_name">
         <td style="text-align:center">72</td>
         <td style="text-align:right" >0x0120</td>
+        <td style="text-align:center">SW</td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center">X</td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >CMB_MSCB_ADR</td>
+        <td style="text-align:left"  >MSCB Address of the CMB in the crate</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >RW</td>
+        <td style="text-align:center"  ></td>
+        <td style="text-align:center">31:0</td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >CMB_MSCB_ADR</td>
+        <td style="text-align:left"  >MSCB Address of the CMB in the crate</td>
+      </tr>
+      <tr class="back_to_overview">
+        <td class="back_to_overview" colspan="7"><a href="#reg_list_72">Register Overview</a></td>
+      </tr>
+      <tr class="reg_table_title">
+        <td class="reg_table_title" colspan="7"><a id="register_73"><h3>Register 73: SD_PKT_CNT_0</h3></a></td>
+      </tr>
+      <tr class="reg_header">
+        <th>#</th>
+        <th>Offset</th>
+        <th>HW/SW</th>
+        <th>SPI WR</th>
+        <th>Restore</th>
+        <th>R/W</th>
+        <th>Pulse</th>
+        <th>Bit</th>
+        <th>Initial</th>
+        <th>Name</th>
+        <th>Comment</th>
+      </tr>
+      <tr class="reg_name">
+        <td style="text-align:center">73</td>
+        <td style="text-align:right" >0x0124</td>
+        <td style="text-align:center">HW</td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_0</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 0</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
+        <td style="text-align:center">31:0</td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_0</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 0</td>
+      </tr>
+      <tr class="back_to_overview">
+        <td class="back_to_overview" colspan="7"><a href="#reg_list_73">Register Overview</a></td>
+      </tr>
+      <tr class="reg_table_title">
+        <td class="reg_table_title" colspan="7"><a id="register_74"><h3>Register 74: SD_PKT_CNT_1</h3></a></td>
+      </tr>
+      <tr class="reg_header">
+        <th>#</th>
+        <th>Offset</th>
+        <th>HW/SW</th>
+        <th>SPI WR</th>
+        <th>Restore</th>
+        <th>R/W</th>
+        <th>Pulse</th>
+        <th>Bit</th>
+        <th>Initial</th>
+        <th>Name</th>
+        <th>Comment</th>
+      </tr>
+      <tr class="reg_name">
+        <td style="text-align:center">74</td>
+        <td style="text-align:right" >0x0128</td>
+        <td style="text-align:center">HW</td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_1</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 1</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
+        <td style="text-align:center">31:0</td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_1</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 1</td>
+      </tr>
+      <tr class="back_to_overview">
+        <td class="back_to_overview" colspan="7"><a href="#reg_list_74">Register Overview</a></td>
+      </tr>
+      <tr class="reg_table_title">
+        <td class="reg_table_title" colspan="7"><a id="register_75"><h3>Register 75: SD_PKT_CNT_2</h3></a></td>
+      </tr>
+      <tr class="reg_header">
+        <th>#</th>
+        <th>Offset</th>
+        <th>HW/SW</th>
+        <th>SPI WR</th>
+        <th>Restore</th>
+        <th>R/W</th>
+        <th>Pulse</th>
+        <th>Bit</th>
+        <th>Initial</th>
+        <th>Name</th>
+        <th>Comment</th>
+      </tr>
+      <tr class="reg_name">
+        <td style="text-align:center">75</td>
+        <td style="text-align:right" >0x012C</td>
+        <td style="text-align:center">HW</td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_2</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 2</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
+        <td style="text-align:center">31:0</td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_2</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 2</td>
+      </tr>
+      <tr class="back_to_overview">
+        <td class="back_to_overview" colspan="7"><a href="#reg_list_75">Register Overview</a></td>
+      </tr>
+      <tr class="reg_table_title">
+        <td class="reg_table_title" colspan="7"><a id="register_76"><h3>Register 76: SD_PKT_CNT_3</h3></a></td>
+      </tr>
+      <tr class="reg_header">
+        <th>#</th>
+        <th>Offset</th>
+        <th>HW/SW</th>
+        <th>SPI WR</th>
+        <th>Restore</th>
+        <th>R/W</th>
+        <th>Pulse</th>
+        <th>Bit</th>
+        <th>Initial</th>
+        <th>Name</th>
+        <th>Comment</th>
+      </tr>
+      <tr class="reg_name">
+        <td style="text-align:center">76</td>
+        <td style="text-align:right" >0x0130</td>
+        <td style="text-align:center">HW</td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_3</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 3</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
+        <td style="text-align:center">31:0</td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_3</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 3</td>
+      </tr>
+      <tr class="back_to_overview">
+        <td class="back_to_overview" colspan="7"><a href="#reg_list_76">Register Overview</a></td>
+      </tr>
+      <tr class="reg_table_title">
+        <td class="reg_table_title" colspan="7"><a id="register_77"><h3>Register 77: SD_PKT_CNT_4</h3></a></td>
+      </tr>
+      <tr class="reg_header">
+        <th>#</th>
+        <th>Offset</th>
+        <th>HW/SW</th>
+        <th>SPI WR</th>
+        <th>Restore</th>
+        <th>R/W</th>
+        <th>Pulse</th>
+        <th>Bit</th>
+        <th>Initial</th>
+        <th>Name</th>
+        <th>Comment</th>
+      </tr>
+      <tr class="reg_name">
+        <td style="text-align:center">77</td>
+        <td style="text-align:right" >0x0134</td>
+        <td style="text-align:center">HW</td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_4</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 4</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
+        <td style="text-align:center">31:0</td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_4</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 4</td>
+      </tr>
+      <tr class="back_to_overview">
+        <td class="back_to_overview" colspan="7"><a href="#reg_list_77">Register Overview</a></td>
+      </tr>
+      <tr class="reg_table_title">
+        <td class="reg_table_title" colspan="7"><a id="register_78"><h3>Register 78: SD_PKT_CNT_5</h3></a></td>
+      </tr>
+      <tr class="reg_header">
+        <th>#</th>
+        <th>Offset</th>
+        <th>HW/SW</th>
+        <th>SPI WR</th>
+        <th>Restore</th>
+        <th>R/W</th>
+        <th>Pulse</th>
+        <th>Bit</th>
+        <th>Initial</th>
+        <th>Name</th>
+        <th>Comment</th>
+      </tr>
+      <tr class="reg_name">
+        <td style="text-align:center">78</td>
+        <td style="text-align:right" >0x0138</td>
+        <td style="text-align:center">HW</td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_5</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 5</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
+        <td style="text-align:center">31:0</td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_5</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 5</td>
+      </tr>
+      <tr class="back_to_overview">
+        <td class="back_to_overview" colspan="7"><a href="#reg_list_78">Register Overview</a></td>
+      </tr>
+      <tr class="reg_table_title">
+        <td class="reg_table_title" colspan="7"><a id="register_79"><h3>Register 79: SD_PKT_CNT_6</h3></a></td>
+      </tr>
+      <tr class="reg_header">
+        <th>#</th>
+        <th>Offset</th>
+        <th>HW/SW</th>
+        <th>SPI WR</th>
+        <th>Restore</th>
+        <th>R/W</th>
+        <th>Pulse</th>
+        <th>Bit</th>
+        <th>Initial</th>
+        <th>Name</th>
+        <th>Comment</th>
+      </tr>
+      <tr class="reg_name">
+        <td style="text-align:center">79</td>
+        <td style="text-align:right" >0x013C</td>
+        <td style="text-align:center">HW</td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_6</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 6</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
+        <td style="text-align:center">31:0</td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_6</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 6</td>
+      </tr>
+      <tr class="back_to_overview">
+        <td class="back_to_overview" colspan="7"><a href="#reg_list_79">Register Overview</a></td>
+      </tr>
+      <tr class="reg_table_title">
+        <td class="reg_table_title" colspan="7"><a id="register_80"><h3>Register 80: SD_PKT_CNT_7</h3></a></td>
+      </tr>
+      <tr class="reg_header">
+        <th>#</th>
+        <th>Offset</th>
+        <th>HW/SW</th>
+        <th>SPI WR</th>
+        <th>Restore</th>
+        <th>R/W</th>
+        <th>Pulse</th>
+        <th>Bit</th>
+        <th>Initial</th>
+        <th>Name</th>
+        <th>Comment</th>
+      </tr>
+      <tr class="reg_name">
+        <td style="text-align:center">80</td>
+        <td style="text-align:right" >0x0140</td>
+        <td style="text-align:center">HW</td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_7</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 7</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
+        <td style="text-align:center">31:0</td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_7</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 7</td>
+      </tr>
+      <tr class="back_to_overview">
+        <td class="back_to_overview" colspan="7"><a href="#reg_list_80">Register Overview</a></td>
+      </tr>
+      <tr class="reg_table_title">
+        <td class="reg_table_title" colspan="7"><a id="register_81"><h3>Register 81: SD_PKT_CNT_8</h3></a></td>
+      </tr>
+      <tr class="reg_header">
+        <th>#</th>
+        <th>Offset</th>
+        <th>HW/SW</th>
+        <th>SPI WR</th>
+        <th>Restore</th>
+        <th>R/W</th>
+        <th>Pulse</th>
+        <th>Bit</th>
+        <th>Initial</th>
+        <th>Name</th>
+        <th>Comment</th>
+      </tr>
+      <tr class="reg_name">
+        <td style="text-align:center">81</td>
+        <td style="text-align:right" >0x0144</td>
+        <td style="text-align:center">HW</td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_8</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 8</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
+        <td style="text-align:center">31:0</td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_8</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 8</td>
+      </tr>
+      <tr class="back_to_overview">
+        <td class="back_to_overview" colspan="7"><a href="#reg_list_81">Register Overview</a></td>
+      </tr>
+      <tr class="reg_table_title">
+        <td class="reg_table_title" colspan="7"><a id="register_82"><h3>Register 82: SD_PKT_CNT_9</h3></a></td>
+      </tr>
+      <tr class="reg_header">
+        <th>#</th>
+        <th>Offset</th>
+        <th>HW/SW</th>
+        <th>SPI WR</th>
+        <th>Restore</th>
+        <th>R/W</th>
+        <th>Pulse</th>
+        <th>Bit</th>
+        <th>Initial</th>
+        <th>Name</th>
+        <th>Comment</th>
+      </tr>
+      <tr class="reg_name">
+        <td style="text-align:center">82</td>
+        <td style="text-align:right" >0x0148</td>
+        <td style="text-align:center">HW</td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_9</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 9</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
+        <td style="text-align:center">31:0</td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_9</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 9</td>
+      </tr>
+      <tr class="back_to_overview">
+        <td class="back_to_overview" colspan="7"><a href="#reg_list_82">Register Overview</a></td>
+      </tr>
+      <tr class="reg_table_title">
+        <td class="reg_table_title" colspan="7"><a id="register_83"><h3>Register 83: SD_PKT_CNT_10</h3></a></td>
+      </tr>
+      <tr class="reg_header">
+        <th>#</th>
+        <th>Offset</th>
+        <th>HW/SW</th>
+        <th>SPI WR</th>
+        <th>Restore</th>
+        <th>R/W</th>
+        <th>Pulse</th>
+        <th>Bit</th>
+        <th>Initial</th>
+        <th>Name</th>
+        <th>Comment</th>
+      </tr>
+      <tr class="reg_name">
+        <td style="text-align:center">83</td>
+        <td style="text-align:right" >0x014C</td>
+        <td style="text-align:center">HW</td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_10</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 10</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
+        <td style="text-align:center">31:0</td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_10</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 10</td>
+      </tr>
+      <tr class="back_to_overview">
+        <td class="back_to_overview" colspan="7"><a href="#reg_list_83">Register Overview</a></td>
+      </tr>
+      <tr class="reg_table_title">
+        <td class="reg_table_title" colspan="7"><a id="register_84"><h3>Register 84: SD_PKT_CNT_11</h3></a></td>
+      </tr>
+      <tr class="reg_header">
+        <th>#</th>
+        <th>Offset</th>
+        <th>HW/SW</th>
+        <th>SPI WR</th>
+        <th>Restore</th>
+        <th>R/W</th>
+        <th>Pulse</th>
+        <th>Bit</th>
+        <th>Initial</th>
+        <th>Name</th>
+        <th>Comment</th>
+      </tr>
+      <tr class="reg_name">
+        <td style="text-align:center">84</td>
+        <td style="text-align:right" >0x0150</td>
+        <td style="text-align:center">HW</td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_11</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 11</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
+        <td style="text-align:center">31:0</td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_11</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 11</td>
+      </tr>
+      <tr class="back_to_overview">
+        <td class="back_to_overview" colspan="7"><a href="#reg_list_84">Register Overview</a></td>
+      </tr>
+      <tr class="reg_table_title">
+        <td class="reg_table_title" colspan="7"><a id="register_85"><h3>Register 85: SD_PKT_CNT_12</h3></a></td>
+      </tr>
+      <tr class="reg_header">
+        <th>#</th>
+        <th>Offset</th>
+        <th>HW/SW</th>
+        <th>SPI WR</th>
+        <th>Restore</th>
+        <th>R/W</th>
+        <th>Pulse</th>
+        <th>Bit</th>
+        <th>Initial</th>
+        <th>Name</th>
+        <th>Comment</th>
+      </tr>
+      <tr class="reg_name">
+        <td style="text-align:center">85</td>
+        <td style="text-align:right" >0x0154</td>
+        <td style="text-align:center">HW</td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_12</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 12</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
+        <td style="text-align:center">31:0</td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_12</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 12</td>
+      </tr>
+      <tr class="back_to_overview">
+        <td class="back_to_overview" colspan="7"><a href="#reg_list_85">Register Overview</a></td>
+      </tr>
+      <tr class="reg_table_title">
+        <td class="reg_table_title" colspan="7"><a id="register_86"><h3>Register 86: SD_PKT_CNT_13</h3></a></td>
+      </tr>
+      <tr class="reg_header">
+        <th>#</th>
+        <th>Offset</th>
+        <th>HW/SW</th>
+        <th>SPI WR</th>
+        <th>Restore</th>
+        <th>R/W</th>
+        <th>Pulse</th>
+        <th>Bit</th>
+        <th>Initial</th>
+        <th>Name</th>
+        <th>Comment</th>
+      </tr>
+      <tr class="reg_name">
+        <td style="text-align:center">86</td>
+        <td style="text-align:right" >0x0158</td>
+        <td style="text-align:center">HW</td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_13</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 13</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
+        <td style="text-align:center">31:0</td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_13</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 13</td>
+      </tr>
+      <tr class="back_to_overview">
+        <td class="back_to_overview" colspan="7"><a href="#reg_list_86">Register Overview</a></td>
+      </tr>
+      <tr class="reg_table_title">
+        <td class="reg_table_title" colspan="7"><a id="register_87"><h3>Register 87: SD_PKT_CNT_14</h3></a></td>
+      </tr>
+      <tr class="reg_header">
+        <th>#</th>
+        <th>Offset</th>
+        <th>HW/SW</th>
+        <th>SPI WR</th>
+        <th>Restore</th>
+        <th>R/W</th>
+        <th>Pulse</th>
+        <th>Bit</th>
+        <th>Initial</th>
+        <th>Name</th>
+        <th>Comment</th>
+      </tr>
+      <tr class="reg_name">
+        <td style="text-align:center">87</td>
+        <td style="text-align:right" >0x015C</td>
+        <td style="text-align:center">HW</td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_14</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 14</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
+        <td style="text-align:center">31:0</td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_14</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 14</td>
+      </tr>
+      <tr class="back_to_overview">
+        <td class="back_to_overview" colspan="7"><a href="#reg_list_87">Register Overview</a></td>
+      </tr>
+      <tr class="reg_table_title">
+        <td class="reg_table_title" colspan="7"><a id="register_88"><h3>Register 88: SD_PKT_CNT_15</h3></a></td>
+      </tr>
+      <tr class="reg_header">
+        <th>#</th>
+        <th>Offset</th>
+        <th>HW/SW</th>
+        <th>SPI WR</th>
+        <th>Restore</th>
+        <th>R/W</th>
+        <th>Pulse</th>
+        <th>Bit</th>
+        <th>Initial</th>
+        <th>Name</th>
+        <th>Comment</th>
+      </tr>
+      <tr class="reg_name">
+        <td style="text-align:center">88</td>
+        <td style="text-align:right" >0x0160</td>
+        <td style="text-align:center">HW</td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_15</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 15</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
+        <td style="text-align:center">31:0</td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_15</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 15</td>
+      </tr>
+      <tr class="back_to_overview">
+        <td class="back_to_overview" colspan="7"><a href="#reg_list_88">Register Overview</a></td>
+      </tr>
+      <tr class="reg_table_title">
+        <td class="reg_table_title" colspan="7"><a id="register_89"><h3>Register 89: SD_PKT_CNT_17</h3></a></td>
+      </tr>
+      <tr class="reg_header">
+        <th>#</th>
+        <th>Offset</th>
+        <th>HW/SW</th>
+        <th>SPI WR</th>
+        <th>Restore</th>
+        <th>R/W</th>
+        <th>Pulse</th>
+        <th>Bit</th>
+        <th>Initial</th>
+        <th>Name</th>
+        <th>Comment</th>
+      </tr>
+      <tr class="reg_name">
+        <td style="text-align:center">89</td>
+        <td style="text-align:right" >0x0164</td>
+        <td style="text-align:center">HW</td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_17</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 17 (TCB Slot)</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
+        <td style="text-align:center">31:0</td>
+        <td style="text-align:right" >0x00000000</td>
+        <td style="text-align:left"  >SD_PKT_CNT_17</td>
+        <td style="text-align:left"  >SERDES receiver packet count for slot 17 (TCB Slot)</td>
+      </tr>
+      <tr class="back_to_overview">
+        <td class="back_to_overview" colspan="7"><a href="#reg_list_89">Register Overview</a></td>
+      </tr>
+      <tr class="reg_table_title">
+        <td class="reg_table_title" colspan="7"><a id="register_90"><h3>Register 90: CRC32_REG_BANK</h3></a></td>
+      </tr>
+      <tr class="reg_header">
+        <th>#</th>
+        <th>Offset</th>
+        <th>HW/SW</th>
+        <th>SPI WR</th>
+        <th>Restore</th>
+        <th>R/W</th>
+        <th>Pulse</th>
+        <th>Bit</th>
+        <th>Initial</th>
+        <th>Name</th>
+        <th>Comment</th>
+      </tr>
+      <tr class="reg_name">
+        <td style="text-align:center">90</td>
+        <td style="text-align:right" >0x0168</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:center"></td>
@@ -7411,7 +8401,7 @@
         <td style="text-align:left"  >Keep at the end of the register bank</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#reg_list_72">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#reg_list_90">Register Overview</a></td>
       </tr>
 
     </tbody>
@@ -7419,7 +8409,7 @@
   </table>
 
   <br>
-  Generated :   04.12.2020 11:07:11
+  Generated :   20.05.2021 11:27:05
 
 </body>
 

@@ -5,7 +5,7 @@
  *  Project :  MEGII - DCB
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  04.12.2020 11:07:11
+ *  Created :  20.05.2021 11:27:05
  *
  *  Description :  Register map definitions.
  *
@@ -91,7 +91,25 @@ const dcb_reg_func_type  dcb_reg_func_list[] = {
   { dcb_hw_reg         , 0 },   /* register 69 [0x0114]: TRB_INFO_LSB */
   { dcb_hw_reg         , 0 },   /* register 70 [0x0118]: TRB_INFO_MSB */
   { dcb_hw_reg         , 0 },   /* register 71 [0x011C]: LMK_MOD_FLAG */
-  { dcb_hw_reg         , 0 }    /* register 72 [0x0120]: CRC32_REG_BANK */
+  { cmb_mscb_adr_reg   , 0 },   /* register 72 [0x0120]: CMB_MSCB_ADR */
+  { dcb_hw_reg         , 0 },   /* register 73 [0x0124]: SD_PKT_CNT_0 */
+  { dcb_hw_reg         , 0 },   /* register 74 [0x0128]: SD_PKT_CNT_1 */
+  { dcb_hw_reg         , 0 },   /* register 75 [0x012C]: SD_PKT_CNT_2 */
+  { dcb_hw_reg         , 0 },   /* register 76 [0x0130]: SD_PKT_CNT_3 */
+  { dcb_hw_reg         , 0 },   /* register 77 [0x0134]: SD_PKT_CNT_4 */
+  { dcb_hw_reg         , 0 },   /* register 78 [0x0138]: SD_PKT_CNT_5 */
+  { dcb_hw_reg         , 0 },   /* register 79 [0x013C]: SD_PKT_CNT_6 */
+  { dcb_hw_reg         , 0 },   /* register 80 [0x0140]: SD_PKT_CNT_7 */
+  { dcb_hw_reg         , 0 },   /* register 81 [0x0144]: SD_PKT_CNT_8 */
+  { dcb_hw_reg         , 0 },   /* register 82 [0x0148]: SD_PKT_CNT_9 */
+  { dcb_hw_reg         , 0 },   /* register 83 [0x014C]: SD_PKT_CNT_10 */
+  { dcb_hw_reg         , 0 },   /* register 84 [0x0150]: SD_PKT_CNT_11 */
+  { dcb_hw_reg         , 0 },   /* register 85 [0x0154]: SD_PKT_CNT_12 */
+  { dcb_hw_reg         , 0 },   /* register 86 [0x0158]: SD_PKT_CNT_13 */
+  { dcb_hw_reg         , 0 },   /* register 87 [0x015C]: SD_PKT_CNT_14 */
+  { dcb_hw_reg         , 0 },   /* register 88 [0x0160]: SD_PKT_CNT_15 */
+  { dcb_hw_reg         , 0 },   /* register 89 [0x0164]: SD_PKT_CNT_17 */
+  { dcb_hw_reg         , 0 }    /* register 90 [0x0168]: CRC32_REG_BANK */
 };
 
 #endif /* DCB_DONT_INCLUDE_REG_ACCESS_VARS */
@@ -175,6 +193,24 @@ const dcb_reg_entry_type  dcb_reg_list[] = {
   { "TRB_INFO_LSB"        , DCB_REG_TRB_INFO_LSB       , DCB_READONLY_REG },
   { "TRB_INFO_MSB"        , DCB_REG_TRB_INFO_MSB       , DCB_READONLY_REG },
   { "LMK_MOD_FLAG"        , DCB_REG_LMK_MOD_FLAG       , DCB_READONLY_REG },
+  { "CMB_MSCB_ADR"        , DCB_REG_CMB_MSCB_ADR       , DCB_WRITABLE_REG },
+  { "SD_PKT_CNT_0"        , DCB_REG_SD_PKT_CNT_0       , DCB_READONLY_REG },
+  { "SD_PKT_CNT_1"        , DCB_REG_SD_PKT_CNT_1       , DCB_READONLY_REG },
+  { "SD_PKT_CNT_2"        , DCB_REG_SD_PKT_CNT_2       , DCB_READONLY_REG },
+  { "SD_PKT_CNT_3"        , DCB_REG_SD_PKT_CNT_3       , DCB_READONLY_REG },
+  { "SD_PKT_CNT_4"        , DCB_REG_SD_PKT_CNT_4       , DCB_READONLY_REG },
+  { "SD_PKT_CNT_5"        , DCB_REG_SD_PKT_CNT_5       , DCB_READONLY_REG },
+  { "SD_PKT_CNT_6"        , DCB_REG_SD_PKT_CNT_6       , DCB_READONLY_REG },
+  { "SD_PKT_CNT_7"        , DCB_REG_SD_PKT_CNT_7       , DCB_READONLY_REG },
+  { "SD_PKT_CNT_8"        , DCB_REG_SD_PKT_CNT_8       , DCB_READONLY_REG },
+  { "SD_PKT_CNT_9"        , DCB_REG_SD_PKT_CNT_9       , DCB_READONLY_REG },
+  { "SD_PKT_CNT_10"       , DCB_REG_SD_PKT_CNT_10      , DCB_READONLY_REG },
+  { "SD_PKT_CNT_11"       , DCB_REG_SD_PKT_CNT_11      , DCB_READONLY_REG },
+  { "SD_PKT_CNT_12"       , DCB_REG_SD_PKT_CNT_12      , DCB_READONLY_REG },
+  { "SD_PKT_CNT_13"       , DCB_REG_SD_PKT_CNT_13      , DCB_READONLY_REG },
+  { "SD_PKT_CNT_14"       , DCB_REG_SD_PKT_CNT_14      , DCB_READONLY_REG },
+  { "SD_PKT_CNT_15"       , DCB_REG_SD_PKT_CNT_15      , DCB_READONLY_REG },
+  { "SD_PKT_CNT_17"       , DCB_REG_SD_PKT_CNT_17      , DCB_READONLY_REG },
   { "CRC32_REG_BANK"      , DCB_REG_CRC32_REG_BANK     , DCB_WRITABLE_REG },
   { (const char*)0        , 0                          , 0                }
 };
@@ -437,6 +473,24 @@ const dcb_bit_group_entry_type  dcb_bit_group_list[] = {
   { "LMK_2_MOD"                    , DCB_LMK_2_MOD_REG                    , DCB_LMK_2_MOD_MASK                    , DCB_LMK_2_MOD_OFS                    },
   { "LMK_1_MOD"                    , DCB_LMK_1_MOD_REG                    , DCB_LMK_1_MOD_MASK                    , DCB_LMK_1_MOD_OFS                    },
   { "LMK_0_MOD"                    , DCB_LMK_0_MOD_REG                    , DCB_LMK_0_MOD_MASK                    , DCB_LMK_0_MOD_OFS                    },
+  { "CMB_MSCB_ADR"                 , DCB_CMB_MSCB_ADR_REG                 , DCB_CMB_MSCB_ADR_MASK                 , DCB_CMB_MSCB_ADR_OFS                 },
+  { "SD_PKT_CNT_0"                 , DCB_SD_PKT_CNT_0_REG                 , DCB_SD_PKT_CNT_0_MASK                 , DCB_SD_PKT_CNT_0_OFS                 },
+  { "SD_PKT_CNT_1"                 , DCB_SD_PKT_CNT_1_REG                 , DCB_SD_PKT_CNT_1_MASK                 , DCB_SD_PKT_CNT_1_OFS                 },
+  { "SD_PKT_CNT_2"                 , DCB_SD_PKT_CNT_2_REG                 , DCB_SD_PKT_CNT_2_MASK                 , DCB_SD_PKT_CNT_2_OFS                 },
+  { "SD_PKT_CNT_3"                 , DCB_SD_PKT_CNT_3_REG                 , DCB_SD_PKT_CNT_3_MASK                 , DCB_SD_PKT_CNT_3_OFS                 },
+  { "SD_PKT_CNT_4"                 , DCB_SD_PKT_CNT_4_REG                 , DCB_SD_PKT_CNT_4_MASK                 , DCB_SD_PKT_CNT_4_OFS                 },
+  { "SD_PKT_CNT_5"                 , DCB_SD_PKT_CNT_5_REG                 , DCB_SD_PKT_CNT_5_MASK                 , DCB_SD_PKT_CNT_5_OFS                 },
+  { "SD_PKT_CNT_6"                 , DCB_SD_PKT_CNT_6_REG                 , DCB_SD_PKT_CNT_6_MASK                 , DCB_SD_PKT_CNT_6_OFS                 },
+  { "SD_PKT_CNT_7"                 , DCB_SD_PKT_CNT_7_REG                 , DCB_SD_PKT_CNT_7_MASK                 , DCB_SD_PKT_CNT_7_OFS                 },
+  { "SD_PKT_CNT_8"                 , DCB_SD_PKT_CNT_8_REG                 , DCB_SD_PKT_CNT_8_MASK                 , DCB_SD_PKT_CNT_8_OFS                 },
+  { "SD_PKT_CNT_9"                 , DCB_SD_PKT_CNT_9_REG                 , DCB_SD_PKT_CNT_9_MASK                 , DCB_SD_PKT_CNT_9_OFS                 },
+  { "SD_PKT_CNT_10"                , DCB_SD_PKT_CNT_10_REG                , DCB_SD_PKT_CNT_10_MASK                , DCB_SD_PKT_CNT_10_OFS                },
+  { "SD_PKT_CNT_11"                , DCB_SD_PKT_CNT_11_REG                , DCB_SD_PKT_CNT_11_MASK                , DCB_SD_PKT_CNT_11_OFS                },
+  { "SD_PKT_CNT_12"                , DCB_SD_PKT_CNT_12_REG                , DCB_SD_PKT_CNT_12_MASK                , DCB_SD_PKT_CNT_12_OFS                },
+  { "SD_PKT_CNT_13"                , DCB_SD_PKT_CNT_13_REG                , DCB_SD_PKT_CNT_13_MASK                , DCB_SD_PKT_CNT_13_OFS                },
+  { "SD_PKT_CNT_14"                , DCB_SD_PKT_CNT_14_REG                , DCB_SD_PKT_CNT_14_MASK                , DCB_SD_PKT_CNT_14_OFS                },
+  { "SD_PKT_CNT_15"                , DCB_SD_PKT_CNT_15_REG                , DCB_SD_PKT_CNT_15_MASK                , DCB_SD_PKT_CNT_15_OFS                },
+  { "SD_PKT_CNT_17"                , DCB_SD_PKT_CNT_17_REG                , DCB_SD_PKT_CNT_17_MASK                , DCB_SD_PKT_CNT_17_OFS                },
   { "CRC32_REG_BANK"               , DCB_CRC32_REG_BANK_REG               , DCB_CRC32_REG_BANK_MASK               , DCB_CRC32_REG_BANK_OFS               },
   { (const char*)0                 , 0                                    , 0                                     , 0                                    }
 };
@@ -518,7 +572,25 @@ const unsigned char reg_restore[] = {
   DCB_DONT_TOUCH_REG,   /* Offset 0x0114 */
   DCB_DONT_TOUCH_REG,   /* Offset 0x0118 */
   DCB_DONT_TOUCH_REG,   /* Offset 0x011C */
-  DCB_DONT_TOUCH_REG    /* Offset 0x0120 */
+  DCB_RESTORE_REG   ,   /* Offset 0x0120 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0124 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0128 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x012C */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0130 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0134 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0138 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x013C */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0140 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0144 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0148 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x014C */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0150 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0154 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0158 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x015C */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0160 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0164 */
+  DCB_DONT_TOUCH_REG    /* Offset 0x0168 */
 };
 
 
@@ -598,7 +670,25 @@ const unsigned int reg_default[] = {
   0x00000000,   /* Offset 0x0110 */
   0x00000000,   /* Offset 0x0114 */
   0x00000000,   /* Offset 0x0118 */
-  0x00000000    /* Offset 0x011C */
+  0x00000000,   /* Offset 0x011C */
+  0x00000000,   /* Offset 0x0120 */
+  0x00000000,   /* Offset 0x0124 */
+  0x00000000,   /* Offset 0x0128 */
+  0x00000000,   /* Offset 0x012C */
+  0x00000000,   /* Offset 0x0130 */
+  0x00000000,   /* Offset 0x0134 */
+  0x00000000,   /* Offset 0x0138 */
+  0x00000000,   /* Offset 0x013C */
+  0x00000000,   /* Offset 0x0140 */
+  0x00000000,   /* Offset 0x0144 */
+  0x00000000,   /* Offset 0x0148 */
+  0x00000000,   /* Offset 0x014C */
+  0x00000000,   /* Offset 0x0150 */
+  0x00000000,   /* Offset 0x0154 */
+  0x00000000,   /* Offset 0x0158 */
+  0x00000000,   /* Offset 0x015C */
+  0x00000000,   /* Offset 0x0160 */
+  0x00000000    /* Offset 0x0164 */
 };
 
 #endif /* DCB_DONT_INCLUDE_VARS */

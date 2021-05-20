@@ -53,6 +53,7 @@ unsigned int dcb_hw_reg(unsigned int cmd, unsigned int par, unsigned int offs, u
 #ifndef DCB_DONT_IMPLEMENT_SW_REGISTERS
 
 unsigned int dcb_sw_slot_en_reg(unsigned int cmd, unsigned int par, unsigned int offs, unsigned int data);
+unsigned int cmb_mscb_adr_reg(unsigned int cmd, unsigned int par, unsigned int offs, unsigned int data);
 
 #endif /* DCB_DONT_IMPLEMENT_SW_REGISTERS */
 

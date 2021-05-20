@@ -396,6 +396,22 @@ unsigned int dcb_sw_slot_en_reg(unsigned int cmd, unsigned int par, unsigned int
   return rd_data;
 }
 
+unsigned int cmb_mscb_adr_reg(unsigned int cmd, unsigned int par, unsigned int offs, unsigned int data)
+{
+  static unsigned int cmb_mscb_adr = 0;
+
+  if (cmd == DCB_REG_WRITE)
+  {
+    cmb_mscb_adr = data;
+  }
+/*  else if (cmd == DCB_REG_READ)
+  {
+  }
+*/
+
+  return cmb_mscb_adr;
+}
+
 #endif /* DCB_DONT_IMPLEMENT_SW_REGISTERS */
 
 /***************************************************************************/
