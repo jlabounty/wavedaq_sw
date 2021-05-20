@@ -2,6 +2,15 @@
 #include "TH1D.h"
 #include "TCanvas.h"
 
+typedef struct {
+   std::string boardName = "UNKNOWN";
+   std::string boardId = "WDXXX";
+   char version = 'G';
+   int slot = 0;
+   std::string crateName = "CRATE";
+   float thr[16];
+} boardData;
+
 void makeThr(string dirname="2020-10-12/"){
    int noped=0;
    const double fallbackThr = -0.035;//in case no pedestal is found
@@ -14,25 +23,79 @@ void makeThr(string dirname="2020-10-12/"){
 
    const double nsigma = 10.;
 
-   TSystemDirectory dir(dirname.c_str(),dirname.c_str());
-   TList *files = dir.GetListOfFiles();
+   std::vector<boardData> boards;
+
+   //open output file
    ofstream outfile("output.xml");
    TFile *outroot = new TFile("output.root", "recreate");
+
+   //list directory content
+   TSystemDirectory dir(dirname.c_str(),dirname.c_str());
+   TList *files = dir.GetListOfFiles();
+
    if (files){
       TSystemFile *file; TString fname; TIter next(files);
       while ((file=(TSystemFile*)next())) {
          fname = file->GetName();
-         if (!file->IsDirectory() && fname.EndsWith(".dat") && fname.Index("out-wd")==0) {
+         if (!file->IsDirectory() && fname.EndsWith(".dat") && fname.Index("out-")==0) {
             std::string s = dirname;
             s += fname.Data();
             ifstream myfile(s.c_str());
             cout << fname << '\n';
-            string line;
+
+            //data for current board
+            boardData board;
+
+            //dataset
             std::array<std::vector<int>, 16> scals;
             std::vector<float> thrs;
+
+            string line;
             while ( getline (myfile,line) ){
                if(line.front() == '#'){
                   //comments
+                  //erase "# "
+                  line.erase(0, 2);
+                  //parsing
+                  std::istringstream ss(line);
+                  std::string parametername;
+                  if(std::getline(ss, parametername, ':')){
+                     if(parametername == "Name"){
+                        //board name
+                        ss >> board.boardName;
+                        cout << "Board Name: "<< board.boardName << '\n';
+                     } else if(parametername == "WDB"){
+                        //board id (WDXXX)
+                        ss >> board.boardId;
+                        cout << "Board Id: "<< board.boardId << '\n';
+                     } else if(parametername == "Revision"){
+                        //board revision (E, F, G)
+                        ss >> board.version;
+                        cout << "Board Version: "<< board.version << '\n';
+                     } else if(parametername == "Crate"){
+                        //crate name in xml
+                        ss >> board.crateName;
+                        cout << "Crate Name: "<< board.crateName << '\n';
+                     } else if(parametername == "Slot"){
+                        //slot number 0-15
+                        ss >> board.slot;
+                        cout << "Slot: "<< board.slot << '\n';
+                     } else if(parametername == "Gain"){
+                        //gain array
+                     } else if(parametername == "PZC"){
+                        //pzc enable (0-1)
+                     } else if(parametername == "PZC level"){
+                        //pzc level (0-6)
+                     } else if(parametername == "Down"){
+                        //lowest threshold
+                     } else if(parametername == "Up"){
+                        //highest threshold
+                     } else if(parametername == "N"){
+                        //number of points
+                     } else {
+                        cout << "unknown parameter " << parametername << '\n';
+                     }
+                  }
                }
                else {
                   stringstream myss(line);
@@ -50,7 +113,7 @@ void makeThr(string dirname="2020-10-12/"){
 
             float peds[16] = {-100};
 
-            outfile << fname.Data() << std::endl;
+            outfile << board.boardName << std::endl;
             outfile << "<TriggerLevel>";
             //TCanvas* c=new TCanvas();
             //c->SetLogy();
@@ -58,52 +121,61 @@ void makeThr(string dirname="2020-10-12/"){
             for(int i=0; i<16; i++){
 
                //fit WD2G
-              /* TH1F *h = new TH1F(Form("%s-%d", fname.Data(), i), Form("%s-%d", fname.Data(), i), thrs.size()-1, thrs.data());
-               for(int j=0; j<scals[i].size(); j++){
-                  h->SetBinContent(j+1, scals[i][j]);
-               }
+               if(board.version == 'G'){
+                  TH1F *h = new TH1F(Form("%s-%d", board.boardName.c_str(), i), Form("%s-%d", board.boardName.c_str(), i), thrs.size()-1, thrs.data());
+                  for(int j=0; j<scals[i].size(); j++){
+                     h->SetBinContent(j+1, scals[i][j]);
+                  }
 
-               h->Fit(fgau, "Q");
-               if(fgau->GetParameter(2) > 0.0007){
-                  noped++;
-                  printf("!!");
-               }
+                  h->Fit(fgau, "Q");
+                  if(fgau->GetParameter(2) > 0.0007){
+                     noped++;
+                     printf("!!");
+                  }
 
-               printf("%2d: %lf %lf -> %lf\n", i,  fgau->GetParameter(1), fgau->GetParameter(2), fgau->GetParameter(1) +0.0005 + nsigma*fgau->GetParameter(2));
-               outfile << fgau->GetParameter(1) +0.0005 + nsigma*fgau->GetParameter(2); //0.0005 is bin size
+                  printf("%2d: %lf %lf -> %lf\n", i,  fgau->GetParameter(1), fgau->GetParameter(2), fgau->GetParameter(1) +0.0005 + nsigma*fgau->GetParameter(2));
+                  outfile << fgau->GetParameter(1) +0.0005 + nsigma*fgau->GetParameter(2); //0.0005 is bin size
+                  board.thr[i] = fgau->GetParameter(1) +0.0005 + nsigma*fgau->GetParameter(2);
 
 
-               h->Write(Form("%s-%d", fname.Data(), i));*/
+                  h->Write(Form("%s-%d", board.boardName.c_str(), i));
 
-               /*h->Draw();
-               TLine *l=new TLine(fgau->GetParameter(1) +0.0005 + nsigma*fgau->GetParameter(2),c->GetUymin(),fgau->GetParameter(1) +0.0005 + nsigma*fgau->GetParameter(2),c->GetUymax());
-               l->SetLineColor(kRed);
-               l->Draw();
-               
-               c->Update();
-               c->WaitPrimitive();
-               delete h;*/
+                  /*h->Draw();
+                  TLine *l=new TLine(fgau->GetParameter(1) +0.0005 + nsigma*fgau->GetParameter(2),c->GetUymin(),fgau->GetParameter(1) +0.0005 + nsigma*fgau->GetParameter(2),c->GetUymax());
+                  l->SetLineColor(kRed);
+                  l->Draw();
+                  
+                  c->Update();
+                  c->WaitPrimitive();
+                  delete h;*/
 
 
                //edge for WD2F
-               peds[i] = -100;
-               TH1F *h = new TH1F(Form("%s-%d", fname.Data(), i), Form("%s-%d", fname.Data(), i), thrs.size()-1, thrs.data());
-               h->Write(Form("%s-%d", fname.Data(), i));
-               delete h;
-
-               for(int j=0; j<scals[i].size(); j++){
-                  if (peds[i] == -100 && scals[i][j]>2000){
-                     peds[i] = thrs[j];
+               } else if (board.version == 'F' || board.version == 'E'){
+                  peds[i] = -100;
+                  TH1F *h = new TH1F(Form("%s-%d", board.boardName.c_str(), i), Form("%s-%d", board.boardName.c_str(), i), thrs.size()-1, thrs.data());
+                  for(int j=0; j<scals[i].size(); j++){
+                     h->SetBinContent(j+1, scals[i][j]);
                   }
-               }
+                  h->Write(Form("%s-%d", board.boardName.c_str(), i));
+                  delete h;
 
-               if(peds[i] != -100){
-                  printf("%2d: %lf\n", i,  peds[i]);
-                  outfile << peds[i] + absoluteThr;
-               }else {
-                  printf("%2d: no ped\n", i);
-                  outfile << fallbackThr;
-                  noped++;
+                  for(int j=0; j<scals[i].size(); j++){
+                     if (peds[i] == -100 && scals[i][j]>2000){
+                        peds[i] = thrs[j];
+                     }
+                  }
+
+                  if(peds[i] != -100){
+                     printf("%2d: %lf\n", i,  peds[i]);
+                     outfile << peds[i] + absoluteThr;
+                     board.thr[i] = peds[i] + absoluteThr;
+                  }else {
+                     printf("%2d: no ped\n", i);
+                     outfile << fallbackThr;
+                     board.thr[i] = fallbackThr;
+                     noped++;
+                  }
                }
                
                //next board
@@ -111,9 +183,19 @@ void makeThr(string dirname="2020-10-12/"){
                   outfile << ", ";
             }
             outfile << "</TriggerLevel>" << std::endl;
+
+            boards.push_back(board);
          }
       }
-      cout << noped << " boards without pedestal\n";
+      cout << "\n\n FINAL STATUS:\n";
+      cout << noped << " channels without or with bad pedestal\n";
+
+      for(auto b : boards){
+         cout << "Board "<< b.boardName << "\n";
+         for(int i=0; i<16; i++)
+            cout << b.thr[i]  << ", ";
+         cout << "\n";
+      }
    }
    outfile.close();
    outroot->Close();
