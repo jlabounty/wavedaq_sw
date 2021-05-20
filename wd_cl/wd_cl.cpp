@@ -116,8 +116,27 @@ std::map<short, FILE*> CreateScalerFiles(WDSystem* sys, int n, float down, float
                char buf[100];
                sprintf(buf, "out-%s.dat", wdb->GetName().c_str());
                FILE *f= fopen(buf, "w");
+
+               //print header
+               fprintf(f, "# Name: %s\n", wdb->GetBoardName().c_str());
                fprintf(f, "# WDB: %s\n", wdb->GetName().c_str());
-               fprintf(f, "# Gain0: %f\n", wdb->GetFeGain(0));
+               fprintf(f, "# Crate: %s\n", wdb->GetCrate()->GetCrateName().c_str());
+               fprintf(f, "# Slot: %d\n", wdb->GetSlot());
+               fprintf(f, "# Gain: ");
+               for(int iCh=0; iCh<16; iCh++){
+                  if(iCh>0)
+                     fprintf(f, ", ");
+                  fprintf(f, "%f", wdb->GetFeGain(iCh));
+               }
+               fprintf(f, "\n");
+               fprintf(f, "# PZC: ");
+               for(int iCh=0; iCh<16; iCh++){
+                  if(iCh>0)
+                     fprintf(f, ", ");
+                  fprintf(f, "%d", wdb->GetFePzc(iCh));
+               }
+               fprintf(f, "\n");
+               fprintf(f, "# PZC level: %d\n", wdb->GetDacPzcLevelN());
                fprintf(f, "# Down: %f\n", down);
                fprintf(f, "# Up: %f\n", up);
                fprintf(f, "# N: %d\n", n);
