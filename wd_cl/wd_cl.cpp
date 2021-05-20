@@ -120,6 +120,7 @@ std::map<short, FILE*> CreateScalerFiles(WDSystem* sys, int n, float down, float
                //print header
                fprintf(f, "# Name: %s\n", wdb->GetBoardName().c_str());
                fprintf(f, "# WDB: %s\n", wdb->GetName().c_str());
+               fprintf(f, "# Revision: %c\n", wdb->GetBoardRevision() + 'A');
                fprintf(f, "# Crate: %s\n", wdb->GetCrate()->GetCrateName().c_str());
                fprintf(f, "# Slot: %d\n", wdb->GetSlot());
                fprintf(f, "# Gain: ");
