@@ -531,8 +531,8 @@ bool WDSystem::IsSerdesGood(){
 //allocate buffers and spawn DAQ threads
 void WDSystem::SpawnDAQ(){
    //number of buffer at each buffer stage
-  const int number_of_buffers = 10;
-  const int number_of_calibrated_buffers = 10;
+  const int number_of_buffers = 20000; // MV change
+  const int number_of_calibrated_buffers = 20000; // MV change
 
    printf("starting all threads\n");
 
@@ -549,6 +549,7 @@ void WDSystem::SpawnDAQ(){
    printf("spawning DAQ for %d WDBs and %d TCBs...\n", nWDBs, nTCBs);
 
    //preallocate Memory pool objects
+   #ifdef USEMEMORYPOOL
    DAQMemoryPool<WDAQDRSPacketData>::GetInstance().PreAllocate(2*18*number_of_buffers*nWDBs);
    DAQMemoryPool<WDAQADCPacketData>::GetInstance().PreAllocate(4*16*number_of_buffers*nWDBs);
    DAQMemoryPool<WDAQTDCPacketData>::GetInstance().PreAllocate(16*number_of_buffers*nWDBs);
@@ -560,7 +561,7 @@ void WDSystem::SpawnDAQ(){
    DAQMemoryPool<WDAQTcbBank>::GetInstance().PreAllocate(5*number_of_calibrated_buffers*nTCBs*4);
    DAQMemoryPool<WDAQTcbEvent>::GetInstance().PreAllocate(number_of_calibrated_buffers*nTCBs*4);
    DAQMemoryPool<WDAQEvent>::GetInstance().PreAllocate(number_of_calibrated_buffers*4);
-
+   #endif
    //create buffers
    int nBuilders;
    try{
@@ -917,8 +918,10 @@ void WDWDB::ConfigureProperty(const std::string &name, Property &property) {
 void WDWDB::ConfigurationStarted(){
    SetSendBlock(true);
    // in case no DCB is used
-   if(!IsDcbInterface())
-      SetDestinationPort(GetCrate()->GetSystem()->GetDAQServerPort());
+   if(!IsDcbInterface()){
+      int destPort = GetCrate()->GetSystem()->GetDAQServerPort();
+      if(destPort) SetDestinationPort(destPort);
+   }
 
    SetFeMux(-1, WDB::cFeMuxInput);
    SetTriggerOutPulseLength(4); // 4 clock shaping
@@ -2879,7 +2882,8 @@ void WDDCB::ConfigureProperty(const std::string &name, Property &property) {
 };
 
 void WDDCB::ConfigurationStarted(){
-   SetDestinationPort(GetCrate()->GetSystem()->GetDAQServerPort());
+   int destPort = GetCrate()->GetSystem()->GetDAQServerPort();
+   if(destPort) SetDestinationPort(destPort);
 }
 
 void WDDCB::ConfigurationEnded(){

@@ -243,7 +243,8 @@ class WDSystem {
       PropertyGroup &GetGroupProperties(std::string groupname){ return fGroupProperties.at(groupname); }
       int GetDAQServerPort(){
          static int distrib = 0;
-         return fDAQServerPorts[(distrib++)%fDAQServerPorts.size()];
+         if (fDAQServerPorts.size() == 0) return 0;
+         else return fDAQServerPorts[(distrib++)%fDAQServerPorts.size()];
       }
       DAQSystem* GetDAQSystem(){ return fDaqSystem; }
 
