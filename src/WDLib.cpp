@@ -531,8 +531,8 @@ bool WDSystem::IsSerdesGood(){
 //allocate buffers and spawn DAQ threads
 void WDSystem::SpawnDAQ(){
    //number of buffer at each buffer stage
-  const int number_of_buffers = 20000; // MV change
-  const int number_of_calibrated_buffers = 20000; // MV change
+  const int number_of_buffers = 10; 
+  const int number_of_calibrated_buffers = 10; 
 
    printf("starting all threads\n");
 
