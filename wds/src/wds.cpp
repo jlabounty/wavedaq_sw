@@ -321,8 +321,6 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
                      std::cout << "Connect to " << dcb->GetName() << " ... " << std::flush;
                   dcb->Connect();
                   dcb->ScanCrate();
-                  // set destination port for DCB, MAC and IP is used automatically from UDP packet
-                  dcb->SetDestinationPort(gl->wp->GetServerPort());
                   if (gl->verbose)
                      std::cout << "OK" << std::endl;
                   if (gl->verbose) {
@@ -348,6 +346,10 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
                   dcb = nullptr;
                }
             }
+
+            // set destination port for DCB, MAC and IP is used automatically from UDP packet
+            if (dcb != nullptr)
+               dcb->SetDestinationPort(gl->wp->GetServerPort());
 
             if (dcb != nullptr)
                gl->recent[dcb->GetName()] = std::time(nullptr);
@@ -622,8 +624,12 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
             d->ResetSerdes(1, false);
          }
 
+         // re-set destination address in case frontend has changed it
+         for (auto &d : gl->dcb)
+            d->SetDestinationPort(gl->wp->GetServerPort());
+
          if (!gl->demoMode) {
-            if (wdbAddress == "*")
+            if (slot == -1)
                gl->wp->StartCalibrationVoltage(nullptr);
             else {
                auto wdb = findBoard(gl->dcb, gl->wdb, wdbAddress);
@@ -632,6 +638,10 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
          }
 
       } else if (item == "tcalib") {
+
+         // re-set destination address in case frontend has changed it
+         for (auto &d : gl->dcb)
+            d->SetDestinationPort(gl->wp->GetServerPort());
 
          if (!gl->demoMode) {
             if (wdbAddress == "*")
