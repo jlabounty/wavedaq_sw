@@ -3437,8 +3437,9 @@ void WP::DoVoltageCalibrationStep() {
       calibProg.iIterTotal = 0;
       calibProg.state = cCsRunning;
 
-      // make sure the sampling speed is up to date
-      b->ReceiveStatusRegister(b->GetDrsSampleFreqLoc());
+      // make sure everything is up to date
+      b->ReceiveStatusRegisters();
+      b->ReceiveControlRegisters();
 
       // save current board settings
       b->Save();
@@ -4167,8 +4168,9 @@ void WP::DoTimeCalibrationStep() {
       calibProg.iIter4 = 0;
       calibProg.state = cCsRunning;
 
-      // make sure the sampling speed is up to date
-      b->ReceiveStatusRegister(b->GetDrsSampleFreqLoc());
+      // make sure everything is up to date
+      b->ReceiveStatusRegisters();
+      b->ReceiveControlRegisters();
 
       // save current board settings
       b->Save();
