@@ -398,6 +398,7 @@ void WDSystem::Configure(bool wait){
 void WDSystem::PowerOn(){
    //first switch on distribution and trigger crate
    GetDistributionCrate()->PowerOn();
+   sleep(10);
    GetTriggerCrate()->PowerOn();
    for(auto &c : fCrate){
       c->PowerOn();
