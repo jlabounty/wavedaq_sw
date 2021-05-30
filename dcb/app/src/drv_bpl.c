@@ -251,7 +251,7 @@ void spi_ascii_cmd(char *txbuff, char *rxbuff, unsigned int rxsize, unsigned cha
             rxbuff[count] = 0;
          }
          timeout_count++;
-      } while ((rx_buff[i] != 0x03) && (count < rxsize) && (timeout_count < SPI_ASCII_RX_TIMEOUT));
+      } while ((rx_buff[i] != 0x03) && ((count < rxsize) || (rxsize == 0))  && (timeout_count < SPI_ASCII_RX_TIMEOUT));
 
       if(timeout_count >= SPI_ASCII_RX_TIMEOUT)
       {

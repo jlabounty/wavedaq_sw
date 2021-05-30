@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  20.05.2021 11:27:05
+// Created :  28.05.2021 10:21:20
 //
 
 
@@ -284,6 +284,10 @@ public:
 
    ////// ------ Register 22 [0x0058]: RST - Reset bits for specific firmwar units (Default: 0x00000000) ------ //////
 
+   // 0x00000200: ISERDES_RCVR_PACKET_COUNT_RST - Reset of all input SERDES packet counters
+   unsigned int GetIserdesRcvrPacketCountRst() { return BitExtract(DCB_ISERDES_RCVR_PACKET_COUNT_RST_REG, DCB_ISERDES_RCVR_PACKET_COUNT_RST_MASK, DCB_ISERDES_RCVR_PACKET_COUNT_RST_OFS); };
+   void         SetIserdesRcvrPacketCountRst(unsigned int value) { SetRegMask(DCB_ISERDES_RCVR_PACKET_COUNT_RST_REG, DCB_ISERDES_RCVR_PACKET_COUNT_RST_MASK, DCB_ISERDES_RCVR_PACKET_COUNT_RST_OFS, value); };
+
    // 0x00000100: WDB_SERDES_CLK_MGR_RST - Reset for clock manager deriving clocks from the WDB clock (e.g. refclk for SYNC output delay)
    unsigned int GetWdbSerdesClkMgrRst() { return BitExtract(DCB_WDB_SERDES_CLK_MGR_RST_REG, DCB_WDB_SERDES_CLK_MGR_RST_MASK, DCB_WDB_SERDES_CLK_MGR_RST_OFS); };
    void         SetWdbSerdesClkMgrRst(unsigned int value) { SetRegMask(DCB_WDB_SERDES_CLK_MGR_RST_REG, DCB_WDB_SERDES_CLK_MGR_RST_MASK, DCB_WDB_SERDES_CLK_MGR_RST_OFS, value); };
@@ -304,7 +308,7 @@ public:
    unsigned int GetLmkSyncDcb() { return BitExtract(DCB_LMK_SYNC_DCB_REG, DCB_LMK_SYNC_DCB_MASK, DCB_LMK_SYNC_DCB_OFS); };
    void         SetLmkSyncDcb(unsigned int value) { SetRegMask(DCB_LMK_SYNC_DCB_REG, DCB_LMK_SYNC_DCB_MASK, DCB_LMK_SYNC_DCB_OFS, value); };
 
-   // 0x00000008: ISERDES_RCVR_ERROR_COUNT_RST - Reset of the input SERDES packet receiver
+   // 0x00000008: ISERDES_RCVR_ERROR_COUNT_RST - Reset of all input SERDES error counters
    unsigned int GetIserdesRcvrErrorCountRst() { return BitExtract(DCB_ISERDES_RCVR_ERROR_COUNT_RST_REG, DCB_ISERDES_RCVR_ERROR_COUNT_RST_MASK, DCB_ISERDES_RCVR_ERROR_COUNT_RST_OFS); };
    void         SetIserdesRcvrErrorCountRst(unsigned int value) { SetRegMask(DCB_ISERDES_RCVR_ERROR_COUNT_RST_REG, DCB_ISERDES_RCVR_ERROR_COUNT_RST_MASK, DCB_ISERDES_RCVR_ERROR_COUNT_RST_OFS, value); };
 
