@@ -2452,14 +2452,14 @@ void WDTCB::ConfigureCdchMask(Property &property){
 
 void WDTCB::ConfigureCdchUSMultiplicityThreshold(Property &property){
    unsigned int threshold;
-   threshold = property.GetUHex();
+   threshold = property.GetInt();
 
    SetCDCHUSMultThr(&threshold);
 }
 
 void WDTCB::ConfigureCdchDSMultiplicityThreshold(Property &property){
    unsigned int threshold;
-   threshold = property.GetUHex();
+   threshold = property.GetInt();
 
    SetCDCHDSMultThr(&threshold);
 }
