@@ -20,10 +20,7 @@ install(TARGETS wds DESTINATION bin)
 #
 # Install if executed on a DCB
 #
-set(DCB $ENV{HOSTNAME})
-string(TOUPPER ${DCB} DCB)
-string(SUBSTRING ${DCB} 0 3 DCB)
-if (${DCB} MATCHES "DCB")
+if (EXISTS /fw_sw/dcb/prod)
    install(TARGETS wds DESTINATION /fw_sw/dcb/prod)
    install(DIRECTORY ${CMAKE_SOURCE_DIR}/wds/html 
       DESTINATION /fw_sw/dcb/prod)
