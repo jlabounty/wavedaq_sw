@@ -20,8 +20,13 @@ install(TARGETS wds DESTINATION bin)
 #
 # Install if executed on a DCB
 #
-install(TARGETS wds DESTINATION /fw_sw/dcb/prod)
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/wds/html 
-   DESTINATION /fw_sw/dcb/prod)
-install(PROGRAMS wds.sh DESTINATION /etc/init.d/)
-install(CODE "execute_process(COMMAND /etc/init.d/wds.sh restart TIMEOUT 10)")
+set(DCB $ENV{HOSTNAME})
+string(TOUPPER ${DCB} DCB)
+string(SUBSTRING ${DCB} 0 3 DCB)
+if (${DCB} MATCHES "DCB")
+   install(TARGETS wds DESTINATION /fw_sw/dcb/prod)
+   install(DIRECTORY ${CMAKE_SOURCE_DIR}/wds/html 
+      DESTINATION /fw_sw/dcb/prod)
+   install(PROGRAMS wds.sh DESTINATION /etc/init.d/)
+   install(CODE "execute_process(COMMAND /etc/init.d/wds.sh restart TIMEOUT 10)")
+endif()
