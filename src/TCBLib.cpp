@@ -514,7 +514,7 @@ void TCB::GetTriggerCountersSPI(u_int32_t *data)
     ReadBLT(RTRGCOUSPI+icycle*BLTSIZE,data+icycle*BLTSIZE,BLTSIZE);
 }
 // read trigger counters, total time and live time through SPI
-void TCB::FReadCounters(u_int32_t *data)
+void TCB::ReadCounters(u_int32_t *data)
 {
   u_int32_t latch = 1;
   WriteReg(RLATCHCOUSPI,&latch);

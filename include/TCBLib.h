@@ -347,6 +347,8 @@ public:
    void GetTriggerCounters(u_int32_t*);
    // read trigger counters through SPI
    void GetTriggerCountersSPI(u_int32_t*);
+   // read trigger counter and timers through SPI
+   void ReadCounters(u_int32_t *);
    // read memory address
    void GetMemoryAddress(u_int32_t*);
    // check if the system is busy
@@ -557,7 +559,6 @@ public:
   void SetFNeutronMask(u_int32_t *);
   void SetMatrixMask(u_int32_t *);
   void SetInterspillDly(u_int32_t *);
-  void FReadCounters(u_int32_t *);
 };
 
 #endif
