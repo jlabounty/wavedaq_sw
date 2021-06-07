@@ -661,7 +661,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
             gl->wp->StartWaveformSaving(std::string(s_http_server_opts.document_root) + "/" + a[0],
                                         a[1] == "bin" ? WP::cLiFormatBinary : WP::cLiFormatXML,
                                         a[2] == "all",
-                                        a[2] == "all" ? -1 : std::stoi(a[2]),
+                                        a[2] == "all" ? -1 : std::stoi(a[2].substr(2)),
                                         std::stoi(a[3]));
          }
 

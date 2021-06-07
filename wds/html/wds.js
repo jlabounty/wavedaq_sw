@@ -231,7 +231,7 @@ function populateControls(init) {
    if (OSC.wdb.address[0] === "D" || OSC.wdbAddress[0] === "d")
       str = OSC.wdb.address + " - " + OSC.wdb.name;
    else
-      str = OSC.wdb.address;
+      str = OSC.wdb.name;
 
    if (str !== document.getElementById('wdSelect').innerHTML)
       document.getElementById('wdSelect').innerHTML = str;
@@ -1756,19 +1756,20 @@ function btnStart() {
 
    let req = new XMLHttpRequest();
    req.onreadystatechange = function () {
-      if (req.readyState === 4 && req.status === 204) {
+      if (req.readyState === 4 && req.status === 200) {
          OSC.logFlag = true;
       }
    };
 
+   let wdbAdr = document.getElementById("saveboards").selectedOptions[0].value === "all" ? "all" : OSC.wdbAddress;
    let param = OSC.logfile;
    param += "\n";
    param += document.getElementById("fileformat").selectedOptions[0].value;
    param += "\n";
-   param += document.getElementById("saveboards").selectedOptions[0].value === "all" ? "all" : OSC.wdbAddress;
+   param += wdbAdr;
    param += "\n";
    param += ne;
-   req.open("PUT", "save", true);
+   req.open("PUT", "save/" + wdbAdr, true);
    req.send(param);
 
    dlgHide('dlgSave');
