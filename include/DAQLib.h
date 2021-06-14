@@ -16,12 +16,46 @@
 template <class T> class DAQMemoryPool;
 class DAQBufferBase;
 template <class T> class DAQBuffer;
+class DAQAlarm;
 class DAQThread;
 class DAQServerThread;
 class DAQSystem;
 
 #ifndef DAQLIB_H
 #define DAQLIB_H
+// --- DAQ Alarm --- Thread safe alarm system
+// currently limited to 32 alarms
+// with callbacks
+class DAQAlarm {
+   typedef void (*callback_t)(unsigned int id, const std::string &description);
+
+   std::vector<bool> fAlarmTriggered;
+   std::vector<callback_t> fAlarmCallback;
+   std::vector<std::string> fAlarmDescription;
+   std::mutex fAccessMutex;
+
+public:
+   // no mutex lock
+   bool Test (unsigned int id) const;
+   // Access mutex lock
+   void Trigger(unsigned int id);
+   void Trigger(unsigned int id, const std::string &description);
+   void Reset(unsigned int id);
+   void Clean();
+   std::string GetDescription(unsigned int id);
+
+   //set callback for given alarm
+   //the function is called in the thread generating the alarm
+   void SetCallback(unsigned int id, callback_t callback);
+
+   //Resize Alarm vector
+   //Not thread safe
+   void Resize(unsigned int size);
+
+   DAQAlarm(unsigned int size = 32){
+      Resize(size);
+   }
+};
 
 // --- DAQ Memory Pool --- Template memory pool singleton implementation
 // Usage by overriding new/delete operators in class:
@@ -296,12 +330,14 @@ public:
 
 // --- DAQ Thread --- basic thread wrapper
 class DAQThread{
+   friend class DAQSystem;
    protected:
       std::chrono::high_resolution_clock::duration fIdleLoopDuration; //allows to avoid polling too much
       std::chrono::high_resolution_clock::duration fLastLoopDuration; //for monitoring
       unsigned int fThreadId;
       std::string fThreadName;
       static std::atomic<unsigned int> fThreadCount;
+      DAQSystem *fSystem;
    private:
       std::thread fThread;
       volatile bool fStarted;
@@ -339,6 +375,10 @@ class DAQThread{
       }*/
       const std::string GetThreadName(){
          return fThreadName;
+      }
+
+      DAQSystem* GetSystem(){
+         return fSystem;
       }
 
       //setter
@@ -430,6 +470,7 @@ class DAQServerThread : public DAQThread{
 class DAQSystem {
    std::vector<DAQBufferBase*> fBuffers;
    std::vector<DAQThread*> fThreads;
+   DAQAlarm *fAlarms;
 
    public:
       //Methods
@@ -444,6 +485,10 @@ class DAQSystem {
       void StopRun();
 
       void CleanBuffers();
+
+      DAQAlarm* GetAlarms(){
+         return fAlarms;
+      }
 
       void AddThread(DAQThread* thread);
       void AddBuffer(DAQBufferBase* buffer);

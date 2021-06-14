@@ -1,4 +1,94 @@
 #include "DAQLib.h"
+// --- DAQ Alarm --- Thread safe alarm system
+// Resize internal vectors
+void DAQAlarm::Resize(unsigned int size){
+   fAlarmTriggered.resize(size);
+   fAlarmCallback.resize(size);
+   fAlarmDescription.resize(size);
+   for(unsigned int i = 0; i<size; i++)
+      fAlarmCallback[i] = nullptr;
+}
+// lockless check of alarm state
+bool DAQAlarm::Test(unsigned int id) const {
+   if( id < fAlarmTriggered.size() )
+      return fAlarmTriggered[id];
+   else
+      return false;
+}
+
+//triggers an alarm
+void DAQAlarm::Trigger(unsigned int id){
+   if( id < fAlarmTriggered.size() ){
+      //locks
+      std::unique_lock<std::mutex> lock(fAccessMutex);
+
+      //only set if not previously fired
+      if (!fAlarmTriggered[id]){
+         fAlarmTriggered[id] = true;
+         //release the lock and call the callback
+         lock.unlock();
+         if(fAlarmCallback[id] != nullptr)
+            fAlarmCallback[id](id, "");
+      }
+   }
+}
+
+//resets an alarm
+void DAQAlarm::Reset(unsigned int id){
+   if( id < fAlarmTriggered.size() ){
+      //locks
+      std::lock_guard<std::mutex> lock(fAccessMutex);
+
+      fAlarmTriggered[id] = false;
+   }
+}
+
+//resets all alarms at once
+void DAQAlarm::Clean(){
+   //locks
+   std::lock_guard<std::mutex> lock(fAccessMutex);
+
+   for (auto a: fAlarmTriggered)
+      a = false;
+}
+
+
+//get the alarm description
+std::string DAQAlarm::GetDescription(unsigned int id){
+   //locks
+   std::lock_guard<std::mutex> lock(fAccessMutex);
+
+   //retrieve the description
+   if( id < fAlarmDescription.size() )
+      return fAlarmDescription[id];
+   else
+      return "";
+   
+}
+
+//Trigger alarm including a description
+void DAQAlarm::Trigger(unsigned int id, const std::string &description){
+   //locks
+   std::unique_lock<std::mutex> lock(fAccessMutex);
+
+   //only set if not previously fired
+   if (!fAlarmTriggered[id]){
+      fAlarmTriggered[id] = true;
+      //copy the description
+      if( id < fAlarmDescription.size() )
+         fAlarmDescription[id] = description;
+
+      //release the lock and call the callback
+      lock.unlock();
+      if(fAlarmCallback[id] != nullptr)
+         fAlarmCallback[id](id, description);
+   }
+}
+
+void DAQAlarm::SetCallback(unsigned int id, callback_t callback){
+   if( id < fAlarmCallback.size() )
+      fAlarmCallback[id] = callback;
+}
 
 // --- DAQ Buffer Base --- virtual class for buffer interface functions
 DAQBufferBase::DAQBufferBase(DAQSystem* parent, std::string name){
@@ -83,6 +173,7 @@ DAQThread::DAQThread(DAQSystem* parent, std::string name){
    fIdleLoopDuration = std::chrono::duration_cast<std::chrono::high_resolution_clock::duration>(std::chrono::microseconds(100)); 
    fLastLoopDuration = std::chrono::high_resolution_clock::duration::zero();
    fThreadName = name;
+   fSystem = nullptr;
 
    fThreadId = fThreadCount++;
    if(parent != nullptr) parent->AddThread(this);
@@ -255,6 +346,7 @@ void DAQSystem::CleanBuffers(){
 // add thread to vector
 void DAQSystem::AddThread(DAQThread* thread){
    fThreads.push_back(thread);
+   thread->fSystem = this;
 }
 
 // add buffer to vector
@@ -265,6 +357,8 @@ void DAQSystem::AddBuffer(DAQBufferBase* buffer){
 DAQSystem::DAQSystem(){
    fBuffers.clear();
    fThreads.clear();
+
+   fAlarms = new DAQAlarm();
 }
 
 DAQSystem::~DAQSystem(){
@@ -275,6 +369,8 @@ DAQSystem::~DAQSystem(){
    //delete threads and buffers
    for(auto b: fBuffers) delete b;
    for(auto t: fThreads) delete t;
+
+   delete fAlarms;
 
    fBuffers.clear();
    fThreads.clear();
