@@ -232,10 +232,10 @@ class WDSystem {
       //Getters
       Property &GetDaqProperty(std::string name){ return fDaqProperties.at(name); };
       WDCrate *GetCrateAt(int crateid) { return fCrate.at(crateid); }
-      WDCrate *GetTriggerCrate(){ return fCrate.at(fTrgCrateId); }
-      WDBoard *GetTriggerBoard(){ return GetTriggerCrate()->GetBoardAt(17); }
-      WDCrate *GetDistributionCrate(){ return fCrate.at(fDistributionCrateId); }
-      WDBoard *GetDistributionBoard(){ return GetDistributionCrate()->GetBoardAt(16); }
+      WDCrate *GetTriggerCrate(); 
+      WDBoard *GetTriggerBoard();
+      WDCrate *GetDistributionCrate();
+      WDBoard *GetDistributionBoard();
       WDBoard *GetBoardAt(WDPosition &p) {return fCrate[p.fCrate]->GetBoardAt(p.fSlot);}
       long GetTriggerCrateId(){ return fTrgCrateId; }
       long GetDistributionCrateId(){ return fDistributionCrateId; }

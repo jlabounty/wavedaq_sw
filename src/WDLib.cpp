@@ -137,6 +137,35 @@ WDBoard* WDCrate::GetBoardAt(int slot){
 }
 
 // --- WDSystem --- 
+// Get tagged Crates
+WDCrate *WDSystem::GetTriggerCrate(){ 
+   if(fTrgCrateId > 0)
+      return fCrate.at(fTrgCrateId);
+   else 
+      return nullptr;
+}
+WDCrate *WDSystem::GetDistributionCrate(){
+   if(fDistributionCrateId>0)
+      return fCrate.at(fDistributionCrateId);
+   else return nullptr;
+}
+
+// Get tagged Boards
+WDBoard *WDSystem::GetTriggerBoard(){
+   WDCrate *trgCrate = GetTriggerCrate();
+   if(trgCrate)
+      return GetTriggerCrate()->GetBoardAt(17);
+   else
+      return nullptr;
+}
+WDBoard *WDSystem::GetDistributionBoard(){
+   WDCrate *distribCrate = GetDistributionCrate();
+   if(distribCrate)
+      return GetDistributionCrate()->GetBoardAt(16);
+   else
+      return nullptr;
+}
+
 // Crate Adder
 void WDSystem::AddCrate(WDCrate *crate){
    fCrate.push_back(crate);
@@ -431,8 +460,9 @@ void WDSystem::Sync(){
    //SYNC!
    if(syncBoard){
       syncBoard->Sync();
-   } else {
-      throw std::runtime_error("no board to generate sync");
+   //this is to crash if no board is available: disabled
+   //} else {
+   //   throw std::runtime_error("no board to generate sync");
    }
 }
 
@@ -448,8 +478,9 @@ void WDSystem::GoRun(){
    WDBoard* triggerBoard = GetTriggerBoard();
    if(triggerBoard) {
       triggerBoard->GoRun();
-   } else {
-      throw std::runtime_error("no trigger board");
+   //this is to crash if no board is available: disabled
+   //} else {
+   //   throw std::runtime_error("no trigger board");
    }
 }
 
@@ -459,8 +490,9 @@ void WDSystem::StopRun(){
    WDBoard* triggerBoard = GetTriggerBoard();
    if(triggerBoard) {
       triggerBoard->StopRun();
-   } else {
-      throw std::runtime_error("no trigger board");
+   //this is to crash if no board is available: disabled
+   //} else {
+   //   throw std::runtime_error("no trigger board");
    }
 
    //stop DAQ system run
