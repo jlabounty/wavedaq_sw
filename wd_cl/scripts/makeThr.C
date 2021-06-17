@@ -106,6 +106,8 @@ void makeThr(string dirname="2020-10-12/"){
                         //pzc enable (0-1)
                      } else if(parametername == "PZC level"){
                         //pzc level (0-6)
+                     } else if(parametername == "Channel Polarity"){
+                        //channel polarity in hex
                      } else if(parametername == "Down"){
                         //lowest threshold
                      } else if(parametername == "Up"){

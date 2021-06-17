@@ -138,6 +138,7 @@ std::map<short, FILE*> CreateScalerFiles(WDSystem* sys, int n, float down, float
                }
                fprintf(f, "\n");
                fprintf(f, "# PZC level: %d\n", wdb->GetDacPzcLevelN());
+               fprintf(f, "# Channel Polarity: %04x\n", wdb->GetTrgSrcPolarity() & 0xFFFF);
                fprintf(f, "# Down: %f\n", down);
                fprintf(f, "# Up: %f\n", up);
                fprintf(f, "# N: %d\n", n);
