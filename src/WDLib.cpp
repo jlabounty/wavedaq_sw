@@ -69,6 +69,18 @@ WDBoard::WDBoard(WDCrate * crate, char slot, std::string name){
    crate->AddBoard(this, slot);
 }
 
+// Get board position
+WDPosition WDBoard::GetPosition(){
+   long crateid = -1;
+   WDCrate* c= GetCrate();
+
+   if(c)
+      crateid = c->GetCrateNumber();
+   WDPosition p(crateid, fSlot);
+   return p;
+}
+
+
 // --- WDCrate --- 
 // Board Adder
 void WDCrate::AddBoard(WDBoard *board, int slot){
@@ -83,6 +95,11 @@ void WDCrate::AddBoard(WDBoard *board, int slot){
    //Add to System Map
    if(fSystem != nullptr) {
       fSystem->fBoardMap[board->fBoardName] = WDPosition(fCrateNumber, slot);
+   }
+
+   //if crate has a group set board one to match
+   if(fGroupName.length() > 0 ){
+      board->SetGroup(fGroupName);
    }
 }
 
@@ -234,6 +251,13 @@ void WDSystem::CreateFromXml(std::string filepath){
          }
 
          WDCrate *c = new WDCrate(std::string(cratenamestring), std::string(mscbnodestring));
+
+         //add a group for that crate
+         char* crategroupstring = mxml_get_attribute(crate_xml, "Group");
+         if(crategroupstring==NULL){
+            c->SetGroup(std::string(crategroupstring));
+         }
+
          AddCrate(c);
 
          bool triggerFlag = false;

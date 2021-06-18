@@ -32,6 +32,25 @@ class WDAQEventBuilder;
 class WDAQWorker;
 class WDAQEventWriter;
 
+// --- WaveDAQ board position --- utility class to store board position in the system
+class WDPosition {
+   public:
+      char fSlot;
+      long fCrate;
+   WDPosition (long crate=-1, char slot=-1){
+      fSlot = slot;
+      fCrate = crate;
+   }
+   WDPosition (const WDPosition &old_obj){
+      fSlot = old_obj.fSlot;
+      fCrate = old_obj.fCrate;
+   }
+   void Set (long crate, char slot){
+      fSlot = slot;
+      fCrate = crate;
+   }
+};
+
 // --- WaveDAQ board --- basic wrapper class for wavedaq board
 class WDBoard {
    friend class WDCrate;
@@ -78,6 +97,7 @@ class WDBoard {
       PropertyGroup &GetProperties(){ return fProperties; }
       std::string GetGroup() { return fGroupName; }
       std::string GetBoardName() {return fBoardName; }
+      WDPosition GetPosition();
 
       //Constructor
       //standalone
@@ -85,6 +105,7 @@ class WDBoard {
          fBoardName = name;
          fSlot = -1;
          fCrate = nullptr;
+         fGroupName = "";
       }
       //inside a crate
       WDBoard(WDCrate * crate, char slot, std::string name="BoardXXX");
@@ -102,6 +123,7 @@ class WDCrate {
       WDSystem *fSystem;
       std::string fCrateName;
       std::string fMscbName;
+      std::string fGroupName;
       int fMscbHandle;
       long fCrateNumber;
 
@@ -119,9 +141,20 @@ class WDCrate {
       WDBoard *GetBoardAt(int slot);
       const std::string GetCrateName(){ return fCrateName; }
       const std::string GetMscbName(){ return fMscbName; }
+      const std::string GetGroup(){ return fGroupName; }
       WDSystem *GetSystem() { return fSystem; }
       int GetMscbHandle() { return fMscbHandle; }
       long GetCrateNumber() { return fCrateNumber; }
+
+      //Setters
+      void SetGroup(std::string groupname) {
+         fGroupName = groupname;
+
+         //apply to other boards in crate
+         for (auto& b :fBoard){
+            if(b) b->SetGroup(groupname);
+         }
+      }
 
       //iterators
       WDBoard **begin() { return fBoard; }
@@ -133,6 +166,7 @@ class WDCrate {
          fSystem = nullptr;
 
          fCrateName = name;
+         fGroupName = "";
 
          for(int i=0; i<18; i++){
             fBoard[i] = 0;
@@ -154,25 +188,6 @@ class WDCrate {
          if(fMscbHandle > 0) mscb_exit(fMscbHandle);
       }
 
-};
-
-// --- WaveDAQ board position --- utility class to store board position in the system
-class WDPosition {
-   public:
-      char fSlot;
-      long fCrate;
-   WDPosition (long crate=-1, char slot=-1){
-      fSlot = slot;
-      fCrate = crate;
-   }
-   WDPosition (const WDPosition &old_obj){
-      fSlot = old_obj.fSlot;
-      fCrate = old_obj.fCrate;
-   }
-   void Set (long crate, char slot){
-      fSlot = slot;
-      fCrate = crate;
-   }
 };
 
 // --- WaveDAQ system --- manage multicrate setup
@@ -236,7 +251,12 @@ class WDSystem {
       WDBoard *GetTriggerBoard();
       WDCrate *GetDistributionCrate();
       WDBoard *GetDistributionBoard();
-      WDBoard *GetBoardAt(WDPosition &p) {return fCrate[p.fCrate]->GetBoardAt(p.fSlot);}
+      WDBoard *GetBoardAt(WDPosition &p) {
+         if(p.fCrate>0 && p.fSlot>0)
+            return fCrate[p.fCrate]->GetBoardAt(p.fSlot);
+         else
+            return nullptr;
+      }
       long GetTriggerCrateId(){ return fTrgCrateId; }
       long GetDistributionCrateId(){ return fDistributionCrateId; }
       unsigned long GetCrateSize() { return fCrate.size(); }
