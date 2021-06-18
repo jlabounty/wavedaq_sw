@@ -2189,6 +2189,36 @@ void WDTCB::ConfigurePacketizer(Property &property){
       bufptr += 2*MEMDIM;
       nbank++;
    }
+ if(list.find("CDCH")!=std::string::npos){
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 0x54444348;//TDCH                                                                                                                                                                    
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 2*MEMDIM+1;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RMEMADDR;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::BLOCK_COPY;
+      inst.arg0 = CDCHMEMBASE;
+      inst.arg1 = bufptr;
+      inst.arg2 = 2*MEMDIM;
+      instVec.push_back(inst);
+      inst.arg2 = 0;
+
+      bufptr += 2*MEMDIM;
+      nbank++;
+   }
    if(list.find("SCIFI")!=std::string::npos){
       inst.offset += 1;
       inst.cmd = ::DIRECT_WRITE;

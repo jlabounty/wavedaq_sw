@@ -138,6 +138,7 @@
 #define RDCMEMBASE    0x14000                   // RDC memories base address (2 memories)
 #define TCMEMBASE     0x15000                   // TC memories base address (2 memories)
 #define ALFAMEMBASE   0x16000                   // ALFA memories base address (2 memories)
+#define CDCHMEMBASE   0x17000                   // CDCH memories base address (2 memories)
 
 #define SCIFICOINCBASE     0x00800000           //SCIFI fiber coincidence base address (441)
 
