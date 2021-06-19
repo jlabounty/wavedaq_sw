@@ -156,13 +156,13 @@ WDBoard* WDCrate::GetBoardAt(int slot){
 // --- WDSystem --- 
 // Get tagged Crates
 WDCrate *WDSystem::GetTriggerCrate(){ 
-   if(fTrgCrateId > 0)
+   if(fTrgCrateId >= 0)
       return fCrate.at(fTrgCrateId);
    else 
       return nullptr;
 }
 WDCrate *WDSystem::GetDistributionCrate(){
-   if(fDistributionCrateId>0)
+   if(fDistributionCrateId >= 0)
       return fCrate.at(fDistributionCrateId);
    else return nullptr;
 }

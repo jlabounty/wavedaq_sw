@@ -255,13 +255,13 @@ class WDSystem {
       WDCrate *GetDistributionCrate();
       WDBoard *GetDistributionBoard();
       WDCrate *GetCrateAt(WDPosition &p) {
-         if(p.fCrate>0)
+         if(p.fCrate>=0)
             return fCrate[p.fCrate];
          else
             return nullptr;
       }
       WDBoard *GetBoardAt(WDPosition &p) {
-         if(p.fCrate>0 && p.fSlot>0)
+         if(p.fCrate>=0 && p.fSlot>=0)
             return fCrate[p.fCrate]->GetBoardAt(p.fSlot);
          else
             return nullptr;
