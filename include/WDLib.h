@@ -145,6 +145,9 @@ class WDCrate {
       WDSystem *GetSystem() { return fSystem; }
       int GetMscbHandle() { return fMscbHandle; }
       long GetCrateNumber() { return fCrateNumber; }
+      WDPosition GetPosition(){
+         return WDPosition(fCrateNumber, -1);//-1 to mark whole crate
+      }
 
       //Setters
       void SetGroup(std::string groupname) {
@@ -251,6 +254,12 @@ class WDSystem {
       WDBoard *GetTriggerBoard();
       WDCrate *GetDistributionCrate();
       WDBoard *GetDistributionBoard();
+      WDCrate *GetCrateAt(WDPosition &p) {
+         if(p.fCrate>0)
+            return fCrate[p.fCrate];
+         else
+            return nullptr;
+      }
       WDBoard *GetBoardAt(WDPosition &p) {
          if(p.fCrate>0 && p.fSlot>0)
             return fCrate[p.fCrate]->GetBoardAt(p.fSlot);
