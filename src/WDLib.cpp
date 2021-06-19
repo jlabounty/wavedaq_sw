@@ -254,7 +254,7 @@ void WDSystem::CreateFromXml(std::string filepath){
 
          //add a group for that crate
          char* crategroupstring = mxml_get_attribute(crate_xml, "Group");
-         if(crategroupstring==NULL){
+         if(crategroupstring!=NULL){
             c->SetGroup(std::string(crategroupstring));
          }
 
