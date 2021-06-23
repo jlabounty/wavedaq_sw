@@ -197,8 +197,9 @@ int main(int argc, char *argv[])
 {
    int option;
    WDSystem *sys;
-   if(argc!=2){
-      printf("exectute %s wdsystem.xml\n", argv[0]);
+   if(argc<2){
+      printf("exectute %s wdsystem.xml [-n]\n", argv[0]);
+      printf("use -n flag to skip connecting the system\n");
       return -1;
    }
 
@@ -233,8 +234,14 @@ int main(int argc, char *argv[])
       printf("All crates on, proceeding...\n");
    }
 
+   bool skipConnect = false;
+   if(argc == 3){
+      if(std::string(argv[2]) == "-n"){
+         skipConnect = true;
+      }
+   }
    //connect to boards
-   sys->Connect();
+   if(!skipConnect) sys->Connect();
 
    /* main loop on the options */
    do {

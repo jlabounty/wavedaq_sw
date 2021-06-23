@@ -240,8 +240,7 @@ void WDSystem::CreateFromXml(std::string filepath){
          //create a new Crate
          char* mscbnodestring = mxml_get_attribute(crate_xml, "MscbNode");
          if(mscbnodestring==NULL){
-            printf("error parsing XML: Crate need MscbNode attribute\n");
-            return;
+            printf("warning parsing XML: cannot access Crate without MscbNode attribute\n");
          }
 
          char* cratenamestring = mxml_get_attribute(crate_xml, "Name");
@@ -250,11 +249,11 @@ void WDSystem::CreateFromXml(std::string filepath){
             cratenamestring = mscbnodestring;
          }
 
-         WDCrate *c = new WDCrate(std::string(cratenamestring), std::string(mscbnodestring));
+         WDCrate *c = new WDCrate((cratenamestring!=NULL)?std::string(cratenamestring):"", (mscbnodestring!=NULL) ? std::string(mscbnodestring) : "");
 
          //add a group for that crate
          char* crategroupstring = mxml_get_attribute(crate_xml, "Group");
-         if(crategroupstring==NULL){
+         if(crategroupstring!=NULL){
             c->SetGroup(std::string(crategroupstring));
          }
 
@@ -345,7 +344,7 @@ void WDSystem::CreateFromXml(std::string filepath){
                char* hostnamestring = mxml_get_attribute(board_xml, "HostName");
                if(hostnamestring == NULL) {
                   printf("warning parsing XML: DCB Name used as MscbNode name\n");
-                  hostnamestring = hostnamestring;
+                  hostnamestring = namestring;
                }
 
                WDDCB *b = new WDDCB(c, atoi(slotstring), std::string(namestring),  std::string(hostnamestring));
