@@ -234,6 +234,9 @@ void GenerateGroupMap(WDSystem* sys, std::map<std::string,std::vector<WDPosition
 //control if parameters are written istantaneously (true) or on ApplySettings (false)
 const bool sequencerNotifyFrontend = false;
 
+// limit on number of lines for each function, negative number to skip
+const int sequencerFunctionLineLimit = 200;
+
 FILE* CreateSequencerFile(std::string filename){
    time_t rawtime;
    FILE* fHandle = fopen((filename + ".msl").c_str(), "w");
@@ -246,14 +249,21 @@ FILE* CreateSequencerFile(std::string filename){
    return fHandle;
 }
 
-void CreateSequencerFunction(FILE* fHandle, std::string name, bool odbsubdir=false){
-   fprintf(fHandle, "SUBROUTINE %s\n", name.c_str());
-   if(odbsubdir) fprintf(fHandle, "ODBSUBDIR \"/Equipment/Trigger/Settings/WaveDAQ/\"\n");
+int CreateSequencerFunction(std::stringstream &s, std::string name, bool odbsubdir=false){
+   s << "SUBROUTINE " << name << std::endl;
+   if(odbsubdir){
+      s << "ODBSUBDIR \"/Equipment/Trigger/Settings/WaveDAQ/\"" << std::endl;
+      return 2;
+   }
+   return 1;
 }
 
-void CloseSequencerFunction(FILE* fHandle, bool odbsubdir=false){
-   if(odbsubdir) fprintf(fHandle, "ENDODBSUBDIR\n");
-   fprintf(fHandle, "ENDSUBROUTINE\n\n");
+int CloseSequencerFunction(std::stringstream &s, bool odbsubdir=false){
+   if(odbsubdir) s << "ENDODBSUBDIR" << std::endl;
+   s << "ENDSUBROUTINE" << std::endl << std::endl;
+
+   if (odbsubdir) return 3;
+   else return 2;
 }
 
 bool IsSequencerArray(const std::string &p){
@@ -292,7 +302,8 @@ bool IsSequencerArray(const std::string &p){
       return false;
 };
 
-void CreateSequencerODBSet(FILE* f, const std::string& crate, const std::string& board, const std::string& p, const std::string& val){
+int CreateSequencerODBSet(std::stringstream &s, const std::string& crate, const std::string& board, const std::string& p, const std::string& val){
+   int count = 0;
    if(IsSequencerArray(p)){
       //check value to set is an array
       if (val.find(',') != std::string::npos) {
@@ -301,21 +312,26 @@ void CreateSequencerODBSet(FILE* f, const std::string& crate, const std::string&
          std::string ival;
          int element =0;
          while (getline(is, ival, ',')){
-            fprintf(f, "ODBSET %s/%s/%s[%d], %s, %d\n", crate.c_str(), board.c_str(), p.c_str(), element, ival.c_str(), (sequencerNotifyFrontend)?1:0);
+            s << "ODBSET " << crate << "/" << board << "/" << p << "["<< element << "], " << ival << ", " << ((sequencerNotifyFrontend)?"1":"0") << std::endl;
             element ++;
+            count++;
          }
 
       } else {
          //single value
-         fprintf(f, "ODBSET %s/%s/%s[*], %s, %d\n", crate.c_str(), board.c_str(), p.c_str(), val.c_str(), (sequencerNotifyFrontend)?1:0);
+         s << "ODBSET " << crate << "/" << board << "/" << p << "[*], " << val << ", " << ((sequencerNotifyFrontend)?"1":"0") << std::endl;
+         count++;
       }
    } else {
       //value in ODB is a single key
-      fprintf(f, "ODBSET %s/%s/%s, %s, %d\n", crate.c_str(), board.c_str(), p.c_str(), val.c_str(), (sequencerNotifyFrontend)?1:0);
+      s << "ODBSET " << crate << "/" << board << "/" << p << ", " << val << ", " << ((sequencerNotifyFrontend)?"1":"0") << std::endl;
+      count++;
    }
+
+   return count;
 }
 
-void CreateSequencerSet(FILE* f, WDSystem* sys, WDPosition& pos, std::string& p){
+int CreateSequencerSet(std::stringstream &s, WDSystem* sys, WDPosition& pos, std::string& p){
    WDCrate* c = sys->GetCrateAt(pos);
    WDBoard* b = sys->GetBoardAt(pos);
 
@@ -325,10 +341,11 @@ void CreateSequencerSet(FILE* f, WDSystem* sys, WDPosition& pos, std::string& p)
       boardname = b->GetBoardName();
    }
 
-   CreateSequencerODBSet(f, c->GetCrateName(), boardname, p, "$1");
+   return CreateSequencerODBSet(s, c->GetCrateName(), boardname, p, "$1");
 }
 
-void CreateSequencerReset(FILE* f, WDSystem* sys, WDPosition& pos, std::string& p, std::string& otherVal){
+int CreateSequencerReset(std::stringstream &s, WDSystem* sys, WDPosition& pos, std::string& p, std::string& otherVal){
+   int count = 0;
    WDCrate* c = sys->GetCrateAt(pos);
    WDBoard* b = sys->GetBoardAt(pos);
 
@@ -337,16 +354,16 @@ void CreateSequencerReset(FILE* f, WDSystem* sys, WDPosition& pos, std::string& 
       try{
          Property& prop = b->GetProperty(p);
          std::string val = prop.GetStringValue();
-         CreateSequencerODBSet(f, c->GetCrateName(), b->GetBoardName(), p, val);
+         count += CreateSequencerODBSet(s, c->GetCrateName(), b->GetBoardName(), p, val);
       } catch (...){
          //if no property value use alternative value
          if(otherVal.length())
-            CreateSequencerODBSet(f, c->GetCrateName(), b->GetBoardName(), p, otherVal);
+            count += CreateSequencerODBSet(s, c->GetCrateName(), b->GetBoardName(), p, otherVal);
       }
    } else {
       //Set to default external value
       if(otherVal.length())
-         CreateSequencerODBSet(f, c->GetCrateName(), "*", p, otherVal);
+         count += CreateSequencerODBSet(s, c->GetCrateName(), "*", p, otherVal);
 
       for(auto& board : *c){
          if(board){
@@ -356,7 +373,7 @@ void CreateSequencerReset(FILE* f, WDSystem* sys, WDPosition& pos, std::string& 
 
                //board with different property from group...
                if(val != otherVal){
-                  CreateSequencerODBSet(f, c->GetCrateName(), board->GetBoardName(), p, val);
+                  count += CreateSequencerODBSet(s, c->GetCrateName(), board->GetBoardName(), p, val);
                }
             } catch (...){
                //already accounted by crate ODBSet
@@ -364,6 +381,8 @@ void CreateSequencerReset(FILE* f, WDSystem* sys, WDPosition& pos, std::string& 
          }
       }
    }
+
+   return count;
 }
 
 FILE* GenerateSequencer(WDSystem* sys, std::vector<WDPosition> &items, std::string filename, std::vector<std::string> &properties){
@@ -373,15 +392,22 @@ FILE* GenerateSequencer(WDSystem* sys, std::vector<WDPosition> &items, std::stri
    FILE* f = CreateSequencerFile("WDAQ" + filename);
 
    for(auto& p: properties){
-      CreateSequencerFunction(f, "Set" + filename + p, true);
+      std::stringstream s;
+      int lines = 0;
+      lines += CreateSequencerFunction(s, "Set" + filename + p, true);
 
       for(auto& pos: items){
-         CreateSequencerSet(f, sys, pos, p);
+         lines += CreateSequencerSet(s, sys, pos, p);
       }
-      CloseSequencerFunction(f, true);
+      lines += CloseSequencerFunction(s, true);
+      printf("function %s lines %d\n", ("Set" + filename + p).c_str(), lines);
+      if(lines < sequencerFunctionLineLimit || sequencerFunctionLineLimit < 0) fputs(s.str().c_str(), f);
+      else printf("***** function skipped!\n");
 
+      s.str("");
+      lines = 0;
 
-      CreateSequencerFunction(f, "Reset" + filename + p, true);
+      lines += CreateSequencerFunction(s, "Reset" + filename + p, true);
       for(auto& pos: items){
          std::string groupname = filename;
          if(filename == "System"){
@@ -398,9 +424,14 @@ FILE* GenerateSequencer(WDSystem* sys, std::vector<WDPosition> &items, std::stri
          } catch (...){
          }
 
-         CreateSequencerReset(f, sys, pos, p, val);
+         lines += CreateSequencerReset(s, sys, pos, p, val);
       }
-      CloseSequencerFunction(f, true);
+      lines += CloseSequencerFunction(s, true);
+      printf("function %s lines %d\n", ("Reset" + filename + p).c_str(), lines);
+      if(lines < sequencerFunctionLineLimit || sequencerFunctionLineLimit < 0) fputs(s.str().c_str(), f);
+      else {
+         printf("***** function skipped!\n");
+      }
    }
 
    return f;
@@ -1080,29 +1111,30 @@ int main(int argc, char *argv[])
             FILE* f = GenerateSequencer(sys, wholeSystem, "System", wdbProperties);
 
             //helper functions
-
+            std::stringstream s;
             //ApplySettings, trigger a reconfiguration and wait all stuff to be written
-            CreateSequencerFunction(f, "ApplySettings");
-            fprintf(f, "ODBSET \"/Equipment/Trigger/Settings/Reload all\", y, 1\n");
-            fprintf(f, "WAIT seconds, 2\n");
-            fprintf(f, "WAIT ODBValue, \"/Equipment/Trigger/Variables/Config busy\", ==, y\n");
-            CloseSequencerFunction(f);
+            CreateSequencerFunction(s, "ApplySettings");
+            s << "ODBSET \"/Equipment/Trigger/Settings/Reload all\", y, 1" << std::endl;
+            s << "WAIT seconds, 2" << std::endl;
+            s << "WAIT ODBValue, \"/Equipment/Trigger/Variables/Config busy\", ==, y" << std::endl;
+            CloseSequencerFunction(s);
 
             WDBoard* trigger = sys->GetTriggerBoard();
             if(trigger){
                //DisableAllTriggers, make sure all TriggerEnable are set to 0
-               CreateSequencerFunction(f, "DisableAllTriggers", true);
-               CreateSequencerODBSet(f, trigger->GetCrate()->GetCrateName(), trigger->GetBoardName(), "TriggerEnable", "n");
-               CloseSequencerFunction(f, true);
+               CreateSequencerFunction(s, "DisableAllTriggers", true);
+               CreateSequencerODBSet(s, trigger->GetCrate()->GetCrateName(), trigger->GetBoardName(), "TriggerEnable", "n");
+               CloseSequencerFunction(s, true);
 
                //EnableTrigger, Enable a trigger and sets TriggerPrescaling and TriggerDelay
-               CreateSequencerFunction(f, "EnableTrigger", true);
-               CreateSequencerODBSet(f, trigger->GetCrate()->GetCrateName(), trigger->GetBoardName(), "TriggerEnable[$1]", "y");
-               CreateSequencerODBSet(f, trigger->GetCrate()->GetCrateName(), trigger->GetBoardName(), "TriggerPrescaling[$1]", "$2");
-               CreateSequencerODBSet(f, trigger->GetCrate()->GetCrateName(), trigger->GetBoardName(), "TriggerDelay[$1]", "$3");
-               CloseSequencerFunction(f, true);
+               CreateSequencerFunction(s, "EnableTrigger", true);
+               CreateSequencerODBSet(s, trigger->GetCrate()->GetCrateName(), trigger->GetBoardName(), "TriggerEnable[$1]", "y");
+               CreateSequencerODBSet(s, trigger->GetCrate()->GetCrateName(), trigger->GetBoardName(), "TriggerPrescaling[$1]", "$2");
+               CreateSequencerODBSet(s, trigger->GetCrate()->GetCrateName(), trigger->GetBoardName(), "TriggerDelay[$1]", "$3");
+               CloseSequencerFunction(s, true);
             }
 
+            fputs(s.str().c_str(), f);
             CloseSequencer(f);
 
             for(auto group: groupMap){
