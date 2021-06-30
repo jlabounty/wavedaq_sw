@@ -235,7 +235,7 @@ void GenerateGroupMap(WDSystem* sys, std::map<std::string,std::vector<WDPosition
 const bool sequencerNotifyFrontend = false;
 
 // limit on number of lines for each function, negative number to skip
-const int sequencerFunctionLineLimit = 200;
+const int sequencerFunctionLineLimit = 500;
 
 FILE* CreateSequencerFile(std::string filename){
    time_t rawtime;
@@ -266,40 +266,67 @@ int CloseSequencerFunction(std::stringstream &s, bool odbsubdir=false){
    else return 2;
 }
 
-bool IsSequencerArray(const std::string &p){
+bool IsSequencerArray(const std::string &p, std::string *midasType=nullptr, int *arraySize=nullptr){
    //if a key is given then the value is a scalar
    if (p.find('[') != std::string::npos)
       return false;
 
    //else check the name (to be kept up to date with wdaq_fe)
-   if(p == "FrontendGain")
+   if(p == "FrontendGain"){
+      if(midasType!=nullptr) *midasType="FLOAT";
+      if(arraySize!=nullptr) *arraySize=16;
       return true;
-   else if(p == "FrontendPzc")
+   } else if(p == "FrontendPzc"){
+      if(midasType!=nullptr) *midasType="BOOL";
+      if(arraySize!=nullptr) *arraySize=16;
       return true;
-   else if(p == "TriggerLevel")
+   } else if(p == "TriggerLevel"){
+      if(midasType!=nullptr) *midasType="FLOAT";
+      if(arraySize!=nullptr) *arraySize=16;
       return true;
-   else if(p == "TriggerGain")
+   } else if(p == "TriggerGain"){
+      if(midasType!=nullptr) *midasType="INT8";
+      if(arraySize!=nullptr) *arraySize=16;
       return true;
-   else if(p == "TriggerTdcOffset")
+   } else if(p == "TriggerTdcOffset"){
+      if(midasType!=nullptr) *midasType="UINT8";
+      if(arraySize!=nullptr) *arraySize=16;
       return true;
-   else if(p == "BgoHitDelay")
+   } else if(p == "BgoHitDelay"){
+      if(midasType!=nullptr) *midasType="INT32";
+      if(arraySize!=nullptr) *arraySize=2;
       return true;
-   else if(p == "RdcHitMask")
+   } else if(p == "RdcHitMask"){
+      if(midasType!=nullptr) *midasType="UINT32";
+      if(arraySize!=nullptr) *arraySize=3;
       return true;
-   else if(p == "TcMask")
+   } else if(p == "TcMask"){
+      if(midasType!=nullptr) *midasType="UINT32";
+      if(arraySize!=nullptr) *arraySize=4;
       return true;
-   else if(p == "CdchMask")
+   } else if(p == "CdchMask"){
+      if(midasType!=nullptr) *midasType="UINT32";
+      if(arraySize!=nullptr) *arraySize=8;
       return true;
-   else if(p == "TriggerEnable")
+   } else if(p == "TriggerEnable"){
+      if(midasType!=nullptr) *midasType="BOOL";
+      if(arraySize!=nullptr) *arraySize=64;
       return true;
-   else if(p == "TriggerPrescaling")
+   } else if(p == "TriggerPrescaling"){
+      if(midasType!=nullptr) *midasType="UINT32";
+      if(arraySize!=nullptr) *arraySize=64;
       return true;
-   else if(p == "TriggerDelay")
+   } else if(p == "TriggerDelay"){
+      if(midasType!=nullptr) *midasType="INT32";
+      if(arraySize!=nullptr) *arraySize=64;
       return true;
-   else if(p == "DetectorDelay")
+   } else if(p == "DetectorDelay"){
+      if(midasType!=nullptr) *midasType="INT32";
+      if(arraySize!=nullptr) *arraySize=6;
       return true;
-   else
+   } else {
       return false;
+   }
 };
 
 int CreateSequencerODBSet(std::stringstream &s, const std::string& crate, const std::string& board, const std::string& p, const std::string& val){
@@ -385,6 +412,80 @@ int CreateSequencerReset(std::stringstream &s, WDSystem* sys, WDPosition& pos, s
    return count;
 }
 
+bool CreateEntryOdbFile(FILE* fHandle, const std::string &crate, const std::string &board, const std::string &property, const std::string &val){
+   std::string midasType;
+   int arraySize;
+   if (IsSequencerArray(property, &midasType, &arraySize)){
+
+      fprintf(fHandle, "[/Equipment/Trigger/Settings/WaveDAQ/%s/%s]\n", crate.c_str(), board.c_str());
+      fprintf(fHandle, "%s = %s[%d] :\n", property.c_str(), midasType.c_str(), arraySize);
+      if (val.find(',') != std::string::npos) {
+         //set value is array
+         std::istringstream is(val);
+         std::string ival;
+         int element =0;
+         while (getline(is, ival, ',')){
+            fprintf(fHandle, "[%d] %s\n", element, ival.c_str());
+            element ++;
+         }
+         if(element != arraySize){
+            printf("number of properties %d do not match array size %d\n", element, arraySize);
+         }
+      } else {
+         for(int element=0; element<arraySize; element++){
+            fprintf(fHandle, "[%d] %s\n", element, val.c_str());
+         }
+      }
+
+      fprintf(fHandle, "\n");
+
+      return true;
+   } else {
+      printf("property %s not supported in ODB load files\n", property.c_str());
+      return false;
+   }
+}
+
+bool CreateOdbFile(std::string filename, WDSystem* sys, std::vector<WDPosition>& items, std::string& p){
+   FILE* fHandle = fopen((filename + ".odb").c_str(), "w");
+
+   for(auto &pos : items){
+      WDCrate* c = sys->GetCrateAt(pos);
+      WDBoard* b = sys->GetBoardAt(pos);
+
+      if(b){
+         try{
+            Property& prop = b->GetProperty(p);
+            std::string val = prop.GetStringValue();
+            bool ret = CreateEntryOdbFile(fHandle, c->GetCrateName(), b->GetBoardName(), p, val);
+            if(!ret){
+               fclose(fHandle);
+               return false;
+            }
+         } catch (...){
+         }
+      } else { 
+         for(auto& board : *c){
+            if(board){
+               try{
+                  Property& prop = board->GetProperty(p);
+                  std::string val = prop.GetStringValue();
+                  bool ret = CreateEntryOdbFile(fHandle, c->GetCrateName(), board->GetBoardName(), p, val);
+                  if(!ret){
+                     fclose(fHandle);
+                     return false;
+                  }
+               } catch (...){
+               }
+            }
+         }
+      }
+   }
+
+   fclose(fHandle);
+   return true;
+}
+
 FILE* GenerateSequencer(WDSystem* sys, std::vector<WDPosition> &items, std::string filename, std::vector<std::string> &properties){
 
    //find corresponding property group
@@ -400,9 +501,9 @@ FILE* GenerateSequencer(WDSystem* sys, std::vector<WDPosition> &items, std::stri
          lines += CreateSequencerSet(s, sys, pos, p);
       }
       lines += CloseSequencerFunction(s, true);
-      printf("function %s lines %d\n", ("Set" + filename + p).c_str(), lines);
+      //printf("function %s lines %d\n", ("Set" + filename + p).c_str(), lines);
       if(lines < sequencerFunctionLineLimit || sequencerFunctionLineLimit < 0) fputs(s.str().c_str(), f);
-      else printf("***** function skipped!\n");
+      else printf("***** function %s (lines %d) skipped!\n", ("Set" + filename + p).c_str(), lines);
 
       s.str("");
       lines = 0;
@@ -427,10 +528,26 @@ FILE* GenerateSequencer(WDSystem* sys, std::vector<WDPosition> &items, std::stri
          lines += CreateSequencerReset(s, sys, pos, p, val);
       }
       lines += CloseSequencerFunction(s, true);
-      printf("function %s lines %d\n", ("Reset" + filename + p).c_str(), lines);
+      //printf("function %s lines %d\n", ("Reset" + filename + p).c_str(), lines);
       if(lines < sequencerFunctionLineLimit || sequencerFunctionLineLimit < 0) fputs(s.str().c_str(), f);
       else {
-         printf("***** function skipped!\n");
+         printf("***** function %s (lines %d) replaced!\n", ("Reset" + filename + p).c_str(), lines);
+
+         bool ret = CreateOdbFile("WDAQReset" + filename + p, sys, items, p);
+
+         if(ret){
+            //add sequencer function to load the ODB file
+            s.str("");
+            lines = 0;
+            lines += CreateSequencerFunction(s, "Reset" + filename + p);
+
+            s << "ODBLOAD $/lib/WDAQReset" << filename << p << ".odb" << std::endl;
+            lines++;
+            lines += CloseSequencerFunction(s);
+
+            fputs(s.str().c_str(), f);
+         }
+
       }
    }
 
@@ -1093,7 +1210,8 @@ int main(int argc, char *argv[])
                                                     "DRSChannelTxEnable",
                                                     "ADCChannelTxEnable",
                                                     "TDCChannelTxEnable",
-                                                    "TRGTxEnable" };
+                                                    "TRGTxEnable",
+                                                    "ZeroSuppressionEnable"};
 
             //make map of boards belonging to a same property group
             std::map<std::string, std::vector<WDPosition>> groupMap;
@@ -1119,6 +1237,11 @@ int main(int argc, char *argv[])
             s << "WAIT ODBValue, \"/Equipment/Trigger/Variables/Config busy\", ==, y" << std::endl;
             CloseSequencerFunction(s);
 
+            //ReloadAll, Load an ODB file with all WDAQ settings
+            CreateSequencerFunction(s, "ReloadAll");
+            s << "ODBLOAD \"$lib/WDAQSystem.odb\"" << std::endl;
+            CloseSequencerFunction(s);
+
             WDBoard* trigger = sys->GetTriggerBoard();
             if(trigger){
                //DisableAllTriggers, make sure all TriggerEnable are set to 0
@@ -1141,6 +1264,14 @@ int main(int argc, char *argv[])
                f = GenerateSequencer(sys, group.second, group.first, wdbProperties);
                CloseSequencer(f);
             }
+
+            printf("Sequencer scripts generated!\n\n");
+            printf("Please generate an ODB file for the whole WaveDAQ system:\n");
+            printf("$ odbedit\n");
+            printf("[local:Exp:S]/> cd Equipment/Trigger/Settings/WaveDAQ/\n");
+            printf("[local:Exp:S]/> save WDAQSystem.odb\n\n");
+            printf("then copy the files to Sequencer directory, typically:\n");
+            printf("$ cp *.odb *.msl ~/online/sequencers/lib\n\n");
 
          }
       } while ( option == 0 ) ;
