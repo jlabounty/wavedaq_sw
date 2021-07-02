@@ -235,7 +235,7 @@ void GenerateGroupMap(WDSystem* sys, std::map<std::string,std::vector<WDPosition
 const bool sequencerNotifyFrontend = false;
 
 // limit on number of lines for each function, negative number to skip
-const int sequencerFunctionLineLimit = 500;
+const int sequencerFunctionLineLimit = 700;
 
 FILE* CreateSequencerFile(std::string filename){
    time_t rawtime;
@@ -1271,7 +1271,7 @@ int main(int argc, char *argv[])
             printf("[local:Exp:S]/> cd Equipment/Trigger/Settings/WaveDAQ/\n");
             printf("[local:Exp:S]/> save WDAQSystem.odb\n\n");
             printf("then copy the files to Sequencer directory, typically:\n");
-            printf("$ cp *.odb *.msl ~/online/sequencers/lib\n\n");
+            printf("$ cp *.odb *.msl ~/online/sequencer/lib\n\n");
 
          }
       } while ( option == 0 ) ;
