@@ -25,17 +25,24 @@ def doBoard(xmlElement, output, crateName):
 def indent(elem, level=0, hor='   ', ver='\n'):
     i = ver + level * hor
     if len(elem):
-        if not elem.text or not elem.text.strip():
+        if not elem.text or not elem.text.strip(" \t\n\r"):
             elem.text = i + hor
-        if not elem.tail or not elem.tail.strip():
+        if not elem.tail or not elem.tail.strip(" \t\n\r"):
             elem.tail = i
         for elem in elem:
             indent(elem, level + 1, hor, ver)
-        if not elem.tail or not elem.tail.strip():
+        if not elem.tail or not elem.tail.strip(" \t\n\r"):
             elem.tail = i
     else:
-        if level and (not elem.tail or not elem.tail.strip()):
+        if level and (not elem.tail or not elem.tail.strip(" \t\n\r")):
             elem.tail = i
+        if level and (not elem.text or not elem.text.strip(" \t\n\r")):
+            #close empty tag on a new line
+            #elem.text = i
+            #drop closing tags
+            #elem.text = ""
+            #close empty tag on same line
+            elem.text = " "
 
 if len(sys.argv) != 4:
     print("usage mergexml.py original.xml mod.xml output.xml")
