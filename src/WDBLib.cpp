@@ -2154,7 +2154,14 @@ bool WP::GetLastEvent(WDB *b, int timeout, WDEvent &event) {
       if (mEventLast.size() == 0)
          return false;
 
-      event = *mEventLast[b->GetSerialNumber()];
+      auto eventptr = mEventLast.find(b->GetSerialNumber());
+      if(eventptr == mEventLast.end())
+         return false;
+
+      if(! eventptr->second->mEventValid)
+         return false;
+
+      event = *(eventptr->second);
       mEventNew = false;
       return true;
    }
