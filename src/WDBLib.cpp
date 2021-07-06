@@ -3419,6 +3419,20 @@ void WP::Collector() {
 //--------------------------------------------------------------------
 
 void WP::DoVoltageCalibrationStep() {
+   //check end of calibration
+   if (calibProg.iBoard == calibProg.lastBoard) {
+      calibProg.state = cCsInactive;
+      calibProg.mode = cCmNone;
+
+      mRotateWaveform = true;
+      mOfsCalib1 = true;
+      mOfsCalib2 = true;
+      mGainCalib = true;
+      mRangeCalib = true;
+      return;
+   }
+
+   //check start of calibration
    if (calibProg.state == cCsFirstBoard) {
       calibProg.state = cCsFirstSample;
       calibProg.progress = 0;
@@ -3858,13 +3872,6 @@ void WP::DoVoltageCalibrationStep() {
    // switch back to old board settings
    b->Restore();
 
-   if (calibProg.iBoard == calibProg.lastBoard) {
-      calibProg.state = cCsInactive;
-      calibProg.mode = cCmNone;
-
-      mRangeCalib = true;
-   }
-
    return;
 }
 
@@ -4144,7 +4151,19 @@ void saveCalib(WDB *b, const char *fn) {
 //--------------------------------------------------------------------
 
 void WP::DoTimeCalibrationStep() {
+   //check end of calibration
+   if (calibProg.iBoard == calibProg.lastBoard) {
+      calibProg.state = cCsInactive;
+      calibProg.mode = cCmNone;
 
+      mTimeCalib1 = true;
+      mTimeCalib2 = true;
+      mTimeCalib3 = true;
+
+      return;
+   }
+
+   //check start of calibration
    if (calibProg.state == cCsFirstBoard) {
 
       calibProg.state = cCsFirstSample;
@@ -4327,14 +4346,6 @@ void WP::DoTimeCalibrationStep() {
    // switch back to old board settings
    b->Restore();
 
-   if (calibProg.iBoard == calibProg.lastBoard) {
-      calibProg.state = cCsInactive;
-      calibProg.mode = cCmNone;
-
-      mTimeCalib1 = true;
-      mTimeCalib2 = true;
-      mTimeCalib3 = true;
-   }
 }
 
 //--------------------------------------------------------------------
