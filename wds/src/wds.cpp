@@ -644,7 +644,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
             d->SetDestinationPort(gl->wp->GetServerPort());
 
          if (!gl->demoMode) {
-            if (wdbAddress == "*")
+            if (slot == -1)
                gl->wp->StartCalibrationTime(nullptr);
             else {
                auto wdb = findBoard(gl->dcb, gl->wdb, wdbAddress);
