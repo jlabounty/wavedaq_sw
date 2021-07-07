@@ -3053,7 +3053,7 @@ void WP::SaveWaveforms() {
       for (auto &it: mEvent) {
          auto ev = it.second;
 
-         if (!li.bAll && b != li.board)
+         if (!li.bAll && it.first != li.board)
             continue;
 
          sprintf(str, "Board_%d", it.first);
