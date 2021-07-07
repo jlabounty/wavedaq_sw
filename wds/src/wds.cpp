@@ -658,11 +658,15 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
             gl->wp->StopLogging();
          else if (item != "") {
             auto a = split(value, '\n');
-            gl->wp->StartWaveformSaving(std::string(s_http_server_opts.document_root) + "/" + a[0],
-                                        a[1] == "bin" ? WP::cLiFormatBinary : WP::cLiFormatXML,
-                                        a[2] == "all",
-                                        a[2] == "all" ? -1 : std::stoi(a[2].substr(2)),
-                                        std::stoi(a[3]));
+
+            auto wdb = findBoard(gl->dcb, gl->wdb, a[2]);
+            if (wdb) {
+               gl->wp->StartWaveformSaving(std::string(s_http_server_opts.document_root) + "/" + a[0],
+                                           a[1] == "bin" ? WP::cLiFormatBinary : WP::cLiFormatXML,
+                                           a[2] == "all",
+                                           a[2] == "all" ? -1 : wdb->GetSerialNumber(),
+                                           std::stoi(a[3]));
+            }
          }
 
       } else if (item == "reboot") {
