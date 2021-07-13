@@ -88,7 +88,7 @@ WDB::WDB(std::string name, bool verbose) : WDBREG() {
    mPrompt = "";
    mVerbose = verbose;
    mLogfile = "";
-   mDemoMode = (name == "demo");
+   mDemoMode = (name == "WD000");
    mSendBlocked = false;
    mReceiveTimeoutMs = cDefaultReceiveTimeoutMs;
    mTimingReferenceSignal = cTimingReferenceOff;
@@ -760,13 +760,18 @@ void WDB::ReceiveControlRegisters(unsigned int index, unsigned int nReg) {
 }
 
 void WDB::ReceiveStatusRegisters(unsigned int index, unsigned int nReg) {
-   if (nReg == 0)
-      nReg = GetNrOfStatRegs();
    if (mDemoMode) {
-      for (auto i = index; i < index + nReg; i++)
+      SetVersion(8);
+      this->sreg.resize(GetNrOfStatRegs());
+      this->creg.resize(GetNrOfCtrlRegs());
+
+      for (auto i = index; i < index + GetNrOfStatRegs(); i++)
          this->sreg[i] = 0;
       return;
    }
+
+   if (nReg == 0)
+      nReg = GetNrOfStatRegs();
 
 #ifdef WD2_USE_UDP_BIN
    std::vector<unsigned int> result = ReadUDP(GetBoardMagicLoc() + index * 4, nReg);
@@ -2095,7 +2100,10 @@ void WP::SetWDBList(std::vector<WDB *> wdb) {
       mWdb.push_back(b);
 
       // build mapping WDB id -> wdb
-      mWdbMap[b->GetSerialNumber()] = b;
+      if (b->IsDemoMode())
+         mWdbMap[1] = b;
+      else
+         mWdbMap[b->GetSerialNumber()] = b;
    }
 }
 

@@ -1519,6 +1519,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
          if (gl->readoutMode == cReadoutModeDRS) {
             event.mHasDRSData = true;
             for (int c = 0; c < WD_N_CHANNELS; c++) {
+               event.mDRSChannelPresent[c] = true;
                for (int i = 0; i < 1024; i++) {
                   float t = i * 1E-6 / demoDrsSampleFreq;
                   event.mWfTDRS[c][i] = t;
@@ -1642,7 +1643,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
             }
          } else if (event.mHasDRSData && gl->readoutMode == cReadoutModeDRS) { //---- DRS waveforms
             int t;                        // array type
-            int brd = 0;                  // board index
+            int brd = gl->demoMode ? 0xFF : 0; // board index
             int n = 1024;                 // number of elements
             int vc = event.mVCalibrated;  // voltage calibrated
             int tc = event.mTCalibrated;  // time calibrated
@@ -1714,6 +1715,11 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
             url += "\r\nContent-Length: 0\r\n\r\n";
             mg_printf(nc, "%s", url.c_str());
          } else {
+            if (gl->demoMode) {
+               std::string url = "HTTP/1.1 301 Moved\r\nLocation: osc.html?adr=WD000";
+               url += "\r\nContent-Length: 0\r\n\r\n";
+               mg_printf(nc, "%s", url.c_str());
+            }
             mg_serve_http(nc, hm, s_http_server_opts);
          }
 
@@ -2165,7 +2171,7 @@ int main(int argc, const char *argv[]) {
 
    if (gl.demoMode) {
       gl.wdb.clear();
-      gl.wdb.push_back(new WDB("demo"));
+      gl.wdb.push_back(new WDB("WD000"));
       gl.readoutMode = cReadoutModeDRS;
    }
 
