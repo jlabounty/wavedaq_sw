@@ -982,9 +982,10 @@ void WDWDB::ConfigurationStarted(){
    SetFeMux(-1, WDB::cFeMuxInput);
    SetTriggerOutPulseLength(4); // 4 clock shaping
    //SetAdvTrgPedCfg(0x0124000A); // default pedestal subtraction config
-   SetAdvTrgPedCfg(0x0124000A); // default pedestal subtraction config
+   //SetAdvTrgPedCfg(0x0120000A); // default pedestal subtraction config
    //SetAdvTrgPedCfg(0x010A000A); // default pedestal subtraction config
    //SetAdvTrgPedCfg(0x010A0018); // default pedestal subtraction config
+   SetAdvTrgPedCfg(0x0210000A); // default pedestal subtraction config
 }
 
 void WDWDB::ConfigurationEnded(){
@@ -2122,10 +2123,10 @@ void WDTCB::ConfigurePacketizer(Property &property){
       bufptr += 2*MEMDIM;
       nbank++;
    }
-   if(list.find("ALFA")!=std::string::npos){
+   if(list.find("ALPHA")!=std::string::npos){
       inst.offset += 1;
       inst.cmd = ::DIRECT_WRITE;
-      inst.arg0 = 0x54414c46;//TALF
+      inst.arg0 = 0x54414c50;//TALP
       inst.arg1 = bufptr++;
       instVec.push_back(inst);
 
