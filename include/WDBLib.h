@@ -643,6 +643,7 @@ public:
    int GetReceiveTimeoutMs() { return mReceiveTimeoutMs; };
    void SetReceiveTimeoutMs(int to) { mReceiveTimeoutMs = to; };
    int GetSlotNumber() { return mSlot; }
+   bool IsDemoMode() { return mDemoMode; }
 
    // high level status registers
    std::string GetFullBuild();
