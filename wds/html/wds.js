@@ -803,13 +803,59 @@ function setDisp(e) {
    if (e.name === "scaler") {
       OSC.disp.scaler = e.checked;
       OSC.resizeCanvas();
-      OSC.redraw();
    }
    if (e.name === "invert") {
       OSC.disp.invert = e.checked;
       OSC.newImage = true;
-      OSC.redraw();
    }
+   if (e.name === "cursorA") {
+      if (!OSC.cursor.onA && !OSC.cursor.selA) {
+         OSC.cursor.onA = true;
+         OSC.cursor.selA = true;
+         OSC.cursor.selB = false;
+      } else if (OSC.cursor.onA && !OSC.cursor.selA) {
+         OSC.cursor.selA = true;
+         OSC.cursor.selB = false;
+      } else if (OSC.cursor.onA && OSC.cursor.selA) {
+         OSC.cursor.onA = false;
+         OSC.cursor.selA = false;
+         OSC.cursor.selB = false;
+      } else if (!OSC.cursor.onA && OSC.cursor.selA) {
+         OSC.cursor.onA = true;
+      }
+   }
+   if (e.name === "cursorB") {
+      if (!OSC.cursor.onB && !OSC.cursor.selB) {
+         OSC.cursor.onB = true;
+         OSC.cursor.selB = true;
+         OSC.cursor.selA = false;
+      } else if (OSC.cursor.onB && !OSC.cursor.selB) {
+         OSC.cursor.selB = true;
+         OSC.cursor.selA = false;
+      } else if (OSC.cursor.onB && OSC.cursor.selB) {
+         OSC.cursor.onB = false;
+         OSC.cursor.selA = false;
+         OSC.cursor.selB = false;
+      } else if (!OSC.cursor.onB && OSC.cursor.selB) {
+         OSC.cursor.onB = true;
+      }
+   }
+   if (e.name === "snap") {
+      OSC.cursor.snap = e.checked;
+   }
+   if (e.name === "cell") {
+      OSC.cursor.cell = e.checked;
+   }
+
+   b = document.getElementById("cursorA");
+   b.style.background = OSC.cursor.onA ? "#FFFFFF" : "#A0A0A0";
+   b.style.border = OSC.cursor.selA ? "3px solid blue" : "2px solid #C0C0C0";
+
+   b = document.getElementById("cursorB");
+   b.style.background = OSC.cursor.onB ? "#FFFFFF" : "#A0A0A0";
+   b.style.border = OSC.cursor.selB ? "3px solid blue" : "2px solid #C0C0C0";
+
+   OSC.redraw();
 }
 
 function setPers(s) {
@@ -913,6 +959,12 @@ function loadWF() {
       return;
    }
 
+   // don't update if browser window is hidden
+   if (document.hidden) {
+      OSC.timer.loadWF = window.setTimeout(loadWF, 100);
+      return;
+   }
+
    let i, c, chn;
 
    if (OSC.demoMode) {
@@ -981,7 +1033,7 @@ function receiveWF() {
       // this.wf = JSON.parse(OSC.req.responseText); // use this for JSON encoded data
 
       // create 16+2+2 empty waveforms
-      let wf = {T: [], U: [], type: 1};
+      let wf = {T: [], U: [], trCell: [], type: 1 };
       for (let i = 0; i < 20; i++) {
          wf.T[i] = [];
          wf.U[i] = [];
@@ -1005,8 +1057,10 @@ function receiveWF() {
             OSC.nLogged = intArray[i++];
             let c = intArray[i++];
             let n = intArray[i++];
+            let trCell = intArray[i++];
             OSC.i1 = undefined;
             OSC.i2 = undefined;
+            wf.trCell[c] = trCell;
             for (let j = 0; j < n; j++) {
                let t = floatArray[i++];
                wf.T[c][j] = t;

@@ -310,6 +310,25 @@
          <div class="groupTitle">Display</div>
          <div class="group">
             <div class="vMiddleBox vSpacer5">
+               Cursor:
+               <button class="squareButton" id="cursorA" name="cursorA" type="button" onClick="setDisp(this)"
+                       onContextmenu="setDisp('cursorA')" style="background-color:#A0A0A0;height:36px;">A
+               </button>
+               <button class="squareButton" id="cursorB" name="cursorB" type="button" onClick="setDisp(this)"
+                       onContextmenu="setDisp('cursorB')" style="background-color:#A0A0A0;height:36px;">B
+               </button>
+               <table border="1" style="display:inline;vertical-align:55%;">
+                  <tr><td>
+                   &nbsp; <input type="checkbox" id="snap" title="Snap cursors to waveforms" name="snap"
+                            onClick="setDisp(this)">&nbsp;snap
+                  </td></tr>
+                  <tr><td>
+               &nbsp;     <input type="checkbox" id="cell" title="Display DRS cell" name="cell"
+                             onClick="setDisp(this)">&nbsp;cell
+                  </td></tr>
+               </table>
+            </div>
+            <div class="vMiddleBox vSpacer5">
                <div class="vMiddleElement">Waveform persistency:&nbsp;</div>
                <select id="persSelect" class="select" onchange="setPers(this)">
                   <option value="0">None</option>

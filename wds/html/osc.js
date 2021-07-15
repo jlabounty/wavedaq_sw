@@ -125,9 +125,23 @@ function Oscilloscope(div) { // constructor
    };
    this.newImage = true;
 
+   // cursor object
+   this.cursor = {
+      onA: false,
+      onB: false,
+      selA: false,
+      selB: false,
+      snap: false,
+      cell: false,
+      AX: undefined,
+      AY: undefined,
+      AX: undefined,
+      AY: undefined
+   }
+
    // default values
    for (var i = 0; i < 20; i++) {
-      this.chOn[i] = false;
+      this.chOn[i] = i < 18;
       this.chOnSelected[i] = false;
       this.wf.T[i] = [];
       this.wf.U[i] = [];
@@ -222,6 +236,32 @@ Oscilloscope.prototype.redraw = function () {
    window.requestAnimationFrame(f);
 };
 
+Oscilloscope.prototype.findClosestChannel = function (cx, cy) {
+   // find which waveform is closest to cursor
+   let dist = 1E6;
+   let chan = undefined;
+   let index = undefined;
+   for (c = 0; c < 20; c++) {
+      if (c === 19) // exclude FFT
+         continue;
+      if (this.chOn[c]) {
+         for (i = 0; i < this.wf.U[c].length; i++) {
+            x = this.wf.T[c][i] * this.wfTS + this.wfTO;
+            y = this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c];
+
+            d = Math.sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy));
+            if (d < dist) {
+               dist = d;
+               chan = c;
+               index = i;
+            }
+         }
+      }
+   }
+   return [chan,dist,index];
+}
+
+
 Oscilloscope.prototype.mouseEvent = function (e) {
 
    // fix buttons for IE
@@ -238,25 +278,93 @@ Oscilloscope.prototype.mouseEvent = function (e) {
       for (var i = 0; i < this.histo.button.length; i++)
          this.histo.button[i].style.pointerEvents = "none";
    } else {
-      for (var i = 0; i < this.histo.button.length; i++)
+      for (i = 0; i < this.histo.button.length; i++)
          this.histo.button[i].style.pointerEvents = "all";
    }
 
+   // process A/B cursors
+   if (e.type === "mousemove" && this.cursor.onA && this.cursor.selA && e.target === this.canvas) {
+      this.cursor.AX = e.clientX;
+      this.cursor.AY = e.clientY;
+      cursor = "none";
+   }
+   if (e.type === "mousemove" && this.cursor.onB && this.cursor.selB && e.target === this.canvas) {
+      this.cursor.BX = e.clientX;
+      this.cursor.BY = e.clientY;
+      cursor = "none";
+   }
+
+   if (e.type === "mousedown" && this.cursor.selA && e.target === this.canvas) {
+      // place cursor and unselect it
+      this.cursor.selA = false;
+      b = document.getElementById("cursorA");
+      b.style.border = "2px solid #C0C0C0";
+      cursor = "none";
+   } else if (e.type === "mousedown" && this.cursor.onA && !this.cursor.selA && e.target === this.canvas) {
+      let d = Math.sqrt((e.clientX - this.cursor.AX) * (e.clientX - this.cursor.AX) +
+         (e.clientY - this.cursor.AY) * (e.clientY - this.cursor.AY));
+      if (d < 10) {
+         // pick up cursor
+         this.cursor.selA = true;
+         this.cursor.selB = false;
+         b = document.getElementById("cursorA");
+         b.style.border = "3px solid blue";
+         b = document.getElementById("cursorB");
+         b.style.border = "2px solid #C0C0C0";
+         cursor = "none";
+      }
+   }
+
+   if (e.type === "mousedown" && this.cursor.selB && e.target === this.canvas) {
+      // place cursor and unselect it
+      this.cursor.selB = false;
+      b = document.getElementById("cursorB");
+      b.style.border = "2px solid #C0C0C0";
+      cursor = "none";
+   } else if (e.type === "mousedown" && this.cursor.onB && !this.cursor.selB && e.target === this.canvas) {
+      let d = Math.sqrt((e.clientX - this.cursor.BX) * (e.clientX - this.cursor.BX) +
+         (e.clientY - this.cursor.BY) * (e.clientY - this.cursor.BY));
+      if (d < 10) {
+         // pick up cursor
+         this.cursor.selA = false;
+         this.cursor.selB = true;
+         b = document.getElementById("cursorA");
+         b.style.border = "2px solid #C0C0C0";
+         b = document.getElementById("cursorB");
+         b.style.border = "3px solid blue";
+         cursor = "none";
+      }
+   }
+
+   if (e.type === "mousemove" && this.cursor.onA && !this.cursor.selA && e.target === this.canvas) {
+      let d = Math.sqrt((e.clientX - this.cursor.AX) * (e.clientX - this.cursor.AX) +
+                        (e.clientY - this.cursor.AY) * (e.clientY - this.cursor.AY));
+      if (d < 10)
+         cursor = "grab";
+   }
+
+   if (e.type === "mousemove" && this.cursor.onB && !this.cursor.selB && e.target === this.canvas) {
+      let d = Math.sqrt((e.clientX - this.cursor.BX) * (e.clientX - this.cursor.BX) +
+         (e.clientY - this.cursor.BY) * (e.clientY - this.cursor.BY));
+      if (d < 10)
+         cursor = "grab";
+   }
+
    // process histogram handle dragging
-   if (this.disp.histo && e.target == this.canvas) {
+   if (this.disp.histo && e.target === this.canvas) {
 
       // division bar
       if (Math.abs(e.clientY - this.hiy1) < 10 &&
          e.clientX > this.x1 && e.clientX < this.x2 &&
-         e.type == "mousemove")
+         e.type === "mousemove")
          cursor = "ns-resize";
 
       if (Math.abs(e.clientY - this.hiy1) < 10 &&
          e.clientX > this.x1 && e.clientX < this.x2 &&
-         e.type == "mousedown")
+         e.type === "mousedown")
          this.dragDivider = true;
 
-      if (e.type == "mousemove" && this.dragDivider) {
+      if (e.type === "mousemove" && this.dragDivider) {
          this.disp.histoDivider = 1 - e.clientY / this.height;
          if (this.disp.histoDivider < 0.1)
             this.disp.histoDivider = 0.1;
@@ -265,24 +373,24 @@ Oscilloscope.prototype.mouseEvent = function (e) {
          OSC.resizeCanvas();
       }
 
-      if (e.type == "mouseup")
+      if (e.type === "mouseup")
          this.dragDivider = false;
 
       // left drag handle
       if (e.clientX > this.x1 && e.clientX < this.x1 + 15 &&
          e.clientY > this.hiy1 + this.hiHeight / 2 - 15 &&
          e.clientY < this.hiy1 + this.hiHeight / 2 + 15 &&
-         e.type == "mousemove")
+         e.type === "mousemove")
          cursor = "e-resize";
 
       if (e.clientX > this.x1 && e.clientX < this.x1 + 15 &&
          e.clientY > this.hiy1 + this.hiHeight / 2 - 15 &&
          e.clientY < this.hiy1 + this.hiHeight / 2 + 15 &&
-         e.type == "mousedown") {
+         e.type === "mousedown") {
          this.histo.dragLeftHandle = true;
       }
 
-      if (e.type == "mousemove" && this.histo.dragLeftHandle || this.histo.dragRightHandle) {
+      if (e.type === "mousemove" && this.histo.dragLeftHandle || this.histo.dragRightHandle) {
          this.histo.dragX = e.clientX;
          if (this.histo.dragX < this.x1)
             this.histo.dragX = this.x1;
@@ -291,7 +399,7 @@ Oscilloscope.prototype.mouseEvent = function (e) {
          cursor = "ew-resize";
       }
 
-      if (e.type == "mouseup") {
+      if (e.type === "mouseup") {
          if (this.histo.dragLeftHandle) {
             this.histo.autoAxis = false;
             this.histo.axisMin = this.histo.axisMin + (this.histo.dragX - this.x1) / (this.x2 - this.x1) * (this.histo.axisMax - this.histo.axisMin);
@@ -308,13 +416,13 @@ Oscilloscope.prototype.mouseEvent = function (e) {
       if (e.clientX < this.x2 && e.clientX > this.x2 - 15 &&
          e.clientY > this.hiy1 + this.hiHeight / 2 - 15 &&
          e.clientY < this.hiy1 + this.hiHeight / 2 + 15 &&
-         e.type == "mousemove")
+         e.type === "mousemove")
          cursor = "w-resize";
 
       if (e.clientX < this.x2 && e.clientX > this.x2 - 15 &&
          e.clientY > this.hiy1 + this.hiHeight / 2 - 15 &&
          e.clientY < this.hiy1 + this.hiHeight / 2 + 15 &&
-         e.type == "mousedown") {
+         e.type === "mousedown") {
          this.histo.dragRightHandle = true;
       }
 
@@ -326,23 +434,23 @@ Oscilloscope.prototype.mouseEvent = function (e) {
       this.histo.cursorValid = false;
 
    // process time cursor
-   if (this.timeCursor.on && e.target == this.canvas) {
+   if (this.timeCursor.on && e.target === this.canvas) {
 
       if (e.clientX > this.timeCursor.x-5 && e.clientX < this.timeCursor.x+5 &&
          e.clientY > this.y1 && e.clientY < this.y2 &&
-         e.type == "mousemove")
+         e.type === "mousemove")
          cursor = "ew-resize";
 
       if (e.clientX > this.timeCursor.x-5 && e.clientX < this.timeCursor.x+5 &&
           e.clientY > this.y1 && e.clientY < this.y2 &&
-          e.type == "mousedown")
+          e.type === "mousedown")
          this.timeCursor.drag = true;
 
-      if (e.type == "mouseup") {
+      if (e.type === "mouseup") {
          this.timeCursor.drag = false;
       }
 
-      if (e.type == "mousemove" && this.timeCursor.drag) {
+      if (e.type === "mousemove" && this.timeCursor.drag) {
          cursor = "ew-resize";
          this.timeCursor.dragX = e.clientX;
          var t = (this.XToTime(e.clientX) / 1E-9).toFixed(1);
@@ -354,23 +462,23 @@ Oscilloscope.prototype.mouseEvent = function (e) {
    }
 
    // process voltage cursor
-   if (this.voltageCursor.on && e.target == this.canvas) {
+   if (this.voltageCursor.on && e.target === this.canvas) {
 
       if (e.clientY > this.voltageCursor.y-5 && e.clientY < this.voltageCursor.y+5 &&
          e.clientX > this.x1 && e.clientX < this.x2 &&
-         e.type == "mousemove")
+         e.type === "mousemove")
          cursor = "ns-resize";
 
       if (e.clientY > this.voltageCursor.y-5 && e.clientY < this.voltageCursor.y+5 &&
          e.clientX > this.x1 && e.clientX < this.x2 &&
-         e.type == "mousedown")
+         e.type === "mousedown")
          this.voltageCursor.drag = true;
 
-      if (e.type == "mouseup") {
+      if (e.type === "mouseup") {
          this.voltageCursor.drag = false;
       }
 
-      if (e.type == "mousemove" && this.voltageCursor.drag) {
+      if (e.type === "mousemove" && this.voltageCursor.drag) {
          cursor = "ns-resize";
          this.voltageCursor.dragY = e.clientY;
          var u = (this.YToVolt(e.clientY, this.voltageCursor.channel) * 1000).toFixed(1);
@@ -382,27 +490,15 @@ Oscilloscope.prototype.mouseEvent = function (e) {
    }
 
    // process waveform dragging
-   if (!this.voltageCursor.on && !this.timeCursor.on && e.target == this.canvas &&
+   if (!this.cursor.selA && !this.cursor.selB &&
+      !this.voltageCursor.on && !this.timeCursor.on &&
+      e.target === this.canvas &&
       e.clientX < this.x2-10 && e.clientX > this.x1+10) {
-      // find which waveform is closest to cursor
-      var dMin = 1E6;
-      var cMin = undefined;
-      for (var c = 0; c < 20; c++) {
-         if (c == 19) // exclude FFT
-            continue;
-         if (this.chOn[c]) {
-            for (var i = 0; i < this.wf.U[c].length; i++) {
-               var x = this.wf.T[c][i] * this.wfTS + this.wfTO;
-               var y = this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c];
 
-               var d = Math.sqrt((x - e.clientX) * (x - e.clientX) + (y - e.clientY) * (y - e.clientY));
-               if (d < dMin) {
-                  dMin = d;
-                  cMin = c;
-               }
-            }
-         }
-      }
+      // find which waveform is closest to cursor
+      let d = this.findClosestChannel(e.clientX, e.clientY);
+      cMin = d[0];
+      dMin = d[1];
 
       if (e.type === "mousemove") {
          if (this.offsetCursor.drag || dMin < 10)
@@ -441,7 +537,9 @@ Oscilloscope.prototype.mouseEvent = function (e) {
    }
 
    // process waveform marker dragging
-   if (!this.voltageCursor.on && !this.timeCursor.on && e.target == this.canvas &&
+   if (!this.cursor.selA && !this.cursor.selB &&
+      !this.voltageCursor.on && !this.timeCursor.on &&
+      e.target == this.canvas &&
       ((e.clientX < this.x1+10 && e.clientY > this.y1 && e.clientY < this.y2) ||
          this.offsetMarkerCursor.drag)) {
       // find which waveform marker is closest to cursor
@@ -492,8 +590,11 @@ Oscilloscope.prototype.mouseEvent = function (e) {
    }
 
    // process trigger level dragging
-   if (!this.voltageCursor.on && !this.timeCursor.on && e.target === this.canvas &&
-      ((e.clientX > this.x2-10 && e.clientX < this.x2 && e.clientY > this.y1 && e.clientY < this.y2-10) ||
+   if (!this.cursor.selA && !this.cursor.selB &&
+      !this.voltageCursor.on && !this.timeCursor.on &&
+      e.target === this.canvas &&
+      ((e.clientX > this.x2-10 && e.clientX < this.x2 &&
+         e.clientY > this.y1 && e.clientY < this.y2-10) ||
       this.triggerCursor.drag)) {
       // find which trigger level is closest to cursor
       var dMin = 1E6;
@@ -764,6 +865,261 @@ Oscilloscope.prototype.drawCursors = function (ctx) {
       ctx.drawLine(this.x1, this.voltageCursor.y, this.x2, this.voltageCursor.y);
    }
 
+   let ta = undefined;
+   let tb = undefined;
+   let ua = undefined;
+   let ub = undefined;
+   let col = undefined;
+
+   let ax1, ax2, ay1, ay2;
+
+   if (this.cursor.onA && this.cursor.AX !== undefined && this.cursor.AY !== undefined) {
+      col = this.disp.invert ? "black" : "white";
+
+      let snap = this.findClosestChannel(this.cursor.AX, this.cursor.AY);
+      let snapDist = 30;
+      if (this.cursor.snap && snap[1] < snapDist) {
+         col = this.disp.invert ? this.chnColorsInverted[snap[0]] : this.chnColors[snap[0]];
+         col = this.disp.invert ? this.chnColorsInverted[snap[0]] : this.chnColors[snap[0]];
+      }
+
+      ctx.fillStyle = col;
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 1;
+      ctx.drawLine(this.x1, this.cursor.AY, this.x2, this.cursor.AY);
+      ctx.drawLine(this.cursor.AX, this.y1, this.cursor.AX, this.y2);
+
+      ctx.beginPath();
+      ctx.globalAlpha = 0.3;
+      ctx.arc(this.cursor.AX, this.cursor.AY, 10, 0, 2 * Math.PI);
+      ctx.fillStyle = col;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      ctx.beginPath();
+      ctx.arc(this.cursor.AX, this.cursor.AY, 4, 0, 2 * Math.PI);
+      ctx.fillStyle = col;
+      ctx.fill();
+
+      // print T/U
+      let s = "";
+      let t;
+      let u;
+      if (this.cursor.snap && snap[1] < snapDist) {
+         if (this.cursor.cell)
+            s += snap[2] + ": ";
+         t = this.wf.T[snap[0]][snap[2]] * 1E9;
+         u = this.wf.U[snap[0]][snap[2]] * 1E3;
+
+         // line to sample
+         ctx.lineWidth = 1;
+         ctx.drawLine(this.cursor.AX, this.cursor.AY, this.timeToX(t/1E9), this.voltToY(u/1E3, snap[0]));
+      } else {
+         t = this.XToTime(this.cursor.AX) * 1E9;
+         u = this.YToVolt(this.cursor.AY, snap[0]) * 1E3;
+      }
+
+      ta = t;
+      ua = u;
+
+      s += t.toFixed(2) + "ns ";
+      s += u.toFixed(1) + "mV";
+
+      ctx.lineWidth = 1;
+      ctx.font = '14px sans-serif';
+      ctx.strokeStyle = "#808080";
+      ctx.fillStyle = "#F0F0F0";
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "left";
+
+      let w = ctx.measureText(s).width + 6;
+      let h = ctx.measureText("M").width * 1.2 + 6;
+      let x = this.cursor.AX + 20;
+      let y = this.cursor.AY + h / 3 * 2;
+      let xl = x;
+      let yl = y;
+      if (x + w >= this.x2) {
+         x = this.cursor.AX - 20 - w;
+         xl = x + w;
+      }
+      if (y > (this.y1 + this.y2) / 2) {
+         y = this.cursor.AY - h / 3 * 5;
+         yl = y + h;
+      }
+
+      ax1 = x;
+      ay1 = y;
+      ax2 = x+w;
+      ay2 = y+h;
+
+      // box
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeRect(x, y, w, h);
+      ctx.fillStyle = "#404040";
+      ctx.fillText(s, x + 3, y + h / 2);
+   }
+
+   if (this.cursor.onB && this.cursor.BX !== undefined && this.cursor.BY !== undefined) {
+      col = this.disp.invert ? "black" : "white";
+
+      snap = this.findClosestChannel(this.cursor.BX, this.cursor.BY);
+      snapDist = 30;
+      if (this.cursor.snap && snap[1] < snapDist) {
+         col = this.disp.invert ? this.chnColorsInverted[snap[0]] : this.chnColors[snap[0]];
+         col = this.disp.invert ? this.chnColorsInverted[snap[0]] : this.chnColors[snap[0]];
+      }
+
+      ctx.fillStyle = col;
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 1;
+      ctx.drawLine(this.x1, this.cursor.BY, this.x2, this.cursor.BY);
+      ctx.drawLine(this.cursor.BX, this.y1, this.cursor.BX, this.y2);
+
+      ctx.beginPath();
+      ctx.globalAlpha = 0.3;
+      ctx.arc(this.cursor.BX, this.cursor.BY, 10, 0, 2 * Math.PI);
+      ctx.fillStyle = col;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      ctx.beginPath();
+      ctx.arc(this.cursor.BX, this.cursor.BY, 4, 0, 2 * Math.PI);
+      ctx.fillStyle = col;
+      ctx.fill();
+
+      // print T/U
+      let s = "";
+      let t;
+      let u;
+      if (this.cursor.snap && snap[1] < snapDist) {
+         if (this.cursor.cell)
+            s += snap[2] + ": ";
+         t = this.wf.T[snap[0]][snap[2]] * 1E9;
+         u = this.wf.U[snap[0]][snap[2]] * 1E3;
+
+         // line to sample
+         ctx.lineWidth = 1;
+         ctx.drawLine(this.cursor.BX, this.cursor.BY, this.timeToX(t/1E9), this.voltToY(u/1E3, snap[0]));
+      } else {
+         t = this.XToTime(this.cursor.BX) * 1E9;
+         u = this.YToVolt(this.cursor.BY, snap[0]) * 1E3;
+      }
+
+      tb = t;
+      ub = u;
+
+      s += t.toFixed(2) + "ns ";
+      s += u.toFixed(1) + "mV";
+
+      ctx.lineWidth = 1;
+      ctx.font = '14px sans-serif';
+      ctx.strokeStyle = "#808080";
+      ctx.fillStyle = "#F0F0F0";
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "left";
+
+      let w = ctx.measureText(s).width + 6;
+      let h = ctx.measureText("M").width * 1.2 + 6;
+      let x = this.cursor.BX + 20;
+      let y = this.cursor.BY + h / 3 * 2;
+      let xl = x;
+      let yl = y;
+      if (x + w >= this.x2) {
+         x = this.cursor.BX - 20 - w;
+         xl = x + w;
+      }
+      if (y > (this.y1 + this.y2) / 2) {
+         y = this.cursor.BY - h / 3 * 5;
+         yl = y + h;
+      }
+
+      // move box in case of collision
+      if (x + w >= ax1 && x <= ax2 &&
+          y + h >= ay1 && y < ay2) {
+         if (y > ay1)
+            y = ay2 + 5;
+         else
+            y = ay1 - h - 5;
+      }
+
+      // box
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeRect(x, y, w, h);
+      ctx.fillStyle = "#404040";
+      ctx.fillText(s, x + 3, y + h / 2);
+   }
+
+   if (ta !== undefined && tb !== undefined) {
+      let dt = Math.abs(ta - tb);
+
+      s = dt.toFixed(2) + "ns";
+
+      let w = ctx.measureText(s).width + 6;
+      let h = ctx.measureText("M").width * 1.2 + 6;
+      let x = (this.cursor.BX + this.cursor.AX) / 2 - w / 2;
+      let y = this.y2 - h - 5;
+      if (x + w >= this.x2 - 20)
+         x = this.x2 - 20 - w;
+      if (x < this.x1 + 20)
+         x = this.x1 + 20;
+
+      // box
+      ctx.strokeStyle = col;
+      ctx.drawLine(this.cursor.AX, y + h/2, this.cursor.BX, y + h/2);
+
+      ctx.strokeStyle = "#808080";
+      ctx.fillStyle = "#F0F0F0";
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeRect(x, y, w, h);
+      ctx.fillStyle = "#404040";
+      ctx.fillText(s, x + 3, y + h / 2);
+   }
+
+   if (ua !== undefined && ub !== undefined) {
+      let du = Math.abs(ua - ub);
+
+      s = du.toFixed(2) + "mV";
+
+      w = ctx.measureText(s).width + 6;
+      h = ctx.measureText("M").width * 1.2 + 6;
+      x = this.x1 + 5;
+      y = (this.cursor.AY + this.cursor.BY) / 2 - h / 2;
+      if (y + w >= this.y2 - 5 - h)
+         y = this.y2 - 5 - h;
+      if (y < this.y1 + 5)
+         y = this.y1 + 5;
+
+      // box
+      ctx.strokeStyle = col;
+      ctx.drawLine(x + w/2, this.cursor.AY, x + w/2, this.cursor.BY);
+
+      ctx.strokeStyle = "#808080";
+      ctx.fillStyle = "#F0F0F0";
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeRect(x, y, w, h);
+      ctx.fillStyle = "#404040";
+      ctx.fillText(s, x + 3, y + h / 2);
+   }
+
+   if ((this.cursor.onA || this.cursor.onB) && this.cursor.cell) {
+      x = 20;
+      y = 10;
+      w = ctx.measureText("TC0: 1024").width + 6;
+      h = 2*(ctx.measureText("M").width * 1.2 + 6);
+
+      // show trigger cells
+      ctx.strokeStyle = "#808080";
+      ctx.fillStyle = "#F0F0F0";
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeRect(x, y, w, h);
+      ctx.fillStyle = "#404040";
+
+      s = "TC0: " + this.wf.trCell[0];
+      ctx.fillText(s, x + 3, y + h / 4);
+
+      s = "TC1: " + this.wf.trCell[8];
+      ctx.fillText(s, x + 3, y + 3* h / 4);
+   }
 };
 
 Oscilloscope.prototype.printStatus = function (ctx) {

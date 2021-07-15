@@ -1651,12 +1651,14 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
             for (int c = 0; c < WD_N_CHANNELS; c++) {
                if (event.mDRSChannelPresent[c]) {
                   t = 1; // time array
+                  int trcell = (c < 8 || c == 16) ? event.mTriggerCellDrs0 : event.mTriggerCellDrs1;
                   mg_send_http_chunk(nc, (const char *) &t, 4);
                   mg_send_http_chunk(nc, (const char *) &brd, 4);
                   mg_send_http_chunk(nc, (const char *) &tc, 4);
                   mg_send_http_chunk(nc, (const char *) &l, 4);
                   mg_send_http_chunk(nc, (const char *) &c, 4);
                   mg_send_http_chunk(nc, (const char *) &n, 4);
+                  mg_send_http_chunk(nc, (const char *) &trcell, 4);
                   mg_send_http_chunk(nc, (const char *) event.mWfTDRS[c], sizeof(float) * n);
                }
             }

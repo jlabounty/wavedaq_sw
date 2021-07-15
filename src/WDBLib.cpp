@@ -92,6 +92,8 @@ WDB::WDB(std::string name, bool verbose) : WDBREG() {
    mSendBlocked = false;
    mReceiveTimeoutMs = cDefaultReceiveTimeoutMs;
    mTimingReferenceSignal = cTimingReferenceOff;
+   if (mDemoMode)
+      mChnTxEn = 0xFF;
 }
 
 //--------------------------------------------------------------------
