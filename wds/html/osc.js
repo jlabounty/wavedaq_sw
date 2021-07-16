@@ -13,6 +13,9 @@ CanvasRenderingContext2D.prototype.drawLine = function (x1, y1, x2, y2) {
    this.stroke();
 };
 
+const dbMin = -100;
+const dbMax = 0;
+
 var ChannelColors = [
    "#FFFF00", "#B0B0FF", "#FFA0A0", "#A0FFA0",
    "#FF9000", "#00AAFF", "#FF00A0", "#00C030",
@@ -242,12 +245,15 @@ Oscilloscope.prototype.findClosestChannel = function (cx, cy) {
    let chan = undefined;
    let index = undefined;
    for (c = 0; c < 20; c++) {
-      if (c === 19) // exclude FFT
-         continue;
       if (this.chOn[c]) {
          for (i = 0; i < this.wf.U[c].length; i++) {
-            x = this.wf.T[c][i] * this.wfTS + this.wfTO;
-            y = this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c];
+            if (c === 19) {
+               x = this.x1 + (this.x2 - this.x1) / 512.0 * i;
+               y = this.y2 - (this.wf.U[c][i]-dbMin)/(dbMax-dbMin) * (this.y2-this.y1);
+            } else {
+               x = this.wf.T[c][i] * this.wfTS + this.wfTO;
+               y = this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c];
+            }
 
             d = Math.sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy));
             if (d < dist) {
@@ -867,8 +873,12 @@ Oscilloscope.prototype.drawCursors = function (ctx) {
 
    let ta = undefined;
    let tb = undefined;
+   let tunit = "ns";
+
    let ua = undefined;
    let ub = undefined;
+   let uunit = "mV";
+
    let col = undefined;
 
    let ax1, ax2, ay1, ay2;
@@ -906,14 +916,39 @@ Oscilloscope.prototype.drawCursors = function (ctx) {
       let t;
       let u;
       if (this.cursor.snap && snap[1] < snapDist) {
-         if (this.cursor.cell)
-            s += snap[2] + ": ";
-         t = this.wf.T[snap[0]][snap[2]] * 1E9;
-         u = this.wf.U[snap[0]][snap[2]] * 1E3;
+         if (snap[0] === 19) { // FFT
+            s += "FFT: ";
 
-         // line to sample
-         ctx.lineWidth = 1;
-         ctx.drawLine(this.cursor.AX, this.cursor.AY, this.timeToX(t/1E9), this.voltToY(u/1E3, snap[0]));
+            var freqMax;
+            if (this.wdb.readoutSrcSel === 1)
+               freqMax = this.wdb.drsSampleFreq / 2;
+            else if (this.wdb.readoutSrcSel === 2)
+               freqMax = this.wdb.adcSampleFreq / 2;
+            else if (this.wdb.readoutSrcSel === 3)
+               freqMax = this.wdb.adcSampleFreq * 8 / 2;
+            else
+               freqMax = this.wdb.adcSampleFreq / 2;
+
+            tunit = "MHz";
+            uunit = "dB";
+            t = snap[2] / 512.0 * freqMax;
+            u = this.wf.U[19][snap[2]];
+
+            let x = this.x1 + (this.x2 - this.x1) / 512.0 * snap[2];
+            let y = this.y2 - (this.wf.U[19][snap[2]]-dbMin)/(dbMax-dbMin) * (this.y2-this.y1);
+
+            // line to FFT point
+            ctx.drawLine(this.cursor.AX, this.cursor.AY, x, y);
+         } else {
+            if (this.cursor.cell)
+               s += snap[2] + ": ";
+            t = this.wf.T[snap[0]][snap[2]] * 1E9;
+            u = this.wf.U[snap[0]][snap[2]] * 1E3;
+
+            // line to sample
+            ctx.drawLine(this.cursor.AX, this.cursor.AY,
+               this.timeToX(t / 1E9), this.voltToY(u / 1E3, snap[0]));
+         }
       } else {
          t = this.XToTime(this.cursor.AX) * 1E9;
          u = this.YToVolt(this.cursor.AY, snap[0]) * 1E3;
@@ -922,8 +957,8 @@ Oscilloscope.prototype.drawCursors = function (ctx) {
       ta = t;
       ua = u;
 
-      s += t.toFixed(2) + "ns ";
-      s += u.toFixed(1) + "mV";
+      s += t.toFixed(1) + tunit + " ";
+      s += u.toFixed(1) + uunit;
 
       ctx.lineWidth = 1;
       ctx.font = '14px sans-serif';
@@ -992,14 +1027,37 @@ Oscilloscope.prototype.drawCursors = function (ctx) {
       let t;
       let u;
       if (this.cursor.snap && snap[1] < snapDist) {
-         if (this.cursor.cell)
-            s += snap[2] + ": ";
-         t = this.wf.T[snap[0]][snap[2]] * 1E9;
-         u = this.wf.U[snap[0]][snap[2]] * 1E3;
+         if (snap[0] === 19) { // FFT
+            s += "FFT: ";
 
-         // line to sample
-         ctx.lineWidth = 1;
-         ctx.drawLine(this.cursor.BX, this.cursor.BY, this.timeToX(t/1E9), this.voltToY(u/1E3, snap[0]));
+            var freqMax;
+            if (this.wdb.readoutSrcSel === 1)
+               freqMax = this.wdb.drsSampleFreq / 2;
+            else if (this.wdb.readoutSrcSel === 2)
+               freqMax = this.wdb.adcSampleFreq / 2;
+            else if (this.wdb.readoutSrcSel === 3)
+               freqMax = this.wdb.adcSampleFreq * 8 / 2;
+            else
+               freqMax = this.wdb.adcSampleFreq / 2;
+
+            t = snap[2] / 512.0 * freqMax;
+            u = this.wf.U[19][snap[2]];
+
+            let x = this.x1 + (this.x2 - this.x1) / 512.0 * snap[2];
+            let y = this.y2 - (this.wf.U[19][snap[2]]-dbMin)/(dbMax-dbMin) * (this.y2-this.y1);
+
+            // line to FFT point
+            ctx.drawLine(this.cursor.BX, this.cursor.BY, x, y);
+         } else {
+            if (this.cursor.cell)
+               s += snap[2] + ": ";
+            t = this.wf.T[snap[0]][snap[2]] * 1E9;
+            u = this.wf.U[snap[0]][snap[2]] * 1E3;
+
+            // line to sample
+            ctx.lineWidth = 1;
+            ctx.drawLine(this.cursor.BX, this.cursor.BY, this.timeToX(t / 1E9), this.voltToY(u / 1E3, snap[0]));
+         }
       } else {
          t = this.XToTime(this.cursor.BX) * 1E9;
          u = this.YToVolt(this.cursor.BY, snap[0]) * 1E3;
@@ -1008,8 +1066,13 @@ Oscilloscope.prototype.drawCursors = function (ctx) {
       tb = t;
       ub = u;
 
-      s += t.toFixed(2) + "ns ";
-      s += u.toFixed(1) + "mV";
+      if (this.cursor.snap && snap[1] < snapDist && snap[0] === 19) {
+         s += t.toFixed(1) + "MHz ";
+         s += u.toFixed(1) + "dB";
+      } else {
+         s += t.toFixed(2) + "ns ";
+         s += u.toFixed(1) + "mV";
+      }
 
       ctx.lineWidth = 1;
       ctx.font = '14px sans-serif';
@@ -1052,7 +1115,7 @@ Oscilloscope.prototype.drawCursors = function (ctx) {
    if (ta !== undefined && tb !== undefined) {
       let dt = Math.abs(ta - tb);
 
-      s = dt.toFixed(2) + "ns";
+      s = dt.toFixed(2) + tunit;
 
       let w = ctx.measureText(s).width + 6;
       let h = ctx.measureText("M").width * 1.2 + 6;
@@ -1078,7 +1141,7 @@ Oscilloscope.prototype.drawCursors = function (ctx) {
    if (ua !== undefined && ub !== undefined) {
       let du = Math.abs(ua - ub);
 
-      s = du.toFixed(2) + "mV";
+      s = du.toFixed(2) + uunit;
 
       w = ctx.measureText(s).width + 6;
       h = ctx.measureText("M").width * 1.2 + 6;
@@ -1391,10 +1454,8 @@ Oscilloscope.prototype.drawWF = function (ctx) {
             for (var i = 0; i < this.wf.U[c].length ; i++) {
                var x, y;
                if (c === 19) { // FFT
-                  let min = -6;
-                  let max = 6;
                   x = this.x1 + (this.x2 - this.x1) / 512.0 * i;
-                  y = this.y2 - (this.wf.U[c][i]-min)/(max-min) * (this.y2-this.y1);
+                  y = this.y2 - (this.wf.U[c][i]-dbMin)/(dbMax-dbMin) * (this.y2-this.y1);
                } else {
                   x = this.wf.T[c][i] * this.wfTS + this.wfTO;
                   y = this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c];
@@ -1478,10 +1539,8 @@ Oscilloscope.prototype.drawWF = function (ctx) {
 
                var x1, y1;
                if (c === 19) { // FFT
-                  var min = -6;
-                  var max = 6;
                   x1 = Math.floor(this.x1 + (this.x2 - this.x1) / 512.0 * i);
-                  y1 = Math.floor(this.y2 - (this.wf.U[c][i]-min)/(max-min) * (this.y2-this.y1));
+                  y1 = Math.floor(this.y2 - (this.wf.U[c][i]-dbMin)/(dbMax-dbMin) * (this.y2-this.y1));
                } else {
                   x1 = Math.floor(this.wf.T[c][i] * this.wfTS + this.wfTO);
                   y1 = Math.floor(this.wf.U[c][i] * this.wfUS[c] + this.wfUO[c]);
@@ -1547,8 +1606,8 @@ Oscilloscope.prototype.drawWF = function (ctx) {
          else if (OSC.wdb.readoutSrcSel === 3)
             freqMax = OSC.wdb.adcSampleFreq * 8 / 2;
          else
-            freqMax = OSC.wdb.adcSampleFreq / 2
-         var f = i/10.0*freqMax;
+            freqMax = OSC.wdb.adcSampleFreq / 2;
+         let f = i/10.0*freqMax;
 
          ctx.font = '14px sans-serif';
          ctx.textAlign = "center";

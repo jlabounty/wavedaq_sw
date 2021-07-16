@@ -1523,7 +1523,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
                for (int i = 0; i < 1024; i++) {
                   float t = i * 1E-6 / demoDrsSampleFreq;
                   event.mWfTDRS[c][i] = t;
-                  event.mWfUDRS[c][i] = (float) (sin(M_PI * 2 * 100E6 * t + c / 8.0) / 2 +
+                  event.mWfUDRS[c][i] = (float) (sin(M_PI * 2 * 800E6 * t + c / 8.0) / 2 +
                                                  ((float) random() / (float) RAND_MAX - 0.5) / 300);
                }
                // add spikes

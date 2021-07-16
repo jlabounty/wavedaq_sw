@@ -1247,7 +1247,7 @@ function calcMathWF(wf)
       fft(w);
 
       for (i = 0; i < 512; i++)
-         wf.U[19][i] = Math.log(w[i]);
+         wf.U[19][i] = 20*Math.log10(w[i]/256);
       wf.T[19] = wf.T[19].slice(0, 512);
       wf.U[19] = wf.U[19].slice(0, 512);
    }
