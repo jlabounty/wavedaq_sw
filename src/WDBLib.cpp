@@ -3882,6 +3882,19 @@ void WP::DoVoltageCalibrationStep() {
    // switch back to old board settings
    b->Restore();
 
+   //check end of calibration
+   if (calibProg.iBoard == calibProg.lastBoard) {
+      calibProg.state = cCsInactive;
+      calibProg.mode = cCmNone;
+
+      mRotateWaveform = true;
+      mOfsCalib1 = true;
+      mOfsCalib2 = true;
+      mGainCalib = true;
+      mRangeCalib = true;
+      return;
+   }
+
    return;
 }
 
@@ -4356,6 +4369,17 @@ void WP::DoTimeCalibrationStep() {
    // switch back to old board settings
    b->Restore();
 
+   //check end of calibration
+   if (calibProg.iBoard == calibProg.lastBoard) {
+      calibProg.state = cCsInactive;
+      calibProg.mode = cCmNone;
+
+      mTimeCalib1 = true;
+      mTimeCalib2 = true;
+      mTimeCalib3 = true;
+
+      return;
+   }
 }
 
 //--------------------------------------------------------------------
