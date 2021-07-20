@@ -8,46 +8,68 @@ typedef struct {
    char version = 'G';
    int slot = 0;
    std::string crateName = "CRATE";
+   unsigned int chnPolarity;
    float thr[16];
    bool written = false;
+   bool bad[16];
 } boardData;
 
 //prints a tag fot the WDB in the output file
 void printBoard(ofstream &outfile, boardData &b){
-   cout << "Board "<< b.boardName << "\n";
+   bool badChn = false;
+   //cout << "Board "<< b.boardName << "\n";
    outfile << "<WDB Name=\"" << b.boardName << "\" Slot=\""<< b.slot <<"\">"<< std::endl;
    outfile << "<TriggerLevel>" << std::endl;
    for(int i=0; i<16; i++){
-      cout << b.thr[i];
+      //cout << b.thr[i];
       outfile << b.thr[i];
+
+      if(b.bad[i])
+         badChn = true;
 
       //next board
       if(i!=15){
-         cout << ", ";
+         //cout << ", ";
          outfile << ", ";
       }
    }
    outfile << std::endl << "</TriggerLevel>" << std::endl;
    outfile << "</WDB>"<< std::endl;
-   cout << "\n";
+   //cout << "\n";
+   if(badChn){
+      cout << "Bad Channel on Board "<< b.boardName << "\n";
+      for(int i=0; i<16; i++){
+         if(b.bad[i]){
+            cout << "Channel " << i << " thr " << b.thr[i] << "\n";
+         }
+      }
+   }
 }
 
-void makeThr(string dirname="2020-10-12/"){
+void makeThr(string dirname="./", double absoluteThr = 0.01 ){
    int noped=0;
    const double fallbackThr = -0.035;//in case no pedestal is found
    //XEC MPPC
-   //const double absoluteThr = -0.010;//offset WRT observed threshold
+   //const double absoluteThr = 0.010;//offset WRT observed threshold
    //RDC LYSO
-   const double absoluteThr = -0.005;//offset WRT observed threshold
+   //const double absoluteThr = 0.005;//offset WRT observed threshold
    //CDCH
    //const double absoluteThr = 0.005;//offset WRT observed threshold
 
-   const double nsigma = 10.;
+   //variable threshold option
+   //const double nsigma = 10.;
 
    std::vector<boardData> boards;
 
    //open output file
    TFile *outroot = new TFile("output.root", "recreate");
+
+   TH1F* hMean = new TH1F("hMean", "Pedestal position", 100, 0, 0);
+   hMean->SetCanExtend(TH1::kAllAxes);
+   TH1F* hSigma = new TH1F("hSigma", "Pedestal sigma", 100, 0, 0);
+   hSigma->SetCanExtend(TH1::kAllAxes);
+   TH1F* hThr = new TH1F("hThr", "Threshold", 100, 0, 0);
+   hThr->SetCanExtend(TH1::kAllAxes);
 
    //list directory content
    TSystemDirectory dir(dirname.c_str(),dirname.c_str());
@@ -108,6 +130,8 @@ void makeThr(string dirname="2020-10-12/"){
                         //pzc level (0-6)
                      } else if(parametername == "Channel Polarity"){
                         //channel polarity in hex
+                        ss >> hex >> board.chnPolarity;
+                        cout << "Channel Polarity: "<< board.chnPolarity << '\n';
                      } else if(parametername == "Down"){
                         //lowest threshold
                      } else if(parametername == "Up"){
@@ -137,6 +161,7 @@ void makeThr(string dirname="2020-10-12/"){
 
             //TCanvas* c=new TCanvas();
             //c->SetLogy();
+            //
             TF1 *fgau= new TF1("fgau", "gaus", thrs.front(), thrs.back());
             for(int i=0; i<16; i++){
 
@@ -148,14 +173,31 @@ void makeThr(string dirname="2020-10-12/"){
                   }
 
                   h->Fit(fgau, "Q");
-                  if(fgau->GetParameter(2) > 0.0007){
+                  if(fgau->GetParameter(2) > 0.001){
                      noped++;
+                     board.bad[i] = true;
                      printf("!!");
+                  } else {
+                     board.bad[i] = false;
                   }
 
-                  printf("%2d: %lf %lf -> %lf\n", i,  fgau->GetParameter(1), fgau->GetParameter(2), fgau->GetParameter(1) +0.0005 + nsigma*fgau->GetParameter(2));
-                  board.thr[i] = fgau->GetParameter(1) +0.0005 + nsigma*fgau->GetParameter(2);
+                  hMean->Fill(fgau->GetParameter(1));
+                  hSigma->Fill(fgau->GetParameter(2));
 
+                  float thr = fgau->GetParameter(1);
+                  if(board.chnPolarity & (1<<i)){
+                     //negative threshold
+                     //thr -= nsigma*fgau->GetParameter(2);
+                     thr -= absoluteThr;
+                  } else {
+                     //positive threshold
+                     //thr += nsigma*fgau->GetParameter(2);
+                     thr += absoluteThr;
+                  }
+
+                  printf("%2d: %lf %lf -> %lf\n", i,  fgau->GetParameter(1), fgau->GetParameter(2), thr);
+                  board.thr[i] = thr;
+                  hThr->Fill(thr);
 
                   h->Write(Form("%s-%d", board.boardName.c_str(), i));
 
@@ -226,6 +268,10 @@ void makeThr(string dirname="2020-10-12/"){
       outfile << "</System>" << std::endl;
       outfile.close();
    }
+
+   hMean->Write();
+   hSigma->Write();
+   hThr->Write();
    outroot->Close();
 
 }
