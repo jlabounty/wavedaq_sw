@@ -105,7 +105,7 @@ void drawBar(const char* name, float value, float valueMax, bool printData = fal
    printf("\n");
 }
 
-std::map<short, FILE*> CreateScalerFiles(WDSystem* sys, int n, float down, float up){
+std::map<short, FILE*> CreateScalerFiles(WDSystem* sys, int n, float down, float up, std::string group=""){
    std::map<short, FILE*> map;
 
    for(auto c : *sys)
@@ -113,62 +113,67 @@ std::map<short, FILE*> CreateScalerFiles(WDSystem* sys, int n, float down, float
          if(b){
             WDWDB* wdb = dynamic_cast<WDWDB*>(b);
             if(wdb != nullptr){
-               char buf[100];
-               sprintf(buf, "out-%s.dat", wdb->GetName().c_str());
-               FILE *f= fopen(buf, "w");
+               if(!group.length() || wdb->GetGroup() == group){
+                  char buf[100];
+                  sprintf(buf, "out-%s.dat", wdb->GetName().c_str());
+                  FILE *f= fopen(buf, "w");
 
-               //print header
-               fprintf(f, "# Name: %s\n", wdb->GetBoardName().c_str());
-               fprintf(f, "# WDB: %s\n", wdb->GetName().c_str());
-               fprintf(f, "# Revision: %c\n", wdb->GetBoardRevision() + 'A');
-               fprintf(f, "# Crate: %s\n", wdb->GetCrate()->GetCrateName().c_str());
-               fprintf(f, "# Slot: %d\n", wdb->GetSlot());
-               fprintf(f, "# Gain: ");
-               for(int iCh=0; iCh<16; iCh++){
-                  if(iCh>0)
-                     fprintf(f, ", ");
-                  fprintf(f, "%f", wdb->GetFeGain(iCh));
+                  //print header
+                  fprintf(f, "# Name: %s\n", wdb->GetBoardName().c_str());
+                  fprintf(f, "# WDB: %s\n", wdb->GetName().c_str());
+                  fprintf(f, "# Revision: %c\n", wdb->GetBoardRevision() + 'A');
+                  fprintf(f, "# Crate: %s\n", wdb->GetCrate()->GetCrateName().c_str());
+                  fprintf(f, "# Slot: %d\n", wdb->GetSlot());
+                  fprintf(f, "# Gain: ");
+                  for(int iCh=0; iCh<16; iCh++){
+                     if(iCh>0)
+                        fprintf(f, ", ");
+                     fprintf(f, "%f", wdb->GetFeGain(iCh));
+                  }
+                  fprintf(f, "\n");
+                  fprintf(f, "# PZC: ");
+                  for(int iCh=0; iCh<16; iCh++){
+                     if(iCh>0)
+                        fprintf(f, ", ");
+                     fprintf(f, "%d", wdb->GetFePzc(iCh));
+                  }
+                  fprintf(f, "\n");
+                  fprintf(f, "# PZC level: %d\n", wdb->GetDacPzcLevelN());
+                  fprintf(f, "# Channel Polarity: %04x\n", wdb->GetTrgSrcPolarity() & 0xFFFF);
+                  fprintf(f, "# Down: %f\n", down);
+                  fprintf(f, "# Up: %f\n", up);
+                  fprintf(f, "# N: %d\n", n);
+               
+                  map[wdb->GetSerialNumber()] = f;
                }
-               fprintf(f, "\n");
-               fprintf(f, "# PZC: ");
-               for(int iCh=0; iCh<16; iCh++){
-                  if(iCh>0)
-                     fprintf(f, ", ");
-                  fprintf(f, "%d", wdb->GetFePzc(iCh));
-               }
-               fprintf(f, "\n");
-               fprintf(f, "# PZC level: %d\n", wdb->GetDacPzcLevelN());
-               fprintf(f, "# Channel Polarity: %04x\n", wdb->GetTrgSrcPolarity() & 0xFFFF);
-               fprintf(f, "# Down: %f\n", down);
-               fprintf(f, "# Up: %f\n", up);
-               fprintf(f, "# N: %d\n", n);
-            
-               map[wdb->GetSerialNumber()] = f;
             }
          }
 
    return map;
 }
-void SetThreshold(WDSystem* sys, float v){
+void SetThreshold(WDSystem* sys, float v, std::string group=""){
    for(auto c : *sys)
       for(auto b :*c)
          if(b){
             WDWDB* wdb = dynamic_cast<WDWDB*>(b);
             if(wdb != nullptr){
-               wdb->SetDacTriggerLevelV(-1,v);
+               if(!group.length() || wdb->GetGroup() == group)
+                  wdb->SetDacTriggerLevelV(-1,v);
             }
          }
 
 }
 
-void SaveScalers(WDSystem* sys, std::map<short, FILE*>& files, float v){
+void SaveScalers(WDSystem* sys, std::map<short, FILE*>& files, float v, std::string group = ""){
    for(auto c : *sys)
       for(auto b :*c)
          if(b){
             WDWDB* wdb = dynamic_cast<WDWDB*>(b);
             if(wdb != nullptr){
-               wdb->SetScalerRst(1);
-               wdb->SetScalerRst(0);
+               if(!group.length() || wdb->GetGroup() == group){
+                  wdb->SetScalerRst(1);
+                  wdb->SetScalerRst(0);
+               }
             }
          }
 
@@ -178,12 +183,14 @@ void SaveScalers(WDSystem* sys, std::map<short, FILE*>& files, float v){
          if(b){
             WDWDB* wdb = dynamic_cast<WDWDB*>(b);
             if(wdb != nullptr){
-               FILE* f = files.at(wdb->GetSerialNumber());
-               std::vector<uint64_t> s;
-               wdb->GetScalers(s);
-               fprintf(f, "%f ", v);
-               for(int j=0; j<16; j++) fprintf(f,"%lld ", s[j]);
-               fprintf(f, "\n");
+               if(!group.length() || wdb->GetGroup() == group){
+                  FILE* f = files.at(wdb->GetSerialNumber());
+                  std::vector<uint64_t> s;
+                  wdb->GetScalers(s);
+                  fprintf(f, "%f ", v);
+                  for(int j=0; j<16; j++) fprintf(f,"%lld ", s[j]);
+                  fprintf(f, "\n");
+               }
             }
          }
 }
@@ -1179,6 +1186,8 @@ int main(int argc, char *argv[])
             int n = 60;
             float down = -0.040;
             float up = 0.020;
+            char group[256] = "";
+            char group_limit;
 
             printf("number of points: ");
             scanf("%d", &n);
@@ -1186,13 +1195,21 @@ int main(int argc, char *argv[])
             scanf("%f", &down);
             printf("end threshold (V): ");
             scanf("%f", &up);
+            printf("Limit to group (y/n): ");
+            scanf(" %c", &group_limit);
+            if(group_limit == 'y'){
+               printf("group (empty for all WDB): ");
+               scanf("%s",group);
+            }
 
-            std::map<short, FILE*> files = CreateScalerFiles(sys, n, down, up);
+            printf("Pedestal for group \"%s\"\n", group);
+
+            std::map<short, FILE*> files = CreateScalerFiles(sys, n, down, up, std::string(group));
             for(int i=0; i<n; i++) {
                float v = down + (up-down)*i/n;
                printf("%d/%d at %f V\n", i+1, n, v);
-               SetThreshold(sys, v);
-               SaveScalers(sys, files, v);
+               SetThreshold(sys, v, std::string(group));
+               SaveScalers(sys, files, v, std::string(group));
             }
             
             CloseScalerFile(files);
