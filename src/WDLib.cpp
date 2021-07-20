@@ -981,11 +981,7 @@ void WDWDB::ConfigurationStarted(){
 
    SetFeMux(-1, WDB::cFeMuxInput);
    SetTriggerOutPulseLength(4); // 4 clock shaping
-   //SetAdvTrgPedCfg(0x0124000A); // default pedestal subtraction config
-   //SetAdvTrgPedCfg(0x0120000A); // default pedestal subtraction config
-   //SetAdvTrgPedCfg(0x010A000A); // default pedestal subtraction config
-   //SetAdvTrgPedCfg(0x010A0018); // default pedestal subtraction config
-   SetAdvTrgPedCfg(0x0210000A); // default pedestal subtraction config
+   SetAdvTrgPedCfg(0x042B0004); // default pedestal subtraction config
 }
 
 void WDWDB::ConfigurationEnded(){
