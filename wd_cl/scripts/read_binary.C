@@ -83,8 +83,8 @@ void decode(const char *filename) {
    unsigned short adc_voltage[2048];
    unsigned char tdc_data[512];
    unsigned long trg_data[512];
-   unsigned long scaler_data[18], scaler_data_old[18] = {0};
-   unsigned long scaler_time, scaler_time_old = 0;
+   unsigned long scaler_data[18];
+   unsigned long scaler_time;
    bool triggered[18];
    Double_t header_array[4];
 
@@ -94,7 +94,9 @@ void decode(const char *filename) {
      UShort_t adc_waveform[16][2048];
      UChar_t tdc_waveform[16][512];
      ULong_t trigger_data[512];
-     Double_t scaler[18];
+     ULong_t scaler[16];
+     ULong_t event_time;
+     Double_t rate[16];
    } WDBDATA;
    std::map<unsigned short, WDBDATA> data;
 
@@ -102,6 +104,13 @@ void decode(const char *filename) {
      ULong_t in_waveform[16][128];
      ULong_t out_waveform[128];
      ULong_t gent_waveform[32];
+     UInt_t trigger_counter[64];
+     UInt_t trigger_type;
+     UInt_t total_time;
+     UInt_t live_time;
+     UInt_t event_counter;
+     UInt_t scifi_scaler[44];
+     UInt_t scifi_coincidence[441];
    } TCBDATA;
    std::map<unsigned short, TCBDATA> data_tcb;
 
@@ -166,7 +175,12 @@ void decode(const char *filename) {
          printf("Found data for board #%d\n", bh.board_serial_number);
 
          //branch output tree to house the data
-         rec->Branch(Form("board%02d", b), &data[bh.board_serial_number] ,"waveform[18][1024]/D:time[18][1024]/D:adc_waveform[16][2048]/s:tdc_waveform[16][512]/b:trigger_data[512]/l:scaler[18]/D");
+         rec->Branch(Form("board%02d", bh.board_serial_number), &data[bh.board_serial_number] ,"waveform[18][1024]/D:time[18][1024]/D:adc_waveform[16][2048]/s:tdc_waveform[16][512]/b:trigger_data[512]/l:scaler[16]/l:event_time/l:rate[16]/D");
+
+         //reset timers and scalers
+         for(int i=0; i<16; i++)
+            data[bh.board_serial_number].scaler[i]=0;
+         data[bh.board_serial_number].event_time=0;
 
          // read time bin widths
          memset(bins[bh.board_serial_number].bin_width, sizeof(WDBBIN), 0);
@@ -184,7 +198,7 @@ void decode(const char *filename) {
       } else if (memcmp(bh.bn, "T#", 2) == 0) {
          printf("expecting TCB %d\n", bh.board_serial_number);
          //branch output tree to house the data
-         rec->Branch(Form("tcb%02d", bh.board_serial_number), &data_tcb[bh.board_serial_number] ,"in_waveform[16][128]/l:out_waveform[128]/l:gent_waveform[32]/l");
+         rec->Branch(Form("tcb%02d", bh.board_serial_number), &data_tcb[bh.board_serial_number] ,"in_waveform[16][128]/l:out_waveform[128]/l:gent_waveform[32]/l:trigger_counter[64]/i:trigger_type/i:total_time/i:live_time/i:event_counter/i:scifi_scaler[44]/i:scifi_coincidence[441]/i");
       } else {
          // probably event header found
          fseek(f, -4, SEEK_CUR);
@@ -277,12 +291,14 @@ void decode(const char *filename) {
                   WDBDATA &this_data =  data[bh.board_serial_number];
                   fread(scaler_data, sizeof(long), 19, f);
                   fread(&scaler_time, sizeof(long), 1, f);
-                  for (int i=0 ; i<18 ; i++) {
-                     this_data.scaler[i] = (Double_t) (scaler_data[i]-scaler_data_old[i])/(scaler_time-scaler_time_old)/12.5e-9;
-                     scaler_data_old[i] = scaler_data[i];
-                     //printf("%d %f\n", i, this_data.scaler[i]);
+
+                  Double_t factor = 80e6 / (scaler_time - this_data.event_time);
+                  
+                  for (int i=0 ; i<16 ; i++) {
+                     this_data.rate[i] = (scaler_data[i+3]-this_data.scaler[i])*factor;
+                     this_data.scaler[i] = scaler_data[i+3];
                   }
-                  scaler_time_old = scaler_time;
+                  this_data.event_time = scaler_time;
                }
             }// end for channels
 
@@ -327,15 +343,22 @@ void decode(const char *filename) {
                      //printf("%016llx %08x %08x\n", val, temp[33+(i+temp[0])%32],  temp[1+(i+temp[0])%32]);
                      this_data.gent_waveform[i] = val;
                   }
+               } else if (bankName[0]=='T' && bankName[1]=='R' && bankName[2]=='G' && bankName[3]=='I'){
+                  this_data.trigger_type = temp[0];
+                  this_data.total_time = temp[3];
+                  this_data.live_time = temp[4];
+                  this_data.event_counter = temp[5];
                } else if (bankName[0]=='T' && bankName[1]=='R' && bankName[2]=='G' && bankName[3]=='C'){
+                  for(int i=0; i<bankSize; i++){
+                  //   printf("%4d: %08x\n", i, temp[i]);
+                     this_data.trigger_counter[i] = temp[i];
+                  }
+               } else if (bankName[0]=='T' && bankName[1]=='S' && bankName[2]=='C' && bankName[3]=='F'){ // SciFi
                   for(int i=0; i<bankSize; i++)
-                     printf("%4d: %08x\n", i, temp[i]);
-               } else if (bankName[0]=='T' && bankName[1]=='S' && bankName[2]=='C' && bankName[3]=='F'){
+                     this_data.scifi_scaler[i] = temp[i];
+               } else if (bankName[0]=='T' && bankName[1]=='S' && bankName[2]=='F' && bankName[3]=='C'){ // SciFi Coincidence
                   for(int i=0; i<bankSize; i++)
-                     printf("%4d: %08x\n", i, temp[i]);
-               } else if (bankName[0]=='T' && bankName[1]=='S' && bankName[2]=='F' && bankName[3]=='C'){
-                  for(int i=0; i<bankSize; i++)
-                     printf("%4d: %08x\n", i, temp[i]);
+                     this_data.scifi_coincidence[i] = temp[i];
                }
             }
          } else {
