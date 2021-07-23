@@ -2295,7 +2295,7 @@ void WDTCB::ConfigurePacketizer(Property &property){
 
       inst.offset += 1;
       inst.cmd = ::COPY;
-      inst.arg0 = RTOTTIME;
+      inst.arg0 = RLIVETIME;
       inst.arg1 = bufptr++;
       instVec.push_back(inst);
 
@@ -2324,7 +2324,7 @@ void WDTCB::ConfigurePacketizer(Property &property){
 
       inst.offset += 1;
       inst.cmd = ::COPY;
-      inst.arg0 = RTOTTIME;
+      inst.arg0 = RLIVETIME;
       inst.arg1 = bufptr++;
       instVec.push_back(inst);
 
