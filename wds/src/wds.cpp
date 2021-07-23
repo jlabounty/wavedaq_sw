@@ -732,15 +732,24 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
                   result = "No board found to upload";
                }
             } else {
-               auto b = dcb->GetWDB(slot);
-               if (b != nullptr && b->GetBoardRevision() == 4) // Rev. E
-                  result = dcb->UploadStart(slot, 4, flags);
-               else if (b != nullptr && b->GetBoardRevision() == 5) // Rev. F
-                  result = dcb->UploadStart(slot, 5, flags);
-               else if (b != nullptr && b->GetBoardRevision() == 6) // Rev. G
-                  result = dcb->UploadStart(slot, 6, flags);
-               else
-                  result = dcb->UploadStart(slot, 6, flags); // use G for empty board
+               if(dcb->GetBoardId(slot)->type_id == BRD_TYPE_ID_WDB || dcb->GetBoardId(slot)->type_id == BRD_TYPE_ID_BLANK){
+                  auto b = dcb->GetWDB(slot);
+                  if (b != nullptr && b->GetBoardRevision() == 4) // Rev. E
+                     result = dcb->UploadStart(slot, 4, flags);
+                  else if (b != nullptr && b->GetBoardRevision() == 5) // Rev. F
+                     result = dcb->UploadStart(slot, 5, flags);
+                  else if (b != nullptr && b->GetBoardRevision() == 6) // Rev. G
+                     result = dcb->UploadStart(slot, 6, flags);
+                  else
+                     result = dcb->UploadStart(slot, 6, flags); // use G for empty board
+               } else if(dcb->GetBoardId(slot)->type_id == BRD_TYPE_ID_TCB){
+                  result = dcb->UploadStart(slot, 0, flags);
+               } else {
+                  if (gl->verbose)
+                     std::cout << "No board found to upload" << std::endl;
+                  gl->progressMode = GLOBALS::finished;
+                  result = "No board found to upload";
+               }
             }
          }
 
