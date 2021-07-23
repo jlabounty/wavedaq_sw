@@ -1770,7 +1770,8 @@ void WDTCB::ConfigurationStarted(){
    SetPacketizerEnable(true);
    SetPacketizerBus(true);
    SetReadoutEnable(true);
-   unsigned int val = 0;
+   unsigned int val = 350;
+   //unsigned int val = 0;
    SetMaxPayload(&val);
 }
 
@@ -2003,6 +2004,36 @@ void WDTCB::ConfigurePacketizer(Property &property){
      bufptr++;
      
      nbank++;
+   }
+   if(list.find("INPUT")!=std::string::npos){
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 0x54494e50;//TINP
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = fnserdes*2*MEMDIM+1;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RMEMADDR;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::BLOCK_COPY;
+      inst.arg0 = MEMBASEADDR;
+      inst.arg1 = bufptr;
+      inst.arg2 = 2*MEMDIM*fnserdes;
+      instVec.push_back(inst);
+      inst.arg2 = 0;
+
+      bufptr += 2*MEMDIM*fnserdes;
+      nbank++;
    }
    if(list.find("TRGC")!=std::string::npos){
       inst.offset += 1;
@@ -2269,8 +2300,6 @@ void WDTCB::ConfigurePacketizer(Property &property){
       instVec.push_back(inst);
 
       nbank++;
-   }
-   if(list.find("SCIFI")!=std::string::npos){
       inst.offset += 1;
       inst.cmd = ::DIRECT_WRITE;
       inst.arg0 = 0x54534643;//TSFC
