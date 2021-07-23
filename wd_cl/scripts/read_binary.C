@@ -269,6 +269,7 @@ void decode(const char *filename) {
                      WDBDATA &this_data =  data[bh.board_serial_number];
                      for(int i=0; i<512; i++){
                         this_data.trigger_data[i] = trg_data[i];
+                        //printf("%x\n", trg_data[i]);
                      }
                   }
                } else if(ch.c[0] == 'S') {
@@ -279,6 +280,7 @@ void decode(const char *filename) {
                   for (int i=0 ; i<18 ; i++) {
                      this_data.scaler[i] = (Double_t) (scaler_data[i]-scaler_data_old[i])/(scaler_time-scaler_time_old)/12.5e-9;
                      scaler_data_old[i] = scaler_data[i];
+                     //printf("%d %f\n", i, this_data.scaler[i]);
                   }
                   scaler_time_old = scaler_time;
                }
@@ -297,19 +299,25 @@ void decode(const char *filename) {
                fread(&bankName, sizeof(char), 4, f);
                fread(&bankSize, sizeof(bankSize), 1, f);
                printf("tcb %d: got bank %c%c%c%c size:%u\n", bh.board_serial_number, bankName[0], bankName[1], bankName[2], bankName[3], bankSize);
-               unsigned int temp[1000];
+               unsigned int temp[8184];
                fread(&temp, sizeof(unsigned int), bankSize, f);
-               for(int i=0; i<bankSize; i++)
-                  printf("%4d: %08x\n", i, temp[i]);
+               //for(int i=0; i<bankSize; i++)
+               //   printf("%4d: %08x\n", i, temp[i]);
 
-               if(bankName[0]=='I' && bankName[1]=='N'){
-                  int serdesNumber = (bankName[2]-'0')*10+(bankName[3]-'0');
-                  for(int i=0; i<128; i++){
-                     uint64_t val = temp[129+(i+temp[0])%128];
-                     val = val <<32;
-                     val |= temp[1+(i+temp[0])%128];
-                     this_data.in_waveform[serdesNumber][i] = val;
-                     //printf("%016llx %08x %08x\n", val, temp[129+(i+temp[0])%128],  temp[1+(i+temp[0])%128]);
+               if(bankName[0]=='T' && bankName[1]=='I' && bankName[2]=='N' && bankName[3]=='P'){
+                  int i=1;
+                  int nserdes = 0;
+                  while(i<bankSize){
+                     printf("serdes %d:\n", nserdes);
+                     for(int j=0; j<128; j++){
+                        uint64_t val = temp[i+128+(j+temp[0])%128];
+                        val = val <<32;
+                        val |= temp[i+(j+temp[0])%128];
+                        this_data.in_waveform[nserdes][j] = val;
+                        //printf("%016llx %08x %08x\n", val, temp[i+128+(j+temp[0])%128],  temp[i+(j+temp[0])%128]);
+                     }
+                     nserdes++;
+                     i+=128*2;
                   }
                } else if (bankName[0]=='G' && bankName[1]=='E' && bankName[2]=='N' && bankName[3]=='T'){
                   for(int i=0; i<32; i++){
@@ -319,6 +327,15 @@ void decode(const char *filename) {
                      //printf("%016llx %08x %08x\n", val, temp[33+(i+temp[0])%32],  temp[1+(i+temp[0])%32]);
                      this_data.gent_waveform[i] = val;
                   }
+               } else if (bankName[0]=='T' && bankName[1]=='R' && bankName[2]=='G' && bankName[3]=='C'){
+                  for(int i=0; i<bankSize; i++)
+                     printf("%4d: %08x\n", i, temp[i]);
+               } else if (bankName[0]=='T' && bankName[1]=='S' && bankName[2]=='C' && bankName[3]=='F'){
+                  for(int i=0; i<bankSize; i++)
+                     printf("%4d: %08x\n", i, temp[i]);
+               } else if (bankName[0]=='T' && bankName[1]=='S' && bankName[2]=='F' && bankName[3]=='C'){
+                  for(int i=0; i<bankSize; i++)
+                     printf("%4d: %08x\n", i, temp[i]);
                }
             }
          } else {

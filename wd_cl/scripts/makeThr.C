@@ -10,6 +10,7 @@ typedef struct {
    std::string crateName = "CRATE";
    unsigned int chnPolarity;
    float thr[16];
+   float rateAtThr[16];
    bool written = false;
    bool bad[16];
 } boardData;
@@ -19,7 +20,7 @@ void printBoard(ofstream &outfile, boardData &b){
    bool badChn = false;
    //cout << "Board "<< b.boardName << "\n";
    outfile << "<WDB Name=\"" << b.boardName << "\" Slot=\""<< b.slot <<"\">"<< std::endl;
-   outfile << "<TriggerLevel>" << std::endl;
+   outfile << "<TriggerLevel>";
    for(int i=0; i<16; i++){
       //cout << b.thr[i];
       outfile << b.thr[i];
@@ -33,14 +34,14 @@ void printBoard(ofstream &outfile, boardData &b){
          outfile << ", ";
       }
    }
-   outfile << std::endl << "</TriggerLevel>" << std::endl;
+   outfile << "</TriggerLevel>" << std::endl;
    outfile << "</WDB>"<< std::endl;
    //cout << "\n";
    if(badChn){
       cout << "Bad Channel on Board "<< b.boardName << "\n";
       for(int i=0; i<16; i++){
          if(b.bad[i]){
-            cout << "Channel " << i << " thr " << b.thr[i] << "\n";
+            cout << "\tChannel " << i << ", thr " << b.thr[i] << " V, rate "<< b.rateAtThr[i]<< "\n";
          }
       }
    }
@@ -173,14 +174,6 @@ void makeThr(string dirname="./", double absoluteThr = 0.01 ){
                   }
 
                   h->Fit(fgau, "Q");
-                  if(fgau->GetParameter(2) > 0.001){
-                     noped++;
-                     board.bad[i] = true;
-                     printf("!!");
-                  } else {
-                     board.bad[i] = false;
-                  }
-
                   hMean->Fill(fgau->GetParameter(1));
                   hSigma->Fill(fgau->GetParameter(2));
 
@@ -194,6 +187,17 @@ void makeThr(string dirname="./", double absoluteThr = 0.01 ){
                      //thr += nsigma*fgau->GetParameter(2);
                      thr += absoluteThr;
                   }
+
+                  Int_t bin = h->FindBin(thr);
+                  board.rateAtThr[i] = h->GetBinContent(bin);
+                  if(board.rateAtThr[i]>10){
+                     noped++;
+                     board.bad[i] = true;
+                     printf("!!");
+                  } else {
+                     board.bad[i] = false;
+                  }
+
 
                   printf("%2d: %lf %lf -> %lf\n", i,  fgau->GetParameter(1), fgau->GetParameter(2), thr);
                   board.thr[i] = thr;
