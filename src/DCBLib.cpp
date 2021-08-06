@@ -577,6 +577,9 @@ std::string DCB::UploadProgress() {
       res = r;
    } while (true);
 
+   if (res.back() == '\n')
+      res.pop_back();
+
    return res;
 }
 

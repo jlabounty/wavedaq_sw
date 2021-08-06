@@ -1177,7 +1177,8 @@ function uploadCurrent(flag) {
    let req = new XMLHttpRequest();
    req.onreadystatechange = function () {
       if (req.readyState === 4 && req.status === 200) {
-         if (req.responseText !== "OK\n")
+         let r = JSON.parse(req.responseText);
+         if (r.Status !== "OK")
             dlgAlert(req.responseText);
          else {
             document.getElementById("progressComment").innerHTML = "Uploading slot ";
@@ -1233,7 +1234,8 @@ function upload() {
    let req = new XMLHttpRequest();
    req.onreadystatechange = function () {
       if (req.readyState === 4 && req.status === 200) {
-         if (req.responseText !== "OK\n")
+         let r = JSON.parse(req.responseText);
+         if (r.Status !== "OK")
             dlgAlert(req.responseText);
          else {
             dlgHide("dlgUpload");
