@@ -1843,6 +1843,9 @@ void connectWDB(GLOBALS *gl, WDB *b) {
 
    // obtain soft auto trigger mode from board
    gl->triggerMode = b->GetDaqSoftNormal() ? cTriggerModeNormal : cTriggerModeAuto;
+
+   // set ADC valid delay 11=ADC latency
+   b->SetValidDelayAdc(11+7);
 }
 
 void connectDCB(GLOBALS *gl, DCB *dcb) {
