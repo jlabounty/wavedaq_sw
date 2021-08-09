@@ -5,7 +5,7 @@
 #  Project :  WaveDream2
 #
 #  Author  :  schmid_e (Author of generation script)
-#  Created :  11.05.2021 14:04:48
+#  Created :  09.08.2021 13:10:56
 #
 #  Register Layout Version :  9
 #
@@ -275,7 +275,7 @@ WD2_SLOT_ID_OFS                          =                                 0
 
 
 
-# ****** Control Register 1 [0x1004]: CTRL - DAQ control register (Default: 0x14200780) ******
+# ****** Control Register 1 [0x1004]: CTRL - DAQ control register (Default: 0x122D0780) ******
 
 # VALID_DELAY_ADC - Delay of the data valid at the ISERDES of the ADCs (delay = value + 1)
 WD2_VALID_DELAY_ADC_REG                  =                      WD2_REG_CTRL
@@ -340,6 +340,11 @@ WD2_DAQ_SINGLE_OFS                       =                                 0
 
 
 # ****** Control Register 2 [0x1008]: CAL_CTRL - Clock and Calibration Control (Default: 0x00000000) ******
+
+# ADC_CAL_PATTERN_EN - Enable ADC calibration pattern
+WD2_ADC_CAL_PATTERN_EN_REG               =                  WD2_REG_CAL_CTRL
+WD2_ADC_CAL_PATTERN_EN_MASK              =                        0x01000000
+WD2_ADC_CAL_PATTERN_EN_OFS               =                                24
 
 # DRS_0_TIMING_REF_SEL - Select timing reference signal for DRS 0: 0 = oscillator / 1 = LMK (CAL_CTRL_A)
 WD2_DRS_0_TIMING_REF_SEL_REG             =                  WD2_REG_CAL_CTRL
@@ -4463,6 +4468,7 @@ wd2_bit_group_list = [
   [ "DAQ_AUTO"                      , WD2_DAQ_AUTO_REG                      , WD2_DAQ_AUTO_MASK                      , WD2_DAQ_AUTO_OFS                     , "Auto-Trigger readout state machine every 0.5s if no other trigger (like \"auto\" acquisition on scope)" ],
   [ "DAQ_NORMAL"                    , WD2_DAQ_NORMAL_REG                    , WD2_DAQ_NORMAL_MASK                    , WD2_DAQ_NORMAL_OFS                   , "Restart readout state machine automatically after readout (like \"normal\" acquisition on scope)" ],
   [ "DAQ_SINGLE"                    , WD2_DAQ_SINGLE_REG                    , WD2_DAQ_SINGLE_MASK                    , WD2_DAQ_SINGLE_OFS                   , "Start readout state machine automatically and stop after readout (like \"single\" acquisition on scope)" ],
+  [ "ADC_CAL_PATTERN_EN"            , WD2_ADC_CAL_PATTERN_EN_REG            , WD2_ADC_CAL_PATTERN_EN_MASK            , WD2_ADC_CAL_PATTERN_EN_OFS           , "Enable ADC calibration pattern" ],
   [ "DRS_0_TIMING_REF_SEL"          , WD2_DRS_0_TIMING_REF_SEL_REG          , WD2_DRS_0_TIMING_REF_SEL_MASK          , WD2_DRS_0_TIMING_REF_SEL_OFS         , "Select timing reference signal for DRS 0: 0 = oscillator / 1 = LMK (CAL_CTRL_A)" ],
   [ "DRS_1_TIMING_REF_SEL"          , WD2_DRS_1_TIMING_REF_SEL_REG          , WD2_DRS_1_TIMING_REF_SEL_MASK          , WD2_DRS_1_TIMING_REF_SEL_OFS         , "Select timing reference signal for DRS 1: 0 = oscillator / 1 = LMK  (CAL_CTRL_B)" ],
   [ "CALIB_BUFFER_EN"               , WD2_CALIB_BUFFER_EN_REG               , WD2_CALIB_BUFFER_EN_MASK               , WD2_CALIB_BUFFER_EN_OFS              , "Enable buffers driving the calib. signal to the frontend MUX (BUFFER_CTRL)" ],
@@ -5057,7 +5063,7 @@ wd2_bit_group_list = [
 #
 
 ctrl_reg_default = [0xFFFFFFFF,   # Offset 0x1000 
-                    0x14200780,   # Offset 0x1004 
+                    0x122D0780,   # Offset 0x1004 
                     0x00000000,   # Offset 0x1008 
                     0x00025050,   # Offset 0x100C 
                     0x00FFFFFF,   # Offset 0x1010 

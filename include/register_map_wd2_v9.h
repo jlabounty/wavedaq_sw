@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  11.05.2021 14:04:48
+ *  Created :  09.08.2021 13:10:56
  *
  *  Register Layout Version :  9
  *
@@ -287,7 +287,7 @@
 
 
 
-/* ****** Control Register 1 [0x1004]: CTRL - DAQ control register (Default: 0x14200780) ****** */
+/* ****** Control Register 1 [0x1004]: CTRL - DAQ control register (Default: 0x122D0780) ****** */
 
 /* VALID_DELAY_ADC - Delay of the data valid at the ISERDES of the ADCs (delay = value + 1) */
 #define WD2_VALID_DELAY_ADC_REG                                       WD2_REG_CTRL
@@ -352,6 +352,11 @@
 
 
 /* ****** Control Register 2 [0x1008]: CAL_CTRL - Clock and Calibration Control (Default: 0x00000000) ****** */
+
+/* ADC_CAL_PATTERN_EN - Enable ADC calibration pattern */
+#define WD2_ADC_CAL_PATTERN_EN_REG                                WD2_REG_CAL_CTRL
+#define WD2_ADC_CAL_PATTERN_EN_MASK                                     0x01000000
+#define WD2_ADC_CAL_PATTERN_EN_OFS                                              24
 
 /* DRS_0_TIMING_REF_SEL - Select timing reference signal for DRS 0: 0 = oscillator / 1 = LMK (CAL_CTRL_A) */
 #define WD2_DRS_0_TIMING_REF_SEL_REG                              WD2_REG_CAL_CTRL

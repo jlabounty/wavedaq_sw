@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  11.05.2021 14:04:48
+ *  Created :  09.08.2021 13:10:56
  *
  *  Register Layout Version :  9
  *
@@ -514,6 +514,7 @@ const wd2_bit_group_entry_type  wd2_bit_group_list[] = {
   { "DAQ_AUTO"                      , WD2_DAQ_AUTO_REG                      , WD2_DAQ_AUTO_MASK                      , WD2_DAQ_AUTO_OFS                      },
   { "DAQ_NORMAL"                    , WD2_DAQ_NORMAL_REG                    , WD2_DAQ_NORMAL_MASK                    , WD2_DAQ_NORMAL_OFS                    },
   { "DAQ_SINGLE"                    , WD2_DAQ_SINGLE_REG                    , WD2_DAQ_SINGLE_MASK                    , WD2_DAQ_SINGLE_OFS                    },
+  { "ADC_CAL_PATTERN_EN"            , WD2_ADC_CAL_PATTERN_EN_REG            , WD2_ADC_CAL_PATTERN_EN_MASK            , WD2_ADC_CAL_PATTERN_EN_OFS            },
   { "DRS_0_TIMING_REF_SEL"          , WD2_DRS_0_TIMING_REF_SEL_REG          , WD2_DRS_0_TIMING_REF_SEL_MASK          , WD2_DRS_0_TIMING_REF_SEL_OFS          },
   { "DRS_1_TIMING_REF_SEL"          , WD2_DRS_1_TIMING_REF_SEL_REG          , WD2_DRS_1_TIMING_REF_SEL_MASK          , WD2_DRS_1_TIMING_REF_SEL_OFS          },
   { "CALIB_BUFFER_EN"               , WD2_CALIB_BUFFER_EN_REG               , WD2_CALIB_BUFFER_EN_MASK               , WD2_CALIB_BUFFER_EN_OFS               },
@@ -1110,7 +1111,7 @@ const wd2_bit_group_entry_type  wd2_bit_group_list[] = {
 
 const unsigned int ctrl_reg_default[] = {
   0xFFFFFFFF,   /* Offset 0x1000 */
-  0x14200780,   /* Offset 0x1004 */
+  0x122D0780,   /* Offset 0x1004 */
   0x00000000,   /* Offset 0x1008 */
   0x00025050,   /* Offset 0x100C */
   0x00FFFFFF,   /* Offset 0x1010 */

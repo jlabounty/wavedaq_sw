@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  11.05.2021 14:04:52
+// Created :  09.08.2021 13:11:43
 //
 // Register Layout Versions :  8, 9
 //
@@ -2400,6 +2400,43 @@ public:
             return 0x0044;
          default:
             throw std::invalid_argument("Function GetAdc1SpeedLoc() not defined for this board version");
+      };
+   };
+
+   // Bit(s) ADC_CAL_PATTERN_EN
+   unsigned int GetAdcCalPatternEn()
+   {
+      switch(this->mVersion)
+      {
+         case 9:
+            // Enable ADC calibration pattern
+            return BitExtractControl(0x1008, 0x01000000, 24);
+         default:
+            throw std::invalid_argument("Function GetAdcCalPatternEn() not defined for this board version");
+      };
+   };
+   void SetAdcCalPatternEn(unsigned int value)
+   {
+      switch(this->mVersion)
+      {
+         case 9:
+            // Enable ADC calibration pattern
+            return SetRegMask(0x1008, 0x01000000, 24, value);
+         default:
+            throw std::invalid_argument("Function SetAdcCalPatternEn() not defined for this board version");
+      };
+   };
+   unsigned int GetAdcCalPatternEnLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
+   {
+      switch(this->mVersion)
+      {
+         case 9:
+            // Enable ADC calibration pattern
+            if(BitMask) *BitMask = 0x01000000;
+            if(BitOfs) *BitOfs = 24;
+            return 0x1008;
+         default:
+            throw std::invalid_argument("Function GetAdcCalPatternEnLoc() not defined for this board version");
       };
    };
 
