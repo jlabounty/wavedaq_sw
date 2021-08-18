@@ -139,6 +139,8 @@
 #define TCMEMBASE     0x15000                   // TC memories base address (2 memories)
 #define ALFAMEMBASE   0x16000                   // ALFA memories base address (2 memories)
 #define CDCHMEMBASE   0x17000                   // CDCH memories base address (2 memories)
+#define MPPCMEMBASE   0x18000                   // XEC MPPC memory base address (1 memory)
+#define PMTMEMBASE    0x18800                   // XEC PMT memory base address (1 memory)
 
 #define SCIFICOINCBASE     0x00800000           //SCIFI fiber coincidence base address (441)
 
