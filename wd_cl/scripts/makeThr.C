@@ -217,15 +217,42 @@ void makeThr(string dirname="./", double absoluteThr = 0.01 ){
 
                //edge for WD2F
                } else if (board.version == 'F' || board.version == 'E'){
-                  peds[i] = -100;
+                  //peds[i] = -100;
                   TH1F *h = new TH1F(Form("%s-%d", board.boardName.c_str(), i), Form("%s-%d", board.boardName.c_str(), i), thrs.size()-1, thrs.data());
                   for(int j=0; j<scals[i].size(); j++){
                      h->SetBinContent(j+1, scals[i][j]);
                   }
                   h->Write(Form("%s-%d", board.boardName.c_str(), i));
+
+                  float thr = h->GetMean();
+                  if(board.chnPolarity & (1<<i)){
+                     //negative threshold
+                     //thr -= nsigma*fgau->GetParameter(2);
+                     thr -= absoluteThr;
+                  } else {
+                     //positive threshold
+                     //thr += nsigma*fgau->GetParameter(2);
+                     thr += absoluteThr;
+                  }
+
+                  Int_t bin = h->FindBin(thr);
+                  board.rateAtThr[i] = h->GetBinContent(bin);
+                  if(board.rateAtThr[i]>10){
+                     noped++;
+                     board.bad[i] = true;
+                     printf("!!");
+                  } else {
+                     board.bad[i] = false;
+                  }
+
+
+                  printf("%2d: %lf %lf -> %lf\n", i,  fgau->GetParameter(1), fgau->GetParameter(2), thr);
+                  board.thr[i] = thr;
+                  hThr->Fill(thr);
+
                   delete h;
 
-                  for(int j=0; j<scals[i].size(); j++){
+                  /*for(int j=0; j<scals[i].size(); j++){
                      if (peds[i] == -100 && scals[i][j]>2000){
                         peds[i] = thrs[j];
                      }
@@ -238,7 +265,7 @@ void makeThr(string dirname="./", double absoluteThr = 0.01 ){
                      printf("%2d: no ped\n", i);
                      board.thr[i] = fallbackThr;
                      noped++;
-                  }
+                  }*/
                }
                
             }
