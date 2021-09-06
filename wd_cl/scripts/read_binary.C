@@ -330,7 +330,7 @@ void decode(const char *filename) {
                         val = val <<32;
                         val |= temp[i+(j+temp[0])%128];
                         this_data.in_waveform[nserdes][j] = val;
-                        //printf("%016llx %08x %08x\n", val, temp[i+128+(j+temp[0])%128],  temp[i+(j+temp[0])%128]);
+                        //printf("%016lx %08x %08x\n", val, temp[i+128+(j+temp[0])%128],  temp[i+(j+temp[0])%128]);
                      }
                      nserdes++;
                      i+=128*2;
@@ -353,6 +353,12 @@ void decode(const char *filename) {
                   //   printf("%4d: %08x\n", i, temp[i]);
                      this_data.trigger_counter[i] = temp[i];
                   }
+               } else if (bankName[0]=='T' && bankName[1]=='X' && bankName[2]=='E' && bankName[3]=='C'){
+                  /*printf("TXEC:\n");
+                  int tc = temp[0];
+                  for(int i=0; i<(bankSize-1)/2; i++){
+                     printf("%4d: %08x %08X\n", i, temp[(i+tc)%128+1], temp[(i+tc)%128+129]);
+                  }*/
                } else if (bankName[0]=='T' && bankName[1]=='S' && bankName[2]=='C' && bankName[3]=='F'){ // SciFi
                   for(int i=0; i<bankSize; i++)
                      this_data.scifi_scaler[i] = temp[i];
@@ -403,6 +409,7 @@ void decode(const char *filename) {
       // fill root tree
       rec->Fill();
 
+      //getchar();
 
    }// end loop on events
 
