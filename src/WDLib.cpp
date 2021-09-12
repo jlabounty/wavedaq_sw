@@ -981,7 +981,7 @@ void WDWDB::ConfigurationStarted(){
 
    SetFeMux(-1, WDB::cFeMuxInput);
    SetTriggerOutPulseLength(4); // 4 clock shaping
-   SetAdvTrgPedCfg(0x042B0008); // default pedestal subtraction config
+   SetAdvTrgPedCfg(0x042B0004); // default pedestal subtraction config
 }
 
 void WDWDB::ConfigurationEnded(){
@@ -1189,7 +1189,8 @@ void WDWDB::ConfigureTimingReference(Property &property) {
 void WDWDB::ConfigureTriggerAlgorithm(Property &property) {
    unsigned char algorithm;
    algorithm = property.GetUInt();
-   SetAdvTrgCtrl(0x00000A03 | ((algorithm & 0xF) << 4) );//ZeroSuppr, TDCPolarity, FADCMODE, RUNMODE
+   SetAdvTrgCtrl(0x00000203 | ((algorithm & 0xF) << 4) );//TDCPolarity, FADCMODE, RUNMODE
+   //SetAdvTrgCtrl(0x00000A03 | ((algorithm & 0xF) << 4) );//ZeroSuppr, TDCPolarity, FADCMODE, RUNMODE
 }
 
 void WDWDB::ConfigureTriggerGain(Property &property) {
@@ -1276,7 +1277,7 @@ void WDWDB::ConfigureTriggerTdcOffset(Property &property) {
    } else
       throw std::runtime_error("TriggerTdcOffset size should be 1 or 16 values");
 
-   for(int i=0; i<1; i++){
+   for(int i=0; i<2; i++){
       unsigned int calib=0;
       for (int j=0 ; j<8 ; j++){
          unsigned int temp = trg_offset[i*8+j];
