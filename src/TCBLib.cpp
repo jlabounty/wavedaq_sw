@@ -1761,13 +1761,13 @@ void TCB::SetTCSectorMergeThreshold(u_int32_t *low, u_int32_t* high)
 // TC Time offset wrt XEC
 void TCB::SetTCTimeOffset(u_int32_t *value)
 {
-   if ((fidcode>>12)!=2) printf("setting Crate TC Time Offset on TCB %4x!!!!!\n", fidcode);
+   if ((fidcode>>12)!=3) printf("setting Crate TC Time Offset on TCB %4x!!!!!\n", fidcode);
    WriteReg(RTCOFFSET,value);
 }
-// TC Time offset wrt XEC
+// TC Track masks
 void TCB::SetTCTrackMask(u_int32_t *value)
 {
-   if ((fidcode>>12)!=2) printf("setting Crate TC Track Mask on TCB %4x!!!!!\n", fidcode);
+   if ((fidcode>>12)!=3) printf("setting Crate TC Track Mask on TCB %4x!!!!!\n", fidcode);
    WriteReg(RTCTRACKMASK,value);
 }
 // BGO QSUM Threshold
