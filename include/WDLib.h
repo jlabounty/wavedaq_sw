@@ -430,6 +430,8 @@ class WDTCB : public TCB, public WDBoard {
       void ConfigurePacketizer(Property &property);
       void ConfigureExtDAQ(Property &property);
       void ConfigureDetectorDelay(Property &property);
+      void ConfigureTdcDelay(Property &property);
+      void ConfigureCombinedConditionDelay(Property &property);
       void ConfigureTimeNarrowThreshold(Property &property);
       void ConfigureTimeWideThreshold(Property &property);
       void ConfigureXecHighThreshold(Property &property);
@@ -445,6 +447,7 @@ class WDTCB : public TCB, public WDBoard {
       void ConfigureTcMultiplicityThreshold(Property &property);
       void ConfigureTcCrateMergeThreshold(Property &property);
       void ConfigureTcSectorMergeThreshold(Property &property);
+      void ConfigureTcTimeOffset(Property &property);
       void ConfigureCdchMask(Property &property);
       void ConfigureCdchUSMultiplicityThreshold(Property &property);
       void ConfigureCdchDSMultiplicityThreshold(Property &property);

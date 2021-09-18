@@ -1621,6 +1621,10 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureExtDAQ(property);
    } else if(name=="DetectorDelay"){
       ConfigureDetectorDelay(property);
+   } else if(name=="TdcDelay"){
+      ConfigureTdcDelay(property);
+   } else if(name=="CombinedConditionDelay"){
+      ConfigureCombinedConditionDelay(property);
    } else if(name=="TimeNarrowThreshold"){
       ConfigureTimeNarrowThreshold(property);
    } else if(name=="TimeWideThreshold"){
@@ -1651,6 +1655,8 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureTcCrateMergeThreshold(property);
    } else if(name=="TcSectorMergeThreshold"){
       ConfigureTcSectorMergeThreshold(property);
+   } else if(name=="TcTimeOffset"){
+      ConfigureTcTimeOffset(property);
    } else if(name=="CdchMask"){
       ConfigureCdchMask(property);
    } else if(name=="CdchUSMultiplicityThreshold"){
@@ -2447,6 +2453,52 @@ void WDTCB::ConfigureDetectorDelay(Property &property){
    
 }
 
+void WDTCB::ConfigureTdcDelay(Property &property){
+   int64_t arraySize = 0;
+   const unsigned int* dlys;
+
+   dlys = property.GetUIntVector(&arraySize);
+   if(arraySize == 2){
+      bool enable[2];
+      u_int32_t val[2];
+      for(int i=0; i<2; i++){
+         if(dlys[i] == 0){
+            enable[i] = false;
+            val[i] = 0;
+         } else {
+            enable[i] = true;
+            val[i] = dlys[i]-1;
+         }
+      }
+      SetTdcDelay(enable, val);
+   } else
+      throw std::runtime_error("TdcDelay size should be 2 values");
+   
+}
+
+void WDTCB::ConfigureCombinedConditionDelay(Property &property){
+   int64_t arraySize = 0;
+   const unsigned int* dlys;
+
+   dlys = property.GetUIntVector(&arraySize);
+   if(arraySize == 2){
+      bool enable[2];
+      u_int32_t val[2];
+      for(int i=0; i<2; i++){
+         if(dlys[i] == 0){
+            enable[i] = false;
+            val[i] = 0;
+         } else {
+            enable[i] = true;
+            val[i] = dlys[i]-1;
+         }
+      }
+      SetCombinedConditionDelay(enable, val);
+   } else
+      throw std::runtime_error("TdcDelay size should be 2 values");
+   
+}
+
 void WDTCB::ConfigureTimeNarrowThreshold(Property &property){
    unsigned int timenarrow;
    timenarrow = property.GetUHex();
@@ -2609,6 +2661,13 @@ void WDTCB::ConfigureTcSectorMergeThreshold(Property &property){
       SetTCSectorMergeThreshold((unsigned int*)thresholds, (unsigned int*)thresholds+1);
    } else
       throw std::runtime_error("TcSectorMergeThreshold size should be 2 values");
+}
+
+void WDTCB::ConfigureTcTimeOffset(Property &property){
+   unsigned int timeoffset;
+   timeoffset = property.GetInt();
+
+   SetTCTimeOffset(&timeoffset);
 }
 
 void WDTCB::ConfigureCdchMask(Property &property){

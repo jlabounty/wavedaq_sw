@@ -63,6 +63,7 @@
 #define RQLTHR             0x606      // sum threshold low
 #define RQCTHR             0x607      // sum threshold cosmic
 #define RLXePATCHID        0x608      // LXe patch request
+#define RTCOFFSET          0x609      // TC time offset in TDC units
 #define RTIMEN             0x60A      // Time Difference threshold Narrow
 #define RTIMEW             0x60B      // Time Difference threshold Wide
 #define RTCMERGEH          0x60C      // TC high threshold for hit merge
@@ -112,6 +113,9 @@
 #define RCDCHMULTTHR       0x640      // CDCH HIT MULTIPLICITY THRESHOLD
 #define RLOLXMASK          0x641      // LoLX HIT MASKS
 #define RLOLXMAJVAL        0x642      // LoLX MAJORITY VALUES
+#define RTCTRACKMASK       0x643      // TC masks on reconstructed tracks, high to enable mask: bit [3:0]
+#define RTDCDLY            0x644      // TDC Delay for different detectors: XEC bit [7:0], TC bit [15:8]
+#define RCOMBDLY           0x645      // Delay for combined triggers: Time bit [7:0], Direction Match bit [15:8]
 #define RFIBCOUNTER        0x700      // SCIFI fiber event counter address (42 values)
 #define RSINGLECRATECFG    0x800      // configurations for single crate trigger logic
 #define RSINGLEISVETO      0x801      // veto set for input channels in single crate logic
@@ -494,6 +498,8 @@ public:
 
    //trigger-specific calls
    void SetDetectorDelay(bool *enable, u_int32_t* value);
+   void SetTdcDelay(bool* enable, u_int32_t*value);
+   void SetCombinedConditionDelay(bool* enable, u_int32_t*value);
    // Set waveform sum trigger threshold
    void SetSumHighThreshold(u_int32_t*);
    void SetSumLowThreshold(u_int32_t*);
@@ -515,6 +521,8 @@ public:
    void SetTCMultiplicityThreshold(u_int32_t*);
    void SetTCCrateMergeThreshold(u_int32_t*, u_int32_t*);
    void SetTCSectorMergeThreshold(u_int32_t*, u_int32_t*);
+   void SetTCTimeOffset(u_int32_t*);
+   void SetTCTrackMask(u_int32_t*);
    //Set BGO Stuff
    void SetBGOThreshold(u_int32_t *);
    void SetBGOVetoThreshold(u_int32_t *);

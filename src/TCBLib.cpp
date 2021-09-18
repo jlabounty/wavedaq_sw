@@ -1629,6 +1629,32 @@ void TCB::SetDetectorDelay(bool *enable, u_int32_t* value){
    WriteReg(RDETECTORDLY1, &dly1);
 }
 
+// detector tdc delays
+void TCB::SetTdcDelay(bool *enable, u_int32_t* value){
+   if ((fidcode>>12)!=3) printf("setting Tdc delays on TCB %4x!!!!!\n", fidcode);
+   else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
+   
+   u_int32_t dly = 0;
+   for(int iDly=0; iDly<2; iDly++){
+      dly |= (value[iDly] & 0x1F) << (8*iDly);
+      if(enable[iDly]) dly |= 0x1 << (8*iDly+5);
+   }
+   WriteReg(RTDCDLY, &dly);
+}
+
+// detector tdc delays
+void TCB::SetCombinedConditionDelay(bool *enable, u_int32_t* value){
+   if ((fidcode>>12)!=3) printf("setting Combined Conditon delays on TCB %4x!!!!!\n", fidcode);
+   else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
+   
+   u_int32_t dly = 0;
+   for(int iDly=0; iDly<2; iDly++){
+      dly |= (value[iDly] & 0x1F) << (8*iDly);
+      if(enable[iDly]) dly |= 0x1 << (8*iDly+5);
+   }
+   WriteReg(RCOMBDLY, &dly);
+}
+
 // waveform sum threshold
 void TCB::SetSumHighThreshold(u_int32_t *data)
 {
@@ -1731,6 +1757,18 @@ void TCB::SetTCSectorMergeThreshold(u_int32_t *low, u_int32_t* high)
    if ((fidcode>>12)!=2) printf("setting Crate TC Hit Merge on TCB %4x!!!!!\n", fidcode);
    WriteReg(RTCMERGEL,low);
    WriteReg(RTCMERGEH,high);
+}
+// TC Time offset wrt XEC
+void TCB::SetTCTimeOffset(u_int32_t *value)
+{
+   if ((fidcode>>12)!=2) printf("setting Crate TC Time Offset on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RTCOFFSET,value);
+}
+// TC Time offset wrt XEC
+void TCB::SetTCTrackMask(u_int32_t *value)
+{
+   if ((fidcode>>12)!=2) printf("setting Crate TC Track Mask on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RTCTRACKMASK,value);
 }
 // BGO QSUM Threshold
 void TCB::SetBGOThreshold(u_int32_t *data)
