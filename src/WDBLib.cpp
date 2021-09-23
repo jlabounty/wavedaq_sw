@@ -1375,7 +1375,7 @@ void WDB::SetDacPulseAmpV(float v) {
    SetDac0ChD(d);
 }
 
-std::vector<float> pzcLevel = {0, 0.5, 1, 1.5, 1.8, 2, 2.5};
+std::vector<double> pzcLevel = {0, 0.5, 1, 1.5, 1.8, 2, 2.5};
 
 float WDB::GetDacPzcLevelV() {
    auto d = GetDac0ChE();
@@ -1389,7 +1389,7 @@ void WDB::SetDacPzcLevelV(float v) {
 
 int WDB::GetDacPzcLevelN() {
    unsigned int i;
-   auto v = GetDacPzcLevelV();
+   auto v = std::round(GetDacPzcLevelV()*100)/100.0;
    for (i = 0; i < pzcLevel.size(); i++)
       if (pzcLevel[i] == v)
          break;
