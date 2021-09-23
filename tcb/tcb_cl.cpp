@@ -112,7 +112,8 @@ int main(int argc, char *argv[])
       printf("[39]: LockSerdes FSM Start \t \t  [40]: Get current serdes values\n");
       printf("[41]: LockSerdes Status    \t \t  [42]: LockSerdes Draw Eye      \n");
       printf("[43]: Single crate TRG conf\t \t  [44]: Read Prescaling          \n");      
-      printf("[45]: SCIFI run            \t \t  [-1]: Exit          \n");
+      printf("[45]: SCIFI run            \t \t  [46]: Read Register \n");
+      printf("[47]: Write Register       \t \t  [-1]: Exit          \n");
       //printf("[-1]: Exit\n");
 
       do {
@@ -868,6 +869,24 @@ int main(int argc, char *argv[])
 	   fclose(ffile);
 	   printf(" Run %d DONE!\n", irun);
 	 }// end loop on runs
+      }
+      if(option == 46) {
+         printf(" opt = 46 : read a register ... \n");
+          printf("\nAddress?(hex)\n");
+          scanf("%x",&scanfdata);
+          TCBBoard.ReadReg(scanfdata, &data);
+          printf("[%4x]: %08x\n",scanfdata, data);
+	 
+      }
+      if(option == 47) {
+         printf(" opt = 47 : write a register ... \n");
+          printf("Address?(hex)\n");
+          scanf("%x",&scanfdata);
+          printf("value?(hex)\n");
+          scanf("%x",&data);
+          TCBBoard.WriteReg(scanfdata, &data);
+          TCBBoard.ReadReg(scanfdata, &data);
+          printf("[%4x]: %08x\n",scanfdata, data);
 	 
       }
 
