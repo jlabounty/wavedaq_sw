@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  09.08.2021 13:11:43
+// Created :  29.09.2021 11:52:36
 //
 // Register Layout Versions :  8, 9
 //
@@ -8710,6 +8710,34 @@ public:
             return 0x11F4;
          default:
             throw std::invalid_argument("Function GetAdvTrgTxChkWord1Loc() not defined for this board version");
+      };
+   };
+
+   // Bit(s) ADV_TRIG_BUSY
+   unsigned int GetAdvTrigBusy()
+   {
+      switch(this->mVersion)
+      {
+         case 8:
+         case 9:
+            // "1" while advanced trigger unit is busy
+            return BitExtractStatus(0x0028, 0x00000080, 7);
+         default:
+            throw std::invalid_argument("Function GetAdvTrigBusy() not defined for this board version");
+      };
+   };
+   unsigned int GetAdvTrigBusyLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
+   {
+      switch(this->mVersion)
+      {
+         case 8:
+         case 9:
+            // "1" while advanced trigger unit is busy
+            if(BitMask) *BitMask = 0x00000080;
+            if(BitOfs) *BitOfs = 7;
+            return 0x0028;
+         default:
+            throw std::invalid_argument("Function GetAdvTrigBusyLoc() not defined for this board version");
       };
    };
 
@@ -24647,34 +24675,6 @@ public:
             return 0x1014;
          default:
             throw std::invalid_argument("Function GetSerdesComEnLoc() not defined for this board version");
-      };
-   };
-
-   // Bit(s) SERIAL_BUSY
-   unsigned int GetSerialBusy()
-   {
-      switch(this->mVersion)
-      {
-         case 8:
-         case 9:
-            // "1" during serial activity like FLASH read/write
-            return BitExtractStatus(0x0028, 0x00000080, 7);
-         default:
-            throw std::invalid_argument("Function GetSerialBusy() not defined for this board version");
-      };
-   };
-   unsigned int GetSerialBusyLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
-   {
-      switch(this->mVersion)
-      {
-         case 8:
-         case 9:
-            // "1" during serial activity like FLASH read/write
-            if(BitMask) *BitMask = 0x00000080;
-            if(BitOfs) *BitOfs = 7;
-            return 0x0028;
-         default:
-            throw std::invalid_argument("Function GetSerialBusyLoc() not defined for this board version");
       };
    };
 
