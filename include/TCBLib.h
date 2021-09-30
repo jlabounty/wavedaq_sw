@@ -91,7 +91,6 @@
 #define RMATRIXMASKS0      0x624      // Mask Matrix
 #define RMATRIXMASKS1      0x625      // Mask Matrix
 #define RMATRIXMASKS2      0x626      // Mask Matrix
-#define RFCALOMASKS        0x627      // Mask for FOOT calorimenter inputs
 #define RFNEUTRONMASKS     0x628      // Mask for FOOT neutron detector inputs
 #define RLXeHITTHR         0x629      // Minimum number of hits in a XEC patch
 #define RLXePATCHDLY       0x62A      // Delay of XEC patch algorithm
@@ -116,6 +115,9 @@
 #define RTCTRACKMASK       0x643      // TC masks on reconstructed tracks, high to enable mask: bit [3:0]
 #define RTDCDLY            0x644      // TDC Delay for different detectors: XEC bit [7:0], TC bit [15:8]
 #define RCOMBDLY           0x645      // Delay for combined triggers: Time bit [7:0], Direction Match bit [15:8]
+#define RFCALOMASKS0       0x650      // Mask for FOOT calorimenter inputs reg 0
+#define RFCALOMASKS1       0x651      // Mask for FOOT calorimenter inputs reg 1
+#define RFCALOMASKS2       0x652      // Mask for FOOT calorimenter inputs reg 2
 #define RFIBCOUNTER        0x700      // SCIFI fiber event counter address (42 values)
 #define RSINGLECRATECFG    0x800      // configurations for single crate trigger logic
 #define RSINGLEISVETO      0x801      // veto set for input channels in single crate logic
