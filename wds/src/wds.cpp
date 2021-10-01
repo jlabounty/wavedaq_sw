@@ -822,7 +822,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       mg_send_response_line(nc, 200, "Content-Type: text/plain\r\nTransfer-Encoding: chunked\r\n");
       mg_send_http_chunk(nc, "", 0); // end of response
       return;
-   }
+   } // method == PUT
 
    // globals
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/gl") == 0) {
