@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  11.05.2021 14:04:42
+ *  Created :  29.09.2021 11:52:12
  *
  *  Register Layout Version :  8
  *
@@ -3539,10 +3539,10 @@
 #define WD2_BOARD_SEL_MASK                                              0x00000100
 #define WD2_BOARD_SEL_OFS                                                        8
 
-/* SERIAL_BUSY - "1" during serial activity like FLASH read/write */
-#define WD2_SERIAL_BUSY_REG                                         WD2_REG_STATUS
-#define WD2_SERIAL_BUSY_MASK                                            0x00000080
-#define WD2_SERIAL_BUSY_OFS                                                      7
+/* ADV_TRIG_BUSY - "1" while advanced trigger unit is busy */
+#define WD2_ADV_TRIG_BUSY_REG                                       WD2_REG_STATUS
+#define WD2_ADV_TRIG_BUSY_MASK                                          0x00000080
+#define WD2_ADV_TRIG_BUSY_OFS                                                    7
 
 /* PACKAGER_BUSY - "1" while packager is not ready to process data (buffers are full or ethernet destination not configured) */
 #define WD2_PACKAGER_BUSY_REG                                       WD2_REG_STATUS

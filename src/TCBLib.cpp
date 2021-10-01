@@ -2127,7 +2127,9 @@ void TCB::SetFCaloMask(u_int32_t *data)
      printf("TCB not compiled for FOOT !!!!!\n");
      throw std::runtime_error("Error in TCB board configuration");
    }
-   WriteReg(RFCALOMASKS,data);
+   WriteReg(RFCALOMASKS0,data+0);
+   WriteReg(RFCALOMASKS1,data+1);
+   WriteReg(RFCALOMASKS2,data+2);
 
 }
 // FOOT Nutron Masks

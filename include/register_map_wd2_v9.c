@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  09.08.2021 13:10:56
+ *  Created :  29.09.2021 11:52:25
  *
  *  Register Layout Version :  9
  *
@@ -937,7 +937,7 @@ const wd2_bit_group_entry_type  wd2_bit_group_list[] = {
   { "DAQ_CLK_DEF_PHASE_CHKD"        , WD2_DAQ_CLK_DEF_PHASE_CHKD_REG        , WD2_DAQ_CLK_DEF_PHASE_CHKD_MASK        , WD2_DAQ_CLK_DEF_PHASE_CHKD_OFS        },
   { "DRS_CONFIG_DONE"               , WD2_DRS_CONFIG_DONE_REG               , WD2_DRS_CONFIG_DONE_MASK               , WD2_DRS_CONFIG_DONE_OFS               },
   { "BOARD_SEL"                     , WD2_BOARD_SEL_REG                     , WD2_BOARD_SEL_MASK                     , WD2_BOARD_SEL_OFS                     },
-  { "SERIAL_BUSY"                   , WD2_SERIAL_BUSY_REG                   , WD2_SERIAL_BUSY_MASK                   , WD2_SERIAL_BUSY_OFS                   },
+  { "ADV_TRIG_BUSY"                 , WD2_ADV_TRIG_BUSY_REG                 , WD2_ADV_TRIG_BUSY_MASK                 , WD2_ADV_TRIG_BUSY_OFS                 },
   { "PACKAGER_BUSY"                 , WD2_PACKAGER_BUSY_REG                 , WD2_PACKAGER_BUSY_MASK                 , WD2_PACKAGER_BUSY_OFS                 },
   { "DRS_CTRL_BUSY"                 , WD2_DRS_CTRL_BUSY_REG                 , WD2_DRS_CTRL_BUSY_MASK                 , WD2_DRS_CTRL_BUSY_OFS                 },
   { "SYS_BUSY"                      , WD2_SYS_BUSY_REG                      , WD2_SYS_BUSY_MASK                      , WD2_SYS_BUSY_OFS                      },

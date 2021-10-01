@@ -232,6 +232,43 @@ void printf_crate_scan(const char *hostname, std::string &b) {
 
 //-------------------------------------------------------------------
 
+void printf_crate_map(const char *cratename, std::string &b) {
+   b[0] = 0;
+   for (int slot = 0; slot < WDAQ_N_SLOTS-2; slot++) {
+
+      int status = get_slot_board_info(slot, &board[slot]);
+      if (status && board[slot].type_id <= BRD_TYPE_ID_MAX &&
+          board[slot].vendor_id <= BRD_VENDOR_ID_MAX) {
+
+         char name[32];
+         if (board[slot].type_id == BRD_TYPE_ID_WDB) {
+
+            char buffer[10];
+            char rbuffer[10];
+
+            memset(buffer, 0, sizeof(buffer));
+            buffer[0] = CMD_READ32;
+            buffer[1] = 0;
+            buffer[2] = 0;
+            buffer[3] = 0;
+            buffer[4] = 0x24; // Status register SN
+            buffer[5] = 0; // dummy
+
+            spi_binary_cmd(buffer, rbuffer, 6 + 4, slot, board[slot].type_id, board[slot].rev_id);
+
+            unsigned int sn = (rbuffer[8] << 8) | rbuffer[9];
+            snprintf(name, sizeof(name), "WD%03d", sn);
+            b += stringf("%s-%d\t%s\n",
+                         cratename,
+                         slot,
+                         name);
+         }
+      }
+   }
+}
+
+//-------------------------------------------------------------------
+
 void set_crate_slot_id() {
 
    char hostname[256];
@@ -258,6 +295,35 @@ void set_crate_slot_id() {
          spi_binary_cmd(buffer, rbuffer,9, slot, board[slot].type_id, board[slot].rev_id);
       }
    }
+}
+
+//-------------------------------------------------------------------
+
+char _fw_buffer[256];
+
+char *fw_getenv(const char *s)
+{
+   FILE *fp;
+   char str[256];
+
+   strcpy(str, "/sbin/fw_printenv ");
+   strncat(str, s, sizeof(str));
+
+   fp = popen(str, "r");
+   if (fp == NULL)
+      return NULL;
+
+   fgets(str, sizeof(str), fp);
+   pclose(fp);
+
+   if (strchr(str, '=') == NULL)
+      return NULL;
+
+   strncpy(_fw_buffer, strchr(str, '=')+1, sizeof(_fw_buffer));
+   while (_fw_buffer[strlen(_fw_buffer)-1] == '\n')
+      _fw_buffer[strlen(_fw_buffer)-1] = 0;
+
+   return _fw_buffer;
 }
 
 //-------------------------------------------------------------------
@@ -403,7 +469,15 @@ int main(int argc, char *argv[]) {
    // socket address used to store client address
    client_address_len = sizeof(client_address);
 
-   printf("DCB binary and ASCII servers listening on %s ports %d,%d\n", hostname, SERVER_PORT_BIN, SERVER_PORT_ASC);
+   char cratename[256];
+   cratename[0] = 0;
+   if (fw_getenv("cratename"))
+      strncpy(cratename, fw_getenv("cratename"), sizeof(cratename));
+   else
+      strncpy(cratename, "unknown", sizeof(cratename));
+
+   printf("DCB binary and ASCII servers listening on %s (%s) ports %d,%d\n",
+          hostname, cratename, SERVER_PORT_BIN, SERVER_PORT_ASC);
 
    if (daemon) {
       printf("DCB server becoming a daemon...\n");
@@ -626,6 +700,8 @@ int main(int argc, char *argv[]) {
       } // binary
 
       if (FD_ISSET(sock_asc, &fds)) {
+         int skip_prompt = 0;
+
          // read content into buffer from an incoming client
          memset(buffer, 0, sizeof(buffer));
          int len = recvfrom(sock_asc, buffer, sizeof(buffer), 0, (struct sockaddr *) &client_address,
@@ -710,6 +786,18 @@ int main(int argc, char *argv[]) {
             set_crate_slot_id();
             printf_crate_scan(hostname, connection[addr]->rb);
 
+         } else if (strncmp(buffer, "map", 3) == 0) {
+
+            char cratename[256];
+            if (fw_getenv("cratename"))
+               strncpy(cratename, fw_getenv("cratename"), sizeof(cratename));
+            else
+               strncpy(cratename, hostname, sizeof(cratename));
+            set_crate_slot_id();
+            printf_crate_map(cratename, connection[addr]->rb);
+
+            skip_prompt = 1;
+
          } else if (connection[addr]->slot != WDAQ_SLOT_DCB) { //---- Send to slot via SPI -----------
 
             // send ASCII command to WDB via SPI
@@ -742,14 +830,15 @@ int main(int argc, char *argv[]) {
             process_dcb_command(*connection[addr], buffer);
 
          // add prompt
-         if (connection[addr]->slot == WDAQ_SLOT_DCB)
-            connection[addr]->sprintf("%s> ", hostname);
-         else
-            connection[addr]->sprintf("%s:%02d> ", hostname, connection[addr]->slot);
+         if (!skip_prompt) {
+            if (connection[addr]->slot == WDAQ_SLOT_DCB)
+               connection[addr]->sprintf("%s> ", hostname);
+            else
+               connection[addr]->sprintf("%s:%02d> ", hostname, connection[addr]->slot);
+         }
 
          // send data back to client
          connection[addr]->flush();
-
       } // ASCII
    }
 
@@ -823,6 +912,7 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("help                 This help page\n");
       c.sprintf("info                 Show system information\n");
       c.sprintf("init <serial>        Initialize DCB environment variables\n");
+      c.sprintf("map                  Print crate map with WDB numbers\n");
       c.sprintf("mark                 Mark board by letting led blink magenta\n");
       c.sprintf("unmark               Remove marking\n");
       c.sprintf("reset                Reboot DCB\n");

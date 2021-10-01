@@ -2890,7 +2890,17 @@ void WDTCB::ConfigureTofYMask(Property &property){
 }
 
 void WDTCB::ConfigureFCaloMask(Property &property){
-   unsigned int mask;
+   int64_t arraySize = 0;
+   const unsigned int* masks;
+
+   masks = property.GetUHexVector(&arraySize);
+   if(arraySize == 3){
+      SetFCaloMask((unsigned int*)masks);
+   } else
+      throw std::runtime_error("FCaloMask size should be 3 values");
+
+
+  unsigned int mask;
    mask = property.GetUHex();
    SetFCaloMask(&mask);
 }

@@ -5,7 +5,7 @@
 #  Project :  WaveDream2
 #
 #  Author  :  schmid_e (Author of generation script)
-#  Created :  09.08.2021 13:10:56
+#  Created :  29.09.2021 11:52:25
 #
 #  Register Layout Version :  9
 #
@@ -3066,10 +3066,10 @@ WD2_BOARD_SEL_REG                        =                    WD2_REG_STATUS
 WD2_BOARD_SEL_MASK                       =                        0x00000100
 WD2_BOARD_SEL_OFS                        =                                 8
 
-# SERIAL_BUSY - "1" during serial activity like FLASH read/write
-WD2_SERIAL_BUSY_REG                      =                    WD2_REG_STATUS
-WD2_SERIAL_BUSY_MASK                     =                        0x00000080
-WD2_SERIAL_BUSY_OFS                      =                                 7
+# ADV_TRIG_BUSY - "1" while advanced trigger unit is busy
+WD2_ADV_TRIG_BUSY_REG                    =                    WD2_REG_STATUS
+WD2_ADV_TRIG_BUSY_MASK                   =                        0x00000080
+WD2_ADV_TRIG_BUSY_OFS                    =                                 7
 
 # PACKAGER_BUSY - "1" while packager is not ready to process data (buffers are full or ethernet destination not configured)
 WD2_PACKAGER_BUSY_REG                    =                    WD2_REG_STATUS
@@ -4891,7 +4891,7 @@ wd2_bit_group_list = [
   [ "DAQ_CLK_DEF_PHASE_CHKD"        , WD2_DAQ_CLK_DEF_PHASE_CHKD_REG        , WD2_DAQ_CLK_DEF_PHASE_CHKD_MASK        , WD2_DAQ_CLK_DEF_PHASE_CHKD_OFS       , "DAQ clock default phase setting is checked" ],
   [ "DRS_CONFIG_DONE"               , WD2_DRS_CONFIG_DONE_REG               , WD2_DRS_CONFIG_DONE_MASK               , WD2_DRS_CONFIG_DONE_OFS              , "DRS configuration done" ],
   [ "BOARD_SEL"                     , WD2_BOARD_SEL_REG                     , WD2_BOARD_SEL_MASK                     , WD2_BOARD_SEL_OFS                    , "Board select from backplane (inverted = high active)" ],
-  [ "SERIAL_BUSY"                   , WD2_SERIAL_BUSY_REG                   , WD2_SERIAL_BUSY_MASK                   , WD2_SERIAL_BUSY_OFS                  , "\"1\" during serial activity like FLASH read/write" ],
+  [ "ADV_TRIG_BUSY"                 , WD2_ADV_TRIG_BUSY_REG                 , WD2_ADV_TRIG_BUSY_MASK                 , WD2_ADV_TRIG_BUSY_OFS                , "\"1\" while advanced trigger unit is busy" ],
   [ "PACKAGER_BUSY"                 , WD2_PACKAGER_BUSY_REG                 , WD2_PACKAGER_BUSY_MASK                 , WD2_PACKAGER_BUSY_OFS                , "\"1\" while packager is not ready to process data (buffers are full or ethernet destination not configured)" ],
   [ "DRS_CTRL_BUSY"                 , WD2_DRS_CTRL_BUSY_REG                 , WD2_DRS_CTRL_BUSY_MASK                 , WD2_DRS_CTRL_BUSY_OFS                , "\"1\" while domino wave running or readout in progress" ],
   [ "SYS_BUSY"                      , WD2_SYS_BUSY_REG                      , WD2_SYS_BUSY_MASK                      , WD2_SYS_BUSY_OFS                     , "Inverted busy signal from backplane (high active, not available until hardware revision G)" ],
