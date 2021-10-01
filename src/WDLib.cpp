@@ -1189,7 +1189,8 @@ void WDWDB::ConfigureTimingReference(Property &property) {
 void WDWDB::ConfigureTriggerAlgorithm(Property &property) {
    unsigned char algorithm;
    algorithm = property.GetUInt();
-   SetAdvTrgCtrl(0x00000203 | ((algorithm & 0xF) << 4) );//TDCPolarity, FADCMODE, RUNMODE
+   //SetAdvTrgCtrl(0x00000203 | ((algorithm & 0xF) << 4) );//TDCPolarity, FADCMODE, RUNMODE
+   SetAdvTrgCtrl(0x00001203 | ((algorithm & 0xF) << 4) );//TdcHysteresis, TDCPolarity, FADCMODE, RUNMODE
    //SetAdvTrgCtrl(0x00000A03 | ((algorithm & 0xF) << 4) );//ZeroSuppr, TDCPolarity, FADCMODE, RUNMODE
 }
 
