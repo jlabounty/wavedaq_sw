@@ -66,8 +66,8 @@ public:
 
    const unsigned int cRequiredRegLayoutCompatLevel = 0;
    const unsigned int cRequiredFwCompatLevel = 0;
-   const int cDefaultReceiveTimeoutMs = 500;
-   const int cIncreasedReceiveTimeoutMs = 1000;
+   const int cDefaultReceiveTimeoutMs = 800;
+   const int cIncreasedReceiveTimeoutMs = 1300;
 
    // register functions, overload pure virtual functions from WDBREG
    void bitReplace(unsigned int &reg, unsigned int mask, unsigned int ofs, unsigned int value);
