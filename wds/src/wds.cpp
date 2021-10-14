@@ -1785,14 +1785,22 @@ void connectWDB(GLOBALS *gl, WDB *b) {
 
    // determine mode according to enabled channels
    if (b->GetDrsChTxEn() > 0) {
+      b->SetChnTxEn(b->GetDrsChTxEn());
       gl->readoutMode = cReadoutModeDRS;
    } else if (b->GetAdcChTxEn() > 0) {
+      b->SetChnTxEn(b->GetAdcChTxEn());
       gl->readoutMode = cReadoutModeADC;
    } else if (b->GetTdcChTxEn() > 0) {
+      b->SetChnTxEn(b->GetTdcChTxEn());
       gl->readoutMode = cReadoutModeTDC;
    } else {
+      b->SetDrsChTxEn(0xFFFF);
+      b->SetChnTxEn(0xFFFF);
       gl->readoutMode = cReadoutModeDRS;
    }
+
+   // disable scaler readout
+   b->SetSclTxEn(0);
 
    // obtain soft auto trigger mode from board
    gl->triggerMode = b->GetDaqSoftNormal() ? cTriggerModeNormal : cTriggerModeAuto;

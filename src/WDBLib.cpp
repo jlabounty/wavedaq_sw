@@ -727,27 +727,12 @@ void WDB::Setup(std::string wdsDirectory, int serverPort) {
    LoadVoltageCalibration(GetDrsSampleFreqMhz(), wdsDirectory);
    LoadTimeCalibration(GetDrsSampleFreqMhz(), wdsDirectory);
 
-   // enable TX for enabled DRS/ADC channels
-   if (GetDrsChTxEn() > 0) {
-      SetChnTxEn(GetDrsChTxEn());
-   } else if (GetAdcChTxEn() > 0) {
-      SetChnTxEn(GetAdcChTxEn());
-   } else if (GetTdcChTxEn() > 0) {
-      SetChnTxEn(GetTdcChTxEn());
-   } else {
-      SetDrsChTxEn(0xFFFF);
-      SetChnTxEn(0xFFFF);
-   }
-
    // enable internal trigger if external trigger is not enabled
    if (!GetExtAsyncTriggerEn())
       SetPatternTriggerEn(1);
 
-   // disable scaler readout
-   SetSclTxEn(0);
-
    // set destination if connected via Ethernet
-   if (!IsDcbInterface())
+   if (!IsDcbInterface() && serverPort != 0)
       SetDestinationPort(serverPort);
 
    // disable auto-trigger
