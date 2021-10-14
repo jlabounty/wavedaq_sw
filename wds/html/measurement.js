@@ -805,9 +805,16 @@ function measChnDelay(ctx, x, y, i1, i2) {
    var c2 = this.param[4].value;
    var thr2 = this.param[5].value / 1000;
 
-   for (var i = i1; i < i2; i++)
-      if (y[c1][i] <= thr1 && y[c1][i + 1] > thr1)
-         break;
+   if (thr1 < 0) {
+      for (var i = i1; i < i2; i++)
+         if (y[c1][i] >= thr1 && y[c1][i + 1] < thr1)
+            break;
+   } else {
+      for (var i = i1; i < i2; i++)
+         if (y[c1][i] <= thr1 && y[c1][i + 1] > thr1)
+            break;
+   }
+
 
    if (i == i2)
       return;
@@ -817,9 +824,15 @@ function measChnDelay(ctx, x, y, i1, i2) {
 
    var t1 = x[c1][i] + (thr1 - y[c1][i]) * (x[c1][i + 1] - x[c1][i]) / (y[c1][i + 1] - y[c1][i]);
 
-   for (i = i1; i < i2; i++)
-      if (y[c2][i] <= thr2 && y[c2][i + 1] > thr2)
-         break;
+   if (thr2 < 0) {
+      for (i = i1; i < i2; i++)
+         if (y[c2][i] >= thr2 && y[c2][i + 1] < thr2)
+            break;
+   } else {
+      for (i = i1; i < i2; i++)
+         if (y[c2][i] <= thr2 && y[c2][i + 1] > thr2)
+            break;
+   }
 
    if (i == i2)
       return;
