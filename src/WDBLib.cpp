@@ -686,6 +686,8 @@ void WDB::Connect() {
    }
 }
 
+//--------------------------------------------------------------------
+
 bool WDB::Ping() {
    try {
       // read magic number
@@ -697,6 +699,71 @@ bool WDB::Ping() {
       return false;
    }
    return true;
+}
+
+void WDB::Setup(std::string wdsDirectory, int serverPort) {
+
+   // receive status registers with retry (in case board is just booting)
+   for (int i=0 ; i<50 ; i++) {
+      ReceiveStatusRegisters();
+      int s = GetBoardMagic();
+      if (s != 0xAC) {
+         sleep_ms(100);
+         std::cout << "Wait for board magic number" << std::endl;
+      } else
+         break;
+      if (i == 49)
+         throw std::runtime_error(std::string("Error reading magic number from " + GetName()));
+   }
+
+   // receive control registers, print status in verbose mode
+   this->ReceiveControlRegisters();
+   if (mVerbose) {
+      std::cout << std::endl << "========== WDB Info ==========" << std::endl;
+      PrintVersion();
+   }
+
+   // load calibration data for board
+   LoadVoltageCalibration(GetDrsSampleFreqMhz(), wdsDirectory);
+   LoadTimeCalibration(GetDrsSampleFreqMhz(), wdsDirectory);
+
+   // enable TX for enabled DRS/ADC channels
+   if (GetDrsChTxEn() > 0) {
+      SetChnTxEn(GetDrsChTxEn());
+   } else if (GetAdcChTxEn() > 0) {
+      SetChnTxEn(GetAdcChTxEn());
+   } else if (GetTdcChTxEn() > 0) {
+      SetChnTxEn(GetTdcChTxEn());
+   } else {
+      SetDrsChTxEn(0xFFFF);
+      SetChnTxEn(0xFFFF);
+   }
+
+   // enable internal trigger if external trigger is not enabled
+   if (!GetExtAsyncTriggerEn())
+      SetPatternTriggerEn(1);
+
+   // disable scaler readout
+   SetSclTxEn(0);
+
+   // set destination if connected via Ethernet
+   if (!IsDcbInterface())
+      SetDestinationPort(serverPort);
+
+   // disable auto-trigger
+   SetDaqNormal(false);
+
+   // Enable serdes if WDB is in crate
+   if (IsDcbInterface()) {
+      SetEthComEn(0);     // disable ethernet
+      SetSerdesComEn(1);  // enable serdes
+   } else {
+      SetEthComEn(1);     // enable ethernet
+      SetSerdesComEn(0);  // disable serdes
+   }
+
+   // set ADC valid delay latency (ADC alone is 11)
+   SetValidDelayAdc(11+7);
 }
 
 //--------------------------------------------------------------------
