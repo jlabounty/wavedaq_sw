@@ -624,6 +624,7 @@ public:
    int IsVerbose() { return mVerbose; }
    void SetLogFile(std::string logfile) { mLogfile = logfile; }
    void Connect();
+   void Setup(std::string wdsDirectory, int serverPort);
    bool Ping();
 
    void SetDestinationPort(int port);

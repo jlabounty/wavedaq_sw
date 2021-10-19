@@ -1781,71 +1781,29 @@ void connectWDB(GLOBALS *gl, WDB *b) {
    b->SetVerbose(gl->verbose);
    b->SetLogFile(gl->logFileName);
    b->Connect();
+   b->Setup(gl->wdsDir, gl->wp->GetServerPort());
 
-   for (int i=0 ; i<50 ; i++) {
-      b->ReceiveStatusRegisters();
-      int s = b->GetBoardMagic();
-      if (s != 0xAC) {
-         sleep_ms(100);
-         std::cout << "Wait for board magic number" << std::endl;
-      } else
-         break;
-      if (i == 49)
-         throw std::runtime_error(std::string("Error reading magic number from " + b->GetName()));
-   }
-
-   b->ReceiveControlRegisters();
-   if (gl->verbose) {
-      std::cout << std::endl << "========== WDB Info ==========" << std::endl;
-      b->PrintVersion();
-   }
-
-   // load calibration data for board
-   b->LoadVoltageCalibration(b->GetDrsSampleFreqMhz(), gl->wdsDir);
-   b->LoadTimeCalibration(b->GetDrsSampleFreqMhz(), gl->wdsDir);
-
+   // determine mode according to enabled channels
    if (b->GetDrsChTxEn() > 0) {
-      gl->readoutMode = cReadoutModeDRS;
       b->SetChnTxEn(b->GetDrsChTxEn());
+      gl->readoutMode = cReadoutModeDRS;
    } else if (b->GetAdcChTxEn() > 0) {
-      gl->readoutMode = cReadoutModeADC;
       b->SetChnTxEn(b->GetAdcChTxEn());
+      gl->readoutMode = cReadoutModeADC;
    } else if (b->GetTdcChTxEn() > 0) {
-      gl->readoutMode = cReadoutModeTDC;
       b->SetChnTxEn(b->GetTdcChTxEn());
+      gl->readoutMode = cReadoutModeTDC;
    } else {
       b->SetDrsChTxEn(0xFFFF);
       b->SetChnTxEn(0xFFFF);
       gl->readoutMode = cReadoutModeDRS;
    }
 
-   // enable internal trigger if external trigger is not enabled
-   if (!b->GetExtAsyncTriggerEn())
-      b->SetPatternTriggerEn(1);
-
    // disable scaler readout
    b->SetSclTxEn(0);
 
-   // set destination if connected via Ethernet
-   if (!b->IsDcbInterface())
-      b->SetDestinationPort(gl->wp->GetServerPort());
-
-   b->SetDaqNormal(false);
-
-   // Enable serdes if WDB is in crate
-   if (b->IsDcbInterface()) {
-      b->SetEthComEn(0);     // disable ethernet
-      b->SetSerdesComEn(1);  // enable serdes
-   } else {
-      b->SetEthComEn(1);     // enable ethernet
-      b->SetSerdesComEn(0);  // disable serdes
-   }
-
    // obtain soft auto trigger mode from board
    gl->triggerMode = b->GetDaqSoftNormal() ? cTriggerModeNormal : cTriggerModeAuto;
-
-   // set ADC valid delay 11=ADC latency
-   b->SetValidDelayAdc(11+7);
 }
 
 void connectDCB(GLOBALS *gl, DCB *dcb) {
