@@ -2899,10 +2899,6 @@ void WDTCB::ConfigureFCaloMask(Property &property){
    } else
       throw std::runtime_error("FCaloMask size should be 3 values");
 
-
-  unsigned int mask;
-   mask = property.GetUHex();
-   SetFCaloMask(&mask);
 }
 
 void WDTCB::ConfigureFNeutronMask(Property &property){
