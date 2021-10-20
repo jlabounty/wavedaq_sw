@@ -558,6 +558,8 @@ class WDAQWorker : public DAQThread{
          fVCalib[id] = calib;
    }
 
+   unsigned long GetDroppedEvents() const { return fDroppedEvent; }
+
    WDAQWorker(DAQBuffer<WDAQEvent> *source, DAQBuffer<WDAQEvent> *destination, DAQSystem* parent = nullptr): DAQThread(parent, "Worker"){
       fSource = source;
       fDestination = destination;
