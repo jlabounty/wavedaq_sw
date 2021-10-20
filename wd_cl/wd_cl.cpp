@@ -1228,7 +1228,13 @@ int main(int argc, char *argv[])
                                                     "ADCChannelTxEnable",
                                                     "TDCChannelTxEnable",
                                                     "TRGTxEnable",
-                                                    "ZeroSuppressionEnable"};
+                                                    "ZeroSuppressionEnable",
+                                                    "SwZeroSuppressionPrescaling",
+                                                    "SwZeroSuppressionClkROIStart",
+                                                    "SwZeroSuppressionClkROIEnd",
+                                                    "SwZeroSuppressionSignalROIStart",
+                                                    "SwZeroSuppressionSignalROIEnd"
+                                                  };
 
             //make map of boards belonging to a same property group
             std::map<std::string, std::vector<WDPosition>> groupMap;
