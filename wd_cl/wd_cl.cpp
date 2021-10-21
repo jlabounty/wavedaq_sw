@@ -1233,7 +1233,10 @@ int main(int argc, char *argv[])
                                                     "SwZeroSuppressionClkROIStart",
                                                     "SwZeroSuppressionClkROIEnd",
                                                     "SwZeroSuppressionSignalROIStart",
-                                                    "SwZeroSuppressionSignalROIEnd"
+                                                    "SwZeroSuppressionSignalROIEnd",
+                                                    "SwZeroSuppressionRegionStart",
+                                                    "SwZeroSuppressionRegionEnd",
+                                                    "SwZeroSuppressionRebinFactor"
                                                   };
 
             //make map of boards belonging to a same property group
