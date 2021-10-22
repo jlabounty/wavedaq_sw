@@ -443,6 +443,7 @@ class WDTCB : public TCB, public WDBoard {
       void ConfigureXecAlfaThreshold(Property &property);
       void ConfigureXecAlfaScale(Property &property);
       void ConfigureXecMovingAverage(Property &property);
+      void ConfigureXecPmtGlobalGain(Property &property);
       void ConfigureTcMask(Property &property);
       void ConfigureTcMultiplicityThreshold(Property &property);
       void ConfigureTcCrateMergeThreshold(Property &property);

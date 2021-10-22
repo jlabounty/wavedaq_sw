@@ -517,7 +517,8 @@ public:
    void SetAlphaThreshold(u_int32_t*);
    void SetAlphaPeakScale(float);
    //qsum std or moving average
-   void SetQsumSelect(u_int32_t*);
+   void SetQsumMovingAverage(bool);
+   void SetQsumPMTMultiplier(int);
    // Set TC masks
    void SetTCMasks(u_int32_t*);
    void SetTCMultiplicityThreshold(u_int32_t*);

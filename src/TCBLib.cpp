@@ -1722,12 +1722,36 @@ void TCB::SetAlphaPeakScale(float value)
    
    WriteReg(RALPHAPEAK,&data);
 }
-void TCB::SetQsumSelect(u_int32_t *data)
+void TCB::SetQsumMovingAverage(bool enable)
 {
    if ((fidcode>>12)!=3) printf("setting QSUM select on TCB %4x!!!!!\n", fidcode);
    else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
-   WriteReg(RQSUMSEL,data);
+
+   u_int32_t data = 0;
+   ReadReg(RQSUMSEL,&data);
+   if(enable){
+      data |= 1;
+   } else {
+      data &= 0xFFFFFFFE;
+   }
+   WriteReg(RQSUMSEL,&data);
 }
+void TCB::SetQsumPMTMultiplier(int value)
+{
+   if ((fidcode>>12)!=3) printf("setting QSUM select on TCB %4x!!!!!\n", fidcode);
+   else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
+
+   u_int32_t data = 0;
+   ReadReg(RQSUMSEL,&data);
+   data &= 0xFFFFFFCF;
+   if(value == 4){
+      data |= 1<<5;
+   } else if(value == 2) {
+      data |= 1<<4;
+   }
+   WriteReg(RQSUMSEL,&data);
+}
+
 // TC Masks
 void TCB::SetTCMasks(u_int32_t *data)
 {

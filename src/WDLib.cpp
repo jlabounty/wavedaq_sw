@@ -1648,6 +1648,8 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureXecAlfaScale(property);
    } else if(name=="XecMovingAverage"){
       ConfigureXecMovingAverage(property);
+   } else if(name=="XecPmtGlobalGain"){
+      ConfigureXecPmtGlobalGain(property);
    } else if(name=="TcMask"){
       ConfigureTcMask(property);
    } else if(name=="TcMultiplicityThreshold"){
@@ -2586,14 +2588,17 @@ void WDTCB::ConfigureXecMovingAverage(Property &property){
    bool xecmovingaverage;
    xecmovingaverage = property.GetBool();
 
-   unsigned int val;
-   if(xecmovingaverage){
-      val = 1;
-   } else {
-      val = 0;
-   }
+   SetQsumMovingAverage(xecmovingaverage);
+}
 
-   SetQsumSelect(&val);
+void WDTCB::ConfigureXecPmtGlobalGain(Property &property){
+   int xecpmtglobalgain;
+   xecpmtglobalgain = property.GetInt();
+
+   if(xecpmtglobalgain!=1 && xecpmtglobalgain!=2 && xecpmtglobalgain!=4){
+      throw std::runtime_error("XecPmtGlobalGain should be one of these values: 1, 2, 4");
+   }
+   SetQsumPMTMultiplier(xecpmtglobalgain);
 }
 
 void WDTCB::ConfigureTcMask(Property &property){
