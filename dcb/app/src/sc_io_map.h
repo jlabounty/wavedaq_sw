@@ -366,30 +366,31 @@
 #define BIT_IDX_EMIO_STAT_BOARD_SEL_MASK             0x00400000
 #define BIT_IDX_EMIO_STAT_BOARD_SEL_OFFSET                   22
 #define BIT_IDX_EMIO_STAT_BOARD_SEL_PIN                     108
+/* The last eight are controlled by the ethernet/SFP driver */
 /*#define BIT_IDX_EMIO_STAT_RESERVED_MASK              0x00800000 */
 /*#define BIT_IDX_EMIO_STAT_RESERVED_OFFSET                    23 */
 /*#define BIT_IDX_EMIO_STAT_RESERVED_PIN                      109 */
-#define BIT_IDX_EMIO_STAT_SFP1_TX_FAULT_MASK         0x01000000
-#define BIT_IDX_EMIO_STAT_SFP1_TX_FAULT_OFFSET               24
-#define BIT_IDX_EMIO_STAT_SFP1_TX_FAULT_PIN                 110
-#define BIT_IDX_EMIO_STAT_SFP1_MOD_MASK              0x02000000
-#define BIT_IDX_EMIO_STAT_SFP1_MOD_OFFSET                    25
-#define BIT_IDX_EMIO_STAT_SFP1_MOD_PIN                      111
-#define BIT_IDX_EMIO_STAT_SFP1_LOS_MASK              0x04000000
-#define BIT_IDX_EMIO_STAT_SFP1_LOS_OFFSET                    26
-#define BIT_IDX_EMIO_STAT_SFP1_LOS_PIN                      112
+/*#define BIT_IDX_EMIO_STAT_SFP1_TX_FAULT_MASK         0x01000000 */
+/*#define BIT_IDX_EMIO_STAT_SFP1_TX_FAULT_OFFSET               24 */
+/*#define BIT_IDX_EMIO_STAT_SFP1_TX_FAULT_PIN                 110 */
+/*#define BIT_IDX_EMIO_STAT_SFP1_MOD_MASK              0x02000000 */
+/*#define BIT_IDX_EMIO_STAT_SFP1_MOD_OFFSET                    25 */
+/*#define BIT_IDX_EMIO_STAT_SFP1_MOD_PIN                      111 */
+/*#define BIT_IDX_EMIO_STAT_SFP1_LOS_MASK              0x04000000 */
+/*#define BIT_IDX_EMIO_STAT_SFP1_LOS_OFFSET                    26 */
+/*#define BIT_IDX_EMIO_STAT_SFP1_LOS_PIN                      112 */
 /*#define BIT_IDX_EMIO_STAT_RESERVED_MASK              0x08000000 */
 /*#define BIT_IDX_EMIO_STAT_RESERVED_OFFSET                    27 */
 /*#define BIT_IDX_EMIO_STAT_RESERVED_PIN                      113 */
-#define BIT_IDX_EMIO_STAT_SFP2_TX_FAULT_MASK         0x10000000
-#define BIT_IDX_EMIO_STAT_SFP2_TX_FAULT_OFFSET               28
-#define BIT_IDX_EMIO_STAT_SFP2_TX_FAULT_PIN                 114
-#define BIT_IDX_EMIO_STAT_SFP2_MOD_MASK              0x20000000
-#define BIT_IDX_EMIO_STAT_SFP2_MOD_OFFSET                    29
-#define BIT_IDX_EMIO_STAT_SFP2_MOD_PIN                      115
-#define BIT_IDX_EMIO_STAT_SFP2_LOS_MASK              0x40000000
-#define BIT_IDX_EMIO_STAT_SFP2_LOS_OFFSET                    30
-#define BIT_IDX_EMIO_STAT_SFP2_LOS_PIN                      116
+/*#define BIT_IDX_EMIO_STAT_SFP2_TX_FAULT_MASK         0x10000000 */
+/*#define BIT_IDX_EMIO_STAT_SFP2_TX_FAULT_OFFSET               28 */
+/*#define BIT_IDX_EMIO_STAT_SFP2_TX_FAULT_PIN                 114 */
+/*#define BIT_IDX_EMIO_STAT_SFP2_MOD_MASK              0x20000000 */
+/*#define BIT_IDX_EMIO_STAT_SFP2_MOD_OFFSET                    29 */
+/*#define BIT_IDX_EMIO_STAT_SFP2_MOD_PIN                      115 */
+/*#define BIT_IDX_EMIO_STAT_SFP2_LOS_MASK              0x40000000 */
+/*#define BIT_IDX_EMIO_STAT_SFP2_LOS_OFFSET                    30 */
+/*#define BIT_IDX_EMIO_STAT_SFP2_LOS_PIN                      116 */
 /*#define BIT_IDX_EMIO_STAT_RESERVED_MASK              0x80000000 */
 /*#define BIT_IDX_EMIO_STAT_RESERVED_OFFSET                    31 */
 /*#define BIT_IDX_EMIO_STAT_RESERVED_PIN                      117 */

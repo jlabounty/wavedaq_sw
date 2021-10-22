@@ -22,7 +22,7 @@
 #include "sc_io.h"
 
 #define NR_OF_MIOS        54
-#define NR_OF_EMIOS       64
+#define NR_OF_EMIOS       56 /* 64 the last 8 are controlled from SFP/Ethernet driver */
 #define MIO_PIN_OFFSET     0
 #define EMIO_PIN_OFFSET   54
 
