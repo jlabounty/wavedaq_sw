@@ -331,6 +331,10 @@ bool IsSequencerArray(const std::string &p, std::string *midasType=nullptr, int 
       if(midasType!=nullptr) *midasType="INT32";
       if(arraySize!=nullptr) *arraySize=6;
       return true;
+   } else if(p == "SwZeroSuppressionRebinThr"){
+      if(midasType!=nullptr) *midasType="FLOAT";
+      if(arraySize!=nullptr) *arraySize=2;
+      return true;
    } else {
       return false;
    }
@@ -358,7 +362,13 @@ int CreateSequencerODBSet(std::stringstream &s, const std::string& crate, const 
       }
    } else {
       //value in ODB is a single key
-      s << "ODBSET " << crate << "/" << board << "/" << p << ", " << val << ", " << ((sequencerNotifyFrontend)?"1":"0") << std::endl;
+      auto comma = val.find(',');
+      if(comma != std::string::npos) {
+         std::string v(val.begin(), val.begin() + comma);
+         s << "ODBSET " << crate << "/" << board << "/" << p << ", " << v << ", " << ((sequencerNotifyFrontend)?"1":"0") << std::endl;
+      } else {
+         s << "ODBSET " << crate << "/" << board << "/" << p << ", " << val << ", " << ((sequencerNotifyFrontend)?"1":"0") << std::endl;
+      }
       count++;
    }
 
@@ -378,7 +388,7 @@ int CreateSequencerSet(std::stringstream &s, WDSystem* sys, WDPosition& pos, std
    return CreateSequencerODBSet(s, c->GetCrateName(), boardname, p, "$1");
 }
 
-int CreateSequencerReset(std::stringstream &s, WDSystem* sys, WDPosition& pos, std::string& p, std::string& otherVal){
+int CreateSequencerReset(std::stringstream &s, WDSystem* sys, WDPosition& pos, std::string& p, std::string& propertyName, std::string& otherVal){
    int count = 0;
    WDCrate* c = sys->GetCrateAt(pos);
    WDBoard* b = sys->GetBoardAt(pos);
@@ -402,7 +412,7 @@ int CreateSequencerReset(std::stringstream &s, WDSystem* sys, WDPosition& pos, s
       for(auto& board : *c){
          if(board){
             try{
-               Property& prop = board->GetProperty(p);
+               Property& prop = board->GetProperty(propertyName);
                std::string val = prop.GetStringValue();
 
                //board with different property from group...
@@ -502,7 +512,27 @@ FILE* GenerateSequencer(WDSystem* sys, std::vector<WDPosition> &items, std::stri
    for(auto& p: properties){
       std::stringstream s;
       int lines = 0;
-      lines += CreateSequencerFunction(s, "Set" + filename + p, true);
+
+      auto bracket = p.find('[');
+      std::string propertyname;
+      std::string propertyindex;
+
+      if(bracket != std::string::npos){
+         propertyname.append(p.begin(), p.begin() + bracket);
+         //Property name contains [, strip it down in the function name
+         auto otherbracket = p.find(']');
+         if(otherbracket != std::string::npos){
+            propertyindex.append(p.begin() + bracket + 1, p.begin() + otherbracket);
+         }
+      }else{
+         propertyname = p;
+      }
+      
+      if(propertyindex.length()){
+         lines += CreateSequencerFunction(s, "Set" + filename + propertyname + propertyindex, true);
+      } else {
+         lines += CreateSequencerFunction(s, "Set" + filename + propertyname, true);
+      }
 
       for(auto& pos: items){
          lines += CreateSequencerSet(s, sys, pos, p);
@@ -515,7 +545,11 @@ FILE* GenerateSequencer(WDSystem* sys, std::vector<WDPosition> &items, std::stri
       s.str("");
       lines = 0;
 
-      lines += CreateSequencerFunction(s, "Reset" + filename + p, true);
+      if(propertyindex.length()){
+         lines += CreateSequencerFunction(s, "Reset" + filename + propertyname + propertyindex, true);
+      } else {
+         lines += CreateSequencerFunction(s, "Reset" + filename + propertyname, true);
+      }
       for(auto& pos: items){
          std::string groupname = filename;
          if(filename == "System"){
@@ -527,12 +561,12 @@ FILE* GenerateSequencer(WDSystem* sys, std::vector<WDPosition> &items, std::stri
          std::string val = "";
          try{
             PropertyGroup &pg = sys->GetGroupProperties(groupname);
-            Property& prop = pg.at(p);
+            Property& prop = pg.at(propertyname);
             val = prop.GetStringValue();
          } catch (...){
          }
 
-         lines += CreateSequencerReset(s, sys, pos, p, val);
+         lines += CreateSequencerReset(s, sys, pos, p, propertyname, val);
       }
       lines += CloseSequencerFunction(s, true);
       //printf("function %s lines %d\n", ("Reset" + filename + p).c_str(), lines);
@@ -1236,7 +1270,10 @@ int main(int argc, char *argv[])
                                                     "SwZeroSuppressionSignalROIEnd",
                                                     "SwZeroSuppressionRegionStart",
                                                     "SwZeroSuppressionRegionEnd",
-                                                    "SwZeroSuppressionRebinFactor"
+                                                    "SwZeroSuppressionRebinFactor",
+                                                    "SwZeroSuppressionThr",
+                                                    "SwZeroSuppressionRebinThr[0]",
+                                                    "SwZeroSuppressionRebinThr[1]"
                                                   };
 
             //make map of boards belonging to a same property group
