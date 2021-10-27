@@ -1271,6 +1271,7 @@ int main(int argc, char *argv[])
                                                     "SwZeroSuppressionRegionStart",
                                                     "SwZeroSuppressionRegionEnd",
                                                     "SwZeroSuppressionRebinFactor",
+                                                    "SwZeroSuppressionRebinSignalThr",
                                                     "SwZeroSuppressionThr",
                                                     "SwZeroSuppressionRebinThr[0]",
                                                     "SwZeroSuppressionRebinThr[1]"
