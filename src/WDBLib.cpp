@@ -3182,7 +3182,7 @@ void WP::SaveWaveforms() {
             WDB *wdb = GetBoard(it.first);
             assert(wdb);
 
-            if (!li.bAll && b != li.board)
+            if (!li.bAll && it.first != li.board)
                continue;
 
             // store board serial number
@@ -3232,7 +3232,7 @@ void WP::SaveWaveforms() {
       for (auto &it: mEvent) {
          auto ev = it.second;
 
-         if (!li.bAll && b != li.board)
+         if (!li.bAll && it.first != li.board)
             continue;
 
          // store board serial number
