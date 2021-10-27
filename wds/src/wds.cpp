@@ -998,6 +998,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
                else
                   mg_printf_http_chunk(nc, "          %g],\n", s);
             }
+            mg_printf_http_chunk(nc, "        \"uptime\": %d,\n", b->GetUptime());
             mg_printf_http_chunk(nc, "        \"pllLck\": %d,\n", b->GetPllLock(false));
             mg_printf_http_chunk(nc, "        \"LEDstate\": %d,\n", b->GetLEDState(true));
             mg_printf_http_chunk(nc, "        \"sysBusy\": %s,\n", b->GetSysBusy() ? "true" : "false");

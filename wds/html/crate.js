@@ -962,14 +962,28 @@ function receiveCrate() {
             wdb.temperature1Wire[3]);
          setItem("infoWDBTemp", wdb.temperature);
 
-         let s = "";
+         let d = Math.floor(wdb.uptime / (86400));
+         let h = Math.floor(wdb.uptime % 86400 / 3600);
+         let m = Math.floor(wdb.uptime % 3600 / 60);
+         let s = Math.floor(wdb.uptime % 60);
+
+         let str = "";
+         if (d > 0)
+            str = d.toString() + " days ";
+         str += (h < 10 ? "0" : "") + h.toString() + ":";
+         str += (m < 10 ? "0" : "") + m.toString() + ":";
+         str += (s < 10 ? "0" : "") + s.toString();
+         str += " (" + wdb.uptime.toString() + " s)";
+         setItem("infoWDBUptime", str);
+
+         str = "";
          for (i = 8; i >= 0; i--) {
             if ((wdb.pllLck & (1 << i)) > 0)
-               s += "1";
+               str += "1";
             else
-               s += "0";
+               str += "0";
          }
-         setItem("infoWDBPLL", s);
+         setItem("infoWDBPLL", str);
 
          setItem("infoWDBBusy", wdb.drsctrlBusy + " / " + wdb.sysBusy);
          setItem("infoWDBTRGParityErrors", wdb.triggerBusParityErrorCount);

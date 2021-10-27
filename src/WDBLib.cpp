@@ -1044,6 +1044,17 @@ float WDB::GetTCalibTemperature()
    return mTCalib.GetTemperature();
 }
 
+unsigned int WDB::GetUptime()
+{
+   // return seconds since last reboot
+   
+   ReceiveStatusRegisters(GetTimeLsbLoc() / 4, 2);
+   unsigned long lsb = this->sreg[GetTimeLsbLoc() / 4];
+   unsigned long msb = this->sreg[GetTimeMsbLoc() / 4];
+   unsigned long t = (msb << 32) | lsb;
+   return t / 80E6;
+}
+
 unsigned int WDB::GetPllLock(bool refresh)
 // all PLLs (DRS, LMK, FPGA DAQ, ISERDES, OSERDES)
 {

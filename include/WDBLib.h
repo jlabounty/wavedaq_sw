@@ -657,6 +657,7 @@ public:
    float GetTemperatureDegree(bool refresh = true);
    float GetVCalibTemperature();
    float GetTCalibTemperature();
+   unsigned int GetUptime();
    unsigned int GetPllLock(bool refresh = true);
    unsigned int GetLEDState(bool refresh = true);
    bool WaitPllLock(int timeout = 100);
