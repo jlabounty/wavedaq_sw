@@ -1782,7 +1782,7 @@ void connectWDB(GLOBALS *gl, WDB *b) {
    b->SetVerbose(gl->verbose);
    b->SetLogFile(gl->logFileName);
    b->Connect();
-   b->Setup(gl->wdsDir, gl->wp->GetServerPort());
+   b->Setup(gl->wdsDir, gl->wp != nullptr ? gl->wp->GetServerPort() : 0);
 
    // determine mode according to enabled channels
    if (b->GetDrsChTxEn() > 0) {
@@ -2083,8 +2083,6 @@ int main(int argc, const char *argv[]) {
                   DCB *dcb = new DCB(b, gl.verbose);
                   dcb->Connect();
                   dcb->ScanCrate();
-                  // set destination port for DCB, MAC and IP is used automatically from UDP packet
-                  dcb->SetDestinationPort(gl.wp->GetServerPort());
                   if (gl.verbose) {
                      std::cout << std::endl << "========== DCB Info ==========" << std::endl;
                      dcb->PrintVersion();
@@ -2100,7 +2098,6 @@ int main(int argc, const char *argv[]) {
                         connectWDB(&gl, wdb);
                         dcb->SetWDB(j, wdb);
                         gl.wdb.push_back(wdb);
-                        gl.wp->SetWDBList(gl.wdb);
                      }
                   }
                } catch (std::runtime_error &e) {
