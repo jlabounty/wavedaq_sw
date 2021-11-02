@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  29.09.2021 11:52:36
+// Created :  29.10.2021 09:37:04
 //
 // Register Layout Versions :  8, 9
 //
@@ -55,7 +55,7 @@ public:
          case 8:
             return 162;
          case 9:
-            return 139;
+            return 137;
          default:
             throw std::invalid_argument("Function GetNrOfCtrlRegs() not defined for this board version");
       };
@@ -69,7 +69,7 @@ public:
          case 8:
             return 90;
          case 9:
-            return 89;
+            return 88;
          default:
             throw std::invalid_argument("Function GetNrOfStatRegs() not defined for this board version");
       };
@@ -5345,7 +5345,7 @@ public:
             return BitExtractStatus(0x0138, 0x00000008, 3);
          case 9:
             // ADC reset modified flag
-            return BitExtractStatus(0x0134, 0x00000008, 3);
+            return BitExtractStatus(0x0130, 0x00000008, 3);
          default:
             throw std::invalid_argument("Function GetAdcRstMod() not defined for this board version");
       };
@@ -5363,7 +5363,7 @@ public:
             // ADC reset modified flag
             if(BitMask) *BitMask = 0x00000008;
             if(BitOfs) *BitOfs = 3;
-            return 0x0134;
+            return 0x0130;
          default:
             throw std::invalid_argument("Function GetAdcRstModLoc() not defined for this board version");
       };
@@ -5419,7 +5419,7 @@ public:
             return BitExtractStatus(0x0144, 0x0000000F, 0);
          case 9:
             // ADC downsampling divider modified flags
-            return BitExtractStatus(0x0140, 0x0000000F, 0);
+            return BitExtractStatus(0x013C, 0x0000000F, 0);
          default:
             throw std::invalid_argument("Function GetAdcSampleDivMod() not defined for this board version");
       };
@@ -5437,7 +5437,7 @@ public:
             // ADC downsampling divider modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
-            return 0x0140;
+            return 0x013C;
          default:
             throw std::invalid_argument("Function GetAdcSampleDivModLoc() not defined for this board version");
       };
@@ -8265,7 +8265,7 @@ public:
             return BitExtractStatus(0x0118, 0xFFFFFFFF, 0);
          case 9:
             // Advanced trigger status register 1
-            return BitExtractStatus(0x0114, 0xFFFFFFFF, 0);
+            return BitExtractStatus(0x0110, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgStat1() not defined for this board version");
       };
@@ -8283,7 +8283,7 @@ public:
             // Advanced trigger status register 1
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x0114;
+            return 0x0110;
          default:
             throw std::invalid_argument("Function GetAdvTrgStat1Loc() not defined for this board version");
       };
@@ -8299,7 +8299,7 @@ public:
             return BitExtractStatus(0x011C, 0xFFFFFFFF, 0);
          case 9:
             // Advanced trigger status register 2
-            return BitExtractStatus(0x0118, 0xFFFFFFFF, 0);
+            return BitExtractStatus(0x0114, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgStat2() not defined for this board version");
       };
@@ -8317,7 +8317,7 @@ public:
             // Advanced trigger status register 2
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x0118;
+            return 0x0114;
          default:
             throw std::invalid_argument("Function GetAdvTrgStat2Loc() not defined for this board version");
       };
@@ -8333,7 +8333,7 @@ public:
             return BitExtractStatus(0x0120, 0xFFFFFFFF, 0);
          case 9:
             // Advanced trigger status register 3
-            return BitExtractStatus(0x011C, 0xFFFFFFFF, 0);
+            return BitExtractStatus(0x0118, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgStat3() not defined for this board version");
       };
@@ -8351,7 +8351,7 @@ public:
             // Advanced trigger status register 3
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x011C;
+            return 0x0118;
          default:
             throw std::invalid_argument("Function GetAdvTrgStat3Loc() not defined for this board version");
       };
@@ -8367,7 +8367,7 @@ public:
             return BitExtractStatus(0x0124, 0xFFFFFFFF, 0);
          case 9:
             // Advanced trigger status register 4
-            return BitExtractStatus(0x0120, 0xFFFFFFFF, 0);
+            return BitExtractStatus(0x011C, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgStat4() not defined for this board version");
       };
@@ -8385,7 +8385,7 @@ public:
             // Advanced trigger status register 4
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x0120;
+            return 0x011C;
          default:
             throw std::invalid_argument("Function GetAdvTrgStat4Loc() not defined for this board version");
       };
@@ -8593,7 +8593,7 @@ public:
             return BitExtractStatus(0x0114, 0xFFFFFFFF, 0);
          case 9:
             // Advanced trigger cell register
-            return BitExtractStatus(0x0110, 0xFFFFFFFF, 0);
+            return BitExtractStatus(0x010C, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetAdvTrgTrigCell() not defined for this board version");
       };
@@ -8611,7 +8611,7 @@ public:
             // Advanced trigger cell register
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x0110;
+            return 0x010C;
          default:
             throw std::invalid_argument("Function GetAdvTrgTrigCellLoc() not defined for this board version");
       };
@@ -9367,7 +9367,7 @@ public:
             return BitExtractStatus(0x0138, 0x00000004, 2);
          case 9:
             // DAQ clock select and DRS clock divider modified flags
-            return BitExtractStatus(0x0134, 0x00000004, 2);
+            return BitExtractStatus(0x0130, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetClkSelAndDrsClkDivMod() not defined for this board version");
       };
@@ -9385,7 +9385,7 @@ public:
             // DAQ clock select and DRS clock divider modified flags
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
-            return 0x0134;
+            return 0x0130;
          default:
             throw std::invalid_argument("Function GetClkSelAndDrsClkDivModLoc() not defined for this board version");
       };
@@ -9401,7 +9401,7 @@ public:
             return BitExtractStatus(0x00FC, 0x0000FFFF, 0);
          case 9:
             // Status of the comparator inputs
-            return BitExtractStatus(0x00F8, 0x0000FFFF, 0);
+            return BitExtractStatus(0x00F4, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetCompChStat() not defined for this board version");
       };
@@ -9419,7 +9419,7 @@ public:
             // Status of the comparator inputs
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x00F8;
+            return 0x00F4;
          default:
             throw std::invalid_argument("Function GetCompChStatLoc() not defined for this board version");
       };
@@ -9515,7 +9515,7 @@ public:
             return BitExtractStatus(0x0140, 0x0000000F, 0);
          case 9:
             // Maximum packet payload size modified flag
-            return BitExtractStatus(0x013C, 0x0000000F, 0);
+            return BitExtractStatus(0x0138, 0x0000000F, 0);
          default:
             throw std::invalid_argument("Function GetComPldSizeMod() not defined for this board version");
       };
@@ -9533,7 +9533,7 @@ public:
             // Maximum packet payload size modified flag
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
-            return 0x013C;
+            return 0x0138;
          default:
             throw std::invalid_argument("Function GetComPldSizeModLoc() not defined for this board version");
       };
@@ -9589,7 +9589,7 @@ public:
             return BitExtractControl(0x1284, 0xFFFFFFFF, 0);
          case 9:
             // Keep at the end of the register bank
-            return BitExtractControl(0x1228, 0xFFFFFFFF, 0);
+            return BitExtractControl(0x1220, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetCrc32RegBank() not defined for this board version");
       };
@@ -9603,7 +9603,7 @@ public:
             return SetRegMask(0x1284, 0xFFFFFFFF, 0, value);
          case 9:
             // Keep at the end of the register bank
-            return SetRegMask(0x1228, 0xFFFFFFFF, 0, value);
+            return SetRegMask(0x1220, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetCrc32RegBank() not defined for this board version");
       };
@@ -9621,7 +9621,7 @@ public:
             // Keep at the end of the register bank
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x1228;
+            return 0x1220;
          default:
             throw std::invalid_argument("Function GetCrc32RegBankLoc() not defined for this board version");
       };
@@ -9637,7 +9637,7 @@ public:
             return BitExtractStatus(0x0148, 0xC0000000, 30);
          case 9:
             // DAC channel a modified flags
-            return BitExtractStatus(0x0144, 0xC0000000, 30);
+            return BitExtractStatus(0x0140, 0xC0000000, 30);
          default:
             throw std::invalid_argument("Function GetDac0AMod() not defined for this board version");
       };
@@ -9655,7 +9655,7 @@ public:
             // DAC channel a modified flags
             if(BitMask) *BitMask = 0xC0000000;
             if(BitOfs) *BitOfs = 30;
-            return 0x0144;
+            return 0x0140;
          default:
             throw std::invalid_argument("Function GetDac0AModLoc() not defined for this board version");
       };
@@ -9671,7 +9671,7 @@ public:
             return BitExtractStatus(0x0148, 0x30000000, 28);
          case 9:
             // DAC channel b modified flags
-            return BitExtractStatus(0x0144, 0x30000000, 28);
+            return BitExtractStatus(0x0140, 0x30000000, 28);
          default:
             throw std::invalid_argument("Function GetDac0BMod() not defined for this board version");
       };
@@ -9689,7 +9689,7 @@ public:
             // DAC channel b modified flags
             if(BitMask) *BitMask = 0x30000000;
             if(BitOfs) *BitOfs = 28;
-            return 0x0144;
+            return 0x0140;
          default:
             throw std::invalid_argument("Function GetDac0BModLoc() not defined for this board version");
       };
@@ -10033,7 +10033,7 @@ public:
             return BitExtractStatus(0x0148, 0x0C000000, 26);
          case 9:
             // DAC channel c modified flags
-            return BitExtractStatus(0x0144, 0x0C000000, 26);
+            return BitExtractStatus(0x0140, 0x0C000000, 26);
          default:
             throw std::invalid_argument("Function GetDac0CMod() not defined for this board version");
       };
@@ -10051,7 +10051,7 @@ public:
             // DAC channel c modified flags
             if(BitMask) *BitMask = 0x0C000000;
             if(BitOfs) *BitOfs = 26;
-            return 0x0144;
+            return 0x0140;
          default:
             throw std::invalid_argument("Function GetDac0CModLoc() not defined for this board version");
       };
@@ -10067,7 +10067,7 @@ public:
             return BitExtractStatus(0x0148, 0x03000000, 24);
          case 9:
             // DAC channel d modified flags
-            return BitExtractStatus(0x0144, 0x03000000, 24);
+            return BitExtractStatus(0x0140, 0x03000000, 24);
          default:
             throw std::invalid_argument("Function GetDac0DMod() not defined for this board version");
       };
@@ -10085,7 +10085,7 @@ public:
             // DAC channel d modified flags
             if(BitMask) *BitMask = 0x03000000;
             if(BitOfs) *BitOfs = 24;
-            return 0x0144;
+            return 0x0140;
          default:
             throw std::invalid_argument("Function GetDac0DModLoc() not defined for this board version");
       };
@@ -10101,7 +10101,7 @@ public:
             return BitExtractStatus(0x0148, 0x00C00000, 22);
          case 9:
             // DAC channel e modified flags
-            return BitExtractStatus(0x0144, 0x00C00000, 22);
+            return BitExtractStatus(0x0140, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetDac0EMod() not defined for this board version");
       };
@@ -10119,7 +10119,7 @@ public:
             // DAC channel e modified flags
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
-            return 0x0144;
+            return 0x0140;
          default:
             throw std::invalid_argument("Function GetDac0EModLoc() not defined for this board version");
       };
@@ -10135,7 +10135,7 @@ public:
             return BitExtractStatus(0x0148, 0x00300000, 20);
          case 9:
             // DAC channel f modified flags
-            return BitExtractStatus(0x0144, 0x00300000, 20);
+            return BitExtractStatus(0x0140, 0x00300000, 20);
          default:
             throw std::invalid_argument("Function GetDac0FMod() not defined for this board version");
       };
@@ -10153,7 +10153,7 @@ public:
             // DAC channel f modified flags
             if(BitMask) *BitMask = 0x00300000;
             if(BitOfs) *BitOfs = 20;
-            return 0x0144;
+            return 0x0140;
          default:
             throw std::invalid_argument("Function GetDac0FModLoc() not defined for this board version");
       };
@@ -10169,7 +10169,7 @@ public:
             return BitExtractStatus(0x0148, 0x000C0000, 18);
          case 9:
             // DAC channel g modified flags
-            return BitExtractStatus(0x0144, 0x000C0000, 18);
+            return BitExtractStatus(0x0140, 0x000C0000, 18);
          default:
             throw std::invalid_argument("Function GetDac0GMod() not defined for this board version");
       };
@@ -10187,7 +10187,7 @@ public:
             // DAC channel g modified flags
             if(BitMask) *BitMask = 0x000C0000;
             if(BitOfs) *BitOfs = 18;
-            return 0x0144;
+            return 0x0140;
          default:
             throw std::invalid_argument("Function GetDac0GModLoc() not defined for this board version");
       };
@@ -10203,7 +10203,7 @@ public:
             return BitExtractStatus(0x0148, 0x00030000, 16);
          case 9:
             // DAC channel h modified flags
-            return BitExtractStatus(0x0144, 0x00030000, 16);
+            return BitExtractStatus(0x0140, 0x00030000, 16);
          default:
             throw std::invalid_argument("Function GetDac0HMod() not defined for this board version");
       };
@@ -10221,7 +10221,7 @@ public:
             // DAC channel h modified flags
             if(BitMask) *BitMask = 0x00030000;
             if(BitOfs) *BitOfs = 16;
-            return 0x0144;
+            return 0x0140;
          default:
             throw std::invalid_argument("Function GetDac0HModLoc() not defined for this board version");
       };
@@ -10237,7 +10237,7 @@ public:
             return BitExtractStatus(0x0148, 0x0000C000, 14);
          case 9:
             // DAC channel a modified flags
-            return BitExtractStatus(0x0144, 0x0000C000, 14);
+            return BitExtractStatus(0x0140, 0x0000C000, 14);
          default:
             throw std::invalid_argument("Function GetDac1AMod() not defined for this board version");
       };
@@ -10255,7 +10255,7 @@ public:
             // DAC channel a modified flags
             if(BitMask) *BitMask = 0x0000C000;
             if(BitOfs) *BitOfs = 14;
-            return 0x0144;
+            return 0x0140;
          default:
             throw std::invalid_argument("Function GetDac1AModLoc() not defined for this board version");
       };
@@ -10271,7 +10271,7 @@ public:
             return BitExtractStatus(0x0148, 0x00003000, 12);
          case 9:
             // DAC channel b modified flags
-            return BitExtractStatus(0x0144, 0x00003000, 12);
+            return BitExtractStatus(0x0140, 0x00003000, 12);
          default:
             throw std::invalid_argument("Function GetDac1BMod() not defined for this board version");
       };
@@ -10289,7 +10289,7 @@ public:
             // DAC channel b modified flags
             if(BitMask) *BitMask = 0x00003000;
             if(BitOfs) *BitOfs = 12;
-            return 0x0144;
+            return 0x0140;
          default:
             throw std::invalid_argument("Function GetDac1BModLoc() not defined for this board version");
       };
@@ -10625,7 +10625,7 @@ public:
             return BitExtractStatus(0x0148, 0x00000C00, 10);
          case 9:
             // DAC channel c modified flags
-            return BitExtractStatus(0x0144, 0x00000C00, 10);
+            return BitExtractStatus(0x0140, 0x00000C00, 10);
          default:
             throw std::invalid_argument("Function GetDac1CMod() not defined for this board version");
       };
@@ -10643,7 +10643,7 @@ public:
             // DAC channel c modified flags
             if(BitMask) *BitMask = 0x00000C00;
             if(BitOfs) *BitOfs = 10;
-            return 0x0144;
+            return 0x0140;
          default:
             throw std::invalid_argument("Function GetDac1CModLoc() not defined for this board version");
       };
@@ -10659,7 +10659,7 @@ public:
             return BitExtractStatus(0x0148, 0x00000300, 8);
          case 9:
             // DAC channel d modified flags
-            return BitExtractStatus(0x0144, 0x00000300, 8);
+            return BitExtractStatus(0x0140, 0x00000300, 8);
          default:
             throw std::invalid_argument("Function GetDac1DMod() not defined for this board version");
       };
@@ -10677,7 +10677,7 @@ public:
             // DAC channel d modified flags
             if(BitMask) *BitMask = 0x00000300;
             if(BitOfs) *BitOfs = 8;
-            return 0x0144;
+            return 0x0140;
          default:
             throw std::invalid_argument("Function GetDac1DModLoc() not defined for this board version");
       };
@@ -10693,7 +10693,7 @@ public:
             return BitExtractStatus(0x0148, 0x000000C0, 6);
          case 9:
             // DAC channel e modified flags
-            return BitExtractStatus(0x0144, 0x000000C0, 6);
+            return BitExtractStatus(0x0140, 0x000000C0, 6);
          default:
             throw std::invalid_argument("Function GetDac1EMod() not defined for this board version");
       };
@@ -10711,7 +10711,7 @@ public:
             // DAC channel e modified flags
             if(BitMask) *BitMask = 0x000000C0;
             if(BitOfs) *BitOfs = 6;
-            return 0x0144;
+            return 0x0140;
          default:
             throw std::invalid_argument("Function GetDac1EModLoc() not defined for this board version");
       };
@@ -10727,7 +10727,7 @@ public:
             return BitExtractStatus(0x0148, 0x00000030, 4);
          case 9:
             // DAC channel f modified flags
-            return BitExtractStatus(0x0144, 0x00000030, 4);
+            return BitExtractStatus(0x0140, 0x00000030, 4);
          default:
             throw std::invalid_argument("Function GetDac1FMod() not defined for this board version");
       };
@@ -10745,7 +10745,7 @@ public:
             // DAC channel f modified flags
             if(BitMask) *BitMask = 0x00000030;
             if(BitOfs) *BitOfs = 4;
-            return 0x0144;
+            return 0x0140;
          default:
             throw std::invalid_argument("Function GetDac1FModLoc() not defined for this board version");
       };
@@ -10761,7 +10761,7 @@ public:
             return BitExtractStatus(0x0148, 0x0000000C, 2);
          case 9:
             // DAC channel g modified flags
-            return BitExtractStatus(0x0144, 0x0000000C, 2);
+            return BitExtractStatus(0x0140, 0x0000000C, 2);
          default:
             throw std::invalid_argument("Function GetDac1GMod() not defined for this board version");
       };
@@ -10779,7 +10779,7 @@ public:
             // DAC channel g modified flags
             if(BitMask) *BitMask = 0x0000000C;
             if(BitOfs) *BitOfs = 2;
-            return 0x0144;
+            return 0x0140;
          default:
             throw std::invalid_argument("Function GetDac1GModLoc() not defined for this board version");
       };
@@ -10795,7 +10795,7 @@ public:
             return BitExtractStatus(0x0148, 0x00000003, 0);
          case 9:
             // DAC channel h modified flags
-            return BitExtractStatus(0x0144, 0x00000003, 0);
+            return BitExtractStatus(0x0140, 0x00000003, 0);
          default:
             throw std::invalid_argument("Function GetDac1HMod() not defined for this board version");
       };
@@ -10813,7 +10813,7 @@ public:
             // DAC channel h modified flags
             if(BitMask) *BitMask = 0x00000003;
             if(BitOfs) *BitOfs = 0;
-            return 0x0144;
+            return 0x0140;
          default:
             throw std::invalid_argument("Function GetDac1HModLoc() not defined for this board version");
       };
@@ -10829,7 +10829,7 @@ public:
             return BitExtractStatus(0x014C, 0xC0000000, 30);
          case 9:
             // DAC channel a modified flags
-            return BitExtractStatus(0x0148, 0xC0000000, 30);
+            return BitExtractStatus(0x0144, 0xC0000000, 30);
          default:
             throw std::invalid_argument("Function GetDac2AMod() not defined for this board version");
       };
@@ -10847,7 +10847,7 @@ public:
             // DAC channel a modified flags
             if(BitMask) *BitMask = 0xC0000000;
             if(BitOfs) *BitOfs = 30;
-            return 0x0148;
+            return 0x0144;
          default:
             throw std::invalid_argument("Function GetDac2AModLoc() not defined for this board version");
       };
@@ -10863,7 +10863,7 @@ public:
             return BitExtractStatus(0x014C, 0x30000000, 28);
          case 9:
             // DAC channel b modified flags
-            return BitExtractStatus(0x0148, 0x30000000, 28);
+            return BitExtractStatus(0x0144, 0x30000000, 28);
          default:
             throw std::invalid_argument("Function GetDac2BMod() not defined for this board version");
       };
@@ -10881,7 +10881,7 @@ public:
             // DAC channel b modified flags
             if(BitMask) *BitMask = 0x30000000;
             if(BitOfs) *BitOfs = 28;
-            return 0x0148;
+            return 0x0144;
          default:
             throw std::invalid_argument("Function GetDac2BModLoc() not defined for this board version");
       };
@@ -11217,7 +11217,7 @@ public:
             return BitExtractStatus(0x014C, 0x0C000000, 26);
          case 9:
             // DAC channel c modified flags
-            return BitExtractStatus(0x0148, 0x0C000000, 26);
+            return BitExtractStatus(0x0144, 0x0C000000, 26);
          default:
             throw std::invalid_argument("Function GetDac2CMod() not defined for this board version");
       };
@@ -11235,7 +11235,7 @@ public:
             // DAC channel c modified flags
             if(BitMask) *BitMask = 0x0C000000;
             if(BitOfs) *BitOfs = 26;
-            return 0x0148;
+            return 0x0144;
          default:
             throw std::invalid_argument("Function GetDac2CModLoc() not defined for this board version");
       };
@@ -11251,7 +11251,7 @@ public:
             return BitExtractStatus(0x014C, 0x03000000, 24);
          case 9:
             // DAC channel d modified flags
-            return BitExtractStatus(0x0148, 0x03000000, 24);
+            return BitExtractStatus(0x0144, 0x03000000, 24);
          default:
             throw std::invalid_argument("Function GetDac2DMod() not defined for this board version");
       };
@@ -11269,7 +11269,7 @@ public:
             // DAC channel d modified flags
             if(BitMask) *BitMask = 0x03000000;
             if(BitOfs) *BitOfs = 24;
-            return 0x0148;
+            return 0x0144;
          default:
             throw std::invalid_argument("Function GetDac2DModLoc() not defined for this board version");
       };
@@ -11285,7 +11285,7 @@ public:
             return BitExtractStatus(0x014C, 0x00C00000, 22);
          case 9:
             // DAC channel e modified flags
-            return BitExtractStatus(0x0148, 0x00C00000, 22);
+            return BitExtractStatus(0x0144, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetDac2EMod() not defined for this board version");
       };
@@ -11303,7 +11303,7 @@ public:
             // DAC channel e modified flags
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
-            return 0x0148;
+            return 0x0144;
          default:
             throw std::invalid_argument("Function GetDac2EModLoc() not defined for this board version");
       };
@@ -11319,7 +11319,7 @@ public:
             return BitExtractStatus(0x014C, 0x00300000, 20);
          case 9:
             // DAC channel f modified flags
-            return BitExtractStatus(0x0148, 0x00300000, 20);
+            return BitExtractStatus(0x0144, 0x00300000, 20);
          default:
             throw std::invalid_argument("Function GetDac2FMod() not defined for this board version");
       };
@@ -11337,7 +11337,7 @@ public:
             // DAC channel f modified flags
             if(BitMask) *BitMask = 0x00300000;
             if(BitOfs) *BitOfs = 20;
-            return 0x0148;
+            return 0x0144;
          default:
             throw std::invalid_argument("Function GetDac2FModLoc() not defined for this board version");
       };
@@ -11353,7 +11353,7 @@ public:
             return BitExtractStatus(0x014C, 0x000C0000, 18);
          case 9:
             // DAC channel g modified flags
-            return BitExtractStatus(0x0148, 0x000C0000, 18);
+            return BitExtractStatus(0x0144, 0x000C0000, 18);
          default:
             throw std::invalid_argument("Function GetDac2GMod() not defined for this board version");
       };
@@ -11371,7 +11371,7 @@ public:
             // DAC channel g modified flags
             if(BitMask) *BitMask = 0x000C0000;
             if(BitOfs) *BitOfs = 18;
-            return 0x0148;
+            return 0x0144;
          default:
             throw std::invalid_argument("Function GetDac2GModLoc() not defined for this board version");
       };
@@ -11387,7 +11387,7 @@ public:
             return BitExtractStatus(0x014C, 0x00030000, 16);
          case 9:
             // DAC channel h modified flags
-            return BitExtractStatus(0x0148, 0x00030000, 16);
+            return BitExtractStatus(0x0144, 0x00030000, 16);
          default:
             throw std::invalid_argument("Function GetDac2HMod() not defined for this board version");
       };
@@ -11405,7 +11405,7 @@ public:
             // DAC channel h modified flags
             if(BitMask) *BitMask = 0x00030000;
             if(BitOfs) *BitOfs = 16;
-            return 0x0148;
+            return 0x0144;
          default:
             throw std::invalid_argument("Function GetDac2HModLoc() not defined for this board version");
       };
@@ -12241,7 +12241,7 @@ public:
             return BitExtractStatus(0x013C, 0x00000004, 2);
          case 9:
             // DRS control bits modified flags
-            return BitExtractStatus(0x0138, 0x00000004, 2);
+            return BitExtractStatus(0x0134, 0x00000004, 2);
          default:
             throw std::invalid_argument("Function GetDrsCtrlMod() not defined for this board version");
       };
@@ -12259,7 +12259,7 @@ public:
             // DRS control bits modified flags
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
-            return 0x0138;
+            return 0x0134;
          default:
             throw std::invalid_argument("Function GetDrsCtrlModLoc() not defined for this board version");
       };
@@ -12711,7 +12711,7 @@ public:
             return BitExtractStatus(0x013C, 0x00000001, 0);
          case 9:
             // DRS write control register modified flags
-            return BitExtractStatus(0x0138, 0x00000001, 0);
+            return BitExtractStatus(0x0134, 0x00000001, 0);
          default:
             throw std::invalid_argument("Function GetDrsWcrMod() not defined for this board version");
       };
@@ -12729,7 +12729,7 @@ public:
             // DRS write control register modified flags
             if(BitMask) *BitMask = 0x00000001;
             if(BitOfs) *BitOfs = 0;
-            return 0x0138;
+            return 0x0134;
          default:
             throw std::invalid_argument("Function GetDrsWcrModLoc() not defined for this board version");
       };
@@ -12825,7 +12825,7 @@ public:
             return BitExtractStatus(0x013C, 0x00000002, 1);
          case 9:
             // DRS write shift register modified flags
-            return BitExtractStatus(0x0138, 0x00000002, 1);
+            return BitExtractStatus(0x0134, 0x00000002, 1);
          default:
             throw std::invalid_argument("Function GetDrsWsrMod() not defined for this board version");
       };
@@ -12843,7 +12843,7 @@ public:
             // DRS write shift register modified flags
             if(BitMask) *BitMask = 0x00000002;
             if(BitOfs) *BitOfs = 1;
-            return 0x0138;
+            return 0x0134;
          default:
             throw std::invalid_argument("Function GetDrsWsrModLoc() not defined for this board version");
       };
@@ -12939,7 +12939,7 @@ public:
             return BitExtractStatus(0x0104, 0xFFFFFFFF, 0);
          case 9:
             // Number of latest event
-            return BitExtractStatus(0x0100, 0xFFFFFFFF, 0);
+            return BitExtractStatus(0x00FC, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetEventNumber() not defined for this board version");
       };
@@ -12957,7 +12957,7 @@ public:
             // Number of latest event
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x0100;
+            return 0x00FC;
          default:
             throw std::invalid_argument("Function GetEventNumberLoc() not defined for this board version");
       };
@@ -12973,7 +12973,7 @@ public:
             return BitExtractStatus(0x0100, 0xFFFFFFFF, 0);
          case 9:
             // Number of events transmitted per second
-            return BitExtractStatus(0x00FC, 0xFFFFFFFF, 0);
+            return BitExtractStatus(0x00F8, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetEventTxRate() not defined for this board version");
       };
@@ -12991,7 +12991,7 @@ public:
             // Number of events transmitted per second
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x00FC;
+            return 0x00F8;
          default:
             throw std::invalid_argument("Function GetEventTxRateLoc() not defined for this board version");
       };
@@ -13123,7 +13123,7 @@ public:
             return BitExtractStatus(0x0138, 0x00000002, 1);
          case 9:
             // External clock frequency modified flags
-            return BitExtractStatus(0x0134, 0x00000002, 1);
+            return BitExtractStatus(0x0130, 0x00000002, 1);
          default:
             throw std::invalid_argument("Function GetExtClkFreqMod() not defined for this board version");
       };
@@ -13141,7 +13141,7 @@ public:
             // External clock frequency modified flags
             if(BitMask) *BitMask = 0x00000002;
             if(BitOfs) *BitOfs = 1;
-            return 0x0134;
+            return 0x0130;
          default:
             throw std::invalid_argument("Function GetExtClkFreqModLoc() not defined for this board version");
       };
@@ -17725,7 +17725,7 @@ public:
             return BitExtractStatus(0x0150, 0xC0000000, 30);
          case 9:
             // Frontend channel 0 register modified flags
-            return BitExtractStatus(0x014C, 0xC0000000, 30);
+            return BitExtractStatus(0x0148, 0xC0000000, 30);
          default:
             throw std::invalid_argument("Function GetFe0Mod() not defined for this board version");
       };
@@ -17743,7 +17743,7 @@ public:
             // Frontend channel 0 register modified flags
             if(BitMask) *BitMask = 0xC0000000;
             if(BitOfs) *BitOfs = 30;
-            return 0x014C;
+            return 0x0148;
          default:
             throw std::invalid_argument("Function GetFe0ModLoc() not defined for this board version");
       };
@@ -17759,7 +17759,7 @@ public:
             return BitExtractStatus(0x0150, 0x00000C00, 10);
          case 9:
             // Frontend channel 10 register modified flags
-            return BitExtractStatus(0x014C, 0x00000C00, 10);
+            return BitExtractStatus(0x0148, 0x00000C00, 10);
          default:
             throw std::invalid_argument("Function GetFe10Mod() not defined for this board version");
       };
@@ -17777,7 +17777,7 @@ public:
             // Frontend channel 10 register modified flags
             if(BitMask) *BitMask = 0x00000C00;
             if(BitOfs) *BitOfs = 10;
-            return 0x014C;
+            return 0x0148;
          default:
             throw std::invalid_argument("Function GetFe10ModLoc() not defined for this board version");
       };
@@ -17793,7 +17793,7 @@ public:
             return BitExtractStatus(0x0150, 0x00000300, 8);
          case 9:
             // Frontend channel 11 register modified flags
-            return BitExtractStatus(0x014C, 0x00000300, 8);
+            return BitExtractStatus(0x0148, 0x00000300, 8);
          default:
             throw std::invalid_argument("Function GetFe11Mod() not defined for this board version");
       };
@@ -17811,7 +17811,7 @@ public:
             // Frontend channel 11 register modified flags
             if(BitMask) *BitMask = 0x00000300;
             if(BitOfs) *BitOfs = 8;
-            return 0x014C;
+            return 0x0148;
          default:
             throw std::invalid_argument("Function GetFe11ModLoc() not defined for this board version");
       };
@@ -17827,7 +17827,7 @@ public:
             return BitExtractStatus(0x0150, 0x000000C0, 6);
          case 9:
             // Frontend channel 12 register modified flags
-            return BitExtractStatus(0x014C, 0x000000C0, 6);
+            return BitExtractStatus(0x0148, 0x000000C0, 6);
          default:
             throw std::invalid_argument("Function GetFe12Mod() not defined for this board version");
       };
@@ -17845,7 +17845,7 @@ public:
             // Frontend channel 12 register modified flags
             if(BitMask) *BitMask = 0x000000C0;
             if(BitOfs) *BitOfs = 6;
-            return 0x014C;
+            return 0x0148;
          default:
             throw std::invalid_argument("Function GetFe12ModLoc() not defined for this board version");
       };
@@ -17861,7 +17861,7 @@ public:
             return BitExtractStatus(0x0150, 0x00000030, 4);
          case 9:
             // Frontend channel 13 register modified flags
-            return BitExtractStatus(0x014C, 0x00000030, 4);
+            return BitExtractStatus(0x0148, 0x00000030, 4);
          default:
             throw std::invalid_argument("Function GetFe13Mod() not defined for this board version");
       };
@@ -17879,7 +17879,7 @@ public:
             // Frontend channel 13 register modified flags
             if(BitMask) *BitMask = 0x00000030;
             if(BitOfs) *BitOfs = 4;
-            return 0x014C;
+            return 0x0148;
          default:
             throw std::invalid_argument("Function GetFe13ModLoc() not defined for this board version");
       };
@@ -17895,7 +17895,7 @@ public:
             return BitExtractStatus(0x0150, 0x0000000C, 2);
          case 9:
             // Frontend channel 14 register modified flags
-            return BitExtractStatus(0x014C, 0x0000000C, 2);
+            return BitExtractStatus(0x0148, 0x0000000C, 2);
          default:
             throw std::invalid_argument("Function GetFe14Mod() not defined for this board version");
       };
@@ -17913,7 +17913,7 @@ public:
             // Frontend channel 14 register modified flags
             if(BitMask) *BitMask = 0x0000000C;
             if(BitOfs) *BitOfs = 2;
-            return 0x014C;
+            return 0x0148;
          default:
             throw std::invalid_argument("Function GetFe14ModLoc() not defined for this board version");
       };
@@ -17929,7 +17929,7 @@ public:
             return BitExtractStatus(0x0150, 0x00000003, 0);
          case 9:
             // Frontend channel 15 register modified flags
-            return BitExtractStatus(0x014C, 0x00000003, 0);
+            return BitExtractStatus(0x0148, 0x00000003, 0);
          default:
             throw std::invalid_argument("Function GetFe15Mod() not defined for this board version");
       };
@@ -17947,7 +17947,7 @@ public:
             // Frontend channel 15 register modified flags
             if(BitMask) *BitMask = 0x00000003;
             if(BitOfs) *BitOfs = 0;
-            return 0x014C;
+            return 0x0148;
          default:
             throw std::invalid_argument("Function GetFe15ModLoc() not defined for this board version");
       };
@@ -17963,7 +17963,7 @@ public:
             return BitExtractStatus(0x0150, 0x30000000, 28);
          case 9:
             // Frontend channel 1 register modified flags
-            return BitExtractStatus(0x014C, 0x30000000, 28);
+            return BitExtractStatus(0x0148, 0x30000000, 28);
          default:
             throw std::invalid_argument("Function GetFe1Mod() not defined for this board version");
       };
@@ -17981,7 +17981,7 @@ public:
             // Frontend channel 1 register modified flags
             if(BitMask) *BitMask = 0x30000000;
             if(BitOfs) *BitOfs = 28;
-            return 0x014C;
+            return 0x0148;
          default:
             throw std::invalid_argument("Function GetFe1ModLoc() not defined for this board version");
       };
@@ -17997,7 +17997,7 @@ public:
             return BitExtractStatus(0x0150, 0x0C000000, 26);
          case 9:
             // Frontend channel 2 register modified flags
-            return BitExtractStatus(0x014C, 0x0C000000, 26);
+            return BitExtractStatus(0x0148, 0x0C000000, 26);
          default:
             throw std::invalid_argument("Function GetFe2Mod() not defined for this board version");
       };
@@ -18015,7 +18015,7 @@ public:
             // Frontend channel 2 register modified flags
             if(BitMask) *BitMask = 0x0C000000;
             if(BitOfs) *BitOfs = 26;
-            return 0x014C;
+            return 0x0148;
          default:
             throw std::invalid_argument("Function GetFe2ModLoc() not defined for this board version");
       };
@@ -18031,7 +18031,7 @@ public:
             return BitExtractStatus(0x0150, 0x03000000, 24);
          case 9:
             // Frontend channel 3 register modified flags
-            return BitExtractStatus(0x014C, 0x03000000, 24);
+            return BitExtractStatus(0x0148, 0x03000000, 24);
          default:
             throw std::invalid_argument("Function GetFe3Mod() not defined for this board version");
       };
@@ -18049,7 +18049,7 @@ public:
             // Frontend channel 3 register modified flags
             if(BitMask) *BitMask = 0x03000000;
             if(BitOfs) *BitOfs = 24;
-            return 0x014C;
+            return 0x0148;
          default:
             throw std::invalid_argument("Function GetFe3ModLoc() not defined for this board version");
       };
@@ -18065,7 +18065,7 @@ public:
             return BitExtractStatus(0x0150, 0x00C00000, 22);
          case 9:
             // Frontend channel 4 register modified flags
-            return BitExtractStatus(0x014C, 0x00C00000, 22);
+            return BitExtractStatus(0x0148, 0x00C00000, 22);
          default:
             throw std::invalid_argument("Function GetFe4Mod() not defined for this board version");
       };
@@ -18083,7 +18083,7 @@ public:
             // Frontend channel 4 register modified flags
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
-            return 0x014C;
+            return 0x0148;
          default:
             throw std::invalid_argument("Function GetFe4ModLoc() not defined for this board version");
       };
@@ -18099,7 +18099,7 @@ public:
             return BitExtractStatus(0x0150, 0x00300000, 20);
          case 9:
             // Frontend channel 5 register modified flags
-            return BitExtractStatus(0x014C, 0x00300000, 20);
+            return BitExtractStatus(0x0148, 0x00300000, 20);
          default:
             throw std::invalid_argument("Function GetFe5Mod() not defined for this board version");
       };
@@ -18117,7 +18117,7 @@ public:
             // Frontend channel 5 register modified flags
             if(BitMask) *BitMask = 0x00300000;
             if(BitOfs) *BitOfs = 20;
-            return 0x014C;
+            return 0x0148;
          default:
             throw std::invalid_argument("Function GetFe5ModLoc() not defined for this board version");
       };
@@ -18133,7 +18133,7 @@ public:
             return BitExtractStatus(0x0150, 0x000C0000, 18);
          case 9:
             // Frontend channel 6 register modified flags
-            return BitExtractStatus(0x014C, 0x000C0000, 18);
+            return BitExtractStatus(0x0148, 0x000C0000, 18);
          default:
             throw std::invalid_argument("Function GetFe6Mod() not defined for this board version");
       };
@@ -18151,7 +18151,7 @@ public:
             // Frontend channel 6 register modified flags
             if(BitMask) *BitMask = 0x000C0000;
             if(BitOfs) *BitOfs = 18;
-            return 0x014C;
+            return 0x0148;
          default:
             throw std::invalid_argument("Function GetFe6ModLoc() not defined for this board version");
       };
@@ -18167,7 +18167,7 @@ public:
             return BitExtractStatus(0x0150, 0x00030000, 16);
          case 9:
             // Frontend channel 7 register modified flags
-            return BitExtractStatus(0x014C, 0x00030000, 16);
+            return BitExtractStatus(0x0148, 0x00030000, 16);
          default:
             throw std::invalid_argument("Function GetFe7Mod() not defined for this board version");
       };
@@ -18185,7 +18185,7 @@ public:
             // Frontend channel 7 register modified flags
             if(BitMask) *BitMask = 0x00030000;
             if(BitOfs) *BitOfs = 16;
-            return 0x014C;
+            return 0x0148;
          default:
             throw std::invalid_argument("Function GetFe7ModLoc() not defined for this board version");
       };
@@ -18201,7 +18201,7 @@ public:
             return BitExtractStatus(0x0150, 0x0000C000, 14);
          case 9:
             // Frontend channel 8 register modified flags
-            return BitExtractStatus(0x014C, 0x0000C000, 14);
+            return BitExtractStatus(0x0148, 0x0000C000, 14);
          default:
             throw std::invalid_argument("Function GetFe8Mod() not defined for this board version");
       };
@@ -18219,7 +18219,7 @@ public:
             // Frontend channel 8 register modified flags
             if(BitMask) *BitMask = 0x0000C000;
             if(BitOfs) *BitOfs = 14;
-            return 0x014C;
+            return 0x0148;
          default:
             throw std::invalid_argument("Function GetFe8ModLoc() not defined for this board version");
       };
@@ -18235,7 +18235,7 @@ public:
             return BitExtractStatus(0x0150, 0x00003000, 12);
          case 9:
             // Frontend channel 9 register modified flags
-            return BitExtractStatus(0x014C, 0x00003000, 12);
+            return BitExtractStatus(0x0148, 0x00003000, 12);
          default:
             throw std::invalid_argument("Function GetFe9Mod() not defined for this board version");
       };
@@ -18253,7 +18253,7 @@ public:
             // Frontend channel 9 register modified flags
             if(BitMask) *BitMask = 0x00003000;
             if(BitOfs) *BitOfs = 12;
-            return 0x014C;
+            return 0x0148;
          default:
             throw std::invalid_argument("Function GetFe9ModLoc() not defined for this board version");
       };
@@ -19208,7 +19208,7 @@ public:
             return BitExtractStatus(0x015C, 0x0000000F, 0);
          case 9:
             // HV supply shunt resistor register modified flags
-            return BitExtractStatus(0x0158, 0x0000000F, 0);
+            return BitExtractStatus(0x0154, 0x0000000F, 0);
          default:
             throw std::invalid_argument("Function GetHvRShuntMod() not defined for this board version");
       };
@@ -19226,7 +19226,7 @@ public:
             // HV supply shunt resistor register modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
-            return 0x0158;
+            return 0x0154;
          default:
             throw std::invalid_argument("Function GetHvRShuntModLoc() not defined for this board version");
       };
@@ -19452,7 +19452,7 @@ public:
             return BitExtractStatus(0x0154, 0xF0000000, 28);
          case 9:
             // Target high voltage channel 0 register modified flags
-            return BitExtractStatus(0x0150, 0xF0000000, 28);
+            return BitExtractStatus(0x014C, 0xF0000000, 28);
          default:
             throw std::invalid_argument("Function GetHvUTarget0Mod() not defined for this board version");
       };
@@ -19470,7 +19470,7 @@ public:
             // Target high voltage channel 0 register modified flags
             if(BitMask) *BitMask = 0xF0000000;
             if(BitOfs) *BitOfs = 28;
-            return 0x0150;
+            return 0x014C;
          default:
             throw std::invalid_argument("Function GetHvUTarget0ModLoc() not defined for this board version");
       };
@@ -19566,7 +19566,7 @@ public:
             return BitExtractStatus(0x0158, 0x00F00000, 20);
          case 9:
             // Target high voltage channel 10 register modified flags
-            return BitExtractStatus(0x0154, 0x00F00000, 20);
+            return BitExtractStatus(0x0150, 0x00F00000, 20);
          default:
             throw std::invalid_argument("Function GetHvUTarget10Mod() not defined for this board version");
       };
@@ -19584,7 +19584,7 @@ public:
             // Target high voltage channel 10 register modified flags
             if(BitMask) *BitMask = 0x00F00000;
             if(BitOfs) *BitOfs = 20;
-            return 0x0154;
+            return 0x0150;
          default:
             throw std::invalid_argument("Function GetHvUTarget10ModLoc() not defined for this board version");
       };
@@ -19640,7 +19640,7 @@ public:
             return BitExtractStatus(0x0158, 0x000F0000, 16);
          case 9:
             // Target high voltage channel 11 register modified flags
-            return BitExtractStatus(0x0154, 0x000F0000, 16);
+            return BitExtractStatus(0x0150, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetHvUTarget11Mod() not defined for this board version");
       };
@@ -19658,7 +19658,7 @@ public:
             // Target high voltage channel 11 register modified flags
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
-            return 0x0154;
+            return 0x0150;
          default:
             throw std::invalid_argument("Function GetHvUTarget11ModLoc() not defined for this board version");
       };
@@ -19714,7 +19714,7 @@ public:
             return BitExtractStatus(0x0158, 0x0000F000, 12);
          case 9:
             // Target high voltage channel 12 register modified flags
-            return BitExtractStatus(0x0154, 0x0000F000, 12);
+            return BitExtractStatus(0x0150, 0x0000F000, 12);
          default:
             throw std::invalid_argument("Function GetHvUTarget12Mod() not defined for this board version");
       };
@@ -19732,7 +19732,7 @@ public:
             // Target high voltage channel 12 register modified flags
             if(BitMask) *BitMask = 0x0000F000;
             if(BitOfs) *BitOfs = 12;
-            return 0x0154;
+            return 0x0150;
          default:
             throw std::invalid_argument("Function GetHvUTarget12ModLoc() not defined for this board version");
       };
@@ -19788,7 +19788,7 @@ public:
             return BitExtractStatus(0x0158, 0x00000F00, 8);
          case 9:
             // Target high voltage channel 13 register modified flags
-            return BitExtractStatus(0x0154, 0x00000F00, 8);
+            return BitExtractStatus(0x0150, 0x00000F00, 8);
          default:
             throw std::invalid_argument("Function GetHvUTarget13Mod() not defined for this board version");
       };
@@ -19806,7 +19806,7 @@ public:
             // Target high voltage channel 13 register modified flags
             if(BitMask) *BitMask = 0x00000F00;
             if(BitOfs) *BitOfs = 8;
-            return 0x0154;
+            return 0x0150;
          default:
             throw std::invalid_argument("Function GetHvUTarget13ModLoc() not defined for this board version");
       };
@@ -19862,7 +19862,7 @@ public:
             return BitExtractStatus(0x0158, 0x000000F0, 4);
          case 9:
             // Target high voltage channel 14 register modified flags
-            return BitExtractStatus(0x0154, 0x000000F0, 4);
+            return BitExtractStatus(0x0150, 0x000000F0, 4);
          default:
             throw std::invalid_argument("Function GetHvUTarget14Mod() not defined for this board version");
       };
@@ -19880,7 +19880,7 @@ public:
             // Target high voltage channel 14 register modified flags
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
-            return 0x0154;
+            return 0x0150;
          default:
             throw std::invalid_argument("Function GetHvUTarget14ModLoc() not defined for this board version");
       };
@@ -19936,7 +19936,7 @@ public:
             return BitExtractStatus(0x0158, 0x0000000F, 0);
          case 9:
             // Target high voltage channel 15 register modified flags
-            return BitExtractStatus(0x0154, 0x0000000F, 0);
+            return BitExtractStatus(0x0150, 0x0000000F, 0);
          default:
             throw std::invalid_argument("Function GetHvUTarget15Mod() not defined for this board version");
       };
@@ -19954,7 +19954,7 @@ public:
             // Target high voltage channel 15 register modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
-            return 0x0154;
+            return 0x0150;
          default:
             throw std::invalid_argument("Function GetHvUTarget15ModLoc() not defined for this board version");
       };
@@ -19970,7 +19970,7 @@ public:
             return BitExtractStatus(0x0154, 0x0F000000, 24);
          case 9:
             // Target high voltage channel 1 register modified flags
-            return BitExtractStatus(0x0150, 0x0F000000, 24);
+            return BitExtractStatus(0x014C, 0x0F000000, 24);
          default:
             throw std::invalid_argument("Function GetHvUTarget1Mod() not defined for this board version");
       };
@@ -19988,7 +19988,7 @@ public:
             // Target high voltage channel 1 register modified flags
             if(BitMask) *BitMask = 0x0F000000;
             if(BitOfs) *BitOfs = 24;
-            return 0x0150;
+            return 0x014C;
          default:
             throw std::invalid_argument("Function GetHvUTarget1ModLoc() not defined for this board version");
       };
@@ -20044,7 +20044,7 @@ public:
             return BitExtractStatus(0x0154, 0x00F00000, 20);
          case 9:
             // Target high voltage channel 2 register modified flags
-            return BitExtractStatus(0x0150, 0x00F00000, 20);
+            return BitExtractStatus(0x014C, 0x00F00000, 20);
          default:
             throw std::invalid_argument("Function GetHvUTarget2Mod() not defined for this board version");
       };
@@ -20062,7 +20062,7 @@ public:
             // Target high voltage channel 2 register modified flags
             if(BitMask) *BitMask = 0x00F00000;
             if(BitOfs) *BitOfs = 20;
-            return 0x0150;
+            return 0x014C;
          default:
             throw std::invalid_argument("Function GetHvUTarget2ModLoc() not defined for this board version");
       };
@@ -20118,7 +20118,7 @@ public:
             return BitExtractStatus(0x0154, 0x000F0000, 16);
          case 9:
             // Target high voltage channel 3 register modified flags
-            return BitExtractStatus(0x0150, 0x000F0000, 16);
+            return BitExtractStatus(0x014C, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetHvUTarget3Mod() not defined for this board version");
       };
@@ -20136,7 +20136,7 @@ public:
             // Target high voltage channel 3 register modified flags
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
-            return 0x0150;
+            return 0x014C;
          default:
             throw std::invalid_argument("Function GetHvUTarget3ModLoc() not defined for this board version");
       };
@@ -20192,7 +20192,7 @@ public:
             return BitExtractStatus(0x0154, 0x0000F000, 12);
          case 9:
             // Target high voltage channel 4 register modified flags
-            return BitExtractStatus(0x0150, 0x0000F000, 12);
+            return BitExtractStatus(0x014C, 0x0000F000, 12);
          default:
             throw std::invalid_argument("Function GetHvUTarget4Mod() not defined for this board version");
       };
@@ -20210,7 +20210,7 @@ public:
             // Target high voltage channel 4 register modified flags
             if(BitMask) *BitMask = 0x0000F000;
             if(BitOfs) *BitOfs = 12;
-            return 0x0150;
+            return 0x014C;
          default:
             throw std::invalid_argument("Function GetHvUTarget4ModLoc() not defined for this board version");
       };
@@ -20266,7 +20266,7 @@ public:
             return BitExtractStatus(0x0154, 0x00000F00, 8);
          case 9:
             // Target high voltage channel 5 register modified flags
-            return BitExtractStatus(0x0150, 0x00000F00, 8);
+            return BitExtractStatus(0x014C, 0x00000F00, 8);
          default:
             throw std::invalid_argument("Function GetHvUTarget5Mod() not defined for this board version");
       };
@@ -20284,7 +20284,7 @@ public:
             // Target high voltage channel 5 register modified flags
             if(BitMask) *BitMask = 0x00000F00;
             if(BitOfs) *BitOfs = 8;
-            return 0x0150;
+            return 0x014C;
          default:
             throw std::invalid_argument("Function GetHvUTarget5ModLoc() not defined for this board version");
       };
@@ -20340,7 +20340,7 @@ public:
             return BitExtractStatus(0x0154, 0x000000F0, 4);
          case 9:
             // Target high voltage channel 6 register modified flags
-            return BitExtractStatus(0x0150, 0x000000F0, 4);
+            return BitExtractStatus(0x014C, 0x000000F0, 4);
          default:
             throw std::invalid_argument("Function GetHvUTarget6Mod() not defined for this board version");
       };
@@ -20358,7 +20358,7 @@ public:
             // Target high voltage channel 6 register modified flags
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
-            return 0x0150;
+            return 0x014C;
          default:
             throw std::invalid_argument("Function GetHvUTarget6ModLoc() not defined for this board version");
       };
@@ -20414,7 +20414,7 @@ public:
             return BitExtractStatus(0x0154, 0x0000000F, 0);
          case 9:
             // Target high voltage channel 7 register modified flags
-            return BitExtractStatus(0x0150, 0x0000000F, 0);
+            return BitExtractStatus(0x014C, 0x0000000F, 0);
          default:
             throw std::invalid_argument("Function GetHvUTarget7Mod() not defined for this board version");
       };
@@ -20432,7 +20432,7 @@ public:
             // Target high voltage channel 7 register modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
-            return 0x0150;
+            return 0x014C;
          default:
             throw std::invalid_argument("Function GetHvUTarget7ModLoc() not defined for this board version");
       };
@@ -20488,7 +20488,7 @@ public:
             return BitExtractStatus(0x0158, 0xF0000000, 28);
          case 9:
             // Target high voltage channel 8 register modified flags
-            return BitExtractStatus(0x0154, 0xF0000000, 28);
+            return BitExtractStatus(0x0150, 0xF0000000, 28);
          default:
             throw std::invalid_argument("Function GetHvUTarget8Mod() not defined for this board version");
       };
@@ -20506,7 +20506,7 @@ public:
             // Target high voltage channel 8 register modified flags
             if(BitMask) *BitMask = 0xF0000000;
             if(BitOfs) *BitOfs = 28;
-            return 0x0154;
+            return 0x0150;
          default:
             throw std::invalid_argument("Function GetHvUTarget8ModLoc() not defined for this board version");
       };
@@ -20562,7 +20562,7 @@ public:
             return BitExtractStatus(0x0158, 0x0F000000, 24);
          case 9:
             // Target high voltage channel 9 register modified flags
-            return BitExtractStatus(0x0154, 0x0F000000, 24);
+            return BitExtractStatus(0x0150, 0x0F000000, 24);
          default:
             throw std::invalid_argument("Function GetHvUTarget9Mod() not defined for this board version");
       };
@@ -20580,7 +20580,7 @@ public:
             // Target high voltage channel 9 register modified flags
             if(BitMask) *BitMask = 0x0F000000;
             if(BitOfs) *BitOfs = 24;
-            return 0x0154;
+            return 0x0150;
          default:
             throw std::invalid_argument("Function GetHvUTarget9ModLoc() not defined for this board version");
       };
@@ -22722,7 +22722,7 @@ public:
             return BitExtractStatus(0x0160, 0xF0000000, 28);
          case 9:
             // LMK channel 0 register modified flags
-            return BitExtractStatus(0x015C, 0xF0000000, 28);
+            return BitExtractStatus(0x0158, 0xF0000000, 28);
          default:
             throw std::invalid_argument("Function GetLmk0Mod() not defined for this board version");
       };
@@ -22740,7 +22740,7 @@ public:
             // LMK channel 0 register modified flags
             if(BitMask) *BitMask = 0xF0000000;
             if(BitOfs) *BitOfs = 28;
-            return 0x015C;
+            return 0x0158;
          default:
             throw std::invalid_argument("Function GetLmk0ModLoc() not defined for this board version");
       };
@@ -22756,7 +22756,7 @@ public:
             return BitExtractStatus(0x0164, 0x0000F000, 12);
          case 9:
             // LMK Register 11 modified flags
-            return BitExtractStatus(0x0160, 0x0000F000, 12);
+            return BitExtractStatus(0x015C, 0x0000F000, 12);
          default:
             throw std::invalid_argument("Function GetLmk11Mod() not defined for this board version");
       };
@@ -22774,7 +22774,7 @@ public:
             // LMK Register 11 modified flags
             if(BitMask) *BitMask = 0x0000F000;
             if(BitOfs) *BitOfs = 12;
-            return 0x0160;
+            return 0x015C;
          default:
             throw std::invalid_argument("Function GetLmk11ModLoc() not defined for this board version");
       };
@@ -22790,7 +22790,7 @@ public:
             return BitExtractStatus(0x0164, 0x00000F00, 8);
          case 9:
             // LMK Register 13 modified flags
-            return BitExtractStatus(0x0160, 0x00000F00, 8);
+            return BitExtractStatus(0x015C, 0x00000F00, 8);
          default:
             throw std::invalid_argument("Function GetLmk13Mod() not defined for this board version");
       };
@@ -22808,7 +22808,7 @@ public:
             // LMK Register 13 modified flags
             if(BitMask) *BitMask = 0x00000F00;
             if(BitOfs) *BitOfs = 8;
-            return 0x0160;
+            return 0x015C;
          default:
             throw std::invalid_argument("Function GetLmk13ModLoc() not defined for this board version");
       };
@@ -22824,7 +22824,7 @@ public:
             return BitExtractStatus(0x0164, 0x000000F0, 4);
          case 9:
             // LMK Register 14 modified flags
-            return BitExtractStatus(0x0160, 0x000000F0, 4);
+            return BitExtractStatus(0x015C, 0x000000F0, 4);
          default:
             throw std::invalid_argument("Function GetLmk14Mod() not defined for this board version");
       };
@@ -22842,7 +22842,7 @@ public:
             // LMK Register 14 modified flags
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
-            return 0x0160;
+            return 0x015C;
          default:
             throw std::invalid_argument("Function GetLmk14ModLoc() not defined for this board version");
       };
@@ -22858,7 +22858,7 @@ public:
             return BitExtractStatus(0x0164, 0x0000000F, 0);
          case 9:
             // LMK Register 15 modified flags
-            return BitExtractStatus(0x0160, 0x0000000F, 0);
+            return BitExtractStatus(0x015C, 0x0000000F, 0);
          default:
             throw std::invalid_argument("Function GetLmk15Mod() not defined for this board version");
       };
@@ -22876,7 +22876,7 @@ public:
             // LMK Register 15 modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
-            return 0x0160;
+            return 0x015C;
          default:
             throw std::invalid_argument("Function GetLmk15ModLoc() not defined for this board version");
       };
@@ -22892,7 +22892,7 @@ public:
             return BitExtractStatus(0x0160, 0x0F000000, 24);
          case 9:
             // LMK channel 1 register modified flags
-            return BitExtractStatus(0x015C, 0x0F000000, 24);
+            return BitExtractStatus(0x0158, 0x0F000000, 24);
          default:
             throw std::invalid_argument("Function GetLmk1Mod() not defined for this board version");
       };
@@ -22910,7 +22910,7 @@ public:
             // LMK channel 1 register modified flags
             if(BitMask) *BitMask = 0x0F000000;
             if(BitOfs) *BitOfs = 24;
-            return 0x015C;
+            return 0x0158;
          default:
             throw std::invalid_argument("Function GetLmk1ModLoc() not defined for this board version");
       };
@@ -22926,7 +22926,7 @@ public:
             return BitExtractStatus(0x0160, 0x00F00000, 20);
          case 9:
             // LMK channel 2 register modified flags
-            return BitExtractStatus(0x015C, 0x00F00000, 20);
+            return BitExtractStatus(0x0158, 0x00F00000, 20);
          default:
             throw std::invalid_argument("Function GetLmk2Mod() not defined for this board version");
       };
@@ -22944,7 +22944,7 @@ public:
             // LMK channel 2 register modified flags
             if(BitMask) *BitMask = 0x00F00000;
             if(BitOfs) *BitOfs = 20;
-            return 0x015C;
+            return 0x0158;
          default:
             throw std::invalid_argument("Function GetLmk2ModLoc() not defined for this board version");
       };
@@ -22960,7 +22960,7 @@ public:
             return BitExtractStatus(0x0160, 0x000F0000, 16);
          case 9:
             // LMK channel 3 register modified flags
-            return BitExtractStatus(0x015C, 0x000F0000, 16);
+            return BitExtractStatus(0x0158, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetLmk3Mod() not defined for this board version");
       };
@@ -22978,7 +22978,7 @@ public:
             // LMK channel 3 register modified flags
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
-            return 0x015C;
+            return 0x0158;
          default:
             throw std::invalid_argument("Function GetLmk3ModLoc() not defined for this board version");
       };
@@ -22994,7 +22994,7 @@ public:
             return BitExtractStatus(0x0160, 0x0000F000, 12);
          case 9:
             // LMK channel 4 register modified flags
-            return BitExtractStatus(0x015C, 0x0000F000, 12);
+            return BitExtractStatus(0x0158, 0x0000F000, 12);
          default:
             throw std::invalid_argument("Function GetLmk4Mod() not defined for this board version");
       };
@@ -23012,7 +23012,7 @@ public:
             // LMK channel 4 register modified flags
             if(BitMask) *BitMask = 0x0000F000;
             if(BitOfs) *BitOfs = 12;
-            return 0x015C;
+            return 0x0158;
          default:
             throw std::invalid_argument("Function GetLmk4ModLoc() not defined for this board version");
       };
@@ -23028,7 +23028,7 @@ public:
             return BitExtractStatus(0x0160, 0x00000F00, 8);
          case 9:
             // LMK channel 5 register modified flags
-            return BitExtractStatus(0x015C, 0x00000F00, 8);
+            return BitExtractStatus(0x0158, 0x00000F00, 8);
          default:
             throw std::invalid_argument("Function GetLmk5Mod() not defined for this board version");
       };
@@ -23046,7 +23046,7 @@ public:
             // LMK channel 5 register modified flags
             if(BitMask) *BitMask = 0x00000F00;
             if(BitOfs) *BitOfs = 8;
-            return 0x015C;
+            return 0x0158;
          default:
             throw std::invalid_argument("Function GetLmk5ModLoc() not defined for this board version");
       };
@@ -23062,7 +23062,7 @@ public:
             return BitExtractStatus(0x0160, 0x000000F0, 4);
          case 9:
             // LMK channel 6 register modified flags
-            return BitExtractStatus(0x015C, 0x000000F0, 4);
+            return BitExtractStatus(0x0158, 0x000000F0, 4);
          default:
             throw std::invalid_argument("Function GetLmk6Mod() not defined for this board version");
       };
@@ -23080,7 +23080,7 @@ public:
             // LMK channel 6 register modified flags
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
-            return 0x015C;
+            return 0x0158;
          default:
             throw std::invalid_argument("Function GetLmk6ModLoc() not defined for this board version");
       };
@@ -23096,7 +23096,7 @@ public:
             return BitExtractStatus(0x0160, 0x0000000F, 0);
          case 9:
             // LMK channel 7 register modified flags
-            return BitExtractStatus(0x015C, 0x0000000F, 0);
+            return BitExtractStatus(0x0158, 0x0000000F, 0);
          default:
             throw std::invalid_argument("Function GetLmk7Mod() not defined for this board version");
       };
@@ -23114,7 +23114,7 @@ public:
             // LMK channel 7 register modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
-            return 0x015C;
+            return 0x0158;
          default:
             throw std::invalid_argument("Function GetLmk7ModLoc() not defined for this board version");
       };
@@ -23130,7 +23130,7 @@ public:
             return BitExtractStatus(0x0164, 0x00F00000, 20);
          case 9:
             // LMK Register 8 modified flags
-            return BitExtractStatus(0x0160, 0x00F00000, 20);
+            return BitExtractStatus(0x015C, 0x00F00000, 20);
          default:
             throw std::invalid_argument("Function GetLmk8Mod() not defined for this board version");
       };
@@ -23148,7 +23148,7 @@ public:
             // LMK Register 8 modified flags
             if(BitMask) *BitMask = 0x00F00000;
             if(BitOfs) *BitOfs = 20;
-            return 0x0160;
+            return 0x015C;
          default:
             throw std::invalid_argument("Function GetLmk8ModLoc() not defined for this board version");
       };
@@ -23164,7 +23164,7 @@ public:
             return BitExtractStatus(0x0164, 0x000F0000, 16);
          case 9:
             // LMK Register 9 modified flags
-            return BitExtractStatus(0x0160, 0x000F0000, 16);
+            return BitExtractStatus(0x015C, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetLmk9Mod() not defined for this board version");
       };
@@ -23182,7 +23182,7 @@ public:
             // LMK Register 9 modified flags
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
-            return 0x0160;
+            return 0x015C;
          default:
             throw std::invalid_argument("Function GetLmk9ModLoc() not defined for this board version");
       };
@@ -23306,7 +23306,7 @@ public:
             return BitExtractStatus(0x0138, 0x00000001, 0);
          case 9:
             // Local clock frequency modified flags
-            return BitExtractStatus(0x0134, 0x00000001, 0);
+            return BitExtractStatus(0x0130, 0x00000001, 0);
          default:
             throw std::invalid_argument("Function GetLocalClkFreqMod() not defined for this board version");
       };
@@ -23324,7 +23324,7 @@ public:
             // Local clock frequency modified flags
             if(BitMask) *BitMask = 0x00000001;
             if(BitOfs) *BitOfs = 0;
-            return 0x0134;
+            return 0x0130;
          default:
             throw std::invalid_argument("Function GetLocalClkFreqModLoc() not defined for this board version");
       };
@@ -23340,7 +23340,7 @@ public:
             return BitExtractStatus(0x0128, 0x0000FFFF, 0);
          case 9:
             // Maximum number of DRS/ADC samples per packet
-            return BitExtractStatus(0x0124, 0x0000FFFF, 0);
+            return BitExtractStatus(0x0120, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetMaxDrsAdcPktSamples() not defined for this board version");
       };
@@ -23358,7 +23358,7 @@ public:
             // Maximum number of DRS/ADC samples per packet
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x0124;
+            return 0x0120;
          default:
             throw std::invalid_argument("Function GetMaxDrsAdcPktSamplesLoc() not defined for this board version");
       };
@@ -23374,7 +23374,7 @@ public:
             return BitExtractStatus(0x0134, 0x0000FFFF, 0);
          case 9:
             // Maximum number of scaler values per packet
-            return BitExtractStatus(0x0130, 0x0000FFFF, 0);
+            return BitExtractStatus(0x012C, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetMaxSclPktSamples() not defined for this board version");
       };
@@ -23392,7 +23392,7 @@ public:
             // Maximum number of scaler values per packet
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x0130;
+            return 0x012C;
          default:
             throw std::invalid_argument("Function GetMaxSclPktSamplesLoc() not defined for this board version");
       };
@@ -23408,7 +23408,7 @@ public:
             return BitExtractStatus(0x012C, 0x0003FFFF, 0);
          case 9:
             // Maximum number of TDC samples per packet
-            return BitExtractStatus(0x0128, 0x0003FFFF, 0);
+            return BitExtractStatus(0x0124, 0x0003FFFF, 0);
          default:
             throw std::invalid_argument("Function GetMaxTdcPktSamples() not defined for this board version");
       };
@@ -23426,7 +23426,7 @@ public:
             // Maximum number of TDC samples per packet
             if(BitMask) *BitMask = 0x0003FFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x0128;
+            return 0x0124;
          default:
             throw std::invalid_argument("Function GetMaxTdcPktSamplesLoc() not defined for this board version");
       };
@@ -23442,7 +23442,7 @@ public:
             return BitExtractStatus(0x0130, 0x0000FFFF, 0);
          case 9:
             // Maximum number of advanced trigger output samples per packet
-            return BitExtractStatus(0x012C, 0x0000FFFF, 0);
+            return BitExtractStatus(0x0128, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetMaxTrgPktSamples() not defined for this board version");
       };
@@ -23460,7 +23460,7 @@ public:
             // Maximum number of advanced trigger output samples per packet
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x012C;
+            return 0x0128;
          default:
             throw std::invalid_argument("Function GetMaxTrgPktSamplesLoc() not defined for this board version");
       };
@@ -23476,7 +23476,7 @@ public:
             return BitExtractControl(0x1280, 0x0000000F, 0);
          case 9:
             // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low)
-            return BitExtractControl(0x1224, 0x0000000F, 0);
+            return BitExtractControl(0x121C, 0x0000000F, 0);
          default:
             throw std::invalid_argument("Function GetMcxRxSigSel() not defined for this board version");
       };
@@ -23490,7 +23490,7 @@ public:
             return SetRegMask(0x1280, 0x0000000F, 0, value);
          case 9:
             // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low)
-            return SetRegMask(0x1224, 0x0000000F, 0, value);
+            return SetRegMask(0x121C, 0x0000000F, 0, value);
          default:
             throw std::invalid_argument("Function SetMcxRxSigSel() not defined for this board version");
       };
@@ -23508,7 +23508,7 @@ public:
             // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low)
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
-            return 0x1224;
+            return 0x121C;
          default:
             throw std::invalid_argument("Function GetMcxRxSigSelLoc() not defined for this board version");
       };
@@ -23524,7 +23524,7 @@ public:
             return BitExtractControl(0x1280, 0x000F0000, 16);
          case 9:
             // Select for TX connector (see RX connector for mapping)
-            return BitExtractControl(0x1224, 0x000F0000, 16);
+            return BitExtractControl(0x121C, 0x000F0000, 16);
          default:
             throw std::invalid_argument("Function GetMcxTxSigSel() not defined for this board version");
       };
@@ -23538,7 +23538,7 @@ public:
             return SetRegMask(0x1280, 0x000F0000, 16, value);
          case 9:
             // Select for TX connector (see RX connector for mapping)
-            return SetRegMask(0x1224, 0x000F0000, 16, value);
+            return SetRegMask(0x121C, 0x000F0000, 16, value);
          default:
             throw std::invalid_argument("Function SetMcxTxSigSel() not defined for this board version");
       };
@@ -23556,7 +23556,7 @@ public:
             // Select for TX connector (see RX connector for mapping)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
-            return 0x1224;
+            return 0x121C;
          default:
             throw std::invalid_argument("Function GetMcxTxSigSelLoc() not defined for this board version");
       };
@@ -24714,9 +24714,6 @@ public:
          case 8:
             // LSBs of 64bit system time counter set value  (time is updated when MSBs are written)
             return BitExtractControl(0x1278, 0xFFFFFFFF, 0);
-         case 9:
-            // LSBs of 64bit system time counter set value  (time is updated when MSBs are written)
-            return BitExtractControl(0x121C, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetSetTimeLsb() not defined for this board version");
       };
@@ -24728,9 +24725,6 @@ public:
          case 8:
             // LSBs of 64bit system time counter set value  (time is updated when MSBs are written)
             return SetRegMask(0x1278, 0xFFFFFFFF, 0, value);
-         case 9:
-            // LSBs of 64bit system time counter set value  (time is updated when MSBs are written)
-            return SetRegMask(0x121C, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetSetTimeLsb() not defined for this board version");
       };
@@ -24744,11 +24738,6 @@ public:
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x1278;
-         case 9:
-            // LSBs of 64bit system time counter set value  (time is updated when MSBs are written)
-            if(BitMask) *BitMask = 0xFFFFFFFF;
-            if(BitOfs) *BitOfs = 0;
-            return 0x121C;
          default:
             throw std::invalid_argument("Function GetSetTimeLsbLoc() not defined for this board version");
       };
@@ -24762,9 +24751,6 @@ public:
          case 8:
             // MSBs of 64bit system time counter set value  (time is updated when MSBs are written)
             return BitExtractControl(0x127C, 0xFFFFFFFF, 0);
-         case 9:
-            // MSBs of 64bit system time counter set value  (time is updated when MSBs are written)
-            return BitExtractControl(0x1220, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetSetTimeMsb() not defined for this board version");
       };
@@ -24776,9 +24762,6 @@ public:
          case 8:
             // MSBs of 64bit system time counter set value  (time is updated when MSBs are written)
             return SetRegMask(0x127C, 0xFFFFFFFF, 0, value);
-         case 9:
-            // MSBs of 64bit system time counter set value  (time is updated when MSBs are written)
-            return SetRegMask(0x1220, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetSetTimeMsb() not defined for this board version");
       };
@@ -24792,11 +24775,6 @@ public:
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x127C;
-         case 9:
-            // MSBs of 64bit system time counter set value  (time is updated when MSBs are written)
-            if(BitMask) *BitMask = 0xFFFFFFFF;
-            if(BitOfs) *BitOfs = 0;
-            return 0x1220;
          default:
             throw std::invalid_argument("Function GetSetTimeMsbLoc() not defined for this board version");
       };
@@ -25094,6 +25072,32 @@ public:
       };
    };
 
+   // Bit(s) SYS_TIME
+   unsigned int GetSysTime()
+   {
+      switch(this->mVersion)
+      {
+         case 9:
+            // System uptime in 10ms steps (no overflow protection)
+            return BitExtractStatus(0x00F0, 0xFFFFFFFF, 0);
+         default:
+            throw std::invalid_argument("Function GetSysTime() not defined for this board version");
+      };
+   };
+   unsigned int GetSysTimeLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
+   {
+      switch(this->mVersion)
+      {
+         case 9:
+            // System uptime in 10ms steps (no overflow protection)
+            if(BitMask) *BitMask = 0xFFFFFFFF;
+            if(BitOfs) *BitOfs = 0;
+            return 0x00F0;
+         default:
+            throw std::invalid_argument("Function GetSysTimeLoc() not defined for this board version");
+      };
+   };
+
    // Bit(s) TCB_OSERDES_IF_RST
    unsigned int GetTcbOserdesIfRst()
    {
@@ -25358,9 +25362,6 @@ public:
          case 8:
             // LSBs of 64bit system time counter (MSBs are latched upon read of LSB register)
             return BitExtractStatus(0x00F4, 0xFFFFFFFF, 0);
-         case 9:
-            // LSBs of 64bit system time counter (MSBs are latched upon read of LSB register)
-            return BitExtractStatus(0x00F0, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetTimeLsb() not defined for this board version");
       };
@@ -25374,11 +25375,6 @@ public:
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00F4;
-         case 9:
-            // LSBs of 64bit system time counter (MSBs are latched upon read of LSB register)
-            if(BitMask) *BitMask = 0xFFFFFFFF;
-            if(BitOfs) *BitOfs = 0;
-            return 0x00F0;
          default:
             throw std::invalid_argument("Function GetTimeLsbLoc() not defined for this board version");
       };
@@ -25392,9 +25388,6 @@ public:
          case 8:
             // MSBs of 64bit system time counter (latched upon read of LSB register)
             return BitExtractStatus(0x00F8, 0xFFFFFFFF, 0);
-         case 9:
-            // MSBs of 64bit system time counter (latched upon read of LSB register)
-            return BitExtractStatus(0x00F4, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetTimeMsb() not defined for this board version");
       };
@@ -25408,11 +25401,6 @@ public:
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
             return 0x00F8;
-         case 9:
-            // MSBs of 64bit system time counter (latched upon read of LSB register)
-            if(BitMask) *BitMask = 0xFFFFFFFF;
-            if(BitOfs) *BitOfs = 0;
-            return 0x00F4;
          default:
             throw std::invalid_argument("Function GetTimeMsbLoc() not defined for this board version");
       };
@@ -25468,7 +25456,7 @@ public:
             return BitExtractStatus(0x0108, 0x80000000, 31);
          case 9:
             // Flag signalling that the current trigger information belongs to the latest trigger received
-            return BitExtractStatus(0x0104, 0x80000000, 31);
+            return BitExtractStatus(0x0100, 0x80000000, 31);
          default:
             throw std::invalid_argument("Function GetTrbFlagNew() not defined for this board version");
       };
@@ -25486,7 +25474,7 @@ public:
             // Flag signalling that the current trigger information belongs to the latest trigger received
             if(BitMask) *BitMask = 0x80000000;
             if(BitOfs) *BitOfs = 31;
-            return 0x0104;
+            return 0x0100;
          default:
             throw std::invalid_argument("Function GetTrbFlagNewLoc() not defined for this board version");
       };
@@ -25502,7 +25490,7 @@ public:
             return BitExtractStatus(0x0108, 0x40000000, 30);
          case 9:
             // Parity error flag of the current trigger information
-            return BitExtractStatus(0x0104, 0x40000000, 30);
+            return BitExtractStatus(0x0100, 0x40000000, 30);
          default:
             throw std::invalid_argument("Function GetTrbFlagParityError() not defined for this board version");
       };
@@ -25520,7 +25508,7 @@ public:
             // Parity error flag of the current trigger information
             if(BitMask) *BitMask = 0x40000000;
             if(BitOfs) *BitOfs = 30;
-            return 0x0104;
+            return 0x0100;
          default:
             throw std::invalid_argument("Function GetTrbFlagParityErrorLoc() not defined for this board version");
       };
@@ -25536,7 +25524,7 @@ public:
             return BitExtractStatus(0x010C, 0xFFFFFFFF, 0);
          case 9:
             // Trigger information LSBs
-            return BitExtractStatus(0x0108, 0xFFFFFFFF, 0);
+            return BitExtractStatus(0x0104, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrbInfoLsb() not defined for this board version");
       };
@@ -25554,7 +25542,7 @@ public:
             // Trigger information LSBs
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x0108;
+            return 0x0104;
          default:
             throw std::invalid_argument("Function GetTrbInfoLsbLoc() not defined for this board version");
       };
@@ -25570,7 +25558,7 @@ public:
             return BitExtractStatus(0x0110, 0x0000FFFF, 0);
          case 9:
             // Trigger information MSBs
-            return BitExtractStatus(0x010C, 0x0000FFFF, 0);
+            return BitExtractStatus(0x0108, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrbInfoMsb() not defined for this board version");
       };
@@ -25588,7 +25576,7 @@ public:
             // Trigger information MSBs
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x010C;
+            return 0x0108;
          default:
             throw std::invalid_argument("Function GetTrbInfoMsbLoc() not defined for this board version");
       };
@@ -25604,7 +25592,7 @@ public:
             return BitExtractStatus(0x0108, 0x0000FFFF, 0);
          case 9:
             // Parity error count of the serial transmission
-            return BitExtractStatus(0x0104, 0x0000FFFF, 0);
+            return BitExtractStatus(0x0100, 0x0000FFFF, 0);
          default:
             throw std::invalid_argument("Function GetTrbParityErrorCount() not defined for this board version");
       };
@@ -25622,7 +25610,7 @@ public:
             // Parity error count of the serial transmission
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x0104;
+            return 0x0100;
          default:
             throw std::invalid_argument("Function GetTrbParityErrorCountLoc() not defined for this board version");
       };
@@ -27678,7 +27666,7 @@ public:
             return BitExtractStatus(0x0138, 0x00000010, 4);
          case 9:
             // Trigger DAQ clock calibration modified flag
-            return BitExtractStatus(0x0134, 0x00000010, 4);
+            return BitExtractStatus(0x0130, 0x00000010, 4);
          default:
             throw std::invalid_argument("Function GetTriggerDaqClkCalMod() not defined for this board version");
       };
@@ -27696,7 +27684,7 @@ public:
             // Trigger DAQ clock calibration modified flag
             if(BitMask) *BitMask = 0x00000010;
             if(BitOfs) *BitOfs = 4;
-            return 0x0134;
+            return 0x0130;
          default:
             throw std::invalid_argument("Function GetTriggerDaqClkCalModLoc() not defined for this board version");
       };
@@ -28072,7 +28060,7 @@ public:
             return 0x0114;
          case 9:
             if(GrpLen) *GrpLen = 5;
-            return 0x0110;
+            return 0x010C;
          default:
             throw std::invalid_argument("Function GetAdvTrgStatGroupParam() not defined for this board version");
       };
