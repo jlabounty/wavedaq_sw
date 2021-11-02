@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  29.09.2021 11:52:11
+ *  Created :  02.11.2021 15:54:09
  *
  *  Register Layout Version :  8
  *
@@ -180,10 +180,8 @@ const wd2_reg_func_type  wd2_ctrl_reg_func_list[] = {
   { wd2_hw_reg       , 0 },   /* ctrl register 155: ADV_TRG_CFG17 */
   { wd2_hw_reg       , 0 },   /* ctrl register 156: ADV_TRG_CFG18 */
   { wd2_hw_reg       , 0 },   /* ctrl register 157: ADV_TRG_CFG19 */
-  { wd2_hw_reg       , 0 },   /* ctrl register 158: SET_TIME_LSB */
-  { wd2_hw_reg       , 0 },   /* ctrl register 159: SET_TIME_MSB */
-  { wd2_hw_reg       , 0 },   /* ctrl register 160: DBG_SIG_SEL */
-  { wd2_hw_reg       , 0 }    /* stat register 89: LMK_8_15_MOD_FLAG */
+  { wd2_hw_reg       , 0 },   /* ctrl register 158: DBG_SIG_SEL */
+  { wd2_hw_reg       , 0 }    /* stat register 88: LMK_8_15_MOD_FLAG */
 };
 
 const wd2_reg_func_type  wd2_stat_reg_func_list[] = {
@@ -275,8 +273,7 @@ const wd2_reg_func_type  wd2_stat_reg_func_list[] = {
   { wd2_hw_reg       , 0 },   /* ctrl register 85: ADC_0_CH_FCO_CFG */
   { wd2_hw_reg       , 0 },   /* ctrl register 86: ADC_1_CH_A_CFG */
   { wd2_hw_reg       , 0 },   /* ctrl register 87: ADC_1_CH_B_CFG */
-  { wd2_hw_reg       , 0 },   /* ctrl register 88: ADC_1_CH_C_CFG */
-  { wd2_hw_reg       , 0 }    /* stat register 89: LMK_8_15_MOD_FLAG */
+  { wd2_hw_reg       , 0 }    /* stat register 88: LMK_8_15_MOD_FLAG */
 };
 
 #endif /* WD2_DONT_INCLUDE_REG_ACCESS_VARS */
@@ -446,8 +443,6 @@ const wd2_reg_name_entry_type  wd2_reg_list[] = {
   { "ADV_TRG_CFG17"             , WD2_REG_ADV_TRG_CFG17             },
   { "ADV_TRG_CFG18"             , WD2_REG_ADV_TRG_CFG18             },
   { "ADV_TRG_CFG19"             , WD2_REG_ADV_TRG_CFG19             },
-  { "SET_TIME_LSB"              , WD2_REG_SET_TIME_LSB              },
-  { "SET_TIME_MSB"              , WD2_REG_SET_TIME_MSB              },
   { "DBG_SIG_SEL"               , WD2_REG_DBG_SIG_SEL               },
   { "CRC32_REG_BANK"            , WD2_REG_CRC32_REG_BANK            },
   { "HW_VER"                    , WD2_REG_HW_VER                    },
@@ -511,8 +506,7 @@ const wd2_reg_name_entry_type  wd2_reg_list[] = {
   { "SCALER_EXT_CLK"            , WD2_REG_SCALER_EXT_CLK            },
   { "SCALER_TIME_STAMP_LSB"     , WD2_REG_SCALER_TIME_STAMP_LSB     },
   { "SCALER_TIME_STAMP_MSB"     , WD2_REG_SCALER_TIME_STAMP_MSB     },
-  { "TIME_LSB"                  , WD2_REG_TIME_LSB                  },
-  { "TIME_MSB"                  , WD2_REG_TIME_MSB                  },
+  { "SYS_TIME"                  , WD2_REG_SYS_TIME                  },
   { "COMP_CH_STAT"              , WD2_REG_COMP_CH_STAT              },
   { "EVENT_TX_RATE"             , WD2_REG_EVENT_TX_RATE             },
   { "EVENT_NR"                  , WD2_REG_EVENT_NR                  },
@@ -1017,8 +1011,6 @@ const wd2_bit_group_entry_type  wd2_bit_group_list[] = {
   { "ADV_TRG_CFG_17"                , WD2_ADV_TRG_CFG_17_REG                , WD2_ADV_TRG_CFG_17_MASK                , WD2_ADV_TRG_CFG_17_OFS                },
   { "ADV_TRG_CFG_18"                , WD2_ADV_TRG_CFG_18_REG                , WD2_ADV_TRG_CFG_18_MASK                , WD2_ADV_TRG_CFG_18_OFS                },
   { "ADV_TRG_CFG_19"                , WD2_ADV_TRG_CFG_19_REG                , WD2_ADV_TRG_CFG_19_MASK                , WD2_ADV_TRG_CFG_19_OFS                },
-  { "SET_TIME_LSB"                  , WD2_SET_TIME_LSB_REG                  , WD2_SET_TIME_LSB_MASK                  , WD2_SET_TIME_LSB_OFS                  },
-  { "SET_TIME_MSB"                  , WD2_SET_TIME_MSB_REG                  , WD2_SET_TIME_MSB_MASK                  , WD2_SET_TIME_MSB_OFS                  },
   { "MCX_TX_SIG_SEL"                , WD2_MCX_TX_SIG_SEL_REG                , WD2_MCX_TX_SIG_SEL_MASK                , WD2_MCX_TX_SIG_SEL_OFS                },
   { "MCX_RX_SIG_SEL"                , WD2_MCX_RX_SIG_SEL_REG                , WD2_MCX_RX_SIG_SEL_MASK                , WD2_MCX_RX_SIG_SEL_OFS                },
   { "CRC32_REG_BANK"                , WD2_CRC32_REG_BANK_REG                , WD2_CRC32_REG_BANK_MASK                , WD2_CRC32_REG_BANK_OFS                },
@@ -1123,8 +1115,7 @@ const wd2_bit_group_entry_type  wd2_bit_group_list[] = {
   { "SCALER_EXT_CLK"                , WD2_SCALER_EXT_CLK_REG                , WD2_SCALER_EXT_CLK_MASK                , WD2_SCALER_EXT_CLK_OFS                },
   { "SCALER_TIME_STAMP_LSB"         , WD2_SCALER_TIME_STAMP_LSB_REG         , WD2_SCALER_TIME_STAMP_LSB_MASK         , WD2_SCALER_TIME_STAMP_LSB_OFS         },
   { "SCALER_TIME_STAMP_MSB"         , WD2_SCALER_TIME_STAMP_MSB_REG         , WD2_SCALER_TIME_STAMP_MSB_MASK         , WD2_SCALER_TIME_STAMP_MSB_OFS         },
-  { "TIME_LSB"                      , WD2_TIME_LSB_REG                      , WD2_TIME_LSB_MASK                      , WD2_TIME_LSB_OFS                      },
-  { "TIME_MSB"                      , WD2_TIME_MSB_REG                      , WD2_TIME_MSB_MASK                      , WD2_TIME_MSB_OFS                      },
+  { "SYS_TIME"                      , WD2_SYS_TIME_REG                      , WD2_SYS_TIME_MASK                      , WD2_SYS_TIME_OFS                      },
   { "COMP_CH_STAT"                  , WD2_COMP_CH_STAT_REG                  , WD2_COMP_CH_STAT_MASK                  , WD2_COMP_CH_STAT_OFS                  },
   { "EVENT_TX_RATE"                 , WD2_EVENT_TX_RATE_REG                 , WD2_EVENT_TX_RATE_MASK                 , WD2_EVENT_TX_RATE_OFS                 },
   { "EVENT_NUMBER"                  , WD2_EVENT_NUMBER_REG                  , WD2_EVENT_NUMBER_MASK                  , WD2_EVENT_NUMBER_OFS                  },
@@ -1389,9 +1380,7 @@ const unsigned int ctrl_reg_default[] = {
   0x00000000,   /* Offset 0x126C */
   0x00000000,   /* Offset 0x1270 */
   0x00000000,   /* Offset 0x1274 */
-  0x00000000,   /* Offset 0x1278 */
-  0x00000000,   /* Offset 0x127C */
-  0x00000000    /* Offset 0x1280 */
+  0x00000000    /* Offset 0x1278 */
 };
 
 #endif /* WD2_DONT_INCLUDE_VARS */

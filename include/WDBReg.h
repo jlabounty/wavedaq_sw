@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  29.10.2021 09:37:04
+// Created :  02.11.2021 15:54:24
 //
 // Register Layout Versions :  8, 9
 //
@@ -53,7 +53,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
-            return 162;
+            return 160;
          case 9:
             return 137;
          default:
@@ -67,7 +67,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
-            return 90;
+            return 89;
          case 9:
             return 88;
          default:
@@ -5342,7 +5342,7 @@ public:
       {
          case 8:
             // ADC reset modified flag
-            return BitExtractStatus(0x0138, 0x00000008, 3);
+            return BitExtractStatus(0x0134, 0x00000008, 3);
          case 9:
             // ADC reset modified flag
             return BitExtractStatus(0x0130, 0x00000008, 3);
@@ -5358,7 +5358,7 @@ public:
             // ADC reset modified flag
             if(BitMask) *BitMask = 0x00000008;
             if(BitOfs) *BitOfs = 3;
-            return 0x0138;
+            return 0x0134;
          case 9:
             // ADC reset modified flag
             if(BitMask) *BitMask = 0x00000008;
@@ -5416,7 +5416,7 @@ public:
       {
          case 8:
             // ADC downsampling divider modified flags
-            return BitExtractStatus(0x0144, 0x0000000F, 0);
+            return BitExtractStatus(0x0140, 0x0000000F, 0);
          case 9:
             // ADC downsampling divider modified flags
             return BitExtractStatus(0x013C, 0x0000000F, 0);
@@ -5432,7 +5432,7 @@ public:
             // ADC downsampling divider modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
-            return 0x0144;
+            return 0x0140;
          case 9:
             // ADC downsampling divider modified flags
             if(BitMask) *BitMask = 0x0000000F;
@@ -8262,7 +8262,7 @@ public:
       {
          case 8:
             // Advanced trigger status register 1
-            return BitExtractStatus(0x0118, 0xFFFFFFFF, 0);
+            return BitExtractStatus(0x0114, 0xFFFFFFFF, 0);
          case 9:
             // Advanced trigger status register 1
             return BitExtractStatus(0x0110, 0xFFFFFFFF, 0);
@@ -8278,7 +8278,7 @@ public:
             // Advanced trigger status register 1
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x0118;
+            return 0x0114;
          case 9:
             // Advanced trigger status register 1
             if(BitMask) *BitMask = 0xFFFFFFFF;
@@ -8296,7 +8296,7 @@ public:
       {
          case 8:
             // Advanced trigger status register 2
-            return BitExtractStatus(0x011C, 0xFFFFFFFF, 0);
+            return BitExtractStatus(0x0118, 0xFFFFFFFF, 0);
          case 9:
             // Advanced trigger status register 2
             return BitExtractStatus(0x0114, 0xFFFFFFFF, 0);
@@ -8312,7 +8312,7 @@ public:
             // Advanced trigger status register 2
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x011C;
+            return 0x0118;
          case 9:
             // Advanced trigger status register 2
             if(BitMask) *BitMask = 0xFFFFFFFF;
@@ -8330,7 +8330,7 @@ public:
       {
          case 8:
             // Advanced trigger status register 3
-            return BitExtractStatus(0x0120, 0xFFFFFFFF, 0);
+            return BitExtractStatus(0x011C, 0xFFFFFFFF, 0);
          case 9:
             // Advanced trigger status register 3
             return BitExtractStatus(0x0118, 0xFFFFFFFF, 0);
@@ -8346,7 +8346,7 @@ public:
             // Advanced trigger status register 3
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x0120;
+            return 0x011C;
          case 9:
             // Advanced trigger status register 3
             if(BitMask) *BitMask = 0xFFFFFFFF;
@@ -8364,7 +8364,7 @@ public:
       {
          case 8:
             // Advanced trigger status register 4
-            return BitExtractStatus(0x0124, 0xFFFFFFFF, 0);
+            return BitExtractStatus(0x0120, 0xFFFFFFFF, 0);
          case 9:
             // Advanced trigger status register 4
             return BitExtractStatus(0x011C, 0xFFFFFFFF, 0);
@@ -8380,7 +8380,7 @@ public:
             // Advanced trigger status register 4
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x0124;
+            return 0x0120;
          case 9:
             // Advanced trigger status register 4
             if(BitMask) *BitMask = 0xFFFFFFFF;
@@ -8590,7 +8590,7 @@ public:
       {
          case 8:
             // Advanced trigger cell register
-            return BitExtractStatus(0x0114, 0xFFFFFFFF, 0);
+            return BitExtractStatus(0x0110, 0xFFFFFFFF, 0);
          case 9:
             // Advanced trigger cell register
             return BitExtractStatus(0x010C, 0xFFFFFFFF, 0);
@@ -8606,7 +8606,7 @@ public:
             // Advanced trigger cell register
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x0114;
+            return 0x0110;
          case 9:
             // Advanced trigger cell register
             if(BitMask) *BitMask = 0xFFFFFFFF;
@@ -9364,7 +9364,7 @@ public:
       {
          case 8:
             // DAQ clock select and DRS clock divider modified flags
-            return BitExtractStatus(0x0138, 0x00000004, 2);
+            return BitExtractStatus(0x0134, 0x00000004, 2);
          case 9:
             // DAQ clock select and DRS clock divider modified flags
             return BitExtractStatus(0x0130, 0x00000004, 2);
@@ -9380,7 +9380,7 @@ public:
             // DAQ clock select and DRS clock divider modified flags
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
-            return 0x0138;
+            return 0x0134;
          case 9:
             // DAQ clock select and DRS clock divider modified flags
             if(BitMask) *BitMask = 0x00000004;
@@ -9398,7 +9398,7 @@ public:
       {
          case 8:
             // Status of the comparator inputs
-            return BitExtractStatus(0x00FC, 0x0000FFFF, 0);
+            return BitExtractStatus(0x00F8, 0x0000FFFF, 0);
          case 9:
             // Status of the comparator inputs
             return BitExtractStatus(0x00F4, 0x0000FFFF, 0);
@@ -9414,7 +9414,7 @@ public:
             // Status of the comparator inputs
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x00FC;
+            return 0x00F8;
          case 9:
             // Status of the comparator inputs
             if(BitMask) *BitMask = 0x0000FFFF;
@@ -9512,7 +9512,7 @@ public:
       {
          case 8:
             // Maximum packet payload size modified flag
-            return BitExtractStatus(0x0140, 0x0000000F, 0);
+            return BitExtractStatus(0x013C, 0x0000000F, 0);
          case 9:
             // Maximum packet payload size modified flag
             return BitExtractStatus(0x0138, 0x0000000F, 0);
@@ -9528,7 +9528,7 @@ public:
             // Maximum packet payload size modified flag
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
-            return 0x0140;
+            return 0x013C;
          case 9:
             // Maximum packet payload size modified flag
             if(BitMask) *BitMask = 0x0000000F;
@@ -9586,7 +9586,7 @@ public:
       {
          case 8:
             // Keep at the end of the register bank
-            return BitExtractControl(0x1284, 0xFFFFFFFF, 0);
+            return BitExtractControl(0x127C, 0xFFFFFFFF, 0);
          case 9:
             // Keep at the end of the register bank
             return BitExtractControl(0x1220, 0xFFFFFFFF, 0);
@@ -9600,7 +9600,7 @@ public:
       {
          case 8:
             // Keep at the end of the register bank
-            return SetRegMask(0x1284, 0xFFFFFFFF, 0, value);
+            return SetRegMask(0x127C, 0xFFFFFFFF, 0, value);
          case 9:
             // Keep at the end of the register bank
             return SetRegMask(0x1220, 0xFFFFFFFF, 0, value);
@@ -9616,7 +9616,7 @@ public:
             // Keep at the end of the register bank
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x1284;
+            return 0x127C;
          case 9:
             // Keep at the end of the register bank
             if(BitMask) *BitMask = 0xFFFFFFFF;
@@ -9634,7 +9634,7 @@ public:
       {
          case 8:
             // DAC channel a modified flags
-            return BitExtractStatus(0x0148, 0xC0000000, 30);
+            return BitExtractStatus(0x0144, 0xC0000000, 30);
          case 9:
             // DAC channel a modified flags
             return BitExtractStatus(0x0140, 0xC0000000, 30);
@@ -9650,7 +9650,7 @@ public:
             // DAC channel a modified flags
             if(BitMask) *BitMask = 0xC0000000;
             if(BitOfs) *BitOfs = 30;
-            return 0x0148;
+            return 0x0144;
          case 9:
             // DAC channel a modified flags
             if(BitMask) *BitMask = 0xC0000000;
@@ -9668,7 +9668,7 @@ public:
       {
          case 8:
             // DAC channel b modified flags
-            return BitExtractStatus(0x0148, 0x30000000, 28);
+            return BitExtractStatus(0x0144, 0x30000000, 28);
          case 9:
             // DAC channel b modified flags
             return BitExtractStatus(0x0140, 0x30000000, 28);
@@ -9684,7 +9684,7 @@ public:
             // DAC channel b modified flags
             if(BitMask) *BitMask = 0x30000000;
             if(BitOfs) *BitOfs = 28;
-            return 0x0148;
+            return 0x0144;
          case 9:
             // DAC channel b modified flags
             if(BitMask) *BitMask = 0x30000000;
@@ -10030,7 +10030,7 @@ public:
       {
          case 8:
             // DAC channel c modified flags
-            return BitExtractStatus(0x0148, 0x0C000000, 26);
+            return BitExtractStatus(0x0144, 0x0C000000, 26);
          case 9:
             // DAC channel c modified flags
             return BitExtractStatus(0x0140, 0x0C000000, 26);
@@ -10046,7 +10046,7 @@ public:
             // DAC channel c modified flags
             if(BitMask) *BitMask = 0x0C000000;
             if(BitOfs) *BitOfs = 26;
-            return 0x0148;
+            return 0x0144;
          case 9:
             // DAC channel c modified flags
             if(BitMask) *BitMask = 0x0C000000;
@@ -10064,7 +10064,7 @@ public:
       {
          case 8:
             // DAC channel d modified flags
-            return BitExtractStatus(0x0148, 0x03000000, 24);
+            return BitExtractStatus(0x0144, 0x03000000, 24);
          case 9:
             // DAC channel d modified flags
             return BitExtractStatus(0x0140, 0x03000000, 24);
@@ -10080,7 +10080,7 @@ public:
             // DAC channel d modified flags
             if(BitMask) *BitMask = 0x03000000;
             if(BitOfs) *BitOfs = 24;
-            return 0x0148;
+            return 0x0144;
          case 9:
             // DAC channel d modified flags
             if(BitMask) *BitMask = 0x03000000;
@@ -10098,7 +10098,7 @@ public:
       {
          case 8:
             // DAC channel e modified flags
-            return BitExtractStatus(0x0148, 0x00C00000, 22);
+            return BitExtractStatus(0x0144, 0x00C00000, 22);
          case 9:
             // DAC channel e modified flags
             return BitExtractStatus(0x0140, 0x00C00000, 22);
@@ -10114,7 +10114,7 @@ public:
             // DAC channel e modified flags
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
-            return 0x0148;
+            return 0x0144;
          case 9:
             // DAC channel e modified flags
             if(BitMask) *BitMask = 0x00C00000;
@@ -10132,7 +10132,7 @@ public:
       {
          case 8:
             // DAC channel f modified flags
-            return BitExtractStatus(0x0148, 0x00300000, 20);
+            return BitExtractStatus(0x0144, 0x00300000, 20);
          case 9:
             // DAC channel f modified flags
             return BitExtractStatus(0x0140, 0x00300000, 20);
@@ -10148,7 +10148,7 @@ public:
             // DAC channel f modified flags
             if(BitMask) *BitMask = 0x00300000;
             if(BitOfs) *BitOfs = 20;
-            return 0x0148;
+            return 0x0144;
          case 9:
             // DAC channel f modified flags
             if(BitMask) *BitMask = 0x00300000;
@@ -10166,7 +10166,7 @@ public:
       {
          case 8:
             // DAC channel g modified flags
-            return BitExtractStatus(0x0148, 0x000C0000, 18);
+            return BitExtractStatus(0x0144, 0x000C0000, 18);
          case 9:
             // DAC channel g modified flags
             return BitExtractStatus(0x0140, 0x000C0000, 18);
@@ -10182,7 +10182,7 @@ public:
             // DAC channel g modified flags
             if(BitMask) *BitMask = 0x000C0000;
             if(BitOfs) *BitOfs = 18;
-            return 0x0148;
+            return 0x0144;
          case 9:
             // DAC channel g modified flags
             if(BitMask) *BitMask = 0x000C0000;
@@ -10200,7 +10200,7 @@ public:
       {
          case 8:
             // DAC channel h modified flags
-            return BitExtractStatus(0x0148, 0x00030000, 16);
+            return BitExtractStatus(0x0144, 0x00030000, 16);
          case 9:
             // DAC channel h modified flags
             return BitExtractStatus(0x0140, 0x00030000, 16);
@@ -10216,7 +10216,7 @@ public:
             // DAC channel h modified flags
             if(BitMask) *BitMask = 0x00030000;
             if(BitOfs) *BitOfs = 16;
-            return 0x0148;
+            return 0x0144;
          case 9:
             // DAC channel h modified flags
             if(BitMask) *BitMask = 0x00030000;
@@ -10234,7 +10234,7 @@ public:
       {
          case 8:
             // DAC channel a modified flags
-            return BitExtractStatus(0x0148, 0x0000C000, 14);
+            return BitExtractStatus(0x0144, 0x0000C000, 14);
          case 9:
             // DAC channel a modified flags
             return BitExtractStatus(0x0140, 0x0000C000, 14);
@@ -10250,7 +10250,7 @@ public:
             // DAC channel a modified flags
             if(BitMask) *BitMask = 0x0000C000;
             if(BitOfs) *BitOfs = 14;
-            return 0x0148;
+            return 0x0144;
          case 9:
             // DAC channel a modified flags
             if(BitMask) *BitMask = 0x0000C000;
@@ -10268,7 +10268,7 @@ public:
       {
          case 8:
             // DAC channel b modified flags
-            return BitExtractStatus(0x0148, 0x00003000, 12);
+            return BitExtractStatus(0x0144, 0x00003000, 12);
          case 9:
             // DAC channel b modified flags
             return BitExtractStatus(0x0140, 0x00003000, 12);
@@ -10284,7 +10284,7 @@ public:
             // DAC channel b modified flags
             if(BitMask) *BitMask = 0x00003000;
             if(BitOfs) *BitOfs = 12;
-            return 0x0148;
+            return 0x0144;
          case 9:
             // DAC channel b modified flags
             if(BitMask) *BitMask = 0x00003000;
@@ -10622,7 +10622,7 @@ public:
       {
          case 8:
             // DAC channel c modified flags
-            return BitExtractStatus(0x0148, 0x00000C00, 10);
+            return BitExtractStatus(0x0144, 0x00000C00, 10);
          case 9:
             // DAC channel c modified flags
             return BitExtractStatus(0x0140, 0x00000C00, 10);
@@ -10638,7 +10638,7 @@ public:
             // DAC channel c modified flags
             if(BitMask) *BitMask = 0x00000C00;
             if(BitOfs) *BitOfs = 10;
-            return 0x0148;
+            return 0x0144;
          case 9:
             // DAC channel c modified flags
             if(BitMask) *BitMask = 0x00000C00;
@@ -10656,7 +10656,7 @@ public:
       {
          case 8:
             // DAC channel d modified flags
-            return BitExtractStatus(0x0148, 0x00000300, 8);
+            return BitExtractStatus(0x0144, 0x00000300, 8);
          case 9:
             // DAC channel d modified flags
             return BitExtractStatus(0x0140, 0x00000300, 8);
@@ -10672,7 +10672,7 @@ public:
             // DAC channel d modified flags
             if(BitMask) *BitMask = 0x00000300;
             if(BitOfs) *BitOfs = 8;
-            return 0x0148;
+            return 0x0144;
          case 9:
             // DAC channel d modified flags
             if(BitMask) *BitMask = 0x00000300;
@@ -10690,7 +10690,7 @@ public:
       {
          case 8:
             // DAC channel e modified flags
-            return BitExtractStatus(0x0148, 0x000000C0, 6);
+            return BitExtractStatus(0x0144, 0x000000C0, 6);
          case 9:
             // DAC channel e modified flags
             return BitExtractStatus(0x0140, 0x000000C0, 6);
@@ -10706,7 +10706,7 @@ public:
             // DAC channel e modified flags
             if(BitMask) *BitMask = 0x000000C0;
             if(BitOfs) *BitOfs = 6;
-            return 0x0148;
+            return 0x0144;
          case 9:
             // DAC channel e modified flags
             if(BitMask) *BitMask = 0x000000C0;
@@ -10724,7 +10724,7 @@ public:
       {
          case 8:
             // DAC channel f modified flags
-            return BitExtractStatus(0x0148, 0x00000030, 4);
+            return BitExtractStatus(0x0144, 0x00000030, 4);
          case 9:
             // DAC channel f modified flags
             return BitExtractStatus(0x0140, 0x00000030, 4);
@@ -10740,7 +10740,7 @@ public:
             // DAC channel f modified flags
             if(BitMask) *BitMask = 0x00000030;
             if(BitOfs) *BitOfs = 4;
-            return 0x0148;
+            return 0x0144;
          case 9:
             // DAC channel f modified flags
             if(BitMask) *BitMask = 0x00000030;
@@ -10758,7 +10758,7 @@ public:
       {
          case 8:
             // DAC channel g modified flags
-            return BitExtractStatus(0x0148, 0x0000000C, 2);
+            return BitExtractStatus(0x0144, 0x0000000C, 2);
          case 9:
             // DAC channel g modified flags
             return BitExtractStatus(0x0140, 0x0000000C, 2);
@@ -10774,7 +10774,7 @@ public:
             // DAC channel g modified flags
             if(BitMask) *BitMask = 0x0000000C;
             if(BitOfs) *BitOfs = 2;
-            return 0x0148;
+            return 0x0144;
          case 9:
             // DAC channel g modified flags
             if(BitMask) *BitMask = 0x0000000C;
@@ -10792,7 +10792,7 @@ public:
       {
          case 8:
             // DAC channel h modified flags
-            return BitExtractStatus(0x0148, 0x00000003, 0);
+            return BitExtractStatus(0x0144, 0x00000003, 0);
          case 9:
             // DAC channel h modified flags
             return BitExtractStatus(0x0140, 0x00000003, 0);
@@ -10808,7 +10808,7 @@ public:
             // DAC channel h modified flags
             if(BitMask) *BitMask = 0x00000003;
             if(BitOfs) *BitOfs = 0;
-            return 0x0148;
+            return 0x0144;
          case 9:
             // DAC channel h modified flags
             if(BitMask) *BitMask = 0x00000003;
@@ -10826,7 +10826,7 @@ public:
       {
          case 8:
             // DAC channel a modified flags
-            return BitExtractStatus(0x014C, 0xC0000000, 30);
+            return BitExtractStatus(0x0148, 0xC0000000, 30);
          case 9:
             // DAC channel a modified flags
             return BitExtractStatus(0x0144, 0xC0000000, 30);
@@ -10842,7 +10842,7 @@ public:
             // DAC channel a modified flags
             if(BitMask) *BitMask = 0xC0000000;
             if(BitOfs) *BitOfs = 30;
-            return 0x014C;
+            return 0x0148;
          case 9:
             // DAC channel a modified flags
             if(BitMask) *BitMask = 0xC0000000;
@@ -10860,7 +10860,7 @@ public:
       {
          case 8:
             // DAC channel b modified flags
-            return BitExtractStatus(0x014C, 0x30000000, 28);
+            return BitExtractStatus(0x0148, 0x30000000, 28);
          case 9:
             // DAC channel b modified flags
             return BitExtractStatus(0x0144, 0x30000000, 28);
@@ -10876,7 +10876,7 @@ public:
             // DAC channel b modified flags
             if(BitMask) *BitMask = 0x30000000;
             if(BitOfs) *BitOfs = 28;
-            return 0x014C;
+            return 0x0148;
          case 9:
             // DAC channel b modified flags
             if(BitMask) *BitMask = 0x30000000;
@@ -11214,7 +11214,7 @@ public:
       {
          case 8:
             // DAC channel c modified flags
-            return BitExtractStatus(0x014C, 0x0C000000, 26);
+            return BitExtractStatus(0x0148, 0x0C000000, 26);
          case 9:
             // DAC channel c modified flags
             return BitExtractStatus(0x0144, 0x0C000000, 26);
@@ -11230,7 +11230,7 @@ public:
             // DAC channel c modified flags
             if(BitMask) *BitMask = 0x0C000000;
             if(BitOfs) *BitOfs = 26;
-            return 0x014C;
+            return 0x0148;
          case 9:
             // DAC channel c modified flags
             if(BitMask) *BitMask = 0x0C000000;
@@ -11248,7 +11248,7 @@ public:
       {
          case 8:
             // DAC channel d modified flags
-            return BitExtractStatus(0x014C, 0x03000000, 24);
+            return BitExtractStatus(0x0148, 0x03000000, 24);
          case 9:
             // DAC channel d modified flags
             return BitExtractStatus(0x0144, 0x03000000, 24);
@@ -11264,7 +11264,7 @@ public:
             // DAC channel d modified flags
             if(BitMask) *BitMask = 0x03000000;
             if(BitOfs) *BitOfs = 24;
-            return 0x014C;
+            return 0x0148;
          case 9:
             // DAC channel d modified flags
             if(BitMask) *BitMask = 0x03000000;
@@ -11282,7 +11282,7 @@ public:
       {
          case 8:
             // DAC channel e modified flags
-            return BitExtractStatus(0x014C, 0x00C00000, 22);
+            return BitExtractStatus(0x0148, 0x00C00000, 22);
          case 9:
             // DAC channel e modified flags
             return BitExtractStatus(0x0144, 0x00C00000, 22);
@@ -11298,7 +11298,7 @@ public:
             // DAC channel e modified flags
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
-            return 0x014C;
+            return 0x0148;
          case 9:
             // DAC channel e modified flags
             if(BitMask) *BitMask = 0x00C00000;
@@ -11316,7 +11316,7 @@ public:
       {
          case 8:
             // DAC channel f modified flags
-            return BitExtractStatus(0x014C, 0x00300000, 20);
+            return BitExtractStatus(0x0148, 0x00300000, 20);
          case 9:
             // DAC channel f modified flags
             return BitExtractStatus(0x0144, 0x00300000, 20);
@@ -11332,7 +11332,7 @@ public:
             // DAC channel f modified flags
             if(BitMask) *BitMask = 0x00300000;
             if(BitOfs) *BitOfs = 20;
-            return 0x014C;
+            return 0x0148;
          case 9:
             // DAC channel f modified flags
             if(BitMask) *BitMask = 0x00300000;
@@ -11350,7 +11350,7 @@ public:
       {
          case 8:
             // DAC channel g modified flags
-            return BitExtractStatus(0x014C, 0x000C0000, 18);
+            return BitExtractStatus(0x0148, 0x000C0000, 18);
          case 9:
             // DAC channel g modified flags
             return BitExtractStatus(0x0144, 0x000C0000, 18);
@@ -11366,7 +11366,7 @@ public:
             // DAC channel g modified flags
             if(BitMask) *BitMask = 0x000C0000;
             if(BitOfs) *BitOfs = 18;
-            return 0x014C;
+            return 0x0148;
          case 9:
             // DAC channel g modified flags
             if(BitMask) *BitMask = 0x000C0000;
@@ -11384,7 +11384,7 @@ public:
       {
          case 8:
             // DAC channel h modified flags
-            return BitExtractStatus(0x014C, 0x00030000, 16);
+            return BitExtractStatus(0x0148, 0x00030000, 16);
          case 9:
             // DAC channel h modified flags
             return BitExtractStatus(0x0144, 0x00030000, 16);
@@ -11400,7 +11400,7 @@ public:
             // DAC channel h modified flags
             if(BitMask) *BitMask = 0x00030000;
             if(BitOfs) *BitOfs = 16;
-            return 0x014C;
+            return 0x0148;
          case 9:
             // DAC channel h modified flags
             if(BitMask) *BitMask = 0x00030000;
@@ -12238,7 +12238,7 @@ public:
       {
          case 8:
             // DRS control bits modified flags
-            return BitExtractStatus(0x013C, 0x00000004, 2);
+            return BitExtractStatus(0x0138, 0x00000004, 2);
          case 9:
             // DRS control bits modified flags
             return BitExtractStatus(0x0134, 0x00000004, 2);
@@ -12254,7 +12254,7 @@ public:
             // DRS control bits modified flags
             if(BitMask) *BitMask = 0x00000004;
             if(BitOfs) *BitOfs = 2;
-            return 0x013C;
+            return 0x0138;
          case 9:
             // DRS control bits modified flags
             if(BitMask) *BitMask = 0x00000004;
@@ -12708,7 +12708,7 @@ public:
       {
          case 8:
             // DRS write control register modified flags
-            return BitExtractStatus(0x013C, 0x00000001, 0);
+            return BitExtractStatus(0x0138, 0x00000001, 0);
          case 9:
             // DRS write control register modified flags
             return BitExtractStatus(0x0134, 0x00000001, 0);
@@ -12724,7 +12724,7 @@ public:
             // DRS write control register modified flags
             if(BitMask) *BitMask = 0x00000001;
             if(BitOfs) *BitOfs = 0;
-            return 0x013C;
+            return 0x0138;
          case 9:
             // DRS write control register modified flags
             if(BitMask) *BitMask = 0x00000001;
@@ -12822,7 +12822,7 @@ public:
       {
          case 8:
             // DRS write shift register modified flags
-            return BitExtractStatus(0x013C, 0x00000002, 1);
+            return BitExtractStatus(0x0138, 0x00000002, 1);
          case 9:
             // DRS write shift register modified flags
             return BitExtractStatus(0x0134, 0x00000002, 1);
@@ -12838,7 +12838,7 @@ public:
             // DRS write shift register modified flags
             if(BitMask) *BitMask = 0x00000002;
             if(BitOfs) *BitOfs = 1;
-            return 0x013C;
+            return 0x0138;
          case 9:
             // DRS write shift register modified flags
             if(BitMask) *BitMask = 0x00000002;
@@ -12936,7 +12936,7 @@ public:
       {
          case 8:
             // Number of latest event
-            return BitExtractStatus(0x0104, 0xFFFFFFFF, 0);
+            return BitExtractStatus(0x0100, 0xFFFFFFFF, 0);
          case 9:
             // Number of latest event
             return BitExtractStatus(0x00FC, 0xFFFFFFFF, 0);
@@ -12952,7 +12952,7 @@ public:
             // Number of latest event
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x0104;
+            return 0x0100;
          case 9:
             // Number of latest event
             if(BitMask) *BitMask = 0xFFFFFFFF;
@@ -12970,7 +12970,7 @@ public:
       {
          case 8:
             // Number of events transmitted per second
-            return BitExtractStatus(0x0100, 0xFFFFFFFF, 0);
+            return BitExtractStatus(0x00FC, 0xFFFFFFFF, 0);
          case 9:
             // Number of events transmitted per second
             return BitExtractStatus(0x00F8, 0xFFFFFFFF, 0);
@@ -12986,7 +12986,7 @@ public:
             // Number of events transmitted per second
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x0100;
+            return 0x00FC;
          case 9:
             // Number of events transmitted per second
             if(BitMask) *BitMask = 0xFFFFFFFF;
@@ -13120,7 +13120,7 @@ public:
       {
          case 8:
             // External clock frequency modified flags
-            return BitExtractStatus(0x0138, 0x00000002, 1);
+            return BitExtractStatus(0x0134, 0x00000002, 1);
          case 9:
             // External clock frequency modified flags
             return BitExtractStatus(0x0130, 0x00000002, 1);
@@ -13136,7 +13136,7 @@ public:
             // External clock frequency modified flags
             if(BitMask) *BitMask = 0x00000002;
             if(BitOfs) *BitOfs = 1;
-            return 0x0138;
+            return 0x0134;
          case 9:
             // External clock frequency modified flags
             if(BitMask) *BitMask = 0x00000002;
@@ -17722,7 +17722,7 @@ public:
       {
          case 8:
             // Frontend channel 0 register modified flags
-            return BitExtractStatus(0x0150, 0xC0000000, 30);
+            return BitExtractStatus(0x014C, 0xC0000000, 30);
          case 9:
             // Frontend channel 0 register modified flags
             return BitExtractStatus(0x0148, 0xC0000000, 30);
@@ -17738,7 +17738,7 @@ public:
             // Frontend channel 0 register modified flags
             if(BitMask) *BitMask = 0xC0000000;
             if(BitOfs) *BitOfs = 30;
-            return 0x0150;
+            return 0x014C;
          case 9:
             // Frontend channel 0 register modified flags
             if(BitMask) *BitMask = 0xC0000000;
@@ -17756,7 +17756,7 @@ public:
       {
          case 8:
             // Frontend channel 10 register modified flags
-            return BitExtractStatus(0x0150, 0x00000C00, 10);
+            return BitExtractStatus(0x014C, 0x00000C00, 10);
          case 9:
             // Frontend channel 10 register modified flags
             return BitExtractStatus(0x0148, 0x00000C00, 10);
@@ -17772,7 +17772,7 @@ public:
             // Frontend channel 10 register modified flags
             if(BitMask) *BitMask = 0x00000C00;
             if(BitOfs) *BitOfs = 10;
-            return 0x0150;
+            return 0x014C;
          case 9:
             // Frontend channel 10 register modified flags
             if(BitMask) *BitMask = 0x00000C00;
@@ -17790,7 +17790,7 @@ public:
       {
          case 8:
             // Frontend channel 11 register modified flags
-            return BitExtractStatus(0x0150, 0x00000300, 8);
+            return BitExtractStatus(0x014C, 0x00000300, 8);
          case 9:
             // Frontend channel 11 register modified flags
             return BitExtractStatus(0x0148, 0x00000300, 8);
@@ -17806,7 +17806,7 @@ public:
             // Frontend channel 11 register modified flags
             if(BitMask) *BitMask = 0x00000300;
             if(BitOfs) *BitOfs = 8;
-            return 0x0150;
+            return 0x014C;
          case 9:
             // Frontend channel 11 register modified flags
             if(BitMask) *BitMask = 0x00000300;
@@ -17824,7 +17824,7 @@ public:
       {
          case 8:
             // Frontend channel 12 register modified flags
-            return BitExtractStatus(0x0150, 0x000000C0, 6);
+            return BitExtractStatus(0x014C, 0x000000C0, 6);
          case 9:
             // Frontend channel 12 register modified flags
             return BitExtractStatus(0x0148, 0x000000C0, 6);
@@ -17840,7 +17840,7 @@ public:
             // Frontend channel 12 register modified flags
             if(BitMask) *BitMask = 0x000000C0;
             if(BitOfs) *BitOfs = 6;
-            return 0x0150;
+            return 0x014C;
          case 9:
             // Frontend channel 12 register modified flags
             if(BitMask) *BitMask = 0x000000C0;
@@ -17858,7 +17858,7 @@ public:
       {
          case 8:
             // Frontend channel 13 register modified flags
-            return BitExtractStatus(0x0150, 0x00000030, 4);
+            return BitExtractStatus(0x014C, 0x00000030, 4);
          case 9:
             // Frontend channel 13 register modified flags
             return BitExtractStatus(0x0148, 0x00000030, 4);
@@ -17874,7 +17874,7 @@ public:
             // Frontend channel 13 register modified flags
             if(BitMask) *BitMask = 0x00000030;
             if(BitOfs) *BitOfs = 4;
-            return 0x0150;
+            return 0x014C;
          case 9:
             // Frontend channel 13 register modified flags
             if(BitMask) *BitMask = 0x00000030;
@@ -17892,7 +17892,7 @@ public:
       {
          case 8:
             // Frontend channel 14 register modified flags
-            return BitExtractStatus(0x0150, 0x0000000C, 2);
+            return BitExtractStatus(0x014C, 0x0000000C, 2);
          case 9:
             // Frontend channel 14 register modified flags
             return BitExtractStatus(0x0148, 0x0000000C, 2);
@@ -17908,7 +17908,7 @@ public:
             // Frontend channel 14 register modified flags
             if(BitMask) *BitMask = 0x0000000C;
             if(BitOfs) *BitOfs = 2;
-            return 0x0150;
+            return 0x014C;
          case 9:
             // Frontend channel 14 register modified flags
             if(BitMask) *BitMask = 0x0000000C;
@@ -17926,7 +17926,7 @@ public:
       {
          case 8:
             // Frontend channel 15 register modified flags
-            return BitExtractStatus(0x0150, 0x00000003, 0);
+            return BitExtractStatus(0x014C, 0x00000003, 0);
          case 9:
             // Frontend channel 15 register modified flags
             return BitExtractStatus(0x0148, 0x00000003, 0);
@@ -17942,7 +17942,7 @@ public:
             // Frontend channel 15 register modified flags
             if(BitMask) *BitMask = 0x00000003;
             if(BitOfs) *BitOfs = 0;
-            return 0x0150;
+            return 0x014C;
          case 9:
             // Frontend channel 15 register modified flags
             if(BitMask) *BitMask = 0x00000003;
@@ -17960,7 +17960,7 @@ public:
       {
          case 8:
             // Frontend channel 1 register modified flags
-            return BitExtractStatus(0x0150, 0x30000000, 28);
+            return BitExtractStatus(0x014C, 0x30000000, 28);
          case 9:
             // Frontend channel 1 register modified flags
             return BitExtractStatus(0x0148, 0x30000000, 28);
@@ -17976,7 +17976,7 @@ public:
             // Frontend channel 1 register modified flags
             if(BitMask) *BitMask = 0x30000000;
             if(BitOfs) *BitOfs = 28;
-            return 0x0150;
+            return 0x014C;
          case 9:
             // Frontend channel 1 register modified flags
             if(BitMask) *BitMask = 0x30000000;
@@ -17994,7 +17994,7 @@ public:
       {
          case 8:
             // Frontend channel 2 register modified flags
-            return BitExtractStatus(0x0150, 0x0C000000, 26);
+            return BitExtractStatus(0x014C, 0x0C000000, 26);
          case 9:
             // Frontend channel 2 register modified flags
             return BitExtractStatus(0x0148, 0x0C000000, 26);
@@ -18010,7 +18010,7 @@ public:
             // Frontend channel 2 register modified flags
             if(BitMask) *BitMask = 0x0C000000;
             if(BitOfs) *BitOfs = 26;
-            return 0x0150;
+            return 0x014C;
          case 9:
             // Frontend channel 2 register modified flags
             if(BitMask) *BitMask = 0x0C000000;
@@ -18028,7 +18028,7 @@ public:
       {
          case 8:
             // Frontend channel 3 register modified flags
-            return BitExtractStatus(0x0150, 0x03000000, 24);
+            return BitExtractStatus(0x014C, 0x03000000, 24);
          case 9:
             // Frontend channel 3 register modified flags
             return BitExtractStatus(0x0148, 0x03000000, 24);
@@ -18044,7 +18044,7 @@ public:
             // Frontend channel 3 register modified flags
             if(BitMask) *BitMask = 0x03000000;
             if(BitOfs) *BitOfs = 24;
-            return 0x0150;
+            return 0x014C;
          case 9:
             // Frontend channel 3 register modified flags
             if(BitMask) *BitMask = 0x03000000;
@@ -18062,7 +18062,7 @@ public:
       {
          case 8:
             // Frontend channel 4 register modified flags
-            return BitExtractStatus(0x0150, 0x00C00000, 22);
+            return BitExtractStatus(0x014C, 0x00C00000, 22);
          case 9:
             // Frontend channel 4 register modified flags
             return BitExtractStatus(0x0148, 0x00C00000, 22);
@@ -18078,7 +18078,7 @@ public:
             // Frontend channel 4 register modified flags
             if(BitMask) *BitMask = 0x00C00000;
             if(BitOfs) *BitOfs = 22;
-            return 0x0150;
+            return 0x014C;
          case 9:
             // Frontend channel 4 register modified flags
             if(BitMask) *BitMask = 0x00C00000;
@@ -18096,7 +18096,7 @@ public:
       {
          case 8:
             // Frontend channel 5 register modified flags
-            return BitExtractStatus(0x0150, 0x00300000, 20);
+            return BitExtractStatus(0x014C, 0x00300000, 20);
          case 9:
             // Frontend channel 5 register modified flags
             return BitExtractStatus(0x0148, 0x00300000, 20);
@@ -18112,7 +18112,7 @@ public:
             // Frontend channel 5 register modified flags
             if(BitMask) *BitMask = 0x00300000;
             if(BitOfs) *BitOfs = 20;
-            return 0x0150;
+            return 0x014C;
          case 9:
             // Frontend channel 5 register modified flags
             if(BitMask) *BitMask = 0x00300000;
@@ -18130,7 +18130,7 @@ public:
       {
          case 8:
             // Frontend channel 6 register modified flags
-            return BitExtractStatus(0x0150, 0x000C0000, 18);
+            return BitExtractStatus(0x014C, 0x000C0000, 18);
          case 9:
             // Frontend channel 6 register modified flags
             return BitExtractStatus(0x0148, 0x000C0000, 18);
@@ -18146,7 +18146,7 @@ public:
             // Frontend channel 6 register modified flags
             if(BitMask) *BitMask = 0x000C0000;
             if(BitOfs) *BitOfs = 18;
-            return 0x0150;
+            return 0x014C;
          case 9:
             // Frontend channel 6 register modified flags
             if(BitMask) *BitMask = 0x000C0000;
@@ -18164,7 +18164,7 @@ public:
       {
          case 8:
             // Frontend channel 7 register modified flags
-            return BitExtractStatus(0x0150, 0x00030000, 16);
+            return BitExtractStatus(0x014C, 0x00030000, 16);
          case 9:
             // Frontend channel 7 register modified flags
             return BitExtractStatus(0x0148, 0x00030000, 16);
@@ -18180,7 +18180,7 @@ public:
             // Frontend channel 7 register modified flags
             if(BitMask) *BitMask = 0x00030000;
             if(BitOfs) *BitOfs = 16;
-            return 0x0150;
+            return 0x014C;
          case 9:
             // Frontend channel 7 register modified flags
             if(BitMask) *BitMask = 0x00030000;
@@ -18198,7 +18198,7 @@ public:
       {
          case 8:
             // Frontend channel 8 register modified flags
-            return BitExtractStatus(0x0150, 0x0000C000, 14);
+            return BitExtractStatus(0x014C, 0x0000C000, 14);
          case 9:
             // Frontend channel 8 register modified flags
             return BitExtractStatus(0x0148, 0x0000C000, 14);
@@ -18214,7 +18214,7 @@ public:
             // Frontend channel 8 register modified flags
             if(BitMask) *BitMask = 0x0000C000;
             if(BitOfs) *BitOfs = 14;
-            return 0x0150;
+            return 0x014C;
          case 9:
             // Frontend channel 8 register modified flags
             if(BitMask) *BitMask = 0x0000C000;
@@ -18232,7 +18232,7 @@ public:
       {
          case 8:
             // Frontend channel 9 register modified flags
-            return BitExtractStatus(0x0150, 0x00003000, 12);
+            return BitExtractStatus(0x014C, 0x00003000, 12);
          case 9:
             // Frontend channel 9 register modified flags
             return BitExtractStatus(0x0148, 0x00003000, 12);
@@ -18248,7 +18248,7 @@ public:
             // Frontend channel 9 register modified flags
             if(BitMask) *BitMask = 0x00003000;
             if(BitOfs) *BitOfs = 12;
-            return 0x0150;
+            return 0x014C;
          case 9:
             // Frontend channel 9 register modified flags
             if(BitMask) *BitMask = 0x00003000;
@@ -19205,7 +19205,7 @@ public:
       {
          case 8:
             // HV supply shunt resistor register modified flags
-            return BitExtractStatus(0x015C, 0x0000000F, 0);
+            return BitExtractStatus(0x0158, 0x0000000F, 0);
          case 9:
             // HV supply shunt resistor register modified flags
             return BitExtractStatus(0x0154, 0x0000000F, 0);
@@ -19221,7 +19221,7 @@ public:
             // HV supply shunt resistor register modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
-            return 0x015C;
+            return 0x0158;
          case 9:
             // HV supply shunt resistor register modified flags
             if(BitMask) *BitMask = 0x0000000F;
@@ -19449,7 +19449,7 @@ public:
       {
          case 8:
             // Target high voltage channel 0 register modified flags
-            return BitExtractStatus(0x0154, 0xF0000000, 28);
+            return BitExtractStatus(0x0150, 0xF0000000, 28);
          case 9:
             // Target high voltage channel 0 register modified flags
             return BitExtractStatus(0x014C, 0xF0000000, 28);
@@ -19465,7 +19465,7 @@ public:
             // Target high voltage channel 0 register modified flags
             if(BitMask) *BitMask = 0xF0000000;
             if(BitOfs) *BitOfs = 28;
-            return 0x0154;
+            return 0x0150;
          case 9:
             // Target high voltage channel 0 register modified flags
             if(BitMask) *BitMask = 0xF0000000;
@@ -19563,7 +19563,7 @@ public:
       {
          case 8:
             // Target high voltage channel 10 register modified flags
-            return BitExtractStatus(0x0158, 0x00F00000, 20);
+            return BitExtractStatus(0x0154, 0x00F00000, 20);
          case 9:
             // Target high voltage channel 10 register modified flags
             return BitExtractStatus(0x0150, 0x00F00000, 20);
@@ -19579,7 +19579,7 @@ public:
             // Target high voltage channel 10 register modified flags
             if(BitMask) *BitMask = 0x00F00000;
             if(BitOfs) *BitOfs = 20;
-            return 0x0158;
+            return 0x0154;
          case 9:
             // Target high voltage channel 10 register modified flags
             if(BitMask) *BitMask = 0x00F00000;
@@ -19637,7 +19637,7 @@ public:
       {
          case 8:
             // Target high voltage channel 11 register modified flags
-            return BitExtractStatus(0x0158, 0x000F0000, 16);
+            return BitExtractStatus(0x0154, 0x000F0000, 16);
          case 9:
             // Target high voltage channel 11 register modified flags
             return BitExtractStatus(0x0150, 0x000F0000, 16);
@@ -19653,7 +19653,7 @@ public:
             // Target high voltage channel 11 register modified flags
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
-            return 0x0158;
+            return 0x0154;
          case 9:
             // Target high voltage channel 11 register modified flags
             if(BitMask) *BitMask = 0x000F0000;
@@ -19711,7 +19711,7 @@ public:
       {
          case 8:
             // Target high voltage channel 12 register modified flags
-            return BitExtractStatus(0x0158, 0x0000F000, 12);
+            return BitExtractStatus(0x0154, 0x0000F000, 12);
          case 9:
             // Target high voltage channel 12 register modified flags
             return BitExtractStatus(0x0150, 0x0000F000, 12);
@@ -19727,7 +19727,7 @@ public:
             // Target high voltage channel 12 register modified flags
             if(BitMask) *BitMask = 0x0000F000;
             if(BitOfs) *BitOfs = 12;
-            return 0x0158;
+            return 0x0154;
          case 9:
             // Target high voltage channel 12 register modified flags
             if(BitMask) *BitMask = 0x0000F000;
@@ -19785,7 +19785,7 @@ public:
       {
          case 8:
             // Target high voltage channel 13 register modified flags
-            return BitExtractStatus(0x0158, 0x00000F00, 8);
+            return BitExtractStatus(0x0154, 0x00000F00, 8);
          case 9:
             // Target high voltage channel 13 register modified flags
             return BitExtractStatus(0x0150, 0x00000F00, 8);
@@ -19801,7 +19801,7 @@ public:
             // Target high voltage channel 13 register modified flags
             if(BitMask) *BitMask = 0x00000F00;
             if(BitOfs) *BitOfs = 8;
-            return 0x0158;
+            return 0x0154;
          case 9:
             // Target high voltage channel 13 register modified flags
             if(BitMask) *BitMask = 0x00000F00;
@@ -19859,7 +19859,7 @@ public:
       {
          case 8:
             // Target high voltage channel 14 register modified flags
-            return BitExtractStatus(0x0158, 0x000000F0, 4);
+            return BitExtractStatus(0x0154, 0x000000F0, 4);
          case 9:
             // Target high voltage channel 14 register modified flags
             return BitExtractStatus(0x0150, 0x000000F0, 4);
@@ -19875,7 +19875,7 @@ public:
             // Target high voltage channel 14 register modified flags
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
-            return 0x0158;
+            return 0x0154;
          case 9:
             // Target high voltage channel 14 register modified flags
             if(BitMask) *BitMask = 0x000000F0;
@@ -19933,7 +19933,7 @@ public:
       {
          case 8:
             // Target high voltage channel 15 register modified flags
-            return BitExtractStatus(0x0158, 0x0000000F, 0);
+            return BitExtractStatus(0x0154, 0x0000000F, 0);
          case 9:
             // Target high voltage channel 15 register modified flags
             return BitExtractStatus(0x0150, 0x0000000F, 0);
@@ -19949,7 +19949,7 @@ public:
             // Target high voltage channel 15 register modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
-            return 0x0158;
+            return 0x0154;
          case 9:
             // Target high voltage channel 15 register modified flags
             if(BitMask) *BitMask = 0x0000000F;
@@ -19967,7 +19967,7 @@ public:
       {
          case 8:
             // Target high voltage channel 1 register modified flags
-            return BitExtractStatus(0x0154, 0x0F000000, 24);
+            return BitExtractStatus(0x0150, 0x0F000000, 24);
          case 9:
             // Target high voltage channel 1 register modified flags
             return BitExtractStatus(0x014C, 0x0F000000, 24);
@@ -19983,7 +19983,7 @@ public:
             // Target high voltage channel 1 register modified flags
             if(BitMask) *BitMask = 0x0F000000;
             if(BitOfs) *BitOfs = 24;
-            return 0x0154;
+            return 0x0150;
          case 9:
             // Target high voltage channel 1 register modified flags
             if(BitMask) *BitMask = 0x0F000000;
@@ -20041,7 +20041,7 @@ public:
       {
          case 8:
             // Target high voltage channel 2 register modified flags
-            return BitExtractStatus(0x0154, 0x00F00000, 20);
+            return BitExtractStatus(0x0150, 0x00F00000, 20);
          case 9:
             // Target high voltage channel 2 register modified flags
             return BitExtractStatus(0x014C, 0x00F00000, 20);
@@ -20057,7 +20057,7 @@ public:
             // Target high voltage channel 2 register modified flags
             if(BitMask) *BitMask = 0x00F00000;
             if(BitOfs) *BitOfs = 20;
-            return 0x0154;
+            return 0x0150;
          case 9:
             // Target high voltage channel 2 register modified flags
             if(BitMask) *BitMask = 0x00F00000;
@@ -20115,7 +20115,7 @@ public:
       {
          case 8:
             // Target high voltage channel 3 register modified flags
-            return BitExtractStatus(0x0154, 0x000F0000, 16);
+            return BitExtractStatus(0x0150, 0x000F0000, 16);
          case 9:
             // Target high voltage channel 3 register modified flags
             return BitExtractStatus(0x014C, 0x000F0000, 16);
@@ -20131,7 +20131,7 @@ public:
             // Target high voltage channel 3 register modified flags
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
-            return 0x0154;
+            return 0x0150;
          case 9:
             // Target high voltage channel 3 register modified flags
             if(BitMask) *BitMask = 0x000F0000;
@@ -20189,7 +20189,7 @@ public:
       {
          case 8:
             // Target high voltage channel 4 register modified flags
-            return BitExtractStatus(0x0154, 0x0000F000, 12);
+            return BitExtractStatus(0x0150, 0x0000F000, 12);
          case 9:
             // Target high voltage channel 4 register modified flags
             return BitExtractStatus(0x014C, 0x0000F000, 12);
@@ -20205,7 +20205,7 @@ public:
             // Target high voltage channel 4 register modified flags
             if(BitMask) *BitMask = 0x0000F000;
             if(BitOfs) *BitOfs = 12;
-            return 0x0154;
+            return 0x0150;
          case 9:
             // Target high voltage channel 4 register modified flags
             if(BitMask) *BitMask = 0x0000F000;
@@ -20263,7 +20263,7 @@ public:
       {
          case 8:
             // Target high voltage channel 5 register modified flags
-            return BitExtractStatus(0x0154, 0x00000F00, 8);
+            return BitExtractStatus(0x0150, 0x00000F00, 8);
          case 9:
             // Target high voltage channel 5 register modified flags
             return BitExtractStatus(0x014C, 0x00000F00, 8);
@@ -20279,7 +20279,7 @@ public:
             // Target high voltage channel 5 register modified flags
             if(BitMask) *BitMask = 0x00000F00;
             if(BitOfs) *BitOfs = 8;
-            return 0x0154;
+            return 0x0150;
          case 9:
             // Target high voltage channel 5 register modified flags
             if(BitMask) *BitMask = 0x00000F00;
@@ -20337,7 +20337,7 @@ public:
       {
          case 8:
             // Target high voltage channel 6 register modified flags
-            return BitExtractStatus(0x0154, 0x000000F0, 4);
+            return BitExtractStatus(0x0150, 0x000000F0, 4);
          case 9:
             // Target high voltage channel 6 register modified flags
             return BitExtractStatus(0x014C, 0x000000F0, 4);
@@ -20353,7 +20353,7 @@ public:
             // Target high voltage channel 6 register modified flags
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
-            return 0x0154;
+            return 0x0150;
          case 9:
             // Target high voltage channel 6 register modified flags
             if(BitMask) *BitMask = 0x000000F0;
@@ -20411,7 +20411,7 @@ public:
       {
          case 8:
             // Target high voltage channel 7 register modified flags
-            return BitExtractStatus(0x0154, 0x0000000F, 0);
+            return BitExtractStatus(0x0150, 0x0000000F, 0);
          case 9:
             // Target high voltage channel 7 register modified flags
             return BitExtractStatus(0x014C, 0x0000000F, 0);
@@ -20427,7 +20427,7 @@ public:
             // Target high voltage channel 7 register modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
-            return 0x0154;
+            return 0x0150;
          case 9:
             // Target high voltage channel 7 register modified flags
             if(BitMask) *BitMask = 0x0000000F;
@@ -20485,7 +20485,7 @@ public:
       {
          case 8:
             // Target high voltage channel 8 register modified flags
-            return BitExtractStatus(0x0158, 0xF0000000, 28);
+            return BitExtractStatus(0x0154, 0xF0000000, 28);
          case 9:
             // Target high voltage channel 8 register modified flags
             return BitExtractStatus(0x0150, 0xF0000000, 28);
@@ -20501,7 +20501,7 @@ public:
             // Target high voltage channel 8 register modified flags
             if(BitMask) *BitMask = 0xF0000000;
             if(BitOfs) *BitOfs = 28;
-            return 0x0158;
+            return 0x0154;
          case 9:
             // Target high voltage channel 8 register modified flags
             if(BitMask) *BitMask = 0xF0000000;
@@ -20559,7 +20559,7 @@ public:
       {
          case 8:
             // Target high voltage channel 9 register modified flags
-            return BitExtractStatus(0x0158, 0x0F000000, 24);
+            return BitExtractStatus(0x0154, 0x0F000000, 24);
          case 9:
             // Target high voltage channel 9 register modified flags
             return BitExtractStatus(0x0150, 0x0F000000, 24);
@@ -20575,7 +20575,7 @@ public:
             // Target high voltage channel 9 register modified flags
             if(BitMask) *BitMask = 0x0F000000;
             if(BitOfs) *BitOfs = 24;
-            return 0x0158;
+            return 0x0154;
          case 9:
             // Target high voltage channel 9 register modified flags
             if(BitMask) *BitMask = 0x0F000000;
@@ -22719,7 +22719,7 @@ public:
       {
          case 8:
             // LMK channel 0 register modified flags
-            return BitExtractStatus(0x0160, 0xF0000000, 28);
+            return BitExtractStatus(0x015C, 0xF0000000, 28);
          case 9:
             // LMK channel 0 register modified flags
             return BitExtractStatus(0x0158, 0xF0000000, 28);
@@ -22735,7 +22735,7 @@ public:
             // LMK channel 0 register modified flags
             if(BitMask) *BitMask = 0xF0000000;
             if(BitOfs) *BitOfs = 28;
-            return 0x0160;
+            return 0x015C;
          case 9:
             // LMK channel 0 register modified flags
             if(BitMask) *BitMask = 0xF0000000;
@@ -22753,7 +22753,7 @@ public:
       {
          case 8:
             // LMK Register 11 modified flags
-            return BitExtractStatus(0x0164, 0x0000F000, 12);
+            return BitExtractStatus(0x0160, 0x0000F000, 12);
          case 9:
             // LMK Register 11 modified flags
             return BitExtractStatus(0x015C, 0x0000F000, 12);
@@ -22769,7 +22769,7 @@ public:
             // LMK Register 11 modified flags
             if(BitMask) *BitMask = 0x0000F000;
             if(BitOfs) *BitOfs = 12;
-            return 0x0164;
+            return 0x0160;
          case 9:
             // LMK Register 11 modified flags
             if(BitMask) *BitMask = 0x0000F000;
@@ -22787,7 +22787,7 @@ public:
       {
          case 8:
             // LMK Register 13 modified flags
-            return BitExtractStatus(0x0164, 0x00000F00, 8);
+            return BitExtractStatus(0x0160, 0x00000F00, 8);
          case 9:
             // LMK Register 13 modified flags
             return BitExtractStatus(0x015C, 0x00000F00, 8);
@@ -22803,7 +22803,7 @@ public:
             // LMK Register 13 modified flags
             if(BitMask) *BitMask = 0x00000F00;
             if(BitOfs) *BitOfs = 8;
-            return 0x0164;
+            return 0x0160;
          case 9:
             // LMK Register 13 modified flags
             if(BitMask) *BitMask = 0x00000F00;
@@ -22821,7 +22821,7 @@ public:
       {
          case 8:
             // LMK Register 14 modified flags
-            return BitExtractStatus(0x0164, 0x000000F0, 4);
+            return BitExtractStatus(0x0160, 0x000000F0, 4);
          case 9:
             // LMK Register 14 modified flags
             return BitExtractStatus(0x015C, 0x000000F0, 4);
@@ -22837,7 +22837,7 @@ public:
             // LMK Register 14 modified flags
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
-            return 0x0164;
+            return 0x0160;
          case 9:
             // LMK Register 14 modified flags
             if(BitMask) *BitMask = 0x000000F0;
@@ -22855,7 +22855,7 @@ public:
       {
          case 8:
             // LMK Register 15 modified flags
-            return BitExtractStatus(0x0164, 0x0000000F, 0);
+            return BitExtractStatus(0x0160, 0x0000000F, 0);
          case 9:
             // LMK Register 15 modified flags
             return BitExtractStatus(0x015C, 0x0000000F, 0);
@@ -22871,7 +22871,7 @@ public:
             // LMK Register 15 modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
-            return 0x0164;
+            return 0x0160;
          case 9:
             // LMK Register 15 modified flags
             if(BitMask) *BitMask = 0x0000000F;
@@ -22889,7 +22889,7 @@ public:
       {
          case 8:
             // LMK channel 1 register modified flags
-            return BitExtractStatus(0x0160, 0x0F000000, 24);
+            return BitExtractStatus(0x015C, 0x0F000000, 24);
          case 9:
             // LMK channel 1 register modified flags
             return BitExtractStatus(0x0158, 0x0F000000, 24);
@@ -22905,7 +22905,7 @@ public:
             // LMK channel 1 register modified flags
             if(BitMask) *BitMask = 0x0F000000;
             if(BitOfs) *BitOfs = 24;
-            return 0x0160;
+            return 0x015C;
          case 9:
             // LMK channel 1 register modified flags
             if(BitMask) *BitMask = 0x0F000000;
@@ -22923,7 +22923,7 @@ public:
       {
          case 8:
             // LMK channel 2 register modified flags
-            return BitExtractStatus(0x0160, 0x00F00000, 20);
+            return BitExtractStatus(0x015C, 0x00F00000, 20);
          case 9:
             // LMK channel 2 register modified flags
             return BitExtractStatus(0x0158, 0x00F00000, 20);
@@ -22939,7 +22939,7 @@ public:
             // LMK channel 2 register modified flags
             if(BitMask) *BitMask = 0x00F00000;
             if(BitOfs) *BitOfs = 20;
-            return 0x0160;
+            return 0x015C;
          case 9:
             // LMK channel 2 register modified flags
             if(BitMask) *BitMask = 0x00F00000;
@@ -22957,7 +22957,7 @@ public:
       {
          case 8:
             // LMK channel 3 register modified flags
-            return BitExtractStatus(0x0160, 0x000F0000, 16);
+            return BitExtractStatus(0x015C, 0x000F0000, 16);
          case 9:
             // LMK channel 3 register modified flags
             return BitExtractStatus(0x0158, 0x000F0000, 16);
@@ -22973,7 +22973,7 @@ public:
             // LMK channel 3 register modified flags
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
-            return 0x0160;
+            return 0x015C;
          case 9:
             // LMK channel 3 register modified flags
             if(BitMask) *BitMask = 0x000F0000;
@@ -22991,7 +22991,7 @@ public:
       {
          case 8:
             // LMK channel 4 register modified flags
-            return BitExtractStatus(0x0160, 0x0000F000, 12);
+            return BitExtractStatus(0x015C, 0x0000F000, 12);
          case 9:
             // LMK channel 4 register modified flags
             return BitExtractStatus(0x0158, 0x0000F000, 12);
@@ -23007,7 +23007,7 @@ public:
             // LMK channel 4 register modified flags
             if(BitMask) *BitMask = 0x0000F000;
             if(BitOfs) *BitOfs = 12;
-            return 0x0160;
+            return 0x015C;
          case 9:
             // LMK channel 4 register modified flags
             if(BitMask) *BitMask = 0x0000F000;
@@ -23025,7 +23025,7 @@ public:
       {
          case 8:
             // LMK channel 5 register modified flags
-            return BitExtractStatus(0x0160, 0x00000F00, 8);
+            return BitExtractStatus(0x015C, 0x00000F00, 8);
          case 9:
             // LMK channel 5 register modified flags
             return BitExtractStatus(0x0158, 0x00000F00, 8);
@@ -23041,7 +23041,7 @@ public:
             // LMK channel 5 register modified flags
             if(BitMask) *BitMask = 0x00000F00;
             if(BitOfs) *BitOfs = 8;
-            return 0x0160;
+            return 0x015C;
          case 9:
             // LMK channel 5 register modified flags
             if(BitMask) *BitMask = 0x00000F00;
@@ -23059,7 +23059,7 @@ public:
       {
          case 8:
             // LMK channel 6 register modified flags
-            return BitExtractStatus(0x0160, 0x000000F0, 4);
+            return BitExtractStatus(0x015C, 0x000000F0, 4);
          case 9:
             // LMK channel 6 register modified flags
             return BitExtractStatus(0x0158, 0x000000F0, 4);
@@ -23075,7 +23075,7 @@ public:
             // LMK channel 6 register modified flags
             if(BitMask) *BitMask = 0x000000F0;
             if(BitOfs) *BitOfs = 4;
-            return 0x0160;
+            return 0x015C;
          case 9:
             // LMK channel 6 register modified flags
             if(BitMask) *BitMask = 0x000000F0;
@@ -23093,7 +23093,7 @@ public:
       {
          case 8:
             // LMK channel 7 register modified flags
-            return BitExtractStatus(0x0160, 0x0000000F, 0);
+            return BitExtractStatus(0x015C, 0x0000000F, 0);
          case 9:
             // LMK channel 7 register modified flags
             return BitExtractStatus(0x0158, 0x0000000F, 0);
@@ -23109,7 +23109,7 @@ public:
             // LMK channel 7 register modified flags
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
-            return 0x0160;
+            return 0x015C;
          case 9:
             // LMK channel 7 register modified flags
             if(BitMask) *BitMask = 0x0000000F;
@@ -23127,7 +23127,7 @@ public:
       {
          case 8:
             // LMK Register 8 modified flags
-            return BitExtractStatus(0x0164, 0x00F00000, 20);
+            return BitExtractStatus(0x0160, 0x00F00000, 20);
          case 9:
             // LMK Register 8 modified flags
             return BitExtractStatus(0x015C, 0x00F00000, 20);
@@ -23143,7 +23143,7 @@ public:
             // LMK Register 8 modified flags
             if(BitMask) *BitMask = 0x00F00000;
             if(BitOfs) *BitOfs = 20;
-            return 0x0164;
+            return 0x0160;
          case 9:
             // LMK Register 8 modified flags
             if(BitMask) *BitMask = 0x00F00000;
@@ -23161,7 +23161,7 @@ public:
       {
          case 8:
             // LMK Register 9 modified flags
-            return BitExtractStatus(0x0164, 0x000F0000, 16);
+            return BitExtractStatus(0x0160, 0x000F0000, 16);
          case 9:
             // LMK Register 9 modified flags
             return BitExtractStatus(0x015C, 0x000F0000, 16);
@@ -23177,7 +23177,7 @@ public:
             // LMK Register 9 modified flags
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
-            return 0x0164;
+            return 0x0160;
          case 9:
             // LMK Register 9 modified flags
             if(BitMask) *BitMask = 0x000F0000;
@@ -23303,7 +23303,7 @@ public:
       {
          case 8:
             // Local clock frequency modified flags
-            return BitExtractStatus(0x0138, 0x00000001, 0);
+            return BitExtractStatus(0x0134, 0x00000001, 0);
          case 9:
             // Local clock frequency modified flags
             return BitExtractStatus(0x0130, 0x00000001, 0);
@@ -23319,7 +23319,7 @@ public:
             // Local clock frequency modified flags
             if(BitMask) *BitMask = 0x00000001;
             if(BitOfs) *BitOfs = 0;
-            return 0x0138;
+            return 0x0134;
          case 9:
             // Local clock frequency modified flags
             if(BitMask) *BitMask = 0x00000001;
@@ -23337,7 +23337,7 @@ public:
       {
          case 8:
             // Maximum number of DRS/ADC samples per packet
-            return BitExtractStatus(0x0128, 0x0000FFFF, 0);
+            return BitExtractStatus(0x0124, 0x0000FFFF, 0);
          case 9:
             // Maximum number of DRS/ADC samples per packet
             return BitExtractStatus(0x0120, 0x0000FFFF, 0);
@@ -23353,7 +23353,7 @@ public:
             // Maximum number of DRS/ADC samples per packet
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x0128;
+            return 0x0124;
          case 9:
             // Maximum number of DRS/ADC samples per packet
             if(BitMask) *BitMask = 0x0000FFFF;
@@ -23371,7 +23371,7 @@ public:
       {
          case 8:
             // Maximum number of scaler values per packet
-            return BitExtractStatus(0x0134, 0x0000FFFF, 0);
+            return BitExtractStatus(0x0130, 0x0000FFFF, 0);
          case 9:
             // Maximum number of scaler values per packet
             return BitExtractStatus(0x012C, 0x0000FFFF, 0);
@@ -23387,7 +23387,7 @@ public:
             // Maximum number of scaler values per packet
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x0134;
+            return 0x0130;
          case 9:
             // Maximum number of scaler values per packet
             if(BitMask) *BitMask = 0x0000FFFF;
@@ -23405,7 +23405,7 @@ public:
       {
          case 8:
             // Maximum number of TDC samples per packet
-            return BitExtractStatus(0x012C, 0x0003FFFF, 0);
+            return BitExtractStatus(0x0128, 0x0003FFFF, 0);
          case 9:
             // Maximum number of TDC samples per packet
             return BitExtractStatus(0x0124, 0x0003FFFF, 0);
@@ -23421,7 +23421,7 @@ public:
             // Maximum number of TDC samples per packet
             if(BitMask) *BitMask = 0x0003FFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x012C;
+            return 0x0128;
          case 9:
             // Maximum number of TDC samples per packet
             if(BitMask) *BitMask = 0x0003FFFF;
@@ -23439,7 +23439,7 @@ public:
       {
          case 8:
             // Maximum number of advanced trigger output samples per packet
-            return BitExtractStatus(0x0130, 0x0000FFFF, 0);
+            return BitExtractStatus(0x012C, 0x0000FFFF, 0);
          case 9:
             // Maximum number of advanced trigger output samples per packet
             return BitExtractStatus(0x0128, 0x0000FFFF, 0);
@@ -23455,7 +23455,7 @@ public:
             // Maximum number of advanced trigger output samples per packet
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x0130;
+            return 0x012C;
          case 9:
             // Maximum number of advanced trigger output samples per packet
             if(BitMask) *BitMask = 0x0000FFFF;
@@ -23473,7 +23473,7 @@ public:
       {
          case 8:
             // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low)
-            return BitExtractControl(0x1280, 0x0000000F, 0);
+            return BitExtractControl(0x1278, 0x0000000F, 0);
          case 9:
             // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low)
             return BitExtractControl(0x121C, 0x0000000F, 0);
@@ -23487,7 +23487,7 @@ public:
       {
          case 8:
             // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low)
-            return SetRegMask(0x1280, 0x0000000F, 0, value);
+            return SetRegMask(0x1278, 0x0000000F, 0, value);
          case 9:
             // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low)
             return SetRegMask(0x121C, 0x0000000F, 0, value);
@@ -23503,7 +23503,7 @@ public:
             // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low)
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
-            return 0x1280;
+            return 0x1278;
          case 9:
             // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low)
             if(BitMask) *BitMask = 0x0000000F;
@@ -23521,7 +23521,7 @@ public:
       {
          case 8:
             // Select for TX connector (see RX connector for mapping)
-            return BitExtractControl(0x1280, 0x000F0000, 16);
+            return BitExtractControl(0x1278, 0x000F0000, 16);
          case 9:
             // Select for TX connector (see RX connector for mapping)
             return BitExtractControl(0x121C, 0x000F0000, 16);
@@ -23535,7 +23535,7 @@ public:
       {
          case 8:
             // Select for TX connector (see RX connector for mapping)
-            return SetRegMask(0x1280, 0x000F0000, 16, value);
+            return SetRegMask(0x1278, 0x000F0000, 16, value);
          case 9:
             // Select for TX connector (see RX connector for mapping)
             return SetRegMask(0x121C, 0x000F0000, 16, value);
@@ -23551,7 +23551,7 @@ public:
             // Select for TX connector (see RX connector for mapping)
             if(BitMask) *BitMask = 0x000F0000;
             if(BitOfs) *BitOfs = 16;
-            return 0x1280;
+            return 0x1278;
          case 9:
             // Select for TX connector (see RX connector for mapping)
             if(BitMask) *BitMask = 0x000F0000;
@@ -24706,80 +24706,6 @@ public:
       };
    };
 
-   // Bit(s) SET_TIME_LSB
-   unsigned int GetSetTimeLsb()
-   {
-      switch(this->mVersion)
-      {
-         case 8:
-            // LSBs of 64bit system time counter set value  (time is updated when MSBs are written)
-            return BitExtractControl(0x1278, 0xFFFFFFFF, 0);
-         default:
-            throw std::invalid_argument("Function GetSetTimeLsb() not defined for this board version");
-      };
-   };
-   void SetSetTimeLsb(unsigned int value)
-   {
-      switch(this->mVersion)
-      {
-         case 8:
-            // LSBs of 64bit system time counter set value  (time is updated when MSBs are written)
-            return SetRegMask(0x1278, 0xFFFFFFFF, 0, value);
-         default:
-            throw std::invalid_argument("Function SetSetTimeLsb() not defined for this board version");
-      };
-   };
-   unsigned int GetSetTimeLsbLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
-   {
-      switch(this->mVersion)
-      {
-         case 8:
-            // LSBs of 64bit system time counter set value  (time is updated when MSBs are written)
-            if(BitMask) *BitMask = 0xFFFFFFFF;
-            if(BitOfs) *BitOfs = 0;
-            return 0x1278;
-         default:
-            throw std::invalid_argument("Function GetSetTimeLsbLoc() not defined for this board version");
-      };
-   };
-
-   // Bit(s) SET_TIME_MSB
-   unsigned int GetSetTimeMsb()
-   {
-      switch(this->mVersion)
-      {
-         case 8:
-            // MSBs of 64bit system time counter set value  (time is updated when MSBs are written)
-            return BitExtractControl(0x127C, 0xFFFFFFFF, 0);
-         default:
-            throw std::invalid_argument("Function GetSetTimeMsb() not defined for this board version");
-      };
-   };
-   void SetSetTimeMsb(unsigned int value)
-   {
-      switch(this->mVersion)
-      {
-         case 8:
-            // MSBs of 64bit system time counter set value  (time is updated when MSBs are written)
-            return SetRegMask(0x127C, 0xFFFFFFFF, 0, value);
-         default:
-            throw std::invalid_argument("Function SetSetTimeMsb() not defined for this board version");
-      };
-   };
-   unsigned int GetSetTimeMsbLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
-   {
-      switch(this->mVersion)
-      {
-         case 8:
-            // MSBs of 64bit system time counter set value  (time is updated when MSBs are written)
-            if(BitMask) *BitMask = 0xFFFFFFFF;
-            if(BitOfs) *BitOfs = 0;
-            return 0x127C;
-         default:
-            throw std::invalid_argument("Function GetSetTimeMsbLoc() not defined for this board version");
-      };
-   };
-
    // Bit(s) SLOT_ID
    unsigned int GetSlotId()
    {
@@ -25077,6 +25003,9 @@ public:
    {
       switch(this->mVersion)
       {
+         case 8:
+            // System uptime in 10ms steps (no overflow protection)
+            return BitExtractStatus(0x00F4, 0xFFFFFFFF, 0);
          case 9:
             // System uptime in 10ms steps (no overflow protection)
             return BitExtractStatus(0x00F0, 0xFFFFFFFF, 0);
@@ -25088,6 +25017,11 @@ public:
    {
       switch(this->mVersion)
       {
+         case 8:
+            // System uptime in 10ms steps (no overflow protection)
+            if(BitMask) *BitMask = 0xFFFFFFFF;
+            if(BitOfs) *BitOfs = 0;
+            return 0x00F4;
          case 9:
             // System uptime in 10ms steps (no overflow protection)
             if(BitMask) *BitMask = 0xFFFFFFFF;
@@ -25354,58 +25288,6 @@ public:
       };
    };
 
-   // Bit(s) TIME_LSB
-   unsigned int GetTimeLsb()
-   {
-      switch(this->mVersion)
-      {
-         case 8:
-            // LSBs of 64bit system time counter (MSBs are latched upon read of LSB register)
-            return BitExtractStatus(0x00F4, 0xFFFFFFFF, 0);
-         default:
-            throw std::invalid_argument("Function GetTimeLsb() not defined for this board version");
-      };
-   };
-   unsigned int GetTimeLsbLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
-   {
-      switch(this->mVersion)
-      {
-         case 8:
-            // LSBs of 64bit system time counter (MSBs are latched upon read of LSB register)
-            if(BitMask) *BitMask = 0xFFFFFFFF;
-            if(BitOfs) *BitOfs = 0;
-            return 0x00F4;
-         default:
-            throw std::invalid_argument("Function GetTimeLsbLoc() not defined for this board version");
-      };
-   };
-
-   // Bit(s) TIME_MSB
-   unsigned int GetTimeMsb()
-   {
-      switch(this->mVersion)
-      {
-         case 8:
-            // MSBs of 64bit system time counter (latched upon read of LSB register)
-            return BitExtractStatus(0x00F8, 0xFFFFFFFF, 0);
-         default:
-            throw std::invalid_argument("Function GetTimeMsb() not defined for this board version");
-      };
-   };
-   unsigned int GetTimeMsbLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
-   {
-      switch(this->mVersion)
-      {
-         case 8:
-            // MSBs of 64bit system time counter (latched upon read of LSB register)
-            if(BitMask) *BitMask = 0xFFFFFFFF;
-            if(BitOfs) *BitOfs = 0;
-            return 0x00F8;
-         default:
-            throw std::invalid_argument("Function GetTimeMsbLoc() not defined for this board version");
-      };
-   };
-
    // Bit(s) TIMING_CALIB_SIGNAL_EN
    unsigned int GetTimingCalibSignalEn()
    {
@@ -25453,7 +25335,7 @@ public:
       {
          case 8:
             // Flag signalling that the current trigger information belongs to the latest trigger received
-            return BitExtractStatus(0x0108, 0x80000000, 31);
+            return BitExtractStatus(0x0104, 0x80000000, 31);
          case 9:
             // Flag signalling that the current trigger information belongs to the latest trigger received
             return BitExtractStatus(0x0100, 0x80000000, 31);
@@ -25469,7 +25351,7 @@ public:
             // Flag signalling that the current trigger information belongs to the latest trigger received
             if(BitMask) *BitMask = 0x80000000;
             if(BitOfs) *BitOfs = 31;
-            return 0x0108;
+            return 0x0104;
          case 9:
             // Flag signalling that the current trigger information belongs to the latest trigger received
             if(BitMask) *BitMask = 0x80000000;
@@ -25487,7 +25369,7 @@ public:
       {
          case 8:
             // Parity error flag of the current trigger information
-            return BitExtractStatus(0x0108, 0x40000000, 30);
+            return BitExtractStatus(0x0104, 0x40000000, 30);
          case 9:
             // Parity error flag of the current trigger information
             return BitExtractStatus(0x0100, 0x40000000, 30);
@@ -25503,7 +25385,7 @@ public:
             // Parity error flag of the current trigger information
             if(BitMask) *BitMask = 0x40000000;
             if(BitOfs) *BitOfs = 30;
-            return 0x0108;
+            return 0x0104;
          case 9:
             // Parity error flag of the current trigger information
             if(BitMask) *BitMask = 0x40000000;
@@ -25521,7 +25403,7 @@ public:
       {
          case 8:
             // Trigger information LSBs
-            return BitExtractStatus(0x010C, 0xFFFFFFFF, 0);
+            return BitExtractStatus(0x0108, 0xFFFFFFFF, 0);
          case 9:
             // Trigger information LSBs
             return BitExtractStatus(0x0104, 0xFFFFFFFF, 0);
@@ -25537,7 +25419,7 @@ public:
             // Trigger information LSBs
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x010C;
+            return 0x0108;
          case 9:
             // Trigger information LSBs
             if(BitMask) *BitMask = 0xFFFFFFFF;
@@ -25555,7 +25437,7 @@ public:
       {
          case 8:
             // Trigger information MSBs
-            return BitExtractStatus(0x0110, 0x0000FFFF, 0);
+            return BitExtractStatus(0x010C, 0x0000FFFF, 0);
          case 9:
             // Trigger information MSBs
             return BitExtractStatus(0x0108, 0x0000FFFF, 0);
@@ -25571,7 +25453,7 @@ public:
             // Trigger information MSBs
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x0110;
+            return 0x010C;
          case 9:
             // Trigger information MSBs
             if(BitMask) *BitMask = 0x0000FFFF;
@@ -25589,7 +25471,7 @@ public:
       {
          case 8:
             // Parity error count of the serial transmission
-            return BitExtractStatus(0x0108, 0x0000FFFF, 0);
+            return BitExtractStatus(0x0104, 0x0000FFFF, 0);
          case 9:
             // Parity error count of the serial transmission
             return BitExtractStatus(0x0100, 0x0000FFFF, 0);
@@ -25605,7 +25487,7 @@ public:
             // Parity error count of the serial transmission
             if(BitMask) *BitMask = 0x0000FFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x0108;
+            return 0x0104;
          case 9:
             // Parity error count of the serial transmission
             if(BitMask) *BitMask = 0x0000FFFF;
@@ -27663,7 +27545,7 @@ public:
       {
          case 8:
             // Trigger DAQ clock calibration modified flag
-            return BitExtractStatus(0x0138, 0x00000010, 4);
+            return BitExtractStatus(0x0134, 0x00000010, 4);
          case 9:
             // Trigger DAQ clock calibration modified flag
             return BitExtractStatus(0x0130, 0x00000010, 4);
@@ -27679,7 +27561,7 @@ public:
             // Trigger DAQ clock calibration modified flag
             if(BitMask) *BitMask = 0x00000010;
             if(BitOfs) *BitOfs = 4;
-            return 0x0138;
+            return 0x0134;
          case 9:
             // Trigger DAQ clock calibration modified flag
             if(BitMask) *BitMask = 0x00000010;
@@ -28057,7 +27939,7 @@ public:
       {
          case 8:
             if(GrpLen) *GrpLen = 5;
-            return 0x0114;
+            return 0x0110;
          case 9:
             if(GrpLen) *GrpLen = 5;
             return 0x010C;
