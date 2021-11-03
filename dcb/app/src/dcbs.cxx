@@ -770,16 +770,70 @@ int main(int argc, char *argv[]) {
             }
 
             if (p != NULL) {
-               if (verbose)
-                  printf("Send \"%s\" to slot %d\n", p, slot);
-               char rb[10000];
-               spi_ascii_cmd(p, rb, sizeof(rb), slot, board[slot].type_id, board[slot].rev_id);
-               connection[addr]->slot = WDAQ_SLOT_DCB;
-               if (verbose)
-                  printf("Received \"%s\" from slot %d\n", rb, slot);
+               //intercept cfgdst and add mac address
+               if (strncmp(p, "cfgdst", 6) == 0) {
+                  // split string into parameter
+                  char *param[10];
+                  int n_param = 0;
+                  memset(param, 0, sizeof(param));
+                  char *pchar = strtok(p, " ");
+                  for (; pchar != NULL && n_param < 10; n_param++) {
+                     param[n_param] = pchar;
+                     pchar = strtok(NULL, " ");
+                  }
+                
+                  char *dest_addr;
+                  int dest_port = 0;
 
-               connection[addr]->sprintf("%s", rb);
-            }
+                  if (n_param == 2) {
+                     // get ip addr from udp packet
+                     dest_port = atoi(param[1]);
+                     sockaddr_in *ptr = (sockaddr_in *) &connection[addr]->client_address;
+                     dest_addr = inet_ntoa(ptr->sin_addr);
+                  } else if (n_param > 2) {
+                     // ip addr given
+                     dest_port = atoi(param[1]);
+                     dest_addr = param[2];
+                  } else {
+                     connection[addr]->sprintf("missing parameter\n", addr, dest_port);
+                  }
+
+		  if(dest_port!=0){
+		     // configure destination of all WDBs
+		     char cmdbuf[64];
+		     sprintf(cmdbuf, "cfgdst %d %s %02X:%02X:%02X:%02X:%02X:%02X\n",
+		           	  dest_port,
+		           	  dest_addr,
+		           	  connection[addr]->client_macaddr[0],
+		           	  connection[addr]->client_macaddr[1],
+		           	  connection[addr]->client_macaddr[2],
+		           	  connection[addr]->client_macaddr[3],
+		           	  connection[addr]->client_macaddr[4],
+		           	  connection[addr]->client_macaddr[5]);
+                     if (verbose)
+                        printf("Send \"%s\" to slot %d\n", cmdbuf, slot);
+
+                     char rb[10000];
+                     spi_ascii_cmd(cmdbuf, rb, sizeof(rb), slot, board[slot].type_id, board[slot].rev_id);
+                     connection[addr]->slot = WDAQ_SLOT_DCB;
+                     if (verbose)
+                        printf("Received \"%s\" from slot %d\n", rb, slot);
+
+                     connection[addr]->sprintf("%s", rb);
+		  }
+
+	       } else {
+                  if (verbose)
+                     printf("Send \"%s\" to slot %d\n", p, slot);
+                  char rb[10000];
+                  spi_ascii_cmd(p, rb, sizeof(rb), slot, board[slot].type_id, board[slot].rev_id);
+                  connection[addr]->slot = WDAQ_SLOT_DCB;
+                  if (verbose)
+                     printf("Received \"%s\" from slot %d\n", rb, slot);
+
+                  connection[addr]->sprintf("%s", rb);
+               }
+	    }
 
          } else if (strncmp(buffer, "scan", 4) == 0) {
 
@@ -1253,7 +1307,7 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       dps_set_udp_dst_port(SYSPTR(dma_pkt_sched), dest_port);
 
       // configure destination of all WDBs
-      char cmdbuf[64];
+      /*char cmdbuf[64];
       sprintf(cmdbuf, "cfgdst %d %s %02X:%02X:%02X:%02X:%02X:%02X\n", dest_port, dest_addr,
               c.client_macaddr[0], c.client_macaddr[1], c.client_macaddr[2],
               c.client_macaddr[3], c.client_macaddr[4], c.client_macaddr[5]);
@@ -1263,7 +1317,7 @@ void process_dcb_command(udp_connection &c, char *buffer) {
             spi_ascii_cmd(cmdbuf, 0, 0, slot,
                           board[slot].type_id, board[slot].rev_id);
          }
-      }
+      }*/
 
    } else if (strcmp(param[0], "sdstat") == 0) {
 

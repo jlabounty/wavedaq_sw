@@ -1334,6 +1334,10 @@ void WDWDB::ConfigureForceEthernet(Property &property){
    if(forceEth){
       SetEthComEn(1);
       SetSerdesComEn(0);
+
+      //set destination port
+      int destPort = GetCrate()->GetSystem()->GetDAQServerPort();
+      if(destPort) SetDestinationPort(destPort);
    } else {
       SetEthComEn(0);
       SetSerdesComEn(1);
