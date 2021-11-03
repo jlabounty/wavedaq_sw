@@ -1301,23 +1301,9 @@ void process_dcb_command(udp_connection &c, char *buffer) {
 
       c.sprintf("Setting data destination to %s port %d\n", dest_addr, dest_port);
 
-      // TODO: Enable slots
       // set UDP destination parameters in DMA packet scheduler (dps) driver
       dps_set_udp_dst_ip_addr_str(SYSPTR(dma_pkt_sched), dest_addr);
       dps_set_udp_dst_port(SYSPTR(dma_pkt_sched), dest_port);
-
-      // configure destination of all WDBs
-      /*char cmdbuf[64];
-      sprintf(cmdbuf, "cfgdst %d %s %02X:%02X:%02X:%02X:%02X:%02X\n", dest_port, dest_addr,
-              c.client_macaddr[0], c.client_macaddr[1], c.client_macaddr[2],
-              c.client_macaddr[3], c.client_macaddr[4], c.client_macaddr[5]);
-
-      for (int slot = 0; slot < WDAQ_N_SLOTS; slot++) {
-         if(board[slot].type_id == BRD_TYPE_ID_WDB){
-            spi_ascii_cmd(cmdbuf, 0, 0, slot,
-                          board[slot].type_id, board[slot].rev_id);
-         }
-      }*/
 
    } else if (strcmp(param[0], "sdstat") == 0) {
 
