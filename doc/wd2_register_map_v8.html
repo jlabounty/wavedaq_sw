@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Created :   29.09.2021 11:52:11 -->
+<!-- Created :   02.11.2021 15:54:09 -->
 <html>
 
 <head>
@@ -7,7 +7,7 @@
   <title>WD2 Register Map V8</title></head>
 
 <body>
-  <h1>WD2 Register Map Version 8</h1>  Generated : 29.09.2021 11:52:11  <a id="ctrl_register_overview"><h2>Control Registers</h2></a>
+  <h1>WD2 Register Map Version 8</h1>  Generated : 02.11.2021 15:54:09  <a id="ctrl_register_overview"><h2>Control Registers</h2></a>
   <table>
     <tbody>
       <tr class="reg_header">
@@ -1446,36 +1446,18 @@
         <td style="text-align:right" ><a href="#ctrl_register_158">0x1278</a></td>
         <td style="text-align:center"><a href="#ctrl_register_158">HW</a></td>
         <td style="text-align:right" ><a href="#ctrl_register_158">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#ctrl_register_158">SET_TIME_LSB</a></td>
-        <td style="text-align:left"  ><a href="#ctrl_register_158">Set System Time</a></td>
+        <td style="text-align:left"  ><a href="#ctrl_register_158">DBG_SIG_SEL</a></td>
+        <td style="text-align:left"  ><a href="#ctrl_register_158">Debug Signal Select for MCX Connectors on HV Board</a></td>
         <td style="text-align:left"  ><a href="#ctrl_register_158">None</a></td>
       </tr>
       <tr class="reg_list">
         <td style="text-align:right" ><a href="#ctrl_register_159" id="ctrl_reg_list_159">159</a></td>
         <td style="text-align:right" ><a href="#ctrl_register_159">0x127C</a></td>
         <td style="text-align:center"><a href="#ctrl_register_159">HW</a></td>
-        <td style="text-align:right" ><a href="#ctrl_register_159">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#ctrl_register_159">SET_TIME_MSB</a></td>
-        <td style="text-align:left"  ><a href="#ctrl_register_159">Set System Time</a></td>
+        <td style="text-align:right" ><a href="#ctrl_register_159">None</a></td>
+        <td style="text-align:left"  ><a href="#ctrl_register_159">CRC32_REG_BANK</a></td>
+        <td style="text-align:left"  ><a href="#ctrl_register_159">CRC32 Checksum of Register Bank Content</a></td>
         <td style="text-align:left"  ><a href="#ctrl_register_159">None</a></td>
-      </tr>
-      <tr class="reg_list">
-        <td style="text-align:right" ><a href="#ctrl_register_160" id="ctrl_reg_list_160">160</a></td>
-        <td style="text-align:right" ><a href="#ctrl_register_160">0x1280</a></td>
-        <td style="text-align:center"><a href="#ctrl_register_160">HW</a></td>
-        <td style="text-align:right" ><a href="#ctrl_register_160">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#ctrl_register_160">DBG_SIG_SEL</a></td>
-        <td style="text-align:left"  ><a href="#ctrl_register_160">Debug Signal Select for MCX Connectors on HV Board</a></td>
-        <td style="text-align:left"  ><a href="#ctrl_register_160">None</a></td>
-      </tr>
-      <tr class="reg_list">
-        <td style="text-align:right" ><a href="#ctrl_register_161" id="ctrl_reg_list_161">161</a></td>
-        <td style="text-align:right" ><a href="#ctrl_register_161">0x1284</a></td>
-        <td style="text-align:center"><a href="#ctrl_register_161">HW</a></td>
-        <td style="text-align:right" ><a href="#ctrl_register_161">None</a></td>
-        <td style="text-align:left"  ><a href="#ctrl_register_161">CRC32_REG_BANK</a></td>
-        <td style="text-align:left"  ><a href="#ctrl_register_161">CRC32 Checksum of Register Bank Content</a></td>
-        <td style="text-align:left"  ><a href="#ctrl_register_161">None</a></td>
       </tr>
       <tr class="back_to_overview">        <td class="back_to_overview" colspan="7"><a href="#ctrl_register_overview">Control Registers Top</a></a></td>      </tr>
     </tbody>
@@ -2047,7 +2029,7 @@
         <td style="text-align:right" ><a href="#stat_register_61">0x00F4</a></td>
         <td style="text-align:center"><a href="#stat_register_61">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_61">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_61">TIME_LSB</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_61">SYS_TIME</a></td>
         <td style="text-align:left"  ><a href="#stat_register_61">Current System Time</a></td>
         <td style="text-align:left"  ><a href="#stat_register_61">None</a></td>
       </tr>
@@ -2056,8 +2038,8 @@
         <td style="text-align:right" ><a href="#stat_register_62">0x00F8</a></td>
         <td style="text-align:center"><a href="#stat_register_62">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_62">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_62">TIME_MSB</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_62">Current System Time</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_62">COMP_CH_STAT</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_62">Comparator channel status</a></td>
         <td style="text-align:left"  ><a href="#stat_register_62">None</a></td>
       </tr>
       <tr class="reg_list">
@@ -2065,8 +2047,8 @@
         <td style="text-align:right" ><a href="#stat_register_63">0x00FC</a></td>
         <td style="text-align:center"><a href="#stat_register_63">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_63">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_63">COMP_CH_STAT</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_63">Comparator channel status</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_63">EVENT_TX_RATE</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_63">Event Transmission Rate</a></td>
         <td style="text-align:left"  ><a href="#stat_register_63">None</a></td>
       </tr>
       <tr class="reg_list">
@@ -2074,8 +2056,8 @@
         <td style="text-align:right" ><a href="#stat_register_64">0x0100</a></td>
         <td style="text-align:center"><a href="#stat_register_64">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_64">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_64">EVENT_TX_RATE</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_64">Event Transmission Rate</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_64">EVENT_NR</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_64">Number of latest event</a></td>
         <td style="text-align:left"  ><a href="#stat_register_64">None</a></td>
       </tr>
       <tr class="reg_list">
@@ -2083,8 +2065,8 @@
         <td style="text-align:right" ><a href="#stat_register_65">0x0104</a></td>
         <td style="text-align:center"><a href="#stat_register_65">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_65">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_65">EVENT_NR</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_65">Number of latest event</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_65">TRB_INFO_STAT</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_65">Trigger Information via Serial Trigger Bus Status</a></td>
         <td style="text-align:left"  ><a href="#stat_register_65">None</a></td>
       </tr>
       <tr class="reg_list">
@@ -2092,8 +2074,8 @@
         <td style="text-align:right" ><a href="#stat_register_66">0x0108</a></td>
         <td style="text-align:center"><a href="#stat_register_66">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_66">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_66">TRB_INFO_STAT</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_66">Trigger Information via Serial Trigger Bus Status</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_66">TRB_INFO_LSB</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_66">Trigger Information via Serial Trigger Bus LSBs</a></td>
         <td style="text-align:left"  ><a href="#stat_register_66">None</a></td>
       </tr>
       <tr class="reg_list">
@@ -2101,8 +2083,8 @@
         <td style="text-align:right" ><a href="#stat_register_67">0x010C</a></td>
         <td style="text-align:center"><a href="#stat_register_67">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_67">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_67">TRB_INFO_LSB</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_67">Trigger Information via Serial Trigger Bus LSBs</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_67">TRB_INFO_MSB</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_67">Trigger Information via Serial Trigger Bus MSBs</a></td>
         <td style="text-align:left"  ><a href="#stat_register_67">None</a></td>
       </tr>
       <tr class="reg_list">
@@ -2110,17 +2092,17 @@
         <td style="text-align:right" ><a href="#stat_register_68">0x0110</a></td>
         <td style="text-align:center"><a href="#stat_register_68">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_68">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_68">TRB_INFO_MSB</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_68">Trigger Information via Serial Trigger Bus MSBs</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_68">None</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_68">ADV_TRG_TRIG_CELL</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_68">Advanced Trigger Cell Register</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_68">ADV_TRG_STAT</a></td>
       </tr>
       <tr class="reg_list">
         <td style="text-align:right" ><a href="#stat_register_69" id="stat_reg_list_69">69</a></td>
         <td style="text-align:right" ><a href="#stat_register_69">0x0114</a></td>
         <td style="text-align:center"><a href="#stat_register_69">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_69">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_69">ADV_TRG_TRIG_CELL</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_69">Advanced Trigger Cell Register</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_69">ADV_TRG_STAT1</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_69">Advanced Trigger Status Register 1</a></td>
         <td style="text-align:left"  ><a href="#stat_register_69">ADV_TRG_STAT</a></td>
       </tr>
       <tr class="reg_list">
@@ -2128,8 +2110,8 @@
         <td style="text-align:right" ><a href="#stat_register_70">0x0118</a></td>
         <td style="text-align:center"><a href="#stat_register_70">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_70">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_70">ADV_TRG_STAT1</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_70">Advanced Trigger Status Register 1</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_70">ADV_TRG_STAT2</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_70">Advanced Trigger Status Register 2</a></td>
         <td style="text-align:left"  ><a href="#stat_register_70">ADV_TRG_STAT</a></td>
       </tr>
       <tr class="reg_list">
@@ -2137,8 +2119,8 @@
         <td style="text-align:right" ><a href="#stat_register_71">0x011C</a></td>
         <td style="text-align:center"><a href="#stat_register_71">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_71">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_71">ADV_TRG_STAT2</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_71">Advanced Trigger Status Register 2</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_71">ADV_TRG_STAT3</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_71">Advanced Trigger Status Register 3</a></td>
         <td style="text-align:left"  ><a href="#stat_register_71">ADV_TRG_STAT</a></td>
       </tr>
       <tr class="reg_list">
@@ -2146,8 +2128,8 @@
         <td style="text-align:right" ><a href="#stat_register_72">0x0120</a></td>
         <td style="text-align:center"><a href="#stat_register_72">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_72">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_72">ADV_TRG_STAT3</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_72">Advanced Trigger Status Register 3</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_72">ADV_TRG_STAT4</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_72">Advanced Trigger Status Register 4</a></td>
         <td style="text-align:left"  ><a href="#stat_register_72">ADV_TRG_STAT</a></td>
       </tr>
       <tr class="reg_list">
@@ -2155,17 +2137,17 @@
         <td style="text-align:right" ><a href="#stat_register_73">0x0124</a></td>
         <td style="text-align:center"><a href="#stat_register_73">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_73">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_73">ADV_TRG_STAT4</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_73">Advanced Trigger Status Register 4</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_73">ADV_TRG_STAT</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_73">MAX_DRS_ADC_PKT_SAMPLES</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_73">Maximum DRS/ADC samples per Packet</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_73">None</a></td>
       </tr>
       <tr class="reg_list">
         <td style="text-align:right" ><a href="#stat_register_74" id="stat_reg_list_74">74</a></td>
         <td style="text-align:right" ><a href="#stat_register_74">0x0128</a></td>
         <td style="text-align:center"><a href="#stat_register_74">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_74">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_74">MAX_DRS_ADC_PKT_SAMPLES</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_74">Maximum DRS/ADC samples per Packet</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_74">MAX_TDC_PKT_SAMPLES</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_74">Maximum TDC samples per Packet</a></td>
         <td style="text-align:left"  ><a href="#stat_register_74">None</a></td>
       </tr>
       <tr class="reg_list">
@@ -2173,8 +2155,8 @@
         <td style="text-align:right" ><a href="#stat_register_75">0x012C</a></td>
         <td style="text-align:center"><a href="#stat_register_75">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_75">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_75">MAX_TDC_PKT_SAMPLES</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_75">Maximum TDC samples per Packet</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_75">MAX_TRG_PKT_SAMPLES</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_75">Maximum advanced trigger output samples per Packet</a></td>
         <td style="text-align:left"  ><a href="#stat_register_75">None</a></td>
       </tr>
       <tr class="reg_list">
@@ -2182,8 +2164,8 @@
         <td style="text-align:right" ><a href="#stat_register_76">0x0130</a></td>
         <td style="text-align:center"><a href="#stat_register_76">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_76">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_76">MAX_TRG_PKT_SAMPLES</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_76">Maximum advanced trigger output samples per Packet</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_76">MAX_SCL_PKT_SAMPLES</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_76">Maximum scaler values per Packet</a></td>
         <td style="text-align:left"  ><a href="#stat_register_76">None</a></td>
       </tr>
       <tr class="reg_list">
@@ -2191,8 +2173,8 @@
         <td style="text-align:right" ><a href="#stat_register_77">0x0134</a></td>
         <td style="text-align:center"><a href="#stat_register_77">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_77">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_77">MAX_SCL_PKT_SAMPLES</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_77">Maximum scaler values per Packet</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_77">CLK_CTRL_MOD_FLAG</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_77">Set if WD2 configuration registers are modified</a></td>
         <td style="text-align:left"  ><a href="#stat_register_77">None</a></td>
       </tr>
       <tr class="reg_list">
@@ -2200,8 +2182,8 @@
         <td style="text-align:right" ><a href="#stat_register_78">0x0138</a></td>
         <td style="text-align:center"><a href="#stat_register_78">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_78">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_78">CLK_CTRL_MOD_FLAG</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_78">Set if WD2 configuration registers are modified</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_78">DRS_MOD_FLAG</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_78">Set if DRS configuration registers are modified</a></td>
         <td style="text-align:left"  ><a href="#stat_register_78">None</a></td>
       </tr>
       <tr class="reg_list">
@@ -2209,8 +2191,8 @@
         <td style="text-align:right" ><a href="#stat_register_79">0x013C</a></td>
         <td style="text-align:center"><a href="#stat_register_79">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_79">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_79">DRS_MOD_FLAG</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_79">Set if DRS configuration registers are modified</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_79">COM_PLD_SIZE_MOD_FLAG</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_79">Set if maximum packet payload size register is modified</a></td>
         <td style="text-align:left"  ><a href="#stat_register_79">None</a></td>
       </tr>
       <tr class="reg_list">
@@ -2218,8 +2200,8 @@
         <td style="text-align:right" ><a href="#stat_register_80">0x0140</a></td>
         <td style="text-align:center"><a href="#stat_register_80">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_80">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_80">COM_PLD_SIZE_MOD_FLAG</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_80">Set if maximum packet payload size register is modified</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_80">ADC_SAMPLE_DIV_MOD_FLAG</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_80">Set if ADC downsampling divider register is modified</a></td>
         <td style="text-align:left"  ><a href="#stat_register_80">None</a></td>
       </tr>
       <tr class="reg_list">
@@ -2227,8 +2209,8 @@
         <td style="text-align:right" ><a href="#stat_register_81">0x0144</a></td>
         <td style="text-align:center"><a href="#stat_register_81">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_81">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_81">ADC_SAMPLE_DIV_MOD_FLAG</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_81">Set if ADC downsampling divider register is modified</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_81">DAC_0_1_MOD_FLAG</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_81">Set if DAC 0 and 1 configuration registers are modified</a></td>
         <td style="text-align:left"  ><a href="#stat_register_81">None</a></td>
       </tr>
       <tr class="reg_list">
@@ -2236,8 +2218,8 @@
         <td style="text-align:right" ><a href="#stat_register_82">0x0148</a></td>
         <td style="text-align:center"><a href="#stat_register_82">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_82">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_82">DAC_0_1_MOD_FLAG</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_82">Set if DAC 0 and 1 configuration registers are modified</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_82">DAC_2_MOD_FLAG</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_82">Set if DAC 2 configuration registers are modified</a></td>
         <td style="text-align:left"  ><a href="#stat_register_82">None</a></td>
       </tr>
       <tr class="reg_list">
@@ -2245,8 +2227,8 @@
         <td style="text-align:right" ><a href="#stat_register_83">0x014C</a></td>
         <td style="text-align:center"><a href="#stat_register_83">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_83">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_83">DAC_2_MOD_FLAG</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_83">Set if DAC 2 configuration registers are modified</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_83">FE_0_15_MOD_FLAG</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_83">Set if frontend configuraiton registers are modified</a></td>
         <td style="text-align:left"  ><a href="#stat_register_83">None</a></td>
       </tr>
       <tr class="reg_list">
@@ -2254,8 +2236,8 @@
         <td style="text-align:right" ><a href="#stat_register_84">0x0150</a></td>
         <td style="text-align:center"><a href="#stat_register_84">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_84">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_84">FE_0_15_MOD_FLAG</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_84">Set if frontend configuraiton registers are modified</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_84">HV_U_TARGET_0_7_MOD_FLAG</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_84">Set if HV target voltage configuraiton of channel 0 to 7 registers are modified</a></td>
         <td style="text-align:left"  ><a href="#stat_register_84">None</a></td>
       </tr>
       <tr class="reg_list">
@@ -2263,8 +2245,8 @@
         <td style="text-align:right" ><a href="#stat_register_85">0x0154</a></td>
         <td style="text-align:center"><a href="#stat_register_85">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_85">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_85">HV_U_TARGET_0_7_MOD_FLAG</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_85">Set if HV target voltage configuraiton of channel 0 to 7 registers are modified</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_85">HV_U_TARGET_8_15_MOD_FLAG</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_85">Set if HV target voltage configuraiton of channel 8 to 15 registers are modified</a></td>
         <td style="text-align:left"  ><a href="#stat_register_85">None</a></td>
       </tr>
       <tr class="reg_list">
@@ -2272,8 +2254,8 @@
         <td style="text-align:right" ><a href="#stat_register_86">0x0158</a></td>
         <td style="text-align:center"><a href="#stat_register_86">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_86">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_86">HV_U_TARGET_8_15_MOD_FLAG</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_86">Set if HV target voltage configuraiton of channel 8 to 15 registers are modified</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_86">HV_MOD_FLAG</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_86">Set if single HV configuraiton registers are modified</a></td>
         <td style="text-align:left"  ><a href="#stat_register_86">None</a></td>
       </tr>
       <tr class="reg_list">
@@ -2281,8 +2263,8 @@
         <td style="text-align:right" ><a href="#stat_register_87">0x015C</a></td>
         <td style="text-align:center"><a href="#stat_register_87">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_87">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_87">HV_MOD_FLAG</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_87">Set if single HV configuraiton registers are modified</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_87">LMK_0_7_MOD_FLAG</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_87">Set if LMK configuraiton registers are modified</a></td>
         <td style="text-align:left"  ><a href="#stat_register_87">None</a></td>
       </tr>
       <tr class="reg_list">
@@ -2290,18 +2272,9 @@
         <td style="text-align:right" ><a href="#stat_register_88">0x0160</a></td>
         <td style="text-align:center"><a href="#stat_register_88">HW</a></td>
         <td style="text-align:right" ><a href="#stat_register_88">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_88">LMK_0_7_MOD_FLAG</a></td>
+        <td style="text-align:left"  ><a href="#stat_register_88">LMK_8_15_MOD_FLAG</a></td>
         <td style="text-align:left"  ><a href="#stat_register_88">Set if LMK configuraiton registers are modified</a></td>
         <td style="text-align:left"  ><a href="#stat_register_88">None</a></td>
-      </tr>
-      <tr class="reg_list">
-        <td style="text-align:right" ><a href="#stat_register_89" id="stat_reg_list_89">89</a></td>
-        <td style="text-align:right" ><a href="#stat_register_89">0x0164</a></td>
-        <td style="text-align:center"><a href="#stat_register_89">HW</a></td>
-        <td style="text-align:right" ><a href="#stat_register_89">0x00000000</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_89">LMK_8_15_MOD_FLAG</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_89">Set if LMK configuraiton registers are modified</a></td>
-        <td style="text-align:left"  ><a href="#stat_register_89">None</a></td>
       </tr>
       <tr class="back_to_overview">        <td class="back_to_overview" colspan="7"><a href="#stat_register_overview">Status Registers Top</a></a></td>      </tr>
     </tbody>
@@ -12333,7 +12306,7 @@
         <td class="back_to_overview" colspan="7"><a href="#ctrl_reg_list_157">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="ctrl_register_158"><h3>Control Register SET_TIME_LSB</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="ctrl_register_158"><h3>Control Register DBG_SIG_SEL</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -12347,72 +12320,6 @@
       <tr class="reg_name">
         <td style="text-align:center">158</td>
         <td style="text-align:right" >0x1278</td>
-        <td style="text-align:center">HW</td>
-        <td style="text-align:center"></td>
-        <td style="text-align:right" >0x00000000</td>
-        <td style="text-align:left"  >SET_TIME_LSB</td>
-        <td style="text-align:left"  >Set System Time</td>
-      </tr>
-      <tr class="reg_content">
-        <td style="text-align:center"></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:center"></td>
-        <td style="text-align:center">31:0</td>
-        <td style="text-align:right" >0x00000000</td>
-        <td style="text-align:left"  >SET_TIME_LSB</td>
-        <td style="text-align:left"  >LSBs of 64bit system time counter set value  (time is updated when MSBs are written)</td>
-      </tr>
-      <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#ctrl_reg_list_158">Register Overview</a></td>
-      </tr>
-      <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="ctrl_register_159"><h3>Control Register SET_TIME_MSB</h3></a></td>
-      </tr>
-      <tr class="reg_header">
-        <th>#</th>
-        <th>Offset</th>
-        <th>HW/SW</th>
-        <th>Bit</th>
-        <th>Initial</th>
-        <th>Name</th>
-        <th>Comment</th>
-      </tr>
-      <tr class="reg_name">
-        <td style="text-align:center">159</td>
-        <td style="text-align:right" >0x127C</td>
-        <td style="text-align:center">HW</td>
-        <td style="text-align:center"></td>
-        <td style="text-align:right" >0x00000000</td>
-        <td style="text-align:left"  >SET_TIME_MSB</td>
-        <td style="text-align:left"  >Set System Time</td>
-      </tr>
-      <tr class="reg_content">
-        <td style="text-align:center"></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:center"></td>
-        <td style="text-align:center">31:0</td>
-        <td style="text-align:right" >0x00000000</td>
-        <td style="text-align:left"  >SET_TIME_MSB</td>
-        <td style="text-align:left"  >MSBs of 64bit system time counter set value  (time is updated when MSBs are written)</td>
-      </tr>
-      <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#ctrl_reg_list_159">Register Overview</a></td>
-      </tr>
-      <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="ctrl_register_160"><h3>Control Register DBG_SIG_SEL</h3></a></td>
-      </tr>
-      <tr class="reg_header">
-        <th>#</th>
-        <th>Offset</th>
-        <th>HW/SW</th>
-        <th>Bit</th>
-        <th>Initial</th>
-        <th>Name</th>
-        <th>Comment</th>
-      </tr>
-      <tr class="reg_name">
-        <td style="text-align:center">160</td>
-        <td style="text-align:right" >0x1280</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -12456,10 +12363,10 @@
         <td style="text-align:left"  >Select for RX connector:<br>0x0 = UART (communication to MicroBlaze)<br>0x1 = Trigger (internal hardware trigger signal to DRS control FSM)<br>0x2 = Soft Trigger (trigger signal from MicroBlaze)<br>0x3 = External Trigger (OR connection of external trigger from MCX and Backplane)<br>0x4 = Sync Signal from Backplane (direct, active high)<br>0x5 = Sync Signal from Backplane (sampled, output to LMK, active low)<br>0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high)<br>0x7 = Busy Local (active high)<br>0x8 = Busy from Backplane (active high)<br>0x9 = LMK Reference Clock (LMK input clock) <br>0xA = ADC Sampling Clock <br>0xB = Divided Data Clock (phase shifted)<br>0xC = LMK5 clock (directly routed from corresponding input)<br>0xD = SPI CS of LMK (active low)</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#ctrl_reg_list_160">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#ctrl_reg_list_158">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="ctrl_register_161"><h3>Control Register CRC32_REG_BANK</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="ctrl_register_159"><h3>Control Register CRC32_REG_BANK</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -12471,8 +12378,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">161</td>
-        <td style="text-align:right" >0x1284</td>
+        <td style="text-align:center">159</td>
+        <td style="text-align:right" >0x127C</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >None</td>
@@ -12489,7 +12396,7 @@
         <td style="text-align:left"  >Keep at the end of the register bank</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#ctrl_reg_list_161">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#ctrl_reg_list_159">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
         <td class="reg_table_title" colspan="7"><a id="stat_register_0"><h3>Status Register HW_VER</h3></a></td>
@@ -15027,7 +14934,7 @@
         <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_60">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_61"><h3>Status Register TIME_LSB</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_61"><h3>Status Register SYS_TIME</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -15044,7 +14951,7 @@
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
-        <td style="text-align:left"  >TIME_LSB</td>
+        <td style="text-align:left"  >SYS_TIME</td>
         <td style="text-align:left"  >Current System Time</td>
       </tr>
       <tr class="reg_content">
@@ -15053,14 +14960,14 @@
         <td style="text-align:center"></td>
         <td style="text-align:center">31:0</td>
         <td style="text-align:right" >0x00000000</td>
-        <td style="text-align:left"  >TIME_LSB</td>
-        <td style="text-align:left"  >LSBs of 64bit system time counter (MSBs are latched upon read of LSB register)</td>
+        <td style="text-align:left"  >SYS_TIME</td>
+        <td style="text-align:left"  >System uptime in 10ms steps (no overflow protection)</td>
       </tr>
       <tr class="back_to_overview">
         <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_61">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_62"><h3>Status Register TIME_MSB</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_62"><h3>Status Register COMP_CH_STAT</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -15074,39 +14981,6 @@
       <tr class="reg_name">
         <td style="text-align:center">62</td>
         <td style="text-align:right" >0x00F8</td>
-        <td style="text-align:center">HW</td>
-        <td style="text-align:center"></td>
-        <td style="text-align:right" >0x00000000</td>
-        <td style="text-align:left"  >TIME_MSB</td>
-        <td style="text-align:left"  >Current System Time</td>
-      </tr>
-      <tr class="reg_content">
-        <td style="text-align:center"></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:center"></td>
-        <td style="text-align:center">31:0</td>
-        <td style="text-align:right" >0x00000000</td>
-        <td style="text-align:left"  >TIME_MSB</td>
-        <td style="text-align:left"  >MSBs of 64bit system time counter (latched upon read of LSB register)</td>
-      </tr>
-      <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_62">Register Overview</a></td>
-      </tr>
-      <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_63"><h3>Status Register COMP_CH_STAT</h3></a></td>
-      </tr>
-      <tr class="reg_header">
-        <th>#</th>
-        <th>Offset</th>
-        <th>HW/SW</th>
-        <th>Bit</th>
-        <th>Initial</th>
-        <th>Name</th>
-        <th>Comment</th>
-      </tr>
-      <tr class="reg_name">
-        <td style="text-align:center">63</td>
-        <td style="text-align:right" >0x00FC</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -15132,10 +15006,10 @@
         <td style="text-align:left"  >Status of the comparator inputs</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_63">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_62">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_64"><h3>Status Register EVENT_TX_RATE</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_63"><h3>Status Register EVENT_TX_RATE</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -15147,8 +15021,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">64</td>
-        <td style="text-align:right" >0x0100</td>
+        <td style="text-align:center">63</td>
+        <td style="text-align:right" >0x00FC</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -15165,10 +15039,10 @@
         <td style="text-align:left"  >Number of events transmitted per second</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_64">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_63">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_65"><h3>Status Register EVENT_NR</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_64"><h3>Status Register EVENT_NR</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -15180,8 +15054,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">65</td>
-        <td style="text-align:right" >0x0104</td>
+        <td style="text-align:center">64</td>
+        <td style="text-align:right" >0x0100</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -15198,10 +15072,10 @@
         <td style="text-align:left"  >Number of latest event</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_65">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_64">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_66"><h3>Status Register TRB_INFO_STAT</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_65"><h3>Status Register TRB_INFO_STAT</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -15213,8 +15087,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">66</td>
-        <td style="text-align:right" >0x0108</td>
+        <td style="text-align:center">65</td>
+        <td style="text-align:right" >0x0104</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -15258,10 +15132,10 @@
         <td style="text-align:left"  >Parity error count of the serial transmission</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_66">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_65">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_67"><h3>Status Register TRB_INFO_LSB</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_66"><h3>Status Register TRB_INFO_LSB</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -15273,8 +15147,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">67</td>
-        <td style="text-align:right" >0x010C</td>
+        <td style="text-align:center">66</td>
+        <td style="text-align:right" >0x0108</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -15291,10 +15165,10 @@
         <td style="text-align:left"  >Trigger information LSBs</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_67">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_66">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_68"><h3>Status Register TRB_INFO_MSB</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_67"><h3>Status Register TRB_INFO_MSB</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -15306,8 +15180,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">68</td>
-        <td style="text-align:right" >0x0110</td>
+        <td style="text-align:center">67</td>
+        <td style="text-align:right" >0x010C</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -15333,10 +15207,10 @@
         <td style="text-align:left"  >Trigger information MSBs</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_68">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_67">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_69"><h3>Status Register ADV_TRG_TRIG_CELL</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_68"><h3>Status Register ADV_TRG_TRIG_CELL</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -15348,8 +15222,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">69</td>
-        <td style="text-align:right" >0x0114</td>
+        <td style="text-align:center">68</td>
+        <td style="text-align:right" >0x0110</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -15366,10 +15240,10 @@
         <td style="text-align:left"  >Advanced trigger cell register</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_69">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_68">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_70"><h3>Status Register ADV_TRG_STAT1</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_69"><h3>Status Register ADV_TRG_STAT1</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -15381,8 +15255,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">70</td>
-        <td style="text-align:right" >0x0118</td>
+        <td style="text-align:center">69</td>
+        <td style="text-align:right" >0x0114</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -15399,10 +15273,10 @@
         <td style="text-align:left"  >Advanced trigger status register 1</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_70">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_69">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_71"><h3>Status Register ADV_TRG_STAT2</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_70"><h3>Status Register ADV_TRG_STAT2</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -15414,8 +15288,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">71</td>
-        <td style="text-align:right" >0x011C</td>
+        <td style="text-align:center">70</td>
+        <td style="text-align:right" >0x0118</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -15432,10 +15306,10 @@
         <td style="text-align:left"  >Advanced trigger status register 2</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_71">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_70">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_72"><h3>Status Register ADV_TRG_STAT3</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_71"><h3>Status Register ADV_TRG_STAT3</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -15447,8 +15321,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">72</td>
-        <td style="text-align:right" >0x0120</td>
+        <td style="text-align:center">71</td>
+        <td style="text-align:right" >0x011C</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -15465,10 +15339,10 @@
         <td style="text-align:left"  >Advanced trigger status register 3</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_72">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_71">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_73"><h3>Status Register ADV_TRG_STAT4</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_72"><h3>Status Register ADV_TRG_STAT4</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -15480,8 +15354,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">73</td>
-        <td style="text-align:right" >0x0124</td>
+        <td style="text-align:center">72</td>
+        <td style="text-align:right" >0x0120</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -15498,10 +15372,10 @@
         <td style="text-align:left"  >Advanced trigger status register 4</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_73">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_72">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_74"><h3>Status Register MAX_DRS_ADC_PKT_SAMPLES</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_73"><h3>Status Register MAX_DRS_ADC_PKT_SAMPLES</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -15513,8 +15387,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">74</td>
-        <td style="text-align:right" >0x0128</td>
+        <td style="text-align:center">73</td>
+        <td style="text-align:right" >0x0124</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -15540,10 +15414,10 @@
         <td style="text-align:left"  >Maximum number of DRS/ADC samples per packet</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_74">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_73">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_75"><h3>Status Register MAX_TDC_PKT_SAMPLES</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_74"><h3>Status Register MAX_TDC_PKT_SAMPLES</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -15555,8 +15429,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">75</td>
-        <td style="text-align:right" >0x012C</td>
+        <td style="text-align:center">74</td>
+        <td style="text-align:right" >0x0128</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -15582,10 +15456,10 @@
         <td style="text-align:left"  >Maximum number of TDC samples per packet</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_75">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_74">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_76"><h3>Status Register MAX_TRG_PKT_SAMPLES</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_75"><h3>Status Register MAX_TRG_PKT_SAMPLES</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -15597,8 +15471,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">76</td>
-        <td style="text-align:right" >0x0130</td>
+        <td style="text-align:center">75</td>
+        <td style="text-align:right" >0x012C</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -15624,10 +15498,10 @@
         <td style="text-align:left"  >Maximum number of advanced trigger output samples per packet</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_76">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_75">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_77"><h3>Status Register MAX_SCL_PKT_SAMPLES</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_76"><h3>Status Register MAX_SCL_PKT_SAMPLES</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -15639,8 +15513,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">77</td>
-        <td style="text-align:right" >0x0134</td>
+        <td style="text-align:center">76</td>
+        <td style="text-align:right" >0x0130</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -15666,10 +15540,10 @@
         <td style="text-align:left"  >Maximum number of scaler values per packet</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_77">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_76">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_78"><h3>Status Register CLK_CTRL_MOD_FLAG</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_77"><h3>Status Register CLK_CTRL_MOD_FLAG</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -15681,8 +15555,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">78</td>
-        <td style="text-align:right" >0x0138</td>
+        <td style="text-align:center">77</td>
+        <td style="text-align:right" >0x0134</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -15744,10 +15618,10 @@
         <td style="text-align:left"  >Local clock frequency modified flags</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_78">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_77">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_79"><h3>Status Register DRS_MOD_FLAG</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_78"><h3>Status Register DRS_MOD_FLAG</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -15759,8 +15633,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">79</td>
-        <td style="text-align:right" >0x013C</td>
+        <td style="text-align:center">78</td>
+        <td style="text-align:right" >0x0138</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -15804,10 +15678,10 @@
         <td style="text-align:left"  >DRS write control register modified flags</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_79">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_78">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_80"><h3>Status Register COM_PLD_SIZE_MOD_FLAG</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_79"><h3>Status Register COM_PLD_SIZE_MOD_FLAG</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -15819,8 +15693,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">80</td>
-        <td style="text-align:right" >0x0140</td>
+        <td style="text-align:center">79</td>
+        <td style="text-align:right" >0x013C</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -15846,10 +15720,10 @@
         <td style="text-align:left"  >Maximum packet payload size modified flag</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_80">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_79">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_81"><h3>Status Register ADC_SAMPLE_DIV_MOD_FLAG</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_80"><h3>Status Register ADC_SAMPLE_DIV_MOD_FLAG</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -15861,8 +15735,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">81</td>
-        <td style="text-align:right" >0x0144</td>
+        <td style="text-align:center">80</td>
+        <td style="text-align:right" >0x0140</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -15888,10 +15762,10 @@
         <td style="text-align:left"  >ADC downsampling divider modified flags</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_81">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_80">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_82"><h3>Status Register DAC_0_1_MOD_FLAG</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_81"><h3>Status Register DAC_0_1_MOD_FLAG</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -15903,8 +15777,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">82</td>
-        <td style="text-align:right" >0x0148</td>
+        <td style="text-align:center">81</td>
+        <td style="text-align:right" >0x0144</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -16056,10 +15930,10 @@
         <td style="text-align:left"  >DAC channel h modified flags</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_82">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_81">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_83"><h3>Status Register DAC_2_MOD_FLAG</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_82"><h3>Status Register DAC_2_MOD_FLAG</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -16071,8 +15945,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">83</td>
-        <td style="text-align:right" >0x014C</td>
+        <td style="text-align:center">82</td>
+        <td style="text-align:right" >0x0148</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -16161,10 +16035,10 @@
         <td style="text-align:left"  ></td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_83">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_82">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_84"><h3>Status Register FE_0_15_MOD_FLAG</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_83"><h3>Status Register FE_0_15_MOD_FLAG</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -16176,8 +16050,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">84</td>
-        <td style="text-align:right" >0x0150</td>
+        <td style="text-align:center">83</td>
+        <td style="text-align:right" >0x014C</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -16329,10 +16203,10 @@
         <td style="text-align:left"  >Frontend channel 15 register modified flags</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_84">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_83">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_85"><h3>Status Register HV_U_TARGET_0_7_MOD_FLAG</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_84"><h3>Status Register HV_U_TARGET_0_7_MOD_FLAG</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -16344,8 +16218,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">85</td>
-        <td style="text-align:right" >0x0154</td>
+        <td style="text-align:center">84</td>
+        <td style="text-align:right" >0x0150</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -16425,10 +16299,10 @@
         <td style="text-align:left"  >Target high voltage channel 7 register modified flags</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_85">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_84">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_86"><h3>Status Register HV_U_TARGET_8_15_MOD_FLAG</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_85"><h3>Status Register HV_U_TARGET_8_15_MOD_FLAG</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -16440,8 +16314,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">86</td>
-        <td style="text-align:right" >0x0158</td>
+        <td style="text-align:center">85</td>
+        <td style="text-align:right" >0x0154</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -16521,10 +16395,10 @@
         <td style="text-align:left"  >Target high voltage channel 15 register modified flags</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_86">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_85">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_87"><h3>Status Register HV_MOD_FLAG</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_86"><h3>Status Register HV_MOD_FLAG</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -16536,8 +16410,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">87</td>
-        <td style="text-align:right" >0x015C</td>
+        <td style="text-align:center">86</td>
+        <td style="text-align:right" >0x0158</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -16563,10 +16437,10 @@
         <td style="text-align:left"  >HV supply shunt resistor register modified flags</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_87">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_86">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_88"><h3>Status Register LMK_0_7_MOD_FLAG</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_87"><h3>Status Register LMK_0_7_MOD_FLAG</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -16578,8 +16452,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">88</td>
-        <td style="text-align:right" >0x0160</td>
+        <td style="text-align:center">87</td>
+        <td style="text-align:right" >0x015C</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -16659,10 +16533,10 @@
         <td style="text-align:left"  >LMK channel 7 register modified flags</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_88">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_87">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="stat_register_89"><h3>Status Register LMK_8_15_MOD_FLAG</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="stat_register_88"><h3>Status Register LMK_8_15_MOD_FLAG</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -16674,8 +16548,8 @@
         <th>Comment</th>
       </tr>
       <tr class="reg_name">
-        <td style="text-align:center">89</td>
-        <td style="text-align:right" >0x0164</td>
+        <td style="text-align:center">88</td>
+        <td style="text-align:right" >0x0160</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
@@ -16746,7 +16620,7 @@
         <td style="text-align:left"  >LMK Register 15 modified flags</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_89">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#stat_reg_list_88">Register Overview</a></td>
       </tr>
 
     </tbody>
@@ -16754,7 +16628,7 @@
   </table>
 
   <br>
-  Generated :   29.09.2021 11:52:11
+  Generated :   02.11.2021 15:54:09
 
 </body>
 

@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  29.09.2021 11:52:25
+ *  Created :  29.10.2021 09:36:48
  *
  *  Register Layout Version :  9
  *
@@ -173,10 +173,8 @@
 #define WD2_REG_ADV_TRG_CFG17                           0x1210
 #define WD2_REG_ADV_TRG_CFG18                           0x1214
 #define WD2_REG_ADV_TRG_CFG19                           0x1218
-#define WD2_REG_SET_TIME_LSB                            0x121C
-#define WD2_REG_SET_TIME_MSB                            0x1220
-#define WD2_REG_DBG_SIG_SEL                             0x1224
-#define WD2_REG_CRC32_REG_BANK                          0x1228
+#define WD2_REG_DBG_SIG_SEL                             0x121C
+#define WD2_REG_CRC32_REG_BANK                          0x1220
 
 /* *** Status Registers *** */
 #define WD2_REG_HW_VER                                  0x0000
@@ -239,35 +237,34 @@
 #define WD2_REG_SCALER_EXT_CLK                          0x00E4
 #define WD2_REG_SCALER_TIME_STAMP_LSB                   0x00E8
 #define WD2_REG_SCALER_TIME_STAMP_MSB                   0x00EC
-#define WD2_REG_TIME_LSB                                0x00F0
-#define WD2_REG_TIME_MSB                                0x00F4
-#define WD2_REG_COMP_CH_STAT                            0x00F8
-#define WD2_REG_EVENT_TX_RATE                           0x00FC
-#define WD2_REG_EVENT_NR                                0x0100
-#define WD2_REG_TRB_INFO_STAT                           0x0104
-#define WD2_REG_TRB_INFO_LSB                            0x0108
-#define WD2_REG_TRB_INFO_MSB                            0x010C
-#define WD2_REG_ADV_TRG_TRIG_CELL                       0x0110
-#define WD2_REG_ADV_TRG_STAT1                           0x0114
-#define WD2_REG_ADV_TRG_STAT2                           0x0118
-#define WD2_REG_ADV_TRG_STAT3                           0x011C
-#define WD2_REG_ADV_TRG_STAT4                           0x0120
-#define WD2_REG_MAX_DRS_ADC_PKT_SAMPLES                 0x0124
-#define WD2_REG_MAX_TDC_PKT_SAMPLES                     0x0128
-#define WD2_REG_MAX_TRG_PKT_SAMPLES                     0x012C
-#define WD2_REG_MAX_SCL_PKT_SAMPLES                     0x0130
-#define WD2_REG_CLK_CTRL_MOD_FLAG                       0x0134
-#define WD2_REG_DRS_MOD_FLAG                            0x0138
-#define WD2_REG_COM_PLD_SIZE_MOD_FLAG                   0x013C
-#define WD2_REG_ADC_SAMPLE_DIV_MOD_FLAG                 0x0140
-#define WD2_REG_DAC_0_1_MOD_FLAG                        0x0144
-#define WD2_REG_DAC_2_MOD_FLAG                          0x0148
-#define WD2_REG_FE_0_15_MOD_FLAG                        0x014C
-#define WD2_REG_HV_U_TARGET_0_7_MOD_FLAG                0x0150
-#define WD2_REG_HV_U_TARGET_8_15_MOD_FLAG               0x0154
-#define WD2_REG_HV_MOD_FLAG                             0x0158
-#define WD2_REG_LMK_0_7_MOD_FLAG                        0x015C
-#define WD2_REG_LMK_8_15_MOD_FLAG                       0x0160
+#define WD2_REG_SYS_TIME                                0x00F0
+#define WD2_REG_COMP_CH_STAT                            0x00F4
+#define WD2_REG_EVENT_TX_RATE                           0x00F8
+#define WD2_REG_EVENT_NR                                0x00FC
+#define WD2_REG_TRB_INFO_STAT                           0x0100
+#define WD2_REG_TRB_INFO_LSB                            0x0104
+#define WD2_REG_TRB_INFO_MSB                            0x0108
+#define WD2_REG_ADV_TRG_TRIG_CELL                       0x010C
+#define WD2_REG_ADV_TRG_STAT1                           0x0110
+#define WD2_REG_ADV_TRG_STAT2                           0x0114
+#define WD2_REG_ADV_TRG_STAT3                           0x0118
+#define WD2_REG_ADV_TRG_STAT4                           0x011C
+#define WD2_REG_MAX_DRS_ADC_PKT_SAMPLES                 0x0120
+#define WD2_REG_MAX_TDC_PKT_SAMPLES                     0x0124
+#define WD2_REG_MAX_TRG_PKT_SAMPLES                     0x0128
+#define WD2_REG_MAX_SCL_PKT_SAMPLES                     0x012C
+#define WD2_REG_CLK_CTRL_MOD_FLAG                       0x0130
+#define WD2_REG_DRS_MOD_FLAG                            0x0134
+#define WD2_REG_COM_PLD_SIZE_MOD_FLAG                   0x0138
+#define WD2_REG_ADC_SAMPLE_DIV_MOD_FLAG                 0x013C
+#define WD2_REG_DAC_0_1_MOD_FLAG                        0x0140
+#define WD2_REG_DAC_2_MOD_FLAG                          0x0144
+#define WD2_REG_FE_0_15_MOD_FLAG                        0x0148
+#define WD2_REG_HV_U_TARGET_0_7_MOD_FLAG                0x014C
+#define WD2_REG_HV_U_TARGET_8_15_MOD_FLAG               0x0150
+#define WD2_REG_HV_MOD_FLAG                             0x0154
+#define WD2_REG_LMK_0_7_MOD_FLAG                        0x0158
+#define WD2_REG_LMK_8_15_MOD_FLAG                       0x015C
 
 /*
  * Bit Positions
@@ -2813,25 +2810,7 @@
 
 
 
-/* ****** Control Register 135 [0x121C]: SET_TIME_LSB - Set System Time (Default: 0x00000000) ****** */
-
-/* SET_TIME_LSB - LSBs of 64bit system time counter set value  (time is updated when MSBs are written) */
-#define WD2_SET_TIME_LSB_REG                                  WD2_REG_SET_TIME_LSB
-#define WD2_SET_TIME_LSB_MASK                                           0xFFFFFFFF
-#define WD2_SET_TIME_LSB_OFS                                                     0
-
-
-
-/* ****** Control Register 136 [0x1220]: SET_TIME_MSB - Set System Time (Default: 0x00000000) ****** */
-
-/* SET_TIME_MSB - MSBs of 64bit system time counter set value  (time is updated when MSBs are written) */
-#define WD2_SET_TIME_MSB_REG                                  WD2_REG_SET_TIME_MSB
-#define WD2_SET_TIME_MSB_MASK                                           0xFFFFFFFF
-#define WD2_SET_TIME_MSB_OFS                                                     0
-
-
-
-/* ****** Control Register 137 [0x1224]: DBG_SIG_SEL - Debug Signal Select for MCX Connectors on HV Board (Default: 0x00000000) ****** */
+/* ****** Control Register 135 [0x121C]: DBG_SIG_SEL - Debug Signal Select for MCX Connectors on HV Board (Default: 0x00000000) ****** */
 
 /* MCX_TX_SIG_SEL - Select for TX connector (see RX connector for mapping) */
 #define WD2_MCX_TX_SIG_SEL_REG                                 WD2_REG_DBG_SIG_SEL
@@ -2859,7 +2838,7 @@
 
 
 
-/* ****** Control Register 138 [0x1228]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: None) ****** */
+/* ****** Control Register 136 [0x1220]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: None) ****** */
 
 /* CRC32_REG_BANK - Keep at the end of the register bank */
 #define WD2_CRC32_REG_BANK_REG                              WD2_REG_CRC32_REG_BANK
@@ -3601,25 +3580,16 @@
 
 
 
-/* ****** Status Register 60 [0x00F0]: TIME_LSB - Current System Time (Default: 0x00000000) ****** */
+/* ****** Status Register 60 [0x00F0]: SYS_TIME - Current System Time (Default: 0x00000000) ****** */
 
-/* TIME_LSB - LSBs of 64bit system time counter (MSBs are latched upon read of LSB register) */
-#define WD2_TIME_LSB_REG                                          WD2_REG_TIME_LSB
-#define WD2_TIME_LSB_MASK                                               0xFFFFFFFF
-#define WD2_TIME_LSB_OFS                                                         0
-
-
-
-/* ****** Status Register 61 [0x00F4]: TIME_MSB - Current System Time (Default: 0x00000000) ****** */
-
-/* TIME_MSB - MSBs of 64bit system time counter (latched upon read of LSB register) */
-#define WD2_TIME_MSB_REG                                          WD2_REG_TIME_MSB
-#define WD2_TIME_MSB_MASK                                               0xFFFFFFFF
-#define WD2_TIME_MSB_OFS                                                         0
+/* SYS_TIME - System uptime in 10ms steps (no overflow protection) */
+#define WD2_SYS_TIME_REG                                          WD2_REG_SYS_TIME
+#define WD2_SYS_TIME_MASK                                               0xFFFFFFFF
+#define WD2_SYS_TIME_OFS                                                         0
 
 
 
-/* ****** Status Register 62 [0x00F8]: COMP_CH_STAT - Comparator channel status (Default: 0x00000000) ****** */
+/* ****** Status Register 61 [0x00F4]: COMP_CH_STAT - Comparator channel status (Default: 0x00000000) ****** */
 
 /* COMP_CH_STAT - Status of the comparator inputs */
 #define WD2_COMP_CH_STAT_REG                                  WD2_REG_COMP_CH_STAT
@@ -3628,7 +3598,7 @@
 
 
 
-/* ****** Status Register 63 [0x00FC]: EVENT_TX_RATE - Event Transmission Rate (Default: 0x00000000) ****** */
+/* ****** Status Register 62 [0x00F8]: EVENT_TX_RATE - Event Transmission Rate (Default: 0x00000000) ****** */
 
 /* EVENT_TX_RATE - Number of events transmitted per second */
 #define WD2_EVENT_TX_RATE_REG                                WD2_REG_EVENT_TX_RATE
@@ -3637,7 +3607,7 @@
 
 
 
-/* ****** Status Register 64 [0x0100]: EVENT_NR - Number of latest event (Default: 0x00000000) ****** */
+/* ****** Status Register 63 [0x00FC]: EVENT_NR - Number of latest event (Default: 0x00000000) ****** */
 
 /* EVENT_NUMBER - Number of latest event */
 #define WD2_EVENT_NUMBER_REG                                      WD2_REG_EVENT_NR
@@ -3646,7 +3616,7 @@
 
 
 
-/* ****** Status Register 65 [0x0104]: TRB_INFO_STAT - Trigger Information via Serial Trigger Bus Status (Default: 0x00000000) ****** */
+/* ****** Status Register 64 [0x0100]: TRB_INFO_STAT - Trigger Information via Serial Trigger Bus Status (Default: 0x00000000) ****** */
 
 /* TRB_FLAG_NEW - Flag signalling that the current trigger information belongs to the latest trigger received */
 #define WD2_TRB_FLAG_NEW_REG                                 WD2_REG_TRB_INFO_STAT
@@ -3665,7 +3635,7 @@
 
 
 
-/* ****** Status Register 66 [0x0108]: TRB_INFO_LSB - Trigger Information via Serial Trigger Bus LSBs (Default: 0x00000000) ****** */
+/* ****** Status Register 65 [0x0104]: TRB_INFO_LSB - Trigger Information via Serial Trigger Bus LSBs (Default: 0x00000000) ****** */
 
 /* TRB_INFO_LSB - Trigger information LSBs */
 #define WD2_TRB_INFO_LSB_REG                                  WD2_REG_TRB_INFO_LSB
@@ -3674,7 +3644,7 @@
 
 
 
-/* ****** Status Register 67 [0x010C]: TRB_INFO_MSB - Trigger Information via Serial Trigger Bus MSBs (Default: 0x00000000) ****** */
+/* ****** Status Register 66 [0x0108]: TRB_INFO_MSB - Trigger Information via Serial Trigger Bus MSBs (Default: 0x00000000) ****** */
 
 /* TRB_INFO_MSB - Trigger information MSBs */
 #define WD2_TRB_INFO_MSB_REG                                  WD2_REG_TRB_INFO_MSB
@@ -3683,7 +3653,7 @@
 
 
 
-/* ****** Status Register 68 [0x0110]: ADV_TRG_TRIG_CELL - Advanced Trigger Cell Register (Default: 0x00000000) ****** */
+/* ****** Status Register 67 [0x010C]: ADV_TRG_TRIG_CELL - Advanced Trigger Cell Register (Default: 0x00000000) ****** */
 
 /* ADV_TRG_TRIG_CELL - Advanced trigger cell register */
 #define WD2_ADV_TRG_TRIG_CELL_REG                        WD2_REG_ADV_TRG_TRIG_CELL
@@ -3692,7 +3662,7 @@
 
 
 
-/* ****** Status Register 69 [0x0114]: ADV_TRG_STAT1 - Advanced Trigger Status Register 1 (Default: 0x00000000) ****** */
+/* ****** Status Register 68 [0x0110]: ADV_TRG_STAT1 - Advanced Trigger Status Register 1 (Default: 0x00000000) ****** */
 
 /* ADV_TRG_STAT_1 - Advanced trigger status register 1 */
 #define WD2_ADV_TRG_STAT_1_REG                               WD2_REG_ADV_TRG_STAT1
@@ -3701,7 +3671,7 @@
 
 
 
-/* ****** Status Register 70 [0x0118]: ADV_TRG_STAT2 - Advanced Trigger Status Register 2 (Default: 0x00000000) ****** */
+/* ****** Status Register 69 [0x0114]: ADV_TRG_STAT2 - Advanced Trigger Status Register 2 (Default: 0x00000000) ****** */
 
 /* ADV_TRG_STAT_2 - Advanced trigger status register 2 */
 #define WD2_ADV_TRG_STAT_2_REG                               WD2_REG_ADV_TRG_STAT2
@@ -3710,7 +3680,7 @@
 
 
 
-/* ****** Status Register 71 [0x011C]: ADV_TRG_STAT3 - Advanced Trigger Status Register 3 (Default: 0x00000000) ****** */
+/* ****** Status Register 70 [0x0118]: ADV_TRG_STAT3 - Advanced Trigger Status Register 3 (Default: 0x00000000) ****** */
 
 /* ADV_TRG_STAT_3 - Advanced trigger status register 3 */
 #define WD2_ADV_TRG_STAT_3_REG                               WD2_REG_ADV_TRG_STAT3
@@ -3719,7 +3689,7 @@
 
 
 
-/* ****** Status Register 72 [0x0120]: ADV_TRG_STAT4 - Advanced Trigger Status Register 4 (Default: 0x00000000) ****** */
+/* ****** Status Register 71 [0x011C]: ADV_TRG_STAT4 - Advanced Trigger Status Register 4 (Default: 0x00000000) ****** */
 
 /* ADV_TRG_STAT_4 - Advanced trigger status register 4 */
 #define WD2_ADV_TRG_STAT_4_REG                               WD2_REG_ADV_TRG_STAT4
@@ -3728,7 +3698,7 @@
 
 
 
-/* ****** Status Register 73 [0x0124]: MAX_DRS_ADC_PKT_SAMPLES - Maximum DRS/ADC samples per Packet (Default: 0x00000000) ****** */
+/* ****** Status Register 72 [0x0120]: MAX_DRS_ADC_PKT_SAMPLES - Maximum DRS/ADC samples per Packet (Default: 0x00000000) ****** */
 
 /* MAX_DRS_ADC_PKT_SAMPLES - Maximum number of DRS/ADC samples per packet */
 #define WD2_MAX_DRS_ADC_PKT_SAMPLES_REG            WD2_REG_MAX_DRS_ADC_PKT_SAMPLES
@@ -3737,7 +3707,7 @@
 
 
 
-/* ****** Status Register 74 [0x0128]: MAX_TDC_PKT_SAMPLES - Maximum TDC samples per Packet (Default: 0x00000000) ****** */
+/* ****** Status Register 73 [0x0124]: MAX_TDC_PKT_SAMPLES - Maximum TDC samples per Packet (Default: 0x00000000) ****** */
 
 /* MAX_TDC_PKT_SAMPLES - Maximum number of TDC samples per packet */
 #define WD2_MAX_TDC_PKT_SAMPLES_REG                    WD2_REG_MAX_TDC_PKT_SAMPLES
@@ -3746,7 +3716,7 @@
 
 
 
-/* ****** Status Register 75 [0x012C]: MAX_TRG_PKT_SAMPLES - Maximum advanced trigger output samples per Packet (Default: 0x00000000) ****** */
+/* ****** Status Register 74 [0x0128]: MAX_TRG_PKT_SAMPLES - Maximum advanced trigger output samples per Packet (Default: 0x00000000) ****** */
 
 /* MAX_TRG_PKT_SAMPLES - Maximum number of advanced trigger output samples per packet */
 #define WD2_MAX_TRG_PKT_SAMPLES_REG                    WD2_REG_MAX_TRG_PKT_SAMPLES
@@ -3755,7 +3725,7 @@
 
 
 
-/* ****** Status Register 76 [0x0130]: MAX_SCL_PKT_SAMPLES - Maximum scaler values per Packet (Default: 0x00000000) ****** */
+/* ****** Status Register 75 [0x012C]: MAX_SCL_PKT_SAMPLES - Maximum scaler values per Packet (Default: 0x00000000) ****** */
 
 /* MAX_SCL_PKT_SAMPLES - Maximum number of scaler values per packet */
 #define WD2_MAX_SCL_PKT_SAMPLES_REG                    WD2_REG_MAX_SCL_PKT_SAMPLES
@@ -3764,7 +3734,7 @@
 
 
 
-/* ****** Status Register 77 [0x0134]: CLK_CTRL_MOD_FLAG - Set if WD2 configuration registers are modified (Default: 0x00000000) ****** */
+/* ****** Status Register 76 [0x0130]: CLK_CTRL_MOD_FLAG - Set if WD2 configuration registers are modified (Default: 0x00000000) ****** */
 
 /* TRIGGER_DAQ_CLK_CAL_MOD - Trigger DAQ clock calibration modified flag */
 #define WD2_TRIGGER_DAQ_CLK_CAL_MOD_REG                  WD2_REG_CLK_CTRL_MOD_FLAG
@@ -3793,7 +3763,7 @@
 
 
 
-/* ****** Status Register 78 [0x0138]: DRS_MOD_FLAG - Set if DRS configuration registers are modified (Default: 0x00000000) ****** */
+/* ****** Status Register 77 [0x0134]: DRS_MOD_FLAG - Set if DRS configuration registers are modified (Default: 0x00000000) ****** */
 
 /* DRS_CTRL_MOD - DRS control bits modified flags */
 #define WD2_DRS_CTRL_MOD_REG                                  WD2_REG_DRS_MOD_FLAG
@@ -3812,7 +3782,7 @@
 
 
 
-/* ****** Status Register 79 [0x013C]: COM_PLD_SIZE_MOD_FLAG - Set if maximum packet payload size register is modified (Default: 0x00000000) ****** */
+/* ****** Status Register 78 [0x0138]: COM_PLD_SIZE_MOD_FLAG - Set if maximum packet payload size register is modified (Default: 0x00000000) ****** */
 
 /* COM_PLD_SIZE_MOD - Maximum packet payload size modified flag */
 #define WD2_COM_PLD_SIZE_MOD_REG                     WD2_REG_COM_PLD_SIZE_MOD_FLAG
@@ -3821,7 +3791,7 @@
 
 
 
-/* ****** Status Register 80 [0x0140]: ADC_SAMPLE_DIV_MOD_FLAG - Set if ADC downsampling divider register is modified (Default: 0x00000000) ****** */
+/* ****** Status Register 79 [0x013C]: ADC_SAMPLE_DIV_MOD_FLAG - Set if ADC downsampling divider register is modified (Default: 0x00000000) ****** */
 
 /* ADC_SAMPLE_DIV_MOD - ADC downsampling divider modified flags */
 #define WD2_ADC_SAMPLE_DIV_MOD_REG                 WD2_REG_ADC_SAMPLE_DIV_MOD_FLAG
@@ -3830,7 +3800,7 @@
 
 
 
-/* ****** Status Register 81 [0x0144]: DAC_0_1_MOD_FLAG - Set if DAC 0 and 1 configuration registers are modified (Default: 0x00000000) ****** */
+/* ****** Status Register 80 [0x0140]: DAC_0_1_MOD_FLAG - Set if DAC 0 and 1 configuration registers are modified (Default: 0x00000000) ****** */
 
 /* DAC0_A_MOD - DAC channel a modified flags */
 #define WD2_DAC0_A_MOD_REG                                WD2_REG_DAC_0_1_MOD_FLAG
@@ -3914,7 +3884,7 @@
 
 
 
-/* ****** Status Register 82 [0x0148]: DAC_2_MOD_FLAG - Set if DAC 2 configuration registers are modified (Default: 0x00000000) ****** */
+/* ****** Status Register 81 [0x0144]: DAC_2_MOD_FLAG - Set if DAC 2 configuration registers are modified (Default: 0x00000000) ****** */
 
 /* DAC2_A_MOD - DAC channel a modified flags */
 #define WD2_DAC2_A_MOD_REG                                  WD2_REG_DAC_2_MOD_FLAG
@@ -3958,7 +3928,7 @@
 
 
 
-/* ****** Status Register 83 [0x014C]: FE_0_15_MOD_FLAG - Set if frontend configuraiton registers are modified (Default: 0x00000000) ****** */
+/* ****** Status Register 82 [0x0148]: FE_0_15_MOD_FLAG - Set if frontend configuraiton registers are modified (Default: 0x00000000) ****** */
 
 /* FE_0_MOD - Frontend channel 0 register modified flags */
 #define WD2_FE_0_MOD_REG                                  WD2_REG_FE_0_15_MOD_FLAG
@@ -4042,7 +4012,7 @@
 
 
 
-/* ****** Status Register 84 [0x0150]: HV_U_TARGET_0_7_MOD_FLAG - Set if HV target voltage configuraiton of channel 0 to 7 registers are modified (Default: 0x00000000) ****** */
+/* ****** Status Register 83 [0x014C]: HV_U_TARGET_0_7_MOD_FLAG - Set if HV target voltage configuraiton of channel 0 to 7 registers are modified (Default: 0x00000000) ****** */
 
 /* HV_U_TARGET_0_MOD - Target high voltage channel 0 register modified flags */
 #define WD2_HV_U_TARGET_0_MOD_REG                 WD2_REG_HV_U_TARGET_0_7_MOD_FLAG
@@ -4086,7 +4056,7 @@
 
 
 
-/* ****** Status Register 85 [0x0154]: HV_U_TARGET_8_15_MOD_FLAG - Set if HV target voltage configuraiton of channel 8 to 15 registers are modified (Default: 0x00000000) ****** */
+/* ****** Status Register 84 [0x0150]: HV_U_TARGET_8_15_MOD_FLAG - Set if HV target voltage configuraiton of channel 8 to 15 registers are modified (Default: 0x00000000) ****** */
 
 /* HV_U_TARGET_8_MOD - Target high voltage channel 8 register modified flags */
 #define WD2_HV_U_TARGET_8_MOD_REG                WD2_REG_HV_U_TARGET_8_15_MOD_FLAG
@@ -4130,7 +4100,7 @@
 
 
 
-/* ****** Status Register 86 [0x0158]: HV_MOD_FLAG - Set if single HV configuraiton registers are modified (Default: 0x00000000) ****** */
+/* ****** Status Register 85 [0x0154]: HV_MOD_FLAG - Set if single HV configuraiton registers are modified (Default: 0x00000000) ****** */
 
 /* HV_R_SHUNT_MOD - HV supply shunt resistor register modified flags */
 #define WD2_HV_R_SHUNT_MOD_REG                                 WD2_REG_HV_MOD_FLAG
@@ -4139,7 +4109,7 @@
 
 
 
-/* ****** Status Register 87 [0x015C]: LMK_0_7_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ****** */
+/* ****** Status Register 86 [0x0158]: LMK_0_7_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ****** */
 
 /* LMK_0_MOD - LMK channel 0 register modified flags */
 #define WD2_LMK_0_MOD_REG                                 WD2_REG_LMK_0_7_MOD_FLAG
@@ -4183,7 +4153,7 @@
 
 
 
-/* ****** Status Register 88 [0x0160]: LMK_8_15_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ****** */
+/* ****** Status Register 87 [0x015C]: LMK_8_15_MOD_FLAG - Set if LMK configuraiton registers are modified (Default: 0x00000000) ****** */
 
 /* LMK_8_MOD - LMK Register 8 modified flags */
 #define WD2_LMK_8_MOD_REG                                WD2_REG_LMK_8_15_MOD_FLAG
@@ -4220,8 +4190,8 @@
  * Number of Registers
  */
 
-#define REG_NR_OF_CTRL_REGS          139
-#define REG_NR_OF_STAT_REGS          89
+#define REG_NR_OF_CTRL_REGS          137
+#define REG_NR_OF_STAT_REGS          88
 
 #ifndef WD2_DONT_INCLUDE_REG_ACCESS_VARS
 

@@ -962,10 +962,11 @@ function receiveCrate() {
             wdb.temperature1Wire[3]);
          setItem("infoWDBTemp", wdb.temperature);
 
-         let d = Math.floor(wdb.uptime / (86400));
-         let h = Math.floor(wdb.uptime % 86400 / 3600);
-         let m = Math.floor(wdb.uptime % 3600 / 60);
-         let s = Math.floor(wdb.uptime % 60);
+         let sec = Math.floor(wdb.uptime / 100);
+         let d = Math.floor(sec / (86400));
+         let h = Math.floor(sec % 86400 / 3600);
+         let m = Math.floor(sec % 3600 / 60);
+         let s = Math.floor(sec % 60);
 
          let str = "";
          if (d > 0)
@@ -973,7 +974,7 @@ function receiveCrate() {
          str += (h < 10 ? "0" : "") + h.toString() + ":";
          str += (m < 10 ? "0" : "") + m.toString() + ":";
          str += (s < 10 ? "0" : "") + s.toString();
-         str += " (" + wdb.uptime.toString() + " s)";
+         str += " (" + sec.toString() + " s)";
          setItem("infoWDBUptime", str);
 
          str = "";
