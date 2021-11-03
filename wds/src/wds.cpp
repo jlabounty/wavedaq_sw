@@ -99,6 +99,7 @@ typedef struct {
    enum { upload, vcalib, tcalib, finished } progressMode;
    std::string progressBoard;
    double progressPercentage;
+   std::string cmdDCB;
 } GLOBALS;
 
 unsigned int demoDrsSampleFreq = 5016;
@@ -1717,13 +1718,20 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       if (uri == "/") {
          char host[256];
          gethostname(host, sizeof(host));
-
-         // redirect to DCB if running on DCB
          if (strncmp(host, "dcb", 3) == 0 || strncmp(host, "DCB", 3) == 0) {
             if (strchr(host, '.'))
                *strchr(host, '.') = 0; // strip domain
+         } else
+            host[0] = 0;
+
+         auto str = gl->cmdDCB;
+         if (str == "")
+            str = std::string(host);
+
+         // redirect to DCB if running on DCB
+         if (str != "") {
             std::string url = "HTTP/1.1 301 Moved\r\nLocation: crate.html?adr=";
-            url += host;
+            url += str;
             url += "\r\nContent-Length: 0\r\n\r\n";
             mg_printf(nc, "%s", url.c_str());
          } else {
@@ -2091,6 +2099,7 @@ int main(int argc, const char *argv[]) {
                      std::cout << std::endl;
                   }
                   gl.dcb.push_back(dcb);
+                  gl.cmdDCB = b;
 
                   for (int j=0 ; j<16 ; j++) {
                      if (dcb->GetBoardId(j)->type_id == BRD_TYPE_ID_WDB) {
