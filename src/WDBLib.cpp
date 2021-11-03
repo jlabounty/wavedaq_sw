@@ -1046,13 +1046,10 @@ float WDB::GetTCalibTemperature()
 
 unsigned int WDB::GetUptime()
 {
-   // return seconds since last reboot
+   // return time since last reboot in 10 ms ticks
    
-   ReceiveStatusRegisters(GetTimeLsbLoc() / 4, 2);
-   unsigned long lsb = this->sreg[GetTimeLsbLoc() / 4];
-   unsigned long msb = this->sreg[GetTimeMsbLoc() / 4];
-   unsigned long t = (msb << 32) | lsb;
-   return t / 80E6;
+   ReceiveStatusRegister(GetSysTimeLoc());
+   return this->sreg[GetSysTimeLoc() / 4];
 }
 
 unsigned int WDB::GetPllLock(bool refresh)
