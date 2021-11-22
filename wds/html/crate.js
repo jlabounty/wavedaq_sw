@@ -516,20 +516,29 @@ function drawWDB(ctx, slot) {
    ctx.arc(30, 127, 4, 0, 2 * Math.PI);
    ctx.fill();
 
-   for (let c = 0; c < 3; c++) {
-      ctx.fillStyle = "#7E5A21";
-      ctx.strokeStyle = "#E1C591";
-      ctx.beginPath();
-      ctx.arc(32, 140 + c * 14, 4, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.stroke();
+   if (CRATE.crate.slot[slot].hvBoardPlugged) {
+      for (let c = 0; c < 3; c++) {
+         ctx.fillStyle = "#7E5A21";
+         ctx.strokeStyle = "#E1C591";
+         ctx.beginPath();
+         ctx.arc(32, 140 + c * 14, 4, 0, 2 * Math.PI);
+         ctx.fill();
+         ctx.stroke();
 
-      ctx.fillStyle = "#7E5A21";
-      ctx.strokeStyle = "#E1C591";
-      ctx.beginPath();
-      ctx.arc(32, 140 + c * 14, 1, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.stroke();
+         ctx.fillStyle = "#7E5A21";
+         ctx.strokeStyle = "#E1C591";
+         ctx.beginPath();
+         ctx.arc(32, 140 + c * 14, 1, 0, 2 * Math.PI);
+         ctx.fill();
+         ctx.stroke();
+      }
+   } else {
+      for (let c = 0; c < 3; c++) {
+         ctx.fillStyle = "#000000";
+         ctx.beginPath();
+         ctx.arc(32, 140 + c * 14, 4, 0, 2 * Math.PI);
+         ctx.fill();
+      }
    }
 
    ctx.save();
