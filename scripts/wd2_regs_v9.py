@@ -5,7 +5,7 @@
 #  Project :  WaveDream2
 #
 #  Author  :  schmid_e (Author of generation script)
-#  Created :  29.10.2021 09:36:48
+#  Created :  13.12.2021 11:25:45
 #
 #  Register Layout Version :  9
 #
@@ -162,7 +162,8 @@ WD2_REG_ADV_TRG_CFG17                           = 0x1210
 WD2_REG_ADV_TRG_CFG18                           = 0x1214
 WD2_REG_ADV_TRG_CFG19                           = 0x1218
 WD2_REG_DBG_SIG_SEL                             = 0x121C
-WD2_REG_CRC32_REG_BANK                          = 0x1220
+WD2_REG_DRS_TRG_RO_DLY                          = 0x1220
+WD2_REG_CRC32_REG_BANK                          = 0x1224
 
 # Status Registers 
 WD2_REG_HW_VER                                  = 0x0000
@@ -2826,7 +2827,16 @@ WD2_MCX_RX_SIG_SEL_OFS                   =                                 0
 
 
 
-# ****** Control Register 136 [0x1220]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: None) ******
+# ****** Control Register 136 [0x1220]: DRS_TRG_RO_DLY - Trigger to DRS Readout Delay (Default: 0x00000008) ******
+
+# DRS_TRG_RO_DLY - Delay from trigger to DRS readout in number of 12.5ns clock cycles (default is 8)
+WD2_DRS_TRG_RO_DLY_REG                   =            WD2_REG_DRS_TRG_RO_DLY
+WD2_DRS_TRG_RO_DLY_MASK                  =                        0xFFFFFFFF
+WD2_DRS_TRG_RO_DLY_OFS                   =                                 0
+
+
+
+# ****** Control Register 137 [0x1224]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: None) ******
 
 # CRC32_REG_BANK - Keep at the end of the register bank
 WD2_CRC32_REG_BANK_REG                   =            WD2_REG_CRC32_REG_BANK
@@ -4178,7 +4188,7 @@ WD2_LMK_15_MOD_OFS                       =                                 0
 # Number of Registers
  
 
-REG_NR_OF_CTRL_REGS          = 137
+REG_NR_OF_CTRL_REGS          = 138
 REG_NR_OF_STAT_REGS          = 88
 
 
@@ -4324,6 +4334,7 @@ wd2_reg_list = [
   [ "ADV_TRG_CFG18"             , WD2_REG_ADV_TRG_CFG18             , "ADV_TRG_CTRL"                   , "Advanced Trigger Configuration Register 18" ],
   [ "ADV_TRG_CFG19"             , WD2_REG_ADV_TRG_CFG19             , "ADV_TRG_CTRL"                   , "Advanced Trigger Configuration Register 19" ],
   [ "DBG_SIG_SEL"               , WD2_REG_DBG_SIG_SEL               , "None"                           , "Debug Signal Select for MCX Connectors on HV Board" ],
+  [ "DRS_TRG_RO_DLY"            , WD2_REG_DRS_TRG_RO_DLY            , "None"                           , "Trigger to DRS Readout Delay" ],
   [ "CRC32_REG_BANK"            , WD2_REG_CRC32_REG_BANK            , "None"                           , "CRC32 Checksum of Register Bank Content" ],
   [ "HW_VER"                    , WD2_REG_HW_VER                    , "None"                           , "Hardware version information of the PCB" ],
   [ "REG_LAYOUT_VER"            , WD2_REG_REG_LAYOUT_VER            , "None"                           , "Register map layout version information" ],
@@ -4823,6 +4834,7 @@ wd2_bit_group_list = [
   [ "ADV_TRG_CFG_19"                , WD2_ADV_TRG_CFG_19_REG                , WD2_ADV_TRG_CFG_19_MASK                , WD2_ADV_TRG_CFG_19_OFS               , "Advanced trigger configuration register 19" ],
   [ "MCX_TX_SIG_SEL"                , WD2_MCX_TX_SIG_SEL_REG                , WD2_MCX_TX_SIG_SEL_MASK                , WD2_MCX_TX_SIG_SEL_OFS               , "Select for TX connector (see RX connector for mapping)" ],
   [ "MCX_RX_SIG_SEL"                , WD2_MCX_RX_SIG_SEL_REG                , WD2_MCX_RX_SIG_SEL_MASK                , WD2_MCX_RX_SIG_SEL_OFS               , "Select for RX connector: / 0x0 = UART (communication to MicroBlaze) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low)" ],
+  [ "DRS_TRG_RO_DLY"                , WD2_DRS_TRG_RO_DLY_REG                , WD2_DRS_TRG_RO_DLY_MASK                , WD2_DRS_TRG_RO_DLY_OFS               , "Delay from trigger to DRS readout in number of 12.5ns clock cycles (default is 8)" ],
   [ "CRC32_REG_BANK"                , WD2_CRC32_REG_BANK_REG                , WD2_CRC32_REG_BANK_MASK                , WD2_CRC32_REG_BANK_OFS               , "Keep at the end of the register bank" ],
   [ "BOARD_MAGIC"                   , WD2_BOARD_MAGIC_REG                   , WD2_BOARD_MAGIC_MASK                   , WD2_BOARD_MAGIC_OFS                  , "0xAC, Magic number for DRS board identification" ],
   [ "VENDOR_ID"                     , WD2_VENDOR_ID_REG                     , WD2_VENDOR_ID_MASK                     , WD2_VENDOR_ID_OFS                    , "ID of the board vendor (0x01 for PSI)" ],
@@ -5161,7 +5173,8 @@ ctrl_reg_default = [0xFFFFFFFF,   # Offset 0x1000
                     0x00000000,   # Offset 0x1210 
                     0x00000000,   # Offset 0x1214 
                     0x00000000,   # Offset 0x1218 
-                    0x00000000]   # Offset 0x121C 
+                    0x00000000,   # Offset 0x121C 
+                    0x00000008]   # Offset 0x1220 
 
 
 # #############################################################################

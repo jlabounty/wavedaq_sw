@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  02.11.2021 15:54:24
+// Created :  13.12.2021 11:26:07
 //
 // Register Layout Versions :  8, 9
 //
@@ -55,7 +55,7 @@ public:
          case 8:
             return 160;
          case 9:
-            return 137;
+            return 138;
          default:
             throw std::invalid_argument("Function GetNrOfCtrlRegs() not defined for this board version");
       };
@@ -9589,7 +9589,7 @@ public:
             return BitExtractControl(0x127C, 0xFFFFFFFF, 0);
          case 9:
             // Keep at the end of the register bank
-            return BitExtractControl(0x1220, 0xFFFFFFFF, 0);
+            return BitExtractControl(0x1224, 0xFFFFFFFF, 0);
          default:
             throw std::invalid_argument("Function GetCrc32RegBank() not defined for this board version");
       };
@@ -9603,7 +9603,7 @@ public:
             return SetRegMask(0x127C, 0xFFFFFFFF, 0, value);
          case 9:
             // Keep at the end of the register bank
-            return SetRegMask(0x1220, 0xFFFFFFFF, 0, value);
+            return SetRegMask(0x1224, 0xFFFFFFFF, 0, value);
          default:
             throw std::invalid_argument("Function SetCrc32RegBank() not defined for this board version");
       };
@@ -9621,7 +9621,7 @@ public:
             // Keep at the end of the register bank
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x1220;
+            return 0x1224;
          default:
             throw std::invalid_argument("Function GetCrc32RegBankLoc() not defined for this board version");
       };
@@ -12578,6 +12578,43 @@ public:
             return 0x0034;
          default:
             throw std::invalid_argument("Function GetDrsStopWsr1Loc() not defined for this board version");
+      };
+   };
+
+   // Bit(s) DRS_TRG_RO_DLY
+   unsigned int GetDrsTrgRoDly()
+   {
+      switch(this->mVersion)
+      {
+         case 9:
+            // Delay from trigger to DRS readout in number of 12.5ns clock cycles (default is 8)
+            return BitExtractControl(0x1220, 0xFFFFFFFF, 0);
+         default:
+            throw std::invalid_argument("Function GetDrsTrgRoDly() not defined for this board version");
+      };
+   };
+   void SetDrsTrgRoDly(unsigned int value)
+   {
+      switch(this->mVersion)
+      {
+         case 9:
+            // Delay from trigger to DRS readout in number of 12.5ns clock cycles (default is 8)
+            return SetRegMask(0x1220, 0xFFFFFFFF, 0, value);
+         default:
+            throw std::invalid_argument("Function SetDrsTrgRoDly() not defined for this board version");
+      };
+   };
+   unsigned int GetDrsTrgRoDlyLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
+   {
+      switch(this->mVersion)
+      {
+         case 9:
+            // Delay from trigger to DRS readout in number of 12.5ns clock cycles (default is 8)
+            if(BitMask) *BitMask = 0xFFFFFFFF;
+            if(BitOfs) *BitOfs = 0;
+            return 0x1220;
+         default:
+            throw std::invalid_argument("Function GetDrsTrgRoDlyLoc() not defined for this board version");
       };
    };
 

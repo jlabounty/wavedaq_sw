@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  29.10.2021 09:36:48
+ *  Created :  13.12.2021 11:25:44
  *
  *  Register Layout Version :  9
  *
@@ -174,7 +174,8 @@
 #define WD2_REG_ADV_TRG_CFG18                           0x1214
 #define WD2_REG_ADV_TRG_CFG19                           0x1218
 #define WD2_REG_DBG_SIG_SEL                             0x121C
-#define WD2_REG_CRC32_REG_BANK                          0x1220
+#define WD2_REG_DRS_TRG_RO_DLY                          0x1220
+#define WD2_REG_CRC32_REG_BANK                          0x1224
 
 /* *** Status Registers *** */
 #define WD2_REG_HW_VER                                  0x0000
@@ -2838,7 +2839,16 @@
 
 
 
-/* ****** Control Register 136 [0x1220]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: None) ****** */
+/* ****** Control Register 136 [0x1220]: DRS_TRG_RO_DLY - Trigger to DRS Readout Delay (Default: 0x00000008) ****** */
+
+/* DRS_TRG_RO_DLY - Delay from trigger to DRS readout in number of 12.5ns clock cycles (default is 8) */
+#define WD2_DRS_TRG_RO_DLY_REG                              WD2_REG_DRS_TRG_RO_DLY
+#define WD2_DRS_TRG_RO_DLY_MASK                                         0xFFFFFFFF
+#define WD2_DRS_TRG_RO_DLY_OFS                                                   0
+
+
+
+/* ****** Control Register 137 [0x1224]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: None) ****** */
 
 /* CRC32_REG_BANK - Keep at the end of the register bank */
 #define WD2_CRC32_REG_BANK_REG                              WD2_REG_CRC32_REG_BANK
@@ -4190,7 +4200,7 @@
  * Number of Registers
  */
 
-#define REG_NR_OF_CTRL_REGS          137
+#define REG_NR_OF_CTRL_REGS          138
 #define REG_NR_OF_STAT_REGS          88
 
 #ifndef WD2_DONT_INCLUDE_REG_ACCESS_VARS
