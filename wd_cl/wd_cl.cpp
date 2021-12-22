@@ -663,7 +663,7 @@ int main(int argc, char *argv[])
       printf("[17]: update firmware      \t \t  [18]: clean buffer         \n");
       printf("[19]: show DAQ status      \t \t  [20]: reboot CMBs          \n");
       printf("[21]: Ascii command        \t \t  [22]: Pedestal scan        \n");
-      printf("[23]: Make Sequencer file  \t \t  [  ]:                      \n");
+      printf("[23]: Make Sequencer file  \t \t  [24]: flash CMBs           \n");
       do {
          char opline[256];
          printf("give an option: ");
@@ -1337,6 +1337,16 @@ int main(int argc, char *argv[])
             printf("then copy the files to Sequencer directory, typically:\n");
             printf("$ cp *.odb *.msl ~/online/sequencer/lib\n\n");
 
+         }
+         if(option == 24)
+         {
+            for(auto c : *sys){
+               int mscbhandle = c->GetMscbHandle();
+               int status = mscb_flash(mscbhandle, 20, 0, 0);
+               // print something only in case of error
+               if (status != MSCB_SUCCESS)
+                  printf("Error: status = %d\n", status);
+            }
          }
       } while ( option == 0 ) ;
       /* end of the main loop on the options*/
