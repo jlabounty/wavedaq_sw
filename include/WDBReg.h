@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  11.01.2022 07:41:00
+// Created :  18.01.2022 08:26:07
 //
 // Register Layout Versions :  8, 9
 //
@@ -53,7 +53,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
-            return 160;
+            return 161;
          case 9:
             return 138;
          default:
@@ -9586,7 +9586,7 @@ public:
       {
          case 8:
             // Keep at the end of the register bank
-            return BitExtractControl(0x127C, 0xFFFFFFFF, 0);
+            return BitExtractControl(0x1280, 0xFFFFFFFF, 0);
          case 9:
             // Keep at the end of the register bank
             return BitExtractControl(0x1224, 0xFFFFFFFF, 0);
@@ -9600,7 +9600,7 @@ public:
       {
          case 8:
             // Keep at the end of the register bank
-            return SetRegMask(0x127C, 0xFFFFFFFF, 0, value);
+            return SetRegMask(0x1280, 0xFFFFFFFF, 0, value);
          case 9:
             // Keep at the end of the register bank
             return SetRegMask(0x1224, 0xFFFFFFFF, 0, value);
@@ -9616,7 +9616,7 @@ public:
             // Keep at the end of the register bank
             if(BitMask) *BitMask = 0xFFFFFFFF;
             if(BitOfs) *BitOfs = 0;
-            return 0x127C;
+            return 0x1280;
          case 9:
             // Keep at the end of the register bank
             if(BitMask) *BitMask = 0xFFFFFFFF;
@@ -12586,6 +12586,9 @@ public:
    {
       switch(this->mVersion)
       {
+         case 8:
+            // Delay from trigger to DRS readout in number of 12.5ns clock cycles (default is 8)
+            return BitExtractControl(0x127C, 0xFFFFFFFF, 0);
          case 9:
             // Delay from trigger to DRS readout in number of 12.5ns clock cycles (default is 8)
             return BitExtractControl(0x1220, 0xFFFFFFFF, 0);
@@ -12597,6 +12600,9 @@ public:
    {
       switch(this->mVersion)
       {
+         case 8:
+            // Delay from trigger to DRS readout in number of 12.5ns clock cycles (default is 8)
+            return SetRegMask(0x127C, 0xFFFFFFFF, 0, value);
          case 9:
             // Delay from trigger to DRS readout in number of 12.5ns clock cycles (default is 8)
             return SetRegMask(0x1220, 0xFFFFFFFF, 0, value);
@@ -12608,6 +12614,11 @@ public:
    {
       switch(this->mVersion)
       {
+         case 8:
+            // Delay from trigger to DRS readout in number of 12.5ns clock cycles (default is 8)
+            if(BitMask) *BitMask = 0xFFFFFFFF;
+            if(BitOfs) *BitOfs = 0;
+            return 0x127C;
          case 9:
             // Delay from trigger to DRS readout in number of 12.5ns clock cycles (default is 8)
             if(BitMask) *BitMask = 0xFFFFFFFF;

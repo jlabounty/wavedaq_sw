@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  11.01.2022 07:39:53
+ *  Created :  18.01.2022 08:15:03
  *
  *  Register Layout Version :  8
  *
@@ -181,6 +181,7 @@ const wd2_reg_func_type  wd2_ctrl_reg_func_list[] = {
   { wd2_hw_reg       , 0 },   /* ctrl register 156: ADV_TRG_CFG18 */
   { wd2_hw_reg       , 0 },   /* ctrl register 157: ADV_TRG_CFG19 */
   { wd2_hw_reg       , 0 },   /* ctrl register 158: DBG_SIG_SEL */
+  { wd2_hw_reg       , 0 },   /* ctrl register 159: DRS_TRG_RO_DLY */
   { wd2_hw_reg       , 0 }    /* stat register 88: LMK_8_15_MOD_FLAG */
 };
 
@@ -444,6 +445,7 @@ const wd2_reg_name_entry_type  wd2_reg_list[] = {
   { "ADV_TRG_CFG18"             , WD2_REG_ADV_TRG_CFG18             },
   { "ADV_TRG_CFG19"             , WD2_REG_ADV_TRG_CFG19             },
   { "DBG_SIG_SEL"               , WD2_REG_DBG_SIG_SEL               },
+  { "DRS_TRG_RO_DLY"            , WD2_REG_DRS_TRG_RO_DLY            },
   { "CRC32_REG_BANK"            , WD2_REG_CRC32_REG_BANK            },
   { "HW_VER"                    , WD2_REG_HW_VER                    },
   { "REG_LAYOUT_VER"            , WD2_REG_REG_LAYOUT_VER            },
@@ -1013,6 +1015,7 @@ const wd2_bit_group_entry_type  wd2_bit_group_list[] = {
   { "ADV_TRG_CFG_19"                , WD2_ADV_TRG_CFG_19_REG                , WD2_ADV_TRG_CFG_19_MASK                , WD2_ADV_TRG_CFG_19_OFS                },
   { "MCX_TX_SIG_SEL"                , WD2_MCX_TX_SIG_SEL_REG                , WD2_MCX_TX_SIG_SEL_MASK                , WD2_MCX_TX_SIG_SEL_OFS                },
   { "MCX_RX_SIG_SEL"                , WD2_MCX_RX_SIG_SEL_REG                , WD2_MCX_RX_SIG_SEL_MASK                , WD2_MCX_RX_SIG_SEL_OFS                },
+  { "DRS_TRG_RO_DLY"                , WD2_DRS_TRG_RO_DLY_REG                , WD2_DRS_TRG_RO_DLY_MASK                , WD2_DRS_TRG_RO_DLY_OFS                },
   { "CRC32_REG_BANK"                , WD2_CRC32_REG_BANK_REG                , WD2_CRC32_REG_BANK_MASK                , WD2_CRC32_REG_BANK_OFS                },
   { "BOARD_MAGIC"                   , WD2_BOARD_MAGIC_REG                   , WD2_BOARD_MAGIC_MASK                   , WD2_BOARD_MAGIC_OFS                   },
   { "VENDOR_ID"                     , WD2_VENDOR_ID_REG                     , WD2_VENDOR_ID_MASK                     , WD2_VENDOR_ID_OFS                     },
@@ -1380,7 +1383,8 @@ const unsigned int ctrl_reg_default[] = {
   0x00000000,   /* Offset 0x126C */
   0x00000000,   /* Offset 0x1270 */
   0x00000000,   /* Offset 0x1274 */
-  0x00000000    /* Offset 0x1278 */
+  0x00000000,   /* Offset 0x1278 */
+  0x00000008    /* Offset 0x127C */
 };
 
 #endif /* WD2_DONT_INCLUDE_VARS */

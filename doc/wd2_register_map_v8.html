@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Created :   11.01.2022 07:39:53 -->
+<!-- Created :   18.01.2022 08:15:03 -->
 <html>
 
 <head>
@@ -7,7 +7,7 @@
   <title>WD2 Register Map V8</title></head>
 
 <body>
-  <h1>WD2 Register Map Version 8</h1>  Generated : 11.01.2022 07:39:53  <a id="ctrl_register_overview"><h2>Control Registers</h2></a>
+  <h1>WD2 Register Map Version 8</h1>  Generated : 18.01.2022 08:15:03  <a id="ctrl_register_overview"><h2>Control Registers</h2></a>
   <table>
     <tbody>
       <tr class="reg_header">
@@ -1454,10 +1454,19 @@
         <td style="text-align:right" ><a href="#ctrl_register_159" id="ctrl_reg_list_159">159</a></td>
         <td style="text-align:right" ><a href="#ctrl_register_159">0x127C</a></td>
         <td style="text-align:center"><a href="#ctrl_register_159">HW</a></td>
-        <td style="text-align:right" ><a href="#ctrl_register_159">None</a></td>
-        <td style="text-align:left"  ><a href="#ctrl_register_159">CRC32_REG_BANK</a></td>
-        <td style="text-align:left"  ><a href="#ctrl_register_159">CRC32 Checksum of Register Bank Content</a></td>
+        <td style="text-align:right" ><a href="#ctrl_register_159">0x00000008</a></td>
+        <td style="text-align:left"  ><a href="#ctrl_register_159">DRS_TRG_RO_DLY</a></td>
+        <td style="text-align:left"  ><a href="#ctrl_register_159">Trigger to DRS Readout Delay</a></td>
         <td style="text-align:left"  ><a href="#ctrl_register_159">None</a></td>
+      </tr>
+      <tr class="reg_list">
+        <td style="text-align:right" ><a href="#ctrl_register_160" id="ctrl_reg_list_160">160</a></td>
+        <td style="text-align:right" ><a href="#ctrl_register_160">0x1280</a></td>
+        <td style="text-align:center"><a href="#ctrl_register_160">HW</a></td>
+        <td style="text-align:right" ><a href="#ctrl_register_160">None</a></td>
+        <td style="text-align:left"  ><a href="#ctrl_register_160">CRC32_REG_BANK</a></td>
+        <td style="text-align:left"  ><a href="#ctrl_register_160">CRC32 Checksum of Register Bank Content</a></td>
+        <td style="text-align:left"  ><a href="#ctrl_register_160">None</a></td>
       </tr>
       <tr class="back_to_overview">        <td class="back_to_overview" colspan="7"><a href="#ctrl_register_overview">Control Registers Top</a></a></td>      </tr>
     </tbody>
@@ -12366,7 +12375,7 @@
         <td class="back_to_overview" colspan="7"><a href="#ctrl_reg_list_158">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
-        <td class="reg_table_title" colspan="7"><a id="ctrl_register_159"><h3>Control Register CRC32_REG_BANK</h3></a></td>
+        <td class="reg_table_title" colspan="7"><a id="ctrl_register_159"><h3>Control Register DRS_TRG_RO_DLY</h3></a></td>
       </tr>
       <tr class="reg_header">
         <th>#</th>
@@ -12380,6 +12389,39 @@
       <tr class="reg_name">
         <td style="text-align:center">159</td>
         <td style="text-align:right" >0x127C</td>
+        <td style="text-align:center">HW</td>
+        <td style="text-align:center"></td>
+        <td style="text-align:right" >0x00000008</td>
+        <td style="text-align:left"  >DRS_TRG_RO_DLY</td>
+        <td style="text-align:left"  >Trigger to DRS Readout Delay</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center">31:0</td>
+        <td style="text-align:right" >0x00000008</td>
+        <td style="text-align:left"  >DRS_TRG_RO_DLY</td>
+        <td style="text-align:left"  >Delay from trigger to DRS readout in number of 12.5ns clock cycles (default is 8)</td>
+      </tr>
+      <tr class="back_to_overview">
+        <td class="back_to_overview" colspan="7"><a href="#ctrl_reg_list_159">Register Overview</a></td>
+      </tr>
+      <tr class="reg_table_title">
+        <td class="reg_table_title" colspan="7"><a id="ctrl_register_160"><h3>Control Register CRC32_REG_BANK</h3></a></td>
+      </tr>
+      <tr class="reg_header">
+        <th>#</th>
+        <th>Offset</th>
+        <th>HW/SW</th>
+        <th>Bit</th>
+        <th>Initial</th>
+        <th>Name</th>
+        <th>Comment</th>
+      </tr>
+      <tr class="reg_name">
+        <td style="text-align:center">160</td>
+        <td style="text-align:right" >0x1280</td>
         <td style="text-align:center">HW</td>
         <td style="text-align:center"></td>
         <td style="text-align:right" >None</td>
@@ -12396,7 +12438,7 @@
         <td style="text-align:left"  >Keep at the end of the register bank</td>
       </tr>
       <tr class="back_to_overview">
-        <td class="back_to_overview" colspan="7"><a href="#ctrl_reg_list_159">Register Overview</a></td>
+        <td class="back_to_overview" colspan="7"><a href="#ctrl_reg_list_160">Register Overview</a></td>
       </tr>
       <tr class="reg_table_title">
         <td class="reg_table_title" colspan="7"><a id="stat_register_0"><h3>Status Register HW_VER</h3></a></td>
@@ -16628,7 +16670,7 @@
   </table>
 
   <br>
-  Generated :   11.01.2022 07:39:53
+  Generated :   18.01.2022 08:15:03
 
 </body>
 
