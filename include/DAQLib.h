@@ -223,6 +223,62 @@ template <class T> class DAQBuffer : public DAQBufferBase {
          lock.unlock();
          return true;
       }
+      //push a bunch of events at once
+      bool Try_push(std::vector<T*>& dataVector){
+         std::lock_guard<std::mutex> lock(fAccess);
+         bool success = true;
+         for(auto &data : dataVector){
+            //check size
+            if(fEvents.size() < fMaxSize){
+               //not full
+               fEvents.push(data);
+               data = nullptr;
+            } else {
+               //full
+               //TODO: add exception
+               //printf("BUFFER OVERSIZE");
+               success = false;
+               //could return here
+            }
+         }
+
+         if(fEvents.size() > 0) 
+            fHasData.notify_one();
+
+         return success;
+      };
+      // pops a bunch of events if available
+      bool Try_pop(std::vector<T*> &ptr){
+         std::unique_lock<std::mutex> lock(fAccess);
+         //check size
+         if(fEvents.size() == 0){
+            //no data, wait
+            /*std::cv_status status = fHasData.wait_for(lock,std::chrono::milliseconds(100), GetSize());
+            if(status == std::cv_status::timeout) {
+               lock.unlock();
+               return false;
+            }*/
+
+            if(fHasData.wait_for(lock, fLockWaitDuration, [&]{return fEvents.size()!=0; }))
+            {
+               //got some data
+            } else {
+               lock.unlock();
+               return false;
+
+            }
+         }
+         unsigned long size = fEvents.size();
+         if(ptr.capacity() < size){
+            ptr.reserve(size);
+         }
+         for(unsigned long i=0; i<size; i++){
+            ptr.push_back(fEvents.front());
+            fEvents.pop();
+         }
+         lock.unlock();
+         return true;
+      }
 
       unsigned int GetSize(){
          std::lock_guard<std::mutex> lock(fAccess);
@@ -272,12 +328,26 @@ public:
    bool Try_pop_from(T* &ptr, unsigned int buffer){
       return buffers[buffer]->Try_pop(ptr);
    }
+   bool Try_push_into(std::vector<T*> &data, unsigned int buffer){
+      return buffers[buffer]->Try_push(data);
+   }
+   bool Try_pop_from(std::vector<T*> &ptr, unsigned int buffer){
+      return buffers[buffer]->Try_pop(ptr);
+   }
    //using a key
    bool Try_push(T* data, unsigned int key=0){
       int buffer = key % buffers.size();
       return buffers[buffer]->Try_push(data);
    }
    bool Try_pop(T* &ptr, unsigned int key=0){
+      int buffer = key % buffers.size();
+      return buffers[buffer]->Try_pop(ptr);
+   }
+   bool Try_push(std::vector<T*> &data, unsigned int key=0){
+      int buffer = key % buffers.size();
+      return buffers[buffer]->Try_push(data);
+   }
+   bool Try_pop(std::vector<T*> &ptr, unsigned int key=0){
       int buffer = key % buffers.size();
       return buffers[buffer]->Try_pop(ptr);
    }
