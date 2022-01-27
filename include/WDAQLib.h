@@ -2,6 +2,7 @@
 #include "WDBLib.h"
 #include <cmath>
 #include <list>
+#include <vector>
 #include <iostream>
 #include <fstream>
 
@@ -449,8 +450,8 @@ class WDAQPacketCollector: public DAQServerThread{
 
    void Begin();
 
-   void GotData(int size, unsigned char* dataptr);
-   void PushPacket(WDAQPacketData*);
+   void GotData();
+   void PushPackets(std::vector<WDAQPacketData*> &);
    
    void End();
 

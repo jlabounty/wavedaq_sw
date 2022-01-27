@@ -244,10 +244,14 @@ void DAQServerThread::Setup(){
    //setup iovecs
    memset(fMsgs, 0, sizeof(fMsgs));
    for (int i = 0; i < MAXMSG; i++) {
-      fIoVecs[i].iov_base         = fDatagramBuffer[i];
-      fIoVecs[i].iov_len          = MAXUDPSIZE;
-      fMsgs[i].msg_hdr.msg_iov    = &fIoVecs[i];
-      fMsgs[i].msg_hdr.msg_iovlen = 1;
+      fIoVecs[i].iov_base             = fDatagramBuffer[i];
+      fIoVecs[i].iov_len              = MAXUDPSIZE;
+      fMsgs[i].msg_hdr.msg_name       = &fAddresses[i];
+      fMsgs[i].msg_hdr.msg_namelen    = sizeof(sockaddr_in);
+      fMsgs[i].msg_hdr.msg_iov        = &fIoVecs[i];
+      fMsgs[i].msg_hdr.msg_iovlen     = 1;
+      fMsgs[i].msg_hdr.msg_control    = NULL;
+      fMsgs[i].msg_hdr.msg_controllen = 0;
    }
 }
 
@@ -274,12 +278,40 @@ void DAQServerThread::Loop(){
          throw std::runtime_error(std::string("Cannot recvmmsg"));
       } else if(fRecvMsg>0){
          //produce
-         for(int i=0; i<fRecvMsg; i++){
-            GotData(fMsgs[i].msg_len, fDatagramBuffer[i]);
-         }
+         GotData();
       }
    } else {
       //timeout: nothing to read
+   }
+}
+
+//return address for given message
+char* DAQServerThread::GetMessageSourceAddress(unsigned int id){
+   if(id >= fRecvMsg){
+      fSrcAddress[0] = '\0';
+   } else {
+      inet_ntop(AF_INET, &(fAddresses[id].sin_addr), fSrcAddress, INET_ADDRSTRLEN);
+   }
+   return fSrcAddress;  
+}
+
+//return buffer content
+unsigned char* DAQServerThread::GetMessageData(unsigned int id){
+   if(id >= fRecvMsg){
+      // out of range
+      return nullptr;
+   } else {
+      return fDatagramBuffer[id];
+   }
+}
+
+//return buffer length
+unsigned int DAQServerThread::GetMessageSize(unsigned int id){
+   if(id >= fRecvMsg){
+      // out of range
+      return 0;
+   } else {
+      return fMsgs[id].msg_len;
    }
 }
 

@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <fcntl.h>
 
 template <class T> class DAQMemoryPool;
@@ -247,6 +248,39 @@ template <class T> class DAQBuffer : public DAQBufferBase {
 
          return success;
       };
+      //push a bunch of events at once
+      bool Try_push(std::vector<T*>& dataVector, std::vector<bool>& enableVector){
+         if(dataVector.size() != enableVector.size()){
+            printf("size mismatch %d %d\n", dataVector.size(), enableVector.size());
+            return false;
+         }
+
+         std::lock_guard<std::mutex> lock(fAccess);
+
+         bool success = true;
+         for(unsigned int iData = 0; iData < dataVector.size(); iData++){
+            // only for enabled items
+            if(enableVector[iData]){
+               //check size
+               if(fEvents.size() < fMaxSize){
+                  //not full
+                  fEvents.push(dataVector[iData]);
+                  dataVector[iData] = nullptr;
+               } else {
+                  //full
+                  //TODO: add exception
+                  //printf("BUFFER OVERSIZE");
+                  success = false;
+                  //could return here
+               }
+            }
+         }
+
+         if(fEvents.size() > 0) 
+            fHasData.notify_one();
+
+         return success;
+      };
       // pops a bunch of events if available
       bool Try_pop(std::vector<T*> &ptr){
          std::unique_lock<std::mutex> lock(fAccess);
@@ -350,6 +384,20 @@ public:
    bool Try_pop(std::vector<T*> &ptr, unsigned int key=0){
       int buffer = key % buffers.size();
       return buffers[buffer]->Try_pop(ptr);
+   }
+   bool Try_push(std::vector<T*> &data, std::vector<unsigned int> &keys){
+      bool ret = true;
+      std::vector<bool> enable(keys.size());
+
+      for(unsigned int ibuffer=0; ibuffer<buffers.size(); ibuffer++){
+         for(unsigned int iKey=0; iKey<keys.size(); iKey++){
+            enable[iKey] = ((keys[iKey] % buffers.size()) == ibuffer);
+         }
+         ret &= buffers[ibuffer]->Try_push(data, enable);
+         if (!ret) printf("cannot push into %d\n", ibuffer);
+      }
+
+      return ret;
    }
 
    unsigned int GetSize(){
@@ -490,6 +538,8 @@ class DAQServerThread : public DAQThread{
       unsigned char fDatagramBuffer[MAXMSG][MAXUDPSIZE];
       struct mmsghdr fMsgs[MAXMSG];
       struct iovec fIoVecs[MAXMSG];
+      struct sockaddr_in fAddresses[MAXMSG];
+      char fSrcAddress[INET_ADDRSTRLEN];
       int fRecvMsg;
       struct timespec fTimeout;
 
@@ -508,7 +558,14 @@ class DAQServerThread : public DAQThread{
       }
 
       //to be implemented in derived class to setup functionalities
-      virtual void GotData(int size, unsigned char *data) { };
+      virtual void GotData() { };
+
+   protected:
+      //helper functions to be used in GotData
+      unsigned int GetMessages() { return  fRecvMsg; }
+      char* GetMessageSourceAddress(unsigned int id);
+      unsigned char* GetMessageData(unsigned int id);
+      unsigned int GetMessageSize(unsigned int id);
 
    public:
       //Methods
