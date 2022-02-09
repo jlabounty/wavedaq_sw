@@ -106,10 +106,9 @@ unsigned int demoDrsSampleFreq = 5016;
 
 std::vector<std::string> split(const std::string &input, char separator);
 void connectWDB(GLOBALS *gl, WDB *b);
-void connectDCB(GLOBALS *gl, DCB *d);
+void connectAllWDB(GLOBALS *gl, DCB *d);
 void disconnectWDB(GLOBALS *gl, WDB *b);
 void disconnectDCB(GLOBALS *gl, DCB *d);
-void switchDaqClock(GLOBALS *gl, DCB *dcb);
 
 /*------------------------------------------------------------------*/
 
@@ -334,10 +333,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
                   gl->dcb.push_back(dcb);
                   mg_printf_http_chunk(nc, "{\n   \"Status\": \"OK\"\n}\n");
 
-                  connectDCB(gl, dcb);
-
-                  dcb->ResetSerdes(0, true);
-                  dcb->ResetSerdes(1, false);
+                  connectAllWDB(gl, dcb);
 
                } catch (std::runtime_error &e) {
                   if (gl->verbose)
@@ -684,8 +680,10 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
             connectWDB(gl, b);
          }
 
-         if (dcb != nullptr)
-            switchDaqClock(gl, dcb);
+         if (dcb != nullptr) {
+            dcb->SwitchDaqClocks();
+            dcb->WaitLockAfterClockSwitch();
+         }
 
       } else if (item == "mark") { // mark ------------------------------
 
@@ -808,7 +806,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
             }
 
             dcb->ScanCrate();
-            connectDCB(gl, dcb);
+            connectAllWDB(gl, dcb);
 
             mg_send_response_line(nc, 200, "Content-Type: application/json\r\nTransfer-Encoding: chunked\r\n");
             mg_printf_http_chunk(nc, "{\n   \"Status\": \"OK\"\n}\n");
@@ -899,6 +897,8 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
             // set destination port for DCB, MAC and IP is used automatically from UDP packet
             dcb->SetDestinationPort(gl->wp->GetServerPort());
             gl->dcb.push_back(dcb);
+            connectAllWDB(gl, dcb);
+
             if (gl->verbose)
                std::cout << "OK" << std::endl;
 
@@ -928,7 +928,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
          if (flag) {
             // do full crate scan, look for new board
             dcb->ScanCrate();
-            connectDCB(gl, dcb);
+            connectAllWDB(gl, dcb);
          }
 
          dcbinfo = dcb->SendReceiveUDP("jinfo");
@@ -1110,8 +1110,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
                   std::cout << std::endl;
                }
                gl->dcb.push_back(dcb);
-
-               connectDCB(gl, dcb);
+               connectAllWDB(gl, dcb);
 
             } catch (std::runtime_error &e) {
                if (gl->verbose)
@@ -1820,7 +1819,7 @@ void connectWDB(GLOBALS *gl, WDB *b) {
    gl->triggerMode = b->GetDaqSoftNormal() ? cTriggerModeNormal : cTriggerModeAuto;
 }
 
-void connectDCB(GLOBALS *gl, DCB *dcb) {
+void connectAllWDB(GLOBALS *gl, DCB *dcb) {
    bool newBoard = false;
    for (int i=0 ; i<16 ; i++) {
       if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
@@ -1842,76 +1841,8 @@ void connectDCB(GLOBALS *gl, DCB *dcb) {
       }
    }
 
-   switchDaqClock(gl, dcb);
-}
-
-void switchDaqClock(GLOBALS *gl, DCB *dcb) {
-
-   bool switched = false;
-
-   // switch all internal clocks to external
-   for (int i = 0; i < 16; i++) {
-      if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
-         WDB *b = dcb->GetWDB(i);
-         auto c = b->GetDaqClkSrcSel();
-         if (c == 1) {
-            if (gl->verbose)
-               std::cout << "Switch clock of " << b->GetName() << " to backplane" << std::endl;
-            b->SetExtClkFreq(80);  // 80 MHz external clock
-            b->SetDaqClkSrcSel(0); // set clock select to backplane
-            switched = true;
-         }
-      }
-   }
-
-   // only continue if at least one board has been switched
-   if (!switched)
-      return;
-
-   // wait until clocks of all WDB have been switched to the backplane
-   for (int i=0 ; i<16 ; i++) {
-      if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
-         WDB *b = dcb->GetWDB(i);
-
-         // wait until clock switched is finished
-         for (int j=0 ; j<20 ; j++) {
-            int l = b->GetExtClkActive(true);
-            if (l == 1)
-               break;
-
-            if (gl->verbose)
-               std::cout << j*100 << "ms: " << b->GetAddr() << " ExtClkActive=" << l << std::endl;
-            sleep_ms(100);
-         }
-
-         // wait until PLLs have locked
-         b->WaitPllLock();
-      }
-   }
-
-   // issue SYNC pulse on backplane
-   dcb->SendReceiveUDP("sync");
-
-   // reset serdes in DCB
-   dcb->ResetSerdes(0, true);
-
-   // reset serdes error counters in DCB
-   dcb->ResetSerdes(1, false);
-
-   if (gl->verbose) {
-      std::cout << "Reset serdes of " << dcb->GetName() << std::endl;
-      std::cout << dcb->SendReceiveUDP("sdstat");
-   }
-
-   // reset all ADCs
-   for (int i = 0; i < 16; i++) {
-      if (dcb->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
-         WDB *b = dcb->GetWDB(i);
-         b->ResetAdc();
-         if (gl->verbose)
-            std::cout << "Reset ADC of " << b->GetName() << std::endl;
-      }
-   }
+   dcb->SwitchDaqClocks();
+   dcb->WaitLockAfterClockSwitch();
 }
 
 void disconnectWDB(GLOBALS *gl, WDB *b) {
@@ -2105,15 +2036,8 @@ int main(int argc, const char *argv[]) {
                   }
                   gl.dcb.push_back(dcb);
                   gl.cmdDCB = b;
+                  connectAllWDB(&gl, dcb);
 
-                  for (int j=0 ; j<16 ; j++) {
-                     if (dcb->GetBoardId(j)->type_id == BRD_TYPE_ID_WDB) {
-                        WDB *wdb = new WDB(dcb, j, gl.verbose);
-                        connectWDB(&gl, wdb);
-                        dcb->SetWDB(j, wdb);
-                        gl.wdb.push_back(wdb);
-                     }
-                  }
                } catch (std::runtime_error &e) {
                   std::cout << std::endl;
                   std::cout << e.what() << std::endl;
@@ -2206,10 +2130,7 @@ int main(int argc, const char *argv[]) {
             std::cout << std::endl;
          }
          gl.dcb.push_back(dcb);
-         connectDCB(&gl, dcb);
-
-         dcb->ResetSerdes(0, true);
-         dcb->ResetSerdes(1, false);
+         connectAllWDB(&gl, dcb);
 
          if (!gl.verbose)
             std::cout << "OK" << std::endl;

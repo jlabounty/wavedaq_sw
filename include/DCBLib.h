@@ -51,6 +51,8 @@ class DCB: public DCBREG {
    WDAQ_BRD         mWDAQBoard[18];
    WDB              *mWDB[16];
 
+   int              mDaqClocksSwitched;
+
 public:
    
    // constructor
@@ -100,6 +102,9 @@ public:
    std::string UploadStart(int slot, int revision=0, std::string flags = "");
    std::string UploadProgress();
    std::string SendToSlot(std::string str, int slot);
+
+   void SwitchDaqClocks();
+   void WaitLockAfterClockSwitch();
 
    // setter & getter ----------
    std::string GetName() { return mDCBName; }

@@ -91,7 +91,8 @@ target_compile_definitions(dcb
 
 target_include_directories(dcb PUBLIC 
    dcb/app/src/
-   include)
+   include
+   mxml)
 
 install(TARGETS dcb
         LIBRARY DESTINATION lib

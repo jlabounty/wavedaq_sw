@@ -47,6 +47,7 @@
 #include "DCBLib.h"
 #include "register_map_dcb.h"
 #include "DCBReg.h"
+#include "WDBLib.h"
 
 #define DCB_CMD_PORT_ASCII        3000
 #define DCB_CMD_PORT_BIN          4000
@@ -825,6 +826,8 @@ void DCB::PrintVersion() {
    std::cout << "Serial number:       " << GetSerialNumber() << std::endl;
 }
 
+//--------------------------------------------------------------------
+
 /* names from wdaq_board_id.h */
 WDAQ_BRD_VENDOR_NAME;
 WDAQ_BRD_TYPE_NAME;
@@ -937,6 +940,8 @@ std::string DCB::GetHwVersion() {
    return s.str();
 }
 
+//--------------------------------------------------------------------
+
 float DCB::GetTemperatureDegree(bool refresh)
 // temperature in deg. C
 {
@@ -957,4 +962,79 @@ unsigned int DCB::GetPllLock(bool refresh)
            GetLmkPllLock() << DCB_LMK_PLL_LOCK_OFS;
 
    return mask;
+}
+
+//--------------------------------------------------------------------
+
+void DCB::SwitchDaqClocks()
+// switch clocks of all WDBs in crate to backplane
+{
+   mDaqClocksSwitched = 0;
+
+   // switch all internal clocks to external
+   for (int i = 0; i < 16; i++) {
+      if (this->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
+         WDB *b = this->GetWDB(i);
+         auto c = b->GetDaqClkSrcSel();
+         if (c == 1) {
+            if (mVerbose)
+               std::cout << "Switch clock of " << b->GetName() << " to backplane" << std::endl;
+            b->SetExtClkFreq(80);  // 80 MHz external clock
+            b->SetDaqClkSrcSel(0); // set clock select to backplane
+            mDaqClocksSwitched++;
+         }
+      }
+   }
+}
+
+void DCB::WaitLockAfterClockSwitch()
+{
+   if (mDaqClocksSwitched == 0)
+      return;
+
+   // wait until clocks of all WDB have been switched to the backplane
+   for (int i=0 ; i<16 ; i++) {
+      if (this->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
+         WDB *b = this->GetWDB(i);
+
+         // wait until clock switched is finished
+         for (int j=0 ; j<20 ; j++) {
+            int l = b->GetExtClkActive(true);
+            if (l == 1)
+               break;
+
+            if (mVerbose)
+               std::cout << j*100 << "ms: " << b->GetAddr() << " ExtClkActive=" << l << std::endl;
+            sleep_ms(100);
+         }
+
+         // wait until PLLs have locked
+         b->WaitPllLock();
+      }
+   }
+
+   // issue SYNC pulse on backplane
+   this->SendReceiveUDP("sync");
+
+   // reset serdes in DCB
+   this->ResetSerdes(0, true);
+
+   // reset serdes error counters in DCB
+   this->ResetSerdes(1, false);
+
+   if (mVerbose) {
+      std::cout << "Reset serdes of " << this->GetName() << std::endl;
+      std::cout << this->SendReceiveUDP("sdstat");
+   }
+
+   // reset all ADCs
+   for (int i = 0; i < 16; i++) {
+      if (this->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
+         WDB *b = this->GetWDB(i);
+         b->ResetAdc();
+         if (mVerbose)
+            std::cout << "Reset ADC of " << b->GetName() << std::endl;
+      }
+   }
+
 }

@@ -10,6 +10,7 @@ target_link_libraries(tcb_cl
    mscb
    tcb
    dcb
+   wdb
    ${CMAKE_THREAD_LIBS_INIT})
 
 install(TARGETS tcb_cl DESTINATION bin)
