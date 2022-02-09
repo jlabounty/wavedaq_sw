@@ -251,7 +251,7 @@ template <class T> class DAQBuffer : public DAQBufferBase {
       //push a bunch of events at once
       bool Try_push(std::vector<T*>& dataVector, std::vector<bool>& enableVector){
          if(dataVector.size() != enableVector.size()){
-            printf("size mismatch %d %d\n", dataVector.size(), enableVector.size());
+            printf("size mismatch %lu %lu\n", dataVector.size(), enableVector.size());
             return false;
          }
 
