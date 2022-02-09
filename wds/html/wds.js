@@ -439,7 +439,7 @@ function populateInfo() {
 
    let s = "";
    for (i = 8; i >= 0; i--) {
-      if ((OSC.wdb.pllLck & (1 << 8)) > 0)
+      if ((OSC.wdb.pllLck & (1 << i)) > 0)
          s += "1";
       else
          s += "0";
