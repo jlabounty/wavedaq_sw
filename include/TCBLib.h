@@ -115,6 +115,7 @@
 #define RTCTRACKMASK       0x643      // TC masks on reconstructed tracks, high to enable mask: bit [3:0]
 #define RTDCDLY            0x644      // TDC Delay for different detectors: XEC bit [7:0], TC bit [15:8]
 #define RCOMBDLY           0x645      // Delay for combined triggers: Time bit [7:0], Direction Match bit [15:8]
+#define RCDCHTRGMASK       0x646      // Mask for CDCH trigger combination
 #define RFCALOMASKS0       0x650      // Mask for FOOT calorimenter inputs reg 0
 #define RFCALOMASKS1       0x651      // Mask for FOOT calorimenter inputs reg 1
 #define RFCALOMASKS2       0x652      // Mask for FOOT calorimenter inputs reg 2
@@ -547,6 +548,7 @@ public:
    void SetNGENLowThreshold(u_int32_t *);
   // Set CDCH Stuff
   void SetCDCHMasks(u_int32_t *);
+  void SetCDCHTriggerMask(u_int32_t *);
   void SetCDCHUSMultThr(u_int32_t *);
   void SetCDCHDSMultThr(u_int32_t *);
   // Set LoLX Stuff

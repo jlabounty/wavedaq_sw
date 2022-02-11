@@ -1666,6 +1666,8 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureTcTimeOffset(property);
    } else if(name=="CdchMask"){
       ConfigureCdchMask(property);
+   } else if(name=="CdchTriggerMask"){
+      ConfigureCdchTriggerMask(property);
    } else if(name=="CdchUSMultiplicityThreshold"){
       ConfigureCdchUSMultiplicityThreshold(property);
    } else if(name=="CdchDSMultiplicityThreshold"){
@@ -2689,6 +2691,13 @@ void WDTCB::ConfigureCdchMask(Property &property){
      SetCDCHMasks((unsigned int*) masks);
    } else
       throw std::runtime_error("CdchMask size should be 8 values");
+}
+
+void WDTCB::ConfigureCdchTriggerMask(Property &property){
+   unsigned int cdchmask;
+   cdchmask = property.GetUHex();
+
+   SetCDCHTriggerMask(&cdchmask);
 }
 
 void WDTCB::ConfigureCdchUSMultiplicityThreshold(Property &property){

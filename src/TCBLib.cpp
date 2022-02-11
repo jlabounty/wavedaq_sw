@@ -1891,6 +1891,11 @@ void TCB::SetCDCHMasks(u_int32_t *data){
      WriteReg(RCDCHMASKS0+iMask,data+iMask);
    }
 }
+// set CDCH trigger mask
+void TCB::SetCDCHTriggerMask(u_int32_t *data){
+   if ((fidcode>>12)!=3) printf("setting CDCH trigger mask on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RCDCHTRGMASK,data);
+}
 // set CDCH US hits multiplicity threshold
 void TCB::SetCDCHUSMultThr(u_int32_t *data){
    if ((fidcode>>12)!=3) printf("setting CDCH masks on TCB %4x!!!!!\n", fidcode);
