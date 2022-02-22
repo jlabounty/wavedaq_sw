@@ -1017,30 +1017,45 @@ void WDAQEventBuilder::Loop(){
             //remove from local event list
             fEvents.erase(new_event_number);
 
+            //#define DEBUGBUILDER 
+
             //check older events (event id smaller than built one by 10)
             for(auto ev = fEvents.cbegin(); ev != fEvents.cend();){
                if((new_event_number - ev->first)>10){
+#ifdef DEBUGBUILDER
                   //This is to print debug information
-                  /*printf("Old event %hu (%d/%d): \n", ev->first, ev->second->IsComplete(), fNBoards);
+                  printf("Old event %hu %hu (%d/%d): \n", ev->first, ev->second->mTriggerType, ev->second->IsComplete(), fNBoards);
                     for(auto be: ev->second->fBoard[BRD_TYPE_ID_WDB]){
-                       printf("\tboard %d (%d)\n\t\t", be.first, be.second->IsComplete());
-                       for(int i=0; i<18; i++) printf("%d-%d-%d ", 
-                                                   static_cast<WDAQWdbEvent*>(be.second)->mDrsHasData[i],
-                                                   static_cast<WDAQWdbEvent*>(be.second)->mAdcHasData[i],
-                                                   static_cast<WDAQWdbEvent*>(be.second)->mTdcHasData[i]);
-                       printf("%d %d\n", static_cast<WDAQWdbEvent*>(be.second)->mTrgHasData, be.second->mEndFlagReceived);
+                       if(be.second->IsComplete()==0 || ev->first == 0) {
+                          printf("\tWDB board %d (%d)\n\t\t", be.first, be.second->IsComplete());
+                          for(int i=0; i<18; i++) printf("%d-%d-%d ", 
+                                                         static_cast<WDAQWdbEvent*>(be.second)->mDrsHasData[i],
+                                                         static_cast<WDAQWdbEvent*>(be.second)->mAdcHasData[i],
+                                                         static_cast<WDAQWdbEvent*>(be.second)->mTdcHasData[i]);
+                          printf("%d %d\n", static_cast<WDAQWdbEvent*>(be.second)->mTrgHasData, be.second->mEndFlagReceived);
+                       }
                     }
-                    for(auto& boardEvent : ev->second->fBoard[BRD_TYPE_ID_TCB])
-                       printf("\tboard %d (%d)\n", boardEvent.first, boardEvent.second->IsComplete());*/
+                    for(auto& boardEvent : ev->second->fBoard[BRD_TYPE_ID_TCB]) {
+                       if(boardEvent.second->IsComplete()==0 || ev->first == 0) {
+                          printf("\tTCB board %X (%d)\n", boardEvent.first, boardEvent.second->IsComplete());
+                          WDAQTcbEvent* tcbeve = static_cast<WDAQTcbEvent*>(boardEvent.second);
+                          for(auto bank : tcbeve->mBanks){
+                              printf("\t\t%c%c%c%c\n", bank.first[0], bank.first[1], bank.first[2], bank.first[3]);
+                              for(auto w: bank.second->data)
+                                 printf("%08x\n", w);
+                          }
+                       }
+                  }
+#endif
                   //remove old event from list
                   delete ev->second;
                   fEvents.erase(ev++);
                   fOldEvent++;
                   fDropping = true;
-               }else{
+               } else { // end if event difference larger than 10 
                   ++ev;
-               }
-            }
+               } //end else
+            } // end for on events
          }// end if evt_ptr->IsComplete()
 
          //check for too many events in the building map
@@ -1049,12 +1064,16 @@ void WDAQEventBuilder::Loop(){
             // dropping oldest
             auto ev = fEvents.cbegin();
 
+#ifdef DEBUGBUILDER
             //debug printf
-            /*printf("dropping event %d constaining %d boards\n", ev->first, ev->second->IsComplete());
+            printf("dropping event %d constaining %d boards\n", ev->first, ev->second->IsComplete());
             for(auto& boardEvent : ev->second->fBoard[BRD_TYPE_ID_WDB])
-              printf("board %d (%d)\n", boardEvent.first, boardEvent.second->IsComplete());
+               if(boardEvent.second->IsComplete()==0 || ev->first == 0)
+                  printf("WDB board %d (%d)\n", boardEvent.first, boardEvent.second->IsComplete());
             for(auto& boardEvent : ev->second->fBoard[BRD_TYPE_ID_TCB])
-              printf("board %d (%d)\n", boardEvent.first, boardEvent.second->IsComplete());*/
+               if(boardEvent.second->IsComplete()==0 || ev->first == 0)
+                  printf("TCB board %X (%d)\n", boardEvent.first, boardEvent.second->IsComplete());
+#endif
 
             delete ev->second;
             fEvents.erase(ev);
