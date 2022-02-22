@@ -895,10 +895,10 @@ function validateParam(input, channel) {
    if (input.id === "inpTriggerShaping") {
       if (input.value < 12.5)
          input.value = 12.5;
-      if (input.value > 100)
-         input.value = 100;
+      if (input.value > 400)
+         input.value = 400;
       input.value = Math.floor(input.value / 12.5) * 12.5;
-      document.getElementById("sldTriggerShaping").set((input.value - 12.5) / 87.5);
+      document.getElementById("sldTriggerShaping").set((input.value - 12.5) / 387.5);
    }
 
    if (input.id === "drsSampleFreq") {
@@ -1605,9 +1605,9 @@ function sldTriggerDelay(value) {
 function sldTriggerShaping(value) {
    if (OSC.demoMode)
       return;
-   let shaping = (Math.round(value * 7) + 1) * 12.5;
+   let shaping = (Math.round(value * 31) + 1) * 12.5;
 
-   OSC.wdb.triggerOutPulseLength = Math.round(value * 7);
+   OSC.wdb.triggerOutPulseLength = Math.round(value * 31);
    document.getElementById("inpTriggerShaping").value = shaping;
    let e = {};
    e.name = "triggerOutPulseLength";
