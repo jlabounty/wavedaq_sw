@@ -304,7 +304,7 @@ class WDSystem {
 // --- WaveDAQ WDB --- wrapper class for WDB
 class WDWDB : public WDB, public WDBoard{
    private:
-      void SetInCrate();
+      std::string GetCalibrationPath();
       void LoadCalibrationFiles();
    
    public:
@@ -498,17 +498,15 @@ class WDDCB : public DCB, public WDBoard {
    public:
       void Connect();//DCB connection are made in constructor, this only set CrateId and applies resets
 
-      void SetSerdesTraining(bool state);
+      void SetSerdesTraining(bool state) { }
       bool IsSerdesTraining();
       void TrainSerdes();
-      void WaitSerdesTrainingFinish();
+      void WaitSerdesTrainingFinish() { }
       bool IsSerdesGood();
       void WaitClockLock();
       void WaitReady();
 
       void Sync(){
-         //SetLmkSyncDcb(1);
-         //SetTrSyncBpl(1);
          SendUDP("sync");
 
          usleep(500000);//wait sync is applied

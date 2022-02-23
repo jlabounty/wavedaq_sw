@@ -1079,9 +1079,17 @@ unsigned int WDB::GetLEDState(bool refresh)
 bool WDB::WaitPllLock(int timeout)
 // wait until all PLLs have locked with timeout
 {
+   unsigned int mask = 0x1F9;
+   if(GetDrsChTxEn() & 0x100FF){
+      mask |= 0x2;
+   }
+   if(GetDrsChTxEn() & 0x2FF00){
+      mask |= 0x4;
+   }
+
    for (int i=0 ; i<timeout ; i++) {
       auto l = GetPllLock(true);
-      if (l == 0x1FF) {
+      if ((l & mask) == mask) {
          if (mVerbose && i > 0)
             std::cout << "PLL locked after " << i*10 << " ms" << std::endl;
          return true;
@@ -1098,6 +1106,37 @@ unsigned int WDB::GetExtClkActive(bool refresh)
       ReceiveStatusRegister(GetExtClkActiveLoc());
 
    return WDBREG::GetExtClkActive();
+}
+
+bool WDB::SwitchDaqClock()
+{
+   auto c = GetDaqClkSrcSel();
+   if (c == 1) {
+      if (mVerbose)
+         std::cout << "Switch clock of " << GetName() << " to backplane" << std::endl;
+      SetExtClkFreq(80);  // 80 MHz external clock
+      SetDaqClkSrcSel(0); // set clock select to backplane
+
+      return true;
+   }
+
+   return false;
+}
+
+void WDB::WaitLockAfterClockSwitch(){
+   // wait until clock switched is finished
+   for (int j=0 ; j<20 ; j++) {
+      int l = GetExtClkActive(true);
+      if (l == 1)
+         break;
+
+      if (mVerbose)
+         std::cout << j*100 << "ms: " << GetAddr() << " ExtClkActive=" << l << std::endl;
+      sleep_ms(100);
+   }
+
+   // wait until PLLs have locked
+   WaitPllLock();
 }
 
 void WDB::SetDrsSampleFreq(unsigned int f, bool wait)

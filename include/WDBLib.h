@@ -747,6 +747,8 @@ public:
    // high level methods ----------
    unsigned int GetTriggerDelayNs();
    void SetTriggerDelayNs(unsigned int ns);
+   bool SwitchDaqClock();
+   void WaitLockAfterClockSwitch();
 
    void SetRange(float r, bool wait = true);
    float GetRange();

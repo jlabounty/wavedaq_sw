@@ -975,14 +975,9 @@ void DCB::SwitchDaqClocks()
    for (int i = 0; i < 16; i++) {
       if (this->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
          WDB *b = this->GetWDB(i);
-         auto c = b->GetDaqClkSrcSel();
-         if (c == 1) {
-            if (mVerbose)
-               std::cout << "Switch clock of " << b->GetName() << " to backplane" << std::endl;
-            b->SetExtClkFreq(80);  // 80 MHz external clock
-            b->SetDaqClkSrcSel(0); // set clock select to backplane
+         if(b->SwitchDaqClock())
             mDaqClocksSwitched++;
-         }
+
       }
    }
 }
@@ -997,19 +992,7 @@ void DCB::WaitLockAfterClockSwitch()
       if (this->GetBoardId(i)->type_id == BRD_TYPE_ID_WDB) {
          WDB *b = this->GetWDB(i);
 
-         // wait until clock switched is finished
-         for (int j=0 ; j<20 ; j++) {
-            int l = b->GetExtClkActive(true);
-            if (l == 1)
-               break;
-
-            if (mVerbose)
-               std::cout << j*100 << "ms: " << b->GetAddr() << " ExtClkActive=" << l << std::endl;
-            sleep_ms(100);
-         }
-
-         // wait until PLLs have locked
-         b->WaitPllLock();
+         b->WaitLockAfterClockSwitch();
       }
    }
 

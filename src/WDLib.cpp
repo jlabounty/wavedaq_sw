@@ -469,7 +469,6 @@ void WDSystem::SetSerdesTraining(bool state){
          if(b) b->SetSerdesTraining(state);
       }
    }
-   sleep(5);
 }
 
 //System Sync
@@ -532,12 +531,16 @@ void WDSystem::TrainSerdes(bool wait){
    //WaitClockLock();
 
    Sync();
+   sleep_ms(2000);
 
    WaitClockLock();
 
    for(auto &c : fCrate){
       for(auto &b : *c){
-         if(b) b->TrainSerdes();
+         if(b) {
+            //printf("TrainSerdes %s\n", b->GetBoardName().c_str());
+            b->TrainSerdes();
+         }
       }
    }
    
@@ -548,7 +551,10 @@ void WDSystem::TrainSerdes(bool wait){
 void WDSystem::WaitSerdesTrainingFinish(){
    for(auto &c : fCrate){
       for(auto &b : *c){
-         if(b) b->WaitSerdesTrainingFinish();
+         if(b){
+            //printf("WaitSerdesTraining %s\n", b->GetBoardName().c_str());
+            b->WaitSerdesTrainingFinish();
+         }
       }
    }
 }
@@ -557,7 +563,10 @@ void WDSystem::WaitSerdesTrainingFinish(){
 void WDSystem::WaitClockLock(){
    for(auto &c : fCrate){
       for(auto &b : *c){
-         if(b) b->WaitClockLock();
+         if(b){
+            //printf("WaitClockLock %s\n", b->GetBoardName().c_str());
+            b->WaitClockLock();
+         }
       }
    }
 }
@@ -566,7 +575,10 @@ void WDSystem::WaitClockLock(){
 void WDSystem::WaitReady(){
    for(auto &c : fCrate){
       for(auto &b : *c){
-         if(b) b->WaitReady();
+         if(b){
+            //printf("WaitReady %s\n", b->GetBoardName().c_str());
+            b->WaitReady();
+         }
       }
    }
 }
@@ -801,8 +813,8 @@ WDWDB::WDWDB(WDCrate *crate, int slot, std::string name, std::string netname, bo
 //connect to the board
 void WDWDB::Connect(){
    WDB::Connect();
-   ReceiveControlRegisters();
-   ReceiveStatusRegisters();
+   std::string path = GetCalibrationPath();
+   Setup(path, 0);
 
    //Set SlotId and CrateId
    WDCrate *crate = GetCrate();
@@ -826,17 +838,14 @@ void WDWDB::Connect(){
    }
 
    printf("Connected to WD%03d\n", GetSerialNumber());
-
-   if(IsDcbInterface()){
-      SetEthComEn(0);
-      SetSerdesComEn(1);
-   }
 }
 
 void WDWDB::SetSerdesTraining(bool state){
    unsigned int regbits = GetAdvTrgCtrl();
    SetAdvTrgCtrl((regbits&0xFFFF7FF) | 0x00000430);//MASKSYNC=0, DEBUG_CTRL=1, ALGSEL=3
-   SetInCrate();
+
+   SwitchDaqClock();
+
 }
 
 bool WDWDB::IsSerdesTraining(){
@@ -846,60 +855,11 @@ bool WDWDB::IsSerdesTraining(){
 
 void WDWDB::WaitClockLock(){
    //Check clock and backplane clock source
-   bool done=false;
-   int count=30;
-
-   do{
-      ReceiveStatusRegister(GetDaqPllLockLoc());
-      done = (GetDaqPllLock() == 1);
-      done &= (GetLmkPllLock() == 1);
-      if(GetDrsChTxEn()){
-         done &= (GetDrsPllLock0() == 1);
-         done &= (GetDrsPllLock1() == 1);
-      }
-      done &= (GetOserdesPllLockDcb() == 1);
-      done &= (GetOserdesPllLockTcb() == 1);
-      done &= (GetSysDcmLock() == 1);
-
-      done &= (GetExtClkActive(true) == 1);
-
-      if(!done) {
-         usleep(100000);
-         count--;
-         if(count == 0){
-            printf("check %s!\n", GetBoardName().c_str());
-            throw std::runtime_error("WDB clock is not locked");
-         }
-      }
-   } while(!done);
+   WaitLockAfterClockSwitch();
 }
 
 void WDWDB::WaitReady(){
-   //check only clock lock
-   bool done=false;
-   int count=30;
-
-   do{
-      ReceiveStatusRegister(GetDaqPllLockLoc());
-      done = (GetDaqPllLock() == 1);
-      done &= (GetLmkPllLock() == 1);
-      if(GetDrsChTxEn()){
-         done &= (GetDrsPllLock0() == 1);
-         done &= (GetDrsPllLock1() == 1);
-      }
-      done &= (GetOserdesPllLockDcb() == 1);
-      done &= (GetOserdesPllLockTcb() == 1);
-      done &= (GetSysDcmLock() == 1);
-
-      if(!done) {
-         usleep(100000);
-         count--;
-         if(count == 0){
-            printf("check %s!\n", GetBoardName().c_str());
-            throw std::runtime_error("WDB is not ready");
-         }
-      }
-   } while(!done);
+   WaitPllLock();
 
    ReceiveStatusRegisters();
 
@@ -982,6 +942,11 @@ void WDWDB::ConfigurationStarted(){
    SetFeMux(-1, WDB::cFeMuxInput);
    SetTriggerOutPulseLength(4); // 4 clock shaping
    SetAdvTrgPedCfg(0x042B0004); // default pedestal subtraction config
+
+   //switch to backplane trigger
+   SetPatternTriggerEn(0);
+   SetExtAsyncTriggerEn(1);
+   SetExtTriggerOutEnable(0);
 }
 
 void WDWDB::ConfigurationEnded(){
@@ -990,9 +955,9 @@ void WDWDB::ConfigurationEnded(){
    SetDaqNormal(true);
 
    //reset from WDB::SetDrsSamplFreq, Already done in WDB???
-   SetAdcIfRst(1);
    LmkSyncLocal();
    SetAdcIfRst(0);
+
    ResetAdc();
 }
 
@@ -1244,7 +1209,7 @@ void WDWDB::ConfigureTriggerDelay(Property &property) {
    unsigned int delay;
    delay = property.GetUInt();
    // if delay = 0 then use the async trigger
-   if(delay == 0) { // this the same as SetInCrate
+   if(delay == 0) { // this the same as
      SetPatternTriggerEn(0);
      SetExtAsyncTriggerEn(1);
    }
@@ -1409,57 +1374,30 @@ void WDWDB::ConfigureSamplingFrequency(Property &property) {
 
 }
 
-// Set configurations to be used in a crate
-void WDWDB::SetInCrate(){
-
-   //switch to backplane trigger
-   SetPatternTriggerEn(0);
-   SetExtAsyncTriggerEn(1);
-   SetExtTriggerOutEnable(0);
-
-   //switch to backplane clock
-   if(GetExtClkInSel() != 0 || GetDaqClkSrcSel() != 0 || GetLmkInputFreq() != 80){
-
-      printf("switching clock for %s\n", GetBoardName().c_str());
-
-      SetSendBlock(true);
-      SetExtClkInSel(0);
-
-      SetDaqClkSrcSel(0);
-
-      SetLmkInputFreq(80);
-      SetSendBlock(false);
-
-      SendControlRegisters(false);
-
-      // left temporary to check if needed
-      //Reset everything
-//      ResetTcbOserdesIf();
-//      ResetDrsControlFsm();
-   }
-   
-   //Reset anyway
-   //ResetAllPll();
-}
-
 //Helper function to calibration files
-void WDWDB::LoadCalibrationFiles(){
+std::string WDWDB::GetCalibrationPath(){
    std::string calibpath = "."; 
    WDCrate* c = GetCrate();
    if(c!=nullptr){
       WDSystem * sys= c->GetSystem();
       if(sys!=nullptr){
          try{
-       calibpath = sys->GetDaqProperty("CalibPath").GetStringValue();
-    } catch (const std::out_of_range& ex){
+            calibpath = sys->GetDaqProperty("CalibPath").GetStringValue();
+         } catch (const std::out_of_range& ex){
          }
       }
    }
 
-   if (!LoadVoltageCalibration(GetDrsSampleFreqMhz(), calibpath.c_str())) {
+   return calibpath;
+}
+
+void WDWDB::LoadCalibrationFiles(){
+   std::string calibpath = GetCalibrationPath();
+
+   if (!LoadVoltageCalibration(GetDrsSampleFreqMhz(), calibpath)) {
       printf("WDB %s: missing voltage calibration file\n", GetBoardName().c_str());
    }
-   if (!LoadTimeCalibration(GetDrsSampleFreqMhz(), calibpath.c_str())) {
+   if (!LoadTimeCalibration(GetDrsSampleFreqMhz(), calibpath)) {
       printf("WDB %s: missing time calibration file\n", GetBoardName().c_str());
    }
 }
@@ -3017,14 +2955,7 @@ void WDDCB::Connect(){
    //printf("setting packet mask to %x\n", packetmask);
    SetDpsSlotEnable(packetmask);
 
-
-   //reset any stuff
-   ResetDps();
-
    printf("Connected to DCB%02d\n", GetSerialNumber());
-}
-
-void WDDCB::SetSerdesTraining(bool state){
 }
 
 bool WDDCB::IsSerdesTraining(){
@@ -3033,44 +2964,6 @@ bool WDDCB::IsSerdesTraining(){
 
 void WDDCB::TrainSerdes(){
    ResetSerdes(0, false);
-}
-
-void WDDCB::WaitSerdesTrainingFinish(){
-   bool done=false;
-   int count=10;
-
-   do{
-      ReceiveRegisters(DCB_REG_SERDES_STATUS_00_07, 3);
-      done = (GetDelaySyncDone00() == 1);
-      done &= (GetDelaySyncDone01() == 1);
-      done &= (GetDelaySyncDone02() == 1);
-      done &= (GetDelaySyncDone03() == 1);
-      done &= (GetDelaySyncDone04() == 1);
-      done &= (GetDelaySyncDone05() == 1);
-      done &= (GetDelaySyncDone06() == 1);
-      done &= (GetDelaySyncDone07() == 1);
-      done &= (GetDelaySyncDone08() == 1);
-      done &= (GetDelaySyncDone09() == 1);
-      done &= (GetDelaySyncDone10() == 1);
-      done &= (GetDelaySyncDone11() == 1);
-      done &= (GetDelaySyncDone12() == 1);
-      done &= (GetDelaySyncDone13() == 1);
-      done &= (GetDelaySyncDone14() == 1);
-      done &= (GetDelaySyncDone15() == 1);
-      done &= (GetDelaySyncDone17() == 1);
-
-      if(!done) {
-         usleep(10000);
-         count--;
-         if(count == 0){
-            printf("check %s!\n", GetBoardName().c_str());
-            throw std::runtime_error("Cannot lock DCB serdes");
-         }
-      }
-   } while(!done);
-
-   ResetSerdes(1, false);
-   //SendUDP("dpsreset"); 
 }
 
 //check serdes is good (like expected ones)
@@ -3104,7 +2997,6 @@ void WDDCB::WaitClockLock(){
    do{
       ReceiveRegisters(DCB_REG_PLL_LOCK);
       done = (GetLmkPllLock() == 1);
-//      done &= (GetSysDcmLock() == 1); // ask Elmar....
       done &= (GetWdbClkMgrLock() == 1);
       done &= (GetSerdesClkMgrLock() == 1);
 
@@ -3123,11 +3015,6 @@ void WDDCB::WaitClockLock(){
 void WDDCB::WaitReady(){
    //Wait Clock locked
    WaitClockLock();
-
-   //Should wait some kind of initialization?
-
-   //Then reset DPS for good measure
-   ResetDps();
 }
 
 void WDDCB::ConfigureProperty(const std::string &name, Property &property) { 
@@ -3141,6 +3028,8 @@ void WDDCB::ConfigureProperty(const std::string &name, Property &property) {
 void WDDCB::ConfigurationStarted(){
    int destPort = GetCrate()->GetSystem()->GetDAQServerPort();
    if(destPort) SetDestinationPort(destPort);
+
+   ResetSerdes(1, false);
 }
 
 void WDDCB::ConfigurationEnded(){
