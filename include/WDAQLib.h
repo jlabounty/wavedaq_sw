@@ -14,6 +14,10 @@
 #include "WDLib.h"
 #include "wdaq_board_id.h"
 
+//Error definition
+#define WDAQLIB_ERROR_CORRUPTEDPACKET 1
+#define WDAQLIB_ERROR_LAST WDAQLIB_ERROR_CORRUPTEDPACKET
+
 //classes in this file
 class WDAQPacketData;
 class WDAQWdbPacketData;

@@ -609,7 +609,12 @@ void WDAQPacketCollector::GotData(){
 
       //check size of received datagram
       if(size < (int)sizeof(FRAME_WDAQ_HEADER)) {
-         printf("Problem with size\n");
+         char *ip = GetMessageSourceAddress(imsg);
+         const std::string alarmMessage = "Message from " + std::string(ip) + ": Problem with size\n";
+         std::cout << alarmMessage << std::endl;
+         if(! GetSystem()->GetAlarms()->Test(WDAQLIB_ERROR_CORRUPTEDPACKET)){
+            GetSystem()->GetAlarms()->Trigger(WDAQLIB_ERROR_CORRUPTEDPACKET, alarmMessage);
+         }
          return;
       }
 
@@ -619,7 +624,13 @@ void WDAQPacketCollector::GotData(){
 
       // check protocol version
       if (daqdata->protocol_version != WDAQ_UDP_PROTOCOL_VERSION) {
-         printf("received packet with wrong protocol version, got %d required %d\n",daqdata->protocol_version, WDAQ_UDP_PROTOCOL_VERSION);
+         char *ip = GetMessageSourceAddress(imsg);
+         //printf("Message from %s: received packet with wrong protocol version, got %d required %d\n", ip, daqdata->protocol_version, WDAQ_UDP_PROTOCOL_VERSION);
+         const std::string alarmMessage = "Message from " + std::string(ip) + ": received packet with wrong protocol version";
+         std::cout << alarmMessage << std::endl;
+         if(! GetSystem()->GetAlarms()->Test(WDAQLIB_ERROR_CORRUPTEDPACKET)){
+            GetSystem()->GetAlarms()->Trigger(WDAQLIB_ERROR_CORRUPTEDPACKET, alarmMessage);
+         }
          return;
       }
       //correct endianess
@@ -705,6 +716,18 @@ void WDAQPacketCollector::GotData(){
          printf("\n");
          printf("\n");
 #endif
+
+         //check payload lenght
+         if(size != sizeof(FRAME_WDAQ_HEADER) + sizeof(FRAME_WDB_HEADER) + daqdata->payload_length ){
+            char *ip = GetMessageSourceAddress(imsg);
+            //printf("Message from %s: size %u expected %u + %u + %u\n", ip, size, sizeof(FRAME_WDAQ_HEADER), sizeof(FRAME_WDB_HEADER), daqdata->payload_length);
+            const std::string alarmMessage = "Message from " + std::string(ip) + ": received packet with wrong size";
+            std::cout << alarmMessage << std::endl;
+            if(! GetSystem()->GetAlarms()->Test(WDAQLIB_ERROR_CORRUPTEDPACKET)){
+               GetSystem()->GetAlarms()->Trigger(WDAQLIB_ERROR_CORRUPTEDPACKET, alarmMessage);
+            }
+            return;
+         }
 
          if(daqdata->data_type == cDataTypeDRS){
             //DRS Data
@@ -830,6 +853,19 @@ void WDAQPacketCollector::GotData(){
          printf("\n");
          printf("\n");
 #endif
+
+         //check payload lenght
+         if(size != sizeof(FRAME_WDAQ_HEADER) + sizeof(FRAME_TCB_HEADER) + daqdata->payload_length ){
+            char *ip = GetMessageSourceAddress(imsg);
+            //printf("Message from %s: size %u expected %u + %u + %u\n", ip, size, sizeof(FRAME_WDAQ_HEADER), sizeof(FRAME_WDB_HEADER), daqdata->payload_length);
+            const std::string alarmMessage = "Message from " + std::string(ip) + ": received packet with wrong size";
+            std::cout << alarmMessage << std::endl;
+            if(! GetSystem()->GetAlarms()->Test(WDAQLIB_ERROR_CORRUPTEDPACKET)){
+               GetSystem()->GetAlarms()->Trigger(WDAQLIB_ERROR_CORRUPTEDPACKET, alarmMessage);
+            }
+            return;
+         }
+
          if(daqdata->data_type == cDataTypeTCB) {
             WDAQTcbPacketData *packet = new WDAQTcbPacketData();
             packet->SetEventHeaderInfo(daqdata); 

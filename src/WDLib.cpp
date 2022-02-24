@@ -239,11 +239,8 @@ void WDSystem::CreateFromXml(std::string filepath){
       if(crate_node_name == "Crate"){
          //create a new Crate
          char* mscbnodestring = mxml_get_attribute(crate_xml, "MscbNode");
-         if(mscbnodestring==NULL){
-            printf("warning parsing XML: cannot access Crate without MscbNode attribute\n");
-         }
-
          char* cratenamestring = mxml_get_attribute(crate_xml, "Name");
+
          if(cratenamestring==NULL){
             printf("warning parsing XML: MscbNode used as crate name\n");
             cratenamestring = mscbnodestring;
@@ -758,8 +755,6 @@ void WDSystem::SpawnDAQ(){
 
          }
       }
-   } else {
-      printf("No writer thread running\n");
    }
 
    fDaqSystem->Start();
@@ -845,6 +840,8 @@ void WDWDB::SetSerdesTraining(bool state){
    SetAdvTrgCtrl((regbits&0xFFFF7FF) | 0x00000430);//MASKSYNC=0, DEBUG_CTRL=1, ALGSEL=3
 
    SwitchDaqClock();
+   // this should avoid a DRS to be not locked
+   SetDaqNormal(true);
 
 }
 
@@ -960,10 +957,10 @@ void WDWDB::ConfigurationEnded(){
    SendControlRegisters(false);
    SetDaqNormal(true);
 
-   //reset from WDB::SetDrsSamplFreq, Already done in WDB???
+   //reset from WDB::SetDrsSamplFreq
    LmkSyncLocal();
-   SetAdcIfRst(0);
 
+   SetAdcIfRst(0);
    ResetAdc();
 }
 
@@ -1438,10 +1435,15 @@ void WDTCB::Connect(){
       sleep(2);
       SetIDCode();
 
+      // if still unvalid, throw an error
+      if(fidcode == 0){
+         const std::string error = "Cannot connect to board " + GetBoardName();
+         throw std::runtime_error(error);
+      }
+
    }
 
    SetNTRG();
-   fverbose= true;
 
    //Set SlotId and CrateId
    WDCrate *crate = GetCrate();
@@ -1698,10 +1700,10 @@ void WDTCB::ConfigurationStarted(){
             cableOnly = false;
          }
          if(!cableOnly){
-            printf("Enabling local trigger: make sure FCI cable is not connected\n");
+            //Enabling local trigger: make sure FCI cable is not connected
             rrun_config |= 0x00000800; //LOCAL_TRG enable
          } else {
-            printf("Local trigger manually disabled: using FCI cable instead\n");
+            //Local trigger manually disabled: using FCI cable instead
          }
       }
    }
@@ -1721,9 +1723,9 @@ void WDTCB::ConfigurationStarted(){
    SetPacketizerAutostart(true);
    SetPacketizerEnable(true);
    SetPacketizerBus(true);
+
    SetReadoutEnable(true);
    unsigned int val = 350;
-   //unsigned int val = 0;
    SetMaxPayload(&val);
 }
 
