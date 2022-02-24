@@ -1123,12 +1123,15 @@ bool WDB::SwitchDaqClock()
    return false;
 }
 
-void WDB::WaitLockAfterClockSwitch(){
+bool WDB::WaitLockAfterClockSwitch(){
+   bool clockok = false;
    // wait until clock switched is finished
    for (int j=0 ; j<20 ; j++) {
       int l = GetExtClkActive(true);
-      if (l == 1)
+      if (l == 1){
+         clockok = true;
          break;
+      }
 
       if (mVerbose)
          std::cout << j*100 << "ms: " << GetAddr() << " ExtClkActive=" << l << std::endl;
@@ -1136,7 +1139,7 @@ void WDB::WaitLockAfterClockSwitch(){
    }
 
    // wait until PLLs have locked
-   WaitPllLock();
+   return clockok && WaitPllLock();
 }
 
 void WDB::SetDrsSampleFreq(unsigned int f, bool wait)

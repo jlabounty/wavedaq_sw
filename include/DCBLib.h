@@ -121,6 +121,7 @@ public:
    std::string GetHwVersion();
    float GetTemperatureDegree(bool refresh = true);
    unsigned int GetPllLock(bool refresh = true);
+   bool WaitPllLock(int timeout = 100);
 };
 
 //--------------------------------------------------------------------

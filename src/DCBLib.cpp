@@ -953,17 +953,36 @@ float DCB::GetTemperatureDegree(bool refresh)
 }
 
 unsigned int DCB::GetPllLock(bool refresh)
-// all PLLs (DRS, LMK, FPGA DAQ, ISERDES, OSERDES)
+// all PLLs (LMK, DCM, CLK_MGR_WDB, CLK_MGR_SERDES)
 {
    if (refresh)
       ReceiveRegisters(DCB_SYS_DCM_LOCK_REG, 1);
    unsigned int mask =
            GetSysDcmLock() << DCB_SYS_DCM_LOCK_OFS |
-           GetLmkPllLock() << DCB_LMK_PLL_LOCK_OFS;
+           GetLmkPllLock() << DCB_LMK_PLL_LOCK_OFS |
+           GetWdbClkMgrLock() << DCB_WDB_CLK_MGR_LOCK_OFS |
+           GetSerdesClkMgrLock() << DCB_SERDES_CLK_MGR_LOCK_OFS;
 
    return mask;
 }
 
+bool DCB::WaitPllLock(int timeout)
+// wait until all PLLs have locked with timeout
+{
+   unsigned int mask = 0xD;
+
+   for (int i=0 ; i<timeout ; i++) {
+      auto l = GetPllLock(true);
+      if ((l & mask) == mask) {
+         if (mVerbose && i > 0)
+            std::cout << "PLL locked after " << i*10 << " ms" << std::endl;
+         return true;
+      }
+      sleep_ms(10);
+   }
+
+   return false;
+}
 //--------------------------------------------------------------------
 
 void DCB::SwitchDaqClocks()

@@ -855,11 +855,17 @@ bool WDWDB::IsSerdesTraining(){
 
 void WDWDB::WaitClockLock(){
    //Check clock and backplane clock source
-   WaitLockAfterClockSwitch();
+   if(!WaitLockAfterClockSwitch()){
+      const std::string error = "WDB PLL not locked, board " + GetBoardName();
+      throw std::runtime_error(error);
+   }
 }
 
 void WDWDB::WaitReady(){
-   WaitPllLock();
+   if(!WaitPllLock()){
+      const std::string error = "WDB PLL not locked, board " + GetBoardName();
+      throw std::runtime_error(error);
+   }
 
    ReceiveStatusRegisters();
 
@@ -1493,8 +1499,8 @@ void WDTCB::WaitSerdesTrainingFinish(){
          usleep(10000);
          count--;
          if(count == 0){
-            printf("check %s!\n", GetBoardName().c_str());
-            throw std::runtime_error("Cannot lock TCB serdes");
+            const std::string error = "TCB serdes training not finished, board " + GetBoardName();
+            throw std::runtime_error(error);
          }
       }
    } while(val != 0);
@@ -1531,14 +1537,6 @@ bool WDTCB::IsSerdesGood(){
 }
 
 void WDTCB::WaitClockLock(){
-   //unsigned int val=0xFFFF;
-   //do{
-      //GetAutoCalibrateBusy(&val);
-
-      //if(val != 0)
-         //usleep(1000);
-   //} while(val != 0);
-
    //Should check PLL state when on register
 }
 
@@ -2992,24 +2990,10 @@ bool WDDCB::IsSerdesGood(){
 }
 
 void WDDCB::WaitClockLock(){
-   bool done=false;
-   int count=30;
-   do{
-      ReceiveRegisters(DCB_REG_PLL_LOCK);
-      done = (GetLmkPllLock() == 1);
-      done &= (GetWdbClkMgrLock() == 1);
-      done &= (GetSerdesClkMgrLock() == 1);
-
-      if(!done) {
-         usleep(100000);
-         count--;
-         if(count == 0){
-            printf("check %s!\n", GetBoardName().c_str());
-            throw std::runtime_error("DCB clock is not locked");
-         }
-      }
-   } while(!done);
-
+   if(!WaitPllLock()){
+      const std::string error = "DCB PLL not locked, board " + GetBoardName();
+      throw std::runtime_error(error);
+   }
 }
 
 void WDDCB::WaitReady(){

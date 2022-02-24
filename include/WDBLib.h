@@ -748,7 +748,7 @@ public:
    unsigned int GetTriggerDelayNs();
    void SetTriggerDelayNs(unsigned int ns);
    bool SwitchDaqClock();
-   void WaitLockAfterClockSwitch();
+   bool WaitLockAfterClockSwitch();
 
    void SetRange(float r, bool wait = true);
    float GetRange();
