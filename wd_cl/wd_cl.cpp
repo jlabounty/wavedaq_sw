@@ -100,7 +100,7 @@ void drawBar(const char* name, float value, float valueMax, bool printData = fal
    printf("\e[0m|");//reset color
    if(printData){
       //print values
-      printf("%f:%f|", value, valueMax);
+      printf("%g:%g|", value, valueMax);
    }
    printf("\n");
 }
@@ -1019,6 +1019,11 @@ int main(int argc, char *argv[])
             long OldCollectorDroppedPackets=0;
             for(auto t : sys->fCollectorThreads)
                OldCollectorDroppedPackets += t->GetDroppedPackets();
+            long OldCollectorCorruptedPackets=0;
+            for(auto t : sys->fCollectorThreads)
+               OldCollectorCorruptedPackets += t->GetCorruptedPackets();
+            for(auto t : sys->fBuilderThreads)
+               OldCollectorCorruptedPackets += t->GetBadPackets();
             long OldBuilderBuildedEvent=0;
             for(auto t : sys->fBuilderThreads)
                OldBuilderBuildedEvent += t->GetBuildedEvents();
@@ -1031,6 +1036,7 @@ int main(int argc, char *argv[])
 
             long AvgCollectorNPackets = 0;
             long AvgCollectorDroppedPackets = 0;
+            long AvgCollectorCorruptedPackets = 0;
             long AvgBuilderBuildedEvent = 0;
             long AvgBuilderDroppedEvent = 0;
             long AvgBuilderOldEvent = 0;
@@ -1038,6 +1044,7 @@ int main(int argc, char *argv[])
 
             long MaxCollectorNPackets = 0;
             long MaxCollectorDroppedPackets = 0;
+            long MaxCollectorCorruptedPackets = 0;
             long MaxBuilderBuildedEvent = 0;
             long MaxBuilderDroppedEvent = 0;
             long MaxBuilderOldEvent = 0;
@@ -1053,6 +1060,11 @@ int main(int argc, char *argv[])
                long collectorDroppedPackets = 0;
                for (auto t: sys->fCollectorThreads)
                   collectorDroppedPackets += t->GetDroppedPackets();
+               long collectorCorruptedPackets = 0;
+               for (auto t: sys->fCollectorThreads)
+                  collectorCorruptedPackets += t->GetCorruptedPackets();
+               for(auto t : sys->fBuilderThreads)
+                  collectorCorruptedPackets += t->GetBadPackets();
                int  collectorReceivedMessages = 0;
                for(auto t : sys->fCollectorThreads)
                    collectorReceivedMessages += t->GetReceivedMessages();
@@ -1094,6 +1106,7 @@ int main(int argc, char *argv[])
                printf("Threads:\n");
 
                long DeltaCollectorNPackets = collectorNPackets-OldCollectorNPackets;
+               long DeltaCollectorCorruptedPackets = collectorCorruptedPackets-OldCollectorCorruptedPackets;
                long DeltaCollectorDroppedPackets = collectorDroppedPackets-OldCollectorDroppedPackets;
                long DeltaBuilderBuildedEvent = builderBuildedEvent-OldBuilderBuildedEvent;
                long DeltaBuilderDroppedEvent = builderDroppedEvent-OldBuilderDroppedEvent;
@@ -1101,6 +1114,7 @@ int main(int argc, char *argv[])
 
                drawBar("Msgs/s", collectorReceivedMessages, 200, true);
                drawBar("Pkts/s", DeltaCollectorNPackets, 1000000, true);
+               drawBar("CorrPkts/s", DeltaCollectorCorruptedPackets, 1000, true);
                drawBar("DropPkts/s", DeltaCollectorDroppedPackets, 1000000, true);
                if(builderNotBuilding) printf("builder is not building\n");
                else printf("builder is building\n");
@@ -1112,6 +1126,7 @@ int main(int argc, char *argv[])
 
                //update
                OldCollectorNPackets = collectorNPackets;
+               OldCollectorCorruptedPackets = collectorCorruptedPackets;
                OldCollectorDroppedPackets = collectorDroppedPackets;
                OldBuilderBuildedEvent = builderBuildedEvent;
                OldBuilderDroppedEvent = builderDroppedEvent;
@@ -1119,6 +1134,7 @@ int main(int argc, char *argv[])
 
                //update max
                if(MaxCollectorNPackets < DeltaCollectorNPackets) MaxCollectorNPackets = DeltaCollectorNPackets;
+               if(MaxCollectorCorruptedPackets < DeltaCollectorCorruptedPackets) MaxCollectorCorruptedPackets = DeltaCollectorCorruptedPackets;
                if(MaxCollectorDroppedPackets < DeltaCollectorDroppedPackets) MaxCollectorDroppedPackets = DeltaCollectorDroppedPackets;
                if(MaxBuilderBuildedEvent < DeltaBuilderBuildedEvent) MaxBuilderBuildedEvent = DeltaBuilderBuildedEvent;
                if(MaxBuilderDroppedEvent < DeltaBuilderDroppedEvent) MaxBuilderDroppedEvent = DeltaBuilderDroppedEvent;
@@ -1126,6 +1142,7 @@ int main(int argc, char *argv[])
                
                //update avgs
                AvgCollectorNPackets = AvgCollectorNPackets + (DeltaCollectorNPackets-AvgCollectorNPackets)*1./(nAvg+1);
+               AvgCollectorCorruptedPackets = AvgCollectorCorruptedPackets + (DeltaCollectorCorruptedPackets-AvgCollectorCorruptedPackets)*1./(nAvg+1);
                AvgCollectorDroppedPackets = AvgCollectorDroppedPackets + (DeltaCollectorDroppedPackets-AvgCollectorDroppedPackets)*1./(nAvg+1);
                AvgBuilderBuildedEvent = AvgBuilderBuildedEvent + (DeltaBuilderBuildedEvent-AvgBuilderBuildedEvent)*1./(nAvg+1);
                AvgBuilderDroppedEvent = AvgBuilderDroppedEvent + (DeltaBuilderDroppedEvent-AvgBuilderDroppedEvent)*1./(nAvg+1);
@@ -1160,6 +1177,7 @@ int main(int argc, char *argv[])
             //print averages and max
             printf("averages on %d seconds\n", nAvg);
             printf("Collected packets/s %lu avg %lu max\n", AvgCollectorNPackets, MaxCollectorNPackets);
+            printf("Corrupted packets/s %lu avg %lu max\n", AvgCollectorCorruptedPackets, MaxCollectorCorruptedPackets);
             printf("Dropped packets/s %lu avg %lu max\n", AvgCollectorDroppedPackets, MaxCollectorDroppedPackets);
             printf("Received Events/s %lu avg %lu max\n", AvgBuilderBuildedEvent, MaxBuilderBuildedEvent);
             printf("Dropped Events/s %lu avg %lu max\n", AvgBuilderDroppedEvent, MaxBuilderDroppedEvent);

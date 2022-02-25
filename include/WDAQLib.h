@@ -83,9 +83,9 @@ class WDAQPacketData{
    void SetEventHeaderInfo(FRAME_WDAQ_HEADER *);
 
    //idea to how to handle board event merging across different board types
-   void AddToBoardEvent(WDAQBoardEvent *e) {
+   bool AddToBoardEvent(WDAQBoardEvent *e) {
       HeaderToBoardEvent(e);
-      AddDataToBoardEvent(e);
+      return AddDataToBoardEvent(e);
    };
 
    virtual ~WDAQPacketData() { };
@@ -100,8 +100,8 @@ class WDAQPacketData{
    //Set WDAQBoardEvent Header
    void HeaderToBoardEvent(WDAQBoardEvent *e);
 
-   //To be overwritten by derived classes
-   virtual void AddDataToBoardEvent(WDAQBoardEvent *e) { };
+   //To be overwritten by derived classes, return false on failure
+   virtual bool AddDataToBoardEvent(WDAQBoardEvent *e) { return true; }
 };
 
 //WDAQ WDB Packet Data - class for WDB UDP DAQ packets 
@@ -128,7 +128,7 @@ class WDAQWdbPacketData: public WDAQPacketData{
    void SetWdbHeaderInfo(FRAME_WDB_HEADER *);
 
    //merge this packet information in given board event, to be implemented according to data
-   virtual void AddDataToBoardEvent(WDAQBoardEvent *e) { };
+   virtual bool AddDataToBoardEvent(WDAQBoardEvent *e) { return true; }
 
 #ifdef USEMEMORYPOOL
    //memory pool operators
@@ -145,7 +145,7 @@ public:
    float data[1024];
 
    //Add packet info to given Board Event
-   void AddDataToBoardEvent(WDAQBoardEvent *e);
+   bool AddDataToBoardEvent(WDAQBoardEvent *e);
 
 #ifdef USEMEMORYPOOL
    //memory pool operators
@@ -162,7 +162,7 @@ public:
    unsigned short data[2048];
 
    //Add packet info to given Board Event
-   void AddDataToBoardEvent(WDAQBoardEvent *e);
+   bool AddDataToBoardEvent(WDAQBoardEvent *e);
 
 #ifdef USEMEMORYPOOL
    //memory pool operators
@@ -179,7 +179,7 @@ public:
    unsigned char data[512];
 
    //Add packet info to given Board Event
-   void AddDataToBoardEvent(WDAQBoardEvent *e);
+   bool AddDataToBoardEvent(WDAQBoardEvent *e);
 
 #ifdef USEMEMORYPOOL
    //memory pool operators
@@ -196,7 +196,7 @@ public:
    unsigned long data[512];
 
    //Add packet info to given Board Event
-   void AddDataToBoardEvent(WDAQBoardEvent *e);
+   bool AddDataToBoardEvent(WDAQBoardEvent *e);
 
 #ifdef USEMEMORYPOOL
    //memory pool operators
@@ -213,7 +213,7 @@ public:
   unsigned long data[WD_N_SCALER];
 
    //Add packet info to given Board Event
-   void AddDataToBoardEvent(WDAQBoardEvent *e);
+   bool AddDataToBoardEvent(WDAQBoardEvent *e);
 
 #ifdef USEMEMORYPOOL
    //memory pool operators
@@ -229,7 +229,7 @@ class WDAQDummyPacketData : public WDAQWdbPacketData{
 public:
 
    //Add packet info to given Board Event
-   void AddDataToBoardEvent(WDAQBoardEvent *e);
+   bool AddDataToBoardEvent(WDAQBoardEvent *e);
 
 #ifdef USEMEMORYPOOL
    //memory pool operators
@@ -253,7 +253,7 @@ class WDAQTcbPacketData: public WDAQPacketData{
    void SetTcbHeaderInfo(FRAME_TCB_HEADER *);
 
    //merge this packet information in given board event, to be implemented according to data
-   void AddDataToBoardEvent(WDAQBoardEvent *e);
+   bool AddDataToBoardEvent(WDAQBoardEvent *e);
 
 #ifdef USEMEMORYPOOL
    //memory pool operators
@@ -424,7 +424,7 @@ public:
    //map (BoardType -> map(BoardSerial -> Board))
    std::map<unsigned char, std::map<unsigned short, WDAQBoardEvent *>> fBoard;
    
-   void AddPacket(WDAQPacketData* pkt);
+   bool AddPacket(WDAQPacketData* pkt);
    void UpdateIsComplete();
    int IsComplete() { return mCompletedBoards; }
    
@@ -450,6 +450,7 @@ class WDAQPacketCollector: public DAQServerThread{
 
    //statistics
    unsigned long fNPackets;
+   unsigned long fCorruptedPackets;
    unsigned long fDroppedPackets;
 
    void Begin();
@@ -463,11 +464,13 @@ class WDAQPacketCollector: public DAQServerThread{
    WDAQPacketCollector(DAQFanoutBuffer<WDAQPacketData> *buf, int nBoards=1, DAQSystem* parent=nullptr): DAQServerThread(nBoards*1*1024*1024, parent, "PacketCollector"){ //  1*1MB/Board
       fBuf = buf;
       fNPackets = 0;
+      fCorruptedPackets = 0;
       fDroppedPackets = 0;
    }
 
    //Statistics getters
    unsigned long GetReceivedPackets() const { return fNPackets; }
+   unsigned long GetCorruptedPackets() const { return fCorruptedPackets; }
    unsigned long GetDroppedPackets() const { return fDroppedPackets; }
 };
 
@@ -503,6 +506,7 @@ class WDAQEventBuilder : public DAQThread{
    unsigned long fBuildedEvent;
    unsigned long fDroppedEvent;
    unsigned long fOldEvent;
+   unsigned long fBadPackets;
    //flags
    bool          fNotBuilding;
    bool          fDropping;
@@ -521,6 +525,7 @@ class WDAQEventBuilder : public DAQThread{
       
       fBuildedEvent = 0;
       fDroppedEvent = 0;
+      fBadPackets = 0;
       fOldEvent = 0;
       fNotBuilding = false;
       fDropping = false;
@@ -533,6 +538,7 @@ class WDAQEventBuilder : public DAQThread{
    //Statistics getters
    unsigned long GetBuildedEvents() const { return fBuildedEvent; }
    unsigned long GetDroppedEvents() const { return fDroppedEvent; }
+   unsigned long GetBadPackets() const { return fBadPackets; }
    unsigned long GetOldEvents() const { return fOldEvent; }
    unsigned long GetEventsInQueue() const { return fEvents.size(); }
 };

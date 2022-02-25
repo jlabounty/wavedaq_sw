@@ -105,7 +105,7 @@ void WDAQWdbPacketData::operator delete(void* ptr){
 
 //WDAQ DRS Packet Data -  derived packet class to host DRS data
 //Add packet info to given Board Event
-void WDAQDRSPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
+bool WDAQDRSPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    //Should check e->mBoardType is WDB 
    WDAQWdbEvent *wdb_e = static_cast<WDAQWdbEvent*>(e);
 
@@ -113,6 +113,9 @@ void WDAQDRSPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    int channel = mChannel;
    int numberBins = (int) mPayloadLength / 1.5;
    int firstBin = mDataOffset / 1.5;
+
+   if((firstBin + numberBins) > 1024 || channel >= WD_N_CHANNELS)
+      return false;
 
    for(int i=0; i<numberBins; i++){
       wdb_e->mDrsU[channel][firstBin+i] = data[i];
@@ -137,6 +140,8 @@ void WDAQDRSPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
      wdb_e->mDrsHasData[channel] = true; 
    }
 
+   return true;
+
 }
 
 #ifdef USEMEMORYPOOL
@@ -154,13 +159,16 @@ void WDAQDRSPacketData::operator delete(void* ptr){
 
 //WDAQ ADC Packet Data -  derived packet class to host ADC data
 //Add packet info to given Board Event
-void WDAQADCPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
+bool WDAQADCPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    //Should check e->mBoardType is WDB 
    WDAQWdbEvent *wdb_e = static_cast<WDAQWdbEvent*>(e);
 
    int channel = mChannel;
    int numberBins = (int) mPayloadLength / 1.5;
    int firstBin = mDataOffset / 1.5;
+
+   if((firstBin + numberBins) > 2048 || channel >= (WD_N_CHANNELS-2))
+      return false;
 
    for(int i=0; i<numberBins; i++){
       wdb_e->mAdcU[channel][firstBin+i] = data[i];
@@ -176,6 +184,7 @@ void WDAQADCPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
       wdb_e->mAdcHasData[channel] = true; 
    }
 
+   return true;
 }
 
 #ifdef USEMEMORYPOOL
@@ -193,13 +202,16 @@ void WDAQADCPacketData::operator delete(void* ptr){
 
 //WDAQ TDC Packet Data -  derived packet class to host TDC data
 //Add packet info to given Board Event
-void WDAQTDCPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
+bool WDAQTDCPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    //Should check e->mBoardType is WDB 
    WDAQWdbEvent *wdb_e = static_cast<WDAQWdbEvent*>(e);
 
    int channel = mChannel;
    int numberBins = (int) mPayloadLength;
    int firstBin = mDataOffset;
+
+   if((firstBin + numberBins) > 512 || channel >= (WD_N_CHANNELS-2))
+      return false;
 
    for(int i=0; i<numberBins; i++){
       wdb_e->mTdc[channel][firstBin+i] = data[i];
@@ -214,6 +226,8 @@ void WDAQTDCPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    // set the flag of tdc channel data reception for the writer
      wdb_e->mTdcHasData[channel] = true; 
    }
+
+   return true;
 }
 
 #ifdef USEMEMORYPOOL
@@ -231,12 +245,15 @@ void WDAQTDCPacketData::operator delete(void* ptr){
 
 //WDAQ TRG Packet Data -  derived packet class to host TRG data
 //Add packet info to given Board Event
-void WDAQTRGPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
+bool WDAQTRGPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    //Should check e->mBoardType is WDB 
    WDAQWdbEvent *wdb_e = static_cast<WDAQWdbEvent*>(e);
 
    int numberBins = (int) mPayloadLength/8;
    int firstBin = mDataOffset/8;
+
+   if((firstBin + numberBins) > 512)
+      return false;
 
    for(int i=0; i<numberBins; i++){
       wdb_e->mTrg[firstBin+i] = data[i];
@@ -250,6 +267,8 @@ void WDAQTRGPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    // set the flag of trigger data reception for the writer
      wdb_e->mTrgHasData = true; 
    }
+
+   return true;
 }
 
 #ifdef USEMEMORYPOOL
@@ -267,7 +286,7 @@ void WDAQTRGPacketData::operator delete(void* ptr){
 
 //WDAQ Scaler Packet Data -  derived packet class to host Scaler data
 //Add packet info to given Board Event
-void WDAQScaPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
+bool WDAQScaPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    //Should check e->mBoardType is WDB 
    WDAQWdbEvent *wdb_e = static_cast<WDAQWdbEvent*>(e);
 
@@ -277,6 +296,8 @@ void WDAQScaPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    }
    // set the flag of scaler reception for the writer
    wdb_e->mScalerHasData = true; 
+
+   return true;
 }
 
 #ifdef USEMEMORYPOOL
@@ -295,7 +316,8 @@ void WDAQScaPacketData::operator delete(void* ptr){
 //WDAQ Dummy Packet Data -  derived packet class to host zero-suppressed data
 //Add packet info to given Board Event: this packet is EMPTY
 // this board has been fully zero suppressed
-void WDAQDummyPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
+bool WDAQDummyPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
+   return true;
 }
 
 #ifdef USEMEMORYPOOL
@@ -323,7 +345,7 @@ void WDAQTcbPacketData::SetTcbHeaderInfo(FRAME_TCB_HEADER *ph){
 
 }
 //Add packet info to given Board Event
-void WDAQTcbPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
+bool WDAQTcbPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    //Should check e->mBoardType is TCB 
    WDAQTcbEvent *tcb_e = static_cast<WDAQTcbEvent*>(e);
    
@@ -346,6 +368,8 @@ void WDAQTcbPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
 
    //tcb_e->UpdateIsComplete();
    //printf("TCB event is complete %d: %d %d %d %d\n", tcb_e->IsComplete(), tcb_e->mStartFlagReceived, tcb_e->mEndFlagReceived, tcb_e->mLastPacket-tcb_e->mFirstPacket+1, tcb_e->mPacketsReceived);
+
+   return true;
 }
 
 #ifdef USEMEMORYPOOL
@@ -492,7 +516,7 @@ WDAQEvent::WDAQEvent(WDAQPacketData* pkt){
 }
 
 //add packet to event
-void WDAQEvent::AddPacket(WDAQPacketData* pkt){
+bool WDAQEvent::AddPacket(WDAQPacketData* pkt){
    unsigned char type = pkt->mBoardType;
    unsigned short id = pkt->mBoardId;
    WDAQBoardEvent *boardEvent;
@@ -517,13 +541,16 @@ void WDAQEvent::AddPacket(WDAQPacketData* pkt){
    }
 
    //process packet content
-   pkt->AddToBoardEvent(boardEvent);
-   boardEvent->UpdateIsComplete();
+   bool success = pkt->AddToBoardEvent(boardEvent);
+   if(success){
+      boardEvent->UpdateIsComplete();
 
-   if(boardEvent->IsComplete()){
-      //printf("event %d of board %d-%d is completed\n", mEventNumber, type, id);
-      UpdateIsComplete();
-   } 
+      if(boardEvent->IsComplete()){
+         //printf("event %d of board %d-%d is completed\n", mEventNumber, type, id);
+         UpdateIsComplete();
+      } 
+   }
+   return success;
 }
 
 //check event complete
@@ -570,6 +597,7 @@ void WDAQEvent::operator delete(void* ptr){
 void WDAQPacketCollector::Begin(){
    //reset statistics
    fNPackets=0;
+   fCorruptedPackets=0;
    fDroppedPackets=0;
 }
 
@@ -611,10 +639,12 @@ void WDAQPacketCollector::GotData(){
       if(size < (int)sizeof(FRAME_WDAQ_HEADER)) {
          char *ip = GetMessageSourceAddress(imsg);
          const std::string alarmMessage = "Message from " + std::string(ip) + ": Problem with size\n";
-         std::cout << alarmMessage << std::endl;
+         //std::cout << alarmMessage << std::endl;
          if(! GetSystem()->GetAlarms()->Test(WDAQLIB_ERROR_CORRUPTEDPACKET)){
             GetSystem()->GetAlarms()->Trigger(WDAQLIB_ERROR_CORRUPTEDPACKET, alarmMessage);
          }
+
+         fCorruptedPackets++;
          return;
       }
 
@@ -627,10 +657,12 @@ void WDAQPacketCollector::GotData(){
          char *ip = GetMessageSourceAddress(imsg);
          //printf("Message from %s: received packet with wrong protocol version, got %d required %d\n", ip, daqdata->protocol_version, WDAQ_UDP_PROTOCOL_VERSION);
          const std::string alarmMessage = "Message from " + std::string(ip) + ": received packet with wrong protocol version";
-         std::cout << alarmMessage << std::endl;
+         //std::cout << alarmMessage << std::endl;
          if(! GetSystem()->GetAlarms()->Test(WDAQLIB_ERROR_CORRUPTEDPACKET)){
             GetSystem()->GetAlarms()->Trigger(WDAQLIB_ERROR_CORRUPTEDPACKET, alarmMessage);
          }
+
+         fCorruptedPackets++;
          return;
       }
       //correct endianess
@@ -722,10 +754,12 @@ void WDAQPacketCollector::GotData(){
             char *ip = GetMessageSourceAddress(imsg);
             //printf("Message from %s: size %u expected %u + %u + %u\n", ip, size, sizeof(FRAME_WDAQ_HEADER), sizeof(FRAME_WDB_HEADER), daqdata->payload_length);
             const std::string alarmMessage = "Message from " + std::string(ip) + ": received packet with wrong size";
-            std::cout << alarmMessage << std::endl;
+            //std::cout << alarmMessage << std::endl;
             if(! GetSystem()->GetAlarms()->Test(WDAQLIB_ERROR_CORRUPTEDPACKET)){
                GetSystem()->GetAlarms()->Trigger(WDAQLIB_ERROR_CORRUPTEDPACKET, alarmMessage);
             }
+
+            fCorruptedPackets++;
             return;
          }
 
@@ -863,6 +897,8 @@ void WDAQPacketCollector::GotData(){
             if(! GetSystem()->GetAlarms()->Test(WDAQLIB_ERROR_CORRUPTEDPACKET)){
                GetSystem()->GetAlarms()->Trigger(WDAQLIB_ERROR_CORRUPTEDPACKET, alarmMessage);
             }
+
+            fCorruptedPackets++;
             return;
          }
 
@@ -890,7 +926,7 @@ void WDAQPacketCollector::GotData(){
 //print statistics at thread end
 void WDAQPacketCollector::End(){
    Clean();
-   printf("Got %lu packets\nDropped %lu packets\n", fNPackets, fDroppedPackets);
+   printf("Got %lu packets\nDropped %lu packets\nReceived %lu corrupted packets\n", fNPackets, fDroppedPackets, fCorruptedPackets);
 }
 
 // functionalies of WDAQTCBReader
@@ -996,6 +1032,7 @@ void WDAQTCBReader::End(){
 //reset statistics and drop packets at start
 void WDAQEventBuilder::Begin(){
    fBuildedEvent = 0;
+   fBadPackets = 0;
    fDroppedEvent = 0;
    fOldEvent = 0;
    fNotBuilding = false;
@@ -1029,7 +1066,17 @@ void WDAQEventBuilder::Loop(){
             evt_ptr = it->second;
          }
 
-         evt_ptr->AddPacket(ptr); 
+         if(! evt_ptr->AddPacket(ptr)){
+            const std::string alarmMessage = "Packet from " + std::to_string(ptr->mBoardId) + ": cannot fit into event";
+            //std::cout << alarmMessage << std::endl;
+            if(! GetSystem()->GetAlarms()->Test(WDAQLIB_ERROR_CORRUPTEDPACKET)){
+               GetSystem()->GetAlarms()->Trigger(WDAQLIB_ERROR_CORRUPTEDPACKET, alarmMessage);
+            }
+
+            fBadPackets++;
+            delete ptr;
+            return;
+         }
          delete ptr;
 
          //printf("%d/%d\n", evt_ptr->IsComplete(), fNBoards);
@@ -1123,7 +1170,7 @@ void WDAQEventBuilder::Loop(){
 
 //print statistics at thread end
 void WDAQEventBuilder::End(){
-   printf("event built: %lu\nevent dropped: %lu\nevent dropped because old: %lu\nevent in queue: %lu\n", fBuildedEvent, fDroppedEvent, fOldEvent, fEvents.size());
+   printf("event built: %lu\nbad packets: %lu\nevent dropped: %lu\nevent dropped because old: %lu\nevent in queue: %lu\n", fBuildedEvent, fBadPackets, fDroppedEvent, fOldEvent, fEvents.size());
 }
 
 //Event worker - Thread that calibrate events
