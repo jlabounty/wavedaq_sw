@@ -1158,6 +1158,10 @@ void WDAQEventBuilder::Loop(){
                   printf("TCB board %X (%d)\n", boardEvent.first, boardEvent.second->IsComplete());
 #endif
 
+            if(! GetSystem()->GetAlarms()->Test(WDAQLIB_ERROR_NOTBUILDING)){
+               const std::string alarmMessage = "Dropping event " + std::to_string(ev->first) + ": containing " + std::to_string(ev->second->IsComplete()) + " boards";
+               GetSystem()->GetAlarms()->Trigger(WDAQLIB_ERROR_NOTBUILDING, alarmMessage);
+            }
             delete ev->second;
             fEvents.erase(ev);
 
@@ -1183,13 +1187,16 @@ void WDAQWorker::Begin(){
 
 //single board calibration
 void WDAQWorker::calibrateBoard(WDAQWdbEvent *ev){
-   VCALIB* calib;
-   try{
-      calib = fVCalib.at(ev->mBoardId);
-   } catch(...){
-      printf("event with WDB board %d\n", ev->mBoardId);
+   auto calibptr = fVCalib.find(ev->mBoardId);
+   if(calibptr == fVCalib.end()){
+      if(! GetSystem()->GetAlarms()->Test(WDAQLIB_ERROR_MISSINGCALIB)){
+         const std::string alarmMessage = "Missing voltage calibration for board " + std::to_string(ev->mBoardId);
+         GetSystem()->GetAlarms()->Trigger(WDAQLIB_ERROR_MISSINGCALIB, alarmMessage);
+      }
       return;
    }
+
+   VCALIB* calib = calibptr->second;
 
    // CLK channels masked with the presence of at least one associated channels in the event
    ev->mDrsHasData[16] &= ev->mDrsHasData[0]|ev->mDrsHasData[1]|ev->mDrsHasData[2]|ev->mDrsHasData[3]|ev->mDrsHasData[4]|ev->mDrsHasData[5]|ev->mDrsHasData[6]|ev->mDrsHasData[7];
@@ -1199,6 +1206,10 @@ void WDAQWorker::calibrateBoard(WDAQWdbEvent *ev){
    if(calib->IsValid() && fabs(calib->GetTemperature() - ev->mTemperature) > 5){
       ev->mTemperatureOk = false;
       //printf("Board %d: temperature difference too big! %f %f\n", ev->mBoardId, calib->GetTemperature(), ev->mTemperature);
+      if(! GetSystem()->GetAlarms()->Test(WDAQLIB_ERROR_CALIBTEMPERATURE)){
+         const std::string alarmMessage = "Calibration out of temperature: board " + std::to_string(ev->mBoardId) + " has T=" + std::to_string(ev->mTemperature) + ", calib at T=" + std::to_string(calib->GetTemperature());
+         GetSystem()->GetAlarms()->Trigger(WDAQLIB_ERROR_CALIBTEMPERATURE, alarmMessage);
+      }
    } else {
       ev->mTemperatureOk = true;
    }
@@ -1208,6 +1219,7 @@ void WDAQWorker::calibrateBoard(WDAQWdbEvent *ev){
    float range = ev->GetRange();
    for(int ch=0; ch<WD_N_CHANNELS; ch++){
       //calibrate only channels with data
+      bool anyChannel = false;
       if(ev->mDrsHasData[ch]){
          int tc = ev->mTriggerCell[ch];
 
@@ -1242,8 +1254,23 @@ void WDAQWorker::calibrateBoard(WDAQWdbEvent *ev){
                ev->mDrsU[ch][bin] -= ofs;
             }
          }
+
+         anyChannel = true;
       }
    }
+
+   // check PLL
+   if(! GetSystem()->GetAlarms()->Test(WDAQLIB_ERROR_PLLLOCK)){
+      if(
+         (ev->mWDBFlags & (1 << cWDFlagDRSPLLLock)) == 0 ||
+         (ev->mWDBFlags & (1 << cWDFlagLMKPLLLock)) == 0
+        ){
+         const std::string alarmMessage = "PLL Not locked: board " + std::to_string(ev->mBoardId) + " has flags=" + std::to_string(ev->mWDBFlags);
+
+         GetSystem()->GetAlarms()->Trigger(WDAQLIB_ERROR_PLLLOCK, alarmMessage);
+      }
+   }
+
 
    ev->mVCalibrated = true;
 }
