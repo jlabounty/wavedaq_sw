@@ -29,29 +29,19 @@
 #define RSYSTRITYPE        0x205      // system (trgbus) trigger type
 #define RPCURR             0x206      // proton current
 #define RFSTIME            0x207      // time counter from external oscillator
-#define RSERDESCONF        0x300      // serdes configuration and reset
-#define RDCBSERDESCONF     0x320      // serdes configuration and reset for dcb
 #define RSERDESTX          0x321      // tx serdes configuration and delay load
-#define RSERDESBSLP        0x322      // individual bitslip for each channel (first address)
-#define RDCBSERDESBSLP     0x326      // individual bitslip for dcb
+#define RSERDESCALIBFSM    0x326      // individual bitslip for dcb
 #define RSERDESMSK         0x327      // mask for input serdes
-#define RSERDESVAL0        0x328      // serdes value to be checked (lower part)
-#define RSERDESVAL1        0x329      // serdes value to be checked (upper part)
-#define RSERDESCHECK       0x32A      // serdes status (first address)
-#define RDCBSERDESCHECK    0x32E      // serdes status DCB
 #define RSERDESSTATUS      0x330      // readout of serdes configuration
-#define RDCBSERDESSTATUS   0x350      // readout of dcb serdes configuration
 #define RSERDESBUSY        0x351      // autolock serdes busy
 #define RSERDESFAIL        0x352      // autolock serdes fail
-#define RDCBDATA           0x353      // Serdes Data From DCB
+#define RDCBREADY          0x353      // Serdes Data From DCB
 #define RSERDESALIGNDLY    0x354      // autolock serdes slot delay enable
 #define RSERDESALIGNDELTA0 0x355      // autolock serdes measured time offsets
 #define RSERDESALIGNDELTA1 0x356      // autolock serdes measured time offsets
 #define RSERDESMINLATENCY  0x357      // autolock serdes slot with minimum latency
 #define RSERDESDLYSTATE    0x360      // autolock serdes sate for each delay
-#define RDCBSERDESDLYSTATE 0x370      // autolock serdes sate for each delay
 #define RSERDESDLYTEST     0x380      // autolock serdes tested for each delay
-#define RDCBSERDESDLYTEST  0x390      // autolock serdes tested for each delay
 #define RTRGCOU            0x400      // trigger counter (first address)
 #define RTRGDLY            0x500      // trigger delay (first address)
 #define RPARAM             0x600      // start of parameter space
@@ -70,8 +60,8 @@
 #define RTCMERGEL          0x60D      // TC low threshold for hit merge
 #define RRDCLYSOTHR        0x60E      // RDC QSUM threshold
 #define RBGOTHR            0x60F      // BGO QSUM threshold
-#define RBGOMASK           0x611      // BGO trigger definition
 #define RRDCMASK           0x610      // RDC trigger definition
+#define RBGOMASK           0x611      // BGO trigger definition
 #define RALPHATHR          0x612      // threshold alpha
 #define RALPHAPEAK         0x613      // alpha peak scale
 #define RQSUMSEL           0x614      // selects the qsum as std or running average
@@ -128,12 +118,6 @@
 #define RTOTTIMESPI        0x940      // total time for spi access
 #define RLIVETIMESPI       0x941      // live time for spi access
 #define RLATCHCOUSPI       0x942      // latch for spi access counters
-// IS THIS STILL USED??
-#define RSERDESCOU         0x900      // serdes error counter (first address)
-#define RSERDESTIME        0x980      // serdes test time
-#define RDCBSERDESCOU      0x981      // serdes error counter dcb
-#define RLXEPATCHLUT       0x20000    // LXe patch LUT base address
-
 #define RALGCLKMEMADDR     0x0FFFE    // counter stop position for ALGCLK memories
 #define RMEMADDR           0x0FFFF    // counter stop position
 #define MEMBASEADDR        0x10000    //base address for memories
@@ -381,44 +365,12 @@ public:
    void GetCompilDate(u_int32_t*);
    // force the trigger passed by the function call
    void ForceTrigger(int);
-   // set the transmission check word
-   void SetCheckWord(u_int32_t,u_int32_t);
-   //get the transmission check word
-   void GetCheckWord();
-   //configure a single serdes link
-   void ConfigureSingleSerdes(int, int, short, int);
-   //configure all serdes link
-   void ConfigureAllSerdes(short, int);
-   //configure all serdes link
-   void ConfigureAllDCBSerdes(short, int);
-   //configure all serdes delays and bits at once
-   void SetAllSerdes(u_int32_t *, int *);
-   //configure all serdes delays and bits at once
-   void SetAllDCBSerdes(u_int32_t *, int *);
-   //reset transmitter
-   void ResetTransmitter();
    //reset transmitter
    void ResetIDLYCTRL();
-   //check an error on a given serdes link
-   void GetSerdesError(u_int32_t*);
-   //return the number of errors in the transmission test
-   void GetSerdesErrorCount(u_int32_t*);
-   //return the number of errors in the transmission test
-   void GetDCBSerdesErrorCount(u_int32_t*);
-   //start serdes check
-   void StartSerdesCheck();
-   //stop serdes check
-   void StopSerdesCheck();
-   //calibrate serdes
-   void CalibrateSerdes(u_int32_t *dlyout=0, int *bitout=0);
-   //calibrate serdes
-   void CalibrateDCBSerdes(u_int32_t *dlyout=0, int *bitout=0);
-   //calibrate serdes
-   void SetDbgserdes(bool);
+   //reset transmitter
+   void ResetTransmitter();
    //set variable pattern
    void SetSerdesPattern(bool);
-   //do a serdes check
-   int CheckSerdes();
    //Assign Bus to Packetizer
    void SetPacketizerBus(bool);
    //Check local bus association

@@ -93,18 +93,18 @@ int main(int argc, char *argv[])
       printf("[ 1]: Set RRUN and RENA    \t \t  [ 2]: Get RRUN and RENA reg\n");
       printf("[ 3]: Activate runmode     \t \t  [ 4]: Remove the busy\n");
       printf("[ 5]: Give a SW stop       \t \t  [ 6]: Give a SW sync \n");
-      printf("[ 7]: Set prescaling       \t \t  [ 8]: Board setup\n");
+      printf("[ 7]: Set prescaling       \t \t  [ 8]: \n");
       printf("[ 9]: Read TotalTime       \t \t  [10]: Read Live Time \n");
       printf("[11]: Read Event Counter   \t \t  [12]: Read trigger type\n");
       printf("[13]: Read Trigger Counters\t \t  [14]: Read memory address\n");
-      printf("[15]: Select Board          \t \t  [16]: Set trg bus delay\n");
+      printf("[15]: Select Board         \t \t  [16]: Set trg bus delay\n");
       printf("[17]: Write SERDES mem     \t \t  [18]: Read SERDES mem\n");
-      printf("[19]: Configure Serdes     \t \t  [20]: Serdes Scan\n");
-      printf("[21]: Load serdes from file\t \t  [22]: Start Serdes test\n");
+      printf("[19]:                      \t \t  [20]: \n");
+      printf("[21]:                      \t \t  [22]: \n");
       printf("[23]: Write SERDES Mask    \t \t  [24]: Set Parameter\n");
-      printf("[25]: Serdes check word    \t \t  [26]: Read serdes status\n");
+      printf("[25]:                      \t \t  [26]: \n");
       printf("[27]: Force a trigger      \t \t  [28]: Reset Transmitter\n");
-      printf("[29]: Automatic Serdes cal \t \t  [30]: Dump Data \n");
+      printf("[29]:                      \t \t  [30]: Dump Data \n");
       printf("[31]: Packetizer Commands  \t \t  [32]: Buffer Commands\n");
       printf("[33]: Reset PLL            \t \t  [34]: Reset PLL unlock cou\n");
       printf("[35]: Read Unlock counter  \t \t  [36]: Get prescaling\n");
@@ -131,9 +131,9 @@ int main(int argc, char *argv[])
         scanf("%x",&scanfdata);
         data |= scanfdata<<5;
         if(((TCBBoard.fidcode&0xf000)>>12)==2 || ((TCBBoard.fidcode&0xf000)>>12)==1) {
-          printf("\nDBGSERDES?\n if 1 0xDEADBEEF is set on any SERDES transmission\n");
+          printf("\nPATTERN_SERDES?\n if 1 serdes calibration pattern is set on any SERDES transmission\n");
           scanf("%x",&scanfdata);
-          data |= scanfdata<<8;
+          data |= scanfdata<<9;
         }
         printf("\nENABLE_TRGBUS?\n If 0 then the TRGBus from backplane is not used but internal signals \n if 1 then the backplane signals are used\n");
         scanf("%x",&scanfdata);
@@ -166,22 +166,81 @@ int main(int argc, char *argv[])
       //
       if(option == 2) {
          printf(" opt = 2 : Get RRUN ... \n");
-         if(TCBBoard.GetPacketizerBus()) 
-           printf("WARNING: the local bus is used by the packetizer, some regs are not accessible!\n");
+
          printf(" FW compilation date: ");
          TCBBoard.GetCompilDate(&data);
          printf("%02d/%02d/20%02d %02d:%02d:%02d\n",(data&0xF8000000)>>27,(data&0x7800000)>>23,(data&0x7e0000)>>17,(data&0x1F000)>>12,(data&0xFC0)>>6,(data&0x3F));
+
          TCBBoard.GetRRUN(&data);
+
+         if((data&0xF000000)>>24==0xF) {
+            printf("\n*********************************************************************************************************************\n");
+            printf("** Board configured to drive the trigger bus to the front panel connector, check the cable to the Ancillary Master! **\n");
+            printf("*********************************************************************************************************************\n\n");
+         }   
+         else if((data&0xF000000)>>24==0xB) {
+            printf("\n****************************************************************\n");
+            printf("** Board configured to drive the trigger bus to the backplane **\n");
+            printf("****************************************************************\n\n");
+         }
+
+         //check expid
+         switch(TCBBoard.fexpid){
+         case 0:
+            printf("NO EXPERIMENT ENABLED\n\n");
+         break;
+         case 1:
+            printf("Board compiled for MEG\n\n");
+         break;
+         case 2:
+            printf("Board compiled for FOOT\n\n");
+         break;
+         case 4:
+            printf("Board compiled for SCIFI\n\n");
+         break;
+         case 8:
+            printf("Board compiled for LOLX\n\n");
+         break;
+         defaut:
+            printf("expid = %d\n WARNING multiple experiment enabled while compiling the FW!\n\n", TCBBoard.fexpid);
+         break;
+         }
+
+         printf(" RUNMODE status %x \n",data&0x1);
+         printf(" INBUSY status %x \n",(data&0x2)>>1);
+         printf(" FADCMODE status %x \n",(data&0x4)>>2);
+         printf(" EXBUSY status %x \n",(data&0x8)>>3);
+         printf(" ENABLE TRGBUS status %x \n",(data&0x10)>>4);
+         printf(" TESTTXMODE status %x \n",(data&0x20)>>5);
+         printf(" MASKFTRG status %x \n",(data&0x40)>>6);
+         printf(" MASKFBUSY status %x \n",(data&0x80)>>7);
+         if( (TCBBoard.fidcode>>12)==2 || (TCBBoard.fidcode>>12)==1 ) 
+            printf(" PATTERNSERDES status %x \n",(data&0x200)>>9);
+         printf(" FBUSY status %x \n",(data&0x400)>>10);
+         printf(" LOCAL_TRG status %x \n",(data&0x800)>>11);
+         printf(" TRGBUS_NEGEDGE status %x \n",(data&0x1000)>>12);
+         printf(" MASKBUSY status %x \n",(data&0x2000)>>13);
+         printf(" MASKSYNC status %x \n",(data&0x4000)>>14);
+         printf(" MASKTRG status %x \n",(data&0x8000)>>15);
+         printf(" IDCODE status %x \n",(data&0xffff0000)>>16);
          printf(" RRUN reg content = %08x\n",data);
+
          if(((TCBBoard.fidcode&0xf000)>>12)==3) {
            int nword = (TCBBoard.fntrg-1)/32 + 1;
            for(int iword = 0; iword <nword; iword++){
              TCBBoard.GetRENA(&data,iword);
+             printf(" TRGENA status %x, bit [%d:%d]\n",data,(iword+1)*32-1,iword*32);
            }
          }
+
          if(((TCBBoard.fidcode&0xf000)>>12)!=3) {
            TCBBoard.GetRALGSEL(&data);
+           printf(" ALGSEL status %x \n",data);
          }
+
+         if(TCBBoard.GetPacketizerBus()) 
+            printf("WARNING: the local bus is used by the packetizer, some regs are not accessible!\n");
+
       }
       //
       if(option == 3) {
@@ -214,8 +273,6 @@ int main(int argc, char *argv[])
       }
       //
       if(option == 8) {
-         printf(" opt = 8 : configuring board ... \n");
-         printf(" not supported anymore!!!\n");
       }
       if(option ==  9) {
          printf(" opt = 9 : Get TotalTime ... \n");
@@ -374,105 +431,12 @@ int main(int argc, char *argv[])
          fclose(filout);
       }
       if(option == 19) {
-         printf(" opt 19 = Write SERDES delay ... \n");
-         int serdes, link, dly, bitsl;
-         printf("serdes id?\n");
-         scanf("%d", &serdes);
-         printf("serdes link?\n");
-         scanf("%d", &link);
-         printf("serdes dly?\n");
-         scanf("%d", &dly);
-         printf("serdes bitslip?\n");
-         scanf("%d", &bitsl);
-         TCBBoard.ConfigureSingleSerdes(serdes, link, dly, bitsl);
       }
       if(option == 20) {
-         printf(" opt 20 = SERDES Scan ... \n");
-
-         int howlong;
-         float errors[128][8][32];
-         u_int32_t ccounters[129];
-         printf("How many usec each point? \n");
-         scanf("%d",&howlong);
-         FILE *fout = fopen("tres.dat","w");
-         fprintf(fout,"MSCBXXX %d\n", TCBBoard.fnserdes);
-
-
-         for(int idly =0; idly<32; idly++){
-            for(int ibit=0; ibit<8; ibit++){
-              TCBBoard.ConfigureAllSerdes(idly, ibit);
-
-               TCBBoard.StartSerdesCheck();
-
-               usleep(howlong);
-
-               TCBBoard.StopSerdesCheck();
-               TCBBoard.GetSerdesErrorCount(ccounters);
-               fprintf(fout,"%d %d ", idly, ibit);
-               for(int icounter=0; icounter<TCBBoard.fnserdes*8; icounter++){
-                  errors[icounter][ibit][idly] = ccounters[icounter]*1./ccounters[TCBBoard.fnserdes*8];
-                  fprintf(fout,"%le ", ccounters[icounter]*1./ccounters[TCBBoard.fnserdes*8]);
-               }
-               fprintf(fout,"\n");
-               printf(" ******************* dly %d/31 ************\r", idly);
-               fflush(stdin);
-            }
-         }
-
-         fclose(fout);
-
-         fout = fopen("serdesconfig.dat","w");
-         //search eyes
-         const float thr = 1e-20;
-         for(int icounter=0; icounter<TCBBoard.fnserdes*8; icounter++){
-            float bestCenter=-1;
-            int bestWidth=-1;
-            int bestBitslip=-1;
-            for(int ibit=0; ibit<8; ibit++){
-               int state=0;
-               int start =-1;
-               int stop =-1;
-               for(int idly=0; idly<32 && state!=2; idly++){
-                  if(errors[icounter][ibit][idly]<thr && state==0){
-                     state=1;
-                     start=idly;
-                     stop=idly;
-                  }
-                  if (errors[icounter][ibit][idly]<thr && state == 1){
-                     stop=idly;
-                  } else if(errors[icounter][ibit][idly] >= thr && state == 1){
-                     state=2;
-                  }
-               }
-
-               int width= stop-start;
-               if(width > bestWidth){
-                  bestWidth = width;
-                  bestCenter = (stop+start)/2;
-                  bestBitslip = ibit;
-               }
-            }
-
-            printf("channel %d: dly %f, bit %d width %d\n", icounter, bestCenter, bestBitslip, bestWidth);
-            fprintf(fout, "%d %d\n", (int)bestCenter, bestBitslip);
-            if(bestWidth > 0) TCBBoard.ConfigureSingleSerdes(icounter/8, icounter%8, (int)(bestCenter), bestBitslip);
-         }
-         fclose(fout);
-
       }
       if(option == 21) {
-         printf(" opt 21 = load serdes value from file ... \n");
-         FILE *fin = fopen("serdesconfig.dat","r");
-         for(int iLink=0; iLink<TCBBoard.fnserdes*8; iLink++){
-            int dly, bit;
-            fscanf(fin, "%d %d\n", &dly, &bit);
-            TCBBoard.ConfigureSingleSerdes(iLink/8, iLink%8,  dly, bit);
-         }
-         fclose(fin);
       }
       if(option == 22) {
-        printf(" opt = 22 : Start Serdes check ... \n");
-        TCBBoard.StartSerdesCheck();
       }
       if(option == 23) {
         printf(" opt = 23 : Set trigger mask ... \n");
@@ -490,29 +454,8 @@ int main(int argc, char *argv[])
         TCBBoard.SetParameter(offset, &data);
       }
       if(option == 25) {
-        u_int32_t valdo, valup;
-        printf(" opt = 25 : Set control words ... \n");
-        printf("Control word [31:0]? (hex)\n");
-        scanf("%x",&valdo);
-        printf("Control word [63:32]? (hex)\n");
-        scanf("%x",&valup);
-        TCBBoard.SetCheckWord(valdo,valup);
-        TCBBoard.GetCheckWord();
-        /*printf("Control word mask [31:0]? (hex)\n");
-        scanf("%x",&valdo);
-        printf("Control word mask [63:32]? (hex)\n");
-        scanf("%x",&valup);
-        TCBBoard.SetCheckWordMask(valdo,valup);
-        TCBBoard.GetCheckWordMask();*/
       }
       if(option == 26) {
-         printf(" opt = 26 : Get Check Status ... \n");
-         //TCBBoard.GetCheckStatus();
-         u_int32_t data[4];
-         TCBBoard.GetSerdesError(data);
-         for (int i=0; i<4; i++){
-            printf("Link[%3d:%3d]= %08x\n", (i+1)*32, i*32, data[i]);
-         }
       }
       if(option == 27) {
         int trgid;
@@ -526,8 +469,6 @@ int main(int argc, char *argv[])
         TCBBoard.ResetTransmitter();
       }
       if(option == 29) {
-        printf(" opt = 29 : Automatic serdes scan ... \n");
-        TCBBoard.CalibrateSerdes();
       }
       if(option == 30) {
         printf(" opt = 30 : Dump Data ... \n");
