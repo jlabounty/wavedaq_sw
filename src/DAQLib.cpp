@@ -268,6 +268,11 @@ void DAQServerThread::Loop(){
 
    retval = pselect(FD_SETSIZE, &rfds, NULL, NULL, &fTimeout, NULL);
 
+   //select can generate EINTR "Interrupted function call", it is safe to restart the syscall so we can mimic a timeout
+   if(retval == -1 && errno == EINTR){
+      retval = 0;
+   }
+
    if (retval == -1)
       throw std::runtime_error(std::string("Cannot select"));
    else if (retval){
