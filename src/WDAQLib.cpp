@@ -533,7 +533,9 @@ bool WDAQEvent::AddPacket(WDAQPacketData* pkt){
          boardEvent = new WDAQTcbEvent(pkt);
          //printf("Event %d: Created TCB board event for board %d-%d\n", mEventNumber, type, id);
       } else {
-         boardEvent = new WDAQBoardEvent(pkt);
+         //no boards with given ID: bad packet
+         return false;
+         //boardEvent = new WDAQBoardEvent(pkt);
          //printf("Event %d: Created board event for board %d-%d\n", mEventNumber, type, id);
       }
 
@@ -673,7 +675,7 @@ void WDAQPacketCollector::GotData(){
       daqdata->event_number                = SWAP_UINT32(daqdata->event_number);
 
       //#define DEBUGGOT 
-
+      
 #ifdef DEBUGGOT
       printf("---------------------------------\n");
       printf("---------------------------------\n");
@@ -714,6 +716,7 @@ void WDAQPacketCollector::GotData(){
       printf("trigger event    \t %d\n", daqdata->trigger_information[5] | (daqdata->trigger_information[4] << 8));
       printf("trigger data     \t %d\n", daqdata->trigger_information[3] | (daqdata->trigger_information[2] << 8));
       printf("trigger type     \t %d\n", daqdata->trigger_information[1] | (daqdata->trigger_information[0] << 8));
+      
 #endif
 
       //from WDB
@@ -1217,9 +1220,9 @@ void WDAQWorker::calibrateBoard(WDAQWdbEvent *ev){
    //amplitude e->mDrsU[ch][bin];
    //unrotate
    float range = ev->GetRange();
+   bool anyChannel = false;
    for(int ch=0; ch<WD_N_CHANNELS; ch++){
       //calibrate only channels with data
-      bool anyChannel = false;
       if(ev->mDrsHasData[ch]){
          int tc = ev->mTriggerCell[ch];
 
@@ -1261,16 +1264,17 @@ void WDAQWorker::calibrateBoard(WDAQWdbEvent *ev){
 
    // check PLL
    if(! GetSystem()->GetAlarms()->Test(WDAQLIB_ERROR_PLLLOCK)){
-      if(
-         (ev->mWDBFlags & (1 << cWDFlagDRSPLLLock)) == 0 ||
-         (ev->mWDBFlags & (1 << cWDFlagLMKPLLLock)) == 0
-        ){
-         const std::string alarmMessage = "PLL Not locked: board " + std::to_string(ev->mBoardId) + " has flags=" + std::to_string(ev->mWDBFlags);
-
-         GetSystem()->GetAlarms()->Trigger(WDAQLIB_ERROR_PLLLOCK, alarmMessage);
+      if(anyChannel) {
+         if(
+               (ev->mWDBFlags & (1 << cWDFlagDRSPLLLock)) == 0 ||
+               (ev->mWDBFlags & (1 << cWDFlagLMKPLLLock)) == 0
+            ){
+            const std::string alarmMessage = "PLL Not locked: board " + std::to_string(ev->mBoardId) + " has flags=" + std::to_string(ev->mWDBFlags);
+            
+            GetSystem()->GetAlarms()->Trigger(WDAQLIB_ERROR_PLLLOCK, alarmMessage);
+         }
       }
    }
-
 
    ev->mVCalibrated = true;
 }
