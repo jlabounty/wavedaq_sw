@@ -205,6 +205,7 @@ public:
    // getters
    u_int32_t      GetIDCode() { return fidcode; }
    u_int32_t      GetSlotNum() { return fslot; }
+   int            GetNSerdes() { return fnserdes; }
    
    // Constructors
    TCB(int verbose = 0) {
@@ -295,6 +296,8 @@ public:
    void ReadMemory(int,u_int32_t*);
    // read all memories
    void ReadMemoryBLT(int,u_int32_t*);
+   //fill an address range with a given value
+   void FillMemory(unsigned int address, unsigned int len, unsigned int val);
    // set the runmode
    void GoRun();
    // get the runmode status
@@ -371,6 +374,12 @@ public:
    void ResetTransmitter();
    //set variable pattern
    void SetSerdesPattern(bool);
+   //send input serdes to algorims and memory
+   void SetFadcMode(bool);
+   //send output memory to serdes
+   void SetTestTxMode(bool);
+   //send TRG, SYNC and BUSY mask
+   void SetTRGBusMasks(bool, bool, bool);
    //Assign Bus to Packetizer
    void SetPacketizerBus(bool);
    //Check local bus association

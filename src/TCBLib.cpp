@@ -238,6 +238,15 @@ void TCB::ReadMemoryBLT(int which, u_int32_t *data)
    }
 }
 
+// Fill a memory with a given word
+void TCB::FillMemory(unsigned int address, unsigned int len, unsigned int val)
+{
+   // now loop to write the memory cells
+   for (unsigned int icell = 0; icell<len; icell++) {
+      WriteReg(address+icell, &val);
+   }
+}
+
 // activate the RUNMODE signal (by removing interal busy)
 void TCB::GoRun()
 {
@@ -571,6 +580,49 @@ void TCB::SetSerdesPattern(bool enable){
         data |= 0x00000200;
    } else {
         data &= 0xFFFFFDFF;
+   }
+   WriteReg(RRUN, &data);
+}
+//Set/unset FadcMode bit
+void TCB::SetFadcMode(bool enable){
+   u_int32_t data;
+   ReadReg(RRUN, &data);
+   if(enable){
+        data |= 0x00000004;
+   } else {
+        data &= 0xFFFFFFFB;
+   }
+   WriteReg(RRUN, &data);
+}
+//Set/unset TestTx bit
+void TCB::SetTestTxMode(bool enable){
+   u_int32_t data;
+   ReadReg(RRUN, &data);
+   if(enable){
+        data |= 0x00000020;
+   } else {
+        data &= 0xFFFFFFDF;
+   }
+   WriteReg(RRUN, &data);
+}
+//Set/unset TRGBus Flags
+void TCB::SetTRGBusMasks(bool trg, bool sync, bool busy){
+   u_int32_t data;
+   ReadReg(RRUN, &data);
+   if(trg){
+        data |= 0x00008000;
+   } else {
+        data &= 0xFFFF7FFF;
+   }
+   if(sync){
+        data |= 0x00004000;
+   } else {
+        data &= 0xFFFFBFFF;
+   }
+   if(sync){
+        data |= 0x00002000;
+   } else {
+        data &= 0xFFFFDFFF;
    }
    WriteReg(RRUN, &data);
 }

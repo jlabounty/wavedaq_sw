@@ -658,7 +658,7 @@ int main(int argc, char *argv[])
       printf("[ 7]: turn on              \t \t  [ 8]: turn off             \n");
       printf("[ 9]: train serdes         \t \t  [10]: print serdes state   \n");
       printf("[11]: spawn daq            \t \t  [12]: stop daq             \n");
-      printf("[13]: sync dly scan        \t \t  [14]: attach debug thread  \n");
+      printf("[13]: Test trigger links   \t \t  [14]: attach debug thread  \n");
       printf("[15]: draw system          \t \t  [16]: print firmware version\n");
       printf("[17]: update firmware      \t \t  [18]: clean buffer         \n");
       printf("[19]: show DAQ status      \t \t  [20]: reboot CMBs          \n");
@@ -804,35 +804,69 @@ int main(int argc, char *argv[])
          }
          if(option == 13)
          {
-            /*sys->SetSerdesTraining(true);
-            unsigned int dly = 0x08;
-            dynamic_cast<WDTCB*>(sys->GetTriggerBoard())->SetTRGBusIDLY(&dly, &dly, &dly);
-            for(dly=0; dly<32; dly++){
-               printf("testing dly %u\n", dly);
-               dynamic_cast<WDTCB*>(sys->GetTriggerBoard())->SetTRGBusODLY(&dly, &dly, &dly);
-               sys->Sync();
-               sys->TrainSerdes();
-               std::this_thread::sleep_for(std::chrono::seconds(3));
-               for(auto c : *sys)
-                  for(auto b :*c)
-                     if(b){
-                        if(dynamic_cast<WDTCB*>(b) != nullptr){
-                           unsigned int val;
-                           dynamic_cast<WDTCB*>(b)->GetAutoCalibrateFail(&val);
-                              unsigned int val1=0;
-                              unsigned int val2=0;
-                              unsigned int val3=0;
-                              dynamic_cast<WDTCB*>(b)->ReadReg(0x355, &val1);
-                              dynamic_cast<WDTCB*>(b)->ReadReg(0x356, &val2);
-                              dynamic_cast<WDTCB*>(b)->ReadReg(0x357, &val3);
-                              printf("%s %08x %08x maxslot=%d ", c->GetMscbName().c_str(), val2, val1, val3);
-                           if(val & 0x80000000){
-                              printf("fail: %08x", val);
+            unsigned int word0, word1;
+            printf("serdesbit 31: 0? (hex)\n");
+            scanf("%x",&word0);
+            printf("serdesbit 63:32? (hex)\n");
+            scanf("%x",&word1);
+            //set TestTxMode and FadcMode, then take bus and fill memories
+            //finally mask trg and busy, disable triggers and go run
+            for(auto c : *sys){
+               for(auto b :*c)
+                  if(b){
+                     if(dynamic_cast<WDTCB*>(b) != nullptr){
+                        WDTCB* tcb = static_cast<WDTCB*>(b);
+                        printf("Configuring %s\n", tcb->GetBoardName().c_str());
+                        sys->SetSerdesTraining(false);
+                        tcb->SetPacketizerBus(false);
+                        tcb->SetFadcMode(true);
+                        tcb->SetTestTxMode(true);
+                        tcb->FillMemory(MEMBASEADDR+16*2*MEMDIM, MEMDIM, word0);
+                        tcb->FillMemory(MEMBASEADDR+16*2*MEMDIM+MEMDIM, MEMDIM, word1);
+
+                        tcb->SetTRGBusMasks(false, true, false); 
+                        unsigned int val = 0;
+                        tcb->SetRENA(&val, 0);
+                        tcb->SetRENA(&val, 1);
+                        tcb->GoRun();
+                     }
+                  }
+            }
+            //make another loop to check input memories
+            unsigned int mem[MEMDIM*2];
+            for(auto c : *sys){
+               for(auto b :*c)
+                  if(b){
+                     if(dynamic_cast<WDTCB*>(b) != nullptr){
+                        WDTCB* tcb = static_cast<WDTCB*>(b);
+                        printf("TCB %s\n", tcb->GetBoardName().c_str());
+                        tcb->SWStop();
+
+                        int nSerdes = tcb->GetNSerdes();
+                        if(((tcb->GetIDCode()&0xf000) >> 12) == 1)
+                           nSerdes = 0; // skip TCB_1
+
+                        for(int iSerdes=0; iSerdes<nSerdes; iSerdes++){
+                           tcb->ReadMemoryBLT(2*iSerdes, mem);
+                           tcb->ReadMemoryBLT(2*iSerdes+1, mem+MEMDIM);
+                           printf("\tSerdes %d\n", iSerdes);
+                           bool correct = true;
+
+                           for(int i=0; i<MEMDIM; i++){
+                              if(mem[i] != word0 || mem[i+MEMDIM] != word1){
+                                 if(correct) printf("\t\t%08x%08x %08x%08x\n", mem[i+MEMDIM], mem[i], word1, word0);
+                                 correct = false;
+                              }
                            }
-                           printf("\n");
+
+                           if(correct)
+                              printf("\tOK!\n");
+                           else
+                              printf("\tBAD!\n");
                         }
                      }
-            }*/
+                  }
+            }
          }
          if(option == 14)
          {
