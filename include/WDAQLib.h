@@ -53,6 +53,9 @@ class WDTCB;
 #define SOE 2
 #define EOT 4
 #define SOT 8
+#define CRC_ERROR 16
+#define DATAGRAM_ERROR 32
+#define BUFFER_ERROR 64
 
 //#define WD2_BOARD_ID 0
 //#define TCB_BOARD_ID 1

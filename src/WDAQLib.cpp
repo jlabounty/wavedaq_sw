@@ -667,12 +667,26 @@ void WDAQPacketCollector::GotData(){
          fCorruptedPackets++;
          continue;
       }
+
       //correct endianess
       daqdata->serial_number               = SWAP_UINT16(daqdata->serial_number);
       daqdata->payload_length              = SWAP_UINT16(daqdata->payload_length);
       daqdata->packet_number               = SWAP_UINT16(daqdata->packet_number);
       daqdata->data_chunk_offset           = SWAP_UINT16(daqdata->data_chunk_offset);
       daqdata->event_number                = SWAP_UINT32(daqdata->event_number);
+
+      // check flags for CRC, Datagram and Overflow error
+      if ((daqdata->wdaq_flags & (CRC_ERROR | DATAGRAM_ERROR | BUFFER_ERROR)) != 0) {
+         char *ip = GetMessageSourceAddress(imsg);
+         const std::string alarmMessage = "Message from " + std::string(ip) + ": serial link error in DCB, flags=" + std::to_string(daqdata->wdaq_flags);
+         //std::cout << alarmMessage << std::endl;
+         if(! GetSystem()->GetAlarms()->Test(WDAQLIB_ERROR_CORRUPTEDPACKET)){
+            GetSystem()->GetAlarms()->Trigger(WDAQLIB_ERROR_CORRUPTEDPACKET, alarmMessage);
+         }
+
+         fCorruptedPackets++;
+         continue;
+      }
 
       //#define DEBUGGOT 
       
