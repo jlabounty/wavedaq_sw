@@ -647,7 +647,7 @@ void WDAQPacketCollector::GotData(){
          }
 
          fCorruptedPackets++;
-         return;
+         continue;
       }
 
       //first link to the WDAQ_FRAME_HEADER
@@ -665,7 +665,7 @@ void WDAQPacketCollector::GotData(){
          }
 
          fCorruptedPackets++;
-         return;
+         continue;
       }
       //correct endianess
       daqdata->serial_number               = SWAP_UINT16(daqdata->serial_number);
@@ -763,7 +763,7 @@ void WDAQPacketCollector::GotData(){
             }
 
             fCorruptedPackets++;
-            return;
+            continue;
          }
 
          if(daqdata->data_type == cDataTypeDRS){
@@ -902,7 +902,7 @@ void WDAQPacketCollector::GotData(){
             }
 
             fCorruptedPackets++;
-            return;
+            continue;
          }
 
          if(daqdata->data_type == cDataTypeTCB) {
@@ -1078,7 +1078,7 @@ void WDAQEventBuilder::Loop(){
 
             fBadPackets++;
             delete ptr;
-            return;
+            continue;
          }
          delete ptr;
 
