@@ -5,7 +5,7 @@
 #  Project :  WaveDream2
 #
 #  Author  :  schmid_e (Author of generation script)
-#  Created :  11.01.2022 07:40:39
+#  Created :  25.02.2022 12:29:50
 #
 #  Register Layout Version :  9
 #
@@ -1604,7 +1604,7 @@ WD2_HV_R_SHUNT_OFS                       =                                 0
 
 
 
-# ****** Control Register 55 [0x10DC]: LMK_0 - LMK Register 0 (Default: 0x00032100) ******
+# ****** Control Register 55 [0x10DC]: LMK_0 - LMK Register 0 (Default: 0x00032900) ******
 
 # LMK0_RESET - Resets LMK Registers to Their Power-On State
 WD2_LMK0_RESET_REG                       =                     WD2_REG_LMK_0
@@ -5092,7 +5092,7 @@ ctrl_reg_default = [0xFFFFFFFF,   # Offset 0x1000
                     0x00000000,   # Offset 0x10D0 
                     0x00000000,   # Offset 0x10D4 
                     0x00002710,   # Offset 0x10D8 
-                    0x00032100,   # Offset 0x10DC 
+                    0x00032900,   # Offset 0x10DC 
                     0x00020101,   # Offset 0x10E0 
                     0x00020102,   # Offset 0x10E4 
                     0x00000103,   # Offset 0x10E8 
