@@ -71,6 +71,8 @@ void makeThr(string dirname="./", double absoluteThr = 0.01 ){
    hSigma->SetCanExtend(TH1::kAllAxes);
    TH1F* hThr = new TH1F("hThr", "Threshold", 100, 0, 0);
    hThr->SetCanExtend(TH1::kAllAxes);
+   TH1F* hRate = new TH1F("hRate", "Rate at Threshold", 100, 0, 0);
+   hRate->SetCanExtend(TH1::kAllAxes);
 
    //list directory content
    TSystemDirectory dir(dirname.c_str(),dirname.c_str());
@@ -190,7 +192,8 @@ void makeThr(string dirname="./", double absoluteThr = 0.01 ){
 
                   Int_t bin = h->FindBin(thr);
                   board.rateAtThr[i] = h->GetBinContent(bin);
-                  if(board.rateAtThr[i]>10){
+                  hRate->Fill(board.rateAtThr[i]);
+                  if(board.rateAtThr[i]>150){
                      noped++;
                      board.bad[i] = true;
                      printf("!!");
@@ -237,6 +240,7 @@ void makeThr(string dirname="./", double absoluteThr = 0.01 ){
 
                   Int_t bin = h->FindBin(thr);
                   board.rateAtThr[i] = h->GetBinContent(bin);
+                  hRate->Fill(board.rateAtThr[i]);
                   if(board.rateAtThr[i]>10){
                      noped++;
                      board.bad[i] = true;
@@ -303,6 +307,7 @@ void makeThr(string dirname="./", double absoluteThr = 0.01 ){
    hMean->Write();
    hSigma->Write();
    hThr->Write();
+   hRate->Write();
    outroot->Close();
 
 }

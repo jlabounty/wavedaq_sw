@@ -1216,8 +1216,8 @@ void WDAQWorker::calibrateBoard(WDAQWdbEvent *ev){
    VCALIB* calib = calibptr->second;
 
    // CLK channels masked with the presence of at least one associated channels in the event
-   ev->mDrsHasData[16] &= ev->mDrsHasData[0]|ev->mDrsHasData[1]|ev->mDrsHasData[2]|ev->mDrsHasData[3]|ev->mDrsHasData[4]|ev->mDrsHasData[5]|ev->mDrsHasData[6]|ev->mDrsHasData[7];
-   ev->mDrsHasData[17] &= ev->mDrsHasData[8]|ev->mDrsHasData[9]|ev->mDrsHasData[10]|ev->mDrsHasData[11]|ev->mDrsHasData[12]|ev->mDrsHasData[13]|ev->mDrsHasData[14]|ev->mDrsHasData[15];
+//   ev->mDrsHasData[16] &= ev->mDrsHasData[0]|ev->mDrsHasData[1]|ev->mDrsHasData[2]|ev->mDrsHasData[3]|ev->mDrsHasData[4]|ev->mDrsHasData[5]|ev->mDrsHasData[6]|ev->mDrsHasData[7];
+//   ev->mDrsHasData[17] &= ev->mDrsHasData[8]|ev->mDrsHasData[9]|ev->mDrsHasData[10]|ev->mDrsHasData[11]|ev->mDrsHasData[12]|ev->mDrsHasData[13]|ev->mDrsHasData[14]|ev->mDrsHasData[15];
 
    //check temperature
    if(calib->IsValid() && fabs(calib->GetTemperature() - ev->mTemperature) > 5){
