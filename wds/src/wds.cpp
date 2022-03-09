@@ -86,6 +86,7 @@ typedef struct {
    bool demoMode;
    int serverPort;
    int verbose;
+   std::string directConnect;
    std::string logFileName;
    std::vector<WDB *> wdb;
    std::vector<DCB *> dcb;
@@ -1744,7 +1745,14 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
                url += "\r\nContent-Length: 0\r\n\r\n";
                mg_printf(nc, "%s", url.c_str());
             }
-            mg_serve_http(nc, hm, s_http_server_opts);
+            // redirect if connected already from command line
+            if (!gl->directConnect.empty()) {
+               std::string url = "HTTP/1.1 301 Moved\r\nLocation: osc.html?adr=";
+               url += gl->directConnect;
+               url += "\r\nContent-Length: 0\r\n\r\n";
+               mg_printf(nc, "%s", url.c_str());
+            } else
+               mg_serve_http(nc, hm, s_http_server_opts);
          }
 
       } else
@@ -1774,6 +1782,7 @@ void showUsage(std::string name) {
    std::cerr << "  -v 1            Print extra information (verbose)" << std::endl;
    std::cerr << "  -v 2            Print each received waveform packet header" << std::endl;
    std::cerr << "  -W <dir>        Specify directory in which \"html\" resides" << std::endl;
+   std::cerr << "  -w <wdb>        Connect directly to WDxxx or DCBxx" << std::endl;
 }
 
 void handler(int sig) {
@@ -1882,6 +1891,7 @@ int main(int argc, const char *argv[]) {
    gl.daemonMode = false;
    gl.serverPort = 8080;
    gl.verbose = 0;
+   gl.directConnect = "";
    gl.logFileName = "";
    gl.triggerMode = cTriggerModeAuto;
    gl.triggerSelfArm = false;
@@ -2023,6 +2033,8 @@ int main(int argc, const char *argv[]) {
             });
 
             if (b.substr(0, 3) == "DCB") {
+               gl.directConnect = b;
+
                try {
                   DCB *dcb = new DCB(b, gl.verbose);
                   dcb->Connect();
@@ -2046,9 +2058,23 @@ int main(int argc, const char *argv[]) {
                }
                if (gl.verbose)
                   std::cout << "OK" << std::endl;
+               gl.directConnect = b;
 
-            } else
-               gl.wdb.push_back(new WDB(b));
+            } else {
+               gl.directConnect = b;
+
+               // connect to board directly
+               try {
+                  WDB *wdb = new WDB(gl.directConnect, gl.verbose);
+                  if (gl.verbose)
+                     std::cout << "Connect to " << wdb->GetAddr() << " ... " << std::flush;
+                  connectWDB(&gl, wdb);
+                  gl.wdb.push_back(wdb);
+               } catch (std::runtime_error &e) {
+                  std::cout << std::endl << "Error connecting to " << gl.directConnect << ": " << e.what() << std::endl;
+                  return 1;
+               }
+            }
          }
          i++;
 
@@ -2166,6 +2192,9 @@ int main(int argc, const char *argv[]) {
    // set destination port for DCB, MAC and IP is used automatically from UDP packet
    for (auto &db : gl.dcb)
       db->SetDestinationPort(gl.wp->GetServerPort());
+
+   for (auto &wb : gl.wdb)
+      wb->SetDestinationPort(gl.wp->GetServerPort());
 
    gl.wp->SetWDBList(gl.wdb);
 
