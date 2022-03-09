@@ -1943,8 +1943,8 @@ int main(int argc, const char *argv[]) {
             }
          }
       } else {
-         std::cerr << "Cannot find 'WDBSYS' environment variable. Please set it to the wavedaq_main or wavedaq_sw directory." << std::endl;
-         std::cerr << "Alternatively, use the '-W <dir>' argument to point to the directory where 'html' resides." << std::endl;
+         std::cerr << "Cannot find 'WDBSYS' environment variable.\nPlease set it to the wavedaq_main or wavedaq_sw directory." << std::endl;
+         std::cerr << "Alternatively, use the '-W <dir>' argument to point to the directory\nwhere the 'html' directory resides." << std::endl;
          return 1;
       }
    }
