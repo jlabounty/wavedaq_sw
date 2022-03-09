@@ -1923,21 +1923,27 @@ int main(int argc, const char *argv[]) {
       gl.wdsDir = dir;
    } else {
       if (getenv("WDBSYS")) {
-         std::ifstream f3(std::string(getenv("WDBSYS")) + "/sw/wds/html/index.html");
-         if (f3.good()) {
+         std::ifstream f2(std::string(getenv("WDBSYS")) + "/sw/wds/html/index.html");
+         if (f2.good()) {
             gl.wdsDir = std::string(getenv("WDBSYS")) + "/sw/wds";
          } else {
-            std::ifstream f4(std::string(getenv("WDBSYS")) + "/html/index.html");
-            if (f4.good()) {
-               gl.wdsDir = std::string(getenv("WDBSYS"));
+            std::ifstream f3(std::string(getenv("WDBSYS")) + "/html/index.html");
+            if (f3.good()) {
+               gl.wdsDir = std::string(getenv("WDBSYS")) + "/html/index.html";
             } else {
-               std::cerr << "Cannot find 'html' directory. Please corret 'WDBSYS' environment variable." << std::endl;
-               std::cerr << "WDBSYS currently points to '" << getenv("WDBSYS") << "'" << std::endl;
-               return 1;
+               std::ifstream f4(std::string(getenv("WDBSYS")) + "/wds/html/index.html");
+               if (f4.good()) {
+                  gl.wdsDir = std::string(getenv("WDBSYS")) + "/wds/html/index.html";
+               } else {
+                  std::cerr << "Cannot find 'html' directory. Please correct 'WDBSYS' environment variable."
+                            << std::endl;
+                  std::cerr << "WDBSYS currently points to '" << getenv("WDBSYS") << "'" << std::endl;
+                  return 1;
+               }
             }
          }
       } else {
-         std::cerr << "Cannot find 'WDBSYS' environment variable. Please set it to the wavedaq_main directory." << std::endl;
+         std::cerr << "Cannot find 'WDBSYS' environment variable. Please set it to the wavedaq_main or wavedaq_sw directory." << std::endl;
          std::cerr << "Alternatively, use the '-W <dir>' argument to point to the directory where 'html' resides." << std::endl;
          return 1;
       }
