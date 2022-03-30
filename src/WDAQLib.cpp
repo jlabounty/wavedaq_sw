@@ -678,7 +678,13 @@ void WDAQPacketCollector::GotData(){
       // check flags for CRC, Datagram and Overflow error
       if ((daqdata->wdaq_flags & (CRC_ERROR | DATAGRAM_ERROR | BUFFER_ERROR)) != 0) {
          char *ip = GetMessageSourceAddress(imsg);
-         const std::string alarmMessage = "Message from " + std::string(ip) + ": serial link error in DCB, flags=" + std::to_string(daqdata->wdaq_flags);
+         std::string alarmMessage = "Message from " + std::string(ip) + ": serial link error in DCB, flags=" + std::to_string(daqdata->wdaq_flags);
+         if(daqdata->wdaq_flags & CRC_ERROR)
+            alarmMessage += ", CRC Error";
+         if(daqdata->wdaq_flags & DATAGRAM_ERROR)
+            alarmMessage += ", Datagram Error";
+         if(daqdata->wdaq_flags & BUFFER_ERROR)
+            alarmMessage += ", Buffer Error";
          //std::cout << alarmMessage << std::endl;
          if(! GetSystem()->GetAlarms()->Test(WDAQLIB_ERROR_CORRUPTEDPACKET)){
             GetSystem()->GetAlarms()->Trigger(WDAQLIB_ERROR_CORRUPTEDPACKET, alarmMessage);
