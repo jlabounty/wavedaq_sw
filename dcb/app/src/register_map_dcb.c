@@ -5,7 +5,7 @@
  *  Project :  MEGII - DCB
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  28.05.2021 10:21:20
+ *  Created :  30.03.2022 09:55:53
  *
  *  Description :  Register map definitions.
  *
@@ -109,7 +109,24 @@ const dcb_reg_func_type  dcb_reg_func_list[] = {
   { dcb_hw_reg         , 0 },   /* register 87 [0x015C]: SD_PKT_CNT_14 */
   { dcb_hw_reg         , 0 },   /* register 88 [0x0160]: SD_PKT_CNT_15 */
   { dcb_hw_reg         , 0 },   /* register 89 [0x0164]: SD_PKT_CNT_17 */
-  { dcb_hw_reg         , 0 }    /* register 90 [0x0168]: CRC32_REG_BANK */
+  { dcb_hw_reg         , 0 },   /* register 90 [0x0168]: SD_EYE_STATUS_0 */
+  { dcb_hw_reg         , 0 },   /* register 91 [0x016C]: SD_EYE_STATUS_1 */
+  { dcb_hw_reg         , 0 },   /* register 92 [0x0170]: SD_EYE_STATUS_2 */
+  { dcb_hw_reg         , 0 },   /* register 93 [0x0174]: SD_EYE_STATUS_3 */
+  { dcb_hw_reg         , 0 },   /* register 94 [0x0178]: SD_EYE_STATUS_4 */
+  { dcb_hw_reg         , 0 },   /* register 95 [0x017C]: SD_EYE_STATUS_5 */
+  { dcb_hw_reg         , 0 },   /* register 96 [0x0180]: SD_EYE_STATUS_6 */
+  { dcb_hw_reg         , 0 },   /* register 97 [0x0184]: SD_EYE_STATUS_7 */
+  { dcb_hw_reg         , 0 },   /* register 98 [0x0188]: SD_EYE_STATUS_8 */
+  { dcb_hw_reg         , 0 },   /* register 99 [0x018C]: SD_EYE_STATUS_9 */
+  { dcb_hw_reg         , 0 },   /* register 100 [0x0190]: SD_EYE_STATUS_10 */
+  { dcb_hw_reg         , 0 },   /* register 101 [0x0194]: SD_EYE_STATUS_11 */
+  { dcb_hw_reg         , 0 },   /* register 102 [0x0198]: SD_EYE_STATUS_12 */
+  { dcb_hw_reg         , 0 },   /* register 103 [0x019C]: SD_EYE_STATUS_13 */
+  { dcb_hw_reg         , 0 },   /* register 104 [0x01A0]: SD_EYE_STATUS_14 */
+  { dcb_hw_reg         , 0 },   /* register 105 [0x01A4]: SD_EYE_STATUS_15 */
+  { dcb_hw_reg         , 0 },   /* register 106 [0x01A8]: SD_EYE_STATUS_17 */
+  { dcb_hw_reg         , 0 }    /* register 107 [0x01AC]: CRC32_REG_BANK */
 };
 
 #endif /* DCB_DONT_INCLUDE_REG_ACCESS_VARS */
@@ -211,6 +228,23 @@ const dcb_reg_entry_type  dcb_reg_list[] = {
   { "SD_PKT_CNT_14"       , DCB_REG_SD_PKT_CNT_14      , DCB_READONLY_REG },
   { "SD_PKT_CNT_15"       , DCB_REG_SD_PKT_CNT_15      , DCB_READONLY_REG },
   { "SD_PKT_CNT_17"       , DCB_REG_SD_PKT_CNT_17      , DCB_READONLY_REG },
+  { "SD_EYE_STATUS_0"     , DCB_REG_SD_EYE_STATUS_0    , DCB_READONLY_REG },
+  { "SD_EYE_STATUS_1"     , DCB_REG_SD_EYE_STATUS_1    , DCB_READONLY_REG },
+  { "SD_EYE_STATUS_2"     , DCB_REG_SD_EYE_STATUS_2    , DCB_READONLY_REG },
+  { "SD_EYE_STATUS_3"     , DCB_REG_SD_EYE_STATUS_3    , DCB_READONLY_REG },
+  { "SD_EYE_STATUS_4"     , DCB_REG_SD_EYE_STATUS_4    , DCB_READONLY_REG },
+  { "SD_EYE_STATUS_5"     , DCB_REG_SD_EYE_STATUS_5    , DCB_READONLY_REG },
+  { "SD_EYE_STATUS_6"     , DCB_REG_SD_EYE_STATUS_6    , DCB_READONLY_REG },
+  { "SD_EYE_STATUS_7"     , DCB_REG_SD_EYE_STATUS_7    , DCB_READONLY_REG },
+  { "SD_EYE_STATUS_8"     , DCB_REG_SD_EYE_STATUS_8    , DCB_READONLY_REG },
+  { "SD_EYE_STATUS_9"     , DCB_REG_SD_EYE_STATUS_9    , DCB_READONLY_REG },
+  { "SD_EYE_STATUS_10"    , DCB_REG_SD_EYE_STATUS_10   , DCB_READONLY_REG },
+  { "SD_EYE_STATUS_11"    , DCB_REG_SD_EYE_STATUS_11   , DCB_READONLY_REG },
+  { "SD_EYE_STATUS_12"    , DCB_REG_SD_EYE_STATUS_12   , DCB_READONLY_REG },
+  { "SD_EYE_STATUS_13"    , DCB_REG_SD_EYE_STATUS_13   , DCB_READONLY_REG },
+  { "SD_EYE_STATUS_14"    , DCB_REG_SD_EYE_STATUS_14   , DCB_READONLY_REG },
+  { "SD_EYE_STATUS_15"    , DCB_REG_SD_EYE_STATUS_15   , DCB_READONLY_REG },
+  { "SD_EYE_STATUS_17"    , DCB_REG_SD_EYE_STATUS_17   , DCB_READONLY_REG },
   { "CRC32_REG_BANK"      , DCB_REG_CRC32_REG_BANK     , DCB_WRITABLE_REG },
   { (const char*)0        , 0                          , 0                }
 };
@@ -492,6 +526,40 @@ const dcb_bit_group_entry_type  dcb_bit_group_list[] = {
   { "SD_PKT_CNT_14"                 , DCB_SD_PKT_CNT_14_REG                 , DCB_SD_PKT_CNT_14_MASK                 , DCB_SD_PKT_CNT_14_OFS                 },
   { "SD_PKT_CNT_15"                 , DCB_SD_PKT_CNT_15_REG                 , DCB_SD_PKT_CNT_15_MASK                 , DCB_SD_PKT_CNT_15_OFS                 },
   { "SD_PKT_CNT_17"                 , DCB_SD_PKT_CNT_17_REG                 , DCB_SD_PKT_CNT_17_MASK                 , DCB_SD_PKT_CNT_17_OFS                 },
+  { "SD_TAP_0"                      , DCB_SD_TAP_0_REG                      , DCB_SD_TAP_0_MASK                      , DCB_SD_TAP_0_OFS                      },
+  { "SD_EYE_0"                      , DCB_SD_EYE_0_REG                      , DCB_SD_EYE_0_MASK                      , DCB_SD_EYE_0_OFS                      },
+  { "SD_TAP_1"                      , DCB_SD_TAP_1_REG                      , DCB_SD_TAP_1_MASK                      , DCB_SD_TAP_1_OFS                      },
+  { "SD_EYE_1"                      , DCB_SD_EYE_1_REG                      , DCB_SD_EYE_1_MASK                      , DCB_SD_EYE_1_OFS                      },
+  { "SD_TAP_2"                      , DCB_SD_TAP_2_REG                      , DCB_SD_TAP_2_MASK                      , DCB_SD_TAP_2_OFS                      },
+  { "SD_EYE_2"                      , DCB_SD_EYE_2_REG                      , DCB_SD_EYE_2_MASK                      , DCB_SD_EYE_2_OFS                      },
+  { "SD_TAP_3"                      , DCB_SD_TAP_3_REG                      , DCB_SD_TAP_3_MASK                      , DCB_SD_TAP_3_OFS                      },
+  { "SD_EYE_3"                      , DCB_SD_EYE_3_REG                      , DCB_SD_EYE_3_MASK                      , DCB_SD_EYE_3_OFS                      },
+  { "SD_TAP_4"                      , DCB_SD_TAP_4_REG                      , DCB_SD_TAP_4_MASK                      , DCB_SD_TAP_4_OFS                      },
+  { "SD_EYE_4"                      , DCB_SD_EYE_4_REG                      , DCB_SD_EYE_4_MASK                      , DCB_SD_EYE_4_OFS                      },
+  { "SD_TAP_5"                      , DCB_SD_TAP_5_REG                      , DCB_SD_TAP_5_MASK                      , DCB_SD_TAP_5_OFS                      },
+  { "SD_EYE_5"                      , DCB_SD_EYE_5_REG                      , DCB_SD_EYE_5_MASK                      , DCB_SD_EYE_5_OFS                      },
+  { "SD_TAP_6"                      , DCB_SD_TAP_6_REG                      , DCB_SD_TAP_6_MASK                      , DCB_SD_TAP_6_OFS                      },
+  { "SD_EYE_6"                      , DCB_SD_EYE_6_REG                      , DCB_SD_EYE_6_MASK                      , DCB_SD_EYE_6_OFS                      },
+  { "SD_TAP_7"                      , DCB_SD_TAP_7_REG                      , DCB_SD_TAP_7_MASK                      , DCB_SD_TAP_7_OFS                      },
+  { "SD_EYE_7"                      , DCB_SD_EYE_7_REG                      , DCB_SD_EYE_7_MASK                      , DCB_SD_EYE_7_OFS                      },
+  { "SD_TAP_8"                      , DCB_SD_TAP_8_REG                      , DCB_SD_TAP_8_MASK                      , DCB_SD_TAP_8_OFS                      },
+  { "SD_EYE_8"                      , DCB_SD_EYE_8_REG                      , DCB_SD_EYE_8_MASK                      , DCB_SD_EYE_8_OFS                      },
+  { "SD_TAP_9"                      , DCB_SD_TAP_9_REG                      , DCB_SD_TAP_9_MASK                      , DCB_SD_TAP_9_OFS                      },
+  { "SD_EYE_9"                      , DCB_SD_EYE_9_REG                      , DCB_SD_EYE_9_MASK                      , DCB_SD_EYE_9_OFS                      },
+  { "SD_TAP_10"                     , DCB_SD_TAP_10_REG                     , DCB_SD_TAP_10_MASK                     , DCB_SD_TAP_10_OFS                     },
+  { "SD_EYE_10"                     , DCB_SD_EYE_10_REG                     , DCB_SD_EYE_10_MASK                     , DCB_SD_EYE_10_OFS                     },
+  { "SD_TAP_11"                     , DCB_SD_TAP_11_REG                     , DCB_SD_TAP_11_MASK                     , DCB_SD_TAP_11_OFS                     },
+  { "SD_EYE_11"                     , DCB_SD_EYE_11_REG                     , DCB_SD_EYE_11_MASK                     , DCB_SD_EYE_11_OFS                     },
+  { "SD_TAP_12"                     , DCB_SD_TAP_12_REG                     , DCB_SD_TAP_12_MASK                     , DCB_SD_TAP_12_OFS                     },
+  { "SD_EYE_12"                     , DCB_SD_EYE_12_REG                     , DCB_SD_EYE_12_MASK                     , DCB_SD_EYE_12_OFS                     },
+  { "SD_TAP_13"                     , DCB_SD_TAP_13_REG                     , DCB_SD_TAP_13_MASK                     , DCB_SD_TAP_13_OFS                     },
+  { "SD_EYE_13"                     , DCB_SD_EYE_13_REG                     , DCB_SD_EYE_13_MASK                     , DCB_SD_EYE_13_OFS                     },
+  { "SD_TAP_14"                     , DCB_SD_TAP_14_REG                     , DCB_SD_TAP_14_MASK                     , DCB_SD_TAP_14_OFS                     },
+  { "SD_EYE_14"                     , DCB_SD_EYE_14_REG                     , DCB_SD_EYE_14_MASK                     , DCB_SD_EYE_14_OFS                     },
+  { "SD_TAP_15"                     , DCB_SD_TAP_15_REG                     , DCB_SD_TAP_15_MASK                     , DCB_SD_TAP_15_OFS                     },
+  { "SD_EYE_15"                     , DCB_SD_EYE_15_REG                     , DCB_SD_EYE_15_MASK                     , DCB_SD_EYE_15_OFS                     },
+  { "SD_TAP_17"                     , DCB_SD_TAP_17_REG                     , DCB_SD_TAP_17_MASK                     , DCB_SD_TAP_17_OFS                     },
+  { "SD_EYE_17"                     , DCB_SD_EYE_17_REG                     , DCB_SD_EYE_17_MASK                     , DCB_SD_EYE_17_OFS                     },
   { "CRC32_REG_BANK"                , DCB_CRC32_REG_BANK_REG                , DCB_CRC32_REG_BANK_MASK                , DCB_CRC32_REG_BANK_OFS                },
   { (const char*)0                  , 0                                     , 0                                      , 0                                     }
 };
@@ -591,7 +659,24 @@ const unsigned char reg_restore[] = {
   DCB_DONT_TOUCH_REG,   /* Offset 0x015C */
   DCB_DONT_TOUCH_REG,   /* Offset 0x0160 */
   DCB_DONT_TOUCH_REG,   /* Offset 0x0164 */
-  DCB_DONT_TOUCH_REG    /* Offset 0x0168 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0168 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x016C */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0170 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0174 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0178 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x017C */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0180 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0184 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0188 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x018C */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0190 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0194 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x0198 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x019C */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x01A0 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x01A4 */
+  DCB_DONT_TOUCH_REG,   /* Offset 0x01A8 */
+  DCB_DONT_TOUCH_REG    /* Offset 0x01AC */
 };
 
 
@@ -689,7 +774,24 @@ const unsigned int reg_default[] = {
   0x00000000,   /* Offset 0x0158 */
   0x00000000,   /* Offset 0x015C */
   0x00000000,   /* Offset 0x0160 */
-  0x00000000    /* Offset 0x0164 */
+  0x00000000,   /* Offset 0x0164 */
+  0x00000000,   /* Offset 0x0168 */
+  0x00000000,   /* Offset 0x016C */
+  0x00000000,   /* Offset 0x0170 */
+  0x00000000,   /* Offset 0x0174 */
+  0x00000000,   /* Offset 0x0178 */
+  0x00000000,   /* Offset 0x017C */
+  0x00000000,   /* Offset 0x0180 */
+  0x00000000,   /* Offset 0x0184 */
+  0x00000000,   /* Offset 0x0188 */
+  0x00000000,   /* Offset 0x018C */
+  0x00000000,   /* Offset 0x0190 */
+  0x00000000,   /* Offset 0x0194 */
+  0x00000000,   /* Offset 0x0198 */
+  0x00000000,   /* Offset 0x019C */
+  0x00000000,   /* Offset 0x01A0 */
+  0x00000000,   /* Offset 0x01A4 */
+  0x00000000    /* Offset 0x01A8 */
 };
 
 #endif /* DCB_DONT_INCLUDE_VARS */

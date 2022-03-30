@@ -5,7 +5,7 @@
  *  Project :  MEGII - DCB
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  28.05.2021 10:21:20
+ *  Created :  30.03.2022 09:55:53
  *
  *  Description :  Register map definitions.
  *
@@ -118,7 +118,24 @@
 #define DCB_REG_SD_PKT_CNT_14                     0x015C
 #define DCB_REG_SD_PKT_CNT_15                     0x0160
 #define DCB_REG_SD_PKT_CNT_17                     0x0164
-#define DCB_REG_CRC32_REG_BANK                    0x0168
+#define DCB_REG_SD_EYE_STATUS_0                   0x0168
+#define DCB_REG_SD_EYE_STATUS_1                   0x016C
+#define DCB_REG_SD_EYE_STATUS_2                   0x0170
+#define DCB_REG_SD_EYE_STATUS_3                   0x0174
+#define DCB_REG_SD_EYE_STATUS_4                   0x0178
+#define DCB_REG_SD_EYE_STATUS_5                   0x017C
+#define DCB_REG_SD_EYE_STATUS_6                   0x0180
+#define DCB_REG_SD_EYE_STATUS_7                   0x0184
+#define DCB_REG_SD_EYE_STATUS_8                   0x0188
+#define DCB_REG_SD_EYE_STATUS_9                   0x018C
+#define DCB_REG_SD_EYE_STATUS_10                  0x0190
+#define DCB_REG_SD_EYE_STATUS_11                  0x0194
+#define DCB_REG_SD_EYE_STATUS_12                  0x0198
+#define DCB_REG_SD_EYE_STATUS_13                  0x019C
+#define DCB_REG_SD_EYE_STATUS_14                  0x01A0
+#define DCB_REG_SD_EYE_STATUS_15                  0x01A4
+#define DCB_REG_SD_EYE_STATUS_17                  0x01A8
+#define DCB_REG_CRC32_REG_BANK                    0x01AC
 
 /*
  * Bit Positions
@@ -1852,7 +1869,245 @@
 
 
 
-/* ****** Register 90 [0x0168]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: 0x00000000) ****** */
+/* ****** Register 90 [0x0168]: SD_EYE_STATUS_0 - SERDES receiver eye pattern status for slot 0 (Default: 0x00000000) ****** */
+
+/* SD_TAP_0 - SERDES receiver selected tap for slot 0 */
+#define DCB_SD_TAP_0_REG                             DCB_REG_SD_EYE_STATUS_0
+#define DCB_SD_TAP_0_MASK                                         0x1F000000
+#define DCB_SD_TAP_0_OFS                                                  24
+
+/* SD_EYE_0 - SERDES receiver eye pattern for slot 0 */
+#define DCB_SD_EYE_0_REG                             DCB_REG_SD_EYE_STATUS_0
+#define DCB_SD_EYE_0_MASK                                         0x000FFFFF
+#define DCB_SD_EYE_0_OFS                                                   0
+
+
+
+/* ****** Register 91 [0x016C]: SD_EYE_STATUS_1 - SERDES receiver eye pattern status for slot 1 (Default: 0x00000000) ****** */
+
+/* SD_TAP_1 - SERDES receiver selected tap for slot 1 */
+#define DCB_SD_TAP_1_REG                             DCB_REG_SD_EYE_STATUS_1
+#define DCB_SD_TAP_1_MASK                                         0x1F000000
+#define DCB_SD_TAP_1_OFS                                                  24
+
+/* SD_EYE_1 - SERDES receiver eye pattern for slot 1 */
+#define DCB_SD_EYE_1_REG                             DCB_REG_SD_EYE_STATUS_1
+#define DCB_SD_EYE_1_MASK                                         0x000FFFFF
+#define DCB_SD_EYE_1_OFS                                                   0
+
+
+
+/* ****** Register 92 [0x0170]: SD_EYE_STATUS_2 - SERDES receiver eye pattern status for slot 2 (Default: 0x00000000) ****** */
+
+/* SD_TAP_2 - SERDES receiver selected tap for slot 2 */
+#define DCB_SD_TAP_2_REG                             DCB_REG_SD_EYE_STATUS_2
+#define DCB_SD_TAP_2_MASK                                         0x1F000000
+#define DCB_SD_TAP_2_OFS                                                  24
+
+/* SD_EYE_2 - SERDES receiver eye pattern for slot 2 */
+#define DCB_SD_EYE_2_REG                             DCB_REG_SD_EYE_STATUS_2
+#define DCB_SD_EYE_2_MASK                                         0x000FFFFF
+#define DCB_SD_EYE_2_OFS                                                   0
+
+
+
+/* ****** Register 93 [0x0174]: SD_EYE_STATUS_3 - SERDES receiver eye pattern status for slot 3 (Default: 0x00000000) ****** */
+
+/* SD_TAP_3 - SERDES receiver selected tap for slot 3 */
+#define DCB_SD_TAP_3_REG                             DCB_REG_SD_EYE_STATUS_3
+#define DCB_SD_TAP_3_MASK                                         0x1F000000
+#define DCB_SD_TAP_3_OFS                                                  24
+
+/* SD_EYE_3 - SERDES receiver eye pattern for slot 3 */
+#define DCB_SD_EYE_3_REG                             DCB_REG_SD_EYE_STATUS_3
+#define DCB_SD_EYE_3_MASK                                         0x000FFFFF
+#define DCB_SD_EYE_3_OFS                                                   0
+
+
+
+/* ****** Register 94 [0x0178]: SD_EYE_STATUS_4 - SERDES receiver eye pattern status for slot 4 (Default: 0x00000000) ****** */
+
+/* SD_TAP_4 - SERDES receiver selected tap for slot 4 */
+#define DCB_SD_TAP_4_REG                             DCB_REG_SD_EYE_STATUS_4
+#define DCB_SD_TAP_4_MASK                                         0x1F000000
+#define DCB_SD_TAP_4_OFS                                                  24
+
+/* SD_EYE_4 - SERDES receiver eye pattern for slot 4 */
+#define DCB_SD_EYE_4_REG                             DCB_REG_SD_EYE_STATUS_4
+#define DCB_SD_EYE_4_MASK                                         0x000FFFFF
+#define DCB_SD_EYE_4_OFS                                                   0
+
+
+
+/* ****** Register 95 [0x017C]: SD_EYE_STATUS_5 - SERDES receiver eye pattern status for slot 5 (Default: 0x00000000) ****** */
+
+/* SD_TAP_5 - SERDES receiver selected tap for slot 5 */
+#define DCB_SD_TAP_5_REG                             DCB_REG_SD_EYE_STATUS_5
+#define DCB_SD_TAP_5_MASK                                         0x1F000000
+#define DCB_SD_TAP_5_OFS                                                  24
+
+/* SD_EYE_5 - SERDES receiver eye pattern for slot 5 */
+#define DCB_SD_EYE_5_REG                             DCB_REG_SD_EYE_STATUS_5
+#define DCB_SD_EYE_5_MASK                                         0x000FFFFF
+#define DCB_SD_EYE_5_OFS                                                   0
+
+
+
+/* ****** Register 96 [0x0180]: SD_EYE_STATUS_6 - SERDES receiver eye pattern status for slot 6 (Default: 0x00000000) ****** */
+
+/* SD_TAP_6 - SERDES receiver selected tap for slot 6 */
+#define DCB_SD_TAP_6_REG                             DCB_REG_SD_EYE_STATUS_6
+#define DCB_SD_TAP_6_MASK                                         0x1F000000
+#define DCB_SD_TAP_6_OFS                                                  24
+
+/* SD_EYE_6 - SERDES receiver eye pattern for slot 6 */
+#define DCB_SD_EYE_6_REG                             DCB_REG_SD_EYE_STATUS_6
+#define DCB_SD_EYE_6_MASK                                         0x000FFFFF
+#define DCB_SD_EYE_6_OFS                                                   0
+
+
+
+/* ****** Register 97 [0x0184]: SD_EYE_STATUS_7 - SERDES receiver eye pattern status for slot 7 (Default: 0x00000000) ****** */
+
+/* SD_TAP_7 - SERDES receiver selected tap for slot 7 */
+#define DCB_SD_TAP_7_REG                             DCB_REG_SD_EYE_STATUS_7
+#define DCB_SD_TAP_7_MASK                                         0x1F000000
+#define DCB_SD_TAP_7_OFS                                                  24
+
+/* SD_EYE_7 - SERDES receiver eye pattern for slot 7 */
+#define DCB_SD_EYE_7_REG                             DCB_REG_SD_EYE_STATUS_7
+#define DCB_SD_EYE_7_MASK                                         0x000FFFFF
+#define DCB_SD_EYE_7_OFS                                                   0
+
+
+
+/* ****** Register 98 [0x0188]: SD_EYE_STATUS_8 - SERDES receiver eye pattern status for slot 8 (Default: 0x00000000) ****** */
+
+/* SD_TAP_8 - SERDES receiver selected tap for slot 8 */
+#define DCB_SD_TAP_8_REG                             DCB_REG_SD_EYE_STATUS_8
+#define DCB_SD_TAP_8_MASK                                         0x1F000000
+#define DCB_SD_TAP_8_OFS                                                  24
+
+/* SD_EYE_8 - SERDES receiver eye pattern for slot 8 */
+#define DCB_SD_EYE_8_REG                             DCB_REG_SD_EYE_STATUS_8
+#define DCB_SD_EYE_8_MASK                                         0x000FFFFF
+#define DCB_SD_EYE_8_OFS                                                   0
+
+
+
+/* ****** Register 99 [0x018C]: SD_EYE_STATUS_9 - SERDES receiver eye pattern status for slot 9 (Default: 0x00000000) ****** */
+
+/* SD_TAP_9 - SERDES receiver selected tap for slot 9 */
+#define DCB_SD_TAP_9_REG                             DCB_REG_SD_EYE_STATUS_9
+#define DCB_SD_TAP_9_MASK                                         0x1F000000
+#define DCB_SD_TAP_9_OFS                                                  24
+
+/* SD_EYE_9 - SERDES receiver eye pattern for slot 9 */
+#define DCB_SD_EYE_9_REG                             DCB_REG_SD_EYE_STATUS_9
+#define DCB_SD_EYE_9_MASK                                         0x000FFFFF
+#define DCB_SD_EYE_9_OFS                                                   0
+
+
+
+/* ****** Register 100 [0x0190]: SD_EYE_STATUS_10 - SERDES receiver eye pattern status for slot 10 (Default: 0x00000000) ****** */
+
+/* SD_TAP_10 - SERDES receiver selected tap for slot 10 */
+#define DCB_SD_TAP_10_REG                           DCB_REG_SD_EYE_STATUS_10
+#define DCB_SD_TAP_10_MASK                                        0x1F000000
+#define DCB_SD_TAP_10_OFS                                                 24
+
+/* SD_EYE_10 - SERDES receiver eye pattern for slot 10 */
+#define DCB_SD_EYE_10_REG                           DCB_REG_SD_EYE_STATUS_10
+#define DCB_SD_EYE_10_MASK                                        0x000FFFFF
+#define DCB_SD_EYE_10_OFS                                                  0
+
+
+
+/* ****** Register 101 [0x0194]: SD_EYE_STATUS_11 - SERDES receiver eye pattern status for slot 11 (Default: 0x00000000) ****** */
+
+/* SD_TAP_11 - SERDES receiver selected tap for slot 11 */
+#define DCB_SD_TAP_11_REG                           DCB_REG_SD_EYE_STATUS_11
+#define DCB_SD_TAP_11_MASK                                        0x1F000000
+#define DCB_SD_TAP_11_OFS                                                 24
+
+/* SD_EYE_11 - SERDES receiver eye pattern for slot 11 */
+#define DCB_SD_EYE_11_REG                           DCB_REG_SD_EYE_STATUS_11
+#define DCB_SD_EYE_11_MASK                                        0x000FFFFF
+#define DCB_SD_EYE_11_OFS                                                  0
+
+
+
+/* ****** Register 102 [0x0198]: SD_EYE_STATUS_12 - SERDES receiver eye pattern status for slot 12 (Default: 0x00000000) ****** */
+
+/* SD_TAP_12 - SERDES receiver selected tap for slot 12 */
+#define DCB_SD_TAP_12_REG                           DCB_REG_SD_EYE_STATUS_12
+#define DCB_SD_TAP_12_MASK                                        0x1F000000
+#define DCB_SD_TAP_12_OFS                                                 24
+
+/* SD_EYE_12 - SERDES receiver eye pattern for slot 12 */
+#define DCB_SD_EYE_12_REG                           DCB_REG_SD_EYE_STATUS_12
+#define DCB_SD_EYE_12_MASK                                        0x000FFFFF
+#define DCB_SD_EYE_12_OFS                                                  0
+
+
+
+/* ****** Register 103 [0x019C]: SD_EYE_STATUS_13 - SERDES receiver eye pattern status for slot 13 (Default: 0x00000000) ****** */
+
+/* SD_TAP_13 - SERDES receiver selected tap for slot 13 */
+#define DCB_SD_TAP_13_REG                           DCB_REG_SD_EYE_STATUS_13
+#define DCB_SD_TAP_13_MASK                                        0x1F000000
+#define DCB_SD_TAP_13_OFS                                                 24
+
+/* SD_EYE_13 - SERDES receiver eye pattern for slot 13 */
+#define DCB_SD_EYE_13_REG                           DCB_REG_SD_EYE_STATUS_13
+#define DCB_SD_EYE_13_MASK                                        0x000FFFFF
+#define DCB_SD_EYE_13_OFS                                                  0
+
+
+
+/* ****** Register 104 [0x01A0]: SD_EYE_STATUS_14 - SERDES receiver eye pattern status for slot 14 (Default: 0x00000000) ****** */
+
+/* SD_TAP_14 - SERDES receiver selected tap for slot 14 */
+#define DCB_SD_TAP_14_REG                           DCB_REG_SD_EYE_STATUS_14
+#define DCB_SD_TAP_14_MASK                                        0x1F000000
+#define DCB_SD_TAP_14_OFS                                                 24
+
+/* SD_EYE_14 - SERDES receiver eye pattern for slot 14 */
+#define DCB_SD_EYE_14_REG                           DCB_REG_SD_EYE_STATUS_14
+#define DCB_SD_EYE_14_MASK                                        0x000FFFFF
+#define DCB_SD_EYE_14_OFS                                                  0
+
+
+
+/* ****** Register 105 [0x01A4]: SD_EYE_STATUS_15 - SERDES receiver eye pattern status for slot 15 (Default: 0x00000000) ****** */
+
+/* SD_TAP_15 - SERDES receiver selected tap for slot 15 */
+#define DCB_SD_TAP_15_REG                           DCB_REG_SD_EYE_STATUS_15
+#define DCB_SD_TAP_15_MASK                                        0x1F000000
+#define DCB_SD_TAP_15_OFS                                                 24
+
+/* SD_EYE_15 - SERDES receiver eye pattern for slot 15 */
+#define DCB_SD_EYE_15_REG                           DCB_REG_SD_EYE_STATUS_15
+#define DCB_SD_EYE_15_MASK                                        0x000FFFFF
+#define DCB_SD_EYE_15_OFS                                                  0
+
+
+
+/* ****** Register 106 [0x01A8]: SD_EYE_STATUS_17 - SERDES receiver eye pattern status for slot 17 (TCB slot) (Default: 0x00000000) ****** */
+
+/* SD_TAP_17 - SERDES receiver selected tap for slot 17 (TCB slot) */
+#define DCB_SD_TAP_17_REG                           DCB_REG_SD_EYE_STATUS_17
+#define DCB_SD_TAP_17_MASK                                        0x1F000000
+#define DCB_SD_TAP_17_OFS                                                 24
+
+/* SD_EYE_17 - SERDES receiver eye pattern for slot 17 (TCB slot) */
+#define DCB_SD_EYE_17_REG                           DCB_REG_SD_EYE_STATUS_17
+#define DCB_SD_EYE_17_MASK                                        0x000FFFFF
+#define DCB_SD_EYE_17_OFS                                                  0
+
+
+
+/* ****** Register 107 [0x01AC]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: 0x00000000) ****** */
 
 /* CRC32_REG_BANK - Keep at the end of the register bank */
 #define DCB_CRC32_REG_BANK_REG                        DCB_REG_CRC32_REG_BANK
@@ -1864,7 +2119,7 @@
  * Number of Registers
  */
 
-#define NR_OF_REGS          91
+#define NR_OF_REGS          108
 
 #ifndef DCB_DONT_INCLUDE_REG_ACCESS_VARS
 

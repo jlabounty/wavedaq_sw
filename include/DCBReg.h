@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  28.05.2021 10:21:20
+// Created :  30.03.2022 09:55:53
 //
 
 
@@ -1124,7 +1124,143 @@ public:
    unsigned int GetSdPktCnt17() { return BitExtract(DCB_SD_PKT_CNT_17_REG, DCB_SD_PKT_CNT_17_MASK, DCB_SD_PKT_CNT_17_OFS); };
 
 
-   ////// ------ Register 90 [0x0168]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: 0x00000000) ------ //////
+   ////// ------ Register 90 [0x0168]: SD_EYE_STATUS_0 - SERDES receiver eye pattern status for slot 0 (Default: 0x00000000) ------ //////
+
+   // 0x1F000000: SD_TAP_0 - SERDES receiver selected tap for slot 0
+   unsigned int GetSdTap0() { return BitExtract(DCB_SD_TAP_0_REG, DCB_SD_TAP_0_MASK, DCB_SD_TAP_0_OFS); };
+   // 0x000FFFFF: SD_EYE_0 - SERDES receiver eye pattern for slot 0
+   unsigned int GetSdEye0() { return BitExtract(DCB_SD_EYE_0_REG, DCB_SD_EYE_0_MASK, DCB_SD_EYE_0_OFS); };
+
+
+   ////// ------ Register 91 [0x016C]: SD_EYE_STATUS_1 - SERDES receiver eye pattern status for slot 1 (Default: 0x00000000) ------ //////
+
+   // 0x1F000000: SD_TAP_1 - SERDES receiver selected tap for slot 1
+   unsigned int GetSdTap1() { return BitExtract(DCB_SD_TAP_1_REG, DCB_SD_TAP_1_MASK, DCB_SD_TAP_1_OFS); };
+   // 0x000FFFFF: SD_EYE_1 - SERDES receiver eye pattern for slot 1
+   unsigned int GetSdEye1() { return BitExtract(DCB_SD_EYE_1_REG, DCB_SD_EYE_1_MASK, DCB_SD_EYE_1_OFS); };
+
+
+   ////// ------ Register 92 [0x0170]: SD_EYE_STATUS_2 - SERDES receiver eye pattern status for slot 2 (Default: 0x00000000) ------ //////
+
+   // 0x1F000000: SD_TAP_2 - SERDES receiver selected tap for slot 2
+   unsigned int GetSdTap2() { return BitExtract(DCB_SD_TAP_2_REG, DCB_SD_TAP_2_MASK, DCB_SD_TAP_2_OFS); };
+   // 0x000FFFFF: SD_EYE_2 - SERDES receiver eye pattern for slot 2
+   unsigned int GetSdEye2() { return BitExtract(DCB_SD_EYE_2_REG, DCB_SD_EYE_2_MASK, DCB_SD_EYE_2_OFS); };
+
+
+   ////// ------ Register 93 [0x0174]: SD_EYE_STATUS_3 - SERDES receiver eye pattern status for slot 3 (Default: 0x00000000) ------ //////
+
+   // 0x1F000000: SD_TAP_3 - SERDES receiver selected tap for slot 3
+   unsigned int GetSdTap3() { return BitExtract(DCB_SD_TAP_3_REG, DCB_SD_TAP_3_MASK, DCB_SD_TAP_3_OFS); };
+   // 0x000FFFFF: SD_EYE_3 - SERDES receiver eye pattern for slot 3
+   unsigned int GetSdEye3() { return BitExtract(DCB_SD_EYE_3_REG, DCB_SD_EYE_3_MASK, DCB_SD_EYE_3_OFS); };
+
+
+   ////// ------ Register 94 [0x0178]: SD_EYE_STATUS_4 - SERDES receiver eye pattern status for slot 4 (Default: 0x00000000) ------ //////
+
+   // 0x1F000000: SD_TAP_4 - SERDES receiver selected tap for slot 4
+   unsigned int GetSdTap4() { return BitExtract(DCB_SD_TAP_4_REG, DCB_SD_TAP_4_MASK, DCB_SD_TAP_4_OFS); };
+   // 0x000FFFFF: SD_EYE_4 - SERDES receiver eye pattern for slot 4
+   unsigned int GetSdEye4() { return BitExtract(DCB_SD_EYE_4_REG, DCB_SD_EYE_4_MASK, DCB_SD_EYE_4_OFS); };
+
+
+   ////// ------ Register 95 [0x017C]: SD_EYE_STATUS_5 - SERDES receiver eye pattern status for slot 5 (Default: 0x00000000) ------ //////
+
+   // 0x1F000000: SD_TAP_5 - SERDES receiver selected tap for slot 5
+   unsigned int GetSdTap5() { return BitExtract(DCB_SD_TAP_5_REG, DCB_SD_TAP_5_MASK, DCB_SD_TAP_5_OFS); };
+   // 0x000FFFFF: SD_EYE_5 - SERDES receiver eye pattern for slot 5
+   unsigned int GetSdEye5() { return BitExtract(DCB_SD_EYE_5_REG, DCB_SD_EYE_5_MASK, DCB_SD_EYE_5_OFS); };
+
+
+   ////// ------ Register 96 [0x0180]: SD_EYE_STATUS_6 - SERDES receiver eye pattern status for slot 6 (Default: 0x00000000) ------ //////
+
+   // 0x1F000000: SD_TAP_6 - SERDES receiver selected tap for slot 6
+   unsigned int GetSdTap6() { return BitExtract(DCB_SD_TAP_6_REG, DCB_SD_TAP_6_MASK, DCB_SD_TAP_6_OFS); };
+   // 0x000FFFFF: SD_EYE_6 - SERDES receiver eye pattern for slot 6
+   unsigned int GetSdEye6() { return BitExtract(DCB_SD_EYE_6_REG, DCB_SD_EYE_6_MASK, DCB_SD_EYE_6_OFS); };
+
+
+   ////// ------ Register 97 [0x0184]: SD_EYE_STATUS_7 - SERDES receiver eye pattern status for slot 7 (Default: 0x00000000) ------ //////
+
+   // 0x1F000000: SD_TAP_7 - SERDES receiver selected tap for slot 7
+   unsigned int GetSdTap7() { return BitExtract(DCB_SD_TAP_7_REG, DCB_SD_TAP_7_MASK, DCB_SD_TAP_7_OFS); };
+   // 0x000FFFFF: SD_EYE_7 - SERDES receiver eye pattern for slot 7
+   unsigned int GetSdEye7() { return BitExtract(DCB_SD_EYE_7_REG, DCB_SD_EYE_7_MASK, DCB_SD_EYE_7_OFS); };
+
+
+   ////// ------ Register 98 [0x0188]: SD_EYE_STATUS_8 - SERDES receiver eye pattern status for slot 8 (Default: 0x00000000) ------ //////
+
+   // 0x1F000000: SD_TAP_8 - SERDES receiver selected tap for slot 8
+   unsigned int GetSdTap8() { return BitExtract(DCB_SD_TAP_8_REG, DCB_SD_TAP_8_MASK, DCB_SD_TAP_8_OFS); };
+   // 0x000FFFFF: SD_EYE_8 - SERDES receiver eye pattern for slot 8
+   unsigned int GetSdEye8() { return BitExtract(DCB_SD_EYE_8_REG, DCB_SD_EYE_8_MASK, DCB_SD_EYE_8_OFS); };
+
+
+   ////// ------ Register 99 [0x018C]: SD_EYE_STATUS_9 - SERDES receiver eye pattern status for slot 9 (Default: 0x00000000) ------ //////
+
+   // 0x1F000000: SD_TAP_9 - SERDES receiver selected tap for slot 9
+   unsigned int GetSdTap9() { return BitExtract(DCB_SD_TAP_9_REG, DCB_SD_TAP_9_MASK, DCB_SD_TAP_9_OFS); };
+   // 0x000FFFFF: SD_EYE_9 - SERDES receiver eye pattern for slot 9
+   unsigned int GetSdEye9() { return BitExtract(DCB_SD_EYE_9_REG, DCB_SD_EYE_9_MASK, DCB_SD_EYE_9_OFS); };
+
+
+   ////// ------ Register 100 [0x0190]: SD_EYE_STATUS_10 - SERDES receiver eye pattern status for slot 10 (Default: 0x00000000) ------ //////
+
+   // 0x1F000000: SD_TAP_10 - SERDES receiver selected tap for slot 10
+   unsigned int GetSdTap10() { return BitExtract(DCB_SD_TAP_10_REG, DCB_SD_TAP_10_MASK, DCB_SD_TAP_10_OFS); };
+   // 0x000FFFFF: SD_EYE_10 - SERDES receiver eye pattern for slot 10
+   unsigned int GetSdEye10() { return BitExtract(DCB_SD_EYE_10_REG, DCB_SD_EYE_10_MASK, DCB_SD_EYE_10_OFS); };
+
+
+   ////// ------ Register 101 [0x0194]: SD_EYE_STATUS_11 - SERDES receiver eye pattern status for slot 11 (Default: 0x00000000) ------ //////
+
+   // 0x1F000000: SD_TAP_11 - SERDES receiver selected tap for slot 11
+   unsigned int GetSdTap11() { return BitExtract(DCB_SD_TAP_11_REG, DCB_SD_TAP_11_MASK, DCB_SD_TAP_11_OFS); };
+   // 0x000FFFFF: SD_EYE_11 - SERDES receiver eye pattern for slot 11
+   unsigned int GetSdEye11() { return BitExtract(DCB_SD_EYE_11_REG, DCB_SD_EYE_11_MASK, DCB_SD_EYE_11_OFS); };
+
+
+   ////// ------ Register 102 [0x0198]: SD_EYE_STATUS_12 - SERDES receiver eye pattern status for slot 12 (Default: 0x00000000) ------ //////
+
+   // 0x1F000000: SD_TAP_12 - SERDES receiver selected tap for slot 12
+   unsigned int GetSdTap12() { return BitExtract(DCB_SD_TAP_12_REG, DCB_SD_TAP_12_MASK, DCB_SD_TAP_12_OFS); };
+   // 0x000FFFFF: SD_EYE_12 - SERDES receiver eye pattern for slot 12
+   unsigned int GetSdEye12() { return BitExtract(DCB_SD_EYE_12_REG, DCB_SD_EYE_12_MASK, DCB_SD_EYE_12_OFS); };
+
+
+   ////// ------ Register 103 [0x019C]: SD_EYE_STATUS_13 - SERDES receiver eye pattern status for slot 13 (Default: 0x00000000) ------ //////
+
+   // 0x1F000000: SD_TAP_13 - SERDES receiver selected tap for slot 13
+   unsigned int GetSdTap13() { return BitExtract(DCB_SD_TAP_13_REG, DCB_SD_TAP_13_MASK, DCB_SD_TAP_13_OFS); };
+   // 0x000FFFFF: SD_EYE_13 - SERDES receiver eye pattern for slot 13
+   unsigned int GetSdEye13() { return BitExtract(DCB_SD_EYE_13_REG, DCB_SD_EYE_13_MASK, DCB_SD_EYE_13_OFS); };
+
+
+   ////// ------ Register 104 [0x01A0]: SD_EYE_STATUS_14 - SERDES receiver eye pattern status for slot 14 (Default: 0x00000000) ------ //////
+
+   // 0x1F000000: SD_TAP_14 - SERDES receiver selected tap for slot 14
+   unsigned int GetSdTap14() { return BitExtract(DCB_SD_TAP_14_REG, DCB_SD_TAP_14_MASK, DCB_SD_TAP_14_OFS); };
+   // 0x000FFFFF: SD_EYE_14 - SERDES receiver eye pattern for slot 14
+   unsigned int GetSdEye14() { return BitExtract(DCB_SD_EYE_14_REG, DCB_SD_EYE_14_MASK, DCB_SD_EYE_14_OFS); };
+
+
+   ////// ------ Register 105 [0x01A4]: SD_EYE_STATUS_15 - SERDES receiver eye pattern status for slot 15 (Default: 0x00000000) ------ //////
+
+   // 0x1F000000: SD_TAP_15 - SERDES receiver selected tap for slot 15
+   unsigned int GetSdTap15() { return BitExtract(DCB_SD_TAP_15_REG, DCB_SD_TAP_15_MASK, DCB_SD_TAP_15_OFS); };
+   // 0x000FFFFF: SD_EYE_15 - SERDES receiver eye pattern for slot 15
+   unsigned int GetSdEye15() { return BitExtract(DCB_SD_EYE_15_REG, DCB_SD_EYE_15_MASK, DCB_SD_EYE_15_OFS); };
+
+
+   ////// ------ Register 106 [0x01A8]: SD_EYE_STATUS_17 - SERDES receiver eye pattern status for slot 17 (TCB slot) (Default: 0x00000000) ------ //////
+
+   // 0x1F000000: SD_TAP_17 - SERDES receiver selected tap for slot 17 (TCB slot)
+   unsigned int GetSdTap17() { return BitExtract(DCB_SD_TAP_17_REG, DCB_SD_TAP_17_MASK, DCB_SD_TAP_17_OFS); };
+   // 0x000FFFFF: SD_EYE_17 - SERDES receiver eye pattern for slot 17 (TCB slot)
+   unsigned int GetSdEye17() { return BitExtract(DCB_SD_EYE_17_REG, DCB_SD_EYE_17_MASK, DCB_SD_EYE_17_OFS); };
+
+
+   ////// ------ Register 107 [0x01AC]: CRC32_REG_BANK - CRC32 Checksum of Register Bank Content (Default: 0x00000000) ------ //////
 
    // 0xFFFFFFFF: CRC32_REG_BANK - Keep at the end of the register bank
    unsigned int GetCrc32RegBank() { return BitExtract(DCB_CRC32_REG_BANK_REG, DCB_CRC32_REG_BANK_MASK, DCB_CRC32_REG_BANK_OFS); };
