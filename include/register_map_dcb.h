@@ -5,7 +5,7 @@
  *  Project :  MEGII - DCB
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  30.03.2022 09:55:53
+ *  Created :  01.04.2022 10:50:56
  *
  *  Description :  Register map definitions.
  *
@@ -291,9 +291,9 @@
 
 
 
-/* ****** Register 8 [0x0020]: PROT_VER - Vesion of the WaveDream2 protocol (Default: 0x00000000) ****** */
+/* ****** Register 8 [0x0020]: PROT_VER - Vesion of the WaveDAQ protocol (Default: 0x00000000) ****** */
 
-/* PROTOCOL_VERSION - Version of the WaveDream2 protocol */
+/* PROTOCOL_VERSION - Version of the WaveDAQ protocol */
 #define DCB_PROTOCOL_VERSION_REG                            DCB_REG_PROT_VER
 #define DCB_PROTOCOL_VERSION_MASK                                 0x000000FF
 #define DCB_PROTOCOL_VERSION_OFS                                           0
@@ -560,13 +560,18 @@
 
 /* IDLE_PATTERN_DETECT_07 - Idle pattern detected on slot 7 */
 #define DCB_IDLE_PATTERN_DETECT_07_REG           DCB_REG_SERDES_STATUS_00_07
-#define DCB_IDLE_PATTERN_DETECT_07_MASK                           0x40000000
-#define DCB_IDLE_PATTERN_DETECT_07_OFS                                    30
+#define DCB_IDLE_PATTERN_DETECT_07_MASK                           0x80000000
+#define DCB_IDLE_PATTERN_DETECT_07_OFS                                    31
 
-/* DELAY_SYNC_DONE_07 - Delay syncronization procedure completed for slot 7 */
-#define DCB_DELAY_SYNC_DONE_07_REG               DCB_REG_SERDES_STATUS_00_07
-#define DCB_DELAY_SYNC_DONE_07_MASK                               0x20000000
-#define DCB_DELAY_SYNC_DONE_07_OFS                                        29
+/* BITSLIP_OK_07 - Bitslip successful on slot 7 */
+#define DCB_BITSLIP_OK_07_REG                    DCB_REG_SERDES_STATUS_00_07
+#define DCB_BITSLIP_OK_07_MASK                                    0x40000000
+#define DCB_BITSLIP_OK_07_OFS                                             30
+
+/* DELAY_OK_07 - Tap delay successfully set (min. 1 valid eye position found) on slot 7 */
+#define DCB_DELAY_OK_07_REG                      DCB_REG_SERDES_STATUS_00_07
+#define DCB_DELAY_OK_07_MASK                                      0x20000000
+#define DCB_DELAY_OK_07_OFS                                               29
 
 /* SYNC_DONE_07 - Overall syncronization procedure completed for slot 7 */
 #define DCB_SYNC_DONE_07_REG                     DCB_REG_SERDES_STATUS_00_07
@@ -575,13 +580,18 @@
 
 /* IDLE_PATTERN_DETECT_06 - Idle pattern detected on slot 6 */
 #define DCB_IDLE_PATTERN_DETECT_06_REG           DCB_REG_SERDES_STATUS_00_07
-#define DCB_IDLE_PATTERN_DETECT_06_MASK                           0x04000000
-#define DCB_IDLE_PATTERN_DETECT_06_OFS                                    26
+#define DCB_IDLE_PATTERN_DETECT_06_MASK                           0x08000000
+#define DCB_IDLE_PATTERN_DETECT_06_OFS                                    27
 
-/* DELAY_SYNC_DONE_06 - Delay syncronization procedure completed for slot 6 */
-#define DCB_DELAY_SYNC_DONE_06_REG               DCB_REG_SERDES_STATUS_00_07
-#define DCB_DELAY_SYNC_DONE_06_MASK                               0x02000000
-#define DCB_DELAY_SYNC_DONE_06_OFS                                        25
+/* BITSLIP_OK_06 - Bitslip successful on slot 6 */
+#define DCB_BITSLIP_OK_06_REG                    DCB_REG_SERDES_STATUS_00_07
+#define DCB_BITSLIP_OK_06_MASK                                    0x04000000
+#define DCB_BITSLIP_OK_06_OFS                                             26
+
+/* DELAY_OK_06 - Tap delay successfully set (min. 1 valid eye position found) on slot 6 */
+#define DCB_DELAY_OK_06_REG                      DCB_REG_SERDES_STATUS_00_07
+#define DCB_DELAY_OK_06_MASK                                      0x02000000
+#define DCB_DELAY_OK_06_OFS                                               25
 
 /* SYNC_DONE_06 - Overall syncronization procedure completed for slot 6 */
 #define DCB_SYNC_DONE_06_REG                     DCB_REG_SERDES_STATUS_00_07
@@ -590,13 +600,18 @@
 
 /* IDLE_PATTERN_DETECT_05 - Idle pattern detected on slot 5 */
 #define DCB_IDLE_PATTERN_DETECT_05_REG           DCB_REG_SERDES_STATUS_00_07
-#define DCB_IDLE_PATTERN_DETECT_05_MASK                           0x00400000
-#define DCB_IDLE_PATTERN_DETECT_05_OFS                                    22
+#define DCB_IDLE_PATTERN_DETECT_05_MASK                           0x00800000
+#define DCB_IDLE_PATTERN_DETECT_05_OFS                                    23
 
-/* DELAY_SYNC_DONE_05 - Delay syncronization procedure completed for slot 5 */
-#define DCB_DELAY_SYNC_DONE_05_REG               DCB_REG_SERDES_STATUS_00_07
-#define DCB_DELAY_SYNC_DONE_05_MASK                               0x00200000
-#define DCB_DELAY_SYNC_DONE_05_OFS                                        21
+/* BITSLIP_OK_05 - Bitslip successful on slot 5 */
+#define DCB_BITSLIP_OK_05_REG                    DCB_REG_SERDES_STATUS_00_07
+#define DCB_BITSLIP_OK_05_MASK                                    0x00400000
+#define DCB_BITSLIP_OK_05_OFS                                             22
+
+/* DELAY_OK_05 - Tap delay successfully set (min. 1 valid eye position found) on slot 5 */
+#define DCB_DELAY_OK_05_REG                      DCB_REG_SERDES_STATUS_00_07
+#define DCB_DELAY_OK_05_MASK                                      0x00200000
+#define DCB_DELAY_OK_05_OFS                                               21
 
 /* SYNC_DONE_05 - Overall syncronization procedure completed for slot 5 */
 #define DCB_SYNC_DONE_05_REG                     DCB_REG_SERDES_STATUS_00_07
@@ -605,13 +620,18 @@
 
 /* IDLE_PATTERN_DETECT_04 - Idle pattern detected on slot 4 */
 #define DCB_IDLE_PATTERN_DETECT_04_REG           DCB_REG_SERDES_STATUS_00_07
-#define DCB_IDLE_PATTERN_DETECT_04_MASK                           0x00040000
-#define DCB_IDLE_PATTERN_DETECT_04_OFS                                    18
+#define DCB_IDLE_PATTERN_DETECT_04_MASK                           0x00080000
+#define DCB_IDLE_PATTERN_DETECT_04_OFS                                    19
 
-/* DELAY_SYNC_DONE_04 - Delay syncronization procedure completed for slot 4 */
-#define DCB_DELAY_SYNC_DONE_04_REG               DCB_REG_SERDES_STATUS_00_07
-#define DCB_DELAY_SYNC_DONE_04_MASK                               0x00020000
-#define DCB_DELAY_SYNC_DONE_04_OFS                                        17
+/* BITSLIP_OK_04 - Bitslip successful on slot 4 */
+#define DCB_BITSLIP_OK_04_REG                    DCB_REG_SERDES_STATUS_00_07
+#define DCB_BITSLIP_OK_04_MASK                                    0x00040000
+#define DCB_BITSLIP_OK_04_OFS                                             18
+
+/* DELAY_OK_04 - Tap delay successfully set (min. 1 valid eye position found) on slot 4 */
+#define DCB_DELAY_OK_04_REG                      DCB_REG_SERDES_STATUS_00_07
+#define DCB_DELAY_OK_04_MASK                                      0x00020000
+#define DCB_DELAY_OK_04_OFS                                               17
 
 /* SYNC_DONE_04 - Overall syncronization procedure completed for slot 4 */
 #define DCB_SYNC_DONE_04_REG                     DCB_REG_SERDES_STATUS_00_07
@@ -620,13 +640,18 @@
 
 /* IDLE_PATTERN_DETECT_03 - Idle pattern detected on slot 3 */
 #define DCB_IDLE_PATTERN_DETECT_03_REG           DCB_REG_SERDES_STATUS_00_07
-#define DCB_IDLE_PATTERN_DETECT_03_MASK                           0x00004000
-#define DCB_IDLE_PATTERN_DETECT_03_OFS                                    14
+#define DCB_IDLE_PATTERN_DETECT_03_MASK                           0x00008000
+#define DCB_IDLE_PATTERN_DETECT_03_OFS                                    15
 
-/* DELAY_SYNC_DONE_03 - Delay syncronization procedure completed for slot 3 */
-#define DCB_DELAY_SYNC_DONE_03_REG               DCB_REG_SERDES_STATUS_00_07
-#define DCB_DELAY_SYNC_DONE_03_MASK                               0x00002000
-#define DCB_DELAY_SYNC_DONE_03_OFS                                        13
+/* BITSLIP_OK_03 - Bitslip successful on slot 3 */
+#define DCB_BITSLIP_OK_03_REG                    DCB_REG_SERDES_STATUS_00_07
+#define DCB_BITSLIP_OK_03_MASK                                    0x00004000
+#define DCB_BITSLIP_OK_03_OFS                                             14
+
+/* DELAY_OK_03 - Tap delay successfully set (min. 1 valid eye position found) on slot 3 */
+#define DCB_DELAY_OK_03_REG                      DCB_REG_SERDES_STATUS_00_07
+#define DCB_DELAY_OK_03_MASK                                      0x00002000
+#define DCB_DELAY_OK_03_OFS                                               13
 
 /* SYNC_DONE_03 - Overall syncronization procedure completed for slot 3 */
 #define DCB_SYNC_DONE_03_REG                     DCB_REG_SERDES_STATUS_00_07
@@ -635,28 +660,38 @@
 
 /* IDLE_PATTERN_DETECT_02 - Idle pattern detected on slot 2 */
 #define DCB_IDLE_PATTERN_DETECT_02_REG           DCB_REG_SERDES_STATUS_00_07
-#define DCB_IDLE_PATTERN_DETECT_02_MASK                           0x00000400
-#define DCB_IDLE_PATTERN_DETECT_02_OFS                                    10
+#define DCB_IDLE_PATTERN_DETECT_02_MASK                           0x00000800
+#define DCB_IDLE_PATTERN_DETECT_02_OFS                                    11
 
-/* DELAY_SYNC_DONE_02 - Delay syncronization procedure completed for slot 2 */
-#define DCB_DELAY_SYNC_DONE_02_REG               DCB_REG_SERDES_STATUS_00_07
-#define DCB_DELAY_SYNC_DONE_02_MASK                               0x00000200
-#define DCB_DELAY_SYNC_DONE_02_OFS                                         9
+/* BITSLIP_OK_02 - Bitslip successful on slot 2 */
+#define DCB_BITSLIP_OK_02_REG                    DCB_REG_SERDES_STATUS_00_07
+#define DCB_BITSLIP_OK_02_MASK                                    0x00000400
+#define DCB_BITSLIP_OK_02_OFS                                             10
+
+/* DELAY_OK_02 - Tap delay successfully set (min. 1 valid eye position found) on slot 2 */
+#define DCB_DELAY_OK_02_REG                      DCB_REG_SERDES_STATUS_00_07
+#define DCB_DELAY_OK_02_MASK                                      0x00000200
+#define DCB_DELAY_OK_02_OFS                                                9
 
 /* SYNC_DONE_02 - Overall syncronization procedure completed for slot 2 */
 #define DCB_SYNC_DONE_02_REG                     DCB_REG_SERDES_STATUS_00_07
 #define DCB_SYNC_DONE_02_MASK                                     0x00000100
 #define DCB_SYNC_DONE_02_OFS                                               8
 
-/* IDLE_PATTERN_DETECT_01 - Idle pattern detected on slot 1 */
+/* IDLE_PATTERN_DETECT_01 - Idle pattern detected on slot 17 */
 #define DCB_IDLE_PATTERN_DETECT_01_REG           DCB_REG_SERDES_STATUS_00_07
-#define DCB_IDLE_PATTERN_DETECT_01_MASK                           0x00000040
-#define DCB_IDLE_PATTERN_DETECT_01_OFS                                     6
+#define DCB_IDLE_PATTERN_DETECT_01_MASK                           0x00000080
+#define DCB_IDLE_PATTERN_DETECT_01_OFS                                     7
 
-/* DELAY_SYNC_DONE_01 - Delay syncronization procedure completed for slot 1 */
-#define DCB_DELAY_SYNC_DONE_01_REG               DCB_REG_SERDES_STATUS_00_07
-#define DCB_DELAY_SYNC_DONE_01_MASK                               0x00000020
-#define DCB_DELAY_SYNC_DONE_01_OFS                                         5
+/* BITSLIP_OK_01 - Bitslip successful on slot 1 */
+#define DCB_BITSLIP_OK_01_REG                    DCB_REG_SERDES_STATUS_00_07
+#define DCB_BITSLIP_OK_01_MASK                                    0x00000040
+#define DCB_BITSLIP_OK_01_OFS                                              6
+
+/* DELAY_OK_01 - Tap delay successfully set (min. 1 valid eye position found) on slot 1 */
+#define DCB_DELAY_OK_01_REG                      DCB_REG_SERDES_STATUS_00_07
+#define DCB_DELAY_OK_01_MASK                                      0x00000020
+#define DCB_DELAY_OK_01_OFS                                                5
 
 /* SYNC_DONE_01 - Overall syncronization procedure completed for slot 1 */
 #define DCB_SYNC_DONE_01_REG                     DCB_REG_SERDES_STATUS_00_07
@@ -665,13 +700,18 @@
 
 /* IDLE_PATTERN_DETECT_00 - Idle pattern detected on slot 0 */
 #define DCB_IDLE_PATTERN_DETECT_00_REG           DCB_REG_SERDES_STATUS_00_07
-#define DCB_IDLE_PATTERN_DETECT_00_MASK                           0x00000004
-#define DCB_IDLE_PATTERN_DETECT_00_OFS                                     2
+#define DCB_IDLE_PATTERN_DETECT_00_MASK                           0x00000008
+#define DCB_IDLE_PATTERN_DETECT_00_OFS                                     3
 
-/* DELAY_SYNC_DONE_00 - Delay syncronization procedure completed for slot 0 */
-#define DCB_DELAY_SYNC_DONE_00_REG               DCB_REG_SERDES_STATUS_00_07
-#define DCB_DELAY_SYNC_DONE_00_MASK                               0x00000002
-#define DCB_DELAY_SYNC_DONE_00_OFS                                         1
+/* BITSLIP_OK_00 - Bitslip successful on slot 0 */
+#define DCB_BITSLIP_OK_00_REG                    DCB_REG_SERDES_STATUS_00_07
+#define DCB_BITSLIP_OK_00_MASK                                    0x00000004
+#define DCB_BITSLIP_OK_00_OFS                                              2
+
+/* DELAY_OK_00 - Tap delay successfully set (min. 1 valid eye position found) on slot 0 */
+#define DCB_DELAY_OK_00_REG                      DCB_REG_SERDES_STATUS_00_07
+#define DCB_DELAY_OK_00_MASK                                      0x00000002
+#define DCB_DELAY_OK_00_OFS                                                1
 
 /* SYNC_DONE_00 - Overall syncronization procedure completed for slot 0 */
 #define DCB_SYNC_DONE_00_REG                     DCB_REG_SERDES_STATUS_00_07
@@ -684,13 +724,18 @@
 
 /* IDLE_PATTERN_DETECT_15 - Idle pattern detected on slot 15 */
 #define DCB_IDLE_PATTERN_DETECT_15_REG           DCB_REG_SERDES_STATUS_08_15
-#define DCB_IDLE_PATTERN_DETECT_15_MASK                           0x40000000
-#define DCB_IDLE_PATTERN_DETECT_15_OFS                                    30
+#define DCB_IDLE_PATTERN_DETECT_15_MASK                           0x80000000
+#define DCB_IDLE_PATTERN_DETECT_15_OFS                                    31
 
-/* DELAY_SYNC_DONE_15 - Delay syncronization procedure completed for slot 15 */
-#define DCB_DELAY_SYNC_DONE_15_REG               DCB_REG_SERDES_STATUS_08_15
-#define DCB_DELAY_SYNC_DONE_15_MASK                               0x20000000
-#define DCB_DELAY_SYNC_DONE_15_OFS                                        29
+/* BITSLIP_OK_15 - Bitslip successful on slot 15 */
+#define DCB_BITSLIP_OK_15_REG                    DCB_REG_SERDES_STATUS_08_15
+#define DCB_BITSLIP_OK_15_MASK                                    0x40000000
+#define DCB_BITSLIP_OK_15_OFS                                             30
+
+/* DELAY_OK_15 - Tap delay successfully set (min. 1 valid eye position found) on slot 15 */
+#define DCB_DELAY_OK_15_REG                      DCB_REG_SERDES_STATUS_08_15
+#define DCB_DELAY_OK_15_MASK                                      0x20000000
+#define DCB_DELAY_OK_15_OFS                                               29
 
 /* SYNC_DONE_15 - Overall syncronization procedure completed for slot 15 */
 #define DCB_SYNC_DONE_15_REG                     DCB_REG_SERDES_STATUS_08_15
@@ -699,13 +744,18 @@
 
 /* IDLE_PATTERN_DETECT_14 - Idle pattern detected on slot 14 */
 #define DCB_IDLE_PATTERN_DETECT_14_REG           DCB_REG_SERDES_STATUS_08_15
-#define DCB_IDLE_PATTERN_DETECT_14_MASK                           0x04000000
-#define DCB_IDLE_PATTERN_DETECT_14_OFS                                    26
+#define DCB_IDLE_PATTERN_DETECT_14_MASK                           0x08000000
+#define DCB_IDLE_PATTERN_DETECT_14_OFS                                    27
 
-/* DELAY_SYNC_DONE_14 - Delay syncronization procedure completed for slot 14 */
-#define DCB_DELAY_SYNC_DONE_14_REG               DCB_REG_SERDES_STATUS_08_15
-#define DCB_DELAY_SYNC_DONE_14_MASK                               0x02000000
-#define DCB_DELAY_SYNC_DONE_14_OFS                                        25
+/* BITSLIP_OK_14 - Bitslip successful on slot 14 */
+#define DCB_BITSLIP_OK_14_REG                    DCB_REG_SERDES_STATUS_08_15
+#define DCB_BITSLIP_OK_14_MASK                                    0x04000000
+#define DCB_BITSLIP_OK_14_OFS                                             26
+
+/* DELAY_OK_14 - Tap delay successfully set (min. 1 valid eye position found) on slot 14 */
+#define DCB_DELAY_OK_14_REG                      DCB_REG_SERDES_STATUS_08_15
+#define DCB_DELAY_OK_14_MASK                                      0x02000000
+#define DCB_DELAY_OK_14_OFS                                               25
 
 /* SYNC_DONE_14 - Overall syncronization procedure completed for slot 14 */
 #define DCB_SYNC_DONE_14_REG                     DCB_REG_SERDES_STATUS_08_15
@@ -714,13 +764,18 @@
 
 /* IDLE_PATTERN_DETECT_13 - Idle pattern detected on slot 13 */
 #define DCB_IDLE_PATTERN_DETECT_13_REG           DCB_REG_SERDES_STATUS_08_15
-#define DCB_IDLE_PATTERN_DETECT_13_MASK                           0x00400000
-#define DCB_IDLE_PATTERN_DETECT_13_OFS                                    22
+#define DCB_IDLE_PATTERN_DETECT_13_MASK                           0x00800000
+#define DCB_IDLE_PATTERN_DETECT_13_OFS                                    23
 
-/* DELAY_SYNC_DONE_13 - Delay syncronization procedure completed for slot 13 */
-#define DCB_DELAY_SYNC_DONE_13_REG               DCB_REG_SERDES_STATUS_08_15
-#define DCB_DELAY_SYNC_DONE_13_MASK                               0x00200000
-#define DCB_DELAY_SYNC_DONE_13_OFS                                        21
+/* BITSLIP_OK_13 - Bitslip successful on slot 13 */
+#define DCB_BITSLIP_OK_13_REG                    DCB_REG_SERDES_STATUS_08_15
+#define DCB_BITSLIP_OK_13_MASK                                    0x00400000
+#define DCB_BITSLIP_OK_13_OFS                                             22
+
+/* DELAY_OK_13 - Tap delay successfully set (min. 1 valid eye position found) on slot 13 */
+#define DCB_DELAY_OK_13_REG                      DCB_REG_SERDES_STATUS_08_15
+#define DCB_DELAY_OK_13_MASK                                      0x00200000
+#define DCB_DELAY_OK_13_OFS                                               21
 
 /* SYNC_DONE_13 - Overall syncronization procedure completed for slot 13 */
 #define DCB_SYNC_DONE_13_REG                     DCB_REG_SERDES_STATUS_08_15
@@ -729,13 +784,18 @@
 
 /* IDLE_PATTERN_DETECT_12 - Idle pattern detected on slot 12 */
 #define DCB_IDLE_PATTERN_DETECT_12_REG           DCB_REG_SERDES_STATUS_08_15
-#define DCB_IDLE_PATTERN_DETECT_12_MASK                           0x00040000
-#define DCB_IDLE_PATTERN_DETECT_12_OFS                                    18
+#define DCB_IDLE_PATTERN_DETECT_12_MASK                           0x00080000
+#define DCB_IDLE_PATTERN_DETECT_12_OFS                                    19
 
-/* DELAY_SYNC_DONE_12 - Delay syncronization procedure completed for slot 12 */
-#define DCB_DELAY_SYNC_DONE_12_REG               DCB_REG_SERDES_STATUS_08_15
-#define DCB_DELAY_SYNC_DONE_12_MASK                               0x00020000
-#define DCB_DELAY_SYNC_DONE_12_OFS                                        17
+/* BITSLIP_OK_12 - Bitslip successful on slot 12 */
+#define DCB_BITSLIP_OK_12_REG                    DCB_REG_SERDES_STATUS_08_15
+#define DCB_BITSLIP_OK_12_MASK                                    0x00040000
+#define DCB_BITSLIP_OK_12_OFS                                             18
+
+/* DELAY_OK_12 - Tap delay successfully set (min. 1 valid eye position found) on slot 12 */
+#define DCB_DELAY_OK_12_REG                      DCB_REG_SERDES_STATUS_08_15
+#define DCB_DELAY_OK_12_MASK                                      0x00020000
+#define DCB_DELAY_OK_12_OFS                                               17
 
 /* SYNC_DONE_12 - Overall syncronization procedure completed for slot 12 */
 #define DCB_SYNC_DONE_12_REG                     DCB_REG_SERDES_STATUS_08_15
@@ -744,13 +804,18 @@
 
 /* IDLE_PATTERN_DETECT_11 - Idle pattern detected on slot 11 */
 #define DCB_IDLE_PATTERN_DETECT_11_REG           DCB_REG_SERDES_STATUS_08_15
-#define DCB_IDLE_PATTERN_DETECT_11_MASK                           0x00004000
-#define DCB_IDLE_PATTERN_DETECT_11_OFS                                    14
+#define DCB_IDLE_PATTERN_DETECT_11_MASK                           0x00008000
+#define DCB_IDLE_PATTERN_DETECT_11_OFS                                    15
 
-/* DELAY_SYNC_DONE_11 - Delay syncronization procedure completed for slot 11 */
-#define DCB_DELAY_SYNC_DONE_11_REG               DCB_REG_SERDES_STATUS_08_15
-#define DCB_DELAY_SYNC_DONE_11_MASK                               0x00002000
-#define DCB_DELAY_SYNC_DONE_11_OFS                                        13
+/* BITSLIP_OK_11 - Bitslip successful on slot 11 */
+#define DCB_BITSLIP_OK_11_REG                    DCB_REG_SERDES_STATUS_08_15
+#define DCB_BITSLIP_OK_11_MASK                                    0x00004000
+#define DCB_BITSLIP_OK_11_OFS                                             14
+
+/* DELAY_OK_11 - Tap delay successfully set (min. 1 valid eye position found) on slot 11 */
+#define DCB_DELAY_OK_11_REG                      DCB_REG_SERDES_STATUS_08_15
+#define DCB_DELAY_OK_11_MASK                                      0x00002000
+#define DCB_DELAY_OK_11_OFS                                               13
 
 /* SYNC_DONE_11 - Overall syncronization procedure completed for slot 11 */
 #define DCB_SYNC_DONE_11_REG                     DCB_REG_SERDES_STATUS_08_15
@@ -759,13 +824,18 @@
 
 /* IDLE_PATTERN_DETECT_10 - Idle pattern detected on slot 10 */
 #define DCB_IDLE_PATTERN_DETECT_10_REG           DCB_REG_SERDES_STATUS_08_15
-#define DCB_IDLE_PATTERN_DETECT_10_MASK                           0x00000400
-#define DCB_IDLE_PATTERN_DETECT_10_OFS                                    10
+#define DCB_IDLE_PATTERN_DETECT_10_MASK                           0x00000800
+#define DCB_IDLE_PATTERN_DETECT_10_OFS                                    11
 
-/* DELAY_SYNC_DONE_10 - Delay syncronization procedure completed for slot 10 */
-#define DCB_DELAY_SYNC_DONE_10_REG               DCB_REG_SERDES_STATUS_08_15
-#define DCB_DELAY_SYNC_DONE_10_MASK                               0x00000200
-#define DCB_DELAY_SYNC_DONE_10_OFS                                         9
+/* BITSLIP_OK_10 - Bitslip successful on slot 10 */
+#define DCB_BITSLIP_OK_10_REG                    DCB_REG_SERDES_STATUS_08_15
+#define DCB_BITSLIP_OK_10_MASK                                    0x00000400
+#define DCB_BITSLIP_OK_10_OFS                                             10
+
+/* DELAY_OK_10 - Tap delay successfully set (min. 1 valid eye position found) on slot 10 */
+#define DCB_DELAY_OK_10_REG                      DCB_REG_SERDES_STATUS_08_15
+#define DCB_DELAY_OK_10_MASK                                      0x00000200
+#define DCB_DELAY_OK_10_OFS                                                9
 
 /* SYNC_DONE_10 - Overall syncronization procedure completed for slot 10 */
 #define DCB_SYNC_DONE_10_REG                     DCB_REG_SERDES_STATUS_08_15
@@ -774,13 +844,18 @@
 
 /* IDLE_PATTERN_DETECT_09 - Idle pattern detected on slot 9 */
 #define DCB_IDLE_PATTERN_DETECT_09_REG           DCB_REG_SERDES_STATUS_08_15
-#define DCB_IDLE_PATTERN_DETECT_09_MASK                           0x00000040
-#define DCB_IDLE_PATTERN_DETECT_09_OFS                                     6
+#define DCB_IDLE_PATTERN_DETECT_09_MASK                           0x00000080
+#define DCB_IDLE_PATTERN_DETECT_09_OFS                                     7
 
-/* DELAY_SYNC_DONE_09 - Delay syncronization procedure completed for slot 9 */
-#define DCB_DELAY_SYNC_DONE_09_REG               DCB_REG_SERDES_STATUS_08_15
-#define DCB_DELAY_SYNC_DONE_09_MASK                               0x00000020
-#define DCB_DELAY_SYNC_DONE_09_OFS                                         5
+/* BITSLIP_OK_09 - Bitslip successful on slot 9 */
+#define DCB_BITSLIP_OK_09_REG                    DCB_REG_SERDES_STATUS_08_15
+#define DCB_BITSLIP_OK_09_MASK                                    0x00000040
+#define DCB_BITSLIP_OK_09_OFS                                              6
+
+/* DELAY_OK_09 - Tap delay successfully set (min. 1 valid eye position found) on slot 9 */
+#define DCB_DELAY_OK_09_REG                      DCB_REG_SERDES_STATUS_08_15
+#define DCB_DELAY_OK_09_MASK                                      0x00000020
+#define DCB_DELAY_OK_09_OFS                                                5
 
 /* SYNC_DONE_09 - Overall syncronization procedure completed for slot 9 */
 #define DCB_SYNC_DONE_09_REG                     DCB_REG_SERDES_STATUS_08_15
@@ -789,13 +864,18 @@
 
 /* IDLE_PATTERN_DETECT_08 - Idle pattern detected on slot 8 */
 #define DCB_IDLE_PATTERN_DETECT_08_REG           DCB_REG_SERDES_STATUS_08_15
-#define DCB_IDLE_PATTERN_DETECT_08_MASK                           0x00000004
-#define DCB_IDLE_PATTERN_DETECT_08_OFS                                     2
+#define DCB_IDLE_PATTERN_DETECT_08_MASK                           0x00000008
+#define DCB_IDLE_PATTERN_DETECT_08_OFS                                     3
 
-/* DELAY_SYNC_DONE_08 - Delay syncronization procedure completed for slot 8 */
-#define DCB_DELAY_SYNC_DONE_08_REG               DCB_REG_SERDES_STATUS_08_15
-#define DCB_DELAY_SYNC_DONE_08_MASK                               0x00000002
-#define DCB_DELAY_SYNC_DONE_08_OFS                                         1
+/* BITSLIP_OK_08 - Bitslip successful on slot 8 */
+#define DCB_BITSLIP_OK_08_REG                    DCB_REG_SERDES_STATUS_08_15
+#define DCB_BITSLIP_OK_08_MASK                                    0x00000004
+#define DCB_BITSLIP_OK_08_OFS                                              2
+
+/* DELAY_OK_08 - Tap delay successfully set (min. 1 valid eye position found) on slot 8 */
+#define DCB_DELAY_OK_08_REG                      DCB_REG_SERDES_STATUS_08_15
+#define DCB_DELAY_OK_08_MASK                                      0x00000002
+#define DCB_DELAY_OK_08_OFS                                                1
 
 /* SYNC_DONE_08 - Overall syncronization procedure completed for slot 8 */
 #define DCB_SYNC_DONE_08_REG                     DCB_REG_SERDES_STATUS_08_15
@@ -808,13 +888,18 @@
 
 /* IDLE_PATTERN_DETECT_17 - Idle pattern detected on slot 17 */
 #define DCB_IDLE_PATTERN_DETECT_17_REG              DCB_REG_SERDES_STATUS_17
-#define DCB_IDLE_PATTERN_DETECT_17_MASK                           0x00000004
-#define DCB_IDLE_PATTERN_DETECT_17_OFS                                     2
+#define DCB_IDLE_PATTERN_DETECT_17_MASK                           0x00000008
+#define DCB_IDLE_PATTERN_DETECT_17_OFS                                     3
 
-/* DELAY_SYNC_DONE_17 - Delay syncronization procedure completed for slot 17 */
-#define DCB_DELAY_SYNC_DONE_17_REG                  DCB_REG_SERDES_STATUS_17
-#define DCB_DELAY_SYNC_DONE_17_MASK                               0x00000002
-#define DCB_DELAY_SYNC_DONE_17_OFS                                         1
+/* BITSLIP_OK_17 - Bitslip successful on slot 17 */
+#define DCB_BITSLIP_OK_17_REG                       DCB_REG_SERDES_STATUS_17
+#define DCB_BITSLIP_OK_17_MASK                                    0x00000004
+#define DCB_BITSLIP_OK_17_OFS                                              2
+
+/* DELAY_OK_17 - Tap delay successfully set (min. 1 valid eye position found) on slot 17 */
+#define DCB_DELAY_OK_17_REG                         DCB_REG_SERDES_STATUS_17
+#define DCB_DELAY_OK_17_MASK                                      0x00000002
+#define DCB_DELAY_OK_17_OFS                                                1
 
 /* SYNC_DONE_17 - Overall syncronization procedure completed for slot 17 */
 #define DCB_SYNC_DONE_17_REG                        DCB_REG_SERDES_STATUS_17

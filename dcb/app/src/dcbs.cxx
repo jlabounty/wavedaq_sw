@@ -781,7 +781,7 @@ int main(int argc, char *argv[]) {
                      param[n_param] = pchar;
                      pchar = strtok(NULL, " ");
                   }
-                
+
                   char *dest_addr;
                   int dest_port = 0;
 
@@ -1308,8 +1308,8 @@ void process_dcb_command(udp_connection &c, char *buffer) {
    } else if (strcmp(param[0], "sdstat") == 0) {
 
       if (n_param == 1) {
-         c.sprintf("Slot Idle Delay Sync ECRC EFrame EDgram ESync\n");
-         c.sprintf("=============================================\n");
+         c.sprintf("Slot Done DlyOk BslOk Idle ECRC EFrame EDgram ESync\n");
+         c.sprintf("===================================================\n");
       }
 
       unsigned int stat[21];
@@ -1317,15 +1317,15 @@ void process_dcb_command(udp_connection &c, char *buffer) {
 
       unsigned char sstat[18];
       for (int i=0 ; i<8 ; i++)
-         sstat[i] = ((stat[0] >> (i*4)) & 0x07);
+         sstat[i] = ((stat[0] >> (i*4)) & 0x0F);
       for (int i=0 ; i<8 ; i++)
-         sstat[8+i] = ((stat[1] >> (i*4)) & 0x07);
-      sstat[16] = (stat[2] & 0x07);
+         sstat[8+i] = ((stat[1] >> (i*4)) & 0x0F);
+      sstat[16] = (stat[2] & 0x0F);
 
       if (n_param == 2) {
          for (int s=0; s<17 ; s++) {
             c.sprintf("%d ", s);
-            c.sprintf("%d ", sstat[s] & 0x07);
+            c.sprintf("%d ", sstat[s] & 0x0F);
             c.sprintf("%d ", (stat[3+s] >> 24) & 0xFF);
             c.sprintf("%d ", (stat[3+s] >> 16) & 0xFF);
             c.sprintf("%d ", (stat[3+s] >>  8) & 0xFF);
@@ -1337,9 +1337,10 @@ void process_dcb_command(udp_connection &c, char *buffer) {
                c.sprintf(" %02d    ", s);
             else
                c.sprintf("TCB    ", s);
-            c.sprintf("%d    ", (sstat[s] & 0x04) ? 1 : 0);
-            c.sprintf("%d    ", (sstat[s] & 0x02) ? 1 : 0);
             c.sprintf("%d    ", (sstat[s] & 0x01) ? 1 : 0);
+            c.sprintf("%d    ", (sstat[s] & 0x02) ? 1 : 0);
+            c.sprintf("%d    ", (sstat[s] & 0x04) ? 1 : 0);
+            c.sprintf("%d    ", (sstat[s] & 0x08) ? 1 : 0);
 
             c.sprintf("%3d   ", (stat[3+s] >> 24) & 0xFF);
             c.sprintf("%3d   ", (stat[3+s] >> 16) & 0xFF);
@@ -1406,13 +1407,13 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       }
 
       if (n == 100)
-         c.sprintf("Serdes link for WDB in slot %d did not sync\n", b); 
+         c.sprintf("Serdes link for WDB in slot %d did not sync\n", b);
       else
          c.sprintf("Ok\n");
    } else if (strcmp(param[0], "dpsreset") == 0) {
-      c.sprintf("Resetting DMA Packet Scheduler...\n"); 
+      c.sprintf("Resetting DMA Packet Scheduler...\n");
       dps_reset(SYSPTR(dma_pkt_sched));
-      
+
    } else if (strcmp(param[0], "sync") == 0) {
 
       bpl_sync();

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Created :   30.03.2022 09:55:53 -->
+<!-- Created :   01.04.2022 10:50:56 -->
 <html>
 
 <head>
@@ -9,7 +9,7 @@
 
 <body>
   <h1>DCB Register Map</h1>
-  Generated : 30.03.2022 09:55:53<br><br>
+  Generated : 01.04.2022 10:50:56<br><br>
   <table>
     <tbody>
       <tr class="reg_header">
@@ -110,7 +110,7 @@
         <td style="text-align:center"><a href="#register_8"></a></td>
         <td style="text-align:right" ><a href="#register_8">0x00000000</a></td>
         <td style="text-align:left"  ><a href="#register_8">PROT_VER</a></td>
-        <td style="text-align:left"  ><a href="#register_8">Vesion of the WaveDream2 protocol</a></td>
+        <td style="text-align:left"  ><a href="#register_8">Vesion of the WaveDAQ protocol</a></td>
       </tr>
       <tr class="reg_list">
         <td style="text-align:right" ><a href="#register_9" id="reg_list_9">9</a></td>
@@ -1693,7 +1693,7 @@
         <td style="text-align:center"></td>
         <td style="text-align:right" >0x00000000</td>
         <td style="text-align:left"  >PROT_VER</td>
-        <td style="text-align:left"  >Vesion of the WaveDream2 protocol</td>
+        <td style="text-align:left"  >Vesion of the WaveDAQ protocol</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -1719,7 +1719,7 @@
         <td style="text-align:center">7:0</td>
         <td style="text-align:right" >0x00</td>
         <td style="text-align:left"  >PROTOCOL_VERSION</td>
-        <td style="text-align:left"  >Version of the WaveDream2 protocol</td>
+        <td style="text-align:left"  >Version of the WaveDAQ protocol</td>
       </tr>
       <tr class="back_to_overview">
         <td class="back_to_overview" colspan="7"><a href="#reg_list_8">Register Overview</a></td>
@@ -2977,19 +2977,6 @@
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
         <td style="text-align:center">31</td>
-        <td style="text-align:right" >0</td>
-        <td style="text-align:left"  >RESERVED</td>
-        <td style="text-align:left"  ></td>
-      </tr>
-      <tr class="reg_content">
-        <td style="text-align:center"></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:center"></td>
-        <td style="text-align:center"  >R</td>
-        <td style="text-align:center"  ></td>
-        <td style="text-align:center">30</td>
         <td style="text-align:right" >0b0</td>
         <td style="text-align:left"  >IDLE_PATTERN_DETECT_07</td>
         <td style="text-align:left"  >Idle pattern detected on slot 7</td>
@@ -3002,10 +2989,23 @@
         <td style="text-align:center"></td>
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
+        <td style="text-align:center">30</td>
+        <td style="text-align:right" >0b0</td>
+        <td style="text-align:left"  >BITSLIP_OK_07</td>
+        <td style="text-align:left"  >Bitslip successful on slot 7</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
         <td style="text-align:center">29</td>
         <td style="text-align:right" >0b0</td>
-        <td style="text-align:left"  >DELAY_SYNC_DONE_07</td>
-        <td style="text-align:left"  >Delay syncronization procedure completed for slot 7</td>
+        <td style="text-align:left"  >DELAY_OK_07</td>
+        <td style="text-align:left"  >Tap delay successfully set (min. 1 valid eye position found) on slot 7</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -3029,19 +3029,6 @@
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
         <td style="text-align:center">27</td>
-        <td style="text-align:right" >0</td>
-        <td style="text-align:left"  >RESERVED</td>
-        <td style="text-align:left"  ></td>
-      </tr>
-      <tr class="reg_content">
-        <td style="text-align:center"></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:center"></td>
-        <td style="text-align:center"  >R</td>
-        <td style="text-align:center"  ></td>
-        <td style="text-align:center">26</td>
         <td style="text-align:right" >0b0</td>
         <td style="text-align:left"  >IDLE_PATTERN_DETECT_06</td>
         <td style="text-align:left"  >Idle pattern detected on slot 6</td>
@@ -3054,10 +3041,23 @@
         <td style="text-align:center"></td>
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
+        <td style="text-align:center">26</td>
+        <td style="text-align:right" >0b0</td>
+        <td style="text-align:left"  >BITSLIP_OK_06</td>
+        <td style="text-align:left"  >Bitslip successful on slot 6</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
         <td style="text-align:center">25</td>
         <td style="text-align:right" >0b0</td>
-        <td style="text-align:left"  >DELAY_SYNC_DONE_06</td>
-        <td style="text-align:left"  >Delay syncronization procedure completed for slot 6</td>
+        <td style="text-align:left"  >DELAY_OK_06</td>
+        <td style="text-align:left"  >Tap delay successfully set (min. 1 valid eye position found) on slot 6</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -3081,19 +3081,6 @@
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
         <td style="text-align:center">23</td>
-        <td style="text-align:right" >0</td>
-        <td style="text-align:left"  >RESERVED</td>
-        <td style="text-align:left"  ></td>
-      </tr>
-      <tr class="reg_content">
-        <td style="text-align:center"></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:center"></td>
-        <td style="text-align:center"  >R</td>
-        <td style="text-align:center"  ></td>
-        <td style="text-align:center">22</td>
         <td style="text-align:right" >0b0</td>
         <td style="text-align:left"  >IDLE_PATTERN_DETECT_05</td>
         <td style="text-align:left"  >Idle pattern detected on slot 5</td>
@@ -3106,10 +3093,23 @@
         <td style="text-align:center"></td>
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
+        <td style="text-align:center">22</td>
+        <td style="text-align:right" >0b0</td>
+        <td style="text-align:left"  >BITSLIP_OK_05</td>
+        <td style="text-align:left"  >Bitslip successful on slot 5</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
         <td style="text-align:center">21</td>
         <td style="text-align:right" >0b0</td>
-        <td style="text-align:left"  >DELAY_SYNC_DONE_05</td>
-        <td style="text-align:left"  >Delay syncronization procedure completed for slot 5</td>
+        <td style="text-align:left"  >DELAY_OK_05</td>
+        <td style="text-align:left"  >Tap delay successfully set (min. 1 valid eye position found) on slot 5</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -3133,19 +3133,6 @@
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
         <td style="text-align:center">19</td>
-        <td style="text-align:right" >0</td>
-        <td style="text-align:left"  >RESERVED</td>
-        <td style="text-align:left"  ></td>
-      </tr>
-      <tr class="reg_content">
-        <td style="text-align:center"></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:center"></td>
-        <td style="text-align:center"  >R</td>
-        <td style="text-align:center"  ></td>
-        <td style="text-align:center">18</td>
         <td style="text-align:right" >0b0</td>
         <td style="text-align:left"  >IDLE_PATTERN_DETECT_04</td>
         <td style="text-align:left"  >Idle pattern detected on slot 4</td>
@@ -3158,10 +3145,23 @@
         <td style="text-align:center"></td>
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
+        <td style="text-align:center">18</td>
+        <td style="text-align:right" >0b0</td>
+        <td style="text-align:left"  >BITSLIP_OK_04</td>
+        <td style="text-align:left"  >Bitslip successful on slot 4</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
         <td style="text-align:center">17</td>
         <td style="text-align:right" >0b0</td>
-        <td style="text-align:left"  >DELAY_SYNC_DONE_04</td>
-        <td style="text-align:left"  >Delay syncronization procedure completed for slot 4</td>
+        <td style="text-align:left"  >DELAY_OK_04</td>
+        <td style="text-align:left"  >Tap delay successfully set (min. 1 valid eye position found) on slot 4</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -3185,19 +3185,6 @@
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
         <td style="text-align:center">15</td>
-        <td style="text-align:right" >0</td>
-        <td style="text-align:left"  >RESERVED</td>
-        <td style="text-align:left"  ></td>
-      </tr>
-      <tr class="reg_content">
-        <td style="text-align:center"></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:center"></td>
-        <td style="text-align:center"  >R</td>
-        <td style="text-align:center"  ></td>
-        <td style="text-align:center">14</td>
         <td style="text-align:right" >0b0</td>
         <td style="text-align:left"  >IDLE_PATTERN_DETECT_03</td>
         <td style="text-align:left"  >Idle pattern detected on slot 3</td>
@@ -3210,10 +3197,23 @@
         <td style="text-align:center"></td>
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
+        <td style="text-align:center">14</td>
+        <td style="text-align:right" >0b0</td>
+        <td style="text-align:left"  >BITSLIP_OK_03</td>
+        <td style="text-align:left"  >Bitslip successful on slot 3</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
         <td style="text-align:center">13</td>
         <td style="text-align:right" >0b0</td>
-        <td style="text-align:left"  >DELAY_SYNC_DONE_03</td>
-        <td style="text-align:left"  >Delay syncronization procedure completed for slot 3</td>
+        <td style="text-align:left"  >DELAY_OK_03</td>
+        <td style="text-align:left"  >Tap delay successfully set (min. 1 valid eye position found) on slot 3</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -3237,19 +3237,6 @@
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
         <td style="text-align:center">11</td>
-        <td style="text-align:right" >0</td>
-        <td style="text-align:left"  >RESERVED</td>
-        <td style="text-align:left"  ></td>
-      </tr>
-      <tr class="reg_content">
-        <td style="text-align:center"></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:center"></td>
-        <td style="text-align:center"  >R</td>
-        <td style="text-align:center"  ></td>
-        <td style="text-align:center">10</td>
         <td style="text-align:right" >0b0</td>
         <td style="text-align:left"  >IDLE_PATTERN_DETECT_02</td>
         <td style="text-align:left"  >Idle pattern detected on slot 2</td>
@@ -3262,10 +3249,23 @@
         <td style="text-align:center"></td>
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
+        <td style="text-align:center">10</td>
+        <td style="text-align:right" >0b0</td>
+        <td style="text-align:left"  >BITSLIP_OK_02</td>
+        <td style="text-align:left"  >Bitslip successful on slot 2</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
         <td style="text-align:center">9</td>
         <td style="text-align:right" >0b0</td>
-        <td style="text-align:left"  >DELAY_SYNC_DONE_02</td>
-        <td style="text-align:left"  >Delay syncronization procedure completed for slot 2</td>
+        <td style="text-align:left"  >DELAY_OK_02</td>
+        <td style="text-align:left"  >Tap delay successfully set (min. 1 valid eye position found) on slot 2</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -3289,9 +3289,9 @@
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
         <td style="text-align:center">7</td>
-        <td style="text-align:right" >0</td>
-        <td style="text-align:left"  >RESERVED</td>
-        <td style="text-align:left"  ></td>
+        <td style="text-align:right" >0b0</td>
+        <td style="text-align:left"  >IDLE_PATTERN_DETECT_01</td>
+        <td style="text-align:left"  >Idle pattern detected on slot 17</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -3303,8 +3303,8 @@
         <td style="text-align:center"  ></td>
         <td style="text-align:center">6</td>
         <td style="text-align:right" >0b0</td>
-        <td style="text-align:left"  >IDLE_PATTERN_DETECT_01</td>
-        <td style="text-align:left"  >Idle pattern detected on slot 1</td>
+        <td style="text-align:left"  >BITSLIP_OK_01</td>
+        <td style="text-align:left"  >Bitslip successful on slot 1</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -3316,8 +3316,8 @@
         <td style="text-align:center"  ></td>
         <td style="text-align:center">5</td>
         <td style="text-align:right" >0b0</td>
-        <td style="text-align:left"  >DELAY_SYNC_DONE_01</td>
-        <td style="text-align:left"  >Delay syncronization procedure completed for slot 1</td>
+        <td style="text-align:left"  >DELAY_OK_01</td>
+        <td style="text-align:left"  >Tap delay successfully set (min. 1 valid eye position found) on slot 1</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -3341,19 +3341,6 @@
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
         <td style="text-align:center">3</td>
-        <td style="text-align:right" >0</td>
-        <td style="text-align:left"  >RESERVED</td>
-        <td style="text-align:left"  ></td>
-      </tr>
-      <tr class="reg_content">
-        <td style="text-align:center"></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:center"></td>
-        <td style="text-align:center"  >R</td>
-        <td style="text-align:center"  ></td>
-        <td style="text-align:center">2</td>
         <td style="text-align:right" >0b0</td>
         <td style="text-align:left"  >IDLE_PATTERN_DETECT_00</td>
         <td style="text-align:left"  >Idle pattern detected on slot 0</td>
@@ -3366,10 +3353,23 @@
         <td style="text-align:center"></td>
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
+        <td style="text-align:center">2</td>
+        <td style="text-align:right" >0b0</td>
+        <td style="text-align:left"  >BITSLIP_OK_00</td>
+        <td style="text-align:left"  >Bitslip successful on slot 0</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
         <td style="text-align:center">1</td>
         <td style="text-align:right" >0b0</td>
-        <td style="text-align:left"  >DELAY_SYNC_DONE_00</td>
-        <td style="text-align:left"  >Delay syncronization procedure completed for slot 0</td>
+        <td style="text-align:left"  >DELAY_OK_00</td>
+        <td style="text-align:left"  >Tap delay successfully set (min. 1 valid eye position found) on slot 0</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -3425,19 +3425,6 @@
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
         <td style="text-align:center">31</td>
-        <td style="text-align:right" >0</td>
-        <td style="text-align:left"  >RESERVED</td>
-        <td style="text-align:left"  ></td>
-      </tr>
-      <tr class="reg_content">
-        <td style="text-align:center"></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:center"></td>
-        <td style="text-align:center"  >R</td>
-        <td style="text-align:center"  ></td>
-        <td style="text-align:center">30</td>
         <td style="text-align:right" >0b0</td>
         <td style="text-align:left"  >IDLE_PATTERN_DETECT_15</td>
         <td style="text-align:left"  >Idle pattern detected on slot 15</td>
@@ -3450,10 +3437,23 @@
         <td style="text-align:center"></td>
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
+        <td style="text-align:center">30</td>
+        <td style="text-align:right" >0b0</td>
+        <td style="text-align:left"  >BITSLIP_OK_15</td>
+        <td style="text-align:left"  >Bitslip successful on slot 15</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
         <td style="text-align:center">29</td>
         <td style="text-align:right" >0b0</td>
-        <td style="text-align:left"  >DELAY_SYNC_DONE_15</td>
-        <td style="text-align:left"  >Delay syncronization procedure completed for slot 15</td>
+        <td style="text-align:left"  >DELAY_OK_15</td>
+        <td style="text-align:left"  >Tap delay successfully set (min. 1 valid eye position found) on slot 15</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -3477,19 +3477,6 @@
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
         <td style="text-align:center">27</td>
-        <td style="text-align:right" >0</td>
-        <td style="text-align:left"  >RESERVED</td>
-        <td style="text-align:left"  ></td>
-      </tr>
-      <tr class="reg_content">
-        <td style="text-align:center"></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:center"></td>
-        <td style="text-align:center"  >R</td>
-        <td style="text-align:center"  ></td>
-        <td style="text-align:center">26</td>
         <td style="text-align:right" >0b0</td>
         <td style="text-align:left"  >IDLE_PATTERN_DETECT_14</td>
         <td style="text-align:left"  >Idle pattern detected on slot 14</td>
@@ -3502,10 +3489,23 @@
         <td style="text-align:center"></td>
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
+        <td style="text-align:center">26</td>
+        <td style="text-align:right" >0b0</td>
+        <td style="text-align:left"  >BITSLIP_OK_14</td>
+        <td style="text-align:left"  >Bitslip successful on slot 14</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
         <td style="text-align:center">25</td>
         <td style="text-align:right" >0b0</td>
-        <td style="text-align:left"  >DELAY_SYNC_DONE_14</td>
-        <td style="text-align:left"  >Delay syncronization procedure completed for slot 14</td>
+        <td style="text-align:left"  >DELAY_OK_14</td>
+        <td style="text-align:left"  >Tap delay successfully set (min. 1 valid eye position found) on slot 14</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -3529,19 +3529,6 @@
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
         <td style="text-align:center">23</td>
-        <td style="text-align:right" >0</td>
-        <td style="text-align:left"  >RESERVED</td>
-        <td style="text-align:left"  ></td>
-      </tr>
-      <tr class="reg_content">
-        <td style="text-align:center"></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:center"></td>
-        <td style="text-align:center"  >R</td>
-        <td style="text-align:center"  ></td>
-        <td style="text-align:center">22</td>
         <td style="text-align:right" >0b0</td>
         <td style="text-align:left"  >IDLE_PATTERN_DETECT_13</td>
         <td style="text-align:left"  >Idle pattern detected on slot 13</td>
@@ -3554,10 +3541,23 @@
         <td style="text-align:center"></td>
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
+        <td style="text-align:center">22</td>
+        <td style="text-align:right" >0b0</td>
+        <td style="text-align:left"  >BITSLIP_OK_13</td>
+        <td style="text-align:left"  >Bitslip successful on slot 13</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
         <td style="text-align:center">21</td>
         <td style="text-align:right" >0b0</td>
-        <td style="text-align:left"  >DELAY_SYNC_DONE_13</td>
-        <td style="text-align:left"  >Delay syncronization procedure completed for slot 13</td>
+        <td style="text-align:left"  >DELAY_OK_13</td>
+        <td style="text-align:left"  >Tap delay successfully set (min. 1 valid eye position found) on slot 13</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -3581,19 +3581,6 @@
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
         <td style="text-align:center">19</td>
-        <td style="text-align:right" >0</td>
-        <td style="text-align:left"  >RESERVED</td>
-        <td style="text-align:left"  ></td>
-      </tr>
-      <tr class="reg_content">
-        <td style="text-align:center"></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:center"></td>
-        <td style="text-align:center"  >R</td>
-        <td style="text-align:center"  ></td>
-        <td style="text-align:center">18</td>
         <td style="text-align:right" >0b0</td>
         <td style="text-align:left"  >IDLE_PATTERN_DETECT_12</td>
         <td style="text-align:left"  >Idle pattern detected on slot 12</td>
@@ -3606,10 +3593,23 @@
         <td style="text-align:center"></td>
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
+        <td style="text-align:center">18</td>
+        <td style="text-align:right" >0b0</td>
+        <td style="text-align:left"  >BITSLIP_OK_12</td>
+        <td style="text-align:left"  >Bitslip successful on slot 12</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
         <td style="text-align:center">17</td>
         <td style="text-align:right" >0b0</td>
-        <td style="text-align:left"  >DELAY_SYNC_DONE_12</td>
-        <td style="text-align:left"  >Delay syncronization procedure completed for slot 12</td>
+        <td style="text-align:left"  >DELAY_OK_12</td>
+        <td style="text-align:left"  >Tap delay successfully set (min. 1 valid eye position found) on slot 12</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -3633,19 +3633,6 @@
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
         <td style="text-align:center">15</td>
-        <td style="text-align:right" >0</td>
-        <td style="text-align:left"  >RESERVED</td>
-        <td style="text-align:left"  ></td>
-      </tr>
-      <tr class="reg_content">
-        <td style="text-align:center"></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:center"></td>
-        <td style="text-align:center"  >R</td>
-        <td style="text-align:center"  ></td>
-        <td style="text-align:center">14</td>
         <td style="text-align:right" >0b0</td>
         <td style="text-align:left"  >IDLE_PATTERN_DETECT_11</td>
         <td style="text-align:left"  >Idle pattern detected on slot 11</td>
@@ -3658,10 +3645,23 @@
         <td style="text-align:center"></td>
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
+        <td style="text-align:center">14</td>
+        <td style="text-align:right" >0b0</td>
+        <td style="text-align:left"  >BITSLIP_OK_11</td>
+        <td style="text-align:left"  >Bitslip successful on slot 11</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
         <td style="text-align:center">13</td>
         <td style="text-align:right" >0b0</td>
-        <td style="text-align:left"  >DELAY_SYNC_DONE_11</td>
-        <td style="text-align:left"  >Delay syncronization procedure completed for slot 11</td>
+        <td style="text-align:left"  >DELAY_OK_11</td>
+        <td style="text-align:left"  >Tap delay successfully set (min. 1 valid eye position found) on slot 11</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -3685,19 +3685,6 @@
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
         <td style="text-align:center">11</td>
-        <td style="text-align:right" >0</td>
-        <td style="text-align:left"  >RESERVED</td>
-        <td style="text-align:left"  ></td>
-      </tr>
-      <tr class="reg_content">
-        <td style="text-align:center"></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:center"></td>
-        <td style="text-align:center"  >R</td>
-        <td style="text-align:center"  ></td>
-        <td style="text-align:center">10</td>
         <td style="text-align:right" >0b0</td>
         <td style="text-align:left"  >IDLE_PATTERN_DETECT_10</td>
         <td style="text-align:left"  >Idle pattern detected on slot 10</td>
@@ -3710,10 +3697,23 @@
         <td style="text-align:center"></td>
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
+        <td style="text-align:center">10</td>
+        <td style="text-align:right" >0b0</td>
+        <td style="text-align:left"  >BITSLIP_OK_10</td>
+        <td style="text-align:left"  >Bitslip successful on slot 10</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
         <td style="text-align:center">9</td>
         <td style="text-align:right" >0b0</td>
-        <td style="text-align:left"  >DELAY_SYNC_DONE_10</td>
-        <td style="text-align:left"  >Delay syncronization procedure completed for slot 10</td>
+        <td style="text-align:left"  >DELAY_OK_10</td>
+        <td style="text-align:left"  >Tap delay successfully set (min. 1 valid eye position found) on slot 10</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -3737,19 +3737,6 @@
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
         <td style="text-align:center">7</td>
-        <td style="text-align:right" >0</td>
-        <td style="text-align:left"  >RESERVED</td>
-        <td style="text-align:left"  ></td>
-      </tr>
-      <tr class="reg_content">
-        <td style="text-align:center"></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:center"></td>
-        <td style="text-align:center"  >R</td>
-        <td style="text-align:center"  ></td>
-        <td style="text-align:center">6</td>
         <td style="text-align:right" >0b0</td>
         <td style="text-align:left"  >IDLE_PATTERN_DETECT_09</td>
         <td style="text-align:left"  >Idle pattern detected on slot 9</td>
@@ -3762,10 +3749,23 @@
         <td style="text-align:center"></td>
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
+        <td style="text-align:center">6</td>
+        <td style="text-align:right" >0b0</td>
+        <td style="text-align:left"  >BITSLIP_OK_09</td>
+        <td style="text-align:left"  >Bitslip successful on slot 9</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
         <td style="text-align:center">5</td>
         <td style="text-align:right" >0b0</td>
-        <td style="text-align:left"  >DELAY_SYNC_DONE_09</td>
-        <td style="text-align:left"  >Delay syncronization procedure completed for slot 9</td>
+        <td style="text-align:left"  >DELAY_OK_09</td>
+        <td style="text-align:left"  >Tap delay successfully set (min. 1 valid eye position found) on slot 9</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -3789,19 +3789,6 @@
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
         <td style="text-align:center">3</td>
-        <td style="text-align:right" >0</td>
-        <td style="text-align:left"  >RESERVED</td>
-        <td style="text-align:left"  ></td>
-      </tr>
-      <tr class="reg_content">
-        <td style="text-align:center"></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:center"></td>
-        <td style="text-align:center"  >R</td>
-        <td style="text-align:center"  ></td>
-        <td style="text-align:center">2</td>
         <td style="text-align:right" >0b0</td>
         <td style="text-align:left"  >IDLE_PATTERN_DETECT_08</td>
         <td style="text-align:left"  >Idle pattern detected on slot 8</td>
@@ -3814,10 +3801,23 @@
         <td style="text-align:center"></td>
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
+        <td style="text-align:center">2</td>
+        <td style="text-align:right" >0b0</td>
+        <td style="text-align:left"  >BITSLIP_OK_08</td>
+        <td style="text-align:left"  >Bitslip successful on slot 8</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
         <td style="text-align:center">1</td>
         <td style="text-align:right" >0b0</td>
-        <td style="text-align:left"  >DELAY_SYNC_DONE_08</td>
-        <td style="text-align:left"  >Delay syncronization procedure completed for slot 8</td>
+        <td style="text-align:left"  >DELAY_OK_08</td>
+        <td style="text-align:left"  >Tap delay successfully set (min. 1 valid eye position found) on slot 8</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -3886,19 +3886,6 @@
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
         <td style="text-align:center">3</td>
-        <td style="text-align:right" >0</td>
-        <td style="text-align:left"  >RESERVED</td>
-        <td style="text-align:left"  ></td>
-      </tr>
-      <tr class="reg_content">
-        <td style="text-align:center"></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:right" ></td>
-        <td style="text-align:center"></td>
-        <td style="text-align:center"  >R</td>
-        <td style="text-align:center"  ></td>
-        <td style="text-align:center">2</td>
         <td style="text-align:right" >0b0</td>
         <td style="text-align:left"  >IDLE_PATTERN_DETECT_17</td>
         <td style="text-align:left"  >Idle pattern detected on slot 17</td>
@@ -3911,10 +3898,23 @@
         <td style="text-align:center"></td>
         <td style="text-align:center"  >R</td>
         <td style="text-align:center"  ></td>
+        <td style="text-align:center">2</td>
+        <td style="text-align:right" >0b0</td>
+        <td style="text-align:left"  >BITSLIP_OK_17</td>
+        <td style="text-align:left"  >Bitslip successful on slot 17</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center"  >R</td>
+        <td style="text-align:center"  ></td>
         <td style="text-align:center">1</td>
         <td style="text-align:right" >0b0</td>
-        <td style="text-align:left"  >DELAY_SYNC_DONE_17</td>
-        <td style="text-align:left"  >Delay syncronization procedure completed for slot 17</td>
+        <td style="text-align:left"  >DELAY_OK_17</td>
+        <td style="text-align:left"  >Tap delay successfully set (min. 1 valid eye position found) on slot 17</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -10020,7 +10020,7 @@
   </table>
 
   <br>
-  Generated :   30.03.2022 09:55:53
+  Generated :   01.04.2022 10:50:56
 
 </body>
 

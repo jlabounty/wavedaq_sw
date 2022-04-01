@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  30.03.2022 09:55:53
+// Created :  01.04.2022 10:50:56
 //
 
 
@@ -120,9 +120,9 @@ public:
 
 
 
-   ////// ------ Register 8 [0x0020]: PROT_VER - Vesion of the WaveDream2 protocol (Default: 0x00000000) ------ //////
+   ////// ------ Register 8 [0x0020]: PROT_VER - Vesion of the WaveDAQ protocol (Default: 0x00000000) ------ //////
 
-   // 0x000000FF: PROTOCOL_VERSION - Version of the WaveDream2 protocol
+   // 0x000000FF: PROTOCOL_VERSION - Version of the WaveDAQ protocol
    unsigned int GetProtocolVersion() { return BitExtract(DCB_PROTOCOL_VERSION_REG, DCB_PROTOCOL_VERSION_MASK, DCB_PROTOCOL_VERSION_OFS); };
    void         SetProtocolVersion(unsigned int value) { SetRegMask(DCB_PROTOCOL_VERSION_REG, DCB_PROTOCOL_VERSION_MASK, DCB_PROTOCOL_VERSION_OFS, value); };
 
@@ -328,114 +328,148 @@ public:
 
    ////// ------ Register 23 [0x005C]: SERDES_STATUS_00_07 - Input Serdes status for slot 0 to 7 (Default: 0x00000000) ------ //////
 
-   // 0x40000000: IDLE_PATTERN_DETECT_07 - Idle pattern detected on slot 7
+   // 0x80000000: IDLE_PATTERN_DETECT_07 - Idle pattern detected on slot 7
    unsigned int GetIdlePatternDetect07() { return BitExtract(DCB_IDLE_PATTERN_DETECT_07_REG, DCB_IDLE_PATTERN_DETECT_07_MASK, DCB_IDLE_PATTERN_DETECT_07_OFS); };
-   // 0x20000000: DELAY_SYNC_DONE_07 - Delay syncronization procedure completed for slot 7
-   unsigned int GetDelaySyncDone07() { return BitExtract(DCB_DELAY_SYNC_DONE_07_REG, DCB_DELAY_SYNC_DONE_07_MASK, DCB_DELAY_SYNC_DONE_07_OFS); };
+   // 0x40000000: BITSLIP_OK_07 - Bitslip successful on slot 7
+   unsigned int GetBitslipOk07() { return BitExtract(DCB_BITSLIP_OK_07_REG, DCB_BITSLIP_OK_07_MASK, DCB_BITSLIP_OK_07_OFS); };
+   // 0x20000000: DELAY_OK_07 - Tap delay successfully set (min. 1 valid eye position found) on slot 7
+   unsigned int GetDelayOk07() { return BitExtract(DCB_DELAY_OK_07_REG, DCB_DELAY_OK_07_MASK, DCB_DELAY_OK_07_OFS); };
    // 0x10000000: SYNC_DONE_07 - Overall syncronization procedure completed for slot 7
    unsigned int GetSyncDone07() { return BitExtract(DCB_SYNC_DONE_07_REG, DCB_SYNC_DONE_07_MASK, DCB_SYNC_DONE_07_OFS); };
-   // 0x04000000: IDLE_PATTERN_DETECT_06 - Idle pattern detected on slot 6
+   // 0x08000000: IDLE_PATTERN_DETECT_06 - Idle pattern detected on slot 6
    unsigned int GetIdlePatternDetect06() { return BitExtract(DCB_IDLE_PATTERN_DETECT_06_REG, DCB_IDLE_PATTERN_DETECT_06_MASK, DCB_IDLE_PATTERN_DETECT_06_OFS); };
-   // 0x02000000: DELAY_SYNC_DONE_06 - Delay syncronization procedure completed for slot 6
-   unsigned int GetDelaySyncDone06() { return BitExtract(DCB_DELAY_SYNC_DONE_06_REG, DCB_DELAY_SYNC_DONE_06_MASK, DCB_DELAY_SYNC_DONE_06_OFS); };
+   // 0x04000000: BITSLIP_OK_06 - Bitslip successful on slot 6
+   unsigned int GetBitslipOk06() { return BitExtract(DCB_BITSLIP_OK_06_REG, DCB_BITSLIP_OK_06_MASK, DCB_BITSLIP_OK_06_OFS); };
+   // 0x02000000: DELAY_OK_06 - Tap delay successfully set (min. 1 valid eye position found) on slot 6
+   unsigned int GetDelayOk06() { return BitExtract(DCB_DELAY_OK_06_REG, DCB_DELAY_OK_06_MASK, DCB_DELAY_OK_06_OFS); };
    // 0x01000000: SYNC_DONE_06 - Overall syncronization procedure completed for slot 6
    unsigned int GetSyncDone06() { return BitExtract(DCB_SYNC_DONE_06_REG, DCB_SYNC_DONE_06_MASK, DCB_SYNC_DONE_06_OFS); };
-   // 0x00400000: IDLE_PATTERN_DETECT_05 - Idle pattern detected on slot 5
+   // 0x00800000: IDLE_PATTERN_DETECT_05 - Idle pattern detected on slot 5
    unsigned int GetIdlePatternDetect05() { return BitExtract(DCB_IDLE_PATTERN_DETECT_05_REG, DCB_IDLE_PATTERN_DETECT_05_MASK, DCB_IDLE_PATTERN_DETECT_05_OFS); };
-   // 0x00200000: DELAY_SYNC_DONE_05 - Delay syncronization procedure completed for slot 5
-   unsigned int GetDelaySyncDone05() { return BitExtract(DCB_DELAY_SYNC_DONE_05_REG, DCB_DELAY_SYNC_DONE_05_MASK, DCB_DELAY_SYNC_DONE_05_OFS); };
+   // 0x00400000: BITSLIP_OK_05 - Bitslip successful on slot 5
+   unsigned int GetBitslipOk05() { return BitExtract(DCB_BITSLIP_OK_05_REG, DCB_BITSLIP_OK_05_MASK, DCB_BITSLIP_OK_05_OFS); };
+   // 0x00200000: DELAY_OK_05 - Tap delay successfully set (min. 1 valid eye position found) on slot 5
+   unsigned int GetDelayOk05() { return BitExtract(DCB_DELAY_OK_05_REG, DCB_DELAY_OK_05_MASK, DCB_DELAY_OK_05_OFS); };
    // 0x00100000: SYNC_DONE_05 - Overall syncronization procedure completed for slot 5
    unsigned int GetSyncDone05() { return BitExtract(DCB_SYNC_DONE_05_REG, DCB_SYNC_DONE_05_MASK, DCB_SYNC_DONE_05_OFS); };
-   // 0x00040000: IDLE_PATTERN_DETECT_04 - Idle pattern detected on slot 4
+   // 0x00080000: IDLE_PATTERN_DETECT_04 - Idle pattern detected on slot 4
    unsigned int GetIdlePatternDetect04() { return BitExtract(DCB_IDLE_PATTERN_DETECT_04_REG, DCB_IDLE_PATTERN_DETECT_04_MASK, DCB_IDLE_PATTERN_DETECT_04_OFS); };
-   // 0x00020000: DELAY_SYNC_DONE_04 - Delay syncronization procedure completed for slot 4
-   unsigned int GetDelaySyncDone04() { return BitExtract(DCB_DELAY_SYNC_DONE_04_REG, DCB_DELAY_SYNC_DONE_04_MASK, DCB_DELAY_SYNC_DONE_04_OFS); };
+   // 0x00040000: BITSLIP_OK_04 - Bitslip successful on slot 4
+   unsigned int GetBitslipOk04() { return BitExtract(DCB_BITSLIP_OK_04_REG, DCB_BITSLIP_OK_04_MASK, DCB_BITSLIP_OK_04_OFS); };
+   // 0x00020000: DELAY_OK_04 - Tap delay successfully set (min. 1 valid eye position found) on slot 4
+   unsigned int GetDelayOk04() { return BitExtract(DCB_DELAY_OK_04_REG, DCB_DELAY_OK_04_MASK, DCB_DELAY_OK_04_OFS); };
    // 0x00010000: SYNC_DONE_04 - Overall syncronization procedure completed for slot 4
    unsigned int GetSyncDone04() { return BitExtract(DCB_SYNC_DONE_04_REG, DCB_SYNC_DONE_04_MASK, DCB_SYNC_DONE_04_OFS); };
-   // 0x00004000: IDLE_PATTERN_DETECT_03 - Idle pattern detected on slot 3
+   // 0x00008000: IDLE_PATTERN_DETECT_03 - Idle pattern detected on slot 3
    unsigned int GetIdlePatternDetect03() { return BitExtract(DCB_IDLE_PATTERN_DETECT_03_REG, DCB_IDLE_PATTERN_DETECT_03_MASK, DCB_IDLE_PATTERN_DETECT_03_OFS); };
-   // 0x00002000: DELAY_SYNC_DONE_03 - Delay syncronization procedure completed for slot 3
-   unsigned int GetDelaySyncDone03() { return BitExtract(DCB_DELAY_SYNC_DONE_03_REG, DCB_DELAY_SYNC_DONE_03_MASK, DCB_DELAY_SYNC_DONE_03_OFS); };
+   // 0x00004000: BITSLIP_OK_03 - Bitslip successful on slot 3
+   unsigned int GetBitslipOk03() { return BitExtract(DCB_BITSLIP_OK_03_REG, DCB_BITSLIP_OK_03_MASK, DCB_BITSLIP_OK_03_OFS); };
+   // 0x00002000: DELAY_OK_03 - Tap delay successfully set (min. 1 valid eye position found) on slot 3
+   unsigned int GetDelayOk03() { return BitExtract(DCB_DELAY_OK_03_REG, DCB_DELAY_OK_03_MASK, DCB_DELAY_OK_03_OFS); };
    // 0x00001000: SYNC_DONE_03 - Overall syncronization procedure completed for slot 3
    unsigned int GetSyncDone03() { return BitExtract(DCB_SYNC_DONE_03_REG, DCB_SYNC_DONE_03_MASK, DCB_SYNC_DONE_03_OFS); };
-   // 0x00000400: IDLE_PATTERN_DETECT_02 - Idle pattern detected on slot 2
+   // 0x00000800: IDLE_PATTERN_DETECT_02 - Idle pattern detected on slot 2
    unsigned int GetIdlePatternDetect02() { return BitExtract(DCB_IDLE_PATTERN_DETECT_02_REG, DCB_IDLE_PATTERN_DETECT_02_MASK, DCB_IDLE_PATTERN_DETECT_02_OFS); };
-   // 0x00000200: DELAY_SYNC_DONE_02 - Delay syncronization procedure completed for slot 2
-   unsigned int GetDelaySyncDone02() { return BitExtract(DCB_DELAY_SYNC_DONE_02_REG, DCB_DELAY_SYNC_DONE_02_MASK, DCB_DELAY_SYNC_DONE_02_OFS); };
+   // 0x00000400: BITSLIP_OK_02 - Bitslip successful on slot 2
+   unsigned int GetBitslipOk02() { return BitExtract(DCB_BITSLIP_OK_02_REG, DCB_BITSLIP_OK_02_MASK, DCB_BITSLIP_OK_02_OFS); };
+   // 0x00000200: DELAY_OK_02 - Tap delay successfully set (min. 1 valid eye position found) on slot 2
+   unsigned int GetDelayOk02() { return BitExtract(DCB_DELAY_OK_02_REG, DCB_DELAY_OK_02_MASK, DCB_DELAY_OK_02_OFS); };
    // 0x00000100: SYNC_DONE_02 - Overall syncronization procedure completed for slot 2
    unsigned int GetSyncDone02() { return BitExtract(DCB_SYNC_DONE_02_REG, DCB_SYNC_DONE_02_MASK, DCB_SYNC_DONE_02_OFS); };
-   // 0x00000040: IDLE_PATTERN_DETECT_01 - Idle pattern detected on slot 1
+   // 0x00000080: IDLE_PATTERN_DETECT_01 - Idle pattern detected on slot 17
    unsigned int GetIdlePatternDetect01() { return BitExtract(DCB_IDLE_PATTERN_DETECT_01_REG, DCB_IDLE_PATTERN_DETECT_01_MASK, DCB_IDLE_PATTERN_DETECT_01_OFS); };
-   // 0x00000020: DELAY_SYNC_DONE_01 - Delay syncronization procedure completed for slot 1
-   unsigned int GetDelaySyncDone01() { return BitExtract(DCB_DELAY_SYNC_DONE_01_REG, DCB_DELAY_SYNC_DONE_01_MASK, DCB_DELAY_SYNC_DONE_01_OFS); };
+   // 0x00000040: BITSLIP_OK_01 - Bitslip successful on slot 1
+   unsigned int GetBitslipOk01() { return BitExtract(DCB_BITSLIP_OK_01_REG, DCB_BITSLIP_OK_01_MASK, DCB_BITSLIP_OK_01_OFS); };
+   // 0x00000020: DELAY_OK_01 - Tap delay successfully set (min. 1 valid eye position found) on slot 1
+   unsigned int GetDelayOk01() { return BitExtract(DCB_DELAY_OK_01_REG, DCB_DELAY_OK_01_MASK, DCB_DELAY_OK_01_OFS); };
    // 0x00000010: SYNC_DONE_01 - Overall syncronization procedure completed for slot 1
    unsigned int GetSyncDone01() { return BitExtract(DCB_SYNC_DONE_01_REG, DCB_SYNC_DONE_01_MASK, DCB_SYNC_DONE_01_OFS); };
-   // 0x00000004: IDLE_PATTERN_DETECT_00 - Idle pattern detected on slot 0
+   // 0x00000008: IDLE_PATTERN_DETECT_00 - Idle pattern detected on slot 0
    unsigned int GetIdlePatternDetect00() { return BitExtract(DCB_IDLE_PATTERN_DETECT_00_REG, DCB_IDLE_PATTERN_DETECT_00_MASK, DCB_IDLE_PATTERN_DETECT_00_OFS); };
-   // 0x00000002: DELAY_SYNC_DONE_00 - Delay syncronization procedure completed for slot 0
-   unsigned int GetDelaySyncDone00() { return BitExtract(DCB_DELAY_SYNC_DONE_00_REG, DCB_DELAY_SYNC_DONE_00_MASK, DCB_DELAY_SYNC_DONE_00_OFS); };
+   // 0x00000004: BITSLIP_OK_00 - Bitslip successful on slot 0
+   unsigned int GetBitslipOk00() { return BitExtract(DCB_BITSLIP_OK_00_REG, DCB_BITSLIP_OK_00_MASK, DCB_BITSLIP_OK_00_OFS); };
+   // 0x00000002: DELAY_OK_00 - Tap delay successfully set (min. 1 valid eye position found) on slot 0
+   unsigned int GetDelayOk00() { return BitExtract(DCB_DELAY_OK_00_REG, DCB_DELAY_OK_00_MASK, DCB_DELAY_OK_00_OFS); };
    // 0x00000001: SYNC_DONE_00 - Overall syncronization procedure completed for slot 0
    unsigned int GetSyncDone00() { return BitExtract(DCB_SYNC_DONE_00_REG, DCB_SYNC_DONE_00_MASK, DCB_SYNC_DONE_00_OFS); };
 
 
    ////// ------ Register 24 [0x0060]: SERDES_STATUS_08_15 - Input Serdes status for slot 8 to 15 (Default: 0x00000000) ------ //////
 
-   // 0x40000000: IDLE_PATTERN_DETECT_15 - Idle pattern detected on slot 15
+   // 0x80000000: IDLE_PATTERN_DETECT_15 - Idle pattern detected on slot 15
    unsigned int GetIdlePatternDetect15() { return BitExtract(DCB_IDLE_PATTERN_DETECT_15_REG, DCB_IDLE_PATTERN_DETECT_15_MASK, DCB_IDLE_PATTERN_DETECT_15_OFS); };
-   // 0x20000000: DELAY_SYNC_DONE_15 - Delay syncronization procedure completed for slot 15
-   unsigned int GetDelaySyncDone15() { return BitExtract(DCB_DELAY_SYNC_DONE_15_REG, DCB_DELAY_SYNC_DONE_15_MASK, DCB_DELAY_SYNC_DONE_15_OFS); };
+   // 0x40000000: BITSLIP_OK_15 - Bitslip successful on slot 15
+   unsigned int GetBitslipOk15() { return BitExtract(DCB_BITSLIP_OK_15_REG, DCB_BITSLIP_OK_15_MASK, DCB_BITSLIP_OK_15_OFS); };
+   // 0x20000000: DELAY_OK_15 - Tap delay successfully set (min. 1 valid eye position found) on slot 15
+   unsigned int GetDelayOk15() { return BitExtract(DCB_DELAY_OK_15_REG, DCB_DELAY_OK_15_MASK, DCB_DELAY_OK_15_OFS); };
    // 0x10000000: SYNC_DONE_15 - Overall syncronization procedure completed for slot 15
    unsigned int GetSyncDone15() { return BitExtract(DCB_SYNC_DONE_15_REG, DCB_SYNC_DONE_15_MASK, DCB_SYNC_DONE_15_OFS); };
-   // 0x04000000: IDLE_PATTERN_DETECT_14 - Idle pattern detected on slot 14
+   // 0x08000000: IDLE_PATTERN_DETECT_14 - Idle pattern detected on slot 14
    unsigned int GetIdlePatternDetect14() { return BitExtract(DCB_IDLE_PATTERN_DETECT_14_REG, DCB_IDLE_PATTERN_DETECT_14_MASK, DCB_IDLE_PATTERN_DETECT_14_OFS); };
-   // 0x02000000: DELAY_SYNC_DONE_14 - Delay syncronization procedure completed for slot 14
-   unsigned int GetDelaySyncDone14() { return BitExtract(DCB_DELAY_SYNC_DONE_14_REG, DCB_DELAY_SYNC_DONE_14_MASK, DCB_DELAY_SYNC_DONE_14_OFS); };
+   // 0x04000000: BITSLIP_OK_14 - Bitslip successful on slot 14
+   unsigned int GetBitslipOk14() { return BitExtract(DCB_BITSLIP_OK_14_REG, DCB_BITSLIP_OK_14_MASK, DCB_BITSLIP_OK_14_OFS); };
+   // 0x02000000: DELAY_OK_14 - Tap delay successfully set (min. 1 valid eye position found) on slot 14
+   unsigned int GetDelayOk14() { return BitExtract(DCB_DELAY_OK_14_REG, DCB_DELAY_OK_14_MASK, DCB_DELAY_OK_14_OFS); };
    // 0x01000000: SYNC_DONE_14 - Overall syncronization procedure completed for slot 14
    unsigned int GetSyncDone14() { return BitExtract(DCB_SYNC_DONE_14_REG, DCB_SYNC_DONE_14_MASK, DCB_SYNC_DONE_14_OFS); };
-   // 0x00400000: IDLE_PATTERN_DETECT_13 - Idle pattern detected on slot 13
+   // 0x00800000: IDLE_PATTERN_DETECT_13 - Idle pattern detected on slot 13
    unsigned int GetIdlePatternDetect13() { return BitExtract(DCB_IDLE_PATTERN_DETECT_13_REG, DCB_IDLE_PATTERN_DETECT_13_MASK, DCB_IDLE_PATTERN_DETECT_13_OFS); };
-   // 0x00200000: DELAY_SYNC_DONE_13 - Delay syncronization procedure completed for slot 13
-   unsigned int GetDelaySyncDone13() { return BitExtract(DCB_DELAY_SYNC_DONE_13_REG, DCB_DELAY_SYNC_DONE_13_MASK, DCB_DELAY_SYNC_DONE_13_OFS); };
+   // 0x00400000: BITSLIP_OK_13 - Bitslip successful on slot 13
+   unsigned int GetBitslipOk13() { return BitExtract(DCB_BITSLIP_OK_13_REG, DCB_BITSLIP_OK_13_MASK, DCB_BITSLIP_OK_13_OFS); };
+   // 0x00200000: DELAY_OK_13 - Tap delay successfully set (min. 1 valid eye position found) on slot 13
+   unsigned int GetDelayOk13() { return BitExtract(DCB_DELAY_OK_13_REG, DCB_DELAY_OK_13_MASK, DCB_DELAY_OK_13_OFS); };
    // 0x00100000: SYNC_DONE_13 - Overall syncronization procedure completed for slot 13
    unsigned int GetSyncDone13() { return BitExtract(DCB_SYNC_DONE_13_REG, DCB_SYNC_DONE_13_MASK, DCB_SYNC_DONE_13_OFS); };
-   // 0x00040000: IDLE_PATTERN_DETECT_12 - Idle pattern detected on slot 12
+   // 0x00080000: IDLE_PATTERN_DETECT_12 - Idle pattern detected on slot 12
    unsigned int GetIdlePatternDetect12() { return BitExtract(DCB_IDLE_PATTERN_DETECT_12_REG, DCB_IDLE_PATTERN_DETECT_12_MASK, DCB_IDLE_PATTERN_DETECT_12_OFS); };
-   // 0x00020000: DELAY_SYNC_DONE_12 - Delay syncronization procedure completed for slot 12
-   unsigned int GetDelaySyncDone12() { return BitExtract(DCB_DELAY_SYNC_DONE_12_REG, DCB_DELAY_SYNC_DONE_12_MASK, DCB_DELAY_SYNC_DONE_12_OFS); };
+   // 0x00040000: BITSLIP_OK_12 - Bitslip successful on slot 12
+   unsigned int GetBitslipOk12() { return BitExtract(DCB_BITSLIP_OK_12_REG, DCB_BITSLIP_OK_12_MASK, DCB_BITSLIP_OK_12_OFS); };
+   // 0x00020000: DELAY_OK_12 - Tap delay successfully set (min. 1 valid eye position found) on slot 12
+   unsigned int GetDelayOk12() { return BitExtract(DCB_DELAY_OK_12_REG, DCB_DELAY_OK_12_MASK, DCB_DELAY_OK_12_OFS); };
    // 0x00010000: SYNC_DONE_12 - Overall syncronization procedure completed for slot 12
    unsigned int GetSyncDone12() { return BitExtract(DCB_SYNC_DONE_12_REG, DCB_SYNC_DONE_12_MASK, DCB_SYNC_DONE_12_OFS); };
-   // 0x00004000: IDLE_PATTERN_DETECT_11 - Idle pattern detected on slot 11
+   // 0x00008000: IDLE_PATTERN_DETECT_11 - Idle pattern detected on slot 11
    unsigned int GetIdlePatternDetect11() { return BitExtract(DCB_IDLE_PATTERN_DETECT_11_REG, DCB_IDLE_PATTERN_DETECT_11_MASK, DCB_IDLE_PATTERN_DETECT_11_OFS); };
-   // 0x00002000: DELAY_SYNC_DONE_11 - Delay syncronization procedure completed for slot 11
-   unsigned int GetDelaySyncDone11() { return BitExtract(DCB_DELAY_SYNC_DONE_11_REG, DCB_DELAY_SYNC_DONE_11_MASK, DCB_DELAY_SYNC_DONE_11_OFS); };
+   // 0x00004000: BITSLIP_OK_11 - Bitslip successful on slot 11
+   unsigned int GetBitslipOk11() { return BitExtract(DCB_BITSLIP_OK_11_REG, DCB_BITSLIP_OK_11_MASK, DCB_BITSLIP_OK_11_OFS); };
+   // 0x00002000: DELAY_OK_11 - Tap delay successfully set (min. 1 valid eye position found) on slot 11
+   unsigned int GetDelayOk11() { return BitExtract(DCB_DELAY_OK_11_REG, DCB_DELAY_OK_11_MASK, DCB_DELAY_OK_11_OFS); };
    // 0x00001000: SYNC_DONE_11 - Overall syncronization procedure completed for slot 11
    unsigned int GetSyncDone11() { return BitExtract(DCB_SYNC_DONE_11_REG, DCB_SYNC_DONE_11_MASK, DCB_SYNC_DONE_11_OFS); };
-   // 0x00000400: IDLE_PATTERN_DETECT_10 - Idle pattern detected on slot 10
+   // 0x00000800: IDLE_PATTERN_DETECT_10 - Idle pattern detected on slot 10
    unsigned int GetIdlePatternDetect10() { return BitExtract(DCB_IDLE_PATTERN_DETECT_10_REG, DCB_IDLE_PATTERN_DETECT_10_MASK, DCB_IDLE_PATTERN_DETECT_10_OFS); };
-   // 0x00000200: DELAY_SYNC_DONE_10 - Delay syncronization procedure completed for slot 10
-   unsigned int GetDelaySyncDone10() { return BitExtract(DCB_DELAY_SYNC_DONE_10_REG, DCB_DELAY_SYNC_DONE_10_MASK, DCB_DELAY_SYNC_DONE_10_OFS); };
+   // 0x00000400: BITSLIP_OK_10 - Bitslip successful on slot 10
+   unsigned int GetBitslipOk10() { return BitExtract(DCB_BITSLIP_OK_10_REG, DCB_BITSLIP_OK_10_MASK, DCB_BITSLIP_OK_10_OFS); };
+   // 0x00000200: DELAY_OK_10 - Tap delay successfully set (min. 1 valid eye position found) on slot 10
+   unsigned int GetDelayOk10() { return BitExtract(DCB_DELAY_OK_10_REG, DCB_DELAY_OK_10_MASK, DCB_DELAY_OK_10_OFS); };
    // 0x00000100: SYNC_DONE_10 - Overall syncronization procedure completed for slot 10
    unsigned int GetSyncDone10() { return BitExtract(DCB_SYNC_DONE_10_REG, DCB_SYNC_DONE_10_MASK, DCB_SYNC_DONE_10_OFS); };
-   // 0x00000040: IDLE_PATTERN_DETECT_09 - Idle pattern detected on slot 9
+   // 0x00000080: IDLE_PATTERN_DETECT_09 - Idle pattern detected on slot 9
    unsigned int GetIdlePatternDetect09() { return BitExtract(DCB_IDLE_PATTERN_DETECT_09_REG, DCB_IDLE_PATTERN_DETECT_09_MASK, DCB_IDLE_PATTERN_DETECT_09_OFS); };
-   // 0x00000020: DELAY_SYNC_DONE_09 - Delay syncronization procedure completed for slot 9
-   unsigned int GetDelaySyncDone09() { return BitExtract(DCB_DELAY_SYNC_DONE_09_REG, DCB_DELAY_SYNC_DONE_09_MASK, DCB_DELAY_SYNC_DONE_09_OFS); };
+   // 0x00000040: BITSLIP_OK_09 - Bitslip successful on slot 9
+   unsigned int GetBitslipOk09() { return BitExtract(DCB_BITSLIP_OK_09_REG, DCB_BITSLIP_OK_09_MASK, DCB_BITSLIP_OK_09_OFS); };
+   // 0x00000020: DELAY_OK_09 - Tap delay successfully set (min. 1 valid eye position found) on slot 9
+   unsigned int GetDelayOk09() { return BitExtract(DCB_DELAY_OK_09_REG, DCB_DELAY_OK_09_MASK, DCB_DELAY_OK_09_OFS); };
    // 0x00000010: SYNC_DONE_09 - Overall syncronization procedure completed for slot 9
    unsigned int GetSyncDone09() { return BitExtract(DCB_SYNC_DONE_09_REG, DCB_SYNC_DONE_09_MASK, DCB_SYNC_DONE_09_OFS); };
-   // 0x00000004: IDLE_PATTERN_DETECT_08 - Idle pattern detected on slot 8
+   // 0x00000008: IDLE_PATTERN_DETECT_08 - Idle pattern detected on slot 8
    unsigned int GetIdlePatternDetect08() { return BitExtract(DCB_IDLE_PATTERN_DETECT_08_REG, DCB_IDLE_PATTERN_DETECT_08_MASK, DCB_IDLE_PATTERN_DETECT_08_OFS); };
-   // 0x00000002: DELAY_SYNC_DONE_08 - Delay syncronization procedure completed for slot 8
-   unsigned int GetDelaySyncDone08() { return BitExtract(DCB_DELAY_SYNC_DONE_08_REG, DCB_DELAY_SYNC_DONE_08_MASK, DCB_DELAY_SYNC_DONE_08_OFS); };
+   // 0x00000004: BITSLIP_OK_08 - Bitslip successful on slot 8
+   unsigned int GetBitslipOk08() { return BitExtract(DCB_BITSLIP_OK_08_REG, DCB_BITSLIP_OK_08_MASK, DCB_BITSLIP_OK_08_OFS); };
+   // 0x00000002: DELAY_OK_08 - Tap delay successfully set (min. 1 valid eye position found) on slot 8
+   unsigned int GetDelayOk08() { return BitExtract(DCB_DELAY_OK_08_REG, DCB_DELAY_OK_08_MASK, DCB_DELAY_OK_08_OFS); };
    // 0x00000001: SYNC_DONE_08 - Overall syncronization procedure completed for slot 8
    unsigned int GetSyncDone08() { return BitExtract(DCB_SYNC_DONE_08_REG, DCB_SYNC_DONE_08_MASK, DCB_SYNC_DONE_08_OFS); };
 
 
    ////// ------ Register 25 [0x0064]: SERDES_STATUS_17 - Input Serdes status for slot 17 (TCB slot) (Default: 0x00000000) ------ //////
 
-   // 0x00000004: IDLE_PATTERN_DETECT_17 - Idle pattern detected on slot 17
+   // 0x00000008: IDLE_PATTERN_DETECT_17 - Idle pattern detected on slot 17
    unsigned int GetIdlePatternDetect17() { return BitExtract(DCB_IDLE_PATTERN_DETECT_17_REG, DCB_IDLE_PATTERN_DETECT_17_MASK, DCB_IDLE_PATTERN_DETECT_17_OFS); };
-   // 0x00000002: DELAY_SYNC_DONE_17 - Delay syncronization procedure completed for slot 17
-   unsigned int GetDelaySyncDone17() { return BitExtract(DCB_DELAY_SYNC_DONE_17_REG, DCB_DELAY_SYNC_DONE_17_MASK, DCB_DELAY_SYNC_DONE_17_OFS); };
+   // 0x00000004: BITSLIP_OK_17 - Bitslip successful on slot 17
+   unsigned int GetBitslipOk17() { return BitExtract(DCB_BITSLIP_OK_17_REG, DCB_BITSLIP_OK_17_MASK, DCB_BITSLIP_OK_17_OFS); };
+   // 0x00000002: DELAY_OK_17 - Tap delay successfully set (min. 1 valid eye position found) on slot 17
+   unsigned int GetDelayOk17() { return BitExtract(DCB_DELAY_OK_17_REG, DCB_DELAY_OK_17_MASK, DCB_DELAY_OK_17_OFS); };
    // 0x00000001: SYNC_DONE_17 - Overall syncronization procedure completed for slot 17
    unsigned int GetSyncDone17() { return BitExtract(DCB_SYNC_DONE_17_REG, DCB_SYNC_DONE_17_MASK, DCB_SYNC_DONE_17_OFS); };
 
