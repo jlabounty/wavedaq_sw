@@ -611,6 +611,16 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
          for (auto &b: wdbList) {
             b->SetZeroSuprEn(value == "true");
          }
+      } else if (item == "triggerOutput") {
+         // set trigger output flag
+         for (auto &b: wdbList) {
+            b->SetExtTriggerOutEnable(value == "true");
+
+            // CH7: MCX clock output
+            b->SetLmk7ClkoutMux(1);
+            b->SetLmk7ClkoutDiv(1);
+            b->SetLmk7ClkoutEn(value == "true");
+         }
       }
 
       //---------- commands ----------
@@ -1298,6 +1308,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
 
       mg_printf_http_chunk(nc, "    \"triggerMode\": %d,\n", gl->triggerMode);
       mg_printf_http_chunk(nc, "    \"zeroSuppression\": %d,\n", b->GetZeroSuprEn());
+      mg_printf_http_chunk(nc, "    \"triggerOutput\": %d,\n", b->GetExtTriggerOutEnable());
       mg_printf_http_chunk(nc, "    \"triggerHoldoff\": %d,\n", b->GetTriggerHoldoff());
       mg_printf_http_chunk(nc, "    \"triggerLeadTrailEdgeSel\": %d,\n", b->GetLeadTrailEdgeSel());
       mg_printf_http_chunk(nc, "    \"triggerExtTriggerOutEnable\": %s,\n", b->GetExtTriggerOutEnable() ? "true" : "false");

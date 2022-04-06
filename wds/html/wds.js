@@ -263,6 +263,7 @@ function populateControls(init) {
       document.getElementById("rbTriggerModeAuto").checked = true;
    }
    document.getElementById("zeroSuppression").checked = (OSC.wdb.zeroSuppression === 1);
+   document.getElementById("triggerOutput").checked = (OSC.wdb.triggerOutput === 1);
    if (document.getElementById("triggerHoldoff") !== document.activeElement) {
       document.getElementById("triggerHoldoff").value = OSC.wdb.triggerHoldoff;
    }
@@ -595,6 +596,7 @@ function readWdb(init) {
                "fePower": false,
                "triggerMode": 2,
                "zeroSuppression": false,
+               "triggerOutput": false,
                "triggerLeadTrailEdgeSel": 0,
                "triggerExtTriggerOutEnable": false,
                "triggerSource": 220152992,
