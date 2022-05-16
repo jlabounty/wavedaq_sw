@@ -1934,17 +1934,20 @@ int main(int argc, const char *argv[]) {
       gl.wdsDir = dir;
    } else {
       if (getenv("WDBSYS")) {
-         std::ifstream f2(std::string(getenv("WDBSYS")) + "/sw/wds/html/index.html");
+         std::string wenv(getenv("WDBSYS"));
+         if (wenv.back() == '/')
+            wenv.pop_back();
+         std::ifstream f2(wenv + "/sw/wds/html/index.html");
          if (f2.good()) {
-            gl.wdsDir = std::string(getenv("WDBSYS")) + "/sw/wds";
+            gl.wdsDir = wenv + "/sw/wds";
          } else {
-            std::ifstream f3(std::string(getenv("WDBSYS")) + "/html/index.html");
+            std::ifstream f3(wenv + "/html/index.html");
             if (f3.good()) {
-               gl.wdsDir = std::string(getenv("WDBSYS")) + "/html/index.html";
+               gl.wdsDir = wenv;
             } else {
-               std::ifstream f4(std::string(getenv("WDBSYS")) + "/wds/html/index.html");
+               std::ifstream f4(wenv + "/wds/html/index.html");
                if (f4.good()) {
-                  gl.wdsDir = std::string(getenv("WDBSYS")) + "/wds/html/index.html";
+                  gl.wdsDir = wenv + "/wds";
                } else {
                   std::cerr << "Cannot find 'html' directory. Please correct 'WDBSYS' environment variable."
                             << std::endl;
