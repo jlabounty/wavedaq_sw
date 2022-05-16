@@ -3241,16 +3241,14 @@ void WP::SaveWaveforms() {
             *(unsigned short *) p = ev->mBoardId;
             p += sizeof(unsigned short);
 
+            // store time calibrations for all channels
             for (int i = 0; i < WD_N_CHANNELS; i++) {
-               if (ev->mDRSChannelPresent[i]) {
-
-                  sprintf((char *) p, "C%03d", i);
-                  p += 4;
-                  for (int j = 0; j < 1024; j++) {
-                     // save binary time as 32-bit float value
-                     *(float *) p = wdb->mTCalib.mCalib.dt[i][j];
-                     p += sizeof(float);
-                  }
+               sprintf((char *) p, "C%03d", i);
+               p += 4;
+               for (int j = 0; j < 1024; j++) {
+                  // save binary time as 32-bit float value
+                  *(float *) p = wdb->mTCalib.mCalib.dt[i][j];
+                  p += sizeof(float);
                }
             }
             b++;
