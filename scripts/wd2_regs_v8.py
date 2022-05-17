@@ -5,7 +5,7 @@
 #  Project :  WaveDream2
 #
 #  Author  :  schmid_e (Author of generation script)
-#  Created :  28.02.2022 07:19:28
+#  Created :  16.05.2022 11:20:15
 #
 #  Register Layout Version :  8
 #
@@ -308,6 +308,11 @@ WD2_VALID_DELAY_ADC_OFS                  =                                24
 WD2_DAQ_DATA_PHASE_REG                   =                      WD2_REG_CTRL
 WD2_DAQ_DATA_PHASE_MASK                  =                        0x00FF0000
 WD2_DAQ_DATA_PHASE_OFS                   =                                16
+
+# DEBUG_OUTPUT - Debug output signal that can be routed to HV board TX by setting the debug mux in DBG_SIG_SEL
+WD2_DEBUG_OUTPUT_REG                     =                      WD2_REG_CTRL
+WD2_DEBUG_OUTPUT_MASK                    =                        0x00008000
+WD2_DEBUG_OUTPUT_OFS                     =                                15
 
 # DRS_CLR_RSR_AFTER_RO - Clear the read shift register (remove the token) after each readout
 WD2_DRS_CLR_RSR_AFTER_RO_REG             =                      WD2_REG_CTRL
@@ -3268,7 +3273,7 @@ WD2_MCX_TX_SIG_SEL_MASK                  =                        0x000F0000
 WD2_MCX_TX_SIG_SEL_OFS                   =                                16
 
 # MCX_RX_SIG_SEL - Select for RX connector:
-# 0x0 = UART (communication to MicroBlaze)
+# 0x0 = UART (communication to MicroBlaze) (communication from MicroBlaze on TX Mux)
 # 0x1 = Trigger (internal hardware trigger signal to DRS control FSM)
 # 0x2 = Soft Trigger (trigger signal from MicroBlaze)
 # 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane)
@@ -3282,6 +3287,8 @@ WD2_MCX_TX_SIG_SEL_OFS                   =                                16
 # 0xB = Divided Data Clock (phase shifted)
 # 0xC = LMK5 clock (directly routed from corresponding input)
 # 0xD = SPI CS of LMK (active low)
+# 0xE = reserved
+# 0xF = Debug IO to STATUS register (from CTRL register on TX Mux)
 WD2_MCX_RX_SIG_SEL_REG                   =               WD2_REG_DBG_SIG_SEL
 WD2_MCX_RX_SIG_SEL_MASK                  =                        0x0000000F
 WD2_MCX_RX_SIG_SEL_OFS                   =                                 0
@@ -3484,6 +3491,11 @@ WD2_SERIAL_NUMBER_OFS                    =                                 0
 WD2_TEMPERATURE_REG                      =                    WD2_REG_STATUS
 WD2_TEMPERATURE_MASK                     =                        0xFFFF0000
 WD2_TEMPERATURE_OFS                      =                                16
+
+# DEBUG_INPUT - Debug input signal that can be routed from HV board RX by setting the debug mux in DBG_SIG_SEL
+WD2_DEBUG_INPUT_REG                      =                    WD2_REG_STATUS
+WD2_DEBUG_INPUT_MASK                     =                        0x00008000
+WD2_DEBUG_INPUT_OFS                      =                                15
 
 # EXT_CLK_ACTIVE - Configuration for external clock for DAQ completed
 WD2_EXT_CLK_ACTIVE_REG                   =                    WD2_REG_STATUS
@@ -4944,6 +4956,7 @@ wd2_bit_group_list = [
   [ "SLOT_ID"                       , WD2_SLOT_ID_REG                       , WD2_SLOT_ID_MASK                       , WD2_SLOT_ID_OFS                      , "ID of the slot where the current board is plugged in" ],
   [ "VALID_DELAY_ADC"               , WD2_VALID_DELAY_ADC_REG               , WD2_VALID_DELAY_ADC_MASK               , WD2_VALID_DELAY_ADC_OFS              , "Delay of the data valid at the ISERDES of the ADCs (delay = value + 1)" ],
   [ "DAQ_DATA_PHASE"                , WD2_DAQ_DATA_PHASE_REG                , WD2_DAQ_DATA_PHASE_MASK                , WD2_DAQ_DATA_PHASE_OFS               , "Phase step setting of the PLL generating the common DAQ clock" ],
+  [ "DEBUG_OUTPUT"                  , WD2_DEBUG_OUTPUT_REG                  , WD2_DEBUG_OUTPUT_MASK                  , WD2_DEBUG_OUTPUT_OFS                 , "Debug output signal that can be routed to HV board TX by setting the debug mux in DBG_SIG_SEL" ],
   [ "DRS_CLR_RSR_AFTER_RO"          , WD2_DRS_CLR_RSR_AFTER_RO_REG          , WD2_DRS_CLR_RSR_AFTER_RO_MASK          , WD2_DRS_CLR_RSR_AFTER_RO_OFS         , "Clear the read shift register (remove the token) after each readout" ],
   [ "COMP_POWER_EN"                 , WD2_COMP_POWER_EN_REG                 , WD2_COMP_POWER_EN_MASK                 , WD2_COMP_POWER_EN_OFS                , "Comparator power enable" ],
   [ "DRS_READOUT_MODE"              , WD2_DRS_READOUT_MODE_REG              , WD2_DRS_READOUT_MODE_MASK              , WD2_DRS_READOUT_MODE_OFS             , "0:start from first bin, 1:start from domino stop" ],
@@ -5410,7 +5423,7 @@ wd2_bit_group_list = [
   [ "ADV_TRG_CFG_18"                , WD2_ADV_TRG_CFG_18_REG                , WD2_ADV_TRG_CFG_18_MASK                , WD2_ADV_TRG_CFG_18_OFS               , "Advanced trigger configuration register 18" ],
   [ "ADV_TRG_CFG_19"                , WD2_ADV_TRG_CFG_19_REG                , WD2_ADV_TRG_CFG_19_MASK                , WD2_ADV_TRG_CFG_19_OFS               , "Advanced trigger configuration register 19" ],
   [ "MCX_TX_SIG_SEL"                , WD2_MCX_TX_SIG_SEL_REG                , WD2_MCX_TX_SIG_SEL_MASK                , WD2_MCX_TX_SIG_SEL_OFS               , "Select for TX connector (see RX connector for mapping)" ],
-  [ "MCX_RX_SIG_SEL"                , WD2_MCX_RX_SIG_SEL_REG                , WD2_MCX_RX_SIG_SEL_MASK                , WD2_MCX_RX_SIG_SEL_OFS               , "Select for RX connector: / 0x0 = UART (communication to MicroBlaze) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low)" ],
+  [ "MCX_RX_SIG_SEL"                , WD2_MCX_RX_SIG_SEL_REG                , WD2_MCX_RX_SIG_SEL_MASK                , WD2_MCX_RX_SIG_SEL_OFS               , "Select for RX connector: / 0x0 = UART (communication to MicroBlaze) (communication from MicroBlaze on TX Mux) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low) / 0xE = reserved / 0xF = Debug IO to STATUS register (from CTRL register on TX Mux)" ],
   [ "DRS_TRG_RO_DLY"                , WD2_DRS_TRG_RO_DLY_REG                , WD2_DRS_TRG_RO_DLY_MASK                , WD2_DRS_TRG_RO_DLY_OFS               , "Delay from trigger to DRS readout in number of 12.5ns clock cycles (default is 8)" ],
   [ "CRC32_REG_BANK"                , WD2_CRC32_REG_BANK_REG                , WD2_CRC32_REG_BANK_MASK                , WD2_CRC32_REG_BANK_OFS               , "Keep at the end of the register bank" ],
   [ "BOARD_MAGIC"                   , WD2_BOARD_MAGIC_REG                   , WD2_BOARD_MAGIC_MASK                   , WD2_BOARD_MAGIC_OFS                  , "0xAC, Magic number for DRS board identification" ],
@@ -5439,6 +5452,7 @@ wd2_bit_group_list = [
   [ "LED_STATE"                     , WD2_LED_STATE_REG                     , WD2_LED_STATE_MASK                     , WD2_LED_STATE_OFS                    , "State of the front panel LED (on-beat-color RGB, off-beat-color RGB)" ],
   [ "SERIAL_NUMBER"                 , WD2_SERIAL_NUMBER_REG                 , WD2_SERIAL_NUMBER_MASK                 , WD2_SERIAL_NUMBER_OFS                , "Serial Number of the WD2 Board (Board ID)" ],
   [ "TEMPERATURE"                   , WD2_TEMPERATURE_REG                   , WD2_TEMPERATURE_MASK                   , WD2_TEMPERATURE_OFS                  , "temperature in 0.0625 deg. C units" ],
+  [ "DEBUG_INPUT"                   , WD2_DEBUG_INPUT_REG                   , WD2_DEBUG_INPUT_MASK                   , WD2_DEBUG_INPUT_OFS                  , "Debug input signal that can be routed from HV board RX by setting the debug mux in DBG_SIG_SEL" ],
   [ "EXT_CLK_ACTIVE"                , WD2_EXT_CLK_ACTIVE_REG                , WD2_EXT_CLK_ACTIVE_MASK                , WD2_EXT_CLK_ACTIVE_OFS               , "Configuration for external clock for DAQ completed" ],
   [ "DAQ_CLK_DEF_PHASE_OK"          , WD2_DAQ_CLK_DEF_PHASE_OK_REG          , WD2_DAQ_CLK_DEF_PHASE_OK_MASK          , WD2_DAQ_CLK_DEF_PHASE_OK_OFS         , "DAQ clock default phase setting is valid" ],
   [ "DAQ_CLK_DEF_PHASE_CHKD"        , WD2_DAQ_CLK_DEF_PHASE_CHKD_REG        , WD2_DAQ_CLK_DEF_PHASE_CHKD_MASK        , WD2_DAQ_CLK_DEF_PHASE_CHKD_OFS       , "DAQ clock default phase setting is checked" ],

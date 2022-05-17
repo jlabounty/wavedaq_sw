@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  28.02.2022 07:19:56
+// Created :  17.05.2022 07:47:20
 //
 // Register Layout Versions :  8, 9
 //
@@ -11935,6 +11935,69 @@ public:
       };
    };
 
+   // Bit(s) DEBUG_INPUT
+   unsigned int GetDebugInput()
+   {
+      switch(this->mVersion)
+      {
+         case 8:
+            // Debug input signal that can be routed from HV board RX by setting the debug mux in DBG_SIG_SEL
+            return BitExtractStatus(0x0028, 0x00008000, 15);
+         default:
+            throw std::invalid_argument("Function GetDebugInput() not defined for this board version");
+      };
+   };
+   unsigned int GetDebugInputLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
+   {
+      switch(this->mVersion)
+      {
+         case 8:
+            // Debug input signal that can be routed from HV board RX by setting the debug mux in DBG_SIG_SEL
+            if(BitMask) *BitMask = 0x00008000;
+            if(BitOfs) *BitOfs = 15;
+            return 0x0028;
+         default:
+            throw std::invalid_argument("Function GetDebugInputLoc() not defined for this board version");
+      };
+   };
+
+   // Bit(s) DEBUG_OUTPUT
+   unsigned int GetDebugOutput()
+   {
+      switch(this->mVersion)
+      {
+         case 8:
+            // Debug output signal that can be routed to HV board TX by setting the debug mux in DBG_SIG_SEL
+            return BitExtractControl(0x1004, 0x00008000, 15);
+         default:
+            throw std::invalid_argument("Function GetDebugOutput() not defined for this board version");
+      };
+   };
+   void SetDebugOutput(unsigned int value)
+   {
+      switch(this->mVersion)
+      {
+         case 8:
+            // Debug output signal that can be routed to HV board TX by setting the debug mux in DBG_SIG_SEL
+            return SetRegMask(0x1004, 0x00008000, 15, value);
+         default:
+            throw std::invalid_argument("Function SetDebugOutput() not defined for this board version");
+      };
+   };
+   unsigned int GetDebugOutputLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
+   {
+      switch(this->mVersion)
+      {
+         case 8:
+            // Debug output signal that can be routed to HV board TX by setting the debug mux in DBG_SIG_SEL
+            if(BitMask) *BitMask = 0x00008000;
+            if(BitOfs) *BitOfs = 15;
+            return 0x1004;
+         default:
+            throw std::invalid_argument("Function GetDebugOutputLoc() not defined for this board version");
+      };
+   };
+
    // Bit(s) DRS_0_TIMING_REF_SEL
    unsigned int GetDrs0TimingRefSel()
    {
@@ -23520,7 +23583,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
-            // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low)
+            // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) (communication from MicroBlaze on TX Mux) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low) / 0xE = reserved / 0xF = Debug IO to STATUS register (from CTRL register on TX Mux)
             return BitExtractControl(0x1278, 0x0000000F, 0);
          case 9:
             // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low)
@@ -23534,7 +23597,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
-            // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low)
+            // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) (communication from MicroBlaze on TX Mux) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low) / 0xE = reserved / 0xF = Debug IO to STATUS register (from CTRL register on TX Mux)
             return SetRegMask(0x1278, 0x0000000F, 0, value);
          case 9:
             // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low)
@@ -23548,7 +23611,7 @@ public:
       switch(this->mVersion)
       {
          case 8:
-            // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low)
+            // Select for RX connector: / 0x0 = UART (communication to MicroBlaze) (communication from MicroBlaze on TX Mux) / 0x1 = Trigger (internal hardware trigger signal to DRS control FSM) / 0x2 = Soft Trigger (trigger signal from MicroBlaze) / 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane) / 0x4 = Sync Signal from Backplane (direct, active high) / 0x5 = Sync Signal from Backplane (sampled, output to LMK, active low) / 0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high) / 0x7 = Busy Local (active high) / 0x8 = Busy from Backplane (active high) / 0x9 = LMK Reference Clock (LMK input clock)  / 0xA = ADC Sampling Clock  / 0xB = Divided Data Clock (phase shifted) / 0xC = LMK5 clock (directly routed from corresponding input) / 0xD = SPI CS of LMK (active low) / 0xE = reserved / 0xF = Debug IO to STATUS register (from CTRL register on TX Mux)
             if(BitMask) *BitMask = 0x0000000F;
             if(BitOfs) *BitOfs = 0;
             return 0x1278;

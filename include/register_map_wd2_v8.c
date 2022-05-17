@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  28.02.2022 07:19:28
+ *  Created :  16.05.2022 11:20:15
  *
  *  Register Layout Version :  8
  *
@@ -548,6 +548,7 @@ const wd2_bit_group_entry_type  wd2_bit_group_list[] = {
   { "SLOT_ID"                       , WD2_SLOT_ID_REG                       , WD2_SLOT_ID_MASK                       , WD2_SLOT_ID_OFS                       },
   { "VALID_DELAY_ADC"               , WD2_VALID_DELAY_ADC_REG               , WD2_VALID_DELAY_ADC_MASK               , WD2_VALID_DELAY_ADC_OFS               },
   { "DAQ_DATA_PHASE"                , WD2_DAQ_DATA_PHASE_REG                , WD2_DAQ_DATA_PHASE_MASK                , WD2_DAQ_DATA_PHASE_OFS                },
+  { "DEBUG_OUTPUT"                  , WD2_DEBUG_OUTPUT_REG                  , WD2_DEBUG_OUTPUT_MASK                  , WD2_DEBUG_OUTPUT_OFS                  },
   { "DRS_CLR_RSR_AFTER_RO"          , WD2_DRS_CLR_RSR_AFTER_RO_REG          , WD2_DRS_CLR_RSR_AFTER_RO_MASK          , WD2_DRS_CLR_RSR_AFTER_RO_OFS          },
   { "COMP_POWER_EN"                 , WD2_COMP_POWER_EN_REG                 , WD2_COMP_POWER_EN_MASK                 , WD2_COMP_POWER_EN_OFS                 },
   { "DRS_READOUT_MODE"              , WD2_DRS_READOUT_MODE_REG              , WD2_DRS_READOUT_MODE_MASK              , WD2_DRS_READOUT_MODE_OFS              },
@@ -1043,6 +1044,7 @@ const wd2_bit_group_entry_type  wd2_bit_group_list[] = {
   { "LED_STATE"                     , WD2_LED_STATE_REG                     , WD2_LED_STATE_MASK                     , WD2_LED_STATE_OFS                     },
   { "SERIAL_NUMBER"                 , WD2_SERIAL_NUMBER_REG                 , WD2_SERIAL_NUMBER_MASK                 , WD2_SERIAL_NUMBER_OFS                 },
   { "TEMPERATURE"                   , WD2_TEMPERATURE_REG                   , WD2_TEMPERATURE_MASK                   , WD2_TEMPERATURE_OFS                   },
+  { "DEBUG_INPUT"                   , WD2_DEBUG_INPUT_REG                   , WD2_DEBUG_INPUT_MASK                   , WD2_DEBUG_INPUT_OFS                   },
   { "EXT_CLK_ACTIVE"                , WD2_EXT_CLK_ACTIVE_REG                , WD2_EXT_CLK_ACTIVE_MASK                , WD2_EXT_CLK_ACTIVE_OFS                },
   { "DAQ_CLK_DEF_PHASE_OK"          , WD2_DAQ_CLK_DEF_PHASE_OK_REG          , WD2_DAQ_CLK_DEF_PHASE_OK_MASK          , WD2_DAQ_CLK_DEF_PHASE_OK_OFS          },
   { "DAQ_CLK_DEF_PHASE_CHKD"        , WD2_DAQ_CLK_DEF_PHASE_CHKD_REG        , WD2_DAQ_CLK_DEF_PHASE_CHKD_MASK        , WD2_DAQ_CLK_DEF_PHASE_CHKD_OFS        },

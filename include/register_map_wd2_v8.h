@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  28.02.2022 07:19:28
+ *  Created :  16.05.2022 11:20:15
  *
  *  Register Layout Version :  8
  *
@@ -320,6 +320,11 @@
 #define WD2_DAQ_DATA_PHASE_REG                                        WD2_REG_CTRL
 #define WD2_DAQ_DATA_PHASE_MASK                                         0x00FF0000
 #define WD2_DAQ_DATA_PHASE_OFS                                                  16
+
+/* DEBUG_OUTPUT - Debug output signal that can be routed to HV board TX by setting the debug mux in DBG_SIG_SEL */
+#define WD2_DEBUG_OUTPUT_REG                                          WD2_REG_CTRL
+#define WD2_DEBUG_OUTPUT_MASK                                           0x00008000
+#define WD2_DEBUG_OUTPUT_OFS                                                    15
 
 /* DRS_CLR_RSR_AFTER_RO - Clear the read shift register (remove the token) after each readout */
 #define WD2_DRS_CLR_RSR_AFTER_RO_REG                                  WD2_REG_CTRL
@@ -3280,7 +3285,7 @@
 #define WD2_MCX_TX_SIG_SEL_OFS                                                  16
 
 /* MCX_RX_SIG_SEL - Select for RX connector:
-0x0 = UART (communication to MicroBlaze)
+0x0 = UART (communication to MicroBlaze) (communication from MicroBlaze on TX Mux)
 0x1 = Trigger (internal hardware trigger signal to DRS control FSM)
 0x2 = Soft Trigger (trigger signal from MicroBlaze)
 0x3 = External Trigger (OR connection of external trigger from MCX and Backplane)
@@ -3293,7 +3298,9 @@
 0xA = ADC Sampling Clock 
 0xB = Divided Data Clock (phase shifted)
 0xC = LMK5 clock (directly routed from corresponding input)
-0xD = SPI CS of LMK (active low) */
+0xD = SPI CS of LMK (active low)
+0xE = reserved
+0xF = Debug IO to STATUS register (from CTRL register on TX Mux) */
 #define WD2_MCX_RX_SIG_SEL_REG                                 WD2_REG_DBG_SIG_SEL
 #define WD2_MCX_RX_SIG_SEL_MASK                                         0x0000000F
 #define WD2_MCX_RX_SIG_SEL_OFS                                                   0
@@ -3496,6 +3503,11 @@
 #define WD2_TEMPERATURE_REG                                         WD2_REG_STATUS
 #define WD2_TEMPERATURE_MASK                                            0xFFFF0000
 #define WD2_TEMPERATURE_OFS                                                     16
+
+/* DEBUG_INPUT - Debug input signal that can be routed from HV board RX by setting the debug mux in DBG_SIG_SEL */
+#define WD2_DEBUG_INPUT_REG                                         WD2_REG_STATUS
+#define WD2_DEBUG_INPUT_MASK                                            0x00008000
+#define WD2_DEBUG_INPUT_OFS                                                     15
 
 /* EXT_CLK_ACTIVE - Configuration for external clock for DAQ completed */
 #define WD2_EXT_CLK_ACTIVE_REG                                      WD2_REG_STATUS
