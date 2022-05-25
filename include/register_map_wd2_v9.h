@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  25.02.2022 12:29:50
+ *  Created :  24.05.2022 11:54:36
  *
  *  Register Layout Version :  9
  *
@@ -296,6 +296,11 @@
 #define WD2_DAQ_DATA_PHASE_REG                                        WD2_REG_CTRL
 #define WD2_DAQ_DATA_PHASE_MASK                                         0x00FF0000
 #define WD2_DAQ_DATA_PHASE_OFS                                                  16
+
+/* DEBUG_OUTPUT - Debug output signal that can be routed to HV board TX by setting the debug mux in DBG_SIG_SEL */
+#define WD2_DEBUG_OUTPUT_REG                                          WD2_REG_CTRL
+#define WD2_DEBUG_OUTPUT_MASK                                           0x00008000
+#define WD2_DEBUG_OUTPUT_OFS                                                    15
 
 /* FE_POWER - Frontend Power (0=Power OFF, 1=Power ON) */
 #define WD2_FE_POWER_REG                                              WD2_REG_CTRL
@@ -2832,7 +2837,9 @@
 0xA = ADC Sampling Clock 
 0xB = Divided Data Clock (phase shifted)
 0xC = LMK5 clock (directly routed from corresponding input)
-0xD = SPI CS of LMK (active low) */
+0xD = SPI CS of LMK (active low)
+0xE = reserved
+0xF = Debug IO to STATUS register (from CTRL register on TX Mux) */
 #define WD2_MCX_RX_SIG_SEL_REG                                 WD2_REG_DBG_SIG_SEL
 #define WD2_MCX_RX_SIG_SEL_MASK                                         0x0000000F
 #define WD2_MCX_RX_SIG_SEL_OFS                                                   0
@@ -3055,6 +3062,11 @@
 #define WD2_DAQ_CLK_DEF_PHASE_CHKD_REG                              WD2_REG_STATUS
 #define WD2_DAQ_CLK_DEF_PHASE_CHKD_MASK                                 0x00001000
 #define WD2_DAQ_CLK_DEF_PHASE_CHKD_OFS                                          12
+
+/* DEBUG_INPUT - Debug input signal that can be routed from HV board RX by setting the debug mux in DBG_SIG_SEL */
+#define WD2_DEBUG_INPUT_REG                                         WD2_REG_STATUS
+#define WD2_DEBUG_INPUT_MASK                                            0x00000800
+#define WD2_DEBUG_INPUT_OFS                                                     11
 
 /* DRS_CONFIG_DONE - DRS configuration done */
 #define WD2_DRS_CONFIG_DONE_REG                                     WD2_REG_STATUS

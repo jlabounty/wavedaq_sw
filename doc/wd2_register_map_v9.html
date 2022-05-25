@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Created :   25.02.2022 12:29:50 -->
+<!-- Created :   24.05.2022 11:54:36 -->
 <html>
 
 <head>
@@ -7,7 +7,7 @@
   <title>WD2 Register Map V9</title></head>
 
 <body>
-  <h1>WD2 Register Map Version 9</h1>  Generated : 25.02.2022 12:29:50  <a id="ctrl_register_overview"><h2>Control Registers</h2></a>
+  <h1>WD2 Register Map Version 9</h1>  Generated : 24.05.2022 11:54:36  <a id="ctrl_register_overview"><h2>Control Registers</h2></a>
   <table>
     <tbody>
       <tr class="reg_header">
@@ -2190,7 +2190,16 @@
         <td style="text-align:center"></td>
         <td style="text-align:right" ></td>
         <td style="text-align:center"></td>
-        <td style="text-align:center">15:12</td>
+        <td style="text-align:center">15</td>
+        <td style="text-align:right" >0b0</td>
+        <td style="text-align:left"  >DEBUG_OUTPUT</td>
+        <td style="text-align:left"  >Debug output signal that can be routed to HV board TX by setting the debug mux in DBG_SIG_SEL</td>
+      </tr>
+      <tr class="reg_content">
+        <td style="text-align:center"></td>
+        <td style="text-align:right" ></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:center">14:12</td>
         <td style="text-align:right" >0</td>
         <td style="text-align:left"  >RESERVED</td>
         <td style="text-align:left"  ></td>
@@ -10053,7 +10062,7 @@
         <td style="text-align:center">3:0</td>
         <td style="text-align:right" >0x0</td>
         <td style="text-align:left"  >MCX_RX_SIG_SEL</td>
-        <td style="text-align:left"  >Select for RX connector:<br>0x0 = UART (communication to MicroBlaze)<br>0x1 = Trigger (internal hardware trigger signal to DRS control FSM)<br>0x2 = Soft Trigger (trigger signal from MicroBlaze)<br>0x3 = External Trigger (OR connection of external trigger from MCX and Backplane)<br>0x4 = Sync Signal from Backplane (direct, active high)<br>0x5 = Sync Signal from Backplane (sampled, output to LMK, active low)<br>0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high)<br>0x7 = Busy Local (active high)<br>0x8 = Busy from Backplane (active high)<br>0x9 = LMK Reference Clock (LMK input clock) <br>0xA = ADC Sampling Clock <br>0xB = Divided Data Clock (phase shifted)<br>0xC = LMK5 clock (directly routed from corresponding input)<br>0xD = SPI CS of LMK (active low)</td>
+        <td style="text-align:left"  >Select for RX connector:<br>0x0 = UART (communication to MicroBlaze)<br>0x1 = Trigger (internal hardware trigger signal to DRS control FSM)<br>0x2 = Soft Trigger (trigger signal from MicroBlaze)<br>0x3 = External Trigger (OR connection of external trigger from MCX and Backplane)<br>0x4 = Sync Signal from Backplane (direct, active high)<br>0x5 = Sync Signal from Backplane (sampled, output to LMK, active low)<br>0x6 = Sync Signal from Backplane (sampled, used for internal logic, active high)<br>0x7 = Busy Local (active high)<br>0x8 = Busy from Backplane (active high)<br>0x9 = LMK Reference Clock (LMK input clock) <br>0xA = ADC Sampling Clock <br>0xB = Divided Data Clock (phase shifted)<br>0xC = LMK5 clock (directly routed from corresponding input)<br>0xD = SPI CS of LMK (active low)<br>0xE = reserved<br>0xF = Debug IO to STATUS register (from CTRL register on TX Mux)</td>
       </tr>
       <tr class="back_to_overview">
         <td class="back_to_overview" colspan="7"><a href="#ctrl_reg_list_135">Register Overview</a></td>
@@ -10696,9 +10705,9 @@
         <td style="text-align:right" ></td>
         <td style="text-align:center"></td>
         <td style="text-align:center">11</td>
-        <td style="text-align:right" >0</td>
-        <td style="text-align:left"  >RESERVED</td>
-        <td style="text-align:left"  ></td>
+        <td style="text-align:right" >0b0</td>
+        <td style="text-align:left"  >DEBUG_INPUT</td>
+        <td style="text-align:left"  >Debug input signal that can be routed from HV board RX by setting the debug mux in DBG_SIG_SEL</td>
       </tr>
       <tr class="reg_content">
         <td style="text-align:center"></td>
@@ -14258,7 +14267,7 @@
   </table>
 
   <br>
-  Generated :   25.02.2022 12:29:50
+  Generated :   24.05.2022 11:54:36
 
 </body>
 

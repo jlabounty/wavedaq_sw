@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  25.02.2022 12:29:50
+ *  Created :  24.05.2022 11:54:36
  *
  *  Register Layout Version :  9
  *
@@ -500,6 +500,7 @@ const wd2_bit_group_entry_type  wd2_bit_group_list[] = {
   { "SLOT_ID"                       , WD2_SLOT_ID_REG                       , WD2_SLOT_ID_MASK                       , WD2_SLOT_ID_OFS                       },
   { "VALID_DELAY_ADC"               , WD2_VALID_DELAY_ADC_REG               , WD2_VALID_DELAY_ADC_MASK               , WD2_VALID_DELAY_ADC_OFS               },
   { "DAQ_DATA_PHASE"                , WD2_DAQ_DATA_PHASE_REG                , WD2_DAQ_DATA_PHASE_MASK                , WD2_DAQ_DATA_PHASE_OFS                },
+  { "DEBUG_OUTPUT"                  , WD2_DEBUG_OUTPUT_REG                  , WD2_DEBUG_OUTPUT_MASK                  , WD2_DEBUG_OUTPUT_OFS                  },
   { "FE_POWER"                      , WD2_FE_POWER_REG                      , WD2_FE_POWER_MASK                      , WD2_FE_POWER_OFS                      },
   { "DRS_CLR_RSR_AFTER_RO"          , WD2_DRS_CLR_RSR_AFTER_RO_REG          , WD2_DRS_CLR_RSR_AFTER_RO_MASK          , WD2_DRS_CLR_RSR_AFTER_RO_OFS          },
   { "COMP_POWER_EN"                 , WD2_COMP_POWER_EN_REG                 , WD2_COMP_POWER_EN_MASK                 , WD2_COMP_POWER_EN_OFS                 },
@@ -930,6 +931,7 @@ const wd2_bit_group_entry_type  wd2_bit_group_list[] = {
   { "EXT_CLK_ACTIVE"                , WD2_EXT_CLK_ACTIVE_REG                , WD2_EXT_CLK_ACTIVE_MASK                , WD2_EXT_CLK_ACTIVE_OFS                },
   { "DAQ_CLK_DEF_PHASE_OK"          , WD2_DAQ_CLK_DEF_PHASE_OK_REG          , WD2_DAQ_CLK_DEF_PHASE_OK_MASK          , WD2_DAQ_CLK_DEF_PHASE_OK_OFS          },
   { "DAQ_CLK_DEF_PHASE_CHKD"        , WD2_DAQ_CLK_DEF_PHASE_CHKD_REG        , WD2_DAQ_CLK_DEF_PHASE_CHKD_MASK        , WD2_DAQ_CLK_DEF_PHASE_CHKD_OFS        },
+  { "DEBUG_INPUT"                   , WD2_DEBUG_INPUT_REG                   , WD2_DEBUG_INPUT_MASK                   , WD2_DEBUG_INPUT_OFS                   },
   { "DRS_CONFIG_DONE"               , WD2_DRS_CONFIG_DONE_REG               , WD2_DRS_CONFIG_DONE_MASK               , WD2_DRS_CONFIG_DONE_OFS               },
   { "BOARD_SEL"                     , WD2_BOARD_SEL_REG                     , WD2_BOARD_SEL_MASK                     , WD2_BOARD_SEL_OFS                     },
   { "ADV_TRIG_BUSY"                 , WD2_ADV_TRIG_BUSY_REG                 , WD2_ADV_TRIG_BUSY_MASK                 , WD2_ADV_TRIG_BUSY_OFS                 },
