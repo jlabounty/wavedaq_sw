@@ -15,6 +15,8 @@
 #define PRESCADC           0x07       // ADC readout prescaling
 #define RSYNCWFM           0x08       // SYNC Waveform from serdes
 #define RPAYLOADMAX        0x09       // Max Packet payload
+#define RLOCK              0x0A       // PLL Lock bits     
+#define RLED               0x0B       // Frontpanel LED status
 #define USR_ACCESS         0x0F       // FW compilaiton date
 #define RENA               0x20       // trigger enable (first address)
 #define RTRIPATT           0x30       // trigger pattern (first address)
@@ -29,6 +31,8 @@
 #define RSYSTRITYPE        0x205      // system (trgbus) trigger type
 #define RPCURR             0x206      // proton current
 #define RFSTIME            0x207      // time counter from external oscillator
+#define RSYSERRCOU         0x208      // counter of errors on trigger bus
+#define RSYSVALIDCOU       0x209      // counter of valid trgbus received
 #define RSERDESTX          0x321      // tx serdes configuration and delay load
 #define RSERDESCALIBFSM    0x326      // individual bitslip for dcb
 #define RSERDESMSK         0x327      // mask for input serdes
@@ -56,8 +60,8 @@
 #define RTCOFFSET          0x609      // TC time offset in TDC units
 #define RTIMEN             0x60A      // Time Difference threshold Narrow
 #define RTIMEW             0x60B      // Time Difference threshold Wide
-#define RTCMERGEH          0x60C      // TC high threshold for hit merge
-#define RTCMERGEL          0x60D      // TC low threshold for hit merge
+#define RTCTRACKMULTTHR    0x60C      // TC multiplicity threshold
+#define RTCTARCKTIMETHR    0x60D      // TC time cut
 #define RRDCLYSOTHR        0x60E      // RDC QSUM threshold
 #define RBGOTHR            0x60F      // BGO QSUM threshold
 #define RRDCMASK           0x610      // RDC trigger definition
@@ -109,6 +113,7 @@
 #define RFCALOMASKS0       0x650      // Mask for FOOT calorimenter inputs reg 0
 #define RFCALOMASKS1       0x651      // Mask for FOOT calorimenter inputs reg 1
 #define RFCALOMASKS2       0x652      // Mask for FOOT calorimenter inputs reg 2
+#define RFPROGCOUVETO      0x660      // Programmable veto for Margherita Majority
 #define RFIBCOUNTER        0x700      // SCIFI fiber event counter address (42 values)
 #define RSINGLECRATECFG    0x800      // configurations for single crate trigger logic
 #define RSINGLEISVETO      0x801      // veto set for input channels in single crate logic
@@ -124,14 +129,17 @@
 #define GENTMEMBASE        0x12000    //base address for trigger generation memories (two memories with size = GENTDIM)
 
 /// Detector memories (size = MEMDIM)
-#define XECMEMBASE    0x11100                   // XEC memories base address (2 memories)
-#define BGOMEMBASE    0x13000                   // BGO memories base address (1 memory)
-#define RDCMEMBASE    0x14000                   // RDC memories base address (2 memories)
-#define TCMEMBASE     0x15000                   // TC memories base address (2 memories)
-#define ALFAMEMBASE   0x16000                   // ALFA memories base address (2 memories)
-#define CDCHMEMBASE   0x17000                   // CDCH memories base address (2 memories)
-#define MPPCMEMBASE   0x18000                   // XEC MPPC memory base address (1 memory)
-#define PMTMEMBASE    0x18800                   // XEC PMT memory base address (1 memory)
+#define XECMEMBASE           0x11100                   // XEC memories base address (2 memories)
+#define BGOMEMBASE           0x13000                   // BGO memories base address (1 memory)
+#define RDCMEMBASE           0x14000                   // RDC memories base address (2 memories)
+#define TCMEMBASE            0x15000                   // TC memories base address (2 memories)
+#define ALFAMEMBASE          0x16000                   // ALFA memories base address (2 memories)
+#define CDCHMEMBASE          0x17000                   // CDCH memories base address (1 memories)
+#define MPPCMEMBASE          0x18000                   // XEC MPPC memory base address (1 memory)
+#define PMTMEMBASE           0x18800                   // XEC PMT memory base address (1 memory)
+#define MPPCTIMEMEMBASE      0x19000                   // XEC MPPC Time memory base address (1 memory)
+#define PMTTIMEMEMBASE       0x19800                   // XEC PMT Time memory base address (1 memory)
+#define MPPCWAVEFORMMEMBASE  0x1A000                   // XEC MPPC MAX Waveform memory base address (1 memory)
 
 #define SCIFICOINCBASE     0x00800000           //SCIFI fiber coincidence base address (441)
 
