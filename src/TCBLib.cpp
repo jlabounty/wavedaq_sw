@@ -1270,15 +1270,15 @@ void TCB::SetTCMultiplicityThreshold(u_int32_t *data)
 void TCB::SetTCCrateMergeThreshold(u_int32_t *low, u_int32_t* high)
 {
    if ((fidcode>>12)!=1) printf("setting Crate TC Hit Merge on TCB %4x!!!!!\n", fidcode);
-   WriteReg(RTCMERGEL,low);
-   WriteReg(RTCMERGEH,high);
+   WriteReg(RTCTRACKMULTTHR,low);
+   WriteReg(RTCTARCKTIMETHR,high);
 }
 // TC Crate Hit Merge
 void TCB::SetTCSectorMergeThreshold(u_int32_t *low, u_int32_t* high)
 {
    if ((fidcode>>12)!=2) printf("setting Crate TC Hit Merge on TCB %4x!!!!!\n", fidcode);
-   WriteReg(RTCMERGEL,low);
-   WriteReg(RTCMERGEH,high);
+   WriteReg(RTCTRACKMULTTHR,low);
+   WriteReg(RTCTARCKTIMETHR,high);
 }
 // TC Time offset wrt XEC
 void TCB::SetTCTimeOffset(u_int32_t *value)
