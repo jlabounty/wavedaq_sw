@@ -194,6 +194,32 @@
                </div>
             </div>
 
+            <div class="vMiddleBox vSpacer5">
+               <div class="vSpacer5">
+                  RX/TX:
+                  <select id="selRxTx" name="selRxTx" class="select" onchange="setParam(this)">
+                     <option value="0">UART</option>
+                     <option value="1">Hardware Trigger</option>
+                     <option value="2">Software Trigger</option>
+                     <option value="3">External Trigger</option>
+                     <option value="4">Sync Direct</option>
+                     <option value="5">Sync Sampled</option>
+                     <option value="6">Sync Active High</option>
+                     <option value="7">Busy Local</option>
+                     <option value="8">Busy Backplane</option>
+                     <option value="9">LMK Reference Clk</option>
+                     <option value="10">ADC Sampling Clk</option>
+                     <option value="11">Divided Data Clk</option>
+                     <option value="12">LMK5 Clock</option>
+                     <option value="13">SPI CS of LMK</option>
+                     <option value="14">spare</option>
+                     <option value="15">Manual IO</option>
+                  </select>
+                  <input type="checkbox" id="rxInput" name="rxInput" disabled>RX
+                  <input type="checkbox" id="txOutput" name="txOutput" disabled onClick="setParam(this)">TX
+               </div>
+            </div>
+
             <table>
                <tr>
                   <td>

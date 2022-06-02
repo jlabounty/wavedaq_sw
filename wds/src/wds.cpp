@@ -621,6 +621,16 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
             b->SetLmk7ClkoutDiv(1);
             b->SetLmk7ClkoutEn(value == "true");
          }
+      } else if (item == "selRxTx") {
+         // set RX/TX multiplexr
+         for (auto &b: wdbList) {
+            b->SetMcxRxSigSel(std::stoi(value));
+            b->SetMcxTxSigSel(std::stoi(value));
+         }
+      } else if (item == "txOutput") {
+         // set RX/TX multiplexr
+         for (auto &b: wdbList)
+            b->SetDebugOutput(value == "true");
       }
 
       //---------- commands ----------
@@ -1328,6 +1338,10 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       for (int i = 0; i < 17; i++)
          mg_printf_http_chunk(nc, "      %d,\n", b->GetTrgStatePtrn(i));
       mg_printf_http_chunk(nc, "      %d ],\n", b->GetTrgStatePtrn(17));
+
+      mg_printf_http_chunk(nc, "    \"selRxTx\": %d,\n", b->GetMcxTxSigSel());
+      mg_printf_http_chunk(nc, "    \"debugOutput\": %d,\n", b->GetDebugOutput());
+      mg_printf_http_chunk(nc, "    \"debugInput\": %d,\n", b->GetDebugInput());
 
       mg_printf_http_chunk(nc, "    \"scaler\": [\n");
       for (auto &s: scaler) {

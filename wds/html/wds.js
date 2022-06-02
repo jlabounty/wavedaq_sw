@@ -283,6 +283,11 @@ function populateControls(init) {
       document.getElementById("trgEdgeTrail").style.display = "none";
    }
 
+   document.getElementById("selRxTx").value = OSC.wdb.selRxTx;
+   document.getElementById("rxInput").checked = (OSC.wdb.debugInput === 1);
+   document.getElementById("txOutput").checked = (OSC.wdb.debugOutput === 1);
+   document.getElementById("txOutput").disabled = (OSC.wdb.selRxTx !== 15);
+
    document.getElementById("cbPzc").checked = OSC.wdb.fePzc[0];
    document.getElementById("selGain").value = OSC.wdb.feGain[0];
    document.getElementById("selPzcLevel").value = OSC.wdb.dacPzcLevel;
@@ -740,6 +745,10 @@ function setParam(e, channel) {
    if (e.name === "clkSource" && e.checked === true) {
       if (OSC.wdb.scaler[17] < 79E6)
          dlgMessage("Error", "No external clock present", true, true);
+   }
+
+   if (e.name === "selRxTx") {
+      document.getElementById("txOutput").disabled = (e.value !== "15");
    }
 
    let uri = e.name + "/";
