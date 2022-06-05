@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1">
+   <title>WaveDAQ System</title>
+   <link href="../favicon.png" rel="shortcut icon" type="image/png" title="WaveDAQ Icon">
+   <link href="../iosicon.png" rel="apple-touch-icon" type="image/png" title="WaveDAQ Icon">
+
+   <style type="text/css">
+      body {
+         margin: 10px;
+         color: black;
+         background-color: white;
+         font-family: verdana,tahoma,sans-serif;
+      }
+
+      .container {
+          position: relative;
+      }
+
+      .container img {
+          width: 100%;
+          height: auto;
+      }
+
+      .container .btn {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+      }
+   </style>
+
+   <script type="text/javascript">
+
+      let wdbAddress;
+
+      function init() {
+
+         let url = new URL(window.location.href);
+         wdbAddress = url.searchParams.get("adr");
+
+         playBgMusic();
+         window.setTimeout(restart, 10000);
+      }
+
+      function restart() {
+         window.location.href = "index.html?adr=" + wdbAddress;
+      }
+
+      function playBgMusic() {
+         let bgMusic = new Audio("finished.mp3");
+         let promise  = bgMusic.play();
+         if (promise !== undefined) {
+            promise.then(_ => {
+               document.getElementById("play").style.visibility = 'hidden';
+            }).catch(error => {
+               console.log(error);
+            });
+         }
+      }
+
+
+   </script>
+</head>
+
+<body onload="init();">
+<div class="container">
+   <img  id="img" src="slide7.png">
+   <button class="btn" id="play" onclick="playBgMusic();">Play Music</button>
+</div>
+</body>
+</html>

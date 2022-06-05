@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1">
+   <title>WaveDAQ System</title>
+   <link href="../favicon.png" rel="shortcut icon" type="image/png" title="WaveDAQ Icon">
+   <link href="../iosicon.png" rel="apple-touch-icon" type="image/png" title="WaveDAQ Icon">
+
+   <style type="text/css">
+      body {
+         margin: 10px;
+         color: black;
+         background-color: white;
+         font-family: verdana,tahoma,sans-serif;
+      }
+
+      .container {
+          position: relative;
+      }
+
+      .container img {
+          width: 100%;
+          height: auto;
+      }
+
+      .container .btn {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+      }
+   </style>
+
+   <script type="text/javascript">
+
+      const slides = [
+         { img: "slide1.png" },
+         { img: "slide2.png", duration: 3000 },
+         { img: "slide3.png", duration: 2000 },
+         { img: "slide4.png", duration: 2000 },
+         { img: "slide5.png", duration: 2000 },
+         { img: "slide6.png", duration: 2000, url: "../osc.html?count=30&redir=cosmic/finish.html" },
+         { img: "slide7.png", duration: 1000 }
+      ];
+
+      let wdbAddress;
+
+      function init() {
+
+         let url = new URL(window.location.href);
+         wdbAddress = url.searchParams.get("adr");
+
+         document.getElementById("img").src = slides[0].img;
+         window.setTimeout(pollBuzzer, 100);
+         playBgMusic();
+      }
+
+      let bgMusic = new Audio("background.mp3");
+
+      function playBgMusic() {
+         let promise  = bgMusic.play();
+         bgMusic.loop = true;
+         if (promise !== undefined) {
+            promise.then(_ => {
+               document.getElementById("play").style.visibility = 'hidden';
+            }).catch(error => {
+               console.log(error);
+            });
+         }
+      }
+
+      function pollBuzzer() {
+         let req = new XMLHttpRequest();
+         req.onreadystatechange = function () {
+            if (req.readyState === 4 && req.status === 200) {
+               let o = JSON.parse(req.responseText);
+               if (o.RX === '0') {
+                  bgMusic.pause();
+                  let sound = new Audio("starting.mp3");
+                  sound.play();
+                  nextSlide(1);
+               } else
+                  window.setTimeout(pollBuzzer, 100);
+            }
+         };
+
+         req.open("GET", "../RX?adr="+wdbAddress, true);
+         req.send();
+      }
+
+      function nextSlide(index, url) {
+         if (url !== undefined) {
+            url += "&adr=" + wdbAddress;
+            window.location.href = url;
+            return;
+         }
+         document.getElementById("img").src = slides[index].img;
+         if (slides[index].duration !== undefined) {
+            window.setTimeout(nextSlide, slides[index].duration, index + 1, slides[index].url);
+         }
+
+      }
+
+   </script>
+</head>
+
+<body onload="init();">
+<div class="container">
+   <img  id="img">
+   <button class="btn" id="play" onclick="playBgMusic();">Play Music</button>
+</div>
+</body>
+</html>

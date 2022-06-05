@@ -600,12 +600,6 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
             sleep_ms(10);
             b->GetPllLock(true);
          }
-      } else if (item == "debugOutput") {
-         // set debug output on front-panel MCX
-         for (auto &b: wdbList) {
-            b->SetMcxRxSigSel(1);
-            b->SetMcxTxSigSel(1);
-         }
       } else if (item == "zeroSuppression") {
          // set zero suppression flag
          for (auto &b: wdbList) {
@@ -622,13 +616,13 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
             b->SetLmk7ClkoutEn(value == "true");
          }
       } else if (item == "selRxTx") {
-         // set RX/TX multiplexr
+         // set RX/TX multiplexer
          for (auto &b: wdbList) {
             b->SetMcxRxSigSel(std::stoi(value));
             b->SetMcxTxSigSel(std::stoi(value));
          }
       } else if (item == "txOutput") {
-         // set RX/TX multiplexr
+         // set RX/TX multiplexer
          for (auto &b: wdbList)
             b->SetDebugOutput(value == "true");
       }
@@ -636,7 +630,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       //---------- commands ----------
       else if (item == "vcalib") {
 
-         // prophylactially issue a SERDES reset
+         // prophylactically issue a SERDES reset
          for (auto &d : gl->dcb) {
             d->ResetSerdes(0, false);
             d->ResetSerdes(1, false);
@@ -1397,6 +1391,50 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       return;
    }
 
+   // RX pin ------------------------------
+   if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/RX") == 0) {
+      if (gl->verbose)
+         std::cout << "Sending /RX to browser" << std::endl;
+
+      int flag = 0;
+      char str[256];
+      mg_get_http_var(&hm->query_string, "adr", str, sizeof(str));
+      auto wdb = findBoard(gl->dcb, gl->wdb, str);
+
+      // if not connected, try to connect
+      if (wdb == nullptr) {
+         wdb = new WDB(str);
+         try {
+            if (gl->verbose)
+               std::cout << "Connect to " << wdb->GetAddr() << " ... " << std::flush;
+            connectWDB(gl, wdb);
+            gl->wdb.push_back(wdb);
+            gl->wp->SetWDBList(gl->wdb);
+            if (gl->verbose)
+               std::cout << "OK" << std::endl;
+         } catch (std::runtime_error &e) {
+            if (gl->verbose)
+               std::cout << "Failure" << std::endl;
+            mg_printf_http_chunk(nc, "{\n");
+            mg_printf_http_chunk(nc, "  \"error\": \"%s\"\n", e.what());
+            mg_printf_http_chunk(nc, "}\n");
+            mg_send_http_chunk(nc, "", 0);
+            delete wdb;
+            return;
+         }
+      }
+
+      wdb->ReceiveStatusRegisters(wdb->GetDebugInputLoc() / 4, 1);
+      flag = wdb->GetDebugInput();
+
+      mg_send_response_line(nc, 200, "Content-Type: application/json\r\nTransfer-Encoding: chunked\r\n");
+      mg_printf_http_chunk(nc, "{\n");
+      mg_printf_http_chunk(nc, "   \"RX\": \"%d\"\n", flag);
+      mg_printf_http_chunk(nc, "}\n");
+      mg_send_http_chunk(nc, "", 0);
+      return;
+   }
+
    // return list of recent boards ------------------------------
    if (http_event == MG_EV_HTTP_REQUEST && mg_vcmp(&hm->uri, "/recent") == 0) {
       if (gl->verbose)
@@ -1848,6 +1886,9 @@ void connectWDB(GLOBALS *gl, WDB *b) {
 
    // disable scaler readout
    b->SetSclTxEn(0);
+
+   // select RX direct input
+   b->SetMcxRxSigSel(15);
 
    // obtain soft auto trigger mode from board
    gl->triggerMode = b->GetDaqSoftNormal() ? cTriggerModeNormal : cTriggerModeAuto;

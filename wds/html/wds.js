@@ -57,6 +57,10 @@ function init() {
       return;
    }
 
+   // count-down for cosmic mode
+   OSC.countDown = url.searchParams.get("count");
+   OSC.redir = url.searchParams.get("redir");
+
    /* test for measurements */
    OSC.measList = document.getElementById("measList");
 

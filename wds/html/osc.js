@@ -156,6 +156,11 @@ function Oscilloscope(div) { // constructor
    // WDB address
    this.wdbAddress = "";
 
+   // Count down.
+   this.countStart = new Date().getTime() / 1000;
+   this.countDown = 0;
+   this.countEvent = 0;
+
    // schedule FPS calculator
    var f = this.calcFPS.bind(this);
    this.t = setTimeout(f, 1000);
@@ -202,7 +207,14 @@ function Oscilloscope(div) { // constructor
 
 Oscilloscope.prototype.sendWaveforms = function (wf) {
    this.nEvents++;
+   this.countEvent++;
    this.wf = wf;
+
+   // play sound in cosmic mode
+   if (this.countDown > 0) {
+      let s = new Audio("cosmic/event.mp3");
+      s.play();
+   }
 
    // execute measurements
    for (var i = 0; i < this.measList.childNodes.length; i++)
@@ -697,7 +709,7 @@ Oscilloscope.prototype.draw = function () {
    
    this.nFrames++;
 
-   var ctx = this.canvas.getContext("2d");
+   let ctx = this.canvas.getContext("2d");
 
    // create new waveform image if canvas has been resized
    if (this.newImage) {
@@ -752,6 +764,9 @@ Oscilloscope.prototype.draw = function () {
       this.printStatus(ctx);
 
    }
+
+   if (this.countDown > 0)
+      this.drawCountDown(ctx);
 };
 
 Oscilloscope.prototype.drawChnButtons = function () {
@@ -779,6 +794,21 @@ Oscilloscope.prototype.printFPS = function () {
    document.getElementById("EPS").innerHTML = this.nEPS;
    document.getElementById("FPS").innerHTML = this.nFPS;
 };
+
+Oscilloscope.prototype.drawCountDown = function (ctx) {
+   ctx.fillStyle = 'yellow';
+   ctx.font = '72px sans-serif';
+   ctx.textAlign = "left";
+   ctx.textBaseline = "top";
+   ctx.fillText(this.countEvent, this.x1+10, this.y1+10);
+
+   ctx.textAlign = "right";
+   let sec = this.countDown - Math.floor(new Date().getTime() / 1000 - this.countStart);
+   if (sec >= 0)
+      ctx.fillText(sec, this.x2-10, this.y1+10);
+   else
+      window.location.href = this.redir + "?adr=" + OSC.wdb.name;
+}
 
 Oscilloscope.prototype.printTemperature = function (ctx) {
    if (this.disp.invert) {
@@ -1398,11 +1428,12 @@ Oscilloscope.prototype.drawGrid = function (ctx) {
    ctx.textBaseline = "middle";
    ctx.font = '24px sans-serif';
 
-   if (this.gl.demoMode || this.demoMode)
-      ctx.fillText("DEMO", this.x2 - 10, this.y1 + 20);
-   else if (this.idle)
-      ctx.fillText("Trig ?", this.x2 - 10, this.y1 + 20);
-
+   if (this.countDown === 0) {
+      if (this.gl.demoMode || this.demoMode)
+         ctx.fillText("DEMO", this.x2 - 10, this.y1 + 20);
+      else if (this.idle)
+         ctx.fillText("Trig ?", this.x2 - 10, this.y1 + 20);
+   }
    ctx.beginPath(); // ?? needed to avoid problems later...
    ctx.stroke();
 };
