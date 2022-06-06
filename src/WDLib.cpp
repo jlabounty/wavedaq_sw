@@ -1662,6 +1662,8 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureTofYMask(property);
    } else if(name=="FCaloMask"){ 
       ConfigureFCaloMask(property);
+   } else if(name=="FProgCouVeto"){ 
+      ConfigureFProgCouVeto(property);
    } else if(name=="FNeutronMask"){ 
       ConfigureFNeutronMask(property);
    } else if(name=="MatrixMask"){ 
@@ -2854,6 +2856,15 @@ void WDTCB::ConfigureFCaloMask(Property &property){
       SetFCaloMask((unsigned int*)masks);
    } else
       throw std::runtime_error("FCaloMask size should be 3 values");
+
+}
+
+void WDTCB::ConfigureFProgCouVeto(Property &property){
+
+   unsigned int counter;
+
+   counter = property.GetUInt();
+   SetFProgCouVeto(&counter);
 
 }
 
