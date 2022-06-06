@@ -60,6 +60,11 @@ function init() {
    // count-down for cosmic mode
    OSC.countDown = url.searchParams.get("count");
    OSC.redir = url.searchParams.get("redir");
+   if (OSC.countDown > 0) {
+      let ctls = document.getElementById("controls");
+      ctls.hidden = true;
+      resize();
+   }
 
    /* test for measurements */
    OSC.measList = document.getElementById("measList");

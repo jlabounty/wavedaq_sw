@@ -5,6 +5,7 @@
    <title>WaveDAQ System</title>
    <link href="../favicon.png" rel="shortcut icon" type="image/png" title="WaveDAQ Icon">
    <link href="../iosicon.png" rel="apple-touch-icon" type="image/png" title="WaveDAQ Icon">
+   <script src="../controls.js" type="text/javascript"></script>
 
    <style type="text/css">
       body {
@@ -14,100 +15,147 @@
          font-family: verdana,tahoma,sans-serif;
       }
 
-      .container {
-          position: relative;
+      table {
+         margin: auto;
+         border: solid 1px #808080;
+         border-radius: 25px;
+         border-spacing: 0;
+         box-shadow: 10px 10px 20px #D0D0D0;
       }
 
-      .container img {
-          width: 100%;
-          height: auto;
+      h1 {
+         font-size: 24pt;
       }
 
-      .container .btn {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
+      th {
+         background-color: #2D674A;
+         color: #B5CFBB;
+         padding-left: 10px;
+         padding-right: 10px;
+         border-top-right-radius: 24px;
+         border-top-left-radius: 24px;
       }
+      
+      td {
+         text-align: center;
+         padding: 10px;
+      }
+
+      #build {
+         display: table;
+         font-size: 8pt;
+         margin: auto;
+      }
+
    </style>
 
    <script type="text/javascript">
-
-      const slides = [
-         { img: "slide1.png" },
-         { img: "slide2.png", duration: 3000 },
-         { img: "slide3.png", duration: 2000 },
-         { img: "slide4.png", duration: 2000 },
-         { img: "slide5.png", duration: 2000 },
-         { img: "slide6.png", duration: 2000, url: "../osc.html?count=30&redir=cosmic/finish.html" },
-         { img: "slide7.png", duration: 1000 }
-      ];
-
-      let wdbAddress;
-
       function init() {
-
-         let url = new URL(window.location.href);
-         wdbAddress = url.searchParams.get("adr");
-
-         document.getElementById("img").src = slides[0].img;
-         window.setTimeout(pollBuzzer, 100);
-         playBgMusic();
-      }
-
-      let bgMusic = new Audio("background.mp3");
-
-      function playBgMusic() {
-         let promise  = bgMusic.play();
-         bgMusic.loop = true;
-         if (promise !== undefined) {
-            promise.then(_ => {
-               document.getElementById("play").style.visibility = 'hidden';
-            }).catch(error => {
-               console.log(error);
-            });
-         }
-      }
-
-      function pollBuzzer() {
+         let i = new Image();
+         i.src = "../spinning-wheel-wds.gif";
          let req = new XMLHttpRequest();
          req.onreadystatechange = function () {
             if (req.readyState === 4 && req.status === 200) {
-               let o = JSON.parse(req.responseText);
-               if (o.RX === '0') {
-                  bgMusic.pause();
-                  let sound = new Audio("starting.mp3");
-                  sound.play();
-                  nextSlide(1);
-               } else
-                  window.setTimeout(pollBuzzer, 100);
-            }
-         };
+               let b = JSON.parse(req.responseText);
+               document.getElementById('build').innerHTML = "wdb build: " + b.build;
 
-         req.open("GET", "../RX?adr="+wdbAddress, true);
+               req.onreadystatechange = function () {
+                  if (req.readyState === 4 && req.status === 200) {
+                     let r = JSON.parse(req.responseText);
+                     let options = "";
+                     for (let i = 0; i < r.recent.length; i++)
+                        options += '<option value="' + r.recent[i] + '">' + r.recent[i] + '</option>\n';
+                     document.getElementById("recent").innerHTML = options;
+                  }
+               }
+               req.open("GET", "../recent?r=" + Math.random(), true);
+               req.send();
+            }
+         }
+         req.open("GET", "../build?r=" + Math.random(), true); // avoid cached results
          req.send();
       }
 
-      function nextSlide(index, url) {
-         if (url !== undefined) {
-            url += "&adr=" + wdbAddress;
-            window.location.href = url;
-            return;
-         }
-         document.getElementById("img").src = slides[index].img;
-         if (slides[index].duration !== undefined) {
-            window.setTimeout(nextSlide, slides[index].duration, index + 1, slides[index].url);
-         }
+      let dlgTimer;
 
+      function mysubmit() {
+         let req = new XMLHttpRequest();
+         req.onreadystatechange = function () {
+            if (req.readyState === 4 && req.status === 200) {
+               if (dlgTimer !== undefined)
+                  window.clearTimeout(dlgTimer);
+               hideWaitDialog();
+               r = JSON.parse(req.responseText);
+               if (r.Status !== "OK")
+                  dlgAlert(r.Status);
+               else {
+                  let a = document.getElementById('address').value;
+                  window.location = "cosmic.html?adr=" + a;
+               }
+            }
+         }
+         dlgTimer = window.setTimeout(showWaitDialog, 500);
+         req.open("PUT", "../connect/" + document.getElementById('address').value);
+         req.send();
+         return false;
+      }
+
+      let DLG;
+
+      function showWaitDialog() {
+         DLG = dlgMessage("Info", "Connecting to " + document.getElementById('address').value + " ..." +
+            "<br /><br /><br /><img alt=\"Please wait\" src=\"../spinning-wheel-wds.gif\">", true, true);
+         let b = document.getElementById("dlgMessageButton");
+         b.innerHTML = "Cancel";
+      }
+
+      function hideWaitDialog() {
+         if (DLG !== undefined)
+            dlgHide(DLG);
       }
 
    </script>
 </head>
 
 <body onload="init();">
-<div class="container">
-   <img  id="img">
-   <button class="btn" id="play" onclick="playBgMusic();">Play Music</button>
-</div>
+<form onsubmit="return mysubmit();" action=".">
+   <table>
+      <tr>
+         <th>
+            <h1>WaveDAQ System</h1>
+         </th>
+      </tr>
+      <tr>
+         <td>
+            <img src="../logo.png" alt="PSI Logo">
+         </td>
+      </tr>
+      <tr>
+         <td style="background-color: #F0F0F0; color: #606060">
+            Please enter network address of a<br />
+            WaveDREAM Board (WDxxx)<br />
+            or a<br />
+            Data Concentrator Board (DCBxx)
+         </td>
+      </tr>
+      <tr>
+         <td>
+            <label for="recent">Address:</label>
+            <input type="text" size="20" id="address" list="recent" autofocus>
+            <datalist id="recent">
+            </datalist>
+         </td>
+      </tr>
+      <tr>
+         <td>
+            <input type="submit" value="Connect">
+         </td>
+      </tr>
+   </table>
+
+   <div id="build">
+      wds built:
+   </div>
+</form>
 </body>
 </html>

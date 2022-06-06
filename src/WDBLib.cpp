@@ -548,7 +548,7 @@ void WDB::Connect() {
       // retrieve Ethernet address of board
       phe = gethostbyname(mWDBAddr.c_str());
       if (phe == NULL)
-         throw std::runtime_error(std::string("Cannot resolve host name \"") + mWDBAddr + "\"");
+         throw std::runtime_error(std::string("Cannot resolve host name '\"'") + mWDBAddr + "'\"'");
 
       std::memset((char *) &client_addr, 0, sizeof(client_addr));
       std::memcpy((char *) &client_addr.sin_addr, phe->h_addr, phe->h_length);
@@ -565,7 +565,7 @@ void WDB::Connect() {
       try {
          WDB::SendUDP("\n");
       } catch (...) {
-         throw std::runtime_error(std::string("Cannot connect to board \"") + mWDBAddr + "\" (" + mEthAddrStr + ")");
+         throw std::runtime_error(std::string("Cannot connect to board '") + mWDBAddr + "' (" + mEthAddrStr + ")");
       }
 
       // set dbglevel none
