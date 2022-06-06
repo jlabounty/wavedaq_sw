@@ -479,6 +479,7 @@ class WDTCB : public TCB, public WDBoard {
       void ConfigureTofXMask(Property &property);
       void ConfigureTofYMask(Property &property);
       void ConfigureFCaloMask(Property &property);
+      void ConfigureFProgCouVeto(Property &property);
       void ConfigureFNeutronMask(Property &property);
       void ConfigureMatrixMask(Property &property);
       void ConfigureInterspillDly(Property &property);

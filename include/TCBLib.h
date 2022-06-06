@@ -541,6 +541,7 @@ public:
   void SetTofXMask(u_int32_t *);
   void SetTofYMask(u_int32_t *);
   void SetFCaloMask(u_int32_t *);
+  void SetFProgCouVeto(u_int32_t *);
   void SetFNeutronMask(u_int32_t *);
   void SetMatrixMask(u_int32_t *);
   void SetInterspillDly(u_int32_t *);

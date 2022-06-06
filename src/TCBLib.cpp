@@ -1657,7 +1657,16 @@ void TCB::SetFCaloMask(u_int32_t *data)
    WriteReg(RFCALOMASKS0,data+0);
    WriteReg(RFCALOMASKS1,data+1);
    WriteReg(RFCALOMASKS2,data+2);
+}
+// set Margarita progammable veto counter
+void TCB::SetFProgCouVeto(u_int32_t *data){
+  if ((fidcode>>12)!=3) printf("setting Margarita Programmable Veto Counter on TCB %4x!!!!!\n", fidcode);
+  else if ((fexpid&0x3)!= 0x2) {
+    printf("TCB not compiled for FOOT !!!!!\n");
+    throw std::runtime_error("Error in TCB board configuration");
+  };
 
+  WriteReg(RFPROGCOUVETO,data);
 }
 // FOOT Nutron Masks
 void TCB::SetFNeutronMask(u_int32_t *data)
