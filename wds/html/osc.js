@@ -797,15 +797,19 @@ Oscilloscope.prototype.printFPS = function () {
 
 Oscilloscope.prototype.drawCountDown = function (ctx) {
    ctx.fillStyle = 'yellow';
-   ctx.font = '72px sans-serif';
-   ctx.textAlign = "left";
-   ctx.textBaseline = "top";
-   ctx.fillText(this.countEvent, this.x1+10, this.y1+10);
+   ctx.font = '144px sans-serif';
+   ctx.textAlign = "center";
+   ctx.textBaseline = "bottom";
+   if (this.countEvent === 1)
+      ctx.fillText(this.countEvent+" Myon", this.x1+(this.x2-this.x1)/4,
+         this.y1+(this.y2-this.y1)/4);
+   else
+      ctx.fillText(this.countEvent+" Myonen", this.x1+(this.x2-this.x1)/4,
+         this.y1+(this.y2-this.y1)/4);
 
-   ctx.textAlign = "right";
    let sec = this.countDown - Math.floor(new Date().getTime() / 1000 - this.countStart);
    if (sec >= 0)
-      ctx.fillText(sec, this.x2-10, this.y1+10);
+      ctx.fillText(sec+" Sekunden", this.x1+(this.x2-this.x1)/4*3, this.y1+(this.y2-this.y1)/4);
    else
       window.location.href = this.redir + "?adr=" + OSC.wdb.name;
 }
