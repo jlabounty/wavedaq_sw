@@ -210,10 +210,15 @@ Oscilloscope.prototype.sendWaveforms = function (wf) {
    this.countEvent++;
    this.wf = wf;
 
-   // play sound in cosmic mode
+   // this is for cosmic mode
    if (this.countDown > 0) {
+      // play sound
       let s = new Audio("cosmic/event.mp3");
       s.play();
+
+      // calculate new random number for track
+      this.cosmicR1 = Math.random();
+      this.cosmicR2 = Math.random();
    }
 
    // execute measurements
@@ -797,7 +802,7 @@ Oscilloscope.prototype.printFPS = function () {
 
 Oscilloscope.prototype.drawCountDown = function (ctx) {
    ctx.fillStyle = 'yellow';
-   ctx.font = '144px sans-serif';
+   ctx.font = Math.floor((this.y2-this.y1)/6) + 'px sans-serif';
    ctx.textAlign = "center";
    ctx.textBaseline = "bottom";
    if (this.countEvent === 1)
@@ -806,6 +811,25 @@ Oscilloscope.prototype.drawCountDown = function (ctx) {
    else
       ctx.fillText(this.countEvent+" Myonen", this.x1+(this.x2-this.x1)/4,
          this.y1+(this.y2-this.y1)/4);
+
+   if (this.cosmicImgReq === undefined) {
+      this.cosmicImgReq = new Image();
+      this.cosmicImgReq.src = 'cosmic/muon_chair.png';
+      let _this = this;
+      this.cosmicImgReq.onload = function () {
+         _this.cosmicImg = _this.cosmicImgReq;
+      }
+   }
+
+   if (this.cosmicImg !== undefined) {
+      let x = Math.floor((this.x2 - this.x1) / 4);
+      ctx.drawImage(this.cosmicImg, x * 3, this.y2 - 10 - x, x, x);
+      ctx.strokeStyle = 'red';
+      ctx.lineWidth = 5;
+      if (this.cosmicR1 !== undefined)
+         ctx.drawLine(x * 3.15 + this.cosmicR1 * x * 0.2, this.y2 - x + 10,
+            x * 3.15 + this.cosmicR2 * x * 0.2, this.y2 - 20);
+   }
 
    let sec = this.countDown - Math.floor(new Date().getTime() / 1000 - this.countStart);
    if (sec >= 0)
