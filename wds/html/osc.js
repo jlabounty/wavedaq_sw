@@ -801,8 +801,11 @@ Oscilloscope.prototype.printFPS = function () {
 };
 
 Oscilloscope.prototype.drawCountDown = function (ctx) {
+   let fh = Math.floor((this.y2-this.y1)/6);
+   if (Math.floor((this.x2-this.x1) / 20) < fh)
+      fh = Math.floor((this.x2-this.x1) / 20);
    ctx.fillStyle = 'yellow';
-   ctx.font = Math.floor((this.y2-this.y1)/6) + 'px sans-serif';
+   ctx.font = fh + 'px sans-serif';
    ctx.textAlign = "center";
    ctx.textBaseline = "bottom";
    if (this.countEvent === 1)
