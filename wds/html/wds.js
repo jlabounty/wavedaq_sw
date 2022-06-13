@@ -59,7 +59,8 @@ function init() {
 
    // count-down for cosmic mode
    OSC.countDown = url.searchParams.get("count");
-   OSC.redir = url.searchParams.get("redir");
+   OSC.redir = url.searchParams.get("redir") + "?adr=" + url.searchParams.get("adr");
+   console.log("REDIR: " + OSC.redir); 
    if (OSC.countDown > 0) {
       let ctls = document.getElementById("controls");
       ctls.hidden = true;

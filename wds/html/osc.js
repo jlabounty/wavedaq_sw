@@ -835,7 +835,7 @@ Oscilloscope.prototype.drawCountDown = function (ctx) {
    if (sec >= 0)
       ctx.fillText(sec+" Sekunden", this.x1+(this.x2-this.x1)/4*3, this.y1+(this.y2-this.y1)/4);
    else
-      window.location.href = this.redir + "?adr=" + OSC.wdb.name;
+      window.location.href = this.redir;
 }
 
 Oscilloscope.prototype.printTemperature = function (ctx) {
