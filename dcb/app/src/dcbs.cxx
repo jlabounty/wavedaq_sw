@@ -974,6 +974,8 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       c.sprintf("rw|regwr <ofs> <d>   Write register\n");
       c.sprintf("rs|regset <ofs> <d>  Set bits of register\n");
       c.sprintf("rc|regclr <ofs> <d>  Clear bits of register\n");
+      c.sprintf("brr|binregrd <slot> <ofs> [<n>] Binary Read register\n");
+      c.sprintf("brw|binregwr <slot> <ofs> <d>   Binary Write register\n");
       c.sprintf("regstore             Store registers in QSPI flash\n");
       c.sprintf("regload              Load registers from QSPI flash\n");
 
@@ -1232,6 +1234,94 @@ void process_dcb_command(udp_connection &c, char *buffer) {
       reg_bank_clr(offset, &data, 1);
       reg_bank_read(offset, &data, 1);
       c.sprintf("[0x%04X]<=0x%08X\r\n", offset, data);
+
+   } else if (strcmp(param[0], "brr") == 0 || strcmp(param[0], "binregrd") == 0) {
+//      c.sprintf("brr|binregrd <slot> <ofs> [<n>] Binary Read register\n");
+      unsigned char rbuffer[1600];
+      unsigned char buffer[1600];
+      memset(rbuffer, 0, sizeof(rbuffer));
+      memset(buffer, 0, sizeof(rbuffer));
+
+      if (n_param < 3) {
+         c.sprintf("Error: please specify slot and register offset\n");
+         return;
+      }
+
+      int slot   = strtoul(param[1], NULL, 0);
+      int offset = strtoul(param[2], NULL, 0);
+      int nr_of_regs = 1;
+
+      if (n_param > 3) {
+         nr_of_regs = strtoul(param[3], NULL, 0);
+      }
+
+      // limit data to 256 registers (4 byte each) for the moment
+      nr_of_regs > 256 ? 256 : nr_of_regs;
+
+      c.sprintf("Read %d registers from slot %d at 0x%08X\n", nr_of_regs, slot, offset);
+
+      unsigned int *p = (unsigned int *) (&rbuffer[6]);
+      unsigned int d;
+
+      if (slot == WDAQ_SLOT_DCB) {
+         for (int i = 0; i < nr_of_regs && i < 256; i++, p++) {
+            reg_bank_read(offset + i * 4, &d, 1);
+            *p = SWAP_UINT32(d);
+         }
+      } else {
+
+         buffer[0] = CMD_READ32;
+         buffer[1] = offset >> 24;
+         buffer[2] = offset >> 16;
+         buffer[3] = offset >>  8;
+         buffer[4] = offset;
+
+         spi_binary_cmd((char *) buffer, (char *) rbuffer, nr_of_regs * 4 + 6, slot,
+                        board[slot].type_id, board[slot].rev_id); // 1 cmd, 4 adr. bytes, 1 dummy + data
+
+      }
+
+      for (unsigned int i = 0; i < nr_of_regs; i++) {
+         c.sprintf("[0x%04X]: 0x%08X\r\n", offset + i*4, SWAP_UINT32(p[i]));
+      }
+
+   } else if (strcmp(param[0], "brw") == 0 || strcmp(param[0], "binregwr") == 0) {
+      unsigned char buffer[10];
+      unsigned char rbuffer[10];
+
+      if (n_param < 4) {
+         c.sprintf("Error: please specify slot, register offset and data\n");
+         return;
+      }
+
+      unsigned int slot = strtoul(param[1], NULL, 0);
+      unsigned int offset = strtoul(param[2], NULL, 0);
+      unsigned int data = strtoul(param[3], NULL, 0);
+      unsigned int d;
+
+      printf("Write to slot %d at 0x%04X, data 0x%08X:\n", slot, offset, data);
+
+      if (slot == WDAQ_SLOT_DCB) {
+         d = SWAP_UINT32(data);
+         reg_bank_write(offset, &d, 1);
+      } else {
+         double start = clock_us();
+
+         buffer[0] = CMD_WRITE32;
+         buffer[1] = offset >> 24;
+         buffer[2] = offset >> 16;
+         buffer[3] = offset >>  8;
+         buffer[4] = offset;
+         buffer[5] = data >> 24;
+         buffer[6] = data >> 16;
+         buffer[7] = data >>  8;
+         buffer[8] = data;
+
+         spi_binary_cmd((char *) &buffer, (char *) rbuffer, 9, slot,
+                        board[slot].type_id, board[slot].rev_id); // 1 cmd, 4 adr. bytes + data
+
+         printf("SPI took %5.3lf ms\n\n", (clock_us() - start) / 1e3);
+      }
 
    } else if (strcmp(param[0], "regstore") == 0) {
 
