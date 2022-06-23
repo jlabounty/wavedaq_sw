@@ -214,6 +214,7 @@ int main(int argc, char *argv[])
          printf(" TESTTXMODE status %x \n",(data&0x20)>>5);
          printf(" MASKFTRG status %x \n",(data&0x40)>>6);
          printf(" MASKFBUSY status %x \n",(data&0x80)>>7);
+         printf(" DCBREADY status %x \n",(data&0x100)>>7);
          if( (TCBBoard.fidcode>>12)==2 || (TCBBoard.fidcode>>12)==1 ) 
             printf(" PATTERNSERDES status %x \n",(data&0x200)>>9);
          printf(" FBUSY status %x \n",(data&0x400)>>10);
@@ -240,6 +241,14 @@ int main(int argc, char *argv[])
 
          if(TCBBoard.GetPacketizerBus()) 
             printf("WARNING: the local bus is used by the packetizer, some regs are not accessible!\n");
+
+         //LED
+         unsigned int led = TCBBoard.GetLed();
+
+         printf("SYSBUSY | %c %c | SPARE\n", (led&0x10)?'O':' ', (led&0x20)?'O':' ');
+         printf("PLLLOCK | %c %c | DTACK\n", (led&0x4)?'O':' ', (led&0x8)?'O':' ');
+         printf("BUSY    | %c %c | RUN  \n", (led&0x1)?'O':' ', (led&0x2)?'O':' ');
+
 
       }
       //
@@ -317,6 +326,13 @@ int main(int argc, char *argv[])
          } else {
             printf("TRANSMISSION ERROR! reading = %d\n",trgtype);
          }
+
+         u_int32_t errorcou;
+         u_int32_t validcou;
+         TCBBoard.GetTrgbusErrorCounter(&errorcou);
+         TCBBoard.GetTrgbusValidCounter(&validcou);
+         printf("%d errors\n", errorcou);
+         printf("%d valid trgbus\n", validcou);
       }
       if(option == 13) {
          printf(" opt = 13 : Get Trigger Counters ... \n");

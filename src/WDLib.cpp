@@ -1592,14 +1592,18 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureXecMovingAverage(property);
    } else if(name=="XecPmtGlobalGain"){
       ConfigureXecPmtGlobalGain(property);
+   } else if(name=="XecMaxFromQsum"){
+      ConfigureXecMaxFromQsum(property);
+   } else if(name=="XecTimeFromPmt"){
+      ConfigureXecTimeFromPmt(property);
    } else if(name=="TcMask"){
       ConfigureTcMask(property);
    } else if(name=="TcMultiplicityThreshold"){
       ConfigureTcMultiplicityThreshold(property);
-   } else if(name=="TcCrateMergeThreshold"){
-      ConfigureTcCrateMergeThreshold(property);
-   } else if(name=="TcSectorMergeThreshold"){
-      ConfigureTcSectorMergeThreshold(property);
+   } else if(name=="TcTrackMultiplicityThreshold"){
+      ConfigureTcMultiplicityThreshold(property);
+   } else if(name=="TcTrackTimeThreshold"){
+      ConfigureTcTrackTimeThreshold(property);
    } else if(name=="TcTimeOffset"){
       ConfigureTcTimeOffset(property);
    } else if(name=="CdchMask"){
@@ -2547,6 +2551,20 @@ void WDTCB::ConfigureXecPmtGlobalGain(Property &property){
    SetQsumPMTMultiplier(xecpmtglobalgain);
 }
 
+void WDTCB::ConfigureXecMaxFromQsum(Property &property){
+   bool qsummax;
+   qsummax = property.GetBool();
+
+   SetXECMaxFromQsum(qsummax);
+}
+
+void WDTCB::ConfigureXecTimeFromPmt(Property &property){
+   bool pmttime;
+   pmttime = property.GetBool();
+
+   SetXECTimeFromPMT(pmttime);
+}
+
 void WDTCB::ConfigureTcMask(Property &property){
    int64_t arraySize = 0;
    const unsigned int* masks;
@@ -2593,26 +2611,18 @@ void WDTCB::ConfigureTcMultiplicityThreshold(Property &property){
    SetTCMultiplicityThreshold(&multtheshold);
 }
 
-void WDTCB::ConfigureTcCrateMergeThreshold(Property &property){
-   int64_t arraySize = 0;
-   const unsigned int* thresholds;
+void WDTCB::ConfigureTcTrackMultiplicityThreshold(Property &property){
+   unsigned int multtheshold;
+   multtheshold = property.GetInt();
 
-   thresholds = property.GetUHexVector(&arraySize);
-   if(arraySize == 2){
-      SetTCCrateMergeThreshold((unsigned int*)thresholds, (unsigned int*)thresholds+1);
-   } else
-      throw std::runtime_error("TcCrateMergeThreshold size should be 2 values");
+   SetTCTrackMultiplicityThreshold(&multtheshold);
 }
 
-void WDTCB::ConfigureTcSectorMergeThreshold(Property &property){
-   int64_t arraySize = 0;
-   const unsigned int* thresholds;
+void WDTCB::ConfigureTcTrackTimeThreshold(Property &property){
+   unsigned int timetheshold;
+   timetheshold = property.GetInt();
 
-   thresholds = property.GetUHexVector(&arraySize);
-   if(arraySize == 2){
-      SetTCSectorMergeThreshold((unsigned int*)thresholds, (unsigned int*)thresholds+1);
-   } else
-      throw std::runtime_error("TcSectorMergeThreshold size should be 2 values");
+   SetTCTrackTimeThreshold(&timetheshold);
 }
 
 void WDTCB::ConfigureTcTimeOffset(Property &property){

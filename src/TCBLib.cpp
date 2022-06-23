@@ -149,6 +149,22 @@ void TCB::SetBoardId(u_int32_t boardid, u_int32_t crateid, u_int32_t slotid)
    WriteReg(RBOARDID, &data);
 }
 
+// Get and decode IDCode
+void TCB::GetBoardId(u_int32_t *boardid, u_int32_t *crateid, u_int32_t *slotid)
+{
+   u_int32_t data = 0;
+   ReadReg(RBOARDID, &data); 
+
+   if(boardid)
+      *boardid = data & 0xFFFF;
+
+   if(crateid)
+      *crateid = (data >> 24) & 0xFF;
+
+   if(slotid)
+      *slotid = (data >> 16) & 0xFF;
+}
+
 //Set NTRG by accessing to rntrg register
 void TCB::SetNTRG()
 {
@@ -279,6 +295,18 @@ int TCB::IsBusy()
    return (data);
 }
 
+//check DCB is ready
+bool TCB::IsDcbReady(){
+
+   u_int32_t data;
+   GetRRUN(&data);
+
+   if(data & 0x100)
+      return true;
+   else
+      return false;
+}
+
 // remove the internal BUSY signal: identical to GORUN with runmode state machine
 void TCB::RemoveBusy()
 {
@@ -360,6 +388,26 @@ void TCB::GetRALGSEL(u_int32_t *data)
   ReadReg(addr,data);
 }
 
+// read PLL Lock
+unsigned int TCB::GetLock()
+{
+   u_int32_t data;
+
+   ReadReg(RLOCK,&data);
+   
+   return data;
+}
+
+// read LED
+unsigned int TCB::GetLed()
+{
+   u_int32_t data;
+
+   ReadReg(RLED,&data);
+   
+   return data;
+}
+
 // read total time
 void TCB::GetTotalTime(u_int32_t *data)
 {
@@ -433,6 +481,21 @@ bool TCB::GetSystemTriggerType(u_int32_t *type, u_int32_t *readoutenable, u_int3
    if(data&0x80000000) return false;
    else return true;
 }
+
+// read system event counter
+void TCB::GetTrgbusErrorCounter(u_int32_t *data)
+{
+   u_int32_t addr = RSYSERRCOU;
+   ReadReg(addr,data);
+}
+
+// read system event counter
+void TCB::GetTrgbusValidCounter(u_int32_t *data)
+{
+   u_int32_t addr = RSYSVALIDCOU;
+   ReadReg(addr,data);
+}
+
 // read trigger counters
 void TCB::GetTriggerCounters(u_int32_t *data)
 {
@@ -535,6 +598,11 @@ void TCB::ReadSERDESMem(int iserdes, int imem, u_int32_t *data){
 void TCB::SetSerdesMask(u_int32_t *data)
 {
    WriteReg(RSERDESMSK,data);
+}
+// serdes mask values getter
+void TCB::GetSerdesMask(u_int32_t *data)
+{
+   ReadReg(RSERDESMSK,data);
 }
 // set parameter
 void TCB::SetParameter(u_int32_t offset, u_int32_t *data)
@@ -761,6 +829,10 @@ void TCB::SetReadoutEnable(bool state){
 
 void TCB::SetMaxPayload(u_int32_t *data){
    WriteReg(RPAYLOADMAX, data);
+}
+
+void TCB::GetMaxPayload(u_int32_t *data){
+   ReadReg(RPAYLOADMAX, data);
 }
 
 //Read current buffer
@@ -1249,6 +1321,30 @@ void TCB::SetQsumPMTMultiplier(int value)
    }
    WriteReg(RQSUMSEL,&data);
 }
+void TCB::SetXECMaxFromQsum(bool enable){
+   if ((fidcode>>12)!=3) printf("setting MAX source on TCB %4x!!!!!\n", fidcode);
+   else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
+
+   u_int32_t data = 0;
+   ReadReg(RQSUMSEL,&data);
+   data &= 0xFFFFFEFF;
+   if(enable){
+      data |= 1<<8;
+   }
+   WriteReg(RQSUMSEL,&data);
+}
+void TCB::SetXECTimeFromPMT(bool enable){
+   if ((fidcode>>12)!=3) printf("setting Time source on TCB %4x!!!!!\n", fidcode);
+   else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
+
+   u_int32_t data = 0;
+   ReadReg(RQSUMSEL,&data);
+   data &= 0xFFFFFDFF;
+   if(enable){
+      data |= 1<<9;
+   }
+   WriteReg(RQSUMSEL,&data);
+}
 
 // TC Masks
 void TCB::SetTCMasks(u_int32_t *data)
@@ -1266,19 +1362,17 @@ void TCB::SetTCMultiplicityThreshold(u_int32_t *data)
    else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
    WriteReg(RTCMULTITHR,data);
 }
-// TC Crate Hit Merge
-void TCB::SetTCCrateMergeThreshold(u_int32_t *low, u_int32_t* high)
-{
-   if ((fidcode>>12)!=1) printf("setting Crate TC Hit Merge on TCB %4x!!!!!\n", fidcode);
-   WriteReg(RTCTRACKMULTTHR,low);
-   WriteReg(RTCTARCKTIMETHR,high);
-}
-// TC Crate Hit Merge
-void TCB::SetTCSectorMergeThreshold(u_int32_t *low, u_int32_t* high)
+// TC Track multiplicity cut
+void TCB::SetTCTrackMultiplicityThreshold(u_int32_t *val)
 {
    if ((fidcode>>12)!=2) printf("setting Crate TC Hit Merge on TCB %4x!!!!!\n", fidcode);
-   WriteReg(RTCTRACKMULTTHR,low);
-   WriteReg(RTCTARCKTIMETHR,high);
+   WriteReg(RTCTRACKMULTTHR,val);
+}
+// TC Track time cut
+void TCB::SetTCTrackTimeThreshold(u_int32_t *val)
+{
+   if ((fidcode>>12)!=2) printf("setting Crate TC Hit Merge on TCB %4x!!!!!\n", fidcode);
+   WriteReg(RTCTRACKTIMETHR,val);
 }
 // TC Time offset wrt XEC
 void TCB::SetTCTimeOffset(u_int32_t *value)

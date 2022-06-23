@@ -61,7 +61,7 @@
 #define RTIMEN             0x60A      // Time Difference threshold Narrow
 #define RTIMEW             0x60B      // Time Difference threshold Wide
 #define RTCTRACKMULTTHR    0x60C      // TC multiplicity threshold
-#define RTCTARCKTIMETHR    0x60D      // TC time cut
+#define RTCTRACKTIMETHR    0x60D      // TC time cut
 #define RRDCLYSOTHR        0x60E      // RDC QSUM threshold
 #define RBGOTHR            0x60F      // BGO QSUM threshold
 #define RRDCMASK           0x610      // RDC trigger definition
@@ -294,6 +294,8 @@ public:
    void SetIDCode();
    // set the BoardID, CrateID and Slot
    void SetBoardId(u_int32_t boardid, u_int32_t crateid, u_int32_t slotid);
+   //get BoardID, CrateID and Slot
+   void GetBoardId(u_int32_t *boardid, u_int32_t *crateid, u_int32_t *slotid);
    // set fntrg
    void SetNTRG();
    // write a memory
@@ -330,6 +332,10 @@ public:
    void GetRENA(u_int32_t*, int);
    // get ralgsel register
    void GetRALGSEL(u_int32_t*);
+   // read PLL Lock
+   unsigned int GetLock();
+   // read LED
+   unsigned int GetLed();
    // read total time
    void GetTotalTime(u_int32_t*);
    // read total time through SPI
@@ -348,6 +354,10 @@ public:
    void GetSystemEventCounter(u_int32_t*);
    // read system trigger type
    bool GetSystemTriggerType(u_int32_t*, u_int32_t*, u_int32_t*);
+   // read trgbus error counter
+   void GetTrgbusErrorCounter(u_int32_t*);
+   // read trgbus Valid counter
+   void GetTrgbusValidCounter(u_int32_t*);
    // read trigger counters
    void GetTriggerCounters(u_int32_t*);
    // read trigger counters through SPI
@@ -358,6 +368,8 @@ public:
    void GetMemoryAddress(u_int32_t*);
    // check if the system is busy
    int IsBusy();
+   //check DCB is ready
+   bool IsDcbReady();
    // write in trg bus Odelay register
    void SetTRGBusODLY(u_int32_t*,u_int32_t*,u_int32_t*);
    // write in trg bus Idelay register
@@ -370,6 +382,8 @@ public:
    void ReadSERDESMem(int,int,u_int32_t*);
    // Serdes delay values setting
    void SetSerdesMask(u_int32_t*);
+   // Serdes delay values setting
+   void GetSerdesMask(u_int32_t*);
    // set generic trigger parameter (with base address 0x600)
    void SetParameter(u_int32_t, u_int32_t*);
    // get FW compilation date
@@ -406,6 +420,8 @@ public:
    void SetReadoutEnable(bool);
    //Set Max Payload Size
    void SetMaxPayload(u_int32_t*);
+   //Set Max Payload Size
+   void GetMaxPayload(u_int32_t*);
    //read current Buffer content
    void ReadBuffer(u_int32_t* ptr, int size = (BUFFERSIZE-1), int offset = 0);
    //increment Buffer pointer
@@ -489,11 +505,15 @@ public:
    //qsum std or moving average
    void SetQsumMovingAverage(bool);
    void SetQsumPMTMultiplier(int);
+   //MAX selection (NTDC-QSUM)
+   void SetXECMaxFromQsum(bool);
+   //Time selection (MPPC-PMT)
+   void SetXECTimeFromPMT(bool);
    // Set TC masks
    void SetTCMasks(u_int32_t*);
    void SetTCMultiplicityThreshold(u_int32_t*);
-   void SetTCCrateMergeThreshold(u_int32_t*, u_int32_t*);
-   void SetTCSectorMergeThreshold(u_int32_t*, u_int32_t*);
+   void SetTCTrackMultiplicityThreshold(u_int32_t*);
+   void SetTCTrackTimeThreshold(u_int32_t*);
    void SetTCTimeOffset(u_int32_t*);
    void SetTCTrackMask(u_int32_t*);
    //Set BGO Stuff
