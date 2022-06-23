@@ -245,9 +245,10 @@ int main(int argc, char *argv[])
          //LED
          unsigned int led = TCBBoard.GetLed();
 
-         printf("SYSBUSY | %c %c | SPARE\n", (led&0x10)?'O':' ', (led&0x20)?'O':' ');
-         printf("PLLLOCK | %c %c | DTACK\n", (led&0x4)?'O':' ', (led&0x8)?'O':' ');
-         printf("BUSY    | %c %c | RUN  \n", (led&0x1)?'O':' ', (led&0x2)?'O':' ');
+         printf("\n");
+         printf("SYSBUSY | %c %c | SPARE\n", (led&0x20)?'O':' ', (led&0x10)?'O':' ');
+         printf("PLLLOCK | %c %c | DTACK\n", (led&0x8)?'O':' ', (led&0x4)?'O':' ');
+         printf("BUSY    | %c %c | RUN  \n", (led&0x2)?'O':' ', (led&0x1)?'O':' ');
 
 
       }
