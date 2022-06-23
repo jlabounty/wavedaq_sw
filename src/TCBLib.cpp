@@ -1358,20 +1358,20 @@ void TCB::SetTCMasks(u_int32_t *data)
 // TC Multiplicity
 void TCB::SetTCMultiplicityThreshold(u_int32_t *data)
 {
-   if ((fidcode>>12)!=3) printf("setting TC Multiplicity on TCB %4x!!!!!\n", fidcode);
-   else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
+   if ((fidcode>>12)!=2) printf("setting TC Multiplicity on TCB %4x!!!!!\n", fidcode);
+
    WriteReg(RTCMULTITHR,data);
 }
 // TC Track multiplicity cut
 void TCB::SetTCTrackMultiplicityThreshold(u_int32_t *val)
 {
-   if ((fidcode>>12)!=2) printf("setting Crate TC Hit Merge on TCB %4x!!!!!\n", fidcode);
+   if ((fidcode>>12)!=2) printf("setting Crate TC Track Multiplicity Thr on TCB %4x!!!!!\n", fidcode);
    WriteReg(RTCTRACKMULTTHR,val);
 }
 // TC Track time cut
 void TCB::SetTCTrackTimeThreshold(u_int32_t *val)
 {
-   if ((fidcode>>12)!=2) printf("setting Crate TC Hit Merge on TCB %4x!!!!!\n", fidcode);
+   if ((fidcode>>12)!=2) printf("setting Crate TC Track Time Thr on TCB %4x!!!!!\n", fidcode);
    WriteReg(RTCTRACKTIMETHR,val);
 }
 // TC Time offset wrt XEC

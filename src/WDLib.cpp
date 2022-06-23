@@ -1601,7 +1601,7 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
    } else if(name=="TcMultiplicityThreshold"){
       ConfigureTcMultiplicityThreshold(property);
    } else if(name=="TcTrackMultiplicityThreshold"){
-      ConfigureTcMultiplicityThreshold(property);
+      ConfigureTcTrackMultiplicityThreshold(property);
    } else if(name=="TcTrackTimeThreshold"){
       ConfigureTcTrackTimeThreshold(property);
    } else if(name=="TcTimeOffset"){
