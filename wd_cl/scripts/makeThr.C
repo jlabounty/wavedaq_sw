@@ -13,6 +13,7 @@ typedef struct {
    float rateAtThr[16];
    bool written = false;
    bool bad[16];
+   bool realBad[16];
 } boardData;
 
 //prints a tag fot the WDB in the output file
@@ -25,7 +26,7 @@ void printBoard(ofstream &outfile, boardData &b){
       //cout << b.thr[i];
       outfile << b.thr[i];
 
-      if(b.bad[i])
+      if(b.bad[i] || b.realBad[i])
          badChn = true;
 
       //next board
@@ -40,22 +41,17 @@ void printBoard(ofstream &outfile, boardData &b){
    if(badChn){
       cout << "Bad Channel on Board "<< b.boardName << "\n";
       for(int i=0; i<16; i++){
-         if(b.bad[i]){
-            cout << "\tChannel " << i << ", thr " << b.thr[i] << " V, rate "<< b.rateAtThr[i]<< "\n";
+         if(b.realBad[i]){
+            cout << "\tChannel " << i << ", thr " << b.thr[i] << " V, rate "<< b.rateAtThr[i]<< ", BAD\n";
+         } else if (b.bad[i]){
+            cout << "\tChannel " << i << ", thr " << b.thr[i] << " V, rate "<< b.rateAtThr[i]<< ", OK\n";
          }
       }
    }
 }
 
-void makeThr(string dirname="./", double absoluteThr = 0.01 ){
+void makeThr(string dirname="./", double absoluteThr = 0.01, double badRate = 100, double badAbsoluteThr = 0.02, double fallbackThr = 0.03){
    int noped=0;
-   const double fallbackThr = -0.035;//in case no pedestal is found
-   //XEC MPPC
-   //const double absoluteThr = 0.010;//offset WRT observed threshold
-   //RDC LYSO
-   //const double absoluteThr = 0.005;//offset WRT observed threshold
-   //CDCH
-   //const double absoluteThr = 0.005;//offset WRT observed threshold
 
    //variable threshold option
    //const double nsigma = 10.;
@@ -73,6 +69,12 @@ void makeThr(string dirname="./", double absoluteThr = 0.01 ){
    hThr->SetCanExtend(TH1::kAllAxes);
    TH1F* hRate = new TH1F("hRate", "Rate at Threshold", 100, 0, 0);
    hRate->SetCanExtend(TH1::kAllAxes);
+   TH1F* hRateGood = new TH1F("hRateGood", "Rate at Threshold for Good channels", 100, 0, 0);
+   hRateGood->SetCanExtend(TH1::kAllAxes);
+   TH1F* hRateBad = new TH1F("hRateBad", "Rate at Threshold for Bad channels", 100, 0, 0);
+   hRateBad->SetCanExtend(TH1::kAllAxes);
+   TH1F* hRateRealBad = new TH1F("hRateRealBad", "Rate at Threshold for RealBad channels", 100, 0, 0);
+   hRateRealBad->SetCanExtend(TH1::kAllAxes);
 
    //list directory content
    TSystemDirectory dir(dirname.c_str(),dirname.c_str());
@@ -180,6 +182,9 @@ void makeThr(string dirname="./", double absoluteThr = 0.01 ){
                   hSigma->Fill(fgau->GetParameter(2));
 
                   float thr = fgau->GetParameter(1);
+                  if (thr >= 1 || thr <= -1)
+                     thr = 0;
+
                   if(board.chnPolarity & (1<<i)){
                      //negative threshold
                      //thr -= nsigma*fgau->GetParameter(2);
@@ -192,15 +197,50 @@ void makeThr(string dirname="./", double absoluteThr = 0.01 ){
 
                   Int_t bin = h->FindBin(thr);
                   board.rateAtThr[i] = h->GetBinContent(bin);
-                  hRate->Fill(board.rateAtThr[i]);
-                  if(board.rateAtThr[i]>150){
-                     noped++;
+                  if(board.rateAtThr[i] > badRate){
                      board.bad[i] = true;
                      printf("!!");
+
+                     //increase threshold
+                     if(board.chnPolarity & (1<<i)){
+                        //negative threshold
+                        thr -= (badAbsoluteThr - absoluteThr);
+                     } else {
+                        //positive threshold
+                        thr += (badAbsoluteThr - absoluteThr);
+                     }
+                     bin = h->FindBin(thr);
+                     board.rateAtThr[i] = h->GetBinContent(bin);
+
+                     //bad also with higher threshold
+                     if(board.rateAtThr[i] > badRate){
+                        board.realBad[i] = true;
+
+                        //increase again
+                        if(board.chnPolarity & (1<<i)){
+                           //negative threshold
+                           thr -= (fallbackThr - badAbsoluteThr);
+                        } else {
+                           //positive threshold
+                           thr += (fallbackThr - badAbsoluteThr);
+                        }
+                        bin = h->FindBin(thr);
+                        board.rateAtThr[i] = h->GetBinContent(bin);
+
+                        hRateRealBad->Fill(board.rateAtThr[i]);
+                        noped++;
+                     } else {
+                        board.realBad[i] = false;
+                        hRateBad->Fill(board.rateAtThr[i]);
+                     }
+
                   } else {
                      board.bad[i] = false;
+                     board.realBad[i] = false;
+                     hRateGood->Fill(board.rateAtThr[i]);
                   }
 
+                  hRate->Fill(board.rateAtThr[i]);
 
                   printf("%2d: %lf %lf -> %lf\n", i,  fgau->GetParameter(1), fgau->GetParameter(2), thr);
                   board.thr[i] = thr;
@@ -255,21 +295,6 @@ void makeThr(string dirname="./", double absoluteThr = 0.01 ){
                   hThr->Fill(thr);
 
                   delete h;
-
-                  /*for(int j=0; j<scals[i].size(); j++){
-                     if (peds[i] == -100 && scals[i][j]>2000){
-                        peds[i] = thrs[j];
-                     }
-                  }
-
-                  if(peds[i] != -100){
-                     printf("%2d: %lf\n", i,  peds[i]);
-                     board.thr[i] = peds[i] + absoluteThr;
-                  }else {
-                     printf("%2d: no ped\n", i);
-                     board.thr[i] = fallbackThr;
-                     noped++;
-                  }*/
                }
                
             }
@@ -308,6 +333,9 @@ void makeThr(string dirname="./", double absoluteThr = 0.01 ){
    hSigma->Write();
    hThr->Write();
    hRate->Write();
+   hRateGood->Write();
+   hRateBad->Write();
+   hRateRealBad->Write();
    outroot->Close();
 
 }

@@ -2170,7 +2170,7 @@ void WDTCB::ConfigurePacketizer(Property &property){
       bufptr += 2*MEMDIM;
       nbank++;
    }
-   if(list.find("MPPC")!=std::string::npos){
+   if(list.find("MPPCQ")!=std::string::npos){
       inst.offset += 1;
       inst.cmd = ::DIRECT_WRITE;
       inst.arg0 = 0x544d5050;//TMPP
@@ -2200,7 +2200,67 @@ void WDTCB::ConfigurePacketizer(Property &property){
       bufptr += MEMDIM;
       nbank++;
    }
-   if(list.find("PMT")!=std::string::npos){
+   if(list.find("MPPCT")!=std::string::npos){
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 0x54544D50;//TTMP
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = MEMDIM+1;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RMEMADDR;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::BLOCK_COPY;
+      inst.arg0 = MPPCTIMEMEMBASE;
+      inst.arg1 = bufptr;
+      inst.arg2 = MEMDIM;
+      instVec.push_back(inst);
+      inst.arg2 = 0;
+
+      bufptr += MEMDIM;
+      nbank++;
+   }
+   if(list.find("MPPCW")!=std::string::npos){
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 0x54574D50;//TWMP
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = MEMDIM+1;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RMEMADDR;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::BLOCK_COPY;
+      inst.arg0 = MPPCWAVEFORMMEMBASE;
+      inst.arg1 = bufptr;
+      inst.arg2 = MEMDIM;
+      instVec.push_back(inst);
+      inst.arg2 = 0;
+
+      bufptr += MEMDIM;
+      nbank++;
+   }
+   if(list.find("PMTQ")!=std::string::npos){
       inst.offset += 1;
       inst.cmd = ::DIRECT_WRITE;
       inst.arg0 = 0x54504d54;//TPMT
@@ -2222,6 +2282,36 @@ void WDTCB::ConfigurePacketizer(Property &property){
       inst.offset += 1;
       inst.cmd = ::BLOCK_COPY;
       inst.arg0 = PMTMEMBASE;
+      inst.arg1 = bufptr;
+      inst.arg2 = MEMDIM;
+      instVec.push_back(inst);
+      inst.arg2 = 0;
+
+      bufptr += MEMDIM;
+      nbank++;
+   }
+   if(list.find("PMTT")!=std::string::npos){
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = 0x5454504D;//TTPM
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::DIRECT_WRITE;
+      inst.arg0 = MEMDIM+1;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::COPY;
+      inst.arg0 = RMEMADDR;
+      inst.arg1 = bufptr++;
+      instVec.push_back(inst);
+
+      inst.offset += 1;
+      inst.cmd = ::BLOCK_COPY;
+      inst.arg0 = PMTTIMEMEMBASE;
       inst.arg1 = bufptr;
       inst.arg2 = MEMDIM;
       instVec.push_back(inst);
