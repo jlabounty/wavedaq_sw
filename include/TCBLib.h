@@ -86,7 +86,7 @@
 #define RMATRIXMASKS1      0x625      // Mask Matrix
 #define RMATRIXMASKS2      0x626      // Mask Matrix
 #define RFNEUTRONMASKS     0x628      // Mask for FOOT neutron detector inputs
-#define RLXeHITTHR         0x629      // Minimum number of hits in a XEC patch
+#define RLXeMPPCTDCTHR     0x629      // Minimum number of hits in a XEC MPPC patch
 #define RLXePATCHDLY       0x62A      // Delay of XEC patch algorithm
 #define RRDCVETOTHR        0x62B      // Veto for RDC signals
 #define RRDCHITDLY         0x62C      // Delay of RDC Hits
@@ -103,6 +103,8 @@
 #define RCDCHMASKS5        0x637      // CDCH WIRE MASKS ON TCB1
 #define RCDCHMASKS6        0x638      // CDCH WIRE MASKS ON TCB1
 #define RCDCHMASKS7        0x639      // CDCH WIRE MASKS ON TCB1
+#define RLXePMTTDCTHR      0x63A      // Minimum number of hits in a XEC PMT patch
+#define RLXeMPPCWFMTHR     0x63B      // Minimum amplitude in a XEC MPPC waveform
 #define RCDCHMULTTHR       0x640      // CDCH HIT MULTIPLICITY THRESHOLD
 #define RLOLXMASK          0x641      // LoLX HIT MASKS
 #define RLOLXMAJVAL        0x642      // LoLX MAJORITY VALUES
@@ -494,7 +496,9 @@ public:
    void SetSumVetoThreshold(u_int32_t*);
    //Xenon patch position selection
    void SetPatch(u_int32_t*);
-   void SetPatchThreshold(u_int32_t*);
+   void SetMppcNTdcThreshold(u_int32_t*);
+   void SetPmtNTdcThreshold(u_int32_t*);
+   void SetMppcWaveformThreshold(u_int32_t*);
    void SetPatchDelay(bool, u_int32_t);
    //time thresholds
    void SetTimeNarrow(u_int32_t*);

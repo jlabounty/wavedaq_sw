@@ -1250,11 +1250,23 @@ void TCB::SetPatch(u_int32_t *data)
    else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
    WriteReg(RLXePATCHID,data);
 }
-void TCB::SetPatchThreshold(u_int32_t *data)
+void TCB::SetMppcNTdcThreshold(u_int32_t *data)
 {
   if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
   else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
-  WriteReg(RLXeHITTHR,data);
+  WriteReg(RLXeMPPCTDCTHR,data);
+}
+void TCB::SetPmtNTdcThreshold(u_int32_t *data)
+{
+  if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
+  else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
+  WriteReg(RLXePMTTDCTHR,data);
+}
+void TCB::SetMppcWaveformThreshold(u_int32_t *data)
+{
+  if ((fidcode>>12)!=3) printf("setting Threshold on TCB %4x!!!!!\n", fidcode);
+  else if (!(fexpid&0x1)) printf("TCB not compiled for MEG !!!!!\n");
+  WriteReg(RLXeMPPCWFMTHR,data);
 }
 void TCB::SetPatchDelay(bool enable, u_int32_t data)
 {

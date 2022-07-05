@@ -1580,8 +1580,12 @@ void WDTCB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureXecVetoThreshold(property);
    } else if(name=="XecPatchId"){
       ConfigureXecPatchId(property);
-   } else if(name=="XecPatchThreshold"){
-      ConfigureXecPatchThreshold(property);
+   } else if(name=="XecMppcNTdcThreshold"){
+      ConfigureXecMppcNTdcThreshold(property);
+   } else if(name=="XecPmtNTdcThreshold"){
+      ConfigureXecPmtNTdcThreshold(property);
+   } else if(name=="XecMppcWaveformThreshold"){
+      ConfigureXecMppcWaveformThreshold(property);
    } else if(name=="XecPatchDelay"){
       ConfigureXecPatchDelay(property);
    } else if(name=="XecAlfaThreshold"){
@@ -2587,11 +2591,25 @@ void WDTCB::ConfigureXecPatchId(Property &property){
    SetPatch(&xecpatchid);
 }
 
-void WDTCB::ConfigureXecPatchThreshold(Property &property){
+void WDTCB::ConfigureXecMppcNTdcThreshold(Property &property){
    unsigned int xecpatchthreshold;
    xecpatchthreshold = property.GetUHex();
 
-   SetPatchThreshold(&xecpatchthreshold);
+   SetMppcNTdcThreshold(&xecpatchthreshold);
+}
+
+void WDTCB::ConfigureXecPmtNTdcThreshold(Property &property){
+   unsigned int xecpatchthreshold;
+   xecpatchthreshold = property.GetUHex();
+
+   SetPmtNTdcThreshold(&xecpatchthreshold);
+}
+
+void WDTCB::ConfigureXecMppcWaveformThreshold(Property &property){
+   unsigned int xecpatchthreshold;
+   xecpatchthreshold = property.GetUHex();
+
+   SetMppcWaveformThreshold(&xecpatchthreshold);
 }
 
 void WDTCB::ConfigureXecPatchDelay(Property &property){
