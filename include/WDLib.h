@@ -348,6 +348,7 @@ class WDWDB : public WDB, public WDBoard{
       void ConfigureMTU(Property &property);
       void ConfigureFrontendGain(Property &property);
       void ConfigureFrontendPzc(Property &property);
+      void ConfigureFrontendAlwaysPower(Property &property);
       void ConfigureFrontendPzcLevel(Property &property);
       void ConfigureTriggerLevel(Property &property);
       void ConfigureChannelPolarity(Property &property);

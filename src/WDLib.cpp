@@ -883,6 +883,8 @@ void WDWDB::ConfigureProperty(const std::string &name, Property &property) {
       ConfigureFrontendPzc(property);
    } else if(name=="FrontendPzcLevel"){
       ConfigureFrontendPzcLevel(property);
+   } else if(name=="FrontendAlwaysPower"){
+      ConfigureFrontendAlwaysPower(property);
    } else if(name=="TriggerLevel"){
       ConfigureTriggerLevel(property);
    } else if(name=="ChannelPolarity"){
@@ -1040,6 +1042,13 @@ void WDWDB::ConfigureFrontendPzcLevel(Property &property) {
       throw std::runtime_error("Invalid FrontendPzcLevel, supported values: from 1 to 7");
    else
       SetDacPzcLevelN(pzc_value-1);
+}
+
+void WDWDB::ConfigureFrontendAlwaysPower(Property &property) {
+   bool power_value;
+   power_value = property.GetBool(); 
+
+   SetFePower(power_value);
 }
 
 void WDWDB::ConfigureTriggerLevel(Property &property) {
