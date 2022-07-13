@@ -1237,6 +1237,16 @@ void WDAQWorker::calibrateBoard(WDAQWdbEvent *ev){
       ev->mTemperatureOk = true;
    }
 
+   if(ev->mTemperature >= 80){
+      ev->mTemperatureOk = false;
+
+      if(! GetSystem()->GetAlarms()->Test(WDAQLIB_ERROR_TEMPERATURE)){
+         const std::string alarmMessage = "Board out of temperature: board " + std::to_string(ev->mBoardId) + " has T=" + std::to_string(ev->mTemperature);
+         GetSystem()->GetAlarms()->Trigger(WDAQLIB_ERROR_TEMPERATURE, alarmMessage);
+      }
+
+   }
+
    //amplitude e->mDrsU[ch][bin];
    //unrotate
    float range = ev->GetRange();
