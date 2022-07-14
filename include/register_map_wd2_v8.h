@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  16.05.2022 11:20:15
+ *  Created :  14.07.2022 14:17:37
  *
  *  Register Layout Version :  8
  *
@@ -427,6 +427,11 @@
 
 
 /* ****** Control Register 4 [0x1010]: DRS_CTRL - DRS4 Control and Configuration Registers (Default: 0x00FFFFFF) ****** */
+
+/* DRS_DISABLE - Disable DRS chip by setting DENABLE 0 and stopping the DRS PLL: 0 = DRS enabled / 1 = DRS disabled */
+#define WD2_DRS_DISABLE_REG                                       WD2_REG_DRS_CTRL
+#define WD2_DRS_DISABLE_MASK                                            0x01000000
+#define WD2_DRS_DISABLE_OFS                                                     24
 
 /* DRS_WSRLOOP - Internally Connect WSRIN to WSROUT (if set to 1) */
 #define WD2_DRS_WSRLOOP_REG                                       WD2_REG_DRS_CTRL

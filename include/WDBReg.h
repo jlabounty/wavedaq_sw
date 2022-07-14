@@ -5,7 +5,7 @@
 //
 //  This file is generated automatically, please do not edit!
 //
-// Created :  24.05.2022 11:55:00
+// Created :  14.07.2022 14:17:46
 //
 // Register Layout Versions :  8, 9
 //
@@ -12336,6 +12336,46 @@ public:
             return 0x0134;
          default:
             throw std::invalid_argument("Function GetDrsCtrlModLoc() not defined for this board version");
+      };
+   };
+
+   // Bit(s) DRS_DISABLE
+   unsigned int GetDrsDisable()
+   {
+      switch(this->mVersion)
+      {
+         case 8:
+         case 9:
+            // Disable DRS chip by setting DENABLE 0 and stopping the DRS PLL: 0 = DRS enabled / 1 = DRS disabled
+            return BitExtractControl(0x1010, 0x01000000, 24);
+         default:
+            throw std::invalid_argument("Function GetDrsDisable() not defined for this board version");
+      };
+   };
+   void SetDrsDisable(unsigned int value)
+   {
+      switch(this->mVersion)
+      {
+         case 8:
+         case 9:
+            // Disable DRS chip by setting DENABLE 0 and stopping the DRS PLL: 0 = DRS enabled / 1 = DRS disabled
+            return SetRegMask(0x1010, 0x01000000, 24, value);
+         default:
+            throw std::invalid_argument("Function SetDrsDisable() not defined for this board version");
+      };
+   };
+   unsigned int GetDrsDisableLoc(unsigned int *BitMask=0, unsigned int *BitOfs=0)
+   {
+      switch(this->mVersion)
+      {
+         case 8:
+         case 9:
+            // Disable DRS chip by setting DENABLE 0 and stopping the DRS PLL: 0 = DRS enabled / 1 = DRS disabled
+            if(BitMask) *BitMask = 0x01000000;
+            if(BitOfs) *BitOfs = 24;
+            return 0x1010;
+         default:
+            throw std::invalid_argument("Function GetDrsDisableLoc() not defined for this board version");
       };
    };
 

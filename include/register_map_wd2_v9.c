@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  24.05.2022 11:54:36
+ *  Created :  14.07.2022 14:17:42
  *
  *  Register Layout Version :  9
  *
@@ -521,6 +521,7 @@ const wd2_bit_group_entry_type  wd2_bit_group_list[] = {
   { "EXT_CLK_IN_SEL"                , WD2_EXT_CLK_IN_SEL_REG                , WD2_EXT_CLK_IN_SEL_MASK                , WD2_EXT_CLK_IN_SEL_OFS                },
   { "EXT_CLK_FREQ"                  , WD2_EXT_CLK_FREQ_REG                  , WD2_EXT_CLK_FREQ_MASK                  , WD2_EXT_CLK_FREQ_OFS                  },
   { "LOCAL_CLK_FREQ"                , WD2_LOCAL_CLK_FREQ_REG                , WD2_LOCAL_CLK_FREQ_MASK                , WD2_LOCAL_CLK_FREQ_OFS                },
+  { "DRS_DISABLE"                   , WD2_DRS_DISABLE_REG                   , WD2_DRS_DISABLE_MASK                   , WD2_DRS_DISABLE_OFS                   },
   { "DRS_WSRLOOP"                   , WD2_DRS_WSRLOOP_REG                   , WD2_DRS_WSRLOOP_MASK                   , WD2_DRS_WSRLOOP_OFS                   },
   { "DRS_PLLEN"                     , WD2_DRS_PLLEN_REG                     , WD2_DRS_PLLEN_MASK                     , WD2_DRS_PLLEN_OFS                     },
   { "DRS_DMODE"                     , WD2_DRS_DMODE_REG                     , WD2_DRS_DMODE_MASK                     , WD2_DRS_DMODE_OFS                     },
