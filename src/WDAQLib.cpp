@@ -176,6 +176,7 @@ bool WDAQADCPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
 
    wdb_e->mAdcTxEnable = mTxEnable;
    wdb_e->mAdcZeroSuppressionMask = mZeroSuppressionMask;
+   wdb_e->mTemperature = mTemperature;
 
    //check all data received
    wdb_e->mAdcByteNumber[channel] += mPayloadLength*8;
@@ -219,6 +220,7 @@ bool WDAQTDCPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
 
    wdb_e->mTdcTxEnable = mTxEnable;
    wdb_e->mTdcZeroSuppressionMask = mZeroSuppressionMask;
+   wdb_e->mTemperature = mTemperature;
 
    //check all data received
    wdb_e->mTdcByteNumber[channel] += mPayloadLength*8;
@@ -260,6 +262,7 @@ bool WDAQTRGPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    }
 
    wdb_e->mTrgTxEnable = 0; //this must be changed with proper TRG data treatment
+   wdb_e->mTemperature = mTemperature;
       
    //check all data received
    wdb_e->mTrgByteNumber += mPayloadLength*8;
@@ -296,6 +299,7 @@ bool WDAQScaPacketData::AddDataToBoardEvent(WDAQBoardEvent *e){
    }
    // set the flag of scaler reception for the writer
    wdb_e->mScalerHasData = true; 
+   wdb_e->mTemperature = mTemperature;
 
    return true;
 }
@@ -755,7 +759,6 @@ void WDAQPacketCollector::GotData(){
          data->dac_rofs                       = SWAP_UINT16(data->dac_rofs);
          data->frontend_settings              = SWAP_UINT16(data->frontend_settings);
          data->time_stamp                     = SWAP_UINT64(data->time_stamp);
-
 
 #ifdef DEBUGGOT
          printf("tx enable        \t 0x%x\n", data->tx_enable);
@@ -1239,6 +1242,7 @@ void WDAQWorker::calibrateBoard(WDAQWdbEvent *ev){
 
    if(ev->mTemperature >= 80){
       ev->mTemperatureOk = false;
+      //printf("board %d: temperature %f\n", ev->mBoardId, ev->mTemperature);
 
       if(! GetSystem()->GetAlarms()->Test(WDAQLIB_ERROR_TEMPERATURE)){
          const std::string alarmMessage = "Board out of temperature: board " + std::to_string(ev->mBoardId) + " has T=" + std::to_string(ev->mTemperature);
