@@ -640,14 +640,29 @@ int main(int argc, char *argv[])
       printf("All crates on, proceeding...\n");
    }
 
+   bool skipInit = false;
    bool skipConnect = false;
-   if(argc == 3){
-      if(std::string(argv[2]) == "-n"){
-         skipConnect = true;
+   if(argc > 2){
+      for(int i=2; i<argc; i++){
+         if(std::string(argv[i]) == "-n"){
+            skipConnect = true;
+            skipInit = true;
+         }
+         if(std::string(argv[i]) == "-s"){
+            skipInit = true;
+         }
       }
    }
    //connect to boards
-   if(!skipConnect) sys->Connect();
+   if(!skipConnect)
+      sys->Connect();
+   else
+      printf("System is loaded but was not connected\n");
+
+   if(!skipInit)
+      sys->Init();
+   else
+      printf("System is not inited\n");
 
    /* main loop on the options */
    do {
@@ -664,6 +679,7 @@ int main(int argc, char *argv[])
       printf("[19]: show DAQ status      \t \t  [20]: reboot CMBs          \n");
       printf("[21]: Ascii command        \t \t  [22]: Pedestal scan        \n");
       printf("[23]: Make Sequencer file  \t \t  [24]: flash CMBs           \n");
+      printf("[25]: Log temperatures     \t \t  [  ]:                      \n");
       do {
          char opline[256];
          printf("give an option: ");
@@ -1399,6 +1415,82 @@ int main(int argc, char *argv[])
                if (status != MSCB_SUCCESS)
                   printf("Error: status = %d\n", status);
             }
+         }
+         if(option == 25)
+         {
+            FILE* f = fopen("WDAQTemperatures.log", "w");
+            fprintf(f, "Time, ");
+            for(auto c : *sys){
+                  for(auto b :*c)
+                     if(b){
+                        if(dynamic_cast<WDWDB*>(b) != nullptr){
+                           fprintf(f, "WDB%03d, ", b->GetSerialNumber());
+                        }
+                     }
+            }
+            fprintf(f, "\n");
+
+            printf("logging temperatures, press 'q' to end\n");
+            float min = -1;
+            float max = -1;
+            int minboard = 0;
+            int maxboard = 0;
+            int iLog = 0;
+
+            bool done = false;
+            while(!done){
+               time_t rawtime;
+               time (&rawtime);
+
+               fprintf(f, "%.19s, ", ctime(&rawtime));
+
+               for(auto c : *sys){
+                     for(auto b :*c)
+                        if(b){
+                           if(dynamic_cast<WDWDB*>(b) != nullptr){
+                              float temp = static_cast<WDWDB*>(b)->GetTemperatureDegree(true);
+                              fprintf(f, "%.1f, ", temp);
+                              if(min == -1 || min > temp){
+                                 min = temp;
+                                 minboard = b->GetSerialNumber();
+                              }
+                              if(max == -1 || max < temp){
+                                 max = temp;
+                                 maxboard = b->GetSerialNumber();
+                              }
+                           }
+                        }
+               }
+               fprintf(f, "\n");
+               iLog++;
+
+               printf("logged %d entries: min %.1f deg WD%03d, max %.1f deg WD%03d\r", iLog, min, minboard, max, maxboard);
+
+               fd_set fds;
+               struct timeval tv;
+               int retval;
+
+               FD_ZERO(&fds);
+               FD_SET(0, &fds);//stdin
+
+               tv.tv_sec = 1;
+               tv.tv_usec = 0;
+
+               retval = select(1, &fds, NULL, NULL, &tv);
+               if (retval == -1){
+                  printf("error with select()\n");
+                  exit(EXIT_FAILURE);
+               } else if (retval){
+                  //stdin commands
+                  char c = getchar();
+                  if(c=='q') done = true;
+               }
+               else{
+                  // timeout
+               }
+            }
+
+            fclose(f);
          }
       } while ( option == 0 ) ;
       /* end of the main loop on the options*/

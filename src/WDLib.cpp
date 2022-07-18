@@ -427,6 +427,23 @@ void WDSystem::Connect(){
 
 }
 
+//Init to all board in the system after connection
+void WDSystem::Init(){
+   for(auto &c : fCrate){
+      //Init central slots
+      if(c->HasBoardIn(16)) 
+         c->GetBoardAt(16)->Init();
+      if(c->HasBoardIn(17)) 
+         c->GetBoardAt(17)->Init();
+
+      //Init other slots
+      for(int i=0; i<16; i++){
+         if(c->HasBoardIn(i)) 
+            c->GetBoardAt(i)->Init();
+      }
+   }
+
+}
 
 //Configure all board in the system
 void WDSystem::Configure(bool wait){
@@ -808,6 +825,12 @@ WDWDB::WDWDB(WDCrate *crate, int slot, std::string name, std::string netname, bo
 //connect to the board
 void WDWDB::Connect(){
    WDB::Connect();
+
+   printf("Connected to WD%03d\n", GetSerialNumber());
+}
+
+//apply init after connection
+void WDWDB::Init(){
    std::string path = GetCalibrationPath();
    Setup(path, 0);
 
@@ -831,8 +854,6 @@ void WDWDB::Connect(){
       //ok for standalone cards
       printf("Board %s not in a crate, cannot set SlotId and CrateId\n", GetBoardName().c_str());
    }
-
-   printf("Connected to WD%03d\n", GetSerialNumber());
 }
 
 void WDWDB::SetSerdesTraining(bool state){
@@ -1454,6 +1475,12 @@ void WDTCB::Connect(){
 
    SetNTRG();
 
+   printf("Connected to TCB with IDCode = %04x\n", fidcode);
+}
+
+void WDTCB::Init(){
+   SetNTRG();
+
    //Set SlotId and CrateId
    WDCrate *crate = GetCrate();
    if(crate != nullptr){
@@ -1465,8 +1492,6 @@ void WDTCB::Connect(){
       //ok for standalone cards
       printf("Board %s not in a crate, cannot set SlotId and CrateId\n", GetBoardName().c_str());
    }
-
-   printf("Connected to TCB with IDCode = %04x\n", fidcode);
 
    //make sure board is stopped
    StopRun();
@@ -3050,6 +3075,10 @@ WDDCB::WDDCB(WDCrate *crate, int slot, std::string name, std::string netname, bo
 void WDDCB::Connect(){
    DCB::Connect();
 
+   printf("Connected to DCB%02d\n", GetSerialNumber());
+}
+
+void WDDCB::Init(){
    //then enable clock distributor and dps for all slots
    SetDistributorClkOutEn(0xFFFFC);
    SetDpsSlotEnable(0x1FFFF);
@@ -3061,9 +3090,7 @@ void WDDCB::Connect(){
    WDCrate *crate = GetCrate();
 
    //Set SlotId
-   SetSendBlock(true);
    SetSlotId(GetSlot());
-   SetSendBlock(false);
 
    int64_t crateNumber = crate->GetCrateNumber();
    if(crateNumber >= 0){
@@ -3092,8 +3119,6 @@ void WDDCB::Connect(){
    SetDistributorClkOutEn(clkmask);
    //printf("setting packet mask to %x\n", packetmask);
    SetDpsSlotEnable(packetmask);
-
-   printf("Connected to DCB%02d\n", GetSerialNumber());
 }
 
 bool WDDCB::IsSerdesTraining(){

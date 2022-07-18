@@ -71,6 +71,7 @@ class WDBoard {
 
       //for derived classes
       virtual void Connect() { };  //called to init connection to the board
+      virtual void Init() { };  //called to init board after connection
       virtual void ConfigurationStarted() { };//called when a configuration starts
       virtual void ConfigurationEnded() { };//called when a vonfiguration ends
       virtual void ConfigureProperty(const std::string &name, Property &property) { }; //called to configure a setting to a property
@@ -232,6 +233,7 @@ class WDSystem {
       void PowerOn();
       void PowerOff();
       void Connect();
+      void Init();
       void Configure(bool wait = true);
       void WaitClockLock();
       void WaitReady();
@@ -309,6 +311,7 @@ class WDWDB : public WDB, public WDBoard{
    
    public:
       void Connect();
+      void Init();
       void SetSerdesTraining(bool state);
       bool IsSerdesTraining();
       void TrainSerdes(){ } //No Serdes to train
@@ -385,6 +388,7 @@ class WDTCB : public TCB, public WDBoard {
    
    public:
       void Connect();
+      void Init();
 
       void SetSerdesTraining(bool state);
       bool IsSerdesTraining();
@@ -502,7 +506,8 @@ class WDTCB : public TCB, public WDBoard {
 class WDDCB : public DCB, public WDBoard {
    
    public:
-      void Connect();//DCB connection are made in constructor, this only set CrateId and applies resets
+      void Connect();
+      void Init();
 
       void SetSerdesTraining(bool state) { }
       bool IsSerdesTraining();
