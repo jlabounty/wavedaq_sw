@@ -97,7 +97,6 @@ function Oscilloscope(div) { // constructor
    this.chOnSelected = []  // channel button selected
    this.wf = {T: [], U: []}; // waveforms
    this.wd = 0;            // WaveDREAM board
-   this.nWd = 0;           // number of boards
 
    this.wfScale = [];      // volts per division
    this.wfScaleIndex = [];
@@ -1254,9 +1253,18 @@ Oscilloscope.prototype.printStatus = function (ctx) {
          ctx.font = '48px sans-serif';
          ctx.textAlign = "center";
          ctx.textBaseline = "middle";
-         ctx.fillText("PLL not locked! (m=0x"+OSC.wdb.pllLck.toString(16)+")", (this.x1 + this.x2) / 2, (this.y1 + this.y2) / 2);
+         ctx.fillText("PLL not locked! (m=0x"+OSC.wdb.pllLck.toString(16)+")", (this.x1 + this.x2) / 2, (this.y1 + this.y2) / 8);
       }
-      
+
+      if (OSC.wdb.wdaqFlags & 0xF0) {
+         ctx.fillStyle = 'red';
+         ctx.strokeStyle = 'red';
+         ctx.font = '48px sans-serif';
+         ctx.textAlign = "center";
+         ctx.textBaseline = "middle";
+         ctx.fillText("SERDES error! (flags=0x"+OSC.wdb.wdaqFlags.toString(16)+")", (this.x1 + this.x2) / 2, (this.y1 + this.y2) / 8);
+      }
+
       if (!OSC.vCalibrated) {
          ctx.fillStyle = 'red';
          ctx.strokeStyle = 'red';

@@ -1238,6 +1238,7 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       mg_printf_http_chunk(nc, "    \"swRevision\": \"%s\",\n", b->GetSwGitHashStr().c_str());
       mg_printf_http_chunk(nc, "    \"swBuild\": \"%s\",\n", gl->demoMode ? "N/A" : b->GetSwBuild().c_str());
       mg_printf_http_chunk(nc, "    \"temperature\": %1.1lf,\n", b->GetTemperatureDegree(false));
+      mg_printf_http_chunk(nc, "    \"wdaqFlags\": %d,\n", b->GetWdaqFlags());
       mg_printf_http_chunk(nc, "    \"tempVCalib\": %1.1lf,\n", b->GetVCalibTemperature());
       mg_printf_http_chunk(nc, "    \"tempTCalib\": %1.1lf,\n", b->GetVCalibTemperature());
       mg_printf_http_chunk(nc, "    \"sysBusy\": %s,\n", b->GetSysBusy() ? "true" : "false");
@@ -1641,6 +1642,10 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
          wdb = nullptr; // signals demo data
 
       if (bNewEvent) {
+
+         // retrieve board info from event
+         wdb->SetWdaqFlags(event.mWdaqFlags);
+
          if (event.mHasADCData && gl->readoutMode == cReadoutModeADC) { //---- ADC waveforms
             int t;                        // array type
             int brd = 0;                  // board index

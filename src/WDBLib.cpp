@@ -2045,6 +2045,7 @@ void WDEvent::SetEventHeaderInfo(FRAME_WDAQ_HEADER *pdaqh) {
    mBoardId = pdaqh->serial_number;
    mCrateId = pdaqh->crate_id;
    mSlotId = pdaqh->slot_id;
+   mWdaqFlags = pdaqh->wdaq_flags;
 }
 
 void WDEvent::SetWDEventHeaderInfo(FRAME_WDAQ_HEADER *pdaqh, FRAME_WDB_HEADER *ph) {
@@ -2372,6 +2373,12 @@ void WP::LogEvent(FRAME_WDAQ_HEADER *pdaqh, FRAME_WDB_HEADER *ph) {
          flags += "EOT,";
       if (pdaqh->wdaq_flags & (1 << cWDAQFlagStartOfType))
          flags += "BOT,";
+      if (pdaqh->wdaq_flags & (1 << cWDAQFlagSerdesCrcError))
+         flags += "SCRC,";
+      if (pdaqh->wdaq_flags & (1 << cWDAQFlagSerdesDatagramError))
+         flags += "SDGM,";
+      if (pdaqh->wdaq_flags & (1 << cWDAQFlagSerdesBufferOverflow))
+         flags += "SBOV,";
 
       if (flags.back() == ',')
          flags.pop_back();

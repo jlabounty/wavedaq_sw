@@ -570,6 +570,7 @@ function readWdb(init) {
                "swRevision": "N/A",
                "swBuild": "N/A",
                "temperature": 37.5,
+               "wdaqFlags": 0,
                "sysBusy": false,
                "drsctrlBusy": false,
                "packagerBusy": false,

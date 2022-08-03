@@ -98,7 +98,10 @@ enum {
    cWDAQFlagEndOfEvent           = 0,
    cWDAQFlagStartOfEvent         = 1,
    cWDAQFlagEndOfType            = 2,
-   cWDAQFlagStartOfType          = 3
+   cWDAQFlagStartOfType          = 3,
+   cWDAQFlagSerdesCrcError       = 4,
+   cWDAQFlagSerdesDatagramError  = 5,
+   cWDAQFlagSerdesBufferOverflow = 6
 };
 
 enum {
@@ -210,6 +213,7 @@ public:
    int              mTriggerCellDrs1;
    unsigned short   mTriggerType;
    float            mTemperature;
+   unsigned char    mWdaqFlags;
 
    int              mDRSChannelPresent[WD_N_CHANNELS];
    float            mWfUDRS[WD_N_CHANNELS][1024];
@@ -528,6 +532,7 @@ class WDB: public WDBREG {
    int              mTimingReferenceSignal;
 
    int              mCalibClkFreq;
+   unsigned char    mWdaqFlags;
 
    std::vector<unsigned int> creg;
    std::vector<unsigned int> sreg;
@@ -660,6 +665,8 @@ public:
    unsigned int GetUptime();
    unsigned int GetPllLock(bool refresh = true);
    unsigned int GetLEDState(bool refresh = true);
+   void SetWdaqFlags(unsigned char flags) { mWdaqFlags = flags; }
+   unsigned char GetWdaqFlags() { return mWdaqFlags; }
    bool WaitPllLock(int timeout = 100);
    unsigned int GetExtClkActive(bool refresh);
    void GetScalers(std::vector<uint64_t> &s, bool refresh = true);
