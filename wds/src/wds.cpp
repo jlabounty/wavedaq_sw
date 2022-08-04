@@ -1644,7 +1644,8 @@ static void wds_handler(struct mg_connection *nc, int http_event, void *pmsg) {
       if (bNewEvent) {
 
          // retrieve board info from event
-         wdb->SetWdaqFlags(event.mWdaqFlags);
+         if (wdb)
+            wdb->SetWdaqFlags(event.mWdaqFlags);
 
          if (event.mHasADCData && gl->readoutMode == cReadoutModeADC) { //---- ADC waveforms
             int t;                        // array type
