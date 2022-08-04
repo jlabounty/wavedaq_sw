@@ -128,86 +128,97 @@
 */
 
 // default styles for dialog boxes
-document.write("<style>" +
-   ".dlgFrame {" +
-   "   font-family: verdana,tahoma,sans-serif;" +
-   "   border: 1px solid black;" +
-   "   box-shadow: 6px 6px 10px 4px rgba(0,0,0,0.2);" +
-   "   border-radius: 6px;" +
-   "   position: absolute;" +
-   "   top: 0;" +
-   "   left: 0;" +
-   "   z-index: 10;" +
-   "   display: none; /* pre-hidden */" +
-   "}\n" +
-   ".dlgTitlebar {" +
-   "   user-select: none;" +
-   "   text-align: center;" +
-   "   background-color: #C0C0C0;" +
-   "   border-top-left-radius: 6px;" +
-   "   border-top-right-radius: 6px;" +
-   "   font-size: 12pt;" +
-   "   padding: 2px;" +
-   "}\n" +
-   ".dlgTitlebar:hover {" +
-   "   cursor: pointer;" +
-   "}\n" +
-   ".dlgButton {" +
-   "   font-size: 1em;" +
-   "   background-color: #D0D0D0;" +
-   "   border: 1px solid #808080;" +
-   "   border-radius: 6px;" +
-   "   padding: 4px 10px;" +
-   "   margin: 3px;" +
-   "}\n" +
-   ".dlgButton:hover {" +
-   "   background-color: #F0F0F0;" +
-   "}\n" +
-   ".dlgPanel {" +
-   "   background-color: #F0F0F0;" +
-   "   text-align: center;" +
-   "   padding: 4px;" +
-   "   border-bottom-left-radius: 6px;" +
-   "   border-bottom-right-radius: 6px;" +
-   "}\n" +
-   ".dlgBlackout {" +
-   "   background: rgba(0,0,0,.5);" +
-   "   position: fixed;" +
-   "   top: 0;" +
-   "   left: 0;" +
-   "   bottom: 0;" +
-   "   right: 0;" +
-   "   z-index: 20;" +
-   "}\n" +
-   ".ctrlHSlider {" +
-   "   width: 200px;" +
-   "   height: 30px;" +
-   "   border-radius: 5px;" +
-   "   padding: 0;" +
-   "}\n" +
-   ".ctrlVSlider {" +
-   "   width: 20px;" +
-   "   height: 200px;" +
-   "   border-radius: 5px;" +
-   "   padding: 0;" +
-   "}\n" +
-   ".ctrlProgress {" +
-   "   border: 1px solid #A0A0A0;" +
-   "   border-radius: 5px;" +
-   "   width: 500px;" +
-   "   height: 5px;" +
-   "   background-color: #E0E0E0;" +
-   "   margin-left: 6px;" +
-   "   margin-top: 5px;" +
-   "}\n" +
-   ".ctrlProgressInd {" +
-   "   border-radius: 5px;" +
-   "   width: 0;" +
-   "   height: 5px;" +
-   "   background-color: #419bf9;" +
-   "   margin: 0;" +
-   "}\n" +
-   "</style>");
+let controls_css = `<style>
+   .dlgFrame {
+      font-family: verdana,tahoma,sans-serif;
+      border: 1px solid black;
+      box-shadow: 6px 6px 10px 4px rgba(0,0,0,0.2);
+      border-radius: 6px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 10;
+      display: none; /* pre-hidden */
+   }
+   .dlgTitlebar {
+      user-select: none;
+      text-align: center;
+      background-color: #C0C0C0;
+      border-top-left-radius: 6px;
+      border-top-right-radius: 6px;
+      font-size: 10pt;
+      padding: 2px;
+      padding-left: 30px;
+      padding-right: 30px;
+   }
+   .dlgTitlebar:hover {
+      cursor: pointer;
+   }
+   .dlgButton {
+      font-size: 10pt;
+      background-color: #F8F8F8;
+      border: 1px solid #808080;
+      border-radius: 6px;
+      padding: 2px 4px;
+      margin: 3px;
+   }
+   .dlgButtonDefault {
+      font-size: 10pt;
+      background-color: #4187F7;
+      color: #FFFFFF;
+      border: 1px solid #808080;
+      border-radius: 6px;
+      padding: 2px 4px;
+      margin: 3px;
+   }
+   .dlgButton:hover {
+      background-color: #F0F0F0;
+   }
+   .dlgPanel {
+      background-color: #F0F0F0;
+      text-align: center;
+      padding: 4px;
+      border-bottom-left-radius: 6px;
+      border-bottom-right-radius: 6px;
+   }
+   .dlgBlackout {
+      background: rgba(0,0,0,.5);
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      z-index: 20;
+   }
+   .ctrlHSlider {
+      width: 200px;
+      height: 30px;
+      border-radius: 5px;
+      padding: 0;
+   }
+   .ctrlVSlider {
+      width: 20px;
+      height: 200px;
+      border-radius: 5px;
+      padding: 0;
+   }
+   .ctrlProgress {
+      border: 1px solid #A0A0A0;
+      border-radius: 5px;
+      width: 500px;
+      height: 5px;
+      background-color: #E0E0E0;
+      margin-left: 6px;
+      margin-top: 5px;
+   }
+   .ctrlProgressInd {
+      border-radius: 5px;
+      width: 0;
+     height: 5px;
+      background-color: #419bf9;
+      margin: 0;
+   }
+   </style>`;
 
 (function (window) { // anonymous global function
    window.addEventListener("load", ctlInit, false);
@@ -224,6 +235,9 @@ function Controls() // constructor
 
 Controls.prototype.init = function () // scan DOM
 {
+   // add special style
+   document.head.insertAdjacentHTML("beforeend", controls_css);
+   
    // scan DOM for controls
    this.ctrlButton = document.getElementsByName("ctrlButton");
    this.ctrlVSlider = document.getElementsByName("ctrlVSlider");
@@ -525,7 +539,7 @@ function drawCloseButton(c, mark) {
    }
 }
 
-function dlgShow(dlg, modal) {
+function dlgCenter(dlg) {
    let d;
    if (typeof dlg === "string")
       d = document.getElementById(dlg);
@@ -537,11 +551,35 @@ function dlgShow(dlg, modal) {
       return;
    }
 
+   d.style.left = Math.round(document.documentElement.clientWidth / 2 - d.offsetWidth / 2) + "px";
+   if (document.documentElement.clientHeight / 2 - d.offsetHeight / 2 < 0)
+      d.style.top = "0px";
+   else
+      d.style.top = Math.round(document.documentElement.clientHeight / 2 - d.offsetHeight / 2) + "px";
+   if (d.offsetHeight > document.documentElement.clientHeight)
+      d.style.position = "absolute";
+}
+
+function dlgShow(dlg, modal, param) {
+   let d;
+   if (typeof dlg === "string")
+      d = document.getElementById(dlg);
+   else
+      d = dlg;
+
+   if (d === null) {
+      dlgAlert("Dialog '" + dlg + "' does not exist");
+      return;
+   }
+
+   // add optional parameter to dialog
+   d.param = param;
+
    // put "close" icon into title bar
    let t;
    if (d.childNodes[0].className === "dlgTitlebar")
       t = d.childNodes[0];
-   if (d.childNodes[1].className === "dlgTitlebar")
+   if (d.childNodes[1] && d.childNodes[1].className === "dlgTitlebar")
       t = d.childNodes[1];
    if (t !== undefined) {
       let ttext = t.innerHTML;
@@ -562,14 +600,7 @@ function dlgShow(dlg, modal) {
    d.modal = (modal === true);
 
    d.style.display = "block";
-   d.style.position = "fixed";
-   d.style.left = Math.round(document.documentElement.clientWidth / 2 - d.offsetWidth / 2) + "px";
-   if (document.documentElement.clientHeight / 2 - d.offsetHeight / 2 < 0)
-      d.style.top = "0px";
-   else
-      d.style.top = Math.round(document.documentElement.clientHeight / 2 - d.offsetHeight / 2) + "px";
-   if (d.offsetHeight > document.documentElement.clientHeight)
-      d.style.position = "absolute";
+   dlgCenter(d);
 
    // put dialog on top of all other dialogs
    let dlgs = document.getElementsByClassName("dlgFrame");
@@ -583,7 +614,7 @@ function dlgShow(dlg, modal) {
       d.style.top = (parseInt(dlgs[dlgs.length - 2].style.top) + 30).toString() + "px";
    }
 
-   // enable scrolling if dialog bog goes beyond screen
+   // enable scrolling if dialog box goes beyond screen
    d.oldScroll = window.getComputedStyle(document.body).overflow;
    document.body.style.overflow = "scroll";
 
@@ -830,16 +861,39 @@ function dlgConfirm(string, confirmCallback, param) {
       "<div class=\"dlgPanel\" style=\"padding: 30px;\">" +
       "<div id=\"dlgMessageString\">" + string + "</div>" +
       "<br /><br />" +
-      "<button class=\"dlgButton\" id=\"dlgMessageButton\" type=\"button\" " +
+      "<button class=\"dlgButtonDefault\" id=\"dlgMessageButtonOk\" type=\"button\" " +
       " onClick=\"let d=this.parentElement.parentElement;d.callback(true,d.callbackParam);dlgMessageDestroy(this);\">OK</button>" +
-      "<button class=\"dlgButton\" id=\"dlgMessageButton\" type=\"button\" " +
+      "<button class=\"dlgButton\" id=\"dlgMessageButtonCancel\" type=\"button\" " +
       " onClick=\"let d=this.parentElement.parentElement;d.callback(false,d.callbackParam);dlgMessageDestroy(this);\">Cancel</button>" +
       "</div>";
 
    document.body.appendChild(d);
 
    dlgShow(d, true);
+   document.getElementById('dlgMessageButtonOk').focus();
    return d;
+}
+
+function dlgQueryKeyDown(event, inp) {
+   let keyCode = ('which' in event) ? event.which : event.keyCode;
+
+   if (keyCode === 27) {
+      // cancel editing
+      let d = inp.parentElement.parentElement.parentElement;
+      d.callback(false, d.callbackParam);
+      dlgMessageDestroy(inp.parentElement);
+      return false;
+   }
+
+   if (keyCode === 13) {
+      // finish editing
+      let d = inp.parentElement.parentElement.parentElement;
+      d.callback(inp.value, d.callbackParam);
+      dlgMessageDestroy(inp.parentElement);
+      return false;
+   }
+
+   return true;
 }
 
 function dlgQuery(string, value, queryCallback, param) {
@@ -850,19 +904,22 @@ function dlgQuery(string, value, queryCallback, param) {
    d.callbackParam = param;
    d.shouldDestroy = true;
 
-   d.innerHTML = "<div class=\"dlgTitlebar\" id=\"dlgMessageTitle\">Please confirm</div>" +
-      "<div class=\"dlgPanel\" style=\"padding: 20px;\">" +
-      "<div id=\"dlgMessageString\">" + string + "&nbsp;&nbsp;<input type='text' size='30' id='dlgQueryInput' value='" + value + "'></input></div>" +
-      "<br /><br />" +
-      "<button class=\"dlgButton\" id=\"dlgMessageButton\" type=\"button\" " +
-      " onClick=\"let d=this.parentElement.parentElement;d.callback(document.getElementById('dlgQueryInput').value,d.callbackParam);dlgMessageDestroy(this);\">OK</button>" +
-      "<button class=\"dlgButton\" id=\"dlgMessageButton\" type=\"button\" " +
-      " onClick=\"let d=this.parentElement.parentElement;d.callback(false,d.callbackParam);dlgMessageDestroy(this);\">Cancel</button>" +
-      "</div>";
+   d.innerHTML = "<div class=\"dlgTitlebar\" id=\"dlgMessageTitle\">&nbsp;</div>" +
+       "<div class=\"dlgPanel\" style=\"padding: 20px;\">" +
+       "<div id=\"dlgMessageString\">" + string + "&nbsp;&nbsp;<input type='text' size='30' id='dlgQueryInput' onkeydown='return dlgQueryKeyDown(event, this);' value='" + value + "'></input></div>" +
+       "<br /><br />" +
+       "<button class=\"dlgButtonDefault\" id=\"dlgMessageButton\" type=\"button\" " +
+       " onClick=\"let d=this.parentElement.parentElement;d.callback(document.getElementById('dlgQueryInput').value,d.callbackParam);dlgMessageDestroy(this);\">OK</button>" +
+       "<button class=\"dlgButton\" id=\"dlgMessageButton\" type=\"button\" " +
+       " onClick=\"let d=this.parentElement.parentElement;d.callback(false,d.callbackParam);dlgMessageDestroy(this);\">Cancel</button>" +
+       "</div>";
 
    document.body.appendChild(d);
 
    dlgShow(d, true);
+   document.getElementById('dlgQueryInput').focus();
+   document.getElementById('dlgQueryInput').select();
+
    return d;
 }
 
