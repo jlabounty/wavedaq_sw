@@ -5,7 +5,7 @@
  *  Project :  WaveDream2
  *
  *  Author  :  schmid_e (Author of generation script)
- *  Created :  14.07.2022 14:17:42
+ *  Created :  12.08.2022 12:59:02
  *
  *  Register Layout Version :  9
  *
@@ -2267,7 +2267,7 @@
 
 /* TRIGGER_DELAY - trigger delay in ticks of 6.25 ns */
 #define WD2_TRIGGER_DELAY_REG                                      WD2_REG_TRG_CFG
-#define WD2_TRIGGER_DELAY_MASK                                          0x000000FF
+#define WD2_TRIGGER_DELAY_MASK                                          0x00000FFF
 #define WD2_TRIGGER_DELAY_OFS                                                    0
 
 
