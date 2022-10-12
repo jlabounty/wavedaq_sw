@@ -1470,12 +1470,12 @@ void TCB::SetCRCPairEnable(u_int32_t *data)
 }
 // set NGEN widow delay
 void TCB::SetNGENDly(u_int32_t *data){
-   if ((fidcode>>12)!=1) printf("setting NGEN delay on TCB %4x!!!!!\n", fidcode);
+   if ((fidcode>>12)!=1 && (fidcode>>12)!=3) printf("setting NGEN delay on TCB %4x!!!!!\n", fidcode);
    WriteReg(RNGENDLY,data);
 }
 // set NGEN widow width
 void TCB::SetNGENWidth(u_int32_t *data){
-   if ((fidcode>>12)!=1) printf("setting NGEN width on TCB %4x!!!!!\n", fidcode);
+   if ((fidcode>>12)!=1 && (fidcode>>12)!=3) printf("setting NGEN width on TCB %4x!!!!!\n", fidcode);
    WriteReg(RNGENWIDTH,data);
 }
 // set NGEN LXe High threshold
