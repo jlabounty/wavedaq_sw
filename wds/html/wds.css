@@ -120,8 +120,12 @@ button {
    margin: 0;
    border: 2px solid #C0C0C0;
    border-radius: 10px;
-   background-color: #E0E0E0;
+   background-color: #F0F0F0;
    padding: 0;
+}
+
+button:active {
+   background-color: #D0D0D0;
 }
 
 input[type=text] {

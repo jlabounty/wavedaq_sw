@@ -98,6 +98,8 @@ function init() {
       let sel = document.createElement('select');
       sel.id = "selGain" + r;
       sel.name = "feGain";
+      let index = 100 + r;
+      sel.setAttribute("tabindex", index.toString());
       sel.setAttribute("onchange", "setParam(this," + r + ")");
       let gains = ["0.5", "1", "2.5", "5", "10", "25", "50", "100"];
       for (let i = 0; i < gains.length; i++) {
@@ -116,6 +118,8 @@ function init() {
       cb.name = "fePzc";
       cb.id = "cbPzc" + r;
       cb.checked = false;
+      index = 116 + r;
+      cb.setAttribute("tabindex", index.toString());
       cb.setAttribute("onclick", "setParam(this," + r + ")");
       cell.appendChild(cb);
 
@@ -126,10 +130,10 @@ function init() {
       inp.value = "0";
       inp.name = "dacTriggerLevel";
       inp.id = "inpDacTriggerLevel" + r;
-      inp.style.width = "60px";
+      inp.style.width = "40px";
       inp.setAttribute("onkeypress", "keyParam(event, this," + r + ")");
       inp.setAttribute("onblur", "validateParam(this," + r + ")");
-      let index = 100+r;
+      index = 132+r;
       inp.setAttribute("tabindex", index.toString());
       cell.appendChild(inp);
       cell.appendChild(document.createTextNode(" mV"));
@@ -141,10 +145,10 @@ function init() {
       inp.value = "N/A";
       inp.name = "hvTarget";
       inp.id = "inpHvTarget" + r;
-      inp.style.width = "80px";
+      inp.style.width = "40px";
       inp.setAttribute("onkeypress", "keyParam(event, this," + r + ")");
-      inp.setAttribute("onblur", "validateParam(this," + r + ")");
-      index = 116 + r;
+      // inp.setAttribute("onblur", "validateParam(this," + r + ")");
+      index = 148 + r;
       inp.setAttribute("tabindex", index.toString());
       cell.appendChild(inp);
       let e = document.createElement("span");
@@ -153,12 +157,22 @@ function init() {
 
       cell = row.insertCell(-1);
       cell.className = "channelsTd";
+      let b  = document.createElement('button');
+      b.innerHTML = "Set";
+      b.style.width = "40px";
+      b.setAttribute("onclick", "validateParam(this.parentElement.parentElement.childNodes[4].childNodes[0]," + r + ")");
+      //index = 116 + r;
+      //inp.setAttribute("tabindex", index.toString());
+      cell.appendChild(b);
+
+      cell = row.insertCell(-1);
+      cell.className = "channelsTd";
       inp = document.createElement('input');
       inp.type = "text";
       inp.value = "N/A";
       inp.name = "hvCurrent";
       inp.id = "inpHvCurrent" + r;
-      inp.style.width = "80px";
+      inp.style.width = "50px";
       inp.disabled = true;
       cell.appendChild(inp);
       cell.appendChild(document.createTextNode(" uA"));
