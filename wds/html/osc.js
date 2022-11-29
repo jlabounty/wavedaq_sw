@@ -782,12 +782,12 @@ Oscilloscope.prototype.drawChnButtons = function () {
       if (this.chOnSelected[i])
          cb.style.border = "3px solid blue";
       else
-         cb.style.border = "2px solid #C0C0C0";
+         cb.style.border = "1px solid #C0C0C0";
       if (this.chOn[i])
          cb.style.backgroundColor = this.chnColors[i];
       else {
          if (i < 16)
-            cb.style.backgroundColor = "#E0E0E0";
+            cb.style.backgroundColor = "#FFFFFF";
          else
             cb.style.backgroundColor = "#A0A0A0";
       }

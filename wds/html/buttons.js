@@ -10,7 +10,7 @@ function ButtonDrawUp(cvs)
    cvs.width = 36;
    cvs.height = 32;
    var ctx = cvs.getContext("2d");
-   ctx.fillStyle = "#E0E0E0";
+   ctx.fillStyle = "#FFFFFF";
    ctx.fillRect(0, 0, 36, 32);
    ctx.beginPath();
    ctx.moveTo(18, 7);
@@ -27,7 +27,7 @@ function ButtonDrawDown(cvs)
    cvs.width = 36;
    cvs.height = 32;
    ctx = cvs.getContext("2d");
-   ctx.fillStyle = "#E0E0E0";
+   ctx.fillStyle = "#FFFFFF";
    ctx.fillRect(0, 0, 36, 32);
    ctx.beginPath();
    ctx.moveTo(18, 29);
@@ -44,7 +44,7 @@ function ButtonDrawLeft(cvs)
    cvs.width = 36;
    cvs.height = 32;
    ctx = cvs.getContext("2d");
-   ctx.fillStyle = "#E0E0E0";
+   ctx.fillStyle = "#FFFFFF";
    ctx.fillRect(0, 0, 36, 32);
    ctx.beginPath();
    ctx.moveTo(7, 18);
@@ -61,7 +61,7 @@ function ButtonDrawRight(cvs)
    cvs.width = 36;
    cvs.height = 32;
    ctx = cvs.getContext("2d");
-   ctx.fillStyle = "#E0E0E0";
+   ctx.fillStyle = "#FFFFFF";
    ctx.fillRect(0, 0, 36, 32);
    ctx.beginPath();
    ctx.moveTo(29, 18);
@@ -78,7 +78,7 @@ function ButtonDrawPlus(cvs)
    cvs.width = 36;
    cvs.height = 36;
    ctx = cvs.getContext("2d");
-   ctx.fillStyle = "#E0E0E0";
+   ctx.fillStyle = "#FFFFFF";
    ctx.fillRect(0, 0, 36, 36);
    ctx.strokeStyle = "#808080";
    ctx.lineWidth = 3;
@@ -91,7 +91,7 @@ function ButtonDrawMinus(cvs)
    cvs.width = 36;
    cvs.height = 36;
    ctx = cvs.getContext("2d");
-   ctx.fillStyle = "#E0E0E0";
+   ctx.fillStyle = "#FFFFFF";
    ctx.fillRect(0, 0, 36, 36);
    ctx.strokeStyle = "#FF0000";
    ctx.lineWidth = 3;
@@ -103,7 +103,7 @@ function ButtonDrawVColl(cvs)
    cvs.width = 36;
    cvs.height = 40;
    ctx = cvs.getContext("2d");
-   ctx.fillStyle = "#E0E0E0";
+   ctx.fillStyle = "#FFFFFF";
    ctx.fillRect(0, 0, 36, 32);
    ctx.fillStyle = "#808080";
    ctx.beginPath();
@@ -126,7 +126,7 @@ function ButtonDrawVExp(cvs)
    cvs.width = 36;
    cvs.height = 40;
    ctx = cvs.getContext("2d");
-   ctx.fillStyle = "#E0E0E0";
+   ctx.fillStyle = "#FFFFFF";
    ctx.fillRect(0, 0, 36, 32);
    ctx.fillStyle = "#808080";
    ctx.beginPath();
@@ -149,7 +149,7 @@ function ButtonDrawEdgeUp(cvs)
    cvs.width = 36;
    cvs.height = 36;
    ctx = cvs.getContext("2d");
-   ctx.fillStyle = "#E0E0E0";
+   ctx.fillStyle = "#FFFFFF";
    ctx.fillRect(0, 0, 36, 36);
    ctx.strokeStyle = "#808080";
    ctx.fillStyle = "#808080";
@@ -173,7 +173,7 @@ function ButtonDrawEdgeDown(cvs)
    cvs.width = 36;
    cvs.height = 36;
    ctx = cvs.getContext("2d");
-   ctx.fillStyle = "#E0E0E0";
+   ctx.fillStyle = "#FFFFFF";
    ctx.fillRect(0, 0, 36, 36);
    ctx.strokeStyle = "#808080";
    ctx.fillStyle = "#808080";
@@ -197,7 +197,7 @@ function ButtonDrawEdgeLead(cvs)
    cvs.width = 36;
    cvs.height = 36;
    ctx = cvs.getContext("2d");
-   ctx.fillStyle = "#E0E0E0";
+   ctx.fillStyle = "#FFFFFF";
    ctx.fillRect(0, 0, 36, 36);
    ctx.strokeStyle = "#808080";
    ctx.fillStyle = "#808080";
@@ -230,7 +230,7 @@ function ButtonDrawEdgeTrail(cvs)
    cvs.width = 36;
    cvs.height = 36;
    ctx = cvs.getContext("2d");
-   ctx.fillStyle = "#E0E0E0";
+   ctx.fillStyle = "#FFFFFF";
    ctx.fillRect(0, 0, 36, 36);
    ctx.strokeStyle = "#808080";
    ctx.fillStyle = "#808080";
