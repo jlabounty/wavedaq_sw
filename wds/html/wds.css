@@ -33,10 +33,13 @@ time, mark, audio, video {
 
 /*------------------------------*/
 
+:root {
+   --bgcol: #EEF0F3;
+}
 body {
    margin: 0;
    color: black;
-   background-color: white;
+   background-color: #EEF0F3;
    font-family: verdana,tahoma,sans-serif;
 }
 
@@ -65,7 +68,7 @@ a:focus { color:#0000FF; text-decoration:underline }
    top: 0;
    left: 0;
    width: 205px;
-   background-color: white;
+   background-color: var(--bgcol);
    text-align: center;
    opacity: 0; /* pre-hidden */
 }
@@ -76,13 +79,13 @@ a:focus { color:#0000FF; text-decoration:underline }
    top: 0;
    left: 0;
    width: 320px;
-   background-color: white;
+   background-color: var(--bgcol);
    text-align: left;
    opacity: 0; /* pre-hidden */
 }
 
 #channels {
-   background-color: white;
+   background-color: var(--bgcol);
    text-align: left;
 }
 
@@ -116,12 +119,16 @@ a:focus { color:#0000FF; text-decoration:underline }
 }
 
 button {
-   font-size: 16px;
+   font-size: 14px;
    margin: 0;
-   border: 2px solid #C0C0C0;
-   border-radius: 10px;
-   background-color: #E0E0E0;
+   border: 1px solid #C0C0C0;
+   border-radius: 6px;
+   background-color: #FFFFFF;
    padding: 0;
+}
+
+button:active {
+   background-color: #D0D0D0;
 }
 
 input[type=text] {
@@ -148,7 +155,7 @@ input[type=text] {
 }
 
 .groupBtn {
-   background-color: white;
+   background-color: var(--bgcol);
    border-radius: 6px;
 }
 
@@ -186,7 +193,7 @@ input[type=text] {
 }
 
 .floatButton {
-   background-color:#F8F8F8;
+   background-color:#FFFFFF;
    user-select: none;
    margin: 3px;
    position: absolute;
@@ -220,7 +227,7 @@ input[type=text] {
    padding-right: 6px;
    padding-bottom: 3px;
    padding-left: 6px;
-   background-color: #E0E0E0;
+   background-color: #FFFFFF;
    width: 32px;
    border-radius: 15px;
 }

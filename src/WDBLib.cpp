@@ -675,7 +675,7 @@ void WDB::Connect() {
 
    // retrieve name from serial number
    char str[32];
-   sprintf(str, "WD%03d", GetSerialNumber());
+   snprintf(str, sizeof(str), "WD%03d", GetSerialNumber());
    mWDBName = std::string(str);
 
    // set internal slot register
@@ -3160,9 +3160,9 @@ void WP::SaveWaveforms() {
    if (li.format == cLiFormatXML) {
       char str[256];
       mxml_start_element(li.xml, "Event");
-      sprintf(str, "%d", li.nLogged + 1);
+      snprintf(str, sizeof(str), "%d", li.nLogged + 1);
       mxml_write_element(li.xml, "Serial", str);
-      sprintf(str, "%4d/%02d/%02d %02d:%02d:%02d.%03d", ts.Year, ts.Month,
+      snprintf(str, sizeof(str), "%4d/%02d/%02d %02d:%02d:%02d.%03d", ts.Year, ts.Month,
               ts.Day, ts.Hour, ts.Minute, ts.Second, ts.Milliseconds);
       mxml_write_element(li.xml, "Time", str);
       mxml_write_element(li.xml, "HUnit", "ns");
@@ -3175,13 +3175,13 @@ void WP::SaveWaveforms() {
          if (!li.bAll && it.first != li.board)
             continue;
 
-         sprintf(str, "Board_%d", it.first);
+         snprintf(str, sizeof(str), "Board_%d", it.first);
          mxml_start_element(li.xml, str);
          for (int i = 0; i < WD_N_CHANNELS; i++) {
             if (ev->mDRSChannelPresent[i]) {
-               sprintf(str, "CHN%d", i);
+               snprintf(str, sizeof(str), "CHN%d", i);
                mxml_start_element(li.xml, str);
-               sprintf(str, "%d", ev->mTriggerCell[i]);
+               snprintf(str, sizeof(str), "%d", ev->mTriggerCell[i]);
                mxml_write_element(li.xml, "Trigger_Cell", str);
 
                uint64_t s = 0;
@@ -3192,7 +3192,7 @@ void WP::SaveWaveforms() {
                      s = sc[i];
                      break;
                   }
-               sprintf(str, "%llu", s);
+               snprintf(str, sizeof(str), "%llu", s);
                mxml_write_element(li.xml, "Scaler", str);
 
                mxml_start_element(li.xml, "Waveform");
@@ -3200,14 +3200,14 @@ void WP::SaveWaveforms() {
 
                if (ev->mHasDRSData) {
                   for (int j = 0; j < 1024; j++) {
-                     sprintf(str, "%1.3f,%1.1f", ev->mWfTDRS[i][j] * 1E9, ev->mWfUDRS[i][j] * 1E3);
+                     snprintf(str, sizeof(str), "%1.3f,%1.1f", ev->mWfTDRS[i][j] * 1E9, ev->mWfUDRS[i][j] * 1E3);
                      mxml_write_element(li.xml, "DRSData", str);
                   }
                }
 
                if (ev->mHasADCData) {
                   for (int j = 0; j < 2048; j++) {
-                     sprintf(str, "%1.3f,%1.1f", ev->mWfTADC[i][j] * 1E9, ev->mWfUADC[i][j] * 1E3);
+                     snprintf(str, sizeof(str), "%1.3f,%1.1f", ev->mWfTADC[i][j] * 1E9, ev->mWfUADC[i][j] * 1E3);
                      mxml_write_element(li.xml, "ADCData", str);
                   }
                }
@@ -3243,14 +3243,14 @@ void WP::SaveWaveforms() {
                continue;
 
             // store board serial number
-            sprintf((char *) p, "B#");
+            snprintf((char *) p, buffer_size, "B#");
             p += 2;
             *(unsigned short *) p = ev->mBoardId;
             p += sizeof(unsigned short);
 
             // store time calibrations for all channels
             for (int i = 0; i < WD_N_CHANNELS; i++) {
-               sprintf((char *) p, "C%03d", i);
+               snprintf((char *) p, buffer_size, "C%03d", i);
                p += 4;
                for (int j = 0; j < 1024; j++) {
                   // save binary time as 32-bit float value
@@ -3291,7 +3291,7 @@ void WP::SaveWaveforms() {
             continue;
 
          // store board serial number
-         sprintf((char *) p, "B#");
+         snprintf((char *) p, buffer_size, "B#");
          p += 2;
          *(unsigned short *) p = ev->mBoardId;
          p += sizeof(unsigned short);
@@ -3308,7 +3308,7 @@ void WP::SaveWaveforms() {
             for (int i = 0; i < WD_N_CHANNELS; i++) {
                if (ev->mDRSChannelPresent[i]) {
                   // channel header
-                  sprintf((char *) p, "C%03d", i);
+                  snprintf((char *) p, buffer_size, "C%03d", i);
                   p += 4;
 
                   // write scaler
@@ -3317,7 +3317,7 @@ void WP::SaveWaveforms() {
                   p += sizeof(int);
 
                   // write trigger cell
-                  sprintf((char *) p, "T#");
+                  snprintf((char *) p, buffer_size, "T#");
                   p += 2;
                   *(unsigned short *) p = ev->mTriggerCell[i];
                   p += sizeof(unsigned short);
@@ -3344,7 +3344,7 @@ void WP::SaveWaveforms() {
             for (int i = 0; i < WD_N_CHANNELS; i++) {
                if (ev->mADCChannelPresent[i]) {
                   // channel header
-                  sprintf((char *) p, "A%03d", i);
+                  snprintf((char *) p, buffer_size, "A%03d", i);
                   p += 4;
                   for (int j = 0; j < 2048; j++) {
                      // save binary date as 16-bit value:
@@ -3368,7 +3368,7 @@ void WP::SaveWaveforms() {
             for (int i = 0; i < WD_N_CHANNELS; i++) {
                if (ev->mTDCChannelPresent[i]) {
                   // channel header
-                  sprintf((char *) p, "T%03d", i);
+                  snprintf((char *) p, buffer_size, "T%03d", i);
                   p += 4;
                   for (int j = 0; j < 512; j++) {
                      *(unsigned char *) p = ev->mWfTDC[i][j];
@@ -3380,7 +3380,7 @@ void WP::SaveWaveforms() {
 
          if (ev->mHasTRGData) {
             // channel header
-            sprintf((char *) p, "TRGD");
+            snprintf((char *) p, buffer_size, "TRGD");
             p += 4;
             for (int j = 0; j < 512; j++) {
                *(uint64_t *) p = ev->mTrgData[j];
