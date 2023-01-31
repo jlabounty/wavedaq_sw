@@ -16,6 +16,13 @@ typedef struct {
    bool realBad[16];
 } boardData;
 
+typedef struct {
+   std::string boardName = "UNKNOWN";
+   std::string crateName = "CRATE";
+   unsigned int cdchMask[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+   bool written = false;
+} tcb1Data;
+
 //prints a tag fot the WDB in the output file
 void printBoard(ofstream &outfile, boardData &b){
    bool badChn = false;
@@ -50,13 +57,87 @@ void printBoard(ofstream &outfile, boardData &b){
    }
 }
 
+void updateTriggerBoard(tcb1Data &triggerBoard, boardData &board){
+   if(board.slot >= 16 || board.slot < 0) 
+      return;
+
+   //CDCH boards
+   if(triggerBoard.crateName.compare(0, 2, "DC") == 0){
+      for(int iCh=0; iCh<16; iCh++){
+         if(! board.realBad[iCh]){
+            triggerBoard.cdchMask[board.slot/2] |= 1 << ((board.slot%2)*16+iCh);
+         }
+      }
+   }
+}
+
+std::string getTcb1BoardName(const std::string crateName){
+   if(crateName.compare(0, 2, "DC") == 0)
+      return crateName + "-T";
+
+   if(crateName.compare(0, 2, "TC") == 0)
+      return crateName + "-T";
+
+   if(crateName.compare(0, 4, "MPPC") == 0)
+      return crateName + "-T";
+
+   if(crateName.compare(0, 3, "PMT") == 0)
+      return crateName + "-T";
+
+   return "UNKNOWN";
+}
+
+void updateTriggerBoards(std::vector<tcb1Data> &triggerBoards, boardData &board){
+   bool found = false;
+   for(auto & triggerBoard : triggerBoards){
+      if(triggerBoard.crateName == board.crateName){
+         //already existing board
+         updateTriggerBoard(triggerBoard, board);
+         found = true;
+      }
+   }
+
+   if(!found){
+      //create a new board
+      tcb1Data triggerBoard;
+      triggerBoard.crateName = board.crateName;
+      triggerBoard.boardName = getTcb1BoardName(board.crateName);
+
+      updateTriggerBoard(triggerBoard, board);
+      triggerBoards.push_back(triggerBoard);
+   }
+}
+
+//prints a tag fot the TCB in the output file
+void printTriggerBoard(ofstream &outfile, tcb1Data &b){
+   if(b.boardName == "UNKNOWN")
+      return;
+
+   outfile << "<TCB Name=\"" << b.boardName << "\" Slot=\"17\">"<< std::endl;
+
+   if(b.crateName.compare(0, 2, "DC") == 0){
+      outfile << "<CdchMask>";
+      for(int i=0; i<8; i++){
+         outfile << "0x" << hex << b.cdchMask[i];
+         if(i<7) outfile << ", ";
+      }
+      outfile << "</CdchMask>" << endl;
+   }
+   
+   outfile << "</TCB>"<< std::endl;
+}
+
 void makeThr(string dirname="./", double absoluteThr = 0.01, double badRate = 100, double badAbsoluteThr = 0.02, double fallbackThr = 0.03){
    int noped=0;
 
    //variable threshold option
    //const double nsigma = 10.;
 
+   //WDB Board data
    std::vector<boardData> boards;
+
+   //TCB1 Board data
+   std::vector<tcb1Data> triggerBoards;
 
    //open output file
    TFile *outroot = new TFile("output.root", "recreate");
@@ -300,6 +381,9 @@ void makeThr(string dirname="./", double absoluteThr = 0.01, double badRate = 10
             }
 
             boards.push_back(board);
+
+            //Update tcb1 with new tcb
+            updateTriggerBoards(triggerBoards, board);
          }
       }
       cout << "\n\n FINAL STATUS:\n";
@@ -322,11 +406,26 @@ void makeThr(string dirname="./", double absoluteThr = 0.01, double badRate = 10
                   others->written = true;
                }
             }
+
+            //Write Trigger board
+            for(auto& triggerBoard: triggerBoards){
+               if(triggerBoard.written == false && triggerBoard.crateName == it->crateName){
+                  printTriggerBoard(outfile, triggerBoard);
+                  triggerBoard.written = true;
+               }
+            }
             outfile << "</Crate>" << std::endl;
          }
       }
       outfile << "</System>" << std::endl;
       outfile.close();
+   }
+
+   for(auto triggerBoard: triggerBoards){
+      cout<< triggerBoard.crateName << endl;
+      for(int i=0; i<8; i++){
+         cout << "\t" << hex << triggerBoard.cdchMask[i] << endl;
+      }
    }
 
    hMean->Write();
