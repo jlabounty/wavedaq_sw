@@ -70,10 +70,11 @@ add_definitions(-DWD2_DONT_INCLUDE_REG_ACCESS_VARS -DDCB_DONT_INCLUDE_REG_ACCESS
 #
 add_library(mxml
   mxml/mxml.cxx
-  mxml/strlcpy.cxx)
+  mscb/src/strlcpy.cxx)
 
 target_include_directories(mxml PUBLIC 
-   mxml)
+   mxml
+   mscb/include)
 
 install(TARGETS mxml
         LIBRARY DESTINATION lib

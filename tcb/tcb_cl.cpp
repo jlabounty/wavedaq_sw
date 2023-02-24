@@ -361,7 +361,7 @@ int main(int argc, char *argv[])
         if(handle != -1){
            printf("Crate number?\n");
            scanf("%d",&crate);
-           sprintf(cratestring,"mscb%d",crate);
+           snprintf(cratestring,sizeof(cratestring),"mscb%d",crate);
            printf("Slot?\n");
            scanf("%d",&slot);
 
@@ -800,7 +800,7 @@ int main(int argc, char *argv[])
 	   // open the file
 	   FILE *ffile;
 	   char filename[100];
-	   sprintf(filename,"%s-%d.dat", fname, irun);
+	   snprintf(filename,sizeof(filename),"%s-%d.dat", fname, irun);
       printf("starting run to file %s\n", filename);
 	   ffile = fopen(filename,"w");
 	   // disable all trigger

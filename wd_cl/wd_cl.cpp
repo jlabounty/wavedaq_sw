@@ -115,7 +115,7 @@ std::map<short, FILE*> CreateScalerFiles(WDSystem* sys, int n, float down, float
             if(wdb != nullptr){
                if(!group.length() || wdb->GetGroup() == group){
                   char buf[100];
-                  sprintf(buf, "out-%s.dat", wdb->GetName().c_str());
+                  snprintf(buf, sizeof(buf), "out-%s.dat", wdb->GetName().c_str());
                   FILE *f= fopen(buf, "w");
 
                   //print header
