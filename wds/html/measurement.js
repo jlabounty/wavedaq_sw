@@ -5,7 +5,7 @@
 //  Created by Stefan Ritt on 26/8/16.
 //
 
-var measList = [
+let measList = [
    {
       name: "Mean",
       unit: "mV",
@@ -218,11 +218,11 @@ Measurement.prototype.measure = function (x, y, i1, i2, update, ctx) {
          this.nMeasured++;
       }
 
-      var vsum = 0;
-      var vvsum = 0;
+      let vsum = 0;
+      let vvsum = 0;
       this.min = this.max = this.value;
 
-      for (var i = 0; i < this.nMeasured; i++) {
+      for (let i = 0; i < this.nMeasured; i++) {
          vsum += this.statArray[i];
          vvsum += (this.statArray[i] * this.statArray[i]);
          if (this.statArray[i] < this.min)
@@ -266,7 +266,7 @@ Measurement.prototype.print = function (index, ctx) {
    var nCh = 0;
    for (var i = 0; i < this.param.length; i++) {
       if (this.param[i].type == "WD")
-         name += "-WD" + this.param[i].value;
+         name += "";
       if (this.param[i].type == "CH") {
          nCh++;
          name += "-CH" + this.param[i].value;

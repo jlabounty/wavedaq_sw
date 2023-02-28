@@ -1978,15 +1978,26 @@ function measSelect(meas, sel, prev) {
          input[pi].onchange = function () {
             measParamChange(meas);
          };
-         for (i = 0; i < OSC.wdb.length; i++) {
+         if (OSC.wdb.length === undefined) {
             let o = document.createElement("option");
-            o.value = i;
-            o.innerHTML = OSC.wdb[i].name;
+            o.value = "0";
+            o.innerHTML = OSC.wdb.name;
             if (prev) {
                if (prev.param[pi].value === i)
                   o.selected = true;
             }
             input[pi].appendChild(o);
+         } else {
+            for (let i = 0; i < OSC.wdb.length; i++) {
+               let o = document.createElement("option");
+               o.value = i.toString();
+               o.innerHTML = OSC.wdb[i].name;
+               if (prev) {
+                  if (prev.param[pi].value === i)
+                     o.selected = true;
+               }
+               input[pi].appendChild(o);
+            }
          }
          meas.appendChild(input[pi]);
       }
