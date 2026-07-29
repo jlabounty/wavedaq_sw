@@ -46,6 +46,7 @@ problem was found, why it matters, and how the fix was verified.
 | commit | item | summary |
 |---|---|---|
 | `1ec038f` | — | `BuilderKey=EventNumber`: key the event builder on the board's event counter when there is no TCB, since `trigger_information` is then always zero |
+| `85914de` | 2.1 | Drain the socket at begin-of-run, and make the builder's two reclaim paths work after a counter reset. Without it every run began with the previous run's events and the builder could wedge for a whole run |
 
 See `git log pioneer/standalone` for the current list.
 
