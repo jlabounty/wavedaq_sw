@@ -517,6 +517,9 @@ WDAQEvent::WDAQEvent(WDAQPacketData* pkt){
 
    //reset event building informations
    mCompletedBoards = 0;
+
+   // Overwritten by the builder as soon as it inserts this event into its pending map.
+   mInsertionSeq = 0;
 }
 
 //add packet to event
@@ -601,6 +604,16 @@ void WDAQEvent::operator delete(void* ptr){
 //Packet Collector - Thread to collect packets
 //Reset statistics at begin
 void WDAQPacketCollector::Begin(){
+   // Drop anything the previous run left in the kernel receive buffer, BEFORE the first
+   // packet of this run is read.
+   //
+   // The collector stops reading between runs while the board keeps streaming, so the
+   // buffer holds datagrams from the previous run -- carrying event numbers from before
+   // the begin-of-run counter reset, i.e. far above the ones about to arrive. Fed to the
+   // builder those are unremovable and wedge it for the whole run. See HARDENING.md 2.1
+   // and the comment on DAQServerThread::Clean().
+   fStaleDatagrams = Clean();
+
    //reset statistics
    fNPackets=0;
    fCorruptedPackets=0;
@@ -1054,13 +1067,24 @@ void WDAQTCBReader::End(){
   fBoard->SetPacketizerBus(false);
 }
 
+// How far a pending event's key may sit from the key currently being processed before it
+// is considered unreachable and reclaimed. Packets of one event can be reordered by the
+// network, so this cannot be zero; it must stay well below cMaxPendingEvents or the map
+// fills with entries the purge will not touch.
+static const int cReorderTolerance = 10;
+
+// Cap on events being assembled at once. Reaching it means events are arriving that
+// cannot be completed, so it is always a symptom rather than normal operation.
+static const size_t cMaxPendingEvents = 20;
+
 //Event builder - Thread that build events from packets
 //reset statistics and drop packets at start
 void WDAQEventBuilder::Begin(){
    fBuildedEvent = 0;
    fBadPackets = 0;
    fDroppedEvent = 0;
-   fOldEvent = 0;
+   fReorderPurged = 0;
+   fMapOverflowDropped = 0;
    fNotBuilding = false;
    fDropping = false;
 
@@ -1090,7 +1114,8 @@ void WDAQEventBuilder::Loop(){
          if(it == fEvents.end()){
             //no event with this event number -> new Event
             evt_ptr = new WDAQEvent(ptr);
-            fEvents[new_event_number] = evt_ptr; 
+            evt_ptr->mInsertionSeq = fInsertionCounter++;
+            fEvents[new_event_number] = evt_ptr;
          } else {
             //have it
             evt_ptr = it->second;
@@ -1129,12 +1154,33 @@ void WDAQEventBuilder::Loop(){
 
             //remove from local event list
             fEvents.erase(new_event_number);
+         }// end if evt_ptr->IsComplete()
 
-            //#define DEBUGBUILDER 
+         //#define DEBUGBUILDER
 
-            //check older events (event id smaller than built one by 10)
-            for(auto ev = fEvents.cbegin(); ev != fEvents.cend();){
-               if((new_event_number - ev->first)>10){
+         // Purge events too far from the current key, in EITHER direction.
+         //
+         // Three changes from upstream, all required by HARDENING.md 2.1:
+         //
+         //  * This used to sit INSIDE the "event complete" branch above. So the moment
+         //    the builder stopped completing events it also stopped purging -- precisely
+         //    when purging is the thing that would let it recover. It now runs for every
+         //    packet, which costs at most cMaxPendingEvents comparisons.
+         //
+         //  * The test used to be one-sided, (new - old) > N, which only removes keys
+         //    BELOW the current one. After the begin-of-run counter reset the stale
+         //    entries are ABOVE it, so nothing ever matched and they stayed for the
+         //    lifetime of the run. It is now symmetric.
+         //
+         //  * The distance is computed in unsigned arithmetic and cast back, so it stays
+         //    correct across a counter wrap. Subtracting two ints directly is undefined
+         //    on overflow, and the old form silently stopped pruning after a wrap.
+         //
+         // The event just touched is at distance 0, so it is never its own victim.
+         for(auto ev = fEvents.cbegin(); ev != fEvents.cend();){
+            int distance = static_cast<int>(static_cast<unsigned int>(new_event_number) -
+                                            static_cast<unsigned int>(ev->first));
+            if(distance > cReorderTolerance || distance < -cReorderTolerance){
 #ifdef DEBUGBUILDER
                   //This is to print debug information
                   printf("Old event %hu %hu (%d/%d): \n", ev->first, ev->second->mTriggerType, ev->second->IsComplete(), fNBoards);
@@ -1160,22 +1206,30 @@ void WDAQEventBuilder::Loop(){
                        }
                   }
 #endif
-                  //remove old event from list
-                  delete ev->second;
-                  fEvents.erase(ev++);
-                  fOldEvent++;
-                  fDropping = true;
-               } else { // end if event difference larger than 10 
-                  ++ev;
-               } //end else
-            } // end for on events
-         }// end if evt_ptr->IsComplete()
+               //remove old event from list
+               delete ev->second;
+               fEvents.erase(ev++);
+               fReorderPurged++;
+               fDropping = true;
+            } else { // end if event too far from the current key
+               ++ev;
+            } //end else
+         } // end for on events
 
          //check for too many events in the building map
-         if(fEvents.size() > 20){
-            // not building any event:
-            // dropping oldest
+         if(fEvents.size() > cMaxPendingEvents){
+            // Drop the event that has been waiting LONGEST, not the smallest key.
+            //
+            // Upstream erased fEvents.cbegin(), i.e. the numerically smallest key. That
+            // is only "oldest" while the key increases monotonically. After the
+            // begin-of-run counter reset the smallest key is the NEWEST event, so the
+            // builder destroyed each new event as it was created while the stale
+            // high-keyed ones sat untouched -- a wedge for the whole run. Insertion
+            // order is what "oldest" was always meant to mean. See HARDENING.md 2.1.
             auto ev = fEvents.cbegin();
+            for(auto cand = fEvents.cbegin(); cand != fEvents.cend(); ++cand){
+               if(cand->second->mInsertionSeq < ev->second->mInsertionSeq) ev = cand;
+            }
 
 #ifdef DEBUGBUILDER
             //debug printf
@@ -1196,7 +1250,7 @@ void WDAQEventBuilder::Loop(){
             fEvents.erase(ev);
 
             fNotBuilding = true;
-            fOldEvent++;
+            fMapOverflowDropped++;
          }
       }
    }
@@ -1204,7 +1258,13 @@ void WDAQEventBuilder::Loop(){
 
 //print statistics at thread end
 void WDAQEventBuilder::End(){
-   printf("event built: %lu\nbad packets: %lu\nevent dropped: %lu\nevent dropped because old: %lu\nevent in queue: %lu\n", fBuildedEvent, fBadPackets, fDroppedEvent, fOldEvent, fEvents.size());
+   // The two drop reasons are reported separately: a nonzero reorder-purge count is
+   // ordinary housekeeping, whereas any map-overflow drop means the builder could not
+   // complete events fast enough and is the signature of a wedge.
+   printf("event built: %lu\nbad packets: %lu\nevent dropped: %lu\n"
+          "event purged (reorder): %lu\nevent dropped (map full): %lu\nevent in queue: %lu\n",
+          fBuildedEvent, fBadPackets, fDroppedEvent,
+          fReorderPurged, fMapOverflowDropped, fEvents.size());
 }
 
 //Event worker - Thread that calibrate events

@@ -429,6 +429,12 @@ public:
    unsigned short   mSerialTriggerData;
    int              mCompletedBoards;
 
+   // Monotonic counter assigned by the builder when this event is created, so "oldest
+   // pending event" can mean what it says. The map is keyed on the event/trigger number,
+   // and the smallest key is NOT the oldest entry once that counter resets at
+   // begin-of-run. See HARDENING.md 2.1.
+   unsigned long    mInsertionSeq;
+
    //map (BoardType -> map(BoardSerial -> Board))
    std::map<unsigned char, std::map<unsigned short, WDAQBoardEvent *>> fBoard;
    
@@ -460,6 +466,10 @@ class WDAQPacketCollector: public DAQServerThread{
    unsigned long fNPackets;
    unsigned long fCorruptedPackets;
    unsigned long fDroppedPackets;
+   // Datagrams discarded from the kernel buffer at begin-of-run, i.e. the previous run's
+   // backlog. Nonzero is normal; a large or growing value means the gap between runs is
+   // letting a lot accumulate.
+   unsigned long fStaleDatagrams;
 
    void Begin();
 
@@ -474,12 +484,14 @@ class WDAQPacketCollector: public DAQServerThread{
       fNPackets = 0;
       fCorruptedPackets = 0;
       fDroppedPackets = 0;
+      fStaleDatagrams = 0;
    }
 
    //Statistics getters
    unsigned long GetReceivedPackets() const { return fNPackets; }
    unsigned long GetCorruptedPackets() const { return fCorruptedPackets; }
    unsigned long GetDroppedPackets() const { return fDroppedPackets; }
+   unsigned long GetStaleDatagrams() const { return fStaleDatagrams; }
 };
 
 // temporary thread to read TCB
@@ -513,8 +525,18 @@ class WDAQEventBuilder : public DAQThread{
    //statistics
    unsigned long fBuildedEvent;
    unsigned long fDroppedEvent;
-   unsigned long fOldEvent;
+   // Split out of the single fOldEvent counter, which conflated two very different
+   // things and so could not distinguish healthy operation from a wedged builder:
+   //   fReorderPurged      an event aged out because the stream moved past it. Normal
+   //                       in small numbers; it is how incomplete events are reclaimed.
+   //   fMapOverflowDropped the pending map hit its cap and something had to go. Always
+   //                       a symptom -- events are arriving that cannot be completed.
+   unsigned long fReorderPurged;
+   unsigned long fMapOverflowDropped;
    unsigned long fBadPackets;
+   // Assigns each pending event an arrival order, so the overflow guard can drop the
+   // one that has actually been waiting longest rather than the smallest key.
+   unsigned long fInsertionCounter;
    //flags
    bool          fNotBuilding;
    bool          fDropping;
@@ -547,7 +569,9 @@ class WDAQEventBuilder : public DAQThread{
       fBuildedEvent = 0;
       fDroppedEvent = 0;
       fBadPackets = 0;
-      fOldEvent = 0;
+      fReorderPurged = 0;
+      fMapOverflowDropped = 0;
+      fInsertionCounter = 0;
       fNotBuilding = false;
       fDropping = false;
       fKeyOnEventNumber = false;
@@ -565,7 +589,11 @@ class WDAQEventBuilder : public DAQThread{
    unsigned long GetBuildedEvents() const { return fBuildedEvent; }
    unsigned long GetDroppedEvents() const { return fDroppedEvent; }
    unsigned long GetBadPackets() const { return fBadPackets; }
-   unsigned long GetOldEvents() const { return fOldEvent; }
+   // Unchanged meaning and unchanged callers: the total of both drop reasons.
+   unsigned long GetOldEvents() const { return fReorderPurged + fMapOverflowDropped; }
+   // Use these to tell a healthy purge from a wedge -- see the member comments.
+   unsigned long GetReorderPurged() const { return fReorderPurged; }
+   unsigned long GetMapOverflowDropped() const { return fMapOverflowDropped; }
    unsigned long GetEventsInQueue() const { return fEvents.size(); }
 };
 

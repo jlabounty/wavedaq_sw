@@ -569,9 +569,11 @@ class DAQServerThread : public DAQThread{
 
    public:
       //Methods
-      void Clean(){
-         //TODO: clean fDataSocket kernel buffer
-      }
+
+      // Discard whatever is sitting in the socket's kernel receive buffer, and return
+      // the number of datagrams dropped. Bounded in both packets and wall time -- see
+      // DAQLib.cpp for why it cannot simply drain until empty.
+      unsigned long Clean();
 
       void SetServerPort(int port){
          if(fServerPort==0) fServerPort = port;

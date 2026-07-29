@@ -1,4 +1,7 @@
 #include "DAQLib.h"
+
+// Explicit rather than relying on <thread> pulling it in: Clean() uses steady_clock.
+#include <chrono>
 // --- DAQ Alarm --- Thread safe alarm system
 // Resize internal vectors
 void DAQAlarm::Resize(unsigned int size){
@@ -288,6 +291,78 @@ void DAQServerThread::Loop(){
    } else {
       //timeout: nothing to read
    }
+}
+
+// Discard whatever is sitting in the socket's kernel receive buffer.
+//
+// Why this exists (was an empty //TODO stub; see HARDENING.md 2.1):
+//
+// Between runs the collector stops calling Loop() -- ThreadMain only calls it while
+// fRunning -- but the board keeps streaming. The kernel buffer therefore fills with
+// datagrams belonging to the *previous* run and, once it is full, with truncated ones.
+// At begin-of-run the board's event counter is reset to zero, so those leftovers arrive
+// at the builder carrying keys far ABOVE the new run's, and nothing can remove them:
+//
+//   * the reorder purge tests (new_key - old_key) > N, and old_key is much larger;
+//   * the map-overflow guard erases the numerically smallest key, which is the
+//     brand-new event, not the stale one.
+//
+// The builder then destroys every new event as it is created, for the rest of the run,
+// after emitting a single latching alarm. Draining here removes the trigger entirely.
+//
+// It cannot simply drain until the socket is empty. A free-running board streams
+// continuously at ~10 MB/s, so "empty" may never happen and an unbounded loop would hang
+// the run transition. Two bounds, whichever comes first:
+//
+//   * a wall-clock deadline, since the backlog is what matters and it is finite;
+//   * a packet cap, as a second line of defence if the clock misbehaves.
+//
+// Dropping a few packets of the *new* run along with the backlog is harmless: they form
+// at most one incomplete event whose key is adjacent to the ones that follow, which the
+// reorder purge removes normally.
+//
+// Hitting a bound is itself diagnostic -- it means the board is filling the buffer faster
+// than we can empty it, so the backlog was not fully cleared -- and is reported.
+unsigned long DAQServerThread::Clean(){
+   if(fDataSocket < 0) return 0;
+
+   const unsigned long cMaxPackets = 200000;                  // ~2x a full 1 MB buffer
+   const auto cDeadline = std::chrono::milliseconds(200);
+
+   unsigned long dropped = 0;
+   bool hitBound = false;
+   auto start = std::chrono::steady_clock::now();
+
+   while(true){
+      int n = recvmmsg(fDataSocket, fMsgs, MAXMSG, MSG_DONTWAIT, nullptr);
+
+      // EAGAIN/EWOULDBLOCK: the buffer is empty, which is the normal exit.
+      if(n <= 0) break;
+
+      dropped += n;
+
+      // A short batch means the kernel had nothing more to give us.
+      if(n < MAXMSG) break;
+
+      if(dropped >= cMaxPackets ||
+         std::chrono::steady_clock::now() - start > cDeadline){
+         hitBound = true;
+         break;
+      }
+   }
+
+   // fRecvMsg is used by the GetMessage* helpers to bound their index checks. Leaving it
+   // pointing at this drain's batch would let a later caller read datagram buffers that
+   // were discarded rather than processed.
+   fRecvMsg = 0;
+
+   if(dropped > 0){
+      printf("%s: discarded %lu stale datagram(s) from the receive buffer%s\n",
+             fThreadName.c_str(), dropped,
+             hitBound ? " (hit drain limit -- backlog may remain)" : "");
+   }
+
+   return dropped;
 }
 
 //return address for given message
