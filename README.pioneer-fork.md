@@ -45,9 +45,10 @@ problem was found, why it matters, and how the fix was verified.
 
 | commit | item | summary |
 |---|---|---|
-| `1ec038f` | — | `BuilderKey=EventNumber`: key the event builder on the board's event counter when there is no TCB, since `trigger_information` is then always zero |
-| `<this>` | 2.6 | Initialise `WDAQWorker`'s statistics in its constructor; they were only zeroed in `Begin()` and read as garbage before the first run |
+| `970edef` | 2.4 | Remove the `DAQAlarm::Test()` data race (atomic array; ThreadSanitizer-confirmed), and stop an exception escaping `DAQThread::ThreadMain` from aborting the process. **The `Clean()` "no-op" the review reported was not real** — see HARDENING.md 2.4 |
+| `bfb5935` | 2.6 | Initialise `WDAQWorker`'s statistics in its constructor; they were only zeroed in `Begin()` and read as garbage before the first run |
 | `85914de` | 2.1 | Drain the socket at begin-of-run, and make the builder's two reclaim paths work after a counter reset. Without it every run began with the previous run's events and the builder could wedge for a whole run |
+| `1ec038f` | — | `BuilderKey=EventNumber`: key the event builder on the board's event counter when there is no TCB, since `trigger_information` is then always zero |
 
 See `git log pioneer/standalone` for the current list.
 
