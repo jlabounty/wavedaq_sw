@@ -1077,7 +1077,11 @@ void WDAQEventBuilder::Loop(){
       for(auto &ptr : vec){
 
          //search for matching packets
-         short new_event_number = ptr->mTriggerNumber;
+         // fKeyOnEventNumber: no TCB, so trigger_information is always zero and the
+         // trigger number cannot separate events -- use the board's event counter.
+         int new_event_number = fKeyOnEventNumber
+                                   ? static_cast<int>(ptr->mEventNumber)
+                                   : static_cast<int>(static_cast<short>(ptr->mTriggerNumber));
 
          WDAQEvent *evt_ptr;
 

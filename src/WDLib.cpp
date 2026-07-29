@@ -704,8 +704,27 @@ void WDSystem::SpawnDAQ(){
    }
 
    //Builder
+   //
+   // "BuilderKey" selects which packet field identifies the event a packet belongs to:
+   //   "TriggerNumber" (default) -- the trigger-bus number a TCB distributes, so all
+   //                                boards in a crate tag the same event identically
+   //   "EventNumber"             -- the board's own event counter, for a board with no
+   //                                TCB, where trigger_information is always zero and
+   //                                every packet would otherwise be keyed 0
+   bool keyOnEventNumber = false;
+   try{
+      std::string key = GetDaqProperty("BuilderKey").GetStringValue();
+      keyOnEventNumber = (key == "EventNumber");
+      if(!keyOnEventNumber && key != "TriggerNumber")
+         printf("Unknown BuilderKey \"%s\", using TriggerNumber\n", key.c_str());
+   } catch (const std::out_of_range& ex){
+   }
+   if(keyOnEventNumber)
+      printf("Event builder keying on board event number (no trigger bus)\n");
+
    for(int i=0; i<nBuilders; i++){
       WDAQEventBuilder* builder = new WDAQEventBuilder(fPacketBuffer->GetBufferAt(i), fEventBuffer, nWDBs+nTCBs, fDaqSystem);
+      builder->SetKeyOnEventNumber(keyOnEventNumber);
       fBuilderThreads.push_back(builder);
    }
 

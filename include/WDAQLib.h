@@ -519,6 +519,19 @@ class WDAQEventBuilder : public DAQThread{
    bool          fNotBuilding;
    bool          fDropping;
 
+   // Which packet field identifies the event this packet belongs to.
+   //
+   // Default is the trigger-bus number, which a TCB distributes so that every board
+   // in a crate tags the same physical event identically. A board addressed directly
+   // over Ethernet has no TCB, so trigger_information is always zero and every packet
+   // would be keyed 0 -- all events collapse into one container, AddPacket() starts
+   // refusing, and throughput dies. For that case key on the board's own event
+   // counter instead, which increments correctly.
+   //
+   // Selected by the "BuilderKey" DAQ property: "TriggerNumber" (default) or
+   // "EventNumber". Crate behaviour is unchanged unless it is set explicitly.
+   bool          fKeyOnEventNumber;
+
    void Begin();
 
    void Loop();
@@ -537,7 +550,12 @@ class WDAQEventBuilder : public DAQThread{
       fOldEvent = 0;
       fNotBuilding = false;
       fDropping = false;
+      fKeyOnEventNumber = false;
    }
+
+   // "TriggerNumber" (default) or "EventNumber" -- see fKeyOnEventNumber.
+   void SetKeyOnEventNumber(bool flag){ fKeyOnEventNumber = flag; }
+   bool GetKeyOnEventNumber() const { return fKeyOnEventNumber; }
 
    //building state getters
    bool GetIsNotBuilding() const { return fNotBuilding; }
