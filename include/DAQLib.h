@@ -3,6 +3,8 @@
 #include <mutex>
 #include <queue>
 #include <thread>
+#include <atomic>
+#include <memory>
 #include <condition_variable>
 #include <atomic>
 #include <stack>
@@ -30,7 +32,21 @@ class DAQSystem;
 class DAQAlarm {
    typedef void (*callback_t)(unsigned int id, const std::string &description);
 
-   std::vector<bool> fAlarmTriggered;
+   // One atomic per alarm, not std::vector<bool>.
+   //
+   // vector<bool> is bit-packed, so two threads triggering *different* alarms write the
+   // same word -- and Test() reads it with no lock at all, by design (see the comment on
+   // its definition). That is a genuine data race, not the benign distinct-object kind:
+   // builder and worker threads both call Test() and Trigger() concurrently, and a
+   // bit-field read-modify-write can lose a neighbouring alarm or tear the read.
+   //
+   // A plain array of atomics gives Test() a lock-free load with no tearing and keeps
+   // distinct alarms genuinely independent. std::vector<std::atomic<bool>> will not
+   // compile -- atomics are neither copyable nor movable, so resize() has nothing to work
+   // with -- hence the explicit array. Resize() is documented as not thread safe and is
+   // only called from the constructor.
+   std::unique_ptr<std::atomic<bool>[]> fAlarmTriggered;
+   size_t fNAlarms = 0;
    std::vector<callback_t> fAlarmCallback;
    std::vector<std::string> fAlarmDescription;
    std::mutex fAccessMutex;

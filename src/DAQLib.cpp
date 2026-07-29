@@ -5,29 +5,36 @@
 // --- DAQ Alarm --- Thread safe alarm system
 // Resize internal vectors
 void DAQAlarm::Resize(unsigned int size){
-   fAlarmTriggered.resize(size);
+   fAlarmTriggered.reset(new std::atomic<bool>[size]);
+   fNAlarms = size;
    fAlarmCallback.resize(size);
    fAlarmDescription.resize(size);
-   for(unsigned int i = 0; i<size; i++)
+   for(unsigned int i = 0; i<size; i++){
+      // std::atomic's default constructor does NOT initialise the value before C++20 and
+      // this builds as C++11, so each element must be stored explicitly. Leaving them
+      // indeterminate would mean alarms that read as already-triggered at startup and
+      // therefore never fire.
+      fAlarmTriggered[i].store(false, std::memory_order_relaxed);
       fAlarmCallback[i] = nullptr;
+   }
 }
 // lockless check of alarm state
 bool DAQAlarm::Test(unsigned int id) const {
-   if( id < fAlarmTriggered.size() )
-      return fAlarmTriggered[id];
+   if( id < fNAlarms )
+      return fAlarmTriggered[id].load(std::memory_order_acquire);
    else
       return false;
 }
 
 //triggers an alarm
 void DAQAlarm::Trigger(unsigned int id){
-   if( id < fAlarmTriggered.size() ){
+   if( id < fNAlarms ){
       //locks
       std::unique_lock<std::mutex> lock(fAccessMutex);
 
       //only set if not previously fired
-      if (!fAlarmTriggered[id]){
-         fAlarmTriggered[id] = true;
+      if (!fAlarmTriggered[id].load(std::memory_order_relaxed)){
+         fAlarmTriggered[id].store(true, std::memory_order_release);
          //release the lock and call the callback
          lock.unlock();
          if(fAlarmCallback[id] != nullptr)
@@ -38,21 +45,35 @@ void DAQAlarm::Trigger(unsigned int id){
 
 //resets an alarm
 void DAQAlarm::Reset(unsigned int id){
-   if( id < fAlarmTriggered.size() ){
+   if( id < fNAlarms ){
       //locks
       std::lock_guard<std::mutex> lock(fAccessMutex);
 
-      fAlarmTriggered[id] = false;
+      fAlarmTriggered[id].store(false, std::memory_order_release);
    }
 }
 
 //resets all alarms at once
+//
+// A note, because this loop is a trap for readers and was misread during review:
+//
+//   for (auto a : fAlarmTriggered) a = false;     // the previous body
+//
+// looks like it assigns to a copy and does nothing. With std::vector<bool> it does NOT.
+// `*it` yields std::vector<bool>::reference, a proxy, so `auto` deduces the proxy and not
+// bool -- and assigning through the copied proxy writes to the underlying bit. Verified:
+// the loop cleared the vector correctly. For any non-proxy element type (vector<char>, an
+// array) the same loop really would be a no-op, which is what makes it so easy to misjudge.
+//
+// So alarms did re-arm at each begin_of_run. The rewrite below is for the data race on
+// Test(), not to fix a no-op -- see the comment on fAlarmTriggered in DAQLib.h and
+// HARDENING.md 2.4.
 void DAQAlarm::Clean(){
    //locks
    std::lock_guard<std::mutex> lock(fAccessMutex);
 
-   for (auto a: fAlarmTriggered)
-      a = false;
+   for (size_t i = 0; i < fNAlarms; i++)
+      fAlarmTriggered[i].store(false, std::memory_order_release);
 }
 
 
@@ -75,8 +96,8 @@ void DAQAlarm::Trigger(unsigned int id, const std::string &description){
    std::unique_lock<std::mutex> lock(fAccessMutex);
 
    //only set if not previously fired
-   if (!fAlarmTriggered[id]){
-      fAlarmTriggered[id] = true;
+   if (id < fNAlarms && !fAlarmTriggered[id].load(std::memory_order_relaxed)){
+      fAlarmTriggered[id].store(true, std::memory_order_release);
       //copy the description
       if( id < fAlarmDescription.size() )
          fAlarmDescription[id] = description;
@@ -116,29 +137,49 @@ void DAQThread::ThreadMain(){
    pthread_setname_np(thread, fThreadName.c_str());
 #endif
 
-   Setup();
+   // Nothing may escape this function.
+   //
+   // Start() launches ThreadMain in a std::thread, so an exception leaving it calls
+   // std::terminate and aborts the whole frontend with no MIDAS message and no clean
+   // end-of-run. Several things in the data path throw as a matter of course --
+   // "Cannot recvmmsg" on a stray socket error, "Cannot select", the inverted SO_RCVBUF
+   // check, std::bad_alloc from pool growth -- and alarm callbacks run on these threads
+   // too, so a throw from user code inside one had the same effect.
+   //
+   // A thread that stops is recoverable and diagnosable; a process that aborts mid-run is
+   // neither. Log it, stop this thread, and leave the rest of the system standing.
+   // See HARDENING.md 2.4.
+   try {
+      Setup();
 
-   while(fStop != true){
+      while(fStop != true){
 
-      bool shouldEnd = false;
-      //checks and run begin of run
-      if(fRunning && !fRunning_old) Begin();
-      //checks end of run
-      if(!fRunning && fRunning_old) shouldEnd = true;
-      fRunning_old = fRunning;
+         bool shouldEnd = false;
+         //checks and run begin of run
+         if(fRunning && !fRunning_old) Begin();
+         //checks end of run
+         if(!fRunning && fRunning_old) shouldEnd = true;
+         fRunning_old = fRunning;
 
-      //timed loop
-      //std::chrono::high_resolution_clock::time_point loopStart = std::chrono::high_resolution_clock::now();
-      if(fRunning && fRunning_old) Loop();
-      else std::this_thread::sleep_for(fIdleLoopDuration);
-      //std::chrono::high_resolution_clock::time_point loopEnd = std::chrono::high_resolution_clock::now();
+         //timed loop
+         if(fRunning && fRunning_old) Loop();
+         else std::this_thread::sleep_for(fIdleLoopDuration);
 
-      //run end of run
-      if(shouldEnd) End();
+         //run end of run
+         if(shouldEnd) End();
 
+      }
+
+      Close();
+   } catch (const std::exception& ex){
+      fprintf(stderr, "FATAL: thread %s stopped by an unhandled exception: %s\n",
+              fThreadName.c_str(), ex.what());
+      fStop = true;
+   } catch (...){
+      fprintf(stderr, "FATAL: thread %s stopped by an unhandled exception\n",
+              fThreadName.c_str());
+      fStop = true;
    }
-
-   Close();
 
    //acknowledge thread stop
    fStarted = false;
