@@ -628,6 +628,12 @@ class WDAQWorker : public DAQThread{
    WDAQWorker(DAQBuffer<WDAQEvent> *source, DAQBuffer<WDAQEvent> *destination, DAQSystem* parent = nullptr): DAQThread(parent, "Worker"){
       fSource = source;
       fDestination = destination;
+      // Both were left indeterminate here and only zeroed in Begin(), which does not run
+      // until the first run starts. Anything reading the statistics before then -- the
+      // frontend publishes them every 10 s from startup -- got whatever was on the heap.
+      // Observed as DroppedCalibratedEvents = 2685009780 in the ODB.
+      fNEvent = 0;
+      fDroppedEvent = 0;
    }
 
    ~WDAQWorker(){
