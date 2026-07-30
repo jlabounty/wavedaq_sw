@@ -38,6 +38,20 @@ of reaching bitbucket. Pull upstream changes with
 `WDBSYS` is set to this directory by `wavedream-scalar-readout/scripts/wdscalers-env.sh`.
 Nothing else needs configuring; a rebuild of the frontend picks it up.
 
+### The fork supplies code, NOT calibration data
+
+`config/wavedaq/online.xml` sets `<CalibPath>/home/pioneer/wavedaq_main/sw/wds</CalibPath>`
+— the **original** tree, deliberately. The per-board `.vcal`/`.tcal` files live in
+`wds/calib/` there and are *untracked* data, so cloning tracked history did not bring them
+and this fork has no `wds/calib/`.
+
+That works today (verified: events are being calibrated) but it is a cross-tree dependency
+worth knowing about, because the failure is silent. `VCALIB::load` leaves `bValid=false` on
+a missing file with no output, and the calibration arithmetic then runs with default gains
+of 1 and offsets of 0 while still marking the event calibrated — so moving or cleaning
+`/home/pioneer/wavedaq_main` would produce uncalibrated waveforms that are
+indistinguishable from calibrated ones. See HARDENING.md Tier 4, "Calibration validity".
+
 ## Changes carried here
 
 Each is cross-referenced to `wavedream-scalar-readout/HARDENING.md`, which records how the
