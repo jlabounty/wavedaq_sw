@@ -174,10 +174,12 @@ void DAQThread::ThreadMain(){
    } catch (const std::exception& ex){
       fprintf(stderr, "FATAL: thread %s stopped by an unhandled exception: %s\n",
               fThreadName.c_str(), ex.what());
+      AlarmThreadStopped(ex.what());
       fStop = true;
    } catch (...){
       fprintf(stderr, "FATAL: thread %s stopped by an unhandled exception\n",
               fThreadName.c_str());
+      AlarmThreadStopped("unknown exception");
       fStop = true;
    }
 
@@ -185,8 +187,32 @@ void DAQThread::ThreadMain(){
    fStarted = false;
 }
 
+// Raise the library alarm for a thread that has just died, so the containment above is
+// visible outside stderr.
+//
+// Best-effort by construction, and deliberately so: this runs on a thread that is already
+// unwinding from an unhandled exception, and a throw from here would escape ThreadMain and
+// call std::terminate -- reintroducing exactly the whole-process abort that containment
+// exists to prevent. Everything is guarded and nothing propagates.
+//
+// The system pointer can legitimately be null: Setup() may throw before the thread is
+// fully wired up, and DAQThread's default constructor takes parent = nullptr. In that case
+// the stderr message above is all there is, which is no worse than before.
+void DAQThread::AlarmThreadStopped(const char* what) noexcept {
+   try {
+      DAQSystem* sys = GetSystem();
+      if(sys == nullptr) return;
+      DAQAlarm* alarms = sys->GetAlarms();
+      if(alarms == nullptr) return;
+      alarms->Trigger(DAQLIB_ALARM_THREADSTOPPED,
+                      "thread " + fThreadName + " stopped: " + std::string(what));
+   } catch (...){
+      // Nothing useful left to do, and nothing may leave this function.
+   }
+}
+
 //thread start
-void DAQThread::Start(){ 
+void DAQThread::Start(){
    //TODO: check thread is not already started
    fStarted = true;
    fThread = std::thread([=] { ThreadMain(); });

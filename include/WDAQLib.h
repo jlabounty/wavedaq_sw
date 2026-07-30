@@ -21,7 +21,23 @@
 #define WDAQLIB_ERROR_CALIBTEMPERATURE 4
 #define WDAQLIB_ERROR_PLLLOCK 5
 #define WDAQLIB_ERROR_TEMPERATURE 6
-#define WDAQLIB_ERROR_LAST WDAQLIB_ERROR_TEMPERATURE
+// A DAQ thread left ThreadMain through an unhandled exception and stopped.
+//
+// Added 2026-07-30. Thread exceptions have been contained since 970edef -- the thread dies
+// alone instead of calling std::terminate and taking the process with it -- but the only
+// record was an fprintf to stderr. In a tmux pane nobody is watching, a collector, builder
+// or worker simply stops and the frontend goes on looking healthy. The stream-stall
+// watchdog covers a dead collector or builder indirectly, with 30-40 s of latency; a dead
+// worker among several was an acknowledged blind spot with no signal at all.
+//
+// Raised through the library's own alarm mechanism rather than al_trigger_alarm, because
+// this library has no MIDAS dependency and must keep none: wds, wddump and wdtest link it
+// too. wdaq_fe registers a callback for this id and turns it into a MIDAS alarm.
+// The number itself is DAQLIB_ALARM_THREADSTOPPED, defined next to DAQAlarm in DAQLib.h,
+// because DAQThread is what raises it and that layer cannot include this header. Aliased
+// here so the frontend's alarm switch reads consistently with the other ids.
+#define WDAQLIB_ERROR_THREADSTOPPED DAQLIB_ALARM_THREADSTOPPED
+#define WDAQLIB_ERROR_LAST WDAQLIB_ERROR_THREADSTOPPED
 
 //classes in this file
 class WDAQPacketData;

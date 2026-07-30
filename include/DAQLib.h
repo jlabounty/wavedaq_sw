@@ -27,6 +27,18 @@ class DAQSystem;
 #ifndef DAQLIB_H
 #define DAQLIB_H
 // --- DAQ Alarm --- Thread safe alarm system
+// Alarm raised by DAQThread itself when a thread dies of an unhandled exception.
+//
+// Defined here rather than alongside the WDAQLIB_ERROR_* ids in WDAQLib.h because this is
+// the layer that raises it: DAQLib is the generic thread/buffer library and does not, and
+// must not, include the WaveDAQ-specific header above it.
+//
+// The id space is nonetheless SHARED with WDAQLIB_ERROR_* -- one DAQAlarm instance serves
+// both layers -- so this number must stay distinct from every one of those. WDAQLib.h
+// aliases it as WDAQLIB_ERROR_THREADSTOPPED and pins WDAQLIB_ERROR_LAST to it, so adding a
+// WaveDAQ error without noticing this one would not compile.
+#define DAQLIB_ALARM_THREADSTOPPED 7
+
 // currently limited to 32 alarms
 // with callbacks
 class DAQAlarm {
@@ -481,6 +493,11 @@ class DAQThread{
 
       //reserved Methods
       void ThreadMain();
+
+      // Raise WDAQLIB_ERROR_THREADSTOPPED after ThreadMain contained an exception.
+      // noexcept: it runs while the thread is already unwinding, and a throw from here
+      // would escape ThreadMain and call std::terminate.
+      void AlarmThreadStopped(const char* what) noexcept;
 
       //to be implemented in derived class to setup functionalities
       virtual void Setup(){;} //called before thread Loop
