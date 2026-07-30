@@ -2,7 +2,17 @@
 build
 cmake-build-debug
 cmake-build-release
-calib
+# calib: NOT ignored in this fork.
+#
+# Upstream ignores it, which is why the .vcal/.tcal files were untracked in the reference
+# tree -- and why a `git clean -dfx` there would have deleted the calibration this
+# deployment depends on, silently producing uncalibrated data that still reported itself
+# as calibrated. See README.pioneer-fork.md and PRODUCTION-REVIEW.md D2.
+#
+# Kept as an explicit un-ignore rather than `git add -f` so that adding a new board's
+# calibration later is an ordinary `git add`.
+!calib
+!calib/**
 *.o
 *~
 

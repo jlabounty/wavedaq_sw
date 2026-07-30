@@ -74,3 +74,30 @@ See `git log pioneer/standalone` for the current list.
 
 The frontend's CMake cache records the absolute source path, so a build directory created
 against the old `wavedaq_main` path must be deleted rather than reused.
+
+## Calibration data lives here now (2026-07-30)
+
+An earlier note in this file said the fork supplies code, not calibration data. That is
+reversed, deliberately.
+
+`wds/calib/` now carries the per-board `.vcal`/`.tcal` files. They previously lived only in
+`/home/pioneer/wavedaq_main/sw/wds/calib/`, where they were **untracked** — a `git clean
+-dfx` in that tree would have deleted the calibration our deployment depends on, and the
+resulting data would have looked entirely normal (see below). Vendoring them removes the
+cross-tree dependency; `config/wavedaq/online.xml` in the wdscalers repo points `CalibPath`
+here.
+
+All frequencies are included, not just the 700 MHz pair in use, so changing
+`SamplingFrequency` does not silently lose calibration.
+
+## WDBSYS in ~/.bashrc collides with this fork
+
+`~/.bashrc:137` exports `WDBSYS=$HOME/wavedaq_main`. Anyone who runs `cmake` for the
+waveform frontend **without** sourcing `wdscalers-env.sh` therefore builds against the
+reference tree rather than this one. Whatever `WDBSYS` points at is compiled straight into
+the binary (`add_subdirectory(${WDBSYS}/sw)`), so there is no library path to inspect
+afterwards and nothing separates the two binaries at runtime.
+
+As of 2026-07-30 the frontend's CMakeLists refuses to configure unless
+`${WDBSYS}/sw/README.pioneer-fork.md` exists — i.e. unless it is pointed at this fork — and
+the frontend logs both git revisions and the resolved `WDBSYS` at startup.

@@ -1443,15 +1443,60 @@ std::string WDWDB::GetCalibrationPath(){
    return calibpath;
 }
 
+// Load the DRS voltage and time calibrations, and ALARM if either is missing.
+//
+// The failure this guards against is the worst kind in the system: a missing or unreadable
+// calibration was previously a printf and nothing else. Calibration then passes the raw
+// values straight through, the worker still marks the event mVCalibrated = true, and the
+// run proceeds at full rate producing waveforms that look entirely normal and are wrong.
+// Nothing downstream can tell -- the .mid file records that the event was calibrated, not
+// whether a calibration existed to apply.
+//
+// So the data is indistinguishable from success, which is what makes this worth an alarm
+// rather than a louder message. printf goes to a tmux pane nobody is reading; the alarm
+// reaches whoever is watching the experiment.
+//
+// Raised through the library's own mechanism (WDAQLIB_ERROR_MISSINGCALIB, already defined
+// and already mapped to a MIDAS alarm by wdaq_fe) because this library has no MIDAS
+// dependency and must keep none.
 void WDWDB::LoadCalibrationFiles(){
    std::string calibpath = GetCalibrationPath();
+   std::string missing;
 
    if (!LoadVoltageCalibration(GetDrsSampleFreqMhz(), calibpath)) {
       printf("WDB %s: missing voltage calibration file\n", GetBoardName().c_str());
+      missing += " voltage";
    }
    if (!LoadTimeCalibration(GetDrsSampleFreqMhz(), calibpath)) {
       printf("WDB %s: missing time calibration file\n", GetBoardName().c_str());
+      missing += " time";
    }
+
+   if (missing.empty())
+      return;
+
+   // Name the path and the frequency, not just the board. The overwhelmingly likely causes
+   // are a CalibPath with no calib/ subdirectory, or a sampling frequency with no matching
+   // file -- and neither is visible from "missing calibration file" alone.
+   fprintf(stderr,
+           "WDB %s: NO%s CALIBRATION at %s for %d MHz. Waveforms will be UNCALIBRATED and "
+           "are NOT marked as such in the data.\n",
+           GetBoardName().c_str(), missing.c_str(), calibpath.c_str(),
+           GetDrsSampleFreqMhz());
+
+   WDCrate* c = GetCrate();
+   if (c == nullptr) return;
+   WDSystem* sys = c->GetSystem();
+   if (sys == nullptr) return;
+   DAQSystem* daq = sys->GetDAQSystem();
+   if (daq == nullptr) return;
+   DAQAlarm* alarms = daq->GetAlarms();
+   if (alarms == nullptr) return;
+
+   alarms->Trigger(WDAQLIB_ERROR_MISSINGCALIB,
+                   "WDB " + GetBoardName() + ": missing" + missing +
+                   " calibration at " + calibpath + " for " +
+                   std::to_string(GetDrsSampleFreqMhz()) + " MHz; waveforms are uncalibrated");
 }
 
 // --- WDTCB ---
