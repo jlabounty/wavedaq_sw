@@ -1077,9 +1077,13 @@ void WDWDB::ConfigureFrontendPzc(Property &property) {
 
 void WDWDB::ConfigureFrontendPzcLevel(Property &property) {
    int pzc_value;
-   pzc_value = property.GetInt(); 
-   if(pzc_value<0 || pzc_value>7)
-      throw std::runtime_error("Invalid FrontendPzcLevel, supported values: from 1 to 7");
+   pzc_value = property.GetInt();
+   // Was `pzc_value<0`, which accepted 0 and then passed -1 to SetDacPzcLevelN -- caught
+   // only by an assert() that is compiled out under NDEBUG, leaving pzcLevel[-1]. The
+   // message always said "from 1 to 7"; now the check agrees with it.
+   if(pzc_value<1 || pzc_value>7)
+      throw std::runtime_error("Invalid FrontendPzcLevel " + std::to_string(pzc_value) +
+                               ", supported values: from 1 to 7");
    else
       SetDacPzcLevelN(pzc_value-1);
 }
@@ -1410,20 +1414,44 @@ void WDWDB::ConfigureDebugSignal(int port, Property &property) {
    }
 }
 
+// Apply the DRS sampling frequency.
+//
+// The two branches are not equivalent, and the difference used to be silent. SetDrsSampleFreq
+// with wait=false stages the LMK clock divider but skips LmkSyncLocal(), the ADC interface
+// reset, ResetAdc() and the PLL-lock check -- so the divider is written and never latched,
+// and the board keeps sampling at its old rate.
+//
+// That is fine for the bulk WDSystem::Configure() path when the frequency has not actually
+// changed, which is the normal case on every frontend start. It is wrong when it HAS
+// changed: setting SamplingFrequency in the ODB and restarting the frontend appeared to
+// work -- the ODB held the new value, no error anywhere -- while the board stayed where it
+// was. Observed 2026-07-30 across three runs.
+//
+// So: compare against the hardware, and take the full path whenever it differs, in either
+// branch. Calibration is per sampling frequency, so it must be reloaded with it; without
+// that the board would sample at the new rate while applying the old rate's constants,
+// which is the silent-wrong-data case the missing-calibration alarm cannot catch (the
+// wrong file exists).
 void WDWDB::ConfigureSamplingFrequency(Property &property) {
    unsigned int freq;
    freq = property.GetUInt();
 
    if(GetSendBlock()){
-      //called within WDSystem::Configure()
+      // Bulk WDSystem::Configure(). Register writes are BUFFERED here -- mSendBlocked
+      // suppresses the UDP write entirely (WDBLib.cpp:886) and the whole block is flushed
+      // afterwards -- so the wait=true sequence cannot work from inside it: LmkSyncLocal(),
+      // ResetAdc() and the status read-back would all be staged rather than executed.
+      //
+      // Staging the divider is therefore all that can be done here, and it is NOT enough to
+      // change the sampling rate on its own. A caller that needs the rate actually changed
+      // must apply it outside the block, through the property path below. The frontend does
+      // that in apply_sampling_frequency_if_changed() after reload_settings_impl() returns.
       SetDrsSampleFreq(freq, false);
    } else  {
       //called when SamplingFrequency Property is changed
       SetDrsSampleFreq(freq);
       LoadCalibrationFiles();
    }
-
-
 }
 
 //Helper function to calibration files

@@ -1489,17 +1489,48 @@ void WDB::SetDacPzcLevelV(float v) {
    SetDac0ChE(d);
 }
 
+// Which PZC level the DAC is currently at, 1..pzcLevel.size().
+//
+// NEAREST match, not exact. This used to compare the read-back voltage for exact float
+// equality against the table and, on no match, fall out of the loop with i ==
+// pzcLevel.size() and return size()+1 -- an out-of-range value used as an undetected
+// "not found" sentinel.
+//
+// That value then escapes into the ODB through the frontend's "Read Hardware" command and
+// is rejected by ConfigureFrontendPzcLevel on the way back in ("Invalid FrontendPzcLevel,
+// supported values: from 1 to 7"), which throws out of reload_settings and ABORTS THE REST
+// OF THE CONFIGURATION -- so every setting after it in the walk silently never reaches the
+// board. Observed 2026-07-30: a Read Hardware wrote 8, and from then on changes to
+// SamplingFrequency were accepted into the ODB and quietly never applied, with the
+// equipment still reporting status Ok.
+//
+// Exact float equality was never the right test for a value that has been through a
+// 16-bit DAC and back. The nearest level is the honest answer, and it keeps the
+// hardware -> ODB -> hardware round trip closed, which is the property that matters.
 int WDB::GetDacPzcLevelN() {
-   unsigned int i;
-   auto v = std::round(GetDacPzcLevelV()*100)/100.0;
-   for (i = 0; i < pzcLevel.size(); i++)
-      if (pzcLevel[i] == v)
-         break;
-   return (int) i + 1;
+   if (pzcLevel.empty())
+      return 1;
+
+   const double v = GetDacPzcLevelV();
+   unsigned int best = 0;
+   double bestErr = std::fabs(pzcLevel[0] - v);
+   for (unsigned int i = 1; i < pzcLevel.size(); i++) {
+      const double err = std::fabs(pzcLevel[i] - v);
+      if (err < bestErr) {
+         bestErr = err;
+         best = i;
+      }
+   }
+   return (int) best + 1;
 }
 
 void WDB::SetDacPzcLevelN(int i) {
-   assert(i >= 0 && i < (int) pzcLevel.size());
+   // Was assert(), which is compiled out under NDEBUG and would then index pzcLevel[-1]
+   // for level 0 -- reachable, because ConfigureFrontendPzcLevel used to accept 0 and pass
+   // i-1. Throw instead: a bad level is a configuration error, not a debug-only concern.
+   if (i < 0 || i >= (int) pzcLevel.size())
+      throw std::runtime_error("PZC level index " + std::to_string(i) + " out of range 0.." +
+                               std::to_string(pzcLevel.size() - 1));
    SetDacPzcLevelV(pzcLevel[i]);
 }
 
