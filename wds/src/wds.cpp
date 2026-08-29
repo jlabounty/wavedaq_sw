@@ -67,6 +67,8 @@
 #include "DCBLib.h"
 
 #include "mongoose.h"
+#include <stdexcept>
+#include <cstdint>
 
 /*-- Globals -------------------------------------------------------*/
 

@@ -136,6 +136,7 @@ public:
 // Windows specific things
 #if defined(_WIN32)
 #include <windows.h>
+#include <cstdint>
 #define sleep_ms(x) Sleep(x)
 #endif // _WIN32
 

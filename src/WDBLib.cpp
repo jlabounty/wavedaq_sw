@@ -41,6 +41,8 @@
 #include "git-revision.h"
 #include "WDBLib.h"
 #include "WDBReg.h"
+#include <stdexcept>
+#include <cstdint>
 
 #define WD2_USE_UDP_BIN
 

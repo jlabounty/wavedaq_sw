@@ -1,5 +1,7 @@
 #include "WDLib.h"
 #include "WDAQLib.h"
+#include <stdexcept>
+#include <cstdint>
 
 #ifdef USEMEMORYPOOL
 //Memory pool template specializations

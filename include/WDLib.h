@@ -13,6 +13,7 @@
 #ifndef WDLIB_H
 #define WDLIB_H
 #include "WDAQLib.h"
+#include <stdexcept>
 
 //classes in this file
 class WDBoard;

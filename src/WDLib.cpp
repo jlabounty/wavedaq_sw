@@ -1,6 +1,8 @@
 #include "WDLib.h"
 #include "WDAQLib.h"
 #include "mxml.h"
+#include <stdexcept>
+#include <cstdint>
 
 // --- WDBoard --- 
 // Set a property

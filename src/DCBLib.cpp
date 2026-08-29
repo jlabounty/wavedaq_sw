@@ -48,6 +48,7 @@
 #include "register_map_dcb.h"
 #include "DCBReg.h"
 #include "WDBLib.h"
+#include <stdexcept>
 
 #define DCB_CMD_PORT_ASCII        3000
 #define DCB_CMD_PORT_BIN          4000

@@ -24,6 +24,7 @@
 
 #include "WDBReg.h"
 #include "DCBLib.h"
+#include <cstdint>
 
 #define WD_N_CHANNELS 18
 #define WD_N_SCALER   19

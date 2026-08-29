@@ -12,6 +12,8 @@
 #include "TCBLib.h"
 #include "math.h"
 #include <unistd.h>
+#include <stdexcept>
+#include <cstdint>
 
 // general write register function
 void TCB::WriteReg(u_int32_t addr, u_int32_t *data)

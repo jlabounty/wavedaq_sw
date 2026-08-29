@@ -2,6 +2,8 @@
 
 // Explicit rather than relying on <thread> pulling it in: Clean() uses steady_clock.
 #include <chrono>
+#include <stdexcept>
+#include <cstring>
 // --- DAQ Alarm --- Thread safe alarm system
 // Resize internal vectors
 void DAQAlarm::Resize(unsigned int size){
