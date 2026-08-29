@@ -11,6 +11,18 @@ endif()
 
 find_package(Threads)
 
+# glibc 2.38 and later declare strlcpy/strlcat in <string.h> as noexcept, which
+# conflicts with the declarations in mxml/strlcpy.h and mscb/include/strlcpy.h --
+# a hard error under GCC 16. Both headers already suppress themselves when
+# STRLCPY_DEFINED is set; their own detection (#ifdef strlcpy) only catches a
+# macro, so probe for the function and set it here instead. On glibc < 2.38 the
+# probe fails and mscb/src/strlcpy.cxx supplies the implementation as before.
+include(CheckSymbolExists)
+check_symbol_exists(strlcpy "string.h" HAVE_SYSTEM_STRLCPY)
+if(HAVE_SYSTEM_STRLCPY)
+   add_definitions(-DSTRLCPY_DEFINED)
+endif()
+
 if(NOT CMAKE_BUILD_TYPE)
    set(CMAKE_BUILD_TYPE Release)
 endif()
