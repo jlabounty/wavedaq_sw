@@ -221,6 +221,7 @@ size_t strlcat(char *dst, const char *src, size_t size);
 // linux and MAC specific things
 #if defined(__linux__) || defined(__APPLE__)
 #include <unistd.h>
+#include <string.h>
 #define sleep_ms(x) usleep(x*1000)
 #endif // __linux__ || __APLE__
 

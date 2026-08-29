@@ -177,6 +177,7 @@
 
 #include "sys/types.h"
 #include "strlcpy.h"
+#include <string.h>
 #include <vector>
 
 #include <stdexcept>
